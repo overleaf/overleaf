@@ -2,6 +2,7 @@ const logger = require('@overleaf/logger')
 const crypto = require('crypto')
 
 const settings = require('@overleaf/settings')
+const Modules = require('../../infrastructure/Modules')
 const { ObjectId } = require('mongodb')
 
 const { Subscription } = require('../../models/Subscription')
@@ -11,7 +12,6 @@ const UserGetter = require('../User/UserGetter')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const LimitationsManager = require('./LimitationsManager')
-const ManagedUsersHandler = require('./ManagedUsersHandler')
 
 const EmailHandler = require('../Email/EmailHandler')
 const EmailHelper = require('../Helpers/EmailHelper')
@@ -22,7 +22,6 @@ const {
   callbackifyMultiResult,
 } = require('@overleaf/promise-utils')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
-const Modules = require('../../infrastructure/Modules')
 
 async function getInvite(token) {
   const subscription = await Subscription.findOne({
@@ -74,7 +73,8 @@ async function acceptInvite(token, userId) {
   await SubscriptionUpdater.promises.addUserToGroup(subscription._id, userId)
 
   if (subscription.managedUsersEnabled) {
-    await ManagedUsersHandler.promises.enrollInSubscription(
+    await Modules.promises.hooks.fire(
+      'enrollInManagedSubscription',
       userId,
       subscription
     )

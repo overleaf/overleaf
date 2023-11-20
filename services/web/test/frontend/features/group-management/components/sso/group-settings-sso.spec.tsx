@@ -1,4 +1,4 @@
-import GroupSettingsSSORoot from '../../../../../../modules/managed-users/frontend/js/components/sso/group-settings-sso-root'
+import GroupSettingsSSORoot from '../../../../../../modules/group-settings/frontend/js/components/sso/group-settings-sso-root'
 
 function GroupSettingsSSOComponent() {
   return (

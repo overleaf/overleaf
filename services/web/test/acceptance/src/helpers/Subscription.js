@@ -2,13 +2,13 @@ const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const { expect } = require('chai')
 const { promisify } = require('util')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
-const ManagedUsersHandler = require('../../../../app/src/Features/Subscription/ManagedUsersHandler')
 const PermissionsManager = require('../../../../app/src/Features/Authorization/PermissionsManager')
-const SSOConfigManager = require('../../../../modules/managed-users/app/src/SSOConfigManager')
+const SSOConfigManager = require('../../../../modules/group-settings/app/src/sso/SSOConfigManager')
 const SubscriptionModel =
   require('../../../../app/src/models/Subscription').Subscription
 const DeletedSubscriptionModel =
   require('../../../../app/src/models/DeletedSubscription').DeletedSubscription
+const Modules = require('../../../../app/src/infrastructure/Modules')
 
 class Subscription {
   constructor(options = {}) {
@@ -78,11 +78,17 @@ class Subscription {
   }
 
   enableManagedUsers(callback) {
-    ManagedUsersHandler.enableManagedUsers(this._id, callback)
+    Modules.hooks.fire('enableManagedUsers', this._id, callback)
   }
 
   getEnrollmentForUser(user, callback) {
-    ManagedUsersHandler.getEnrollmentForUser(user, callback)
+    Modules.hooks.fire(
+      'getManagedUsersEnrollmentForUser',
+      user,
+      (error, [enrollment]) => {
+        callback(error, enrollment)
+      }
+    )
   }
 
   getCapabilities(groupPolicy) {
@@ -98,7 +104,12 @@ class Subscription {
       if (error) {
         return callback(error)
       }
-      ManagedUsersHandler.enrollInSubscription(user._id, subscription, callback)
+      Modules.hooks.fire(
+        'enrollInManagedSubscription',
+        user._id,
+        subscription,
+        callback
+      )
     })
   }
 

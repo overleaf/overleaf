@@ -76,12 +76,6 @@ describe('TeamInvitesHandler', function () {
       },
     }
 
-    this.ManagedUsersHandler = {
-      promises: {
-        enrollInSubscription: sinon.stub().resolves(),
-      },
-    }
-
     this.newToken = 'bbbbbbbbb'
 
     this.crypto = {
@@ -128,7 +122,6 @@ describe('TeamInvitesHandler', function () {
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './LimitationsManager': this.LimitationsManager,
         '../Email/EmailHandler': this.EmailHandler,
-        './ManagedUsersHandler': this.ManagedUsersHandler,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         '../../infrastructure/Modules': (this.Modules = {
           promises: { hooks: { fire: sinon.stub().resolves() } },
@@ -393,7 +386,8 @@ describe('TeamInvitesHandler', function () {
 
         this.TeamInvitesHandler.acceptInvite('dddddddd', this.user.id, () => {
           sinon.assert.calledWith(
-            this.ManagedUsersHandler.promises.enrollInSubscription,
+            this.Modules.promises.hooks.fire,
+            'enrollInManagedSubscription',
             this.user.id,
             this.subscription
           )

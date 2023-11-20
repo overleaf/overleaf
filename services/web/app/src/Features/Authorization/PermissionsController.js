@@ -4,7 +4,7 @@ const {
   getUserCapabilities,
   getUserRestrictions,
 } = require('./PermissionsManager')
-const ManagedUsersHandler = require('../Subscription/ManagedUsersHandler')
+const Modules = require('../../infrastructure/Modules')
 
 /**
  * Function that returns middleware to add an `assertPermission` function to the request object to check if the user has a specific capability.
@@ -26,19 +26,26 @@ function useCapabilities() {
       return next()
     }
     try {
-      // get the group policy applying to the user
-      const { groupPolicy, managedBy, isManagedGroupAdmin } =
-        await ManagedUsersHandler.promises.getEnrollmentForUser(req.user)
-      // attach the subscription ID to the request object
-      req.managedBy = managedBy
-      // attach the subscription admin status to the request object
-      req.isManagedGroupAdmin = isManagedGroupAdmin
-      // attach the new capabilities to the request object
-      for (const cap of getUserCapabilities(groupPolicy)) {
-        req.capabilitySet.add(cap)
+      const result = (
+        await Modules.promises.hooks.fire(
+          'getManagedUsersEnrollmentForUser',
+          req.user
+        )
+      )[0]
+      if (result) {
+        // get the group policy applying to the user
+        const { groupPolicy, managedBy, isManagedGroupAdmin } = result
+        // attach the subscription ID to the request object
+        req.managedBy = managedBy
+        // attach the subscription admin status to the request object
+        req.isManagedGroupAdmin = isManagedGroupAdmin
+        // attach the new capabilities to the request object
+        for (const cap of getUserCapabilities(groupPolicy)) {
+          req.capabilitySet.add(cap)
+        }
+        // also attach the user's restrictions (the capabilities they don't have)
+        req.userRestrictions = getUserRestrictions(groupPolicy)
       }
-      // also attach the user's restrictions (the capabilities they don't have)
-      req.userRestrictions = getUserRestrictions(groupPolicy)
       next()
     } catch (error) {
       if (error instanceof UserNotFoundError) {
@@ -69,10 +76,14 @@ function requirePermission(...requiredCapabilities) {
       return next(new Error('no user'))
     }
     try {
-      // get the group policy applying to the user
-      const { groupPolicy, managedUsersEnabled } =
-        await ManagedUsersHandler.promises.getEnrollmentForUser(req.user)
-
+      const result =
+        (
+          await Modules.promises.hooks.fire(
+            'getManagedUsersEnrollmentForUser',
+            req.user
+          )
+        )[0] || {}
+      const { groupPolicy, managedUsersEnabled } = result
       if (!managedUsersEnabled) {
         return next()
       }

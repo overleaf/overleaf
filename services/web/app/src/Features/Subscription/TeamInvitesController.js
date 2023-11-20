@@ -84,9 +84,9 @@ async function viewInvite(req, res, next) {
       personalSubscription.recurlySubscription_id &&
       personalSubscription.recurlySubscription_id !== ''
 
-    const groupSSOActive = await SubscriptionLocator.promises.hasSSOEnabled(
-      subscription
-    )
+    const groupSSOActive = (
+      await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
+    )?.[0]
 
     if (subscription?.groupPolicy) {
       if (!subscription.populated('groupPolicy')) {
@@ -194,9 +194,9 @@ async function acceptInvite(req, res, next) {
     token,
     userId
   )
-  const groupSSOActive = await SubscriptionLocator.promises.hasSSOEnabled(
-    subscription
-  )
+  const groupSSOActive = (
+    await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
+  )?.[0]
 
   res.json({ groupSSOActive })
 }
