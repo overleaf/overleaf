@@ -16,6 +16,7 @@ import {
   TrackChangesIdSeeds,
 } from '@/features/ide-react/editor/types/document'
 import { EditorFacade } from '@/features/source-editor/extensions/realtime'
+import { recordDocumentFirstChangeEvent } from '@/features/event-tracking/document-first-change-event'
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
@@ -421,6 +422,7 @@ export class ShareJsDoc extends EventEmitter {
   private bindToDocChanges(doc: Doc) {
     const { submitOp } = doc
     doc.submitOp = (op: ShareJsOperation, callback?: () => void) => {
+      recordDocumentFirstChangeEvent()
       this.trigger('op:sent', op)
       doc.pendingCallbacks.push(() => {
         return this.trigger('op:acknowledged', op)

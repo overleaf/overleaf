@@ -5,6 +5,7 @@ import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import { isMobileDevice } from '../../../infrastructure/event-tracking'
 
 function PdfHybridDownloadButton() {
   const { pdfDownloadUrl } = useCompileContext()
@@ -20,6 +21,7 @@ function PdfHybridDownloadButton() {
     eventTracking.sendMB('download-pdf-button-click', {
       projectId,
       location: 'pdf-preview',
+      isMobileDevice,
     })
   }
 

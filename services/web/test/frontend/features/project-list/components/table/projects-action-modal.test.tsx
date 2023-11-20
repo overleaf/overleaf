@@ -91,6 +91,7 @@ describe('<ProjectsActionModal />', function () {
     expect(sendMBSpy).to.have.been.calledWith('project-list-page-interaction', {
       action: 'archive',
       page: '/',
+      isMobileDevice: false,
     })
   })
 })

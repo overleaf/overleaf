@@ -4,6 +4,7 @@ import { useProjectContext } from '../../../shared/context/project-context'
 import Icon from '../../../shared/components/icon'
 import Tooltip from '../../../shared/components/tooltip'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import { isMobileDevice } from '../../../infrastructure/event-tracking'
 
 export default function DownloadPDF() {
   const { t } = useTranslation()
@@ -14,6 +15,7 @@ export default function DownloadPDF() {
     eventTracking.sendMB('download-pdf-button-click', {
       projectId,
       location: 'left-menu',
+      isMobileDevice,
     })
   }
 

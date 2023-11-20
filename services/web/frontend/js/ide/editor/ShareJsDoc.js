@@ -20,6 +20,7 @@ import EventEmitter from '../../utils/EventEmitter'
 import ShareJs from '../../vendor/libs/sharejs'
 import EditorWatchdogManager from '../connection/EditorWatchdogManager'
 import { debugConsole } from '@/utils/debugging'
+import { recordDocumentFirstChangeEvent } from '@/features/event-tracking/document-first-change-event'
 
 let ShareJsDoc
 const SINGLE_USER_FLUSH_DELAY = 2000 // ms
@@ -457,6 +458,7 @@ export default ShareJsDoc = (function () {
     _bindToDocChanges(doc) {
       const { submitOp } = doc
       doc.submitOp = (...args) => {
+        recordDocumentFirstChangeEvent()
         this.trigger('op:sent', ...Array.from(args))
         doc.pendingCallbacks.push(() => {
           return this.trigger('op:acknowledged', ...Array.from(args))

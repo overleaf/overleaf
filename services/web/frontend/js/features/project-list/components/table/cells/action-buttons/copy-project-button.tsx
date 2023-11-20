@@ -11,6 +11,7 @@ import {
   Project,
 } from '../../../../../../../../types/project/dashboard/api'
 import { useProjectTags } from '@/features/project-list/hooks/use-project-tags'
+import { isMobileDevice } from '../../../../../../infrastructure/event-tracking'
 
 type CopyButtonProps = {
   project: Project
@@ -41,7 +42,11 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
 
   const handleAfterCloned = useCallback(
     (clonedProject: ClonedProject, tags: { _id: string }[]) => {
-      eventTracking.sendMB('project-list-page-interaction', { action: 'clone' })
+      eventTracking.sendMB('project-list-page-interaction', {
+        action: 'clone',
+        projectId: project.id,
+        isMobileDevice,
+      })
       addClonedProjectToViewData(clonedProject)
       for (const tag of tags) {
         addProjectToTagInView(tag._id, clonedProject.project_id)

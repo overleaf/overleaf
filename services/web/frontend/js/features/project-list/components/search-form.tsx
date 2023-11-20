@@ -11,6 +11,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import classnames from 'classnames'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
 import { Filter } from '../context/project-list-context'
+import { isMobileDevice } from '../../../infrastructure/event-tracking'
 
 type SearchFormOwnProps = {
   inputValue: string
@@ -64,7 +65,10 @@ function SearchForm({
       HTMLInputElement & Omit<FormControl, keyof HTMLInputElement>
     >
   ) => {
-    eventTracking.sendMB('project-list-page-interaction', { action: 'search' })
+    eventTracking.sendMB('project-list-page-interaction', {
+      action: 'search',
+      isMobileDevice,
+    })
     setInputValue(e.target.value)
   }
 

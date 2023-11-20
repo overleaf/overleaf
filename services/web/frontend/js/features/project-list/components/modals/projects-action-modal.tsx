@@ -6,6 +6,7 @@ import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
+import { isMobileDevice } from '../../../../infrastructure/event-tracking'
 
 type ProjectsActionModalProps = {
   title?: string
@@ -57,7 +58,10 @@ function ProjectsActionModal({
 
   useEffect(() => {
     if (showModal) {
-      eventTracking.sendMB('project-list-page-interaction', { action })
+      eventTracking.sendMB('project-list-page-interaction', {
+        action,
+        isMobileDevice,
+      })
     }
   }, [action, showModal])
 

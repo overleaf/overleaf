@@ -10,6 +10,8 @@ import {
   owner,
   archivedProjects,
   makeLongProjectList,
+  archiveableProject,
+  copyableProject,
 } from '../fixtures/projects-data'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 
@@ -818,6 +820,8 @@ describe('<ProjectListRoot />', function () {
               {
                 action: 'rename',
                 page: '/',
+                projectId: copyableProject.id,
+                isMobileDevice: false,
               }
             )
 
@@ -949,6 +953,8 @@ describe('<ProjectListRoot />', function () {
               {
                 action: 'clone',
                 page: '/',
+                projectId: archiveableProject.id,
+                isMobileDevice: false,
               }
             )
 
@@ -1106,6 +1112,8 @@ describe('<ProjectListRoot />', function () {
           {
             action: 'clone',
             page: '/',
+            projectId: archiveableProject.id,
+            isMobileDevice: false,
           }
         )
 

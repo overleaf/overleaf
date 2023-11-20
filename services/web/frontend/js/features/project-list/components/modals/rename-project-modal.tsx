@@ -16,6 +16,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { useProjectListContext } from '../../context/project-list-context'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
+import { isMobileDevice } from '../../../../infrastructure/event-tracking'
 
 type RenameProjectModalProps = {
   handleCloseModal: () => void
@@ -37,9 +38,11 @@ function RenameProjectModal({
     if (showModal) {
       eventTracking.sendMB('project-list-page-interaction', {
         action: 'rename',
+        projectId: project.id,
+        isMobileDevice,
       })
     }
-  }, [showModal])
+  }, [showModal, project.id])
 
   const isValid = useMemo(
     () => newProjectName !== project.name && newProjectName.trim().length > 0,
