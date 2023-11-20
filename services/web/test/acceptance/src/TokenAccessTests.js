@@ -1247,6 +1247,73 @@ describe('TokenAccess', function () {
           done
         )
       })
+
+      it('should save URL hash in redirect', function (done) {
+        const urlFragment = '#123456'
+        const tokenWithUrlFragment = `${this.tokens.readAndWrite}${urlFragment}`
+
+        async.series(
+          [
+            cb =>
+              tryEditorAccess(
+                this.anon,
+                this.projectId,
+                expectErrorResponse.restricted.html,
+                cb
+              ),
+            cb =>
+              this.anon.request.get(
+                tokenWithUrlFragment,
+                (err, response, body) => {
+                  if (err) {
+                    return cb(err)
+                  }
+                  expect(response.statusCode).to.equal(200)
+
+                  this.anon.request.post(
+                    `${this.tokens.readAndWrite}/grant`,
+                    {
+                      json: {
+                        token: this.tokens.readAndWrite,
+                        tokenHashPrefix: urlFragment,
+                      },
+                    },
+                    (err, response, body) => {
+                      if (err) {
+                        return cb(err)
+                      }
+                      expect(response.statusCode).to.equal(200)
+                      expect(body).to.deep.equal({
+                        redirect: '/restricted',
+                        anonWriteAccessDenied: true,
+                      })
+                      cb()
+                    }
+                  )
+                }
+              ),
+            cb =>
+              tryAnonContentAccess(
+                this.anon,
+                this.projectId,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(403)
+                  expect(body).to.equal('Forbidden')
+                },
+                cb
+              ),
+            cb =>
+              this.anon.login((err, response, body) => {
+                expect(err).to.not.exist
+                expect(response.statusCode).to.equal(200)
+                expect(body.redir).to.equal(`/${tokenWithUrlFragment}`)
+                cb()
+              }),
+          ],
+          done
+        )
+      })
     })
   } else {
     describe('anonymous read-and-write token, enabled', function () {

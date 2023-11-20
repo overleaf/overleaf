@@ -111,6 +111,7 @@ async function checkAndGetProjectOrResponseAction(
   tokenType,
   token,
   userId,
+  tokenHashPrefix,
   req,
   res,
   next
@@ -122,10 +123,14 @@ async function checkAndGetProjectOrResponseAction(
     !TokenAccessHandler.ANONYMOUS_READ_AND_WRITE_ENABLED
   ) {
     logger.warn('[TokenAccess] deny anonymous read-and-write token access')
-    AuthenticationController.setRedirectInSession(
-      req,
-      TokenAccessHandler.makeTokenUrl(token)
-    )
+
+    let projectUrlWithToken = TokenAccessHandler.makeTokenUrl(token)
+
+    if (tokenHashPrefix && tokenHashPrefix.startsWith('#')) {
+      projectUrlWithToken += `${tokenHashPrefix}`
+    }
+
+    AuthenticationController.setRedirectInSession(req, projectUrlWithToken)
     return [
       null,
       () => {
@@ -245,6 +250,7 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       tokenType,
       token,
       userId,
+      tokenHashPrefix,
       req,
       res,
       next
@@ -323,6 +329,7 @@ async function grantTokenAccessReadOnly(req, res, next) {
       tokenType,
       token,
       userId,
+      tokenHashPrefix,
       req,
       res,
       next

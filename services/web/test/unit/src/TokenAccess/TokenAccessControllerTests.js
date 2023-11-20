@@ -86,7 +86,7 @@ describe('TokenAccessController', function () {
     describe('normal case', function () {
       beforeEach(function (done) {
         this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true, tokenHashPrefix: 'prefix' }
+        this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
         this.res.callback = done
         this.TokenAccessController.grantTokenAccessReadAndWrite(
           this.req,
@@ -118,7 +118,7 @@ describe('TokenAccessController', function () {
           this.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
           this.token,
-          'prefix',
+          '#prefix',
           'readAndWrite',
           this.user._id,
           { projectId: this.project._id, action: 'continue' }
@@ -222,7 +222,7 @@ describe('TokenAccessController', function () {
       beforeEach(function () {
         this.SessionManager.getLoggedInUserId.returns(null)
         this.req.params = { token: this.token }
-        this.req.body = { tokenHashPrefix: 'prefix' }
+        this.req.body = { tokenHashPrefix: '#prefix' }
       })
       describe('ANONYMOUS_READ_AND_WRITE_ENABLED is undefined', function () {
         beforeEach(function (done) {
@@ -246,13 +246,19 @@ describe('TokenAccessController', function () {
             this.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
             this.token,
-            'prefix',
+            '#prefix',
             'readAndWrite',
             null,
             {
               action: 'denied anonymous read-and-write token access',
             }
           )
+        })
+
+        it('saves redirect URL with URL fragment', function () {
+          expect(
+            this.AuthenticationController.setRedirectInSession.lastCall.args[1]
+          ).to.equal('/#prefix')
         })
       })
 
@@ -280,7 +286,7 @@ describe('TokenAccessController', function () {
             this.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
             this.token,
-            'prefix',
+            '#prefix',
             'readAndWrite',
             null,
             {
@@ -304,7 +310,7 @@ describe('TokenAccessController', function () {
             has_owner: true,
           })
           this.req.params = { token: this.token }
-          this.req.body = { tokenHashPrefix: 'prefix' }
+          this.req.body = { tokenHashPrefix: '#prefix' }
           this.res.callback = done
           this.TokenAccessController.grantTokenAccessReadAndWrite(
             this.req,
@@ -328,7 +334,7 @@ describe('TokenAccessController', function () {
             this.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
             this.token,
-            'prefix',
+            '#prefix',
             'readAndWrite',
             this.user._id,
             {
@@ -345,7 +351,7 @@ describe('TokenAccessController', function () {
             exists: false,
           })
           this.req.params = { token: this.token }
-          this.req.body = { tokenHashPrefix: 'prefix' }
+          this.req.body = { tokenHashPrefix: '#prefix' }
           this.res.callback = done
           this.TokenAccessController.grantTokenAccessReadAndWrite(
             this.req,
@@ -361,7 +367,7 @@ describe('TokenAccessController', function () {
             this.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
             this.token,
-            'prefix',
+            '#prefix',
             'readAndWrite',
             this.user._id,
             {
@@ -376,7 +382,7 @@ describe('TokenAccessController', function () {
       beforeEach(function () {
         this.TokenAccessHandler.promises.getProjectByToken.resolves(undefined)
         this.req.params = { token: this.token }
-        this.req.body = { tokenHashPrefix: 'prefix' }
+        this.req.body = { tokenHashPrefix: '#prefix' }
       })
       it('passes Errors.NotFoundError to next when project not found and still checks token hash', function (done) {
         this.TokenAccessController.grantTokenAccessReadAndWrite(
@@ -389,7 +395,7 @@ describe('TokenAccessController', function () {
               this.TokenAccessHandler.checkTokenHashPrefix
             ).to.have.been.calledWith(
               this.token,
-              'prefix',
+              '#prefix',
               'readAndWrite',
               this.user._id,
               {
@@ -406,7 +412,7 @@ describe('TokenAccessController', function () {
     it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (done) {
       this.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
       this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: 'prefix' }
+      this.req.body = { tokenHashPrefix: '#prefix' }
       this.TokenAccessController.grantTokenAccessReadAndWrite(
         this.req,
         this.res,
@@ -417,7 +423,7 @@ describe('TokenAccessController', function () {
             this.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
             this.token,
-            'prefix',
+            '#prefix',
             'readAndWrite',
             this.user._id,
             {
@@ -434,7 +440,7 @@ describe('TokenAccessController', function () {
     it('returns 400 when not using a read write token', function () {
       this.TokenAccessHandler.isReadAndWriteToken.returns(false)
       this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: 'prefix' }
+      this.req.body = { tokenHashPrefix: '#prefix' }
       this.TokenAccessController.grantTokenAccessReadAndWrite(
         this.req,
         this.res
@@ -447,7 +453,7 @@ describe('TokenAccessController', function () {
     describe('normal case', function () {
       beforeEach(function (done) {
         this.req.params = { token: this.token }
-        this.req.body = { confirmedByUser: true, tokenHashPrefix: 'prefix' }
+        this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
         this.res.callback = done
         this.TokenAccessController.grantTokenAccessReadOnly(
           this.req,
@@ -479,7 +485,7 @@ describe('TokenAccessController', function () {
           this.TokenAccessHandler.checkTokenHashPrefix
         ).to.have.been.calledWith(
           this.token,
-          'prefix',
+          '#prefix',
           'readOnly',
           this.user._id,
           { projectId: this.project._id, action: 'continue' }
@@ -521,7 +527,7 @@ describe('TokenAccessController', function () {
     it('returns 400 when not using a read only token', function () {
       this.TokenAccessHandler.isReadOnlyToken.returns(false)
       this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: 'prefix' }
+      this.req.body = { tokenHashPrefix: '#prefix' }
       this.TokenAccessController.grantTokenAccessReadOnly(this.req, this.res)
       expect(this.res.sendStatus).to.have.been.calledWith(400)
     })
@@ -587,7 +593,7 @@ describe('TokenAccessController', function () {
     it('passes Errors.NotFoundError to next when token access is not enabled but still checks token hash', function (done) {
       this.TokenAccessHandler.tokenAccessEnabledForProject.returns(false)
       this.req.params = { token: this.token }
-      this.req.body = { tokenHashPrefix: 'prefix' }
+      this.req.body = { tokenHashPrefix: '#prefix' }
       this.TokenAccessController.grantTokenAccessReadOnly(
         this.req,
         this.res,
@@ -598,7 +604,7 @@ describe('TokenAccessController', function () {
             this.TokenAccessHandler.checkTokenHashPrefix
           ).to.have.been.calledWith(
             this.token,
-            'prefix',
+            '#prefix',
             'readOnly',
             this.user._id,
             {

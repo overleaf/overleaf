@@ -310,10 +310,7 @@ const TokenAccessHandler = {
       }
     }
 
-    if (
-      hashPrefixStatus === 'mismatch' ||
-      hashPrefixStatus === 'mismatch-v1-format'
-    ) {
+    if (hashPrefixStatus === 'mismatch') {
       logger.info(
         {
           tokenHashPrefix,
