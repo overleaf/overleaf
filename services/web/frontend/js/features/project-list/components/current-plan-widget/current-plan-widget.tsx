@@ -20,11 +20,7 @@ function CurrentPlanWidget() {
   const isGroupPlan = type === 'group'
   const isCommonsPlan = type === 'commons'
 
-  const newFeaturesPageVariant =
-    getMeta('ol-splitTestVariants')?.['features-page'] === 'new'
-  const featuresPageURL = newFeaturesPageVariant
-    ? '/about/features-overview'
-    : '/learn/how-to/Overleaf_premium_features'
+  const featuresPageURL = '/learn/how-to/Overleaf_premium_features'
 
   let currentPlan
 

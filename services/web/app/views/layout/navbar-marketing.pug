@@ -30,7 +30,6 @@ nav.navbar.navbar-default.navbar-main
 		- var canDisplayAdminRedirect = canRedirectToAdminDomain()
 		- var canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || (getSessionUser() && getSessionUser().staffAccess && (getSessionUser().staffAccess.splitTestMetrics || getSessionUser().staffAccess.splitTestManagement)))
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
-		- var featuresPageVariant = splitTestVariants && splitTestVariants['features-page']
 
 		if (typeof(suppressNavbarRight) == "undefined")
 			.navbar-collapse.collapse(data-ol-navbar-main-collapse)
@@ -101,15 +100,14 @@ nav.navbar.navbar-default.navbar-main
 											else
 												li
 													if child.url
-														if !child.splitTest || child.splitTest && child.splitTest === 'features-page' && child.splitTestVariant === featuresPageVariant
-															a(
-																href=child.url,
-																class=child.class,
-																event-tracking=child.event
-																event-tracking-mb="true"
-																event-tracking-trigger="click"
-																event-segmentation=child.eventSegmentation
-															) !{translate(child.text)}
+														a(
+															href=child.url,
+															class=child.class,
+															event-tracking=child.event
+															event-tracking-mb="true"
+															event-tracking-trigger="click"
+															event-segmentation=child.eventSegmentation
+														) !{translate(child.text)}
 													else
 														| !{translate(child.text)}
 							else

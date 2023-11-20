@@ -81,10 +81,7 @@ function getWebpackAssets(entrypoint, section) {
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(
     expressify(
-      SplitTestMiddleware.loadAssignmentsInLocals([
-        'design-system-updates',
-        'features-page',
-      ])
+      SplitTestMiddleware.loadAssignmentsInLocals(['design-system-updates'])
     )
   )
 

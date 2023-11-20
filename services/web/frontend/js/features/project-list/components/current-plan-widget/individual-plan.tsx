@@ -1,8 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { IndividualPlanSubscription } from '../../../../../../types/project/dashboard/subscription'
 import Tooltip from '../../../../shared/components/tooltip'
-import getMeta from '../../../../utils/meta'
-import * as eventTracking from '../../../../infrastructure/event-tracking'
 
 type IndividualPlanProps = Pick<
   IndividualPlanSubscription,
@@ -32,14 +30,6 @@ function IndividualPlan({
       <Trans i18nKey="premium_plan_label" components={{ b: <strong /> }} />
     )
 
-  const featuresPageVariant = getMeta('ol-splitTestVariants')?.['features-page']
-  function handleLinkClick() {
-    eventTracking.sendMB('features-page-link', {
-      splitTest: 'features-page',
-      splitTestVariant: featuresPageVariant,
-    })
-  }
-
   return (
     <>
       <span className="current-plan-label visible-xs">{currentPlanLabel}</span>
@@ -48,11 +38,7 @@ function IndividualPlan({
         id="individual-plan"
         overlayProps={{ placement: 'bottom' }}
       >
-        <a
-          href={featuresPageURL}
-          className="current-plan-label hidden-xs"
-          onClick={handleLinkClick}
-        >
+        <a href={featuresPageURL} className="current-plan-label hidden-xs">
           {currentPlanLabel} <span className="info-badge" />
         </a>
       </Tooltip>

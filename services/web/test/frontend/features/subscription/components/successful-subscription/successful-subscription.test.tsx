@@ -41,7 +41,7 @@ describe('successful subscription page', function () {
       /it’s support from people like yourself that allows .* to continue to grow and improve/i
     )
     expect(screen.getByText(/get the most out of your/i).textContent).to.match(
-      /get the most out of your .* subscription by checking out the list of .*’s premium features/i
+      /get the most out of your .* subscription by checking out .*’s features/i
     )
     expect(
       screen
@@ -70,11 +70,9 @@ describe('successful subscription page', function () {
     )
 
     const helpLink = screen.getByRole('link', {
-      name: /.*’s premium features/i,
+      name: /.*’s features/i,
     })
-    expect(helpLink.getAttribute('href')).to.equal(
-      '/learn/how-to/Overleaf_premium_features'
-    )
+    expect(helpLink.getAttribute('href')).to.equal('/about/features-overview')
 
     const backToYourProjectsLink = screen.getByRole('link', {
       name: /back to your projects/i,
