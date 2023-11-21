@@ -24,6 +24,8 @@ class Subscription {
     this.planCode = options.planCode
     this.recurlySubscription_id = options.recurlySubscription_id
     this.features = options.features
+    this.ssoConfig = options.ssoConfig
+    this.groupPolicy = options.groupPolicy
   }
 
   ensureExists(callback) {

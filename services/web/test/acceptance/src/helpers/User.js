@@ -40,6 +40,7 @@ class User {
     this._id = user._id.toString()
     this.first_name = user.first_name
     this.referal_id = user.referal_id
+    this.enrollment = user.enrollment
   }
 
   get(callback) {
@@ -226,6 +227,14 @@ class User {
 
   setEmails(emails, callback) {
     UserModel.updateOne({ _id: this.id }, { emails }, callback)
+  }
+
+  setEnrollment(enrollment, callback) {
+    UserModel.updateOne({ _id: this.id }, { enrollment }, callback)
+  }
+
+  setSamlIdentifiers(samlIdentifiers, callback) {
+    UserModel.updateOne({ _id: this.id }, { samlIdentifiers }, callback)
   }
 
   logout(callback) {
