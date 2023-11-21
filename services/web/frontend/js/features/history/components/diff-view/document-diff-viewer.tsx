@@ -8,14 +8,8 @@ import {
 import { EditorView, lineNumbers } from '@codemirror/view'
 import { indentationMarkers } from '@replit/codemirror-indentation-markers'
 import { highlights, setHighlightsEffect } from '../../extensions/highlights'
-import useScopeValue from '../../../../shared/hooks/use-scope-value'
-import {
-  theme,
-  Options,
-  setOptionsTheme,
-  FontFamily,
-  LineHeight,
-} from '../../extensions/theme'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import { theme, Options, setOptionsTheme } from '../../extensions/theme'
 import { indentUnit } from '@codemirror/language'
 import { Highlight } from '../../services/types/doc'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
@@ -50,9 +44,8 @@ function DocumentDiffViewer({
   doc: string
   highlights: Highlight[]
 }) {
-  const [fontFamily] = useScopeValue<FontFamily>('settings.fontFamily')
-  const [fontSize] = useScopeValue<number>('settings.fontSize')
-  const [lineHeight] = useScopeValue<LineHeight>('settings.lineHeight')
+  const { userSettings } = useUserSettingsContext()
+  const { fontFamily, fontSize, lineHeight } = userSettings
   const isMounted = useIsMounted()
   const { t } = useTranslation()
 

@@ -14,31 +14,34 @@ import { SplitTestProvider } from './split-test-context'
 import { FileTreeDataProvider } from './file-tree-data-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 
 export function ContextRoot({ children, ide }) {
   return (
     <SplitTestProvider>
       <IdeAngularProvider ide={ide}>
         <UserProvider>
-          <ProjectProvider>
-            <FileTreeDataProvider>
-              <FileTreePathProvider>
-                <DetachProvider>
-                  <EditorProvider>
-                    <ProjectSettingsProvider>
-                      <LayoutProvider>
-                        <LocalCompileProvider>
-                          <DetachCompileProvider>
-                            <ChatProvider>{children}</ChatProvider>
-                          </DetachCompileProvider>
-                        </LocalCompileProvider>
-                      </LayoutProvider>
-                    </ProjectSettingsProvider>
-                  </EditorProvider>
-                </DetachProvider>
-              </FileTreePathProvider>
-            </FileTreeDataProvider>
-          </ProjectProvider>
+          <UserSettingsProvider>
+            <ProjectProvider>
+              <FileTreeDataProvider>
+                <FileTreePathProvider>
+                  <DetachProvider>
+                    <EditorProvider>
+                      <ProjectSettingsProvider>
+                        <LayoutProvider>
+                          <LocalCompileProvider>
+                            <DetachCompileProvider>
+                              <ChatProvider>{children}</ChatProvider>
+                            </DetachCompileProvider>
+                          </LocalCompileProvider>
+                        </LayoutProvider>
+                      </ProjectSettingsProvider>
+                    </EditorProvider>
+                  </DetachProvider>
+                </FileTreePathProvider>
+              </FileTreeDataProvider>
+            </ProjectProvider>
+          </UserSettingsProvider>
         </UserProvider>
       </IdeAngularProvider>
     </SplitTestProvider>

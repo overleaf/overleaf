@@ -1,11 +1,11 @@
 import { memo, useEffect, useRef, useState } from 'react'
 import { useLayoutContext } from '../../../shared/context/layout-context'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 export default memo(function LeftMenuMask() {
   const { setLeftMenuShown } = useLayoutContext()
-  const [editorTheme] = useScopeValue('settings.editorTheme')
-  const [overallTheme] = useScopeValue('settings.overallTheme')
+  const { userSettings } = useUserSettingsContext()
+  const { editorTheme, overallTheme } = userSettings
   const [original] = useState({ editorTheme, overallTheme })
   const maskRef = useRef<HTMLDivElement | null>(null)
 

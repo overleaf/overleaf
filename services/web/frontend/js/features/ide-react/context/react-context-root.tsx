@@ -18,6 +18,7 @@ import { ReferencesProvider } from '@/features/ide-react/context/references-cont
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { ModalsContextProvider } from '@/features/ide-react/context/modals-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 
 export const ReactContextRoot: FC = ({ children }) => {
   return (
@@ -25,37 +26,39 @@ export const ReactContextRoot: FC = ({ children }) => {
       <ConnectionProvider>
         <IdeReactProvider>
           <UserProvider>
-            <ProjectProvider>
-              <FileTreeDataProvider>
-                <FileTreePathProvider>
-                  <ReferencesProvider>
-                    <DetachProvider>
-                      <EditorProvider>
-                        <ProjectSettingsProvider>
-                          <LayoutProvider>
-                            <LocalCompileProvider>
-                              <DetachCompileProvider>
-                                <ChatProvider>
-                                  <ModalsContextProvider>
-                                    <EditorManagerProvider>
-                                      <OnlineUsersProvider>
-                                        <MetadataProvider>
-                                          {children}
-                                        </MetadataProvider>
-                                      </OnlineUsersProvider>
-                                    </EditorManagerProvider>
-                                  </ModalsContextProvider>
-                                </ChatProvider>
-                              </DetachCompileProvider>
-                            </LocalCompileProvider>
-                          </LayoutProvider>
-                        </ProjectSettingsProvider>
-                      </EditorProvider>
-                    </DetachProvider>
-                  </ReferencesProvider>
-                </FileTreePathProvider>
-              </FileTreeDataProvider>
-            </ProjectProvider>
+            <UserSettingsProvider>
+              <ProjectProvider>
+                <FileTreeDataProvider>
+                  <FileTreePathProvider>
+                    <ReferencesProvider>
+                      <DetachProvider>
+                        <EditorProvider>
+                          <ProjectSettingsProvider>
+                            <LayoutProvider>
+                              <LocalCompileProvider>
+                                <DetachCompileProvider>
+                                  <ChatProvider>
+                                    <ModalsContextProvider>
+                                      <EditorManagerProvider>
+                                        <OnlineUsersProvider>
+                                          <MetadataProvider>
+                                            {children}
+                                          </MetadataProvider>
+                                        </OnlineUsersProvider>
+                                      </EditorManagerProvider>
+                                    </ModalsContextProvider>
+                                  </ChatProvider>
+                                </DetachCompileProvider>
+                              </LocalCompileProvider>
+                            </LayoutProvider>
+                          </ProjectSettingsProvider>
+                        </EditorProvider>
+                      </DetachProvider>
+                    </ReferencesProvider>
+                  </FileTreePathProvider>
+                </FileTreeDataProvider>
+              </ProjectProvider>
+            </UserSettingsProvider>
           </UserProvider>
         </IdeReactProvider>
       </ConnectionProvider>

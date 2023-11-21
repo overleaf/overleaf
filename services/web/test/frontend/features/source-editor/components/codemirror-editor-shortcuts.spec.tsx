@@ -140,11 +140,11 @@ contentLine3
 \\end{document}`
 
     const scope = mockScope(shortDoc)
-    scope.settings.mode = 'emacs'
+    const userSettings = { mode: 'emacs' }
 
     cy.mount(
       <Container>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
       </Container>
@@ -245,11 +245,11 @@ contentLine3
 `
 
     const scope = mockScope(shortDoc)
-    scope.settings.mode = 'vim'
+    const userSettings = { mode: 'vim' }
 
     cy.mount(
       <Container>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
       </Container>

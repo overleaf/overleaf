@@ -1,6 +1,6 @@
 import { ChangeEventHandler, useCallback } from 'react'
 
-type PossibleValue = string | boolean
+type PossibleValue = string | number | boolean
 
 export type Option<T extends PossibleValue = string> = {
   value: T
@@ -35,14 +35,16 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
 }: SettingsMenuSelectProps<T>) {
   const handleChange: ChangeEventHandler<HTMLSelectElement> = useCallback(
     event => {
-      let value: PossibleValue = event.target.value
-      if (value === 'true' || value === 'false') {
-        value = value === 'true'
+      const selectedValue = event.target.value
+      let onChangeValue: PossibleValue = selectedValue
+      if (typeof value === 'boolean') {
+        onChangeValue = selectedValue === 'true'
+      } else if (typeof value === 'number') {
+        onChangeValue = parseInt(selectedValue, 10)
       }
-
-      onChange(value as T)
+      onChange(onChangeValue as T)
     },
-    [onChange]
+    [onChange, value]
   )
 
   return (

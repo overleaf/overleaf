@@ -14,6 +14,7 @@ import { LocalCompileProvider } from '@/shared/context/local-compile-context'
 import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -21,6 +22,20 @@ export const PROJECT_ID = 'project123'
 export const PROJECT_NAME = 'project-name'
 export const USER_ID = '123abd'
 export const USER_EMAIL = 'testuser@example.com'
+
+const defaultUserSettings = {
+  pdfViewer: 'pdfjs',
+  fontSize: 12,
+  fontFamily: 'monaco',
+  lineHeight: 'normal',
+  editorTheme: 'textmate',
+  overallTheme: '',
+  mode: 'default',
+  autoComplete: true,
+  autoPairDelimiters: true,
+  trackChanges: true,
+  syntaxValidation: false,
+}
 
 export function EditorProviders({
   user = { id: USER_ID, email: USER_EMAIL },
@@ -71,12 +86,17 @@ export function EditorProviders({
       },
     },
   },
+  userSettings = {},
   providers = {},
 }) {
   window.user = user || window.user
   window.gitBridgePublicBaseUrl = 'https://git.overleaf.test'
   window.project_id = projectId != null ? projectId : window.project_id
   window.isRestrictedTokenMember = isRestrictedTokenMember
+  window.metaAttributesCache.set(
+    'ol-userSettings',
+    merge({}, defaultUserSettings, userSettings)
+  )
 
   const $scope = merge(
     {
@@ -126,6 +146,7 @@ export function EditorProviders({
     ProjectSettingsProvider,
     SplitTestProvider,
     UserProvider,
+    UserSettingsProvider,
     ...providers,
   }
 
@@ -133,25 +154,27 @@ export function EditorProviders({
     <Providers.SplitTestProvider>
       <Providers.IdeAngularProvider ide={window._ide}>
         <Providers.UserProvider>
-          <Providers.ProjectProvider>
-            <Providers.FileTreeDataProvider>
-              <Providers.FileTreePathProvider>
-                <Providers.DetachProvider>
-                  <Providers.EditorProvider>
-                    <Providers.ProjectSettingsProvider>
-                      <Providers.LayoutProvider>
-                        <Providers.LocalCompileProvider>
-                          <Providers.DetachCompileProvider>
-                            {children}
-                          </Providers.DetachCompileProvider>
-                        </Providers.LocalCompileProvider>
-                      </Providers.LayoutProvider>
-                    </Providers.ProjectSettingsProvider>
-                  </Providers.EditorProvider>
-                </Providers.DetachProvider>
-              </Providers.FileTreePathProvider>
-            </Providers.FileTreeDataProvider>
-          </Providers.ProjectProvider>
+          <Providers.UserSettingsProvider>
+            <Providers.ProjectProvider>
+              <Providers.FileTreeDataProvider>
+                <Providers.FileTreePathProvider>
+                  <Providers.DetachProvider>
+                    <Providers.EditorProvider>
+                      <Providers.ProjectSettingsProvider>
+                        <Providers.LayoutProvider>
+                          <Providers.LocalCompileProvider>
+                            <Providers.DetachCompileProvider>
+                              {children}
+                            </Providers.DetachCompileProvider>
+                          </Providers.LocalCompileProvider>
+                        </Providers.LayoutProvider>
+                      </Providers.ProjectSettingsProvider>
+                    </Providers.EditorProvider>
+                  </Providers.DetachProvider>
+                </Providers.FileTreePathProvider>
+              </Providers.FileTreeDataProvider>
+            </Providers.ProjectProvider>
+          </Providers.UserSettingsProvider>
         </Providers.UserProvider>
       </Providers.IdeAngularProvider>
     </Providers.SplitTestProvider>

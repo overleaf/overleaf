@@ -31,6 +31,7 @@ import { useLayoutContext } from './layout-context'
 import { useUserContext } from './user-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 export const LocalCompileContext = createContext()
 
@@ -114,8 +115,9 @@ export function LocalCompileProvider({ children }) {
     'pdf.logEntryAnnotations'
   )
 
-  // the PDF viewer
-  const [pdfViewer] = useScopeValue('settings.pdfViewer')
+  // the PDF viewer and whether syntax validation is enabled globally
+  const { userSettings } = useUserSettingsContext()
+  const { pdfViewer, syntaxValidation } = userSettings
 
   // the URL for downloading the PDF
   const [, setPdfDownloadUrl] = useScopeValueSetterOnly('pdf.downloadUrl')
@@ -231,9 +233,6 @@ export function LocalCompileProvider({ children }) {
 
   // whether the editor linter found errors
   const [hasLintingError, setHasLintingError] = useScopeValue('hasLintingError')
-
-  // whether syntax validation is enabled globally
-  const [syntaxValidation] = useScopeValue('settings.syntaxValidation')
 
   // the timestamp that a doc was last changed
   const [changedAt, setChangedAt] = useState(0)

@@ -7,18 +7,6 @@ export const figuresFolderId = '123456789012345678901234'
 export const figureId = '234567890123456789012345'
 export const mockScope = (content?: string) => {
   return {
-    settings: {
-      fontSize: 12,
-      fontFamily: 'monaco',
-      lineHeight: 'normal',
-      editorTheme: 'textmate',
-      overallTheme: '',
-      mode: 'default',
-      autoComplete: true,
-      autoPairDelimiters: true,
-      trackChanges: true,
-      syntaxValidation: false,
-    },
     editor: {
       sharejs_doc: mockDoc(content),
       open_doc_name: 'test.tex',

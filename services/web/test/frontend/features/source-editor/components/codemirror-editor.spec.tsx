@@ -41,13 +41,13 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
 
   it('renders client-side lint annotations in the gutter', function () {
     const scope = mockScope()
-    scope.settings.syntaxValidation = true
+    const userSettings = { syntaxValidation: true }
 
     cy.clock()
 
     cy.mount(
       <Container>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
       </Container>
@@ -89,11 +89,13 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       ],
     }
 
+    const userSettings = { syntaxValidation: false }
+
     cy.clock()
 
     cy.mount(
       <Container>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
       </Container>
@@ -318,11 +320,11 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
     cy.interceptCompile()
 
     const scope = mockScope()
-    scope.settings.mode = 'vim'
+    const userSettings = { mode: 'vim' }
 
     cy.mount(
       <Container>
-        <EditorProviders scope={scope}>
+        <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
       </Container>

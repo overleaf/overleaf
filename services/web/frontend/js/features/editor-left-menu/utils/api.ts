@@ -1,29 +1,8 @@
-import type {
-  FontFamily,
-  LineHeight,
-  OverallTheme,
-} from '../../source-editor/extensions/theme'
-import type {
-  Keybindings,
-  PdfViewer,
-  ProjectCompiler,
-} from '../../../../../types/project-settings'
+import type { ProjectCompiler } from '../../../../../types/project-settings'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import { postJSON } from '../../../infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-
-export type UserSettings = {
-  pdfViewer: PdfViewer
-  autoComplete: boolean
-  autoPairDelimiters: boolean
-  syntaxValidation: boolean
-  editorTheme: string
-  overallTheme: OverallTheme
-  mode: Keybindings
-  fontSize: string
-  fontFamily: FontFamily
-  lineHeight: LineHeight
-}
+import { UserSettings } from '../../../../../types/user-settings'
 
 export type ProjectSettings = {
   compiler: ProjectCompiler

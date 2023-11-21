@@ -21,7 +21,6 @@ import { getMockIde } from '@/shared/context/mock/mock-ide'
 import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-manager-context-adapter'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { EventLog } from '@/features/ide-react/editor/event-log'
-import { populateSettingsScope } from '@/features/ide-react/scope-adapters/settings-adapter'
 import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
 import { populateReferenceScope } from '@/features/ide-react/context/references-context'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
@@ -69,7 +68,6 @@ function createReactScopeValueStore(projectId: string) {
   populateLayoutScope(scopeStore)
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
-  populateSettingsScope(scopeStore)
   populateOnlineUsersScope(scopeStore)
   populateReferenceScope(scopeStore)
   populateReviewPanelScope(scopeStore)

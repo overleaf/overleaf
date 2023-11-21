@@ -231,12 +231,12 @@ describe('<PdfPreview/>', function () {
 
     const scope = mockScope()
     // enable linting in the editor
-    scope.settings.syntaxValidation = true
+    const userSettings = { syntaxValidation: true }
     // mock a linting error
     scope.hasLintingError = true
 
     cy.mount(
-      <EditorProviders scope={scope}>
+      <EditorProviders scope={scope} userSettings={userSettings}>
         <div className="pdf-viewer">
           <PdfPreview />
         </div>

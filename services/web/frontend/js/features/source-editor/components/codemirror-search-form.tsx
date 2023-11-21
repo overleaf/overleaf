@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import classnames from 'classnames'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { getStoredSelection, setStoredSelection } from '../extensions/search'
 import { debounce } from 'lodash'
 import { EditorSelection, EditorState } from '@codemirror/state'
@@ -46,8 +46,8 @@ const CodeMirrorSearchForm: FC = () => {
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
 
-  const [keybindings] = useScopeValue<string>('settings.mode')
-  const emacsKeybindingsActive = keybindings === 'emacs'
+  const { userSettings } = useUserSettingsContext()
+  const emacsKeybindingsActive = userSettings.mode === 'emacs'
   const [activeSearchOption, setActiveSearchOption] =
     useState<ActiveSearchOption>(null)
 

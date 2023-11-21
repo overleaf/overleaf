@@ -367,12 +367,9 @@ If the project has been renamed please look in your project list for a new proje
       'vibrant_ink',
     ]
     $scope.darkTheme = false
-    $scope.$watch('settings.editorTheme', function (theme) {
-      if (Array.from(DARK_THEMES).includes(theme)) {
-        return ($scope.darkTheme = true)
-      } else {
-        return ($scope.darkTheme = false)
-      }
+    // Listen for settings change from React
+    window.addEventListener('settings:change', event => {
+      $scope.darkTheme = DARK_THEMES.includes(event.detail.editorTheme)
     })
 
     ide.localStorage = localStorage

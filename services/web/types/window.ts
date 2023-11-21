@@ -3,7 +3,7 @@ import { OAuthProviders } from './oauth-providers'
 import { OverallThemeMeta } from './project-settings'
 import { User } from './user'
 import 'recurly__recurly-js'
-import { UserSettings } from '@/features/editor-left-menu/utils/api'
+import { UserSettings } from './user-settings'
 
 declare global {
   // eslint-disable-next-line no-unused-vars

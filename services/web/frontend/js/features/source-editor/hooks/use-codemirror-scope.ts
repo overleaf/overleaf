@@ -6,10 +6,7 @@ import useEventListener from '../../../shared/hooks/use-event-listener'
 import useScopeEventListener from '../../../shared/hooks/use-scope-event-listener'
 import { createExtensions } from '../extensions'
 import {
-  FontFamily,
-  LineHeight,
   lineHeights,
-  OverallTheme,
   setEditorTheme,
   setOptionsTheme,
 } from '../extensions/theme'
@@ -49,6 +46,7 @@ import { useErrorHandler } from 'react-error-boundary'
 import { setVisual } from '../extensions/visual/visual'
 import getMeta from '../../../utils/meta'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
@@ -67,17 +65,18 @@ function useCodeMirrorScope(view: EditorView) {
   const [docName] = useScopeValue<string>('editor.open_doc_name')
   const [trackChanges] = useScopeValue<boolean>('editor.trackChanges')
 
-  const [fontFamily] = useScopeValue<FontFamily>('settings.fontFamily')
-  const [fontSize] = useScopeValue<number>('settings.fontSize')
-  const [lineHeight] = useScopeValue<LineHeight>('settings.lineHeight')
-  const [overallTheme] = useScopeValue<OverallTheme>('settings.overallTheme')
-  const [autoComplete] = useScopeValue<boolean>('settings.autoComplete')
-  const [editorTheme] = useScopeValue<string>('settings.editorTheme')
-  const [autoPairDelimiters] = useScopeValue<boolean>(
-    'settings.autoPairDelimiters'
-  )
-  const [mode] = useScopeValue<string>('settings.mode')
-  const [syntaxValidation] = useScopeValue<boolean>('settings.syntaxValidation')
+  const { userSettings } = useUserSettingsContext()
+  const {
+    fontFamily,
+    fontSize,
+    lineHeight,
+    overallTheme,
+    autoComplete,
+    editorTheme,
+    autoPairDelimiters,
+    mode,
+    syntaxValidation,
+  } = userSettings
 
   const [cursorHighlights] = useScopeValue<Record<string, Highlight[]>>(
     'onlineUserCursorHighlights'
