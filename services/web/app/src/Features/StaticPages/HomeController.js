@@ -58,6 +58,12 @@ module.exports = HomeController = {
         )
       }
 
+      const websiteRedesignVariant =
+        res.locals.splitTestVariants?.['website-redesign']
+      const websiteRedesignActive =
+        websiteRedesignVariant === 'new-design' ||
+        websiteRedesignVariant === 'new-design-registration'
+
       const onboardingFlowAssignment =
         await SplitTestHandler.promises.getAssignment(
           req,
@@ -65,12 +71,18 @@ module.exports = HomeController = {
           'onboarding-flow'
         )
 
-      return res.render('external/home/v2', {
-        designSystemUpdatesVariant: designSystemUpdatesAssignment.variant,
-        onboardingFlowVariant: onboardingFlowAssignment.variant,
-        hideNewsletterCheckbox:
-          onboardingFlowAssignment.variant === 'token-confirmation-odc',
-      })
+      if (websiteRedesignActive) {
+        return res.render('external/home/website-redesign/index', {
+          onboardingFlowVariant: onboardingFlowAssignment.variant,
+        })
+      } else {
+        return res.render('external/home/v2', {
+          designSystemUpdatesVariant: designSystemUpdatesAssignment.variant,
+          onboardingFlowVariant: onboardingFlowAssignment.variant,
+          hideNewsletterCheckbox:
+            onboardingFlowAssignment.variant === 'token-confirmation-odc',
+        })
+      }
     } else {
       return res.redirect('/login')
     }
