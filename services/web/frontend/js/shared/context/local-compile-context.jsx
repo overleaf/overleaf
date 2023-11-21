@@ -144,6 +144,11 @@ export function LocalCompileProvider({ children }) {
   // data received in response to a compile request
   const [data, setData] = useState()
 
+  // the rootDocId used in the most recent compile request, which may not be the
+  // same as the project rootDocId. This is used to calculate correct paths when
+  // parsing the compile logs
+  const lastCompileRootDocId = data?.rootDocId
+
   // callback to be invoked for PdfJsMetrics
   const [firstRenderDone, setFirstRenderDone] = useState(() => () => {})
 
@@ -251,8 +256,9 @@ export function LocalCompileProvider({ children }) {
   }, [compiling])
 
   const _buildLogEntryAnnotations = useCallback(
-    entries => buildLogEntryAnnotations(entries, fileTreeData, rootDocId),
-    [fileTreeData, rootDocId]
+    entries =>
+      buildLogEntryAnnotations(entries, fileTreeData, lastCompileRootDocId),
+    [fileTreeData, lastCompileRootDocId]
   )
 
   const buildLogEntryAnnotationsRef = useRef(_buildLogEntryAnnotations)
@@ -265,7 +271,6 @@ export function LocalCompileProvider({ children }) {
   const [compiler] = useState(() => {
     return new DocumentCompiler({
       projectId,
-      rootDocId,
       setChangedAt,
       setSavedAt,
       setCompiling,
@@ -283,6 +288,11 @@ export function LocalCompileProvider({ children }) {
   useEffect(() => {
     compiler.currentDoc = currentDoc
   }, [compiler, currentDoc])
+
+  // keep the project rootDocId in sync with the compiler
+  useEffect(() => {
+    compiler.projectRootDocId = rootDocId
+  }, [compiler, rootDocId])
 
   // keep draft setting in sync with the compiler
   useEffect(() => {

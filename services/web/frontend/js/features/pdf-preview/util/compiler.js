@@ -19,7 +19,6 @@ export default class DocumentCompiler {
   constructor({
     compilingRef,
     projectId,
-    rootDocId,
     setChangedAt,
     setSavedAt,
     setCompiling,
@@ -32,7 +31,6 @@ export default class DocumentCompiler {
   }) {
     this.compilingRef = compilingRef
     this.projectId = projectId
-    this.rootDocId = rootDocId
     this.setChangedAt = setChangedAt
     this.setSavedAt = setSavedAt
     this.setCompiling = setCompiling
@@ -43,6 +41,7 @@ export default class DocumentCompiler {
     this.cleanupCompileResult = cleanupCompileResult
     this.signal = signal
 
+    this.projectRootDocId = null
     this.clsiServerId = null
     this.currentDoc = null
     this.error = undefined
@@ -95,8 +94,10 @@ export default class DocumentCompiler {
 
       const t0 = performance.now()
 
+      const rootDocId = this.getRootDocOverrideId()
+
       const body = {
-        rootDoc_id: this.getRootDocOverrideId(),
+        rootDoc_id: rootDocId,
         draft: options.draft,
         check: 'silent', // NOTE: 'error' and 'validate' are possible, but unused
         // use incremental compile for all users but revert to a full compile
@@ -123,6 +124,7 @@ export default class DocumentCompiler {
       this.setError(undefined)
 
       data.options = options
+      data.rootDocId = rootDocId
       if (data.clsiServerId) {
         this.clsiServerId = data.clsiServerId
       }
@@ -140,7 +142,7 @@ export default class DocumentCompiler {
   // if it contains "\documentclass" then use this as the root doc
   getRootDocOverrideId() {
     // only override when not in the root doc itself
-    if (this.currentDoc.doc_id !== this.rootDocId) {
+    if (this.currentDoc.doc_id !== this.projectRootDocId) {
       const snapshot = this.currentDoc.getSnapshot()
 
       if (snapshot && isMainFile(snapshot)) {
