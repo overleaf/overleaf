@@ -17,6 +17,7 @@ import { ReviewPanelCommentThread } from '../../../../../../../types/review-pane
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
+import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
 
 type CommentEntryProps = {
   docId: DocId
@@ -36,7 +37,7 @@ function CommentEntry({
   permissions,
 }: CommentEntryProps) {
   const { t } = useTranslation()
-  const { gotoEntry, resolveComment, submitReply, handleLayoutChange } =
+  const { resolveComment, submitReply, handleLayoutChange } =
     useReviewPanelUpdaterFnsContext()
   const [replyContent, setReplyContent] = useState('')
   const [animating, setAnimating] = useState(false)
@@ -50,22 +51,7 @@ function CommentEntry({
     handleIndicatorClick,
   } = useIndicatorHover()
 
-  const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as Element
-
-    for (const selector of [
-      '.rp-entry',
-      '.rp-comment-loaded',
-      '.rp-comment-content',
-      '.rp-comment-reply',
-      '.rp-entry-metadata',
-    ]) {
-      if (target.matches(selector)) {
-        gotoEntry(docId, offset)
-        break
-      }
-    }
-  }
+  const handleEntryClick = useEntryClick(docId, offset)
 
   const handleAnimateAndCallOnResolve = () => {
     setAnimating(true)

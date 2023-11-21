@@ -11,6 +11,7 @@ import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-sha
 import { BaseChangeEntryProps } from '../types/base-change-entry-props'
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
+import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
 
 interface AggregateChangeEntryProps extends BaseChangeEntryProps {
   replacedContent: string
@@ -30,7 +31,7 @@ function AggregateChangeEntry({
   contentLimit = 17,
 }: AggregateChangeEntryProps) {
   const { t } = useTranslation()
-  const { acceptChanges, rejectChanges, gotoEntry, handleLayoutChange } =
+  const { acceptChanges, rejectChanges, handleLayoutChange } =
     useReviewPanelUpdaterFnsContext()
   const [isDeletionCollapsed, setIsDeletionCollapsed] = useState(true)
   const [isInsertionCollapsed, setIsInsertionCollapsed] = useState(true)
@@ -53,21 +54,7 @@ function AggregateChangeEntry({
     ? content.substring(0, contentLimit)
     : content
 
-  const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as Element
-
-    for (const selector of [
-      '.rp-entry',
-      '.rp-entry-description',
-      '.rp-entry-body',
-      '.rp-entry-action-icon i',
-    ]) {
-      if (target.matches(selector)) {
-        gotoEntry(docId, offset)
-        break
-      }
-    }
-  }
+  const handleEntryClick = useEntryClick(docId, offset)
 
   const handleDeletionToggleCollapse = () => {
     setIsDeletionCollapsed(value => !value)

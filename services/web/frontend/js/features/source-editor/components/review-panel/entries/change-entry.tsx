@@ -12,6 +12,7 @@ import { BaseChangeEntryProps } from '../types/base-change-entry-props'
 import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-shallow-array-compare'
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
+import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
 
 interface ChangeEntryProps extends BaseChangeEntryProps {
   type: ReviewPanelChangeEntry['type']
@@ -31,7 +32,7 @@ function ChangeEntry({
   contentLimit = 40,
 }: ChangeEntryProps) {
   const { t } = useTranslation()
-  const { handleLayoutChange, acceptChanges, rejectChanges, gotoEntry } =
+  const { handleLayoutChange, acceptChanges, rejectChanges } =
     useReviewPanelUpdaterFnsContext()
   const [isCollapsed, setIsCollapsed] = useState(true)
   const {
@@ -49,21 +50,7 @@ function ChangeEntry({
   const needsCollapsing = content.length > contentLimit
   const isInsert = type === 'insert'
 
-  const handleEntryClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const target = e.target as Element
-
-    for (const selector of [
-      '.rp-entry',
-      '.rp-entry-description',
-      '.rp-entry-body',
-      '.rp-entry-action-icon i',
-    ]) {
-      if (target.matches(selector)) {
-        gotoEntry(docId, offset)
-        break
-      }
-    }
-  }
+  const handleEntryClick = useEntryClick(docId, offset)
 
   const handleToggleCollapse = () => {
     setIsCollapsed(value => !value)
