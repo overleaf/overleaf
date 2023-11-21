@@ -89,7 +89,7 @@ benchmarks:
 build:
 	docker pull gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		|| docker pull gcr.io/overleaf-ops/$(PROJECT_NAME):main-deps \
-		|| echo 'nothing cached'
+		|| echo 'nothing cached for gcr.io/overleaf-ops'
 	docker build \
 	 	--pull \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
