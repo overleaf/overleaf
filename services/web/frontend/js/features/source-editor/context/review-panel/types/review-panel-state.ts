@@ -46,6 +46,7 @@ export interface ReviewPanelState {
       }
     >
     layoutSuspended: boolean
+    unsavedComment: string
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
@@ -87,6 +88,9 @@ export interface ReviewPanelState {
     >
     setLayoutSuspended: React.Dispatch<
       React.SetStateAction<Value<'layoutSuspended'>>
+    >
+    setUnsavedComment: React.Dispatch<
+      React.SetStateAction<Value<'unsavedComment'>>
     >
   }
 }

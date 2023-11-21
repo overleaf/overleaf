@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import EntryContainer from './entry-container'
 import EntryCallout from './entry-callout'
 import EntryActions from './entry-actions'
@@ -11,20 +11,19 @@ import {
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
-import { ReviewPanelAddCommentEntry } from '../../../../../../../types/review-panel/entry'
 
-type AddCommentEntryProps = {
-  entryId: ReviewPanelAddCommentEntry['type']
-}
-
-function AddCommentEntry({ entryId }: AddCommentEntryProps) {
+function AddCommentEntry() {
   const { t } = useTranslation()
-  const { isAddingComment } = useReviewPanelValueContext()
-  const { setIsAddingComment, submitNewComment, handleLayoutChange } =
-    useReviewPanelUpdaterFnsContext()
+  const { isAddingComment, unsavedComment } = useReviewPanelValueContext()
+  const {
+    setIsAddingComment,
+    submitNewComment,
+    handleLayoutChange,
+    setUnsavedComment,
+  } = useReviewPanelUpdaterFnsContext()
 
-  const [content, setContent] = useState('')
-  const [isSubmitting, setIsSubmiting] = useState(false)
+  const [content, setContent] = useState(unsavedComment)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleStartNewComment = () => {
     setIsAddingComment(true)
@@ -32,14 +31,14 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
   }
 
   const handleSubmitNewComment = async () => {
-    setIsSubmiting(true)
+    setIsSubmitting(true)
     try {
       await submitNewComment(content)
-      setIsSubmiting(false)
+      setIsSubmitting(false)
       setIsAddingComment(false)
       setContent('')
     } catch (err) {
-      setIsSubmiting(false)
+      setIsSubmitting(false)
     }
     handleLayoutChange({ async: true })
   }
@@ -55,6 +54,20 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
       setIsAddingComment(false)
     }
   }, [setIsAddingComment])
+
+  const unsavedCommentRef = useRef(unsavedComment)
+
+  // Keep unsaved comment ref up to date for use when the component unmounts
+  useEffect(() => {
+    unsavedCommentRef.current = content
+  }, [content])
+
+  // Store the unsaved comment in the context on unmount
+  useEffect(() => {
+    return () => {
+      setUnsavedComment(unsavedCommentRef.current)
+    }
+  }, [setUnsavedComment])
 
   const handleCommentKeyPress = (
     e: React.KeyboardEvent<HTMLTextAreaElement>
@@ -76,7 +89,7 @@ function AddCommentEntry({ entryId }: AddCommentEntryProps) {
   }
 
   return (
-    <EntryContainer id={entryId}>
+    <EntryContainer id="add-comment">
       <EntryCallout className="rp-entry-callout-add-comment" />
       <div
         className={classnames('rp-entry', 'rp-entry-add-comment', {

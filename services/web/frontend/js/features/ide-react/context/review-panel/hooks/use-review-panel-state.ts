@@ -509,6 +509,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const [navHeight, setNavHeight] = useState(0)
   const [toolbarHeight, setToolbarHeight] = useState(0)
   const [layoutSuspended, setLayoutSuspended] = useState(false)
+  const [unsavedComment, setUnsavedComment] = useState('')
 
   // listen for events from the CodeMirror 6 track changes extension
   useEffect(() => {
@@ -573,6 +574,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
       layoutSuspended,
+      unsavedComment,
     }),
     [
       collapsed,
@@ -599,6 +601,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       trackChangesForGuestsAvailable,
       formattedProjectMembers,
       layoutSuspended,
+      unsavedComment,
     ]
   )
 
@@ -630,6 +633,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       setNavHeight,
       setToolbarHeight,
       setLayoutSuspended,
+      setUnsavedComment,
     }),
     [
       handleSetSubview,
@@ -657,6 +661,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       setNavHeight,
       setToolbarHeight,
       setLayoutSuspended,
+      setUnsavedComment,
     ]
   )
 

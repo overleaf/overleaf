@@ -130,7 +130,7 @@ function CurrentFileContainer() {
               }
 
               if (entry.type === 'add-comment' && permissions.comment) {
-                return <AddCommentEntry key={id} entryId={entry.type} />
+                return <AddCommentEntry key={id} />
               }
 
               if (entry.type === 'bulk-actions') {
