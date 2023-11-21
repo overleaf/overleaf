@@ -327,16 +327,14 @@
     top: 0;
   }
 
-  .rp-state-current-file-mini.rp-layout-left & {
-    left: auto;
-    right: @review-off-width + @rp-entry-arrow-width;
+  .rp-state-current-file-mini.rp-layout-left &,
+  .rp-floating-entry-layout-left & {
     border-left-width: 0;
     border-right-width: @rp-entry-ribbon-width;
     border-right-style: solid;
 
     &::before {
       left: -(@review-off-width + @rp-entry-arrow-width);
-      right: -(2 * @rp-entry-arrow-width + 2);
     }
 
     &::after {
@@ -348,6 +346,23 @@
       );
       right: -(@rp-entry-ribbon-width + @rp-entry-arrow-width);
       left: auto;
+    }
+  }
+
+  .rp-state-current-file-mini.rp-layout-left & {
+    left: auto;
+    right: @review-off-width + @rp-entry-arrow-width;
+
+    &::before {
+      right: -(2 * @rp-entry-arrow-width + 2);
+    }
+  }
+
+  .rp-floating-entry-layout-left & {
+    left: -(@review-panel-width + @rp-entry-arrow-width + 2);
+
+    &::before {
+      right: -(2 * @rp-entry-arrow-width);
     }
   }
 
@@ -518,7 +533,8 @@
     border-right-width: 0;
   }
 
-  .rp-state-current-file-mini.rp-layout-left & {
+  .rp-state-current-file-mini.rp-layout-left &,
+  .rp-floating-entry-layout-left & {
     &:first-child {
       border-bottom-left-radius: 3px;
     }
@@ -1276,6 +1292,10 @@ button when (@is-overleaf-light = true) {
   .rp-entry-list-react {
     position: relative;
     overflow: hidden;
+
+    .rp-size-mini & {
+      overflow: visible;
+    }
   }
 
   .rp-state-current-file & {

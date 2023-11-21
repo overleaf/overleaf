@@ -1,6 +1,7 @@
-import classnames from 'classnames'
+import classNames from 'classnames'
 import { createPortal } from 'react-dom'
 import { Coordinates } from '../hooks/use-indicator-hover'
+import useScopeValue from '@/shared/hooks/use-scope-value'
 
 function EntryContainer({
   id,
@@ -10,9 +11,11 @@ function EntryContainer({
 }: React.ComponentProps<'div'> & {
   hoverCoords?: Coordinates | null
 }) {
+  const [layoutToLeft] = useScopeValue<boolean>('reviewPanel.layoutToLeft')
+
   const container = (
     <div
-      className={classnames('rp-entry-wrapper', className)}
+      className={classNames('rp-entry-wrapper', className)}
       data-entry-id={id}
       {...rest}
     />
@@ -22,7 +25,9 @@ function EntryContainer({
     // Render in a floating positioned container
     return createPortal(
       <div
-        className="rp-floating-entry"
+        className={classNames('rp-floating-entry', {
+          'rp-floating-entry-layout-left': layoutToLeft,
+        })}
         style={{ left: hoverCoords.x + 'px', top: hoverCoords.y + 'px' }}
       >
         {container}
