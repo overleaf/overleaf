@@ -129,6 +129,10 @@ describe('UserController', function () {
       promises: { sendEmail: sinon.stub().resolves() },
     }
 
+    this.OneTimeTokenHandler = {
+      promises: { expireAllTokensForUser: sinon.stub().resolves() },
+    }
+
     this.UserController = SandboxedModule.require(modulePath, {
       requires: {
         '../Helpers/UrlHelper': this.UrlHelper,
@@ -149,6 +153,7 @@ describe('UserController', function () {
         '@overleaf/settings': this.settings,
         '@overleaf/o-error': OError,
         '../Email/EmailHandler': this.EmailHandler,
+        '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../../infrastructure/RequestContentTypeDetection':
           this.RequestContentTypeDetection,
       },
@@ -735,6 +740,17 @@ describe('UserController', function () {
           const emailCall = this.EmailHandler.promises.sendEmail.lastCall
           expect(emailCall.args[0]).to.equal('securityAlert')
           expect(emailCall.args[1]).to.deep.equal(expectedArg)
+          done()
+        })
+        this.UserController.changePassword(this.req, this.res)
+      })
+
+      it('should expire password reset tokens', function (done) {
+        this.res.json.callsFake(() => {
+          this.OneTimeTokenHandler.promises.expireAllTokensForUser.should.have.been.calledWith(
+            this.user._id,
+            'password'
+          )
           done()
         })
         this.UserController.changePassword(this.req, this.res)

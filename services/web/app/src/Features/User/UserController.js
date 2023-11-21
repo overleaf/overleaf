@@ -22,6 +22,7 @@ const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
 const Modules = require('../../infrastructure/Modules')
+const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
 
 async function _sendSecurityAlertClearedSessions(user) {
   const emailOptions = {
@@ -130,6 +131,11 @@ async function changePassword(req, res, next) {
   await UserSessionsManager.promises.revokeAllUserSessions(user, [
     req.sessionID,
   ])
+
+  await OneTimeTokenHandler.promises.expireAllTokensForUser(
+    userId.toString(),
+    'password'
+  )
 
   return res.json({
     message: {

@@ -112,6 +112,25 @@ const OneTimeTokenHandler = {
       }
     )
   },
+
+  expireAllTokensForUser(userId, use, callback) {
+    const now = new Date()
+    db.tokens.updateMany(
+      {
+        use,
+        'data.user_id': userId.toString(),
+        usedAt: { $exists: false },
+      },
+      {
+        $set: {
+          usedAt: now,
+        },
+      },
+      error => {
+        callback(error)
+      }
+    )
+  },
 }
 
 OneTimeTokenHandler.promises = promisifyAll(OneTimeTokenHandler)
