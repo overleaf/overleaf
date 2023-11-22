@@ -153,7 +153,7 @@ const submitOpsAfterEvent = (
   // TODO: could put this in an update listener instead, if the ShareJS doc has been updated by then?
   currentDoc.on(eventName, () => {
     currentDoc.off(eventName)
-    submitOps(currentDoc, ops, transaction)
+    window.setTimeout(() => submitOps(currentDoc, ops, transaction))
   })
 }
 
