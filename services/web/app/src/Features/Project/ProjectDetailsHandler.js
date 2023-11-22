@@ -138,17 +138,9 @@ async function validateProjectName(name) {
     )
   }
   if (name !== name.trim()) {
-    const message = 'Project name cannot start or end with whitespace'
-
-    const error = new Errors.InvalidNameError({
-      message,
-      info: { name },
-    })
-
-    logger.warn({ error }, message)
-
-    // TODO: throw the error, after checking that it won't cause problems
-    // throw error
+    throw new Errors.InvalidNameError(
+      'Project name cannot start or end with whitespace'
+    )
   }
 }
 
