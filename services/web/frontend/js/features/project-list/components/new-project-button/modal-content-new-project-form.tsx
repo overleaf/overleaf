@@ -8,6 +8,8 @@ import {
 } from '../../../../infrastructure/fetch-json'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { useLocation } from '../../../../shared/hooks/use-location'
+import getMeta from '@/utils/meta'
+import Notification from '@/shared/components/notification'
 
 type NewProjectData = {
   project_id: string
@@ -31,6 +33,10 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
   const [projectName, setProjectName] = useState('')
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
   const location = useLocation()
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
 
   const createNewProject = () => {
     runAsync(
@@ -68,9 +74,17 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
       </Modal.Header>
 
       <Modal.Body>
-        {isError && (
-          <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
-        )}
+        {isError &&
+          (newNotificationStyle ? (
+            <div className="notification-list">
+              <Notification
+                type="error"
+                content={getUserFacingMessage(error) as string}
+              />
+            </div>
+          ) : (
+            <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
+          ))}
         <Form onSubmit={handleSubmit}>
           <input
             type="text"

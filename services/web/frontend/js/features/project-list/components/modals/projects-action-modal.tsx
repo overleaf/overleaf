@@ -7,6 +7,8 @@ import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { isMobileDevice } from '../../../../infrastructure/event-tracking'
+import getMeta from '@/utils/meta'
+import Notification from '@/shared/components/notification'
 
 type ProjectsActionModalProps = {
   title?: string
@@ -80,18 +82,7 @@ function ProjectsActionModal({
       <Modal.Footer>
         {!isProcessing &&
           errors.length > 0 &&
-          errors.map((e, i) => (
-            <Alert
-              bsStyle="danger"
-              key={`action-error-${i}`}
-              className="text-center"
-              aria-live="polite"
-            >
-              <b>{e.projectName}</b>
-              <br />
-              {getUserFacingMessage(e.error)}
-            </Alert>
-          ))}
+          errors.map((e, i) => <ErrorNotification error={e} key={i} />)}
         <button className="btn btn-secondary" onClick={handleCloseModal}>
           {t('cancel')}
         </button>
@@ -105,6 +96,39 @@ function ProjectsActionModal({
       </Modal.Footer>
     </AccessibleModal>
   )
+}
+
+type ErrorNotificationProps = {
+  error: any
+}
+
+function ErrorNotification({ error }: ErrorNotificationProps) {
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
+
+  if (newNotificationStyle) {
+    return (
+      // `notification-list` sets the margin-bottom correctly also when used individually in each notification.
+      // Once the legacy alerts are cleaned up we should move the styled div up to the notification list container.
+      <div className="notification-list">
+        <Notification
+          type="error"
+          title={error.projectName}
+          content={getUserFacingMessage(error.error) as string}
+        />
+      </div>
+    )
+  } else {
+    return (
+      <Alert bsStyle="danger" className="text-center" aria-live="polite">
+        <b>{error.projectName}</b>
+        <br />
+        {getUserFacingMessage(error.error)}
+      </Alert>
+    )
+  }
 }
 
 export default memo(ProjectsActionModal)

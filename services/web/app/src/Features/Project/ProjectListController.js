@@ -447,6 +447,22 @@ async function projectListPage(req, res, next) {
     logger.error({ err: error }, 'Failed to get individual subscription')
   }
 
+  let newNotificationStyle
+  try {
+    const newNotificationStyleAssignment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'new-notification-style'
+      )
+    newNotificationStyle = newNotificationStyleAssignment.variant === 'enabled'
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "new-notification-style" split test assignment'
+    )
+  }
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
@@ -477,6 +493,7 @@ async function projectListPage(req, res, next) {
         groupName: subscription.teamName,
       })),
     hasIndividualRecurlySubscription,
+    newNotificationStyle,
   })
 }
 
