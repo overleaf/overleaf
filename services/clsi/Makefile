@@ -23,6 +23,7 @@ DOCKER_COMPOSE_TEST_UNIT = \
 clean:
 	-docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	-docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	-docker rmi us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	-$(DOCKER_COMPOSE_TEST_UNIT) down --rmi local
 	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --rmi local
 
@@ -90,12 +91,18 @@ build:
 	docker pull gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		|| docker pull gcr.io/overleaf-ops/$(PROJECT_NAME):main-deps \
 		|| echo 'nothing cached for gcr.io/overleaf-ops'
+	docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
+		|| docker pull us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):main-deps \
+		|| echo 'nothing cached for us-east1-docker.pkg.dev/overleaf-ops/ol-docker'
 	docker build \
 	 	--pull \
 		--build-arg BUILDKIT_INLINE_CACHE=1 \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):main-deps \
+		--tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
+		--cache-from us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
+		--cache-from us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):main-deps \
 		--target base \
 		--file Dockerfile \
 		../..
@@ -103,6 +110,8 @@ build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--cache-from gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
+		--tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--cache-from us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-deps \
 		--file Dockerfile \
 		../..
 

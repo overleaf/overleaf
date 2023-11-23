@@ -1,7 +1,7 @@
 clsi
 --data-dirs=cache,compiles,output
 --dependencies=
---docker-repos=gcr.io/overleaf-ops
+--docker-repos=gcr.io/overleaf-ops,us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true"
 --env-pass-through=TEXLIVE_IMAGE
 --esmock-loader=False

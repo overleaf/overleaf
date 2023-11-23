@@ -23,6 +23,7 @@ DOCKER_COMPOSE_TEST_UNIT = \
 clean:
 	-docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	-docker rmi gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+	-docker rmi us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	-$(DOCKER_COMPOSE_TEST_UNIT) down --rmi local
 	-$(DOCKER_COMPOSE_TEST_ACCEPTANCE) down --rmi local
 
@@ -89,6 +90,7 @@ benchmarks:
 build:
 	docker build --pull --tag ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--tag gcr.io/overleaf-ops/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
+		--tag us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER) \
 		--file Dockerfile \
 		../..
 
