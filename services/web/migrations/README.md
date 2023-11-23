@@ -3,12 +3,17 @@
 Migrations for the app environment live in this folder, and use the [East](https://github.com/okv/east) migration
 framework.
 
-We have an npm script which wraps east: `npm run migrations -- ...`
+We have a npm script which wraps east: `npm run migrations -- ...`
 
 For example:
 
-``` sh
-npm run migrations -- list -t 'saas'
+```shell
+npm run migrations -- list -t 'server-ce'
+```
+
+For SAAS, use the rake tasks for staging/production
+```shell
+rake deploy:migrations:list[staging]
 ```
 
 ### Environments and Tags
@@ -30,7 +35,7 @@ Our adapter will refuse to run if this flag is not set.
 
 To create a new migration, run:
 
-```
+```shell
 npm run migrations -- create <migration name>
 ```
 
@@ -42,18 +47,28 @@ undo the changes made in `migrate`.
 
 To run a script in a migration file, look at `migrations/20190730093801_script_example.js`, which runs the script
 `scripts/example/script_for_migration.js`. This uses a method where the script can be run standalone via `node`, or
-through the migrations mechanism.
+through the migrations' mechanism.
 
 ### Running migrations
 
 To run all migrations in a server-ce environment:
-``` sh
+```shell
 npm run migrations -- migrate -t 'server-ce'
+# Note: They are run by default on container start.
 ```
 
-To run all migrations in a saas environment:
-``` sh
-npm run migrations -- migrate -t 'saas'
+To run all migrations in a SAAS environment use the rake task:
+```shell
+# list first and check that only your newly added migration is shown. If not, ask in the dev channel for help.
+rake deploy:migrations:list[staging]
+# After confirming the listing, run the migrations
+rake deploy:migrations[staging]
+```
+
+To run all migrations in the dev-env:
+```shell
+make services/web/migrate
+# Note: "make install" will pick them up as well
 ```
 
 The `-t` flag also works with other `east` commands like `rollback`, and `list`.
