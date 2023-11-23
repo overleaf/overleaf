@@ -5,7 +5,7 @@ import {
 import { UserId } from '../user'
 import { DateString } from '../helpers/date'
 
-interface ReviewPanelCommentThreadBase {
+export interface ReviewPanelCommentThreadBase {
   messages: Array<ReviewPanelCommentThreadMessage>
   submitting?: boolean // angular specific (to be made into a local state)
 }

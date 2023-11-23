@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next'
 import customLocalStorage from '@/infrastructure/local-storage'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { EditorType } from '@/features/ide-react/editor/types/editor-type'
+import { DocId } from '../../../../../types/project-settings'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -45,9 +46,9 @@ type EditorManager = {
   getEditorType: () => EditorType | null
   showSymbolPalette: boolean
   currentDocument: Document
-  currentDocumentId: string | null
+  currentDocumentId: DocId | null
   getCurrentDocValue: () => string | null
-  getCurrentDocId: () => string | null
+  getCurrentDocId: () => DocId | null
   startIgnoringExternalUpdates: () => void
   stopIgnoringExternalUpdates: () => void
   openDocId: (docId: string, options?: OpenDocOptions) => void
@@ -96,7 +97,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const [showVisual] = useScopeValue<boolean>('editor.showVisual')
   const [currentDocument, setCurrentDocument] =
     useScopeValue<Document>('editor.sharejs_doc')
-  const [openDocId, setOpenDocId] = useScopeValue<string | null>(
+  const [openDocId, setOpenDocId] = useScopeValue<DocId | null>(
     'editor.open_doc_id'
   )
   const [, setOpenDocName] = useScopeValue<string | null>(
@@ -418,7 +419,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       }
 
       // We're now either opening a new document or reloading a broken one.
-      setOpenDocId(doc._id)
+      setOpenDocId(doc._id as DocId)
       setOpenDocName(doc.name)
       setOpening(true)
 

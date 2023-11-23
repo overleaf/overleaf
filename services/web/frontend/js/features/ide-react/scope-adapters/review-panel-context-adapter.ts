@@ -2,12 +2,8 @@ import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/rea
 
 export default function populateReviewPanelScope(store: ReactScopeValueStore) {
   store.set('reviewPanel.overview.docsCollapsedState', {})
-  store.set('reviewPanel.subView', 'cur_file')
   store.set('reviewPanel.overview.loading', false)
   store.set('reviewPanel.nVisibleSelectedChanges', 0)
-  store.set('reviewPanel.commentThreads', {})
-  store.set('reviewPanel.entries', {})
-  store.set('loadingThreads', true)
   store.set('permissions', {
     read: false,
     write: false,
@@ -15,7 +11,7 @@ export default function populateReviewPanelScope(store: ReactScopeValueStore) {
     comment: false,
   })
   store.set('users', {})
-  store.set('reviewPanel.resolvedComments', {})
+  store.set('reviewPanel.layoutToLeft', false)
   store.set('reviewPanel.rendererData.lineHeight', 0)
   store.set('resolveComment', () => {})
   store.set('submitNewComment', async () => {})

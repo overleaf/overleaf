@@ -46,7 +46,7 @@ export type CommentId = Brand<string, 'CommentId'>
 export interface ReviewPanelCommentThreadMessage {
   content: string
   id: CommentId
-  timestamp: number
+  timestamp: Date
   user: ReviewPanelUser
   user_id: UserId
 }

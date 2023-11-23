@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { isEqual, cloneDeep } from 'lodash'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
+import useAsync from '@/shared/hooks/use-async'
+import useAbortController from '@/shared/hooks/use-abort-controller'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
 import { dispatchReviewPanelLayout as handleLayoutChange } from '@/features/source-editor/extensions/changes/change-manager'
 import { useProjectContext } from '@/shared/context/project-context'
@@ -9,19 +12,49 @@ import { useUserContext } from '@/shared/context/user-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { debugConsole } from '@/utils/debugging'
-import { postJSON } from '@/infrastructure/fetch-json'
-import { ReviewPanelStateReactIde } from '../types/review-panel-state'
+import { useEditorContext } from '@/shared/context/editor-context'
+import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import ColorManager from '@/ide/colors/ColorManager'
+// @ts-ignore
+import RangesTracker from '@overleaf/ranges-tracker'
+import { ReviewPanelStateReactIde } from '../types/review-panel-state'
 import * as ReviewPanel from '../types/review-panel-state'
 import {
+  ReviewPanelCommentThreadMessage,
+  ReviewPanelCommentThreads,
+  ReviewPanelDocEntries,
   SubView,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { UserId } from '../../../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../../../types/public-access-level'
-import { DeepReadonly } from '../../../../../../../types/utils'
+import {
+  DeepReadonly,
+  MergeAndOverride,
+} from '../../../../../../../types/utils'
+import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
+import { DocId } from '../../../../../../../types/project-settings'
+import {
+  ReviewPanelAggregateChangeEntry,
+  ReviewPanelChangeEntry,
+  ReviewPanelCommentEntry,
+  ReviewPanelEntry,
+} from '../../../../../../../types/review-panel/entry'
+import {
+  ReviewPanelCommentThreadMessageApi,
+  ReviewPanelCommentThreadsApi,
+} from '../../../../../../../types/review-panel/api'
+import { Document } from '@/features/ide-react/editor/document'
 
-function formatUser(user: any): any {
+const dispatchReviewPanelEvent = (type: string, payload?: any) => {
+  window.dispatchEvent(
+    new CustomEvent('review-panel:event', {
+      detail: { type, payload },
+    })
+  )
+}
+
+const formatUser = (user: any): any => {
   let isSelf, name
   const id =
     (user != null ? user._id : undefined) ||
@@ -62,6 +95,15 @@ function formatUser(user: any): any {
   }
 }
 
+const formatComment = (
+  comment: ReviewPanelCommentThreadMessageApi
+): ReviewPanelCommentThreadMessage => {
+  const commentTyped = comment as unknown as ReviewPanelCommentThreadMessage
+  commentTyped.user = formatUser(comment.user)
+  commentTyped.timestamp = new Date(comment.timestamp)
+  return commentTyped
+}
+
 function useReviewPanelState(): ReviewPanelStateReactIde {
   const { reviewPanelOpen, setReviewPanelOpen } = useLayoutContext()
   const { projectId } = useIdeReactContext()
@@ -71,10 +113,14 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const {
     features: { trackChangesVisible, trackChanges },
   } = project
+  const { isRestrictedTokenMember } = useEditorContext()
 
-  const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
-    'reviewPanel.subView'
-  )
+  // TODO `currentDocument` and `currentDocumentId` should be get from `useEditorManagerContext()` but that makes tests fail
+  const [currentDocument] = useScopeValue<Document>('editor.sharejs_doc')
+  const [currentDocumentId] = useScopeValue<DocId>('editor.open_doc_id')
+
+  const [subView, setSubView] =
+    useState<ReviewPanel.Value<'subView'>>('cur_file')
   const [loading] = useScopeValue<ReviewPanel.Value<'loading'>>(
     'reviewPanel.overview.loading'
   )
@@ -84,29 +130,25 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const [collapsed, setCollapsed] = useScopeValue<
     ReviewPanel.Value<'collapsed'>
   >('reviewPanel.overview.docsCollapsedState')
-  const [commentThreads] = useScopeValue<ReviewPanel.Value<'commentThreads'>>(
-    'reviewPanel.commentThreads',
-    true
-  )
-  const [entries] = useScopeValue<ReviewPanel.Value<'entries'>>(
-    'reviewPanel.entries',
-    true
-  )
-  const [loadingThreads] =
-    useScopeValue<ReviewPanel.Value<'loadingThreads'>>('loadingThreads')
+  const [commentThreads, setCommentThreads] = useState<
+    ReviewPanel.Value<'commentThreads'>
+  >({})
+  const [entries, setEntries] = useState<ReviewPanel.Value<'entries'>>({})
 
   const [permissions] =
     useScopeValue<ReviewPanel.Value<'permissions'>>('permissions')
-  const [users] = useScopeValue<ReviewPanel.Value<'users'>>('users', true)
-  const [resolvedComments] = useScopeValue<
+  const [users, setUsers] = useScopeValue<ReviewPanel.Value<'users'>>(
+    'users',
+    true
+  )
+  const [resolvedComments, setResolvedComments] = useState<
     ReviewPanel.Value<'resolvedComments'>
-  >('reviewPanel.resolvedComments', true)
+  >({})
 
   const [wantTrackChanges, setWantTrackChanges] = useScopeValue<
     ReviewPanel.Value<'wantTrackChanges'>
   >('editor.wantTrackChanges')
-  const [openDocId] =
-    useScopeValue<ReviewPanel.Value<'openDocId'>>('editor.open_doc_id')
+  const openDocId = currentDocumentId
   const [shouldCollapse, setShouldCollapse] =
     useState<ReviewPanel.Value<'shouldCollapse'>>(true)
   const [lineHeight] = useScopeValue<number>(
@@ -125,6 +167,325 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     useState<ReviewPanel.Value<'trackChangesOnForGuests'>>(false)
   const [trackChangesForGuestsAvailable, setTrackChangesForGuestsAvailable] =
     useState<ReviewPanel.Value<'trackChangesForGuestsAvailable'>>(false)
+
+  const [resolvedThreadIds, setResolvedThreadIds] = useState<
+    Record<ThreadId, boolean>
+  >({})
+
+  const {
+    isLoading: loadingThreads,
+    reset,
+    runAsync: runAsyncThreads,
+  } = useAsync<ReviewPanelCommentThreadsApi>()
+  const loadThreadsController = useAbortController()
+  const loadThreadsExecuted = useRef(false)
+  const ensureThreadsAreLoaded = useCallback(() => {
+    if (loadThreadsExecuted.current) {
+      // We get any updates in real time so only need to load them once.
+      return
+    }
+    loadThreadsExecuted.current = true
+
+    return runAsyncThreads(
+      getJSON(`/project/${projectId}/threads`, {
+        signal: loadThreadsController.signal,
+      })
+    )
+      .then(threads => {
+        const tempResolvedThreadIds: typeof resolvedThreadIds = {}
+        const threadsEntries = Object.entries(threads) as [
+          [
+            ThreadId,
+            MergeAndOverride<
+              ReviewPanelCommentThread,
+              ReviewPanelCommentThreadsApi[ThreadId]
+            >
+          ]
+        ]
+        for (const [threadId, thread] of threadsEntries) {
+          for (const comment of thread.messages) {
+            formatComment(comment)
+          }
+          if (thread.resolved_by_user) {
+            thread.resolved_by_user = formatUser(thread.resolved_by_user)
+            tempResolvedThreadIds[threadId] = true
+          }
+        }
+        setResolvedThreadIds(tempResolvedThreadIds)
+        setCommentThreads(threads as unknown as ReviewPanelCommentThreads)
+
+        dispatchReviewPanelEvent('loaded_threads')
+        handleLayoutChange({ async: true })
+
+        return {
+          resolvedThreadIds: tempResolvedThreadIds,
+          commentThreads: threads,
+        }
+      })
+      .catch(debugConsole.error)
+  }, [loadThreadsController.signal, projectId, runAsyncThreads])
+
+  const rangesTrackers = useRef<Record<DocId, RangesTracker>>({})
+  const refreshingRangeUsers = useRef(false)
+  const refreshedForUserIds = useRef(new Set<UserId>())
+  const refreshChangeUsers = useCallback(
+    (userId: UserId | null) => {
+      if (userId != null) {
+        if (refreshedForUserIds.current.has(userId)) {
+          // We've already tried to refresh to get this user id, so stop it looping
+          return
+        }
+        refreshedForUserIds.current.add(userId)
+      }
+
+      // Only do one refresh at once
+      if (refreshingRangeUsers.current) {
+        return
+      }
+      refreshingRangeUsers.current = true
+
+      getJSON(`/project/${projectId}/changes/users`)
+        .then(usersResponse => {
+          refreshingRangeUsers.current = false
+          const tempUsers = {} as ReviewPanel.Value<'users'>
+          // Always include ourself, since if we submit an op, we might need to display info
+          // about it locally before it has been flushed through the server
+          if (user) {
+            tempUsers[user.id] = formatUser(user)
+          }
+
+          for (const user of usersResponse) {
+            if (user.id) {
+              tempUsers[user.id] = formatUser(user)
+            }
+          }
+
+          setUsers(tempUsers)
+        })
+        .catch(error => {
+          refreshingRangeUsers.current = false
+          debugConsole.error(error)
+        })
+    },
+    [projectId, setUsers, user]
+  )
+
+  const getChangeTracker = useCallback(
+    (docId: DocId) => {
+      if (!rangesTrackers.current[docId]) {
+        rangesTrackers.current[docId] = new RangesTracker() as RangesTracker
+        rangesTrackers.current[docId].resolvedThreadIds = {
+          ...resolvedThreadIds,
+        }
+      }
+      return rangesTrackers.current[docId]
+    },
+    [resolvedThreadIds]
+  )
+
+  const getDocEntries = useCallback(
+    (docId: DocId) => {
+      return entries[docId] ?? ({} as ReviewPanelDocEntries)
+    },
+    [entries]
+  )
+
+  const getDocResolvedComments = useCallback(
+    (docId: DocId) => {
+      return resolvedComments[docId] ?? ({} as ReviewPanelDocEntries)
+    },
+    [resolvedComments]
+  )
+
+  const updateEntries = useCallback(
+    async (docId: DocId) => {
+      const rangesTracker = getChangeTracker(docId)
+      let localResolvedThreadIds = resolvedThreadIds
+
+      if (!isRestrictedTokenMember) {
+        if (rangesTracker.comments.length > 0) {
+          const threadsLoadResult = await ensureThreadsAreLoaded()
+          if (typeof threadsLoadResult === 'object') {
+            localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
+          }
+        } else if (loadingThreads) {
+          // ensure that tracked changes are highlighted even if no comments are loaded
+          reset()
+          dispatchReviewPanelEvent('loaded_threads')
+        }
+      }
+
+      const docEntries = cloneDeep(getDocEntries(docId))
+      const docResolvedComments = cloneDeep(getDocResolvedComments(docId))
+      // Assume we'll delete everything until we see it, then we'll remove it from this object
+      const deleteChanges = new Set<keyof ReviewPanelDocEntries>()
+
+      for (const [id, change] of Object.entries(docEntries)) {
+        if (
+          'entry_ids' in change &&
+          id !== 'add-comment' &&
+          id !== 'bulk-actions'
+        ) {
+          for (const entryId of change.entry_ids) {
+            deleteChanges.add(entryId)
+          }
+        }
+      }
+      for (const [, change] of Object.entries(docResolvedComments)) {
+        if ('entry_ids' in change) {
+          for (const entryId of change.entry_ids) {
+            deleteChanges.add(entryId)
+          }
+        }
+      }
+
+      let potentialAggregate = false
+      let prevInsertion = null
+
+      for (const change of rangesTracker.changes as any[]) {
+        if (
+          potentialAggregate &&
+          change.op.d &&
+          change.op.p === prevInsertion.op.p + prevInsertion.op.i.length &&
+          change.metadata.user_id === prevInsertion.metadata.user_id
+        ) {
+          // An actual aggregate op.
+          const aggregateChangeEntries = docEntries as Record<
+            string,
+            ReviewPanelAggregateChangeEntry
+          >
+          aggregateChangeEntries[prevInsertion.id].type = 'aggregate-change'
+          aggregateChangeEntries[prevInsertion.id].metadata.replaced_content =
+            change.op.d
+          aggregateChangeEntries[prevInsertion.id].entry_ids.push(change.id)
+        } else {
+          if (docEntries[change.id] == null) {
+            docEntries[change.id] = {} as ReviewPanelEntry
+          }
+          deleteChanges.delete(change.id)
+          const newEntry: Partial<ReviewPanelChangeEntry> = {
+            type: change.op.i ? 'insert' : 'delete',
+            entry_ids: [change.id],
+            content: change.op.i || change.op.d,
+            offset: change.op.p,
+            metadata: change.metadata,
+          }
+          const newEntryEntries = Object.entries(newEntry) as [
+            [keyof typeof newEntry, typeof newEntry[keyof typeof newEntry]]
+          ]
+          for (const [key, value] of newEntryEntries) {
+            const entriesTyped = docEntries[change.id] as Record<any, any>
+            entriesTyped[key] = value
+          }
+        }
+
+        if (change.op.i) {
+          potentialAggregate = true
+          prevInsertion = change
+        } else {
+          potentialAggregate = false
+          prevInsertion = null
+        }
+
+        if (!users[change.metadata.user_id]) {
+          if (!isRestrictedTokenMember) {
+            refreshChangeUsers(change.metadata.user_id)
+          }
+        }
+      }
+
+      for (const comment of rangesTracker.comments) {
+        deleteChanges.delete(comment.id)
+
+        const newEntry: Partial<ReviewPanelCommentEntry> = {
+          type: 'comment',
+          thread_id: comment.op.t,
+          entry_ids: [comment.id],
+          content: comment.op.c,
+          offset: comment.op.p,
+        }
+        const newEntryEntries = Object.entries(newEntry) as [
+          [keyof typeof newEntry, typeof newEntry[keyof typeof newEntry]]
+        ]
+
+        let newComment: any
+        if (localResolvedThreadIds[comment.op.t]) {
+          docResolvedComments[comment.id] ??= {} as ReviewPanelCommentEntry
+          newComment = docResolvedComments[comment.id]
+          delete docEntries[comment.id]
+        } else {
+          docEntries[comment.id] ??= {} as ReviewPanelEntry
+          newComment = docEntries[comment.id]
+          delete docResolvedComments[comment.id]
+        }
+
+        for (const [key, value] of newEntryEntries) {
+          newComment[key] = value
+        }
+      }
+
+      deleteChanges.forEach(changeId => {
+        delete docEntries[changeId]
+        delete docResolvedComments[changeId]
+      })
+
+      setEntries(prev => {
+        return isEqual(prev[docId], docEntries)
+          ? prev
+          : { ...prev, [docId]: docEntries }
+      })
+      setResolvedComments(prev => {
+        return isEqual(prev[docId], docResolvedComments)
+          ? prev
+          : { ...prev, [docId]: docResolvedComments }
+      })
+
+      return docEntries
+    },
+    [
+      getChangeTracker,
+      getDocEntries,
+      getDocResolvedComments,
+      isRestrictedTokenMember,
+      refreshChangeUsers,
+      resolvedThreadIds,
+      users,
+      ensureThreadsAreLoaded,
+      loadingThreads,
+      reset,
+    ]
+  )
+
+  const regenerateTrackChangesId = useCallback(
+    (doc: typeof currentDocument) => {
+      const currentChangeTracker = getChangeTracker(doc.doc_id as DocId)
+      const oldId = currentChangeTracker.getIdSeed()
+      const newId = RangesTracker.generateIdSeed()
+      currentChangeTracker.setIdSeed(newId)
+      doc.setTrackChangesIdSeeds({ pending: newId, inflight: oldId })
+    },
+    [getChangeTracker]
+  )
+
+  useEffect(() => {
+    if (!currentDocument) {
+      return
+    }
+    // The open doc range tracker is kept up to date in real-time so
+    // replace any outdated info with this
+    rangesTrackers.current[currentDocument.doc_id as DocId] =
+      currentDocument.ranges
+    rangesTrackers.current[currentDocument.doc_id as DocId].resolvedThreadIds =
+      { ...resolvedThreadIds }
+    currentDocument.on('flipped_pending_to_inflight', () =>
+      regenerateTrackChangesId(currentDocument)
+    )
+    regenerateTrackChangesId(currentDocument)
+
+    return () => {
+      currentDocument.off('flipped_pending_to_inflight')
+    }
+  }, [currentDocument, regenerateTrackChangesId, resolvedThreadIds])
 
   const currentUserType = useCallback((): 'member' | 'guest' | 'anonymous' => {
     if (!user) {
@@ -387,6 +748,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const projectJoinedEffectExecuted = useRef(false)
   useEffect(() => {
     if (!projectJoinedEffectExecuted.current) {
+      projectJoinedEffectExecuted.current = true
       requestAnimationFrame(() => {
         if (trackChanges) {
           applyTrackChangesStateToClient(project.trackChangesState)
@@ -395,7 +757,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
         }
         setGuestFeatureBasedOnProjectAccessLevel(project.publicAccessLevel)
       })
-      projectJoinedEffectExecuted.current = true
     }
   }, [
     applyTrackChangesStateToClient,
@@ -489,13 +850,10 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       'bulkRejectActions'
     )
 
-  const handleSetSubview = useCallback(
-    (subView: SubView) => {
-      setSubView(subView)
-      sendMB('rp-subview-change', { subView })
-    },
-    [setSubView]
-  )
+  const handleSetSubview = useCallback((subView: SubView) => {
+    setSubView(subView)
+    sendMB('rp-subview-change', { subView })
+  }, [])
 
   const submitReply = useCallback(
     (threadId: ThreadId, replyContent: string) => {
@@ -523,11 +881,27 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       }
     }
 
+    const editorTrackChangesChanged = async () => {
+      const entries = await updateEntries(currentDocumentId)
+      dispatchReviewPanelEvent('recalculate-screen-positions', {
+        entries,
+        updateType: 'trackedChangesChange',
+      })
+      // Ensure that watchers, such as the React-based review panel component,
+      // are informed of the changes to entries
+      handleLayoutChange()
+    }
+
     const handleEditorEvents = (e: Event) => {
       const event = e as CustomEvent
       const { type } = event.detail
 
       switch (type) {
+        case 'track-changes:changed': {
+          editorTrackChangesChanged()
+          break
+        }
+
         case 'toggle-track-changes': {
           toggleTrackChangesFromKbdShortcut()
           break
@@ -541,10 +915,12 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       window.removeEventListener('editor:event', handleEditorEvents)
     }
   }, [
+    currentDocumentId,
     toggleTrackChangesForUser,
     trackChanges,
     trackChangesState,
     trackChangesVisible,
+    updateEntries,
     user.id,
   ])
 
