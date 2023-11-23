@@ -271,6 +271,12 @@ module.exports = {
     algorithm: process.env.OT_JWT_AUTH_ALG || 'HS256',
   },
 
+  splitTest: {
+    devToolbar: {
+      enabled: false,
+    },
+  },
+
   splitTests: [],
 
   // Where your instance of ShareLaTeX can be found publically. Used in emails
@@ -828,6 +834,7 @@ module.exports = {
   overleafModuleImports: {
     // modules to import (an empty array for each set of modules)
     createFileModes: [],
+    devToolbar: [],
     gitBridge: [],
     publishModal: [],
     tprFileViewInfo: [],

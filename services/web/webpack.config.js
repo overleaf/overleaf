@@ -13,6 +13,7 @@ const PackageVersions = require('./app/src/infrastructure/PackageVersions')
 // Generate a hash of entry points, including modules
 const entryPoints = {
   tracing: './frontend/js/tracing.js',
+  devToolbar: './frontend/js/dev-toolbar.js',
   main: './frontend/js/main.js',
   ide: './frontend/js/ide.js',
   'ide-detached': './frontend/js/ide-detached.js',

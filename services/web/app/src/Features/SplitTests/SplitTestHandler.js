@@ -58,6 +58,8 @@ async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
   if (!Features.hasFeature('saas')) {
     assignment = _getNonSaasAssignment(splitTestName)
   } else {
+    await _loadSplitTestInfoInLocals(res.locals, splitTestName, req.session)
+
     // Check the query string for an override, ignoring an invalid value
     const queryVariant = query[splitTestName]
     if (queryVariant) {
@@ -91,7 +93,7 @@ async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
     splitTestName,
     assignment.variant
   )
-  await _loadSplitTestInfoInLocals(res.locals, splitTestName)
+
   return assignment
 }
 
@@ -244,6 +246,14 @@ async function _getAssignment(
 
   const splitTest = await _getSplitTest(splitTestName)
   const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+
+  if (Settings.splitTest.devToolbar.enabled) {
+    const override = session?.splitTestOverrides?.[splitTestName]
+    if (override) {
+      return _makeAssignment(splitTest, override, currentVersion)
+    }
+  }
+
   if (!currentVersion?.active) {
     return DEFAULT_ASSIGNMENT
   }
@@ -352,6 +362,20 @@ function getPercentile(analyticsId, splitTestName, splitTestPhase) {
   )
 }
 
+function setOverrideInSession(session, splitTestName, variantName) {
+  if (!Settings.splitTest.devToolbar.enabled) {
+    return
+  }
+  if (!session.splitTestOverrides) {
+    session.splitTestOverrides = {}
+  }
+  session.splitTestOverrides[splitTestName] = variantName
+}
+
+function clearOverridesInSession(session) {
+  delete session.splitTestOverrides
+}
+
 function _getVariantFromPercentile(variants, percentile) {
   for (const variant of variants) {
     for (const stripe of variant.rolloutStripes) {
@@ -425,12 +449,14 @@ function _makeAssignment(splitTest, variant, currentVersion) {
   return {
     variant,
     analytics: {
-      segmentation: {
-        splitTest: splitTest.name,
-        variant,
-        phase: currentVersion.phase,
-        versionNumber: currentVersion.versionNumber,
-      },
+      segmentation: splitTest
+        ? {
+            splitTest: splitTest.name,
+            variant,
+            phase: currentVersion.phase,
+            versionNumber: currentVersion.versionNumber,
+          }
+        : {},
     },
   }
 }
@@ -492,18 +518,33 @@ async function _getUser(id, splitTestName) {
   return user
 }
 
-async function _loadSplitTestInfoInLocals(locals, splitTestName) {
+async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
   const splitTest = await _getSplitTest(splitTestName)
   if (splitTest) {
+    const override = session?.splitTestOverrides?.[splitTestName]
+
     const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
-    if (!currentVersion.active) {
+    if (!currentVersion.active && !Settings.splitTest.devToolbar.enabled) {
       return
     }
 
     const phase = currentVersion.phase
-    LocalsHelper.setSplitTestInfo(locals, splitTestName, {
+    const info = {
       phase,
       badgeInfo: splitTest.badgeInfo?.[phase],
+    }
+    if (Settings.splitTest.devToolbar.enabled) {
+      info.active = currentVersion.active
+      info.variants = currentVersion.variants.map(variant => ({
+        name: variant.name,
+        rolloutPercent: variant.rolloutPercent,
+      }))
+      info.hasOverride = !!override
+    }
+    LocalsHelper.setSplitTestInfo(locals, splitTestName, info)
+  } else if (Settings.splitTest.devToolbar.enabled) {
+    LocalsHelper.setSplitTestInfo(locals, splitTestName, {
+      missing: true,
     })
   }
 }
@@ -555,6 +596,8 @@ module.exports = {
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
   sessionMaintenance: callbackify(sessionMaintenance),
+  setOverrideInSession,
+  clearOverridesInSession,
   promises: {
     getAssignment,
     getAssignmentForMongoUser,

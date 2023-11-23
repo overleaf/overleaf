@@ -79,9 +79,15 @@ html(
 
 		block body
 
+		if (settings.splitTest.devToolbar.enabled)
+			div#dev-toolbar
+
 	block foot-scripts
 		each file in entrypointScripts(entrypoint)
 			script(type="text/javascript", nonce=scriptNonce, src=file)
+		if (settings.splitTest.devToolbar.enabled)
+			each file in entrypointScripts("devToolbar")
+				script(type="text/javascript", nonce=scriptNonce, src=file)
 	
 	script(type="text/javascript", nonce=scriptNonce).
 		//- Look for bundle

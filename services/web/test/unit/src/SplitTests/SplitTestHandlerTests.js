@@ -46,6 +46,11 @@ describe('SplitTestHandler', function () {
     this.Settings = {
       moduleImportSequence: [],
       overleaf: {},
+      splitTest: {
+        devToolbar: {
+          enabled: false,
+        },
+      },
     }
     this.AnalyticsManager = {
       getIdsFromSession: sinon.stub(),

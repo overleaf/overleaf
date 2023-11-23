@@ -267,6 +267,12 @@ module.exports = {
   test: {
     counterInit: 0,
   },
+
+  splitTest: {
+    devToolbar: {
+      enabled: false,
+    },
+  },
 }
 
 module.exports.mergeWith = function (overrides) {

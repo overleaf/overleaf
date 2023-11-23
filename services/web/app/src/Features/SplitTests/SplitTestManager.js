@@ -1,7 +1,9 @@
 const { SplitTest } = require('../../models/SplitTest')
 const SplitTestUtils = require('./SplitTestUtils')
 const OError = require('@overleaf/o-error')
+const Settings = require('@overleaf/settings')
 const _ = require('lodash')
+const { CacheFlow } = require('cache-flow')
 
 const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
@@ -315,6 +317,10 @@ async function archive(name, userId) {
   return _saveSplitTest(splitTest)
 }
 
+async function clearCache() {
+  await CacheFlow.reset('split-test')
+}
+
 function _checkNewVariantsConfiguration(variants, newVariantsConfiguration) {
   const totalRolloutPercentage = _getTotalRolloutPercentage(
     newVariantsConfiguration
@@ -410,7 +416,7 @@ async function _saveSplitTest(splitTest) {
  *  since deleting all records in staging or prod would be very bad...
  */
 function _checkEnvIsSafe(operation) {
-  if (process.env.NODE_ENV !== 'development') {
+  if (Settings.splitTest.devToolbar.enabled) {
     throw OError.tag(
       `attempted to ${operation} all feature flags outside of local env`
     )
@@ -459,4 +465,5 @@ module.exports = {
   archive,
   replaceSplitTests,
   mergeSplitTests,
+  clearCache,
 }
