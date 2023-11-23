@@ -14,6 +14,7 @@ import Icon from '@/shared/components/icon'
 import { ManagedUserAlert } from '../../utils/types'
 import { useGroupMembersContext } from '../../context/group-members-context'
 import getMeta from '@/utils/meta'
+
 type resendInviteResponse = {
   success: boolean
 }
@@ -38,23 +39,22 @@ export default function DropdownButton({
     runAsync: runResendManagedUserInviteAsync,
     isLoading: isResendingManagedUserInvite,
   } = useAsync<resendInviteResponse>()
-
-  const groupSSOActive = getMeta('ol-groupSSOActive')
-  const ssoEnabledButNotAccepted = groupSSOActive && !user.enrollment?.sso
   const {
     runAsync: runResendLinkSSOInviteAsync,
     isLoading: isResendingSSOLinkInvite,
   } = useAsync<resendInviteResponse>()
-
   const {
     runAsync: runResendGroupInviteAsync,
     isLoading: isResendingGroupInvite,
   } = useAsync<resendInviteResponse>()
 
-  const userPending = user.invite
+  const managedUsersActive = getMeta('ol-managedUsersActive')
+  const groupSSOActive = getMeta('ol-groupSSOActive')
 
-  const userNotManaged =
-    !user.isEntityAdmin && !userPending && !user.enrollment?.managedBy
+  const userPending = user.invite
+  const isGroupSSOLinked =
+    !userPending && user.enrollment?.sso?.some(sso => sso.groupId === groupId)
+  const isUserManaged = !userPending && user.enrollment?.managedBy === groupId
 
   const handleResendManagedUserInvite = useCallback(
     async user => {
@@ -178,6 +178,82 @@ export default function DropdownButton({
     removeMember(user)
   }
 
+  const buttons = []
+
+  if (userPending) {
+    buttons.push(
+      <MenuItemButton
+        onClick={onResendGroupInviteClick}
+        key="resend-group-invite-action"
+        data-testid="resend-group-invite-action"
+      >
+        {t('resend_group_invite')}
+        {isResendingGroupInvite ? (
+          <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
+        ) : null}
+      </MenuItemButton>
+    )
+  }
+  if (managedUsersActive && !isUserManaged) {
+    buttons.push(
+      <MenuItemButton
+        onClick={onResendManagedUserInviteClick}
+        key="resend-managed-user-invite-action"
+        data-testid="resend-managed-user-invite-action"
+      >
+        {t('resend_managed_user_invite')}
+        {isResendingManagedUserInvite ? (
+          <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
+        ) : null}
+      </MenuItemButton>
+    )
+  }
+  if (groupSSOActive && !isGroupSSOLinked) {
+    buttons.push(
+      <MenuItemButton
+        onClick={onResendSSOLinkInviteClick}
+        key="resend-sso-link-invite-action"
+        data-testid="resend-sso-link-invite-action"
+      >
+        {t('resend_link_sso')}
+        {isResendingSSOLinkInvite ? (
+          <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
+        ) : null}
+      </MenuItemButton>
+    )
+  }
+  if (isUserManaged && !user.isEntityAdmin) {
+    buttons.push(
+      <MenuItemButton
+        className="delete-user-action"
+        key="delete-user-action"
+        data-testid="delete-user-action"
+        onClick={onDeleteUserClick}
+      >
+        {t('delete_user')}
+      </MenuItemButton>
+    )
+  } else if (!isUserManaged) {
+    buttons.push(
+      <MenuItemButton
+        key="remove-user-action"
+        data-testid="remove-user-action"
+        onClick={onRemoveFromGroup}
+        className="delete-user-action"
+      >
+        {t('remove_from_group')}
+      </MenuItemButton>
+    )
+  }
+
+  if (buttons.length === 0) {
+    buttons.push(
+      <MenuItem key="no-actions-available" data-testid="no-actions-available">
+        <span className="text-muted">{t('no_actions')}</span>
+      </MenuItem>
+    )
+  }
+
   return (
     <span className="managed-user-actions">
       <Dropdown
@@ -197,60 +273,7 @@ export default function DropdownButton({
           />
         </Dropdown.Toggle>
         <Dropdown.Menu className="dropdown-menu-right managed-user-dropdown-menu">
-          {userPending ? (
-            <MenuItemButton
-              onClick={onResendGroupInviteClick}
-              data-testid="resend-group-invite-action"
-            >
-              {t('resend_group_invite')}
-              {isResendingGroupInvite ? (
-                <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
-              ) : null}
-            </MenuItemButton>
-          ) : null}
-          {userNotManaged ? (
-            <MenuItemButton
-              onClick={onResendManagedUserInviteClick}
-              data-testid="resend-managed-user-invite-action"
-            >
-              {t('resend_managed_user_invite')}
-              {isResendingManagedUserInvite ? (
-                <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
-              ) : null}
-            </MenuItemButton>
-          ) : null}
-          {!userPending && ssoEnabledButNotAccepted && (
-            <MenuItemButton
-              onClick={onResendSSOLinkInviteClick}
-              data-testid="resend-sso-link-invite-action"
-            >
-              {t('resend_link_sso')}
-              {isResendingSSOLinkInvite ? (
-                <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
-              ) : null}
-            </MenuItemButton>
-          )}
-          {user.isEntityAdmin ? (
-            <MenuItem data-testid="no-actions-available">
-              <span className="text-muted">{t('no_actions')}</span>
-            </MenuItem>
-          ) : user.enrollment?.managedBy ? (
-            <MenuItemButton
-              className="delete-user-action"
-              data-testid="delete-user-action"
-              onClick={onDeleteUserClick}
-            >
-              {t('delete_user')}
-            </MenuItemButton>
-          ) : (
-            <MenuItemButton
-              onClick={onRemoveFromGroup}
-              className="delete-user-action"
-              data-testid="remove-user-action"
-            >
-              {t('remove_from_group')}
-            </MenuItemButton>
-          )}
+          {buttons}
         </Dropdown.Menu>
       </Dropdown>
     </span>
