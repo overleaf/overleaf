@@ -10,13 +10,9 @@ include ./left-menu-react
 	.ui-layout-center
 		include ./header-react
 
-		if (!historyViewReact)
-			include ./history/toolbarV2.pug
-
 		main#ide-body(
 			ng-cloak,
 			role="main",
-			ng-class="{ 'ide-history-open' : (ui.view == 'history' && !history.isReact) }",
 			layout="main",
 			ng-hide="state.loading",
 			resize-on="layout:chat:resize,history:toggle,layout:flat-screen:toggle,south-pane-toggled",
@@ -31,18 +27,11 @@ include ./left-menu-react
 		)
 			.ui-layout-west
 				include ./file-tree-react
-				if (historyViewReact)
-					include ./file-tree-history-react
-				else
-					include ./history/fileTreeV2
+				include ./file-tree-history-react
 
 			.ui-layout-center
 				include ./editor
-
-				if (historyViewReact)
-					history-root()
-				else
-					include ./history
+				history-root()
 
 			if !isRestrictedTokenMember
 				.ui-layout-east

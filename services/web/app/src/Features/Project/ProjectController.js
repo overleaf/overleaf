@@ -663,21 +663,6 @@ const ProjectController = {
             }
           )
         },
-        historyViewAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'history-view-version',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         reviewPanelAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -728,7 +713,6 @@ const ProjectController = {
           isInvitedMember,
           brandVariation,
           pdfjsAssignment,
-          historyViewAssignment,
           reviewPanelAssignment,
           idePageAssignment,
           personalAccessTokenAssignment,
@@ -922,7 +906,6 @@ const ProjectController = {
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
               showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
-              historyViewReact: historyViewAssignment.variant === 'react',
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               idePageReact,
               showPersonalAccessToken,

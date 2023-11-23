@@ -5,7 +5,6 @@ import ToolbarDatetime from './toolbar-datetime'
 import ToolbarFileInfo from './toolbar-file-info'
 import ToolbarRestoreFileButton from './toolbar-restore-file-button'
 import { isFileRemoved } from '../../../utils/file-diff'
-import SplitTestBadge from '../../../../../shared/components/split-test-badge'
 
 type ToolbarProps = {
   diff: Nullable<Diff>
@@ -18,10 +17,6 @@ export default function Toolbar({ diff, selection }: ToolbarProps) {
 
   return (
     <div className="history-react-toolbar">
-      <SplitTestBadge
-        splitTestName="history-view-version"
-        displayOnVariants={['react']}
-      />
       <ToolbarDatetime selection={selection} />
       {selection.selectedFile?.pathname ? (
         <ToolbarFileInfo diff={diff} selection={selection} />

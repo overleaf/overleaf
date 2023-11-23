@@ -125,12 +125,6 @@ export default HistoryManager = (function () {
       )
     }
 
-    isReact() {
-      return (
-        getMeta('ol-splitTestVariants')?.['history-view-version'] === 'react'
-      )
-    }
-
     hardReset() {
       this.$scope.history = {
         updates: [],
@@ -159,7 +153,6 @@ export default HistoryManager = (function () {
         showOnlyLabels: this._getShowOnlyLabelsUserPref(),
         labels: null,
         loadingFileTree: true,
-        isReact: this.isReact(),
       }
       const _deregisterFeatureWatcher = this.$scope.$watch(
         'project.features.versioning',
