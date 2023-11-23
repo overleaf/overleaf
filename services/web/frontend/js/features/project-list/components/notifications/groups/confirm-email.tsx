@@ -12,6 +12,7 @@ import {
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import { UserEmailData } from '../../../../../../../types/user-email'
 import { debugConsole } from '@/utils/debugging'
+import { Subscription } from '../../../../../../../types/project/dashboard/subscription'
 
 const ssoAvailable = ({ samlProviderId, affiliation }: UserEmailData) => {
   const { hasSamlFeature, hasSamlBeta } = getMeta(
@@ -58,6 +59,17 @@ function emailHasLicenceAfterConfirming(emailData: UserEmailData) {
   return affiliation.institution.commonsAccount
 }
 
+function isOnFreeOrIndividualPlan() {
+  const subscription: Subscription | undefined = getMeta(
+    'ol-usersBestSubscription'
+  )
+  if (!subscription) {
+    return false
+  }
+  const { type } = subscription
+  return type === 'free' || type === 'individual'
+}
+
 const showConfirmEmail = (userEmail: UserEmailData) => {
   const { emailConfirmationDisabled } = getMeta(
     'ol-ExposedSettings'
@@ -86,7 +98,10 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
     return null
   }
 
-  if (emailHasLicenceAfterConfirming(userEmail)) {
+  // Only show the notification if a) a commons license is available and b) the
+  // user is on a free or individual plan. Users on a group or Commons plan
+  // already have premium features.
+  if (emailHasLicenceAfterConfirming(userEmail) && isOnFreeOrIndividualPlan()) {
     return (
       <Notification bsStyle="info">
         <Notification.Body data-testid="notification-body">

@@ -36,6 +36,12 @@ import { Project } from '../../../../../types/project/dashboard/api'
 import GroupsAndEnterpriseBanner from '../../../../../frontend/js/features/project-list/components/notifications/groups-and-enterprise-banner'
 import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+import {
+  commonsSubscription,
+  freeSubscription,
+  groupSubscription,
+  individualSubscription,
+} from '../fixtures/user-subscriptions'
 
 const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
@@ -588,6 +594,10 @@ describe('<UserNotifications />', function () {
         emailConfirmationDisabled: false,
       })
       window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
+      window.metaAttributesCache.set(
+        'ol-usersBestSubscription',
+        freeSubscription
+      )
     })
 
     afterEach(function () {
@@ -634,24 +644,47 @@ describe('<UserNotifications />', function () {
       screen.getByText(/something went wrong/i)
     })
 
-    it('shows notification for commons account', async function () {
-      window.metaAttributesCache.set('ol-userEmails', [
-        unconfirmedCommonsUserData,
-      ])
+    for (const subscription of [freeSubscription, individualSubscription]) {
+      it(`shows commons notification for commons account when user is on ${subscription.type} plan`, async function () {
+        window.metaAttributesCache.set('ol-userEmails', [
+          unconfirmedCommonsUserData,
+        ])
+        window.metaAttributesCache.set('ol-usersBestSubscription', subscription)
 
-      renderWithinProjectListProvider(ConfirmEmail)
-      await fetchMock.flush(true)
+        renderWithinProjectListProvider(ConfirmEmail)
+        await fetchMock.flush(true)
 
-      const alert = screen.getByRole('alert')
-      const email = unconfirmedCommonsUserData.email
-      const notificationBody = within(alert).getByTestId('notification-body')
-      expect(notificationBody.textContent).to.contain(
-        'You are one step away from accessing Overleaf Professional features'
-      )
-      expect(notificationBody.textContent).to.contain(
-        `Overleaf has an Overleaf subscription. Click the confirmation link sent to ${email} to upgrade to Overleaf Professional`
-      )
-    })
+        const alert = screen.getByRole('alert')
+        const email = unconfirmedCommonsUserData.email
+        const notificationBody = within(alert).getByTestId('notification-body')
+        expect(notificationBody.textContent).to.contain(
+          'You are one step away from accessing Overleaf Professional features'
+        )
+        expect(notificationBody.textContent).to.contain(
+          `Overleaf has an Overleaf subscription. Click the confirmation link sent to ${email} to upgrade to Overleaf Professional`
+        )
+      })
+    }
+    for (const subscription of [groupSubscription, commonsSubscription]) {
+      it(`shows default notification for commons account when user is on ${subscription.type} plan`, async function () {
+        window.metaAttributesCache.set('ol-userEmails', [
+          unconfirmedCommonsUserData,
+        ])
+        window.metaAttributesCache.set('ol-usersBestSubscription', subscription)
+
+        renderWithinProjectListProvider(ConfirmEmail)
+        await fetchMock.flush(true)
+
+        const alert = screen.getByRole('alert')
+        const email = unconfirmedCommonsUserData.email
+        const notificationBody = within(alert).getByTestId(
+          'pro-notification-body'
+        )
+        expect(notificationBody.textContent).to.contain(
+          `Please confirm your email ${email} by clicking on the link in the confirmation email`
+        )
+      })
+    }
   })
 
   describe('<Affiliation/>', function () {
