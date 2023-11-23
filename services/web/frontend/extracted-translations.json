@@ -996,6 +996,7 @@
   "right": "",
   "role": "",
   "saml_auth_error": "",
+  "saml_identity_exists_error": "",
   "saml_invalid_signature_error": "",
   "saml_login_disabled_error": "",
   "saml_login_failure": "",

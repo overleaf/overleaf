@@ -1519,6 +1519,7 @@
   "saml": "SAML",
   "saml_auth_error": "Sorry, your identity provider responded with an error.  Please contact your administrator for more information.",
   "saml_create_admin_instructions": "Choose an email address for the first __appName__ admin account. This should correspond to an account in the SAML system. You will then be asked to log in with this account.",
+  "saml_identity_exists_error": "Sorry, the identity returned by your identity provider is already linked with a different Overleaf account.  Please contact your administrator for more information.",
   "saml_invalid_signature_error": "Sorry, the response from your identity provider was signed with an unexpected certificate.  Please contact your administrator for more information.",
   "saml_login_disabled_error": "Sorry, single sign-on login has been disabled for __email__.  Please contact your administrator for more information.",
   "saml_login_failure": "Sorry, there was a problem logging you in.  Please contact your administrator for more information.",
