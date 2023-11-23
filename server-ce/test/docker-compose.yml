@@ -1,0 +1,64 @@
+version: '2.2'
+services:
+  sharelatex:
+    image: ${IMAGE_TAG:-sharelatex/sharelatex:latest}
+    container_name: sharelatex
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - 80:80
+    links:
+      - mongo
+      - redis
+    environment:
+      SHARELATEX_APP_NAME: Overleaf Community Edition
+      SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
+      SHARELATEX_REDIS_HOST: redis
+      REDIS_HOST: redis
+      ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
+      ENABLE_CONVERSIONS: 'true'
+      EMAIL_CONFIRMATION_DISABLED: 'true'
+    healthcheck:
+      test: curl --fail http://localhost:3000/status || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - ./util/seed-mongo.sh:/etc/my_init.d/99_seed-mongo.sh
+      - ./util/seed-mongo.js:/overleaf/services/web/modules/server-ce-scripts/scripts/seed-mongo.js
+
+  mongo:
+    image: mongo:5.0.17
+    container_name: mongo
+    command: '--replSet overleaf'
+    expose:
+      - 27017
+    healthcheck:
+      # FIXME: silly hack to make sure replicaset is initialized
+      test: 'echo ''rs.initiate({ _id: "overleaf", members: [{ _id: 0, host: "mongo:27017" }] })'' | mongo localhost:27017/test --quiet'
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  redis:
+    image: redis:7.2.1
+    container_name: redis
+    expose:
+      - 6379
+
+  e2e:
+    image: cypress/included:13.3.0
+    links:
+      - sharelatex
+    working_dir: /e2e
+    volumes:
+      - ./:/e2e
+    environment:
+      CYPRESS_BASE_URL: http://sharelatex
+      SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
+    depends_on:
+      sharelatex:
+        condition: service_healthy

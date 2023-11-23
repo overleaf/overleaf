@@ -1,0 +1,16 @@
+{
+  "name": "@overleaf/server-ce/test",
+  "description": "e2e tests for Overleaf Community Edition",
+  "private": true,
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx,json}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx,json}'"
+  },
+  "dependencies": {
+    "@testing-library/cypress": "^10.0.1",
+    "cypress": "13.3.0",
+    "typescript": "^5.0.4"
+  }
+}

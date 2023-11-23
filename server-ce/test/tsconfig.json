@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "esnext" /* Specify ECMAScript target version */,
+    "module": "es2020" /* Specify module code generation */,
+    "allowJs": true /* Allow JavaScript files to be compiled. */,
+    //    "checkJs": true /* Report errors in .js files. */,
+    "jsx": "preserve" /* Specify JSX code generation */,
+    "noEmit": true /* Do not emit outputs. */,
+    "strict": true /* Enable all strict type-checking options. */,
+    "moduleResolution": "node" /* Specify module resolution strategy */,
+    "esModuleInterop": true /* Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'. */,
+    "skipLibCheck": true /* Skip type checking of declaration files. */,
+    "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
+    "types": ["cypress", "node", "@testing-library/cypress"]
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}
