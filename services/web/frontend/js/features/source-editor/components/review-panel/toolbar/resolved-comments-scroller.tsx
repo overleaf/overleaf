@@ -2,11 +2,11 @@ import { useTranslation } from 'react-i18next'
 import { useMemo } from 'react'
 import ResolvedCommentEntry from '../entries/resolved-comment-entry'
 import { FilteredResolvedComments } from './resolved-comments-dropdown'
-import { ReviewPanelPermissions } from '../../../../../../../types/review-panel/review-panel'
+import { Permissions } from '@/features/ide-react/types/permissions'
 
 type ResolvedCommentsScrollerProps = {
   resolvedComments: FilteredResolvedComments[]
-  permissions: ReviewPanelPermissions
+  permissions: Permissions
 }
 
 function ResolvedCommentsScroller({

@@ -21,6 +21,7 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 import { Project } from '../../../../../types/project'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'
 
 type DocumentMetadata = {
@@ -53,6 +54,7 @@ export const MetadataProvider: FC = ({ children }) => {
   const { socket } = useConnectionContext()
   const { onlineUsersCount } = useOnlineUsersContext()
   const { permissionsLevel } = useEditorContext()
+  const { permissions } = usePermissionsContext()
   const { currentDocument } = useEditorManagerContext()
   const { showGenericMessageModal } = useModalsContext()
 
@@ -190,7 +192,7 @@ export const MetadataProvider: FC = ({ children }) => {
         )
       }
       window.setTimeout(() => {
-        if (permissionsLevel !== 'readOnly') {
+        if (permissions.write) {
           loadProjectMetaFromServer()
         }
       }, 200)
@@ -204,7 +206,7 @@ export const MetadataProvider: FC = ({ children }) => {
   }, [
     eventEmitter,
     loadProjectMetaFromServer,
-    permissionsLevel,
+    permissions,
     showGenericMessageModal,
     t,
   ])

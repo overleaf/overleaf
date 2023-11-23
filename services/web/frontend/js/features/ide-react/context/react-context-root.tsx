@@ -19,6 +19,7 @@ import { SplitTestProvider } from '@/shared/context/split-test-context'
 import { ModalsContextProvider } from '@/features/ide-react/context/modals-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
+import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 
 export const ReactContextRoot: FC = ({ children }) => {
   return (
@@ -33,25 +34,27 @@ export const ReactContextRoot: FC = ({ children }) => {
                     <ReferencesProvider>
                       <DetachProvider>
                         <EditorProvider>
-                          <ProjectSettingsProvider>
-                            <LayoutProvider>
-                              <LocalCompileProvider>
-                                <DetachCompileProvider>
-                                  <ChatProvider>
-                                    <ModalsContextProvider>
-                                      <EditorManagerProvider>
-                                        <OnlineUsersProvider>
-                                          <MetadataProvider>
-                                            {children}
-                                          </MetadataProvider>
-                                        </OnlineUsersProvider>
-                                      </EditorManagerProvider>
-                                    </ModalsContextProvider>
-                                  </ChatProvider>
-                                </DetachCompileProvider>
-                              </LocalCompileProvider>
-                            </LayoutProvider>
-                          </ProjectSettingsProvider>
+                          <PermissionsProvider>
+                            <ProjectSettingsProvider>
+                              <LayoutProvider>
+                                <LocalCompileProvider>
+                                  <DetachCompileProvider>
+                                    <ChatProvider>
+                                      <ModalsContextProvider>
+                                        <EditorManagerProvider>
+                                          <OnlineUsersProvider>
+                                            <MetadataProvider>
+                                              {children}
+                                            </MetadataProvider>
+                                          </OnlineUsersProvider>
+                                        </EditorManagerProvider>
+                                      </ModalsContextProvider>
+                                    </ChatProvider>
+                                  </DetachCompileProvider>
+                                </LocalCompileProvider>
+                              </LayoutProvider>
+                            </ProjectSettingsProvider>
+                          </PermissionsProvider>
                         </EditorProvider>
                       </DetachProvider>
                     </ReferencesProvider>

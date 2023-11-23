@@ -11,13 +11,13 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
+import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import ColorManager from '@/ide/colors/ColorManager'
 // @ts-ignore
 import RangesTracker from '@overleaf/ranges-tracker'
-import { ReviewPanelStateReactIde } from '../types/review-panel-state'
 import * as ReviewPanel from '../types/review-panel-state'
 import {
   ReviewPanelCommentThreadMessage,
@@ -28,6 +28,7 @@ import {
 } from '../../../../../../../types/review-panel/review-panel'
 import { UserId } from '../../../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../../../types/public-access-level'
+import { ReviewPanelStateReactIde } from '../types/review-panel-state'
 import {
   DeepReadonly,
   MergeAndOverride,
@@ -114,6 +115,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     features: { trackChangesVisible, trackChanges },
   } = project
   const { isRestrictedTokenMember } = useEditorContext()
+  // TODO permissions to be removed from the review panel context. It currently acts just as a proxy.
+  const { permissions } = usePermissionsContext()
 
   // TODO `currentDocument` and `currentDocumentId` should be get from `useEditorManagerContext()` but that makes tests fail
   const [currentDocument] = useScopeValue<Document>('editor.sharejs_doc')
@@ -134,9 +137,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     ReviewPanel.Value<'commentThreads'>
   >({})
   const [entries, setEntries] = useState<ReviewPanel.Value<'entries'>>({})
-
-  const [permissions] =
-    useScopeValue<ReviewPanel.Value<'permissions'>>('permissions')
   const [users, setUsers] = useScopeValue<ReviewPanel.Value<'users'>>(
     'users',
     true

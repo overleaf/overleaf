@@ -2,11 +2,11 @@ import {
   CommentId,
   ReviewPanelCommentThreads,
   ReviewPanelEntries,
-  ReviewPanelPermissions,
   ReviewPanelUsers,
   SubView,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
+import { Permissions } from '@/features/ide-react/types/permissions'
 import { DocId } from '../../../../../../../types/project-settings'
 import { dispatchReviewPanelLayout } from '../../../extensions/changes/change-manager'
 import { UserId } from '../../../../../../../types/user'
@@ -21,7 +21,7 @@ export interface ReviewPanelState {
     isAddingComment: boolean
     loadingThreads: boolean
     nVisibleSelectedChanges: number
-    permissions: ReviewPanelPermissions
+    permissions: Permissions
     users: ReviewPanelUsers
     resolvedComments: ReviewPanelEntries
     shouldCollapse: boolean

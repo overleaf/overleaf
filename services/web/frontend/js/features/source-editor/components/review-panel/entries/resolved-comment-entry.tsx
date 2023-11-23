@@ -4,7 +4,7 @@ import Linkify from 'react-linkify'
 import { formatTime } from '../../../../utils/format-date'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import { FilteredResolvedComments } from '../toolbar/resolved-comments-dropdown'
-import { ReviewPanelPermissions } from '../../../../../../../types/review-panel/review-panel'
+import { Permissions } from '@/features/ide-react/types/permissions'
 
 function LinkDecorator(
   decoratedHref: string,
@@ -20,7 +20,7 @@ function LinkDecorator(
 
 type ResolvedCommentEntryProps = {
   thread: FilteredResolvedComments
-  permissions: ReviewPanelPermissions
+  permissions: Permissions
   contentLimit?: number
 }
 

@@ -1,6 +1,6 @@
 import { Emitter } from 'strict-event-emitter'
 import { Project } from '../../../../types/project'
-import { PermissionsLevel } from '@/features/ide-react/types/permissions-level'
+import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { ShareJsDoc } from '@/features/ide-react/editor/share-js-doc'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { CursorPosition } from '@/features/ide-react/types/cursor-position'

@@ -10,13 +10,6 @@ import { ReviewPanelCommentThread } from './comment-thread'
 
 export type SubView = 'cur_file' | 'overview'
 
-export interface ReviewPanelPermissions {
-  read: boolean
-  write: boolean
-  admin: boolean
-  comment: boolean
-}
-
 export type ThreadId = Brand<string, 'ThreadId'>
 // Entries may contain `add-comment` and `bulk-actions` props along with DocIds
 // Ideally the `add-comment` and `bulk-actions` objects should not be within the entries object

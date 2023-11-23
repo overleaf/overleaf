@@ -8,10 +8,8 @@ import AutoExpandingTextArea from '../../../../../shared/components/auto-expandi
 import Icon from '../../../../../shared/components/icon'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
-import {
-  ReviewPanelPermissions,
-  ThreadId,
-} from '../../../../../../../types/review-panel/review-panel'
+import { ThreadId } from '../../../../../../../types/review-panel/review-panel'
+import { Permissions } from '@/features/ide-react/types/permissions'
 import { DocId } from '../../../../../../../types/project-settings'
 import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
 import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel/entry'
@@ -24,7 +22,7 @@ type CommentEntryProps = {
   entryId: ThreadId
   thread: ReviewPanelCommentThread | undefined
   threadId: ReviewPanelCommentEntry['thread_id']
-  permissions: ReviewPanelPermissions
+  permissions: Permissions
 } & Pick<ReviewPanelCommentEntry, 'offset' | 'focused'>
 
 function CommentEntry({
