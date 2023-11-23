@@ -9,6 +9,11 @@ export const loadMathJax = async () => {
       window.MathJax = {
         // https://docs.mathjax.org/en/latest/options/input/tex.html#the-configuration-block
         tex: {
+          macros: {
+            // Implements support for the \bm command from the bm package. It bolds the argument in math mode.
+            // https://github.com/mathjax/MathJax/issues/1219#issuecomment-341059843
+            bm: ['\\boldsymbol{#1}', 1],
+          },
           inlineMath: [
             ['\\(', '\\)'],
             ['$', '$'],
