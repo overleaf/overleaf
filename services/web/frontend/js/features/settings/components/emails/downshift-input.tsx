@@ -7,7 +7,7 @@ type DownshiftInputProps = {
   itemsTitle?: string
   inputValue: string
   label: string
-  setValue: React.Dispatch<React.SetStateAction<string>>
+  setValue: (value: string) => void
   inputRef?: React.ForwardedRef<HTMLInputElement>
   showLabel?: boolean
   showSuggestedText?: boolean
