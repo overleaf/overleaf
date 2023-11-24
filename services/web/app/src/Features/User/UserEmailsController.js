@@ -295,7 +295,29 @@ const UserEmailsController = {
                   'failed to add audit log entry'
                 )
               }
-              res.sendStatus(200)
+              UserGetter.getUser(
+                userData.userId,
+                { email: 1 },
+                function (error, user) {
+                  if (error) {
+                    logger.error(
+                      { error, userId: userData.userId },
+                      'failed to get user'
+                    )
+                  }
+                  const isPrimary = user?.email === userData.email
+                  AnalyticsManager.recordEventForUser(
+                    userData.userId,
+                    'email-verified',
+                    {
+                      provider: 'email',
+                      verification_type: 'link',
+                      isPrimary,
+                    }
+                  )
+                  res.sendStatus(200)
+                }
+              )
             }
           )
         }

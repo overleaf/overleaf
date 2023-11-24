@@ -21,6 +21,7 @@ describe('UserEmailsController', function () {
     }
 
     this.UserGetter = {
+      getUser: sinon.stub().yields(),
       getUserFullEmails: sinon.stub(),
       getUserByAnyEmail: sinon.stub(),
       promises: {
