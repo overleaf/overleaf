@@ -18,7 +18,6 @@ export default function populateReviewPanelScope(store: ReactScopeValueStore) {
   store.set('deleteComment', () => {})
   store.set('gotoEntry', () => {})
   store.set('saveEdit', () => {})
-  store.set('unresolveComment', () => {})
   store.set('deleteThread', () => {})
   store.set('refreshResolvedCommentsDropdown', async () => {})
   store.set('acceptChanges', () => {})

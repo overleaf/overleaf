@@ -297,6 +297,16 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [resolvedComments]
   )
 
+  const getThread = useCallback(
+    (threadId: ThreadId) => {
+      return (
+        commentThreads[threadId] ??
+        ({ messages: [] } as ReviewPanelCommentThread)
+      )
+    },
+    [commentThreads]
+  )
+
   const updateEntries = useCallback(
     async (docId: DocId) => {
       const rangesTracker = getChangeTracker(docId)
@@ -830,8 +840,35 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     })
   }, [reviewPanelOpen, setReviewPanelOpen, trackChangesVisible])
 
-  const [unresolveComment] =
-    useScopeValue<ReviewPanel.UpdaterFn<'unresolveComment'>>('unresolveComment')
+  const onCommentReopened = useCallback(
+    (threadId: ThreadId) => {
+      setCommentThreads(prevState => {
+        const {
+          resolved: _1,
+          resolved_by_user: _2,
+          resolved_at: _3,
+          ...thread
+        } = getThread(threadId)
+        return { ...prevState, [threadId]: thread }
+      })
+      setResolvedThreadIds(({ [threadId]: _, ...resolvedThreadIds }) => {
+        return resolvedThreadIds
+      })
+      dispatchReviewPanelEvent('comment:unresolve_thread', threadId)
+    },
+    [getThread]
+  )
+
+  const unresolveComment = useCallback(
+    (threadId: ThreadId) => {
+      onCommentReopened(threadId)
+      const url = `/project/${projectId}/thread/${threadId}/reopen`
+      postJSON(url).catch(debugConsole.error)
+      sendMB('rp-comment-reopen')
+    },
+    [onCommentReopened, projectId]
+  )
+
   const [deleteThread] =
     useScopeValue<ReviewPanel.UpdaterFn<'deleteThread'>>('deleteThread')
   const [refreshResolvedCommentsDropdown] = useScopeValue<
@@ -923,6 +960,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     updateEntries,
     user.id,
   ])
+
+  useSocketListener(socket, 'reopen-thread', onCommentReopened)
 
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
