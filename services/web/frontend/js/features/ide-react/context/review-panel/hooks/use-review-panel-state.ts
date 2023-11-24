@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { isEqual, cloneDeep } from 'lodash'
+import usePersistedState from '@/shared/hooks/use-persisted-state'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useAsync from '@/shared/hooks/use-async'
@@ -130,9 +131,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const [nVisibleSelectedChanges] = useScopeValue<
     ReviewPanel.Value<'nVisibleSelectedChanges'>
   >('reviewPanel.nVisibleSelectedChanges')
-  const [collapsed, setCollapsed] = useScopeValue<
+  const [collapsed, setCollapsed] = usePersistedState<
     ReviewPanel.Value<'collapsed'>
-  >('reviewPanel.overview.docsCollapsedState')
+  >(`docs_collapsed_state:${projectId}`, {}, false, true)
   const [commentThreads, setCommentThreads] = useState<
     ReviewPanel.Value<'commentThreads'>
   >({})
@@ -273,7 +274,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const getChangeTracker = useCallback(
     (docId: DocId) => {
       if (!rangesTrackers.current[docId]) {
-        rangesTrackers.current[docId] = new RangesTracker() as RangesTracker
+        rangesTrackers.current[docId] = new RangesTracker()
         rangesTrackers.current[docId].resolvedThreadIds = {
           ...resolvedThreadIds,
         }
@@ -890,9 +891,47 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [onThreadDeleted, projectId]
   )
 
-  const [refreshResolvedCommentsDropdown] = useScopeValue<
-    ReviewPanel.UpdaterFn<'refreshResolvedCommentsDropdown'>
-  >('refreshResolvedCommentsDropdown')
+  const refreshRanges = useCallback(() => {
+    type Doc = {
+      id: DocId
+      ranges: {
+        comments?: unknown[]
+        changes?: unknown[]
+      }
+    }
+
+    return getJSON<Doc[]>(`/project/${projectId}/ranges`)
+      .then(docs => {
+        setCollapsed(prevState => {
+          const collapsed = { ...prevState }
+          docs.forEach(doc => {
+            if (collapsed[doc.id] == null) {
+              collapsed[doc.id] = false
+            }
+          })
+          return collapsed
+        })
+
+        docs.forEach(async doc => {
+          if (doc.id !== currentDocumentId) {
+            // this is kept up to date in real-time, don't overwrite
+            const rangesTracker = getChangeTracker(doc.id)
+            rangesTracker.comments = doc.ranges?.comments ?? []
+            rangesTracker.changes = doc.ranges?.changes ?? []
+          }
+        })
+
+        return Promise.all(docs.map(doc => updateEntries(doc.id)))
+      })
+      .catch(debugConsole.error)
+  }, [
+    currentDocumentId,
+    getChangeTracker,
+    projectId,
+    setCollapsed,
+    updateEntries,
+  ])
+
   const [acceptChanges] =
     useScopeValue<ReviewPanel.UpdaterFn<'acceptChanges'>>('acceptChanges')
   const [rejectChanges] =
@@ -1056,7 +1095,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       submitNewComment,
       deleteComment,
       unresolveComment,
-      refreshResolvedCommentsDropdown,
+      refreshResolvedCommentsDropdown: refreshRanges,
       deleteThread,
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,
@@ -1084,7 +1123,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       submitNewComment,
       deleteComment,
       unresolveComment,
-      refreshResolvedCommentsDropdown,
+      refreshRanges,
       deleteThread,
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,

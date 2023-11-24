@@ -1,6 +1,7 @@
 import {
   CommentId,
   ReviewPanelCommentThreads,
+  ReviewPanelDocEntries,
   ReviewPanelEntries,
   ReviewPanelUsers,
   SubView,
@@ -72,7 +73,9 @@ export interface ReviewPanelState {
     ) => void
     unresolveComment: (threadId: ThreadId) => void
     deleteThread: (docId: DocId, threadId: ThreadId) => void
-    refreshResolvedCommentsDropdown: () => Promise<void>
+    refreshResolvedCommentsDropdown: () => Promise<
+      void | ReviewPanelDocEntries[]
+    >
     submitNewComment: (content: string) => Promise<void>
     setEntryHover: React.Dispatch<React.SetStateAction<Value<'entryHover'>>>
     setIsAddingComment: React.Dispatch<

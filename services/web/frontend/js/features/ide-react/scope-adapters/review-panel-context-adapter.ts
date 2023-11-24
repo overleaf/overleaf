@@ -1,7 +1,6 @@
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 
 export default function populateReviewPanelScope(store: ReactScopeValueStore) {
-  store.set('reviewPanel.overview.docsCollapsedState', {})
   store.set('reviewPanel.overview.loading', false)
   store.set('reviewPanel.nVisibleSelectedChanges', 0)
   store.set('permissions', {
@@ -18,7 +17,6 @@ export default function populateReviewPanelScope(store: ReactScopeValueStore) {
   store.set('deleteComment', () => {})
   store.set('gotoEntry', () => {})
   store.set('saveEdit', () => {})
-  store.set('refreshResolvedCommentsDropdown', async () => {})
   store.set('acceptChanges', () => {})
   store.set('rejectChanges', () => {})
   store.set('bulkAcceptActions', () => {})
