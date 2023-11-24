@@ -194,7 +194,7 @@ export default function DropdownButton({
       </MenuItemButton>
     )
   }
-  if (managedUsersActive && !isUserManaged) {
+  if (managedUsersActive && !isUserManaged && !userPending) {
     buttons.push(
       <MenuItemButton
         onClick={onResendManagedUserInviteClick}
@@ -208,7 +208,7 @@ export default function DropdownButton({
       </MenuItemButton>
     )
   }
-  if (groupSSOActive && !isGroupSSOLinked) {
+  if (groupSSOActive && !isGroupSSOLinked && !userPending) {
     buttons.push(
       <MenuItemButton
         onClick={onResendSSOLinkInviteClick}

@@ -34,7 +34,7 @@ describe('DropdownButton', function () {
   const subscriptionId = '123abc123abc'
 
   describe('with a standard group', function () {
-    describe('for a pending user (have not joined group)', function () {
+    describe('for a pending user (has not joined group)', function () {
       const user: User = {
         _id: 'some-user',
         email: 'some.user@example.com',
@@ -66,6 +66,8 @@ describe('DropdownButton', function () {
         cy.findByTestId('resend-group-invite-action').should('be.visible')
         cy.findByTestId('remove-user-action').should('be.visible')
 
+        cy.findByTestId('resend-managed-user-invite-action').should('not.exist')
+        cy.findByTestId('resend-sso-link-invite-action').should('not.exist')
         cy.findByTestId('no-actions-available').should('not.exist')
       })
     })
@@ -111,6 +113,44 @@ describe('DropdownButton', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-managedUsersActive', true)
         win.metaAttributesCache.set('ol-groupSSOActive', false)
+      })
+    })
+
+    describe('for a pending user (has not joined group)', function () {
+      const user: User = {
+        _id: 'some-user',
+        email: 'some.user@example.com',
+        first_name: 'Some',
+        last_name: 'User',
+        invite: true,
+        last_active_at: new Date(),
+        enrollment: {},
+        isEntityAdmin: undefined,
+      }
+
+      beforeEach(function () {
+        cy.window().then(win => {
+          win.metaAttributesCache.set('ol-users', [user])
+        })
+
+        mountDropDownComponent(user, subscriptionId)
+      })
+
+      it('should render dropdown button', function () {
+        cy.get('#managed-user-dropdown-some\\.user\\@example\\.com').should(
+          'exist'
+        )
+        cy.get(`.action-btn`).should('exist')
+      })
+
+      it('should show the correct menu when dropdown button is clicked', function () {
+        cy.get('.action-btn').click()
+        cy.findByTestId('resend-group-invite-action').should('be.visible')
+        cy.findByTestId('remove-user-action').should('be.visible')
+
+        cy.findByTestId('resend-managed-user-invite-action').should('not.exist')
+        cy.findByTestId('resend-sso-link-invite-action').should('not.exist')
+        cy.findByTestId('no-actions-available').should('not.exist')
       })
     })
 
@@ -240,6 +280,44 @@ describe('DropdownButton', function () {
       })
     })
 
+    describe('for a pending user (has not joined group)', function () {
+      const user: User = {
+        _id: 'some-user',
+        email: 'some.user@example.com',
+        first_name: 'Some',
+        last_name: 'User',
+        invite: true,
+        last_active_at: new Date(),
+        enrollment: {},
+        isEntityAdmin: undefined,
+      }
+
+      beforeEach(function () {
+        cy.window().then(win => {
+          win.metaAttributesCache.set('ol-users', [user])
+        })
+
+        mountDropDownComponent(user, subscriptionId)
+      })
+
+      it('should render dropdown button', function () {
+        cy.get('#managed-user-dropdown-some\\.user\\@example\\.com').should(
+          'exist'
+        )
+        cy.get(`.action-btn`).should('exist')
+      })
+
+      it('should show the correct menu when dropdown button is clicked', function () {
+        cy.get('.action-btn').click()
+        cy.findByTestId('resend-group-invite-action').should('be.visible')
+        cy.findByTestId('remove-user-action').should('be.visible')
+
+        cy.findByTestId('resend-managed-user-invite-action').should('not.exist')
+        cy.findByTestId('resend-sso-link-invite-action').should('not.exist')
+        cy.findByTestId('no-actions-available').should('not.exist')
+      })
+    })
+
     describe('for a group member not linked with SSO yet', function () {
       const user: User = {
         _id: 'some-user',
@@ -307,6 +385,44 @@ describe('DropdownButton', function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-managedUsersActive', true)
         win.metaAttributesCache.set('ol-groupSSOActive', true)
+      })
+    })
+
+    describe('for a pending user (has not joined group)', function () {
+      const user: User = {
+        _id: 'some-user',
+        email: 'some.user@example.com',
+        first_name: 'Some',
+        last_name: 'User',
+        invite: true,
+        last_active_at: new Date(),
+        enrollment: {},
+        isEntityAdmin: undefined,
+      }
+
+      beforeEach(function () {
+        cy.window().then(win => {
+          win.metaAttributesCache.set('ol-users', [user])
+        })
+
+        mountDropDownComponent(user, subscriptionId)
+      })
+
+      it('should render dropdown button', function () {
+        cy.get('#managed-user-dropdown-some\\.user\\@example\\.com').should(
+          'exist'
+        )
+        cy.get(`.action-btn`).should('exist')
+      })
+
+      it('should show the correct menu when dropdown button is clicked', function () {
+        cy.get('.action-btn').click()
+        cy.findByTestId('resend-group-invite-action').should('be.visible')
+        cy.findByTestId('remove-user-action').should('be.visible')
+
+        cy.findByTestId('resend-managed-user-invite-action').should('not.exist')
+        cy.findByTestId('resend-sso-link-invite-action').should('not.exist')
+        cy.findByTestId('no-actions-available').should('not.exist')
       })
     })
 
