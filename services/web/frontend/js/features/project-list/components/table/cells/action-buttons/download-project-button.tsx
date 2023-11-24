@@ -5,7 +5,7 @@ import Icon from '../../../../../../shared/components/icon'
 import Tooltip from '../../../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
-import { isMobileDevice } from '../../../../../../infrastructure/event-tracking'
+import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
 
 type DownloadProjectButtonProps = {
   project: Project
@@ -24,7 +24,7 @@ function DownloadProjectButton({
     eventTracking.sendMB('project-list-page-interaction', {
       action: 'downloadZip',
       projectId: project.id,
-      isMobileDevice,
+      isSmallDevice,
     })
     location.assign(`/project/${project.id}/download/zip`)
   }, [project, location])

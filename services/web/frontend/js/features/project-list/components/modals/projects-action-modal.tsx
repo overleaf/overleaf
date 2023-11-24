@@ -6,7 +6,7 @@ import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
-import { isMobileDevice } from '../../../../infrastructure/event-tracking'
+import { isSmallDevice } from '../../../../infrastructure/event-tracking'
 import getMeta from '@/utils/meta'
 import Notification from '@/shared/components/notification'
 
@@ -62,7 +62,7 @@ function ProjectsActionModal({
     if (showModal) {
       eventTracking.sendMB('project-list-page-interaction', {
         action,
-        isMobileDevice,
+        isSmallDevice,
       })
     }
   }, [action, showModal])

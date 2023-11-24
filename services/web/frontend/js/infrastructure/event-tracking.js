@@ -55,7 +55,7 @@ export function sendMBSampled(key, body = {}, rate = 0.01) {
 // @screen-xs-max: (@screen-sm-min - 1);
 // @screen-sm-min: @screen-sm;
 // @screen-sm: 768px;
-export const isMobileDevice = window.matchMedia('(max-width: 767px)').matches
+export const isSmallDevice = window.screen.width < 768
 
 function sendBeacon(key, data) {
   if (!navigator || !navigator.sendBeacon) return

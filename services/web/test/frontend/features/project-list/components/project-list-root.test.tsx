@@ -821,7 +821,7 @@ describe('<ProjectListRoot />', function () {
                 action: 'rename',
                 page: '/',
                 projectId: copyableProject.id,
-                isMobileDevice: false,
+                isSmallDevice: true,
               }
             )
 
@@ -954,7 +954,7 @@ describe('<ProjectListRoot />', function () {
                 action: 'clone',
                 page: '/',
                 projectId: archiveableProject.id,
-                isMobileDevice: false,
+                isSmallDevice: true,
               }
             )
 
@@ -1113,7 +1113,7 @@ describe('<ProjectListRoot />', function () {
             action: 'clone',
             page: '/',
             projectId: archiveableProject.id,
-            isMobileDevice: false,
+            isSmallDevice: true,
           }
         )
 

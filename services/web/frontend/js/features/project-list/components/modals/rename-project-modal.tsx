@@ -16,7 +16,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { useProjectListContext } from '../../context/project-list-context'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
-import { isMobileDevice } from '../../../../infrastructure/event-tracking'
+import { isSmallDevice } from '../../../../infrastructure/event-tracking'
 import Notification from '@/shared/components/notification'
 import getMeta from '@/utils/meta'
 
@@ -45,7 +45,7 @@ function RenameProjectModal({
       eventTracking.sendMB('project-list-page-interaction', {
         action: 'rename',
         projectId: project.id,
-        isMobileDevice,
+        isSmallDevice,
       })
     }
   }, [showModal, project.id])

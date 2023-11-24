@@ -85,7 +85,7 @@ describe('Project list search form', function () {
     expect(sendMBSpy).to.have.been.calledWith('project-list-page-interaction', {
       action: 'search',
       page: '/',
-      isMobileDevice: false,
+      isSmallDevice: true,
     })
     expect(setInputValueMock).to.be.calledWith(value)
   })

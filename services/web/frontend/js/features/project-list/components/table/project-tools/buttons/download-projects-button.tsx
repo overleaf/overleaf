@@ -5,7 +5,7 @@ import Tooltip from '../../../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
-import { isMobileDevice } from '../../../../../../infrastructure/event-tracking'
+import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
 
 function DownloadProjectsButton() {
   const { selectedProjects, selectOrUnselectAllProjects } =
@@ -19,7 +19,7 @@ function DownloadProjectsButton() {
   const handleDownloadProjects = useCallback(() => {
     eventTracking.sendMB('project-list-page-interaction', {
       action: 'downloadZips',
-      isMobileDevice,
+      isSmallDevice,
     })
 
     location.assign(`/project/download/zip?project_ids=${projectIds.join(',')}`)
