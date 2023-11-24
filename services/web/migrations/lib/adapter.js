@@ -1,5 +1,4 @@
 const Path = require('path')
-const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
 
 class Adapter {
   constructor(params) {
@@ -19,6 +18,7 @@ class Adapter {
   }
 
   async connect() {
+    const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
     await waitForDb()
     return { db }
   }
@@ -28,6 +28,7 @@ class Adapter {
   }
 
   async getExecutedMigrationNames() {
+    const { db } = await this.connect()
     const migrations = await db.migrations
       .find({}, { sort: { migratedAt: 1 }, projection: { name: 1 } })
       .toArray()
@@ -35,6 +36,7 @@ class Adapter {
   }
 
   async markExecuted(name) {
+    const { db } = await this.connect()
     return db.migrations.insertOne({
       name,
       migratedAt: new Date(),
@@ -42,6 +44,7 @@ class Adapter {
   }
 
   async unmarkExecuted(name) {
+    const { db } = await this.connect()
     return db.migrations.deleteOne({
       name,
     })
