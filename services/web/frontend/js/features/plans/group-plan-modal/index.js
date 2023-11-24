@@ -61,6 +61,7 @@ modalEl
   .on('shown.bs.modal', function () {
     const path = `${window.location.pathname}${window.location.search}`
     history.replaceState(null, document.title, path + '#groups')
+    eventTracking.sendMB('form-submitted-groups-modal-open')
   })
   .on('hidden.bs.modal', function () {
     const path = `${window.location.pathname}${window.location.search}`
