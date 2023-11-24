@@ -34,7 +34,13 @@ async function main() {
     console.error('  Are you running this script in the correct environment?')
     process.exit(1)
   }
-  const delay = parseInt(args['delay-in-seconds'], 10) || 10
+  const delay = parseInt(args['delay-in-seconds'] || '10', 10)
+  if (!(delay >= 0)) {
+    console.error(
+      `--delay-in-seconds='${args['delay-in-seconds']}' should be a number >=0`
+    )
+    process.exit(1)
+  }
   console.log()
   console.log(
     `Disconnect all users from ${args['confirm-site-url']}, with delay ${delay}`
