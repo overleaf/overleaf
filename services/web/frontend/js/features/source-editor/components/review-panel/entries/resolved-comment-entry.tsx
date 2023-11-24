@@ -42,7 +42,7 @@ function ResolvedCommentEntry({
   }
 
   const handleDelete = () => {
-    deleteThread(undefined, thread.docId, thread.threadId)
+    deleteThread(thread.docId, thread.threadId)
   }
 
   return (

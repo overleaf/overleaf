@@ -71,7 +71,7 @@ export interface ReviewPanelState {
       content: string
     ) => void
     unresolveComment: (threadId: ThreadId) => void
-    deleteThread: (_entryId: unknown, docId: DocId, threadId: ThreadId) => void
+    deleteThread: (docId: DocId, threadId: ThreadId) => void
     refreshResolvedCommentsDropdown: () => Promise<void>
     submitNewComment: (content: string) => Promise<void>
     setEntryHover: React.Dispatch<React.SetStateAction<Value<'entryHover'>>>

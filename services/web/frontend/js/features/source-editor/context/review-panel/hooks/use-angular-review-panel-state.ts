@@ -7,6 +7,7 @@ import {
   SubView,
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
+import { DocId } from '../../../../../../../types/project-settings'
 import { dispatchReviewPanelLayout as handleLayoutChange } from '../../../extensions/changes/change-manager'
 
 function useAngularReviewPanelState(): ReviewPanelState {
@@ -99,8 +100,21 @@ function useAngularReviewPanelState(): ReviewPanelState {
     )
   const [unresolveComment] =
     useScopeValue<ReviewPanel.UpdaterFn<'unresolveComment'>>('unresolveComment')
-  const [deleteThread] =
-    useScopeValue<ReviewPanel.UpdaterFn<'deleteThread'>>('deleteThread')
+
+  const [deleteThreadAngular] =
+    useScopeValue<
+      (
+        _: unknown,
+        ...args: [...Parameters<ReviewPanel.UpdaterFn<'deleteThread'>>]
+      ) => ReturnType<ReviewPanel.UpdaterFn<'deleteThread'>>
+    >('deleteThread')
+  const deleteThread = useCallback(
+    (docId: DocId, threadId: ThreadId) => {
+      deleteThreadAngular(undefined, docId, threadId)
+    },
+    [deleteThreadAngular]
+  )
+
   const [refreshResolvedCommentsDropdown] = useScopeValue<
     ReviewPanel.UpdaterFn<'refreshResolvedCommentsDropdown'>
   >('refreshResolvedCommentsDropdown')

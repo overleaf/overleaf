@@ -14,7 +14,7 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { getJSON, postJSON } from '@/infrastructure/fetch-json'
+import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import ColorManager from '@/ide/colors/ColorManager'
 // @ts-ignore
 import RangesTracker from '@overleaf/ranges-tracker'
@@ -869,8 +869,27 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [onCommentReopened, projectId]
   )
 
-  const [deleteThread] =
-    useScopeValue<ReviewPanel.UpdaterFn<'deleteThread'>>('deleteThread')
+  const onThreadDeleted = useCallback((threadId: ThreadId) => {
+    setResolvedThreadIds(({ [threadId]: _, ...resolvedThreadIds }) => {
+      return resolvedThreadIds
+    })
+    setCommentThreads(({ [threadId]: _, ...commentThreads }) => {
+      return commentThreads
+    })
+    dispatchReviewPanelEvent('comment:remove', threadId)
+  }, [])
+
+  const deleteThread = useCallback(
+    (docId: DocId, threadId: ThreadId) => {
+      onThreadDeleted(threadId)
+      deleteJSON(`/project/${projectId}/doc/${docId}/thread/${threadId}`).catch(
+        debugConsole.error
+      )
+      sendMB('rp-comment-delete')
+    },
+    [onThreadDeleted, projectId]
+  )
+
   const [refreshResolvedCommentsDropdown] = useScopeValue<
     ReviewPanel.UpdaterFn<'refreshResolvedCommentsDropdown'>
   >('refreshResolvedCommentsDropdown')
@@ -962,6 +981,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   ])
 
   useSocketListener(socket, 'reopen-thread', onCommentReopened)
+  useSocketListener(socket, 'delete-thread', onThreadDeleted)
 
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
