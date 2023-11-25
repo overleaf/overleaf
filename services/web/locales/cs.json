@@ -322,7 +322,6 @@
   "support_lots_of_features": "Podporujeme téměř všechny funkce LaTeXu, včetně vkládání obrázků, bibliografie, rovnic a mnohem více! Přečtěte si o všech těch úžasných věcech, které můžete v __appName__ dělat, v našem <0>__help_guides_link__</0>",
   "sure_you_want_to_change_plan": "Opravdu chcete změnit tarif na <0>__planName__</0>?",
   "sure_you_want_to_delete": "Opravdu chcete nenávratně smazat následující soubory?",
-  "sure_you_want_to_restore_before": "Opravdu chcete obnovit <0>__filename__</0> do stavu před změnami k __date__?",
   "sv": "Švédština",
   "sync": "Synchronizace",
   "sync_project_to_github_explanation": "Každá změna, kterou uděláte v __appName__u, bude commitována a mergována z každou změnou v GitHubu.",

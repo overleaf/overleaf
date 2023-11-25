@@ -362,7 +362,6 @@
   "subscription_canceled_and_terminate_on_x": " Aboneliğiniz iptal edildi ve <0>__terminateDate__</0> tarihinde sonlandırılacaktır. Başka herhangi bir ücret alınmayacaktır.",
   "support_lots_of_features": "Neredeyse tüm LaTeX özelliklerini destekliyoruz, görüntü ekleme, kaynakçalar, denklemler ve çok daha fazlası! __appName__ kullanarak yapabileceğiniz ilginç şeyler hakkında daha fazla bilgi almak için: <0>__help_guides_link__</0>",
   "sure_you_want_to_change_plan": "Planınızı <0>__planName__</0> olarak değiştirmek istediğinizden emin misiniz?",
-  "sure_you_want_to_restore_before": "<0>__filename__</0> adlı dosyanın __date__ tarihinden önceki haline geri çevirmek istediğinizden emin misiniz?",
   "sv": "İsveççe",
   "sync": "Senkronizasyon",
   "sync_project_to_github_explanation": "__appName__ üzerinden yaptığınız tüm değişiklikler GitHub üzerine işlenecek ve birleştirilecektir.",

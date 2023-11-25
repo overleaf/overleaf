@@ -425,7 +425,6 @@
   "sure_you_want_to_change_plan": "Вы уверены, что хотите сменить тарифный план на <0>__planName__</0>?",
   "sure_you_want_to_delete": "Вы уверены, что хотите перманентно удалить следующие файлы?",
   "sure_you_want_to_leave_group": "Вы уверены, что хотите покинуть группу?",
-  "sure_you_want_to_restore_before": "Вы уверены, что хотите вернуть файл <0>__filename__</0> к состоянию на __date__?",
   "sv": "Шведский",
   "sync": "Синхронизация",
   "sync_project_to_github_explanation": "Все изменения, сделанные Вами в __appName__ будут интегрированы (commit и merge) со всеми обновлениями на GitHub.",

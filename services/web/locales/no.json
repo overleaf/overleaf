@@ -374,7 +374,6 @@
   "support_lots_of_features": "Vi støtter nesten all LaTeX-funksjonalitet, inkludert innsetting av bilder, bibliografi, ligninger, og mye mer! Les om alle de spennende tingene du kan gjøre med __appName__ i vår <0>__help_guides_link__</0>",
   "sure_you_want_to_change_plan": "Er du sikker på at du vil bytte plan til <0>__planName__</0>?",
   "sure_you_want_to_leave_group": "Er du sikker på at du vil forlate denne gruppen?",
-  "sure_you_want_to_restore_before": "Er du sikker på at du vil gjenopprette <0>__filename__</0> til før endringene den __date__?",
   "sv": "Svensk",
   "sync": "Synk",
   "sync_project_to_github_explanation": "Alle endringer du har gjort i __appName__ vil bli commited og merged med eventuelle oppdateringer i GitHub.",

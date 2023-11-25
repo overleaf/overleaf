@@ -462,7 +462,6 @@
   "sure_you_want_to_change_plan": "本当にプランを <0>__planName__</0> に変えますか？",
   "sure_you_want_to_delete": "以下のファイルを完全に消去しますか？",
   "sure_you_want_to_leave_group": "このグループから本当に退出しますか？",
-  "sure_you_want_to_restore_before": "本当に <0>__filename__</0> を __date__ の変更前に戻しますか？",
   "sv": "スェーデン語",
   "sync": "同期",
   "sync_project_to_github_explanation": "__appName__ で行った変更はすべてGitHubの更新と関連付けられ、統合されます。",

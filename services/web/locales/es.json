@@ -421,7 +421,6 @@
   "sure_you_want_to_change_plan": "¿Estás seguro que quieres cambiar al plan <0>__planName__</0>_?",
   "sure_you_want_to_delete": "¿Seguro que quieres borrar permanentemente los siguientes archivos?",
   "sure_you_want_to_leave_group": "¿Seguro que quieres abandonar este grupo?",
-  "sure_you_want_to_restore_before": "¿Estás seguro que quieres restablecer <0>__filename__</0> antes de los cambios en __date__?",
   "sv": "Sueco",
   "sync": "Sincronizar",
   "sync_project_to_github_explanation": "Cualquier cambio que hagas en __appName__ será guardado como un commit y merge con cualquier actualización en GitHub.",
