@@ -9,7 +9,6 @@ export default function populateReviewPanelScope(store: ReactScopeValueStore) {
   store.set('submitNewComment', async () => {})
   store.set('deleteComment', () => {})
   store.set('gotoEntry', () => {})
-  store.set('saveEdit', () => {})
   store.set('acceptChanges', () => {})
   store.set('rejectChanges', () => {})
   store.set('bulkAcceptActions', () => {})

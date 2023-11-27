@@ -21,6 +21,7 @@ import ColorManager from '@/ide/colors/ColorManager'
 import RangesTracker from '@overleaf/ranges-tracker'
 import * as ReviewPanel from '../types/review-panel-state'
 import {
+  CommentId,
   ReviewPanelCommentThreadMessage,
   ReviewPanelCommentThreads,
   ReviewPanelDocEntries,
@@ -823,8 +824,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     useScopeValue<ReviewPanel.UpdaterFn<'deleteComment'>>('deleteComment')
   const [gotoEntry] =
     useScopeValue<ReviewPanel.UpdaterFn<'gotoEntry'>>('gotoEntry')
-  const [saveEdit] =
-    useScopeValue<ReviewPanel.UpdaterFn<'saveEdit'>>('saveEdit')
   const [submitReplyAngular] =
     useScopeValue<
       (entry: { thread_id: ThreadId; replyContent: string }) => void
@@ -935,6 +934,29 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       sendMB('rp-comment-delete')
     },
     [onThreadDeleted, projectId]
+  )
+
+  const onCommentEdited: ReviewPanel.UpdaterFn<'saveEdit'> = (
+    threadId: ThreadId,
+    commentId: CommentId,
+    content: string
+  ) => {
+    setCommentThreads(prevState => {
+      const thread = { ...getThread(threadId) }
+      thread.messages = thread.messages.map(message => {
+        return message.id === commentId ? { ...message, content } : message
+      })
+      return { ...prevState, [threadId]: thread }
+    })
+  }
+
+  const saveEdit = useCallback(
+    (threadId: ThreadId, commentId: CommentId, content: string) => {
+      const url = `/project/${projectId}/thread/${threadId}/messages/${commentId}/edit`
+      postJSON(url, { body: { content } }).catch(debugConsole.error)
+      handleLayoutChange({ async: true })
+    },
+    [projectId]
   )
 
   const refreshRanges = useCallback(() => {
@@ -1068,6 +1090,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   useSocketListener(socket, 'reopen-thread', onCommentReopened)
   useSocketListener(socket, 'delete-thread', onThreadDeleted)
   useSocketListener(socket, 'resolve-thread', onCommentResolved)
+  useSocketListener(socket, 'edit-message', onCommentEdited)
 
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
