@@ -40,6 +40,8 @@ function sentryReporter() {
             /Non-Error promise rejection captured with value: Object Not Found Matching Id/,
             // Ignore CM6 error until upgraded
             "Cannot read properties of undefined (reading 'length')",
+            // Ignore Angular digest iteration limit - see https://github.com/overleaf/internal/issues/15750
+            '10 $digest() iterations reached',
           ],
 
           denyUrls: [
