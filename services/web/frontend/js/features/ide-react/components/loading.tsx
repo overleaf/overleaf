@@ -1,69 +1,69 @@
 import { FC, useEffect, useState } from 'react'
-import LoadingBranded from '../../../shared/components/loading-branded'
-import i18n from '../../../i18n'
-import { useConnectionContext } from '../context/connection-context'
+import LoadingBranded from '@/shared/components/loading-branded'
+import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import getMeta from '@/utils/meta'
+import { useConnectionContext } from '../context/connection-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 
-type LoadStatus = 'initial' | 'rendered' | 'connected' | 'loaded'
+type Part = 'initial' | 'render' | 'connection' | 'translations' | 'project'
 
-const loadProgressPercentage: Record<LoadStatus, number> = {
-  initial: 20,
-  rendered: 40,
-  connected: 70,
-  loaded: 100,
-}
+const initialParts = new Set<Part>(['initial'])
 
-// Pass in loading text from the server because i18n will not be ready initially
-export const Loading: FC<{ loadingText: string }> = ({
-  loadingText,
-  children,
-}) => {
-  const [loadStatus, setLoadStatus] = useState<LoadStatus>('initial')
+const totalParts = new Set<Part>([
+  'initial',
+  'render',
+  'connection',
+  'translations',
+  'project',
+])
+
+export const Loading: FC<{
+  setLoaded: (value: boolean) => void
+}> = ({ setLoaded }) => {
+  const [loadedParts, setLoadedParts] = useState(initialParts)
+
+  const progress = (loadedParts.size / totalParts.size) * 100
+
+  useEffect(() => {
+    setLoaded(progress === 100)
+  }, [progress, setLoaded])
+
   const { connectionState, isConnected } = useConnectionContext()
-  const loadProgress = loadProgressPercentage[loadStatus]
-  const editorLoaded = loadStatus === 'loaded'
+  const i18n = useWaitForI18n()
+  const { projectJoined } = useIdeReactContext()
 
-  const [i18nLoaded, setI18nLoaded] = useState(false)
-  const [translationLoadError, setTranslationLoadError] = useState(false)
-
-  // Advance to 40% once this component is rendered
   useEffect(() => {
-    // Force a reflow now so that the animation from 20% to 40% occurs
-    // eslint-disable-next-line no-void
-    void document.body.offsetHeight
-    setLoadStatus('rendered')
+    setLoadedParts(value => new Set(value).add('render'))
   }, [])
 
   useEffect(() => {
-    i18n
-      .then(() => setI18nLoaded(true))
-      .catch(() => {
-        setTranslationLoadError(true)
-      })
-  }, [])
-
-  useEffect(() => {
-    if (editorLoaded) {
-      return
-    }
     if (isConnected) {
-      setLoadStatus(i18nLoaded ? 'loaded' : 'connected')
+      setLoadedParts(value => new Set(value).add('connection'))
     }
-  }, [i18nLoaded, editorLoaded, setLoadStatus, isConnected])
+  }, [isConnected])
 
-  const translationLoadErrorMessage = translationLoadError
-    ? getMeta('ol-translationLoadErrorMessage')
-    : ''
+  useEffect(() => {
+    if (i18n.isReady) {
+      setLoadedParts(value => new Set(value).add('translations'))
+    }
+  }, [i18n.isReady])
 
-  return editorLoaded ? (
-    <>{children}</>
-  ) : (
+  useEffect(() => {
+    if (projectJoined) {
+      setLoadedParts(value => new Set(value).add('project'))
+    }
+  }, [projectJoined])
+
+  const error =
+    connectionState.error ||
+    (i18n.error ? getMeta('ol-translationLoadErrorMessage') : '')
+
+  // Use loading text from the server, because i18n will not be ready initially
+  const label = getMeta('ol-loadingText')
+
+  return (
     <div className="loading-screen">
-      <LoadingBranded
-        loadProgress={loadProgress}
-        label={loadingText}
-        error={connectionState.error || translationLoadErrorMessage}
-      />
+      <LoadingBranded loadProgress={progress} label={label} error={error} />
     </div>
   )
 }

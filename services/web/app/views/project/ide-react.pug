@@ -4,6 +4,7 @@ block vars
 	- var suppressNavbar = true
 	- var suppressFooter = true
 	- var suppressSkipToContent = true
+	- var deferScripts = true
 	- metadata.robotsNoindexNofollow = true
 
 block entrypointVar
@@ -24,5 +25,5 @@ block append meta
 
 block prepend foot-scripts
 	each file in (useOpenTelemetry ? entrypointScripts("tracing") : [])
-		script(type="text/javascript", nonce=scriptNonce, src=file)
-	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js')
+		script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
+	script(type="text/javascript", nonce=scriptNonce, src=(wsUrl || '/socket.io') + '/socket.io.js', defer=deferScripts)
