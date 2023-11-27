@@ -1,8 +1,6 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
 const { ObjectID } = require('mongodb')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const logger = require('@overleaf/logger')
 
 const INVOICE_SUBSCRIPTION_LIMIT = 10
 
@@ -101,25 +99,11 @@ async function _sendSubscriptionUpdatedEvent(userId, eventData) {
 async function _sendSubscriptionCancelledEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  let designSystemUpdatesAssignment = { variant: 'default' }
-  try {
-    designSystemUpdatesAssignment =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        userId,
-        'design-system-updates'
-      )
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'failed to get "design-system-updates" split test assignment'
-    )
-  }
   AnalyticsManager.recordEventForUser(userId, 'subscription-cancelled', {
     plan_code: planCode,
     quantity,
     is_trial: isTrial,
     subscriptionId,
-    'split-test-design-system-updates': designSystemUpdatesAssignment.variant,
   })
   AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
   AnalyticsManager.setUserPropertyForUser(

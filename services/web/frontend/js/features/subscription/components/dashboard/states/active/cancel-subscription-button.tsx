@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
-import { getSplitTestVariant } from '../../../../../../../../frontend/js/utils/splitTestUtils'
 
 export function CancelSubscriptionButton(
   props: React.ComponentProps<'button'>
@@ -10,15 +9,8 @@ export function CancelSubscriptionButton(
   const { recurlyLoadError, setShowCancellation } =
     useSubscriptionDashboardContext()
 
-  const designSystemUpdatesVariant = getSplitTestVariant(
-    'design-system-updates',
-    'default'
-  )
-
   function handleCancelSubscriptionClick() {
-    eventTracking.sendMB('subscription-page-cancel-button-click', {
-      'split-test-design-system-updates': designSystemUpdatesVariant,
-    })
+    eventTracking.sendMB('subscription-page-cancel-button-click', {})
     setShowCancellation(true)
   }
 

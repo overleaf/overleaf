@@ -31,17 +31,7 @@
   display: flex;
   flex-wrap: wrap;
 }
-.tags-input .tags when(@is-new-css = false) {
-  padding: 3px;
-  border-radius: 3px; /* overriding .form-control */
-}
-.tags-input .tags:focus-within when(@is-new-css = false) {
-  outline: none;
-  -webkit-box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
-  -moz-box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
-  box-shadow: 0 0 3px 1px rgba(5, 139, 242, 0.6);
-}
-.tags-input .tags:focus-within when(@is-new-css = true) {
+.tags-input .tags:focus-within {
   &:extend(.input-focus-style);
 }
 .tags-input .tags .tag-list {
@@ -83,12 +73,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.tags-input .tags .input when(@is-new-css = false) {
-  margin: 2px;
-  padding: 0;
-  padding-left: 5px;
-}
-.tags-input .tags .input when(@is-new-css = true) {
+.tags-input .tags .input {
   .placeholder();
 }
 .tags-input .tags .input.invalid-tag {

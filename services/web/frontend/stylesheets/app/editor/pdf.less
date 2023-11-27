@@ -24,7 +24,7 @@
   flex: 1 1 100%;
 }
 
-.toolbar-pdf-left when (@is-new-css = true) {
+.toolbar-pdf-left {
   margin-left: 2px;
 }
 
@@ -236,19 +236,11 @@
       }
     }
 
-    i.fa-arrows-h when(@is-new-css = false) {
-      border-right: 2px solid white;
-      border-left: 2px solid white;
-    }
-    i.fa-arrows-h when(@is-new-css = true) {
+    i.fa-arrows-h {
       border-right: 2px solid @content-primary;
       border-left: 2px solid @content-primary;
     }
-    i.fa-arrows-v when(@is-new-css = false) {
-      border-top: 2px solid white;
-      border-bottom: 2px solid white;
-    }
-    i.fa-arrows-v when(@is-new-css = true) {
+    i.fa-arrows-v {
       border-top: 2px solid @content-primary;
       border-bottom: 2px solid @content-primary;
     }

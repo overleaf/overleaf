@@ -47,17 +47,8 @@
       border-right: 1px solid fade(@neutral-90, 16%);
     }
 
-    // on new css, btn-secondary already has a border
-    &.btn-secondary when (@is-new-css = false) {
-      border-right: 1px solid fade(@ol-blue-gray-6, 16%);
-    }
-
     &.btn-danger {
       border-right: 1px solid fade(@neutral-90, 16%);
-    }
-
-    &[disabled] when (@is-new-css = false) {
-      opacity: 1;
     }
 
     &.no-left-radius {
@@ -66,7 +57,7 @@
     }
   }
 
-  .split-menu-button when (@is-new-css = true) {
+  .split-menu-button {
     // workaround for for the blue 2x border on the new css
     // if z-index rule is not added, the border will overlap under the `split-menu-dropdown-toggle` since margin between both component is only 1px
     z-index: 1;
@@ -87,7 +78,7 @@
       // on new css, btn-secondary has a border
       // since the border between both buttons already been defined in the `split-menu-button`
       // we will remove the rule from the dropdown toggle
-      &.btn-secondary when (@is-new-css = true) {
+      &.btn-secondary {
         border-left: none;
       }
     }

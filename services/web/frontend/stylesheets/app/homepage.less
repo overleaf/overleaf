@@ -183,20 +183,7 @@
   }
 }
 
-.hp-login-btn when(@is-new-css = false) {
-  .login-btn;
-  min-width: 220px;
-
-  background-color: @ol-blue-gray-3;
-
-  &:hover,
-  &:focus,
-  &:active {
-    background-color: darken(@ol-blue-gray-3, 8%);
-  }
-}
-
-.hp-login-btn when(@is-new-css = true) {
+.hp-login-btn {
   .login-btn;
   min-width: 220px;
 }

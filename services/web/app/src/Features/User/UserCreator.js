@@ -37,20 +37,6 @@ async function _addAffiliation(user, affiliationOptions) {
 }
 
 async function recordRegistrationEvent(user) {
-  let designSystemUpdatesAssignment = { variant: 'default' }
-  try {
-    designSystemUpdatesAssignment =
-      await SplitTestHandler.promises.getAssignmentForUser(
-        user._id,
-        'design-system-updates'
-      )
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'failed to get "design-system-updates" split test assignment'
-    )
-  }
-
   const onboardingFlowAssignment =
     await SplitTestHandler.promises.getAssignmentForUser(
       user._id,
@@ -60,7 +46,6 @@ async function recordRegistrationEvent(user) {
   try {
     const segmentation = {
       'home-registration': 'default',
-      'split-test-design-system-updates': designSystemUpdatesAssignment.variant,
       'onboarding-flow': onboardingFlowAssignment.variant,
     }
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {

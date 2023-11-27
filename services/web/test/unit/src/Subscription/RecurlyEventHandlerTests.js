@@ -173,11 +173,6 @@ describe('RecurlyEventHandler', function () {
       this.eventData
     )
     sinon.assert.calledWith(
-      this.SplitTestHandler.promises.getAssignmentForUser,
-      this.userId,
-      'design-system-updates'
-    )
-    sinon.assert.calledWith(
       this.AnalyticsManager.recordEventForUser,
       this.userId,
       'subscription-cancelled',
@@ -186,7 +181,6 @@ describe('RecurlyEventHandler', function () {
         quantity: 1,
         is_trial: true,
         subscriptionId: this.eventData.subscription.uuid,
-        'split-test-design-system-updates': 'default',
       }
     )
     sinon.assert.calledWith(

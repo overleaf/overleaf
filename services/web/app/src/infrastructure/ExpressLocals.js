@@ -81,10 +81,7 @@ function getWebpackAssets(entrypoint, section) {
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(
     expressify(
-      SplitTestMiddleware.loadAssignmentsInLocals([
-        'design-system-updates',
-        'website-redesign',
-      ])
+      SplitTestMiddleware.loadAssignmentsInLocals(['website-redesign'])
     )
   )
 
@@ -224,12 +221,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.buildCssPath = function (themeModifier = '') {
-      if (
-        res.locals.splitTestVariants?.['design-system-updates'] === 'enabled'
-      ) {
-        themeModifier = `main-${themeModifier}`
-      }
-      return res.locals.buildStylesheetPath(`${themeModifier}style.css`)
+      return res.locals.buildStylesheetPath(`main-${themeModifier}style.css`)
     }
 
     res.locals.buildImgPath = function (imgFile) {

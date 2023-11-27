@@ -5,54 +5,7 @@
 // Base styles
 // --------------------------------------------------
 
-.btn when(@is-new-css = false) {
-  display: inline-block;
-  margin-bottom: 0; // For input.btn
-  font-weight: @btn-font-weight;
-  text-align: center;
-  vertical-align: middle;
-  cursor: pointer;
-  background-image: none; // Reset unusual Firefox-on-Android default style; see https://github.com/necolas/normalize.css/issues/214
-  border: @btn-border-width solid transparent;
-  border-bottom: @btn-border-bottom-width solid transparent;
-  white-space: nowrap;
-  .button-size(
-    @padding-base-vertical; @padding-base-horizontal; @font-size-base;
-      @line-height-base; @btn-border-radius-base
-  );
-  .user-select(none);
-
-  &,
-  &:active,
-  &.active {
-    &:focus {
-      .tab-focus();
-    }
-  }
-
-  &:hover,
-  &:focus {
-    color: @btn-default-color;
-    text-decoration: none;
-  }
-
-  &:active,
-  &.active {
-    outline: 0;
-    background-image: none;
-    .box-shadow(inset 0 3px 5px rgba(0, 0, 0, 0.125));
-  }
-
-  &.disabled,
-  &[disabled],
-  fieldset[disabled] & {
-    cursor: not-allowed;
-    pointer-events: none; // Future-proof disabling of clicks
-    .opacity(0.65);
-    .box-shadow(none);
-  }
-}
-.btn when(@is-new-css = true) {
+.btn {
   display: inline-block;
   margin-bottom: 0; // For input.btn
   font-weight: @btn-font-weight;
@@ -119,10 +72,7 @@
 .btn-default-outline {
   .button-outline-variant(@btn-default-bg);
 }
-.btn-primary when (@is-new-css = false) {
-  .button-variant(@btn-primary-color; @btn-primary-bg; @btn-primary-border);
-}
-.btn-primary when (@is-new-css = true) {
+.btn-primary {
   .btn-borderless();
 }
 .btn-primary-on-primary-bg {
@@ -142,66 +92,30 @@
   .button-variant(@btn-warning-color; @btn-warning-bg; @btn-warning-border);
 }
 // Danger and error appear as red
-.btn-danger when(@is-new-css = false) {
-  .button-variant(@btn-danger-color; @btn-danger-bg; @btn-danger-border);
-}
-.btn-danger when(@is-new-css = true) {
+.btn-danger {
   .btn-borderless(@white, @red, @red-60);
 }
 // Danger Ghost and error appear as light red with no border
-.btn-danger-ghost when (@is-new-css = false) {
-  .button-variant(@btn-danger-ghost-color; @btn-danger-ghost-bg; @btn-danger-ghost-border);
-  // hover for ghost acts different from typical variants, as it's default state has no bg
-  &:hover {
-    background-color: @red-10;
-  }
-}
-.btn-info-ghost when (@is-new-css = true) {
-  .btn-borderless(@blue-50, @btn-info-ghost-bg, @blue-10);
+.btn-danger-ghost {
+  .btn-borderless(@red-50, @btn-danger-ghost-bg, @red-10);
 }
 // Info Ghost appear as info blue with no border
-.btn-info-ghost when (@is-new-css = false) {
-  .button-variant(@btn-info-ghost-color; @btn-info-ghost-bg; @btn-info-ghost-border);
-  // hover for ghost acts different from typical variants, as it's default state has no bg
-  &:hover {
-    background-color: @blue-10;
-  }
+.btn-info-ghost {
+  .btn-borderless(@blue-50, @btn-info-ghost-bg, @blue-10);
 }
 // Inline button to fit text, without link styling.
 // TODO: generic class for other styles
-.btn-info-ghost-inline when (@is-new-css = true) {
+.btn-info-ghost-inline {
   .btn-borderless(@blue-50, @btn-info-ghost-bg, @blue-10);
   padding: 0 !important;
   font-size: inherit !important;
   vertical-align: inherit;
 }
-.btn-info-ghost-inline when (@is-new-css = false) {
-  .button-variant(@btn-info-ghost-color; @btn-info-ghost-bg; @btn-info-ghost-border);
-  // hover for ghost acts different from typical variants, as it's default state has no bg
-  &:hover {
-    background-color: @blue-10;
-  }
-  padding: 0 !important;
-  font-size: inherit !important;
-  vertical-align: inherit;
-}
-.btn-danger-ghost when (@is-new-css = true) {
-  .btn-borderless(@red-50, @btn-danger-ghost-bg, @red-10);
-}
 // btn-secondary
-.btn-secondary when(@is-new-css = false) {
-  &:not(.btn-secondary-info) {
-    .btn-default;
-  }
-}
-.btn-secondary when(@is-new-css = true) {
+.btn-secondary {
   .btn-bordered();
 }
-// btn-info for old and btn-secondary for new
-.btn-secondary-info when(@is-new-css = false) {
-  .btn-info;
-}
-.btn-secondary-info when(@is-new-css = true) {
+.btn-secondary-info {
   .btn-secondary;
 }
 
@@ -349,17 +263,9 @@ input[type='button'] {
   }
 }
 
-.login-btn when(@is-new-css = true) {
+.login-btn {
   .btn;
   .btn-secondary;
-  position: relative;
-  padding-left: 20px;
-  padding-right: 0;
-}
-
-.login-btn when(@is-new-css = false) {
-  .btn;
-  .btn-default;
   position: relative;
   padding-left: 20px;
   padding-right: 0;
