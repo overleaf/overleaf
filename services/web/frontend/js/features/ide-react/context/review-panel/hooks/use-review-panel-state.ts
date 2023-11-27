@@ -47,6 +47,7 @@ import {
   ReviewPanelCommentThreadsApi,
 } from '../../../../../../../types/review-panel/api'
 import { Document } from '@/features/ide-react/editor/document'
+import { DateString } from '../../../../../../../types/helpers/date'
 
 const dispatchReviewPanelEvent = (type: string, payload?: any) => {
   window.dispatchEvent(
@@ -816,8 +817,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     applyTrackChangesStateToClient
   )
 
-  const [resolveComment] =
-    useScopeValue<ReviewPanel.UpdaterFn<'resolveComment'>>('resolveComment')
   const [submitNewComment] =
     useScopeValue<ReviewPanel.UpdaterFn<'submitNewComment'>>('submitNewComment')
   const [deleteComment] =
@@ -840,6 +839,53 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       value: reviewPanelOpen,
     })
   }, [reviewPanelOpen, setReviewPanelOpen, trackChangesVisible])
+
+  const onCommentResolved = useCallback(
+    (threadId: ThreadId, user: any) => {
+      setCommentThreads(prevState => {
+        const thread = { ...getThread(threadId) }
+        thread.resolved = true
+        thread.resolved_by_user = formatUser(user)
+        thread.resolved_at = new Date().toISOString() as DateString
+        return { ...prevState, [threadId]: thread }
+      })
+      setResolvedThreadIds(prevState => ({ ...prevState, [threadId]: true }))
+      dispatchReviewPanelEvent('comment:resolve_threads', [threadId])
+    },
+    [getThread]
+  )
+
+  const resolveComment = useCallback(
+    (docId: DocId, entryId: ThreadId) => {
+      const docEntries = getDocEntries(docId)
+      const entry = docEntries[entryId] as ReviewPanelCommentEntry
+
+      setEntries(prevState => ({
+        ...prevState,
+        [docId]: {
+          ...prevState[docId],
+          [entryId]: {
+            ...prevState[docId][entryId],
+            focused: false,
+          },
+        },
+      }))
+
+      postJSON(`/project/${projectId}/thread/${entry.thread_id}/resolve`)
+      onCommentResolved(entry.thread_id, user)
+      sendMB('rp-comment-resolve', {
+        view: reviewPanelOpen ? subView : 'mini',
+      })
+    },
+    [
+      getDocEntries,
+      onCommentResolved,
+      projectId,
+      reviewPanelOpen,
+      subView,
+      user,
+    ]
+  )
 
   const onCommentReopened = useCallback(
     (threadId: ThreadId) => {
@@ -1021,6 +1067,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
   useSocketListener(socket, 'reopen-thread', onCommentReopened)
   useSocketListener(socket, 'delete-thread', onThreadDeleted)
+  useSocketListener(socket, 'resolve-thread', onCommentResolved)
 
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
