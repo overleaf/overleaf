@@ -5,8 +5,8 @@ import {
   Prec,
   TransactionSpec,
 } from '@codemirror/state'
-import { EmacsHandler } from '@replit/codemirror-emacs'
-import { CodeMirror } from '@replit/codemirror-vim'
+import type { EmacsHandler } from '@replit/codemirror-emacs'
+import type { CodeMirror, Vim } from '@replit/codemirror-vim'
 import { foldCode, toggleFold, unfoldCode } from '@codemirror/language'
 import { EditorView } from '@codemirror/view'
 import {
@@ -22,28 +22,32 @@ const hasNonEmptySelection = (cm: CodeMirror): boolean => {
   return selections.some(selection => selection.length)
 }
 
+type VimCodeMirrorCommands = typeof CodeMirror.commands & {
+  save: (cm: CodeMirror) => void
+}
+
 let customisedVim = false
-const customiseVimOnce = (Vim: any, CodeMirror: any) => {
+const customiseVimOnce = (_Vim: typeof Vim, _CodeMirror: typeof CodeMirror) => {
   if (customisedVim) {
     return
   }
   // Allow copy via Ctrl-C in insert mode
-  Vim.unmap('<C-c>', 'insert')
+  _Vim.unmap('<C-c>', 'insert')
 
-  Vim.defineAction(
+  _Vim.defineAction(
     'insertModeCtrlC',
     (cm: CodeMirror, actionArgs: object, state: any) => {
       if (hasNonEmptySelection(cm)) {
         navigator.clipboard.writeText(cm.getSelection())
         cm.setSelection(cm.getCursor(), cm.getCursor())
       } else {
-        Vim.exitInsertMode(cm)
+        _Vim.exitInsertMode(cm)
       }
     }
   )
 
   // Overwrite the moveByCharacters command with a decoration-aware version
-  Vim.defineMotion(
+  _Vim.defineMotion(
     'moveByCharacters',
     function (
       cm: CodeMirror,
@@ -60,50 +64,50 @@ const customiseVimOnce = (Vim: any, CodeMirror: any) => {
         cursor = view.moveByChar(cursor, forward)
       }
       const finishLine = view.state.doc.lineAt(cursor.head)
-      return new CodeMirror.Pos(
+      return new _CodeMirror.Pos(
         finishLine.number - 1,
         cursor.head - finishLine.from
       )
     }
   )
 
-  Vim.mapCommand('<C-c>', 'action', 'insertModeCtrlC', undefined, {
+  _Vim.mapCommand('<C-c>', 'action', 'insertModeCtrlC', undefined, {
     context: 'insert',
   })
 
   // Code folding commands
-  Vim.defineAction('toggleFold', function (cm: CodeMirror) {
+  _Vim.defineAction('toggleFold', function (cm: CodeMirror) {
     toggleFold(cm.cm6)
   })
-  Vim.mapCommand('za', 'action', 'toggleFold')
+  _Vim.mapCommand('za', 'action', 'toggleFold')
 
-  Vim.defineAction('foldCode', function (cm: CodeMirror) {
+  _Vim.defineAction('foldCode', function (cm: CodeMirror) {
     foldCode(cm.cm6)
   })
-  Vim.mapCommand('zc', 'action', 'foldCode')
+  _Vim.mapCommand('zc', 'action', 'foldCode')
 
-  Vim.defineAction('unfoldCode', function (cm: CodeMirror) {
+  _Vim.defineAction('unfoldCode', function (cm: CodeMirror) {
     unfoldCode(cm.cm6)
   })
 
   // disable tab and shift-tab keys in command (normal) and visual modes
   // using "undefined" params because mapCommand signature is:
   // mapCommand(keys, type, name, args, extra)
-  Vim.mapCommand('<Tab>', undefined, undefined, undefined, {
+  _Vim.mapCommand('<Tab>', undefined, undefined, undefined, {
     context: 'normal',
   })
-  Vim.mapCommand('<Tab>', undefined, undefined, undefined, {
+  _Vim.mapCommand('<Tab>', undefined, undefined, undefined, {
     context: 'visual',
   })
-  Vim.mapCommand('<S-Tab>', undefined, undefined, undefined, {
+  _Vim.mapCommand('<S-Tab>', undefined, undefined, undefined, {
     context: 'normal',
   })
-  Vim.mapCommand('<S-Tab>', undefined, undefined, undefined, {
+  _Vim.mapCommand('<S-Tab>', undefined, undefined, undefined, {
     context: 'visual',
   })
 
   // Make the Vim 'write' command start a compile
-  CodeMirror.commands.save = () => {
+  ;(_CodeMirror.commands as VimCodeMirrorCommands).save = () => {
     window.dispatchEvent(new Event('pdf:recompile'))
   }
   customisedVim = true
@@ -113,7 +117,7 @@ const customiseVimOnce = (Vim: any, CodeMirror: any) => {
 let emacsSearchCloseListener: (() => void) | undefined
 
 let customisedEmacs = false
-const customiseEmacsOnce = () => {
+const customiseEmacsOnce = (_EmacsHandler: typeof EmacsHandler) => {
   if (customisedEmacs) {
     return
   }
@@ -133,7 +137,7 @@ const customiseEmacsOnce = () => {
     handler.view.dispatch({ selection, scrollIntoView: true })
   }
 
-  EmacsHandler.addCommands({
+  _EmacsHandler.addCommands({
     openSearch(handler: EmacsHandler) {
       const mark = handler.view.state.selection.main
       handler.pushEmacsMark([mark.anchor, mark.head])
@@ -156,18 +160,18 @@ const customiseEmacsOnce = () => {
       window.dispatchEvent(new Event('pdf:recompile'))
     },
   })
-  EmacsHandler.bindKey('C-s', 'openSearch')
-  EmacsHandler.bindKey('C-r', 'openSearch')
-  EmacsHandler.bindKey('C-x C-s', 'save')
-  EmacsHandler.bindKey('C-a', {
+  _EmacsHandler.bindKey('C-s', 'openSearch')
+  _EmacsHandler.bindKey('C-r', 'openSearch')
+  _EmacsHandler.bindKey('C-x C-s', 'save')
+  _EmacsHandler.bindKey('C-a', {
     command: 'goOrSelect',
     args: [cursorToBeginningOfVisualLine, selectToBeginningOfVisualLine],
   })
-  EmacsHandler.bindKey('C-e', {
+  _EmacsHandler.bindKey('C-e', {
     command: 'goOrSelect',
     args: [cursorToEndOfVisualLine, selectToEndOfVisualLine],
   })
-  EmacsHandler.bindKey('C-k', {
+  _EmacsHandler.bindKey('C-k', {
     command: 'killLine',
     args: selectRestOfVisualLine,
   })
@@ -184,7 +188,9 @@ const options = [
   {
     name: 'vim',
     load: () =>
-      import('@replit/codemirror-vim').then(m => {
+      import(
+        /* webpackChunkName: "codemirror-vim" */ '@replit/codemirror-vim'
+      ).then(m => {
         customiseVimOnce(m.Vim, m.CodeMirror)
         return m.vim()
       }),
@@ -192,8 +198,10 @@ const options = [
   {
     name: 'emacs',
     load: () =>
-      import('@replit/codemirror-emacs').then(m => {
-        customiseEmacsOnce()
+      import(
+        /* webpackChunkName: "codemirror-emacs" */ '@replit/codemirror-emacs'
+      ).then(m => {
+        customiseEmacsOnce(m.EmacsHandler)
         return [
           m.emacs(),
           EditorView.domEventHandlers({
