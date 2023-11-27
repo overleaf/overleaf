@@ -199,7 +199,7 @@ describe('fetch-utils', function () {
     })
 
     it('handles errors', async function () {
-      await expect(fetchJson(this.url('/500'))).to.be.rejectedWith(
+      await expect(fetchString(this.url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
       await expectRequestAborted(this.server.lastReq)
