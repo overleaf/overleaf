@@ -132,14 +132,19 @@ export function EditorAndSidebar({
     [eventEmitter, openDocId, openDocWithId, rootDocId]
   )
 
+  const openDocIdRef = useRef<typeof openDocId | null>(null)
+
   // Synchronize the file tree when openDoc or openDocId is called on the editor
   // manager context from elsewhere. If the file tree does change, it will
   // trigger the onSelect handler in this component, which will update the local
   // state.
   useEffect(() => {
-    debugConsole.log(`openDocId changed to ${openDocId}`)
-    if (openDocId !== null) {
-      selectEntity(openDocId)
+    if (openDocId !== openDocIdRef.current) {
+      debugConsole.log(`openDocId changed to ${openDocId}`)
+      openDocIdRef.current = openDocId
+      if (openDocId !== null) {
+        selectEntity(openDocId)
+      }
     }
   }, [openDocId, selectEntity])
 
