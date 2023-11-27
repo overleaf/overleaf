@@ -120,6 +120,12 @@ class SAMLInvalidSignatureError extends SAMLAuthenticationError {
   }
 }
 
+class SAMLMissingSignatureError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_missing_signature_error'
+  }
+}
+
 class SAMLInvalidResponseError extends SAMLAuthenticationError {}
 
 class SAMLLoginFailureError extends SAMLAuthenticationError {
@@ -261,6 +267,7 @@ module.exports = {
   SAMLGroupSSOLoginIdentityNotFoundError,
   SAMLGroupSSODisabledError,
   SAMLInvalidSignatureError,
+  SAMLMissingSignatureError,
   SAMLInvalidResponseError,
   SAMLLoginFailureError,
   SLInV2Error,

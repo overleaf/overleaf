@@ -1012,6 +1012,7 @@
   "saml_login_failure": "",
   "saml_login_identity_mismatch_error": "",
   "saml_login_identity_not_found_error": "",
+  "saml_missing_signature_error": "",
   "save": "",
   "save_or_cancel-cancel": "",
   "save_or_cancel-or": "",
