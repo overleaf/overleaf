@@ -267,9 +267,17 @@ async function resendInvite(req, res, next) {
     await rateLimiters.resendGroupInvite.consume(userEmail)
 
     const existingUser = await UserGetter.promises.getUserByAnyEmail(userEmail)
-    const emailTemplate = existingUser
-      ? 'verifyEmailToJoinManagedUsers'
-      : 'inviteNewUserToJoinManagedUsers'
+
+    let emailTemplate
+    if (subscription.managedUsersEnabled) {
+      if (existingUser) {
+        emailTemplate = 'verifyEmailToJoinManagedUsers'
+      } else {
+        emailTemplate = 'inviteNewUserToJoinManagedUsers'
+      }
+    } else {
+      emailTemplate = 'verifyEmailToJoinTeam'
+    }
 
     EmailHandler.sendDeferredEmail(emailTemplate, opts)
   } catch (err) {
