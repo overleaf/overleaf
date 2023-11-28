@@ -81,6 +81,35 @@ async function fetchNothing(url, opts = {}) {
 }
 
 /**
+ * Make a request and extract the redirect from the response.
+ *
+ * @param {string | URL} url - request URL
+ * @param {object} opts - fetch options
+ * @return {Promise<string>}
+ * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
+ */
+async function fetchRedirect(url, opts = {}) {
+  const { fetchOpts } = parseOpts(opts)
+  fetchOpts.redirect = 'manual'
+  const response = await performRequest(url, fetchOpts)
+  if (response.status < 300 || response.status >= 400) {
+    const body = await maybeGetResponseBody(response)
+    throw new RequestFailedError(url, opts, response, body)
+  }
+  const location = response.headers.get('Location')
+  if (!location) {
+    const body = await maybeGetResponseBody(response)
+    throw new RequestFailedError(url, opts, response, body).withCause(
+      new OError('missing Location response header on 3xx response', {
+        headers: Object.fromEntries(response.headers.entries()),
+      })
+    )
+  }
+  await discardResponseBody(response)
+  return location
+}
+
+/**
  * Make a request and return a string.
  *
  * @param {string | URL} url - request URL
@@ -222,6 +251,7 @@ module.exports = {
   fetchStream,
   fetchStreamWithResponse,
   fetchNothing,
+  fetchRedirect,
   fetchString,
   fetchStringWithResponse,
   RequestFailedError,

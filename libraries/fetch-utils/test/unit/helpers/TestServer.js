@@ -73,6 +73,18 @@ class TestServer {
     // Never returns
 
     this.app.post('/hang', (req, res) => {})
+
+    // Redirect
+
+    this.app.get('/redirect/1', (req, res) => {
+      res.redirect('/redirect/2')
+    })
+    this.app.get('/redirect/2', (req, res) => {
+      res.send('body after redirect')
+    })
+    this.app.get('/redirect/empty-location', (req, res) => {
+      res.sendStatus(302)
+    })
   }
 
   start(port) {

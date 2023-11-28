@@ -7,6 +7,7 @@ const {
   fetchJson,
   fetchStream,
   fetchNothing,
+  fetchRedirect,
   fetchString,
   RequestFailedError,
 } = require('../..')
@@ -200,6 +201,36 @@ describe('fetch-utils', function () {
 
     it('handles errors', async function () {
       await expect(fetchString(this.url('/500'))).to.be.rejectedWith(
+        RequestFailedError
+      )
+      await expectRequestAborted(this.server.lastReq)
+    })
+  })
+
+  describe('fetchRedirect', function () {
+    it('returns the immediate redirect', async function () {
+      const body = await fetchRedirect(this.url('/redirect/1'))
+      expect(body).to.equal(this.url('/redirect/2'))
+    })
+
+    it('rejects status 200', async function () {
+      await expect(fetchRedirect(this.url('/hello'))).to.be.rejectedWith(
+        RequestFailedError
+      )
+      await expectRequestAborted(this.server.lastReq)
+    })
+
+    it('rejects empty redirect', async function () {
+      await expect(fetchRedirect(this.url('/redirect/empty-location')))
+        .to.be.rejectedWith(RequestFailedError)
+        .and.eventually.have.property('cause')
+        .and.to.have.property('message')
+        .to.equal('missing Location response header on 3xx response')
+      await expectRequestAborted(this.server.lastReq)
+    })
+
+    it('handles errors', async function () {
+      await expect(fetchRedirect(this.url('/500'))).to.be.rejectedWith(
         RequestFailedError
       )
       await expectRequestAborted(this.server.lastReq)
