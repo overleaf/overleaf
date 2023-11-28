@@ -75,15 +75,13 @@ function HistoryVersion({
       ) : null}
       {update.meta.first_in_day ? (
         <div
-          className={classNames({
-            'version-element-within-selected ':
+          className={classNames('history-version-day', {
+            'version-element-within-selected':
               selectionState === 'withinSelected' ||
               selectionState === 'lowerSelected',
           })}
         >
-          <time className="history-version-day">
-            {relativeDate(update.meta.end_ts)}
-          </time>
+          <time>{relativeDate(update.meta.end_ts)}</time>
         </div>
       ) : null}
       <div
