@@ -39,9 +39,6 @@ function setupEventTracking(el) {
   let timer
   let timeoutAmt = 500
   switch (trigger) {
-    case 'load':
-      submit()
-      break
     case 'click':
       el.addEventListener('click', () => submit())
       break

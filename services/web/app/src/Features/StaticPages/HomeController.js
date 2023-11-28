@@ -14,6 +14,7 @@
  */
 let HomeController
 const Features = require('../../infrastructure/Features')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const Path = require('path')
 const fs = require('fs')
@@ -55,6 +56,9 @@ module.exports = HomeController = {
           res,
           'onboarding-flow'
         )
+      AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
+        page: req.url,
+      })
 
       if (websiteRedesignActive) {
         return res.render('external/home/website-redesign/index', {
