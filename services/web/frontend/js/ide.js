@@ -22,7 +22,6 @@ import LoadingManager from './ide/LoadingManager'
 import ConnectionManager from './ide/connection/ConnectionManager'
 import EditorManager from './ide/editor/EditorManager'
 import OnlineUsersManager from './ide/online-users/OnlineUsersManager'
-import HistoryV2Manager from './ide/history/HistoryV2Manager'
 import PermissionsManager from './ide/permissions/PermissionsManager'
 import BinaryFilesManager from './ide/binary-files/BinaryFilesManager'
 import ReferencesManager from './ide/references/ReferencesManager'
@@ -205,7 +204,6 @@ App.controller('IdeController', [
       eventTracking
     )
     ide.onlineUsersManager = new OnlineUsersManager(ide, $scope)
-    ide.historyManager = new HistoryV2Manager(ide, $scope, localStorage)
     ide.permissionsManager = new PermissionsManager(ide, $scope)
     ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
     ide.metadataManager = new MetadataManager(ide, $scope, metadata)

@@ -14,6 +14,7 @@ import localStorage from '../../infrastructure/local-storage'
 import getMeta from '../../utils/meta'
 import { debugConsole } from '@/utils/debugging'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
+import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -60,15 +61,15 @@ function setLayoutInLocalStorage(pdfLayout: IdeLayout) {
 export const LayoutProvider: FC = ({ children }) => {
   // what to show in the "flat" view (editor or pdf)
   const [view, _setView] = useScopeValue<IdeView>('ui.view')
-  const [toggleHistory] = useScopeValue<() => void>('toggleHistory')
   const [openFile] = useScopeValue<BinaryFile | null>('openFile')
+  const historyToggleEmitter = useScopeEventEmitter('history:toggle', true)
 
   const setView = useCallback(
     (value: IdeView) => {
       _setView(oldValue => {
         // ensure that the "history:toggle" event is broadcast when switching in or out of history view
         if (value === 'history' || oldValue === 'history') {
-          toggleHistory()
+          historyToggleEmitter()
         }
 
         if (value === 'editor' && openFile) {
@@ -82,7 +83,7 @@ export const LayoutProvider: FC = ({ children }) => {
         return value
       })
     },
-    [_setView, openFile, toggleHistory]
+    [_setView, openFile, historyToggleEmitter]
   )
 
   // whether the chat pane is open

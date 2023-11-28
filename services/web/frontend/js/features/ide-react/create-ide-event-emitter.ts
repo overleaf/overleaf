@@ -26,6 +26,7 @@ export type IdeEvents = {
   'scroll:editor:update': []
   'comment:start_adding': []
   'references:should-reindex': []
+  'history:toggle': []
 
   'entity:deleted': [entity: FileTreeFindResult]
 }

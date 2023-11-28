@@ -116,7 +116,6 @@ export function EditorProviders({
       },
       $on: sinon.stub(),
       $applyAsync: sinon.stub(),
-      toggleHistory: sinon.stub(),
       permissionsLevel,
     },
     scope

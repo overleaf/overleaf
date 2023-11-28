@@ -5,10 +5,6 @@ const reviewPanelStorageKey = `ui.reviewPanelOpen.${getMeta('ol-project_id')}`
 
 export default function populateLayoutScope(store: ReactScopeValueStore) {
   store.set('ui.view', 'editor')
-
-  // TODO: Find out what this needs to do and make it do it
-  store.set('toggleHistory', () => {})
-
   store.set('openFile', null)
   store.persisted('ui.chatOpen', false, 'ui.chatOpen')
   store.persisted('ui.reviewPanelOpen', false, reviewPanelStorageKey)

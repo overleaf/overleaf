@@ -89,7 +89,6 @@ const initialize = () => {
       pdfViewer: 'js',
       syntaxValidation: true,
     },
-    toggleHistory: () => {},
     editor: {
       richText: false,
       sharejs_doc: {
