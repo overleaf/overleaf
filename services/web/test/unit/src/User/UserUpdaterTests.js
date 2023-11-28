@@ -199,7 +199,7 @@ describe('UserUpdater', function () {
 
     it('adds the new email', function () {
       expect(this.db.users.updateOne).to.have.been.calledWith(
-        { _id: this.user._id },
+        { _id: this.user._id, 'emails.email': { $ne: this.newEmail } },
         {
           $push: {
             emails: sinon.match({ email: this.newEmail }),
@@ -281,7 +281,7 @@ describe('UserUpdater', function () {
         .reverse()
         .join('')
       this.db.users.updateOne.should.have.been.calledWith(
-        { _id: this.user._id },
+        { _id: this.user._id, 'emails.email': { $ne: this.newEmail } },
         {
           $push: {
             emails: {

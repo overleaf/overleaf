@@ -104,7 +104,7 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
         emails: { email: newEmail, createdAt: new Date(), reversedHostname },
       },
     }
-    await updateUser(userId, update)
+    await updateUser({ _id: userId, 'emails.email': { $ne: newEmail } }, update)
   } catch (error) {
     throw OError.tag(error, 'problem updating users emails')
   }
