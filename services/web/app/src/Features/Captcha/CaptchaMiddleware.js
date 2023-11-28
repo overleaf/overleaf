@@ -26,6 +26,11 @@ async function initializeDeviceHistory(req) {
 }
 
 async function canSkipCaptcha(req, res) {
+  const trustedUser =
+    req.body?.email && Settings.recaptcha.trustedUsers.includes(req.body.email)
+  if (trustedUser) {
+    return res.json(true)
+  }
   await initializeDeviceHistory(req)
   const canSkip = req.deviceHistory.has(req.body?.email)
   Metrics.inc('captcha_pre_flight', 1, {
@@ -36,11 +41,19 @@ async function canSkipCaptcha(req, res) {
 
 function validateCaptcha(action) {
   return expressify(async function (req, res, next) {
+    const trustedUser =
+      req.body?.email &&
+      Settings.recaptcha.trustedUsers.includes(req.body.email)
     if (!Settings.recaptcha?.siteKey || Settings.recaptcha.disabled[action]) {
       if (action === 'login') {
         AuthenticationController.setAuditInfo(req, { captcha: 'disabled' })
       }
       Metrics.inc('captcha', 1, { path: action, status: 'disabled' })
+      return next()
+    }
+    if (trustedUser && action === 'login') {
+      AuthenticationController.setAuditInfo(req, { captcha: 'trusted' })
+      Metrics.inc('captcha', 1, { path: action, status: 'trusted' })
       return next()
     }
     const reCaptchaResponse = req.body['g-recaptcha-response']

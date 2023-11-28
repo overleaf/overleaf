@@ -680,6 +680,10 @@ module.exports = {
     endpoint:
       process.env.RECAPTCHA_ENDPOINT ||
       'https://www.google.com/recaptcha/api/siteverify',
+    trustedUsers: (process.env.CAPTCHA_TRUSTED_USERS || '')
+      .split(',')
+      .map(x => x.trim())
+      .filter(x => x !== ''),
     disabled: {
       invite: true,
       login: true,
