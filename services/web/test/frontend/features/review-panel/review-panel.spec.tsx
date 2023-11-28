@@ -13,7 +13,6 @@ function Container(props: ContainerProps) {
 
 describe('<ReviewPanel />', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-isReviewPanelReact', true)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
 
     cy.interceptEvents()

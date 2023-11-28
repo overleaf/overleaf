@@ -111,7 +111,6 @@ export default App.controller('ReviewPanelController', [
       // as only one.
       nVisibleSelectedChanges: 0,
       entryHover: false,
-      isReact: getMeta('ol-splitTestVariants')?.['review-panel'] === 'react',
     }
 
     ide.$scope.loadingThreads = true
@@ -731,38 +730,6 @@ export default App.controller('ReviewPanelController', [
       })
     }
 
-    ide.$scope.showBulkAcceptDialog = () => showBulkActionsDialog(true)
-
-    ide.$scope.showBulkRejectDialog = () => showBulkActionsDialog(false)
-
-    const showBulkActionsDialog = isAccept =>
-      $modal
-        .open({
-          templateUrl: 'bulkActionsModalTemplate',
-          controller: 'BulkActionsModalController',
-          resolve: {
-            isAccept() {
-              return isAccept
-            },
-            nChanges() {
-              return ide.$scope.reviewPanel.nVisibleSelectedChanges
-            },
-          },
-          scope: $scope.$new(),
-        })
-        .result.then(function (isAccept) {
-          if (isAccept) {
-            return ide.$scope.bulkAcceptActions()
-          } else {
-            return ide.$scope.bulkRejectActions()
-          }
-        })
-
-    $scope.handleTogglerClick = function (e) {
-      e.target.blur()
-      return $scope.toggleReviewPanel()
-    }
-
     ide.$scope.addNewComment = function (e) {
       e.preventDefault()
       ide.$scope.$broadcast('comment:start_adding')
@@ -819,19 +786,13 @@ export default App.controller('ReviewPanelController', [
         eventTracking.sendMB('rp-new-comment', { size: content.length })
       }
 
-      if (ide.$scope.reviewPanel.isReact === false) {
-        emitCommentAdd()
-      }
-
       return $http
         .post(`/project/${$scope.project_id}/thread/${thread_id}/messages`, {
           content,
           _csrf: window.csrfToken,
         })
         .then(() => {
-          if (ide.$scope.reviewPanel.isReact) {
-            emitCommentAdd()
-          }
+          emitCommentAdd()
         })
         .catch(() => {
           ide.showGenericMessageModal(
@@ -1007,27 +968,6 @@ export default App.controller('ReviewPanelController', [
 
     ide.$scope.gotoEntry = (doc_id, entry_offset) =>
       ide.editorManager.openDocId(doc_id, { gotoOffset: entry_offset })
-
-    $scope.toggleFullTCStateCollapse = function () {
-      if ($scope.project.features.trackChanges) {
-        return (ide.$scope.reviewPanel.fullTCStateCollapsed =
-          !ide.$scope.reviewPanel.fullTCStateCollapsed)
-      } else {
-        _sendAnalytics()
-        return $scope.openTrackChangesUpgradeModal()
-      }
-    }
-
-    const _sendAnalytics = () => {
-      eventTracking.send(
-        'subscription-funnel',
-        'editor-click-feature',
-        'real-time-track-changes'
-      )
-      eventTracking.sendMB('paywall-prompt', {
-        'paywall-type': 'track-changes',
-      })
-    }
 
     const _setUserTCState = function (userId, newValue, isLocal) {
       if (isLocal == null) {
@@ -1338,13 +1278,6 @@ export default App.controller('ReviewPanelController', [
           .join(''),
       }
     }
-
-    $scope.openTrackChangesUpgradeModal = () =>
-      $modal.open({
-        templateUrl: 'trackChangesUpgradeModalTemplate',
-        controller: 'TrackChangesUpgradeModalController',
-        scope: $scope.$new(),
-      })
 
     // listen for events from the CodeMirror 6 track changes extension
     window.addEventListener('editor:event', event => {

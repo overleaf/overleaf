@@ -44,7 +44,6 @@ import { EditorView } from '@codemirror/view'
 import { CurrentDoc } from '../../../../../types/current-doc'
 import { useErrorHandler } from 'react-error-boundary'
 import { setVisual } from '../extensions/visual/visual'
-import getMeta from '../../../utils/meta'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 
@@ -87,7 +86,6 @@ function useCodeMirrorScope(view: EditorView) {
   )
 
   const [visual] = useScopeValue<boolean>('editor.showVisual')
-  const reactReviewPanel: boolean = getMeta('ol-isReviewPanelReact')
 
   const [references] = useScopeValue<{ keys: string[] }>('$root._references')
 
@@ -272,7 +270,6 @@ function useCodeMirrorScope(view: EditorView) {
           visual: visualRef.current,
           changeManager: createChangeManager(view, currentDoc),
           handleError,
-          reactReviewPanel,
         }),
       })
       view.setState(state)
@@ -302,7 +299,7 @@ function useCodeMirrorScope(view: EditorView) {
     }
     // IMPORTANT: This effect must not depend on anything variable apart from currentDoc,
     // as the editor state is recreated when the effect runs.
-  }, [view, currentDoc, handleError, reactReviewPanel])
+  }, [view, currentDoc, handleError])
 
   useEffect(() => {
     visualRef.current.visual = visual

@@ -5,11 +5,9 @@ import { EditorView } from '@codemirror/view'
  * changes. This is used to synchronize the editor content and review panel
  * height in "Current file" mode.
  */
-export const geometryChangeEvent = (reactReviewPanel: boolean) =>
-  reactReviewPanel
-    ? EditorView.updateListener.of(update => {
-        if (update.geometryChanged) {
-          window.dispatchEvent(new CustomEvent('editor:geometry-change'))
-        }
-      })
-    : []
+export const geometryChangeEvent = () =>
+  EditorView.updateListener.of(update => {
+    if (update.geometryChanged) {
+      window.dispatchEvent(new CustomEvent('editor:geometry-change'))
+    }
+  })

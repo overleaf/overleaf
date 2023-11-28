@@ -134,5 +134,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   moduleExtensions.map(extension => extension()),
   thirdPartyExtensions(),
   effectListeners(),
-  geometryChangeEvent(options.reactReviewPanel),
+  geometryChangeEvent(),
 ]

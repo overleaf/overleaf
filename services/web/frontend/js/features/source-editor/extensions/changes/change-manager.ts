@@ -11,11 +11,6 @@ import { EditorView, ViewUpdate } from '@codemirror/view'
 import { CurrentDoc } from '../../../../../../types/current-doc'
 import { fullHeightCoordsAtPos } from '../../utils/layer'
 import { debounce } from 'lodash'
-import getMeta from '../../../../utils/meta'
-
-// If a toolbar row sits alongside the review panel, the review panel entries need to be shifted down by 32px.
-// Once the review panel is always inside the editor, this offset can be removed.
-const offsetTop = getMeta('ol-isReviewPanelReact') ? 0 : 32
 
 // With less than this number of entries, don't bother culling to avoid
 // little UI jumps when scrolling.
@@ -123,7 +118,7 @@ export const createChangeManager = (
           visibilityChanged = true
         }
 
-        entry.screenPos = { y: y + offsetTop, height, editorPaddingTop }
+        entry.screenPos = { y, height, editorPaddingTop }
         entry.inViewport = true
       } else {
         entry.inViewport = false

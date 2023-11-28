@@ -663,21 +663,6 @@ const ProjectController = {
             }
           )
         },
-        reviewPanelAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'review-panel',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
-        },
         idePageAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
@@ -713,7 +698,6 @@ const ProjectController = {
           isInvitedMember,
           brandVariation,
           pdfjsAssignment,
-          reviewPanelAssignment,
           idePageAssignment,
           personalAccessTokenAssignment,
           projectTags,
@@ -898,7 +882,6 @@ const ProjectController = {
               showUpgradePrompt,
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
-              isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               idePageReact,
               showPersonalAccessToken,
               optionalPersonalAccessToken,

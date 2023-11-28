@@ -45,10 +45,6 @@
 				div(ng-controller="EditorLoaderController")
 
 				include ../../source-editor/source-editor
-				
-				div(ng-if="!reviewPanel.isReact")
-					if !isRestrictedTokenMember
-						include ./review-panel
 
 			if moduleIncludesAvailable('editor:symbol-palette')
 				.div(vertical-resizable-bottom)
