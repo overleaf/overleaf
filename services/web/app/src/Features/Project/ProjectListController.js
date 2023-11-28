@@ -335,6 +335,19 @@ async function projectListPage(req, res, next) {
       'failed to get "welcome-page-redesign" split test assignment'
     )
   }
+  try {
+    // The assignment will be picked up via 'ol-splitTestVariants' in react.
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'download-pdf-dashboard'
+    )
+  } catch (err) {
+    logger.error(
+      { err },
+      'failed to get "download-pdf-dashboard" split test assignment'
+    )
+  }
 
   const hasPaidAffiliation = userAffiliations.some(
     affiliation => affiliation.licence && affiliation.licence !== 'free'

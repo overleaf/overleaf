@@ -22,13 +22,13 @@ describe('<DownloadProjectButton />', function () {
   })
 
   it('renders tooltip for button', function () {
-    const btn = screen.getByLabelText('Download')
+    const btn = screen.getByLabelText('Download .zip file')
     fireEvent.mouseOver(btn)
-    screen.getByRole('tooltip', { name: 'Download' })
+    screen.getByRole('tooltip', { name: 'Download .zip file' })
   })
 
   it('downloads the project when clicked', async function () {
-    const btn = screen.getByLabelText('Download') as HTMLButtonElement
+    const btn = screen.getByLabelText('Download .zip file') as HTMLButtonElement
     fireEvent.click(btn)
 
     await waitFor(() => {

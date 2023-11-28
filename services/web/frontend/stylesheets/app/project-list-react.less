@@ -702,6 +702,12 @@
   }
 
   .projects-dropdown-menu {
+    &.dropdown-menu {
+      // Avoid line breaks for labels in menu items.
+      // There is enough space for these on mobile devices (checked DE and EN translations).
+      white-space: nowrap;
+    }
+
     .dropdown-header {
       padding: 14px 20px;
       font-size: 13px;
@@ -806,6 +812,10 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
+
+    &.fa-spinner {
+      top: 30%;
+    }
   }
 }
 

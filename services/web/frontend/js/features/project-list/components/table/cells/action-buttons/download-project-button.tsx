@@ -17,7 +17,7 @@ function DownloadProjectButton({
   children,
 }: DownloadProjectButtonProps) {
   const { t } = useTranslation()
-  const text = t('download')
+  const text = t('download_zip_file')
   const location = useLocation()
 
   const downloadProject = useCallback(() => {

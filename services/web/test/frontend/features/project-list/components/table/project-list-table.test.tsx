@@ -11,6 +11,9 @@ describe('<ProjectListTable />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [])
+    window.metaAttributesCache.set('ol-splitTestVariants', {
+      'download-pdf-dashboard': 'enabled',
+    })
     window.user_id = userId
     fetchMock.reset()
   })
@@ -112,8 +115,10 @@ describe('<ProjectListTable />', function () {
     // temporary count tests until we add filtering for archived/trashed
     const copyButtons = screen.getAllByLabelText('Copy')
     expect(copyButtons.length).to.equal(currentProjects.length)
-    const downloadButtons = screen.getAllByLabelText('Download')
+    const downloadButtons = screen.getAllByLabelText('Download .zip file')
     expect(downloadButtons.length).to.equal(currentProjects.length)
+    const downloadPDFButtons = screen.getAllByLabelText('Download PDF')
+    expect(downloadPDFButtons.length).to.equal(currentProjects.length)
     const archiveButtons = screen.getAllByLabelText('Archive')
     expect(archiveButtons.length).to.equal(currentProjects.length)
     const trashButtons = screen.getAllByLabelText('Trash')

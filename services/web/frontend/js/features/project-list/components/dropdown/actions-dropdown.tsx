@@ -11,6 +11,8 @@ import UntrashProjectButton from '../table/cells/action-buttons/untrash-project-
 import LeaveProjectButton from '../table/cells/action-buttons/leave-project-button'
 import DeleteProjectButton from '../table/cells/action-buttons/delete-project-button'
 import { Project } from '../../../../../../types/project/dashboard/api'
+import CompileAndDownloadProjectPDFButton from '../table/cells/action-buttons/compile-and-download-project-pdf-button'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type ActionButtonProps = {
   project: Project
@@ -27,6 +29,29 @@ function CopyProjectButtonMenuItem({ project, onClick }: ActionButtonProps) {
         </MenuItemButton>
       )}
     </CopyProjectButton>
+  )
+}
+
+function CompileAndDownloadProjectPDFButtonMenuItem({
+  project,
+  onClick,
+}: ActionButtonProps) {
+  return (
+    <CompileAndDownloadProjectPDFButton project={project}>
+      {(text, pendingCompile, downloadProject) => (
+        <MenuItemButton
+          onClick={() => downloadProject(onClick)}
+          className="projects-action-menu-item"
+        >
+          {pendingCompile ? (
+            <Icon type="spinner" spin className="menu-item-button-icon" />
+          ) : (
+            <Icon type="file-pdf-o" className="menu-item-button-icon" />
+          )}{' '}
+          <span className="menu-item-button-text">{text}</span>
+        </MenuItemButton>
+      )}
+    </CompileAndDownloadProjectPDFButton>
   )
 }
 
@@ -194,6 +219,12 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
           project={project}
           onClick={handleClose}
         />
+        {isSplitTestEnabled('download-pdf-dashboard') && (
+          <CompileAndDownloadProjectPDFButtonMenuItem
+            project={project}
+            onClick={handleClose}
+          />
+        )}
         <ArchiveProjectButtonMenuItem project={project} onClick={handleClose} />
         <TrashProjectButtonMenuItem project={project} onClick={handleClose} />
         <UnarchiveProjectButtonMenuItem
