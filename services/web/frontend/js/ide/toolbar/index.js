@@ -1,2 +1,1 @@
 import './EditorLoaderController'
-import './EditorToolbarController'

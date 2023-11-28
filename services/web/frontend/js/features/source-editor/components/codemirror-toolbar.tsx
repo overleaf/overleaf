@@ -17,7 +17,6 @@ import EditorSwitch from './editor-switch'
 import SwitchToPDFButton from './switch-to-pdf-button'
 import { DetacherSynctexControl } from '../../pdf-preview/components/detach-synctex-control'
 import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-compile-button-wrapper'
-import getMeta from '../../../utils/meta'
 import { isVisual } from '../extensions/visual/visual'
 import { language } from '@codemirror/language'
 import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
@@ -34,8 +33,6 @@ export const CodeMirrorToolbar = () => {
 }
 
 const Toolbar = memo(function Toolbar() {
-  const showSourceToolbar: boolean = getMeta('ol-showSourceToolbar')
-
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
 
@@ -117,7 +114,7 @@ const Toolbar = memo(function Toolbar() {
 
   return (
     <div className="ol-cm-toolbar toolbar-editor" ref={elementRef}>
-      {showSourceToolbar && <EditorSwitch />}
+      <EditorSwitch />
       {showActions && (
         <ToolbarItems
           state={state}
@@ -126,6 +123,7 @@ const Toolbar = memo(function Toolbar() {
           listDepth={listDepth}
         />
       )}
+
       <div className="ol-cm-toolbar-button-group ol-cm-toolbar-stretch">
         {showActions && (
           <ToolbarOverflow
@@ -143,8 +141,10 @@ const Toolbar = memo(function Toolbar() {
             />
           </ToolbarOverflow>
         )}
+
         <div className="formatting-buttons-wrapper" />
       </div>
+
       <div className="ol-cm-toolbar-button-group ol-cm-toolbar-end">
         <ToolbarButton
           id="toolbar-toggle-search"
@@ -153,13 +153,10 @@ const Toolbar = memo(function Toolbar() {
           active={searchPanelOpen(state)}
           icon="search"
         />
-        {showSourceToolbar && (
-          <>
-            <SwitchToPDFButton />
-            <DetacherSynctexControl />
-            <DetachCompileButtonWrapper />
-          </>
-        )}
+
+        <SwitchToPDFButton />
+        <DetacherSynctexControl />
+        <DetachCompileButtonWrapper />
       </div>
       <div className="ol-cm-toolbar-button-group hidden">
         <ToolbarButton

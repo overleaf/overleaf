@@ -280,26 +280,6 @@ export default App.controller('ReviewPanelController', [
       return rangesTrackers[doc_id]
     }
 
-    let scrollbar = {}
-    ide.$scope.reviewPanelEventsBridge.on(
-      'aceScrollbarVisibilityChanged',
-      function (isVisible, scrollbarWidth) {
-        scrollbar = { isVisible, scrollbarWidth }
-        return updateScrollbar()
-      }
-    )
-
-    function updateScrollbar() {
-      if (
-        scrollbar.isVisible &&
-        ide.$scope.reviewPanel.subView === $scope.SubViews.CUR_FILE
-      ) {
-        return $reviewPanelEl.css('right', `${scrollbar.scrollbarWidth}px`)
-      } else {
-        return $reviewPanelEl.css('right', '0')
-      }
-    }
-
     $scope.$watch(
       '!ui.reviewPanelOpen && reviewPanel.hasEntries',
       function (open, prevVal) {
@@ -335,7 +315,6 @@ export default App.controller('ReviewPanelController', [
       if (view == null) {
         return
       }
-      updateScrollbar()
       if (view === $scope.SubViews.OVERVIEW) {
         return refreshOverviewPanel()
       } else if (oldView === $scope.SubViews.OVERVIEW) {

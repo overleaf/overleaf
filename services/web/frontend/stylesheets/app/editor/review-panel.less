@@ -82,7 +82,7 @@
   }
 
   position: absolute;
-  top: 32px;
+  top: 0px;
   bottom: 0px;
   right: 0px;
   background-color: @rp-bg-blue;
@@ -90,10 +90,6 @@
   font-size: @rp-base-font-size;
   color: @rp-type-blue;
   z-index: 6;
-
-  .has-source-toolbar & {
-    top: 0;
-  }
 }
 
 .loading-panel {
@@ -1128,10 +1124,6 @@ button when (@is-overleaf-light = true) {
   .rp-unsupported & {
     display: none;
   }
-
-  .has-source-toolbar & {
-    top: 32px;
-  }
 }
 
 .rp-track-changes-indicator {
@@ -1375,9 +1367,5 @@ button when (@is-overleaf-light = true) {
 
   .rp-track-changes-indicator {
     border: 0;
-  }
-
-  .has-source-toolbar & {
-    top: 0;
   }
 }

@@ -10,16 +10,10 @@ export default function HotkeysModal({
   show,
   isMac = false,
   trackChangesVisible = false,
-  newSourceEditor = false,
 }) {
   const { t } = useTranslation()
 
-  const goToLineSuffix = newSourceEditor ? 'Shift + L' : 'L'
   const ctrl = isMac ? 'Cmd' : 'Ctrl'
-
-  const modalTitle = newSourceEditor
-    ? `${t('hotkeys')} (Source editor)`
-    : `${t('hotkeys')} (Legacy source editor)`
 
   return (
     <AccessibleModal
@@ -29,7 +23,7 @@ export default function HotkeysModal({
       animation={animation}
     >
       <Modal.Header closeButton>
-        <Modal.Title>{modalTitle}</Modal.Title>
+        <Modal.Title>{t('hotkeys')} (Source editor)</Modal.Title>
       </Modal.Header>
 
       <Modal.Body className="hotkeys-modal">
@@ -77,7 +71,7 @@ export default function HotkeysModal({
           </Col>
           <Col xs={4}>
             <Hotkey
-              combination={`${ctrl} + ${goToLineSuffix}`}
+              combination={`${ctrl} + Shift + L`}
               description={t('hotkey_go_to_line')}
             />
           </Col>
@@ -211,7 +205,6 @@ HotkeysModal.propTypes = {
   show: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
   trackChangesVisible: PropTypes.bool,
-  newSourceEditor: PropTypes.bool,
 }
 
 function Hotkey({ combination, description }) {

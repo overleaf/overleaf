@@ -1,5 +1,27 @@
 import getMeta from '../../utils/meta'
-import { IGNORED_MISSPELLINGS } from '../../ide/editor/directives/aceEditor/spell-check/IgnoredMisspellings'
+
+const IGNORED_MISSPELLINGS = [
+  'Overleaf',
+  'overleaf',
+  'ShareLaTeX',
+  'sharelatex',
+  'LaTeX',
+  'TeX',
+  'BibTeX',
+  'BibLaTeX',
+  'XeTeX',
+  'XeLaTeX',
+  'LuaTeX',
+  'LuaLaTeX',
+  'http',
+  'https',
+  'www',
+  'COVID',
+  'Lockdown',
+  'lockdown',
+  'Coronavirus',
+  'coronavirus',
+]
 
 export class IgnoredWords {
   public learnedWords!: Set<string>

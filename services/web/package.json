@@ -239,7 +239,6 @@
     "@uppy/utils": "^4.0.7",
     "@uppy/xhr-upload": "^1.6.8",
     "abort-controller": "^3.0.0",
-    "ace-builds": "overleaf/ace-builds#v1.4.12-69aace50e6796d42116f8f96e19d2468d8a88af9",
     "acorn": "^7.1.1",
     "acorn-walk": "^7.1.1",
     "algoliasearch": "^3.35.1",

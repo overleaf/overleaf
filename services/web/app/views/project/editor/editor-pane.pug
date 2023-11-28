@@ -21,7 +21,6 @@
 		include ./file-view
 
 		.editor-container.full-size(
-			class={"has-source-toolbar" : showSourceToolbar},
 			ng-show="ui.view == 'editor' && editor.multiSelectedCount === 0"
 			vertical-resizable-panes="south-pane-resizer"
 			vertical-resizable-panes-hidden-externally-on="south-pane-toggled"
@@ -44,14 +43,10 @@
 						| &nbsp;&nbsp;#{translate("open_a_file_on_the_left")}
 
 				div(ng-controller="EditorLoaderController")
-					if (!showSourceToolbar)
-						include ./toolbar
 
-				div(ng-if="editor.newSourceEditor")
-					include ../../source-editor/source-editor
-				div(ng-if="!editor.newSourceEditor")
-					include ./source-editor
-				div(ng-if="!editor.newSourceEditor || !reviewPanel.isReact")
+				include ../../source-editor/source-editor
+				
+				div(ng-if="!reviewPanel.isReact")
 					if !isRestrictedTokenMember
 						include ./review-panel
 

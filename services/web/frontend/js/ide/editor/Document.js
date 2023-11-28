@@ -85,44 +85,17 @@ export default Document = (function () {
       this.connected = this.ide.socket.socket.connected
       this.joined = false
       this.wantToBeJoined = false
-      this._checkAceConsistency = () => this._checkConsistency(this.ace)
       this._checkCM6Consistency = () => this._checkConsistency(this.cm6)
       this._bindToEditorEvents()
       this._bindToSocketEvents()
     }
 
     editorType() {
-      if (this.ace) {
-        return 'ace'
-      } else if (this.cm6) {
+      if (this.cm6) {
         return 'cm6'
       } else {
         return null
       }
-    }
-
-    attachToAce(ace) {
-      this.ace = ace
-      if (this.doc != null) {
-        this.doc.attachToAce(this.ace)
-      }
-      const editorDoc = this.ace.getSession().getDocument()
-      editorDoc.on('change', this._checkAceConsistency)
-      return this.ide.$scope.$emit('document:opened', this.doc)
-    }
-
-    detachFromAce() {
-      if (this.doc != null) {
-        this.doc.detachFromAce()
-      }
-      const editorDoc =
-        this.ace != null ? this.ace.getSession().getDocument() : undefined
-      if (editorDoc != null) {
-        editorDoc.off('change', this._checkAceConsistency)
-      }
-      delete this.ace
-      this.clearChaosMonkey()
-      return this.ide.$scope.$emit('document:closed', this.doc)
     }
 
     attachToCM6(cm6) {
@@ -328,9 +301,7 @@ export default Document = (function () {
         }
         char = copy[0]
         copy = copy.slice(1)
-        if (this.ace) {
-          this.ace.session.insert({ row: line, column: pos }, char)
-        } else if (this.cm6) {
+        if (this.cm6) {
           this.cm6.view.dispatch({
             changes: {
               from: Math.min(pos, this.cm6.view.state.doc.length),
@@ -757,7 +728,7 @@ export default Document = (function () {
         this.ranges.setIdSeed(old_id_seed)
       }
       if (remote_op) {
-        // With remote ops, Ace hasn't been updated when we receive this op,
+        // With remote ops, the editor hasn't been updated when we receive this op,
         // so defer updating track changes until it has
         return setTimeout(() => this.emit('ranges:dirty'))
       } else {

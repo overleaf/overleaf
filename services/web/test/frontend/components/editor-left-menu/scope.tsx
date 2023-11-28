@@ -10,7 +10,6 @@ type Scope = {
       doc_id?: string
       getSnapshot?: () => string
     }
-    newSourceEditor?: boolean
   }
   hasLintingError?: boolean
   ui?: {
@@ -45,7 +44,6 @@ export const mockScope = (scope?: Scope) => ({
       doc_id: 'test-doc',
       getSnapshot: () => 'some doc content',
     },
-    newSourceEditor: true,
   },
   hasLintingError: false,
   ui: {

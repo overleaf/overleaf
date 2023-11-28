@@ -1,4 +1,4 @@
-import EditorSwitch from '../js/features/source-editor/components/editor-switch-legacy'
+import EditorSwitch from '../js/features/source-editor/components/editor-switch'
 import { ScopeDecorator } from './decorators/scope'
 
 export default {

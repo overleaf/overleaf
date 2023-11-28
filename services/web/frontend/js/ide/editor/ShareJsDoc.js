@@ -357,19 +357,6 @@ export default ShareJsDoc = (function () {
       }
     }
 
-    attachToAce(ace) {
-      this._attachToEditor('Ace', ace, () => {
-        this._doc.attach_ace(ace, window.maxDocLength)
-      })
-    }
-
-    detachFromAce() {
-      this._maybeDetachEditorWatchdogManager()
-      return typeof this._doc.detach_ace === 'function'
-        ? this._doc.detach_ace()
-        : undefined
-    }
-
     attachToCM6(cm6) {
       this._attachToEditor('CM6', cm6, () => {
         cm6.attachShareJs(this._doc, window.maxDocLength)

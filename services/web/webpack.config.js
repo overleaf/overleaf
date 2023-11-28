@@ -61,18 +61,11 @@ function getModuleDirectory(moduleName) {
 
 const mathjaxDir = getModuleDirectory('mathjax')
 const mathjax3Dir = getModuleDirectory('mathjax-3')
-const aceDir = getModuleDirectory('ace-builds')
 
 const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist401']
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 
-const ACE_VERSION = require('ace-builds/version')
-if (ACE_VERSION !== PackageVersions.version.ace) {
-  throw new Error(
-    '"ace-builds" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
-  )
-}
 const MATHJAX_VERSION = require('mathjax/package.json').version
 if (MATHJAX_VERSION !== PackageVersions.version.mathjax) {
   throw new Error(
@@ -236,11 +229,6 @@ module.exports = {
   },
   resolve: {
     alias: {
-      // Aliases for AMD modules
-
-      // Enables ace/ace shortcut
-      ace: 'ace-builds/src-noconflict',
-
       // custom prefixes for import paths
       '@': path.resolve(__dirname, './frontend/js/'),
     },
@@ -334,11 +322,6 @@ module.exports = {
           from: 'fonts/HTML-CSS/TeX/woff/*',
           to: 'js/libs/mathjax',
           context: mathjaxDir,
-        },
-        {
-          from: 'src-min-noconflict',
-          to: `js/ace-${PackageVersions.version.ace}/`,
-          context: aceDir,
         },
         ...pdfjsVersions.flatMap(version => {
           const dir = getModuleDirectory(version)

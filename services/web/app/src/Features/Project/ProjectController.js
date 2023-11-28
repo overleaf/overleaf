@@ -799,11 +799,6 @@ const ProjectController = {
 
             const detachRole = req.params.detachRole
 
-            // Allow override via legacy_source_editor=true in query string
-            const showLegacySourceEditor = shouldDisplayFeature(
-              'legacy_source_editor'
-            )
-
             const showSymbolPalette =
               !Features.hasFeature('saas') ||
               (user.features && user.features.symbolPalette)
@@ -896,8 +891,6 @@ const ProjectController = {
               showTemplatesServerPro,
               pdfjsVariant: pdfjsAssignment.variant,
               debugPdfDetach,
-              showLegacySourceEditor,
-              showSourceToolbar: !showLegacySourceEditor,
               showSymbolPalette,
               symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
               detachRole,
@@ -905,7 +898,6 @@ const ProjectController = {
               showUpgradePrompt,
               fixedSizeDocument: true,
               useOpenTelemetry: Settings.useOpenTelemetryClient,
-              showCM6SwitchAwaySurvey: Settings.showCM6SwitchAwaySurvey,
               isReviewPanelReact: reviewPanelAssignment.variant === 'react',
               idePageReact,
               showPersonalAccessToken,

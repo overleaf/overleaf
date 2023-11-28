@@ -28,8 +28,6 @@ import BinaryFilesManager from './ide/binary-files/BinaryFilesManager'
 import ReferencesManager from './ide/references/ReferencesManager'
 import MetadataManager from './ide/metadata/MetadataManager'
 import './ide/review-panel/ReviewPanelManager'
-import OutlineManager from './features/outline/outline-manager'
-import SafariScrollPatcher from './ide/SafariScrollPatcher'
 import './ide/cobranding/CobrandingDataService'
 import './ide/chat/index'
 import './ide/file-view/index'
@@ -59,14 +57,10 @@ import './shared/context/controllers/root-context-controller'
 import './features/editor-navigation-toolbar/controllers/editor-navigation-toolbar-controller'
 import './features/pdf-preview/controllers/pdf-preview-controller'
 import './features/share-project-modal/controllers/react-share-project-modal-controller'
-import './features/source-editor/controllers/editor-switch-controller'
-import './features/source-editor/controllers/cm6-switch-away-survey-controller'
-import './features/source-editor/controllers/legacy-editor-warning-controller'
 import './features/history/controllers/history-controller'
 import './features/editor-left-menu/controllers/editor-left-menu-controller'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
-import { reportAcePerf } from './ide/editor/ace-performance'
 import { debugConsole } from '@/utils/debugging'
 
 App.controller('IdeController', [
@@ -215,7 +209,6 @@ App.controller('IdeController', [
     ide.permissionsManager = new PermissionsManager(ide, $scope)
     ide.binaryFilesManager = new BinaryFilesManager(ide, $scope)
     ide.metadataManager = new MetadataManager(ide, $scope, metadata)
-    ide.outlineManager = new OutlineManager(ide, $scope)
 
     let inited = false
     $scope.$on('project:joined', function () {
@@ -301,32 +294,6 @@ If the project has been renamed please look in your project list for a new proje
               }
             }
           }
-        } else if (editorType === 'ace') {
-          const acePerfData = reportAcePerf()
-
-          if (acePerfData.numberOfEntries > 0) {
-            const perfProps = [
-              'NumberOfEntries',
-              'MeanKeypressPaint',
-              'Grammarly',
-              'SessionLength',
-              'Memory',
-              'Lags',
-              'NonLags',
-              'LongestLag',
-              'MeanLagsPerMeasure',
-              'MeanKeypressesPerMeasure',
-              'Release',
-            ]
-
-            for (const prop of perfProps) {
-              const perfValue =
-                acePerfData[prop.charAt(0).toLowerCase() + prop.slice(1)]
-              if (perfValue !== null) {
-                segmentation['acePerf' + prop] = perfValue
-              }
-            }
-          }
         }
 
         return segmentation
@@ -374,8 +341,6 @@ If the project has been renamed please look in your project list for a new proje
 
     ide.localStorage = localStorage
 
-    ide.browserIsSafari = false
-
     $scope.switchToFlatLayout = function (view) {
       $scope.ui.pdfLayout = 'flat'
       $scope.ui.view = view
@@ -416,39 +381,6 @@ If the project has been renamed please look in your project list for a new proje
 
     $scope.handleKeyDown = () => {
       // unused?
-    }
-
-    try {
-      ;({ userAgent } = navigator)
-      ide.browserIsSafari =
-        userAgent &&
-        /.*Safari\/.*/.test(userAgent) &&
-        !/.*Chrome\/.*/.test(userAgent) &&
-        !/.*Chromium\/.*/.test(userAgent)
-    } catch (error) {
-      err = error
-      debugConsole.error(err)
-    }
-
-    if (ide.browserIsSafari) {
-      ide.safariScrollPatcher = new SafariScrollPatcher($scope)
-    }
-
-    // Fix Chrome 61 and 62 text-shadow rendering
-    let browserIsChrome61or62 = false
-    try {
-      const chromeVersion =
-        parseFloat(navigator.userAgent.split(' Chrome/')[1]) || null
-      browserIsChrome61or62 = chromeVersion != null
-      if (browserIsChrome61or62) {
-        document.styleSheets[0].insertRule(
-          '.ace_editor.ace_autocomplete .ace_completion-highlight { text-shadow: none !important; font-weight: bold; }',
-          1
-        )
-      }
-    } catch (error1) {
-      err = error1
-      debugConsole.error(err)
     }
 
     // User can append ?ft=somefeature to url to activate a feature toggle

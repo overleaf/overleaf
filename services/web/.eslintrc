@@ -166,7 +166,6 @@
         "__webpack_public_path__": true,
         "$": true,
         "angular": true,
-        "ace": true,
         "ga": true,
         // Injected in layout.pug
         "user_id": true,

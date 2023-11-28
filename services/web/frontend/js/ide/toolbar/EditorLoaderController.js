@@ -10,12 +10,5 @@ App.controller('EditorLoaderController', [
         val === true ? 'rich-text' : 'source'
       )
     })
-
-    $scope.$watch('editor.newSourceEditor', function (val) {
-      localStorage(
-        `editor.source_editor.${$scope.project_id}`,
-        val === true ? 'cm6' : 'ace'
-      )
-    })
   },
 ])

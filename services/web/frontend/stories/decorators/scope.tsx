@@ -92,7 +92,6 @@ const initialize = () => {
     toggleHistory: () => {},
     editor: {
       richText: false,
-      newSourceEditor: false,
       sharejs_doc: {
         doc_id: 'test-doc',
         getSnapshot: () => 'some doc content',

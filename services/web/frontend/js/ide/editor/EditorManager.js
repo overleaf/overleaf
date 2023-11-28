@@ -15,15 +15,12 @@ import _ from 'lodash'
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import Document from './Document'
-import './components/spellMenu'
-import './directives/aceEditor'
 import './directives/formattingButtons'
 import './directives/toggleSwitch'
 import './controllers/SavingNotificationController'
 import './controllers/CompileButton'
 import './controllers/SwitchToPDFButton'
-import getMeta from '../../utils/meta'
-import { hasSeenCM6SwitchAwaySurvey } from '../../features/source-editor/utils/switch-away-survey'
+import '../metadata/services/metadata'
 import { debugConsole } from '@/utils/debugging'
 
 let EditorManager
@@ -48,7 +45,6 @@ export default EditorManager = (function () {
         wantTrackChanges: false,
         docTooLongErrorShown: false,
         showVisual: this.showVisual(),
-        newSourceEditor: this.newSourceEditor(),
         showSymbolPalette: false,
         toggleSymbolPalette: () => {
           const newValue = !this.$scope.editor.showSymbolPalette
@@ -169,35 +165,6 @@ export default EditorManager = (function () {
         this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
         'rich-text'
       )
-    }
-
-    newSourceEditor() {
-      // Use the new source editor if the legacy editor is disabled
-      if (!getMeta('ol-showLegacySourceEditor')) {
-        return true
-      }
-
-      const storedPrefIsCM6 = () => {
-        const sourceEditor = this.localStorage(
-          `editor.source_editor.${this.$scope.project_id}`
-        )
-
-        return sourceEditor === 'cm6' || sourceEditor == null
-      }
-
-      const showCM6SwitchAwaySurvey = getMeta('ol-showCM6SwitchAwaySurvey')
-
-      if (!showCM6SwitchAwaySurvey) {
-        return storedPrefIsCM6()
-      }
-
-      if (hasSeenCM6SwitchAwaySurvey()) {
-        return storedPrefIsCM6()
-      } else {
-        // force user to switch to cm6 if they haven't seen either of the
-        // switch-away surveys
-        return true
-      }
     }
 
     autoOpenDoc() {

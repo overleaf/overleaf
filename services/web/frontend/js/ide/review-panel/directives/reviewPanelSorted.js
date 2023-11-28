@@ -249,16 +249,14 @@ export default App.directive('reviewPanelSorted', function () {
       // mousewheel/trackpad scrolling behaviour from Ace, and turn mousewheel events into
       // scroll events ourselves, then it makes the review panel slightly less smooth (barely)
       // noticeable, but keeps it perfectly in step with Ace.
-      ace
-        .require('ace/lib/event')
-        .addMouseWheelListener(scroller[0], function (e) {
-          const deltaY = e.wheelY
-          const old_top = parseInt(list.css('top'))
-          const top = old_top - deltaY * 4
-          scrollAce(-top)
-          dispatchScrollEvent(deltaY * 4)
-          return e.preventDefault()
-        })
+      scroller[0].addEventListener('wheel', e => {
+        // FIXME (or remove this): https://developer.mozilla.org/en-US/docs/Web/API/Element/wheel_event
+        const deltaY = e.wheelY
+        const old_top = parseInt(list.css('top'))
+        const top = old_top - deltaY * 4
+        dispatchScrollEvent(deltaY * 4)
+        return e.preventDefault()
+      })
 
       // We always scroll by telling Ace to scroll and then updating the
       // review panel. This lets Ace manage the size of the scroller and
@@ -273,14 +271,6 @@ export default App.directive('reviewPanelSorted', function () {
           return list.css({ top: -scrollTop })
         }
       }
-
-      const scrollAce = scrollTop =>
-        scope.reviewPanelEventsBridge.emit('externalScroll', scrollTop)
-
-      scope.reviewPanelEventsBridge.on('aceScroll', scrollPanel)
-      scope.$on('$destroy', () =>
-        scope.reviewPanelEventsBridge.off('aceScroll')
-      )
 
       // receive the scroll position from the CodeMirror 6 track changes extension
       window.addEventListener('editor:scroll', event => {

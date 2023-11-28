@@ -9,40 +9,28 @@ import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 function EditorSwitch() {
   const { t } = useTranslation()
-  const [newSourceEditor, setNewSourceEditor] = useScopeValue(
-    'editor.newSourceEditor'
-  )
   const [visual, setVisual] = useScopeValue('editor.showVisual')
-
   const [docName] = useScopeValue('editor.open_doc_name')
+
   const richTextAvailable = isValidTeXFile(docName)
-  // TODO: rename this after legacy & toolbar split tests are complete
-  const richTextOrVisual = richTextAvailable && visual
 
   const handleChange = useCallback(
     event => {
       const editorType = event.target.value
 
       switch (editorType) {
-        case 'ace':
-          setVisual(false)
-          setNewSourceEditor(false)
-          break
-
         case 'cm6':
           setVisual(false)
-          setNewSourceEditor(true)
           break
 
         case 'rich-text':
           setVisual(true)
-          setNewSourceEditor(true)
           break
       }
 
       sendMB('editor-switch-change', { editorType })
     },
-    [setVisual, setNewSourceEditor]
+    [setVisual]
   )
 
   return (
@@ -56,7 +44,7 @@ function EditorSwitch() {
           value="cm6"
           id="editor-switch-cm6"
           className="toggle-switch-input"
-          checked={!richTextOrVisual && !!newSourceEditor}
+          checked={!richTextAvailable || !visual}
           onChange={handleChange}
         />
         <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
@@ -64,13 +52,13 @@ function EditorSwitch() {
         </label>
 
         <RichTextToggle
-          checked={!!richTextOrVisual}
+          checked={richTextAvailable && visual}
           disabled={!richTextAvailable}
           handleChange={handleChange}
         />
       </fieldset>
 
-      {!!richTextOrVisual && (
+      {richTextAvailable && visual && (
         <FeedbackBadge
           id="visual-editor-feedback"
           url="https://forms.gle/AUqHmKNiEH3DRniPA"
