@@ -371,7 +371,9 @@ describe('joinProject', function () {
     })
 
     it('should return an invalid id error', function () {
-      this.error.message.should.equal('invalid id')
+      this.error.message.should.equal(
+        'missing/bad ?projectId=... query flag on handshake'
+      )
     })
 
     it('should not call to web', function () {
@@ -809,7 +811,9 @@ describe('joinProject', function () {
       })
 
       it('should return an invalid id error', function () {
-        this.error.message.should.equal('invalid id')
+        this.error.message.should.equal(
+          'missing/bad ?projectId=... query flag on handshake'
+        )
       })
 
       it('should not call to web', function () {

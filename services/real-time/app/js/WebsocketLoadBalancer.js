@@ -9,7 +9,6 @@ const ChannelManager = require('./ChannelManager')
 const ConnectedUsersManager = require('./ConnectedUsersManager')
 
 const RESTRICTED_USER_MESSAGE_TYPE_PASS_LIST = [
-  'connectionAccepted',
   'otUpdateApplied',
   'otUpdateError',
   'joinDoc',
