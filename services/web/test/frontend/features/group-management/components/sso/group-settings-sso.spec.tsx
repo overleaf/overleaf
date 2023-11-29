@@ -31,15 +31,13 @@ describe('GroupSettingsSSO', function () {
     it('renders without sso configuration', function () {
       cy.mount(<GroupSettingsSSOComponent />)
 
-      cy.get('.group-settings-sso-enable').within(() => {
-        cy.contains('Enable SSO')
-        cy.contains(
-          'Enabling SSO will make this the only sign-in option for members.'
-        )
-        cy.get('.switch-input').within(() => {
-          cy.get('.invisible-input').should('not.be.checked')
-          cy.get('.invisible-input').should('be.disabled')
-        })
+      cy.contains('Enable SSO')
+      cy.contains(
+        'Set up single sign-on for your group. This sign in method will be optional for group members unless Managed Users is enabled.'
+      )
+      cy.get('.switch-input').within(() => {
+        cy.get('.invisible-input').should('not.be.checked')
+        cy.get('.invisible-input').should('be.disabled')
       })
     })
 
@@ -59,11 +57,9 @@ describe('GroupSettingsSSO', function () {
 
       cy.wait('@sso')
 
-      cy.get('.group-settings-sso-enable').within(() => {
-        cy.get('.switch-input').within(() => {
-          cy.get('.invisible-input').should('be.checked')
-          cy.get('.invisible-input').should('not.be.disabled')
-        })
+      cy.get('.switch-input').within(() => {
+        cy.get('.invisible-input').should('be.checked')
+        cy.get('.invisible-input').should('not.be.disabled')
       })
     })
 
@@ -94,11 +90,9 @@ describe('GroupSettingsSSO', function () {
 
       cy.wait('@sso')
 
-      cy.get('.group-settings-sso-enable').within(() => {
-        cy.get('.switch-input').within(() => {
-          cy.get('.invisible-input').should('be.checked')
-          cy.get('.invisible-input').should('not.be.disabled')
-        })
+      cy.get('.switch-input').within(() => {
+        cy.get('.invisible-input').should('be.checked')
+        cy.get('.invisible-input').should('not.be.disabled')
       })
 
       cy.findByRole('button', { name: 'View configuration' }).click()
@@ -125,10 +119,8 @@ describe('GroupSettingsSSO', function () {
 
         cy.wait('@sso')
 
-        cy.get('.group-settings-sso-enable').within(() => {
-          cy.get('.switch-input').within(() => {
-            cy.get('.invisible-input').click({ force: true })
-          })
+        cy.get('.switch-input').within(() => {
+          cy.get('.invisible-input').click({ force: true })
         })
       })
 
@@ -168,12 +160,12 @@ describe('GroupSettingsSSO', function () {
           cy.findByRole('button', { name: 'Enable SSO' }).click()
         })
         cy.get('.modal-dialog').should('not.exist')
-        cy.get('.group-settings-sso-enable').within(() => {
-          cy.get('.switch-input').within(() => {
-            cy.get('.invisible-input').should('be.checked')
-            cy.get('.invisible-input').should('not.be.disabled')
-          })
+
+        cy.get('.switch-input').within(() => {
+          cy.get('.invisible-input').should('be.checked')
+          cy.get('.invisible-input').should('not.be.disabled')
         })
+
         cy.findByText('SSO is enabled')
       })
     })
@@ -195,10 +187,8 @@ describe('GroupSettingsSSO', function () {
 
         cy.wait('@sso')
 
-        cy.get('.group-settings-sso-enable').within(() => {
-          cy.get('.switch-input').within(() => {
-            cy.get('.invisible-input').click({ force: true })
-          })
+        cy.get('.switch-input').within(() => {
+          cy.get('.invisible-input').click({ force: true })
         })
       })
 
@@ -240,11 +230,11 @@ describe('GroupSettingsSSO', function () {
           cy.findByRole('button', { name: 'Disable SSO' }).click()
         })
         cy.get('.modal-dialog').should('not.exist')
-        cy.get('.group-settings-sso-enable').within(() => {
-          cy.get('.switch-input').within(() => {
-            cy.get('.invisible-input').should('not.be.checked')
-          })
+
+        cy.get('.switch-input').within(() => {
+          cy.get('.invisible-input').should('not.be.checked')
         })
+
         cy.findByText('SSO is disabled')
       })
     })
