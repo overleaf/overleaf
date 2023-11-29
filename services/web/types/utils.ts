@@ -18,3 +18,7 @@ export type DeepReadonly<T> = T extends (infer R)[]
 export type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
 
 export type MergeAndOverride<Parent, Own> = Own & Omit<Parent, keyof Own>
+
+export type Entries<T extends object> = [keyof T, T[keyof T]][]
+
+export type Keys<T extends object> = (keyof T)[]

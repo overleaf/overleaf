@@ -58,8 +58,8 @@ export interface ReviewPanelState {
     resolveComment: (docId: DocId, entryId: ThreadId) => void
     deleteComment: (threadId: ThreadId, commentId: CommentId) => void
     submitReply: (threadId: ThreadId, replyContent: string) => void
-    acceptChanges: (entryIds: unknown) => void
-    rejectChanges: (entryIds: unknown) => void
+    acceptChanges: (entryIds: ThreadId[]) => void
+    rejectChanges: (entryIds: ThreadId[]) => void
     toggleTrackChangesForEveryone: (onForEveryone: boolean) => void
     toggleTrackChangesForUser: (onForUser: boolean, userId: UserId) => void
     toggleTrackChangesForGuests: (onForGuests: boolean) => void
@@ -97,6 +97,7 @@ export interface ReviewPanelState {
     >
   }
 }
+
 /* eslint-enable no-use-before-define */
 
 // Getter for values

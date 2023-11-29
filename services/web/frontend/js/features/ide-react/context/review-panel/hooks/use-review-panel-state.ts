@@ -6,7 +6,10 @@ import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useAsync from '@/shared/hooks/use-async'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
-import { dispatchReviewPanelLayout as handleLayoutChange } from '@/features/source-editor/extensions/changes/change-manager'
+import {
+  dispatchReviewPanelLayout as handleLayoutChange,
+  UpdateType,
+} from '@/features/source-editor/extensions/changes/change-manager'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useUserContext } from '@/shared/context/user-context'
@@ -33,12 +36,15 @@ import { PublicAccessLevel } from '../../../../../../../types/public-access-leve
 import { ReviewPanelStateReactIde } from '../types/review-panel-state'
 import {
   DeepReadonly,
+  Entries,
   MergeAndOverride,
 } from '../../../../../../../types/utils'
 import { ReviewPanelCommentThread } from '../../../../../../../types/review-panel/comment-thread'
 import { DocId } from '../../../../../../../types/project-settings'
 import {
+  ReviewPanelAddCommentEntry,
   ReviewPanelAggregateChangeEntry,
+  ReviewPanelBulkActionsEntry,
   ReviewPanelChangeEntry,
   ReviewPanelCommentEntry,
   ReviewPanelEntry,
@@ -130,9 +136,13 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const [loading] = useScopeValue<ReviewPanel.Value<'loading'>>(
     'reviewPanel.overview.loading'
   )
-  const [nVisibleSelectedChanges] = useScopeValue<
-    ReviewPanel.Value<'nVisibleSelectedChanges'>
-  >('reviewPanel.nVisibleSelectedChanges')
+  // All selected changes. If an aggregated change (insertion + deletion) is selected, the two ids
+  // will be present. The length of this array will differ from the count below (see explanation).
+  const selectedEntryIds = useRef<ThreadId[]>([])
+  // A count of user-facing selected changes. An aggregated change (insertion + deletion) will count
+  // as only one.
+  const [nVisibleSelectedChanges, setNVisibleSelectedChanges] =
+    useState<ReviewPanel.Value<'nVisibleSelectedChanges'>>(0)
   const [collapsed, setCollapsed] = usePersistedState<
     ReviewPanel.Value<'collapsed'>
   >(`docs_collapsed_state:${projectId}`, {}, false, true)
@@ -333,7 +343,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       // Assume we'll delete everything until we see it, then we'll remove it from this object
       const deleteChanges = new Set<keyof ReviewPanelDocEntries>()
 
-      for (const [id, change] of Object.entries(docEntries)) {
+      for (const [id, change] of Object.entries(docEntries) as Entries<
+        typeof docEntries
+      >) {
         if (
           'entry_ids' in change &&
           id !== 'add-comment' &&
@@ -344,7 +356,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           }
         }
       }
-      for (const [, change] of Object.entries(docResolvedComments)) {
+      for (const [, change] of Object.entries(docResolvedComments) as Entries<
+        typeof docResolvedComments
+      >) {
         if ('entry_ids' in change) {
           for (const entryId of change.entry_ids) {
             deleteChanges.add(entryId)
@@ -383,10 +397,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
             offset: change.op.p,
             metadata: change.metadata,
           }
-          const newEntryEntries = Object.entries(newEntry) as [
-            [keyof typeof newEntry, typeof newEntry[keyof typeof newEntry]]
-          ]
-          for (const [key, value] of newEntryEntries) {
+          for (const [key, value] of Object.entries(newEntry) as Entries<
+            typeof newEntry
+          >) {
             const entriesTyped = docEntries[change.id] as Record<any, any>
             entriesTyped[key] = value
           }
@@ -417,9 +430,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           content: comment.op.c,
           offset: comment.op.p,
         }
-        const newEntryEntries = Object.entries(newEntry) as [
-          [keyof typeof newEntry, typeof newEntry[keyof typeof newEntry]]
-        ]
 
         let newComment: any
         if (localResolvedThreadIds[comment.op.t]) {
@@ -432,7 +442,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           delete docResolvedComments[comment.id]
         }
 
-        for (const [key, value] of newEntryEntries) {
+        for (const [key, value] of Object.entries(newEntry) as Entries<
+          typeof newEntry
+        >) {
           newComment[key] = value
         }
       }
@@ -827,6 +839,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       (entry: { thread_id: ThreadId; replyContent: string }) => void
     >('submitReply')
 
+  const view = reviewPanelOpen ? subView : 'mini'
+
   const toggleReviewPanel = useCallback(() => {
     if (!trackChangesVisible) {
       return
@@ -870,18 +884,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
       postJSON(`/project/${projectId}/thread/${entry.thread_id}/resolve`)
       onCommentResolved(entry.thread_id, user)
-      sendMB('rp-comment-resolve', {
-        view: reviewPanelOpen ? subView : 'mini',
-      })
+      sendMB('rp-comment-resolve', { view })
     },
-    [
-      getDocEntries,
-      onCommentResolved,
-      projectId,
-      reviewPanelOpen,
-      subView,
-      user,
-    ]
+    [getDocEntries, onCommentResolved, projectId, user, view]
   )
 
   const onCommentReopened = useCallback(
@@ -979,6 +984,47 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [onCommentDeleted, projectId]
   )
 
+  const doAcceptChanges = useCallback(
+    (entryIds: ThreadId[]) => {
+      const url = `/project/${projectId}/doc/${currentDocumentId}/changes/accept`
+      postJSON(url, { body: { change_ids: entryIds } }).catch(
+        debugConsole.error
+      )
+      dispatchReviewPanelEvent('changes:accept', entryIds)
+    },
+    [currentDocumentId, projectId]
+  )
+
+  const acceptChanges = useCallback(
+    (entryIds: ThreadId[]) => {
+      doAcceptChanges(entryIds)
+      sendMB('rp-changes-accepted', { view })
+    },
+    [doAcceptChanges, view]
+  )
+
+  const doRejectChanges = useCallback((entryIds: ThreadId[]) => {
+    dispatchReviewPanelEvent('changes:reject', entryIds)
+  }, [])
+
+  const rejectChanges = useCallback(
+    (entryIds: ThreadId[]) => {
+      doRejectChanges(entryIds)
+      sendMB('rp-changes-rejected', { view })
+    },
+    [doRejectChanges, view]
+  )
+
+  const bulkAcceptActions = useCallback(() => {
+    doAcceptChanges(selectedEntryIds.current)
+    sendMB('rp-bulk-accept', { view, nEntries: nVisibleSelectedChanges })
+  }, [doAcceptChanges, nVisibleSelectedChanges, view])
+
+  const bulkRejectActions = useCallback(() => {
+    doRejectChanges(selectedEntryIds.current)
+    sendMB('rp-bulk-reject', { view, nEntries: nVisibleSelectedChanges })
+  }, [doRejectChanges, nVisibleSelectedChanges, view])
+
   const refreshRanges = useCallback(() => {
     type Doc = {
       id: DocId
@@ -1019,19 +1065,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     setCollapsed,
     updateEntries,
   ])
-
-  const [acceptChanges] =
-    useScopeValue<ReviewPanel.UpdaterFn<'acceptChanges'>>('acceptChanges')
-  const [rejectChanges] =
-    useScopeValue<ReviewPanel.UpdaterFn<'rejectChanges'>>('rejectChanges')
-  const [bulkAcceptActions] =
-    useScopeValue<ReviewPanel.UpdaterFn<'bulkAcceptActions'>>(
-      'bulkAcceptActions'
-    )
-  const [bulkRejectActions] =
-    useScopeValue<ReviewPanel.UpdaterFn<'bulkRejectActions'>>(
-      'bulkRejectActions'
-    )
 
   const handleSetSubview = useCallback((subView: SubView) => {
     setSubView(subView)
@@ -1075,13 +1108,142 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       handleLayoutChange()
     }
 
+    const editorFocusChanged = (
+      selectionOffsetStart: number,
+      selectionOffsetEnd: number,
+      selection: boolean,
+      updateType: UpdateType
+    ) => {
+      let tempEntries = {
+        ...getDocEntries(currentDocumentId),
+      }
+      // All selected changes will be added to this array.
+      selectedEntryIds.current = []
+      // Count of user-visible changes, i.e. an aggregated change will count as one.
+      let tempNVisibleSelectedChanges = 0
+
+      const offset = selectionOffsetStart
+      const length = selectionOffsetEnd - selectionOffsetStart
+
+      // Recreate the add comment and bulk actions entries only when
+      // necessary. This is to avoid the UI thinking that these entries have
+      // changed and getting into an infinite loop.
+      if (selection) {
+        const existingAddComment = tempEntries[
+          'add-comment'
+        ] as ReviewPanelAddCommentEntry
+        if (
+          !existingAddComment ||
+          existingAddComment.offset !== offset ||
+          existingAddComment.length !== length
+        ) {
+          tempEntries['add-comment'] = {
+            type: 'add-comment',
+            offset,
+            length,
+          } as ReviewPanelAddCommentEntry
+        }
+        const existingBulkActions = tempEntries[
+          'bulk-actions'
+        ] as ReviewPanelBulkActionsEntry
+        if (
+          !existingBulkActions ||
+          existingBulkActions.offset !== offset ||
+          existingBulkActions.length !== length
+        ) {
+          tempEntries['bulk-actions'] = {
+            type: 'bulk-actions',
+            offset,
+            length,
+          } as ReviewPanelBulkActionsEntry
+        }
+      } else {
+        delete (tempEntries as Partial<typeof tempEntries>)['add-comment']
+        delete (tempEntries as Partial<typeof tempEntries>)['bulk-actions']
+      }
+
+      for (const [key, entry] of Object.entries(tempEntries) as Entries<
+        typeof tempEntries
+      >) {
+        let isChangeEntryAndWithinSelection = false
+        if (entry.type === 'comment' && !resolvedThreadIds[entry.thread_id]) {
+          tempEntries = {
+            ...tempEntries,
+            [key]: {
+              ...tempEntries[key],
+              focused:
+                entry.offset <= selectionOffsetStart &&
+                selectionOffsetStart <= entry.offset + entry.content.length,
+            },
+          }
+        } else if (
+          entry.type === 'insert' ||
+          entry.type === 'aggregate-change'
+        ) {
+          isChangeEntryAndWithinSelection =
+            entry.offset >= selectionOffsetStart &&
+            entry.offset + entry.content.length <= selectionOffsetEnd
+          tempEntries = {
+            ...tempEntries,
+            [key]: {
+              ...tempEntries[key],
+              focused:
+                entry.offset <= selectionOffsetStart &&
+                selectionOffsetStart <= entry.offset + entry.content.length,
+            },
+          }
+        } else if (entry.type === 'delete') {
+          isChangeEntryAndWithinSelection =
+            selectionOffsetStart <= entry.offset &&
+            entry.offset <= selectionOffsetEnd
+          tempEntries = {
+            ...tempEntries,
+            [key]: {
+              ...tempEntries[key],
+              focused: entry.offset === selectionOffsetStart,
+            },
+          }
+        } else if (
+          ['add-comment', 'bulk-actions'].includes(entry.type) &&
+          selection
+        ) {
+          tempEntries = {
+            ...tempEntries,
+            [key]: { ...tempEntries[key], focused: true },
+          }
+        }
+        if (isChangeEntryAndWithinSelection) {
+          const entryIds = 'entry_ids' in entry ? entry.entry_ids : []
+          for (const entryId of entryIds) {
+            selectedEntryIds.current.push(entryId)
+          }
+          tempNVisibleSelectedChanges++
+        }
+      }
+      setEntries(prev => ({ ...prev, [currentDocumentId]: tempEntries }))
+      setNVisibleSelectedChanges(tempNVisibleSelectedChanges)
+      dispatchReviewPanelEvent('recalculate-screen-positions', {
+        entries: tempEntries,
+        updateType,
+      })
+      // Ensure that watchers, such as the React-based review panel component,
+      // are informed of the changes to entries
+      handleLayoutChange()
+    }
+
     const handleEditorEvents = (e: Event) => {
       const event = e as CustomEvent
-      const { type } = event.detail
+      const { type, payload } = event.detail
 
       switch (type) {
         case 'track-changes:changed': {
           editorTrackChangesChanged()
+          break
+        }
+
+        case 'focus:changed': {
+          const { from, to, empty, updateType } = payload
+          editorFocusChanged(from, to, !empty, updateType)
           break
         }
 
@@ -1099,6 +1261,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     }
   }, [
     currentDocumentId,
+    getDocEntries,
+    resolvedThreadIds,
     toggleTrackChangesForUser,
     trackChanges,
     trackChangesState,
@@ -1112,6 +1276,21 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   useSocketListener(socket, 'resolve-thread', onCommentResolved)
   useSocketListener(socket, 'edit-message', onCommentEdited)
   useSocketListener(socket, 'delete-message', onCommentDeleted)
+  useSocketListener(
+    socket,
+    'accept-changes',
+    useCallback(
+      (docId: DocId, entryIds: ThreadId[]) => {
+        if (docId !== currentDocumentId) {
+          getChangeTracker(docId).removeChangeIds(entryIds)
+        } else {
+          dispatchReviewPanelEvent('changes:accept', entryIds)
+        }
+        updateEntries(docId)
+      },
+      [currentDocumentId, getChangeTracker, updateEntries]
+    )
+  )
 
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({

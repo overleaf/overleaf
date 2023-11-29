@@ -63,7 +63,7 @@ export type ChangeManager = {
   destroy: () => void
 }
 
-type UpdateType =
+export type UpdateType =
   | 'edit'
   | 'selectionChange'
   | 'geometryChange'

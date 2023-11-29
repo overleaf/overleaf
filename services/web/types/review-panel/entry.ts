@@ -61,6 +61,7 @@ export interface ReviewPanelAggregateChangeEntry extends ReviewPanelBaseEntry {
 
 export interface ReviewPanelAddCommentEntry extends ReviewPanelBaseEntry {
   type: 'add-comment'
+  length: number
 }
 
 export interface ReviewPanelBulkActionsEntry extends ReviewPanelBaseEntry {
