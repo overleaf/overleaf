@@ -12,22 +12,17 @@
  */
 const { expect } = require('chai')
 
+const FixturesManager = require('./helpers/FixturesManager')
 const RealTimeClient = require('./helpers/RealTimeClient')
 
 describe('Session', function () {
   return describe('with an established session', function () {
     before(function (done) {
-      this.user_id = 'mock-user-id'
-      RealTimeClient.setSession(
-        {
-          user: { _id: this.user_id },
-        },
-        error => {
-          if (error != null) {
-            throw error
-          }
-          this.client = RealTimeClient.connect()
-          return done()
+      FixturesManager.setUpProject(
+        { privilegeLevel: 'owner' },
+        (error, options) => {
+          if (error) return done(error)
+          this.client = RealTimeClient.connect(options.project_id, done)
         }
       )
       return null

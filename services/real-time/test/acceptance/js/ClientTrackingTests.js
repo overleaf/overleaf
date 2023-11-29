@@ -50,37 +50,15 @@ describe('clientTracking', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
+            this.clientA = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
-            this.clientB = RealTimeClient.connect()
-            return this.clientB.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              {
-                project_id: this.project_id,
-              },
-              cb
-            )
+            this.clientB = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
             return this.clientA.emit('joinDoc', this.doc_id, cb)
-          },
-
-          cb => {
-            return this.clientB.emit(
-              'joinProject',
-              {
-                project_id: this.project_id,
-              },
-              cb
-            )
           },
 
           cb => {
@@ -179,38 +157,19 @@ describe('clientTracking', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
+            this.clientA = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
-            return this.clientA.emit(
-              'joinProject',
-              {
-                project_id: this.project_id,
-              },
+            RealTimeClient.setAnonSession(
+              this.project_id,
+              this.anonymousAccessToken,
               cb
             )
           },
 
           cb => {
-            return RealTimeClient.setSession({}, cb)
-          },
-
-          cb => {
-            this.anonymous = RealTimeClient.connect()
-            return this.anonymous.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.anonymous.emit(
-              'joinProject',
-              {
-                project_id: this.project_id,
-                anonymousAccessToken: this.anonymousAccessToken,
-              },
-              cb
-            )
+            this.anonymous = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {

@@ -45,45 +45,17 @@ describe('leaveProject', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
+            this.clientA = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
-            this.clientB = RealTimeClient.connect()
-            this.clientB.on('connectionAccepted', cb)
+            this.clientB = RealTimeClient.connect(this.project_id, cb)
 
             this.clientBDisconnectMessages = []
             return this.clientB.on(
               'clientTracking.clientDisconnected',
               data => {
                 return this.clientBDisconnectMessages.push(data)
-              }
-            )
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              (error, project, privilegeLevel, protocolVersion) => {
-                this.project = project
-                this.privilegeLevel = privilegeLevel
-                this.protocolVersion = protocolVersion
-                return cb(error)
-              }
-            )
-          },
-
-          cb => {
-            return this.clientB.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              (error, project, privilegeLevel, protocolVersion) => {
-                this.project = project
-                this.privilegeLevel = privilegeLevel
-                this.protocolVersion = protocolVersion
-                return cb(error)
               }
             )
           },
@@ -192,14 +164,8 @@ describe('leaveProject', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connect', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel

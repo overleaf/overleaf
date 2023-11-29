@@ -35,8 +35,8 @@ module.exports = MockWebServer = {
     }
     const project = MockWebServer.projects[projectId]
     const privilegeLevel =
-      MockWebServer.privileges[projectId][userId] ||
-      MockWebServer.privileges[projectId][anonymousAccessToken]
+      MockWebServer.privileges[projectId]?.[userId] ||
+      MockWebServer.privileges[projectId]?.[anonymousAccessToken]
     const userMetadata = MockWebServer.userMetadata[projectId]?.[userId]
     return callback(null, project, privilegeLevel, userMetadata)
   },
@@ -64,6 +64,9 @@ module.exports = MockWebServer = {
         (error, project, privilegeLevel, userMetadata) => {
           if (error != null) {
             return next(error)
+          }
+          if (!project) {
+            return res.sendStatus(404)
           }
           return res.json({
             project,

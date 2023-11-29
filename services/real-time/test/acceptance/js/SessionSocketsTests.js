@@ -9,21 +9,29 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const RealTimeClient = require('./helpers/RealTimeClient')
+const FixturesManager = require('./helpers/FixturesManager')
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 
 describe('SessionSockets', function () {
-  before(function () {
-    return (this.checkSocket = function (fn) {
-      const client = RealTimeClient.connect()
-      client.on('connectionAccepted', fn)
-      client.on('connectionRejected', fn)
-      return null
-    })
+  beforeEach(function (done) {
+    FixturesManager.setUpProject(
+      {
+        privilegeLevel: 'owner',
+      },
+      (err, options) => {
+        if (err) return done(err)
+
+        this.checkSocket = function (fn) {
+          RealTimeClient.connect(options.project_id, fn)
+        }
+        done()
+      }
+    )
   })
 
   describe('without cookies', function () {
-    before(function () {
+    beforeEach(function () {
       return (RealTimeClient.cookie = null)
     })
 
@@ -37,7 +45,7 @@ describe('SessionSockets', function () {
   })
 
   describe('with a different cookie', function () {
-    before(function () {
+    beforeEach(function () {
       return (RealTimeClient.cookie = 'some.key=someValue')
     })
 
@@ -51,7 +59,7 @@ describe('SessionSockets', function () {
   })
 
   describe('with an invalid cookie', function () {
-    before(function (done) {
+    beforeEach(function (done) {
       RealTimeClient.setSession({}, error => {
         if (error) {
           return done(error)
@@ -74,7 +82,7 @@ describe('SessionSockets', function () {
   })
 
   describe('with a valid cookie and no matching session', function () {
-    before(function () {
+    beforeEach(function () {
       return (RealTimeClient.cookie = `${Settings.cookieName}=unknownId`)
     })
 
@@ -88,11 +96,6 @@ describe('SessionSockets', function () {
   })
 
   return describe('with a valid cookie and a matching session', function () {
-    before(function (done) {
-      RealTimeClient.setSession({}, done)
-      return null
-    })
-
     return it('should not return an error', function (done) {
       return this.checkSocket(error => {
         expect(error).to.not.exist

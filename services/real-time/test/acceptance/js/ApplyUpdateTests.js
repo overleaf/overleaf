@@ -87,16 +87,7 @@ describe('applyOtUpdate', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.client = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
@@ -206,19 +197,10 @@ describe('applyOtUpdate', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            this.client.on('connectionAccepted', cb)
+            this.client = RealTimeClient.connect(this.project_id, cb)
             return this.client.on('otUpdateError', otUpdateError => {
               this.otUpdateError = otUpdateError
             })
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
           },
 
           cb => {
@@ -303,16 +285,7 @@ describe('applyOtUpdate', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.client = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
@@ -393,16 +366,7 @@ describe('applyOtUpdate', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.client = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
@@ -506,16 +470,7 @@ describe('applyOtUpdate', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.client = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
@@ -593,16 +548,7 @@ describe('applyOtUpdate', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.client = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {

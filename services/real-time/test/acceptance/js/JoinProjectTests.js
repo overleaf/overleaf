@@ -36,14 +36,8 @@ describe('joinProject', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.client = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel
@@ -143,21 +137,16 @@ describe('joinProject', function () {
           },
 
           cb => {
-            RealTimeClient.setSession({}, cb)
+            RealTimeClient.setAnonSession(
+              this.project_id,
+              this.anonymousAccessToken,
+              cb
+            )
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            this.client.emit(
-              'joinProject',
-              {
-                project_id: this.project_id,
-                anonymousAccessToken: this.anonymousAccessToken,
-              },
+            this.client = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel
@@ -246,14 +235,8 @@ describe('joinProject', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.client = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.error = error
                 this.project = project
@@ -275,11 +258,8 @@ describe('joinProject', function () {
     return it('should not have joined the project room', function (done) {
       return RealTimeClient.getConnectedClient(
         this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
-            false
-          )
+        error => {
+          expect(error.message).to.equal('not found')
           return done()
         }
       )
@@ -308,22 +288,10 @@ describe('joinProject', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              (error, project, privilegeLevel, protocolVersion) => {
-                this.error = error
-                this.project = project
-                this.privilegeLevel = privilegeLevel
-                this.protocolVersion = protocolVersion
-                cb()
-              }
-            )
+            this.client = RealTimeClient.connect(this.project_id, error => {
+              this.error = error
+              cb()
+            })
           },
         ],
         done
@@ -335,16 +303,10 @@ describe('joinProject', function () {
     })
 
     it('should not have joined the project room', function (done) {
-      RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
-            false
-          )
-          done()
-        }
-      )
+      RealTimeClient.getConnectedClient(this.client.socket.sessionid, error => {
+        expect(error.message).to.equal('not found')
+        done()
+      })
     })
   })
 
@@ -370,22 +332,10 @@ describe('joinProject', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              (error, project, privilegeLevel, protocolVersion) => {
-                this.error = error
-                this.project = project
-                this.privilegeLevel = privilegeLevel
-                this.protocolVersion = protocolVersion
-                cb()
-              }
-            )
+            this.client = RealTimeClient.connect(this.project_id, error => {
+              this.error = error
+              cb()
+            })
           },
         ],
         done
@@ -397,16 +347,10 @@ describe('joinProject', function () {
     })
 
     it('should not have joined the project room', function (done) {
-      RealTimeClient.getConnectedClient(
-        this.client.socket.sessionid,
-        (error, client) => {
-          if (error) return done(error)
-          expect(Array.from(client.rooms).includes(this.project_id)).to.equal(
-            false
-          )
-          done()
-        }
-      )
+      RealTimeClient.getConnectedClient(this.client.socket.sessionid, error => {
+        expect(error.message).to.equal('not found')
+        done()
+      })
     })
   })
 
@@ -416,19 +360,10 @@ describe('joinProject', function () {
       return async.series(
         [
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: 'invalid-id' },
-              error => {
-                this.error = error
-                return cb()
-              }
-            )
+            this.client = RealTimeClient.connect('invalid-id', error => {
+              this.error = error
+              return cb()
+            })
           },
         ],
         done
@@ -444,94 +379,13 @@ describe('joinProject', function () {
     })
   })
 
-  describe('when joining more than one project', function () {
-    before(function (done) {
-      return async.series(
-        [
-          cb => {
-            return FixturesManager.setUpProject(
-              {
-                privilegeLevel: 'owner',
-                project: {
-                  name: 'Other Project',
-                },
-              },
-              (e, { project_id: projectId, user_id: userId }) => {
-                this.other_project_id = projectId
-                this.other_user_id = userId
-                return cb(e)
-              }
-            )
-          },
-
-          cb => {
-            return FixturesManager.setUpProject(
-              {
-                user_id: this.other_user_id,
-                privilegeLevel: 'owner',
-                project: {
-                  name: 'Test Project',
-                },
-              },
-              (e, { project_id: projectId, user_id: userId }) => {
-                this.project_id = projectId
-                this.user_id = userId
-                return cb(e)
-              }
-            )
-          },
-
-          cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              (error, project, privilegeLevel, protocolVersion) => {
-                this.project = project
-                this.privilegeLevel = privilegeLevel
-                this.protocolVersion = protocolVersion
-                return cb(error)
-              }
-            )
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.other_project_id },
-              error => {
-                this.error = error
-                return cb()
-              }
-            )
-          },
-        ],
-        done
-      )
-    })
-
-    return it('should return an error', function () {
-      this.error.message.should.equal('cannot join multiple projects')
-    })
-  })
-
   describe('when over rate limit', function () {
     before(function (done) {
       return async.series(
         [
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: '429429429429429429429429' }, // rate-limited
+            this.client = RealTimeClient.connect(
+              '429429429429429429429429', // rate-limited
               error => {
                 this.error = error
                 return cb()
@@ -551,7 +405,6 @@ describe('joinProject', function () {
 
   describe('when automatically joining the project', function () {
     describe('when authorized', function () {
-      let connectionAcceptedReceived = false
       before(function (done) {
         async.series(
           [
@@ -573,29 +426,18 @@ describe('joinProject', function () {
 
             cb => {
               this.client = RealTimeClient.connect(
-                `projectId=${this.project_id}`
-              )
-              this.client.on('connectionAccepted', () => {
-                connectionAcceptedReceived = true
-              })
-              this.client.on('connectionRejected', cb)
-              this.client.on(
-                'joinProjectResponse',
-                ({ project, permissionsLevel, protocolVersion }) => {
+                this.project_id,
+                (err, project, permissionsLevel, protocolVersion) => {
                   this.project = project
                   this.permissionsLevel = permissionsLevel
                   this.protocolVersion = protocolVersion
-                  cb()
+                  cb(err)
                 }
               )
             },
           ],
           done
         )
-      })
-
-      it('should not emit connectionAccepted', function () {
-        expect(connectionAcceptedReceived).to.equal(false)
       })
 
       it('should get the project from web', function () {
@@ -652,7 +494,6 @@ describe('joinProject', function () {
     })
 
     describe('when authorized with token', function () {
-      let connectionAcceptedReceived = false
       before(function (done) {
         async.series(
           [
@@ -682,41 +523,27 @@ describe('joinProject', function () {
             },
 
             cb => {
-              RealTimeClient.setSession(
-                {
-                  anonTokenAccess: {
-                    [this.project_id]: this.anonymousAccessToken,
-                  },
-                },
+              RealTimeClient.setAnonSession(
+                this.project_id,
+                this.anonymousAccessToken,
                 cb
               )
             },
 
             cb => {
               this.client = RealTimeClient.connect(
-                `projectId=${this.project_id}`
-              )
-              this.client.on('connectionAccepted', () => {
-                connectionAcceptedReceived = true
-              })
-              this.client.on('connectionRejected', cb)
-              this.client.on(
-                'joinProjectResponse',
-                ({ project, permissionsLevel, protocolVersion }) => {
+                this.project_id,
+                (err, project, permissionsLevel, protocolVersion) => {
                   this.project = project
                   this.permissionsLevel = permissionsLevel
                   this.protocolVersion = protocolVersion
-                  cb()
+                  cb(err)
                 }
               )
             },
           ],
           done
         )
-      })
-
-      it('should not emit connectionAccepted', function () {
-        expect(connectionAcceptedReceived).to.equal(false)
       })
 
       it('should get the project from web', function () {
@@ -795,10 +622,7 @@ describe('joinProject', function () {
             },
 
             cb => {
-              this.client = RealTimeClient.connect(
-                `projectId=${this.project_id}`
-              )
-              this.client.on('connectionRejected', err => {
+              this.client = RealTimeClient.connect(this.project_id, err => {
                 this.error = err
                 cb()
               })
@@ -858,10 +682,7 @@ describe('joinProject', function () {
             },
 
             cb => {
-              this.client = RealTimeClient.connect(
-                `projectId=${this.project_id}`
-              )
-              this.client.on('connectionRejected', err => {
+              this.client = RealTimeClient.connect(this.project_id, err => {
                 this.error = err
                 cb()
               })
@@ -921,10 +742,7 @@ describe('joinProject', function () {
             },
 
             cb => {
-              this.client = RealTimeClient.connect(
-                `projectId=${this.project_id}`
-              )
-              this.client.on('connectionRejected', err => {
+              this.client = RealTimeClient.connect(this.project_id, err => {
                 this.error = err
                 cb()
               })
@@ -968,8 +786,7 @@ describe('joinProject', function () {
         async.series(
           [
             cb => {
-              this.client = RealTimeClient.connect('projectId=invalid-id')
-              this.client.on('connectionRejected', err => {
+              this.client = RealTimeClient.connect('invalid-id', err => {
                 this.error = err
                 cb()
               })
@@ -1000,73 +817,6 @@ describe('joinProject', function () {
       })
     })
 
-    describe('when joining more than one project', function () {
-      before(function (done) {
-        async.series(
-          [
-            cb => {
-              FixturesManager.setUpProject(
-                {
-                  privilegeLevel: 'owner',
-                  project: {
-                    name: 'Other Project',
-                  },
-                },
-                (e, { project_id: projectId, user_id: userId }) => {
-                  this.other_project_id = projectId
-                  this.other_user_id = userId
-                  cb(e)
-                }
-              )
-            },
-
-            cb => {
-              FixturesManager.setUpProject(
-                {
-                  user_id: this.other_user_id,
-                  privilegeLevel: 'owner',
-                  project: {
-                    name: 'Test Project',
-                  },
-                },
-                (e, { project_id: projectId, user_id: userId }) => {
-                  this.project_id = projectId
-                  this.user_id = userId
-                  cb(e)
-                }
-              )
-            },
-
-            cb => {
-              this.client = RealTimeClient.connect(
-                `projectId=${this.project_id}`
-              )
-              this.client.on('connectionRejected', cb)
-              this.client.on('joinProjectResponse', () => {
-                cb()
-              })
-            },
-
-            cb => {
-              this.client.emit(
-                'joinProject',
-                { project_id: this.other_project_id },
-                error => {
-                  this.error = error
-                  cb()
-                }
-              )
-            },
-          ],
-          done
-        )
-      })
-
-      it('should return an error', function () {
-        this.error.message.should.equal('cannot join multiple projects')
-      })
-    })
-
     describe('when over rate limit', function () {
       let joinProjectResponseReceived = false
       before(function (done) {
@@ -1074,12 +824,12 @@ describe('joinProject', function () {
           [
             cb => {
               this.client = RealTimeClient.connect(
-                'projectId=429429429429429429429429'
+                '429429429429429429429429',
+                err => {
+                  this.error = err
+                  cb()
+                }
               )
-              this.client.on('connectionRejected', err => {
-                this.error = err
-                cb()
-              })
               this.client.on('joinProjectResponse', () => {
                 joinProjectResponseReceived = true
                 cb()

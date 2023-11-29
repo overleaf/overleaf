@@ -44,14 +44,8 @@ describe('PubSubRace', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connect', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel
@@ -120,14 +114,8 @@ describe('PubSubRace', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connect', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel
@@ -203,14 +191,8 @@ describe('PubSubRace', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connect', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel
@@ -285,14 +267,8 @@ describe('PubSubRace', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connect', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel

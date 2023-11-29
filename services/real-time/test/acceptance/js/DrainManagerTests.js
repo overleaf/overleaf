@@ -63,29 +63,11 @@ describe('DrainManagerTests', function () {
       return async.series(
         [
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
+            this.clientA = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {
-            this.clientB = RealTimeClient.connect()
-            return this.clientB.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
-          },
-
-          cb => {
-            return this.clientB.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.clientB = RealTimeClient.connect(this.project_id, cb)
           },
         ],
         done

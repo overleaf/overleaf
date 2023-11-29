@@ -79,16 +79,9 @@ describe('MatrixTests', function () {
         if (err) return done(err)
         privateProjectId = projectId
         privateDocId = docId
-        privateClient = RealTimeClient.connect()
-        privateClient.on('connectionAccepted', () => {
-          privateClient.emit(
-            'joinProject',
-            { project_id: privateProjectId },
-            err => {
-              if (err) return done(err)
-              privateClient.emit('joinDoc', privateDocId, done)
-            }
-          )
+        privateClient = RealTimeClient.connect(projectId, err => {
+          if (err) return done(err)
+          privateClient.emit('joinDoc', privateDocId, done)
         })
       }
     )
@@ -110,28 +103,19 @@ describe('MatrixTests', function () {
 
   const USER_SETUP = {
     anonymous: {
-      getAnonymousAccessToken() {
-        return readWriteAnonymousAccessToken
-      },
       setup(cb) {
-        RealTimeClient.setSession(
-          {
-            anonTokenAccess: {
-              [readWriteProjectId]: readWriteAnonymousAccessToken,
-            },
-          },
+        RealTimeClient.setAnonSession(
+          readWriteProjectId,
+          readWriteAnonymousAccessToken,
           err => {
             if (err) return cb(err)
-            cb(null, {
-              client: RealTimeClient.connect(),
-            })
+            cb(null, {})
           }
         )
       },
     },
 
     registered: {
-      getAnonymousAccessToken() {},
       setup(cb) {
         const userId = FixturesManager.getRandomId()
         const user = { _id: userId, first_name: 'Joe', last_name: 'Bloggs' }
@@ -145,14 +129,12 @@ describe('MatrixTests', function () {
           )
           cb(null, {
             user_id: userId,
-            client: RealTimeClient.connect(),
           })
         })
       },
     },
 
     registeredWithOwnedProject: {
-      getAnonymousAccessToken() {},
       setup(cb) {
         FixturesManager.setUpEditorSession(
           { privilegeLevel: 'owner' },
@@ -168,7 +150,6 @@ describe('MatrixTests', function () {
               user_id: userId,
               project_id: projectId,
               doc_id: docId,
-              client: RealTimeClient.connect(),
             })
           }
         )
@@ -182,34 +163,17 @@ describe('MatrixTests', function () {
     let options, client
 
     const SESSION_SETUP = {
-      noop: {
-        getActions(cb) {
-          cb(null, [])
-        },
-        needsOwnProject: false,
-      },
-
       joinReadWriteProject: {
         getActions(cb) {
-          const anonymousAccessToken = userItem.getAnonymousAccessToken()
-          cb(null, [
-            {
-              rpc: 'joinProject',
-              args: [{ project_id: readWriteProjectId, anonymousAccessToken }],
-            },
-          ])
+          cb(null, [{ connect: readWriteProjectId }])
         },
         needsOwnProject: false,
       },
 
       joinReadWriteProjectAndDoc: {
         getActions(cb) {
-          const anonymousAccessToken = userItem.getAnonymousAccessToken()
           cb(null, [
-            {
-              rpc: 'joinProject',
-              args: [{ project_id: readWriteProjectId, anonymousAccessToken }],
-            },
+            { connect: readWriteProjectId },
             { rpc: 'joinDoc', args: [readWriteDocId] },
           ])
         },
@@ -218,25 +182,15 @@ describe('MatrixTests', function () {
 
       joinOwnProject: {
         getActions(cb) {
-          const anonymousAccessToken = userItem.getAnonymousAccessToken()
-          cb(null, [
-            {
-              rpc: 'joinProject',
-              args: [{ project_id: options.project_id, anonymousAccessToken }],
-            },
-          ])
+          cb(null, [{ connect: options.project_id }])
         },
         needsOwnProject: true,
       },
 
       joinOwnProjectAndDoc: {
         getActions(cb) {
-          const anonymousAccessToken = userItem.getAnonymousAccessToken()
           cb(null, [
-            {
-              rpc: 'joinProject',
-              args: [{ project_id: options.project_id, anonymousAccessToken }],
-            },
+            { connect: options.project_id },
             { rpc: 'joinDoc', args: [options.doc_id] },
           ])
         },
@@ -250,19 +204,27 @@ describe('MatrixTests', function () {
 
         async.eachSeries(
           actions,
-          (action, cb) => {
-            if (action.rpc) {
-              client.emit(action.rpc, ...action.args, (...returnedArgs) => {
-                const error = returnedArgs.shift()
-                if (action.fails) {
-                  expect(error).to.exist
-                  expect(returnedArgs).to.have.length(0)
-                  return cb()
-                }
-                cb(error)
-              })
+          (action, next) => {
+            const cb = (...returnedArgs) => {
+              const error = returnedArgs.shift()
+              if (action.fails) {
+                expect(error).to.exist
+                expect(returnedArgs).to.have.length(0)
+                return next()
+              }
+              next(error)
+            }
+
+            if (action.connect) {
+              client = RealTimeClient.connect(action.connect, cb)
+            } else if (action.rpc) {
+              if (client?.socket?.connected) {
+                client.emit(action.rpc, ...action.args, cb)
+              } else {
+                cb(new Error('not connected!'))
+              }
             } else {
-              cb(new Error('unexpected action'))
+              next(new Error('unexpected action'))
             }
           },
           done
@@ -274,10 +236,8 @@ describe('MatrixTests', function () {
       beforeEach(function userSetup(done) {
         userItem.setup((err, _options) => {
           if (err) return done(err)
-
           options = _options
-          client = options.client
-          client.on('connectionAccepted', done)
+          done()
         })
       })
 
@@ -292,18 +252,19 @@ describe('MatrixTests', function () {
 
           joinProjectWithBadAccessToken: {
             getActions(cb) {
-              cb(null, [
-                {
-                  rpc: 'joinProject',
-                  args: [
+              RealTimeClient.setAnonSession(
+                privateProjectId,
+                'invalid-access-token',
+                err => {
+                  if (err) return cb(err)
+                  cb(null, [
                     {
-                      project_id: privateProjectId,
-                      anonymousAccessToken: 'invalid-access-token',
+                      connect: privateProjectId,
+                      fails: 1,
                     },
-                  ],
-                  fails: 1,
-                },
-              ])
+                  ])
+                }
+              )
             },
           },
 
@@ -311,8 +272,7 @@ describe('MatrixTests', function () {
             getActions(cb) {
               cb(null, [
                 {
-                  rpc: 'joinProject',
-                  args: [{ project_id: privateDocId }],
+                  connect: privateDocId,
                   fails: 1,
                 },
               ])
@@ -329,8 +289,7 @@ describe('MatrixTests', function () {
             getActions(cb) {
               cb(null, [
                 {
-                  rpc: 'joinProject',
-                  args: [{ project_id: privateProjectId }],
+                  connect: privateProjectId,
                   fails: 1,
                 },
               ])
@@ -347,8 +306,7 @@ describe('MatrixTests', function () {
             getActions(cb) {
               cb(null, [
                 {
-                  rpc: 'joinProject',
-                  args: [{ project_id: privateProjectId }],
+                  connect: privateProjectId,
                   fails: 1,
                 },
                 { rpc: 'joinDoc', args: [privateDocId], fails: 1 },
@@ -379,6 +337,7 @@ describe('MatrixTests', function () {
                   RealTimeClient.getConnectedClient(
                     client.socket.sessionid,
                     (error, client) => {
+                      if (error?.message === 'not found') return done() // disconnected
                       if (error) return done(error)
                       expect(client.rooms).to.not.include(privateProjectId)
                       done()
@@ -390,6 +349,7 @@ describe('MatrixTests', function () {
                   RealTimeClient.getConnectedClient(
                     client.socket.sessionid,
                     (error, client) => {
+                      if (error?.message === 'not found') return done() // disconnected
                       if (error) return done(error)
                       expect(client.rooms).to.not.include(privateDocId)
                       done()
@@ -467,6 +427,10 @@ describe('MatrixTests', function () {
                 })
 
                 beforeEach(function sendAsUser(done) {
+                  if (!client?.socket?.connected) {
+                    // disconnected clients cannot emit messages
+                    return this.skip()
+                  }
                   const userUpdate = Object.assign({}, update, {
                     hash: 'user',
                   })

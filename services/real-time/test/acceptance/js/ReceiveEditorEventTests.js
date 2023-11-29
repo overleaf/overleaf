@@ -80,18 +80,7 @@ describe('receiveEditorEvent', function () {
          * Connect owner to project/doc
          */
         cb => {
-          this.owner_client = RealTimeClient.connect()
-          return this.owner_client.on('connectionAccepted', cb)
-        },
-
-        cb => {
-          return this.owner_client.emit(
-            'joinProject',
-            {
-              project_id: this.project_id,
-            },
-            cb
-          )
+          this.owner_client = RealTimeClient.connect(this.project_id, cb)
         },
 
         cb => {
@@ -120,18 +109,7 @@ describe('receiveEditorEvent', function () {
          * Connect user_a to project/doc
          */
         cb => {
-          this.user_a_client = RealTimeClient.connect()
-          return this.user_a_client.on('connectionAccepted', cb)
-        },
-
-        cb => {
-          return this.user_a_client.emit(
-            'joinProject',
-            {
-              project_id: this.project_id,
-            },
-            cb
-          )
+          this.user_a_client = RealTimeClient.connect(this.project_id, cb)
         },
         cb => {
           return this.user_a_client.emit('joinDoc', this.doc_id, cb)
@@ -159,18 +137,7 @@ describe('receiveEditorEvent', function () {
          * Connect user_b to project/doc
          */
         cb => {
-          this.user_b_client = RealTimeClient.connect()
-          return this.user_b_client.on('connectionAccepted', cb)
-        },
-
-        cb => {
-          return this.user_b_client.emit(
-            'joinProject',
-            {
-              project_id: this.project_id,
-            },
-            cb
-          )
+          this.user_b_client = RealTimeClient.connect(this.project_id, cb)
         },
         cb => {
           return this.user_b_client.emit('joinDoc', this.doc_id, cb)
@@ -202,18 +169,7 @@ describe('receiveEditorEvent', function () {
          * Connect user_c to project/doc
          */
         cb => {
-          this.user_c_client = RealTimeClient.connect()
-          return this.user_c_client.on('connectionAccepted', cb)
-        },
-
-        cb => {
-          return this.user_c_client.emit(
-            'joinProject',
-            {
-              project_id: this.project_id,
-            },
-            cb
-          )
+          this.user_c_client = RealTimeClient.connect(this.project_id, cb)
         },
         cb => {
           return this.user_c_client.emit('joinDoc', this.doc_id, cb)

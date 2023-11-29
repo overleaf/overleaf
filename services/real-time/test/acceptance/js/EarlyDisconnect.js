@@ -31,10 +31,9 @@ describe('EarlyDisconnect', function () {
   describe('when the client disconnects before joinProject completes', function () {
     before(function () {
       // slow down web-api requests to force the race condition
-      let joinProject
-      this.actualWebAPIjoinProject = joinProject = MockWebServer.joinProject
-      return (MockWebServer.joinProject = (projectId, userId, cb) =>
-        setTimeout(() => joinProject(projectId, userId, cb), 300))
+      this.actualWebAPIjoinProject = MockWebServer.joinProject
+      MockWebServer.joinProject = (...args) =>
+        setTimeout(() => this.actualWebAPIjoinProject(...args), 300)
     })
 
     after(function () {
@@ -61,19 +60,10 @@ describe('EarlyDisconnect', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              () => {}
-            )
-            // disconnect before joinProject completes
+            this.clientA = RealTimeClient.connect(this.project_id, cb)
+            // disconnect after the handshake and before joinProject completes
+            setTimeout(() => this.clientA.disconnect(), 100)
             this.clientA.on('disconnect', () => cb())
-            return this.clientA.disconnect()
           },
 
           cb => {
@@ -122,14 +112,8 @@ describe('EarlyDisconnect', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel
@@ -210,14 +194,8 @@ describe('EarlyDisconnect', function () {
           },
 
           cb => {
-            this.clientA = RealTimeClient.connect()
-            return this.clientA.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.clientA.emit(
-              'joinProject',
-              { project_id: this.project_id },
+            this.clientA = RealTimeClient.connect(
+              this.project_id,
               (error, project, privilegeLevel, protocolVersion) => {
                 this.project = project
                 this.privilegeLevel = privilegeLevel

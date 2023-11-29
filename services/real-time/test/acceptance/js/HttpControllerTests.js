@@ -63,16 +63,7 @@ describe('HttpControllerTests', function () {
           },
 
           cb => {
-            this.client = RealTimeClient.connect()
-            return this.client.on('connectionAccepted', cb)
-          },
-
-          cb => {
-            return this.client.emit(
-              'joinProject',
-              { project_id: this.project_id },
-              cb
-            )
+            this.client = RealTimeClient.connect(this.project_id, cb)
           },
 
           cb => {

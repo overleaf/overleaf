@@ -40,17 +40,10 @@ describe('Router', function () {
             },
 
             cb => {
-              this.client = RealTimeClient.connect()
-              return this.client.on('connectionAccepted', cb)
+              this.client = RealTimeClient.connect(this.project_id, cb)
             },
 
             cb => {
-              this.client = RealTimeClient.connect()
-              return this.client.on('connectionAccepted', cb)
-            },
-
-            cb => {
-              this.client.emit('joinProject', { project_id: this.project_id })
               return setTimeout(cb, 100)
             },
           ],
@@ -90,17 +83,11 @@ describe('Router', function () {
             },
 
             cb => {
-              this.client = RealTimeClient.connect()
-              return this.client.on('connectionAccepted', cb)
+              this.client = RealTimeClient.connect(this.project_id, cb)
             },
 
             cb => {
-              this.client = RealTimeClient.connect()
-              return this.client.on('connectionAccepted', cb)
-            },
-
-            cb => {
-              return this.client.emit('joinProject', 1, 2, 3, 4, 5, error => {
+              return this.client.emit('joinDoc', 1, 2, 3, 4, 5, error => {
                 this.error = error
                 return cb()
               })

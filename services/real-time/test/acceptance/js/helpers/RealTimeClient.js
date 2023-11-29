@@ -54,6 +54,17 @@ module.exports = Client = {
     })
   },
 
+  setAnonSession(projectId, anonymousAccessToken, callback) {
+    Client.setSession(
+      {
+        anonTokenAccess: {
+          [projectId]: anonymousAccessToken,
+        },
+      },
+      callback
+    )
+  },
+
   unsetSession(callback) {
     if (callback == null) {
       callback = function () {}
@@ -62,19 +73,29 @@ module.exports = Client = {
     return callback()
   },
 
-  connect(query) {
+  connect(projectId, callback) {
     const client = io.connect('http://localhost:3026', {
       'force new connection': true,
-      query,
+      query: new URLSearchParams({ projectId }).toString(),
     })
-    client.on(
-      'connectionAccepted',
-      (_, publicId) => (client.publicId = publicId)
-    )
-    client.on(
-      'joinProjectResponse',
-      ({ publicId }) => (client.publicId = publicId)
-    )
+    let disconnected = false
+    client.on('disconnect', () => {
+      disconnected = true
+    })
+    client.on('connectionRejected', err => {
+      // Wait for disconnect ahead of continuing with the test sequence.
+      setTimeout(() => {
+        if (!disconnected) {
+          throw new Error('should disconnect after connectionRejected')
+        }
+        callback(err)
+      }, 10)
+    })
+    client.on('joinProjectResponse', resp => {
+      const { publicId, project, permissionsLevel, protocolVersion } = resp
+      client.publicId = publicId
+      callback(null, project, permissionsLevel, protocolVersion)
+    })
     return client
   },
 
