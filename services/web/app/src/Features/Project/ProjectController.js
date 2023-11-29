@@ -864,7 +864,6 @@ const ProjectController = {
               },
               privilegeLevel,
               anonymous,
-              anonymousAccessToken: anonymous ? anonRequestToken : null,
               isTokenMember,
               isRestrictedTokenMember: AuthorizationManager.isRestrictedUser(
                 userId,

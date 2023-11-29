@@ -27,8 +27,6 @@ export default ConnectionManager = (function () {
       this.prototype.MIN_RETRY_INTERVAL = 1000 // ms, rate limit on reconnects for user clicking "try now"
       this.prototype.BACKGROUND_RETRY_INTERVAL = 5 * 1000
 
-      this.prototype.JOIN_PROJECT_RETRY_INTERVAL = 5000
-      this.prototype.JOIN_PROJECT_MAX_RETRY_INTERVAL = 60000
       this.prototype.RECONNECT_GRACEFULLY_RETRY_INTERVAL = 5000 // ms
       this.prototype.MAX_RECONNECT_GRACEFULLY_INTERVAL = 45 * 1000
     }
@@ -75,8 +73,6 @@ export default ConnectionManager = (function () {
       this.userIsInactive = false
       this.gracefullyReconnecting = false
       this.shuttingDown = false
-
-      this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
 
       this.$scope.connection = {
         debug: debugging,
@@ -186,31 +182,7 @@ export default ConnectionManager = (function () {
       })
 
       // The next event we should get is an authentication response
-      // from the server, either "connectionAccepted" or "bootstrap" or
-      // "connectionRejected".
-
-      // Handle real-time without bootstrap capability.
-      this.ide.socket.on('connectionAccepted', (_, publicId) => {
-        this.ide.socket.publicId = publicId || this.ide.socket.socket.sessionid
-        // state should be 'authenticating'...
-        debugConsole.log('[socket.io connectionAccepted] allowed to connect')
-        this.connected = true
-        this.gracefullyReconnecting = false
-        this.ide.pushEvent('connected')
-        this.updateConnectionManagerState('joining')
-
-        this.$scope.$apply(() => {
-          if (this.$scope.state.loading) {
-            this.$scope.state.load_progress = 70
-          }
-        })
-
-        // we have passed authentication so we can now join the project
-        const connectionJobId = this.$scope.connection.jobId
-        setTimeout(() => {
-          this.joinProject(connectionJobId)
-        }, 100)
-      })
+      // from the server, either "joinProjectResponse" or "connectionRejected".
 
       this.ide.socket.on(
         'joinProjectResponse',
@@ -229,9 +201,7 @@ export default ConnectionManager = (function () {
             }
           })
 
-          const connectionJobId = this.$scope.connection.jobId
           this.handleJoinProjectResponse({
-            connectionJobId,
             project,
             permissionsLevel,
             protocolVersion,
@@ -425,79 +395,7 @@ Something went wrong connecting to your project. Please refresh if this continue
       }
     }
 
-    joinProject(connectionId) {
-      debugConsole.log(`[joinProject ${connectionId}] joining...`)
-      // Note: if the "joinProject" message doesn't reach the server
-      // (e.g. if we are in a disconnected state at this point) the
-      // callback will never be executed
-      if (!this.expectConnectionManagerState('joining', connectionId)) {
-        debugConsole.log(
-          `[joinProject ${connectionId}] aborting with stale connection`
-        )
-        return
-      }
-      const data = {
-        project_id: this.ide.project_id,
-      }
-      if (window.anonymousAccessToken) {
-        data.anonymousAccessToken = window.anonymousAccessToken
-      }
-      this.ide.socket.emit(
-        'joinProject',
-        data,
-        (err, project, permissionsLevel, protocolVersion) => {
-          this.handleJoinProjectResponse({
-            connectionId,
-            err,
-            project,
-            permissionsLevel,
-            protocolVersion,
-          })
-        }
-      )
-    }
-
-    handleJoinProjectResponse({
-      connectionId,
-      err,
-      project,
-      permissionsLevel,
-      protocolVersion,
-    }) {
-      if (err != null || project == null) {
-        err = err || {}
-        if (err.code === 'ProjectNotFound') {
-          // A stale browser tab tried to join a deleted project.
-          // Reloading the page will render a 404.
-          this.ide
-            .showGenericMessageModal(
-              'Project has been deleted',
-              'This project has been deleted by the owner.'
-            )
-            .result.then(() => location.reload(true))
-          return
-        }
-        if (err.code === 'TooManyRequests') {
-          debugConsole.log(
-            `[joinProject ${connectionId}] retrying: ${err.message}`
-          )
-          setTimeout(
-            () => this.joinProject(connectionId),
-            this.joinProjectRetryInterval
-          )
-          if (
-            this.joinProjectRetryInterval < this.JOIN_PROJECT_MAX_RETRY_INTERVAL
-          ) {
-            this.joinProjectRetryInterval += this.JOIN_PROJECT_RETRY_INTERVAL
-          }
-          return
-        } else {
-          return this.reportConnectionError(err)
-        }
-      }
-
-      this.joinProjectRetryInterval = this.JOIN_PROJECT_RETRY_INTERVAL
-
+    handleJoinProjectResponse({ project, permissionsLevel, protocolVersion }) {
       if (
         this.$scope.protocolVersion != null &&
         this.$scope.protocolVersion !== protocolVersion

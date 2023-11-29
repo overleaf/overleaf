@@ -53,14 +53,19 @@ function setUpStatusIndicators() {
         reconnect: false,
         'connect timeout': timeout,
         'force new connection': true,
+        query: new URLSearchParams({
+          projectId: '404404404404404404404404',
+        }).toString(),
       })
       return new Promise((resolve, reject) => {
         setTimeout(() => reject(new Error('timed out')), timeout)
-        socket.on('connectionAccepted', function () {
-          resolve()
-        })
         socket.on('connectionRejected', function (err) {
-          reject(new Error(err && err.message))
+          if (err.code === 'ProjectNotFound') {
+            // We received the response from joinProject, so the websocket is up.
+            resolve()
+          } else {
+            reject(new Error(err && err.message))
+          }
         })
         socket.on('connect_failed', function (err) {
           reject(new Error(err && err.message))
