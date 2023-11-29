@@ -678,6 +678,17 @@ const ProjectController = {
             }
           )
         },
+        writefullIntegrationAssignment(cb) {
+          SplitTestHandler.getAssignment(
+            req,
+            res,
+            'writefull-integration',
+            () => {
+              // We'll pick up the assignment from the res.locals assignment.
+              cb()
+            }
+          )
+        },
         projectTags(cb) {
           if (!userId) {
             return cb(null, [])
