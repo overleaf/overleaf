@@ -495,7 +495,7 @@ format_in_docker:
 #
 
 IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-IMAGE_REPO ?= gcr.io/overleaf-ops/$(PROJECT_NAME)
+IMAGE_REPO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/$(PROJECT_NAME)
 IMAGE_REPO_BRANCH ?= $(IMAGE_REPO):$(BRANCH_NAME)
 IMAGE_REPO_MAIN ?= $(IMAGE_REPO):main
 IMAGE_REPO_FINAL ?= $(IMAGE_REPO_BRANCH)-$(BUILD_NUMBER)
