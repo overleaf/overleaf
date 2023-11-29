@@ -58,7 +58,7 @@ const unsupportedSpellcheckLanguages = [
 
 async function joinProject(req, res, next) {
   const projectId = req.params.Project_id
-  let userId = req.query.user_id
+  let userId = req.query.user_id // keep schema in sync with router
   if (userId === 'anonymous-user') {
     userId = null
   }

@@ -70,6 +70,8 @@ module.exports = {
       AuthenticationController.requirePrivateApiAuth(),
       RateLimiterMiddleware.rateLimit(rateLimiters.joinProject, {
         params: ['Project_id'],
+        // keep schema in sync with controller
+        getUserId: req => req.query.user_id,
       }),
       EditorHttpController.joinProject
     )
