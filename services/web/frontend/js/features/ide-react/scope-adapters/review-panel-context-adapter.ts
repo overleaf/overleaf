@@ -7,7 +7,6 @@ export default function populateReviewPanelScope(store: ReactScopeValueStore) {
   store.set('reviewPanel.layoutToLeft', false)
   store.set('reviewPanel.rendererData.lineHeight', 0)
   store.set('submitNewComment', async () => {})
-  store.set('deleteComment', () => {})
   store.set('gotoEntry', () => {})
   store.set('acceptChanges', () => {})
   store.set('rejectChanges', () => {})

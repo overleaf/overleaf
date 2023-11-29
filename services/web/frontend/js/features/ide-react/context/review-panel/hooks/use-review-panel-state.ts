@@ -820,8 +820,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
   const [submitNewComment] =
     useScopeValue<ReviewPanel.UpdaterFn<'submitNewComment'>>('submitNewComment')
-  const [deleteComment] =
-    useScopeValue<ReviewPanel.UpdaterFn<'deleteComment'>>('deleteComment')
   const [gotoEntry] =
     useScopeValue<ReviewPanel.UpdaterFn<'gotoEntry'>>('gotoEntry')
   const [submitReplyAngular] =
@@ -959,6 +957,28 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [projectId]
   )
 
+  const onCommentDeleted = useCallback(
+    (threadId: ThreadId, commentId: CommentId) => {
+      setCommentThreads(prevState => {
+        const thread = { ...getThread(threadId) }
+        thread.messages = thread.messages.filter(m => m.id !== commentId)
+        return { ...prevState, [threadId]: thread }
+      })
+    },
+    [getThread]
+  )
+
+  const deleteComment = useCallback(
+    (threadId: ThreadId, commentId: CommentId) => {
+      onCommentDeleted(threadId, commentId)
+      deleteJSON(
+        `/project/${projectId}/thread/${threadId}/messages/${commentId}`
+      ).catch(debugConsole.error)
+      handleLayoutChange({ async: true })
+    },
+    [onCommentDeleted, projectId]
+  )
+
   const refreshRanges = useCallback(() => {
     type Doc = {
       id: DocId
@@ -1091,6 +1111,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   useSocketListener(socket, 'delete-thread', onThreadDeleted)
   useSocketListener(socket, 'resolve-thread', onCommentResolved)
   useSocketListener(socket, 'edit-message', onCommentEdited)
+  useSocketListener(socket, 'delete-message', onCommentDeleted)
 
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
