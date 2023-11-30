@@ -158,9 +158,6 @@ const UserSchema = new Schema(
     featuresEpoch: {
       type: String,
     },
-    // when auto-merged from SL and must-reconfirm is set, we may end up using
-    // `sharelatexHashedPassword` to recover accounts...
-    sharelatexHashedPassword: String,
     must_reconfirm: { type: Boolean, default: false },
     referal_id: {
       type: String,
