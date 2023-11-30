@@ -5,9 +5,6 @@ import SettingsOverallTheme from '../../../../../../frontend/js/features/editor-
 import type { OverallThemeMeta } from '../../../../../../types/project-settings'
 import { renderWithEditorContext } from '../../../../helpers/render-with-context'
 
-const IEEE_BRAND_ID = 1234
-const OTHER_BRAND_ID = 2234
-
 describe('<SettingsOverallTheme />', function () {
   const overallThemes: OverallThemeMeta[] = [
     {
@@ -24,9 +21,6 @@ describe('<SettingsOverallTheme />', function () {
 
   beforeEach(function () {
     window.metaAttributesCache.set('ol-overallThemes', overallThemes)
-    window.metaAttributesCache.set('ol-ExposedSettings', {
-      ieeeBrandId: IEEE_BRAND_ID,
-    })
   })
 
   afterEach(function () {
@@ -43,31 +37,5 @@ describe('<SettingsOverallTheme />', function () {
       const option = within(select).getByText(theme.name)
       expect(option.getAttribute('value')).to.equal(theme.val)
     }
-  })
-  describe('Branded Project', function () {
-    it('should hide overall theme picker for IEEE branded projects', function () {
-      window.metaAttributesCache.set('ol-brandVariation', {
-        brand_id: IEEE_BRAND_ID,
-      })
-      renderWithEditorContext(<SettingsOverallTheme />)
-      const select = screen.queryByText('Overall theme')
-      expect(select).to.not.exist
-    })
-
-    it('should show overall theme picker for branded projects that are not IEEE', function () {
-      window.metaAttributesCache.set('ol-brandVariation', {
-        brand_id: OTHER_BRAND_ID,
-      })
-      renderWithEditorContext(<SettingsOverallTheme />)
-      const select = screen.getByLabelText('Overall theme')
-      expect(select).to.exist
-    })
-
-    it('should show overall theme picker for non branded projects', function () {
-      window.metaAttributesCache.set('ol-brandVariation', undefined)
-      renderWithEditorContext(<SettingsOverallTheme />)
-      const select = screen.getByLabelText('Overall theme')
-      expect(select).to.exist
-    })
   })
 })

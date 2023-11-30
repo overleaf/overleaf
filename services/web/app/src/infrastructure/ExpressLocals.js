@@ -377,7 +377,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       adminEmail: Settings.adminEmail,
       dropboxAppName:
         Settings.apis.thirdPartyDataStore?.dropboxAppName || 'Overleaf',
-      ieeeBrandId: IEEE_BRAND_ID,
       hasSamlBeta: req.session.samlBeta,
       hasAffiliationsFeature: Features.hasFeature('affiliations'),
       hasSamlFeature: Features.hasFeature('saml'),

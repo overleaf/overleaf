@@ -19,7 +19,6 @@ export type ExposedSettings = {
   hasLinkedProjectOutputFileFeature: boolean
   hasSamlBeta?: boolean
   hasSamlFeature: boolean
-  ieeeBrandId: number
   isOverleaf: boolean
   maxEntitiesPerProject: number
   projectUploadTimeout: number
