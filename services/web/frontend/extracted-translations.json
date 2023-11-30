@@ -350,6 +350,7 @@
   "existing_plan_active_until_term_end": "",
   "expand": "",
   "expired": "",
+  "expired_confirmation_code": "",
   "expires": "",
   "export_csv": "",
   "export_project_to_github": "",

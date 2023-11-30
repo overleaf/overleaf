@@ -524,6 +524,7 @@
   "examples": "Examples",
   "existing_plan_active_until_term_end": "Your existing plan and its features will remain active until the end of the current billing period.",
   "expand": "Expand",
+  "expired_confirmation_code": "That didn’t work. Please check the code and try again. Or click <0>Resend confirmation code</0> to get a new one.",
   "expires": "Expires",
   "expiry": "Expiry Date",
   "export_csv": "Export CSV",
