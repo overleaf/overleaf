@@ -21,6 +21,7 @@ import { LocalCompileProvider } from '@/shared/context/local-compile-context'
 import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -247,6 +248,7 @@ export const ScopeDecorator = (
     ProjectSettingsProvider,
     SplitTestProvider,
     UserProvider,
+    UserSettingsProvider,
     ...opts.providers,
   }
 
@@ -254,25 +256,27 @@ export const ScopeDecorator = (
     <Providers.SplitTestProvider>
       <Providers.IdeAngularProvider ide={ide}>
         <Providers.UserProvider>
-          <Providers.ProjectProvider>
-            <Providers.FileTreeDataProvider>
-              <Providers.FileTreePathProvider>
-                <Providers.DetachProvider>
-                  <Providers.EditorProvider>
-                    <Providers.ProjectSettingsProvider>
-                      <Providers.LayoutProvider>
-                        <Providers.LocalCompileProvider>
-                          <Providers.DetachCompileProvider>
-                            <Story />
-                          </Providers.DetachCompileProvider>
-                        </Providers.LocalCompileProvider>
-                      </Providers.LayoutProvider>
-                    </Providers.ProjectSettingsProvider>
-                  </Providers.EditorProvider>
-                </Providers.DetachProvider>
-              </Providers.FileTreePathProvider>
-            </Providers.FileTreeDataProvider>
-          </Providers.ProjectProvider>
+          <Providers.UserSettingsProvider>
+            <Providers.ProjectProvider>
+              <Providers.FileTreeDataProvider>
+                <Providers.FileTreePathProvider>
+                  <Providers.DetachProvider>
+                    <Providers.EditorProvider>
+                      <Providers.ProjectSettingsProvider>
+                        <Providers.LayoutProvider>
+                          <Providers.LocalCompileProvider>
+                            <Providers.DetachCompileProvider>
+                              <Story />
+                            </Providers.DetachCompileProvider>
+                          </Providers.LocalCompileProvider>
+                        </Providers.LayoutProvider>
+                      </Providers.ProjectSettingsProvider>
+                    </Providers.EditorProvider>
+                  </Providers.DetachProvider>
+                </Providers.FileTreePathProvider>
+              </Providers.FileTreeDataProvider>
+            </Providers.ProjectProvider>
+          </Providers.UserSettingsProvider>
         </Providers.UserProvider>
       </Providers.IdeAngularProvider>
     </Providers.SplitTestProvider>
