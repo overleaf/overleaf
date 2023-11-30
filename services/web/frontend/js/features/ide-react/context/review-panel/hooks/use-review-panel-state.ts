@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { isEqual, cloneDeep } from 'lodash'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
@@ -16,6 +17,7 @@ import { useUserContext } from '@/shared/context/user-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
@@ -115,6 +117,7 @@ const formatComment = (
 }
 
 function useReviewPanelState(): ReviewPanelStateReactIde {
+  const { t } = useTranslation()
   const { reviewPanelOpen, setReviewPanelOpen } = useLayoutContext()
   const { projectId } = useIdeReactContext()
   const project = useProjectContext()
@@ -126,6 +129,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const { isRestrictedTokenMember } = useEditorContext()
   // TODO permissions to be removed from the review panel context. It currently acts just as a proxy.
   const { permissions } = usePermissionsContext()
+  const { showGenericMessageModal } = useModalsContext()
 
   // TODO `currentDocument` and `currentDocumentId` should be get from `useEditorManagerContext()` but that makes tests fail
   const [currentDocument] = useScopeValue<Document>('editor.sharejs_doc')
@@ -834,10 +838,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     useScopeValue<ReviewPanel.UpdaterFn<'submitNewComment'>>('submitNewComment')
   const [gotoEntry] =
     useScopeValue<ReviewPanel.UpdaterFn<'gotoEntry'>>('gotoEntry')
-  const [submitReplyAngular] =
-    useScopeValue<
-      (entry: { thread_id: ThreadId; replyContent: string }) => void
-    >('submitReply')
 
   const view = reviewPanelOpen ? subView : 'mini'
 
@@ -1073,9 +1073,28 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
   const submitReply = useCallback(
     (threadId: ThreadId, replyContent: string) => {
-      submitReplyAngular({ thread_id: threadId, replyContent })
+      const url = `/project/${projectId}/thread/${threadId}/messages`
+      postJSON(url, { body: { content: replyContent } }).catch(() => {
+        showGenericMessageModal(
+          t('error_submitting_comment'),
+          t('comment_submit_error')
+        )
+      })
+
+      const trackingMetadata = {
+        view,
+        size: replyContent.length,
+        thread: threadId,
+      }
+
+      setCommentThreads(prevState => ({
+        ...prevState,
+        [threadId]: { ...getThread(threadId), submitting: true },
+      }))
+      handleLayoutChange({ async: true })
+      sendMB('rp-comment-reply', trackingMetadata)
     },
-    [submitReplyAngular]
+    [getThread, projectId, showGenericMessageModal, t, view]
   )
 
   const [entryHover, setEntryHover] = useState(false)
@@ -1289,6 +1308,22 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
         updateEntries(docId)
       },
       [currentDocumentId, getChangeTracker, updateEntries]
+    )
+  )
+  useSocketListener(
+    socket,
+    'new-comment',
+    useCallback(
+      (threadId: ThreadId, comment: ReviewPanelCommentThreadMessageApi) => {
+        setCommentThreads(prevState => {
+          const { submitting: _, ...thread } = getThread(threadId)
+          thread.messages = [...thread.messages]
+          thread.messages.push(formatComment(comment))
+          return { ...prevState, [threadId]: thread }
+        })
+        handleLayoutChange({ async: true })
+      },
+      [getThread]
     )
   )
 
