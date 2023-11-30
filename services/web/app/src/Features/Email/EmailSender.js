@@ -94,6 +94,12 @@ async function sendEmail(options) {
     if (EMAIL_SETTINGS.textEncoding != null) {
       sendMailOptions.textEncoding = EMAIL_SETTINGS.textEncoding
     }
+    if (options.category) {
+      // category support for sendgrid
+      sendMailOptions.headers = {
+        'X-SMTPAPI': JSON.stringify({ category: options.category }),
+      }
+    }
     await client.sendMail(sendMailOptions)
   } catch (err) {
     throw new OError('error sending message').withCause(err)

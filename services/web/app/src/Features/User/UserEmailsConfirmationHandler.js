@@ -60,6 +60,7 @@ async function sendConfirmationCode(email) {
   await EmailHandler.promises.sendEmail('confirmCode', {
     to: email,
     confirmCode,
+    category: ['ConfirmEmail'],
   })
 
   return {
