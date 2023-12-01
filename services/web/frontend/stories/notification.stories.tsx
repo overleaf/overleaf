@@ -247,6 +247,72 @@ export const CustomIcon = (args: Args) => {
   )
 }
 
+export const MultipleButtons = (args: Args) => {
+  return (
+    <Notification
+      {...args}
+      content={<p>Lorem ipsum</p>}
+      action={
+        <>
+          <button className="btn btn-secondary btn-sm">button1</button>
+          <button className="btn btn-secondary btn-sm">button2</button>
+        </>
+      }
+      type="info"
+      isActionBelowContent
+      isDismissible
+    />
+  )
+}
+
+export const OverlayedWithCustomClass = (args: Args) => {
+  return (
+    <>
+      <Notification
+        {...args}
+        content={
+          <p>
+            This can be <b>any HTML</b> passed to the component. For example,
+            paragraphs, headers, <code>code samples</code>,{' '}
+            <a href="/">links</a>, etc are all supported.
+          </p>
+        }
+        className="ol-overlay"
+        action={
+          <>
+            <button className="btn btn-secondary btn-sm">button1</button>
+            <button className="btn btn-secondary btn-sm">button2</button>
+          </>
+        }
+        type="info"
+        isActionBelowContent
+        isDismissible
+      />
+      <div>
+        <p>we need filler content, so here are some jokes</p>
+        <ul>
+          <li>Did you hear about the circus fire? It was in tents!</li>
+          <li>How do you catch a squirrel? Climb a tree and act like a nut!</li>
+          <li>
+            Did you hear about the guy who invented Lifesavers? They say he made
+            a mint!
+          </li>
+          <li>
+            Why couldn't the bicycle stand up by itself? It was two tired.
+          </li>
+          <li>
+            did one hat say to the other?" "Stay here! I'm going on ahead.
+          </li>
+          <li>
+            Why did Billy get fired from the banana factory? He kept throwing
+            away the bent ones.
+          </li>
+        </ul>
+      </div>
+    </>
+  )
+}
+
 export const SuccessFlow = (args: Args) => {
   console.log('.....render')
   fetchMock.post(
