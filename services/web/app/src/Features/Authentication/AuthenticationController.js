@@ -244,11 +244,11 @@ const AuthenticationController = {
 
   captchaRequiredForLogin(req, user) {
     switch (AuthenticationController.getAuditInfo(req).captcha) {
+      case 'trusted':
       case 'disabled':
         return false
       case 'solved':
         return false
-      case 'trusted':
       case 'skipped': {
         let required = false
         if (user.lastFailedLogin) {
