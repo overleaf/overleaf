@@ -1,9 +1,7 @@
 import { memo, useCallback } from 'react'
 import { UpdateRange, Version } from '../../services/types/update'
 import TagTooltip from './tag-tooltip'
-import { formatTime, isoToUnix } from '../../../utils/format-date'
-import { isPseudoLabel } from '../../utils/label'
-import UserNameWithColoredBadge from './user-name-with-colored-badge'
+import { formatTimeBasedOnYear, isoToUnix } from '../../../utils/format-date'
 import HistoryDropdown from './dropdown/history-dropdown'
 import HistoryVersionDetails from './history-version-details'
 import { LoadedLabel } from '../../services/types/label'
@@ -132,29 +130,18 @@ function LabelListItem({
         {labels.map(label => (
           <div key={label.id} className="history-version-label">
             <TagTooltip
-              showTooltip={false}
+              showTooltip
               currentUserId={currentUserId}
               label={label}
             />
-            <time
-              className="history-version-metadata-time"
-              data-testid="history-version-metadata-time"
-            >
-              {formatTime(label.created_at, 'Do MMMM, h:mm a')}
-            </time>
-            {!isPseudoLabel(label) && (
-              <div className="history-version-saved-by">
-                <span className="history-version-saved-by-label">
-                  {t('saved_by')}
-                </span>
-                <UserNameWithColoredBadge
-                  user={{
-                    id: label.user_id,
-                    displayName: label.user_display_name,
-                  }}
-                  currentUserId={currentUserId}
-                />
-              </div>
+            {label.lastUpdatedTimestamp && (
+              <time
+                className="history-version-metadata-time"
+                data-testid="history-version-metadata-time"
+              >
+                {t('last_edit')}{' '}
+                {formatTimeBasedOnYear(label.lastUpdatedTimestamp)}
+              </time>
             )}
           </div>
         ))}

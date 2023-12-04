@@ -3,6 +3,7 @@ import { Nullable } from '../../../../../../types/utils'
 interface LabelBase {
   id: string
   created_at: string
+  lastUpdatedTimestamp: Nullable<number>
 }
 
 interface UpdateLabel extends LabelBase {

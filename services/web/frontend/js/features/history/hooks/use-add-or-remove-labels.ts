@@ -36,7 +36,11 @@ function useAddOrRemoveLabels() {
     if (labels) {
       const nonPseudoLabels = labels.filter(isLabel)
       const processedNonPseudoLabels = labelsHandler(nonPseudoLabels)
-      const newLabels = loadLabels(processedNonPseudoLabels, tempUpdates[0].toV)
+      const newLabels = loadLabels(
+        processedNonPseudoLabels,
+        tempUpdates[0].toV,
+        tempUpdates[0].meta.end_ts
+      )
       setLabels(newLabels)
 
       return newLabels

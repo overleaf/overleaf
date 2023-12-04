@@ -12,9 +12,9 @@ import useAddOrRemoveLabels from '../../hooks/use-add-or-remove-labels'
 import { useHistoryContext } from '../../context/history-context'
 import { deleteLabel } from '../../services/api'
 import { isPseudoLabel } from '../../utils/label'
-import { formatDate } from '../../../../utils/dates'
 import { LoadedLabel } from '../../services/types/label'
 import { debugConsole } from '@/utils/debugging'
+import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 
 type TagProps = {
   label: LoadedLabel
@@ -152,7 +152,7 @@ function TagTooltip({ label, currentUserId, showTooltip }: LabelBadgesProps) {
             {t('history_label_created_by')} {labelOwnerName}
           </div>
           <div className="history-version-label-tooltip-row">
-            <time>{formatDate(label.created_at)}</time>
+            <time>{formatTimeBasedOnYear(label.created_at)}</time>
           </div>
         </div>
       }

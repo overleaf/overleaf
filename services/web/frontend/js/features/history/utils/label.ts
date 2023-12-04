@@ -35,7 +35,8 @@ const deletePseudoCurrentStateLabelIfExistent = (labels: LoadedLabel[]) => {
 
 const addPseudoCurrentStateLabelIfNeeded = (
   labels: LoadedLabel[],
-  mostRecentVersion: Nullable<number>
+  mostRecentVersion: Nullable<number>,
+  lastUpdatedTimestamp: Nullable<number>
 ) => {
   if (!labels.length || labels[0].version !== mostRecentVersion) {
     const pseudoCurrentStateLabel: PseudoCurrentStateLabel = {
@@ -43,25 +44,41 @@ const addPseudoCurrentStateLabelIfNeeded = (
       isPseudoCurrentStateLabel: true,
       version: mostRecentVersion,
       created_at: new Date().toISOString(),
+      lastUpdatedTimestamp,
     }
     return [pseudoCurrentStateLabel, ...labels]
   }
   return labels
 }
 
+const addLastUpdatedTimestamp = (
+  labels: LoadedLabel[],
+  lastUpdatedTimestamp: Nullable<number>
+) => {
+  return labels.map(label => ({
+    ...label,
+    lastUpdatedTimestamp,
+  }))
+}
+
 export const loadLabels = (
   labels: Label[],
-  lastUpdateToV: Nullable<number>
+  lastUpdateToV: Nullable<number>,
+  lastUpdatedTimestamp: Nullable<number>
 ) => {
   const sortedLabels = sortLabelsByVersionAndDate(labels)
   const labelsWithoutPseudoLabel =
     deletePseudoCurrentStateLabelIfExistent(sortedLabels)
   const labelsWithPseudoLabelIfNeeded = addPseudoCurrentStateLabelIfNeeded(
     labelsWithoutPseudoLabel,
-    lastUpdateToV
+    lastUpdateToV,
+    lastUpdatedTimestamp
   )
-
-  return labelsWithPseudoLabelIfNeeded
+  const labelsWithLastUpdatedTimestamp = addLastUpdatedTimestamp(
+    labelsWithPseudoLabelIfNeeded,
+    lastUpdatedTimestamp
+  )
+  return labelsWithLastUpdatedTimestamp
 }
 
 export const getVersionWithLabels = (labels: Nullable<LoadedLabel[]>) => {

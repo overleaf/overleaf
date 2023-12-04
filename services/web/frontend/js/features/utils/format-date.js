@@ -19,6 +19,14 @@ export function relativeDate(date) {
   return moment(date).calendar()
 }
 
+export function formatTimeBasedOnYear(date) {
+  const currentDate = moment()
+
+  return currentDate.diff(date, 'years') > 0
+    ? formatTime(date, 'D MMMM YYYY, h:mm a')
+    : formatTime(date, 'D MMMM, h:mm a')
+}
+
 /**
  * @param {string} isoTimestamp
  * @returns {number}
