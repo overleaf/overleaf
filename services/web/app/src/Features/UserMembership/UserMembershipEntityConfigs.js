@@ -43,6 +43,23 @@ module.exports = {
     },
   },
 
+  groupMember: {
+    modelName: 'Subscription',
+    readOnly: true,
+    hasMembersLimit: true,
+    fields: {
+      primaryKey: '_id',
+      read: ['member_ids'],
+      write: null,
+      access: 'member_ids',
+      membership: 'member_ids',
+      name: 'teamName',
+    },
+    baseQuery: {
+      groupPlan: true,
+    },
+  },
+
   groupAdmin: {
     modelName: 'Subscription',
     fields: {

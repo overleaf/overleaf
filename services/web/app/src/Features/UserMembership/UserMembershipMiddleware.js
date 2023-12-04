@@ -31,6 +31,14 @@ const UserMembershipMiddleware = {
     requireEntity(),
   ],
 
+  requireGroupMemberAccess: [
+    AuthenticationController.requireLogin(),
+    fetchEntityConfig('groupMember'),
+    fetchEntity(),
+    requireEntity(),
+    allowAccessIfAny([UserMembershipAuthorization.hasEntityAccess()]),
+  ],
+
   requireGroupManagementAccess: [
     AuthenticationController.requireLogin(),
     fetchEntityConfig('group'),
