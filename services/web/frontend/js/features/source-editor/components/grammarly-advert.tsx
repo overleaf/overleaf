@@ -54,7 +54,7 @@ export default function GrammarlyAdvert() {
           <a
             className="advert-link"
             onClick={() => eventTracking.sendMB('grammarly-advert-clicked')}
-            href="https://www.grammarly.com/upgrade?transaction_id=10264119b53f745bed2cdca3c3e4a5&affiliateNetwork=ho&utm_campaign=Overleaf&affiliateID=142242&utm_source=program"
+            href="https://grammarly.go2cloud.org/aff_c?offer_id=372&aff_id=142242"
             target="_blank"
             rel="noopener"
           >
