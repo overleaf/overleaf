@@ -8,6 +8,7 @@ import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
+import { useIdeContext } from '@/shared/context/ide-context'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
@@ -27,6 +28,8 @@ function EditorWidgets() {
   } = useBulkActionsModal()
   const { setIsAddingComment, handleSetSubview } =
     useReviewPanelUpdaterFnsContext()
+  const { isReactIde } = useIdeContext()
+  const { toggleReviewPanel } = useReviewPanelUpdaterFnsContext()
   const [addNewComment] =
     useScopeValue<(e: React.MouseEvent<HTMLButtonElement>) => void>(
       'addNewComment'
@@ -47,6 +50,13 @@ function EditorWidgets() {
     openDocId && openDocId in entries ? entries[openDocId] : undefined
 
   const handleAddNewCommentClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (isReactIde) {
+      e.preventDefault()
+      setIsAddingComment(true)
+      toggleReviewPanel()
+      return
+    }
+
     addNewComment(e)
     setTimeout(() => {
       // Re-render the comment box in order to add autofocus every time

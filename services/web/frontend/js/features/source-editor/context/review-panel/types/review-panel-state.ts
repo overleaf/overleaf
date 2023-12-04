@@ -76,7 +76,7 @@ export interface ReviewPanelState {
     refreshResolvedCommentsDropdown: () => Promise<
       void | ReviewPanelDocEntries[]
     >
-    submitNewComment: (content: string) => Promise<void>
+    submitNewComment: (content: string) => void
     setEntryHover: React.Dispatch<React.SetStateAction<Value<'entryHover'>>>
     setIsAddingComment: React.Dispatch<
       React.SetStateAction<Value<'isAddingComment'>>

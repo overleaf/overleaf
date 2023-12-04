@@ -33,6 +33,7 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
     </>
   )
 
+  // TODO fix DOM structure
   return ReactDOM.createPortal(
     isReactIde ? (
       <div

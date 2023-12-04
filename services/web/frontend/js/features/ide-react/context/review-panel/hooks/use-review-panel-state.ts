@@ -6,6 +6,7 @@ import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useAsync from '@/shared/hooks/use-async'
 import useAbortController from '@/shared/hooks/use-abort-controller'
+import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
 import {
   dispatchReviewPanelLayout as handleLayoutChange,
@@ -130,6 +131,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   // TODO permissions to be removed from the review panel context. It currently acts just as a proxy.
   const { permissions } = usePermissionsContext()
   const { showGenericMessageModal } = useModalsContext()
+  const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
 
   // TODO `currentDocument` and `currentDocumentId` should be get from `useEditorManagerContext()` but that makes tests fail
   const [currentDocument] = useScopeValue<Document>('editor.sharejs_doc')
@@ -834,8 +836,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     applyTrackChangesStateToClient
   )
 
-  const [submitNewComment] =
-    useScopeValue<ReviewPanel.UpdaterFn<'submitNewComment'>>('submitNewComment')
   const [gotoEntry] =
     useScopeValue<ReviewPanel.UpdaterFn<'gotoEntry'>>('gotoEntry')
 
@@ -1097,6 +1097,53 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [getThread, projectId, showGenericMessageModal, t, view]
   )
 
+  // TODO `submitNewComment` is partially localized in the `add-comment-entry` component.
+  const submitNewComment = useCallback(
+    (content: string) => {
+      if (!content) {
+        return
+      }
+
+      const entries = getDocEntries(currentDocumentId)
+      const addCommentEntry = entries['add-comment'] as
+        | ReviewPanelAddCommentEntry
+        | undefined
+
+      if (!addCommentEntry) {
+        return
+      }
+
+      const { offset, length } = addCommentEntry
+      const threadId = RangesTracker.generateId()
+      setCommentThreads(prevState => ({
+        ...prevState,
+        [threadId]: { ...getThread(threadId), submitting: true },
+      }))
+
+      const url = `/project/${projectId}/thread/${threadId}/messages`
+      postJSON(url, { body: { content } })
+        .then(() => {
+          dispatchReviewPanelEvent('comment:add', { threadId, offset, length })
+          handleLayoutChange({ async: true })
+          sendMB('rp-new-comment', { size: content.length })
+        })
+        .catch(() => {
+          showGenericMessageModal(
+            t('error_submitting_comment'),
+            t('comment_submit_error')
+          )
+        })
+    },
+    [
+      currentDocumentId,
+      getDocEntries,
+      getThread,
+      projectId,
+      showGenericMessageModal,
+      t,
+    ]
+  )
+
   const [entryHover, setEntryHover] = useState(false)
   const [isAddingComment, setIsAddingComment] = useState(false)
   const [navHeight, setNavHeight] = useState(0)
@@ -1250,6 +1297,19 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       handleLayoutChange()
     }
 
+    const addNewCommentFromKbdShortcut = () => {
+      if (!trackChangesVisible) {
+        return
+      }
+      dispatchReviewPanelEvent('comment:select_line')
+
+      if (!reviewPanelOpen) {
+        toggleReviewPanel()
+      }
+      handleLayoutChange({ async: true })
+      addCommentEmitter()
+    }
+
     const handleEditorEvents = (e: Event) => {
       const event = e as CustomEvent
       const { type, payload } = event.detail
@@ -1266,6 +1326,11 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           break
         }
 
+        case 'add-new-comment': {
+          addNewCommentFromKbdShortcut()
+          break
+        }
+
         case 'toggle-track-changes': {
           toggleTrackChangesFromKbdShortcut()
           break
@@ -1279,9 +1344,12 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       window.removeEventListener('editor:event', handleEditorEvents)
     }
   }, [
+    addCommentEmitter,
     currentDocumentId,
     getDocEntries,
     resolvedThreadIds,
+    reviewPanelOpen,
+    toggleReviewPanel,
     toggleTrackChangesForUser,
     trackChanges,
     trackChangesState,

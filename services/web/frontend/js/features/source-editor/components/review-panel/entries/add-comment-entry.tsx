@@ -30,10 +30,10 @@ function AddCommentEntry() {
     handleLayoutChange({ async: true })
   }
 
-  const handleSubmitNewComment = async () => {
+  const handleSubmitNewComment = () => {
     setIsSubmitting(true)
     try {
-      await submitNewComment(content)
+      submitNewComment(content)
       setIsSubmitting(false)
       setIsAddingComment(false)
       setContent('')
