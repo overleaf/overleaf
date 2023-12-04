@@ -62,9 +62,11 @@ function CommonNotification({ notification }: CommonNotificationProps) {
   return (
     <>
       {templateKey === 'notification_project_invite' ? (
-        <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
-          <Notification.Body>
-            {accepted ? (
+        <Notification
+          bsStyle="info"
+          onDismiss={() => id && handleDismiss(id)}
+          body={
+            accepted ? (
               <Trans
                 i18nKey="notification_project_invite_accepted_message"
                 components={{ b: <b /> }}
@@ -83,10 +85,10 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 shouldUnescape
                 tOptions={{ interpolation: { escapeValue: true } }}
               />
-            )}
-          </Notification.Body>
-          <Notification.Action>
-            {accepted ? (
+            )
+          }
+          action={
+            accepted ? (
               <Button
                 bsStyle="info"
                 bsSize="sm"
@@ -110,17 +112,21 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   t('join_project')
                 )}
               </Button>
-            )}
-          </Notification.Action>
-        </Notification>
+            )
+          }
+        />
       ) : templateKey === 'wfh_2020_upgrade_offer' ? (
-        <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
-          <Notification.Body>
-            Important notice: Your free WFH2020 upgrade came to an end on June
-            30th 2020. We're still providing a number of special initiatives to
-            help you continue collaborating throughout 2020.
-          </Notification.Body>
-          <Notification.Action>
+        <Notification
+          bsStyle="info"
+          onDismiss={() => id && handleDismiss(id)}
+          body={
+            <>
+              Important notice: Your free WFH2020 upgrade came to an end on June
+              30th 2020. We're still providing a number of special initiatives
+              to help you continue collaborating throughout 2020.
+            </>
+          }
+          action={
             <Button
               bsStyle="info"
               bsSize="sm"
@@ -129,55 +135,59 @@ function CommonNotification({ notification }: CommonNotificationProps) {
             >
               View
             </Button>
-          </Notification.Action>
-        </Notification>
+          }
+        />
       ) : templateKey === 'notification_ip_matched_affiliation' ? (
-        <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
-          <Notification.Body>
-            <Trans
-              i18nKey="looks_like_youre_at"
-              components={[<b />]} // eslint-disable-line react/jsx-key
-              values={{
-                institutionName: notification.messageOpts.university_name,
-              }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />
-            <br />
-            {notification.messageOpts.ssoEnabled ? (
-              <>
-                <Trans
-                  i18nKey="you_can_now_log_in_sso"
-                  components={[<b />]} // eslint-disable-line react/jsx-key
-                />
-                <br />
-                {t('link_institutional_email_get_started')}{' '}
-                <a
-                  href={
-                    notification.messageOpts.portalPath ||
-                    'https://www.overleaf.com/learn/how-to/Institutional_Login'
-                  }
-                >
-                  {t('find_out_more_nt')}
-                </a>
-              </>
-            ) : (
-              <>
-                <Trans
-                  i18nKey="did_you_know_institution_providing_professional"
-                  components={[<b />]} // eslint-disable-line react/jsx-key
-                  values={{
-                    institutionName: notification.messageOpts.university_name,
-                  }}
-                  shouldUnescape
-                  tOptions={{ interpolation: { escapeValue: true } }}
-                />
-                <br />
-                {t('add_email_to_claim_features')}
-              </>
-            )}
-          </Notification.Body>
-          <Notification.Action>
+        <Notification
+          bsStyle="info"
+          onDismiss={() => id && handleDismiss(id)}
+          body={
+            <>
+              <Trans
+                i18nKey="looks_like_youre_at"
+                components={[<b />]} // eslint-disable-line react/jsx-key
+                values={{
+                  institutionName: notification.messageOpts.university_name,
+                }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
+              />
+              <br />
+              {notification.messageOpts.ssoEnabled ? (
+                <>
+                  <Trans
+                    i18nKey="you_can_now_log_in_sso"
+                    components={[<b />]} // eslint-disable-line react/jsx-key
+                  />
+                  <br />
+                  {t('link_institutional_email_get_started')}{' '}
+                  <a
+                    href={
+                      notification.messageOpts.portalPath ||
+                      'https://www.overleaf.com/learn/how-to/Institutional_Login'
+                    }
+                  >
+                    {t('find_out_more_nt')}
+                  </a>
+                </>
+              ) : (
+                <>
+                  <Trans
+                    i18nKey="did_you_know_institution_providing_professional"
+                    components={[<b />]} // eslint-disable-line react/jsx-key
+                    values={{
+                      institutionName: notification.messageOpts.university_name,
+                    }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
+                  />
+                  <br />
+                  {t('add_email_to_claim_features')}
+                </>
+              )}
+            </>
+          }
+          action={
             <Button
               bsStyle="info"
               bsSize="sm"
@@ -192,20 +202,22 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                 ? t('link_account')
                 : t('add_affiliation')}
             </Button>
-          </Notification.Action>
-        </Notification>
+          }
+        />
       ) : templateKey === 'notification_tpds_file_limit' ? (
         <Notification
           bsStyle="danger"
           onDismiss={() => id && handleDismiss(id)}
-        >
-          <Notification.Body>
-            Error: Your project {notification.messageOpts.projectName} has gone
-            over the 2000 file limit using an integration (e.g. Dropbox or
-            GitHub) <br />
-            Please decrease the size of your project to prevent further errors.
-          </Notification.Body>
-          <Notification.Action>
+          body={
+            <>
+              Error: Your project {notification.messageOpts.projectName} has
+              gone over the 2000 file limit using an integration (e.g. Dropbox
+              or GitHub) <br />
+              Please decrease the size of your project to prevent further
+              errors.
+            </>
+          }
+          action={
             <Button
               bsStyle="danger"
               bsSize="sm"
@@ -214,76 +226,82 @@ function CommonNotification({ notification }: CommonNotificationProps) {
             >
               Account Settings
             </Button>
-          </Notification.Action>
-        </Notification>
+          }
+        />
       ) : templateKey === 'notification_dropbox_duplicate_project_names' ? (
         <Notification
           bsStyle="warning"
           onDismiss={() => id && handleDismiss(id)}
-        >
-          <Notification.Body>
-            <p>
-              <Trans
-                i18nKey="dropbox_duplicate_project_names"
-                components={[<b />]} // eslint-disable-line react/jsx-key
-                values={{ projectName: notification.messageOpts.projectName }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
-              />
-            </p>
-            <p>
-              <Trans
-                i18nKey="dropbox_duplicate_project_names_suggestion"
-                components={[<b />]} // eslint-disable-line react/jsx-key
-              />{' '}
-              <a href="/learn/how-to/Dropbox_Synchronization#Troubleshooting">
-                {t('learn_more')}
-              </a>
-              .
-            </p>
-          </Notification.Body>
-        </Notification>
+          body={
+            <>
+              <p>
+                <Trans
+                  i18nKey="dropbox_duplicate_project_names"
+                  components={[<b />]} // eslint-disable-line react/jsx-key
+                  values={{ projectName: notification.messageOpts.projectName }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
+                />
+              </p>
+              <p>
+                <Trans
+                  i18nKey="dropbox_duplicate_project_names_suggestion"
+                  components={[<b />]} // eslint-disable-line react/jsx-key
+                />{' '}
+                <a href="/learn/how-to/Dropbox_Synchronization#Troubleshooting">
+                  {t('learn_more')}
+                </a>
+                .
+              </p>
+            </>
+          }
+        />
       ) : templateKey ===
         'notification_dropbox_unlinked_due_to_lapsed_reconfirmation' ? (
-        <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
-          <Notification.Body>
-            <Trans
-              i18nKey="dropbox_unlinked_premium_feature"
-              components={[<b />]} // eslint-disable-line react/jsx-key
-            />{' '}
-            {user.features?.dropbox ? (
+        <Notification
+          bsStyle="info"
+          onDismiss={() => id && handleDismiss(id)}
+          body={
+            <>
               <Trans
-                i18nKey="can_now_relink_dropbox"
-                /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-                components={[<a href="/user/settings#project-sync" />]}
-              />
-            ) : (
-              t('confirm_affiliation_to_relink_dropbox')
-            )}{' '}
-            <a href="/learn/how-to/Institutional_Email_Reconfirmation">
-              {t('learn_more')}
-            </a>
-          </Notification.Body>
-        </Notification>
+                i18nKey="dropbox_unlinked_premium_feature"
+                components={[<b />]} // eslint-disable-line react/jsx-key
+              />{' '}
+              {user.features?.dropbox ? (
+                <Trans
+                  i18nKey="can_now_relink_dropbox"
+                  /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+                  components={[<a href="/user/settings#project-sync" />]}
+                />
+              ) : (
+                t('confirm_affiliation_to_relink_dropbox')
+              )}{' '}
+              <a href="/learn/how-to/Institutional_Email_Reconfirmation">
+                {t('learn_more')}
+              </a>
+            </>
+          }
+        />
       ) : templateKey === 'notification_group_invitation' ? (
         <GroupInvitationNotification notification={notification} />
       ) : templateKey === 'notification_personal_and_group_subscriptions' ? (
         <Notification
           bsStyle="warning"
           onDismiss={() => id && handleDismiss(id)}
-        >
-          <Notification.Body>
+          body={
             <Trans
               i18nKey="notification_personal_and_group_subscriptions"
               /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
               components={[<strong />, <a href="/user/subscription" />]}
             />
-          </Notification.Body>
-        </Notification>
+          }
+        />
       ) : (
-        <Notification bsStyle="info" onDismiss={() => id && handleDismiss(id)}>
-          <Notification.Body>{html}</Notification.Body>
-        </Notification>
+        <Notification
+          bsStyle="info"
+          onDismiss={() => id && handleDismiss(id)}
+          body={html}
+        />
       )}
     </>
   )
