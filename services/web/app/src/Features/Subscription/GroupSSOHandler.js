@@ -18,10 +18,7 @@ async function checkUserCanEnrollInSubscription(userId, subscription) {
     throw new Errors.SAMLGroupSSOLoginIdentityNotFoundError()
   }
 
-  const user = await User.findOne(
-    { _id: userId },
-    { projection: { enrollment: 1 } }
-  ).exec()
+  const user = await User.findOne({ _id: userId }, { enrollment: 1 }).exec()
 
   const userIsEnrolled = user.enrollment?.sso?.some(
     enrollment => enrollment.groupId.toString() === subscription._id.toString()
