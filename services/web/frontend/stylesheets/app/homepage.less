@@ -329,3 +329,135 @@
     }
   }
 }
+
+.website-redesign {
+  .home-top {
+    padding-top: @header-height;
+    p {
+      margin: 0;
+    }
+
+    .home-top-card {
+      margin-top: @margin-lg;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .home-top-begin-text {
+        display: flex;
+        color: #5f5ff0;
+        font-size: 65px;
+        line-height: 80px;
+        font-family: 'DM Mono', monospace;
+        align-self: flex-start;
+        width: 100%;
+
+        @media (max-width: @screen-sm-max) {
+          text-align: center;
+          flex-direction: column;
+          align-items: center;
+        }
+      }
+
+      .home-top-parenthesis-text {
+        color: #bbdbb8;
+        font-size: 65px;
+        line-height: 80px;
+      }
+    }
+  }
+
+  .home-registration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+
+    .home-registration-sso {
+      display: flex;
+      gap: 16px;
+
+      @media (max-width: @screen-sm-max) {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .form-group {
+        .hp-login-btn {
+          width: 100%;
+        }
+      }
+    }
+
+    .home-registration-separator {
+      margin: 0 0 4px;
+      color: @neutral-90;
+
+      > span {
+        vertical-align: middle;
+        &::before,
+        &::after {
+          content: '';
+          display: inline-block;
+          vertical-align: middle;
+          width: 196px;
+          height: 1px;
+          background-color: @neutral-20;
+
+          @media (max-width: @screen-sm-max) {
+            flex-direction: column;
+            width: 100%;
+            width: 156px;
+          }
+        }
+
+        &::before {
+          margin-right: 20px;
+
+          @media (max-width: @screen-sm-max) {
+            margin-right: 5px;
+          }
+        }
+
+        &::after {
+          margin-left: 20px;
+
+          @media (max-width: @screen-sm-max) {
+            margin-left: 5px;
+          }
+        }
+      }
+    }
+
+    .home-registration-password {
+      display: flex;
+      flex-direction: column;
+
+      .home-registration-password-input {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        margin-bottom: 0;
+      }
+    }
+
+    .home-registration-sign-up {
+      display: block;
+      margin-top: 10px;
+      width: 100%;
+      margin-bottom: 0;
+
+      > button {
+        width: 100%;
+      }
+    }
+
+    .tos-agreement-notice {
+      a {
+        color: @green-60;
+        text-decoration: underline;
+        font-weight: 400;
+      }
+    }
+  }
+}

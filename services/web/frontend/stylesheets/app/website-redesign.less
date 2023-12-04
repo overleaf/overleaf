@@ -1,0 +1,339 @@
+.website-redesign {
+  p,
+  h2,
+  h3,
+  a {
+    font-family: 'Noto Sans', sans-serif;
+  }
+
+  h2 {
+    font-weight: 600;
+    font-size: 2.25rem;
+    line-height: 3rem;
+    margin-top: 0;
+  }
+
+  h3 {
+    font-weight: 600;
+  }
+
+  a {
+    font-weight: 600;
+  }
+
+  .img-rounded {
+    // TODO: design specifies 'border-radius-large' which is 5px, but uses 16px
+    border-radius: 16px;
+  }
+
+  .plans-cards {
+    @media (min-width: @screen-md-min) {
+      display: flex; /* equal heights */
+      flex-wrap: wrap;
+    }
+
+    .plans-card-container {
+      min-height: 348px;
+
+      @media (max-width: @screen-sm-max) {
+        margin-bottom: 16px;
+        height: 398px;
+      }
+    }
+
+    .plans-card {
+      border-radius: 8px;
+      padding: 0;
+      height: 100%;
+
+      .plans-card-inner {
+        padding: 36px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        font-size: 16px;
+
+        .plans-card-inner-title {
+          font-size: 20px;
+          font-weight: 600;
+          margin-top: 0;
+        }
+
+        ul {
+          list-style-type: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            margin-bottom: 8px;
+          }
+        }
+
+        .plans-card-inner-footer {
+          margin-top: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+
+      &.grey-border {
+        border: 2px solid #e7e9ee;
+      }
+
+      // workaround for border that contains both linear-gradient and border radius
+      // https://stackoverflow.com/a/53037637
+      &.blue-gradient-highlighted {
+        border: double 2px transparent;
+        border-radius: 8px;
+        background-image: linear-gradient(white, white),
+          linear-gradient(245.63deg, #214475 0%, #254c84 28.54%, #6597e0 96.69%);
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+
+        .plans-card-inner-title {
+          background: linear-gradient(
+            245.63deg,
+            #214475 0%,
+            #254c84 28.54%,
+            #6597e0 96.69%
+          );
+          background-clip: text;
+          color: transparent;
+        }
+      }
+    }
+  }
+
+  .info-cards {
+    .info-card-container {
+      height: 348px;
+      margin-bottom: 16px;
+
+      .info-card {
+        border-radius: 8px;
+        height: 100%;
+        box-shadow: 0px 2px 4px 0px #1e253029;
+        border-top: 8px solid #2f4858;
+        padding: 48px 40px 48px 40px;
+      }
+    }
+  }
+
+  .features-card {
+    .features-card-image {
+      img.img-responsive {
+        width: 100%;
+      }
+
+      @media (max-width: @screen-sm-max) {
+        margin-bottom: 50px;
+      }
+    }
+
+    .features-card-description {
+      p {
+        margin-bottom: 10px;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin-bottom: 8px;
+        }
+      }
+
+      .premium-badge {
+        .premium-badge-img {
+          margin-left: 10px;
+        }
+
+        @media (max-width: @screen-xs-max) {
+          display: flex;
+          .premium-badge-img {
+            width: 87px;
+            margin-left: auto;
+          }
+        }
+      }
+    }
+  }
+
+  .top-image-cards {
+    .top-image-card {
+      > img.img-responsive {
+        width: 100%;
+      }
+
+      .top-image-card-title {
+        font-size: 24px;
+        margin-top: 16px;
+        margin-bottom: 8px;
+
+        a {
+          width: 100%;
+          color: @neutral-90;
+          display: inline-flex;
+          justify-content: space-between;
+        }
+
+        i.material-symbols-rounded {
+          vertical-align: middle;
+          text-decoration: none;
+        }
+      }
+
+      .top-image-card-text {
+        font-size: 16px;
+      }
+
+      &:not(:last-of-type) {
+        @media (max-width: @screen-sm-max) {
+          margin-bottom: 40px;
+        }
+      }
+    }
+  }
+
+  .cta-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 64px;
+    background: #2f4858;
+    color: white;
+    border-radius: 8px;
+
+    .cta-card-title {
+      font-size: 52px;
+      font-weight: 500;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 8px;
+
+      span.purple-color {
+        color: #939aff;
+      }
+
+      span.lime-color {
+        color: #7ee787;
+      }
+    }
+
+    .cta-card-buttons {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+    }
+  }
+
+  .testimonial-media {
+    border-radius: 24px;
+
+    .testimonial-media-text-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 352px;
+      background-color: #2f4858;
+      color: white;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 0;
+      border-bottom-left-radius: 24px;
+      padding: 96px 64px;
+
+      @media (max-width: @screen-sm-max) {
+        border-top-left-radius: 24px;
+        border-top-right-radius: 24px;
+        border-bottom-left-radius: 0;
+        min-height: 316px;
+        padding: 56px 24px;
+      }
+
+      .testimonial-media-text {
+        margin-bottom: auto;
+        font-size: 28px;
+        font-weight: 600;
+        line-height: 38px;
+
+        @media (max-width: @screen-sm-max) {
+          font-size: 24px;
+          line-height: 32px;
+        }
+      }
+    }
+
+    .testimonial-media-video {
+      height: 100%;
+      min-height: 352px;
+      background-color: @neutral-20;
+      border-top-right-radius: 24px;
+      border-bottom-right-radius: 24px;
+      border-bottom-left-radius: 0;
+
+      @media (max-width: @screen-sm-max) {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 24px;
+        border-bottom-left-radius: 24px;
+      }
+    }
+  }
+
+  .mono-text {
+    font-family: 'DM Mono', monospace;
+    color: @green-60;
+    font-feature-settings: 'ss05';
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+    margin: 0;
+  }
+
+  .green-link {
+    color: @green-60;
+
+    i.material-symbols-rounded {
+      vertical-align: middle;
+      padding-bottom: 3px;
+      font-size: 24px;
+    }
+
+    &:hover {
+      color: @green-70;
+      .right-arrow {
+        background: @green-70;
+      }
+    }
+  }
+
+  .btn-blue-gradient {
+    background: linear-gradient(
+      245.63deg,
+      #214475 0%,
+      #254c84 28.54%,
+      #6597e0 96.69%
+    );
+    color: white;
+  }
+
+  .round-background {
+    border-radius: 50%;
+    font-size: 25px;
+    top: 4px;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .green-round-background {
+    .round-background;
+    background: @green-10;
+    color: @green-40;
+  }
+
+  .blue-round-background {
+    .round-background;
+    background: @blue-10;
+    color: @blue-40;
+  }
+}
