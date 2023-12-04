@@ -3,7 +3,7 @@ import React, { ReactElement, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import MaterialIcon from './material-icon'
 
-type NotificationType = 'info' | 'success' | 'warning' | 'error'
+export type NotificationType = 'info' | 'success' | 'warning' | 'error'
 
 type NotificationProps = {
   action?: React.ReactElement

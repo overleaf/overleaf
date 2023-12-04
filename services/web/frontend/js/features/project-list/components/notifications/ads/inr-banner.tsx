@@ -96,14 +96,16 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
 
   if (variant === 'default') {
     return (
-      <Notification bsStyle="info" onDismiss={bannerDismissed}>
-        <Notification.Body>
+      <Notification
+        bsStyle="info"
+        onDismiss={bannerDismissed}
+        body={
           <Trans
             i18nKey="inr_discount_offer"
             components={[<b />]} // eslint-disable-line react/jsx-key
           />
-        </Notification.Body>
-        <Notification.Action>
+        }
+        action={
           <Button
             bsStyle="info"
             bsSize="sm"
@@ -112,13 +114,15 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
           >
             {t('get_discounted_plan')}
           </Button>
-        </Notification.Action>
-      </Notification>
+        }
+      />
     )
   } else if (variant === 'green-banner') {
     return (
-      <Notification bsStyle="success" onDismiss={bannerDismissed}>
-        <Notification.Body>
+      <Notification
+        bsStyle="success"
+        onDismiss={bannerDismissed}
+        body={
           <Trans
             i18nKey="inr_discount_offer_green_banner"
             components={[<b />, <br />]} // eslint-disable-line react/jsx-key
@@ -126,17 +130,18 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
             shouldUnescape
             tOptions={{ interpolation: { escapeValue: true } }}
           />
-        </Notification.Body>
-        <Notification.Action>
+        }
+        action={
           <Button
             bsStyle="success"
+            bsSize="sm"
             className="pull-right"
             onClick={handleClick}
           >
             {t('get_discounted_plan')} ₹
           </Button>
-        </Notification.Action>
-      </Notification>
+        }
+      />
     )
   } else if (variant === 'modal') {
     return (

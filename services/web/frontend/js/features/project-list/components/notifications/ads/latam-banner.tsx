@@ -83,8 +83,10 @@ export default function LATAMBanner() {
   } = LATAM_CURRENCIES[currency as keyof typeof LATAM_CURRENCIES]
 
   return (
-    <Notification bsStyle="info" onDismiss={() => handleDismiss()}>
-      <Notification.Body>
+    <Notification
+      bsStyle="info"
+      onDismiss={() => handleDismiss()}
+      body={
         <Trans
           i18nKey="latam_discount_offer"
           components={[<b />]} // eslint-disable-line react/jsx-key
@@ -92,8 +94,8 @@ export default function LATAMBanner() {
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
         />
-      </Notification.Body>
-      <Notification.Action>
+      }
+      action={
         <Button
           bsStyle="info"
           bsSize="sm"
@@ -102,7 +104,7 @@ export default function LATAMBanner() {
         >
           {t('get_discounted_plan')}
         </Button>
-      </Notification.Action>
-    </Notification>
+      }
+    />
   )
 }

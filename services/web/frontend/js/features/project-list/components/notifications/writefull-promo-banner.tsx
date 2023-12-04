@@ -41,15 +41,14 @@ function WritefullPromoBanner({
       bsStyle="info"
       onDismiss={handleClose}
       className="centered-alert"
-    >
-      <Notification.Body>
+      body={
         <span>
           Get <b>10% off</b> Writefull premium—AI-based language feedback and
           TeXGPT to help you write great papers faster. Use code:{' '}
           <b>OVERLEAF10</b>
         </span>
-      </Notification.Body>
-      <Notification.Action>
+      }
+      action={
         <a
           className="pull-right btn btn-info btn-sm"
           href="https://my.writefull.com/overleaf-invite?code=OVERLEAF10"
@@ -66,8 +65,8 @@ function WritefullPromoBanner({
           />
           <span>Get Writefull for Overleaf</span>
         </a>
-      </Notification.Action>
-    </Notification>
+      }
+    />
   )
 }
 

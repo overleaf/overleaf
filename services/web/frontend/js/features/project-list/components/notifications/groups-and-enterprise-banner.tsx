@@ -62,11 +62,11 @@ export default function GroupsAndEnterpriseBanner() {
   }
 
   return (
-    <Notification bsStyle="info" onDismiss={handleClose}>
-      <Notification.Body>
-        <BannerContent variant={groupsAndEnterpriseBannerVariant} />
-      </Notification.Body>
-      <Notification.Action>
+    <Notification
+      bsStyle="info"
+      onDismiss={handleClose}
+      body={<BannerContent variant={groupsAndEnterpriseBannerVariant} />}
+      action={
         <a
           className="pull-right btn btn-info btn-sm"
           href={contactSalesUrl}
@@ -76,8 +76,8 @@ export default function GroupsAndEnterpriseBanner() {
         >
           {t('contact_sales')}
         </a>
-      </Notification.Action>
-    </Notification>
+      }
+    />
   )
 }
 
