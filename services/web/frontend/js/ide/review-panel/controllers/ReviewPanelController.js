@@ -143,10 +143,6 @@ export default App.controller('ReviewPanelController', [
       ide.$scope.$broadcast('review-panel:layout', false)
     })
 
-    $scope.$on('expandable-text-area:resize', event =>
-      $timeout(() => ide.$scope.$broadcast('review-panel:layout'))
-    )
-
     $scope.$on('review-panel:sizes', (e, sizes) => {
       $scope.$broadcast('editor:set-scroll-size', sizes)
       dispatchReviewPanelEvent('sizes', sizes)
