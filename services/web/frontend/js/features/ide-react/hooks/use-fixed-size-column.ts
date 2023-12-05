@@ -1,32 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ImperativePanelHandle } from 'react-resizable-panels'
-import { PanelGroupOnLayout } from 'react-resizable-panels/src/types'
+import {
+  ImperativePanelHandle,
+  PanelGroupOnLayout,
+} from 'react-resizable-panels'
 
-export default function useFixedSizeColumn(
-  defaultSize: number,
-  isOpen: boolean
-) {
+export default function useFixedSizeColumn(isOpen: boolean) {
   const fixedPanelRef = useRef<ImperativePanelHandle>(null)
 
-  const fixedPanelWidthRef = useRef({ size: defaultSize, pixels: 0 })
+  const fixedPanelSizeRef = useRef<number>(0)
   const [initialLayoutDone, setInitialLayoutDone] = useState(false)
 
-  const measureFixedPanelSizePixels = useCallback(() => {
-    return fixedPanelRef.current?.getSize('pixels') || 0
-  }, [fixedPanelRef])
-
-  const handleLayout: PanelGroupOnLayout = useCallback(
-    sizes => {
-      // Measure the pixel width here because it's not always up to date in the
-      // panel's onResize
-      fixedPanelWidthRef.current = {
-        size: sizes[0],
-        pixels: measureFixedPanelSizePixels(),
-      }
+  const handleLayout: PanelGroupOnLayout = useCallback(() => {
+    if (fixedPanelRef.current) {
+      fixedPanelSizeRef.current = fixedPanelRef.current.getSize().sizePixels
       setInitialLayoutDone(true)
-    },
-    [measureFixedPanelSizePixels]
-  )
+    }
+  }, [])
 
   useEffect(() => {
     if (!isOpen) {
@@ -43,24 +32,26 @@ export default function useFixedSizeColumn(
     const fixedPanelElement = document.querySelector(
       `[data-panel-id="${fixedPanelRef.current.getId()}"]`
     )
+    if (!fixedPanelElement) {
+      return
+    }
 
-    const panelGroupElement = fixedPanelElement?.closest('[data-panel-group]')
-    if (!panelGroupElement || !fixedPanelElement) {
+    const panelGroupElement = fixedPanelElement.closest('[data-panel-group]')
+    if (!panelGroupElement) {
       return
     }
 
     const resizeObserver = new ResizeObserver(() => {
-      fixedPanelRef.current?.resize(fixedPanelWidthRef.current.pixels, 'pixels')
+      // when the panel group resizes, set the size of this panel to the previous size, in pixels
+      fixedPanelRef.current?.resize({
+        sizePixels: fixedPanelSizeRef.current,
+      })
     })
 
     resizeObserver.observe(panelGroupElement)
 
     return () => resizeObserver.unobserve(panelGroupElement)
-  }, [fixedPanelRef, measureFixedPanelSizePixels, initialLayoutDone, isOpen])
+  }, [fixedPanelRef, initialLayoutDone, isOpen])
 
-  return {
-    fixedPanelRef,
-    fixedPanelWidthRef,
-    handleLayout,
-  }
+  return { fixedPanelRef, handleLayout }
 }

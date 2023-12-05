@@ -22,33 +22,38 @@ export const EditorPane: FC<{ show: boolean }> = ({ show }) => {
   )
 
   return (
-    <PanelGroup
-      autoSaveId="ide-react-editor-and-symbol-palette-layout"
-      direction="vertical"
-      units="pixels"
-      className={classNames({ hidden: !show })}
-    >
-      <Panel id="sourceEditor" order={1} className="ide-react-editor-panel">
-        <SourceEditor />
-        {isLoading && <LoadingPane />}
-      </Panel>
+    <div className="ide-react-editor-content full-size">
+      <PanelGroup
+        autoSaveId="ide-editor-layout"
+        direction="vertical"
+        className={classNames({ hidden: !show })}
+      >
+        <Panel
+          id="panel-source-editor"
+          order={1}
+          className="ide-react-editor-panel"
+        >
+          <SourceEditor />
+          {isLoading && <LoadingPane />}
+        </Panel>
 
-      {editor.showSymbolPalette && (
-        <>
-          <VerticalResizeHandle id="editor-symbol-palette" />
-          <Panel
-            id="symbol-palette"
-            order={2}
-            defaultSize={250}
-            minSize={250}
-            maxSize={336}
-          >
-            <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
-              <SymbolPalettePane />
-            </Suspense>
-          </Panel>
-        </>
-      )}
-    </PanelGroup>
+        {editor.showSymbolPalette && (
+          <>
+            <VerticalResizeHandle id="editor-symbol-palette" />
+            <Panel
+              id="panel-symbol-palette"
+              order={2}
+              defaultSizePixels={250}
+              minSizePixels={250}
+              maxSizePixels={336}
+            >
+              <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
+                <SymbolPalettePane />
+              </Suspense>
+            </Panel>
+          </>
+        )}
+      </PanelGroup>
+    </div>
   )
 }

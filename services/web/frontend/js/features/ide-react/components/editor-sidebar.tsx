@@ -27,11 +27,12 @@ export default function EditorSidebar({
         hidden: !shouldShow,
       })}
     >
-      <PanelGroup
-        autoSaveId="ide-react-editor-sidebar-layout"
-        direction="vertical"
-      >
-        <Panel defaultSize={75} className="ide-react-file-tree-panel">
+      <PanelGroup autoSaveId="ide-editor-sidebar-layout" direction="vertical">
+        <Panel
+          defaultSizePercentage={75}
+          className="ide-react-file-tree-panel"
+          id="panel-file-tree"
+        >
           <FileTree
             onInit={onFileTreeInit}
             onSelect={onFileTreeSelect}
@@ -39,7 +40,7 @@ export default function EditorSidebar({
           />
         </Panel>
         <VerticalResizeHandle />
-        <Panel defaultSize={25}>
+        <Panel defaultSizePercentage={25} id="panel-outline">
           <div className="outline-container" />
         </Panel>
       </PanelGroup>

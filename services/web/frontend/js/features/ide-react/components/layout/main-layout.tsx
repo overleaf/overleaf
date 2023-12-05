@@ -1,62 +1,149 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
-import { useState } from 'react'
+import { FC } from 'react'
 import { HorizontalResizeHandle } from '../resize/horizontal-resize-handle'
-import useFixedSizeColumn from '@/features/ide-react/hooks/use-fixed-size-column'
-import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
 import classNames from 'classnames'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import EditorNavigationToolbar from '@/features/ide-react/components/editor-navigation-toolbar'
 import ChatPane from '@/features/chat/components/chat-pane'
-import { EditorAndSidebar } from '@/features/ide-react/components/editor-and-sidebar'
+import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
+import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
+import { HistoryProvider } from '@/features/history/context/history-context'
+import History from '@/features/ide-react/components/history'
+import EditorSidebar from '@/features/ide-react/components/editor-sidebar'
+import { EditorPane } from '@/features/ide-react/components/editor/editor-pane'
+import { useFileTree } from '@/features/ide-react/hooks/use-file-tree'
+import { useTranslation } from 'react-i18next'
+import { useSidebarPane } from '@/features/ide-react/hooks/use-sidebar-pane'
+import { useChatPane } from '@/features/ide-react/hooks/use-chat-pane'
+import { EditorAndPdf } from '@/features/ide-react/components/editor-and-pdf'
 
-const CHAT_DEFAULT_SIZE = 20
+export const MainLayout: FC = () => {
+  const { view } = useLayoutContext()
 
-// The main area below the header is split into two: the main content and chat.
-// The reason for not splitting the left column containing the file tree and
-// outline here is that the history view has its own file tree, so it is more
-// convenient to replace the whole of the main content when in history view.
-export default function MainLayout() {
-  const { chatIsOpen } = useLayoutContext()
+  const {
+    isOpen: sidebarIsOpen,
+    setIsOpen: setSidebarIsOpen,
+    fixedPanelRef: sidebarPanelRef,
+    handleLayout: handleSidebarLayout,
+    togglePane: toggleSidebar,
+    handlePaneExpand: handleSidebarExpand,
+    handlePaneCollapse: handleSidebarCollapse,
+    resizing: sidebarResizing,
+    setResizing: setSidebarResizing,
+  } = useSidebarPane()
 
-  const { fixedPanelRef: chatPanelRef, handleLayout } = useFixedSizeColumn(
-    CHAT_DEFAULT_SIZE,
-    chatIsOpen
-  )
+  const {
+    isOpen: chatIsOpen,
+    fixedPanelRef: chatPanelRef,
+    handleLayout: handleChatLayout,
+    resizing: chatResizing,
+    setResizing: setChatResizing,
+  } = useChatPane()
 
-  useCollapsiblePanel(chatIsOpen, chatPanelRef)
+  const {
+    selectedEntityCount,
+    openEntity,
+    openDocId,
+    handleFileTreeInit,
+    handleFileTreeSelect,
+    handleFileTreeDelete,
+  } = useFileTree()
 
-  const [resizing, setResizing] = useState(false)
+  const { t } = useTranslation()
+
+  // keep the editor pane open
+  const editorPane = openDocId ? (
+    <EditorPane
+      show={openEntity?.type === 'doc' && selectedEntityCount === 1}
+    />
+  ) : null
 
   return (
     <div className="ide-react-main">
       <EditorNavigationToolbar />
       <div className="ide-react-body">
         <PanelGroup
-          autoSaveId="ide-react-chat-layout"
+          autoSaveId="ide-outer-layout"
           direction="horizontal"
-          onLayout={handleLayout}
+          onLayout={handleSidebarLayout}
           className={classNames({
-            'ide-react-main-resizing': resizing,
+            'ide-panel-group-resizing': sidebarResizing || chatResizing,
           })}
         >
-          <Panel id="main" order={1}>
-            <EditorAndSidebar />
+          {/* sidebar */}
+          <Panel
+            ref={sidebarPanelRef}
+            id="panel-sidebar"
+            order={1}
+            defaultSizePixels={200}
+            minSizePixels={150}
+            collapsible
+            onCollapse={handleSidebarCollapse}
+            onExpand={handleSidebarExpand}
+          >
+            <EditorSidebar
+              shouldShow={view !== 'history'}
+              onFileTreeInit={handleFileTreeInit}
+              onFileTreeSelect={handleFileTreeSelect}
+              onFileTreeDelete={handleFileTreeDelete}
+            />
+            {view === 'history' && <HistorySidebar />}
           </Panel>
-          {chatIsOpen ? (
-            <>
-              <HorizontalResizeHandle onDragging={setResizing} />
-              <Panel
-                ref={chatPanelRef}
-                id="chat"
-                order={2}
-                defaultSize={CHAT_DEFAULT_SIZE}
-                minSize={5}
-                collapsible
-              >
-                <ChatPane />
+
+          <HorizontalResizeHandle
+            onDoubleClick={toggleSidebar}
+            resizable={sidebarIsOpen}
+            onDragging={setSidebarResizing}
+          >
+            <HorizontalToggler
+              id="panel-sidebar"
+              togglerType="west"
+              isOpen={sidebarIsOpen}
+              setIsOpen={setSidebarIsOpen}
+              tooltipWhenOpen={t('tooltip_hide_filetree')}
+              tooltipWhenClosed={t('tooltip_show_filetree')}
+            />
+          </HorizontalResizeHandle>
+
+          <Panel id="panel-outer-main" order={2}>
+            <PanelGroup
+              autoSaveId="ide-inner-layout"
+              direction="horizontal"
+              onLayout={handleChatLayout}
+            >
+              <Panel className="ide-react-panel" id="panel-main" order={1}>
+                {view === 'history' ? (
+                  <HistoryProvider>
+                    <History />
+                  </HistoryProvider>
+                ) : (
+                  <EditorAndPdf
+                    editorPane={editorPane}
+                    selectedEntityCount={selectedEntityCount}
+                    openEntity={openEntity}
+                  />
+                )}
               </Panel>
-            </>
-          ) : null}
+
+              {chatIsOpen && (
+                <>
+                  <HorizontalResizeHandle onDragging={setChatResizing} />
+
+                  {/* chat */}
+                  <Panel
+                    ref={chatPanelRef}
+                    id="panel-chat"
+                    order={2}
+                    defaultSizePixels={200}
+                    minSizePixels={150}
+                    collapsible
+                  >
+                    <ChatPane />
+                  </Panel>
+                </>
+              )}
+            </PanelGroup>
+          </Panel>
         </PanelGroup>
       </div>
     </div>

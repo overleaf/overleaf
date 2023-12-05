@@ -1,99 +1,103 @@
-import { ReactNode, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import {
-  ImperativePanelHandle,
-  Panel,
-  PanelGroup,
-} from 'react-resizable-panels'
+import React, { FC, useState } from 'react'
+import { Panel, PanelGroup } from 'react-resizable-panels'
+import NoSelectionPane from '@/features/ide-react/components/editor/no-selection-pane'
+import FileView from '@/features/file-view/components/file-view'
+import { fileViewFile } from '@/features/ide-react/hooks/use-file-tree'
+import MultipleSelectionPane from '@/features/ide-react/components/editor/multiple-selection-pane'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
-import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
-import { useLayoutContext } from '@/shared/context/layout-context'
-import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
 import { DefaultSynctexControl } from '@/features/pdf-preview/components/detach-synctex-control'
-import classnames from 'classnames'
+import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
+import { usePdfPane } from '@/features/ide-react/hooks/use-pdf-pane'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { useTranslation } from 'react-i18next'
+import classNames from 'classnames'
 
-export type EditorProps = {
-  editorContent: ReactNode
-}
-
-export default function EditorAndPdf({ editorContent }: EditorProps) {
-  const { t } = useTranslation()
-  const { view, pdfLayout, changeLayout, detachRole, reattach } =
-    useLayoutContext()
+export const EditorAndPdf: FC<{
+  editorPane: React.ReactNode
+  selectedEntityCount: number
+  openEntity: any // TODO
+}> = ({ editorPane, selectedEntityCount, openEntity }) => {
   const [resizing, setResizing] = useState(false)
 
-  const pdfPanelRef = useRef<ImperativePanelHandle>(null)
-  const isDualPane = pdfLayout === 'sideBySide'
-  const editorIsVisible = isDualPane || view === 'editor' || view === 'file'
-  const pdfIsOpen = isDualPane || view === 'pdf'
+  const { t } = useTranslation()
 
-  useCollapsiblePanel(pdfIsOpen, pdfPanelRef)
+  const {
+    togglePdfPane,
+    handlePdfPaneExpand,
+    handlePdfPaneCollapse,
+    setPdfIsOpen,
+    pdfIsOpen,
+    pdfPanelRef,
+  } = usePdfPane()
 
-  const historyIsOpen = view === 'history'
+  const { view, pdfLayout } = useLayoutContext()
 
-  function setPdfIsOpen(isOpen: boolean) {
-    if (isOpen) {
-      if (detachRole === 'detacher') {
-        reattach()
-      }
-      changeLayout('sideBySide')
-    } else {
-      changeLayout('flat', 'editor')
-    }
-  }
+  const editorIsOpen =
+    view === 'editor' || view === 'file' || pdfLayout === 'sideBySide'
 
   return (
-    <PanelGroup
-      autoSaveId="ide-react-editor-and-pdf-layout"
-      direction="horizontal"
-      className={classnames('ide-react-editor-and-pdf', {
-        hide: historyIsOpen,
-        'ide-react-editor-and-pdf-resizing': resizing,
-      })}
-    >
-      {editorIsVisible ? (
-        <Panel
-          id="editor"
-          order={1}
-          defaultSize={50}
-          className="ide-react-panel"
-        >
-          <div className="ide-react-editor-content full-size">
-            {editorContent}
-          </div>
-        </Panel>
-      ) : null}
-      <HorizontalResizeHandle
-        resizable={isDualPane}
-        onDoubleClick={() => setPdfIsOpen(!pdfIsOpen)}
-        onDragging={setResizing}
-      >
-        <HorizontalToggler
-          id="editor-pdf"
-          togglerType="east"
-          isOpen={pdfIsOpen}
-          setIsOpen={setPdfIsOpen}
-          tooltipWhenOpen={t('tooltip_hide_pdf')}
-          tooltipWhenClosed={t('tooltip_show_pdf')}
-        />
-        {isDualPane ? (
-          <div className="synctex-controls">
-            <DefaultSynctexControl />
-          </div>
-        ) : null}
-      </HorizontalResizeHandle>
+    <PanelGroup autoSaveId="ide-editor-pdf-layout" direction="horizontal">
+      {/* main */}
+      {editorIsOpen && (
+        <>
+          <Panel
+            id="panel-main"
+            order={1}
+            defaultSizePercentage={50}
+            minSizePercentage={25}
+            className={classNames('ide-react-panel', {
+              'ide-panel-group-resizing': resizing,
+            })}
+          >
+            {selectedEntityCount === 0 && <NoSelectionPane />}
+            {selectedEntityCount === 1 && openEntity?.type === 'fileRef' && (
+              <FileView file={fileViewFile(openEntity.entity)} />
+            )}
+            {selectedEntityCount === 1 && editorPane}
+            {selectedEntityCount > 1 && (
+              <MultipleSelectionPane
+                selectedEntityCount={selectedEntityCount}
+              />
+            )}
+          </Panel>
+
+          <HorizontalResizeHandle
+            resizable={pdfLayout === 'sideBySide'}
+            onDoubleClick={togglePdfPane}
+            onDragging={setResizing}
+          >
+            <HorizontalToggler
+              id="editor-pdf"
+              togglerType="east"
+              isOpen={pdfIsOpen}
+              setIsOpen={setPdfIsOpen}
+              tooltipWhenOpen={t('tooltip_hide_pdf')}
+              tooltipWhenClosed={t('tooltip_show_pdf')}
+            />
+
+            {pdfLayout === 'sideBySide' && (
+              <div className="synctex-controls">
+                <DefaultSynctexControl />
+              </div>
+            )}
+          </HorizontalResizeHandle>
+        </>
+      )}
+
+      {/* pdf */}
       <Panel
         ref={pdfPanelRef}
-        id="pdf"
+        id="panel-pdf"
         order={2}
-        defaultSize={50}
-        minSize={5}
+        defaultSizePercentage={50}
+        minSizePercentage={25}
         collapsible
-        onCollapse={collapsed => setPdfIsOpen(!collapsed)}
+        onCollapse={handlePdfPaneCollapse}
+        onExpand={handlePdfPaneExpand}
         className="ide-react-panel"
       >
-        {pdfIsOpen || resizing ? <PdfPreview /> : null}
+        {pdfIsOpen && <PdfPreview />}
       </Panel>
     </PanelGroup>
   )

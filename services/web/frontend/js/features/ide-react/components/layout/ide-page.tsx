@@ -1,5 +1,5 @@
 import { Alerts } from '@/features/ide-react/components/alerts/alerts'
-import MainLayout from '@/features/ide-react/components/layout/main-layout'
+import { MainLayout } from '@/features/ide-react/components/layout/main-layout'
 import EditorLeftMenu from '@/features/editor-left-menu/components/editor-left-menu'
 import { useLayoutEventTracking } from '@/features/ide-react/hooks/use-layout-event-tracking'
 import useSocketListeners from '@/features/ide-react/hooks/use-socket-listeners'
@@ -10,7 +10,7 @@ import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-e
 import { useConnectionState } from '@/features/ide-react/hooks/use-connection-state'
 
 export default function IdePage() {
-  useLayoutEventTracking() // send event when the layout changes
+  useLayoutEventTracking() // sent event when the layout changes
   useSocketListeners() // listen for project-related websocket messages
   useEditingSessionHeartbeat() // send a batched event when user is active
   useRegisterUserActivity() // record activity and ensure connection when user is active
