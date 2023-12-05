@@ -180,13 +180,8 @@ function useHistory() {
 
     Promise.all([updatesPromise, labelsPromise])
       .then(([{ updates: updatesData, nextBeforeTimestamp }, labels]) => {
-        const lastUpdateToV = updatesData.length ? updatesData[0].toV : null
-        const lastUpdatedTimestamp = updatesData.length
-          ? updatesData[0].meta.end_ts
-          : null
-
         if (labels) {
-          setLabels(loadLabels(labels, lastUpdateToV, lastUpdatedTimestamp))
+          setLabels(loadLabels(labels, updatesData))
         }
 
         const { updates, visibleUpdateCount, freeHistoryLimitHit } =

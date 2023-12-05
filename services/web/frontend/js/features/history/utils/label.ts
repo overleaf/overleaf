@@ -6,6 +6,7 @@ import {
 } from '../services/types/label'
 import { Nullable } from '../../../../../types/utils'
 import { Selection } from '../services/types/selection'
+import { Update } from '../services/types/update'
 
 export const isPseudoLabel = (
   label: LoadedLabel
@@ -35,8 +36,7 @@ const deletePseudoCurrentStateLabelIfExistent = (labels: LoadedLabel[]) => {
 
 const addPseudoCurrentStateLabelIfNeeded = (
   labels: LoadedLabel[],
-  mostRecentVersion: Nullable<number>,
-  lastUpdatedTimestamp: Nullable<number>
+  mostRecentVersion: Nullable<number>
 ) => {
   if (!labels.length || labels[0].version !== mostRecentVersion) {
     const pseudoCurrentStateLabel: PseudoCurrentStateLabel = {
@@ -44,39 +44,38 @@ const addPseudoCurrentStateLabelIfNeeded = (
       isPseudoCurrentStateLabel: true,
       version: mostRecentVersion,
       created_at: new Date().toISOString(),
-      lastUpdatedTimestamp,
+      lastUpdatedTimestamp: null,
     }
     return [pseudoCurrentStateLabel, ...labels]
   }
   return labels
 }
 
-const addLastUpdatedTimestamp = (
-  labels: LoadedLabel[],
-  lastUpdatedTimestamp: Nullable<number>
-) => {
-  return labels.map(label => ({
-    ...label,
-    lastUpdatedTimestamp,
-  }))
+const addLastUpdatedTimestamp = (labels: LoadedLabel[], updates: Update[]) => {
+  return labels.map(label => {
+    const lastUpdatedTimestamp = updates.find(update =>
+      update.labels.find(l => l.id === label.id)
+    )?.meta.end_ts
+
+    return {
+      ...label,
+      lastUpdatedTimestamp: lastUpdatedTimestamp || null,
+    }
+  })
 }
 
-export const loadLabels = (
-  labels: Label[],
-  lastUpdateToV: Nullable<number>,
-  lastUpdatedTimestamp: Nullable<number>
-) => {
+export const loadLabels = (labels: Label[], updates: Update[]) => {
+  const lastUpdateToV = updates.length ? updates[0].toV : null
   const sortedLabels = sortLabelsByVersionAndDate(labels)
   const labelsWithoutPseudoLabel =
     deletePseudoCurrentStateLabelIfExistent(sortedLabels)
   const labelsWithPseudoLabelIfNeeded = addPseudoCurrentStateLabelIfNeeded(
     labelsWithoutPseudoLabel,
-    lastUpdateToV,
-    lastUpdatedTimestamp
+    lastUpdateToV
   )
   const labelsWithLastUpdatedTimestamp = addLastUpdatedTimestamp(
     labelsWithPseudoLabelIfNeeded,
-    lastUpdatedTimestamp
+    updates
   )
   return labelsWithLastUpdatedTimestamp
 }
