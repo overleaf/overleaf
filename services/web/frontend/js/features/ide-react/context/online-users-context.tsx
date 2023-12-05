@@ -18,6 +18,7 @@ import { Doc } from '../../../../../types/doc'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
+import { debugConsole } from '@/utils/debugging'
 
 type OnlineUser = {
   id: string
@@ -176,9 +177,12 @@ export const OnlineUsersProvider: FC = ({ children }) => {
     const handleProjectJoined = () => {
       socket.emit(
         'clientTracking.getConnectedUsers',
-        // eslint-disable-next-line n/handle-callback-err
         (error: Error, connectedUsers: ConnectedUser[]) => {
-          // TODO: MIGRATION: Handle error (although the original code doesn't)
+          if (error) {
+            // TODO: handle this error or ignore it?
+            debugConsole.error(error)
+            return
+          }
           const newOnlineUsers: OnlineUsersContextValue['onlineUsers'] = {}
           for (const user of connectedUsers) {
             if (user.client_id === socket.publicId) {

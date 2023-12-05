@@ -65,20 +65,6 @@ export class ShareJsDoc extends EventEmitter {
     this.connection = {
       send: (update: Update) => {
         this.startInflightOpTimeout(update)
-        // TODO: MIGRATION: Work out whether we can get rid of this. It looks as
-        // though it's here for debugging and isn't used
-
-        // if (
-        //   window.disconnectOnUpdate != null &&
-        //   Math.random() < window.disconnectOnUpdate
-        // ) {
-        //   debugConsole.log('Disconnecting on update', update)
-        //   this.socket.disconnect()
-        // }
-        // if (window.dropUpdates != null && Math.random() < window.dropUpdates) {
-        //   debugConsole.log('Simulating a lost update', update)
-        //   return
-        // }
         if (this.track_changes && this.track_changes_id_seeds) {
           if (update.meta == null) {
             update.meta = {}

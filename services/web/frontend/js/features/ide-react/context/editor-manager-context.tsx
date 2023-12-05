@@ -19,7 +19,6 @@ import { debugConsole } from '@/utils/debugging'
 import { Document } from '@/features/ide-react/editor/document'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
-import _ from 'lodash'
 import { Doc } from '../../../../../types/doc'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
@@ -30,6 +29,7 @@ import customLocalStorage from '@/infrastructure/local-storage'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { EditorType } from '@/features/ide-react/editor/types/editor-type'
 import { DocId } from '../../../../../types/project-settings'
+import { Update } from '@/features/history/services/types/update'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -237,14 +237,13 @@ export const EditorManagerProvider: FC = ({ children }) => {
     (doc: Doc, document: Document) => {
       attachErrorHandlerToDocument(doc, document)
 
-      // TODO: MIGRATION: Add a type for `update`
-      document.on('externalUpdate', (update: any) => {
+      document.on('externalUpdate', (update: Update) => {
         if (ignoringExternalUpdates) {
           return
         }
         if (
-          _.property(['meta', 'type'])(update) === 'external' &&
-          _.property(['meta', 'source'])(update) === 'git-bridge'
+          update.meta.type === 'external' &&
+          update.meta.source === 'git-bridge'
         ) {
           return
         }

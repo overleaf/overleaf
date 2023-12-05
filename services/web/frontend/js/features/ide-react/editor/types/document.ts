@@ -8,14 +8,13 @@ export type ShareJsOperation = AnyOperation[]
 
 export type TrackChangesIdSeeds = { inflight: string; pending: string }
 
-export type Message = Record<string, any>
-// TODO: MIGRATION: Make an accurate and more specific type
-// {
-//   v: Version
-//   open?: boolean
-//   meta?: {
-//     type: string
-//   }
-//   doc?: string
-//   snapshot?: string
-// }
+// TODO: check the properties of this type
+export type Message = {
+  v: Version
+  open?: boolean
+  meta?: {
+    type?: string
+  }
+  doc?: string
+  snapshot?: string
+}

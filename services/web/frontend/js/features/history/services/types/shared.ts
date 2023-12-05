@@ -11,6 +11,8 @@ export interface Meta {
   users: Nullable<User>[]
   start_ts: number
   end_ts: number
+  type?: 'external' // TODO
+  source?: 'git-bridge' // TODO
   origin?: {
     kind:
       | 'dropbox'

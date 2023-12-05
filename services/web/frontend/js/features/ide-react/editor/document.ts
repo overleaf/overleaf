@@ -37,7 +37,24 @@ const MAX_PENDING_OP_SIZE = 64
 type JoinCallback = (error?: Error) => void
 type LeaveCallback = JoinCallback
 
-type Update = Record<string, any>
+type Update =
+  | {
+      v: number
+      doc: string
+    }
+  | {
+      v: number
+      doc: string
+      op: AnyOperation[]
+      meta: {
+        type?: string
+        source: string
+        user_id: string
+        ts: number
+      }
+      hash?: string
+      lastV?: number
+    }
 
 type Message = {
   meta: {
@@ -100,9 +117,6 @@ export class Document extends EventEmitter {
     }
     if (this.cm6) {
       this.cm6.on('change', this.checkConsistency)
-    }
-    if (this.doc) {
-      this.ideEventEmitter.emit('document:opened', this.doc)
     }
   }
 
@@ -183,8 +197,7 @@ export class Document extends EventEmitter {
 
   private onUpdateAppliedHandler = (update: any) => this.onUpdateApplied(update)
 
-  // TODO: MIGRATION: Create proper types for error and message
-  private onErrorHandler = (error: Error, message: { doc_id: string }) => {
+  private onErrorHandler = (error: Error, message: ErrorMetadata) => {
     // 'otUpdateError' are emitted per doc socket.io room, hence we can be
     //  sure that message.doc_id exists.
     if (message.doc_id !== this.doc_id) {

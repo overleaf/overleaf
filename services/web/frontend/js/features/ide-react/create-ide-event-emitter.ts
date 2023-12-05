@@ -8,10 +8,6 @@ import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
 
 export type IdeEvents = {
   'project:joined': [{ project: Project; permissionsLevel: PermissionsLevel }]
-
-  // TODO: MIGRATION: This doesn't seem to be used. Investigate whether it can be removed
-  'document:opened': [doc: ShareJsDoc]
-
   'document:closed': [doc: ShareJsDoc]
   'doc:changed': [{ doc_id: string }]
   'doc:saved': [{ doc_id: string }]
@@ -27,7 +23,6 @@ export type IdeEvents = {
   'comment:start_adding': []
   'references:should-reindex': []
   'history:toggle': []
-
   'entity:deleted': [entity: FileTreeFindResult]
 }
 
