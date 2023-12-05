@@ -13,7 +13,7 @@ const mountEditor = (
   props?: Omit<ComponentProps<typeof EditorProviders>, 'children' | 'scope'>
 ) => {
   const scope = mockScope(content)
-  scope.permissionsLevel = 'readOnly'
+  scope.permissions.write = false
   scope.editor.showVisual = true
 
   cy.mount(

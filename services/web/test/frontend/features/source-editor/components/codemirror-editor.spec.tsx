@@ -227,6 +227,7 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   it('does not allow typing to the document in read-only mode', function () {
     const scope = mockScope()
     scope.permissionsLevel = 'readOnly'
+    scope.permissions.write = false
 
     cy.mount(
       <Container>

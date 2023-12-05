@@ -54,7 +54,7 @@ export const MetadataProvider: FC = ({ children }) => {
   const { socket } = useConnectionContext()
   const { onlineUsersCount } = useOnlineUsersContext()
   const { permissionsLevel } = useEditorContext()
-  const { permissions } = usePermissionsContext()
+  const permissions = usePermissionsContext()
   const { currentDocument } = useEditorManagerContext()
   const { showGenericMessageModal } = useModalsContext()
 

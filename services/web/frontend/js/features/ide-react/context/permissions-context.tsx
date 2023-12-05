@@ -1,110 +1,73 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import getMeta from '@/utils/meta'
-import { Permissions } from '@/features/ide-react/types/permissions'
+import {
+  Permissions,
+  PermissionsLevel,
+} from '@/features/ide-react/types/permissions'
+import useScopeValue from '@/shared/hooks/use-scope-value'
+import { DeepReadonly } from '../../../../../types/utils'
 
-type PermissionsContextValue = {
-  permissions: Permissions
-}
+const PermissionsContext = createContext<Permissions | undefined>(undefined)
 
-const PermissionsContext = createContext<PermissionsContextValue | undefined>(
-  undefined
-)
-
-const readOnlyPermissions: Readonly<Permissions> = {
-  read: true,
-  write: false,
-  admin: false,
-  comment: true,
-}
-const readAndWritePermissions: Readonly<Permissions> = {
-  read: true,
-  write: true,
-  admin: false,
-  comment: true,
-}
-const ownerPermissions: Readonly<Permissions> = {
-  read: true,
-  write: true,
-  admin: true,
-  comment: true,
-}
-const permissionsMap = {
-  readOnly: readOnlyPermissions,
-  readAndWrite: readAndWritePermissions,
-  owner: ownerPermissions,
-  anonymous: {
-    readOnly: { ...readOnlyPermissions, comment: false },
-    readAndWrite: { ...readAndWritePermissions, comment: false },
-    owner: { ...ownerPermissions, comment: false },
-  },
-} as const
-
-export const PermissionsProvider: React.FC = ({ children }) => {
-  const [permissions, setPermissions] = useState<Permissions>({
-    read: false,
+const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
+  readOnly: {
+    read: true,
     write: false,
     admin: false,
-    comment: false,
-  })
+    comment: true,
+  },
+  readAndWrite: {
+    read: true,
+    write: true,
+    admin: false,
+    comment: true,
+  },
+  owner: {
+    read: true,
+    write: true,
+    admin: true,
+    comment: true,
+  },
+}
+
+const anonymousPermissionsMap: typeof permissionsMap = {
+  readOnly: { ...permissionsMap.readOnly, comment: false },
+  readAndWrite: { ...permissionsMap.readAndWrite, comment: false },
+  owner: { ...permissionsMap.owner, comment: false },
+}
+
+export const PermissionsProvider: React.FC = ({ children }) => {
+  const [permissions, setPermissions] =
+    useScopeValue<Readonly<Permissions>>('permissions')
   const { connectionState } = useConnectionContext()
-  const { permissionsLevel } = useEditorContext()
+  const { permissionsLevel } = useEditorContext() as {
+    permissionsLevel: PermissionsLevel
+  }
   const anonymous = getMeta('ol-anonymous') as boolean | undefined
 
   useEffect(() => {
-    if (permissionsLevel === 'readOnly') {
-      if (anonymous) {
-        setPermissions(permissionsMap.anonymous.readOnly)
-      } else {
-        setPermissions(permissionsMap.readOnly)
-      }
-    }
-    if (permissionsLevel === 'readAndWrite') {
-      if (permissions.admin) {
-        if (anonymous) {
-          setPermissions(permissionsMap.anonymous.owner)
-        } else {
-          setPermissions(permissionsMap.owner)
-        }
-      } else {
-        if (anonymous) {
-          setPermissions(permissionsMap.anonymous.readAndWrite)
-        } else {
-          setPermissions(permissionsMap.readAndWrite)
-        }
-      }
-    }
-    if (permissionsLevel === 'owner') {
-      if (anonymous) {
-        setPermissions(permissionsMap.anonymous.owner)
-      } else {
-        setPermissions(permissionsMap.owner)
-      }
-    }
-  }, [anonymous, permissions, permissionsLevel])
+    const activePermissionsMap = anonymous
+      ? anonymousPermissionsMap
+      : permissionsMap
+    setPermissions(activePermissionsMap[permissionsLevel])
+  }, [anonymous, permissionsLevel, setPermissions])
 
   useEffect(() => {
     if (connectionState.forceDisconnected) {
       setPermissions(prevState => ({ ...prevState, write: false }))
     }
-  }, [connectionState.forceDisconnected])
-
-  const value = useMemo<PermissionsContextValue>(
-    () => ({
-      permissions,
-    }),
-    [permissions]
-  )
+  }, [connectionState.forceDisconnected, setPermissions])
 
   return (
-    <PermissionsContext.Provider value={value}>
+    <PermissionsContext.Provider value={permissions}>
       {children}
     </PermissionsContext.Provider>
   )
 }
 
-export function usePermissionsContext(): PermissionsContextValue {
+export function usePermissionsContext() {
   const context = useContext(PermissionsContext)
 
   if (!context) {

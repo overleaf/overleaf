@@ -26,7 +26,6 @@ import { useIdeContext } from '../../../shared/context/ide-context'
 import { restoreScrollPosition } from '../extensions/scroll-position'
 import { setEditable } from '../extensions/editable'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
-import { useEditorContext } from '../../../shared/context/editor-context'
 import { setAutoPair } from '../extensions/auto-pair'
 import { setAutoComplete } from '../extensions/auto-complete'
 import { usePhrases } from './use-phrases'
@@ -51,7 +50,8 @@ function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
 
   const { fileTreeData } = useFileTreeData()
-  const { permissionsLevel } = useEditorContext()
+
+  const [permissions] = useScopeValue<{ write: boolean }>('permissions')
 
   // set up scope listeners
 
@@ -240,7 +240,7 @@ function useCodeMirrorScope(view: EditorView) {
     }
   }, [view, fileTreeData])
 
-  const editableRef = useRef(permissionsLevel !== 'readOnly')
+  const editableRef = useRef(permissions.write)
 
   const { previewByPath } = useFileTreePathContext()
 
@@ -317,9 +317,9 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, previewByPath])
 
   useEffect(() => {
-    editableRef.current = permissionsLevel !== 'readOnly'
+    editableRef.current = permissions.write
     view.dispatch(setEditable(editableRef.current)) // the editor needs to be locked when there's a problem saving data
-  }, [view, permissionsLevel])
+  }, [view, permissions.write])
 
   useEffect(() => {
     phrasesRef.current = phrases

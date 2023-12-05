@@ -129,7 +129,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   } = project
   const { isRestrictedTokenMember } = useEditorContext()
   // TODO permissions to be removed from the review panel context. It currently acts just as a proxy.
-  const { permissions } = usePermissionsContext()
+  const permissions = usePermissionsContext()
   const { showGenericMessageModal } = useModalsContext()
   const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
 

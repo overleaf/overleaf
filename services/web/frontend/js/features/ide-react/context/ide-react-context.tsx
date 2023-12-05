@@ -49,6 +49,12 @@ function populateIdeReactScope(store: ReactScopeValueStore) {
 function populateProjectScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('project', true)
   store.set('permissionsLevel', 'readOnly')
+  store.set('permissions', {
+    read: true,
+    write: false,
+    admin: false,
+    comment: true,
+  })
 }
 
 function populatePdfScope(store: ReactScopeValueStore) {
