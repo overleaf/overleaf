@@ -1622,6 +1622,7 @@
   "session_error": "Session error. Please check you have cookies enabled. If the problem persists, try clearing your cache and cookies.",
   "session_expired_redirecting_to_login": "Session Expired. Redirecting to login page in __seconds__ seconds",
   "sessions": "Sessions",
+  "set_color": "set color",
   "set_new_password": "Set new password",
   "set_password": "Set Password",
   "settings": "Settings",

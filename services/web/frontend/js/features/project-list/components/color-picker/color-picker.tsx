@@ -5,26 +5,26 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Tooltip from '../../../../shared/components/tooltip'
 
-const PRESET_COLORS: ReadonlyArray<string> = [
-  '#A7B1C2',
-  '#F04343',
-  '#DD8A3E',
-  '#E4CA3E',
-  '#33CF67',
-  '#43A7F0',
-  '#434AF0',
-  '#B943F0',
-  '#FF4BCD',
+const PRESET_COLORS: ReadonlyArray<{ color: string; name: string }> = [
+  { color: '#A7B1C2', name: 'Grey' },
+  { color: '#F04343', name: 'Red' },
+  { color: '#DD8A3E', name: 'Orange' },
+  { color: '#E4CA3E', name: 'Yellow' },
+  { color: '#33CF67', name: 'Green' },
+  { color: '#43A7F0', name: 'Light blue' },
+  { color: '#434AF0', name: 'Dark blue' },
+  { color: '#B943F0', name: 'Purple' },
+  { color: '#FF4BCD', name: 'Pink' },
 ]
 
 type ColorPickerItemProps = {
   color: string
+  name: string
 }
 
-function ColorPickerItem({ color }: ColorPickerItemProps) {
+function ColorPickerItem({ color, name }: ColorPickerItemProps) {
   const { selectColor, selectedColor, pickingCustomColor } = useSelectColor()
   const { t } = useTranslation()
-  const labelId = `color-picker-item-label-${color.replace('#', '')}`
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -36,7 +36,7 @@ function ColorPickerItem({ color }: ColorPickerItemProps) {
     /* eslint-disable-next-line jsx-a11y/click-events-have-key-events,
       jsx-a11y/no-static-element-interactions, jsx-a11y/interactive-supports-focus */
     <div
-      aria-labelledby={labelId}
+      aria-label={`${name}, ${t('set_color')}`}
       className="color-picker-item"
       onClick={() => selectColor(color)}
       role="button"
@@ -44,7 +44,7 @@ function ColorPickerItem({ color }: ColorPickerItemProps) {
       tabIndex={0}
       onKeyDown={handleKeyDown}
     >
-      <span id={labelId} className="sr-only">
+      <span id={name} className="sr-only">
         {t('select_color', { color })}
       </span>
       {!pickingCustomColor && color === selectedColor && (
@@ -71,7 +71,7 @@ function MoreButton() {
   }, [selectedColor])
 
   const isCustomColorSelected =
-    localColor && !PRESET_COLORS.includes(localColor)
+    localColor && !PRESET_COLORS.some(colorObj => colorObj.color === localColor)
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -148,15 +148,15 @@ export function ColorPicker({
   useEffect(() => {
     if (!selectedColor) {
       selectColor(
-        PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)]
+        PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)].color
       )
     }
   }, [selectColor, selectedColor])
 
   return (
     <>
-      {PRESET_COLORS.map(hexColor => (
-        <ColorPickerItem color={hexColor} key={hexColor} />
+      {PRESET_COLORS.map(({ color, name }) => (
+        <ColorPickerItem color={color} name={name} key={color} />
       ))}
       {!disableCustomColor && <MoreButton />}
     </>
