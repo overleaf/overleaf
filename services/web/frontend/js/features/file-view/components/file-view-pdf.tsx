@@ -35,6 +35,14 @@ const FileViewPdf: FC<{
 
         const pdf = await PDFJS.getDocument(preview.url).promise
 
+        // bail out if loading the PDF took too long
+        if (!mountedRef.current) {
+          onError()
+          return
+        }
+
+        element.textContent = '' // ensure the element is empty
+
         const scale = window.devicePixelRatio || 1
 
         for (let i = 1; i <= pdf.numPages; i++) {
