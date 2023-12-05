@@ -426,6 +426,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     TutorialController.completeTutorial
   )
 
+  webRouter.post(
+    '/tutorial/:tutorialKey/postpone',
+    AuthenticationController.requireLogin(),
+    TutorialController.postponeTutorial
+  )
+
   webRouter.get(
     '/user/projects',
     AuthenticationController.requireLogin(),

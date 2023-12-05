@@ -126,9 +126,7 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
   useMeta({
     'ol-showSymbolPalette': true,
     'ol-mathJax3Path': 'https://unpkg.com/mathjax@3.2.2/es5/tex-svg-full.js',
-    'ol-completedTutorials': {
-      'table-generator-promotion': '2023-09-01T00:00:00.000Z',
-    },
+    'ol-inactiveTutorials': ['table-generator-promotion'],
     'ol-project_id': '63e21c07946dd8c76505f85a',
   })
 

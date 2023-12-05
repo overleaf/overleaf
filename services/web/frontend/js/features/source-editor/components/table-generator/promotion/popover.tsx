@@ -26,28 +26,20 @@ const NEW_USER_CUTOFF_TIME = new Date(2023, 8, 20).getTime()
 const NOW_TIME = new Date().getTime()
 const GRAMMARLY_CUTOFF_TIME = new Date(2023, 9, 10).getTime()
 
-type CompletedTutorials = {
-  'table-generator-promotion'?: Date | string
-}
 type EditorTutorials = {
-  completedTutorials?: CompletedTutorials
-  setCompletedTutorial: (key: string) => void
+  inactiveTutorials: [string]
+  deactivateTutorial: (key: string) => void
 }
 
 const editorContextPropTypes = {
-  completedTutorials: PropTypes.shape({
-    'table-generator-promotion': PropTypes.oneOfType([
-      PropTypes.instanceOf(Date),
-      PropTypes.string,
-    ]),
-  }),
-  setCompletedTutorial: PropTypes.func.isRequired,
+  inactiveTutorials: PropTypes.arrayOf(PropTypes.string).isRequired,
+  deactivateTutorial: PropTypes.func.isRequired,
 }
 
 export const PromotionOverlay: FC = ({ children }) => {
   const ref = useRef<HTMLSpanElement>(null)
 
-  const { completedTutorials }: EditorTutorials = useEditorContext(
+  const { inactiveTutorials }: EditorTutorials = useEditorContext(
     editorContextPropTypes
   )
   const {
@@ -68,7 +60,7 @@ export const PromotionOverlay: FC = ({ children }) => {
 
   const showPromotion =
     splitTestVariants['table-generator-promotion'] === 'enabled' &&
-    !completedTutorials?.['table-generator-promotion'] &&
+    !inactiveTutorials.includes('table-generator-promotion') &&
     !hideBecauseNewUser
 
   if (!showPromotion) {
@@ -88,17 +80,17 @@ const PromotionOverlayContent = memo(
     _props,
     ref: Ref<HTMLSpanElement>
   ) {
-    const { setCompletedTutorial }: EditorTutorials = useEditorContext(
+    const { deactivateTutorial }: EditorTutorials = useEditorContext(
       editorContextPropTypes
     )
     const [timeoutExpired, setTimeoutExpired] = useState(false)
 
     const onClose = useCallback(() => {
-      setCompletedTutorial('table-generator-promotion')
+      deactivateTutorial('table-generator-promotion')
       postJSON('/tutorial/table-generator-promotion/complete').catch(
         debugConsole.error
       )
-    }, [setCompletedTutorial])
+    }, [deactivateTutorial])
 
     const onDismiss = useCallback(() => {
       onClose()

@@ -51,9 +51,9 @@ describe('change list', function () {
     cy.intercept('GET', '/project/*/filetree/diff*', {
       body: { diff: [{ pathname: 'main.tex' }, { pathname: 'name.tex' }] },
     }).as('diff')
-    window.metaAttributesCache.set('ol-completedTutorials', {
-      'react-history-buttons-tutorial': Date.now(),
-    })
+    window.metaAttributesCache.set('ol-inactiveTutorials', [
+      'react-history-buttons-tutorial',
+    ])
   })
 
   describe('toggle switch', function () {

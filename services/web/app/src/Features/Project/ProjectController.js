@@ -38,6 +38,7 @@ const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
+const TutorialHandler = require('../Tutorial/TutorialHandler')
 
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
@@ -847,7 +848,7 @@ const ProjectController = {
                 alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
                 labsProgram: user.labsProgram,
-                completedTutorials: user.completedTutorials,
+                inactiveTutorials: TutorialHandler.getInactiveTutorials(user),
                 isAdmin: hasAdminAccess(user),
               },
               userSettings: {

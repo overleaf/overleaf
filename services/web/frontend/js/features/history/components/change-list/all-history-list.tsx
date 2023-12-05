@@ -16,12 +16,9 @@ import useAsync from '@/shared/hooks/use-async'
 import { completeHistoryTutorial } from '../../services/api'
 import { debugConsole } from '@/utils/debugging'
 
-type CompletedTutorials = {
-  'react-history-buttons-tutorial': Date
-}
 type EditorTutorials = {
-  completedTutorials: CompletedTutorials
-  setCompletedTutorial: (key: string) => void
+  inactiveTutorials: [string]
+  deactivateTutorial: (key: string) => void
 }
 
 function AllHistoryList() {
@@ -100,18 +97,18 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const { completedTutorials, setCompletedTutorial }: EditorTutorials =
+  const { inactiveTutorials, deactivateTutorial }: EditorTutorials =
     useEditorContext()
 
   const [showPopover, setShowPopover] = useState(() => {
     // only show tutorial popover if they haven't dismissed ("completed") it yet
-    return !completedTutorials?.['react-history-buttons-tutorial']
+    return !inactiveTutorials.includes('react-history-buttons-tutorial')
   })
 
   const completeTutorial = useCallback(() => {
     setShowPopover(false)
-    setCompletedTutorial('react-history-buttons-tutorial')
-  }, [setCompletedTutorial])
+    deactivateTutorial('react-history-buttons-tutorial')
+  }, [deactivateTutorial])
 
   const { runAsync } = useAsync()
 

@@ -86,18 +86,15 @@ export function EditorProvider({ children }) {
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
-  const [completedTutorials, setCompletedTutorials] = useState(() =>
-    getMeta('ol-completedTutorials')
+  const [inactiveTutorials, setInactiveTutorials] = useState(() =>
+    getMeta('ol-inactiveTutorials', [])
   )
 
-  const setCompletedTutorial = useCallback(
+  const deactivateTutorial = useCallback(
     tutorialKey => {
-      setCompletedTutorials({
-        ...completedTutorials,
-        [tutorialKey]: new Date(),
-      })
+      setInactiveTutorials([...inactiveTutorials, tutorialKey])
     },
-    [completedTutorials]
+    [inactiveTutorials]
   )
 
   useEffect(() => {
@@ -172,8 +169,8 @@ export function EditorProvider({ children }) {
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
-      completedTutorials,
-      setCompletedTutorial,
+      inactiveTutorials,
+      deactivateTutorial,
     }),
     [
       cobranding,
@@ -186,8 +183,8 @@ export function EditorProvider({ children }) {
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
-      completedTutorials,
-      setCompletedTutorial,
+      inactiveTutorials,
+      deactivateTutorial,
     ]
   )
 

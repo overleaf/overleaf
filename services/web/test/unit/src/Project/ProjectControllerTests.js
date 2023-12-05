@@ -150,6 +150,9 @@ describe('ProjectController', function () {
     this.ProjectAuditLogHandler = {
       addEntry: sinon.stub().yields(),
     }
+    this.TutorialHandler = {
+      getInactiveTutorials: sinon.stub().returns([]),
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -192,6 +195,7 @@ describe('ProjectController', function () {
         '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
         '../Survey/SurveyHandler': this.SurveyHandler,
         './ProjectAuditLogHandler': this.ProjectAuditLogHandler,
+        '../Tutorial/TutorialHandler': this.TutorialHandler,
       },
     })
 
