@@ -26,12 +26,6 @@ import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import { useSelectFileTreeEntity } from '@/features/ide-react/hooks/use-select-file-tree-entity'
 
-type EditorAndSidebarProps = {
-  shouldPersistLayout: boolean
-  leftColumnDefaultSize: number
-  setLeftColumnDefaultSize: React.Dispatch<React.SetStateAction<number>>
-}
-
 function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
   return {
     _id: fileRef._id,
@@ -58,11 +52,8 @@ function fileViewFile(fileRef: FileRef) {
   }
 }
 
-export function EditorAndSidebar({
-  shouldPersistLayout,
-  leftColumnDefaultSize,
-  setLeftColumnDefaultSize,
-}: EditorAndSidebarProps) {
+export function EditorAndSidebar() {
+  const [leftColumnDefaultSize, setLeftColumnDefaultSize] = useState(20)
   const [leftColumnIsOpen, setLeftColumnIsOpen] = useState(true)
   const { rootDocId } = useProjectContext()
   const { eventEmitter } = useIdeReactContext()
@@ -75,9 +66,6 @@ export function EditorAndSidebar({
   const { projectJoined } = useIdeReactContext()
   const { selectEntity } = useSelectFileTreeEntity()
   const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
-
-  const historyIsOpen = view === 'history'
-
   const [openEntity, setOpenEntity] = useState<
     FileTreeDocumentFindResult | FileTreeFileRefFindResult | null
   >(null)
@@ -157,88 +145,93 @@ export function EditorAndSidebar({
     }
   }, [fileTreeReady, openInitialDoc, projectJoined, rootDocId])
 
-  // Keep the editor file tree around so that it is available and up to date
-  // when restoring a file
-  const leftColumnContent = (
-    <>
-      <EditorSidebar
-        shouldShow={!historyIsOpen}
-        shouldPersistLayout={shouldPersistLayout}
-        onFileTreeInit={handleFileTreeInit}
-        onFileTreeSelect={handleFileTreeSelect}
-        onFileTreeDelete={handleFileTreeDelete}
+  // Keep the editor file tree around so that it is available and up to date when restoring a file
+  const editorSidebar = (
+    <EditorSidebar
+      shouldShow={view !== 'history'}
+      onFileTreeInit={handleFileTreeInit}
+      onFileTreeSelect={handleFileTreeSelect}
+      onFileTreeDelete={handleFileTreeDelete}
+    />
+  )
+
+  if (view === 'history') {
+    return (
+      <TwoColumnMainContent
+        leftColumnId="editor-left-column"
+        leftColumnContent={
+          <>
+            {editorSidebar}
+            <HistorySidebar />
+          </>
+        }
+        leftColumnDefaultSize={leftColumnDefaultSize}
+        setLeftColumnDefaultSize={setLeftColumnDefaultSize}
+        rightColumnContent={
+          <HistoryProvider>
+            <History />
+          </HistoryProvider>
+        }
+        leftColumnIsOpen={leftColumnIsOpen}
+        setLeftColumnIsOpen={setLeftColumnIsOpen}
       />
-      {historyIsOpen ? <HistorySidebar /> : null}
-    </>
+    )
+  }
+
+  // Always have the editor mounted when not in history view, and hide and
+  // show it as necessary
+  const editorPane = (
+    <EditorPane
+      show={openEntity?.type === 'doc' && selectedEntityCount === 1}
+    />
   )
 
   let rightColumnContent
 
-  if (historyIsOpen) {
+  if (openDocId === undefined) {
+    rightColumnContent = <NoOpenDocPane />
+  } else if (selectedEntityCount === 0) {
     rightColumnContent = (
-      <HistoryProvider>
-        <History />
-      </HistoryProvider>
+      <>
+        {editorPane}
+        <NoSelectionPane />
+      </>
     )
-  } else {
-    let editorContent = null
-
-    // Always have the editor mounted when not in history view, and hide and
-    // show it as necessary
-    const editorPane = (
-      <EditorPane
-        shouldPersistLayout={shouldPersistLayout}
-        show={openEntity?.type === 'doc' && selectedEntityCount === 1}
-      />
-    )
-    if (openDocId === undefined) {
-      rightColumnContent = <NoOpenDocPane />
-    } else if (selectedEntityCount === 0) {
-      rightColumnContent = (
-        <>
-          {editorPane}
-          <NoSelectionPane />
-        </>
-      )
-    } else if (selectedEntityCount > 1) {
-      editorContent = (
-        <>
-          {editorPane}
-          <MultipleSelectionPane selectedEntityCount={selectedEntityCount} />
-        </>
-      )
-    } else if (openEntity) {
-      editorContent =
-        openEntity.type === 'doc' ? (
-          editorPane
-        ) : (
+  } else if (selectedEntityCount > 1) {
+    rightColumnContent = (
+      <EditorAndPdf
+        editorContent={
           <>
             {editorPane}
-            <FileView file={fileViewFile(openEntity.entity)} />
+            <MultipleSelectionPane selectedEntityCount={selectedEntityCount} />
           </>
-        )
-    }
-
-    if (editorContent) {
-      rightColumnContent = (
-        <EditorAndPdf
-          editorContent={editorContent}
-          shouldPersistLayout={shouldPersistLayout}
-        />
-      )
-    }
+        }
+      />
+    )
+  } else if (openEntity) {
+    rightColumnContent = (
+      <EditorAndPdf
+        editorContent={
+          <>
+            {editorPane}
+            {openEntity.type !== 'doc' && (
+              <FileView file={fileViewFile(openEntity.entity)} />
+            )}
+          </>
+        }
+      />
+    )
   }
 
   return (
     <TwoColumnMainContent
       leftColumnId="editor-left-column"
-      leftColumnContent={leftColumnContent}
+      leftColumnContent={editorSidebar}
       leftColumnDefaultSize={leftColumnDefaultSize}
       setLeftColumnDefaultSize={setLeftColumnDefaultSize}
       rightColumnContent={rightColumnContent}
       leftColumnIsOpen={leftColumnIsOpen}
       setLeftColumnIsOpen={setLeftColumnIsOpen}
-      shouldPersistLayout={shouldPersistLayout}
     />
   )
 }

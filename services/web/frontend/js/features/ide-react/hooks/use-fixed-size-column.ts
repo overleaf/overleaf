@@ -15,7 +15,7 @@ export default function useFixedSizeColumn(
     return fixedPanelRef.current?.getSize('pixels') || 0
   }, [fixedPanelRef])
 
-  const handleLayout = useCallback(
+  const handleLayout: PanelGroupOnLayout = useCallback(
     sizes => {
       // Measure the pixel width here because it's not always up to date in the
       // panel's onResize
@@ -26,7 +26,7 @@ export default function useFixedSizeColumn(
       setInitialLayoutDone(true)
     },
     [measureFixedPanelSizePixels]
-  ) as PanelGroupOnLayout
+  )
 
   useEffect(() => {
     if (!isOpen) {

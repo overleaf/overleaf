@@ -17,7 +17,6 @@ type TwoColumnMainContentProps = {
   setLeftColumnIsOpen: (
     leftColumnIsOpen: TwoColumnMainContentProps['leftColumnIsOpen']
   ) => void
-  shouldPersistLayout?: boolean
 }
 
 export default function TwoColumnMainContent({
@@ -28,7 +27,6 @@ export default function TwoColumnMainContent({
   rightColumnContent,
   leftColumnIsOpen,
   setLeftColumnIsOpen,
-  shouldPersistLayout = false,
 }: TwoColumnMainContentProps) {
   const { t } = useTranslation()
 
@@ -52,9 +50,7 @@ export default function TwoColumnMainContent({
 
   return (
     <PanelGroup
-      autoSaveId={
-        shouldPersistLayout ? 'ide-react-main-content-layout' : undefined
-      }
+      autoSaveId="ide-react-main-content-layout"
       direction="horizontal"
       onLayout={handleLayout}
       className={classNames({

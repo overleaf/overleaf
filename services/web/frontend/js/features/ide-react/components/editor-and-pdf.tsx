@@ -14,14 +14,10 @@ import { DefaultSynctexControl } from '@/features/pdf-preview/components/detach-
 import classnames from 'classnames'
 
 export type EditorProps = {
-  shouldPersistLayout?: boolean
   editorContent: ReactNode
 }
 
-export default function EditorAndPdf({
-  shouldPersistLayout = false,
-  editorContent,
-}: EditorProps) {
+export default function EditorAndPdf({ editorContent }: EditorProps) {
   const { t } = useTranslation()
   const { view, pdfLayout, changeLayout, detachRole, reattach } =
     useLayoutContext()
@@ -49,9 +45,7 @@ export default function EditorAndPdf({
 
   return (
     <PanelGroup
-      autoSaveId={
-        shouldPersistLayout ? 'ide-react-editor-and-pdf-layout' : undefined
-      }
+      autoSaveId="ide-react-editor-and-pdf-layout"
       direction="horizontal"
       className={classnames('ide-react-editor-and-pdf', {
         hide: historyIsOpen,

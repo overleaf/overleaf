@@ -6,14 +6,12 @@ export default function useCollapsiblePanel(
   panelRef: RefObject<ImperativePanelHandle>
 ) {
   useEffect(() => {
-    const panel = panelRef.current
-    if (!panel) {
-      return
-    }
-    if (panelIsOpen) {
-      panel.expand()
-    } else {
-      panel.collapse()
+    if (panelRef.current) {
+      if (panelIsOpen) {
+        panelRef.current.expand()
+      } else {
+        panelRef.current.collapse()
+      }
     }
   }, [panelIsOpen, panelRef])
 }

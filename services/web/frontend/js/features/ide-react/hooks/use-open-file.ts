@@ -21,6 +21,4 @@ export function useOpenFile() {
   // Expose BinaryFilesManager via ide object solely for the benefit of the file
   // restore feature in history. This can be removed once Angular is gone.
   ide.binaryFilesManager = { openFileWithId }
-
-  return openFileWithId
 }
