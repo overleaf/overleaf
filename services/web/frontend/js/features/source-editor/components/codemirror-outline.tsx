@@ -1,16 +1,15 @@
 import { createPortal } from 'react-dom'
 import { useCodeMirrorStateContext } from './codemirror-editor'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import OutlinePane from '../../outline/components/outline-pane'
 import { documentOutline } from '../languages/latex/document-outline'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
 import useScopeEventEmitter from '../../../shared/hooks/use-scope-event-emitter'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import { nestOutline } from '../utils/tree-query'
+import { nestOutline, Outline } from '../utils/tree-query'
 import { ProjectionStatus } from '../utils/tree-operations/projection'
 import useEventListener from '../../../shared/hooks/use-event-listener'
-import useDeepCompareMemo from '../../../shared/hooks/use-deep-compare-memo'
 import useDebounce from '../../../shared/hooks/use-debounce'
 
 const closestSectionLineNumber = (
@@ -28,6 +27,39 @@ const closestSectionLineNumber = (
     highestLine = section.line
   }
   return highestLine
+}
+
+type PartialFlatOutline = {
+  level: number
+  title: string
+  line: number
+}[]
+
+const outlineChanged = (
+  a: PartialFlatOutline | undefined,
+  b: PartialFlatOutline
+): boolean => {
+  if (!a) {
+    return true
+  }
+
+  if (a.length !== b.length) {
+    return true
+  }
+
+  for (let i = 0; i < a.length; i++) {
+    const aItem = a[i]
+    const bItem = b[i]
+    if (
+      aItem.level !== bItem.level ||
+      aItem.line !== bItem.line ||
+      aItem.title !== bItem.title
+    ) {
+      return true
+    }
+  }
+
+  return false
 }
 
 export const CodemirrorOutline = React.memo(function CodemirrorOutline() {
@@ -90,28 +122,37 @@ export const CodemirrorOutline = React.memo(function CodemirrorOutline() {
     }, [])
   )
 
-  const outlineStatus = useMemo(
-    () =>
-      debouncedState.field(documentOutline, false)?.status ||
-      ProjectionStatus.Pending,
-    [debouncedState]
-  )
+  const outlineResult = debouncedState.field(documentOutline, false)
 
-  const flatOutline = useMemo(() => {
-    const outlineResult = debouncedState.field(documentOutline, false)
-    if (outlineResult?.status !== ProjectionStatus.Pending) {
-      // We have a (potentially partial) outline.
-      return outlineResult?.items!.map(element => {
-        // Remove {from, to} to not trip up deep comparison
-        const { level, title, line } = element
-        return { level, title, line }
-      })
+  // when the outline projection changes, calculate the flat outline
+  const flatOutline = useMemo<PartialFlatOutline | undefined>(() => {
+    if (!outlineResult || outlineResult.status === ProjectionStatus.Pending) {
+      return undefined
     }
-    return undefined
-  }, [debouncedState])
 
-  const outline = useDeepCompareMemo(() => {
-    return flatOutline ? nestOutline(flatOutline) : []
+    // We have a (potentially partial) outline.
+    return outlineResult.items.map(element => {
+      const { level, title, line } = element
+      return { level, title, line }
+    })
+  }, [outlineResult])
+
+  const [outline, setOutline] = useState<Outline[]>([])
+
+  const prevFlatOutlineRef = useRef<PartialFlatOutline | undefined>(undefined)
+
+  // when the flat outline changes, calculate the nested outline
+  useEffect(() => {
+    const prevFlatOutline = prevFlatOutlineRef.current
+    prevFlatOutlineRef.current = flatOutline
+
+    if (flatOutline) {
+      if (outlineChanged(prevFlatOutline, flatOutline)) {
+        setOutline(nestOutline(flatOutline))
+      }
+    } else {
+      setOutline([])
+    }
   }, [flatOutline])
 
   const jumpToLine = useCallback(
@@ -121,13 +162,6 @@ export const CodemirrorOutline = React.memo(function CodemirrorOutline() {
       eventTracking.sendMB('outline-jump-to-line')
     },
     [goToLineEmitter]
-  )
-
-  const onToggle = useCallback(
-    isOpen => {
-      outlineToggledEmitter(isOpen)
-    },
-    [outlineToggledEmitter]
   )
 
   const highlightedLine = useMemo(
@@ -143,13 +177,13 @@ export const CodemirrorOutline = React.memo(function CodemirrorOutline() {
   return createPortal(
     <OutlinePane
       outline={outline}
-      onToggle={onToggle}
+      onToggle={outlineToggledEmitter}
       eventTracking={eventTracking}
       isTexFile={isTexFile && !binaryFileOpened}
       jumpToLine={jumpToLine}
       highlightedLine={highlightedLine}
       show
-      isPartial={outlineStatus === ProjectionStatus.Partial}
+      isPartial={outlineResult?.status === ProjectionStatus.Partial}
     />,
     outlineDomElement
   )
