@@ -214,7 +214,8 @@ async function projectListPage(req, res, next) {
   }
 
   const notificationsInstitution = []
-  // Institution SSO Notifications
+  // Institution and group SSO Notifications
+  let groupSsoSetupSuccess
   let reconfirmedViaSAML
   if (Features.hasFeature('saml')) {
     reconfirmedViaSAML = _.get(req.session, ['saml', 'reconfirmed'])
@@ -240,7 +241,7 @@ async function projectListPage(req, res, next) {
     }
 
     if (samlSession) {
-      // Notification: After SSO Linked
+      // Notification institution SSO: After SSO Linked
       if (samlSession.linked) {
         notificationsInstitution.push({
           email: samlSession.institutionEmail,
@@ -251,7 +252,12 @@ async function projectListPage(req, res, next) {
         })
       }
 
-      // Notification: After SSO Linked or Logging in
+      // Notification group SSO: After SSO Linked
+      if (samlSession.linkedGroup) {
+        groupSsoSetupSuccess = true
+      }
+
+      // Notification institution SSO: After SSO Linked or Logging in
       // The requested email does not match primary email returned from
       // the institution
       if (
@@ -266,7 +272,7 @@ async function projectListPage(req, res, next) {
         })
       }
 
-      // Notification: Tried to register, but account already existed
+      // Notification institution SSO: Tried to register, but account already existed
       // registerIntercept is set before the institution callback.
       // institutionEmail is set after institution callback.
       // Check for both in case SSO flow was abandoned
@@ -500,6 +506,7 @@ async function projectListPage(req, res, next) {
     inrGeoBannerSplitTestName,
     projectDashboardReact: true, // used in navbar
     welcomePageRedesignVariant: welcomePageRedesignAssignment.variant,
+    groupSsoSetupSuccess,
     groupSubscriptionsPendingEnrollment:
       groupSubscriptionsPendingEnrollment.map(subscription => ({
         groupId: subscription._id,

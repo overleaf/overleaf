@@ -5,6 +5,7 @@ import ConfirmEmail from './groups/confirm-email'
 import ReconfirmationInfo from './groups/affiliation/reconfirmation-info'
 import GroupsAndEnterpriseBanner from './groups-and-enterprise-banner'
 import WritefullPromoBanner from './writefull-promo-banner'
+import GroupSsoSetupSuccess from './groups/group-sso-setup-success'
 import INRBanner from './ads/inr-banner'
 import LATAMBanner from './ads/latam-banner'
 import getMeta from '../../../../utils/meta'
@@ -73,6 +74,7 @@ function UserNotifications() {
               key={subscription.groupId}
             />
           ))}
+        <GroupSsoSetupSuccess />
         <Common />
         <Institution />
         <ConfirmEmail />

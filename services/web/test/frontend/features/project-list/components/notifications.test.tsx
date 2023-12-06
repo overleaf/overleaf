@@ -34,6 +34,7 @@ import {
 import { DeepPartial } from '../../../../../types/utils'
 import { Project } from '../../../../../types/project/dashboard/api'
 import GroupsAndEnterpriseBanner from '../../../../../frontend/js/features/project-list/components/notifications/groups-and-enterprise-banner'
+import GroupSsoSetupSuccess from '../../../../../frontend/js/features/project-list/components/notifications/groups/group-sso-setup-success'
 import localStorage from '../../../../../frontend/js/infrastructure/local-storage'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
 import {
@@ -955,6 +956,30 @@ describe('<UserNotifications />', function () {
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
       })
+    })
+  })
+
+  describe('GroupSsoSetupSuccess', function () {
+    beforeEach(function () {
+      window.metaAttributesCache = window.metaAttributesCache || new Map()
+    })
+
+    afterEach(function () {
+      window.metaAttributesCache = window.metaAttributesCache || new Map()
+    })
+
+    it('shows group SSO linked notification', function () {
+      window.metaAttributesCache.set('ol-groupSsoSetupSuccess', true)
+      renderWithinProjectListProvider(GroupSsoSetupSuccess)
+      screen.getByText('Success! Single sign-on is all set up for you.')
+    })
+
+    it('does not show group SSO linked notification', function () {
+      window.metaAttributesCache.set('ol-groupSsoSetupSuccess', false)
+      renderWithinProjectListProvider(GroupSsoSetupSuccess)
+      expect(
+        screen.queryByText('Success! Single sign-on is all set up for you.')
+      ).to.be.null
     })
   })
 })

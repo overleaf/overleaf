@@ -240,12 +240,17 @@ input.project-list-table-select-item[type='checkbox'] {
   }
   .notification-entry {
     .alert {
+      // old alert style
       .box-shadow(2px 4px 6px rgba(0, 0, 0, 0.25));
       display: flex;
       flex-wrap: wrap;
       @media (min-width: @screen-sm-min) {
         flex-wrap: nowrap;
       }
+    }
+    .notification {
+      // new alert style. match the existing margin on .alert since there is a mix of old and new alert styles
+      margin-bottom: @line-height-computed;
     }
     &.centered-alert .alert {
       align-items: center;
