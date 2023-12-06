@@ -23,17 +23,14 @@ export default function DictionaryModalContent({
 
   const handleRemove = useCallback(
     word => {
+      ignoredWords.remove(word)
       runAsync(
         postJSON('/spelling/unlearn', {
           body: {
             word,
           },
         })
-      )
-        .then(() => {
-          ignoredWords.remove(word)
-        })
-        .catch(debugConsole.error)
+      ).catch(debugConsole.error)
     },
     [runAsync]
   )
