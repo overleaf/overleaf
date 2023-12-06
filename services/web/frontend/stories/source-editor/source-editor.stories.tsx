@@ -54,6 +54,17 @@ const settings = {
   syntaxValidation: false,
 }
 
+const reviewPanel = {
+  resolvedComments: {},
+  formattedProjectMembers: {},
+  overview: { docsCollapsedState: { 'story-doc': false } },
+  entries: {},
+}
+
+const permissions = {
+  write: true,
+}
+
 export const Latex = (args: any, { globals: { theme } }: any) => {
   useScope({
     editor: {
@@ -87,6 +98,8 @@ export const Latex = (args: any, { globals: { theme } }: any) => {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
     },
+    permissions,
+    reviewPanel,
   })
 
   useMeta({
@@ -106,6 +119,8 @@ export const Markdown = (args: any, { globals: { theme } }: any) => {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
     },
+    permissions,
+    reviewPanel,
   })
 
   return <SourceEditor />
@@ -122,6 +137,8 @@ export const Visual = (args: any, { globals: { theme } }: any) => {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
     },
+    permissions,
+    reviewPanel,
   })
   useMeta({
     'ol-showSymbolPalette': true,
@@ -143,6 +160,8 @@ export const Bibtex = (args: any, { globals: { theme } }: any) => {
       ...settings,
       overallTheme: theme === 'default-' ? '' : theme,
     },
+    permissions,
+    reviewPanel,
   })
 
   return <SourceEditor />
