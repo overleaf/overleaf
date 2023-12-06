@@ -27,7 +27,6 @@ describe('GroupSSOHandler', function () {
     this.ssoConfigData = {
       entryPoint: 'https://example.com/saml',
       certificates: ['abc'],
-      signatureAlgorithm: 'sha256',
       userIdAttribute: 'nameId',
       enabled: true,
     }

@@ -1,9 +1,12 @@
 import GroupSettingsSSORoot from '../../../../../../modules/group-settings/frontend/js/components/sso/group-settings-sso-root'
+import { SSOConfigurationProvider } from '../../../../../../modules/group-settings/frontend/js/context/sso-configuration-context'
 
 function GroupSettingsSSOComponent() {
   return (
     <div style={{ padding: '25px', width: '600px' }}>
-      <GroupSettingsSSORoot managedUsersEnabled />
+      <SSOConfigurationProvider>
+        <GroupSettingsSSORoot />
+      </SSOConfigurationProvider>
     </div>
   )
 }
@@ -41,14 +44,58 @@ describe('GroupSettingsSSO', function () {
       })
     })
 
-    it('renders with sso configuration', function () {
+    it('renders with sso configuration not validated', function () {
       cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
           certificates: ['cert1', 'cert2'],
-          signatureAlgorithm: 'sha1',
           userIdAttribute: 'email',
+          enabled: false,
+          validated: false,
+        },
+      }).as('sso')
+
+      cy.mount(<GroupSettingsSSOComponent />)
+
+      cy.wait('@sso')
+
+      cy.get('.switch-input').within(() => {
+        cy.get('.invisible-input').should('not.be.checked')
+        cy.get('.invisible-input').should('be.disabled')
+      })
+    })
+
+    it('renders with sso configuration validated and not enabled', function () {
+      cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
+        statusCode: 200,
+        body: {
+          entryPoint: 'entrypoint',
+          certificates: ['cert1', 'cert2'],
+          userIdAttribute: 'email',
+          validated: true,
+          enabled: false,
+        },
+      }).as('sso')
+
+      cy.mount(<GroupSettingsSSOComponent />)
+
+      cy.wait('@sso')
+
+      cy.get('.switch-input').within(() => {
+        cy.get('.invisible-input').should('not.be.checked')
+        cy.get('.invisible-input').should('not.be.disabled')
+      })
+    })
+
+    it('renders with sso configuration validated and enabled', function () {
+      cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
+        statusCode: 200,
+        body: {
+          entryPoint: 'entrypoint',
+          certificates: ['cert1', 'cert2'],
+          userIdAttribute: 'email',
+          validated: true,
           enabled: true,
         },
       }).as('sso')
@@ -63,15 +110,15 @@ describe('GroupSettingsSSO', function () {
       })
     })
 
-    it('updates the configuration, and checks the success message', function () {
+    it('updates the configuration, and checks the draft configuration message', function () {
       cy.intercept('GET', `/manage/groups/${GROUP_ID}/settings/sso`, {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
           certificates: ['cert'],
-          signatureAlgorithm: 'sha1',
           userIdAttribute: 'email',
-          enabled: true,
+          validated: true,
+          enabled: false,
         },
       }).as('sso')
 
@@ -80,8 +127,8 @@ describe('GroupSettingsSSO', function () {
         body: {
           entryPoint: 'entrypoint',
           certificates: ['certi'],
-          signatureAlgorithm: 'sha1',
           userIdAttribute: 'email',
+          validated: false,
           enabled: false,
         },
       }).as('ssoUpdated')
@@ -91,15 +138,15 @@ describe('GroupSettingsSSO', function () {
       cy.wait('@sso')
 
       cy.get('.switch-input').within(() => {
-        cy.get('.invisible-input').should('be.checked')
+        cy.get('.invisible-input').should('not.be.checked')
         cy.get('.invisible-input').should('not.be.disabled')
       })
 
       cy.findByRole('button', { name: 'View configuration' }).click()
-      cy.findByRole('button', { name: 'Edit configuration' }).click()
-      cy.findByRole('button', { name: 'Save' }).click()
+      cy.findByRole('button', { name: 'Edit' }).click()
+      cy.findByRole('button', { name: 'Next' }).click()
       cy.wait('@ssoUpdated')
-      cy.findByText('SSO configuration was updated successfully')
+      cy.findByText('Your configuration has not been finalized.')
     })
 
     describe('sso enable modal', function () {
@@ -109,7 +156,6 @@ describe('GroupSettingsSSO', function () {
           body: {
             entryPoint: 'entrypoint',
             certificates: ['cert'],
-            signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
             enabled: false,
           },
@@ -150,8 +196,8 @@ describe('GroupSettingsSSO', function () {
           body: {
             entryPoint: 'entrypoint',
             certificates: ['cert'],
-            signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
+            validated: true,
             enabled: true,
           },
         }).as('sso')
@@ -177,8 +223,8 @@ describe('GroupSettingsSSO', function () {
           body: {
             entryPoint: 'entrypoint',
             certificates: ['cert'],
-            signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
+            validated: true,
             enabled: true,
           },
         }).as('sso')
@@ -220,8 +266,8 @@ describe('GroupSettingsSSO', function () {
           body: {
             entryPoint: 'entrypoint',
             certificates: ['cert'],
-            signatureAlgorithm: 'sha1',
             userIdAttribute: 'email',
+            validated: true,
             enabled: false,
           },
         }).as('sso')
