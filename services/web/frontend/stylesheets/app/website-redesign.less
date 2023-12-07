@@ -37,7 +37,7 @@
 
       @media (max-width: @screen-sm-max) {
         margin-bottom: 16px;
-        height: 398px;
+        min-height: unset;
       }
     }
 
@@ -74,11 +74,15 @@
           display: flex;
           flex-direction: column;
           gap: 12px;
+
+          @media (max-width: @screen-sm-max) {
+            margin-top: 16px;
+          }
         }
       }
 
       &.grey-border {
-        border: 2px solid #e7e9ee;
+        border: 2px solid var(--neutral-20);
       }
 
       // workaround for border that contains both linear-gradient and border radius
@@ -86,20 +90,13 @@
       &.blue-gradient-highlighted {
         border: double 2px transparent;
         border-radius: 8px;
-        background-image: linear-gradient(white, white),
-          linear-gradient(245.63deg, #214475 0%, #254c84 28.54%, #6597e0 96.69%);
+        background-image: linear-gradient(var(--white), var(--white)),
+          var(--premium-gradient);
         background-origin: border-box;
         background-clip: content-box, border-box;
 
         .plans-card-inner-title {
-          background: linear-gradient(
-            245.63deg,
-            #214475 0%,
-            #254c84 28.54%,
-            #6597e0 96.69%
-          );
-          background-clip: text;
-          color: transparent;
+          color: var(--blue-60);
         }
       }
     }
@@ -107,13 +104,17 @@
 
   .info-cards {
     .info-card-container {
-      height: 348px;
+      min-height: 348px;
       margin-bottom: 16px;
+
+      @media (max-width: @screen-sm-max) {
+        min-height: unset;
+      }
 
       .info-card {
         border-radius: 8px;
         height: 100%;
-        box-shadow: 0px 2px 4px 0px #1e253029;
+        box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
         border-top: 8px solid #2f4858;
         padding: 48px 40px 48px 40px;
       }
@@ -143,19 +144,18 @@
 
         li {
           margin-bottom: 8px;
-        }
-      }
 
-      .premium-badge {
-        .premium-badge-img {
-          margin-left: 10px;
-        }
+          @media (max-width: @screen-sm-max) {
+            display: flex;
 
-        @media (max-width: @screen-xs-max) {
-          display: flex;
-          .premium-badge-img {
-            width: 87px;
-            margin-left: auto;
+            i {
+              height: 25px; // force height if text wraps to multiple lines
+            }
+
+            .label-premium {
+              margin-left: auto;
+              height: 20px; // force height if text wraps to multiple lines
+            }
           }
         }
       }
@@ -175,7 +175,7 @@
 
         a {
           width: 100%;
-          color: @neutral-90;
+          color: var(--neutral-90);
           display: inline-flex;
           justify-content: space-between;
         }
@@ -204,7 +204,7 @@
     align-items: center;
     padding: 64px;
     background: #2f4858;
-    color: white;
+    color: var(--white);
     border-radius: 8px;
 
     .cta-card-title {
@@ -232,12 +232,12 @@
   .testimonial-media {
     border-radius: 24px;
 
-    .testimonial-media-text-container {
+    .testimonial-media-text {
       display: flex;
       flex-direction: column;
       min-height: 352px;
       background-color: #2f4858;
-      color: white;
+      color: var(--white);
       border-top-left-radius: 24px;
       border-top-right-radius: 0;
       border-bottom-left-radius: 24px;
@@ -251,38 +251,38 @@
         padding: 56px 24px;
       }
 
-      .testimonial-media-text {
+      blockquote {
         margin-bottom: auto;
-        font-size: 28px;
-        font-weight: 600;
-        line-height: 38px;
-
-        @media (max-width: @screen-sm-max) {
-          font-size: 24px;
-          line-height: 32px;
-        }
       }
     }
 
     .testimonial-media-video {
       height: 100%;
       min-height: 352px;
-      background-color: @neutral-20;
+      background-color: var(--neutral-20);
       border-top-right-radius: 24px;
       border-bottom-right-radius: 24px;
       border-bottom-left-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       @media (max-width: @screen-sm-max) {
         border-top-right-radius: 0;
         border-bottom-right-radius: 24px;
         border-bottom-left-radius: 24px;
       }
+
+      video {
+        height: 100%;
+        width: 100%;
+      }
     }
   }
 
   .mono-text {
     font-family: 'DM Mono', monospace;
-    color: @green-60;
+    color: var(--green-60);
     font-feature-settings: 'ss05';
     font-size: 1.125rem;
     font-weight: 500;
@@ -291,7 +291,7 @@
   }
 
   .green-link {
-    color: @green-60;
+    color: var(--green-60);
 
     i.material-symbols-rounded {
       vertical-align: middle;
@@ -300,21 +300,20 @@
     }
 
     &:hover {
-      color: @green-70;
+      color: var(--green-70);
       .right-arrow {
-        background: @green-70;
+        background: var(--green-70);
       }
     }
   }
 
   .btn-blue-gradient {
-    background: linear-gradient(
-      245.63deg,
-      #214475 0%,
-      #254c84 28.54%,
-      #6597e0 96.69%
-    );
-    color: white;
+    background: var(--premium-gradient);
+    color: var(--white);
+
+    &:hover {
+      background: var(--blue-70);
+    }
   }
 
   .round-background {
@@ -327,13 +326,54 @@
 
   .green-round-background {
     .round-background;
-    background: @green-10;
-    color: @green-40;
+    background: var(--green-10);
+    color: var(--green-40);
   }
 
   .blue-round-background {
     .round-background;
-    background: @blue-10;
-    color: @blue-40;
+    background: var(--blue-10);
+    color: var(--blue-40);
+  }
+
+  // most of these are here to replace rules from core/type.less
+  blockquote {
+    border-left: none;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 38px;
+    quotes: '\0022''\0022'; // use straight (" ") instead of curly ones (“ ”)
+    padding: unset;
+    margin: unset;
+
+    &::after {
+      visibility: visible;
+      display: inline;
+      margin-left: 1px; // it's too tight to the text otherwise
+    }
+
+    &::before {
+      color: inherit;
+      margin-right: 0;
+      vertical-align: 0;
+    }
+
+    &::after,
+    &::before {
+      font-size: 28px;
+      line-height: 38px;
+    }
+
+    @media (max-width: @screen-sm-max) {
+      font-size: 24px;
+      line-height: 32px;
+
+      &::after,
+      &::before {
+        visibility: visible;
+        font-size: 24px;
+        line-height: 32px;
+      }
+    }
   }
 }
