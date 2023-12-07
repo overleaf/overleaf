@@ -2073,7 +2073,7 @@
   "webinars": "Webinars",
   "website_status": "Website status",
   "wed_love_you_to_stay": "We’d love you to stay",
-  "welcome_to_sl": "Welcome to __appName__!",
+  "welcome_to_sl": "Welcome to __appName__",
   "were_in_the_process_of_reducing_compile_timeout_which_may_affect_this_project": "We’re in the process of <0>reducing the compile timeout limit</0> on our free plan, which may affect this project in future.",
   "were_in_the_process_of_reducing_compile_timeout_which_may_affect_your_project": "We’re in the process of <0>reducing the compile timeout limit</0> on our free plan, which may affect your project in future.",
   "were_performing_maintenance": "We’re performing maintenance on Overleaf and you need to wait a moment. Sorry for any inconvenience. The editor will refresh automatically in __seconds__ seconds.",

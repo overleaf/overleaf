@@ -10,7 +10,7 @@ describe('<WelcomeMessageNew />', function () {
   it('renders welcome page correctly', function () {
     render(<WelcomeMessageNew />)
 
-    screen.getByText('Welcome to Overleaf!')
+    screen.getByText('Welcome to Overleaf')
     screen.getByText('Create a new project')
     screen.getByText('Learn LaTeX with a tutorial')
     screen.getByText('Browse templates')

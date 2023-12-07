@@ -17,7 +17,7 @@ describe('i18n', function () {
         return <div>{t('welcome_to_sl')}</div>
       }
       cy.mount(<Test />)
-      cy.findByText('Welcome to Overleaf!')
+      cy.findByText('Welcome to Overleaf')
     })
 
     it('uses values', function () {

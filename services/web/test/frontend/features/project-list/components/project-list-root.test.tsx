@@ -75,7 +75,7 @@ describe('<ProjectListRoot />', function () {
     })
 
     it('the welcome page is displayed', async function () {
-      screen.getByRole('heading', { name: 'Welcome to Overleaf!' })
+      screen.getByRole('heading', { name: 'Welcome to Overleaf' })
     })
 
     it('the email confirmation alert is not displayed', async function () {
