@@ -4,13 +4,16 @@ import fetchMock from 'fetch-mock'
 import LinkingSection from '../../../../../frontend/js/features/settings/components/linking-section'
 import { UserProvider } from '../../../../../frontend/js/shared/context/user-context'
 import { SSOProvider } from '../../../../../frontend/js/features/settings/context/sso-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 function renderSectionWithProviders() {
   render(<LinkingSection />, {
     wrapper: ({ children }) => (
-      <UserProvider>
-        <SSOProvider>{children}</SSOProvider>
-      </UserProvider>
+      <SplitTestProvider>
+        <UserProvider>
+          <SSOProvider>{children}</SSOProvider>
+        </UserProvider>
+      </SplitTestProvider>
     ),
   })
 }
@@ -47,6 +50,7 @@ describe('<LinkingSection />', function () {
     // all environments
     window.metaAttributesCache.set('integrationLinkingWidgets', [])
     window.metaAttributesCache.set('referenceLinkingWidgets', [])
+    window.metaAttributesCache.set('integrationLinkingWidgets', [])
 
     window.metaAttributesCache.set('ol-thirdPartyIds', {
       google: 'google-id',

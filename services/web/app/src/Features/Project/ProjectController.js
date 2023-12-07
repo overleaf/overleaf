@@ -442,7 +442,7 @@ const ProjectController = {
             )
             User.findById(
               userId,
-              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials',
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials writefull',
               (err, user) => {
                 // Handle case of deleted user
                 if (user == null) {
@@ -845,6 +845,9 @@ const ProjectController = {
                 featureSwitches: user.featureSwitches,
                 features: user.features,
                 refProviders: _.mapValues(user.refProviders, Boolean),
+                writefull: {
+                  enabled: Boolean(user.writefull?.enabled),
+                },
                 alphaProgram: user.alphaProgram,
                 betaProgram: user.betaProgram,
                 labsProgram: user.labsProgram,
@@ -1146,6 +1149,9 @@ const defaultSettingsForAnonymousUser = userId => ({
   },
   alphaProgram: false,
   betaProgram: false,
+  writefull: {
+    enabled: false,
+  },
 })
 
 const THEME_LIST = [

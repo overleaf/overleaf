@@ -6,6 +6,7 @@ import { useSSOContext, SSOSubscription } from '../context/sso-context'
 import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 function LinkingSection() {
   useBroadcastUser()
@@ -25,6 +26,11 @@ function LinkingSection() {
       getMeta('referenceLinkingWidgets') ||
       importOverleafModules('referenceLinkingWidgets')
   )
+  const [langFeedbackLinkingWidgets] = useState<any[]>(
+    () =>
+      getMeta('langFeedbackLinkingWidgets') ||
+      importOverleafModules('langFeedbackLinkingWidgets')
+  )
 
   const oauth2ServerComponents = importOverleafModules('oauth2Server') as {
     import: { default: ElementType }
@@ -39,6 +45,20 @@ function LinkingSection() {
     ? integrationLinkingWidgets.concat(oauth2ServerComponents)
     : integrationLinkingWidgets
 
+  // currently the only thing that is in the langFeedback section is writefull,
+  // which is behind a split test. we should hide this section if the user is not in the split test
+  // todo: remove split test check, and split test context after gradual rollout is complete
+  const {
+    splitTestVariants,
+  }: { splitTestVariants: Record<string, string | undefined> } =
+    useSplitTestContext()
+
+  const shouldLoadWritefull =
+    splitTestVariants['writefull-integration'] === 'enabled' &&
+    !window.writefull // check if the writefull extension is installed, in which case we dont handle the integration
+
+  const haslangFeedbackLinkingWidgets =
+    langFeedbackLinkingWidgets.length && shouldLoadWritefull
   const hasIntegrationLinkingSection = allIntegrationLinkingWidgets.length
   const hasReferencesLinkingSection = referenceLinkingWidgets.length
 
@@ -63,6 +83,7 @@ function LinkingSection() {
   const hasSSOLinkingSection = Object.keys(subscriptions).length > 0
 
   if (
+    !haslangFeedbackLinkingWidgets &&
     !hasIntegrationLinkingSection &&
     !hasReferencesLinkingSection &&
     !hasSSOLinkingSection
@@ -74,6 +95,24 @@ function LinkingSection() {
     <>
       <h3>{t('integrations')}</h3>
       <p className="small">{t('linked_accounts_explained')}</p>
+      {haslangFeedbackLinkingWidgets ? (
+        <>
+          <h3 id="project-sync" className="text-capitalize">
+            {t('language_feedback')}
+          </h3>
+          <div className="settings-widgets-container">
+            {langFeedbackLinkingWidgets.map(
+              ({ import: { default: widget }, path }, widgetIndex) => (
+                <ModuleLinkingWidget
+                  key={path}
+                  ModuleComponent={widget}
+                  isLast={widgetIndex === langFeedbackLinkingWidgets.length - 1}
+                />
+              )
+            )}
+          </div>
+        </>
+      ) : null}
       {hasIntegrationLinkingSection ? (
         <>
           <h3 id="project-sync" className="text-capitalize">
@@ -140,7 +179,8 @@ function LinkingSection() {
           </div>
         </>
       ) : null}
-      {hasIntegrationLinkingSection ||
+      {haslangFeedbackLinkingWidgets ||
+      hasIntegrationLinkingSection ||
       hasReferencesLinkingSection ||
       hasSSOLinkingSection ? (
         <hr />

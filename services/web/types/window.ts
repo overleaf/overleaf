@@ -42,5 +42,6 @@ declare global {
       useRecaptchaNet?: boolean
     }
     expectingLinkedFileRefreshedSocketFor?: string | null
+    writefull?: Map<string, any>
   }
 }

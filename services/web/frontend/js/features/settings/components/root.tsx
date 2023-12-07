@@ -14,6 +14,7 @@ import LeaveSection from './leave-section'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { UserProvider } from '../../../shared/context/user-context'
 import { SSOProvider } from '../context/sso-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import useScrollToIdOnLoad from '../../../shared/hooks/use-scroll-to-id-on-load'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
@@ -63,9 +64,11 @@ function SettingsPageContent() {
             </div>
           </div>
           <hr />
-          <SSOProvider>
-            <LinkingSection />
-          </SSOProvider>
+          <SplitTestProvider>
+            <SSOProvider>
+              <LinkingSection />
+            </SSOProvider>
+          </SplitTestProvider>
           {isOverleaf ? (
             <>
               <BetaProgramSection />

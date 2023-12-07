@@ -851,6 +851,7 @@ module.exports = {
     sourceEditorComponents: [],
     sourceEditorCompletionSources: [],
     sourceEditorSymbolPalette: [],
+    langFeedbackLinkingWidgets: [],
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
     importProjectFromGithubModalWrapper: [],

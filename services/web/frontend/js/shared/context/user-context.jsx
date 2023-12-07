@@ -30,6 +30,9 @@ UserContext.Provider.propTypes = {
         mendeley: PropTypes.boolean,
         zotero: PropTypes.boolean,
       }),
+      writefull: PropTypes.shape({
+        enabled: PropTypes.boolean,
+      }),
     }),
   }),
 }

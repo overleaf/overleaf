@@ -172,6 +172,9 @@ const UserSchema = new Schema(
       mendeley: Schema.Types.Mixed,
       zotero: Schema.Types.Mixed,
     },
+    writefull: {
+      enabled: { type: Boolean, default: false },
+    },
     alphaProgram: { type: Boolean, default: false }, // experimental features
     betaProgram: { type: Boolean, default: false },
     labsProgram: { type: Boolean, default: false },

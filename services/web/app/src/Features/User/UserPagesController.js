@@ -89,6 +89,13 @@ async function settingsPage(req, res) {
     }
   }
 
+  // eslint-disable-next-line no-unused-vars -- getAssignment sets res.locals, which will pass to the splitTest context
+  const writefullSplitTest = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'writefull-integration'
+  )
+
   let personalAccessTokens
   if (showPersonalAccessToken || optionalPersonalAccessToken) {
     try {
@@ -132,6 +139,9 @@ async function settingsPage(req, res) {
       refProviders: {
         mendeley: Boolean(user.refProviders?.mendeley),
         zotero: Boolean(user.refProviders?.zotero),
+      },
+      writefull: {
+        enabled: Boolean(user.writefull?.enabled),
       },
     },
     hasPassword: !!user.hashedPassword,
