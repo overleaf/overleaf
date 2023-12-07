@@ -166,4 +166,5 @@ module.exports = {
   continuousBackgroundFlush: process.env.CONTINUOUS_BACKGROUND_FLUSH === 'true',
 
   smoothingOffset: process.env.SMOOTHING_OFFSET || 1000, // milliseconds
+  delayShutdownMs: parseInt(process.env.DELAY_SHUTDOWN_MS || '10000', 10),
 }

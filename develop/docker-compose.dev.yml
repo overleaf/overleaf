@@ -1,8 +1,8 @@
 services:
   clsi:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9230:9229"
     volumes:
@@ -11,9 +11,9 @@ services:
       - ../services/clsi/config:/overleaf/services/clsi/config
 
   chat:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9231:9229"
     volumes:
@@ -22,9 +22,9 @@ services:
       - ../services/chat/config:/overleaf/services/chat/config
 
   contacts:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9232:9229"
     volumes:
@@ -33,9 +33,9 @@ services:
       - ../services/contacts/config:/overleaf/services/contacts/config
 
   docstore:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9233:9229"
     volumes:
@@ -44,9 +44,9 @@ services:
       - ../services/docstore/config:/overleaf/services/docstore/config
 
   document-updater:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9234:9229"
     volumes:
@@ -55,9 +55,9 @@ services:
       - ../services/document-updater/config:/overleaf/services/document-updater/config
 
   filestore:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9235:9229"
     volumes:
@@ -66,9 +66,9 @@ services:
       - ../services/filestore/config:/overleaf/services/filestore/config
 
   history-v1:
-    command: [ "npm", "run", "nodemon" ]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9239:9229"
     volumes:
@@ -80,9 +80,9 @@ services:
       - ../services/history-v1/migrations:/overleaf/services/history-v1/migrations
 
   notifications:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9236:9229"
     volumes:
@@ -91,9 +91,9 @@ services:
       - ../services/notifications/config:/overleaf/services/notifications/config
 
   project-history:
-    command: [ "npm", "run", "nodemon" ]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9240:9229"
     volumes:
@@ -102,9 +102,9 @@ services:
       - ../services/project-history/config:/overleaf/services/project-history/config
 
   real-time:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9237:9229"
     volumes:
@@ -113,9 +113,9 @@ services:
       - ../services/real-time/config:/overleaf/services/real-time/config
 
   web:
-    command: ["npm", "run", "nodemon"]
+    command: ["node", "--watch", "app.js", "--watch-locales"]
     environment:
-      - NODE_APP_OPTIONS=--inspect=0.0.0.0:9229
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
     ports:
       - "127.0.0.1:9229:9229"
     volumes:

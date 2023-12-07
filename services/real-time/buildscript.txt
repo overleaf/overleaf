@@ -6,4 +6,4 @@ real-time
 --esmock-loader=False
 --node-version=18.18.2
 --public-repo=False
---script-version=4.4.0
+--script-version=4.5.0

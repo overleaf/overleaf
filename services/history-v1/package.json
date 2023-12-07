@@ -49,7 +49,7 @@
     "yauzl": "^2.9.1"
   },
   "scripts": {
-    "start": "node $NODE_APP_OPTIONS app.js",
+    "start": "node app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix .",
     "format": "prettier --list-different $PWD/'**/*.js'",
@@ -58,7 +58,7 @@
     "test:acceptance": "npm run test:acceptance:_run -- --grep=$MOCHA_GREP",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
-    "nodemon": "node --watch $NODE_APP_OPTIONS app.js",
+    "nodemon": "node --watch app.js",
     "migrate": "knex migrate:latest",
     "delete_old_chunks": "node storage/tasks/delete_old_chunks.js",
     "fix_duplicate_versions": "node storage/tasks/fix_duplicate_versions.js",

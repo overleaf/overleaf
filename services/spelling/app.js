@@ -5,6 +5,7 @@ import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import { app } from './app/js/server.js'
 import * as ASpell from './app/js/ASpell.js'
+import Metrics from '@overleaf/metrics'
 
 const { host = 'localhost', port = 3005 } = Settings.internal?.spelling ?? {}
 
@@ -21,5 +22,6 @@ process.on('SIGTERM', () => {
   ASpell.stopCacheDump()
   server.close(() => {
     logger.info({ host, port }, 'spelling HTTP server closed')
+    Metrics.close()
   })
 })
