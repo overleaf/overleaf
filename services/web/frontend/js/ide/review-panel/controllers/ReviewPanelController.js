@@ -989,7 +989,6 @@ export default App.controller('ReviewPanelController', [
         state.value = newValue
         state.syncState = UserTCSyncState.PENDING
       }
-
       if (userId === ide.$scope.user.id) {
         return ($scope.editor.wantTrackChanges = newValue)
       }
@@ -1022,6 +1021,9 @@ export default App.controller('ReviewPanelController', [
     }
 
     const applyClientTrackChangesStateToServer = function () {
+      ide.$scope.reviewPanel.trackChangesState = {
+        ...ide.$scope.reviewPanel.trackChangesState,
+      }
       const data = {}
       if (ide.$scope.reviewPanel.trackChangesOnForEveryone) {
         data.on = true
