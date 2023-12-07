@@ -63,6 +63,8 @@ module.exports = HomeController = {
       if (websiteRedesignActive) {
         return res.render('external/home/website-redesign/index', {
           onboardingFlowVariant: onboardingFlowAssignment.variant,
+          hideNewsletterCheckbox:
+            onboardingFlowAssignment.variant === 'token-confirmation-odc',
         })
       } else {
         return res.render('external/home/v2', {
