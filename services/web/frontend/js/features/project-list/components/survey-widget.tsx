@@ -2,6 +2,7 @@ import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import getMeta from '../../../utils/meta'
 import { Survey } from '../../../../../types/project/dashboard/survey'
 import { useCallback } from 'react'
+import Close from '@/shared/components/close'
 
 export default function SurveyWidget() {
   const survey: Survey = getMeta('ol-survey')
@@ -33,16 +34,8 @@ export default function SurveyWidget() {
               {survey.linkText}
             </a>
           </div>
-          <div className="notification-close">
-            <button
-              type="button"
-              className="close pull-right"
-              title="Dismiss Overleaf survey"
-              onClick={dismissSurvey}
-            >
-              <span aria-hidden="true">&times;</span>
-              <span className="sr-only">Dismiss Overleaf survey</span>
-            </button>
+          <div className="notification-close notification-close-button-style">
+            <Close variant="dark" onDismiss={() => dismissSurvey()} />
           </div>
         </div>
       </div>

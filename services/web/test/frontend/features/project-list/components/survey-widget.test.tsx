@@ -39,7 +39,7 @@ describe('<SurveyWidget />', function () {
 
     it('it is dismissed on click on the dismiss button', function () {
       const dismissButton = screen.getByRole('button', {
-        name: 'Dismiss Overleaf survey',
+        name: 'Close',
       })
       fireEvent.click(dismissButton)
 
