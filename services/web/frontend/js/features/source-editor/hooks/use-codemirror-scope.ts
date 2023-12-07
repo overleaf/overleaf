@@ -36,7 +36,10 @@ import {
   resetLearnedWords,
   setSpelling,
 } from '../extensions/spelling'
-import { createChangeManager } from '../extensions/changes/change-manager'
+import {
+  createChangeManager,
+  dispatchEditorEvent,
+} from '../extensions/changes/change-manager'
 import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
 import { EditorView } from '@codemirror/view'
@@ -171,14 +174,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   useEffect(() => {
     if (lineHeight && fontSize) {
-      window.dispatchEvent(
-        new CustomEvent('editor:event', {
-          detail: {
-            type: 'line-height',
-            payload: lineHeights[lineHeight] * fontSize,
-          },
-        })
-      )
+      dispatchEditorEvent('line-height', lineHeights[lineHeight] * fontSize)
     }
   }, [lineHeight, fontSize])
 

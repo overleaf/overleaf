@@ -170,9 +170,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const openDocId = currentDocumentId
   const [shouldCollapse, setShouldCollapse] =
     useState<ReviewPanel.Value<'shouldCollapse'>>(true)
-  const [lineHeight] = useScopeValue<number>(
-    'reviewPanel.rendererData.lineHeight'
-  )
+  const [lineHeight, setLineHeight] =
+    useState<ReviewPanel.Value<'lineHeight'>>(0)
 
   const [formattedProjectMembers, setFormattedProjectMembers] = useState<
     ReviewPanel.Value<'formattedProjectMembers'>
@@ -1163,6 +1162,11 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       }
     }
 
+    const editorLineHeightChanged = (payload: typeof lineHeight) => {
+      setLineHeight(payload)
+      handleLayoutChange()
+    }
+
     const editorTrackChangesChanged = async () => {
       const entries = await updateEntries(currentDocumentId)
       dispatchReviewPanelEvent('recalculate-screen-positions', {
@@ -1315,6 +1319,11 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       const { type, payload } = event.detail
 
       switch (type) {
+        case 'line-height': {
+          editorLineHeightChanged(payload)
+          break
+        }
+
         case 'track-changes:changed': {
           editorTrackChangesChanged()
           break
