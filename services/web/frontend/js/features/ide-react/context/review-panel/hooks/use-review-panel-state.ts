@@ -139,9 +139,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
   const [subView, setSubView] =
     useState<ReviewPanel.Value<'subView'>>('cur_file')
-  const [loading] = useScopeValue<ReviewPanel.Value<'loading'>>(
-    'reviewPanel.overview.loading'
-  )
+  const [isOverviewLoading, setIsOverviewLoading] =
+    useState<ReviewPanel.Value<'isOverviewLoading'>>(false)
   // All selected changes. If an aggregated change (insertion + deletion) is selected, the two ids
   // will be present. The length of this array will differ from the count below (see explanation).
   const selectedEntryIds = useRef<ThreadId[]>([])
@@ -844,9 +843,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     if (!trackChangesVisible) {
       return
     }
-    setReviewPanelOpen(value => !value)
+    setReviewPanelOpen(!reviewPanelOpen)
     sendMB('rp-toggle-panel', {
-      value: reviewPanelOpen,
+      value: !reviewPanelOpen,
     })
   }, [reviewPanelOpen, setReviewPanelOpen, trackChangesVisible])
 
@@ -1404,6 +1403,52 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     )
   )
 
+  const openSubView = useRef<typeof subView>('cur_file')
+  useEffect(() => {
+    if (!reviewPanelOpen) {
+      // Always show current file when not open, but save current state
+      setSubView(prevState => {
+        openSubView.current = prevState
+        return 'cur_file'
+      })
+    } else {
+      // Reset back to what we had when previously open
+      setSubView(openSubView.current)
+    }
+    handleLayoutChange({ async: true, animate: false })
+  }, [reviewPanelOpen])
+
+  const canRefreshRanges = useRef(false)
+  useEffect(() => {
+    if (subView === 'overview' && canRefreshRanges.current) {
+      canRefreshRanges.current = false
+
+      setIsOverviewLoading(true)
+      refreshRanges().finally(() => {
+        setIsOverviewLoading(false)
+      })
+    }
+  }, [subView, refreshRanges])
+
+  const prevSubView = useRef(subView)
+  const initializedPrevSubView = useRef(false)
+  useEffect(() => {
+    // Prevent setting a computed value for `prevSubView` on mount
+    if (!initializedPrevSubView.current) {
+      initializedPrevSubView.current = true
+      return
+    }
+    prevSubView.current = subView === 'cur_file' ? 'overview' : 'cur_file'
+    // Allow refreshing ranges once for each `subView` change
+    canRefreshRanges.current = true
+  }, [subView])
+
+  useEffect(() => {
+    if (subView === 'cur_file' && prevSubView.current === 'overview') {
+      dispatchReviewPanelEvent('overview-closed', subView)
+    }
+  }, [subView])
+
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
       collapsed,
@@ -1421,7 +1466,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       toolbarHeight,
       subView,
       wantTrackChanges,
-      loading,
+      isOverviewLoading,
       openDocId,
       lineHeight,
       trackChangesState,
@@ -1448,7 +1493,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       toolbarHeight,
       subView,
       wantTrackChanges,
-      loading,
+      isOverviewLoading,
       openDocId,
       lineHeight,
       trackChangesState,

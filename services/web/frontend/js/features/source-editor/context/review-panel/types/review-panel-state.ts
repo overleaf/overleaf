@@ -30,7 +30,7 @@ export interface ReviewPanelState {
     toolbarHeight: number
     subView: SubView
     wantTrackChanges: boolean
-    loading: boolean
+    isOverviewLoading: boolean
     openDocId: DocId | null
     lineHeight: number
     trackChangesState:

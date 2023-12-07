@@ -14,9 +14,9 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
     'reviewPanel.subView'
   )
-  const [loading] = useScopeValue<ReviewPanel.Value<'loading'>>(
-    'reviewPanel.overview.loading'
-  )
+  const [isOverviewLoading] = useScopeValue<
+    ReviewPanel.Value<'isOverviewLoading'>
+  >('reviewPanel.overview.loading')
   const [nVisibleSelectedChanges] = useScopeValue<
     ReviewPanel.Value<'nVisibleSelectedChanges'>
   >('reviewPanel.nVisibleSelectedChanges')
@@ -170,7 +170,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       toolbarHeight,
       subView,
       wantTrackChanges,
-      loading,
+      isOverviewLoading,
       openDocId,
       lineHeight,
       trackChangesState,
@@ -197,7 +197,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
       toolbarHeight,
       subView,
       wantTrackChanges,
-      loading,
+      isOverviewLoading,
       openDocId,
       lineHeight,
       trackChangesState,

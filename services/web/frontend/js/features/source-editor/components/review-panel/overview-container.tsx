@@ -9,7 +9,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { MainDocument } from '../../../../../../types/project-settings'
 
 function OverviewContainer() {
-  const { loading } = useReviewPanelValueContext()
+  const { isOverviewLoading } = useReviewPanelValueContext()
   const docs: MainDocument[] = useFileTreeData().docs
 
   return (
@@ -23,7 +23,7 @@ function OverviewContainer() {
         tabIndex={0}
         aria-labelledby="review-panel-tab-overview"
       >
-        {loading ? (
+        {isOverviewLoading ? (
           <div className="rp-loading">
             <Icon type="spinner" spin />
           </div>
