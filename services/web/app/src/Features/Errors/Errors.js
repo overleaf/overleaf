@@ -238,6 +238,12 @@ class InvalidQueryError extends OErrorV2CompatibleError {
 
 class AffiliationError extends OError {}
 
+class InvalidEmailError extends OError {
+  get i18nKey() {
+    return 'invalid_email'
+  }
+}
+
 class InvalidInstitutionalEmailError extends OError {
   get i18nKey() {
     return 'invalid_institutional_email'
@@ -288,5 +294,6 @@ module.exports = {
   DocHasRangesError,
   InvalidQueryError,
   AffiliationError,
+  InvalidEmailError,
   InvalidInstitutionalEmailError,
 }
