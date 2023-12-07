@@ -49,7 +49,7 @@ export default function GrammarlyAdvert() {
         <div className="advert-content">
           <p>
             Overleafers get a limited-time 30% discount on Grammarly Premium.
-            (Hurry! Offer ends December 16.)
+            (Hurry! Offer ends December 15.)
           </p>
           <a
             className="advert-link"
