@@ -46,6 +46,7 @@ describe('<EditorLeftMenu />', function () {
       window.metaAttributesCache.set('ol-anonymous', false)
       window.metaAttributesCache.set('ol-gitBridgeEnabled', true)
       window.metaAttributesCache.set('ol-showSupport', true)
+      window.metaAttributesCache.set('ol-ExposedSettings', { ieeeBrandId: 123 })
       window.metaAttributesCache.set('ol-user', {
         email: 'sherlock@holmes.co.uk',
         first_name: 'Sherlock',
@@ -849,6 +850,7 @@ describe('<EditorLeftMenu />', function () {
         },
       })
       window.metaAttributesCache.set('ol-anonymous', true)
+      window.metaAttributesCache.set('ol-ExposedSettings', { ieeeBrandId: 123 })
 
       cy.mount(
         <EditorProviders scope={scope}>

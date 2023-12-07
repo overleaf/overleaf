@@ -138,6 +138,7 @@ const initialize = () => {
     hasLinkedProjectFileFeature: true,
     hasLinkedProjectOutputFileFeature: true,
     hasSamlFeature: true,
+    ieeeBrandId: 15,
     isOverleaf: true,
     labsEnabled: true,
     maxEntitiesPerProject: 10,
