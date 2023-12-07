@@ -1,7 +1,11 @@
 import { useReviewPanelUpdaterFnsContext } from '@/features/source-editor/context/review-panel/review-panel-context'
 import { DocId } from '../../../../../../../types/project-settings'
 
-export function useEntryClick(docId: DocId, offset: number) {
+export function useEntryClick(
+  docId: DocId,
+  offset: number,
+  cb?: (e: React.MouseEvent<HTMLDivElement>) => void
+) {
   const { gotoEntry } = useReviewPanelUpdaterFnsContext()
 
   return (e: React.MouseEvent<HTMLDivElement>) => {
@@ -23,5 +27,7 @@ export function useEntryClick(docId: DocId, offset: number) {
         gotoEntry(docId, offset)
       }
     }
+
+    cb?.(e)
   }
 }

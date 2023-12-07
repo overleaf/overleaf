@@ -54,7 +54,7 @@ function AggregateChangeEntry({
     ? content.substring(0, contentLimit)
     : content
 
-  const handleEntryClick = useEntryClick(docId, offset)
+  const handleEntryClick = useEntryClick(docId, offset, endHover)
 
   const handleDeletionToggleCollapse = () => {
     setIsDeletionCollapsed(value => !value)

@@ -50,7 +50,7 @@ function ChangeEntry({
   const needsCollapsing = content.length > contentLimit
   const isInsert = type === 'insert'
 
-  const handleEntryClick = useEntryClick(docId, offset)
+  const handleEntryClick = useEntryClick(docId, offset, endHover)
 
   const handleToggleCollapse = () => {
     setIsCollapsed(value => !value)
