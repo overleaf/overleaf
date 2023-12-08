@@ -1029,6 +1029,18 @@ export const atomicDecorations = (options: Options) => {
                     )
                   )
                 }
+              } else if (commandName === '\\keywords') {
+                if (shouldDecorate(state, nodeRef)) {
+                  // command name and opening brace
+                  decorations.push(
+                    ...decorateArgumentBraces(
+                      new BraceWidget('keywords: '),
+                      textArgumentNode,
+                      nodeRef.from
+                    )
+                  )
+                  return false
+                }
               } else if (
                 commandName === '\\footnote' ||
                 commandName === '\\endnote'
