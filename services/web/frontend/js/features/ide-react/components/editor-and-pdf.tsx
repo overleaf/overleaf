@@ -37,7 +37,13 @@ export const EditorAndPdf: FC<{
     view === 'editor' || view === 'file' || pdfLayout === 'sideBySide'
 
   return (
-    <PanelGroup autoSaveId="ide-editor-pdf-layout" direction="horizontal">
+    <PanelGroup
+      autoSaveId="ide-editor-pdf-layout"
+      direction="horizontal"
+      className={classNames({
+        'ide-panel-group-resizing': resizing,
+      })}
+    >
       {/* main */}
       {editorIsOpen && (
         <>
