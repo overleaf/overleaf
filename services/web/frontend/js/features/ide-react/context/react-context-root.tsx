@@ -24,23 +24,23 @@ import { PermissionsProvider } from '@/features/ide-react/context/permissions-co
 export const ReactContextRoot: FC = ({ children }) => {
   return (
     <SplitTestProvider>
-      <ConnectionProvider>
-        <IdeReactProvider>
-          <UserProvider>
-            <UserSettingsProvider>
-              <ProjectProvider>
-                <FileTreeDataProvider>
-                  <FileTreePathProvider>
-                    <ReferencesProvider>
-                      <DetachProvider>
-                        <EditorProvider>
-                          <PermissionsProvider>
-                            <ProjectSettingsProvider>
-                              <LayoutProvider>
-                                <LocalCompileProvider>
-                                  <DetachCompileProvider>
-                                    <ChatProvider>
-                                      <ModalsContextProvider>
+      <ModalsContextProvider>
+        <ConnectionProvider>
+          <IdeReactProvider>
+            <UserProvider>
+              <UserSettingsProvider>
+                <ProjectProvider>
+                  <FileTreeDataProvider>
+                    <FileTreePathProvider>
+                      <ReferencesProvider>
+                        <DetachProvider>
+                          <EditorProvider>
+                            <PermissionsProvider>
+                              <ProjectSettingsProvider>
+                                <LayoutProvider>
+                                  <LocalCompileProvider>
+                                    <DetachCompileProvider>
+                                      <ChatProvider>
                                         <EditorManagerProvider>
                                           <OnlineUsersProvider>
                                             <MetadataProvider>
@@ -48,23 +48,23 @@ export const ReactContextRoot: FC = ({ children }) => {
                                             </MetadataProvider>
                                           </OnlineUsersProvider>
                                         </EditorManagerProvider>
-                                      </ModalsContextProvider>
-                                    </ChatProvider>
-                                  </DetachCompileProvider>
-                                </LocalCompileProvider>
-                              </LayoutProvider>
-                            </ProjectSettingsProvider>
-                          </PermissionsProvider>
-                        </EditorProvider>
-                      </DetachProvider>
-                    </ReferencesProvider>
-                  </FileTreePathProvider>
-                </FileTreeDataProvider>
-              </ProjectProvider>
-            </UserSettingsProvider>
-          </UserProvider>
-        </IdeReactProvider>
-      </ConnectionProvider>
+                                      </ChatProvider>
+                                    </DetachCompileProvider>
+                                  </LocalCompileProvider>
+                                </LayoutProvider>
+                              </ProjectSettingsProvider>
+                            </PermissionsProvider>
+                          </EditorProvider>
+                        </DetachProvider>
+                      </ReferencesProvider>
+                    </FileTreePathProvider>
+                  </FileTreeDataProvider>
+                </ProjectProvider>
+              </UserSettingsProvider>
+            </UserProvider>
+          </IdeReactProvider>
+        </ConnectionProvider>
+      </ModalsContextProvider>
     </SplitTestProvider>
   )
 }
