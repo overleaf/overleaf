@@ -9,6 +9,7 @@ export default function populateLayoutScope(store: ReactScopeValueStore) {
   store.persisted('ui.chatOpen', false, 'ui.chatOpen')
   store.persisted('ui.reviewPanelOpen', false, reviewPanelStorageKey)
   store.set('ui.leftMenuShown', false)
+  store.set('ui.miniReviewPanelVisible', false)
   store.set('ui.pdfLayout', 'sideBySide')
   store.set('ui.loadingStyleSheet', false)
 }

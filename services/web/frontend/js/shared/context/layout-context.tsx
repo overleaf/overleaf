@@ -33,6 +33,10 @@ type LayoutContextValue = {
   setReviewPanelOpen: Dispatch<
     SetStateAction<LayoutContextValue['reviewPanelOpen']>
   >
+  miniReviewPanelVisible: boolean
+  setMiniReviewPanelVisible: Dispatch<
+    SetStateAction<LayoutContextValue['miniReviewPanelVisible']>
+  >
   leftMenuShown: boolean
   setLeftMenuShown: Dispatch<
     SetStateAction<LayoutContextValue['leftMenuShown']>
@@ -92,6 +96,10 @@ export const LayoutProvider: FC = ({ children }) => {
   // whether the review pane is open
   const [reviewPanelOpen, setReviewPanelOpen] =
     useScopeValue('ui.reviewPanelOpen')
+
+  // whether the review pane is collapsed
+  const [miniReviewPanelVisible, setMiniReviewPanelVisible] =
+    useScopeValue<boolean>('ui.miniReviewPanelVisible')
 
   // whether the menu pane is open
   const [leftMenuShown, setLeftMenuShown] =
@@ -168,11 +176,13 @@ export const LayoutProvider: FC = ({ children }) => {
       pdfLayout,
       pdfPreviewOpen,
       reviewPanelOpen,
+      miniReviewPanelVisible,
       loadingStyleSheet,
       setChatIsOpen,
       setLeftMenuShown,
       setPdfLayout,
       setReviewPanelOpen,
+      setMiniReviewPanelVisible,
       setLoadingStyleSheet,
       setView,
       view,
@@ -188,11 +198,13 @@ export const LayoutProvider: FC = ({ children }) => {
       pdfLayout,
       pdfPreviewOpen,
       reviewPanelOpen,
+      miniReviewPanelVisible,
       loadingStyleSheet,
       setChatIsOpen,
       setLeftMenuShown,
       setPdfLayout,
       setReviewPanelOpen,
+      setMiniReviewPanelVisible,
       setLoadingStyleSheet,
       setView,
       view,

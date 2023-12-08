@@ -119,7 +119,8 @@ const formatComment = (
 
 function useReviewPanelState(): ReviewPanelStateReactIde {
   const { t } = useTranslation()
-  const { reviewPanelOpen, setReviewPanelOpen } = useLayoutContext()
+  const { reviewPanelOpen, setReviewPanelOpen, setMiniReviewPanelVisible } =
+    useLayoutContext()
   const { projectId } = useIdeReactContext()
   const project = useProjectContext()
   const user = useUserContext()
@@ -1148,6 +1149,24 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const [toolbarHeight, setToolbarHeight] = useState(0)
   const [layoutSuspended, setLayoutSuspended] = useState(false)
   const [unsavedComment, setUnsavedComment] = useState('')
+
+  useEffect(() => {
+    if (!trackChangesVisible) {
+      setReviewPanelOpen(false)
+    }
+  }, [trackChangesVisible, setReviewPanelOpen])
+
+  const hasEntries = useMemo(() => {
+    const docEntries = getDocEntries(currentDocumentId)
+    const permEntriesCount = Object.keys(docEntries).filter(key => {
+      return !['add-comment', 'bulk-actions'].includes(key)
+    }).length
+    return permEntriesCount > 0 && trackChangesVisible
+  }, [currentDocumentId, getDocEntries, trackChangesVisible])
+
+  useEffect(() => {
+    setMiniReviewPanelVisible(!reviewPanelOpen && hasEntries)
+  }, [reviewPanelOpen, hasEntries, setMiniReviewPanelVisible])
 
   // listen for events from the CodeMirror 6 track changes extension
   useEffect(() => {

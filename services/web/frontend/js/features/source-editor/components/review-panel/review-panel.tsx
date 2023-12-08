@@ -19,7 +19,7 @@ type ReviewPanelViewProps = {
 
 function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
   const { subView, loadingThreads } = useReviewPanelValueContext()
-  const { reviewPanelOpen } = useLayoutContext()
+  const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
   const { isReactIde } = useIdeContext()
 
   const content = (
@@ -44,7 +44,7 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
           'rp-state-current-file-mini':
             subView === 'cur_file' && !reviewPanelOpen,
           'rp-state-overview': subView === 'overview',
-          // 'rp-size-mini': ui.miniReviewPanelVisible,
+          'rp-size-mini': miniReviewPanelVisible,
           'rp-size-expanded': reviewPanelOpen,
           // 'rp-layout-left': reviewPanel.layoutToLeft,
           'rp-loading-threads': loadingThreads,
