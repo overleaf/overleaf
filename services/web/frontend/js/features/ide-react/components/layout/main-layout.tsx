@@ -36,8 +36,11 @@ export const MainLayout: FC = () => {
     isOpen: chatIsOpen,
     fixedPanelRef: chatPanelRef,
     handleLayout: handleChatLayout,
+    togglePane: toggleChat,
     resizing: chatResizing,
     setResizing: setChatResizing,
+    handlePaneCollapse: handleChatCollapse,
+    handlePaneExpand: handleChatExpand,
   } = useChatPane()
 
   const {
@@ -125,23 +128,25 @@ export const MainLayout: FC = () => {
                 )}
               </Panel>
 
-              {chatIsOpen && (
-                <>
-                  <HorizontalResizeHandle onDragging={setChatResizing} />
+              <HorizontalResizeHandle
+                onDoubleClick={toggleChat}
+                resizable={chatIsOpen}
+                onDragging={setChatResizing}
+              />
 
-                  {/* chat */}
-                  <Panel
-                    ref={chatPanelRef}
-                    id="panel-chat"
-                    order={2}
-                    defaultSizePixels={200}
-                    minSizePixels={150}
-                    collapsible
-                  >
-                    <ChatPane />
-                  </Panel>
-                </>
-              )}
+              {/* chat */}
+              <Panel
+                ref={chatPanelRef}
+                id="panel-chat"
+                order={2}
+                defaultSizePixels={200}
+                minSizePixels={150}
+                collapsible
+                onCollapse={handleChatCollapse}
+                onExpand={handleChatExpand}
+              >
+                <ChatPane />
+              </Panel>
             </PanelGroup>
           </Panel>
         </PanelGroup>
