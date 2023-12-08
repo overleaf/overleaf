@@ -1177,6 +1177,10 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       handleLayoutChange()
     }
 
+    const editorTrackChangesVisibilityChanged = () => {
+      handleLayoutChange({ async: true, animate: false })
+    }
+
     const editorFocusChanged = (
       selectionOffsetStart: number,
       selectionOffsetEnd: number,
@@ -1328,6 +1332,11 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           break
         }
 
+        case 'track-changes:visibility_changed': {
+          editorTrackChangesVisibilityChanged()
+          break
+        }
+
         case 'focus:changed': {
           const { from, to, empty, updateType } = payload
           editorFocusChanged(from, to, !empty, updateType)
@@ -1341,6 +1350,11 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
         case 'toggle-track-changes': {
           toggleTrackChangesFromKbdShortcut()
+          break
+        }
+
+        case 'toggle-review-panel': {
+          toggleReviewPanel()
           break
         }
       }
