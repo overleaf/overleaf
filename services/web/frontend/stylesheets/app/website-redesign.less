@@ -1,9 +1,19 @@
 .website-redesign {
   p,
+  h1,
   h2,
   h3,
-  a {
+  h4,
+  a,
+  strong,
+  span {
     font-family: 'Noto Sans', sans-serif;
+  }
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 600;
+    line-height: 4rem;
   }
 
   h2 {
@@ -133,6 +143,11 @@
     }
 
     .features-card-description {
+      h3 {
+        font-size: 1.875rem; // 30px
+        line-height: 2.5rem; // 40px
+      }
+
       p {
         margin-bottom: 10px;
       }
@@ -143,11 +158,10 @@
         margin: 0;
 
         li {
-          margin-bottom: 8px;
+          margin-bottom: 16px;
+          display: flex;
 
           @media (max-width: @screen-sm-max) {
-            display: flex;
-
             i {
               height: 25px; // force height if text wraps to multiple lines
             }
@@ -156,6 +170,18 @@
               margin-left: auto;
               height: 20px; // force height if text wraps to multiple lines
             }
+          }
+
+          h4 {
+            display: flex;
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 20px;
+            font-weight: 600;
+          }
+
+          p {
+            margin-bottom: 0;
           }
         }
       }
@@ -166,6 +192,7 @@
     .top-image-card {
       > img.img-responsive {
         width: 100%;
+        border-radius: 8px;
       }
 
       .top-image-card-title {
@@ -178,6 +205,7 @@
           color: var(--neutral-90);
           display: inline-flex;
           justify-content: space-between;
+          text-decoration: none;
         }
 
         i.material-symbols-rounded {
@@ -207,8 +235,12 @@
     color: var(--white);
     border-radius: 8px;
 
+    @media (max-width: @screen-sm-max) {
+      padding: 48px 24px 48px 24px;
+    }
+
     .cta-card-title {
-      font-size: 52px;
+      font-size: 3.25rem; // 52px
       font-weight: 500;
       font-family: 'DM Mono', monospace;
       margin-bottom: 8px;
@@ -220,12 +252,85 @@
       span.lime-color {
         color: #7ee787;
       }
+
+      @media (max-width: @screen-sm-max) {
+        font-size: 2.25rem; // 36px
+      }
     }
 
-    .cta-card-buttons {
-      margin-top: 24px;
+    .cta-card-quote {
+      font-size: 1.875rem; // 30px
+      font-weight: 600;
+      line-height: 2.5rem; // 40px
+      letter-spacing: 0em;
+      text-align: center;
+    }
+  }
+
+  .quote-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px;
+    background: #2f4858;
+    color: white;
+    border-radius: 16px;
+
+    .quote-card-quote {
+      font-size: 1.875rem; // 30px
+      font-weight: 600;
+      line-height: 2.5rem; // 40px
+      letter-spacing: 0em;
+      text-align: center;
+
+      @media (max-width: @screen-sm-max) {
+        font-size: 1.5rem; // 24px
+        line-height: 2rem; // 32px
+      }
+    }
+
+    .quote-card-img {
+      margin-top: 32px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: @screen-sm-max) {
+      padding: 56px 24px 56px 24px;
+    }
+  }
+
+  .integrations-card {
+    h3 {
       display: flex;
-      gap: 12px;
+      align-items: center;
+
+      @media (max-width: @screen-sm-max) {
+        .label-premium {
+          margin-left: auto;
+          height: 20px;
+        }
+      }
+    }
+
+    .integrations-icons {
+      img {
+        width: 6rem; // 96px
+        height: 6rem; // 96px
+      }
+
+      .first-row,
+      .second-row {
+        display: flex;
+      }
+
+      .first-row {
+        justify-content: space-between;
+      }
+
+      .second-row {
+        margin-top: 40px;
+        justify-content: space-evenly;
+      }
     }
   }
 
@@ -288,6 +393,12 @@
     font-weight: 500;
     line-height: 1.5rem;
     margin: 0;
+
+    ~ h1,
+    ~ h2,
+    ~ h3 {
+      margin-top: 8px;
+    }
   }
 
   .green-link {
@@ -322,6 +433,8 @@
     top: 4px;
     vertical-align: middle;
     margin-right: 8px;
+    width: 25px;
+    height: 25px;
   }
 
   .green-round-background {
@@ -374,6 +487,36 @@
         font-size: 24px;
         line-height: 32px;
       }
+    }
+  }
+
+  .circle-img {
+    height: 64px;
+    max-width: 64px;
+  }
+
+  .premium-badge {
+    .premium-badge-img {
+      margin-left: 10px;
+    }
+
+    @media (max-width: @screen-xs-max) {
+      display: flex;
+      .premium-badge-img {
+        width: 87px;
+        margin-left: auto;
+      }
+    }
+  }
+
+  .responsive-button-container {
+    display: flex;
+    margin-top: 24px;
+    gap: 16px;
+
+    @media (max-width: @screen-sm-max) {
+      flex-direction: column;
+      width: 100%;
     }
   }
 }
