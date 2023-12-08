@@ -332,9 +332,6 @@ function PositionedEntries({
     }
 
     const focusedEntryView = entryViews[focusedEntryIndex]
-    if (!focusedEntryView.hasScreenPos) {
-      return
-    }
 
     // If the focused entry has no screenPos, we can't position other
     // entryViews relative to it, so we position all other entryViews as
