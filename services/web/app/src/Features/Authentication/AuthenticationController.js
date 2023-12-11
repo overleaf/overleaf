@@ -80,36 +80,30 @@ const AuthenticationController = {
     // This function is middleware which wraps the passport.authenticate middleware,
     // so we can send back our custom `{message: {text: "", type: ""}}` responses on failure,
     // and send a `{redir: ""}` response on success
-    passport.authenticate(
-      'local',
-      { keepSessionInfo: true },
-      function (err, user, info) {
-        if (err) {
-          return next(err)
-        }
-        if (user) {
-          // `user` is either a user object or false
-          AuthenticationController.setAuditInfo(req, {
-            method: 'Password login',
-          })
-          return AuthenticationController.finishLogin(user, req, res, next)
+    passport.authenticate('local', function (err, user, info) {
+      if (err) {
+        return next(err)
+      }
+      if (user) {
+        // `user` is either a user object or false
+        AuthenticationController.setAuditInfo(req, { method: 'Password login' })
+        return AuthenticationController.finishLogin(user, req, res, next)
+      } else {
+        if (info.redir != null) {
+          return res.json({ redir: info.redir })
         } else {
-          if (info.redir != null) {
-            return res.json({ redir: info.redir })
-          } else {
-            res.status(info.status || 200)
-            delete info.status
-            const body = { message: info }
-            const { errorReason } = info
-            if (errorReason) {
-              body.errorReason = errorReason
-              delete info.errorReason
-            }
-            return res.json(body)
+          res.status(info.status || 200)
+          delete info.status
+          const body = { message: info }
+          const { errorReason } = info
+          if (errorReason) {
+            body.errorReason = errorReason
+            delete info.errorReason
           }
+          return res.json(body)
         }
       }
-    )(req, res, next)
+    })(req, res, next)
   },
 
   finishLogin(user, req, res, next) {
@@ -563,34 +557,55 @@ const AuthenticationController = {
 }
 
 function _afterLoginSessionSetup(req, user, callback) {
-  req.login(user, { keepSessionInfo: true }, function (err) {
+  if (callback == null) {
+    callback = function () {}
+  }
+  req.login(user, function (err) {
     if (err) {
       OError.tag(err, 'error from req.login', {
         user_id: user._id,
       })
       return callback(err)
     }
-    delete req.session.__tmp
-    delete req.session.csrfSecret
-    req.session.save(function (err) {
+    // Regenerate the session to get a new sessionID (cookie value) to
+    // protect against session fixation attacks
+    const oldSession = req.session
+    req.session.destroy(function (err) {
       if (err) {
-        OError.tag(err, 'error saving regenerated session after login', {
+        OError.tag(err, 'error when trying to destroy old session', {
           user_id: user._id,
         })
         return callback(err)
       }
-      UserSessionsManager.trackSession(user, req.sessionID, function () {})
-      if (!req.deviceHistory) {
-        // Captcha disabled or SSO-based login.
-        return callback()
+      req.sessionStore.generate(req)
+      // Note: the validation token is not writable, so it does not get
+      // transferred to the new session below.
+      for (const key in oldSession) {
+        const value = oldSession[key]
+        if (key !== '__tmp' && key !== 'csrfSecret') {
+          req.session[key] = value
+        }
       }
-      req.deviceHistory.add(user.email)
-      req.deviceHistory
-        .serialize(req.res)
-        .catch(err => {
-          logger.err({ err }, 'cannot serialize deviceHistory')
-        })
-        .finally(() => callback())
+      req.session.save(function (err) {
+        if (err) {
+          OError.tag(err, 'error saving regenerated session after login', {
+            user_id: user._id,
+          })
+          return callback(err)
+        }
+        UserSessionsManager.trackSession(user, req.sessionID, function () {})
+        if (!req.deviceHistory) {
+          // Captcha disabled or SSO-based login.
+          return callback()
+        }
+        req.deviceHistory.add(user.email)
+        req.deviceHistory
+          .serialize(req.res)
+          .catch(err => {
+            logger.err({ err }, 'cannot serialize deviceHistory')
+          })
+          .finally(() => callback())
+      })
     })
   })
 }

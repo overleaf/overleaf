@@ -173,7 +173,7 @@ describe('UserController', function () {
   describe('tryDeleteUser', function () {
     beforeEach(function () {
       this.req.body.password = 'wat'
-      this.req.logout = sinon.stub().yields()
+      this.req.logout = sinon.stub()
       this.req.session.destroy = sinon.stub().yields()
       this.SessionManager.getLoggedInUserId = sinon
         .stub()
