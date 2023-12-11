@@ -2,7 +2,7 @@
   max-width: 400px;
   padding: 24px;
   margin: 0 auto;
-  background: #fff;
+  background: @white;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -31,14 +31,20 @@
   }
 }
 
-.onboarding-data-collection-form {
+.onboarding-data-collection-wrapper {
   max-width: 720px;
-  padding: 24px;
   margin: 0 auto;
-  background: #fff;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
+
+  .onboarding-data-collection-form {
+    background: #fff;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
 
   .ui-select-container,
   .select-wrapper {
@@ -124,6 +130,21 @@
           margin-right: 4px;
         }
       }
+    }
+  }
+
+  .onboarding-collapse-button {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: @blue-50;
+    user-select: none;
+  }
+
+  .onboarding-collapse-button,
+  .onboarding-privacy-extended {
+    @media (max-width: @screen-xs-max) {
+      padding: 0 24px;
     }
   }
 }
