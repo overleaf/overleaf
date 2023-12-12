@@ -5,6 +5,7 @@ import ConfirmEmail from './groups/confirm-email'
 import ReconfirmationInfo from './groups/affiliation/reconfirmation-info'
 import GroupsAndEnterpriseBanner from './groups-and-enterprise-banner'
 import WritefullPromoBanner from './writefull-promo-banner'
+import WritefullPremiumPromoBanner from './writefull-premium-promo-banner'
 import GroupSsoSetupSuccess from './groups/group-sso-setup-success'
 import INRBanner from './ads/inr-banner'
 import LATAMBanner from './ads/latam-banner'
@@ -12,7 +13,9 @@ import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
+const WRITEFULL_PROMO_DELAY_MS = 24 * 60 * 60 * 1000 // 1 day
 const isChromium = () =>
   (window.navigator as any).userAgentData?.brands?.some(
     (item: { brand: string }) => item.brand === 'Chromium'
@@ -44,22 +47,52 @@ function UserNotifications() {
     'unassigned'
   )
   const showLATAMBanner = getMeta('ol-showLATAMBanner', false)
+  const writefullIntegrationSplitTestEnabled = isSplitTestEnabled(
+    'writefull-integration'
+  )
 
   // Temporary workaround to prevent also showing groups/enterprise banner
   const [showWritefull, setShowWritefull] = useState(() => {
-    if (isChromium()) {
-      const show =
-        getMeta('ol-showWritefullPromoBanner') &&
-        !customLocalStorage.getItem('has_dismissed_writefull_promo_banner')
-      if (show) {
-        sendMB('promo-prompt', {
-          location: 'dashboard-banner',
-          page: '/project',
-          name: 'writefull',
-        })
-      }
-      return show
+    const dismissed = customLocalStorage.getItem(
+      'has_dismissed_writefull_promo_banner'
+    )
+    if (dismissed) {
+      return false
     }
+
+    let show = false
+    if (writefullIntegrationSplitTestEnabled) {
+      // Show the Writefull promo 1 day after it has been enabled
+      const user = getMeta('ol-user')
+      if (user.writefull?.enabled) {
+        const scheduledAt = customLocalStorage.getItem(
+          'writefull_promo_scheduled_at'
+        )
+        if (scheduledAt == null) {
+          customLocalStorage.setItem(
+            'writefull_promo_scheduled_at',
+            new Date(Date.now() + WRITEFULL_PROMO_DELAY_MS).toISOString()
+          )
+        } else if (new Date() >= new Date(scheduledAt)) {
+          show = true
+        }
+      }
+    } else {
+      // Only show the Writefull extension promo on Chrome browsers
+      show = isChromium() && getMeta('ol-showWritefullPromoBanner')
+    }
+
+    if (show) {
+      sendMB('promo-prompt', {
+        location: 'dashboard-banner',
+        page: '/project',
+        name: writefullIntegrationSplitTestEnabled
+          ? 'writefull-premium'
+          : 'writefull',
+      })
+    }
+
+    return show
   })
   const [dismissedWritefull, setDismissedWritefull] = useState(false)
 
@@ -91,13 +124,23 @@ function UserNotifications() {
             splitTestName={inrGeoBannerSplitTestName}
           />
         ) : null}
-        <WritefullPromoBanner
-          show={showWritefull}
-          setShow={setShowWritefull}
-          onDismiss={() => {
-            setDismissedWritefull(true)
-          }}
-        />
+        {writefullIntegrationSplitTestEnabled ? (
+          <WritefullPremiumPromoBanner
+            show={showWritefull}
+            setShow={setShowWritefull}
+            onDismiss={() => {
+              setDismissedWritefull(true)
+            }}
+          />
+        ) : (
+          <WritefullPromoBanner
+            show={showWritefull}
+            setShow={setShowWritefull}
+            onDismiss={() => {
+              setDismissedWritefull(true)
+            }}
+          />
+        )}
       </ul>
     </div>
   )

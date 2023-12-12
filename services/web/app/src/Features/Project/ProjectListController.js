@@ -103,7 +103,7 @@ async function projectListPage(req, res, next) {
   const user = await User.findById(
     userId,
     `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate${
-      isSaas ? ' enrollment' : ''
+      isSaas ? ' enrollment writefull' : ''
     }`
   )
 
@@ -383,6 +383,19 @@ async function projectListPage(req, res, next) {
         'failed to get "writefull-promo-banner" split test assignment'
       )
     }
+  }
+
+  try {
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'writefull-integration'
+    )
+  } catch (err) {
+    logger.warn(
+      { err },
+      'failed to get "writefull-integration" split test assignment'
+    )
   }
 
   let showInrGeoBanner, inrGeoBannerSplitTestName

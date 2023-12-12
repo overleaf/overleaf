@@ -1,0 +1,67 @@
+import { memo, useCallback } from 'react'
+import Notification from '@/shared/components/notification'
+import { sendMB } from '@/infrastructure/event-tracking'
+import customLocalStorage from '@/infrastructure/local-storage'
+import WritefullLogo from '@/shared/svgs/writefull-logo'
+
+const eventSegmentation = {
+  location: 'dashboard-banner',
+  page: '/project',
+  name: 'writefull-premium',
+}
+
+function WritefullPremiumPromoBanner({
+  show,
+  setShow,
+  onDismiss,
+}: {
+  show: boolean
+  setShow: (value: boolean) => void
+  onDismiss: () => void
+}) {
+  const handleClose = useCallback(() => {
+    customLocalStorage.setItem(
+      'has_dismissed_writefull_promo_banner',
+      new Date()
+    )
+    customLocalStorage.removeItem('writefull_promo_scheduled_at')
+    setShow(false)
+    sendMB('promo-dismiss', eventSegmentation)
+    onDismiss()
+  }, [setShow, onDismiss])
+
+  if (!show) {
+    return null
+  }
+
+  return (
+    <Notification
+      type="info"
+      isDismissible
+      onDismiss={handleClose}
+      content={
+        <>
+          Enjoying Writefull? Get <strong>10% off Writefull Premium</strong>,
+          giving you access to TeXGPT—AI assistance to generate LaTeX code. Use{' '}
+          <strong>OVERLEAF10</strong> at the checkout.
+        </>
+      }
+      action={
+        <a
+          className="btn btn-secondary"
+          href="https://my.writefull.com/plans"
+          target="_blank"
+          rel="noreferrer"
+          onClick={() => {
+            sendMB('promo-click', eventSegmentation)
+          }}
+        >
+          <WritefullLogo width="16" height="16" />{' '}
+          <span>Get Writefull Premium</span>
+        </a>
+      }
+    />
+  )
+}
+
+export default memo(WritefullPremiumPromoBanner)

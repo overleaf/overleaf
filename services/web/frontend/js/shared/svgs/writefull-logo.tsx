@@ -1,14 +1,14 @@
-function WritefullLogo() {
+function WritefullLogo({ width = '40', height = '40' }) {
   return (
     <svg
-      width="40"
-      height="40"
+      width={width}
+      height={height}
       viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
+      style={{ verticalAlign: 'middle' }}
     >
-      <rect width="40" height="40" fill="white" />
       <rect
         x="1.6665"
         y="1.66666"

@@ -62,6 +62,7 @@ function WritefullPromoBanner({
             height={16}
             width={16}
             style={{ marginRight: 4 }}
+            aria-hidden="true"
           />
           <span>Get Writefull for Overleaf</span>
         </a>

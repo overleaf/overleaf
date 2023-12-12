@@ -26,6 +26,7 @@ import Common from '../../../../../frontend/js/features/project-list/components/
 import Institution from '../../../../../frontend/js/features/project-list/components/notifications/groups/institution'
 import ConfirmEmail from '../../../../../frontend/js/features/project-list/components/notifications/groups/confirm-email'
 import ReconfirmationInfo from '../../../../../frontend/js/features/project-list/components/notifications/groups/affiliation/reconfirmation-info'
+import UserNotifications from '../../../../../frontend/js/features/project-list/components/notifications/user-notifications'
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
 import {
   Notification,
@@ -955,6 +956,139 @@ describe('<UserNotifications />', function () {
         const link = screen.getByRole('link', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
+      })
+    })
+  })
+
+  describe('<WritefullPromoBanner>', function () {
+    beforeEach(function () {
+      window.metaAttributesCache = window.metaAttributesCache || new Map()
+      window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
+      window.metaAttributesCache.set('ol-showWritefullPromoBanner', true)
+
+      // The older banner is only shown to Chrome users
+      const navigator = window.navigator as any
+      navigator.userAgentData = { brands: [{ brand: 'Chromium' }] }
+
+      localStorage.clear()
+    })
+
+    afterEach(function () {
+      window.metaAttributesCache = window.metaAttributesCache || new Map()
+    })
+
+    describe('when writefull-integration split test is not enabled', function () {
+      beforeEach(function () {
+        window.metaAttributesCache.set('ol-splitTestVariants', {
+          'writefull-integration': 'default',
+        })
+      })
+
+      it('shows the older banner', function () {
+        renderWithinProjectListProvider(UserNotifications)
+        const ctaLink = screen.getByRole('link', {
+          name: 'Get Writefull for Overleaf',
+        })
+        expect(ctaLink.getAttribute('href')).to.equal(
+          'https://my.writefull.com/overleaf-invite?code=OVERLEAF10'
+        )
+      })
+
+      it('dismisses the banner when the close button is clicked', function () {
+        renderWithinProjectListProvider(UserNotifications)
+        screen.getByRole('link', { name: /Writefull/ })
+        const closeButton = screen.getByRole('button', { name: 'Close' })
+        fireEvent.click(closeButton)
+        expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
+        expect(localStorage.getItem('has_dismissed_writefull_promo_banner')).to
+          .exist
+      })
+
+      it("doesn't show the banner if it has been dismissed", function () {
+        localStorage.setItem(
+          'has_dismissed_writefull_promo_banner',
+          new Date(Date.now() - 1000)
+        )
+        renderWithinProjectListProvider(UserNotifications)
+        expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
+      })
+    })
+
+    describe('when writefull-integration split test is enabled', function () {
+      beforeEach(function () {
+        window.metaAttributesCache.set('ol-splitTestVariants', {
+          'writefull-integration': 'enabled',
+        })
+      })
+
+      describe('when the writefull integration is enabled', function () {
+        beforeEach(function () {
+          window.metaAttributesCache.set('ol-user', {
+            writefull: { enabled: true },
+          })
+        })
+
+        it('schedules the notification for the next day', function () {
+          renderWithinProjectListProvider(UserNotifications)
+          expect(localStorage.getItem('writefull_promo_scheduled_at')).to.exist
+          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
+        })
+
+        it('shows the banner after it has been scheduled', function () {
+          localStorage.setItem(
+            'writefull_promo_scheduled_at',
+            new Date(Date.now() - 1000)
+          )
+          renderWithinProjectListProvider(UserNotifications)
+          const ctaLink = screen.getByRole('link', {
+            name: 'Get Writefull Premium',
+          })
+          expect(ctaLink.getAttribute('href')).to.equal(
+            'https://my.writefull.com/plans'
+          )
+        })
+
+        it('dismisses the banner when the close button is clicked', function () {
+          localStorage.setItem(
+            'writefull_promo_scheduled_at',
+            new Date(Date.now() - 1000)
+          )
+          renderWithinProjectListProvider(UserNotifications)
+          screen.getByRole('link', { name: /Writefull/ })
+          const closeButton = screen.getByRole('button', { name: 'Close' })
+          fireEvent.click(closeButton)
+          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
+          expect(localStorage.getItem('has_dismissed_writefull_promo_banner'))
+            .to.exist
+          expect(localStorage.getItem('writefull_promo_scheduled_at')).not.to
+            .exist
+        })
+
+        it("doesn't show the banner if it has been dismissed", function () {
+          localStorage.setItem(
+            'writefull_promo_scheduled_at',
+            new Date(Date.now() - 1000)
+          )
+          localStorage.setItem(
+            'has_dismissed_writefull_promo_banner',
+            new Date(Date.now() - 500)
+          )
+          renderWithinProjectListProvider(UserNotifications)
+          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
+        })
+      })
+
+      describe('when the writefull integration is not enabled', function () {
+        beforeEach(function () {
+          window.metaAttributesCache.set('ol-user', {
+            writefull: { enabled: false },
+          })
+        })
+
+        it("doesn't show the banner", function () {
+          renderWithinProjectListProvider(UserNotifications)
+          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
+        })
       })
     })
   })
