@@ -346,24 +346,32 @@
       .home-top-begin-text {
         display: flex;
         color: #5f5ff0;
-        font-size: 65px;
-        line-height: 80px;
+        font-size: 4rem;
+        line-height: 1.25;
         font-family: 'DM Mono', monospace;
         align-self: flex-start;
         width: 100%;
         margin-top: 0;
+        font-weight: 400;
 
         @media (max-width: @screen-sm-max) {
           text-align: center;
           flex-direction: column;
           align-items: center;
+          font-size: 2.25rem;
         }
       }
 
       .home-top-parenthesis-text {
         color: #bbdbb8;
-        font-size: 65px;
-        line-height: 80px;
+        font-size: 4rem;
+        line-height: 1.25;
+        font-family: 'DM Mono', monospace;
+        display: inherit;
+
+        @media (max-width: @screen-sm-max) {
+          font-size: 2.25rem;
+        }
       }
     }
   }
@@ -454,7 +462,7 @@
     }
 
     .tos-agreement-notice {
-      font-size: 12px;
+      font-size: 0.75rem;
 
       a {
         color: @green-60;
@@ -465,7 +473,7 @@
   }
 
   .home-register-newsletter-checkbox {
-    font-size: 12px;
+    font-size: 0.75rem;
     margin-top: 10px;
     text-align: center;
 
