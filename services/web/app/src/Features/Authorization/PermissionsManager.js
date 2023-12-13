@@ -272,8 +272,8 @@ function hasPermission(groupPolicy, capability) {
   const results = getEnforcedPolicyNames(groupPolicy).map(userPolicyName =>
     getCapabilityValueFromPolicy(userPolicyName, capability)
   )
-  // if there are no results, return the default permission
-  if (results.length === 0) {
+  // if there are no results, or none of the policies apply, return the default permission
+  if (results.length === 0 || results.every(result => result === undefined)) {
     return getDefaultPermission(capability)
   }
   // only allow the permission if all the results are true, otherwise deny it

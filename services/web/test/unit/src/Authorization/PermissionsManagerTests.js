@@ -86,12 +86,22 @@ describe('PermissionsManager', function () {
         const groupPolicy = {
           policy: true,
         }
-        const capability = 'capability3'
-        const result = this.PermissionsManager.hasPermission(
-          groupPolicy,
-          capability
-        )
-        expect(result).to.be.false
+        {
+          const capability = 'capability3'
+          const result = this.PermissionsManager.hasPermission(
+            groupPolicy,
+            capability
+          )
+          expect(result).to.be.true
+        }
+        {
+          const capability = 'capability4'
+          const result = this.PermissionsManager.hasPermission(
+            groupPolicy,
+            capability
+          )
+          expect(result).to.be.false
+        }
       })
 
       it('should return the default permission if the policy is not enforced', function () {
@@ -192,12 +202,22 @@ describe('PermissionsManager', function () {
         const groupPolicy = {
           policy: true,
         }
-        const capability = 'capability3'
-        const result = this.PermissionsManager.hasPermission(
-          groupPolicy,
-          capability
-        )
-        expect(result).to.be.false
+        {
+          const capability = 'capability3'
+          const result = this.PermissionsManager.hasPermission(
+            groupPolicy,
+            capability
+          )
+          expect(result).to.be.true
+        }
+        {
+          const capability = 'capability4'
+          const result = this.PermissionsManager.hasPermission(
+            groupPolicy,
+            capability
+          )
+          expect(result).to.be.false
+        }
       })
     })
   })
