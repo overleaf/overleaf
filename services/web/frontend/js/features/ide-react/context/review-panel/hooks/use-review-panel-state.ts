@@ -1186,13 +1186,17 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     }
 
     const editorTrackChangesChanged = async () => {
-      const entries = await updateEntries(currentDocumentId)
+      const tempEntries = cloneDeep(await updateEntries(currentDocumentId))
+
+      // `tempEntries` would be mutated
       dispatchReviewPanelEvent('recalculate-screen-positions', {
-        entries,
+        entries: tempEntries,
         updateType: 'trackedChangesChange',
       })
-      // Ensure that watchers, such as the React-based review panel component,
-      // are informed of the changes to entries
+
+      // The state should be updated after dispatching the 'recalculate-screen-positions'
+      // event as `tempEntries` will be mutated
+      setEntries(prev => ({ ...prev, [currentDocumentId]: tempEntries }))
       handleLayoutChange()
     }
 
@@ -1206,9 +1210,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       selection: boolean,
       updateType: UpdateType
     ) => {
-      let tempEntries = {
-        ...getDocEntries(currentDocumentId),
-      }
+      let tempEntries = cloneDeep(getDocEntries(currentDocumentId))
       // All selected changes will be added to this array.
       selectedEntryIds.current = []
       // Count of user-visible changes, i.e. an aggregated change will count as one.
@@ -1312,14 +1314,18 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           tempNVisibleSelectedChanges++
         }
       }
-      setEntries(prev => ({ ...prev, [currentDocumentId]: tempEntries }))
-      setNVisibleSelectedChanges(tempNVisibleSelectedChanges)
+
+      // `tempEntries` would be mutated
       dispatchReviewPanelEvent('recalculate-screen-positions', {
         entries: tempEntries,
         updateType,
       })
-      // Ensure that watchers, such as the React-based review panel component,
-      // are informed of the changes to entries
+
+      // The state should be updated after dispatching the 'recalculate-screen-positions'
+      // event as `tempEntries` will be mutated
+      setEntries(prev => ({ ...prev, [currentDocumentId]: tempEntries }))
+      setNVisibleSelectedChanges(tempNVisibleSelectedChanges)
+
       handleLayoutChange()
     }
 
