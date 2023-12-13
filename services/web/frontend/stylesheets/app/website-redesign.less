@@ -27,10 +27,6 @@
     font-weight: 600;
   }
 
-  a {
-    font-weight: 600;
-  }
-
   .img-rounded {
     // TODO: design specifies 'border-radius-large' which is 5px, but uses 16px
     border-radius: 16px;
@@ -113,6 +109,11 @@
   }
 
   .info-cards {
+    @media (min-width: @screen-md-min) {
+      display: flex; /* equal heights */
+      flex-wrap: wrap;
+    }
+
     .info-card-container {
       min-height: 348px;
       margin-bottom: 16px;
@@ -132,6 +133,10 @@
   }
 
   .features-card {
+    display: flex; /* equal heights */
+    flex-wrap: wrap;
+    align-items: center;
+
     .features-card-image {
       img.img-responsive {
         width: 100%;
@@ -202,6 +207,7 @@
 
         a {
           width: 100%;
+          font-weight: 600;
           color: var(--neutral-90);
           display: inline-flex;
           justify-content: space-between;
@@ -400,6 +406,42 @@
     }
   }
 
+  .resources {
+    @media (min-width: @screen-md-min) {
+      display: flex; /* equal heights */
+      flex-wrap: wrap;
+    }
+    .resources-card {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: column;
+      margin-bottom: 48px;
+      align-content: flex-start;
+
+      @media (max-width: @screen-sm-max) {
+        margin-bottom: 16px;
+      }
+
+      img {
+        width: 56px;
+      }
+
+      h3 {
+        width: 100%;
+      }
+
+      a {
+        margin-top: auto;
+      }
+    }
+  }
+
+  .centered-block {
+    @media (min-width: @screen-md-min) {
+      text-align: center;
+    }
+  }
+
   .mono-text {
     font-family: 'DM Mono', monospace;
     color: var(--green-60);
@@ -542,7 +584,7 @@
     }
 
     @media (max-width: @screen-sm-max) {
-      flex-direction: column;
+      flex-direction: column-reverse;
       width: 100%;
     }
   }
