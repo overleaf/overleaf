@@ -77,7 +77,7 @@ describe('AuthenticationController', function () {
         '../User/UserSessionsManager': (this.UserSessionsManager = {
           trackSession: sinon.stub(),
           untrackSession: sinon.stub(),
-          revokeAllUserSessions: sinon.stub().callsArgWith(1, null),
+          revokeAllUserSessions: sinon.stub().yields(null),
         }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub().yields(null, []) },
@@ -184,17 +184,17 @@ describe('AuthenticationController', function () {
   describe('passportLogin', function () {
     beforeEach(function () {
       this.info = null
-      this.req.login = sinon.stub().callsArgWith(1, null)
+      this.req.login = sinon.stub().yields(null)
       this.res.json = sinon.stub()
       this.req.session = {
         passport: { user: this.user },
         postLoginRedirect: '/path/to/redir/to',
       }
-      this.req.session.destroy = sinon.stub().callsArgWith(0, null)
-      this.req.session.save = sinon.stub().callsArgWith(0, null)
+      this.req.session.destroy = sinon.stub().yields(null)
+      this.req.session.save = sinon.stub().yields(null)
       this.req.sessionStore = { generate: sinon.stub() }
       this.AuthenticationController.finishLogin = sinon.stub()
-      this.passport.authenticate.callsArgWith(1, null, this.user, this.info)
+      this.passport.authenticate.yields(null, this.user, this.info)
       this.err = new Error('woops')
     })
 
@@ -205,7 +205,7 @@ describe('AuthenticationController', function () {
 
     describe('when authenticate produces an error', function () {
       beforeEach(function () {
-        this.passport.authenticate.callsArgWith(1, this.err)
+        this.passport.authenticate.yields(this.err)
       })
 
       it('should return next with an error', function () {
@@ -221,7 +221,7 @@ describe('AuthenticationController', function () {
     describe('when authenticate produces a user', function () {
       beforeEach(function () {
         this.req.session.postLoginRedirect = 'some_redirect'
-        this.passport.authenticate.callsArgWith(1, null, this.user, this.info)
+        this.passport.authenticate.yields(null, this.user, this.info)
       })
 
       afterEach(function () {
@@ -244,7 +244,7 @@ describe('AuthenticationController', function () {
     describe('when authenticate does not produce a user', function () {
       beforeEach(function () {
         this.info = { text: 'a', type: 'b' }
-        this.passport.authenticate.callsArgWith(1, null, false, this.info)
+        this.passport.authenticate.yields(null, false, this.info)
       })
 
       it('should not call finishLogin', function () {
@@ -273,8 +273,7 @@ describe('AuthenticationController', function () {
     beforeEach(function () {
       this.AuthenticationController._recordFailedLogin = sinon.stub()
       this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
-      this.Modules.hooks.fire = sinon.stub().callsArgWith(3, null, [])
-      // @AuthenticationController.establishUserSession = sinon.stub().callsArg(2)
+      this.Modules.hooks.fire = sinon.stub().yields(null, [])
       this.req.body = {
         email: this.email,
         password: this.password,
@@ -290,7 +289,7 @@ describe('AuthenticationController', function () {
       beforeEach(function () {
         this.Modules.hooks.fire = sinon
           .stub()
-          .callsArgWith(3, null, [null, { redir: '/somewhere' }, null])
+          .yields(null, [null, { redir: '/somewhere' }, null])
       })
 
       it('should stop early and call done with this info object', function (done) {
@@ -311,7 +310,7 @@ describe('AuthenticationController', function () {
 
     describe('when the users rate limit', function () {
       beforeEach(function () {
-        this.LoginRateLimiter.processLoginRequest.callsArgWith(1, null, false)
+        this.LoginRateLimiter.processLoginRequest.yields(null, false)
       })
 
       it('should block the request if the limit has been exceeded', function (done) {
@@ -330,10 +329,10 @@ describe('AuthenticationController', function () {
     describe('when the user is authenticated', function () {
       beforeEach(function () {
         this.cb = sinon.stub()
-        this.LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
+        this.LoginRateLimiter.processLoginRequest.yields(null, true)
         this.AuthenticationManager.authenticate = sinon
           .stub()
-          .callsArgWith(3, null, this.user)
+          .yields(null, this.user)
         this.req.sessionID = Math.random()
       })
 
@@ -361,7 +360,7 @@ describe('AuthenticationController', function () {
         beforeEach(function () {
           this.AuthenticationManager.authenticate = sinon
             .stub()
-            .callsArgWith(3, new AuthenticationErrors.ParallelLoginError())
+            .yields(new AuthenticationErrors.ParallelLoginError())
           this.AuthenticationController.doPassportLogin(
             this.req,
             this.req.body.email,
@@ -437,10 +436,10 @@ describe('AuthenticationController', function () {
 
     describe('when the user is not authenticated', function () {
       beforeEach(function () {
-        this.LoginRateLimiter.processLoginRequest.callsArgWith(1, null, true)
+        this.LoginRateLimiter.processLoginRequest.yields(null, true)
         this.AuthenticationManager.authenticate = sinon
           .stub()
-          .callsArgWith(3, null, null)
+          .yields(null, null)
         this.cb = sinon.stub()
         this.AuthenticationController.doPassportLogin(
           this.req,
@@ -937,7 +936,7 @@ describe('AuthenticationController', function () {
 
   describe('_recordSuccessfulLogin', function () {
     beforeEach(function () {
-      this.UserUpdater.updateUser = sinon.stub().callsArg(2)
+      this.UserUpdater.updateUser = sinon.stub().yields()
       this.AuthenticationController._recordSuccessfulLogin(
         this.user._id,
         this.callback
@@ -1078,8 +1077,8 @@ describe('AuthenticationController', function () {
       this.req.session = {
         passport: { user: { _id: 'one' } },
       }
-      this.req.session.destroy = sinon.stub().callsArgWith(0, null)
-      this.req.session.save = sinon.stub().callsArgWith(0, null)
+      this.req.session.destroy = sinon.stub().yields(null)
+      this.req.session.save = sinon.stub().yields(null)
       this.req.sessionStore = { generate: sinon.stub() }
       this.req.login = sinon.stub().yields(null)
 
@@ -1345,9 +1344,7 @@ describe('AuthenticationController', function () {
 
       describe('when req.session.save produces an error', function () {
         beforeEach(function () {
-          this.req.session.save = sinon
-            .stub()
-            .callsArgWith(0, new Error('woops'))
+          this.req.session.save = sinon.stub().yields(new Error('woops'))
         })
 
         it('should produce an error', function (done) {

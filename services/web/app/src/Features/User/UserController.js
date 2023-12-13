@@ -266,7 +266,8 @@ async function tryDeleteUser(req, res, next) {
   const sessionId = req.sessionID
 
   if (typeof req.logout === 'function') {
-    req.logout()
+    const logout = promisify(req.logout)
+    await logout()
   }
 
   const destroySession = promisify(req.session.destroy.bind(req.session))
@@ -431,9 +432,10 @@ async function doLogout(req) {
   logger.debug({ user }, 'logging out')
   const sessionId = req.sessionID
 
-  // passport logout
   if (typeof req.logout === 'function') {
-    req.logout()
+    // passport logout
+    const logout = promisify(req.logout.bind(req))
+    await logout()
   }
 
   const destroySession = promisify(req.session.destroy.bind(req.session))
