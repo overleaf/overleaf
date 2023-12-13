@@ -12,6 +12,7 @@ type EnableWidgetProps = {
   title: string
   description: string
   helpPath: string
+  helpTextOverride?: string
   hasFeature?: boolean
   isPremiumFeature?: boolean
   statusIndicator?: ReactNode
@@ -27,6 +28,7 @@ export function EnableWidget({
   title,
   description,
   helpPath,
+  helpTextOverride,
   hasFeature,
   isPremiumFeature,
   statusIndicator,
@@ -37,6 +39,7 @@ export function EnableWidget({
   disabled,
 }: EnableWidgetProps) {
   const { t } = useTranslation()
+  const helpText = helpTextOverride || t('learn_more')
 
   return (
     <div className="settings-widget-container">
@@ -51,7 +54,7 @@ export function EnableWidget({
         <p className="small">
           {description}{' '}
           <a href={helpPath} target="_blank" rel="noreferrer">
-            {t('learn_more')}
+            {helpText}
           </a>
         </p>
         {children}

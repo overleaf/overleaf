@@ -2,19 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import MaterialIcon from '@/shared/components/material-icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import customLocalStorage from '../../../infrastructure/local-storage'
-import grammarlyExtensionPresent from '../../../shared/utils/grammarly'
+import useWaitForGrammarlyCheck from '@/shared/hooks/use-wait-for-grammarly-check'
 export default function GrammarlyAdvert() {
   const [show, setShow] = useState(false)
 
-  // grammarly can take some time to load, and wont tell us when they do... so we need to run the check after a bit of time
-  const [grammarlyInstalled, setGrammarlyInstalled] = useState(false)
-  useEffect(() => {
-    const timer = setTimeout(
-      () => setGrammarlyInstalled(grammarlyExtensionPresent()),
-      5000
-    )
-    return () => clearTimeout(timer)
-  }, [])
+  // grammarly can take some time to load, we should assume its installed and hide until we know for sure
+  const grammarlyInstalled = useWaitForGrammarlyCheck({ initialState: false })
 
   useEffect(() => {
     const hasDismissedGrammarlyAdvert = customLocalStorage.getItem(

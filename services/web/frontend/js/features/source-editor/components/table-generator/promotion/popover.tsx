@@ -19,17 +19,13 @@ import { useSplitTestContext } from '../../../../../shared/context/split-test-co
 import { User } from '../../../../../../../types/user'
 import { useUserContext } from '../../../../../shared/context/user-context'
 import grammarlyExtensionPresent from '../../../../../shared/utils/grammarly'
+import { EditorTutorials } from '../../../../../../../types/tutorial'
 import { debugConsole } from '../../../../../utils/debugging'
 
 const DELAY_BEFORE_SHOWING_PROMOTION = 1000
 const NEW_USER_CUTOFF_TIME = new Date(2023, 8, 20).getTime()
 const NOW_TIME = new Date().getTime()
 const GRAMMARLY_CUTOFF_TIME = new Date(2023, 9, 10).getTime()
-
-type EditorTutorials = {
-  inactiveTutorials: [string]
-  deactivateTutorial: (key: string) => void
-}
 
 const editorContextPropTypes = {
   inactiveTutorials: PropTypes.arrayOf(PropTypes.string).isRequired,
