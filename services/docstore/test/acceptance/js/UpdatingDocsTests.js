@@ -17,17 +17,17 @@ const DocstoreClient = require('./helpers/DocstoreClient')
 
 describe('Applying updates to a doc', function () {
   beforeEach(function (done) {
-    this.project_id = ObjectId()
-    this.doc_id = ObjectId()
+    this.project_id = new ObjectId()
+    this.doc_id = new ObjectId()
     this.originalLines = ['original', 'lines']
     this.newLines = ['new', 'lines']
     this.originalRanges = {
       changes: [
         {
-          id: ObjectId().toString(),
+          id: new ObjectId().toString(),
           op: { i: 'foo', p: 3 },
           meta: {
-            user_id: ObjectId().toString(),
+            user_id: new ObjectId().toString(),
             ts: new Date().toString(),
           },
         },
@@ -36,10 +36,10 @@ describe('Applying updates to a doc', function () {
     this.newRanges = {
       changes: [
         {
-          id: ObjectId().toString(),
+          id: new ObjectId().toString(),
           op: { i: 'bar', p: 6 },
           meta: {
-            user_id: ObjectId().toString(),
+            user_id: new ObjectId().toString(),
             ts: new Date().toString(),
           },
         },
@@ -258,7 +258,7 @@ describe('Applying updates to a doc', function () {
 
   describe('when the doc does not exist', function () {
     beforeEach(function (done) {
-      this.missing_doc_id = ObjectId()
+      this.missing_doc_id = new ObjectId()
       return DocstoreClient.updateDoc(
         this.project_id,
         this.missing_doc_id,

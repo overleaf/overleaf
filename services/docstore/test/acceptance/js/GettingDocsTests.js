@@ -17,17 +17,17 @@ const DocstoreClient = require('./helpers/DocstoreClient')
 
 describe('Getting a doc', function () {
   beforeEach(function (done) {
-    this.project_id = ObjectId()
-    this.doc_id = ObjectId()
+    this.project_id = new ObjectId()
+    this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
     this.ranges = {
       changes: [
         {
-          id: ObjectId().toString(),
+          id: new ObjectId().toString(),
           op: { i: 'foo', p: 3 },
           meta: {
-            user_id: ObjectId().toString(),
+            user_id: new ObjectId().toString(),
             ts: new Date().toString(),
           },
         },
@@ -69,7 +69,7 @@ describe('Getting a doc', function () {
 
   describe('when the doc does not exist', function () {
     return it('should return a 404', function (done) {
-      const missingDocId = ObjectId()
+      const missingDocId = new ObjectId()
       return DocstoreClient.getDoc(
         this.project_id,
         missingDocId,
@@ -85,7 +85,7 @@ describe('Getting a doc', function () {
 
   return describe('when the doc is a deleted doc', function () {
     beforeEach(function (done) {
-      this.deleted_doc_id = ObjectId()
+      this.deleted_doc_id = new ObjectId()
       return DocstoreClient.createDoc(
         this.project_id,
         this.deleted_doc_id,

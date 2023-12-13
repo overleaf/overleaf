@@ -19,29 +19,29 @@ const DocstoreClient = require('./helpers/DocstoreClient')
 
 describe('Getting all docs', function () {
   beforeEach(function (done) {
-    this.project_id = ObjectId()
+    this.project_id = new ObjectId()
     this.docs = [
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['one', 'two', 'three'],
         ranges: { mock: 'one' },
         rev: 2,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['aaa', 'bbb', 'ccc'],
         ranges: { mock: 'two' },
         rev: 4,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['111', '222', '333'],
         ranges: { mock: 'three' },
         rev: 6,
       },
     ]
     this.deleted_doc = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       lines: ['deleted'],
       ranges: { mock: 'four' },
       rev: 8,

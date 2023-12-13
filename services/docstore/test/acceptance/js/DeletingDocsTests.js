@@ -25,8 +25,8 @@ function deleteTestSuite(deleteDoc) {
   })
 
   beforeEach(function (done) {
-    this.project_id = ObjectId()
-    this.doc_id = ObjectId()
+    this.project_id = new ObjectId()
+    this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
     this.ranges = []
@@ -70,7 +70,7 @@ function deleteTestSuite(deleteDoc) {
     })
 
     afterEach(function (done) {
-      db.docs.remove({ _id: this.doc_id }, done)
+      db.docs.deleteOne({ _id: this.doc_id }, done)
     })
 
     it('should mark the doc as deleted on /deleted', function (done) {
@@ -129,7 +129,7 @@ function deleteTestSuite(deleteDoc) {
     })
 
     afterEach(function cleanupDoc(done) {
-      db.docs.remove({ _id: this.doc_id }, done)
+      db.docs.deleteOne({ _id: this.doc_id }, done)
     })
 
     it('should set the deleted flag in the doc', function (done) {
@@ -167,7 +167,7 @@ function deleteTestSuite(deleteDoc) {
   })
 
   describe('when the doc exists in another project', function () {
-    const otherProjectId = ObjectId()
+    const otherProjectId = new ObjectId()
 
     it('should show as not existing on /deleted', function (done) {
       DocstoreClient.isDocDeleted(otherProjectId, this.doc_id, (error, res) => {
@@ -188,7 +188,7 @@ function deleteTestSuite(deleteDoc) {
 
   describe('when the doc does not exist', function () {
     it('should show as not existing on /deleted', function (done) {
-      const missingDocId = ObjectId()
+      const missingDocId = new ObjectId()
       DocstoreClient.isDocDeleted(
         this.project_id,
         missingDocId,
@@ -201,7 +201,7 @@ function deleteTestSuite(deleteDoc) {
     })
 
     it('should return a 404', function (done) {
-      const missingDocId = ObjectId()
+      const missingDocId = new ObjectId()
       deleteDoc(this.project_id, missingDocId, (error, res, doc) => {
         if (error) return done(error)
         res.statusCode.should.equal(404)
@@ -338,7 +338,7 @@ describe('Delete via PATCH', function () {
 
     describe('after deleting multiple docs', function () {
       beforeEach('create doc2', function (done) {
-        this.doc_id2 = ObjectId()
+        this.doc_id2 = new ObjectId()
         DocstoreClient.createDoc(
           this.project_id,
           this.doc_id2,
@@ -359,7 +359,7 @@ describe('Delete via PATCH', function () {
         )
       })
       beforeEach('create doc3', function (done) {
-        this.doc_id3 = ObjectId()
+        this.doc_id3 = new ObjectId()
         DocstoreClient.createDoc(
           this.project_id,
           this.doc_id3,
@@ -447,8 +447,8 @@ describe('Delete via PATCH', function () {
 
 describe("Destroying a project's documents", function () {
   beforeEach(function (done) {
-    this.project_id = ObjectId()
-    this.doc_id = ObjectId()
+    this.project_id = new ObjectId()
+    this.doc_id = new ObjectId()
     this.lines = ['original', 'lines']
     this.version = 42
     this.ranges = []
@@ -471,12 +471,15 @@ describe("Destroying a project's documents", function () {
 
   describe('when the doc exists', function () {
     beforeEach(function (done) {
-      db.docOps.insert({ doc_id: ObjectId(this.doc_id), version: 1 }, err => {
-        if (err) {
-          return done(err)
+      db.docOps.insertOne(
+        { doc_id: new ObjectId(this.doc_id), version: 1 },
+        err => {
+          if (err) {
+            return done(err)
+          }
+          DocstoreClient.destroyAllDoc(this.project_id, done)
         }
-        DocstoreClient.destroyAllDoc(this.project_id, done)
-      })
+      )
     })
 
     it('should remove the doc from the docs collection', function (done) {

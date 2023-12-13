@@ -31,8 +31,8 @@ describe('MongoManager', function () {
         './Errors': Errors,
       },
     })
-    this.projectId = ObjectId().toString()
-    this.docId = ObjectId().toString()
+    this.projectId = new ObjectId().toString()
+    this.docId = new ObjectId().toString()
     this.rev = 42
     this.callback = sinon.stub()
     this.stubbedErr = new Error('hello world')
@@ -56,8 +56,8 @@ describe('MongoManager', function () {
       this.db.docs.findOne
         .calledWith(
           {
-            _id: ObjectId(this.docId),
-            project_id: ObjectId(this.projectId),
+            _id: new ObjectId(this.docId),
+            project_id: new ObjectId(this.projectId),
           },
           {
             projection: this.filter,
@@ -86,8 +86,8 @@ describe('MongoManager', function () {
     it('should pass the parameter along', function () {
       this.db.docs.updateOne.should.have.been.calledWith(
         {
-          _id: ObjectId(this.docId),
-          project_id: ObjectId(this.projectId),
+          _id: new ObjectId(this.docId),
+          project_id: new ObjectId(this.projectId),
         },
         {
           $set: this.meta,
@@ -125,7 +125,7 @@ describe('MongoManager', function () {
         this.db.docs.find
           .calledWith(
             {
-              project_id: ObjectId(this.projectId),
+              project_id: new ObjectId(this.projectId),
               deleted: { $ne: true },
             },
             {
@@ -156,7 +156,7 @@ describe('MongoManager', function () {
         this.db.docs.find
           .calledWith(
             {
-              project_id: ObjectId(this.projectId),
+              project_id: new ObjectId(this.projectId),
             },
             {
               projection: this.filter,
@@ -193,7 +193,7 @@ describe('MongoManager', function () {
     it('should find the deleted docs via the project_id', function () {
       this.db.docs.find
         .calledWith({
-          project_id: ObjectId(this.projectId),
+          project_id: new ObjectId(this.projectId),
           deleted: true,
         })
         .should.equal(true)
@@ -231,8 +231,8 @@ describe('MongoManager', function () {
           assert.equal(err, null)
           const args = this.db.docs.updateOne.args[0]
           assert.deepEqual(args[0], {
-            _id: ObjectId(this.docId),
-            project_id: ObjectId(this.projectId),
+            _id: new ObjectId(this.docId),
+            project_id: new ObjectId(this.projectId),
             rev: this.oldRev,
           })
           assert.equal(args[1].$set.lines, this.lines)
@@ -264,8 +264,8 @@ describe('MongoManager', function () {
         { lines: this.lines, ranges: this.ranges },
         err => {
           expect(this.db.docs.insertOne).to.have.been.calledWith({
-            _id: ObjectId(this.docId),
-            project_id: ObjectId(this.projectId),
+            _id: new ObjectId(this.docId),
+            project_id: new ObjectId(this.projectId),
             rev: 1,
             lines: this.lines,
             ranges: this.ranges,
@@ -307,8 +307,8 @@ describe('MongoManager', function () {
 
   describe('destroyProject', function () {
     beforeEach(function (done) {
-      this.projectId = ObjectId()
-      this.docIds = [ObjectId(), ObjectId()]
+      this.projectId = new ObjectId()
+      this.docIds = [new ObjectId(), new ObjectId()]
       this.db.docs.deleteMany = sinon.stub().yields()
       this.db.docOps.deleteMany = sinon.stub().yields()
       this.db.docs.find = sinon
@@ -349,7 +349,7 @@ describe('MongoManager', function () {
       it('should look for the doc in the database', function () {
         this.db.docOps.findOne
           .calledWith(
-            { doc_id: ObjectId(this.docId) },
+            { doc_id: new ObjectId(this.docId) },
             {
               projection: { version: 1 },
             }
@@ -376,7 +376,7 @@ describe('MongoManager', function () {
 
   describe('checkRevUnchanged', function () {
     this.beforeEach(function () {
-      this.doc = { _id: ObjectId(), name: 'mock-doc', rev: 1 }
+      this.doc = { _id: new ObjectId(), name: 'mock-doc', rev: 1 }
     })
 
     it('should call the callback when the rev has not changed', function (done) {
@@ -397,7 +397,7 @@ describe('MongoManager', function () {
 
     it('should return a value error if incoming rev is NaN', function (done) {
       this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
-      this.doc = { _id: ObjectId(), name: 'mock-doc', rev: NaN }
+      this.doc = { _id: new ObjectId(), name: 'mock-doc', rev: NaN }
       this.MongoManager.checkRevUnchanged(this.doc, err => {
         err.should.be.instanceof(Errors.DocRevValueError)
         done()
@@ -435,8 +435,8 @@ describe('MongoManager', function () {
       it('updates Mongo', function () {
         expect(this.db.docs.updateOne).to.have.been.calledWith(
           {
-            _id: ObjectId(this.docId),
-            project_id: ObjectId(this.projectId),
+            _id: new ObjectId(this.docId),
+            project_id: new ObjectId(this.projectId),
             rev: this.archivedDoc.rev,
           },
           {
@@ -466,8 +466,8 @@ describe('MongoManager', function () {
       it('sets ranges to an empty object', function () {
         expect(this.db.docs.updateOne).to.have.been.calledWith(
           {
-            _id: ObjectId(this.docId),
-            project_id: ObjectId(this.projectId),
+            _id: new ObjectId(this.docId),
+            project_id: new ObjectId(this.projectId),
             rev: this.archivedDoc.rev,
           },
           {

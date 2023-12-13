@@ -17,8 +17,8 @@ const logger = require('@overleaf/logger')
 
 module.exports = {
   check(callback) {
-    const docId = ObjectId()
-    const projectId = ObjectId(settings.docstore.healthCheck.project_id)
+    const docId = new ObjectId()
+    const projectId = new ObjectId(settings.docstore.healthCheck.project_id)
     const url = `http://localhost:${port}/project/${projectId}/doc/${docId}`
     const lines = [
       'smoke test - delete me',

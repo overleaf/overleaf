@@ -7,9 +7,9 @@ const Errors = require('../../../app/js/Errors')
 
 describe('DocManager', function () {
   beforeEach(function () {
-    this.doc_id = ObjectId().toString()
-    this.project_id = ObjectId().toString()
-    this.another_project_id = ObjectId().toString()
+    this.doc_id = new ObjectId().toString()
+    this.project_id = new ObjectId().toString()
+    this.another_project_id = new ObjectId().toString()
     this.stubbedError = new Error('blew up')
     this.version = 42
 
@@ -343,7 +343,7 @@ describe('DocManager', function () {
         this.lines = ['mock', 'doc', 'lines']
         this.rev = 77
         this.MongoManager.promises.findDoc.resolves({
-          _id: ObjectId(this.doc_id),
+          _id: new ObjectId(this.doc_id),
         })
         this.meta = {}
       })
@@ -478,10 +478,10 @@ describe('DocManager', function () {
       this.originalRanges = {
         changes: [
           {
-            id: ObjectId().toString(),
+            id: new ObjectId().toString(),
             op: { i: 'foo', p: 3 },
             meta: {
-              user_id: ObjectId().toString(),
+              user_id: new ObjectId().toString(),
               ts: new Date().toString(),
             },
           },
@@ -490,10 +490,10 @@ describe('DocManager', function () {
       this.newRanges = {
         changes: [
           {
-            id: ObjectId().toString(),
+            id: new ObjectId().toString(),
             op: { i: 'bar', p: 6 },
             meta: {
-              user_id: ObjectId().toString(),
+              user_id: new ObjectId().toString(),
               ts: new Date().toString(),
             },
           },

@@ -46,47 +46,47 @@ describe('DocArchiveManager', function () {
       ReadableString: sinon.stub().returns({ stream: 'readStream' }),
     }
 
-    projectId = ObjectId()
+    projectId = new ObjectId()
     archivedDocs = [
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         inS3: true,
         rev: 2,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         inS3: true,
         rev: 4,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         inS3: true,
         rev: 6,
       },
     ]
     mongoDocs = [
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['one', 'two', 'three'],
         rev: 2,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['aaa', 'bbb', 'ccc'],
         rev: 4,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         inS3: true,
         rev: 6,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         inS3: true,
         rev: 6,
       },
       {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['111', '222', '333'],
         rev: 6,
       },

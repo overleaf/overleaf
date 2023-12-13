@@ -60,7 +60,7 @@ module.exports = RangeManager = {
 
   _safeObjectId(data) {
     try {
-      return ObjectId(data)
+      return new ObjectId(data)
     } catch (error) {
       return data
     }

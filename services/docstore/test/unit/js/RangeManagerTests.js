@@ -31,10 +31,10 @@ describe('RangeManager', function () {
 
   describe('jsonRangesToMongo', function () {
     it('should convert ObjectIds and dates to proper objects', function () {
-      const changeId = ObjectId().toString()
-      const commentId = ObjectId().toString()
-      const userId = ObjectId().toString()
-      const threadId = ObjectId().toString()
+      const changeId = new ObjectId().toString()
+      const commentId = new ObjectId().toString()
+      const userId = new ObjectId().toString()
+      const threadId = new ObjectId().toString()
       const ts = new Date().toJSON()
       return this.RangeManager.jsonRangesToMongo({
         changes: [
@@ -56,18 +56,18 @@ describe('RangeManager', function () {
       }).should.deep.equal({
         changes: [
           {
-            id: ObjectId(changeId),
+            id: new ObjectId(changeId),
             op: { i: 'foo', p: 3 },
             metadata: {
-              user_id: ObjectId(userId),
+              user_id: new ObjectId(userId),
               ts: new Date(ts),
             },
           },
         ],
         comments: [
           {
-            id: ObjectId(commentId),
-            op: { c: 'foo', p: 3, t: ObjectId(threadId) },
+            id: new ObjectId(commentId),
+            op: { c: 'foo', p: 3, t: new ObjectId(threadId) },
           },
         ],
       })
@@ -109,10 +109,10 @@ describe('RangeManager', function () {
     })
 
     return it('should be consistent when transformed through json -> mongo -> json', function () {
-      const changeId = ObjectId().toString()
-      const commentId = ObjectId().toString()
-      const userId = ObjectId().toString()
-      const threadId = ObjectId().toString()
+      const changeId = new ObjectId().toString()
+      const commentId = new ObjectId().toString()
+      const userId = new ObjectId().toString()
+      const threadId = new ObjectId().toString()
       const ts = new Date().toJSON()
       const ranges1 = {
         changes: [
@@ -145,18 +145,18 @@ describe('RangeManager', function () {
       this.ranges = {
         changes: [
           {
-            id: ObjectId(),
+            id: new ObjectId(),
             op: { i: 'foo', p: 3 },
             metadata: {
-              user_id: ObjectId(),
+              user_id: new ObjectId(),
               ts: new Date(),
             },
           },
         ],
         comments: [
           {
-            id: ObjectId(),
-            op: { c: 'foo', p: 3, t: ObjectId() },
+            id: new ObjectId(),
+            op: { c: 'foo', p: 3, t: new ObjectId() },
           },
         ],
       }
@@ -194,7 +194,7 @@ describe('RangeManager', function () {
 
     return describe('with changes', function () {
       it('should return true when the change id changes', function () {
-        this.ranges_copy.changes[0].id = ObjectId()
+        this.ranges_copy.changes[0].id = new ObjectId()
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
           this.ranges_copy
@@ -202,7 +202,7 @@ describe('RangeManager', function () {
       })
 
       it('should return true when the change user id changes', function () {
-        this.ranges_copy.changes[0].metadata.user_id = ObjectId()
+        this.ranges_copy.changes[0].metadata.user_id = new ObjectId()
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
           this.ranges_copy
@@ -226,7 +226,7 @@ describe('RangeManager', function () {
       })
 
       it('should return true when the comment id changes', function () {
-        this.ranges_copy.comments[0].id = ObjectId()
+        this.ranges_copy.comments[0].id = new ObjectId()
         return this.RangeManager.shouldUpdateRanges(
           this.ranges,
           this.ranges_copy

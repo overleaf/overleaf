@@ -26,10 +26,10 @@ describe('Getting A Doc from Archive', function () {
 
   describe('for an archived doc', function () {
     before(function (done) {
-      this.project_id = ObjectId()
+      this.project_id = new ObjectId()
       this.timeout(1000 * 30)
       this.doc = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         lines: ['foo', 'bar'],
         ranges: {},
         version: 2,
@@ -100,10 +100,10 @@ describe('Getting A Doc from Archive', function () {
 
     describe('for an non-archived doc', function () {
       before(function (done) {
-        this.project_id = ObjectId()
+        this.project_id = new ObjectId()
         this.timeout(1000 * 30)
         this.doc = {
-          _id: ObjectId(),
+          _id: new ObjectId(),
           lines: ['foo', 'bar'],
           ranges: {},
           version: 2,
