@@ -1,17 +1,13 @@
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import Icon from '../../../../shared/components/icon'
-import ChangeEntry from './entries/change-entry'
-import AggregateChangeEntry from './entries/aggregate-change-entry'
-import CommentEntry from './entries/comment-entry'
 import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
 } from '../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
-import { ThreadId } from '../../../../../../types/review-panel/review-panel'
+import { ReviewPanelDocEntries } from '../../../../../../types/review-panel/review-panel'
 import { MainDocument } from '../../../../../../types/project-settings'
-import { ReviewPanelEntry } from '../../../../../../types/review-panel/entry'
-import useCollapseHeight from './hooks/use-collapse-height'
+import OverviewFileEntries from '@/features/source-editor/components/review-panel/entries/overview-file-entries'
 
 type OverviewFileProps = {
   docId: MainDocument['doc']['id']
@@ -19,26 +15,13 @@ type OverviewFileProps = {
 }
 
 function OverviewFile({ docId, docPath }: OverviewFileProps) {
-  const { entries, collapsed, commentThreads, permissions, users } =
-    useReviewPanelValueContext()
+  const { entries, collapsed } = useReviewPanelValueContext()
   const { setCollapsed } = useReviewPanelUpdaterFnsContext()
 
   const docCollapsed = collapsed[docId]
-  const docEntries = useMemo(
-    () => (docId in entries ? entries[docId] : {}),
-    [docId, entries]
-  )
-  const objectEntries = useMemo(() => {
-    const entries = Object.entries(docEntries) as Array<
-      [ThreadId, ReviewPanelEntry]
-    >
-
-    const orderedEntries = entries.sort(([, entryA], [, entryB]) => {
-      return entryA.offset - entryB.offset
-    })
-
-    return orderedEntries
-  }, [docEntries])
+  const docEntries = useMemo(() => {
+    return docId in entries ? entries[docId] : ({} as ReviewPanelDocEntries)
+  }, [docId, entries])
   const entryCount = useMemo(() => {
     return Object.keys(docEntries).filter(
       key => key !== 'add-comment' && key !== 'bulk-actions'
@@ -48,9 +31,6 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
   const handleToggleCollapsed = () => {
     setCollapsed({ ...collapsed, [docId]: !docCollapsed })
   }
-
-  const entriesContainerRef = useRef<HTMLDivElement | null>(null)
-  useCollapseHeight(entriesContainerRef, docCollapsed)
 
   return (
     <div className="rp-overview-file">
@@ -78,65 +58,9 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
           )}
         </div>
       )}
-      <div className="rp-overview-file-entries" ref={entriesContainerRef}>
-        {objectEntries.map(([id, entry]) => {
-          if (entry.type === 'insert' || entry.type === 'delete') {
-            return (
-              <ChangeEntry
-                key={id}
-                docId={docId}
-                entryId={id}
-                permissions={permissions}
-                user={users[entry.metadata.user_id]}
-                content={entry.content}
-                offset={entry.offset}
-                type={entry.type}
-                focused={entry.focused}
-                entryIds={entry.entry_ids}
-                timestamp={entry.metadata.ts}
-              />
-            )
-          }
-
-          if (entry.type === 'aggregate-change') {
-            return (
-              <AggregateChangeEntry
-                key={id}
-                docId={docId}
-                entryId={id}
-                permissions={permissions}
-                user={users[entry.metadata.user_id]}
-                content={entry.content}
-                replacedContent={entry.metadata.replaced_content}
-                offset={entry.offset}
-                focused={entry.focused}
-                entryIds={entry.entry_ids}
-                timestamp={entry.metadata.ts}
-              />
-            )
-          }
-
-          if (entry.type === 'comment') {
-            const thread = commentThreads[entry.thread_id]
-            if (!thread?.resolved) {
-              return (
-                <CommentEntry
-                  key={id}
-                  docId={docId}
-                  threadId={entry.thread_id}
-                  thread={thread}
-                  entryId={id}
-                  offset={entry.offset}
-                  focused={entry.focused}
-                  permissions={permissions}
-                />
-              )
-            }
-          }
-
-          return null
-        })}
-      </div>
+      {!docCollapsed && (
+        <OverviewFileEntries docId={docId} docEntries={docEntries} />
+      )}
     </div>
   )
 }

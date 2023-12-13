@@ -68,11 +68,11 @@ describe('<ReviewPanel />', function () {
 
       it('opens/closes toggle menu', function () {
         cy.get('@review-panel').within(() => {
-          cy.findByTestId('review-panel-track-changes-menu').as('menu')
-          cy.get('@menu').should('have.css', 'height', '1px')
+          cy.findByTestId('review-panel-track-changes-menu').should('not.exist')
           cy.findByRole('button', { name: /track changes is/i }).click()
           // verify the menu is expanded
-          cy.get('@menu')
+          cy.findByTestId('review-panel-track-changes-menu')
+            .as('menu')
             .then($el => {
               const height = window
                 .getComputedStyle($el[0])
@@ -81,7 +81,7 @@ describe('<ReviewPanel />', function () {
             })
             .should('be.gt', 1)
           cy.findByRole('button', { name: /track changes is/i }).click()
-          cy.get('@menu').should('have.css', 'height', '1px')
+          cy.get('@menu').should('not.exist')
         })
       })
 
