@@ -3,11 +3,11 @@ import LeftMenuMask from './left-menu-mask'
 import AccessibleModal from '../../../shared/components/accessible-modal'
 import { Modal } from 'react-bootstrap'
 import classNames from 'classnames'
-import { lazy, Suspense } from 'react'
+import { lazy, memo, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 const EditorLeftMenuBody = lazy(() => import('./editor-left-menu-body'))
 
-export default function EditorLeftMenu() {
+function EditorLeftMenu() {
   const { leftMenuShown, setLeftMenuShown } = useLayoutContext()
 
   const closeModal = () => {
@@ -36,3 +36,5 @@ export default function EditorLeftMenu() {
     </>
   )
 }
+
+export default memo(EditorLeftMenu)

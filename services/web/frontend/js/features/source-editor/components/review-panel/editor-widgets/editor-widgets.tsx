@@ -14,7 +14,7 @@ import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useScopeEventListener from '@/shared/hooks/use-scope-event-listener'
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 
 function EditorWidgets() {
   const { t } = useTranslation()
@@ -109,4 +109,4 @@ function EditorWidgets() {
   )
 }
 
-export default EditorWidgets
+export default memo(EditorWidgets)

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, memo, useState } from 'react'
 import { GenericErrorBoundaryFallback } from '@/shared/components/generic-error-boundary-fallback'
 import withErrorBoundary from '@/infrastructure/error-boundary'
 import IdePage from '@/features/ide-react/components/layout/ide-page'
@@ -15,4 +15,4 @@ const IdeRoot: FC = () => {
   )
 }
 
-export default withErrorBoundary(IdeRoot, GenericErrorBoundaryFallback)
+export default withErrorBoundary(memo(IdeRoot), GenericErrorBoundaryFallback)

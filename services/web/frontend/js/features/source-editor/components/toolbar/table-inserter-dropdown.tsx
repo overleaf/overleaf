@@ -1,4 +1,4 @@
-import { FC, useCallback, useRef, useState } from 'react'
+import { FC, memo, useCallback, useRef, useState } from 'react'
 import * as commands from '../../extensions/toolbar/commands'
 import { useTranslation } from 'react-i18next'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
@@ -9,7 +9,7 @@ import MaterialIcon from '../../../../shared/components/material-icon'
 import classNames from 'classnames'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 
-export const TableInserterDropdown: FC = () => {
+export const TableInserterDropdown = memo(() => {
   const { t } = useTranslation()
   const { open, onToggle, ref } = useDropdown()
   const view = useCodeMirrorViewContext()
@@ -69,7 +69,9 @@ export const TableInserterDropdown: FC = () => {
       </Overlay>
     </>
   )
-}
+})
+TableInserterDropdown.displayName = 'TableInserterDropdown'
+
 const range = (start: number, end: number) =>
   Array.from({ length: end - start + 1 }, (v, k) => k + start)
 

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Modal } from 'react-bootstrap'
 import AccessibleModal from '@/shared/components/accessible-modal'
+import { memo } from 'react'
 
 export type GenericMessageModalOwnProps = {
   title: string
@@ -34,4 +35,4 @@ function GenericMessageModal({
   )
 }
 
-export default GenericMessageModal
+export default memo(GenericMessageModal)

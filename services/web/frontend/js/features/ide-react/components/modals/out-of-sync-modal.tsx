@@ -1,7 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next'
 import { Button, Modal } from 'react-bootstrap'
 import AccessibleModal from '@/shared/components/accessible-modal'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
 
 export type OutOfSyncModalProps = {
@@ -78,4 +78,4 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
   )
 }
 
-export default OutOfSyncModal
+export default memo(OutOfSyncModal)

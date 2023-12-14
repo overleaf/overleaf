@@ -7,6 +7,7 @@ import OverviewFile from './overview-file'
 import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { MainDocument } from '../../../../../../types/project-settings'
+import { memo } from 'react'
 
 function OverviewContainer() {
   const { isOverviewLoading } = useReviewPanelValueContext()
@@ -42,4 +43,4 @@ function OverviewContainer() {
   )
 }
 
-export default OverviewContainer
+export default memo(OverviewContainer)

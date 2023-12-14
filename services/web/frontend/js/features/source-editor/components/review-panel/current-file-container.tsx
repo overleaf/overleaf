@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import Container from './container'
 import Toolbar from './toolbar/toolbar'
 import Nav from './nav'
@@ -151,4 +151,4 @@ function CurrentFileContainer() {
   )
 }
 
-export default CurrentFileContainer
+export default memo(CurrentFileContainer)

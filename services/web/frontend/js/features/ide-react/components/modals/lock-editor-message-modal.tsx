@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Modal } from 'react-bootstrap'
 import AccessibleModal from '@/shared/components/accessible-modal'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 
 export type LockEditorMessageModalProps = {
   delay: number // In seconds
@@ -45,4 +45,4 @@ function LockEditorMessageModal({ delay, show }: LockEditorMessageModalProps) {
   )
 }
 
-export default LockEditorMessageModal
+export default memo(LockEditorMessageModal)
