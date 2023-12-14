@@ -393,6 +393,7 @@
   "department": "Department",
   "descending": "Descending",
   "description": "Description",
+  "details_provided_by_google_explanation": "Your details were provided by your Google account. Please check you’re happy with them.",
   "dictionary": "Dictionary",
   "did_you_know_institution_providing_professional": "Did you know that __institutionName__ is providing <0>free __appName__ Professional features</0> to everyone at __institutionName__?",
   "did_you_know_that_overleaf_offers": "Did you know that __appName__ offers group and organization-wide subscription options? Request information or a quote.",
