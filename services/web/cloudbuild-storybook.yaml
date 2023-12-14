@@ -1,4 +1,11 @@
 steps:
+  - id: npm_ci
+    name: "node:18.18.2"
+    entrypoint: /bin/bash
+    args:
+      - '-c'
+      - 'bin/npm_install_subset . libraries/* services/web'
+
   - id: build-storybook
     name: 'node:18.18.2'
     env:

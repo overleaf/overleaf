@@ -553,8 +553,9 @@ tar:
 	COMPOSE_PROJECT_NAME=tar_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 build_storybook:
+	npm run lezer-latex:generate
 	npm run build-storybook
-	if [[ -n "$(BRANCH_NAME)" ]]; then \
+	if [ -n "$(BRANCH_NAME)" ]; then \
 	  echo "Renaming storybook-static -> $(BRANCH_NAME)."; \
 	  d=$$(dirname "$(BRANCH_NAME)"); \
 	  mkdir -p "storybook-output/$$d"; \
