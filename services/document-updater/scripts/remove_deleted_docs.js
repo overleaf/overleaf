@@ -19,7 +19,7 @@ async function removeDeletedDocs(dockeys, options) {
   const docIds = ProjectFlusher._extractIds(dockeys)
   for (const docId of docIds) {
     summary.totalDocs++
-    const docCount = await db.docs.find({ _id: ObjectId(docId) }).count()
+    const docCount = await db.docs.find({ _id: new ObjectId(docId) }).count()
     if (!docCount) {
       try {
         await removeDeletedDoc(docId, options)
@@ -44,7 +44,7 @@ async function removeDeletedDoc(docId, options) {
     lastUpdatedBy,
   ] = await getDoc(projectId, docId)
 
-  const project = await db.projects.findOne({ _id: ObjectId(projectId) })
+  const project = await db.projects.findOne({ _id: new ObjectId(projectId) })
 
   let status
 

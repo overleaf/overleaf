@@ -703,8 +703,8 @@ describe('Ranges', function () {
           }
           db.docSnapshots
             .find({
-              project_id: ObjectId(this.project_id),
-              doc_id: ObjectId(this.doc_id),
+              project_id: new ObjectId(this.project_id),
+              doc_id: new ObjectId(this.doc_id),
             })
             .toArray((error, docSnapshots) => {
               if (error != null) {

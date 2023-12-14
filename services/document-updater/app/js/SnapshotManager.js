@@ -16,8 +16,8 @@ const { db, ObjectId } = require('./mongodb')
 module.exports = SnapshotManager = {
   recordSnapshot(projectId, docId, version, pathname, lines, ranges, callback) {
     try {
-      projectId = ObjectId(projectId)
-      docId = ObjectId(docId)
+      projectId = new ObjectId(projectId)
+      docId = new ObjectId(docId)
     } catch (error) {
       return callback(error)
     }
@@ -70,7 +70,7 @@ module.exports = SnapshotManager = {
 
   _safeObjectId(data) {
     try {
-      return ObjectId(data)
+      return new ObjectId(data)
     } catch (error) {
       return data
     }
