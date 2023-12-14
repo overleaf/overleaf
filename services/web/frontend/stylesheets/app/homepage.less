@@ -344,6 +344,7 @@
       align-items: center;
 
       .home-top-begin-text {
+        font-weight: 400;
         display: flex;
         color: #5f5ff0;
         font-size: 4rem;
@@ -363,6 +364,7 @@
       }
 
       .home-top-parenthesis-text {
+        font-weight: 500;
         color: #bbdbb8;
         font-size: 4rem;
         line-height: 1.25;
@@ -479,6 +481,35 @@
 
     input[type='checkbox'] {
       margin-top: 2px;
+    }
+  }
+
+  .home-university-logos {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+
+    > img {
+      max-width: 145px;
+    }
+
+    // 991px
+    @media (max-width: @screen-sm-max) {
+      justify-content: center;
+      gap: 50px;
+    }
+  }
+
+  .home-templates-button-desktop {
+    @media (max-width: @screen-sm-max) {
+      display: none;
+    }
+  }
+
+  .home-templates-button-mobile {
+    display: none;
+    @media (max-width: @screen-sm-max) {
+      display: block;
     }
   }
 }

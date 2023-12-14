@@ -27,6 +27,11 @@
     font-weight: 600;
   }
 
+  // override .btn default style
+  .btn {
+    font-weight: 600;
+  }
+
   .img-rounded {
     // TODO: design specifies 'border-radius-large' which is 5px, but uses 16px
     border-radius: 16px;
@@ -164,21 +169,18 @@
 
         li {
           margin-bottom: 16px;
+          // flex is needed in the case of "premium" label being on the same line
           display: flex;
 
           @media (max-width: @screen-sm-max) {
-            i {
-              height: 25px; // force height if text wraps to multiple lines
-            }
-
-            .label-premium {
+            // only for label-premium that appears directly as a child of li
+            > .label-premium {
               margin-left: auto;
-              height: 20px; // force height if text wraps to multiple lines
+              align-self: center;
             }
           }
 
           h4 {
-            display: flex;
             margin-top: 0;
             margin-bottom: 8px;
             font-size: 20px;
@@ -247,15 +249,23 @@
 
     .cta-card-title {
       font-size: 3.25rem; // 52px
-      font-weight: 500;
-      font-family: 'DM Mono', monospace;
       margin-bottom: 8px;
+      line-height: 1.3;
+
+      &.title-mono {
+        > span {
+          // override Noto Sans
+          font-family: 'DM Mono', monospace;
+        }
+      }
 
       span.purple-color {
         color: #939aff;
+        font-weight: 400;
       }
 
       span.lime-color {
+        font-weight: 500;
         color: #7ee787;
       }
 
@@ -306,18 +316,6 @@
   }
 
   .integrations-card {
-    h3 {
-      display: flex;
-      align-items: center;
-
-      @media (max-width: @screen-sm-max) {
-        .label-premium {
-          margin-left: auto;
-          height: 20px;
-        }
-      }
-    }
-
     .integrations-icons {
       img {
         width: 6rem; // 96px
@@ -587,5 +585,9 @@
       flex-direction: column-reverse;
       width: 100%;
     }
+  }
+
+  .label-premium {
+    height: 20px; // override default height
   }
 }
