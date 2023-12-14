@@ -96,6 +96,12 @@ class SAMLAuthenticationError extends OError {
   }
 }
 
+class SAMLAuthenticationRequiredError extends SAMLAuthenticationError {
+  get i18nKey() {
+    return 'saml_authentication_required_error'
+  }
+}
+
 class SAMLGroupSSOLoginIdentityMismatchError extends SAMLAuthenticationError {
   get i18nKey() {
     return 'saml_login_identity_mismatch_error'
@@ -269,6 +275,7 @@ module.exports = {
   InvalidError,
   NotInV2Error,
   OutputFileFetchFailedError,
+  SAMLAuthenticationRequiredError,
   SAMLIdentityExistsError,
   SAMLAlreadyLinkedError,
   SAMLEmailNotAffiliatedError,

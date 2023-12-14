@@ -1546,6 +1546,7 @@
   "ru": "Russian",
   "saml": "SAML",
   "saml_auth_error": "Sorry, your identity provider responded with an error.  Please contact your administrator for more information.",
+  "saml_authentication_required_error": "Other login methods have been disabled by your group administrator. Please use your group SSO login.",
   "saml_create_admin_instructions": "Choose an email address for the first __appName__ admin account. This should correspond to an account in the SAML system. You will then be asked to log in with this account.",
   "saml_email_not_recognized_error": "This email address isn’t set up for SSO. Please check it and try again or contact your administrator.",
   "saml_identity_exists_error": "Sorry, the identity returned by your identity provider is already linked with a different Overleaf account.  Please contact your administrator for more information.",
