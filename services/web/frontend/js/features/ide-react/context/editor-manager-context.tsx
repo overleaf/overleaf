@@ -53,6 +53,7 @@ type EditorManager = {
   stopIgnoringExternalUpdates: () => void
   openDocId: (docId: string, options?: OpenDocOptions) => void
   openDoc: (document: Doc, options?: OpenDocOptions) => void
+  openDocs: OpenDocuments
   openInitialDoc: (docId: string) => void
   jumpToLine: (options: GotoLineOptions) => void
 }
@@ -594,6 +595,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       stopIgnoringExternalUpdates,
       openDocId: openDocWithId,
       openDoc,
+      openDocs,
       openInitialDoc,
       jumpToLine,
     }),
@@ -608,6 +610,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       stopIgnoringExternalUpdates,
       openDocWithId,
       openDoc,
+      openDocs,
       openInitialDoc,
       jumpToLine,
     ]

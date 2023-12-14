@@ -1,8 +1,8 @@
 import { Trans, useTranslation } from 'react-i18next'
-import Close from '../../../../shared/components/close'
-import usePersistedState from '../../../../shared/hooks/use-persisted-state'
-import getMeta from '../../../../utils/meta'
-import { SuggestedLanguage } from '../../../../../../types/project/dashboard/system-message'
+import Close from './close'
+import usePersistedState from '../hooks/use-persisted-state'
+import getMeta from '../../utils/meta'
+import { SuggestedLanguage } from '../../../../types/system-message'
 
 function TranslationMessage() {
   const { t } = useTranslation()

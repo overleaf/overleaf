@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
 import SystemMessage from './system-message'
 import TranslationMessage from './translation-message'
-import useAsync from '../../../../shared/hooks/use-async'
-import { getJSON } from '../../../../infrastructure/fetch-json'
-import getMeta from '../../../../utils/meta'
+import useAsync from '../hooks/use-async'
+import { getJSON } from '@/infrastructure/fetch-json'
+import getMeta from '../../utils/meta'
 import {
   SystemMessage as TSystemMessage,
   SuggestedLanguage,
-} from '../../../../../../types/project/dashboard/system-message'
+} from '../../../../types/system-message'
 import { debugConsole } from '@/utils/debugging'
 
 const MESSAGE_POLL_INTERVAL = 15 * 60 * 1000

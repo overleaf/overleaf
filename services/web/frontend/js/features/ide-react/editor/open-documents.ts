@@ -61,15 +61,28 @@ export class OpenDocuments {
     })
   }
 
-  private docsArray() {
-    return Array.from(this.openDocs.values())
-  }
-
   hasUnsavedChanges() {
-    return this.docsArray().some(doc => doc.hasBufferedOps())
+    for (const doc of this.openDocs.values()) {
+      if (doc.hasBufferedOps()) {
+        return true
+      }
+    }
+    return false
   }
 
   flushAll() {
-    return this.docsArray().map(doc => doc.flush())
+    for (const doc of this.openDocs.values()) {
+      doc.flush()
+    }
+  }
+
+  unsavedDocIds() {
+    const ids = []
+    for (const [docId, doc] of this.openDocs) {
+      if (!doc.pollSavedStatus()) {
+        ids.push(docId)
+      }
+    }
+    return ids
   }
 }

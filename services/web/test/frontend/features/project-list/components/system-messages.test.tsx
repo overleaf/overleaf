@@ -1,7 +1,7 @@
 import { expect } from 'chai'
 import { render, screen, fireEvent } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
-import SystemMessages from '../../../../../frontend/js/features/project-list/components/notifications/system-messages'
+import SystemMessages from '@/shared/components/system-messages'
 
 describe('<SystemMessages />', function () {
   beforeEach(function () {

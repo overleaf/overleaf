@@ -2,20 +2,24 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from 'react-bootstrap'
 import AccessibleModal from '@/shared/components/accessible-modal'
 import { memo, useEffect, useState } from 'react'
+import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 
-export type LockEditorMessageModalProps = {
-  delay: number // In seconds
-  show: boolean
-}
-
-function LockEditorMessageModal({ delay, show }: LockEditorMessageModalProps) {
+// show modal when editor is forcefully disconnected
+function ForceDisconnected() {
+  const { connectionState } = useConnectionContext()
   const { t } = useTranslation()
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(0)
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    if (connectionState.forceDisconnected) {
+      setShow(true)
+      setSecondsUntilRefresh(connectionState.forcedDisconnectDelay)
+    }
+  }, [connectionState])
 
   useEffect(() => {
     if (show) {
-      setSecondsUntilRefresh(delay)
-
       const timer = window.setInterval(() => {
         setSecondsUntilRefresh(seconds => Math.max(0, seconds - 1))
       }, 1000)
@@ -24,11 +28,15 @@ function LockEditorMessageModal({ delay, show }: LockEditorMessageModalProps) {
         window.clearInterval(timer)
       }
     }
-  }, [show, delay])
+  }, [show])
+
+  if (!show) {
+    return null
+  }
 
   return (
     <AccessibleModal
-      show={show}
+      show
       // It's not possible to hide this modal, but it's a required prop
       onHide={() => {}}
       className="lock-editor-modal"
@@ -45,4 +53,4 @@ function LockEditorMessageModal({ delay, show }: LockEditorMessageModalProps) {
   )
 }
 
-export default memo(LockEditorMessageModal)
+export default memo(ForceDisconnected)

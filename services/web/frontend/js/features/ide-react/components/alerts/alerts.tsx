@@ -5,7 +5,6 @@ import { debugging } from '@/utils/debugging'
 import { Alert } from 'react-bootstrap'
 import useScopeValue from '@/shared/hooks/use-scope-value'
 
-// TODO SavingNotificationController, SystemMessagesController, out-of-sync modal
 export function Alerts() {
   const { t } = useTranslation()
   const {

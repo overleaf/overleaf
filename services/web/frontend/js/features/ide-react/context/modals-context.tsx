@@ -12,7 +12,6 @@ import GenericMessageModal, {
 import OutOfSyncModal, {
   OutOfSyncModalProps,
 } from '@/features/ide-react/components/modals/out-of-sync-modal'
-import LockEditorMessageModal from '@/features/ide-react/components/modals/lock-editor-message-modal'
 
 type ModalsContextValue = {
   genericModalVisible: boolean
@@ -23,7 +22,6 @@ type ModalsContextValue = {
   showOutOfSyncModal: (
     editorContent: OutOfSyncModalProps['editorContent']
   ) => void
-  showLockEditorMessageModal: (delay: number) => void
 }
 
 const ModalsContext = createContext<ModalsContextValue | undefined>(undefined)
@@ -37,12 +35,6 @@ export const ModalsContextProvider: FC = ({ children }) => {
     useState(false)
   const [outOfSyncModalData, setOutOfSyncModalData] = useState({
     editorContent: '',
-  })
-
-  const [shouldShowLockEditorModal, setShouldShowLockEditorModal] =
-    useState(false)
-  const [lockEditorModalData, setLockEditorModalData] = useState({
-    delay: 0,
   })
 
   const handleHideGenericModal = useCallback(() => {
@@ -69,24 +61,13 @@ export const ModalsContextProvider: FC = ({ children }) => {
     setShouldShowOutOfSyncModal(true)
   }, [])
 
-  const showLockEditorMessageModal = useCallback((delay: number) => {
-    setLockEditorModalData({ delay })
-    setShouldShowLockEditorModal(true)
-  }, [])
-
   const value = useMemo<ModalsContextValue>(
     () => ({
       showGenericMessageModal,
       genericModalVisible: showGenericModal,
       showOutOfSyncModal,
-      showLockEditorMessageModal,
     }),
-    [
-      showGenericMessageModal,
-      showGenericModal,
-      showOutOfSyncModal,
-      showLockEditorMessageModal,
-    ]
+    [showGenericMessageModal, showGenericModal, showOutOfSyncModal]
   )
 
   return (
@@ -101,10 +82,6 @@ export const ModalsContextProvider: FC = ({ children }) => {
         {...outOfSyncModalData}
         show={shouldShowOutOfSyncModal}
         onHide={handleHideOutOfSyncModal}
-      />
-      <LockEditorMessageModal
-        {...lockEditorModalData}
-        show={shouldShowLockEditorModal}
       />
     </ModalsContext.Provider>
   )

@@ -82,7 +82,8 @@ export function EditorProvider({ children }) {
 
   const [loading] = useScopeValue('state.loading')
   const [projectName, setProjectName] = useScopeValue('project.name')
-  const [permissionsLevel] = useScopeValue('permissionsLevel')
+  const [permissionsLevel, setPermissionsLevel] =
+    useScopeValue('permissionsLevel')
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
@@ -164,6 +165,7 @@ export function EditorProvider({ children }) {
       loading,
       renameProject,
       permissionsLevel,
+      setPermissionsLevel,
       isProjectOwner: owner?._id === userId,
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
       showSymbolPalette,
@@ -180,6 +182,7 @@ export function EditorProvider({ children }) {
       loading,
       renameProject,
       permissionsLevel,
+      setPermissionsLevel,
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,

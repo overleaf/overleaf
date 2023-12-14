@@ -1,4 +1,4 @@
-import SystemMessages from '../../js/features/project-list/components/notifications/system-messages'
+import SystemMessages from '@/shared/components/system-messages'
 import useFetchMock from '../hooks/use-fetch-mock'
 import { FetchMockStatic } from 'fetch-mock'
 

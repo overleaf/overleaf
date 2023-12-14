@@ -7,7 +7,7 @@ import { useOpenFile } from '@/features/ide-react/hooks/use-open-file'
 import { useEditingSessionHeartbeat } from '@/features/ide-react/hooks/use-editing-session-heartbeat'
 import { useRegisterUserActivity } from '@/features/ide-react/hooks/use-register-user-activity'
 import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-error'
-import { useConnectionState } from '@/features/ide-react/hooks/use-connection-state'
+import { Modals } from '@/features/ide-react/components/modals/modals'
 
 export default function IdePage() {
   useLayoutEventTracking() // sent event when the layout changes
@@ -16,11 +16,11 @@ export default function IdePage() {
   useRegisterUserActivity() // record activity and ensure connection when user is active
   useHasLintingError() // pass editor:lint hasLintingError to the compiler
   useOpenFile() // create ide.binaryFilesManager (TODO: move to the history file restore component)
-  useConnectionState() // show modal when editor is forcefully disconnected
 
   return (
     <>
       <Alerts />
+      <Modals />
       <EditorLeftMenu />
       <MainLayout />
     </>

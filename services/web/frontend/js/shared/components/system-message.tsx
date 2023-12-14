@@ -1,5 +1,5 @@
-import Close from '../../../../shared/components/close'
-import usePersistedState from '../../../../shared/hooks/use-persisted-state'
+import Close from './close'
+import usePersistedState from '../hooks/use-persisted-state'
 
 type SystemMessageProps = {
   id: string
