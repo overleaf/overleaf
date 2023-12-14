@@ -23,6 +23,7 @@
     "modules/**/test/frontend/**/*.*",
     "frontend/stories/**/*.*",
     "modules/**/stories/**/*.*",
+    ".storybook/*.*",
     "cypress",
     "types"
   ],
