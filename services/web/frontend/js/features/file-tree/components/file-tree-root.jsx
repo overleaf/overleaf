@@ -34,7 +34,7 @@ const FileTreeRoot = React.memo(function FileTreeRoot({
 }) {
   const { _id: projectId } = useProjectContext(projectContextPropTypes)
   const { fileTreeData } = useFileTreeData()
-  const isReady = projectId && fileTreeData
+  const isReady = Boolean(projectId && fileTreeData)
 
   useEffect(() => {
     if (isReady) onInit()

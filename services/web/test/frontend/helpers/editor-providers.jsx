@@ -15,6 +15,7 @@ import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
+import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -141,6 +142,7 @@ export function EditorProviders({
     IdeAngularProvider,
     LayoutProvider,
     LocalCompileProvider,
+    OutlineProvider,
     ProjectProvider,
     ProjectSettingsProvider,
     SplitTestProvider,
@@ -163,7 +165,9 @@ export function EditorProviders({
                         <Providers.LayoutProvider>
                           <Providers.LocalCompileProvider>
                             <Providers.DetachCompileProvider>
-                              {children}
+                              <Providers.OutlineProvider>
+                                {children}
+                              </Providers.OutlineProvider>
                             </Providers.DetachCompileProvider>
                           </Providers.LocalCompileProvider>
                         </Providers.LayoutProvider>

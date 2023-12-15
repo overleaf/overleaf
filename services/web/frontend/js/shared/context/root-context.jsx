@@ -15,6 +15,7 @@ import { FileTreeDataProvider } from './file-tree-data-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
+import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 
 export function ContextRoot({ children, ide }) {
   return (
@@ -31,7 +32,9 @@ export function ContextRoot({ children, ide }) {
                         <LayoutProvider>
                           <LocalCompileProvider>
                             <DetachCompileProvider>
-                              <ChatProvider>{children}</ChatProvider>
+                              <ChatProvider>
+                                <OutlineProvider>{children}</OutlineProvider>
+                              </ChatProvider>
                             </DetachCompileProvider>
                           </LocalCompileProvider>
                         </LayoutProvider>

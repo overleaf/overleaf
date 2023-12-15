@@ -32,9 +32,3 @@ export type FileTreeFindResult =
   | FileTreeFolderFindResult
   | FileTreeDocumentFindResult
   | FileTreeFileRefFindResult
-
-export type FileTreeSelectHandler = (
-  selectedEntities: FileTreeFindResult[]
-) => void
-
-export type FileTreeDeleteHandler = (entity: FileTreeFindResult) => void

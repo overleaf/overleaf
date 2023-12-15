@@ -12,7 +12,7 @@ export default function useFixedSizeColumn(isOpen: boolean) {
 
   const handleLayout: PanelGroupOnLayout = useCallback(() => {
     if (fixedPanelRef.current) {
-      fixedPanelSizeRef.current = fixedPanelRef.current.getSize().sizePixels
+      fixedPanelSizeRef.current = fixedPanelRef.current.getSize()
       setInitialLayoutDone(true)
     }
   }, [])
@@ -43,9 +43,7 @@ export default function useFixedSizeColumn(isOpen: boolean) {
 
     const resizeObserver = new ResizeObserver(() => {
       // when the panel group resizes, set the size of this panel to the previous size, in pixels
-      fixedPanelRef.current?.resize({
-        sizePixels: fixedPanelSizeRef.current,
-      })
+      fixedPanelRef.current?.resize(fixedPanelSizeRef.current)
     })
 
     resizeObserver.observe(panelGroupElement)

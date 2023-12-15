@@ -49,14 +49,13 @@ export default {
   component: OutlinePane,
   argTypes: {
     jumpToLine: { action: 'jumpToLine' },
+    onToggle: { action: 'onToggle' },
+    toggleExpanded: { action: 'toggleExpanded' },
   },
   args: {
-    eventTracking: { sendMB: () => {} },
     isTexFile: true,
     outline: [],
-    jumpToLine: () => {},
-    onToggle: () => {},
-    show: true,
+    expanded: true,
   },
   decorators: [ScopeDecorator],
 }

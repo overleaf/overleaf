@@ -1,26 +1,19 @@
-import FileTreeRoot from '@/features/file-tree/components/file-tree-root'
 import React, { useCallback, useState } from 'react'
 import { useUserContext } from '@/shared/context/user-context'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
-import {
-  FileTreeDeleteHandler,
-  FileTreeSelectHandler,
-} from '@/features/ide-react/types/file-tree'
 import { RefProviders } from '../../../../../types/user'
+import FileTreeRoot from '@/features/file-tree/components/file-tree-root'
+import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 
-type FileTreeProps = {
-  onInit: () => void
-  onSelect: FileTreeSelectHandler
-  onDelete: FileTreeDeleteHandler
-}
-
-export function FileTree({ onInit, onSelect, onDelete }: FileTreeProps) {
+export function FileTree() {
   const user = useUserContext()
   const { indexAllReferences } = useReferencesContext()
   const { setStartedFreeTrial } = useIdeReactContext()
   const { isConnected } = useConnectionContext()
+  const { handleFileTreeInit, handleFileTreeSelect, handleFileTreeDelete } =
+    useFileTreeOpenContext()
 
   const [refProviders, setRefProviders] = useState<RefProviders>(
     () => user.refProviders || {}
@@ -45,9 +38,9 @@ export function FileTree({ onInit, onSelect, onDelete }: FileTreeProps) {
         setRefProviderEnabled={setRefProviderEnabled}
         setStartedFreeTrial={setStartedFreeTrial}
         isConnected={isConnected}
-        onInit={onInit}
-        onSelect={onSelect}
-        onDelete={onDelete}
+        onInit={handleFileTreeInit}
+        onSelect={handleFileTreeSelect}
+        onDelete={handleFileTreeDelete}
       />
     </div>
   )

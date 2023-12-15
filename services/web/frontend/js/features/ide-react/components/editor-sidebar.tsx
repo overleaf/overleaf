@@ -1,47 +1,45 @@
-import React from 'react'
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
 import { FileTree } from '@/features/ide-react/components/file-tree'
-import {
-  FileTreeDeleteHandler,
-  FileTreeSelectHandler,
-} from '@/features/ide-react/types/file-tree'
 import classNames from 'classnames'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { OutlineContainer } from '@/features/outline/components/outline-container'
+import { useOutlinePane } from '@/features/ide-react/hooks/use-outline-pane'
 
-type EditorSidebarProps = {
-  shouldShow?: boolean
-  onFileTreeInit: () => void
-  onFileTreeSelect: FileTreeSelectHandler
-  onFileTreeDelete: FileTreeDeleteHandler
-}
+export default function EditorSidebar() {
+  const { view } = useLayoutContext()
 
-export default function EditorSidebar({
-  shouldShow = false,
-  onFileTreeInit,
-  onFileTreeSelect,
-  onFileTreeDelete,
-}: EditorSidebarProps) {
+  const { outlineDisabled, outlineRef } = useOutlinePane()
+
   return (
     <aside
       className={classNames('ide-react-editor-sidebar', {
-        hidden: !shouldShow,
+        hidden: view === 'history',
       })}
     >
       <PanelGroup autoSaveId="ide-editor-sidebar-layout" direction="vertical">
         <Panel
-          defaultSizePercentage={75}
+          defaultSize={50}
+          minSize={25}
           className="ide-react-file-tree-panel"
           id="panel-file-tree"
+          order={1}
         >
-          <FileTree
-            onInit={onFileTreeInit}
-            onSelect={onFileTreeSelect}
-            onDelete={onFileTreeDelete}
-          />
+          <FileTree />
         </Panel>
-        <VerticalResizeHandle />
-        <Panel defaultSizePercentage={25} id="panel-outline">
-          <div className="outline-container" />
+
+        <VerticalResizeHandle disabled={outlineDisabled} />
+
+        <Panel
+          defaultSize={50}
+          maxSize={75}
+          id="panel-outline"
+          order={2}
+          collapsible
+          ref={outlineRef}
+          style={{ minHeight: 32 }} // keep the header visible
+        >
+          <OutlineContainer />
         </Panel>
       </PanelGroup>
     </aside>

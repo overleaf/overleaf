@@ -332,7 +332,7 @@
     "react-i18next": "^13.3.1",
     "react-linkify": "^1.0.0-alpha",
     "react-refresh": "^0.14.0",
-    "react-resizable-panels": "^0.0.63",
+    "react-resizable-panels": "^1.0.1",
     "react2angular": "^4.0.6",
     "react2angular-shared-context": "^1.1.0",
     "requirejs": "^2.3.6",

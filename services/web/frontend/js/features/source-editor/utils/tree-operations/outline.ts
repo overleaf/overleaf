@@ -3,6 +3,7 @@ import { SyntaxNode, SyntaxNodeRef } from '@lezer/common'
 import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
 import * as tokens from '../../lezer-latex/latex.terms.mjs'
 import { getEnvironmentArguments, getEnvironmentName } from './environments'
+import { PartialFlatOutline } from '@/features/ide-react/context/outline-context'
 
 export type Outline = {
   line: number
@@ -116,7 +117,7 @@ export const enterNode = (
     }
     const name = command.getChild('SectioningArgument')?.getChild('LongArg')
 
-    if (name == null || command == null) {
+    if (!name) {
       return
     }
 
@@ -185,14 +186,13 @@ const flatItemToOutline = (item: {
   title: string
   line: number
   level: number
-}): Outline => {
-  const { title, line, level } = item
-  return { title, line, level }
-}
+}): Outline => ({
+  title: item.title,
+  line: item.line,
+  level: item.level,
+})
 
-export const nestOutline = (
-  flatOutline: { title: string; line: number; level: number }[]
-): Outline[] => {
+export const nestOutline = (flatOutline: PartialFlatOutline): Outline[] => {
   const parentStack: Outline[] = []
   const outline = []
 

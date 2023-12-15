@@ -46,6 +46,7 @@ import './features/share-project-modal/controllers/react-share-project-modal-con
 import './features/source-editor/controllers/grammarly-advert-controller'
 import './features/history/controllers/history-controller'
 import './features/editor-left-menu/controllers/editor-left-menu-controller'
+import './features/outline/controllers/outline-controller'
 import { cleanupServiceWorker } from './utils/service-worker-cleanup'
 import { reportCM6Perf } from './infrastructure/cm6-performance'
 import { debugConsole } from '@/utils/debugging'

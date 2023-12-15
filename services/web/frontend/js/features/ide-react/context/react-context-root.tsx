@@ -20,6 +20,8 @@ import { ModalsContextProvider } from '@/features/ide-react/context/modals-conte
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
+import { FileTreeOpenProvider } from '@/features/ide-react/context/file-tree-open-context'
+import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 
 export const ReactContextRoot: FC = ({ children }) => {
   return (
@@ -42,11 +44,15 @@ export const ReactContextRoot: FC = ({ children }) => {
                                     <DetachCompileProvider>
                                       <ChatProvider>
                                         <EditorManagerProvider>
-                                          <OnlineUsersProvider>
-                                            <MetadataProvider>
-                                              {children}
-                                            </MetadataProvider>
-                                          </OnlineUsersProvider>
+                                          <FileTreeOpenProvider>
+                                            <OnlineUsersProvider>
+                                              <MetadataProvider>
+                                                <OutlineProvider>
+                                                  {children}
+                                                </OutlineProvider>
+                                              </MetadataProvider>
+                                            </OnlineUsersProvider>
+                                          </FileTreeOpenProvider>
                                         </EditorManagerProvider>
                                       </ChatProvider>
                                     </DetachCompileProvider>

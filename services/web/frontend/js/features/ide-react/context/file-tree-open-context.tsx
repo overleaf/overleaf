@@ -1,28 +1,46 @@
-import { FileRef } from '../../../../../types/file-ref'
-import { BinaryFile } from '@/features/file-view/types/binary-file'
+import {
+  createContext,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { useProjectContext } from '@/shared/context/project-context'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useSelectFileTreeEntity } from '@/features/ide-react/hooks/use-select-file-tree-entity'
 import useScopeValue from '@/shared/hooks/use-scope-value'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { BinaryFile } from '@/features/file-view/types/binary-file'
 import {
-  FileTreeDeleteHandler,
   FileTreeDocumentFindResult,
   FileTreeFileRefFindResult,
   FileTreeFindResult,
 } from '@/features/ide-react/types/file-tree'
 import { debugConsole } from '@/utils/debugging'
-import { useProjectContext } from '@/shared/context/project-context'
-import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
-import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
 
-export const useFileTree = () => {
+const FileTreeOpenContext = createContext<
+  | {
+      selectedEntityCount: number
+      openEntity: FileTreeDocumentFindResult | FileTreeFileRefFindResult | null
+      handleFileTreeInit: () => void
+      handleFileTreeSelect: (selectedEntities: FileTreeFindResult[]) => void
+      handleFileTreeDelete: (entity: FileTreeFindResult) => void
+    }
+  | undefined
+>(undefined)
+
+export const FileTreeOpenProvider: FC = ({ children }) => {
   const { rootDocId } = useProjectContext()
-  const { eventEmitter } = useIdeReactContext()
+  const { eventEmitter, projectJoined } = useIdeReactContext()
   const {
     openDocId: openDocWithId,
     currentDocumentId: openDocId,
     openInitialDoc,
   } = useEditorManagerContext()
-  const { projectJoined } = useIdeReactContext()
   const { selectEntity } = useSelectFileTreeEntity()
   const [, setOpenFile] = useScopeValue<BinaryFile | null>('openFile')
   const [openEntity, setOpenEntity] = useState<
@@ -68,8 +86,8 @@ export const useFileTree = () => {
     [fileTreeReady, setOpenFile, openDocWithId]
   )
 
-  const handleFileTreeDelete: FileTreeDeleteHandler = useCallback(
-    entity => {
+  const handleFileTreeDelete = useCallback(
+    (entity: FileTreeFindResult) => {
       eventEmitter.emit('entity:deleted', entity)
       // Select the root document if the current document was deleted
       if (entity.entity._id === openDocId) {
@@ -104,38 +122,37 @@ export const useFileTree = () => {
     }
   }, [fileTreeReady, openInitialDoc, projectJoined, rootDocId])
 
-  return {
-    selectedEntityCount,
-    openEntity,
-    openDocId,
+  const value = useMemo(() => {
+    return {
+      selectedEntityCount,
+      openEntity,
+      handleFileTreeInit,
+      handleFileTreeSelect,
+      handleFileTreeDelete,
+    }
+  }, [
+    handleFileTreeDelete,
     handleFileTreeInit,
     handleFileTreeSelect,
-    handleFileTreeDelete,
-  }
+    openEntity,
+    selectedEntityCount,
+  ])
+
+  return (
+    <FileTreeOpenContext.Provider value={value}>
+      {children}
+    </FileTreeOpenContext.Provider>
+  )
 }
 
-function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
-  return {
-    _id: fileRef._id,
-    name: fileRef.name,
-    id: fileRef._id,
-    type: 'file',
-    selected: true,
-    linkedFileData: fileRef.linkedFileData,
-    created: fileRef.created ? new Date(fileRef.created) : new Date(),
-  }
-}
+export const useFileTreeOpenContext = () => {
+  const context = useContext(FileTreeOpenContext)
 
-// `FileViewHeader`, which is TypeScript, expects a BinaryFile, which has a
-// `created` property of type `Date`, while `TPRFileViewInfo`, written in JS,
-// into which `FileViewHeader` passes its BinaryFile, expects a file object with
-// `created` property of type `string`, which is a mismatch. `TPRFileViewInfo`
-// is the only one making runtime complaints and it seems that other uses of
-// `FileViewHeader` pass in a string for `created`, so that's what this function
-// does too.
-export function fileViewFile(fileRef: FileRef) {
-  return {
-    ...convertFileRefToBinaryFile(fileRef),
-    created: fileRef.created,
+  if (!context) {
+    throw new Error(
+      'useFileTreeOpenContext is only available inside FileTreeOpenProvider'
+    )
   }
+
+  return context
 }

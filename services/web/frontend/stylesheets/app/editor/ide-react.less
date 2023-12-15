@@ -92,8 +92,15 @@
   height: 6px;
   background-color: @vertical-resizable-resizer-bg;
 
-  &:hover {
-    background-color: @vertical-resizable-resizer-hover-bg;
+  &.vertical-resize-handle-enabled {
+    &:hover {
+      background-color: @vertical-resizable-resizer-hover-bg;
+    }
+  }
+
+  &:not(.vertical-resize-handle-enabled) {
+    opacity: 0.5;
+    cursor: default;
   }
 
   &::after {
@@ -120,6 +127,7 @@
 
 .ide-react-file-tree-panel {
   display: flex;
+  flex-direction: column;
 
   // Prevent the file tree expanding beyond the boundary of the panel
   .file-tree {

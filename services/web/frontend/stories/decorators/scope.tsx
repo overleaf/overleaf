@@ -22,6 +22,7 @@ import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
+import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -245,6 +246,7 @@ export const ScopeDecorator = (
     IdeAngularProvider,
     LayoutProvider,
     LocalCompileProvider,
+    OutlineProvider,
     ProjectProvider,
     ProjectSettingsProvider,
     SplitTestProvider,
@@ -267,7 +269,9 @@ export const ScopeDecorator = (
                         <Providers.LayoutProvider>
                           <Providers.LocalCompileProvider>
                             <Providers.DetachCompileProvider>
-                              <Story />
+                              <Providers.OutlineProvider>
+                                <Story />
+                              </Providers.OutlineProvider>
                             </Providers.DetachCompileProvider>
                           </Providers.LocalCompileProvider>
                         </Providers.LayoutProvider>

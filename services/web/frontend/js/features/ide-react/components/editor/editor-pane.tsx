@@ -7,13 +7,15 @@ import classNames from 'classnames'
 import { LoadingPane } from '@/features/ide-react/components/editor/loading-pane'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import { VerticalResizeHandle } from '@/features/ide-react/components/resize/vertical-resize-handle'
+import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 
 const SymbolPalettePane = lazy(
   () => import('@/features/ide-react/components/editor/symbol-palette-pane')
 )
 
-export const EditorPane: FC<{ show: boolean }> = ({ show }) => {
+export const EditorPane: FC = () => {
   const [editor] = useScopeValue<EditorScopeValue>('editor')
+  const { selectedEntityCount, openEntity } = useFileTreeOpenContext()
 
   const isLoading = Boolean(
     (!editor.sharejs_doc || editor.opening) &&
@@ -22,12 +24,12 @@ export const EditorPane: FC<{ show: boolean }> = ({ show }) => {
   )
 
   return (
-    <div className="ide-react-editor-content full-size">
-      <PanelGroup
-        autoSaveId="ide-editor-layout"
-        direction="vertical"
-        className={classNames({ hidden: !show })}
-      >
+    <div
+      className={classNames('ide-react-editor-content', 'full-size', {
+        hidden: openEntity?.type !== 'doc' || selectedEntityCount !== 1,
+      })}
+    >
+      <PanelGroup autoSaveId="ide-editor-layout" direction="vertical">
         <Panel
           id="panel-source-editor"
           order={1}
@@ -43,9 +45,9 @@ export const EditorPane: FC<{ show: boolean }> = ({ show }) => {
             <Panel
               id="panel-symbol-palette"
               order={2}
-              defaultSizePixels={250}
-              minSizePixels={250}
-              maxSizePixels={336}
+              defaultSize={25}
+              minSize={10}
+              maxSize={50}
             >
               <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
                 <SymbolPalettePane />
