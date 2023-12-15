@@ -41,6 +41,7 @@ export class ConnectionManager extends Emitter<Events> {
   private readonly idleDisconnectInterval: number
   private reconnectCountdownInterval = 0
   readonly socket: Socket
+  private userIsLeavingPage = false
 
   constructor() {
     super()
@@ -51,6 +52,9 @@ export class ConnectionManager extends Emitter<Events> {
     }, ONE_HOUR_IN_MS)
 
     window.addEventListener('online', () => this.onOnline())
+    window.addEventListener('beforeunload', () => {
+      this.userIsLeavingPage = true
+    })
 
     const socket = SocketIoShim.connect('', {
       'auto connect': false,
@@ -85,6 +89,7 @@ export class ConnectionManager extends Emitter<Events> {
   // Called when document is clicked or the editor cursor changes
   registerUserActivity() {
     this.lastUserActivity = performance.now()
+    this.userIsLeavingPage = false
     this.ensureIsConnected()
   }
 
@@ -273,6 +278,7 @@ export class ConnectionManager extends Emitter<Events> {
   }
 
   private startAutoReconnectCountdown(backoff: number) {
+    if (this.userIsLeavingPage) return
     if (!this.canReconnect()) return
     let countdown
     if (this.isUserInactiveSince(TWO_MINUTES_IN_MS)) {
