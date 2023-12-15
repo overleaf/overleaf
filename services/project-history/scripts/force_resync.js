@@ -40,7 +40,7 @@ function checkAndClear(project, callback) {
 
   function checkNotV1Project(cb) {
     db.projects.findOne(
-      { _id: ObjectId(projectId) },
+      { _id: new ObjectId(projectId) },
       { projection: { overleaf: true } },
       (err, result) => {
         console.log(

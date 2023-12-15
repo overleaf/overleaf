@@ -3,10 +3,11 @@ import Settings from '@overleaf/settings'
 import assert from 'assert'
 import async from 'async'
 import crypto from 'crypto'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockFileStore = () => nock('http://localhost:3009')
@@ -172,7 +173,7 @@ function olAddFileUpdate(file, userId, ts, fileHash) {
 }
 
 describe('Sending Updates', function () {
-  const historyId = ObjectId().toString()
+  const historyId = new ObjectId().toString()
 
   beforeEach(function (done) {
     this.timestamp = new Date()
@@ -181,9 +182,9 @@ describe('Sending Updates', function () {
       if (error) {
         return done(error)
       }
-      this.userId = ObjectId().toString()
-      this.projectId = ObjectId().toString()
-      this.docId = ObjectId().toString()
+      this.userId = new ObjectId().toString()
+      this.projectId = new ObjectId().toString()
+      this.docId = new ObjectId().toString()
 
       this.doc = {
         id: this.docId,
@@ -432,7 +433,7 @@ describe('Sending Updates', function () {
 
     it('should send add file updates to the history store', function (done) {
       const file = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/test.png',
         contents: Buffer.from([1, 2, 3]),
         hash: 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74',
@@ -507,7 +508,7 @@ describe('Sending Updates', function () {
         .digest('hex')
 
       const file = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/large.png',
         contents: fileContents,
         hash: fileHash,
@@ -940,8 +941,8 @@ describe('Sending Updates', function () {
     })
 
     it('should not concat updates with different user_ids', function (done) {
-      const userId1 = ObjectId().toString()
-      const userId2 = ObjectId().toString()
+      const userId1 = new ObjectId().toString()
+      const userId2 = new ObjectId().toString()
 
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
@@ -994,12 +995,12 @@ describe('Sending Updates', function () {
 
     it('should not concat updates with different docs', function (done) {
       const doc1 = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/doc1.tex',
         length: 10,
       }
       const doc2 = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/doc2.tex',
         length: 10,
       }
@@ -1224,7 +1225,7 @@ describe('Sending Updates', function () {
 
     it('should not concat text updates across project structure ops', function (done) {
       const newDoc = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/main.tex',
         hash: '0a207c060e61f3b88eaee0a8cd0696f46fb155eb',
         docLines: 'a\nb',
@@ -1628,7 +1629,7 @@ describe('Sending Updates', function () {
 
     it('should return a 500 if the filestore returns a 500', function (done) {
       const file = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/test.png',
         contents: Buffer.from([1, 2, 3]),
         hash: 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74',
@@ -1704,7 +1705,7 @@ describe('Sending Updates', function () {
 
     it('should return a 500 if the filestore request errors', function (done) {
       const file = {
-        id: ObjectId().toString(),
+        id: new ObjectId().toString(),
         pathname: '/test.png',
         contents: Buffer.from([1, 2, 3]),
         hash: 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74',
@@ -1798,7 +1799,7 @@ describe('Sending Updates', function () {
       const newDoc = []
       for (let i = 0; i <= 2; i++) {
         newDoc[i] = {
-          id: ObjectId().toString(),
+          id: new ObjectId().toString(),
           pathname: `/main${i}.tex`,
           hash: '0a207c060e61f3b88eaee0a8cd0696f46fb155eb',
           docLines: 'a\nb',

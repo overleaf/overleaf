@@ -11,9 +11,10 @@
  */
 import sinon from 'sinon'
 import { expect } from 'chai'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import tk from 'timekeeper'
 import { strict as esmock } from 'esmock'
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/js/LabelsManager.js'
 
@@ -62,10 +63,10 @@ describe('LabelsManager', function () {
   describe('getLabels', function () {
     beforeEach(function () {
       this.label = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         comment: 'some comment',
         version: 123,
-        user_id: ObjectId(),
+        user_id: new ObjectId(),
         created_at: new Date(),
       }
 
@@ -82,7 +83,7 @@ describe('LabelsManager', function () {
       it('gets the labels state from mongo', function () {
         return expect(
           this.db.projectHistoryLabels.find
-        ).to.have.been.calledWith({ project_id: ObjectId(this.project_id) })
+        ).to.have.been.calledWith({ project_id: new ObjectId(this.project_id) })
       })
 
       return it('returns formatted labels', function () {
@@ -119,7 +120,7 @@ describe('LabelsManager', function () {
       beforeEach(function () {
         this.createdAt = new Date(1)
         this.db.projectHistoryLabels.insertOne.yields(null, {
-          insertedId: ObjectId(this.label_id),
+          insertedId: new ObjectId(this.label_id),
         })
         return this.LabelsManager.createLabel(
           this.project_id,
@@ -155,10 +156,10 @@ describe('LabelsManager', function () {
           this.db.projectHistoryLabels.insertOne
         ).to.have.been.calledWith(
           sinon.match({
-            project_id: ObjectId(this.project_id),
+            project_id: new ObjectId(this.project_id),
             comment: this.comment,
             version: this.version,
-            user_id: ObjectId(this.user_id),
+            user_id: new ObjectId(this.user_id),
             created_at: this.createdAt,
           }),
           sinon.match.any
@@ -167,10 +168,10 @@ describe('LabelsManager', function () {
 
       return it('returns the label', function () {
         return expect(this.callback).to.have.been.calledWith(null, {
-          id: ObjectId(this.label_id),
+          id: new ObjectId(this.label_id),
           comment: this.comment,
           version: this.version,
-          user_id: ObjectId(this.user_id),
+          user_id: new ObjectId(this.user_id),
           created_at: this.createdAt,
         })
       })
@@ -179,7 +180,7 @@ describe('LabelsManager', function () {
     describe('without createdAt', function () {
       beforeEach(function () {
         this.db.projectHistoryLabels.insertOne.yields(null, {
-          insertedId: ObjectId(this.label_id),
+          insertedId: new ObjectId(this.label_id),
         })
         return this.LabelsManager.createLabel(
           this.project_id,
@@ -197,10 +198,10 @@ describe('LabelsManager', function () {
           this.db.projectHistoryLabels.insertOne
         ).to.have.been.calledWith(
           sinon.match({
-            project_id: ObjectId(this.project_id),
+            project_id: new ObjectId(this.project_id),
             comment: this.comment,
             version: this.version,
-            user_id: ObjectId(this.user_id),
+            user_id: new ObjectId(this.user_id),
             created_at: this.now,
           })
         )
@@ -211,7 +212,7 @@ describe('LabelsManager', function () {
       beforeEach(function () {
         this.createdAt = new Date(1)
         this.db.projectHistoryLabels.insertOne.yields(null, {
-          insertedId: ObjectId(this.label_id),
+          insertedId: new ObjectId(this.label_id),
         })
         return this.LabelsManager.createLabel(
           this.project_id,
@@ -247,9 +248,9 @@ describe('LabelsManager', function () {
         this.db.projectHistoryLabels.deleteOne
       ).to.have.been.calledWith(
         {
-          _id: ObjectId(this.label_id),
-          project_id: ObjectId(this.project_id),
-          user_id: ObjectId(this.user_id),
+          _id: new ObjectId(this.label_id),
+          project_id: new ObjectId(this.project_id),
+          user_id: new ObjectId(this.user_id),
         },
         this.callback
       )

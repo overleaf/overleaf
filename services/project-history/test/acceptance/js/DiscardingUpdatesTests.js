@@ -15,10 +15,11 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import Settings from '@overleaf/settings'
 import assert from 'assert'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockWeb = () => nock('http://localhost:3000')
@@ -31,9 +32,9 @@ describe('DiscardingUpdates', function () {
       if (error != null) {
         throw error
       }
-      this.user_id = ObjectId().toString()
-      this.project_id = ObjectId().toString()
-      this.doc_id = ObjectId().toString()
+      this.user_id = new ObjectId().toString()
+      this.project_id = new ObjectId().toString()
+      this.doc_id = new ObjectId().toString()
 
       MockHistoryStore().post('/api/projects').reply(200, {
         projectId: 0,

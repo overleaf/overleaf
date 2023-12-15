@@ -20,7 +20,7 @@ function checkAndClear(project, callback) {
   const projectId = project.project_id
   function checkDeleted(cb) {
     db.projects.findOne(
-      { _id: ObjectId(projectId) },
+      { _id: new ObjectId(projectId) },
       { projection: { _id: 1 } },
       (err, result) => {
         if (err) {
@@ -40,9 +40,9 @@ function checkAndClear(project, callback) {
     db.deletedProjects.findOne(
       {
         // this condition makes use of the index
-        'deleterData.deletedProjectId': ObjectId(projectId),
+        'deleterData.deletedProjectId': new ObjectId(projectId),
         // this condition checks if the deleted project has expired
-        'project._id': ObjectId(projectId),
+        'project._id': new ObjectId(projectId),
       },
       { projection: { _id: 1 } },
       (err, result) => {

@@ -3,15 +3,16 @@ import nock from 'nock'
 import { expect } from 'chai'
 import request from 'request'
 import assert from 'assert'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockWeb = () => nock('http://localhost:3000')
 
 describe('Flushing old queues', function () {
-  const historyId = ObjectId().toString()
+  const historyId = new ObjectId().toString()
 
   beforeEach(function (done) {
     this.timestamp = new Date()
@@ -20,9 +21,9 @@ describe('Flushing old queues', function () {
       if (error) {
         throw error
       }
-      this.projectId = ObjectId().toString()
-      this.docId = ObjectId().toString()
-      this.fileId = ObjectId().toString()
+      this.projectId = new ObjectId().toString()
+      this.docId = new ObjectId().toString()
+      this.fileId = new ObjectId().toString()
 
       MockHistoryStore().post('/api/projects').reply(200, {
         projectId: historyId,

@@ -1,8 +1,9 @@
 import sinon from 'sinon'
 import { expect } from 'chai'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import tk from 'timekeeper'
 import { strict as esmock } from 'esmock'
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/js/SyncManager.js'
 
@@ -125,7 +126,7 @@ describe('SyncManager', function () {
 
       it('gets the sync state from mongo', function () {
         expect(this.db.projectHistorySyncState.findOne).to.have.been.calledWith(
-          { project_id: ObjectId(this.projectId) }
+          { project_id: new ObjectId(this.projectId) }
         )
       })
 
@@ -140,7 +141,7 @@ describe('SyncManager', function () {
           this.db.projectHistorySyncState.updateOne
         ).to.have.been.calledWith(
           {
-            project_id: ObjectId(this.projectId),
+            project_id: new ObjectId(this.projectId),
           },
           sinon.match({
             $set: {
@@ -219,7 +220,7 @@ describe('SyncManager', function () {
               this.db.projectHistorySyncState.updateOne
             ).to.have.been.calledWith(
               {
-                project_id: ObjectId(this.projectId),
+                project_id: new ObjectId(this.projectId),
               },
               sinon.match({
                 $set: this.syncState.toRaw(),
@@ -261,7 +262,7 @@ describe('SyncManager', function () {
               this.db.projectHistorySyncState.updateOne
             ).to.have.been.calledWith(
               {
-                project_id: ObjectId(this.projectId),
+                project_id: new ObjectId(this.projectId),
               },
               sinon.match({
                 $set: {
@@ -621,7 +622,7 @@ describe('SyncManager', function () {
       it('queues blank doc additions for missing docs', function () {
         const newDoc = {
           path: 'another.tex',
-          doc: ObjectId().toString(),
+          doc: new ObjectId().toString(),
         }
         const updates = [
           resyncProjectStructureUpdate(
@@ -919,7 +920,7 @@ describe('SyncManager', function () {
         this.UpdateCompressor.diffAsShareJsOps.returns([{ i: 'a', p: 0 }])
         const newDoc = {
           path: 'another.tex',
-          doc: ObjectId().toString(),
+          doc: new ObjectId().toString(),
           content: 'a',
         }
         const updates = [

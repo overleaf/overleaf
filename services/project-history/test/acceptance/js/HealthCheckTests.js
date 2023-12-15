@@ -12,18 +12,19 @@
 import { expect } from 'chai'
 import settings from '@overleaf/settings'
 import request from 'request'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockWeb = () => nock('http://localhost:3000')
 
 describe('Health Check', function () {
   beforeEach(function (done) {
-    const projectId = ObjectId()
-    const historyId = ObjectId().toString()
+    const projectId = new ObjectId()
+    const historyId = new ObjectId().toString()
     settings.history.healthCheck = { project_id: projectId }
     return ProjectHistoryApp.ensureRunning(error => {
       if (error != null) {

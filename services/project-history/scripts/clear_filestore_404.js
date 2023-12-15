@@ -37,7 +37,7 @@ function checkAndClear(project, callback) {
 
   function checkNotV1Project(cb) {
     db.projects.findOne(
-      { _id: ObjectId(projectId) },
+      { _id: new ObjectId(projectId) },
       { projection: { overleaf: true } },
       (err, result) => {
         console.log(
@@ -67,7 +67,7 @@ function checkAndClear(project, callback) {
       console.log('2. deleting overleaf.history.id in mongo project', projectId)
       // Accessing mongo projects collection directly - BE CAREFUL!
       db.projects.updateOne(
-        { _id: ObjectId(projectId) },
+        { _id: new ObjectId(projectId) },
         { $unset: { 'overleaf.history.id': '' } },
         (err, result) => {
           console.log(' - got result from remove', err, result)

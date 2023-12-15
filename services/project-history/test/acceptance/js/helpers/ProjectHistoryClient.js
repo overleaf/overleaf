@@ -250,13 +250,13 @@ export function deleteLabel(projectId, userId, labelId, callback) {
 }
 
 export function setFailure(failureEntry, callback) {
-  db.projectHistoryFailures.remove(
+  db.projectHistoryFailures.deleteOne(
     { project_id: { $exists: true } },
     (err, result) => {
       if (err) {
         return callback(err)
       }
-      db.projectHistoryFailures.insert(failureEntry, callback)
+      db.projectHistoryFailures.insertOne(failureEntry, callback)
     }
   )
 }

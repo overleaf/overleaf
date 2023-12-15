@@ -1,6 +1,7 @@
 import sinon from 'sinon'
 import { strict as esmock } from 'esmock'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/js/HttpController.js'
 
@@ -106,7 +107,7 @@ describe('HttpController', function () {
 
   describe('initializeProject', function () {
     beforeEach(function () {
-      this.historyId = ObjectId().toString()
+      this.historyId = new ObjectId().toString()
       this.req = { body: { historyId: this.historyId } }
       this.HistoryStoreManager.initializeProject.yields(null, this.historyId)
       this.HttpController.initializeProject(this.req, this.res, this.next)
@@ -478,7 +479,7 @@ describe('HttpController', function () {
         params: {
           project_id: this.projectId,
           user_id: this.userId,
-          label_id: (this.label_id = ObjectId()),
+          label_id: (this.label_id = new ObjectId()),
         },
       }
       this.HttpController.deleteLabel(this.req, this.res, this.next)

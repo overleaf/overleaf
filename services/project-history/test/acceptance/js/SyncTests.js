@@ -3,9 +3,10 @@ import nock from 'nock'
 import { expect } from 'chai'
 import request from 'request'
 import assert from 'assert'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
 
@@ -14,7 +15,7 @@ const MockFileStore = () => nock('http://localhost:3009')
 const MockWeb = () => nock('http://localhost:3000')
 
 describe('Syncing with web and doc-updater', function () {
-  const historyId = ObjectId().toString()
+  const historyId = new ObjectId().toString()
 
   beforeEach(function (done) {
     this.timestamp = new Date()
@@ -23,9 +24,9 @@ describe('Syncing with web and doc-updater', function () {
       if (error) {
         throw error
       }
-      this.project_id = ObjectId().toString()
-      this.doc_id = ObjectId().toString()
-      this.file_id = ObjectId().toString()
+      this.project_id = new ObjectId().toString()
+      this.doc_id = new ObjectId().toString()
+      this.file_id = new ObjectId().toString()
 
       MockHistoryStore().post('/api/projects').reply(200, {
         projectId: historyId,

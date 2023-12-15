@@ -1,7 +1,8 @@
 import sinon from 'sinon'
 import { expect } from 'chai'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import { strict as esmock } from 'esmock'
+const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/js/RetryManager.js'
 

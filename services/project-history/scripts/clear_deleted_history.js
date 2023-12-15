@@ -35,7 +35,7 @@ function checkAndClear(project, callback) {
 
   function checkDeleted(cb) {
     db.projects.findOne(
-      { _id: ObjectId(projectId) },
+      { _id: new ObjectId(projectId) },
       { projection: { overleaf: true } },
       (err, result) => {
         console.log(

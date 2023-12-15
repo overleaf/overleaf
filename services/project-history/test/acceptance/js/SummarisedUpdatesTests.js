@@ -15,10 +15,11 @@ import { expect } from 'chai'
 import Settings from '@overleaf/settings'
 import request from 'request'
 import assert from 'assert'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockFileStore = () => nock('http://localhost:3009')
@@ -28,8 +29,8 @@ const fixture = path => new URL(`../fixtures/${path}`, import.meta.url)
 
 describe('Summarized updates', function () {
   beforeEach(function (done) {
-    this.projectId = ObjectId().toString()
-    this.historyId = ObjectId().toString()
+    this.projectId = new ObjectId().toString()
+    this.historyId = new ObjectId().toString()
     return ProjectHistoryApp.ensureRunning(error => {
       if (error != null) {
         throw error

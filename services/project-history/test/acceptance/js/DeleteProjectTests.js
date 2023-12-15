@@ -1,8 +1,9 @@
 import { expect } from 'chai'
 import nock from 'nock'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockWeb = () => nock('http://localhost:3000')
@@ -10,8 +11,8 @@ const fixture = path => new URL(`../fixtures/${path}`, import.meta.url)
 
 describe('Deleting project', function () {
   beforeEach(function (done) {
-    this.projectId = ObjectId().toString()
-    this.historyId = ObjectId().toString()
+    this.projectId = new ObjectId().toString()
+    this.historyId = new ObjectId().toString()
     MockWeb()
       .get(`/project/${this.projectId}/details`)
       .reply(200, {

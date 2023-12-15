@@ -1,8 +1,9 @@
 import { expect } from 'chai'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockWeb = () => nock('http://localhost:3000')
@@ -16,7 +17,7 @@ describe('ReadSnapshot', function () {
         throw error
       }
 
-      this.historyId = ObjectId().toString()
+      this.historyId = new ObjectId().toString()
       MockHistoryStore().post('/api/projects').reply(200, {
         projectId: this.historyId,
       })
@@ -27,7 +28,7 @@ describe('ReadSnapshot', function () {
           if (error) {
             throw error
           }
-          this.projectId = ObjectId().toString()
+          this.projectId = new ObjectId().toString()
           MockWeb()
             .get(`/project/${this.projectId}/details`)
             .reply(200, {

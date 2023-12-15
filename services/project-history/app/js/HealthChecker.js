@@ -6,7 +6,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { ObjectId } from 'mongodb'
+import { ObjectId } from './mongodb.js'
 import request from 'request'
 import async from 'async'
 import settings from '@overleaf/settings'
@@ -17,7 +17,7 @@ import * as LockManager from './LockManager.js'
 const { port } = settings.internal.history
 
 export function check(callback) {
-  const projectId = ObjectId(settings.history.healthCheck.project_id)
+  const projectId = new ObjectId(settings.history.healthCheck.project_id)
   const url = `http://localhost:${port}/project/${projectId}`
   logger.debug({ projectId }, 'running health check')
   const jobs = [

@@ -1,8 +1,9 @@
 import Metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
-import { MongoClient } from 'mongodb'
+import mongodb from 'mongodb-legacy'
+const { MongoClient, ObjectId } = mongodb
 
-export { ObjectId } from 'mongodb'
+export { ObjectId }
 
 export const mongoClient = new MongoClient(Settings.mongo.url)
 const mongoDb = mongoClient.db()

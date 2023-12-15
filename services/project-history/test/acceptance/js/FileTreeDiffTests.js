@@ -17,11 +17,12 @@ import request from 'request'
 import assert from 'assert'
 import Path from 'path'
 import crypto from 'crypto'
-import { ObjectId } from 'mongodb'
+import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 import * as HistoryId from './helpers/HistoryId.js'
+const { ObjectId } = mongodb
 
 const MockHistoryStore = () => nock('http://localhost:3100')
 const MockFileStore = () => nock('http://localhost:3009')
@@ -36,8 +37,8 @@ describe('FileTree Diffs', function () {
         throw error
       }
 
-      this.historyId = ObjectId().toString()
-      this.projectId = ObjectId().toString()
+      this.historyId = new ObjectId().toString()
+      this.projectId = new ObjectId().toString()
 
       MockHistoryStore().post('/api/projects').reply(200, {
         projectId: this.historyId,

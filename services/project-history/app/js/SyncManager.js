@@ -131,7 +131,7 @@ function _startResyncWithoutLock(projectId, options, callback) {
 function _getResyncState(projectId, callback) {
   db.projectHistorySyncState.findOne(
     {
-      project_id: ObjectId(projectId.toString()),
+      project_id: new ObjectId(projectId.toString()),
     },
     function (error, rawSyncState) {
       if (error) {
@@ -172,7 +172,7 @@ export function setResyncState(projectId, syncState, callback) {
   // apply the update
   db.projectHistorySyncState.updateOne(
     {
-      project_id: ObjectId(projectId),
+      project_id: new ObjectId(projectId),
     },
     update,
     {
@@ -185,7 +185,7 @@ export function setResyncState(projectId, syncState, callback) {
 export function clearResyncState(projectId, callback) {
   db.projectHistorySyncState.deleteOne(
     {
-      project_id: ObjectId(projectId.toString()),
+      project_id: new ObjectId(projectId.toString()),
     },
     callback
   )
