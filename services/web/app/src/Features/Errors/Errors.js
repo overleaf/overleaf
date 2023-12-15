@@ -134,6 +134,12 @@ class SAMLMissingSignatureError extends SAMLAuthenticationError {
 
 class SAMLInvalidResponseError extends SAMLAuthenticationError {}
 
+class SAMLResponseAlreadyProcessedError extends SAMLInvalidResponseError {
+  constructor() {
+    super('saml response already processed')
+  }
+}
+
 class SAMLLoginFailureError extends SAMLAuthenticationError {
   get i18nKey() {
     return 'saml_login_failure'
@@ -290,6 +296,7 @@ module.exports = {
   SAMLInvalidResponseError,
   SAMLLoginFailureError,
   SAMLEmailNotRecognizedError,
+  SAMLResponseAlreadyProcessedError,
   SLInV2Error,
   ThirdPartyIdentityExistsError,
   ThirdPartyUserNotFoundError,

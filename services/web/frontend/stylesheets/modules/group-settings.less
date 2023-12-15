@@ -257,3 +257,28 @@ h3.group-settings-title {
     flex-shrink: 0;
   }
 }
+
+.saml-response-xml-wrapper {
+  padding: 4px 0;
+  overflow: hidden;
+  background-color: @neutral-10;
+
+  .saml-response-xml {
+    font-family: monospace;
+    white-space: pre-wrap;
+    font-size: 12px;
+    word-break: break-word;
+    padding-inline-start: 32px;
+    height: 32px;
+
+    &.view-more {
+      height: auto;
+    }
+
+    li::marker {
+      font-size: 10px;
+      color: @gray-light;
+      width: 10px;
+    }
+  }
+}
