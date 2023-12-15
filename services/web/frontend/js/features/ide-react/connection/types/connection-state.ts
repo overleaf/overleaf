@@ -7,6 +7,7 @@ export type ConnectionError =
   | 'rate-limited'
   | 'unable-to-connect'
   | 'unable-to-join'
+  | 'io-not-loaded'
 
 export type ConnectionState = {
   readyState: WebSocket['CONNECTING'] | WebSocket['OPEN'] | WebSocket['CLOSED']

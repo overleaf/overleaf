@@ -1,28 +1,26 @@
-import { useTranslation } from 'react-i18next'
-
 type LoadingBrandedTypes = {
   loadProgress: number // Percentage
   label?: string
-  error?: string | null
+  hasError?: boolean
 }
 
 export default function LoadingBranded({
   loadProgress,
   label,
-  error,
+  hasError = false,
 }: LoadingBrandedTypes) {
-  const { t } = useTranslation()
   return (
-    <div className="loading-screen-brand-container">
-      <div
-        className="loading-screen-brand"
-        style={{ height: `${loadProgress}%` }}
-      />
-      {error ? (
-        <p className="loading-screen-error">{error}</p>
-      ) : (
+    <>
+      <div className="loading-screen-brand-container">
+        <div
+          className="loading-screen-brand"
+          style={{ height: `${loadProgress}%` }}
+        />
+      </div>
+
+      {!hasError && (
         <div className="h3 loading-screen-label" aria-live="polite">
-          {label || t('loading')}
+          {label}
           <span className="loading-screen-ellip" aria-hidden="true">
             .
           </span>
@@ -34,6 +32,6 @@ export default function LoadingBranded({
           </span>
         </div>
       )}
-    </div>
+    </>
   )
 }

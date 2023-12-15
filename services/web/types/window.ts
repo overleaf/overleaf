@@ -43,5 +43,6 @@ declare global {
     }
     expectingLinkedFileRefreshedSocketFor?: string | null
     writefull?: any
+    io?: any
   }
 }

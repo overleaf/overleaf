@@ -54,16 +54,38 @@ export const Loading: FC<{
     }
   }, [projectJoined])
 
-  const error =
-    connectionState.error ||
-    (i18n.error ? getMeta('ol-translationLoadErrorMessage') : '')
+  const LoadingScreenError = () => {
+    if (connectionState.error) {
+      // NOTE: translations not ready yet
+      return connectionState.error === 'io-not-loaded'
+        ? 'Could not connect to websocket server :('
+        : connectionState.error
+    }
+
+    if (i18n.error) {
+      return getMeta('ol-translationLoadErrorMessage')
+    }
+
+    return ''
+  }
 
   // Use loading text from the server, because i18n will not be ready initially
   const label = getMeta('ol-loadingText')
 
+  const hasError = Boolean(connectionState.error || i18n.error)
+
   return (
     <div className="loading-screen">
-      <LoadingBranded loadProgress={progress} label={label} error={error} />
+      <LoadingBranded
+        loadProgress={progress}
+        label={label}
+        hasError={hasError}
+      />
+      {hasError && (
+        <p className="loading-screen-error">
+          <LoadingScreenError />
+        </p>
+      )}
     </div>
   )
 }

@@ -67,6 +67,18 @@ export class ConnectionManager extends Emitter<Events> {
     }) as unknown as Socket
     this.socket = socket
 
+    // bail out if socket.io failed to load (e.g. the real-time server is down)
+    if (typeof window.io !== 'object') {
+      debugConsole.error(
+        'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
+      )
+      this.changeState({
+        ...this.state,
+        error: 'io-not-loaded',
+      })
+      return
+    }
+
     socket.on('disconnect', () => this.onDisconnect())
     socket.on('error', () => this.onConnectError())
     socket.on('connect_failed', () => this.onConnectError())

@@ -71,9 +71,11 @@ function ProjectListPageContent() {
     eventTracking.sendMB('loads_v2_dash', {})
   }, [])
 
+  const { t } = useTranslation()
+
   return isLoading ? (
     <div className="loading-container">
-      <LoadingBranded loadProgress={loadProgress} />
+      <LoadingBranded loadProgress={loadProgress} label={t('loading')} />
     </div>
   ) : (
     <>
