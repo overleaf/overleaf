@@ -11,6 +11,7 @@ import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
 import { useCallback } from 'react'
 import { PublicAccessLevel } from '../../../../../types/public-access-level'
+import { useLocation } from '@/shared/hooks/use-location'
 
 function useSocketListeners() {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ function useSocketListeners() {
   const [, setPublicAccessLevel] = useScopeValue('project.publicAccesLevel')
   const [, setProjectMembers] = useScopeValue('project.members')
   const [, setProjectInvites] = useScopeValue('project.invites')
+  const location = useLocation()
 
   useSocketListener(
     socket,
@@ -31,7 +33,16 @@ function useSocketListeners() {
           'you_have_been_removed_from_this_project_and_will_be_redirected_to_project_dashboard'
         )
       )
-    }, [showGenericMessageModal, t])
+
+      // redirect to project page before reconnect timer runs out and reloads the page
+      const timer = window.setTimeout(() => {
+        location.assign('/project')
+      }, 5000)
+
+      return () => {
+        window.clearTimeout(timer)
+      }
+    }, [showGenericMessageModal, t, location])
   )
 
   useSocketListener(
