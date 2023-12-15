@@ -102,7 +102,8 @@ export class Document extends EventEmitter {
     readonly socket: Socket,
     private readonly globalEditorWatchdogManager: EditorWatchdogManager,
     private readonly ideEventEmitter: IdeEventEmitter,
-    private readonly eventLog: EventLog
+    private readonly eventLog: EventLog,
+    private readonly detachDoc: (docId: string, doc: Document) => void
   ) {
     super()
     this.connected = this.socket.socket.connected
@@ -550,9 +551,10 @@ export class Document extends EventEmitter {
         `[cleanUp] Document (${this.doc_id}) has buffered ops, refusing to remove from openDocs`
       )
       return // return immediately, do not unbind from events
-    } else {
-      this.emit('detach', this.doc_id)
     }
+
+    this.detachDoc(this.doc_id, this)
+
     this.unBindFromEditorEvents()
     this.unBindFromSocketEvents()
   }

@@ -49,16 +49,26 @@ export class OpenDocuments {
       this.socket,
       this.globalEditorWatchdogManager,
       this.events,
-      this.eventLog
+      this.eventLog,
+      this.detachDoc.bind(this)
     )
     this.openDocs.set(docId, doc)
-    doc.on('detach', () => {
+  }
+
+  detachDoc(docId: string, doc: Document) {
+    if (this.openDocs.get(docId) === doc) {
       debugConsole.log(
         `[detach] Removing document with ID (${docId}) from openDocs`
       )
-      doc.off('detach')
       this.openDocs.delete(docId)
-    })
+    } else {
+      // It's possible that this instance has error, and the doc has been reloaded.
+      // This creates a new instance in Document.openDoc with the same id. We shouldn't
+      // clear it because it's not this instance.
+      debugConsole.log(
+        `[_cleanUp] New instance of (${docId}) created. Not removing`
+      )
+    }
   }
 
   hasUnsavedChanges() {
