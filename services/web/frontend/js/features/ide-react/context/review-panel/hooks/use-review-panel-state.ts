@@ -19,6 +19,10 @@ import { useIdeReactContext } from '@/features/ide-react/context/ide-react-conte
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import {
+  EditorManager,
+  useEditorManagerContext,
+} from '@/features/ide-react/context/editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
@@ -56,7 +60,6 @@ import {
   ReviewPanelCommentThreadMessageApi,
   ReviewPanelCommentThreadsApi,
 } from '../../../../../../../types/review-panel/api'
-import { Document } from '@/features/ide-react/editor/document'
 import { DateString } from '../../../../../../../types/helpers/date'
 
 const dispatchReviewPanelEvent = (type: string, payload?: any) => {
@@ -129,14 +132,15 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     features: { trackChangesVisible, trackChanges },
   } = project
   const { isRestrictedTokenMember } = useEditorContext()
+  const { openDocId, currentDocument, currentDocumentId } =
+    useEditorManagerContext() as MergeAndOverride<
+      EditorManager,
+      { currentDocumentId: DocId }
+    >
   // TODO permissions to be removed from the review panel context. It currently acts just as a proxy.
   const permissions = usePermissionsContext()
   const { showGenericMessageModal } = useModalsContext()
   const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
-
-  // TODO `currentDocument` and `currentDocumentId` should be get from `useEditorManagerContext()` but that makes tests fail
-  const [currentDocument] = useScopeValue<Document>('editor.sharejs_doc')
-  const [currentDocumentId] = useScopeValue<DocId>('editor.open_doc_id')
 
   const [subView, setSubView] =
     useState<ReviewPanel.Value<'subView'>>('cur_file')
@@ -167,7 +171,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const [wantTrackChanges, setWantTrackChanges] = useScopeValue<
     ReviewPanel.Value<'wantTrackChanges'>
   >('editor.wantTrackChanges')
-  const openDocId = currentDocumentId
   const [shouldCollapse, setShouldCollapse] =
     useState<ReviewPanel.Value<'shouldCollapse'>>(true)
   const [lineHeight, setLineHeight] =
@@ -835,8 +838,12 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     applyTrackChangesStateToClient
   )
 
-  const [gotoEntry] =
-    useScopeValue<ReviewPanel.UpdaterFn<'gotoEntry'>>('gotoEntry')
+  const gotoEntry = useCallback(
+    (docId: DocId, entryOffset: number) => {
+      openDocId(docId, { gotoOffset: entryOffset })
+    },
+    [openDocId]
+  )
 
   const view = reviewPanelOpen ? subView : 'mini'
 
@@ -1506,7 +1513,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       subView,
       wantTrackChanges,
       isOverviewLoading,
-      openDocId,
+      openDocId: currentDocumentId,
       lineHeight,
       trackChangesState,
       trackChangesOnForEveryone,
@@ -1533,7 +1540,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       subView,
       wantTrackChanges,
       isOverviewLoading,
-      openDocId,
+      currentDocumentId,
       lineHeight,
       trackChangesState,
       trackChangesOnForEveryone,

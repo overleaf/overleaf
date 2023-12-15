@@ -42,7 +42,7 @@ interface OpenDocOptions
   forceReopen?: boolean
 }
 
-type EditorManager = {
+export type EditorManager = {
   getEditorType: () => EditorType | null
   showSymbolPalette: boolean
   currentDocument: Document
