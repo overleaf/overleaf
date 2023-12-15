@@ -273,7 +273,7 @@
     "cheerio": "^1.0.0-rc.3",
     "classnames": "^2.2.6",
     "copy-webpack-plugin": "^11.0.0",
-    "crypto-js": "^3.1.9-1",
+    "crypto-js": "^4.2.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
     "cypress": "13.3.3",
