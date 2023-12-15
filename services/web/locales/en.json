@@ -1029,7 +1029,7 @@
   "login_here": "Login here",
   "login_or_password_wrong_try_again": "Your login or password is incorrect. Please try again",
   "login_register_or": "or",
-  "login_to_accept_invitation": "Login to accept invitation",
+  "login_to_accept_invitation": "Log in to accept invitation",
   "login_to_overleaf": "Log in to Overleaf",
   "login_with_service": "Log in with __service__",
   "login_with_service_will_stop_working_soon": "Login with __service__ will stop working soon. If you log in with __service__, please take a moment to set up another SSO provider or a password.",
