@@ -1,3 +1,5 @@
+- var websiteRedesignActive = splitTestVariants && (splitTestVariants['website-redesign'] === 'new-design' || splitTestVariants['website-redesign'] === 'new-design-registration')
+
 footer.fat-footer.hidden-print
 	.fat-footer-container(role="navigation" aria-label=translate('footer_navigation'))
 		.fat-footer-sections(class=hideFatFooter ? 'hidden' : undefined)
@@ -69,6 +71,9 @@ footer.fat-footer.hidden-print
 				h2.footer-section-heading #{translate('help')}
 		
 				ul.list-unstyled
+					if websiteRedesignActive
+						li
+							a(href="/about/why-latex") #{translate('why_latex')}
 					li
 						a(href="/learn") #{translate('Documentation')} 
 					li

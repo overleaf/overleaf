@@ -1,4 +1,4 @@
-footer.fat-footer.hidden-print.website-redesign
+footer.fat-footer.hidden-print.website-redesign-fat-footer
 	.fat-footer-container(role="navigation" aria-label=translate('footer_navigation'))
 		.fat-footer-sections(class=hideFatFooter ? 'hidden' : undefined)
 			.footer-section#footer-brand
@@ -45,7 +45,7 @@ footer.fat-footer.hidden-print.website-redesign
 					li
 						a(href="/user/subscription/plans?itm_referrer=footer-for-indv-groups") !{translate('for_individuals_and_groups')}
 					li
-						a(href="/for/enterprises") #{translate('for_enterprise')}
+						a(href="/for/enterprises") #{translate('for_business')}
 					li
 						a(href="/for/universities") #{translate('for_universities')}
 					li
@@ -69,6 +69,8 @@ footer.fat-footer.hidden-print.website-redesign
 				h2.footer-section-heading #{translate('help')}
 		
 				ul.list-unstyled
+					li
+						a(href="/about/why-latex") #{translate('why_latex')}
 					li
 						a(href="/learn") #{translate('Documentation')} 
 					li

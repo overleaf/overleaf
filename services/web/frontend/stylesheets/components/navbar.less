@@ -488,6 +488,16 @@
       }
     }
 
+    > li.primary > a {
+      .btn-borderless();
+    }
+
+    > li.secondary > a {
+      .btn-bordered();
+
+      border-width: @border-radius-small;
+    }
+
     @media (min-width: @grid-float-breakpoint) {
       > li > a {
         border-color: @navbar-default-link-border-color;
@@ -615,7 +625,7 @@
   }
 }
 
-.website-redesign {
+.website-redesign-navbar {
   &.navbar-default {
     background-color: @navbar-default-bg-website-redesign;
 
@@ -627,36 +637,23 @@
       color: @navbar-default-color-website-redesign;
     }
 
+    // There is this -15px margin hack that is needed on the original
+    // This causes inconsistency with the website redesign navbar,
+    // so reset it to 0 for now
+    @media (min-width: @grid-float-breakpoint) {
+      .navbar-right:last-child {
+        margin-right: 0;
+      }
+    }
+
     .navbar-nav {
       > li > a {
         color: @navbar-default-link-color-website-redesign;
         // border: 2px solid transparent;
-        font-size: @navbar-btn-font-size; // TODO
-        font-weight: @navbar-btn-font-weight; // TODO
-        line-height: @navbar-btn-line-height; // TODO
-        background-color: @navbar-default-link-bg; // TODO
 
-        &:hover,
-        &:focus {
-          color: #fff;
-          background-color: @navbar-default-link-hover-bg; // TODO
-          // border: 2px solid @navbar-default-link-hover-color; // TODO
-        }
-      }
-      > .active > a {
-        &,
-        &:hover,
-        &:focus {
-          color: @navbar-default-link-active-color; // TODO
-          background-color: @navbar-default-link-active-bg; // TODO
-        }
-      }
-      > .disabled > a {
-        &,
-        &:hover,
-        &:focus {
-          color: @navbar-default-link-disabled-color; // TODO
-          background-color: @navbar-default-link-disabled-bg; // TODO
+        @media (min-width: @grid-float-breakpoint) {
+          border-radius: @navbar-btn-border-radius;
+          padding: @navbar-btn-padding;
         }
       }
 
@@ -672,6 +669,109 @@
         }
         @media (min-width: @grid-float-breakpoint) {
           padding: @navbar-subdued-padding;
+        }
+      }
+
+      > li.primary > a {
+        .btn-borderless();
+      }
+
+      > li.secondary > a {
+        .btn-bordered();
+
+        border-width: @border-radius-small;
+        border-color: transparent;
+
+        @media (min-width: @grid-float-breakpoint) {
+          border-color: @btn-bordered-border-color;
+        }
+      }
+    }
+
+    .navbar-toggle {
+      border-color: @navbar-default-toggle-border-color-website-redesign;
+      color: @navbar-default-link-color-website-redesign;
+      &:hover,
+      &.active {
+        background-color: @navbar-default-toggle-hover-bg-website-redesign;
+        border-color: @navbar-default-toggle-hover-bg-website-redesign;
+        color: #fff;
+      }
+    }
+
+    .navbar-collapse {
+      // Use absolute positioning to build the hamburger menu.
+      background-color: @navbar-default-bg-website-redesign;
+      border-bottom: solid 1px @navbar-default-border;
+    }
+
+    // Dropdown menu items
+    .navbar-nav {
+      .dropdown-menu-button,
+      .dropdown-menu > li > a {
+        &:hover,
+        &:focus {
+          background-color: @navbar-default-link-active-bg-website-redesign;
+        }
+      }
+
+      // Remove background color from open dropdown
+      > .open > a {
+        &,
+        &:hover,
+        &:focus {
+          background-color: @btn-secondary-hover-bg-color; // force secondary button style
+          color: @navbar-default-link-active-color-website-redesign;
+        }
+      }
+
+      > .open.subdued > a {
+        &,
+        &:hover,
+        &:focus {
+          color: @navbar-subdued-hover-color-website-redesign;
+          background-color: @navbar-subdued-hover-bg-website-redesign;
+        }
+      }
+
+      @media (max-width: @grid-float-breakpoint-max) {
+        // Dropdowns get custom display when collapsed
+        .open .dropdown-menu {
+          background-color: darken(@navbar-default-bg-website-redesign, 5%);
+          > li > div.subdued {
+            color: mix(
+              @navbar-default-link-color-website-redesign,
+              @navbar-default-bg-website-redesign
+            );
+          }
+          > li > a,
+          > li > form > button {
+            // padding: 12px 12px 13px 30px;
+            color: @navbar-default-link-color-website-redesign;
+            &:hover,
+            &:focus {
+              color: #fff;
+              background-color: @navbar-default-link-hover-bg-website-redesign;
+            }
+          }
+          > .active > a,
+          > .active > form > button {
+            &,
+            &:hover,
+            &:focus {
+              color: @navbar-default-link-active-color-website-redesign;
+              background-color: @navbar-default-link-active-bg-website-redesign;
+            }
+          }
+          > .disabled > a,
+          > .disabled > form > button {
+            &,
+            &:hover,
+            &:focus {
+              color: @navbar-default-link-disabled-color-website-redesign;
+              background-color: @navbar-default-link-disabled-bg;
+            }
+          }
         }
       }
     }

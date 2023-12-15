@@ -1,3 +1,5 @@
+- var websiteRedesignActive = splitTestVariants && (splitTestVariants['website-redesign'] === 'new-design' || splitTestVariants['website-redesign'] === 'new-design-registration')
+
 nav.navbar.navbar-default.navbar-main
 	.container-fluid
 		.navbar-header
@@ -64,7 +66,8 @@ nav.navbar.navbar-default.navbar-main
 										a(href="/admin/survey") Manage Surveys
 
 					// loop over header_extras
-					each item in nav.header_extras
+					- var headerExtras = websiteRedesignActive ? nav.header_extras_website_redesign : nav.header_extras
+					each item in headerExtras
 						-
 							if ((item.only_when_logged_in && getSessionUser())
 											|| (item.only_when_logged_out && (!getSessionUser()))
@@ -127,26 +130,48 @@ nav.navbar.navbar-default.navbar-main
 					if !getSessionUser()
 						// register link
 						if hasFeature('registration-page')
+							if websiteRedesignActive
+								li.primary
+									a(
+										href="/register"
+										event-tracking="menu-clicked-register"
+										event-tracking-action="clicked"
+										event-tracking-trigger="click"
+										event-tracking-mb="true"
+										event-segmentation={ page: currentUrl }
+									) #{translate('sign_up')}
+							else
+								li
+									a(
+										href="/register"
+										event-tracking="menu-clicked-register"
+										event-tracking-action="clicked"
+										event-tracking-trigger="click"
+										event-tracking-mb="true"
+										event-segmentation={ page: currentUrl }
+									) #{translate('Register')}
+
+						// login link
+						if websiteRedesignActive
 							li
 								a(
-									href="/register"
-									event-tracking="menu-clicked-register"
+									href="/login"
+									event-tracking="menu-clicked-login"
 									event-tracking-action="clicked"
 									event-tracking-trigger="click"
 									event-tracking-mb="true"
 									event-segmentation={ page: currentUrl }
-								) #{translate('register')}
-
-						// login link
-						li
-							a(
-								href="/login"
-								event-tracking="menu-clicked-login"
-								event-tracking-action="clicked"
-								event-tracking-trigger="click"
-								event-tracking-mb="true"
-								event-segmentation={ page: currentUrl }
-							).text-capitalize #{translate('log_in')}
+								) #{translate('log_in')}
+						else
+							li
+								a(
+									href="/login"
+									event-tracking="menu-clicked-login"
+									event-tracking-action="clicked"
+									event-tracking-trigger="click"
+									event-tracking-mb="true"
+									event-segmentation={ page: currentUrl }
+								).text-capitalize #{translate('log_in')}
 
 					// projects link and account menu
 					if getSessionUser()

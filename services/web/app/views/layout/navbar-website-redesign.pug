@@ -1,4 +1,4 @@
-nav.navbar.navbar-default.navbar-main.website-redesign
+nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 	.container-fluid
 		.navbar-header
 			if (typeof(suppressNavbarRight) == "undefined")
@@ -64,7 +64,7 @@ nav.navbar.navbar-default.navbar-main.website-redesign
 										a(href="/admin/survey") Manage Surveys
 
 					// loop over header_extras
-					each item in nav.header_extras
+					each item in nav.header_extras_website_redesign
 						-
 							if ((item.only_when_logged_in && getSessionUser())
 											|| (item.only_when_logged_out && (!getSessionUser()))
@@ -127,7 +127,7 @@ nav.navbar.navbar-default.navbar-main.website-redesign
 					if !getSessionUser()
 						// register link
 						if hasFeature('registration-page')
-							li
+							li.primary
 								a(
 									href="/register"
 									event-tracking="menu-clicked-register"
@@ -135,10 +135,10 @@ nav.navbar.navbar-default.navbar-main.website-redesign
 									event-tracking-trigger="click"
 									event-tracking-mb="true"
 									event-segmentation={ page: currentUrl }
-								) #{translate('register')}
+								) #{translate('sign_up')}
 
 						// login link
-						li
+						li.secondary
 							a(
 								href="/login"
 								event-tracking="menu-clicked-login"
@@ -150,9 +150,9 @@ nav.navbar.navbar-default.navbar-main.website-redesign
 
 					// projects link and account menu
 					if getSessionUser()
-						li
+						li.secondary
 							a(href="/project") #{translate('Projects')}
-						li.dropdown
+						li.secondary.dropdown
 							a.dropdown-toggle(
 								href="#",
 								role="button",

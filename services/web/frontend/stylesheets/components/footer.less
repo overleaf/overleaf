@@ -298,7 +298,7 @@ footer.site-footer {
   }
 }
 
-.website-redesign {
+.website-redesign-fat-footer {
   &.fat-footer {
     background: @white;
     color: @neutral-90;
@@ -306,9 +306,28 @@ footer.site-footer {
     a {
       color: @neutral-90;
     }
+
+    .footer-section-heading {
+      color: @neutral-90;
+    }
+
+    h2 {
+      font-weight: 400;
+    }
+
+    .fat-footer-base {
+      color: @neutral-90;
+    }
   }
 
   .footer-brand {
     background-image: @navbar-brand-image-url-website-redesign;
+  }
+
+  @media (max-width: @screen-xs-max) {
+    .fat-footer-sections {
+      grid-template-columns: repeat(1, 1fr);
+      grid-template-rows: repeat(6, auto);
+    }
   }
 }
