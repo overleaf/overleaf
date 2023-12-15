@@ -14,9 +14,14 @@ function ForceDisconnected() {
   useEffect(() => {
     if (connectionState.forceDisconnected) {
       setShow(true)
+    }
+  }, [connectionState.forceDisconnected])
+
+  useEffect(() => {
+    if (connectionState.forceDisconnected) {
       setSecondsUntilRefresh(connectionState.forcedDisconnectDelay)
     }
-  }, [connectionState])
+  }, [connectionState.forceDisconnected, connectionState.forcedDisconnectDelay])
 
   useEffect(() => {
     if (show) {
