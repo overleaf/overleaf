@@ -18,7 +18,7 @@ type ReviewPanelViewProps = {
 }
 
 function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
-  const { subView, loadingThreads } = useReviewPanelValueContext()
+  const { subView, loadingThreads, layoutToLeft } = useReviewPanelValueContext()
   const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
   const { isReactIde } = useIdeContext()
 
@@ -45,7 +45,7 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
           'rp-state-overview': subView === 'overview',
           'rp-size-mini': miniReviewPanelVisible,
           'rp-size-expanded': reviewPanelOpen,
-          // 'rp-layout-left': reviewPanel.layoutToLeft,
+          'rp-layout-left': layoutToLeft,
           'rp-loading-threads': loadingThreads,
         })}
       >

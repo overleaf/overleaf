@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { createPortal } from 'react-dom'
+import { useReviewPanelValueContext } from '@/features/source-editor/context/review-panel/review-panel-context'
 import { Coordinates } from '../hooks/use-indicator-hover'
-import useScopeValue from '@/shared/hooks/use-scope-value'
 
 function EntryContainer({
   id,
@@ -11,7 +11,7 @@ function EntryContainer({
 }: React.ComponentProps<'div'> & {
   hoverCoords?: Coordinates | null
 }) {
-  const [layoutToLeft] = useScopeValue<boolean>('reviewPanel.layoutToLeft')
+  const { layoutToLeft } = useReviewPanelValueContext()
 
   const container = (
     <div

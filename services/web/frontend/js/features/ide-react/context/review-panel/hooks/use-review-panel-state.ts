@@ -7,6 +7,7 @@ import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useAsync from '@/shared/hooks/use-async'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
+import useLayoutToLeft from '@/features/ide-react/context/review-panel/hooks/useLayoutToLeft'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
 import {
   dispatchReviewPanelLayout as handleLayoutChange,
@@ -147,6 +148,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const { showGenericMessageModal } = useModalsContext()
   const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
 
+  const layoutToLeft = useLayoutToLeft('.ide-react-editor-panel')
   const [subView, setSubView] =
     useState<ReviewPanel.Value<'subView'>>('cur_file')
   const [isOverviewLoading, setIsOverviewLoading] =
@@ -1523,6 +1525,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       formattedProjectMembers,
       layoutSuspended,
       unsavedComment,
+      layoutToLeft,
     }),
     [
       collapsed,
@@ -1550,6 +1553,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       formattedProjectMembers,
       layoutSuspended,
       unsavedComment,
+      layoutToLeft,
     ]
   )
 

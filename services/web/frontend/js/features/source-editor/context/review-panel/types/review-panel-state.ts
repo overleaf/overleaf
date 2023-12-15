@@ -48,6 +48,7 @@ export interface ReviewPanelState {
     >
     layoutSuspended: boolean
     unsavedComment: string
+    layoutToLeft: boolean
   }
   updaterFns: {
     handleSetSubview: (subView: SubView) => void
