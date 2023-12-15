@@ -132,11 +132,16 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     features: { trackChangesVisible, trackChanges },
   } = project
   const { isRestrictedTokenMember } = useEditorContext()
-  const { openDocId, currentDocument, currentDocumentId } =
-    useEditorManagerContext() as MergeAndOverride<
-      EditorManager,
-      { currentDocumentId: DocId }
-    >
+  const {
+    openDocId,
+    currentDocument,
+    currentDocumentId,
+    wantTrackChanges,
+    setWantTrackChanges,
+  } = useEditorManagerContext() as MergeAndOverride<
+    EditorManager,
+    { currentDocumentId: DocId }
+  >
   // TODO permissions to be removed from the review panel context. It currently acts just as a proxy.
   const permissions = usePermissionsContext()
   const { showGenericMessageModal } = useModalsContext()
@@ -168,9 +173,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     ReviewPanel.Value<'resolvedComments'>
   >({})
 
-  const [wantTrackChanges, setWantTrackChanges] = useScopeValue<
-    ReviewPanel.Value<'wantTrackChanges'>
-  >('editor.wantTrackChanges')
   const [shouldCollapse, setShouldCollapse] =
     useState<ReviewPanel.Value<'shouldCollapse'>>(true)
   const [lineHeight, setLineHeight] =
@@ -806,20 +808,19 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           project.owner
         )
       }
-      if (project.members) {
-        for (const member of project.members) {
-          if (member.privileges === 'readAndWrite') {
-            if (!trackChangesState[member._id]) {
-              // An added member will have track changes enabled if track changes is on for everyone
-              setUserTCState(
-                trackChangesState,
-                member._id,
-                trackChangesOnForEveryone,
-                true
-              )
-            }
-            tempFormattedProjectMembers[member._id] = formatUser(member)
+      const members = project.members ?? []
+      for (const member of members) {
+        if (member.privileges === 'readAndWrite') {
+          if (!trackChangesState[member._id]) {
+            // An added member will have track changes enabled if track changes is on for everyone
+            setUserTCState(
+              trackChangesState,
+              member._id,
+              trackChangesOnForEveryone,
+              true
+            )
           }
+          tempFormattedProjectMembers[member._id] = formatUser(member)
         }
       }
       return tempFormattedProjectMembers
