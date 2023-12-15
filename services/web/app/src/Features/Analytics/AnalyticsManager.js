@@ -66,14 +66,6 @@ function recordEventForSession(session, event, segmentation) {
   if (_isAnalyticsDisabled() || _isSmokeTestUser(userId)) {
     return
   }
-  logger.debug({
-    analyticsId,
-    userId,
-    event,
-    segmentation,
-    isLoggedIn: !!userId,
-    createdAt: new Date(),
-  })
   _recordEvent({
     analyticsId,
     userId,
@@ -182,6 +174,17 @@ function _recordEvent(
     )
     return
   }
+  logger.debug(
+    {
+      analyticsId,
+      userId,
+      event,
+      segmentation,
+      isLoggedIn: !!userId,
+      createdAt: new Date(),
+    },
+    'queueing analytics event'
+  )
   Metrics.analyticsQueue.inc({ status: 'adding', event_type: 'event' })
   analyticsEventsQueue
     .add(
