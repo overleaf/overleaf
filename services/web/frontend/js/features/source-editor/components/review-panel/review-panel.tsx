@@ -33,11 +33,10 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
     </>
   )
 
-  // TODO fix DOM structure
   return ReactDOM.createPortal(
     isReactIde ? (
       <div
-        className={classnames('review-panel', {
+        className={classnames('review-panel-wrapper', {
           'rp-state-current-file': subView === 'cur_file',
           'rp-state-current-file-expanded':
             subView === 'cur_file' && reviewPanelOpen,
