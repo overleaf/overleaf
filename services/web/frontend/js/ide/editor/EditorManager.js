@@ -22,6 +22,7 @@ import './controllers/CompileButton'
 import './controllers/SwitchToPDFButton'
 import '../metadata/services/metadata'
 import { debugConsole } from '@/utils/debugging'
+import customLocalStorage from '@/infrastructure/local-storage'
 
 let EditorManager
 
@@ -161,10 +162,20 @@ export default EditorManager = (function () {
     }
 
     showVisual() {
-      return (
-        this.localStorage(`editor.mode.${this.$scope.project_id}`) ===
-        'rich-text'
-      )
+      const editorModeKey = `editor.mode.${this.$scope.project_id}`
+      const editorModeVal = this.localStorage(editorModeKey)
+
+      if (editorModeVal) {
+        // clean up the old key
+        customLocalStorage.removeItem(editorModeKey)
+      }
+
+      const lastUsedMode = this.localStorage(`editor.lastUsedMode`)
+      if (lastUsedMode) {
+        return lastUsedMode === 'visual'
+      } else {
+        return editorModeVal === 'rich-text'
+      }
     }
 
     autoOpenDoc() {

@@ -1,4 +1,5 @@
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
+import customLocalStorage from '@/infrastructure/local-storage'
 
 export function populateEditorScope(
   store: ReactScopeValueStore,
@@ -23,8 +24,25 @@ export function populateEditorScope(
     newSourceEditor: true,
     error_state: false,
   })
-  store.persisted('editor.showVisual', false, `editor.mode.${projectId}`, {
-    toPersisted: showVisual => (showVisual ? 'rich-text' : 'source'),
-    fromPersisted: mode => mode === 'rich-text',
-  })
+  store.persisted(
+    'editor.showVisual',
+    showVisualFallbackValue(projectId),
+    `editor.lastUsedMode`,
+    {
+      toPersisted: showVisual => (showVisual ? 'visual' : 'code'),
+      fromPersisted: mode => mode === 'visual',
+    }
+  )
+}
+
+function showVisualFallbackValue(projectId: string) {
+  const editorModeKey = `editor.mode.${projectId}`
+  const editorModeVal = customLocalStorage.getItem(editorModeKey)
+
+  if (editorModeVal) {
+    // clean up the old key
+    customLocalStorage.removeItem(editorModeKey)
+  }
+
+  return editorModeVal === 'rich-text'
 }
