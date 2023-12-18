@@ -13,7 +13,7 @@ const MODULE_PATH =
 describe('ProjectEntityMongoUpdateHandler', function () {
   beforeEach(function () {
     this.doc = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'test-doc.txt',
       lines: ['hello', 'world'],
       rev: 1234,
@@ -23,7 +23,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       fileSystem: '/test-doc.txt',
     }
     this.file = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'something.jpg',
       linkedFileData: { provider: 'url' },
       hash: 'some-hash',
@@ -32,18 +32,18 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       fileSystem: '/something.png',
       mongo: 'rootFolder.0.fileRefs.0',
     }
-    this.subfolder = { _id: ObjectId(), name: 'test-subfolder' }
+    this.subfolder = { _id: new ObjectId(), name: 'test-subfolder' }
     this.subfolderPath = {
       fileSystem: '/test-folder/test-subfolder',
       mongo: 'rootFolder.0.folders.0.folders.0',
     }
-    this.notSubfolder = { _id: ObjectId(), name: 'test-folder-2' }
+    this.notSubfolder = { _id: new ObjectId(), name: 'test-folder-2' }
     this.notSubfolderPath = {
       fileSystem: '/test-folder-2/test-subfolder',
       mongo: 'rootFolder.0.folders.0.folders.0',
     }
     this.folder = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'test-folder',
       folders: [this.subfolder],
     }
@@ -52,7 +52,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       mongo: 'rootFolder.0.folders.0',
     }
     this.rootFolder = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       folders: [this.folder],
       docs: [this.doc],
       fileRefs: [this.file],
@@ -62,7 +62,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
       mongo: 'rootFolder.0',
     }
     this.project = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'project name',
       rootFolder: [this.rootFolder],
     }
@@ -221,7 +221,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
   describe('addDoc', function () {
     beforeEach(async function () {
-      const doc = { _id: ObjectId(), name: 'other.txt' }
+      const doc = { _id: new ObjectId(), name: 'other.txt' }
       this.ProjectMock.expects('findOneAndUpdate')
         .withArgs(
           {
@@ -261,7 +261,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
   describe('addFile', function () {
     beforeEach(function () {
-      this.newFile = { _id: ObjectId(), name: 'picture.jpg' }
+      this.newFile = { _id: new ObjectId(), name: 'picture.jpg' }
       this.ProjectMock.expects('findOneAndUpdate')
         .withArgs(
           {
@@ -329,7 +329,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     beforeEach(async function () {
       const folderName = 'New folder'
       this.FolderModel.withArgs({ name: folderName }).returns({
-        _id: ObjectId(),
+        _id: new ObjectId(),
         name: folderName,
       })
       this.ProjectMock.expects('findOneAndUpdate')
@@ -364,7 +364,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
   describe('replaceFileWithNew', function () {
     beforeEach(async function () {
       const newFile = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         name: 'some-other-file.png',
         linkedFileData: { some: 'data' },
         hash: 'some-hash',
@@ -460,7 +460,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     describe('when the path is a new folder at the top level', function () {
       beforeEach(async function () {
-        this.newFolder = { _id: ObjectId(), name: 'new-folder' }
+        this.newFolder = { _id: new ObjectId(), name: 'new-folder' }
         this.FolderModel.returns(this.newFolder)
         this.exactCaseMatch = false
         this.ProjectMock.expects('findOneAndUpdate')
@@ -504,7 +504,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     describe('adding a subfolder', function () {
       beforeEach(async function () {
-        this.newFolder = { _id: ObjectId(), name: 'new-folder' }
+        this.newFolder = { _id: new ObjectId(), name: 'new-folder' }
         this.FolderModel.returns(this.newFolder)
         this.ProjectMock.expects('findOneAndUpdate')
           .withArgs(
@@ -548,12 +548,12 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     describe('when mutliple folders are missing', async function () {
       beforeEach(function () {
-        this.folder1 = { _id: ObjectId(), name: 'folder1' }
+        this.folder1 = { _id: new ObjectId(), name: 'folder1' }
         this.folder1Path = {
           fileSystem: '/test-folder/folder1',
           mongo: 'rootFolder.0.folders.0.folders.0',
         }
-        this.folder2 = { _id: ObjectId(), name: 'folder2' }
+        this.folder2 = { _id: new ObjectId(), name: 'folder2' }
         this.folder2Path = {
           fileSystem: '/test-folder/folder1/folder2',
           mongo: 'rootFolder.0.folders.0.folders.0.folders.0',
@@ -865,7 +865,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
     describe('updating the project', function () {
       describe('when the parent folder is given', function () {
         beforeEach(function () {
-          this.newFile = { _id: ObjectId(), name: 'new file.png' }
+          this.newFile = { _id: new ObjectId(), name: 'new file.png' }
           this.ProjectMock.expects('findOneAndUpdate')
             .withArgs(
               {
@@ -927,7 +927,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         })
 
         it('should error if element name contains invalid characters', async function () {
-          const file = { _id: ObjectId(), name: 'something*bad' }
+          const file = { _id: new ObjectId(), name: 'something*bad' }
           await expect(
             this.subject.promises._putElement(
               this.project,
@@ -940,7 +940,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
         it('should error if element name is too long', async function () {
           const file = {
-            _id: ObjectId(),
+            _id: new ObjectId(),
             name: 'long-'.repeat(1000) + 'something',
           }
           await expect(
@@ -955,7 +955,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
         it('should error if the folder name is too long', async function () {
           const file = {
-            _id: ObjectId(),
+            _id: new ObjectId(),
             name: 'something',
           }
           this.ProjectLocator.promises.findElement
@@ -980,7 +980,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
         ;['file', 'doc', 'folder'].forEach(entityType => {
           it(`should error if a ${entityType} already exists with the same name`, async function () {
             const file = {
-              _id: ObjectId(),
+              _id: new ObjectId(),
               name: this[entityType].name,
             }
             await expect(
@@ -998,7 +998,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     describe('when the parent folder is not given', function () {
       it('should default to root folder insert', async function () {
-        this.newFile = { _id: ObjectId(), name: 'new file.png' }
+        this.newFile = { _id: new ObjectId(), name: 'new file.png' }
         this.ProjectMock.expects('findOneAndUpdate')
           .withArgs(
             { _id: this.project._id, 'rootFolder.0': { $exists: true } },

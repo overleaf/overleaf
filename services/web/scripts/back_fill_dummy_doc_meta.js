@@ -29,7 +29,7 @@ async function main(options) {
   _.defaults(options, {
     dryRun: process.env.DRY_RUN === 'true',
     cacheSize: parseInt(process.env.CACHE_SIZE, 10) || 100,
-    firstProjectId: ObjectId(process.env.FIRST_PROJECT_ID),
+    firstProjectId: new ObjectId(process.env.FIRST_PROJECT_ID),
     incrementByS: parseInt(process.env.INCREMENT_BY_S, 10) || ONE_WEEK_IN_S,
     batchSize: parseInt(process.env.BATCH_SIZE, 10) || 1000,
     stopAtS: parseInt(process.env.STOP_AT_S, 10) || NOW_IN_S,

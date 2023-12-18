@@ -43,7 +43,7 @@ async function main() {
 }
 
 async function getProjects() {
-  const projectIds = OPTIONS.projectIds.map(id => ObjectId(id))
+  const projectIds = OPTIONS.projectIds.map(id => new ObjectId(id))
   const projects = await db.projects
     .find(
       { _id: { $in: projectIds } },

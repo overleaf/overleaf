@@ -28,7 +28,7 @@ async function main() {
   if (!DRY_RUN) {
     console.log(`updating doc ${DOC_ID} in mongo for project ${PROJECT_ID}`)
     const result = await db.docs.updateOne(
-      { _id: ObjectId(DOC_ID), project_id: ObjectId(PROJECT_ID) },
+      { _id: new ObjectId(DOC_ID), project_id: new ObjectId(PROJECT_ID) },
       {
         $set: { lines, version, ranges },
         $inc: { rev: 1 }, // maintain same behaviour as Docstore upsertIntoDocCollection

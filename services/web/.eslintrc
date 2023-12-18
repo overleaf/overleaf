@@ -103,6 +103,26 @@
       }
     },
     {
+      // Backend + backend tests specific rules
+      "files": ["**/app/src/**/*.js", "app.js", "**/test/**/*.*", "**/scripts/*.*"],
+      "rules": {
+        // do not allow node-fetch in backend code
+        "no-restricted-syntax": [
+          "error",
+          // Require `new` when constructing ObjectId (For mongo + mongoose upgrade)
+          {
+            "selector": "CallExpression[callee.name='ObjectId'], CallExpression[callee.property.name='ObjectId']",
+            "message": "Construct ObjectId with `new ObjectId()` instead of `ObjectId()`"
+          },
+          // Require `new` when mapping a list of ids to a list of ObjectId (For mongo + mongoose upgrade)
+          {
+            "selector": "CallExpression[callee.property.name='map'] Identifier[name='ObjectId']:first-child, CallExpression[callee.property.name='map'] MemberExpression[property.name='ObjectId']:first-child",
+            "message": "Don't map ObjectId directly. Use `id => new ObjectId(id)` instead"
+          }
+        ]
+      }
+    },
+    {
       // Cypress specific rules
       "files": ["cypress/**/*.{js,jsx,ts,tsx}", "**/test/frontend/**/*.spec.{js,jsx,ts,tsx}"],
       "extends": [

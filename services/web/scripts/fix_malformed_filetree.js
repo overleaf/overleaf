@@ -45,7 +45,7 @@ function parseArgs() {
     process.exit(1)
   }
   const [projectId, mongoPath] = args
-  return { projectId: ObjectId(projectId), mongoPath }
+  return { projectId: new ObjectId(projectId), mongoPath }
 }
 
 function isRootFolder(path) {
@@ -86,7 +86,7 @@ async function fixRootFolder(projectId) {
       $set: {
         rootFolder: [
           {
-            _id: ObjectId(),
+            _id: new ObjectId(),
             name: 'rootFolder',
             folders: [],
             docs: [],
@@ -127,7 +127,7 @@ async function fixArray(projectId, path) {
 async function fixFolderId(projectId, path) {
   const result = await db.projects.updateOne(
     { _id: projectId, [path]: { $exists: false } },
-    { $set: { [path]: ObjectId() } }
+    { $set: { [path]: new ObjectId() } }
   )
   return result.modifiedCount
 }

@@ -11,13 +11,13 @@ const { ObjectId } = require('mongodb')
 describe('TokenAccessHandler', function () {
   beforeEach(function () {
     this.token = 'abcdefabcdef'
-    this.projectId = ObjectId()
+    this.projectId = new ObjectId()
     this.project = {
       _id: this.projectId,
       publicAccesLevel: 'tokenBased',
-      owner_ref: ObjectId(),
+      owner_ref: new ObjectId(),
     }
-    this.userId = ObjectId()
+    this.userId = new ObjectId()
     this.req = {}
     this.TokenAccessHandler = SandboxedModule.require(modulePath, {
       requires: {

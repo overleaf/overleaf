@@ -2,6 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const { ObjectId } = require('mongodb')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsManager'
@@ -16,19 +17,23 @@ describe('InstitutionsManager', function () {
     this.getConfirmedInstitutionAffiliations = sinon.stub()
     this.addAffiliation = sinon.stub().callsArgWith(3, null)
     this.refreshFeatures = sinon.stub().yields()
+    const lapsedUser = {
+      _id: '657300a08a14461b3d1aac3e',
+      features: {},
+    }
     this.users = [
-      { _id: 'lapsed', features: {} },
-      { _id: '1a', features: {} },
-      { _id: '2b', features: {} },
-      { _id: '3c', features: {} },
+      lapsedUser,
+      { _id: '657300a08a14461b3d1aac3f', features: {} },
+      { _id: '657300a08a14461b3d1aac40', features: {} },
+      { _id: '657300a08a14461b3d1aac41', features: {} },
     ]
     this.ssoUsers = [
       {
-        _id: '1a',
+        _id: '657300a08a14461b3d1aac3f',
         samlIdentifiers: [{ providerId: this.institutionId.toString() }],
       },
       {
-        _id: '2b',
+        _id: '657300a08a14461b3d1aac40',
         samlIdentifiers: [
           {
             providerId: this.institutionId.toString(),
@@ -37,7 +42,7 @@ describe('InstitutionsManager', function () {
         ],
       },
       {
-        _id: 'lapsed',
+        _id: '657300a08a14461b3d1aac3e',
         samlIdentifiers: [{ providerId: this.institutionId.toString() }],
         hasEntitlement: true,
       },
@@ -83,12 +88,15 @@ describe('InstitutionsManager', function () {
         }),
       },
     }
-    this.Mongo = { ObjectId: sinon.stub().returnsArg(0) }
+
+    this.Mongo = {
+      ObjectId,
+    }
 
     this.v1Counts = {
       user_ids: this.users.map(user => user._id),
       current_users_count: 3,
-      lapsed_user_ids: ['lapsed'],
+      lapsed_user_ids: [lapsedUser._id],
       entitled_via_sso: 1, // 2 entitled, but 1 lapsed
       with_confirmed_email: 2, // 1 non entitled SSO + 1 email user
     }
@@ -151,8 +159,8 @@ describe('InstitutionsManager', function () {
     beforeEach(function () {
       this.user1Id = '123abc123abc123abc123abc'
       this.user2Id = '456def456def456def456def'
-      this.user3Id = 'trial123abc'
-      this.user4Id = 'group123abc'
+      this.user3Id = '789abd789abd789abd789abd'
+      this.user4Id = '321cba321cba321cba321cba'
       this.affiliations = [
         { user_id: this.user1Id },
         { user_id: this.user2Id },
@@ -164,10 +172,18 @@ describe('InstitutionsManager', function () {
       this.user3 = { _id: this.user3Id }
       this.user4 = { _id: this.user4Id }
 
-      this.UserGetter.getUser.withArgs(this.user1Id).yields(null, this.user1)
-      this.UserGetter.getUser.withArgs(this.user2Id).yields(null, this.user2)
-      this.UserGetter.getUser.withArgs(this.user3Id).yields(null, this.user3)
-      this.UserGetter.getUser.withArgs(this.user4Id).yields(null, this.user4)
+      this.UserGetter.getUser
+        .withArgs(new ObjectId(this.user1Id))
+        .yields(null, this.user1)
+      this.UserGetter.getUser
+        .withArgs(new ObjectId(this.user2Id))
+        .yields(null, this.user2)
+      this.UserGetter.getUser
+        .withArgs(new ObjectId(this.user3Id))
+        .yields(null, this.user3)
+      this.UserGetter.getUser
+        .withArgs(new ObjectId(this.user4Id))
+        .yields(null, this.user4)
 
       this.SubscriptionLocator.getUsersSubscription
         .withArgs(this.user2)
@@ -188,7 +204,9 @@ describe('InstitutionsManager', function () {
           groupPlan: true,
         })
 
-      this.refreshFeatures.withArgs(this.user1Id).yields(null, {}, true)
+      this.refreshFeatures
+        .withArgs(new ObjectId(this.user1Id))
+        .yields(null, {}, true)
       this.getInstitutionAffiliations.yields(null, this.affiliations)
       this.getConfirmedInstitutionAffiliations.yields(null, this.affiliations)
     })
@@ -370,7 +388,7 @@ describe('InstitutionsManager', function () {
     beforeEach(function () {
       this.host = 'mit.edu'.split('').reverse().join('')
       this.stubbedUser1 = {
-        _id: '3131231',
+        _id: '6573014d8a14461b3d1aac3f',
         name: 'bob',
         email: 'hello@world.com',
         emails: [
@@ -393,7 +411,7 @@ describe('InstitutionsManager', function () {
         },
       ]
       this.stubbedUser2 = {
-        _id: '3131232',
+        _id: '6573014d8a14461b3d1aac40',
         name: 'test',
         email: 'hello2@world.com',
         emails: [{ email: 'subb2@mit.edu', reversedHostname: this.host }],

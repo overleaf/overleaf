@@ -12,10 +12,10 @@ const MODULE_PATH = path.join(
 
 describe('ProjectListController', function () {
   beforeEach(function () {
-    this.project_id = ObjectId('abcdefabcdefabcdefabcdef')
+    this.project_id = new ObjectId('abcdefabcdefabcdefabcdef')
 
     this.user = {
-      _id: ObjectId('123456123456123456123456'),
+      _id: new ObjectId('123456123456123456123456'),
       email: 'test@overleaf.com',
       first_name: 'bjkdsjfk',
       features: {},

@@ -12,9 +12,9 @@ const MODULE_PATH =
 describe('TpdsController', function () {
   beforeEach(function () {
     this.metadata = {
-      projectId: ObjectId(),
-      entityId: ObjectId(),
-      folderId: ObjectId(),
+      projectId: new ObjectId(),
+      entityId: new ObjectId(),
+      folderId: new ObjectId(),
       entityType: 'doc',
       rev: 2,
     }
@@ -46,7 +46,7 @@ describe('TpdsController', function () {
       conflict: sinon.stub(),
     }
 
-    this.newProject = { _id: ObjectId() }
+    this.newProject = { _id: new ObjectId() }
     this.ProjectCreationHandler = {
       promises: { createBlankProject: sinon.stub().resolves(this.newProject) },
     }
@@ -291,10 +291,10 @@ describe('TpdsController', function () {
 
     it("creates a folder if it doesn't exist", function (done) {
       const metadata = {
-        folderId: ObjectId(),
-        projectId: ObjectId(),
+        folderId: new ObjectId(),
+        projectId: new ObjectId(),
         path: '/def/ghi.txt',
-        parentFolderId: ObjectId(),
+        parentFolderId: new ObjectId(),
       }
       this.TpdsUpdateHandler.promises.createFolder.resolves(metadata)
       this.res.json.callsFake(body => {
@@ -311,8 +311,8 @@ describe('TpdsController', function () {
 
     it('supports top level folders', function (done) {
       const metadata = {
-        folderId: ObjectId(),
-        projectId: ObjectId(),
+        folderId: new ObjectId(),
+        projectId: new ObjectId(),
         path: '/',
         parentFolderId: null,
       }

@@ -10,9 +10,9 @@ const modulePath = path.join(
 )
 
 const projectId = 'project_id_here'
-const userId = ObjectId()
-const readOnlyRef = ObjectId()
-const collaberatorRef = ObjectId()
+const userId = new ObjectId()
+const readOnlyRef = new ObjectId()
+const collaberatorRef = new ObjectId()
 const projectName = 'project_name_here'
 
 const thirdPartyDataStoreApiUrl = 'http://third-party-json-store.herokuapp.com'

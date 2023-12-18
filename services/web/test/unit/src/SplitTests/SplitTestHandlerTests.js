@@ -79,7 +79,7 @@ describe('SplitTestHandler', function () {
   describe('with an existing user', function () {
     beforeEach(async function () {
       this.user = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         splitTests: {
           'active-test': [
             {
@@ -149,7 +149,7 @@ describe('SplitTestHandler', function () {
 
   describe('with an non-existent user', function () {
     beforeEach(async function () {
-      const unknownUserId = ObjectId()
+      const unknownUserId = new ObjectId()
       this.assignments =
         await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
           unknownUserId
@@ -163,7 +163,7 @@ describe('SplitTestHandler', function () {
 
   describe('with a user without assignments', function () {
     beforeEach(async function () {
-      this.user = { _id: ObjectId() }
+      this.user = { _id: new ObjectId() }
       this.UserGetter.promises.getUser
         .withArgs(this.user._id)
         .resolves(this.user)

@@ -38,8 +38,8 @@ describe('TpdsUpdateHandler', function () {
     this.update = {}
     this.folderPath = '/some/folder'
     this.folder = {
-      _id: ObjectId(),
-      parentFolder_id: ObjectId(),
+      _id: new ObjectId(),
+      parentFolder_id: new ObjectId(),
     }
 
     this.CooldownManager = {
@@ -125,7 +125,7 @@ describe('TpdsUpdateHandler', function () {
     describe('byId', function () {
       describe('with no matching project', function () {
         beforeEach(function () {
-          this.projectId = ObjectId().toString()
+          this.projectId = new ObjectId().toString()
         })
         receiveUpdateById()
         expectProjectNotCreated()
@@ -222,7 +222,7 @@ describe('TpdsUpdateHandler', function () {
     describe('byId', function () {
       describe('with no matching project', function () {
         beforeEach(function () {
-          this.projectId = ObjectId().toString()
+          this.projectId = new ObjectId().toString()
         })
         receiveFileDeleteById()
         expectDeleteNotProcessed()

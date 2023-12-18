@@ -48,8 +48,8 @@ rl.on('line', async line => {
   projectId = projectId.replace(/^ObjectId\(/, '').replace(/\)$/, '')
 
   try {
-    docId = ObjectId(docId).toString()
-    projectId = ObjectId(projectId).toString()
+    docId = new ObjectId(docId).toString()
+    projectId = new ObjectId(projectId).toString()
   } catch (err) {
     console.error(`Invalid id: ${docId}, ${projectId}`)
     return
@@ -114,14 +114,14 @@ async function projectIdExists(projectId) {
 
 async function findProject(projectId) {
   return db.projects.findOne(
-    { _id: ObjectId(projectId) },
+    { _id: new ObjectId(projectId) },
     { projection: { _id: 1 } }
   )
 }
 
 async function findDeletedProject(projectId) {
   return db.deletedProjects.findOne(
-    { 'project._id': ObjectId(projectId) },
+    { 'project._id': new ObjectId(projectId) },
     { projection: { _id: 1 } }
   )
 }

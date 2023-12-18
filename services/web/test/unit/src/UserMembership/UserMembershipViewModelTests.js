@@ -109,7 +109,7 @@ describe('UserMembershipViewModel', function () {
     it('build user id', function (done) {
       this.UserGetter.getUser.yields(null, this.user)
       return this.UserMembershipViewModel.buildAsync(
-        ObjectId(),
+        new ObjectId(),
         (error, viewModel) => {
           expect(error).not.to.exist
           assertNotCalled(this.UserMembershipViewModel.build)
@@ -127,7 +127,7 @@ describe('UserMembershipViewModel', function () {
 
     it('build user id with error', function (done) {
       this.UserGetter.getUser.yields(new Error('nope'))
-      const userId = ObjectId()
+      const userId = new ObjectId()
       return this.UserMembershipViewModel.buildAsync(
         userId,
         (error, viewModel) => {

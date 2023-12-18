@@ -4,7 +4,7 @@ const sinon = require('sinon')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const { assert } = require('chai')
-const { ObjectID } = require('mongodb')
+const { ObjectId } = require('mongodb')
 
 const MODULE_PATH = path.join(
   __dirname,
@@ -85,7 +85,7 @@ describe('AnalyticsManager', function () {
 
     it('analyticsId is missing', function () {
       this.AnalyticsManager.identifyUser(
-        new ObjectID(this.fakeUserId),
+        new ObjectId(this.fakeUserId),
         undefined
       )
       sinon.assert.notCalled(this.Queues.createScheduledJob)
@@ -93,7 +93,7 @@ describe('AnalyticsManager', function () {
 
     it('analyticsId is not a valid UUID', function () {
       this.AnalyticsManager.identifyUser(
-        new ObjectID(this.fakeUserId),
+        new ObjectId(this.fakeUserId),
         this.fakeUserId
       )
       sinon.assert.notCalled(this.Queues.createScheduledJob)
@@ -101,8 +101,8 @@ describe('AnalyticsManager', function () {
 
     it('userId and analyticsId are the same Mongo ID', function () {
       this.AnalyticsManager.identifyUser(
-        new ObjectID(this.fakeUserId),
-        new ObjectID(this.fakeUserId)
+        new ObjectId(this.fakeUserId),
+        new ObjectId(this.fakeUserId)
       )
       sinon.assert.notCalled(this.Queues.createScheduledJob)
     })

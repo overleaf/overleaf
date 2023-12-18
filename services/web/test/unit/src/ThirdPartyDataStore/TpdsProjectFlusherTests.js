@@ -9,8 +9,8 @@ const MODULE_PATH =
 
 describe('TpdsProjectFlusher', function () {
   beforeEach(function () {
-    this.project = { _id: ObjectId() }
-    this.folder = { _id: ObjectId() }
+    this.project = { _id: new ObjectId() }
+    this.folder = { _id: new ObjectId() }
     this.docs = {
       '/doc/one': {
         _id: 'mock-doc-1',

@@ -27,15 +27,15 @@ const {
 
 describe('UserMembershipHandler', function () {
   beforeEach(function () {
-    this.user = { _id: ObjectId() }
-    this.newUser = { _id: ObjectId(), email: 'new-user-email@foo.bar' }
-    this.fakeEntityId = ObjectId()
+    this.user = { _id: new ObjectId() }
+    this.newUser = { _id: new ObjectId(), email: 'new-user-email@foo.bar' }
+    this.fakeEntityId = new ObjectId()
     this.subscription = {
       _id: 'mock-subscription-id',
       groupPlan: true,
       membersLimit: 10,
-      member_ids: [ObjectId(), ObjectId()],
-      manager_ids: [ObjectId()],
+      member_ids: [new ObjectId(), new ObjectId()],
+      manager_ids: [new ObjectId()],
       invited_emails: ['mock-email-1@foo.com'],
       teamInvites: [{ email: 'mock-email-1@bar.com' }],
       update: sinon.stub().yields(null),
@@ -43,13 +43,13 @@ describe('UserMembershipHandler', function () {
     this.institution = {
       _id: 'mock-institution-id',
       v1Id: 123,
-      managerIds: [ObjectId(), ObjectId(), ObjectId()],
+      managerIds: [new ObjectId(), new ObjectId(), new ObjectId()],
       updateOne: sinon.stub().yields(null),
     }
     this.publisher = {
       _id: 'mock-publisher-id',
       slug: 'slug',
-      managerIds: [ObjectId(), ObjectId()],
+      managerIds: [new ObjectId(), new ObjectId()],
       updateOne: sinon.stub().yields(null),
     }
 

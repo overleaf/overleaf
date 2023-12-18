@@ -48,17 +48,17 @@ describe('UpdateMerger :', function () {
     }
 
     this.doc = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       rev: 2,
     }
 
     this.file = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       rev: 6,
     }
 
     this.folder = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
     }
 
     this.EditorController = {

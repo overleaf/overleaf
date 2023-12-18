@@ -10,13 +10,13 @@ const modulePath = require('path').join(
 
 describe('TagsHandler', function () {
   beforeEach(function () {
-    this.userId = ObjectId().toString()
+    this.userId = new ObjectId().toString()
     this.callback = sinon.stub()
 
     this.tag = { user_id: this.userId, name: 'some name', color: '#3399CC' }
-    this.tagId = ObjectId().toString()
-    this.projectId = ObjectId().toString()
-    this.projectIds = [ObjectId().toString(), ObjectId().toString()]
+    this.tagId = new ObjectId().toString()
+    this.projectId = new ObjectId().toString()
+    this.projectIds = [new ObjectId().toString(), new ObjectId().toString()]
 
     this.mongodb = { ObjectId }
     this.TagMock = sinon.mock(Tag)

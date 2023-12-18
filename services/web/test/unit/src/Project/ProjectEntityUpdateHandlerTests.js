@@ -182,7 +182,7 @@ describe('ProjectEntityUpdateHandler', function () {
       this.ranges = { mock: 'ranges' }
       this.lastUpdatedAt = new Date().getTime()
       this.lastUpdatedBy = 'fake-last-updater-id'
-      this.parentFolder = { _id: ObjectId() }
+      this.parentFolder = { _id: new ObjectId() }
       this.DocstoreManager.isDocDeleted.yields(null, false)
       this.ProjectGetter.getProject.yields(null, this.project)
       this.ProjectLocator.findElement.yields(
@@ -1011,7 +1011,7 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('updating an existing file', function () {
       beforeEach(function () {
         this.existingFile = { _id: fileId, name: this.fileName, rev: 1 }
-        this.newFile = { _id: ObjectId(), name: this.fileName, rev: 3 }
+        this.newFile = { _id: new ObjectId(), name: this.fileName, rev: 3 }
         this.folder = { _id: folderId, fileRefs: [this.existingFile], docs: [] }
         this.ProjectLocator.findElement.yields(null, this.folder)
         this.newProject = 'new-project-stub'
@@ -2634,7 +2634,7 @@ describe('ProjectEntityUpdateHandler', function () {
   describe('_cleanUpDoc', function () {
     beforeEach(function () {
       this.doc = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         name: 'test.tex',
       }
       this.path = '/path/to/doc'
@@ -2679,7 +2679,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
     describe('when the doc is not the root doc', function () {
       beforeEach(function () {
-        this.project.rootDoc_id = ObjectId()
+        this.project.rootDoc_id = new ObjectId()
         this.ProjectEntityUpdateHandler._cleanUpDoc(
           this.project,
           this.doc,

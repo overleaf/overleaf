@@ -37,7 +37,7 @@ describe('MongoTests', function () {
 
       expect(query).to.exist
       expect(query._id).to.be.instanceof(NativeObjectId)
-      expect(query._id).to.deep.equal(NativeObjectId(userIdAsString))
+      expect(query._id).to.deep.equal(new NativeObjectId(userIdAsString))
 
       const user = await db.users.findOne(query)
       expect(user).to.exist
@@ -79,7 +79,9 @@ describe('MongoTests', function () {
     describe('with an ObjectId from the native driver', function () {
       let user
       beforeEach(async function getUser() {
-        user = await db.users.findOne({ _id: NativeObjectId(userIdAsString) })
+        user = await db.users.findOne({
+          _id: new NativeObjectId(userIdAsString),
+        })
         expect(user).to.exist
         expect(user._id).to.exist
         expect(user.email).to.equal(userEmail)

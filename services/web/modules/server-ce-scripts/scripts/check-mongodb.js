@@ -22,7 +22,7 @@ async function testTransactions() {
   const session = mongoClient.startSession()
   try {
     await session.withTransaction(async () => {
-      await db.users.findOne({ _id: ObjectId() }, { session })
+      await db.users.findOne({ _id: new ObjectId() }, { session })
     })
   } finally {
     await session.endSession()

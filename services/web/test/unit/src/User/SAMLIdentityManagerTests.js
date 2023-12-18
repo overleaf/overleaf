@@ -370,7 +370,7 @@ describe('SAMLIdentityManager', function () {
             expect(
               this.UserGetter.promises.getUser
             ).to.have.been.calledWithMatch({
-              _id: ObjectId('6005c75b12cbcaf771f4a105'),
+              _id: new ObjectId('6005c75b12cbcaf771f4a105'),
               'samlIdentifiers.providerId': '123456',
             })
             expect(error).to.be.instanceof(Errors.SAMLAlreadyLinkedError)

@@ -1,12 +1,12 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
-const { ObjectID } = require('mongodb')
+const { ObjectId } = require('mongodb')
 
 const INVOICE_SUBSCRIPTION_LIMIT = 10
 
 async function sendRecurlyAnalyticsEvent(event, eventData) {
   const userId = _getUserId(eventData)
-  if (!ObjectID.isValid(userId)) {
+  if (!ObjectId.isValid(userId)) {
     return
   }
 

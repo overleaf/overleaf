@@ -42,7 +42,7 @@ describe('History', function () {
         this.v1_history_id = 42
         return db.projects.updateOne(
           {
-            _id: ObjectId(this.project_id),
+            _id: new ObjectId(this.project_id),
           },
           {
             $set: {
@@ -90,7 +90,7 @@ describe('History', function () {
           }
           this.v1_history_id = 42
           db.projects.updateOne(
-            { _id: ObjectId(this.project_id) },
+            { _id: new ObjectId(this.project_id) },
             {
               $set: {
                 'overleaf.history.id': this.v1_history_id,
@@ -202,7 +202,7 @@ describe('History', function () {
         }
         return db.projects.updateOne(
           {
-            _id: ObjectId(this.project_id),
+            _id: new ObjectId(this.project_id),
           },
           {
             $unset: {
@@ -260,7 +260,7 @@ describe('History', function () {
         this.v1_history_id = 42
         return db.projects.updateOne(
           {
-            _id: ObjectId(this.project_id),
+            _id: new ObjectId(this.project_id),
           },
           {
             $set: {
@@ -324,7 +324,7 @@ describe('History', function () {
         this.v1_history_id = 42
         return db.projects.updateOne(
           {
-            _id: ObjectId(this.project_id),
+            _id: new ObjectId(this.project_id),
           },
           {
             $set: {

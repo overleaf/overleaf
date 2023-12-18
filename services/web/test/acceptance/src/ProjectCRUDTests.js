@@ -78,7 +78,7 @@ describe('Project CRUD', function () {
       it('should mark the project as not archived for the user', async function () {
         await Project.updateOne(
           { _id: this.projectId },
-          { $set: { archived: [ObjectId(this.user._id)] } }
+          { $set: { archived: [new ObjectId(this.user._id)] } }
         ).exec()
 
         const { response } = await this.user.doRequest(
@@ -117,7 +117,7 @@ describe('Project CRUD', function () {
     it('should mark the project as untrashed for the user', async function () {
       await Project.updateOne(
         { _id: this.projectId },
-        { trashed: [ObjectId(this.user._id)] }
+        { trashed: [new ObjectId(this.user._id)] }
       ).exec()
       const { response } = await this.user.doRequest(
         'DELETE',
@@ -132,7 +132,7 @@ describe('Project CRUD', function () {
     it('does nothing if the user has already untrashed the project', async function () {
       await Project.updateOne(
         { _id: this.projectId },
-        { trashed: [ObjectId(this.user._id)] }
+        { trashed: [new ObjectId(this.user._id)] }
       ).exec()
       // Mark as untrashed the first time
       await this.user.doRequest('DELETE', `/project/${this.projectId}/trash`)

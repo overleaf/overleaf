@@ -14,16 +14,16 @@ const MODULE_PATH = Path.join(
 describe('CollaboratorsGetter', function () {
   beforeEach(function () {
     this.userId = 'mock-user-id'
-    this.ownerRef = ObjectId()
-    this.readOnlyRef1 = ObjectId()
-    this.readOnlyRef2 = ObjectId()
-    this.readWriteRef1 = ObjectId()
-    this.readWriteRef2 = ObjectId()
-    this.readOnlyTokenRef = ObjectId()
-    this.readWriteTokenRef = ObjectId()
-    this.nonMemberRef = ObjectId()
+    this.ownerRef = new ObjectId()
+    this.readOnlyRef1 = new ObjectId()
+    this.readOnlyRef2 = new ObjectId()
+    this.readWriteRef1 = new ObjectId()
+    this.readWriteRef2 = new ObjectId()
+    this.readOnlyTokenRef = new ObjectId()
+    this.readWriteTokenRef = new ObjectId()
+    this.nonMemberRef = new ObjectId()
     this.project = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       owner_ref: [this.ownerRef],
       readOnly_refs: [this.readOnlyRef1, this.readOnlyRef2],
       collaberator_refs: [this.readWriteRef1, this.readWriteRef2],
@@ -366,7 +366,7 @@ describe('CollaboratorsGetter', function () {
   })
 
   describe('getPublicShareTokens', function () {
-    const userMock = ObjectId()
+    const userMock = new ObjectId()
 
     it('should return null when the project is not found', async function () {
       this.ProjectMock.expects('findOne').chain('exec').resolves(undefined)

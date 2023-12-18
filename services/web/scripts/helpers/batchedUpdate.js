@@ -22,9 +22,9 @@ function refreshGlobalOptionsForBatchedUpdate(options = {}) {
   BATCH_SIZE = parseInt(options.BATCH_SIZE, 10) || 1000
   VERBOSE_LOGGING = options.VERBOSE_LOGGING === 'true'
   if (options.BATCH_LAST_ID) {
-    BATCH_RANGE_START = ObjectId(options.BATCH_LAST_ID)
+    BATCH_RANGE_START = new ObjectId(options.BATCH_LAST_ID)
   } else if (options.BATCH_RANGE_START) {
-    BATCH_RANGE_START = ObjectId(options.BATCH_RANGE_START)
+    BATCH_RANGE_START = new ObjectId(options.BATCH_RANGE_START)
   } else {
     if (BATCH_DESCENDING) {
       BATCH_RANGE_START = ID_EDGE_FUTURE
@@ -35,7 +35,7 @@ function refreshGlobalOptionsForBatchedUpdate(options = {}) {
   BATCH_MAX_TIME_SPAN_IN_MS =
     parseInt(options.BATCH_MAX_TIME_SPAN_IN_MS, 10) || ONE_MONTH_IN_MS
   if (options.BATCH_RANGE_END) {
-    BATCH_RANGE_END = ObjectId(options.BATCH_RANGE_END)
+    BATCH_RANGE_END = new ObjectId(options.BATCH_RANGE_END)
   } else {
     if (BATCH_DESCENDING) {
       BATCH_RANGE_END = ID_EDGE_PAST

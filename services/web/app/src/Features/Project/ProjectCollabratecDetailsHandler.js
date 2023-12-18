@@ -43,8 +43,8 @@ module.exports = ProjectCollabratecDetailsHandler = {
       callback = function () {}
     }
     try {
-      projectId = ObjectId(projectId)
-      userId = ObjectId(userId)
+      projectId = new ObjectId(projectId)
+      userId = new ObjectId(userId)
     } catch (error) {
       const err = error
       return callback(err)
@@ -75,8 +75,8 @@ module.exports = ProjectCollabratecDetailsHandler = {
       callback = function () {}
     }
     try {
-      projectId = ObjectId(projectId)
-      userId = ObjectId(userId)
+      projectId = new ObjectId(projectId)
+      userId = new ObjectId(userId)
     } catch (error) {
       const err = error
       return callback(err)
@@ -109,7 +109,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
       callback = function () {}
     }
     try {
-      projectId = ObjectId(projectId)
+      projectId = new ObjectId(projectId)
     } catch (error) {
       err = error
       return callback(err)
@@ -119,7 +119,7 @@ module.exports = ProjectCollabratecDetailsHandler = {
     }
     for (const collabratecUser of Array.from(collabratecUsers)) {
       try {
-        collabratecUser.user_id = ObjectId(collabratecUser.user_id)
+        collabratecUser.user_id = new ObjectId(collabratecUser.user_id)
       } catch (error1) {
         err = error1
         return callback(err)
@@ -134,8 +134,8 @@ module.exports = ProjectCollabratecDetailsHandler = {
       callback = function () {}
     }
     try {
-      projectId = ObjectId(projectId)
-      userId = ObjectId(userId)
+      projectId = new ObjectId(projectId)
+      userId = new ObjectId(userId)
     } catch (error) {
       const err = error
       return callback(err)
@@ -156,8 +156,8 @@ module.exports = ProjectCollabratecDetailsHandler = {
       callback = function () {}
     }
     try {
-      oldUserId = ObjectId(oldUserId)
-      newUserId = ObjectId(newUserId)
+      oldUserId = new ObjectId(oldUserId)
+      newUserId = new ObjectId(newUserId)
     } catch (error) {
       const err = error
       return callback(err)

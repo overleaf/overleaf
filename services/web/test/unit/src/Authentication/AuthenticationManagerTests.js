@@ -747,7 +747,7 @@ describe('AuthenticationManager', function () {
 
   describe('setUserPassword', function () {
     beforeEach(function () {
-      this.user_id = ObjectId()
+      this.user_id = new ObjectId()
       this.password = 'bananagram'
       this.hashedPassword = 'asdkjfa;osiuvandf'
       this.salt = 'saltaasdfasdfasdf'
@@ -955,7 +955,7 @@ describe('AuthenticationManager', function () {
       it("should update the user's password in the database", function () {
         const { args } = this.db.users.updateOne.lastCall
         expect(args[0]).to.deep.equal({
-          _id: ObjectId(this.user_id.toString()),
+          _id: new ObjectId(this.user_id.toString()),
         })
         expect(args[1]).to.deep.equal({
           $set: {

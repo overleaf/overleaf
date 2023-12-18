@@ -567,7 +567,7 @@ describe('ProjectDeleter', function () {
 
   describe('archiveProject', function () {
     beforeEach(function () {
-      const archived = [ObjectId(this.user._id)]
+      const archived = [new ObjectId(this.user._id)]
       this.ProjectHelper.calculateArchivedArray.returns(archived)
 
       this.ProjectMock.expects('findOne')
@@ -580,7 +580,7 @@ describe('ProjectDeleter', function () {
           { _id: this.project._id },
           {
             $set: { archived },
-            $pull: { trashed: ObjectId(this.user._id) },
+            $pull: { trashed: new ObjectId(this.user._id) },
           }
         )
         .resolves()
@@ -609,7 +609,7 @@ describe('ProjectDeleter', function () {
 
   describe('unarchiveProject', function () {
     beforeEach(function () {
-      const archived = [ObjectId(this.user._id)]
+      const archived = [new ObjectId(this.user._id)]
       this.ProjectHelper.calculateArchivedArray.returns(archived)
 
       this.ProjectMock.expects('findOne')
@@ -645,7 +645,7 @@ describe('ProjectDeleter', function () {
 
   describe('trashProject', function () {
     beforeEach(function () {
-      const archived = [ObjectId(this.user._id)]
+      const archived = [new ObjectId(this.user._id)]
       this.ProjectHelper.calculateArchivedArray.returns(archived)
 
       this.ProjectMock.expects('findOne')
@@ -657,7 +657,7 @@ describe('ProjectDeleter', function () {
         .withArgs(
           { _id: this.project._id },
           {
-            $addToSet: { trashed: ObjectId(this.user._id) },
+            $addToSet: { trashed: new ObjectId(this.user._id) },
             $set: { archived },
           }
         )
@@ -695,7 +695,7 @@ describe('ProjectDeleter', function () {
       this.ProjectMock.expects('updateOne')
         .withArgs(
           { _id: this.project._id },
-          { $pull: { trashed: ObjectId(this.user._id) } }
+          { $pull: { trashed: new ObjectId(this.user._id) } }
         )
         .resolves()
     })
@@ -731,8 +731,8 @@ describe('ProjectDeleter', function () {
 
   describe('undeleteProject', function () {
     beforeEach(function () {
-      this.unknownProjectId = ObjectId()
-      this.purgedProjectId = ObjectId()
+      this.unknownProjectId = new ObjectId()
+      this.purgedProjectId = new ObjectId()
 
       this.deletedProject = {
         _id: 'deleted',

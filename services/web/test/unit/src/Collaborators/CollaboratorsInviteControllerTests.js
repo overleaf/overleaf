@@ -20,7 +20,7 @@ describe('CollaboratorsInviteController', function () {
       email: 'current-user@example.com',
     }
     this.invite = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       token: this.token,
       sendingUserId: this.currentUser._id,
       projectId: this.projectId,
@@ -116,8 +116,8 @@ describe('CollaboratorsInviteController', function () {
   describe('getAllInvites', function () {
     beforeEach(function () {
       this.fakeInvites = [
-        { _id: ObjectId(), one: 1 },
-        { _id: ObjectId(), two: 2 },
+        { _id: new ObjectId(), one: 1 },
+        { _id: new ObjectId(), two: 2 },
       ]
       this.req.params = { Project_id: this.projectId }
     })
@@ -1295,7 +1295,7 @@ describe('CollaboratorsInviteController', function () {
 
       describe('when user account is present', function () {
         beforeEach(function () {
-          this.user = { _id: ObjectId().toString() }
+          this.user = { _id: new ObjectId().toString() }
           this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
         })
 

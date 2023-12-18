@@ -244,8 +244,8 @@ const InstitutionsManager = {
       if (error) {
         return callback(error)
       }
-      const userIds = affiliations.map(affiliation =>
-        ObjectId(affiliation.user_id)
+      const userIds = affiliations.map(
+        affiliation => new ObjectId(affiliation.user_id)
       )
       Subscription.find({ admin_id: userIds })
         .populate('admin_id', 'email')
@@ -294,12 +294,12 @@ const fetchInstitutionAndAffiliations = (institutionId, callback) =>
   )
 
 function refreshFeatures(affiliation, callback) {
-  const userId = ObjectId(affiliation.user_id)
+  const userId = new ObjectId(affiliation.user_id)
   FeaturesUpdater.refreshFeatures(userId, 'refresh-institution-users', callback)
 }
 
 function refreshFeaturesAndNotify(affiliation, callback) {
-  const userId = ObjectId(affiliation.user_id)
+  const userId = new ObjectId(affiliation.user_id)
   async.waterfall(
     [
       cb =>

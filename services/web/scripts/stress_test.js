@@ -363,7 +363,7 @@ async function uploadFile(projectId) {
   async function upload(abortSignal, deleteFile = true) {
     const size = userSize.get()
     const buffer = Buffer.alloc(size, crypto.randomUUID())
-    const fileId = ObjectId()
+    const fileId = new ObjectId()
     const url = `${settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
     const md5 = computeMD5Hash(buffer)
     const response = await fetch(url, {

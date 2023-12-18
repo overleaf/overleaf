@@ -63,7 +63,7 @@ class FolderStructureBuilder {
 
   createFolder(name) {
     return {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name,
       folders: [],
       docs: [],

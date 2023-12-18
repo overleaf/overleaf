@@ -8,7 +8,7 @@ const MODULE_PATH = '../../../../app/src/Features/History/HistoryManager'
 describe('HistoryManager', function () {
   beforeEach(function () {
     this.user_id = 'user-id-123'
-    this.historyId = ObjectId().toString()
+    this.historyId = new ObjectId().toString()
     this.AuthenticationController = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }

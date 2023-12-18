@@ -128,7 +128,7 @@ async function archiveProject(projectId, userId) {
 
     await Project.updateOne(
       { _id: projectId },
-      { $set: { archived }, $pull: { trashed: ObjectId(userId) } }
+      { $set: { archived }, $pull: { trashed: new ObjectId(userId) } }
     )
   } catch (err) {
     logger.warn({ err }, 'problem archiving project')
@@ -172,7 +172,7 @@ async function trashProject(projectId, userId) {
     await Project.updateOne(
       { _id: projectId },
       {
-        $addToSet: { trashed: ObjectId(userId) },
+        $addToSet: { trashed: new ObjectId(userId) },
         $set: { archived },
       }
     )
@@ -191,7 +191,7 @@ async function untrashProject(projectId, userId) {
 
     await Project.updateOne(
       { _id: projectId },
-      { $pull: { trashed: ObjectId(userId) } }
+      { $pull: { trashed: new ObjectId(userId) } }
     )
   } catch (err) {
     logger.warn({ err }, 'problem untrashing project')
@@ -280,7 +280,7 @@ async function deleteProject(projectId, options = {}) {
 }
 
 async function undeleteProject(projectId, options = {}) {
-  projectId = ObjectId(projectId)
+  projectId = new ObjectId(projectId)
   const deletedProject = await DeletedProject.findOne({
     'deleterData.deletedProjectId': projectId,
   }).exec()

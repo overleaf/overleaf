@@ -12,7 +12,7 @@ const Modules = require('../../../../app/src/infrastructure/Modules')
 
 class Subscription {
   constructor(options = {}) {
-    this.admin_id = options.adminId || ObjectId()
+    this.admin_id = options.adminId || new ObjectId()
     this.overleaf = options.overleaf || {}
     this.groupPlan = options.groupPlan
     this.manager_ids = options.managerIds || [this.admin_id]
@@ -48,7 +48,7 @@ class Subscription {
   }
 
   get(callback) {
-    db.subscriptions.findOne({ _id: ObjectId(this._id) }, callback)
+    db.subscriptions.findOne({ _id: new ObjectId(this._id) }, callback)
   }
 
   getWithGroupPolicy(callback) {
@@ -57,7 +57,7 @@ class Subscription {
 
   setManagerIds(managerIds, callback) {
     return SubscriptionModel.findOneAndUpdate(
-      { _id: ObjectId(this._id) },
+      { _id: new ObjectId(this._id) },
       { manager_ids: managerIds },
       callback
     )

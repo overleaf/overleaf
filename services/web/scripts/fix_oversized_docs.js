@@ -75,8 +75,8 @@ async function processDoc(projectId, docId) {
     if (opts.commit) {
       const fileRef = await sendDocToFilestore(projectId, doc)
       await ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile(
-        ObjectId(projectId),
-        ObjectId(docId),
+        new ObjectId(projectId),
+        new ObjectId(docId),
         fileRef
       )
       await deleteDocFromMongo(projectId, doc)

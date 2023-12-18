@@ -209,8 +209,8 @@ async function getAllInvitedMembers(projectId) {
 }
 
 async function userIsTokenMember(userId, projectId) {
-  userId = ObjectId(userId.toString())
-  projectId = ObjectId(projectId.toString())
+  userId = new ObjectId(userId.toString())
+  projectId = new ObjectId(projectId.toString())
   const project = await Project.findOne(
     {
       _id: projectId,

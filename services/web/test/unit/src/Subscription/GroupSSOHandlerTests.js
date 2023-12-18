@@ -11,7 +11,7 @@ describe('GroupSSOHandler', function () {
   beforeEach(function () {
     this.user = { _id: new ObjectId(), enrollment: { sso: [] } }
     this.subscription = {
-      _id: ObjectId().toString(),
+      _id: new ObjectId().toString(),
       admin_id: new ObjectId(),
       member_ids: [this.user._id],
     }

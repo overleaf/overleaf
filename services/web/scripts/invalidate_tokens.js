@@ -3,7 +3,7 @@ const minimist = require('minimist')
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined
 const projectIds = argv._.map(x => {
-  return ObjectId(x)
+  return new ObjectId(x)
 })
 
 if (!commit) {

@@ -3,7 +3,7 @@ const _ = require('underscore')
 const { FolderSchema } = require('./Folder')
 const Errors = require('../Features/Errors/Errors')
 
-const concreteObjectId = mongoose.Types.ObjectId
+const ConcreteObjectId = mongoose.Types.ObjectId
 const { Schema } = mongoose
 const { ObjectId } = Schema
 
@@ -119,7 +119,8 @@ ProjectSchema.statics.getProject = function (projectOrId, fields, callback) {
     callback(null, projectOrId)
   } else {
     try {
-      concreteObjectId(projectOrId.toString())
+      // eslint-disable-next-line no-new
+      new ConcreteObjectId(projectOrId.toString())
     } catch (e) {
       return callback(new Errors.NotFoundError(e.message))
     }

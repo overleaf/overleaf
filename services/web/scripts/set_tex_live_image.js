@@ -39,7 +39,7 @@ function parseProjectIds(projectIds) {
   for (const projectId of projectIds) {
     let oid
     try {
-      oid = ObjectId(projectId)
+      oid = new ObjectId(projectId)
     } catch (err) {
       console.error(`Invalid project id: ${projectId}`)
       process.exit(1)
@@ -51,7 +51,7 @@ function parseProjectIds(projectIds) {
 
 async function updateImage(image, projectIds) {
   const res = await Project.updateMany(
-    { _id: { $in: projectIds.map(ObjectId) } },
+    { _id: { $in: projectIds.map(id => new ObjectId(id)) } },
     { $set: { imageName: `quay.io/sharelatex/${image}` } }
   ).exec()
   console.log(`Found ${res.matchedCount} out of ${projectIds.length} projects`)

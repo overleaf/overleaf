@@ -24,7 +24,7 @@ async function _addAuditLogEntry(operation, userId, auditLog, extraInfo) {
 
 async function _ensureCanAddIdentifier(userId, institutionEmail, providerId) {
   const userWithProvider = await UserGetter.promises.getUser(
-    { _id: ObjectId(userId), 'samlIdentifiers.providerId': providerId },
+    { _id: new ObjectId(userId), 'samlIdentifiers.providerId': providerId },
     { _id: 1 }
   )
 

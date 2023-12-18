@@ -32,8 +32,8 @@ describe('UserInfoController', function () {
   describe('getPersonalInfo', function () {
     describe('when the user exists with sharelatex id', function () {
       beforeEach(function () {
-        this.user_id = ObjectId().toString()
-        this.user = { _id: ObjectId(this.user_id) }
+        this.user_id = new ObjectId().toString()
+        this.user = { _id: new ObjectId(this.user_id) }
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, this.user)
         this.UserInfoController.sendFormattedPersonalInfo = sinon.stub()
@@ -43,7 +43,7 @@ describe('UserInfoController', function () {
       it('should look up the user in the database', function () {
         this.UserGetter.getUser
           .calledWith(
-            { _id: ObjectId(this.user_id) },
+            { _id: new ObjectId(this.user_id) },
             { _id: true, first_name: true, last_name: true, email: true }
           )
           .should.equal(true)
@@ -54,7 +54,7 @@ describe('UserInfoController', function () {
       beforeEach(function () {
         this.user_id = 12345
         this.user = {
-          _id: ObjectId(),
+          _id: new ObjectId(),
           overleaf: {
             id: this.user_id,
           },
@@ -76,7 +76,7 @@ describe('UserInfoController', function () {
 
     describe('when the user does not exist', function () {
       beforeEach(function () {
-        this.user_id = ObjectId().toString()
+        this.user_id = new ObjectId().toString()
         this.req.params = { user_id: this.user_id }
         this.UserGetter.getUser = sinon.stub().callsArgWith(2, null, null)
         this.UserInfoController.getPersonalInfo(this.req, this.res, this.next)
@@ -104,7 +104,7 @@ describe('UserInfoController', function () {
   describe('sendFormattedPersonalInfo', function () {
     beforeEach(function () {
       this.user = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         first_name: 'Douglas',
         last_name: 'Adams',
         email: 'doug@sharelatex.com',
@@ -126,7 +126,7 @@ describe('UserInfoController', function () {
   describe('formatPersonalInfo', function () {
     it('should return the correctly formatted data', function () {
       this.user = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         first_name: 'Douglas',
         last_name: 'Adams',
         email: 'doug@sharelatex.com',

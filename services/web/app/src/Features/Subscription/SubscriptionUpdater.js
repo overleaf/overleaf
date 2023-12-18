@@ -27,16 +27,16 @@ const UserAuditLogHandler = require('../User/UserAuditLogHandler')
  */
 async function updateAdmin(subscription, adminId) {
   const query = {
-    _id: ObjectId(subscription._id),
+    _id: new ObjectId(subscription._id),
     customAccount: true,
   }
   const update = {
-    $set: { admin_id: ObjectId(adminId) },
+    $set: { admin_id: new ObjectId(adminId) },
   }
   if (subscription.groupPlan) {
-    update.$addToSet = { manager_ids: ObjectId(adminId) }
+    update.$addToSet = { manager_ids: new ObjectId(adminId) }
   } else {
-    update.$set.manager_ids = [ObjectId(adminId)]
+    update.$set.manager_ids = [new ObjectId(adminId)]
   }
   await Subscription.updateOne(query, update).exec()
 }

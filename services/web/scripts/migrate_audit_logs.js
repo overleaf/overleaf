@@ -25,7 +25,7 @@ async function main(options) {
   if (options.projectId) {
     console.log('migrating projectId=' + options.projectId)
     const project = await db.projects.findOne(
-      { _id: ObjectId(options.projectId) },
+      { _id: new ObjectId(options.projectId) },
       { _id: 1, auditLog: 1 }
     )
     if (!project || !project.auditLog) {
@@ -36,7 +36,7 @@ async function main(options) {
   } else if (options.userId) {
     console.log('migrating userId=' + options.userId)
     const user = await db.users.findOne(
-      { _id: ObjectId(options.userId) },
+      { _id: new ObjectId(options.userId) },
       { _id: 1, auditLog: 1 }
     )
     if (!user || !user.auditLog) {

@@ -38,7 +38,7 @@ async function processBatch(rooms) {
   }
   const projectIds = Array.from(
     new Set(rooms.map(room => room.project_id.toString()))
-  ).map(ObjectId)
+  ).map(id => new ObjectId(id))
   console.log(
     `Checking projects (${projectIds.length})`,
     JSON.stringify(projectIds)

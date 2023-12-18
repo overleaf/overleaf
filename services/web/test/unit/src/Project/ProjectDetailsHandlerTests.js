@@ -10,16 +10,16 @@ const MODULE_PATH = '../../../../app/src/Features/Project/ProjectDetailsHandler'
 describe('ProjectDetailsHandler', function () {
   beforeEach(function () {
     this.user = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       email: 'user@example.com',
       features: 'mock-features',
     }
     this.collaborator = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       email: 'collaborator@example.com',
     }
     this.project = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'project',
       description: 'this is a great project',
       something: 'should not exist',

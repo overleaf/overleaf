@@ -91,7 +91,7 @@ class MockDocstoreApi extends AbstractMockApi {
     this.app.post('/project/:projectId/destroy', async (req, res) => {
       const { projectId } = req.params
       delete this.docs[projectId]
-      await db.docs.deleteMany({ project_id: ObjectId(projectId) })
+      await db.docs.deleteMany({ project_id: new ObjectId(projectId) })
       res.sendStatus(204)
     })
   }

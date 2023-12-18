@@ -224,7 +224,7 @@ async function getProjectUsersIds(projectId) {
   // filter invited users to only return those with dropbox linked
   const dropboxUsers = await UserGetter.getUsers(
     {
-      _id: { $in: userIds.map(id => ObjectId(id)) },
+      _id: { $in: userIds.map(id => new ObjectId(id)) },
       'dropbox.access_token.uid': { $ne: null },
     },
     {

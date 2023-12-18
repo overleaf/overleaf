@@ -11,10 +11,10 @@ const MODULE_PATH = path.join(
 
 describe('ProjectController', function () {
   beforeEach(function () {
-    this.project_id = ObjectId('abcdefabcdefabcdefabcdef')
+    this.project_id = new ObjectId('abcdefabcdefabcdefabcdef')
 
     this.user = {
-      _id: ObjectId('123456123456123456123456'),
+      _id: new ObjectId('123456123456123456123456'),
       email: 'test@overleaf.com',
       first_name: 'bjkdsjfk',
       features: {},
@@ -590,7 +590,7 @@ describe('ProjectController', function () {
       this.res.render = (pageName, opts) => {
         expect(this.UserModel.updateOne).to.have.been.calledOnce
         expect(this.UserModel.updateOne.args[0][0]).to.deep.equal({
-          _id: ObjectId(this.user._id),
+          _id: new ObjectId(this.user._id),
         })
         expect(this.UserModel.updateOne.args[0][1].$set.lastActive).to.exist
         done()

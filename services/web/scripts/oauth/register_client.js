@@ -61,7 +61,7 @@ async function upsertApplication(opts) {
     defaults.redirectUris = []
   }
   if (opts.mongoId != null) {
-    defaults._id = ObjectId(opts.mongoId)
+    defaults._id = new ObjectId(opts.mongoId)
   }
 
   await db.oauthApplications.updateOne(

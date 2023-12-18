@@ -17,7 +17,7 @@ describe('AuthenticationController', function () {
       'valid-test-user': Math.random().toString(16).slice(2),
     }
     this.user = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       email: (this.email = 'USER@example.com'),
       first_name: 'bob',
       last_name: 'brown',

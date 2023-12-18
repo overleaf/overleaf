@@ -10,10 +10,13 @@ const MODULE_PATH =
 
 describe('OwnershipTransferHandler', function () {
   beforeEach(function () {
-    this.user = { _id: ObjectId(), email: 'owner@example.com' }
-    this.collaborator = { _id: ObjectId(), email: 'collaborator@example.com' }
+    this.user = { _id: new ObjectId(), email: 'owner@example.com' }
+    this.collaborator = {
+      _id: new ObjectId(),
+      email: 'collaborator@example.com',
+    }
     this.project = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'project',
       owner_ref: this.user._id,
       collaberator_refs: [this.collaborator._id],
@@ -205,7 +208,7 @@ describe('OwnershipTransferHandler', function () {
     })
 
     it('should track the change in BigQuery', async function () {
-      const sessionUserId = ObjectId()
+      const sessionUserId = new ObjectId()
       await this.handler.promises.transferOwnership(
         this.project._id,
         this.collaborator._id,
@@ -222,7 +225,7 @@ describe('OwnershipTransferHandler', function () {
     })
 
     it('should write an entry in the audit log', async function () {
-      const sessionUserId = ObjectId()
+      const sessionUserId = new ObjectId()
       await this.handler.promises.transferOwnership(
         this.project._id,
         this.collaborator._id,

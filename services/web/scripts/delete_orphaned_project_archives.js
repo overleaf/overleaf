@@ -59,8 +59,8 @@ async function processBatch(entries) {
     prefixes.push(prefix)
     projectIdToPrefix.set(projectId, prefixes)
   }
-  const projectIds = Array.from(projectIdToPrefix.keys()).map(id =>
-    ObjectId(id)
+  const projectIds = Array.from(projectIdToPrefix.keys()).map(
+    id => new ObjectId(id)
   )
   const projectsWithOrphanedArchive = await getHardDeletedProjectIds({
     projectIds,

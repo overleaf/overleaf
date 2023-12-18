@@ -435,7 +435,7 @@ const ProjectController = {
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
             User.updateOne(
-              { _id: ObjectId(userId) },
+              { _id: new ObjectId(userId) },
               { $set: { lastActive: new Date() } },
               {},
               () => {}
@@ -753,7 +753,7 @@ const ProjectController = {
             } else if (
               Settings.wsUrlV2 &&
               Settings.wsUrlV2Percentage > 0 &&
-              (ObjectId(projectId).getTimestamp() / 1000) % 100 <
+              (new ObjectId(projectId).getTimestamp() / 1000) % 100 <
                 Settings.wsUrlV2Percentage
             ) {
               wsUrl = Settings.wsUrlV2

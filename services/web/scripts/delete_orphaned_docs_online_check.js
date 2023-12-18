@@ -20,7 +20,7 @@ if (!process.env.BATCH_LAST_ID) {
   console.error('Set BATCH_LAST_ID and re-run.')
   process.exit(1)
 }
-const BATCH_LAST_ID = ObjectId(process.env.BATCH_LAST_ID)
+const BATCH_LAST_ID = new ObjectId(process.env.BATCH_LAST_ID)
 const INCREMENT_BY_S = parseInt(process.env.INCREMENT_BY_S, 10) || ONE_WEEK_IN_S
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 1000
 const READ_CONCURRENCY_SECONDARY =
@@ -66,7 +66,7 @@ async function main() {
     if (docs.length) {
       const projectIds = Array.from(
         new Set(docs.map(doc => doc.project_id.toString()))
-      ).map(ObjectId)
+      ).map(id => new ObjectId(id))
       console.log('Checking projects', JSON.stringify(projectIds))
       const { nProjectsWithOrphanedDocs, nDeletedDocs } = await processBatch(
         projectIds

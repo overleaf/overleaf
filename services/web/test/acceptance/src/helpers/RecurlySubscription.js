@@ -12,7 +12,7 @@ before(function () {
 
 class RecurlySubscription {
   constructor(options = {}) {
-    options.recurlySubscription_id = ObjectId().toString()
+    options.recurlySubscription_id = new ObjectId().toString()
     this.subscription = new Subscription(options)
 
     this.uuid = options.recurlySubscription_id

@@ -238,7 +238,7 @@ class UserHelper {
   static async updateUser(userId, update) {
     // TODO(das7pad): revert back to args pass-through after mongo upgrades
     const user = await UserUpdater.promises.updateUser(
-      { _id: ObjectId(userId) },
+      { _id: new ObjectId(userId) },
       update
     )
 

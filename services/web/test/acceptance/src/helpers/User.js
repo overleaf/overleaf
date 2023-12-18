@@ -44,7 +44,7 @@ class User {
   }
 
   get(callback) {
-    db.users.findOne({ _id: ObjectId(this._id) }, callback)
+    db.users.findOne({ _id: new ObjectId(this._id) }, callback)
   }
 
   getAuditLog(callback) {
@@ -53,7 +53,7 @@ class User {
       if (!user) return callback(new Error('User not found'))
 
       db.userAuditLogEntries
-        .find({ userId: ObjectId(this._id) })
+        .find({ userId: new ObjectId(this._id) })
         .toArray((error, auditLog) => {
           if (error) return callback(error)
           callback(null, auditLog || [])
@@ -74,7 +74,7 @@ class User {
   }
 
   mongoUpdate(updateOp, callback) {
-    db.users.updateOne({ _id: ObjectId(this._id) }, updateOp, callback)
+    db.users.updateOne({ _id: new ObjectId(this._id) }, updateOp, callback)
   }
 
   register(callback) {
@@ -347,7 +347,7 @@ class User {
 
   getFeatures(callback) {
     db.users.findOne(
-      { _id: ObjectId(this.id) },
+      { _id: new ObjectId(this.id) },
       { projection: { features: 1 } },
       (error, user) => callback(error, user && user.features)
     )
@@ -362,11 +362,11 @@ class User {
         return callback()
       }
       const userId = user._id
-      db.projects.deleteMany({ owner_ref: ObjectId(userId) }, err => {
+      db.projects.deleteMany({ owner_ref: new ObjectId(userId) }, err => {
         if (err != null) {
           callback(err)
         }
-        db.users.deleteOne({ _id: ObjectId(userId) }, callback)
+        db.users.deleteOne({ _id: new ObjectId(userId) }, callback)
       })
     })
   }
@@ -401,7 +401,7 @@ class User {
   }
 
   getProject(projectId, callback) {
-    db.projects.findOne({ _id: ObjectId(projectId.toString()) }, callback)
+    db.projects.findOne({ _id: new ObjectId(projectId.toString()) }, callback)
   }
 
   saveProject(project, callback) {
@@ -498,7 +498,7 @@ class User {
   }
 
   deleteProjects(callback) {
-    db.projects.deleteMany({ owner_ref: ObjectId(this.id) }, callback)
+    db.projects.deleteMany({ owner_ref: new ObjectId(this.id) }, callback)
   }
 
   openProject(projectId, callback) {
@@ -721,14 +721,14 @@ class User {
     } else if (privileges === 'readOnly') {
       updateOp = { $addToSet: { readOnly_refs: user._id } }
     }
-    db.projects.updateOne({ _id: ObjectId(projectId) }, updateOp, callback)
+    db.projects.updateOne({ _id: new ObjectId(projectId) }, updateOp, callback)
   }
 
   makePublic(projectId, level, callback) {
     // A fudge, to get around the fact that `readOnly` and `readAndWrite` are now disallowed
     // via the API, but we still need to test the behaviour of projects with these values set.
     db.projects.updateOne(
-      { _id: ObjectId(projectId) },
+      { _id: new ObjectId(projectId) },
       // NOTE: Yes, there is a typo in the db schema.
       { $set: { publicAccesLevel: level } },
       callback

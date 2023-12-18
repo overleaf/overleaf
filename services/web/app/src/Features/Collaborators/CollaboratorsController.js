@@ -105,7 +105,7 @@ async function transferOwnership(req, res, next) {
       toUserId,
       {
         allowTransferToNonCollaborators: hasAdminAccess(sessionUser),
-        sessionUserId: ObjectId(sessionUser._id),
+        sessionUserId: new ObjectId(sessionUser._id),
       }
     )
     res.sendStatus(204)
@@ -143,8 +143,8 @@ async function getShareTokens(req, res) {
   let tokens
   if (userId) {
     tokens = await CollaboratorsGetter.promises.getPublicShareTokens(
-      ObjectId(userId),
-      ObjectId(projectId)
+      new ObjectId(userId),
+      new ObjectId(projectId)
     )
   } else {
     // anonymous access, the token is already available in the session

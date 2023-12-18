@@ -14,8 +14,8 @@ describe('CollaboratorsController', function () {
     this.res = new MockResponse()
     this.req = new MockRequest()
 
-    this.user = { _id: ObjectId() }
-    this.projectId = ObjectId()
+    this.user = { _id: new ObjectId() }
+    this.projectId = new ObjectId()
     this.callback = sinon.stub()
 
     this.CollaboratorsHandler = {

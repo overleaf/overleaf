@@ -34,7 +34,7 @@ async function main() {
   }
 
   await db.users.updateOne(
-    { _id: ObjectId(userId) },
+    { _id: new ObjectId(userId) },
     { $set: { 'features.compileTimeout': compileTimeout } }
   )
 }

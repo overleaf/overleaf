@@ -568,7 +568,7 @@ async function _putElement(project, folderId, element, type) {
     throw new Errors.InvalidNameError('blocked element name')
   }
   _checkValidElementName(folder, element.name)
-  element._id = ObjectId(element._id.toString())
+  element._id = new ObjectId(element._id.toString())
   const mongoPath = `${path.mongo}.${pathSegment}`
   const newProject = await Project.findOneAndUpdate(
     { _id: project._id, [path.mongo]: { $exists: true } },

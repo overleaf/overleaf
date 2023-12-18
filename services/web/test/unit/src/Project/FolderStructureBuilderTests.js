@@ -1,17 +1,22 @@
 const { expect } = require('chai')
-const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Project/FolderStructureBuilder'
-const MOCK_OBJECT_ID = 'MOCK_OBJECT_ID'
+const MOCK_OBJECT_ID = new ObjectId('657306930a1cf28031c358da')
 
 describe('FolderStructureBuilder', function () {
   beforeEach(function () {
-    this.ObjectId = sinon.stub().returns(MOCK_OBJECT_ID)
     this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        mongodb: { ObjectId: this.ObjectId },
+        mongodb: {
+          ObjectId: class {
+            constructor() {
+              return MOCK_OBJECT_ID
+            }
+          },
+        },
       },
     })
   })

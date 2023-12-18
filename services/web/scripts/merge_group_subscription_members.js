@@ -44,8 +44,8 @@ async function main() {
 
   await waitForDb()
 
-  const targetSubscription = await getSubscription(ObjectId(target))
-  const sourceSubscription = await getSubscription(ObjectId(source))
+  const targetSubscription = await getSubscription(new ObjectId(target))
+  const sourceSubscription = await getSubscription(new ObjectId(source))
 
   if (!targetSubscription) {
     throw new Error('couldnt find target (to) subscription')

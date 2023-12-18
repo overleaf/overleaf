@@ -168,7 +168,7 @@ async function processUsers(userIds) {
 
   const limit = pLimit(CONCURRENCY)
   const results = await Promise.allSettled(
-    userIds.map(userId => limit(() => _handleUser(ObjectId(userId))))
+    userIds.map(userId => limit(() => _handleUser(new ObjectId(userId))))
   )
   results.forEach((result, idx) => {
     if (result.status !== 'fulfilled') {

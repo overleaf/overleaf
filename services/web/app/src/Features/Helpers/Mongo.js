@@ -4,11 +4,11 @@ const { ObjectId: MongooseObjectId } = require('mongoose').mongo
 
 function _getObjectIdInstance(id) {
   if (typeof id === 'string') {
-    return ObjectId(id)
+    return new ObjectId(id)
   } else if (id instanceof ObjectId) {
     return id
   } else if (id instanceof MongooseObjectId) {
-    return ObjectId(id.toString())
+    return new ObjectId(id.toString())
   } else {
     throw new OError('unexpected object id', { id })
   }
@@ -25,7 +25,7 @@ function normalizeQuery(query) {
   ) {
     return { _id: _getObjectIdInstance(query) }
   } else if (typeof query._id === 'string') {
-    query._id = ObjectId(query._id)
+    query._id = new ObjectId(query._id)
     return query
   } else {
     return query

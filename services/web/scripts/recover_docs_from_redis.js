@@ -53,7 +53,7 @@ async function main() {
 
 async function processDoc(docId) {
   // check if the doc is in mongo.. if so ignore it
-  const docCount = await db.docs.find({ _id: ObjectId(docId) }).count()
+  const docCount = await db.docs.find({ _id: new ObjectId(docId) }).count()
   if (docCount > 0) {
     logger.debug({ docId }, 'doc is present in mongo - no recovery needed')
     return
@@ -70,7 +70,7 @@ async function processDoc(docId) {
     return
   }
   // check that the project is in mongo, if not delete the doc
-  const project = await db.projects.findOne({ _id: ObjectId(projectId) })
+  const project = await db.projects.findOne({ _id: new ObjectId(projectId) })
   if (!project) {
     logger.warn(
       { docId },

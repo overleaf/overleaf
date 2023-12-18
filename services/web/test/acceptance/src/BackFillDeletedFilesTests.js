@@ -27,20 +27,20 @@ describe('BackFillDeletedFiles', function () {
     user = new User()
     await user.login()
 
-    projectId1 = ObjectId(await user.createProject('project1'))
-    projectId2 = ObjectId(await user.createProject('project2'))
-    projectId3 = ObjectId(await user.createProject('project3'))
-    projectId4 = ObjectId(await user.createProject('project4'))
-    projectId5 = ObjectId(await user.createProject('project5'))
+    projectId1 = new ObjectId(await user.createProject('project1'))
+    projectId2 = new ObjectId(await user.createProject('project2'))
+    projectId3 = new ObjectId(await user.createProject('project3'))
+    projectId4 = new ObjectId(await user.createProject('project4'))
+    projectId5 = new ObjectId(await user.createProject('project5'))
   })
 
   let fileId1, fileId2, fileId3, fileId4
   beforeEach('create files', function () {
     // take a short cut and just allocate file ids
-    fileId1 = ObjectId()
-    fileId2 = ObjectId()
-    fileId3 = ObjectId()
-    fileId4 = ObjectId()
+    fileId1 = new ObjectId()
+    fileId2 = new ObjectId()
+    fileId3 = new ObjectId()
+    fileId4 = new ObjectId()
   })
   const otherFileDetails = {
     name: 'universe.jpg',

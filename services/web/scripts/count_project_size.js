@@ -100,7 +100,7 @@ async function countDocsSizes(docs) {
   for (const docId of ids) {
     const result = await db.docs.aggregate([
       {
-        $match: { _id: ObjectId(docId) },
+        $match: { _id: new ObjectId(docId) },
       },
       {
         $project: {

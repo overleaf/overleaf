@@ -33,7 +33,7 @@ function getPersonalInfo(req, res, next) {
   if (/^\d+$/.test(userId)) {
     query = { 'overleaf.id': parseInt(userId, 10) }
   } else if (/^[a-f0-9]{24}$/.test(userId)) {
-    query = { _id: ObjectId(userId) }
+    query = { _id: new ObjectId(userId) }
   } else {
     return res.sendStatus(400)
   }

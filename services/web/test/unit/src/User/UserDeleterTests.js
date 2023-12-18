@@ -14,7 +14,7 @@ describe('UserDeleter', function () {
   beforeEach(function () {
     tk.freeze(Date.now())
 
-    this.userId = ObjectId()
+    this.userId = new ObjectId()
 
     this.UserMock = sinon.mock(User)
     this.DeletedUserMock = sinon.mock(DeletedUser)
@@ -289,7 +289,7 @@ describe('UserDeleter', function () {
       describe('when a user and IP address are specified', function () {
         beforeEach(function () {
           this.ipAddress = '1.2.3.4'
-          this.deleterId = ObjectId()
+          this.deleterId = new ObjectId()
 
           this.deletedUser.deleterData.deleterIpAddress = this.ipAddress
           this.deletedUser.deleterData.deleterId = this.deleterId

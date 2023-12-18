@@ -143,7 +143,7 @@ function removeUserFromEntity(entity, attribute, userId, callback) {
 
 function buildEntityQuery(entityId, entityConfig, loggedInUser) {
   if (ObjectId.isValid(entityId.toString())) {
-    entityId = ObjectId(entityId)
+    entityId = new ObjectId(entityId)
   }
   const query = Object.assign({}, entityConfig.baseQuery)
   query[entityConfig.fields.primaryKey] = entityId

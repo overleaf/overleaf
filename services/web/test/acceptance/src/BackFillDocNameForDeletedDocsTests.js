@@ -19,17 +19,17 @@ describe('BackFillDocNameForDeletedDocs', function () {
     user = new User()
     await user.login()
 
-    projectId1 = ObjectId(await user.createProject('project1'))
-    projectId2 = ObjectId(await user.createProject('project2'))
+    projectId1 = new ObjectId(await user.createProject('project1'))
+    projectId2 = new ObjectId(await user.createProject('project2'))
   })
   beforeEach('create docs', async function () {
-    docId1 = ObjectId(
+    docId1 = new ObjectId(
       await user.createDocInProject(projectId1, null, 'doc1.tex')
     )
-    docId2 = ObjectId(
+    docId2 = new ObjectId(
       await user.createDocInProject(projectId1, null, 'doc2.tex')
     )
-    docId3 = ObjectId(
+    docId3 = new ObjectId(
       await user.createDocInProject(projectId2, null, 'doc3.tex')
     )
   })

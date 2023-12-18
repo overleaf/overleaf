@@ -432,7 +432,7 @@ describe('Deleting a project', function () {
 
       it('Should remove the project data from mongo', function (done) {
         db.deletedProjects.findOne(
-          { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
+          { 'deleterData.deletedProjectId': new ObjectId(this.projectId) },
           (error, deletedProject) => {
             expect(error).not.to.exist
             expect(deletedProject).to.exist
@@ -454,7 +454,11 @@ describe('Deleting a project', function () {
                 expect(res.statusCode).to.equal(200)
 
                 db.deletedProjects.findOne(
-                  { 'deleterData.deletedProjectId': ObjectId(this.projectId) },
+                  {
+                    'deleterData.deletedProjectId': new ObjectId(
+                      this.projectId
+                    ),
+                  },
                   (error, deletedProject) => {
                     expect(error).not.to.exist
                     expect(deletedProject).to.exist

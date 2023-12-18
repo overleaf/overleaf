@@ -19,7 +19,7 @@ const SandboxedModule = require('sandboxed-module')
 
 describe('UserMembershipsHandler', function () {
   beforeEach(function () {
-    this.user = { _id: ObjectId() }
+    this.user = { _id: new ObjectId() }
 
     this.Institution = { updateMany: sinon.stub().yields(null) }
     this.Subscription = { updateMany: sinon.stub().yields(null) }

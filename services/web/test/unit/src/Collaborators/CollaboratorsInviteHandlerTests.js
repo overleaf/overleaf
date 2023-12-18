@@ -14,7 +14,7 @@ describe('CollaboratorsInviteHandler', function () {
         if (options == null) {
           options = {}
         }
-        this._id = ObjectId()
+        this._id = new ObjectId()
         for (const k in options) {
           const v = options[k]
           this[k] = v
@@ -55,19 +55,19 @@ describe('CollaboratorsInviteHandler', function () {
       },
     })
 
-    this.projectId = ObjectId()
-    this.sendingUserId = ObjectId()
+    this.projectId = new ObjectId()
+    this.sendingUserId = new ObjectId()
     this.sendingUser = {
       _id: this.sendingUserId,
       name: 'Bob',
     }
     this.email = 'user@example.com'
-    this.userId = ObjectId()
+    this.userId = new ObjectId()
     this.user = {
       _id: this.userId,
       email: 'someone@example.com',
     }
-    this.inviteId = ObjectId()
+    this.inviteId = new ObjectId()
     this.token = 'hnhteaosuhtaeosuahs'
     this.privileges = 'readAndWrite'
     this.fakeInvite = {
@@ -114,8 +114,8 @@ describe('CollaboratorsInviteHandler', function () {
   describe('getAllInvites', function () {
     beforeEach(function () {
       this.fakeInvites = [
-        { _id: ObjectId(), one: 1 },
-        { _id: ObjectId(), two: 2 },
+        { _id: new ObjectId(), one: 1 },
+        { _id: new ObjectId(), two: 2 },
       ]
       this.ProjectInvite.find.returns({
         exec: sinon.stub().resolves(this.fakeInvites),
@@ -607,8 +607,8 @@ describe('CollaboratorsInviteHandler', function () {
 
   describe('_tryCancelInviteNotification', function () {
     beforeEach(function () {
-      this.inviteId = ObjectId()
-      this.currentUser = { _id: ObjectId() }
+      this.inviteId = new ObjectId()
+      this.currentUser = { _id: new ObjectId() }
       this.notification = { read: sinon.stub().resolves() }
       this.NotificationsBuilder.promises.projectInvite = sinon
         .stub()
@@ -644,18 +644,18 @@ describe('CollaboratorsInviteHandler', function () {
   describe('_trySendInviteNotification', function () {
     beforeEach(function () {
       this.invite = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         token: 'some_token',
-        sendingUserId: ObjectId(),
+        sendingUserId: new ObjectId(),
         projectId: this.project_id,
         targetEmail: 'user@example.com',
         createdAt: new Date(),
       }
       this.sendingUser = {
-        _id: ObjectId(),
+        _id: new ObjectId(),
         first_name: 'jim',
       }
-      this.existingUser = { _id: ObjectId() }
+      this.existingUser = { _id: new ObjectId() }
       this.UserGetter.promises.getUserByAnyEmail = sinon
         .stub()
         .resolves(this.existingUser)

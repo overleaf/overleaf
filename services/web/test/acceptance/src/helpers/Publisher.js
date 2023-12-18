@@ -22,7 +22,7 @@ class Publisher {
 
   setManagerIds(managerIds, callback) {
     return PublisherModel.findOneAndUpdate(
-      { _id: ObjectId(this._id) },
+      { _id: new ObjectId(this._id) },
       { managerIds },
       callback
     )

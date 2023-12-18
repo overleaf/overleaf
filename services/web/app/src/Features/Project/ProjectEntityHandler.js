@@ -148,8 +148,8 @@ const ProjectEntityHandler = {
   },
 
   /**
-   * @param {ObjectID | string} projectId
-   * @param {ObjectID | string} docId
+   * @param {ObjectId | string} projectId
+   * @param {ObjectId | string} docId
    * @param {Function} callback
    */
   getDocPathByProjectIdAndDocId(projectId, docId, callback) {
@@ -176,7 +176,7 @@ const ProjectEntityHandler = {
 
   /**
    * @param {Project} project
-   * @param {ObjectID | string} docId
+   * @param {ObjectId | string} docId
    * @param {Function} callback
    */
   getDocPathFromProjectByDocId(project, docId, callback) {

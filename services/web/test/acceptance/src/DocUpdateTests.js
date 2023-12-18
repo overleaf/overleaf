@@ -135,7 +135,7 @@ describe('DocUpdate', function () {
 
   describe('unknown doc', function () {
     beforeEach(function () {
-      writeOptions.docId = ObjectId()
+      writeOptions.docId = new ObjectId()
     })
 
     shouldBlockChanges()

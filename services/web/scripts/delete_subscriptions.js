@@ -8,7 +8,7 @@ const { ObjectId } = require('mongodb')
 const run = async () => {
   for (const id of ids) {
     console.log('id', id)
-    const subscription = await Subscription.findOne({ _id: ObjectId(id) })
+    const subscription = await Subscription.findOne({ _id: new ObjectId(id) })
     await SubscriptionUpdater.promises.deleteSubscription(
       subscription,
       deleterData
@@ -33,7 +33,7 @@ const setup = () => {
     process.exit(1)
   }
 
-  deleterData = { id: ObjectId(deleterId) }
+  deleterData = { id: new ObjectId(deleterId) }
 }
 
 setup()

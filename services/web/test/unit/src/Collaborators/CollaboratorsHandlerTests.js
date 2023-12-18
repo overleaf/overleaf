@@ -16,21 +16,21 @@ const sleep = promisify(setTimeout)
 
 describe('CollaboratorsHandler', function () {
   beforeEach(function () {
-    this.userId = ObjectId()
-    this.addingUserId = ObjectId()
+    this.userId = new ObjectId()
+    this.addingUserId = new ObjectId()
     this.project = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       owner_ref: this.addingUserId,
       name: 'Foo',
     }
 
     this.archivedProject = {
-      _id: ObjectId(),
-      archived: [ObjectId(this.userId)],
+      _id: new ObjectId(),
+      archived: [new ObjectId(this.userId)],
     }
 
     this.oldArchivedProject = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       archived: true,
     }
 
@@ -124,7 +124,7 @@ describe('CollaboratorsHandler', function () {
 
     describe('an archived project, archived with a boolean value', function () {
       beforeEach(function () {
-        const archived = [ObjectId(this.userId)]
+        const archived = [new ObjectId(this.userId)]
         this.ProjectHelper.calculateArchivedArray.returns(archived)
 
         this.ProjectMock.expects('findOne')
@@ -394,14 +394,14 @@ describe('CollaboratorsHandler', function () {
 
   describe('transferProjects', function () {
     beforeEach(function () {
-      this.fromUserId = ObjectId()
-      this.toUserId = ObjectId()
+      this.fromUserId = new ObjectId()
+      this.toUserId = new ObjectId()
       this.projects = [
         {
-          _id: ObjectId(),
+          _id: new ObjectId(),
         },
         {
-          _id: ObjectId(),
+          _id: new ObjectId(),
         },
       ]
       this.ProjectMock.expects('find')

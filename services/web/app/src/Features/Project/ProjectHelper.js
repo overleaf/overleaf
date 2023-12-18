@@ -37,7 +37,7 @@ function compilerFromV1Engine(engine) {
  * @returns {boolean}
  */
 function isArchived(project, userId) {
-  userId = ObjectId(userId)
+  userId = new ObjectId(userId)
 
   return (project.archived || []).some(id => id.equals(userId))
 }
@@ -48,7 +48,7 @@ function isArchived(project, userId) {
  * @returns {boolean}
  */
 function isTrashed(project, userId) {
-  userId = ObjectId(userId)
+  userId = new ObjectId(userId)
 
   return (project.trashed || []).some(id => id.equals(userId))
 }
@@ -75,7 +75,7 @@ function _allCollaborators(project) {
 
 function calculateArchivedArray(project, userId, action) {
   let archived = project.archived
-  userId = ObjectId(userId)
+  userId = new ObjectId(userId)
 
   if (archived === true) {
     archived = _allCollaborators(project)

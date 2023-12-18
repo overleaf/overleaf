@@ -52,9 +52,9 @@ describe('ConvertArchivedState', function () {
     })
     projectThree = await userOne.getProject(projectThreeId)
     projectThree.archived = [
-      ObjectId(userOne._id),
-      ObjectId(userTwo._id),
-      ObjectId(userFour._id),
+      new ObjectId(userOne._id),
+      new ObjectId(userTwo._id),
+      new ObjectId(userFour._id),
     ]
     projectThree.collaberator_refs.push(userTwo._id)
     projectThree.tokenAccessReadOnly_refs.push(userFour._id)

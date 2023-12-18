@@ -18,7 +18,7 @@ describe('UserUpdater', function () {
     tk.freeze(Date.now())
 
     this.user = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       name: 'bob',
       email: 'hello@world.com',
       emails: [{ email: 'hello@world.com' }],
@@ -31,9 +31,7 @@ describe('UserUpdater', function () {
     }
     this.mongodb = {
       db: this.db,
-      ObjectId(id) {
-        return id
-      },
+      ObjectId,
     }
 
     this.UserGetter = {

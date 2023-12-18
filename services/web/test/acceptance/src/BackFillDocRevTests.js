@@ -5,9 +5,9 @@ const logger = require('@overleaf/logger/logging-manager')
 const { expect } = require('chai')
 
 describe('BackFillDocRevTests', function () {
-  const docId1 = ObjectId()
-  const docId2 = ObjectId()
-  const docId3 = ObjectId()
+  const docId1 = new ObjectId()
+  const docId2 = new ObjectId()
+  const docId3 = new ObjectId()
 
   beforeEach('insert docs', async function () {
     await db.docs.insertMany([

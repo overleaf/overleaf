@@ -25,9 +25,9 @@ const modulePath = Path.join(
 
 describe('ProjectCollabratecDetailsHandler', function () {
   beforeEach(function () {
-    this.projectId = ObjectId('5bea8747c7bba6012fcaceb3')
-    this.userId = ObjectId('5be316a9c7f6aa03802ea8fb')
-    this.userId2 = ObjectId('5c1794b3f0e89b1d1c577eca')
+    this.projectId = new ObjectId('5bea8747c7bba6012fcaceb3')
+    this.userId = new ObjectId('5be316a9c7f6aa03802ea8fb')
+    this.userId2 = new ObjectId('5c1794b3f0e89b1d1c577eca')
     this.ProjectModel = {}
     this.ProjectCollabratecDetailsHandler = SandboxedModule.require(
       modulePath,
@@ -132,10 +132,10 @@ describe('ProjectCollabratecDetailsHandler', function () {
         it('should call find with project and user id', function () {
           return expect(this.ProjectModel.findOne).to.have.been.calledWithMatch(
             {
-              _id: ObjectId(this.projectId),
+              _id: new ObjectId(this.projectId),
               collabratecUsers: {
                 $elemMatch: {
-                  user_id: ObjectId(this.userId),
+                  user_id: new ObjectId(this.userId),
                 },
               },
             }

@@ -12,9 +12,9 @@ const MODULE_PATH =
 describe('TokenAccessController', function () {
   beforeEach(function () {
     this.token = 'abc123'
-    this.user = { _id: ObjectId() }
+    this.user = { _id: new ObjectId() }
     this.project = {
-      _id: ObjectId(),
+      _id: new ObjectId(),
       tokenAccessReadAndWrite_refs: [],
       tokenAccessReadOnly_refs: [],
     }

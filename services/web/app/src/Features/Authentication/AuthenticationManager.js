@@ -369,7 +369,7 @@ const AuthenticationManager = {
         return callback(error)
       }
       db.users.updateOne(
-        { _id: ObjectId(user._id.toString()) },
+        { _id: new ObjectId(user._id.toString()) },
         {
           $set: {
             hashedPassword: hash,

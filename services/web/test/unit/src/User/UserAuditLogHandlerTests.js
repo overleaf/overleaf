@@ -8,8 +8,8 @@ const MODULE_PATH = '../../../../app/src/Features/User/UserAuditLogHandler'
 
 describe('UserAuditLogHandler', function () {
   beforeEach(function () {
-    this.userId = ObjectId()
-    this.initiatorId = ObjectId()
+    this.userId = new ObjectId()
+    this.initiatorId = new ObjectId()
     this.action = {
       operation: 'clear-sessions',
       initiatorId: this.initiatorId,

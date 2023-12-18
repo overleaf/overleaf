@@ -47,8 +47,8 @@ describe('ProjectHelper', function () {
     describe('project.archived being an array', function () {
       it('returns true if user id is found', function () {
         this.project.archived = [
-          ObjectId('588f3ddae8ebc1bac07c9fa4'),
-          ObjectId('5c41deb2b4ca500153340809'),
+          new ObjectId('588f3ddae8ebc1bac07c9fa4'),
+          new ObjectId('5c41deb2b4ca500153340809'),
         ]
         expect(
           this.ProjectHelper.isArchived(this.project, this.user._id)
@@ -76,8 +76,8 @@ describe('ProjectHelper', function () {
   describe('isTrashed', function () {
     it('returns true if user id is found', function () {
       this.project.trashed = [
-        ObjectId('588f3ddae8ebc1bac07c9fa4'),
-        ObjectId('5c41deb2b4ca500153340809'),
+        new ObjectId('588f3ddae8ebc1bac07c9fa4'),
+        new ObjectId('5c41deb2b4ca500153340809'),
       ]
       expect(
         this.ProjectHelper.isTrashed(this.project, this.user._id)
@@ -107,17 +107,17 @@ describe('ProjectHelper', function () {
         const project = { archived: [] }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
           'ARCHIVE'
         )
-        expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
+        expect(result).to.deep.equal([new ObjectId('5c922599cdb09e014aa7d499')])
       })
 
       it('returns an array without the current user id when unarchiving', function () {
-        const project = { archived: [ObjectId('5c922599cdb09e014aa7d499')] }
+        const project = { archived: [new ObjectId('5c922599cdb09e014aa7d499')] }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
           'UNARCHIVE'
         )
         expect(result).to.deep.equal([])
@@ -130,11 +130,13 @@ describe('ProjectHelper', function () {
           archived: true,
           owner_ref: this.user._id,
           collaberator_refs: [
-            ObjectId('4f2cfb341eb5855a5b000f8b'),
-            ObjectId('5c45f3bd425ead01488675aa'),
+            new ObjectId('4f2cfb341eb5855a5b000f8b'),
+            new ObjectId('5c45f3bd425ead01488675aa'),
           ],
-          readOnly_refs: [ObjectId('5c92243fcdb09e014aa7d487')],
-          tokenAccessReadAndWrite_refs: [ObjectId('5c922599cdb09e014aa7d499')],
+          readOnly_refs: [new ObjectId('5c92243fcdb09e014aa7d487')],
+          tokenAccessReadAndWrite_refs: [
+            new ObjectId('5c922599cdb09e014aa7d499'),
+          ],
           tokenAccessReadOnly_refs: [],
         }
 
@@ -145,10 +147,10 @@ describe('ProjectHelper', function () {
         )
         expect(result).to.deep.equal([
           this.user._id,
-          ObjectId('4f2cfb341eb5855a5b000f8b'),
-          ObjectId('5c45f3bd425ead01488675aa'),
-          ObjectId('5c92243fcdb09e014aa7d487'),
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('4f2cfb341eb5855a5b000f8b'),
+          new ObjectId('5c45f3bd425ead01488675aa'),
+          new ObjectId('5c92243fcdb09e014aa7d487'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
         ])
       })
 
@@ -157,12 +159,14 @@ describe('ProjectHelper', function () {
           archived: true,
           owner_ref: this.user._id,
           collaberator_refs: [
-            ObjectId('4f2cfb341eb5855a5b000f8b'),
-            ObjectId('5c45f3bd425ead01488675aa'),
-            ObjectId('5c922599cdb09e014aa7d499'),
+            new ObjectId('4f2cfb341eb5855a5b000f8b'),
+            new ObjectId('5c45f3bd425ead01488675aa'),
+            new ObjectId('5c922599cdb09e014aa7d499'),
           ],
-          readOnly_refs: [ObjectId('5c92243fcdb09e014aa7d487')],
-          tokenAccessReadAndWrite_refs: [ObjectId('5c922599cdb09e014aa7d499')],
+          readOnly_refs: [new ObjectId('5c92243fcdb09e014aa7d487')],
+          tokenAccessReadAndWrite_refs: [
+            new ObjectId('5c922599cdb09e014aa7d499'),
+          ],
           tokenAccessReadOnly_refs: [],
         }
 
@@ -172,10 +176,10 @@ describe('ProjectHelper', function () {
           'UNARCHIVE'
         )
         expect(result).to.deep.equal([
-          ObjectId('4f2cfb341eb5855a5b000f8b'),
-          ObjectId('5c45f3bd425ead01488675aa'),
-          ObjectId('5c922599cdb09e014aa7d499'),
-          ObjectId('5c92243fcdb09e014aa7d487'),
+          new ObjectId('4f2cfb341eb5855a5b000f8b'),
+          new ObjectId('5c45f3bd425ead01488675aa'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c92243fcdb09e014aa7d487'),
         ])
       })
     })
@@ -185,17 +189,17 @@ describe('ProjectHelper', function () {
         const project = { archived: false }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
           'ARCHIVE'
         )
-        expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
+        expect(result).to.deep.equal([new ObjectId('5c922599cdb09e014aa7d499')])
       })
 
       it('returns an empty array when unarchiving', function () {
         const project = { archived: false }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
           'UNARCHIVE'
         )
         expect(result).to.deep.equal([])
@@ -207,17 +211,17 @@ describe('ProjectHelper', function () {
         const project = { archived: undefined }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
           'ARCHIVE'
         )
-        expect(result).to.deep.equal([ObjectId('5c922599cdb09e014aa7d499')])
+        expect(result).to.deep.equal([new ObjectId('5c922599cdb09e014aa7d499')])
       })
 
       it('returns an empty array when unarchiving', function () {
         const project = { archived: undefined }
         const result = this.ProjectHelper.calculateArchivedArray(
           project,
-          ObjectId('5c922599cdb09e014aa7d499'),
+          new ObjectId('5c922599cdb09e014aa7d499'),
           'UNARCHIVE'
         )
         expect(result).to.deep.equal([])

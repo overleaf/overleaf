@@ -181,12 +181,12 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       const query = {
-        _id: ObjectId(this.subscription._id),
+        _id: new ObjectId(this.subscription._id),
         customAccount: true,
       }
       const update = {
-        $set: { admin_id: ObjectId(this.otherUserId) },
-        $addToSet: { manager_ids: ObjectId(this.otherUserId) },
+        $set: { admin_id: new ObjectId(this.otherUserId) },
+        $addToSet: { manager_ids: new ObjectId(this.otherUserId) },
       }
       this.SubscriptionModel.updateOne.should.have.been.calledOnce
       this.SubscriptionModel.updateOne.should.have.been.calledWith(
@@ -201,13 +201,13 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       const query = {
-        _id: ObjectId(this.subscription._id),
+        _id: new ObjectId(this.subscription._id),
         customAccount: true,
       }
       const update = {
         $set: {
-          admin_id: ObjectId(this.otherUserId),
-          manager_ids: [ObjectId(this.otherUserId)],
+          admin_id: new ObjectId(this.otherUserId),
+          manager_ids: [new ObjectId(this.otherUserId)],
         },
       }
       this.SubscriptionModel.updateOne.should.have.been.calledOnce
@@ -710,10 +710,10 @@ describe('SubscriptionUpdater', function () {
   describe('deleteSubscription', function () {
     beforeEach(async function () {
       this.subscription = {
-        _id: ObjectId().toString(),
+        _id: new ObjectId().toString(),
         mock: 'subscription',
-        admin_id: ObjectId(),
-        member_ids: [ObjectId(), ObjectId(), ObjectId()],
+        admin_id: new ObjectId(),
+        member_ids: [new ObjectId(), new ObjectId(), new ObjectId()],
       }
       await this.SubscriptionUpdater.promises.deleteSubscription(
         this.subscription,

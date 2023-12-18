@@ -63,8 +63,8 @@ describe('Authentication', function () {
       const auditLogEntry = auditLog[0]
       expect(auditLogEntry).to.exist
       expect(auditLogEntry.timestamp).to.exist
-      expect(auditLogEntry.initiatorId).to.deep.equal(ObjectId(user.id))
-      expect(auditLogEntry.userId).to.deep.equal(ObjectId(user.id))
+      expect(auditLogEntry.initiatorId).to.deep.equal(new ObjectId(user.id))
+      expect(auditLogEntry.userId).to.deep.equal(new ObjectId(user.id))
       expect(auditLogEntry.operation).to.equal('login')
       expect(auditLogEntry.info).to.deep.equal({
         method: 'Password login',
@@ -96,8 +96,8 @@ describe('Authentication', function () {
       const auditLogEntry = auditLog.pop()
       expect(auditLogEntry).to.exist
       expect(auditLogEntry.timestamp).to.exist
-      expect(auditLogEntry.initiatorId).to.deep.equal(ObjectId(user.id))
-      expect(auditLogEntry.userId).to.deep.equal(ObjectId(user.id))
+      expect(auditLogEntry.initiatorId).to.deep.equal(new ObjectId(user.id))
+      expect(auditLogEntry.userId).to.deep.equal(new ObjectId(user.id))
       expect(auditLogEntry.operation).to.equal('failed-password-match')
       expect(auditLogEntry.info).to.deep.equal({
         method: 'Password login',
