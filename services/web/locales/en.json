@@ -1401,6 +1401,7 @@
   "project_too_much_editable_text": "This project has too much editable text, please try to reduce it.",
   "project_url": "Affected project URL",
   "projects": "Projects",
+  "projects_count": "Projects count",
   "projects_list": "Projects list",
   "provide_details_of_your_sso_configuration": "Add, edit, or delete your Identity Provider’s SAML metadata.",
   "pt": "Portuguese",
