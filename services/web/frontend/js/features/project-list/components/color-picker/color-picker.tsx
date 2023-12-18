@@ -45,7 +45,7 @@ function ColorPickerItem({ color, name }: ColorPickerItemProps) {
       onKeyDown={handleKeyDown}
     >
       <span id={name} className="sr-only">
-        {t('select_color', { color })}
+        {t('select_color', { name })}
       </span>
       {!pickingCustomColor && color === selectedColor && (
         <Icon type="check" className="color-picker-item-icon" />

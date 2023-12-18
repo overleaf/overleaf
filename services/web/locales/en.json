@@ -1612,7 +1612,7 @@
   "select_an_output_file": "Select an Output File",
   "select_an_output_file_figure_modal": "Select an output file",
   "select_cells_in_a_single_row_to_merge": "Select cells in a single row to merge",
-  "select_color": "Select color __color__",
+  "select_color": "Select color __name__",
   "select_folder_from_project": "Select folder from project",
   "select_from_output_files": "select from output files",
   "select_from_project_files": "select from project files",

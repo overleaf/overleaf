@@ -918,6 +918,10 @@
   display: inline-block;
   vertical-align: middle;
 
+  &:focus-visible {
+    box-shadow: 0 0 0 2px @white, 0 0 0 3px @blue-50, 0 0 0 5px @blue-30;
+  }
+
   &.more-button {
     border: 1px solid @gray-dark;
 
