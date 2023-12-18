@@ -51,13 +51,13 @@ const config = {
       items: [
         {
           feature: 'compile_timeout_short',
-          info: 'compile_timeout_short_info',
+          info: 'compile_timeout_short_info_basic',
           value: 'str',
           plans: {
-            free: 'one_minute',
-            collaborator: 'four_minutes',
-            professional: 'four_minutes',
-            student: 'four_minutes',
+            free: 'basic',
+            collaborator: '12x_basic',
+            professional: '12x_basic',
+            student: '12x_basic',
           },
         },
         {

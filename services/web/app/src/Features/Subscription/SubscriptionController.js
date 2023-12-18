@@ -133,24 +133,6 @@ async function plansPage(req, res) {
     plansPageViewSegmentation
   )
 
-  let showNewCompileTimeoutVariant = false
-  const compileAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'compile-backend-class-n2d'
-  )
-  if (compileAssignment?.variant === 'n2d') {
-    const timeoutAssignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'compile-timeout-20s'
-    )
-    if (timeoutAssignment?.variant === '20s') {
-      // there may be anonymous/logged out users in this group
-      showNewCompileTimeoutVariant = true
-    }
-  }
-
   res.render('subscriptions/plans', {
     title: 'plans_and_pricing',
     currentView,
@@ -168,7 +150,6 @@ async function plansPage(req, res) {
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
     showInrGeoBanner,
     annualTrialsAssignment: annualTrialsAssignment?.variant,
-    showNewCompileTimeoutVariant,
   })
 }
 
@@ -371,24 +352,6 @@ async function interstitialPaymentPage(req, res) {
         templatePath = 'subscriptions/interstitial-payment'
     }
 
-    let showNewCompileTimeoutVariant = false
-    const compileAssignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'compile-backend-class-n2d'
-    )
-    if (compileAssignment?.variant === 'n2d') {
-      const timeoutAssignment = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'compile-timeout-20s'
-      )
-      if (timeoutAssignment?.variant === '20s') {
-        // there may be anonymous/logged out users in this group
-        showNewCompileTimeoutVariant = true
-      }
-    }
-
     res.render(templatePath, {
       title: 'subscribe',
       itm_content: req.query?.itm_content,
@@ -398,7 +361,6 @@ async function interstitialPaymentPage(req, res) {
       interstitialPaymentConfig,
       showSkipLink,
       showInrGeoBanner,
-      showNewCompileTimeoutVariant,
     })
   }
 }

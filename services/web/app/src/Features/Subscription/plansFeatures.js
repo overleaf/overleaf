@@ -33,12 +33,12 @@ const individualPlans = [
     items: [
       {
         feature: 'compile_timeout_short',
-        info: 'compile_timeout_short_info',
+        info: 'compile_timeout_short_info_basic',
         value: 'str',
         plans: {
-          free: 'one_minute',
-          collaborator: 'four_minutes',
-          professional: 'four_minutes',
+          free: 'basic',
+          collaborator: '12x_basic',
+          professional: '12x_basic',
         },
       },
       {
@@ -302,12 +302,22 @@ const groupPlans = [
     items: [
       {
         feature: 'compile_timeout_short',
-        info: 'compile_timeout_short_info',
+        info: 'compile_timeout_short_info_basic',
         value: 'str',
         plans: {
           group_standard: 'four_minutes',
           group_professional: 'four_minutes',
           organization: 'four_minutes',
+        },
+      },
+      {
+        feature: 'compile_servers',
+        info: 'compile_servers_info',
+        value: 'str',
+        plans: {
+          group_standard: 'fastest',
+          group_professional: 'fastest',
+          organization: 'fastest',
         },
       },
       {
@@ -482,11 +492,20 @@ const studentPlans = [
     items: [
       {
         feature: 'compile_timeout_short',
-        info: 'compile_timeout_short_info',
+        info: 'compile_timeout_short_info_basic',
         value: 'str',
         plans: {
-          free: 'one_minute',
-          student: 'four_minutes',
+          free: 'basic',
+          student: '12x_basic',
+        },
+      },
+      {
+        feature: 'compile_servers',
+        info: 'compile_servers_info',
+        value: 'str',
+        plans: {
+          free: 'fast',
+          student: 'fastest',
         },
       },
       {
