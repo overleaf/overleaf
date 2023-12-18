@@ -25,6 +25,7 @@ const commandSuggestions = [
   ['\\href', { name: 'hyperref', command: '\\usepackage{hyperref}' }],
   ['\\texorpdfstring', { name: 'hyperref', command: '\\usepackage{hyperref}' }],
   ['\\phantomsection', { name: 'hyperref', command: '\\usepackage{hyperref}' }],
+  ['\\arraybackslash', { name: 'array', command: '\\usepackage{array}' }],
 ]
 
 const environmentSuggestions = [

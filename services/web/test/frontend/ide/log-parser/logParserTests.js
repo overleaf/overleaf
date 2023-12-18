@@ -400,6 +400,23 @@ describe('logParser', function (done) {
       ],
     ])
   })
+
+  it('should parse errors without blank lines between them', function () {
+    const { errors, warnings } = parseLatexLog('undefined-control-sequence.log')
+    expect(warnings).to.be.empty
+    expect(errors.map(x => [x.line, x.message, x.file])).to.deep.equal([
+      [3, 'Undefined control sequence.', './main.tex'],
+      [4, 'Undefined control sequence.', './main.tex'],
+      [5, 'Undefined control sequence.', './main.tex'],
+      [5, 'LaTeX Error: Illegal character in array arg.', './main.tex'],
+      [5, 'LaTeX Error: Illegal character in array arg.', './main.tex'],
+      [6, 'Undefined control sequence.', './main.tex'],
+      [7, 'Undefined control sequence.', './main.tex'],
+      [8, 'Undefined control sequence.', './main.tex'],
+      [8, 'LaTeX Error: Illegal character in array arg.', './main.tex'],
+      [8, 'LaTeX Error: Illegal character in array arg.', './main.tex'],
+    ])
+  })
 })
 
 function readLog(filename) {

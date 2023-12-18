@@ -74,11 +74,11 @@ export default class LatexParser {
           .join('\n')
         this.currentError.content += '\n'
         this.currentError.content += this.log
-          .linesUpToNextWhitespaceLine()
+          .linesUpToNextWhitespaceLine(true)
           .join('\n')
         this.currentError.content += '\n'
         this.currentError.content += this.log
-          .linesUpToNextWhitespaceLine()
+          .linesUpToNextWhitespaceLine(true)
           .join('\n')
         this.currentError.raw += this.currentError.content
         const lineNo = this.currentError.raw.match(/l\.([0-9]+)/)
@@ -372,17 +372,22 @@ class LogText {
     this.row--
   }
 
-  linesUpToNextWhitespaceLine() {
-    return this.linesUpToNextMatchingLine(/^ *$/)
+  linesUpToNextWhitespaceLine(stopAtError) {
+    return this.linesUpToNextMatchingLine(/^ *$/, stopAtError)
   }
 
-  linesUpToNextMatchingLine(match) {
+  linesUpToNextMatchingLine(match, stopAtError) {
     const lines = []
 
     while (true) {
       const nextLine = this.nextLine()
 
       if (nextLine === false) {
+        break
+      }
+
+      if (stopAtError && nextLine.match(/^! /)) {
+        this.rewindLine()
         break
       }
 
