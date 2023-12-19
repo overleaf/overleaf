@@ -181,7 +181,6 @@
   "compile_terminated_by_user": "Kompileringen avbröts med ’Stoppa kompilering’-knappen. Du kan titta i råloggarna för att se var kompileringen avbröts.",
   "compile_timeout": "Timeout för kompilering (minuter)",
   "compile_timeout_short": "Timeout för kompilering",
-  "compile_timeout_short_info": "Detta är hur mycket tid du får för att kompilera ditt projekt på Overleafs servrar. För korta och enkla projekt bör 1 minut räcka, men du kan behöva längre tid för komplexa eller längre projekt.",
   "compiler": "Kompilator",
   "compiling": "Kompilerar",
   "complete": "Färdigt",
