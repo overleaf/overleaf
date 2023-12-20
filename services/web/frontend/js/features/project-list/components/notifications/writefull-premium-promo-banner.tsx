@@ -20,11 +20,7 @@ function WritefullPremiumPromoBanner({
   onDismiss: () => void
 }) {
   const handleClose = useCallback(() => {
-    customLocalStorage.setItem(
-      'has_dismissed_writefull_promo_banner',
-      new Date()
-    )
-    customLocalStorage.removeItem('writefull_promo_scheduled_at')
+    customLocalStorage.setItem('has_dismissed_writefull_promo_banner', true)
     setShow(false)
     sendMB('promo-dismiss', eventSegmentation)
     onDismiss()

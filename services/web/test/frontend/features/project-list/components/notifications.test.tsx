@@ -1027,18 +1027,7 @@ describe('<UserNotifications />', function () {
             writefull: { enabled: true },
           })
         })
-
-        it('schedules the notification for the next day', function () {
-          renderWithinProjectListProvider(UserNotifications)
-          expect(localStorage.getItem('writefull_promo_scheduled_at')).to.exist
-          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
-        })
-
-        it('shows the banner after it has been scheduled', function () {
-          localStorage.setItem(
-            'writefull_promo_scheduled_at',
-            new Date(Date.now() - 1000)
-          )
+        it('shows the banner', function () {
           renderWithinProjectListProvider(UserNotifications)
           const ctaLink = screen.getByRole('link', {
             name: 'Get Writefull Premium',
@@ -1049,10 +1038,6 @@ describe('<UserNotifications />', function () {
         })
 
         it('dismisses the banner when the close button is clicked', function () {
-          localStorage.setItem(
-            'writefull_promo_scheduled_at',
-            new Date(Date.now() - 1000)
-          )
           renderWithinProjectListProvider(UserNotifications)
           screen.getByRole('link', { name: /Writefull/ })
           const closeButton = screen.getByRole('button', { name: 'Close' })
@@ -1060,15 +1045,9 @@ describe('<UserNotifications />', function () {
           expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
           expect(localStorage.getItem('has_dismissed_writefull_promo_banner'))
             .to.exist
-          expect(localStorage.getItem('writefull_promo_scheduled_at')).not.to
-            .exist
         })
 
         it("doesn't show the banner if it has been dismissed", function () {
-          localStorage.setItem(
-            'writefull_promo_scheduled_at',
-            new Date(Date.now() - 1000)
-          )
           localStorage.setItem(
             'has_dismissed_writefull_promo_banner',
             new Date(Date.now() - 500)

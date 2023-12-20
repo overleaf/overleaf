@@ -15,7 +15,6 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
-const WRITEFULL_PROMO_DELAY_MS = 24 * 60 * 60 * 1000 // 1 day
 const isChromium = () =>
   (window.navigator as any).userAgentData?.brands?.some(
     (item: { brand: string }) => item.brand === 'Chromium'
@@ -62,21 +61,9 @@ function UserNotifications() {
 
     let show = false
     if (writefullIntegrationSplitTestEnabled) {
-      // Show the Writefull promo 1 day after it has been enabled
+      // only show to users who have writefull installed once the integration is live
       const user = getMeta('ol-user')
-      if (user.writefull?.enabled) {
-        const scheduledAt = customLocalStorage.getItem(
-          'writefull_promo_scheduled_at'
-        )
-        if (scheduledAt == null) {
-          customLocalStorage.setItem(
-            'writefull_promo_scheduled_at',
-            new Date(Date.now() + WRITEFULL_PROMO_DELAY_MS).toISOString()
-          )
-        } else if (new Date() >= new Date(scheduledAt)) {
-          show = true
-        }
-      }
+      show = user.writefull?.enabled === true
     } else {
       // Only show the Writefull extension promo on Chrome browsers
       show = isChromium() && getMeta('ol-showWritefullPromoBanner')
