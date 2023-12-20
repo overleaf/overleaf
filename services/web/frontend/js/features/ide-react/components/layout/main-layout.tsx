@@ -24,7 +24,6 @@ export const MainLayout: FC = () => {
     isOpen: sidebarIsOpen,
     setIsOpen: setSidebarIsOpen,
     panelRef: sidebarPanelRef,
-    handleLayout: handleSidebarLayout,
     togglePane: toggleSidebar,
     handlePaneExpand: handleSidebarExpand,
     handlePaneCollapse: handleSidebarCollapse,
@@ -35,7 +34,6 @@ export const MainLayout: FC = () => {
   const {
     isOpen: chatIsOpen,
     panelRef: chatPanelRef,
-    handleLayout: handleChatLayout,
     togglePane: toggleChat,
     resizing: chatResizing,
     setResizing: setChatResizing,
@@ -57,7 +55,6 @@ export const MainLayout: FC = () => {
         <PanelGroup
           autoSaveId="ide-outer-layout"
           direction="horizontal"
-          onLayout={handleSidebarLayout}
           className={classNames({
             'ide-panel-group-resizing': sidebarResizing || chatResizing,
           })}
@@ -94,11 +91,7 @@ export const MainLayout: FC = () => {
           </HorizontalResizeHandle>
 
           <Panel id="panel-outer-main" order={2}>
-            <PanelGroup
-              autoSaveId="ide-inner-layout"
-              direction="horizontal"
-              onLayout={handleChatLayout}
-            >
+            <PanelGroup autoSaveId="ide-inner-layout" direction="horizontal">
               <Panel className="ide-react-panel" id="panel-main" order={1}>
                 {view === 'history' ? (
                   <HistoryProvider>
