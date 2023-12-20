@@ -49,6 +49,7 @@ function UserNotifications() {
   const writefullIntegrationSplitTestEnabled = isSplitTestEnabled(
     'writefull-integration'
   )
+  const user = getMeta('ol-user')
 
   // Temporary workaround to prevent also showing groups/enterprise banner
   const [showWritefull, setShowWritefull] = useState(() => {
@@ -59,23 +60,21 @@ function UserNotifications() {
       return false
     }
 
-    let show = false
-    if (writefullIntegrationSplitTestEnabled) {
-      // only show to users who have writefull installed once the integration is live
-      const user = getMeta('ol-user')
-      show = user.writefull?.enabled === true
-    } else {
-      // Only show the Writefull extension promo on Chrome browsers
-      show = isChromium() && getMeta('ol-showWritefullPromoBanner')
-    }
+    const show =
+      user.writefull?.enabled === true || // show to any users who have writefull enabled regardless of split test
+      (!writefullIntegrationSplitTestEnabled && // show old banner to users who are not in the split test, who are on chrome and havent dismissed
+        isChromium() &&
+        getMeta('ol-showWritefullPromoBanner'))
 
     if (show) {
       sendMB('promo-prompt', {
         location: 'dashboard-banner',
         page: '/project',
-        name: writefullIntegrationSplitTestEnabled
-          ? 'writefull-premium'
-          : 'writefull',
+        name:
+          user.writefull?.enabled === true ||
+          writefullIntegrationSplitTestEnabled
+            ? 'writefull-premium'
+            : 'writefull',
       })
     }
 
@@ -111,7 +110,7 @@ function UserNotifications() {
             splitTestName={inrGeoBannerSplitTestName}
           />
         ) : null}
-        {writefullIntegrationSplitTestEnabled ? (
+        {writefullIntegrationSplitTestEnabled || user.writefull?.enabled ? (
           <WritefullPremiumPromoBanner
             show={showWritefull}
             setShow={setShowWritefull}

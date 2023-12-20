@@ -982,6 +982,9 @@ describe('<UserNotifications />', function () {
         window.metaAttributesCache.set('ol-splitTestVariants', {
           'writefull-integration': 'default',
         })
+        window.metaAttributesCache.set('ol-user', {
+          writefull: { enabled: false },
+        })
       })
 
       it('shows the older banner', function () {
@@ -1033,7 +1036,7 @@ describe('<UserNotifications />', function () {
             name: 'Get Writefull Premium',
           })
           expect(ctaLink.getAttribute('href')).to.equal(
-            'https://my.writefull.com/plans'
+            'https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans'
           )
         })
 

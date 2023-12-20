@@ -51,6 +51,8 @@ describe('<ProjectListRoot />', function () {
     window.metaAttributesCache.set('ol-userEmails', [
       { email: 'test@overleaf.com', default: true },
     ])
+    // we need a blank user here since its used in checking if we should display certain ads
+    window.metaAttributesCache.set('ol-user', {})
     window.user_id = userId
     assignStub = sinon.stub()
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
