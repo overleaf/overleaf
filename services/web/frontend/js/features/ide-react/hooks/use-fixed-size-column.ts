@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import {
   ImperativePanelHandle,
   PanelGroupOnLayout,
 } from 'react-resizable-panels'
 
-export default function useFixedSizeColumn(isOpen: boolean) {
-  const fixedPanelRef = useRef<ImperativePanelHandle>(null)
-
+export default function useFixedSizeColumn(
+  isOpen: boolean,
+  fixedPanelRef: RefObject<ImperativePanelHandle>
+) {
   const fixedPanelSizeRef = useRef<number>(0)
   const [initialLayoutDone, setInitialLayoutDone] = useState(false)
 
@@ -15,7 +16,7 @@ export default function useFixedSizeColumn(isOpen: boolean) {
       fixedPanelSizeRef.current = fixedPanelRef.current.getSize()
       setInitialLayoutDone(true)
     }
-  }, [])
+  }, [fixedPanelRef])
 
   useEffect(() => {
     if (!isOpen) {
@@ -51,5 +52,5 @@ export default function useFixedSizeColumn(isOpen: boolean) {
     return () => resizeObserver.unobserve(panelGroupElement)
   }, [fixedPanelRef, initialLayoutDone, isOpen])
 
-  return { fixedPanelRef, handleLayout }
+  return handleLayout
 }

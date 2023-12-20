@@ -9,7 +9,7 @@ import { useOutlinePane } from '@/features/ide-react/hooks/use-outline-pane'
 export default function EditorSidebar() {
   const { view } = useLayoutContext()
 
-  const { outlineDisabled, outlineRef } = useOutlinePane()
+  const { outlineEnabled, outlinePanelRef } = useOutlinePane()
 
   return (
     <aside
@@ -28,7 +28,7 @@ export default function EditorSidebar() {
           <FileTree />
         </Panel>
 
-        <VerticalResizeHandle disabled={outlineDisabled} />
+        <VerticalResizeHandle disabled={!outlineEnabled} />
 
         <Panel
           defaultSize={50}
@@ -36,7 +36,7 @@ export default function EditorSidebar() {
           id="panel-outline"
           order={2}
           collapsible
-          ref={outlineRef}
+          ref={outlinePanelRef}
           style={{ minHeight: 32 }} // keep the header visible
         >
           <OutlineContainer />

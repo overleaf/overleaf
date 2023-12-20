@@ -23,7 +23,7 @@ export const MainLayout: FC = () => {
   const {
     isOpen: sidebarIsOpen,
     setIsOpen: setSidebarIsOpen,
-    fixedPanelRef: sidebarPanelRef,
+    panelRef: sidebarPanelRef,
     handleLayout: handleSidebarLayout,
     togglePane: toggleSidebar,
     handlePaneExpand: handleSidebarExpand,
@@ -34,7 +34,7 @@ export const MainLayout: FC = () => {
 
   const {
     isOpen: chatIsOpen,
-    fixedPanelRef: chatPanelRef,
+    panelRef: chatPanelRef,
     handleLayout: handleChatLayout,
     togglePane: toggleChat,
     resizing: chatResizing,

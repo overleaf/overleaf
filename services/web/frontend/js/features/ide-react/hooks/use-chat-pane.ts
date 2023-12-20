@@ -1,13 +1,16 @@
 import { useLayoutContext } from '@/shared/context/layout-context'
 import useFixedSizeColumn from '@/features/ide-react/hooks/use-fixed-size-column'
 import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
+import { ImperativePanelHandle } from 'react-resizable-panels'
 
 export const useChatPane = () => {
   const { chatIsOpen: isOpen, setChatIsOpen: setIsOpen } = useLayoutContext()
   const [resizing, setResizing] = useState(false)
-  const { fixedPanelRef, handleLayout } = useFixedSizeColumn(isOpen)
-  useCollapsiblePanel(isOpen, fixedPanelRef)
+  const panelRef = useRef<ImperativePanelHandle>(null)
+
+  const handleLayout = useFixedSizeColumn(isOpen, panelRef)
+  useCollapsiblePanel(isOpen, panelRef)
 
   const togglePane = useCallback(() => {
     setIsOpen(value => !value)
@@ -23,7 +26,7 @@ export const useChatPane = () => {
 
   return {
     isOpen,
-    fixedPanelRef,
+    panelRef,
     handleLayout,
     resizing,
     setResizing,
