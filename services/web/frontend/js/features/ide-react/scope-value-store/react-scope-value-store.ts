@@ -60,7 +60,7 @@ export class ReactScopeValueStore implements ScopeValueStore {
   private readonly items = new Map<string, ScopeValueStoreValue>()
   private readonly persisters: Map<string, Persister> = new Map()
 
-  private watcherUpdates: WatcherUpdate[] = []
+  private watcherUpdates = new Map<string, WatcherUpdate>()
   private watcherUpdateTimer: number | null = null
   private allowedNonExistentPaths: AllowedNonExistentPath[] = []
 
@@ -129,8 +129,8 @@ export class ReactScopeValueStore implements ScopeValueStore {
       this.watcherUpdateTimer = null
     }
     // Clone watcherUpdates in case a watcher creates new watcherUpdates
-    const watcherUpdates = [...this.watcherUpdates]
-    this.watcherUpdates = []
+    const watcherUpdates = [...this.watcherUpdates.values()]
+    this.watcherUpdates = new Map()
     for (const { value, watchers } of watcherUpdates) {
       for (const watcher of watchers) {
         if (!watcher.removed) {
@@ -152,7 +152,7 @@ export class ReactScopeValueStore implements ScopeValueStore {
       path,
       watchers: [...watchers],
     }
-    this.watcherUpdates.push(update)
+    this.watcherUpdates.set(path, update)
     if (!this.watcherUpdateTimer) {
       this.watcherUpdateTimer = window.setTimeout(() => {
         this.watcherUpdateTimer = null
@@ -166,6 +166,7 @@ export class ReactScopeValueStore implements ScopeValueStore {
   }
 
   private setValue<T>(path: string, value: T): void {
+    debugConsole.log('setValue', path, value)
     let item = this.items.get(path)
     if (item === undefined) {
       item = { value, watchers: [] }

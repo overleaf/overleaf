@@ -71,7 +71,7 @@ const EditorNavigationToolbarRoot = React.memo(
       eventTracking.sendMB('navigation-clicked-chat', {
         action: isOpentoString(!chatIsOpen),
       })
-      setChatIsOpen(value => !value)
+      setChatIsOpen(!chatIsOpen)
     }, [chatIsOpen, setChatIsOpen, markMessagesAsRead])
 
     const toggleReviewPanelOpen = useCallback(
