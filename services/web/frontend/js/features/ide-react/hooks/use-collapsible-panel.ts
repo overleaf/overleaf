@@ -5,29 +5,15 @@ export default function useCollapsiblePanel(
   panelIsOpen: boolean,
   panelRef: RefObject<ImperativePanelHandle>
 ) {
-  // store the expanded height in localStorage when collapsing,
-  // so it can be restored when expanding after reloading the page
+  // collapse the panel when it is toggled closed (including on initial layout)
   useEffect(() => {
     const panelHandle = panelRef.current
 
     if (panelHandle) {
-      const storageKey = `ide-panel.expanded-size.${panelHandle.getId()}`
-      if (!panelIsOpen) {
-        // collapsing, so store the current size if > 0
-        const size = panelHandle.getSize()
-        if (size > 0) {
-          localStorage.setItem(storageKey, String(size))
-        }
-
-        panelHandle.collapse()
+      if (panelIsOpen) {
+        panelHandle.expand()
       } else {
-        const storedKey = localStorage.getItem(storageKey)
-
-        if (storedKey) {
-          panelHandle.resize(Number(storedKey))
-        } else {
-          panelHandle.expand()
-        }
+        panelHandle.collapse()
       }
     }
   }, [panelIsOpen, panelRef])

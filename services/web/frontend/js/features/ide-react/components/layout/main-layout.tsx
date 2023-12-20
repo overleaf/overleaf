@@ -65,7 +65,7 @@ export const MainLayout: FC = () => {
             id="panel-sidebar"
             order={1}
             defaultSize={10}
-            minSize={10}
+            minSize={5}
             maxSize={30}
             collapsible
             onCollapse={handleSidebarCollapse}
@@ -114,7 +114,7 @@ export const MainLayout: FC = () => {
                 id="panel-chat"
                 order={2}
                 defaultSize={20}
-                minSize={10}
+                minSize={5}
                 maxSize={30}
                 collapsible
                 onCollapse={handleChatCollapse}
