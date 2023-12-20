@@ -639,6 +639,7 @@ CodeMirror
 // rule is added automatically (inline and not configurable), the only workaround is to use `!important`.
 .editor-container {
   overflow: visible !important;
+  container-type: inline-size;
 }
 
 .pdf-preview-messages {
@@ -757,4 +758,11 @@ grammarly-extension[data-grammarly-shadow-root='true'] {
   margin: 48px 64px;
   width: 80%;
   max-width: 560px;
+}
+
+/* If the container is smaller than 400px */
+@container (max-width: 400px) {
+  .writefull-notification {
+    display: none;
+  }
 }
