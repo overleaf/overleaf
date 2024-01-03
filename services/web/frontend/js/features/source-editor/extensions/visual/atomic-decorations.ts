@@ -67,6 +67,12 @@ import { TableRenderingErrorWidget } from './visual-widgets/table-rendering-erro
 import { GraphicsWidget } from './visual-widgets/graphics'
 import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 import { PreviewPath } from '../../../../../../types/preview-path'
+import {
+  generateTable,
+  ParsedTableData,
+  validateParsedTable,
+} from '../../components/table-generator/utils'
+import { debugConsole } from '@/utils/debugging'
 
 type Options = {
   previewByPath: (path: string) => PreviewPath | null
@@ -324,21 +330,29 @@ export const atomicDecorations = (options: Options) => {
                 tabularNode.parent,
                 tableNode
               )
-              const tabularWidget = new TabularWidget(
-                tabularNode,
-                state.doc.sliceString(
-                  (tableNode ?? tabularNode).from,
-                  (tableNode ?? tabularNode).to
-                ),
-                tableNode,
-                directChild,
-                state
-              )
 
-              if (tabularWidget.isValid()) {
+              let parsedTableData: ParsedTableData | null = null
+              let validTable = false
+              try {
+                parsedTableData = generateTable(tabularNode, state)
+                validTable = validateParsedTable(parsedTableData)
+              } catch (e) {
+                debugConsole.error(e)
+              }
+
+              if (parsedTableData && validTable) {
                 decorations.push(
                   Decoration.replace({
-                    widget: tabularWidget,
+                    widget: new TabularWidget(
+                      parsedTableData,
+                      tabularNode,
+                      state.doc.sliceString(
+                        (tableNode ?? tabularNode).from,
+                        (tableNode ?? tabularNode).to
+                      ),
+                      tableNode,
+                      directChild
+                    ),
                     block: true,
                   }).range(nodeRef.from, nodeRef.to)
                 )

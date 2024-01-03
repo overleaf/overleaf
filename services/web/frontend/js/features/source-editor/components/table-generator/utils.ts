@@ -451,6 +451,27 @@ export function generateTable(
   }
 }
 
+export const validateParsedTable = (parseResult: ParsedTableData) => {
+  for (const row of parseResult.table.rows) {
+    const rowLength = row.cells.reduce(
+      (acc, cell) => acc + (cell.multiColumn?.columnSpan ?? 1),
+      0
+    )
+    for (const cell of row.cells) {
+      if (
+        cell.multiColumn?.columns.specification &&
+        cell.multiColumn.columns.specification.length !== 1
+      ) {
+        return false
+      }
+    }
+    if (rowLength !== parseResult.table.columns.length) {
+      return false
+    }
+  }
+  return true
+}
+
 export function parseTableEnvironment(tableNode: SyntaxNode) {
   const tableEnvironment: TableEnvironmentData = {
     table: { from: tableNode.from, to: tableNode.to },
