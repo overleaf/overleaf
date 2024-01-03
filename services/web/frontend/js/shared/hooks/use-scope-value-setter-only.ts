@@ -19,7 +19,7 @@ export default function useScopeValueSetterOnly<T = any>(
   path: string, // dot '.' path of a property in the Angular scope.
   defaultValue?: T
 ): [T | undefined, Dispatch<SetStateAction<T | undefined>>] {
-  const { $scope } = useIdeContext()
+  const { scopeStore } = useIdeContext()
 
   const [value, setValue] = useState<T | undefined>(defaultValue)
 
@@ -27,11 +27,11 @@ export default function useScopeValueSetterOnly<T = any>(
     (newValue: SetStateAction<T | undefined>) => {
       setValue(val => {
         const actualNewValue = _.isFunction(newValue) ? newValue(val) : newValue
-        $scope.$applyAsync(() => _.set($scope, path, actualNewValue))
+        scopeStore.set(path, actualNewValue)
         return actualNewValue
       })
     },
-    [path, $scope]
+    [path, scopeStore]
   )
 
   return [value, scopeSetter]
