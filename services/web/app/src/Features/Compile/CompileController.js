@@ -637,6 +637,14 @@ module.exports = CompileController = {
               // Ignore noisy spurious error
               return
             }
+            if (
+              err instanceof RequestFailedError &&
+              ['sync-to-code', 'sync-to-pdf', 'output-file'].includes(action)
+            ) {
+              // Ignore noisy error
+              // https://github.com/overleaf/internal/issues/15201
+              return
+            }
             logger.warn(
               {
                 err,
