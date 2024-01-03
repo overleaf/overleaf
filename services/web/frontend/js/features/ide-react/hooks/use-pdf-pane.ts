@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { ImperativePanelHandle } from 'react-resizable-panels'
 import useCollapsiblePanel from '@/features/ide-react/hooks/use-collapsible-panel'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -11,13 +11,6 @@ export const usePdfPane = () => {
   const pdfIsOpen = pdfLayout === 'sideBySide' || view === 'pdf'
 
   useCollapsiblePanel(pdfIsOpen, pdfPanelRef)
-
-  // close a detached PDF when the detacher PDF view opens
-  useEffect(() => {
-    if (pdfIsOpen && detachRole === 'detacher') {
-      reattach()
-    }
-  }, [detachRole, pdfIsOpen, reattach])
 
   // triggered by a double-click on the resizer
   const togglePdfPane = useCallback(() => {
@@ -32,12 +25,16 @@ export const usePdfPane = () => {
   const setPdfIsOpen = useCallback(
     (value: boolean) => {
       if (value) {
+        // opening the PDF view, so close a detached PDF
+        if (detachRole === 'detacher') {
+          reattach()
+        }
         changeLayout('sideBySide')
       } else {
         changeLayout('flat', 'editor')
       }
     },
-    [changeLayout]
+    [changeLayout, detachRole, reattach]
   )
 
   // triggered when the PDF pane becomes open
