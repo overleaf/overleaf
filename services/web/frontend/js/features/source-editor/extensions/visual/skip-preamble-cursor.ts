@@ -6,7 +6,7 @@ import {
   StateField,
 } from '@codemirror/state'
 import { syntaxTree } from '@codemirror/language'
-import { Preamble } from './visual-widgets/preamble'
+import { collapsePreambleEffect, Preamble } from './visual-widgets/preamble'
 /**
  * A view plugin that moves the cursor from the start of the preamble into the document body when the doc is opened.
  */
@@ -63,11 +63,17 @@ export const skipPreambleWithCursor = (
       }
     }
 
-    view.dom.addEventListener('editor:collapse-preamble', escapeFromPreamble)
-
     return {
       update(update) {
-        if (!checkedOnce) {
+        if (checkedOnce) {
+          if (
+            update.transactions.some(tr =>
+              tr.effects.some(effect => effect.is(collapsePreambleEffect))
+            )
+          ) {
+            escapeFromPreamble()
+          }
+        } else {
           const { state } = update
 
           if (syntaxTree(state).length === state.doc.length) {
@@ -87,12 +93,6 @@ export const skipPreambleWithCursor = (
             }
           }
         }
-      },
-      destroy() {
-        view.dom?.removeEventListener(
-          'editor:collapse-preamble',
-          escapeFromPreamble
-        )
       },
     }
   })

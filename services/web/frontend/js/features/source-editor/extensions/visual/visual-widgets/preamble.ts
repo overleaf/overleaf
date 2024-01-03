@@ -1,4 +1,4 @@
-import { EditorSelection } from '@codemirror/state'
+import { EditorSelection, StateEffect } from '@codemirror/state'
 import { EditorView, WidgetType } from '@codemirror/view'
 import { SyntaxNode } from '@lezer/common'
 
@@ -14,6 +14,8 @@ export type Preamble = {
     content: string
   }[]
 }
+
+export const collapsePreambleEffect = StateEffect.define<boolean>()
 
 export class PreambleWidget extends WidgetType {
   constructor(public expanded: boolean) {
@@ -60,7 +62,9 @@ export class PreambleWidget extends WidgetType {
       }
       event.preventDefault()
       if (this.expanded) {
-        view.dom.dispatchEvent(new Event('editor:collapse-preamble'))
+        view.dispatch({
+          effects: collapsePreambleEffect.of(true),
+        })
       } else {
         view.dispatch({
           selection: EditorSelection.cursor(0),
