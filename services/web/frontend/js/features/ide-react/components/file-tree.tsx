@@ -11,7 +11,7 @@ export function FileTree() {
   const user = useUserContext()
   const { indexAllReferences } = useReferencesContext()
   const { setStartedFreeTrial } = useIdeReactContext()
-  const { isConnected } = useConnectionContext()
+  const { isConnected, connectionState } = useConnectionContext()
   const { handleFileTreeInit, handleFileTreeSelect, handleFileTreeDelete } =
     useFileTreeOpenContext()
 
@@ -37,7 +37,7 @@ export function FileTree() {
         reindexReferences={reindexReferences}
         setRefProviderEnabled={setRefProviderEnabled}
         setStartedFreeTrial={setStartedFreeTrial}
-        isConnected={isConnected}
+        isConnected={isConnected || connectionState.reconnectAt !== null}
         onInit={handleFileTreeInit}
         onSelect={handleFileTreeSelect}
         onDelete={handleFileTreeDelete}

@@ -4,6 +4,8 @@ import { useConnectionContext } from '@/features/ide-react/context/connection-co
 import { debugging } from '@/utils/debugging'
 import { Alert } from 'react-bootstrap'
 import useScopeValue from '@/shared/hooks/use-scope-value'
+import { createPortal } from 'react-dom'
+import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
 
 export function Alerts() {
   const { t } = useTranslation()
@@ -14,11 +16,16 @@ export function Alerts() {
     tryReconnectNow,
     secondsUntilReconnect,
   } = useConnectionContext()
+  const globalAlertsContainer = useGlobalAlertsContainer()
 
   const [synctexError] = useScopeValue('sync_tex_error')
 
-  return (
-    <div className="global-alerts">
+  if (!globalAlertsContainer) {
+    return null
+  }
+
+  return createPortal(
+    <>
       {connectionState.forceDisconnected ? (
         <Alert bsStyle="danger" className="small">
           <strong>{t('disconnected')}</strong>
@@ -67,6 +74,7 @@ export function Alerts() {
           <strong>Connected: {isConnected.toString()}</strong>
         </Alert>
       ) : null}
-    </div>
+    </>,
+    globalAlertsContainer
   )
 }

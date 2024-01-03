@@ -8,6 +8,7 @@ export const UnsavedDocsLockedModal: FC = () => {
 
   return (
     <AccessibleModal
+      show
       onHide={() => {}} // It's not possible to hide this modal, but it's a required prop
       className="lock-editor-modal"
       backdrop={false}

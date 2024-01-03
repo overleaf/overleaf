@@ -5,6 +5,8 @@ import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { UnsavedDocsLockedModal } from '@/features/ide-react/components/unsaved-docs/unsaved-docs-locked-modal'
 import { UnsavedDocsAlert } from '@/features/ide-react/components/unsaved-docs/unsaved-docs-alert'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import { createPortal } from 'react-dom'
+import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-alerts-context'
 
 const MAX_UNSAVED_SECONDS = 15 // lock the editor after this time if unsaved
 
@@ -13,6 +15,7 @@ export const UnsavedDocs: FC = () => {
   const { permissionsLevel, setPermissionsLevel } = useEditorContext()
   const [isLocked, setIsLocked] = useState(false)
   const [unsavedDocs, setUnsavedDocs] = useState(new Map<string, number>())
+  const globalAlertsContainer = useGlobalAlertsContainer()
 
   // always contains the latest value
   const previousUnsavedDocsRef = useRef(unsavedDocs)
@@ -99,7 +102,12 @@ export const UnsavedDocs: FC = () => {
   return (
     <>
       {isLocked && <UnsavedDocsLockedModal />}
-      {unsavedDocs.size > 0 && <UnsavedDocsAlert unsavedDocs={unsavedDocs} />}
+      {unsavedDocs.size > 0 &&
+        globalAlertsContainer &&
+        createPortal(
+          <UnsavedDocsAlert unsavedDocs={unsavedDocs} />,
+          globalAlertsContainer
+        )}
     </>
   )
 }

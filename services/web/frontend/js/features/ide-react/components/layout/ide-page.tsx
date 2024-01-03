@@ -8,6 +8,7 @@ import { useEditingSessionHeartbeat } from '@/features/ide-react/hooks/use-editi
 import { useRegisterUserActivity } from '@/features/ide-react/hooks/use-register-user-activity'
 import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-error'
 import { Modals } from '@/features/ide-react/components/modals/modals'
+import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts-context'
 
 export default function IdePage() {
   useLayoutEventTracking() // sent event when the layout changes
@@ -18,11 +19,11 @@ export default function IdePage() {
   useOpenFile() // create ide.binaryFilesManager (TODO: move to the history file restore component)
 
   return (
-    <>
+    <GlobalAlertsProvider>
       <Alerts />
       <Modals />
       <EditorLeftMenu />
       <MainLayout />
-    </>
+    </GlobalAlertsProvider>
   )
 }

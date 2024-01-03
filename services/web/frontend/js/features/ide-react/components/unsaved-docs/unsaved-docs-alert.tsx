@@ -6,14 +6,14 @@ import { useTranslation } from 'react-i18next'
 export const UnsavedDocsAlert: FC<{ unsavedDocs: Map<string, number> }> = ({
   unsavedDocs,
 }) => (
-  <div className="global-alerts">
+  <>
     {[...unsavedDocs.entries()].map(
       ([docId, seconds]) =>
         seconds > 8 && (
           <UnsavedDocAlert key={docId} docId={docId} seconds={seconds} />
         )
     )}
-  </div>
+  </>
 )
 
 const UnsavedDocAlert: FC<{ docId: string; seconds: number }> = ({
