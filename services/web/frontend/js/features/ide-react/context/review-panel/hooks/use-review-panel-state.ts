@@ -1153,7 +1153,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     ]
   )
 
-  const [entryHover, setEntryHover] = useState(false)
   const [isAddingComment, setIsAddingComment] = useState(false)
   const [navHeight, setNavHeight] = useState(0)
   const [toolbarHeight, setToolbarHeight] = useState(0)
@@ -1503,7 +1502,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       collapsed,
       commentThreads,
       entries,
-      entryHover,
       isAddingComment,
       loadingThreads,
       nVisibleSelectedChanges,
@@ -1531,7 +1529,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       collapsed,
       commentThreads,
       entries,
-      entryHover,
       isAddingComment,
       loadingThreads,
       nVisibleSelectedChanges,
@@ -1578,7 +1575,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,
       toggleTrackChangesForGuests,
-      setEntryHover,
       setCollapsed,
       setShouldCollapse,
       setIsAddingComment,
@@ -1607,7 +1603,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       toggleTrackChangesForUser,
       toggleTrackChangesForGuests,
       setCollapsed,
-      setEntryHover,
       setShouldCollapse,
       setIsAddingComment,
       setNavHeight,

@@ -4,14 +4,13 @@ const reviewPanelClasses = ['ol-cm-review-panel']
 
 type ContainerProps = {
   children?: React.ReactNode
-  classNames?: Record<string, boolean>
-  style?: React.CSSProperties
+  className?: string
 }
 
-function Container({ children, classNames, ...rest }: ContainerProps) {
+function Container({ children, className, ...rest }: ContainerProps) {
   return (
     <div
-      className={classnames(...reviewPanelClasses, classNames)}
+      className={classnames(...reviewPanelClasses, className)}
       {...rest}
       data-testid="review-panel"
     >

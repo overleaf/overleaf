@@ -149,7 +149,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
     [submitReplyAngular]
   )
 
-  const [entryHover, setEntryHover] = useState(false)
   const [isAddingComment, setIsAddingComment] = useState(false)
   const [navHeight, setNavHeight] = useState(0)
   const [toolbarHeight, setToolbarHeight] = useState(0)
@@ -161,7 +160,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
       collapsed,
       commentThreads,
       entries,
-      entryHover,
       isAddingComment,
       loadingThreads,
       nVisibleSelectedChanges,
@@ -189,7 +187,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
       collapsed,
       commentThreads,
       entries,
-      entryHover,
       isAddingComment,
       loadingThreads,
       nVisibleSelectedChanges,
@@ -236,7 +233,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
       toggleTrackChangesForEveryone,
       toggleTrackChangesForUser,
       toggleTrackChangesForGuests,
-      setEntryHover,
       setCollapsed,
       setShouldCollapse,
       setIsAddingComment,
@@ -265,7 +261,6 @@ function useAngularReviewPanelState(): ReviewPanelState {
       toggleTrackChangesForUser,
       toggleTrackChangesForGuests,
       setCollapsed,
-      setEntryHover,
       setShouldCollapse,
       setIsAddingComment,
       setNavHeight,
