@@ -470,6 +470,10 @@ lint: typecheck_frontend
 typecheck_frontend:
 	npx -p typescript tsc --noEmit
 
+lint: typecheck_backend
+typecheck_backend:
+	npx -p typescript tsc -p tsconfig.backend.json --noEmit
+
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j2 --output-sync
 

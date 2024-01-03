@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": [
+    "app/src/**/*",
+    "modules/*/app/src/**/*",
+    "modules/*/test/acceptance/**/*",
+    "modules/*/test/smoke/**/*",
+    "modules/*/test/unit/**/*",
+    "scripts/**/*",
+    "test/acceptance/**/*",
+    "test/smoke/**/*",
+    "test/unit/**/*"
+  ]
+}
