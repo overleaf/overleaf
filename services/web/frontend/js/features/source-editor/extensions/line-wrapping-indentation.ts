@@ -78,12 +78,14 @@ export const lineWrappingIndentation = (visual: boolean) => {
                 update(update: ViewUpdate) {
                   const maxIndent = view.state.field(field)
 
-                  if (
-                    maxIndent !== previousMaxIndent ||
-                    update.geometryChanged ||
-                    update.viewportChanged
-                  ) {
+                  if (maxIndent !== previousMaxIndent) {
                     value.decorations = buildDecorations(view, maxIndent)
+                  } else if (update.geometryChanged || update.viewportChanged) {
+                    value.decorations = updateDecorations(
+                      value.decorations,
+                      update,
+                      maxIndent
+                    )
                   }
 
                   previousMaxIndent = maxIndent
@@ -111,7 +113,6 @@ export const buildDecorations = (view: EditorView, maxIndent: number) => {
   let from = 0
 
   for (const line of doc.iterLines()) {
-    // const indent = line.match(/^(\s*)/)[1].length
     const indent = calculateIndent(line, tabSize, maxIndent)
 
     if (indent) {
@@ -122,6 +123,67 @@ export const buildDecorations = (view: EditorView, maxIndent: number) => {
   }
 
   return Decoration.set(decorations)
+}
+
+export const updateDecorations = (
+  decorations: DecorationSet,
+  update: ViewUpdate,
+  maxIndent: number
+) => {
+  const add: Range<Decoration>[] = []
+
+  const { doc: startDoc } = update.startState
+  const { doc, tabSize } = update.state
+
+  const changedLinesFrom = new Set()
+
+  let filterFrom = doc.length
+  let filterTo = 0
+
+  update.changes.iterChangedRanges((fromA, toA, fromB, toB) => {
+    // remove changed lines
+    const fromALineNumber = startDoc.lineAt(fromA).number
+    const toALineNumber = startDoc.lineAt(toA).number
+
+    for (
+      let lineNumber = fromALineNumber;
+      lineNumber <= toALineNumber;
+      lineNumber++
+    ) {
+      const line = startDoc.line(lineNumber)
+      changedLinesFrom.add(line.from)
+      filterFrom = Math.min(line.from, filterFrom)
+      filterTo = Math.max(line.from, filterTo)
+    }
+
+    // add changed lines
+    const fromBLineNumber = doc.lineAt(fromB).number
+    const toBLineNumber = doc.lineAt(toB).number
+
+    for (
+      let lineNumber = fromBLineNumber;
+      lineNumber <= toBLineNumber;
+      lineNumber++
+    ) {
+      const line = doc.line(lineNumber)
+      const indent = calculateIndent(line.text, tabSize, maxIndent)
+
+      if (indent) {
+        add.push(lineIndentDecoration(indent).range(line.from))
+      }
+    }
+  })
+
+  return decorations
+    .update({
+      filter(from) {
+        return !changedLinesFrom.has(from)
+      },
+      filterFrom,
+      filterTo,
+    })
+    .map(update.changes)
+    .update({ add })
 }
 
 const lineIndentDecoration = (indent: number) =>
