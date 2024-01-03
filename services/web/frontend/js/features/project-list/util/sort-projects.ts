@@ -49,9 +49,7 @@ export const ownerNameComparator = (v1: Project, v2: Project) => {
     return Compare.SORT_A_AFTER_B
   }
 
-  return ownerNameV1 > ownerNameV2
-    ? Compare.SORT_A_BEFORE_B
-    : Compare.SORT_A_AFTER_B
+  return ownerNameV1.localeCompare(ownerNameV2)
 }
 
 export const defaultComparator = (
