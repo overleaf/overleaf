@@ -57,6 +57,7 @@ export const TableInserterDropdown = memo(() => {
         container={view.dom}
         containerPadding={0}
         animation
+        rootClose
         onHide={() => onToggle(false)}
       >
         <Popover

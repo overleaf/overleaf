@@ -57,6 +57,7 @@ export const ToolbarDropdown: FC<{
       placement="bottom"
       container={tabularRef.current}
       animation
+      rootClose
       containerPadding={0}
       onHide={() => onToggle(false)}
     >

@@ -52,6 +52,7 @@ export const ToolbarButtonMenu: FC<{
       container={tableContainerRef.current}
       containerPadding={0}
       animation
+      rootClose
       onHide={() => onToggle(false)}
     >
       <Popover
