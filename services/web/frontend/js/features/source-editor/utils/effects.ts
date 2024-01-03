@@ -12,8 +12,3 @@ export const updateHasEffect =
     update.transactions.some(tr =>
       tr.effects.some(effect => effect.is(effectType))
     )
-
-export const findEffect =
-  <T>(effectType: StateEffectType<T>) =>
-  (tr: Transaction) =>
-    tr.effects.find(effect => effect.is(effectType))
