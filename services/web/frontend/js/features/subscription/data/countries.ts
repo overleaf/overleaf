@@ -43,7 +43,6 @@ const countries = <const>[
   { code: 'KH', name: 'Cambodia' },
   { code: 'CM', name: 'Cameroon' },
   { code: 'CA', name: 'Canada' },
-  { code: 'IC', name: 'Canary Islands' },
   { code: 'CT', name: 'Canton and Enderbury Islands' },
   { code: 'KY', name: 'Cayman Islands' },
   { code: 'CF', name: 'Central African Republic' },
