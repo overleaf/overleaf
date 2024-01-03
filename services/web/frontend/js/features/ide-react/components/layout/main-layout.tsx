@@ -64,7 +64,7 @@ export const MainLayout: FC = () => {
             ref={sidebarPanelRef}
             id="panel-sidebar"
             order={1}
-            defaultSize={10}
+            defaultSize={15}
             minSize={5}
             maxSize={30}
             collapsible
