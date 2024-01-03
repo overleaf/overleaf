@@ -210,6 +210,12 @@ const ButtonsTemplate = (args, { globals: { theme } }) => {
                 <Button className="btn-danger-ghost" bsStyle={null}>
                   Danger Ghost
                 </Button>
+                <Button className="btn-info-ghost" bsStyle={null}>
+                  Info Ghost
+                </Button>
+                <Button className="btn-bg-ghost" bsStyle={null}>
+                  Background (bg) Ghost
+                </Button>
               </div>
 
               <h3>Sizes</h3>
@@ -287,6 +293,18 @@ export const Alerts = () => {
                 </div>
               }
             />
+
+            <Notification
+              type="offer"
+              body={
+                <div>
+                  <b>
+                    <code>.notitifcation .notification-type-offer</code>
+                  </b>
+                </div>
+              }
+            />
+
             <b>
               Note: these styles below will be deprecated since there are new
               alert styles rolling out as part of the new design system
