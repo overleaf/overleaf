@@ -30,14 +30,16 @@ const GRAMMARLY_CUTOFF_TIME = new Date(2023, 9, 10).getTime()
 const editorContextPropTypes = {
   inactiveTutorials: PropTypes.arrayOf(PropTypes.string).isRequired,
   deactivateTutorial: PropTypes.func.isRequired,
+  currentPopup: PropTypes.string,
+  setCurrentPopup: PropTypes.func.isRequired,
 }
 
 export const PromotionOverlay: FC = ({ children }) => {
   const ref = useRef<HTMLSpanElement>(null)
 
-  const { inactiveTutorials }: EditorTutorials = useEditorContext(
-    editorContextPropTypes
-  )
+  const { inactiveTutorials, currentPopup, setCurrentPopup }: EditorTutorials =
+    useEditorContext(editorContextPropTypes)
+
   const {
     splitTestVariants,
   }: { splitTestVariants: Record<string, string | undefined> } =
@@ -54,10 +56,20 @@ export const PromotionOverlay: FC = ({ children }) => {
   const hideBecauseNewUser =
     !userRegistrationTime || userRegistrationTime > NEW_USER_CUTOFF_TIME
 
+  const popupPresent =
+    currentPopup && currentPopup !== 'table-generator-promotion'
+
   const showPromotion =
     splitTestVariants['table-generator-promotion'] === 'enabled' &&
+    !popupPresent &&
     !inactiveTutorials.includes('table-generator-promotion') &&
     !hideBecauseNewUser
+
+  useEffect(() => {
+    if (showPromotion) {
+      setCurrentPopup('table-generator-promotion')
+    }
+  }, [showPromotion, setCurrentPopup])
 
   if (!showPromotion) {
     return <>{children}</>

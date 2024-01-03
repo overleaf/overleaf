@@ -2,4 +2,6 @@
 export type EditorTutorials = {
   inactiveTutorials: [string]
   deactivateTutorial: (key: string) => void
+  currentPopup: string
+  setCurrentPopup: (id: string) => void
 }

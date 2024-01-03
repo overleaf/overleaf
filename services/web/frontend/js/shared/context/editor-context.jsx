@@ -91,6 +91,8 @@ export function EditorProvider({ children }) {
     getMeta('ol-inactiveTutorials', [])
   )
 
+  const [currentPopup, setCurrentPopup] = useState(null)
+
   const deactivateTutorial = useCallback(
     tutorialKey => {
       setInactiveTutorials([...inactiveTutorials, tutorialKey])
@@ -173,6 +175,8 @@ export function EditorProvider({ children }) {
       insertSymbol,
       inactiveTutorials,
       deactivateTutorial,
+      currentPopup,
+      setCurrentPopup,
     }),
     [
       cobranding,
@@ -188,6 +192,8 @@ export function EditorProvider({ children }) {
       insertSymbol,
       inactiveTutorials,
       deactivateTutorial,
+      currentPopup,
+      setCurrentPopup,
     ]
   )
 
