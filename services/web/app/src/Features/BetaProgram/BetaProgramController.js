@@ -4,7 +4,7 @@ const UserGetter = require('../User/UserGetter')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const { expressify } = require('../../util/promises')
+const { expressify } = require('@overleaf/promise-utils')
 
 async function optIn(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
