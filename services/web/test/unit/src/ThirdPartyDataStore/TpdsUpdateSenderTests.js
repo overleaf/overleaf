@@ -18,7 +18,6 @@ const projectName = 'project_name_here'
 const thirdPartyDataStoreApiUrl = 'http://third-party-json-store.herokuapp.com'
 const siteUrl = 'http://www.localhost:3000'
 const filestoreUrl = 'filestore.sharelatex.com'
-const projectArchiverUrl = 'project-archiver.overleaf.com'
 
 describe('TpdsUpdateSender', function () {
   beforeEach(function () {
@@ -436,21 +435,6 @@ describe('TpdsUpdateSender', function () {
             },
           },
         }
-      )
-    })
-  })
-
-  describe('deleteProject', function () {
-    it('should not call request if there is no project archiver url', async function () {
-      await this.TpdsUpdateSender.promises.deleteProject({ projectId })
-      this.FetchUtils.fetchNothing.should.not.have.been.called
-    })
-    it('should make a delete request to project archiver', async function () {
-      this.settings.apis.project_archiver = { url: projectArchiverUrl }
-      await this.TpdsUpdateSender.promises.deleteProject({ projectId })
-      this.FetchUtils.fetchNothing.should.have.been.calledWith(
-        `${projectArchiverUrl}/project/${projectId}`,
-        { method: 'DELETE' }
       )
     })
   })

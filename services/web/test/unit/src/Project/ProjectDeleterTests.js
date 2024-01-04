@@ -127,11 +127,6 @@ describe('ProjectDeleter', function () {
         deleteProject: sinon.stub().resolves(),
       },
     }
-    this.TpdsUpdateSender = {
-      promises: {
-        deleteProject: sinon.stub().resolves(),
-      },
-    }
     this.Features = {
       hasFeature: sinon.stub().returns(true),
     }
@@ -154,7 +149,6 @@ describe('ProjectDeleter', function () {
           this.DocumentUpdaterHandler,
         '../Tags/TagsHandler': this.TagsHandler,
         '../FileStore/FileStoreHandler': this.FileStoreHandler,
-        '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Chat/ChatApiHandler': this.ChatApiHandler,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
@@ -496,14 +490,6 @@ describe('ProjectDeleter', function () {
         ).to.have.been.calledWith(this.deletedProjects[0].project._id)
       })
 
-      it('should destroy the files in project-archiver', function () {
-        expect(
-          this.TpdsUpdateSender.promises.deleteProject
-        ).to.have.been.calledWith({
-          projectId: this.deletedProjects[0].project._id,
-        })
-      })
-
       it('should destroy the chat threads and messages', function () {
         expect(
           this.ChatApiHandler.promises.destroyProject
@@ -550,11 +536,6 @@ describe('ProjectDeleter', function () {
 
       it('should not destroy the files in filestore', function () {
         expect(this.FileStoreHandler.promises.deleteProject).to.not.have.been
-          .called
-      })
-
-      it('should not destroy the files in project-archiver', function () {
-        expect(this.TpdsUpdateSender.promises.deleteProject).to.not.have.been
           .called
       })
 

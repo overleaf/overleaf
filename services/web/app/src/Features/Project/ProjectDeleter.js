@@ -17,7 +17,6 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const HistoryManager = require('../History/HistoryManager')
 const FilestoreHandler = require('../FileStore/FileStoreHandler')
-const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const ChatApiHandler = require('../Chat/ChatApiHandler')
 const moment = require('moment')
 const { promiseMapWithLimit } = require('@overleaf/promise-utils')
@@ -382,9 +381,6 @@ async function expireDeletedProject(projectId) {
         historyId
       ),
       FilestoreHandler.promises.deleteProject(deletedProject.project._id),
-      TpdsUpdateSender.promises.deleteProject({
-        projectId: deletedProject.project._id,
-      }),
       ChatApiHandler.promises.destroyProject(deletedProject.project._id),
       hardDeleteDeletedFiles(deletedProject.project._id),
       ProjectAuditLogEntry.deleteMany({ projectId }),
