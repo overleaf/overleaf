@@ -2,6 +2,10 @@ const fs = require('fs')
 const Path = require('path')
 const { merge } = require('@overleaf/settings/merge')
 
+// Automatically detect module imports that are included in this version of the application (SaaS, Server-CE, Server Pro).
+// E.g. during a Server-CE build, we will not find imports for proprietary modules.
+//
+// Restart webpack after adding/removing modules.
 const MODULES_PATH = Path.join(__dirname, '../modules')
 const entryPointsIde = []
 const entryPointsMain = []
@@ -837,6 +841,9 @@ module.exports = {
 
   overleafModuleImports: {
     // modules to import (an empty array for each set of modules)
+    //
+    // Restart webpack after making changes.
+    //
     createFileModes: [],
     devToolbar: [],
     gitBridge: [],
@@ -863,6 +870,7 @@ module.exports = {
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
     ssoConfigurationModal: [],
+    // See comment at the definition of these variables.
     entryPointsIde,
     entryPointsMain,
   },

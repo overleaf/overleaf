@@ -1,4 +1,7 @@
 const { createMacro, MacroError } = require('babel-plugin-macros')
+
+// This copy of the settings will be taken when webpack starts.
+// Be sure to restart webpack after making changes to the settings.
 const Settings = require('@overleaf/settings')
 
 const macro = createMacro(importOverleafModuleMacro)

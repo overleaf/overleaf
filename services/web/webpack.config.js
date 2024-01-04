@@ -9,6 +9,10 @@ const {
 } = require('./webpack-plugins/lezer-grammar-compiler')
 
 const PackageVersions = require('./app/src/infrastructure/PackageVersions')
+const invalidateBabelCacheIfNeeded = require('./frontend/macros/invalidate-babel-cache-if-needed')
+
+// Make sure that babel-macros are re-evaluated after changing the modules config
+invalidateBabelCacheIfNeeded()
 
 // Generate a hash of entry points, including modules
 const entryPoints = {
