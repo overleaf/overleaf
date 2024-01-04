@@ -1,8 +1,10 @@
 import { useState, useEffect, forwardRef } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
+import { escapeRegExp } from 'lodash'
 
 type DownshiftInputProps = {
+  highlightMatches?: boolean
   items: string[]
   itemsTitle?: string
   inputValue: string
@@ -19,6 +21,7 @@ const filterItemsByInputValue = (
 ) => items.filter(item => item.toLowerCase().includes(inputValue.toLowerCase()))
 
 function Downshift({
+  highlightMatches = false,
   items,
   itemsTitle,
   inputValue,
@@ -62,6 +65,15 @@ function Downshift({
       }
     },
   })
+
+  const highlightMatchedCharacters = (item: string, query: string) => {
+    if (!query || !highlightMatches) return item
+    const regex = new RegExp(`(${escapeRegExp(query)})`, 'gi')
+    const parts = item.split(regex)
+    return parts.map((part, index) =>
+      regex.test(part) ? <strong key={`${part}-${index}`}>{part}</strong> : part
+    )
+  }
 
   return (
     <div
@@ -116,7 +128,7 @@ function Downshift({
               })}
             >
               <span className="ui-select-choices-row-inner">
-                <span>{item}</span>
+                <span>{highlightMatchedCharacters(item, inputValue)}</span>
               </span>
             </div>
           </li>
