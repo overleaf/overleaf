@@ -23,8 +23,6 @@ import ProjectListTitle from './title/project-list-title'
 import Sidebar from './sidebar/sidebar'
 import LoadMore from './load-more'
 import { useEffect } from 'react'
-import getMeta from '../../../utils/meta'
-import WelcomeMessageNew from './welcome-message-new'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '../../../shared/components/generic-error-boundary-fallback'
 
@@ -63,9 +61,6 @@ function ProjectListPageContent() {
   } = useProjectListContext()
 
   const selectedTag = tags.find(tag => tag._id === selectedTagId)
-  const welcomePageRedesignVariant = getMeta(
-    'ol-welcomePageRedesignVariant'
-  ) as 'enabled' | 'default'
 
   useEffect(() => {
     eventTracking.sendMB('loads_v2_dash', {})
@@ -176,11 +171,7 @@ function ProjectListPageContent() {
                     <UserNotifications />
                   </Col>
                 </Row>
-                {welcomePageRedesignVariant === 'enabled' ? (
-                  <WelcomeMessageNew />
-                ) : (
-                  <WelcomeMessage />
-                )}
+                <WelcomeMessage />
               </Col>
             </Row>
           </div>

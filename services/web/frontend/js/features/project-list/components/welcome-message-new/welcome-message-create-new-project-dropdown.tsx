@@ -20,7 +20,6 @@ function WelcomeMessageCreateNewProjectDropdown({
 
   const handleClick = useCallback(() => {
     sendMB('welcome-page-create-first-project-click', {
-      'welcome-page-redesign': 'enabled',
       dropdownMenu: 'main-button',
       dropdownOpen: showDropdown,
     })
@@ -55,7 +54,6 @@ function WelcomeMessageCreateNewProjectDropdown({
       setShowDropdown(false)
 
       sendMB('welcome-page-create-first-project-click', {
-        'welcome-page-redesign': 'enabled',
         dropdownOpen: true,
         dropdownMenu: dropdownMenuEvent,
       })
@@ -75,7 +73,6 @@ function WelcomeMessageCreateNewProjectDropdown({
       setShowDropdown(false)
 
       sendMB('welcome-page-create-first-project-click', {
-        'welcome-page-redesign': 'enabled',
         dropdownMenu: 'institution-template',
         dropdownOpen: true,
         institutionTemplateName,

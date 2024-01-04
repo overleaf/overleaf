@@ -325,22 +325,6 @@ async function projectListPage(req, res, next) {
       )
     }
   }
-
-  let welcomePageRedesignAssignment = { variant: 'default' }
-
-  try {
-    welcomePageRedesignAssignment =
-      await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'welcome-page-redesign'
-      )
-  } catch (error) {
-    logger.error(
-      { err: error },
-      'failed to get "welcome-page-redesign" split test assignment'
-    )
-  }
   try {
     // The assignment will be picked up via 'ol-splitTestVariants' in react.
     await SplitTestHandler.promises.getAssignment(
@@ -518,7 +502,6 @@ async function projectListPage(req, res, next) {
     inrGeoBannerVariant,
     inrGeoBannerSplitTestName,
     projectDashboardReact: true, // used in navbar
-    welcomePageRedesignVariant: welcomePageRedesignAssignment.variant,
     groupSsoSetupSuccess,
     groupSubscriptionsPendingEnrollment:
       groupSubscriptionsPendingEnrollment.map(subscription => ({

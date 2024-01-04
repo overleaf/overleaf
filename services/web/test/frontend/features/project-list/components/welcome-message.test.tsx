@@ -1,14 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-import WelcomeMessageNew from '../../../../../frontend/js/features/project-list/components/welcome-message-new'
+import WelcomeMessage from '../../../../../frontend/js/features/project-list/components/welcome-message'
 import { expect } from 'chai'
 
-describe('<WelcomeMessageNew />', function () {
+describe('<WelcomeMessage />', function () {
   afterEach(function () {
     window.metaAttributesCache = new Map()
   })
 
   it('renders welcome page correctly', function () {
-    render(<WelcomeMessageNew />)
+    render(<WelcomeMessage />)
 
     screen.getByText('Welcome to Overleaf')
     screen.getByText('Create a new project')
@@ -17,7 +17,7 @@ describe('<WelcomeMessageNew />', function () {
   })
 
   it('shows correct dropdown when clicking create a new project', function () {
-    render(<WelcomeMessageNew />)
+    render(<WelcomeMessage />)
 
     const button = screen.getByRole('button', {
       name: 'Create a new project',
@@ -39,7 +39,7 @@ describe('<WelcomeMessageNew />', function () {
       },
     ])
 
-    render(<WelcomeMessageNew />)
+    render(<WelcomeMessage />)
 
     const button = screen.getByRole('button', {
       name: 'Create a new project',
@@ -66,7 +66,7 @@ describe('<WelcomeMessageNew />', function () {
   })
 
   it('shows correct dropdown when clicking create a new project with a portal template', function () {
-    render(<WelcomeMessageNew />)
+    render(<WelcomeMessage />)
 
     const button = screen.getByRole('button', {
       name: 'Create a new project',
@@ -81,7 +81,7 @@ describe('<WelcomeMessageNew />', function () {
   })
 
   it('shows correct link for latex tutorial menu', function () {
-    render(<WelcomeMessageNew />)
+    render(<WelcomeMessage />)
 
     const link = screen.getByRole('link', {
       name: 'Learn LaTeX with a tutorial',
@@ -93,7 +93,7 @@ describe('<WelcomeMessageNew />', function () {
   })
 
   it('shows correct link for browse templates menu', function () {
-    render(<WelcomeMessageNew />)
+    render(<WelcomeMessage />)
 
     const link = screen.getByRole('link', {
       name: 'Browse templates',
