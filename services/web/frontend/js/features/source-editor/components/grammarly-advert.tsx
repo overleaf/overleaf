@@ -1,91 +1,104 @@
 import { useCallback, useEffect, useState } from 'react'
-import MaterialIcon from '@/shared/components/material-icon'
+import { Button } from 'react-bootstrap'
+import { useTranslation } from 'react-i18next'
+import Notification from '@/shared/components/notification'
+import useRemindMeLater from '@/shared/hooks/use-remind-me-later'
+import GrammarlyLogo from '@/shared/svgs/grammarly-logo'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import customLocalStorage from '../../../infrastructure/local-storage'
 import useWaitForGrammarlyCheck from '@/shared/hooks/use-wait-for-grammarly-check'
+
 export default function GrammarlyAdvert() {
   const [show, setShow] = useState(false)
+  const { t } = useTranslation()
 
   // grammarly can take some time to load, we should assume its installed and hide until we know for sure
   const grammarlyInstalled = useWaitForGrammarlyCheck({ initialState: false })
 
-  useEffect(() => {
-    const hasDismissedGrammarlyAdvert = customLocalStorage.getItem(
-      'editor.has_dismissed_grammarly_advert'
-    )
+  const { stillDissmissed, remindThemLater, saveDismissed } =
+    useRemindMeLater('grammarly_advert')
 
-    const showGrammarlyAdvert =
-      grammarlyInstalled && !hasDismissedGrammarlyAdvert
+  useEffect(() => {
+    const showGrammarlyAdvert = grammarlyInstalled && !stillDissmissed
 
     if (showGrammarlyAdvert) {
       eventTracking.sendMB('grammarly-advert-shown')
       setShow(true)
     }
-  }, [grammarlyInstalled, setShow])
+  }, [stillDissmissed, grammarlyInstalled, setShow])
 
-  const handleClose = useCallback(() => {
+  const handleDismiss = useCallback(() => {
     setShow(false)
-    customLocalStorage.setItem('editor.has_dismissed_grammarly_advert', true)
+    saveDismissed()
     eventTracking.sendMB('grammarly-advert-dismissed')
-  }, [])
+  }, [saveDismissed])
+
+  const handleClickClaim = useCallback(() => {
+    eventTracking.sendMB('promo-click', {
+      location: 'notification',
+      name: 'grammarly-advert',
+      type: 'click',
+    })
+
+    saveDismissed()
+    setShow(false)
+
+    window.open(
+      'https://grammarly.go2cloud.org/aff_c?offer_id=372&aff_id=142242'
+    )
+  }, [saveDismissed])
+
+  const handleLater = useCallback(() => {
+    eventTracking.sendMB('promo-click', {
+      location: 'notification',
+      name: 'grammarly-advert',
+      type: 'pause',
+    })
+    setShow(false)
+    remindThemLater()
+  }, [remindThemLater])
 
   if (!show) {
     return null
   }
-  // promotion ends on december 16th, 2023 at 00:00 UTC
-  const promotionEnded = new Date() > new Date(Date.UTC(2023, 11, 16, 0, 0, 0))
 
-  const permanentOffer = (
-    <div className="alert alert-info grammarly-advert" role="alert">
-      <div className="grammarly-advert-container">
-        <div className="advert-content">
-          <p>
-            Love Grammarly? Then you're in luck! Get 25% off Grammarly Premium
-            with this exclusive offer for Overleaf users.
-          </p>
-          <a
-            className="advert-link"
-            onClick={() => eventTracking.sendMB('grammarly-advert-clicked')}
-            href="https://grammarly.go2cloud.org/aff_c?offer_id=373&aff_id=142242"
-            target="_blank"
-            rel="noopener"
-          >
-            Claim my discount
-          </a>
-        </div>
-        <div className="grammarly-notification-close-btn">
-          <button aria-label="Close" onClick={handleClose}>
-            <MaterialIcon type="close" />
-          </button>
-        </div>
-      </div>
+  const actions = (
+    <div>
+      <Button
+        bsStyle={null}
+        className="btn-secondary"
+        onClick={handleClickClaim}
+      >
+        {t('claim_discount')}
+      </Button>
+      <Button className="btn-bg-ghost" bsStyle={null} onClick={handleLater}>
+        {t('maybe_later')}
+      </Button>
     </div>
   )
-  const promoOffer = (
-    <div className="alert alert-info grammarly-advert" role="alert">
-      <div className="grammarly-advert-container">
-        <div className="advert-content">
+
+  return (
+    <Notification
+      action={actions}
+      ariaLive="polite"
+      className="editor-notification ol-overlay"
+      content={
+        <div>
           <p>
-            Overleafers get a limited-time 30% discount on Grammarly Premium.
-            (Hurry! Offer ends December 15.)
+            Get 25% off Grammarly Premium with this exclusive offer for Overleaf
+            users.
           </p>
-          <a
-            className="advert-link"
-            onClick={() => eventTracking.sendMB('grammarly-advert-clicked')}
-            href="https://grammarly.go2cloud.org/aff_c?offer_id=372&aff_id=142242"
-            target="_blank"
-            rel="noopener"
-          >
-            Claim my discount
-          </a>
         </div>
-        <div className="grammarly-notification-close-btn">
-          <button aria-label="Close" onClick={handleClose}>
-            <MaterialIcon type="close" />
-          </button>
+      }
+      customIcon={
+        <div>
+          <GrammarlyLogo width="50" height="50" background="#fff" />
         </div>
-      </div>
-    </div>
+      }
+      isActionBelowContent
+      isDismissible
+      onDismiss={handleDismiss}
+      title="Love Grammarly? Then you're in luck!"
+      type="offer"
+    />
   )
-  return promotionEnded ? permanentOffer : promoOffer
 }

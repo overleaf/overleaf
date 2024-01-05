@@ -60,20 +60,18 @@ block content
 					ng-controller="SystemMessageController"
 					ng-hide="hidden"
 				)
-					button(ng-hide="protected",ng-click="hide()").close.pull-right
+					button(ng-hide="protected" ng-click="hide()").close.pull-right
 						span(aria-hidden="true") &times;
 						span.sr-only #{translate("close")}
 					.system-message-content
 						| {{htmlContent}}
-
-			grammarly-advert()
 
 			if hasFeature('saas')
 				legacy-editor-warning(delay=10000)
 
 		include ./editor/main
 
-	script(type="text/ng-template", id="genericMessageModalTemplate")
+	script(type="text/ng-template" id="genericMessageModalTemplate")
 		.modal-header
 			button.close(
 				type="button"
@@ -87,7 +85,7 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("ok")}
 
-	script(type="text/ng-template", id="outOfSyncModalTemplate")
+	script(type="text/ng-template" id="outOfSyncModalTemplate")
 		.modal-header
 			button.close(
 				type="button"
@@ -112,7 +110,7 @@ block content
 		.modal-footer
 			button.btn.btn-info(ng-click="done()") #{translate("reload_editor")}
 
-	script(type="text/ng-template", id="lockEditorModalTemplate")
+	script(type="text/ng-template" id="lockEditorModalTemplate")
 		.modal-header
 			h3 {{ title }}
 		.modal-body(ng-bind-html="message")
