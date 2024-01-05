@@ -417,6 +417,16 @@ describe('logParser', function (done) {
       [8, 'LaTeX Error: Illegal character in array arg.', './main.tex'],
     ])
   })
+
+  it('should not unwrap errors into previous line', function () {
+    const { errors, warnings } = parseLatexLog(
+      'lncs-undefined-control-sequence.log'
+    )
+    expect(warnings).to.be.empty
+    expect(errors.map(x => [x.line, x.message, x.file])).to.deep.equal([
+      [102, 'Undefined control sequence.', './main.tex'],
+    ])
+  })
 })
 
 function readLog(filename) {

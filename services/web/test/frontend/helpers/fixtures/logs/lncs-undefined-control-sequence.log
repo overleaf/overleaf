@@ -1,0 +1,19 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=latex 2023.8.28)  4 JAN 2024 10:26
+entering extended mode
+ \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2023-06-01> patch level 1
+L3 programming layer <2023-06-30>
+(Font)              Font shape `OT1/cmss/m/sl' tried instead on input line 100.
+! Undefined control sequence.
+l.102         but here: "\anUndefinedCommand
+                                            " lorem ipsum ...
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+Output written on output.dvi (1 page, 796 bytes).

@@ -346,16 +346,21 @@ class LogText {
       // append this line to it.
       // Some lines end with ... when LaTeX knows it's hit the limit
       // These shouldn't be wrapped.
+      // If the next line looks like it could be an error (i.e. start with a !),
+      // do not unwrap the line.
       const prevLine = wrappedLines[i - 1]
       const currentLine = wrappedLines[i]
 
-      if (prevLine.length === LOG_WRAP_LIMIT && prevLine.slice(-3) !== '...') {
+      if (
+        prevLine.length === LOG_WRAP_LIMIT &&
+        prevLine.slice(-3) !== '...' &&
+        currentLine.charAt(0) !== '!'
+      ) {
         this.lines[this.lines.length - 1] += currentLine
       } else {
         this.lines.push(currentLine)
       }
     }
-
     this.row = 0
   }
 
