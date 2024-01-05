@@ -19,6 +19,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import { debugConsole } from '@/utils/debugging'
+import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 
 type OnlineUser = {
   id: string
@@ -213,7 +214,9 @@ export const OnlineUsersProvider: FC = ({ children }) => {
 
   // Track the position of the main cursor
   useEffect(() => {
-    const handleCursorUpdate = (position: CursorPosition | null) => {
+    const handleCursorUpdate = ({
+      detail: [position],
+    }: CustomEvent<IdeEvents['cursor:editor:update']>) => {
       if (position) {
         setCurrentPosition(position)
       }

@@ -1,7 +1,6 @@
 import { ConnectionError, ConnectionState } from './types/connection-state'
 import SocketIoShim from '../../../ide/connection/SocketIoShim'
 import getMeta from '../../../utils/meta'
-import { Emitter } from 'strict-event-emitter'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { debugConsole } from '@/utils/debugging'
 
@@ -29,11 +28,12 @@ const initialState: ConnectionState = {
   error: '',
 }
 
-type Events = {
-  statechange: [{ state: ConnectionState; previousState: ConnectionState }]
-}
+export class StateChangeEvent extends CustomEvent<{
+  state: ConnectionState
+  previousState: ConnectionState
+}> {}
 
-export class ConnectionManager extends Emitter<Events> {
+export class ConnectionManager extends EventTarget {
   state: ConnectionState = initialState
   private connectionAttempt: number | null = null
   private gracefullyReconnectUntil = 0
@@ -113,7 +113,9 @@ export class ConnectionManager extends Emitter<Events> {
       previousState,
       state,
     })
-    this.emit('statechange', { state, previousState })
+    this.dispatchEvent(
+      new StateChangeEvent('statechange', { detail: { state, previousState } })
+    )
   }
 
   private onOnline() {

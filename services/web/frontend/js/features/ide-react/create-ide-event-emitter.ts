@@ -1,4 +1,3 @@
-import { Emitter } from 'strict-event-emitter'
 import { Project } from '../../../../types/project'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { ShareJsDoc } from '@/features/ide-react/editor/share-js-doc'
@@ -26,8 +25,33 @@ export type IdeEvents = {
   'entity:deleted': [entity: FileTreeFindResult]
 }
 
-export type IdeEventEmitter = Emitter<IdeEvents>
+export class IdeEventEmitter extends EventTarget {
+  emit<T extends keyof IdeEvents>(eventName: T, ...detail: IdeEvents[T]) {
+    this.dispatchEvent(new CustomEvent<IdeEvents[T]>(eventName, { detail }))
+  }
 
-export function createIdeEventEmitter(): IdeEventEmitter {
-  return new Emitter<IdeEvents>()
+  on<T extends keyof IdeEvents>(
+    eventName: T,
+    listener: (event: CustomEvent<IdeEvents[T]>) => void
+  ) {
+    this.addEventListener(eventName, listener as EventListener)
+  }
+
+  once<T extends keyof IdeEvents>(
+    eventName: T,
+    listener: (event: CustomEvent<IdeEvents[T]>) => void
+  ) {
+    this.addEventListener(eventName, listener as EventListener, { once: true })
+  }
+
+  off<T extends keyof IdeEvents>(
+    eventName: T,
+    listener: (event: CustomEvent<IdeEvents[T]>) => void
+  ) {
+    this.removeEventListener(eventName, listener as EventListener)
+  }
+}
+
+export function createIdeEventEmitter() {
+  return new IdeEventEmitter()
 }

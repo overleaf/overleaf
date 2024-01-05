@@ -2,14 +2,13 @@ import {
   ScopeEventEmitter,
   ScopeEventName,
 } from '../../../../../types/ide/scope-event-emitter'
-import EventEmitter from 'events'
 
 export class ReactScopeEventEmitter implements ScopeEventEmitter {
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly eventEmitter: EventEmitter) {}
+  constructor(private readonly eventEmitter: EventTarget) {}
 
   emit(eventName: ScopeEventName, broadcast: boolean, ...detail: unknown[]) {
-    this.eventEmitter.emit(eventName, ...detail)
+    this.eventEmitter.dispatchEvent(new CustomEvent(eventName, { detail }))
   }
 
   on(eventName: ScopeEventName, listener: (...args: unknown[]) => void) {
@@ -18,9 +17,9 @@ export class ReactScopeEventEmitter implements ScopeEventEmitter {
     const wrappedListener = (...detail: unknown[]) => {
       listener({}, ...detail)
     }
-    this.eventEmitter.on(eventName, wrappedListener)
+    this.eventEmitter.addEventListener(eventName, wrappedListener)
     return () => {
-      this.eventEmitter.off(eventName, wrappedListener)
+      this.eventEmitter.removeEventListener(eventName, wrappedListener)
     }
   }
 }

@@ -18,11 +18,10 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { useIdeContext } from '@/shared/context/ide-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { FileTreeFindResult } from '@/features/ide-react/types/file-tree'
-import { Project } from '../../../../../types/project'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'
+import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 
 type DocumentMetadata = {
   labels: string[]
@@ -63,7 +62,9 @@ export const MetadataProvider: FC = ({ children }) => {
   const debouncerRef = useRef<Map<string, number>>(new Map()) // DocId => Timeout
 
   useEffect(() => {
-    const handleEntityDeleted = (entity: FileTreeFindResult) => {
+    const handleEntityDeleted = ({
+      detail: [entity],
+    }: CustomEvent<IdeEvents['entity:deleted']>) => {
       if (entity.type === 'doc') {
         setDocuments(documents => {
           return _.omit(documents, entity.entity._id)
@@ -184,7 +185,9 @@ export const MetadataProvider: FC = ({ children }) => {
   useEventListener('editor:metadata-outdated', handleMetadataOutdated)
 
   useEffect(() => {
-    const handleProjectJoined = ({ project }: { project: Project }) => {
+    const handleProjectJoined = ({
+      detail: [{ project }],
+    }: CustomEvent<IdeEvents['project:joined']>) => {
       if (project.deletedByExternalDataSource) {
         showGenericMessageModal(
           t('project_renamed_or_deleted'),

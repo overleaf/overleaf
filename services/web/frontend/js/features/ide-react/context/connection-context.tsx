@@ -8,7 +8,10 @@ import {
   useMemo,
 } from 'react'
 import { ConnectionState } from '../connection/types/connection-state'
-import { ConnectionManager } from '@/features/ide-react/connection/connection-manager'
+import {
+  ConnectionManager,
+  StateChangeEvent,
+} from '@/features/ide-react/connection/connection-manager'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { secondsUntil } from '@/features/ide-react/connection/utils'
 import { useLocation } from '@/shared/hooks/use-location'
@@ -37,13 +40,13 @@ export const ConnectionProvider: FC = ({ children }) => {
   )
 
   useEffect(() => {
-    function handleStateChange(event: { state: ConnectionState }) {
-      setConnectionState(event.state)
-    }
-    connectionManager.on('statechange', handleStateChange)
+    const handleStateChange = ((event: StateChangeEvent) => {
+      setConnectionState(event.detail.state)
+    }) as EventListener
+    connectionManager.addEventListener('statechange', handleStateChange)
 
     return () => {
-      connectionManager.off('statechange', handleStateChange)
+      connectionManager.removeEventListener('statechange', handleStateChange)
     }
   }, [connectionManager])
 

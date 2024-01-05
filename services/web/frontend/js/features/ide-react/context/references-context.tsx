@@ -18,6 +18,7 @@ import useScopeValue from '@/shared/hooks/use-scope-value'
 import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/react-scope-value-store'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
+import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 
 type References = {
   keys: string[]
@@ -108,7 +109,9 @@ export const ReferencesProvider: FC = ({ children }) => {
   )
 
   useEffect(() => {
-    const handleDocClosed = (doc: ShareJsDoc) => {
+    const handleDocClosed = ({
+      detail: [doc],
+    }: CustomEvent<IdeEvents['document:closed']>) => {
       if (
         doc.doc_id &&
         findDocEntityById(fileTreeData, doc.doc_id)?.name?.endsWith('.bib')
