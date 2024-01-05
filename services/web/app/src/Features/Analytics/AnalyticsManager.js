@@ -7,7 +7,6 @@ const crypto = require('crypto')
 const _ = require('lodash')
 const { expressify } = require('@overleaf/promise-utils')
 const logger = require('@overleaf/logger')
-const { getAnalyticsIdFromMongoUser } = require('./AnalyticsHelper')
 
 const analyticsEventsQueue = Queues.getQueue('analytics-events')
 const analyticsEditingSessionsQueue = Queues.getQueue(
@@ -308,12 +307,11 @@ async function analyticsIdMiddleware(req, res, next) {
   const sessionUser = SessionManager.getSessionUser(session)
 
   if (sessionUser) {
-    session.analyticsId = getAnalyticsIdFromMongoUser(sessionUser)
+    session.analyticsId = await UserAnalyticsIdCache.get(sessionUser._id)
   } else if (!session.analyticsId) {
     // generate an `analyticsId` if needed
     session.analyticsId = crypto.randomUUID()
   }
-
   next()
 }
 

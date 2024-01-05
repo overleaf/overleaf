@@ -304,7 +304,10 @@ describe('AnalyticsManager', function () {
               }
             },
           },
-          './UserAnalyticsIdCache': {},
+
+          './UserAnalyticsIdCache': (this.UserAnalyticsIdCache = {
+            get: sinon.stub().resolves(this.analyticsId),
+          }),
           crypto: {
             randomUUID: () => this.analyticsId,
           },
@@ -343,12 +346,14 @@ describe('AnalyticsManager', function () {
       await this.AnalyticsManager.analyticsIdMiddleware(
         this.req,
         this.res,
-        this.next
+        () => {
+          assert.equal(this.analyticsId, this.req.session.analyticsId)
+        }
       )
-      assert.equal(this.analyticsId, this.req.session.analyticsId)
     })
 
     it('sets session.analyticsId with a legacy user session without an analyticsId', async function () {
+      this.UserAnalyticsIdCache.get.resolves(this.userId)
       this.req.session.user = {
         _id: this.userId,
         analyticsId: undefined,
@@ -356,26 +361,26 @@ describe('AnalyticsManager', function () {
       await this.AnalyticsManager.analyticsIdMiddleware(
         this.req,
         this.res,
-        this.next
+        () => {
+          assert.equal(this.userId, this.req.session.analyticsId)
+        }
       )
-      assert.equal(this.userId, this.req.session.analyticsId)
     })
 
     it('updates session.analyticsId with a legacy user session without an analyticsId if different', async function () {
+      this.UserAnalyticsIdCache.get.resolves(this.userId)
       this.req.session.user = {
         _id: this.userId,
         analyticsId: undefined,
       }
       this.req.analyticsId = 'foo'
-      await this.AnalyticsManager.analyticsIdMiddleware(
-        this.req,
-        this.res,
-        this.next
-      )
-      assert.equal(this.userId, this.req.session.analyticsId)
+      this.AnalyticsManager.analyticsIdMiddleware(this.req, this.res, () => {
+        assert.equal(this.userId, this.req.session.analyticsId)
+      })
     })
 
     it('does not update session.analyticsId with a legacy user session without an analyticsId if same', async function () {
+      this.UserAnalyticsIdCache.get.resolves(this.userId)
       this.req.session.user = {
         _id: this.userId,
         analyticsId: undefined,
@@ -384,16 +389,10 @@ describe('AnalyticsManager', function () {
       await this.AnalyticsManager.analyticsIdMiddleware(
         this.req,
         this.res,
-        this.next
+        () => {
+          assert.equal(this.userId, this.req.session.analyticsId)
+        }
       )
-      assert.equal(this.userId, this.req.session.analyticsId)
-
-      await this.AnalyticsManager.analyticsIdMiddleware(
-        this.req,
-        this.res,
-        this.next
-      )
-      assert.equal(this.userId, this.req.session.analyticsId)
     })
   })
 })

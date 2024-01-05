@@ -37,6 +37,11 @@ describe('CompileManager', function () {
         './ClsiManager': (this.ClsiManager = {}),
         '../../infrastructure/RateLimiter': this.RateLimiter,
         '@overleaf/metrics': this.Metrics,
+        '../Analytics/UserAnalyticsIdCache': (this.UserAnalyticsIdCache = {
+          callbacks: {
+            get: sinon.stub().yields(null, 'abc'),
+          },
+        }),
         '../SplitTests/SplitTestHandler': {
           getAssignmentForMongoUser: (this.getAssignmentForMongoUser = sinon
             .stub()
@@ -177,7 +182,7 @@ describe('CompileManager', function () {
   })
 
   describe('getProjectCompileLimits', function () {
-    beforeEach(function () {
+    beforeEach(function (done) {
       this.features = {
         compileTimeout: (this.timeout = 42),
         compileGroup: (this.group = 'priority'),
@@ -198,7 +203,10 @@ describe('CompileManager', function () {
         )
       this.CompileManager.getProjectCompileLimits(
         this.project_id,
-        this.callback
+        (err, res) => {
+          this.callback(err, res)
+          done()
+        }
       )
     })
 

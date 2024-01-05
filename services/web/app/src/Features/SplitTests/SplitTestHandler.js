@@ -9,7 +9,6 @@ const { callbackify } = require('util')
 const SplitTestCache = require('./SplitTestCache')
 const { SplitTest } = require('../../models/SplitTest')
 const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
-const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
 const Features = require('../../infrastructure/Features')
 const SplitTestUtils = require('./SplitTestUtils')
 const Settings = require('@overleaf/settings')
@@ -142,7 +141,7 @@ async function getAssignmentForMongoUser(
   }
 
   return _getAssignment(splitTestName, {
-    analyticsId: getAnalyticsIdFromMongoUser(user),
+    analyticsId: await UserAnalyticsIdCache.get(user._id),
     sync,
     user,
     userId: user._id.toString(),

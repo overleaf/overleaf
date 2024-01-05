@@ -9,7 +9,7 @@ const ClsiManager = require('./ClsiManager')
 const Metrics = require('@overleaf/metrics')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
-const { getAnalyticsIdFromMongoUser } = require('../Analytics/AnalyticsHelper')
+const UserAnalyticsIdCache = require('../Analytics/UserAnalyticsIdCache')
 
 const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF = new Date('2023-09-18T11:00:00.000Z')
 const NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE = new Date(
@@ -178,70 +178,84 @@ module.exports = CompileManager = {
             if (owner && owner.alphaProgram) {
               ownerFeatures.compileGroup = 'alpha'
             }
-            const limits = {
-              timeout:
-                ownerFeatures.compileTimeout ||
-                Settings.defaultFeatures.compileTimeout,
-              compileGroup:
-                ownerFeatures.compileGroup ||
-                Settings.defaultFeatures.compileGroup,
-              ownerAnalyticsId: getAnalyticsIdFromMongoUser(owner),
-            }
-            CompileManager._getCompileBackendClassDetails(
-              owner,
-              limits.compileGroup,
-              (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
-                if (err) return callback(err)
-                limits.compileBackendClass = compileBackendClass
-                limits.showFasterCompilesFeedbackUI =
-                  showFasterCompilesFeedbackUI
-                if (compileBackendClass === 'n2d' && limits.timeout <= 60) {
-                  // project owners with faster compiles but with <= 60 compile timeout (default)
-                  // will have a 20s compile timeout
-                  // The compile-timeout-20s split test exists to enable a gradual rollout
-                  SplitTestHandler.getAssignmentForMongoUser(
-                    owner,
-                    'compile-timeout-20s',
-                    (err, assignment) => {
-                      if (err) return callback(err)
-                      // users who were on the 'default' servers at time of original rollout
-                      // will have a later cutoff date for the 20s timeout in the next phase
-                      // we check the backend class at version 8 (baseline)
-                      const backendClassHistory =
-                        owner.splitTests?.['compile-backend-class-n2d'] || []
-                      const backendClassBaselineVariant =
-                        backendClassHistory.find(version => {
-                          return version.versionNumber === 8
-                        })?.variantName
-                      const timeoutEnforcedCutoff =
-                        backendClassBaselineVariant === 'default'
-                          ? NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE
-                          : NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
-                      if (assignment?.variant === '20s') {
-                        if (owner.signUpDate > timeoutEnforcedCutoff) {
-                          limits.timeout = 20
-                          callback(null, limits)
-                        } else {
-                          SplitTestHandler.getAssignmentForMongoUser(
-                            owner,
-                            'compile-timeout-20s-existing-users',
-                            (err, assignmentExistingUsers) => {
-                              if (err) return callback(err)
-                              if (assignmentExistingUsers?.variant === '20s') {
-                                limits.timeout = 20
-                              }
-                              callback(null, limits)
-                            }
-                          )
-                        }
-                      } else {
-                        callback(null, limits)
-                      }
-                    }
-                  )
-                } else {
-                  callback(null, limits)
+            UserAnalyticsIdCache.callbacks.get(
+              owner._id,
+              function (err, analyticsId) {
+                if (err) {
+                  return callback(err)
                 }
+                const limits = {
+                  timeout:
+                    ownerFeatures.compileTimeout ||
+                    Settings.defaultFeatures.compileTimeout,
+                  compileGroup:
+                    ownerFeatures.compileGroup ||
+                    Settings.defaultFeatures.compileGroup,
+                  ownerAnalyticsId: analyticsId,
+                }
+                CompileManager._getCompileBackendClassDetails(
+                  owner,
+                  limits.compileGroup,
+                  (
+                    err,
+                    { compileBackendClass, showFasterCompilesFeedbackUI }
+                  ) => {
+                    if (err) return callback(err)
+                    limits.compileBackendClass = compileBackendClass
+                    limits.showFasterCompilesFeedbackUI =
+                      showFasterCompilesFeedbackUI
+                    if (compileBackendClass === 'n2d' && limits.timeout <= 60) {
+                      // project owners with faster compiles but with <= 60 compile timeout (default)
+                      // will have a 20s compile timeout
+                      // The compile-timeout-20s split test exists to enable a gradual rollout
+                      SplitTestHandler.getAssignmentForMongoUser(
+                        owner,
+                        'compile-timeout-20s',
+                        (err, assignment) => {
+                          if (err) return callback(err)
+                          // users who were on the 'default' servers at time of original rollout
+                          // will have a later cutoff date for the 20s timeout in the next phase
+                          // we check the backend class at version 8 (baseline)
+                          const backendClassHistory =
+                            owner.splitTests?.['compile-backend-class-n2d'] ||
+                            []
+                          const backendClassBaselineVariant =
+                            backendClassHistory.find(version => {
+                              return version.versionNumber === 8
+                            })?.variantName
+                          const timeoutEnforcedCutoff =
+                            backendClassBaselineVariant === 'default'
+                              ? NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE
+                              : NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
+                          if (assignment?.variant === '20s') {
+                            if (owner.signUpDate > timeoutEnforcedCutoff) {
+                              limits.timeout = 20
+                              callback(null, limits)
+                            } else {
+                              SplitTestHandler.getAssignmentForMongoUser(
+                                owner,
+                                'compile-timeout-20s-existing-users',
+                                (err, assignmentExistingUsers) => {
+                                  if (err) return callback(err)
+                                  if (
+                                    assignmentExistingUsers?.variant === '20s'
+                                  ) {
+                                    limits.timeout = 20
+                                  }
+                                  callback(null, limits)
+                                }
+                              )
+                            }
+                          } else {
+                            callback(null, limits)
+                          }
+                        }
+                      )
+                    } else {
+                      callback(null, limits)
+                    }
+                  }
+                )
               }
             )
           }

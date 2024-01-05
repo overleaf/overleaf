@@ -1,6 +1,6 @@
 const UserGetter = require('../User/UserGetter')
 const { CacheLoader } = require('cache-flow')
-const { getAnalyticsIdFromMongoUser } = require('./AnalyticsHelper')
+const { callbackify } = require('util')
 
 class UserAnalyticsIdCache extends CacheLoader {
   constructor() {
@@ -13,7 +13,7 @@ class UserAnalyticsIdCache extends CacheLoader {
   async load(userId) {
     const user = await UserGetter.promises.getUser(userId, { analyticsId: 1 })
     if (user) {
-      return getAnalyticsIdFromMongoUser(user)
+      return user.analyticsId || user._id.toString()
     }
   }
 
@@ -24,4 +24,8 @@ class UserAnalyticsIdCache extends CacheLoader {
   }
 }
 
-module.exports = new UserAnalyticsIdCache()
+const userAnalyticsIdCache = new UserAnalyticsIdCache()
+userAnalyticsIdCache.callbacks = {
+  get: callbackify(userAnalyticsIdCache.get).bind(userAnalyticsIdCache),
+}
+module.exports = userAnalyticsIdCache
