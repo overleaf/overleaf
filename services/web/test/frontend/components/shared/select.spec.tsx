@@ -266,4 +266,13 @@ describe('<Select />', function () {
       })
     })
   })
+
+  describe('keyboard navigation', function () {
+    it('can select an item using the keyboard', function () {
+      render({ defaultText: 'Choose an item' })
+      cy.findByText('Choose an item').type('{Enter}{downArrow}{Enter}')
+      cy.findByText('Demo item 1').should('exist')
+      cy.findByText('Demo item 2').should('not.exist')
+    })
+  })
 })

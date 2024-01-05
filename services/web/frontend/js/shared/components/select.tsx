@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-for */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, KeyboardEventHandler, useCallback } from 'react'
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import Icon from './icon'
@@ -59,6 +59,7 @@ export const Select = <T,>({
     getMenuProps,
     getItemProps,
     highlightedIndex,
+    openMenu,
   } = useSelect({
     items: items ?? [],
     itemToString,
@@ -91,6 +92,17 @@ export const Select = <T,>({
     }
   }, [name, itemToString, selectedItem, defaultItem])
 
+  const onKeyDown: KeyboardEventHandler<HTMLButtonElement> = useCallback(
+    event => {
+      if (event.key === 'Enter' && !isOpen) {
+        event.preventDefault()
+        ;(event.nativeEvent as any).preventDownshiftDefault = true
+        openMenu()
+      }
+    },
+    [isOpen, openMenu]
+  )
+
   let value: string | undefined
   if (selectedItem || defaultItem) {
     value = itemToString(selectedItem || defaultItem)
@@ -113,7 +125,12 @@ export const Select = <T,>({
         ) : null}
         <div
           className={classNames({ disabled }, 'select-trigger')}
-          {...getToggleButtonProps({ disabled })}
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          tabIndex={0}
+          {...getToggleButtonProps({
+            disabled,
+            onKeyDown,
+          })}
         >
           <div>{value}</div>
           <div>
