@@ -69,6 +69,7 @@ export const toolbarPanel = () => [
       '& .list-group': {
         marginBottom: 0,
         backgroundColor: 'var(--editor-toolbar-bg)',
+        borderRadius: '4px',
       },
       '& .list-group-item': {
         width: '100%',
@@ -285,9 +286,20 @@ export const toolbarPanel = () => [
       fontSize: '12px',
     },
     '.ol-cm-toolbar-table-grid-popover': {
+      maxWidth: 'unset',
       padding: '8px',
-      marginLeft: '80px',
+      boxShadow: '0 5px 10px rgba(0, 0, 0, 0.2)',
+      borderRadius: '4px',
       backgroundColor: 'var(--editor-toolbar-bg)',
+      pointerEvents: 'all',
+    },
+    '.ol-cm-toolbar-button-menu-popover-unstyled': {
+      maxWidth: 'unset',
+      background: 'transparent',
+      border: 0,
+      padding: '0 8px 8px 160px',
+      boxShadow: 'none',
+      pointerEvents: 'none',
     },
   }),
 ]
