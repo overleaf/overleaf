@@ -43,7 +43,7 @@ export default function GrammarlyAdvert() {
     setShow(false)
 
     window.open(
-      'https://grammarly.go2cloud.org/aff_c?offer_id=372&aff_id=142242'
+      'https://grammarly.go2cloud.org/aff_c?offer_id=373&aff_id=142242'
     )
   }, [saveDismissed])
 
