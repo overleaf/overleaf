@@ -17,7 +17,7 @@ export const listItemMarker = EditorState.transactionFilter.of(tr => {
     for (const [index, range] of tr.selection.ranges.entries()) {
       if (range.empty) {
         const node = syntaxTree(tr.state).resolveInner(range.anchor, 1)
-        const pos = chooseTargetPosition(node, tr, range)
+        const pos = chooseTargetPosition(node, tr, range, index)
         if (pos !== null) {
           selection = selection.replaceRange(
             EditorSelection.cursor(
@@ -41,7 +41,8 @@ export const listItemMarker = EditorState.transactionFilter.of(tr => {
 const chooseTargetPosition = (
   node: SyntaxNode,
   tr: Transaction,
-  range: SelectionRange
+  range: SelectionRange,
+  index: number
 ) => {
   let targetNode
   if (node.type.is('Item')) {
@@ -62,8 +63,10 @@ const chooseTargetPosition = (
     return targetNode.to
   }
 
+  const previousHead = tr.startState.selection.ranges[index]?.head
+
   // keyboard navigation
-  if (range.assoc === 1 && !range.goalColumn) {
+  if (range.head < previousHead) {
     // moving backwards: jump to end of the previous line
     return Math.max(tr.state.doc.lineAt(range.anchor).from - 1, 1)
   } else {

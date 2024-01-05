@@ -191,20 +191,22 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
 
   it('handles keyboard navigation around a list', function () {
     const content = [
+      '',
       '\\begin{itemize}',
       '\\item One',
       '\\item Two',
       '\\end{itemize}',
+      '',
     ].join('\n')
     mountEditor(content)
 
     cy.get('.cm-line').eq(0).as('line')
     cy.get('@line').click('left')
     cy.get('@line').type(
-      '{downArrow}'.repeat(4) + // down to the end line
-        '{rightArrow}'.repeat(3) + // along a few characters
-        '{upArrow}'.repeat(2) + // up to the first list item
-        '{rightArrow}'.repeat(4) + // along to the start of the second list item
+      '{downArrow}'.repeat(2) + // down to the second list item
+        '{rightArrow}'.repeat(2) + // along a few characters
+        '{upArrow}'.repeat(1) + // up to the first list item
+        '{rightArrow}'.repeat(2) + // along to the start of the second list item
         '{shift}' + // start extending the selection
         '{rightArrow}'.repeat(3) // cover the word
     )
