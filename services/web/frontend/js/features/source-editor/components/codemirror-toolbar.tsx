@@ -20,6 +20,7 @@ import DetachCompileButtonWrapper from '../../pdf-preview/components/detach-comp
 import { isVisual } from '../extensions/visual/visual'
 import { language } from '@codemirror/language'
 import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
+import { debugConsole } from '@/utils/debugging'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -54,6 +55,8 @@ const Toolbar = memo(function Toolbar() {
 
   const buildOverflow = useCallback(
     (element: Element) => {
+      debugConsole.log('recalculating toolbar overflow')
+
       setOverflowOpen(false)
       setOverflowed(true)
 
@@ -93,6 +96,30 @@ const Toolbar = memo(function Toolbar() {
     }
   }, [buildOverflow, languageName, resizeRef, visual])
 
+  // calculate overflow when buttons change
+  const observerRef = useRef<MutationObserver | null>(null)
+  const handleButtons = useCallback(
+    node => {
+      if (!('MutationObserver' in window)) {
+        return
+      }
+
+      if (node) {
+        observerRef.current = new MutationObserver(() => {
+          if (resizeRef.current) {
+            buildOverflow(resizeRef.current.element)
+          }
+        })
+
+        observerRef.current.observe(node, { childList: true })
+      } else if (observerRef.current) {
+        observerRef.current.disconnect()
+      }
+    },
+    [buildOverflow, resizeRef]
+  )
+
+  // calculate overflow when active element changes to/from inside a table
   const insideTable = document.activeElement?.closest(
     '.table-generator-help-modal,.table-generator'
   )
@@ -145,7 +172,10 @@ const Toolbar = memo(function Toolbar() {
         <div className="formatting-buttons-wrapper" />
       </div>
 
-      <div className="ol-cm-toolbar-button-group ol-cm-toolbar-end">
+      <div
+        className="ol-cm-toolbar-button-group ol-cm-toolbar-end"
+        ref={handleButtons}
+      >
         <ToolbarButton
           id="toolbar-toggle-search"
           label="Toggle Search"
