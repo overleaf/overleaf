@@ -184,6 +184,12 @@ export const MetadataProvider: FC = ({ children }) => {
 
   useEventListener('editor:metadata-outdated', handleMetadataOutdated)
 
+  const permissionsRef = useRef(permissions)
+
+  useEffect(() => {
+    permissionsRef.current = permissions
+  }, [permissions])
+
   useEffect(() => {
     const handleProjectJoined = ({
       detail: [{ project }],
@@ -195,7 +201,7 @@ export const MetadataProvider: FC = ({ children }) => {
         )
       }
       window.setTimeout(() => {
-        if (permissions.write) {
+        if (permissionsRef.current.write) {
           loadProjectMetaFromServer()
         }
       }, 200)
@@ -206,13 +212,7 @@ export const MetadataProvider: FC = ({ children }) => {
     return () => {
       eventEmitter.off('project:joined', handleProjectJoined)
     }
-  }, [
-    eventEmitter,
-    loadProjectMetaFromServer,
-    permissions,
-    showGenericMessageModal,
-    t,
-  ])
+  }, [eventEmitter, loadProjectMetaFromServer, showGenericMessageModal, t])
 
   const value = useMemo<MetadataContextValue>(
     () => ({
