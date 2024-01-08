@@ -20,6 +20,10 @@ export default function GroupsAndEnterpriseBanner() {
   )
   const groupsAndEnterpriseBannerVariant: GroupsAndEnterpriseBannerVariant =
     getMeta('ol-groupsAndEnterpriseBannerVariant')
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
 
   const hasDismissedGroupsAndEnterpriseBanner = hasRecentlyDismissedBanner()
 
@@ -68,7 +72,11 @@ export default function GroupsAndEnterpriseBanner() {
       body={<BannerContent variant={groupsAndEnterpriseBannerVariant} />}
       action={
         <a
-          className="pull-right btn btn-info btn-sm"
+          className={
+            newNotificationStyle
+              ? 'btn btn-secondary btn-sm'
+              : 'pull-right btn btn-info btn-sm'
+          }
           href={contactSalesUrl}
           target="_blank"
           rel="noreferrer"

@@ -17,6 +17,10 @@ function Institution() {
     'ol-notificationsInstitution',
     []
   ) as InstitutionType[]
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
   const { handleDismiss } = useAsyncDismiss()
 
   if (!notificationsInstitution.length) {
@@ -41,47 +45,51 @@ function Institution() {
         ) => (
           <Fragment key={index}>
             {templateKey === 'notification_institution_sso_available' && (
-              <Notification bsStyle="info">
-                <Notification.Body>
-                  <p>
-                    <Trans
-                      i18nKey="can_link_institution_email_acct_to_institution_acct"
-                      components={{ b: <b /> }}
-                      values={{ appName, email, institutionName }}
-                      shouldUnescape
-                      tOptions={{ interpolation: { escapeValue: true } }}
-                    />
-                  </p>
-                  <div>
-                    <Trans
-                      i18nKey="doing_this_allow_log_in_through_institution"
-                      components={{ b: <b /> }}
-                      values={{ appName }}
-                      shouldUnescape
-                      tOptions={{ interpolation: { escapeValue: true } }}
-                    />{' '}
-                    <a href="/learn/how-to/Institutional_Login">
-                      {t('learn_more')}
-                    </a>
-                  </div>
-                </Notification.Body>
-                <Notification.Action>
+              <Notification
+                bsStyle="info"
+                body={
+                  <>
+                    {' '}
+                    <p>
+                      <Trans
+                        i18nKey="can_link_institution_email_acct_to_institution_acct"
+                        components={{ b: <b /> }}
+                        values={{ appName, email, institutionName }}
+                        shouldUnescape
+                        tOptions={{ interpolation: { escapeValue: true } }}
+                      />
+                    </p>
+                    <div>
+                      <Trans
+                        i18nKey="doing_this_allow_log_in_through_institution"
+                        components={{ b: <b /> }}
+                        values={{ appName }}
+                        shouldUnescape
+                        tOptions={{ interpolation: { escapeValue: true } }}
+                      />{' '}
+                      <a href="/learn/how-to/Institutional_Login">
+                        {t('learn_more')}
+                      </a>
+                    </div>
+                  </>
+                }
+                action={
                   <Button
-                    bsStyle="info"
+                    bsStyle={newNotificationStyle ? null : 'info'}
+                    className={newNotificationStyle ? 'btn-secondary' : ''}
                     bsSize="sm"
                     href={`${samlInitPath}?university_id=${institutionId}&auto=/project&email=${email}`}
                   >
                     {t('link_account')}
                   </Button>
-                </Notification.Action>
-              </Notification>
+                }
+              />
             )}
             {templateKey === 'notification_institution_sso_linked' && (
               <Notification
                 bsStyle="info"
                 onDismiss={() => id && handleDismiss(id)}
-              >
-                <Notification.Body>
+                body={
                   <Trans
                     i18nKey="account_has_been_link_to_institution_account"
                     components={{ b: <b /> }}
@@ -89,76 +97,88 @@ function Institution() {
                     shouldUnescape
                     tOptions={{ interpolation: { escapeValue: true } }}
                   />
-                </Notification.Body>
-              </Notification>
+                }
+              />
             )}
             {templateKey === 'notification_institution_sso_non_canonical' && (
               <Notification
                 bsStyle="warning"
                 onDismiss={() => id && handleDismiss(id)}
-              >
-                <Notification.Body>
-                  <Icon type="exclamation-triangle" fw />
-                  <Trans
-                    i18nKey="tried_to_log_in_with_email"
-                    components={{ b: <b /> }}
-                    values={{ appName, email: requestedEmail }}
-                    shouldUnescape
-                    tOptions={{ interpolation: { escapeValue: true } }}
-                  />{' '}
-                  <Trans
-                    i18nKey="in_order_to_match_institutional_metadata_associated"
-                    components={{ b: <b /> }}
-                    values={{ email: institutionEmail }}
-                    shouldUnescape
-                    tOptions={{ interpolation: { escapeValue: true } }}
-                  />
-                </Notification.Body>
-              </Notification>
+                body={
+                  <>
+                    {!newNotificationStyle && (
+                      <>
+                        <Icon type="exclamation-triangle" fw />{' '}
+                      </>
+                    )}
+                    <Trans
+                      i18nKey="tried_to_log_in_with_email"
+                      components={{ b: <b /> }}
+                      values={{ appName, email: requestedEmail }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
+                    />{' '}
+                    <Trans
+                      i18nKey="in_order_to_match_institutional_metadata_associated"
+                      components={{ b: <b /> }}
+                      values={{ email: institutionEmail }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
+                    />
+                  </>
+                }
+              />
             )}
             {templateKey ===
               'notification_institution_sso_already_registered' && (
               <Notification
                 bsStyle="info"
                 onDismiss={() => id && handleDismiss(id)}
-              >
-                <Notification.Body>
-                  <Trans
-                    i18nKey="tried_to_register_with_email"
-                    components={{ b: <b /> }}
-                    values={{ appName, email }}
-                    shouldUnescape
-                    tOptions={{ interpolation: { escapeValue: true } }}
-                  />{' '}
-                  {t('we_logged_you_in')}
-                </Notification.Body>
-                <Notification.Action>
+                body={
+                  <>
+                    <Trans
+                      i18nKey="tried_to_register_with_email"
+                      components={{ b: <b /> }}
+                      values={{ appName, email }}
+                      shouldUnescape
+                      tOptions={{ interpolation: { escapeValue: true } }}
+                    />{' '}
+                    {t('we_logged_you_in')}
+                  </>
+                }
+                action={
                   <Button
-                    bsStyle="info"
+                    bsStyle={newNotificationStyle ? null : 'info'}
+                    className={newNotificationStyle ? 'btn-secondary' : ''}
                     bsSize="sm"
                     href="/learn/how-to/Institutional_Login"
                   >
                     {t('find_out_more')}
                   </Button>
-                </Notification.Action>
-              </Notification>
+                }
+              />
             )}
             {templateKey === 'notification_institution_sso_error' && (
               <Notification
                 bsStyle="danger"
                 onDismiss={() => id && handleDismiss(id)}
-              >
-                <Notification.Body>
-                  <Icon type="exclamation-triangle" fw />{' '}
-                  {t('generic_something_went_wrong')}.
-                  <div>
-                    {error?.translatedMessage
-                      ? error?.translatedMessage
-                      : error?.message}
-                  </div>
-                  {error?.tryAgain ? `${t('try_again')}.` : null}
-                </Notification.Body>
-              </Notification>
+                body={
+                  <>
+                    {!newNotificationStyle && (
+                      <>
+                        <Icon type="exclamation-triangle" fw />{' '}
+                      </>
+                    )}
+                    {t('generic_something_went_wrong')}.
+                    <div>
+                      {error?.translatedMessage
+                        ? error?.translatedMessage
+                        : error?.message}
+                    </div>
+                    {error?.tryAgain ? `${t('try_again')}.` : null}
+                  </>
+                }
+              />
             )}
           </Fragment>
         )

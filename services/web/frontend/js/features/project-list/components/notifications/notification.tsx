@@ -61,13 +61,15 @@ function Notification({
       bsStyle === 'danger' ? 'error' : bsStyle
     ) as NotificationType
     return (
-      <NewNotification
-        type={newNotificationType}
-        isDismissible={onDismiss != null}
-        onDismiss={handleDismiss}
-        content={body as React.ReactElement}
-        action={action}
-      />
+      <li>
+        <NewNotification
+          type={newNotificationType}
+          isDismissible={onDismiss != null}
+          onDismiss={handleDismiss}
+          content={body as React.ReactElement}
+          action={action}
+        />
+      </li>
     )
   }
 

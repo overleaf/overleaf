@@ -25,6 +25,10 @@ function ReconfirmAffiliation({
 }: ReconfirmAffiliationProps) {
   const { t } = useTranslation()
   const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
   const { error, isLoading, isError, isSuccess, runAsync } = useAsync()
   const [hasSent, setHasSent] = useState(false)
   const [isPending, setIsPending] = useState(false)
@@ -95,7 +99,7 @@ function ReconfirmAffiliation({
 
   return (
     <div className="w-100">
-      <Icon type="warning" />
+      {!newNotificationStyle && <Icon type="warning" />}
       <Button
         bsStyle="info"
         bsSize="sm"

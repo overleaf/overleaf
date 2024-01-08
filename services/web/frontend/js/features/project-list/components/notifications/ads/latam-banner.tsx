@@ -16,6 +16,10 @@ const LATAM_CURRENCIES = {
 
 export default function LATAMBanner() {
   const { t } = useTranslation()
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
   const [dismissedAt, setDismissedAt] = usePersistedState<Date | undefined>(
     `has_dismissed_latam_banner`
   )
@@ -97,9 +101,9 @@ export default function LATAMBanner() {
       }
       action={
         <Button
-          bsStyle="info"
+          bsStyle={newNotificationStyle ? null : 'info'}
           bsSize="sm"
-          className="pull-right"
+          className={newNotificationStyle ? 'btn-secondary' : 'pull-right'}
           onClick={handleClick}
         >
           {t('get_discounted_plan')}

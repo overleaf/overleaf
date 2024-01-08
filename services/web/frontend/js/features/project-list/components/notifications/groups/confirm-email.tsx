@@ -103,8 +103,53 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
   // already have premium features.
   if (emailHasLicenceAfterConfirming(userEmail) && isOnFreeOrIndividualPlan()) {
     return (
-      <Notification bsStyle="info">
-        <Notification.Body data-testid="notification-body">
+      <Notification
+        bsStyle="info"
+        body={
+          <div data-testid="notification-body">
+            {isLoading ? (
+              <>
+                <Icon type="spinner" spin /> {t('resending_confirmation_email')}
+                &hellip;
+              </>
+            ) : isError ? (
+              <div aria-live="polite">{getUserFacingMessage(error)}</div>
+            ) : (
+              <>
+                <Trans
+                  i18nKey="one_step_away_from_professional_features"
+                  components={[<strong />]} // eslint-disable-line react/jsx-key
+                />
+                <button
+                  className="pull-right btn btn-info btn-sm"
+                  onClick={() => handleResendConfirmationEmail(userEmail)}
+                >
+                  {t('resend_email')}
+                </button>
+                <br />
+                <Trans
+                  i18nKey="institution_has_overleaf_subscription"
+                  values={{
+                    institutionName: userEmail.affiliation?.institution.name,
+                    emailAddress: userEmail.email,
+                  }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
+                  components={[<strong />]} // eslint-disable-line react/jsx-key
+                />
+              </>
+            )}
+          </div>
+        }
+      />
+    )
+  }
+
+  return (
+    <Notification
+      bsStyle="warning"
+      body={
+        <div data-testid="pro-notification-body">
           {isLoading ? (
             <>
               <Icon type="spinner" spin /> {t('resending_confirmation_email')}
@@ -114,60 +159,21 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
             <div aria-live="polite">{getUserFacingMessage(error)}</div>
           ) : (
             <>
-              <Trans
-                i18nKey="one_step_away_from_professional_features"
-                components={[<strong />]} // eslint-disable-line react/jsx-key
-              />
-              <button
-                className="pull-right btn btn-info btn-sm"
+              {t('please_confirm_email', {
+                emailAddress: userEmail.email,
+              })}{' '}
+              <Button
+                bsStyle="link"
+                className="btn-inline-link"
                 onClick={() => handleResendConfirmationEmail(userEmail)}
               >
-                {t('resend_email')}
-              </button>
-              <br />
-              <Trans
-                i18nKey="institution_has_overleaf_subscription"
-                values={{
-                  institutionName: userEmail.affiliation?.institution.name,
-                  emailAddress: userEmail.email,
-                }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
-                components={[<strong />]} // eslint-disable-line react/jsx-key
-              />
+                ({t('resend_confirmation_email')})
+              </Button>
             </>
           )}
-        </Notification.Body>
-      </Notification>
-    )
-  }
-
-  return (
-    <Notification bsStyle="warning">
-      <Notification.Body data-testid="pro-notification-body">
-        {isLoading ? (
-          <>
-            <Icon type="spinner" spin /> {t('resending_confirmation_email')}
-            &hellip;
-          </>
-        ) : isError ? (
-          <div aria-live="polite">{getUserFacingMessage(error)}</div>
-        ) : (
-          <>
-            {t('please_confirm_email', {
-              emailAddress: userEmail.email,
-            })}{' '}
-            <Button
-              bsStyle="link"
-              className="btn-inline-link"
-              onClick={() => handleResendConfirmationEmail(userEmail)}
-            >
-              ({t('resend_confirmation_email')})
-            </Button>
-          </>
-        )}
-      </Notification.Body>
-    </Notification>
+        </div>
+      }
+    />
   )
 }
 

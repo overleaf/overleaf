@@ -44,7 +44,7 @@ function WritefullPremiumPromoBanner({
       }
       action={
         <a
-          className="btn btn-secondary"
+          className="btn btn-secondary btn-sm"
           href="https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans"
           target="_blank"
           rel="noreferrer"

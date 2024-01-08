@@ -5,6 +5,7 @@ import Notification from '../notification'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import { Modal, Button } from 'react-bootstrap'
 import AccessibleModal from '../../../../../shared/components/accessible-modal'
+import getMeta from '@/utils/meta'
 
 interface VariantContents {
   default: string
@@ -25,6 +26,10 @@ type INRBannerProps = {
 
 export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
   const { t } = useTranslation()
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
   const [dismissedUntil, setDismissedUntil] = usePersistedState<
     Date | undefined
   >(`has_dismissed_inr_banner_until`)
@@ -107,9 +112,9 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
         }
         action={
           <Button
-            bsStyle="info"
+            bsStyle={newNotificationStyle ? null : 'info'}
             bsSize="sm"
-            className="pull-right"
+            className={newNotificationStyle ? 'btn-secondary' : 'pull-right'}
             onClick={handleClick}
           >
             {t('get_discounted_plan')}
@@ -133,9 +138,9 @@ export default function INRBanner({ variant, splitTestName }: INRBannerProps) {
         }
         action={
           <Button
-            bsStyle="success"
+            bsStyle={newNotificationStyle ? null : 'success'}
             bsSize="sm"
-            className="pull-right"
+            className={newNotificationStyle ? 'btn-secondary' : 'pull-right'}
             onClick={handleClick}
           >
             {t('get_discounted_plan')} ₹

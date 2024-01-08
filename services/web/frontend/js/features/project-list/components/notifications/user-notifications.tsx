@@ -13,6 +13,7 @@ import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import classNames from 'classnames'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 const isChromium = () =>
@@ -34,6 +35,10 @@ const EnrollmentNotification: JSXElementConstructor<{
 }> = enrollmentNotificationModule?.import.default
 
 function UserNotifications() {
+  const newNotificationStyle = getMeta(
+    'ol-newNotificationStyle',
+    false
+  ) as boolean
   const groupSubscriptionsPendingEnrollment: Subscription[] = getMeta(
     'ol-groupSubscriptionsPendingEnrollment',
     []
@@ -61,7 +66,7 @@ function UserNotifications() {
     }
 
     const show =
-      user.writefull?.enabled === true || // show to any users who have writefull enabled regardless of split test
+      user?.writefull?.enabled === true || // show to any users who have writefull enabled regardless of split test
       (!writefullIntegrationSplitTestEnabled && // show old banner to users who are not in the split test, who are on chrome and havent dismissed
         isChromium() &&
         getMeta('ol-showWritefullPromoBanner'))
@@ -71,7 +76,7 @@ function UserNotifications() {
         location: 'dashboard-banner',
         page: '/project',
         name:
-          user.writefull?.enabled === true ||
+          user?.writefull?.enabled === true ||
           writefullIntegrationSplitTestEnabled
             ? 'writefull-premium'
             : 'writefull',
@@ -83,7 +88,11 @@ function UserNotifications() {
   const [dismissedWritefull, setDismissedWritefull] = useState(false)
 
   return (
-    <div className="user-notifications">
+    <div
+      className={classNames('user-notifications', {
+        'notification-list': newNotificationStyle,
+      })}
+    >
       <ul className="list-unstyled">
         {EnrollmentNotification &&
           groupSubscriptionsPendingEnrollment.map(subscription => (
@@ -110,7 +119,7 @@ function UserNotifications() {
             splitTestName={inrGeoBannerSplitTestName}
           />
         ) : null}
-        {writefullIntegrationSplitTestEnabled || user.writefull?.enabled ? (
+        {writefullIntegrationSplitTestEnabled || user?.writefull?.enabled ? (
           <WritefullPremiumPromoBanner
             show={showWritefull}
             setShow={setShowWritefull}
