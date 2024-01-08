@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
-import { debounce } from 'lodash'
+import { debounce, throttle } from 'lodash'
 import PdfViewerControls from './pdf-viewer-controls'
 import { useProjectContext } from '../../../shared/context/project-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
@@ -359,9 +359,9 @@ function PdfJsViewer({ url, pdfFile }) {
   // adjust the scale when the container is resized
   useEffect(() => {
     if (pdfJsWrapper && 'ResizeObserver' in window) {
-      const resizeListener = () => {
+      const resizeListener = throttle(() => {
         pdfJsWrapper.updateOnResize()
-      }
+      }, 250)
 
       const resizeObserver = new ResizeObserver(resizeListener)
       resizeObserver.observe(pdfJsWrapper.container)
