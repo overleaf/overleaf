@@ -136,13 +136,24 @@ document
     })
   })
 
-const isGroupPlanModalAvailable = document.querySelector(
-  '[data-ol-group-plan-modal]'
-)
+function updateGroupModalPlanPricingIfAvailable() {
+  const isGroupPlanModalAvailable = document.querySelector(
+    '[data-ol-group-plan-modal]'
+  )
 
-if (isGroupPlanModalAvailable) {
-  updateGroupModalPlanPricing()
+  if (isGroupPlanModalAvailable) {
+    updateGroupModalPlanPricing()
+  }
 }
+
+updateGroupModalPlanPricingIfAvailable()
+
+// When using browser back buttons, we need to update the pricing plan
+// after the page has fully loaded as we need to wait for the previously
+// selected values to load for e.g. size.
+window.addEventListener('load', () => {
+  updateGroupModalPlanPricingIfAvailable()
+})
 
 if (window.location.hash === '#groups') {
   showGroupPlanModal()
