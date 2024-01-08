@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const Path = require('path')
 const fs = require('fs')
-const _ = require('underscore')
+const _ = require('lodash')
 const User = require('./helpers/User')
 const UserHelper = require('./helpers/UserHelper')
 

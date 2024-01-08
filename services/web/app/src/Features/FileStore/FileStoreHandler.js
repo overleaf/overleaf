@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const fs = require('fs')
 const request = require('request')

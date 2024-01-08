@@ -1,6 +1,6 @@
 // TODO: This file was created by bulk-decaffeinate.
 // Sanity-check the conversion and remove this comment.
-const _ = require('underscore')
+const _ = require('lodash')
 
 module.exports = {
   areSame(lines1, lines2) {

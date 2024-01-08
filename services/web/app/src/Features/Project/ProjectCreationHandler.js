@@ -13,7 +13,7 @@ const { User } = require('../../models/User')
 const fs = require('fs')
 const path = require('path')
 const { callbackify } = require('util')
-const _ = require('underscore')
+const _ = require('lodash')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 

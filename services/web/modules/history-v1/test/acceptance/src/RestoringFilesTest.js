@@ -11,7 +11,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const { expect } = require('chai')
-const _ = require('underscore')
+const _ = require('lodash')
 const fs = require('fs')
 const Path = require('path')
 

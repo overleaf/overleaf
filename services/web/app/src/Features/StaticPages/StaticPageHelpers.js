@@ -18,7 +18,7 @@ const extensionsToProxy = [
   '.gif',
   '.jpg',
 ]
-const _ = require('underscore')
+const _ = require('lodash')
 
 module.exports = {
   shouldProxy(url) {

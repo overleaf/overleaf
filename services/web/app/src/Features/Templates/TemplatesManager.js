@@ -13,7 +13,7 @@ const request = require('request')
 const settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const Errors = require('../Errors/Errors')
-const _ = require('underscore')
+const _ = require('lodash')
 
 const TemplatesManager = {
   createProjectFromV1Template(

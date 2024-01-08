@@ -2,7 +2,7 @@ const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const CompileManager = require('../Compile/CompileManager')
 const ClsiManager = require('../Compile/ClsiManager')
 const ProjectFileAgent = require('./ProjectFileAgent')
-const _ = require('underscore')
+const _ = require('lodash')
 const {
   CompileFailedError,
   BadDataError,

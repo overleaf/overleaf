@@ -25,7 +25,7 @@ const {
   EmptyZipFileError,
   ZipContentsTooLargeError,
 } = require('./ArchiveErrors')
-const _ = require('underscore')
+const _ = require('lodash')
 const { promisifyAll } = require('@overleaf/promise-utils')
 
 const ONE_MEG = 1024 * 1024

@@ -18,7 +18,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Notifications/NotificationsHandler.js'
 )
-const _ = require('underscore')
+const _ = require('lodash')
 
 describe('NotificationsHandler', function () {
   const userId = '123nd3ijdks'

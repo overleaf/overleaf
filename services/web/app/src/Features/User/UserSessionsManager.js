@@ -2,7 +2,7 @@ const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const Async = require('async')
-const _ = require('underscore')
+const _ = require('lodash')
 const { promisify } = require('util')
 const UserSessionsRedis = require('./UserSessionsRedis')
 const rclient = UserSessionsRedis.client()
@@ -86,7 +86,7 @@ const UserSessionsManager = {
         })
         return callback(err)
       }
-      sessionKeys = _.filter(sessionKeys, k => !_.contains(exclude, k))
+      sessionKeys = _.filter(sessionKeys, k => !_.includes(exclude, k))
       if (sessionKeys.length === 0) {
         logger.debug({ userId: user._id }, 'no other sessions found, returning')
         return callback(null, [])

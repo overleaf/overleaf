@@ -1,7 +1,7 @@
 const request = require('request').defaults({ timeout: 30 * 1000 })
 const OError = require('@overleaf/o-error')
 const settings = require('@overleaf/settings')
-const _ = require('underscore')
+const _ = require('lodash')
 const async = require('async')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
@@ -348,10 +348,10 @@ function _getUpdates(entityType, oldEntities, newEntities) {
   const adds = []
   const renames = []
 
-  const oldEntitiesHash = _.indexBy(oldEntities, entity =>
+  const oldEntitiesHash = _.keyBy(oldEntities, entity =>
     entity[entityType]._id.toString()
   )
-  const newEntitiesHash = _.indexBy(newEntities, entity =>
+  const newEntitiesHash = _.keyBy(newEntities, entity =>
     entity[entityType]._id.toString()
   )
 

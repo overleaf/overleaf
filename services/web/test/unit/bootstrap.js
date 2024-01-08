@@ -77,7 +77,6 @@ function getSandboxedModuleRequires() {
     '@overleaf/o-error',
     'sanitize-html',
     'sshpk',
-    'underscore',
     'xml2js',
   ]
   for (const modulePath of internalModules) {

@@ -13,7 +13,7 @@ const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const modulePath = '../../../app/js/DocumentUpdaterManager'
-const _ = require('underscore')
+const _ = require('lodash')
 
 describe('DocumentUpdaterManager', function () {
   beforeEach(function () {
@@ -400,24 +400,24 @@ describe('DocumentUpdaterManager', function () {
         10000,
         this.DocumentUpdaterManager._getPendingUpdateListKey
       )
-      this.keys = _.unique(keys)
+      this.keys = _.uniq(keys)
     })
     it('should return normal pending updates key', function () {
-      _.contains(this.keys, 'pending-updates-list').should.equal(true)
+      _.includes(this.keys, 'pending-updates-list').should.equal(true)
     })
 
     it('should return pending-updates-list-n keys', function () {
-      _.contains(this.keys, 'pending-updates-list-1').should.equal(true)
-      _.contains(this.keys, 'pending-updates-list-3').should.equal(true)
-      _.contains(this.keys, 'pending-updates-list-9').should.equal(true)
+      _.includes(this.keys, 'pending-updates-list-1').should.equal(true)
+      _.includes(this.keys, 'pending-updates-list-3').should.equal(true)
+      _.includes(this.keys, 'pending-updates-list-9').should.equal(true)
     })
 
     it('should not include pending-updates-list-0 key', function () {
-      _.contains(this.keys, 'pending-updates-list-0').should.equal(false)
+      _.includes(this.keys, 'pending-updates-list-0').should.equal(false)
     })
 
     it('should not include maximum as pendingUpdateListShardCount value', function () {
-      _.contains(this.keys, 'pending-updates-list-10').should.equal(false)
+      _.includes(this.keys, 'pending-updates-list-10').should.equal(false)
     })
   })
 })

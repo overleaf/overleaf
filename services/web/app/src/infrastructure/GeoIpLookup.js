@@ -1,6 +1,6 @@
 const request = require('request')
 const settings = require('@overleaf/settings')
-const _ = require('underscore')
+const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const { URL } = require('url')
 const { promisify, promisifyMultiResult } = require('@overleaf/promise-utils')
@@ -65,7 +65,7 @@ const EuroCountries = [
   'ES',
 ]
 
-_.each(EuroCountries, country => (currencyMappings[country] = 'EUR'))
+_.forEach(EuroCountries, country => (currencyMappings[country] = 'EUR'))
 
 function isValidCurrencyParam(currency) {
   if (!currency) {

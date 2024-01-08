@@ -22,7 +22,7 @@ const fs = require('fs')
 const { promisify } = require('util')
 const async = require('async')
 const globby = require('globby')
-const _ = require('underscore')
+const _ = require('lodash')
 const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = ProjectRootDocManager = {

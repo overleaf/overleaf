@@ -16,7 +16,7 @@
 
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
-const _ = require('underscore')
+const _ = require('lodash')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const Settings = require('@overleaf/settings')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')

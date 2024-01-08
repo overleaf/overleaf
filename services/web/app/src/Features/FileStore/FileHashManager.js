@@ -15,7 +15,7 @@ let FileHashManager
 const crypto = require('crypto')
 const logger = require('@overleaf/logger')
 const fs = require('fs')
-const _ = require('underscore')
+const _ = require('lodash')
 
 module.exports = FileHashManager = {
   computeHash(filePath, callback) {

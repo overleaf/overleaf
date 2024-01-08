@@ -1,6 +1,6 @@
 const NotificationsHandler = require('./NotificationsHandler')
 const SessionManager = require('../Authentication/SessionManager')
-const _ = require('underscore')
+const _ = require('lodash')
 
 module.exports = {
   getAllUnreadNotifications(req, res, next) {

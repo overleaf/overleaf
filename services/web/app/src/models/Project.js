@@ -1,5 +1,5 @@
 const mongoose = require('../infrastructure/Mongoose')
-const _ = require('underscore')
+const _ = require('lodash')
 const { FolderSchema } = require('./Folder')
 const Errors = require('../Features/Errors/Errors')
 
@@ -129,8 +129,8 @@ ProjectSchema.statics.getProject = function (projectOrId, fields, callback) {
 }
 
 function applyToAllFilesRecursivly(folder, fun) {
-  _.each(folder.fileRefs, file => fun(file))
-  _.each(folder.folders, folder => applyToAllFilesRecursivly(folder, fun))
+  _.forEach(folder.fileRefs, file => fun(file))
+  _.forEach(folder.folders, folder => applyToAllFilesRecursivly(folder, fun))
 }
 ProjectSchema.statics.applyToAllFilesRecursivly = applyToAllFilesRecursivly
 

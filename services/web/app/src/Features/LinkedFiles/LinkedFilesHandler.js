@@ -15,7 +15,7 @@ const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
 const { Project } = require('../../models/Project')
 const ProjectGetter = require('../Project/ProjectGetter')
-const _ = require('underscore')
+const _ = require('lodash')
 const {
   ProjectNotFoundError,
   V1ProjectNotFoundError,

@@ -21,7 +21,7 @@ const Features = require('../../infrastructure/Features')
 const ProjectGetter = require('../Project/ProjectGetter')
 const UserGetter = require('../User/UserGetter')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const _ = require('underscore')
+const _ = require('lodash')
 const Async = require('async')
 const Errors = require('../Errors/Errors')
 
@@ -41,7 +41,7 @@ module.exports = ReferencesHandler = {
   _findBibFileIds(project) {
     const ids = []
     function _process(folder) {
-      _.each(folder.fileRefs || [], function (file) {
+      _.forEach(folder.fileRefs || [], function (file) {
         if (
           __guard__(file != null ? file.name : undefined, x1 =>
             x1.match(/^.*\.bib$/)
@@ -50,16 +50,16 @@ module.exports = ReferencesHandler = {
           return ids.push(file._id)
         }
       })
-      return _.each(folder.folders || [], folder => _process(folder))
+      return _.forEach(folder.folders || [], folder => _process(folder))
     }
-    _.each(project.rootFolder || [], rootFolder => _process(rootFolder))
+    _.forEach(project.rootFolder || [], rootFolder => _process(rootFolder))
     return ids
   },
 
   _findBibDocIds(project) {
     const ids = []
     function _process(folder) {
-      _.each(folder.docs || [], function (doc) {
+      _.forEach(folder.docs || [], function (doc) {
         if (
           __guard__(doc != null ? doc.name : undefined, x1 =>
             x1.match(/^.*\.bib$/)
@@ -68,9 +68,9 @@ module.exports = ReferencesHandler = {
           return ids.push(doc._id)
         }
       })
-      return _.each(folder.folders || [], folder => _process(folder))
+      return _.forEach(folder.folders || [], folder => _process(folder))
     }
-    _.each(project.rootFolder || [], rootFolder => _process(rootFolder))
+    _.forEach(project.rootFolder || [], rootFolder => _process(rootFolder))
     return ids
   },
 

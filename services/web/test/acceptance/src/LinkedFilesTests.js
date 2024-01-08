@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const _ = require('underscore')
+const _ = require('lodash')
 const fs = require('fs')
 
 const Settings = require('@overleaf/settings')

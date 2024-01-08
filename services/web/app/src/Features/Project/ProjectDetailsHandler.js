@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 const ProjectGetter = require('./ProjectGetter')
 const UserGetter = require('../User/UserGetter')
 const { Project } = require('../../models/Project')
@@ -154,8 +154,8 @@ async function generateUniqueName(userId, name, suffixes = []) {
     await ProjectGetter.promises.findAllUsersProjects(userId, { name: 1 })
   // allUsersProjectNames is returned as a hash {owned: [name1, name2, ...], readOnly: [....]}
   // collect all of the names and flatten them into a single array
-  const projectNameList = _.pluck(
-    _.flatten(_.values(allUsersProjectNames)),
+  const projectNameList = _.map(
+    _.flattenDeep(_.values(allUsersProjectNames)),
     'name'
   )
   const uniqueName = await ProjectHelper.promises.ensureNameIsUnique(
@@ -194,7 +194,7 @@ async function setPublicAccessLevel(projectId, newAccessLevel) {
   if (
     projectId != null &&
     newAccessLevel != null &&
-    _.include(
+    _.includes(
       [PublicAccessLevels.PRIVATE, PublicAccessLevels.TOKEN_BASED],
       newAccessLevel
     )

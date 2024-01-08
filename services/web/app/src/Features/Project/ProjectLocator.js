@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const async = require('async')
@@ -43,7 +43,7 @@ function findElement(options, _callback) {
       searchFolder.folders != null &&
       searchFolder.folders.length !== 0
     ) {
-      _.each(searchFolder.folders, (folder, index) => {
+      _.forEach(searchFolder.folders, (folder, index) => {
         if (folder == null) {
           return
         }

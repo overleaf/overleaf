@@ -19,7 +19,7 @@ const NewBackendCloudClsiCookieManager = require('./ClsiCookieManager')(
   Settings.apis.clsi_new?.backendGroupName
 )
 const ClsiStateManager = require('./ClsiStateManager')
-const _ = require('underscore')
+const _ = require('lodash')
 const ClsiFormatChecker = require('./ClsiFormatChecker')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const Metrics = require('@overleaf/metrics')

@@ -1,4 +1,4 @@
-const _ = require('underscore')
+const _ = require('lodash')
 const { promisify } = require('util')
 const { User } = require('../../models/User')
 const Settings = require('@overleaf/settings')
@@ -38,7 +38,7 @@ module.exports = ReferalFeatures = {
 
   _getBonusLevel(user) {
     let highestBonusLevel = 0
-    _.each(_.keys(Settings.bonus_features), function (level) {
+    _.forEach(_.keys(Settings.bonus_features), function (level) {
       const levelIsLessThanUser = level <= user.refered_user_count
       const levelIsMoreThanCurrentHighest = level >= highestBonusLevel
       if (levelIsLessThanUser && levelIsMoreThanCurrentHighest) {

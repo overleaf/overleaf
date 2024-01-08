@@ -10,7 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require('underscore')
+const _ = require('lodash')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 

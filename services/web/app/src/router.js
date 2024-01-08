@@ -66,7 +66,7 @@ const {
 } = require('./infrastructure/UnsupportedBrowserMiddleware')
 
 const logger = require('@overleaf/logger')
-const _ = require('underscore')
+const _ = require('lodash')
 const { plainTextResponse } = require('./infrastructure/Response')
 const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
 

@@ -1,5 +1,5 @@
 const request = require('request')
-const _ = require('underscore')
+const _ = require('lodash')
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const settings = require('@overleaf/settings')

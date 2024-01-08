@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const _ = require('underscore')
+const _ = require('lodash')
 const fsPromises = require('fs/promises')
 const fs = require('fs')
 const logger = require('@overleaf/logger')

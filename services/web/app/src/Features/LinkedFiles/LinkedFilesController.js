@@ -17,7 +17,7 @@ const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
-const _ = require('underscore')
+const _ = require('lodash')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const {
   CompileFailedError,

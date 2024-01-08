@@ -3,7 +3,7 @@ const { ObjectId } = require('mongodb')
 const Path = require('path')
 const fs = require('fs')
 const Settings = require('@overleaf/settings')
-const _ = require('underscore')
+const _ = require('lodash')
 
 const ProjectGetter = require('../../../../../app/src/Features/Project/ProjectGetter')
 
@@ -201,8 +201,8 @@ describe('ProjectStructureChanges', function () {
         expect(update.userId).to.equal(owner._id)
         expect(update.docLines).to.be.a('string')
       }
-      expect(_.where(updates, { pathname: '/main.tex' }).length).to.equal(1)
-      expect(_.where(updates, { pathname: '/sample.bib' }).length).to.equal(1)
+      expect(_.filter(updates, { pathname: '/main.tex' }).length).to.equal(1)
+      expect(_.filter(updates, { pathname: '/sample.bib' }).length).to.equal(1)
       expect(updates[2].type).to.equal('add-file')
       expect(updates[2].userId).to.equal(owner._id)
       expect(updates[2].pathname).to.equal('/frog.jpg')
@@ -249,8 +249,8 @@ describe('ProjectStructureChanges', function () {
         expect(update.userId).to.equal(owner._id)
         expect(update.docLines).to.be.a('string')
       }
-      expect(_.where(updates, { pathname: '/main.tex' }).length).to.equal(1)
-      expect(_.where(updates, { pathname: '/sample.bib' }).length).to.equal(1)
+      expect(_.filter(updates, { pathname: '/main.tex' }).length).to.equal(1)
+      expect(_.filter(updates, { pathname: '/sample.bib' }).length).to.equal(1)
       expect(updates[2].type).to.equal('add-file')
       expect(updates[2].userId).to.equal(owner._id)
       expect(updates[2].pathname).to.equal('/frog.jpg')

@@ -1,5 +1,5 @@
 let ProjectEditorHandler
-const _ = require('underscore')
+const _ = require('lodash')
 const Path = require('path')
 
 function mergeDeletedDocs(a, b) {

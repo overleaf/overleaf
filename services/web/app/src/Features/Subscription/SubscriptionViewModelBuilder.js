@@ -8,7 +8,7 @@ const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
 const InstitutionsManager = require('../Institutions/InstitutionsManager')
 const PublishersGetter = require('../Publishers/PublishersGetter')
 const sanitizeHtml = require('sanitize-html')
-const _ = require('underscore')
+const _ = require('lodash')
 const async = require('async')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { callbackify } = require('@overleaf/promise-utils')
@@ -424,7 +424,7 @@ function buildPlansList(currentPlan) {
   const result = { allPlans }
 
   if (currentPlan) {
-    result.planCodesChangingAtTermEnd = _.pluck(
+    result.planCodesChangingAtTermEnd = _.map(
       _.filter(plans, plan => {
         if (!plan.hideFromUsers) {
           return SubscriptionHelper.shouldPlanChangeAtTermEnd(currentPlan, plan)
