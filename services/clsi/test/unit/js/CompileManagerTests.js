@@ -116,14 +116,12 @@ describe('CompileManager', function () {
       lstat: sinon.stub(),
       stat: sinon.stub(),
       readFile: sinon.stub(),
+      mkdir: sinon.stub().resolves(),
     }
     this.fsPromises.lstat.withArgs(this.compileDir).resolves(this.dirStats)
     this.fsPromises.stat
       .withArgs(Path.join(this.compileDir, 'output.synctex.gz'))
       .resolves(this.fileStats)
-    this.fse = {
-      ensureDir: sinon.stub().resolves(),
-    }
 
     this.CompileManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -145,7 +143,6 @@ describe('CompileManager', function () {
         './LockManager': this.LockManager,
         './SynctexOutputParser': this.SynctexOutputParser,
         'fs/promises': this.fsPromises,
-        'fs-extra': this.fse,
       },
     })
   })
@@ -177,7 +174,9 @@ describe('CompileManager', function () {
       })
 
       it('should ensure that the compile directory exists', function () {
-        expect(this.fse.ensureDir).to.have.been.calledWith(this.compileDir)
+        expect(this.fsPromises.mkdir).to.have.been.calledWith(this.compileDir, {
+          recursive: true,
+        })
       })
 
       it('should not run LaTeX', function () {
@@ -193,7 +192,9 @@ describe('CompileManager', function () {
       })
 
       it('should ensure that the compile directory exists', function () {
-        expect(this.fse.ensureDir).to.have.been.calledWith(this.compileDir)
+        expect(this.fsPromises.mkdir).to.have.been.calledWith(this.compileDir, {
+          recursive: true,
+        })
       })
 
       it('should write the resources to disk', function () {

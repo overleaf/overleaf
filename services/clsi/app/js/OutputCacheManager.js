@@ -2,7 +2,6 @@ let OutputCacheManager
 const { callbackify, promisify } = require('util')
 const async = require('async')
 const fs = require('fs')
-const fse = require('fs-extra')
 const Path = require('path')
 const logger = require('@overleaf/logger')
 const _ = require('lodash')
@@ -240,7 +239,7 @@ module.exports = OutputCacheManager = {
     }
 
     // make the new cache directory
-    fse.ensureDir(cacheDir, function (err) {
+    fs.mkdir(cacheDir, { recursive: true }, function (err) {
       if (err) {
         logger.error(
           { err, directory: cacheDir },
@@ -250,6 +249,8 @@ module.exports = OutputCacheManager = {
       } else {
         // copy all the output files into the new cache directory
         const results = []
+        const dirCache = new Set()
+        dirCache.add(cacheDir)
         async.mapSeries(
           outputFiles,
           function (file, cb) {
@@ -281,7 +282,7 @@ module.exports = OutputCacheManager = {
                   if (!shouldCopy) {
                     return cb()
                   }
-                  OutputCacheManager._copyFile(src, dst, function (err) {
+                  OutputCacheManager._copyFile(src, dst, dirCache, err => {
                     if (err) {
                       return cb(err)
                     }
@@ -298,7 +299,7 @@ module.exports = OutputCacheManager = {
               // pass back the original files if we encountered *any* error
               callback(err, outputFiles)
               // clean up the directory we just created
-              fse.remove(cacheDir, function (err) {
+              fs.rm(cacheDir, { force: true, recursive: true }, function (err) {
                 if (err) {
                   return logger.error(
                     { err, dir: cacheDir },
@@ -447,7 +448,7 @@ module.exports = OutputCacheManager = {
   },
 
   ensureContentDir(contentRoot, callback) {
-    fse.ensureDir(contentRoot, function (err) {
+    fs.mkdir(contentRoot, { recursive: true }, function (err) {
       if (err) {
         return callback(err)
       }
@@ -466,7 +467,7 @@ module.exports = OutputCacheManager = {
               return callback(err)
             }
             const contentDir = Path.join(contentRoot, contentId)
-            fse.ensureDir(contentDir, function (err) {
+            fs.mkdir(contentDir, { recursive: true }, function (err) {
               if (err) {
                 return callback(err)
               }
@@ -485,10 +486,12 @@ module.exports = OutputCacheManager = {
       buildId
     )
     logger.debug({ dir: archiveDir }, 'archiving log files for project')
-    fse.ensureDir(archiveDir, function (err) {
+    fs.mkdir(archiveDir, { recursive: true }, function (err) {
       if (err) {
         return callback(err)
       }
+      const dirCache = new Set()
+      dirCache.add(archiveDir)
       async.mapSeries(
         outputFiles,
         function (file, cb) {
@@ -510,7 +513,7 @@ module.exports = OutputCacheManager = {
                 if (!shouldArchive) {
                   return cb()
                 }
-                OutputCacheManager._copyFile(src, dst, cb)
+                OutputCacheManager._copyFile(src, dst, dirCache, cb)
               }
             )
           })
@@ -523,7 +526,7 @@ module.exports = OutputCacheManager = {
   expireOutputFiles(outputDir, options, callback) {
     // look in compileDir for build dirs and delete if > N or age of mod time > T
     const cleanupAll = cb => {
-      fse.remove(outputDir, err => {
+      fs.rm(outputDir, { force: true, recursive: true }, err => {
         if (err) {
           return cb(err)
         }
@@ -582,13 +585,17 @@ module.exports = OutputCacheManager = {
       }
 
       const removeDir = (dir, cb) =>
-        fse.remove(Path.join(cacheRoot, dir), function (err, result) {
-          logger.debug({ cache: cacheRoot, dir }, 'removed expired cache dir')
-          if (err) {
-            logger.error({ err, dir }, 'cache remove error')
+        fs.rm(
+          Path.join(cacheRoot, dir),
+          { force: true, recursive: true },
+          function (err, result) {
+            logger.debug({ cache: cacheRoot, dir }, 'removed expired cache dir')
+            if (err) {
+              logger.error({ err, dir }, 'cache remove error')
+            }
+            cb(err, result)
           }
-          cb(err, result)
-        })
+        )
       async.eachSeries(
         toRemove,
         (dir, cb) => removeDir(dir, cb),
@@ -637,28 +644,53 @@ module.exports = OutputCacheManager = {
     })
   },
 
-  _copyFile(src, dst, callback) {
-    // copy output file into the cache
-    fse.copy(src, dst, function (err) {
-      if (err?.code === 'ENOENT') {
-        logger.warn(
-          { err, file: src },
-          'file has disappeared when copying to build cache'
-        )
-        callback(err, false)
-      } else if (err) {
-        logger.error({ err, src, dst }, 'copy error for file in cache')
-        callback(err)
-      } else {
-        if (Settings.clsi?.optimiseInDocker) {
-          // don't run any optimisations on the pdf when they are done
-          // in the docker container
-          callback()
-        } else {
-          // call the optimiser for the file too
-          OutputFileOptimiser.optimiseFile(src, dst, callback)
+  _ensureParentExists(dst, dirCache, callback) {
+    let parent = Path.dirname(dst)
+    if (dirCache.has(parent)) {
+      callback()
+    } else {
+      fs.mkdir(parent, { recursive: true }, err => {
+        if (err) return callback(err)
+        while (!dirCache.has(parent)) {
+          dirCache.add(parent)
+          parent = Path.dirname(parent)
         }
+        callback()
+      })
+    }
+  },
+
+  _copyFile(src, dst, dirCache, callback) {
+    OutputCacheManager._ensureParentExists(dst, dirCache, err => {
+      if (err) {
+        logger.warn(
+          { err, dst },
+          'creating parent directory in output cache failed'
+        )
+        return callback(err, false)
       }
+      // copy output file into the cache
+      fs.copyFile(src, dst, function (err) {
+        if (err?.code === 'ENOENT') {
+          logger.warn(
+            { err, file: src },
+            'file has disappeared when copying to build cache'
+          )
+          callback(err, false)
+        } else if (err) {
+          logger.error({ err, src, dst }, 'copy error for file in cache')
+          callback(err)
+        } else {
+          if (Settings.clsi?.optimiseInDocker) {
+            // don't run any optimisations on the pdf when they are done
+            // in the docker container
+            callback()
+          } else {
+            // call the optimiser for the file too
+            OutputFileOptimiser.optimiseFile(src, dst, callback)
+          }
+        }
+      })
     })
   },
 

@@ -13,7 +13,6 @@
 const UrlFetcher = require('./UrlFetcher')
 const Settings = require('@overleaf/settings')
 const fs = require('fs')
-const fse = require('fs-extra')
 const Path = require('path')
 const { callbackify } = require('util')
 
@@ -32,7 +31,10 @@ function getCachePath(projectId, url, lastModified) {
 }
 
 async function clearProject(projectId) {
-  await fse.remove(getProjectDir(projectId))
+  await fs.promises.rm(getProjectDir(projectId), {
+    force: true,
+    recursive: true,
+  })
 }
 
 async function createProjectDir(projectId) {

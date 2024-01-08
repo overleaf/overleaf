@@ -1,6 +1,5 @@
 const childProcess = require('child_process')
 const fsPromises = require('fs/promises')
-const fse = require('fs-extra')
 const os = require('os')
 const Path = require('path')
 const { callbackify, promisify } = require('util')
@@ -51,7 +50,7 @@ async function doCompileWithLock(request) {
   // use a .project-lock file in the compile directory to prevent
   // simultaneous compiles
   const lockFile = Path.join(compileDir, '.project-lock')
-  await fse.ensureDir(compileDir)
+  await fsPromises.mkdir(compileDir, { recursive: true })
   const lock = await LockManager.acquire(lockFile)
   try {
     return await doCompile(request)
@@ -378,7 +377,7 @@ async function clearExpiredProjects(maxCacheAgeMs) {
     const age = now - stats.mtime
     const hasExpired = age > maxCacheAgeMs
     if (hasExpired) {
-      await fse.remove(dir)
+      await fsPromises.rm(dir, { force: true, recursive: true })
     }
   }
 }
@@ -519,7 +518,7 @@ async function wordcount(projectId, userId, filename, image) {
   const compileName = getCompileName(projectId, userId)
   const compileGroup = 'wordcount'
   try {
-    await fse.ensureDir(compileDir)
+    await fsPromises.mkdir(compileDir, { recursive: true })
   } catch (err) {
     throw OError.tag(err, 'error ensuring dir for wordcount', {
       projectId,

@@ -29,9 +29,9 @@ describe('UrlCache', function () {
         '@overleaf/settings': (this.Settings = {
           path: { clsiCacheDir: '/cache/dir' },
         }),
-        'fs-extra': (this.fse = { remove: sinon.stub().resolves() }),
         fs: (this.fs = {
           promises: {
+            rm: sinon.stub().resolves(),
             copyFile: sinon.stub().resolves(),
           },
         }),
@@ -105,7 +105,10 @@ describe('UrlCache', function () {
 
     it('should clear the cache in bulk', function () {
       expect(
-        this.fse.remove.calledWith('/cache/dir/' + this.project_id)
+        this.fs.promises.rm.calledWith('/cache/dir/' + this.project_id, {
+          force: true,
+          recursive: true,
+        })
       ).to.equal(true)
     })
   })

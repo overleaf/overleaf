@@ -16,7 +16,6 @@ const Client = require('./helpers/Client')
 const fetch = require('node-fetch')
 const { pipeline } = require('stream')
 const fs = require('fs')
-const fsExtra = require('fs-extra')
 const ChildProcess = require('child_process')
 const ClsiApp = require('./helpers/ClsiApp')
 const logger = require('@overleaf/logger')
@@ -204,13 +203,13 @@ describe('Example Documents', function () {
     ClsiApp.ensureRunning(done)
   })
   before(function (done) {
-    fsExtra.remove(fixturePath('tmp'), done)
+    fs.rm(fixturePath('tmp'), { force: true, recursive: true }, done)
   })
   before(function (done) {
     fs.mkdir(fixturePath('tmp'), done)
   })
   after(function (done) {
-    fsExtra.remove(fixturePath('tmp'), done)
+    fs.rm(fixturePath('tmp'), { force: true, recursive: true }, done)
   })
 
   return Array.from(fs.readdirSync(fixturePath('examples'))).map(exampleDir =>
