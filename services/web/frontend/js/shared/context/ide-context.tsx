@@ -1,4 +1,4 @@
-import { createContext, FC, useContext, useMemo } from 'react'
+import { createContext, FC, useContext, useEffect, useMemo } from 'react'
 import { ScopeValueStore } from '../../../../types/ide/scope-value-store'
 import { Scope } from '../../../../types/angular/scope'
 import getMeta from '@/utils/meta'
@@ -23,6 +23,25 @@ export const IdeProvider: FC<{
   scopeStore: ScopeValueStore
   scopeEventEmitter: ScopeEventEmitter
 }> = ({ ide, scopeStore, scopeEventEmitter, children }) => {
+  /**
+   * Expose scopeStore via `window.overleaf.unstable.store`, so it can be accessed by external extensions.
+   *
+   * These properties are expected to be available:
+   *   - `editor.view`
+   *   - `project.spellcheckLanguage`
+   *   - `editor.open_doc_name`,
+   *   - `editor.open_doc_id`,
+   */
+  useEffect(() => {
+    window.overleaf = {
+      ...window.overleaf,
+      unstable: {
+        ...window.overleaf?.unstable,
+        store: scopeStore,
+      },
+    }
+  }, [scopeStore])
+
   const value = useMemo<IdeContextValue>(() => {
     return {
       ...ide,

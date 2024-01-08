@@ -4,6 +4,7 @@ import { OverallThemeMeta } from './project-settings'
 import { User } from './user'
 import 'recurly__recurly-js'
 import { UserSettings } from './user-settings'
+import { ScopeValueStore } from './ide/scope-value-store'
 
 declare global {
   // eslint-disable-next-line no-unused-vars
@@ -44,5 +45,10 @@ declare global {
     expectingLinkedFileRefreshedSocketFor?: string | null
     writefull?: any
     io?: any
+    overleaf: {
+      unstable: {
+        store: ScopeValueStore
+      }
+    }
   }
 }
