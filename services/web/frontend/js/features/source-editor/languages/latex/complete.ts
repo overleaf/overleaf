@@ -92,12 +92,7 @@ export function getCompletionDetails(
 
   command = command.toLowerCase()
 
-  const existingKeys = existing
-    ? existing
-        .split(',')
-        .map(key => key.trim())
-        .filter(Boolean)
-    : []
+  const existingKeys = existing ? splitExistingKeys(existing) : []
 
   const from =
     matchBefore.from + (before?.length || 0) + (existing?.length || 0)
@@ -159,8 +154,44 @@ export const makeArgumentCompletionSource = (
   return ifIn(ifInSpec, completionSource)
 }
 
+const splitExistingKeys = (text: string) =>
+  text
+    .split(',')
+    .map(key => key.trim())
+    .filter(Boolean)
+
+export const makeMultipleArgumentCompletionSource = (
+  ifInSpec: string[],
+  builder: (
+    builderOptions: Pick<
+      CompletionBuilderOptions,
+      'completions' | 'context' | 'existingKeys' | 'from' | 'validFor'
+    >
+  ) => CompletionResult | null
+): CompletionSource => {
+  const completionSource: CompletionSource = (context: CompletionContext) => {
+    const token = context.tokenBefore(ifInSpec)
+
+    if (!token) {
+      return null
+    }
+
+    // match multiple comma-separated arguments, up to the last separator
+    const existing = token.text.match(/^\{(.+\s*,\s*)?.*$/)?.[1] ?? ''
+
+    return builder({
+      completions: blankCompletions(),
+      context,
+      existingKeys: splitExistingKeys(existing),
+      from: token.from + 1 + existing.length,
+      validFor: /[^}\s]*/,
+    })
+  }
+  return ifIn(ifInSpec, completionSource)
+}
+
 export const bibKeyArgumentCompletionSource: CompletionSource =
-  makeArgumentCompletionSource(
+  makeMultipleArgumentCompletionSource(
     ['BibKeyArgument'],
     ({ completions, context, from, validFor, existingKeys }) => {
       buildReferenceCompletions(completions, context)
@@ -176,7 +207,7 @@ export const bibKeyArgumentCompletionSource: CompletionSource =
   )
 
 export const refArgumentCompletionSource: CompletionSource =
-  makeArgumentCompletionSource(
+  makeMultipleArgumentCompletionSource(
     ['RefArgument'],
     ({ completions, context, from, validFor, existingKeys }) => {
       buildLabelCompletions(completions, context)
@@ -192,7 +223,7 @@ export const refArgumentCompletionSource: CompletionSource =
   )
 
 export const packageArgumentCompletionSource: CompletionSource =
-  makeArgumentCompletionSource(
+  makeMultipleArgumentCompletionSource(
     ['PackageArgument'],
     ({ completions, context, from, validFor, existingKeys }) => {
       buildPackageCompletions(completions, context)
