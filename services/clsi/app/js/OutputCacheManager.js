@@ -1,15 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS104: Avoid inline assignments
- * DS204: Change includes calls to have a more natural evaluation order
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 let OutputCacheManager
 const { callbackify, promisify } = require('util')
 const async = require('async')
@@ -133,16 +121,13 @@ module.exports = OutputCacheManager = {
 
   generateBuildId(callback) {
     // generate a secure build id from Date.now() and 8 random bytes in hex
-    if (callback == null) {
-      callback = function () {}
-    }
-    return crypto.randomBytes(8, function (err, buf) {
-      if (err != null) {
+    crypto.randomBytes(8, function (err, buf) {
+      if (err) {
         return callback(err)
       }
       const random = buf.toString('hex')
       const date = Date.now().toString(16)
-      return callback(err, `${date}-${random}`)
+      callback(err, `${date}-${random}`)
     })
   },
 
@@ -153,11 +138,8 @@ module.exports = OutputCacheManager = {
     outputDir,
     callback
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return OutputCacheManager.generateBuildId(function (err, buildId) {
-      if (err != null) {
+    OutputCacheManager.generateBuildId(function (err, buildId) {
+      if (err) {
         return callback(err)
       }
       if (!OLDEST_BUILD_DIR.has(outputDir)) {
@@ -175,7 +157,7 @@ module.exports = OutputCacheManager = {
             buildId
           ),
         function (err, result) {
-          if (err != null) {
+          if (err) {
             return callback(err)
           }
           OutputCacheManager.collectOutputPdfSize(
@@ -231,9 +213,6 @@ module.exports = OutputCacheManager = {
   ) {
     // make a compileDir/CACHE_SUBDIR/build_id directory and
     // copy all the output files into it
-    if (callback == null) {
-      callback = function () {}
-    }
     // Put the files into a new cache subdirectory
     const cacheDir = Path.join(
       outputDir,
@@ -246,17 +225,14 @@ module.exports = OutputCacheManager = {
     )
 
     // Archive logs in background
-    if (
-      (Settings.clsi != null ? Settings.clsi.archive_logs : undefined) ||
-      (Settings.clsi != null ? Settings.clsi.strace : undefined)
-    ) {
+    if (Settings.clsi?.archive_logs || Settings.clsi?.strace) {
       OutputCacheManager.archiveLogs(
         outputFiles,
         compileDir,
         outputDir,
         buildId,
         function (err) {
-          if (err != null) {
+          if (err) {
             return logger.warn({ err }, 'erroring archiving log files')
           }
         }
@@ -264,17 +240,17 @@ module.exports = OutputCacheManager = {
     }
 
     // make the new cache directory
-    return fse.ensureDir(cacheDir, function (err) {
-      if (err != null) {
+    fse.ensureDir(cacheDir, function (err) {
+      if (err) {
         logger.error(
           { err, directory: cacheDir },
           'error creating cache directory'
         )
-        return callback(err, outputFiles)
+        callback(err, outputFiles)
       } else {
         // copy all the output files into the new cache directory
         const results = []
-        return async.mapSeries(
+        async.mapSeries(
           outputFiles,
           function (file, cb) {
             // don't send dot files as output, express doesn't serve them
@@ -287,52 +263,43 @@ module.exports = OutputCacheManager = {
             }
             // copy other files into cache directory if valid
             const newFile = _.clone(file)
-            const [src, dst] = Array.from([
-              Path.join(compileDir, file.path),
-              Path.join(cacheDir, file.path),
-            ])
-            return OutputCacheManager._checkFileIsSafe(
-              src,
-              function (err, isSafe) {
-                if (err != null) {
-                  return cb(err)
-                }
-                if (!isSafe) {
-                  return cb()
-                }
-                return OutputCacheManager._checkIfShouldCopy(
-                  src,
-                  function (err, shouldCopy) {
-                    if (err != null) {
+            const src = Path.join(compileDir, file.path)
+            const dst = Path.join(cacheDir, file.path)
+            OutputCacheManager._checkFileIsSafe(src, function (err, isSafe) {
+              if (err) {
+                return cb(err)
+              }
+              if (!isSafe) {
+                return cb()
+              }
+              OutputCacheManager._checkIfShouldCopy(
+                src,
+                function (err, shouldCopy) {
+                  if (err) {
+                    return cb(err)
+                  }
+                  if (!shouldCopy) {
+                    return cb()
+                  }
+                  OutputCacheManager._copyFile(src, dst, function (err) {
+                    if (err) {
                       return cb(err)
                     }
-                    if (!shouldCopy) {
-                      return cb()
-                    }
-                    return OutputCacheManager._copyFile(
-                      src,
-                      dst,
-                      function (err) {
-                        if (err != null) {
-                          return cb(err)
-                        }
-                        newFile.build = buildId // attach a build id if we cached the file
-                        results.push(newFile)
-                        return cb()
-                      }
-                    )
-                  }
-                )
-              }
-            )
+                    newFile.build = buildId // attach a build id if we cached the file
+                    results.push(newFile)
+                    cb()
+                  })
+                }
+              )
+            })
           },
           function (err) {
-            if (err != null) {
+            if (err) {
               // pass back the original files if we encountered *any* error
               callback(err, outputFiles)
               // clean up the directory we just created
-              return fse.remove(cacheDir, function (err) {
-                if (err != null) {
+              fse.remove(cacheDir, function (err) {
+                if (err) {
                   return logger.error(
                     { err, dir: cacheDir },
                     'error removing cache dir after failure'
@@ -481,7 +448,7 @@ module.exports = OutputCacheManager = {
 
   ensureContentDir(contentRoot, callback) {
     fse.ensureDir(contentRoot, function (err) {
-      if (err != null) {
+      if (err) {
         return callback(err)
       }
       fs.readdir(contentRoot, function (err, results) {
@@ -503,7 +470,7 @@ module.exports = OutputCacheManager = {
               if (err) {
                 return callback(err)
               }
-              return callback(null, contentDir)
+              callback(null, contentDir)
             })
           })
         }
@@ -512,49 +479,41 @@ module.exports = OutputCacheManager = {
   },
 
   archiveLogs(outputFiles, compileDir, outputDir, buildId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
     const archiveDir = Path.join(
       outputDir,
       OutputCacheManager.ARCHIVE_SUBDIR,
       buildId
     )
     logger.debug({ dir: archiveDir }, 'archiving log files for project')
-    return fse.ensureDir(archiveDir, function (err) {
-      if (err != null) {
+    fse.ensureDir(archiveDir, function (err) {
+      if (err) {
         return callback(err)
       }
-      return async.mapSeries(
+      async.mapSeries(
         outputFiles,
         function (file, cb) {
-          const [src, dst] = Array.from([
-            Path.join(compileDir, file.path),
-            Path.join(archiveDir, file.path),
-          ])
-          return OutputCacheManager._checkFileIsSafe(
-            src,
-            function (err, isSafe) {
-              if (err != null) {
-                return cb(err)
-              }
-              if (!isSafe) {
-                return cb()
-              }
-              return OutputCacheManager._checkIfShouldArchive(
-                src,
-                function (err, shouldArchive) {
-                  if (err != null) {
-                    return cb(err)
-                  }
-                  if (!shouldArchive) {
-                    return cb()
-                  }
-                  return OutputCacheManager._copyFile(src, dst, cb)
-                }
-              )
+          const src = Path.join(compileDir, file.path)
+          const dst = Path.join(archiveDir, file.path)
+          OutputCacheManager._checkFileIsSafe(src, function (err, isSafe) {
+            if (err) {
+              return cb(err)
             }
-          )
+            if (!isSafe) {
+              return cb()
+            }
+            OutputCacheManager._checkIfShouldArchive(
+              src,
+              function (err, shouldArchive) {
+                if (err) {
+                  return cb(err)
+                }
+                if (!shouldArchive) {
+                  return cb()
+                }
+                OutputCacheManager._copyFile(src, dst, cb)
+              }
+            )
+          })
         },
         callback
       )
@@ -563,9 +522,6 @@ module.exports = OutputCacheManager = {
 
   expireOutputFiles(outputDir, options, callback) {
     // look in compileDir for build dirs and delete if > N or age of mod time > T
-    if (callback == null) {
-      callback = function () {}
-    }
     const cleanupAll = cb => {
       fse.remove(outputDir, err => {
         if (err) {
@@ -578,8 +534,8 @@ module.exports = OutputCacheManager = {
     }
 
     const cacheRoot = Path.join(outputDir, OutputCacheManager.CACHE_SUBDIR)
-    return fs.readdir(cacheRoot, function (err, results) {
-      if (err != null) {
+    fs.readdir(cacheRoot, function (err, results) {
+      if (err) {
         if (err.code === 'ENOENT') {
           // cache directory is empty
           return cleanupAll(callback)
@@ -594,16 +550,13 @@ module.exports = OutputCacheManager = {
       let oldestDirTimeToKeep = 0
 
       const isExpired = function (dir, index) {
-        if ((options != null ? options.keep : undefined) === dir) {
+        if (options?.keep === dir) {
           // This is the directory we just created for the compile request.
           oldestDirTimeToKeep = currentTime
           return false
         }
         // remove any directories over the requested (non-null) limit
-        if (
-          (options != null ? options.limit : undefined) != null &&
-          index > options.limit
-        ) {
+        if (options?.limit != null && index > options.limit) {
           return true
         }
         // remove any directories over the hard limit
@@ -612,10 +565,7 @@ module.exports = OutputCacheManager = {
         }
         // we can get the build time from the first part of the directory name DDDD-RRRR
         // DDDD is date and RRRR is random bytes
-        const dirTime = parseInt(
-          __guard__(dir.split('-'), x => x[0]),
-          16
-        )
+        const dirTime = parseInt(dir.split('-')[0], 16)
         const age = currentTime - dirTime
         const expired = age > OutputCacheManager.CACHE_AGE
         if (expired) {
@@ -634,12 +584,12 @@ module.exports = OutputCacheManager = {
       const removeDir = (dir, cb) =>
         fse.remove(Path.join(cacheRoot, dir), function (err, result) {
           logger.debug({ cache: cacheRoot, dir }, 'removed expired cache dir')
-          if (err != null) {
+          if (err) {
             logger.error({ err, dir }, 'cache remove error')
           }
-          return cb(err, result)
+          cb(err, result)
         })
-      return async.eachSeries(
+      async.eachSeries(
         toRemove,
         (dir, cb) => removeDir(dir, cb),
         err => {
@@ -657,22 +607,19 @@ module.exports = OutputCacheManager = {
   },
 
   _fileIsHidden(path) {
-    return (path != null ? path.match(/^\.|\/\./) : undefined) != null
+    return path?.match(/^\.|\/\./) != null
   },
 
   _checkFileIsSafe(src, callback) {
     // check if we have a valid file to copy into the cache
-    if (callback == null) {
-      callback = function () {}
-    }
-    return fs.stat(src, function (err, stats) {
-      if ((err != null ? err.code : undefined) === 'ENOENT') {
+    fs.stat(src, function (err, stats) {
+      if (err?.code === 'ENOENT') {
         logger.warn(
           { err, file: src },
           'file has disappeared before copying to build cache'
         )
         return callback(err, false)
-      } else if (err != null) {
+      } else if (err) {
         // some other problem reading the file
         logger.error({ err, file: src }, 'stat error for file in cache')
         return callback(err, false)
@@ -692,61 +639,46 @@ module.exports = OutputCacheManager = {
 
   _copyFile(src, dst, callback) {
     // copy output file into the cache
-    return fse.copy(src, dst, function (err) {
-      if ((err != null ? err.code : undefined) === 'ENOENT') {
+    fse.copy(src, dst, function (err) {
+      if (err?.code === 'ENOENT') {
         logger.warn(
           { err, file: src },
           'file has disappeared when copying to build cache'
         )
-        return callback(err, false)
-      } else if (err != null) {
+        callback(err, false)
+      } else if (err) {
         logger.error({ err, src, dst }, 'copy error for file in cache')
-        return callback(err)
+        callback(err)
       } else {
-        if (
-          Settings.clsi != null ? Settings.clsi.optimiseInDocker : undefined
-        ) {
+        if (Settings.clsi?.optimiseInDocker) {
           // don't run any optimisations on the pdf when they are done
           // in the docker container
-          return callback()
+          callback()
         } else {
           // call the optimiser for the file too
-          return OutputFileOptimiser.optimiseFile(src, dst, callback)
+          OutputFileOptimiser.optimiseFile(src, dst, callback)
         }
       }
     })
   },
 
   _checkIfShouldCopy(src, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return callback(null, !Path.basename(src).match(/^strace/))
+    callback(null, !Path.basename(src).match(/^strace/))
   },
 
   _checkIfShouldArchive(src, callback) {
-    let needle
-    if (callback == null) {
-      callback = function () {}
-    }
     if (Path.basename(src).match(/^strace/)) {
       return callback(null, true)
     }
+    const basename = Path.basename(src)
     if (
-      (Settings.clsi != null ? Settings.clsi.archive_logs : undefined) &&
-      ((needle = Path.basename(src)),
-      ['output.log', 'output.blg'].includes(needle))
+      Settings.clsi?.archive_logs &&
+      ['output.log', 'output.blg'].includes(basename)
     ) {
       return callback(null, true)
     }
-    return callback(null, false)
+    callback(null, false)
   },
-}
-
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }
 
 OutputCacheManager.promises = {
