@@ -14,12 +14,18 @@ export class ReactScopeEventEmitter implements ScopeEventEmitter {
   on(eventName: ScopeEventName, listener: (...args: unknown[]) => void) {
     // A listener attached via useScopeEventListener expects an event as the
     // first parameter. We don't have one, so just provide an empty object
-    const wrappedListener = (...detail: unknown[]) => {
-      listener({}, ...detail)
+    const wrappedListener = (event: CustomEvent<unknown[]>) => {
+      listener({}, ...event.detail)
     }
-    this.eventEmitter.addEventListener(eventName, wrappedListener)
+    this.eventEmitter.addEventListener(
+      eventName,
+      wrappedListener as EventListener
+    )
     return () => {
-      this.eventEmitter.removeEventListener(eventName, wrappedListener)
+      this.eventEmitter.removeEventListener(
+        eventName,
+        wrappedListener as EventListener
+      )
     }
   }
 }
