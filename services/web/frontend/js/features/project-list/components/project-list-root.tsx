@@ -75,7 +75,7 @@ function ProjectListPageContent() {
   ) : (
     <>
       <SystemMessages />
-      <div className="project-list-wrapper clearfix">
+      <div className="project-list-wrapper clearfix container mx-0 px-0">
         {totalProjectsCount > 0 ? (
           <>
             <Sidebar />
@@ -158,7 +158,7 @@ function ProjectListPageContent() {
         ) : (
           <div className="project-list-welcome-wrapper">
             {error ? <DashApiError /> : ''}
-            <Row className="row-spaced">
+            <Row className="row-spaced mx-0">
               <Col
                 sm={10}
                 smOffset={1}
