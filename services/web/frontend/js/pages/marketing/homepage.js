@@ -62,7 +62,7 @@ function homepageAnimation() {
   }
 
   const frames = [
-    ...createFrames('article', opts),
+    ...createFrames('articles', opts),
     ...createFrames('theses', opts),
     ...createFrames('reports', opts),
     ...createFrames('presentations', opts),
