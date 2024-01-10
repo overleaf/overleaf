@@ -1,95 +1,54 @@
-let OutputFileFinder
 const Path = require('path')
-const _ = require('lodash')
-const { spawn } = require('child_process')
-const logger = require('@overleaf/logger')
+const fs = require('fs')
+const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
-module.exports = OutputFileFinder = {
-  findOutputFiles(resources, directory, callback) {
-    const incomingResources = new Set(resources.map(resource => resource.path))
-
-    OutputFileFinder._getAllFiles(directory, function (error, allFiles) {
-      if (allFiles == null) {
-        allFiles = []
-      }
-      if (error) {
-        logger.err({ err: error }, 'error finding all output files')
-        return callback(error)
-      }
-      const outputFiles = []
-      for (const file of allFiles) {
-        if (!incomingResources.has(file)) {
-          outputFiles.push({
-            path: file,
-            type: Path.extname(file).replace(/^\./, '') || undefined,
-          })
-        }
-      }
-      callback(null, outputFiles, allFiles)
-    })
-  },
-
-  _getAllFiles(directory, callback) {
-    callback = _.once(callback)
-    // don't include clsi-specific files/directories in the output list
-    const EXCLUDE_DIRS = [
-      '-name',
-      '.cache',
-      '-o',
-      '-name',
-      '.archive',
-      '-o',
-      '-name',
-      '.project-*',
-    ]
-    const args = [
-      directory,
-      '(',
-      ...EXCLUDE_DIRS,
-      ')',
-      '-prune',
-      '-o',
-      '-type',
-      'f',
-      '-print',
-    ]
-    logger.debug({ args }, 'running find command')
-
-    const proc = spawn('find', args)
-    let stdout = ''
-    proc.stdout.setEncoding('utf8').on('data', chunk => (stdout += chunk))
-    proc.on('error', callback)
-    proc.on('close', function (code) {
-      if (code !== 0) {
-        logger.warn(
-          { directory, code },
-          "find returned error, directory likely doesn't exist"
-        )
-        return callback(null, [])
-      }
-      let fileList = stdout.trim().split('\n')
-      fileList = fileList.map(function (file) {
-        // Strip leading directory
-        return Path.relative(directory, file)
-      })
-      callback(null, fileList)
-    })
-  },
+async function walkFolder(compileDir, d, files, allEntries) {
+  const dirents = await fs.promises.readdir(Path.join(compileDir, d), {
+    withFileTypes: true,
+  })
+  for (const dirent of dirents) {
+    const p = Path.join(d, dirent.name)
+    if (dirent.isDirectory()) {
+      await walkFolder(compileDir, p, files, allEntries)
+      allEntries.push(p + '/')
+    } else if (dirent.isFile()) {
+      files.push(p)
+      allEntries.push(p)
+    } else {
+      allEntries.push(p)
+    }
+  }
 }
 
-module.exports.promises = {
-  findOutputFiles: (resources, directory) =>
-    new Promise((resolve, reject) => {
-      OutputFileFinder.findOutputFiles(
-        resources,
-        directory,
-        (err, outputFiles, allFiles) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve({ outputFiles, allFiles })
-          }
-        }
-      )
-    }),
+async function findOutputFiles(resources, directory) {
+  const files = []
+  const allEntries = []
+  await walkFolder(directory, '', files, allEntries)
+
+  const incomingResources = new Set(resources.map(resource => resource.path))
+
+  const outputFiles = []
+  for (const path of files) {
+    if (incomingResources.has(path)) continue
+    if (path === '.project-sync-state') continue
+    if (path === '.project-lock') continue
+    outputFiles.push({
+      path,
+      type: Path.extname(path).replace(/^\./, '') || undefined,
+    })
+  }
+  return {
+    outputFiles,
+    allEntries,
+  }
+}
+
+module.exports = {
+  findOutputFiles: callbackifyMultiResult(findOutputFiles, [
+    'outputFiles',
+    'allEntries',
+  ]),
+  promises: {
+    findOutputFiles,
+  },
 }

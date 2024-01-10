@@ -1,8 +1,7 @@
-const childProcess = require('child_process')
 const fsPromises = require('fs/promises')
 const os = require('os')
 const Path = require('path')
-const { callbackify, promisify } = require('util')
+const { callbackify } = require('util')
 
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
@@ -20,8 +19,6 @@ const Errors = require('./Errors')
 const CommandRunner = require('./CommandRunner')
 const { emitPdfStats } = require('./ContentCacheMetrics')
 const SynctexOutputParser = require('./SynctexOutputParser')
-
-const execFile = promisify(childProcess.execFile)
 
 const COMPILE_TIME_BUCKETS = [
   // NOTE: These buckets are locked in per metric name.
@@ -211,7 +208,7 @@ async function doCompile(request) {
       Metrics.inc('compiles-timeout', 1, request.metricsOpts)
     }
 
-    const outputFiles = await _saveOutputFiles({
+    const { outputFiles, allEntries } = await _saveOutputFiles({
       request,
       compileDir,
       resourceList,
@@ -222,7 +219,11 @@ async function doCompile(request) {
 
     // Clear project if this compile was abruptly terminated
     if (error.terminated || error.timedout) {
-      await clearProject(request.project_id, request.user_id)
+      await clearProjectWithListing(
+        request.project_id,
+        request.user_id,
+        allEntries
+      )
     }
 
     throw error
@@ -279,7 +280,7 @@ async function doCompile(request) {
   // Emit compile time.
   timings.compile = ts
 
-  const outputFiles = await _saveOutputFiles({
+  const { outputFiles } = await _saveOutputFiles({
     request,
     compileDir,
     resourceList,
@@ -312,10 +313,8 @@ async function _saveOutputFiles({
   )
   const outputDir = getOutputDir(request.project_id, request.user_id)
 
-  let { outputFiles } = await OutputFileFinder.promises.findOutputFiles(
-    resourceList,
-    compileDir
-  )
+  let { outputFiles, allEntries } =
+    await OutputFileFinder.promises.findOutputFiles(resourceList, compileDir)
 
   try {
     outputFiles = await OutputCacheManager.promises.saveOutputFiles(
@@ -330,7 +329,7 @@ async function _saveOutputFiles({
   }
 
   timings.output = timer.done()
-  return outputFiles
+  return { outputFiles, allEntries }
 }
 
 async function stopCompile(projectId, userId) {
@@ -340,6 +339,11 @@ async function stopCompile(projectId, userId) {
 
 async function clearProject(projectId, userId) {
   const compileDir = getCompileDir(projectId, userId)
+  await fsPromises.rm(compileDir, { force: true, recursive: true })
+}
+
+async function clearProjectWithListing(projectId, userId, allEntries) {
+  const compileDir = getCompileDir(projectId, userId)
 
   const exists = await _checkDirectory(compileDir)
   if (!exists) {
@@ -347,12 +351,15 @@ async function clearProject(projectId, userId) {
     return
   }
 
-  try {
-    await execFile('rm', ['-r', '-f', '--', compileDir])
-  } catch (err) {
-    OError.tag(err, `rm -r failed`, { compileDir, stderr: err.stderr })
-    throw err
+  for (const pathInProject of allEntries) {
+    const path = Path.join(compileDir, pathInProject)
+    if (path.endsWith('/')) {
+      await fsPromises.rmdir(path)
+    } else {
+      await fsPromises.unlink(path)
+    }
   }
+  await fsPromises.rmdir(compileDir)
 }
 
 async function _findAllDirs() {

@@ -53,7 +53,10 @@ describe('CompileManager', function () {
     }
     this.OutputFileFinder = {
       promises: {
-        findOutputFiles: sinon.stub().resolves(this.outputFiles),
+        findOutputFiles: sinon.stub().resolves({
+          outputFiles: this.outputFiles,
+          allEntries: this.outputFiles.map(f => f.path).concat(['main.tex']),
+        }),
       },
     }
     this.OutputCacheManager = {
@@ -117,6 +120,9 @@ describe('CompileManager', function () {
       stat: sinon.stub(),
       readFile: sinon.stub(),
       mkdir: sinon.stub().resolves(),
+      rm: sinon.stub().resolves(),
+      unlink: sinon.stub().resolves(),
+      rmdir: sinon.stub().resolves(),
     }
     this.fsPromises.lstat.withArgs(this.compileDir).resolves(this.dirStats)
     this.fsPromises.stat
@@ -319,12 +325,15 @@ describe('CompileManager', function () {
       })
 
       it('should clear the compile directory', function () {
-        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
-          '-r',
-          '-f',
-          '--',
-          this.compileDir,
-        ])
+        for (const { path } of this.buildFiles) {
+          expect(this.fsPromises.unlink).to.have.been.calledWith(
+            this.compileDir + '/' + path
+          )
+        }
+        expect(this.fsPromises.unlink).to.have.been.calledWith(
+          this.compileDir + '/main.tex'
+        )
+        expect(this.fsPromises.rmdir).to.have.been.calledWith(this.compileDir)
       })
     })
 
@@ -339,50 +348,29 @@ describe('CompileManager', function () {
       })
 
       it('should clear the compile directory', function () {
-        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
-          '-r',
-          '-f',
-          '--',
-          this.compileDir,
-        ])
+        for (const { path } of this.buildFiles) {
+          expect(this.fsPromises.unlink).to.have.been.calledWith(
+            this.compileDir + '/' + path
+          )
+        }
+        expect(this.fsPromises.unlink).to.have.been.calledWith(
+          this.compileDir + '/main.tex'
+        )
+        expect(this.fsPromises.rmdir).to.have.been.calledWith(this.compileDir)
       })
     })
   })
 
   describe('clearProject', function () {
-    describe('successfully', function () {
-      beforeEach(async function () {
-        await this.CompileManager.promises.clearProject(
-          this.projectId,
-          this.userId
-        )
-      })
+    it('should clear the compile directory', async function () {
+      await this.CompileManager.promises.clearProject(
+        this.projectId,
+        this.userId
+      )
 
-      it('should remove the project directory', function () {
-        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
-          '-r',
-          '-f',
-          '--',
-          this.compileDir,
-        ])
-      })
-    })
-
-    describe('with a non-success status code', function () {
-      beforeEach(async function () {
-        this.child_process.execFile.yields(new Error('oops'))
-        await expect(
-          this.CompileManager.promises.clearProject(this.projectId, this.userId)
-        ).to.be.rejected
-      })
-
-      it('should remove the project directory', function () {
-        expect(this.child_process.execFile).to.have.been.calledWith('rm', [
-          '-r',
-          '-f',
-          '--',
-          this.compileDir,
-        ])
+      expect(this.fsPromises.rm).to.have.been.calledWith(this.compileDir, {
+        force: true,
+        recursive: true,
       })
     })
   })

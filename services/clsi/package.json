@@ -20,6 +20,7 @@
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
+    "@overleaf/promise-utils": "*",
     "@overleaf/settings": "*",
     "async": "3.2.2",
     "body-parser": "^1.19.0",
