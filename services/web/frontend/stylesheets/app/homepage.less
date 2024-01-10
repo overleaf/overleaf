@@ -331,48 +331,81 @@
 }
 
 .website-redesign {
-  .home-top {
+  .home-animation-text-container {
     padding-top: @header-height;
-    p {
-      margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .home-begin-text {
+      font-weight: 400;
+      display: flex;
+      color: #5f5ff0;
+      font-size: 4rem;
+      line-height: 1.25;
+      font-family: 'DM Mono', monospace;
+      align-self: flex-start;
+      width: 100%;
+      margin-top: 0;
+      font-weight: 400;
+
+      @media (max-width: @screen-sm-max) {
+        text-align: center;
+        flex-direction: column;
+        align-items: center;
+        font-size: 2.25rem;
+      }
     }
 
-    .home-top-card {
-      margin-top: @margin-lg;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .home-parenthesis-text {
+      color: #bbdbb8;
+      font-size: 4rem;
+      line-height: 1.25;
+      font-family: 'DM Mono', monospace;
+      display: inherit;
 
-      .home-top-begin-text {
-        font-weight: 400;
-        display: flex;
-        color: #5f5ff0;
-        font-size: 4rem;
-        line-height: 1.25;
+      #home-animation-text {
         font-family: 'DM Mono', monospace;
-        align-self: flex-start;
-        width: 100%;
-        margin-top: 0;
-        font-weight: 400;
-
-        @media (max-width: @screen-sm-max) {
-          text-align: center;
-          flex-direction: column;
-          align-items: center;
-          font-size: 2.25rem;
-        }
+        color: @neutral-70;
       }
 
-      .home-top-parenthesis-text {
-        font-weight: 500;
-        color: #bbdbb8;
-        font-size: 4rem;
-        line-height: 1.25;
-        font-family: 'DM Mono', monospace;
-        display: inherit;
+      @media (max-width: @screen-sm-max) {
+        font-size: 2.25rem;
+      }
+    }
+  }
 
-        @media (max-width: @screen-sm-max) {
-          font-size: 2.25rem;
+  .home-top-text {
+    text-align: center;
+    font-size: 1.25rem;
+    line-height: 1.4;
+    margin-bottom: 0;
+
+    @media (max-width: @screen-sm-max) {
+      font-size: 1.125rem;
+      line-height: 1.33;
+      padding: 0 100px;
+    }
+
+    @media (max-width: @screen-xs-max) {
+      padding: 0 20px;
+    }
+
+    // force different line for desktop on both text
+    > span:first-of-type {
+      display: block;
+
+      @media (max-width: @screen-sm-max) {
+        display: inline;
+      }
+    }
+
+    // need to have an extra space only for mobile
+    // since on mobile all the text are inline
+    .dash-text {
+      @media (max-width: @screen-sm-max) {
+        &::after {
+          content: ' ';
         }
       }
     }
@@ -484,6 +517,16 @@
     }
   }
 
+  .home-millions-user-text {
+    text-align: center;
+    font-size: 1.25rem;
+    margin-bottom: 5px;
+
+    @media (max-width: @screen-sm-max) {
+      font-size: 1rem;
+    }
+  }
+
   .home-university-logos {
     display: flex;
     justify-content: space-between;
@@ -511,5 +554,11 @@
     @media (max-width: @screen-sm-max) {
       display: block;
     }
+  }
+
+  .home-plans-footer {
+    text-align: center;
+    font-size: 1.125rem;
+    line-height: 1.333;
   }
 }

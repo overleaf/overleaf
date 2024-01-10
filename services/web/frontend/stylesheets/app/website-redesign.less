@@ -133,6 +133,18 @@
         box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
         border-top: 8px solid #2f4858;
         padding: 48px 40px 48px 40px;
+
+        &.info-card-big-text {
+          h3 {
+            font-size: 1.5rem;
+            line-height: 1.333;
+          }
+
+          p {
+            font-size: 1.125rem;
+            line-height: 1.333;
+          }
+        }
       }
     }
   }
@@ -153,13 +165,33 @@
     }
 
     .features-card-description {
-      h3 {
-        font-size: 1.875rem; // 30px
-        line-height: 2.5rem; // 40px
+      padding-top: 16px;
+
+      h3.features-card-ul-title {
+        font-size: 1.875rem;
+        line-height: 1.5;
+      }
+
+      h3.features-card-title {
+        font-size: 1.5rem;
+        line-height: 1.4;
+        margin-bottom: 8px;
       }
 
       p {
-        margin-bottom: 10px;
+        margin-bottom: 16px;
+        font-size: 1.125rem;
+        line-height: 1.333;
+
+        @media (max-width: @screen-sm-max) {
+          font-size: 1rem;
+          line-height: 1.375;
+        }
+      }
+
+      a.green-link {
+        margin-top: 4px;
+        display: block;
       }
 
       ul {
@@ -168,11 +200,16 @@
         margin: 0;
 
         li {
-          margin-bottom: 16px;
+          margin-bottom: 12px;
+          font-size: 1.125rem;
+          line-height: 1.333;
           // flex is needed in the case of "premium" label being on the same line
           display: flex;
 
           @media (max-width: @screen-sm-max) {
+            font-size: 1rem;
+            line-height: 1.375;
+
             // only for label-premium that appears directly as a child of li
             > .label-premium {
               margin-left: auto;
@@ -274,6 +311,13 @@
       }
     }
 
+    .cta-card-text {
+      font-size: 1.125rem;
+      line-height: 1.333;
+      margin: 8px 0;
+      text-align: center;
+    }
+
     .cta-card-quote {
       font-size: 1.875rem; // 30px
       font-weight: 600;
@@ -350,7 +394,7 @@
       border-top-left-radius: 24px;
       border-top-right-radius: 0;
       border-bottom-left-radius: 24px;
-      padding: 96px 64px;
+      padding: 96px 56px;
 
       @media (max-width: @screen-sm-max) {
         border-top-left-radius: 24px;
@@ -361,7 +405,18 @@
       }
 
       blockquote {
-        margin-bottom: auto;
+        hyphens: auto;
+        flex-grow: 1;
+      }
+
+      .testimonial-media-author {
+        font-size: 1.125rem;
+        line-height: 1.333;
+
+        @media (max-width: @screen-sm-max) {
+          font-size: 1rem;
+          line-height: 1.375;
+        }
       }
     }
 
@@ -457,6 +512,9 @@
   }
 
   .link-with-arrow {
+    font-size: 1.125rem;
+    line-height: 1.333;
+
     i.material-symbols-rounded {
       vertical-align: middle;
       padding-bottom: 3px;
@@ -515,12 +573,13 @@
   // most of these are here to replace rules from core/type.less
   blockquote {
     border-left: none;
-    font-size: 28px;
+    font-size: 1.875rem;
+    line-height: 1.333;
     font-weight: 600;
-    line-height: 38px;
     quotes: '\0022''\0022'; // use straight (" ") instead of curly ones (“ ”)
     padding: unset;
     margin: unset;
+    font-family: 'Noto Sans', sans-serif;
 
     &::after {
       visibility: visible;
@@ -536,19 +595,19 @@
 
     &::after,
     &::before {
-      font-size: 28px;
-      line-height: 38px;
+      font-size: 1.875rem;
+      line-height: 1.333;
     }
 
     @media (max-width: @screen-sm-max) {
-      font-size: 24px;
-      line-height: 32px;
+      font-size: 1.5rem;
+      line-height: 1.333;
 
       &::after,
       &::before {
         visibility: visible;
-        font-size: 24px;
-        line-height: 32px;
+        font-size: 1.5rem;
+        line-height: 1.333;
       }
     }
   }
@@ -589,5 +648,18 @@
 
   .label-premium {
     height: 20px; // override default height
+  }
+
+  .header-description {
+    p {
+      font-size: 1.25rem;
+      line-height: 1.4;
+      margin-bottom: 0;
+
+      @media (max-width: @screen-sm-max) {
+        font-size: 1.125rem;
+        line-height: 1.33;
+      }
+    }
   }
 }
