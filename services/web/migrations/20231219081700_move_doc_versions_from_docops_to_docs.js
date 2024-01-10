@@ -1,14 +1,18 @@
-const { ReadPreference } = require('mongodb')
+const { ObjectId, ReadPreference } = require('mongodb')
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || '1000', 10)
+const MIN_ID = process.env.MIN_ID
 
 exports.tags = ['server-ce', 'server-pro', 'saas']
 
 exports.migrate = async ({ db }) => {
-  const records = db.docOps.find(
-    {},
-    { readPreference: ReadPreference.secondaryPreferred }
-  )
+  const filter = {}
+  if (MIN_ID) {
+    filter._id = { $gte: new ObjectId(MIN_ID) }
+  }
+  const records = db.docOps
+    .find(filter, { readPreference: ReadPreference.secondaryPreferred })
+    .sort({ _id: 1 })
 
   let docsProcessed = 0
   let batch = []
@@ -30,12 +34,13 @@ exports.migrate = async ({ db }) => {
     }
     docsProcessed += 1
     if (docsProcessed % 100000 === 0) {
-      console.log(`${docsProcessed} docs processed`)
+      console.log(`${docsProcessed} docs processed - last id: ${docId}`)
     }
   }
   if (batch.length > 0) {
     await db.docs.bulkWrite(batch, { ordered: false })
   }
+  console.log(`DONE - ${docsProcessed} docs processed`)
 }
 
 exports.rollback = async ({ db }) => {
