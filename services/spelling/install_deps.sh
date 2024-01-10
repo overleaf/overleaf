@@ -17,7 +17,7 @@ echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/tr
 apt-get update
 
 # aspell is leaking memory in bookworm, we'll obtain it from trixie
-apt-get install -y -t trixie aspell=0.60.8.1-1
+apt satisfy -y -t trixie 'aspell (>=0.60.8.1)'
 
 apt-get install -y \
   aspell-af \
