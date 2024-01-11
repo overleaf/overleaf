@@ -1,13 +1,5 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "noEmit": true,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
-    "strict": true
-  },
+  "extends": "../../tsconfig.backend.json",
   "include": [
     "app/src/**/*",
     "modules/*/app/src/**/*",

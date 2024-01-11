@@ -40,6 +40,7 @@
     "chai-as-promised": "^7.1.1",
     "esmock": "^2.1.0",
     "mocha": "^10.2.0",
-    "sinon": "^9.2.4"
+    "sinon": "^9.2.4",
+    "typescript": "^5.0.4"
   }
 }

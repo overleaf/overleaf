@@ -14,7 +14,8 @@
     "lint": "eslint --max-warnings 0 --format unix .",
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@overleaf/logger": "*",
@@ -35,7 +36,8 @@
     "request": "^2.88.2",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4",
-    "timekeeper": "^2.2.0"
+    "timekeeper": "^2.2.0",
+    "typescript": "^5.0.4"
   },
   "version": "1.0.0",
   "directories": {

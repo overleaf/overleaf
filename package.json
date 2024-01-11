@@ -15,7 +15,8 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "prettier": "2.5.1"
+    "prettier": "2.5.1",
+    "typescript": "^5.0.4"
   },
   "scripts": {
     "format": "prettier --list-different $PWD/'**/*.js'",

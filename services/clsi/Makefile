@@ -45,7 +45,10 @@ lint:
 lint_fix:
 	$(RUN_LINTING) lint:fix
 
-test: format lint test_unit test_acceptance
+typecheck:
+	$(RUN_LINTING) typecheck
+
+test: format lint typecheck test_unit test_acceptance
 
 test_unit:
 ifneq (,$(wildcard test/unit))

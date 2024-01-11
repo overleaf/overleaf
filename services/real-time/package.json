@@ -43,6 +43,7 @@
     "sandboxed-module": "~0.3.0",
     "sinon": "^9.2.4",
     "timekeeper": "0.0.4",
+    "typescript": "^5.0.4",
     "uid-safe": "^2.1.5"
   }
 }

@@ -35,6 +35,7 @@
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",
     "sandboxed-module": "^2.0.4",
-    "sinon": "^9.2.4"
+    "sinon": "^9.2.4",
+    "typescript": "^5.0.4"
   }
 }

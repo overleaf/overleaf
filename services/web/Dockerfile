@@ -49,6 +49,7 @@ FROM deps as dev
 
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
+COPY tsconfig.backend.json /overleaf/
 COPY services/web /overleaf/services/web
 
 # Build the latex parser
