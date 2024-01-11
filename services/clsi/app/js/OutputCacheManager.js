@@ -266,33 +266,25 @@ module.exports = OutputCacheManager = {
             const newFile = _.clone(file)
             const src = Path.join(compileDir, file.path)
             const dst = Path.join(cacheDir, file.path)
-            OutputCacheManager._checkFileIsSafe(src, function (err, isSafe) {
-              if (err) {
-                return cb(err)
-              }
-              if (!isSafe) {
-                return cb()
-              }
-              OutputCacheManager._checkIfShouldCopy(
-                src,
-                function (err, shouldCopy) {
+            OutputCacheManager._checkIfShouldCopy(
+              src,
+              function (err, shouldCopy) {
+                if (err) {
+                  return cb(err)
+                }
+                if (!shouldCopy) {
+                  return cb()
+                }
+                OutputCacheManager._copyFile(src, dst, dirCache, err => {
                   if (err) {
                     return cb(err)
                   }
-                  if (!shouldCopy) {
-                    return cb()
-                  }
-                  OutputCacheManager._copyFile(src, dst, dirCache, err => {
-                    if (err) {
-                      return cb(err)
-                    }
-                    newFile.build = buildId // attach a build id if we cached the file
-                    results.push(newFile)
-                    cb()
-                  })
-                }
-              )
-            })
+                  newFile.build = buildId // attach a build id if we cached the file
+                  results.push(newFile)
+                  cb()
+                })
+              }
+            )
           },
           function (err) {
             if (err) {
@@ -497,26 +489,18 @@ module.exports = OutputCacheManager = {
         function (file, cb) {
           const src = Path.join(compileDir, file.path)
           const dst = Path.join(archiveDir, file.path)
-          OutputCacheManager._checkFileIsSafe(src, function (err, isSafe) {
-            if (err) {
-              return cb(err)
-            }
-            if (!isSafe) {
-              return cb()
-            }
-            OutputCacheManager._checkIfShouldArchive(
-              src,
-              function (err, shouldArchive) {
-                if (err) {
-                  return cb(err)
-                }
-                if (!shouldArchive) {
-                  return cb()
-                }
-                OutputCacheManager._copyFile(src, dst, dirCache, cb)
+          OutputCacheManager._checkIfShouldArchive(
+            src,
+            function (err, shouldArchive) {
+              if (err) {
+                return cb(err)
               }
-            )
-          })
+              if (!shouldArchive) {
+                return cb()
+              }
+              OutputCacheManager._copyFile(src, dst, dirCache, cb)
+            }
+          )
         },
         callback
       )
@@ -615,33 +599,6 @@ module.exports = OutputCacheManager = {
 
   _fileIsHidden(path) {
     return path?.match(/^\.|\/\./) != null
-  },
-
-  _checkFileIsSafe(src, callback) {
-    // check if we have a valid file to copy into the cache
-    fs.stat(src, function (err, stats) {
-      if (err?.code === 'ENOENT') {
-        logger.warn(
-          { err, file: src },
-          'file has disappeared before copying to build cache'
-        )
-        return callback(err, false)
-      } else if (err) {
-        // some other problem reading the file
-        logger.error({ err, file: src }, 'stat error for file in cache')
-        return callback(err, false)
-      } else if (!stats.isFile()) {
-        // other filetype - reject it
-        logger.warn(
-          { src, stat: stats },
-          'nonfile output - refusing to copy to cache'
-        )
-        return callback(null, false)
-      } else {
-        // it's a plain file, ok to copy
-        return callback(null, true)
-      }
-    })
   },
 
   _ensureParentExists(dst, dirCache, callback) {
