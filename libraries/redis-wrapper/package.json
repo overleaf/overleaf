@@ -13,12 +13,15 @@
   "repository": "github:overleaf/redis-wrapper",
   "license": "ISC",
   "scripts": {
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "test": "mocha --recursive test/unit/src/",
-    "test:ci": "npm run test"
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
   },
   "peerDependencies": {
     "@overleaf/logger": "*",
@@ -35,6 +38,7 @@
     "chai": "^4.3.6",
     "mocha": "^10.2.0",
     "sandboxed-module": "^2.0.4",
-    "sinon": "^9.2.4"
+    "sinon": "^9.2.4",
+    "typescript": "^5.0.4"
   }
 }

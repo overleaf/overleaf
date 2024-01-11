@@ -4,20 +4,23 @@
   "description": "utilities to help working with promises",
   "main": "index.js",
   "scripts": {
-    "test": "npm run lint && npm run format && npm run test:unit",
-    "test:unit": "mocha",
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "test:ci": "npm run test:unit"
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "AGPL-3.0-only",
   "devDependencies": {
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
-    "mocha": "^10.2.0"
+    "mocha": "^10.2.0",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "p-limit": "^2.3.0"

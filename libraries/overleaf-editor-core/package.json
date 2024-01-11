@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "description": "Library shared between the editor server and clients.",
   "main": "index.js",
+  "types": "types/index.js",
   "scripts": {
-    "test": "mocha",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "lint": "eslint --max-warnings 0 --format unix lib test && tsc",
-    "lint:fix": "eslint --fix lib test",
-    "test:ci": "npm run test"
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
   },
   "author": "team@overleaf.com",
   "license": "Proprietary",

@@ -6,6 +6,8 @@
     "type": "git",
     "url": "https://github.com/overleaf/metrics-module.git"
   },
+  "main": "index.js",
+  "types": "types/index.js",
   "dependencies": {
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.1.0",
     "@google-cloud/profiler": "^6.0.0",
@@ -24,17 +26,20 @@
     "chai": "^4.3.6",
     "mocha": "^10.2.0",
     "sandboxed-module": "^2.0.4",
-    "sinon": "^9.2.4"
+    "sinon": "^9.2.4",
+    "typescript": "^5.0.4"
   },
   "scripts": {
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
-    "test:unit": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/unit",
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
-    "test": "npm run test:unit && npm run test:acceptance",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "test:ci": "npm run test"
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
   },
   "peerDependencies": {
     "@overleaf/logger": "*"

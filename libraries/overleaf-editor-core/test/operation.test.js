@@ -62,8 +62,8 @@ describe('Operation', function () {
 
     return {
       snapshot: snapshotA,
-      operations: operations,
-      primeOperations: primeOperations,
+      operations,
+      primeOperations,
 
       log() {
         console.log(this)

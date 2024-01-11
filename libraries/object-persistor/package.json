@@ -3,14 +3,17 @@
   "version": "1.0.2",
   "description": "Module for storing objects in multiple backends, with fallback on 404 to assist migration between them",
   "main": "index.js",
+  "types": "types/index.js",
   "scripts": {
-    "test": "npm run lint && npm run format && npm run test:unit",
-    "test:unit": "mocha",
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "test:ci": "npm run test:unit"
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
   },
   "repository": {
     "type": "git",
@@ -39,6 +42,7 @@
     "mongodb": "^6.1.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "^9.2.4",
-    "sinon-chai": "^3.7.0"
+    "sinon-chai": "^3.7.0",
+    "typescript": "^5.0.4"
   }
 }

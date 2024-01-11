@@ -3,13 +3,17 @@
   "version": "3.0.0",
   "description": "",
   "main": "index.js",
+  "types": "./types/index.js",
   "scripts": {
-    "test": "mocha test/**/*.js",
-    "lint": "eslint --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix .",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
-    "test:ci": "npm run test"
+    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "test:ci": "npm run test:unit",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
   },
   "author": "",
   "license": "AGPL-3.0-only",
@@ -22,6 +26,7 @@
   "devDependencies": {
     "chai": "^4.3.6",
     "mocha": "^10.2.0",
-    "sandboxed-module": "^2.0.4"
+    "sandboxed-module": "^2.0.4",
+    "typescript": "^5.0.4"
   }
 }
