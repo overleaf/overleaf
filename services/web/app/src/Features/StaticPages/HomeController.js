@@ -58,6 +58,7 @@ module.exports = HomeController = {
         )
       AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
         page: req.url,
+        'website-redesign': websiteRedesignVariant,
       })
 
       if (websiteRedesignActive) {

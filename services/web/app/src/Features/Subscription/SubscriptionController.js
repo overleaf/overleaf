@@ -110,6 +110,9 @@ async function plansPage(req, res) {
     )
   }
 
+  const websiteRedesignVariant =
+    res.locals.splitTestVariants?.['website-redesign']
+
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
@@ -122,6 +125,7 @@ async function plansPage(req, res) {
       ? 'latam'
       : 'default',
     'annual-trials': annualTrialsAssignment.variant,
+    'website-redesign': websiteRedesignVariant,
   }
   if (inrGeoBannerSplitTestName) {
     plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
