@@ -44,15 +44,13 @@ function getOutputDir(projectId, userId) {
 
 async function doCompileWithLock(request) {
   const compileDir = getCompileDir(request.project_id, request.user_id)
-  // use a .project-lock file in the compile directory to prevent
-  // simultaneous compiles
-  const lockFile = Path.join(compileDir, '.project-lock')
   await fsPromises.mkdir(compileDir, { recursive: true })
-  const lock = await LockManager.acquire(lockFile)
+  // prevent simultaneous compiles
+  const lock = LockManager.acquire(compileDir)
   try {
     return await doCompile(request)
   } finally {
-    await lock.release()
+    lock.release()
   }
 }
 

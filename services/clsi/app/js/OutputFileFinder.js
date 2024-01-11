@@ -31,7 +31,6 @@ async function findOutputFiles(resources, directory) {
   for (const path of files) {
     if (incomingResources.has(path)) continue
     if (path === '.project-sync-state') continue
-    if (path === '.project-lock') continue
     outputFiles.push({
       path,
       type: Path.extname(path).replace(/^\./, '') || undefined,

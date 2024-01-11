@@ -99,10 +99,10 @@ describe('CompileManager', function () {
       },
     }
     this.lock = {
-      release: sinon.stub().resolves(),
+      release: sinon.stub(),
     }
     this.LockManager = {
-      acquire: sinon.stub().resolves(this.lock),
+      acquire: sinon.stub().returns(this.lock),
     }
     this.SynctexOutputParser = {
       parseViewOutput: sinon.stub(),
@@ -173,7 +173,7 @@ describe('CompileManager', function () {
     describe('when the project is locked', function () {
       beforeEach(async function () {
         const error = new Error('locked')
-        this.LockManager.acquire.rejects(error)
+        this.LockManager.acquire.throws(error)
         await expect(
           this.CompileManager.promises.doCompileWithLock(this.request)
         ).to.be.rejectedWith(error)
