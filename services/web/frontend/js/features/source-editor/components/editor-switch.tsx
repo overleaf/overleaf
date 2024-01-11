@@ -5,7 +5,6 @@ import { sendMB } from '../../../infrastructure/event-tracking'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
 import { PromotionOverlay } from './table-generator/promotion/popover'
-import { FeedbackBadge } from '@/shared/components/feedback-badge'
 
 function EditorSwitch() {
   const { t } = useTranslation()
@@ -57,25 +56,9 @@ function EditorSwitch() {
           handleChange={handleChange}
         />
       </fieldset>
-
-      {richTextAvailable && visual && (
-        <FeedbackBadge
-          id="visual-editor-feedback"
-          url="https://forms.gle/AUqHmKNiEH3DRniPA"
-          text={<VisualEditorFeedbackContent />}
-        />
-      )}
     </div>
   )
 }
-
-const VisualEditorFeedbackContent = () => (
-  <>
-    We have a new Visual Editor!
-    <br />
-    Click to give feedback
-  </>
-)
 
 const RichTextToggle: FC<{
   checked: boolean
