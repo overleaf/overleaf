@@ -130,6 +130,14 @@ const SplitTestSchema = new Schema(
       type: Date,
       required: false,
     },
+    requiredCohortSize: {
+      type: Number,
+      required: false,
+    },
+    expectedUplift: {
+      type: Number,
+      required: false,
+    },
     ticketUrl: {
       type: String,
       required: false,

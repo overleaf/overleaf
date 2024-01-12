@@ -106,7 +106,6 @@ async function createSplitTest(
   const splitTest = new SplitTest({
     name: (name || '').trim(),
     description: info.description,
-    expectedEndDate: info.expectedEndDate,
     ticketUrl: info.ticketUrl,
     reportsUrls: info.reportsUrls,
     winningVariant: info.winningVariant,
@@ -122,6 +121,9 @@ async function createSplitTest(
         author: userId,
       },
     ],
+    expectedEndDate: info.expectedEndDate,
+    expectedUplift: info.expectedUplift,
+    requiredCohortSize: info.requiredCohortSize,
   })
   return _saveSplitTest(splitTest)
 }

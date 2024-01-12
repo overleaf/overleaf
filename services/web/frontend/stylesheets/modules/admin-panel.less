@@ -17,3 +17,21 @@
   max-height: calc(100vh - 40vh);
   overflow-y: auto;
 }
+
+.hr-sect {
+  display: flex;
+  flex-basis: 100%;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.35);
+  margin: 8px 0;
+}
+.hr-sect:before,
+.hr-sect:after {
+  content: '';
+  flex-grow: 1;
+  background: rgba(0, 0, 0, 0.35);
+  height: 1px;
+  font-size: 0;
+  line-height: 0;
+  margin: 0 8px;
+}
