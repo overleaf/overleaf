@@ -376,7 +376,10 @@ export const createChangeManager = (
         broadcastChange()
         // Dispatch a focus:changed event to force the Angular controller to
         // reassemble the list of entries without bulk actions
-        scheduleDispatchFocusChanged(view.state, 'rejectChanges')
+        setTimeout(() => {
+          // Delay the execution to make sure it runs after `broadcastChange`
+          scheduleDispatchFocusChanged(view.state, 'rejectChanges')
+        }, 30)
         break
       }
 
