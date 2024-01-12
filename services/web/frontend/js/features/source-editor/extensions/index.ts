@@ -47,6 +47,7 @@ import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
 import { toolbarPanel } from './toolbar/toolbar-panel'
 import { geometryChangeEvent } from './geometry-change-event'
+import { docName } from '@/features/source-editor/extensions/doc-name'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -101,9 +102,11 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // precedence over language-specific keyboard shortcuts
   keybindings(),
 
+  docName(options.docName),
+
   // NOTE: `annotations` needs to be before `language`
   annotations(),
-  language(options.currentDoc, options.metadata, options.settings),
+  language(options.docName, options.metadata, options.settings),
   indentUnit.of('    '), // 4 spaces
   theme(options.theme),
   realtime(options.currentDoc, options.handleError),
@@ -121,7 +124,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // so the decorations are added in the correct order.
   emptyLineFiller(),
   trackChanges(options.currentDoc, options.changeManager),
-  visual(options.currentDoc, options.visual),
+  visual(options.visual),
   toolbarPanel(),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),

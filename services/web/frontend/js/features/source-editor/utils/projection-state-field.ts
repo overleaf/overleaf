@@ -1,4 +1,4 @@
-import { ChangeSet, StateField } from '@codemirror/state'
+import { ChangeSet, EditorState, StateField } from '@codemirror/state'
 import {
   ProjectionItem,
   ProjectionResult,
@@ -6,6 +6,7 @@ import {
   EnterNodeFn,
   ProjectionStatus,
 } from './tree-operations/projection'
+import { languageLoadedEffect } from '@/features/source-editor/extensions/language'
 
 export function mergeChangeRanges(changes: ChangeSet) {
   let fromA = Number.MAX_VALUE
@@ -33,20 +34,26 @@ export function mergeChangeRanges(changes: ChangeSet) {
 export function makeProjectionStateField<T extends ProjectionItem>(
   enterNode: EnterNodeFn<T>
 ): StateField<ProjectionResult<T>> {
+  const initialiseProjection = (state: EditorState) =>
+    getUpdatedProjection(
+      state,
+      0,
+      state.doc.length,
+      0,
+      state.doc.length,
+      true,
+      enterNode
+    )
+
   const field = StateField.define<ProjectionResult<T>>({
     create(state) {
-      const projection = getUpdatedProjection<T>(
-        state,
-        0,
-        state.doc.length,
-        0,
-        state.doc.length,
-        true,
-        enterNode
-      )
-      return projection
+      return initialiseProjection(state)
     },
     update(currentProjection, transaction) {
+      if (transaction.effects.some(effect => effect.is(languageLoadedEffect))) {
+        return initialiseProjection(transaction.state)
+      }
+
       if (
         transaction.docChanged ||
         currentProjection.status !== ProjectionStatus.Complete

@@ -15,8 +15,6 @@ import { mousedown, mouseDownEffect } from './selection'
 import { forceParsing, syntaxTree } from '@codemirror/language'
 import { hasLanguageLoadedEffect } from '../language'
 import { restoreScrollPosition } from '../scroll-position'
-import { CurrentDoc } from '../../../../../../types/current-doc'
-import isValidTeXFile from '../../../../main/is-valid-tex-file'
 import { listItemMarker } from './list-item-marker'
 import { selectDecoratedArgument } from './select-decorated-argument'
 import { pasteHtml } from './paste-html'
@@ -51,11 +49,7 @@ const visualState = StateField.define<boolean>({
 const configureVisualExtensions = (options: Options) =>
   options.visual ? extension(options) : []
 
-export const visual = (currentDoc: CurrentDoc, options: Options): Extension => {
-  if (!isValidTeXFile(currentDoc.docName)) {
-    return []
-  }
-
+export const visual = (options: Options): Extension => {
   return [
     visualState.init(() => options.visual),
     visualConf.of(configureVisualExtensions(options)),

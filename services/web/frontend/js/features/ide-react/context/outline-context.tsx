@@ -114,7 +114,6 @@ export const OutlineProvider: FC = ({ children }) => {
     [flatOutline, currentlyHighlightedLine]
   )
 
-  // TODO: update when the file is renamed
   const [docName] = useScopeValue<string | null>('editor.open_doc_name')
   const isTexFile = useMemo(
     () => (docName ? isValidTeXFile(docName) : false),

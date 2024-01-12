@@ -17,6 +17,7 @@ import {
 import { countFiles } from '../../features/file-tree/util/count-in-tree'
 import useDeepCompareEffect from '../../shared/hooks/use-deep-compare-effect'
 import { docsInFolder } from '@/features/file-tree/util/docs-in-folder'
+import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
 
 const FileTreeDataContext = createContext()
 
@@ -137,6 +138,8 @@ export function useFileTreeData(propTypes) {
 
 export function FileTreeDataProvider({ children }) {
   const [project] = useScopeValue('project')
+  const [openDocId] = useScopeValue('editor.open_doc_id')
+  const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
 
   const { rootFolder } = project || {}
 
@@ -187,13 +190,19 @@ export function FileTreeDataProvider({ children }) {
     })
   }, [])
 
-  const dispatchRename = useCallback((id, newName) => {
-    dispatch({
-      type: ACTION_TYPES.RENAME,
-      newName,
-      id,
-    })
-  }, [])
+  const dispatchRename = useCallback(
+    (id, newName) => {
+      dispatch({
+        type: ACTION_TYPES.RENAME,
+        newName,
+        id,
+      })
+      if (id === openDocId) {
+        setOpenDocName(newName)
+      }
+    },
+    [openDocId, setOpenDocName]
+  )
 
   const dispatchDelete = useCallback(id => {
     dispatch({ type: ACTION_TYPES.DELETE, id })
