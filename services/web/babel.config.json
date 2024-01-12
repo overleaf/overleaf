@@ -6,8 +6,14 @@
         "useBuiltIns": "usage",
         // This version must be aligned with the `core-js` version in `package.json`
         "corejs": { "version": "3.30" },
-        // Exclude Array.prototype.push polyfill, as it's not needed and affects performance in Chrome
-        "exclude": ["es.array.push"]
+        "exclude": [
+          // Exclude Array.prototype.push polyfill, as it's not needed and affects performance in Chrome
+          "es.array.push",
+          // Exclude objectSpread polyfill, as it's not needed and affects performance
+          "@babel/plugin-transform-object-rest-spread",
+          // Exclude _defineProperty polyfill, as it causes a bug without the objectSpread polyfill
+          "@babel/plugin-transform-computed-properties"
+        ]
       }
     ],
     ["@babel/react", { "runtime": "automatic" }],
