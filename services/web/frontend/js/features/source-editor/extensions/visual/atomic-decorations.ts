@@ -1110,6 +1110,33 @@ export const atomicDecorations = (options: Options) => {
                   )
                   return false
                 }
+              } else if (commandName === '\\ce') {
+                // Chemical equation/formula, from the `mhchem` CTAN package.
+                // Handled by the MathJaX mhchem extension:
+                // https://docs.mathjax.org/en/latest/input/tex/extensions/mhchem.html
+                if (textArgumentNode && shouldDecorate(state, nodeRef)) {
+                  const innerContent = state.doc
+                    .sliceString(
+                      textArgumentNode.from + 1,
+                      textArgumentNode.to - 1
+                    )
+                    .trim()
+
+                  if (innerContent.length) {
+                    const outerContent = state.doc.sliceString(
+                      nodeRef.from,
+                      nodeRef.to
+                    )
+
+                    decorations.push(
+                      Decoration.replace({
+                        widget: new MathWidget(outerContent, false),
+                      }).range(nodeRef.from, nodeRef.to)
+                    )
+                  }
+
+                  return false
+                }
               } else if (hasCharacterSubstitution(commandName)) {
                 if (shouldDecorate(state, nodeRef)) {
                   const replacement = createCharacterCommand(commandName)
