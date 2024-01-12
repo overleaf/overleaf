@@ -19,6 +19,7 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import usePreviousValue from '../../../shared/hooks/use-previous-value'
 import { useFileTreeMainContext } from '@/features/file-tree/contexts/file-tree-main'
+import { fileCollator } from '@/features/file-tree/util/file-collator'
 
 const FileTreeSelectableContext = createContext()
 
@@ -223,6 +224,38 @@ export function useSelectableEntity(id, type) {
 
   const isSelected = selectedEntityIds.has(id)
 
+  const buildSelectedRange = useCallback(
+    id => {
+      const selected = []
+
+      let started = false
+
+      for (const itemId of sortedItems(fileTreeData)) {
+        if (itemId === id) {
+          selected.push(itemId)
+          if (started) {
+            break
+          } else {
+            started = true
+          }
+        } else if (selectedEntityIds.has(itemId)) {
+          // TODO: should only look at latest ("main") selected item
+          selected.push(itemId)
+          if (started) {
+            break
+          } else {
+            started = true
+          }
+        } else if (started) {
+          selected.push(itemId)
+        }
+      }
+
+      return selected
+    },
+    [fileTreeData, selectedEntityIds]
+  )
+
   const chooseView = useCallback(() => {
     for (const id of selectedEntityIds) {
       const selectedEntity = findInTree(fileTreeData, id)
@@ -251,7 +284,13 @@ export function useSelectableEntity(id, type) {
       const multiSelect =
         !isRootFolderSelected && (isMac ? ev.metaKey : ev.ctrlKey)
       setIsRootFolderSelected(false)
-      selectOrMultiSelectEntity(id, multiSelect)
+
+      if (ev.shiftKey) {
+        // use Shift to select a range of items
+        selectOrMultiSelectEntity(buildSelectedRange(id))
+      } else {
+        selectOrMultiSelectEntity(id, multiSelect)
+      }
 
       if (type === 'file') {
         setView('file')
@@ -268,6 +307,7 @@ export function useSelectableEntity(id, type) {
       selectOrMultiSelectEntity,
       setView,
       type,
+      buildSelectedRange,
       chooseView,
     ]
   )
@@ -327,4 +367,22 @@ export function useFileTreeSelectable() {
   }
 
   return context
+}
+
+const alphabetical = (a, b) => fileCollator.compare(a.name, b.name)
+
+function* sortedItems(folder) {
+  yield folder._id
+
+  const folders = [...folder.folders].sort(alphabetical)
+  for (const subfolder of folders) {
+    for (const id of sortedItems(subfolder)) {
+      yield id
+    }
+  }
+
+  const files = [...folder.docs, ...folder.fileRefs].sort(alphabetical)
+  for (const file of files) {
+    yield file._id
+  }
 }
