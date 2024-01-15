@@ -2120,6 +2120,7 @@
   "work_with_word_users_blurb": "__appName__ is so easy to get started with that you’ll be able to invite your non-LaTeX colleagues to contribute directly to your LaTeX documents. They’ll be productive from day one and be able to pick up small amounts of LaTeX as they go.",
   "would_you_like_to_see_a_university_subscription": "Would you like to see a university-wide __appName__ subscription at your university?",
   "writefull": "Writefull",
+  "writefull_disable_prompt_body": "Writefull is enabled. You can switch it on or off in the account settings anytime.",
   "writefull_learn_more": "Learn more about Writefull for Overleaf",
   "writefull_prompt_body": "Get free AI-powered language feedback with our Writefull integration. (You can also grab 10% off Writefull premium with the code OVERLEAF10.)",
   "writefull_prompt_title": "AI writing assistance in Overleaf",
