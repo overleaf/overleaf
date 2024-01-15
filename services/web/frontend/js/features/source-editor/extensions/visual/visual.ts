@@ -16,7 +16,6 @@ import { forceParsing, syntaxTree } from '@codemirror/language'
 import { hasLanguageLoadedEffect } from '../language'
 import { restoreScrollPosition } from '../scroll-position'
 import { listItemMarker } from './list-item-marker'
-import { selectDecoratedArgument } from './select-decorated-argument'
 import { pasteHtml } from './paste-html'
 import { commandTooltip } from '../command-tooltip'
 import { tableGeneratorTheme } from './table-generator'
@@ -193,7 +192,6 @@ const extension = (options: Options) => [
   visualKeymap,
   commandTooltip,
   scrollJumpAdjuster,
-  selectDecoratedArgument,
   showContentWhenParsed,
   pasteHtml,
   tableGeneratorTheme,

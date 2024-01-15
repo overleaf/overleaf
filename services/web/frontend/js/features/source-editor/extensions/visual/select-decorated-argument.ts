@@ -1,4 +1,9 @@
-import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
+import {
+  EditorSelection,
+  EditorState,
+  SelectionRange,
+  StateField,
+} from '@codemirror/state'
 import { syntaxTree } from '@codemirror/language'
 import { Tree } from '@lezer/common'
 import {
@@ -6,6 +11,7 @@ import {
   descendantsOfNodeWithType,
 } from '../../utils/tree-operations/ancestors'
 import { getMousedownSelection, selectionIntersects } from './selection'
+import { DecorationSet } from '@codemirror/view'
 
 /**
  * A custom extension that updates the selection in a transaction if the mouse pointer was used
@@ -13,28 +19,47 @@ import { getMousedownSelection, selectionIntersects } from './selection'
  * or to drag a range across the whole range of an argument (the selection is placed inside the braces),
  * when the selection was not already inside the command.
  */
-export const selectDecoratedArgument = EditorState.transactionFilter.of(tr => {
-  if (tr.selection && tr.isUserEvent('select.pointer')) {
-    const tree = syntaxTree(tr.state)
-    let selection = tr.selection
-    const mousedownSelection = getMousedownSelection(tr.state)
-    let replaced = false
-    for (const [index, range] of selection.ranges.entries()) {
-      const replacementRange =
-        selectArgument(tree, range, mousedownSelection, 1) ||
-        selectArgument(tree, range, mousedownSelection, -1)
-      if (replacementRange) {
-        selection = selection.replaceRange(replacementRange, index)
-        replaced = true
+export const selectDecoratedArgument = (
+  field: StateField<{ decorations: DecorationSet }>
+) =>
+  EditorState.transactionFilter.of(tr => {
+    if (tr.selection && tr.isUserEvent('select.pointer')) {
+      const tree = syntaxTree(tr.state)
+      let selection = tr.selection
+      const mousedownSelection = getMousedownSelection(tr.state)
+      let replaced = false
+      const rangeSet = tr.state.field(field, false)?.decorations
+      for (const [index, range] of selection.ranges.entries()) {
+        if (rangeSet) {
+          let isAtomicRange = false
+          rangeSet.between(range.anchor, range.anchor, (_from, to) => {
+            if (to > range.anchor) {
+              isAtomicRange = true
+              return false
+            }
+          })
+
+          if (isAtomicRange === false) {
+            // skip since decoration is not covering the selection
+            continue
+          }
+        }
+
+        const replacementRange =
+          selectArgument(tree, range, mousedownSelection, 1) ||
+          selectArgument(tree, range, mousedownSelection, -1)
+        if (replacementRange) {
+          selection = selection.replaceRange(replacementRange, index)
+          replaced = true
+        }
+      }
+      if (replaced) {
+        return [tr, { selection }]
       }
     }
-    if (replaced) {
-      return [tr, { selection }]
-    }
-  }
 
-  return tr
-})
+    return tr
+  })
 
 const selectArgument = (
   tree: Tree,

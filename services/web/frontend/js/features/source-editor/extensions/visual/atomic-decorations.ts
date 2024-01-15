@@ -67,6 +67,7 @@ import { TableRenderingErrorWidget } from './visual-widgets/table-rendering-erro
 import { GraphicsWidget } from './visual-widgets/graphics'
 import { InlineGraphicsWidget } from './visual-widgets/inline-graphics'
 import { PreviewPath } from '../../../../../../types/preview-path'
+import { selectDecoratedArgument } from './select-decorated-argument'
 import {
   generateTable,
   ParsedTableData,
@@ -1278,6 +1279,7 @@ export const atomicDecorations = (options: Options) => {
             }
           }),
           skipPreambleWithCursor(field),
+          selectDecoratedArgument(field),
         ]
       },
     }),
