@@ -43,7 +43,7 @@ function ArchiveProjectModal({
       <p>
         {t('archiving_projects_wont_affect_collaborators')}{' '}
         <a
-          href="https://www.overleaf.com/blog/new-feature-using-archive-and-trash-to-keep-your-projects-organized"
+          href="https://www.overleaf.com/learn/how-to/How_do_I_archive_and_unarchive_projects%3F"
           target="_blank"
           rel="noreferrer"
         >
