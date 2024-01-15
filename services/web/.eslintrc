@@ -18,6 +18,8 @@
     }
   },
   "rules": {
+    "no-constant-binary-expression": "error",
+
     // do not allow importing of implicit dependencies.
     "import/no-extraneous-dependencies": "error",
 
