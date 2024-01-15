@@ -64,6 +64,10 @@ window.ExposedSettings = {
     'lhs',
     'mk',
     'xmpdata',
+    'cfg',
+    'rnw',
+    'ltx',
+    'inc',
   ],
   editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
 }
