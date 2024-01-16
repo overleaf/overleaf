@@ -1,3 +1,4 @@
+// ts-check
 const _ = require('lodash')
 const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')

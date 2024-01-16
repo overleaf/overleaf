@@ -1,3 +1,4 @@
+// ts-check
 const { ObjectId } = require('mongodb')
 const _ = require('lodash')
 const { promisify } = require('util')

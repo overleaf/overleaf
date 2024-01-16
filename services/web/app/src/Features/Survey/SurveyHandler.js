@@ -1,3 +1,4 @@
+// ts-check
 const crypto = require('crypto')
 const SurveyCache = require('./SurveyCache')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')

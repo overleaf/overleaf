@@ -1,3 +1,4 @@
+// ts-check
 const Settings = require('@overleaf/settings')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const PlansLocator = require('./PlansLocator')
