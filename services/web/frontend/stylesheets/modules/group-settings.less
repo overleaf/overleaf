@@ -140,6 +140,12 @@ h3.group-settings-title {
     }
   }
 
+  .sso-config-options-buttons {
+    button:not(:last-child) {
+      margin-right: 8px;
+    }
+  }
+
   .sso-config-info-section {
     margin-bottom: @margin-md;
     padding: 0 @padding-base-horizontal;
@@ -150,9 +156,17 @@ h3.group-settings-title {
     font-weight: bold;
   }
 
+  .sso-config-info-label-optional {
+    font-weight: normal;
+  }
+
   .sso-config-info-content {
     color: @gray-darker;
     word-break: break-word;
+  }
+
+  .sso-config-info-content-empty {
+    color: var(--neutral-60);
   }
 
   p {
