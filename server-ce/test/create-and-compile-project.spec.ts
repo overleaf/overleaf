@@ -5,7 +5,8 @@ describe('Project creation and compilation', function () {
   it('users can create project and compile it', function () {
     login('user@example.com')
     cy.visit('/project')
-    createProject('test-project')
+    // this is the first project created, the welcome screen is displayed instead of the project list
+    createProject('test-project', { isFirstProject: true })
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     cy.findByText('\\maketitle')
       .parent()

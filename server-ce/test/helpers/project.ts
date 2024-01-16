@@ -2,10 +2,18 @@ export function createProject(
   name: string,
   {
     type = 'Blank Project',
-  }: { type?: 'Blank Project' | 'Example Project' } = {}
+    isFirstProject,
+  }: {
+    type?: 'Blank Project' | 'Example Project'
+    isFirstProject?: boolean
+  } = {}
 ): Cypress.Chainable<string> {
-  // FIXME: This should be be a data-test-id shared between the welcome page and project list
-  cy.get('.new-project-button').first().click()
+  if (isFirstProject) {
+    cy.findByText('Create a new project').click()
+  } else {
+    // FIXME: This should be be a data-test-id shared between the welcome page and project list
+    cy.get('.new-project-button').first().click()
+  }
   // FIXME: This should only look in the left menu
   cy.findAllByText(type).first().click()
   cy.findByRole('dialog').within(() => {
