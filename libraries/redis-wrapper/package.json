@@ -3,6 +3,7 @@
   "version": "2.1.0",
   "description": "Redis wrapper for node which will either use cluster or single instance redis",
   "main": "index.js",
+  "types": "types/index.d.ts",
   "files": [
     "index.js",
     "Errors.js",
@@ -17,11 +18,12 @@
     "lint:fix": "eslint --fix --ext .js --ext .cjs .",
     "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
-    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "test:ci": "npm run test:unit",
-    "typecheck": "tsc --noEmit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
+    "types:build": "[ -d types ] || tsc --emitDeclarationOnly",
+    "types:check": "tsc --noEmit",
+    "types:rebuild": "rm -rf types && npm run types:build"
   },
   "peerDependencies": {
     "@overleaf/logger": "*",

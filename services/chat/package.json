@@ -15,7 +15,7 @@
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "lint:fix": "eslint --fix .",
-    "typecheck": "tsc --noEmit"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@overleaf/logger": "*",

@@ -34,7 +34,10 @@ FROM deps-prod as deps
 
 ENV CYPRESS_INSTALL_BINARY=0
 
-RUN cd /overleaf && npm install
+COPY tsconfig.backend.json /overleaf/
+RUN cd /overleaf \
+ && npm install \
+ && npm run --workspaces --if-present types:build
 
 # the web image with only production dependencies but no webpack production build, for development
 FROM deps-prod as app-only
@@ -49,7 +52,6 @@ FROM deps as dev
 
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
-COPY tsconfig.backend.json /overleaf/
 COPY services/web /overleaf/services/web
 
 # Build the latex parser

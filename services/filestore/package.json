@@ -15,7 +15,8 @@
     "format:fix": "prettier --write $PWD/'**/*.js'",
     "test:acceptance:_run": "mocha --recursive --reporter spec --timeout 15000 --exit $@ test/acceptance/js",
     "test:unit:_run": "mocha --recursive --reporter spec $@ test/unit/js",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@overleaf/logger": "*",

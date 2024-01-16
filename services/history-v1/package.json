@@ -63,6 +63,7 @@
     "migrate": "knex migrate:latest",
     "delete_old_chunks": "node storage/tasks/delete_old_chunks.js",
     "fix_duplicate_versions": "node storage/tasks/fix_duplicate_versions.js",
-    "benchmarks": "node benchmarks/index.js"
+    "benchmarks": "node benchmarks/index.js",
+    "types:check": "tsc --noEmit"
   }
 }

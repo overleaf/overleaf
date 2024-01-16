@@ -33,6 +33,9 @@ MONOREPO=$(shell cd ../../ && pwd)
 # Eslint and prettier (plus some configs) are on the root.
 RUN_LINTING = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(HERE) node:18.18.2 npm run --silent
 
+# Same but from the top of the monorepo
+RUN_LINTING_MONOREPO = docker run --rm -v $(MONOREPO):$(MONOREPO) -w $(MONOREPO) node:18.18.2 npm run --silent
+
 format:
 	$(RUN_LINTING) format
 
@@ -45,8 +48,11 @@ lint:
 lint_fix:
 	$(RUN_LINTING) lint:fix
 
-typecheck:
-	$(RUN_LINTING) typecheck
+build_types:
+	$(RUN_LINTING_MONOREPO) --workspaces --if-present types:build
+
+typecheck: build_types
+	$(RUN_LINTING) types:check
 
 test: format lint typecheck test_unit test_acceptance
 
@@ -105,4 +111,12 @@ publish:
 	docker push $(DOCKER_REPO)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 
 
-.PHONY: clean test test_unit test_acceptance test_clean benchmarks build publish
+.PHONY: clean \
+	format format_fix \
+	lint lint_fix \
+	build_types typecheck \
+	test test_clean test_unit test_unit_clean \
+	test_acceptance test_acceptance_debug test_acceptance_pre_run \
+	test_acceptance_run test_acceptance_run_debug test_acceptance_clean \
+	benchmarks \
+	build tar publish \

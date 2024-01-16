@@ -3,17 +3,18 @@
   "version": "3.0.0",
   "description": "",
   "main": "index.js",
-  "types": "./types/index.js",
+  "types": "./types/index.d.ts",
   "scripts": {
-    "test": "npm run lint && npm run format && npm run typecheck && npm run test:unit",
+    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .js --ext .cjs .",
     "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
     "test:ci": "npm run test:unit",
-    "typecheck": "tsc --noEmit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "update-types": "rm -rf types && tsc --emitDeclarationOnly"
+    "types:build": "[ -d types ] || tsc --emitDeclarationOnly",
+    "types:check": "tsc --noEmit",
+    "types:rebuild": "rm -rf types && npm run types:build"
   },
   "author": "",
   "license": "AGPL-3.0-only",

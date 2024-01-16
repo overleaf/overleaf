@@ -5,6 +5,6 @@ spelling
 --env-add=
 --env-pass-through=
 --esmock-loader=True
---node-version=18.18.2-buster
+--node-version=18.18.2
 --public-repo=False
 --script-version=4.5.0
