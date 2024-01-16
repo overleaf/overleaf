@@ -404,7 +404,7 @@ export default App.controller('ReviewPanelController', [
       return q
     }
 
-    function updateEntries(doc_id) {
+    async function updateEntries(doc_id) {
       const rangesTracker = getChangeTracker(doc_id)
       const entries = getDocEntries(doc_id)
       const resolvedComments = getDocResolvedComments(doc_id)
@@ -478,7 +478,7 @@ export default App.controller('ReviewPanelController', [
 
       if (!window.isRestrictedTokenMember) {
         if (rangesTracker.comments.length > 0) {
-          ensureThreadsAreLoaded()
+          await ensureThreadsAreLoaded()
         } else if (ide.$scope.loadingThreads === true) {
           // ensure that tracked changes are highlighted even if no comments are loaded
           ide.$scope.loadingThreads = false
@@ -486,32 +486,34 @@ export default App.controller('ReviewPanelController', [
         }
       }
 
-      for (const comment of Array.from(rangesTracker.comments)) {
-        let new_comment
-        changed = true
-        delete delete_changes[comment.id]
-        if (ide.$scope.reviewPanel.resolvedThreadIds[comment.op.t]) {
-          new_comment =
-            resolvedComments[comment.id] != null
-              ? resolvedComments[comment.id]
-              : (resolvedComments[comment.id] = {})
-          delete entries[comment.id]
-        } else {
-          new_comment =
-            entries[comment.id] != null
-              ? entries[comment.id]
-              : (entries[comment.id] = {})
-          delete resolvedComments[comment.id]
-        }
-        const new_entry = {
-          type: 'comment',
-          thread_id: comment.op.t,
-          entry_ids: [comment.id],
-          content: comment.op.c,
-          offset: comment.op.p,
-        }
-        for (const key in new_entry) {
-          new_comment[key] = new_entry[key]
+      if (!_loadingThreadsInProgress) {
+        for (const comment of Array.from(rangesTracker.comments)) {
+          let new_comment
+          changed = true
+          delete delete_changes[comment.id]
+          if (ide.$scope.reviewPanel.resolvedThreadIds[comment.op.t]) {
+            new_comment =
+              resolvedComments[comment.id] != null
+                ? resolvedComments[comment.id]
+                : (resolvedComments[comment.id] = {})
+            delete entries[comment.id]
+          } else {
+            new_comment =
+              entries[comment.id] != null
+                ? entries[comment.id]
+                : (entries[comment.id] = {})
+            delete resolvedComments[comment.id]
+          }
+          const new_entry = {
+            type: 'comment',
+            thread_id: comment.op.t,
+            entry_ids: [comment.id],
+            content: comment.op.c,
+            offset: comment.op.p,
+          }
+          for (const key in new_entry) {
+            new_comment[key] = new_entry[key]
+          }
         }
       }
 
@@ -530,9 +532,9 @@ export default App.controller('ReviewPanelController', [
       return entries
     }
 
-    $scope.$on('editor:track-changes:changed', function () {
+    $scope.$on('editor:track-changes:changed', async function () {
       const doc_id = $scope.editor.open_doc_id
-      const entries = updateEntries(doc_id)
+      const entries = await updateEntries(doc_id)
 
       $scope.$broadcast('review-panel:recalculate-screen-positions')
       dispatchReviewPanelEvent('recalculate-screen-positions', {
@@ -1191,19 +1193,22 @@ export default App.controller('ReviewPanelController', [
         .catch(() => (_refreshingRangeUsers = false))
     }
 
-    let _threadsLoaded = false
-    function ensureThreadsAreLoaded() {
-      if (_threadsLoaded) {
+    let _threadsLoadedOnce = false
+    let _loadingThreadsInProgress = false
+    async function ensureThreadsAreLoaded() {
+      if (_threadsLoadedOnce) {
         // We get any updates in real time so only need to load them once.
         return
       }
-      _threadsLoaded = true
+      _threadsLoadedOnce = true
+      _loadingThreadsInProgress = true
       ide.$scope.loadingThreads = true
       return $http
         .get(`/project/${$scope.project_id}/threads`)
-        .then(function (response) {
+        .then(async function (response) {
           const threads = response.data
           ide.$scope.loadingThreads = false
+          _loadingThreadsInProgress = false
           for (const thread_id in ide.$scope.reviewPanel.resolvedThreadIds) {
             delete ide.$scope.reviewPanel.resolvedThreadIds[thread_id]
           }
@@ -1222,7 +1227,7 @@ export default App.controller('ReviewPanelController', [
           // Update entries so that the view has up-to-date information about
           // the entries when handling the loaded_threads events, which avoids
           // thrashing
-          updateEntries($scope.editor.open_doc_id)
+          await updateEntries($scope.editor.open_doc_id)
 
           dispatchReviewPanelEvent('loaded_threads')
           return $timeout(() => ide.$scope.$broadcast('review-panel:layout'))

@@ -4,11 +4,10 @@ import { isEqual, cloneDeep } from 'lodash'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
-import useAsync from '@/shared/hooks/use-async'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
 import useLayoutToLeft from '@/features/ide-react/context/review-panel/hooks/useLayoutToLeft'
-import { sendMB } from '../../../../../infrastructure/event-tracking'
+import { sendMB } from '@/infrastructure/event-tracking'
 import {
   dispatchReviewPanelLayout as handleLayoutChange,
   UpdateType,
@@ -197,26 +196,25 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     Record<ThreadId, boolean>
   >({})
 
-  const {
-    isLoading: loadingThreads,
-    reset,
-    runAsync: runAsyncThreads,
-  } = useAsync<ReviewPanelCommentThreadsApi>()
+  const [loadingThreads, setLoadingThreads] =
+    useScopeValue<boolean>('loadingThreads')
+
   const loadThreadsController = useAbortController()
-  const loadThreadsExecuted = useRef(false)
+  const threadsLoadedOnceRef = useRef(false)
+  const loadingThreadsInProgressRef = useRef(false)
   const ensureThreadsAreLoaded = useCallback(() => {
-    if (loadThreadsExecuted.current) {
+    if (threadsLoadedOnceRef.current) {
       // We get any updates in real time so only need to load them once.
       return
     }
-    loadThreadsExecuted.current = true
+    threadsLoadedOnceRef.current = true
+    loadingThreadsInProgressRef.current = true
 
-    return runAsyncThreads(
-      getJSON(`/project/${projectId}/threads`, {
-        signal: loadThreadsController.signal,
-      })
-    )
+    return getJSON(`/project/${projectId}/threads`, {
+      signal: loadThreadsController.signal,
+    })
       .then(threads => {
+        setLoadingThreads(false)
         const tempResolvedThreadIds: typeof resolvedThreadIds = {}
         const threadsEntries = Object.entries(threads) as [
           [
@@ -248,7 +246,10 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
         }
       })
       .catch(debugConsole.error)
-  }, [loadThreadsController.signal, projectId, runAsyncThreads])
+      .finally(() => {
+        loadingThreadsInProgressRef.current = false
+      })
+  }, [loadThreadsController.signal, projectId, setLoadingThreads])
 
   const rangesTrackers = useRef<Record<DocId, RangesTracker>>({})
   const refreshingRangeUsers = useRef(false)
@@ -335,21 +336,6 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const updateEntries = useCallback(
     async (docId: DocId) => {
       const rangesTracker = getChangeTracker(docId)
-      let localResolvedThreadIds = resolvedThreadIds
-
-      if (!isRestrictedTokenMember) {
-        if (rangesTracker.comments.length > 0) {
-          const threadsLoadResult = await ensureThreadsAreLoaded()
-          if (typeof threadsLoadResult === 'object') {
-            localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
-          }
-        } else if (loadingThreads) {
-          // ensure that tracked changes are highlighted even if no comments are loaded
-          reset()
-          dispatchReviewPanelEvent('loaded_threads')
-        }
-      }
-
       const docEntries = cloneDeep(getDocEntries(docId))
       const docResolvedComments = cloneDeep(getDocResolvedComments(docId))
       // Assume we'll delete everything until we see it, then we'll remove it from this object
@@ -432,32 +418,41 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
         }
       }
 
-      for (const comment of rangesTracker.comments) {
-        deleteChanges.delete(comment.id)
+      let localResolvedThreadIds = resolvedThreadIds
 
-        const newEntry: Partial<ReviewPanelCommentEntry> = {
-          type: 'comment',
-          thread_id: comment.op.t,
-          entry_ids: [comment.id],
-          content: comment.op.c,
-          offset: comment.op.p,
+      if (!isRestrictedTokenMember) {
+        if (rangesTracker.comments.length > 0) {
+          const threadsLoadResult = await ensureThreadsAreLoaded()
+          if (threadsLoadResult?.resolvedThreadIds) {
+            localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
+          }
+        } else if (loadingThreads) {
+          // ensure that tracked changes are highlighted even if no comments are loaded
+          setLoadingThreads(false)
+          dispatchReviewPanelEvent('loaded_threads')
         }
+      }
 
-        let newComment: any
-        if (localResolvedThreadIds[comment.op.t]) {
-          docResolvedComments[comment.id] ??= {} as ReviewPanelCommentEntry
-          newComment = docResolvedComments[comment.id]
-          delete docEntries[comment.id]
-        } else {
-          docEntries[comment.id] ??= {} as ReviewPanelEntry
-          newComment = docEntries[comment.id]
-          delete docResolvedComments[comment.id]
-        }
+      if (!loadingThreadsInProgressRef.current) {
+        for (const comment of rangesTracker.comments) {
+          deleteChanges.delete(comment.id)
 
-        for (const [key, value] of Object.entries(newEntry) as Entries<
-          typeof newEntry
-        >) {
-          newComment[key] = value
+          let newComment: any
+          if (localResolvedThreadIds[comment.op.t]) {
+            docResolvedComments[comment.id] ??= {} as ReviewPanelCommentEntry
+            newComment = docResolvedComments[comment.id]
+            delete docEntries[comment.id]
+          } else {
+            docEntries[comment.id] ??= {} as ReviewPanelEntry
+            newComment = docEntries[comment.id]
+            delete docResolvedComments[comment.id]
+          }
+
+          newComment.type = 'comment'
+          newComment.thread_id = comment.op.t
+          newComment.entry_ids = [comment.id]
+          newComment.content = comment.op.c
+          newComment.offset = comment.op.p
         }
       }
 
@@ -489,7 +484,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       users,
       ensureThreadsAreLoaded,
       loadingThreads,
-      reset,
+      setLoadingThreads,
     ]
   )
 
