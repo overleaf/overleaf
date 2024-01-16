@@ -7,6 +7,7 @@ const FileConverter = require('./FileConverter')
 const KeyBuilder = require('./KeyBuilder')
 const ImageOptimiser = require('./ImageOptimiser')
 const { ConversionError, InvalidParametersError } = require('./Errors')
+const metrics = require('@overleaf/metrics')
 
 module.exports = {
   insertFile: callbackify(insertFile),
@@ -77,6 +78,8 @@ async function getFile(bucket, key, opts) {
   }
 }
 
+let ACTIVE_SIGNED_URL_CALLS = 0
+
 async function getRedirectUrl(bucket, key, opts) {
   // if we're doing anything unusual with options, or the request isn't for
   // one of the default buckets, return null so that we proxy the file
@@ -89,7 +92,22 @@ async function getRedirectUrl(bucket, key, opts) {
     Object.values(Settings.filestore.stores).includes(bucket) &&
     Settings.filestore.allowRedirects
   ) {
-    return PersistorManager.getRedirectUrl(bucket, key)
+    // record the number of in-flight calls to generate signed URLs
+    metrics.gauge('active_signed_url_calls', ++ACTIVE_SIGNED_URL_CALLS, {
+      path: bucket,
+    })
+    try {
+      const timer = new metrics.Timer('signed_url_call_time', {
+        path: bucket,
+      })
+      const redirectUrl = await PersistorManager.getRedirectUrl(bucket, key)
+      timer.done()
+      return redirectUrl
+    } finally {
+      metrics.gauge('active_signed_url_calls', --ACTIVE_SIGNED_URL_CALLS, {
+        path: bucket,
+      })
+    }
   }
 
   return null

@@ -83,6 +83,10 @@ describe('FileHandler', function () {
         './ImageOptimiser': ImageOptimiser,
         '@overleaf/settings': Settings,
         '@overleaf/object-persistor': ObjectPersistor,
+        '@overleaf/metrics': {
+          gauge: sinon.stub(),
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
+        },
         fs,
       },
       globals: { console },
