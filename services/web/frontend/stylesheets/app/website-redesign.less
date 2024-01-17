@@ -348,21 +348,20 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 48px;
-    background: #2f4858;
+    padding: 32px;
+    background: var(--deep-green);
     color: white;
     border-radius: 16px;
 
-    .quote-card-quote {
+    blockquote {
       font-size: 1.875rem; // 30px
       font-weight: 600;
-      line-height: 2.5rem; // 40px
-      letter-spacing: 0em;
+      line-height: 1.26;
       text-align: center;
 
       @media (max-width: @screen-sm-max) {
         font-size: 1.5rem; // 24px
-        line-height: 2rem; // 32px
+        line-height: 1.333;
       }
     }
 
@@ -395,67 +394,6 @@
       .second-row {
         margin-top: 40px;
         justify-content: space-evenly;
-      }
-    }
-  }
-
-  .testimonial-media {
-    border-radius: 24px;
-
-    .testimonial-media-text {
-      display: flex;
-      flex-direction: column;
-      min-height: 352px;
-      background-color: #2f4858;
-      color: var(--white);
-      border-top-left-radius: 24px;
-      border-top-right-radius: 0;
-      border-bottom-left-radius: 24px;
-      padding: 64px 56px;
-
-      @media (max-width: @screen-sm-max) {
-        border-top-left-radius: 24px;
-        border-top-right-radius: 24px;
-        border-bottom-left-radius: 0;
-        min-height: 316px;
-        padding: 56px 24px;
-      }
-
-      blockquote {
-        flex-grow: 1;
-      }
-
-      .testimonial-media-author {
-        font-size: 1.125rem;
-        line-height: 1.333;
-
-        @media (max-width: @screen-sm-max) {
-          font-size: 1rem;
-          line-height: 1.375;
-        }
-      }
-    }
-
-    .testimonial-media-video {
-      height: 100%;
-      min-height: 352px;
-      background-color: var(--neutral-20);
-      border-top-right-radius: 24px;
-      border-bottom-right-radius: 24px;
-      border-bottom-left-radius: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      @media (max-width: @screen-sm-max) {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 24px;
-        border-bottom-left-radius: 24px;
-      }
-
-      video {
-        height: 100%;
-        width: 100%;
       }
     }
   }
@@ -576,18 +514,18 @@
 
   .round-background {
     border-radius: 50%;
-    font-size: 25px;
+    font-size: 1.5rem;
     top: 4px;
     vertical-align: middle;
     margin-right: 8px;
-    width: 25px;
-    height: 25px;
+    width: 24px;
+    height: 24px;
   }
 
   .green-round-background {
     .round-background;
-    background: var(--green-10);
-    color: var(--green-40);
+    background: var(--mint-green);
+    color: var(--deep-green);
   }
 
   .blue-round-background {
@@ -602,7 +540,7 @@
     font-size: 1.875rem;
     line-height: 1.333;
     font-weight: 600;
-    quotes: '\0022''\0022'; // use straight (" ") instead of curly ones (“ ”)
+    quotes: '\201C''\201D'; // override default quotes
     padding: unset;
     margin: unset;
     font-family: 'Noto Sans', sans-serif;
