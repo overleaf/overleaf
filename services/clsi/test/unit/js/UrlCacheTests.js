@@ -29,6 +29,9 @@ describe('UrlCache', function () {
         '@overleaf/settings': (this.Settings = {
           path: { clsiCacheDir: '/cache/dir' },
         }),
+        '@overleaf/metrics': {
+          Timer: sinon.stub().returns({ done: sinon.stub() }),
+        },
         fs: (this.fs = {
           promises: {
             rm: sinon.stub().resolves(),

@@ -15,6 +15,7 @@ const Settings = require('@overleaf/settings')
 const fs = require('fs')
 const Path = require('path')
 const { callbackify } = require('util')
+const Metrics = require('./Metrics')
 
 const PENDING_DOWNLOADS = new Map()
 
@@ -30,11 +31,16 @@ function getCachePath(projectId, url, lastModified) {
   return Path.join(getProjectDir(projectId), key)
 }
 
-async function clearProject(projectId) {
+async function clearProject(projectId, options) {
+  const timer = new Metrics.Timer('url_cache', {
+    status: options?.reason || 'unknown',
+    path: 'delete',
+  })
   await fs.promises.rm(getProjectDir(projectId), {
     force: true,
     recursive: true,
   })
+  timer.done()
 }
 
 async function createProjectDir(projectId) {
@@ -44,15 +50,40 @@ async function createProjectDir(projectId) {
 async function downloadUrlToFile(projectId, url, destPath, lastModified) {
   const cachePath = getCachePath(projectId, url, lastModified)
   try {
+    const timer = new Metrics.Timer('url_cache', {
+      status: 'cache-hit',
+      path: 'copy',
+    })
     await fs.promises.copyFile(cachePath, destPath)
+    // the metric is only updated if the file is present in the cache
+    timer.done()
     return
   } catch (e) {
     if (e.code !== 'ENOENT') {
       throw e
     }
   }
-  await download(url, cachePath)
-  await fs.promises.copyFile(cachePath, destPath)
+  // time the download
+  {
+    const timer = new Metrics.Timer('url_cache', {
+      status: 'cache-miss',
+      path: 'download',
+    })
+    try {
+      await download(url, cachePath)
+    } finally {
+      timer.done()
+    }
+  }
+  // time the file copy
+  {
+    const timer = new Metrics.Timer('url_cache', {
+      status: 'cache-miss',
+      path: 'copy',
+    })
+    await fs.promises.copyFile(cachePath, destPath)
+    timer.done()
+  }
 }
 
 async function download(url, cachePath) {

@@ -97,7 +97,7 @@ describe('ProjectPersistenceManager', function () {
         .callsArgWith(0, null, this.project_ids)
       this.ProjectPersistenceManager.clearProjectFromCache = sinon
         .stub()
-        .callsArg(1)
+        .callsArg(2)
       this.CompileManager.clearExpiredProjects = sinon.stub().callsArg(1)
       return this.ProjectPersistenceManager.clearExpiredProjects(this.callback)
     })
@@ -120,7 +120,7 @@ describe('ProjectPersistenceManager', function () {
       this.ProjectPersistenceManager._clearProjectFromDatabase = sinon
         .stub()
         .callsArg(1)
-      this.UrlCache.clearProject = sinon.stub().callsArg(1)
+      this.UrlCache.clearProject = sinon.stub().callsArg(2)
       this.CompileManager.clearProject = sinon.stub().callsArg(2)
       return this.ProjectPersistenceManager.clearProject(
         this.project_id,

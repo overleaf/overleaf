@@ -124,6 +124,7 @@ module.exports = ProjectPersistenceManager = {
           projectId => callback =>
             ProjectPersistenceManager.clearProjectFromCache(
               projectId,
+              { reason: 'expired' },
               function (err) {
                 if (err != null) {
                   logger.error({ err, projectId }, 'error clearing project')
@@ -156,6 +157,7 @@ module.exports = ProjectPersistenceManager = {
       }
       return ProjectPersistenceManager.clearProjectFromCache(
         projectId,
+        { reason: 'cleared' },
         function (error) {
           if (error != null) {
             return callback(error)
@@ -166,12 +168,12 @@ module.exports = ProjectPersistenceManager = {
     })
   },
 
-  clearProjectFromCache(projectId, callback) {
+  clearProjectFromCache(projectId, options, callback) {
     if (callback == null) {
       callback = function () {}
     }
     logger.debug({ projectId }, 'clearing project from cache')
-    return UrlCache.clearProject(projectId, function (error) {
+    return UrlCache.clearProject(projectId, options, function (error) {
       if (error != null) {
         logger.err({ error, projectId }, 'error clearing project from cache')
         return callback(error)

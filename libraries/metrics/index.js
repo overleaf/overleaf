@@ -121,12 +121,13 @@ class Timer {
     this.buckets = buckets
   }
 
-  done() {
+  // any labels passed into the done method override labels from constructor
+  done(labels = {}) {
     const timeSpan = new Date() - this.start
     if (this.buckets) {
-      histogram(this.key, timeSpan, this.buckets, this.labels)
+      histogram(this.key, timeSpan, this.buckets, { ...this.labels, ...labels })
     } else {
-      timing(this.key, timeSpan, this.sampleRate, this.labels)
+      timing(this.key, timeSpan, this.sampleRate, { ...this.labels, ...labels })
     }
     return timeSpan
   }
