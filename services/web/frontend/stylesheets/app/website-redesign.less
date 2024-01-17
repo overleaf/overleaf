@@ -532,6 +532,9 @@
   .link-with-arrow {
     font-size: 1.125rem;
     line-height: 1.333;
+    font-family: 'DM Mono', monospace;
+    font-feature-settings: 'ss05';
+    font-weight: 500;
 
     i.material-symbols-rounded {
       vertical-align: middle;
@@ -542,12 +545,12 @@
 
   .green-link {
     .link-with-arrow;
-    color: @green-60;
+    color: var(--emerald-green);
 
     &:hover {
-      color: var(--green-70);
+      color: var(--green-60);
       .right-arrow {
-        background: var(--green-70);
+        background: var(--green-60);
       }
     }
   }
