@@ -112,6 +112,8 @@ const settings = {
   sentry: {
     dsn: process.env.SENTRY_DSN,
   },
+
+  delayShutdownMs: parseInt(process.env.DELAY_SHUTDOWN_MS || '30000', 10),
 }
 
 // Filestore health check

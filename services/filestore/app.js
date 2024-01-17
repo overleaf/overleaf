@@ -39,6 +39,19 @@ app.use(function (req, res, next) {
   next()
 })
 
+// Handle requests that come in after we've started shutting down
+app.use((req, res, next) => {
+  if (settings.shuttingDown) {
+    logger.warn(
+      { req, timeSinceShutdown: Date.now() - settings.shutDownTime },
+      'request received after shutting down'
+    )
+    // We don't want keep-alive connections to be kept open when the server is shutting down.
+    res.set('Connection', 'close')
+  }
+  next()
+})
+
 Metrics.injectMetricsRoute(app)
 
 app.head(
@@ -134,7 +147,11 @@ app.get(
 )
 
 app.get('/status', function (req, res) {
-  res.send('filestore sharelatex up')
+  if (settings.shuttingDown) {
+    res.sendStatus(503) // Service unavailable
+  } else {
+    res.send('filestore is up')
+  }
 })
 
 app.get('/health_check', healthCheckController.check)
@@ -163,5 +180,21 @@ process
     logger.err(err, 'Uncaught Exception thrown')
     process.exit(1)
   })
+
+function handleShutdownSignal(signal) {
+  logger.info({ signal }, 'received interrupt, cleaning up')
+  if (settings.shuttingDown) {
+    logger.warn({ signal }, 'already shutting down, ignoring interrupt')
+    return
+  }
+  settings.shuttingDown = true
+  settings.shutDownTime = Date.now()
+  setTimeout(() => {
+    logger.info({ signal }, 'shutting down')
+    process.exit()
+  }, settings.delayShutdownMs)
+}
+
+process.on('SIGTERM', handleShutdownSignal)
 
 module.exports = app
