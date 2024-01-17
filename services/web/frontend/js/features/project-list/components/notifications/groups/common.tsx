@@ -293,6 +293,22 @@ function CommonNotification({ notification }: CommonNotificationProps) {
         />
       ) : templateKey === 'notification_group_invitation' ? (
         <GroupInvitationNotification notification={notification} />
+      ) : templateKey === 'notification_ieee_collabratec_retirement' ? (
+        <Notification
+          bsStyle="warning"
+          onDismiss={() => id && handleDismiss(id)}
+          body={
+            <Trans
+              i18nKey="notification_ieee_collabratec_retirement_message"
+              components={[
+                // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
+                <a href="mailto:authors@ieee.org" />,
+                // eslint-disable-next-line jsx-a11y/anchor-has-content,react/jsx-key
+                <a href="/user/subscription" />,
+              ]}
+            />
+          }
+        />
       ) : templateKey === 'notification_personal_and_group_subscriptions' ? (
         <Notification
           bsStyle="warning"

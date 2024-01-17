@@ -7,6 +7,7 @@ type TemplateKey =
   | 'notification_dropbox_unlinked_due_to_lapsed_reconfirmation'
   | 'notification_group_invitation'
   | 'notification_personal_and_group_subscriptions'
+  | 'notification_ieee_collabratec_retirement'
 
 type NotificationBase = {
   _id?: number
@@ -73,6 +74,11 @@ export interface NotificationGroupInvitation extends NotificationBase {
   }
 }
 
+export interface NotificationIeeeCollabratecRetirement
+  extends NotificationBase {
+  templateKey: Extract<TemplateKey, 'notification_ieee_collabratec_retirement'>
+}
+
 export type Notification =
   | NotificationProjectInvite
   | NotificationWFH2020UpgradeOffer
@@ -81,6 +87,7 @@ export type Notification =
   | NotificationDropboxDuplicateProjectNames
   | NotificationDropboxUnlinkedDueToLapsedReconfirmation
   | NotificationGroupInvitation
+  | NotificationIeeeCollabratecRetirement
 
 export type Institution = {
   _id?: number
