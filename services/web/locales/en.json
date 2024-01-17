@@ -2123,7 +2123,7 @@
   "writefull": "Writefull",
   "writefull_disable_prompt_body": "Writefull is enabled. You can switch it on or off in the account settings anytime.",
   "writefull_learn_more": "Learn more about Writefull for Overleaf",
-  "writefull_prompt_body": "Get free AI-powered language feedback with our Writefull integration. (You can also grab 10% off Writefull premium with the code OVERLEAF10.)",
+  "writefull_prompt_body": "Turn on the new Writefull integration to get free AI-powered language feedback specifically tailored to research writing.",
   "writefull_prompt_title": "AI writing assistance in Overleaf",
   "writefull_settings_description": "Get free AI-based language feedback specifically tailored for research writing with Writefull for Overleaf.",
   "x_changes_in": "__count__ change in",
