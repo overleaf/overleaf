@@ -96,18 +96,12 @@
         border: 2px solid var(--neutral-20);
       }
 
-      // workaround for border that contains both linear-gradient and border radius
-      // https://stackoverflow.com/a/53037637
-      &.blue-gradient-highlighted {
-        border: double 2px transparent;
+      &.blue-border {
+        border: solid 2px var(--sapphire-blue);
         border-radius: 8px;
-        background-image: linear-gradient(var(--white), var(--white)),
-          var(--premium-gradient);
-        background-origin: border-box;
-        background-clip: content-box, border-box;
 
         .plans-card-inner-title {
-          color: var(--blue-60);
+          color: var(--sapphire-blue);
         }
       }
     }
@@ -129,8 +123,8 @@
       .info-card {
         border-radius: 8px;
         height: 100%;
-        box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
-        border-top: 8px solid #2f4858;
+        box-shadow: 0px 2px 4px 0px #1e253014, 0px 4px 12px 0px #1e25301f;
+        border-top: 8px solid var(--sapphire-blue);
         padding: 32px 40px 32px 40px;
 
         &.info-card-big-text {
@@ -143,6 +137,10 @@
             font-size: 1.125rem;
             line-height: 1.333;
           }
+        }
+
+        i.material-symbols {
+          color: var(--sapphire-blue);
         }
       }
     }
@@ -567,12 +565,12 @@
     color: white;
   }
 
-  .btn-blue-gradient {
-    background: var(--premium-gradient);
+  .btn-blue {
+    background: var(--sapphire-blue);
     color: var(--white);
 
     &:hover {
-      background: var(--blue-70);
+      background: var(--sapphire-blue-dark);
     }
   }
 
