@@ -91,6 +91,10 @@ const defaultTextExtensions = [
   'lhs',
   'mk',
   'xmpdata',
+  'cfg',
+  'rnw',
+  'ltx',
+  'inc',
 ]
 
 const parseTextExtensions = function (extensions) {

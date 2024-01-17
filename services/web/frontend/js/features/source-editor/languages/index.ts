@@ -27,6 +27,7 @@ export const languages = [
       'ldf',
       'xmpdata',
       'Rnw',
+      'rnw',
       'lyx',
       'inc',
       'dtx',
@@ -44,6 +45,7 @@ export const languages = [
       'pygstyle',
       'pygtex',
       'ps_tex',
+      'ltx',
     ],
     load: () => {
       return import('./latex').then(m => m.latex())
