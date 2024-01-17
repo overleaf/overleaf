@@ -574,7 +574,7 @@ describe('AuthenticationController', function () {
       this.res.json = sinon.stub()
       this.res.status = sinon.stub().returns(this.res)
       this.res.sendStatus = sinon.stub()
-      this.middleware = this.AuthenticationController.requireOauth()
+      this.middleware = this.AuthenticationController.requireOauth('scope')
     })
 
     describe('when Oauth2Server authenticates', function () {
