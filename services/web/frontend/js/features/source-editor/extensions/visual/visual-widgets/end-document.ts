@@ -21,7 +21,7 @@ export class EndDocumentWidget extends WidgetType {
     return true
   }
 
-  updateDOM(): boolean {
-    return true
+  get estimatedHeight() {
+    return 30
   }
 }

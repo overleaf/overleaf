@@ -59,6 +59,10 @@ export class TabularWidget extends WidgetType {
     return true
   }
 
+  get estimatedHeight() {
+    return this.parsedTableData.table.rows.length * 50
+  }
+
   destroy(element: HTMLElement) {
     ReactDOM.unmountComponentAtNode(element)
   }
