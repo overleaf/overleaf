@@ -7,9 +7,13 @@ import './shared/exceptions'
 import './ct/commands'
 
 beforeEach(function () {
-  window.metaAttributesCache = new Map()
+  cy.window().then(win => {
+    win.metaAttributesCache = new Map()
+  })
 })
 
 afterEach(function () {
-  window.metaAttributesCache.clear()
+  cy.window().then(win => {
+    win.metaAttributesCache?.clear()
+  })
 })

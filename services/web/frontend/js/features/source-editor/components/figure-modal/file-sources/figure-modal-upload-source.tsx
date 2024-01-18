@@ -2,10 +2,10 @@ import { FC, useCallback, useEffect, useState } from 'react'
 import { useFigureModalContext } from '../figure-modal-context'
 import { useCurrentProjectFolders } from '../../../hooks/use-current-project-folders'
 import { File } from '../../../utils/file'
-import { Dashboard, useUppy } from '@uppy/react'
+import { Dashboard } from '@uppy/react'
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
-import { Uppy, UppyFile } from '@uppy/core'
+import { Uppy, type UppyFile } from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
 import { refreshProjectMetadata } from '../../../../file-tree/util/api'
 import { useProjectContext } from '../../../../../shared/context/project-context'
@@ -41,10 +41,9 @@ export const FigureModalUploadFileSource: FC = () => {
   const [name, setName] = useState<string>('')
   const [uploading, setUploading] = useState<boolean>(false)
   const [uploadError, setUploadError] = useState<any>(null)
-
-  const uppy = useUppy(() =>
+  const [uppy] = useState(() =>
     new Uppy({
-      allowMultipleUploads: false,
+      allowMultipleUploadBatches: false,
       restrictions: {
         maxNumberOfFiles: 1,
         maxFileSize: maxFileSize || null,
@@ -54,6 +53,7 @@ export const FigureModalUploadFileSource: FC = () => {
     })
       // use the basic XHR uploader
       .use(XHRUpload, {
+        endpoint: `/project/${projectId}/upload?folder_id=${rootFile.id}`,
         headers: {
           'X-CSRF-TOKEN': window.csrfToken,
         },
@@ -91,7 +91,7 @@ export const FigureModalUploadFileSource: FC = () => {
 
   useEffect(() => {
     // broadcast doc metadata after each successful upload
-    const onUploadSuccess = (_file: UppyFile, response: any) => {
+    const onUploadSuccess = (_file: UppyFile | undefined, response: any) => {
       setUploading(false)
       if (response.body.entity_type === 'doc') {
         window.setTimeout(() => {
@@ -139,7 +139,11 @@ export const FigureModalUploadFileSource: FC = () => {
     }
 
     // handle upload errors
-    const onError = (_file: UppyFile, error: any, response: any) => {
+    const onError = (
+      _file: UppyFile | undefined,
+      error: any,
+      response: any
+    ) => {
       setUploading(false)
       setUploadError(error)
       switch (response?.status) {

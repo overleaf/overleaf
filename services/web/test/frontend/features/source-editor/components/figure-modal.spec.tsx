@@ -83,7 +83,7 @@ describe('<FigureModal />', function () {
       cy.findByRole('menu').within(() => {
         cy.findByText('Upload from computer').click()
       })
-      cy.findByLabelText('File Uploader')
+      cy.findByLabelText('Uppy Dashboard')
         .get('.uppy-Dashboard-input:first')
         .as('file-input')
     })

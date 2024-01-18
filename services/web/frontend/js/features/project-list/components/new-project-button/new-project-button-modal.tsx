@@ -1,9 +1,10 @@
 import BlankProjectModal from './blank-project-modal'
 import ExampleProjectModal from './example-project-modal'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
-import { JSXElementConstructor, lazy, Suspense } from 'react'
+import { JSXElementConstructor, lazy, Suspense, useCallback } from 'react'
 import { Nullable } from '../../../../../../types/utils'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+import { useLocation } from '@/shared/hooks/use-location'
 
 const UploadProjectModal = lazy(() => import('./upload-project-modal'))
 
@@ -26,6 +27,15 @@ function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
     onHide: () => void
   }> = importProjectFromGithubModalWrapper?.import.default
 
+  const location = useLocation()
+
+  const openProject = useCallback(
+    (projectId: string) => {
+      location.assign(`/project/${projectId}`)
+    },
+    [location]
+  )
+
   switch (modal) {
     case 'blank_project':
       return <BlankProjectModal onHide={onHide} />
@@ -34,7 +44,7 @@ function NewProjectButtonModal({ modal, onHide }: NewProjectButtonModalProps) {
     case 'upload_project':
       return (
         <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
-          <UploadProjectModal onHide={onHide} />
+          <UploadProjectModal onHide={onHide} openProject={openProject} />
         </Suspense>
       )
     case 'import_from_github':

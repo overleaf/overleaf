@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import Uppy from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
-import { Dashboard, useUppy } from '@uppy/react'
+import { Dashboard } from '@uppy/react'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
@@ -45,13 +45,13 @@ export default function FileTreeUploadDoc() {
   }
 
   // initialise the Uppy object
-  const uppy = useUppy(() => {
+  const [uppy] = useState(() => {
     const endpoint = buildEndpoint(projectId, parentFolderId)
 
     return (
       new Uppy({
         // logger: Uppy.debugLogger,
-        allowMultipleUploads: false,
+        allowMultipleUploadBatches: false,
         restrictions: {
           maxNumberOfFiles,
           maxFileSize: maxFileSize || null,

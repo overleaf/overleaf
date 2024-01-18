@@ -2,7 +2,6 @@ import { useRef, useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import getDroppedFiles from '@uppy/utils/lib/getDroppedFiles'
-
 import { DndProvider, createDndContext, useDrag, useDrop } from 'react-dnd'
 import {
   HTML5Backend,

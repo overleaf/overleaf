@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Uppy from '@uppy/core'
-import { Dashboard, useUppy } from '@uppy/react'
+import { Dashboard } from '@uppy/react'
 import XHRUpload from '@uppy/xhr-upload'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import getMeta from '../../../../utils/meta'
@@ -10,7 +10,6 @@ import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
-import { useLocation } from '../../../../shared/hooks/use-location'
 
 type UploadResponse = {
   project_id: string
@@ -18,19 +17,19 @@ type UploadResponse = {
 
 type UploadProjectModalProps = {
   onHide: () => void
+  openProject: (projectId: string) => void
 }
 
-function UploadProjectModal({ onHide }: UploadProjectModalProps) {
+function UploadProjectModal({ onHide, openProject }: UploadProjectModalProps) {
   const { t } = useTranslation()
   const { maxUploadSize, projectUploadTimeout } = getMeta(
     'ol-ExposedSettings'
   ) as ExposedSettings
   const [ableToUpload, setAbleToUpload] = useState(false)
-  const location = useLocation()
 
-  const uppy: Uppy.Uppy<Uppy.StrictTypes> = useUppy(() => {
-    return Uppy({
-      allowMultipleUploads: false,
+  const [uppy] = useState(() => {
+    return new Uppy({
+      allowMultipleUploadBatches: false,
       restrictions: {
         maxNumberOfFiles: 1,
         maxFileSize: maxUploadSize,
@@ -62,7 +61,7 @@ function UploadProjectModal({ onHide }: UploadProjectModalProps) {
         const { project_id: projectId }: UploadResponse = response.body
 
         if (projectId) {
-          location.assign(`/project/${projectId}`)
+          openProject(projectId)
         }
       })
       .on('restriction-failed', () => {
