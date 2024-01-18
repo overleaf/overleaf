@@ -249,6 +249,50 @@
     }
   }
 
+  .bg-vivid-tangerine {
+    background-color: var(--vivid-tangerine);
+  }
+  .bg-mint-green {
+    background-color: var(--mint-green);
+  }
+  .bg-light-pastel-purple {
+    background-color: var(--light-pastel-purple);
+  }
+
+  .sticky-tags-container {
+    margin-top: -20px;
+    .sticky-tag {
+      padding: 6px 10px;
+      width: fit-content;
+      font-size: 1.8rem;
+      font-weight: 400;
+      font-family: 'DM Mono', monospace;
+      font-feature-settings: 'ss05';
+      border-radius: 10px;
+      color: black;
+      position: absolute;
+    }
+
+    .tag-top {
+      transform: rotate(4.88deg);
+      right: 40px;
+      top: -10px;
+      z-index: 1;
+    }
+    .tag-middle {
+      transform: rotate(0.31deg);
+      right: 60px;
+      top: 45px;
+      z-index: 2;
+    }
+    .tag-bottom {
+      transform: rotate(-5.84deg);
+      right: 20px;
+      top: 98px;
+      z-index: 1;
+    }
+  }
+
   .top-image-cards {
     .top-image-card {
       > img.img-responsive {
