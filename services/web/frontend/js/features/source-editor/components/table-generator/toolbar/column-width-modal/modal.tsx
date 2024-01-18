@@ -151,7 +151,11 @@ const ColumnWidthModalBody = () => {
             </FormGroup>
             <FormGroup className="col-md-4 mb-0">
               <Select
-                label="&nbsp;"
+                label={
+                  <>
+                    &nbsp;<span className="sr-only">{t('length_unit')}</span>
+                  </>
+                }
                 items={UNITS}
                 itemToKey={x => x ?? ''}
                 itemToString={x => (x === 'custom' ? t('custom') : x ?? '')}

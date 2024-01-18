@@ -1,6 +1,12 @@
 /* eslint-disable jsx-a11y/label-has-for */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { useRef, useEffect, KeyboardEventHandler, useCallback } from 'react'
+import {
+  useRef,
+  useEffect,
+  KeyboardEventHandler,
+  useCallback,
+  ReactNode,
+} from 'react'
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
 import Icon from './icon'
@@ -12,7 +18,7 @@ export type SelectProps<T> = {
   // Stringifies an item of type T. The resulting string is rendered as a dropdown option.
   itemToString: (item: T | null | undefined) => string
   // Caption for the dropdown.
-  label?: string
+  label?: ReactNode
   // Attribute used to identify the component inside a Form. This name is used to
   // retrieve FormData when the form is submitted. The value of the FormData entry
   // is the string returned by `itemToString(selectedItem)`.

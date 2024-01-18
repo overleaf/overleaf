@@ -1,7 +1,10 @@
+// Needed since eslint gets confused by mocha-each
+/* eslint-disable mocha/prefer-arrow-callback */
 import { FC } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
+import forEach from 'mocha-each'
 
 const Container: FC = ({ children }) => (
   <div style={{ width: 1000, height: 800 }}>{children}</div>
@@ -498,7 +501,124 @@ cell 3 & cell 4 \\\\
         .contains('button', 'Caption above')
         .should('be.disabled')
     })
+
+    describe('Fixed width columns', function () {
+      it('Can add fixed width columns', function () {
+        // Check that no column indicators exist
+        mountEditor(`
+        \\begin{tabular}{cc}
+        cell 1 & cell 2\\\\
+        cell 3 & cell 4 \\\\
+        \\end{tabular}`)
+        cy.get('.table-generator-column-indicator-label').should('not.exist')
+        cy.get('.table-generator-cell').eq(0).as('cell')
+        // Activate the table
+        cy.get('@cell').click()
+        cy.get('.table-generator-floating-toolbar')
+          .as('toolbar')
+          .should('exist')
+        // Select the second column
+        cy.get('.column-selector').eq(1).click()
+        cy.get('@toolbar').findByLabelText('Adjust column width').click()
+        cy.get('.table-generator-toolbar-dropdown-menu')
+          .findByText('Fixed width, wrap text')
+          .click()
+        // The modal should be open
+        cy.get('.table-generator-width-modal').as('modal').should('be.visible')
+        // The width input should be focused
+        cy.get('@modal')
+          .get('#column-width-modal-width')
+          .should('be.focused')
+          .type('20')
+        // Change the unit to inches
+        cy.get('@modal').findAllByLabelText('Length unit').first().click()
+        cy.get('@modal')
+          .findByRole('listbox')
+          .as('dropdown')
+          .should('be.visible')
+        cy.get('@dropdown').findByText('in').click()
+        // Confirm the change
+        cy.get('@modal').findByText('OK').click()
+        // Modal should close
+        cy.get('@modal').should('not.exist')
+        // Check that the width is applied to the right column
+        cy.get('.table-generator-column-widths-row td')
+          // 3rd element (buffer, column 1, column 2)
+          .eq(2)
+          .should('contain.text', '20in')
+      })
+
+      forEach([
+        ['20in', 'in'],
+        ['20', 'Custom'],
+        ['\\foobar', 'Custom'],
+      ]).it(
+        `Understands '%s' width descriptor`,
+        function (width, expectedUnit) {
+          // Check that no column indicators exist
+          mountEditor(`
+          \\begin{tabular}{cp{${width}}}
+          cell 1 & cell 2\\\\
+          cell 3 & cell 4 \\\\
+          \\end{tabular}`)
+          // Activate the table
+          cy.get('.table-generator-cell').eq(0).click()
+          // Click the column width indicator
+          cy.get('.table-generator-column-indicator-label').click()
+          // The modal should be open
+          cy.get('.table-generator-width-modal')
+            .as('modal')
+            .should('be.visible')
+          cy.get('@modal')
+            .findAllByLabelText('Length unit')
+            .first()
+            .should('have.text', expectedUnit)
+          cy.get('@modal').findByText('Cancel').click()
+        }
+      )
+
+      it(`It can justify fixed width cells`, function () {
+        // Check that no column indicators exist
+        mountEditor(`
+        \\begin{tabular}{>{\\raggedright\\arraybackslash}p{2cm}c}
+        cell 1 & cell 2\\\\
+        cell 3 & cell 4 \\\\
+        \\end{tabular}`)
+        // Activate the table
+        cy.get('.table-generator-cell').eq(0).click()
+        cy.get('.table-generator-floating-toolbar')
+          .as('toolbar')
+          .should('exist')
+        // Select the first column
+        cy.get('.column-selector').first().click()
+        // Verify current alignment is left, and open the menu
+        cy.get('@toolbar')
+          .findByLabelText('Alignment')
+          .should('not.be.disabled')
+          .should('contain.text', 'format_align_left')
+          .click()
+        // Change to justified alignment
+        cy.get('.table-generator').findByLabelText('Justify').click()
+        // Verify that alignment icon and class alignments were updated
+        cy.get('@toolbar')
+          .findByLabelText('Alignment')
+          .should('contain.text', 'format_align_justify')
+        cy.get('.table-generator-cell')
+          .eq(0)
+          .should('have.class', 'alignment-paragraph')
+        cy.get('.table-generator-cell')
+          .eq(1)
+          .should('have.class', 'alignment-center')
+        cy.get('.table-generator-cell')
+          .eq(2)
+          .should('have.class', 'alignment-paragraph')
+        cy.get('.table-generator-cell')
+          .eq(3)
+          .should('have.class', 'alignment-center')
+      })
+    })
   })
+
   describe('Tabular interactions', function () {
     it('Can type into cells', function () {
       mountEditor(`
