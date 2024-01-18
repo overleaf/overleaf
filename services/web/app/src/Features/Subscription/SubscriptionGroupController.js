@@ -1,95 +1,116 @@
+// ts-check
 const SubscriptionGroupHandler = require('./SubscriptionGroupHandler')
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const SessionManager = require('../Authentication/SessionManager')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
+const { expressify } = require('@overleaf/promise-utils')
+const Modules = require('../../infrastructure/Modules')
 
-function removeUserFromGroup(req, res, next) {
+/**
+ * @typedef {import("../../../../types/subscription/dashboard/subscription").Subscription} Subscription
+ */
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function removeUserFromGroup(req, res) {
   const subscription = req.entity
   const userToRemoveId = req.params.user_id
   const loggedInUserId = SessionManager.getLoggedInUserId(req.session)
+  const subscriptionId = subscription._id
   logger.debug(
-    { subscriptionId: subscription._id, userToRemoveId },
+    { subscriptionId, userToRemoveId },
     'removing user from group subscription'
   )
-  UserAuditLogHandler.addEntry(
+
+  await _removeUserFromGroup(req, res, {
     userToRemoveId,
-    'remove-from-group-subscription',
     loggedInUserId,
-    req.ip,
-    { subscriptionId: subscription._id },
-    function (auditLogError) {
-      if (auditLogError) {
-        OError.tag(auditLogError, 'error adding audit log entry', {
-          userToRemoveId,
-          subscriptionId: subscription._id,
-        })
-        return next(auditLogError)
-      }
-      SubscriptionGroupHandler.removeUserFromGroup(
-        subscription._id,
-        userToRemoveId,
-        function (error) {
-          if (error) {
-            OError.tag(error, 'error removing user from group', {
-              subscriptionId: subscription._id,
-              userToRemove_id: userToRemoveId,
-            })
-            return next(error)
-          }
-          res.sendStatus(200)
-        }
-      )
-    }
-  )
+    subscription,
+  })
 }
 
-function removeSelfFromGroup(req, res, next) {
-  const subscriptionId = req.query.subscriptionId
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function removeSelfFromGroup(req, res) {
   const userToRemoveId = SessionManager.getLoggedInUserId(req.session)
-  SubscriptionLocator.getSubscription(
-    subscriptionId,
-    function (error, subscription) {
-      if (error) {
-        return next(error)
-      }
-
-      UserAuditLogHandler.addEntry(
-        userToRemoveId,
-        'remove-from-group-subscription',
-        userToRemoveId,
-        req.ip,
-        { subscriptionId: subscription._id },
-        function (auditLogError) {
-          if (auditLogError) {
-            OError.tag(auditLogError, 'error adding audit log entry', {
-              userToRemoveId,
-              subscriptionId,
-            })
-            return next(auditLogError)
-          }
-          SubscriptionGroupHandler.removeUserFromGroup(
-            subscription._id,
-            userToRemoveId,
-            function (error) {
-              if (error) {
-                logger.err(
-                  { err: error, userToRemoveId, subscriptionId },
-                  'error removing self from group'
-                )
-                return res.sendStatus(500)
-              }
-              res.sendStatus(200)
-            }
-          )
-        }
-      )
-    }
+  const subscription = await SubscriptionLocator.promises.getSubscription(
+    req.query.subscriptionId
   )
+
+  await _removeUserFromGroup(req, res, {
+    userToRemoveId,
+    loggedInUserId: userToRemoveId,
+    subscription,
+  })
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @param {string} userToRemoveId
+ * @param {string} loggedInUserId
+ * @param {Subscription} subscription
+ * @returns {Promise<void>}
+ * @private
+ */
+async function _removeUserFromGroup(
+  req,
+  res,
+  { userToRemoveId, loggedInUserId, subscription }
+) {
+  const subscriptionId = subscription._id
+
+  const groupSSOActive = (
+    await Modules.promises.hooks.fire('hasGroupSSOEnabled', subscription)
+  )?.[0]
+  if (groupSSOActive) {
+    await Modules.promises.hooks.fire(
+      'unlinkUserFromGroupSSO',
+      userToRemoveId,
+      subscriptionId
+    )
+  }
+
+  try {
+    await UserAuditLogHandler.promises.addEntry(
+      userToRemoveId,
+      'remove-from-group-subscription',
+      loggedInUserId,
+      req.ip,
+      { subscriptionId }
+    )
+  } catch (auditLogError) {
+    throw OError.tag(auditLogError, 'error adding audit log entry', {
+      userToRemoveId,
+      subscriptionId,
+    })
+  }
+
+  try {
+    await SubscriptionGroupHandler.promises.removeUserFromGroup(
+      subscriptionId,
+      userToRemoveId
+    )
+  } catch (error) {
+    logger.err(
+      { err: error, userToRemoveId, subscriptionId },
+      'error removing self from group'
+    )
+    return res.sendStatus(500)
+  }
+
+  res.sendStatus(200)
 }
 
 module.exports = {
-  removeUserFromGroup,
-  removeSelfFromGroup,
+  removeUserFromGroup: expressify(removeUserFromGroup),
+  removeSelfFromGroup: expressify(removeSelfFromGroup),
 }

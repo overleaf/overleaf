@@ -4,6 +4,7 @@ const UserUpdater = require('../User/UserUpdater')
 const SAMLIdentityManager = require('../User/SAMLIdentityManager')
 const { User } = require('../../models/User')
 const Errors = require('../Errors/Errors')
+const GroupUtils = require('./GroupUtils')
 
 async function checkUserCanEnrollInSubscription(userId, subscription) {
   const ssoConfig = await SSOConfig.findById(subscription?.ssoConfig).exec()
@@ -37,7 +38,7 @@ async function enrollInSubscription(
 ) {
   await checkUserCanEnrollInSubscription(userId, subscription)
 
-  const providerId = `ol-group-subscription-id:${subscription._id.toString()}`
+  const providerId = GroupUtils.getProviderId(subscription._id)
 
   const userBySamlIdentifier = await SAMLIdentityManager.getUser(
     providerId,

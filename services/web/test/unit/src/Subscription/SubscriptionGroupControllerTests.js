@@ -26,10 +26,16 @@ describe('SubscriptionGroupController', function () {
       _id: this.subscriptionId,
     }
 
-    this.GroupHandler = { removeUserFromGroup: sinon.stub().callsArgWith(2) }
+    this.SubscriptionGroupHandler = {
+      promises: {
+        removeUserFromGroup: sinon.stub().resolves(),
+      },
+    }
 
     this.SubscriptionLocator = {
-      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription),
+      promises: {
+        getSubscription: sinon.stub().resolves(this.subscription),
+      },
     }
 
     this.SessionManager = {
@@ -42,15 +48,26 @@ describe('SubscriptionGroupController', function () {
     }
 
     this.UserAuditLogHandler = {
-      addEntry: sinon.stub().callsArgWith(5),
+      promises: {
+        addEntry: sinon.stub().resolves(),
+      },
+    }
+
+    this.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
+      },
     }
 
     this.Controller = SandboxedModule.require(modulePath, {
       requires: {
-        './SubscriptionGroupHandler': this.GroupHandler,
+        './SubscriptionGroupHandler': this.SubscriptionGroupHandler,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../Authentication/SessionManager': this.SessionManager,
         '../User/UserAuditLogHandler': this.UserAuditLogHandler,
+        '../../infrastructure/Modules': this.Modules,
       },
     })
   })
@@ -63,13 +80,13 @@ describe('SubscriptionGroupController', function () {
 
       const res = {
         sendStatus: () => {
-          this.GroupHandler.removeUserFromGroup
+          this.SubscriptionGroupHandler.promises.removeUserFromGroup
             .calledWith(this.subscriptionId, userIdToRemove)
             .should.equal(true)
           done()
         },
       }
-      this.Controller.removeUserFromGroup(this.req, res)
+      this.Controller.removeUserFromGroup(this.req, res, done)
     })
 
     it('should log that the user has been removed', function (done) {
@@ -80,7 +97,7 @@ describe('SubscriptionGroupController', function () {
       const res = {
         sendStatus: () => {
           sinon.assert.calledWith(
-            this.UserAuditLogHandler.addEntry,
+            this.UserAuditLogHandler.promises.addEntry,
             userIdToRemove,
             'remove-from-group-subscription',
             this.adminUserId,
@@ -90,7 +107,54 @@ describe('SubscriptionGroupController', function () {
           done()
         },
       }
-      this.Controller.removeUserFromGroup(this.req, res)
+      this.Controller.removeUserFromGroup(this.req, res, done)
+    })
+
+    it('should call the group SSO hooks with group SSO enabled', function (done) {
+      const userIdToRemove = '31231'
+      this.req.params = { user_id: userIdToRemove }
+      this.req.entity = this.subscription
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', this.subscription)
+        .resolves([true])
+
+      const res = {
+        sendStatus: () => {
+          this.Modules.promises.hooks.fire
+            .calledWith('hasGroupSSOEnabled', this.subscription)
+            .should.equal(true)
+          this.Modules.promises.hooks.fire
+            .calledWith(
+              'unlinkUserFromGroupSSO',
+              userIdToRemove,
+              this.subscriptionId
+            )
+            .should.equal(true)
+          sinon.assert.calledTwice(this.Modules.promises.hooks.fire)
+          done()
+        },
+      }
+      this.Controller.removeUserFromGroup(this.req, res, done)
+    })
+
+    it('should call the group SSO hooks with group SSO disabled', function (done) {
+      const userIdToRemove = '31231'
+      this.req.params = { user_id: userIdToRemove }
+      this.req.entity = this.subscription
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', this.subscription)
+        .resolves([false])
+
+      const res = {
+        sendStatus: () => {
+          this.Modules.promises.hooks.fire
+            .calledWith('hasGroupSSOEnabled', this.subscription)
+            .should.equal(true)
+          sinon.assert.calledOnce(this.Modules.promises.hooks.fire)
+          done()
+        },
+      }
+      this.Controller.removeUserFromGroup(this.req, res, done)
     })
   })
 
@@ -103,29 +167,29 @@ describe('SubscriptionGroupController', function () {
       const res = {
         sendStatus: () => {
           sinon.assert.calledWith(
-            this.SubscriptionLocator.getSubscription,
+            this.SubscriptionLocator.promises.getSubscription,
             this.subscriptionId
           )
           sinon.assert.calledWith(
-            this.GroupHandler.removeUserFromGroup,
+            this.SubscriptionGroupHandler.promises.removeUserFromGroup,
             this.subscriptionId,
             memberUserIdToremove
           )
           done()
         },
       }
-      this.Controller.removeSelfFromGroup(this.req, res)
+      this.Controller.removeSelfFromGroup(this.req, res, done)
     })
 
     it('should log that the user has left the subscription', function (done) {
       this.req.query = { subscriptionId: this.subscriptionId }
-      const memberUserIdToremove = 123456789
+      const memberUserIdToremove = '123456789'
       this.req.session.user._id = memberUserIdToremove
 
       const res = {
         sendStatus: () => {
           sinon.assert.calledWith(
-            this.UserAuditLogHandler.addEntry,
+            this.UserAuditLogHandler.promises.addEntry,
             memberUserIdToremove,
             'remove-from-group-subscription',
             memberUserIdToremove,
@@ -135,7 +199,56 @@ describe('SubscriptionGroupController', function () {
           done()
         },
       }
-      this.Controller.removeSelfFromGroup(this.req, res)
+      this.Controller.removeSelfFromGroup(this.req, res, done)
+    })
+
+    it('should call the group SSO hooks with group SSO enabled', function (done) {
+      this.req.query = { subscriptionId: this.subscriptionId }
+      const memberUserIdToremove = '123456789'
+      this.req.session.user._id = memberUserIdToremove
+
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', this.subscription)
+        .resolves([true])
+
+      const res = {
+        sendStatus: () => {
+          this.Modules.promises.hooks.fire
+            .calledWith('hasGroupSSOEnabled', this.subscription)
+            .should.equal(true)
+          this.Modules.promises.hooks.fire
+            .calledWith(
+              'unlinkUserFromGroupSSO',
+              memberUserIdToremove,
+              this.subscriptionId
+            )
+            .should.equal(true)
+          sinon.assert.calledTwice(this.Modules.promises.hooks.fire)
+          done()
+        },
+      }
+      this.Controller.removeSelfFromGroup(this.req, res, done)
+    })
+
+    it('should call the group SSO hooks with group SSO disabled', function (done) {
+      const userIdToRemove = '31231'
+      this.req.session.user._id = userIdToRemove
+      this.req.params = { user_id: userIdToRemove }
+      this.req.entity = this.subscription
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', this.subscription)
+        .resolves([false])
+
+      const res = {
+        sendStatus: () => {
+          this.Modules.promises.hooks.fire
+            .calledWith('hasGroupSSOEnabled', this.subscription)
+            .should.equal(true)
+          sinon.assert.calledOnce(this.Modules.promises.hooks.fire)
+          done()
+        },
+      }
+      this.Controller.removeSelfFromGroup(this.req, res, done)
     })
   })
 })
