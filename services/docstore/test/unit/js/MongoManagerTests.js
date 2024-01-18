@@ -12,8 +12,8 @@ describe('MongoManager', function () {
   beforeEach(function () {
     this.db = {
       docs: {
-        updateOne: sinon.stub().yields(null, { matchedCount: 1 }),
-        insertOne: sinon.stub().yields(null),
+        updateOne: sinon.stub().resolves({ matchedCount: 1 }),
+        insertOne: sinon.stub().resolves(),
       },
       docOps: {},
     }
@@ -34,21 +34,19 @@ describe('MongoManager', function () {
     this.projectId = new ObjectId().toString()
     this.docId = new ObjectId().toString()
     this.rev = 42
-    this.callback = sinon.stub()
     this.stubbedErr = new Error('hello world')
     this.lines = ['Three French hens', 'Two turtle doves']
   })
 
   describe('findDoc', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.doc = { name: 'mock-doc' }
-      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, this.doc)
+      this.db.docs.findOne = sinon.stub().resolves(this.doc)
       this.filter = { lines: true }
-      this.MongoManager.findDoc(
+      this.result = await this.MongoManager.promises.findDoc(
         this.projectId,
         this.docId,
-        this.filter,
-        this.callback
+        this.filter
       )
     })
 
@@ -66,20 +64,18 @@ describe('MongoManager', function () {
         .should.equal(true)
     })
 
-    it('should call the callback with the doc', function () {
-      this.callback.calledWith(null, this.doc).should.equal(true)
+    it('should return the doc', function () {
+      expect(this.doc).to.deep.equal(this.doc)
     })
   })
 
   describe('patchDoc', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.meta = { name: 'foo.tex' }
-      this.callback.callsFake(done)
-      this.MongoManager.patchDoc(
+      await this.MongoManager.promises.patchDoc(
         this.projectId,
         this.docId,
-        this.meta,
-        this.callback
+        this.meta
       )
     })
 
@@ -91,8 +87,7 @@ describe('MongoManager', function () {
         },
         {
           $set: this.meta,
-        },
-        this.callback
+        }
       )
     })
   })
@@ -105,19 +100,16 @@ describe('MongoManager', function () {
       this.doc3 = { name: 'mock-doc3' }
       this.doc4 = { name: 'mock-doc4' }
       this.db.docs.find = sinon.stub().returns({
-        toArray: sinon
-          .stub()
-          .callsArgWith(0, null, [this.doc, this.doc3, this.doc4]),
+        toArray: sinon.stub().resolves([this.doc, this.doc3, this.doc4]),
       })
     })
 
     describe('with included_deleted = false', function () {
-      beforeEach(function () {
-        this.MongoManager.getProjectsDocs(
+      beforeEach(async function () {
+        this.result = await this.MongoManager.promises.getProjectsDocs(
           this.projectId,
           { include_deleted: false },
-          this.filter,
-          this.callback
+          this.filter
         )
       })
 
@@ -135,20 +127,17 @@ describe('MongoManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the docs', function () {
-        this.callback
-          .calledWith(null, [this.doc, this.doc3, this.doc4])
-          .should.equal(true)
+      it('should call return the docs', function () {
+        expect(this.result).to.deep.equal([this.doc, this.doc3, this.doc4])
       })
     })
 
     describe('with included_deleted = true', function () {
-      beforeEach(function () {
-        this.MongoManager.getProjectsDocs(
+      beforeEach(async function () {
+        this.result = await this.MongoManager.promises.getProjectsDocs(
           this.projectId,
           { include_deleted: true },
-          this.filter,
-          this.callback
+          this.filter
         )
       })
 
@@ -165,28 +154,24 @@ describe('MongoManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the docs', function () {
-        this.callback
-          .calledWith(null, [this.doc, this.doc3, this.doc4])
-          .should.equal(true)
+      it('should return the docs', function () {
+        expect(this.result).to.deep.equal([this.doc, this.doc3, this.doc4])
       })
     })
   })
 
   describe('getProjectsDeletedDocs', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.filter = { name: true }
       this.doc1 = { _id: '1', name: 'mock-doc1.tex' }
       this.doc2 = { _id: '2', name: 'mock-doc2.tex' }
       this.doc3 = { _id: '3', name: 'mock-doc3.tex' }
       this.db.docs.find = sinon.stub().returns({
-        toArray: sinon.stub().yields(null, [this.doc1, this.doc2, this.doc3]),
+        toArray: sinon.stub().resolves([this.doc1, this.doc2, this.doc3]),
       })
-      this.callback.callsFake(done)
-      this.MongoManager.getProjectsDeletedDocs(
+      this.result = await this.MongoManager.promises.getProjectsDeletedDocs(
         this.projectId,
-        this.filter,
-        this.callback
+        this.filter
       )
     })
 
@@ -209,10 +194,8 @@ describe('MongoManager', function () {
         .should.equal(true)
     })
 
-    it('should call the callback with the docs', function () {
-      this.callback
-        .calledWith(null, [this.doc1, this.doc2, this.doc3])
-        .should.equal(true)
+    it('should return the docs', function () {
+      expect(this.result).to.deep.equal([this.doc1, this.doc2, this.doc3])
     })
   })
 
@@ -221,108 +204,97 @@ describe('MongoManager', function () {
       this.oldRev = 77
     })
 
-    it('should upsert the document', function (done) {
-      this.MongoManager.upsertIntoDocCollection(
+    it('should upsert the document', async function () {
+      await this.MongoManager.promises.upsertIntoDocCollection(
         this.projectId,
         this.docId,
         this.oldRev,
-        { lines: this.lines },
-        err => {
-          assert.equal(err, null)
-          const args = this.db.docs.updateOne.args[0]
-          assert.deepEqual(args[0], {
-            _id: new ObjectId(this.docId),
-            project_id: new ObjectId(this.projectId),
-            rev: this.oldRev,
-          })
-          assert.equal(args[1].$set.lines, this.lines)
-          assert.equal(args[1].$inc.rev, 1)
-          done()
-        }
+        { lines: this.lines }
       )
+
+      const args = this.db.docs.updateOne.args[0]
+      assert.deepEqual(args[0], {
+        _id: new ObjectId(this.docId),
+        project_id: new ObjectId(this.projectId),
+        rev: this.oldRev,
+      })
+      assert.equal(args[1].$set.lines, this.lines)
+      assert.equal(args[1].$inc.rev, 1)
     })
 
-    it('should handle update error', function (done) {
-      this.db.docs.updateOne.yields(this.stubbedErr)
-      this.MongoManager.upsertIntoDocCollection(
-        this.projectId,
-        this.docId,
-        this.rev,
-        { lines: this.lines },
-        err => {
-          err.should.equal(this.stubbedErr)
-          done()
-        }
-      )
-    })
-
-    it('should insert without a previous rev', function (done) {
-      this.MongoManager.upsertIntoDocCollection(
-        this.projectId,
-        this.docId,
-        null,
-        { lines: this.lines, ranges: this.ranges },
-        err => {
-          expect(this.db.docs.insertOne).to.have.been.calledWith({
-            _id: new ObjectId(this.docId),
-            project_id: new ObjectId(this.projectId),
-            rev: 1,
+    it('should handle update error', async function () {
+      this.db.docs.updateOne.rejects(this.stubbedErr)
+      await expect(
+        this.MongoManager.promises.upsertIntoDocCollection(
+          this.projectId,
+          this.docId,
+          this.rev,
+          {
             lines: this.lines,
-            ranges: this.ranges,
-          })
-          expect(err).to.not.exist
-          done()
-        }
-      )
+          }
+        )
+      ).to.be.rejectedWith(this.stubbedErr)
     })
 
-    it('should handle generic insert error', function (done) {
-      this.db.docs.insertOne.yields(this.stubbedErr)
-      this.MongoManager.upsertIntoDocCollection(
+    it('should insert without a previous rev', async function () {
+      await this.MongoManager.promises.upsertIntoDocCollection(
         this.projectId,
         this.docId,
         null,
-        { lines: this.lines, ranges: this.ranges },
-        err => {
-          expect(err).to.equal(this.stubbedErr)
-          done()
-        }
+        { lines: this.lines, ranges: this.ranges }
       )
+
+      expect(this.db.docs.insertOne).to.have.been.calledWith({
+        _id: new ObjectId(this.docId),
+        project_id: new ObjectId(this.projectId),
+        rev: 1,
+        lines: this.lines,
+        ranges: this.ranges,
+      })
     })
 
-    it('should handle duplicate insert error', function (done) {
-      this.db.docs.insertOne.yields({ code: 11000 })
-      this.MongoManager.upsertIntoDocCollection(
-        this.projectId,
-        this.docId,
-        null,
-        { lines: this.lines, ranges: this.ranges },
-        err => {
-          expect(err).to.be.instanceof(Errors.DocRevValueError)
-          done()
-        }
-      )
+    it('should handle generic insert error', async function () {
+      this.db.docs.insertOne.rejects(this.stubbedErr)
+      await expect(
+        this.MongoManager.promises.upsertIntoDocCollection(
+          this.projectId,
+          this.docId,
+          null,
+          { lines: this.lines, ranges: this.ranges }
+        )
+      ).to.be.rejectedWith(this.stubbedErr)
+    })
+
+    it('should handle duplicate insert error', async function () {
+      this.db.docs.insertOne.rejects({ code: 11000 })
+      await expect(
+        this.MongoManager.promises.upsertIntoDocCollection(
+          this.projectId,
+          this.docId,
+          null,
+          { lines: this.lines, ranges: this.ranges }
+        )
+      ).to.be.rejectedWith(Errors.DocRevValueError)
     })
   })
 
   describe('destroyProject', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.projectId = new ObjectId()
       this.docIds = [new ObjectId(), new ObjectId()]
-      this.db.docs.deleteMany = sinon.stub().yields()
-      this.db.docOps.deleteMany = sinon.stub().yields()
+      this.db.docs.deleteMany = sinon.stub().resolves()
+      this.db.docOps.deleteMany = sinon.stub().resolves()
       this.db.docs.find = sinon
         .stub()
         .withArgs({ project_id: this.projectId })
         .returns({
-          toArray: sinon.stub().yields(
-            null,
+          toArray: sinon.stub().resolves(
             this.docIds.map(id => ({
               _id: id,
             }))
           ),
         })
-      this.MongoManager.destroyProject(this.projectId, done)
+      await this.MongoManager.promises.destroyProject(this.projectId)
     })
 
     it('should destroy all docs', function () {
@@ -340,10 +312,10 @@ describe('MongoManager', function () {
 
   describe('getDocVersion', function () {
     describe('when the doc exists', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.doc = { version: (this.version = 42) }
-        this.db.docOps.findOne = sinon.stub().callsArgWith(2, null, this.doc)
-        this.MongoManager.getDocVersion(this.docId, this.callback)
+        this.db.docOps.findOne = sinon.stub().resolves(this.doc)
+        this.result = await this.MongoManager.promises.getDocVersion(this.docId)
       })
 
       it('should look for the doc in the database', function () {
@@ -357,19 +329,19 @@ describe('MongoManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the version', function () {
-        this.callback.calledWith(null, this.version).should.equal(true)
+      it('should return the version', function () {
+        expect(this.result).to.equal(this.version)
       })
     })
 
     describe("when the doc doesn't exist", function () {
-      beforeEach(function () {
-        this.db.docOps.findOne = sinon.stub().callsArgWith(2, null, null)
-        this.MongoManager.getDocVersion(this.docId, this.callback)
+      beforeEach(async function () {
+        this.db.docOps.findOne = sinon.stub().resolves(null)
+        this.result = await this.MongoManager.promises.getDocVersion(this.docId)
       })
 
-      it('should call the callback with 0', function () {
-        this.callback.calledWith(null, 0).should.equal(true)
+      it('should return 0', function () {
+        expect(this.result).to.equal(0)
       })
     })
   })
@@ -379,37 +351,31 @@ describe('MongoManager', function () {
       this.doc = { _id: new ObjectId(), name: 'mock-doc', rev: 1 }
     })
 
-    it('should call the callback when the rev has not changed', function (done) {
-      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 1 })
-      this.MongoManager.checkRevUnchanged(this.doc, err => {
-        assert.isUndefined(err)
-        done()
-      })
+    it('should not error when the rev has not changed', async function () {
+      this.db.docs.findOne = sinon.stub().resolves({ rev: 1 })
+      await this.MongoManager.promises.checkRevUnchanged(this.doc)
     })
 
-    it('should return an error when the rev has changed', function (done) {
-      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
-      this.MongoManager.checkRevUnchanged(this.doc, err => {
-        err.should.be.instanceof(Errors.DocModifiedError)
-        done()
-      })
+    it('should return an error when the rev has changed', async function () {
+      this.db.docs.findOne = sinon.stub().resolves({ rev: 2 })
+      await expect(
+        this.MongoManager.promises.checkRevUnchanged(this.doc)
+      ).to.be.rejectedWith(Errors.DocModifiedError)
     })
 
-    it('should return a value error if incoming rev is NaN', function (done) {
-      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: 2 })
+    it('should return a value error if incoming rev is NaN', async function () {
+      this.db.docs.findOne = sinon.stub().resolves({ rev: 2 })
       this.doc = { _id: new ObjectId(), name: 'mock-doc', rev: NaN }
-      this.MongoManager.checkRevUnchanged(this.doc, err => {
-        err.should.be.instanceof(Errors.DocRevValueError)
-        done()
-      })
+      await expect(
+        this.MongoManager.promises.checkRevUnchanged(this.doc)
+      ).to.be.rejectedWith(Errors.DocRevValueError)
     })
 
-    it('should return a value error if checked doc rev is NaN', function (done) {
-      this.db.docs.findOne = sinon.stub().callsArgWith(2, null, { rev: NaN })
-      this.MongoManager.checkRevUnchanged(this.doc, err => {
-        err.should.be.instanceof(Errors.DocRevValueError)
-        done()
-      })
+    it('should return a value error if checked doc rev is NaN', async function () {
+      this.db.docs.findOne = sinon.stub().resolves({ rev: NaN })
+      await expect(
+        this.MongoManager.promises.checkRevUnchanged(this.doc)
+      ).to.be.rejectedWith(Errors.DocRevValueError)
     })
   })
 
@@ -423,12 +389,11 @@ describe('MongoManager', function () {
     })
 
     describe('complete doc', function () {
-      beforeEach(function (done) {
-        this.MongoManager.restoreArchivedDoc(
+      beforeEach(async function () {
+        await this.MongoManager.promises.restoreArchivedDoc(
           this.projectId,
           this.docId,
-          this.archivedDoc,
-          done
+          this.archivedDoc
         )
       })
 
@@ -453,13 +418,12 @@ describe('MongoManager', function () {
     })
 
     describe('without ranges', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         delete this.archivedDoc.ranges
-        this.MongoManager.restoreArchivedDoc(
+        await this.MongoManager.promises.restoreArchivedDoc(
           this.projectId,
           this.docId,
-          this.archivedDoc,
-          done
+          this.archivedDoc
         )
       })
 
@@ -484,17 +448,15 @@ describe('MongoManager', function () {
     })
 
     describe("when the update doesn't succeed", function () {
-      it('throws a DocRevValueError', function (done) {
-        this.db.docs.updateOne.yields(null, { matchedCount: 0 })
-        this.MongoManager.restoreArchivedDoc(
-          this.projectId,
-          this.docId,
-          this.archivedDoc,
-          err => {
-            expect(err).to.be.instanceof(Errors.DocRevValueError)
-            done()
-          }
-        )
+      it('throws a DocRevValueError', async function () {
+        this.db.docs.updateOne.resolves({ matchedCount: 0 })
+        await expect(
+          this.MongoManager.promises.restoreArchivedDoc(
+            this.projectId,
+            this.docId,
+            this.archivedDoc
+          )
+        ).to.be.rejectedWith(Errors.DocRevValueError)
       })
     })
   })

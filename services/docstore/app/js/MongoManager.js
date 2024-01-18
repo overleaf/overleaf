@@ -1,28 +1,25 @@
 const { db, ObjectId } = require('./mongodb')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-const OError = require('@overleaf/o-error')
 const Errors = require('./Errors')
-const { promisify } = require('util')
+const { callbackify } = require('util')
 
 const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
 
-function findDoc(projectId, docId, filter, callback) {
-  db.docs.findOne(
+async function findDoc(projectId, docId, filter) {
+  const doc = await db.docs.findOne(
     {
       _id: new ObjectId(docId.toString()),
       project_id: new ObjectId(projectId.toString()),
     },
     {
       projection: filter,
-    },
-    callback
+    }
   )
+  return doc
 }
 
-function getProjectsDeletedDocs(projectId, filter, callback) {
-  db.docs
+async function getProjectsDeletedDocs(projectId, filter) {
+  const docs = await db.docs
     .find(
       {
         project_id: new ObjectId(projectId.toString()),
@@ -34,10 +31,11 @@ function getProjectsDeletedDocs(projectId, filter, callback) {
         limit: Settings.max_deleted_docs,
       }
     )
-    .toArray(callback)
+    .toArray()
+  return docs
 }
 
-function getProjectsDocs(projectId, options, filter, callback) {
+async function getProjectsDocs(projectId, options, filter) {
   const query = { project_id: new ObjectId(projectId.toString()) }
   if (!options.include_deleted) {
     query.deleted = { $ne: true }
@@ -48,21 +46,23 @@ function getProjectsDocs(projectId, options, filter, callback) {
   if (options.limit) {
     queryOptions.limit = options.limit
   }
-  db.docs.find(query, queryOptions).toArray(callback)
+  const docs = await db.docs.find(query, queryOptions).toArray()
+  return docs
 }
 
-function getArchivedProjectDocs(projectId, maxResults, callback) {
+async function getArchivedProjectDocs(projectId, maxResults) {
   const query = {
     project_id: new ObjectId(projectId.toString()),
     inS3: true,
   }
-  db.docs
+  const docs = await db.docs
     .find(query, { projection: { _id: 1 }, limit: maxResults })
-    .toArray(callback)
+    .toArray()
+  return docs
 }
 
-function getNonArchivedProjectDocIds(projectId, callback) {
-  db.docs
+async function getNonArchivedProjectDocIds(projectId) {
+  const docs = await db.docs
     .find(
       {
         project_id: new ObjectId(projectId),
@@ -71,27 +71,23 @@ function getNonArchivedProjectDocIds(projectId, callback) {
       { projection: { _id: 1 } }
     )
     .map(doc => doc._id)
-    .toArray(callback)
+    .toArray()
+  return docs
 }
 
-function getNonDeletedArchivedProjectDocs(projectId, maxResults, callback) {
+async function getNonDeletedArchivedProjectDocs(projectId, maxResults) {
   const query = {
     project_id: new ObjectId(projectId.toString()),
     deleted: { $ne: true },
     inS3: true,
   }
-  db.docs
+  const docs = await db.docs
     .find(query, { projection: { _id: 1 }, limit: maxResults })
-    .toArray(callback)
+    .toArray()
+  return docs
 }
 
-function upsertIntoDocCollection(
-  projectId,
-  docId,
-  previousRev,
-  updates,
-  callback
-) {
+async function upsertIntoDocCollection(projectId, docId, previousRev, updates) {
   if (previousRev) {
     const update = {
       $set: updates,
@@ -100,51 +96,43 @@ function upsertIntoDocCollection(
     if (updates.lines || updates.ranges) {
       update.$inc = { rev: 1 }
     }
-    db.docs.updateOne(
+    const result = await db.docs.updateOne(
       {
         _id: new ObjectId(docId),
         project_id: new ObjectId(projectId),
         rev: previousRev,
       },
-      update,
-      (err, result) => {
-        if (err) return callback(err)
-        if (result.matchedCount !== 1) {
-          return callback(new Errors.DocRevValueError())
-        }
-        callback()
-      }
+      update
     )
+    if (result.matchedCount !== 1) {
+      throw new Errors.DocRevValueError()
+    }
   } else {
-    db.docs.insertOne(
-      {
+    try {
+      await db.docs.insertOne({
         _id: new ObjectId(docId),
         project_id: new ObjectId(projectId),
         rev: 1,
         ...updates,
-      },
-      err => {
-        if (err) {
-          if (err.code === 11000) {
-            // duplicate doc _id
-            return callback(new Errors.DocRevValueError())
-          }
-          return callback(err)
-        }
-        callback()
+      })
+    } catch (err) {
+      if (err.code === 11000) {
+        // duplicate doc _id
+        throw new Errors.DocRevValueError()
+      } else {
+        throw err
       }
-    )
+    }
   }
 }
 
-function patchDoc(projectId, docId, meta, callback) {
-  db.docs.updateOne(
+async function patchDoc(projectId, docId, meta) {
+  await db.docs.updateOne(
     {
       _id: new ObjectId(docId),
       project_id: new ObjectId(projectId),
     },
-    { $set: meta },
-    callback
+    { $set: meta }
   )
 }
 
@@ -154,9 +142,9 @@ function patchDoc(projectId, docId, meta, callback) {
  * This will return null if the doc is not found, if it's already archived or
  * if the lock can't be acquired.
  */
-function getDocForArchiving(projectId, docId, callback) {
+async function getDocForArchiving(projectId, docId) {
   const archivingUntil = new Date(Date.now() + ARCHIVING_LOCK_DURATION_MS)
-  db.docs.findOneAndUpdate(
+  const result = await db.docs.findOneAndUpdate(
     {
       _id: new ObjectId(docId),
       project_id: new ObjectId(projectId),
@@ -167,27 +155,21 @@ function getDocForArchiving(projectId, docId, callback) {
     {
       projection: { lines: 1, ranges: 1, rev: 1 },
       includeResultMetadata: true,
-    },
-    (err, result) => {
-      if (err) {
-        return callback(err)
-      }
-      callback(null, result.value)
     }
   )
+  return result.value
 }
 
 /**
  * Clear the doc contents from Mongo and release the archiving lock
  */
-function markDocAsArchived(projectId, docId, rev, callback) {
-  db.docs.updateOne(
+async function markDocAsArchived(projectId, docId, rev) {
+  await db.docs.updateOne(
     { _id: new ObjectId(docId), rev },
     {
       $set: { inS3: true },
       $unset: { lines: 1, ranges: 1, archivingUntil: 1 },
-    },
-    callback
+    }
   )
 }
 
@@ -196,7 +178,7 @@ function markDocAsArchived(projectId, docId, rev, callback) {
  *
  * This checks that the archived doc's rev matches.
  */
-function restoreArchivedDoc(projectId, docId, archivedDoc, callback) {
+async function restoreArchivedDoc(projectId, docId, archivedDoc) {
   const query = {
     _id: new ObjectId(docId),
     project_id: new ObjectId(projectId),
@@ -211,60 +193,34 @@ function restoreArchivedDoc(projectId, docId, archivedDoc, callback) {
       inS3: true,
     },
   }
-  db.docs.updateOne(query, update, (err, result) => {
-    if (err) {
-      OError.tag(err, 'failed to unarchive doc', {
-        docId,
-        rev: archivedDoc.rev,
-      })
-      return callback(err)
-    }
-    if (result.matchedCount === 0) {
-      return callback(
-        new Errors.DocRevValueError('failed to unarchive doc', {
-          docId,
-          rev: archivedDoc.rev,
-        })
-      )
-    }
-    callback()
-  })
+  const result = await db.docs.updateOne(query, update)
+
+  if (result.matchedCount === 0) {
+    throw new Errors.DocRevValueError('failed to unarchive doc', {
+      docId,
+      rev: archivedDoc.rev,
+    })
+  }
 }
 
-function getDocVersion(docId, callback) {
-  db.docOps.findOne(
-    {
-      doc_id: new ObjectId(docId),
-    },
+async function getDocVersion(docId) {
+  const doc = await db.docOps.findOne(
+    { doc_id: new ObjectId(docId) },
     {
       projection: {
         version: 1,
       },
-    },
-    function (error, doc) {
-      if (error) {
-        return callback(error)
-      }
-      callback(null, (doc && doc.version) || 0)
     }
   )
+  return (doc && doc.version) || 0
 }
 
-function getDocRev(docId, callback) {
-  db.docs.findOne(
-    {
-      _id: new ObjectId(docId.toString()),
-    },
-    {
-      projection: { rev: 1 },
-    },
-    function (err, doc) {
-      if (err) {
-        return callback(err)
-      }
-      callback(null, doc && doc.rev)
-    }
+async function getDocRev(docId) {
+  const doc = await db.docs.findOne(
+    { _id: new ObjectId(docId.toString()) },
+    { projection: { rev: 1 } }
   )
+  return doc && doc.rev
 }
 
 /**
@@ -273,68 +229,64 @@ function getDocRev(docId, callback) {
  * Check that the rev of an existing doc is unchanged. If the rev has
  * changed, return a DocModifiedError.
  */
-function checkRevUnchanged(doc, callback) {
-  getDocRev(doc._id, function (err, currentRev) {
-    if (err) return callback(err)
-    if (isNaN(currentRev) || isNaN(doc.rev)) {
-      return callback(
-        new Errors.DocRevValueError('doc rev is NaN', {
-          doc_id: doc._id,
-          rev: doc.rev,
-          currentRev,
-        })
-      )
-    }
-    if (doc.rev !== currentRev) {
-      return callback(
-        new Errors.DocModifiedError('doc rev has changed', {
-          doc_id: doc._id,
-          rev: doc.rev,
-          currentRev,
-        })
-      )
-    }
-    callback()
-  })
+async function checkRevUnchanged(doc) {
+  const currentRev = await getDocRev(doc._id)
+  if (isNaN(currentRev) || isNaN(doc.rev)) {
+    throw new Errors.DocRevValueError('doc rev is NaN', {
+      doc_id: doc._id,
+      rev: doc.rev,
+      currentRev,
+    })
+  }
+  if (doc.rev !== currentRev) {
+    throw new Errors.DocModifiedError('doc rev has changed', {
+      doc_id: doc._id,
+      rev: doc.rev,
+      currentRev,
+    })
+  }
 }
 
-function destroyProject(projectId, callback) {
-  db.docs
+async function destroyProject(projectId) {
+  const records = await db.docs
     .find({ project_id: new ObjectId(projectId) }, { projection: { _id: 1 } })
-    .toArray((err, records) => {
-      const docIds = records.map(r => r._id)
-      if (err) {
-        return callback(err)
-      }
-      db.docOps.deleteMany({ doc_id: { $in: docIds } }, err => {
-        if (err) {
-          return callback(err)
-        }
-        db.docs.deleteMany({ project_id: new ObjectId(projectId) }, callback)
-      })
-    })
+    .toArray()
+  const docIds = records.map(r => r._id)
+  await db.docOps.deleteMany({ doc_id: { $in: docIds } })
+  await db.docs.deleteMany({ project_id: new ObjectId(projectId) })
 }
 
 module.exports = {
-  findDoc,
-  getProjectsDeletedDocs,
-  getProjectsDocs,
-  getArchivedProjectDocs,
-  getNonArchivedProjectDocIds,
-  getNonDeletedArchivedProjectDocs,
-  upsertIntoDocCollection,
-  restoreArchivedDoc,
-  patchDoc,
-  getDocForArchiving,
-  markDocAsArchived,
-  getDocVersion,
-  checkRevUnchanged,
-  destroyProject,
-}
-
-const methods = Object.getOwnPropertyNames(module.exports)
-module.exports.promises = {}
-for (const method of methods) {
-  metrics.timeAsyncMethod(module.exports, method, 'mongo.MongoManager', logger)
-  module.exports.promises[method] = promisify(module.exports[method])
+  findDoc: callbackify(findDoc),
+  getProjectsDeletedDocs: callbackify(getProjectsDeletedDocs),
+  getProjectsDocs: callbackify(getProjectsDocs),
+  getArchivedProjectDocs: callbackify(getArchivedProjectDocs),
+  getNonArchivedProjectDocIds: callbackify(getNonArchivedProjectDocIds),
+  getNonDeletedArchivedProjectDocs: callbackify(
+    getNonDeletedArchivedProjectDocs
+  ),
+  upsertIntoDocCollection: callbackify(upsertIntoDocCollection),
+  restoreArchivedDoc: callbackify(restoreArchivedDoc),
+  patchDoc: callbackify(patchDoc),
+  getDocForArchiving: callbackify(getDocForArchiving),
+  markDocAsArchived: callbackify(markDocAsArchived),
+  getDocVersion: callbackify(getDocVersion),
+  checkRevUnchanged: callbackify(checkRevUnchanged),
+  destroyProject: callbackify(destroyProject),
+  promises: {
+    findDoc,
+    getProjectsDeletedDocs,
+    getProjectsDocs,
+    getArchivedProjectDocs,
+    getNonArchivedProjectDocIds,
+    getNonDeletedArchivedProjectDocs,
+    upsertIntoDocCollection,
+    restoreArchivedDoc,
+    patchDoc,
+    getDocForArchiving,
+    markDocAsArchived,
+    getDocVersion,
+    checkRevUnchanged,
+    destroyProject,
+  },
 }
