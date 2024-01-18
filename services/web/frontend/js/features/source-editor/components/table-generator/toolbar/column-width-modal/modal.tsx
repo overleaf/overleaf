@@ -190,7 +190,9 @@ const ColumnWidthModalBody = () => {
               \usepackage{'{'}array{'}'}
             </code>
             <CopyToClipboard
-              content="\\usepackage{array} % required for text wrapping in tables"
+              content={
+                '\\usepackage{array} % required for text wrapping in tables'
+              }
               tooltipId="table-generator-array-copy"
             />
           </div>
