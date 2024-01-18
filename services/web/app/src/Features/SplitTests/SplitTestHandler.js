@@ -13,6 +13,7 @@ const Features = require('../../infrastructure/Features')
 const SplitTestUtils = require('./SplitTestUtils')
 const Settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')
+const logger = require('@overleaf/logger')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
@@ -54,37 +55,42 @@ async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
   const query = req.query || {}
   let assignment
 
-  if (!Features.hasFeature('saas')) {
-    assignment = _getNonSaasAssignment(splitTestName)
-  } else {
-    await _loadSplitTestInfoInLocals(res.locals, splitTestName, req.session)
+  try {
+    if (!Features.hasFeature('saas')) {
+      assignment = _getNonSaasAssignment(splitTestName)
+    } else {
+      await _loadSplitTestInfoInLocals(res.locals, splitTestName, req.session)
 
-    // Check the query string for an override, ignoring an invalid value
-    const queryVariant = query[splitTestName]
-    if (queryVariant) {
-      const variants = await _getVariantNames(splitTestName)
-      if (variants.includes(queryVariant)) {
-        assignment = {
-          variant: queryVariant,
-          analytics: {
-            segmentation: {},
-          },
+      // Check the query string for an override, ignoring an invalid value
+      const queryVariant = query[splitTestName]
+      if (queryVariant) {
+        const variants = await _getVariantNames(splitTestName)
+        if (variants.includes(queryVariant)) {
+          assignment = {
+            variant: queryVariant,
+            analytics: {
+              segmentation: {},
+            },
+          }
         }
       }
-    }
 
-    if (!assignment) {
-      const { userId, analyticsId } = AnalyticsManager.getIdsFromSession(
-        req.session
-      )
-      assignment = await _getAssignment(splitTestName, {
-        analyticsId,
-        userId,
-        session: req.session,
-        sync,
-      })
-      _collectSessionStats(req.session)
+      if (!assignment) {
+        const { userId, analyticsId } = AnalyticsManager.getIdsFromSession(
+          req.session
+        )
+        assignment = await _getAssignment(splitTestName, {
+          analyticsId,
+          userId,
+          session: req.session,
+          sync,
+        })
+        _collectSessionStats(req.session)
+      }
     }
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to get split test assignment')
+    assignment = DEFAULT_ASSIGNMENT
   }
 
   LocalsHelper.setSplitTestVariant(
@@ -112,12 +118,17 @@ async function getAssignmentForUser(
   splitTestName,
   { sync = false } = {}
 ) {
-  if (!Features.hasFeature('saas')) {
-    return _getNonSaasAssignment(splitTestName)
-  }
+  try {
+    if (!Features.hasFeature('saas')) {
+      return _getNonSaasAssignment(splitTestName)
+    }
 
-  const analyticsId = await UserAnalyticsIdCache.get(userId)
-  return _getAssignment(splitTestName, { analyticsId, userId, sync })
+    const analyticsId = await UserAnalyticsIdCache.get(userId)
+    return _getAssignment(splitTestName, { analyticsId, userId, sync })
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to get split test assignment for user')
+    return DEFAULT_ASSIGNMENT
+  }
 }
 
 /**
@@ -136,16 +147,24 @@ async function getAssignmentForMongoUser(
   splitTestName,
   { sync = false } = {}
 ) {
-  if (!Features.hasFeature('saas')) {
-    return _getNonSaasAssignment(splitTestName)
-  }
+  try {
+    if (!Features.hasFeature('saas')) {
+      return _getNonSaasAssignment(splitTestName)
+    }
 
-  return _getAssignment(splitTestName, {
-    analyticsId: await UserAnalyticsIdCache.get(user._id),
-    sync,
-    user,
-    userId: user._id.toString(),
-  })
+    return _getAssignment(splitTestName, {
+      analyticsId: await UserAnalyticsIdCache.get(user._id),
+      sync,
+      user,
+      userId: user._id.toString(),
+    })
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'Failed to get split test assignment for mongo user'
+    )
+    return DEFAULT_ASSIGNMENT
+  }
 }
 
 /**

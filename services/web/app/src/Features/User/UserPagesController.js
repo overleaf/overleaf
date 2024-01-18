@@ -74,23 +74,16 @@ async function settingsPage(req, res) {
   // if not already enabled, use a split test to determine whether to offer personal access tokens
   let optionalPersonalAccessToken = false
   if (!showPersonalAccessToken) {
-    try {
-      const { variant } = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'personal-access-token'
-      )
-      optionalPersonalAccessToken = variant === 'enabled' // `?personal-access-token=enabled`
-    } catch (error) {
-      logger.error(
-        { err: error },
-        'Failed to get personal-access-token split test assignment'
-      )
-    }
+    const { variant } = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'personal-access-token'
+    )
+    optionalPersonalAccessToken = variant === 'enabled' // `?personal-access-token=enabled`
   }
 
-  // eslint-disable-next-line no-unused-vars -- getAssignment sets res.locals, which will pass to the splitTest context
-  const writefullSplitTest = await SplitTestHandler.promises.getAssignment(
+  // getAssignment sets res.locals, which will pass to the splitTest context
+  await SplitTestHandler.promises.getAssignment(
     req,
     res,
     'writefull-integration'

@@ -542,78 +542,31 @@ const ProjectController = {
             req,
             res,
             'project-share-modal-paywall',
-            {},
-            () => {
-              // do not fail editor load if assignment fails
-              cb()
-            }
+            cb
           )
         },
         sharingModalNullTest(cb) {
           // null test targeting logged in users, for front-end side
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'null-test-share-modal',
-            {},
-            () => {
-              // do not fail editor load if assignment fails
-              cb()
-            }
-          )
+          SplitTestHandler.getAssignment(req, res, 'null-test-share-modal', cb)
         },
         pdfjsAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'pdfjs-40',
-            {},
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
+          SplitTestHandler.getAssignment(req, res, 'pdfjs-40', cb)
         },
         latexLogParserAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'latex-log-parser',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
+          SplitTestHandler.getAssignment(req, res, 'latex-log-parser', cb)
         },
         trackPdfDownloadAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'track-pdf-download', () => {
-            // We'll pick up the assignment from the res.locals assignment.
-            cb()
-          })
+          SplitTestHandler.getAssignment(req, res, 'track-pdf-download', cb)
         },
         pdfCachingModeAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'pdf-caching-mode', () => {
-            // We'll pick up the assignment from the res.locals assignment.
-            cb()
-          })
+          SplitTestHandler.getAssignment(req, res, 'pdf-caching-mode', cb)
         },
         pdfCachingPrefetchingAssignment(cb) {
           SplitTestHandler.getAssignment(
             req,
             res,
             'pdf-caching-prefetching',
-            () => {
-              // We'll pick up the assignment from the res.locals assignment.
-              cb()
-            }
+            cb
           )
         },
         pdfCachingPrefetchLargeAssignment(cb) {
@@ -621,10 +574,7 @@ const ProjectController = {
             req,
             res,
             'pdf-caching-prefetch-large',
-            () => {
-              // We'll pick up the assignment from the res.locals assignment.
-              cb()
-            }
+            cb
           )
         },
         pdfCachingCachedUrlLookupAssignment(cb) {
@@ -632,10 +582,7 @@ const ProjectController = {
             req,
             res,
             'pdf-caching-cached-url-lookup',
-            () => {
-              // We'll pick up the assignment from the res.locals assignment.
-              cb()
-            }
+            cb
           )
         },
         tableGeneratorPromotionAssignment(cb) {
@@ -643,52 +590,17 @@ const ProjectController = {
             req,
             res,
             'table-generator-promotion',
-            () => {
-              // We'll pick up the assignment from the res.locals assignment.
-              cb()
-            }
+            cb
           )
         },
         personalAccessTokenAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'personal-access-token',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
+          SplitTestHandler.getAssignment(req, res, 'personal-access-token', cb)
         },
         idePageAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'ide-page',
-            (error, assignment) => {
-              // do not fail editor load if assignment fails
-              if (error) {
-                cb(null, { variant: 'default' })
-              } else {
-                cb(null, assignment)
-              }
-            }
-          )
+          SplitTestHandler.getAssignment(req, res, 'ide-page', cb)
         },
         writefullIntegrationAssignment(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'writefull-integration',
-            () => {
-              // We'll pick up the assignment from the res.locals assignment.
-              cb()
-            }
-          )
+          SplitTestHandler.getAssignment(req, res, 'writefull-integration', cb)
         },
         projectTags(cb) {
           if (!userId) {

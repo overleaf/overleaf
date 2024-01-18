@@ -326,19 +326,13 @@ async function projectListPage(req, res, next) {
       )
     }
   }
-  try {
-    // The assignment will be picked up via 'ol-splitTestVariants' in react.
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'download-pdf-dashboard'
-    )
-  } catch (err) {
-    logger.error(
-      { err },
-      'failed to get "download-pdf-dashboard" split test assignment'
-    )
-  }
+
+  // The assignment will be picked up via 'ol-splitTestVariants' in react.
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'download-pdf-dashboard'
+  )
 
   const hasPaidAffiliation = userAffiliations.some(
     affiliation => affiliation.licence && affiliation.licence !== 'free'
@@ -370,18 +364,11 @@ async function projectListPage(req, res, next) {
     }
   }
 
-  try {
-    await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'writefull-integration'
-    )
-  } catch (err) {
-    logger.warn(
-      { err },
-      'failed to get "writefull-integration" split test assignment'
-    )
-  }
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'writefull-integration'
+  )
 
   let showInrGeoBanner, inrGeoBannerSplitTestName
   let inrGeoBannerVariant = 'default'
@@ -390,63 +377,35 @@ async function projectListPage(req, res, next) {
   if (usersBestSubscription?.type === 'free') {
     const { currencyCode, countryCode } =
       await GeoIpLookup.promises.getCurrencyCode(req.ip)
-    let inrGeoPricingVariant = 'default'
-    try {
-      // Split test is kept active, but all users geolocated in India can
-      // now use the INR currency (See #13507)
-      const inrGeoPricingAssignment =
-        await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'geo-pricing-inr'
-        )
-      inrGeoPricingVariant = inrGeoPricingAssignment.variant
-    } catch (error) {
-      logger.error(
-        { err: error },
-        'Failed to get geo-pricing-inr split test assignment'
+    // Split test is kept active, but all users geolocated in India can
+    // now use the INR currency (See #13507)
+    const { variant: inrGeoPricingVariant } =
+      await SplitTestHandler.promises.getAssignment(req, res, 'geo-pricing-inr')
+    const latamGeoPricingAssignment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'geo-pricing-latam'
       )
-    }
-    try {
-      const latamGeoPricingAssignment =
-        await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'geo-pricing-latam'
-        )
-      showLATAMBanner =
-        latamGeoPricingAssignment.variant === 'latam' &&
-        ['BR', 'MX', 'CO', 'CL', 'PE'].includes(countryCode)
-      // LATAM Banner needs to know which currency to display
-      if (showLATAMBanner) {
-        recommendedCurrency = currencyCode
-      }
-    } catch (error) {
-      logger.error(
-        { err: error },
-        'Failed to get geo-pricing-latam split test assignment'
-      )
+    showLATAMBanner =
+      latamGeoPricingAssignment.variant === 'latam' &&
+      ['BR', 'MX', 'CO', 'CL', 'PE'].includes(countryCode)
+    // LATAM Banner needs to know which currency to display
+    if (showLATAMBanner) {
+      recommendedCurrency = currencyCode
     }
     if (countryCode === 'IN') {
       inrGeoBannerSplitTestName =
         inrGeoPricingVariant === 'inr'
           ? 'geo-banners-inr-2'
           : 'geo-banners-inr-1'
-      try {
-        const geoBannerAssignment =
-          await SplitTestHandler.promises.getAssignment(
-            req,
-            res,
-            inrGeoBannerSplitTestName
-          )
-        showInrGeoBanner = true
-        inrGeoBannerVariant = geoBannerAssignment.variant
-      } catch (error) {
-        logger.error(
-          { err: error },
-          `Failed to get INR geo banner lookup or assignment (${inrGeoBannerSplitTestName})`
-        )
-      }
+      const geoBannerAssignment = await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        inrGeoBannerSplitTestName
+      )
+      showInrGeoBanner = true
+      inrGeoBannerVariant = geoBannerAssignment.variant
     }
   }
 
