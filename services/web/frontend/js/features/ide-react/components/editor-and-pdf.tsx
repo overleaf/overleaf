@@ -52,7 +52,7 @@ export const EditorAndPdf: FC<{
             id="panel-main"
             order={1}
             defaultSize={50}
-            minSize={25}
+            minSize={5}
             className={classNames('ide-react-panel', {
               'ide-panel-group-resizing': resizing,
             })}
@@ -98,7 +98,7 @@ export const EditorAndPdf: FC<{
         id="panel-pdf"
         order={2}
         defaultSize={50}
-        minSize={25}
+        minSize={5}
         collapsible
         onCollapse={handlePdfPaneCollapse}
         onExpand={handlePdfPaneExpand}

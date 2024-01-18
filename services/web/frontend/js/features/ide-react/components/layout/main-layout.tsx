@@ -66,7 +66,7 @@ export const MainLayout: FC = () => {
             order={1}
             defaultSize={15}
             minSize={5}
-            maxSize={30}
+            maxSize={80}
             collapsible
             onCollapse={handleSidebarCollapse}
             onExpand={handleSidebarExpand}
