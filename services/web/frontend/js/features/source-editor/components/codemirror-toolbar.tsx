@@ -121,7 +121,7 @@ const Toolbar = memo(function Toolbar() {
 
   // calculate overflow when active element changes to/from inside a table
   const insideTable = document.activeElement?.closest(
-    '.table-generator-help-modal,.table-generator'
+    '.table-generator-help-modal,.table-generator,.table-generator-width-modal'
   )
   useEffect(() => {
     if (resizeRef.current) {

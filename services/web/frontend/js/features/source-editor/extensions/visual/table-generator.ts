@@ -22,10 +22,21 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     '--table-generator-toolbar-dropdown-disabled-background':
       'rgba(125,125,125,0.3)',
     '--table-generator-toolbar-dropdown-disabled-color': '#999',
+    '--table-generator-toolbar-dropdown-active-background': 'var(--green-10)',
+    '--table-generator-toolbar-dropdown-active-color': 'var(--green-70)',
+    '--table-generator-toolbar-dropdown-active-hover-background':
+      'var(--green-10)',
+    '--table-generator-toolbar-dropdown-active-active-background':
+      'var(--green-20)',
     '--table-generator-toolbar-shadow-color': '#1e253029',
     '--table-generator-error-background': '#2c3645',
     '--table-generator-error-color': '#fff',
     '--table-generator-error-border-color': '#677283',
+    '--table-generator-column-size-indicator-background': 'var(--neutral-80)',
+    '--table-generator-column-size-indicator-hover-background':
+      'var(--neutral-70)',
+    '--table-generator-column-size-indicator-color': 'white',
+    '--table-generator-column-size-indicator-hover-color': 'white',
   },
 
   '&light .table-generator': {
@@ -48,10 +59,20 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     '--table-generator-toolbar-dropdown-border-color': 'var(--neutral-60)',
     '--table-generator-toolbar-dropdown-disabled-background': '#f2f2f2',
     '--table-generator-toolbar-dropdown-disabled-color': 'var(--neutral-40)',
+    '--table-generator-toolbar-dropdown-active-background': 'var(--green-10)',
+    '--table-generator-toolbar-dropdown-active-color': 'var(--green-70)',
+    '--table-generator-toolbar-dropdown-active-hover-background':
+      'var(--green-10)',
+    '--table-generator-toolbar-dropdown-active-active-background':
+      'var(--green-20)',
     '--table-generator-toolbar-shadow-color': '#1e253029',
     '--table-generator-error-background': '#F1F4F9',
     '--table-generator-error-color': 'black',
     '--table-generator-error-border-color': '#C3D0E3',
+    '--table-generator-column-size-indicator-background': '#E7E9EE',
+    '--table-generator-column-size-indicator-hover-background': '#D7DADF',
+    '--table-generator-column-size-indicator-color': 'black',
+    '--table-generator-column-size-indicator-hover-color': 'black',
   },
 
   '.table-generator': {
@@ -162,6 +183,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
         '&::after': {
           width: '4px',
+          bottom: '4px',
           height: 'calc(100% - 8px)',
         },
       },
@@ -172,6 +194,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
         '&::after': {
           width: 'calc(100% - 8px)',
           height: '4px',
+          right: '4px',
         },
       },
 
@@ -179,8 +202,8 @@ export const tableGeneratorTheme = EditorView.baseTheme({
         content: '""',
         display: 'block',
         position: 'absolute',
-        bottom: '4px',
-        right: '4px',
+        bottom: '8px',
+        right: '8px',
         width: 'calc(100% - 8px)',
         height: 'calc(100% - 8px)',
         'background-color': 'var(--table-generator-selector-background-color)',
@@ -199,7 +222,6 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
   '.table-generator-floating-toolbar': {
     position: 'absolute',
-    top: '0',
     transform: 'translateY(-100%)',
     left: '0',
     right: '0',
@@ -216,6 +238,9 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     display: 'flex',
     flexWrap: 'wrap',
     rowGap: '8px',
+    '&.table-generator-toolbar-floating-custom-sizes': {
+      top: '-8px',
+    },
   },
 
   '.table-generator-toolbar-button': {
@@ -375,6 +400,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     display: 'flex',
     'flex-direction': 'column',
     'min-width': '200px',
+    padding: '4px',
 
     '& > button': {
       border: 'none',
@@ -382,11 +408,11 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       background: 'transparent',
       'white-space': 'nowrap',
       color: 'var(--table-generator-toolbar-button-color)',
-      'border-radius': '0',
+      'border-radius': '4px',
       'font-size': '14px',
       display: 'flex',
       'align-items': 'center',
-      'justify-content': 'space-between',
+      'justify-content': 'flex-start',
       'column-gap': '8px',
       'align-self': 'stretch',
       padding: '12px 8px',
@@ -398,6 +424,12 @@ export const tableGeneratorTheme = EditorView.baseTheme({
         'text-align': 'left',
       },
 
+      '&.ol-cm-toolbar-dropdown-option-active': {
+        'background-color':
+          'var(--table-generator-toolbar-dropdown-active-background)',
+        color: 'var(--table-generator-toolbar-dropdown-active-color)',
+      },
+
       '&:hover, &:focus': {
         'background-color':
           'var(--table-generator-toolbar-button-hover-background)',
@@ -407,6 +439,18 @@ export const tableGeneratorTheme = EditorView.baseTheme({
         'background-color':
           'var(--table-generator-toolbar-button-active-background)',
       },
+
+      '&.ol-cm-toolbar-dropdown-option-active:hover, &.ol-cm-toolbar-dropdown-option-active:focus':
+        {
+          'background-color':
+            'var(--table-generator-toolbar-dropdown-active-hover-background)',
+        },
+
+      '&.ol-cm-toolbar-dropdown-option-active:active, &.ol-cm-toolbar-dropdown-option-active.active':
+        {
+          'background-color':
+            'var(--table-generator-toolbar-dropdown-active-active-background)',
+        },
 
       '&:hover, &:focus, &:active, &.active': {
         'box-shadow': 'none',
@@ -427,6 +471,11 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'box-sizing': 'content-box',
       border: '0',
       height: '1px',
+    },
+
+    '& .ol-cm-toolbar-dropdown-option-content': {
+      textAlign: 'left',
+      flexGrow: '1',
     },
   },
 
@@ -463,6 +512,45 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     border: 'none !important',
     '& td': {
       'min-width': '40px',
+    },
+  },
+
+  '.table-generator-column-indicator-button': {
+    verticalAlign: 'middle',
+    borderRadius: '4px',
+    padding: '2px 4px 2px 4px',
+    background: 'var(--table-generator-column-size-indicator-background)',
+    margin: 0,
+    border: 'none',
+    fontFamily: 'Lato, sans-serif',
+    fontSize: '12px',
+    lineHeight: '16px',
+    fontWeight: 400,
+    display: 'flex',
+    maxWidth: '100%',
+    color: 'var(--table-generator-column-size-indicator-color)',
+
+    '&:hover': {
+      background:
+        'var(--table-generator-column-size-indicator-hover-background)',
+      color: 'var(--table-generator-column-size-indicator-hover-color)',
+    },
+
+    '& .table-generator-column-indicator-icon': {
+      fontSize: '16px',
+      lineHeight: '16px',
+    },
+
+    '& .table-generator-column-indicator-label': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+    },
+  },
+  '.table-generator-column-widths-row': {
+    height: '20px',
+    '& td': {
+      lineHeight: '1',
     },
   },
 })

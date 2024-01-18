@@ -14,6 +14,7 @@ import {
   extendForwardsOverEmptyLines,
 } from '../../../extensions/visual/selection'
 import { debugConsole } from '@/utils/debugging'
+import { WidthSelection } from './column-width-modal/column-width'
 
 /* eslint-disable no-unused-vars */
 export enum BorderTheme {
@@ -145,11 +146,15 @@ const addColumnBordersToSpecification = (specification: ColumnDefinition[]) => {
 export const setAlignment = (
   view: EditorView,
   selection: TableSelection,
-  alignment: 'left' | 'right' | 'center',
+  alignment: ColumnDefinition['alignment'],
   positions: Positions,
   table: TableData
 ) => {
   if (selection.isMergedCellSelected(table)) {
+    if (alignment === 'paragraph') {
+      // shouldn't happen
+      return
+    }
     // change for mergedColumn
     const { minX, minY } = selection.normalized()
     const cell = table.getCell(minY, minX)
@@ -189,8 +194,16 @@ export const setAlignment = (
         continue
       }
       columnSpecification[i].alignment = alignment
-      // TODO: This won't work for paragraph, which needs width argument
-      columnSpecification[i].content = alignment[0]
+      if (columnSpecification[i].isParagraphColumn) {
+        columnSpecification[i].customCellDefinition =
+          generateParagraphColumnSpecification(alignment)
+      } else {
+        if (alignment === 'paragraph') {
+          // shouldn't happen
+          continue
+        }
+        columnSpecification[i].content = alignment[0]
+      }
     }
   }
   const newSpecification = generateColumnSpecification(columnSpecification)
@@ -214,10 +227,11 @@ const generateColumnSpecification = (columns: ColumnDefinition[]) => {
         content,
         cellSpacingLeft,
         cellSpacingRight,
+        customCellDefinition,
       }) =>
         `${'|'.repeat(
           borderLeft
-        )}${cellSpacingLeft}${content}${cellSpacingRight}${'|'.repeat(
+        )}${cellSpacingLeft}${customCellDefinition}${content}${cellSpacingRight}${'|'.repeat(
           borderRight
         )}`
     )
@@ -439,6 +453,8 @@ export const insertColumn = (
       content: 'l',
       cellSpacingLeft: '',
       cellSpacingRight: '',
+      customCellDefinition: '',
+      isParagraphColumn: false,
     }))
   )
   if (targetIndex === 0 && borderTheme === BorderTheme.FULLY_BORDERED) {
@@ -648,5 +664,137 @@ export const mergeCells = (
       to,
       insert: `${preamble}${content}${postamble}`,
     },
+  })
+}
+
+const getSuffixForUnit = (
+  unit: WidthSelection['unit'],
+  currentSize?: WidthSelection
+) => {
+  if (unit === 'custom') {
+    return ''
+  }
+  if (unit === '%') {
+    if (currentSize?.unit === '%' && currentSize.command) {
+      return `\\${currentSize.command}`
+    } else {
+      return '\\linewidth'
+    }
+  }
+  return unit
+}
+
+const COMMAND_FOR_PARAGRAPH_ALIGNMENT: Record<
+  ColumnDefinition['alignment'],
+  string
+> = {
+  left: '\\raggedright',
+  right: '\\raggedleft',
+  center: '\\centering',
+  paragraph: '',
+}
+
+const transformColumnWidth = (width: WidthSelection) => {
+  if (width.unit === '%') {
+    return width.width / 100
+  } else {
+    return width.width
+  }
+}
+
+const generateParagraphColumnSpecification = (
+  alignment: ColumnDefinition['alignment']
+) => {
+  if (alignment === 'paragraph') {
+    return ''
+  }
+  return `>{${COMMAND_FOR_PARAGRAPH_ALIGNMENT[alignment]}\\arraybackslash}`
+}
+
+function getParagraphAlignmentCharacter(
+  column: ColumnDefinition
+): 'p' | 'm' | 'b' {
+  if (!column.isParagraphColumn) {
+    return 'p'
+  }
+  const currentAlignmentCharacter = column.content[0]
+  if (currentAlignmentCharacter === 'm' || currentAlignmentCharacter === 'b') {
+    return currentAlignmentCharacter
+  }
+  return 'p'
+}
+
+export const setColumnWidth = (
+  view: EditorView,
+  selection: TableSelection,
+  newWidth: WidthSelection,
+  positions: Positions,
+  table: TableData
+) => {
+  const { minX, maxX } = selection.normalized()
+  const specification = view.state.sliceDoc(
+    positions.columnDeclarations.from,
+    positions.columnDeclarations.to
+  )
+  const columnSpecification = parseColumnSpecifications(specification)
+  for (let i = minX; i <= maxX; i++) {
+    if (selection.isColumnSelected(i, table)) {
+      const suffix = getSuffixForUnit(newWidth.unit, table.columns[i].size)
+      const widthValue = transformColumnWidth(newWidth)
+      columnSpecification[i].customCellDefinition =
+        generateParagraphColumnSpecification(columnSpecification[i].alignment)
+      // Reuse paragraph alignment characters to preserve m and b columns
+      const alignmentCharacter = getParagraphAlignmentCharacter(
+        columnSpecification[i]
+      )
+      columnSpecification[
+        i
+      ].content = `${alignmentCharacter}{${widthValue}${suffix}}`
+    }
+  }
+  const newSpecification = generateColumnSpecification(columnSpecification)
+  view.dispatch({
+    changes: [
+      {
+        from: positions.columnDeclarations.from,
+        to: positions.columnDeclarations.to,
+        insert: newSpecification,
+      },
+    ],
+  })
+}
+
+export const removeColumnWidths = (
+  view: EditorView,
+  selection: TableSelection,
+  positions: Positions,
+  table: TableData
+) => {
+  const { minX, maxX } = selection.normalized()
+  const specification = view.state.sliceDoc(
+    positions.columnDeclarations.from,
+    positions.columnDeclarations.to
+  )
+  const columnSpecification = parseColumnSpecifications(specification)
+  for (let i = minX; i <= maxX; i++) {
+    if (selection.isColumnSelected(i, table)) {
+      columnSpecification[i].customCellDefinition = ''
+      if (columnSpecification[i].alignment === 'paragraph') {
+        columnSpecification[i].content = 'l'
+        columnSpecification[i].alignment = 'left'
+      } else {
+        columnSpecification[i].content = columnSpecification[i].alignment[0]
+      }
+    }
+  }
+  const newSpecification = generateColumnSpecification(columnSpecification)
+  view.dispatch({
+    changes: [
+      {
+        from: positions.columnDeclarations.from,
+        to: positions.columnDeclarations.to,
+        insert: newSpecification,
+      },
+    ],
   })
 }

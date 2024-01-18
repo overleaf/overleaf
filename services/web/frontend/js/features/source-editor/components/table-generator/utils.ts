@@ -2,8 +2,15 @@ import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
 import { CellData, ColumnDefinition, TableData } from './tabular'
 import { TableEnvironmentData } from './contexts/table-context'
+import {
+  ABSOLUTE_SIZE_REGEX,
+  AbsoluteWidthUnits,
+  RELATIVE_SIZE_REGEX,
+  RelativeWidthCommand,
+  WidthSelection,
+} from './toolbar/column-width-modal/column-width'
 
-const ALIGNMENT_CHARACTERS = ['c', 'l', 'r', 'p']
+const COMMIT_CHARACTERS = ['c', 'l', 'r', 'p', 'm', 'b', '>']
 
 export type CellPosition = { from: number; to: number }
 export type RowPosition = {
@@ -40,6 +47,9 @@ export function parseColumnSpecifications(
   let currentContent = ''
   let currentCellSpacingLeft = ''
   let currentCellSpacingRight = ''
+  let currentCustomCellDefinition = ''
+  let currentIsParagraphColumn = false
+  let currentSize: WidthSelection | undefined
   function maybeCommit() {
     if (currentAlignment !== undefined) {
       columns.push({
@@ -49,6 +59,9 @@ export function parseColumnSpecifications(
         content: currentContent,
         cellSpacingLeft: currentCellSpacingLeft,
         cellSpacingRight: currentCellSpacingRight,
+        customCellDefinition: currentCustomCellDefinition,
+        isParagraphColumn: currentIsParagraphColumn,
+        size: currentSize,
       })
       currentAlignment = undefined
       currentBorderLeft = 0
@@ -56,10 +69,13 @@ export function parseColumnSpecifications(
       currentContent = ''
       currentCellSpacingLeft = ''
       currentCellSpacingRight = ''
+      currentCustomCellDefinition = ''
+      currentIsParagraphColumn = false
+      currentSize = undefined
     }
   }
   for (let i = 0; i < specification.length; i++) {
-    if (ALIGNMENT_CHARACTERS.includes(specification.charAt(i))) {
+    if (COMMIT_CHARACTERS.includes(specification.charAt(i))) {
       maybeCommit()
     }
     const hasAlignment = currentAlignment !== undefined
@@ -85,13 +101,55 @@ export function parseColumnSpecifications(
         currentAlignment = 'right'
         currentContent += 'r'
         break
-      case 'p': {
+      case 'p':
+      case 'm':
+      case 'b': {
+        currentIsParagraphColumn = true
         currentAlignment = 'paragraph'
-        currentContent += 'p'
-        // TODO: Parse these details
+        if (currentCustomCellDefinition !== '') {
+          // Maybe we have another alignment hidden in here
+          const match = currentCustomCellDefinition.match(
+            />\{\s*\\(raggedleft|raggedright|centering)\s*\\arraybackslash\s*\}/
+          )
+          if (match) {
+            switch (match[1]) {
+              case 'raggedleft':
+                currentAlignment = 'right'
+                break
+              case 'raggedright':
+                currentAlignment = 'left'
+                break
+              case 'centering':
+                currentAlignment = 'center'
+                break
+            }
+          }
+        }
+        currentContent += char
         const argumentEnd = parseArgument(specification, i + 1)
+        const columnDefinition = specification.slice(i, argumentEnd + 1)
+        const absoluteSizeMatch = columnDefinition.match(ABSOLUTE_SIZE_REGEX)
+        const relativeSizeMatch = columnDefinition.match(RELATIVE_SIZE_REGEX)
+        if (absoluteSizeMatch) {
+          currentSize = {
+            unit: absoluteSizeMatch[2] as AbsoluteWidthUnits,
+            width: parseFloat(absoluteSizeMatch[1]),
+          }
+        } else if (relativeSizeMatch) {
+          const widthAsFraction = parseFloat(relativeSizeMatch[1]) || 0
+          currentSize = {
+            unit: '%',
+            width: widthAsFraction * 100,
+            command: relativeSizeMatch[2] as RelativeWidthCommand,
+          }
+        } else {
+          currentSize = {
+            unit: 'custom',
+            width: columnDefinition.slice(2, -1),
+          }
+        }
         // Don't include the p twice
-        currentContent += specification.slice(i + 1, argumentEnd + 1)
+        currentContent += columnDefinition.slice(1)
         i = argumentEnd
         break
       }
@@ -107,6 +165,14 @@ export function parseColumnSpecifications(
         } else {
           currentCellSpacingLeft = argument
         }
+        break
+      }
+      case '>': {
+        const argumentEnd = parseArgument(specification, i + 1)
+        // Include the >
+        const argument = specification.slice(i, argumentEnd + 1)
+        i = argumentEnd
+        currentCustomCellDefinition = argument
         break
       }
       case ' ':

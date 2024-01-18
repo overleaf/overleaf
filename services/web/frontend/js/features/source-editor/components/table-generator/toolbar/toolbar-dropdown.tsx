@@ -6,6 +6,7 @@ import Tooltip from '../../../../../shared/components/tooltip'
 import { useTabularContext } from '../contexts/tabular-context'
 import { emitTableGeneratorEvent } from '../analytics'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import classNames from 'classnames'
 
 export const ToolbarDropdown: FC<{
   id: string
@@ -15,6 +16,7 @@ export const ToolbarDropdown: FC<{
   tooltip?: string
   disabled?: boolean
   disabledTooltip?: string
+  showCaret?: boolean
 }> = ({
   id,
   label,
@@ -24,6 +26,7 @@ export const ToolbarDropdown: FC<{
   tooltip,
   disabled,
   disabledTooltip,
+  showCaret,
 }) => {
   const { open, onToggle, ref } = useDropdown()
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -48,6 +51,7 @@ export const ToolbarDropdown: FC<{
     >
       {label && <span>{label}</span>}
       <MaterialIcon type={icon} />
+      {showCaret && <MaterialIcon type="expand_more" />}
     </button>
   )
   const overlay = tabularRef.current && (
@@ -110,8 +114,10 @@ export const ToolbarDropdownItem: FC<
   Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> & {
     command: () => void
     id: string
+    icon?: string
+    active?: boolean
   }
-> = ({ children, command, id, ...props }) => {
+> = ({ children, command, id, icon, active, ...props }) => {
   const view = useCodeMirrorViewContext()
   const onClick = useCallback(() => {
     emitTableGeneratorEvent(view, id)
@@ -119,13 +125,17 @@ export const ToolbarDropdownItem: FC<
   }, [view, command, id])
   return (
     <button
-      className="ol-cm-toolbar-menu-item"
+      className={classNames('ol-cm-toolbar-menu-item', {
+        'ol-cm-toolbar-dropdown-option-active': active,
+      })}
       role="menuitem"
       type="button"
       {...props}
       onClick={onClick}
     >
-      {children}
+      {icon && <MaterialIcon type={icon} />}
+      <span className="ol-cm-toolbar-dropdown-option-content">{children}</span>
+      {active && <MaterialIcon type="check" />}
     </button>
   )
 }

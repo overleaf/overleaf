@@ -19,6 +19,8 @@ import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { undo, redo } from '@codemirror/commands'
 import { ChangeSpec } from '@codemirror/state'
 import { startCompileKeypress } from '@/features/pdf-preview/hooks/use-compile-triggers'
+import { useTabularContext } from './contexts/tabular-context'
+import { ColumnSizeIndicator } from './column-size-indicator'
 
 type NavigationKey =
   | 'ArrowRight'
@@ -52,6 +54,7 @@ export const Table: FC = () => {
     updateCellData,
   } = useEditingContext()
   const { table: tableData } = useTableContext()
+  const { openColumnWidthModal, columnWidthModalShown } = useTabularContext()
   const tableRef = useRef<HTMLTableElement>(null)
   const view = useCodeMirrorViewContext()
   const { columns: cellWidths, tableWidth } = useMemo(() => {
@@ -276,8 +279,9 @@ export const Table: FC = () => {
       if (view.state.readOnly) {
         return false
       }
-      if (cellData || !selection) {
-        // We're editing a cell, so allow browser to insert there
+      if (cellData || !selection || columnWidthModalShown) {
+        // We're editing a cell, or modifying column widths,
+        // so allow browser to insert there
         return false
       }
       event.preventDefault()
@@ -312,8 +316,9 @@ export const Table: FC = () => {
     }
 
     const onCopy = (event: ClipboardEvent) => {
-      if (cellData || !selection) {
-        // We're editing a cell, so allow browser to insert there
+      if (cellData || !selection || columnWidthModalShown) {
+        // We're editing a cell, or modifying column widths,
+        // so allow browser to copy from there
         return false
       }
       event.preventDefault()
@@ -334,7 +339,22 @@ export const Table: FC = () => {
       window.removeEventListener('paste', onPaste)
       window.removeEventListener('copy', onCopy)
     }
-  }, [cellData, selection, tableData, view])
+  }, [cellData, selection, tableData, view, columnWidthModalShown])
+
+  const hasCustomSizes = useMemo(
+    () => tableData.columns.some(x => x.size),
+    [tableData.columns]
+  )
+
+  const onSizeClick = (index: number) => {
+    setSelection(
+      new TableSelection(
+        { row: 0, cell: index },
+        { row: tableData.rows.length - 1, cell: index }
+      )
+    )
+    openColumnWidthModal()
+  }
 
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
@@ -352,6 +372,21 @@ export const Table: FC = () => {
         ))}
       </colgroup>
       <thead>
+        {hasCustomSizes && (
+          <tr className="table-generator-column-widths-row">
+            <td />
+            {tableData.columns.map((column, columnIndex) => (
+              <td align="center" key={columnIndex}>
+                {column.size && (
+                  <ColumnSizeIndicator
+                    size={column.size}
+                    onClick={() => onSizeClick(columnIndex)}
+                  />
+                )}
+              </td>
+            ))}
+          </tr>
+        )}
         <tr>
           <td />
           {tableData.columns.map((_, columnIndex) => (

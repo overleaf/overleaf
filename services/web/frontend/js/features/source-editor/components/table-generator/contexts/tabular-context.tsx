@@ -14,6 +14,9 @@ const TabularContext = createContext<
       showHelp: () => void
       hideHelp: () => void
       helpShown: boolean
+      columnWidthModalShown: boolean
+      openColumnWidthModal: () => void
+      closeColumnWidthModal: () => void
     }
   | undefined
 >(undefined)
@@ -21,10 +24,29 @@ const TabularContext = createContext<
 export const TabularProvider: FC = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null)
   const [helpShown, setHelpShown] = useState(false)
+  const [columnWidthModalShown, setColumnWidthModalShown] = useState(false)
   const showHelp = useCallback(() => setHelpShown(true), [])
   const hideHelp = useCallback(() => setHelpShown(false), [])
+  const openColumnWidthModal = useCallback(
+    () => setColumnWidthModalShown(true),
+    []
+  )
+  const closeColumnWidthModal = useCallback(
+    () => setColumnWidthModalShown(false),
+    []
+  )
   return (
-    <TabularContext.Provider value={{ ref, helpShown, showHelp, hideHelp }}>
+    <TabularContext.Provider
+      value={{
+        ref,
+        helpShown,
+        showHelp,
+        hideHelp,
+        columnWidthModalShown,
+        openColumnWidthModal,
+        closeColumnWidthModal,
+      }}
+    >
       {children}
     </TabularContext.Provider>
   )

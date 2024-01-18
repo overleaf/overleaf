@@ -4,7 +4,7 @@ import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/
 import { mockScope } from '../helpers/mock-scope'
 
 const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
+  <div style={{ width: 1000, height: 800 }}>{children}</div>
 )
 
 const mountEditor = (content: string | string[]) => {
@@ -16,7 +16,7 @@ const mountEditor = (content: string | string[]) => {
   }
   const scope = mockScope(content)
   scope.editor.showVisual = true
-
+  cy.viewport(1000, 800)
   cy.mount(
     <Container>
       <EditorProviders scope={scope}>

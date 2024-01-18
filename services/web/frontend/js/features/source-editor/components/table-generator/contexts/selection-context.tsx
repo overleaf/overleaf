@@ -331,6 +331,42 @@ export class TableSelection {
     return true
   }
 
+  isOnlyFixedWidthColumns(table: TableData) {
+    const { minX, maxX } = this.normalized()
+    for (let cell = minX; cell <= maxX; ++cell) {
+      if (!this.isColumnSelected(cell, table)) {
+        return false
+      }
+      if (!table.columns[cell].isParagraphColumn) {
+        return false
+      }
+    }
+    return true
+  }
+
+  isOnlyParagraphCells(table: TableData) {
+    const { minX, maxX } = this.normalized()
+    for (let cell = minX; cell <= maxX; ++cell) {
+      if (!table.columns[cell].isParagraphColumn) {
+        return false
+      }
+    }
+    return true
+  }
+
+  isOnlyNonFixedWidthColumns(table: TableData) {
+    const { minX, maxX } = this.normalized()
+    for (let cell = minX; cell <= maxX; ++cell) {
+      if (!this.isColumnSelected(cell, table)) {
+        return false
+      }
+      if (table.columns[cell].isParagraphColumn) {
+        return false
+      }
+    }
+    return true
+  }
+
   width() {
     const { minX, maxX } = this.normalized()
     return maxX - minX + 1

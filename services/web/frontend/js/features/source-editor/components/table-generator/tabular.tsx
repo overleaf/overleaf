@@ -27,6 +27,8 @@ import { BorderTheme } from './toolbar/commands'
 import { TableGeneratorHelpModal } from './help-modal'
 import { SplitTestProvider } from '../../../../shared/context/split-test-context'
 import { useTranslation } from 'react-i18next'
+import { ColumnWidthModal } from './toolbar/column-width-modal/modal'
+import { WidthSelection } from './toolbar/column-width-modal/column-width'
 
 export type ColumnDefinition = {
   alignment: 'left' | 'center' | 'right' | 'paragraph'
@@ -35,6 +37,9 @@ export type ColumnDefinition = {
   content: string
   cellSpacingLeft: string
   cellSpacingRight: string
+  customCellDefinition: string
+  isParagraphColumn: boolean
+  size?: WidthSelection
 }
 
 export type CellData = {
@@ -252,6 +257,7 @@ export const Tabular: FC<{
                 <EditingContextProvider>
                   <TabularWrapper />
                 </EditingContextProvider>
+                <ColumnWidthModal />
               </SelectionContextProvider>
             </TableProvider>
             <TableGeneratorHelpModal />
@@ -271,7 +277,8 @@ const TabularWrapper: FC = () => {
     const listener: (event: MouseEvent) => void = event => {
       if (
         !ref.current?.contains(event.target as Node) &&
-        !(event.target as HTMLElement).closest('.table-generator-help-modal')
+        !(event.target as HTMLElement).closest('.table-generator-help-modal') &&
+        !(event.target as HTMLElement).closest('.table-generator-width-modal')
       ) {
         if (selection) {
           setSelection(null)

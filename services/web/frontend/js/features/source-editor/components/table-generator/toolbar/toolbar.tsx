@@ -11,6 +11,7 @@ import {
   mergeCells,
   moveCaption,
   removeCaption,
+  removeColumnWidths,
   removeNodes,
   removeRowOrColumns,
   setAlignment,
@@ -22,6 +23,9 @@ import { useTableContext } from '../contexts/table-context'
 import { useTabularContext } from '../contexts/tabular-context'
 import { useTranslation } from 'react-i18next'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
+import classNames from 'classnames'
+
+type CaptionPosition = 'no_caption' | 'above' | 'below'
 
 export const Toolbar = memo(function Toolbar() {
   const { selection, setSelection } = useSelectionContext()
@@ -34,7 +38,7 @@ export const Toolbar = memo(function Toolbar() {
     table,
     directTableChild,
   } = useTableContext()
-  const { showHelp } = useTabularContext()
+  const { showHelp, openColumnWidthModal } = useTabularContext()
   const { t } = useTranslation()
 
   const borderDropdownLabel = useMemo(() => {
@@ -48,15 +52,26 @@ export const Toolbar = memo(function Toolbar() {
     }
   }, [table, t])
 
-  const captionLabel = useMemo(() => {
+  const captionPosition: CaptionPosition = useMemo(() => {
     if (!tableEnvironment?.caption) {
-      return t('no_caption')
+      return 'no_caption'
     }
     if (tableEnvironment.caption.from < positions.tabular.from) {
-      return t('caption_above')
+      return 'above'
     }
-    return t('caption_below')
-  }, [tableEnvironment, positions.tabular.from, t])
+    return 'below'
+  }, [tableEnvironment, positions])
+
+  const captionLabel = useMemo(() => {
+    switch (captionPosition) {
+      case 'no_caption':
+        return t('no_caption')
+      case 'above':
+        return t('caption_above')
+      case 'below':
+        return t('caption_below')
+    }
+  }, [t, captionPosition])
 
   const currentAlignment = useMemo(() => {
     if (!selection) {
@@ -94,14 +109,27 @@ export const Toolbar = memo(function Toolbar() {
     }
   }, [currentAlignment])
 
+  const hasCustomSizes = useMemo(
+    () => table.columns.some(x => x.size),
+    [table.columns]
+  )
+
   if (!selection) {
     return null
   }
   const columnsToInsert = selection.maximumCellWidth(table)
   const rowsToInsert = selection.height()
 
+  const onlyFixedWidthColumnsSelected = selection.isOnlyFixedWidthColumns(table)
+  const onlyNonFixedWidthColumnsSelected =
+    selection.isOnlyNonFixedWidthColumns(table)
+
   return (
-    <div className="table-generator-floating-toolbar">
+    <div
+      className={classNames('table-generator-floating-toolbar', {
+        'table-generator-toolbar-floating-custom-sizes': hasCustomSizes,
+      })}
+    >
       <div className="table-generator-button-group">
         <ToolbarDropdown
           id="table-generator-caption-dropdown"
@@ -116,6 +144,7 @@ export const Toolbar = memo(function Toolbar() {
             command={() => {
               removeCaption(view, tableEnvironment)
             }}
+            active={captionPosition === 'no_caption'}
           >
             {t('no_caption')}
           </ToolbarDropdownItem>
@@ -124,6 +153,7 @@ export const Toolbar = memo(function Toolbar() {
             command={() => {
               moveCaption(view, positions, 'above', tableEnvironment)
             }}
+            active={captionPosition === 'above'}
           >
             {t('caption_above')}
           </ToolbarDropdownItem>
@@ -132,6 +162,7 @@ export const Toolbar = memo(function Toolbar() {
             command={() => {
               moveCaption(view, positions, 'below', tableEnvironment)
             }}
+            active={captionPosition === 'below'}
           >
             {t('caption_below')}
           </ToolbarDropdownItem>
@@ -151,11 +182,10 @@ export const Toolbar = memo(function Toolbar() {
                 table
               )
             }}
+            active={table.getBorderTheme() === BorderTheme.FULLY_BORDERED}
+            icon="border_all"
           >
-            <MaterialIcon type="border_all" />
-            <span className="table-generator-button-label">
-              {t('all_borders')}
-            </span>
+            {t('all_borders')}
           </ToolbarDropdownItem>
           <ToolbarDropdownItem
             id="table-generator-borders-no-borders"
@@ -168,11 +198,10 @@ export const Toolbar = memo(function Toolbar() {
                 table
               )
             }}
+            active={table.getBorderTheme() === BorderTheme.NO_BORDERS}
+            icon="border_clear"
           >
-            <MaterialIcon type="border_clear" />
-            <span className="table-generator-button-label">
-              {t('no_borders')}
-            </span>
+            {t('no_borders')}
           </ToolbarDropdownItem>
           <div className="table-generator-border-options-coming-soon">
             <div className="info-icon">
@@ -200,6 +229,7 @@ export const Toolbar = memo(function Toolbar() {
             command={() => {
               setAlignment(view, selection, 'left', positions, table)
             }}
+            active={currentAlignment === 'left'}
           />
           <ToolbarButton
             icon="format_align_center"
@@ -208,6 +238,7 @@ export const Toolbar = memo(function Toolbar() {
             command={() => {
               setAlignment(view, selection, 'center', positions, table)
             }}
+            active={currentAlignment === 'center'}
           />
           <ToolbarButton
             icon="format_align_right"
@@ -216,8 +247,66 @@ export const Toolbar = memo(function Toolbar() {
             command={() => {
               setAlignment(view, selection, 'right', positions, table)
             }}
+            active={currentAlignment === 'right'}
           />
+          {onlyFixedWidthColumnsSelected &&
+            !selection.isMergedCellSelected(table) && (
+              <ToolbarButton
+                icon="format_align_justify"
+                id="table-generator-align-justify"
+                label={t('justify')}
+                command={() => {
+                  setAlignment(view, selection, 'paragraph', positions, table)
+                }}
+                active={currentAlignment === 'paragraph'}
+              />
+            )}
         </ToolbarButtonMenu>
+        <ToolbarDropdown
+          id="format_text_wrap"
+          btnClassName="table-generator-toolbar-button"
+          icon={
+            selection.isOnlyParagraphCells(table) ? 'format_text_wrap' : 'width'
+          }
+          tooltip={t('adjust_column_width')}
+          disabled={!selection.isAnyColumnSelected(table)}
+          disabledTooltip={t('select_a_column_to_adjust_column_width')}
+          showCaret
+        >
+          <ToolbarDropdownItem
+            id="table-generator-unwrap-text"
+            icon="width"
+            active={onlyNonFixedWidthColumnsSelected}
+            command={() =>
+              removeColumnWidths(view, selection, positions, table)
+            }
+            disabled={!selection.isAnyColumnSelected(table)}
+          >
+            {t('stretch_width_to_text')}
+          </ToolbarDropdownItem>
+          <ToolbarDropdownItem
+            id="table-generator-wrap-text"
+            icon="format_text_wrap"
+            active={onlyFixedWidthColumnsSelected}
+            command={openColumnWidthModal}
+            disabled={!selection.isAnyColumnSelected(table)}
+          >
+            {onlyFixedWidthColumnsSelected
+              ? t('fixed_width')
+              : t('fixed_width_wrap_text')}
+          </ToolbarDropdownItem>
+          {onlyFixedWidthColumnsSelected && (
+            <>
+              <hr />
+              <ToolbarDropdownItem
+                id="table-generator-resize"
+                command={openColumnWidthModal}
+              >
+                {t('set_column_width')}
+              </ToolbarDropdownItem>
+            </>
+          )}
+        </ToolbarDropdown>
         <ToolbarButton
           icon="cell_merge"
           id="table-generator-merge-cells"
@@ -361,7 +450,7 @@ export const Toolbar = memo(function Toolbar() {
         <div className="toolbar-beta-badge">
           <FeedbackBadge
             id="table-generator-feedback"
-            url="https://forms.gle/ri3fzV1oQDAjmfmD7"
+            url="https://forms.gle/9dHxXPGugxEHgY3L9"
             text={<FeedbackBadgeContent />}
           />
         </div>
