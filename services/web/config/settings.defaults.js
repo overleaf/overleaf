@@ -862,6 +862,7 @@ module.exports = {
     sourceEditorComponents: [],
     sourceEditorCompletionSources: [],
     sourceEditorSymbolPalette: [],
+    sourceEditorToolbarComponents: [],
     writefullEditorPromotion: [],
     langFeedbackLinkingWidgets: [],
     integrationLinkingWidgets: [],
