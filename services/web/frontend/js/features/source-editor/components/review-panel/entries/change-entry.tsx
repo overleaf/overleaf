@@ -117,14 +117,18 @@ function ChangeEntry({
               </span>
             </div>
             <div className="rp-entry-metadata">
-              {formatTime(timestamp, 'MMM D, Y h:mm A')}
-              &nbsp;&bull;&nbsp;
+              <span className="rp-entry-metadata-element">
+                {formatTime(timestamp, 'MMM D, Y h:mm A')}
+              </span>
               {user && (
-                <span
-                  className="rp-entry-user"
-                  style={{ color: `hsl(${user.hue}, 70%, 40%)` }}
-                >
-                  {user.name ?? t('anonymous')}
+                <span className="rp-entry-metadata-element">
+                  &nbsp;&bull;&nbsp;
+                  <span
+                    className="rp-entry-user"
+                    style={{ color: `hsl(${user.hue}, 70%, 40%)` }}
+                  >
+                    {user.name ?? t('anonymous')}
+                  </span>
                 </span>
               )}
             </div>

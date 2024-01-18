@@ -1492,6 +1492,12 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     }
   }, [subView])
 
+  useEffect(() => {
+    if (Object.keys(users).length) {
+      handleLayoutChange({ async: true })
+    }
+  }, [users])
+
   const values = useMemo<ReviewPanelStateReactIde['values']>(
     () => ({
       collapsed,
