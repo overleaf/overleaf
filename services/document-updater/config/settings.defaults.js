@@ -150,6 +150,8 @@ module.exports = {
 
   dispatcherCount: parseInt(process.env.DISPATCHER_COUNT || 10, 10),
 
+  redisLockTTLSeconds: 30,
+
   mongo: {
     url:
       process.env.MONGO_CONNECTION_STRING ||

@@ -10,6 +10,7 @@ const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(__dirname, './../../../index.js')
+const redisLockerModulePath = path.join(__dirname, './../../../RedisLocker.js')
 const { expect } = require('chai')
 
 describe('index', function () {
@@ -53,9 +54,58 @@ describe('index', function () {
       },
       globals: {
         process,
+        Buffer,
       },
     })
-    return (this.auth_pass = '1234 pass')
+    this.auth_pass = '1234 pass'
+
+    this.RedisLocker = SandboxedModule.require(redisLockerModulePath, {
+      requires: {
+        '@overleaf/metrics': {
+          inc() {},
+        },
+      },
+      globals: {
+        process,
+        Math,
+        Buffer,
+      },
+    })
+  })
+
+  describe('lock TTL', function () {
+    it('should throw an error when creating a client with wrong type', function () {
+      const createNewRedisLock = () => {
+        return new this.RedisLocker({
+          lockTTLSeconds: '60',
+        })
+      }
+      expect(createNewRedisLock).to.throw(
+        'redis lock TTL must be at least 30s and below 1000s'
+      )
+    })
+
+    it('should throw an error when creating a client with small TTL', function () {
+      const createNewRedisLock = () => {
+        return new this.RedisLocker({
+          lockTTLSeconds: 1,
+        })
+      }
+      expect(createNewRedisLock).to.throw(
+        'redis lock TTL must be at least 30s and below 1000s'
+      )
+    })
+
+    it('should throw an error when creating a client with huge TTL', function () {
+      const createNewRedisLock = () => {
+        return new this.RedisLocker({
+          lockTTLSeconds: 30_000,
+        })
+      }
+      expect(createNewRedisLock).to.throw(
+        'redis lock TTL must be at least 30s and below 1000s'
+      )
+    })
   })
 
   describe('redis-sentinel', function () {

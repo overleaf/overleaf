@@ -15,10 +15,11 @@ const UNLOCK_SCRIPT =
 
 module.exports = class RedisLocker {
   /**
-   * @param rclient initialized ioredis client
-   * @param getKey compose the redis key based on the passed id
-   * @param wrapTimeoutError assign the id to a designated field on the error
-   * @param metricsPrefix prefix all the metrics with the given prefix
+   * @param {import('ioredis')} rclient initialized ioredis client
+   * @param {function(string): string} getKey compose the redis key based on the passed id
+   * @param {function(Error, string): Error} wrapTimeoutError assign the id to a designated field on the error
+   * @param {string} metricsPrefix prefix all the metrics with the given prefix
+   * @param {number} lockTTLSeconds
    *
    * @example ```
    * const lock = new RedisLocker({
@@ -35,7 +36,22 @@ module.exports = class RedisLocker {
    * }
    * ```
    */
-  constructor({ rclient, getKey, wrapTimeoutError, metricsPrefix }) {
+  constructor({
+    rclient,
+    getKey,
+    wrapTimeoutError,
+    metricsPrefix,
+    lockTTLSeconds = 30,
+  }) {
+    if (
+      typeof lockTTLSeconds !== 'number' ||
+      lockTTLSeconds < 30 ||
+      lockTTLSeconds >= 1000
+    ) {
+      // set upper limit to 1000s to detect wrong units
+      throw new Error('redis lock TTL must be at least 30s and below 1000s')
+    }
+
     this.rclient = rclient
     this.getKey = getKey
     this.wrapTimeoutError = wrapTimeoutError
@@ -44,7 +60,7 @@ module.exports = class RedisLocker {
     this.LOCK_TEST_INTERVAL = 50 // 50ms between each test of the lock
     this.MAX_TEST_INTERVAL = 1000 // back off to 1s between each test of the lock
     this.MAX_LOCK_WAIT_TIME = 10000 // 10s maximum time to spend trying to get the lock
-    this.LOCK_TTL = 30 // seconds. Time until lock auto expires in redis.
+    this.LOCK_TTL = lockTTLSeconds // seconds. Time until lock auto expires in redis.
 
     // read-only copy for unit tests
     this.unlockScript = UNLOCK_SCRIPT

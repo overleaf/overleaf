@@ -14,4 +14,5 @@ module.exports = new RedisLocker({
     return err
   },
   metricsPrefix: 'doc',
+  lockTTLSeconds: Settings.redisLockTTLSeconds,
 })

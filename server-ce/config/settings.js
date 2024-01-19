@@ -235,6 +235,11 @@ const settings = {
     10
   ),
 
+  redisLockTTLSeconds: parseInt(
+    process.env.SHARELATEX_REDIS_LOCK_TTL_SECONDS || '60',
+    10
+  ),
+
   i18n: {
     subdomainLang: {
       www: {
