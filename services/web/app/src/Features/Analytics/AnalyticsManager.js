@@ -84,7 +84,7 @@ async function setUserPropertyForUser(userId, propertyName, propertyValue) {
 
   const analyticsId = await UserAnalyticsIdCache.get(userId)
   if (analyticsId) {
-    _setUserProperty({ analyticsId, propertyName, propertyValue })
+    await _setUserProperty({ analyticsId, propertyName, propertyValue })
   }
 }
 
@@ -99,7 +99,7 @@ async function setUserPropertyForAnalyticsId(
 
   _checkPropertyValue(propertyValue)
 
-  _setUserProperty({ analyticsId, propertyName, propertyValue })
+  await _setUserProperty({ analyticsId, propertyName, propertyValue })
 }
 
 async function setUserPropertyForSession(session, propertyName, propertyValue) {
@@ -111,7 +111,7 @@ async function setUserPropertyForSession(session, propertyName, propertyValue) {
   _checkPropertyValue(propertyValue)
 
   if (analyticsId) {
-    _setUserProperty({ analyticsId, propertyName, propertyValue })
+    await _setUserProperty({ analyticsId, propertyName, propertyValue })
   }
 }
 
@@ -206,7 +206,7 @@ function _recordEvent(
     })
 }
 
-function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
+async function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
   if (!_isAttributeValid(propertyName)) {
     logger.info(
       { analyticsId, propertyName, propertyValue },
@@ -225,7 +225,7 @@ function _setUserProperty({ analyticsId, propertyName, propertyValue }) {
     status: 'adding',
     event_type: 'user-property',
   })
-  analyticsUserPropertiesQueue
+  await analyticsUserPropertiesQueue
     .add('user-property', {
       analyticsId,
       propertyName,
