@@ -7,7 +7,6 @@ const mongoDb = mongoClient.db()
 
 const db = {
   docs: mongoDb.collection('docs'),
-  docOps: mongoDb.collection('docOps'),
 }
 
 Metrics.mongodb.monitor(mongoClient)

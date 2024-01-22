@@ -16,7 +16,6 @@ describe('DocManager', function () {
     this.MongoManager = {
       promises: {
         findDoc: sinon.stub(),
-        getDocVersion: sinon.stub().resolves(this.version),
         getProjectsDocs: sinon.stub(),
         patchDoc: sinon.stub().resolves(),
         upsertIntoDocCollection: sinon.stub().resolves(),
@@ -120,6 +119,7 @@ describe('DocManager', function () {
         _id: this.doc_id,
         project_id: this.project_id,
         lines: ['mock-lines'],
+        version: this.version,
       }
     })
 
@@ -166,52 +166,9 @@ describe('DocManager', function () {
           .should.equal(true)
       })
 
-      it('should get the doc version from the docOps collection', function () {
-        this.MongoManager.promises.getDocVersion
-          .calledWith(this.doc_id)
-          .should.equal(true)
-      })
-
       it('should return the doc with the version', function () {
         this.result.lines.should.equal(this.doc.lines)
         this.result.version.should.equal(this.version)
-      })
-    })
-
-    describe('without the version filter', function () {
-      beforeEach(async function () {
-        this.MongoManager.promises.findDoc.resolves(this.doc)
-        await this.DocManager.promises._getDoc(this.project_id, this.doc_id, {
-          version: false,
-          inS3: true,
-        })
-      })
-
-      it('should not get the doc version from the docOps collection', function () {
-        this.MongoManager.promises.getDocVersion.called.should.equal(false)
-      })
-    })
-
-    describe('when the doc record already has a version', function () {
-      beforeEach(async function () {
-        this.docWithVersion = { ...this.doc, version: 109 }
-        this.MongoManager.promises.findDoc.resolves(this.docWithVersion)
-        this.result = await this.DocManager.promises._getDoc(
-          this.project_id,
-          this.doc_id,
-          {
-            version: true,
-            inS3: true,
-          }
-        )
-      })
-
-      it('should return that version', function () {
-        expect(this.result).to.deep.equal(this.docWithVersion)
-      })
-
-      it('should not fetch the doc version from the docOps collection', function () {
-        expect(this.MongoManager.promises.getDocVersion).not.to.have.been.called
       })
     })
 
@@ -232,12 +189,14 @@ describe('DocManager', function () {
         this.doc = {
           _id: this.doc_id,
           project_id: this.project_id,
+          version: 2,
           inS3: true,
         }
         this.unarchivedDoc = {
           _id: this.doc_id,
           project_id: this.project_id,
           lines: ['mock-lines'],
+          version: 2,
           inS3: false,
         }
         this.MongoManager.promises.findDoc.resolves(this.doc)
@@ -271,7 +230,6 @@ describe('DocManager', function () {
       it('should return the doc', function () {
         expect(this.result).to.deep.equal({
           ...this.unarchivedDoc,
-          version: this.version,
         })
       })
     })

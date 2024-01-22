@@ -471,29 +471,13 @@ describe("Destroying a project's documents", function () {
 
   describe('when the doc exists', function () {
     beforeEach(function (done) {
-      db.docOps.insertOne(
-        { doc_id: new ObjectId(this.doc_id), version: 1 },
-        err => {
-          if (err) {
-            return done(err)
-          }
-          DocstoreClient.destroyAllDoc(this.project_id, done)
-        }
-      )
+      DocstoreClient.destroyAllDoc(this.project_id, done)
     })
 
     it('should remove the doc from the docs collection', function (done) {
       db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
-        done()
-      })
-    })
-
-    it('should remove the docOps from the docOps collection', function (done) {
-      db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
-        expect(err).not.to.exist
-        expect(docOps).to.deep.equal([])
         done()
       })
     })
@@ -513,14 +497,6 @@ describe("Destroying a project's documents", function () {
       db.docs.find({ _id: this.doc_id }).toArray((err, docs) => {
         expect(err).not.to.exist
         expect(docs).to.deep.equal([])
-        done()
-      })
-    })
-
-    it('should remove the docOps from the docOps collection', function (done) {
-      db.docOps.find({ doc_id: this.doc_id }).toArray((err, docOps) => {
-        expect(err).not.to.exist
-        expect(docOps).to.deep.equal([])
         done()
       })
     })

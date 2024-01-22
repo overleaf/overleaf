@@ -30,11 +30,6 @@ const DocManager = {
       return await DocManager._getDoc(projectId, docId, filter)
     }
 
-    if (filter.version && doc.version === undefined) {
-      const version = await MongoManager.promises.getDocVersion(docId)
-      doc.version = version
-    }
-
     return doc
   },
 
@@ -95,11 +90,7 @@ const DocManager = {
   // without unarchiving it (avoids unnecessary writes to mongo)
   async peekDoc(projectId, docId) {
     const doc = await DocManager._peekRawDoc(projectId, docId)
-    if (doc.version === undefined) {
-      const version = await MongoManager.promises.getDocVersion(docId)
-      await MongoManager.promises.checkRevUnchanged(doc)
-      doc.version = version
-    }
+    await MongoManager.promises.checkRevUnchanged(doc)
     return doc
   },
 

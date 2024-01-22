@@ -61,7 +61,6 @@ module.exports = {
         })
       },
       cb => db.docs.deleteOne({ _id: docId, project_id: projectId }, cb),
-      cb => db.docOps.deleteOne({ doc_id: docId }, cb),
     ]
     return async.series(jobs, callback)
   },

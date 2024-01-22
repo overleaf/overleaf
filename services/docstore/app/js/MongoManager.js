@@ -5,20 +5,21 @@ const { callbackify } = require('util')
 
 const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
 
-async function findDoc(projectId, docId, filter) {
+async function findDoc(projectId, docId, projection) {
   const doc = await db.docs.findOne(
     {
       _id: new ObjectId(docId.toString()),
       project_id: new ObjectId(projectId.toString()),
     },
-    {
-      projection: filter,
-    }
+    { projection }
   )
+  if (doc && projection.version && !doc.version) {
+    doc.version = 0
+  }
   return doc
 }
 
-async function getProjectsDeletedDocs(projectId, filter) {
+async function getProjectsDeletedDocs(projectId, projection) {
   const docs = await db.docs
     .find(
       {
@@ -26,7 +27,7 @@ async function getProjectsDeletedDocs(projectId, filter) {
         deleted: true,
       },
       {
-        projection: filter,
+        projection,
         sort: { deletedAt: -1 },
         limit: Settings.max_deleted_docs,
       }
@@ -35,13 +36,13 @@ async function getProjectsDeletedDocs(projectId, filter) {
   return docs
 }
 
-async function getProjectsDocs(projectId, options, filter) {
+async function getProjectsDocs(projectId, options, projection) {
   const query = { project_id: new ObjectId(projectId.toString()) }
   if (!options.include_deleted) {
     query.deleted = { $ne: true }
   }
   const queryOptions = {
-    projection: filter,
+    projection,
   }
   if (options.limit) {
     queryOptions.limit = options.limit
@@ -203,18 +204,6 @@ async function restoreArchivedDoc(projectId, docId, archivedDoc) {
   }
 }
 
-async function getDocVersion(docId) {
-  const doc = await db.docOps.findOne(
-    { doc_id: new ObjectId(docId) },
-    {
-      projection: {
-        version: 1,
-      },
-    }
-  )
-  return (doc && doc.version) || 0
-}
-
 async function getDocRev(docId) {
   const doc = await db.docs.findOne(
     { _id: new ObjectId(docId.toString()) },
@@ -248,11 +237,6 @@ async function checkRevUnchanged(doc) {
 }
 
 async function destroyProject(projectId) {
-  const records = await db.docs
-    .find({ project_id: new ObjectId(projectId) }, { projection: { _id: 1 } })
-    .toArray()
-  const docIds = records.map(r => r._id)
-  await db.docOps.deleteMany({ doc_id: { $in: docIds } })
   await db.docs.deleteMany({ project_id: new ObjectId(projectId) })
 }
 
@@ -270,7 +254,6 @@ module.exports = {
   patchDoc: callbackify(patchDoc),
   getDocForArchiving: callbackify(getDocForArchiving),
   markDocAsArchived: callbackify(markDocAsArchived),
-  getDocVersion: callbackify(getDocVersion),
   checkRevUnchanged: callbackify(checkRevUnchanged),
   destroyProject: callbackify(destroyProject),
   promises: {
@@ -285,7 +268,6 @@ module.exports = {
     patchDoc,
     getDocForArchiving,
     markDocAsArchived,
-    getDocVersion,
     checkRevUnchanged,
     destroyProject,
   },

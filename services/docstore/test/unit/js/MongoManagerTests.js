@@ -15,7 +15,6 @@ describe('MongoManager', function () {
         updateOne: sinon.stub().resolves({ matchedCount: 1 }),
         insertOne: sinon.stub().resolves(),
       },
-      docOps: {},
     }
     this.MongoManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -281,67 +280,13 @@ describe('MongoManager', function () {
   describe('destroyProject', function () {
     beforeEach(async function () {
       this.projectId = new ObjectId()
-      this.docIds = [new ObjectId(), new ObjectId()]
       this.db.docs.deleteMany = sinon.stub().resolves()
-      this.db.docOps.deleteMany = sinon.stub().resolves()
-      this.db.docs.find = sinon
-        .stub()
-        .withArgs({ project_id: this.projectId })
-        .returns({
-          toArray: sinon.stub().resolves(
-            this.docIds.map(id => ({
-              _id: id,
-            }))
-          ),
-        })
       await this.MongoManager.promises.destroyProject(this.projectId)
     })
 
     it('should destroy all docs', function () {
       sinon.assert.calledWith(this.db.docs.deleteMany, {
         project_id: this.projectId,
-      })
-    })
-
-    it('should destroy the docOps', function () {
-      sinon.assert.calledWith(this.db.docOps.deleteMany, {
-        doc_id: { $in: this.docIds },
-      })
-    })
-  })
-
-  describe('getDocVersion', function () {
-    describe('when the doc exists', function () {
-      beforeEach(async function () {
-        this.doc = { version: (this.version = 42) }
-        this.db.docOps.findOne = sinon.stub().resolves(this.doc)
-        this.result = await this.MongoManager.promises.getDocVersion(this.docId)
-      })
-
-      it('should look for the doc in the database', function () {
-        this.db.docOps.findOne
-          .calledWith(
-            { doc_id: new ObjectId(this.docId) },
-            {
-              projection: { version: 1 },
-            }
-          )
-          .should.equal(true)
-      })
-
-      it('should return the version', function () {
-        expect(this.result).to.equal(this.version)
-      })
-    })
-
-    describe("when the doc doesn't exist", function () {
-      beforeEach(async function () {
-        this.db.docOps.findOne = sinon.stub().resolves(null)
-        this.result = await this.MongoManager.promises.getDocVersion(this.docId)
-      })
-
-      it('should return 0', function () {
-        expect(this.result).to.equal(0)
       })
     })
   })
