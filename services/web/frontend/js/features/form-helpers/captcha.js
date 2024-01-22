@@ -114,7 +114,7 @@ export async function validateCaptchaV2() {
     })
     // Attach abort handler once when setting up the captcha.
     document
-      .querySelector('.content')
+      .querySelector('[data-ol-captcha-retry-trigger-area]')
       .addEventListener('click', handleAbortedCaptcha)
   }
 
