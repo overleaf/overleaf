@@ -1,4 +1,7 @@
 .website-redesign {
+  // hero section of features, enterprises, and universities will have an image that will overflow the page
+  overflow-x: hidden;
+
   p,
   h1,
   h2,
@@ -237,59 +240,134 @@
   .features-card-hero {
     /* borrow from features-card, but rewrite if needed before adding too many overrides */
     .features-card;
-
+    position: relative;
+    height: 655px;
     padding-top: @line-height-computed * 2;
 
-    .features-card-description,
-    .features-card-description-list {
+    @media (max-width: @screen-sm-max) {
+      height: unset;
+      padding-top: 0;
+    }
+
+    .features-card-description {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      h1 {
+        @media (max-width: @screen-sm-max) {
+          font-size: 2.25rem;
+          line-height: 1.333;
+        }
+
+        &.features-card-hero-smaller-title {
+          @media (min-width: @screen-lg-min) {
+            // 3rem is the default, this is a workaround for big screen
+            // since 6-width column on md screen size will wrap the text in three lines
+            font-size: 2.8rem;
+          }
+        }
+      }
+
       p {
         font-size: 1.25rem;
         width: 90%;
+
+        @media (max-width: @screen-sm-max) {
+          font-size: 1.125rem;
+          line-height: 1.33;
+          width: unset;
+        }
       }
     }
-  }
 
-  .bg-vivid-tangerine {
-    background-color: var(--vivid-tangerine);
-  }
-  .bg-mint-green {
-    background-color: var(--mint-green);
-  }
-  .bg-light-pastel-purple {
-    background-color: var(--light-pastel-purple);
-  }
-
-  .sticky-tags-container {
-    margin-top: -20px;
-    .sticky-tag {
-      padding: 6px 10px;
-      width: fit-content;
-      font-size: 1.8rem;
-      font-weight: 400;
-      font-family: 'DM Mono', monospace;
-      font-feature-settings: 'ss05';
-      border-radius: 10px;
-      color: black;
+    .features-card-image {
       position: absolute;
+      // on wide screen, image will be fixed without any variable width translation
+      transform: translateX(600px);
+      top: 100px;
+      width: 720px;
+      height: auto;
+      padding: 0;
+
+      // starting from 1500px, image will have a variable translation that depends on screen width
+      // this will make image "fixed" on a specific point on the screen
+      @media (max-width: 1500px) {
+        transform: translateX(calc(50vw - 121px));
+      }
+
+      @media (max-width: 1400px) {
+        width: 650px;
+        transform: translateX(calc(50vw - 52px));
+      }
+
+      // bootstrap layout changes on 1200px (@screen-lg), add a specific
+      // case for this exact width
+      @media (min-width: 1200px) and (max-width: 1200px) {
+        width: 600px;
+        transform: translateX(calc(50vw));
+      }
+
+      @media (max-width: 1199px) {
+        width: 600px;
+        transform: translateX(calc(50vw - 106px));
+      }
+
+      @media (max-width: 1100px) {
+        width: 550px;
+        transform: translateX(calc(50vw - 55px));
+      }
+
+      // 991px
+      @media (max-width: @screen-sm-max) {
+        position: relative;
+        transform: none;
+        top: 0;
+        width: 100%;
+        margin-bottom: 50px;
+      }
+
+      img.img-responsive {
+        width: 100%;
+      }
     }
 
-    .tag-top {
-      transform: rotate(4.88deg);
-      right: 40px;
-      top: -10px;
-      z-index: 1;
-    }
-    .tag-middle {
-      transform: rotate(0.31deg);
-      right: 60px;
-      top: 45px;
+    .sticky-tags {
+      position: absolute;
       z-index: 2;
-    }
-    .tag-bottom {
-      transform: rotate(-5.84deg);
-      right: 20px;
-      top: 98px;
-      z-index: 1;
+      height: 160px;
+      bottom: -105px;
+      right: 55px;
+
+      @media (max-width: 1400px) {
+        height: 150px;
+        bottom: -103px;
+        right: 47px;
+      }
+
+      @media (max-width: 1200px) {
+        height: 130px;
+        bottom: -87px;
+      }
+
+      @media (max-width: 1100px) {
+        height: 120px;
+        bottom: -81px;
+      }
+
+      // 991px
+      @media (max-width: @screen-sm-max) {
+        height: 130px;
+        bottom: -75px;
+        right: 70px;
+      }
+
+      // 767px
+      @media (max-width: @screen-xs-max) {
+        height: 24%;
+        bottom: -10vw; // scale with width
+        right: 9.5vw; // scale with width
+      }
     }
   }
 
