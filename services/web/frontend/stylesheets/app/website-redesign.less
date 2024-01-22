@@ -149,6 +149,53 @@
     }
   }
 
+  .security-heading-section {
+    @media (max-width: @screen-sm-max) {
+      p {
+        text-align: left;
+      }
+
+      h2 {
+        width: 100%;
+        text-align: left;
+      }
+    }
+
+    .heading-and-stickers-container {
+      display: flex;
+      justify-content: center;
+
+      .lock-sticker {
+        width: 70px;
+        position: absolute;
+        top: -95px;
+        right: -90px;
+
+        @media (max-width: @screen-lg) {
+          right: -145px;
+        }
+
+        @media (max-width: @screen-sm-max) {
+          display: none;
+        }
+      }
+
+      .arrow-sticker {
+        width: 140px;
+        position: absolute;
+        top: -50px;
+        right: -55px;
+
+        @media (max-width: @screen-lg) {
+          right: -110px;
+        }
+        @media (max-width: @screen-sm-max) {
+          display: none;
+        }
+      }
+    }
+  }
+
   .features-card {
     display: flex; /* equal heights */
     flex-wrap: wrap;
@@ -157,6 +204,30 @@
     .features-card-image {
       img.img-responsive {
         width: 100%;
+      }
+
+      @media (max-width: @screen-sm-max) {
+        margin-bottom: 50px;
+      }
+    }
+
+    .features-card-video {
+      video {
+        box-shadow: 0px 4px 6px 0px rgba(30, 37, 48, 0.12),
+          0px 8px 16px 0px rgba(30, 37, 48, 0.12);
+        max-height: 100%;
+        width: auto;
+      }
+
+      video.video-responsive {
+        width: 100%;
+      }
+
+      video.video-w-md-90 {
+        width: 90%;
+        @media (max-width: @screen-sm-max) {
+          width: 100%;
+        }
       }
 
       @media (max-width: @screen-sm-max) {
@@ -785,6 +856,27 @@
       @media (max-width: @screen-sm-max) {
         font-size: 1.125rem;
         line-height: 1.33;
+      }
+    }
+  }
+
+  .editor-pdf-video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 585px;
+
+    @media (max-width: @screen-sm-max) {
+      height: auto;
+    }
+
+    video {
+      box-shadow: 0px 60px 25px -15px rgba(16, 24, 40, 0.2);
+      max-height: 100%;
+      width: auto;
+
+      @media (max-width: @screen-sm-max) {
+        width: 100%;
       }
     }
   }
