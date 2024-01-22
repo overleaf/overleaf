@@ -128,6 +128,20 @@ class MockProjectHistoryApi extends AbstractMockApi {
       }
     )
 
+    this.app.delete('/project/:projectId/labels/:labelId', (req, res) => {
+      const { projectId, labelId } = req.params
+      const label =
+        this.labels[projectId] != null
+          ? this.labels[projectId][labelId]
+          : undefined
+      if (label != null) {
+        this.deleteLabel(projectId, labelId)
+        res.sendStatus(204)
+      } else {
+        res.sendStatus(404)
+      }
+    })
+
     this.app.post('/project/:projectId/flush', (req, res) => {
       res.sendStatus(200)
     })

@@ -81,7 +81,7 @@ export function createLabel(
   })
 }
 
-export function deleteLabel(projectId, userId, labelId, callback) {
+export function deleteLabelForUser(projectId, userId, labelId, callback) {
   return _toObjectId(
     projectId,
     userId,
@@ -100,6 +100,21 @@ export function deleteLabel(projectId, userId, labelId, callback) {
       )
     }
   )
+}
+
+export function deleteLabel(projectId, labelId, callback) {
+  return _toObjectId(projectId, labelId, function (error, projectId, labelId) {
+    if (error != null) {
+      return callback(OError.tag(error))
+    }
+    return db.projectHistoryLabels.deleteOne(
+      {
+        _id: new ObjectId(labelId),
+        project_id: new ObjectId(projectId),
+      },
+      callback
+    )
+  })
 }
 
 export function transferLabels(fromUserId, toUserId, callback) {

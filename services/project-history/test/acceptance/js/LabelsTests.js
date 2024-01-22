@@ -116,6 +116,40 @@ describe('Labels', function () {
         }
         return ProjectHistoryClient.deleteLabel(
           this.project_id,
+          label.id,
+          error => {
+            if (error != null) {
+              throw error
+            }
+            return ProjectHistoryClient.getLabels(
+              this.project_id,
+              (error, labels) => {
+                if (error != null) {
+                  throw error
+                }
+                expect(labels).to.deep.equal([])
+                return done()
+              }
+            )
+          }
+        )
+      }
+    )
+  })
+
+  it('can delete labels for the current user', function (done) {
+    return ProjectHistoryClient.createLabel(
+      this.project_id,
+      this.user_id,
+      7,
+      this.comment,
+      this.created_at,
+      (error, label) => {
+        if (error != null) {
+          throw error
+        }
+        return ProjectHistoryClient.deleteLabelForUser(
+          this.project_id,
           this.user_id,
           label.id,
           error => {

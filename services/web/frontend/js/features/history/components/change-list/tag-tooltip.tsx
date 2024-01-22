@@ -15,6 +15,7 @@ import { isPseudoLabel } from '../../utils/label'
 import { LoadedLabel } from '../../services/types/label'
 import { debugConsole } from '@/utils/debugging'
 import { formatTimeBasedOnYear } from '@/features/utils/format-date'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 type TagProps = {
   label: LoadedLabel
@@ -22,6 +23,8 @@ type TagProps = {
 }
 
 function Tag({ label, currentUserId, ...props }: TagProps) {
+  const { isProjectOwner } = useEditorContext()
+
   const { t } = useTranslation()
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const { projectId } = useHistoryContext()
@@ -67,7 +70,7 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
         prepend={<Icon type="tag" fw />}
         onClose={showConfirmationModal}
         closeButton={Boolean(
-          isOwnedByCurrentUser && !isPseudoCurrentStateLabel
+          (isOwnedByCurrentUser || isProjectOwner) && !isPseudoCurrentStateLabel
         )}
         closeBtnProps={{ 'aria-label': t('delete') }}
         className="history-version-badge"

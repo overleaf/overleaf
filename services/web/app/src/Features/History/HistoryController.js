@@ -6,6 +6,7 @@ const request = require('request')
 const settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')
 const UserGetter = require('../User/UserGetter')
+const ProjectGetter = require('../Project/ProjectGetter')
 const Errors = require('../Errors/Errors')
 const HistoryManager = require('./HistoryManager')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
@@ -218,16 +219,35 @@ module.exports = HistoryController = {
   deleteLabel(req, res, next) {
     const { Project_id: projectId, label_id: labelId } = req.params
     const userId = SessionManager.getLoggedInUserId(req.session)
-    HistoryController._makeRequest(
+
+    ProjectGetter.getProject(
+      projectId,
       {
-        method: 'DELETE',
-        url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels/${labelId}`,
+        owner_ref: true,
       },
-      function (err) {
+      (err, project) => {
         if (err) {
           return next(err)
         }
-        res.sendStatus(204)
+
+        // If the current user is the project owner, we can use the non-user-specific delete label endpoint.
+        // Otherwise, we have to use the user-specific version (which only deletes the label if it is owned by the user)
+        const deleteEndpointUrl = project.owner_ref.equals(userId)
+          ? `${settings.apis.project_history.url}/project/${projectId}/labels/${labelId}`
+          : `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels/${labelId}`
+
+        HistoryController._makeRequest(
+          {
+            method: 'DELETE',
+            url: deleteEndpointUrl,
+          },
+          function (err) {
+            if (err) {
+              return next(err)
+            }
+            res.sendStatus(204)
+          }
+        )
       }
     )
   },

@@ -45,6 +45,7 @@ describe('HttpController', function () {
     this.LabelsManager = {
       createLabel: sinon.stub(),
       deleteLabel: sinon.stub().yields(),
+      deleteLabelForUser: sinon.stub().yields(),
       getLabels: sinon.stub(),
     }
     this.HistoryApiManager = {
@@ -75,6 +76,7 @@ describe('HttpController', function () {
     })
     this.pathname = 'doc-id-123'
     this.projectId = new ObjectId().toString()
+    this.projectOwnerId = new ObjectId().toString()
     this.next = sinon.stub()
     this.userId = new ObjectId().toString()
     this.now = Date.now()
@@ -473,7 +475,7 @@ describe('HttpController', function () {
     })
   })
 
-  describe('deleteLabel', function () {
+  describe('deleteLabelForUser', function () {
     beforeEach(function () {
       this.req = {
         params: {
@@ -482,12 +484,34 @@ describe('HttpController', function () {
           label_id: (this.label_id = new ObjectId()),
         },
       }
+      this.HttpController.deleteLabelForUser(this.req, this.res, this.next)
+    })
+
+    it('should delete a label for a project', function () {
+      this.LabelsManager.deleteLabelForUser
+        .calledWith(this.projectId, this.userId, this.label_id)
+        .should.equal(true)
+    })
+
+    it('should return 204', function () {
+      this.res.sendStatus.calledWith(204).should.equal(true)
+    })
+  })
+
+  describe('deleteLabel', function () {
+    beforeEach(function () {
+      this.req = {
+        params: {
+          project_id: this.projectId,
+          label_id: (this.label_id = new ObjectId()),
+        },
+      }
       this.HttpController.deleteLabel(this.req, this.res, this.next)
     })
 
-    it('should create a label for a project', function () {
+    it('should delete a label for a project', function () {
       this.LabelsManager.deleteLabel
-        .calledWith(this.projectId, this.userId, this.label_id)
+        .calledWith(this.projectId, this.label_id)
         .should.equal(true)
     })
 

@@ -379,13 +379,29 @@ export function createLabel(req, res, next) {
   )
 }
 
-export function deleteLabel(req, res, next) {
+/**
+ * This will delete a label if it is owned by the current user. If you wish to
+ * delete a label regardless of the current user, then use `deleteLabel` instead.
+ */
+export function deleteLabelForUser(req, res, next) {
   const {
     project_id: projectId,
     user_id: userId,
     label_id: labelId,
   } = req.params
-  LabelsManager.deleteLabel(projectId, userId, labelId, error => {
+
+  LabelsManager.deleteLabelForUser(projectId, userId, labelId, error => {
+    if (error != null) {
+      return next(error)
+    }
+    res.sendStatus(204)
+  })
+}
+
+export function deleteLabel(req, res, next) {
+  const { project_id: projectId, label_id: labelId } = req.params
+
+  LabelsManager.deleteLabel(projectId, labelId, error => {
     if (error != null) {
       return next(error)
     }

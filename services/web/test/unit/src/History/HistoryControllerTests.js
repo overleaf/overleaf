@@ -38,6 +38,7 @@ describe('HistoryController', function () {
         '../Project/ProjectEntityUpdateHandler':
           (this.ProjectEntityUpdateHandler = {}),
         '../User/UserGetter': (this.UserGetter = {}),
+        '../Project/ProjectGetter': (this.ProjectGetter = {}),
         './RestoreManager': (this.RestoreManager = {}),
         '../../infrastructure/Features': (this.Features = sinon
           .stub()

@@ -234,10 +234,25 @@ export function getLabels(projectId, callback) {
   )
 }
 
-export function deleteLabel(projectId, userId, labelId, callback) {
+export function deleteLabelForUser(projectId, userId, labelId, callback) {
   request.delete(
     {
       url: `http://localhost:3054/project/${projectId}/user/${userId}/labels/${labelId}`,
+    },
+    (error, res, body) => {
+      if (error) {
+        return callback(error)
+      }
+      expect(res.statusCode).to.equal(204)
+      callback(null, body)
+    }
+  )
+}
+
+export function deleteLabel(projectId, labelId, callback) {
+  request.delete(
+    {
+      url: `http://localhost:3054/project/${projectId}/labels/${labelId}`,
     },
     (error, res, body) => {
       if (error) {

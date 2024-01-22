@@ -112,6 +112,24 @@ export function initialize(app) {
 
   app.delete(
     '/project/:project_id/user/:user_id/labels/:label_id',
+    validate({
+      params: Joi.object({
+        project_id: Joi.string().regex(/^[0-9a-f]{24}$/),
+        user_id: Joi.string().regex(/^[0-9a-f]{24}$/),
+        label_id: Joi.string().regex(/^[0-9a-f]{24}$/),
+      }),
+    }),
+    HttpController.deleteLabelForUser
+  )
+
+  app.delete(
+    '/project/:project_id/labels/:label_id',
+    validate({
+      params: Joi.object({
+        project_id: Joi.string().regex(/^[0-9a-f]{24}$/),
+        label_id: Joi.string().regex(/^[0-9a-f]{24}$/),
+      }),
+    }),
     HttpController.deleteLabel
   )
 

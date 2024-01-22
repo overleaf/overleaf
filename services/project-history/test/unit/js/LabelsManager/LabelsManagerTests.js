@@ -232,10 +232,10 @@ describe('LabelsManager', function () {
     })
   })
 
-  return describe('deleteLabel', function () {
+  describe('deleteLabelForUser', function () {
     beforeEach(function () {
       this.db.projectHistoryLabels.deleteOne.yields()
-      return this.LabelsManager.deleteLabel(
+      return this.LabelsManager.deleteLabelForUser(
         this.project_id,
         this.user_id,
         this.label_id,
@@ -251,6 +251,29 @@ describe('LabelsManager', function () {
           _id: new ObjectId(this.label_id),
           project_id: new ObjectId(this.project_id),
           user_id: new ObjectId(this.user_id),
+        },
+        this.callback
+      )
+    })
+  })
+
+  return describe('deleteLabel', function () {
+    beforeEach(function () {
+      this.db.projectHistoryLabels.deleteOne.yields()
+      return this.LabelsManager.deleteLabel(
+        this.project_id,
+        this.label_id,
+        this.callback
+      )
+    })
+
+    return it('removes the label from the database', function () {
+      return expect(
+        this.db.projectHistoryLabels.deleteOne
+      ).to.have.been.calledWith(
+        {
+          _id: new ObjectId(this.label_id),
+          project_id: new ObjectId(this.project_id),
         },
         this.callback
       )
