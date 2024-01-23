@@ -273,7 +273,7 @@ describe('ProjectDetailsHandler', function () {
           { _id: 140, name: 'numeric (40)' },
           { _id: 141, name: 'Yearbook (2021)' },
           { _id: 142, name: 'Yearbook (2021) (1)' },
-          { _id: 142, name: 'Resume (2020' },
+          { _id: 143, name: 'Resume (2020' },
         ],
         readAndWrite: [
           { _id: 4, name: 'name2' },
@@ -362,15 +362,6 @@ describe('ProjectDetailsHandler', function () {
       expect(name).to.equal('numeric (21)')
     })
 
-    it('should find the next available numeric index when a numeric index is already present', async function () {
-      const name = await this.handler.promises.generateUniqueName(
-        this.user._id,
-        'numeric (5)',
-        []
-      )
-      expect(name).to.equal('numeric (21)')
-    })
-
     it('should not find a numeric index lower than the one already present', async function () {
       const name = await this.handler.promises.generateUniqueName(
         this.user._id,
@@ -413,6 +404,83 @@ describe('ProjectDetailsHandler', function () {
           []
         )
         expect(name).to.equal('Yearbook (2021')
+      })
+    })
+
+    describe('numeric index is already present', function () {
+      describe('when there is 1 project "x (2)"', function () {
+        beforeEach(function () {
+          const usersProjects = {
+            owned: [{ _id: 1, name: 'x (2)' }],
+          }
+          this.ProjectGetter.promises.findAllUsersProjects.resolves(
+            usersProjects
+          )
+        })
+
+        it('should produce "x (3)" uploading a zip with name "x (2)"', async function () {
+          const name = await this.handler.promises.generateUniqueName(
+            this.user._id,
+            'x (2)',
+            []
+          )
+          expect(name).to.equal('x (3)')
+        })
+      })
+
+      describe('when there are 2 projects "x (2)" and "x (3)"', function () {
+        beforeEach(function () {
+          const usersProjects = {
+            owned: [
+              { _id: 1, name: 'x (2)' },
+              { _id: 2, name: 'x (3)' },
+            ],
+          }
+          this.ProjectGetter.promises.findAllUsersProjects.resolves(
+            usersProjects
+          )
+        })
+
+        it('should produce "x (4)" when uploading a zip with name "x (2)"', async function () {
+          const name = await this.handler.promises.generateUniqueName(
+            this.user._id,
+            'x (2)',
+            []
+          )
+          expect(name).to.equal('x (4)')
+        })
+      })
+
+      describe('when there are 2 projects "x (2)" and "x (4)"', function () {
+        beforeEach(function () {
+          const usersProjects = {
+            owned: [
+              { _id: 1, name: 'x (2)' },
+              { _id: 2, name: 'x (4)' },
+            ],
+          }
+          this.ProjectGetter.promises.findAllUsersProjects.resolves(
+            usersProjects
+          )
+        })
+
+        it('should produce "x (3)" when uploading a zip with name "x (2)"', async function () {
+          const name = await this.handler.promises.generateUniqueName(
+            this.user._id,
+            'x (2)',
+            []
+          )
+          expect(name).to.equal('x (3)')
+        })
+
+        it('should produce "x (5)" when uploading a zip with name "x (4)"', async function () {
+          const name = await this.handler.promises.generateUniqueName(
+            this.user._id,
+            'x (4)',
+            []
+          )
+          expect(name).to.equal('x (5)')
+        })
       })
     })
   })

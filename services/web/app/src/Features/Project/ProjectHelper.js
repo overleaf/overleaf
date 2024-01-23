@@ -146,7 +146,6 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   const match = name.match(NUMERIC_SUFFIX_MATCH)
   let basename = name
   let n = 1
-  const last = allProjectNames.size + n
 
   if (match != null) {
     basename = name.replace(NUMERIC_SUFFIX_MATCH, '')
@@ -158,6 +157,7 @@ function _addNumericSuffixToProjectName(name, allProjectNames, maxLength) {
   const projectNamesWithSamePrefix = Array.from(allProjectNames).filter(name =>
     prefixMatcher.test(name)
   )
+  const last = allProjectNames.size + n
   const nIsLikelyAYear = n > 1000 && projectNamesWithSamePrefix.length < n / 2
   if (nIsLikelyAYear) {
     basename = name
