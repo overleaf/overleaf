@@ -16,14 +16,13 @@
   "types": "types/index.d.cts",
   "files": [
     "index.cjs",
-    "index.d.ts"
+    "types/index.d.cts"
   ],
   "scripts": {
-    "build": "npm run --silent test && npm run --silent update-readme",
+    "build": "npm run --silent test",
     "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .js --ext .cjs .",
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
-    "update-readme": "doc/update-readme.js",
     "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
     "test:ci": "npm run test:unit",
