@@ -245,17 +245,18 @@ describe('CheckRedisMongoSyncState', function () {
     }
 
     it('should flag limit', async function () {
-      const result = await runScript({ LIMIT: '2' })
+      const result = await runScript({ LIMIT: '4' })
       expect(result.code).to.equal(2)
-      expect(result.stdout).to.include('Processed 2 projects')
+      // A redis SCAN may return more than COUNT (aka LIMIT) entries. Match loosely.
+      expect(result.stdout).to.match(/Processed \d+ projects/)
       expect(result.stderr).to.include(
-        'Found too many un-flushed projects (LIMIT=2). Please fix the reported projects first, then try again.'
+        'Found too many un-flushed projects (LIMIT=4). Please fix the reported projects first, then try again.'
       )
     })
 
     it('should continue with auto-flush', async function () {
       const result = await runScript({
-        LIMIT: '2',
+        LIMIT: '4',
         FLUSH_IN_SYNC_PROJECTS: 'true',
       })
       expect(result.code).to.equal(0)
