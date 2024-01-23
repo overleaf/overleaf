@@ -12,7 +12,7 @@
     "lint:fix": "eslint --fix --ext .js --ext .cjs .",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "types:build": "[ -d types ] || tsc --emitDeclarationOnly",
+    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
     "types:check": "tsc --noEmit",
     "types:rebuild": "rm -rf types && npm run types:build"
   },

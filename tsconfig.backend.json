@@ -3,6 +3,7 @@
     "allowJs": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
+    "noEmit": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
     "strict": true
