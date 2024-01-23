@@ -57,6 +57,7 @@ function PdfCompileButton() {
   const dropdownToggleClassName = classNames({
     'detach-compile-button-animate': animateCompileDropdownArrow,
     'btn-striped-animated': hasChanges,
+    'no-left-border': true,
   })
 
   const buttonClassName = classNames({
