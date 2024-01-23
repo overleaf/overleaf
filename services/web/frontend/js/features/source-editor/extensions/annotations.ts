@@ -11,6 +11,7 @@ import {
 } from '@codemirror/state'
 import { Annotation } from '../../../../../types/annotation'
 import { debugConsole } from '@/utils/debugging'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 const compileLintSourceConf = new Compartment()
 
@@ -56,29 +57,36 @@ const compileLogLintSource = (): Extension =>
     const items: Diagnostic[] = []
     const cursor = view.state.field(compileDiagnosticsState).iter()
     while (cursor.value !== null) {
+      const { diagnostic } = cursor.value
       items.push({
-        ...cursor.value.diagnostic,
+        ...diagnostic,
         from: cursor.from,
         to: cursor.to,
+        renderMessage: () => renderMessage(diagnostic),
       })
       cursor.next()
     }
     return items
   }, lintSourceConfig)
 
-class DiagnosticRangeValue extends RangeValue {
-  constructor(public diagnostic: Diagnostic) {
+interface CompileLogDiagnostic extends Diagnostic {
+  compile?: true
+  ruleId?: string
+}
+
+class CompileLogDiagnosticRangeValue extends RangeValue {
+  constructor(public diagnostic: CompileLogDiagnostic) {
     super()
   }
 }
 
-const setCompileDiagnosticsEffect = StateEffect.define<Diagnostic[]>()
+const setCompileDiagnosticsEffect = StateEffect.define<CompileLogDiagnostic[]>()
 
 /**
  * A state field for the compile log diagnostics
  */
 export const compileDiagnosticsState = StateField.define<
-  RangeSet<DiagnosticRangeValue>
+  RangeSet<CompileLogDiagnosticRangeValue>
 >({
   create() {
     return RangeSet.empty
@@ -88,7 +96,7 @@ export const compileDiagnosticsState = StateField.define<
       if (effect.is(setCompileDiagnosticsEffect)) {
         return RangeSet.of(
           effect.value.map(diagnostic =>
-            new DiagnosticRangeValue(diagnostic).range(
+            new CompileLogDiagnosticRangeValue(diagnostic).range(
               diagnostic.from,
               diagnostic.to
             )
@@ -138,7 +146,7 @@ export const showCompileLogDiagnostics = (show: boolean) => {
 const convertAnnotationToDiagnostic = (
   doc: Text,
   annotation: Annotation
-): Diagnostic => {
+): CompileLogDiagnostic => {
   if (annotation.row < 0) {
     throw new Error(`Invalid annotation row ${annotation.row}`)
   }
@@ -150,6 +158,27 @@ const convertAnnotationToDiagnostic = (
     to: line.to, // NOTE: highlight whole line as synctex doesn't output column number
     severity: annotation.type,
     message: annotation.text,
-    // source: annotation.source, // NOTE: the source is displayed in the tooltip
+    ruleId: annotation.ruleId,
+    compile: true,
   }
+}
+
+export const renderMessage = (
+  diagnostic: Pick<
+    CompileLogDiagnostic,
+    'message' | 'severity' | 'ruleId' | 'compile'
+  >
+) => {
+  const { message, severity, ruleId, compile = false } = diagnostic
+
+  const div = document.createElement('div')
+  div.textContent = message
+
+  window.setTimeout(() => {
+    if (div.isConnected) {
+      sendMB('lint-gutter-marker-view', { severity, ruleId, compile })
+    }
+  }, 500) // 500ms delay to indicate intention, rather than accidental hover
+
+  return div
 }

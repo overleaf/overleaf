@@ -155,6 +155,7 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
           type: entry.level === 'error' ? 'error' : 'warning',
           text: entry.message,
           source: 'compile', // NOTE: this is used in Ace for filtering the annotations
+          ruleId: entry.ruleId,
         })
       }
     }

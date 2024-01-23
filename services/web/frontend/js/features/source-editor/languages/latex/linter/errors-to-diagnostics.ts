@@ -1,5 +1,6 @@
 import { Diagnostic } from '@codemirror/lint'
 import { Range } from '../../../utils/range'
+import { renderMessage } from '@/features/source-editor/extensions/annotations'
 
 export type LintError = {
   startPos: number
@@ -78,12 +79,17 @@ export const errorsToDiagnostics = (
     const newStart = movableStart ? cursorPosition : errorRange.from
     const newEnd = movableEnd ? cursorPosition : errorRange.to
 
-    // Create the diagnostic
-    diagnostics.push({
+    const diagnostic: Diagnostic = {
       from: newStart,
       to: newEnd,
       severity: error.type,
       message: error.text,
+    }
+
+    // Create the diagnostic
+    diagnostics.push({
+      ...diagnostic,
+      renderMessage: () => renderMessage(diagnostic),
     })
   }
 

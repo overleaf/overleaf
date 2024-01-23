@@ -3,4 +3,5 @@ export type Annotation = {
   type: 'info' | 'warning' | 'error'
   text: string
   source?: string
+  ruleId?: string
 }
