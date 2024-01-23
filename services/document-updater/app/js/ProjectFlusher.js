@@ -20,6 +20,7 @@ const async = require('async')
 const ProjectManager = require('./ProjectManager')
 const _ = require('lodash')
 const logger = require('@overleaf/logger')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 const ProjectFlusher = {
   // iterate over keys asynchronously using redis scan (non-blocking)
@@ -135,3 +136,4 @@ const ProjectFlusher = {
 }
 
 module.exports = ProjectFlusher
+module.exports.promises = promisifyAll(ProjectFlusher)

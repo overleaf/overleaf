@@ -10,6 +10,7 @@ const crypto = require('crypto')
 const async = require('async')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const { docIsTooLarge } = require('./Limits')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 // Sometimes Redis calls take an unexpectedly long time.  We have to be
 // quick with Redis calls because we're holding a lock that expires
@@ -617,3 +618,23 @@ module.exports = RedisManager = {
     return crypto.createHash('sha1').update(docLines, 'utf8').digest('hex')
   },
 }
+
+module.exports.promises = promisifyAll(module.exports, {
+  multiResult: {
+    getDoc: [
+      'lines',
+      'version',
+      'ranges',
+      'pathname',
+      'projectHistoryId',
+      'unflushedTime',
+      'lastUpdatedAt',
+      'lastUpdatedBy',
+    ],
+    getNextProjectToFlushAndDelete: [
+      'projectId',
+      'flushTimestamp',
+      'queueLength',
+    ],
+  },
+})

@@ -6,6 +6,7 @@ const async = require('async')
 const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const Errors = require('./Errors')
+const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = {
   flushProjectWithLocks,
@@ -16,6 +17,8 @@ module.exports = {
   clearProjectState,
   updateProjectWithLocks,
 }
+
+module.exports.promises = promisifyAll(module.exports)
 
 function flushProjectWithLocks(projectId, _callback) {
   const timer = new Metrics.Timer('projectManager.flushProjectWithLocks')
