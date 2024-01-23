@@ -134,3 +134,5 @@ globalThis.fetch =
 // ignore CSS files
 const { addHook } = require('pirates')
 addHook(() => '', { exts: ['.css'], ignoreNodeModules: false })
+
+globalThis.HTMLElement.prototype.scrollIntoView = () => {}

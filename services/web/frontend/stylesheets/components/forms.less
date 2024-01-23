@@ -187,9 +187,18 @@ input[type='date'] {
 //
 // Designed to help with the organization and spacing of vertical forms. For
 // horizontal forms, use the predefined grid classes.
-
+@form-group-margin-bottom: 15px;
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: @form-group-margin-bottom;
+}
+
+// Form alert
+//
+// adds top padding/mergin so that element has spacing when scrolled into
+// view, but no vertical spacing is applied to layout
+.form-group#form-alert {
+  padding-top: @form-group-margin-bottom;
+  margin-top: -@form-group-margin-bottom;
 }
 
 // Checkboxes and radios
