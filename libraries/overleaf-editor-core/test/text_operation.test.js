@@ -1,3 +1,4 @@
+// @ts-check
 //
 // These tests are based on the OT.js tests:
 // https://github.com/Operational-Transformation/ot.js/blob/
@@ -123,7 +124,7 @@ describe('TextOperation', function () {
       const ops2 = ops.slice(0)
       fn(ops2)
       expect(() => {
-        TextOperation.fromJSON({ textOperations: ops2 })
+        TextOperation.fromJSON({ textOperation: ops2 })
       }).to.throw
     }
 
