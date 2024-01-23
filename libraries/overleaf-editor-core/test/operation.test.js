@@ -114,10 +114,10 @@ describe('Operation', function () {
   }
 
   // shorthand for creating an edit operation
-  function edit(pathname, textOperationJsonObject) {
+  function edit(pathname, textOperationOps) {
     return Operation.editFile(
       pathname,
-      TextOperation.fromJSON(textOperationJsonObject)
+      TextOperation.fromJSON({ textOperation: textOperationOps })
     )
   }
 
@@ -633,14 +633,12 @@ describe('Operation', function () {
       .expectPrime(1, EditFileOperation)
       .expectPrime(0, EditFileOperation)
       .tap(function () {
-        expect(this.primeOperations[1].getTextOperation().toJSON()).to.eql([
-          1,
-          'y',
-        ])
-        expect(this.primeOperations[0].getTextOperation().toJSON()).to.eql([
-          'x',
-          1,
-        ])
+        expect(this.primeOperations[1].getOperation().toJSON()).to.eql({
+          textOperation: [1, 'y'],
+        })
+        expect(this.primeOperations[0].getOperation().toJSON()).to.eql({
+          textOperation: ['x', 1],
+        })
       })
       .swap()
       .expectFiles({ foo: 'yx' })

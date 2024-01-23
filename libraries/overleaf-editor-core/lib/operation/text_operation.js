@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * The text operation from OT.js with some minor cosmetic changes.
  *
@@ -8,10 +9,10 @@
  */
 
 'use strict'
-
 const containsNonBmpChars = require('../util').containsNonBmpChars
-
 const OError = require('@overleaf/o-error')
+const EditOperation = require('./edit_operation')
+/** @typedef {import('../file_data/string_file_data')} StringFileData */
 
 class UnprocessableError extends OError {}
 
@@ -44,8 +45,9 @@ class TooLongError extends UnprocessableError {
 
 /**
  * Create an empty text operation.
+ * @extends EditOperation
  */
-class TextOperation {
+class TextOperation extends EditOperation {
   /**
    * Length of the longest file that we'll attempt to edit, in characters.
    *
@@ -61,6 +63,7 @@ class TextOperation {
   static isRemove = isRemove
 
   constructor() {
+    super()
     // When an operation is applied to an input string, you can think of this as
     // if an imaginary cursor runs over the entire string and skips over some
     // parts, removes some parts and inserts characters at some positions. These
@@ -206,16 +209,16 @@ class TextOperation {
   }
 
   /**
-   * Converts operation into a JSON value.
+   * @inheritdoc
    */
   toJSON() {
-    return this.ops
+    return { textOperation: this.ops }
   }
 
   /**
    * Converts a plain JS object into an operation and validates it.
    */
-  static fromJSON = function (ops) {
+  static fromJSON = function ({ textOperation: ops }) {
     const o = new TextOperation()
     for (let i = 0, l = ops.length; i < l; i++) {
       const op = ops[i]
@@ -240,8 +243,12 @@ class TextOperation {
   /**
    * Apply an operation to a string, returning a new string. Throws an error if
    * there's a mismatch between the input string and the operation.
+   * @override
+   * @inheritdoc
+   * @param {StringFileData} file
    */
-  apply(str) {
+  apply(file) {
+    const str = file.getContent()
     const operation = this
     if (containsNonBmpChars(str)) {
       throw new TextOperation.ApplyError(
@@ -298,16 +305,12 @@ class TextOperation {
     if (result.length > TextOperation.MAX_STRING_LENGTH) {
       throw new TextOperation.TooLongError(operation, result.length)
     }
-    return result
+
+    file.content = result
   }
 
   /**
-   * Determine the effect of this operation on the length of the text.
-   *
-   * NB: This is an Overleaf addition to the original TextOperation.
-   *
-   * @param {number} length of the original string; non-negative
-   * @return {number} length of the new string; non-negative
+   * @inheritdoc
    */
   applyToLength(length) {
     const operation = this
@@ -356,12 +359,11 @@ class TextOperation {
   }
 
   /**
-   * Computes the inverse of an operation. The inverse of an operation is the
-   * operation that reverts the effects of the operation, e.g. when you have an
-   * operation 'insert("hello "); skip(6);' then the inverse is 'remove("hello ");
-   * skip(6);'. The inverse should be used for implementing undo.
+   * @inheritdoc
+   * @param {StringFileData} previousState
    */
-  invert(str) {
+  invert(previousState) {
+    const str = previousState.getContent()
     let strIndex = 0
     const inverse = new TextOperation()
     const ops = this.ops
@@ -382,16 +384,14 @@ class TextOperation {
   }
 
   /**
-   * When you use ctrl-z to undo your latest changes, you expect the program not
-   * to undo every single keystroke but to undo your last sentence you wrote at
-   * a stretch or the deletion you did by holding the backspace key down. This
-   * This can be implemented by composing operations on the undo stack. This
-   * method can help decide whether two operations should be composed. It
-   * returns true if the operations are consecutive insert operations or both
-   * operations delete text at the same position. You may want to include other
-   * factors like the time since the last change in your decision.
+   * @inheritdoc
+   * @param {EditOperation} other
    */
   canBeComposedWithForUndo(other) {
+    if (!(other instanceof TextOperation)) {
+      return false
+    }
+
     if (this.isNoop() || other.isNoop()) {
       return true
     }
@@ -419,16 +419,25 @@ class TextOperation {
 
   /**
    * @inheritdoc
+   * @param {EditOperation} other
    */
   canBeComposedWith(other) {
+    if (!(other instanceof TextOperation)) {
+      return false
+    }
     return this.targetLength === other.baseLength
   }
 
-  // Compose merges two consecutive operations into one operation, that
-  // preserves the changes of both. Or, in other words, for each input string S
-  // and a pair of consecutive operations A and B,
-  // apply(apply(S, A), B) = apply(S, compose(A, B)) must hold.
+  /**
+   * @inheritdoc
+   * @param {EditOperation} operation2
+   */
   compose(operation2) {
+    if (!(operation2 instanceof TextOperation)) {
+      throw new Error(
+        `Trying to compose TextOperation with ${operation2?.constructor?.name}.`
+      )
+    }
     const operation1 = this
     if (operation1.targetLength !== operation2.baseLength) {
       throw new Error(
@@ -543,6 +552,8 @@ class TextOperation {
    * produces two operations A' and B' (in an array) such that
    * `apply(apply(S, A), B') = apply(apply(S, B), A')`. This function is the
    * heart of OT.
+   * @param {TextOperation} operation1
+   * @param {TextOperation} operation2
    */
   static transform(operation1, operation2) {
     if (operation1.baseLength !== operation2.baseLength) {

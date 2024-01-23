@@ -1,17 +1,18 @@
+// @ts-check
 'use strict'
 
 const { expect } = require('chai')
 
 const ot = require('..')
+const EditOperationBuilder = require('../lib/operation/edit_operation_builder')
 const File = ot.File
 const Operation = ot.Operation
-const TextOperation = ot.TextOperation
 
 describe('EditFileOperation', function () {
   function edit(pathname, textOperationJsonObject) {
     return Operation.editFile(
       pathname,
-      TextOperation.fromJSON(textOperationJsonObject)
+      EditOperationBuilder.fromJSON({ textOperation: textOperationJsonObject })
     )
   }
 

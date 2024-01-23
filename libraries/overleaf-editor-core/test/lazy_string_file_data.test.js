@@ -21,32 +21,32 @@ describe('LazyStringFileData', function () {
     roundTripFileData = LazyStringFileData.fromRaw(fileData.toRaw())
     expect(roundTripFileData.getHash()).to.equal(testHash)
     expect(roundTripFileData.getStringLength()).to.equal(0)
-    expect(roundTripFileData.getTextOperations()).to.have.length(0)
+    expect(roundTripFileData.getOperations()).to.have.length(0)
 
     fileData.edit(new TextOperation().insert('a'))
     expect(fileData.toRaw()).to.eql({
       hash: testHash,
       stringLength: 1,
-      textOperations: [['a']],
+      operations: [{ textOperation: ['a'] }],
     })
     roundTripFileData = LazyStringFileData.fromRaw(fileData.toRaw())
     expect(roundTripFileData.getHash()).not.to.exist // file has changed
     expect(roundTripFileData.getStringLength()).to.equal(1)
-    expect(roundTripFileData.getTextOperations()).to.have.length(1)
-    expect(roundTripFileData.getTextOperations()[0].ops).to.have.length(1)
+    expect(roundTripFileData.getOperations()).to.have.length(1)
+    expect(roundTripFileData.getOperations()[0].ops).to.have.length(1)
 
     fileData.edit(new TextOperation().retain(1).insert('b'))
     expect(fileData.toRaw()).to.eql({
       hash: testHash,
       stringLength: 2,
-      textOperations: [['a'], [1, 'b']],
+      operations: [{ textOperation: ['a'] }, { textOperation: [1, 'b'] }],
     })
     roundTripFileData = LazyStringFileData.fromRaw(fileData.toRaw())
     expect(roundTripFileData.getHash()).not.to.exist // file has changed
     expect(roundTripFileData.getStringLength()).to.equal(2)
-    expect(roundTripFileData.getTextOperations()).to.have.length(2)
-    expect(roundTripFileData.getTextOperations()[0].ops).to.have.length(1)
-    expect(roundTripFileData.getTextOperations()[1].ops).to.have.length(2)
+    expect(roundTripFileData.getOperations()).to.have.length(2)
+    expect(roundTripFileData.getOperations()[0].ops).to.have.length(1)
+    expect(roundTripFileData.getOperations()[1].ops).to.have.length(2)
   })
 
   it('validates operations when edited', function () {
@@ -55,13 +55,13 @@ describe('LazyStringFileData', function () {
     expect(fileData.getHash()).equal(testHash)
     expect(fileData.getByteLength()).to.equal(0) // approximately
     expect(fileData.getStringLength()).to.equal(0)
-    expect(fileData.getTextOperations()).to.have.length(0)
+    expect(fileData.getOperations()).to.have.length(0)
 
     fileData.edit(new TextOperation().insert('a'))
     expect(fileData.getHash()).not.to.exist
     expect(fileData.getByteLength()).to.equal(1) // approximately
     expect(fileData.getStringLength()).to.equal(1)
-    expect(fileData.getTextOperations()).to.have.length(1)
+    expect(fileData.getOperations()).to.have.length(1)
 
     expect(() => {
       fileData.edit(new TextOperation().retain(10))
@@ -69,7 +69,7 @@ describe('LazyStringFileData', function () {
     expect(fileData.getHash()).not.to.exist
     expect(fileData.getByteLength()).to.equal(1) // approximately
     expect(fileData.getStringLength()).to.equal(1)
-    expect(fileData.getTextOperations()).to.have.length(1)
+    expect(fileData.getOperations()).to.have.length(1)
   })
 
   it('validates string length when edited', function () {
@@ -78,14 +78,14 @@ describe('LazyStringFileData', function () {
     expect(fileData.getHash()).equal(testHash)
     expect(fileData.getByteLength()).to.equal(0) // approximately
     expect(fileData.getStringLength()).to.equal(0)
-    expect(fileData.getTextOperations()).to.have.length(0)
+    expect(fileData.getOperations()).to.have.length(0)
 
     const longString = _.repeat('a', TextOperation.MAX_STRING_LENGTH)
     fileData.edit(new TextOperation().insert(longString))
     expect(fileData.getHash()).not.to.exist
     expect(fileData.getByteLength()).to.equal(longString.length) // approximate
     expect(fileData.getStringLength()).to.equal(longString.length)
-    expect(fileData.getTextOperations()).to.have.length(1)
+    expect(fileData.getOperations()).to.have.length(1)
 
     expect(() => {
       fileData.edit(new TextOperation().retain(longString.length).insert('x'))
@@ -93,6 +93,6 @@ describe('LazyStringFileData', function () {
     expect(fileData.getHash()).not.to.exist
     expect(fileData.getByteLength()).to.equal(longString.length) // approximate
     expect(fileData.getStringLength()).to.equal(longString.length)
-    expect(fileData.getTextOperations()).to.have.length(1)
+    expect(fileData.getOperations()).to.have.length(1)
   })
 })

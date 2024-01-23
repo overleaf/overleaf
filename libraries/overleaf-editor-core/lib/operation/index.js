@@ -2,8 +2,7 @@
 
 const _ = require('lodash')
 const assert = require('check-types').assert
-
-const TextOperation = require('./text_operation')
+const EditOperationTransformer = require('./edit_operation_transformer')
 
 // Dependencies are loaded at the bottom of the file to mitigate circular
 // dependency
@@ -224,8 +223,8 @@ class Operation {
     return new AddFileOperation(pathname, file)
   }
 
-  static editFile(pathname, textOperation) {
-    return new EditFileOperation(pathname, textOperation)
+  static editFile(pathname, editOperation) {
+    return new EditFileOperation(pathname, editOperation)
   }
 
   static moveFile(pathname, newPathname) {
@@ -390,7 +389,7 @@ function transformMoveFileEditFile(move, edit) {
     }
     return [
       move,
-      Operation.editFile(move.getNewPathname(), edit.getTextOperation()),
+      Operation.editFile(move.getNewPathname(), edit.getOperation()),
     ]
   }
 
@@ -422,13 +421,13 @@ function transformMoveFileSetFileMetadata(move, set) {
 
 function transformEditFileEditFile(edit1, edit2) {
   if (edit1.getPathname() === edit2.getPathname()) {
-    const primeTextOps = TextOperation.transform(
-      edit1.getTextOperation(),
-      edit2.getTextOperation()
+    const primeOps = EditOperationTransformer.transform(
+      edit1.getOperation(),
+      edit2.getOperation()
     )
     return [
-      Operation.editFile(edit1.getPathname(), primeTextOps[0]),
-      Operation.editFile(edit2.getPathname(), primeTextOps[1]),
+      Operation.editFile(edit1.getPathname(), primeOps[0]),
+      Operation.editFile(edit2.getPathname(), primeOps[1]),
     ]
   }
 

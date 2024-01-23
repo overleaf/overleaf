@@ -1,5 +1,9 @@
+// @ts-check
 'use strict'
 
+/**
+ * @typedef {import('../operation/edit_operation')} EditOperation
+ */
 const assert = require('check-types').assert
 
 const FileData = require('./')
@@ -44,9 +48,12 @@ class HollowStringFileData extends FileData {
     return this
   }
 
-  /** @inheritdoc */
-  edit(textOperation) {
-    this.stringLength = textOperation.applyToLength(this.stringLength)
+  /**
+   * @inheritdoc
+   * @param {EditOperation} operation
+   */
+  edit(operation) {
+    this.stringLength = operation.applyToLength(this.stringLength)
   }
 }
 

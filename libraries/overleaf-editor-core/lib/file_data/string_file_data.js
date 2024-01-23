@@ -1,3 +1,4 @@
+// @ts-check
 'use strict'
 
 const assert = require('check-types').assert
@@ -7,6 +8,8 @@ const CommentList = require('./comment_list')
 
 /**
  * @typedef {import("../types").StringFileRawData} StringFileRawData
+ * @typedef {import("../operation/edit_operation")} EditOperation
+ * @typedef {import("../types").BlobStore} BlobStore
  * @typedef {import("../types").CommentRawData} CommentRawData
  */
 
@@ -65,9 +68,11 @@ class StringFileData extends FileData {
     return this.content.length
   }
 
-  /** @inheritdoc */
-  edit(textOperation) {
-    this.content = textOperation.apply(this.content)
+  /**
+   * @inheritdoc
+   * @param {EditOperation} operation */
+  edit(operation) {
+    operation.apply(this)
   }
 
   /** @inheritdoc */
@@ -75,7 +80,10 @@ class StringFileData extends FileData {
     return this.comments.getComments()
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   * @returns {Promise<StringFileData>}
+   */
   async toEager() {
     return this
   }
@@ -85,7 +93,10 @@ class StringFileData extends FileData {
     return FileData.createHollow(this.getByteLength(), this.getStringLength())
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   * @param {BlobStore} blobStore
+   */
   async store(blobStore) {
     const blob = await blobStore.putString(this.content)
     return { hash: blob.getHash() }

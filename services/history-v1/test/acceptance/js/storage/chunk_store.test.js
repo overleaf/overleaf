@@ -52,7 +52,9 @@ describe('chunkStore', function () {
 
       describe('adding and editing a blank file', function () {
         const testPathname = 'foo.txt'
-        const testTextOperation = TextOperation.fromJSON(['a']) // insert an a
+        const testTextOperation = TextOperation.fromJSON({
+          textOperation: ['a'],
+        }) // insert an a
         let lastChangeTimestamp
 
         beforeEach(async function () {
@@ -259,7 +261,9 @@ describe('chunkStore', function () {
         it('does not create chunks', async function () {
           const oldEndVersion = 0
           const testPathname = 'foo.txt'
-          const testTextOperation = TextOperation.fromJSON(['a']) // insert an a
+          const testTextOperation = TextOperation.fromJSON({
+            textOperation: ['a'],
+          }) // insert an a
 
           let chunk = await chunkStore.loadLatest(projectId)
           expect(chunk.getEndVersion()).to.equal(oldEndVersion)
@@ -287,13 +291,13 @@ describe('chunkStore', function () {
               makeChange(
                 Operation.editFile(
                   'main.tex',
-                  TextOperation.fromJSON([3, 'def'])
+                  TextOperation.fromJSON({ textOperation: [3, 'def'] })
                 )
               ),
               makeChange(
                 Operation.editFile(
                   'main.tex',
-                  TextOperation.fromJSON([6, 'ghi'])
+                  TextOperation.fromJSON({ textOperation: [6, 'ghi'] })
                 )
               ),
             ],

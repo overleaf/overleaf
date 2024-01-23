@@ -6,7 +6,7 @@ describe('OperationsCompressor', function () {
   function edit(pathname, textOperationJsonObject) {
     return Core.Operation.editFile(
       pathname,
-      Core.TextOperation.fromJSON(textOperationJsonObject)
+      Core.TextOperation.fromJSON({ textOperation: textOperationJsonObject })
     )
   }
 

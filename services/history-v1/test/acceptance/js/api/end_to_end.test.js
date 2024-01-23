@@ -212,7 +212,12 @@ describe('overleaf ot', function () {
         // edit the main file
         .then(projectId => {
           const change = new Change(
-            [Operation.editFile('main.tex', TextOperation.fromJSON(['hello']))],
+            [
+              Operation.editFile(
+                'main.tex',
+                TextOperation.fromJSON({ textOperation: ['hello'] })
+              ),
+            ],
             new Date()
           )
           return basicAuthClient.apis.ProjectImport.importChanges1({
@@ -263,7 +268,7 @@ describe('overleaf ot', function () {
             [
               Operation.editFile(
                 'main.tex',
-                TextOperation.fromJSON([1, -4, 'i world'])
+                TextOperation.fromJSON({ textOperation: [1, -4, 'i world'] })
               ),
             ],
             new Date()
