@@ -15,6 +15,7 @@ let StringFileData = null
 
 /**
  * @typedef {import("../types").BlobStore} BlobStore
+ * @typedef {import("../types").CommentRawData} CommentRawData
  */
 
 /**
@@ -146,6 +147,16 @@ class FileData {
    */
   async store(blobStore) {
     throw new Error('store not implemented for ' + JSON.stringify(this))
+  }
+
+  /**
+   * @see File#getComments
+   * @function
+   * @return {CommentRawData[]}
+   * @abstract
+   */
+  getComments() {
+    throw new Error('getComments not implemented for ' + JSON.stringify(this))
   }
 }
 

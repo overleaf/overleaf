@@ -12,6 +12,7 @@ const StringFileData = require('./file_data/string_file_data')
  * @typedef {import("./blob")} Blob
  * @typedef {import("./types").BlobStore} BlobStore
  * @typedef {import("./types").StringFileRawData} StringFileRawData
+ * @typedef {import("./types").CommentRawData} CommentRawData
  * @typedef {import("./operation/text_operation")} TextOperation
  */
 
@@ -181,6 +182,15 @@ class File {
   edit(textOperation) {
     if (!this.data.isEditable()) throw new File.NotEditableError()
     this.data.edit(textOperation)
+  }
+
+  /**
+   * Get the comments for this file.
+   *
+   * @return {CommentRawData[]}
+   */
+  getComments() {
+    return this.data.getComments()
   }
 
   /**

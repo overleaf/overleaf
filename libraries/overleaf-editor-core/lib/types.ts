@@ -5,8 +5,18 @@ export type BlobStore = {
   putString(content: string): Promise<Blob>
 }
 
+export type CommentRawData = {
+  id: string
+  ranges: {
+    pos: number
+    length: number
+  }[]
+  resolved?: boolean
+}
+
 export type StringFileRawData = {
   content: string
+  comments?: CommentRawData[]
 }
 
 export type RawV2DocVersions = Record<string, { pathname: string; v: number }>

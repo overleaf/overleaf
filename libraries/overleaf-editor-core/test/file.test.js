@@ -88,4 +88,9 @@ describe('File', function () {
       expect(clone.getStringLength()).to.equal(0)
     })
   })
+
+  it('getComments() returns an empty comment list', function () {
+    const file = File.fromString('foo')
+    expect(file.getComments()).to.eql([])
+  })
 })

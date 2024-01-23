@@ -3,23 +3,31 @@
 const assert = require('check-types').assert
 
 const FileData = require('./')
+const CommentList = require('./comment_list')
 
 /**
  * @typedef {import("../types").StringFileRawData} StringFileRawData
+ * @typedef {import("../types").CommentRawData} CommentRawData
  */
 
 class StringFileData extends FileData {
   /**
    * @param {string} content
+   * @param {CommentRawData[]} [rawComments]
    */
-  constructor(content) {
+  constructor(content, rawComments = []) {
     super()
     assert.string(content)
     this.content = content
+    this.comments = CommentList.fromRaw(rawComments)
   }
 
+  /**
+   * @param {StringFileRawData} raw
+   * @returns {StringFileData}
+   */
   static fromRaw(raw) {
-    return new StringFileData(raw.content)
+    return new StringFileData(raw.content, raw.comments || [])
   }
 
   /**
@@ -27,7 +35,14 @@ class StringFileData extends FileData {
    * @returns {StringFileRawData}
    */
   toRaw() {
-    return { content: this.content }
+    const raw = { content: this.content }
+
+    const comments = this.getComments()
+    if (comments.length) {
+      raw.comments = comments
+    }
+
+    return raw
   }
 
   /** @inheritdoc */
@@ -53,6 +68,11 @@ class StringFileData extends FileData {
   /** @inheritdoc */
   edit(textOperation) {
     this.content = textOperation.apply(this.content)
+  }
+
+  /** @inheritdoc */
+  getComments() {
+    return this.comments.getComments()
   }
 
   /** @inheritdoc */
