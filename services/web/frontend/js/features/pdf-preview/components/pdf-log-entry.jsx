@@ -4,6 +4,7 @@ import { memo, useCallback } from 'react'
 import PreviewLogEntryHeader from '../../preview/components/preview-log-entry-header'
 import PdfLogEntryContent from './pdf-log-entry-content'
 import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 function PdfLogEntry({
   ruleId,
@@ -33,8 +34,12 @@ function PdfLogEntry({
     event => {
       event.preventDefault()
       onSourceLocationClick(sourceLocation)
+
+      const parts = sourceLocation?.file?.split('.')
+      const extension = parts?.length > 1 ? parts.pop() : ''
+      sendMB('log-entry-link-click', { level, ruleId, extension })
     },
-    [onSourceLocationClick, sourceLocation]
+    [level, onSourceLocationClick, ruleId, sourceLocation]
   )
 
   return (
