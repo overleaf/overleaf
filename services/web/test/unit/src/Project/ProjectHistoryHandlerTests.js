@@ -48,50 +48,55 @@ describe('ProjectHistoryHandler', function () {
         '../../models/Project': {
           Project: this.ProjectModel,
         },
-        './ProjectDetailsHandler': (this.ProjectDetailsHandler = {}),
-        '../History/HistoryManager': (this.HistoryManager = {}),
-        './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
+        './ProjectDetailsHandler': (this.ProjectDetailsHandler = {
+          promises: {},
+        }),
+        '../History/HistoryManager': (this.HistoryManager = {
+          promises: {},
+        }),
+        './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {
+          promises: {},
+        }),
       },
     }))
   })
 
   describe('starting history for an existing project', function () {
-    beforeEach(function () {
-      this.HistoryManager.initializeProject = sinon
+    beforeEach(async function () {
+      this.HistoryManager.promises.initializeProject = sinon
         .stub()
-        .yields(null, this.historyId)
-      this.HistoryManager.flushProject = sinon.stub().callsArg(1)
-      return (this.ProjectEntityUpdateHandler.resyncProjectHistory = sinon
-        .stub()
-        .callsArg(1))
+        .resolves(this.historyId)
+      this.HistoryManager.promises.flushProject = sinon.stub()
+
+      return (this.ProjectEntityUpdateHandler.promises.resyncProjectHistory =
+        sinon.stub())
     })
 
     describe('when the history does not already exist', function () {
-      beforeEach(function () {
-        this.ProjectDetailsHandler.getDetails = sinon
+      beforeEach(async function () {
+        this.ProjectDetailsHandler.promises.getDetails = sinon
           .stub()
           .withArgs(projectId)
-          .callsArgWith(1, null, this.project)
-        this.ProjectModel.updateOne = sinon
-          .stub()
-          .callsArgWith(2, null, { matchedCount: 1 })
-        return this.ProjectHistoryHandler.ensureHistoryExistsForProject(
-          projectId,
-          this.callback
+          .resolves(this.project)
+        this.ProjectModel.updateOne = sinon.stub().resolves({ matchedCount: 1 })
+        return this.ProjectHistoryHandler.promises.ensureHistoryExistsForProject(
+          projectId
         )
       })
 
-      it('should get any existing history id for the project', function () {
-        return this.ProjectDetailsHandler.getDetails
+      it('should get any existing history id for the project', async function () {
+        return this.ProjectDetailsHandler.promises.getDetails
           .calledWith(projectId)
           .should.equal(true)
       })
 
-      it('should initialize a new history in the v1 history service', function () {
-        return this.HistoryManager.initializeProject.called.should.equal(true)
+      it('should initialize a new history in the v1 history service', async function () {
+        return this.HistoryManager.promises.initializeProject.called.should.equal(
+          true
+        )
       })
 
-      it('should set the new history id on the project', function () {
+      it('should set the new history id on the project', async function () {
         return this.ProjectModel.updateOne
           .calledWith(
             { _id: projectId, 'overleaf.history.id': { $exists: false } },
@@ -100,63 +105,58 @@ describe('ProjectHistoryHandler', function () {
           .should.equal(true)
       })
 
-      it('should resync the project history', function () {
-        return this.ProjectEntityUpdateHandler.resyncProjectHistory
+      it('should resync the project history', async function () {
+        return this.ProjectEntityUpdateHandler.promises.resyncProjectHistory
           .calledWith(projectId)
           .should.equal(true)
       })
 
-      it('should flush the project history', function () {
-        return this.HistoryManager.flushProject
+      it('should flush the project history', async function () {
+        return this.HistoryManager.promises.flushProject
           .calledWith(projectId)
           .should.equal(true)
-      })
-
-      it('should call the callback without an error', function () {
-        return this.callback.called.should.equal(true)
       })
     })
 
     describe('when the history already exists', function () {
       beforeEach(function () {
         this.project.overleaf = { history: { id: 1234 } }
-        this.ProjectDetailsHandler.getDetails = sinon
+        this.ProjectDetailsHandler.promises.getDetails = sinon
           .stub()
           .withArgs(projectId)
-          .callsArgWith(1, null, this.project)
-        this.ProjectModel.updateOne = sinon.stub()
-        return this.ProjectHistoryHandler.ensureHistoryExistsForProject(
-          projectId,
-          this.callback
+          .resolves(this.project)
+        this.ProjectModel.updateOne = sinon.stub().resolves({ matchedCount: 1 })
+        return this.ProjectHistoryHandler.promises.ensureHistoryExistsForProject(
+          projectId
         )
       })
 
-      it('should get any existing history id for the project', function () {
-        return this.ProjectDetailsHandler.getDetails
+      it('should get any existing history id for the project', async function () {
+        return this.ProjectDetailsHandler.promises.getDetails
           .calledWith(projectId)
           .should.equal(true)
       })
 
-      it('should not initialize a new history in the v1 history service', function () {
-        return this.HistoryManager.initializeProject.called.should.equal(false)
-      })
-
-      it('should not set the new history id on the project', function () {
-        return this.ProjectModel.updateOne.called.should.equal(false)
-      })
-
-      it('should not resync the project history', function () {
-        return this.ProjectEntityUpdateHandler.resyncProjectHistory.called.should.equal(
+      it('should not initialize a new history in the v1 history service', async function () {
+        return this.HistoryManager.promises.initializeProject.called.should.equal(
           false
         )
       })
 
-      it('should not flush the project history', function () {
-        return this.HistoryManager.flushProject.called.should.equal(false)
+      it('should not set the new history id on the project', async function () {
+        return this.ProjectModel.updateOne.called.should.equal(false)
       })
 
-      it('should call the callback', function () {
-        return this.callback.calledWith().should.equal(true)
+      it('should not resync the project history', async function () {
+        return this.ProjectEntityUpdateHandler.promises.resyncProjectHistory.called.should.equal(
+          false
+        )
+      })
+
+      it('should not flush the project history', async function () {
+        return this.HistoryManager.promises.flushProject.called.should.equal(
+          false
+        )
       })
     })
   })
