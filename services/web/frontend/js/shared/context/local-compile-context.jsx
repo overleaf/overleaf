@@ -15,11 +15,13 @@ import useAbortController from '../hooks/use-abort-controller'
 import DocumentCompiler from '../../features/pdf-preview/util/compiler'
 import {
   send,
+  sendMB,
   sendMBOnce,
   sendMBSampled,
 } from '../../infrastructure/event-tracking'
 import {
   buildLogEntryAnnotations,
+  countRules,
   handleLogFiles,
   handleOutputFiles,
 } from '../../features/pdf-preview/util/output-files'
@@ -32,6 +34,7 @@ import { useUserContext } from './user-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 export const LocalCompileContext = createContext()
 
@@ -333,6 +336,8 @@ export function LocalCompileProvider({ children }) {
     }
   }, [compiling, isProjectOwner, features])
 
+  const { splitTestVariants } = useSplitTestContext()
+
   // handle the data returned from a compile request
   // note: this should _only_ run when `data` changes,
   // the other dependencies must all be static
@@ -378,21 +383,32 @@ export function LocalCompileProvider({ children }) {
             )
 
             // sample compile stats for real users
-            if (
-              !window.user.alphaProgram &&
-              ['success', 'stopped-on-first-error'].includes(data.status)
-            ) {
-              sendMBSampled(
-                'compile-result',
-                {
-                  errors: result.logEntries.errors.length,
-                  warnings: result.logEntries.warnings.length,
-                  typesetting: result.logEntries.typesetting.length,
-                  newPdfPreview: true, // TODO: is this useful?
+            if (!window.user.alphaProgram) {
+              if (['success', 'stopped-on-first-error'].includes(data.status)) {
+                sendMBSampled(
+                  'compile-result',
+                  {
+                    errors: result.logEntries.errors.length,
+                    warnings: result.logEntries.warnings.length,
+                    typesetting: result.logEntries.typesetting.length,
+                    newPdfPreview: true, // TODO: is this useful?
+                    stopOnFirstError: data.options.stopOnFirstError,
+                  },
+                  0.01
+                )
+              }
+
+              if (splitTestVariants['compile-log-events'] === 'enabled') {
+                sendMB('compile-log-entries', {
+                  status: data.status,
                   stopOnFirstError: data.options.stopOnFirstError,
-                },
-                0.01
-              )
+                  isAutoCompileOnLoad: !!data.options.isAutoCompileOnLoad,
+                  isAutoCompileOnChange: !!data.options.isAutoCompileOnChange,
+                  errors: countRules(result.logEntries.errors),
+                  warnings: countRules(result.logEntries.warnings),
+                  typesetting: countRules(result.logEntries.typesetting),
+                })
+              }
             }
           }
         )
@@ -470,6 +486,7 @@ export function LocalCompileProvider({ children }) {
     setLogEntries,
     setLogEntryAnnotations,
     setPdfFile,
+    splitTestVariants,
   ])
 
   // switch to logs if there's an error

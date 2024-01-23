@@ -163,6 +163,13 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
   return logEntryAnnotations
 }
 
+export const countRules = (entries = []) =>
+  entries.reduce((counts, entry) => {
+    const { ruleId } = entry
+    counts[ruleId] = counts[ruleId] ? counts[ruleId] + 1 : 1
+    return counts
+  }, {})
+
 function buildURL(file, pdfDownloadDomain) {
   if (file.build && pdfDownloadDomain) {
     // Downloads from the compiles domain must include a build id.
