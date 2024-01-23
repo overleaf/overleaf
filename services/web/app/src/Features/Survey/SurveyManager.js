@@ -26,7 +26,7 @@ async function updateSurvey({ name, preText, linkText, url, options }) {
 async function deleteSurvey() {
   const survey = await getSurvey()
   if (survey) {
-    await survey.remove()
+    await survey.deleteOne()
   }
 }
 
