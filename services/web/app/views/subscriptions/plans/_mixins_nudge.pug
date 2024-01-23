@@ -34,9 +34,39 @@ mixin plans_v2_table(period, config)
 				} else {
 					var thClass = ''
 				}
+				thClass += ' plans-v2-table-column-header'
+				if (colspan > 1) {
+					var scopeValue = 'colgroup'
+				}
+				else {
+					var scopeValue = 'col'
+				}
+			case tableHeadKey
+				when 'individual_free'
+					- var ariaLabel = translate("free")
+				when 'individual_collaborator'
+					- var ariaLabel = translate("standard")
+				when 'individual_professional'
+					- var ariaLabel = translate("professional")
+				when 'group_collaborator'
+					- var ariaLabel = translate("group_standard")
+				when 'group_professional'
+					- var ariaLabel = translate("group_professional")
+				when 'group_organization'
+					- var ariaLabel = translate("organization")
+				when 'student_free'
+					- var ariaLabel = translate("free")
+				when 'student_student'
+					- var ariaLabel = translate("student")
+				when 'student_university'
+					- var ariaLabel = translate("university")
+				default
+					- var ariaLabel = undefined
 			th(
+				aria-label=ariaLabel
 				class=thClass
 				colspan=colspan
+				scope=scopeValue
 			)
 				.plans-v2-table-th
 					if (discountHighlighted)
@@ -93,12 +123,14 @@ mixin plans_v2_table(period, config)
 			tr(
 				class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-v2-table-row-last-row-per-section cols-${maxColumn}` : `cols-${maxColumn}`)
 			)
-				td(
+				th(
+					class="plans-v2-table-row-header"
 					event-tracking="plans-page-table"
 					event-tracking-trigger="hover"
 					event-tracking-ga="subscription-funnel"
 					event-tracking-label=`${feature.feature}`
 					colspan=baseColspan
+					scope="row"
 				)
 					.plans-v2-table-feature-name
 						if feature.info

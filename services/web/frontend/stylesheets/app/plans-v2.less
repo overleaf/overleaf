@@ -437,10 +437,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
         }
       }
     }
-
-    &:not(.plans-v2-table-divider) {
-      background-color: @white;
-    }
   }
 
   // only make corners have round borders if the column is not highlighted
@@ -543,7 +539,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   // for remove-personal-plan split test default variant
   @media (max-width: @screen-xs-max) {
     tr.cols-4:not(.plans-v2-table-divider) {
-      td:not(:first-of-type),
+      td,
       th:not(:first-of-type) {
         // 25% is because table-individual have 4 real columns on mobile
         // it actually has 5 table columns, but on mobile version, the first column become row
@@ -603,11 +599,15 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   // See https://stackoverflow.com/a/56913789 for more details
   height: 100%;
 
+  .plans-v2-table-row-header {
+    font-weight: 500;
+  }
+
   tr {
     height: 100%;
   }
 
-  th,
+  .plans-v2-table-column-header,
   td {
     background-clip: padding-box; /* needed for firefox when there is bg color */
     text-align: center;
@@ -621,7 +621,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     }
   }
 
-  th {
+  .plans-v2-table-column-header {
     border-top: 0;
     font-family: @headings-font-family;
     font-size: @font-size-h2;
@@ -645,11 +645,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     vertical-align: middle;
     height: 100%;
 
-    &:first-child {
-      border-left: 0;
-      text-align: left;
-    }
-
     &:last-child:not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
       border-right: 0;
     }
@@ -663,7 +658,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
     // css hack for table border-radius on the first feature name
     &:nth-child(2) {
-      td:first-child {
+      .plans-v2-table-row-header:first-child {
         background-color: @ol-blue-gray-0;
 
         .plans-v2-table-feature-name {
@@ -714,7 +709,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
   @media (min-width: @screen-sm-min) {
     // highlight rows on hover
-    tr:not(.plans-v2-table-divider):hover td {
+    tr:not(.plans-v2-table-divider):hover {
       background-color: @table-hover-bg;
 
       .plans-v2-table-feature-name,
@@ -739,7 +734,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       justify-content: space-around;
     }
 
-    th {
+    .plans-v2-table-column-header {
       font-size: 12px;
     }
 
@@ -752,7 +747,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     // the width: 100vw rule will enhance the flex-flow on the tr by ensuring the feature name (first column of each feature row)
     // will have the full width of viewport,
     // and making the first td appear like the it is in its own row (although it's technically still on the same tr as the other tds)
-    td:first-child {
+    .plans-v2-table-row-header {
       background: @gray-lightest;
       width: 100vw;
 
