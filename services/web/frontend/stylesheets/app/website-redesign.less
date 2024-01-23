@@ -22,12 +22,25 @@
   h2 {
     font-weight: 600;
     font-size: 2.25rem;
-    line-height: 3rem;
+    line-height: 1.333;
     margin-top: 0;
+
+    @media (max-width: @screen-sm-max) {
+      font-size: 1.875rem;
+    }
   }
 
   h3 {
     font-weight: 600;
+  }
+
+  h1,
+  h2,
+  h3 {
+    > span.mono-text {
+      display: block;
+      margin-bottom: @margin-xs;
+    }
   }
 
   // override .btn default style
@@ -212,14 +225,14 @@
     }
 
     .features-card-video {
+      display: flex;
+      justify-content: center;
+
       video {
         box-shadow: 0px 4px 6px 0px rgba(30, 37, 48, 0.12),
           0px 8px 16px 0px rgba(30, 37, 48, 0.12);
         max-height: 100%;
         width: auto;
-      }
-
-      video.video-responsive {
         width: 100%;
       }
 
@@ -618,19 +631,29 @@
   }
 
   .text-with-bg {
-    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-feature-settings: 'ss05';
     padding: 0 @padding-sm;
     margin: 0 6px;
     border-radius: 10px;
     margin-top: 5px;
-  }
 
-  .purple-bg {
-    background-color: var(--ceil);
-  }
+    // will make all spans content inline while avoiding overflowing the viewport in mobile
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/display#flow-root
+    // https://css-tricks.com/display-flow-root/
+    display: inline flow-root;
 
-  .yellow-bg {
-    background-color: var(--caramel);
+    &.tangerine-bg {
+      background-color: var(--vivid-tangerine);
+    }
+
+    &.purple-bg {
+      background-color: var(--ceil);
+    }
+
+    &.yellow-bg {
+      background-color: var(--caramel);
+    }
   }
 
   .security-info {
@@ -692,12 +715,6 @@
     font-weight: 500;
     line-height: 1.5rem;
     margin: 0;
-
-    ~ h1,
-    ~ h2,
-    ~ h3 {
-      margin-top: 8px;
-    }
   }
 
   .link-with-arrow {
