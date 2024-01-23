@@ -214,19 +214,13 @@
     flex-wrap: wrap;
     align-items: center;
 
-    .features-card-image {
+    .features-card-media,
+    .features-card-media-right {
+      padding-top: 24px;
+
       img.img-responsive {
         width: 100%;
       }
-
-      @media (max-width: @screen-sm-max) {
-        margin-bottom: 50px;
-      }
-    }
-
-    .features-card-video {
-      display: flex;
-      justify-content: center;
 
       video {
         box-shadow: 0px 4px 6px 0px rgba(30, 37, 48, 0.12),
@@ -236,15 +230,18 @@
         width: 100%;
       }
 
-      video.video-w-md-90 {
-        width: 90%;
-        @media (max-width: @screen-sm-max) {
-          width: 100%;
-        }
-      }
-
       @media (max-width: @screen-sm-max) {
         margin-bottom: 50px;
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      .features-card-media-right {
+        padding-left: 64px;
+      }
+
+      .features-card-media {
+        padding-right: 64px;
       }
     }
 
@@ -322,8 +319,10 @@
   }
 
   .features-card-hero {
-    /* borrow from features-card, but rewrite if needed before adding too many overrides */
-    .features-card;
+    display: flex; /* equal heights */
+    flex-wrap: wrap;
+    align-items: center;
+
     position: relative;
     height: 655px;
     padding-top: @line-height-computed * 2;
