@@ -1,69 +1,78 @@
 const { Project } = require('../../models/Project')
 const settings = require('@overleaf/settings')
-const { promisifyAll } = require('@overleaf/promise-utils')
-
+const { callbackify } = require('util')
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
 const ProjectOptionsHandler = {
-  setCompiler(projectId, compiler, callback) {
+  async setCompiler(projectId, compiler) {
     if (!compiler) {
-      return callback()
+      return
     }
     compiler = compiler.toLowerCase()
     if (!safeCompilers.includes(compiler)) {
-      return callback(new Error(`invalid compiler: ${compiler}`))
+      throw new Error(`invalid compiler: ${compiler}`)
     }
     const conditions = { _id: projectId }
     const update = { compiler }
-    Project.updateOne(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {})
   },
 
-  setImageName(projectId, imageName, callback) {
+  async setImageName(projectId, imageName) {
     if (!imageName || !Array.isArray(settings.allowedImageNames)) {
-      return callback()
+      return
     }
     imageName = imageName.toLowerCase()
     const isAllowed = settings.allowedImageNames.find(
       allowed => imageName === allowed.imageName
     )
     if (!isAllowed) {
-      return callback(new Error(`invalid imageName: ${imageName}`))
+      throw new Error(`invalid imageName: ${imageName}`)
     }
     const conditions = { _id: projectId }
     const update = { imageName: settings.imageRoot + '/' + imageName }
-    Project.updateOne(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {})
   },
 
-  setSpellCheckLanguage(projectId, languageCode, callback) {
+  async setSpellCheckLanguage(projectId, languageCode) {
     if (!Array.isArray(settings.languages)) {
-      return callback()
+      return
     }
     const language = settings.languages.find(
       language => language.code === languageCode
     )
     if (languageCode && !language) {
-      return callback(new Error(`invalid languageCode: ${languageCode}`))
+      throw new Error(`invalid languageCode: ${languageCode}`)
     }
     const conditions = { _id: projectId }
     const update = { spellCheckLanguage: languageCode }
-    Project.updateOne(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {})
   },
 
-  setBrandVariationId(projectId, brandVariationId, callback) {
+  async setBrandVariationId(projectId, brandVariationId) {
     if (!brandVariationId) {
-      return callback()
+      return
     }
     const conditions = { _id: projectId }
     const update = { brandVariationId }
-    Project.updateOne(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {})
   },
 
-  unsetBrandVariationId(projectId, callback) {
+  async unsetBrandVariationId(projectId) {
     const conditions = { _id: projectId }
     const update = { $unset: { brandVariationId: 1 } }
-    Project.updateOne(conditions, update, {}, callback)
+    return Project.updateOne(conditions, update, {})
   },
 }
 
-ProjectOptionsHandler.promises = promisifyAll(ProjectOptionsHandler)
-module.exports = ProjectOptionsHandler
+module.exports = {
+  setCompiler: callbackify(ProjectOptionsHandler.setCompiler),
+  setImageName: callbackify(ProjectOptionsHandler.setImageName),
+  setSpellCheckLanguage: callbackify(
+    ProjectOptionsHandler.setSpellCheckLanguage
+  ),
+  setBrandVariationId: callbackify(ProjectOptionsHandler.setBrandVariationId),
+  unsetBrandVariationId: callbackify(
+    ProjectOptionsHandler.unsetBrandVariationId
+  ),
+  promises: ProjectOptionsHandler,
+}

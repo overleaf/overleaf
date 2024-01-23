@@ -26,7 +26,7 @@ describe('ProjectOptionsHandler', function () {
     this.projectModel = Project = class Project {
       constructor(options) {}
     }
-    this.projectModel.updateOne = sinon.stub().yields()
+    this.projectModel.updateOne = sinon.stub().resolves()
 
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
@@ -47,29 +47,26 @@ describe('ProjectOptionsHandler', function () {
   })
 
   describe('Setting the compiler', function () {
-    it('should perform and update on mongo', function (done) {
-      this.handler.setCompiler(projectId, 'xeLaTeX', err => {
-        const args = this.projectModel.updateOne.args[0]
-        args[0]._id.should.equal(projectId)
-        args[1].compiler.should.equal('xelatex')
-        done()
-      })
+    it('should perform and update on mongo', async function () {
+      await this.handler.promises.setCompiler(projectId, 'xeLaTeX')
+      const args = this.projectModel.updateOne.args[0]
+      args[0]._id.should.equal(projectId)
+      args[1].compiler.should.equal('xelatex')
     })
 
-    it('should not perform and update on mongo if it is not a recognised compiler', function (done) {
-      this.handler.setCompiler(projectId, 'something', err => {
-        this.projectModel.updateOne.called.should.equal(false)
-        done()
-      })
+    it('should not perform and update on mongo if it is not a recognised compiler', async function () {
+      const fakeComplier = 'something'
+      expect(
+        this.handler.promises.setCompiler(projectId, 'something')
+      ).to.be.rejectedWith(`invalid compiler: ${fakeComplier}`)
+
+      this.projectModel.updateOne.called.should.equal(false)
     })
 
     describe('when called without arg', function () {
-      it('should callback with null', function (done) {
-        this.handler.setCompiler(projectId, null, err => {
-          expect(err).to.be.undefined
-          this.projectModel.updateOne.callCount.should.equal(0)
-          done()
-        })
+      it('should callback with null', async function () {
+        await this.handler.promises.setCompiler(projectId, null)
+        this.projectModel.updateOne.callCount.should.equal(0)
       })
     })
 
@@ -78,39 +75,34 @@ describe('ProjectOptionsHandler', function () {
         this.projectModel.updateOne = sinon.stub().yields('error')
       })
 
-      it('should callback with error', function (done) {
-        this.handler.setCompiler(projectId, 'xeLaTeX', err => {
-          err.should.equal('error')
-          done()
-        })
+      it('should be rejected', async function () {
+        expect(this.handler.promises.setCompiler(projectId, 'xeLaTeX')).to.be
+          .rejected
       })
     })
   })
 
   describe('Setting the imageName', function () {
-    it('should perform and update on mongo', function (done) {
-      this.handler.setImageName(projectId, 'texlive-1234.5', err => {
-        const args = this.projectModel.updateOne.args[0]
-        args[0]._id.should.equal(projectId)
-        args[1].imageName.should.equal('docker-repo/subdir/texlive-1234.5')
-        done()
-      })
+    it('should perform and update on mongo', async function () {
+      await this.handler.promises.setImageName(projectId, 'texlive-1234.5')
+      const args = this.projectModel.updateOne.args[0]
+      args[0]._id.should.equal(projectId)
+      args[1].imageName.should.equal('docker-repo/subdir/texlive-1234.5')
     })
 
-    it('should not perform and update on mongo if it is not a reconised compiler', function (done) {
-      this.handler.setImageName(projectId, 'something', err => {
-        this.projectModel.updateOne.called.should.equal(false)
-        done()
-      })
+    it('should not perform and update on mongo if it is not a reconised image name', async function () {
+      const fakeImageName = 'something'
+      expect(
+        this.handler.promises.setImageName(projectId, fakeImageName)
+      ).to.be.rejectedWith(`invalid imageName: ${fakeImageName}`)
+
+      this.projectModel.updateOne.called.should.equal(false)
     })
 
     describe('when called without arg', function () {
-      it('should callback with null', function (done) {
-        this.handler.setImageName(projectId, null, err => {
-          expect(err).to.be.undefined
-          this.projectModel.updateOne.callCount.should.equal(0)
-          done()
-        })
+      it('should callback with null', async function () {
+        await this.handler.promises.setImageName(projectId, null)
+        this.projectModel.updateOne.callCount.should.equal(0)
       })
     })
 
@@ -119,37 +111,32 @@ describe('ProjectOptionsHandler', function () {
         this.projectModel.updateOne = sinon.stub().yields('error')
       })
 
-      it('should callback with error', function (done) {
-        this.handler.setImageName(projectId, 'texlive-1234.5', err => {
-          err.should.equal('error')
-          done()
-        })
+      it('should be rejected', async function () {
+        expect(this.handler.promises.setImageName(projectId, 'texlive-1234.5'))
+          .to.be.rejected
       })
     })
   })
 
   describe('setting the spellCheckLanguage', function () {
-    it('should perform and update on mongo', function (done) {
-      this.handler.setSpellCheckLanguage(projectId, 'fr', err => {
-        const args = this.projectModel.updateOne.args[0]
-        args[0]._id.should.equal(projectId)
-        args[1].spellCheckLanguage.should.equal('fr')
-        done()
-      })
+    it('should perform and update on mongo', async function () {
+      await this.handler.promises.setSpellCheckLanguage(projectId, 'fr')
+      const args = this.projectModel.updateOne.args[0]
+      args[0]._id.should.equal(projectId)
+      args[1].spellCheckLanguage.should.equal('fr')
     })
 
-    it('should not perform and update on mongo if it is not a reconised compiler', function (done) {
-      this.handler.setSpellCheckLanguage(projectId, 'no a lang', err => {
-        this.projectModel.updateOne.called.should.equal(false)
-        done()
-      })
+    it('should not perform and update on mongo if it is not a reconised langauge', async function () {
+      const fakeLanguageCode = 'not a lang'
+      expect(
+        this.handler.promises.setSpellCheckLanguage(projectId, fakeLanguageCode)
+      ).to.be.rejectedWith(`invalid languageCode: ${fakeLanguageCode}`)
+      this.projectModel.updateOne.called.should.equal(false)
     })
 
-    it('should perform and update on mongo if the language is blank (means turn it off)', function (done) {
-      this.handler.setSpellCheckLanguage(projectId, '', err => {
-        this.projectModel.updateOne.called.should.equal(true)
-        done()
-      })
+    it('should perform and update on mongo if the language is blank (means turn it off)', async function () {
+      await this.handler.promises.setSpellCheckLanguage(projectId, '')
+      this.projectModel.updateOne.called.should.equal(true)
     })
 
     describe('when mongo update error occurs', function () {
@@ -157,37 +144,29 @@ describe('ProjectOptionsHandler', function () {
         this.projectModel.updateOne = sinon.stub().yields('error')
       })
 
-      it('should callback with error', function (done) {
-        this.handler.setSpellCheckLanguage(projectId, 'fr', err => {
-          err.should.equal('error')
-          done()
-        })
+      it('should be rejected', async function () {
+        expect(this.handler.promises.setSpellCheckLanguage(projectId)).to.be
+          .rejected
       })
     })
   })
 
   describe('setting the brandVariationId', function () {
-    it('should perform and update on mongo', function (done) {
-      this.handler.setBrandVariationId(projectId, '123', err => {
-        const args = this.projectModel.updateOne.args[0]
-        args[0]._id.should.equal(projectId)
-        args[1].brandVariationId.should.equal('123')
-        done()
-      })
+    it('should perform and update on mongo', async function () {
+      await this.handler.promises.setBrandVariationId(projectId, '123')
+      const args = this.projectModel.updateOne.args[0]
+      args[0]._id.should.equal(projectId)
+      args[1].brandVariationId.should.equal('123')
     })
 
-    it('should not perform and update on mongo if there is no brand variation', function (done) {
-      this.handler.setBrandVariationId(projectId, null, err => {
-        this.projectModel.updateOne.called.should.equal(false)
-        done()
-      })
+    it('should not perform and update on mongo if there is no brand variation', async function () {
+      await this.handler.promises.setBrandVariationId(projectId, null)
+      this.projectModel.updateOne.called.should.equal(false)
     })
 
-    it('should not perform and update on mongo if brand variation is an empty string', function (done) {
-      this.handler.setBrandVariationId(projectId, '', err => {
-        this.projectModel.updateOne.called.should.equal(false)
-        done()
-      })
+    it('should not perform and update on mongo if brand variation is an empty string', async function () {
+      await this.handler.promises.setBrandVariationId(projectId, '')
+      this.projectModel.updateOne.called.should.equal(false)
     })
 
     describe('when mongo update error occurs', function () {
@@ -195,23 +174,19 @@ describe('ProjectOptionsHandler', function () {
         this.projectModel.updateOne = sinon.stub().yields('error')
       })
 
-      it('should callback with error', function (done) {
-        this.handler.setBrandVariationId(projectId, '123', err => {
-          err.should.equal('error')
-          done()
-        })
+      it('should be rejected', async function () {
+        expect(this.handler.promises.setBrandVariationId(projectId, '123')).to
+          .be.rejected
       })
     })
   })
 
   describe('unsetting the brandVariationId', function () {
-    it('should perform and update on mongo', function (done) {
-      this.handler.unsetBrandVariationId(projectId, err => {
-        const args = this.projectModel.updateOne.args[0]
-        args[0]._id.should.equal(projectId)
-        expect(args[1]).to.deep.equal({ $unset: { brandVariationId: 1 } })
-        done()
-      })
+    it('should perform and update on mongo', async function () {
+      await this.handler.promises.unsetBrandVariationId(projectId)
+      const args = this.projectModel.updateOne.args[0]
+      args[0]._id.should.equal(projectId)
+      expect(args[1]).to.deep.equal({ $unset: { brandVariationId: 1 } })
     })
 
     describe('when mongo update error occurs', function () {
@@ -219,11 +194,9 @@ describe('ProjectOptionsHandler', function () {
         this.projectModel.updateOne = sinon.stub().yields('error')
       })
 
-      it('should callback with error', function (done) {
-        this.handler.unsetBrandVariationId(projectId, err => {
-          err.should.equal('error')
-          done()
-        })
+      it('should be rejected', async function () {
+        expect(this.handler.promises.unsetBrandVariationId(projectId)).to.be
+          .rejected
       })
     })
   })
