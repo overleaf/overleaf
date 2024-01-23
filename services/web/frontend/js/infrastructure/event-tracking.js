@@ -51,6 +51,14 @@ export function sendMBSampled(key, body = {}, rate = 0.01) {
   }
 }
 
+const sentOncePerPageLoad = new Set()
+
+export function sendMBOncePerPageLoad(key, segmentation = {}) {
+  if (sentOncePerPageLoad.has(key)) return
+  sendMB(key, segmentation)
+  sentOncePerPageLoad.add(key)
+}
+
 // Use breakpoint @screen-xs-max from less:
 // @screen-xs-max: (@screen-sm-min - 1);
 // @screen-sm-min: @screen-sm;
