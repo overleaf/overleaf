@@ -182,10 +182,10 @@
         width: 70px;
         position: absolute;
         top: -95px;
-        right: -90px;
+        right: -50px;
 
         @media (max-width: @screen-lg) {
-          right: -145px;
+          right: -105px;
         }
 
         @media (max-width: @screen-sm-max) {
@@ -197,10 +197,10 @@
         width: 140px;
         position: absolute;
         top: -50px;
-        right: -55px;
+        right: -15px;
 
         @media (max-width: @screen-lg) {
-          right: -110px;
+          right: -70px;
         }
         @media (max-width: @screen-sm-max) {
           display: none;
@@ -861,6 +861,11 @@
 
   .label-premium {
     height: 20px; // override default height
+    @media (max-width: @screen-md-max) {
+      display: block;
+      width: fit-content;
+      margin: 10px 0px 0px 0px;
+    }
   }
 
   .header-description {
