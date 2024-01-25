@@ -225,6 +225,72 @@ h3.group-settings-title {
       padding-right: 0;
     }
   }
+
+  .payload-content {
+    padding: @padding-base-horizontal;
+    border: 1px solid @neutral-20;
+    margin-top: 16px;
+    border-radius: @border-radius-base-new;
+    color: black;
+
+    .saml-response-xml-wrapper {
+      margin-top: 16px;
+      overflow: hidden;
+      background-color: @neutral-10;
+      border-radius: @border-radius-base-new;
+
+      .saml-response-header {
+        font-family: Lato, sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 0 16px;
+        border-bottom: 1px solid @neutral-20;
+        line-height: 56px;
+
+        .copy-response {
+          vertical-align: bottom;
+          margin-top: 10px;
+
+          .material-symbols {
+            vertical-align: text-top;
+          }
+        }
+      }
+
+      .saml-response-footer {
+        text-align: center;
+        line-height: 56px;
+        position: sticky;
+        bottom: 0;
+        background: linear-gradient(
+          360deg,
+          #f4f5f6 0%,
+          rgba(244, 245, 246, 0) 835.48%
+        );
+      }
+
+      .saml-response-xml {
+        font-family: 'DM Mono', monospace;
+        white-space: pre-wrap;
+        font-size: 13px;
+        word-break: break-word;
+        padding: 16px 16px 0 16px;
+        height: 100px;
+        min-height: 100px;
+
+        &.view-more {
+          height: auto;
+        }
+      }
+
+      .expand-viewer {
+        .material-symbols {
+          vertical-align: bottom;
+          font-size: 24px;
+        }
+      }
+    }
+  }
 }
 
 .certificate-wrapper {
@@ -271,30 +337,5 @@ h3.group-settings-title {
   .certificate-delete {
     flex-grow: 1;
     flex-shrink: 0;
-  }
-}
-
-.saml-response-xml-wrapper {
-  padding: 4px 0;
-  overflow: hidden;
-  background-color: @neutral-10;
-
-  .saml-response-xml {
-    font-family: monospace;
-    white-space: pre-wrap;
-    font-size: 12px;
-    word-break: break-word;
-    padding-inline-start: 32px;
-    height: 32px;
-
-    &.view-more {
-      height: auto;
-    }
-
-    li::marker {
-      font-size: 10px;
-      color: @gray-light;
-      width: 10px;
-    }
   }
 }
