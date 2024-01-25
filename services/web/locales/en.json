@@ -829,6 +829,7 @@
   "image_width": "Image width",
   "import_a_bibtex_file_from_your_provider_account": "Import a BibTeX file from your __provider__ account",
   "import_from_github": "Import from GitHub",
+  "import_idp_metadata": "Import IdP metadata",
   "import_to_sharelatex": "Import to __appName__",
   "imported_from_another_project_at_date": "Imported from <0>Another project</0>/__sourceEntityPathHTML__, at __formattedDate__ __relativeDate__",
   "imported_from_external_provider_at_date": "Imported from <0>__shortenedUrlHTML__</0> at __formattedDate__ __relativeDate__",
