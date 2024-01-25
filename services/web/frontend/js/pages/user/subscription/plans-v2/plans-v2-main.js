@@ -102,10 +102,13 @@ let currentMonthlyAnnualSwitchValue = 'annual'
 
 function selectTab(viewTab) {
   document.querySelectorAll('[data-ol-plans-v2-view-tab]').forEach(el => {
-    el.classList.toggle(
-      'active',
-      el.getAttribute('data-ol-plans-v2-view-tab') === viewTab
-    )
+    const tab = el.querySelector('[data-ol-plans-v2-view-tab] button')
+    if (tab) {
+      const isActive =
+        tab.parentElement.getAttribute('data-ol-plans-v2-view-tab') === viewTab
+      tab.parentElement.classList.toggle('active', isActive)
+      tab.setAttribute('aria-selected', isActive)
+    }
   })
 
   document.querySelectorAll('[data-ol-plans-v2-view]').forEach(el => {
@@ -147,6 +150,24 @@ function setUpTabSwitching() {
       selectTab(viewTab)
     })
   })
+
+  const tabs = document.querySelectorAll(
+    '[data-ol-plans-v2-view-tab] [role="tab"]'
+  )
+
+  if (tabs) {
+    tabs.forEach(tab => {
+      tab.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+          const currentIndex = Array.from(tabs).indexOf(tab)
+          const nextIndex =
+            event.key === 'ArrowLeft' ? currentIndex - 1 : currentIndex + 1
+          const newIndex = (nextIndex + tabs.length) % tabs.length
+          tabs[newIndex].focus()
+        }
+      })
+    })
+  }
 }
 
 function setUpGroupPlanPricingChange() {
