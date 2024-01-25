@@ -74,12 +74,14 @@ function AutoExpandingTextArea({
     }
 
     const resizeObserver = new ResizeObserver(() => {
-      // Ignore the resize that is triggered when the element is first
-      // inserted into the DOM
       if (!ref.current) {
         return
       }
       const newHeight = ref.current.offsetHeight
+      // Ignore the resize when the height of the element is less than or equal to 0
+      if (newHeight <= 0) {
+        return
+      }
       const heightChanged = newHeight !== previousHeightRef.current
       previousHeightRef.current = newHeight
       if (heightChanged) {
