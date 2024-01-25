@@ -176,10 +176,7 @@ export default function SelectCollaborators({
                 ref: inputRef,
                 // preventKeyAction: showDropdown,
                 onBlur: () => {
-                  // blur: if the dropdown isn't open, try to create a new item using inputValue
-                  if (!isOpen) {
-                    addNewItem(inputValue, false)
-                  }
+                  addNewItem(inputValue, false)
                 },
                 onChange: e => {
                   setInputValue(e.target.value)

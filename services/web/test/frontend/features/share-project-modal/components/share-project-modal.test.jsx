@@ -8,6 +8,7 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
+import userEvent from '@testing-library/user-event'
 
 import ShareProjectModal from '../../../../../frontend/js/features/share-project-modal/components/share-project-modal'
 import {
@@ -847,6 +848,43 @@ describe('<ShareProjectModal/>', function () {
 
     // Blurring the input should not add another contact
     fireEvent.blur(inputElement)
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+        1
+      )
+    })
+  })
+
+  it('selects contact by typing the entire email and blurring the input', async function () {
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      scope: { project },
+    })
+
+    const [inputElement] = await screen.findAllByLabelText(
+      'Share with your collaborators'
+    )
+
+    // Wait for contacts to load
+    await waitFor(() => {
+      expect(fetchMock.called('express:/user/contacts')).to.be.true
+    })
+
+    // Enter a prefix that matches a contact
+    await userEvent.type(inputElement, 'ptolemy@example.com')
+
+    // The matching contact should now be present and selected
+    await screen.findByRole('option', {
+      name: `Claudius Ptolemy <ptolemy@example.com>`,
+      selected: true,
+    })
+
+    // No items should be added yet
+    expect(screen.queryByRole('button', { name: 'Remove' })).to.be.null
+
+    // Click anywhere on the form to blur the input
+    await userEvent.click(screen.getByRole('dialog'))
+
+    // The contact should be added
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
         1
