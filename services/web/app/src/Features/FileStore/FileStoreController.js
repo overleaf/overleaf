@@ -15,10 +15,17 @@ module.exports = {
       { project_id: projectId, element_id: fileId, type: 'file' },
       function (err, file) {
         if (err) {
-          logger.err(
-            { err, projectId, fileId, queryString },
-            'error finding element for downloading file'
-          )
+          if (err.name === 'NotFoundError') {
+            logger.warn(
+              { err, projectId, fileId, queryString },
+              'entity not found when downloading file'
+            )
+          } else {
+            logger.err(
+              { err, projectId, fileId, queryString },
+              'error finding element for downloading file'
+            )
+          }
           return res.sendStatus(500)
         }
         FileStoreHandler.getFileStream(
