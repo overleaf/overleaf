@@ -1571,7 +1571,7 @@
   "saml_login_identity_not_found_error": "抱歉，我们无法找到为此身份提供商设置单点登录的 Overleaf 帐户。",
   "saml_metadata": "Overleaf SAML 元数据",
   "saml_missing_signature_error": "抱歉，从您的身份提供商收到的信息未签名（响应和断言签名都是必需的）。 请联系您的管理员以获取更多信息。",
-  "saml_response": "SAML 响应",
+  "saml_response": "SAML 响应：",
   "save": "保存",
   "save_20_percent_by_paying_annually": "按年支付可节省20%",
   "save_30_percent_or_more": "节省30%或更多",
