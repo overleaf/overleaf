@@ -602,6 +602,9 @@ const ProjectController = {
         writefullIntegrationAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'writefull-integration', cb)
         },
+        compileLogEventsAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'compile-log-events', cb)
+        },
         projectTags(cb) {
           if (!userId) {
             return cb(null, [])
