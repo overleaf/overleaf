@@ -1873,6 +1873,7 @@
   "the_required_parameters_were_not_supplied": "The link to open this content on Overleaf was missing some required parameters. If this keeps happening for links on a particular site, please report this to them.",
   "the_supplied_parameters_were_invalid": "The link to open this content on Overleaf included some invalid parameters. If this keeps happening for links on a particular site, please report this to them.",
   "the_supplied_uri_is_invalid": "The link to open this content on Overleaf included an invalid URI. If this keeps happening for links on a particular site, please report this to them.",
+  "the_target_folder_could_not_be_found": "The target folder could not be found.",
   "the_width_you_choose_here_is_based_on_the_width_of_the_text_in_your_document": "The width you choose here is based on the width of the text in your document. Alternatively, you can customize the image size directly in the LaTeX code.",
   "their_projects_will_be_transferred_to_another_user": "Their projects will all be transferred to another user of your choice",
   "theme": "Theme",

@@ -653,6 +653,9 @@ const ProjectEntityUpdateHandler = {
       { project_id: projectId, element_id: folderId, type: 'folder' },
       (error, folder, folderPath) => {
         if (error != null) {
+          if (error instanceof Errors.NotFoundError && folder == null) {
+            return callback(new Error('folder_not_found'))
+          }
           return callback(error)
         }
         if (folder == null) {
@@ -842,6 +845,9 @@ const ProjectEntityUpdateHandler = {
         { project_id: projectId, element_id: folderId, type: 'folder' },
         (error, folder) => {
           if (error != null) {
+            if (error instanceof Errors.NotFoundError && folder == null) {
+              return callback(new Error('folder_not_found'))
+            }
             return callback(error)
           }
           if (folder == null) {

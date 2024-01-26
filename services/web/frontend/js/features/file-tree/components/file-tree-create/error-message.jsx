@@ -26,6 +26,13 @@ export default function ErrorMessage({ error }) {
       case 'remote-service-error':
         return <DangerMessage>{t('remote_service_error')}</DangerMessage>
 
+      case 'folder_not_found':
+        return (
+          <DangerMessage>
+            {t('the_target_folder_could_not_be_found')}
+          </DangerMessage>
+        )
+
       case 'invalid_filename':
         return (
           <DangerMessage>

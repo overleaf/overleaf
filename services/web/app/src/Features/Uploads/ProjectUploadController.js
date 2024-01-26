@@ -120,6 +120,11 @@ module.exports = ProjectUploadController = {
               success: false,
               error: 'project_has_too_many_files',
             })
+          } else if (error.message === 'folder_not_found') {
+            return res.status(422).json({
+              success: false,
+              error: 'folder_not_found',
+            })
           } else {
             return res.status(422).json({ success: false })
           }
