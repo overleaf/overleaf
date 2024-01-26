@@ -710,6 +710,21 @@
     }
   }
 
+  .heading-section-md-align-left {
+    @media (max-width: @screen-md-min) {
+      display: flex;
+      flex-direction: column;
+      align-items: baseline;
+
+      h2 {
+        text-align: left;
+      }
+      p {
+        text-align: left;
+      }
+    }
+  }
+
   .mono-text {
     font-family: 'DM Mono', monospace;
     color: var(--green-60);
@@ -857,14 +872,18 @@
       justify-content: center;
     }
 
-    @media (max-width: @screen-sm-max) {
-      flex-direction: column-reverse;
-      width: 100%;
+    &.align-left-button-sm {
+      @media (max-width: @screen-sm-max) {
+        justify-content: start;
+      }
     }
   }
 
   .label-premium {
     height: 20px; // override default height
+  }
+
+  .label-premium-block-md {
     @media (max-width: @screen-md-max) {
       display: block;
       width: fit-content;
