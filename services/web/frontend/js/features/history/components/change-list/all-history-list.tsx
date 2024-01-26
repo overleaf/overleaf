@@ -16,11 +16,6 @@ import useAsync from '@/shared/hooks/use-async'
 import { completeHistoryTutorial } from '../../services/api'
 import { debugConsole } from '@/utils/debugging'
 
-type EditorTutorials = {
-  inactiveTutorials: [string]
-  deactivateTutorial: (key: string) => void
-}
-
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
   const {
@@ -97,8 +92,7 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const { inactiveTutorials, deactivateTutorial }: EditorTutorials =
-    useEditorContext()
+  const { inactiveTutorials, deactivateTutorial } = useEditorContext()
 
   const [showPopover, setShowPopover] = useState(() => {
     // only show tutorial popover if they haven't dismissed ("completed") it yet

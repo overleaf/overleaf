@@ -22,7 +22,6 @@ function EditorNavigationToolbar() {
   return (
     <>
       <EditorNavigationToolbarRoot
-        // @ts-ignore
         onlineUsersArray={onlineUsersArray}
         openDoc={openDoc}
         openShareProjectModal={handleOpenShareModal}

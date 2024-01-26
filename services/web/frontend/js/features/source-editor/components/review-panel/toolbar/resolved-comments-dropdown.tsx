@@ -13,10 +13,7 @@ import {
   ThreadId,
 } from '../../../../../../../types/review-panel/review-panel'
 import { ReviewPanelResolvedCommentThread } from '../../../../../../../types/review-panel/comment-thread'
-import {
-  DocId,
-  MainDocument,
-} from '../../../../../../../types/project-settings'
+import { DocId } from '../../../../../../../types/project-settings'
 import { ReviewPanelEntry } from '../../../../../../../types/review-panel/entry'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 
@@ -35,7 +32,7 @@ function ResolvedCommentsDropdown() {
   const [isLoading, setIsLoading] = useState(false)
   const { commentThreads, resolvedComments, permissions } =
     useReviewPanelValueContext()
-  const docs: MainDocument[] = useFileTreeData().docs
+  const { docs } = useFileTreeData()
 
   const { refreshResolvedCommentsDropdown } = useReviewPanelUpdaterFnsContext()
 

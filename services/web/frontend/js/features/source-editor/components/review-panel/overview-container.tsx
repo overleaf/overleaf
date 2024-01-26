@@ -6,12 +6,11 @@ import Icon from '../../../../shared/components/icon'
 import OverviewFile from './overview-file'
 import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
-import { MainDocument } from '../../../../../../types/project-settings'
 import { memo } from 'react'
 
 function OverviewContainer() {
   const { isOverviewLoading } = useReviewPanelValueContext()
-  const docs: MainDocument[] = useFileTreeData().docs
+  const { docs } = useFileTreeData()
 
   return (
     <Container>

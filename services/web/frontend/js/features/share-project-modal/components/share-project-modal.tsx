@@ -5,17 +5,14 @@ import React, {
   useEffect,
   useState,
 } from 'react'
-import PropTypes from 'prop-types'
 import ShareProjectModalContent from './share-project-modal-content'
-import {
-  useProjectContext,
-  projectShape,
-} from '../../../shared/context/project-context'
+import { useProjectContext } from '../../../shared/context/project-context'
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import { Project } from '../../../../../types/project'
 
 type ShareProjectContextValue = {
-  updateProject: (data: unknown) => void
+  updateProject: (project: Project) => void
   monitorRequest: <T extends Promise<unknown>>(request: () => T) => T
   inFlight: boolean
   setInFlight: React.Dispatch<
@@ -58,11 +55,9 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
     useState<ShareProjectContextValue['inFlight']>(false)
   const [error, setError] = useState<ShareProjectContextValue['error']>()
 
-  const project = useProjectContext(projectShape)
+  const project = useProjectContext()
 
-  const { splitTestVariants } = useSplitTestContext({
-    splitTestVariants: PropTypes.object,
-  })
+  const { splitTestVariants } = useSplitTestContext()
 
   // send tracking event when the modal is opened
   useEffect(() => {

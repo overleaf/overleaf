@@ -12,6 +12,7 @@ import useScopeValue from '../hooks/use-scope-value'
 import useDetachLayout from '../hooks/use-detach-layout'
 import localStorage from '../../infrastructure/local-storage'
 import getMeta from '../../utils/meta'
+import { DetachRole } from './detach-context'
 import { debugConsole } from '@/utils/debugging'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
@@ -23,10 +24,10 @@ type LayoutContextValue = {
   reattach: () => void
   detach: () => void
   detachIsLinked: boolean
-  detachRole: 'detacher' | 'detached' | null
+  detachRole: DetachRole
   changeLayout: (newLayout: IdeLayout, newView?: IdeView) => void
-  view: IdeView
-  setView: (view: IdeView) => void
+  view: IdeView | null
+  setView: (view: IdeView | null) => void
   chatIsOpen: boolean
   setChatIsOpen: Dispatch<SetStateAction<LayoutContextValue['chatIsOpen']>>
   reviewPanelOpen: boolean
@@ -64,12 +65,12 @@ function setLayoutInLocalStorage(pdfLayout: IdeLayout) {
 
 export const LayoutProvider: FC = ({ children }) => {
   // what to show in the "flat" view (editor or pdf)
-  const [view, _setView] = useScopeValue<IdeView>('ui.view')
+  const [view, _setView] = useScopeValue<IdeView | null>('ui.view')
   const [openFile] = useScopeValue<BinaryFile | null>('openFile')
   const historyToggleEmitter = useScopeEventEmitter('history:toggle', true)
 
   const setView = useCallback(
-    (value: IdeView) => {
+    (value: IdeView | null) => {
       _setView(oldValue => {
         // ensure that the "history:toggle" event is broadcast when switching in or out of history view
         if (value === 'history' || oldValue === 'history') {

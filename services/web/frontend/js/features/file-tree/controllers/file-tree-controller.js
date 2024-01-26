@@ -110,8 +110,14 @@ App.controller('ReactFileTreeController', [
 
 App.component(
   'fileTreeRoot',
-  react2angular(
-    rootContext.use(FileTreeRoot),
-    Object.keys(FileTreeRoot.propTypes)
-  )
+  react2angular(rootContext.use(FileTreeRoot), [
+    'onSelect',
+    'onDelete',
+    'onInit',
+    'isConnected',
+    'setRefProviderEnabled',
+    'setStartedFreeTrial',
+    'reindexReferences',
+    'refProviders',
+  ])
 )

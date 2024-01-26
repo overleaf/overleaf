@@ -26,8 +26,8 @@ function FasterCompilesFeedbackContent() {
     true
   )
   const [sayThanks, setSayThanks] = useState(false)
-  const lastClsiServerId = useRef('')
-  const lastPdfUrl = useRef('')
+  const lastClsiServerId = useRef<string | undefined>(undefined)
+  const lastPdfUrl = useRef<string | undefined>(undefined)
 
   useEffect(() => {
     if (
@@ -52,7 +52,7 @@ function FasterCompilesFeedbackContent() {
       projectId,
       server: clsiServerId?.includes('-c2d-') ? 'faster' : 'normal',
       feedback,
-      pdfSize: pdfFile.size,
+      pdfSize: pdfFile?.size,
       ...deliveryLatencies,
     })
     setHasRatedProject(true)

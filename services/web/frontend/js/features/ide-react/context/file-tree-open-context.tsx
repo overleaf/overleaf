@@ -91,7 +91,7 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
       eventEmitter.emit('entity:deleted', entity)
       // Select the root document if the current document was deleted
       if (entity.entity._id === openDocId) {
-        openDocWithId(rootDocId)
+        openDocWithId(rootDocId!)
       }
     },
     [eventEmitter, openDocId, openDocWithId, rootDocId]
@@ -116,7 +116,12 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
   // Open a document once the file tree and project are ready
   const initialOpenDoneRef = useRef(false)
   useEffect(() => {
-    if (fileTreeReady && projectJoined && !initialOpenDoneRef.current) {
+    if (
+      rootDocId &&
+      fileTreeReady &&
+      projectJoined &&
+      !initialOpenDoneRef.current
+    ) {
       initialOpenDoneRef.current = true
       openInitialDoc(rootDocId)
     }

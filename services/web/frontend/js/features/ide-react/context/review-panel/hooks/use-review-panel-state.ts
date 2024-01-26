@@ -523,7 +523,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     if (!user) {
       return 'anonymous'
     }
-    if (project.owner === user.id) {
+    // FIXME: check this
+    if (project.owner._id === user.id) {
       return 'member'
     }
     for (const member of project.members as any[]) {
@@ -711,7 +712,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   )
 
   const applyTrackChangesStateToClient = useCallback(
-    (state: boolean | Record<UserId, boolean>) => {
+    (state: boolean | ReviewPanel.Value<'trackChangesState'>) => {
       if (typeof state === 'boolean') {
         setEveryoneTCState(state)
         setGuestsTCState(state)
@@ -728,13 +729,13 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
           newTrackChangesState = setUserTCState(
             newTrackChangesState,
             member._id,
-            state[member._id] ?? false
+            !!state[member._id]
           )
         }
         newTrackChangesState = setUserTCState(
           newTrackChangesState,
           project.owner._id,
-          state[project.owner._id] ?? false
+          !!state[project.owner._id]
         )
         return newTrackChangesState
       }
@@ -750,7 +751,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   )
 
   const setGuestFeatureBasedOnProjectAccessLevel = (
-    projectPublicAccessLevel: PublicAccessLevel
+    projectPublicAccessLevel?: PublicAccessLevel
   ) => {
     setTrackChangesForGuestsAvailable(projectPublicAccessLevel === 'tokenBased')
   }
@@ -1169,7 +1170,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   }, [currentDocumentId, getDocEntries, trackChangesVisible])
 
   useEffect(() => {
-    setMiniReviewPanelVisible(!reviewPanelOpen && hasEntries)
+    setMiniReviewPanelVisible(!reviewPanelOpen && !!hasEntries)
   }, [reviewPanelOpen, hasEntries, setMiniReviewPanelVisible])
 
   // listen for events from the CodeMirror 6 track changes extension

@@ -136,7 +136,7 @@ type ReadOrWriteFormGroupProps = {
   id: string
   type: string
   label: string
-  value: string
+  value?: string
   handleChange: (event: any) => void
   canEdit: boolean
   required: boolean

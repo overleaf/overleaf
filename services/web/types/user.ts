@@ -9,8 +9,14 @@ export type UserId = Brand<string, 'UserId'>
 
 export type User = {
   id: UserId
+  isAdmin?: boolean
   email: string
   allowedFreeTrial?: boolean
+  first_name?: string
+  last_name?: string
+  alphaProgram?: boolean
+  betaProgram?: boolean
+  labsProgram?: boolean
   signUpDate?: string // date string
   features?: {
     collaborators?: number
@@ -29,6 +35,9 @@ export type User = {
     zotero?: boolean
   }
   refProviders?: RefProviders
+  writefull?: {
+    enabled: boolean
+  }
 }
 
 export type MongoUser = Pick<User, Exclude<keyof User, 'id'>> & { _id: string }

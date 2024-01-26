@@ -5,7 +5,7 @@ import { FC } from 'react'
 
 export const CompileTimeoutWarning: FC<{
   handleDismissWarning: () => void
-  showNewCompileTimeoutUI: string
+  showNewCompileTimeoutUI?: string
 }> = ({ handleDismissWarning, showNewCompileTimeoutUI }) => {
   const { t } = useTranslation()
 

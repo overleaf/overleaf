@@ -38,7 +38,7 @@ const memberGroupSubscriptions: MemberGroupSubscription[] = [
       email: 'someone@example.com',
     },
   },
-]
+] as MemberGroupSubscription[]
 
 describe('<GroupSubscriptionMemberships />', function () {
   beforeEach(function () {

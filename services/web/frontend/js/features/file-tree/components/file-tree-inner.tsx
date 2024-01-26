@@ -1,11 +1,7 @@
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
-import { useCallback } from 'react'
+import { FC, useCallback } from 'react'
 
-type FileTreeInnerProps = {
-  children: React.ReactNode
-}
-
-function FileTreeInner({ children }: FileTreeInnerProps) {
+const FileTreeInner: FC = ({ children }) => {
   const { setIsRootFolderSelected, selectedEntityIds, select } =
     useFileTreeSelectable()
 

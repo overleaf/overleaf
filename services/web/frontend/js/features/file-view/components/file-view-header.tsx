@@ -1,5 +1,4 @@
 import { useState, type ElementType } from 'react'
-import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
 
 import Icon from '../../../shared/components/icon'
@@ -48,12 +47,8 @@ type FileViewHeaderProps = {
 }
 
 export default function FileViewHeader({ file }: FileViewHeaderProps) {
-  const { _id: projectId } = useProjectContext({
-    _id: PropTypes.string.isRequired,
-  })
-  const { permissionsLevel } = useEditorContext({
-    permissionsLevel: PropTypes.string,
-  })
+  const { _id: projectId } = useProjectContext()
+  const { permissionsLevel } = useEditorContext()
   const { t } = useTranslation()
 
   const [refreshError, setRefreshError] = useState<Nullable<string>>(null)
@@ -150,7 +145,6 @@ function ProjectFilePathProvider({ file }: ProjectFilePathProviderProps) {
   return (
     <p>
       <LinkedFileIcon />
-      &nbsp;
       <Trans
         i18nKey="imported_from_another_project_at_date"
         components={
