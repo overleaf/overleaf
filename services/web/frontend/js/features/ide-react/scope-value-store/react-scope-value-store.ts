@@ -273,7 +273,9 @@ export class ReactScopeValueStore implements ScopeValueStore {
     // useScopeValue, during which the value could change without being
     // observed
     if ('value' in item) {
-      this.scheduleWatcherUpdate<T>(path, item.value, [watcher])
+      // add this watcher to any existing watchers scheduled for this path
+      const { watchers } = this.watcherUpdates.get(path) ?? { watchers: [] }
+      this.scheduleWatcherUpdate<T>(path, item.value, [...watchers, watcher])
     }
 
     return () => {

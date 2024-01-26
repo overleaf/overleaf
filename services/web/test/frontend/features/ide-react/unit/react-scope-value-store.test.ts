@@ -122,6 +122,35 @@ describe('ReactScopeValueStore', function () {
     expect(watcher).to.have.been.calledWith('wombat')
   })
 
+  it('handles multiple watchers for the same path added at the same time before the value is set', async function () {
+    const store = new ReactScopeValueStore()
+
+    const watcherOne = sinon.stub()
+    const watcherTwo = sinon.stub()
+    store.watch('test', watcherOne)
+    store.watch('test', watcherTwo)
+    await waitForWatchers(() => {
+      store.set('test', 'wombat')
+    })
+
+    expect(watcherOne).to.have.been.calledWith('wombat')
+    expect(watcherTwo).to.have.been.calledWith('wombat')
+  })
+
+  it('handles multiple watchers for the same path added at the same time after the value is set', async function () {
+    const store = new ReactScopeValueStore()
+    store.set('test', 'wombat')
+
+    const watcherOne = sinon.stub()
+    const watcherTwo = sinon.stub()
+    store.watch('test', watcherOne)
+    store.watch('test', watcherTwo)
+    store.flushUpdates()
+
+    expect(watcherOne).to.have.been.calledWith('wombat')
+    expect(watcherTwo).to.have.been.calledWith('wombat')
+  })
+
   it('throws an error when watching an unknown value', function () {
     const store = new ReactScopeValueStore()
     expect(() => store.watch('test', () => {})).to.throw
