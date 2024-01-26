@@ -96,6 +96,9 @@ export type ProjectListContextValue = {
   searchText: string
   setSearchText: React.Dispatch<React.SetStateAction<string>>
   selectedProjects: Project[]
+  selectedProjectIds: Set<string>
+  setSelectedProjectIds: React.Dispatch<React.SetStateAction<Set<string>>>
+  toggleSelectedProject: (projectId: string, selected?: boolean) => void
   hiddenProjectsCount: number
   loadMoreCount: number
   showAllProjects: () => void
@@ -262,22 +265,44 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
     setMaxVisibleProjects(maxVisibleProjects + loadMoreCount)
   }, [maxVisibleProjects, loadMoreCount])
 
+  const [selectedProjectIds, setSelectedProjectIds] = useState(
+    () => new Set<string>()
+  )
+
+  const toggleSelectedProject = useCallback(
+    (projectId: string, selected?: boolean) => {
+      setSelectedProjectIds(selectedProjectIds => {
+        if (selected === true) {
+          selectedProjectIds.add(projectId)
+        } else if (selected === false) {
+          selectedProjectIds.delete(projectId)
+        } else if (selectedProjectIds.has(projectId)) {
+          selectedProjectIds.delete(projectId)
+        } else {
+          selectedProjectIds.add(projectId)
+        }
+        return new Set([...selectedProjectIds])
+      })
+    },
+    []
+  )
+
   const selectedProjects = useMemo(() => {
-    return visibleProjects.filter(project => project.selected)
-  }, [visibleProjects])
+    return visibleProjects.filter(project => selectedProjectIds.has(project.id))
+  }, [selectedProjectIds, visibleProjects])
 
   const selectOrUnselectAllProjects = useCallback(
     checked => {
-      const visibleProjectIds = visibleProjects.map(p => p.id)
-      setLoadedProjects(loadedProjects =>
-        loadedProjects.map(p => {
-          if (visibleProjectIds.includes(p.id)) {
-            return { ...p, selected: checked }
+      setSelectedProjectIds(selectedProjectIds => {
+        for (const project of visibleProjects) {
+          if (checked) {
+            selectedProjectIds.add(project.id)
           } else {
-            return p
+            selectedProjectIds.delete(project.id)
           }
-        })
-      )
+        }
+        return new Set([...selectedProjectIds])
+      })
     },
     [visibleProjects]
   )
@@ -448,16 +473,19 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       selectedTagId,
       selectFilter,
       selectedProjects,
+      selectedProjectIds,
       selectOrUnselectAllProjects,
       selectTag,
       searchText,
       setSearchText,
+      setSelectedProjectIds,
       setShowCustomPicker,
       setSort,
       showAllProjects,
       showCustomPicker,
       sort,
       tags,
+      toggleSelectedProject,
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,
@@ -483,17 +511,20 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
       removeProjectFromView,
       selectedTagId,
       selectFilter,
+      selectedProjectIds,
       selectedProjects,
       selectOrUnselectAllProjects,
       selectTag,
       searchText,
       setSearchText,
+      setSelectedProjectIds,
       setShowCustomPicker,
       setSort,
       showAllProjects,
       showCustomPicker,
       sort,
       tags,
+      toggleSelectedProject,
       totalProjectsCount,
       untaggedProjectsCount,
       updateProjectViewData,

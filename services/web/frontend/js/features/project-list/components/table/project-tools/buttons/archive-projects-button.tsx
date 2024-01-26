@@ -9,7 +9,8 @@ import { archiveProject } from '../../../../util/api'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 
 function ArchiveProjectsButton() {
-  const { selectedProjects, updateProjectViewData } = useProjectListContext()
+  const { selectedProjects, toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('archive')
 
@@ -29,10 +30,10 @@ function ArchiveProjectsButton() {
   const handleArchiveProject = async (project: Project) => {
     await archiveProject(project.id)
 
+    toggleSelectedProject(project.id, false)
     updateProjectViewData({
       ...project,
       archived: true,
-      selected: false,
       trashed: false,
     })
   }

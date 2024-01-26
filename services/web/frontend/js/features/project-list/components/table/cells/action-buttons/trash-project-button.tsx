@@ -14,7 +14,8 @@ type TrashProjectButtonProps = {
 }
 
 function TrashProjectButton({ project, children }: TrashProjectButtonProps) {
-  const { updateProjectViewData } = useProjectListContext()
+  const { toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('trash')
   const [showModal, setShowModal] = useState(false)
@@ -32,13 +33,13 @@ function TrashProjectButton({ project, children }: TrashProjectButtonProps) {
 
   const handleTrashProject = useCallback(async () => {
     await trashProject(project.id)
+    toggleSelectedProject(project.id, false)
     updateProjectViewData({
       ...project,
       trashed: true,
       archived: false,
-      selected: false,
     })
-  }, [project, updateProjectViewData])
+  }, [project, toggleSelectedProject, updateProjectViewData])
 
   if (project.trashed) return null
 

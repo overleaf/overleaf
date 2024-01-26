@@ -13,7 +13,7 @@ function CopyProjectMenuItem() {
   const {
     addClonedProjectToViewData,
     addProjectToTagInView,
-    updateProjectViewData,
+    toggleSelectedProject,
     selectedProjects,
   } = useProjectListContext()
   const { t } = useTranslation()
@@ -43,7 +43,7 @@ function CopyProjectMenuItem() {
       for (const tag of tags) {
         addProjectToTagInView(tag._id, clonedProject.project_id)
       }
-      updateProjectViewData({ ...project, selected: false })
+      toggleSelectedProject(project.id, false)
 
       if (isMounted.current) {
         setShowModal(false)
@@ -54,7 +54,7 @@ function CopyProjectMenuItem() {
       selectedProjects,
       addClonedProjectToViewData,
       addProjectToTagInView,
-      updateProjectViewData,
+      toggleSelectedProject,
     ]
   )
 

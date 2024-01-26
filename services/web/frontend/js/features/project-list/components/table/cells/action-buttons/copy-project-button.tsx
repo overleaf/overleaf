@@ -22,6 +22,7 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
   const {
     addClonedProjectToViewData,
     addProjectToTagInView,
+    toggleSelectedProject,
     updateProjectViewData,
   } = useProjectListContext()
   const { t } = useTranslation()
@@ -51,13 +52,15 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
       for (const tag of tags) {
         addProjectToTagInView(tag._id, clonedProject.project_id)
       }
-      updateProjectViewData({ ...project, selected: false })
+      toggleSelectedProject(project.id, false)
+      updateProjectViewData({ ...project })
       setShowModal(false)
     },
     [
       addClonedProjectToViewData,
       addProjectToTagInView,
       project,
+      toggleSelectedProject,
       updateProjectViewData,
     ]
   )

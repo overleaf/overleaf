@@ -9,7 +9,8 @@ import { trashProject } from '../../../../util/api'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 
 function TrashProjectsButton() {
-  const { selectedProjects, updateProjectViewData } = useProjectListContext()
+  const { selectedProjects, toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('trash')
 
@@ -29,11 +30,11 @@ function TrashProjectsButton() {
   const handleTrashProject = async (project: Project) => {
     await trashProject(project.id)
 
+    toggleSelectedProject(project.id, false)
     updateProjectViewData({
       ...project,
       trashed: true,
       archived: false,
-      selected: false,
     })
   }
 

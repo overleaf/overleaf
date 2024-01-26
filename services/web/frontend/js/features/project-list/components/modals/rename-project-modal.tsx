@@ -34,7 +34,8 @@ function RenameProjectModal({
   const { t } = useTranslation()
   const [newProjectName, setNewProjectName] = useState(project.name)
   const { error, isError, isLoading, runAsync } = useAsync()
-  const { updateProjectViewData } = useProjectListContext()
+  const { toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
   const newNotificationStyle = getMeta(
     'ol-newNotificationStyle',
     false
@@ -63,10 +64,10 @@ function RenameProjectModal({
 
       runAsync(renameProject(project.id, newProjectName))
         .then(() => {
+          toggleSelectedProject(project.id, false)
           updateProjectViewData({
             ...project,
             name: newProjectName,
-            selected: false,
           })
           handleCloseModal()
         })
@@ -78,6 +79,7 @@ function RenameProjectModal({
       newProjectName,
       project,
       runAsync,
+      toggleSelectedProject,
       updateProjectViewData,
     ]
   )

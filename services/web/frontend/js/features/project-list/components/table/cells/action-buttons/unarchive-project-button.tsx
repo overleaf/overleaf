@@ -20,13 +20,14 @@ function UnarchiveProjectButton({
 }: UnarchiveProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('unarchive')
-  const { updateProjectViewData } = useProjectListContext()
+  const { toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
 
   const handleUnarchiveProject = useCallback(async () => {
     await unarchiveProject(project.id)
-
-    updateProjectViewData({ ...project, archived: false, selected: false })
-  }, [project, updateProjectViewData])
+    toggleSelectedProject(project.id, false)
+    updateProjectViewData({ ...project, archived: false })
+  }, [project, toggleSelectedProject, updateProjectViewData])
 
   if (!project.archived) return null
 

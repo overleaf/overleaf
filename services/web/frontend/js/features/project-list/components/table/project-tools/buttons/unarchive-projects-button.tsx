@@ -5,13 +5,15 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import { unarchiveProject } from '../../../../util/api'
 
 function UnarchiveProjectsButton() {
-  const { selectedProjects, updateProjectViewData } = useProjectListContext()
+  const { selectedProjects, toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
 
   const handleUnarchiveProjects = async () => {
     for (const project of selectedProjects) {
       await unarchiveProject(project.id)
-      updateProjectViewData({ ...project, archived: false, selected: false })
+      toggleSelectedProject(project.id, false)
+      updateProjectViewData({ ...project, archived: false })
     }
   }
 

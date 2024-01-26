@@ -20,12 +20,14 @@ function UntrashProjectButton({
 }: UntrashProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('untrash')
-  const { updateProjectViewData } = useProjectListContext()
+  const { toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
 
   const handleUntrashProject = useCallback(async () => {
     await untrashProject(project.id)
-    updateProjectViewData({ ...project, trashed: false, selected: false })
-  }, [project, updateProjectViewData])
+    toggleSelectedProject(project.id, false)
+    updateProjectViewData({ ...project, trashed: false })
+  }, [project, toggleSelectedProject, updateProjectViewData])
 
   if (!project.trashed) return null
 

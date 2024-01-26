@@ -17,7 +17,8 @@ function ArchiveProjectButton({
   project,
   children,
 }: ArchiveProjectButtonProps) {
-  const { updateProjectViewData } = useProjectListContext()
+  const { toggleSelectedProject, updateProjectViewData } =
+    useProjectListContext()
   const { t } = useTranslation()
   const text = t('archive')
   const [showModal, setShowModal] = useState(false)
@@ -35,13 +36,13 @@ function ArchiveProjectButton({
 
   const handleArchiveProject = useCallback(async () => {
     await archiveProject(project.id)
+    toggleSelectedProject(project.id, false)
     updateProjectViewData({
       ...project,
       archived: true,
-      selected: false,
       trashed: false,
     })
-  }, [project, updateProjectViewData])
+  }, [project, toggleSelectedProject, updateProjectViewData])
 
   if (project.archived) return null
 
