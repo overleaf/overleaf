@@ -50,6 +50,10 @@ module.exports = HomeController = {
         websiteRedesignVariant === 'new-design' ||
         websiteRedesignVariant === 'new-design-registration'
 
+      if (websiteRedesignActive) {
+        return res.redirect(302, '/home-2')
+      }
+
       const onboardingFlowAssignment =
         await SplitTestHandler.promises.getAssignment(
           req,
@@ -57,23 +61,41 @@ module.exports = HomeController = {
           'onboarding-flow'
         )
       AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
-        page: req.url,
+        page: req.path,
         'website-redesign': websiteRedesignVariant,
       })
 
-      if (websiteRedesignActive) {
-        return res.render('external/home/website-redesign/index', {
-          onboardingFlowVariant: onboardingFlowAssignment.variant,
-          hideNewsletterCheckbox:
-            onboardingFlowAssignment.variant === 'token-confirmation-odc',
-        })
-      } else {
-        return res.render('external/home/v2', {
-          onboardingFlowVariant: onboardingFlowAssignment.variant,
-          hideNewsletterCheckbox:
-            onboardingFlowAssignment.variant === 'token-confirmation-odc',
-        })
-      }
+      return res.render('external/home/v2', {
+        onboardingFlowVariant: onboardingFlowAssignment.variant,
+        hideNewsletterCheckbox:
+          onboardingFlowAssignment.variant === 'token-confirmation-odc',
+      })
+    } else {
+      return res.redirect('/login')
+    }
+  },
+
+  async homeNew(req, res) {
+    if (Features.hasFeature('homepage') && homepageExists) {
+      const websiteRedesignVariant =
+        res.locals.splitTestVariants?.['website-redesign']
+
+      const onboardingFlowAssignment =
+        await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'onboarding-flow'
+        )
+      AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
+        page: req.path,
+        'website-redesign': websiteRedesignVariant,
+      })
+
+      return res.render('external/home/website-redesign/index', {
+        onboardingFlowVariant: onboardingFlowAssignment.variant,
+        hideNewsletterCheckbox:
+          onboardingFlowAssignment.variant === 'token-confirmation-odc',
+      })
     } else {
       return res.redirect('/login')
     }
