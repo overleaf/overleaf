@@ -23,7 +23,6 @@ export default class DocumentCompiler {
     compilingRef,
     projectId,
     setChangedAt,
-    setSavedAt,
     setCompiling,
     setData,
     setFirstRenderDone,
@@ -35,7 +34,6 @@ export default class DocumentCompiler {
     this.compilingRef = compilingRef
     this.projectId = projectId
     this.setChangedAt = setChangedAt
-    this.setSavedAt = setSavedAt
     this.setCompiling = setCompiling
     this.setData = setData
     this.setFirstRenderDone = setFirstRenderDone
@@ -82,7 +80,7 @@ export default class DocumentCompiler {
         return resolve()
       }
 
-      this._onDocSavedCallback = docSavedParams => {
+      this._onDocSavedCallback = () => {
         // TODO: it's possible that there's more than one doc open with buffered ops, and ideally we'd wait for all docs to be flushed
         removeEventListener()
         resolve()
@@ -124,7 +122,6 @@ export default class DocumentCompiler {
 
       // reset values
       this.setChangedAt(0) // TODO: wait for doc:saved?
-      this.setSavedAt(0)
       this.validationIssues = undefined
 
       const params = this.buildCompileParams(options)

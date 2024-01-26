@@ -254,9 +254,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // the timestamp that a doc was last changed
   const [changedAt, setChangedAt] = useState(0)
 
-  // the timestamp that a doc was last saved
-  const [savedAt, setSavedAt] = useState(0)
-
   const { signal } = useAbortController()
 
   const cleanupCompileResult = useCallback(() => {
@@ -288,7 +285,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
     return new DocumentCompiler({
       projectId,
       setChangedAt,
-      setSavedAt,
       setCompiling,
       setData,
       setFirstRenderDone,
@@ -321,8 +317,8 @@ export const LocalCompileProvider: FC = ({ children }) => {
   }, [compiler, stopOnFirstError])
 
   useEffect(() => {
-    setUncompiled(changedAt > 0 || savedAt > 0)
-  }, [setUncompiled, changedAt, savedAt])
+    setUncompiled(changedAt > 0)
+  }, [setUncompiled, changedAt])
 
   useEffect(() => {
     setEditedSinceCompileStarted(changedAt > 0)
@@ -530,13 +526,13 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // call the debounced autocompile function if the project is available for auto-compiling and it has changed
   useEffect(() => {
     if (canAutoCompile) {
-      if (changedAt > 0 || savedAt > 0) {
+      if (changedAt > 0) {
         compiler.debouncedAutoCompile()
       }
     } else {
       compiler.debouncedAutoCompile.cancel()
     }
-  }, [compiler, canAutoCompile, changedAt, savedAt])
+  }, [compiler, canAutoCompile, changedAt])
 
   // cancel debounced recompile on unmount
   useEffect(() => {
@@ -651,7 +647,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
       validationIssues,
       firstRenderDone,
       setChangedAt,
-      setSavedAt,
       cleanupCompileResult,
       syncToEntry,
     }),
@@ -702,7 +697,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
       validationIssues,
       firstRenderDone,
       setChangedAt,
-      setSavedAt,
       cleanupCompileResult,
       setShowLogs,
       toggleLogs,

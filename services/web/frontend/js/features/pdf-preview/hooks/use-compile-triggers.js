@@ -68,16 +68,4 @@ export default function useCompileTriggers(
     setOrTriggerChangedAt(Date.now())
   }, [setOrTriggerChangedAt])
   useEventListener('doc:changed', setChangedAtHandler)
-
-  // record when the server acknowledges saving changes
-  const setOrTriggerSavedAt = useDetachAction(
-    'set-saved-at',
-    setSavedAt,
-    'detacher',
-    'detached'
-  )
-  const setSavedAtHandler = useCallback(() => {
-    setOrTriggerSavedAt(Date.now())
-  }, [setOrTriggerSavedAt])
-  useEventListener('doc:saved', setSavedAtHandler)
 }
