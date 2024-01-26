@@ -5,6 +5,7 @@
     "patch-package": "^6.4.7"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.6",
     "eslint": "^8.15.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",

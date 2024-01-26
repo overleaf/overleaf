@@ -1,7 +1,7 @@
 class Range {
   /**
-   * @param {number} pos 
-   * @param {number} length 
+   * @param {number} pos
+   * @param {number} length
    */
   constructor(pos, length) {
     this.pos = pos
@@ -11,7 +11,7 @@ class Range {
   toRaw() {
     return {
       pos: this.pos,
-      length: this.length
+      length: this.length,
     }
   }
 
