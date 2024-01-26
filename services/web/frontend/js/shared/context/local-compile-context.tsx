@@ -90,7 +90,6 @@ export type CompileContext = {
   startCompile: (options?: any) => void
   stopCompile: () => void
   setChangedAt: (value: any) => void
-  setSavedAt: (value: any) => void
   clearCache: () => void
   syncToEntry: (value: any) => void
 }

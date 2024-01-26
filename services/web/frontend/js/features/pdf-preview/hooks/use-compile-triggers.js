@@ -30,11 +30,7 @@ export const startCompileKeypress = event => {
   }
 }
 
-export default function useCompileTriggers(
-  startCompile,
-  setChangedAt,
-  setSavedAt
-) {
+export default function useCompileTriggers(startCompile, setChangedAt) {
   const handleKeyDown = useCallback(
     event => {
       if (startCompileKeypress(event)) {

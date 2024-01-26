@@ -66,7 +66,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
     startCompile: _startCompile,
     stopCompile: _stopCompile,
     setChangedAt: _setChangedAt,
-    setSavedAt: _setSavedAt,
     clearCache: _clearCache,
     syncToEntry: _syncToEntry,
   } = localCompileContext
@@ -356,12 +355,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
     'detached',
     'detacher'
   )
-  const setSavedAt = useDetachAction(
-    'setSavedAt',
-    _setSavedAt,
-    'detached',
-    'detacher'
-  )
   const clearCache = useDetachAction(
     'clearCache',
     _clearCache,
@@ -376,7 +369,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
     'detacher'
   )
 
-  useCompileTriggers(startCompile, setChangedAt, setSavedAt)
+  useCompileTriggers(startCompile, setChangedAt)
 
   const value = useMemo(
     () => ({
@@ -431,7 +424,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
       validationIssues,
       firstRenderDone,
       setChangedAt,
-      setSavedAt,
       cleanupCompileResult,
       syncToEntry,
     }),
@@ -485,7 +477,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
       validationIssues,
       firstRenderDone,
       setChangedAt,
-      setSavedAt,
       cleanupCompileResult,
       syncToEntry,
     ]
