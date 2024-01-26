@@ -361,11 +361,14 @@
       color: #bbdbb8;
       font-size: 4rem;
       line-height: 1.25;
-      font-family: 'DM Mono', monospace;
       display: inherit;
 
-      #home-animation-text {
+      span {
+        /* specifity workaround, otherwise .website-redesign span would take precedence */
         font-family: 'DM Mono', monospace;
+      }
+
+      #home-animation-text {
         color: @neutral-70;
       }
 

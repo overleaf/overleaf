@@ -3,6 +3,7 @@
   overflow-x: hidden;
 
   p,
+  div,
   h1,
   h2,
   h3,
@@ -605,6 +606,10 @@
   }
 
   .integrations-card {
+    display: flex; /* for center align */
+    flex-wrap: wrap;
+    align-items: center;
+
     .integrations-icons {
       img {
         width: 6rem; // 96px
