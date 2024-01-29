@@ -527,6 +527,7 @@
   "error_opening_document": "Error opening document",
   "error_opening_document_detail": "Sorry, something went wrong opening this document. Please try again.",
   "error_performing_request": "An error has occurred while performing your request.",
+  "error_processing_file": "Sorry, something went wrong processing this file. Please try again.",
   "error_submitting_comment": "Error submitting comment",
   "es": "Spanish",
   "estimated_number_of_users": "Estimated Number of Users",

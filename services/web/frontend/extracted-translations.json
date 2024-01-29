@@ -358,6 +358,7 @@
   "error_opening_document": "",
   "error_opening_document_detail": "",
   "error_performing_request": "",
+  "error_processing_file": "",
   "error_submitting_comment": "",
   "example_project": "",
   "existing_plan_active_until_term_end": "",
