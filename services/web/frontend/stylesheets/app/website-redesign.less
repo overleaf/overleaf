@@ -498,6 +498,10 @@
           display: inline-flex;
           justify-content: space-between;
           text-decoration: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
         }
 
         i.material-symbols-rounded {
@@ -931,5 +935,9 @@
 
   .overleaf-sticker {
     float: right;
+
+    @media (max-width: @screen-sm-max) {
+      width: 74px; // 70% of 106px
+    }
   }
 }
