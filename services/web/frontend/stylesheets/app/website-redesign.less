@@ -456,25 +456,21 @@
 
   .organization-logos-container {
     display: flex;
-    justify-content: space-evenly;
-    height: 62px;
+    justify-content: space-around;
+    align-items: center;
 
     @media (max-width: @screen-md-max) {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      flex-wrap: wrap;
       gap: 30px;
-      justify-items: center;
-      height: unset;
     }
 
     .organization-logo {
       object-fit: contain;
-      width: 100%;
-      height: 100%;
-      padding: 0 @padding-md;
+      max-height: 62px;
 
       @media (max-width: @screen-md-max) {
         max-height: 40px;
+        flex-basis: 34%;
       }
     }
   }
