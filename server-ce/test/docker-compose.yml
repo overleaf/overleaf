@@ -14,9 +14,9 @@ services:
       - mongo
       - redis
     environment:
-      SHARELATEX_APP_NAME: Overleaf Community Edition
-      SHARELATEX_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
-      SHARELATEX_REDIS_HOST: redis
+      OVERLEAF_APP_NAME: Overleaf Community Edition
+      OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
+      OVERLEAF_REDIS_HOST: redis
       REDIS_HOST: redis
       ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
       ENABLE_CONVERSIONS: 'true'

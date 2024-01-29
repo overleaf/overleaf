@@ -89,7 +89,7 @@ ENV OVERLEAF_CONFIG /etc/sharelatex/settings.js
 ENV WEB_API_USER "overleaf"
 ENV ADMIN_PRIVILEGE_AVAILABLE "true"
 
-ENV SHARELATEX_APP_NAME "Overleaf Community Edition"
+ENV OVERLEAF_APP_NAME "Overleaf Community Edition"
 
 ENV OPTIMISE_PDF "true"
 

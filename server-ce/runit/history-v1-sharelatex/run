@@ -6,4 +6,4 @@ if [ "$DEBUG_NODE" == "true" ]; then
     NODE_PARAMS="--inspect=0.0.0.0:30640"
 fi
 
-MONGO_CONNECTION_STRING=$SHARELATEX_MONGO_URL NODE_CONFIG_DIR=/overleaf/services/history-v1/config exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS  /overleaf/services/history-v1/app.js >> /var/log/sharelatex/history-v1.log 2>&1
+MONGO_CONNECTION_STRING=$OVERLEAF_MONGO_URL NODE_CONFIG_DIR=/overleaf/services/history-v1/config exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS  /overleaf/services/history-v1/app.js >> /var/log/sharelatex/history-v1.log 2>&1

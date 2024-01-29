@@ -67,7 +67,7 @@ const settings = {
   //
   // The following works out of the box with Mongo's default settings:
   mongo: {
-    url: process.env.SHARELATEX_MONGO_URL || 'mongodb://dockerhost/sharelatex',
+    url: process.env.OVERLEAF_MONGO_URL || 'mongodb://dockerhost/sharelatex',
   },
 
   // Redis is used in Overleaf Community Edition for high volume queries, like real-time
@@ -76,9 +76,9 @@ const settings = {
   // The following config will work with Redis's default settings:
   redis: {
     web: (redisConfig = {
-      host: process.env.SHARELATEX_REDIS_HOST || 'dockerhost',
-      port: process.env.SHARELATEX_REDIS_PORT || '6379',
-      password: process.env.SHARELATEX_REDIS_PASS || undefined,
+      host: process.env.OVERLEAF_REDIS_HOST || 'dockerhost',
+      port: process.env.OVERLEAF_REDIS_PORT || '6379',
+      password: process.env.OVERLEAF_REDIS_PASS || undefined,
       key_schema: {
         // document-updater
         blockingKey({ doc_id }) {
@@ -179,33 +179,33 @@ const settings = {
 
   // Where your instance of Overleaf Community Edition can be found publicly. This is used
   // when emails are sent out and in generated links:
-  siteUrl: (siteUrl = process.env.SHARELATEX_SITE_URL || 'http://localhost'),
+  siteUrl: (siteUrl = process.env.OVERLEAF_SITE_URL || 'http://localhost'),
 
   // Status page URL as displayed on the maintenance/500 pages.
-  statusPageUrl: process.env.SHARELATEX_STATUS_PAGE_URL,
+  statusPageUrl: process.env.OVERLEAF_STATUS_PAGE_URL,
 
   // The name this is used to describe your Overleaf Community Edition Installation
-  appName: process.env.SHARELATEX_APP_NAME || 'Overleaf Community Edition',
+  appName: process.env.OVERLEAF_APP_NAME || 'Overleaf Community Edition',
 
   restrictInvitesToExistingAccounts:
-    process.env.SHARELATEX_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
+    process.env.OVERLEAF_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
 
   nav: {
     title:
-      process.env.SHARELATEX_NAV_TITLE ||
-      process.env.SHARELATEX_APP_NAME ||
+      process.env.OVERLEAF_NAV_TITLE ||
+      process.env.OVERLEAF_APP_NAME ||
       'Overleaf Community Edition',
   },
 
   // The email address which users will be directed to as the main point of
   // contact for this installation of Overleaf Community Edition.
-  adminEmail: process.env.SHARELATEX_ADMIN_EMAIL || 'placeholder@example.com',
+  adminEmail: process.env.OVERLEAF_ADMIN_EMAIL || 'placeholder@example.com',
 
   // If provided, a sessionSecret is used to sign cookies so that they cannot be
   // spoofed. This is recommended.
   security: {
     sessionSecret:
-      process.env.SHARELATEX_SESSION_SECRET || process.env.CRYPTO_RANDOM,
+      process.env.OVERLEAF_SESSION_SECRET || process.env.CRYPTO_RANDOM,
   },
 
   // These credentials are used for authenticating api requests
@@ -222,18 +222,18 @@ const settings = {
 
   // If you are running Overleaf Community Edition over https, set this to true to send the
   // cookie with a secure flag (recommended).
-  secureCookie: process.env.SHARELATEX_SECURE_COOKIE != null,
+  secureCookie: process.env.OVERLEAF_SECURE_COOKIE != null,
 
   // If you are running Overleaf Community Edition behind a proxy (like Apache, Nginx, etc)
   // then set this to true to allow it to correctly detect the forwarded IP
   // address and http/https protocol information.
 
-  behindProxy: process.env.SHARELATEX_BEHIND_PROXY || false,
+  behindProxy: process.env.OVERLEAF_BEHIND_PROXY || false,
   trustedProxyIps: process.env.SHARELATEX_TRUSTED_PROXY_IPS,
 
   // The amount of time, in milliseconds, until the (rolling) cookie session expires
   cookieSessionLength: parseInt(
-    process.env.SHARELATEX_COOKIE_SESSION_LENGTH || 5 * 24 * 60 * 60 * 1000, // default 5 days
+    process.env.OVERLEAF_COOKIE_SESSION_LENGTH || 5 * 24 * 60 * 60 * 1000, // default 5 days
     10
   ),
 
@@ -269,7 +269,7 @@ const settings = {
       user: 'staging',
       pass: process.env.STAGING_PASSWORD,
       requestTimeout: parseInt(
-        process.env.SHARELATEX_HISTORY_V1_HTTP_REQUEST_TIMEOUT || '300000', // default is 5min
+        process.env.OVERLEAF_HISTORY_V1_HTTP_REQUEST_TIMEOUT || '300000', // default is 5min
         10
       ),
     },
@@ -291,27 +291,27 @@ const settings = {
 
 // # OPTIONAL CONFIGURABLE SETTINGS
 
-if (process.env.SHARELATEX_LEFT_FOOTER != null) {
+if (process.env.OVERLEAF_LEFT_FOOTER != null) {
   try {
-    settings.nav.left_footer = JSON.parse(process.env.SHARELATEX_LEFT_FOOTER)
+    settings.nav.left_footer = JSON.parse(process.env.OVERLEAF_LEFT_FOOTER)
   } catch (error) {
     e = error
-    console.error('could not parse SHARELATEX_LEFT_FOOTER, not valid JSON')
+    console.error('could not parse OVERLEAF_LEFT_FOOTER, not valid JSON')
   }
 }
 
-if (process.env.SHARELATEX_RIGHT_FOOTER != null) {
-  settings.nav.right_footer = process.env.SHARELATEX_RIGHT_FOOTER
+if (process.env.OVERLEAF_RIGHT_FOOTER != null) {
+  settings.nav.right_footer = process.env.OVERLEAF_RIGHT_FOOTER
   try {
-    settings.nav.right_footer = JSON.parse(process.env.SHARELATEX_RIGHT_FOOTER)
+    settings.nav.right_footer = JSON.parse(process.env.OVERLEAF_RIGHT_FOOTER)
   } catch (error1) {
     e = error1
-    console.error('could not parse SHARELATEX_RIGHT_FOOTER, not valid JSON')
+    console.error('could not parse OVERLEAF_RIGHT_FOOTER, not valid JSON')
   }
 }
 
-if (process.env.SHARELATEX_HEADER_IMAGE_URL != null) {
-  settings.nav.custom_logo = process.env.SHARELATEX_HEADER_IMAGE_URL
+if (process.env.OVERLEAF_HEADER_IMAGE_URL != null) {
+  settings.nav.custom_logo = process.env.OVERLEAF_HEADER_IMAGE_URL
 }
 
 if (process.env.SHARELATEX_HEADER_NAV_LINKS != null) {
@@ -325,14 +325,12 @@ if (process.env.SHARELATEX_HEADER_NAV_LINKS != null) {
 `)
 }
 
-if (process.env.SHARELATEX_HEADER_EXTRAS != null) {
+if (process.env.OVERLEAF_HEADER_EXTRAS != null) {
   try {
-    settings.nav.header_extras = JSON.parse(
-      process.env.SHARELATEX_HEADER_EXTRAS
-    )
+    settings.nav.header_extras = JSON.parse(process.env.OVERLEAF_HEADER_EXTRAS)
   } catch (error2) {
     e = error2
-    console.error('could not parse SHARELATEX_HEADER_EXTRAS, not valid JSON')
+    console.error('could not parse OVERLEAF_HEADER_EXTRAS, not valid JSON')
   }
 }
 
@@ -345,50 +343,49 @@ if (process.env.SHARELATEX_HEADER_EXTRAS != null) {
 //
 //     http://www.nodemailer.com/docs/transports
 
-if (process.env.SHARELATEX_EMAIL_FROM_ADDRESS != null) {
+if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
   settings.email = {
-    fromAddress: process.env.SHARELATEX_EMAIL_FROM_ADDRESS,
-    replyTo: process.env.SHARELATEX_EMAIL_REPLY_TO || '',
-    driver: process.env.SHARELATEX_EMAIL_DRIVER,
+    fromAddress: process.env.OVERLEAF_EMAIL_FROM_ADDRESS,
+    replyTo: process.env.OVERLEAF_EMAIL_REPLY_TO || '',
+    driver: process.env.OVERLEAF_EMAIL_DRIVER,
     parameters: {
       // AWS Creds
-      AWSAccessKeyID: process.env.SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID,
-      AWSSecretKey: process.env.SHARELATEX_EMAIL_AWS_SES_SECRET_KEY,
+      AWSAccessKeyID: process.env.OVERLEAF_EMAIL_AWS_SES_ACCESS_KEY_ID,
+      AWSSecretKey: process.env.OVERLEAF_EMAIL_AWS_SES_SECRET_KEY,
 
       // SMTP Creds
-      host: process.env.SHARELATEX_EMAIL_SMTP_HOST,
-      port: process.env.SHARELATEX_EMAIL_SMTP_PORT,
-      secure: parse(process.env.SHARELATEX_EMAIL_SMTP_SECURE),
-      ignoreTLS: parse(process.env.SHARELATEX_EMAIL_SMTP_IGNORE_TLS),
-      name: process.env.SHARELATEX_EMAIL_SMTP_NAME,
-      logger: process.env.SHARELATEX_EMAIL_SMTP_LOGGER === 'true',
+      host: process.env.OVERLEAF_EMAIL_SMTP_HOST,
+      port: process.env.OVERLEAF_EMAIL_SMTP_PORT,
+      secure: parse(process.env.OVERLEAF_EMAIL_SMTP_SECURE),
+      ignoreTLS: parse(process.env.OVERLEAF_EMAIL_SMTP_IGNORE_TLS),
+      name: process.env.OVERLEAF_EMAIL_SMTP_NAME,
+      logger: process.env.OVERLEAF_EMAIL_SMTP_LOGGER === 'true',
     },
 
-    textEncoding: process.env.SHARELATEX_EMAIL_TEXT_ENCODING,
+    textEncoding: process.env.OVERLEAF_EMAIL_TEXT_ENCODING,
     template: {
-      customFooter: process.env.SHARELATEX_CUSTOM_EMAIL_FOOTER,
+      customFooter: process.env.OVERLEAF_CUSTOM_EMAIL_FOOTER,
     },
   }
 
-  if (process.env.SHARELATEX_EMAIL_AWS_SES_REGION != null) {
-    settings.email.parameters.region =
-      process.env.SHARELATEX_EMAIL_AWS_SES_REGION
+  if (process.env.OVERLEAF_EMAIL_AWS_SES_REGION != null) {
+    settings.email.parameters.region = process.env.OVERLEAF_EMAIL_AWS_SES_REGION
   }
 
   if (
-    process.env.SHARELATEX_EMAIL_SMTP_USER != null ||
-    process.env.SHARELATEX_EMAIL_SMTP_PASS != null
+    process.env.OVERLEAF_EMAIL_SMTP_USER != null ||
+    process.env.OVERLEAF_EMAIL_SMTP_PASS != null
   ) {
     settings.email.parameters.auth = {
-      user: process.env.SHARELATEX_EMAIL_SMTP_USER,
-      pass: process.env.SHARELATEX_EMAIL_SMTP_PASS,
+      user: process.env.OVERLEAF_EMAIL_SMTP_USER,
+      pass: process.env.OVERLEAF_EMAIL_SMTP_PASS,
     }
   }
 
-  if (process.env.SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH != null) {
+  if (process.env.OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH != null) {
     settings.email.parameters.tls = {
       rejectUnauthorized: parse(
-        process.env.SHARELATEX_EMAIL_SMTP_TLS_REJECT_UNAUTH
+        process.env.OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH
       ),
     }
   }
@@ -464,21 +461,21 @@ if (process.env.SANDBOXED_COMPILES === 'true') {
 
 // Templates
 // ---------
-if (process.env.SHARELATEX_TEMPLATES_USER_ID) {
+if (process.env.OVERLEAF_TEMPLATES_USER_ID) {
   settings.templates = {
     mountPointUrl: '/templates',
-    user_id: process.env.SHARELATEX_TEMPLATES_USER_ID,
+    user_id: process.env.OVERLEAF_TEMPLATES_USER_ID,
   }
 
   settings.templateLinks = parse(
-    process.env.SHARELATEX_NEW_PROJECT_TEMPLATE_LINKS
+    process.env.OVERLEAF_NEW_PROJECT_TEMPLATE_LINKS
   )
 }
 
 // /Learn
 // -------
-if (process.env.SHARELATEX_PROXY_LEARN != null) {
-  settings.proxyLearn = parse(process.env.SHARELATEX_PROXY_LEARN)
+if (process.env.OVERLEAF_PROXY_LEARN != null) {
+  settings.proxyLearn = parse(process.env.OVERLEAF_PROXY_LEARN)
   if (settings.proxyLearn) {
     settings.nav.header_extras = [
       {
@@ -498,26 +495,26 @@ if (process.env.SHARELATEX_ELASTICSEARCH_URL != null) {
 }
 
 // filestore
-switch (process.env.SHARELATEX_FILESTORE_BACKEND) {
+switch (process.env.OVERLEAF_FILESTORE_BACKEND) {
   case 's3':
     settings.filestore = {
       backend: 's3',
       stores: {
-        user_files: process.env.SHARELATEX_FILESTORE_USER_FILES_BUCKET_NAME,
+        user_files: process.env.OVERLEAF_FILESTORE_USER_FILES_BUCKET_NAME,
         template_files:
-        process.env.SHARELATEX_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
+          process.env.OVERLEAF_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
       },
       s3: {
         key:
-          process.env.SHARELATEX_FILESTORE_S3_ACCESS_KEY_ID ||
+          process.env.OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID ||
           process.env.AWS_ACCESS_KEY_ID,
         secret:
-          process.env.SHARELATEX_FILESTORE_S3_SECRET_ACCESS_KEY ||
+          process.env.OVERLEAF_FILESTORE_S3_SECRET_ACCESS_KEY ||
           process.env.AWS_SECRET_ACCESS_KEY,
-        endpoint: process.env.SHARELATEX_FILESTORE_S3_ENDPOINT,
-        pathStyle: process.env.SHARELATEX_FILESTORE_S3_PATH_STYLE === 'true',
+        endpoint: process.env.OVERLEAF_FILESTORE_S3_ENDPOINT,
+        pathStyle: process.env.OVERLEAF_FILESTORE_S3_PATH_STYLE === 'true',
         region:
-          process.env.SHARELATEX_FILESTORE_S3_REGION ||
+          process.env.OVERLEAF_FILESTORE_S3_REGION ||
           process.env.AWS_DEFAULT_REGION,
       },
     }
