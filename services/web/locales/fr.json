@@ -359,7 +359,6 @@
   "git_bridge_modal_description": "Vous pouvez effectuer un git clone de votre projet en utilisant le lien ci-dessous.",
   "github_commit_message_placeholder": "Message de commit pour les changements effectués dans __appName__…",
   "github_credentials_expired": "Vos identifiants GitHub ont expiré",
-  "github_for_link_shared_projects": "Vous avez accédé à ce projet par un partage de lien : celui-ci ne sera pas synchronisé à votre GitHub tant que vous n’aurez pas été invité par courriel par le propriétaire du projet.",
   "github_git_folder_error": "Ce projet contient un répertoire .git à sa racine, ce qui indique qu’il s’agit déjà d’un dépôt Git. Le service de synchronisation GitHub d’Overleaf n’est pas en mesure de synchroniser les historiques Git. Veuillez supprimer le répertoire .git et réessayer.",
   "github_integration_info": "Poussez et tirez des commits vers et depuis GitHub, ou directement depuis Git, permettant ainsi à vous et vos collaborateur·rice·s de travailler hors connexion avec Git ou en ligne sur Overleaf.",
   "github_integration_lowercase": "Intégration avec Git et GitHub",

@@ -257,7 +257,6 @@
   "git_bridge_modal_description": "Você pode usar git clone no seu projeto usando o link abaixo.",
   "github_commit_message_placeholder": "Mensagem de commit para as alterações feitas no __appName__...",
   "github_credentials_expired": "Suas credenciais de autorização do GitHub expiraram",
-  "github_for_link_shared_projects": "Este projeto foi acessado por meio do compartilhamento de links e não será sincronizado com o seu Github, a menos que você seja convidado por e-mail pelo proprietário do projeto.",
   "github_integration_info": "Enviar e baixe suas alterações do GitHub, assim você e seus colaboradores podem trabalhar offline com o git e online com o Overleaf.",
   "github_integration_lowercase": "Integração com GitHub",
   "github_is_premium": "Sincronizar com GitHub é um recurso premium",

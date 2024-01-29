@@ -579,7 +579,6 @@
   "github_commit_message_placeholder": "Commit besked for ændringer i __appName__...",
   "github_credentials_expired": "Dine GitHub autentificeringsoplysninger er udløbet",
   "github_file_name_error": "Dette repository kan ikke importeres, fordi det indeholder en eller flere filer med et ugyldigt filnavn:",
-  "github_for_link_shared_projects": "Du har adgang til dette projekt via link-deling, og vil ikke blive synkroniseret med GitHub, medmindre du bliver inviteret via e-mail af projektejeren.",
   "github_git_and_dropbox_integrations": "<0>GitHub</0>-, <0>Git</0>- og <0>Dropbox</0>-integrationer",
   "github_git_folder_error": "Dette projekt indeholder en .git mappe i den yderste mappe, hvilket indikerer at det allerede er et Git repository. Overleaf GitHub synkroniseringen kan ikke synkronisere Git historikker. Fjern venligst .git mappen og prøv igen.",
   "github_integration_info": "Push og pull commits til og fra Github eller direkte fra Git, so dig og dine samarbejdspartnere kan arbejde offline med Git og online med Overleaf.",

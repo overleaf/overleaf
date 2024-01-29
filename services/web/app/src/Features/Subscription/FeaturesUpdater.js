@@ -59,6 +59,16 @@ async function refreshFeatures(userId, reason) {
       logger.error(err)
     }
   }
+
+  if (oldFeatures.github === true && features.github === false) {
+    logger.debug({ userId }, '[FeaturesUpdater] must unlink github')
+    try {
+      await Modules.promises.hooks.fire('removeGithub', userId, reason)
+    } catch (err) {
+      logger.error(err)
+    }
+  }
+
   return { features: newFeatures, featuresChanged }
 }
 

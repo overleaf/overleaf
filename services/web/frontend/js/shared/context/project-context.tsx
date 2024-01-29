@@ -23,6 +23,7 @@ const ProjectContext = createContext<
         versioning?: boolean
         gitBridge?: boolean
         referencesSearch?: boolean
+        github?: boolean
       }
       publicAccessLevel?: PublicAccessLevel
       owner: {
