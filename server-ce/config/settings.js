@@ -420,7 +420,7 @@ if (
 // Overleaf Server Pro
 // ######################
 
-if (parse(process.env.SHARELATEX_IS_SERVER_PRO) === true) {
+if (parse(process.env.OVERLEAF_IS_SERVER_PRO) === true) {
   settings.bypassPercentageRollouts = true
   settings.apis.references = { url: 'http://localhost:3040' }
 }

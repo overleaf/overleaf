@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ "${SHARELATEX_IS_SERVER_PRO:-null}" == "true" ]]; then
+if [[ "${OVERLEAF_IS_SERVER_PRO:-null}" == "true" ]]; then
   environment="server-pro"
 else
   environment="server-ce"
