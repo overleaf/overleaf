@@ -136,3 +136,5 @@ const { addHook } = require('pirates')
 addHook(() => '', { exts: ['.css'], ignoreNodeModules: false })
 
 globalThis.HTMLElement.prototype.scrollIntoView = () => {}
+
+globalThis.DOMParser = window.DOMParser
