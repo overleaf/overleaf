@@ -10,7 +10,7 @@ export type NotificationType =
   | 'error'
   | 'offer'
 
-type NotificationProps = {
+export type NotificationProps = {
   action?: React.ReactElement
   ariaLive?: 'polite' | 'off' | 'assertive'
   className?: string
@@ -21,6 +21,7 @@ type NotificationProps = {
   onDismiss?: () => void
   title?: string
   type: NotificationType
+  id?: string
 }
 
 function NotificationIcon({
@@ -57,6 +58,7 @@ function Notification({
   onDismiss,
   title,
   type,
+  id,
 }: NotificationProps) {
   type = type || 'info'
   const { t } = useTranslation()
@@ -83,6 +85,7 @@ function Notification({
       className={notificationClassName}
       aria-live={ariaLive || 'off'}
       role="alert"
+      id={id}
     >
       <NotificationIcon notificationType={type} customIcon={customIcon} />
 
