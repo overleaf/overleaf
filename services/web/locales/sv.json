@@ -363,6 +363,7 @@
   "get_started_now": "Börja redan nu",
   "github_commit_message_placeholder": "Commit meddelande för ändringar gjorda i __appName__...",
   "github_credentials_expired": "Din auktorisering för GitHub har löpt ut",
+  "github_for_link_shared_projects": "Det här projektet har nåtts via länkdelning och kommer inte att synkroniseras med din GitHub om inte projektägaren bjuder in dig via e-post.",
   "github_integration_info": "Hämta och tryck upp ändringar till och från GitHub, så att dina samarbetspartners kan jobba offline med git och online med __appName__.",
   "github_integration_lowercase": "GitHubintegration",
   "github_is_premium": "GitHub synk är en premium funktion",
