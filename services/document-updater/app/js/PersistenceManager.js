@@ -1,8 +1,9 @@
+const { promisify } = require('util')
+const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
 const Metrics = require('./Metrics')
 const logger = require('@overleaf/logger')
-const { promisifyAll } = require('@overleaf/promise-utils')
 const request = require('requestretry').defaults({
   maxAttempts: 2,
   retryDelay: 10,
@@ -175,10 +176,17 @@ function setDoc(
   )
 }
 
-module.exports = { getDoc, setDoc }
-
-module.exports.promises = promisifyAll(module.exports, {
-  multiResult: {
-    getDoc: ['lines', 'version', 'ranges', 'pathname', 'projectHistoryId'],
+module.exports = {
+  getDoc,
+  setDoc,
+  promises: {
+    getDoc: promisifyMultiResult(getDoc, [
+      'lines',
+      'version',
+      'ranges',
+      'pathname',
+      'projectHistoryId',
+    ]),
+    setDoc: promisify(setDoc),
   },
-})
+}

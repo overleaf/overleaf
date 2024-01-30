@@ -1,3 +1,4 @@
+const { promisify } = require('util')
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const os = require('os')
@@ -64,6 +65,27 @@ module.exports = class RedisLocker {
 
     // read-only copy for unit tests
     this.unlockScript = UNLOCK_SCRIPT
+
+    this.promises = {
+      checkLock: promisify(this.checkLock.bind(this)),
+      getLock: promisify(this.getLock.bind(this)),
+      releaseLock: promisify(this.releaseLock.bind(this)),
+
+      // tryLock returns two values: gotLock and lockValue. We need to merge
+      // these two values into one for the promises version.
+      tryLock: id =>
+        new Promise((resolve, reject) => {
+          this.tryLock(id, (err, gotLock, lockValue) => {
+            if (err) {
+              reject(err)
+            } else if (!gotLock) {
+              resolve(null)
+            } else {
+              resolve(lockValue)
+            }
+          })
+        }),
+    }
   }
 
   // Use a signed lock value as described in

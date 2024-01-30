@@ -10,8 +10,8 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let RealTimeRedisManager
 const Settings = require('@overleaf/settings')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
@@ -30,7 +30,7 @@ let COUNT = 0
 
 const MAX_OPS_PER_ITERATION = 8 // process a limited number of ops for safety
 
-module.exports = RealTimeRedisManager = {
+const RealTimeRedisManager = {
   getPendingUpdatesForDoc(docId, callback) {
     const multi = rclient.multi()
     multi.lrange(
@@ -92,3 +92,8 @@ module.exports = RealTimeRedisManager = {
     }
   },
 }
+
+module.exports = RealTimeRedisManager
+module.exports.promises = promisifyAll(RealTimeRedisManager, {
+  without: ['sendData'],
+})

@@ -1,12 +1,15 @@
 const chai = require('chai')
+const chaiAsPromised = require('chai-as-promised')
+const sinonChai = require('sinon-chai')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 
 // Chai configuration
 chai.should()
+chai.use(chaiAsPromised)
 // Load sinon-chai assertions so expect(stubFn).to.have.been.calledWith('abc')
 // has a nicer failure messages
-chai.use(require('sinon-chai'))
+chai.use(sinonChai)
 
 // Global stubs
 const sandbox = sinon.createSandbox()

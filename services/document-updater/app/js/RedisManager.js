@@ -1,16 +1,15 @@
-let RedisManager
 const Settings = require('@overleaf/settings')
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const logger = require('@overleaf/logger')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const metrics = require('./Metrics')
 const Errors = require('./Errors')
 const crypto = require('crypto')
 const async = require('async')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const { docIsTooLarge } = require('./Limits')
-const { promisifyAll } = require('@overleaf/promise-utils')
 
 // Sometimes Redis calls take an unexpectedly long time.  We have to be
 // quick with Redis calls because we're holding a lock that expires
@@ -28,7 +27,7 @@ const MAX_RANGES_SIZE = 3 * MEGABYTES
 
 const keys = Settings.redis.documentupdater.key_schema
 
-module.exports = RedisManager = {
+const RedisManager = {
   rclient,
 
   putDocInMemory(
@@ -619,7 +618,9 @@ module.exports = RedisManager = {
   },
 }
 
-module.exports.promises = promisifyAll(module.exports, {
+module.exports = RedisManager
+module.exports.promises = promisifyAll(RedisManager, {
+  without: ['_deserializeRanges', '_computeHash'],
   multiResult: {
     getDoc: [
       'lines',

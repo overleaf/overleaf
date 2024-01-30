@@ -1,5 +1,5 @@
-let ProjectHistoryRedisManager
 const Settings = require('@overleaf/settings')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const projectHistoryKeys = Settings.redis?.project_history?.key_schema
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
@@ -8,7 +8,7 @@ const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const { docIsTooLarge } = require('./Limits')
 
-module.exports = ProjectHistoryRedisManager = {
+const ProjectHistoryRedisManager = {
   queueOps(projectId, ...rest) {
     // Record metric for ops pushed onto queue
     const callback = rest.pop()
@@ -172,3 +172,6 @@ module.exports = ProjectHistoryRedisManager = {
     ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
   },
 }
+
+module.exports = ProjectHistoryRedisManager
+module.exports.promises = promisifyAll(ProjectHistoryRedisManager)

@@ -10,11 +10,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let ShareJsUpdateManager
 const ShareJsModel = require('./sharejs/server/model')
 const ShareJsDB = require('./ShareJsDB')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
+const { promisifyAll } = require('@overleaf/promise-utils')
 const Keys = require('./UpdateKeys')
 const { EventEmitter } = require('events')
 const util = require('util')
@@ -28,7 +28,7 @@ util.inherits(ShareJsModel, EventEmitter)
 
 const MAX_AGE_OF_OP = 80
 
-module.exports = ShareJsUpdateManager = {
+const ShareJsUpdateManager = {
   getNewShareJsModel(projectId, docId, lines, version) {
     const db = new ShareJsDB(projectId, docId, lines, version)
     const model = new ShareJsModel(db, {
@@ -143,3 +143,11 @@ module.exports = ShareJsUpdateManager = {
       .digest('hex')
   },
 }
+
+module.exports = ShareJsUpdateManager
+module.exports.promises = promisifyAll(ShareJsUpdateManager, {
+  without: ['getNewShareJsModel', '_listenForOps', '_sendOp', '_computeHash'],
+  multiResult: {
+    applyUpdate: ['updatedDocLines', 'version', 'appliedOps'],
+  },
+})

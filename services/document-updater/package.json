@@ -25,6 +25,7 @@
     "@overleaf/ranges-tracker": "*",
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
+    "@types/chai-as-promised": "^7.1.8",
     "async": "^3.2.2",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",

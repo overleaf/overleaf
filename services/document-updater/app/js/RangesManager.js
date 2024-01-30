@@ -7,7 +7,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let RangesManager
+const { promisifyAll } = require('@overleaf/promise-utils')
 const RangesTracker = require('@overleaf/ranges-tracker')
 const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
@@ -15,7 +15,7 @@ const _ = require('lodash')
 
 const RANGE_DELTA_BUCKETS = [0, 1, 2, 3, 4, 5, 10, 20, 50]
 
-module.exports = RangesManager = {
+const RangesManager = {
   MAX_COMMENTS: 500,
   MAX_CHANGES: 2000,
 
@@ -176,3 +176,11 @@ module.exports = RangesManager = {
     return [emptyCount, totalCount]
   },
 }
+
+module.exports = RangesManager
+module.exports.promises = promisifyAll(RangesManager, {
+  without: ['_getRanges', '_emptyRangesCount'],
+  multiResult: {
+    applyUpdate: ['newRanges', 'rangesWereCollapsed'],
+  },
+})

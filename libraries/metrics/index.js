@@ -97,7 +97,7 @@ function histogram(key, value, buckets, labels = {}) {
 }
 
 class Timer {
-  constructor(key, sampleRate = 1, labels = {}, buckets) {
+  constructor(key, sampleRate = 1, labels = {}, buckets = undefined) {
     if (typeof sampleRate === 'object') {
       // called with (key, labels, buckets)
       if (arguments.length === 3) {

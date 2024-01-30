@@ -1,4 +1,4 @@
-let DocumentManager
+const { promisifyAll } = require('@overleaf/promise-utils')
 const RedisManager = require('./RedisManager')
 const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const PersistenceManager = require('./PersistenceManager')
@@ -11,7 +11,7 @@ const RangesManager = require('./RangesManager')
 
 const MAX_UNFLUSHED_AGE = 300 * 1000 // 5 mins, document should be flushed to mongo this time after a change
 
-module.exports = DocumentManager = {
+const DocumentManager = {
   getDoc(projectId, docId, _callback) {
     const timer = new Metrics.Timer('docManager.getDoc')
     const callback = (...args) => {
@@ -680,3 +680,45 @@ module.exports = DocumentManager = {
     )
   },
 }
+
+module.exports = DocumentManager
+module.exports.promises = promisifyAll(DocumentManager, {
+  multiResult: {
+    getDoc: [
+      'lines',
+      'version',
+      'ranges',
+      'pathname',
+      'projectHistoryId',
+      'unflushedTime',
+      'alreadyLoaded',
+    ],
+    getDocWithLock: [
+      'lines',
+      'version',
+      'ranges',
+      'pathname',
+      'projectHistoryId',
+      'unflushedTime',
+      'alreadyLoaded',
+    ],
+    getDocAndFlushIfOld: ['lines', 'version'],
+    getDocAndFlushIfOldWithLock: ['lines', 'version'],
+    getDocAndRecentOps: [
+      'lines',
+      'version',
+      'ops',
+      'ranges',
+      'pathname',
+      'projectHistoryId',
+    ],
+    getDocAndRecentOpsWithLock: [
+      'lines',
+      'version',
+      'ops',
+      'ranges',
+      'pathname',
+      'projectHistoryId',
+    ],
+  },
+})
