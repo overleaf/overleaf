@@ -2,42 +2,40 @@
 
 steps:
   - id: build-base
-    name: gcr.io/overleaf-ops/cloud-builder
+    name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
     dir: server-ce
     args:
       - 'build-base'
-      - 'SHARELATEX_BASE_CACHE=${_IMAGE_BASE_CACHE}'
-      - 'SHARELATEX_BASE_TAG=${_IMAGE_BASE}'
+      - 'OVERLEAF_BASE_CACHE=${_IMAGE_BASE_CACHE}'
+      - 'OVERLEAF_BASE_TAG=${_IMAGE_BASE}'
   - id: build-community
-    name: gcr.io/overleaf-ops/cloud-builder
+    name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
     dir: server-ce
     args:
       - build-community
-      - 'SHARELATEX_BASE_CACHE=${_IMAGE_BASE_CACHE}'
-      - 'SHARELATEX_BASE_TAG=${_IMAGE_BASE}'
-      - 'SHARELATEX_TAG=${_IMAGE_TAG}'
-  - id: tag_master_latest_base
+      - 'OVERLEAF_BASE_CACHE=${_IMAGE_BASE_CACHE}'
+      - 'OVERLEAF_BASE_TAG=${_IMAGE_BASE}'
+      - 'OVERLEAF_TAG=${_IMAGE_TAG}'
+  - id: tag_main_latest_base
     name: gcr.io/cloud-builders/docker
-    args:
-      - '-e'
-      - '-c'
-      - >-
-        if [ ${BRANCH_NAME} == main ]; then
-          docker tag ${_IMAGE_BASE} ${_IMAGE_BASE_CACHE};
-          docker push ${_IMAGE_BASE_CACHE};
-        fi
-    entrypoint: /bin/bash
-  - id: tag_master_latest
+    script: |
+      #!/usr/bin/env bash
+      set -e
+      if [ ${BRANCH_NAME} == main ]; then
+        docker tag ${_IMAGE_BASE} ${_IMAGE_BASE_CACHE};
+        docker push ${_IMAGE_BASE_CACHE};
+      fi
+    automapSubstitutions: true
+  - id: tag_main_latest
     name: gcr.io/cloud-builders/docker
-    args:
-      - '-e'
-      - '-c'
-      - >-
-        if [ $BRANCH_NAME == main ]; then
-          docker tag ${_IMAGE_TAG} ${_IMAGE_CE};
-          docker push ${_IMAGE_CE};
-        fi
-    entrypoint: /bin/bash
+    script: |
+      #!/usr/bin/env bash
+      set -e
+      if [ $BRANCH_NAME == main ]; then
+        docker tag ${_IMAGE_TAG} ${_IMAGE_CE};
+        docker push ${_IMAGE_CE};
+      fi
+    automapSubstitutions: true
 timeout: 3600s
 options:
   machineType: E2_HIGHCPU_32
@@ -47,10 +45,10 @@ images:
   - '${_IMAGE_BASE}'
   - '${_IMAGE_TAG}'
 substitutions:
-  _IMAGE_BASE: 'gcr.io/overleaf-ops/sharelatex-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
-  _IMAGE_BASE_CACHE: 'gcr.io/overleaf-ops/sharelatex-base:latest'
-  _IMAGE_CE: 'gcr.io/overleaf-ops/sharelatex:latest'
-  _IMAGE_TAG: 'gcr.io/overleaf-ops/sharelatex:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+  _IMAGE_BASE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+  _IMAGE_BASE_CACHE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex-base:latest'
+  _IMAGE_CE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex:latest'
+  _IMAGE_TAG: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
 tags:
   - 'overleaf-public'
   - '${BRANCH_NAME}'
