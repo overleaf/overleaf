@@ -1,6 +1,5 @@
 const fs = require('fs')
 const Path = require('path')
-const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 
 module.exports = function invalidateBabelCacheIfNeeded() {
@@ -13,8 +12,8 @@ module.exports = function invalidateBabelCacheIfNeeded() {
 
   const newState = JSON.stringify(Settings.overleafModuleImports)
   if (lastState !== newState) {
-    logger.warn(
-      {},
+    // eslint-disable-next-line no-console
+    console.warn(
       'Detected change in overleafModuleImports, purging babel cache!'
     )
     fs.rmSync(cachePath, { recursive: true, force: true, maxRetries: 5 })
