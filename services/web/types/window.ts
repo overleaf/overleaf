@@ -49,7 +49,9 @@ declare global {
     brandVariation?: Record<string, any>
     data?: Record<string, any>
     expectingLinkedFileRefreshedSocketFor?: string | null
-    writefull?: any
+    writefull?: {
+      type: 'extension' | 'integration'
+    }
     io?: any
     overleaf: {
       unstable: {
