@@ -19,7 +19,6 @@ function setup(videoEl) {
   const INTERSECTION_THRESHOLD = 0.7
 
   let videoIsVisible
-  let canPlayListenerAdded
 
   videoEl.addEventListener('ended', () => {
     setTimeout(() => {
@@ -36,17 +35,11 @@ function setup(videoEl) {
         if (change.isIntersecting) {
           videoIsVisible = true
           if (videoEl.readyState >= videoEl.HAVE_FUTURE_DATA) {
-            if (videoEl.paused && !videoEl.ended) {
+            if (!videoEl.ended) {
               videoEl.play()
             }
           } else {
-            if (!canPlayListenerAdded) {
-              canPlayListenerAdded = true
-              videoEl.addEventListener('canplay', function playWhenReady() {
-                videoEl.play()
-                videoEl.removeEventListener('canplay', playWhenReady)
-              })
-            }
+            videoEl.play()
           }
         } else {
           videoIsVisible = false
