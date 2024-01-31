@@ -66,9 +66,13 @@ function getClient() {
   return client
 }
 
-async function sendEmail(options) {
+async function sendEmail(options, emailType) {
   try {
     const canContinue = await checkCanSendEmail(options)
+    metrics.inc('email_status', {
+      status: canContinue ? 'sent' : 'rate_limited',
+      path: emailType,
+    })
     if (!canContinue) {
       logger.debug(
         {

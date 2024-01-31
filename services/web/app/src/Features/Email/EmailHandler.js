@@ -22,7 +22,7 @@ async function sendEmail(emailType, opts) {
   opts.html = email.html
   opts.text = email.text
   opts.subject = email.subject
-  await EmailSender.promises.sendEmail(opts)
+  await EmailSender.promises.sendEmail(opts, emailType)
 }
 
 function sendDeferredEmail(emailType, opts, delay) {
