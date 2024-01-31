@@ -2,7 +2,7 @@
 
 // To run in dev:
 //
-// docker-compose run --rm project-history scripts/clear_deleted.js
+// docker compose run --rm project-history scripts/clear_deleted.js
 //
 // In production:
 //

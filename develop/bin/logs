@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-docker-compose logs --follow --tail 10 --no-color "$@" \
+docker compose logs --follow --tail 10 --no-color "$@" \
   | ggrep --line-buffered --invert-match "global.gc" \
   | ggrep --line-buffered --invert-match "health.check" \
   | ggrep --line-buffered --invert-match "slow event loop" \

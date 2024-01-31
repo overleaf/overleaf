@@ -2,7 +2,7 @@
 
 // To run in dev:
 //
-// docker-compose run --rm project-history scripts/flush_all.js <limit>
+// docker compose run --rm project-history scripts/flush_all.js <limit>
 //
 // In production:
 //
