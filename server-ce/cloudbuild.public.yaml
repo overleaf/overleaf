@@ -45,10 +45,10 @@ images:
   - '${_IMAGE_BASE}'
   - '${_IMAGE_TAG}'
 substitutions:
-  _IMAGE_BASE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
-  _IMAGE_BASE_CACHE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex-base:latest'
-  _IMAGE_CE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex:latest'
-  _IMAGE_TAG: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/sharelatex:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+  _IMAGE_BASE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
+  _IMAGE_BASE_CACHE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:latest'
+  _IMAGE_CE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:latest'
+  _IMAGE_TAG: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
 tags:
   - 'overleaf-public'
   - '${BRANCH_NAME}'
