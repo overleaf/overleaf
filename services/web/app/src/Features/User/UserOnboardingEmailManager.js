@@ -2,6 +2,7 @@ const Queues = require('../../infrastructure/Queues')
 const EmailHandler = require('../Email/EmailHandler')
 const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
+const Settings = require('@overleaf/settings')
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
@@ -15,7 +16,7 @@ async function scheduleOnboardingEmail(user) {
 
 async function sendOnboardingEmail(userId) {
   const user = await UserGetter.promises.getUser({ _id: userId }, { email: 1 })
-  if (user) {
+  if (Settings.enableOnboardingEmails && user) {
     await EmailHandler.promises.sendEmail('userOnboardingEmail', {
       to: user.email,
     })

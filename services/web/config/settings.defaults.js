@@ -397,6 +397,7 @@ module.exports = {
 
   enableSubscriptions: false,
   restrictedCountries: [],
+  enableOnboardingEmails: process.env.ENABLE_ONBOARDING_EMAILS === 'true',
 
   enabledLinkedFileTypes: (process.env.ENABLED_LINKED_FILE_TYPES || '').split(
     ','

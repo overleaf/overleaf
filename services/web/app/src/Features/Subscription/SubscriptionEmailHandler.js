@@ -2,6 +2,7 @@ const EmailHandler = require('../Email/EmailHandler')
 const UserGetter = require('../User/UserGetter')
 require('./SubscriptionEmailBuilder')
 const PlansLocator = require('./PlansLocator')
+const Settings = require('@overleaf/settings')
 
 const SubscriptionEmailHandler = {
   async sendTrialOnboardingEmail(userId, planCode) {
@@ -13,13 +14,15 @@ const SubscriptionEmailHandler = {
     if (!plan) {
       throw new Error('unknown paid plan: ' + planCode)
     }
-    const emailOptions = {
-      to: user.email,
-      sendingUser_id: userId,
-      planName: plan.name,
-      features: plan.features,
+    if (Settings.enableOnboardingEmails) {
+      const emailOptions = {
+        to: user.email,
+        sendingUser_id: userId,
+        planName: plan.name,
+        features: plan.features,
+      }
+      await EmailHandler.promises.sendEmail('trialOnboarding', emailOptions)
     }
-    await EmailHandler.promises.sendEmail('trialOnboarding', emailOptions)
   },
 }
 

@@ -49,6 +49,9 @@ describe('UserOnboardingEmailManager', function () {
         '../Email/EmailHandler': this.EmailHandler,
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,
+        '@overleaf/settings': (this.Settings = {
+          enableOnboardingEmails: true,
+        }),
       },
     })
   })
@@ -68,26 +71,42 @@ describe('UserOnboardingEmailManager', function () {
   })
 
   describe('sendOnboardingEmail', function () {
-    it('should send onboarding email and update user', async function () {
-      await this.UserOnboardingEmailManager.sendOnboardingEmail(this.fakeUserId)
-      expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
-        'userOnboardingEmail',
-        {
-          to: this.fakeUserEmail,
-        }
-      )
-      expect(this.UserUpdater.promises.updateUser).to.have.been.calledWith(
-        this.fakeUserId,
-        { $set: { onboardingEmailSentAt: sinon.match.date } }
-      )
-    })
-
-    it('should stop if user is not found', async function () {
-      await this.UserOnboardingEmailManager.sendOnboardingEmail({
-        data: { userId: 'deleted-user' },
+    describe('when onboarding emails are disabled', function () {
+      beforeEach(function () {
+        this.Settings.enableOnboardingEmails = false
       })
-      expect(this.EmailHandler.promises.sendEmail).not.to.have.been.called
-      expect(this.UserUpdater.promises.updateUser).not.to.have.been.called
+      it('should not send onboarding email', async function () {
+        await this.UserOnboardingEmailManager.sendOnboardingEmail(
+          this.fakeUserId
+        )
+        expect(this.EmailHandler.promises.sendEmail).not.to.have.been.called
+        expect(this.UserUpdater.promises.updateUser).not.to.have.been.called
+      })
+    })
+    describe('when onboarding emails are enabled', function () {
+      it('should send onboarding email and update user', async function () {
+        await this.UserOnboardingEmailManager.sendOnboardingEmail(
+          this.fakeUserId
+        )
+        expect(this.EmailHandler.promises.sendEmail).to.have.been.calledWith(
+          'userOnboardingEmail',
+          {
+            to: this.fakeUserEmail,
+          }
+        )
+        expect(this.UserUpdater.promises.updateUser).to.have.been.calledWith(
+          this.fakeUserId,
+          { $set: { onboardingEmailSentAt: sinon.match.date } }
+        )
+      })
+
+      it('should stop if user is not found', async function () {
+        await this.UserOnboardingEmailManager.sendOnboardingEmail({
+          data: { userId: 'deleted-user' },
+        })
+        expect(this.EmailHandler.promises.sendEmail).not.to.have.been.called
+        expect(this.UserUpdater.promises.updateUser).not.to.have.been.called
+      })
     })
   })
 })

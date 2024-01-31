@@ -29,27 +29,45 @@ describe('SubscriptionEmailHandler', function () {
             features: { collaborators: 42 },
           }),
         }),
+        '@overleaf/settings': (this.Settings = {
+          enableOnboardingEmails: true,
+        }),
       },
     })
   })
 
-  it('sends trail onboarding email', async function () {
-    await this.SubscriptionEmailHandler.sendTrialOnboardingEmail(
-      this.userId,
-      'foo-plan-code'
-    )
+  describe('when onboarding emails are disabled', function () {
+    beforeEach(function () {
+      this.Settings.enableOnboardingEmails = false
+    })
+    it('does not send a trial onboarding email', async function () {
+      await this.SubscriptionEmailHandler.sendTrialOnboardingEmail(
+        this.userId,
+        'foo-plan-code'
+      )
+      expect(this.EmailHandler.promises.sendEmail).to.not.have.been.called
+    })
+  })
 
-    expect(this.PlansLocator.findLocalPlanInSettings).to.have.been.calledWith(
-      'foo-plan-code'
-    )
-    expect(this.EmailHandler.promises.sendEmail.lastCall.args).to.deep.equal([
-      'trialOnboarding',
-      {
-        to: this.email,
-        sendingUser_id: this.userId,
-        planName: 'foo',
-        features: { collaborators: 42 },
-      },
-    ])
+  describe('when onboarding emails are enabled', function () {
+    it('sends trial onboarding email', async function () {
+      await this.SubscriptionEmailHandler.sendTrialOnboardingEmail(
+        this.userId,
+        'foo-plan-code'
+      )
+
+      expect(this.PlansLocator.findLocalPlanInSettings).to.have.been.calledWith(
+        'foo-plan-code'
+      )
+      expect(this.EmailHandler.promises.sendEmail.lastCall.args).to.deep.equal([
+        'trialOnboarding',
+        {
+          to: this.email,
+          sendingUser_id: this.userId,
+          planName: 'foo',
+          features: { collaborators: 42 },
+        },
+      ])
+    })
   })
 })
