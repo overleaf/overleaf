@@ -20,10 +20,11 @@ html(
 
 		block _headLinks
 
-		if settings.i18n.subdomainLang
-			each subdomainDetails in settings.i18n.subdomainLang
-				if !subdomainDetails.hide
-					link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
+		if (typeof(suppressRelAlternateLinks) == "undefined")
+			if settings.i18n.subdomainLang
+				each subdomainDetails in settings.i18n.subdomainLang
+					if !subdomainDetails.hide
+						link(rel="alternate", href=subdomainDetails.url+currentUrl, hreflang=subdomainDetails.lngCode)
 		
 		if (entrypoint !== 'marketing')
 			link(rel="preload", href=buildJsPath(currentLngCode + "-json.js"), as="script", nonce=scriptNonce)
