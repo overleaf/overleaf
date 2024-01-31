@@ -19,8 +19,10 @@ class Adapter {
 
   async connect() {
     const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
+    const { getNativeDb } = require('../../app/src/infrastructure/Mongoose')
     await waitForDb()
-    return { db }
+    const nativeDb = await getNativeDb()
+    return { db, nativeDb }
   }
 
   disconnect() {

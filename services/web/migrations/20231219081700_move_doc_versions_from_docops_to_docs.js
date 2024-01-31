@@ -5,12 +5,14 @@ const MIN_ID = process.env.MIN_ID
 
 exports.tags = ['server-ce', 'server-pro', 'saas']
 
-exports.migrate = async ({ db }) => {
+exports.migrate = async ({ db, nativeDb }) => {
+  const docOps = nativeDb.collection('docOps')
+
   const filter = {}
   if (MIN_ID) {
     filter._id = { $gte: new ObjectId(MIN_ID) }
   }
-  const records = db.docOps
+  const records = docOps
     .find(filter, { readPreference: ReadPreference.secondaryPreferred })
     .sort({ _id: 1 })
 

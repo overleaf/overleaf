@@ -38,7 +38,6 @@ async function setupDb() {
   db.dropboxProjects = internalDb.collection('dropboxProjects')
   db.docHistory = internalDb.collection('docHistory')
   db.docHistoryIndex = internalDb.collection('docHistoryIndex')
-  db.docOps = internalDb.collection('docOps')
   db.docSnapshots = internalDb.collection('docSnapshots')
   db.docs = internalDb.collection('docs')
   db.feedbacks = internalDb.collection('feedbacks')
