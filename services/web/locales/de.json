@@ -585,7 +585,6 @@
   "github_credentials_expired": "Deine GitHub-Autorisierungsschlüssel sind abgelaufen",
   "github_empty_repository_error": "Es sieht so aus, als sei dein GitHub-Repository leer oder noch nicht verfügbar. Erstelle eine neue Datei auf GitHub.com und versuche es erneut.",
   "github_file_name_error": "Dein Projekt kann nicht importiert werden, da es eine oder mehrere Dateien mit ungültigen Dateinamen enthält:",
-  "github_for_link_shared_projects": "Auf dieses Projekt wurde über Linkfreigabe zugegriffen und es wird nicht mit deinem GitHub synchronisiert, es sei denn, du wirst vom Projektinhaber per E-Mail eingeladen.",
   "github_git_and_dropbox_integrations": "<0>GitHub-</0>, <0>Git-</0> und <0>Dropbox-</0>Integrationen",
   "github_git_folder_error": "Dieses Projekt enthält auf der obersten Ebene einen .git-Ordner, was darauf hinweist, dass es sich bereits um ein Git-Repository handelt. Der GitHub-Synchronisierungsdienst von Overleaf kann keine Git-Verläufe synchronisieren. Bitte entferne den .git-Ordner and versuche es erneut.",
   "github_integration_info": "Nutze Push und Pull von Commits zu und von GitHub oder direkt von Git, sodass du oder deine Mitarbeiter offline mit Git und online mit Overleaf arbeiten können.",
