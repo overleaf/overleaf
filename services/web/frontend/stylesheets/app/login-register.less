@@ -2,7 +2,6 @@
 @brand-google-color: #276fea; // Not the "official" color but modified for a11y
 @brand-twitter-color: #1da1f2;
 @brand-orcid-color: #a6ce39;
-@brand-sharelatex-color: #a93529;
 
 .login-register-alternatives {
   .form-group:last-child {
@@ -30,8 +29,7 @@
   text-align: center;
 }
 
-.login-register-form,
-.login-register-sharelatex {
+.login-register-form {
   padding: @line-height-computed;
   border-bottom: solid 1px @hr-border;
   &:last-child {
@@ -74,15 +72,6 @@
   background-color: #fff;
   padding: 0 (@line-height-computed / 2);
 }
-.login-register-sharelatex-tooltip {
-  display: inline-block;
-  font-size: 135%;
-  position: relative;
-  top: 2px;
-  margin-left: 3px;
-  color: @link-color;
-  cursor: pointer;
-}
 
 .login-register-newsletter {
   font-size: 90%;
@@ -91,17 +80,6 @@
 
   & > .checkbox {
     margin-bottom: 0;
-  }
-}
-
-.login-btn-sharelatex {
-  background-color: @brand-sharelatex-color;
-  &:focus,
-  &:hover {
-    background-color: darken(@brand-sharelatex-color, 8%);
-  }
-  &:active {
-    background-color: darken(@brand-sharelatex-color, 16%);
   }
 }
 
@@ -133,9 +111,6 @@
 }
 .login-btn-icon-institution {
   background-image: url(../../../public/img/other-brands/logo_institution.svg);
-}
-.login-btn-icon-sharelatex {
-  background-size: 22px;
 }
 
 .registration-message-heading {
