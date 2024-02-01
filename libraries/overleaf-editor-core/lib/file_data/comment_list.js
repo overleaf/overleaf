@@ -1,7 +1,9 @@
+// @ts-check
 const Comment = require('./comment')
 
 /**
  * @typedef {import("../types").CommentRawData} CommentRawData
+ * @typedef {import("./range")} Range
  */
 
 class CommentList {
@@ -37,10 +39,11 @@ class CommentList {
    * @param {Comment} newComment
    */
   add(id, newComment) {
-    const existing = this.getComment(id)
-    if (existing) {
-      // todo: merge/split ranges
-      existing.ranges = newComment.ranges
+    const existingComment = this.getComment(id)
+    if (existingComment) {
+      for (const range of newComment.ranges) {
+        existingComment.addRange(range)
+      }
     } else {
       this.comments.set(id, newComment)
     }
@@ -62,6 +65,32 @@ class CommentList {
       comments.set(rawComment.id, Comment.fromRaw(rawComment))
     }
     return new CommentList(comments)
+  }
+
+  /**
+   * @param {Range} range
+   * @param {{ commentIds: string[] }} opts
+   */
+  applyInsert(range, opts = { commentIds: [] }) {
+    for (const [commentId, comment] of this.comments) {
+      comment.applyInsert(
+        range.pos,
+        range.length,
+        opts.commentIds.includes(commentId)
+      )
+    }
+  }
+
+  /**
+   * @param {Range} range
+   */
+  applyDelete(range) {
+    for (const [commentId, comment] of this.comments) {
+      comment.applyDelete(range)
+      if (comment.isEmpty()) {
+        this.delete(commentId)
+      }
+    }
   }
 }
 
