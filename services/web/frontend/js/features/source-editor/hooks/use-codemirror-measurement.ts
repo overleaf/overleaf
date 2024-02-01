@@ -8,7 +8,7 @@ export default function useCodeMirrorMeasurement(
   measure: (view: EditorView) => number
 ) {
   const view = useCodeMirrorViewContext()
-  const [measurement, setMeasurement] = useState(measure(view))
+  const [measurement, setMeasurement] = useState(() => measure(view))
 
   useEventListener(
     'editor:geometry-change',
@@ -17,7 +17,10 @@ export default function useCodeMirrorMeasurement(
         key,
         read: () => measure(view),
         write(value) {
-          setMeasurement(value)
+          // wrap the React state setter in a timeout so it doesn't run inside the CodeMirror update cycle
+          window.setTimeout(() => {
+            setMeasurement(value)
+          })
         },
       })
     }, [view, measure, key])
