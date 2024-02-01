@@ -57,7 +57,12 @@ export class ConnectionManager extends EventTarget {
       this.userIsLeavingPage = true
     })
 
-    const socket = SocketIoShim.connect('', {
+    const parsedURL = new URL(
+      getMeta('ol-wsUrl') || '/socket.io',
+      window.origin
+    )
+    const socket = SocketIoShim.connect(parsedURL.origin, {
+      resource: parsedURL.pathname.slice(1),
       'auto connect': false,
       'connect timeout': 30 * 1000,
       'force new connection': true,
@@ -70,6 +75,7 @@ export class ConnectionManager extends EventTarget {
 
     // bail out if socket.io failed to load (e.g. the real-time server is down)
     if (typeof window.io !== 'object') {
+      this.switchToWsFallbackIfPossible()
       debugConsole.error(
         'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
       )
@@ -116,6 +122,18 @@ export class ConnectionManager extends EventTarget {
     this.dispatchEvent(
       new StateChangeEvent('statechange', { detail: { state, previousState } })
     )
+  }
+
+  private switchToWsFallbackIfPossible() {
+    const search = new URLSearchParams(window.location.search)
+    if (getMeta('ol-wsUrl') && search.get('ws') !== 'fallback') {
+      // if we tried to boot from a custom real-time backend and failed,
+      // try reloading and falling back to the siteUrl
+      search.set('ws', 'fallback')
+      window.location.search = search.toString()
+      return true
+    }
+    return false
   }
 
   private onOnline() {
@@ -170,11 +188,13 @@ export class ConnectionManager extends EventTarget {
           CONNECTION_ERROR_RECONNECT_DELAY
       )
     } else {
-      this.disconnect()
-      this.changeState({
-        ...this.state,
-        error: 'unable-to-connect',
-      })
+      if (!this.switchToWsFallbackIfPossible()) {
+        this.disconnect()
+        this.changeState({
+          ...this.state,
+          error: 'unable-to-connect',
+        })
+      }
     }
   }
 

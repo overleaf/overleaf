@@ -39,7 +39,7 @@ function convertMetaToWindowAttributes() {
   Array.from(document.querySelectorAll('meta[name^="ol-"]'))
     .map(element => element.name)
     // process short labels before long ones:
-    // e.g. assign 'sharelatex' before 'sharelatex.templates'
+    // e.g. assign 'foo' before 'foo.bar'
     .sort()
     .forEach(nameWithNamespace => {
       const label = nameWithNamespace.slice('ol-'.length)

@@ -8,8 +8,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 
-/* global io */
-
 import SocketIoShim from './SocketIoShim'
 import getMeta from '../../utils/meta'
 import { debugConsole, debugging } from '@/utils/debugging'
@@ -34,13 +32,8 @@ export default ConnectionManager = (function () {
     constructor(ide, $scope) {
       this.ide = ide
       this.$scope = $scope
-      this.wsUrl = ide.wsUrl || null // websocket url (if defined)
-      if (typeof io === 'undefined' || io === null) {
-        if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
-          // if we tried to boot from a custom real-time backend and failed,
-          // try reloading and falling back to the siteUrl
-          window.location = window.location.href + '?ws=fallback'
-        }
+      if (typeof window.io !== 'object') {
+        this.switchToWsFallbackIfPossible()
         debugConsole.error(
           'Socket.io javascript not loaded. Please check that the real-time service is running and accessible.'
         )
@@ -110,24 +103,10 @@ export default ConnectionManager = (function () {
 
       // initial connection attempt
       this.updateConnectionManagerState('connecting')
-      let parsedURL
-      try {
-        parsedURL = new URL(this.wsUrl || '/socket.io', window.location)
-      } catch (e) {
-        // hello IE11
-        if (
-          this.wsUrl &&
-          this.wsUrl.indexOf('/') !== 0 &&
-          !window.location.href.match(/ws=fallback/)
-        ) {
-          // do not even try parsing the wsUrl, use the fallback
-          window.location = window.location.href + '?ws=fallback'
-        }
-        parsedURL = {
-          origin: null,
-          pathname: this.wsUrl || '/socket.io',
-        }
-      }
+      const parsedURL = new URL(
+        getMeta('ol-wsUrl') || '/socket.io',
+        window.origin
+      )
       const query = new URLSearchParams({
         projectId: getMeta('ol-project_id'),
       }).toString()
@@ -155,11 +134,7 @@ export default ConnectionManager = (function () {
         }
         this.updateConnectionManagerState('error')
         debugConsole.log('socket.io error', err)
-        if (this.wsUrl && !window.location.href.match(/ws=fallback/)) {
-          // if we tried to load a custom websocket location and failed
-          // try reloading and falling back to the siteUrl
-          window.location = window.location.href + '?ws=fallback'
-        } else {
+        if (!this.switchToWsFallbackIfPossible()) {
           this.connected = false
           return this.$scope.$apply(() => {
             return (this.$scope.state.error =
@@ -294,6 +269,18 @@ The editor will refresh automatically in ${delay} seconds.\
         debugConsole.log('Reconnect gracefully')
         this.reconnectGracefully()
       })
+    }
+
+    switchToWsFallbackIfPossible() {
+      const search = new URLSearchParams(window.location.search)
+      if (getMeta('ol-wsUrl') && search.get('ws') !== 'fallback') {
+        // if we tried to boot from a custom real-time backend and failed,
+        // try reloading and falling back to the siteUrl
+        search.set('ws', 'fallback')
+        window.location.search = search.toString()
+        return true
+      }
+      return false
     }
 
     updateConnectionManagerState(state) {
