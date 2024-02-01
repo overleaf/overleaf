@@ -390,6 +390,11 @@ export const EditorManagerProvider: FC = ({ children }) => {
     [attachErrorHandlerToDocument, doOpenNewDocument, currentDocument]
   )
 
+  const openDocIdRef = useRef(openDocId)
+  useEffect(() => {
+    openDocIdRef.current = openDocId
+  }, [openDocId])
+
   const openDoc = useCallback(
     async (doc: Doc, options: OpenDocOptions = {}) => {
       debugConsole.log(`[openDoc] Opening ${doc._id}`)
@@ -421,15 +426,16 @@ export const EditorManagerProvider: FC = ({ children }) => {
         }
       }
 
-      // If we already have the document open we can return at this point.
+      // If we already have the document open, or are opening the document, we can return at this point.
       // Note: only use forceReopen:true to override this when the document is
       // out of sync and needs to be reloaded from the server.
-      if (doc._id === openDocId && !options.forceReopen) {
+      if (doc._id === openDocIdRef.current && !options.forceReopen) {
         done(false)
         return
       }
 
       // We're now either opening a new document or reloading a broken one.
+      openDocIdRef.current = doc._id as DocId
       setOpenDocId(doc._id as DocId)
       setOpenDocName(doc.name)
       setOpening(true)
@@ -458,7 +464,6 @@ export const EditorManagerProvider: FC = ({ children }) => {
     [
       eventEmitter,
       jumpToLine,
-      openDocId,
       openNewDocument,
       setCurrentDocument,
       setOpenDocId,
