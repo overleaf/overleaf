@@ -78,10 +78,6 @@ module.exports = ProjectUploadController = {
     const projectId = req.params.Project_id
     const { folder_id: folderId } = req.query
     if (name == null || name.length === 0 || name.length > 150) {
-      logger.err(
-        { projectId, fileName: name },
-        'bad name when trying to upload file'
-      )
       return res.status(422).json({
         success: false,
         error: 'invalid_filename',
@@ -100,16 +96,6 @@ module.exports = ProjectUploadController = {
         fs.unlink(path, function () {})
         timer.done()
         if (error != null) {
-          logger.error(
-            {
-              err: error,
-              projectId,
-              filePath: path,
-              fileName: name,
-              folderId,
-            },
-            'error uploading file'
-          )
           if (error.name === 'InvalidNameError') {
             return res.status(422).json({
               success: false,
@@ -126,6 +112,16 @@ module.exports = ProjectUploadController = {
               error: 'folder_not_found',
             })
           } else {
+            logger.error(
+              {
+                err: error,
+                projectId,
+                filePath: path,
+                fileName: name,
+                folderId,
+              },
+              'error uploading file'
+            )
             return res.status(422).json({ success: false })
           }
         } else {
