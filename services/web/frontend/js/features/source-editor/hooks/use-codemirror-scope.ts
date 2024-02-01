@@ -54,6 +54,8 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { setDocName } from '@/features/source-editor/extensions/doc-name'
 import isValidTexFile from '@/main/is-valid-tex-file'
+import { captureException } from '@/infrastructure/error-reporter'
+import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 
 function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
@@ -241,12 +243,30 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { previewByPath } = useFileTreePathContext()
 
+  const showVisual = visual && isValidTexFile(docName)
+
   const visualRef = useRef({
     previewByPath,
-    visual,
+    visual: showVisual,
   })
 
   const handleError = useErrorHandler()
+
+  const handleException = useCallback((exception: any) => {
+    captureException(exception, {
+      tags: {
+        handler: 'cm6-exception',
+        // which editor mode is active ('visual' | 'code')
+        ol_editor_mode: visualRef.current.visual ? 'visual' : 'code',
+        // which editor keybindings are active ('default' | 'vim' | 'emacs')
+        ol_editor_keybindings: settingsRef.current.mode,
+        // whether Writefull is present ('extension' | 'integration')
+        ol_extensions_writefull: window.writefull?.type,
+        // whether Grammarly is present
+        ol_extensions_grammarly: grammarlyExtensionPresent(),
+      },
+    })
+  }, [])
 
   // create a new state when currentDoc changes
 
@@ -268,6 +288,7 @@ function useCodeMirrorScope(view: EditorView) {
           visual: visualRef.current,
           changeManager: createChangeManager(view, currentDoc),
           handleError,
+          handleException,
         }),
       })
       view.setState(state)
@@ -297,7 +318,7 @@ function useCodeMirrorScope(view: EditorView) {
     }
     // IMPORTANT: This effect must not depend on anything variable apart from currentDoc,
     // as the editor state is recreated when the effect runs.
-  }, [view, currentDoc, handleError])
+  }, [view, currentDoc, handleError, handleException])
 
   useEffect(() => {
     if (docName) {
@@ -313,8 +334,6 @@ function useCodeMirrorScope(view: EditorView) {
       )
     }
   }, [view, docName])
-
-  const showVisual = visual && isValidTexFile(docName)
 
   useEffect(() => {
     visualRef.current.visual = showVisual

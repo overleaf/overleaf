@@ -29,7 +29,6 @@ import { filterCharacters } from './filter-characters'
 import { keybindings } from './keybindings'
 import { bracketMatching, bracketSelection } from './bracket-matching'
 import { verticalOverflow } from './vertical-overflow'
-import { exceptionLogger } from './exception-logger'
 import { thirdPartyExtensions } from './third-party-extensions'
 import { lineNumbers } from './line-numbers'
 import { highlightActiveLine } from './highlight-active-line'
@@ -132,7 +131,8 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   highlightActiveLineGutter(),
   inlineBackground(options.visual.visual),
   codemirrorDevTools(),
-  exceptionLogger(),
+  // Send exceptions to Sentry
+  EditorView.exceptionSink.of(options.handleException),
   // CodeMirror extensions provided by modules
   moduleExtensions.map(extension => extension()),
   thirdPartyExtensions(),
