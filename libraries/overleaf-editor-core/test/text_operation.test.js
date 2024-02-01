@@ -13,6 +13,7 @@ const randomOperation = require('./support/random_text_operation')
 const ot = require('..')
 const TextOperation = ot.TextOperation
 const StringFileData = require('../lib/file_data/string_file_data')
+const { RetainOp, InsertOp, RemoveOp } = require('../lib/operation/scan_op')
 
 describe('TextOperation', function () {
   const numTrials = 500
@@ -73,22 +74,22 @@ describe('TextOperation', function () {
     expect(o.ops.length).to.equal(0)
     o.retain(2)
     expect(o.ops.length).to.equal(1)
-    expect(last(o.ops)).to.equal(2)
+    expect(last(o.ops).equals(new RetainOp(2))).to.be.true
     o.retain(3)
     expect(o.ops.length).to.equal(1)
-    expect(last(o.ops)).to.equal(5)
+    expect(last(o.ops).equals(new RetainOp(5))).to.be.true
     o.insert('abc')
     expect(o.ops.length).to.equal(2)
-    expect(last(o.ops)).to.equal('abc')
+    expect(last(o.ops).equals(new InsertOp('abc'))).to.be.true
     o.insert('xyz')
     expect(o.ops.length).to.equal(2)
-    expect(last(o.ops)).to.equal('abcxyz')
+    expect(last(o.ops).equals(new InsertOp('abcxyz'))).to.be.true
     o.remove('d')
     expect(o.ops.length).to.equal(3)
-    expect(last(o.ops)).to.equal(-1)
+    expect(last(o.ops).equals(new RemoveOp(1))).to.be.true
     o.remove('d')
     expect(o.ops.length).to.equal(3)
-    expect(last(o.ops)).to.equal(-2)
+    expect(last(o.ops).equals(new RemoveOp(2))).to.be.true
   })
 
   it('checks for no-ops', function () {

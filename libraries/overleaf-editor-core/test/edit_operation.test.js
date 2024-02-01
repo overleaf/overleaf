@@ -31,7 +31,7 @@ describe('EditOperationBuilder', function () {
     }
     const op = EditOperationBuilder.fromJSON(raw)
     expect(op).to.be.an.instanceof(TextOperation)
-    expect(op.ops).to.deep.equal([1, 'foo', 3])
+    expect(op.toJSON()).to.deep.equal(raw)
   })
 
   it('Throws error for unsupported operation', function () {
