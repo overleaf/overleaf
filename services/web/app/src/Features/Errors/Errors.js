@@ -95,6 +95,7 @@ class SAMLAuthenticationError extends OError {
     return 'saml_auth_error'
   }
 }
+class SAMLAssertionAudienceMismatch extends SAMLAuthenticationError {}
 
 class SAMLAuthenticationRequiredError extends SAMLAuthenticationError {
   get i18nKey() {
@@ -281,6 +282,7 @@ module.exports = {
   InvalidError,
   NotInV2Error,
   OutputFileFetchFailedError,
+  SAMLAssertionAudienceMismatch,
   SAMLAuthenticationRequiredError,
   SAMLIdentityExistsError,
   SAMLAlreadyLinkedError,
