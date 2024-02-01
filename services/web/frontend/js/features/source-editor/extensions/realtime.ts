@@ -1,4 +1,4 @@
-import { Prec, Transaction, Annotation } from '@codemirror/state'
+import { Prec, Transaction, Annotation, ChangeSpec } from '@codemirror/state'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EventEmitter } from 'events'
 import { CurrentDoc } from '../../../../../types/current-doc'
@@ -92,24 +92,29 @@ export class EditorFacade extends EventEmitter {
   }
 
   // Dispatch changes to CodeMirror view
-  cmInsert(position: number, text: string, origin?: string) {
+  cmChange(changes: ChangeSpec, origin?: string) {
+    const isRemote = origin === 'remote'
+
     this.view.dispatch({
-      changes: { from: position, insert: text },
+      changes,
       annotations: [
-        Transaction.remote.of(origin === 'remote'),
-        Transaction.addToHistory.of(origin !== 'remote'),
+        Transaction.remote.of(isRemote),
+        Transaction.addToHistory.of(!isRemote),
       ],
+      effects:
+        // if this is a remote change, restore a snapshot of the current scroll position after the change has been applied
+        isRemote
+          ? this.view.scrollSnapshot().map(this.view.state.changes(changes))
+          : undefined,
     })
   }
 
+  cmInsert(position: number, text: string, origin?: string) {
+    this.cmChange({ from: position, insert: text }, origin)
+  }
+
   cmDelete(position: number, text: string, origin?: string) {
-    this.view.dispatch({
-      changes: { from: position, to: position + text.length },
-      annotations: [
-        Transaction.remote.of(origin === 'remote'),
-        Transaction.addToHistory.of(origin !== 'remote'),
-      ],
-    })
+    this.cmChange({ from: position, to: position + text.length }, origin)
   }
 
   // Connect to ShareJS, passing changes to the CodeMirror view
