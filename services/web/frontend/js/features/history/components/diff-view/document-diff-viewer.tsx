@@ -25,6 +25,7 @@ import { inlineBackground } from '../../../source-editor/extensions/inline-backg
 function extensions(themeOptions: Options): Extension[] {
   return [
     EditorView.editable.of(false),
+    EditorState.readOnly.of(true),
     EditorView.contentAttributes.of({ tabindex: '0' }),
     lineNumbers(),
     EditorView.lineWrapping,
