@@ -9,6 +9,7 @@ function setConsent(value) {
   const cookieDomain = window.ExposedSettings.cookieDomain
   const oneYearInSeconds = 60 * 60 * 24 * 365
   const cookieAttributes =
+    '; path=/' +
     '; domain=' +
     cookieDomain +
     '; max-age=' +
