@@ -2,9 +2,8 @@ import { useState, useEffect, useRef, memo } from 'react'
 import PropTypes from 'prop-types'
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed'
 import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
 import OutlineList from './outline-list'
-import Icon from '../../../shared/components/icon'
+import { OutlineItemToggleButton } from '@/features/outline/components/outline-item-toggle-button'
 
 const OutlineItem = memo(function OutlineItem({
   outlineItem,
@@ -13,8 +12,6 @@ const OutlineItem = memo(function OutlineItem({
   matchesHighlightedLine,
   containsHighlightedLine,
 }) {
-  const { t } = useTranslation()
-
   const [expanded, setExpanded] = useState(true)
   const titleElementRef = useRef()
   const isHighlightedRef = useRef(false)
@@ -29,10 +26,6 @@ const OutlineItem = memo(function OutlineItem({
   const itemLinkClasses = classNames('outline-item-link', {
     'outline-item-link-highlight': isHighlighted,
   })
-
-  function handleExpandCollapseClick() {
-    setExpanded(!expanded)
-  }
 
   function handleOutlineItemLinkClick(event) {
     const syncToPdf = event.detail === 2 // double-click = sync to PDF
@@ -65,18 +58,12 @@ const OutlineItem = memo(function OutlineItem({
       aria-label={outlineItem.title}
     >
       <div className="outline-item-row">
-        {outlineItem.children ? (
-          <button
-            className="outline-item-expand-collapse-btn"
-            onClick={handleExpandCollapseClick}
-            aria-label={expanded ? t('collapse') : t('expand')}
-          >
-            <Icon
-              type={expanded ? 'angle-down' : 'angle-right'}
-              className="outline-caret-icon"
-            />
-          </button>
-        ) : null}
+        {!!outlineItem.children && (
+          <OutlineItemToggleButton
+            expanded={expanded}
+            setExpanded={setExpanded}
+          />
+        )}
         <button
           className={itemLinkClasses}
           onClick={handleOutlineItemLinkClick}

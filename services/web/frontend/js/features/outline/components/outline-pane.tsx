@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react'
 import classNames from 'classnames'
-import { useTranslation } from 'react-i18next'
 
 import OutlineRoot from './outline-root'
-import Icon from '../../../shared/components/icon'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
-import Tooltip from '../../../shared/components/tooltip'
+import { OutlineToggleButton } from '@/features/outline/components/outline-toggle-button'
 
 const OutlinePane = React.memo<{
   isTexFile: boolean
@@ -28,8 +26,6 @@ const OutlinePane = React.memo<{
   expanded,
   toggleExpanded,
 }) {
-  const { t } = useTranslation()
-
   const isOpen = Boolean(isTexFile && expanded)
 
   useEffect(() => {
@@ -43,32 +39,13 @@ const OutlinePane = React.memo<{
   return (
     <div className={headerClasses}>
       <header className="outline-header">
-        <button
-          className="outline-header-expand-collapse-btn"
-          disabled={!isTexFile}
-          onClick={toggleExpanded}
-          aria-label={expanded ? t('hide_outline') : t('show_outline')}
-        >
-          <Icon
-            type={isOpen ? 'angle-down' : 'angle-right'}
-            className="outline-caret-icon"
-          />
-          <h4 className="outline-header-name">{t('file_outline')}</h4>
-          {isPartial && (
-            <Tooltip
-              id="partial-outline"
-              description={t('partial_outline_warning')}
-              overlayProps={{ placement: 'top' }}
-            >
-              <span role="status">
-                <Icon
-                  type="exclamation-triangle"
-                  aria-label={t('partial_outline_warning')}
-                />
-              </span>
-            </Tooltip>
-          )}
-        </button>
+        <OutlineToggleButton
+          toggleExpanded={toggleExpanded}
+          expanded={expanded}
+          isOpen={isOpen}
+          isPartial={isPartial}
+          isTexFile={isTexFile}
+        />
       </header>
       {isOpen && (
         <div className="outline-body">

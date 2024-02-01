@@ -43,7 +43,7 @@ function setTitle(title: string) {
 }
 
 function useBrowserWindow() {
-  const [hasFocus, setHasFocus] = useState(document.hasFocus())
+  const [hasFocus, setHasFocus] = useState(() => document.hasFocus())
 
   useEffect(() => {
     function handleFocusEvent() {

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { memo, useCallback, useState } from 'react'
 import { useUserContext } from '@/shared/context/user-context'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
@@ -7,7 +7,7 @@ import { RefProviders } from '../../../../../types/user'
 import FileTreeRoot from '@/features/file-tree/components/file-tree-root'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
 
-export function FileTree() {
+export const FileTree = memo(function FileTree() {
   const user = useUserContext()
   const { indexAllReferences } = useReferencesContext()
   const { setStartedFreeTrial } = useIdeReactContext()
@@ -44,4 +44,4 @@ export function FileTree() {
       />
     </div>
   )
-}
+})

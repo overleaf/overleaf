@@ -176,7 +176,10 @@ export const ChatContext = createContext<
 >(undefined)
 
 export const ChatProvider: FC = ({ children }) => {
-  const clientId = useRef(uuid())
+  const clientId = useRef<string>()
+  if (clientId.current === undefined) {
+    clientId.current = uuid()
+  }
   const user = useUserContext()
   const { _id: projectId } = useProjectContext()
 
