@@ -83,6 +83,29 @@ class Subscription {
     Modules.hooks.fire('enableManagedUsers', this._id, callback)
   }
 
+  enableFeatureSSO(callback) {
+    SubscriptionModel.findOneAndUpdate(
+      { _id: new ObjectId(this._id) },
+      { 'features.groupSSO': true },
+      callback
+    )
+  }
+
+  setValidatedAndEnabledSSO(callback) {
+    db.subscriptions.findOne({ _id: new ObjectId(this._id) }, (error, doc) => {
+      if (error) {
+        return callback(error)
+      }
+      const ssoConfigId = doc.ssoConfig
+
+      db.ssoConfigs.findOneAndUpdate(
+        { _id: ssoConfigId },
+        { $set: { enabled: true, validated: true } },
+        callback
+      )
+    })
+  }
+
   getEnrollmentForUser(user, callback) {
     Modules.hooks.fire(
       'getManagedUsersEnrollmentForUser',
@@ -157,5 +180,15 @@ Object.getOwnPropertyNames(Subscription.prototype).forEach(methodName => {
     Subscription.promises.prototype[methodName] = promisify(method)
   }
 })
+
+Subscription.promises.prototype.inviteUser = async function (adminUser, email) {
+  await adminUser.login()
+  return await adminUser.doRequest('POST', {
+    url: `/manage/groups/${this._id}/invites`,
+    json: {
+      email,
+    },
+  })
+}
 
 module.exports = Subscription

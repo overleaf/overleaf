@@ -229,14 +229,6 @@ class User {
     UserModel.updateOne({ _id: this.id }, { emails }, callback)
   }
 
-  setEnrollment(enrollment, callback) {
-    UserModel.updateOne({ _id: this.id }, { enrollment }, callback)
-  }
-
-  setSamlIdentifiers(samlIdentifiers, callback) {
-    UserModel.updateOne({ _id: this.id }, { samlIdentifiers }, callback)
-  }
-
   logout(callback) {
     this.getCsrfToken(error => {
       if (error != null) {
