@@ -23,6 +23,7 @@ import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/pro
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { OutlineProvider } from '@/features/ide-react/context/outline-context'
+import { ChatProvider } from '@/features/chat/context/chat-context'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -242,6 +243,7 @@ export const ScopeDecorator = (
   useMeta(meta)
 
   const Providers = {
+    ChatProvider,
     DetachCompileProvider,
     DetachProvider,
     EditorProvider,
@@ -273,9 +275,11 @@ export const ScopeDecorator = (
                         <Providers.LayoutProvider>
                           <Providers.LocalCompileProvider>
                             <Providers.DetachCompileProvider>
-                              <Providers.OutlineProvider>
-                                <Story />
-                              </Providers.OutlineProvider>
+                              <Providers.ChatProvider>
+                                <Providers.OutlineProvider>
+                                  <Story />
+                                </Providers.OutlineProvider>
+                              </Providers.ChatProvider>
                             </Providers.DetachCompileProvider>
                           </Providers.LocalCompileProvider>
                         </Providers.LayoutProvider>
