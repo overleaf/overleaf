@@ -154,6 +154,26 @@ h3.group-settings-title {
   .sso-config-info-label {
     font-size: @font-size-small;
     font-weight: bold;
+
+    .certificate-status {
+      font-weight: normal;
+
+      .material-symbols {
+        vertical-align: top;
+      }
+
+      &.certificate-valid {
+        color: @ol-green;
+      }
+
+      &.certificate-expiring-soon {
+        color: @yellow-50;
+      }
+
+      &.certificate-expired {
+        color: @red-50;
+      }
+    }
   }
 
   .sso-config-info-label-optional {

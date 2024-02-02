@@ -1,5 +1,6 @@
 import GroupSettingsSSORoot from '../../../../../../modules/group-settings/frontend/js/components/sso/group-settings-sso-root'
 import { SSOConfigurationProvider } from '../../../../../../modules/group-settings/frontend/js/context/sso-configuration-context'
+import { singleLineCertificates } from '../../../../../../modules/group-settings/test/data/certificates'
 
 function GroupSettingsSSOComponent() {
   return (
@@ -49,7 +50,12 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificates: ['cert1', 'cert2'],
+          certificates: [
+            {
+              value: singleLineCertificates[0],
+            },
+            { value: singleLineCertificates[1] },
+          ],
           userIdAttribute: 'email',
           enabled: false,
           validated: false,
@@ -71,7 +77,10 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificates: ['cert1', 'cert2'],
+          certificates: [
+            { value: singleLineCertificates[0] },
+            { value: singleLineCertificates[1] },
+          ],
           userIdAttribute: 'email',
           validated: true,
           enabled: false,
@@ -93,7 +102,10 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificates: ['cert1', 'cert2'],
+          certificates: [
+            { value: singleLineCertificates[0] },
+            { value: singleLineCertificates[1] },
+          ],
           userIdAttribute: 'email',
           validated: true,
           enabled: true,
@@ -115,7 +127,7 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificates: ['cert'],
+          certificates: [{ value: singleLineCertificates[0] }],
           userIdAttribute: 'email',
           validated: true,
           enabled: false,
@@ -126,7 +138,7 @@ describe('GroupSettingsSSO', function () {
         statusCode: 200,
         body: {
           entryPoint: 'entrypoint',
-          certificates: ['certi'],
+          certificates: [{ value: singleLineCertificates[1] }],
           userIdAttribute: 'email',
           validated: false,
           enabled: false,
@@ -155,7 +167,7 @@ describe('GroupSettingsSSO', function () {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificates: ['cert'],
+            certificates: [{ value: singleLineCertificates[0] }],
             userIdAttribute: 'email',
             enabled: false,
           },
@@ -195,7 +207,7 @@ describe('GroupSettingsSSO', function () {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificates: ['cert'],
+            certificates: [{ value: singleLineCertificates[0] }],
             userIdAttribute: 'email',
             validated: true,
             enabled: true,
@@ -222,7 +234,7 @@ describe('GroupSettingsSSO', function () {
           statusCode: 200,
           body: {
             entryPoint: 'entrypoint',
-            certificates: ['cert'],
+            certificates: [{ value: singleLineCertificates[0] }],
             userIdAttribute: 'email',
             validated: true,
             enabled: true,
