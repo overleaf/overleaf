@@ -88,6 +88,22 @@ function AddCommentEntry() {
     }
   }
 
+  const handleCommentAutoFocus = (textarea: HTMLTextAreaElement) => {
+    // Sometimes the comment textarea is scrolled out of view once focussed,
+    // so this checks for that and scrolls it into view if necessary. It
+    // seems we sometimes need to allow time for the dust to settle after
+    // focussing the textarea before scrolling.
+    window.setTimeout(() => {
+      const observer = new IntersectionObserver(([entry]) => {
+        if (entry.intersectionRatio < 1) {
+          textarea.scrollIntoView({ block: 'center' })
+        }
+        observer.disconnect()
+      })
+      observer.observe(textarea)
+    }, 500)
+  }
+
   return (
     <EntryContainer id="add-comment">
       <EntryCallout className="rp-entry-callout-add-comment" />
@@ -109,6 +125,7 @@ function AddCommentEntry() {
                   onChange={e => setContent(e.target.value)}
                   onKeyPress={handleCommentKeyPress}
                   onResize={handleLayoutChange}
+                  onAutoFocus={handleCommentAutoFocus}
                   placeholder={t('add_your_comment_here')}
                   value={content}
                   autoFocus // eslint-disable-line jsx-a11y/no-autofocus
