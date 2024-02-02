@@ -85,7 +85,15 @@ describe('CompileManager', function () {
     }
     this.CommandRunner = {
       promises: {
-        run: sinon.stub().resolves({ stdout: this.commandOutput }),
+        run: sinon.stub().callsFake((_1, _2, _3, _4, _5, _6, compileGroup) => {
+          if (compileGroup === 'synctex') {
+            return Promise.resolve({ stdout: this.commandOutput })
+          } else {
+            return Promise.resolve({
+              stdout: 'Encoding: ascii\nWords in text: 2',
+            })
+          }
+        }),
       },
     }
     this.DraftModeManager = {
@@ -544,11 +552,6 @@ describe('CompileManager', function () {
 
   describe('wordcount', function () {
     beforeEach(async function () {
-      this.stdout = 'Encoding: ascii\nWords in text: 2'
-      this.fsPromises.readFile
-        .withArgs(Path.join(this.compileDir, 'main.tex.wc'))
-        .resolves(this.stdout)
-
       this.timeout = 60 * 1000
       this.filename = 'main.tex'
       this.image = 'example.com/image'
@@ -563,13 +566,7 @@ describe('CompileManager', function () {
 
     it('should run the texcount command', function () {
       this.filePath = `$COMPILE_DIR/${this.filename}`
-      this.command = [
-        'texcount',
-        '-nocol',
-        '-inc',
-        this.filePath,
-        `-out=${this.filePath}.wc`,
-      ]
+      this.command = ['texcount', '-nocol', '-inc', this.filePath]
 
       expect(this.CommandRunner.promises.run).to.have.been.calledWith(
         `${this.projectId}-${this.userId}`,

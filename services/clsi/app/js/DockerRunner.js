@@ -72,6 +72,10 @@ const DockerRunner = {
       image = `${Settings.texliveImageNameOveride}/${img[2]}`
     }
 
+    if (compileGroup === 'synctex' || compileGroup === 'wordcount') {
+      volumes[directory] += ':ro'
+    }
+
     const options = DockerRunner._getContainerOptions(
       command,
       image,

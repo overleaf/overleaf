@@ -511,17 +511,12 @@ async function _runSynctex(projectId, userId, command, imageName) {
 async function wordcount(projectId, userId, filename, image) {
   logger.debug({ projectId, userId, filename, image }, 'running wordcount')
   const filePath = `$COMPILE_DIR/${filename}`
-  const command = [
-    'texcount',
-    '-nocol',
-    '-inc',
-    filePath,
-    `-out=${filePath}.wc`,
-  ]
+  const command = ['texcount', '-nocol', '-inc', filePath]
   const compileDir = getCompileDir(projectId, userId)
   const timeout = 60 * 1000
   const compileName = getCompileName(projectId, userId)
   const compileGroup = 'wordcount'
+
   try {
     await fsPromises.mkdir(compileDir, { recursive: true })
   } catch (err) {
@@ -531,22 +526,23 @@ async function wordcount(projectId, userId, filename, image) {
       filename,
     })
   }
-  await CommandRunner.promises.run(
-    compileName,
-    command,
-    compileDir,
-    image,
-    timeout,
-    {},
-    compileGroup
-  )
 
-  let stdout
   try {
-    stdout = await fsPromises.readFile(
-      compileDir + '/' + filename + '.wc',
-      'utf-8'
+    const { stdout } = await CommandRunner.promises.run(
+      compileName,
+      command,
+      compileDir,
+      image,
+      timeout,
+      {},
+      compileGroup
     )
+    const results = _parseWordcountFromOutput(stdout)
+    logger.debug(
+      { projectId, userId, wordcount: results },
+      'word count results'
+    )
+    return results
   } catch (err) {
     throw OError.tag(err, 'error reading word count output', {
       command,
@@ -555,10 +551,6 @@ async function wordcount(projectId, userId, filename, image) {
       userId,
     })
   }
-
-  const results = _parseWordcountFromOutput(stdout)
-  logger.debug({ projectId, userId, wordcount: results }, 'word count results')
-  return results
 }
 
 function _parseWordcountFromOutput(output) {
