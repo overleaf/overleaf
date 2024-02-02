@@ -17,7 +17,6 @@
     "types:check": "tsc --noEmit"
   },
   "dependencies": {
-    "@hapi/joi": "^17.1.1",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
@@ -31,6 +30,7 @@
     "cookie-parser": "^1.4.5",
     "express": "^4.18.2",
     "express-session": "^1.17.1",
+    "joi": "^17.12.0",
     "proxy-addr": "^2.0.7",
     "request": "^2.88.2",
     "socket.io": "github:overleaf/socket.io#0.9.19-overleaf-10",

@@ -30,7 +30,7 @@
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "byline": "^4.2.1",
-    "celebrate": "^10.1.0",
+    "celebrate": "^15.0.3",
     "cli": "^1.0.1",
     "diff-match-patch": "overleaf/diff-match-patch#89805f9c671a77a263fc53461acd62aa7498f688",
     "esmock": "^2.1.0",

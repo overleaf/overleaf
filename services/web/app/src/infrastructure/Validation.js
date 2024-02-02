@@ -2,20 +2,22 @@ const { Joi: CelebrateJoi, celebrate, errors } = require('celebrate')
 const { ObjectId } = require('mongodb')
 
 const objectIdValidator = {
-  name: 'objectId',
-  language: {
-    invalid: 'needs to be a valid ObjectId',
+  type: 'objectId',
+  base: CelebrateJoi.any(),
+  messages: {
+    'objectId.invalid': 'needs to be a valid ObjectId',
   },
-  pre(value, state, options) {
+  coerce(value) {
+    return {
+      value: typeof value === typeof ObjectId ? value : new ObjectId(value),
+    }
+  },
+  prepare(value, helpers) {
     if (!ObjectId.isValid(value)) {
-      return this.createError('objectId.invalid', { value }, state, options)
+      return {
+        errors: helpers.error('objectId.invalid'),
+      }
     }
-
-    if (options.convert) {
-      return new ObjectId(value)
-    }
-
-    return value
   },
 }
 

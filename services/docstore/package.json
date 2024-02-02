@@ -28,7 +28,7 @@
     "body-parser": "^1.19.0",
     "bson": "^1.1.4",
     "bunyan": "^1.8.15",
-    "celebrate": "^13.0.4",
+    "celebrate": "^15.0.3",
     "express": "^4.18.2",
     "lodash": "^4.17.21",
     "mongodb": "^6.2.0",

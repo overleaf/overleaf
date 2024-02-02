@@ -8,7 +8,7 @@ const WebsocketAddressManager = require('./WebsocketAddressManager')
 const bodyParser = require('body-parser')
 const base64id = require('base64id')
 const { UnexpectedArgumentsError } = require('./Errors')
-const Joi = require('@hapi/joi')
+const Joi = require('joi')
 
 const HOSTNAME = require('os').hostname()
 
