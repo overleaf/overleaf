@@ -201,6 +201,7 @@ const AuthenticationController = {
             return done(null, null, {
               text: req.i18n.translate('to_many_login_requests_2_mins'),
               type: 'error',
+              key: 'to-many-login-requests-2-mins',
               status: 429,
             })
           }
@@ -236,8 +237,8 @@ const AuthenticationController = {
                 AuthenticationController._recordFailedLogin()
                 logger.debug({ email }, 'failed log in')
                 done(null, false, {
-                  text: req.i18n.translate('email_or_password_wrong_try_again'),
                   type: 'error',
+                  key: 'invalid-password-retry-or-reset',
                   status: 401,
                 })
               }

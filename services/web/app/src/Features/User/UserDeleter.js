@@ -33,7 +33,7 @@ module.exports = {
   },
 }
 
-async function deleteUser(userId, options = {}) {
+async function deleteUser(userId, options) {
   if (!userId) {
     logger.warn('user_id is null when trying to delete user')
     throw new Error('no user_id')

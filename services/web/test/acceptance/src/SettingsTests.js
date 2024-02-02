@@ -11,6 +11,7 @@
 const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
+const Features = require('../../../app/src/infrastructure/Features')
 
 describe('SettingsPage', function () {
   beforeEach(function (done) {
@@ -32,6 +33,10 @@ describe('SettingsPage', function () {
   })
 
   it('update main email address', function (done) {
+    if (Features.externalAuthenticationSystemUsed()) {
+      this.skip()
+      return
+    }
     const newEmail = 'foo@bar.com'
     return this.user.updateSettings({ email: newEmail }, error => {
       expect(error).not.to.exist

@@ -166,9 +166,10 @@ describe('HaveIBeenPwnedApi', function () {
         await user.loginWithEmailPassword(user.email, 'aLeakedPassword42')
         expect.fail('expected the login request to fail')
       } catch (err) {
-        expect(err).to.match(
-          /login failed: status=401 body={"message":{"text":"Your email or password is incorrect. Please try again.","type":"error"}}/
-        )
+        expect(err).to.match(/login failed: status=401/)
+        expect(err.info.body).to.deep.equal({
+          message: { type: 'error', key: 'invalid-password-retry-or-reset' },
+        })
       }
       await letPasswordCheckRunInBackground()
     })

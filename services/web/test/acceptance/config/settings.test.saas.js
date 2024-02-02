@@ -49,9 +49,6 @@ const overrides = {
     },
   },
 
-  overleaf: {
-    oauth: undefined,
-  },
   saml: undefined,
 
   // Disable contentful module.

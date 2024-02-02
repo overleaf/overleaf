@@ -156,10 +156,11 @@ class User {
           }
           if (response.statusCode !== 200) {
             return callback(
-              new Error(
+              new OError(
                 `login failed: status=${
                   response.statusCode
-                } body=${JSON.stringify(body)}`
+                } body=${JSON.stringify(body)}`,
+                { response, body }
               )
             )
           }

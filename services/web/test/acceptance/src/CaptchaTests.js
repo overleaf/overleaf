@@ -54,8 +54,8 @@ describe('Captcha', function () {
     expect(response.statusCode).to.equal(401)
     expect(body).to.deep.equal({
       message: {
-        text: 'Your email or password is incorrect. Please try again.',
         type: 'error',
+        key: 'invalid-password-retry-or-reset',
       },
     })
   }

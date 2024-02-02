@@ -239,7 +239,7 @@ const expectLoginPage = (user, callback) => {
   tryFollowLoginLink(user, '/login', (err, response, body) => {
     expect(err).not.to.exist
     expect(response.statusCode).to.equal(200)
-    expect(body).to.match(/<title>Login - .*<\/title>/)
+    expect(body).to.match(/<title>(Login|Log in to Overleaf) - .*<\/title>/)
     callback()
   })
 }

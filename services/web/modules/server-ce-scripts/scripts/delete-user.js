@@ -22,7 +22,10 @@ async function main() {
         )
         return resolve()
       }
-      UserDeleter.deleteUser(user._id, function (err) {
+      const options = {
+        ipAddress: '0.0.0.0',
+      }
+      UserDeleter.deleteUser(user._id, options, function (err) {
         if (err) {
           return reject(err)
         }

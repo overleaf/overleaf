@@ -119,6 +119,11 @@ describe('ServerCEScripts', function () {
       run('node modules/server-ce-scripts/scripts/delete-user --email=' + email)
       const dbEntry = await user.get()
       expect(dbEntry).to.not.exist
+      const softDeletedEntry = await db.deletedUsers.findOne({
+        'user.email': email,
+      })
+      expect(softDeletedEntry).to.exist
+      expect(softDeletedEntry.deleterData.deleterIpAddress).to.equal('0.0.0.0')
     })
 
     it('should exit with code 1 on missing email', function () {

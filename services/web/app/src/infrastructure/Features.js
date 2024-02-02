@@ -38,7 +38,7 @@ const Features = {
     return (
       (Boolean(Settings.ldap) && Boolean(Settings.ldap.enable)) ||
       (Boolean(Settings.saml) && Boolean(Settings.saml.enable)) ||
-      Boolean(_.get(Settings, ['overleaf', 'oauth']))
+      Boolean(Settings.overleaf)
     )
   },
 

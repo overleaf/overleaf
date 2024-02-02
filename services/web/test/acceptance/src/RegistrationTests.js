@@ -78,7 +78,7 @@ describe('Registration', function () {
               'g-recaptcha-response': 'valid',
             },
           })
-          const message = body && body.message && body.message.text
+          const message = body && body.message && body.message.key
           pushInto.push(message)
         }
       }
@@ -97,9 +97,7 @@ describe('Registration', function () {
       it('should produce the correct responses so far', function () {
         expect(results.length).to.equal(9)
         expect(results).to.deep.equal(
-          Array(9).fill(
-            'Your email or password is incorrect. Please try again.'
-          )
+          Array(9).fill('invalid-password-retry-or-reset')
         )
       })
 
@@ -117,12 +115,8 @@ describe('Registration', function () {
           expect(results.length).to.equal(15)
           expect(results).to.deep.equal(
             Array(10)
-              .fill('Your email or password is incorrect. Please try again.')
-              .concat(
-                Array(5).fill(
-                  'This account has had too many login requests. Please wait 2 minutes before trying to log in again'
-                )
-              )
+              .fill('invalid-password-retry-or-reset')
+              .concat(Array(5).fill('to-many-login-requests-2-mins'))
           )
         })
 
@@ -146,9 +140,7 @@ describe('Registration', function () {
           })
 
           it('should not rate limit their request', function () {
-            expect(messages).to.deep.equal([
-              'Your email or password is incorrect. Please try again.',
-            ])
+            expect(messages).to.deep.equal(['invalid-password-retry-or-reset'])
           })
 
           it('should not record any further rate limited requests', async function () {
@@ -195,9 +187,7 @@ describe('Registration', function () {
           it('should not emit any rate limited responses yet', function () {
             expect(results.length).to.equal(9)
             expect(results).to.deep.equal(
-              Array(9).fill(
-                'Your email or password is incorrect. Please try again.'
-              )
+              Array(9).fill('invalid-password-retry-or-reset')
             )
           })
         })
@@ -360,9 +350,13 @@ describe('Registration', function () {
         this.user1.addEmail(secondaryEmail, err => {
           expect(err).to.not.exist
           this.user1.loginWith(secondaryEmail, err => {
-            expect(err).to.match(
-              /login failed: status=401 body={"message":{"text":"Your email or password is incorrect. Please try again.","type":"error"}}/
-            )
+            expect(err).to.match(/login failed: status=401/)
+            expect(err.info.body).to.deep.equal({
+              message: {
+                type: 'error',
+                key: 'invalid-password-retry-or-reset',
+              },
+            })
             this.user1.isLoggedIn((err, isLoggedIn) => {
               expect(err).to.not.exist
               expect(isLoggedIn).to.equal(false)
@@ -402,7 +396,7 @@ describe('Registration', function () {
                   expect(err).to.not.exist
                   expect(body.redir != null).to.equal(false)
                   expect(body.message != null).to.equal(true)
-                  expect(body.message).to.have.all.keys('type', 'text')
+                  expect(body.message).to.have.all.keys('type', 'key')
                   expect(body.message.type).to.equal('error')
                   cb()
                 }

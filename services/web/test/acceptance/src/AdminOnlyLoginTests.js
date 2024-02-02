@@ -31,9 +31,10 @@ describe('AdminOnlyLogin', function () {
       await user.login()
       expect.fail('expected the login request to fail')
     } catch (err) {
-      expect(err).to.match(
-        /login failed: status=403 body={"message":{"type":"error","text":"Admin only panel"}}/
-      )
+      expect(err).to.match(/login failed: status=403/)
+      expect(err.info.body).to.deep.equal({
+        message: { type: 'error', text: 'Admin only panel' },
+      })
     }
   }
 

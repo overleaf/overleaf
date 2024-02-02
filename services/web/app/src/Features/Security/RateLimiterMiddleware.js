@@ -69,8 +69,13 @@ function loginRateLimit(req, res, next) {
     } else {
       logger.warn({ email }, 'rate limit exceeded')
       res.status(429) // Too many requests
-      res.write('Rate limit reached, please try again later')
-      res.end()
+      res.json({
+        message: {
+          type: 'error',
+          text: req.i18n.translate('to_many_login_requests_2_mins'),
+          key: 'to-many-login-requests-2-mins',
+        },
+      })
     }
   })
 }
