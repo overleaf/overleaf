@@ -128,8 +128,10 @@ async function clearSAMLData(userId, auditLog, sendEmail) {
     $unset: {
       samlIdentifiers: 1,
       'emails.$[].samlProviderId': 1,
+      'enrollment.sso': 1,
     },
   }
+
   await updateUser(userId, update)
 
   for (const emailData of user.emails) {
