@@ -1,9 +1,6 @@
 const _ = require('lodash')
 const Settings = require('@overleaf/settings')
 
-const publicRegistrationModuleAvailable =
-  Settings.moduleImportSequence.includes('public-registration')
-
 const supportModuleAvailable = Settings.moduleImportSequence.includes('support')
 
 const symbolPaletteModuleAvailable =
@@ -60,7 +57,7 @@ const Features = {
           Boolean(Settings.overleaf)
         )
       case 'registration':
-        return publicRegistrationModuleAvailable || Boolean(Settings.overleaf)
+        return Boolean(Settings.overleaf)
       case 'github-sync':
         return Boolean(Settings.enableGithubSync)
       case 'git-bridge':
@@ -89,8 +86,6 @@ const Features = {
           _.get(Settings, ['apis', 'linkedUrlProxy', 'url']) &&
             Settings.enabledLinkedFileTypes.includes('url')
         )
-      case 'public-registration':
-        return publicRegistrationModuleAvailable
       case 'support':
         return supportModuleAvailable
       case 'symbol-palette':

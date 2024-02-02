@@ -578,7 +578,58 @@ describe('EmailBuilder', function () {
           })
         })
       })
+
+      describe('welcome', function () {
+        beforeEach(function () {
+          this.emailAddress = 'example@overleaf.com'
+          this.opts = {
+            to: this.emailAddress,
+            confirmEmailUrl: `${this.settings.siteUrl}/user/emails/confirm?token=token123`,
+          }
+          this.email = this.EmailBuilder.buildEmail('welcome', this.opts)
+          this.dom = cheerio.load(this.email.html)
+        })
+
+        it('should build the email', function () {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include a CTA button and a fallback CTA link', function () {
+            const buttonLink = this.dom('a:contains("Confirm Email")')
+            expect(buttonLink.length).to.equal(1)
+            expect(buttonLink.attr('href')).to.equal(this.opts.confirmEmailUrl)
+            const fallback = this.dom('.force-overleaf-style').last()
+            expect(fallback.length).to.equal(1)
+            expect(fallback.html()).to.contain(this.opts.confirmEmailUrl)
+          })
+          it('should include help links', function () {
+            const helpGuidesLink = this.dom('a:contains("Help Guides")')
+            const templatesLink = this.dom('a:contains("Templates")')
+            const logInLink = this.dom('a:contains("log in")')
+            expect(helpGuidesLink.length).to.equal(1)
+            expect(templatesLink.length).to.equal(1)
+            expect(logInLink.length).to.equal(1)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should contain the CTA URL', function () {
+            expect(this.email.text).to.contain(this.opts.confirmEmailUrl)
+          })
+          it('should include help URL', function () {
+            expect(this.email.text).to.contain('/learn')
+            expect(this.email.text).to.contain('/login')
+            expect(this.email.text).to.contain('/templates')
+          })
+          it('should contain HTML links', function () {
+            expect(this.email.text).to.not.contain('<a')
+          })
+        })
+      })
     })
+
     describe('no CTA', function () {
       describe('securityAlert', function () {
         before(function () {
@@ -625,6 +676,47 @@ describe('EmailBuilder', function () {
           it('should remove all HTML in opts.message', function () {
             expect(this.email.text).to.not.contain(this.messageHTML)
             expect(this.email.text).to.contain(this.message)
+          })
+        })
+      })
+
+      describe('welcomeWithoutCTA', function () {
+        beforeEach(function () {
+          this.emailAddress = 'example@overleaf.com'
+          this.opts = {
+            to: this.emailAddress,
+          }
+          this.email = this.EmailBuilder.buildEmail(
+            'welcomeWithoutCTA',
+            this.opts
+          )
+          this.dom = cheerio.load(this.email.html)
+        })
+
+        it('should build the email', function () {
+          expect(this.email.html).to.exist
+          expect(this.email.text).to.exist
+        })
+
+        describe('HTML email', function () {
+          it('should include help links', function () {
+            const helpGuidesLink = this.dom('a:contains("Help Guides")')
+            const templatesLink = this.dom('a:contains("Templates")')
+            const logInLink = this.dom('a:contains("log in")')
+            expect(helpGuidesLink.length).to.equal(1)
+            expect(templatesLink.length).to.equal(1)
+            expect(logInLink.length).to.equal(1)
+          })
+        })
+
+        describe('plain text email', function () {
+          it('should include help URL', function () {
+            expect(this.email.text).to.contain('/learn')
+            expect(this.email.text).to.contain('/login')
+            expect(this.email.text).to.contain('/templates')
+          })
+          it('should contain HTML links', function () {
+            expect(this.email.text).to.not.contain('<a')
           })
         })
       })

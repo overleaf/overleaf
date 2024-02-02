@@ -396,7 +396,7 @@ describe('Registration', function () {
                   expect(err).to.not.exist
                   expect(body.redir != null).to.equal(false)
                   expect(body.message != null).to.equal(true)
-                  expect(body.message).to.have.all.keys('type', 'key')
+                  expect(body.message).to.have.all.keys('type', 'text')
                   expect(body.message.type).to.equal('error')
                   cb()
                 }

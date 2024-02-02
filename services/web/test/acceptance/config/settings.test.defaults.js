@@ -96,12 +96,6 @@ module.exports = {
     },
   },
 
-  // for registration via SL, set enableLegacyRegistration to true
-  // for registration via Overleaf v1, set enableLegacyLogin to true
-
-  // Currently, acceptance tests require enableLegacyRegistration.
-  enableLegacyRegistration: true,
-
   features: (features = {
     v1_free: {
       collaborators: 1,
