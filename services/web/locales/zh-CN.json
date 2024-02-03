@@ -676,7 +676,7 @@
   "git": "Git",
   "git_authentication_token": "Git 身份验证令牌",
   "git_authentication_token_create_modal_info_1": "这是你的Git身份验证令牌。当提示输入密码时，您应该输入此信息。",
-  "git_authentication_token_create_modal_info_2": "<0>您将只看到此身份验证令牌仅一次，因此请复制它并确保其安全存储</0>。有关使用身份验证令牌的完整说明，请访问我们的＜1＞帮助页面1＞。",
+  "git_authentication_token_create_modal_info_2": "<0>您将只会看到此身份验证令牌仅一次，因此请复制它并确保其安全存储</0>。有关使用身份验证令牌的完整说明，请访问我们的<1>帮助页面</1>。",
   "git_bridge_modal_click_generate": "单击<strong>生成令牌</strong>立即生成您的身份验证令牌。或者稍后在您的帐户设置中执行此操作。",
   "git_bridge_modal_description": "您可以使用下面显示的链接来git clone您的项目。",
   "git_bridge_modal_enter_authentication_token": "当提示输入密码时，请输入新的身份验证令牌：",
