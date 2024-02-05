@@ -262,7 +262,10 @@ function CommonNotification({ notification }: CommonNotificationProps) {
                   i18nKey="dropbox_duplicate_project_names_suggestion"
                   components={[<b />]} // eslint-disable-line react/jsx-key
                 />{' '}
-                <a href="/learn/how-to/Dropbox_Synchronization#Troubleshooting">
+                <a
+                  href="/learn/how-to/Dropbox_Synchronization#Troubleshooting"
+                  target="_blank"
+                >
                   {t('learn_more')}
                 </a>
                 .
@@ -290,7 +293,10 @@ function CommonNotification({ notification }: CommonNotificationProps) {
               ) : (
                 t('confirm_affiliation_to_relink_dropbox')
               )}{' '}
-              <a href="/learn/how-to/Institutional_Email_Reconfirmation">
+              <a
+                href="/learn/how-to/Institutional_Email_Reconfirmation"
+                target="_blank"
+              >
                 {t('learn_more')}
               </a>
             </>

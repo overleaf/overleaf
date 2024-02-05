@@ -9,7 +9,7 @@ function FreePlan() {
         i18nKey="on_free_plan_upgrade_to_access_features"
         components={[
           // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-          <a href="/learn/how-to/Overleaf_premium_features" rel="noopener" />,
+          <a href="/learn/how-to/Overleaf_premium_features" target="_blank" />,
         ]}
       />
       :

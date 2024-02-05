@@ -129,7 +129,10 @@ function ReconfirmAffiliation({
         components={[<a href={`/user/settings?remove=${email}`} />]}
       />
       &nbsp;
-      <a href="/learn/how-to/Institutional_Email_Reconfirmation">
+      <a
+        href="/learn/how-to/Institutional_Email_Reconfirmation"
+        target="_blank"
+      >
         {t('learn_more')}
       </a>
       {isError && (

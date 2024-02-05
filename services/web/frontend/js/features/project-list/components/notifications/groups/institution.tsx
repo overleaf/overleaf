@@ -67,7 +67,10 @@ function Institution() {
                         shouldUnescape
                         tOptions={{ interpolation: { escapeValue: true } }}
                       />{' '}
-                      <a href="/learn/how-to/Institutional_Login">
+                      <a
+                        href="/learn/how-to/Institutional_Login"
+                        target="_blank"
+                      >
                         {t('learn_more')}
                       </a>
                     </div>
@@ -152,6 +155,7 @@ function Institution() {
                     className={newNotificationStyle ? 'btn-secondary' : ''}
                     bsSize="sm"
                     href="/learn/how-to/Institutional_Login"
+                    target="_blank"
                   >
                     {t('find_out_more')}
                   </Button>

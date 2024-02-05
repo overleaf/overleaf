@@ -30,7 +30,11 @@ export default function ManagedAccountAlert() {
           <Trans
             i18nKey="need_contact_group_admin_to_make_changes"
             components={[
-              <a href="/learn/how-to/Understanding_Managed_Overleaf_Accounts" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
+              // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
+              <a
+                href="/learn/how-to/Understanding_Managed_Overleaf_Accounts"
+                target="_blank"
+              />,
             ]}
           />
         </div>

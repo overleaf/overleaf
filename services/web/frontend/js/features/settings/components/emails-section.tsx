@@ -39,7 +39,10 @@ function EmailsSectionContent() {
             // eslint-disable-next-line react/jsx-key
             <strong />,
             // eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key
-            <a href="/learn/how-to/Managing_your_Overleaf_emails" />,
+            <a
+              href="/learn/how-to/Managing_your_Overleaf_emails"
+              target="_blank"
+            />,
           ]}
         />
       </p>
