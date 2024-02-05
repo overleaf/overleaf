@@ -1,13 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS201: Simplify complex destructure assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import OError from '@overleaf/o-error'
 import { db, ObjectId } from './mongodb.js'
 import * as HistoryStoreManager from './HistoryStoreManager.js'
@@ -15,18 +5,18 @@ import * as UpdatesProcessor from './UpdatesProcessor.js'
 import * as WebApiManager from './WebApiManager.js'
 
 export function getLabels(projectId, callback) {
-  return _toObjectId(projectId, function (error, projectId) {
-    if (error != null) {
+  _toObjectId(projectId, function (error, projectId) {
+    if (error) {
       return callback(OError.tag(error))
     }
-    return db.projectHistoryLabels
+    db.projectHistoryLabels
       .find({ project_id: new ObjectId(projectId) })
       .toArray(function (error, labels) {
-        if (error != null) {
+        if (error) {
           return callback(OError.tag(error))
         }
         const formattedLabels = labels.map(_formatLabel)
-        return callback(null, formattedLabels)
+        callback(null, formattedLabels)
       })
   })
 }
@@ -42,22 +32,18 @@ export function createLabel(
 ) {
   const validateVersionExists = function (callback) {
     if (shouldValidateExists === false) {
-      return callback()
+      callback()
     } else {
-      return _validateChunkExistsForVersion(
-        projectId.toString(),
-        version,
-        callback
-      )
+      _validateChunkExistsForVersion(projectId.toString(), version, callback)
     }
   }
 
-  return _toObjectId(projectId, userId, function (error, projectId, userId) {
-    if (error != null) {
+  _toObjectId(projectId, userId, function (error, projectId, userId) {
+    if (error) {
       return callback(OError.tag(error))
     }
-    return validateVersionExists(function (error) {
-      if (error != null) {
+    validateVersionExists(function (error) {
+      if (error) {
         return callback(OError.tag(error))
       }
 
@@ -71,7 +57,7 @@ export function createLabel(
         created_at: createdAt,
       }
       db.projectHistoryLabels.insertOne(label, function (error, confirmation) {
-        if (error != null) {
+        if (error) {
           return callback(OError.tag(error))
         }
         label._id = confirmation.insertedId
@@ -82,15 +68,15 @@ export function createLabel(
 }
 
 export function deleteLabelForUser(projectId, userId, labelId, callback) {
-  return _toObjectId(
+  _toObjectId(
     projectId,
     userId,
     labelId,
     function (error, projectId, userId, labelId) {
-      if (error != null) {
+      if (error) {
         return callback(OError.tag(error))
       }
-      return db.projectHistoryLabels.deleteOne(
+      db.projectHistoryLabels.deleteOne(
         {
           _id: new ObjectId(labelId),
           project_id: new ObjectId(projectId),
@@ -103,11 +89,11 @@ export function deleteLabelForUser(projectId, userId, labelId, callback) {
 }
 
 export function deleteLabel(projectId, labelId, callback) {
-  return _toObjectId(projectId, labelId, function (error, projectId, labelId) {
-    if (error != null) {
+  _toObjectId(projectId, labelId, function (error, projectId, labelId) {
+    if (error) {
       return callback(OError.tag(error))
     }
-    return db.projectHistoryLabels.deleteOne(
+    db.projectHistoryLabels.deleteOne(
       {
         _id: new ObjectId(labelId),
         project_id: new ObjectId(projectId),
@@ -118,24 +104,20 @@ export function deleteLabel(projectId, labelId, callback) {
 }
 
 export function transferLabels(fromUserId, toUserId, callback) {
-  return _toObjectId(
-    fromUserId,
-    toUserId,
-    function (error, fromUserId, toUserId) {
-      if (error != null) {
-        return callback(OError.tag(error))
-      }
-      return db.projectHistoryLabels.updateMany(
-        {
-          user_id: fromUserId,
-        },
-        {
-          $set: { user_id: toUserId },
-        },
-        callback
-      )
+  _toObjectId(fromUserId, toUserId, function (error, fromUserId, toUserId) {
+    if (error) {
+      return callback(OError.tag(error))
     }
-  )
+    db.projectHistoryLabels.updateMany(
+      {
+        user_id: fromUserId,
+      },
+      {
+        $set: { user_id: toUserId },
+      },
+      callback
+    )
+  })
 }
 
 function _toObjectId(...args1) {
@@ -144,9 +126,9 @@ function _toObjectId(...args1) {
   const callback = args1[adjustedLength - 1]
   try {
     const ids = args.map(id => new ObjectId(id))
-    return callback(null, ...Array.from(ids))
+    callback(null, ...ids)
   } catch (error) {
-    return callback(error)
+    callback(error)
   }
 }
 
@@ -161,23 +143,23 @@ function _formatLabel(label) {
 }
 
 function _validateChunkExistsForVersion(projectId, version, callback) {
-  return UpdatesProcessor.processUpdatesForProject(projectId, function (error) {
-    if (error != null) {
+  UpdatesProcessor.processUpdatesForProject(projectId, function (error) {
+    if (error) {
       return callback(error)
     }
-    return WebApiManager.getHistoryId(projectId, function (error, historyId) {
-      if (error != null) {
+    WebApiManager.getHistoryId(projectId, function (error, historyId) {
+      if (error) {
         return callback(error)
       }
-      return HistoryStoreManager.getChunkAtVersion(
+      HistoryStoreManager.getChunkAtVersion(
         projectId,
         historyId,
         version,
         function (error) {
-          if (error != null) {
+          if (error) {
             return callback(error)
           }
-          return callback()
+          callback()
         }
       )
     })
