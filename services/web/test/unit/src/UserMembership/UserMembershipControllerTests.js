@@ -23,6 +23,8 @@ const EntityConfigs = require('../../../../app/src/Features/UserMembership/UserM
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const {
   UserIsManagerError,
+  UserNotFoundError,
+  UserAlreadyAddedError,
 } = require('../../../../app/src/Features/UserMembership/UserMembershipErrors')
 
 describe('UserMembershipController', function () {
@@ -91,7 +93,11 @@ describe('UserMembershipController', function () {
       modulePath,
       {
         requires: {
-          './UserMembershipErrors': { UserIsManagerError },
+          './UserMembershipErrors': {
+            UserIsManagerError,
+            UserNotFoundError,
+            UserAlreadyAddedError,
+          },
           '../Authentication/SessionManager': this.SessionManager,
           '../SplitTests/SplitTestHandler': this.SplitTestHandler,
           './UserMembershipHandler': this.UserMembershipHandler,
@@ -212,7 +218,7 @@ describe('UserMembershipController', function () {
     })
 
     it('handle user already added', function (done) {
-      this.UserMembershipHandler.addUser.yields({ alreadyAdded: true })
+      this.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
       return this.UserMembershipController.add(this.req, {
         status: () => ({
           json: payload => {
@@ -224,7 +230,7 @@ describe('UserMembershipController', function () {
     })
 
     it('handle user not found', function (done) {
-      this.UserMembershipHandler.addUser.yields({ userNotFound: true })
+      this.UserMembershipHandler.addUser.yields(new UserNotFoundError())
       return this.UserMembershipController.add(this.req, {
         status: () => ({
           json: payload => {

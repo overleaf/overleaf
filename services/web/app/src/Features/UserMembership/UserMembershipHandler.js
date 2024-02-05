@@ -1,20 +1,5 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { ObjectId } = require('mongodb')
-const async = require('async')
-const { promisifyAll } = require('@overleaf/promise-utils')
-const Errors = require('../Errors/Errors')
+const { promisifyAll, callbackify } = require('@overleaf/promise-utils')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,
   Subscription: require('../../models/Subscription').Subscription,
@@ -22,82 +7,70 @@ const EntityModels = {
 }
 const UserMembershipViewModel = require('./UserMembershipViewModel')
 const UserGetter = require('../User/UserGetter')
-const logger = require('@overleaf/logger')
-const UserMembershipEntityConfigs = require('./UserMembershipEntityConfigs')
-const { UserIsManagerError } = require('./UserMembershipErrors')
+const {
+  UserIsManagerError,
+  UserNotFoundError,
+  UserAlreadyAddedError,
+} = require('./UserMembershipErrors')
 
 const UserMembershipHandler = {
-  getEntityWithoutAuthorizationCheck(entityId, entityConfig, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async getEntityWithoutAuthorizationCheck(entityId, entityConfig) {
     const query = buildEntityQuery(entityId, entityConfig)
-    EntityModels[entityConfig.modelName].findOne(query, callback)
+    return await EntityModels[entityConfig.modelName].findOne(query).exec()
   },
 
-  createEntity(entityId, entityConfig, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async createEntity(entityId, entityConfig) {
     const data = buildEntityQuery(entityId, entityConfig)
-    EntityModels[entityConfig.modelName].create(data, callback)
+    return await EntityModels[entityConfig.modelName].create(data).exec()
   },
 
-  getUsers(entity, entityConfig, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async getUsers(entity, entityConfig) {
     const attributes = entityConfig.fields.read
-    getPopulatedListOfMembers(entity, attributes, callback)
+    return await getPopulatedListOfMembers(entity, attributes)
   },
 
-  addUser(entity, entityConfig, email, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async addUser(entity, entityConfig, email) {
     const attribute = entityConfig.fields.write
-    UserGetter.getUserByAnyEmail(email, function (error, user) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (!user) {
-        const err = { userNotFound: true }
-        return callback(err)
-      }
-      if (entity[attribute].some(managerId => managerId.equals(user._id))) {
-        error = { alreadyAdded: true }
-        return callback(error)
-      }
+    const user = await UserGetter.promises.getUserByAnyEmail(email)
 
-      addUserToEntity(entity, attribute, user, error =>
-        callback(error, UserMembershipViewModel.build(user))
-      )
-    })
+    if (!user) {
+      throw new UserNotFoundError()
+    }
+
+    if (entity[attribute].some(managerId => managerId.equals(user._id))) {
+      throw new UserAlreadyAddedError()
+    }
+
+    await addUserToEntity(entity, attribute, user)
+    return UserMembershipViewModel.build(user)
   },
 
-  removeUser(entity, entityConfig, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async removeUser(entity, entityConfig, userId) {
     const attribute = entityConfig.fields.write
-    if (entity.admin_id != null ? entity.admin_id.equals(userId) : undefined) {
-      return callback(new UserIsManagerError())
+    if (entity.admin_id ? entity.admin_id.equals(userId) : undefined) {
+      throw new UserIsManagerError()
     }
-    removeUserFromEntity(entity, attribute, userId, callback)
+    return await removeUserFromEntity(entity, attribute, userId)
   },
 }
 
 UserMembershipHandler.promises = promisifyAll(UserMembershipHandler)
-module.exports = UserMembershipHandler
+module.exports = {
+  getEntityWithoutAuthorizationCheck: callbackify(
+    UserMembershipHandler.getEntityWithoutAuthorizationCheck
+  ),
+  createEntity: callbackify(UserMembershipHandler.createEntity),
+  getUsers: callbackify(UserMembershipHandler.getUsers),
+  addUser: callbackify(UserMembershipHandler.addUser),
+  removeUser: callbackify(UserMembershipHandler.removeUser),
+  promises: UserMembershipHandler,
+}
 
-function getPopulatedListOfMembers(entity, attributes, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
+async function getPopulatedListOfMembers(entity, attributes) {
   const userObjects = []
 
-  for (const attribute of Array.from(attributes)) {
-    for (const userObject of Array.from(entity[attribute] || [])) {
+  for (const attribute of attributes) {
+    for (const userObject of entity[attribute] || []) {
       // userObject can be an email as String, a user id as ObjectId or an
       // invite as Object with an email attribute as String. We want to pass to
       // UserMembershipViewModel either an email as (String) or a user id (ObjectId)
@@ -106,42 +79,38 @@ function getPopulatedListOfMembers(entity, attributes, callback) {
     }
   }
 
-  async.map(userObjects, UserMembershipViewModel.buildAsync, (err, users) => {
-    if (err) {
-      return callback(err)
+  const users = await Promise.all(
+    userObjects.map(userObject =>
+      UserMembershipViewModel.promises.buildAsync(userObject)
+    )
+  )
+
+  for (const user of users) {
+    if (
+      user?._id &&
+      entity?.admin_id &&
+      user._id.toString() === entity.admin_id.toString()
+    ) {
+      user.isEntityAdmin = true
     }
-    for (const user of users) {
-      if (
-        user?._id &&
-        entity?.admin_id &&
-        user._id.toString() === entity.admin_id.toString()
-      ) {
-        user.isEntityAdmin = true
-      }
-    }
-    callback(null, users)
-  })
+  }
+
+  return users
 }
 
-function addUserToEntity(entity, attribute, user, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
+async function addUserToEntity(entity, attribute, user) {
   const fieldUpdate = {}
   fieldUpdate[attribute] = user._id
-  entity.updateOne({ $addToSet: fieldUpdate }, callback)
+  return await entity.updateOne({ $addToSet: fieldUpdate }).exec()
 }
 
-function removeUserFromEntity(entity, attribute, userId, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
+async function removeUserFromEntity(entity, attribute, userId) {
   const fieldUpdate = {}
   fieldUpdate[attribute] = userId
-  entity.updateOne({ $pull: fieldUpdate }, callback)
+  return await entity.updateOne({ $pull: fieldUpdate }).exec()
 }
 
-function buildEntityQuery(entityId, entityConfig, loggedInUser) {
+function buildEntityQuery(entityId, entityConfig) {
   if (ObjectId.isValid(entityId.toString())) {
     entityId = new ObjectId(entityId)
   }

@@ -10,11 +10,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let UserMembershipViewModel
 const UserGetter = require('../User/UserGetter')
 const { isObjectIdInstance } = require('../Helpers/Mongo')
+const { promisify } = require('@overleaf/promise-utils')
 
-module.exports = UserMembershipViewModel = {
+const UserMembershipViewModel = {
   build(userOrEmail) {
     if (userOrEmail._id) {
       return buildUserViewModel(userOrEmail)
@@ -75,3 +75,9 @@ function buildUserViewModel(user, isInvite) {
 const buildUserViewModelWithEmail = email => buildUserViewModel({ email }, true)
 
 const buildUserViewModelWithId = id => buildUserViewModel({ _id: id }, false)
+
+UserMembershipViewModel.promises = {
+  buildAsync: promisify(UserMembershipViewModel.buildAsync),
+}
+
+module.exports = UserMembershipViewModel

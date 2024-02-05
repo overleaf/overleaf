@@ -15,7 +15,11 @@ const UserMembershipHandler = require('./UserMembershipHandler')
 const Errors = require('../Errors/Errors')
 const EmailHelper = require('../Helpers/EmailHelper')
 const { csvAttachment } = require('../../infrastructure/Response')
-const { UserIsManagerError } = require('./UserMembershipErrors')
+const {
+  UserIsManagerError,
+  UserAlreadyAddedError,
+  UserNotFoundError,
+} = require('./UserMembershipErrors')
 const { SSOConfig } = require('../../models/SSOConfig')
 const CSVParser = require('json2csv').Parser
 
@@ -136,7 +140,7 @@ module.exports = {
       entityConfig,
       email,
       function (error, user) {
-        if (error != null ? error.alreadyAdded : undefined) {
+        if (error && error instanceof UserAlreadyAddedError) {
           return res.status(400).json({
             error: {
               code: 'user_already_added',
@@ -144,7 +148,7 @@ module.exports = {
             },
           })
         }
-        if (error != null ? error.userNotFound : undefined) {
+        if (error && error instanceof UserNotFoundError) {
           return res.status(404).json({
             error: {
               code: 'user_not_found',
