@@ -5,13 +5,26 @@ export type BlobStore = {
   putString(content: string): Promise<Blob>
 }
 
+type Range = {
+  pos: number
+  length: number
+}
+
 export type CommentRawData = {
   id: string
-  ranges: {
-    pos: number
-    length: number
-  }[]
+  ranges: Range[]
   resolved?: boolean
+}
+
+export type TrackedChangeRawData = {
+  range: Range
+  tracking: TrackingPropsRawData
+}
+
+export type TrackingPropsRawData = {
+  type: 'insert' | 'delete' | 'none'
+  userId: string
+  ts: string
 }
 
 export type StringFileRawData = {

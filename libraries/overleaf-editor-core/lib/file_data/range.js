@@ -170,6 +170,23 @@ class Range {
   static fromRaw(raw) {
     return new Range(raw.pos, raw.length)
   }
+
+  /**
+   * Splits a range into two ranges, at a given cursor
+   * @param {number} cursor
+   * @returns {[Range, Range]}
+   */
+  splitAt(cursor) {
+    if (!this.containsCursor(cursor)) {
+      throw new Error('The cursor must be contained in the range')
+    }
+    const rangeUpToCursor = new Range(this.pos, cursor - this.pos)
+    const rangeAfterCursor = new Range(
+      cursor,
+      this.length - rangeUpToCursor.length
+    )
+    return [rangeUpToCursor, rangeAfterCursor]
+  }
 }
 
 module.exports = Range

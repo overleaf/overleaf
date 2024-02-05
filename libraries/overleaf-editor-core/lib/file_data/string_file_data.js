@@ -5,24 +5,28 @@ const assert = require('check-types').assert
 
 const FileData = require('./')
 const CommentList = require('./comment_list')
+const TrackedChangeList = require('./tracked_change_list')
 
 /**
  * @typedef {import("../types").StringFileRawData} StringFileRawData
  * @typedef {import("../operation/edit_operation")} EditOperation
  * @typedef {import("../types").BlobStore} BlobStore
  * @typedef {import("../types").CommentRawData} CommentRawData
+ * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
  */
 
 class StringFileData extends FileData {
   /**
    * @param {string} content
-   * @param {CommentRawData[]} [rawComments]
+   * @param {CommentRawData[] | undefined} [rawComments]
+   * @param {TrackedChangeRawData[] | undefined} [rawTrackedChanges]
    */
-  constructor(content, rawComments = []) {
+  constructor(content, rawComments = [], rawTrackedChanges = []) {
     super()
     assert.string(content)
     this.content = content
     this.comments = CommentList.fromRaw(rawComments)
+    this.trackedChanges = TrackedChangeList.fromRaw(rawTrackedChanges)
   }
 
   /**
@@ -43,6 +47,10 @@ class StringFileData extends FileData {
     const comments = this.getComments()
     if (comments.length) {
       raw.comments = comments
+    }
+
+    if (this.trackedChanges.length) {
+      raw.trackedChanges = this.trackedChanges.toRaw()
     }
 
     return raw

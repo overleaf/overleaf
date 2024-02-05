@@ -342,4 +342,90 @@ describe('Range', function () {
     expect(from5to14.start).to.eql(8)
     expect(from5to14.end).to.eql(18)
   })
+
+  describe('splitAt', function () {
+    it('should split at the start', function () {
+      const range = new Range(5, 10)
+      const [left, right] = range.splitAt(5)
+      expect(left.isEmpty()).to.be.true
+      expect(right.start).to.eql(5)
+      expect(right.end).to.eql(15)
+    })
+
+    it('should not split before the start', function () {
+      const range = new Range(5, 10)
+      expect(() => range.splitAt(4)).to.throw()
+    })
+
+    it('should split at last cursor in range', function () {
+      const range = new Range(5, 10)
+      const [left, right] = range.splitAt(14)
+      expect(left.start).to.equal(5)
+      expect(left.end).to.equal(14)
+      expect(right.start).to.equal(14)
+      expect(right.end).to.equal(15)
+    })
+
+    it('should not split after the end', function () {
+      const range = new Range(5, 10)
+      expect(() => range.splitAt(16)).to.throw()
+    })
+
+    it('should split at end', function () {
+      const range = new Range(5, 10)
+      const [left, right] = range.splitAt(15)
+      expect(left.start).to.equal(5)
+      expect(left.end).to.equal(15)
+      expect(right.start).to.equal(15)
+      expect(right.end).to.equal(15)
+    })
+
+    it('should split in the middle', function () {
+      const range = new Range(5, 10)
+      const [left, right] = range.splitAt(10)
+      expect(left.start).to.equal(5)
+      expect(left.end).to.equal(10)
+      expect(right.start).to.equal(10)
+      expect(right.end).to.equal(15)
+    })
+  })
+
+  describe('insertAt', function () {
+    it('should insert at the start', function () {
+      const range = new Range(5, 10)
+      const [left, inserted, right] = range.insertAt(5, 3)
+      expect(left.isEmpty()).to.be.true
+      expect(inserted.start).to.eql(5)
+      expect(inserted.end).to.eql(8)
+      expect(right.start).to.eql(8)
+      expect(right.end).to.eql(18)
+    })
+
+    it('should insert at the end', function () {
+      const range = new Range(5, 10)
+      const [left, inserted, right] = range.insertAt(15, 3)
+      expect(left.start).to.eql(5)
+      expect(left.end).to.eql(15)
+      expect(inserted.start).to.eql(15)
+      expect(inserted.end).to.eql(18)
+      expect(right.isEmpty()).to.be.true
+    })
+
+    it('should insert in the middle', function () {
+      const range = new Range(5, 10)
+      const [left, inserted, right] = range.insertAt(10, 3)
+      expect(left.start).to.eql(5)
+      expect(left.end).to.eql(10)
+      expect(inserted.start).to.eql(10)
+      expect(inserted.end).to.eql(13)
+      expect(right.start).to.eql(13)
+      expect(right.end).to.eql(18)
+    })
+
+    it('should throw if cursor is out of range', function () {
+      const range = new Range(5, 10)
+      expect(() => range.insertAt(4, 3)).to.throw()
+      expect(() => range.insertAt(16, 3)).to.throw()
+    })
+  })
 })
