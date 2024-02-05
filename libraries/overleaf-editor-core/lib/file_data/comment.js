@@ -33,7 +33,7 @@ class Comment {
    */
   addRange(range) {
     this.ranges.push(range)
-    this.ranges.sort((a, b) => a.firstIndex - b.firstIndex)
+    this.ranges.sort((a, b) => a.start - b.start)
     this.mergeRanges()
   }
 
@@ -48,13 +48,13 @@ class Comment {
     const splittedRanges = []
 
     for (const commentRange of this.ranges) {
-      if (commentRange.firstNextIndex === cursor) {
+      if (cursor === commentRange.end) {
         // insert right after the comment
         if (extendComment) {
           commentRange.extendBy(length)
           existingRangeExtended = true
         }
-      } else if (commentRange.firstIndex === cursor) {
+      } else if (cursor === commentRange.start) {
         // insert at the start of the comment
         if (extendComment) {
           commentRange.extendBy(length)
@@ -62,10 +62,10 @@ class Comment {
         } else {
           commentRange.moveBy(length)
         }
-      } else if (commentRange.firstIndexIsAfter(cursor)) {
+      } else if (commentRange.startIsAfter(cursor)) {
         // insert before the comment
         commentRange.moveBy(length)
-      } else if (commentRange.containsIndex(cursor)) {
+      } else if (commentRange.containsCursor(cursor)) {
         // insert is inside the comment
         if (extendComment) {
           commentRange.extendBy(length)

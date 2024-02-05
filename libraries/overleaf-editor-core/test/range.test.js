@@ -7,14 +7,14 @@ const Range = require('../lib/file_data/range')
 describe('Range', function () {
   it('should create a range', function () {
     const from5to14 = new Range(5, 10)
-    expect(from5to14.firstIndex).to.eql(5)
-    expect(from5to14.lastIndex).to.eql(14)
+    expect(from5to14.start).to.eql(5)
+    expect(from5to14.end).to.eql(15)
   })
 
   it('should create a range using fromRaw', function () {
     const from5to14 = Range.fromRaw({ pos: 5, length: 10 })
-    expect(from5to14.firstIndex).to.eql(5)
-    expect(from5to14.lastIndex).to.eql(14)
+    expect(from5to14.start).to.eql(5)
+    expect(from5to14.end).to.eql(15)
   })
 
   it('should convert to raw', function () {
@@ -172,14 +172,14 @@ describe('Range', function () {
     expect(from0to99.contains(from0to99)).to.eql(true)
   })
 
-  it('should check if range contains an index', function () {
+  it('should check if range contains a cursor', function () {
     const from5to14 = new Range(5, 10)
-    expect(from5to14.containsIndex(4)).to.eql(false)
-    expect(from5to14.containsIndex(5)).to.eql(true)
-    expect(from5to14.containsIndex(6)).to.eql(true)
-    expect(from5to14.containsIndex(14)).to.eql(true)
-    expect(from5to14.containsIndex(15)).to.eql(false)
-    expect(from5to14.containsIndex(16)).to.eql(false)
+    expect(from5to14.containsCursor(4)).to.eql(false)
+    expect(from5to14.containsCursor(5)).to.eql(true)
+    expect(from5to14.containsCursor(6)).to.eql(true)
+    expect(from5to14.containsCursor(14)).to.eql(true)
+    expect(from5to14.containsCursor(15)).to.eql(true)
+    expect(from5to14.containsCursor(16)).to.eql(false)
   })
 
   describe('subtract range from another', function () {
@@ -187,7 +187,7 @@ describe('Range', function () {
       const from1to5 = new Range(1, 6)
       const from0to1 = new Range(0, 1)
       expect(from1to5.subtract(from0to1)).to.eql(0)
-      expect(from1to5.firstIndex).to.eql(1)
+      expect(from1to5.start).to.eql(1)
       expect(from1to5.length).to.eql(6)
     })
 
@@ -195,32 +195,32 @@ describe('Range', function () {
       const from5to19 = new Range(5, 15)
       const from15to24 = new Range(15, 10)
       expect(from15to24.subtract(from5to19)).to.eql(5)
-      expect(from15to24.firstIndex).to.eql(5)
-      expect(from15to24.lastIndex).to.eql(9)
+      expect(from15to24.start).to.eql(5)
+      expect(from15to24.end).to.eql(10)
     })
 
     it('should subtract from the right', function () {
       const from10to24 = new Range(10, 15)
       const from5to19 = new Range(5, 15)
       expect(from5to19.subtract(from10to24)).to.eql(10)
-      expect(from5to19.firstIndex).to.eql(5)
-      expect(from5to19.lastIndex).to.eql(9)
+      expect(from5to19.start).to.eql(5)
+      expect(from5to19.end).to.eql(10)
     })
 
     it('should subtract from the middle', function () {
       const from5to19 = new Range(5, 15)
       const from10to14 = new Range(10, 5)
       expect(from5to19.subtract(from10to14)).to.eql(5)
-      expect(from5to19.firstIndex).to.eql(5)
-      expect(from5to19.lastIndex).to.eql(14)
+      expect(from5to19.start).to.eql(5)
+      expect(from5to19.end).to.eql(15)
     })
 
     it('should delete entire range', function () {
       const from0to99 = new Range(0, 100)
       const from5to19 = new Range(5, 15)
       expect(from5to19.subtract(from0to99)).to.eql(15)
-      expect(from5to19.firstIndex).to.eql(5)
-      expect(() => from5to19.lastIndex).to.throw()
+      expect(from5to19.start).to.eql(5)
+      expect(from5to19.end).to.eql(5)
       expect(from5to19.length).to.eql(0)
     })
 
@@ -229,8 +229,8 @@ describe('Range', function () {
       const from20to29 = new Range(20, 10)
       expect(from5to14.subtract(from20to29)).to.eql(0)
       expect(from20to29.subtract(from5to14)).to.eql(0)
-      expect(from5to14.firstIndex).to.eql(5)
-      expect(from5to14.lastIndex).to.eql(14)
+      expect(from5to14.start).to.eql(5)
+      expect(from5to14.end).to.eql(15)
     })
   })
 
@@ -240,8 +240,8 @@ describe('Range', function () {
       const from10to19 = new Range(10, 10)
       expect(from5to14.canMerge(from10to19)).to.eql(true)
       from5to14.merge(from10to19)
-      expect(from5to14.firstIndex).to.eql(5)
-      expect(from5to14.lastIndex).to.eql(19)
+      expect(from5to14.start).to.eql(5)
+      expect(from5to14.end).to.eql(20)
     })
 
     it('should merge ranges overlaping at the start', function () {
@@ -249,8 +249,8 @@ describe('Range', function () {
       const from0to9 = new Range(0, 10)
       expect(from5to14.canMerge(from0to9)).to.eql(true)
       from5to14.merge(from0to9)
-      expect(from5to14.firstIndex).to.eql(0)
-      expect(from5to14.lastIndex).to.eql(14)
+      expect(from5to14.start).to.eql(0)
+      expect(from5to14.end).to.eql(15)
     })
 
     it('should merge ranges if one is covered by another', function () {
@@ -266,8 +266,8 @@ describe('Range', function () {
       const from0to19 = new Range(0, 20)
       expect(from0to19.canMerge(from5to14)).to.eql(true)
       from0to19.merge(from5to14)
-      expect(from0to19.firstIndex).to.eql(0)
-      expect(from0to19.lastIndex).to.eql(19)
+      expect(from0to19.start).to.eql(0)
+      expect(from0to19.end).to.eql(20)
     })
 
     it('should not merge ranges if they do not overlap', function () {
@@ -319,27 +319,27 @@ describe('Range', function () {
 
   it('should check if range starts after a position', function () {
     const from5to14 = new Range(5, 10)
-    expect(from5to14.firstIndexIsAfter(3)).to.be.true
-    expect(from5to14.firstIndexIsAfter(4)).to.be.true
-    expect(from5to14.firstIndexIsAfter(5)).to.be.false
-    expect(from5to14.firstIndexIsAfter(6)).to.be.false
-    expect(from5to14.firstIndexIsAfter(15)).to.be.false
-    expect(from5to14.firstIndexIsAfter(16)).to.be.false
+    expect(from5to14.startIsAfter(3)).to.be.true
+    expect(from5to14.startIsAfter(4)).to.be.true
+    expect(from5to14.startIsAfter(5)).to.be.false
+    expect(from5to14.startIsAfter(6)).to.be.false
+    expect(from5to14.startIsAfter(15)).to.be.false
+    expect(from5to14.startIsAfter(16)).to.be.false
   })
 
   it('should extend the range', function () {
     const from5to14 = new Range(5, 10)
     from5to14.extendBy(3)
     expect(from5to14.length).to.eql(13)
-    expect(from5to14.firstIndex).to.eql(5)
-    expect(from5to14.lastIndex).to.eql(17)
+    expect(from5to14.start).to.eql(5)
+    expect(from5to14.end).to.eql(18)
   })
 
   it('should move the range', function () {
     const from5to14 = new Range(5, 10)
     from5to14.moveBy(3)
     expect(from5to14.length).to.eql(10)
-    expect(from5to14.firstIndex).to.eql(8)
-    expect(from5to14.lastIndex).to.eql(17)
+    expect(from5to14.start).to.eql(8)
+    expect(from5to14.end).to.eql(18)
   })
 })

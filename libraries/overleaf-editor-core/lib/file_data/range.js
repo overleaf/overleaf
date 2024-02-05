@@ -9,21 +9,11 @@ class Range {
     this.length = length
   }
 
-  get firstIndex() {
+  get start() {
     return this.pos
   }
 
-  /**
-   * @returns {number} for an empty range, lastIndex will be -1
-   */
-  get lastIndex() {
-    if (this.length === 0) {
-      throw new Error('Range is empty')
-    }
-    return this.pos + this.length - 1
-  }
-
-  get firstNextIndex() {
+  get end() {
     return this.pos + this.length
   }
 
@@ -32,15 +22,15 @@ class Range {
    * @returns {boolean}
    */
   startsAfter(range) {
-    return this.firstIndex >= range.firstNextIndex
+    return this.start >= range.end
   }
 
   /**
    * @param {number} pos
    * @returns {boolean}
    */
-  firstIndexIsAfter(pos) {
-    return this.firstIndex > pos
+  startIsAfter(pos) {
+    return this.start > pos
   }
 
   /**
@@ -56,27 +46,22 @@ class Range {
    * @param {Range} range
    */
   contains(range) {
-    return (
-      this.firstIndex <= range.firstIndex && this.lastIndex >= range.lastIndex
-    )
+    return this.start <= range.start && this.end >= range.end
   }
 
   /**
-   * checks if the range contains a given index
-   * @param {number} index
+   * checks if the range contains a cursor (i.e. is not at the ends of the range)
+   * @param {number} cursor
    */
-  containsIndex(index) {
-    return this.firstIndex <= index && this.lastIndex >= index
+  containsCursor(cursor) {
+    return this.start <= cursor && this.end >= cursor
   }
 
   /**
    * @param {Range} range
    */
   overlaps(range) {
-    return (
-      this.firstIndex < range.firstNextIndex &&
-      this.firstNextIndex > range.firstIndex
-    )
+    return this.start < range.end && this.end > range.start
   }
 
   /**
@@ -84,10 +69,7 @@ class Range {
    * @param {Range} range
    */
   touches(range) {
-    return (
-      this.firstNextIndex === range.firstIndex ||
-      this.firstIndex === range.firstNextIndex
-    )
+    return this.end === range.start || this.start === range.end
   }
 
   /**
@@ -107,13 +89,13 @@ class Range {
     }
 
     if (range.overlaps(this)) {
-      if (range.firstIndex < this.firstIndex) {
-        const intersectedLength = range.lastIndex - this.firstIndex + 1
+      if (range.start < this.start) {
+        const intersectedLength = range.end - this.start
         this.length -= intersectedLength
         this.pos = range.pos
         return intersectedLength
       } else {
-        const intersectedLength = this.lastIndex - range.firstIndex + 1
+        const intersectedLength = this.end - range.start
         this.length -= intersectedLength
         return intersectedLength
       }
@@ -137,10 +119,10 @@ class Range {
     if (!this.canMerge(range)) {
       throw new Error('Ranges cannot be merged')
     }
-    const newFirstIndex = Math.min(this.pos, range.pos)
-    const newLastIndex = Math.max(this.lastIndex, range.lastIndex)
-    this.pos = newFirstIndex
-    this.length = newLastIndex + 1 - newFirstIndex
+    const newPos = Math.min(this.pos, range.pos)
+    const newEnd = Math.max(this.end, range.end)
+    this.pos = newPos
+    this.length = newEnd - newPos
   }
 
   /**
@@ -160,22 +142,22 @@ class Range {
   }
 
   /**
-   * Splits a range on the index and insert a range with the length provided
-   * @param {number} index
+   * Splits a range on the cursor and insert a range with the length provided
+   * @param {number} cursor
    * @param {number} length
    * @returns {[Range, Range, Range]}
    */
-  insertAt(index, length) {
-    if (!this.containsIndex(index)) {
-      throw new Error('The index must be contained in the range')
+  insertAt(cursor, length) {
+    if (!this.containsCursor(cursor)) {
+      throw new Error('The cursor must be contained in the range')
     }
-    const rangeUpToIndex = new Range(this.pos, index - this.pos)
-    const insertedRange = new Range(index, length)
-    const rangeAfterIndex = new Range(
-      index + length,
-      this.length - rangeUpToIndex.length
+    const rangeUpToCursor = new Range(this.pos, cursor - this.pos)
+    const insertedRange = new Range(cursor, length)
+    const rangeAfterCursor = new Range(
+      cursor + length,
+      this.length - rangeUpToCursor.length
     )
-    return [rangeUpToIndex, insertedRange, rangeAfterIndex]
+    return [rangeUpToCursor, insertedRange, rangeAfterCursor]
   }
 
   toRaw() {
