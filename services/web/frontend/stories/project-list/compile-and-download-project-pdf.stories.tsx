@@ -5,9 +5,6 @@ import { projectsData } from '../../../test/frontend/features/project-list/fixtu
 
 export const Successful = (args: any) => {
   window.user_id = '624333f147cfd8002622a1d3'
-  window.metaAttributesCache.set('ol-splitTestVariants', {
-    'download-pdf-dashboard': 'enabled',
-  })
   useFetchMock(fetchMock => {
     fetchMock.post(/\/api\/project/, {
       projects: projectsData,
@@ -36,9 +33,6 @@ export const Successful = (args: any) => {
 
 export const Failure = (args: any) => {
   window.user_id = '624333f147cfd8002622a1d3'
-  window.metaAttributesCache.set('ol-splitTestVariants', {
-    'download-pdf-dashboard': 'enabled',
-  })
   useFetchMock(fetchMock => {
     fetchMock.post(/\/api\/project/, {
       projects: projectsData,

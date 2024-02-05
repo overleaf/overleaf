@@ -327,13 +327,6 @@ async function projectListPage(req, res, next) {
     }
   }
 
-  // The assignment will be picked up via 'ol-splitTestVariants' in react.
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'download-pdf-dashboard'
-  )
-
   const hasPaidAffiliation = userAffiliations.some(
     affiliation => affiliation.licence && affiliation.licence !== 'free'
   )

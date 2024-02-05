@@ -12,7 +12,6 @@ import LeaveProjectButton from '../table/cells/action-buttons/leave-project-butt
 import DeleteProjectButton from '../table/cells/action-buttons/delete-project-button'
 import { Project } from '../../../../../../types/project/dashboard/api'
 import CompileAndDownloadProjectPDFButton from '../table/cells/action-buttons/compile-and-download-project-pdf-button'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type ActionButtonProps = {
   project: Project
@@ -219,12 +218,10 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
           project={project}
           onClick={handleClose}
         />
-        {isSplitTestEnabled('download-pdf-dashboard') && (
-          <CompileAndDownloadProjectPDFButtonMenuItem
-            project={project}
-            onClick={handleClose}
-          />
-        )}
+        <CompileAndDownloadProjectPDFButtonMenuItem
+          project={project}
+          onClick={handleClose}
+        />
         <ArchiveProjectButtonMenuItem project={project} onClick={handleClose} />
         <TrashProjectButtonMenuItem project={project} onClick={handleClose} />
         <UnarchiveProjectButtonMenuItem

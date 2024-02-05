@@ -11,9 +11,6 @@ describe('<ProjectListTable />', function () {
   beforeEach(function () {
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [])
-    window.metaAttributesCache.set('ol-splitTestVariants', {
-      'download-pdf-dashboard': 'enabled',
-    })
     window.user_id = userId
     fetchMock.reset()
   })

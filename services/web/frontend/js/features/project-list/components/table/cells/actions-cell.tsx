@@ -8,7 +8,6 @@ import { DownloadProjectButtonTooltip } from './action-buttons/download-project-
 import { LeaveProjectButtonTooltip } from './action-buttons/leave-project-button'
 import { DeleteProjectButtonTooltip } from './action-buttons/delete-project-button'
 import { CompileAndDownloadProjectPDFButtonTooltip } from './action-buttons/compile-and-download-project-pdf-button'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type ActionsCellProps = {
   project: Project
@@ -19,9 +18,7 @@ export default function ActionsCell({ project }: ActionsCellProps) {
     <>
       <CopyProjectButtonTooltip project={project} />
       <DownloadProjectButtonTooltip project={project} />
-      {isSplitTestEnabled('download-pdf-dashboard') && (
-        <CompileAndDownloadProjectPDFButtonTooltip project={project} />
-      )}
+      <CompileAndDownloadProjectPDFButtonTooltip project={project} />
       <ArchiveProjectButtonTooltip project={project} />
       <TrashProjectButtonTooltip project={project} />
       <UnarchiveProjectButtonTooltip project={project} />
