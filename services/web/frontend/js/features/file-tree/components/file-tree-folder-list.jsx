@@ -22,7 +22,6 @@ function FileTreeFolderList({
       className={classNames('list-unstyled', classes.root)}
       role="tree"
       ref={dropRef}
-      dnd-container="true"
       data-testid={dataTestId}
     >
       {folders.sort(compareFunction).map(folder => {

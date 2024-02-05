@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
@@ -37,6 +37,8 @@ const FileTreeRoot = React.memo<{
   onDelete,
   isConnected,
 }) {
+  const [fileTreeContainer, setFileTreeContainer] =
+    useState<HTMLDivElement | null>(null)
   const { _id: projectId } = useProjectContext()
   const { fileTreeData } = useFileTreeData()
   const isReady = Boolean(projectId && fileTreeData)
@@ -47,24 +49,29 @@ const FileTreeRoot = React.memo<{
   if (!isReady) return null
 
   return (
-    <FileTreeContext
-      refProviders={refProviders}
-      setRefProviderEnabled={setRefProviderEnabled}
-      setStartedFreeTrial={setStartedFreeTrial}
-      reindexReferences={reindexReferences}
-      onSelect={onSelect}
-    >
-      {isConnected ? null : <div className="disconnected-overlay" />}
-      <FileTreeToolbar />
-      <FileTreeContextMenu />
-      <FileTreeInner>
-        <FileTreeRootFolder onDelete={onDelete} />
-      </FileTreeInner>
-      <FileTreeModalDelete />
-      <FileTreeModalCreateFile />
-      <FileTreeModalCreateFolder />
-      <FileTreeModalError />
-    </FileTreeContext>
+    <div className="file-tree" ref={setFileTreeContainer}>
+      {fileTreeContainer && (
+        <FileTreeContext
+          refProviders={refProviders}
+          setRefProviderEnabled={setRefProviderEnabled}
+          setStartedFreeTrial={setStartedFreeTrial}
+          reindexReferences={reindexReferences}
+          onSelect={onSelect}
+          fileTreeContainer={fileTreeContainer}
+        >
+          {isConnected ? null : <div className="disconnected-overlay" />}
+          <FileTreeToolbar />
+          <FileTreeContextMenu />
+          <FileTreeInner>
+            <FileTreeRootFolder onDelete={onDelete} />
+          </FileTreeInner>
+          <FileTreeModalDelete />
+          <FileTreeModalCreateFile />
+          <FileTreeModalCreateFolder />
+          <FileTreeModalError />
+        </FileTreeContext>
+      )}
+    </div>
   )
 })
 

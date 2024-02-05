@@ -15,12 +15,14 @@ const FileTreeContext: FC<{
   setRefProviderEnabled: (provider: string, value: boolean) => void
   setStartedFreeTrial: (value: boolean) => void
   onSelect: () => void
+  fileTreeContainer?: HTMLDivElement
 }> = ({
   refProviders,
   reindexReferences,
   setRefProviderEnabled,
   setStartedFreeTrial,
   onSelect,
+  fileTreeContainer,
   children,
 }) => {
   return (
@@ -32,7 +34,9 @@ const FileTreeContext: FC<{
     >
       <FileTreeSelectableProvider onSelect={onSelect}>
         <FileTreeActionableProvider reindexReferences={reindexReferences}>
-          <FileTreeDraggableProvider>{children}</FileTreeDraggableProvider>
+          <FileTreeDraggableProvider fileTreeContainer={fileTreeContainer}>
+            {children}
+          </FileTreeDraggableProvider>
         </FileTreeActionableProvider>
       </FileTreeSelectableProvider>
     </FileTreeMainProvider>

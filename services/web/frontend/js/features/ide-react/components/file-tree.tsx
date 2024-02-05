@@ -31,17 +31,15 @@ export const FileTree = memo(function FileTree() {
   )
 
   return (
-    <div className="file-tree">
-      <FileTreeRoot
-        refProviders={refProviders}
-        reindexReferences={reindexReferences}
-        setRefProviderEnabled={setRefProviderEnabled}
-        setStartedFreeTrial={setStartedFreeTrial}
-        isConnected={isConnected || connectionState.reconnectAt !== null}
-        onInit={handleFileTreeInit}
-        onSelect={handleFileTreeSelect}
-        onDelete={handleFileTreeDelete}
-      />
-    </div>
+    <FileTreeRoot
+      refProviders={refProviders}
+      reindexReferences={reindexReferences}
+      setRefProviderEnabled={setRefProviderEnabled}
+      setStartedFreeTrial={setStartedFreeTrial}
+      isConnected={isConnected || connectionState.reconnectAt !== null}
+      onInit={handleFileTreeInit}
+      onSelect={handleFileTreeSelect}
+      onDelete={handleFileTreeDelete}
+    />
   )
 })

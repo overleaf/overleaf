@@ -26,21 +26,23 @@ describe('FileTree Delete Entity Flow', function () {
       ]
 
       cy.mount(
-        <EditorProviders
-          rootFolder={rootFolder as any}
-          projectId="123abc"
-          socket={new MockedSocket()}
-        >
-          <FileTreeRoot
-            refProviders={{}}
-            reindexReferences={cy.stub().as('reindexReferences')}
-            setRefProviderEnabled={cy.stub()}
-            setStartedFreeTrial={cy.stub()}
-            onSelect={cy.stub()}
-            onInit={cy.stub()}
-            isConnected
-          />
-        </EditorProviders>
+        <div style={{ width: 400 }}>
+          <EditorProviders
+            rootFolder={rootFolder as any}
+            projectId="123abc"
+            socket={new MockedSocket()}
+          >
+            <FileTreeRoot
+              refProviders={{}}
+              reindexReferences={cy.stub().as('reindexReferences')}
+              setRefProviderEnabled={cy.stub()}
+              setStartedFreeTrial={cy.stub()}
+              onSelect={cy.stub()}
+              onInit={cy.stub()}
+              isConnected
+            />
+          </EditorProviders>
+        </div>
       )
 
       cy.findByRole('treeitem', { name: 'main.tex' }).click()
@@ -151,21 +153,23 @@ describe('FileTree Delete Entity Flow', function () {
       ]
 
       cy.mount(
-        <EditorProviders
-          rootFolder={rootFolder as any}
-          projectId="123abc"
-          socket={new MockedSocket()}
-        >
-          <FileTreeRoot
-            refProviders={{}}
-            reindexReferences={cy.stub().as('reindexReferences')}
-            setRefProviderEnabled={cy.stub()}
-            setStartedFreeTrial={cy.stub()}
-            onSelect={cy.stub()}
-            onInit={cy.stub()}
-            isConnected
-          />
-        </EditorProviders>
+        <div style={{ width: 400 }}>
+          <EditorProviders
+            rootFolder={rootFolder as any}
+            projectId="123abc"
+            socket={new MockedSocket()}
+          >
+            <FileTreeRoot
+              refProviders={{}}
+              reindexReferences={cy.stub().as('reindexReferences')}
+              setRefProviderEnabled={cy.stub()}
+              setStartedFreeTrial={cy.stub()}
+              onSelect={cy.stub()}
+              onInit={cy.stub()}
+              isConnected
+            />
+          </EditorProviders>
+        </div>
       )
 
       cy.findByRole('button', { name: 'Expand' }).click()
@@ -212,21 +216,23 @@ describe('FileTree Delete Entity Flow', function () {
       ]
 
       cy.mount(
-        <EditorProviders
-          rootFolder={rootFolder as any}
-          projectId="123abc"
-          socket={new MockedSocket()}
-        >
-          <FileTreeRoot
-            refProviders={{}}
-            reindexReferences={cy.stub().as('reindexReferences')}
-            setRefProviderEnabled={cy.stub()}
-            setStartedFreeTrial={cy.stub()}
-            onSelect={cy.stub()}
-            onInit={cy.stub()}
-            isConnected
-          />
-        </EditorProviders>
+        <div style={{ width: 400 }}>
+          <EditorProviders
+            rootFolder={rootFolder as any}
+            projectId="123abc"
+            socket={new MockedSocket()}
+          >
+            <FileTreeRoot
+              refProviders={{}}
+              reindexReferences={cy.stub().as('reindexReferences')}
+              setRefProviderEnabled={cy.stub()}
+              setStartedFreeTrial={cy.stub()}
+              onSelect={cy.stub()}
+              onInit={cy.stub()}
+              isConnected
+            />
+          </EditorProviders>
+        </div>
       )
 
       // select two files

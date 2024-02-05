@@ -40,7 +40,7 @@ FileTreeDraggablePreviewLayer.propTypes = {
   isOver: PropTypes.bool.isRequired,
   isDragging: PropTypes.bool.isRequired,
   item: PropTypes.shape({
-    title: PropTypes.string.isRequired,
+    title: PropTypes.string,
   }),
   clientOffset: PropTypes.shape({
     x: PropTypes.number,

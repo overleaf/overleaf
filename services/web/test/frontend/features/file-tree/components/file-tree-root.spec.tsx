@@ -64,23 +64,25 @@ describe('<FileTreeRoot/>', function () {
     ]
 
     cy.mount(
-      <EditorProviders
-        rootFolder={rootFolder as any}
-        projectId="123abc"
-        rootDocId="456def"
-        features={{} as any}
-        permissionsLevel="owner"
-      >
-        <FileTreeRoot
-          refProviders={{}}
-          reindexReferences={cy.stub()}
-          setRefProviderEnabled={cy.stub()}
-          setStartedFreeTrial={cy.stub()}
-          onSelect={cy.stub()}
-          onInit={cy.stub()}
-          isConnected
-        />
-      </EditorProviders>
+      <div style={{ width: 400 }}>
+        <EditorProviders
+          rootFolder={rootFolder as any}
+          projectId="123abc"
+          rootDocId="456def"
+          features={{} as any}
+          permissionsLevel="owner"
+        >
+          <FileTreeRoot
+            refProviders={{}}
+            reindexReferences={cy.stub()}
+            setRefProviderEnabled={cy.stub()}
+            setStartedFreeTrial={cy.stub()}
+            onSelect={cy.stub()}
+            onInit={cy.stub()}
+            isConnected
+          />
+        </EditorProviders>
+      </div>
     )
 
     // as a proxy to check that the invalid entity has not been select we start

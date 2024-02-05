@@ -1,72 +1,47 @@
-import { useRef, useEffect, useState, FC } from 'react'
+import { useEffect, useState, FC, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import getDroppedFiles from '@uppy/utils/lib/getDroppedFiles'
-import { DndProvider, createDndContext, useDrag, useDrop } from 'react-dnd'
+import { DndProvider, DragSourceMonitor, useDrag, useDrop } from 'react-dnd'
 import {
   HTML5Backend,
   getEmptyImage,
   NativeTypes,
 } from 'react-dnd-html5-backend'
-
 import {
   findAllInTreeOrThrow,
   findAllFolderIdsInFolders,
 } from '../util/find-in-tree'
-
 import { useFileTreeActionable } from './file-tree-actionable'
-import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
-import { useEditorContext } from '../../../shared/context/editor-context'
-
-// HACK ALERT
-// DnD binds drag and drop events on window and stop propagation if the dragged
-// item is not a DnD element. This break other drag and drop interfaces; in
-// particular in rich text.
-// This is a hacky workaround to avoid calling the DnD listeners when the
-// draggable or droppable element is not within a `dnd-container` element.
-const ModifiedBackend = (...args: any[]) => {
-  function isDndChild(elt: Element): boolean {
-    if (elt.getAttribute && elt.getAttribute('dnd-container')) return true
-    if (!elt.parentNode) return false
-    return isDndChild(elt.parentNode as Element)
-  }
-  // @ts-ignore
-  const instance = new HTML5Backend(...args)
-
-  const dragDropListeners = [
-    'handleTopDragStart',
-    'handleTopDragStartCapture',
-    'handleTopDragEndCapture',
-    'handleTopDragEnter',
-    'handleTopDragEnterCapture',
-    'handleTopDragLeaveCapture',
-    'handleTopDragOver',
-    'handleTopDragOverCapture',
-    'handleTopDrop',
-    'handleTopDropCapture',
-  ]
-
-  dragDropListeners.forEach(dragDropListener => {
-    const originalListener = instance[dragDropListener]
-    instance[dragDropListener] = (ev: Event, ...extraArgs: any[]) => {
-      if (isDndChild(ev.target as Element)) originalListener(ev, ...extraArgs)
-    }
-  })
-
-  return instance
-}
-
-const DndContext = createDndContext(ModifiedBackend)
+import { useEditorContext } from '@/shared/context/editor-context'
 
 const DRAGGABLE_TYPE = 'ENTITY'
-export const FileTreeDraggableProvider: FC = ({ children }) => {
-  const DndManager = useRef(DndContext)
+export const FileTreeDraggableProvider: FC<{
+  fileTreeContainer?: HTMLDivElement
+}> = ({ fileTreeContainer, children }) => {
+  const options = useMemo(
+    () => ({ rootElement: fileTreeContainer }),
+    [fileTreeContainer]
+  )
 
   return (
-    <DndProvider manager={DndManager.current.dragDropManager!}>
+    <DndProvider backend={HTML5Backend} options={options}>
       {children}
     </DndProvider>
   )
+}
+
+type DragObject = {
+  type: string
+  title: string
+  forbiddenFolderIds: Set<string>
+  draggedEntityIds: Set<string>
+}
+
+type DropResult = {
+  targetEntityId: string
+  dropEffect: DataTransfer['dropEffect']
 }
 
 export function useDraggable(draggedEntityId: string) {
@@ -75,28 +50,38 @@ export function useDraggable(draggedEntityId: string) {
   const { permissionsLevel } = useEditorContext()
   const { fileTreeData } = useFileTreeData()
   const { selectedEntityIds, isRootFolderSelected } = useFileTreeSelectable()
+  const { finishMoving } = useFileTreeActionable()
 
   const [isDraggable, setIsDraggable] = useState(true)
 
-  const item = { type: DRAGGABLE_TYPE }
-  const [{ isDragging, draggedEntityIds }, dragRef, preview] = useDrag({
-    item, // required, but overwritten by the return value of `begin`
-    begin: () => {
+  const [, dragRef, preview] = useDrag({
+    type: DRAGGABLE_TYPE,
+    item() {
       const draggedEntityIds = getDraggedEntityIds(
         isRootFolderSelected ? new Set() : selectedEntityIds,
         draggedEntityId
       )
+
       const draggedItems = findAllInTreeOrThrow(fileTreeData, draggedEntityIds)
-      const title = getDraggedTitle(draggedItems, t)
-      const forbiddenFolderIds = getForbiddenFolderIds(draggedItems)
-      return { ...item, title, forbiddenFolderIds, draggedEntityIds }
+
+      return {
+        type: DRAGGABLE_TYPE,
+        title: getDraggedTitle(draggedItems, t),
+        forbiddenFolderIds: getForbiddenFolderIds(draggedItems),
+        draggedEntityIds,
+      }
     },
-    collect: monitor => ({
-      isDragging: !!monitor.isDragging(),
-      draggedEntityIds: monitor.getItem()?.draggedEntityIds,
-    }),
-    canDrag: () => permissionsLevel !== 'readOnly' && isDraggable,
-    end: () => item,
+    canDrag() {
+      return permissionsLevel !== 'readOnly' && isDraggable
+    },
+    end(item: DragObject, monitor: DragSourceMonitor<DragObject, DropResult>) {
+      if (monitor.didDrop()) {
+        const result = monitor.getDropResult()
+        if (result) {
+          finishMoving(result.targetEntityId, item.draggedEntityIds) // TODO: use result.dropEffect
+        }
+      }
+    },
   })
 
   // remove the automatic preview as we're using a custom preview via
@@ -105,51 +90,49 @@ export function useDraggable(draggedEntityId: string) {
     preview(getEmptyImage())
   }, [preview])
 
-  return {
-    dragRef,
-    isDragging,
-    setIsDraggable,
-    draggedEntityIds,
-  }
+  return { dragRef, setIsDraggable }
 }
 
-export function useDroppable(droppedEntityId: string) {
-  const { finishMoving, setDroppedFiles, startUploadingDocOrFile } =
-    useFileTreeActionable()
+export function useDroppable(targetEntityId: string) {
+  const { setDroppedFiles, startUploadingDocOrFile } = useFileTreeActionable()
 
-  const [{ isOver }, dropRef] = useDrop<any, any, any>({
+  const [{ isOver }, dropRef] = useDrop({
     accept: [DRAGGABLE_TYPE, NativeTypes.FILE],
-    canDrop: (item, monitor) => {
-      const isOver = monitor.isOver({ shallow: true })
-      if (!isOver) return false
-      if (
-        item.type === DRAGGABLE_TYPE &&
-        item.forbiddenFolderIds.has(droppedEntityId)
-      )
+    canDrop(item: DragObject, monitor) {
+      if (!monitor.isOver({ shallow: true })) {
         return false
-      return true
+      }
+
+      return !(
+        item.type === DRAGGABLE_TYPE &&
+        item.forbiddenFolderIds.has(targetEntityId)
+      )
     },
-    drop: (item, monitor) => {
-      const didDropInChild = monitor.didDrop()
-      if (didDropInChild) return
+    drop(item, monitor) {
+      // monitor.didDrop() returns true if the drop was already handled by a nested child
+      if (monitor.didDrop()) {
+        return
+      }
+
+      // item(s) dragged within the file tree
       if (item.type === DRAGGABLE_TYPE) {
-        finishMoving(droppedEntityId, item.draggedEntityIds)
-      } else {
-        getDroppedFiles(item).then(files => {
-          setDroppedFiles({ files, targetFolderId: droppedEntityId })
-          startUploadingDocOrFile()
-        })
+        return { targetEntityId }
+      }
+
+      // native file(s) dragged in from outside
+      getDroppedFiles(item as unknown as DataTransfer).then(files => {
+        setDroppedFiles({ files, targetFolderId: targetEntityId })
+        startUploadingDocOrFile()
+      })
+    },
+    collect(monitor) {
+      return {
+        isOver: monitor.canDrop(),
       }
     },
-    collect: monitor => ({
-      isOver: monitor.canDrop(),
-    }),
   })
 
-  return {
-    dropRef,
-    isOver,
-  }
+  return { dropRef, isOver }
 }
 
 // Get the list of dragged entity ids. If the dragged entity is one of the

@@ -33,21 +33,23 @@ describe('FileTree Rename Entity Flow', function () {
     ]
 
     cy.mount(
-      <EditorProviders
-        rootFolder={rootFolder as any}
-        projectId="123abc"
-        socket={new MockedSocket()}
-      >
-        <FileTreeRoot
-          refProviders={{}}
-          reindexReferences={cy.stub()}
-          setRefProviderEnabled={cy.stub()}
-          setStartedFreeTrial={cy.stub()}
-          onSelect={cy.stub().as('onSelect')}
-          onInit={cy.stub()}
-          isConnected
-        />
-      </EditorProviders>
+      <div style={{ width: 400 }}>
+        <EditorProviders
+          rootFolder={rootFolder as any}
+          projectId="123abc"
+          socket={new MockedSocket()}
+        >
+          <FileTreeRoot
+            refProviders={{}}
+            reindexReferences={cy.stub()}
+            setRefProviderEnabled={cy.stub()}
+            setStartedFreeTrial={cy.stub()}
+            onSelect={cy.stub().as('onSelect')}
+            onInit={cy.stub()}
+            isConnected
+          />
+        </EditorProviders>
+      </div>
     )
   })
 

@@ -240,6 +240,9 @@ module.exports = {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.mjs', '.cjs', '.json'],
     fallback: {
       events: require.resolve('events'),
+      // for react-dnd + React 17
+      'react/jsx-runtime': 'react/jsx-runtime.js',
+      'react/jsx-dev-runtime': 'react/jsx-dev-runtime.js',
     },
   },
 
