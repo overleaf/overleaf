@@ -192,7 +192,7 @@ function handleShutdownSignal(signal) {
   setTimeout(() => {
     logger.info({ signal }, 'shutting down')
     process.exit()
-  }, settings.delayShutdownMs)
+  }, settings.gracefulShutdownDelayInMs)
 }
 
 process.on('SIGTERM', handleShutdownSignal)

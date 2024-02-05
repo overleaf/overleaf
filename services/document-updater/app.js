@@ -217,7 +217,7 @@ const shutdownCleanly = signal => () => {
   setTimeout(() => {
     logger.info({ signal }, 'shutting down')
     process.exit()
-  }, Settings.delayShutdownMs)
+  }, Settings.gracefulShutdownDelayInMs)
 }
 
 const watchForEvent = eventName => {

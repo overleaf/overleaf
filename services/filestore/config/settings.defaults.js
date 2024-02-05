@@ -113,7 +113,8 @@ const settings = {
     dsn: process.env.SENTRY_DSN,
   },
 
-  delayShutdownMs: parseInt(process.env.DELAY_SHUTDOWN_MS || '30000', 10),
+  gracefulShutdownDelayInMs:
+    parseInt(process.env.GRACEFUL_SHUTDOWN_DELAY_SECONDS ?? '30', 10) * 1000,
 }
 
 // Filestore health check
