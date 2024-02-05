@@ -105,6 +105,12 @@ export const EditorAndPdf: FC<{
         className="ide-react-panel"
       >
         {pdfIsOpen && <PdfPreview />}
+        {/* ensure that "sync to code" is available in PDF only layout */}
+        {pdfLayout === 'flat' && view === 'pdf' && (
+          <div className="synctex-controls" hidden>
+            <DefaultSynctexControl />
+          </div>
+        )}
       </Panel>
     </PanelGroup>
   )
