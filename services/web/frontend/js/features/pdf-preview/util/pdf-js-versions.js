@@ -3,6 +3,8 @@
 
 import 'core-js/stable/global-this' // polyfill for globalThis (used by pdf.js)
 import 'core-js/stable/promise/all-settled' // polyfill for Promise.allSettled (used by pdf.js)
+import 'core-js/stable/structured-clone' // polyfill for global.StructuredClone (used by pdf.js)
+import 'core-js/stable/array/at' // polyfill for Array.prototype.at (used by pdf.js)
 import getMeta from '@/utils/meta'
 import { createWorker } from '@/utils/worker'
 
