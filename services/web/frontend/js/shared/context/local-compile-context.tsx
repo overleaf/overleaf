@@ -21,7 +21,7 @@ import {
 } from '../../infrastructure/event-tracking'
 import {
   buildLogEntryAnnotations,
-  countRules,
+  buildRuleCounts,
   handleLogFiles,
   handleOutputFiles,
 } from '../../features/pdf-preview/util/output-files'
@@ -414,9 +414,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
                   stopOnFirstError: data.options.stopOnFirstError,
                   isAutoCompileOnLoad: !!data.options.isAutoCompileOnLoad,
                   isAutoCompileOnChange: !!data.options.isAutoCompileOnChange,
-                  errors: countRules(result.logEntries.errors),
-                  warnings: countRules(result.logEntries.warnings),
-                  typesetting: countRules(result.logEntries.typesetting),
+                  ...buildRuleCounts(result.logEntries.all),
                 })
               }
             }

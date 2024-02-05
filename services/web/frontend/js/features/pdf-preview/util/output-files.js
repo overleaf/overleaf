@@ -164,12 +164,14 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
   return logEntryAnnotations
 }
 
-export const countRules = (entries = []) =>
-  entries.reduce((counts, entry) => {
-    const { ruleId } = entry
-    counts[ruleId] = counts[ruleId] ? counts[ruleId] + 1 : 1
-    return counts
-  }, {})
+export const buildRuleCounts = (entries = []) => {
+  const counts = {}
+  for (const entry of entries) {
+    const key = `${entry.level}_${entry.ruleId}`
+    counts[key] = counts[key] ? counts[key] + 1 : 1
+  }
+  return counts
+}
 
 function buildURL(file, pdfDownloadDomain) {
   if (file.build && pdfDownloadDomain) {
