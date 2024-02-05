@@ -124,8 +124,8 @@ describe('<ShareProjectModal/>', function () {
       { name: 'Close' }
     )
 
-    fireEvent.click(headerCloseButton)
-    fireEvent.click(footerCloseButton)
+    await userEvent.click(headerCloseButton)
+    await userEvent.click(footerCloseButton)
 
     expect(handleHide.callCount).to.equal(2)
   })
@@ -620,7 +620,7 @@ describe('<ShareProjectModal/>', function () {
     fireEvent.change(privilegesElement, { target: { value: 'readOnly' } })
 
     const submitButton = screen.getByRole('button', { name: 'Share' })
-    submitButton.click()
+    await userEvent.click(submitButton)
 
     let calls
     await waitFor(
@@ -713,7 +713,7 @@ describe('<ShareProjectModal/>', function () {
       )
 
       expect(submitButton.disabled).to.be.false
-      submitButton.click()
+      await userEvent.click(submitButton)
       await fetchMock.flush(true)
       expect(fetchMock.done()).to.be.true
     }

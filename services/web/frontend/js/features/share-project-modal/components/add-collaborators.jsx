@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
@@ -9,6 +9,7 @@ import { useUserContacts } from '../hooks/use-user-contacts'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import ClickableElementEnhancer from '@/shared/components/clickable-element-enhancer'
 
 export default function AddCollaborators() {
   const [privileges, setPrivileges] = useState('readAndWrite')
@@ -45,9 +46,7 @@ export default function AddCollaborators() {
 
   const { reset, selectedItems } = multipleSelectionProps
 
-  async function handleSubmit(event) {
-    event.preventDefault()
-
+  const handleSubmit = useCallback(async () => {
     if (!selectedItems.length) {
       return
     }
@@ -125,10 +124,22 @@ export default function AddCollaborators() {
     }
 
     setInFlight(false)
-  }
+  }, [
+    currentMemberEmails,
+    invites,
+    isMounted,
+    members,
+    privileges,
+    projectId,
+    reset,
+    selectedItems,
+    setError,
+    setInFlight,
+    updateProject,
+  ])
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form>
       <FormGroup>
         <SelectCollaborators
           loading={!nonMemberContacts}
@@ -151,9 +162,13 @@ export default function AddCollaborators() {
             <option value="readOnly">{t('read_only')}</option>
           </FormControl>
           <span>&nbsp;&nbsp;</span>
-          <Button type="submit" bsStyle="primary">
+          <ClickableElementEnhancer
+            as={Button}
+            onClick={handleSubmit}
+            bsStyle="primary"
+          >
             {t('share')}
-          </Button>
+          </ClickableElementEnhancer>
         </div>
       </FormGroup>
     </Form>

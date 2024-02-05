@@ -5,6 +5,7 @@ import AccessibleModal from '../../../shared/components/accessible-modal'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+import ClickableElementEnhancer from '@/shared/components/clickable-element-enhancer'
 
 const ReadOnlyTokenLink = lazy(() =>
   import('./link-sharing').then(({ ReadOnlyTokenLink }) => ({
@@ -63,15 +64,16 @@ export default function ShareProjectModalContent({
         </div>
 
         <div className="modal-footer-right">
-          <Button
-            type="button"
+          <ClickableElementEnhancer
             onClick={cancel}
+            as={Button}
+            type="button"
             bsStyle={null}
             className="btn-secondary"
             disabled={inFlight}
           >
             {t('close')}
-          </Button>
+          </ClickableElementEnhancer>
         </div>
       </Modal.Footer>
     </AccessibleModal>
