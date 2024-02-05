@@ -62,6 +62,7 @@ module.exports = merge(base, {
         /node_modules/, // default
         /source-editor/, // avoid crashing the source editor
       ],
+      overlay: false,
     }),
 
     // Disable React DevTools if DISABLE_REACT_DEVTOOLS is set to "true"
@@ -77,6 +78,7 @@ module.exports = merge(base, {
     port: parseInt(process.env.PORT, 10) || 3808,
     client: {
       webSocketURL: 'auto://0.0.0.0:0/ws',
+      overlay: process.env.DISABLE_WEBPACK_OVERLAY !== 'true',
     },
     hot: true,
     allowedHosts: '.dev-overleaf.com',
