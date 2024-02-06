@@ -21,7 +21,7 @@ const UserMembershipHandler = {
 
   async createEntity(entityId, entityConfig) {
     const data = buildEntityQuery(entityId, entityConfig)
-    return await EntityModels[entityConfig.modelName].create(data).exec()
+    return await EntityModels[entityConfig.modelName].create(data)
   },
 
   async getUsers(entity, entityConfig) {
