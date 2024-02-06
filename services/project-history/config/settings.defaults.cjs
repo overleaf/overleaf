@@ -27,7 +27,7 @@ module.exports = {
       url: `http://${
         process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
       }:${process.env.WEB_PORT || 3000}`,
-      user: process.env.WEB_API_USER || 'sharelatex',
+      user: process.env.WEB_API_USER || 'overleaf',
       pass: process.env.WEB_API_PASSWORD || 'password',
       historyIdCacheSize: parseInt(
         process.env.HISTORY_ID_CACHE_SIZE || '10000',

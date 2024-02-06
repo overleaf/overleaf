@@ -92,7 +92,7 @@ const settings = {
       url: `http://${
         process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
       }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
-      user: process.env.WEB_API_USER || 'sharelatex',
+      user: process.env.WEB_API_USER || 'overleaf',
       pass: process.env.WEB_API_PASSWORD || 'password',
     },
     documentupdater: {
@@ -108,7 +108,7 @@ const settings = {
     sessionSecret: process.env.SESSION_SECRET || 'secret-please-change',
   },
 
-  cookieName: process.env.COOKIE_NAME || 'sharelatex.sid',
+  cookieName: process.env.COOKIE_NAME || 'overleaf.sid',
 
   // Expose the hostname in the `debug.getHostname` rpc
   exposeHostname: process.env.EXPOSE_HOSTNAME === 'true',

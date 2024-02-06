@@ -19,7 +19,7 @@ import './features/cookie-banner'
 import '../../modules/modules-main'
 import './cdn-load-test' // TODO: remove this?
 import { debugConsole } from '@/utils/debugging'
-angular.module('SharelatexApp').config([
+angular.module('OverleafApp').config([
   '$locationProvider',
   function ($locationProvider) {
     try {
@@ -33,4 +33,4 @@ angular.module('SharelatexApp').config([
     }
   },
 ])
-export default angular.bootstrap(document.body, ['SharelatexApp'])
+export default angular.bootstrap(document.body, ['OverleafApp'])

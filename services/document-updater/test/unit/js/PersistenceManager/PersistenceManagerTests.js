@@ -35,7 +35,7 @@ describe('PersistenceManager', function () {
     this.Settings.apis = {
       web: {
         url: (this.url = 'www.example.com'),
-        user: (this.user = 'sharelatex'),
+        user: (this.user = 'overleaf'),
         pass: (this.pass = 'password'),
       },
     }

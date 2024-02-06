@@ -25,7 +25,7 @@ describe('ChatApiHandler', function () {
     this.settings = {
       apis: {
         chat: {
-          internal_url: 'chat.sharelatex.env',
+          internal_url: 'chat.overleaf.env',
         },
       },
     }

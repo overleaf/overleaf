@@ -9,6 +9,12 @@ const ENTRY_POINT_DIR = process.argv[1]
   : undefined
 const NODE_ENV = (process.env.NODE_ENV || 'development').toLowerCase()
 const SHARELATEX_CONFIG = process.env.SHARELATEX_CONFIG
+const OVERLEAF_CONFIG = process.env.OVERLEAF_CONFIG || SHARELATEX_CONFIG
+if (SHARELATEX_CONFIG && SHARELATEX_CONFIG !== OVERLEAF_CONFIG) {
+  throw new Error(
+    'found mismatching SHARELATEX_CONFIG, rename to OVERLEAF_CONFIG'
+  )
+}
 
 let settings
 let settingsExist = false
@@ -26,7 +32,7 @@ if (defaultsPath) {
 }
 
 const overridesPath =
-  pathIfExists(SHARELATEX_CONFIG) ||
+  pathIfExists(OVERLEAF_CONFIG) ||
   pathIfExists(Path.join(CWD, `config/settings.${NODE_ENV}.cjs`)) ||
   pathIfExists(Path.join(CWD, `config/settings.${NODE_ENV}.js`))
 if (overridesPath) {

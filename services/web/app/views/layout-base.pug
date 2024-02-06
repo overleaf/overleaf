@@ -39,9 +39,6 @@ html(
 			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
 
 			meta(name="ol-usersEmail" content=getUserEmail())
-			meta(name="ol-sharelatex" data-type="json" content={
-				siteUrl: settings.siteUrl,
-			})
 			meta(name="ol-ab" data-type="json" content={})
 			meta(name="ol-user_id" content=getLoggedInUserId())
 			//- Internationalisation settings
@@ -58,13 +55,6 @@ html(
 					appId: settings.algolia.app_id,
 					apiKey: settings.algolia.read_only_api_key,
 					indexes: settings.algolia.indexes
-				})
-
-			if (typeof(settings.templates) != "undefined")
-				meta(name="ol-sharelatex.templates" data-type="json" content={
-					user_id : settings.templates.user_id,
-					cdnDomain : settings.templates.cdnDomain,
-					indexName : settings.templates.indexName
 				})
 
 			meta(name="ol-isManagedAccount" data-type="boolean" content=isManagedAccount)

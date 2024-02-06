@@ -397,7 +397,7 @@ If the project has been renamed please look in your project list for a new proje
 
 cleanupServiceWorker()
 
-angular.module('SharelatexApp').config([
+angular.module('OverleafApp').config([
   '$provide',
   function ($provide) {
     $provide.decorator('$browser', [
@@ -413,7 +413,7 @@ angular.module('SharelatexApp').config([
   },
 ])
 
-export default angular.bootstrap(document.body, ['SharelatexApp'])
+export default angular.bootstrap(document.body, ['OverleafApp'])
 
 function __guard__(value, transform) {
   return typeof value !== 'undefined' && value !== null

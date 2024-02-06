@@ -142,10 +142,10 @@ export function _convertPathname(pathname) {
   // workaround for filenames containing asterisks, this will
   // fail if a corresponding replacement file already exists but it
   // would fail anyway without this attempt to fix the pathname.
-  // See https://github.com/overleaf/sharelatex/issues/900
+  // See https://github.com/overleaf/internal/issues/900
   pathname = pathname.replace(/\*/g, '__ASTERISK__')
   // workaround for filenames beginning with spaces
-  // See https://github.com/overleaf/sharelatex/issues/1404
+  // See https://github.com/overleaf/internal/issues/1404
   // note: we have already stripped any leading slash above
   pathname = pathname.replace(/^ /, '__SPACE__') // handle top-level
   pathname = pathname.replace(/\/ /g, '/__SPACE__') // handle folders

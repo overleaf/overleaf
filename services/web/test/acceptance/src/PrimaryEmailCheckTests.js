@@ -13,7 +13,7 @@ describe('PrimaryEmailCheck', function () {
     )
   })
 
-  describe('redirections in Server CE/Pro', function () {
+  describe('redirections in Overleaf Community Edition/Server Pro', function () {
     before(async function () {
       if (Features.hasFeature('saas')) {
         this.skip()

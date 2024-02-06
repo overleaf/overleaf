@@ -82,7 +82,7 @@ describe('UserController', function () {
       },
     }
 
-    this.settings = { siteUrl: 'sharelatex.example.com' }
+    this.settings = { siteUrl: 'overleaf.example.com' }
 
     this.UserHandler = {
       promises: { populateTeamInvites: sinon.stub().resolves() },

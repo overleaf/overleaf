@@ -17,7 +17,7 @@ describe('ContactManager', function () {
         '@overleaf/settings': (this.settings = {
           apis: {
             contacts: {
-              url: 'http://contacts.sharelatex.com',
+              url: 'http://contacts.overleaf.com',
             },
           },
         }),

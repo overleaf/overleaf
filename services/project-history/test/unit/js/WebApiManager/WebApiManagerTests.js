@@ -12,7 +12,7 @@ describe('WebApiManager', function () {
       apis: {
         web: {
           url: 'http://example.com',
-          user: 'sharelatex',
+          user: 'overleaf',
           pass: 'password',
         },
       },

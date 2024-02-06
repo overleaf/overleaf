@@ -5,7 +5,7 @@ const path = require('path')
 
 /**
  * Regular expressions for Overleaf v2 taken from
- * https://github.com/sharelatex/web-sharelatex/blob/master/app/coffee/Features/Project/SafePath.coffee
+ * https://github.com/overleaf/internal/blob/f7b287b6a07354000a6b463ca3a5828104e4a811/services/web/app/src/Features/Project/SafePath.js
  */
 
 //

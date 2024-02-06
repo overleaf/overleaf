@@ -8,9 +8,9 @@ Settings file location
 ----------------------
 
 You can specify a custom location for the settings file by setting the
-`SHARELATEX_CONFIG` environment variable. E.g.
+`OVERLEAF_CONFIG` environment variable. E.g.
 
-	$ export SHARELATEX_CONFIG=/home/james/config/settings.development.js
+	$ export OVERLEAF_CONFIG=/home/james/config/settings.development.js
 
 Otherwise, the settings will be loaded from `config/settings.NODE_ENV.js`,
 where `NODE_ENV` is another environment variable, or defaults to `development`.

@@ -12,7 +12,7 @@ require('jsdom-global')(undefined, {
 })
 
 const path = require('path')
-process.env.SHARELATEX_CONFIG = path.resolve(
+process.env.OVERLEAF_CONFIG = path.resolve(
   __dirname,
   '../../config/settings.webpack.js'
 )

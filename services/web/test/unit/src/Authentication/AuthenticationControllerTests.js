@@ -481,7 +481,7 @@ describe('AuthenticationController', function () {
     beforeEach(function () {
       this.user = {
         _id: 'user-id-123',
-        email: 'user@sharelatex.com',
+        email: 'user@overleaf.com',
       }
       this.middleware = this.AuthenticationController.requireLogin()
     })
@@ -491,7 +491,7 @@ describe('AuthenticationController', function () {
         this.req.session = {
           user: (this.user = {
             _id: 'user-id-123',
-            email: 'user@sharelatex.com',
+            email: 'user@overleaf.com',
           }),
         }
         this.middleware(this.req, this.res, this.next)
@@ -524,7 +524,7 @@ describe('AuthenticationController', function () {
     beforeEach(function () {
       this.user = {
         _id: 'user-id-123',
-        email: 'user@sharelatex.com',
+        email: 'user@overleaf.com',
       }
       this.middleware = this.AuthenticationController.validateUserSession()
     })

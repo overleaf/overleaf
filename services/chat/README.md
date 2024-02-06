@@ -1,7 +1,7 @@
 overleaf/chat
 ===============
 
-The backend API that powers the chat service in ShareLaTeX
+The backend API that powers the chat service in Overleaf
 
 License
 -------

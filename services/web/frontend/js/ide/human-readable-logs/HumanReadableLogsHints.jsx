@@ -260,7 +260,7 @@ const hints = {
       <>
         The compiler cannot find the file you want to include. Make sure that
         you have{' '}
-        <WikiLink url="https://www.overleaf.com/learn/Including_images_in_ShareLaTeX">
+        <WikiLink url="https://www.overleaf.com/learn/how-to/Including_images_on_Overleaf">
           uploaded the file
         </WikiLink>{' '}
         and{' '}

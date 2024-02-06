@@ -106,7 +106,7 @@ describe('SubscriptionController', function () {
           subdomain: 'sl',
         },
       },
-      siteUrl: 'http://de.sharelatex.dev:3000',
+      siteUrl: 'http://de.overleaf.dev:3000',
     }
     this.AuthorizationManager = {
       promises: {

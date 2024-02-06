@@ -3,7 +3,7 @@ MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
 
-export SHARELATEX_CONFIG = /overleaf/services/web/$(MODULE_DIR)/test/acceptance/config/settings.test.js
+export OVERLEAF_CONFIG = /overleaf/services/web/$(MODULE_DIR)/test/acceptance/config/settings.test.js
 export BASE_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
 
 CFG_SAAS=/overleaf/services/web/test/acceptance/config/settings.test.saas.js

@@ -1,5 +1,5 @@
 {
-  "databaseUrl": "postgres://sharelatex:sharelatex@postgres/sharelatex",
+  "databaseUrl": "postgres://overleaf:overleaf@postgres/overleaf-history-v1-test",
   "persistor": {
     "backend": "gcs",
     "gcs": {

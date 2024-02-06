@@ -147,7 +147,7 @@ const LoggingManager = {
   },
 }
 
-LoggingManager.initialize('default-sharelatex')
+LoggingManager.initialize('default')
 
 function handleWarning(err) {
   LoggingManager.warn({ err }, 'Warning details')

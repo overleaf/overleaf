@@ -5,8 +5,8 @@ BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 PROJECT_NAME = web
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 
-export SHARELATEX_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
-export BASE_CONFIG ?= ${SHARELATEX_CONFIG}
+export OVERLEAF_CONFIG ?= /overleaf/services/web/test/acceptance/config/settings.test.saas.js
+export BASE_CONFIG ?= ${OVERLEAF_CONFIG}
 
 CFG_SAAS=/overleaf/services/web/test/acceptance/config/settings.test.saas.js
 CFG_SERVER_CE=/overleaf/services/web/test/acceptance/config/settings.test.server-ce.js
@@ -179,11 +179,11 @@ TEST_ACCEPTANCE_APP :=  \
 
 test_acceptance_app: $(TEST_ACCEPTANCE_APP)
 test_acceptance_app_saas: export COMPOSE_PROJECT_NAME=acceptance_test_saas_$(BUILD_DIR_NAME)
-test_acceptance_app_saas: export SHARELATEX_CONFIG=$(CFG_SAAS)
+test_acceptance_app_saas: export OVERLEAF_CONFIG=$(CFG_SAAS)
 test_acceptance_app_server_ce: export COMPOSE_PROJECT_NAME=acceptance_test_server_ce_$(BUILD_DIR_NAME)
-test_acceptance_app_server_ce: export SHARELATEX_CONFIG=$(CFG_SERVER_CE)
+test_acceptance_app_server_ce: export OVERLEAF_CONFIG=$(CFG_SERVER_CE)
 test_acceptance_app_server_pro: export COMPOSE_PROJECT_NAME=acceptance_test_server_pro_$(BUILD_DIR_NAME)
-test_acceptance_app_server_pro: export SHARELATEX_CONFIG=$(CFG_SERVER_PRO)
+test_acceptance_app_server_pro: export OVERLEAF_CONFIG=$(CFG_SERVER_PRO)
 
 $(TEST_ACCEPTANCE_APP):
 	$(DOCKER_COMPOSE) down -v -t 0
@@ -197,8 +197,8 @@ $(TEST_ACCEPTANCE_APP):
 #  add a dependency on each modules Makefile and cross-link that to the
 #  template at the very top of this file.
 # Example: `web$ make modules/server-ce-scripts/test_acceptance_server_ce`
-# Description: Run the acceptance tests of the server-ce-scripts module in a
-#               Server CE Environment.
+# Description: Run the acceptance tests of the server-ce-scripts module in an
+#               Overleaf Community Edition Environment.
 # Break down:
 #  Target: modules/server-ce-scripts/test_acceptance_server_ce
 #    -> depends on modules/server-ce-scripts/Makefile
@@ -261,7 +261,7 @@ test_acceptance_module_maybe_in_server_pro: export BASE_CONFIG=$(CFG_SERVER_PRO)
 #  service would start mongo/redis.
 $(TEST_ACCEPTANCE_MODULE_MAYBE_IN): test_acceptance_module_maybe_in_%:
 	$(MAKE) $(shell \
-		SHARELATEX_CONFIG=$(BASE_CONFIG) \
+		OVERLEAF_CONFIG=$(BASE_CONFIG) \
 		$(DOCKER_COMPOSE) run --rm test_unit \
 		node test/acceptance/getModuleTargets test_acceptance_$* \
 		| grep -e /$(MODULE_NAME)/ || echo test_acceptance_module_noop LABEL=$* \
@@ -285,7 +285,7 @@ TEST_ACCEPTANCE_MODULES_MERGED_INNER = $(MODULE_DIRS:=/test_acceptance_merged_in
 $(TEST_ACCEPTANCE_MODULES_MERGED_INNER): %/test_acceptance_merged_inner: %/Makefile
 test_acceptance_modules_merged_inner:
 	$(MAKE) $(shell \
-		SHARELATEX_CONFIG=$(BASE_CONFIG) \
+		OVERLEAF_CONFIG=$(BASE_CONFIG) \
 		node test/acceptance/getModuleTargets test_acceptance_merged_inner \
 	)
 
@@ -308,7 +308,7 @@ TEST_ACCEPTANCE_MODULES_MERGED_INNER_SPLIT = \
 # Finally we check with grep for any targets in a batch and print a fallback if none were found.
 $(TEST_ACCEPTANCE_MODULES_MERGED_INNER_SPLIT):
 	$(MAKE) $(shell \
-		SHARELATEX_CONFIG=$(BASE_CONFIG) \
+		OVERLEAF_CONFIG=$(BASE_CONFIG) \
 		node test/acceptance/getModuleTargets test_acceptance_merged_inner \
 		| tail -n+$(START) | head -n 10 \
 		| grep -e . || echo no_more_targets \

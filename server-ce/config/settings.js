@@ -18,10 +18,12 @@ const Path = require('path')
 
 // These credentials are used for authenticating api requests
 // between services that may need to go over public channels
-const httpAuthUser = 'sharelatex'
+const httpAuthUser = process.env.WEB_API_USER
 const httpAuthPass = process.env.WEB_API_PASSWORD
 const httpAuthUsers = {}
-httpAuthUsers[httpAuthUser] = httpAuthPass
+if (httpAuthUser && httpAuthPass) {
+  httpAuthUsers[httpAuthUser] = httpAuthPass
+}
 
 const parse = function (option) {
   if (option != null) {
@@ -58,7 +60,7 @@ const settings = {
   // Databases
   // ---------
 
-  // ShareLaTeX's main persistent data store is MongoDB (http://www.mongodb.org/)
+  // Overleaf Community Edition's main persistent data store is MongoDB (http://www.mongodb.org/)
   // Documentation about the URL connection string format can be found at:
   //
   //    http://docs.mongodb.org/manual/reference/connection-string/
@@ -68,7 +70,7 @@ const settings = {
     url: process.env.SHARELATEX_MONGO_URL || 'mongodb://dockerhost/sharelatex',
   },
 
-  // Redis is used in ShareLaTeX for high volume queries, like real-time
+  // Redis is used in Overleaf Community Edition for high volume queries, like real-time
   // editing, and session management.
   //
   // The following config will work with Redis's default settings:
@@ -175,15 +177,15 @@ const settings = {
   // Server Config
   // -------------
 
-  // Where your instance of ShareLaTeX can be found publicly. This is used
+  // Where your instance of Overleaf Community Edition can be found publicly. This is used
   // when emails are sent out and in generated links:
   siteUrl: (siteUrl = process.env.SHARELATEX_SITE_URL || 'http://localhost'),
 
   // Status page URL as displayed on the maintenance/500 pages.
   statusPageUrl: process.env.SHARELATEX_STATUS_PAGE_URL,
 
-  // The name this is used to describe your ShareLaTeX Installation
-  appName: process.env.SHARELATEX_APP_NAME || 'ShareLaTeX (Community Edition)',
+  // The name this is used to describe your Overleaf Community Edition Installation
+  appName: process.env.SHARELATEX_APP_NAME || 'Overleaf Community Edition',
 
   restrictInvitesToExistingAccounts:
     process.env.SHARELATEX_RESTRICT_INVITES_TO_EXISTING_ACCOUNTS === 'true',
@@ -192,11 +194,11 @@ const settings = {
     title:
       process.env.SHARELATEX_NAV_TITLE ||
       process.env.SHARELATEX_APP_NAME ||
-      'ShareLaTeX Community Edition',
+      'Overleaf Community Edition',
   },
 
   // The email address which users will be directed to as the main point of
-  // contact for this installation of ShareLaTeX.
+  // contact for this installation of Overleaf Community Edition.
   adminEmail: process.env.SHARELATEX_ADMIN_EMAIL || 'placeholder@example.com',
 
   // If provided, a sessionSecret is used to sign cookies so that they cannot be
@@ -218,11 +220,11 @@ const settings = {
   // but should be set to true in production.
   cacheStaticAssets: true,
 
-  // If you are running ShareLaTeX over https, set this to true to send the
+  // If you are running Overleaf Community Edition over https, set this to true to send the
   // cookie with a secure flag (recommended).
   secureCookie: process.env.SHARELATEX_SECURE_COOKIE != null,
 
-  // If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
+  // If you are running Overleaf Community Edition behind a proxy (like Apache, Nginx, etc)
   // then set this to true to allow it to correctly detect the forwarded IP
   // address and http/https protocol information.
 
@@ -317,7 +319,7 @@ if (process.env.SHARELATEX_HEADER_NAV_LINKS != null) {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 #  WARNING: SHARELATEX_HEADER_NAV_LINKS is no longer supported
-#  See https://github.com/sharelatex/sharelatex/wiki/Configuring-Headers,-Footers-&-Logo
+#  See https://github.com/overleaf/overleaf/wiki/Configuring-Headers,-Footers-&-Logo
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #\
 `)
@@ -338,7 +340,7 @@ if (process.env.SHARELATEX_HEADER_EXTRAS != null) {
 // -------------
 //
 // You must configure a mail server to be able to send invite emails from
-// ShareLaTeX. The config settings are passed to nodemailer. See the nodemailer
+// Overleaf Community Edition. The config settings are passed to nodemailer. See the nodemailer
 // documentation for available options:
 //
 //     http://www.nodemailer.com/docs/transports
@@ -418,7 +420,7 @@ if (
 }
 
 // ######################
-// ShareLaTeX Server Pro
+// Overleaf Server Pro
 // ######################
 
 if (parse(process.env.SHARELATEX_IS_SERVER_PRO) === true) {
@@ -503,7 +505,7 @@ switch (process.env.SHARELATEX_FILESTORE_BACKEND) {
       stores: {
         user_files: process.env.SHARELATEX_FILESTORE_USER_FILES_BUCKET_NAME,
         template_files:
-          process.env.SHARELATEX_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
+        process.env.SHARELATEX_FILESTORE_TEMPLATE_FILES_BUCKET_NAME,
       },
       s3: {
         key:

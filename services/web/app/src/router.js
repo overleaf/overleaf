@@ -1192,11 +1192,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     } else if (!Settings.editorIsOpen) {
       plainTextResponse(res, 'web editor is closed (web)')
     } else {
-      plainTextResponse(res, 'web sharelatex is alive (web)')
+      plainTextResponse(res, 'web is alive (web)')
     }
   })
   privateApiRouter.get('/status', (req, res) => {
-    plainTextResponse(res, 'web sharelatex is alive (api)')
+    plainTextResponse(res, 'web is alive (api)')
   })
 
   // used by kubernetes health-check and acceptance tests

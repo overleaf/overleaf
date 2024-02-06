@@ -15,13 +15,13 @@ describe('HistoryStoreManager', function () {
       overleaf: {
         history: {
           host: 'http://example.com',
-          user: 'sharelatex',
+          user: 'overleaf',
           pass: 'password',
         },
       },
       apis: {
         filestore: {
-          url: 'http://filestore.sharelatex.production',
+          url: 'http://filestore.overleaf.production',
         },
         history_v1: { requestTimeout: 123 },
       },

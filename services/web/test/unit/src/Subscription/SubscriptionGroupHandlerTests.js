@@ -58,7 +58,7 @@ describe('SubscriptionGroupHandler', function () {
       findOne: sinon.stub().yields(),
     }
 
-    this.settings = { siteUrl: 'http://www.sharelatex.com' }
+    this.settings = { siteUrl: 'http://www.overleaf.com' }
 
     this.readStub = sinon.stub()
     this.NotificationsBuilder = {

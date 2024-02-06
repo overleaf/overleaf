@@ -18,9 +18,9 @@ describe('Translations', function () {
           i18n: {
             escapeHTMLInVars: false,
             subdomainLang: {
-              www: { lngCode: 'en', url: 'https://www.sharelatex.com' },
-              fr: { lngCode: 'fr', url: 'https://fr.sharelatex.com' },
-              da: { lngCode: 'da', url: 'https://da.sharelatex.com' },
+              www: { lngCode: 'en', url: 'https://www.overleaf.com' },
+              fr: { lngCode: 'fr', url: 'https://fr.overleaf.com' },
+              da: { lngCode: 'da', url: 'https://da.overleaf.com' },
             },
           },
         },
@@ -95,7 +95,7 @@ describe('Translations', function () {
 
   describe('setLangBasedOnDomainMiddleware', function () {
     it('should set the lang to french if the domain is fr', function (done) {
-      req.headers.host = 'fr.sharelatex.com'
+      req.headers.host = 'fr.overleaf.com'
       runMiddlewares(() => {
         expect(req.lng).to.equal('fr')
         done()
@@ -105,7 +105,7 @@ describe('Translations', function () {
     describe('suggestedLanguageSubdomainConfig', function () {
       it('should set suggestedLanguageSubdomainConfig if the detected lang is different to subdomain lang', function (done) {
         req.headers['accept-language'] = 'da, en-gb;q=0.8, en;q=0.7'
-        req.headers.host = 'fr.sharelatex.com'
+        req.headers.host = 'fr.overleaf.com'
         runMiddlewares(() => {
           expect(res.locals.suggestedLanguageSubdomainConfig).to.exist
           expect(res.locals.suggestedLanguageSubdomainConfig.lngCode).to.equal(
@@ -117,7 +117,7 @@ describe('Translations', function () {
 
       it('should not set suggestedLanguageSubdomainConfig if the detected lang is the same as subdomain lang', function (done) {
         req.headers['accept-language'] = 'da, en-gb;q=0.8, en;q=0.7'
-        req.headers.host = 'da.sharelatex.com'
+        req.headers.host = 'da.overleaf.com'
         runMiddlewares(() => {
           expect(res.locals.suggestedLanguageSubdomainConfig).to.not.exist
           done()

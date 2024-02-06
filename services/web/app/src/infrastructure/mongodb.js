@@ -97,7 +97,7 @@ async function dropTestDatabase() {
   const dbName = internalDb.databaseName
   const env = process.env.NODE_ENV
 
-  if (dbName !== 'test-sharelatex' || env !== 'test') {
+  if (dbName !== 'test-overleaf' || env !== 'test') {
     throw new OError(
       `Refusing to clear database '${dbName}' in environment '${env}'`
     )

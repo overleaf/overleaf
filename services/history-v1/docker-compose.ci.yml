@@ -58,8 +58,9 @@ services:
   postgres:
     image: postgres:10
     environment:
-      POSTGRES_USER: sharelatex
-      POSTGRES_PASSWORD: sharelatex
+      POSTGRES_USER: overleaf
+      POSTGRES_PASSWORD: overleaf
+      POSTGRES_DB: overleaf-history-v1-test
     healthcheck:
       test: pg_isready --quiet
       interval: 1s

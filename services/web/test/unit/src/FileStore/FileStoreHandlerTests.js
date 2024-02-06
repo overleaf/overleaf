@@ -30,7 +30,7 @@ describe('FileStoreHandler', function () {
     this.readStream = { my: 'readStream', on: sinon.stub() }
     this.request = sinon.stub()
     this.request.head = sinon.stub()
-    this.filestoreUrl = 'http://filestore.sharelatex.test'
+    this.filestoreUrl = 'http://filestore.overleaf.test'
     this.settings = {
       apis: { filestore: { url: this.filestoreUrl } },
     }

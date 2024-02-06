@@ -2,7 +2,7 @@ const { merge } = require('@overleaf/settings/merge')
 
 let features
 
-const httpAuthUser = 'sharelatex'
+const httpAuthUser = 'overleaf'
 const httpAuthPass = 'password'
 const httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass

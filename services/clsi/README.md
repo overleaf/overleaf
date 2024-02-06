@@ -100,14 +100,14 @@ sudo chmod -R g+w compiles
 sudo chmod g+s compiles
 ```
 
-Another solution is to create a `sharelatex` group and add both `root` and the user with `uid` `1000` to it. If the host does not have a user with that `uid`, you will need to create one first.
+Another solution is to create a `overleaf` group and add both `root` and the user with `uid` `1000` to it. If the host does not have a user with that `uid`, you will need to create one first.
 
 ```shell
 sudo useradd --uid 1000 host-node-user # If required
-sudo groupadd sharelatex
-sudo usermod -a -G sharelatex root
-sudo usermod -a -G sharelatex $(id -nu 1000)
-sudo chown -R 1000:sharelatex compiles
+sudo groupadd overleaf
+sudo usermod -a -G overleaf root
+sudo usermod -a -G overleaf $(id -nu 1000)
+sudo chown -R 1000:overleaf compiles
 sudo chmod -R g+w compiles
 sudo chmod g+s compiles
 ```

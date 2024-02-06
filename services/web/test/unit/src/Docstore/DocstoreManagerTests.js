@@ -15,7 +15,7 @@ describe('DocstoreManager', function () {
         '@overleaf/settings': (this.settings = {
           apis: {
             docstore: {
-              url: 'docstore.sharelatex.com',
+              url: 'docstore.overleaf.com',
             },
           },
         }),

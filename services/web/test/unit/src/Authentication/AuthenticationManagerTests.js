@@ -63,7 +63,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.user = {
           _id: 'user-id',
-          email: (this.email = 'USER@sharelatex.com'),
+          email: (this.email = 'USER@overleaf.com'),
         }
         this.user.hashedPassword = this.testPassword
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
@@ -194,7 +194,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.user = {
           _id: '5c8791477192a80b5e76ca7e',
-          email: (this.email = 'USER@sharelatex.com'),
+          email: (this.email = 'USER@overleaf.com'),
         }
         this.db.users.updateOne = sinon
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
@@ -249,7 +249,7 @@ describe('AuthenticationManager', function () {
       beforeEach(function () {
         this.user = {
           _id: 'user-id',
-          email: (this.email = 'USER@sharelatex.com'),
+          email: (this.email = 'USER@overleaf.com'),
         }
         this.unencryptedPassword = 'banana'
         this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)

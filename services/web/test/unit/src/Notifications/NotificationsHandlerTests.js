@@ -23,7 +23,7 @@ const _ = require('lodash')
 describe('NotificationsHandler', function () {
   const userId = '123nd3ijdks'
   const notificationId = '123njdskj9jlk'
-  const notificationUrl = 'notification.sharelatex.testing'
+  const notificationUrl = 'notification.overleaf.testing'
 
   beforeEach(function () {
     this.request = sinon.stub().callsArgWith(1)

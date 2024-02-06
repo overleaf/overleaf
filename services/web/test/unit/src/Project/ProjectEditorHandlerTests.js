@@ -55,8 +55,8 @@ describe('ProjectEditorHandler', function () {
         user: (this.owner = {
           _id: 'owner-id',
           first_name: 'Owner',
-          last_name: 'ShareLaTeX',
-          email: 'owner@sharelatex.com',
+          last_name: 'Overleaf',
+          email: 'owner@overleaf.com',
         }),
         privilegeLevel: 'owner',
       },
@@ -65,7 +65,7 @@ describe('ProjectEditorHandler', function () {
           _id: 'read-only-id',
           first_name: 'Read',
           last_name: 'Only',
-          email: 'read-only@sharelatex.com',
+          email: 'read-only@overleaf.com',
         },
         privilegeLevel: 'readOnly',
       },
@@ -74,7 +74,7 @@ describe('ProjectEditorHandler', function () {
           _id: 'read-write-id',
           first_name: 'Read',
           last_name: 'Write',
-          email: 'read-write@sharelatex.com',
+          email: 'read-write@overleaf.com',
         },
         privilegeLevel: 'readAndWrite',
       },
@@ -135,9 +135,9 @@ describe('ProjectEditorHandler', function () {
       it('should include the owner', function () {
         expect(this.result.owner).to.exist
         this.result.owner._id.should.equal('owner-id')
-        this.result.owner.email.should.equal('owner@sharelatex.com')
+        this.result.owner.email.should.equal('owner@overleaf.com')
         this.result.owner.first_name.should.equal('Owner')
-        this.result.owner.last_name.should.equal('ShareLaTeX')
+        this.result.owner.last_name.should.equal('Overleaf')
         this.result.owner.privileges.should.equal('owner')
       })
 
@@ -169,16 +169,14 @@ describe('ProjectEditorHandler', function () {
         findMember('read-only-id').privileges.should.equal('readOnly')
         findMember('read-only-id').first_name.should.equal('Read')
         findMember('read-only-id').last_name.should.equal('Only')
-        findMember('read-only-id').email.should.equal(
-          'read-only@sharelatex.com'
-        )
+        findMember('read-only-id').email.should.equal('read-only@overleaf.com')
 
         expect(findMember('read-write-id')).to.exist
         findMember('read-write-id').privileges.should.equal('readAndWrite')
         findMember('read-write-id').first_name.should.equal('Read')
         findMember('read-write-id').last_name.should.equal('Write')
         findMember('read-write-id').email.should.equal(
-          'read-write@sharelatex.com'
+          'read-write@overleaf.com'
         )
       })
 

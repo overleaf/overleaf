@@ -72,7 +72,7 @@ describe('DockerRunner', function () {
     this.directory = '/local/compile/directory'
     this.mainFile = 'main-file.tex'
     this.compiler = 'pdflatex'
-    this.image = 'example.com/sharelatex/image:2016.2'
+    this.image = 'example.com/overleaf/image:2016.2'
     this.env = {}
     this.callback = sinon.stub()
     this.project_id = 'project-id-123'
@@ -154,7 +154,7 @@ describe('DockerRunner', function () {
     describe('when path.sandboxedCompilesHostDir is set', function () {
       beforeEach(function () {
         this.Settings.path.sandboxedCompilesHostDir = '/some/host/dir/compiles'
-        this.directory = '/var/lib/sharelatex/data/compiles/xyz'
+        this.directory = '/var/lib/overleaf/data/compiles/xyz'
         this.DockerRunner._runAndWaitForContainer = sinon
           .stub()
           .callsArgWith(3, null, (this.output = 'mock-output'))

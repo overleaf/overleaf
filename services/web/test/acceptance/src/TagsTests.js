@@ -133,7 +133,7 @@ describe('Tags', function () {
   })
 
   describe('get tags via api', function () {
-    const auth = Buffer.from('sharelatex:password').toString('base64')
+    const auth = Buffer.from('overleaf:password').toString('base64')
     const authedRequest = request.defaults({
       headers: {
         Authorization: `Basic ${auth}`,

@@ -287,7 +287,7 @@ module.exports = {
 
   splitTests: [],
 
-  // Where your instance of ShareLaTeX can be found publically. Used in emails
+  // Where your instance of Overleaf Community Edition/Server Pro can be found publicly. Used in emails
   // that are sent out, generated links, etc.
   siteUrl: (siteUrl = process.env.PUBLIC_URL || 'http://localhost:3000'),
 
@@ -317,7 +317,7 @@ module.exports = {
   // use full domain for cookies to only be accessible from that domain,
   // replace subdomain with dot to have them accessible on all subdomains
   cookieDomain: process.env.COOKIE_DOMAIN,
-  cookieName: process.env.COOKIE_NAME || 'sharelatex.sid',
+  cookieName: process.env.COOKIE_NAME || 'overleaf.sid',
   cookieRollingSession: true,
 
   // this is only used if cookies are used for clsi backend
@@ -526,7 +526,7 @@ module.exports = {
   // Email support
   // -------------
   //
-  //	ShareLaTeX uses nodemailer (http://www.nodemailer.com/) to send transactional emails.
+  //	Overleaf uses nodemailer (http://www.nodemailer.com/) to send transactional emails.
   //	To see the range of transport and options they support, see http://www.nodemailer.com/docs/transports
   // email:
   //	fromAddress: ""
@@ -556,7 +556,7 @@ module.exports = {
   // them.
   cacheStaticAssets: false,
 
-  // If you are running ShareLaTeX over https, set this to true to send the
+  // If you are running Overleaf over https, set this to true to send the
   // cookie with a secure flag (recommended).
   secureCookie: false,
 
@@ -565,7 +565,7 @@ module.exports = {
   // https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03#section-4.1.2.7
   sameSiteCookie: 'lax',
 
-  // If you are running ShareLaTeX behind a proxy (like Apache, Nginx, etc)
+  // If you are running Overleaf behind a proxy (like Apache, Nginx, etc)
   // then set this to true to allow it to correctly detect the forwarded IP
   // address and http/https protocol information.
   behindProxy: false,

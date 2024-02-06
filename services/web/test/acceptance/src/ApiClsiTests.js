@@ -15,7 +15,7 @@ const { expect } = require('chai')
 const request = require('./helpers/request')
 const Settings = require('@overleaf/settings')
 
-const auth = Buffer.from('sharelatex:password').toString('base64')
+const auth = Buffer.from('overleaf:password').toString('base64')
 const authedRequest = request.defaults({
   headers: {
     Authorization: `Basic ${auth}`,

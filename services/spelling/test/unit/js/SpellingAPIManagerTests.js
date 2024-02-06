@@ -28,7 +28,7 @@ describe('SpellingAPIManager', function () {
     }
     this.SpellingAPIManager = await esmock(MODULE_PATH, {
       '../../../app/js/ASpell.js': this.ASpell,
-      '@overleaf/settings': { ignoredMisspellings: ['ShareLaTeX'] },
+      '@overleaf/settings': { ignoredMisspellings: ['Overleaf'] },
     })
   })
 

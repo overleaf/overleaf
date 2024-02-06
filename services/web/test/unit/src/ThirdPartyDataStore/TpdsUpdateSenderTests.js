@@ -17,7 +17,7 @@ const projectName = 'project_name_here'
 
 const thirdPartyDataStoreApiUrl = 'http://third-party-json-store.herokuapp.com'
 const siteUrl = 'http://www.localhost:3000'
-const filestoreUrl = 'filestore.sharelatex.com'
+const filestoreUrl = 'filestore.overleaf.com'
 
 describe('TpdsUpdateSender', function () {
   beforeEach(function () {
@@ -34,7 +34,7 @@ describe('TpdsUpdateSender', function () {
         getInvitedMemberIds: sinon.stub().resolves(this.memberIds),
       },
     }
-    this.docstoreUrl = 'docstore.sharelatex.env'
+    this.docstoreUrl = 'docstore.overleaf.env'
     this.response = {
       ok: true,
       json: sinon.stub(),

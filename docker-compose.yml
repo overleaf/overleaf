@@ -50,20 +50,20 @@ services:
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
 
-            # SHARELATEX_SITE_URL: http://sharelatex.mydomain.com
-            # SHARELATEX_NAV_TITLE: Our ShareLaTeX Instance
-            # SHARELATEX_HEADER_IMAGE_URL: http://somewhere.com/mylogo.png
+            # SHARELATEX_SITE_URL: http://overleaf.example.com
+            # SHARELATEX_NAV_TITLE: Overleaf Community Edition
+            # SHARELATEX_HEADER_IMAGE_URL: http://example.com/mylogo.png
             # SHARELATEX_ADMIN_EMAIL: support@it.com
 
-            # SHARELATEX_LEFT_FOOTER: '[{"text": "Powered by <a href=\"https://www.sharelatex.com\">ShareLaTeX</a> 2016"},{"text": "Another page I want to link to can be found <a href=\"here\">here</a>"} ]'
+            # SHARELATEX_LEFT_FOOTER: '[{"text": "Another page I want to link to can be found <a href=\"here\">here</a>"} ]'
             # SHARELATEX_RIGHT_FOOTER: '[{"text": "Hello I am on the Right"} ]'
 
-            # SHARELATEX_EMAIL_FROM_ADDRESS: "team@sharelatex.com"
+            # SHARELATEX_EMAIL_FROM_ADDRESS: "hello@example.com"
 
             # SHARELATEX_EMAIL_AWS_SES_ACCESS_KEY_ID:
             # SHARELATEX_EMAIL_AWS_SES_SECRET_KEY:
 
-            # SHARELATEX_EMAIL_SMTP_HOST: smtp.mydomain.com
+            # SHARELATEX_EMAIL_SMTP_HOST: smtp.example.com
             # SHARELATEX_EMAIL_SMTP_PORT: 587
             # SHARELATEX_EMAIL_SMTP_SECURE: false
             # SHARELATEX_EMAIL_SMTP_USER:

@@ -84,9 +84,9 @@ RUN touch $SITE_MAINTENANCE_FILE
 
 # Set Environment Variables
 # --------------------------------
-ENV SHARELATEX_CONFIG /etc/sharelatex/settings.js
+ENV OVERLEAF_CONFIG /etc/sharelatex/settings.js
 
-ENV WEB_API_USER "sharelatex"
+ENV WEB_API_USER "overleaf"
 ENV ADMIN_PRIVILEGE_AVAILABLE "true"
 
 ENV SHARELATEX_APP_NAME "Overleaf Community Edition"

@@ -83,7 +83,7 @@ describe('TemplatesManager', function () {
           apis: {
             v1: {
               url: (this.v1Url = 'http://overleaf.com'),
-              user: 'sharelatex',
+              user: 'overleaf',
               pass: 'password',
             },
           },

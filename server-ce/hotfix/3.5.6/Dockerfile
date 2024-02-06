@@ -1,6 +1,6 @@
 FROM sharelatex/sharelatex:3.5.5
 
-# Patch: support trustProxyIps in Server CE/Pro
+# Patch: support trustProxyIps in Overleaf Community Edition/Server Pro
 COPY trusted_proxy_ips.patch .
 RUN patch -p0 --directory=/etc/sharelatex < trusted_proxy_ips.patch
 

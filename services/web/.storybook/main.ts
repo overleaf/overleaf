@@ -4,7 +4,7 @@ import path from 'node:path'
 const rootDir = path.resolve(__dirname, '..')
 
 // NOTE: must be set before webpack config is imported
-process.env.SHARELATEX_CONFIG = path.join(rootDir, 'config/settings.webpack.js')
+process.env.OVERLEAF_CONFIG = path.join(rootDir, 'config/settings.webpack.js')
 
 const config: StorybookConfig = {
   core: {

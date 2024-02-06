@@ -31,7 +31,7 @@ describe('TpdsUpdateTests', function () {
           method: 'POST',
           url: `/project/${this.projectId}/contents/test.tex`,
           auth: {
-            username: 'sharelatex',
+            username: 'overleaf',
             password: 'password',
             sendImmediately: true,
           },
@@ -67,7 +67,7 @@ describe('TpdsUpdateTests', function () {
           method: 'DELETE',
           url: `/project/${this.projectId}/contents/main.tex`,
           auth: {
-            username: 'sharelatex',
+            username: 'overleaf',
             password: 'password',
             sendImmediately: true,
           },
@@ -105,7 +105,7 @@ describe('TpdsUpdateTests', function () {
           method: 'POST',
           url: `/user/${this.owner._id}/update/test-project/other.tex`,
           auth: {
-            username: 'sharelatex',
+            username: 'overleaf',
             password: 'password',
             sendImmediately: true,
           },
@@ -153,7 +153,7 @@ describe('TpdsUpdateTests', function () {
               method: 'POST',
               url: `/user/${this.owner._id}/update/test-project/test.tex`,
               auth: {
-                username: 'sharelatex',
+                username: 'overleaf',
                 password: 'password',
                 sendImmediately: true,
               },
