@@ -731,7 +731,7 @@ describe('DocumentManager', function () {
         .yields(null, this.lines, this.version, this.ranges)
       this.RangesManager.acceptChanges = sinon
         .stub()
-        .yields(null, this.updated_ranges)
+        .returns(this.updated_ranges)
       this.RedisManager.updateDocument = sinon.stub().yields()
     })
 
@@ -830,7 +830,7 @@ describe('DocumentManager', function () {
         .yields(null, this.lines, this.version, this.ranges)
       this.RangesManager.deleteComment = sinon
         .stub()
-        .yields(null, this.updated_ranges)
+        .returns(this.updated_ranges)
       this.RedisManager.updateDocument = sinon.stub().yields()
     })
 

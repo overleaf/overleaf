@@ -117,14 +117,13 @@ const UpdateManager = {
         sync: incomingUpdateVersion === previousVersion,
       })
 
-      const { newRanges, rangesWereCollapsed } =
-        await RangesManager.promises.applyUpdate(
-          projectId,
-          docId,
-          ranges,
-          appliedOps,
-          updatedDocLines
-        )
+      const { newRanges, rangesWereCollapsed } = RangesManager.applyUpdate(
+        projectId,
+        docId,
+        ranges,
+        appliedOps,
+        updatedDocLines
+      )
       profile.log('RangesManager.applyUpdate', { sync: true })
 
       UpdateManager._addProjectHistoryMetadataToOps(

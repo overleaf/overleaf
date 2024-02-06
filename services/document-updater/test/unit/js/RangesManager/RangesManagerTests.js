@@ -1,23 +1,12 @@
-/* eslint-disable
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath = '../../../../app/js/RangesManager.js'
 const SandboxedModule = require('sandboxed-module')
+
+const MODULE_PATH = '../../../../app/js/RangesManager.js'
 
 describe('RangesManager', function () {
   beforeEach(function () {
-    this.RangesManager = SandboxedModule.require(modulePath, {
+    this.RangesManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/metrics': (this.Metrics = { histogram: sinon.stub() }),
       },
@@ -26,7 +15,6 @@ describe('RangesManager', function () {
     this.doc_id = 'doc-id-123'
     this.project_id = 'project-id-123'
     this.user_id = 'user-id-123'
-    return (this.callback = sinon.stub())
   })
 
   describe('applyUpdate', function () {
@@ -68,33 +56,27 @@ describe('RangesManager', function () {
           },
         ],
       }
-      return (this.newDocLines = ['one two three four five'])
+      this.newDocLines = ['one two three four five']
     }) // old is "one three four five"
 
     describe('successfully', function () {
       beforeEach(function () {
-        return this.RangesManager.applyUpdate(
+        this.result = this.RangesManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.entries,
           this.updates,
-          this.newDocLines,
-          this.callback
+          this.newDocLines
         )
       })
 
-      return it('should return the modified the comments and changes', function () {
-        this.callback.called.should.equal(true)
-        const [error, entries, rangesWereCollapsed] = Array.from(
-          this.callback.args[0]
-        )
-        expect(error).to.be.null
-        expect(rangesWereCollapsed).to.equal(false)
-        entries.comments[0].op.should.deep.equal({
+      it('should return the modified the comments and changes', function () {
+        expect(this.result.rangesWereCollapsed).to.equal(false)
+        this.result.newRanges.comments[0].op.should.deep.equal({
           c: 'three ',
           p: 8,
         })
-        return entries.changes[0].op.should.deep.equal({
+        this.result.newRanges.changes[0].op.should.deep.equal({
           i: 'five',
           p: 19,
         })
@@ -104,44 +86,36 @@ describe('RangesManager', function () {
     describe('with empty comments', function () {
       beforeEach(function () {
         this.entries.comments = []
-        return this.RangesManager.applyUpdate(
+        this.result = this.RangesManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.entries,
           this.updates,
-          this.newDocLines,
-          this.callback
+          this.newDocLines
         )
       })
 
-      return it('should return an object with no comments', function () {
+      it('should return an object with no comments', function () {
         // Save space in redis and don't store just {}
-        this.callback.called.should.equal(true)
-        const [error, entries] = Array.from(this.callback.args[0])
-        expect(error).to.be.null
-        return expect(entries.comments).to.be.undefined
+        expect(this.result.newRanges.comments).to.be.undefined
       })
     })
 
     describe('with empty changes', function () {
       beforeEach(function () {
         this.entries.changes = []
-        return this.RangesManager.applyUpdate(
+        this.result = this.RangesManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.entries,
           this.updates,
-          this.newDocLines,
-          this.callback
+          this.newDocLines
         )
       })
 
-      return it('should return an object with no changes', function () {
+      it('should return an object with no changes', function () {
         // Save space in redis and don't store just {}
-        this.callback.called.should.equal(true)
-        const [error, entries] = Array.from(this.callback.args[0])
-        expect(error).to.be.null
-        return expect(entries.changes).to.be.undefined
+        expect(this.result.newRanges.changes).to.be.undefined
       })
     })
 
@@ -187,23 +161,18 @@ describe('RangesManager', function () {
           ],
           changes: [],
         }
-        return this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.entries,
-          this.updates,
-          this.newDocLines,
-          this.callback
-        )
       })
 
-      return it('should return an error', function () {
-        this.callback.called.should.equal(true)
-        const [error, entries] = Array.from(this.callback.args[0])
-        expect(error).to.not.be.null
-        return expect(error.message).to.equal(
-          'too many comments or tracked changes'
-        )
+      it('should throw an error', function () {
+        expect(() => {
+          this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.entries,
+            this.updates,
+            this.newDocLines
+          )
+        }).to.throw('too many comments or tracked changes')
       })
     })
 
@@ -248,24 +217,18 @@ describe('RangesManager', function () {
           comments: [],
         }
         this.newDocLines = ['one two three four']
-        return this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.entries,
-          this.updates,
-          this.newDocLines,
-          this.callback
-        )
       })
 
-      return it('should return an error', function () {
-        // Save space in redis and don't store just {}
-        this.callback.called.should.equal(true)
-        const [error, entries] = Array.from(this.callback.args[0])
-        expect(error).to.not.be.null
-        return expect(error.message).to.equal(
-          'too many comments or tracked changes'
-        )
+      it('should throw an error', function () {
+        expect(() => {
+          this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.entries,
+            this.updates,
+            this.newDocLines
+          )
+        }).to.throw('too many comments or tracked changes')
       })
     })
 
@@ -284,22 +247,18 @@ describe('RangesManager', function () {
             ],
           },
         ]
-        return this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.entries,
-          this.updates,
-          this.newDocLines,
-          this.callback
-        )
       })
 
-      return it('should return an error', function () {
-        // Save space in redis and don't store just {}
-        this.callback.called.should.equal(true)
-        const [error, entries] = Array.from(this.callback.args[0])
-        expect(error).to.not.be.null
-        return expect(error.message).to.equal(
+      it('should throw an error', function () {
+        expect(() => {
+          this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.entries,
+            this.updates,
+            this.newDocLines
+          )
+        }).to.throw(
           'Change ({"op":{"i":"five","p":15},"metadata":{"user_id":"user-id-123"}}) doesn\'t match text ("our ")'
         )
       })
@@ -336,22 +295,17 @@ describe('RangesManager', function () {
           ],
           changes: [],
         }
-        return this.RangesManager.applyUpdate(
+        this.result = this.RangesManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.entries,
           this.updates,
-          this.newDocLines,
-          this.callback
+          this.newDocLines
         )
       })
 
-      return it('should return ranges_were_collapsed == true', function () {
-        this.callback.called.should.equal(true)
-        const [error, entries, rangesWereCollapsed] = Array.from(
-          this.callback.args[0]
-        )
-        return expect(rangesWereCollapsed).to.equal(true)
+      it('should return ranges_were_collapsed == true', function () {
+        expect(this.result.rangesWereCollapsed).to.equal(true)
       })
     })
 
@@ -396,13 +350,12 @@ describe('RangesManager', function () {
             },
           ],
         }
-        return this.RangesManager.applyUpdate(
+        this.result = this.RangesManager.applyUpdate(
           this.project_id,
           this.doc_id,
           this.entries,
           this.updates,
-          this.newDocLines,
-          this.callback
+          this.newDocLines
         )
       })
 
@@ -410,19 +363,15 @@ describe('RangesManager', function () {
         this.Metrics.histogram.called.should.equal(true)
       })
 
-      return it('should return ranges_were_collapsed == true', function () {
-        this.callback.called.should.equal(true)
-        const [error, entries, rangesWereCollapsed] = Array.from(
-          this.callback.args[0]
-        )
-        return expect(rangesWereCollapsed).to.equal(true)
+      it('should return ranges_were_collapsed == true', function () {
+        expect(this.result.rangesWereCollapsed).to.equal(true)
       })
     })
   })
 
-  return describe('acceptChanges', function () {
+  describe('acceptChanges', function () {
     beforeEach(function () {
-      this.RangesManager = SandboxedModule.require(modulePath, {
+      this.RangesManager = SandboxedModule.require(MODULE_PATH, {
         requires: {
           '@overleaf/ranges-tracker': (this.RangesTracker =
             SandboxedModule.require('@overleaf/ranges-tracker')),
@@ -470,118 +419,99 @@ describe('RangesManager', function () {
           },
         ],
       }
-      return (this.removeChangeIdsSpy = sinon.spy(
+      this.removeChangeIdsSpy = sinon.spy(
         this.RangesTracker.prototype,
         'removeChangeIds'
-      ))
+      )
     })
 
     describe('successfully with a single change', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.change_ids = [this.ranges.changes[1].id]
-        return this.RangesManager.acceptChanges(
+        this.result = this.RangesManager.acceptChanges(
           this.change_ids,
-          this.ranges,
-          (err, ranges) => {
-            if (err) return done(err)
-            this.rangesResponse = ranges
-            return done()
-          }
+          this.ranges
         )
       })
 
       it('should log the call with the correct number of changes', function () {
-        return this.logger.debug
+        this.logger.debug
           .calledWith('accepting 1 changes in ranges')
           .should.equal(true)
       })
 
       it('should delegate the change removal to the ranges tracker', function () {
-        return this.removeChangeIdsSpy
-          .calledWith(this.change_ids)
-          .should.equal(true)
+        this.removeChangeIdsSpy.calledWith(this.change_ids).should.equal(true)
       })
 
       it('should remove the change', function () {
-        return expect(
-          this.rangesResponse.changes.find(
+        expect(
+          this.result.changes.find(
             change => change.id === this.ranges.changes[1].id
           )
         ).to.be.undefined
       })
 
       it('should return the original number of changes minus 1', function () {
-        return this.rangesResponse.changes.length.should.equal(
-          this.ranges.changes.length - 1
-        )
+        this.result.changes.length.should.equal(this.ranges.changes.length - 1)
       })
 
-      return it('should not touch other changes', function () {
-        return [0, 2, 3, 4].map(i =>
+      it('should not touch other changes', function () {
+        for (const i of [0, 2, 3, 4]) {
           expect(
-            this.rangesResponse.changes.find(
+            this.result.changes.find(
               change => change.id === this.ranges.changes[i].id
             )
           ).to.deep.equal(this.ranges.changes[i])
-        )
+        }
       })
     })
 
-    return describe('successfully with multiple changes', function () {
-      beforeEach(function (done) {
+    describe('successfully with multiple changes', function () {
+      beforeEach(function () {
         this.change_ids = [
           this.ranges.changes[1].id,
           this.ranges.changes[3].id,
           this.ranges.changes[4].id,
         ]
-        return this.RangesManager.acceptChanges(
+        this.result = this.RangesManager.acceptChanges(
           this.change_ids,
-          this.ranges,
-          (err, ranges) => {
-            if (err) return done(err)
-            this.rangesResponse = ranges
-            return done()
-          }
+          this.ranges
         )
       })
 
       it('should log the call with the correct number of changes', function () {
-        return this.logger.debug
+        this.logger.debug
           .calledWith(`accepting ${this.change_ids.length} changes in ranges`)
           .should.equal(true)
       })
 
       it('should delegate the change removal to the ranges tracker', function () {
-        return this.removeChangeIdsSpy
-          .calledWith(this.change_ids)
-          .should.equal(true)
+        this.removeChangeIdsSpy.calledWith(this.change_ids).should.equal(true)
       })
 
       it('should remove the changes', function () {
-        return [1, 3, 4].map(
-          i =>
-            expect(
-              this.rangesResponse.changes.find(
-                change => change.id === this.ranges.changes[1].id
-              )
-            ).to.be.undefined
-        )
+        for (const i of [1, 3, 4]) {
+          expect(
+            this.result.changes.find(
+              change => change.id === this.ranges.changes[i].id
+            )
+          ).to.be.undefined
+        }
       })
 
       it('should return the original number of changes minus the number of accepted changes', function () {
-        return this.rangesResponse.changes.length.should.equal(
-          this.ranges.changes.length - 3
-        )
+        this.result.changes.length.should.equal(this.ranges.changes.length - 3)
       })
 
-      return it('should not touch other changes', function () {
-        return [0, 2].map(i =>
+      it('should not touch other changes', function () {
+        for (const i of [0, 2]) {
           expect(
-            this.rangesResponse.changes.find(
+            this.result.changes.find(
               change => change.id === this.ranges.changes[i].id
             )
           ).to.deep.equal(this.ranges.changes[i])
-        )
+        }
       })
     })
   })

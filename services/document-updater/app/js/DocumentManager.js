@@ -380,26 +380,29 @@ const DocumentManager = {
             new Errors.NotFoundError(`document not found: ${docId}`)
           )
         }
-        RangesManager.acceptChanges(changeIds, ranges, (error, newRanges) => {
-          if (error) {
-            return callback(error)
-          }
-          RedisManager.updateDocument(
-            projectId,
-            docId,
-            lines,
-            version,
-            [],
-            newRanges,
-            {},
-            error => {
-              if (error) {
-                return callback(error)
-              }
-              callback()
+
+        let newRanges
+        try {
+          newRanges = RangesManager.acceptChanges(changeIds, ranges)
+        } catch (err) {
+          return callback(err)
+        }
+
+        RedisManager.updateDocument(
+          projectId,
+          docId,
+          lines,
+          version,
+          [],
+          newRanges,
+          {},
+          error => {
+            if (error) {
+              return callback(error)
             }
-          )
-        })
+            callback()
+          }
+        )
       }
     )
   },
@@ -423,26 +426,29 @@ const DocumentManager = {
             new Errors.NotFoundError(`document not found: ${docId}`)
           )
         }
-        RangesManager.deleteComment(commentId, ranges, (error, newRanges) => {
-          if (error) {
-            return callback(error)
-          }
-          RedisManager.updateDocument(
-            projectId,
-            docId,
-            lines,
-            version,
-            [],
-            newRanges,
-            {},
-            error => {
-              if (error) {
-                return callback(error)
-              }
-              callback()
+
+        let newRanges
+        try {
+          newRanges = RangesManager.deleteComment(commentId, ranges)
+        } catch (err) {
+          return callback(err)
+        }
+
+        RedisManager.updateDocument(
+          projectId,
+          docId,
+          lines,
+          version,
+          [],
+          newRanges,
+          {},
+          error => {
+            if (error) {
+              return callback(error)
             }
-          )
-        })
+            callback()
+          }
+        )
       }
     )
   },

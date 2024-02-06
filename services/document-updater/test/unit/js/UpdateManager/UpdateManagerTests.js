@@ -65,9 +65,7 @@ describe('UpdateManager', function () {
     }
 
     this.RangesManager = {
-      promises: {
-        applyUpdate: sinon.stub(),
-      },
+      applyUpdate: sinon.stub(),
     }
 
     this.SnapshotManager = {
@@ -320,7 +318,7 @@ describe('UpdateManager', function () {
         pathname: this.pathname,
         projectHistoryId: this.projectHistoryId,
       })
-      this.RangesManager.promises.applyUpdate.resolves({
+      this.RangesManager.applyUpdate.returns({
         newRanges: this.updated_ranges,
         rangesWereCollapsed: false,
       })
@@ -357,7 +355,7 @@ describe('UpdateManager', function () {
       })
 
       it('should update the ranges', function () {
-        this.RangesManager.promises.applyUpdate
+        this.RangesManager.applyUpdate
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -444,7 +442,7 @@ describe('UpdateManager', function () {
 
     describe('when ranges get collapsed', function () {
       beforeEach(async function () {
-        this.RangesManager.promises.applyUpdate.resolves({
+        this.RangesManager.applyUpdate.returns({
           newRanges: this.updated_ranges,
           rangesWereCollapsed: true,
         })
