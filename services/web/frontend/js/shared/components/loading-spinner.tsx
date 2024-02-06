@@ -2,7 +2,13 @@ import { useTranslation } from 'react-i18next'
 import Icon from './icon'
 import { useEffect, useState } from 'react'
 
-function LoadingSpinner({ delay = 0 }) {
+function LoadingSpinner({
+  delay = 0,
+  loadingText,
+}: {
+  delay?: 0 | 500 // 500 is our standard delay
+  loadingText?: string
+}) {
   const { t } = useTranslation()
 
   const [show, setShow] = useState(false)
@@ -25,7 +31,7 @@ function LoadingSpinner({ delay = 0 }) {
     <div className="loading">
       <Icon type="refresh" fw spin />
       &nbsp;
-      {t('loading')}…
+      {loadingText || t('loading')}…
     </div>
   )
 }
@@ -35,13 +41,15 @@ export default LoadingSpinner
 export function FullSizeLoadingSpinner({
   delay = 0,
   minHeight,
+  loadingText,
 }: {
-  delay?: number
+  delay?: 0 | 500
   minHeight?: string
+  loadingText?: string
 }) {
   return (
     <div className="full-size-loading-spinner-container" style={{ minHeight }}>
-      <LoadingSpinner delay={delay} />
+      <LoadingSpinner loadingText={loadingText} delay={delay} />
     </div>
   )
 }

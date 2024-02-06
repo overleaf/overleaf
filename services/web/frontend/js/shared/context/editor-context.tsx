@@ -46,6 +46,8 @@ export const EditorContext = createContext<
       inactiveTutorials: [string]
       currentPopup: string | null
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
+      writefullAdClicked: boolean
+      setWritefullAdClicked: Dispatch<SetStateAction<boolean>>
     }
   | undefined
 >(undefined)
@@ -83,6 +85,8 @@ export const EditorProvider: FC = ({ children }) => {
   const [inactiveTutorials, setInactiveTutorials] = useState(() =>
     getMeta('ol-inactiveTutorials', [])
   )
+
+  const [writefullAdClicked, setWritefullAdClicked] = useState(false)
 
   const [currentPopup, setCurrentPopup] = useState<string | null>(null)
 
@@ -175,6 +179,8 @@ export const EditorProvider: FC = ({ children }) => {
       deactivateTutorial,
       currentPopup,
       setCurrentPopup,
+      writefullAdClicked,
+      setWritefullAdClicked,
     }),
     [
       cobranding,
@@ -192,6 +198,8 @@ export const EditorProvider: FC = ({ children }) => {
       deactivateTutorial,
       currentPopup,
       setCurrentPopup,
+      writefullAdClicked,
+      setWritefullAdClicked,
     ]
   )
 
