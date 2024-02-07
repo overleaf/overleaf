@@ -1,0 +1,34 @@
+--- services/web/app/src/Features/Editor/EditorHttpController.js
++++ services/web/app/src/Features/Editor/EditorHttpController.js
+@@ -8,7 +8,6 @@ const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
+ const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInviteHandler')
+ const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+ const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
+-const TokenAccessHandler = require('../TokenAccess/TokenAccessHandler')
+ const SessionManager = require('../Authentication/SessionManager')
+ const Errors = require('../Errors/Errors')
+ const DocstoreManager = require('../Docstore/DocstoreManager')
+@@ -178,7 +177,7 @@ async function _buildJoinProjectView(req, projectId, userId) {
+     await CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
+       projectId
+     )
+-  const token = TokenAccessHandler.getRequestToken(req, projectId)
++  const token = req.headers['x-sl-anonymous-access-token']
+   const privilegeLevel =
+     await AuthorizationManager.promises.getPrivilegeLevelForProject(
+       userId,
+--- services/web/app/src/Features/TokenAccess/TokenAccessHandler.js
++++ services/web/app/src/Features/TokenAccess/TokenAccessHandler.js
+@@ -213,10 +213,9 @@ const TokenAccessHandler = {
+
+   getRequestToken(req, projectId) {
+     const token =
+-      (req.session &&
+-        req.session.anonTokenAccess &&
+-        req.session.anonTokenAccess[projectId.toString()]) ||
+-      req.headers['x-sl-anonymous-access-token']
++      req.session &&
++      req.session.anonTokenAccess &&
++      req.session.anonTokenAccess[projectId.toString()]
+     return token
+   },
