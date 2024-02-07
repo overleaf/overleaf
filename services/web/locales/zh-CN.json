@@ -886,6 +886,7 @@
   "integrations": "集成",
   "interested_in": "感兴趣的项目",
   "interested_in_cheaper_personal_plan": "你会对更便宜的<0>__price__</0>个人计划感兴趣吗？",
+  "invalid_certificate": "证书无效，请检查证书，然后重试。",
   "invalid_confirmation_code": "无效！请检查代码，然后重试。",
   "invalid_email": "有未验证的邮箱",
   "invalid_file_name": "文件名无效",
