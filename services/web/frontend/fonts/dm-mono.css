@@ -9,7 +9,7 @@
   font-feature-settings: 'ss05';
   font-style: normal;
   font-weight: 300;
-  src: url('dm-mono/DMMono-Light.woff2') format('woff2'),
+  src: url('dm-mono/DMMono-Light.woff2') format('woff2');
 }
 
 @font-face {
@@ -17,7 +17,7 @@
   font-feature-settings: 'ss05';
   font-style: italic;
   font-weight: 300;
-  src: url('dm-mono/DMMono-LightItalic.woff2') format('woff2'),
+  src: url('dm-mono/DMMono-LightItalic.woff2') format('woff2');
 }
 
 @font-face {
@@ -25,7 +25,7 @@
   font-feature-settings: 'ss05';
   font-style: normal;
   font-weight: 400;
-  src: url('dm-mono/DMMono-Regular.woff2') format('woff2'),
+  src: url('dm-mono/DMMono-Regular.woff2') format('woff2');
 }
 
 @font-face {
@@ -33,7 +33,7 @@
   font-feature-settings: 'ss05';
   font-style: italic;
   font-weight: 400;
-  src: url('dm-mono/DMMono-Italic.woff2') format('woff2'),
+  src: url('dm-mono/DMMono-Italic.woff2') format('woff2');
 }
 
 @font-face {
@@ -41,7 +41,7 @@
   font-feature-settings: 'ss05';
   font-style: normal;
   font-weight: 500;
-  src: url('dm-mono/DMMono-Medium.woff2') format('woff2'),
+  src: url('dm-mono/DMMono-Medium.woff2') format('woff2');
 }
 
 @font-face {
@@ -49,5 +49,5 @@
   font-feature-settings: 'ss05';
   font-style: italic;
   font-weight: 500;
-  src: url('dm-mono/DMMono-MediumItalic.woff2') format('woff2'),
+  src: url('dm-mono/DMMono-MediumItalic.woff2') format('woff2');
 }
