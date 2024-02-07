@@ -229,7 +229,7 @@ const settings = {
   // address and http/https protocol information.
 
   behindProxy: process.env.OVERLEAF_BEHIND_PROXY || false,
-  trustedProxyIps: process.env.SHARELATEX_TRUSTED_PROXY_IPS,
+  trustedProxyIps: process.env.OVERLEAF_TRUSTED_PROXY_IPS,
 
   // The amount of time, in milliseconds, until the (rolling) cookie session expires
   cookieSessionLength: parseInt(
@@ -238,18 +238,18 @@ const settings = {
   ),
 
   redisLockTTLSeconds: parseInt(
-    process.env.SHARELATEX_REDIS_LOCK_TTL_SECONDS || '60',
+    process.env.OVERLEAF_REDIS_LOCK_TTL_SECONDS || '60',
     10
   ),
 
   i18n: {
     subdomainLang: {
       www: {
-        lngCode: process.env.SHARELATEX_SITE_LANGUAGE || 'en',
+        lngCode: process.env.OVERLEAF_SITE_LANGUAGE || 'en',
         url: siteUrl,
       },
     },
-    defaultLng: process.env.SHARELATEX_SITE_LANGUAGE || 'en',
+    defaultLng: process.env.OVERLEAF_SITE_LANGUAGE || 'en',
   },
 
   currentImageName: process.env.TEX_LIVE_DOCKER_IMAGE,
@@ -312,17 +312,6 @@ if (process.env.OVERLEAF_RIGHT_FOOTER != null) {
 
 if (process.env.OVERLEAF_HEADER_IMAGE_URL != null) {
   settings.nav.custom_logo = process.env.OVERLEAF_HEADER_IMAGE_URL
-}
-
-if (process.env.SHARELATEX_HEADER_NAV_LINKS != null) {
-  console.error(`\
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#
-#  WARNING: SHARELATEX_HEADER_NAV_LINKS is no longer supported
-#  See https://github.com/overleaf/overleaf/wiki/Configuring-Headers,-Footers-&-Logo
-#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #\
-`)
 }
 
 if (process.env.OVERLEAF_HEADER_EXTRAS != null) {
@@ -392,9 +381,9 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
 }
 
 // i18n
-if (process.env.SHARELATEX_LANG_DOMAIN_MAPPING != null) {
+if (process.env.OVERLEAF_LANG_DOMAIN_MAPPING != null) {
   settings.i18n.subdomainLang = parse(
-    process.env.SHARELATEX_LANG_DOMAIN_MAPPING
+    process.env.OVERLEAF_LANG_DOMAIN_MAPPING
   )
 }
 
@@ -403,15 +392,15 @@ if (process.env.SHARELATEX_LANG_DOMAIN_MAPPING != null) {
 // These restrict the passwords users can use when registering
 // opts are from http://antelle.github.io/passfield
 if (
-  process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN ||
-  process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH ||
-  process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH
+  process.env.OVERLEAF_PASSWORD_VALIDATION_PATTERN ||
+  process.env.OVERLEAF_PASSWORD_VALIDATION_MIN_LENGTH ||
+  process.env.OVERLEAF_PASSWORD_VALIDATION_MAX_LENGTH
 ) {
   settings.passwordStrengthOptions = {
-    pattern: process.env.SHARELATEX_PASSWORD_VALIDATION_PATTERN || 'aA$3',
+    pattern: process.env.OVERLEAF_PASSWORD_VALIDATION_PATTERN || 'aA$3',
     length: {
-      min: process.env.SHARELATEX_PASSWORD_VALIDATION_MIN_LENGTH || 8,
-      max: process.env.SHARELATEX_PASSWORD_VALIDATION_MAX_LENGTH || 72,
+      min: process.env.OVERLEAF_PASSWORD_VALIDATION_MIN_LENGTH || 8,
+      max: process.env.OVERLEAF_PASSWORD_VALIDATION_MAX_LENGTH || 72,
     },
   }
 }
@@ -488,9 +477,9 @@ if (process.env.OVERLEAF_PROXY_LEARN != null) {
 
 // /References
 // -----------
-if (process.env.SHARELATEX_ELASTICSEARCH_URL != null) {
+if (process.env.OVERLEAF_ELASTICSEARCH_URL != null) {
   settings.references.elasticsearch = {
-    host: process.env.SHARELATEX_ELASTICSEARCH_URL,
+    host: process.env.OVERLEAF_ELASTICSEARCH_URL,
   }
 }
 
