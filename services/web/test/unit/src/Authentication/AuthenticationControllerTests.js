@@ -578,13 +578,15 @@ describe('AuthenticationController', function () {
     })
 
     describe('when Oauth2Server authenticates', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.token = {
           accessToken: 'token',
           user: 'user',
         }
-        this.Oauth2Server.server.authenticate.yields(null, this.token)
-        this.middleware(this.req, this.res, this.next)
+        this.Oauth2Server.server.authenticate = sinon
+          .stub()
+          .resolves(this.token)
+        this.middleware(this.req, this.res, () => done())
       })
 
       it('should set oauth_token on request', function () {
@@ -598,15 +600,12 @@ describe('AuthenticationController', function () {
       it('should set oauth_user on request', function () {
         this.req.oauth_user.should.equal('user')
       })
-
-      it('should call next', function () {
-        this.next.should.have.been.calledOnce
-      })
     })
 
     describe('when Oauth2Server returns 401 error', function () {
-      beforeEach(function () {
-        this.Oauth2Server.server.authenticate.yields({ code: 401 })
+      beforeEach(function (done) {
+        this.res.json.callsFake(() => done())
+        this.Oauth2Server.server.authenticate.rejects({ code: 401 })
         this.middleware(this.req, this.res, this.next)
       })
 

@@ -26,6 +26,7 @@ const {
 const { ParallelLoginError } = require('./AuthenticationErrors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Modules = require('../../infrastructure/Modules')
+const { expressify } = require('@overleaf/promise-utils')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -320,35 +321,33 @@ const AuthenticationController = {
 
     // require this here because module may not be included in some versions
     const Oauth2Server = require('../../../../modules/oauth2-server/app/src/Oauth2Server')
-    return function (req, res, next) {
+    const middleware = async (req, res, next) => {
       const request = new Oauth2Server.Request(req)
       const response = new Oauth2Server.Response(res)
-      Oauth2Server.server.authenticate(
-        request,
-        response,
-        { scope },
-        function (err, token) {
-          if (err) {
-            // use a 401 status code for malformed header for git-bridge
-            if (
-              err.code === 400 &&
-              err.message === 'Invalid request: malformed authorization header'
-            ) {
-              err.code = 401
-            }
-            // send all other errors
-            res
-              .status(err.code)
-              .json({ error: err.name, error_description: err.message })
-          } else {
-            req.oauth = { access_token: token.accessToken }
-            req.oauth_token = token
-            req.oauth_user = token.user
-            next()
-          }
+      try {
+        const token = await Oauth2Server.server.authenticate(
+          request,
+          response,
+          { scope }
+        )
+        req.oauth = { access_token: token.accessToken }
+        req.oauth_token = token
+        req.oauth_user = token.user
+        next()
+      } catch (err) {
+        if (
+          err.code === 400 &&
+          err.message === 'Invalid request: malformed authorization header'
+        ) {
+          err.code = 401
         }
-      )
+        // send all other errors
+        res
+          .status(err.code)
+          .json({ error: err.name, error_description: err.message })
+      }
     }
+    return expressify(middleware)
   },
 
   validateUserSession: function () {

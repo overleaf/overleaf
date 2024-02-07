@@ -69,7 +69,7 @@
     "@contentful/rich-text-html-renderer": "^16.0.2",
     "@contentful/rich-text-types": "^16.0.2",
     "@google-cloud/bigquery": "^6.0.1",
-    "@node-oauth/oauth2-server": "^4.3.0",
+    "@node-oauth/oauth2-server": "^5.1.0",
     "@node-saml/passport-saml": "^4.0.4",
     "@overleaf/access-token-encryptor": "*",
     "@overleaf/fetch-utils": "*",
