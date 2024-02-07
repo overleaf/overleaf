@@ -213,10 +213,9 @@ const TokenAccessHandler = {
 
   getRequestToken(req, projectId) {
     const token =
-      (req.session &&
-        req.session.anonTokenAccess &&
-        req.session.anonTokenAccess[projectId.toString()]) ||
-      req.headers['x-sl-anonymous-access-token']
+      req.session &&
+      req.session.anonTokenAccess &&
+      req.session.anonTokenAccess[projectId.toString()]
     return token
   },
 
