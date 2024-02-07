@@ -32,7 +32,6 @@ describe('PersistenceManager', function () {
     this.pathname = '/a/b/c.tex'
     this.lastUpdatedAt = Date.now()
     this.lastUpdatedBy = 'last-author-id'
-    this.historyRangesSupport = false
     this.Settings.apis = {
       web: {
         url: (this.url = 'www.example.com'),
@@ -50,7 +49,6 @@ describe('PersistenceManager', function () {
         ranges: this.ranges,
         pathname: this.pathname,
         projectHistoryId: this.projectHistoryId,
-        historyRangesSupport: this.historyRangesSupport,
       }
     })
 
@@ -96,8 +94,7 @@ describe('PersistenceManager', function () {
             this.version,
             this.ranges,
             this.pathname,
-            this.projectHistoryId,
-            this.historyRangesSupport
+            this.projectHistoryId
           )
           .should.equal(true)
       })

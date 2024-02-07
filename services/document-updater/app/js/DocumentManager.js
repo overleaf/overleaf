@@ -29,10 +29,7 @@ const DocumentManager = {
         ranges,
         pathname,
         projectHistoryId,
-        unflushedTime,
-        lastUpdatedAt,
-        lastUpdatedBy,
-        historyRangesSupport
+        unflushedTime
       ) => {
         if (error) {
           return callback(error)
@@ -45,15 +42,7 @@ const DocumentManager = {
           PersistenceManager.getDoc(
             projectId,
             docId,
-            (
-              error,
-              lines,
-              version,
-              ranges,
-              pathname,
-              projectHistoryId,
-              historyRangesSupport
-            ) => {
+            (error, lines, version, ranges, pathname, projectHistoryId) => {
               if (error) {
                 return callback(error)
               }
@@ -65,7 +54,6 @@ const DocumentManager = {
                   version,
                   pathname,
                   projectHistoryId,
-                  historyRangesSupport,
                 },
                 'got doc from persistence API'
               )
@@ -77,7 +65,6 @@ const DocumentManager = {
                 ranges,
                 pathname,
                 projectHistoryId,
-                historyRangesSupport,
                 error => {
                   if (error) {
                     return callback(error)
@@ -90,8 +77,7 @@ const DocumentManager = {
                     pathname,
                     projectHistoryId,
                     null,
-                    false,
-                    historyRangesSupport
+                    false
                   )
                 }
               )
@@ -106,8 +92,7 @@ const DocumentManager = {
             pathname,
             projectHistoryId,
             unflushedTime,
-            true,
-            historyRangesSupport
+            true
           )
         }
       }
@@ -713,7 +698,6 @@ module.exports.promises = promisifyAll(DocumentManager, {
       'projectHistoryId',
       'unflushedTime',
       'alreadyLoaded',
-      'historyRangesSupport',
     ],
     getDocWithLock: [
       'lines',
@@ -723,7 +707,6 @@ module.exports.promises = promisifyAll(DocumentManager, {
       'projectHistoryId',
       'unflushedTime',
       'alreadyLoaded',
-      'historyRangesSupport',
     ],
     getDocAndFlushIfOld: ['lines', 'version'],
     getDocAndFlushIfOldWithLock: ['lines', 'version'],

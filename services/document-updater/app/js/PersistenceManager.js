@@ -101,8 +101,7 @@ function getDoc(projectId, docId, options = {}, _callback) {
         body.version,
         body.ranges,
         body.pathname,
-        body.projectHistoryId?.toString(),
-        body.historyRangesSupport || false
+        body.projectHistoryId?.toString()
       )
     } else if (res.statusCode === 404) {
       callback(new Errors.NotFoundError(`doc not not found: ${urlPath}`))
@@ -187,7 +186,6 @@ module.exports = {
       'ranges',
       'pathname',
       'projectHistoryId',
-      'historyRangesSupport',
     ]),
     setDoc: promisify(setDoc),
   },
