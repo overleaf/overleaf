@@ -386,6 +386,7 @@
   "delete_figure": "Delete figure",
   "delete_projects": "Delete Projects",
   "delete_row_or_column": "Delete row or column",
+  "delete_sso_config": "Delete SSO configuration",
   "delete_table": "Delete table",
   "delete_tag": "Delete Tag",
   "delete_token": "Delete token",
