@@ -1,8 +1,11 @@
+/* eslint-disable mocha/handle-done-callback */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const MockRequest = require('../helpers/MockRequest')
+const MockResponse = require('../helpers/MockResponse')
 
 const MODULE_PATH = '../../../../app/src/Features/Editor/EditorHttpController'
 
@@ -39,13 +42,8 @@ describe('EditorHttpController', function () {
     this.source = 'editor'
 
     this.parentFolderId = 'mock-folder-id'
-    this.req = { i18n: { translate: string => string } }
-    this.res = {
-      send: sinon.stub().returns(this.res),
-      status: sinon.stub().returns(this.res),
-      sendStatus: sinon.stub().returns(this.res),
-      json: sinon.stub().returns(this.res),
-    }
+    this.req = new MockRequest()
+    this.res = new MockResponse()
     this.next = sinon.stub()
     this.token = null
     this.docLines = ['hello', 'overleaf']
@@ -176,7 +174,7 @@ describe('EditorHttpController', function () {
         this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
           true
         )
-        this.res.json.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
@@ -203,7 +201,7 @@ describe('EditorHttpController', function () {
     describe('when the project is marked as deleted', function () {
       beforeEach(function (done) {
         this.projectView.deletedByExternalDataSource = true
-        this.res.json.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
@@ -220,7 +218,7 @@ describe('EditorHttpController', function () {
         this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
           'readOnly'
         )
-        this.res.json.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
@@ -240,19 +238,22 @@ describe('EditorHttpController', function () {
         this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
           null
         )
-        this.res.sendStatus.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
       it('should send a 403 response', function () {
-        expect(this.res.sendStatus).to.have.been.calledWith(403)
+        expect(this.res.statusCode).to.equal(403)
       })
     })
 
     describe('with an anonymous user', function () {
       beforeEach(function (done) {
+        this.token = 'token'
+        this.TokenAccessHandler.getRequestToken.returns(this.token)
         this.req.query = { user_id: 'anonymous-user' }
-        this.res.json.callsFake(() => done())
+        this.req.headers = { 'x-sl-anonymous-access-token': this.token }
+        this.res.callback = done
         this.AuthorizationManager.isRestrictedUser
           .withArgs(null, 'readOnly', false, false)
           .returns(true)
@@ -282,7 +283,7 @@ describe('EditorHttpController', function () {
         this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
           'readAndWrite'
         )
-        this.res.json.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.joinProject(this.req, this.res)
       })
 
@@ -323,7 +324,7 @@ describe('EditorHttpController', function () {
 
     describe('successfully', function () {
       beforeEach(function (done) {
-        this.res.json.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.addDoc(this.req, this.res)
       })
 
@@ -346,10 +347,10 @@ describe('EditorHttpController', function () {
     describe('unsuccesfully', function () {
       it('handle name too short', function (done) {
         this.req.body.name = ''
-        this.res.sendStatus.callsFake(status => {
-          expect(status).to.equal(400)
+        this.res.callback = () => {
+          expect(this.res.statusCode).to.equal(400)
           done()
-        })
+        }
         this.EditorHttpController.addDoc(this.req, this.res)
       })
 
@@ -357,12 +358,11 @@ describe('EditorHttpController', function () {
         this.EditorController.promises.addDoc.rejects(
           new Error('project_has_too_many_files')
         )
-        this.res.json.callsFake(payload => {
-          expect(payload).to.equal('project_has_too_many_files')
+        this.res.callback = () => {
+          expect(this.res.body).to.equal('"project_has_too_many_files"')
           expect(this.res.status).to.have.been.calledWith(400)
           done()
-        })
-        this.res.status.returns(this.res)
+        }
         this.EditorHttpController.addDoc(this.req, this.res)
       })
     })
@@ -380,7 +380,7 @@ describe('EditorHttpController', function () {
 
     describe('successfully', function () {
       beforeEach(function (done) {
-        this.res.json.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.addFolder(this.req, this.res)
       })
 
@@ -403,10 +403,10 @@ describe('EditorHttpController', function () {
     describe('unsuccesfully', function () {
       it('handle name too short', function (done) {
         this.req.body.name = ''
-        this.res.sendStatus.callsFake(status => {
-          expect(status).to.equal(400)
+        this.res.callback = () => {
+          expect(this.res.statusCode).to.equal(400)
           done()
-        })
+        }
         this.EditorHttpController.addFolder(this.req, this.res)
       })
 
@@ -414,12 +414,11 @@ describe('EditorHttpController', function () {
         this.EditorController.promises.addFolder.rejects(
           new Error('project_has_too_many_files')
         )
-        this.res.json.callsFake(payload => {
-          expect(payload).to.equal('project_has_too_many_files')
-          expect(this.res.status).to.have.been.calledWith(400)
+        this.res.callback = () => {
+          expect(this.res.body).to.equal('"project_has_too_many_files"')
+          expect(this.res.statusCode).to.equal(400)
           done()
-        })
-        this.res.status.returns(this.res)
+        }
         this.EditorHttpController.addFolder(this.req, this.res)
       })
 
@@ -427,12 +426,11 @@ describe('EditorHttpController', function () {
         this.EditorController.promises.addFolder.rejects(
           new Error('invalid element name')
         )
-        this.res.json.callsFake(payload => {
-          expect(payload).to.equal('invalid_file_name')
-          expect(this.res.status).to.have.been.calledWith(400)
+        this.res.callback = () => {
+          expect(this.res.body).to.equal('"invalid_file_name"')
+          expect(this.res.statusCode).to.equal(400)
           done()
-        })
-        this.res.status.returns(this.res)
+        }
         this.EditorHttpController.addFolder(this.req, this.res)
       })
     })
@@ -453,7 +451,7 @@ describe('EditorHttpController', function () {
       beforeEach(function (done) {
         this.newName = 'new-name'
         this.req.body = { name: this.newName, source: this.source }
-        this.res.sendStatus.callsFake(() => done())
+        this.res.callback = done
         this.EditorHttpController.renameEntity(this.req, this.res)
       })
 
@@ -482,7 +480,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should send back a bad request status code', function () {
-        expect(this.res.sendStatus).to.have.been.calledWith(400)
+        expect(this.res.statusCode).to.equal(400)
       })
     })
 
@@ -494,7 +492,7 @@ describe('EditorHttpController', function () {
       })
 
       it('should send back a bad request status code', function () {
-        expect(this.res.sendStatus).to.have.been.calledWith(400)
+        expect(this.res.statusCode).to.equal(400)
       })
     })
   })
@@ -510,7 +508,7 @@ describe('EditorHttpController', function () {
         entity_type: this.entityType,
       }
       this.req.body = { folder_id: this.folderId, source: this.source }
-      this.res.sendStatus.callsFake(() => done())
+      this.res.callback = done
       this.EditorHttpController.moveEntity(this.req, this.res)
     })
 
@@ -526,7 +524,7 @@ describe('EditorHttpController', function () {
     })
 
     it('should send back a success response', function () {
-      expect(this.res.sendStatus).to.have.been.calledWith(204)
+      expect(this.res.statusCode).to.equal(204)
     })
   })
 
@@ -539,7 +537,7 @@ describe('EditorHttpController', function () {
         entity_id: this.entityId,
         entity_type: this.entityType,
       }
-      this.res.sendStatus.callsFake(() => done())
+      this.res.callback = done
       this.EditorHttpController.deleteEntity(this.req, this.res)
     })
 
@@ -556,7 +554,7 @@ describe('EditorHttpController', function () {
     })
 
     it('should send back a success response', function () {
-      expect(this.res.sendStatus).to.have.been.calledWith(204)
+      expect(this.res.statusCode).to.equal(204)
     })
   })
 })
