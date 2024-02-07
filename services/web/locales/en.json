@@ -1739,6 +1739,7 @@
   "sso_account_already_linked": "Account already linked to another __appName__ user",
   "sso_active": "SSO active",
   "sso_already_setup_good_to_go": "Single sign-on is already set up on your account, so you’re good to go.",
+  "sso_config_deleted": "SSO configuration deleted",
   "sso_config_prop_help_certificate": "Base64 encoded certificate without whitespace",
   "sso_config_prop_help_first_name": "The SAML attribute that specifies the user’s first name",
   "sso_config_prop_help_last_name": "The SAML attribute that specifies the user’s last name",

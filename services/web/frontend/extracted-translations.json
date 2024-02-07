@@ -1177,6 +1177,7 @@
   "spell_check": "",
   "sso": "",
   "sso_active": "",
+  "sso_config_deleted": "",
   "sso_config_prop_help_certificate": "",
   "sso_config_prop_help_first_name": "",
   "sso_config_prop_help_last_name": "",
