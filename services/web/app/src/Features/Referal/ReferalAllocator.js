@@ -1,33 +1,22 @@
 const OError = require('@overleaf/o-error')
 const { User } = require('../../models/User')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
-const { promisify } = require('@overleaf/promise-utils')
+const { callbackify } = require('@overleaf/promise-utils')
 
-function allocate(
-  referalId,
-  newUserId,
-  referalSource,
-  referalMedium,
-  callback
-) {
-  if (callback == null) {
-    callback = function () {}
-  }
+async function allocate(referalId, newUserId, referalSource, referalMedium) {
   if (referalId == null) {
-    return callback(null)
+    return null
   }
 
   const query = { referal_id: referalId }
-  User.findOne(query, { _id: 1 }, function (error, user) {
-    if (error != null) {
-      return callback(error)
-    }
-    if (user == null || user._id == null) {
-      return callback(null)
-    }
+  const user = await User.findOne(query, { _id: 1 }).exec()
+  if (user == null || user._id == null) {
+    return null
+  }
 
-    if (referalSource === 'bonus') {
-      User.updateOne(
+  if (referalSource === 'bonus') {
+    try {
+      await User.updateOne(
         query,
         {
           $push: {
@@ -37,27 +26,23 @@ function allocate(
             refered_user_count: 1,
           },
         },
-        {},
-        function (err) {
-          if (err != null) {
-            OError.tag(err, 'something went wrong allocating referal', {
-              referalId,
-              newUserId,
-            })
-            return callback(err)
-          }
-          FeaturesUpdater.refreshFeatures(user._id, 'referral', callback)
-        }
-      )
-    } else {
-      callback()
+        {}
+      ).exec()
+    } catch (err) {
+      OError.tag(err, 'something went wrong allocating referal', {
+        referalId,
+        newUserId,
+      })
+      throw err
     }
-  })
+
+    return await FeaturesUpdater.promises.refreshFeatures(user._id, 'referral')
+  }
 }
 
 module.exports = {
-  allocate,
+  allocate: callbackify(allocate),
   promises: {
-    allocate: promisify(allocate),
+    allocate,
   },
 }

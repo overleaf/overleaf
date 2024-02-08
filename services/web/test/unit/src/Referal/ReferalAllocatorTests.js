@@ -16,28 +16,30 @@ describe('ReferalAllocator', function () {
         '@overleaf/settings': (this.Settings = {}),
       },
     })
-    this.callback = sinon.stub()
     this.referal_id = 'referal-id-123'
     this.referal_medium = 'twitter'
     this.user_id = 'user-id-123'
     this.new_user_id = 'new-user-id-123'
-    this.FeaturesUpdater.refreshFeatures = sinon.stub().yields()
-    this.User.updateOne = sinon.stub().callsArgWith(3, null)
-    this.User.findOne = sinon
-      .stub()
-      .callsArgWith(2, null, { _id: this.user_id })
+    this.FeaturesUpdater.promises = {
+      refreshFeatures: sinon.stub().resolves(),
+    }
+    this.User.updateOne = sinon.stub().returns({
+      exec: sinon.stub().resolves(),
+    })
+    this.User.findOne = sinon.stub().returns({
+      exec: sinon.stub().resolves({ _id: this.user_id }),
+    })
   })
 
   describe('allocate', function () {
     describe('when the referal was a bonus referal', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.referal_source = 'bonus'
-        this.ReferalAllocator.allocate(
+        await this.ReferalAllocator.promises.allocate(
           this.referal_id,
           this.new_user_id,
           this.referal_source,
-          this.referal_medium,
-          this.callback
+          this.referal_medium
         )
       })
 
@@ -66,27 +68,24 @@ describe('ReferalAllocator', function () {
       })
 
       it("should refresh the user's subscription", function () {
-        this.FeaturesUpdater.refreshFeatures
+        this.FeaturesUpdater.promises.refreshFeatures
           .calledWith(this.user_id)
           .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
       })
     })
 
     describe('when there is no user for the referal id', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.referal_source = 'bonus'
         this.referal_id = 'wombat'
-        this.User.findOne = sinon.stub().callsArgWith(2, null, null)
-        this.ReferalAllocator.allocate(
+        this.User.findOne = sinon.stub().returns({
+          exec: sinon.stub().resolves(null),
+        })
+        await this.ReferalAllocator.promises.allocate(
           this.referal_id,
           this.new_user_id,
           this.referal_source,
-          this.referal_medium,
-          this.callback
+          this.referal_medium
         )
       })
 
@@ -101,23 +100,18 @@ describe('ReferalAllocator', function () {
       })
 
       it('should not assign the user a bonus', function () {
-        this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+        this.FeaturesUpdater.promises.refreshFeatures.called.should.equal(false)
       })
     })
 
     describe('when the referal is not a bonus referal', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.referal_source = 'public_share'
-        this.ReferalAllocator.allocate(
+        await this.ReferalAllocator.promises.allocate(
           this.referal_id,
           this.new_user_id,
           this.referal_source,
-          this.referal_medium,
-          this.callback
+          this.referal_medium
         )
       })
 
@@ -132,11 +126,7 @@ describe('ReferalAllocator', function () {
       })
 
       it('should not assign the user a bonus', function () {
-        this.FeaturesUpdater.refreshFeatures.called.should.equal(false)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+        this.FeaturesUpdater.promises.refreshFeatures.called.should.equal(false)
       })
     })
   })
