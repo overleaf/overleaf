@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import ChatPane from '../js/features/chat/components/chat-pane'
 import useFetchMock from './hooks/use-fetch-mock'
 import { generateMessages } from './fixtures/chat-messages'
@@ -47,23 +46,5 @@ export default {
   args: {
     resetUnreadMessages: () => {},
   },
-  decorators: [
-    ScopeDecorator,
-    Story => {
-      useEffect(() => {
-        window.MathJax = {
-          Hub: {
-            Queue: () => {},
-            config: { tex2jax: { inlineMath: [['$', '$']] } },
-          },
-        }
-
-        return () => {
-          delete window.MathJax
-        }
-      }, [])
-
-      return <Story />
-    },
-  ],
+  decorators: [ScopeDecorator],
 }

@@ -1,7 +1,6 @@
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-const querystring = require('querystring')
 const _ = require('lodash')
 const { URL } = require('url')
 const Path = require('path')
@@ -186,14 +185,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       return chunks.map(chunk => staticFilesBase + chunk)
     }
 
-    res.locals.mathJaxPath = `/js/libs/mathjax/MathJax.js?${querystring.stringify(
-      {
-        config: 'TeX-AMS_HTML,Safe',
-        v: PackageVersions.version.mathjax,
-      }
-    )}`
-
-    res.locals.mathJax3Path = `/js/libs/mathjax-3-${PackageVersions.version['mathjax-3']}/es5/tex-svg-full.js`
+    res.locals.mathJaxPath = `/js/libs/mathjax-${PackageVersions.version.mathjax}/es5/tex-svg-full.js`
 
     res.locals.lib = PackageVersions.lib
 

@@ -1,7 +1,5 @@
 const version = {
-  // Upgrade instructions: https://github.com/overleaf/write_latex/wiki/Upgrading-Ace
-  mathjax: '2.7.9',
-  'mathjax-3': '3.2.2',
+  mathjax: '3.2.2',
 }
 
 module.exports = {

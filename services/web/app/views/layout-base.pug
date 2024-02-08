@@ -37,6 +37,7 @@ html(
 			//- Configure dynamically loaded assets (via webpack) to be downloaded from CDN
 			//- See: https://webpack.js.org/guides/public-path/#on-the-fly
 			meta(name="ol-baseAssetPath" content=buildBaseAssetPath())
+			meta(name="ol-mathJaxPath" content=mathJaxPath)
 
 			meta(name="ol-usersEmail" content=getUserEmail())
 			meta(name="ol-ab" data-type="json" content={})

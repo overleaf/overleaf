@@ -24,9 +24,9 @@ window.MathJax = {
 
 export const interceptMathJax = () => {
   // NOTE: this is just a URL to be intercepted with the stub, not the real (versioned) MathJax URL
-  const url = '/js/libs/mathjax-3/es5/tex-svg-full.js'
+  const url = '/js/libs/mathjax/es5/tex-svg-full.js'
   cy.window().then(win => {
-    win.metaAttributesCache.set('ol-mathJax3Path', url)
+    win.metaAttributesCache.set('ol-mathJaxPath', url)
   })
   cy.intercept('GET', url, MATHJAX_STUB).as('mathjax-load-request')
 }
