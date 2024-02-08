@@ -3,6 +3,7 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const LinkedFilesController = require('./LinkedFilesController')
+const { validate, Joi } = require('../../infrastructure/Validation')
 
 const rateLimiters = {
   createLinkedFile: new RateLimiter('create-linked-file', {
@@ -23,6 +24,12 @@ module.exports = {
       AuthorizationMiddleware.ensureUserCanWriteProjectContent,
       RateLimiterMiddleware.rateLimit(rateLimiters.createLinkedFile, {
         params: ['project_id'],
+      }),
+      validate({
+        body: {
+          name: Joi.string().required(),
+          // TODO: validate the remaining properties
+        },
       }),
       LinkedFilesController.createLinkedFile
     )
