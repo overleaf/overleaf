@@ -1050,6 +1050,7 @@
   "revoke_invite": "",
   "right": "",
   "role": "",
+  "saml_audience_mismatch_error": "",
   "saml_auth_error": "",
   "saml_identity_exists_error": "",
   "saml_invalid_signature_error": "",
