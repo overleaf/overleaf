@@ -6,7 +6,7 @@ module.exports = {
     const userId = SessionManager.getLoggedInUserId(req.session)
     ReferalHandler.getReferedUsers(
       userId,
-      (err, referedUsers, referedUserCount) => {
+      (err, { referedUsers, referedUserCount }) => {
         if (err) {
           next(err)
         } else {
