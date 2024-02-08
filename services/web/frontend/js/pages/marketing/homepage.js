@@ -27,9 +27,11 @@ function realTimeEditsDemo() {
 
   nextFrame()
 }
-realTimeEditsDemo()
+if (document.querySelector('.real-time-example')) {
+  realTimeEditsDemo()
+}
 
-function homepageAnimation() {
+function homepageAnimation(homepageAnimationEl) {
   function createFrames(word, { buildTime, holdTime, breakTime }) {
     const frames = []
     let current = ''
@@ -50,7 +52,7 @@ function homepageAnimation() {
     }
 
     // Add the final frame with an empty string
-    frames.push({ before: '', time: holdTime })
+    frames.push({ before: '', time: breakTime })
 
     return frames
   }
@@ -62,11 +64,14 @@ function homepageAnimation() {
   }
 
   const frames = [
+    // 1.5s pause before starting
+    { before: '', time: 1500 },
     ...createFrames('articles', opts),
     ...createFrames('theses', opts),
     ...createFrames('reports', opts),
     ...createFrames('presentations', opts),
-    ...createFrames('anything', opts),
+    // 5s pause on 'anything' frame
+    ...createFrames('anything', { ...opts, holdTime: 5000 }),
   ]
 
   let index = 0
@@ -74,10 +79,22 @@ function homepageAnimation() {
     const frame = frames[index]
     index = (index + 1) % frames.length
 
-    $('#home-animation-text').html(frame.before)
+    homepageAnimationEl.innerHTML = frame.before
     setTimeout(nextFrame, frame.time)
   }
 
   nextFrame()
 }
-homepageAnimation()
+
+const homepageAnimationEl = document.querySelector('#home-animation-text')
+const reducedMotionReduce = window.matchMedia(
+  '(prefers-reduced-motion: reduce)'
+)
+
+if (homepageAnimationEl) {
+  if (reducedMotionReduce.matches) {
+    homepageAnimationEl.innerHTML = 'anything'
+  } else {
+    homepageAnimation(homepageAnimationEl)
+  }
+}
