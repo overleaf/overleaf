@@ -63,7 +63,7 @@ describe('Project creation and compilation', function () {
       cy.findByText('Create').click()
     })
     // FIXME: should be aria-labeled or data-test-id
-    cy.get('.file-tree').within(() => {
+    cy.get('.file-tree').first().within(() => {
       cy.findByText('frog.jpg').click()
     })
     cy.findByText('Another project')
@@ -100,9 +100,7 @@ describe('Project creation and compilation', function () {
     cy.findByText('Share').click()
     cy.findByRole('dialog').within(() => {
       cy.get('input').type('collaborator@example.com,')
-      // FIXME: Open an issue for this.
-      cy.get('button[type="submit"]').click({ force: true })
-      cy.get('button[type="submit"]').click({ force: true })
+      cy.findByText('Share').click({ force: true })
     })
 
     cy.visit('/project')
@@ -123,7 +121,7 @@ describe('Project creation and compilation', function () {
       cy.url().should('include', targetProjectId)
     })
 
-    cy.get('.file-tree').within(() => {
+    cy.get('.file-tree').first().within(() => {
       cy.findByText('frog.jpg').click()
     })
     cy.findByText('Another project')

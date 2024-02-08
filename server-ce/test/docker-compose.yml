@@ -9,7 +9,7 @@ services:
       redis:
         condition: service_started
     ports:
-      - 80:80
+      - 127.0.0.2:80:80
     links:
       - mongo
       - redis
@@ -50,7 +50,7 @@ services:
       - 6379
 
   e2e:
-    image: cypress/included:13.3.0
+    image: cypress/included:13.3.3
     links:
       - sharelatex
     working_dir: /e2e
@@ -59,6 +59,25 @@ services:
     environment:
       CYPRESS_BASE_URL: http://sharelatex
       SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
+    depends_on:
+      sharelatex:
+        condition: service_healthy
+
+  e2e-open:
+    image: cypress/included:13.3.3
+    entrypoint: npm
+    command: run cypress:open
+    links:
+      - sharelatex
+    working_dir: /e2e
+    volumes:
+      - ./:/e2e
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    user: "${DOCKER_USER:-1000:1000}"
+    environment:
+      CYPRESS_BASE_URL: http://sharelatex
+      SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
+      DISPLAY: ${DISPLAY:-:0}
     depends_on:
       sharelatex:
         condition: service_healthy
