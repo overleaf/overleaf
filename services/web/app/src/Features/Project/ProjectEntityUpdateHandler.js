@@ -204,11 +204,11 @@ const ProjectEntityUpdateHandler = {
             return callback(null, { rev })
           }
           // Don't need to block for marking as updated
-          ProjectUpdateHandler.markAsUpdated(
-            projectId,
-            lastUpdatedAt,
-            lastUpdatedBy
-          )
+          ProjectUpdateHandler.promises
+            .markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy)
+            .catch(error => {
+              logger.error({ error }, 'failed to mark project as updated')
+            })
           TpdsUpdateSender.addDoc(
             {
               projectId,
@@ -557,7 +557,11 @@ const ProjectEntityUpdateHandler = {
               if (error != null) {
                 return callback(error)
               }
-              ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
+              ProjectUpdateHandler.promises
+                .markAsUpdated(projectId, new Date(), userId)
+                .catch(error => {
+                  logger.error({ error }, 'failed to mark project as updated')
+                })
               callback(null, fileRef, folderId)
             }
           )
@@ -616,7 +620,11 @@ const ProjectEntityUpdateHandler = {
             if (err != null) {
               return callback(err)
             }
-            ProjectUpdateHandler.markAsUpdated(projectId, new Date(), userId)
+            ProjectUpdateHandler.promises
+              .markAsUpdated(projectId, new Date(), userId)
+              .catch(error => {
+                logger.error({ error }, 'failed to mark project as updated')
+              })
 
             DocumentUpdaterHandler.updateProjectStructure(
               projectId,

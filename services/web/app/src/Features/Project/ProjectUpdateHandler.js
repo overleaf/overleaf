@@ -1,24 +1,9 @@
-/* eslint-disable
-    n/handle-callback-err,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { Project } = require('../../models/Project')
-const logger = require('@overleaf/logger')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const { callbackify } = require('util')
 
 const ProjectUpdateHandler = {
-  markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    if (lastUpdatedAt == null) {
+  async markAsUpdated(projectId, lastUpdatedAt, lastUpdatedBy) {
+    if (!lastUpdatedAt) {
       lastUpdatedAt = new Date()
     }
 
@@ -31,59 +16,32 @@ const ProjectUpdateHandler = {
       lastUpdated: lastUpdatedAt || new Date().getTime(),
       lastUpdatedBy,
     }
-    Project.updateOne(conditions, update, {}, callback)
+    await Project.updateOne(conditions, update, {}).exec()
   },
 
-  // like markAsUpdated but allows lastUpdatedAt to be reset to earlier time
-  resetUpdated(projectId, lastUpdatedAt, lastUpdatedBy, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    if (lastUpdatedAt == null) {
-      lastUpdatedAt = new Date()
-    }
-
-    const conditions = {
-      _id: projectId,
-    }
-
-    const update = {
-      lastUpdated: lastUpdatedAt || new Date().getTime(),
-      lastUpdatedBy,
-    }
-    Project.updateOne(conditions, update, {}, callback)
-  },
-
-  markAsOpened(projectId, callback) {
+  async markAsOpened(projectId) {
     const conditions = { _id: projectId }
     const update = { lastOpened: Date.now() }
-    Project.updateOne(conditions, update, {}, function (err) {
-      if (callback != null) {
-        return callback()
-      }
-    })
+    await Project.updateOne(conditions, update, {}).exec()
   },
 
-  markAsInactive(projectId, callback) {
+  async markAsInactive(projectId) {
     const conditions = { _id: projectId }
     const update = { active: false }
-    Project.updateOne(conditions, update, {}, function (err) {
-      if (callback != null) {
-        return callback()
-      }
-    })
+    await Project.updateOne(conditions, update, {}).exec()
   },
 
-  markAsActive(projectId, callback) {
+  async markAsActive(projectId) {
     const conditions = { _id: projectId }
     const update = { active: true }
-    Project.updateOne(conditions, update, {}, function (err) {
-      if (callback != null) {
-        return callback()
-      }
-    })
+    await Project.updateOne(conditions, update, {}).exec()
   },
 }
 
-ProjectUpdateHandler.promises = promisifyAll(ProjectUpdateHandler)
-module.exports = ProjectUpdateHandler
+module.exports = {
+  markAsUpdated: callbackify(ProjectUpdateHandler.markAsUpdated),
+  markAsOpened: callbackify(ProjectUpdateHandler.markAsOpened),
+  markAsInactive: callbackify(ProjectUpdateHandler.markAsInactive),
+  markAsActive: callbackify(ProjectUpdateHandler.markAsActive),
+  promises: ProjectUpdateHandler,
+}

@@ -103,7 +103,9 @@ describe('ProjectEntityUpdateHandler', function () {
       findElementByPath: sinon.stub(),
     }
     this.ProjectUpdater = {
-      markAsUpdated: sinon.stub(),
+      promises: {
+        markAsUpdated: sinon.stub().resolves(),
+      },
     }
     this.ProjectEntityHandler = {
       getDoc: sinon.stub(),
@@ -244,7 +246,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
       it('should mark the project as updated', function () {
         sinon.assert.calledWith(
-          this.ProjectUpdater.markAsUpdated,
+          this.ProjectUpdater.promises.markAsUpdated,
           projectId,
           this.lastUpdatedAt,
           this.lastUpdatedBy
@@ -283,7 +285,7 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should not mark the project as updated', function () {
-        this.ProjectUpdater.markAsUpdated.called.should.equal(false)
+        this.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
       })
 
       it('should not send the doc the to the TPDS', function () {
@@ -326,7 +328,7 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should not mark the project as updated', function () {
-        this.ProjectUpdater.markAsUpdated.called.should.equal(false)
+        this.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
       })
 
       it('should not send the doc the to the TPDS', function () {
@@ -373,7 +375,7 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should not mark the project as updated', function () {
-        this.ProjectUpdater.markAsUpdated.called.should.equal(false)
+        this.ProjectUpdater.promises.markAsUpdated.called.should.equal(false)
       })
 
       it('should not send the doc the to the TPDS', function () {
@@ -658,7 +660,7 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should mark the project as updated', function () {
-        const args = this.ProjectUpdater.markAsUpdated.args[0]
+        const args = this.ProjectUpdater.promises.markAsUpdated.args[0]
         args[0].should.equal(projectId)
         args[1].should.exist
         args[2].should.equal(userId)
@@ -1066,7 +1068,7 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('should mark the project as updated', function () {
-        const args = this.ProjectUpdater.markAsUpdated.args[0]
+        const args = this.ProjectUpdater.promises.markAsUpdated.args[0]
         args[0].should.equal(projectId)
         args[1].should.exist
         args[2].should.equal(userId)
