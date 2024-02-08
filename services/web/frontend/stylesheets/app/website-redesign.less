@@ -265,41 +265,6 @@
         margin-top: 4px;
         display: block;
       }
-
-      ul {
-        list-style-type: none;
-        padding: 0;
-        margin: 0;
-
-        li {
-          margin-bottom: 12px;
-          font-size: 1.125rem;
-          line-height: 1.333;
-          // flex is needed in the case of "premium" label being on the same line
-          display: flex;
-
-          @media (max-width: @screen-sm-max) {
-            font-size: 1rem;
-            line-height: 1.375;
-
-            // only for label-premium that appears directly as a child of li
-            > .label-premium {
-              align-self: center;
-            }
-          }
-
-          h4 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 20px;
-            font-weight: 600;
-          }
-
-          p {
-            margin-bottom: 0;
-          }
-        }
-      }
     }
 
     .features-card-description {
@@ -314,6 +279,40 @@
       h3 {
         font-size: 1.875rem;
         line-height: 1.5;
+      }
+
+      ul.list-simple-text,
+      ul.list-heading-text {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin-bottom: 12px;
+          font-size: 1.125rem;
+          line-height: 1.333;
+          display: flex;
+
+          .label-premium {
+            margin-left: 0;
+          }
+
+          @media (max-width: @screen-sm-max) {
+            font-size: 1rem;
+            line-height: 1.375;
+          }
+        }
+      }
+
+      ul.list-heading-text {
+        li {
+          h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 20px;
+            font-weight: 600;
+          }
+        }
       }
     }
   }
@@ -859,20 +858,6 @@
   .circle-img {
     height: 64px;
     max-width: 64px;
-  }
-
-  .premium-badge {
-    .premium-badge-img {
-      margin-left: 10px;
-    }
-
-    @media (max-width: @screen-xs-max) {
-      display: flex;
-      .premium-badge-img {
-        width: 87px;
-        margin-left: auto;
-      }
-    }
   }
 
   .responsive-button-container {
