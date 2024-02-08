@@ -2,8 +2,10 @@
   "name": "@overleaf/ranges-tracker",
   "description": "Shared logic for syncing comments and tracked changes with operational transforms",
   "main": "index.cjs",
+  "types": "types/index.d.cts",
   "files": [
-    "index.cjs"
+    "index.cjs",
+    "types"
   ],
   "author": "Overleaf (https://www.overleaf.com)",
   "private": true,

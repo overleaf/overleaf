@@ -1,6 +1,6 @@
 // Migrated from static methods of Document in Document.js
 
-import { Document } from '@/features/ide-react/editor/document'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { debugConsole } from '@/utils/debugging'
 import { Socket } from '@/features/ide-react/connection/types/socket'
 import { IdeEventEmitter } from '@/features/ide-react/create-ide-event-emitter'
@@ -8,7 +8,7 @@ import { EventLog } from '@/features/ide-react/editor/event-log'
 import EditorWatchdogManager from '@/features/ide-react/connection/editor-watchdog-manager'
 
 export class OpenDocuments {
-  private openDocs = new Map<string, Document>()
+  private openDocs = new Map<string, DocumentContainer>()
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
@@ -44,7 +44,7 @@ export class OpenDocuments {
   }
 
   private createDoc(docId: string) {
-    const doc = new Document(
+    const doc = new DocumentContainer(
       docId,
       this.socket,
       this.globalEditorWatchdogManager,
@@ -55,7 +55,7 @@ export class OpenDocuments {
     this.openDocs.set(docId, doc)
   }
 
-  detachDoc(docId: string, doc: Document) {
+  detachDoc(docId: string, doc: DocumentContainer) {
     if (this.openDocs.get(docId) === doc) {
       debugConsole.log(
         `[detach] Removing document with ID (${docId}) from openDocs`

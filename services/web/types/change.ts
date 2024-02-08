@@ -1,36 +1,31 @@
+import { ThreadId } from './review-panel/review-panel'
+import { UserId } from './user'
+
 export interface Operation {
-  p: number
+  p: number // position
 }
 
 export interface InsertOperation extends Operation {
-  i: string
-  t: string
-}
-
-export interface ChangeOperation extends Operation {
-  c: string
-  t: string
+  i: string // inserted text
 }
 
 export interface DeleteOperation extends Operation {
-  d: string
+  d: string // deleted text
 }
 
 export interface CommentOperation extends Operation {
-  c: string
+  c: string // comment text
+  t: ThreadId // thread/comment id
 }
 
-export type NonCommentOperation =
-  | InsertOperation
-  | ChangeOperation
-  | DeleteOperation
+export type EditOperation = InsertOperation | DeleteOperation
 
-export type AnyOperation = NonCommentOperation | CommentOperation
+export type AnyOperation = EditOperation | CommentOperation
 
 export type Change<T extends AnyOperation = AnyOperation> = {
   id: string
   metadata?: {
-    user_id: string
+    user_id: UserId | null
     ts: Date
   }
   op: T

@@ -16,7 +16,7 @@ import EditorWatchdogManager from '@/features/ide-react/connection/editor-watchd
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 import { useConnectionContext } from '@/features/ide-react/context/connection-context'
 import { debugConsole } from '@/utils/debugging'
-import { Document } from '@/features/ide-react/editor/document'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { GotoLineOptions } from '@/features/ide-react/types/goto-line-options'
 import { Doc } from '../../../../../types/doc'
@@ -45,7 +45,7 @@ interface OpenDocOptions
 export type EditorManager = {
   getEditorType: () => EditorType | null
   showSymbolPalette: boolean
-  currentDocument: Document
+  currentDocument: DocumentContainer
   currentDocumentId: DocId | null
   getCurrentDocValue: () => string | null
   getCurrentDocId: () => DocId | null
@@ -73,7 +73,7 @@ function hasGotoOffset(options: OpenDocOptions): options is GotoOffsetOptions {
 export type EditorScopeValue = {
   showSymbolPalette: false
   toggleSymbolPalette: () => void
-  sharejs_doc: Document | null
+  sharejs_doc: DocumentContainer | null
   open_doc_id: string | null
   open_doc_name: string | null
   opening: boolean
@@ -101,7 +101,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   )
   const [showVisual] = useScopeValue<boolean>('editor.showVisual')
   const [currentDocument, setCurrentDocument] =
-    useScopeValue<Document>('editor.sharejs_doc')
+    useScopeValue<DocumentContainer>('editor.sharejs_doc')
   const [openDocId, setOpenDocId] = useScopeValue<DocId | null>(
     'editor.open_doc_id'
   )
@@ -140,7 +140,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   // prevents circular dependencies in useCallbacks
   const [docError, setDocError] = useState<{
     doc: Doc
-    document: Document
+    document: DocumentContainer
     error: Error | string
     meta?: Record<string, any>
     editorContent?: string
@@ -225,12 +225,12 @@ export const EditorManagerProvider: FC = ({ children }) => {
     [goToLineEmitter]
   )
 
-  const unbindFromDocumentEvents = (document: Document) => {
+  const unbindFromDocumentEvents = (document: DocumentContainer) => {
     document.off()
   }
 
   const attachErrorHandlerToDocument = useCallback(
-    (doc: Doc, document: Document) => {
+    (doc: Doc, document: DocumentContainer) => {
       document.on(
         'error',
         (
@@ -246,7 +246,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   )
 
   const bindToDocumentEvents = useCallback(
-    (doc: Doc, document: Document) => {
+    (doc: Doc, document: DocumentContainer) => {
       attachErrorHandlerToDocument(doc, document)
 
       document.on('externalUpdate', (update: Update) => {
@@ -276,7 +276,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const syncTimeoutRef = useRef<number | null>(null)
 
   const syncTrackChangesState = useCallback(
-    (doc: Document) => {
+    (doc: DocumentContainer) => {
       if (!doc) {
         return
       }
@@ -310,7 +310,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
   const doOpenNewDocument = useCallback(
     (doc: Doc) =>
-      new Promise<Document>((resolve, reject) => {
+      new Promise<DocumentContainer>((resolve, reject) => {
         debugConsole.log('[doOpenNewDocument] Opening...')
         const newDocument = openDocs.getDocument(doc._id)
         if (!newDocument) {
@@ -344,7 +344,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   )
 
   const openNewDocument = useCallback(
-    async (doc: Doc): Promise<Document> => {
+    async (doc: Doc): Promise<DocumentContainer> => {
       // Leave the current document
       //  - when we are opening a different new one, to avoid race conditions
       //     between leaving and joining the same document

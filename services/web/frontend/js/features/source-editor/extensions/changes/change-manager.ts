@@ -8,9 +8,12 @@ import {
 } from '../vertical-overflow'
 import { EditorSelection, EditorState } from '@codemirror/state'
 import { EditorView, ViewUpdate } from '@codemirror/view'
-import { CurrentDoc } from '../../../../../../types/current-doc'
 import { fullHeightCoordsAtPos } from '../../utils/layer'
 import { debounce } from 'lodash'
+import { Change, EditOperation } from '../../../../../../types/change'
+import { ThreadId } from '../../../../../../types/review-panel/review-panel'
+import { isDeleteOperation, isInsertOperation } from '@/utils/operations'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
 // With less than this number of entries, don't bother culling to avoid
 // little UI jumps when scrolling.
@@ -75,7 +78,7 @@ export type UpdateType =
 
 export const createChangeManager = (
   view: EditorView,
-  currentDoc: CurrentDoc
+  currentDoc: DocumentContainer
 ): ChangeManager => {
   /**
    * Calculate the screen coordinates of each entry (change or comment),
@@ -152,7 +155,7 @@ export const createChangeManager = (
   /**
    * Add a comment (thread) to the ShareJS doc when it's created
    */
-  const addComment = (offset: number, length: number, threadId: string) => {
+  const addComment = (offset: number, length: number, threadId: ThreadId) => {
     currentDoc.submitOp({
       c: view.state.doc.sliceString(offset, offset + length),
       p: offset,
@@ -164,14 +167,14 @@ export const createChangeManager = (
    * Remove a comment (thread) from the range tracker when it's deleted
    */
   const removeComment = (commentId: string) => {
-    currentDoc.ranges.removeCommentId(commentId)
+    currentDoc.ranges!.removeCommentId(commentId)
   }
 
   /**
    * Remove tracked changes from the range tracker when they're accepted
    */
   const acceptChanges = (changeIds: string[]) => {
-    currentDoc.ranges.removeChangeIds(changeIds)
+    currentDoc.ranges!.removeChangeIds(changeIds)
   }
 
   /**
@@ -179,7 +182,9 @@ export const createChangeManager = (
    * and restore the original content
    */
   const rejectChanges = (changeIds: string[]) => {
-    const changes: any[] = currentDoc.ranges.getChanges(changeIds)
+    const changes = currentDoc.ranges!.getChanges(
+      changeIds
+    ) as Change<EditOperation>[]
 
     if (changes.length === 0) {
       return {}
@@ -242,38 +247,30 @@ export const createChangeManager = (
     const changesToDispatch = changes.map(change => {
       const { op } = change
 
-      const opType = 'i' in op ? 'i' : 'c' in op ? 'c' : 'd'
+      if (isInsertOperation(op)) {
+        const from = op.p
+        const content = op.i
+        const to = from + content.length
 
-      switch (opType) {
-        case 'd': {
-          return {
-            from: op.p,
-            to: op.p,
-            insert: op.d,
-          }
+        const text = view.state.doc.sliceString(from, to)
+
+        if (text !== content) {
+          throw new Error(
+            `Op to be removed (${JSON.stringify(
+              change.op
+            )}) does not match editor text '${text}'`
+          )
         }
 
-        case 'i': {
-          const from = op.p
-          const content = op.i
-          const to = from + content.length
-
-          const text = view.state.doc.sliceString(from, to)
-
-          if (text !== content) {
-            throw new Error(
-              `Op to be removed (${JSON.stringify(
-                change.op
-              )}) does not match editor text '${text}'`
-            )
-          }
-
-          return { from, to, insert: '' }
+        return { from, to, insert: '' }
+      } else if (isDeleteOperation(op)) {
+        return {
+          from: op.p,
+          to: op.p,
+          insert: op.d,
         }
-
-        default: {
-          throw new Error(`unknown change: ${JSON.stringify(change)}`)
-        }
+      } else {
+        throw new Error(`unknown change type: ${JSON.stringify(change)}`)
       }
     })
 

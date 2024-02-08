@@ -21,15 +21,14 @@ import {
   StoredComment,
 } from './changes/comments'
 import { invertedEffects } from '@codemirror/commands'
-import { CurrentDoc } from '../../../../../types/current-doc'
 import { Change, DeleteOperation } from '../../../../../types/change'
 import { ChangeManager } from './changes/change-manager'
 import { debugConsole } from '@/utils/debugging'
+import { isCommentOperation, isDeleteOperation } from '@/utils/operations'
 import {
-  isChangeOperation,
-  isCommentOperation,
-  isDeleteOperation,
-} from '@/utils/operations'
+  DocumentContainer,
+  RangesTrackerWithResolvedThreadIds,
+} from '@/features/ide-react/editor/document-container'
 
 const clearChangesEffect = StateEffect.define()
 const buildChangesEffect = StateEffect.define()
@@ -46,7 +45,7 @@ const restoreDetachedCommentsEffect = StateEffect.define<RangeSet<any>>({
 })
 
 type Options = {
-  currentDoc: CurrentDoc
+  currentDoc: DocumentContainer
   loadingThreads: boolean
 }
 
@@ -182,7 +181,11 @@ export const buildChangeMarkers = () => {
   }
 }
 
-const buildChangeDecorations = (currentDoc: CurrentDoc) => {
+const buildChangeDecorations = (currentDoc: DocumentContainer) => {
+  if (!currentDoc.ranges) {
+    return Decoration.none
+  }
+
   const changes = [...currentDoc.ranges.changes, ...currentDoc.ranges.comments]
 
   const decorations = []
@@ -245,7 +248,7 @@ class ChangeCalloutWidget extends WidgetType {
   }
 }
 
-const createChangeRange = (change: Change, currentDoc: CurrentDoc) => {
+const createChangeRange = (change: Change, currentDoc: DocumentContainer) => {
   const { id, metadata, op } = change
 
   const from = op.p
@@ -273,14 +276,18 @@ const createChangeRange = (change: Change, currentDoc: CurrentDoc) => {
     return [calloutWidget.range(from, from), changeWidget.range(from, from)]
   }
 
-  if (isChangeOperation(op) && currentDoc.ranges.resolvedThreadIds[op.t]) {
+  const _isCommentOperation = isCommentOperation(op)
+
+  if (
+    _isCommentOperation &&
+    (currentDoc.ranges as RangesTrackerWithResolvedThreadIds)
+      .resolvedThreadIds![op.t]
+  ) {
     return []
   }
 
-  const isChangeOrCommentOperation =
-    isChangeOperation(op) || isCommentOperation(op)
-  const opType = isChangeOrCommentOperation ? 'c' : 'i'
-  const changedText = isChangeOrCommentOperation ? op.c : op.i
+  const opType = _isCommentOperation ? 'c' : 'i'
+  const changedText = _isCommentOperation ? op.c : op.i
   const to = from + changedText.length
 
   // Mark decorations must not be empty

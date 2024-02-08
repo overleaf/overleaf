@@ -1,11 +1,11 @@
 import { Range, RangeSet, RangeValue, Transaction } from '@codemirror/state'
-import { CurrentDoc } from '../../../../../../types/current-doc'
 import {
   AnyOperation,
   Change,
-  ChangeOperation,
   CommentOperation,
 } from '../../../../../../types/change'
+import { ThreadId } from '../../../../../../types/review-panel/review-panel'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
 export type StoredComment = {
   text: string
@@ -20,14 +20,14 @@ export type StoredComment = {
  * Find tracked comments within the range of the current transaction's changes
  */
 export const findCommentsInCut = (
-  currentDoc: CurrentDoc,
+  currentDoc: DocumentContainer,
   transaction: Transaction
 ) => {
   const items: StoredComment[] = []
 
   transaction.changes.iterChanges((fromA, toA) => {
-    const comments = currentDoc.ranges.comments
-      .filter(
+    const comments = currentDoc
+      .ranges!.comments.filter(
         comment =>
           fromA <= comment.op.p && comment.op.p + comment.op.c.length <= toA
       )
@@ -55,7 +55,7 @@ export const findCommentsInPaste = (
   storedComments: StoredComment[],
   transaction: Transaction
 ) => {
-  const ops: ChangeOperation[] = []
+  const ops: CommentOperation[] = []
 
   transaction.changes.iterChanges((fromA, toA, fromB, toB, inserted) => {
     const insertedText = inserted.toString()
@@ -71,7 +71,7 @@ export const findCommentsInPaste = (
         ops.push({
           c: text,
           p: fromB + offset,
-          t: comment.id,
+          t: comment.id as ThreadId,
         })
       }
     }
@@ -93,13 +93,13 @@ class CommentRangeValue extends RangeValue {
  * Find tracked comments with no content with the ranges of a transaction's changes
  */
 export const findDetachedCommentsInChanges = (
-  currentDoc: CurrentDoc,
+  currentDoc: DocumentContainer,
   transaction: Transaction
 ) => {
   const items: Range<CommentRangeValue>[] = []
 
   transaction.changes.iterChanges((fromA, toA) => {
-    for (const comment of currentDoc.ranges.comments) {
+    for (const comment of currentDoc.ranges!.comments) {
       const content = comment.op.c
 
       // TODO: handle comments that were never attached
@@ -124,7 +124,7 @@ export const findDetachedCommentsInChanges = (
  * (used when restoring comments on paste)
  */
 const submitOps = (
-  currentDoc: CurrentDoc,
+  currentDoc: DocumentContainer,
   ops: AnyOperation[],
   transaction: Transaction
 ) => {
@@ -133,14 +133,14 @@ const submitOps = (
   }
 
   // Check that comments still match text. Will throw error if not.
-  currentDoc.ranges.validate(transaction.state.doc.toString())
+  currentDoc.ranges!.validate(transaction.state.doc.toString())
 }
 
 /**
  * Wait for the ShareJS doc to fire an event, then submit the operations.
  */
 const submitOpsAfterEvent = (
-  currentDoc: CurrentDoc,
+  currentDoc: DocumentContainer,
   eventName: string,
   ops: AnyOperation[],
   transaction: Transaction
@@ -161,7 +161,7 @@ const submitOpsAfterEvent = (
  * Look through the comments stored on cut, and restore those in text that matches the pasted text.
  */
 export const restoreCommentsOnPaste = (
-  currentDoc: CurrentDoc,
+  currentDoc: DocumentContainer,
   transaction: Transaction,
   storedComments: StoredComment[]
 ) => {
@@ -183,18 +183,18 @@ export const restoreCommentsOnPaste = (
  * When undoing a change, find comments from the original content and restore them.
  */
 export const restoreDetachedComments = (
-  currentDoc: CurrentDoc,
+  currentDoc: DocumentContainer,
   transaction: Transaction,
   storedComments: RangeSet<any>
 ) => {
-  const ops: ChangeOperation[] = []
+  const ops: CommentOperation[] = []
 
   const cursor = storedComments.iter()
 
   while (cursor.value) {
     const { id } = cursor.value.comment
 
-    const comment = currentDoc.ranges.comments.find(item => item.id === id)
+    const comment = currentDoc.ranges!.comments.find(item => item.id === id)
 
     // check that the comment still exists and is detached
     if (comment && comment.op.c === '') {

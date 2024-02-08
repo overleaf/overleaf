@@ -1,9 +1,9 @@
 import { Prec, Transaction, Annotation, ChangeSpec } from '@codemirror/state'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EventEmitter } from 'events'
-import { CurrentDoc } from '../../../../../types/current-doc'
 import { ShareDoc } from '../../../../../types/share-doc'
 import { debugConsole } from '@/utils/debugging'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
 /*
  * Integrate CodeMirror 6 with the real-time system, via ShareJS.
@@ -34,7 +34,7 @@ export type ChangeDescription = {
  * A custom extension that connects the CodeMirror 6 editor to the currently open ShareJS document.
  */
 export const realtime = (
-  { currentDoc }: { currentDoc: CurrentDoc },
+  { currentDoc }: { currentDoc: DocumentContainer },
   handleError: (error: Error) => void
 ) => {
   const realtimePlugin = ViewPlugin.define(view => {

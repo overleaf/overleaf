@@ -1,11 +1,6 @@
-/* eslint-disable
-    camelcase,
-    n/handle-callback-err,
-    max-len,
-*/
+/* eslint-disable camelcase */
 // Migrated from services/web/frontend/js/ide/editor/Document.js
 
-// @ts-ignore
 import RangesTracker from '@overleaf/ranges-tracker'
 import { ShareJsDoc } from './share-js-doc'
 import { debugConsole } from '@/utils/debugging'
@@ -19,6 +14,7 @@ import {
   AnyOperation,
   Change,
   CommentOperation,
+  EditOperation,
 } from '../../../../../types/change'
 import {
   isCommentOperation,
@@ -31,6 +27,7 @@ import {
   TrackChangesIdSeeds,
   Version,
 } from '@/features/ide-react/editor/types/document'
+import { ThreadId } from '../../../../../types/review-panel/review-panel'
 
 const MAX_PENDING_OP_SIZE = 64
 
@@ -79,11 +76,22 @@ function getShareJsOpSize(shareJsOp: ShareJsOperation) {
   return shareJsOp.reduce((total, op) => total + getOpSize(op), 0)
 }
 
-export class Document extends EventEmitter {
+// TODO: define these in RangesTracker
+type _RangesTracker = Omit<RangesTracker, 'changes' | 'comments'> & {
+  changes: Change<EditOperation>[]
+  comments: Change<CommentOperation>[]
+  track_changes?: boolean
+}
+
+export type RangesTrackerWithResolvedThreadIds = _RangesTracker & {
+  resolvedThreadIds: Record<ThreadId, boolean>
+}
+
+export class DocumentContainer extends EventEmitter {
   private connected: boolean
   private wantToBeJoined = false
   private chaosMonkeyTimer: number | null = null
-  private track_changes_as: string | null = null
+  public track_changes_as: string | null = null
 
   private joinCallbacks: JoinCallback[] = []
   private leaveCallbacks: LeaveCallback[] = []
@@ -91,7 +99,9 @@ export class Document extends EventEmitter {
   doc?: ShareJsDoc
   cm6?: EditorFacade
   oldInflightOp?: ShareJsOperation
-  ranges: RangesTracker
+
+  ranges?: _RangesTracker | RangesTrackerWithResolvedThreadIds
+
   joined = false
 
   // This is set and read in useCodeMirrorScope
@@ -103,7 +113,7 @@ export class Document extends EventEmitter {
     private readonly globalEditorWatchdogManager: EditorWatchdogManager,
     private readonly ideEventEmitter: IdeEventEmitter,
     private readonly eventLog: EventLog,
-    private readonly detachDoc: (docId: string, doc: Document) => void
+    private readonly detachDoc: (docId: string, doc: DocumentContainer) => void
   ) {
     super()
     this.connected = this.socket.socket.connected
@@ -675,18 +685,18 @@ export class Document extends EventEmitter {
     let track_changes_as = null
     const remote_op = msg != null
     if (remote_op && msg?.meta.tc) {
-      old_id_seed = this.ranges.getIdSeed()
-      this.ranges.setIdSeed(msg.meta.tc)
+      old_id_seed = this.ranges!.getIdSeed()
+      this.ranges!.setIdSeed(msg.meta.tc)
       track_changes_as = msg.meta.user_id
     } else if (!remote_op && this.track_changes_as != null) {
       track_changes_as = this.track_changes_as
     }
-    this.ranges.track_changes = track_changes_as != null
+    this.ranges!.track_changes = track_changes_as != null
     for (const op of this.filterOps(ops)) {
-      this.ranges.applyOp(op, { user_id: track_changes_as })
+      this.ranges!.applyOp(op, { user_id: track_changes_as })
     }
     if (old_id_seed != null) {
-      this.ranges.setIdSeed(old_id_seed)
+      this.ranges!.setIdSeed(old_id_seed)
     }
     if (remote_op) {
       // With remote ops, the editor hasn't been updated when we receive this
@@ -697,7 +707,10 @@ export class Document extends EventEmitter {
     }
   }
 
-  private catchUpRanges(changes: Change[], comments: CommentOperation[]) {
+  private catchUpRanges(
+    changes: Change<EditOperation>[],
+    comments: Change<CommentOperation>[]
+  ) {
     // We've just been given the current server's ranges, but need to apply any local ops we have.
     // Reset to the server state then apply our local ops again.
     if (changes == null) {
@@ -707,16 +720,16 @@ export class Document extends EventEmitter {
       comments = []
     }
     this.emit('ranges:clear')
-    this.ranges.changes = changes
-    this.ranges.comments = comments
-    this.ranges.track_changes = this.doc?.track_changes
+    this.ranges!.changes = changes
+    this.ranges!.comments = comments
+    this.ranges!.track_changes = this.doc?.track_changes
     for (const op of this.filterOps(this.doc?.getInflightOp() || [])) {
-      this.ranges.setIdSeed(this.doc?.track_changes_id_seeds?.inflight)
-      this.ranges.applyOp(op, { user_id: this.track_changes_as })
+      this.ranges!.setIdSeed(this.doc?.track_changes_id_seeds?.inflight)
+      this.ranges!.applyOp(op, { user_id: this.track_changes_as })
     }
     for (const op of this.filterOps(this.doc?.getPendingOp() || [])) {
-      this.ranges.setIdSeed(this.doc?.track_changes_id_seeds?.pending)
-      this.ranges.applyOp(op, { user_id: this.track_changes_as })
+      this.ranges!.setIdSeed(this.doc?.track_changes_id_seeds?.pending)
+      this.ranges!.applyOp(op, { user_id: this.track_changes_as })
     }
     return this.emit('ranges:redraw')
   }

@@ -47,7 +47,6 @@ import {
 import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
 import { EditorView } from '@codemirror/view'
-import { CurrentDoc } from '../../../../../types/current-doc'
 import { useErrorHandler } from 'react-error-boundary'
 import { setVisual } from '../extensions/visual/visual'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
@@ -56,6 +55,7 @@ import { setDocName } from '@/features/source-editor/extensions/doc-name'
 import isValidTexFile from '@/main/is-valid-tex-file'
 import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 
 function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
@@ -71,7 +71,9 @@ function useCodeMirrorScope(view: EditorView) {
 
   const [loadingThreads] = useScopeValue<boolean>('loadingThreads')
 
-  const [currentDoc] = useScopeValue<CurrentDoc | null>('editor.sharejs_doc')
+  const [currentDoc] = useScopeValue<DocumentContainer | null>(
+    'editor.sharejs_doc'
+  )
   const [docName] = useScopeValue<string>('editor.open_doc_name')
   const [trackChanges] = useScopeValue<boolean>('editor.trackChanges')
 

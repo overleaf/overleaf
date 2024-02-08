@@ -27,7 +27,6 @@ import { debugConsole } from '@/utils/debugging'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import ColorManager from '@/ide/colors/ColorManager'
-// @ts-ignore
 import RangesTracker from '@overleaf/ranges-tracker'
 import * as ReviewPanel from '../types/review-panel-state'
 import {
@@ -61,6 +60,12 @@ import {
   ReviewPanelCommentThreadsApi,
 } from '../../../../../../../types/review-panel/api'
 import { DateString } from '../../../../../../../types/helpers/date'
+import {
+  Change,
+  CommentOperation,
+  EditOperation,
+} from '../../../../../../../types/change'
+import { RangesTrackerWithResolvedThreadIds } from '@/features/ide-react/editor/document-container'
 
 const dispatchReviewPanelEvent = (type: string, payload?: any) => {
   window.dispatchEvent(
@@ -251,7 +256,9 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       })
   }, [loadThreadsController.signal, projectId, setLoadingThreads])
 
-  const rangesTrackers = useRef<Record<DocId, RangesTracker>>({})
+  const rangesTrackers = useRef<
+    Record<DocId, RangesTrackerWithResolvedThreadIds>
+  >({})
   const refreshingRangeUsers = useRef(false)
   const refreshedForUserIds = useRef(new Set<UserId>())
   const refreshChangeUsers = useCallback(
@@ -299,12 +306,14 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
   const getChangeTracker = useCallback(
     (docId: DocId) => {
       if (!rangesTrackers.current[docId]) {
-        rangesTrackers.current[docId] = new RangesTracker()
-        rangesTrackers.current[docId].resolvedThreadIds = {
-          ...resolvedThreadIds,
-        }
+        const rangesTracker = new RangesTracker([], [])
+        ;(
+          rangesTracker as RangesTrackerWithResolvedThreadIds
+        ).resolvedThreadIds = { ...resolvedThreadIds }
+        rangesTrackers.current[docId] =
+          rangesTracker as RangesTrackerWithResolvedThreadIds
       }
-      return rangesTrackers.current[docId]
+      return rangesTrackers.current[docId]!
     },
     [resolvedThreadIds]
   )
@@ -435,17 +444,18 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
 
       if (!loadingThreadsInProgressRef.current) {
         for (const comment of rangesTracker.comments) {
-          deleteChanges.delete(comment.id)
+          const commentId = comment.id as ThreadId
+          deleteChanges.delete(commentId)
 
           let newComment: any
           if (localResolvedThreadIds[comment.op.t]) {
-            docResolvedComments[comment.id] ??= {} as ReviewPanelCommentEntry
-            newComment = docResolvedComments[comment.id]
-            delete docEntries[comment.id]
+            docResolvedComments[commentId] ??= {} as ReviewPanelCommentEntry
+            newComment = docResolvedComments[commentId]
+            delete docEntries[commentId]
           } else {
-            docEntries[comment.id] ??= {} as ReviewPanelEntry
-            newComment = docEntries[comment.id]
-            delete docResolvedComments[comment.id]
+            docEntries[commentId] ??= {} as ReviewPanelEntry
+            newComment = docEntries[commentId]
+            delete docResolvedComments[commentId]
           }
 
           newComment.type = 'comment'
@@ -505,10 +515,12 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     }
     // The open doc range tracker is kept up to date in real-time so
     // replace any outdated info with this
+    const rangesTracker = currentDocument.ranges!
+    ;(rangesTracker as RangesTrackerWithResolvedThreadIds).resolvedThreadIds = {
+      ...resolvedThreadIds,
+    }
     rangesTrackers.current[currentDocument.doc_id as DocId] =
-      currentDocument.ranges
-    rangesTrackers.current[currentDocument.doc_id as DocId].resolvedThreadIds =
-      { ...resolvedThreadIds }
+      rangesTracker as RangesTrackerWithResolvedThreadIds
     currentDocument.on('flipped_pending_to_inflight', () =>
       regenerateTrackChangesId(currentDocument)
     )
@@ -1034,8 +1046,8 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     type Doc = {
       id: DocId
       ranges: {
-        comments?: unknown[]
-        changes?: unknown[]
+        comments?: Change<CommentOperation>[]
+        changes?: Change<EditOperation>[]
       }
     }
 
@@ -1119,7 +1131,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
       }
 
       const { offset, length } = addCommentEntry
-      const threadId = RangesTracker.generateId()
+      const threadId = RangesTracker.generateId() as ThreadId
       setCommentThreads(prevState => ({
         ...prevState,
         [threadId]: { ...getThread(threadId), submitting: true },
