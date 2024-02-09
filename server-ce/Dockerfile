@@ -41,14 +41,14 @@ ADD server-ce/runit /etc/service
 # Configure nginx
 # ---------------
 ADD server-ce/nginx/nginx.conf.template /etc/nginx/templates/nginx.conf.template
-ADD server-ce/nginx/sharelatex.conf /etc/nginx/sites-enabled/sharelatex.conf
+ADD server-ce/nginx/overleaf.conf /etc/nginx/sites-enabled/overleaf.conf
 ADD server-ce/nginx/clsi-nginx.conf /etc/nginx/sites-enabled/clsi-nginx.conf
 
 
 # Configure log rotation
 # ----------------------
-ADD server-ce/logrotate/sharelatex /etc/logrotate.d/sharelatex
-RUN chmod 644 /etc/logrotate.d/sharelatex
+ADD server-ce/logrotate/overleaf /etc/logrotate.d/overleaf
+RUN chmod 644 /etc/logrotate.d/overleaf
 
 # Configure cron tasks
 # ----------------------
@@ -65,7 +65,7 @@ COPY server-ce/init_preshutdown_scripts/ /etc/my_init.pre_shutdown.d/
 
 # Copy app settings files
 # -----------------------
-COPY server-ce/config/settings.js /etc/sharelatex/settings.js
+COPY server-ce/config/settings.js /etc/overleaf/settings.js
 
 # Copy history-v1 files
 # -----------------------
@@ -79,12 +79,12 @@ RUN chmod +x /usr/local/bin/grunt
 
 # File that controls open|closed status of the site
 # -------------------------------------------------
-ENV SITE_MAINTENANCE_FILE "/etc/sharelatex/site_status"
+ENV SITE_MAINTENANCE_FILE "/etc/overleaf/site_status"
 RUN touch $SITE_MAINTENANCE_FILE
 
 # Set Environment Variables
 # --------------------------------
-ENV OVERLEAF_CONFIG /etc/sharelatex/settings.js
+ENV OVERLEAF_CONFIG /etc/overleaf/settings.js
 
 ENV WEB_API_USER "overleaf"
 ENV ADMIN_PRIVILEGE_AVAILABLE "true"

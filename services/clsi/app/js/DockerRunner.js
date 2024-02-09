@@ -42,9 +42,9 @@ const DockerRunner = {
         'altering bind path for sibling containers'
       )
       // Server Pro, example:
-      //   '/var/lib/sharelatex/data/compiles/<project-id>'
+      //   '/var/lib/overleaf/data/compiles/<project-id>'
       //   ... becomes ...
-      //   '/opt/sharelatex_data/data/compiles/<project-id>'
+      //   '/opt/overleaf_data/data/compiles/<project-id>'
       directory = Path.join(
         Settings.path.sandboxedCompilesHostDir,
         Path.basename(directory)

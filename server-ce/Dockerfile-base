@@ -6,7 +6,7 @@ FROM phusion/baseimage:focal-1.2.0
 
 # Makes sure LuaTex cache is writable
 # -----------------------------------
-ENV TEXMFVAR=/var/lib/sharelatex/tmp/texmf-var
+ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
 
 # Update to ensure dependencies are updated
 # ------------------------------------------
@@ -74,12 +74,12 @@ RUN mkdir /install-tl-unx \
 &&  rm -rf /install-tl-unx
 
 
-# Set up sharelatex user and home directory
+# Set up overleaf user and home directory
 # -----------------------------------------
-RUN adduser --system --group --home /overleaf --no-create-home sharelatex && \
-	mkdir -p /var/lib/sharelatex && \
-	chown www-data:www-data /var/lib/sharelatex && \
-	mkdir -p /var/log/sharelatex && \
-	chown www-data:www-data /var/log/sharelatex && \
-	mkdir -p /var/lib/sharelatex/data/template_files && \
-	chown www-data:www-data /var/lib/sharelatex/data/template_files
+RUN adduser --system --group --home /overleaf --no-create-home overleaf && \
+	mkdir -p /var/lib/overleaf && \
+	chown www-data:www-data /var/lib/overleaf && \
+	mkdir -p /var/log/overleaf && \
+	chown www-data:www-data /var/log/overleaf && \
+	mkdir -p /var/lib/overleaf/data/template_files && \
+	chown www-data:www-data /var/lib/overleaf/data/template_files

@@ -44,8 +44,8 @@ const parseIntOrFail = function (value) {
   return parsedValue
 }
 
-const DATA_DIR = '/var/lib/sharelatex/data'
-const TMP_DIR = '/var/lib/sharelatex/tmp'
+const DATA_DIR = '/var/lib/overleaf/data'
+const TMP_DIR = '/var/lib/overleaf/tmp'
 
 const settings = {
   clsi: {

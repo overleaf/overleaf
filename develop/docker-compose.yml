@@ -148,7 +148,7 @@ services:
       - SHARELATEX_ALLOW_PUBLIC_ACCESS=true
     command: ["node", "app.js"]
     volumes:
-      - sharelatex-data:/var/lib/sharelatex
+      - sharelatex-data:/var/lib/overleaf
       - web-data:/overleaf/services/web/data
     depends_on:
       - mongo

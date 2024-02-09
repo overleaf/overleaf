@@ -18,7 +18,7 @@ services:
             - redis
         stop_grace_period: 60s
         volumes:
-            - ~/sharelatex_data:/var/lib/sharelatex
+            - ~/sharelatex_data:/var/lib/overleaf
             ########################################################################
             ####  Server Pro: Uncomment the following line to mount the docker  ####
             ####             socket, required for Sibling Containers to work    ####
@@ -45,7 +45,7 @@ services:
 
             # temporary fix for LuaLaTex compiles
             # see https://github.com/overleaf/overleaf/issues/695
-            TEXMFVAR: /var/lib/sharelatex/tmp/texmf-var
+            TEXMFVAR: /var/lib/overleaf/tmp/texmf-var
 
             ## Set for SSL via nginx-proxy
             #VIRTUAL_HOST: 103.112.212.22
@@ -147,4 +147,4 @@ services:
     #       - "443:443"
     #     volumes:
     #       - /var/run/docker.sock:/tmp/docker.sock:ro
-    #       - /home/sharelatex/tmp:/etc/nginx/certs
+    #       - /home/overleaf/tmp:/etc/nginx/certs

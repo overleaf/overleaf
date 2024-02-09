@@ -12,13 +12,13 @@
   },
   "mongo": {},
   "blobStore": {
-    "globalBucket": "/var/lib/sharelatex/data/history/overleaf-global-blobs",
-    "projectBucket": "/var/lib/sharelatex/data/history/overleaf-project-blobs"
+    "globalBucket": "/var/lib/overleaf/data/history/overleaf-global-blobs",
+    "projectBucket": "/var/lib/overleaf/data/history/overleaf-project-blobs"
   },
   "chunkStore": {
-    "bucket": "/var/lib/sharelatex/data/history/overleaf-chunks"
+    "bucket": "/var/lib/overleaf/data/history/overleaf-chunks"
   },
   "zipStore": {
-    "bucket": "/var/lib/sharelatex/data/history/overleaf-zips"
+    "bucket": "/var/lib/overleaf/data/history/overleaf-zips"
   }
 }

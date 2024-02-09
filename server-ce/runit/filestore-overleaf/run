@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /sbin/setuser www-data /usr/bin/node /overleaf/services/filestore/app.js >> /var/log/overleaf/filestore.log 2>&1

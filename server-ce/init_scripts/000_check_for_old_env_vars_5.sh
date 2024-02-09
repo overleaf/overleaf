@@ -32,6 +32,7 @@ $OLD_ITEMS
     github.com/overleaf/toolkit$ bin/upgrade
     github.com/overleaf/toolkit$ bin/rename-env-vars-5-0.sh
 
+
   Legacy docker compose setups/Horizontal scaling setups:
 
     github.com/overleaf/overleaf$ git pull
@@ -40,12 +41,13 @@ $OLD_ITEMS
     # When using a docker-compose.override.yml file (or other file name):
     github.com/overleaf/overleaf$ server-ce/bin/rename-env-vars-5-0.sh docker-compose.override.yml
 
+
   Other deployment methods:
 
     Try using the docker compose script or get in touch with support.
 
 
-  Refusing to startup, existing in 10s.
+  Refusing to startup, exiting in 10s.
 
 ------------------------------------------------------------------------
 EOF
