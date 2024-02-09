@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
@@ -13,9 +13,14 @@ export default function PdfLogEntryRawContent({
   const [expanded, setExpanded] = useState(false)
   const [needsExpander, setNeedsExpander] = useState(false)
 
-  const { elementRef } = useResizeObserver(element => {
-    setNeedsExpander(element.scrollHeight > collapsedSize)
-  })
+  const { elementRef } = useResizeObserver(
+    useCallback(
+      element => {
+        setNeedsExpander(element.scrollHeight > collapsedSize)
+      },
+      [collapsedSize]
+    )
+  )
 
   const { t } = useTranslation()
 
