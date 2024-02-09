@@ -30,7 +30,7 @@
     "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
   },
   "mongo": {
-    "uri": "MONGO_CONNECTION_STRING"
+    "uri": "OVERLEAF_MONGO_URL"
   },
   "basicHttpAuth": {
     "password": "STAGING_PASSWORD",
