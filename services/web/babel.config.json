@@ -12,7 +12,15 @@
           // Exclude objectSpread polyfill, as it's not needed and affects performance
           "@babel/plugin-transform-object-rest-spread",
           // Exclude _defineProperty polyfill, as it causes a bug without the objectSpread polyfill
-          "@babel/plugin-transform-computed-properties"
+          "@babel/plugin-transform-computed-properties",
+          // Use native async functions, for performance
+          "@babel/plugin-transform-async-to-generator",
+          // Use native generators, for performance
+          "@babel/plugin-transform-regenerator",
+          // Use native async generators, for performance
+          "@babel/plugin-transform-async-generator-functions",
+          // Use native for-of loops, for performance
+          "@babel/plugin-transform-for-of"
         ]
       }
     ],
