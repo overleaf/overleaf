@@ -167,6 +167,7 @@ describe('EditorHttpController', function () {
     beforeEach(function () {
       this.req.params = { Project_id: this.project._id }
       this.req.query = { user_id: this.user._id }
+      this.req.body = { userId: this.user._id }
     })
 
     describe('successfully', function () {
@@ -251,6 +252,10 @@ describe('EditorHttpController', function () {
       beforeEach(function (done) {
         this.token = 'token'
         this.TokenAccessHandler.getRequestToken.returns(this.token)
+        this.req.body = {
+          userId: 'anonymous-user',
+          anonymousAccessToken: this.token,
+        }
         this.req.query = { user_id: 'anonymous-user' }
         this.req.headers = { 'x-sl-anonymous-access-token': this.token }
         this.res.callback = done

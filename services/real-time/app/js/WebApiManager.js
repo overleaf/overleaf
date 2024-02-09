@@ -27,7 +27,10 @@ module.exports = {
           pass: settings.apis.web.pass,
           sendImmediately: true,
         },
-        json: true,
+        json: {
+          userId,
+          anonymousAccessToken: user.anonymousAccessToken,
+        },
         jar: false,
         headers,
       },

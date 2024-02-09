@@ -57,7 +57,7 @@ const unsupportedSpellcheckLanguages = [
 
 async function joinProject(req, res, next) {
   const projectId = req.params.Project_id
-  let userId = req.query.user_id // keep schema in sync with router
+  let userId = req.body.userId || req.query.user_id // keep schema in sync with router
   if (userId === 'anonymous-user') {
     userId = null
   }
@@ -177,7 +177,8 @@ async function _buildJoinProjectView(req, projectId, userId) {
     await CollaboratorsGetter.promises.getInvitedMembersWithPrivilegeLevels(
       projectId
     )
-  const token = req.headers['x-sl-anonymous-access-token']
+  const token =
+    req.body.anonymousAccessToken || req.headers['x-sl-anonymous-access-token']
   const privilegeLevel =
     await AuthorizationManager.promises.getPrivilegeLevelForProject(
       userId,

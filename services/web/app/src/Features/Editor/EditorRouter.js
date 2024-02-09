@@ -71,7 +71,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit(rateLimiters.joinProject, {
         params: ['Project_id'],
         // keep schema in sync with controller
-        getUserId: req => req.query.user_id,
+        getUserId: req => req.body.userId || req.query.user_id,
       }),
       EditorHttpController.joinProject
     )

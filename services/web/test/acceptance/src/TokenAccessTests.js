@@ -160,7 +160,15 @@ const _doTryTokenAccept = (
   })
 }
 
-const tryContentAccess = (user, projcetId, test, callback) => {
+const tryContentAccess = (user, projectId, test, callback) => {
+  tryContentAccessQuery(user, projectId, test, err1 => {
+    tryContentAccessBody(user, projectId, test, err2 => {
+      callback(err1 || err2)
+    })
+  })
+}
+
+const tryContentAccessQuery = (user, projcetId, test, callback) => {
   // The real-time service calls this end point to determine the user's
   // permissions.
   let userId
@@ -191,7 +199,47 @@ const tryContentAccess = (user, projcetId, test, callback) => {
   )
 }
 
+const tryContentAccessBody = (user, projcetId, test, callback) => {
+  // The real-time service calls this end point to determine the user's
+  // permissions.
+  let userId
+  if (user.id != null) {
+    userId = user.id
+  } else {
+    userId = 'anonymous-user'
+  }
+  request.post(
+    {
+      url: `/project/${projcetId}/join`,
+      auth: {
+        user: settings.apis.web.user,
+        pass: settings.apis.web.pass,
+        sendImmediately: true,
+      },
+      json: {
+        userId,
+      },
+      jar: false,
+    },
+    (error, response, body) => {
+      if (error != null) {
+        return callback(error)
+      }
+      test(response, body)
+      callback()
+    }
+  )
+}
+
 const tryAnonContentAccess = (user, projectId, token, test, callback) => {
+  tryAnonContentAccessHeader(user, projectId, token, test, err1 => {
+    tryAnonContentAccessBody(user, projectId, token, test, err2 => {
+      callback(err1 || err2)
+    })
+  })
+}
+
+const tryAnonContentAccessHeader = (user, projectId, token, test, callback) => {
   // The real-time service calls this end point to determine the user's
   // permissions.
   let userId
@@ -213,6 +261,39 @@ const tryAnonContentAccess = (user, projectId, token, test, callback) => {
         'x-sl-anonymous-access-token': token,
       },
       json: true,
+      jar: false,
+    },
+    (error, response, body) => {
+      if (error != null) {
+        return callback(error)
+      }
+      test(response, body)
+      callback()
+    }
+  )
+}
+
+const tryAnonContentAccessBody = (user, projectId, token, test, callback) => {
+  // The real-time service calls this end point to determine the user's
+  // permissions.
+  let userId
+  if (user.id != null) {
+    userId = user.id
+  } else {
+    userId = 'anonymous-user'
+  }
+  request.post(
+    {
+      url: `/project/${projectId}/join`,
+      auth: {
+        user: settings.apis.web.user,
+        pass: settings.apis.web.pass,
+        sendImmediately: true,
+      },
+      json: {
+        userId,
+        anonymousAccessToken: token,
+      },
       jar: false,
     },
     (error, response, body) => {
