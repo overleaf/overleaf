@@ -42,6 +42,7 @@ describe('DocumentManager', function () {
     this.lastUpdatedAt = Date.now()
     this.lastUpdatedBy = 'last-author-id'
     this.source = 'external-source'
+    this.historyRangesSupport = false
   })
 
   afterEach(function () {
@@ -335,7 +336,10 @@ describe('DocumentManager', function () {
             this.ranges,
             this.pathname,
             this.projectHistoryId,
-            this.unflushedTime
+            this.unflushedTime,
+            this.lastUpdatedAt,
+            this.lastUpdatedBy,
+            this.historyRangesSupport
           )
         this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
       })
@@ -356,7 +360,8 @@ describe('DocumentManager', function () {
             this.pathname,
             this.projectHistoryId,
             this.unflushedTime,
-            true
+            true,
+            this.historyRangesSupport
           )
           .should.equal(true)
       })
@@ -380,7 +385,8 @@ describe('DocumentManager', function () {
             this.version,
             this.ranges,
             this.pathname,
-            this.projectHistoryId
+            this.projectHistoryId,
+            this.historyRangesSupport
           )
         this.RedisManager.putDocInMemory = sinon.stub().yields()
         this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
@@ -407,7 +413,8 @@ describe('DocumentManager', function () {
             this.version,
             this.ranges,
             this.pathname,
-            this.projectHistoryId
+            this.projectHistoryId,
+            this.historyRangesSupport
           )
           .should.equal(true)
       })
@@ -422,7 +429,8 @@ describe('DocumentManager', function () {
             this.pathname,
             this.projectHistoryId,
             null,
-            false
+            false,
+            this.historyRangesSupport
           )
           .should.equal(true)
       })
