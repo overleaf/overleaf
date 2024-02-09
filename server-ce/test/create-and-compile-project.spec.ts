@@ -8,11 +8,10 @@ describe('Project creation and compilation', function () {
     // this is the first project created, the welcome screen is displayed instead of the project list
     createProject('test-project', { isFirstProject: true })
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
-    cy.findByText('\\maketitle')
-      .parent()
-      .click()
-      .type('\n\\section{{}Test Section}')
+    cy.findByText('\\maketitle').parent().click()
+    cy.findByText('\\maketitle').parent().type('\n\\section{{}Test Section}')
     // Wait for the PDF compilation throttling
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
     cy.wait(3000)
     cy.findByText('Recompile').click()
     cy.get('.pdf-viewer').should('contain.text', 'Test Section')
@@ -62,10 +61,7 @@ describe('Project creation and compilation', function () {
       cy.findByLabelText('Select a File').select('frog.jpg')
       cy.findByText('Create').click()
     })
-    // FIXME: should be aria-labeled or data-test-id
-    cy.get('.file-tree').first().within(() => {
-      cy.findByText('frog.jpg').click()
-    })
+    cy.findByTestId('file-tree').findByText('frog.jpg').click()
     cy.findByText('Another project')
       .should('have.attr', 'href')
       .then(href => {
@@ -121,9 +117,7 @@ describe('Project creation and compilation', function () {
       cy.url().should('include', targetProjectId)
     })
 
-    cy.get('.file-tree').first().within(() => {
-      cy.findByText('frog.jpg').click()
-    })
+    cy.findByTestId('file-tree').findByText('frog.jpg').click()
     cy.findByText('Another project')
       .should('have.attr', 'href')
       .then(href => {

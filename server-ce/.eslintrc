@@ -13,5 +13,9 @@
   "rules": {
     // Do not allow importing of implicit dependencies.
     "import/no-extraneous-dependencies": "error"
-  }
+  },
+  "overrides": [
+    // Extra rules for Cypress tests
+    { "files": ["**/*.spec.ts"], "extends": ["plugin:cypress/recommended"] }
+  ]
 }

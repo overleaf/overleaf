@@ -49,7 +49,11 @@ const FileTreeRoot = React.memo<{
   if (!isReady) return null
 
   return (
-    <div className="file-tree" ref={setFileTreeContainer}>
+    <div
+      className="file-tree"
+      data-testid="file-tree"
+      ref={setFileTreeContainer}
+    >
       {fileTreeContainer && (
         <FileTreeContext
           refProviders={refProviders}
