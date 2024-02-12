@@ -256,8 +256,6 @@ describe('EditorHttpController', function () {
           userId: 'anonymous-user',
           anonymousAccessToken: this.token,
         }
-        this.req.query = { user_id: 'anonymous-user' }
-        this.req.headers = { 'x-sl-anonymous-access-token': this.token }
         this.res.callback = done
         this.AuthorizationManager.isRestrictedUser
           .withArgs(null, 'readOnly', false, false)

@@ -20,13 +20,12 @@ const joinProject = (userId, projectId, callback) =>
   request.post(
     {
       url: `/project/${projectId}/join`,
-      qs: { user_id: userId },
       auth: {
         user: settings.apis.web.user,
         pass: settings.apis.web.pass,
         sendImmediately: true,
       },
-      json: true,
+      json: { userId },
       jar: false,
     },
     callback

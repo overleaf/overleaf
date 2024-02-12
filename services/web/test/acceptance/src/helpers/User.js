@@ -680,13 +680,12 @@ class User {
     this.request.post(
       {
         url: `/project/${projectId}/join`,
-        qs: { user_id: this._id },
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,
           sendImmediately: true,
         },
-        json: true,
+        json: { userId: this._id },
         jar: false,
       },
       (error, response, body) => {

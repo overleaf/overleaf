@@ -12,6 +12,7 @@
 let MockWebServer
 const sinon = require('sinon')
 const express = require('express')
+const bodyParser = require('body-parser')
 
 module.exports = MockWebServer = {
   projects: {},
@@ -43,8 +44,7 @@ module.exports = MockWebServer = {
 
   joinProjectRequest(req, res, next) {
     const { project_id: projectId } = req.params
-    const { user_id: userId } = req.query
-    const { 'x-sl-anonymous-access-token': anonymousAccessToken } = req.headers
+    const { anonymousAccessToken, userId } = req.body
     if (projectId === '404404404404404404404404') {
       // not-found
       return res.status(404).send()
@@ -89,6 +89,7 @@ module.exports = MockWebServer = {
       return callback()
     }
     const app = express()
+    app.use(bodyParser.json())
     app.post('/project/:project_id/join', MockWebServer.joinProjectRequest)
     return app
       .listen(3000, error => {

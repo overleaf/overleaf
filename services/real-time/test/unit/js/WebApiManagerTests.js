@@ -60,9 +60,6 @@ describe('WebApiManager', function () {
         return this.request.post
           .calledWith({
             url: `${this.settings.apis.web.url}/project/${this.project_id}/join`,
-            qs: {
-              user_id: this.user_id,
-            },
             auth: {
               user: this.settings.apis.web.user,
               pass: this.settings.apis.web.pass,
@@ -73,7 +70,6 @@ describe('WebApiManager', function () {
               anonymousAccessToken: undefined,
             },
             jar: false,
-            headers: {},
           })
           .should.equal(true)
       })
@@ -122,9 +118,6 @@ describe('WebApiManager', function () {
       it('should send a request to web to join the project', function () {
         this.request.post.should.have.been.calledWith({
           url: `${this.settings.apis.web.url}/project/${this.project_id}/join`,
-          qs: {
-            user_id: this.user_id,
-          },
           auth: {
             user: this.settings.apis.web.user,
             pass: this.settings.apis.web.pass,
@@ -135,7 +128,6 @@ describe('WebApiManager', function () {
             anonymousAccessToken: this.token,
           },
           jar: false,
-          headers: { 'x-sl-anonymous-access-token': this.token },
         })
       })
 

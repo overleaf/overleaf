@@ -14,14 +14,9 @@ module.exports = {
     const userId = user._id
     logger.debug({ projectId, userId }, 'sending join project request to web')
     const url = `${settings.apis.web.url}/project/${projectId}/join`
-    const headers = {}
-    if (user.anonymousAccessToken) {
-      headers['x-sl-anonymous-access-token'] = user.anonymousAccessToken
-    }
     request.post(
       {
         url,
-        qs: { user_id: userId },
         auth: {
           user: settings.apis.web.user,
           pass: settings.apis.web.pass,
@@ -32,7 +27,6 @@ module.exports = {
           anonymousAccessToken: user.anonymousAccessToken,
         },
         jar: false,
-        headers,
       },
       function (error, response, data) {
         if (error) {

@@ -3,6 +3,7 @@ const AuthenticationController = require('../Authentication/AuthenticationContro
 const AuthorizationMiddleware = require('../Authorization/AuthorizationMiddleware')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
+const { validate, Joi } = require('../../infrastructure/Validation')
 
 const rateLimiters = {
   addDocToProject: new RateLimiter('add-doc-to-project', {
@@ -71,7 +72,13 @@ module.exports = {
       RateLimiterMiddleware.rateLimit(rateLimiters.joinProject, {
         params: ['Project_id'],
         // keep schema in sync with controller
-        getUserId: req => req.body.userId || req.query.user_id,
+        getUserId: req => req.body.userId,
+      }),
+      validate({
+        body: Joi.object({
+          userId: Joi.string().required(),
+          anonymousAccessToken: Joi.string().optional(),
+        }),
       }),
       EditorHttpController.joinProject
     )
