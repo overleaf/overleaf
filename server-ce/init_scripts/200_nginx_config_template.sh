@@ -34,6 +34,9 @@ if [ -f "${nginx_template_file}" ]; then
     < "${nginx_template_file}" \
     > "${nginx_config_file}"
 
+  echo "Checking Nginx config"
+  nginx -t
+
   echo "Nginx: reloading config"
   service nginx reload
 fi
