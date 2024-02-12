@@ -1,7 +1,6 @@
 import getMeta from '../../../utils/meta'
 import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLogs'
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
-import { v4 as uuid } from 'uuid'
 import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
 import { dirname, findEntityByPath } from '@/features/file-tree/util/path'
@@ -40,6 +39,12 @@ export function handleOutputFiles(outputFiles, projectId, data) {
   return outputFile
 }
 
+let nextEntryId = 1
+
+function generateEntryKey() {
+  return '' + nextEntryId++
+}
+
 export const handleLogFiles = async (outputFiles, data, signal) => {
   const result = {
     log: null,
@@ -60,7 +65,7 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
           if (entry.file) {
             entry.file = normalizeFilePath(entry.file)
           }
-          entry.key = uuid()
+          entry.key = generateEntryKey()
         }
         result.logEntries[key].push(...newEntries[key])
       }

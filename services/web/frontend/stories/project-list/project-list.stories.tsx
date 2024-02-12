@@ -7,7 +7,7 @@ import {
 } from '../../../test/frontend/features/project-list/fixtures/projects-data'
 import { useMeta } from '../hooks/use-meta'
 import { tags } from '../../../test/frontend/features/project-list/fixtures/tags-data'
-import uuid from 'uuid'
+import { v4 as uuid } from 'uuid'
 
 const MOCK_DELAY = 500
 
@@ -22,7 +22,7 @@ export const Interactive = (args: any) => {
     fetchMock.post(
       'express:/project/:projectId/clone',
       () => ({
-        project_id: uuid.v4(),
+        project_id: uuid(),
         name: copyableProject.name,
         lastUpdated: new Date().toISOString(),
         owner: {

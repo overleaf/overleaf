@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid'
-
 const ONE_MINUTE = 60 * 1000
 
 const user = {
@@ -14,6 +12,8 @@ const user2 = {
   email: 'another_fake@example.com',
 }
 
+let nextMessageId = 1
+
 export function generateMessages(count) {
   const messages = []
   let timestamp = new Date().getTime() // newest message goes first
@@ -24,7 +24,7 @@ export function generateMessages(count) {
     timestamp -= (4.3 + Math.random()) * ONE_MINUTE
 
     messages.push({
-      id: uuid(),
+      id: '' + nextMessageId++,
       content: `message #${i}`,
       user: author,
       timestamp,

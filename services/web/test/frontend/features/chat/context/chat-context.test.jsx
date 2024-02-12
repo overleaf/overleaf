@@ -6,8 +6,10 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
 import EventEmitter from 'events'
-import uuid from 'uuid'
-import { useChatContext } from '../../../../../frontend/js/features/chat/context/chat-context'
+import {
+  useChatContext,
+  chatClientIdGenerator,
+} from '@/features/chat/context/chat-context'
 import {
   ChatProviders,
   cleanUpContext,
@@ -31,7 +33,7 @@ describe('ChatContext', function () {
     window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', user)
 
-    this.stub = sinon.stub(uuid, 'v4').returns(uuidValue)
+    this.stub = sinon.stub(chatClientIdGenerator, 'generate').returns(uuidValue)
   })
 
   afterEach(function () {

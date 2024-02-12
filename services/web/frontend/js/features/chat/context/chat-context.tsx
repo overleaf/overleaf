@@ -68,6 +68,17 @@ type Action =
       error: any
     }
 
+// Wrap uuid in an object method so that it can be stubbed
+export const chatClientIdGenerator = {
+  generate: () => uuid(),
+}
+
+let nextChatMessageId = 1
+
+function generateChatMessageId() {
+  return '' + nextChatMessageId++
+}
+
 function chatReducer(state: State, action: Action): State {
   switch (action.type) {
     case 'INITIAL_FETCH_MESSAGES':
@@ -103,10 +114,10 @@ function chatReducer(state: State, action: Action): State {
           state.messages,
           {
             // Messages are sent optimistically, so don't have an id (used for
-            // React keys). The uuid is valid for this session, and ensures all
+            // React keys). The id is valid for this session, and ensures all
             // messages have an id. It will be overwritten by the actual ids on
             // refresh
-            id: uuid(),
+            id: generateChatMessageId(),
             user: action.user,
             content: action.content,
             timestamp: Date.now(),
@@ -178,7 +189,7 @@ export const ChatContext = createContext<
 export const ChatProvider: FC = ({ children }) => {
   const clientId = useRef<string>()
   if (clientId.current === undefined) {
-    clientId.current = uuid()
+    clientId.current = chatClientIdGenerator.generate()
   }
   const user = useUserContext()
   const { _id: projectId } = useProjectContext()
