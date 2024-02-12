@@ -12,7 +12,7 @@ module.exports = V1SubscriptionManager = {
       {
         method: 'GET',
         url(v1Id) {
-          return `/api/v1/sharelatex/users/${v1Id}/subscriptions`
+          return `/api/v1/overleaf/users/${v1Id}/subscriptions`
         },
       },
       callback
@@ -25,7 +25,7 @@ module.exports = V1SubscriptionManager = {
       {
         method: 'DELETE',
         url(v1Id) {
-          return `/api/v1/sharelatex/users/${v1Id}/subscription`
+          return `/api/v1/overleaf/users/${v1Id}/subscription`
         },
       },
       callback

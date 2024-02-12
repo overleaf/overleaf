@@ -531,7 +531,7 @@ describe('ExportsHandler', function () {
 
       it('should issue the request', function () {
         return expect(this.stubPost.getCall(0).args[0]).to.deep.equal({
-          url: this.settings.apis.v1.url + '/api/v1/sharelatex/exports',
+          url: this.settings.apis.v1.url + '/api/v1/overleaf/exports',
           auth: {
             user: this.settings.apis.v1.user,
             pass: this.settings.apis.v1.pass,
@@ -626,7 +626,7 @@ describe('ExportsHandler', function () {
         return expect(this.stubGet.getCall(0).args[0]).to.deep.equal({
           url:
             this.settings.apis.v1.url +
-            '/api/v1/sharelatex/exports/' +
+            '/api/v1/overleaf/exports/' +
             this.export_id,
           auth: {
             user: this.settings.apis.v1.user,
@@ -680,7 +680,7 @@ describe('ExportsHandler', function () {
         return expect(this.stubGet.getCall(0).args[0]).to.deep.equal({
           url:
             this.settings.apis.v1.url +
-            '/api/v1/sharelatex/exports/' +
+            '/api/v1/overleaf/exports/' +
             this.export_id +
             '/zip_url',
           auth: {

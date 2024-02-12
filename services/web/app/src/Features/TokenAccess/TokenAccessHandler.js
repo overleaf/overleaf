@@ -254,7 +254,7 @@ const TokenAccessHandler = {
       return callback(null, { allow: true })
     }
     V1Api.request(
-      { url: `/api/v1/sharelatex/docs/${token}/is_published` },
+      { url: `/api/v1/overleaf/docs/${token}/is_published` },
       function (err, response, body) {
         if (err != null) {
           return callback(err)
@@ -271,7 +271,7 @@ const TokenAccessHandler = {
         exported: false,
       })
     }
-    const v1Url = `/api/v1/sharelatex/docs/${token}/info`
+    const v1Url = `/api/v1/overleaf/docs/${token}/info`
     V1Api.request({ url: v1Url }, function (err, response, body) {
       if (err != null) {
         return callback(err)

@@ -21,7 +21,7 @@ module.exports = V1Handler = {
     return V1Api.request(
       {
         method: 'POST',
-        url: '/api/v1/sharelatex/login',
+        url: '/api/v1/overleaf/login',
         json: { email, password },
         expectedStatusCodes: [403],
       },
@@ -58,7 +58,7 @@ module.exports = V1Handler = {
     return V1Api.request(
       {
         method: 'POST',
-        url: '/api/v1/sharelatex/reset_password',
+        url: '/api/v1/overleaf/reset_password',
         json: {
           user_id: v1UserId,
           password,

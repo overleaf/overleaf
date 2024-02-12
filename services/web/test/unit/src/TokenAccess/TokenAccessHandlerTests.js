@@ -549,7 +549,7 @@ describe('TokenAccessHandler', function () {
         it('should return response body', function () {
           expect(
             this.V1Api.request.calledWith({
-              url: `/api/v1/sharelatex/docs/${this.token}/is_published`,
+              url: `/api/v1/overleaf/docs/${this.token}/is_published`,
             })
           ).to.equal(true)
           expect(this.callback.calledWith(null, 'mock-data')).to.equal(true)
@@ -617,7 +617,7 @@ describe('TokenAccessHandler', function () {
         it('should return response body', function () {
           expect(
             this.V1Api.request.calledWith({
-              url: `/api/v1/sharelatex/docs/${this.token}/info`,
+              url: `/api/v1/overleaf/docs/${this.token}/info`,
             })
           ).to.equal(true)
           expect(this.callback.calledWith(null, 'mock-data')).to.equal(true)

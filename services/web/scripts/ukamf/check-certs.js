@@ -44,7 +44,7 @@ async function checkCert(ukamfDB, providerId) {
     const { body } = await V1Api.request({
       json: true,
       qs: { university_id: providerId },
-      uri: '/api/v1/sharelatex/university_saml',
+      uri: '/api/v1/overleaf/university_saml',
     })
     // show notice if sso not currently enabled
     if (body.sso_enabled === true) {

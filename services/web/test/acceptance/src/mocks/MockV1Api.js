@@ -156,20 +156,17 @@ class MockV1Api extends AbstractMockApi {
   }
 
   applyRoutes() {
-    this.app.get(
-      '/api/v1/sharelatex/users/:v1_user_id/plan_code',
-      (req, res) => {
-        const user = this.users[req.params.v1_user_id]
-        if (user) {
-          res.json(user)
-        } else {
-          res.sendStatus(404)
-        }
+    this.app.get('/api/v1/overleaf/users/:v1_user_id/plan_code', (req, res) => {
+      const user = this.users[req.params.v1_user_id]
+      if (user) {
+        res.json(user)
+      } else {
+        res.sendStatus(404)
       }
-    )
+    })
 
     this.app.get(
-      '/api/v1/sharelatex/users/:v1_user_id/subscriptions',
+      '/api/v1/overleaf/users/:v1_user_id/subscriptions',
       (req, res) => {
         const user = this.users[req.params.v1_user_id]
         if (user && user.subscription) {
@@ -181,7 +178,7 @@ class MockV1Api extends AbstractMockApi {
     )
 
     this.app.get(
-      '/api/v1/sharelatex/users/:v1_user_id/subscription_status',
+      '/api/v1/overleaf/users/:v1_user_id/subscription_status',
       (req, res) => {
         const user = this.users[req.params.v1_user_id]
         if (user && user.subscription_status) {
@@ -193,7 +190,7 @@ class MockV1Api extends AbstractMockApi {
     )
 
     this.app.delete(
-      '/api/v1/sharelatex/users/:v1_user_id/subscription',
+      '/api/v1/overleaf/users/:v1_user_id/subscription',
       (req, res) => {
         const user = this.users[req.params.v1_user_id]
         if (user) {
@@ -205,12 +202,12 @@ class MockV1Api extends AbstractMockApi {
       }
     )
 
-    this.app.post('/api/v1/sharelatex/users/:v1_user_id/sync', (req, res) => {
+    this.app.post('/api/v1/overleaf/users/:v1_user_id/sync', (req, res) => {
       this.syncUserFeatures(req.params.v1_user_id)
       res.sendStatus(200)
     })
 
-    this.app.post('/api/v1/sharelatex/exports', (req, res) => {
+    this.app.post('/api/v1/overleaf/exports', (req, res) => {
       this.exportParams = Object.assign({}, req.body)
       res.json({ exportId: this.exportId })
     })
@@ -370,7 +367,7 @@ class MockV1Api extends AbstractMockApi {
       }
     })
 
-    this.app.put('/api/v1/sharelatex/users/:id/email', (req, res) => {
+    this.app.put('/api/v1/overleaf/users/:id/email', (req, res) => {
       const { email } = req.body && req.body.user
       if (this.existingEmails.includes(email)) {
         res.sendStatus(409)
@@ -380,7 +377,7 @@ class MockV1Api extends AbstractMockApi {
       }
     })
 
-    this.app.post('/api/v1/sharelatex/login', (req, res) => {
+    this.app.post('/api/v1/overleaf/login', (req, res) => {
       for (const id in this.users) {
         const user = this.users[id]
         if (
@@ -425,12 +422,12 @@ class MockV1Api extends AbstractMockApi {
       }
     })
 
-    this.app.get('/api/v1/sharelatex/docs/:token/is_published', (req, res) => {
+    this.app.get('/api/v1/overleaf/docs/:token/is_published', (req, res) => {
       return res.json({ allow: true })
     })
 
     this.app.get(
-      '/api/v1/sharelatex/users/:user_id/docs/:token/info',
+      '/api/v1/overleaf/users/:user_id/docs/:token/info',
       (req, res) => {
         const info = this.getDocInfo(req.params.token) || {
           exists: false,
@@ -440,7 +437,7 @@ class MockV1Api extends AbstractMockApi {
       }
     )
 
-    this.app.get('/api/v1/sharelatex/docs/:token/info', (req, res) => {
+    this.app.get('/api/v1/overleaf/docs/:token/info', (req, res) => {
       const info = this.getDocInfo(req.params.token) || {
         exists: false,
         exported: false,
@@ -449,7 +446,7 @@ class MockV1Api extends AbstractMockApi {
     })
 
     this.app.get(
-      '/api/v1/sharelatex/docs/read_token/:token/exists',
+      '/api/v1/overleaf/docs/read_token/:token/exists',
       (req, res) => {
         res.json({ exists: false })
       }
