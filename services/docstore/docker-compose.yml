@@ -31,9 +31,6 @@ services:
       service: dev
     environment:
       ELASTIC_SEARCH_DSN: es:9200
-      REDIS_HOST: redis
-      QUEUES_REDIS_HOST: redis
-      ANALYTICS_QUEUES_REDIS_HOST: redis
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
       GCS_API_ENDPOINT: http://gcs:9090
