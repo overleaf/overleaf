@@ -161,11 +161,11 @@ test_frontend_ct_editor:
 TEST_ACCEPTANCE_MONGO_INIT := \
 	$(DOCKER_COMPOSE) up -d mongo; \
 	$(DOCKER_COMPOSE) exec -T mongo sh -c ' \
-		while ! mongo --eval "db.version()" > /dev/null; do \
+		while ! mongosh --eval "db.version()" > /dev/null; do \
 			echo "Waiting for Mongo..."; \
 			sleep 1; \
 		done; \
-		mongo --eval "rs.initiate({ _id: \"overleaf\", members: [ { _id: 0, host: \"mongo:27017\" } ] })"'
+		mongosh --eval "rs.initiate({ _id: \"overleaf\", members: [ { _id: 0, host: \"mongo:27017\" } ] })"'
 
 test_acceptance: test_acceptance_app test_acceptance_modules
 test_acceptance_saas: test_acceptance_app_saas test_acceptance_modules_merged_saas

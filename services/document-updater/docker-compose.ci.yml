@@ -51,9 +51,9 @@ services:
       retries: 20
 
   mongo:
-    image: mongo:5.0.17
+    image: mongo:6.0.13
     command: --replSet overleaf
     healthcheck:
-      test: "mongo --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
+      test: "mongosh --quiet localhost/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 1)'"
       interval: 1s
       retries: 20

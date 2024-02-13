@@ -79,7 +79,7 @@ services:
     image: redis
 
   mongo:
-    image: mongo:5.0.17
+    image: mongo:6.0.13
     command: --replSet overleaf
 
   ldap:
