@@ -1,15 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const { expect } = require('chai')
 const async = require('async')
@@ -21,7 +9,7 @@ const DocUpdaterApp = require('./helpers/DocUpdaterApp')
 
 describe('Ranges', function () {
   before(function (done) {
-    return DocUpdaterApp.ensureRunning(done)
+    DocUpdaterApp.ensureRunning(done)
   })
 
   describe('tracking changes from ops', function () {
@@ -58,43 +46,37 @@ describe('Ranges', function () {
         version: 0,
       })
       const jobs = []
-      for (const update of Array.from(this.updates)) {
-        ;(update => {
-          return jobs.push(callback =>
-            DocUpdaterClient.sendUpdate(
-              this.project_id,
-              this.doc.id,
-              update,
-              callback
-            )
+      for (const update of this.updates) {
+        jobs.push(callback =>
+          DocUpdaterClient.sendUpdate(
+            this.project_id,
+            this.doc.id,
+            update,
+            callback
           )
-        })(update)
+        )
       }
 
-      return DocUpdaterApp.ensureRunning(error => {
+      DocUpdaterApp.ensureRunning(error => {
         if (error != null) {
           throw error
         }
-        return DocUpdaterClient.preloadDoc(
-          this.project_id,
-          this.doc.id,
-          error => {
+        DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+          if (error != null) {
+            throw error
+          }
+          async.series(jobs, error => {
             if (error != null) {
               throw error
             }
-            return async.series(jobs, error => {
-              if (error != null) {
-                throw error
-              }
-              return done()
-            })
-          }
-        )
+            done()
+          })
+        })
       })
     })
 
     it('should update the ranges', function (done) {
-      return DocUpdaterClient.getDoc(
+      DocUpdaterClient.getDoc(
         this.project_id,
         this.doc.id,
         (error, res, data) => {
@@ -106,12 +88,12 @@ describe('Ranges', function () {
           change.op.should.deep.equal({ i: '456', p: 3 })
           change.id.should.equal(this.id_seed + '000001')
           change.metadata.user_id.should.equal(this.user_id)
-          return done()
+          done()
         }
       )
     })
 
-    return describe('Adding comments', function () {
+    describe('Adding comments', function () {
       describe('standalone', function () {
         before(function (done) {
           this.project_id = DocUpdaterClient.randomId()
@@ -134,37 +116,31 @@ describe('Ranges', function () {
             version: 0,
           })
           const jobs = []
-          for (const update of Array.from(this.updates)) {
-            ;(update => {
-              return jobs.push(callback =>
-                DocUpdaterClient.sendUpdate(
-                  this.project_id,
-                  this.doc.id,
-                  update,
-                  callback
-                )
+          for (const update of this.updates) {
+            jobs.push(callback =>
+              DocUpdaterClient.sendUpdate(
+                this.project_id,
+                this.doc.id,
+                update,
+                callback
               )
-            })(update)
+            )
           }
-          return DocUpdaterClient.preloadDoc(
-            this.project_id,
-            this.doc.id,
-            error => {
+          DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+            if (error != null) {
+              throw error
+            }
+            async.series(jobs, error => {
               if (error != null) {
                 throw error
               }
-              return async.series(jobs, error => {
-                if (error != null) {
-                  throw error
-                }
-                return setTimeout(done, 200)
-              })
-            }
-          )
+              setTimeout(done, 200)
+            })
+          })
         })
 
-        return it('should update the ranges', function (done) {
-          return DocUpdaterClient.getDoc(
+        it('should update the ranges', function (done) {
+          DocUpdaterClient.getDoc(
             this.project_id,
             this.doc.id,
             (error, res, data) => {
@@ -175,13 +151,13 @@ describe('Ranges', function () {
               const comment = ranges.comments[0]
               comment.op.should.deep.equal({ c: 'bar', p: 4, t: this.tid })
               comment.id.should.equal(this.tid)
-              return done()
+              done()
             }
           )
         })
       })
 
-      return describe('with conflicting ops needing OT', function () {
+      describe('with conflicting ops needing OT', function () {
         before(function (done) {
           this.project_id = DocUpdaterClient.randomId()
           this.user_id = DocUpdaterClient.randomId()
@@ -209,37 +185,31 @@ describe('Ranges', function () {
             version: 0,
           })
           const jobs = []
-          for (const update of Array.from(this.updates)) {
-            ;(update => {
-              return jobs.push(callback =>
-                DocUpdaterClient.sendUpdate(
-                  this.project_id,
-                  this.doc.id,
-                  update,
-                  callback
-                )
+          for (const update of this.updates) {
+            jobs.push(callback =>
+              DocUpdaterClient.sendUpdate(
+                this.project_id,
+                this.doc.id,
+                update,
+                callback
               )
-            })(update)
+            )
           }
-          return DocUpdaterClient.preloadDoc(
-            this.project_id,
-            this.doc.id,
-            error => {
+          DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+            if (error != null) {
+              throw error
+            }
+            async.series(jobs, error => {
               if (error != null) {
                 throw error
               }
-              return async.series(jobs, error => {
-                if (error != null) {
-                  throw error
-                }
-                return setTimeout(done, 200)
-              })
-            }
-          )
+              setTimeout(done, 200)
+            })
+          })
         })
 
-        return it('should update the comments with the OT shifted comment', function (done) {
-          return DocUpdaterClient.getDoc(
+        it('should update the comments with the OT shifted comment', function (done) {
+          DocUpdaterClient.getDoc(
             this.project_id,
             this.doc.id,
             (error, res, data) => {
@@ -249,7 +219,7 @@ describe('Ranges', function () {
               const { ranges } = data
               const comment = ranges.comments[0]
               comment.op.should.deep.equal({ c: 'bar', p: 7, t: this.tid })
-              return done()
+              done()
             }
           )
         })
@@ -287,30 +257,26 @@ describe('Ranges', function () {
           ],
         },
       })
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc.id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocUpdaterClient.sendUpdate(
-            this.project_id,
-            this.doc.id,
-            this.update,
-            error => {
-              if (error != null) {
-                throw error
-              }
-              return setTimeout(done, 200)
-            }
-          )
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+        if (error != null) {
+          throw error
         }
-      )
+        DocUpdaterClient.sendUpdate(
+          this.project_id,
+          this.doc.id,
+          this.update,
+          error => {
+            if (error != null) {
+              throw error
+            }
+            setTimeout(done, 200)
+          }
+        )
+      })
     })
 
     it('should have preloaded the existing ranges', function (done) {
-      return DocUpdaterClient.getDoc(
+      DocUpdaterClient.getDoc(
         this.project_id,
         this.doc.id,
         (error, res, data) => {
@@ -320,27 +286,23 @@ describe('Ranges', function () {
           const { changes } = data.ranges
           changes[0].op.should.deep.equal({ i: '123', p: 1 })
           changes[1].op.should.deep.equal({ i: '456', p: 5 })
-          return done()
+          done()
         }
       )
     })
 
-    return it('should flush the ranges to the persistence layer again', function (done) {
-      return DocUpdaterClient.flushDoc(this.project_id, this.doc.id, error => {
+    it('should flush the ranges to the persistence layer again', function (done) {
+      DocUpdaterClient.flushDoc(this.project_id, this.doc.id, error => {
         if (error != null) {
           throw error
         }
-        return MockWebApi.getDocument(
-          this.project_id,
-          this.doc.id,
-          (error, doc) => {
-            if (error) return done(error)
-            const { changes } = doc.ranges
-            changes[0].op.should.deep.equal({ i: '123', p: 1 })
-            changes[1].op.should.deep.equal({ i: '456', p: 5 })
-            return done()
-          }
-        )
+        MockWebApi.getDocument(this.project_id, this.doc.id, (error, doc) => {
+          if (error) return done(error)
+          const { changes } = doc.ranges
+          changes[0].op.should.deep.equal({ i: '123', p: 1 })
+          changes[1].op.should.deep.equal({ i: '456', p: 5 })
+          done()
+        })
       })
     })
   })
@@ -365,49 +327,45 @@ describe('Ranges', function () {
         lines: this.doc.lines,
         version: 0,
       })
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc.id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocUpdaterClient.sendUpdate(
-            this.project_id,
-            this.doc.id,
-            this.update,
-            error => {
-              if (error != null) {
-                throw error
-              }
-              return setTimeout(() => {
-                return DocUpdaterClient.getDoc(
-                  this.project_id,
-                  this.doc.id,
-                  (error, res, data) => {
-                    if (error != null) {
-                      throw error
-                    }
-                    const { ranges } = data
-                    const change = ranges.changes[0]
-                    change.op.should.deep.equal({ i: '456', p: 1 })
-                    change.id.should.equal(this.id_seed + '000001')
-                    change.metadata.user_id.should.equal(this.user_id)
-                    return done()
-                  }
-                )
-              }, 200)
-            }
-          )
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+        if (error != null) {
+          throw error
         }
-      )
+        DocUpdaterClient.sendUpdate(
+          this.project_id,
+          this.doc.id,
+          this.update,
+          error => {
+            if (error != null) {
+              throw error
+            }
+            setTimeout(() => {
+              DocUpdaterClient.getDoc(
+                this.project_id,
+                this.doc.id,
+                (error, res, data) => {
+                  if (error != null) {
+                    throw error
+                  }
+                  const { ranges } = data
+                  const change = ranges.changes[0]
+                  change.op.should.deep.equal({ i: '456', p: 1 })
+                  change.id.should.equal(this.id_seed + '000001')
+                  change.metadata.user_id.should.equal(this.user_id)
+                  done()
+                }
+              )
+            }, 200)
+          }
+        )
+      })
     })
     afterEach(function () {
       MockWebApi.setDocument.restore()
     })
 
     it('should remove the change after accepting', function (done) {
-      return DocUpdaterClient.acceptChange(
+      DocUpdaterClient.acceptChange(
         this.project_id,
         this.doc.id,
         this.id_seed + '000001',
@@ -415,7 +373,7 @@ describe('Ranges', function () {
           if (error != null) {
             throw error
           }
-          return DocUpdaterClient.getDoc(
+          DocUpdaterClient.getDoc(
             this.project_id,
             this.doc.id,
             (error, res, data) => {
@@ -423,7 +381,7 @@ describe('Ranges', function () {
                 throw error
               }
               expect(data.ranges.changes).to.be.undefined
-              return done()
+              done()
             }
           )
         }
@@ -483,45 +441,41 @@ describe('Ranges', function () {
         lines: this.doc.lines,
         version: 0,
       })
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc.id,
-        error => {
-          if (error != null) {
-            throw error
-          }
-          return DocUpdaterClient.sendUpdate(
-            this.project_id,
-            this.doc.id,
-            this.update,
-            error => {
-              if (error != null) {
-                throw error
-              }
-              return setTimeout(() => {
-                return DocUpdaterClient.getDoc(
-                  this.project_id,
-                  this.doc.id,
-                  (error, res, data) => {
-                    if (error != null) {
-                      throw error
-                    }
-                    const { ranges } = data
-                    const change = ranges.comments[0]
-                    change.op.should.deep.equal({ c: 'bar', p: 4, t: this.tid })
-                    change.id.should.equal(this.tid)
-                    return done()
-                  }
-                )
-              }, 200)
-            }
-          )
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+        if (error != null) {
+          throw error
         }
-      )
+        DocUpdaterClient.sendUpdate(
+          this.project_id,
+          this.doc.id,
+          this.update,
+          error => {
+            if (error != null) {
+              throw error
+            }
+            setTimeout(() => {
+              DocUpdaterClient.getDoc(
+                this.project_id,
+                this.doc.id,
+                (error, res, data) => {
+                  if (error != null) {
+                    throw error
+                  }
+                  const { ranges } = data
+                  const change = ranges.comments[0]
+                  change.op.should.deep.equal({ c: 'bar', p: 4, t: this.tid })
+                  change.id.should.equal(this.tid)
+                  done()
+                }
+              )
+            }, 200)
+          }
+        )
+      })
     })
 
-    return it('should remove the comment range', function (done) {
-      return DocUpdaterClient.removeComment(
+    it('should remove the comment range', function (done) {
+      DocUpdaterClient.removeComment(
         this.project_id,
         this.doc.id,
         this.tid,
@@ -530,7 +484,7 @@ describe('Ranges', function () {
             throw error
           }
           expect(res.statusCode).to.equal(204)
-          return DocUpdaterClient.getDoc(
+          DocUpdaterClient.getDoc(
             this.project_id,
             this.doc.id,
             (error, res, data) => {
@@ -538,7 +492,7 @@ describe('Ranges', function () {
                 throw error
               }
               expect(data.ranges.comments).to.be.undefined
-              return done()
+              done()
             }
           )
         }
@@ -569,37 +523,31 @@ describe('Ranges', function () {
         version: 0,
       })
       const jobs = []
-      for (const update of Array.from(this.updates)) {
-        ;(update => {
-          return jobs.push(callback =>
-            DocUpdaterClient.sendUpdate(
-              this.project_id,
-              this.doc.id,
-              update,
-              callback
-            )
+      for (const update of this.updates) {
+        jobs.push(callback =>
+          DocUpdaterClient.sendUpdate(
+            this.project_id,
+            this.doc.id,
+            update,
+            callback
           )
-        })(update)
+        )
       }
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc.id,
-        error => {
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+        if (error != null) {
+          throw error
+        }
+        async.series(jobs, error => {
           if (error != null) {
             throw error
           }
-          return async.series(jobs, error => {
-            if (error != null) {
-              throw error
-            }
-            return setTimeout(done, 200)
-          })
-        }
-      )
+          setTimeout(done, 200)
+        })
+      })
     })
 
-    return it('should not update the ranges', function (done) {
-      return DocUpdaterClient.getDoc(
+    it('should not update the ranges', function (done) {
+      DocUpdaterClient.getDoc(
         this.project_id,
         this.doc.id,
         (error, res, data) => {
@@ -608,13 +556,13 @@ describe('Ranges', function () {
           }
           const { ranges } = data
           expect(ranges.changes).to.be.undefined
-          return done()
+          done()
         }
       )
     })
   })
 
-  return describe('deleting text surrounding a comment', function () {
+  describe('deleting text surrounding a comment', function () {
     before(function (done) {
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
@@ -653,48 +601,42 @@ describe('Ranges', function () {
         },
       ]
       const jobs = []
-      for (const update of Array.from(this.updates)) {
-        ;(update => {
-          return jobs.push(callback =>
-            DocUpdaterClient.sendUpdate(
-              this.project_id,
-              this.doc_id,
-              update,
-              callback
-            )
+      for (const update of this.updates) {
+        jobs.push(callback =>
+          DocUpdaterClient.sendUpdate(
+            this.project_id,
+            this.doc_id,
+            update,
+            callback
           )
-        })(update)
+        )
       }
-      return DocUpdaterClient.preloadDoc(
-        this.project_id,
-        this.doc_id,
-        error => {
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc_id, error => {
+        if (error != null) {
+          throw error
+        }
+        async.series(jobs, function (error) {
           if (error != null) {
             throw error
           }
-          return async.series(jobs, function (error) {
-            if (error != null) {
-              throw error
-            }
-            return setTimeout(() => {
-              return DocUpdaterClient.getDoc(
-                this.project_id,
-                this.doc_id,
-                (error, res, data) => {
-                  if (error != null) {
-                    throw error
-                  }
-                  return done()
+          setTimeout(() => {
+            DocUpdaterClient.getDoc(
+              this.project_id,
+              this.doc_id,
+              (error, res, data) => {
+                if (error != null) {
+                  throw error
                 }
-              )
-            }, 200)
-          })
-        }
-      )
+                done()
+              }
+            )
+          }, 200)
+        })
+      })
     })
 
-    return it('should write a snapshot from before the destructive change', function (done) {
-      return DocUpdaterClient.getDoc(
+    it('should write a snapshot from before the destructive change', function (done) {
+      DocUpdaterClient.getDoc(
         this.project_id,
         this.doc_id,
         (error, res, data) => {
@@ -718,7 +660,7 @@ describe('Ranges', function () {
                 p: 1,
                 tid: this.tid,
               })
-              return done()
+              done()
             })
         }
       )

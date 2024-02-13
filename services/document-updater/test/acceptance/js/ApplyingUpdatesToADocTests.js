@@ -1,11 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const { expect } = require('chai')
 const async = require('async')
@@ -27,14 +19,13 @@ describe('Applying updates to a doc', function () {
   before(function (done) {
     this.lines = ['one', 'two', 'three']
     this.version = 42
+    this.op = {
+      i: 'one and a half\n',
+      p: 4,
+    }
     this.update = {
       doc: this.doc_id,
-      op: [
-        {
-          i: 'one and a half\n',
-          p: 4,
-        },
-      ],
+      op: [this.op],
       v: this.version,
     }
     this.result = ['one', 'one and a half', 'two', 'three']
@@ -43,10 +34,8 @@ describe('Applying updates to a doc', function () {
 
   describe('when the document is not loaded', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       sinon.spy(MockWebApi, 'getDocument')
       this.startTime = Date.now()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
@@ -97,7 +86,7 @@ describe('Applying updates to a doc', function () {
           if (error != null) {
             throw error
           }
-          JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
+          JSON.parse(updates[0]).op.should.deep.equal([this.op])
           done()
         }
       )
@@ -158,10 +147,8 @@ describe('Applying updates to a doc', function () {
 
   describe('when the document is loaded', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
@@ -213,7 +200,7 @@ describe('Applying updates to a doc', function () {
         -1,
         (error, updates) => {
           if (error) return done(error)
-          JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
+          JSON.parse(updates[0]).op.should.deep.equal([this.op])
           done()
         }
       )
@@ -222,10 +209,8 @@ describe('Applying updates to a doc', function () {
 
   describe('when the document is loaded and is using project-history only', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
 
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
@@ -273,7 +258,7 @@ describe('Applying updates to a doc', function () {
         -1,
         (error, updates) => {
           if (error) return done(error)
-          JSON.parse(updates[0]).op.should.deep.equal(this.update.op)
+          JSON.parse(updates[0]).op.should.deep.equal([this.op])
           done()
         }
       )
@@ -283,10 +268,8 @@ describe('Applying updates to a doc', function () {
   describe('when the document has been deleted', function () {
     describe('when the ops come in a single linear order', function () {
       before(function (done) {
-        ;[this.project_id, this.doc_id] = Array.from([
-          DocUpdaterClient.randomId(),
-          DocUpdaterClient.randomId(),
-        ])
+        this.project_id = DocUpdaterClient.randomId()
+        this.doc_id = DocUpdaterClient.randomId()
         const lines = ['', '', '']
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines,
@@ -312,7 +295,7 @@ describe('Applying updates to a doc', function () {
       it('should be able to continue applying updates when the project has been deleted', function (done) {
         let update
         const actions = []
-        for (update of Array.from(this.updates.slice(0, 6))) {
+        for (update of this.updates.slice(0, 6)) {
           ;(update => {
             actions.push(callback =>
               DocUpdaterClient.sendUpdate(
@@ -327,7 +310,7 @@ describe('Applying updates to a doc', function () {
         actions.push(callback =>
           DocUpdaterClient.deleteDoc(this.project_id, this.doc_id, callback)
         )
-        for (update of Array.from(this.updates.slice(6))) {
+        for (update of this.updates.slice(6)) {
           ;(update => {
             actions.push(callback =>
               DocUpdaterClient.sendUpdate(
@@ -363,7 +346,7 @@ describe('Applying updates to a doc', function () {
           -1,
           (error, updates) => {
             if (error) return done(error)
-            updates = Array.from(updates).map(u => JSON.parse(u))
+            updates = updates.map(u => JSON.parse(u))
             for (let i = 0; i < this.updates.length; i++) {
               const appliedUpdate = this.updates[i]
               appliedUpdate.op.should.deep.equal(updates[i].op)
@@ -376,10 +359,8 @@ describe('Applying updates to a doc', function () {
 
     describe('when older ops come in after the delete', function () {
       before(function (done) {
-        ;[this.project_id, this.doc_id] = Array.from([
-          DocUpdaterClient.randomId(),
-          DocUpdaterClient.randomId(),
-        ])
+        this.project_id = DocUpdaterClient.randomId()
+        this.doc_id = DocUpdaterClient.randomId()
         const lines = ['', '', '']
         MockWebApi.insertDoc(this.project_id, this.doc_id, {
           lines,
@@ -400,7 +381,7 @@ describe('Applying updates to a doc', function () {
       it('should be able to continue applying updates when the project has been deleted', function (done) {
         let update
         const actions = []
-        for (update of Array.from(this.updates.slice(0, 5))) {
+        for (update of this.updates.slice(0, 5)) {
           ;(update => {
             actions.push(callback =>
               DocUpdaterClient.sendUpdate(
@@ -415,7 +396,7 @@ describe('Applying updates to a doc', function () {
         actions.push(callback =>
           DocUpdaterClient.deleteDoc(this.project_id, this.doc_id, callback)
         )
-        for (update of Array.from(this.updates.slice(5))) {
+        for (update of this.updates.slice(5)) {
           ;(update => {
             actions.push(callback =>
               DocUpdaterClient.sendUpdate(
@@ -448,10 +429,8 @@ describe('Applying updates to a doc', function () {
 
   describe('with a broken update', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       this.broken_update = {
         doc_id: this.doc_id,
         v: this.version,
@@ -493,7 +472,7 @@ describe('Applying updates to a doc', function () {
 
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
-      const [channel, message] = Array.from(this.messageCallback.args[0])
+      const [channel, message] = this.messageCallback.args[0]
       channel.should.equal('applied-ops')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,
@@ -505,10 +484,8 @@ describe('Applying updates to a doc', function () {
 
   describe('when there is no version in Mongo', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
       })
@@ -546,10 +523,8 @@ describe('Applying updates to a doc', function () {
 
   describe('when the sending duplicate ops', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       MockWebApi.insertDoc(this.project_id, this.doc_id, {
         lines: this.lines,
         version: this.version,
@@ -633,10 +608,8 @@ describe('Applying updates to a doc', function () {
 
   describe('when sending updates for a non-existing doc id', function () {
     before(function (done) {
-      ;[this.project_id, this.doc_id] = Array.from([
-        DocUpdaterClient.randomId(),
-        DocUpdaterClient.randomId(),
-      ])
+      this.project_id = DocUpdaterClient.randomId()
+      this.doc_id = DocUpdaterClient.randomId()
       this.non_existing = {
         doc_id: this.doc_id,
         v: this.version,
@@ -674,7 +647,7 @@ describe('Applying updates to a doc', function () {
 
     it('should send a message with an error', function () {
       this.messageCallback.called.should.equal(true)
-      const [channel, message] = Array.from(this.messageCallback.args[0])
+      const [channel, message] = this.messageCallback.args[0]
       channel.should.equal('applied-ops')
       JSON.parse(message).should.deep.include({
         project_id: this.project_id,

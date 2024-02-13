@@ -74,6 +74,14 @@ describe('UpdateManager', function () {
       },
     }
 
+    this.ProjectHistoryRedisManager = {
+      promises: {
+        queueOps: sinon
+          .stub()
+          .callsFake(async (projectId, ...ops) => ops.length),
+      },
+    }
+
     this.UpdateManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './LockManager': this.LockManager,
@@ -87,6 +95,7 @@ describe('UpdateManager', function () {
         './RangesManager': this.RangesManager,
         './SnapshotManager': this.SnapshotManager,
         './Profiler': this.Profiler,
+        './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
       },
     })
   })
@@ -309,6 +318,11 @@ describe('UpdateManager', function () {
         { v: 42, op: 'mock-op-42' },
         { v: 45, op: 'mock-op-45' },
       ]
+      this.historyUpdates = [
+        'history-update-1',
+        'history-update-2',
+        'history-update-3',
+      ]
       this.project_ops_length = 123
       this.pathname = '/a/b/c.tex'
       this.DocumentManager.promises.getDoc.resolves({
@@ -317,19 +331,19 @@ describe('UpdateManager', function () {
         ranges: this.ranges,
         pathname: this.pathname,
         projectHistoryId: this.projectHistoryId,
+        historyRangesSupport: false,
       })
       this.RangesManager.applyUpdate.returns({
         newRanges: this.updated_ranges,
         rangesWereCollapsed: false,
+        historyUpdates: this.historyUpdates,
       })
       this.ShareJsUpdateManager.promises.applyUpdate = sinon.stub().resolves({
         updatedDocLines: this.updatedDocLines,
         version: this.version,
         appliedOps: this.appliedOps,
       })
-      this.RedisManager.promises.updateDocument.resolves(
-        this.project_ops_length
-      )
+      this.RedisManager.promises.updateDocument.resolves()
       this.UpdateManager.promises._addProjectHistoryMetadataToOps = sinon.stub()
     })
 
@@ -390,9 +404,15 @@ describe('UpdateManager', function () {
       })
 
       it('should push the applied ops into the history queue', function () {
-        this.HistoryManager.recordAndFlushHistoryOps
-          .calledWith(this.project_id, this.appliedOps, this.project_ops_length)
-          .should.equal(true)
+        this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWith(
+          this.project_id,
+          ...this.appliedOps.map(op => JSON.stringify(op))
+        )
+        this.HistoryManager.recordAndFlushHistoryOps.should.have.been.calledWith(
+          this.project_id,
+          this.appliedOps,
+          this.appliedOps.length
+        )
       })
     })
 
@@ -445,6 +465,7 @@ describe('UpdateManager', function () {
         this.RangesManager.applyUpdate.returns({
           newRanges: this.updated_ranges,
           rangesWereCollapsed: true,
+          historyUpdates: this.historyUpdates,
         })
         await this.UpdateManager.promises.applyUpdate(
           this.project_id,
@@ -468,6 +489,36 @@ describe('UpdateManager', function () {
             this.ranges
           )
           .should.equal(true)
+      })
+    })
+
+    describe('when history ranges are supported', function () {
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          historyRangesSupport: true,
+        })
+        await this.UpdateManager.promises.applyUpdate(
+          this.project_id,
+          this.doc_id,
+          this.update
+        )
+      })
+
+      it('should push the history updates into the history queue', function () {
+        this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWith(
+          this.project_id,
+          ...this.historyUpdates.map(op => JSON.stringify(op))
+        )
+        this.HistoryManager.recordAndFlushHistoryOps.should.have.been.calledWith(
+          this.project_id,
+          this.historyUpdates,
+          this.historyUpdates.length
+        )
       })
     })
   })

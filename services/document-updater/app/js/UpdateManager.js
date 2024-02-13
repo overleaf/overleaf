@@ -3,6 +3,7 @@
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const LockManager = require('./LockManager')
 const RedisManager = require('./RedisManager')
+const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const RealTimeRedisManager = require('./RealTimeRedisManager')
 const ShareJsUpdateManager = require('./ShareJsUpdateManager')
 const HistoryManager = require('./HistoryManager')
@@ -14,6 +15,15 @@ const DocumentManager = require('./DocumentManager')
 const RangesManager = require('./RangesManager')
 const SnapshotManager = require('./SnapshotManager')
 const Profiler = require('./Profiler')
+const { isInsert, isDelete } = require('./Utils')
+
+/**
+ * @typedef {import("./types").DeleteOp} DeleteOp
+ * @typedef {import("./types").InsertOp} InsertOp
+ * @typedef {import("./types").Op} Op
+ * @typedef {import("./types").Ranges} Ranges
+ * @typedef {import("./types").Update} Update
+ */
 
 const UpdateManager = {
   async processOutstandingUpdates(projectId, docId) {
@@ -82,6 +92,13 @@ const UpdateManager = {
     profile.log('async done').end()
   },
 
+  /**
+   * Apply an update to the given document
+   *
+   * @param {string} projectId
+   * @param {string} docId
+   * @param {Update} update
+   */
   async applyUpdate(projectId, docId, update) {
     const profile = new Profiler('applyUpdate', {
       project_id: projectId,
@@ -92,8 +109,14 @@ const UpdateManager = {
     profile.log('sanitizeUpdate', { sync: true })
 
     try {
-      let { lines, version, ranges, pathname, projectHistoryId } =
-        await DocumentManager.promises.getDoc(projectId, docId)
+      let {
+        lines,
+        version,
+        ranges,
+        pathname,
+        projectHistoryId,
+        historyRangesSupport,
+      } = await DocumentManager.promises.getDoc(projectId, docId)
       profile.log('getDoc')
 
       if (lines == null || version == null) {
@@ -117,13 +140,20 @@ const UpdateManager = {
         sync: incomingUpdateVersion === previousVersion,
       })
 
-      const { newRanges, rangesWereCollapsed } = RangesManager.applyUpdate(
-        projectId,
-        docId,
-        ranges,
-        appliedOps,
-        updatedDocLines
-      )
+      let { newRanges, rangesWereCollapsed, historyUpdates } =
+        RangesManager.applyUpdate(
+          projectId,
+          docId,
+          ranges,
+          appliedOps,
+          updatedDocLines
+        )
+      if (!historyRangesSupport) {
+        // The document has not been transitioned to include comments and
+        // tracked changes in its history. Send regular updates rather than the
+        // full history updates.
+        historyUpdates = appliedOps
+      }
       profile.log('RangesManager.applyUpdate', { sync: true })
 
       UpdateManager._addProjectHistoryMetadataToOps(
@@ -132,8 +162,7 @@ const UpdateManager = {
         projectHistoryId,
         lines
       )
-
-      const projectOpsLength = await RedisManager.promises.updateDocument(
+      await RedisManager.promises.updateDocument(
         projectId,
         docId,
         updatedDocLines,
@@ -144,12 +173,27 @@ const UpdateManager = {
       )
       profile.log('RedisManager.updateDocument')
 
-      HistoryManager.recordAndFlushHistoryOps(
-        projectId,
-        appliedOps,
-        projectOpsLength
-      )
-      profile.log('recordAndFlushHistoryOps')
+      if (historyUpdates.length > 0) {
+        Metrics.inc('history-queue', 1, { status: 'project-history' })
+        try {
+          const projectOpsLength =
+            await ProjectHistoryRedisManager.promises.queueOps(
+              projectId,
+              ...historyUpdates.map(op => JSON.stringify(op))
+            )
+          HistoryManager.recordAndFlushHistoryOps(
+            projectId,
+            historyUpdates,
+            projectOpsLength
+          )
+          profile.log('recordAndFlushHistoryOps')
+        } catch (err) {
+          // The full project history can re-sync a project in case
+          //  updates went missing.
+          // Just record the error here and acknowledge the write-op.
+          Metrics.inc('history-queue-error')
+        }
+      }
 
       if (rangesWereCollapsed) {
         Metrics.inc('doc-snapshot')
@@ -259,10 +303,19 @@ const UpdateManager = {
     return update
   },
 
+  /**
+   * Add metadata to ops that will be useful to project history
+   *
+   * @param {Update[]} updates
+   * @param {string} pathname
+   * @param {string} projectHistoryId
+   * @param {string[]} lines
+   */
   _addProjectHistoryMetadataToOps(updates, pathname, projectHistoryId, lines) {
     let docLength = _.reduce(lines, (chars, line) => chars + line.length, 0)
     docLength += lines.length - 1 // count newline characters
-    updates.forEach(function (update) {
+
+    for (const update of updates) {
       update.projectHistoryId = projectHistoryId
       if (!update.meta) {
         update.meta = {}
@@ -279,14 +332,14 @@ const UpdateManager = {
       // before it's ops are applied. However, we need to track any
       // changes to it for the next update.
       for (const op of update.op) {
-        if (op.i != null) {
+        if (isInsert(op)) {
           docLength += op.i.length
         }
-        if (op.d != null) {
+        if (isDelete(op)) {
           docLength -= op.d.length
         }
       }
-    })
+    }
   },
 }
 

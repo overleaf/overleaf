@@ -8,7 +8,6 @@ const metrics = require('./Metrics')
 const Errors = require('./Errors')
 const crypto = require('crypto')
 const async = require('async')
-const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const { docIsTooLarge } = require('./Limits')
 
 // Sometimes Redis calls take an unexpectedly long time.  We have to be
@@ -477,25 +476,7 @@ const RedisManager = {
           if (error) {
             return callback(error)
           }
-
-          if (jsonOps.length > 0) {
-            metrics.inc('history-queue', 1, { status: 'project-history' })
-            ProjectHistoryRedisManager.queueOps(
-              projectId,
-              ...jsonOps,
-              (error, projectUpdateCount) => {
-                if (error) {
-                  // The full project history can re-sync a project in case
-                  //  updates went missing.
-                  // Just record the error here and acknowledge the write-op.
-                  metrics.inc('history-queue-error')
-                }
-                callback(null, projectUpdateCount)
-              }
-            )
-          } else {
-            callback(null)
-          }
+          callback()
         })
       })
     })

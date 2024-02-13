@@ -1,18 +1,18 @@
 const sinon = require('sinon')
-const modulePath = '../../../../app/js/RedisManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
 const crypto = require('crypto')
 const tk = require('timekeeper')
+
+const MODULE_PATH = '../../../../app/js/RedisManager.js'
 
 describe('RedisManager', function () {
   beforeEach(function () {
     this.multi = { exec: sinon.stub().yields() }
     this.rclient = { multi: () => this.multi, srem: sinon.stub().yields() }
     tk.freeze(new Date())
-    this.RedisManager = SandboxedModule.require(modulePath, {
+    this.RedisManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         '@overleaf/settings': (this.settings = {
           documentupdater: { logHashErrors: { write: true, read: true } },
           redis: {
@@ -468,13 +468,6 @@ describe('RedisManager', function () {
           null,
           null,
         ])
-      this.ProjectHistoryRedisManager.queueOps = sinon
-        .stub()
-        .callsArgWith(
-          this.ops.length + 1,
-          null,
-          this.project_update_list_length
-        )
     })
 
     describe('with a consistent version', function () {
@@ -545,16 +538,8 @@ describe('RedisManager', function () {
           .should.equal(true)
       })
 
-      it('should push the updates into the project history ops list', function () {
-        this.ProjectHistoryRedisManager.queueOps
-          .calledWith(this.project_id, JSON.stringify(this.ops[0]))
-          .should.equal(true)
-      })
-
       it('should call the callback', function () {
-        this.callback
-          .calledWith(null, this.project_update_list_length)
-          .should.equal(true)
+        this.callback.should.have.been.called
       })
 
       it('should not log any errors', function () {
@@ -578,16 +563,8 @@ describe('RedisManager', function () {
           )
         })
 
-        it('should push the updates into the project history ops list', function () {
-          this.ProjectHistoryRedisManager.queueOps
-            .calledWith(this.project_id, JSON.stringify(this.ops[0]))
-            .should.equal(true)
-        })
-
-        it('should call the callback with the project update count only', function () {
-          this.callback
-            .calledWith(null, this.project_update_list_length)
-            .should.equal(true)
+        it('should call the callback', function () {
+          this.callback.should.have.been.called
         })
       })
     })
@@ -645,10 +622,6 @@ describe('RedisManager', function () {
 
       it('should not try to enqueue doc updates', function () {
         this.multi.rpush.called.should.equal(false)
-      })
-
-      it('should not try to enqueue project updates', function () {
-        this.ProjectHistoryRedisManager.queueOps.called.should.equal(false)
       })
 
       it('should still set the doclines', function () {
@@ -1041,9 +1014,6 @@ describe('RedisManager', function () {
         this.RedisManager.getDoc = sinon
           .stub()
           .callsArgWith(2, null, 'lines', 'version')
-        this.ProjectHistoryRedisManager.queueRenameEntity = sinon
-          .stub()
-          .yields()
         this.RedisManager.renameDoc(
           this.project_id,
           this.docId,
@@ -1066,9 +1036,6 @@ describe('RedisManager', function () {
         this.RedisManager.getDoc = sinon
           .stub()
           .callsArgWith(2, null, null, null)
-        this.ProjectHistoryRedisManager.queueRenameEntity = sinon
-          .stub()
-          .yields()
         this.RedisManager.renameDoc(
           this.project_id,
           this.docId,
