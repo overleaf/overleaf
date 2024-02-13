@@ -1769,6 +1769,7 @@
   "sso_link_invite_has_been_sent_to_email": "An SSO invite reminder has been sent to <0>__email__</0>",
   "sso_link_now_or_later": "We need to link your account with the group identity provider. You can either do this now, or do this later.",
   "sso_link_your_group_uses_sso": "The group you are part of uses single sign-on",
+  "sso_login": "SSO login",
   "sso_logs": "SSO Logs",
   "sso_not_active": "SSO not active",
   "sso_not_linked": "You have not linked your account to __provider__. Please log in to your account another way and link your __provider__ account via your account settings.",

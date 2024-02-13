@@ -348,7 +348,7 @@ class UserHelper {
     if (body.message && body.message.type === 'error') {
       throw new Error(`register api error: ${body.message.text}`)
     }
-    if (body.redir === '/institutional-login') {
+    if (body.redir === '/sso-login') {
       throw new Error(
         `cannot register intitutional email: ${options.json.email}`
       )
