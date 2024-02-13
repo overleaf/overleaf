@@ -19,6 +19,7 @@ const { isInsert, isDelete } = require('./Utils')
 
 /**
  * @typedef {import("./types").DeleteOp} DeleteOp
+ * @typedef {import("./types").HistoryUpdate } HistoryUpdate
  * @typedef {import("./types").InsertOp} InsertOp
  * @typedef {import("./types").Op} Op
  * @typedef {import("./types").Ranges} Ranges
@@ -156,12 +157,6 @@ const UpdateManager = {
       }
       profile.log('RangesManager.applyUpdate', { sync: true })
 
-      UpdateManager._addProjectHistoryMetadataToOps(
-        appliedOps,
-        pathname,
-        projectHistoryId,
-        lines
-      )
       await RedisManager.promises.updateDocument(
         projectId,
         docId,
@@ -172,6 +167,15 @@ const UpdateManager = {
         update.meta
       )
       profile.log('RedisManager.updateDocument')
+
+      UpdateManager._addMetadataToHistoryUpdates(
+        historyUpdates,
+        pathname,
+        projectHistoryId,
+        lines,
+        ranges,
+        historyRangesSupport
+      )
 
       if (historyUpdates.length > 0) {
         Metrics.inc('history-queue', 1, { status: 'project-history' })
@@ -304,16 +308,31 @@ const UpdateManager = {
   },
 
   /**
-   * Add metadata to ops that will be useful to project history
+   * Add metadata that will be useful to project history
    *
-   * @param {Update[]} updates
+   * @param {HistoryUpdate[]} updates
    * @param {string} pathname
    * @param {string} projectHistoryId
    * @param {string[]} lines
+   * @param {Ranges} ranges
+   * @param {boolean} historyRangesSupport
    */
-  _addProjectHistoryMetadataToOps(updates, pathname, projectHistoryId, lines) {
+  _addMetadataToHistoryUpdates(
+    updates,
+    pathname,
+    projectHistoryId,
+    lines,
+    ranges,
+    historyRangesSupport
+  ) {
     let docLength = _.reduce(lines, (chars, line) => chars + line.length, 0)
     docLength += lines.length - 1 // count newline characters
+    let historyDocLength = docLength
+    for (const change of ranges.changes ?? []) {
+      if ('d' in change.op) {
+        historyDocLength += change.op.d.length
+      }
+    }
 
     for (const update of updates) {
       update.projectHistoryId = projectHistoryId
@@ -322,6 +341,10 @@ const UpdateManager = {
       }
       update.meta.pathname = pathname
       update.meta.doc_length = docLength
+      if (historyRangesSupport && historyDocLength !== docLength) {
+        update.meta.history_doc_length = historyDocLength
+      }
+
       // Each update may contain multiple ops, i.e.
       // [{
       // 	ops: [{i: "foo", p: 4}, {d: "bar", p:8}]
@@ -334,9 +357,21 @@ const UpdateManager = {
       for (const op of update.op) {
         if (isInsert(op)) {
           docLength += op.i.length
+          if (!op.trackedDeleteRejection) {
+            // Tracked delete rejections end up retaining characters rather
+            // than inserting
+            historyDocLength += op.i.length
+          }
         }
         if (isDelete(op)) {
           docLength -= op.d.length
+          if (!update.meta.tc || op.u) {
+            // This is either a regular delete or a tracked insert rejection.
+            // It will be translated to a delete in history.  Tracked deletes
+            // are translated into retains and don't change the history doc
+            // length.
+            historyDocLength -= op.d.length
+          }
         }
       }
     }

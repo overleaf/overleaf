@@ -2,8 +2,6 @@ export type Update = {
   op: Op[]
   v: number
   meta?: {
-    pathname?: string
-    doc_length?: number
     tc?: boolean
     user_id?: string
   }
@@ -82,6 +80,7 @@ export type HistoryUpdate = {
   meta?: {
     pathname?: string
     doc_length?: number
+    history_doc_length?: number
     tc?: boolean
     user_id?: string
   }
