@@ -365,28 +365,14 @@ async function projectListPage(req, res, next) {
 
   let showInrGeoBanner, inrGeoBannerSplitTestName
   let inrGeoBannerVariant = 'default'
-  let showLATAMBanner = false
   let recommendedCurrency
   if (usersBestSubscription?.type === 'free') {
-    const { currencyCode, countryCode } =
-      await GeoIpLookup.promises.getCurrencyCode(req.ip)
+    const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(req.ip)
     // Split test is kept active, but all users geolocated in India can
     // now use the INR currency (See #13507)
     const { variant: inrGeoPricingVariant } =
       await SplitTestHandler.promises.getAssignment(req, res, 'geo-pricing-inr')
-    const latamGeoPricingAssignment =
-      await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        'geo-pricing-latam'
-      )
-    showLATAMBanner =
-      latamGeoPricingAssignment.variant === 'latam' &&
-      ['BR', 'MX', 'CO', 'CL', 'PE'].includes(countryCode)
-    // LATAM Banner needs to know which currency to display
-    if (showLATAMBanner) {
-      recommendedCurrency = currencyCode
-    }
+
     if (countryCode === 'IN') {
       inrGeoBannerSplitTestName =
         inrGeoPricingVariant === 'inr'
@@ -449,7 +435,6 @@ async function projectListPage(req, res, next) {
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant,
     showWritefullPromoBanner,
-    showLATAMBanner,
     recommendedCurrency,
     showInrGeoBanner,
     inrGeoBannerVariant,

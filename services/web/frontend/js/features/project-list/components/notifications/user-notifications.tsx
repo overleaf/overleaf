@@ -8,7 +8,6 @@ import WritefullPromoBanner from './writefull-promo-banner'
 import WritefullPremiumPromoBanner from './writefull-premium-promo-banner'
 import GroupSsoSetupSuccess from './groups/group-sso-setup-success'
 import INRBanner from './ads/inr-banner'
-import LATAMBanner from './ads/latam-banner'
 import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import customLocalStorage from '../../../../infrastructure/local-storage'
@@ -50,7 +49,6 @@ function UserNotifications() {
     'ol-inrGeoBannerSplitTestName',
     'unassigned'
   )
-  const showLATAMBanner = getMeta('ol-showLATAMBanner', false)
   const writefullIntegrationSplitTestEnabled = isSplitTestEnabled(
     'writefull-integration'
   )
@@ -107,18 +105,15 @@ function UserNotifications() {
         <Institution />
         <ConfirmEmail />
         <ReconfirmationInfo />
-        {!showLATAMBanner &&
-          !showInrGeoBanner &&
-          !showWritefull &&
-          !dismissedWritefull && <GroupsAndEnterpriseBanner />}
-        {showLATAMBanner ? (
-          <LATAMBanner />
-        ) : showInrGeoBanner ? (
+        {!showInrGeoBanner && !showWritefull && !dismissedWritefull && (
+          <GroupsAndEnterpriseBanner />
+        )}
+        {showInrGeoBanner && (
           <INRBanner
             variant={inrGeoBannerVariant}
             splitTestName={inrGeoBannerSplitTestName}
           />
-        ) : null}
+        )}
         {writefullIntegrationSplitTestEnabled || user?.writefull?.enabled ? (
           <WritefullPremiumPromoBanner
             show={showWritefull}

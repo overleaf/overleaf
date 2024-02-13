@@ -38,12 +38,8 @@ async function plansPage(req, res) {
   if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
     currency = queryCurrency
   }
-  const {
-    recommendedCurrency,
-    countryCode,
-    geoPricingINRTestVariant,
-    geoPricingLATAMTestVariant,
-  } = await _getRecommendedCurrency(req, res)
+  const { recommendedCurrency, countryCode, geoPricingINRTestVariant } =
+    await _getRecommendedCurrency(req, res)
   if (recommendedCurrency && currency == null) {
     currency = recommendedCurrency
   }
@@ -102,12 +98,6 @@ async function plansPage(req, res) {
     countryCode,
     'geo-pricing-inr-group': geoPricingINRTestVariant,
     'geo-pricing-inr-page': currency === 'INR' ? 'inr' : 'default',
-    'geo-pricing-latam-group': geoPricingLATAMTestVariant,
-    'geo-pricing-latam-page': ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(
-      currency
-    )
-      ? 'latam'
-      : 'default',
     'annual-trials': annualTrialsAssignment.variant,
     'website-redesign': websiteRedesignVariant,
   }
@@ -247,12 +237,8 @@ async function userSubscriptionPage(req, res) {
 
 async function interstitialPaymentPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const {
-    recommendedCurrency,
-    countryCode,
-    geoPricingINRTestVariant,
-    geoPricingLATAMTestVariant,
-  } = await _getRecommendedCurrency(req, res)
+  const { recommendedCurrency, countryCode, geoPricingINRTestVariant } =
+    await _getRecommendedCurrency(req, res)
 
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
@@ -289,12 +275,6 @@ async function interstitialPaymentPage(req, res) {
       countryCode,
       'geo-pricing-inr-group': geoPricingINRTestVariant,
       'geo-pricing-inr-page': recommendedCurrency === 'INR' ? 'inr' : 'default',
-      'geo-pricing-latam-group': geoPricingLATAMTestVariant,
-      'geo-pricing-latam-page': ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(
-        recommendedCurrency
-      )
-        ? 'latam'
-        : 'default',
       'annual-trials': annualTrialsAssignment.variant,
     }
     if (inrGeoBannerSplitTestName) {
@@ -653,23 +633,15 @@ async function _getRecommendedCurrency(req, res) {
     res,
     'geo-pricing-inr'
   )
-  // for #13559
-  const assignmentLATAM = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'geo-pricing-latam'
-  )
-  if (
-    ['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency) &&
-    assignmentLATAM?.variant !== 'latam'
-  ) {
+
+  if (['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency)) {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
+
   return {
     recommendedCurrency,
     countryCode,
     geoPricingINRTestVariant: assignmentINR?.variant,
-    geoPricingLATAMTestVariant: assignmentLATAM?.variant,
   }
 }
 
