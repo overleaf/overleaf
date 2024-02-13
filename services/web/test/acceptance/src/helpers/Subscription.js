@@ -91,6 +91,21 @@ class Subscription {
     )
   }
 
+  setValidatedSSO(callback) {
+    db.subscriptions.findOne({ _id: new ObjectId(this._id) }, (error, doc) => {
+      if (error) {
+        return callback(error)
+      }
+      const ssoConfigId = doc.ssoConfig
+
+      db.ssoConfigs.findOneAndUpdate(
+        { _id: ssoConfigId },
+        { $set: { validated: true } },
+        callback
+      )
+    })
+  }
+
   setValidatedAndEnabledSSO(callback) {
     db.subscriptions.findOne({ _id: new ObjectId(this._id) }, (error, doc) => {
       if (error) {
