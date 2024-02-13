@@ -264,7 +264,9 @@ async function resendInvite(req, res, next) {
   }
 
   try {
-    await rateLimiters.resendGroupInvite.consume(userEmail)
+    await rateLimiters.resendGroupInvite.consume(userEmail, 1, {
+      method: 'email',
+    })
 
     const existingUser = await UserGetter.promises.getUserByAnyEmail(userEmail)
 

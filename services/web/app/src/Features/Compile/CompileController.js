@@ -281,7 +281,7 @@ module.exports = CompileController = {
     const projectId = req.params.Project_id
     const rateLimit = function (callback) {
       pdfDownloadRateLimiter
-        .consume(req.ip)
+        .consume(req.ip, 1, { method: 'ip' })
         .then(() => {
           callback(null, true)
         })

@@ -34,7 +34,7 @@ class RateLimiter {
     })
   }
 
-  async consume(key, points = 1, options = {}) {
+  async consume(key, points = 1, options = { method: 'unknown' }) {
     if (Settings.disableRateLimits) {
       // Return a fake result in case it's used somewhere
       return {
@@ -57,7 +57,10 @@ class RateLimiter {
         if (err.consumedPoints - points <= this._rateLimiter.points) {
           logger.warn({ path: this.name, key }, 'rate limit exceeded')
         }
-        Metrics.inc('rate-limit-hit', 1, { path: this.name })
+        Metrics.inc('rate-limit-hit', 1, {
+          path: this.name,
+          method: options.method,
+        })
         throw err
       }
     }

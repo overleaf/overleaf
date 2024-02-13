@@ -8,7 +8,7 @@ const rateLimiter = new RateLimiter('login', {
 
 function processLoginRequest(email, callback) {
   rateLimiter
-    .consume(email)
+    .consume(email, 1, { method: 'email' })
     .then(() => {
       callback(null, true)
     })

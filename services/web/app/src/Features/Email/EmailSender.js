@@ -116,7 +116,7 @@ async function checkCanSendEmail(options) {
     return true
   }
   try {
-    await rateLimiter.consume(options.sendingUser_id)
+    await rateLimiter.consume(options.sendingUser_id, 1, { method: 'userId' })
   } catch (err) {
     if (err instanceof Error) {
       throw err

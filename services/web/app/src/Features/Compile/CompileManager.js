@@ -310,7 +310,7 @@ module.exports = CompileManager = {
     Metrics.inc(`auto-compile-${compileGroup}`)
     const rateLimiter = getAutoCompileRateLimiter(compileGroup)
     rateLimiter
-      .consume('global')
+      .consume('global', 1, { method: 'global' })
       .then(() => {
         callback(null, true)
       })

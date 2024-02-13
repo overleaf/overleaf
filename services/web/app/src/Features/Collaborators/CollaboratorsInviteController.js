@@ -69,7 +69,7 @@ const CollaboratorsInviteController = {
     const maxRequests = 10 * collabLimit
     const points = Math.floor(RATE_LIMIT_POINTS / maxRequests)
     try {
-      await rateLimiter.consume(userId, points)
+      await rateLimiter.consume(userId, points, { method: 'userId' })
     } catch (err) {
       if (err instanceof Error) {
         throw err
