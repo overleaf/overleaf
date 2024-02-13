@@ -103,7 +103,7 @@ class TrackedChangeList {
         trackedChange.range.startIsAfter(cursor) ||
         cursor === trackedChange.range.start
       ) {
-        trackedChange.range.moveBy(insertedText.length)
+        trackedChange.range = trackedChange.range.moveBy(insertedText.length)
         newTrackedChanges.push(trackedChange)
       } else if (cursor === trackedChange.range.end) {
         // The insertion is at the end of the tracked change. So we don't need
@@ -157,10 +157,10 @@ class TrackedChangeList {
       if (deletedRange.contains(trackedChange.range)) {
         continue
       } else if (deletedRange.overlaps(trackedChange.range)) {
-        trackedChange.range.subtract(deletedRange)
+        trackedChange.range = trackedChange.range.subtract(deletedRange)
         newTrackedChanges.push(trackedChange)
       } else if (trackedChange.range.startIsAfter(cursor)) {
-        trackedChange.range.pos -= length
+        trackedChange.range = trackedChange.range.moveBy(-length)
         newTrackedChanges.push(trackedChange)
       } else {
         newTrackedChanges.push(trackedChange)
@@ -188,13 +188,14 @@ class TrackedChangeList {
       } else if (retainedRange.overlaps(trackedChange.range)) {
         if (trackedChange.range.contains(retainedRange)) {
           const [leftRange, rightRange] = trackedChange.range.splitAt(cursor)
-          rightRange.pos += length
-          rightRange.length -= length
           newTrackedChanges.push(
             new TrackedChange(leftRange, trackedChange.tracking.clone())
           )
           newTrackedChanges.push(
-            new TrackedChange(rightRange, trackedChange.tracking.clone())
+            new TrackedChange(
+              rightRange.moveBy(length).shrinkBy(length),
+              trackedChange.tracking.clone()
+            )
           )
         } else if (retainedRange.start <= trackedChange.range.start) {
           // overlaps to the left

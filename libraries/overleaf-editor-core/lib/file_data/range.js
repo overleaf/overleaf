@@ -5,7 +5,9 @@ class Range {
    * @param {number} length
    */
   constructor(pos, length) {
+    /** @readonly */
     this.pos = pos
+    /** @readonly */
     this.length = length
   }
 
@@ -74,34 +76,28 @@ class Range {
 
   /**
    * @param {Range} range
-   * @returns {number} the length of the intersected range
+   * @returns {Range}
    */
   subtract(range) {
     if (this.contains(range)) {
-      this.length -= range.length
-      return range.length
+      return this.shrinkBy(range.length)
     }
 
     if (range.contains(this)) {
-      const intersectedLength = this.length
-      this.length = 0
-      return intersectedLength
+      return new Range(this.pos, 0)
     }
 
     if (range.overlaps(this)) {
       if (range.start < this.start) {
         const intersectedLength = range.end - this.start
-        this.length -= intersectedLength
-        this.pos = range.pos
-        return intersectedLength
+        return new Range(range.pos, this.length - intersectedLength)
       } else {
         const intersectedLength = this.end - range.start
-        this.length -= intersectedLength
-        return intersectedLength
+        return new Range(this.pos, this.length - intersectedLength)
       }
     }
 
-    return 0
+    return new Range(this.pos, this.length)
   }
 
   /**
@@ -121,8 +117,8 @@ class Range {
     }
     const newPos = Math.min(this.pos, range.pos)
     const newEnd = Math.max(this.end, range.end)
-    this.pos = newPos
-    this.length = newEnd - newPos
+
+    return new Range(newPos, newEnd - newPos)
   }
 
   /**
@@ -130,7 +126,7 @@ class Range {
    * @param {number} length
    */
   moveBy(length) {
-    this.pos += length
+    return new Range(this.pos + length, this.length)
   }
 
   /**
@@ -138,7 +134,21 @@ class Range {
    * @param {number} extensionLength
    */
   extendBy(extensionLength) {
-    this.length += extensionLength
+    return new Range(this.pos, this.length + extensionLength)
+  }
+
+  /**
+   * Shrinks the range by a given number
+   * @param {number} shrinkLength
+   */
+  shrinkBy(shrinkLength) {
+    const newLength = this.length - shrinkLength
+
+    if (newLength < 0) {
+      throw new Error('Cannot shrink range by more than its length')
+    }
+
+    return new Range(this.pos, newLength)
   }
 
   /**

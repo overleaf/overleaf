@@ -66,7 +66,7 @@ class TrackedChange {
     if (!this.canMerge(other)) {
       throw new Error('Cannot merge tracked changes')
     }
-    this.range.merge(other.range)
+    this.range = this.range.merge(other.range)
     this.tracking.ts =
       this.tracking.ts.getTime() > other.tracking.ts.getTime()
         ? this.tracking.ts

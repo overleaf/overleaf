@@ -45,30 +45,32 @@ class Comment {
    */
   applyInsert(cursor, length, extendComment = false) {
     let existingRangeExtended = false
-    const splittedRanges = []
+    const newRanges = []
 
     for (const commentRange of this.ranges) {
       if (cursor === commentRange.end) {
         // insert right after the comment
         if (extendComment) {
-          commentRange.extendBy(length)
+          newRanges.push(commentRange.extendBy(length))
           existingRangeExtended = true
+        } else {
+          newRanges.push(commentRange)
         }
       } else if (cursor === commentRange.start) {
         // insert at the start of the comment
         if (extendComment) {
-          commentRange.extendBy(length)
+          newRanges.push(commentRange.extendBy(length))
           existingRangeExtended = true
         } else {
-          commentRange.moveBy(length)
+          newRanges.push(commentRange.moveBy(length))
         }
       } else if (commentRange.startIsAfter(cursor)) {
         // insert before the comment
-        commentRange.moveBy(length)
+        newRanges.push(commentRange.moveBy(length))
       } else if (commentRange.containsCursor(cursor)) {
         // insert is inside the comment
         if (extendComment) {
-          commentRange.extendBy(length)
+          newRanges.push(commentRange.extendBy(length))
           existingRangeExtended = true
         } else {
           const [rangeUpToCursor, , rangeAfterCursor] = commentRange.insertAt(
@@ -77,17 +79,17 @@ class Comment {
           )
 
           // use current commentRange for the part before the cursor
-          commentRange.length = rangeUpToCursor.length
+          newRanges.push(new Range(commentRange.pos, rangeUpToCursor.length))
           // add the part after the cursor as a new range
-          splittedRanges.push(rangeAfterCursor)
+          newRanges.push(rangeAfterCursor)
         }
+      } else {
+        // insert is after the comment
+        newRanges.push(commentRange)
       }
     }
 
-    // add the splitted ranges
-    for (const range of splittedRanges) {
-      this.addRange(range)
-    }
+    this.ranges = newRanges
 
     // if the insert is not inside any range, add a new range
     if (extendComment && !existingRangeExtended) {
@@ -100,14 +102,19 @@ class Comment {
    * @param {Range} deletedRange
    */
   applyDelete(deletedRange) {
+    const newRanges = []
+
     for (const commentRange of this.ranges) {
       if (commentRange.overlaps(deletedRange)) {
-        commentRange.subtract(deletedRange)
+        newRanges.push(commentRange.subtract(deletedRange))
       } else if (commentRange.startsAfter(deletedRange)) {
-        commentRange.pos -= deletedRange.length
+        newRanges.push(commentRange.moveBy(-deletedRange.length))
+      } else {
+        newRanges.push(commentRange)
       }
     }
 
+    this.ranges = newRanges
     this.mergeRanges()
   }
 
@@ -130,10 +137,10 @@ class Comment {
       if (range.isEmpty()) {
         continue
       }
-      const lastRange = mergedRanges[mergedRanges.length - 1]
+      const lastMerged = mergedRanges[mergedRanges.length - 1]
 
-      if (lastRange?.canMerge(range)) {
-        lastRange.merge(range)
+      if (lastMerged?.canMerge(range)) {
+        mergedRanges[mergedRanges.length - 1] = lastMerged.merge(range)
       } else {
         mergedRanges.push(range)
       }

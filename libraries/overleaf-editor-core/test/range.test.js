@@ -186,51 +186,51 @@ describe('Range', function () {
     it('should not subtract', function () {
       const from1to5 = new Range(1, 6)
       const from0to1 = new Range(0, 1)
-      expect(from1to5.subtract(from0to1)).to.eql(0)
-      expect(from1to5.start).to.eql(1)
-      expect(from1to5.length).to.eql(6)
+      const subtracted = from1to5.subtract(from0to1)
+      expect(subtracted.start).to.eql(1)
+      expect(subtracted.length).to.eql(6)
     })
 
     it('should subtract from the left', function () {
       const from5to19 = new Range(5, 15)
       const from15to24 = new Range(15, 10)
-      expect(from15to24.subtract(from5to19)).to.eql(5)
-      expect(from15to24.start).to.eql(5)
-      expect(from15to24.end).to.eql(10)
+      const subtracted = from15to24.subtract(from5to19)
+      expect(subtracted.start).to.eql(5)
+      expect(subtracted.end).to.eql(10)
     })
 
     it('should subtract from the right', function () {
       const from10to24 = new Range(10, 15)
       const from5to19 = new Range(5, 15)
-      expect(from5to19.subtract(from10to24)).to.eql(10)
-      expect(from5to19.start).to.eql(5)
-      expect(from5to19.end).to.eql(10)
+      const subtracted = from5to19.subtract(from10to24)
+      expect(subtracted.start).to.eql(5)
+      expect(subtracted.end).to.eql(10)
     })
 
     it('should subtract from the middle', function () {
       const from5to19 = new Range(5, 15)
       const from10to14 = new Range(10, 5)
-      expect(from5to19.subtract(from10to14)).to.eql(5)
-      expect(from5to19.start).to.eql(5)
-      expect(from5to19.end).to.eql(15)
+      const subtracted = from5to19.subtract(from10to14)
+      expect(subtracted.start).to.eql(5)
+      expect(subtracted.end).to.eql(15)
     })
 
     it('should delete entire range', function () {
       const from0to99 = new Range(0, 100)
       const from5to19 = new Range(5, 15)
-      expect(from5to19.subtract(from0to99)).to.eql(15)
-      expect(from5to19.start).to.eql(5)
-      expect(from5to19.end).to.eql(5)
-      expect(from5to19.length).to.eql(0)
+      const subtracted = from5to19.subtract(from0to99)
+      expect(subtracted.start).to.eql(5)
+      expect(subtracted.end).to.eql(5)
+      expect(subtracted.length).to.eql(0)
     })
 
     it('should not subtract if ranges do not overlap', function () {
       const from5to14 = new Range(5, 10)
       const from20to29 = new Range(20, 10)
-      expect(from5to14.subtract(from20to29)).to.eql(0)
-      expect(from20to29.subtract(from5to14)).to.eql(0)
-      expect(from5to14.start).to.eql(5)
-      expect(from5to14.end).to.eql(15)
+      const subtracted1 = from5to14.subtract(from20to29)
+      const subtracted2 = from20to29.subtract(from5to14)
+      expect(subtracted1.toRaw()).deep.equal(from5to14.toRaw())
+      expect(subtracted2.toRaw()).deep.equal(from20to29.toRaw())
     })
   })
 
@@ -239,35 +239,35 @@ describe('Range', function () {
       const from5to14 = new Range(5, 10)
       const from10to19 = new Range(10, 10)
       expect(from5to14.canMerge(from10to19)).to.eql(true)
-      from5to14.merge(from10to19)
-      expect(from5to14.start).to.eql(5)
-      expect(from5to14.end).to.eql(20)
+      const result = from5to14.merge(from10to19)
+      expect(result.start).to.eql(5)
+      expect(result.end).to.eql(20)
     })
 
     it('should merge ranges overlaping at the start', function () {
       const from5to14 = new Range(5, 10)
       const from0to9 = new Range(0, 10)
       expect(from5to14.canMerge(from0to9)).to.eql(true)
-      from5to14.merge(from0to9)
-      expect(from5to14.start).to.eql(0)
-      expect(from5to14.end).to.eql(15)
+      const result = from5to14.merge(from0to9)
+      expect(result.start).to.eql(0)
+      expect(result.end).to.eql(15)
     })
 
     it('should merge ranges if one is covered by another', function () {
       const from5to14 = new Range(5, 10)
       const from0to19 = new Range(0, 20)
       expect(from5to14.canMerge(from0to19)).to.eql(true)
-      from5to14.merge(from0to19)
-      expect(from5to14.toRaw()).deep.equal(from0to19.toRaw())
+      const result = from5to14.merge(from0to19)
+      expect(result.toRaw()).deep.equal(from0to19.toRaw())
     })
 
     it('should produce the same length after merge', function () {
       const from5to14 = new Range(5, 10)
       const from0to19 = new Range(0, 20)
       expect(from0to19.canMerge(from5to14)).to.eql(true)
-      from0to19.merge(from5to14)
-      expect(from0to19.start).to.eql(0)
-      expect(from0to19.end).to.eql(20)
+      const result = from0to19.merge(from5to14)
+      expect(result.start).to.eql(0)
+      expect(result.end).to.eql(20)
     })
 
     it('should not merge ranges if they do not overlap', function () {
@@ -329,18 +329,31 @@ describe('Range', function () {
 
   it('should extend the range', function () {
     const from5to14 = new Range(5, 10)
-    from5to14.extendBy(3)
-    expect(from5to14.length).to.eql(13)
-    expect(from5to14.start).to.eql(5)
-    expect(from5to14.end).to.eql(18)
+    const result = from5to14.extendBy(3)
+    expect(result.length).to.eql(13)
+    expect(result.start).to.eql(5)
+    expect(result.end).to.eql(18)
+  })
+
+  it('should shrink the range', function () {
+    const from5to14 = new Range(5, 10)
+    const result = from5to14.shrinkBy(3)
+    expect(result.length).to.eql(7)
+    expect(result.start).to.eql(5)
+    expect(result.end).to.eql(12)
+  })
+
+  it('should throw if shrinking too much', function () {
+    const from5to14 = new Range(5, 10)
+    expect(() => from5to14.shrinkBy(11)).to.throw()
   })
 
   it('should move the range', function () {
     const from5to14 = new Range(5, 10)
-    from5to14.moveBy(3)
-    expect(from5to14.length).to.eql(10)
-    expect(from5to14.start).to.eql(8)
-    expect(from5to14.end).to.eql(18)
+    const result = from5to14.moveBy(3)
+    expect(result.length).to.eql(10)
+    expect(result.start).to.eql(8)
+    expect(result.end).to.eql(18)
   })
 
   describe('splitAt', function () {
