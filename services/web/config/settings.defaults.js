@@ -114,7 +114,7 @@ module.exports = {
   },
 
   allowAnonymousReadAndWriteSharing:
-    process.env.SHARELATEX_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING === 'true',
+    process.env.OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING === 'true',
 
   // Databases
   // ---------
@@ -586,7 +586,7 @@ module.exports = {
 
   // Should we allow access to any page without logging in? This includes
   // public projects, /learn, /templates, about pages, etc.
-  allowPublicAccess: process.env.SHARELATEX_ALLOW_PUBLIC_ACCESS === 'true',
+  allowPublicAccess: process.env.OVERLEAF_ALLOW_PUBLIC_ACCESS === 'true',
 
   // editor should be open by default
   editorIsOpen: process.env.EDITOR_OPEN !== 'false',
