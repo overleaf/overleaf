@@ -138,7 +138,14 @@ class Subscription {
     })
   }
 
-  linkGroupSSO(user, externalUserId, userIdAttribute, auditLog, callback) {
+  linkGroupSSO(
+    user,
+    externalUserId,
+    userIdAttribute,
+    auditLog,
+    sessionID,
+    callback
+  ) {
     SubscriptionModel.findById(this._id).exec((error, subscription) => {
       if (error) {
         return callback(error)
@@ -150,6 +157,7 @@ class Subscription {
         externalUserId,
         userIdAttribute,
         auditLog,
+        sessionID,
         callback
       )
     })
