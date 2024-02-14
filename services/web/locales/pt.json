@@ -332,7 +332,6 @@
   "language": "Idioma",
   "last_modified": "Última Modificação",
   "last_name": "Sobrenome",
-  "latam_discount_offer": "__flag__ Boa notícia! Agora você pode usar __currencyName__ para pagar uma assinatura Overleaf com <0>__discountPercent__% de desconto</0> em nossos recursos premium.",
   "latex_editor_info": "Tudo que você precisa num editar moderno de LaTeX - correção ortográfica, auto-completar inteligente, realce de sintaxe, diversas cores de temas, atalhos de vim e emacs, ajuda com mensagens de aviso e erros do LaTeX e muito mais.",
   "latex_guides": "Guias LaTeX",
   "latex_templates": "Modelos LaTeX",

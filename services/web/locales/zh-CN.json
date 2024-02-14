@@ -2151,6 +2151,8 @@
   "writefull": "Writefull",
   "writefull_disable_prompt_body": "Writefull 已启用。 您可以随时在帐户设置中打开或关闭它。",
   "writefull_learn_more": "了解更多关于 Writefull for Overleaf",
+  "writefull_loading_error_body": "尝试刷新页面，如果无效，尝试禁用所有的浏览器拓展，以便检查是否他们阻止了 Writefull 的加载。",
+  "writefull_loading_error_title": "Writefull 加载失败",
   "writefull_prompt_body": "通过我们的 Writefull 集成，获得 AI语言反馈。（您还可以使用代码OVERLEAF10享受Writefull premium 10%的折扣。）",
   "writefull_prompt_title": "Overleaf 的 AI 写作助理",
   "writefull_settings_description": "使用 Writefull for Overleaf 获得专为研究写作量身定制的基于人工智能的免费语言反馈。 另外，如果您升级到 Writefull Premium，您可以使用 TeXGPT 生成 LaTeX 代码 - 在结账时使用 OVERLEAF10 可获得 10% 的折扣。",
