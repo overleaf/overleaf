@@ -61,6 +61,7 @@ html(
 			meta(name="ol-isManagedAccount" data-type="boolean" content=isManagedAccount)
 			each restriction in userRestrictions || []
 				meta(name='ol-cannot-' + restriction data-type="boolean" content=true)
+			meta(name="ol-bootstrapVersion" data-type="json" content=bootstrapVersion)
 
 		block head-scripts
 

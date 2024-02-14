@@ -25,6 +25,12 @@ const entryPoints = {
   'main-style': './frontend/stylesheets/main-style.less',
   'main-ieee-style': './frontend/stylesheets/main-ieee-style.less',
   'main-light-style': './frontend/stylesheets/main-light-style.less',
+  'main-style-bootstrap-5':
+    './frontend/stylesheets/bootstrap-5/main-style.scss',
+  'main-ieee-style-bootstrap-5':
+    './frontend/stylesheets/bootstrap-5/main-ieee-style.scss',
+  'main-light-style-bootstrap-5':
+    './frontend/stylesheets/bootstrap-5/main-light-style.scss',
 }
 
 // Add entrypoints for each "page"
@@ -165,6 +171,46 @@ module.exports = {
           },
           // Compiles the Less syntax to CSS
           { loader: 'less-loader' },
+        ],
+      },
+      {
+        // Pass Sass files through sass-loader/css-loader/mini-css-extract-
+        // plugin (note: run in reverse order)
+        test: /\.s[ac]ss$/,
+        use: [
+          // Allows the CSS to be extracted to a separate .css file
+          { loader: MiniCssExtractPlugin.loader },
+          // Resolves any CSS dependencies (e.g. url())
+          { loader: 'css-loader' },
+          // Resolve relative paths sensibly in SASS
+          { loader: 'resolve-url-loader' },
+          {
+            // Runs autoprefixer on CSS via postcss
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: ['autoprefixer'],
+              },
+            },
+          },
+          // Compile Sass off the main event loop
+          {
+            loader: 'thread-loader',
+            options: {
+              // keep workers alive for dev-server, and shut them down when not needed
+              poolTimeout:
+                process.env.NODE_ENV === 'development' ? 10 * 60 * 1000 : 500,
+              // bring up more workers after they timed out
+              poolRespawn: true,
+              // limit concurrency (one per entrypoint and let the small includes queue up)
+              workers: 6,
+            },
+          },
+          // Compiles Sass to CSS
+          {
+            loader: 'sass-loader',
+            options: { sourceMap: true }, // sourceMap: true is required for resolve-url-loader
+          },
         ],
       },
       {

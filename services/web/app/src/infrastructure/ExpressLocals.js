@@ -213,7 +213,13 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.buildCssPath = function (themeModifier = '') {
-      return res.locals.buildStylesheetPath(`main-${themeModifier}style.css`)
+      // Pick which main stylesheet to use based on Bootstrap version
+      const bootstrap5Modifier =
+        res.locals.bootstrapVersion === 5 ? '-bootstrap-5' : ''
+
+      return res.locals.buildStylesheetPath(
+        `main-${themeModifier}style${bootstrap5Modifier}.css`
+      )
     }
 
     res.locals.buildImgPath = function (imgFile) {
@@ -359,6 +365,13 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function (req, res, next) {
     res.locals.showThinFooter = !Features.hasFeature('saas')
+    next()
+  })
+
+  webRouter.use(function (req, res, next) {
+    // Set the Bootstrap version to 3 in all cases for now. This will come from
+    // a split test/feature flag in future.
+    res.locals.bootstrapVersion = 3
     next()
   })
 

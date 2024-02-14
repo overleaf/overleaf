@@ -1,0 +1,30 @@
+// Only include the parts of Bootstrap we need to minimize bundle size
+
+// Include functions first (enabling manipulation of colors, SVGs, calc, etc. in the variable overrides)
+@import 'bootstrap-5/scss/functions';
+
+// Overrides for Bootstrap 5 Sass variables. These have to be included before
+// Bootstrap itself because Bootstrap uses them to create the CSS variables it
+// uses, and in calculations to determine, for example, what colour text to use
+// on a button based on contrast.
+@import 'bootstrap-variable-overrides';
+
+// Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
+@import 'bootstrap-5/scss/variables';
+@import 'bootstrap-5/scss/variables-dark';
+
+// Include remainder of required parts
+@import 'bootstrap-5/scss/maps';
+@import 'bootstrap-5/scss/mixins';
+@import 'bootstrap-5/scss/root';
+
+// Include any other optional parts as needed, including components
+@import 'bootstrap-5/scss/utilities';
+@import 'bootstrap-5/scss/reboot';
+@import 'bootstrap-5/scss/type';
+@import 'bootstrap-5/scss/images';
+@import 'bootstrap-5/scss/containers';
+@import 'bootstrap-5/scss/grid';
+@import 'bootstrap-5/scss/helpers';
+@import 'bootstrap-5/scss/buttons';
+@import 'bootstrap-5/scss/modal';

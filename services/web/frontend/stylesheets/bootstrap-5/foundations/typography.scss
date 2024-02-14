@@ -1,0 +1,104 @@
+// This file provides CSS variables for font size and line height, plus Sass variables for base text size for Bootstrap
+@use 'sass:math';
+
+$default-font-size: 1rem;
+$default-line-height: 1.5;
+
+:root {
+  --font-size-01: 0.75rem; // 12px
+  --font-size-02: 0.875rem; // 14px
+  --font-size-03: 1rem; // 16px
+  --font-size-04: 1.125rem; // 18px
+  --font-size-05: 1.25rem; // 20px
+  --font-size-06: 1.5rem; // 24px
+  --font-size-07: 1.875rem; // 30px
+  --font-size-08: 2.25rem; // 36px
+  --font-size-09: 3rem; // 48px
+  --font-size-10: 3.25rem; // 52px
+  --font-size-11: 3.75rem; // 60px
+  --font-size-12: 4.5rem; // 72px
+  --font-size-13: 6em; // 96px
+
+  --line-height-01: 1rem; // 16px
+  --line-height-02: 1.25rem; // 20px
+  --line-height-03: 1.5rem; // 24px
+  --line-height-04: 1.75rem; // 28px
+  --line-height-05: 2rem; // 32px
+  --line-height-06: 2.5rem; // 40px
+  --line-height-07: 3rem; // 48px
+  --line-height-08: 4rem; // 64px
+  --line-height-09: 4.25rem; // 68px
+  --line-height-10: 5rem; // 80px
+  --line-height-11: 6rem; // 96px
+  --line-height-12: 8rem; // 128px
+}
+
+// Semantic styles, as Sass mixins
+@mixin display-lg {
+  font-size: var(--font-size-13);
+  line-height: var(--line-height-12);
+}
+
+@mixin display-md {
+  font-size: var(--font-size-12);
+  line-height: var(--line-height-11);
+}
+@mixin display-sm {
+  font-size: var(--font-size-11);
+  line-height: var(--line-height-10);
+}
+
+@mixin display-xs {
+  font-size: var(--font-size-10);
+  line-height: var(--line-height-09);
+}
+
+@mixin heading-2xl {
+  font-size: var(--font-size-09);
+  line-height: var(--line-height-08);
+}
+
+@mixin heading-xl {
+  font-size: var(--font-size-08);
+  line-height: var(--line-height-07);
+}
+
+@mixin heading-lg {
+  font-size: var(--font-size-07);
+  line-height: var(--line-height-06);
+}
+
+@mixin heading-md {
+  font-size: var(--font-size-06);
+  line-height: var(--line-height-05);
+}
+
+@mixin heading-sm {
+  font-size: var(--font-size-05);
+  line-height: var(--line-height-04);
+}
+
+@mixin heading-xs {
+  font-size: var(--font-size-04);
+  line-height: var(--line-height-03);
+}
+
+@mixin body-lg {
+  font-size: var(--font-size-04);
+  line-height: var(--line-height-03);
+}
+
+@mixin body-base {
+  font-size: var(--font-size-03);
+  line-height: var(--line-height-03);
+}
+
+@mixin body-sm {
+  font-size: var(--font-size-02);
+  line-height: var(--line-height-02);
+}
+
+@mixin body-xs {
+  font-size: var(--font-size-01);
+  line-height: var(--line-height-01);
+}

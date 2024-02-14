@@ -1,0 +1,11 @@
+// This file provides overrides for Bootstrap 5's default font-related Sass variables
+
+$font-family-sans-serif: 'Lato', sans-serif;
+$font-family-serif: 'Merriweather', serif;
+$font-family-monospace: 'Menlo', 'Monaco', 'Consolas', 'Courier New', monospace;
+$font-size-base: $default-font-size;
+$line-height-base: $default-line-height;
+
+// Colours
+$primary: $bg-accent-01;
+$secondary: $bg-light-primary;

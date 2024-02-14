@@ -1,0 +1,34 @@
+// Web fonts
+@import '../../fonts/lato.css';
+@import '../../fonts/merriweather.css';
+@import '../../fonts/source-code-pro.css';
+@import '../../fonts/stix-two-math.css';
+@import '../../fonts/noto-serif.css';
+@import '../../fonts/material-symbols.css';
+@import '../../fonts/font-awesome.css';
+
+$is-overleaf-light: false;
+
+// Vendor CSS
+// TODO Bootstrap 5: Check whether this works with Bootstrap 5, and whether we can replace it
+@import '../vendor/select/select.css';
+
+// Sass and CSS variables from Overleaf foundations
+@import 'foundations/colours';
+@import 'foundations/spacing';
+@import 'foundations/typography';
+@import 'foundations/border-radius';
+
+// Boostrap-related
+
+// Note that files containing Bootstrap or Sass files that interact with
+// Bootstrap's Sass variable must use @import rather than @use because
+// Bootstrap relies on its variables, mixins etc. all being global.
+
+// Include Bootstrap 5 itself, plus overrides of its Sass variable
+@import 'scss/bootstrap';
+
+// Override and extend Bootstrap styles. This can include overriding CSS
+// variables in the usual CSS way, and can also refer to (but not override)
+// Bootstrap Sass variables.
+@import 'scss/bootstrap-rule-overrides';

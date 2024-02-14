@@ -1,0 +1,500 @@
+// This file provides CSS and Sass variables for colours as both RGB triples,
+// which can be combined with an alpha value, and actual colour values.
+
+// Note that colours used by Bootstrap's Sass are used in calculations and
+// therefore cannot contain CSS variables
+
+/* ====== RGB triples, for use with alpha values ====== */
+
+/* Neutral */
+$white-rgb: 255 255 255;
+$neutral-10-rgb: 244 245 246;
+$neutral-20-rgb: 231 233 238;
+$neutral-30-rgb: 208 213 221;
+$neutral-40-rgb: 175 181 192;
+$neutral-50-rgb: 141 150 165;
+$neutral-60-rgb: 103 114 131;
+$neutral-70-rgb: 73 83 101;
+$neutral-80-rgb: 47 58 76;
+$neutral-90-rgb: 27 34 44;
+
+/* Green */
+$green-10-rgb: 235 246 234;
+$green-20-rgb: 187 219 184;
+$green-30-rgb: 140 202 134;
+$green-40-rgb: 91 181 83;
+$green-50-rgb: 19 138 7;
+$green-60-rgb: 36 107 30;
+$green-70-rgb: 31 89 25;
+
+/* Blue */
+$blue-10-rgb: 241 244 249;
+$blue-20-rgb: 195 208 227;
+$blue-30-rgb: 151 182 229;
+$blue-40-rgb: 101 151 224;
+$blue-50-rgb: 50 101 178;
+$blue-60-rgb: 40 81 143;
+$blue-70-rgb: 33 68 117;
+
+/* Red */
+$red-10-rgb: 249 241 241;
+$red-20-rgb: 245 190 186;
+$red-30-rgb: 229 157 154;
+$red-40-rgb: 227 109 102;
+$red-50-rgb: 184 58 51;
+$red-60-rgb: 148 47 42;
+$red-70-rgb: 120 39 34;
+
+/* Yellow */
+$yellow-10-rgb: 252 241 227;
+$yellow-20-rgb: 252 196 131;
+$yellow-30-rgb: 247 164 69;
+$yellow-40-rgb: 222 128 20;
+$yellow-50-rgb: 143 85 20;
+$yellow-60-rgb: 122 67 4;
+$yellow-70-rgb: 99 58 11;
+
+/* ====== Full RGB colour values ====== */
+
+/* Neutral */
+$white: rgb($white-rgb);
+$neutral-10: rgb($neutral-10-rgb);
+$neutral-20: rgb($neutral-20-rgb);
+$neutral-30: rgb($neutral-30-rgb);
+$neutral-40: rgb($neutral-40-rgb);
+$neutral-50: rgb($neutral-50-rgb);
+$neutral-60: rgb($neutral-60-rgb);
+$neutral-70: rgb($neutral-70-rgb);
+$neutral-80: rgb($neutral-80-rgb);
+$neutral-90: rgb($neutral-90-rgb);
+
+/* Green */
+$green-10: rgb($green-10-rgb);
+$green-20: rgb($green-20-rgb);
+$green-30: rgb($green-30-rgb);
+$green-40: rgb($green-40-rgb);
+$green-50: rgb($green-50-rgb);
+$green-60: rgb($green-60-rgb);
+$green-70: rgb($green-70-rgb);
+
+/* Blue */
+$blue-10: rgb($blue-10-rgb);
+$blue-20: rgb($blue-20-rgb);
+$blue-30: rgb($blue-30-rgb);
+$blue-40: rgb($blue-40-rgb);
+$blue-50: rgb($blue-50-rgb);
+$blue-60: rgb($blue-60-rgb);
+$blue-70: rgb($blue-70-rgb);
+
+/* Red */
+$red-10: rgb($red-10-rgb);
+$red-20: rgb($red-20-rgb);
+$red-30: rgb($red-30-rgb);
+$red-40: rgb($red-40-rgb);
+$red-50: rgb($red-50-rgb);
+$red-60: rgb($red-60-rgb);
+$red-70: rgb($red-70-rgb);
+
+/* Yellow */
+$yellow-10: rgb($yellow-10-rgb);
+$yellow-20: rgb($yellow-20-rgb);
+$yellow-30: rgb($yellow-30-rgb);
+$yellow-40: rgb($yellow-40-rgb);
+$yellow-50: rgb($yellow-50-rgb);
+$yellow-60: rgb($yellow-60-rgb);
+$yellow-70: rgb($yellow-70-rgb);
+
+/* ====== RGB triples for semantic colour variables, for use with alpha values ====== */
+$bg-light-primary-rgb: $white-rgb;
+$bg-light-secondary-rgb: $neutral-10-rgb;
+$bg-light-tertiary-rgb: $neutral-20-rgb;
+$bg-light-disabled-rgb: $neutral-20-rgb;
+
+$bg-dark-primary-rgb: $neutral-90-rgb;
+$bg-dark-secondary-rgb: $neutral-80-rgb;
+$bg-dark-tertiary-rgb: $neutral-70-rgb;
+$bg-dark-disabled-rgb: $neutral-70-rgb;
+
+$bg-accent-01-rgb: $green-50-rgb;
+$bg-accent-02-rgb: $green-60-rgb;
+$bg-accent-03-rgb: $green-10-rgb;
+
+$bg-danger-01-rgb: $red-50-rgb;
+$bg-danger-02-rgb: $red-60-rgb;
+$bg-danger-03-rgb: $red-10-rgb;
+
+$bg-warning-01-rgb: $yellow-50-rgb;
+$bg-warning-02-rgb: $yellow-60-rgb;
+$bg-warning-03-rgb: $yellow-10-rgb;
+
+$bg-info-01-rgb: $blue-50-rgb;
+$bg-info-02-rgb: $blue-60-rgb;
+$bg-info-03-rgb: $blue-10-rgb;
+
+$content-primary-rgb: $neutral-90-rgb;
+$content-secondary-rgb: $neutral-70-rgb;
+$content-disabled-rgb: $neutral-40-rgb;
+$content-placeholder-rgb: $neutral-60-rgb;
+$content-danger-rgb: $red-50-rgb;
+$content-warning-rgb: $yellow-50-rgb;
+$content-positive-rgb: $green-50-rgb;
+
+$border-primary-rgb: $neutral-60-rgb;
+$border-hover-rgb: $neutral-70-rgb;
+$border-disabled-rgb: $neutral-20-rgb;
+$border-active-rgb: $blue-50-rgb;
+$border-danger-rgb: $red-50-rgb;
+$border-divider-rgb: $neutral-20-rgb;
+
+$link-web-rgb: $green-60-rgb;
+$link-web-hover-rgb: $green-70-rgb;
+$link-web-visited-rgb: $green-70-rgb;
+$link-ui-rgb: $blue-50-rgb;
+$link-ui-hover-rgb: $blue-60-rgb;
+$link-ui-visited-rgb: $blue-60-rgb;
+
+$content-primary-dark-rgb: $white-rgb;
+$content-secondary-dark-rgb: $neutral-20-rgb;
+$content-disabled-dark-rgb: $neutral-60-rgb;
+$content-placeholder-dark-rgb: $neutral-50-rgb;
+$content-danger-dark-rgb: $red-40-rgb;
+$content-warning-dark-rgb: $yellow-40-rgb;
+$content-positive-dark-rgb: $green-40-rgb;
+
+$border-primary-dark-rgb: $neutral-30-rgb;
+$border-hover-dark-rgb: $neutral-20-rgb;
+$border-disabled-dark-rgb: $neutral-80-rgb;
+$border-active-dark-rgb: $blue-30-rgb;
+$border-danger-dark-rgb: $red-40-rgb;
+$border-divider-dark-rgb: $neutral-80-rgb;
+
+$link-web-dark-rgb: $green-30-rgb;
+$link-web-hover-dark-rgb: $green-40-rgb;
+$link-web-visited-dark-rgb: $green-40-rgb;
+$link-ui-dark-rgb: $blue-30-rgb;
+$link-ui-hover-dark-rgb: $blue-40-rgb;
+$link-ui-visited-dark-rgb: $blue-40-rgb;
+
+/* ====== Full RGB colour values for semantic colour variables ====== */
+$bg-light-primary: rgb($bg-light-primary-rgb);
+$bg-light-secondary: rgb($bg-light-secondary-rgb);
+$bg-light-tertiary: rgb($bg-light-tertiary-rgb);
+$bg-light-disabled: rgb($bg-light-disabled-rgb);
+
+$bg-dark-primary: rgb($bg-dark-primary-rgb);
+$bg-dark-secondary: rgb($bg-dark-secondary-rgb);
+$bg-dark-tertiary: rgb($bg-dark-tertiary-rgb);
+$bg-dark-disabled: rgb($bg-dark-disabled-rgb);
+
+$bg-accent-01: rgb($bg-accent-01-rgb);
+$bg-accent-02: rgb($bg-accent-02-rgb);
+$bg-accent-03: rgb($bg-accent-03-rgb);
+
+$bg-danger-01: rgb($bg-danger-01-rgb);
+$bg-danger-02: rgb($bg-danger-02-rgb);
+$bg-danger-03: rgb($bg-danger-03-rgb);
+
+$bg-warning-01: rgb($bg-warning-01-rgb);
+$bg-warning-02: rgb($bg-warning-02-rgb);
+$bg-warning-03: rgb($bg-warning-03-rgb);
+
+$bg-info-01: rgb($bg-info-01-rgb);
+$bg-info-02: rgb($bg-info-02-rgb);
+$bg-info-03: rgb($bg-info-03-rgb);
+
+$content-primary: rgb($content-primary-rgb);
+$content-secondary: rgb($content-secondary-rgb);
+$content-disabled: rgb($content-disabled-rgb);
+$content-placeholder: rgb($content-placeholder-rgb);
+$content-danger: rgb($content-danger-rgb);
+$content-warning: rgb($content-warning-rgb);
+$content-positive: rgb($content-positive-rgb);
+
+$border-primary: rgb($border-primary-rgb);
+$border-hover: rgb($border-hover-rgb);
+$border-disabled: rgb($border-disabled-rgb);
+$border-active: rgb($border-active-rgb);
+$border-danger: rgb($border-danger-rgb);
+$border-divider: rgb($border-divider-rgb);
+
+$link-web: rgb($link-web-rgb);
+$link-web-hover: rgb($link-web-hover-rgb);
+$link-web-visited: rgb($link-web-visited-rgb);
+$link-ui: rgb($link-ui-rgb);
+$link-ui-hover: rgb($link-ui-hover-rgb);
+$link-ui-visited: rgb($link-ui-visited-rgb);
+
+$content-primary-dark: rgb($content-primary-dark-rgb);
+$content-secondary-dark: rgb($content-secondary-dark-rgb);
+$content-disabled-dark: rgb($content-disabled-dark-rgb);
+$content-placeholder-dark: rgb($content-placeholder-dark-rgb);
+$content-danger-dark: rgb($content-danger-dark-rgb);
+$content-warning-dark: rgb($content-warning-dark-rgb);
+$content-positive-dark: rgb($content-positive-dark-rgb);
+
+$border-primary-dark: rgb($border-primary-dark-rgb);
+$border-hover-dark: rgb($border-hover-dark-rgb);
+$border-disabled-dark: rgb($border-disabled-dark-rgb);
+$border-active-dark: rgb($border-active-dark-rgb);
+$border-danger-dark: rgb($border-danger-dark-rgb);
+$border-divider-dark: rgb($border-divider-dark-rgb);
+
+$link-web-dark: rgb($link-web-dark-rgb);
+$link-web-hover-dark: rgb($link-web-hover-dark-rgb);
+$link-web-visited-dark: rgb($link-web-visited-dark-rgb);
+$link-ui-dark: rgb($link-ui-dark-rgb);
+$link-ui-hover-dark: rgb($link-ui-hover-dark-rgb);
+$link-ui-visited-dark: rgb($link-ui-visited-dark-rgb);
+
+:root {
+  /* ====== RGB triples, for use with alpha values ====== */
+
+  /* Neutral */
+  --white-rgb: #{$white-rgb};
+  --neutral-10-rgb: #{$neutral-10-rgb};
+  --neutral-20-rgb: #{$neutral-20-rgb};
+  --neutral-30-rgb: #{$neutral-30-rgb};
+  --neutral-40-rgb: #{$neutral-40-rgb};
+  --neutral-50-rgb: #{$neutral-50-rgb};
+  --neutral-60-rgb: #{$neutral-60-rgb};
+  --neutral-70-rgb: #{$neutral-70-rgb};
+  --neutral-80-rgb: #{$neutral-80-rgb};
+  --neutral-90-rgb: #{$neutral-90-rgb};
+
+  /* Green */
+  --green-10-rgb: #{$green-10-rgb};
+  --green-20-rgb: #{$green-20-rgb};
+  --green-30-rgb: #{$green-30-rgb};
+  --green-40-rgb: #{$green-40-rgb};
+  --green-50-rgb: #{$green-50-rgb};
+  --green-60-rgb: #{$green-60-rgb};
+  --green-70-rgb: #{$green-70-rgb};
+
+  /* Blue */
+  --blue-10-rgb: #{$blue-10-rgb};
+  --blue-20-rgb: #{$blue-20-rgb};
+  --blue-30-rgb: #{$blue-30-rgb};
+  --blue-40-rgb: #{$blue-40-rgb};
+  --blue-50-rgb: #{$blue-50-rgb};
+  --blue-60-rgb: #{$blue-60-rgb};
+  --blue-70-rgb: #{$blue-70-rgb};
+
+  /* Red */
+  --red-10-rgb: #{$red-10-rgb};
+  --red-20-rgb: #{$red-20-rgb};
+  --red-30-rgb: #{$red-30-rgb};
+  --red-40-rgb: #{$red-40-rgb};
+  --red-50-rgb: #{$red-50-rgb};
+  --red-60-rgb: #{$red-60-rgb};
+  --red-70-rgb: #{$red-70-rgb};
+
+  /* Yellow */
+  --yellow-10-rgb: #{$yellow-10-rgb};
+  --yellow-20-rgb: #{$yellow-20-rgb};
+  --yellow-30-rgb: #{$yellow-30-rgb};
+  --yellow-40-rgb: #{$yellow-40-rgb};
+  --yellow-50-rgb: #{$yellow-50-rgb};
+  --yellow-60-rgb: #{$yellow-60-rgb};
+  --yellow-70-rgb: #{$yellow-70-rgb};
+
+  /* ====== Full RGB colour values ====== */
+
+  /* Neutral */
+  --white: rgb(var(--white-rgb));
+  --neutral-10: rgb(var(--neutral-10-rgb));
+  --neutral-20: rgb(var(--neutral-20-rgb));
+  --neutral-30: rgb(var(--neutral-30-rgb));
+  --neutral-40: rgb(var(--neutral-40-rgb));
+  --neutral-50: rgb(var(--neutral-50-rgb));
+  --neutral-60: rgb(var(--neutral-60-rgb));
+  --neutral-70: rgb(var(--neutral-70-rgb));
+  --neutral-80: rgb(var(--neutral-80-rgb));
+  --neutral-90: rgb(var(--neutral-90-rgb));
+
+  /* Green */
+  --green-10: rgb(var(--green-10-rgb));
+  --green-20: rgb(var(--green-20-rgb));
+  --green-30: rgb(var(--green-30-rgb));
+  --green-40: rgb(var(--green-40-rgb));
+  --green-50: rgb(var(--green-50-rgb));
+  --green-60: rgb(var(--green-60-rgb));
+  --green-70: rgb(var(--green-70-rgb));
+
+  /* Blue */
+  --blue-10: rgb(var(--blue-10-rgb));
+  --blue-20: rgb(var(--blue-20-rgb));
+  --blue-30: rgb(var(--blue-30-rgb));
+  --blue-40: rgb(var(--blue-40-rgb));
+  --blue-50: rgb(var(--blue-50-rgb));
+  --blue-60: rgb(var(--blue-60-rgb));
+  --blue-70: rgb(var(--blue-70-rgb));
+
+  /* Red */
+  --red-10: rgb(var(--red-10-rgb));
+  --red-20: rgb(var(--red-20-rgb));
+  --red-30: rgb(var(--red-30-rgb));
+  --red-40: rgb(var(--red-40-rgb));
+  --red-50: rgb(var(--red-50-rgb));
+  --red-60: rgb(var(--red-60-rgb));
+  --red-70: rgb(var(--red-70-rgb));
+
+  /* Yellow */
+  --yellow-10: rgb(var(--yellow-10-rgb));
+  --yellow-20: rgb(var(--yellow-20-rgb));
+  --yellow-30: rgb(var(--yellow-30-rgb));
+  --yellow-40: rgb(var(--yellow-40-rgb));
+  --yellow-50: rgb(var(--yellow-50-rgb));
+  --yellow-60: rgb(var(--yellow-60-rgb));
+  --yellow-70: rgb(var(--yellow-70-rgb));
+
+  /* ====== RGB triples for semantic colour variables, for use with alpha values ====== */
+  --bg-light-primary-rgb: var(--white-rgb);
+  --bg-light-secondary-rgb: var(--neutral-10-rgb);
+  --bg-light-tertiary-rgb: var(--neutral-20-rgb);
+  --bg-light-disabled-rgb: var(--neutral-20-rgb);
+
+  --bg-dark-primary-rgb: var(--neutral-90-rgb);
+  --bg-dark-secondary-rgb: var(--neutral-80-rgb);
+  --bg-dark-tertiary-rgb: var(--neutral-70-rgb);
+  --bg-dark-disabled-rgb: var(--neutral-70-rgb);
+
+  --bg-accent-01-rgb: var(--green-50-rgb);
+  --bg-accent-02-rgb: var(--green-60-rgb);
+  --bg-accent-03-rgb: var(--green-10-rgb);
+
+  --bg-danger-01-rgb: var(--red-50-rgb);
+  --bg-danger-02-rgb: var(--red-60-rgb);
+  --bg-danger-03-rgb: var(--red-10-rgb);
+
+  --bg-warning-01-rgb: var(--yellow-50-rgb);
+  --bg-warning-02-rgb: var(--yellow-60-rgb);
+  --bg-warning-03-rgb: var(--yellow-10-rgb);
+
+  --bg-info-01-rgb: var(--blue-50-rgb);
+  --bg-info-02-rgb: var(--blue-60-rgb);
+  --bg-info-03-rgb: var(--blue-10-rgb);
+
+  --content-primary-rgb: var(--neutral-90-rgb);
+  --content-secondary-rgb: var(--neutral-70-rgb);
+  --content-disabled-rgb: var(--neutral-40-rgb);
+  --content-placeholder-rgb: var(--neutral-60-rgb);
+  --content-danger-rgb: var(--red-50-rgb);
+  --content-warning-rgb: var(--yellow-50-rgb);
+  --content-positive-rgb: var(--green-50-rgb);
+
+  --border-primary-rgb: var(--neutral-60-rgb);
+  --border-hover-rgb: var(--neutral-70-rgb);
+  --border-disabled-rgb: var(--neutral-20-rgb);
+  --border-active-rgb: var(--blue-50-rgb);
+  --border-danger-rgb: var(--red-50-rgb);
+  --border-divider-rgb: var(--neutral-20-rgb);
+
+  --link-web-rgb: var(--green-60-rgb);
+  --link-web-hover-rgb: var(--green-70-rgb);
+  --link-web-visited-rgb: var(--green-70-rgb);
+  --link-ui-rgb: var(--blue-50-rgb);
+  --link-ui-hover-rgb: var(--blue-60-rgb);
+  --link-ui-visited-rgb: var(--blue-60-rgb);
+
+  --content-primary-dark-rgb: var(--white-rgb);
+  --content-secondary-dark-rgb: var(--neutral-20-rgb);
+  --content-disabled-dark-rgb: var(--neutral-60-rgb);
+  --content-placeholder-dark-rgb: var(--neutral-50-rgb);
+  --content-danger-dark-rgb: var(--red-40-rgb);
+  --content-warning-dark-rgb: var(--yellow-40-rgb);
+  --content-positive-dark-rgb: var(--green-40-rgb);
+
+  --border-primary-dark-rgb: var(--neutral-30-rgb);
+  --border-hover-dark-rgb: var(--neutral-20-rgb);
+  --border-disabled-dark-rgb: var(--neutral-80-rgb);
+  --border-active-dark-rgb: var(--blue-30-rgb);
+  --border-danger-dark-rgb: var(--red-40-rgb);
+  --border-divider-dark-rgb: var(--neutral-80-rgb);
+
+  --link-web-dark-rgb: var(--green-30-rgb);
+  --link-web-hover-dark-rgb: var(--green-40-rgb);
+  --link-web-visited-dark-rgb: var(--green-40-rgb);
+  --link-ui-dark-rgb: var(--blue-30-rgb);
+  --link-ui-hover-dark-rgb: var(--blue-40-rgb);
+  --link-ui-visited-dark-rgb: var(--blue-40-rgb);
+
+
+  /* ====== Full RGB colour values for semantic colour variables ====== */
+  --bg-light-primary: rgb(var(--bg-light-primary-rgb));
+  --bg-light-secondary: rgb(var(--bg-light-secondary-rgb));
+  --bg-light-tertiary: rgb(var(--bg-light-tertiary-rgb));
+  --bg-light-disabled: rgb(var(--bg-light-disabled-rgb));
+
+  --bg-dark-primary: rgb(var(--bg-dark-primary-rgb));
+  --bg-dark-secondary: rgb(var(--bg-dark-secondary-rgb));
+  --bg-dark-tertiary: rgb(var(--bg-dark-tertiary-rgb));
+  --bg-dark-disabled: rgb(var(--bg-dark-disabled-rgb));
+
+  --bg-accent-01: rgb(var(--bg-accent-01-rgb));
+  --bg-accent-02: rgb(var(--bg-accent-02-rgb));
+  --bg-accent-03: rgb(var(--bg-accent-03-rgb));
+
+  --bg-danger-01: rgb(var(--bg-danger-01-rgb));
+  --bg-danger-02: rgb(var(--bg-danger-02-rgb));
+  --bg-danger-03: rgb(var(--bg-danger-03-rgb));
+
+  --bg-warning-01: rgb(var(--bg-warning-01-rgb));
+  --bg-warning-02: rgb(var(--bg-warning-02-rgb));
+  --bg-warning-03: rgb(var(--bg-warning-03-rgb));
+
+  --bg-info-01: rgb(var(--bg-info-01-rgb));
+  --bg-info-02: rgb(var(--bg-info-02-rgb));
+  --bg-info-03: rgb(var(--bg-info-03-rgb));
+
+  --content-primary: rgb(var(--content-primary-rgb));
+  --content-secondary: rgb(var(--content-secondary-rgb));
+  --content-disabled: rgb(var(--content-disabled-rgb));
+  --content-placeholder: rgb(var(--content-placeholder-rgb));
+  --content-danger: rgb(var(--content-danger-rgb));
+  --content-warning: rgb(var(--content-warning-rgb));
+  --content-positive: rgb(var(--content-positive-rgb));
+
+  --border-primary: rgb(var(--border-primary-rgb));
+  --border-hover: rgb(var(--border-hover-rgb));
+  --border-disabled: rgb(var(--border-disabled-rgb));
+  --border-active: rgb(var(--border-active-rgb));
+  --border-danger: rgb(var(--border-danger-rgb));
+  --border-divider: rgb(var(--border-divider-rgb));
+
+  --link-web: rgb(var(--link-web-rgb));
+  --link-web-hover: rgb(var(--link-web-hover-rgb));
+  --link-web-visited: rgb(var(--link-web-visited-rgb));
+  --link-ui: rgb(var(--link-ui-rgb));
+  --link-ui-hover: rgb(var(--link-ui-hover-rgb));
+  --link-ui-visited: rgb(var(--link-ui-visited-rgb));
+
+  --content-primary-dark: rgb(var(--content-primary-dark-rgb));
+  --content-secondary-dark: rgb(var(--content-secondary-dark-rgb));
+  --content-disabled-dark: rgb(var(--content-disabled-dark-rgb));
+  --content-placeholder-dark: rgb(var(--content-placeholder-dark-rgb));
+  --content-danger-dark: rgb(var(--content-danger-dark-rgb));
+  --content-warning-dark: rgb(var(--content-warning-dark-rgb));
+  --content-positive-dark: rgb(var(--content-positive-dark-rgb));
+
+  --border-primary-dark: rgb(var(--border-primary-dark-rgb));
+  --border-hover-dark: rgb(var(--border-hover-dark-rgb));
+  --border-disabled-dark: rgb(var(--border-disabled-dark-rgb));
+  --border-active-dark: rgb(var(--border-active-dark-rgb));
+  --border-danger-dark: rgb(var(--border-danger-dark-rgb));
+  --border-divider-dark: rgb(var(--border-divider-dark-rgb));
+
+  --link-web-dark: rgb(var(--link-web-dark-rgb));
+  --link-web-hover-dark: rgb(var(--link-web-hover-dark-rgb));
+  --link-web-visited-dark: rgb(var(--link-web-visited-dark-rgb));
+  --link-ui-dark: rgb(var(--link-ui-dark-rgb));
+  --link-ui-hover-dark: rgb(var(--link-ui-hover-dark-rgb));
+  --link-ui-visited-dark: rgb(var(--link-ui-visited-dark-rgb));
+
+  // Gradients
+  --premium-gradient: linear-gradient(
+      246deg,
+      var(--blue-70) 0%,
+      #254c84 29%,
+      var(--blue-40) 97%
+  );
+}

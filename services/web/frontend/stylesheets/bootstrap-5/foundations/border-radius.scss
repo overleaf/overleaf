@@ -1,0 +1,12 @@
+// This file provides both Sass and CSS variables for border radiuses
+$border-radius-base: 4px;
+$border-radius-medium: 8px;
+$border-radius-large: 16px;
+$border-radius-full: 9999px;
+
+:root {
+  --border-radius-base: #{$border-radius-base};
+  --border-radius-medium: #{$border-radius-medium};
+  --border-radius-large: #{$border-radius-large};
+  --border-radius-full: #{$border-radius-full};
+}

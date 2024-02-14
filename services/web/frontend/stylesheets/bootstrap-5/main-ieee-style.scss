@@ -1,0 +1,7 @@
+@import 'main-style';
+
+// IEEE-specific theme overrides
+@import 'css-variables/themes/ieee';
+
+// IEEE-specific rules
+$ieee-wedge: 30px;

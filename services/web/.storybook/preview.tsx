@@ -55,6 +55,8 @@ const preview: Preview = {
       // render stories in iframes, to isolate modals
       inlineStories: false,
     },
+    // Default to Bootstrap 3 styles
+    bootstrap5: false,
   },
   globalTypes: {
     theme: {
@@ -78,15 +80,23 @@ const preview: Preview = {
       return {
         // NOTE: this uses `${theme}style.less` rather than `${theme}.less`
         // so that webpack only bundles files ending with "style.less"
-        activeStyle: await import(
+        bootstrap3Style: await import(
           `!!to-string-loader!css-loader!less-loader!../../../services/web/frontend/stylesheets/${theme}style.less`
+        ),
+        // NOTE: this uses `${theme}style.scss` rather than `${theme}.scss`
+        // so that webpack only bundles files ending with "style.scss"
+        bootstrap5Style: await import(
+          `!!to-string-loader!css-loader!resolve-url-loader!sass-loader!../../../services/web/frontend/stylesheets/bootstrap-5/${theme}style.scss`
         ),
       }
     },
   ],
   decorators: [
     (Story, context) => {
-      const { activeStyle } = context.loaded
+      const { bootstrap3Style, bootstrap5Style } = context.loaded
+      const activeStyle = context.parameters.bootstrap5
+        ? bootstrap5Style
+        : bootstrap3Style
 
       return (
         <>
