@@ -55,6 +55,7 @@ export type TrackedChange = {
 export type HistoryOp = HistoryInsertOp | HistoryDeleteOp | HistoryCommentOp
 
 export type HistoryInsertOp = InsertOp & {
+  commentIds?: string[]
   hpos?: number
   trackedDeleteRejection?: boolean
 }

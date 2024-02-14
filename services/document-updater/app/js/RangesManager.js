@@ -8,6 +8,7 @@ const _ = require('lodash')
 const { isInsert, isDelete, isComment } = require('./Utils')
 
 /**
+ * @typedef {import('./types').Comment} Comment
  * @typedef {import('./types').CommentOp} CommentOp
  * @typedef {import('./types').DeleteOp} DeleteOp
  * @typedef {import('./types').HistoryCommentOp} HistoryCommentOp
@@ -57,7 +58,9 @@ const RangesManager = {
       }
       const historyOps = []
       for (const op of update.op) {
-        historyOps.push(getHistoryOp(op, rangesTracker.changes))
+        historyOps.push(
+          getHistoryOp(op, rangesTracker.comments, rangesTracker.changes)
+        )
         rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
       }
       historyUpdates.push({ ...update, op: historyOps })
@@ -172,9 +175,9 @@ const RangesManager = {
  *        RangesTracker is ordered by position.
  * @returns {HistoryOp}
  */
-function getHistoryOp(op, changes, opts = {}) {
+function getHistoryOp(op, comments, changes, opts = {}) {
   if (isInsert(op)) {
-    return getHistoryOpForInsert(op, changes)
+    return getHistoryOpForInsert(op, comments, changes)
   } else if (isDelete(op)) {
     return getHistoryOpForDelete(op, changes)
   } else if (isComment(op)) {
@@ -191,13 +194,28 @@ function getHistoryOp(op, changes, opts = {}) {
  * op. When an insert is made at the same position as a tracked delete, the
  * insert is placed before the tracked delete.
  *
+ * We also add a commentIds property when inserts are made inside a comment.
+ * The current behaviour is to include the insert in the comment only if the
+ * insert is made strictly inside the comment. Inserts made at the edges are
+ * not included in the comment.
+ *
  * @param {InsertOp} op
+ * @param {Comment[]} comments
  * @param {TrackedChange[]} changes
  * @returns {HistoryInsertOp}
  */
-function getHistoryOpForInsert(op, changes) {
+function getHistoryOpForInsert(op, comments, changes) {
   let hpos = op.p
   let trackedDeleteRejection = false
+  const commentIds = new Set()
+
+  for (const comment of comments) {
+    if (comment.op.p < op.p && op.p < comment.op.p + comment.op.c.length) {
+      // Insert is inside the comment; add the comment id
+      commentIds.add(comment.op.t)
+    }
+  }
+
   for (const change of changes) {
     if (!isDelete(change.op)) {
       // We're only interested in tracked deletes
@@ -227,6 +245,9 @@ function getHistoryOpForInsert(op, changes) {
 
   /** @type {HistoryInsertOp} */
   const historyOp = { ...op }
+  if (commentIds.size > 0) {
+    historyOp.commentIds = Array.from(commentIds)
+  }
   if (hpos !== op.p) {
     historyOp.hpos = hpos
   }

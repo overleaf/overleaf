@@ -386,6 +386,49 @@ describe('RangesManager', function () {
         ])
       })
     })
+
+    describe('inserts inside comments', function () {
+      beforeEach(function () {
+        // original text is "one three four five"
+        this.ranges = {
+          comments: makeRanges([
+            { c: 'three', p: 4, t: 'comment-id-1' },
+            { c: 'ree four', p: 6, t: 'comment-id-2' },
+          ]),
+        }
+        this.updates = makeUpdates([
+          { i: '[before]', p: 4 },
+          { i: '[inside]', p: 13 }, // 4 + 8 + 1
+          { i: '[overlap]', p: 23 }, // 13 + 8 + 2
+          { i: '[after]', p: 39 }, // 23 + 9 + 7
+        ])
+        this.newDocLines = [
+          'one [before]t[inside]hr[overlap]ee four[after] five',
+        ]
+        this.result = this.RangesManager.applyUpdate(
+          this.project_id,
+          this.doc_id,
+          this.ranges,
+          this.updates,
+          this.newDocLines
+        )
+      })
+
+      it('should add the proper commentIds properties to ops', function () {
+        expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+          [{ i: '[before]', p: 4 }],
+          [{ i: '[inside]', p: 13, commentIds: ['comment-id-1'] }],
+          [
+            {
+              i: '[overlap]',
+              p: 23,
+              commentIds: ['comment-id-1', 'comment-id-2'],
+            },
+          ],
+          [{ i: '[after]', p: 39 }],
+        ])
+      })
+    })
   })
 
   describe('acceptChanges', function () {
