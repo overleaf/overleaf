@@ -69,9 +69,12 @@ class CommentList {
 
   /**
    * @param {Range} range
-   * @param {{ commentIds: string[] }} opts
+   * @param {{ commentIds?: string[] }} opts
    */
   applyInsert(range, opts = { commentIds: [] }) {
+    if (!opts.commentIds) {
+      opts.commentIds = []
+    }
     for (const [commentId, comment] of this.comments) {
       comment.applyInsert(
         range.pos,
@@ -85,12 +88,20 @@ class CommentList {
    * @param {Range} range
    */
   applyDelete(range) {
-    for (const [commentId, comment] of this.comments) {
+    for (const [, comment] of this.comments) {
       comment.applyDelete(range)
-      if (comment.isEmpty()) {
-        this.delete(commentId)
-      }
     }
+  }
+
+  /**
+   *
+   * @param {Range} range
+   * @returns {string[]}
+   */
+  idsCoveringRange(range) {
+    return Array.from(this.comments.entries())
+      .filter(([, comment]) => comment.ranges.some(r => r.contains(range)))
+      .map(([id]) => id)
   }
 }
 

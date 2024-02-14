@@ -30,6 +30,32 @@ export type TrackingPropsRawData = {
 export type StringFileRawData = {
   content: string
   comments?: CommentRawData[]
+  trackedChanges?: TrackedChangeRawData[]
 }
 
 export type RawV2DocVersions = Record<string, { pathname: string; v: number }>
+
+export type RawInsertOp =
+  | {
+      i: string
+      commentIds?: string[]
+      tracking?: TrackingPropsRawData
+    }
+  | string
+
+export type RawRemoveOp = number
+export type RawRetainOp =
+  | {
+      r: number
+      commentIds?: string[]
+      tracking?: TrackingPropsRawData
+    }
+  | number
+
+export type RawScanOp = RawInsertOp | RawRemoveOp | RawRetainOp
+
+export type RawTextOperation = {
+  textOperation: RawScanOp[]
+}
+
+export type RawEditOperation = RawTextOperation

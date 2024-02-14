@@ -5,25 +5,21 @@ const {
   InvalidInsertionError,
   UnprocessableError,
 } = require('../errors')
+const TrackingProps = require('../file_data/tracking_props')
 
-/** @typedef {{ result: string, inputCursor: number}} ApplyContext */
-/** @typedef {{ length: number, inputCursor: number, readonly inputLength: number}} LengthApplyContext */
+/**
+ * @typedef {{ length: number, inputCursor: number, readonly inputLength: number}} LengthApplyContext
+ * @typedef {import('../types').RawScanOp} RawScanOp
+ * @typedef {import('../types').RawInsertOp} RawInsertOp
+ * @typedef {import('../types').RawRetainOp} RawRetainOp
+ * @typedef {import('../types').RawRemoveOp} RawRemoveOp
+ */
 
 class ScanOp {
   constructor() {
     if (this.constructor === ScanOp) {
       throw new Error('Cannot instantiate abstract class')
     }
-  }
-
-  /**
-   * Applies an operation to a string
-   * @param {string} input
-   * @param {ApplyContext} current
-   * @returns {ApplyContext}
-   */
-  apply(input, current) {
-    throw new Error('abstract method')
   }
 
   /**
@@ -35,12 +31,15 @@ class ScanOp {
     throw new Error('abstract method')
   }
 
+  /**
+   * @returns {RawScanOp}
+   */
   toJSON() {
     throw new Error('abstract method')
   }
 
   /**
-   * @param {object} raw
+   * @param {RawScanOp} raw
    * @returns {ScanOp}
    */
   static fromJSON(raw) {
@@ -87,7 +86,13 @@ class ScanOp {
 }
 
 class InsertOp extends ScanOp {
-  constructor(insertion) {
+  /**
+   *
+   * @param {string} insertion
+   * @param {TrackingProps | undefined} tracking
+   * @param {string[] | undefined} commentIds
+   */
+  constructor(insertion, tracking = undefined, commentIds = undefined) {
     super()
     if (typeof insertion !== 'string') {
       throw new InvalidInsertionError('insertion must be a string')
@@ -95,12 +100,17 @@ class InsertOp extends ScanOp {
     if (containsNonBmpChars(insertion)) {
       throw new InvalidInsertionError('insertion contains non-BMP characters')
     }
+    /** @type {string} */
     this.insertion = insertion
+    /** @type {TrackingProps | undefined} */
+    this.tracking = tracking
+    /** @type {string[] | undefined} */
+    this.commentIds = commentIds
   }
 
   /**
    *
-   * @param {{i: string} | string} op
+   * @param {RawInsertOp} op
    * @returns {InsertOp}
    */
   static fromJSON(op) {
@@ -113,21 +123,11 @@ class InsertOp extends ScanOp {
         'insert operation must have a string property'
       )
     }
-    return new InsertOp(op.i)
-  }
-
-  /**
-   * @inheritdoc
-   * @param {string} input
-   * @param {ApplyContext} current
-   * @returns {ApplyContext}
-   *  */
-  apply(input, current) {
-    if (containsNonBmpChars(this.insertion)) {
-      throw new InvalidInsertionError(input, this.toJSON())
-    }
-    current.result += this.insertion
-    return current
+    return new InsertOp(
+      op.i,
+      op.tracking && TrackingProps.fromRaw(op.tracking),
+      op.commentIds
+    )
   }
 
   /**
@@ -145,24 +145,69 @@ class InsertOp extends ScanOp {
     if (!(other instanceof InsertOp)) {
       return false
     }
-    return this.insertion === other.insertion
+    if (this.insertion !== other.insertion) {
+      return false
+    }
+    if (this.tracking) {
+      if (!this.tracking.equals(other.tracking)) {
+        return false
+      }
+    } else if (other.tracking) {
+      return false
+    }
+
+    if (this.commentIds) {
+      return (
+        this.commentIds.length === other.commentIds?.length &&
+        this.commentIds.every(id => other.commentIds?.includes(id))
+      )
+    }
+    return !other.commentIds
   }
 
   canMergeWith(other) {
-    return other instanceof InsertOp
+    if (!(other instanceof InsertOp)) {
+      return false
+    }
+    if (this.tracking) {
+      if (!this.tracking.equals(other.tracking)) {
+        return false
+      }
+    } else if (other.tracking) {
+      return false
+    }
+    if (this.commentIds) {
+      return (
+        this.commentIds.length === other.commentIds?.length &&
+        this.commentIds.every(id => other.commentIds?.includes(id))
+      )
+    }
+    return !other.commentIds
   }
 
   mergeWith(other) {
-    if (!(other instanceof InsertOp)) {
+    if (!this.canMergeWith(other)) {
       throw new Error('Cannot merge with incompatible operation')
     }
     this.insertion += other.insertion
+    // We already have the same tracking info and commentIds
   }
 
+  /**
+   * @returns {RawInsertOp}
+   */
   toJSON() {
-    // TODO: Once we add metadata to the operation, generate an object rather
-    // than the compact representation.
-    return this.insertion
+    if (!this.tracking && !this.commentIds) {
+      return this.insertion
+    }
+    const obj = { i: this.insertion }
+    if (this.tracking) {
+      obj.tracking = this.tracking.toRaw()
+    }
+    if (this.commentIds) {
+      obj.commentIds = this.commentIds
+    }
+    return obj
   }
 
   toString() {
@@ -171,34 +216,19 @@ class InsertOp extends ScanOp {
 }
 
 class RetainOp extends ScanOp {
-  constructor(length) {
+  /**
+   * @param {number} length
+   * @param {TrackingProps | undefined} tracking
+   */
+  constructor(length, tracking = undefined) {
     super()
     if (length < 0) {
       throw new Error('length must be non-negative')
     }
+    /** @type {number} */
     this.length = length
-  }
-
-  /**
-   * @inheritdoc
-   * @param {string} input
-   * @param {ApplyContext} current
-   * @returns {ApplyContext}
-   *  */
-  apply(input, current) {
-    if (current.inputCursor + this.length > input.length) {
-      throw new ApplyError(
-        "Operation can't retain more chars than are left in the string.",
-        this.toJSON(),
-        input
-      )
-    }
-    current.result += input.slice(
-      current.inputCursor,
-      current.inputCursor + this.length
-    )
-    current.inputCursor += this.length
-    return current
+    /** @type {TrackingProps | undefined} */
+    this.tracking = tracking
   }
 
   /**
@@ -221,8 +251,8 @@ class RetainOp extends ScanOp {
 
   /**
    *
-   * @param {number | {r: number}} op
-   * @returns
+   * @param {RawRetainOp} op
+   * @returns {RetainOp}
    */
   static fromJSON(op) {
     if (typeof op === 'number') {
@@ -232,6 +262,9 @@ class RetainOp extends ScanOp {
     if (typeof op.r !== 'number') {
       throw new Error('retain operation must have a number property')
     }
+    if (op.tracking) {
+      return new RetainOp(op.r, TrackingProps.fromRaw(op.tracking))
+    }
     return new RetainOp(op.r)
   }
 
@@ -240,24 +273,40 @@ class RetainOp extends ScanOp {
     if (!(other instanceof RetainOp)) {
       return false
     }
-    return this.length === other.length
+    if (this.length !== other.length) {
+      return false
+    }
+    if (this.tracking) {
+      return this.tracking.equals(other.tracking)
+    }
+    return !other.tracking
   }
 
   canMergeWith(other) {
-    return other instanceof RetainOp
+    if (!(other instanceof RetainOp)) {
+      return false
+    }
+    if (this.tracking) {
+      return this.tracking.equals(other.tracking)
+    }
+    return !other.tracking
   }
 
   mergeWith(other) {
-    if (!(other instanceof RetainOp)) {
+    if (!this.canMergeWith(other)) {
       throw new Error('Cannot merge with incompatible operation')
     }
     this.length += other.length
   }
 
+  /**
+   * @returns {RawRetainOp}
+   */
   toJSON() {
-    // TODO: Once we add metadata to the operation, generate an object rather
-    // than the compact representation.
-    return this.length
+    if (!this.tracking) {
+      return this.length
+    }
+    return { r: this.length, tracking: this.tracking.toRaw() }
   }
 
   toString() {
@@ -271,18 +320,8 @@ class RemoveOp extends ScanOp {
     if (length < 0) {
       throw new Error('length must be non-negative')
     }
+    /** @type {number} */
     this.length = length
-  }
-
-  /**
-   * @inheritdoc
-   * @param {string} _input
-   * @param {ApplyContext} current
-   * @returns {ApplyContext}
-   */
-  apply(_input, current) {
-    current.inputCursor += this.length
-    return current
   }
 
   /**
@@ -297,7 +336,7 @@ class RemoveOp extends ScanOp {
 
   /**
    *
-   * @param {number} op
+   * @param {RawRemoveOp} op
    * @returns {RemoveOp}
    */
   static fromJSON(op) {
@@ -320,12 +359,15 @@ class RemoveOp extends ScanOp {
   }
 
   mergeWith(other) {
-    if (!(other instanceof RemoveOp)) {
+    if (!this.canMergeWith(other)) {
       throw new Error('Cannot merge with incompatible operation')
     }
     this.length += other.length
   }
 
+  /**
+   * @returns {RawRemoveOp}
+   */
   toJSON() {
     return -this.length
   }
@@ -335,20 +377,35 @@ class RemoveOp extends ScanOp {
   }
 }
 
+/**
+ * @param {RawScanOp} op
+ * @returns {op is RawRetainOp}
+ */
 function isRetain(op) {
   return (
     (typeof op === 'number' && op > 0) ||
-    (typeof op === 'object' && typeof op.r === 'number' && op.r > 0)
+    (typeof op === 'object' &&
+      'r' in op &&
+      typeof op.r === 'number' &&
+      op.r > 0)
   )
 }
 
+/**
+ * @param {RawScanOp} op
+ * @returns {op is RawInsertOp}
+ */
 function isInsert(op) {
   return (
     typeof op === 'string' ||
-    (typeof op === 'object' && typeof op.i === 'string')
+    (typeof op === 'object' && 'i' in op && typeof op.i === 'string')
   )
 }
 
+/**
+ * @param {RawScanOp} op
+ * @returns {op is RawRemoveOp}
+ */
 function isRemove(op) {
   return typeof op === 'number' && op < 0
 }

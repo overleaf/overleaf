@@ -8,12 +8,19 @@ const TrackingProps = require('./tracking_props')
 
 class TrackedChange {
   /**
-   *
    * @param {Range} range
    * @param {TrackingProps} tracking
    */
   constructor(range, tracking) {
+    /**
+     * @readonly
+     * @type {Range}
+     */
     this.range = range
+    /**
+     * @readonly
+     * @type {TrackingProps}
+     */
     this.tracking = tracking
   }
 
@@ -60,17 +67,22 @@ class TrackedChange {
    * Merges another tracked change into this, updating the range and tracking
    * timestamp
    * @param {TrackedChange} other
-   * @returns {void}
+   * @returns {TrackedChange}
    */
   merge(other) {
     if (!this.canMerge(other)) {
       throw new Error('Cannot merge tracked changes')
     }
-    this.range = this.range.merge(other.range)
-    this.tracking.ts =
-      this.tracking.ts.getTime() > other.tracking.ts.getTime()
-        ? this.tracking.ts
-        : other.tracking.ts
+    return new TrackedChange(
+      this.range.merge(other.range),
+      new TrackingProps(
+        this.tracking.type,
+        this.tracking.userId,
+        this.tracking.ts.getTime() > other.tracking.ts.getTime()
+          ? this.tracking.ts
+          : other.tracking.ts
+      )
+    )
   }
 }
 

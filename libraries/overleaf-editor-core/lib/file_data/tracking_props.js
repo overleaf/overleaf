@@ -1,6 +1,6 @@
 // @ts-check
 /**
- * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
+ * @typedef {import("../types").TrackingPropsRawData} TrackingPropsRawData
  */
 
 class TrackingProps {
@@ -22,6 +22,7 @@ class TrackingProps {
      */
     this.userId = userId
     /**
+     * @readonly
      * @type {Date}
      */
     this.ts = ts
@@ -29,13 +30,16 @@ class TrackingProps {
 
   /**
    *
-   * @param {TrackedChangeRawData['tracking']} raw
-   * @returns
+   * @param {TrackingPropsRawData} raw
+   * @returns {TrackingProps}
    */
   static fromRaw(raw) {
     return new TrackingProps(raw.type, raw.userId, new Date(raw.ts))
   }
 
+  /**
+   * @returns {TrackingPropsRawData}
+   */
   toRaw() {
     return {
       type: this.type,
@@ -44,8 +48,15 @@ class TrackingProps {
     }
   }
 
-  clone() {
-    return new TrackingProps(this.type, this.userId, this.ts)
+  equals(other) {
+    if (!(other instanceof TrackingProps)) {
+      return false
+    }
+    return (
+      this.type === other.type &&
+      this.userId === other.userId &&
+      this.ts.getTime() === other.ts.getTime()
+    )
   }
 }
 

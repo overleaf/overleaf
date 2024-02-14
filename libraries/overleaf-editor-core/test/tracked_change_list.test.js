@@ -841,5 +841,44 @@ describe('TrackedChangeList', function () {
       expect(trackedChanges.trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
+
+    it('should append a new tracked change when retaining a range from another user with tracking info', function () {
+      const trackedChanges = TrackedChangeList.fromRaw([
+        {
+          range: { pos: 4, length: 4 },
+          tracking: {
+            type: 'delete',
+            userId: 'user1',
+            ts: '2023-01-01T00:00:00.000Z',
+          },
+        },
+      ])
+      trackedChanges.applyRetain(8, 1, {
+        tracking: TrackingProps.fromRaw({
+          type: 'delete',
+          userId: 'user2',
+          ts: '2024-01-01T00:00:00.000Z',
+        }),
+      })
+      expect(trackedChanges.trackedChanges.length).to.equal(2)
+      expect(trackedChanges.toRaw()).to.deep.equal([
+        {
+          range: { pos: 4, length: 4 },
+          tracking: {
+            type: 'delete',
+            userId: 'user1',
+            ts: '2023-01-01T00:00:00.000Z',
+          },
+        },
+        {
+          range: { pos: 8, length: 1 },
+          tracking: {
+            type: 'delete',
+            userId: 'user2',
+            ts: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      ])
+    })
   })
 })

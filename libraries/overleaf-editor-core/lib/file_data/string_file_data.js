@@ -34,7 +34,11 @@ class StringFileData extends FileData {
    * @returns {StringFileData}
    */
   static fromRaw(raw) {
-    return new StringFileData(raw.content, raw.comments || [])
+    return new StringFileData(
+      raw.content,
+      raw.comments || [],
+      raw.trackedChanges || []
+    )
   }
 
   /**

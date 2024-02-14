@@ -1,11 +1,14 @@
 // @ts-check
-/** @typedef {import('./edit_operation')} EditOperation */
+/**
+ * @typedef {import('./edit_operation')} EditOperation
+ * @typedef {import('../types').RawEditOperation} RawEditOperation
+ */
 const TextOperation = require('./text_operation')
 
 class EditOperationBuilder {
   /**
    *
-   * @param {object} raw
+   * @param {RawEditOperation} raw
    * @returns {EditOperation}
    */
   static fromJSON(raw) {

@@ -12,7 +12,6 @@
 const containsNonBmpChars = require('../util').containsNonBmpChars
 const EditOperation = require('./edit_operation')
 const {
-  ScanOp,
   RetainOp,
   InsertOp,
   RemoveOp,
@@ -26,7 +25,13 @@ const {
   InvalidInsertionError,
   TooLongError,
 } = require('../errors')
-/** @typedef {import('../file_data/string_file_data')} StringFileData */
+const Range = require('../file_data/range')
+const TrackingProps = require('../file_data/tracking_props')
+/**
+ * @typedef {import('../file_data/string_file_data')} StringFileData
+ * @typedef {import('../types').RawTextOperation} RawTextOperation
+ * @typedef {import('../operation/scan_op').ScanOp} ScanOp
+ */
 
 /**
  * Create an empty text operation.
@@ -85,8 +90,10 @@ class TextOperation extends EditOperation {
   /**
    * Skip over a given number of characters.
    * @param {number | {r: number}} n
+   * @param {{tracking?: TrackingProps}} opts
+   * @returns {TextOperation}
    */
-  retain(n) {
+  retain(n, opts = {}) {
     if (n === 0) {
       return this
     }
@@ -95,6 +102,7 @@ class TextOperation extends EditOperation {
       throw new Error('retain expects an integer or a retain object')
     }
     const newOp = RetainOp.fromJSON(n)
+    newOp.tracking = opts.tracking
 
     if (newOp.length === 0) {
       return this
@@ -117,12 +125,16 @@ class TextOperation extends EditOperation {
   /**
    * Insert a string at the current position.
    * @param {string | {i: string}} insertValue
+   * @param {{tracking?: TrackingProps, commentIds?: string[]}} opts
+   * @returns {TextOperation}
    */
-  insert(insertValue) {
+  insert(insertValue, opts = {}) {
     if (!isInsert(insertValue)) {
       throw new Error('insert expects a string or an insert object')
     }
     const newOp = InsertOp.fromJSON(insertValue)
+    newOp.tracking = opts.tracking
+    newOp.commentIds = opts.commentIds
     if (newOp.insertion === '') {
       return this
     }
@@ -154,6 +166,7 @@ class TextOperation extends EditOperation {
   /**
    * Remove a string at the current position.
    * @param {number | string} n
+   * @returns {TextOperation}
    */
   remove(n) {
     if (typeof n === 'string') {
@@ -198,6 +211,7 @@ class TextOperation extends EditOperation {
 
   /**
    * @inheritdoc
+   * @returns {RawTextOperation}
    */
   toJSON() {
     return { textOperation: this.ops.map(op => op.toJSON()) }
@@ -205,16 +219,24 @@ class TextOperation extends EditOperation {
 
   /**
    * Converts a plain JS object into an operation and validates it.
+   * @param {RawTextOperation} obj
+   * @returns {TextOperation}
    */
   static fromJSON = function ({ textOperation: ops }) {
     const o = new TextOperation()
     for (const op of ops) {
       if (isRetain(op)) {
-        o.retain(op)
+        const retain = RetainOp.fromJSON(op)
+        o.retain(retain.length, { tracking: retain.tracking })
       } else if (isInsert(op)) {
-        o.insert(op)
+        const insert = InsertOp.fromJSON(op)
+        o.insert(insert.insertion, {
+          commentIds: insert.commentIds,
+          tracking: insert.tracking,
+        })
       } else if (isRemove(op)) {
-        o.remove(op)
+        const remove = RemoveOp.fromJSON(op)
+        o.remove(-remove.length)
       } else {
         throw new UnprocessableError('unknown operation: ' + JSON.stringify(op))
       }
@@ -248,10 +270,42 @@ class TextOperation extends EditOperation {
     }
 
     const ops = this.ops
-    const { inputCursor, result } = ops.reduce(
-      (intermediate, op) => op.apply(str, intermediate),
-      { result: '', inputCursor: 0 }
-    )
+    let inputCursor = 0
+    let result = ''
+    for (const op of ops) {
+      if (op instanceof RetainOp) {
+        if (inputCursor + op.length > str.length) {
+          throw new ApplyError(
+            "Operation can't retain more chars than are left in the string.",
+            op.toJSON(),
+            str
+          )
+        }
+        file.trackedChanges.applyRetain(result.length, op.length, {
+          tracking: op.tracking,
+        })
+        result += str.slice(inputCursor, inputCursor + op.length)
+        inputCursor += op.length
+      } else if (op instanceof InsertOp) {
+        if (containsNonBmpChars(op.insertion)) {
+          throw new InvalidInsertionError(str, op.toJSON())
+        }
+        file.trackedChanges.applyInsert(result.length, op.insertion, {
+          tracking: op.tracking,
+        })
+        file.comments.applyInsert(
+          new Range(result.length, op.insertion.length),
+          { commentIds: op.commentIds }
+        )
+        result += op.insertion
+      } else if (op instanceof RemoveOp) {
+        file.trackedChanges.applyDelete(result.length, op.length)
+        file.comments.applyDelete(new Range(result.length, op.length))
+        inputCursor += op.length
+      } else {
+        throw new UnprocessableError('Unknown ScanOp type during apply')
+      }
+    }
 
     if (inputCursor !== str.length) {
       throw new TextOperation.ApplyError(
@@ -311,14 +365,65 @@ class TextOperation extends EditOperation {
     for (let i = 0, l = ops.length; i < l; i++) {
       const op = ops[i]
       if (op instanceof RetainOp) {
-        inverse.retain(op.length)
-        strIndex += op.length
+        // Where we need to end up after the retains
+        const target = strIndex + op.length
+        // A previous retain could have overriden some tracking info. Now we
+        // need to restore it.
+        const previousRanges = previousState.trackedChanges.inRange(
+          new Range(strIndex, op.length)
+        )
+
+        let removeTrackingInfoIfNeeded
+        if (op.tracking) {
+          removeTrackingInfoIfNeeded = new TrackingProps(
+            'none',
+            op.tracking.userId,
+            op.tracking.ts
+          )
+        }
+
+        for (const trackedChange of previousRanges) {
+          if (strIndex < trackedChange.range.start) {
+            inverse.retain(trackedChange.range.start - strIndex, {
+              tracking: removeTrackingInfoIfNeeded,
+            })
+            strIndex = trackedChange.range.start
+          }
+          if (trackedChange.range.end < strIndex + op.length) {
+            inverse.retain(trackedChange.range.length, {
+              tracking: trackedChange.tracking,
+            })
+            strIndex = trackedChange.range.end
+          }
+          if (trackedChange.range.end !== strIndex) {
+            // No need to split the range at the end
+            const [left] = trackedChange.range.splitAt(strIndex)
+            inverse.retain(left.length, { tracking: trackedChange.tracking })
+            strIndex = left.end
+          }
+        }
+        if (strIndex < target) {
+          inverse.retain(target - strIndex, {
+            tracking: removeTrackingInfoIfNeeded,
+          })
+          strIndex = target
+        }
       } else if (op instanceof InsertOp) {
         inverse.remove(op.insertion.length)
       } else if (op instanceof RemoveOp) {
-        // remove op
-        inverse.insert(str.slice(strIndex, strIndex + op.length))
-        strIndex += op.length
+        const segments = calculateTrackingCommentSegments(
+          strIndex,
+          op.length,
+          previousState.comments,
+          previousState.trackedChanges
+        )
+        for (const segment of segments) {
+          inverse.insert(str.slice(strIndex, strIndex + segment.length), {
+            tracking: segment.tracking,
+            commentIds: segment.commentIds,
+          })
+          strIndex += segment.length
+        }
       } else {
         throw new UnprocessableError('unknown scanop during inversion')
       }
@@ -410,7 +515,10 @@ class TextOperation extends EditOperation {
       }
 
       if (op2 instanceof InsertOp) {
-        operation.insert(op2.insertion)
+        operation.insert(op2.insertion, {
+          tracking: op2.tracking,
+          commentIds: op2.commentIds,
+        })
         op2 = ops2[i2++]
         continue
       }
@@ -427,48 +535,70 @@ class TextOperation extends EditOperation {
       }
 
       if (op1 instanceof RetainOp && op2 instanceof RetainOp) {
+        // If both have tracking info, use the latter one. Otherwise use the
+        // tracking info from the former.
+        const tracking = op2.tracking ?? op1.tracking
         if (op1.length > op2.length) {
-          operation.retain(op2.length)
-          op1 = ScanOp.fromJSON(op1.length - op2.length)
+          operation.retain(op2.length, {
+            tracking,
+          })
+          op1 = new RetainOp(op1.length - op2.length, op1.tracking)
           op2 = ops2[i2++]
         } else if (op1.length === op2.length) {
-          operation.retain(op1.length)
+          operation.retain(op1.length, {
+            tracking,
+          })
           op1 = ops1[i1++]
           op2 = ops2[i2++]
         } else {
-          operation.retain(op1.length)
-          op2 = ScanOp.fromJSON(op2.length - op1.length)
+          operation.retain(op1.length, {
+            tracking,
+          })
+          op2 = new RetainOp(op2.length - op1.length, op2.tracking)
           op1 = ops1[i1++]
         }
       } else if (op1 instanceof InsertOp && op2 instanceof RemoveOp) {
         if (op1.insertion.length > op2.length) {
-          op1 = ScanOp.fromJSON(op1.insertion.slice(op2.length))
+          op1 = new InsertOp(
+            op1.insertion.slice(op2.length),
+            op1.tracking,
+            op1.commentIds
+          )
           op2 = ops2[i2++]
         } else if (op1.insertion.length === op2.length) {
           op1 = ops1[i1++]
           op2 = ops2[i2++]
         } else {
-          op2 = ScanOp.fromJSON(-op2.length + op1.insertion.length)
+          op2 = RemoveOp.fromJSON(op1.insertion.length - op2.length)
           op1 = ops1[i1++]
         }
       } else if (op1 instanceof InsertOp && op2 instanceof RetainOp) {
+        const opts = {
+          // Prefer the latter tracking info
+          tracking: op2.tracking ?? op1.tracking,
+          commentIds: op1.commentIds,
+        }
         if (op1.insertion.length > op2.length) {
-          operation.insert(op1.insertion.slice(0, op2.length))
-          op1 = ScanOp.fromJSON(op1.insertion.slice(op2.length))
+          operation.insert(op1.insertion.slice(0, op2.length), opts)
+          op1 = new InsertOp(
+            op1.insertion.slice(op2.length),
+            op1.tracking,
+            op1.commentIds
+          )
           op2 = ops2[i2++]
         } else if (op1.insertion.length === op2.length) {
-          operation.insert(op1.insertion)
+          operation.insert(op1.insertion, opts)
           op1 = ops1[i1++]
           op2 = ops2[i2++]
         } else {
-          operation.insert(op1.insertion)
-          op2 = ScanOp.fromJSON(op2.length - op1.insertion.length)
+          operation.insert(op1.insertion, opts)
+          op2 = new RetainOp(op2.length - op1.insertion.length, op2.tracking)
           op1 = ops1[i1++]
         }
       } else if (op1 instanceof RetainOp && op2 instanceof RemoveOp) {
         if (op1.length > op2.length) {
           operation.remove(-op2.length)
-          op1 = ScanOp.fromJSON(op1.length - op2.length)
+          op1 = new RetainOp(op1.length - op2.length, op1.tracking)
           op2 = ops2[i2++]
         } else if (op1.length === op2.length) {
           operation.remove(-op2.length)
@@ -476,7 +606,7 @@ class TextOperation extends EditOperation {
           op2 = ops2[i2++]
         } else {
           operation.remove(op1.length)
-          op2 = ScanOp.fromJSON(-op2.length + op1.length)
+          op2 = RemoveOp.fromJSON(op1.length - op2.length)
           op1 = ops1[i1++]
         }
       } else {
@@ -498,6 +628,7 @@ class TextOperation extends EditOperation {
    * heart of OT.
    * @param {TextOperation} operation1
    * @param {TextOperation} operation2
+   * @returns {[TextOperation, TextOperation]}
    */
   static transform(operation1, operation2) {
     if (operation1.baseLength !== operation2.baseLength) {
@@ -526,14 +657,20 @@ class TextOperation extends EditOperation {
       // => insert the string in the corresponding prime operation, skip it in
       // the other one. If both op1 and op2 are insert ops, prefer op1.
       if (op1 instanceof InsertOp) {
-        operation1prime.insert(op1.insertion)
+        operation1prime.insert(op1.insertion, {
+          tracking: op1.tracking,
+          commentIds: op1.commentIds,
+        })
         operation2prime.retain(op1.insertion.length)
         op1 = ops1[i1++]
         continue
       }
       if (op2 instanceof InsertOp) {
         operation1prime.retain(op2.insertion.length)
-        operation2prime.insert(op2.insertion)
+        operation2prime.insert(op2.insertion, {
+          tracking: op2.tracking,
+          commentIds: op2.commentIds,
+        })
         op2 = ops2[i2++]
         continue
       }
@@ -552,9 +689,21 @@ class TextOperation extends EditOperation {
       let minl
       if (op1 instanceof RetainOp && op2 instanceof RetainOp) {
         // Simple case: retain/retain
+
+        // If both have tracking info, we use the one from op1
+        /** @type {TrackingProps | undefined} */
+        let operation1primeTracking
+        /** @type {TrackingProps | undefined} */
+        let operation2primeTracking
+        if (op1.tracking) {
+          operation1primeTracking = op1.tracking
+        } else {
+          operation2primeTracking = op2.tracking
+        }
+
         if (op1.length > op2.length) {
           minl = op2.length
-          op1 = ScanOp.fromJSON(op1.length - op2.length)
+          op1 = new RetainOp(op1.length - op2.length, op1.tracking)
           op2 = ops2[i2++]
         } else if (op1.length === op2.length) {
           minl = op2.length
@@ -562,30 +711,30 @@ class TextOperation extends EditOperation {
           op2 = ops2[i2++]
         } else {
           minl = op1.length
-          op2 = ScanOp.fromJSON(op2.length - op1.length)
+          op2 = new RetainOp(op2.length - op1.length, op2.tracking)
           op1 = ops1[i1++]
         }
-        operation1prime.retain(minl)
-        operation2prime.retain(minl)
+        operation1prime.retain(minl, { tracking: operation1primeTracking })
+        operation2prime.retain(minl, { tracking: operation2primeTracking })
       } else if (op1 instanceof RemoveOp && op2 instanceof RemoveOp) {
         // Both operations remove the same string at the same position. We don't
         // need to produce any operations, we just skip over the remove ops and
         // handle the case that one operation removes more than the other.
         if (op1.length > op2.length) {
-          op1 = ScanOp.fromJSON(-op1.length - -op2.length)
+          op1 = RemoveOp.fromJSON(op2.length - op1.length)
           op2 = ops2[i2++]
         } else if (op1.length === op2.length) {
           op1 = ops1[i1++]
           op2 = ops2[i2++]
         } else {
-          op2 = ScanOp.fromJSON(-op2.length - -op1.length)
+          op2 = RemoveOp.fromJSON(op1.length - op2.length)
           op1 = ops1[i1++]
         }
         // next two cases: remove/retain and retain/remove
       } else if (op1 instanceof RemoveOp && op2 instanceof RetainOp) {
         if (op1.length > op2.length) {
           minl = op2.length
-          op1 = ScanOp.fromJSON(-op1.length + op2.length)
+          op1 = RemoveOp.fromJSON(op2.length - op1.length)
           op2 = ops2[i2++]
         } else if (op1.length === op2.length) {
           minl = op2.length
@@ -593,14 +742,14 @@ class TextOperation extends EditOperation {
           op2 = ops2[i2++]
         } else {
           minl = op1.length
-          op2 = ScanOp.fromJSON(op2.length + -op1.length)
+          op2 = new RetainOp(op2.length - op1.length, op2.tracking)
           op1 = ops1[i1++]
         }
         operation1prime.remove(minl)
       } else if (op1 instanceof RetainOp && op2 instanceof RemoveOp) {
         if (op1.length > op2.length) {
           minl = op2.length
-          op1 = ScanOp.fromJSON(op1.length + -op2.length)
+          op1 = new RetainOp(op1.length - op2.length, op1.tracking)
           op2 = ops2[i2++]
         } else if (op1.length === op2.length) {
           minl = op1.length
@@ -608,7 +757,7 @@ class TextOperation extends EditOperation {
           op2 = ops2[i2++]
         } else {
           minl = op1.length
-          op2 = ScanOp.fromJSON(-op2.length + op1.length)
+          op2 = RemoveOp.fromJSON(op1.length - op2.length)
           op1 = ops1[i1++]
         }
         operation2prime.remove(minl)
@@ -658,6 +807,79 @@ function getStartIndex(operation) {
     return operation.ops[0].length
   }
   return 0
+}
+
+/**
+ * Constructs the segments defined as each overlapping range of tracked
+ * changes and comments. Each segment can have it's own tracking props and
+ * attached comment ids.
+ *
+ *                  The quick brown fox jumps over the lazy dog
+ * Tracked inserts            ----------               -----
+ * Tracked deletes      ------
+ * Comment 1               -------
+ * Comment 2                    ----
+ * Comment 3                           -----------------
+ *
+ * Approx. boundaries:  |  | | || |   |                |   |
+ *
+ * @param {number} cursor
+ * @param {number} length
+ * @param {import('../file_data/comment_list')} commentsList
+ * @param {import('../file_data/tracked_change_list')} trackedChangeList
+ * @returns {{length: number, commentIds?: string[], tracking?: TrackingProps}[]}
+ */
+function calculateTrackingCommentSegments(
+  cursor,
+  length,
+  commentsList,
+  trackedChangeList
+) {
+  const breaks = new Set()
+  const opStart = cursor
+  const opEnd = cursor + length
+  // Utility function to limit breaks to the boundary set by the operation range
+  function addBreak(rangeBoundary) {
+    if (rangeBoundary < opStart || rangeBoundary > opEnd) {
+      return
+    }
+    breaks.add(rangeBoundary)
+  }
+  // Add comment boundaries
+  for (const comment of commentsList.comments.values()) {
+    for (const range of comment.ranges) {
+      addBreak(range.end)
+      addBreak(range.start)
+    }
+  }
+  // Add tracked change boundaries
+  for (const trackedChange of trackedChangeList.trackedChanges) {
+    addBreak(trackedChange.range.start)
+    addBreak(trackedChange.range.end)
+  }
+  // Add operation boundaries
+  addBreak(opStart)
+  addBreak(opEnd)
+
+  // Sort the boundaries so that we can construct ranges between them
+  const sortedBreaks = Array.from(breaks).sort((a, b) => a - b)
+
+  const separateRanges = []
+  for (let i = 1; i < sortedBreaks.length; i++) {
+    const start = sortedBreaks[i - 1]
+    const end = sortedBreaks[i]
+    const currentRange = new Range(start, end - start)
+    // The comment ids that cover the current range is part of this sub-range
+    const commentIds = commentsList.idsCoveringRange(currentRange)
+    // The tracking info that covers the current range is part of this sub-range
+    const tracking = trackedChangeList.propsAtRange(currentRange)
+    separateRanges.push({
+      length: currentRange.length,
+      commentIds: commentIds.length > 0 ? commentIds : undefined,
+      tracking,
+    })
+  }
+  return separateRanges
 }
 
 module.exports = TextOperation

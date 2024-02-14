@@ -47,6 +47,16 @@ class TrackedChangeList {
   }
 
   /**
+   * Returns the tracking props for a given range.
+   * @param {Range} range
+   * @returns {TrackingProps | undefined}
+   */
+  propsAtRange(range) {
+    return this.trackedChanges.find(change => change.range.contains(range))
+      ?.tracking
+  }
+
+  /**
    * Removes the tracked changes that are fully included in the range
    * @param {Range} range
    */
@@ -80,7 +90,7 @@ class TrackedChangeList {
       const last = newTrackedChanges[newTrackedChanges.length - 1]
       const current = this.trackedChanges[i]
       if (last.canMerge(current)) {
-        last.merge(current)
+        newTrackedChanges[newTrackedChanges.length - 1] = last.merge(current)
       } else {
         newTrackedChanges.push(current)
       }
@@ -103,8 +113,12 @@ class TrackedChangeList {
         trackedChange.range.startIsAfter(cursor) ||
         cursor === trackedChange.range.start
       ) {
-        trackedChange.range = trackedChange.range.moveBy(insertedText.length)
-        newTrackedChanges.push(trackedChange)
+        newTrackedChanges.push(
+          new TrackedChange(
+            trackedChange.range.moveBy(insertedText.length),
+            trackedChange.tracking
+          )
+        )
       } else if (cursor === trackedChange.range.end) {
         // The insertion is at the end of the tracked change. So we don't need
         // to move it.
@@ -116,17 +130,15 @@ class TrackedChangeList {
           cursor,
           insertedText.length
         )
-        const firstPart = new TrackedChange(
-          firstRange,
-          trackedChange.tracking.clone()
-        )
-        newTrackedChanges.push(firstPart)
+        const firstPart = new TrackedChange(firstRange, trackedChange.tracking)
+        if (!firstPart.range.isEmpty()) {
+          newTrackedChanges.push(firstPart)
+        }
         // second part will be added at the end if it is a tracked insertion
-        const thirdPart = new TrackedChange(
-          thirdRange,
-          trackedChange.tracking.clone()
-        )
-        newTrackedChanges.push(thirdPart)
+        const thirdPart = new TrackedChange(thirdRange, trackedChange.tracking)
+        if (!thirdPart.range.isEmpty()) {
+          newTrackedChanges.push(thirdPart)
+        }
       } else {
         newTrackedChanges.push(trackedChange)
       }
@@ -157,11 +169,19 @@ class TrackedChangeList {
       if (deletedRange.contains(trackedChange.range)) {
         continue
       } else if (deletedRange.overlaps(trackedChange.range)) {
-        trackedChange.range = trackedChange.range.subtract(deletedRange)
-        newTrackedChanges.push(trackedChange)
+        const newRange = trackedChange.range.subtract(deletedRange)
+        if (!newRange.isEmpty()) {
+          newTrackedChanges.push(
+            new TrackedChange(newRange, trackedChange.tracking)
+          )
+        }
       } else if (trackedChange.range.startIsAfter(cursor)) {
-        trackedChange.range = trackedChange.range.moveBy(-length)
-        newTrackedChanges.push(trackedChange)
+        newTrackedChanges.push(
+          new TrackedChange(
+            trackedChange.range.moveBy(-length),
+            trackedChange.tracking
+          )
+        )
       } else {
         newTrackedChanges.push(trackedChange)
       }
@@ -188,28 +208,41 @@ class TrackedChangeList {
       } else if (retainedRange.overlaps(trackedChange.range)) {
         if (trackedChange.range.contains(retainedRange)) {
           const [leftRange, rightRange] = trackedChange.range.splitAt(cursor)
-          newTrackedChanges.push(
-            new TrackedChange(leftRange, trackedChange.tracking.clone())
-          )
-          newTrackedChanges.push(
-            new TrackedChange(
-              rightRange.moveBy(length).shrinkBy(length),
-              trackedChange.tracking.clone()
+          if (!leftRange.isEmpty()) {
+            newTrackedChanges.push(
+              new TrackedChange(leftRange, trackedChange.tracking)
             )
-          )
+          }
+          if (!rightRange.isEmpty() && rightRange.length > length) {
+            newTrackedChanges.push(
+              new TrackedChange(
+                rightRange.moveBy(length).shrinkBy(length),
+                trackedChange.tracking
+              )
+            )
+          }
         } else if (retainedRange.start <= trackedChange.range.start) {
           // overlaps to the left
           const [, reducedRange] = trackedChange.range.splitAt(
             retainedRange.end
           )
-          trackedChange.range = reducedRange
-          newTrackedChanges.push(trackedChange)
+          if (!reducedRange.isEmpty()) {
+            newTrackedChanges.push(
+              new TrackedChange(reducedRange, trackedChange.tracking)
+            )
+          }
         } else {
           // overlaps to the right
           const [reducedRange] = trackedChange.range.splitAt(cursor)
-          trackedChange.range = reducedRange
-          newTrackedChanges.push(trackedChange)
+          if (!reducedRange.isEmpty()) {
+            newTrackedChanges.push(
+              new TrackedChange(reducedRange, trackedChange.tracking)
+            )
+          }
         }
+      } else {
+        // keep the range
+        newTrackedChanges.push(trackedChange)
       }
     }
     if (opts.tracking?.type === 'delete' || opts.tracking?.type === 'insert') {

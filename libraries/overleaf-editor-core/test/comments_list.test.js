@@ -413,7 +413,7 @@ describe('commentList', function () {
       })
     })
 
-    it('should delete entire comment', function () {
+    it('should leave comment without ranges', function () {
       const commentList = CommentList.fromRaw([
         {
           id: 'comm1',
@@ -436,6 +436,7 @@ describe('commentList', function () {
           ranges: [{ pos: 5, length: 10 }],
           resolved: false,
         },
+        { id: 'comm2', ranges: [], resolved: false },
         {
           id: 'comm3',
           ranges: [{ pos: 20, length: 15 }],

@@ -7,6 +7,7 @@ const {
   RemoveOp,
 } = require('../lib/operation/scan_op')
 const { UnprocessableError, ApplyError } = require('../lib/errors')
+const TrackingProps = require('../lib/file_data/tracking_props')
 
 describe('ScanOp', function () {
   describe('fromJSON', function () {
@@ -41,7 +42,9 @@ describe('ScanOp', function () {
     })
 
     it('throws an error for invalid input', function () {
-      expect(() => ScanOp.fromJSON({})).to.throw(UnprocessableError)
+      expect(() => ScanOp.fromJSON(/** @type {any} */ ({}))).to.throw(
+        UnprocessableError
+      )
     })
 
     it('throws an error for zero', function () {
@@ -63,6 +66,27 @@ describe('RetainOp', function () {
     expect(op1.equals(op2)).to.be.false
   })
 
+  it('is not equal to another RetainOp with no tracking info', function () {
+    const op1 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new RetainOp(4)
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another RetainOp with different tracking info', function () {
+    const op1 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user2', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    expect(op1.equals(op2)).to.be.false
+  })
+
   it('is not equal to an InsertOp', function () {
     const op1 = new RetainOp(1)
     const op2 = new InsertOp('a')
@@ -81,6 +105,43 @@ describe('RetainOp', function () {
     expect(op1.canMergeWith(op2)).to.be.true
     op1.mergeWith(op2)
     expect(op1.equals(new RetainOp(3))).to.be.true
+  })
+
+  it('cannot merge with another RetainOp if tracking info is different', function () {
+    const op1 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user2', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    expect(op1.canMergeWith(op2)).to.be.false
+    expect(() => op1.mergeWith(op2)).to.throw(Error)
+  })
+
+  it('can merge with another RetainOp if tracking info is the same', function () {
+    const op1 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new RetainOp(
+      4,
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    op1.mergeWith(op2)
+    expect(
+      op1.equals(
+        new RetainOp(
+          8,
+          new TrackingProps(
+            'insert',
+            'user1',
+            new Date('2024-01-01T00:00:00.000Z')
+          )
+        )
+      )
+    ).to.be.true
   })
 
   it('cannot merge with an InsertOp', function () {
@@ -112,16 +173,6 @@ describe('RetainOp', function () {
     expect(length).to.equal(13)
     expect(inputCursor).to.equal(13)
   })
-
-  it('adds from the input to the result when applied', function () {
-    const op = new RetainOp(3)
-    const { result, inputCursor } = op.apply('abcdefghi', {
-      result: 'xyz',
-      inputCursor: 3,
-    })
-    expect(result).to.equal('xyzdef')
-    expect(inputCursor).to.equal(6)
-  })
 })
 
 describe('InsertOp', function () {
@@ -134,6 +185,60 @@ describe('InsertOp', function () {
   it('is not equal to another InsertOp with a different insertion', function () {
     const op1 = new InsertOp('a')
     const op2 = new InsertOp('b')
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with no tracking info', function () {
+    const op1 = new InsertOp(
+      'a',
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new InsertOp('a')
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with different tracking info', function () {
+    const op1 = new InsertOp(
+      'a',
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new InsertOp(
+      'a',
+      new TrackingProps('insert', 'user2', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with no comment ids', function () {
+    const op1 = new InsertOp('a', undefined, ['1'])
+    const op2 = new InsertOp('a')
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with tracking info', function () {
+    const op1 = new InsertOp('a', undefined)
+    const op2 = new InsertOp(
+      'a',
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with comment ids', function () {
+    const op1 = new InsertOp('a')
+    const op2 = new InsertOp('a', undefined, ['1'])
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with different comment ids', function () {
+    const op1 = new InsertOp('a', undefined, ['1'])
+    const op2 = new InsertOp('a', undefined, ['2'])
+    expect(op1.equals(op2)).to.be.false
+  })
+
+  it('is not equal to another InsertOp with overlapping comment ids', function () {
+    const op1 = new InsertOp('a', undefined, ['1'])
+    const op2 = new InsertOp('a', undefined, ['2', '1'])
     expect(op1.equals(op2)).to.be.false
   })
 
@@ -155,6 +260,103 @@ describe('InsertOp', function () {
     expect(op1.canMergeWith(op2)).to.be.true
     op1.mergeWith(op2)
     expect(op1.equals(new InsertOp('ab'))).to.be.true
+  })
+
+  it('cannot merge with another InsertOp if comment id info is different', function () {
+    const op1 = new InsertOp('a', undefined, ['1'])
+    const op2 = new InsertOp('b', undefined, ['1', '2'])
+    expect(op1.canMergeWith(op2)).to.be.false
+    expect(() => op1.mergeWith(op2)).to.throw(Error)
+  })
+
+  it('cannot merge with another InsertOp if comment id info is different while tracking info matches', function () {
+    const op1 = new InsertOp(
+      'a',
+      new TrackingProps(
+        'insert',
+        'user1',
+        new Date('2024-01-01T00:00:00.000Z')
+      ),
+      ['1', '2']
+    )
+    const op2 = new InsertOp(
+      'b',
+      new TrackingProps(
+        'insert',
+        'user1',
+        new Date('2024-01-01T00:00:00.000Z')
+      ),
+      ['3']
+    )
+    expect(op1.canMergeWith(op2)).to.be.false
+    expect(() => op1.mergeWith(op2)).to.throw(Error)
+  })
+
+  it('cannot merge with another InsertOp if comment id is present in other and tracking info matches', function () {
+    const op1 = new InsertOp(
+      'a',
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new InsertOp(
+      'b',
+      new TrackingProps(
+        'insert',
+        'user1',
+        new Date('2024-01-01T00:00:00.000Z')
+      ),
+      ['1']
+    )
+    expect(op1.canMergeWith(op2)).to.be.false
+    expect(() => op1.mergeWith(op2)).to.throw(Error)
+  })
+
+  it('cannot merge with another InsertOp if tracking info is different', function () {
+    const op1 = new InsertOp(
+      'a',
+      new TrackingProps('insert', 'user1', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    const op2 = new InsertOp(
+      'b',
+      new TrackingProps('insert', 'user2', new Date('2024-01-01T00:00:00.000Z'))
+    )
+    expect(op1.canMergeWith(op2)).to.be.false
+    expect(() => op1.mergeWith(op2)).to.throw(Error)
+  })
+
+  it('can merge with another InsertOp if tracking and comment info is the same', function () {
+    const op1 = new InsertOp(
+      'a',
+      new TrackingProps(
+        'insert',
+        'user1',
+        new Date('2024-01-01T00:00:00.000Z')
+      ),
+      ['1', '2']
+    )
+    const op2 = new InsertOp(
+      'b',
+      new TrackingProps(
+        'insert',
+        'user1',
+        new Date('2024-01-01T00:00:00.000Z')
+      ),
+      ['1', '2']
+    )
+    expect(op1.canMergeWith(op2)).to.be.true
+    op1.mergeWith(op2)
+    expect(
+      op1.equals(
+        new InsertOp(
+          'ab',
+          new TrackingProps(
+            'insert',
+            'user1',
+            new Date('2024-01-01T00:00:00.000Z')
+          ),
+          ['1', '2']
+        )
+      )
+    ).to.be.true
   })
 
   it('cannot merge with a RetainOp', function () {
@@ -185,16 +387,6 @@ describe('InsertOp', function () {
     })
     expect(length).to.equal(13)
     expect(inputCursor).to.equal(20)
-  })
-
-  it('adds from the insertion to the result when applied', function () {
-    const op = new InsertOp('ghi')
-    const { result, inputCursor } = op.apply('abcdef', {
-      result: 'xyz',
-      inputCursor: 3,
-    })
-    expect(result).to.equal('xyzghi')
-    expect(inputCursor).to.equal(3)
   })
 
   it('can apply a retain of the rest of the input', function () {
@@ -281,15 +473,5 @@ describe('RemoveOp', function () {
     })
     expect(length).to.equal(10)
     expect(inputCursor).to.equal(13)
-  })
-
-  it('does not change the result and adds to the cursor when applied', function () {
-    const op = new RemoveOp(3)
-    const { result, inputCursor } = op.apply('abcdefghi', {
-      result: 'xyz',
-      inputCursor: 3,
-    })
-    expect(result).to.equal('xyz')
-    expect(inputCursor).to.equal(6)
   })
 })
