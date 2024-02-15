@@ -15,6 +15,7 @@ import { useFileTreeActionable } from './file-tree-actionable'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { isAcceptableFile } from '@/features/file-tree/util/is-acceptable-file'
 
 const DRAGGABLE_TYPE = 'ENTITY'
 export const FileTreeDraggableProvider: FC<{
@@ -120,10 +121,12 @@ export function useDroppable(targetEntityId: string) {
       }
 
       // native file(s) dragged in from outside
-      getDroppedFiles(item as unknown as DataTransfer).then(files => {
-        setDroppedFiles({ files, targetFolderId: targetEntityId })
-        startUploadingDocOrFile()
-      })
+      getDroppedFiles(item as unknown as DataTransfer)
+        .then(files => files.filter(isAcceptableFile))
+        .then(files => {
+          setDroppedFiles({ files, targetFolderId: targetEntityId })
+          startUploadingDocOrFile()
+        })
     },
     collect(monitor) {
       return {

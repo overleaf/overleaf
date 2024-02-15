@@ -1,37 +1,80 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Uppy from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
 import { Dashboard } from '@uppy/react'
 import { useFileTreeActionable } from '../../../contexts/file-tree-actionable'
 import { useProjectContext } from '../../../../../shared/context/project-context'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
-
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
 import { refreshProjectMetadata } from '../../../util/api'
 import ErrorMessage from '../error-message'
 import { debugConsole } from '@/utils/debugging'
+import { isAcceptableFile } from '@/features/file-tree/util/is-acceptable-file'
+import { findByNameInFolder } from '@/features/file-tree/util/is-name-unique-in-folder'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
+import { FileTreeEntity } from '../../../../../../../types/file-tree-entity'
+import { UploadConflicts } from '@/features/file-tree/components/file-tree-create/file-tree-upload-conflicts'
 
 export default function FileTreeUploadDoc() {
-  const { parentFolderId, cancel, isDuplicate, droppedFiles, setDroppedFiles } =
+  const { parentFolderId, cancel, droppedFiles, setDroppedFiles } =
     useFileTreeActionable()
+  const { fileTreeData } = useFileTreeData()
   const { _id: projectId } = useProjectContext()
 
   const [error, setError] = useState<string>()
 
-  const [conflicts, setConflicts] = useState<any[]>([])
+  const [conflicts, setConflicts] = useState<FileTreeEntity[]>([])
+  const [folderConflicts, setFolderConflicts] = useState<FileTreeEntity[]>([])
   const [overwrite, setOverwrite] = useState(false)
 
   const maxNumberOfFiles = 40
   const maxFileSize = window.ExposedSettings.maxUploadSize
 
   // calculate conflicts
-  const buildConflicts = (files: Record<string, any>) =>
-    Object.values(files).filter(file =>
-      isDuplicate(file.meta.targetFolderId ?? parentFolderId, file.meta.name)
-    )
+  const buildConflicts = (files: Record<string, any>) => {
+    const conflicts = new Set<FileTreeEntity>()
+
+    for (const file of Object.values(files)) {
+      const { name, relativePath } = file.meta
+
+      if (!relativePath) {
+        const targetFolderId = file.meta.targetFolderId ?? parentFolderId
+        const duplicate = findByNameInFolder(fileTreeData, targetFolderId, name)
+        if (duplicate) {
+          conflicts.add(duplicate)
+        }
+      }
+    }
+
+    return [...conflicts]
+  }
+
+  const buildFolderConflicts = (files: Record<string, any>) => {
+    const conflicts = new Set<FileTreeEntity>()
+
+    for (const file of Object.values(files)) {
+      const { relativePath } = file.meta
+
+      if (relativePath) {
+        const [rootName] = relativePath.replace(/^\//, '').split('/')
+        if (!conflicts.has(rootName)) {
+          const targetFolderId = file.meta.targetFolderId ?? parentFolderId
+          const duplicateEntity = findByNameInFolder(
+            fileTreeData,
+            targetFolderId,
+            rootName
+          )
+          if (duplicateEntity) {
+            conflicts.add(duplicateEntity)
+          }
+        }
+      }
+    }
+
+    return [...conflicts]
+  }
 
   const buildEndpoint = (projectId: string, targetFolderId: string) => {
     let endpoint = `/project/${projectId}/upload`
@@ -42,6 +85,11 @@ export default function FileTreeUploadDoc() {
 
     return endpoint
   }
+
+  const overwriteRef = useRef(overwrite)
+  useEffect(() => {
+    overwriteRef.current = overwrite
+  }, [overwrite])
 
   // initialise the Uppy object
   const [uppy] = useState(() => {
@@ -55,24 +103,21 @@ export default function FileTreeUploadDoc() {
           maxNumberOfFiles,
           maxFileSize: maxFileSize || null,
         },
-        onBeforeUpload: files => {
-          let result = true
-
-          setOverwrite(overwrite => {
-            if (!overwrite) {
-              setConflicts(() => {
-                const conflicts = buildConflicts(files)
-
-                result = conflicts.length === 0
-
-                return conflicts
-              })
-            }
-
-            return overwrite
-          })
-
-          return result
+        onBeforeFileAdded(file) {
+          if (!isAcceptableFile(file)) {
+            return false
+          }
+        },
+        onBeforeUpload(files) {
+          if (overwriteRef.current) {
+            return true
+          } else {
+            const conflicts = buildConflicts(files)
+            const folderConflicts = buildFolderConflicts(files)
+            setConflicts(conflicts)
+            setFolderConflicts(folderConflicts)
+            return conflicts.length === 0 && folderConflicts.length === 0
+          }
         },
         autoProceed: true,
       })
@@ -135,6 +180,7 @@ export default function FileTreeUploadDoc() {
           source: 'Local',
           isRemote: false,
           meta: {
+            relativePath: file.relativePath,
             targetFolderId: droppedFiles.targetFolderId,
           },
         })
@@ -163,7 +209,8 @@ export default function FileTreeUploadDoc() {
   }, [uppy])
 
   // whether to show a message about conflicting files
-  const showConflicts = !overwrite && conflicts.length > 0
+  const showConflicts =
+    !overwrite && (conflicts.length > 0 || folderConflicts.length > 0)
 
   return (
     <>
@@ -175,7 +222,9 @@ export default function FileTreeUploadDoc() {
         <UploadConflicts
           cancel={cancel}
           conflicts={conflicts}
+          folderConflicts={folderConflicts}
           handleOverwrite={handleOverwrite}
+          setError={setError}
         />
       ) : (
         <Dashboard
@@ -186,16 +235,19 @@ export default function FileTreeUploadDoc() {
           width="100%"
           showLinkToFileUploadResult={false}
           proudlyDisplayPoweredByUppy={false}
+          // allow files or folders to be selected
+          fileManagerSelectionType="both"
           locale={{
             strings: {
               // Text to show on the droppable area.
               // `%{browse}` is replaced with a link that opens the system file selection dialog.
               // TODO: 'drag_here' or 'drop_files_here_to_upload'?
               // dropHereOr: `${t('drag_here')} ${t('or')} %{browse}`,
-              dropPasteFiles: `Drag here, paste an image or file, or %{browseFiles}`,
+              dropPasteBoth: `Drop or paste your files, folder, or images here. %{browseFiles} or %{browseFolders} from your computer.`,
               // Used as the label for the link that opens the system file selection dialog.
               // browseFiles: t('select_from_your_computer')
-              browseFiles: 'select from your computer',
+              browseFiles: 'Select files',
+              browseFolders: 'select a folder',
             },
           }}
         />
@@ -226,46 +278,4 @@ function UploadErrorMessage({
     default:
       return <ErrorMessage error={error} />
   }
-}
-
-function UploadConflicts({
-  cancel,
-  conflicts,
-  handleOverwrite,
-}: {
-  cancel: () => void
-  conflicts: any[]
-  handleOverwrite: () => void
-}) {
-  const { t } = useTranslation()
-
-  return (
-    <div className="small modal-new-file--body-conflict">
-      <p className="text-center mb-0">
-        {t('the_following_files_already_exist_in_this_project')}
-      </p>
-
-      <ul className="text-center list-unstyled row-spaced-small mt-1">
-        {conflicts.map((conflict, index) => (
-          <li key={index}>
-            <strong>{conflict.meta.name}</strong>
-          </li>
-        ))}
-      </ul>
-
-      <p className="text-center row-spaced-small">
-        {t('do_you_want_to_overwrite_them')}
-      </p>
-
-      <p className="text-center">
-        <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
-          {t('cancel')}
-        </Button>
-        &nbsp;
-        <Button bsStyle="danger" onClick={handleOverwrite}>
-          {t('overwrite')}
-        </Button>
-      </p>
-    </div>
-  )
 }

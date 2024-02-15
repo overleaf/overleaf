@@ -40,6 +40,12 @@ describe('ProjectUploadController', function () {
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
     }
+    this.ProjectLocator = {
+      promises: {},
+    }
+    this.EditorController = {
+      promises: {},
+    }
 
     return (this.ProjectUploadController = SandboxedModule.require(modulePath, {
       requires: {
@@ -50,6 +56,8 @@ describe('ProjectUploadController', function () {
         '@overleaf/metrics': this.metrics,
         '../Authentication/SessionManager': this.SessionManager,
         './ArchiveErrors': ArchiveErrors,
+        '../Project/ProjectLocator': this.ProjectLocator,
+        '../Editor/EditorController': this.EditorController,
         fs: (this.fs = {}),
       },
     }))
@@ -221,6 +229,53 @@ describe('ProjectUploadController', function () {
 
       it('should remove the uploaded file', function () {
         return this.fs.unlink.calledWith(this.path).should.equal(true)
+      })
+    })
+
+    describe('with folder structure', function () {
+      beforeEach(function (done) {
+        this.entity = {
+          _id: '1234',
+          type: 'file',
+        }
+        this.FileSystemImportManager.addEntity = sinon
+          .stub()
+          .callsArgWith(6, null, this.entity)
+        this.ProjectLocator.promises.findElement = sinon.stub().resolves({
+          path: { fileSystem: '/test' },
+        })
+        this.EditorController.promises.mkdirp = sinon.stub().resolves({
+          lastFolder: { _id: 'folder-id' },
+        })
+        this.req.body.relativePath = 'foo/bar/' + this.name
+        this.res.json = data => {
+          expect(data.success).to.be.true
+          done()
+        }
+        this.ProjectUploadController.uploadFile(this.req, this.res)
+      })
+
+      it('should insert the file', function () {
+        this.ProjectLocator.promises.findElement.should.be.calledOnceWithExactly(
+          {
+            project_id: this.project_id,
+            element_id: this.folder_id,
+            type: 'folder',
+          }
+        )
+
+        this.EditorController.promises.mkdirp.should.be.calledWith(
+          this.project_id,
+          '/test/foo/bar'
+        )
+
+        this.FileSystemImportManager.addEntity.should.be.calledOnceWith(
+          this.user_id,
+          this.project_id,
+          'folder-id',
+          this.name,
+          this.path
+        )
       })
     })
 

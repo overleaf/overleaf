@@ -403,6 +403,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       textExtensions: Settings.textExtensions,
       editableFilenames: Settings.editableFilenames,
       validRootDocExtensions: Settings.validRootDocExtensions,
+      fileIgnorePattern: Settings.fileIgnorePattern,
       sentryAllowedOriginRegex: Settings.sentry.allowedOriginRegex,
       sentryDsn: Settings.sentry.publicDSN,
       sentryEnvironment: Settings.sentry.environment,
