@@ -275,25 +275,16 @@ function _isAttributeValueValid(attributeValue) {
   return _isAttributeValid(attributeValue) || attributeValue instanceof Date
 }
 
-function _isSegmentationValueValid(attributeValue) {
-  // spaces and %-escaped values are allowed for segmentation values
-  return !attributeValue || /^[a-zA-Z0-9-_.:;,/ %]+$/.test(attributeValue)
-}
-
 function _isSegmentationValid(segmentation) {
-  if (!segmentation) {
-    return true
+  if (segmentation) {
+    for (const key of Object.keys(segmentation)) {
+      if (!_isAttributeValid(key)) {
+        return false
+      }
+    }
   }
 
-  const hasAnyInvalidKey = [...Object.keys(segmentation)].some(
-    key => !_isAttributeValid(key)
-  )
-
-  const hasAnyInvalidValue = [...Object.values(segmentation)].some(
-    value => !_isSegmentationValueValid(value)
-  )
-
-  return !hasAnyInvalidKey && !hasAnyInvalidValue
+  return true
 }
 
 function getIdsFromSession(session) {

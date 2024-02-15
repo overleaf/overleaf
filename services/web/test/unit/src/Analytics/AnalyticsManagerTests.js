@@ -112,7 +112,7 @@ describe('AnalyticsManager', function () {
         this.fakeUserId,
         '789ghi',
         'fr',
-        { key: '<alert>' }
+        { '<alert>': 'foo' }
       )
       sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsEditingSessionQueue.add)
@@ -131,7 +131,7 @@ describe('AnalyticsManager', function () {
       await this.AnalyticsManager.recordEventForUser(
         this.fakeUserId,
         'an_event',
-        { not_a: 'Valid Segmentation!' }
+        { 'not_a!': 'Valid Segmentation' }
       )
       sinon.assert.called(this.logger.info)
       sinon.assert.notCalled(this.analyticsEventsQueue.add)
