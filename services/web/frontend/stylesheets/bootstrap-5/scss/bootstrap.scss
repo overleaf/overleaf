@@ -28,3 +28,6 @@
 @import 'bootstrap-5/scss/helpers';
 @import 'bootstrap-5/scss/buttons';
 @import 'bootstrap-5/scss/modal';
+
+// Include utilities API last to generate classes based on the Sass map in `_utilities.scss`
+@import 'bootstrap-5/scss/utilities/api';
