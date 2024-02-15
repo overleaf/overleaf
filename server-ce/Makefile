@@ -10,7 +10,9 @@ all: build-base build-community
 
 build-base:
 	cp .dockerignore $(MONOREPO_ROOT)
+ifeq ($(shell uname -m),x86_64)
 	docker pull $(OVERLEAF_BASE_CACHE) || echo "nothing cached yet"
+endif
 	docker build -f Dockerfile-base --pull --cache-from $(OVERLEAF_BASE_CACHE) -t $(OVERLEAF_BASE_TAG) $(MONOREPO_ROOT)
 
 
