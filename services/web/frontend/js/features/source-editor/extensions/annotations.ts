@@ -24,15 +24,17 @@ export const annotations = () => [
   lintGutter({
     hoverTime: 0,
   }),
-  /**
-   * A theme which moves the lint gutter outside the line numbers.
-   */
-  EditorView.baseTheme({
-    '.cm-gutter-lint': {
-      order: -1,
-    },
-  }),
+  annotationsTheme,
 ]
+
+/**
+ * A theme which moves the lint gutter outside the line numbers.
+ */
+const annotationsTheme = EditorView.baseTheme({
+  '.cm-gutter-lint': {
+    order: -1,
+  },
+})
 
 export const lintSourceConfig = {
   delay: 100,

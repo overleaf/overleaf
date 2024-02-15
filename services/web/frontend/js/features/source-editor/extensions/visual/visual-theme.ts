@@ -439,10 +439,8 @@ const currentWidth = Facet.define<string, string>({
 function createContentWidthTheme(contentWidth: string) {
   return [
     currentWidth.of(contentWidth),
-    EditorView.theme({
-      '&.cm-editor': {
-        '--content-width': contentWidth,
-      },
+    EditorView.editorAttributes.of({
+      style: `--content-width: ${contentWidth}`,
     }),
   ]
 }

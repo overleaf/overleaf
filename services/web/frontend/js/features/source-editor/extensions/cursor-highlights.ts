@@ -26,48 +26,50 @@ export const cursorHighlights = () => {
   return [
     cursorHighlightsState,
     cursorHighlightsLayer,
+    cursorHighlightsTheme,
     hoverTooltip(cursorTooltip, {
       hoverTime: 1,
     }),
-    EditorView.theme({
-      '.ol-cm-cursorHighlightsLayer': {
-        zIndex: 100,
-        contain: 'size style',
-        pointerEvents: 'none',
-      },
-      '.ol-cm-cursorHighlight': {
-        color: 'hsl(var(--hue), 70%, 50%)',
-        borderLeft: '2px solid hsl(var(--hue), 70%, 50%)',
-        display: 'inline-block',
-        height: '1.6em',
-        position: 'absolute',
-        pointerEvents: 'none',
-      },
-      '.ol-cm-cursorHighlight:before': {
-        content: "''",
-        position: 'absolute',
-        left: '-2px',
-        top: '-5px',
-        height: '5px',
-        width: '5px',
-        borderWidth: '3px 3px 2px 2px',
-        borderStyle: 'solid',
-        borderColor: 'inherit',
-      },
-      '.ol-cm-cursorHighlightLabel': {
-        lineHeight: 1,
-        backgroundColor: 'hsl(var(--hue), 70%, 50%)',
-        padding: '1em 1em',
-        fontSize: '0.8rem',
-        fontFamily: 'Lato, sans-serif',
-        color: 'white',
-        fontWeight: 700,
-        whiteSpace: 'nowrap',
-        pointerEvents: 'none',
-      },
-    }),
   ]
 }
+
+const cursorHighlightsTheme = EditorView.theme({
+  '.ol-cm-cursorHighlightsLayer': {
+    zIndex: 100,
+    contain: 'size style',
+    pointerEvents: 'none',
+  },
+  '.ol-cm-cursorHighlight': {
+    color: 'hsl(var(--hue), 70%, 50%)',
+    borderLeft: '2px solid hsl(var(--hue), 70%, 50%)',
+    display: 'inline-block',
+    height: '1.6em',
+    position: 'absolute',
+    pointerEvents: 'none',
+  },
+  '.ol-cm-cursorHighlight:before': {
+    content: "''",
+    position: 'absolute',
+    left: '-2px',
+    top: '-5px',
+    height: '5px',
+    width: '5px',
+    borderWidth: '3px 3px 2px 2px',
+    borderStyle: 'solid',
+    borderColor: 'inherit',
+  },
+  '.ol-cm-cursorHighlightLabel': {
+    lineHeight: 1,
+    backgroundColor: 'hsl(var(--hue), 70%, 50%)',
+    padding: '1em 1em',
+    fontSize: '0.8rem',
+    fontFamily: 'Lato, sans-serif',
+    color: 'white',
+    fontWeight: 700,
+    whiteSpace: 'nowrap',
+    pointerEvents: 'none',
+  },
+})
 
 class HighlightRangeValue extends RangeValue {
   mapMode = MapMode.Simple

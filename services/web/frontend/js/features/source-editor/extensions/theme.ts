@@ -74,44 +74,21 @@ const createThemeFromOptions = ({
   return [
     EditorView.editorAttributes.of({
       class: overallTheme === '' ? 'overall-theme-dark' : 'overall-theme-light',
+      style: Object.entries({
+        '--font-size': `${fontSize}px`,
+        '--source-font-family': fontFamilies[fontFamily]?.join(', '),
+        '--line-height': lineHeights[lineHeight],
+      })
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(';'),
     }),
+    // set variables for tooltips, which are outside the editor
+    // TODO: set these on document.body, or a new container element for the tooltips, without using a style mod
     EditorView.theme({
-      '&.cm-editor': {
-        // set variables
-        '--font-size': `${fontSize}px`,
-        '--source-font-family': fontFamilies[fontFamily]?.join(', '),
-        '--line-height': lineHeights[lineHeight],
-      },
-      '.cm-content': {
-        fontSize: 'var(--font-size)',
-        fontFamily: 'var(--source-font-family)',
-        lineHeight: 'var(--line-height)',
-      },
-      '.cm-cursor-primary': {
-        fontSize: 'var(--font-size)',
-        fontFamily: 'var(--source-font-family)',
-        lineHeight: 'var(--line-height)',
-      },
-      '.cm-gutters': {
-        fontSize: 'var(--font-size)',
-        lineHeight: 'var(--line-height)',
-      },
       '.cm-tooltip': {
-        // set variables for tooltips, which are outside the editor
         '--font-size': `${fontSize}px`,
         '--source-font-family': fontFamilies[fontFamily]?.join(', '),
         '--line-height': lineHeights[lineHeight],
-        // NOTE: fontFamily is not set here, as most tooltips use the UI font
-        fontSize: 'var(--font-size)',
-      },
-      '.cm-panel': {
-        fontSize: 'var(--font-size)',
-      },
-      '.cm-foldGutter .cm-gutterElement > span': {
-        height: 'calc(var(--font-size) * var(--line-height))',
-      },
-      '.cm-lineNumbers': {
-        fontFamily: 'var(--source-font-family)',
       },
     }),
   ]
@@ -121,6 +98,33 @@ const createThemeFromOptions = ({
  * Base styles that can have &dark and &light variants
  */
 const baseTheme = EditorView.baseTheme({
+  '.cm-content': {
+    fontSize: 'var(--font-size)',
+    fontFamily: 'var(--source-font-family)',
+    lineHeight: 'var(--line-height)',
+  },
+  '.cm-cursor-primary': {
+    fontSize: 'var(--font-size)',
+    fontFamily: 'var(--source-font-family)',
+    lineHeight: 'var(--line-height)',
+  },
+  '.cm-gutters': {
+    fontSize: 'var(--font-size)',
+    lineHeight: 'var(--line-height)',
+  },
+  '.cm-tooltip': {
+    // NOTE: fontFamily is not set here, as most tooltips use the UI font
+    fontSize: 'var(--font-size)',
+  },
+  '.cm-panel': {
+    fontSize: 'var(--font-size)',
+  },
+  '.cm-foldGutter .cm-gutterElement > span': {
+    height: 'calc(var(--font-size) * var(--line-height))',
+  },
+  '.cm-lineNumbers': {
+    fontFamily: 'var(--source-font-family)',
+  },
   // use a background color for lint error ranges
   '.cm-lintRange-error': {
     padding: 'var(--half-leading, 0) 0',
@@ -255,17 +259,25 @@ const staticTheme = EditorView.theme({
   },
 })
 
+const themeCache = new Map<string, any>()
+
 const loadSelectedTheme = async (editorTheme: string) => {
   if (!editorTheme) {
     editorTheme = 'textmate' // use the default theme if unset
   }
 
-  const { theme, highlightStyle, dark } = await import(
-    /* webpackChunkName: "cm6-theme" */ `../themes/cm6/${editorTheme}.json`
-  )
+  if (!themeCache.has(editorTheme)) {
+    const { theme, highlightStyle, dark } = await import(
+      /* webpackChunkName: "cm6-theme" */ `../themes/cm6/${editorTheme}.json`
+    )
 
-  return [
-    EditorView.theme(theme, { dark }),
-    EditorView.theme(highlightStyle, { dark }),
-  ]
+    const extension = [
+      EditorView.theme(theme, { dark }),
+      EditorView.theme(highlightStyle, { dark }),
+    ]
+
+    themeCache.set(editorTheme, extension)
+  }
+
+  return themeCache.get(editorTheme)
 }

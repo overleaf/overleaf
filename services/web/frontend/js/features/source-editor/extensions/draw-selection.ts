@@ -12,24 +12,22 @@ import { updateHasReviewPanelToggledEffect } from './changes/change-manager'
  * of the coords to cover the full line height.
  */
 export const drawSelection = () => {
-  return [cursorLayer, selectionLayer, hideNativeSelection]
+  return [cursorLayer, selectionLayer, Prec.highest(hideNativeSelection)]
 }
 
 const canHidePrimary = !browser.ios
 
-const hideNativeSelection = Prec.highest(
-  EditorView.theme({
-    '.cm-line': {
-      'caret-color': canHidePrimary ? 'transparent !important' : null,
-      '& ::selection': {
-        backgroundColor: 'transparent !important',
-      },
-      '&::selection': {
-        backgroundColor: 'transparent !important',
-      },
+const hideNativeSelection = EditorView.theme({
+  '.cm-line': {
+    'caret-color': canHidePrimary ? 'transparent !important' : null,
+    '& ::selection': {
+      backgroundColor: 'transparent !important',
     },
-  })
-)
+    '&::selection': {
+      backgroundColor: 'transparent !important',
+    },
+  },
+})
 
 const cursorLayer = layer({
   above: true,

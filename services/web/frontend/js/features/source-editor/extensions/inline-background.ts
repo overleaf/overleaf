@@ -36,10 +36,8 @@ function measureHalfLeading(view: EditorView) {
 }
 
 function createTheme(halfLeading: number) {
-  return EditorView.theme({
-    '.cm-content': {
-      '--half-leading': halfLeading + 'px',
-    },
+  return EditorView.contentAttributes.of({
+    style: `--half-leading: ${halfLeading}px`,
   })
 }
 

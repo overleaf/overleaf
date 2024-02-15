@@ -42,6 +42,59 @@ export const storePastedContent = (
   effects: pastedContentEffect.of({ content, formatted }),
 })
 
+const pastedContentTheme = EditorView.baseTheme({
+  '.ol-cm-pasted-content-menu-toggle': {
+    background: 'none',
+    borderRadius: '8px',
+    border: '1px solid rgb(125, 125, 125)',
+    margin: '0 4px',
+    opacity: '0.7',
+    '&:hover': {
+      opacity: '1',
+    },
+  },
+  '.ol-cm-pasted-content-menu-popover': {
+    maxWidth: 'unset',
+    '& .popover-content': {
+      padding: 0,
+    },
+  },
+  '&dark .ol-cm-pasted-content-menu-popover': {
+    background: 'rgba(0, 0, 0)',
+  },
+  '.ol-cm-pasted-content-menu': {
+    display: 'flex',
+    flexDirection: 'column',
+    boxSizing: 'border-box',
+    fontSize: '14px',
+    fontFamily: '"Lato", sans-serif',
+  },
+  '.ol-cm-pasted-content-menu-item': {
+    border: 'none',
+    background: 'none',
+    padding: '8px 16px',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    gap: '12px',
+    '&[aria-disabled="true"]': {
+      color: 'rgba(125, 125, 125, 0.5)',
+    },
+    '&:hover': {
+      backgroundColor: 'rgba(125, 125, 125, 0.2)',
+    },
+  },
+  '.ol-cm-pasted-content-menu-item-label': {
+    flex: 1,
+    textAlign: 'left',
+  },
+  '.ol-cm-pasted-content-menu-item-shortcut': {
+    textAlign: 'right',
+  },
+})
+
 export const pastedContent = StateField.define<{
   content: PastedContent
   formatted: boolean
@@ -88,58 +141,7 @@ export const pastedContent = StateField.define<{
 
         return Decoration.set(decorations, true)
       }),
-      EditorView.baseTheme({
-        '.ol-cm-pasted-content-menu-toggle': {
-          background: 'none',
-          borderRadius: '8px',
-          border: '1px solid rgb(125, 125, 125)',
-          margin: '0 4px',
-          opacity: '0.7',
-          '&:hover': {
-            opacity: '1',
-          },
-        },
-        '.ol-cm-pasted-content-menu-popover': {
-          maxWidth: 'unset',
-          '& .popover-content': {
-            padding: 0,
-          },
-        },
-        '&dark .ol-cm-pasted-content-menu-popover': {
-          background: 'rgba(0, 0, 0)',
-        },
-        '.ol-cm-pasted-content-menu': {
-          display: 'flex',
-          flexDirection: 'column',
-          boxSizing: 'border-box',
-          fontSize: '14px',
-          fontFamily: '"Lato", sans-serif',
-        },
-        '.ol-cm-pasted-content-menu-item': {
-          border: 'none',
-          background: 'none',
-          padding: '8px 16px',
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          whiteSpace: 'nowrap',
-          gap: '12px',
-          '&[aria-disabled="true"]': {
-            color: 'rgba(125, 125, 125, 0.5)',
-          },
-          '&:hover': {
-            backgroundColor: 'rgba(125, 125, 125, 0.2)',
-          },
-        },
-        '.ol-cm-pasted-content-menu-item-label': {
-          flex: 1,
-          textAlign: 'left',
-        },
-        '.ol-cm-pasted-content-menu-item-shortcut': {
-          textAlign: 'right',
-        },
-      }),
+      pastedContentTheme,
     ]
   },
 })

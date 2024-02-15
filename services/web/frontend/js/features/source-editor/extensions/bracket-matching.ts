@@ -134,9 +134,11 @@ export const bracketSelection = (): Extension[] => [
       return false
     },
   }),
-  EditorView.baseTheme({
-    '.cm-matchingBracket': {
-      pointerEvents: 'none',
-    },
-  }),
+  matchingBracketTheme,
 ]
+
+const matchingBracketTheme = EditorView.baseTheme({
+  '.cm-matchingBracket': {
+    pointerEvents: 'none',
+  },
+})

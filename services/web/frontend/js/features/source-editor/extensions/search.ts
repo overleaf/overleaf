@@ -251,126 +251,126 @@ export const search = () => {
         }
       }
     }),
-
-    // search form theme
-    EditorView.theme({
-      '.ol-cm-search-form': {
-        padding: '10px',
-        display: 'flex',
-        gap: '10px',
-        background: 'var(--ol-blue-gray-1)',
-        '--ol-cm-search-form-focus-shadow':
-          'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(102 175 233 / 60%)',
-        '--ol-cm-search-form-error-shadow':
-          'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px var(--input-shadow-danger-color)',
-      },
-      '.ol-cm-search-controls': {
-        display: 'grid',
-        gridTemplateColumns: 'auto auto',
-        gridTemplateRows: 'auto auto',
-        gap: '10px',
-      },
-      '.ol-cm-search-form-row': {
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'space-between',
-      },
-      '.ol-cm-search-form-group': {
-        display: 'flex',
-        gap: '10px',
-        alignItems: 'center',
-      },
-      '.ol-cm-search-input-group': {
-        border: '1px solid var(--input-border)',
-        borderRadius: '20px',
-        background: 'white',
-        width: '100%',
-        maxWidth: '25em',
-        '& input[type="text"]': {
-          background: 'none',
-          boxShadow: 'none',
-        },
-        '& input[type="text"]:focus': {
-          outline: 'none',
-          boxShadow: 'none',
-        },
-        '& .btn.btn': {
-          background: 'var(--ol-blue-gray-0)',
-          color: 'var(--ol-blue-gray-3)',
-          borderRadius: '50%',
-          height: '2em',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '2em',
-          marginRight: '3px',
-          '&.checked': {
-            color: '#fff',
-            backgroundColor: 'var(--ol-blue)',
-          },
-          '&:active': {
-            boxShadow: 'none',
-          },
-        },
-        '&:focus-within': {
-          borderColor: 'var(--input-border-focus)',
-          boxShadow: 'var(--ol-cm-search-form-focus-shadow)',
-        },
-      },
-      '.ol-cm-search-input-group.ol-cm-search-input-error': {
-        '&:focus-within': {
-          borderColor: 'var(--input-border-danger)',
-          boxShadow: 'var(--ol-cm-search-form-error-shadow)',
-        },
-      },
-      '.input-group .ol-cm-search-form-input': {
-        border: 'none',
-      },
-      '.ol-cm-search-input-button': {
-        background: '#fff',
-        color: 'inherit',
-        border: 'none',
-      },
-      '.ol-cm-search-input-button.focused': {
-        borderColor: 'var(--input-border-focus)',
-        boxShadow: 'var(--ol-cm-search-form-focus-shadow)',
-      },
-      '.ol-cm-search-form-button-group': {
-        flexShrink: 0,
-      },
-      '.ol-cm-search-form-position': {
-        flexShrink: 0,
-        color: 'var(--ol-blue-gray-4)',
-      },
-      '.ol-cm-search-hidden-inputs': {
-        position: 'absolute',
-        left: '-10000px',
-      },
-      '.ol-cm-search-form-close': {
-        flex: 1,
-      },
-      '.ol-cm-search-replace-input': {
-        order: 3,
-      },
-      '.ol-cm-search-replace-buttons': {
-        order: 4,
-      },
-      '.ol-cm-stored-selection': {
-        background: 'rgba(125, 125, 125, 0.1)',
-        paddingTop: 'var(--half-leading)',
-        paddingBottom: 'var(--half-leading)',
-      },
-      // set the default "match" style
-      '.cm-selectionMatch, .cm-searchMatch': {
-        backgroundColor: 'transparent',
-        outlineOffset: '-1px',
-        paddingTop: 'var(--half-leading)',
-        paddingBottom: 'var(--half-leading)',
-      },
-      // make sure selectionMatch inside searchMatch doesn't have a background colour
-      '.cm-searchMatch .cm-selectionMatch': {
-        backgroundColor: 'transparent !important',
-      },
-    }),
+    searchFormTheme,
   ]
 }
+
+const searchFormTheme = EditorView.theme({
+  '.ol-cm-search-form': {
+    padding: '10px',
+    display: 'flex',
+    gap: '10px',
+    background: 'var(--ol-blue-gray-1)',
+    '--ol-cm-search-form-focus-shadow':
+      'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(102 175 233 / 60%)',
+    '--ol-cm-search-form-error-shadow':
+      'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px var(--input-shadow-danger-color)',
+  },
+  '.ol-cm-search-controls': {
+    display: 'grid',
+    gridTemplateColumns: 'auto auto',
+    gridTemplateRows: 'auto auto',
+    gap: '10px',
+  },
+  '.ol-cm-search-form-row': {
+    display: 'flex',
+    gap: '10px',
+    justifyContent: 'space-between',
+  },
+  '.ol-cm-search-form-group': {
+    display: 'flex',
+    gap: '10px',
+    alignItems: 'center',
+  },
+  '.ol-cm-search-input-group': {
+    border: '1px solid var(--input-border)',
+    borderRadius: '20px',
+    background: 'white',
+    width: '100%',
+    maxWidth: '25em',
+    '& input[type="text"]': {
+      background: 'none',
+      boxShadow: 'none',
+    },
+    '& input[type="text"]:focus': {
+      outline: 'none',
+      boxShadow: 'none',
+    },
+    '& .btn.btn': {
+      background: 'var(--ol-blue-gray-0)',
+      color: 'var(--ol-blue-gray-3)',
+      borderRadius: '50%',
+      height: '2em',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: '2em',
+      marginRight: '3px',
+      '&.checked': {
+        color: '#fff',
+        backgroundColor: 'var(--ol-blue)',
+      },
+      '&:active': {
+        boxShadow: 'none',
+      },
+    },
+    '&:focus-within': {
+      borderColor: 'var(--input-border-focus)',
+      boxShadow: 'var(--ol-cm-search-form-focus-shadow)',
+    },
+  },
+  '.ol-cm-search-input-group.ol-cm-search-input-error': {
+    '&:focus-within': {
+      borderColor: 'var(--input-border-danger)',
+      boxShadow: 'var(--ol-cm-search-form-error-shadow)',
+    },
+  },
+  '.input-group .ol-cm-search-form-input': {
+    border: 'none',
+  },
+  '.ol-cm-search-input-button': {
+    background: '#fff',
+    color: 'inherit',
+    border: 'none',
+  },
+  '.ol-cm-search-input-button.focused': {
+    borderColor: 'var(--input-border-focus)',
+    boxShadow: 'var(--ol-cm-search-form-focus-shadow)',
+  },
+  '.ol-cm-search-form-button-group': {
+    flexShrink: 0,
+  },
+  '.ol-cm-search-form-position': {
+    flexShrink: 0,
+    color: 'var(--ol-blue-gray-4)',
+  },
+  '.ol-cm-search-hidden-inputs': {
+    position: 'absolute',
+    left: '-10000px',
+  },
+  '.ol-cm-search-form-close': {
+    flex: 1,
+  },
+  '.ol-cm-search-replace-input': {
+    order: 3,
+  },
+  '.ol-cm-search-replace-buttons': {
+    order: 4,
+  },
+  '.ol-cm-stored-selection': {
+    background: 'rgba(125, 125, 125, 0.1)',
+    paddingTop: 'var(--half-leading)',
+    paddingBottom: 'var(--half-leading)',
+  },
+  // set the default "match" style
+  '.cm-selectionMatch, .cm-searchMatch': {
+    backgroundColor: 'transparent',
+    outlineOffset: '-1px',
+    paddingTop: 'var(--half-leading)',
+    paddingBottom: 'var(--half-leading)',
+  },
+  // make sure selectionMatch inside searchMatch doesn't have a background colour
+  '.cm-searchMatch .cm-selectionMatch': {
+    backgroundColor: 'transparent !important',
+  },
+})

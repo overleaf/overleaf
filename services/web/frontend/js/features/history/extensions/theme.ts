@@ -13,6 +13,7 @@ export type Options = {
 const optionsThemeConf = new Compartment()
 
 export const theme = (options: Options) => [
+  baseTheme,
   optionsThemeConf.of(createThemeFromOptions(options)),
 ]
 
@@ -35,35 +36,45 @@ const createThemeFromOptions = ({
   // Theme styles that depend on settings
   const fontFamilyValue = fontFamilies[fontFamily]?.join(', ')
   return [
-    EditorView.theme({
-      '&.cm-editor': {
+    EditorView.editorAttributes.of({
+      style: Object.entries({
         '--font-size': `${fontSize}px`,
         '--source-font-family': fontFamilyValue,
         '--line-height': lineHeights[lineHeight],
-      },
-      '.cm-content': {
-        fontSize: 'var(--font-size)',
-        fontFamily: 'var(--source-font-family)',
-        lineHeight: 'var(--line-height)',
-        color: '#000',
-      },
-      '.cm-gutters': {
-        fontSize: 'var(--font-size)',
-        lineHeight: 'var(--line-height)',
-      },
+      })
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(';'),
+    }),
+    // Set variables for tooltips, which are outside the editor
+    // TODO: set these on document.body, or a new container element for the tooltips, without using a style mod
+    EditorView.baseTheme({
       '.cm-tooltip': {
-        // Set variables for tooltips, which are outside the editor
         '--font-size': `${fontSize}px`,
         '--source-font-family': fontFamilyValue,
-        // NOTE: fontFamily is not set here, as most tooltips use the UI font
-        fontSize: 'var(--font-size)',
-      },
-      '.cm-lineNumbers': {
-        fontFamily: 'var(--source-font-family)',
       },
     }),
   ]
 }
+
+const baseTheme = EditorView.baseTheme({
+  '.cm-content': {
+    fontSize: 'var(--font-size)',
+    fontFamily: 'var(--source-font-family)',
+    lineHeight: 'var(--line-height)',
+    color: '#000',
+  },
+  '.cm-gutters': {
+    fontSize: 'var(--font-size)',
+    lineHeight: 'var(--line-height)',
+  },
+  '.cm-lineNumbers': {
+    fontFamily: 'var(--source-font-family)',
+  },
+  '.cm-tooltip': {
+    // NOTE: fontFamily is not set here, as most tooltips use the UI font
+    fontSize: 'var(--font-size)',
+  },
+})
 
 export const setOptionsTheme = (options: Options): TransactionSpec => {
   return {

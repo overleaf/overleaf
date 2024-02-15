@@ -20,13 +20,15 @@ export const highlightActiveLine = (visual: boolean) => {
   return sourceOnly(visual, [
     activeLineLayer,
     singleLineHighlighter,
-    EditorView.baseTheme({
-      '.ol-cm-activeLineLayer': {
-        pointerEvents: 'none',
-      },
-    }),
+    highlightActiveLineTheme,
   ])
 }
+
+const highlightActiveLineTheme = EditorView.baseTheme({
+  '.ol-cm-activeLineLayer': {
+    pointerEvents: 'none',
+  },
+})
 
 /**
  * Line decoration approach used for non-wrapped lines, adapted from built-in

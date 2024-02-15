@@ -70,10 +70,12 @@ export const emptyLineFiller = () => {
         },
       }
     ),
-    EditorView.baseTheme({
-      '.ol-cm-filler': {
-        padding: '0 2px',
-      },
-    }),
+    emptyLineFillerTheme,
   ]
 }
+
+const emptyLineFillerTheme = EditorView.baseTheme({
+  '.ol-cm-filler': {
+    padding: '0 2px',
+  },
+})

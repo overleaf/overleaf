@@ -31,19 +31,7 @@ type Options = { spellCheckLanguage?: string }
  */
 export const spelling = ({ spellCheckLanguage }: Options) => {
   return [
-    EditorView.baseTheme({
-      '.ol-cm-spelling-error': {
-        textDecorationColor: 'red',
-        textDecorationLine: 'underline',
-        textDecorationStyle: 'dotted',
-        textDecorationThickness: '2px',
-        textDecorationSkipInk: 'none',
-        textUnderlineOffset: '0.2em',
-      },
-      '.cm-tooltip.ol-cm-spelling-context-menu-tooltip': {
-        borderWidth: '0',
-      },
-    }),
+    spellingTheme,
     parserWatcher,
     spellCheckLanguageConf.of(spellCheckLanguageFacet.of(spellCheckLanguage)),
     spellCheckField,
@@ -53,6 +41,20 @@ export const spelling = ({ spellCheckLanguage }: Options) => {
     spellingMenuField,
   ]
 }
+
+const spellingTheme = EditorView.baseTheme({
+  '.ol-cm-spelling-error': {
+    textDecorationColor: 'red',
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+    textDecorationThickness: '2px',
+    textDecorationSkipInk: 'none',
+    textUnderlineOffset: '0.2em',
+  },
+  '.cm-tooltip.ol-cm-spelling-context-menu-tooltip': {
+    borderWidth: '0',
+  },
+})
 
 const spellCheckField = StateField.define<SpellChecker | null>({
   create(state) {
