@@ -61,7 +61,6 @@ const baseTheme = EditorView.baseTheme({
     fontSize: 'var(--font-size)',
     fontFamily: 'var(--source-font-family)',
     lineHeight: 'var(--line-height)',
-    color: '#000',
   },
   '.cm-gutters': {
     fontSize: 'var(--font-size)',
