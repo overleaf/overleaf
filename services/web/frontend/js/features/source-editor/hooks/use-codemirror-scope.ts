@@ -43,6 +43,7 @@ import {
 import {
   createChangeManager,
   dispatchEditorEvent,
+  reviewPanelToggled,
 } from '../extensions/changes/change-manager'
 import { setKeybindings } from '../extensions/keybindings'
 import { Highlight } from '../../../../../types/highlight'
@@ -56,6 +57,7 @@ import isValidTexFile from '@/main/is-valid-tex-file'
 import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
@@ -68,6 +70,8 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { logEntryAnnotations, editedSinceCompileStarted, compiling } =
     useCompileContext()
+
+  const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
 
   const [loadingThreads] = useScopeValue<boolean>('loadingThreads')
 
@@ -515,6 +519,10 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view])
 
   useEventListener('learnedWords:reset', handleResetLearnedWords)
+
+  useEffect(() => {
+    view.dispatch(reviewPanelToggled())
+  }, [reviewPanelOpen, miniReviewPanelVisible, view])
 }
 
 export default useCodeMirrorScope

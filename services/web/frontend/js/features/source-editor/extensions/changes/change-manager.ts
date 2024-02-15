@@ -6,7 +6,12 @@ import {
   updateChangesTopPadding,
   updateSetsVerticalOverflow,
 } from '../vertical-overflow'
-import { EditorSelection, EditorState } from '@codemirror/state'
+import {
+  EditorSelection,
+  EditorState,
+  StateEffect,
+  TransactionSpec,
+} from '@codemirror/state'
 import { EditorView, ViewUpdate } from '@codemirror/view'
 import { fullHeightCoordsAtPos } from '../../utils/layer'
 import { debounce } from 'lodash'
@@ -14,6 +19,7 @@ import { Change, EditOperation } from '../../../../../../types/change'
 import { ThreadId } from '../../../../../../types/review-panel/review-panel'
 import { isDeleteOperation, isInsertOperation } from '@/utils/operations'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
+import { updateHasEffect } from '@/features/source-editor/utils/effects'
 
 // With less than this number of entries, don't bother culling to avoid
 // little UI jumps when scrolling.
@@ -597,3 +603,13 @@ export const createChangeManager = (
     },
   }
 }
+
+const reviewPanelToggledEffect = StateEffect.define()
+
+export const updateHasReviewPanelToggledEffect = updateHasEffect(
+  reviewPanelToggledEffect
+)
+
+export const reviewPanelToggled = (): TransactionSpec => ({
+  effects: reviewPanelToggledEffect.of(null),
+})
