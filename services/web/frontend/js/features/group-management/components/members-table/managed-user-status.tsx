@@ -9,11 +9,7 @@ export default function ManagedUserStatus({ user }: ManagedUserStatusProps) {
   const { t } = useTranslation()
   const managedUserInvite = (
     <span className="security-state-invite-pending">
-      <MaterialIcon
-        type="schedule"
-        category="outlined"
-        accessibilityLabel={t('pending_invite')}
-      />
+      <MaterialIcon type="schedule" accessibilityLabel={t('pending_invite')} />
       &nbsp;
       {t('managed')}
     </span>

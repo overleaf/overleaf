@@ -164,7 +164,7 @@ function AllHistoryList() {
               // eslint-disable-next-line react/jsx-key
               <MaterialIcon
                 type="align_end"
-                className="material-symbols-rounded history-dropdown-icon-inverted"
+                className="history-dropdown-icon-inverted"
               />,
               <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
             ]}

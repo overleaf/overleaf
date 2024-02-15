@@ -1,27 +1,18 @@
 import classNames from 'classnames'
 import React from 'react'
 
-type IconOwnProps = {
+type IconProps = React.ComponentProps<'i'> & {
   type: string
-  category?: 'rounded' | 'outlined'
   accessibilityLabel?: string
 }
 
-type IconProps = IconOwnProps &
-  Omit<React.ComponentProps<'i'>, keyof IconOwnProps>
-
 function MaterialIcon({
   type,
-  category = 'rounded',
   className,
   accessibilityLabel,
   ...rest
 }: IconProps) {
-  const iconClassName = classNames(
-    'material-symbols',
-    `material-symbols-${category}`,
-    className
-  )
+  const iconClassName = classNames('material-symbols', className)
 
   return (
     <>
