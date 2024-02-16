@@ -722,7 +722,7 @@ export class DocumentContainer extends EventEmitter {
     this.emit('ranges:clear')
     this.ranges!.changes = changes
     this.ranges!.comments = comments
-    this.ranges!.track_changes = this.doc?.track_changes
+    this.ranges!.track_changes = this.doc?.track_changes ?? false
     for (const op of this.filterOps(this.doc?.getInflightOp() || [])) {
       this.ranges!.setIdSeed(this.doc?.track_changes_id_seeds?.inflight)
       this.ranges!.applyOp(op, { user_id: this.track_changes_as })

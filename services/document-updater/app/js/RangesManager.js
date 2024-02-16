@@ -37,9 +37,11 @@ const RangesManager = {
    * @param {Ranges} ranges - ranges before the updates were applied
    * @param {Update[]} updates
    * @param {string[]} newDocLines - the document lines after the updates were applied
+   * @param {object} opts
+   * @param {boolean} [opts.historyRangesSupport] - whether history ranges support is enabled
    * @returns {{ newRanges: Ranges, rangesWereCollapsed: boolean, historyUpdates: HistoryUpdate[] }}
    */
-  applyUpdate(projectId, docId, ranges, updates, newDocLines) {
+  applyUpdate(projectId, docId, ranges, updates, newDocLines, opts = {}) {
     if (ranges == null) {
       ranges = {}
     }
@@ -58,9 +60,13 @@ const RangesManager = {
       }
       const historyOps = []
       for (const op of update.op) {
-        historyOps.push(
-          getHistoryOp(op, rangesTracker.comments, rangesTracker.changes)
-        )
+        if (opts.historyRangesSupport) {
+          historyOps.push(
+            getHistoryOp(op, rangesTracker.comments, rangesTracker.changes)
+          )
+        } else if (isInsert(op) || isDelete(op)) {
+          historyOps.push(op)
+        }
         rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
       }
       historyUpdates.push({ ...update, op: historyOps })

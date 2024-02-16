@@ -141,20 +141,15 @@ const UpdateManager = {
         sync: incomingUpdateVersion === previousVersion,
       })
 
-      let { newRanges, rangesWereCollapsed, historyUpdates } =
+      const { newRanges, rangesWereCollapsed, historyUpdates } =
         RangesManager.applyUpdate(
           projectId,
           docId,
           ranges,
           appliedOps,
-          updatedDocLines
+          updatedDocLines,
+          { historyRangesSupport }
         )
-      if (!historyRangesSupport) {
-        // The document has not been transitioned to include comments and
-        // tracked changes in its history. Send regular updates rather than the
-        // full history updates.
-        historyUpdates = appliedOps
-      }
       profile.log('RangesManager.applyUpdate', { sync: true })
 
       await RedisManager.promises.updateDocument(

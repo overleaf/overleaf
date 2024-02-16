@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * The purpose of this class is to track a set of inserts and deletes to a document, like
  * track changes in Word. We store these as a set of ShareJs style ranges:
@@ -44,8 +45,21 @@ class RangesTracker {
       comments = []
     }
     this.comments = comments
-    this.setIdSeed(RangesTracker.generateIdSeed())
-    this.resetDirtyState()
+    this.track_changes = false
+    this.id_seed = RangesTracker.generateIdSeed()
+    this.id_increment = 0
+    this._dirtyState = {
+      comment: {
+        moved: {},
+        removed: {},
+        added: {},
+      },
+      change: {
+        moved: {},
+        removed: {},
+        added: {},
+      },
+    }
   }
 
   getIdSeed() {

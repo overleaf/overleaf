@@ -237,25 +237,13 @@ describe('RangesManager', function () {
       })
     })
 
-    describe('inserts among tracked deletes', function () {
+    describe('with comment updates', function () {
       beforeEach(function () {
-        // original text is "on[1]e[22] [333](three) fo[4444]ur five"
-        // [] denotes tracked deletes
-        // () denotes tracked inserts
-        this.ranges = {
-          changes: makeRanges([
-            { d: '1', p: 2 },
-            { d: '22', p: 3 },
-            { d: '333', p: 4 },
-            { i: 'three', p: 4 },
-            { d: '4444', p: 12 },
-          ]),
-        }
         this.updates = makeUpdates([
-          { i: 'zero ', p: 0 },
-          { i: 'two ', p: 9, u: true },
+          { i: 'two ', p: 4 },
+          { c: 'one', p: 0 },
         ])
-        this.newDocLines = ['zero one two three four five']
+        this.ranges = {}
         this.result = this.RangesManager.applyUpdate(
           this.project_id,
           this.doc_id,
@@ -265,168 +253,210 @@ describe('RangesManager', function () {
         )
       })
 
-      it('should offset the hpos by the length of tracked deletes before the insert', function () {
-        expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
-          [{ i: 'zero ', p: 0 }],
-          // 'two' is added just before the "333" tracked delete
-          [{ i: 'two ', p: 9, u: true, hpos: 12 }],
+      it('should not send comments to the history', function () {
+        expect(this.result.historyUpdates[0].op).to.deep.equal([
+          { i: 'two ', p: 4 },
         ])
       })
     })
 
-    describe('tracked delete rejections', function () {
-      beforeEach(function () {
-        // original text is "one [two ]three four five"
-        // [] denotes tracked deletes
-        this.ranges = {
-          changes: makeRanges([{ d: 'two ', p: 4 }]),
-        }
-        this.updates = makeUpdates([{ i: 'tw', p: 4, u: true }])
-        this.newDocLines = ['one twthree four five']
-        this.result = this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.ranges,
-          this.updates,
-          this.newDocLines
-        )
+    describe('with history ranges support', function () {
+      describe('inserts among tracked deletes', function () {
+        beforeEach(function () {
+          // original text is "on[1]e[22] [333](three) fo[4444]ur five"
+          // [] denotes tracked deletes
+          // () denotes tracked inserts
+          this.ranges = {
+            changes: makeRanges([
+              { d: '1', p: 2 },
+              { d: '22', p: 3 },
+              { d: '333', p: 4 },
+              { i: 'three', p: 4 },
+              { d: '4444', p: 12 },
+            ]),
+          }
+          this.updates = makeUpdates([
+            { i: 'zero ', p: 0 },
+            { i: 'two ', p: 9, u: true },
+          ])
+          this.newDocLines = ['zero one two three four five']
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
+
+        it('should offset the hpos by the length of tracked deletes before the insert', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [{ i: 'zero ', p: 0 }],
+            // 'two' is added just before the "333" tracked delete
+            [{ i: 'two ', p: 9, u: true, hpos: 12 }],
+          ])
+        })
       })
 
-      it('should mark the insert as a tracked delete rejection where appropriate', function () {
-        expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
-          [{ i: 'tw', p: 4, u: true, trackedDeleteRejection: true }],
-        ])
-      })
-    })
+      describe('tracked delete rejections', function () {
+        beforeEach(function () {
+          // original text is "one [two ]three four five"
+          // [] denotes tracked deletes
+          this.ranges = {
+            changes: makeRanges([{ d: 'two ', p: 4 }]),
+          }
+          this.updates = makeUpdates([{ i: 'tw', p: 4, u: true }])
+          this.newDocLines = ['one twthree four five']
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
 
-    describe('deletes among tracked deletes', function () {
-      beforeEach(function () {
-        // original text is "on[1]e [22](three) f[333]ou[4444]r [55555]five"
-        // [] denotes tracked deletes
-        // () denotes tracked inserts
-        this.ranges = {
-          comments: [],
-          changes: makeRanges([
-            { d: '1', p: 2 },
-            { d: '22', p: 4 },
-            { i: 'three', p: 4 },
-            { d: '333', p: 11 },
-            { d: '4444', p: 13 },
-            { d: '55555', p: 15 },
-          ]),
-        }
-        this.updates = makeUpdates([
-          { d: 'four ', p: 10 },
-          { d: 'three ', p: 4 },
-        ])
-        this.newDocLines = ['one five']
-        this.result = this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.ranges,
-          this.updates,
-          this.newDocLines
-        )
+        it('should mark the insert as a tracked delete rejection where appropriate', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [{ i: 'tw', p: 4, u: true, trackedDeleteRejection: true }],
+          ])
+        })
       })
 
-      it('should split and offset deletes appropriately', function () {
-        expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
-          [
-            // the "four" delete has tracked deletes inside it, add splits
-            {
-              d: 'four ',
-              p: 10,
-              hpos: 13,
-              hsplits: [
-                { offset: 1, length: 3 },
-                { offset: 3, length: 4 },
-              ],
-            },
-          ],
+      describe('deletes among tracked deletes', function () {
+        beforeEach(function () {
+          // original text is "on[1]e [22](three) f[333]ou[4444]r [55555]five"
+          // [] denotes tracked deletes
+          // () denotes tracked inserts
+          this.ranges = {
+            comments: [],
+            changes: makeRanges([
+              { d: '1', p: 2 },
+              { d: '22', p: 4 },
+              { i: 'three', p: 4 },
+              { d: '333', p: 11 },
+              { d: '4444', p: 13 },
+              { d: '55555', p: 15 },
+            ]),
+          }
+          this.updates = makeUpdates([
+            { d: 'four ', p: 10 },
+            { d: 'three ', p: 4 },
+          ])
+          this.newDocLines = ['one five']
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
 
-          // the "three" delete is offset to the right by the two first tracked
-          // deletes
-          [{ d: 'three ', p: 4, hpos: 7 }],
-        ])
-      })
-    })
+        it('should split and offset deletes appropriately', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [
+              // the "four" delete has tracked deletes inside it, add splits
+              {
+                d: 'four ',
+                p: 10,
+                hpos: 13,
+                hsplits: [
+                  { offset: 1, length: 3 },
+                  { offset: 3, length: 4 },
+                ],
+              },
+            ],
 
-    describe('comments among tracked deletes', function () {
-      beforeEach(function () {
-        // original text is "on[1]e[22] [333](three) fo[4444]ur five"
-        // [] denotes tracked deletes
-        // () denotes tracked inserts
-        this.ranges = {
-          changes: makeRanges([
-            { d: '1', p: 2 },
-            { d: '22', p: 3 },
-            { d: '333', p: 4 },
-            { i: 'three', p: 4 },
-            { d: '4444', p: 12 },
-          ]),
-        }
-        this.updates = makeUpdates([
-          { c: 'three ', p: 4 },
-          { c: 'four ', p: 10 },
-        ])
-        this.newDocLines = ['one three four five']
-        this.result = this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.ranges,
-          this.updates,
-          this.newDocLines
-        )
-      })
-
-      it('should offset the hpos by the length of tracked deletes before the insert', function () {
-        expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
-          [{ c: 'three ', p: 4, hpos: 10 }],
-          [{ c: 'four ', p: 10, hpos: 16, hlen: 9 }],
-        ])
-      })
-    })
-
-    describe('inserts inside comments', function () {
-      beforeEach(function () {
-        // original text is "one three four five"
-        this.ranges = {
-          comments: makeRanges([
-            { c: 'three', p: 4, t: 'comment-id-1' },
-            { c: 'ree four', p: 6, t: 'comment-id-2' },
-          ]),
-        }
-        this.updates = makeUpdates([
-          { i: '[before]', p: 4 },
-          { i: '[inside]', p: 13 }, // 4 + 8 + 1
-          { i: '[overlap]', p: 23 }, // 13 + 8 + 2
-          { i: '[after]', p: 39 }, // 23 + 9 + 7
-        ])
-        this.newDocLines = [
-          'one [before]t[inside]hr[overlap]ee four[after] five',
-        ]
-        this.result = this.RangesManager.applyUpdate(
-          this.project_id,
-          this.doc_id,
-          this.ranges,
-          this.updates,
-          this.newDocLines
-        )
+            // the "three" delete is offset to the right by the two first tracked
+            // deletes
+            [{ d: 'three ', p: 4, hpos: 7 }],
+          ])
+        })
       })
 
-      it('should add the proper commentIds properties to ops', function () {
-        expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
-          [{ i: '[before]', p: 4 }],
-          [{ i: '[inside]', p: 13, commentIds: ['comment-id-1'] }],
-          [
-            {
-              i: '[overlap]',
-              p: 23,
-              commentIds: ['comment-id-1', 'comment-id-2'],
-            },
-          ],
-          [{ i: '[after]', p: 39 }],
-        ])
+      describe('comments among tracked deletes', function () {
+        beforeEach(function () {
+          // original text is "on[1]e[22] [333](three) fo[4444]ur five"
+          // [] denotes tracked deletes
+          // () denotes tracked inserts
+          this.ranges = {
+            changes: makeRanges([
+              { d: '1', p: 2 },
+              { d: '22', p: 3 },
+              { d: '333', p: 4 },
+              { i: 'three', p: 4 },
+              { d: '4444', p: 12 },
+            ]),
+          }
+          this.updates = makeUpdates([
+            { c: 'three ', p: 4 },
+            { c: 'four ', p: 10 },
+          ])
+          this.newDocLines = ['one three four five']
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
+
+        it('should offset the hpos by the length of tracked deletes before the insert', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [{ c: 'three ', p: 4, hpos: 10 }],
+            [{ c: 'four ', p: 10, hpos: 16, hlen: 9 }],
+          ])
+        })
+      })
+
+      describe('inserts inside comments', function () {
+        beforeEach(function () {
+          // original text is "one three four five"
+          this.ranges = {
+            comments: makeRanges([
+              { c: 'three', p: 4, t: 'comment-id-1' },
+              { c: 'ree four', p: 6, t: 'comment-id-2' },
+            ]),
+          }
+          this.updates = makeUpdates([
+            { i: '[before]', p: 4 },
+            { i: '[inside]', p: 13 }, // 4 + 8 + 1
+            { i: '[overlap]', p: 23 }, // 13 + 8 + 2
+            { i: '[after]', p: 39 }, // 23 + 9 + 7
+          ])
+          this.newDocLines = [
+            'one [before]t[inside]hr[overlap]ee four[after] five',
+          ]
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
+
+        it('should add the proper commentIds properties to ops', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [{ i: '[before]', p: 4 }],
+            [{ i: '[inside]', p: 13, commentIds: ['comment-id-1'] }],
+            [
+              {
+                i: '[overlap]',
+                p: 23,
+                commentIds: ['comment-id-1', 'comment-id-2'],
+              },
+            ],
+            [{ i: '[after]', p: 39 }],
+          ])
+        })
       })
     })
   })

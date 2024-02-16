@@ -396,7 +396,7 @@ describe('UpdateManager', function () {
 
       it('should add metadata to the ops', function () {
         this.UpdateManager.promises._addMetadataToHistoryUpdates.should.have.been.calledWith(
-          this.appliedOps,
+          this.historyUpdates,
           this.pathname,
           this.projectHistoryId,
           this.lines
@@ -406,12 +406,12 @@ describe('UpdateManager', function () {
       it('should push the applied ops into the history queue', function () {
         this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWith(
           this.project_id,
-          ...this.appliedOps.map(op => JSON.stringify(op))
+          ...this.historyUpdates.map(op => JSON.stringify(op))
         )
         this.HistoryManager.recordAndFlushHistoryOps.should.have.been.calledWith(
           this.project_id,
-          this.appliedOps,
-          this.appliedOps.length
+          this.historyUpdates,
+          this.historyUpdates.length
         )
       })
     })
