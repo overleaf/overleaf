@@ -600,7 +600,18 @@ const ProjectController = {
           SplitTestHandler.getAssignment(req, res, 'ide-page', cb)
         },
         writefullIntegrationAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'writefull-integration', cb)
+          if (anonymous) {
+            // Disable allocation to split test for non-logged-in users.
+            // The in-editor promotion is only relevant for logged-in users.
+            cb()
+          } else {
+            SplitTestHandler.getAssignment(
+              req,
+              res,
+              'writefull-integration',
+              cb
+            )
+          }
         },
         compileLogEventsAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'compile-log-events', cb)
