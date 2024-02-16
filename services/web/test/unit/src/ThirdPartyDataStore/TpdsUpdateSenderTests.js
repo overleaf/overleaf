@@ -134,10 +134,7 @@ describe('TpdsUpdateSender', function () {
               uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
                 projectName
               )}${encodeURIComponent(path)}`,
-              headers: {
-                sl_all_user_ids: JSON.stringify([userId]),
-                sl_project_owner_user_id: userId,
-              },
+              headers: {},
             },
           },
         }
@@ -148,12 +145,6 @@ describe('TpdsUpdateSender', function () {
         {
           json: {
             group: collaberatorRef,
-            job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([collaberatorRef]),
-                sl_project_owner_user_id: userId,
-              },
-            },
           },
         }
       )
@@ -163,12 +154,7 @@ describe('TpdsUpdateSender', function () {
         {
           json: {
             group: readOnlyRef,
-            job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([readOnlyRef]),
-                sl_project_owner_user_id: userId,
-              },
-            },
+            job: {},
           },
         }
       )
@@ -199,9 +185,7 @@ describe('TpdsUpdateSender', function () {
                 projectName
               )}${encodeURIComponent(path)}`,
               streamOrigin: `${this.docstoreUrl}/project/${projectId}/doc/${docId}/raw`,
-              headers: {
-                sl_all_user_ids: JSON.stringify([userId]),
-              },
+              headers: {},
             },
           },
         }
@@ -213,9 +197,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: collaberatorRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([collaberatorRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -227,9 +209,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: readOnlyRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([readOnlyRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -258,9 +238,7 @@ describe('TpdsUpdateSender', function () {
               uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
                 projectName
               )}${encodeURIComponent(path)}`,
-              headers: {
-                sl_all_user_ids: JSON.stringify([userId]),
-              },
+              headers: {},
               json: { subtreeEntityIds },
             },
           },
@@ -273,9 +251,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: collaberatorRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([collaberatorRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -287,9 +263,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: readOnlyRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([readOnlyRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -320,9 +294,7 @@ describe('TpdsUpdateSender', function () {
                 startPath: `/${projectName}/${startPath}`,
                 endPath: `/${projectName}/${endPath}`,
               },
-              headers: {
-                sl_all_user_ids: JSON.stringify([userId]),
-              },
+              headers: {},
             },
           },
         }
@@ -334,9 +306,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: collaberatorRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([collaberatorRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -348,9 +318,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: readOnlyRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([readOnlyRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -380,9 +348,7 @@ describe('TpdsUpdateSender', function () {
                 startPath: oldProjectName,
                 endPath: newProjectName,
               },
-              headers: {
-                sl_all_user_ids: JSON.stringify([userId]),
-              },
+              headers: {},
             },
           },
         }
@@ -394,9 +360,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: collaberatorRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([collaberatorRef]),
-              },
+              headers: {},
             },
           },
         }
@@ -408,9 +372,7 @@ describe('TpdsUpdateSender', function () {
           json: {
             group: readOnlyRef,
             job: {
-              headers: {
-                sl_all_user_ids: JSON.stringify([readOnlyRef]),
-              },
+              headers: {},
             },
           },
         }

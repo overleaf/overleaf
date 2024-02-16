@@ -55,8 +55,6 @@ async function addEntity(params) {
         sl_entity_type: entityType,
         sl_entity_rev: rev,
         sl_project_id: projectId,
-        sl_all_user_ids: JSON.stringify([userId]),
-        sl_project_owner_user_id: projectUserIds[0],
         sl_folder_id: folderId,
       },
       uri: buildTpdsUrl(userId, projectName, path),
@@ -124,8 +122,6 @@ async function deleteEntity(params) {
       method: 'delete',
       headers: {
         sl_project_id: projectId,
-        sl_all_user_ids: JSON.stringify([userId]),
-        sl_project_owner_user_id: projectUserIds[0],
         sl_entity_id: entityId,
         sl_entity_type: entityType,
       },
@@ -135,7 +131,6 @@ async function deleteEntity(params) {
       // would be moved to a POST endpoint.
       json: { subtreeEntityIds },
       title: 'deleteEntity',
-      sl_all_user_ids: JSON.stringify([userId]),
     }
 
     await enqueue(userId, 'standardHttpRequest', job)
@@ -145,14 +140,12 @@ async function deleteEntity(params) {
 async function createProject(params) {
   if (!tpdsUrl) return // Overleaf Community Edition/Server Pro
 
-  const { projectId, projectName, ownerId, userId } = params
+  const { projectId, projectName, userId } = params
 
   const job = {
     method: 'post',
     headers: {
       sl_project_id: projectId.toString(),
-      sl_all_user_ids: JSON.stringify([userId.toString()]),
-      sl_project_owner_user_id: ownerId.toString(),
     },
     uri: Path.join(
       tpdsUrl,
@@ -163,7 +156,6 @@ async function createProject(params) {
       encodeURIComponent(projectName)
     ),
     title: 'createProject',
-    sl_all_user_ids: JSON.stringify([userId]),
   }
 
   await enqueue(userId, 'standardHttpRequest', job)
@@ -217,8 +209,6 @@ async function moveEntity(params) {
     const headers = {
       sl_project_id: projectId,
       sl_entity_rev: rev,
-      sl_all_user_ids: JSON.stringify([userId]),
-      sl_project_owner_user_id: projectUserIds[0],
     }
     if (entityId != null) {
       headers.sl_entity_id = entityId
