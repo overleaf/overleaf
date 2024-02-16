@@ -56,6 +56,11 @@ async function addEntity(params) {
         sl_entity_rev: rev,
         sl_project_id: projectId,
         sl_folder_id: folderId,
+        'x-entity-id': entityId,
+        'x-entity-rev': rev,
+        'x-entity-type': entityType,
+        'x-folder-id': folderId,
+        'x-project-id': projectId,
       },
       uri: buildTpdsUrl(userId, projectName, path),
       title: 'addFile',
@@ -124,6 +129,9 @@ async function deleteEntity(params) {
         sl_project_id: projectId,
         sl_entity_id: entityId,
         sl_entity_type: entityType,
+        'x-entity-id': entityId,
+        'x-entity-type': entityType,
+        'x-project-id': projectId,
       },
       uri: buildTpdsUrl(userId, projectName, path),
       // We're sending a body with the DELETE request. This is unconventional,
@@ -146,6 +154,7 @@ async function createProject(params) {
     method: 'post',
     headers: {
       sl_project_id: projectId.toString(),
+      'x-project-id': projectId,
     },
     uri: Path.join(
       tpdsUrl,
@@ -209,15 +218,20 @@ async function moveEntity(params) {
     const headers = {
       sl_project_id: projectId,
       sl_entity_rev: rev,
+      'x-project-id': projectId,
+      'x-entity-rev': rev,
     }
     if (entityId != null) {
       headers.sl_entity_id = entityId
+      headers['x-entity-id'] = entityId
     }
     if (entityType != null) {
       headers.sl_entity_type = entityType
+      headers['x-entity-type'] = entityType
     }
     if (folderId != null) {
       headers.sl_folder_id = folderId
+      headers['x-folder-id'] = folderId
     }
     const job = {
       method: 'put',
