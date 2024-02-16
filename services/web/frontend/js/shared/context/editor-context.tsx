@@ -19,6 +19,8 @@ import { useUserContext } from './user-context'
 import { saveProjectSettings } from '@/features/editor-left-menu/utils/api'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 
+type writefullAdButtons = '' | 'try-it' | 'log-in'
+
 export const EditorContext = createContext<
   | {
       cobranding?: {
@@ -46,8 +48,8 @@ export const EditorContext = createContext<
       inactiveTutorials: [string]
       currentPopup: string | null
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
-      writefullAdClicked: boolean
-      setWritefullAdClicked: Dispatch<SetStateAction<boolean>>
+      writefullAdClicked: writefullAdButtons
+      setWritefullAdClicked: Dispatch<SetStateAction<writefullAdButtons>>
     }
   | undefined
 >(undefined)
@@ -86,7 +88,8 @@ export const EditorProvider: FC = ({ children }) => {
     getMeta('ol-inactiveTutorials', [])
   )
 
-  const [writefullAdClicked, setWritefullAdClicked] = useState(false)
+  const [writefullAdClicked, setWritefullAdClicked] =
+    useState<writefullAdButtons>('')
 
   const [currentPopup, setCurrentPopup] = useState<string | null>(null)
 

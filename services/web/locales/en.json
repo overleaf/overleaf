@@ -2175,6 +2175,7 @@
   "writefull_loading_error_body": "Try refreshing the page. If this doesn’t work, try disabling any active browser extensions to check they aren’t blocking Writefull from loading.",
   "writefull_loading_error_title": "Writefull didn’t load correctly",
   "writefull_prompt_body": "Turn on the new Writefull integration to get free AI-powered language feedback specifically tailored to research writing.",
+  "writefull_prompt_terms": "[COPY NOT FINAL] By trying Writefull you agree to their <0>terms of service</0> and <1>privacy policy</1>. If you already have a Writefull account, you can <2>log in</2> to it. If not, we’ll create one for you as <3>__email__</3>.",
   "writefull_prompt_title": "AI writing assistance in Overleaf",
   "writefull_settings_description": "Get free AI-based language feedback specifically tailored for research writing with Writefull for Overleaf.",
   "x_changes_in": "__count__ change in",

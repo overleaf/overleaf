@@ -16,6 +16,7 @@ export type NotificationProps = {
   className?: string
   content: React.ReactElement | string
   customIcon?: React.ReactElement
+  disclaimer?: React.ReactElement | string
   isDismissible?: boolean
   isActionBelowContent?: boolean
   onDismiss?: () => void
@@ -53,6 +54,7 @@ function Notification({
   className = '',
   content,
   customIcon,
+  disclaimer,
   isActionBelowContent,
   isDismissible,
   onDismiss,
@@ -99,6 +101,9 @@ function Notification({
           {content}
         </div>
         {action && <div className="notification-cta">{action}</div>}
+        {disclaimer && (
+          <div className="notification-disclaimer">{disclaimer}</div>
+        )}
       </div>
 
       {isDismissible && (
