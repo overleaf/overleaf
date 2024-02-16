@@ -80,7 +80,9 @@ async function acceptInvite(token, userId) {
     )
   }
   if (subscription.ssoConfig) {
-    const ssoConfig = await SSOConfig.findById(subscription.ssoConfig)
+    const ssoConfig = await SSOConfig.findById(
+      subscription.ssoConfig._id || subscription.ssoConfig
+    )
     if (ssoConfig?.enabled) {
       await Modules.promises.hooks.fire(
         'scheduleGroupSSOReminder',
@@ -152,6 +154,26 @@ async function _createInvite(subscription, email, inviter) {
 
     // legacy: remove any invite that might have been created in the past
     await _removeInviteFromTeam(subscription._id, email)
+
+    try {
+      if (subscription.ssoConfig) {
+        const ssoConfig = await SSOConfig.findById(
+          subscription.ssoConfig._id || subscription.ssoConfig
+        )
+        if (ssoConfig?.enabled) {
+          await Modules.promises.hooks.fire(
+            'sendGroupSSOReminder',
+            inviter._id,
+            subscription._id
+          )
+        }
+      }
+    } catch (error) {
+      logger.error(
+        { err: error, userId: inviter._id, subscriptionId: subscription._id },
+        'Failed to schedule Group SSO invite for group admin'
+      )
+    }
 
     return {
       email: inviter.email,

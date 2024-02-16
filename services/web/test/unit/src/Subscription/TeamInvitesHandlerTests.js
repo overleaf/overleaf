@@ -259,6 +259,45 @@ describe('TeamInvitesHandler', function () {
       )
     })
 
+    it('sends an SSO invite if SSO is enabled and inviting self', function (done) {
+      this.subscription.ssoConfig = new ObjectId('abc123abc123')
+      this.SSOConfig.findById
+        .withArgs(this.subscription.ssoConfig)
+        .resolves({ enabled: true })
+
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
+        this.subscription,
+        this.manager.email,
+        (err, invite) => {
+          sinon.assert.calledWith(
+            this.Modules.promises.hooks.fire,
+            'sendGroupSSOReminder',
+            this.manager._id,
+            this.subscription._id
+          )
+          done(err)
+        }
+      )
+    })
+
+    it('does not send an SSO invite if SSO is disabled and inviting self', function (done) {
+      this.subscription.ssoConfig = new ObjectId('abc123abc123')
+      this.SSOConfig.findById
+        .withArgs(this.subscription.ssoConfig)
+        .resolves({ enabled: false })
+
+      this.TeamInvitesHandler.createInvite(
+        this.manager._id,
+        this.subscription,
+        this.manager.email,
+        (err, invite) => {
+          sinon.assert.notCalled(this.Modules.promises.hooks.fire)
+          done(err)
+        }
+      )
+    })
+
     it('sends a notification if inviting registered user', function (done) {
       const id = new ObjectId('6a6b3a8014829a865bbf700d')
       const managedUsersEnabled = false
