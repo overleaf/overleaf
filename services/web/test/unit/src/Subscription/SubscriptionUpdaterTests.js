@@ -77,6 +77,13 @@ describe('SubscriptionUpdater', function () {
       exec: sinon.stub().resolves(this.subscription),
     })
 
+    this.SSOConfigModel = class {}
+    this.SSOConfigModel.findOne = sinon.stub().returns({
+      lean: sinon.stub().returns({
+        exec: sinon.stub().resolves({ enabled: true }),
+      }),
+    })
+
     this.SubscriptionLocator = {
       promises: {
         getUsersSubscription: sinon.stub(),
@@ -158,6 +165,7 @@ describe('SubscriptionUpdater', function () {
         '../../models/Subscription': {
           Subscription: this.SubscriptionModel,
         },
+        '../../models/SSOConfig': { SSOConfig: this.SSOConfigModel },
         './UserFeaturesUpdater': this.UserFeaturesUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
         '@overleaf/settings': this.Settings,
@@ -284,9 +292,22 @@ describe('SubscriptionUpdater', function () {
       })
     })
 
-    it('should not remove the subscription when expired if it has "managedUsers" feature', async function () {
+    it('should not remove the subscription when expired if it has Managed Users enabled', async function () {
       this.Features.hasFeature.withArgs('saas').returns(true)
       this.subscription.managedUsersEnabled = true
+
+      this.recurlySubscription.state = 'expired'
+      await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
+        this.recurlySubscription,
+        this.subscription,
+        {}
+      )
+      this.SubscriptionModel.deleteOne.should.not.have.been.called
+    })
+
+    it('should not remove the subscription when expired if it has Group SSO enabled', async function () {
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.subscription.ssoConfig = new ObjectId('abc123abc123')
 
       this.recurlySubscription.state = 'expired'
       await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(

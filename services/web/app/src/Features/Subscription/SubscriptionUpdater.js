@@ -10,6 +10,7 @@ const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
 const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
+const { SSOConfig } = require('../../models/SSOConfig')
 
 /**
  * Change the admin of the given subscription.
@@ -257,15 +258,35 @@ async function updateSubscriptionFromRecurly(
   if (recurlySubscription.state === 'expired') {
     const hasManagedUsersFeature =
       Features.hasFeature('saas') && subscription?.managedUsersEnabled
+
+    // If a payment lapses and if the group is managed or has group SSO, as a temporary measure we need to
+    // make sure that the group continues as-is and no destructive actions are taken.
     if (hasManagedUsersFeature) {
-      // If a payment lapses and if the group is managed, as a temporary measure we need to
-      // make sure that the group continues as-is and no destructive actions are taken.
       logger.warn(
         { subscriptionId: subscription._id },
-        'expired subscription has managedUsers feature, skipping deletion'
+        'expired subscription has managedUsers feature enabled, skipping deletion'
       )
     } else {
-      await deleteSubscription(subscription, requesterData)
+      let hasGroupSSOEnabled = false
+      if (subscription?.ssoConfig) {
+        const ssoConfig = await SSOConfig.findOne({
+          _id: subscription.ssoConfig._id || subscription.ssoConfig,
+        })
+          .lean()
+          .exec()
+        if (ssoConfig.enabled) {
+          hasGroupSSOEnabled = true
+        }
+      }
+
+      if (hasGroupSSOEnabled) {
+        logger.warn(
+          { subscriptionId: subscription._id },
+          'expired subscription has groupSSO feature enabled, skipping deletion'
+        )
+      } else {
+        await deleteSubscription(subscription, requesterData)
+      }
     }
     return
   }
