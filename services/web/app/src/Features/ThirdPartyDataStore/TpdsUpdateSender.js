@@ -51,11 +51,6 @@ async function addEntity(params) {
     const job = {
       method: 'post',
       headers: {
-        sl_entity_id: entityId,
-        sl_entity_type: entityType,
-        sl_entity_rev: rev,
-        sl_project_id: projectId,
-        sl_folder_id: folderId,
         'x-entity-id': entityId,
         'x-entity-rev': rev,
         'x-entity-type': entityType,
@@ -126,9 +121,6 @@ async function deleteEntity(params) {
     const job = {
       method: 'delete',
       headers: {
-        sl_project_id: projectId,
-        sl_entity_id: entityId,
-        sl_entity_type: entityType,
         'x-entity-id': entityId,
         'x-entity-type': entityType,
         'x-project-id': projectId,
@@ -153,7 +145,6 @@ async function createProject(params) {
   const job = {
     method: 'post',
     headers: {
-      sl_project_id: projectId.toString(),
       'x-project-id': projectId,
     },
     uri: Path.join(
@@ -216,21 +207,16 @@ async function moveEntity(params) {
 
   for (const userId of projectUserIds) {
     const headers = {
-      sl_project_id: projectId,
-      sl_entity_rev: rev,
       'x-project-id': projectId,
       'x-entity-rev': rev,
     }
     if (entityId != null) {
-      headers.sl_entity_id = entityId
       headers['x-entity-id'] = entityId
     }
     if (entityType != null) {
-      headers.sl_entity_type = entityType
       headers['x-entity-type'] = entityType
     }
     if (folderId != null) {
-      headers.sl_folder_id = folderId
       headers['x-folder-id'] = folderId
     }
     const job = {
