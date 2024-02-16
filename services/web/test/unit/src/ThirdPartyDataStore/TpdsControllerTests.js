@@ -110,9 +110,46 @@ describe('TpdsController', function () {
           project_id: '',
         },
         headers: {
+          'x-update-source': (this.source = 'dropbox'),
+        },
+      }
+    })
+
+    it('should process the update with the update receiver by name and old header', function (done) {
+      this.req = {
+        params: {
+          0: `${this.projectName}${this.path}`,
+          user_id: this.user_id,
+          project_id: '',
+        },
+        headers: {
           'x-sl-update-source': (this.source = 'dropbox'),
         },
       }
+      const res = {
+        json: payload => {
+          expect(payload).to.deep.equal({
+            status: 'applied',
+            projectId: this.metadata.projectId.toString(),
+            entityId: this.metadata.entityId.toString(),
+            folderId: this.metadata.folderId.toString(),
+            entityType: this.metadata.entityType,
+            rev: this.metadata.rev.toString(),
+          })
+          this.TpdsUpdateHandler.promises.newUpdate
+            .calledWith(
+              this.user_id,
+              '', // projectId
+              this.projectName,
+              this.path,
+              this.req,
+              this.source
+            )
+            .should.equal(true)
+          done()
+        },
+      }
+      this.TpdsController.mergeUpdate(this.req, res)
     })
 
     it('should process the update with the update receiver by name', function (done) {
@@ -162,7 +199,7 @@ describe('TpdsController', function () {
           destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox'),
+          'x-update-source': (this.source = 'dropbox'),
         },
       }
       const res = {
@@ -232,7 +269,7 @@ describe('TpdsController', function () {
           destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox'),
+          'x-update-source': (this.source = 'dropbox'),
         },
       }
       const res = {
@@ -260,7 +297,7 @@ describe('TpdsController', function () {
           destroy() {},
         },
         headers: {
-          'x-sl-update-source': (this.source = 'dropbox'),
+          'x-update-source': (this.source = 'dropbox'),
         },
       }
       const res = {
@@ -379,7 +416,7 @@ describe('TpdsController', function () {
           destroy: sinon.stub(),
         },
         headers: {
-          'x-sl-update-source': (this.source = 'github'),
+          'x-update-source': (this.source = 'github'),
         },
       }
       this.res = {
@@ -419,7 +456,7 @@ describe('TpdsController', function () {
           destroy: sinon.stub(),
         },
         headers: {
-          'x-sl-update-source': (this.source = 'github'),
+          'x-update-source': (this.source = 'github'),
         },
       }
       this.res = {
