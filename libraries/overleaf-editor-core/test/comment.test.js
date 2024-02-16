@@ -2,8 +2,8 @@
 'use strict'
 
 const { expect } = require('chai')
-const Comment = require('../lib/file_data/comment')
-const Range = require('../lib/file_data/range')
+const Comment = require('../lib/comment')
+const Range = require('../lib/range')
 
 describe('Comment', function () {
   it('should move ranges to the right of insert', function () {

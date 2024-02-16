@@ -3,8 +3,8 @@
 
 const { expect } = require('chai')
 const CommentList = require('../lib/file_data/comment_list')
-const Comment = require('../lib/file_data/comment')
-const Range = require('../lib/file_data/range')
+const Comment = require('../lib/comment')
+const Range = require('../lib/range')
 
 describe('commentList', function () {
   it('checks if toRaw() returns a correct comment list', function () {
@@ -77,13 +77,15 @@ describe('commentList', function () {
   it('should add range to existing if a new comment has the same id', function () {
     const commentList = new CommentList(
       new Map([
-        ['comm1', new Comment([new Range(5, 10)])],
-        ['comm2', new Comment([new Range(20, 5)])],
+        ['comm1', new Comment([new Range(5, 10)], false)],
+        ['comm2', new Comment([new Range(20, 5)], true)],
         ['comm3', new Comment([new Range(30, 15)])],
       ])
     )
 
-    commentList.add('comm2', new Comment([new Range(40, 10)]))
+    commentList.add('comm1', new Comment([new Range(5, 10)], true))
+    commentList.add('comm2', new Comment([new Range(40, 10)], true))
+
     expect(commentList.getComments()).to.eql([
       { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
       {
@@ -92,7 +94,7 @@ describe('commentList', function () {
           { pos: 20, length: 5 },
           { pos: 40, length: 10 },
         ],
-        resolved: false,
+        resolved: true,
       },
       {
         id: 'comm3',

@@ -11,7 +11,6 @@ type Range = {
 }
 
 export type CommentRawData = {
-  id: string
   ranges: Range[]
   resolved?: boolean
 }
@@ -27,9 +26,11 @@ export type TrackingPropsRawData = {
   ts: string
 }
 
+export type CommentsListRawData = Array<{ id: string } & CommentRawData>
+
 export type StringFileRawData = {
   content: string
-  comments?: CommentRawData[]
+  comments?: CommentsListRawData
   trackedChanges?: TrackedChangeRawData[]
 }
 
@@ -58,4 +59,11 @@ export type RawTextOperation = {
   textOperation: RawScanOp[]
 }
 
-export type RawEditOperation = RawTextOperation
+export type RawAddCommentOperation = CommentRawData & { commentId: string }
+
+export type RawDeleteCommentOperation = { deleteComment: string }
+
+export type RawEditOperation =
+  | RawTextOperation
+  | RawAddCommentOperation
+  | RawDeleteCommentOperation

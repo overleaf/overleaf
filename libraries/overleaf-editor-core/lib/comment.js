@@ -1,8 +1,10 @@
 // @ts-check
+const { RetainOp, InsertOp, RemoveOp } = require('./operation/scan_op')
 const Range = require('./range')
 
 /**
- * @typedef {import("../types").CommentRawData} CommentRawData
+ * @typedef {import("./types").CommentRawData} CommentRawData
+ * @typedef {import("./operation/text_operation")} TextOperation
  */
 
 class Comment {
@@ -118,10 +120,32 @@ class Comment {
     this.mergeRanges()
   }
 
+  /**
+   *
+   * @param {TextOperation} operation
+   */
+  applyTextOperation(operation) {
+    let cursor = 0
+    for (const op of operation.ops) {
+      if (op instanceof RetainOp) {
+        cursor += op.length
+      } else if (op instanceof InsertOp) {
+        this.applyInsert(cursor, op.insertion.length)
+        cursor += op.insertion.length
+      } else if (op instanceof RemoveOp) {
+        this.applyDelete(new Range(cursor, op.length))
+      }
+    }
+  }
+
   isEmpty() {
     return this.ranges.length === 0
   }
 
+  /**
+   *
+   * @returns {CommentRawData}
+   */
   toRaw() {
     return {
       resolved: this.resolved,
@@ -147,6 +171,13 @@ class Comment {
     }
 
     this.ranges = mergedRanges
+  }
+
+  /**
+   * @returns {Comment}
+   */
+  clone() {
+    return Comment.fromRaw(this.toRaw())
   }
 
   /**

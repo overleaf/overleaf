@@ -25,7 +25,7 @@ const {
   InvalidInsertionError,
   TooLongError,
 } = require('../errors')
-const Range = require('../file_data/range')
+const Range = require('../range')
 const TrackingProps = require('../file_data/tracking_props')
 /**
  * @typedef {import('../file_data/string_file_data')} StringFileData

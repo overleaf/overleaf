@@ -2,7 +2,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const Range = require('../lib/file_data/range')
+const Range = require('../lib/range')
 
 describe('Range', function () {
   it('should create a range', function () {

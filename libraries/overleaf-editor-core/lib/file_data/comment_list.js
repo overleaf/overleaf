@@ -1,9 +1,9 @@
 // @ts-check
-const Comment = require('./comment')
+const Comment = require('../comment')
 
 /**
- * @typedef {import("../types").CommentRawData} CommentRawData
- * @typedef {import("./range")} Range
+ * @typedef {import("../types").CommentsListRawData} CommentsListRawData
+ * @typedef {import("../range")} Range
  */
 
 class CommentList {
@@ -15,7 +15,7 @@ class CommentList {
   }
 
   /**
-   * @returns {CommentRawData[]}
+   * @returns {CommentsListRawData}
    */
   getComments() {
     return Array.from(this.comments).map(([commentId, comment]) => {
@@ -41,6 +41,7 @@ class CommentList {
   add(id, newComment) {
     const existingComment = this.getComment(id)
     if (existingComment) {
+      existingComment.resolved = existingComment.resolved && newComment.resolved
       for (const range of newComment.ranges) {
         existingComment.addRange(range)
       }
@@ -57,7 +58,7 @@ class CommentList {
   }
 
   /**
-   * @param {CommentRawData[]} rawComments
+   * @param {CommentsListRawData} rawComments
    */
   static fromRaw(rawComments) {
     const comments = new Map()

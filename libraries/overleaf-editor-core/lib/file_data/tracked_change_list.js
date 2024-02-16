@@ -1,5 +1,5 @@
 // @ts-check
-const Range = require('./range')
+const Range = require('../range')
 const TrackedChange = require('./tracked_change')
 
 /**

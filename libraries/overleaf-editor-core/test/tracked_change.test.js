@@ -1,6 +1,6 @@
 // @ts-check
 const TrackedChange = require('../lib/file_data/tracked_change')
-const Range = require('../lib/file_data/range')
+const Range = require('../lib/range')
 const TrackingProps = require('../lib/file_data/tracking_props')
 const { expect } = require('chai')
 

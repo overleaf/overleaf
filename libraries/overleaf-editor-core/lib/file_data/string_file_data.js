@@ -11,15 +11,15 @@ const TrackedChangeList = require('./tracked_change_list')
  * @typedef {import("../types").StringFileRawData} StringFileRawData
  * @typedef {import("../operation/edit_operation")} EditOperation
  * @typedef {import("../types").BlobStore} BlobStore
- * @typedef {import("../types").CommentRawData} CommentRawData
+ * @typedef {import("../types").CommentsListRawData} CommentsListRawData
  * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
  */
 
 class StringFileData extends FileData {
   /**
    * @param {string} content
-   * @param {CommentRawData[] | undefined} [rawComments]
-   * @param {TrackedChangeRawData[] | undefined} [rawTrackedChanges]
+   * @param {CommentsListRawData} [rawComments]
+   * @param {TrackedChangeRawData[]} [rawTrackedChanges]
    */
   constructor(content, rawComments = [], rawTrackedChanges = []) {
     super()

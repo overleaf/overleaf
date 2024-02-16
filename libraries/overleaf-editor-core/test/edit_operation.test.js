@@ -5,6 +5,11 @@ const EditOperationTransformer = require('../lib/operation/edit_operation_transf
 const EditOperation = require('../lib/operation/edit_operation')
 const randomTextOperation = require('./support/random_text_operation')
 const random = require('./support/random')
+const AddCommentOperation = require('../lib/operation/add_comment_operation')
+const DeleteCommentOperation = require('../lib/operation/delete_comment_operation')
+const Comment = require('../lib/comment')
+const Range = require('../lib/range')
+const EditNoOperation = require('../lib/operation/edit_no_operation')
 
 describe('EditOperation', function () {
   it('Cannot be instantiated', function () {
@@ -21,6 +26,171 @@ describe('EditOperationTransformer', function () {
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(TextOperation)
     expect(bPrime).to.be.an.instanceof(TextOperation)
+  })
+
+  it('Transforms TextOperation and EditNoOperation', function () {
+    const a = new TextOperation().insert('foo')
+    const b = new EditNoOperation()
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(bPrime).to.be.an.instanceof(EditNoOperation)
+  })
+
+  it('Transforms two AddCommentOperations with same commentId', function () {
+    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const b = new AddCommentOperation('comm1', new Comment([new Range(2, 3)]))
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(bPrime).to.be.an.instanceof(AddCommentOperation)
+  })
+
+  it('Transforms two AddCommentOperations with different commentId', function () {
+    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const b = new AddCommentOperation('comm2', new Comment([new Range(2, 3)]))
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(bPrime.toJSON()).to.eql(b.toJSON())
+  })
+
+  it('Transforms two DeleteCommentOperations with same commentId', function () {
+    const a = new DeleteCommentOperation('comm1')
+    const b = new DeleteCommentOperation('comm1')
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(EditNoOperation)
+    expect(bPrime).to.be.an.instanceof(EditNoOperation)
+  })
+
+  it('Transforms two DeleteCommentOperations with different commentId', function () {
+    const a = new DeleteCommentOperation('comm1')
+    const b = new DeleteCommentOperation('comm2')
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(DeleteCommentOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(DeleteCommentOperation)
+    expect(bPrime.toJSON()).to.eql(b.toJSON())
+  })
+
+  it('Transforms AddCommentOperation and DeleteCommentOperation with same commentId', function () {
+    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const b = new DeleteCommentOperation('comm1')
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(EditNoOperation)
+    expect(bPrime).to.be.an.instanceof(DeleteCommentOperation)
+    expect(bPrime.toJSON()).to.eql(b.toJSON())
+  })
+
+  it('Transforms DeleteCommentOperation and AddCommentOperation with same commentId', function () {
+    const a = new DeleteCommentOperation('comm1')
+    const b = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(DeleteCommentOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(EditNoOperation)
+  })
+
+  it('Transforms AddCommentOperation and TextOperation', function () {
+    // abc hello[ world] xyz - insert(9, " world")
+    // abc hello |xyz| -   addComment(10, 3, "comment_id")
+
+    const a = new TextOperation().retain(9).insert(' world')
+    const b = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(bPrime.toJSON()).to.eql({
+      commentId: 'comm1',
+      ranges: [{ pos: 16, length: 3 }],
+      resolved: false,
+    })
+  })
+
+  it('Transforms TextOperation and AddCommentOperation', function () {
+    // abc hello |xyz| -   addComment(10, 3, "comment_id")
+    // abc hello[ world] xyz - insert(9, " world")
+
+    const a = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+    const b = new TextOperation().retain(9).insert(' world')
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(bPrime).to.be.an.instanceof(TextOperation)
+    expect(bPrime.toJSON()).to.eql(b.toJSON())
+    expect(aPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(aPrime.toJSON()).to.eql({
+      commentId: 'comm1',
+      ranges: [{ pos: 16, length: 3 }],
+      resolved: false,
+    })
+  })
+
+  it('Transforms AddCommentOperation and TextOperation that makes a detached comment', function () {
+    // [abc hello xyz] - delete(0, 13)
+    // abc |hello| xyz - addComment(5, 5, "comment_id")
+
+    const a = new TextOperation().remove(13)
+    const b = new AddCommentOperation('comm1', new Comment([new Range(5, 5)]))
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(bPrime.toJSON()).to.eql({
+      commentId: 'comm1',
+      ranges: [],
+      resolved: false,
+    })
+  })
+
+  it('Transforms AddCommentOperation and deletion TextOperation', function () {
+    // abc hell{o xy}z - retain(8).delete(4)
+    // abc hello |xyz| -   addComment(10, 3, "comment_id")
+    // abc hell|z|
+
+    const a = new TextOperation().retain(8).remove(4)
+    const b = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(bPrime.toJSON()).to.eql({
+      commentId: 'comm1',
+      ranges: [{ pos: 8, length: 1 }],
+      resolved: false,
+    })
+  })
+
+  it('Transforms AddCommentOperation and complex TextOperation', function () {
+    // [foo ]abc hell{o xy}z - insert(0, "foo ").retain(8).delete(4)
+    // abc hello |xyz| -   addComment(10, 3, "comment_id")
+    // foo abc hell|z|
+
+    const a = new TextOperation().insert('foo ').retain(8).remove(4)
+    const b = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(bPrime.toJSON()).to.eql({
+      commentId: 'comm1',
+      ranges: [{ pos: 12, length: 1 }],
+      resolved: false,
+    })
+  })
+
+  it('Transforms DeleteCommentOperation and TextOperation', function () {
+    const a = new TextOperation().retain(9).insert(' world')
+    const b = new DeleteCommentOperation('comm1')
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(DeleteCommentOperation)
+    expect(bPrime.toJSON()).to.eql(b.toJSON())
   })
 })
 
