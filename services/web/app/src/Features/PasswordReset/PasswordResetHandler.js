@@ -8,35 +8,32 @@ const { callbackify, promisify } = require('util')
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 
-function generateAndEmailResetToken(email, callback) {
-  UserGetter.getUserByAnyEmail(email, (err, user) => {
-    if (err || !user) {
-      return callback(err, null)
-    }
-    if (user.email !== email) {
-      return callback(null, 'secondary')
-    }
-    const data = { user_id: user._id.toString(), email }
-    OneTimeTokenHandler.getNewToken('password', data, (err, token) => {
-      if (err) {
-        return callback(err)
-      }
-      const emailOptions = {
-        to: email,
-        setNewPasswordUrl: `${
-          settings.siteUrl
-        }/user/password/set?passwordResetToken=${token}&email=${encodeURIComponent(
-          email
-        )}`,
-      }
-      EmailHandler.sendEmail('passwordResetRequested', emailOptions, err => {
-        if (err) {
-          return callback(err)
-        }
-        callback(null, 'primary')
-      })
-    })
-  })
+async function generateAndEmailResetToken(email) {
+  const user = await UserGetter.promises.getUserByAnyEmail(email)
+
+  if (!user) {
+    return null
+  }
+
+  if (user.email !== email) {
+    return 'secondary'
+  }
+
+  const data = { user_id: user._id.toString(), email }
+  const token = await OneTimeTokenHandler.promises.getNewToken('password', data)
+
+  const emailOptions = {
+    to: email,
+    setNewPasswordUrl: `${
+      settings.siteUrl
+    }/user/password/set?passwordResetToken=${token}&email=${encodeURIComponent(
+      email
+    )}`,
+  }
+
+  await EmailHandler.promises.sendEmail('passwordResetRequested', emailOptions)
+
+  return 'primary'
 }
 
 function expirePasswordResetToken(token, callback) {
@@ -120,7 +117,7 @@ async function setNewUserPassword(token, password, auditLog) {
 }
 
 const PasswordResetHandler = {
-  generateAndEmailResetToken,
+  generateAndEmailResetToken: callbackify(generateAndEmailResetToken),
 
   setNewUserPassword: callbackify(setNewUserPassword),
 
@@ -130,6 +127,7 @@ const PasswordResetHandler = {
 }
 
 PasswordResetHandler.promises = {
+  generateAndEmailResetToken,
   getUserForPasswordResetToken: promisify(
     PasswordResetHandler.getUserForPasswordResetToken
   ),

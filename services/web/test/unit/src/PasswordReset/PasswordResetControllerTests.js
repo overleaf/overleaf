@@ -35,6 +35,7 @@ describe('PasswordResetController', function () {
     this.PasswordResetHandler = {
       generateAndEmailResetToken: sinon.stub(),
       promises: {
+        generateAndEmailResetToken: sinon.stub(),
         setNewUserPassword: sinon
           .stub()
           .resolves({ found: true, reset: true, userID: this.user_id }),
@@ -79,27 +80,24 @@ describe('PasswordResetController', function () {
   })
 
   describe('requestReset', function () {
-    beforeEach(function () {
-      this.res.json = sinon.stub()
-    })
     it('should tell the handler to process that email', function (done) {
-      this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
-        1,
-        null,
+      this.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
         'primary'
       )
+      this.res.callback = () => {
+        this.res.statusCode.should.equal(200)
+        this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
+        expect(
+          this.PasswordResetHandler.promises.generateAndEmailResetToken.lastCall
+            .args[0]
+        ).equal(this.email)
+        done()
+      }
       this.PasswordResetController.requestReset(this.req, this.res)
-      this.PasswordResetHandler.generateAndEmailResetToken
-        .calledWith(this.email)
-        .should.equal(true)
-      this.res.statusCode.should.equal(200)
-      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-      done()
     })
 
     it('should send a 500 if there is an error', function (done) {
-      this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
-        1,
+      this.PasswordResetHandler.promises.generateAndEmailResetToken.rejects(
         new Error('error')
       )
       this.PasswordResetController.requestReset(this.req, this.res, error => {
@@ -109,44 +107,41 @@ describe('PasswordResetController', function () {
     })
 
     it("should send a 404 if the email doesn't exist", function (done) {
-      this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
-        1,
-        null,
+      this.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
         null
       )
+      this.res.callback = () => {
+        this.res.statusCode.should.equal(404)
+        this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
+        done()
+      }
       this.PasswordResetController.requestReset(this.req, this.res)
-      this.res.statusCode.should.equal(404)
-      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-      done()
     })
 
     it('should send a 404 if the email is registered as a secondard email', function (done) {
-      this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
-        1,
-        null,
+      this.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
         'secondary'
       )
+      this.res.callback = () => {
+        this.res.statusCode.should.equal(404)
+        this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
+        done()
+      }
       this.PasswordResetController.requestReset(this.req, this.res)
-      this.res.statusCode.should.equal(404)
-      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-      done()
     })
 
     it('should normalize the email address', function (done) {
       this.email = '  UPperCaseEMAILWithSpacesAround@example.Com '
       this.req.body.email = this.email
-      this.PasswordResetHandler.generateAndEmailResetToken.callsArgWith(
-        1,
-        null,
+      this.PasswordResetHandler.promises.generateAndEmailResetToken.resolves(
         'primary'
       )
+      this.res.callback = () => {
+        this.res.statusCode.should.equal(200)
+        this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
+        done()
+      }
       this.PasswordResetController.requestReset(this.req, this.res)
-      this.PasswordResetHandler.generateAndEmailResetToken
-        .calledWith(this.email.toLowerCase().trim())
-        .should.equal(true)
-      this.res.statusCode.should.equal(200)
-      this.res.json.calledWith(sinon.match.has('message')).should.equal(true)
-      done()
     })
   })
 

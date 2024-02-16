@@ -1,18 +1,4 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
@@ -25,16 +11,20 @@ describe('PasswordResetHandler', function () {
   beforeEach(function () {
     this.settings = { siteUrl: 'https://www.overleaf.com' }
     this.OneTimeTokenHandler = {
-      getNewToken: sinon.stub(),
+      promises: {
+        getNewToken: sinon.stub(),
+      },
       peekValueFromToken: sinon.stub(),
       expireToken: sinon.stub(),
     }
     this.UserGetter = {
       getUserByMainEmail: sinon.stub(),
       getUser: sinon.stub(),
-      getUserByAnyEmail: sinon.stub(),
+      promises: {
+        getUserByAnyEmail: sinon.stub(),
+      },
     }
-    this.EmailHandler = { sendEmail: sinon.stub() }
+    this.EmailHandler = { promises: { sendEmail: sinon.stub() } }
     this.AuthenticationManager = {
       setUserPasswordInV2: sinon.stub(),
       promises: {
@@ -70,26 +60,27 @@ describe('PasswordResetHandler', function () {
 
   describe('generateAndEmailResetToken', function () {
     it('should check the user exists', function () {
-      this.UserGetter.getUserByAnyEmail.yields()
+      this.UserGetter.promises.getUserByAnyEmail.resolves()
       this.PasswordResetHandler.generateAndEmailResetToken(
         this.user.email,
         this.callback
       )
-      this.UserGetter.getUserByAnyEmail.should.have.been.calledWith(
+      this.UserGetter.promises.getUserByAnyEmail.should.have.been.calledWith(
         this.user.email
       )
     })
 
     it('should send the email with the token', function (done) {
-      this.UserGetter.getUserByAnyEmail.yields(null, this.user)
-      this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
-      this.EmailHandler.sendEmail.yields()
+      this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
+      this.OneTimeTokenHandler.promises.getNewToken.resolves(this.token)
+      this.EmailHandler.promises.sendEmail.resolves()
       this.PasswordResetHandler.generateAndEmailResetToken(
         this.user.email,
         (err, status) => {
-          this.EmailHandler.sendEmail.called.should.equal(true)
+          expect(err).to.not.exist
+          this.EmailHandler.promises.sendEmail.called.should.equal(true)
           status.should.equal('primary')
-          const args = this.EmailHandler.sendEmail.args[0]
+          const args = this.EmailHandler.promises.sendEmail.args[0]
           args[0].should.equal('passwordResetRequested')
           args[1].setNewPasswordUrl.should.equal(
             `${this.settings.siteUrl}/user/password/set?passwordResetToken=${
@@ -101,19 +92,32 @@ describe('PasswordResetHandler', function () {
       )
     })
 
+    it('should return errors from getUserByAnyEmail', function (done) {
+      const err = new Error('oops')
+      this.UserGetter.promises.getUserByAnyEmail.rejects(err)
+      this.PasswordResetHandler.generateAndEmailResetToken(
+        this.user.email,
+        err => {
+          expect(err).to.equal(err)
+          done()
+        }
+      )
+    })
+
     describe('when the email exists', function () {
-      beforeEach(function () {
-        this.UserGetter.getUserByAnyEmail.yields(null, this.user)
-        this.OneTimeTokenHandler.getNewToken.yields(null, this.token)
-        this.EmailHandler.sendEmail.yields()
-        this.PasswordResetHandler.generateAndEmailResetToken(
-          this.email,
-          this.callback
-        )
+      let result
+      beforeEach(async function () {
+        this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
+        this.OneTimeTokenHandler.promises.getNewToken.resolves(this.token)
+        this.EmailHandler.promises.sendEmail.resolves()
+        result =
+          await this.PasswordResetHandler.promises.generateAndEmailResetToken(
+            this.email
+          )
       })
 
       it('should set the password token data to the user id and email', function () {
-        this.OneTimeTokenHandler.getNewToken.should.have.been.calledWith(
+        this.OneTimeTokenHandler.promises.getNewToken.should.have.been.calledWith(
           'password',
           {
             email: this.email,
@@ -123,8 +127,8 @@ describe('PasswordResetHandler', function () {
       })
 
       it('should send an email with the token', function () {
-        this.EmailHandler.sendEmail.called.should.equal(true)
-        const args = this.EmailHandler.sendEmail.args[0]
+        this.EmailHandler.promises.sendEmail.called.should.equal(true)
+        const args = this.EmailHandler.promises.sendEmail.args[0]
         args[0].should.equal('passwordResetRequested')
         args[1].setNewPasswordUrl.should.equal(
           `${this.settings.siteUrl}/user/password/set?passwordResetToken=${
@@ -133,52 +137,54 @@ describe('PasswordResetHandler', function () {
         )
       })
 
-      it('should return status == true', function () {
-        this.callback.calledWith(null, 'primary').should.equal(true)
+      it('should return status == true', async function () {
+        expect(result).to.equal('primary')
       })
     })
 
     describe("when the email doesn't exist", function () {
-      beforeEach(function () {
-        this.UserGetter.getUserByAnyEmail.yields(null, null)
-        this.PasswordResetHandler.generateAndEmailResetToken(
-          this.email,
-          this.callback
-        )
+      let result
+      beforeEach(async function () {
+        this.UserGetter.promises.getUserByAnyEmail.resolves(null)
+        result =
+          await this.PasswordResetHandler.promises.generateAndEmailResetToken(
+            this.email
+          )
       })
 
       it('should not set the password token data', function () {
-        this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
+        this.OneTimeTokenHandler.promises.getNewToken.called.should.equal(false)
       })
 
       it('should send an email with the token', function () {
-        this.EmailHandler.sendEmail.called.should.equal(false)
+        this.EmailHandler.promises.sendEmail.called.should.equal(false)
       })
 
       it('should return status == null', function () {
-        this.callback.calledWith(null, null).should.equal(true)
+        expect(result).to.equal(null)
       })
     })
 
     describe('when the email is a secondary email', function () {
-      beforeEach(function () {
-        this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.user)
-        this.PasswordResetHandler.generateAndEmailResetToken(
-          'secondary@email.com',
-          this.callback
-        )
+      let result
+      beforeEach(async function () {
+        this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
+        result =
+          await this.PasswordResetHandler.promises.generateAndEmailResetToken(
+            'secondary@email.com'
+          )
       })
 
       it('should not set the password token data', function () {
-        this.OneTimeTokenHandler.getNewToken.called.should.equal(false)
+        this.OneTimeTokenHandler.promises.getNewToken.called.should.equal(false)
       })
 
       it('should not send an email with the token', function () {
-        this.EmailHandler.sendEmail.called.should.equal(false)
+        this.EmailHandler.promises.sendEmail.called.should.equal(false)
       })
 
       it('should return status == secondary', function () {
-        this.callback.calledWith(null, 'secondary').should.equal(true)
+        expect(result).to.equal('secondary')
       })
     })
   })
@@ -238,7 +244,7 @@ describe('PasswordResetHandler', function () {
             this.password,
             this.auditLog,
             (err, result) => {
-              const { found, reset, userId } = result
+              const { found, reset } = result
               expect(err).to.not.exist
               expect(found).to.be.false
               expect(reset).to.be.false
@@ -263,7 +269,7 @@ describe('PasswordResetHandler', function () {
             this.password,
             this.auditLog,
             (err, result) => {
-              const { found, reset, userId } = result
+              const { found, reset } = result
               expect(err).to.not.exist
               expect(found).to.be.false
               expect(reset).to.be.false
@@ -289,7 +295,6 @@ describe('PasswordResetHandler', function () {
               this.password,
               this.auditLog,
               (error, result) => {
-                const { reset, userId } = result
                 sinon.assert.calledWith(
                   this.UserAuditLogHandler.promises.addEntry,
                   this.user_id,
@@ -343,7 +348,6 @@ describe('PasswordResetHandler', function () {
                 this.password,
                 this.auditLog,
                 (error, result) => {
-                  const { reset, userId } = result
                   expect(error).to.not.exist
                   sinon.assert.calledWith(
                     this.UserAuditLogHandler.promises.addEntry,
@@ -444,7 +448,7 @@ describe('PasswordResetHandler', function () {
             this.password,
             this.auditLog,
             (err, result) => {
-              const { reset, userId } = result
+              const { reset } = result
               expect(err).to.not.exist
               expect(reset).to.be.false
               expect(this.OneTimeTokenHandler.expireToken.called).to.equal(
@@ -471,7 +475,7 @@ describe('PasswordResetHandler', function () {
             this.password,
             this.auditLog,
             (err, result) => {
-              const { reset, userId } = result
+              const { reset } = result
               expect(err).to.not.exist
               expect(reset).to.be.false
               expect(this.OneTimeTokenHandler.expireToken.called).to.equal(

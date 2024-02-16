@@ -104,6 +104,41 @@ async function setNewUserPassword(req, res, next) {
   AuthenticationController.finishLogin(user, req, res, next)
 }
 
+async function requestReset(req, res, next) {
+  const email = EmailsHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.status(400).json({
+      message: req.i18n.translate('must_be_email_address'),
+    })
+  }
+
+  let status
+  try {
+    status = await PasswordResetHandler.promises.generateAndEmailResetToken(
+      email
+    )
+  } catch (err) {
+    OError.tag(err, 'failed to generate and email password reset token', {
+      email,
+    })
+    throw err
+  }
+
+  if (status === 'primary') {
+    return res.status(200).json({
+      message: req.i18n.translate('password_reset_email_sent'),
+    })
+  } else if (status === 'secondary') {
+    return res.status(404).json({
+      message: req.i18n.translate('secondary_email_password_reset'),
+    })
+  } else {
+    return res.status(404).json({
+      message: req.i18n.translate('cant_find_email'),
+    })
+  }
+}
+
 module.exports = {
   renderRequestResetForm(req, res) {
     const errorQuery = req.query.error
@@ -117,34 +152,7 @@ module.exports = {
     })
   },
 
-  requestReset(req, res, next) {
-    const email = EmailsHelper.parseEmail(req.body.email)
-    if (!email) {
-      return res.status(400).json({
-        message: req.i18n.translate('must_be_email_address'),
-      })
-    }
-    PasswordResetHandler.generateAndEmailResetToken(email, (err, status) => {
-      if (err != null) {
-        OError.tag(err, 'failed to generate and email password reset token', {
-          email,
-        })
-        next(err)
-      } else if (status === 'primary') {
-        res.status(200).json({
-          message: req.i18n.translate('password_reset_email_sent'),
-        })
-      } else if (status === 'secondary') {
-        res.status(404).json({
-          message: req.i18n.translate('secondary_email_password_reset'),
-        })
-      } else {
-        res.status(404).json({
-          message: req.i18n.translate('cant_find_email'),
-        })
-      }
-    })
-  },
+  requestReset: expressify(requestReset),
 
   renderSetPasswordForm(req, res) {
     if (req.query.passwordResetToken != null) {
