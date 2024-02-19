@@ -1,55 +1,30 @@
-/* eslint-disable
-    n/handle-callback-err,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let SystemMessageManager
 const { SystemMessage } = require('../../models/SystemMessage')
 const {
   addRequiredCleanupHandlerBeforeDrainingConnections,
 } = require('../../infrastructure/GracefulShutdown')
+const { callbackifyAll } = require('@overleaf/promise-utils')
 
-module.exports = SystemMessageManager = {
-  getMessages(callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    callback(null, this._cachedMessages)
+const SystemMessageManager = {
+  getMessages() {
+    return this._cachedMessages
   },
 
-  getMessagesFromDB(callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    SystemMessage.find({}, callback)
+  async getMessagesFromDB() {
+    return await SystemMessage.find({}).exec()
   },
 
-  clearMessages(callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    SystemMessage.deleteMany({}, callback)
+  async clearMessages() {
+    await SystemMessage.deleteMany({}).exec()
   },
 
-  createMessage(content, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async createMessage(content) {
     const message = new SystemMessage({ content })
-    message.save(callback)
+    await message.save()
   },
 
-  refreshCache() {
-    this.getMessagesFromDB((error, messages) => {
-      if (!error) {
-        this._cachedMessages = messages
-      }
-    })
+  async refreshCache() {
+    const messages = await this.getMessagesFromDB()
+    this._cachedMessages = messages
   },
 }
 
@@ -66,3 +41,9 @@ addRequiredCleanupHandlerBeforeDrainingConnections(
     clearInterval(intervalHandle)
   }
 )
+
+module.exports = {
+  getMessages: SystemMessageManager.getMessages.bind(SystemMessageManager),
+  ...callbackifyAll(SystemMessageManager, { without: ['getMessages'] }),
+  promises: SystemMessageManager,
+}

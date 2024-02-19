@@ -295,4 +295,32 @@ describe('callbackifyAll', function () {
       })
     })
   })
+
+  describe('without option', function () {
+    before(function () {
+      this.module = {
+        async asyncAdd(a, b) {
+          return a + b
+        },
+        async asyncArithmetic(a, b) {
+          return { sum: a + b, product: a * b }
+        },
+      }
+      this.callbackified = callbackifyAll(this.module, {
+        without: ['asyncAdd'],
+      })
+    })
+
+    it('does not callbackify excluded functions', function () {
+      expect(this.callbackified.asyncAdd).not.to.exist
+    })
+
+    it('callbackifies other functions', async function () {
+      this.callbackified.asyncArithmetic(5, 6, (err, { sum, product }) => {
+        expect(err).not.to.exist
+        expect(sum).to.equal(11)
+        expect(product).to.equal(30)
+      })
+    })
+  })
 })

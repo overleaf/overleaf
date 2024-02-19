@@ -143,13 +143,18 @@ function promisifyMultiResult(fn, resultNames) {
  *
  * @param {Object} module - The module to callbackify
  * @param {Object} opts - Options
+ * @param {Array<string>} opts.without - Array of method names to exclude from
+ *                                       being callbackified
  * @param {Object} opts.multiResult - Spec of methods to be callbackified with
  *                                    callbackifyMultiResult()
  */
 function callbackifyAll(module, opts = {}) {
-  const { multiResult = {} } = opts
+  const { without = [], multiResult = {} } = opts
   const callbacks = {}
   for (const propName of Object.getOwnPropertyNames(module)) {
+    if (without.includes(propName)) {
+      continue
+    }
     const propValue = module[propName]
     if (typeof propValue === 'function') {
       if (propValue.constructor.name === 'AsyncFunction') {
