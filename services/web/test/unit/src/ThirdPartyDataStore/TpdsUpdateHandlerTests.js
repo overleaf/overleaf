@@ -504,7 +504,7 @@ function expectProjectCreated() {
 
   it('sets the root doc', function () {
     // Fire pending timers
-    this.clock.runAll()
+    this.clock.next()
     expect(
       this.RootDocManager.promises.setRootDocAutomatically
     ).to.have.been.calledWith(this.projects.active1._id)
@@ -519,7 +519,7 @@ function expectProjectNotCreated() {
 
   it('does not set the root doc', function () {
     // Fire pending timers
-    this.clock.runAll()
+    this.clock.next()
     expect(this.RootDocManager.promises.setRootDocAutomatically).not.to.have
       .been.called
   })
