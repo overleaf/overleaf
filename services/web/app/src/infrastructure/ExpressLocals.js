@@ -420,6 +420,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       cookieDomain: Settings.cookieDomain,
       templateLinks: Settings.templateLinks,
       labsEnabled: Settings.labs && Settings.labs.enable,
+      groupSSOEnabled: Settings.groupSSO?.enabled,
     }
     next()
   })

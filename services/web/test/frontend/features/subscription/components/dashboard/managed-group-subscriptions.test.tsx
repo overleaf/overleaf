@@ -12,7 +12,10 @@ import {
 } from '../../helpers/render-with-subscription-dash-context'
 import { UserId } from '../../../../../../types/user'
 
-function getManagedGroupSubscription(groupSSO: boolean, managedUsers: boolean) {
+function getManagedGroupSubscriptions(
+  groupSSO: boolean | null,
+  managedUsers: boolean | null
+): ManagedGroupSubscription[] {
   const subscriptionOne = {
     ...groupActiveSubscription,
     userIsGroupMember: true,
@@ -44,13 +47,15 @@ function getManagedGroupSubscription(groupSSO: boolean, managedUsers: boolean) {
 }
 
 const managedGroupSubscriptions: ManagedGroupSubscription[] =
-  getManagedGroupSubscription(false, false)
+  getManagedGroupSubscriptions(false, false)
 const managedGroupSubscriptions2: ManagedGroupSubscription[] =
-  getManagedGroupSubscription(true, true)
+  getManagedGroupSubscriptions(true, true)
 const managedGroupSubscriptions3: ManagedGroupSubscription[] =
-  getManagedGroupSubscription(true, false)
+  getManagedGroupSubscriptions(true, false)
 const managedGroupSubscriptions4: ManagedGroupSubscription[] =
-  getManagedGroupSubscription(false, true)
+  getManagedGroupSubscriptions(false, true)
+const managedGroupSubscriptions5: ManagedGroupSubscription[] =
+  getManagedGroupSubscriptions(null, true)
 
 describe('<ManagedGroupSubscriptions />', function () {
   afterEach(function () {
@@ -122,63 +127,209 @@ describe('<ManagedGroupSubscriptions />', function () {
       .be.null
   })
 
-  it('renders the Manage group settings row when feature is turned on', async function () {
-    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
-      metaTags: [
-        {
-          name: 'ol-managedGroupSubscriptions',
-          value: managedGroupSubscriptions2,
-        },
-        {
-          name: 'ol-groupSettingsEnabledFor',
-          value: [managedGroupSubscriptions2[0]._id],
-        },
-      ],
+  describe('with group SSO off by default', function () {
+    beforeEach(function () {
+      window.metaAttributesCache.set('ol-ExposedSettings', {
+        groupSSOEnabled: false,
+      })
     })
-    await screen.findAllByText('Manage group settings')
-    await screen.findAllByText('Configure and manage SSO and Managed Users')
+
+    it('renders the Manage group settings row when feature is turned on', async function () {
+      renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+        metaTags: [
+          {
+            name: 'ol-managedGroupSubscriptions',
+            value: managedGroupSubscriptions2,
+          },
+          {
+            name: 'ol-groupSettingsEnabledFor',
+            value: [managedGroupSubscriptions2[0]._id],
+          },
+        ],
+      })
+      await screen.findAllByText('Manage group settings')
+      await screen.findAllByText('Configure and manage SSO and Managed Users')
+    })
+
+    describe('renders the the correct subText for Manage Group settings row', async function () {
+      it('with managedUsers.enabled=true and groupSSO.enabled=true', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions2,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions2[0]._id],
+            },
+          ],
+        })
+        await screen.findAllByText('Configure and manage SSO and Managed Users')
+      })
+
+      it('with managedUsers.enabled=false and groupSSO.enabled=true', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions3,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions3[0]._id],
+            },
+          ],
+        })
+        await screen.findAllByText('Configure and manage SSO')
+      })
+
+      it('with managedUsers.enabled=true and groupSSO.enabled=false', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions4,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions4[0]._id],
+            },
+          ],
+        })
+        await screen.findAllByText('Turn on Managed Users')
+      })
+
+      it('with managedUsers.enabled=true and groupSSO.enabled=null', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions5,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions5[0]._id],
+            },
+          ],
+        })
+        await screen.findAllByText('Turn on Managed Users')
+      })
+    })
   })
 
-  it('renders the the correct subText for Manage Group settings row', async function () {
-    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
-      metaTags: [
-        {
-          name: 'ol-managedGroupSubscriptions',
-          value: managedGroupSubscriptions2,
-        },
-        {
-          name: 'ol-groupSettingsEnabledFor',
-          value: [managedGroupSubscriptions2[0]._id],
-        },
-      ],
+  describe('with group SSO on by default', function () {
+    it('renders the Manage group settings row when features are turned on', async function () {
+      renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+        metaTags: [
+          {
+            name: 'ol-managedGroupSubscriptions',
+            value: managedGroupSubscriptions2,
+          },
+          {
+            name: 'ol-groupSettingsEnabledFor',
+            value: [managedGroupSubscriptions2[0]._id],
+          },
+          {
+            name: 'ol-ExposedSettings',
+            value: {
+              groupSSOEnabled: true,
+            },
+          },
+        ],
+      })
+      await screen.findAllByText('Manage group settings')
+      await screen.findAllByText('Configure and manage SSO and Managed Users')
     })
-    await screen.findAllByText('Configure and manage SSO and Managed Users')
 
-    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
-      metaTags: [
-        {
-          name: 'ol-managedGroupSubscriptions',
-          value: managedGroupSubscriptions3,
-        },
-        {
-          name: 'ol-groupSettingsEnabledFor',
-          value: [managedGroupSubscriptions3[0]._id],
-        },
-      ],
+    describe('renders the the correct subText for Manage Group settings row', async function () {
+      it('with managedUsers.enabled=true and groupSSO.enabled=true', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions2,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions2[0]._id],
+            },
+            {
+              name: 'ol-ExposedSettings',
+              value: {
+                groupSSOEnabled: true,
+              },
+            },
+          ],
+        })
+        await screen.findAllByText('Configure and manage SSO and Managed Users')
+      })
+
+      it('with managedUsers.enabled=false and groupSSO.enabled=true', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions3,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions3[0]._id],
+            },
+            {
+              name: 'ol-ExposedSettings',
+              value: {
+                groupSSOEnabled: true,
+              },
+            },
+          ],
+        })
+        await screen.findAllByText('Configure and manage SSO')
+      })
+
+      it('with managedUsers.enabled=true and groupSSO.enabled=false', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions4,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions4[0]._id],
+            },
+            {
+              name: 'ol-ExposedSettings',
+              value: {
+                groupSSOEnabled: true,
+              },
+            },
+          ],
+        })
+        await screen.findAllByText('Turn on Managed Users')
+      })
+
+      it('with managedUsers.enabled=true and groupSSO.enabled=null', async function () {
+        renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
+          metaTags: [
+            {
+              name: 'ol-managedGroupSubscriptions',
+              value: managedGroupSubscriptions5,
+            },
+            {
+              name: 'ol-groupSettingsEnabledFor',
+              value: [managedGroupSubscriptions5[0]._id],
+            },
+            {
+              name: 'ol-ExposedSettings',
+              value: {
+                groupSSOEnabled: true,
+              },
+            },
+          ],
+        })
+        await screen.findAllByText('Configure and manage SSO and Managed Users')
+      })
     })
-    await screen.findAllByText('Configure and manage SSO')
-    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
-      metaTags: [
-        {
-          name: 'ol-managedGroupSubscriptions',
-          value: managedGroupSubscriptions4,
-        },
-        {
-          name: 'ol-groupSettingsEnabledFor',
-          value: [managedGroupSubscriptions4[0]._id],
-        },
-      ],
-    })
-    await screen.findAllByText('Turn on Managed Users')
   })
 })

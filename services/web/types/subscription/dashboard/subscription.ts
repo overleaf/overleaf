@@ -78,8 +78,8 @@ export type ManagedGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
   planLevelName: string
   admin_id: User
   features: {
-    groupSSO: boolean
-    managedUsers: boolean
+    groupSSO: boolean | null
+    managedUsers: boolean | null
   }
 }
 
