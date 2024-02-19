@@ -2205,6 +2205,7 @@
   "you_can_opt_in_and_out_of_overleaf_labs_at_any_time_on_this_page": "You can <0>opt in and out</0> of Overleaf Labs at any time on this page",
   "you_can_opt_in_and_out_of_the_program_at_any_time_on_this_page": "You can <0>opt in and out</0> of the program at any time on this page",
   "you_can_opt_in_to_individual_experiments": "You will be asked to opt in and out of individual experiments; each experiment may have unique partners, requirements, terms and conditions, etc. that must be opted in to for that specific experiment",
+  "you_cant_add_or_change_password_due_to_sso": "You can’t add or change your password because your group or organization uses <0>single sign-on (SSO)</0>.",
   "you_cant_join_this_group_subscription": "You can’t join this group subscription",
   "you_dont_have_any_repositories": "You don’t have any repositories",
   "you_get_access_to": "You get access to",

@@ -183,6 +183,17 @@ describe('<PasswordSection />', function () {
 
     await screen.findByText('Your old password is wrong')
   })
+
+  it('shows message when user cannot use password log in', async function () {
+    window.metaAttributesCache.set('ol-cannot-change-password', true)
+    render(<PasswordSection />)
+    await screen.findByRole('heading', { name: 'Change Password' })
+    screen.getByText(
+      'You can’t add or change your password because your group or organization uses',
+      { exact: false }
+    )
+    screen.getByRole('link', { name: 'single sign-on (SSO)' })
+  })
 })
 
 function submitValidForm() {

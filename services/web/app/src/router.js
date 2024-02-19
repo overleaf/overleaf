@@ -290,6 +290,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/password/update',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.changePassword),
+    PermissionsController.requirePermission('change-password'),
     UserController.changePassword
   )
   webRouter.get(
