@@ -24,7 +24,7 @@
     "@overleaf/promise-utils": "*",
     "@overleaf/settings": "*",
     "archiver": "5.3.2",
-    "async": "3.2.2",
+    "async": "^3.2.2",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "diskusage": "^1.1.3",
