@@ -41,6 +41,10 @@ describe('TutorialHandler', function () {
     })
   })
 
+  afterEach(function () {
+    this.clock.restore()
+  })
+
   describe('getInactiveTutorials', function () {
     it('returns all recorded tutorials except when they were posponed long ago', function () {
       const hiddenTutorials = this.TutorialHandler.getInactiveTutorials(
