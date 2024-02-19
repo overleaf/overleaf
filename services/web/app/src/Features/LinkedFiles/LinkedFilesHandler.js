@@ -1,160 +1,108 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const FileWriter = require('../../infrastructure/FileWriter')
 const EditorController = require('../Editor/EditorController')
 const ProjectLocator = require('../Project/ProjectLocator')
 const { Project } = require('../../models/Project')
 const ProjectGetter = require('../Project/ProjectGetter')
-const _ = require('lodash')
 const {
   ProjectNotFoundError,
   V1ProjectNotFoundError,
   BadDataError,
 } = require('./LinkedFilesErrors')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const { callbackifyAll } = require('@overleaf/promise-utils')
 
 const LinkedFilesHandler = {
-  getFileById(projectId, fileId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    ProjectLocator.findElement(
+  async getFileById(projectId, fileId) {
+    const { element, path, folder } = await ProjectLocator.promises.findElement(
       {
         project_id: projectId,
         element_id: fileId,
         type: 'file',
-      },
-      function (err, file, path, parentFolder) {
-        if (err != null) {
-          return callback(err)
-        }
-        callback(null, file, path, parentFolder)
       }
     )
+    return { file: element, path, parentFolder: folder }
   },
 
-  getSourceProject(data, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
+  async getSourceProject(data) {
     const projection = { _id: 1, name: 1 }
     if (data.v1_source_doc_id != null) {
-      Project.findOne(
+      const project = await Project.findOne(
         { 'overleaf.id': data.v1_source_doc_id },
-        projection,
-        function (err, project) {
-          if (err != null) {
-            return callback(err)
-          }
-          if (project == null) {
-            return callback(new V1ProjectNotFoundError())
-          }
-          callback(null, project)
-        }
-      )
+        projection
+      ).exec()
+
+      if (project == null) {
+        throw new V1ProjectNotFoundError()
+      }
+
+      return project
     } else if (data.source_project_id != null) {
-      ProjectGetter.getProject(
+      const project = await ProjectGetter.promises.getProject(
         data.source_project_id,
-        projection,
-        function (err, project) {
-          if (err != null) {
-            return callback(err)
-          }
-          if (project == null) {
-            return callback(new ProjectNotFoundError())
-          }
-          callback(null, project)
-        }
+        projection
       )
+
+      if (project == null) {
+        throw new ProjectNotFoundError()
+      }
+
+      return project
     } else {
-      callback(new BadDataError('neither v1 nor v2 id present'))
+      throw new BadDataError('neither v1 nor v2 id present')
     }
   },
 
-  importFromStream(
+  async importFromStream(
     projectId,
     readStream,
     linkedFileData,
     name,
     parentFolderId,
-    userId,
-    callback
+    userId
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    callback = _.once(callback)
-    FileWriter.writeStreamToDisk(projectId, readStream, function (err, fsPath) {
-      if (err != null) {
-        return callback(err)
-      }
-      EditorController.upsertFile(
-        projectId,
-        parentFolderId,
-        name,
-        fsPath,
-        linkedFileData,
-        'upload',
-        userId,
-        (err, file) => {
-          if (err != null) {
-            return callback(err)
-          }
-          callback(null, file)
-        }
-      )
-    })
+    const fsPath = await FileWriter.promises.writeStreamToDisk(
+      projectId,
+      readStream
+    )
+
+    return await EditorController.promises.upsertFile(
+      projectId,
+      parentFolderId,
+      name,
+      fsPath,
+      linkedFileData,
+      'upload',
+      userId
+    )
   },
 
-  importContent(
+  async importContent(
     projectId,
     content,
     linkedFileData,
     name,
     parentFolderId,
-    userId,
-    callback
+    userId
   ) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    callback = _.once(callback)
-    FileWriter.writeContentToDisk(projectId, content, function (err, fsPath) {
-      if (err != null) {
-        return callback(err)
-      }
-      EditorController.upsertFile(
-        projectId,
-        parentFolderId,
-        name,
-        fsPath,
-        linkedFileData,
-        'upload',
-        userId,
-        (err, file) => {
-          if (err != null) {
-            return callback(err)
-          }
-          callback(null, file)
-        }
-      )
-    })
+    const fsPath = await FileWriter.promises.writeContentToDisk(
+      projectId,
+      content
+    )
+
+    return await EditorController.promises.upsertFile(
+      projectId,
+      parentFolderId,
+      name,
+      fsPath,
+      linkedFileData,
+      'upload',
+      userId
+    )
   },
 }
 
 module.exports = {
-  ...LinkedFilesHandler,
-  promises: promisifyAll(LinkedFilesHandler, {
+  promises: LinkedFilesHandler,
+  ...callbackifyAll(LinkedFilesHandler, {
     multiResult: { getFileById: ['file', 'path', 'parentFolder'] },
   }),
 }
