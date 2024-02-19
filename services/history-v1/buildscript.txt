@@ -4,6 +4,6 @@ history-v1
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=18.18.2
+--node-version=18.19.1
 --public-repo=False
 --script-version=4.5.0
