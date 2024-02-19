@@ -23,6 +23,8 @@ const createInvite = (sendingUser, projectId, email, callback) => {
           return callback(err)
         }
         expect(response.statusCode).to.equal(200)
+        expect(body.error).to.not.exist
+        expect(body.invite).to.exist
         callback(null, body.invite)
       }
     )
