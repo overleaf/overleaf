@@ -64,7 +64,7 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 										a(href="/admin/survey") Manage Surveys
 
 					// loop over header_extras
-					each item in nav.header_extras_website_redesign
+					each item in nav.header_extras
 						-
 							if ((item.only_when_logged_in && getSessionUser())
 											|| (item.only_when_logged_out && (!getSessionUser()))

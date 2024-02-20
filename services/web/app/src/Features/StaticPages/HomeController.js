@@ -26,7 +26,10 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const logger = require('@overleaf/logger')
 
 const homepageExists = fs.existsSync(
-  Path.join(__dirname, '/../../../views/external/home/v2.pug')
+  Path.join(
+    __dirname,
+    '/../../../views/external/home/website-redesign/index.pug'
+  )
 )
 
 module.exports = HomeController = {
@@ -44,16 +47,6 @@ module.exports = HomeController = {
 
   async home(req, res) {
     if (Features.hasFeature('homepage') && homepageExists) {
-      const websiteRedesignVariant =
-        res.locals.splitTestVariants?.['website-redesign']
-      const websiteRedesignActive =
-        websiteRedesignVariant === 'new-design' ||
-        websiteRedesignVariant === 'new-design-registration'
-
-      if (websiteRedesignActive) {
-        return res.redirect(302, '/home-2')
-      }
-
       const onboardingFlowAssignment =
         await SplitTestHandler.promises.getAssignment(
           req,
@@ -62,33 +55,6 @@ module.exports = HomeController = {
         )
       AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
         page: req.path,
-        'website-redesign': websiteRedesignVariant,
-      })
-
-      return res.render('external/home/v2', {
-        onboardingFlowVariant: onboardingFlowAssignment.variant,
-        hideNewsletterCheckbox:
-          onboardingFlowAssignment.variant === 'token-confirmation-odc',
-      })
-    } else {
-      return res.redirect('/login')
-    }
-  },
-
-  async homeNew(req, res) {
-    if (Features.hasFeature('homepage') && homepageExists) {
-      const websiteRedesignVariant =
-        res.locals.splitTestVariants?.['website-redesign']
-
-      const onboardingFlowAssignment =
-        await SplitTestHandler.promises.getAssignment(
-          req,
-          res,
-          'onboarding-flow'
-        )
-      AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
-        page: req.path,
-        'website-redesign': websiteRedesignVariant,
       })
 
       return res.render('external/home/website-redesign/index', {

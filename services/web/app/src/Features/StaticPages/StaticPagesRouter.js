@@ -15,7 +15,6 @@ module.exports = {
   apply(webRouter) {
     webRouter.get('/', HomeController.index)
     webRouter.get('/home', HomeController.home)
-    webRouter.get('/home-2', HomeController.homeNew)
 
     webRouter.get(
       '/planned_maintenance',

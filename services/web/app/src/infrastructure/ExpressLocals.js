@@ -9,7 +9,6 @@ const request = require('request')
 const contentDisposition = require('content-disposition')
 const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
-const SplitTestMiddleware = require('../Features/SplitTests/SplitTestMiddleware')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
 const {
@@ -19,7 +18,6 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
-const { expressify } = require('@overleaf/promise-utils')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -78,12 +76,6 @@ function getWebpackAssets(entrypoint, section) {
 }
 
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
-  webRouter.use(
-    expressify(
-      SplitTestMiddleware.loadAssignmentsInLocals(['website-redesign'])
-    )
-  )
-
   if (process.env.NODE_ENV === 'development') {
     // In the dev-env, delay requests until we fetched the manifest once.
     webRouter.use(function (req, res, next) {

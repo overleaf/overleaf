@@ -90,16 +90,12 @@ async function plansPage(req, res) {
     'annual-trials'
   )
 
-  const websiteRedesignVariant =
-    res.locals.splitTestVariants?.['website-redesign']
-
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
     'geo-pricing-inr-group': geoPricingINRTestVariant,
     'geo-pricing-inr-page': currency === 'INR' ? 'inr' : 'default',
     'annual-trials': annualTrialsAssignment.variant,
-    'website-redesign': websiteRedesignVariant,
   }
   if (inrGeoBannerSplitTestName) {
     plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
