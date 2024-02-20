@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Button, Modal } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
@@ -18,19 +18,24 @@ export default function DictionaryModalContent({
   handleHide,
 }: DictionaryModalContentProps) {
   const { t } = useTranslation()
+  const [learnedWords, setLearnedWords] = useState(ignoredWords.learnedWords)
 
   const { isError, runAsync } = useAsync()
 
   const handleRemove = useCallback(
     word => {
-      ignoredWords.remove(word)
       runAsync(
         postJSON('/spelling/unlearn', {
           body: {
             word,
           },
         })
-      ).catch(debugConsole.error)
+      )
+        .then(() => {
+          ignoredWords.remove(word)
+          setLearnedWords(new Set(ignoredWords.learnedWords))
+        })
+        .catch(debugConsole.error)
     },
     [runAsync]
   )
@@ -46,31 +51,29 @@ export default function DictionaryModalContent({
           <Alert bsStyle="danger">{t('generic_something_went_wrong')}</Alert>
         ) : null}
 
-        {ignoredWords.learnedWords?.size > 0 ? (
+        {learnedWords?.size > 0 ? (
           <ul className="list-unstyled dictionary-entries-list">
-            {[...ignoredWords.learnedWords]
-              .sort(wordsSortFunction)
-              .map(learnedWord => (
-                <li key={learnedWord} className="dictionary-entry">
-                  <span className="dictionary-entry-name">{learnedWord}</span>
-                  <Tooltip
-                    id={`tooltip-remove-learned-word-${learnedWord}`}
-                    description={t('edit_dictionary_remove')}
-                    overlayProps={{ delay: 0 }}
+            {[...learnedWords].sort(wordsSortFunction).map(learnedWord => (
+              <li key={learnedWord} className="dictionary-entry">
+                <span className="dictionary-entry-name">{learnedWord}</span>
+                <Tooltip
+                  id={`tooltip-remove-learned-word-${learnedWord}`}
+                  description={t('edit_dictionary_remove')}
+                  overlayProps={{ delay: 0 }}
+                >
+                  <Button
+                    bsStyle="danger"
+                    bsSize="xs"
+                    onClick={() => handleRemove(learnedWord)}
                   >
-                    <Button
-                      bsStyle="danger"
-                      bsSize="xs"
-                      onClick={() => handleRemove(learnedWord)}
-                    >
-                      <Icon
-                        type="trash-o"
-                        accessibilityLabel={t('edit_dictionary_remove')}
-                      />
-                    </Button>
-                  </Tooltip>
-                </li>
-              ))}
+                    <Icon
+                      type="trash-o"
+                      accessibilityLabel={t('edit_dictionary_remove')}
+                    />
+                  </Button>
+                </Tooltip>
+              </li>
+            ))}
           </ul>
         ) : (
           <p className="dictionary-empty-body text-center">

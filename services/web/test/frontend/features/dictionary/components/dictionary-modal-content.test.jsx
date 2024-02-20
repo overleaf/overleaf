@@ -1,5 +1,8 @@
-import { screen, fireEvent } from '@testing-library/react'
-import { expect } from 'chai'
+import {
+  screen,
+  fireEvent,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import DictionaryModal from '../../../../../frontend/js/features/dictionary/components/dictionary-modal'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
@@ -16,6 +19,7 @@ describe('<DictionaryModalContent />', function () {
   afterEach(function () {
     window.metaAttributesCache = new Map()
     fetchMock.reset()
+    window.dispatchEvent(new CustomEvent('learnedWords:doreset'))
   })
 
   it('list words', async function () {
@@ -35,12 +39,13 @@ describe('<DictionaryModalContent />', function () {
     fetchMock.post('/spelling/unlearn', 200)
     setLearnedWords(['Foo', 'bar'])
     renderWithEditorContext(<DictionaryModal show handleHide={() => {}} />)
+    screen.getByText('Foo')
     screen.getByText('bar')
     const [firstButton] = screen.getAllByRole('button', {
       name: 'Remove from dictionary',
     })
     fireEvent.click(firstButton)
-    expect(screen.queryByText('bar')).to.not.exist
+    await waitForElementToBeRemoved(() => screen.getByText('bar'))
     screen.getByText('Foo')
   })
 
@@ -48,12 +53,13 @@ describe('<DictionaryModalContent />', function () {
     fetchMock.post('/spelling/unlearn', 500)
     setLearnedWords(['foo'])
     renderWithEditorContext(<DictionaryModal show handleHide={() => {}} />)
+    screen.getByText('foo')
     const [firstButton] = screen.getAllByRole('button', {
       name: 'Remove from dictionary',
     })
     fireEvent.click(firstButton)
     await fetchMock.flush()
     screen.getByText('Sorry, something went wrong')
-    screen.getByText('Your custom dictionary is empty.')
+    screen.getByText('foo')
   })
 })
