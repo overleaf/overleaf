@@ -160,7 +160,7 @@ class Operation {
    * @return {Operation[]} operations `[a', b']`
    */
   static transform(a, b) {
-    if (a.isNoOp() || b.isNoOp()) return [b, a]
+    if (a.isNoOp() || b.isNoOp()) return [a, b]
 
     function transpose(transformer) {
       return transformer(b, a).reverse()

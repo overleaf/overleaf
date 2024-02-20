@@ -741,4 +741,10 @@ describe('Operation', function () {
       .expectFiles({})
       .expectSymmetry()
   })
+
+  it('transforms no-op with other operation', function () {
+    runConcurrently(Operation.NO_OP, addFile('foo', 'test')).expectFiles({
+      foo: 'test',
+    })
+  })
 })
