@@ -279,7 +279,7 @@ describe('UpdatesProcessor', function () {
       this.SyncManager.expandSyncUpdates.yields(null, this.expandedUpdates)
       this.UpdateCompressor.compressRawUpdates.returns(this.compressedUpdates)
       this.BlobManager.createBlobForUpdates.yields(null, this.updatesWithBlobs)
-      this.UpdateTranslator.convertToChanges.yields(null, this.changes)
+      this.UpdateTranslator.convertToChanges.returns(this.changes)
 
       this.UpdatesProcessor._processUpdates(
         this.project_id,

@@ -22,7 +22,7 @@ describe('UpdateTranslator', function () {
   })
 
   describe('convertToChanges', function () {
-    it('can translate doc additions', function (done) {
+    it('can translate doc additions', function () {
       const updates = [
         {
           update: {
@@ -37,35 +37,30 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'main.tex',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'main.tex',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('can translate file additions', function (done) {
+    it('can translate file additions', function () {
       const updates = [
         {
           update: {
@@ -80,35 +75,30 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'test.png',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'test.png',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('can translate doc renames', function (done) {
+    it('can translate doc renames', function () {
       const updates = [
         {
           update: {
@@ -122,33 +112,28 @@ describe('UpdateTranslator', function () {
           },
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'main.tex',
-                newPathname: 'new_main.tex',
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'main.tex',
+              newPathname: 'new_main.tex',
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('can translate file renames', function (done) {
+    it('can translate file renames', function () {
       const updates = [
         {
           update: {
@@ -162,33 +147,28 @@ describe('UpdateTranslator', function () {
           },
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'test.png',
-                newPathname: 'new_test.png',
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'test.png',
+              newPathname: 'new_test.png',
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('can translate multiple updates with the correct versions', function (done) {
+    it('can translate multiple updates with the correct versions', function () {
       const updates = [
         {
           update: {
@@ -215,48 +195,43 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'main.tex',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'test.png',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'main.tex',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'test.png',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('returns an error if the update has an unknown format', function (done) {
+    it('returns an error if the update has an unknown format', function () {
       const updates = [
         {
           update: {
@@ -264,21 +239,12 @@ describe('UpdateTranslator', function () {
           },
         },
       ]
-      const assertion = (error, changes) => {
-        expect(error)
-          .to.exist.and.be.instanceof(Error)
-          .and.have.property('message', 'update with unknown format')
-        done()
-      }
-
-      this.UpdateTranslator.convertToChanges(
-        this.project_id,
-        updates,
-        assertion
-      )
+      expect(() =>
+        this.UpdateTranslator.convertToChanges(this.project_id, updates)
+      ).to.throw('update with unknown format')
     })
 
-    it('replaces backslashes with underscores in pathnames', function (done) {
+    it('replaces backslashes with underscores in pathnames', function () {
       const updates = [
         {
           update: {
@@ -292,33 +258,28 @@ describe('UpdateTranslator', function () {
           },
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: '_main_foo.tex',
-                newPathname: '_new_main_foo_bar.tex',
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: '_main_foo.tex',
+              newPathname: '_new_main_foo_bar.tex',
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('replaces leading asterisks with __ASTERISK__ in pathnames', function (done) {
+    it('replaces leading asterisks with __ASTERISK__ in pathnames', function () {
       const updates = [
         {
           update: {
@@ -333,35 +294,30 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'test__ASTERISK__test.png',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'test__ASTERISK__test.png',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('replaces a leading space for top-level files with __SPACE__', function (done) {
+    it('replaces a leading space for top-level files with __SPACE__', function () {
       const updates = [
         {
           update: {
@@ -376,35 +332,30 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: '__SPACE__test.png',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: '__SPACE__test.png',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('replaces leading spaces of files in subfolders with __SPACE__', function (done) {
+    it('replaces leading spaces of files in subfolders with __SPACE__', function () {
       const updates = [
         {
           update: {
@@ -419,35 +370,30 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'folder/__SPACE__test.png',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [this.user_id],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'folder/__SPACE__test.png',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [this.user_id],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('sets a null author when user_id is "anonymous-user"', function (done) {
+    it('sets a null author when user_id is "anonymous-user"', function () {
       const updates = [
         {
           update: {
@@ -462,35 +408,30 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'main.tex',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [null],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'main.tex',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [null],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
-    it('sets an empty array as author when there is no meta.user_id', function (done) {
+    it('sets an empty array as author when there is no meta.user_id', function () {
       const updates = [
         {
           update: {
@@ -504,36 +445,31 @@ describe('UpdateTranslator', function () {
           blobHash: this.mockBlobHash,
         },
       ]
-      const assertion = (error, changes) => {
-        changes = changes.map(change => change.toRaw())
-        expect(error).to.be.null
-        expect(changes).to.deep.equal([
-          {
-            authors: [],
-            operations: [
-              {
-                pathname: 'main.tex',
-                file: {
-                  hash: this.mockBlobHash,
-                },
-              },
-            ],
-            v2Authors: [],
-            timestamp: this.timestamp,
-          },
-        ])
-        done()
-      }
 
-      this.UpdateTranslator.convertToChanges(
+      const changes = this.UpdateTranslator.convertToChanges(
         this.project_id,
-        updates,
-        assertion
-      )
+        updates
+      ).map(change => change.toRaw())
+
+      expect(changes).to.deep.equal([
+        {
+          authors: [],
+          operations: [
+            {
+              pathname: 'main.tex',
+              file: {
+                hash: this.mockBlobHash,
+              },
+            },
+          ],
+          v2Authors: [],
+          timestamp: this.timestamp,
+        },
+      ])
     })
 
     describe('text updates', function () {
-      it('can translate insertions', function (done) {
+      it('can translate insertions', function () {
         const updates = [
           {
             update: {
@@ -553,39 +489,34 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: [3, 'foo', 9, 'bar', 8],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [3, 'foo', 9, 'bar', 8],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
               },
             },
-          ])
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+          },
+        ])
       })
 
-      it('can translate deletions', function (done) {
+      it('can translate deletions', function () {
         const updates = [
           {
             update: {
@@ -604,39 +535,34 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: [3, -2, 7, -3, 5],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [3, -2, 7, -3, 5],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
               },
             },
-          ])
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+          },
+        ])
       })
 
-      it('can translate insertions at the start and end (with zero retained)', function (done) {
+      it('can translate insertions at the start and end (with zero retained)', function () {
         const updates = [
           {
             update: {
@@ -657,39 +583,34 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: [20],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [20],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
               },
             },
-          ])
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+          },
+        ])
       })
 
-      it('can handle operations in non-linear offset order', function (done) {
+      it('can handle operations in non-linear offset order', function () {
         const updates = [
           {
             update: {
@@ -708,46 +629,43 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: [3, 'bar', 12, 'foo', 5],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [3, 'bar', 12, 'foo', 5],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
               },
             },
-          ])
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+          },
+        ])
       })
 
-      it('can ignore comment ops', function (done) {
+      it('handles comment ops', function () {
         const updates = [
           {
             update: {
               doc: this.doc_id,
               op: [
                 { p: 0, i: 'foo' },
-                { p: 5, c: 'bar' },
+                { p: 3, d: 'bar' },
+                { p: 5, c: 'comment this', t: 'comment-id-1' },
+                { p: 7, c: 'another comment', t: 'comment-id-2' },
                 { p: 10, i: 'baz' },
               ],
               v: this.version,
@@ -760,39 +678,50 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: ['foo', 7, 'baz', 13],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: ['foo', -3, 17],
+              },
+              {
+                pathname: 'main.tex',
+                commentId: 'comment-id-1',
+                ranges: [{ pos: 5, length: 12 }],
+                resolved: false,
+              },
+              {
+                pathname: 'main.tex',
+                commentId: 'comment-id-2',
+                ranges: [{ pos: 7, length: 15 }],
+                resolved: false,
+              },
+              {
+                pathname: 'main.tex',
+                textOperation: [10, 'baz', 10],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
               },
             },
-          ])
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+          },
+        ])
       })
 
-      it('handles insertions after the end of the document', function (done) {
+      it('handles insertions after the end of the document', function () {
         const updates = [
           {
             update: {
@@ -808,39 +737,34 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: [2, '\\'],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [2, '\\'],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
               },
             },
-          ])
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+          },
+        ])
       })
 
-      it('translates external source metadata into an origin', function (done) {
+      it('translates external source metadata into an origin', function () {
         const updates = [
           {
             update: {
@@ -858,40 +782,35 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          changes = changes.map(change => change.toRaw())
-          expect(error).to.be.null
-          expect(changes).to.deep.equal([
-            {
-              authors: [],
-              operations: [
-                {
-                  pathname: 'main.tex',
-                  textOperation: [3, 'foo', 17],
-                },
-              ],
-              v2Authors: [this.user_id],
-              timestamp: this.timestamp,
-              v2DocVersions: {
-                '59bfd450e3028c4d40a1e9ab': {
-                  pathname: 'main.tex',
-                  v: 0,
-                },
-              },
-              origin: { kind: 'dropbox' },
-            },
-          ])
-          done()
-        }
 
-        this.UpdateTranslator.convertToChanges(
+        const changes = this.UpdateTranslator.convertToChanges(
           this.project_id,
-          updates,
-          assertion
-        )
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [3, 'foo', 17],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
+              },
+            },
+            origin: { kind: 'dropbox' },
+          },
+        ])
       })
 
-      it('errors on unexpected ops', function (done) {
+      it('errors on unexpected ops', function () {
         const updates = [
           {
             update: {
@@ -907,16 +826,9 @@ describe('UpdateTranslator', function () {
             },
           },
         ]
-        const assertion = (error, changes) => {
-          expect(error.message).to.equal('unexpected op type')
-          done()
-        }
-
-        this.UpdateTranslator.convertToChanges(
-          this.project_id,
-          updates,
-          assertion
-        )
+        expect(() => {
+          this.UpdateTranslator.convertToChanges(this.project_id, updates)
+        }).to.throw('unexpected op type')
       })
     })
   })

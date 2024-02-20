@@ -65,7 +65,7 @@ describe('UpdateCompressor', function () {
       ).to.deep.equal([])
     })
 
-    it('should ignore comment ops', function () {
+    it('should not ignore comment ops', function () {
       expect(
         this.UpdateCompressor.convertToSingleOpUpdates([
           {
@@ -74,19 +74,24 @@ describe('UpdateCompressor', function () {
               (this.op2 = { p: 9, c: 'baz' }),
               (this.op3 = { p: 6, i: 'bar' }),
             ],
-            meta: { ts: this.ts1, user_id: this.user_id },
+            meta: { ts: this.ts1, user_id: this.user_id, doc_length: 10 },
             v: 42,
           },
         ])
       ).to.deep.equal([
         {
           op: this.op1,
-          meta: { ts: this.ts1, user_id: this.user_id },
+          meta: { ts: this.ts1, user_id: this.user_id, doc_length: 10 },
+          v: 42,
+        },
+        {
+          op: this.op2,
+          meta: { ts: this.ts1, user_id: this.user_id, doc_length: 13 },
           v: 42,
         },
         {
           op: this.op3,
-          meta: { ts: this.ts1, user_id: this.user_id },
+          meta: { ts: this.ts1, user_id: this.user_id, doc_length: 13 },
           v: 42,
         },
       ])

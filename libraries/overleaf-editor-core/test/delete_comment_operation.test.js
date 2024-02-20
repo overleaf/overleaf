@@ -32,9 +32,7 @@ describe('DeleteCommentOperation', function () {
     const fileData = new StringFileData('abc')
     const op = new DeleteCommentOperation('123')
     fileData.comments.add('123', new Comment([new Range(0, 1)]))
-    const invertedOp = /** @type {InstanceType<AddCommentOperation>} */ (
-      op.invert(fileData)
-    )
+    const invertedOp = /** @type {AddCommentOperation} */ (op.invert(fileData))
     expect(invertedOp).to.be.instanceOf(AddCommentOperation)
     expect(invertedOp.commentId).to.equal('123')
     expect(invertedOp.comment).to.be.instanceOf(Comment)

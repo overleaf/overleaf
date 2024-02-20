@@ -408,15 +408,12 @@ function _processUpdates(
                 )
               },
               (updatesWithBlobs, cb) => {
-                cb = profile.wrap('convertToChanges', cb)
-                UpdateTranslator.convertToChanges(
+                const changes = UpdateTranslator.convertToChanges(
                   projectId,
-                  updatesWithBlobs,
-                  cb
-                )
-              },
-              (changes, cb) => {
-                changes = changes.map(change => change.toRaw())
+                  updatesWithBlobs
+                ).map(change => change.toRaw())
+                profile.log('convertToChanges')
+
                 let change
                 const numChanges = changes.length
                 const byteLength = Buffer.byteLength(

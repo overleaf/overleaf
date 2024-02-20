@@ -73,19 +73,12 @@ function slRenameUpdate(historyId, doc, userId, ts, pathname, newPathname) {
   }
 }
 
-function olTextUpdate(doc, userId, ts, textOperation, v) {
+function olUpdate(doc, userId, ts, operations, v) {
   return {
     v2Authors: [userId],
     timestamp: ts.toJSON(),
     authors: [],
-
-    operations: [
-      {
-        pathname: doc.pathname.replace(/^\//, ''), // Strip leading /
-        textOperation,
-      },
-    ],
-
+    operations,
     v2DocVersions: {
       [doc.id]: {
         pathname: doc.pathname.replace(/^\//, ''), // Strip leading /
@@ -95,26 +88,34 @@ function olTextUpdate(doc, userId, ts, textOperation, v) {
   }
 }
 
-function olTextUpdates(doc, userId, ts, textOperations, v) {
+function olTextOperation(doc, textOperation) {
   return {
-    v2Authors: [userId],
-    timestamp: ts.toJSON(),
-    authors: [],
-
-    operations: textOperations.map(textOperation => ({
-      // Strip leading /
-      pathname: doc.pathname.replace(/^\//, ''),
-
-      textOperation,
-    })),
-
-    v2DocVersions: {
-      [doc.id]: {
-        pathname: doc.pathname.replace(/^\//, ''), // Strip leading /
-        v: v || 1,
-      },
-    },
+    pathname: doc.pathname.replace(/^\//, ''), // Strip leading /
+    textOperation,
   }
+}
+
+function olAddCommentOperation(doc, commentId, pos, length) {
+  return {
+    pathname: doc.pathname.replace(/^\//, ''), // Strip leading /
+    commentId,
+    ranges: [{ pos, length }],
+    resolved: false,
+  }
+}
+
+function olTextUpdate(doc, userId, ts, textOperation, v) {
+  return olUpdate(doc, userId, ts, [olTextOperation(doc, textOperation)], v)
+}
+
+function olTextUpdates(doc, userId, ts, textOperations, v) {
+  return olUpdate(
+    doc,
+    userId,
+    ts,
+    textOperations.map(textOperation => olTextOperation(doc, textOperation)),
+    v
+  )
 }
 
 function olRenameUpdate(doc, userId, ts, pathname, newPathname) {
@@ -594,11 +595,21 @@ describe('Sending Updates', function () {
       )
     })
 
-    it('should ignore comment ops', function (done) {
+    it('should handle comment ops', function (done) {
       const createChange = MockHistoryStore()
         .post(`/api/projects/${historyId}/legacy_changes`, body => {
           expect(body).to.deep.equal([
-            olTextUpdate(this.doc, this.userId, this.timestamp, [3, '\nc', 2]),
+            olUpdate(this.doc, this.userId, this.timestamp, [
+              olTextOperation(this.doc, [3, '\nc', 2]),
+              olAddCommentOperation(this.doc, 'comment-id-1', 3, 2),
+            ]),
+            olUpdate(
+              this.doc,
+              this.userId,
+              this.timestamp,
+              [olAddCommentOperation(this.doc, 'comment-id-2', 2, 1)],
+              2
+            ),
           ])
           return true
         })
@@ -618,7 +629,7 @@ describe('Sending Updates', function () {
                 this.timestamp,
                 [
                   { p: 3, i: '\nc' },
-                  { p: 3, c: '\nc' },
+                  { p: 3, c: '\nc', t: 'comment-id-1' },
                 ]
               ),
               cb
@@ -633,7 +644,7 @@ describe('Sending Updates', function () {
                 this.userId,
                 2,
                 this.timestamp,
-                [{ p: 2, c: 'b' }]
+                [{ p: 2, c: 'b', t: 'comment-id-2' }]
               ),
               cb
             )

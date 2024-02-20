@@ -36,16 +36,13 @@ function expandResyncProjectStructure(chunk, update) {
 
 function expandUpdates(updates) {
   const wrappedUpdates = updates.map(update => ({ update }))
-  UpdateTranslator.convertToChanges(
-    projectId,
-    wrappedUpdates,
-    (err, changes) => {
-      if (err != null) {
-        error(err)
-      }
-      console.log(JSON.stringify(changes, null, 2))
-    }
-  )
+  let changes
+  try {
+    changes = UpdateTranslator.convertToChanges(projectId, wrappedUpdates)
+  } catch (err) {
+    error(err)
+  }
+  console.log(JSON.stringify(changes, null, 2))
 }
 
 if (updates[0].resyncProjectStructure) {

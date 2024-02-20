@@ -36,6 +36,8 @@ const adjustLengthByOp = function (length, op) {
     return length + op.i.length
   } else if (op.d != null) {
     return length - op.d.length
+  } else if (op.c != null) {
+    return length
   } else {
     throw new OError('unexpected op type')
   }
@@ -63,8 +65,7 @@ export function convertToSingleOpUpdates(updates) {
       splitUpdates.push(update)
       continue
     }
-    // Reject any non-insert or delete ops, i.e. comments
-    const ops = update.op.filter(o => o.i != null || o.d != null)
+    const ops = update.op
     let { doc_length: docLength } = update.meta
     for (const op of ops) {
       const splitUpdate = cloneWithOp(update, op)
