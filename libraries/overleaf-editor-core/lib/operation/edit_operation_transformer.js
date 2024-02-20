@@ -31,14 +31,12 @@ class EditOperationTransformer {
     }
 
     if (a instanceof AddCommentOperation && b instanceof TextOperation) {
-      const comment = a.comment.clone()
-      comment.applyTextOperation(b)
+      const comment = a.comment.applyTextOperation(b)
       return [new AddCommentOperation(a.commentId, comment), b]
     }
 
     if (a instanceof TextOperation && b instanceof AddCommentOperation) {
-      const comment = b.comment.clone()
-      comment.applyTextOperation(a)
+      const comment = b.comment.applyTextOperation(a)
       return [a, new AddCommentOperation(b.commentId, comment)]
     }
 

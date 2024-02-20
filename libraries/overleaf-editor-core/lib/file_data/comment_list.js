@@ -41,10 +41,9 @@ class CommentList {
   add(id, newComment) {
     const existingComment = this.getComment(id)
     if (existingComment) {
-      existingComment.resolved = existingComment.resolved && newComment.resolved
-      for (const range of newComment.ranges) {
-        existingComment.addRange(range)
-      }
+      const resolved = existingComment.resolved && newComment.resolved
+      const mergedRanges = [...existingComment.ranges, ...newComment.ranges]
+      this.comments.set(id, new Comment(mergedRanges, resolved))
     } else {
       this.comments.set(id, newComment)
     }
@@ -77,11 +76,12 @@ class CommentList {
       opts.commentIds = []
     }
     for (const [commentId, comment] of this.comments) {
-      comment.applyInsert(
+      const commentAfterInsert = comment.applyInsert(
         range.pos,
         range.length,
         opts.commentIds.includes(commentId)
       )
+      this.comments.set(commentId, commentAfterInsert)
     }
   }
 
@@ -89,8 +89,9 @@ class CommentList {
    * @param {Range} range
    */
   applyDelete(range) {
-    for (const [, comment] of this.comments) {
-      comment.applyDelete(range)
+    for (const [commentId, comment] of this.comments) {
+      const commentAfterDelete = comment.applyDelete(range)
+      this.comments.set(commentId, commentAfterDelete)
     }
   }
 

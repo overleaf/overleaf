@@ -9,34 +9,24 @@ const Range = require('./range')
 
 class Comment {
   /**
-   * @type {Range[]}
+   * @readonly
+   * @type {ReadonlyArray<Range>}
    */
   ranges = []
 
   /**
+   * @readonly
    * @type {boolean}
    */
   resolved = false
 
   /**
-   * @param {Range[]} ranges
+   * @param {ReadonlyArray<Range>} ranges
    * @param {boolean} [resolved]
    */
   constructor(ranges, resolved = false) {
     this.resolved = resolved
-    for (const range of ranges) {
-      this.addRange(range)
-    }
-  }
-
-  /**
-   *
-   * @param {Range} range
-   */
-  addRange(range) {
-    this.ranges.push(range)
-    this.ranges.sort((a, b) => a.start - b.start)
-    this.mergeRanges()
+    this.ranges = this.mergeRanges(ranges)
   }
 
   /**
@@ -44,6 +34,7 @@ class Comment {
    * @param {number} cursor
    * @param {number} length
    * @param {boolean} [extendComment]
+   * @returns {Comment}
    */
   applyInsert(cursor, length, extendComment = false) {
     let existingRangeExtended = false
@@ -91,17 +82,18 @@ class Comment {
       }
     }
 
-    this.ranges = newRanges
-
     // if the insert is not inside any range, add a new range
     if (extendComment && !existingRangeExtended) {
-      this.addRange(new Range(cursor, length))
+      newRanges.push(new Range(cursor, length))
     }
+
+    return new Comment(newRanges, this.resolved)
   }
 
   /**
    *
    * @param {Range} deletedRange
+   * @returns {Comment}
    */
   applyDelete(deletedRange) {
     const newRanges = []
@@ -116,26 +108,29 @@ class Comment {
       }
     }
 
-    this.ranges = newRanges
-    this.mergeRanges()
+    return new Comment(newRanges, this.resolved)
   }
 
   /**
    *
    * @param {TextOperation} operation
+   * @returns {Comment}
    */
   applyTextOperation(operation) {
+    /** @type {Comment} */
+    let comment = this
     let cursor = 0
     for (const op of operation.ops) {
       if (op instanceof RetainOp) {
         cursor += op.length
       } else if (op instanceof InsertOp) {
-        this.applyInsert(cursor, op.insertion.length)
+        comment = comment.applyInsert(cursor, op.insertion.length)
         cursor += op.insertion.length
       } else if (op instanceof RemoveOp) {
-        this.applyDelete(new Range(cursor, op.length))
+        comment = comment.applyDelete(new Range(cursor, op.length))
       }
     }
+    return comment
   }
 
   isEmpty() {
@@ -153,11 +148,16 @@ class Comment {
     }
   }
 
-  mergeRanges() {
+  /**
+   * @param {ReadonlyArray<Range>} ranges
+   * @returns {ReadonlyArray<Range>}
+   */
+  mergeRanges(ranges) {
     /** @type {Range[]} */
     const mergedRanges = []
 
-    for (const range of this.ranges) {
+    const sortedRanges = [...ranges].sort((a, b) => a.start - b.start)
+    for (const range of sortedRanges) {
       if (range.isEmpty()) {
         continue
       }
@@ -170,14 +170,7 @@ class Comment {
       }
     }
 
-    this.ranges = mergedRanges
-  }
-
-  /**
-   * @returns {Comment}
-   */
-  clone() {
-    return Comment.fromRaw(this.toRaw())
+    return mergedRanges
   }
 
   /**
