@@ -9,7 +9,7 @@ import * as WebApiManager from './WebApiManager.js'
 import * as ChunkTranslator from './ChunkTranslator.js'
 import * as Errors from './Errors.js'
 
-let MAX_CHUNK_REQUESTS = 5
+let MAX_CHUNK_REQUESTS = 10
 
 /**
  * Container for functions that need to be mocked in tests
