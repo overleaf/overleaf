@@ -1,7 +1,7 @@
-// This file provides CSS and Sass variables for colours as both RGB triples,
-// which can be combined with an alpha value, and actual colour values.
+// This file provides CSS and Sass variables for colors as both RGB triples,
+// which can be combined with an alpha value, and actual color values.
 
-// Note that colours used by Bootstrap's Sass are used in calculations and
+// Note that colors used by Bootstrap's Sass are used in calculations and
 // therefore cannot contain CSS variables
 
 /* ====== RGB triples, for use with alpha values ====== */
@@ -54,7 +54,7 @@ $yellow-50-rgb: 143 85 20;
 $yellow-60-rgb: 122 67 4;
 $yellow-70-rgb: 99 58 11;
 
-/* ====== Full RGB colour values ====== */
+/* ====== Full RGB color values ====== */
 
 /* Neutral */
 $white: rgb($white-rgb);
@@ -104,7 +104,7 @@ $yellow-50: rgb($yellow-50-rgb);
 $yellow-60: rgb($yellow-60-rgb);
 $yellow-70: rgb($yellow-70-rgb);
 
-/* ====== RGB triples for semantic colour variables, for use with alpha values ====== */
+/* ====== RGB triples for semantic color variables, for use with alpha values ====== */
 $bg-light-primary-rgb: $white-rgb;
 $bg-light-secondary-rgb: $neutral-10-rgb;
 $bg-light-tertiary-rgb: $neutral-20-rgb;
@@ -175,7 +175,7 @@ $link-ui-dark-rgb: $blue-30-rgb;
 $link-ui-hover-dark-rgb: $blue-40-rgb;
 $link-ui-visited-dark-rgb: $blue-40-rgb;
 
-/* ====== Full RGB colour values for semantic colour variables ====== */
+/* ====== Full RGB color values for semantic color variables ====== */
 $bg-light-primary: rgb($bg-light-primary-rgb);
 $bg-light-secondary: rgb($bg-light-secondary-rgb);
 $bg-light-tertiary: rgb($bg-light-tertiary-rgb);
@@ -297,7 +297,7 @@ $link-ui-visited-dark: rgb($link-ui-visited-dark-rgb);
   --yellow-60-rgb: #{$yellow-60-rgb};
   --yellow-70-rgb: #{$yellow-70-rgb};
 
-  /* ====== Full RGB colour values ====== */
+  /* ====== Full RGB color values ====== */
 
   /* Neutral */
   --white: rgb(var(--white-rgb));
@@ -347,7 +347,7 @@ $link-ui-visited-dark: rgb($link-ui-visited-dark-rgb);
   --yellow-60: rgb(var(--yellow-60-rgb));
   --yellow-70: rgb(var(--yellow-70-rgb));
 
-  /* ====== RGB triples for semantic colour variables, for use with alpha values ====== */
+  /* ====== RGB triples for semantic color variables, for use with alpha values ====== */
   --bg-light-primary-rgb: var(--white-rgb);
   --bg-light-secondary-rgb: var(--neutral-10-rgb);
   --bg-light-tertiary-rgb: var(--neutral-20-rgb);
@@ -419,7 +419,7 @@ $link-ui-visited-dark: rgb($link-ui-visited-dark-rgb);
   --link-ui-visited-dark-rgb: var(--blue-40-rgb);
 
 
-  /* ====== Full RGB colour values for semantic colour variables ====== */
+  /* ====== Full RGB color values for semantic color variables ====== */
   --bg-light-primary: rgb(var(--bg-light-primary-rgb));
   --bg-light-secondary: rgb(var(--bg-light-secondary-rgb));
   --bg-light-tertiary: rgb(var(--bg-light-tertiary-rgb));
