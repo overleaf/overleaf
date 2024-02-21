@@ -47,7 +47,7 @@ const createThemeFromOptions = ({
     }),
     // Set variables for tooltips, which are outside the editor
     // TODO: set these on document.body, or a new container element for the tooltips, without using a style mod
-    EditorView.baseTheme({
+    EditorView.theme({
       '.cm-tooltip': {
         '--font-size': `${fontSize}px`,
         '--source-font-family': fontFamilyValue,
@@ -56,11 +56,12 @@ const createThemeFromOptions = ({
   ]
 }
 
-const baseTheme = EditorView.baseTheme({
+const baseTheme = EditorView.theme({
   '.cm-content': {
     fontSize: 'var(--font-size)',
     fontFamily: 'var(--source-font-family)',
     lineHeight: 'var(--line-height)',
+    color: '#000',
   },
   '.cm-gutters': {
     fontSize: 'var(--font-size)',
