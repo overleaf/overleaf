@@ -38,8 +38,10 @@ async function plansPage(req, res) {
   if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
     currency = queryCurrency
   }
-  const { recommendedCurrency, countryCode, geoPricingINRTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const { recommendedCurrency, countryCode } = await _getRecommendedCurrency(
+    req,
+    res
+  )
   if (recommendedCurrency && currency == null) {
     currency = recommendedCurrency
   }
@@ -65,24 +67,6 @@ async function plansPage(req, res) {
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
 
-  let showInrGeoBanner, inrGeoBannerSplitTestName
-  let inrGeoBannerVariant = 'default'
-  if (countryCode === 'IN') {
-    inrGeoBannerSplitTestName =
-      geoPricingINRTestVariant === 'inr'
-        ? 'geo-banners-inr-2'
-        : 'geo-banners-inr-1'
-    const geoBannerAssignment = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      inrGeoBannerSplitTestName
-    )
-    inrGeoBannerVariant = geoBannerAssignment.variant
-    if (inrGeoBannerVariant !== 'default') {
-      showInrGeoBanner = true
-    }
-  }
-
   // annual plans with the free trial option split test - nudge variant
   const annualTrialsAssignment = await SplitTestHandler.promises.getAssignment(
     req,
@@ -93,12 +77,7 @@ async function plansPage(req, res) {
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
-    'geo-pricing-inr-group': geoPricingINRTestVariant,
-    'geo-pricing-inr-page': currency === 'INR' ? 'inr' : 'default',
     'annual-trials': annualTrialsAssignment.variant,
-  }
-  if (inrGeoBannerSplitTestName) {
-    plansPageViewSegmentation[inrGeoBannerSplitTestName] = inrGeoBannerVariant
   }
 
   AnalyticsManager.recordEventForSession(
@@ -122,7 +101,7 @@ async function plansPage(req, res) {
     groupPlanModalDefaults,
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
-    showInrGeoBanner,
+    showInrGeoBanner: countryCode === 'IN',
     annualTrialsAssignment: annualTrialsAssignment?.variant,
   })
 }
@@ -233,8 +212,10 @@ async function userSubscriptionPage(req, res) {
 
 async function interstitialPaymentPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const { recommendedCurrency, countryCode, geoPricingINRTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const { recommendedCurrency, countryCode } = await _getRecommendedCurrency(
+    req,
+    res
+  )
 
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
@@ -244,24 +225,6 @@ async function interstitialPaymentPage(req, res) {
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
-    let showInrGeoBanner, inrGeoBannerSplitTestName
-    let inrGeoBannerVariant = 'default'
-    if (countryCode === 'IN') {
-      inrGeoBannerSplitTestName =
-        geoPricingINRTestVariant === 'inr'
-          ? 'geo-banners-inr-2'
-          : 'geo-banners-inr-1'
-      const geoBannerAssignment = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        inrGeoBannerSplitTestName
-      )
-      inrGeoBannerVariant = geoBannerAssignment.variant
-      if (inrGeoBannerVariant !== 'default') {
-        showInrGeoBanner = true
-      }
-    }
-
     // annual plans with the free trial option split test - nudge variant
     const annualTrialsAssignment =
       await SplitTestHandler.promises.getAssignment(req, res, 'annual-trials')
@@ -269,13 +232,7 @@ async function interstitialPaymentPage(req, res) {
     const paywallPlansPageViewSegmentation = {
       currency: recommendedCurrency,
       countryCode,
-      'geo-pricing-inr-group': geoPricingINRTestVariant,
-      'geo-pricing-inr-page': recommendedCurrency === 'INR' ? 'inr' : 'default',
       'annual-trials': annualTrialsAssignment.variant,
-    }
-    if (inrGeoBannerSplitTestName) {
-      paywallPlansPageViewSegmentation[inrGeoBannerSplitTestName] =
-        inrGeoBannerVariant
     }
     AnalyticsManager.recordEventForSession(
       req.session,
@@ -304,7 +261,7 @@ async function interstitialPaymentPage(req, res) {
       recommendedCurrency,
       interstitialPaymentConfig,
       showSkipLink,
-      showInrGeoBanner,
+      showInrGeoBanner: countryCode === 'IN',
     })
   }
 }
@@ -621,14 +578,6 @@ async function _getRecommendedCurrency(req, res) {
   const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
   const countryCode = currencyLookup.countryCode
   let recommendedCurrency = currencyLookup.currencyCode
-  // for #12703
-  // Split test is kept active, but all users geolocated in India can
-  // now use the INR currency (See #13507)
-  const assignmentINR = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'geo-pricing-inr'
-  )
 
   if (['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency)) {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
@@ -637,7 +586,6 @@ async function _getRecommendedCurrency(req, res) {
   return {
     recommendedCurrency,
     countryCode,
-    geoPricingINRTestVariant: assignmentINR?.variant,
   }
 }
 

@@ -363,28 +363,14 @@ async function projectListPage(req, res, next) {
     'writefull-integration'
   )
 
-  let showInrGeoBanner, inrGeoBannerSplitTestName
-  let inrGeoBannerVariant = 'default'
+  let showInrGeoBanner = false
   let recommendedCurrency
+
   if (usersBestSubscription?.type === 'free') {
     const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(req.ip)
-    // Split test is kept active, but all users geolocated in India can
-    // now use the INR currency (See #13507)
-    const { variant: inrGeoPricingVariant } =
-      await SplitTestHandler.promises.getAssignment(req, res, 'geo-pricing-inr')
 
     if (countryCode === 'IN') {
-      inrGeoBannerSplitTestName =
-        inrGeoPricingVariant === 'inr'
-          ? 'geo-banners-inr-2'
-          : 'geo-banners-inr-1'
-      const geoBannerAssignment = await SplitTestHandler.promises.getAssignment(
-        req,
-        res,
-        inrGeoBannerSplitTestName
-      )
       showInrGeoBanner = true
-      inrGeoBannerVariant = geoBannerAssignment.variant
     }
   }
 
@@ -437,8 +423,6 @@ async function projectListPage(req, res, next) {
     showWritefullPromoBanner,
     recommendedCurrency,
     showInrGeoBanner,
-    inrGeoBannerVariant,
-    inrGeoBannerSplitTestName,
     projectDashboardReact: true, // used in navbar
     groupSsoSetupSuccess,
     groupSubscriptionsPendingEnrollment:

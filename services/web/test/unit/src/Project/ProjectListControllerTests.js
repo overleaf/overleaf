@@ -126,6 +126,14 @@ describe('ProjectListController', function () {
         getUserSubscription: sinon.stub().resolves({}),
       },
     }
+    this.GeoIpLookup = {
+      promises: {
+        getCurrencyCode: sinon.stub().resolves({
+          countryCode: 'US',
+          currencyCode: 'USD',
+        }),
+      },
+    }
 
     this.ProjectListController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -155,6 +163,7 @@ describe('ProjectListController', function () {
           this.UserPrimaryEmailCheckHandler,
         '../Notifications/NotificationsBuilder': this.NotificationBuilder,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
+        '../../infrastructure/GeoIpLookup': this.GeoIpLookup,
       },
     })
 
@@ -305,6 +314,38 @@ describe('ProjectListController', function () {
       this.Features.hasFeature.withArgs('saas').returns(false)
       this.res.render = (pageName, opts) => {
         expect(opts.usersBestSubscription).to.be.undefined
+        done()
+      }
+      this.ProjectListController.projectListPage(this.req, this.res)
+    })
+
+    it('should show INR Banner for Indian users with free account', function (done) {
+      // usersBestSubscription is only available when saas feature is present
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.SubscriptionViewModelBuilder.promises.getBestSubscription.resolves({
+        type: 'free',
+      })
+      this.GeoIpLookup.promises.getCurrencyCode.resolves({
+        countryCode: 'IN',
+      })
+      this.res.render = (pageName, opts) => {
+        expect(opts.showInrGeoBanner).to.be.true
+        done()
+      }
+      this.ProjectListController.projectListPage(this.req, this.res)
+    })
+
+    it('should not show INR Banner for Indian users with premium account', function (done) {
+      // usersBestSubscription is only available when saas feature is present
+      this.Features.hasFeature.withArgs('saas').returns(true)
+      this.SubscriptionViewModelBuilder.promises.getBestSubscription.resolves({
+        type: 'individual',
+      })
+      this.GeoIpLookup.promises.getCurrencyCode.resolves({
+        countryCode: 'IN',
+      })
+      this.res.render = (pageName, opts) => {
+        expect(opts.showInrGeoBanner).to.be.false
         done()
       }
       this.ProjectListController.projectListPage(this.req, this.res)

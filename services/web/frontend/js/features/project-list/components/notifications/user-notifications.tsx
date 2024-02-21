@@ -44,11 +44,6 @@ function UserNotifications() {
   )
 
   const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
-  const inrGeoBannerVariant = getMeta('ol-inrGeoBannerVariant', 'default')
-  const inrGeoBannerSplitTestName = getMeta(
-    'ol-inrGeoBannerSplitTestName',
-    'unassigned'
-  )
   const writefullIntegrationSplitTestEnabled = isSplitTestEnabled(
     'writefull-integration'
   )
@@ -105,15 +100,8 @@ function UserNotifications() {
         <Institution />
         <ConfirmEmail />
         <ReconfirmationInfo />
-        {!showInrGeoBanner && !showWritefull && !dismissedWritefull && (
-          <GroupsAndEnterpriseBanner />
-        )}
-        {showInrGeoBanner && (
-          <INRBanner
-            variant={inrGeoBannerVariant}
-            splitTestName={inrGeoBannerSplitTestName}
-          />
-        )}
+        {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
+        {showInrGeoBanner && <INRBanner />}
         {writefullIntegrationSplitTestEnabled || user?.writefull?.enabled ? (
           <WritefullPremiumPromoBanner
             show={showWritefull}

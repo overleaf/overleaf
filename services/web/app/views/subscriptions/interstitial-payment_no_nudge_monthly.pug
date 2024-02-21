@@ -18,7 +18,8 @@ block content
 			.plans
 				.container
 					if showInrGeoBanner
-						div.alert.alert-success.text-centered !{translate("inr_discount_offer_plans_page_banner", {flag: '🇮🇳'})}
+						div.notification.notification-type-success.text-centered
+							div.notification-content !{translate("inr_discount_offer_plans_page_banner", {flag: '🇮🇳'})}
 
 					.row
 						.col-md-12
