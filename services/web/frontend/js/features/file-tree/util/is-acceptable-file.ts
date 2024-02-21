@@ -5,5 +5,17 @@ const fileIgnoreMatcher = new Minimatch(
   { nocase: true, dot: true }
 )
 
-export const isAcceptableFile = (file: { name: string }) =>
-  !fileIgnoreMatcher.match(file.name)
+export const isAcceptableFile = (name?: string, relativePath?: string) => {
+  if (!name) {
+    // the file must have a name, of course
+    return false
+  }
+
+  if (!relativePath) {
+    // uploading an individual file, so allow anything
+    return true
+  }
+
+  // uploading a file in a folder, so exclude unwanted file paths
+  return !fileIgnoreMatcher.match(relativePath + '/' + name)
+}

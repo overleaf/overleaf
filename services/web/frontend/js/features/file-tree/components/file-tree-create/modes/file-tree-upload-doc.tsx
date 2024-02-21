@@ -96,7 +96,7 @@ export default function FileTreeUploadDoc() {
     const endpoint = buildEndpoint(projectId, parentFolderId)
 
     return (
-      new Uppy({
+      new Uppy<{ relativePath?: string; targetFolderId: string }>({
         // logger: Uppy.debugLogger,
         allowMultipleUploadBatches: false,
         restrictions: {
@@ -104,7 +104,12 @@ export default function FileTreeUploadDoc() {
           maxFileSize: maxFileSize || null,
         },
         onBeforeFileAdded(file) {
-          if (!isAcceptableFile(file)) {
+          if (
+            !isAcceptableFile(
+              file.name,
+              file.meta.relativePath as string | undefined
+            )
+          ) {
             return false
           }
         },
@@ -180,15 +185,14 @@ export default function FileTreeUploadDoc() {
           source: 'Local',
           isRemote: false,
           meta: {
-            relativePath: file.relativePath,
+            relativePath: (file as any).relativePath,
             targetFolderId: droppedFiles.targetFolderId,
           },
         })
         const uppyFile = uppy.getFile(fileId)
         uppy.setFileState(fileId, {
           xhrUpload: {
-            // @ts-ignore
-            ...uppyFile.xhrUpload,
+            ...(uppyFile as any).xhrUpload,
             endpoint: buildEndpoint(projectId, droppedFiles.targetFolderId),
           },
         })

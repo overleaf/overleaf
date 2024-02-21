@@ -34,6 +34,15 @@ import {
 } from '../errors'
 import { Folder } from '../../../../../types/folder'
 
+type DroppedFile = File & {
+  relativePath?: string
+}
+
+type DroppedFiles = {
+  files: DroppedFile[]
+  targetFolderId: string
+}
+
 const FileTreeActionableContext = createContext<
   | {
       isDeleting: boolean
@@ -63,8 +72,8 @@ const FileTreeActionableContext = createContext<
       finishCreatingDoc: any
       finishCreatingLinkedFile: any
       cancel: () => void
-      droppedFiles: { files: any; targetFolderId: string } | null
-      setDroppedFiles: (files: any) => void
+      droppedFiles: { files: File[]; targetFolderId: string } | null
+      setDroppedFiles: (value: DroppedFiles | null) => void
       downloadPath?: string
     }
   | undefined
@@ -222,7 +231,7 @@ export const FileTreeActionableProvider: FC<{
   const { fileTreeData, dispatchRename, dispatchMove } = useFileTreeData()
   const { selectedEntityIds, isRootFolderSelected } = useFileTreeSelectable()
 
-  const [droppedFiles, setDroppedFiles] = useState(null)
+  const [droppedFiles, setDroppedFiles] = useState<DroppedFiles | null>(null)
 
   const startRenaming = useCallback(() => {
     dispatch({ type: ACTION_TYPES.START_RENAME })

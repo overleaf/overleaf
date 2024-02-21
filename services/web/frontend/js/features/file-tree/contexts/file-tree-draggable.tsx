@@ -122,7 +122,12 @@ export function useDroppable(targetEntityId: string) {
 
       // native file(s) dragged in from outside
       getDroppedFiles(item as unknown as DataTransfer)
-        .then(files => files.filter(isAcceptableFile))
+        .then(files =>
+          files.filter(file =>
+            // note: getDroppedFiles normalises webkitRelativePath to relativePath
+            isAcceptableFile(file.name, (file as any).relativePath)
+          )
+        )
         .then(files => {
           setDroppedFiles({ files, targetFolderId: targetEntityId })
           startUploadingDocOrFile()
