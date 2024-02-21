@@ -475,13 +475,18 @@ export const FileTreeActionableProvider: FC<{
     }
   }, [])
 
-  // build the path for downloading a single file
+  // build the path for downloading a single file or doc
   const downloadPath = useMemo(() => {
     if (selectedEntityIds.size === 1) {
       const [selectedEntityId] = selectedEntityIds
       const selectedEntity = findInTree(fileTreeData, selectedEntityId)
+
       if (selectedEntity?.type === 'fileRef') {
         return `/project/${projectId}/file/${selectedEntityId}`
+      }
+
+      if (selectedEntity?.type === 'doc') {
+        return `/project/${projectId}/doc/${selectedEntityId}/download`
       }
     }
   }, [fileTreeData, projectId, selectedEntityIds])

@@ -31,6 +31,7 @@ const ClsiCookieManager = require('./Features/Compile/ClsiCookieManager')(
 const HealthCheckController = require('./Features/HealthCheck/HealthCheckController')
 const ProjectDownloadsController = require('./Features/Downloads/ProjectDownloadsController')
 const FileStoreController = require('./Features/FileStore/FileStoreController')
+const DocumentUpdaterController = require('./Features/DocumentUpdater/DocumentUpdaterController')
 const HistoryController = require('./Features/History/HistoryController')
 const ExportsController = require('./Features/Exports/ExportsController')
 const PasswordResetRouter = require('./Features/PasswordReset/PasswordResetRouter')
@@ -489,6 +490,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/Project/:Project_id/file/:File_id',
     AuthorizationMiddleware.ensureUserCanReadProject,
     FileStoreController.getFile
+  )
+  webRouter.get(
+    '/Project/:Project_id/doc/:Doc_id/download', // "download" suffix to avoid conflict with private API route at doc/:doc_id
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    DocumentUpdaterController.getDoc
   )
   webRouter.post(
     '/project/:Project_id/settings',

@@ -550,7 +550,7 @@ class User {
   }
 
   uploadFileInProject(projectId, folderId, file, name, contentType, callback) {
-    const imageFile = fs.createReadStream(
+    const fileStream = fs.createReadStream(
       Path.resolve(Path.join(__dirname, '..', '..', 'files', file))
     )
 
@@ -563,7 +563,7 @@ class User {
         formData: {
           name,
           qqfile: {
-            value: imageFile,
+            value: fileStream,
             options: {
               filename: name,
               contentType,

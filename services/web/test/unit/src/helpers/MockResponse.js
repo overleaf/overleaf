@@ -18,7 +18,7 @@ const contentDisposition = require('content-disposition')
 class MockResponse {
   static initClass() {
     // Added via ExpressLocals.
-    this.prototype.setContentDisposition = sinon.stub()
+    this.prototype.setContentDisposition = sinon.stub() // FIXME: should be reset between each test
   }
 
   constructor() {

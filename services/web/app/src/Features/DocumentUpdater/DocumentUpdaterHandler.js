@@ -6,6 +6,7 @@ const async = require('async')
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
+const { promisifyMultiResult } = require('@overleaf/promise-utils')
 
 module.exports = {
   flushProjectToMongo,
@@ -27,7 +28,12 @@ module.exports = {
     flushProjectToMongoAndDelete: promisify(flushProjectToMongoAndDelete),
     flushDocToMongo: promisify(flushDocToMongo),
     deleteDoc: promisify(deleteDoc),
-    getDocument: promisify(getDocument),
+    getDocument: promisifyMultiResult(getDocument, [
+      'lines',
+      'version',
+      'ranges',
+      'ops',
+    ]),
     setDocument: promisify(setDocument),
     getProjectDocsIfMatch: promisify(getProjectDocsIfMatch),
     clearProjectState: promisify(clearProjectState),
