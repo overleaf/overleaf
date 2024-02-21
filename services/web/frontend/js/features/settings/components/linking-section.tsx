@@ -37,6 +37,9 @@ function LinkingSection() {
     path: string
   }[]
 
+  const renderSyncSection =
+    getMeta('ol-isSaas') || getMeta('ol-gitBridgeEnabled')
+
   const showPersonalAccessTokenComponents: boolean =
     getMeta('ol-showPersonalAccessToken') ||
     getMeta('ol-optionalPersonalAccessToken')
@@ -62,7 +65,8 @@ function LinkingSection() {
 
   const haslangFeedbackLinkingWidgets =
     langFeedbackLinkingWidgets.length && shouldLoadWritefull
-  const hasIntegrationLinkingSection = allIntegrationLinkingWidgets.length
+  const hasIntegrationLinkingSection =
+    renderSyncSection && allIntegrationLinkingWidgets.length
   const hasReferencesLinkingSection = referenceLinkingWidgets.length
 
   // Filter out SSO providers that are not allowed to be linked by

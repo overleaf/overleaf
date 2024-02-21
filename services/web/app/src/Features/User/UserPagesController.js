@@ -162,6 +162,8 @@ async function settingsPage(req, res) {
     isManagedAccount: !!req.managedBy,
     userRestrictions: Array.from(req.userRestrictions || []),
     currentManagedUserAdminEmail,
+    gitBridgeEnabled: Settings.enableGitBridge,
+    isSaas: Features.hasFeature('saas'),
   })
 }
 
