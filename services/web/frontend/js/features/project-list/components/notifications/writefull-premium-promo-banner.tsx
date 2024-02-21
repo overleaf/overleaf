@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react'
-import Notification from '@/shared/components/notification'
+import Notification from './notification'
 import { sendMB } from '@/infrastructure/event-tracking'
 import customLocalStorage from '@/infrastructure/local-storage'
 import WritefullLogo from '@/shared/svgs/writefull-logo'
@@ -32,10 +32,10 @@ function WritefullPremiumPromoBanner({
 
   return (
     <Notification
-      type="info"
-      isDismissible
+      bsStyle="info"
+      newNotificationStyle
       onDismiss={handleClose}
-      content={
+      body={
         <>
           Enjoying Writefull? Get <strong>10% off Writefull Premium</strong>,
           giving you access to TeXGPT—AI assistance to generate LaTeX code. Use{' '}

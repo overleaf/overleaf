@@ -16,6 +16,7 @@ type NotificationProps = {
   action?: React.ReactElement
   onDismiss?: AlertProps['onDismiss']
   className?: string
+  newNotificationStyle?: boolean
 }
 
 /**
@@ -35,12 +36,12 @@ function Notification({
   className,
   body,
   action,
+  newNotificationStyle,
   ...props
 }: NotificationProps) {
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  newNotificationStyle =
+    newNotificationStyle ??
+    (getMeta('ol-newNotificationStyle', false) as boolean)
 
   const [show, setShow] = useState(true)
 
@@ -61,7 +62,7 @@ function Notification({
       bsStyle === 'danger' ? 'error' : bsStyle
     ) as NotificationType
     return (
-      <li>
+      <li className={classnames('notification-entry', className)}>
         <NewNotification
           type={newNotificationType}
           isDismissible={onDismiss != null}
