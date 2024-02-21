@@ -11,6 +11,14 @@ function s3Config() {
   }
 }
 
+function s3ConfigDefaultProviderCredentials() {
+  return {
+    endpoint: process.env.AWS_S3_ENDPOINT,
+    pathStyle: true,
+    partSize: 100 * 1024 * 1024,
+  }
+}
+
 function s3Stores() {
   return {
     user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
@@ -63,6 +71,11 @@ module.exports = {
   S3Persistor: {
     backend: 's3',
     s3: s3Config(),
+    stores: s3Stores(),
+  },
+  S3PersistorDefaultProviderCredentials: {
+    backend: 's3',
+    s3: s3ConfigDefaultProviderCredentials(),
     stores: s3Stores(),
   },
   GcsPersistor: {

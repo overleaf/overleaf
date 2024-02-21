@@ -281,14 +281,16 @@ describe('S3PersistorTests', function () {
         expect(S3.firstCall).to.have.been.calledWith(alternativeS3Credentials)
         expect(S3.secondCall).to.have.been.calledWith(defaultS3Credentials)
       })
+    })
 
-      it('throws an error if there are no credentials for the bucket', async function () {
+    describe('without hard-coded credentials', function () {
+      it('uses the default provider chain', async function () {
         delete settings.key
         delete settings.secret
 
-        await expect(
-          S3Persistor.getObjectStream('anotherBucket', key)
-        ).to.eventually.be.rejected.and.be.an.instanceOf(Errors.SettingsError)
+        await S3Persistor.getObjectStream(bucket, key)
+        expect(S3).to.have.been.calledOnce
+        expect(S3.args[0].credentials).to.not.exist
       })
     })
 

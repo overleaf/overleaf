@@ -14,12 +14,7 @@ const { pipeline, PassThrough } = require('stream')
 const fs = require('fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
-const {
-  WriteError,
-  ReadError,
-  NotFoundError,
-  SettingsError,
-} = require('./Errors')
+const { WriteError, ReadError, NotFoundError } = require('./Errors')
 
 module.exports = class S3Persistor extends AbstractPersistor {
   constructor(settings = {}) {
@@ -336,23 +331,11 @@ module.exports = class S3Persistor extends AbstractPersistor {
   }
 
   _getClientForBucket(bucket, clientOptions) {
-    if (this.settings.bucketCreds && this.settings.bucketCreds[bucket]) {
-      return new S3(
-        this._buildClientOptions(
-          this.settings.bucketCreds[bucket],
-          clientOptions
-        )
+    return new S3(
+      this._buildClientOptions(
+        this.settings.bucketCreds?.[bucket],
+        clientOptions
       )
-    }
-
-    // no specific credentials for the bucket
-    if (this.settings.key) {
-      return new S3(this._buildClientOptions(null, clientOptions))
-    }
-
-    throw new SettingsError(
-      'no bucket-specific or default credentials provided',
-      { bucket }
     )
   }
 
@@ -364,11 +347,14 @@ module.exports = class S3Persistor extends AbstractPersistor {
         accessKeyId: bucketCredentials.auth_key,
         secretAccessKey: bucketCredentials.auth_secret,
       }
-    } else {
+    } else if (this.settings.key) {
       options.credentials = {
         accessKeyId: this.settings.key,
         secretAccessKey: this.settings.secret,
       }
+    } else {
+      // Use the default credentials provider (process.env -> SSP -> ini -> IAM)
+      // Docs: https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/CredentialProviderChain.html#defaultProviders-property
     }
 
     if (this.settings.endpoint) {
