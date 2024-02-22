@@ -213,17 +213,27 @@
   .customer-story-card-title {
     margin-top: 25px;
     margin-bottom: 12.5px;
-    font-size: 20px;
+    font-size: 1.5rem;
     font-weight: 600;
 
     a {
       display: flex;
       justify-content: space-between;
       color: var(--neutral-90);
+      i {
+        font-size: 1.5rem;
+      }
     }
   }
 
   .customer-story-content {
+    h1 {
+      @media (max-width: @screen-sm-max) {
+        font-size: 2.25rem;
+        line-height: 1.333;
+      }
+    }
+
     .table-of-contents-section {
       padding-right: 64px;
       @media (max-width: @screen-sm-max) {
@@ -258,6 +268,17 @@
         font-size: 1.875rem;
         line-height: 1.333;
         margin-top: 0;
+      }
+
+      .at-glance-section {
+        padding-top: 24px;
+        p {
+          margin-top: 16px;
+        }
+      }
+
+      p {
+        font-size: 1.125rem;
       }
 
       .border-r-16 {
@@ -304,7 +325,8 @@
       }
 
       p {
-        font-size: 1.2rem;
+        margin-top: 1rem;
+        font-size: 1.125rem;
       }
     }
   }
@@ -632,13 +654,18 @@
     }
 
     h2 {
+      font-size: 1.875rem;
       color: var(--white);
+    }
+    p {
+      font-size: 1.125rem;
     }
 
     .btn-container {
+      padding-top: 10px;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
     }
   }
 
@@ -726,6 +753,10 @@
     .quote-card-img {
       margin-top: 32px;
       margin-bottom: 16px;
+    }
+
+    .quote-card-link {
+      color: var(--mint-green);
     }
 
     @media (max-width: @screen-sm-max) {
@@ -861,6 +892,21 @@
     font-weight: 500;
     line-height: 1.5rem;
     margin: 0;
+  }
+
+  .customer-stories-hero-heading {
+    @media (max-width: @screen-sm-max) {
+      font-size: 2.25rem;
+      line-height: 1.333;
+    }
+  }
+
+  .customer-stories-hero-text {
+    font-size: 1.25rem;
+  }
+
+  .customer-stories-logos-text {
+    font-size: 1.125rem;
   }
 
   .link-with-arrow {
