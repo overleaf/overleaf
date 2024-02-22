@@ -1,7 +1,20 @@
-const { ObjectId, ReadPreference } = require('mongodb')
+const mongodb = require('mongodb')
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
-const { getNativeDb } = require('./Mongoose')
+const Mongoose = require('./Mongoose')
+
+// Ensure Mongoose is using the same mongodb instance as the mongodb module,
+// otherwise we will get multiple versions of the ObjectId class. Mongoose
+// patches ObjectId, so loading multiple versions of the mongodb module can
+// cause problems with ObjectId comparisons.
+if (Mongoose.mongo !== mongodb) {
+  throw new OError(
+    'FATAL ERROR: Mongoose is using a different mongodb instance'
+  )
+}
+
+const { getNativeDb } = Mongoose
+const { ObjectId, ReadPreference } = mongodb
 
 if (
   typeof global.beforeEach === 'function' &&
