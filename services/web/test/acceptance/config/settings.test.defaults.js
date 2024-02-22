@@ -240,10 +240,6 @@ module.exports = {
 
   reconfirmNotificationDays: 14,
 
-  unsupportedBrowsers: {
-    ie: '<=11',
-  },
-
   recaptcha: {
     siteKey: 'siteKey',
     disabled: {
