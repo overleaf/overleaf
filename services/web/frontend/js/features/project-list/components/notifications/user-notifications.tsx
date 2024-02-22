@@ -58,9 +58,13 @@ function UserNotifications() {
       return false
     }
 
+    const hasWritefullExtensionAlreadyInstalled =
+      window.writefull?.type === 'extension'
+
     const show =
       user?.writefull?.enabled === true || // show to any users who have writefull enabled regardless of split test
       (!writefullIntegrationSplitTestEnabled && // show old banner to users who are not in the split test, who are on chrome and havent dismissed
+        !hasWritefullExtensionAlreadyInstalled &&
         isChromium() &&
         getMeta('ol-showWritefullPromoBanner'))
 
