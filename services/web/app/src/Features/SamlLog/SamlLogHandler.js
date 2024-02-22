@@ -2,8 +2,9 @@ const { SamlLog } = require('../../models/SamlLog')
 const SessionManager = require('../Authentication/SessionManager')
 const logger = require('@overleaf/logger')
 const { err: errSerializer } = require('@overleaf/logger/serializers')
+const { callbackify } = require('util')
 
-function log(req, data, samlAssertion) {
+async function log(req, data, samlAssertion) {
   let providerId, sessionId
 
   data = data || {}
@@ -61,18 +62,17 @@ function log(req, data, samlAssertion) {
         'SamlLog JSON.stringify Error'
       )
     }
-    samlLog.save(err => {
-      if (err) {
-        logger.error({ err, sessionId, providerId }, 'SamlLog Error')
-      }
-    })
+    await samlLog.save()
   } catch (err) {
     logger.error({ err, sessionId, providerId }, 'SamlLog Error')
   }
 }
 
 const SamlLogHandler = {
-  log,
+  log: callbackify(log),
+  promises: {
+    log,
+  },
 }
 
 module.exports = SamlLogHandler

@@ -10,6 +10,7 @@ module.exports = {
   callbackifyAll,
   callbackifyMultiResult,
   expressify,
+  expressifyErrorHandler,
   promiseMapWithLimit,
 }
 
@@ -205,6 +206,17 @@ function callbackifyMultiResult(fn, resultNames) {
 function expressify(fn) {
   return (req, res, next) => {
     fn(req, res, next).catch(next)
+  }
+}
+
+/**
+ * Transform an async function into an Error Handling Express middleware
+ *
+ * Any error will be passed to the error middlewares via `next()`
+ */
+function expressifyErrorHandler(fn) {
+  return (err, req, res, next) => {
+    fn(err, req, res, next).catch(next)
   }
 }
 

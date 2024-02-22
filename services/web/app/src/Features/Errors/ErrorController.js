@@ -1,109 +1,115 @@
-let ErrorController
 const Errors = require('./Errors')
 const SessionManager = require('../Authentication/SessionManager')
 const SamlLogHandler = require('../SamlLog/SamlLogHandler')
 const HttpErrorHandler = require('./HttpErrorHandler')
 const { plainTextResponse } = require('../../infrastructure/Response')
+const { expressifyErrorHandler } = require('@overleaf/promise-utils')
 
-module.exports = ErrorController = {
-  notFound(req, res) {
-    res.status(404)
-    res.render('general/404', { title: 'page_not_found' })
-  },
+function notFound(req, res) {
+  res.status(404)
+  res.render('general/404', { title: 'page_not_found' })
+}
 
-  forbidden(req, res) {
-    res.status(403)
-    res.render('user/restricted')
-  },
+function forbidden(req, res) {
+  res.status(403)
+  res.render('user/restricted')
+}
 
-  serverError(req, res) {
-    res.status(500)
-    res.render('general/500', { title: 'Server Error' })
-  },
+function serverError(req, res) {
+  res.status(500)
+  res.render('general/500', { title: 'Server Error' })
+}
 
-  handleError(error, req, res, next) {
-    const shouldSendErrorResponse = !res.headersSent
-    const user = SessionManager.getSessionUser(req.session)
-    req.logger.addFields({ err: error })
-    // log errors related to SAML flow
-    if (req.session && req.session.saml) {
-      req.logger.setLevel('error')
-      SamlLogHandler.log(req, { error })
+async function handleError(error, req, res, next) {
+  const shouldSendErrorResponse = !res.headersSent
+  const user = SessionManager.getSessionUser(req.session)
+  req.logger.addFields({ err: error })
+  // log errors related to SAML flow
+  if (req.session && req.session.saml) {
+    req.logger.setLevel('error')
+    await SamlLogHandler.promises.log(req, { error })
+  }
+  if (error.code === 'EBADCSRFTOKEN') {
+    req.logger.addFields({ user })
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      res.sendStatus(403)
     }
-    if (error.code === 'EBADCSRFTOKEN') {
-      req.logger.addFields({ user })
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        res.sendStatus(403)
-      }
-    } else if (error instanceof Errors.NotFoundError) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        ErrorController.notFound(req, res)
-      }
-    } else if (
-      error instanceof URIError &&
-      error.message.match(/^Failed to decode param/)
-    ) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        res.status(400)
-        res.render('general/500', { title: 'Invalid Error' })
-      }
-    } else if (error instanceof Errors.ForbiddenError) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        ErrorController.forbidden(req, res)
-      }
-    } else if (error instanceof Errors.TooManyRequestsError) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        res.sendStatus(429)
-      }
-    } else if (error instanceof Errors.InvalidError) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        res.status(400)
-        plainTextResponse(res, error.message)
-      }
-    } else if (error instanceof Errors.InvalidNameError) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        res.status(400)
-        plainTextResponse(res, error.message)
-      }
-    } else if (error instanceof Errors.SAMLSessionDataMissing) {
-      req.logger.setLevel('warn')
-      if (shouldSendErrorResponse) {
-        HttpErrorHandler.badRequest(req, res, error.message)
-      }
-    } else {
-      req.logger.setLevel('error')
-      if (shouldSendErrorResponse) {
-        ErrorController.serverError(req, res)
-      }
+  } else if (error instanceof Errors.NotFoundError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      notFound(req, res)
     }
-    if (!shouldSendErrorResponse) {
-      // Pass the error to the default Express error handler, which will close
-      // the connection.
-      next(error)
+  } else if (
+    error instanceof URIError &&
+    error.message.match(/^Failed to decode param/)
+  ) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      res.status(400)
+      res.render('general/500', { title: 'Invalid Error' })
     }
-  },
+  } else if (error instanceof Errors.ForbiddenError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      forbidden(req, res)
+    }
+  } else if (error instanceof Errors.TooManyRequestsError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      res.sendStatus(429)
+    }
+  } else if (error instanceof Errors.InvalidError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      res.status(400)
+      plainTextResponse(res, error.message)
+    }
+  } else if (error instanceof Errors.InvalidNameError) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      res.status(400)
+      plainTextResponse(res, error.message)
+    }
+  } else if (error instanceof Errors.SAMLSessionDataMissing) {
+    req.logger.setLevel('warn')
+    if (shouldSendErrorResponse) {
+      HttpErrorHandler.badRequest(req, res, error.message)
+    }
+  } else {
+    req.logger.setLevel('error')
+    if (shouldSendErrorResponse) {
+      serverError(req, res)
+    }
+  }
+  if (!shouldSendErrorResponse) {
+    // Pass the error to the default Express error handler, which will close
+    // the connection.
+    next(error)
+  }
+}
 
-  handleApiError(err, req, res, next) {
-    req.logger.addFields({ err })
-    if (err instanceof Errors.NotFoundError) {
-      req.logger.setLevel('warn')
-      res.sendStatus(404)
-    } else if (
-      err instanceof URIError &&
-      err.message.match(/^Failed to decode param/)
-    ) {
-      req.logger.setLevel('warn')
-      res.sendStatus(400)
-    } else {
-      req.logger.setLevel('error')
-      res.sendStatus(500)
-    }
-  },
+function handleApiError(err, req, res, next) {
+  req.logger.addFields({ err })
+  if (err instanceof Errors.NotFoundError) {
+    req.logger.setLevel('warn')
+    res.sendStatus(404)
+  } else if (
+    err instanceof URIError &&
+    err.message.match(/^Failed to decode param/)
+  ) {
+    req.logger.setLevel('warn')
+    res.sendStatus(400)
+  } else {
+    req.logger.setLevel('error')
+    res.sendStatus(500)
+  }
+}
+
+module.exports = {
+  notFound,
+  forbidden,
+  serverError,
+  handleError: expressifyErrorHandler(handleError),
+  handleApiError,
 }

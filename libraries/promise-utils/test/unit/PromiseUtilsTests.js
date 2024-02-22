@@ -4,6 +4,8 @@ const {
   promisifyClass,
   callbackifyMultiResult,
   callbackifyAll,
+  expressify,
+  expressifyErrorHandler,
 } = require('../..')
 
 describe('promisifyAll', function () {
@@ -321,6 +323,26 @@ describe('callbackifyAll', function () {
         expect(sum).to.equal(11)
         expect(product).to.equal(30)
       })
+    })
+  })
+})
+
+describe('expressify', function () {
+  it('should propagate any rejection to the "next" callback', function (done) {
+    const fn = () => Promise.reject(new Error('rejected'))
+    expressify(fn)({}, {}, error => {
+      expect(error.message).to.equal('rejected')
+      done()
+    })
+  })
+})
+
+describe('expressifyErrorHandler', function () {
+  it('should propagate any rejection to the "next" callback', function (done) {
+    const fn = () => Promise.reject(new Error('rejected'))
+    expressifyErrorHandler(fn)({}, {}, {}, error => {
+      expect(error.message).to.equal('rejected')
+      done()
     })
   })
 })

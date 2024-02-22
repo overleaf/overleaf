@@ -29,8 +29,8 @@ describe('SamlLogHandler', function () {
   })
 
   describe('with valid data object', function () {
-    beforeEach(function () {
-      SamlLogHandler.log(
+    beforeEach(async function () {
+      await SamlLogHandler.promises.log(
         {
           session: { saml: { universityId: providerId } },
           sessionID: sessionId,
@@ -54,11 +54,11 @@ describe('SamlLogHandler', function () {
   })
 
   describe('when a json stringify error occurs', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       const circularRef = {}
       circularRef.circularRef = circularRef
 
-      SamlLogHandler.log(
+      await SamlLogHandler.promises.log(
         {
           session: { saml: { universityId: providerId } },
           sessionID: sessionId,
@@ -81,10 +81,13 @@ describe('SamlLogHandler', function () {
   })
 
   describe('when logging error occurs', function () {
-    beforeEach(function () {
-      samlLog.save = sinon.stub().yields('error')
+    let err
 
-      SamlLogHandler.log(
+    beforeEach(async function () {
+      err = new Error()
+      samlLog.save = sinon.stub().rejects(err)
+
+      await SamlLogHandler.promises.log(
         {
           session: { saml: { universityId: providerId } },
           sessionID: sessionId,
@@ -95,7 +98,10 @@ describe('SamlLogHandler', function () {
 
     it('should log error', function () {
       this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
-        { err: 'error', providerId, sessionId: sessionId.substr(0, 8) },
+        {
+          err,
+          sessionId: sessionId.substr(0, 8),
+        },
         'SamlLog Error'
       )
     })
