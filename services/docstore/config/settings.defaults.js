@@ -9,7 +9,11 @@ const Settings = {
     },
   },
 
-  mongo: {},
+  mongo: {
+    options: {
+      monitorCommands: true,
+    },
+  },
 
   docstore: {
     archiveOnSoftDelete: process.env.ARCHIVE_ON_SOFT_DELETE === 'true',

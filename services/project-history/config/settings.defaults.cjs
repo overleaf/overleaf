@@ -3,6 +3,9 @@ module.exports = {
     url:
       process.env.MONGO_CONNECTION_STRING ||
       `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`,
+    options: {
+      monitorCommands: true,
+    },
   },
   internal: {
     history: {

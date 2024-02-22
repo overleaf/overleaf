@@ -5,7 +5,10 @@ const { MongoClient, ObjectId } = mongodb
 
 export { ObjectId }
 
-export const mongoClient = new MongoClient(Settings.mongo.url)
+export const mongoClient = new MongoClient(
+  Settings.mongo.url,
+  Settings.mongo.options
+)
 const mongoDb = mongoClient.db()
 
 Metrics.mongodb.monitor(mongoClient)

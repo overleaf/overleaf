@@ -129,6 +129,7 @@ module.exports = {
         process.env.MONGO_SOCKET_TIMEOUT ?? '60000',
         10
       ),
+      monitorCommands: true,
     },
     url:
       process.env.MONGO_CONNECTION_STRING ||
