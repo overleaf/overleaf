@@ -58,6 +58,7 @@ import { captureException } from '@/infrastructure/error-reporter'
 import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { debugConsole } from '@/utils/debugging'
 
 function useCodeMirrorScope(view: EditorView) {
   const ide = useIdeContext()
@@ -278,6 +279,8 @@ function useCodeMirrorScope(view: EditorView) {
 
   useEffect(() => {
     if (currentDoc) {
+      debugConsole.log('creating new editor state')
+
       const state = EditorState.create({
         doc: currentDoc.getSnapshot(),
         extensions: createExtensions({

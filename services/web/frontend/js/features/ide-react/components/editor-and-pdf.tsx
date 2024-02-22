@@ -13,10 +13,9 @@ import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
 import { fileViewFile } from '@/features/ide-react/util/file-view'
 import { useFileTreeOpenContext } from '@/features/ide-react/context/file-tree-open-context'
+import { EditorPane } from '@/features/ide-react/components/editor/editor-pane'
 
-export const EditorAndPdf: FC<{
-  editorPane: React.ReactNode
-}> = ({ editorPane }) => {
+export const EditorAndPdf: FC = () => {
   const [resizing, setResizing] = useState(false)
 
   const { t } = useTranslation()
@@ -43,54 +42,53 @@ export const EditorAndPdf: FC<{
       direction="horizontal"
       className={classNames({
         'ide-panel-group-resizing': resizing,
+        hidden: view === 'history',
       })}
     >
       {/* main */}
-      {editorIsOpen && (
-        <>
-          <Panel
-            id="panel-main"
-            order={1}
-            defaultSize={50}
-            minSize={5}
-            className={classNames('ide-react-panel', {
-              'ide-panel-group-resizing': resizing,
-            })}
-          >
-            {selectedEntityCount === 0 && <NoSelectionPane />}
-            {selectedEntityCount === 1 && openEntity?.type === 'fileRef' && (
-              <FileView file={fileViewFile(openEntity.entity)} />
-            )}
-            {selectedEntityCount === 1 && editorPane}
-            {selectedEntityCount > 1 && (
-              <MultipleSelectionPane
-                selectedEntityCount={selectedEntityCount}
-              />
-            )}
-          </Panel>
+      <Panel
+        id="panel-main"
+        order={1}
+        defaultSize={50}
+        minSize={5}
+        className={classNames('ide-react-panel', {
+          'ide-panel-group-resizing': resizing,
+          hidden: !editorIsOpen,
+        })}
+      >
+        {selectedEntityCount === 0 && <NoSelectionPane />}
+        {selectedEntityCount === 1 && openEntity?.type === 'fileRef' && (
+          <FileView file={fileViewFile(openEntity.entity)} />
+        )}
+        {selectedEntityCount > 1 && (
+          <MultipleSelectionPane selectedEntityCount={selectedEntityCount} />
+        )}
+        <EditorPane />
+      </Panel>
 
-          <HorizontalResizeHandle
-            resizable={pdfLayout === 'sideBySide'}
-            onDoubleClick={togglePdfPane}
-            onDragging={setResizing}
-          >
-            <HorizontalToggler
-              id="editor-pdf"
-              togglerType="east"
-              isOpen={pdfIsOpen}
-              setIsOpen={setPdfIsOpen}
-              tooltipWhenOpen={t('tooltip_hide_pdf')}
-              tooltipWhenClosed={t('tooltip_show_pdf')}
-            />
+      <HorizontalResizeHandle
+        resizable={pdfLayout === 'sideBySide'}
+        onDoubleClick={togglePdfPane}
+        onDragging={setResizing}
+        className={classNames({
+          hidden: !editorIsOpen,
+        })}
+      >
+        <HorizontalToggler
+          id="editor-pdf"
+          togglerType="east"
+          isOpen={pdfIsOpen}
+          setIsOpen={setPdfIsOpen}
+          tooltipWhenOpen={t('tooltip_hide_pdf')}
+          tooltipWhenClosed={t('tooltip_show_pdf')}
+        />
 
-            {pdfLayout === 'sideBySide' && (
-              <div className="synctex-controls">
-                <DefaultSynctexControl />
-              </div>
-            )}
-          </HorizontalResizeHandle>
-        </>
-      )}
+        {pdfLayout === 'sideBySide' && (
+          <div className="synctex-controls">
+            <DefaultSynctexControl />
+          </div>
+        )}
+      </HorizontalResizeHandle>
 
       {/* pdf */}
       <Panel
