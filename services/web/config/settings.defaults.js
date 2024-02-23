@@ -876,7 +876,7 @@ module.exports = {
     oauth2Server: [],
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
-    ssoConfigurationModal: [],
+    ssoCertificateInfo: [],
     // See comment at the definition of these variables.
     entryPointsIde,
     entryPointsMain,

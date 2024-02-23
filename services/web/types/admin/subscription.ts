@@ -1,4 +1,5 @@
 import { GroupPolicy } from '../subscription/dashboard/subscription'
+import { SSOConfig } from '../subscription/sso'
 import { TeamInvite } from '../team-invite'
 
 export type Subscription = {
@@ -8,6 +9,6 @@ export type Subscription = {
   admin_id: string
   groupPlan: boolean
   customAccount: boolean
-  ssoConfig: object
+  ssoConfig: SSOConfig
   managedUsersEnabled: boolean
 }
