@@ -19,6 +19,7 @@ $is-overleaf-light: false;
 @import 'foundations/spacing';
 @import 'foundations/typography';
 @import 'foundations/border-radius';
+@import 'foundations/elevation';
 
 // Boostrap-related
 
@@ -33,3 +34,7 @@ $is-overleaf-light: false;
 // variables in the usual CSS way, and can also refer to (but not override)
 // Bootstrap Sass variables.
 @import 'scss/bootstrap-rule-overrides';
+
+// Components
+@import 'scss/components/dropdown-menu';
+@import 'scss/components/split-button';

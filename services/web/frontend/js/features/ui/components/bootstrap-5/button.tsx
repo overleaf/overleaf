@@ -14,13 +14,14 @@ function Button({
   disabled = false,
   loading = false,
   children,
+  className,
 }: ButtonProps) {
   const sizeClass = sizeClasses.get(size)
 
   return (
     <BootstrapButton
+      className={sizeClass + ' ' + className}
       variant={variant}
-      className={sizeClass}
       disabled={disabled}
       {...(loading ? { 'data-ol-loading': true } : null)}
     >

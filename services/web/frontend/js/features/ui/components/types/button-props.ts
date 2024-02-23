@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 export type ButtonProps = {
-  variant?:
+  variant:
     | 'primary'
     | 'secondary'
     | 'ghost'
@@ -12,4 +12,5 @@ export type ButtonProps = {
   disabled?: boolean
   loading?: boolean
   children: ReactNode
+  className?: string
 }

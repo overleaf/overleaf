@@ -1,0 +1,106 @@
+.dropdown {
+  display: inline-flex;
+}
+
+.dropdown-menu {
+  @include shadow-sm;
+  border: none;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-02);
+  transform: none;
+  width: 240px;
+}
+
+.dropdown-item {
+  @include body-sm;
+  border-radius: var(--border-radius-base);
+  color: var(--neutral-90);
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: start;
+  min-height: 44px; // a minimum height of 44px to be accessible for touch screens
+  padding: var(--spacing-05) var(--spacing-04);
+  position: relative;
+
+  &:hover:not(.active) {
+    background-color: var(--bg-light-secondary);
+    cursor: pointer;
+  }
+
+  &:active {
+    background-color: var(--bg-accent-03);
+    color: inherit;
+  }
+
+  &[variant="danger"] {
+    color: var(--content-danger);
+
+    &:hover:not(.active) {
+      background-color: var(--bg-danger-03);
+    }
+  }
+
+  &.active {
+    background-color: var(--bg-accent-03);
+    color: var(--green-70);
+  }
+}
+
+.dropdown-divider {
+  border-radius: 1px;
+  background-color: var(--border-divider);
+  margin: 2px 6px;
+}
+
+.dropdown-item-description {
+  @include body-xs;
+  color: var(--content-secondary);
+  margin-top: var(--spacing-01);
+}
+
+.dropdown-item-description-container {
+  grid-auto-flow: row;
+  min-height: 60px;
+}
+
+.dropdown-item-trailing-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dropdown-item-leading-icon {
+  padding-right: var(--spacing-04);
+}
+
+// description text should look disabled when the dropdown item is disabled
+.dropdown-item.disabled .dropdown-item-description,
+.dropdown-item[aria-disabled="true"] .dropdown-item-description {
+  background-color: transparent;
+  color: var(--content-disabled);
+}
+
+// override disabled styles when the state is active
+.dropdown-item.active .dropdown-item-description {
+  background-color: initial;
+  color: var(--green-70);
+}
+
+.dropdown-button-toggle {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  padding-right: var(--spacing-05);
+  padding-left: var(--spacing-05);
+
+  &.btn-primary, &.btn-danger {
+    border-left: 1px solid rgb($neutral-90, 0.16);
+  }
+  &.btn-secondary {
+    border-left: 1px solid var(--neutral-60);
+  }
+
+  &[disabled], &[aria-disabled="true"] {
+    border-left: 1px solid var(--neutral-10);
+  }
+}
