@@ -80,9 +80,12 @@ async function removeUserFromProject(projectId, userId) {
 
 async function removeUserFromAllProjects(userId) {
   const { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly } =
-    await CollaboratorsGetter.promises.getProjectsUserIsMemberOf(userId, {
-      _id: 1,
-    })
+    await CollaboratorsGetter.promises.dangerouslyGetAllProjectsUserIsMemberOf(
+      userId,
+      {
+        _id: 1,
+      }
+    )
   const allProjects = readAndWrite
     .concat(readOnly)
     .concat(tokenReadAndWrite)

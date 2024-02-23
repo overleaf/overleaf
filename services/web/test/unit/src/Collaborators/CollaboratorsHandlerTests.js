@@ -64,7 +64,7 @@ describe('CollaboratorsHandler', function () {
     }
     this.CollaboratorsGetter = {
       promises: {
-        getProjectsUserIsMemberOf: sinon.stub(),
+        dangerouslyGetAllProjectsUserIsMemberOf: sinon.stub(),
       },
     }
     this.CollaboratorsHandler = SandboxedModule.require(MODULE_PATH, {
@@ -333,7 +333,7 @@ describe('CollaboratorsHandler', function () {
 
   describe('removeUserFromAllProjects', function () {
     it('should remove the user from each project', async function () {
-      this.CollaboratorsGetter.promises.getProjectsUserIsMemberOf
+      this.CollaboratorsGetter.promises.dangerouslyGetAllProjectsUserIsMemberOf
         .withArgs(this.userId, { _id: 1 })
         .resolves({
           readAndWrite: [

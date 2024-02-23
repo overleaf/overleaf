@@ -24,6 +24,9 @@ module.exports = {
   getMemberIdPrivilegeLevel: callbackify(getMemberIdPrivilegeLevel),
   getInvitedCollaboratorCount: callbackify(getInvitedCollaboratorCount),
   getProjectsUserIsMemberOf: callbackify(getProjectsUserIsMemberOf),
+  dangerouslyGetAllProjectsUserIsMemberOf: callbackify(
+    dangerouslyGetAllProjectsUserIsMemberOf
+  ),
   isUserInvitedMemberOfProject: callbackify(isUserInvitedMemberOfProject),
   getPublicShareTokens: callbackify(getPublicShareTokens),
   userIsTokenMember: callbackify(userIsTokenMember),
@@ -37,6 +40,7 @@ module.exports = {
     getMemberIdPrivilegeLevel,
     getInvitedCollaboratorCount,
     getProjectsUserIsMemberOf,
+    dangerouslyGetAllProjectsUserIsMemberOf,
     isUserInvitedMemberOfProject,
     getPublicShareTokens,
     userIsTokenMember,
@@ -169,6 +173,9 @@ async function getPublicShareTokens(userId, projectId) {
   }
 }
 
+// This function returns all the projects that a user currently has access to,
+// excluding projects where the user is listed in the token access fields when
+// token access has been disabled.
 async function getProjectsUserIsMemberOf(userId, fields) {
   const limit = pLimit(2)
   const [readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly] =
@@ -194,6 +201,26 @@ async function getProjectsUserIsMemberOf(userId, fields) {
         ).exec()
       ),
     ])
+  return { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly }
+}
+
+// This function returns all the projects that a user is a member of, regardless of
+// the current state of the project, so it includes those projects where token access
+// has been disabled.
+async function dangerouslyGetAllProjectsUserIsMemberOf(userId, fields) {
+  const readAndWrite = await Project.find(
+    { collaberator_refs: userId },
+    fields
+  ).exec()
+  const readOnly = await Project.find({ readOnly_refs: userId }, fields).exec()
+  const tokenReadAndWrite = await Project.find(
+    { tokenAccessReadAndWrite_refs: userId },
+    fields
+  ).exec()
+  const tokenReadOnly = await Project.find(
+    { tokenAccessReadOnly_refs: userId },
+    fields
+  ).exec()
   return { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly }
 }
 
