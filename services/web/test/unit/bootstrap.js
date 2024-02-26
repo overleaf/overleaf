@@ -22,6 +22,9 @@ chai.config.truncateThreshold = 0
 // add support for mongoose in sinon
 require('sinon-mongoose')
 
+// ensure every ObjectId has the id string as a property for correct comparisons
+require('mongodb').ObjectId.cacheHexString = true
+
 /*
  * Global stubs
  */
@@ -78,6 +81,7 @@ function getSandboxedModuleRequires() {
     'sanitize-html',
     'sshpk',
     'xml2js',
+    'mongodb',
   ]
   for (const modulePath of internalModules) {
     requires[Path.resolve(__dirname, modulePath)] = require(modulePath)

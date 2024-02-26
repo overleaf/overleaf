@@ -1,24 +1,14 @@
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const { ObjectId } = require('mongodb')
+const sinon = require('sinon')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Project/FolderStructureBuilder'
-const MOCK_OBJECT_ID = new ObjectId('657306930a1cf28031c358da')
 
 describe('FolderStructureBuilder', function () {
   beforeEach(function () {
-    this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        mongodb: {
-          ObjectId: class {
-            constructor() {
-              return MOCK_OBJECT_ID
-            }
-          },
-        },
-      },
-    })
+    this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {})
   })
 
   describe('buildFolderStructure', function () {
@@ -28,8 +18,8 @@ describe('FolderStructureBuilder', function () {
       })
 
       it('returns an empty root folder', function () {
-        expect(this.result).to.deep.equal({
-          _id: MOCK_OBJECT_ID,
+        sinon.assert.match(this.result, {
+          _id: sinon.match.instanceOf(ObjectId),
           name: 'rootFolder',
           folders: [],
           docs: [],
@@ -61,14 +51,14 @@ describe('FolderStructureBuilder', function () {
       })
 
       it('returns a full folder structure', function () {
-        expect(this.result).to.deep.equal({
-          _id: MOCK_OBJECT_ID,
+        sinon.assert.match(this.result, {
+          _id: sinon.match.instanceOf(ObjectId),
           name: 'rootFolder',
           docs: [{ _id: 'doc-1', name: 'main.tex' }],
           fileRefs: [{ _id: 'file-1', name: 'aaa.jpg' }],
           folders: [
             {
-              _id: MOCK_OBJECT_ID,
+              _id: sinon.match.instanceOf(ObjectId),
               name: 'foo',
               docs: [
                 { _id: 'doc-2', name: 'other.tex' },
@@ -77,13 +67,13 @@ describe('FolderStructureBuilder', function () {
               fileRefs: [{ _id: 'file-2', name: 'bbb.jpg' }],
               folders: [
                 {
-                  _id: MOCK_OBJECT_ID,
+                  _id: sinon.match.instanceOf(ObjectId),
                   name: 'foo1',
                   docs: [],
                   fileRefs: [],
                   folders: [
                     {
-                      _id: MOCK_OBJECT_ID,
+                      _id: sinon.match.instanceOf(ObjectId),
                       name: 'foo2',
                       docs: [{ _id: 'doc-4', name: 'another.tex' }],
                       fileRefs: [],
@@ -94,7 +84,7 @@ describe('FolderStructureBuilder', function () {
               ],
             },
             {
-              _id: MOCK_OBJECT_ID,
+              _id: sinon.match.instanceOf(ObjectId),
               name: 'bar',
               docs: [],
               fileRefs: [{ _id: 'file-3', name: 'ccc.jpg' }],
