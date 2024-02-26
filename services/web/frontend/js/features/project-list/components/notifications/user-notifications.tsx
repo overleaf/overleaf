@@ -80,6 +80,15 @@ function UserNotifications() {
   })
   const [dismissedWritefull, setDismissedWritefull] = useState(false)
 
+  const hasWritefullExtensionAlreadyInstalled =
+    window.writefull?.type === 'extension'
+  const usesWritefullIntegration =
+    writefullIntegrationSplitTestEnabled || user?.writefull?.enabled
+  const writefullBannerVariant =
+    hasWritefullExtensionAlreadyInstalled || usesWritefullIntegration
+      ? 'plans-page'
+      : 'chrome-store'
+
   return (
     <div
       className={classNames('user-notifications', {
@@ -102,7 +111,7 @@ function UserNotifications() {
         <ReconfirmationInfo />
         {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
         {showInrGeoBanner && <INRBanner />}
-        {writefullIntegrationSplitTestEnabled || user?.writefull?.enabled ? (
+        {writefullBannerVariant === 'plans-page' ? (
           <WritefullPremiumPromoBanner
             show={showWritefull}
             setShow={setShowWritefull}
