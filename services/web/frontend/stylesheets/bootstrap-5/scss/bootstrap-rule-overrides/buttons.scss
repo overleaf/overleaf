@@ -1,4 +1,9 @@
-@mixin ol-button-size($font-size, $line-height, $padding-y, $padding-x: var(--spacing-06)) {
+@mixin ol-button-size(
+  $font-size,
+  $line-height,
+  $padding-y,
+  $padding-x: var(--spacing-06)
+) {
   --bs-btn-font-size: #{$font-size};
   --bs-btn-line-height: #{$line-height};
   --bs-btn-padding-y: #{$padding-y};
@@ -48,14 +53,14 @@
   @include ol-button-size(
     $font-size: var(--font-size-03),
     $line-height: var(--line-height-03),
-    $padding-y: var(--spacing-03),
+    $padding-y: var(--spacing-03)
   );
 
   &.btn-lg {
     @include ol-button-size(
       $font-size: var(--font-size-03),
       $line-height: var(--line-height-03),
-      $padding-y: var(--spacing-05),
+      $padding-y: var(--spacing-05)
     );
   }
 
@@ -64,7 +69,7 @@
       $font-size: var(--font-size-02),
       $line-height: var(--line-height-02),
       $padding-y: var(--spacing-01),
-      $padding-x: var(--spacing-05),
+      $padding-x: var(--spacing-05)
     );
   }
 
@@ -74,7 +79,7 @@
       $color: var(--content-primary-dark),
       $background: var(--bg-accent-01),
       $hover-background: var(--bg-accent-02),
-      $hover-border: var(--bg-accent-02),
+      $hover-border: var(--bg-accent-02)
     );
   }
 
@@ -85,7 +90,7 @@
       $border: var(--border-primary),
       $hover-background: var(--bg-light-tertiary),
       $hover-border: var(--border-primary),
-      $borderless: false,
+      $borderless: false
     );
   }
 
@@ -93,8 +98,8 @@
     @include ol-button-variant(
       $color: var(--content-primary),
       $background: var(--bg-light-primary),
-      $hover-background: var(--bg-light-tertiary),
-    )
+      $hover-background: var(--bg-light-tertiary)
+    );
   }
 
   &.btn-danger {
@@ -102,22 +107,22 @@
       $color: var(--content-primary-dark),
       $background: var(--bg-danger-01),
       $border: var(--bg-danger-01),
-      $hover-background: var(--bg-danger-02),
-    )
+      $hover-background: var(--bg-danger-02)
+    );
   }
 
   &.btn-danger-ghost {
     @include ol-button-variant(
       $color: var(--content-danger),
       $background: var(--bg-light-primary),
-      $hover-background: var(--bg-danger-03),
-    )
+      $hover-background: var(--bg-danger-03)
+    );
   }
 
   &.btn-premium {
     @include ol-button-variant(
       $color: var(--content-primary-dark),
-      $background: var(--blue-70),
+      $background: var(--blue-70)
     );
     background: var(--premium-gradient);
   }

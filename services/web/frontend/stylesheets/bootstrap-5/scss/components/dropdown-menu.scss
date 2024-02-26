@@ -32,7 +32,7 @@
     color: inherit;
   }
 
-  &[variant="danger"] {
+  &[variant='danger'] {
     color: var(--content-danger);
 
     &:hover:not(.active) {
@@ -76,7 +76,7 @@
 
 // description text should look disabled when the dropdown item is disabled
 .dropdown-item.disabled .dropdown-item-description,
-.dropdown-item[aria-disabled="true"] .dropdown-item-description {
+.dropdown-item[aria-disabled='true'] .dropdown-item-description {
   background-color: transparent;
   color: var(--content-disabled);
 }
@@ -93,14 +93,16 @@
   padding-right: var(--spacing-05);
   padding-left: var(--spacing-05);
 
-  &.btn-primary, &.btn-danger {
+  &.btn-primary,
+  &.btn-danger {
     border-left: 1px solid rgb($neutral-90, 0.16);
   }
   &.btn-secondary {
     border-left: 1px solid var(--neutral-60);
   }
 
-  &[disabled], &[aria-disabled="true"] {
+  &[disabled],
+  &[aria-disabled='true'] {
     border-left: 1px solid var(--neutral-10);
   }
 }
