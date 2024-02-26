@@ -63,7 +63,10 @@ export type RawAddCommentOperation = CommentRawData & { commentId: string }
 
 export type RawDeleteCommentOperation = { deleteComment: string }
 
+export type RawSetCommentStateOperation = { commentId: string; resolved: boolean }
+
 export type RawEditOperation =
   | RawTextOperation
   | RawAddCommentOperation
   | RawDeleteCommentOperation
+  | RawSetCommentStateOperation

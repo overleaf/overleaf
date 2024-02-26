@@ -32,7 +32,11 @@ class Operation {
     if ('file' in raw) {
       return AddFileOperation.fromRaw(raw)
     }
-    if ('textOperation' in raw || 'commentId' in raw) {
+    if (
+      'textOperation' in raw ||
+      'commentId' in raw ||
+      'deleteComment' in raw
+    ) {
       return EditFileOperation.fromRaw(raw)
     }
     if ('newPathname' in raw) {

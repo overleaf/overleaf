@@ -1,36 +1,37 @@
 // @ts-check
 const core = require('../../index')
 const Comment = require('../comment')
+const EditNoOperation = require('./edit_no_operation')
 const EditOperation = require('./edit_operation')
 
 /**
  * @typedef {import('./delete_comment_operation')} DeleteCommentOperation
  * @typedef {import('../types').CommentRawData} CommentRawData
- * @typedef {import('../types').RawAddCommentOperation} RawAddCommentOperation
+ * @typedef {import('../types').RawSetCommentStateOperation} RawSetCommentStateOperation
  * @typedef {import('../file_data/string_file_data')} StringFileData
  */
 
 /**
  * @extends EditOperation
  */
-class AddCommentOperation extends EditOperation {
+class SetCommentStateOperation extends EditOperation {
   /**
    * @param {string} commentId
-   * @param {Comment} comment
+   * @param {boolean} resolved
    */
-  constructor(commentId, comment) {
+  constructor(commentId, resolved) {
     super()
     this.commentId = commentId
-    this.comment = comment
+    this.resolved = resolved
   }
 
   /**
    *
-   * @returns {RawAddCommentOperation}
+   * @returns {RawSetCommentStateOperation}
    */
   toJSON() {
     return {
-      ...this.comment.toRaw(),
+      resolved: this.resolved,
       commentId: this.commentId,
     }
   }
@@ -39,15 +40,24 @@ class AddCommentOperation extends EditOperation {
    * @param {StringFileData} fileData
    */
   apply(fileData) {
-    fileData.comments.add(this.commentId, this.comment)
+    const comment = fileData.comments.getComment(this.commentId)
+    if (comment) {
+      const newComment = new Comment(comment.ranges, this.resolved)
+      fileData.comments.add(this.commentId, newComment)
+    }
   }
 
   /**
    *
-   * @returns {DeleteCommentOperation}
+   * @returns {SetCommentStateOperation | EditNoOperation}
    */
-  invert() {
-    return new core.DeleteCommentOperation(this.commentId)
+  invert(previousState) {
+    const comment = previousState.comments.getComment(this.commentId)
+    if (!comment) {
+      return new EditNoOperation()
+    }
+
+    return new SetCommentStateOperation(this.commentId, comment.resolved)
   }
 
   /**
@@ -57,11 +67,9 @@ class AddCommentOperation extends EditOperation {
    */
   canBeComposedWith(other) {
     return (
-      (other instanceof AddCommentOperation &&
+      (other instanceof SetCommentStateOperation &&
         this.commentId === other.commentId) ||
       (other instanceof core.DeleteCommentOperation &&
-        this.commentId === other.commentId) ||
-      (other instanceof core.SetCommentStateOperation &&
         this.commentId === other.commentId)
     )
   }
@@ -73,40 +81,32 @@ class AddCommentOperation extends EditOperation {
    */
   compose(other) {
     if (
+      other instanceof SetCommentStateOperation &&
+      other.commentId === this.commentId
+    ) {
+      return other
+    }
+
+    if (
       other instanceof core.DeleteCommentOperation &&
       other.commentId === this.commentId
     ) {
       return other
     }
 
-    if (
-      other instanceof AddCommentOperation &&
-      other.commentId === this.commentId
-    ) {
-      return other
-    }
-
-    if (
-      other instanceof core.SetCommentStateOperation &&
-      other.commentId === this.commentId
-    ) {
-      const comment = new Comment(this.comment.ranges, other.resolved)
-      return new AddCommentOperation(this.commentId, comment)
-    }
-
     throw new Error(
-      `Trying to compose AddCommentOperation with ${other?.constructor?.name}.`
+      `Trying to compose SetCommentStateOperation with ${other?.constructor?.name}.`
     )
   }
 
   /**
    * @inheritdoc
-   * @param {RawAddCommentOperation} raw
-   * @returns {AddCommentOperation}
+   * @param {RawSetCommentStateOperation} raw
+   * @returns {SetCommentStateOperation}
    */
   static fromJSON(raw) {
-    return new AddCommentOperation(raw.commentId, Comment.fromRaw(raw))
+    return new SetCommentStateOperation(raw.commentId, raw.resolved)
   }
 }
 
-module.exports = AddCommentOperation
+module.exports = SetCommentStateOperation

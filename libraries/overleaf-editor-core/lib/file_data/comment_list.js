@@ -39,14 +39,7 @@ class CommentList {
    * @param {Comment} newComment
    */
   add(id, newComment) {
-    const existingComment = this.getComment(id)
-    if (existingComment) {
-      const resolved = existingComment.resolved && newComment.resolved
-      const mergedRanges = [...existingComment.ranges, ...newComment.ranges]
-      this.comments.set(id, new Comment(mergedRanges, resolved))
-    } else {
-      this.comments.set(id, newComment)
-    }
+    this.comments.set(id, newComment)
   }
 
   /**

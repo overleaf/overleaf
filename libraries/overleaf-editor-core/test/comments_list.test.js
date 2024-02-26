@@ -74,7 +74,7 @@ describe('commentList', function () {
     ])
   })
 
-  it('should add range to existing if a new comment has the same id', function () {
+  it('should overwrite existing comment if new one is added', function () {
     const commentList = new CommentList(
       new Map([
         ['comm1', new Comment([new Range(5, 10)], false)],
@@ -87,13 +87,10 @@ describe('commentList', function () {
     commentList.add('comm2', new Comment([new Range(40, 10)], true))
 
     expect(commentList.getComments()).to.eql([
-      { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
+      { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: true },
       {
         id: 'comm2',
-        ranges: [
-          { pos: 20, length: 5 },
-          { pos: 40, length: 10 },
-        ],
+        ranges: [{ pos: 40, length: 10 }],
         resolved: true,
       },
       {

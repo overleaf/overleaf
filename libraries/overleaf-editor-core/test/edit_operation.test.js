@@ -7,6 +7,7 @@ const randomTextOperation = require('./support/random_text_operation')
 const random = require('./support/random')
 const AddCommentOperation = require('../lib/operation/add_comment_operation')
 const DeleteCommentOperation = require('../lib/operation/delete_comment_operation')
+const SetCommentStateOperation = require('../lib/operation/set_comment_state_operation')
 const Comment = require('../lib/comment')
 const Range = require('../lib/range')
 const EditNoOperation = require('../lib/operation/edit_no_operation')
@@ -40,7 +41,7 @@ describe('EditOperationTransformer', function () {
     const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
     const b = new AddCommentOperation('comm1', new Comment([new Range(2, 3)]))
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
-    expect(aPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(aPrime).to.be.an.instanceof(EditNoOperation)
     expect(bPrime).to.be.an.instanceof(AddCommentOperation)
   })
 
@@ -192,6 +193,65 @@ describe('EditOperationTransformer', function () {
     expect(bPrime).to.be.an.instanceof(DeleteCommentOperation)
     expect(bPrime.toJSON()).to.eql(b.toJSON())
   })
+
+  it('Transforms SetCommentStateOperation and TextOperation', function () {
+    const a = new TextOperation().retain(9).insert(' world')
+    const b = new SetCommentStateOperation('comm1', true)
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(TextOperation)
+    expect(aPrime.toJSON()).to.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(SetCommentStateOperation)
+    expect(bPrime.toJSON()).to.eql(b.toJSON())
+  })
+
+  it('Transforms SetCommentStateOperation and AddCommentOperation', function () {
+    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const b = new SetCommentStateOperation('comm1', true)
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(AddCommentOperation)
+    expect(aPrime.toJSON()).to.deep.eql({
+      commentId: 'comm1',
+      ranges: [{ pos: 0, length: 1 }],
+      resolved: true,
+    })
+    expect(bPrime).to.be.an.instanceof(SetCommentStateOperation)
+    expect(bPrime.toJSON()).to.deep.eql(b.toJSON())
+  })
+
+  it('Transforms SetCommentStateOperation and DeleteCommentOperation', function () {
+    const a = new DeleteCommentOperation('comm1')
+    const b = new SetCommentStateOperation('comm1', true)
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(DeleteCommentOperation)
+    expect(aPrime.toJSON()).to.deep.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(EditNoOperation)
+  })
+
+  it('Transforms SetCommentStateOperation and SetCommentStateOperation', function () {
+    const a = new SetCommentStateOperation('comm1', false)
+    const b = new SetCommentStateOperation('comm1', true)
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime.toJSON()).to.deep.eql({
+      commentId: 'comm1',
+      resolved: false,
+    })
+    expect(bPrime).to.be.an.instanceof(EditNoOperation)
+  })
+
+  it('Transforms two SetCommentStateOperation with different commentId', function () {
+    const a = new SetCommentStateOperation('comm1', false)
+    const b = new SetCommentStateOperation('comm2', true)
+
+    const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
+    expect(aPrime).to.be.an.instanceof(SetCommentStateOperation)
+    expect(aPrime.toJSON()).to.deep.eql(a.toJSON())
+    expect(bPrime).to.be.an.instanceof(SetCommentStateOperation)
+    expect(bPrime.toJSON()).to.deep.eql(b.toJSON())
+  })
 })
 
 describe('EditOperationBuilder', function () {
@@ -201,6 +261,43 @@ describe('EditOperationBuilder', function () {
     }
     const op = EditOperationBuilder.fromJSON(raw)
     expect(op).to.be.an.instanceof(TextOperation)
+    expect(op.toJSON()).to.deep.equal(raw)
+  })
+
+  it('Constructs AddCommentOperation from JSON', function () {
+    const raw = {
+      commentId: 'comm1',
+      ranges: [{ pos: 0, length: 1 }],
+      resolved: false,
+    }
+    const op = EditOperationBuilder.fromJSON(raw)
+    expect(op).to.be.an.instanceof(AddCommentOperation)
+    expect(op.toJSON()).to.deep.equal(raw)
+  })
+
+  it('Constructs DeleteCommentOperation from JSON', function () {
+    const raw = {
+      deleteComment: 'comm1',
+    }
+    const op = EditOperationBuilder.fromJSON(raw)
+    expect(op).to.be.an.instanceof(DeleteCommentOperation)
+    expect(op.toJSON()).to.deep.equal(raw)
+  })
+
+  it('Constructs SetCommentStateOperation from JSON', function () {
+    const raw = {
+      commentId: 'comm1',
+      resolved: true,
+    }
+    const op = EditOperationBuilder.fromJSON(raw)
+    expect(op).to.be.an.instanceof(SetCommentStateOperation)
+    expect(op.toJSON()).to.deep.equal(raw)
+  })
+
+  it('Constructs EditNoOperation from JSON', function () {
+    const raw = { noOp: true }
+    const op = EditOperationBuilder.fromJSON(raw)
+    expect(op).to.be.an.instanceof(EditNoOperation)
     expect(op.toJSON()).to.deep.equal(raw)
   })
 

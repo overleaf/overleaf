@@ -4,11 +4,14 @@
  * @typedef {import('../types').RawTextOperation} RawTextOperation
  * @typedef {import('../types').RawAddCommentOperation} RawAddCommentOperation
  * @typedef {import('../types').RawDeleteCommentOperation} RawDeleteCommentOperation
+ * @typedef {import('../types').RawSetCommentStateOperation} RawSetCommentStateOperation
  * @typedef {import('../types').RawEditOperation} RawEditOperation
  */
 const DeleteCommentOperation = require('./delete_comment_operation')
 const AddCommentOperation = require('./add_comment_operation')
 const TextOperation = require('./text_operation')
+const SetCommentStateOperation = require('./set_comment_state_operation')
+const EditNoOperation = require('./edit_no_operation')
 
 class EditOperationBuilder {
   /**
@@ -26,32 +29,66 @@ class EditOperationBuilder {
     if (isRawDeleteCommentOperation(raw)) {
       return DeleteCommentOperation.fromJSON(raw)
     }
+    if (isRawSetCommentStateOperation(raw)) {
+      return SetCommentStateOperation.fromJSON(raw)
+    }
+    if (isRawEditNoOperation(raw)) {
+      return EditNoOperation.fromJSON()
+    }
     throw new Error('Unsupported operation in EditOperationBuilder.fromJSON')
   }
 }
 
 /**
- * @param {*} raw
+ * @param {unknown} raw
  * @returns {raw is RawTextOperation}
  */
 function isTextOperation(raw) {
-  return raw?.textOperation !== undefined
+  return raw !== null && typeof raw === 'object' && 'textOperation' in raw
 }
 
 /**
- * @param {*} raw
+ * @param {unknown} raw
  * @returns {raw is RawAddCommentOperation}
  */
 function isRawAddCommentOperation(raw) {
-  return raw?.commentId && Array.isArray(raw.ranges)
+  return (
+    raw !== null &&
+    typeof raw === 'object' &&
+    'commentId' in raw &&
+    'ranges' in raw &&
+    Array.isArray(raw.ranges)
+  )
 }
 
 /**
- * @param {*} raw
+ * @param {unknown} raw
  * @returns {raw is RawDeleteCommentOperation}
  */
 function isRawDeleteCommentOperation(raw) {
-  return raw?.deleteComment
+  return raw !== null && typeof raw === 'object' && 'deleteComment' in raw
+}
+
+/**
+ * @param {unknown} raw
+ * @returns {raw is RawSetCommentStateOperation}
+ */
+function isRawSetCommentStateOperation(raw) {
+  return (
+    raw !== null &&
+    typeof raw === 'object' &&
+    'commentId' in raw &&
+    'resolved' in raw &&
+    typeof raw.resolved === 'boolean'
+  )
+}
+
+/**
+ * @param {unknown} raw
+ * @returns {raw is RawEditNoOperation}
+ */
+function isRawEditNoOperation(raw) {
+  return raw !== null && typeof raw === 'object' && 'noOp' in raw
 }
 
 module.exports = EditOperationBuilder

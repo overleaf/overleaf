@@ -114,9 +114,10 @@ class Comment {
   /**
    *
    * @param {TextOperation} operation
+   * @param {string} commentId
    * @returns {Comment}
    */
-  applyTextOperation(operation) {
+  applyTextOperation(operation, commentId) {
     /** @type {Comment} */
     let comment = this
     let cursor = 0
@@ -124,7 +125,11 @@ class Comment {
       if (op instanceof RetainOp) {
         cursor += op.length
       } else if (op instanceof InsertOp) {
-        comment = comment.applyInsert(cursor, op.insertion.length)
+        comment = comment.applyInsert(
+          cursor,
+          op.insertion.length,
+          op.commentIds?.includes(commentId)
+        )
         cursor += op.insertion.length
       } else if (op instanceof RemoveOp) {
         comment = comment.applyDelete(new Range(cursor, op.length))
