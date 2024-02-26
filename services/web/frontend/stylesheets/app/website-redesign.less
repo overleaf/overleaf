@@ -694,7 +694,7 @@
       &.title-mono {
         > span {
           // override Noto Sans
-          font-family: 'DM Mono', monospace;
+          .dm-mono;
         }
       }
 
@@ -792,7 +792,7 @@
   }
 
   .text-with-bg {
-    font-family: 'DM Mono', monospace;
+    .dm-mono;
     padding: 0 @padding-sm;
     border-radius: 10px;
     margin-top: 5px;
@@ -885,8 +885,13 @@
     }
   }
 
-  .mono-text {
+  .dm-mono {
     font-family: 'DM Mono', monospace;
+    font-feature-settings: 'ss05';
+  }
+
+  .mono-text {
+    .dm-mono;
     color: var(--green-60);
     font-size: 1.125rem;
     font-weight: 500;
@@ -910,9 +915,9 @@
   }
 
   .link-with-arrow {
+    .dm-mono;
     font-size: 1.125rem;
     line-height: 1.333;
-    font-family: 'DM Mono', monospace;
     font-weight: 500;
 
     i.material-symbols {
