@@ -23,7 +23,7 @@ describe('File', function () {
   describe('toRaw', function () {
     it('returns non-empty metadata', function () {
       const metadata = { main: true }
-      const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
+      const file = File.fromHash(File.EMPTY_FILE_HASH, undefined, metadata)
       expect(file.toRaw()).to.eql({
         hash: File.EMPTY_FILE_HASH,
         metadata,
@@ -35,7 +35,7 @@ describe('File', function () {
 
     it('returns a deep clone of metadata', function () {
       const metadata = { externalFile: { id: 123 } }
-      const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
+      const file = File.fromHash(File.EMPTY_FILE_HASH, undefined, metadata)
       const raw = file.toRaw()
       const fileMetadata = file.getMetadata()
       const rawMetadata = raw.metadata
@@ -54,7 +54,7 @@ describe('File', function () {
 
     it('returns non-empty metadata', async function () {
       const metadata = { main: true }
-      const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
+      const file = File.fromHash(File.EMPTY_FILE_HASH, undefined, metadata)
       const fakeBlobStore = new FakeBlobStore()
       const raw = await file.store(fakeBlobStore)
       expect(raw).to.eql({
@@ -65,7 +65,7 @@ describe('File', function () {
 
     it('returns a deep clone of metadata', async function () {
       const metadata = { externalFile: { id: 123 } }
-      const file = File.fromHash(File.EMPTY_FILE_HASH, metadata)
+      const file = File.fromHash(File.EMPTY_FILE_HASH, undefined, metadata)
       const fakeBlobStore = new FakeBlobStore()
       const raw = await file.store(fakeBlobStore)
       raw.metadata.externalFile.id = 456

@@ -67,11 +67,12 @@ class File {
 
   /**
    * @param  {string} hash
+   * @param  {string} [rangesHash]
    * @param  {Object} [metadata]
    * @return {File}
    */
-  static fromHash(hash, metadata) {
-    return new File(new HashFileData(hash), metadata)
+  static fromHash(hash, rangesHash, metadata) {
+    return new File(new HashFileData(hash, rangesHash), metadata)
   }
 
   /**
@@ -95,11 +96,12 @@ class File {
 
   /**
    * @param {Blob} blob
+   * @param {Blob} [blob]
    * @param {Object} [metadata]
    * @return {File}
    */
-  static createLazyFromBlob(blob, metadata) {
-    return new File(FileData.createLazyFromBlob(blob), metadata)
+  static createLazyFromBlobs(blob, rangesBlob, metadata) {
+    return new File(FileData.createLazyFromBlobs(blob, rangesBlob), metadata)
   }
 
   toRaw() {
@@ -115,6 +117,16 @@ class File {
    */
   getHash() {
     return this.data.getHash()
+  }
+
+  /**
+   * Hexadecimal SHA-1 hash of the ranges content (comments + tracked changes),
+   * if known.
+   *
+   * @return {string | null | undefined}
+   */
+  getRangesHash() {
+    return this.data.getRangesHash()
   }
 
   /**

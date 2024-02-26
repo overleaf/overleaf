@@ -50,13 +50,21 @@ class FileData {
     return new HollowStringFileData(stringLength)
   }
 
-  /** @see File.createLazyFromBlob */
-  static createLazyFromBlob(blob) {
+  /**
+   * @see File.createLazyFromBlob
+   * @param {Blob} blob
+   * @param {Blob} [rangesBlob]
+   */
+  static createLazyFromBlobs(blob, rangesBlob) {
     assert.instance(blob, Blob, 'FileData: bad blob')
     if (blob.getStringLength() == null) {
       return new BinaryFileData(blob.getHash(), blob.getByteLength())
     }
-    return new LazyStringFileData(blob.getHash(), blob.getStringLength())
+    return new LazyStringFileData(
+      blob.getHash(),
+      rangesBlob?.getHash(),
+      blob.getStringLength()
+    )
   }
 
   toRaw() {
@@ -69,6 +77,14 @@ class FileData {
    */
 
   getHash() {
+    return null
+  }
+
+  /**
+   * @see File#getHash
+   * @return {string | null | undefined}
+   */
+  getRangesHash() {
     return null
   }
 

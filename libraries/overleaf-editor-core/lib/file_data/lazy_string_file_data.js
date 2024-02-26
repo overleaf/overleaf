@@ -10,20 +10,30 @@ const EagerStringFileData = require('./string_file_data')
 const EditOperation = require('../operation/edit_operation')
 const EditOperationBuilder = require('../operation/edit_operation_builder')
 
+/**
+ *  @typedef {import('../types').BlobStore} BlobStore
+ *  @typedef {import('../types').RangesBlob} RangesBlob
+ */
+
 class LazyStringFileData extends FileData {
   /**
    * @param {string} hash
+   * @param {string | undefined} rangesHash
    * @param {number} stringLength
    * @param {Array.<EditOperation>} [operations]
    * @see FileData
    */
-  constructor(hash, stringLength, operations) {
+  constructor(hash, rangesHash, stringLength, operations) {
     super()
     assert.match(hash, Blob.HEX_HASH_RX)
+    if (rangesHash) {
+      assert.match(rangesHash, Blob.HEX_HASH_RX)
+    }
     assert.greaterOrEqual(stringLength, 0)
     assert.maybe.array.of.instance(operations, EditOperation)
 
     this.hash = hash
+    this.rangesHash = rangesHash
     this.stringLength = stringLength
     this.operations = operations || []
   }
@@ -31,6 +41,7 @@ class LazyStringFileData extends FileData {
   static fromRaw(raw) {
     return new LazyStringFileData(
       raw.hash,
+      raw.rangesHash,
       raw.stringLength,
       raw.operations && _.map(raw.operations, EditOperationBuilder.fromJSON)
     )
@@ -39,6 +50,9 @@ class LazyStringFileData extends FileData {
   /** @inheritdoc */
   toRaw() {
     const raw = { hash: this.hash, stringLength: this.stringLength }
+    if (this.rangesHash) {
+      raw.rangesHash = this.rangesHash
+    }
     if (this.operations.length) {
       raw.operations = _.map(this.operations, function (operation) {
         return operation.toJSON()
@@ -51,6 +65,12 @@ class LazyStringFileData extends FileData {
   getHash() {
     if (this.operations.length) return null
     return this.hash
+  }
+
+  /** @inheritdoc */
+  getRangesHash() {
+    if (this.operations.length) return null
+    return this.rangesHash
   }
 
   /** @inheritdoc */
@@ -86,11 +106,20 @@ class LazyStringFileData extends FileData {
 
   /**
    * @inheritdoc
+   * @param {BlobStore} blobStore
    * @returns {Promise<EagerStringFileData>}
    */
   async toEager(blobStore) {
     const content = await blobStore.getString(this.hash)
-    const file = new EagerStringFileData(content)
+    let comments
+    let trackedChanges
+    if (this.rangesHash) {
+      /** @type {RangesBlob} */
+      const ranges = await blobStore.getObject(this.rangesHash)
+      comments = ranges.comments
+      trackedChanges = ranges.trackedChanges
+    }
+    const file = new EagerStringFileData(content, comments, trackedChanges)
     applyOperations(this.operations, file)
     return file
   }
@@ -114,7 +143,11 @@ class LazyStringFileData extends FileData {
   /** @inheritdoc */
   async store(blobStore) {
     if (this.operations.length === 0) {
-      return { hash: this.hash }
+      const raw = { hash: this.hash }
+      if (this.rangesHash) {
+        raw.rangesHash = this.rangesHash
+      }
+      return raw
     }
     const eager = await this.toEager(blobStore)
     this.operations.length = 0

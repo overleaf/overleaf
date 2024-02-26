@@ -32,13 +32,14 @@ function makeProjectKey(projectId, hash) {
   return `${projectKey.format(projectId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
 }
 
-async function uploadBlob(projectId, blob, stream) {
+async function uploadBlob(projectId, blob, stream, opts = {}) {
   const bucket = config.get('blobStore.projectBucket')
   const key = makeProjectKey(projectId, blob.getHash())
   logger.debug({ projectId, blob }, 'uploadBlob started')
   try {
     await persistor.sendStream(bucket, key, stream, {
       contentType: 'application/octet-stream',
+      ...opts,
     })
   } finally {
     logger.debug({ projectId, blob }, 'uploadBlob finished')
@@ -162,7 +163,7 @@ class BlobStore {
    * string content.
    *
    * @param {string} string
-   * @return {Promise.<Blob>}
+   * @return {Promise.<core.Blob>}
    */
   async putString(string) {
     assert.string(string, 'bad string')
@@ -185,7 +186,7 @@ class BlobStore {
    * temporary file).
    *
    * @param {string} pathname
-   * @return {Promise.<Blob>}
+   * @return {Promise.<core.Blob>}
    */
   async putFile(pathname) {
     assert.string(pathname, 'bad pathname')
@@ -205,6 +206,27 @@ class BlobStore {
   }
 
   /**
+   * Stores an object as a gzipped JSON string in a blob.
+   *
+   * @param {object} obj
+   * @returns {Promise.<core.Blob>}
+   */
+  async putObject(obj) {
+    assert.object(obj, 'bad object')
+    const string = JSON.stringify(obj)
+    const hash = blobHash.fromString(string)
+    const stream = await streams.gzipStringToStream(string)
+    const newBlob = new Blob(hash, Buffer.byteLength(string), string.length)
+    await uploadBlob(this.projectId, newBlob, stream, {
+      contentEncoding: 'gzip',
+      contentType: 'application/json',
+    })
+    await this.backend.insertBlob(this.projectId, newBlob)
+    return newBlob
+  }
+
+  /**
+   *
    * Fetch a blob's content by its hash as a UTF-8 encoded string.
    *
    * @param {string} hash hexadecimal SHA-1 hash
@@ -221,6 +243,27 @@ class BlobStore {
       return buffer.toString()
     } finally {
       logger.debug({ projectId, hash }, 'getString finished')
+    }
+  }
+
+  /**
+   * Fetch a JSON encoded gzipped blob by its hash, decompress and deserialize
+   * it.
+   *
+   * @template [T=unknown]
+   * @param {string} hash hexadecimal SHA-1 hash
+   * @return {Promise.<T>} promise for the content of the file
+   */
+  async getObject(hash) {
+    assert.blobHash(hash, 'bad hash')
+    const projectId = this.projectId
+    logger.debug({ projectId, hash }, 'getObject started')
+    try {
+      const stream = await this.getStream(hash)
+      const buffer = await streams.gunzipStreamToBuffer(stream)
+      return JSON.parse(buffer.toString())
+    } finally {
+      logger.debug({ projectId, hash }, 'getObject finished')
     }
   }
 
@@ -252,7 +295,7 @@ class BlobStore {
    * Read a blob metadata record by hexadecimal hash.
    *
    * @param {string} hash hexadecimal SHA-1 hash
-   * @return {Promise.<Blob?>}
+   * @return {Promise.<core.Blob?>}
    */
   async getBlob(hash) {
     assert.blobHash(hash, 'bad hash')

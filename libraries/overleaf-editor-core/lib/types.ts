@@ -1,8 +1,16 @@
 import Blob from './blob'
 
 export type BlobStore = {
+  getBlob(hash: string): Promise<Blob>
   getString(hash: string): Promise<string>
   putString(content: string): Promise<Blob>
+  putObject(obj: object): Promise<Blob>
+  getObject<T = unknown>(hash: string): Promise<T>
+}
+
+export type RangesBlob = {
+  comments: CommentsListRawData
+  trackedChanges: TrackedChangeRawData[]
 }
 
 type Range = {

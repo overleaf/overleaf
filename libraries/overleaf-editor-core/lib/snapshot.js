@@ -186,7 +186,9 @@ class Snapshot {
     // eslint-disable-next-line array-callback-return
     this.fileMap.map(file => {
       const hash = file.getHash()
+      const rangeHash = file.getRangesHash()
       if (hash) blobHashes.add(hash)
+      if (rangeHash) blobHashes.add(rangeHash)
     })
   }
 

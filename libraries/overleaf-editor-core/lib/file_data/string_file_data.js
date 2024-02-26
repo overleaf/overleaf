@@ -13,6 +13,7 @@ const TrackedChangeList = require('./tracked_change_list')
  * @typedef {import("../types").BlobStore} BlobStore
  * @typedef {import("../types").CommentsListRawData} CommentsListRawData
  * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
+ * @typedef {import('../types').RangesBlob} RangesBlob
  */
 
 class StringFileData extends FileData {
@@ -111,6 +112,15 @@ class StringFileData extends FileData {
    */
   async store(blobStore) {
     const blob = await blobStore.putString(this.content)
+    if (this.comments.comments.size || this.trackedChanges.length) {
+      /** @type {RangesBlob} */
+      const ranges = {
+        comments: this.getComments(),
+        trackedChanges: this.trackedChanges.toRaw(),
+      }
+      const rangesBlob = await blobStore.putObject(ranges)
+      return { hash: blob.getHash(), rangesHash: rangesBlob.getHash() }
+    }
     return { hash: blob.getHash() }
   }
 }
