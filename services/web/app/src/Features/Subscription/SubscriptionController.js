@@ -67,17 +67,9 @@ async function plansPage(req, res) {
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
 
-  // annual plans with the free trial option split test - nudge variant
-  const annualTrialsAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'annual-trials'
-  )
-
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
-    'annual-trials': annualTrialsAssignment.variant,
   }
 
   AnalyticsManager.recordEventForSession(
@@ -102,7 +94,6 @@ async function plansPage(req, res) {
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
     showInrGeoBanner: countryCode === 'IN',
-    annualTrialsAssignment: annualTrialsAssignment?.variant,
   })
 }
 
@@ -225,14 +216,9 @@ async function interstitialPaymentPage(req, res) {
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
-    // annual plans with the free trial option split test - nudge variant
-    const annualTrialsAssignment =
-      await SplitTestHandler.promises.getAssignment(req, res, 'annual-trials')
-
     const paywallPlansPageViewSegmentation = {
       currency: recommendedCurrency,
       countryCode,
-      'annual-trials': annualTrialsAssignment.variant,
     }
     AnalyticsManager.recordEventForSession(
       req.session,
@@ -240,20 +226,7 @@ async function interstitialPaymentPage(req, res) {
       paywallPlansPageViewSegmentation
     )
 
-    let templatePath
-
-    switch (annualTrialsAssignment?.variant) {
-      case 'nudge':
-        templatePath = 'subscriptions/interstitial-payment_nudge_annual'
-        break
-      case 'no-nudge':
-        templatePath = 'subscriptions/interstitial-payment_no_nudge_monthly'
-        break
-      default:
-        templatePath = 'subscriptions/interstitial-payment'
-    }
-
-    res.render(templatePath, {
+    res.render('subscriptions/interstitial-payment', {
       title: 'subscribe',
       itm_content: req.query?.itm_content,
       itm_campaign: req.query?.itm_campaign,
