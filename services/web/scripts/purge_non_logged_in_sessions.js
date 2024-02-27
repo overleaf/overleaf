@@ -1,62 +1,98 @@
 const RedisWrapper = require('@overleaf/redis-wrapper')
 const Settings = require('@overleaf/settings')
 const SessionManager = require('../app/src/Features/Authentication/SessionManager')
-const async = require('async')
-const _ = require('lodash')
 
 const redis = RedisWrapper.createClient(Settings.redis.websessions)
 
-let totalDeletedSessions = 0
+const argv = require('minimist')(process.argv.slice(2), {
+  string: ['count'],
+  boolean: ['dry-run', 'help'],
+  alias: {
+    count: 'c',
+    'dry-run': 'n',
+    help: 'h',
+  },
+})
 
-const queue = async.queue(function (sessKey, callback) {
-  const cb = _.once(callback)
-  redis.get(sessKey, (_err, session) => {
-    try {
-      if (SessionManager.isUserLoggedIn(JSON.parse(session))) {
-        cb()
-      } else {
-        redis.del(sessKey, () => {
-          totalDeletedSessions++
-          if (totalDeletedSessions % 1000 === 0) {
-            console.log(`Keys deleted so far: ${totalDeletedSessions}`)
-          }
-          cb()
-        })
-      }
-    } catch (err) {
-      console.log(`${sessKey} couldn't parse`)
-      cb()
-    }
-  })
-}, 20)
+if (argv.help) {
+  console.log(
+    `Usage: node purge_non_logged_in_sessions.js [--count <count>] [--dry-run]
+  --count <count> the number of keys to scan on each iteration (default 1000)
+  --dry-run to not delete any keys
+  --help to show this help
 
-function scanAndPurge(cb) {
-  const stream = redis.scanStream({
-    match: 'sess:*',
-    count: 1000,
-  })
-  console.log('starting scan')
-
-  stream.on('data', resultKeys => {
-    console.log(`Keys found, count:${resultKeys.length}`)
-    queue.push(resultKeys)
-  })
-
-  stream.on('end', () => {
-    queue.drain(() => {
-      console.log(
-        `All sessions have been checked, ${totalDeletedSessions} deleted`
-      )
-      cb()
-    })
-  })
-
-  stream.on('error', err => {
-    console.log(err)
-  })
+Note: use --count=10000 to delete faster (this will impact redis performance,
+so use with caution)`
+  )
+  process.exit()
 }
 
-scanAndPurge(err => {
+const scanCount = argv.count ? parseInt(argv.count, 10) : 1000
+const dryRun = argv['dry-run']
+
+console.log(`Scan count set to ${scanCount}`)
+
+if (dryRun) {
+  console.log('Dry run, not deleting any keys')
+}
+
+// iterate over all redis keys matching sess:* and delete the ones
+// that are not logged in using async await and mget and mdel
+async function scanAndPurge() {
+  let totalSessions = 0
+  let totalDeletedSessions = 0
+  const stream = redis.scanStream({
+    match: 'sess:*',
+    count: scanCount,
+  })
+  console.log('Starting scan...')
+  for await (const resultKeys of stream) {
+    if (resultKeys.length === 0) {
+      continue // scan is allowed to return zero elements, the client should not consider the iteration complete
+    }
+    console.log(`Keys found, count: ${resultKeys.length}`)
+    totalSessions += resultKeys.length
+    const sessions = await redis.mget(resultKeys)
+    const toDelete = []
+    for (let i = 0; i < sessions.length; i++) {
+      const resultKey = resultKeys[i]
+      const session = sessions[i]
+      if (!session) {
+        continue
+      }
+      try {
+        const sessionObject = JSON.parse(session)
+        if (!SessionManager.isUserLoggedIn(sessionObject)) {
+          totalDeletedSessions++
+          toDelete.push(resultKey)
+        }
+      } catch (error) {
+        console.error(`Error parsing session ${resultKeys[i]}: ${error}`)
+      }
+    }
+    if (toDelete.length === 0) {
+      continue
+    }
+    if (dryRun) {
+      console.log(`Would delete ${toDelete.length} keys`)
+    } else {
+      await redis.del(toDelete)
+      console.log(`Keys deleted so far: ${totalDeletedSessions}`)
+    }
+  }
+  if (dryRun) {
+    console.log(
+      `Dry run: ${totalSessions} sessions checked, ${totalDeletedSessions} would have been deleted`
+    )
+  } else {
+    console.log(
+      `All ${totalSessions} sessions have been checked, ${totalDeletedSessions} deleted`
+    )
+  }
+  redis.quit()
+}
+
+scanAndPurge().catch(err => {
   console.error(err)
   process.exit()
 })
