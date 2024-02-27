@@ -568,24 +568,31 @@ const EditorController = {
   },
 
   setPublicAccessLevel(projectId, newAccessLevel, callback) {
-    ProjectDetailsHandler.setPublicAccessLevel(
-      projectId,
-      newAccessLevel,
-      function (err) {
-        if (err) {
-          return callback(err)
-        }
-        EditorRealTimeController.emitToRoom(
-          projectId,
-          'project:publicAccessLevel:changed',
-          { newAccessLevel }
-        )
-        if (newAccessLevel === PublicAccessLevels.TOKEN_BASED) {
-          ProjectDetailsHandler.ensureTokensArePresent(projectId, callback)
-        } else {
-          callback()
-        }
-      }
+    async.series(
+      [
+        cb => {
+          if (newAccessLevel === PublicAccessLevels.TOKEN_BASED) {
+            ProjectDetailsHandler.ensureTokensArePresent(projectId, cb)
+          } else {
+            cb()
+          }
+        },
+        cb =>
+          ProjectDetailsHandler.setPublicAccessLevel(
+            projectId,
+            newAccessLevel,
+            cb
+          ),
+        cb => {
+          EditorRealTimeController.emitToRoom(
+            projectId,
+            'project:publicAccessLevel:changed',
+            { newAccessLevel }
+          )
+          cb()
+        },
+      ],
+      callback
     )
   },
 
