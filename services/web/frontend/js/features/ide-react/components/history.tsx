@@ -7,7 +7,7 @@ import { useHistoryContext } from '@/features/history/context/history-context'
 
 export default function History() {
   const { updatesInfo } = useHistoryContext()
-  const fileTreeContainer = document.querySelector('.history-file-tree')
+  const fileTreeContainer = document.getElementById('history-file-tree')
 
   return (
     <>

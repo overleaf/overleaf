@@ -7,13 +7,12 @@ import EditorNavigationToolbar from '@/features/ide-react/components/editor-navi
 import ChatPane from '@/features/chat/components/chat-pane'
 import { HorizontalToggler } from '@/features/ide-react/components/resize/horizontal-toggler'
 import { HistorySidebar } from '@/features/ide-react/components/history-sidebar'
-import { HistoryProvider } from '@/features/history/context/history-context'
-import History from '@/features/ide-react/components/history'
 import EditorSidebar from '@/features/ide-react/components/editor-sidebar'
 import { useTranslation } from 'react-i18next'
 import { useSidebarPane } from '@/features/ide-react/hooks/use-sidebar-pane'
 import { useChatPane } from '@/features/ide-react/hooks/use-chat-pane'
 import { EditorAndPdf } from '@/features/ide-react/components/editor-and-pdf'
+import HistoryContainer from '@/features/ide-react/components/history-container'
 
 export const MainLayout: FC = () => {
   const { view } = useLayoutContext()
@@ -86,11 +85,7 @@ export const MainLayout: FC = () => {
           <Panel id="panel-outer-main" order={2}>
             <PanelGroup autoSaveId="ide-inner-layout" direction="horizontal">
               <Panel className="ide-react-panel" id="panel-main" order={1}>
-                {view === 'history' && (
-                  <HistoryProvider>
-                    <History />
-                  </HistoryProvider>
-                )}
+                <HistoryContainer />
                 <EditorAndPdf />
               </Panel>
 
