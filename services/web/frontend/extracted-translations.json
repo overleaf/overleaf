@@ -1187,6 +1187,7 @@
   "sso_configuration": "",
   "sso_configuration_not_finalized": "",
   "sso_configuration_saved": "",
+  "sso_disabled_by_group_admin": "",
   "sso_error_audience_mismatch": "",
   "sso_error_idp_error": "",
   "sso_error_invalid_external_user_id": "",

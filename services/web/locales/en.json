@@ -1727,6 +1727,7 @@
   "sso_configuration": "SSO configuration",
   "sso_configuration_not_finalized": "Your configuration has not been finalized.",
   "sso_configuration_saved": "SSO configuration has been saved",
+  "sso_disabled_by_group_admin": "SSO has been disabled by your group administrator. You can still log in and use Overleaf as you normally would.",
   "sso_error_audience_mismatch": "The Service Provider entity ID configured in your IdP does not match the one provided in our metadata. Please contact your IT department for more information.",
   "sso_error_idp_error": "Your identity provider responded with an error.",
   "sso_error_invalid_external_user_id": "The SAML attribute provided by your IdP that uniquely identifies your user has an invalid format, a string is expected. Attribute: <0>__expecting__</0>",
