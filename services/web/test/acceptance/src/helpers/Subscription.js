@@ -153,31 +153,6 @@ class Subscription {
     })
   }
 
-  linkGroupSSO(
-    user,
-    externalUserId,
-    userIdAttribute,
-    auditLog,
-    sessionID,
-    callback
-  ) {
-    SubscriptionModel.findById(this._id).exec((error, subscription) => {
-      if (error) {
-        return callback(error)
-      }
-      Modules.hooks.fire(
-        'linkUserToGroupSSO',
-        user._id,
-        subscription,
-        externalUserId,
-        userIdAttribute,
-        auditLog,
-        sessionID,
-        callback
-      )
-    })
-  }
-
   expectDeleted(deleterData, callback) {
     DeletedSubscriptionModel.find(
       { 'subscription._id': this._id },
