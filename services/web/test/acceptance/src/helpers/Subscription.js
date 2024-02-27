@@ -182,6 +182,14 @@ class Subscription {
       }
     )
   }
+
+  addMember(userId, callback) {
+    return SubscriptionModel.findOneAndUpdate(
+      { _id: new ObjectId(this._id) },
+      { $push: { member_ids: userId } },
+      callback
+    )
+  }
 }
 
 Subscription.promises = class extends Subscription {}
