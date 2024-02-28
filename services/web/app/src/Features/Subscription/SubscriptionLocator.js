@@ -1,126 +1,115 @@
-const { promisify } = require('util')
+const { callbackifyAll } = require('@overleaf/promise-utils')
 const { Subscription } = require('../../models/Subscription')
 const { DeletedSubscription } = require('../../models/DeletedSubscription')
 const logger = require('@overleaf/logger')
 require('./GroupPlansData') // make sure dynamic group plans are loaded
 
 const SubscriptionLocator = {
-  getUsersSubscription(userOrId, callback) {
+  async getUsersSubscription(userOrId) {
     const userId = SubscriptionLocator._getUserId(userOrId)
-    Subscription.findOne({ admin_id: userId }, function (err, subscription) {
-      logger.debug({ userId }, 'got users subscription')
-      callback(err, subscription)
-    })
+    const subscription = await Subscription.findOne({ admin_id: userId }).exec()
+    logger.debug({ userId }, 'got users subscription')
+    return subscription
   },
 
-  getUserIndividualSubscription(userOrId, callback) {
+  async getUserIndividualSubscription(userOrId) {
     const userId = SubscriptionLocator._getUserId(userOrId)
-    Subscription.findOne(
-      { admin_id: userId, groupPlan: false },
-      function (err, subscription) {
-        logger.debug({ userId }, 'got users individual subscription')
-        callback(err, subscription)
-      }
-    )
+    const subscription = await Subscription.findOne({
+      admin_id: userId,
+      groupPlan: false,
+    }).exec()
+    logger.debug({ userId }, 'got users individual subscription')
+    return subscription
   },
 
-  getManagedGroupSubscriptions(userOrId, callback) {
-    Subscription.find({
+  async getManagedGroupSubscriptions(userOrId) {
+    return await Subscription.find({
       manager_ids: userOrId,
       groupPlan: true,
     })
       .populate('admin_id')
-      .exec(callback)
+      .exec()
   },
 
-  getMemberSubscriptions(userOrId, callback) {
+  async getMemberSubscriptions(userOrId) {
     const userId = SubscriptionLocator._getUserId(userOrId)
-    Subscription.find({ member_ids: userId })
+    return await Subscription.find({ member_ids: userId })
       .populate('admin_id')
-      .exec(callback)
+      .exec()
   },
 
-  getAdminEmail(subscriptionId, callback) {
-    Subscription.findById(subscriptionId)
+  async getAdminEmail(subscriptionId) {
+    const subscription = await Subscription.findById(subscriptionId)
       .populate('admin_id', 'email')
-      .exec((err, subscription) => {
-        if (err) {
-          return callback(err)
-        }
-        callback(err, subscription?.admin_id?.email)
-      })
+      .exec()
+
+    return subscription?.admin_id?.email
   },
 
-  getAdminEmailAndName(subscriptionId, callback) {
-    Subscription.findById(subscriptionId)
+  async getAdminEmailAndName(subscriptionId) {
+    const subscription = await Subscription.findById(subscriptionId)
       .populate('admin_id', ['email', 'first_name', 'last_name'])
-      .exec((err, subscription) => {
-        if (err) {
-          return callback(err)
-        }
-        callback(err, subscription?.admin_id)
-      })
+      .exec()
+
+    return subscription?.admin_id
   },
 
-  hasRecurlyGroupSubscription(userOrId, callback) {
+  async hasRecurlyGroupSubscription(userOrId) {
     const userId = SubscriptionLocator._getUserId(userOrId)
-    Subscription.exists(
-      {
-        groupPlan: true,
-        recurlySubscription_id: { $exists: true },
-        $or: [
-          { member_ids: userId },
-          { manager_ids: userId },
-          { admin_id: userId },
-        ],
-      },
-      callback
-    )
+    return await Subscription.exists({
+      groupPlan: true,
+      recurlySubscription_id: { $exists: true },
+      $or: [
+        { member_ids: userId },
+        { manager_ids: userId },
+        { admin_id: userId },
+      ],
+    }).exec()
   },
 
-  getSubscription(subscriptionId, callback) {
-    Subscription.findOne({ _id: subscriptionId }, callback)
+  async getSubscription(subscriptionId) {
+    return await Subscription.findOne({ _id: subscriptionId }).exec()
   },
 
-  getSubscriptionByMemberIdAndId(userId, subscriptionId, callback) {
-    Subscription.findOne(
+  async getSubscriptionByMemberIdAndId(userId, subscriptionId) {
+    return await Subscription.findOne(
       { member_ids: userId, _id: subscriptionId },
-      { _id: 1 },
-      callback
+      { _id: 1 }
+    ).exec()
+  },
+
+  async getGroupSubscriptionsMemberOf(userId) {
+    return await Subscription.find(
+      { member_ids: userId },
+      { _id: 1, planCode: 1 }
     )
   },
 
-  getGroupSubscriptionsMemberOf(userId, callback) {
-    Subscription.find({ member_ids: userId }, { _id: 1, planCode: 1 }, callback)
+  async getGroupsWithEmailInvite(email) {
+    return await Subscription.find({ invited_emails: email }).exec()
   },
 
-  getGroupsWithEmailInvite(email, callback) {
-    Subscription.find({ invited_emails: email }, callback)
-  },
-
-  getGroupsWithTeamInvitesEmail(email, callback) {
-    Subscription.find(
+  async getGroupsWithTeamInvitesEmail(email) {
+    return await Subscription.find(
       { teamInvites: { $elemMatch: { email } } },
-      { teamInvites: 1 },
-      callback
-    )
+      { teamInvites: 1 }
+    ).exec()
   },
 
-  getGroupWithV1Id(v1TeamId, callback) {
-    Subscription.findOne({ 'overleaf.id': v1TeamId }, callback)
+  async getGroupWithV1Id(v1TeamId) {
+    return await Subscription.findOne({ 'overleaf.id': v1TeamId }).exec()
   },
 
-  getUserDeletedSubscriptions(userId, callback) {
-    DeletedSubscription.find({ 'subscription.admin_id': userId }, callback)
+  async getUserDeletedSubscriptions(userId) {
+    return await DeletedSubscription.find({
+      'subscription.admin_id': userId,
+    }).exec()
   },
 
-  getDeletedSubscription(subscriptionId, callback) {
-    DeletedSubscription.findOne(
-      {
-        'subscription._id': subscriptionId,
-      },
-      callback
-    )
+  async getDeletedSubscription(subscriptionId) {
+    return await DeletedSubscription.findOne({
+      'subscription._id': subscriptionId,
+    }).exec()
   },
 
   _getUserId(userOrId) {
@@ -132,37 +121,7 @@ const SubscriptionLocator = {
   },
 }
 
-SubscriptionLocator.promises = {
-  getUsersSubscription: promisify(SubscriptionLocator.getUsersSubscription),
-  getUserIndividualSubscription: promisify(
-    SubscriptionLocator.getUserIndividualSubscription
-  ),
-  getManagedGroupSubscriptions: promisify(
-    SubscriptionLocator.getManagedGroupSubscriptions
-  ),
-  getMemberSubscriptions: promisify(SubscriptionLocator.getMemberSubscriptions),
-  getAdminEmail: promisify(SubscriptionLocator.getAdminEmail),
-  getAdminEmailAndName: promisify(SubscriptionLocator.getAdminEmailAndName),
-  getSubscription: promisify(SubscriptionLocator.getSubscription),
-  getSubscriptionByMemberIdAndId: promisify(
-    SubscriptionLocator.getSubscriptionByMemberIdAndId
-  ),
-  getGroupSubscriptionsMemberOf: promisify(
-    SubscriptionLocator.getGroupSubscriptionsMemberOf
-  ),
-  getGroupsWithEmailInvite: promisify(
-    SubscriptionLocator.getGroupsWithEmailInvite
-  ),
-  getGroupsWithTeamInvitesEmail: promisify(
-    SubscriptionLocator.getGroupsWithTeamInvitesEmail
-  ),
-  getGroupWithV1Id: promisify(SubscriptionLocator.getGroupWithV1Id),
-  getUserDeletedSubscriptions: promisify(
-    SubscriptionLocator.getUserDeletedSubscriptions
-  ),
-  getDeletedSubscription: promisify(SubscriptionLocator.getDeletedSubscription),
-  hasRecurlyGroupSubscription: promisify(
-    SubscriptionLocator.hasRecurlyGroupSubscription
-  ),
+module.exports = {
+  ...callbackifyAll(SubscriptionLocator),
+  promises: SubscriptionLocator,
 }
-module.exports = SubscriptionLocator
