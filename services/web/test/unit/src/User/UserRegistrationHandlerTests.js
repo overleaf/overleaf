@@ -16,19 +16,33 @@ describe('UserRegistrationHandler', function () {
       _id: (this.user_id = '31j2lk21kjl'),
       analyticsId: this.analyticsId,
     }
-    this.User = { updateOne: sinon.stub().callsArgWith(2) }
-    this.UserGetter = { getUserByAnyEmail: sinon.stub() }
+    this.User = {
+      updateOne: sinon.stub().returns({ exec: sinon.stub().resolves() }),
+    }
+    this.UserGetter = {
+      promises: {
+        getUserByAnyEmail: sinon.stub(),
+      },
+    }
     this.UserCreator = {
-      createNewUser: sinon.stub().callsArgWith(2, null, this.user),
+      promises: {
+        createNewUser: sinon.stub().resolves(this.user),
+      },
     }
     this.AuthenticationManager = {
       validateEmail: sinon.stub().returns(null),
       validatePassword: sinon.stub().returns(null),
-      setUserPassword: sinon.stub().callsArgWith(2),
+      promises: {
+        setUserPassword: sinon.stub().resolves(this.user),
+      },
     }
-    this.NewsLetterManager = { subscribe: sinon.stub().callsArgWith(1) }
-    this.EmailHandler = { sendEmail: sinon.stub().callsArgWith(2) }
-    this.OneTimeTokenHandler = { getNewToken: sinon.stub() }
+    this.NewsLetterManager = {
+      subscribe: sinon.stub(),
+    }
+    this.EmailHandler = {
+      promises: { sendEmail: sinon.stub() },
+    }
+    this.OneTimeTokenHandler = { promises: { getNewToken: sinon.stub() } }
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': { User: this.User },
@@ -60,7 +74,7 @@ describe('UserRegistrationHandler', function () {
 
   describe('validate Register Request', function () {
     it('allows passing validation through', function () {
-      const result = this.handler._registrationRequestIsValid(
+      const result = this.handler.promises._registrationRequestIsValid(
         this.passingRequest
       )
       result.should.equal(true)
@@ -74,7 +88,7 @@ describe('UserRegistrationHandler', function () {
       })
 
       it('does not allow through', function () {
-        const result = this.handler._registrationRequestIsValid(
+        const result = this.handler.promises._registrationRequestIsValid(
           this.passingRequest
         )
         return result.should.equal(false)
@@ -89,7 +103,7 @@ describe('UserRegistrationHandler', function () {
       })
 
       it('does not allow through', function () {
-        const result = this.handler._registrationRequestIsValid(
+        const result = this.handler.promises._registrationRequestIsValid(
           this.passingRequest
         )
         result.should.equal(false)
@@ -101,118 +115,100 @@ describe('UserRegistrationHandler', function () {
     describe('holdingAccount', function (done) {
       beforeEach(function () {
         this.user.holdingAccount = true
-        this.handler._registrationRequestIsValid = sinon.stub().returns(true)
-        this.UserGetter.getUserByAnyEmail.callsArgWith(1, null, this.user)
+        this.handler.promises._registrationRequestIsValid = sinon
+          .stub()
+          .returns(true)
+        this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
       })
 
-      it('should not create a new user if there is a holding account there', function (done) {
-        this.handler.registerNewUser(this.passingRequest, error => {
-          this.UserCreator.createNewUser.called.should.equal(false)
-          done(error)
-        })
+      it('should not create a new user if there is a holding account there', async function () {
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        this.UserCreator.promises.createNewUser.called.should.equal(false)
       })
 
-      it('should set holding account to false', function (done) {
-        this.handler.registerNewUser(this.passingRequest, error => {
-          const update = this.User.updateOne.args[0]
-          assert.deepEqual(update[0], { _id: this.user._id })
-          assert.deepEqual(update[1], { $set: { holdingAccount: false } })
-          done(error)
-        })
+      it('should set holding account to false', async function () {
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        const update = this.User.updateOne.args[0]
+        assert.deepEqual(update[0], { _id: this.user._id })
+        assert.deepEqual(update[1], { $set: { holdingAccount: false } })
       })
     })
 
     describe('invalidRequest', function () {
-      it('should not create a new user if the the request is not valid', function (done) {
-        this.handler._registrationRequestIsValid = sinon.stub().returns(false)
-        this.handler.registerNewUser(this.passingRequest, error => {
-          expect(error).to.be.instanceOf(Error)
-
-          this.UserCreator.createNewUser.called.should.equal(false)
-          done()
-        })
+      it('should not create a new user if the the request is not valid', async function () {
+        this.handler.promises._registrationRequestIsValid = sinon
+          .stub()
+          .returns(false)
+        expect(this.handler.promises.registerNewUser(this.passingRequest)).to.be
+          .rejected
+        this.UserCreator.promises.createNewUser.called.should.equal(false)
       })
 
-      it('should return email registered in the error if there is a non holdingAccount there', function (done) {
-        this.UserGetter.getUserByAnyEmail.callsArgWith(
-          1,
-          null,
+      it('should return email registered in the error if there is a non holdingAccount there', async function () {
+        this.UserGetter.promises.getUserByAnyEmail.resolves(
           (this.user = { holdingAccount: false })
         )
-        this.handler.registerNewUser(this.passingRequest, (err, user) => {
-          expect(err).to.be.instanceOf(Error)
-          expect(err).to.have.property('message', 'EmailAlreadyRegistered')
-          user.should.deep.equal(this.user)
-          done()
-        })
+        expect(
+          this.handler.promises.registerNewUser(this.passingRequest)
+        ).to.be.rejectedWith('EmailAlreadyRegistered')
       })
     })
 
     describe('validRequest', function () {
       beforeEach(function () {
-        this.handler._registrationRequestIsValid = sinon.stub().returns(true)
-        this.UserGetter.getUserByAnyEmail.callsArgWith(1)
+        this.handler.promises._registrationRequestIsValid = sinon
+          .stub()
+          .returns(true)
+        this.UserGetter.promises.getUserByAnyEmail.resolves()
       })
 
-      it('should create a new user', function (done) {
-        this.handler.registerNewUser(this.passingRequest, error => {
-          sinon.assert.calledWith(this.UserCreator.createNewUser, {
-            email: this.passingRequest.email,
-            holdingAccount: false,
-            first_name: this.passingRequest.first_name,
-            last_name: this.passingRequest.last_name,
-            analyticsId: this.user.analyticsId,
-          })
-          done(error)
+      it('should create a new user', async function () {
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        sinon.assert.calledWith(this.UserCreator.promises.createNewUser, {
+          email: this.passingRequest.email,
+          holdingAccount: false,
+          first_name: this.passingRequest.first_name,
+          last_name: this.passingRequest.last_name,
+          analyticsId: this.user.analyticsId,
         })
       })
 
-      it('lower case email', function (done) {
+      it('lower case email', async function () {
         this.passingRequest.email = 'soMe@eMail.cOm'
-        this.handler.registerNewUser(this.passingRequest, error => {
-          this.UserCreator.createNewUser.args[0][0].email.should.equal(
-            'some@email.com'
-          )
-          done(error)
-        })
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        this.UserCreator.promises.createNewUser.args[0][0].email.should.equal(
+          'some@email.com'
+        )
       })
 
-      it('trim white space from email', function (done) {
+      it('trim white space from email', async function () {
         this.passingRequest.email = ' some@email.com '
-        this.handler.registerNewUser(this.passingRequest, error => {
-          this.UserCreator.createNewUser.args[0][0].email.should.equal(
-            'some@email.com'
-          )
-          done(error)
-        })
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        this.UserCreator.promises.createNewUser.args[0][0].email.should.equal(
+          'some@email.com'
+        )
       })
 
-      it('should set the password', function (done) {
-        this.handler.registerNewUser(this.passingRequest, error => {
-          this.AuthenticationManager.setUserPassword
-            .calledWith(this.user, this.passingRequest.password)
-            .should.equal(true)
-          done(error)
-        })
+      it('should set the password', async function () {
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        this.AuthenticationManager.promises.setUserPassword
+          .calledWith(this.user, this.passingRequest.password)
+          .should.equal(true)
       })
 
-      it('should add the user to the newsletter if accepted terms', function (done) {
+      it('should add the user to the newsletter if accepted terms', async function () {
         this.passingRequest.subscribeToNewsletter = 'true'
-        this.handler.registerNewUser(this.passingRequest, error => {
-          this.NewsLetterManager.subscribe
-            .calledWith(this.user)
-            .should.equal(true)
-          done(error)
-        })
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        this.NewsLetterManager.subscribe
+          .calledWith(this.user)
+          .should.equal(true)
       })
 
-      it('should not add the user to the newsletter if not accepted terms', function (done) {
-        this.handler.registerNewUser(this.passingRequest, error => {
-          this.NewsLetterManager.subscribe
-            .calledWith(this.user)
-            .should.equal(false)
-          done(error)
-        })
+      it('should not add the user to the newsletter if not accepted terms', async function () {
+        await this.handler.promises.registerNewUser(this.passingRequest)
+        this.NewsLetterManager.subscribe
+          .calledWith(this.user)
+          .should.equal(false)
       })
     })
   })
@@ -225,26 +221,24 @@ describe('UserRegistrationHandler', function () {
           return (this.password = 'mock-password')
         },
       })
-      this.OneTimeTokenHandler.getNewToken.yields(
-        null,
+      this.OneTimeTokenHandler.promises.getNewToken.resolves(
         (this.token = 'mock-token')
       )
-      this.handler.registerNewUser = sinon.stub()
-      this.callback = sinon.stub()
+      this.handler.promises.registerNewUser = sinon.stub()
     })
 
     describe('with a new user', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.user.email = this.email.toLowerCase()
-        this.handler.registerNewUser.callsArgWith(1, null, this.user)
-        this.handler.registerNewUserAndSendActivationEmail(
-          this.email,
-          this.callback
-        )
+        this.handler.promises.registerNewUser.resolves(this.user)
+        this.result =
+          await this.handler.promises.registerNewUserAndSendActivationEmail(
+            this.email
+          )
       })
 
       it('should ask the UserRegistrationHandler to register user', function () {
-        sinon.assert.calledWith(this.handler.registerNewUser, {
+        sinon.assert.calledWith(this.handler.promises.registerNewUser, {
           email: this.email,
           password: this.password,
         })
@@ -255,13 +249,13 @@ describe('UserRegistrationHandler', function () {
           user_id: this.user._id.toString(),
           email: this.user.email,
         }
-        this.OneTimeTokenHandler.getNewToken
+        this.OneTimeTokenHandler.promises.getNewToken
           .calledWith('password', data, { expiresIn: 7 * 24 * 60 * 60 })
           .should.equal(true)
       })
 
       it('should send a registered email', function () {
-        this.EmailHandler.sendEmail
+        this.EmailHandler.promises.sendEmail
           .calledWith('registered', {
             to: this.user.email,
             setNewPasswordUrl: `${this.settings.siteUrl}/user/activate?token=${this.token}&user_id=${this.user_id}`,
@@ -269,33 +263,29 @@ describe('UserRegistrationHandler', function () {
           .should.equal(true)
       })
 
-      it('should return the user', function () {
-        this.callback
-          .calledWith(
-            null,
-            this.user,
-            `${this.settings.siteUrl}/user/activate?token=${this.token}&user_id=${this.user_id}`
-          )
-          .should.equal(true)
+      it('should return the user and new password url', function () {
+        const { user, setNewPasswordUrl } = this.result
+        expect(user).to.deep.equal(this.user)
+        expect(setNewPasswordUrl).to.equal(
+          `${this.settings.siteUrl}/user/activate?token=${this.token}&user_id=${this.user_id}`
+        )
       })
     })
 
     describe('with a user that already exists', function () {
-      beforeEach(function () {
-        this.handler.registerNewUser.callsArgWith(
-          1,
-          new Error('EmailAlreadyRegistered'),
-          this.user
+      beforeEach(async function () {
+        this.handler.promises.registerNewUser.rejects(
+          new Error('EmailAlreadyRegistered')
         )
-        this.handler.registerNewUserAndSendActivationEmail(
-          this.email,
-          this.callback
+        this.UserGetter.promises.getUserByAnyEmail.resolves(this.user)
+        await this.handler.promises.registerNewUserAndSendActivationEmail(
+          this.email
         )
       })
 
       it('should still generate a new password token and email', function () {
-        this.OneTimeTokenHandler.getNewToken.called.should.equal(true)
-        this.EmailHandler.sendEmail.called.should.equal(true)
+        this.OneTimeTokenHandler.promises.getNewToken.called.should.equal(true)
+        this.EmailHandler.promises.sendEmail.called.should.equal(true)
       })
     })
   })

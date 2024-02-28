@@ -3,13 +3,17 @@ const UserCreator = require('./UserCreator')
 const UserGetter = require('./UserGetter')
 const AuthenticationManager = require('../Authentication/AuthenticationManager')
 const NewsletterManager = require('../Newsletter/NewsletterManager')
-const async = require('async')
 const logger = require('@overleaf/logger')
 const crypto = require('crypto')
 const EmailHandler = require('../Email/EmailHandler')
 const OneTimeTokenHandler = require('../Security/OneTimeTokenHandler')
 const settings = require('@overleaf/settings')
 const EmailHelper = require('../Helpers/EmailHelper')
+const {
+  callbackify,
+  callbackifyMultiResult,
+} = require('@overleaf/promise-utils')
+const OError = require('@overleaf/o-error')
 
 const UserRegistrationHandler = {
   _registrationRequestIsValid(body) {
@@ -21,10 +25,10 @@ const UserRegistrationHandler = {
     return !(invalidEmail || invalidPassword)
   },
 
-  _createNewUserIfRequired(user, userDetails, callback) {
+  async _createNewUserIfRequired(user, userDetails) {
     if (!user) {
       userDetails.holdingAccount = false
-      UserCreator.createNewUser(
+      return await UserCreator.promises.createNewUser(
         {
           holdingAccount: false,
           email: userDetails.email,
@@ -32,116 +36,101 @@ const UserRegistrationHandler = {
           last_name: userDetails.last_name,
           analyticsId: userDetails.analyticsId,
         },
-        {},
-        callback
+        {}
       )
-    } else {
-      callback(null, user)
     }
+    return user
   },
 
-  registerNewUser(userDetails, callback) {
-    const self = this
-    const requestIsValid = this._registrationRequestIsValid(userDetails)
+  async registerNewUser(userDetails) {
+    const requestIsValid =
+      UserRegistrationHandler._registrationRequestIsValid(userDetails)
+
     if (!requestIsValid) {
-      return callback(new Error('request is not valid'))
+      throw new Error('request is not valid')
     }
     userDetails.email = EmailHelper.parseEmail(userDetails.email)
-    UserGetter.getUserByAnyEmail(userDetails.email, (error, user) => {
-      if (error) {
-        return callback(error)
-      }
-      if (user && user.holdingAccount === false) {
-        return callback(new Error('EmailAlreadyRegistered'), user)
-      }
-      self._createNewUserIfRequired(user, userDetails, (error, user) => {
-        if (error) {
-          return callback(error)
-        }
-        async.series(
-          [
-            callback =>
-              User.updateOne(
-                { _id: user._id },
-                { $set: { holdingAccount: false } },
-                callback
-              ),
-            callback =>
-              AuthenticationManager.setUserPassword(
-                user,
-                userDetails.password,
-                callback
-              ),
-            callback => {
-              if (userDetails.subscribeToNewsletter === 'true') {
-                NewsletterManager.subscribe(user, error => {
-                  if (error) {
-                    logger.warn(
-                      { err: error, user },
-                      'Failed to subscribe user to newsletter'
-                    )
-                  }
-                })
-              }
-              callback()
-            }, // this can be slow, just fire it off
-          ],
-          error => {
-            callback(error, user)
-          }
+
+    let user = await UserGetter.promises.getUserByAnyEmail(userDetails.email)
+    if (user && user.holdingAccount === false) {
+      // We add userId to the error object so that the calling function can access
+      // the id of the already existing user account.
+      throw new OError('EmailAlreadyRegistered', { userId: user._id })
+    }
+
+    user = await UserRegistrationHandler._createNewUserIfRequired(
+      user,
+      userDetails
+    )
+
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { holdingAccount: false } }
+    ).exec()
+
+    await AuthenticationManager.promises.setUserPassword(
+      user,
+      userDetails.password
+    )
+
+    if (userDetails.subscribeToNewsletter === 'true') {
+      try {
+        NewsletterManager.subscribe(user)
+      } catch (error) {
+        logger.warn(
+          { err: error, user },
+          'Failed to subscribe user to newsletter'
         )
-      })
-    })
+        throw error
+      }
+    }
+
+    return user
   },
 
-  registerNewUserAndSendActivationEmail(email, callback) {
-    UserRegistrationHandler.registerNewUser(
-      {
+  async registerNewUserAndSendActivationEmail(email) {
+    let user
+    try {
+      user = await UserRegistrationHandler.registerNewUser({
         email,
         password: crypto.randomBytes(32).toString('hex'),
-      },
-      (error, user) => {
-        if (error && error.message !== 'EmailAlreadyRegistered') {
-          return callback(error)
-        }
-
-        if (error && error.message === 'EmailAlreadyRegistered') {
-          logger.debug(
-            { email },
-            'user already exists, resending welcome email'
-          )
-        }
-
-        const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
-        OneTimeTokenHandler.getNewToken(
-          'password',
-          { user_id: user._id.toString(), email: user.email },
-          { expiresIn: ONE_WEEK },
-          (error, token) => {
-            if (error) {
-              return callback(error)
-            }
-
-            const setNewPasswordUrl = `${settings.siteUrl}/user/activate?token=${token}&user_id=${user._id}`
-
-            EmailHandler.sendEmail(
-              'registered',
-              {
-                to: user.email,
-                setNewPasswordUrl,
-              },
-              error => {
-                if (error) {
-                  logger.warn({ err: error }, 'failed to send activation email')
-                }
-                callback(null, user, setNewPasswordUrl)
-              }
-            )
-          }
-        )
+      })
+    } catch (error) {
+      if (error.message === 'EmailAlreadyRegistered') {
+        logger.debug({ email }, 'user already exists, resending welcome email')
+        user = await UserGetter.promises.getUserByAnyEmail(email)
+      } else {
+        throw error
       }
+    }
+
+    const ONE_WEEK = 7 * 24 * 60 * 60 // seconds
+    const token = await OneTimeTokenHandler.promises.getNewToken(
+      'password',
+      { user_id: user._id.toString(), email: user.email },
+      { expiresIn: ONE_WEEK }
     )
+
+    const setNewPasswordUrl = `${settings.siteUrl}/user/activate?token=${token}&user_id=${user._id}`
+
+    try {
+      EmailHandler.promises.sendEmail('registered', {
+        to: user.email,
+        setNewPasswordUrl,
+      })
+    } catch (error) {
+      logger.warn({ err: error }, 'failed to send activation email')
+    }
+
+    return { user, setNewPasswordUrl }
   },
 }
 
-module.exports = UserRegistrationHandler
+module.exports = {
+  registerNewUser: callbackify(UserRegistrationHandler.registerNewUser),
+  registerNewUserAndSendActivationEmail: callbackifyMultiResult(
+    UserRegistrationHandler.registerNewUserAndSendActivationEmail,
+    ['user', 'setNewPasswordUrl']
+  ),
+  promises: UserRegistrationHandler,
+}
