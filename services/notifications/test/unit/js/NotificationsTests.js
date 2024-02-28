@@ -41,7 +41,6 @@ describe('Notifications Tests', function () {
       requires: {
         '@overleaf/settings': {},
         './mongodb': { db: this.db, ObjectId },
-        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
       },
     })
 

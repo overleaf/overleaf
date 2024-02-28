@@ -49,9 +49,6 @@ describe('UserGetter', function () {
       requires: {
         '../Helpers/Mongo': { normalizeQuery, normalizeMultiQuery },
         '../../infrastructure/mongodb': this.Mongo,
-        '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub(),
-        },
         '@overleaf/settings': (this.settings = {
           reconfirmNotificationDays: 14,
         }),

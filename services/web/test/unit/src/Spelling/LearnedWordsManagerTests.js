@@ -21,7 +21,6 @@ describe('LearnedWordsManager', function () {
       requires: {
         '../../infrastructure/mongodb': { db: this.db },
         '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub(),
           inc: sinon.stub(),
         },
         '@overleaf/settings': {

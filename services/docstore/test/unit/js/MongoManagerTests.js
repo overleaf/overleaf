@@ -22,7 +22,6 @@ describe('MongoManager', function () {
           db: this.db,
           ObjectId,
         },
-        '@overleaf/metrics': { timeAsyncMethod: sinon.stub() },
         '@overleaf/settings': {
           max_deleted_docs: 42,
           docstore: { archivingLockDurationMs: 5000 },

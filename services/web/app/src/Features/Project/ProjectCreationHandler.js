@@ -1,4 +1,3 @@
-const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
@@ -242,10 +241,3 @@ module.exports = {
     createExampleProject,
   },
 }
-
-metrics.timeAsyncMethod(
-  module.exports,
-  'createBlankProject',
-  'mongo.ProjectCreationHandler',
-  logger
-)

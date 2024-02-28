@@ -1,6 +1,4 @@
 const { db } = require('../../infrastructure/mongodb')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
@@ -94,11 +92,3 @@ const promises = {
 LearnedWordsManager.promises = promises
 
 module.exports = LearnedWordsManager
-;['learnWord', 'unlearnWord', 'getLearnedWords'].map(method =>
-  metrics.timeAsyncMethod(
-    LearnedWordsManager,
-    method,
-    'mongo.LearnedWordsManager',
-    logger
-  )
-)

@@ -1,7 +1,6 @@
 const { callbackify } = require('util')
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
 const settings = require('@overleaf/settings')
 const request = require('requestretry')
 const { promisifyAll } = require('@overleaf/promise-utils')
@@ -373,18 +372,6 @@ function makeAffiliationRequest(options, callback) {
     callback(null, body)
   })
 }
-;[
-  'getInstitutionAffiliations',
-  'getConfirmedInstitutionAffiliations',
-  'getUserAffiliations',
-].map(method =>
-  metrics.timeAsyncMethod(
-    InstitutionsAPI,
-    method,
-    'mongo.InstitutionsAPI',
-    logger
-  )
-)
 
 InstitutionsAPI.promises = promisifyAll(InstitutionsAPI, {
   without: [

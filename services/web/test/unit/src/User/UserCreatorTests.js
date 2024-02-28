@@ -19,7 +19,6 @@ describe('UserCreator', function () {
         '../../models/User': {
           User: this.UserModel,
         },
-        '@overleaf/metrics': { timeAsyncMethod() {} },
         '../../infrastructure/Features': (this.Features = {
           hasFeature: sinon.stub().returns(false),
         }),

@@ -1,7 +1,5 @@
 const { callbackify } = require('util')
 const { db } = require('../../infrastructure/mongodb')
-const metrics = require('@overleaf/metrics')
-const logger = require('@overleaf/logger')
 const moment = require('moment')
 const settings = require('@overleaf/settings')
 const { promisifyAll } = require('@overleaf/promise-utils')
@@ -305,16 +303,6 @@ const decorateFullEmails = (
 
   return emailsData
 }
-;[
-  'getUser',
-  'getUserEmail',
-  'getUserByMainEmail',
-  'getUserByAnyEmail',
-  'getUsers',
-  'ensureUniqueEmailAddress',
-].map(method =>
-  metrics.timeAsyncMethod(UserGetter, method, 'mongo.UserGetter', logger)
-)
 
 UserGetter.promises = promisifyAll(UserGetter, {
   without: ['getSsoUsersAtInstitution', 'getUserFullEmails'],

@@ -53,9 +53,6 @@ describe('ProjectGetter', function () {
     this.ProjectGetter = SandboxedModule.require(modulePath, {
       requires: {
         '../../infrastructure/mongodb': { db: this.db, ObjectId },
-        '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub(),
-        },
         '../../models/Project': {
           Project: this.Project,
         },

@@ -20,9 +20,6 @@ describe('InstitutionsAPI', function () {
     }
     this.InstitutionsAPI = SandboxedModule.require(modulePath, {
       requires: {
-        '@overleaf/metrics': {
-          timeAsyncMethod: sinon.stub(),
-        },
         '@overleaf/settings': this.settings,
         requestretry: this.request,
         '@overleaf/fetch-utils': {
