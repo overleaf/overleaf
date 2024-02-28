@@ -3,6 +3,7 @@ const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const RedisWrapper = require('./RedisWrapper')
 const RateLimiterFlexible = require('rate-limiter-flexible')
+const OError = require('@overleaf/o-error')
 
 const rclient = RedisWrapper.client('ratelimiter')
 
@@ -21,6 +22,9 @@ class RateLimiter {
    *
    *   points - number of points that can be consumed over the given duration
    *            (default: 4)
+   *   subnetPoints - number of points that can be consumed over the given
+   *                  duration accross a sub-network. This should only be used
+   *                  ip-based rate limits.
    *   duration - duration of the fixed window in seconds (default: 1)
    *   blockDuration - additional seconds to block after all points are consumed
    *                   (default: 0)
@@ -32,6 +36,14 @@ class RateLimiter {
       keyPrefix: `rate-limit:${name}`,
       storeClient: rclient,
     })
+    if (opts.subnetPoints) {
+      this._subnetRateLimiter = new RateLimiterFlexible.RateLimiterRedis({
+        ...opts,
+        points: opts.subnetPoints,
+        keyPrefix: `rate-limit:${name}`,
+        storeClient: rclient,
+      })
+    }
   }
 
   async consume(key, points = 1, options = { method: 'unknown' }) {
@@ -44,8 +56,24 @@ class RateLimiter {
         isFirstInDuration: false,
       }
     }
+
+    await this.consumeForRateLimiter(this._rateLimiter, key, options, points)
+
+    if (options.method === 'ip' && this._subnetRateLimiter) {
+      const subnetKey = this.getSubnetKeyFromIp(key)
+      await this.consumeForRateLimiter(
+        this._subnetRateLimiter,
+        subnetKey,
+        options,
+        points,
+        'ip-subnet'
+      )
+    }
+  }
+
+  async consumeForRateLimiter(rateLimiter, key, options, points, method) {
     try {
-      const res = await this._rateLimiter.consume(key, points, options)
+      const res = await rateLimiter.consume(key, points, options)
       return res
     } catch (err) {
       if (err instanceof Error) {
@@ -54,16 +82,27 @@ class RateLimiter {
         // Only log the first time we exceed the rate limit for a given key and
         // duration. This happens when the previous amount of consumed points
         // was below the threshold.
-        if (err.consumedPoints - points <= this._rateLimiter.points) {
+        if (err.consumedPoints - points <= rateLimiter.points) {
           logger.warn({ path: this.name, key }, 'rate limit exceeded')
         }
         Metrics.inc('rate-limit-hit', 1, {
           path: this.name,
-          method: options.method,
+          method: method || options.method,
         })
         throw err
       }
     }
+  }
+
+  getSubnetKeyFromIp(ip) {
+    if (!/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(ip)) {
+      throw new OError(
+        'Cannot generate subnet key as the ip address is not of the expected format.',
+        { ip }
+      )
+    }
+
+    return ip.split('.').slice(0, 3).join('.')
   }
 
   async delete(key) {
@@ -83,6 +122,7 @@ const openProjectRateLimiter = new RateLimiter('open-project', {
 // Keep in sync with the can-skip-captcha options.
 const overleafLoginRateLimiter = new RateLimiter('overleaf-login', {
   points: 20,
+  subnetPoints: 200,
   duration: 60,
 })
 
