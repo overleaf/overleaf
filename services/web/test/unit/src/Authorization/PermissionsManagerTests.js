@@ -1,12 +1,22 @@
+const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Authorization/PermissionsManager.js'
 const SandboxedModule = require('sandboxed-module')
+const { ForbiddenError } = require('../../../../app/src/Features/Errors/Errors')
 
 describe('PermissionsManager', function () {
   beforeEach(function () {
     this.PermissionsManager = SandboxedModule.require(modulePath, {
-      requires: {},
+      requires: {
+        '../../infrastructure/Modules': (this.Modules = {
+          promises: {
+            hooks: {
+              fire: (this.hooksFire = sinon.stub().resolves([{}])),
+            },
+          },
+        }),
+      },
     })
     this.PermissionsManager.registerCapability('capability1', {
       default: true,
@@ -387,6 +397,111 @@ describe('PermissionsManager', function () {
           ['policy2', false],
         ])
       )
+    })
+  })
+
+  describe('checkUserPermissions', function () {
+    describe('allowed', function () {
+      it('should not error when managedUsersEnabled is not enabled for user', async function () {
+        const result =
+          await this.PermissionsManager.promises.checkUserPermissions(
+            { _id: 'user123' },
+            ['add-secondary-email']
+          )
+        expect(result).to.be.undefined
+      })
+
+      it('should not error when default capability is true', async function () {
+        this.PermissionsManager.registerCapability('some-policy-to-check', {
+          default: true,
+        })
+        this.hooksFire.resolves([
+          {
+            managedUsersEnabled: true,
+            groupPolicy: {},
+          },
+        ])
+        const result =
+          await this.PermissionsManager.promises.checkUserPermissions(
+            { _id: 'user123' },
+            ['some-policy-to-check']
+          )
+        expect(result).to.be.undefined
+      })
+
+      it('should not error when default permission is false but user has permission', async function () {
+        this.PermissionsManager.registerCapability('some-policy-to-check', {
+          default: false,
+        })
+        this.PermissionsManager.registerPolicy('userCanDoSomePolicy', {
+          'some-policy-to-check': true,
+        })
+        this.hooksFire.resolves([
+          {
+            managedUsersEnabled: true,
+            groupPolicy: {
+              userCanDoSomePolicy: true,
+            },
+          },
+        ])
+        const result =
+          await this.PermissionsManager.promises.checkUserPermissions(
+            { _id: 'user123' },
+            ['some-policy-to-check']
+          )
+        expect(result).to.be.undefined
+      })
+    })
+
+    describe('not allowed', function () {
+      it('should return error when managedUsersEnabled is enabled for user but there is no group policy', async function () {
+        this.hooksFire.resolves([{ managedUsersEnabled: true }])
+        await expect(
+          this.PermissionsManager.promises.checkUserPermissions(
+            { _id: 'user123' },
+            ['add-secondary-email']
+          )
+        ).to.be.rejectedWith(Error, 'unknown capability: add-secondary-email')
+      })
+
+      it('should return error when default permission is false', async function () {
+        this.PermissionsManager.registerCapability('some-policy-to-check', {
+          default: false,
+        })
+        this.hooksFire.resolves([
+          {
+            managedUsersEnabled: true,
+            groupPolicy: {},
+          },
+        ])
+        await expect(
+          this.PermissionsManager.promises.checkUserPermissions(
+            { _id: 'user123' },
+            ['some-policy-to-check']
+          )
+        ).to.be.rejectedWith(ForbiddenError)
+      })
+
+      it('should return error when default permission is true but user does not have permission', async function () {
+        this.PermissionsManager.registerCapability('some-policy-to-check', {
+          default: true,
+        })
+        this.PermissionsManager.registerPolicy('userCannotDoSomePolicy', {
+          'some-policy-to-check': false,
+        })
+        this.hooksFire.resolves([
+          {
+            managedUsersEnabled: true,
+            groupPolicy: { userCannotDoSomePolicy: true },
+          },
+        ])
+        await expect(
+          this.PermissionsManager.promises.checkUserPermissions(
+            { _id: 'user123' },
+            ['some-policy-to-check']
+          )
+        ).to.be.rejectedWith(ForbiddenError)
+      })
     })
   })
 })

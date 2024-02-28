@@ -42,6 +42,8 @@
  */
 
 const { callbackify } = require('util')
+const { ForbiddenError } = require('../Errors/Errors')
+const Modules = require('../../infrastructure/Modules')
 
 const POLICY_TO_CAPABILITY_MAP = new Map()
 const POLICY_TO_VALIDATOR_MAP = new Map()
@@ -313,6 +315,38 @@ async function getUserValidationStatus({ user, groupPolicy, subscription }) {
   return userValidationStatus
 }
 
+/**
+ * Checks if a user has permission for a given set of capabilities
+ *
+ * @param {Object} user - The user object to retrieve the group policy for.
+ *   Only the user's _id is required
+ * @param {Array} capabilities - The list of the capabilities to check permission for.
+ * @returns {Promise<void>}
+ * @throws {Error} If the user does not have permission
+ */
+async function checkUserPermissions(user, requiredCapabilities) {
+  const result =
+    (
+      await Modules.promises.hooks.fire(
+        'getManagedUsersEnrollmentForUser',
+        user
+      )
+    )[0] || {}
+  const { groupPolicy, managedUsersEnabled } = result
+  if (!managedUsersEnabled) {
+    return
+  }
+  // check that the user has all the required capabilities
+  for (const requiredCapability of requiredCapabilities) {
+    // if the user has the permission, continue
+    if (!hasPermission(groupPolicy, requiredCapability)) {
+      throw new ForbiddenError(
+        `user does not have permission for ${requiredCapability}`
+      )
+    }
+  }
+}
+
 module.exports = {
   registerCapability,
   registerPolicy,
@@ -320,5 +354,5 @@ module.exports = {
   getUserCapabilities,
   getUserRestrictions,
   getUserValidationStatus: callbackify(getUserValidationStatus),
-  promises: { getUserValidationStatus },
+  promises: { checkUserPermissions, getUserValidationStatus },
 }

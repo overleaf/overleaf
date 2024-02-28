@@ -1,9 +1,9 @@
 const { ForbiddenError, UserNotFoundError } = require('../Errors/Errors')
 const {
-  hasPermission,
   getUserCapabilities,
   getUserRestrictions,
 } = require('./PermissionsManager')
+const { checkUserPermissions } = require('./PermissionsManager').promises
 const Modules = require('../../infrastructure/Modules')
 
 /**
@@ -76,26 +76,7 @@ function requirePermission(...requiredCapabilities) {
       return next(new Error('no user'))
     }
     try {
-      const result =
-        (
-          await Modules.promises.hooks.fire(
-            'getManagedUsersEnrollmentForUser',
-            req.user
-          )
-        )[0] || {}
-      const { groupPolicy, managedUsersEnabled } = result
-      if (!managedUsersEnabled) {
-        return next()
-      }
-      // check that the user has all the required capabilities
-      for (const requiredCapability of requiredCapabilities) {
-        // if the user has the permission, continue
-        if (!hasPermission(groupPolicy, requiredCapability)) {
-          throw new ForbiddenError(
-            `user does not have permission for ${requiredCapability}`
-          )
-        }
-      }
+      await checkUserPermissions(req.user, requiredCapabilities)
       next()
     } catch (error) {
       next(error)
