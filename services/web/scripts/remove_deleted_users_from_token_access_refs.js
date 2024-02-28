@@ -3,6 +3,9 @@ const { batchedUpdate } = require('./helpers/batchedUpdate')
 const { ObjectId } = require('mongodb')
 const minimist = require('minimist')
 const CollaboratorsHandler = require('../app/src/Features/Collaborators/CollaboratorsHandler')
+const {
+  READ_PREFERENCE_SECONDARY,
+} = require('../app/src/infrastructure/mongodb')
 
 const argv = minimist(process.argv.slice(2), {
   string: ['projects'],
@@ -35,9 +38,18 @@ const PROJECTS_LIST = argv.projects
 
 async function findUserIds() {
   const userIds = new Set()
-  const cursor = db.users.find({}, { _id: 1 })
+  const cursor = db.users.find(
+    {},
+    {
+      projection: { _id: 1 },
+      readPreference: READ_PREFERENCE_SECONDARY,
+    }
+  )
   for await (const user of cursor) {
     userIds.add(user._id.toString())
+    if (userIds.size % 1_000_000 === 0) {
+      console.log(`=> ${userIds.size} users added`, new Date().toISOString())
+    }
   }
   console.log(`=> User ids count: ${userIds.size}`)
   return userIds
