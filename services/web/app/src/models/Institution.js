@@ -4,6 +4,7 @@ const { ObjectId } = Schema
 const settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const request = require('request')
+const { promisify } = require('@overleaf/promise-utils')
 
 const InstitutionSchema = new Schema(
   {
@@ -43,6 +44,11 @@ InstitutionSchema.method('fetchV1Data', function (callback) {
     }
   )
 })
+
+InstitutionSchema.method(
+  'fetchV1DataPromise',
+  promisify(InstitutionSchema.methods.fetchV1Data)
+)
 
 exports.Institution = mongoose.model('Institution', InstitutionSchema)
 exports.InstitutionSchema = InstitutionSchema

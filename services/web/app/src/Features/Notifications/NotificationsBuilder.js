@@ -325,6 +325,9 @@ NotificationsBuilder.promises = {
   dropboxDuplicateProjectNames(userId) {
     return promisifyAll(dropboxDuplicateProjectNames(userId))
   },
+  featuresUpgradedByAffiliation: function (affiliation, user) {
+    return promisifyAll(featuresUpgradedByAffiliation(affiliation, user))
+  },
   ipMatcherAffiliation: function (userId) {
     return promisifyAll(ipMatcherAffiliation(userId))
   },

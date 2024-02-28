@@ -1,15 +1,12 @@
-const async = require('async')
-const { callbackify, promisify } = require('util')
+const {
+  callbackifyAll,
+  promiseMapWithLimit,
+} = require('@overleaf/promise-utils')
 const { ObjectId } = require('mongodb')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const { fetchJson } = require('@overleaf/fetch-utils')
-const {
-  getInstitutionAffiliations,
-  getConfirmedInstitutionAffiliations,
-  addAffiliation,
-  promises: InstitutionsAPIPromises,
-} = require('./InstitutionsAPI')
+const InstitutionsAPI = require('./InstitutionsAPI')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const FeaturesHelper = require('../Subscription/FeaturesHelper')
 const UserGetter = require('../User/UserGetter')
@@ -78,8 +75,50 @@ async function _checkUsersFeatures(userIds) {
   return result
 }
 
-async function checkInstitutionUsers(institutionId, emitNonProUserIds) {
-  /*
+const InstitutionsManager = {
+  async clearInstitutionNotifications(institutionId, dryRun) {
+    async function clear(key) {
+      const run = dryRun
+        ? NotificationsHandler.promises.previewMarkAsReadByKeyOnlyBulk
+        : NotificationsHandler.promises.markAsReadByKeyOnlyBulk
+
+      return await run(key)
+    }
+
+    const ipMatcherAffiliation = await clear(
+      `ip-matched-affiliation-${institutionId}`
+    )
+    const featuresUpgradedByAffiliation = await clear(
+      `features-updated-by=${institutionId}`
+    )
+    const redundantPersonalSubscription = await clear(
+      `redundant-personal-subscription-${institutionId}`
+    )
+
+    return {
+      ipMatcherAffiliation,
+      featuresUpgradedByAffiliation,
+      redundantPersonalSubscription,
+    }
+  },
+
+  async refreshInstitutionUsers(institutionId, notify) {
+    const refreshFunction = notify ? refreshFeaturesAndNotify : refreshFeatures
+
+    const { institution, affiliations } = await fetchInstitutionAndAffiliations(
+      institutionId
+    )
+
+    for (const affiliation of affiliations) {
+      affiliation.institutionName = institution.name
+      affiliation.institutionId = institutionId
+    }
+
+    await promiseMapWithLimit(ASYNC_LIMIT, affiliations, refreshFunction)
+  },
+
+  async checkInstitutionUsers(institutionId, emitNonProUserIds) {
+    /*
     v1 has affiliation data. Via getInstitutionAffiliationsCounts, v1 will send
     lapsed_user_ids, which includes all user types
     (not linked, linked and entitled, linked not entitled).
@@ -88,357 +127,245 @@ async function checkInstitutionUsers(institutionId, emitNonProUserIds) {
     lapsed count into SSO (entitled and not) or just email users
   */
 
-  const result = {
-    emailUsers: {
-      total: 0, // v1 all users - v2 all SSO users
-      current: 0, // v1 current - v1 SSO entitled - (v2 calculated not entitled current)
-      lapsed: 0, // v1 lapsed user IDs that are not in v2 SSO users
-      pro: {
-        current: 0,
-        lapsed: 0,
-      },
-      nonPro: {
-        current: 0,
-        lapsed: 0,
-      },
-    },
-    ssoUsers: {
-      total: 0, // only v2
-      current: {
-        entitled: 0, // only v1
-        notEntitled: 0, // v2 non-entitled SSO users - v1 lapsed user IDs
-      },
-      lapsed: 0, // v2 SSO users that are in v1 lapsed user IDs
-      pro: {
-        current: 0,
-        lapsed: 0,
-      },
-      nonPro: {
-        current: 0,
-        lapsed: 0,
-      },
-    },
-  }
-
-  const {
-    user_ids: userIds, // confirmed and not removed users. Includes users with lapsed reconfirmations
-    current_users_count: currentUsersCount, // all users not with lapsed reconfirmations
-    lapsed_user_ids: lapsedUserIds, // includes all user types that did not reconfirm (sso entitled, sso not entitled, email only)
-    with_confirmed_email: withConfirmedEmail, // same count as affiliation metrics
-    entitled_via_sso: entitled, // same count as affiliation metrics
-  } = await InstitutionsAPIPromises.getInstitutionAffiliationsCounts(
-    institutionId
-  )
-  result.ssoUsers.current.entitled = entitled
-
-  const { allSsoUsers, allSsoUsersByIds, currentNotEntitledCount } =
-    await _getSsoUsers(institutionId, lapsedUserIds)
-  result.ssoUsers.total = allSsoUsers.length
-  result.ssoUsers.current.notEntitled = currentNotEntitledCount
-
-  // check if lapsed user ID an SSO user
-  const lapsedUsersByIds = {}
-  lapsedUserIds.forEach(id => {
-    lapsedUsersByIds[id] = true // create a map for more performant lookups
-    if (allSsoUsersByIds[id]) {
-      ++result.ssoUsers.lapsed
-    } else {
-      ++result.emailUsers.lapsed
-    }
-  })
-
-  result.emailUsers.current =
-    currentUsersCount - entitled - result.ssoUsers.current.notEntitled
-  result.emailUsers.total = userIds.length - allSsoUsers.length
-
-  // compare v1 and v2 counts.
-  if (
-    result.ssoUsers.current.notEntitled + result.emailUsers.current !==
-    withConfirmedEmail
-  ) {
-    result.databaseMismatch = {
-      withConfirmedEmail: {
-        v1: withConfirmedEmail,
-        v2: result.ssoUsers.current.notEntitled + result.emailUsers.current,
-      },
-    }
-  }
-
-  // Add Pro/NonPro status for users
-  // NOTE: Users not entitled via institution could have Pro via another method
-  const { proUserIds, nonProUserIds } = await _checkUsersFeatures(userIds)
-  proUserIds.forEach(id => {
-    const userType = lapsedUsersByIds[id] ? 'lapsed' : 'current'
-    if (allSsoUsersByIds[id]) {
-      result.ssoUsers.pro[userType]++
-    } else {
-      result.emailUsers.pro[userType]++
-    }
-  })
-  nonProUserIds.forEach(id => {
-    const userType = lapsedUsersByIds[id] ? 'lapsed' : 'current'
-    if (allSsoUsersByIds[id]) {
-      result.ssoUsers.nonPro[userType]++
-    } else {
-      result.emailUsers.nonPro[userType]++
-    }
-  })
-  if (emitNonProUserIds) {
-    result.nonProUserIds = nonProUserIds
-  }
-  return result
-}
-
-const InstitutionsManager = {
-  clearInstitutionNotifications(institutionId, dryRun, callback) {
-    function clear(key, cb) {
-      const run = dryRun
-        ? NotificationsHandler.previewMarkAsReadByKeyOnlyBulk
-        : NotificationsHandler.markAsReadByKeyOnlyBulk
-
-      run(key, cb)
-    }
-
-    async.series(
-      {
-        ipMatcherAffiliation(cb) {
-          const key = `ip-matched-affiliation-${institutionId}`
-          clear(key, cb)
+    const result = {
+      emailUsers: {
+        total: 0, // v1 all users - v2 all SSO users
+        current: 0, // v1 current - v1 SSO entitled - (v2 calculated not entitled current)
+        lapsed: 0, // v1 lapsed user IDs that are not in v2 SSO users
+        pro: {
+          current: 0,
+          lapsed: 0,
         },
-        featuresUpgradedByAffiliation(cb) {
-          const key = `features-updated-by=${institutionId}`
-          clear(key, cb)
-        },
-        redundantPersonalSubscription(cb) {
-          const key = `redundant-personal-subscription-${institutionId}`
-          clear(key, cb)
+        nonPro: {
+          current: 0,
+          lapsed: 0,
         },
       },
-      callback
+      ssoUsers: {
+        total: 0, // only v2
+        current: {
+          entitled: 0, // only v1
+          notEntitled: 0, // v2 non-entitled SSO users - v1 lapsed user IDs
+        },
+        lapsed: 0, // v2 SSO users that are in v1 lapsed user IDs
+        pro: {
+          current: 0,
+          lapsed: 0,
+        },
+        nonPro: {
+          current: 0,
+          lapsed: 0,
+        },
+      },
+    }
+
+    const {
+      user_ids: userIds, // confirmed and not removed users. Includes users with lapsed reconfirmations
+      current_users_count: currentUsersCount, // all users not with lapsed reconfirmations
+      lapsed_user_ids: lapsedUserIds, // includes all user types that did not reconfirm (sso entitled, sso not entitled, email only)
+      with_confirmed_email: withConfirmedEmail, // same count as affiliation metrics
+      entitled_via_sso: entitled, // same count as affiliation metrics
+    } = await InstitutionsAPI.promises.getInstitutionAffiliationsCounts(
+      institutionId
     )
-  },
+    result.ssoUsers.current.entitled = entitled
 
-  refreshInstitutionUsers(institutionId, notify, callback) {
-    const refreshFunction = notify ? refreshFeaturesAndNotify : refreshFeatures
-    async.waterfall(
-      [
-        cb => fetchInstitutionAndAffiliations(institutionId, cb),
-        function (institution, affiliations, cb) {
-          for (const affiliation of affiliations) {
-            affiliation.institutionName = institution.name
-            affiliation.institutionId = institutionId
-          }
-          async.eachLimit(affiliations, ASYNC_LIMIT, refreshFunction, err =>
-            cb(err)
-          )
-        },
-      ],
-      callback
-    )
-  },
+    const { allSsoUsers, allSsoUsersByIds, currentNotEntitledCount } =
+      await _getSsoUsers(institutionId, lapsedUserIds)
+    result.ssoUsers.total = allSsoUsers.length
+    result.ssoUsers.current.notEntitled = currentNotEntitledCount
 
-  checkInstitutionUsers: callbackify(checkInstitutionUsers),
-
-  getInstitutionUsersSubscriptions(institutionId, callback) {
-    getInstitutionAffiliations(institutionId, function (error, affiliations) {
-      if (error) {
-        return callback(error)
+    // check if lapsed user ID an SSO user
+    const lapsedUsersByIds = {}
+    lapsedUserIds.forEach(id => {
+      lapsedUsersByIds[id] = true // create a map for more performant lookups
+      if (allSsoUsersByIds[id]) {
+        ++result.ssoUsers.lapsed
+      } else {
+        ++result.emailUsers.lapsed
       }
-      const userIds = affiliations.map(
-        affiliation => new ObjectId(affiliation.user_id)
-      )
-      Subscription.find({ admin_id: userIds })
-        .populate('admin_id', 'email')
-        .exec(callback)
     })
+
+    result.emailUsers.current =
+      currentUsersCount - entitled - result.ssoUsers.current.notEntitled
+    result.emailUsers.total = userIds.length - allSsoUsers.length
+
+    // compare v1 and v2 counts.
+    if (
+      result.ssoUsers.current.notEntitled + result.emailUsers.current !==
+      withConfirmedEmail
+    ) {
+      result.databaseMismatch = {
+        withConfirmedEmail: {
+          v1: withConfirmedEmail,
+          v2: result.ssoUsers.current.notEntitled + result.emailUsers.current,
+        },
+      }
+    }
+
+    // Add Pro/NonPro status for users
+    // NOTE: Users not entitled via institution could have Pro via another method
+    const { proUserIds, nonProUserIds } = await _checkUsersFeatures(userIds)
+    proUserIds.forEach(id => {
+      const userType = lapsedUsersByIds[id] ? 'lapsed' : 'current'
+      if (allSsoUsersByIds[id]) {
+        result.ssoUsers.pro[userType]++
+      } else {
+        result.emailUsers.pro[userType]++
+      }
+    })
+    nonProUserIds.forEach(id => {
+      const userType = lapsedUsersByIds[id] ? 'lapsed' : 'current'
+      if (allSsoUsersByIds[id]) {
+        result.ssoUsers.nonPro[userType]++
+      } else {
+        result.emailUsers.nonPro[userType]++
+      }
+    })
+    if (emitNonProUserIds) {
+      result.nonProUserIds = nonProUserIds
+    }
+    return result
   },
 
-  affiliateUsers(hostname, callback) {
+  async getInstitutionUsersSubscriptions(institutionId) {
+    const affiliations =
+      await InstitutionsAPI.promises.getInstitutionAffiliations(institutionId)
+
+    const userIds = affiliations.map(
+      affiliation => new ObjectId(affiliation.user_id)
+    )
+    return await Subscription.find({ admin_id: userIds })
+      .populate('admin_id', 'email')
+      .exec()
+  },
+
+  async affiliateUsers(hostname) {
     const reversedHostname = hostname.trim().split('').reverse().join('')
-    UserGetter.getInstitutionUsersByHostname(hostname, (error, users) => {
-      if (error) {
-        OError.tag(error, 'problem fetching users by hostname')
-        return callback(error)
-      }
 
-      async.mapLimit(
-        users,
-        ASYNC_LIMIT,
-        (user, innerCallback) => {
-          affiliateUserByReversedHostname(user, reversedHostname, innerCallback)
-        },
-        callback
-      )
-    })
+    let users
+    try {
+      users = await UserGetter.promises.getInstitutionUsersByHostname(hostname)
+    } catch (error) {
+      OError.tag(error, 'problem fetching users by hostname')
+      throw error
+    }
+
+    await promiseMapWithLimit(ASYNC_LIMIT, users, user =>
+      affiliateUserByReversedHostname(user, reversedHostname)
+    )
   },
 
-  confirmDomain: callbackify(confirmDomain),
+  /**
+   * Enqueue a job for adding affiliations for when a domain is confirmed
+   */
+  async confirmDomain(hostname) {
+    const queue = Queues.getQueue('confirm-institution-domain')
+    await queue.add({ hostname })
+  },
+
+  async fetchV1Data(institution) {
+    const url = `${Settings.apis.v1.url}/universities/list/${institution.v1Id}`
+    try {
+      const data = await fetchJson(url, {
+        signal: AbortSignal.timeout(Settings.apis.v1.timeout),
+      })
+
+      institution.name = data?.name
+      institution.countryCode = data?.country_code
+      institution.departments = data?.departments
+      institution.portalSlug = data?.portal_slug
+    } catch (error) {
+      logger.err(
+        { model: 'Institution', v1Id: institution.v1Id, error },
+        '[fetchV1DataError]'
+      )
+    }
+  },
 }
 
-const fetchInstitutionAndAffiliations = (institutionId, callback) =>
-  async.waterfall(
-    [
-      cb =>
-        Institution.findOne({ v1Id: institutionId }, (err, institution) =>
-          cb(err, institution)
-        ),
-      (institution, cb) =>
-        institution.fetchV1Data((err, institution) => cb(err, institution)),
-      (institution, cb) =>
-        getConfirmedInstitutionAffiliations(
-          institutionId,
-          (err, affiliations) => cb(err, institution, affiliations)
-        ),
-    ],
-    callback
-  )
+const fetchInstitutionAndAffiliations = async institutionId => {
+  let institution = await Institution.findOne({ v1Id: institutionId }).exec()
+  institution = await institution.fetchV1DataPromise()
 
-function refreshFeatures(affiliation, callback) {
-  const userId = new ObjectId(affiliation.user_id)
-  FeaturesUpdater.refreshFeatures(userId, 'refresh-institution-users', callback)
-}
-
-function refreshFeaturesAndNotify(affiliation, callback) {
-  const userId = new ObjectId(affiliation.user_id)
-  async.waterfall(
-    [
-      cb =>
-        FeaturesUpdater.refreshFeatures(
-          userId,
-          'refresh-institution-users',
-          (err, features, featuresChanged) => cb(err, featuresChanged)
-        ),
-      (featuresChanged, cb) =>
-        getUserInfo(userId, (error, user, subscription) =>
-          cb(error, user, subscription, featuresChanged)
-        ),
-      (user, subscription, featuresChanged, cb) =>
-        notifyUser(user, affiliation, subscription, featuresChanged, cb),
-    ],
-    callback
-  )
-}
-
-const getUserInfo = (userId, callback) =>
-  async.waterfall(
-    [
-      cb => UserGetter.getUser(userId, { _id: 1 }, cb),
-      (user, cb) =>
-        SubscriptionLocator.getUsersSubscription(user, (err, subscription) =>
-          cb(err, user, subscription)
-        ),
-    ],
-    callback
-  )
-
-const notifyUser = (
-  user,
-  affiliation,
-  subscription,
-  featuresChanged,
-  callback
-) =>
-  async.parallel(
-    [
-      function (cb) {
-        if (featuresChanged) {
-          NotificationsBuilder.featuresUpgradedByAffiliation(
-            affiliation,
-            user
-          ).create(cb)
-        } else {
-          cb()
-        }
-      },
-      function (cb) {
-        if (subscription && !subscription.groupPlan) {
-          NotificationsBuilder.redundantPersonalSubscription(
-            affiliation,
-            user
-          ).create(cb)
-        } else {
-          cb()
-        }
-      },
-    ],
-    callback
-  )
-
-async function fetchV1Data(institution) {
-  const url = `${Settings.apis.v1.url}/universities/list/${institution.v1Id}`
-  try {
-    const data = await fetchJson(url, {
-      signal: AbortSignal.timeout(Settings.apis.v1.timeout),
-    })
-
-    institution.name = data?.name
-    institution.countryCode = data?.country_code
-    institution.departments = data?.departments
-    institution.portalSlug = data?.portal_slug
-  } catch (error) {
-    logger.err(
-      { model: 'Institution', v1Id: institution.v1Id, error },
-      '[fetchV1DataError]'
+  const affiliations =
+    await InstitutionsAPI.promises.getConfirmedInstitutionAffiliations(
+      institutionId
     )
-  }
+
+  return { institution, affiliations }
 }
 
-/**
- * Enqueue a job for adding affiliations for when a domain is confirmed
- */
-async function confirmDomain(hostname) {
-  const queue = Queues.getQueue('confirm-institution-domain')
-  await queue.add({ hostname })
+async function refreshFeatures(affiliation) {
+  const userId = new ObjectId(affiliation.user_id)
+  return await FeaturesUpdater.promises.refreshFeatures(
+    userId,
+    'refresh-institution-users'
+  )
 }
 
-function affiliateUserByReversedHostname(user, reversedHostname, callback) {
+async function refreshFeaturesAndNotify(affiliation) {
+  const userId = new ObjectId(affiliation.user_id)
+  const { featuresChanged } = await FeaturesUpdater.promises.refreshFeatures(
+    userId,
+    'refresh-institution-users'
+  )
+  const { user, subscription } = await getUserInfo(userId)
+  return await notifyUser(user, affiliation, subscription, featuresChanged)
+}
+
+const getUserInfo = async userId => {
+  const user = await UserGetter.promises.getUser(userId, { _id: 1 })
+  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
+    user
+  )
+  return { user, subscription }
+}
+
+const notifyUser = async (user, affiliation, subscription, featuresChanged) => {
+  return await Promise.all([
+    (async () => {
+      if (featuresChanged) {
+        return await NotificationsBuilder.promises
+          .featuresUpgradedByAffiliation(affiliation, user)
+          .create()
+      }
+    })(),
+    (async () => {
+      if (subscription && !subscription.groupPlan) {
+        return await NotificationsBuilder.promises
+          .redundantPersonalSubscription(affiliation, user)
+          .create()
+      }
+    })(),
+  ])
+}
+
+async function affiliateUserByReversedHostname(user, reversedHostname) {
   const matchingEmails = user.emails.filter(
     email => email.reversedHostname === reversedHostname
   )
-  async.mapSeries(
-    matchingEmails,
-    (email, innerCallback) => {
-      addAffiliation(
-        user._id,
-        email.email,
-        {
-          confirmedAt: email.confirmedAt,
-          entitlement:
-            email.samlIdentifier && email.samlIdentifier.hasEntitlement,
-        },
-        error => {
-          if (error) {
-            OError.tag(
-              error,
-              'problem adding affiliation while confirming hostname'
-            )
-            return innerCallback(error)
-          }
-          innerCallback()
-        }
-      )
-    },
-    err => {
-      if (err) {
-        return callback(err)
-      }
-      FeaturesUpdater.refreshFeatures(
-        user._id,
-        'affiliate-user-by-reversed-hostname',
-        callback
-      )
+
+  for (const email of matchingEmails) {
+    try {
+      await InstitutionsAPI.promises.addAffiliation(user._id, email.email, {
+        confirmedAt: email.confirmedAt,
+        entitlement:
+          email.samlIdentifier && email.samlIdentifier.hasEntitlement,
+      })
+    } catch (error) {
+      OError.tag(error, 'problem adding affiliation while confirming hostname')
+      throw error
     }
+  }
+
+  await FeaturesUpdater.promises.refreshFeatures(
+    user._id,
+    'affiliate-user-by-reversed-hostname'
   )
 }
 
-InstitutionsManager.promises = {
-  affiliateUsers: promisify(InstitutionsManager.affiliateUsers),
-  confirmDomain,
-  checkInstitutionUsers,
-  clearInstitutionNotifications: promisify(
-    InstitutionsManager.clearInstitutionNotifications
-  ),
-  fetchV1Data,
+module.exports = {
+  ...callbackifyAll(InstitutionsManager),
+  promises: InstitutionsManager,
 }
-
-module.exports = InstitutionsManager
