@@ -22,8 +22,8 @@
   "devDependencies": {
     "chai": "^3.3.0",
     "mocha": "^10.2.0",
-    "typescript": "^5.0.4",
-    "sinon": "^9.2.4"
+    "sinon": "^9.2.4",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
     "@overleaf/o-error": "*",
