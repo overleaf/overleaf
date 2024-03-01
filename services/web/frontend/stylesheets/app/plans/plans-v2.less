@@ -7,9 +7,7 @@
 @plans-v2-highlighted-text-height-mobile: 41px;
 @plans-v2-learn-more-link-color: hsl(206, 100%, 52%);
 @plans-v2-top-switch-group-width-mobile: 46%;
-@plans-v2-discount-highlighted-text-z-index: 2;
 @plans-v2-table-border-radius: 20px;
-@plans-v2-dark-blue: #2857a1;
 @plans-v2-table-td-mobile-min-height: 34px;
 
 .plans {
@@ -17,11 +15,6 @@
     [data-ol-current-view='group'] [data-ol-plans-v2-m-a-switch-container] {
       display: none;
     }
-  }
-
-  .btn-dark-blue {
-    background-color: @plans-v2-dark-blue;
-    color: @white;
   }
 }
 
@@ -404,7 +397,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   }
 }
 
-.plans-v2-table-group,
 .plans-v2-table-student {
   tr {
     // "hide" the last column on desktop by making the background-color as the default background color
@@ -459,27 +451,12 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
   }
 
   @media (max-width: @screen-md-max) {
-    tr {
+    tr:first-of-type {
       th:last-of-type {
         // Last column is only a UI placeholder for desktop view.
         // We need to hide it for mobile to have the full table fully visible on mobile
         // without any empty horizontal space.
         display: none;
-      }
-    }
-  }
-
-  @media (max-width: @screen-xs-max) {
-    tr {
-      &:not(.plans-v2-table-divider) {
-        td:not(:first-of-type),
-        th:not(:first-of-type) {
-          // 33.33% is because table-group & table-student have 3 real column on mobile.
-          // It actually has 5 table column, but on mobile version,
-          // the first column become row and the last column is hidden since it is just a UI placeholder.
-          // We need to force 33.33% width to make each of 3 columns have an equal width of 1/3 screen width.
-          width: 33.33%;
-        }
       }
     }
   }
@@ -535,29 +512,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       }
     }
   }
-
-  // for remove-personal-plan split test default variant
-  @media (max-width: @screen-xs-max) {
-    tr.cols-4:not(.plans-v2-table-divider) {
-      td,
-      th:not(:first-of-type) {
-        // 25% is because table-individual have 4 real columns on mobile
-        // it actually has 5 table columns, but on mobile version, the first column become row
-        // we need to force 25% width to make each of 4 columns have an equal width of 1/4 screen width
-        width: 25%;
-      }
-    }
-    // for remove-personal-plan split test personal-off variant
-    tr.cols-3:not(.plans-v2-table-divider) {
-      td:not(:first-of-type),
-      th:not(:first-of-type) {
-        // 33% is because table-individual have 3 real columns on mobile
-        // it actually has 4 table columns, but on mobile version, the first column become row
-        // we need to force 33% width to make each of 3 columns have an equal width of 1/3 screen width
-        width: calc(100% / 3);
-      }
-    }
-  }
 }
 
 .plans-v2-table-group {
@@ -578,6 +532,30 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
 
     @media (max-width: @screen-xs-max) {
       font-size: @font-size-small;
+    }
+  }
+
+  tr {
+    // top right border radius on desktop only
+    &:first-of-type {
+      th:last-child > .plans-v2-table-th {
+        border-top-right-radius: @plans-v2-table-border-radius;
+
+        @media (max-width: @screen-xs-max) {
+          border-top-right-radius: 0;
+        }
+      }
+    }
+
+    // bottom right border radius on desktop only
+    &:last-of-type {
+      td:last-child > .plans-v2-table-cell {
+        border-bottom-right-radius: @plans-v2-table-border-radius;
+
+        @media (max-width: @screen-xs-max) {
+          border-bottom-right-radius: 0;
+        }
+      }
     }
   }
 }
@@ -612,7 +590,7 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     background-clip: padding-box; /* needed for firefox when there is bg color */
     text-align: center;
 
-    &:not(.plans-v2-table-cell-before-green-highlighted-column):not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted):not(.plans-v2-table-discount-highlighted) {
+    &:not(.plans-v2-table-cell-before-green-highlighted-column):not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
       border-right: 1px solid @ol-blue-gray-0;
 
       @media (max-width: @screen-xs-max) {
@@ -693,14 +671,6 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
         }
       }
     }
-
-    &:last-child td.plans-v2-table-discount-highlighted {
-      border-bottom: 2px solid @plans-v2-dark-blue;
-
-      @media (max-width: @screen-xs-max) {
-        border-bottom: unset;
-      }
-    }
   }
 
   .fa-check {
@@ -732,6 +702,30 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       // so, one tr can have multiple "visible" row depending on the total width.
       flex-flow: row wrap;
       justify-content: space-around;
+    }
+
+    // The forced width below (plans-v2-table-cols-n) is to ensure the table columns have an equal width
+    // because on mobile, the first column (empty cell on first `tr` and feature name on the rest of `tr`) will be shown as its own row
+    // and the rest of the `tr` will incorporate a full width of the viewport
+    tr.plans-v2-table-cols-4:not(.plans-v2-table-divider) {
+      td,
+      th:not(:first-of-type) {
+        width: 25%;
+      }
+    }
+
+    tr.plans-v2-table-cols-3:not(.plans-v2-table-divider) {
+      td,
+      th:not(:first-of-type) {
+        width: calc(100% / 3);
+      }
+    }
+
+    tr.plans-v2-table-cols-2:not(.plans-v2-table-divider) {
+      td,
+      th:not(:first-of-type) {
+        width: 50%;
+      }
     }
 
     .plans-v2-table-column-header {
@@ -1062,7 +1056,7 @@ tr.plans-v2-table-divider {
       }
     }
 
-    .plans-v2-table-divider-highlighted {
+    .plans-v2-table-divider-highlighted > div {
       border-right: none;
     }
   }
@@ -1100,50 +1094,6 @@ p.plans-v2-table-green-highlighted-text {
   color: @white;
   height: @plans-v2-highlighted-text-height-desktop;
   margin: 0;
-
-  @media (max-width: @screen-sm-max) {
-    top: -1 * @plans-v2-highlighted-text-height-mobile;
-    height: @plans-v2-highlighted-text-height-mobile;
-  }
-
-  @media (max-width: @screen-xs-max) {
-    padding-left: 5px;
-    padding-right: 5px;
-    font-size: @font-size-extra-small;
-    line-height: 15px;
-  }
-}
-
-.plans-v2-table-discount-highlighted {
-  border-left: 2px solid @plans-v2-dark-blue;
-  border-right: 2px solid @plans-v2-dark-blue;
-
-  @media (max-width: @screen-xs-max) {
-    border-left: unset;
-    border-right: unset;
-  }
-}
-
-p.plans-v2-table-discount-highlighted-text {
-  border: 2px solid @plans-v2-dark-blue;
-  position: absolute;
-  top: -1 * @plans-v2-highlighted-text-height-desktop;
-  left: -2px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  // 4px because border width is 2px each side (left and right)
-  width: calc(100% + 4px);
-  font-family: @font-family-sans-serif;
-  font-size: @font-size-small;
-  line-height: 19px;
-  font-weight: 700;
-  background-color: @plans-v2-dark-blue;
-  border-radius: @plans-v2-table-border-radius @plans-v2-table-border-radius 0 0;
-  color: @white;
-  height: @plans-v2-highlighted-text-height-desktop;
-  margin: 0;
-  z-index: @plans-v2-discount-highlighted-text-z-index;
 
   @media (max-width: @screen-sm-max) {
     top: -1 * @plans-v2-highlighted-text-height-mobile;
@@ -1222,10 +1172,6 @@ p.plans-v2-table-discount-highlighted-text {
 
 .plans-v2-table-sticky-header-item-green-highlighted span {
   color: @ol-green;
-}
-
-.plans-v2-table-sticky-header-item-discount-highlighted span {
-  color: @plans-v2-dark-blue;
 }
 
 .plans-v2-faq {

@@ -20,6 +20,7 @@ const config = {
     additionalEventSegmentation: {},
   },
   group: {
+    maxColumn: 3,
     tableHead: {
       group_collaborator: {},
       group_professional: {},
@@ -36,15 +37,15 @@ const config = {
     additionalEventSegmentation: {},
   },
   student: {
-    baseColspan: 2,
+    baseColspan: 1,
     maxColumn: 3,
     tableHead: {
       student_free: {
-        colspan: 3,
+        colspan: 1,
       },
       student_student: {
         showExtraContent: false,
-        colspan: 3,
+        colspan: 1,
       },
     },
     features: plansFeatures.student,
