@@ -179,9 +179,7 @@ describe('RangesManager', function () {
             this.updates,
             this.newDocLines
           )
-        }).to.throw(
-          'Change ({"id":"1","op":{"i":"five","p":15},"metadata":{"user_id":"user-id-123"}}) doesn\'t match text ("our ")'
-        )
+        }).to.throw('insertion does not match text in document')
       })
     })
 
