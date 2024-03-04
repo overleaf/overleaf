@@ -715,6 +715,7 @@ export const atomicDecorations = (options: Options) => {
           return false // no markup in input content
         } else if (nodeRef.type.is('Math')) {
           // math equations
+          let passToMathJax = true
 
           const ancestorNode =
             ancestorNodeOfType(state, nodeRef.from, '$MathContainer') ||
@@ -743,6 +744,9 @@ export const atomicDecorations = (options: Options) => {
                 if (environmentName) {
                   // use the outer content of environments that MathJax supports
                   // https://docs.mathjax.org/en/latest/input/tex/macros/index.html#environments
+                  if (environmentName === 'tikzcd') {
+                    passToMathJax = false
+                  }
                   if (
                     environmentName !== 'math' &&
                     environmentName !== 'displaymath'
@@ -764,17 +768,18 @@ export const atomicDecorations = (options: Options) => {
                   displayMode = true
                 }
               }
-
-              decorations.push(
-                Decoration.replace({
-                  widget: new MathWidget(
-                    content,
-                    displayMode,
-                    commandDefinitions
-                  ),
-                  block: displayMode,
-                }).range(ancestorNode.from, ancestorNode.to)
-              )
+              if (passToMathJax) {
+                decorations.push(
+                  Decoration.replace({
+                    widget: new MathWidget(
+                      content,
+                      displayMode,
+                      commandDefinitions
+                    ),
+                    block: displayMode,
+                  }).range(ancestorNode.from, ancestorNode.to)
+                )
+              }
             }
           }
 
