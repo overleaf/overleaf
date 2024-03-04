@@ -1280,7 +1280,7 @@
   "password_change_password_must_be_different": "The password you entered is the same as your current password. Please try a different password.",
   "password_change_passwords_do_not_match": "Passwords do not match",
   "password_change_successful": "Password changed",
-  "password_compromised_try_again_or_use_known_device_or_reset": "The password you’ve entered is on a <0>public list of compromised passwords</0>. Please check it’s correct and try again. Alternatively, try logging in from a device you’ve previously used or <1>reset your password</1>",
+  "password_compromised_try_again_or_use_known_device_or_reset": "The password you’ve entered is on a <0>public list of compromised passwords</0>. Please try logging in from a device you’ve previously used or <1>reset your password</1>",
   "password_managed_externally": "Password settings are managed externally",
   "password_reset": "Password Reset",
   "password_reset_email_sent": "You have been sent an email to complete your password reset.",

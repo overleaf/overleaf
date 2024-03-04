@@ -60,19 +60,6 @@ function _metricsForSuccessfulPasswordMatch(password) {
 
 const AuthenticationManager = {
   _checkUserPassword(query, password, callback) {
-    HaveIBeenPwned.checkPasswordForReuse(password, (err, isPasswordReused) => {
-      if (err) {
-        logger.err({ err }, 'cannot check password for re-use')
-      }
-      if (isPasswordReused) return callback(new PasswordReusedError())
-      AuthenticationManager._checkUserPasswordWithOutHIBPCheck(
-        query,
-        password,
-        callback
-      )
-    })
-  },
-  _checkUserPasswordWithOutHIBPCheck(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
     // gets serialized into the session and there may be subtle differences
     // between the user returned by Mongoose vs mongodb (such as default values)
@@ -132,75 +119,84 @@ const AuthenticationManager = {
   },
 
   authenticate(query, password, auditLog, { skipHIBPCheck = false }, callback) {
-    const checkUserPassword = callback => {
-      if (skipHIBPCheck) {
-        AuthenticationManager._checkUserPasswordWithOutHIBPCheck(
-          query,
-          password,
-          callback
-        )
-      } else {
-        AuthenticationManager._checkUserPassword(query, password, callback)
-      }
-    }
-    checkUserPassword((error, user, match) => {
-      if (error) {
-        return callback(error)
-      }
-      if (!user) {
-        return callback(null, null)
-      }
-      const update = { $inc: { loginEpoch: 1 } }
-      if (!match) {
-        update.$set = { lastFailedLogin: new Date() }
-      }
-      User.updateOne(
-        { _id: user._id, loginEpoch: user.loginEpoch },
-        update,
-        {},
-        (err, result) => {
-          if (err) {
-            return callback(err)
-          }
-          if (result.modifiedCount !== 1) {
-            return callback(new ParallelLoginError())
-          }
-          if (!match) {
-            if (!auditLog) {
-              return callback(null, null)
-            } else {
-              return UserAuditLogHandler.addEntry(
-                user._id,
-                'failed-password-match',
-                user._id,
-                auditLog.ipAddress,
-                auditLog.info,
-                err => {
-                  if (err) {
-                    logger.error(
-                      { userId: user._id, err, info: auditLog.info },
-                      'Error while adding AuditLog entry for failed-password-match'
-                    )
-                  }
-                  callback(null, null)
-                }
-              )
-            }
-          }
-          AuthenticationManager.checkRounds(
-            user,
-            user.hashedPassword,
-            password,
-            function (err) {
-              if (err) {
-                return callback(err)
-              }
-              callback(null, user)
-            }
-          )
+    AuthenticationManager._checkUserPassword(
+      query,
+      password,
+      (error, user, match) => {
+        if (error) {
+          return callback(error)
         }
-      )
-    })
+        if (!user) {
+          return callback(null, null)
+        }
+        const update = { $inc: { loginEpoch: 1 } }
+        if (!match) {
+          update.$set = { lastFailedLogin: new Date() }
+        }
+        User.updateOne(
+          { _id: user._id, loginEpoch: user.loginEpoch },
+          update,
+          {},
+          (err, result) => {
+            if (err) {
+              return callback(err)
+            }
+            if (result.modifiedCount !== 1) {
+              return callback(new ParallelLoginError())
+            }
+            if (!match) {
+              if (!auditLog) {
+                return callback(null, null)
+              } else {
+                return UserAuditLogHandler.addEntry(
+                  user._id,
+                  'failed-password-match',
+                  user._id,
+                  auditLog.ipAddress,
+                  auditLog.info,
+                  err => {
+                    if (err) {
+                      logger.error(
+                        { userId: user._id, err, info: auditLog.info },
+                        'Error while adding AuditLog entry for failed-password-match'
+                      )
+                    }
+                    callback(null, null)
+                  }
+                )
+              }
+            }
+            AuthenticationManager.checkRounds(
+              user,
+              user.hashedPassword,
+              password,
+              function (err) {
+                if (err) {
+                  return callback(err)
+                }
+                if (skipHIBPCheck) {
+                  callback(null, user)
+                  HaveIBeenPwned.checkPasswordForReuseInBackground(password)
+                  return
+                }
+                HaveIBeenPwned.checkPasswordForReuse(
+                  password,
+                  (err, isPasswordReused) => {
+                    if (err) {
+                      logger.err({ err }, 'cannot check password for re-use')
+                    }
+                    if (isPasswordReused) {
+                      return callback(new PasswordReusedError())
+                    }
+                    callback(null, user)
+                  }
+                )
+              }
+            )
+          }
+        )
+      }
+    )
   },
 
   validateEmail(email) {
@@ -348,7 +344,7 @@ const AuthenticationManager = {
     }
     // check if we can log in with this password. In which case we should reject it,
     // because it is the same as the existing password.
-    AuthenticationManager._checkUserPasswordWithOutHIBPCheck(
+    AuthenticationManager._checkUserPassword(
       { _id: user._id },
       password,
       (err, _user, match) => {

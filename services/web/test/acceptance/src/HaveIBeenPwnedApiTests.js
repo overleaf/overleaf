@@ -85,11 +85,17 @@ describe('HaveIBeenPwnedApi', function () {
     beforeEach('login', async function () {
       try {
         await user.loginNoUpdate()
-      } catch (e) {
-        expect(e.message).to.include('password-compromised')
-        return
+        expect.fail('should have failed login with weak password')
+      } catch (err) {
+        expect(err).to.match(/login failed: status=400/)
+        expect(err.info.body).to.deep.equal({
+          message: {
+            type: 'error',
+            key: 'password-compromised',
+            text: `The password you’ve entered is on a public list of compromised passwords (https://haveibeenpwned.com). Please try logging in from a device you’ve previously used or reset your password (${Settings.siteUrl}/user/password/reset).`,
+          },
+        })
       }
-      expect.fail('should have failed login with weak password')
     })
     it('should track the weak password', async function () {
       const after = await getMetricReUsed()
@@ -160,19 +166,15 @@ describe('HaveIBeenPwnedApi', function () {
         await user.loginWithEmailPassword(user.email, 'aLeakedPassword42')
         expect.fail('expected the login request to fail')
       } catch (err) {
-        expect(err).to.match(/login failed: status=400/)
+        expect(err).to.match(/login failed: status=401/)
         expect(err.info.body).to.deep.equal({
-          message: {
-            type: 'error',
-            key: 'password-compromised',
-            text: `The password you’ve entered is on a public list of compromised passwords (https://haveibeenpwned.com). Please check it’s correct and try again. Alternatively, try logging in from a device you’ve previously used or reset your password (${Settings.siteUrl}/user/password/reset).`,
-          },
+          message: { type: 'error', key: 'invalid-password-retry-or-reset' },
         })
       }
     })
-    it('should increment the counter', async function () {
+    it('should not increment the counter', async function () {
       expect(previous).to.deep.equal({
-        reUsed: (await getMetricReUsed()) - 1,
+        reUsed: await getMetricReUsed(),
         unique: await getMetricUnique(),
         failure: await getMetricFailure(),
       })
