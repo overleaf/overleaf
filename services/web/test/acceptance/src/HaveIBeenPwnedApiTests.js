@@ -4,16 +4,11 @@ const User = require('./helpers/User').promises
 const MockHaveIBeenPwnedApiClass = require('./mocks/MockHaveIBeenPwnedApi')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 const { getMetric } = require('./helpers/metrics').promises
-const sleep = require('util').promisify(setTimeout)
 
 let MockHaveIBeenPwnedApi
 before(function () {
   MockHaveIBeenPwnedApi = MockHaveIBeenPwnedApiClass.instance()
 })
-
-async function letPasswordCheckRunInBackground() {
-  await sleep(200)
-}
 
 async function getMetricReUsed() {
   return getMetric(
@@ -83,14 +78,18 @@ describe('HaveIBeenPwnedApi', function () {
     })
     beforeEach('create the user', async function () {
       await user.ensureUserExists()
-      await letPasswordCheckRunInBackground()
     })
     beforeEach('fetch previous count', async function () {
       previous = await getMetricReUsed()
     })
     beforeEach('login', async function () {
-      await user.loginNoUpdate()
-      await letPasswordCheckRunInBackground()
+      try {
+        await user.loginNoUpdate()
+      } catch (e) {
+        expect(e.message).to.include('password-compromised')
+        return
+      }
+      expect.fail('should have failed login with weak password')
     })
     it('should track the weak password', async function () {
       const after = await getMetricReUsed()
@@ -105,14 +104,12 @@ describe('HaveIBeenPwnedApi', function () {
     })
     beforeEach('create the user', async function () {
       await user.ensureUserExists()
-      await letPasswordCheckRunInBackground()
     })
     beforeEach('fetch previous count', async function () {
       previous = await getMetricUnique()
     })
     beforeEach('login', async function () {
       await user.loginNoUpdate()
-      await letPasswordCheckRunInBackground()
     })
     it('should track the strong password', async function () {
       const after = await getMetricUnique()
@@ -127,14 +124,12 @@ describe('HaveIBeenPwnedApi', function () {
     })
     beforeEach('create the user', async function () {
       await user.ensureUserExists()
-      await letPasswordCheckRunInBackground()
     })
     beforeEach('fetch previous count', async function () {
       previous = await getMetricFailure()
     })
     beforeEach('login', async function () {
       await user.loginNoUpdate()
-      await letPasswordCheckRunInBackground()
     })
     it('should track the failure to collect a score', async function () {
       const after = await getMetricFailure()
@@ -152,7 +147,6 @@ describe('HaveIBeenPwnedApi', function () {
     })
     beforeEach('create the user', async function () {
       await user.ensureUserExists()
-      await letPasswordCheckRunInBackground()
     })
     beforeEach('fetch previous counts', async function () {
       previous = {
@@ -166,16 +160,19 @@ describe('HaveIBeenPwnedApi', function () {
         await user.loginWithEmailPassword(user.email, 'aLeakedPassword42')
         expect.fail('expected the login request to fail')
       } catch (err) {
-        expect(err).to.match(/login failed: status=401/)
+        expect(err).to.match(/login failed: status=400/)
         expect(err.info.body).to.deep.equal({
-          message: { type: 'error', key: 'invalid-password-retry-or-reset' },
+          message: {
+            type: 'error',
+            key: 'password-compromised',
+            text: `This password was detected on a public list of known compromised passwords (https://haveibeenpwned.com). Please reset your password here (${Settings.siteUrl}/user/password/reset) to login.`,
+          },
         })
       }
-      await letPasswordCheckRunInBackground()
     })
-    it('should not increment any counter', async function () {
+    it('should increment the counter', async function () {
       expect(previous).to.deep.equal({
-        reUsed: await getMetricReUsed(),
+        reUsed: (await getMetricReUsed()) - 1,
         unique: await getMetricUnique(),
         failure: await getMetricFailure(),
       })
@@ -192,7 +189,6 @@ describe('HaveIBeenPwnedApi', function () {
     })
     beforeEach('create the user', async function () {
       await user.ensureUserExists()
-      await letPasswordCheckRunInBackground()
     })
     beforeEach('fetch previous count', async function () {
       previous = await getMetricReUsed()
@@ -207,7 +203,6 @@ describe('HaveIBeenPwnedApi', function () {
           },
         })
       )
-      await letPasswordCheckRunInBackground()
     })
     it('should track the weak password', async function () {
       const after = await getMetricReUsed()
@@ -221,7 +216,6 @@ describe('HaveIBeenPwnedApi', function () {
     })
     beforeEach('create the user', async function () {
       await user.ensureUserExists()
-      await letPasswordCheckRunInBackground()
     })
     beforeEach('fetch previous count', async function () {
       previous = await getMetricUnique()
@@ -229,7 +223,6 @@ describe('HaveIBeenPwnedApi', function () {
     beforeEach('set password', async function () {
       const response = await resetPassword('a-strong-new-password')
       expect(response.statusCode).to.equal(200)
-      await letPasswordCheckRunInBackground()
     })
     it('should track the strong password', async function () {
       const after = await getMetricUnique()

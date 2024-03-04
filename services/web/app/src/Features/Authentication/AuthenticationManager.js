@@ -60,6 +60,19 @@ function _metricsForSuccessfulPasswordMatch(password) {
 
 const AuthenticationManager = {
   _checkUserPassword(query, password, callback) {
+    HaveIBeenPwned.checkPasswordForReuse(password, (err, isPasswordReused) => {
+      if (err) {
+        logger.err({ err }, 'cannot check password for re-use')
+      }
+      if (isPasswordReused) return callback(new PasswordReusedError())
+      AuthenticationManager._checkUserPasswordWithOutHIBPCheck(
+        query,
+        password,
+        callback
+      )
+    })
+  },
+  _checkUserPasswordWithOutHIBPCheck(query, password, callback) {
     // Using Mongoose for legacy reasons here. The returned User instance
     // gets serialized into the session and there may be subtle differences
     // between the user returned by Mongoose vs mongodb (such as default values)
@@ -179,7 +192,6 @@ const AuthenticationManager = {
                   return callback(err)
                 }
                 callback(null, user)
-                HaveIBeenPwned.checkPasswordForReuseInBackground(password)
               }
             )
           }
@@ -333,7 +345,7 @@ const AuthenticationManager = {
     }
     // check if we can log in with this password. In which case we should reject it,
     // because it is the same as the existing password.
-    AuthenticationManager._checkUserPassword(
+    AuthenticationManager._checkUserPasswordWithOutHIBPCheck(
       { _id: user._id },
       password,
       (err, _user, match) => {

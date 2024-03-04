@@ -23,7 +23,10 @@ const AnalyticsRegistrationSourceHelper = require('../Analytics/AnalyticsRegistr
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
-const { ParallelLoginError } = require('./AuthenticationErrors')
+const {
+  ParallelLoginError,
+  PasswordReusedError,
+} = require('./AuthenticationErrors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Modules = require('../../infrastructure/Modules')
 const { expressify } = require('@overleaf/promise-utils')
@@ -218,6 +221,28 @@ const AuthenticationController = {
               if (error != null) {
                 if (error instanceof ParallelLoginError) {
                   return done(null, false, { status: 429 })
+                } else if (error instanceof PasswordReusedError) {
+                  const text = `${req.i18n
+                    .translate(
+                      'password_was_detected_on_a_public_list_of_known_compromised_passwords'
+                    )
+                    .replace('<0>', '')
+                    .replace(
+                      '</0>',
+                      ' (https://haveibeenpwned.com)'
+                    )}. ${req.i18n
+                    .translate('please_reset_your_password_to_login')
+                    .replace('<0>', '')
+                    .replace(
+                      '</0>',
+                      ` (${Settings.siteUrl}/user/password/reset)`
+                    )}.`
+                  return done(null, false, {
+                    status: 400,
+                    type: 'error',
+                    key: 'password-compromised',
+                    text,
+                  })
                 }
                 return done(error)
               }

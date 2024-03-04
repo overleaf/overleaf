@@ -15,6 +15,10 @@ block content
 								| !{translate('email_or_password_wrong_try_again_or_reset', {}, [{ name: 'a', attrs: { href: '/user/password/reset', 'aria-describedby': 'resetPasswordDescription' } }])}
 								span.sr-only(id='resetPasswordDescription')
 									| #{translate('reset_password_link')}
+							+customValidationMessage('password-compromised')
+								| !{translate('password_was_detected_on_a_public_list_of_known_compromised_passwords', {}, [{name: 'a', attrs: {href: 'https://haveibeenpwned.com', rel: 'noopener noreferrer', target: '_blank'}}])}.
+								|
+								| !{translate('please_reset_your_password_to_login', {}, [{name: 'a', attrs: {href: '/user/password/reset', target: '_blank'}}])}.
 							.form-group
 								input.form-control(
 									type='email',

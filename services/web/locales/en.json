@@ -1338,6 +1338,7 @@
   "please_reconfirm_your_affiliation_before_making_this_primary": "Please confirm your affiliation before making this the primary.",
   "please_refresh": "Please refresh the page to continue.",
   "please_request_a_new_password_reset_email_and_follow_the_link": "Please request a new password reset email and follow the link",
+  "please_reset_your_password_to_login": "Please reset your password <0>here</0> to login",
   "please_select_a_file": "Please Select a File",
   "please_select_a_project": "Please Select a Project",
   "please_select_an_output_file": "Please Select an Output File",
