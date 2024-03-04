@@ -131,73 +131,76 @@ const AuthenticationManager = {
     })
   },
 
-  authenticate(query, password, auditLog, callback) {
-    if (typeof callback === 'undefined') {
-      callback = auditLog
-      auditLog = null
-    }
-    AuthenticationManager._checkUserPassword(
-      query,
-      password,
-      (error, user, match) => {
-        if (error) {
-          return callback(error)
-        }
-        if (!user) {
-          return callback(null, null)
-        }
-        const update = { $inc: { loginEpoch: 1 } }
-        if (!match) {
-          update.$set = { lastFailedLogin: new Date() }
-        }
-        User.updateOne(
-          { _id: user._id, loginEpoch: user.loginEpoch },
-          update,
-          {},
-          (err, result) => {
-            if (err) {
-              return callback(err)
-            }
-            if (result.modifiedCount !== 1) {
-              return callback(new ParallelLoginError())
-            }
-            if (!match) {
-              if (!auditLog) {
-                return callback(null, null)
-              } else {
-                return UserAuditLogHandler.addEntry(
-                  user._id,
-                  'failed-password-match',
-                  user._id,
-                  auditLog.ipAddress,
-                  auditLog.info,
-                  err => {
-                    if (err) {
-                      logger.error(
-                        { userId: user._id, err, info: auditLog.info },
-                        'Error while adding AuditLog entry for failed-password-match'
-                      )
-                    }
-                    callback(null, null)
-                  }
-                )
-              }
-            }
-            AuthenticationManager.checkRounds(
-              user,
-              user.hashedPassword,
-              password,
-              function (err) {
-                if (err) {
-                  return callback(err)
-                }
-                callback(null, user)
-              }
-            )
-          }
+  authenticate(query, password, auditLog, { skipHIBPCheck = false }, callback) {
+    const checkUserPassword = callback => {
+      if (skipHIBPCheck) {
+        AuthenticationManager._checkUserPasswordWithOutHIBPCheck(
+          query,
+          password,
+          callback
         )
+      } else {
+        AuthenticationManager._checkUserPassword(query, password, callback)
       }
-    )
+    }
+    checkUserPassword((error, user, match) => {
+      if (error) {
+        return callback(error)
+      }
+      if (!user) {
+        return callback(null, null)
+      }
+      const update = { $inc: { loginEpoch: 1 } }
+      if (!match) {
+        update.$set = { lastFailedLogin: new Date() }
+      }
+      User.updateOne(
+        { _id: user._id, loginEpoch: user.loginEpoch },
+        update,
+        {},
+        (err, result) => {
+          if (err) {
+            return callback(err)
+          }
+          if (result.modifiedCount !== 1) {
+            return callback(new ParallelLoginError())
+          }
+          if (!match) {
+            if (!auditLog) {
+              return callback(null, null)
+            } else {
+              return UserAuditLogHandler.addEntry(
+                user._id,
+                'failed-password-match',
+                user._id,
+                auditLog.ipAddress,
+                auditLog.info,
+                err => {
+                  if (err) {
+                    logger.error(
+                      { userId: user._id, err, info: auditLog.info },
+                      'Error while adding AuditLog entry for failed-password-match'
+                    )
+                  }
+                  callback(null, null)
+                }
+              )
+            }
+          }
+          AuthenticationManager.checkRounds(
+            user,
+            user.hashedPassword,
+            password,
+            function (err) {
+              if (err) {
+                return callback(err)
+              }
+              callback(null, user)
+            }
+          )
+        }
+      )
+    })
   },
 
   validateEmail(email) {

@@ -209,14 +209,16 @@ const AuthenticationController = {
               status: 429,
             })
           }
+          const { fromKnownDevice } = AuthenticationController.getAuditInfo(req)
           const auditLog = {
             ipAddress: req.ip,
-            info: { method: 'Password login' },
+            info: { method: 'Password login', fromKnownDevice },
           }
           AuthenticationManager.authenticate(
             { email },
             password,
             auditLog,
+            { skipHIBPCheck: fromKnownDevice },
             function (error, user) {
               if (error != null) {
                 if (error instanceof ParallelLoginError) {
@@ -224,17 +226,13 @@ const AuthenticationController = {
                 } else if (error instanceof PasswordReusedError) {
                   const text = `${req.i18n
                     .translate(
-                      'password_was_detected_on_a_public_list_of_known_compromised_passwords'
+                      'password_compromised_try_again_or_use_known_device_or_reset'
                     )
                     .replace('<0>', '')
+                    .replace('</0>', ' (https://haveibeenpwned.com)')
+                    .replace('<1>', '')
                     .replace(
-                      '</0>',
-                      ' (https://haveibeenpwned.com)'
-                    )}. ${req.i18n
-                    .translate('please_reset_your_password_to_login')
-                    .replace('<0>', '')
-                    .replace(
-                      '</0>',
+                      '</1>',
                       ` (${Settings.siteUrl}/user/password/reset)`
                     )}.`
                   return done(null, false, {

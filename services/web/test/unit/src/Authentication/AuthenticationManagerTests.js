@@ -13,6 +13,10 @@ describe('AuthenticationManager', function () {
     tk.freeze(Date.now())
     this.settings = { security: { bcryptRounds: 4 } }
     this.metrics = { inc: sinon.stub().returns() }
+    this.HaveIBeenPwned = {
+      checkPasswordForReuse: sinon.stub().yields(null, false),
+      checkPasswordForReuseInBackground: sinon.stub(),
+    }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
@@ -30,10 +34,7 @@ describe('AuthenticationManager', function () {
         '@overleaf/settings': this.settings,
         '../User/UserGetter': (this.UserGetter = {}),
         './AuthenticationErrors': AuthenticationErrors,
-        './HaveIBeenPwned': {
-          checkPasswordForReuse: sinon.stub().yields(null, false),
-          checkPasswordForReuseInBackground: sinon.stub(),
-        },
+        './HaveIBeenPwned': this.HaveIBeenPwned,
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().callsArgWith(5, null),
         }),
@@ -76,6 +77,8 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
+            null,
+            { skipHIBPCheck: true },
             (error, user) => {
               this.callback(error, user)
               done()
@@ -116,6 +119,8 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             'notthecorrectpassword',
+            null,
+            { skipHIBPCheck: true },
             (...args) => {
               this.callback(...args)
               done()
@@ -153,6 +158,8 @@ describe('AuthenticationManager', function () {
             this.AuthenticationManager.authenticate(
               { email: this.email },
               'testpassword',
+              null,
+              { skipHIBPCheck: true },
               (...args) => {
                 this.callback(...args)
                 done()
@@ -175,6 +182,8 @@ describe('AuthenticationManager', function () {
             this.AuthenticationManager.authenticate(
               { email: this.email },
               'notthecorrectpassword',
+              null,
+              { skipHIBPCheck: true },
               (...args) => {
                 this.callback(...args)
                 done()
@@ -264,6 +273,8 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
+            null,
+            { skipHIBPCheck: true },
             (error, user) => {
               this.callback(error, user)
               done()
@@ -292,6 +303,29 @@ describe('AuthenticationManager', function () {
         it('should return the user', function () {
           this.callback.calledWith(null, this.user).should.equal(true)
         })
+
+        describe('HIBP', function () {
+          it('should not check HIBP if not requested', function () {
+            this.HaveIBeenPwned.checkPasswordForReuse.should.not.have.been
+              .called
+          })
+
+          it('should check HIBP if requested', function (done) {
+            this.AuthenticationManager.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              null,
+              { skipHIBPCheck: false },
+              error => {
+                if (error) return done(error)
+                this.HaveIBeenPwned.checkPasswordForReuse.should.have.been.calledWith(
+                  this.unencryptedPassword
+                )
+                done()
+              }
+            )
+          })
+        })
       })
 
       describe('when the encrypted passwords do not match', function () {
@@ -301,6 +335,8 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
+            null,
+            { skipHIBPCheck: true },
             this.callback
           )
         })
@@ -320,6 +356,7 @@ describe('AuthenticationManager', function () {
             { email: this.email },
             this.unencryptedPassword,
             this.auditLog,
+            { skipHIBPCheck: true },
             this.callback
           )
         })
@@ -350,6 +387,8 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
+            null,
+            { skipHIBPCheck: true },
             (error, user) => {
               this.callback(error, user)
               done()
@@ -398,6 +437,8 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.authenticate(
             { email: this.email },
             this.unencryptedPassword,
+            null,
+            { skipHIBPCheck: true },
             (error, user) => {
               this.callback(error, user)
               done()
@@ -431,6 +472,8 @@ describe('AuthenticationManager', function () {
         this.AuthenticationManager.authenticate(
           { email: this.email },
           this.unencrpytedPassword,
+          null,
+          { skipHIBPCheck: true },
           this.callback
         )
       })

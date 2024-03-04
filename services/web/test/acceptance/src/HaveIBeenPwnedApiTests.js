@@ -165,7 +165,7 @@ describe('HaveIBeenPwnedApi', function () {
           message: {
             type: 'error',
             key: 'password-compromised',
-            text: `This password was detected on a public list of known compromised passwords (https://haveibeenpwned.com). Please reset your password here (${Settings.siteUrl}/user/password/reset) to login.`,
+            text: `The password you’ve entered is on a public list of compromised passwords (https://haveibeenpwned.com). Please check it’s correct and try again. Alternatively, try logging in from a device you’ve previously used or reset your password (${Settings.siteUrl}/user/password/reset).`,
           },
         })
       }

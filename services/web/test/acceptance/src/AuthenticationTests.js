@@ -69,6 +69,7 @@ describe('Authentication', function () {
       expect(auditLogEntry.info).to.deep.equal({
         method: 'Password login',
         captcha: 'solved',
+        fromKnownDevice: false,
       })
       expect(auditLogEntry.ipAddress).to.equal('127.0.0.1')
     })
@@ -101,6 +102,7 @@ describe('Authentication', function () {
       expect(auditLogEntry.operation).to.equal('failed-password-match')
       expect(auditLogEntry.info).to.deep.equal({
         method: 'Password login',
+        fromKnownDevice: true,
       })
       expect(auditLogEntry.ipAddress).to.equal('127.0.0.1')
     })

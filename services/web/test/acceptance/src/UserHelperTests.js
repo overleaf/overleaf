@@ -18,7 +18,9 @@ describe('UserHelper', function () {
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
         const authedUser = await AuthenticationManager.promises.authenticate(
           { _id: userHelper.user._id },
-          userHelper.getDefaultPassword()
+          userHelper.getDefaultPassword(),
+          null,
+          { skipHIBPCheck: true }
         )
         expect(authedUser).to.not.be.null
       })
@@ -32,7 +34,9 @@ describe('UserHelper', function () {
         userHelper.user.email.should.equal('foo@test.com')
         const authedUser = await AuthenticationManager.promises.authenticate(
           { _id: userHelper.user._id },
-          userHelper.getDefaultPassword()
+          userHelper.getDefaultPassword(),
+          null,
+          { skipHIBPCheck: true }
         )
         expect(authedUser).to.not.be.null
       })
@@ -46,7 +50,9 @@ describe('UserHelper', function () {
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
         const authedUser = await AuthenticationManager.promises.authenticate(
           { _id: userHelper.user._id },
-          'foofoofoo'
+          'foofoofoo',
+          null,
+          { skipHIBPCheck: true }
         )
         expect(authedUser).to.not.be.null
       })
@@ -124,7 +130,9 @@ describe('UserHelper', function () {
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
         const authedUser = await AuthenticationManager.promises.authenticate(
           { _id: userHelper.user._id },
-          userHelper.getDefaultPassword()
+          userHelper.getDefaultPassword(),
+          null,
+          { skipHIBPCheck: true }
         )
         expect(authedUser).to.not.be.null
       })
@@ -138,7 +146,9 @@ describe('UserHelper', function () {
         userHelper.user.email.should.equal('foo2@test.com')
         const authedUser = await AuthenticationManager.promises.authenticate(
           { _id: userHelper.user._id },
-          userHelper.getDefaultPassword()
+          userHelper.getDefaultPassword(),
+          null,
+          { skipHIBPCheck: true }
         )
         expect(authedUser).to.not.be.null
       })
@@ -152,7 +162,9 @@ describe('UserHelper', function () {
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
         const authedUser = await AuthenticationManager.promises.authenticate(
           { _id: userHelper.user._id },
-          'foofoofoo'
+          'foofoofoo',
+          null,
+          { skipHIBPCheck: true }
         )
         expect(authedUser).to.not.be.null
       })

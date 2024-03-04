@@ -59,7 +59,9 @@ function validateCaptcha(action) {
     const reCaptchaResponse = req.body['g-recaptcha-response']
     if (action === 'login') {
       await initializeDeviceHistory(req)
-      if (!reCaptchaResponse && req.deviceHistory.has(req.body?.email)) {
+      const fromKnownDevice = req.deviceHistory.has(req.body?.email)
+      AuthenticationController.setAuditInfo(req, { fromKnownDevice })
+      if (!reCaptchaResponse && fromKnownDevice) {
         // The user has previously logged in from this device, which required
         //  solving a captcha or keeping the device history alive.
         // We can skip checking the (missing) captcha response.

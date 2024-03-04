@@ -32,6 +32,13 @@ class User {
     })
   }
 
+  resetCookies() {
+    this.jar = request.jar()
+    this.request = request.defaults({
+      jar: this.jar,
+    })
+  }
+
   setExtraAttributes(user) {
     if ((user != null ? user._id : undefined) == null) {
       throw new Error('User does not exist')

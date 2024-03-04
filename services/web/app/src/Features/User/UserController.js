@@ -72,7 +72,9 @@ async function changePassword(req, res, next) {
 
   const user = await AuthenticationManager.promises.authenticate(
     { _id: userId },
-    req.body.currentPassword
+    req.body.currentPassword,
+    null,
+    { skipHIBPCheck: true }
   )
   if (!user) {
     return HttpErrorHandler.badRequest(
@@ -228,7 +230,9 @@ async function tryDeleteUser(req, res, next) {
 
   const user = await AuthenticationManager.promises.authenticate(
     { _id: userId },
-    password
+    password,
+    null,
+    { skipHIBPCheck: true }
   )
   if (!user) {
     logger.err({ userId }, 'auth failed during attempt to delete account')
