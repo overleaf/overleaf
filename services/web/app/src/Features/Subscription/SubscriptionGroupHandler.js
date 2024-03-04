@@ -1,60 +1,41 @@
-const { promisify } = require('util')
+const { callbackify } = require('util')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const { Subscription } = require('../../models/Subscription')
 
-function removeUserFromGroup(subscriptionId, userIdToRemove, callback) {
-  SubscriptionUpdater.removeUserFromGroup(
+async function removeUserFromGroup(subscriptionId, userIdToRemove) {
+  await SubscriptionUpdater.promises.removeUserFromGroup(
     subscriptionId,
-    userIdToRemove,
-    callback
+    userIdToRemove
   )
 }
 
-function replaceUserReferencesInGroups(oldId, newId, callback) {
-  Subscription.updateOne(
-    { admin_id: oldId },
-    { admin_id: newId },
-    function (error) {
-      if (error) {
-        return callback(error)
-      }
+async function replaceUserReferencesInGroups(oldId, newId) {
+  await Subscription.updateOne({ admin_id: oldId }, { admin_id: newId }).exec()
 
-      _replaceInArray(
-        Subscription,
-        'manager_ids',
-        oldId,
-        newId,
-        function (error) {
-          if (error) {
-            return callback(error)
-          }
-
-          _replaceInArray(Subscription, 'member_ids', oldId, newId, callback)
-        }
-      )
-    }
-  )
+  await _replaceInArray(Subscription, 'manager_ids', oldId, newId)
+  await _replaceInArray(Subscription, 'member_ids', oldId, newId)
 }
 
-function isUserPartOfGroup(userId, subscriptionId, callback) {
-  SubscriptionLocator.getSubscriptionByMemberIdAndId(
-    userId,
-    subscriptionId,
-    function (err, subscription) {
-      const partOfGroup = !!subscription
-      callback(err, partOfGroup)
-    }
-  )
+async function isUserPartOfGroup(userId, subscriptionId) {
+  const subscription =
+    await SubscriptionLocator.promises.getSubscriptionByMemberIdAndId(
+      userId,
+      subscriptionId
+    )
+
+  return !!subscription
 }
 
-function getTotalConfirmedUsersInGroup(subscriptionId, callback) {
-  SubscriptionLocator.getSubscription(subscriptionId, (err, subscription) =>
-    callback(err, subscription?.member_ids?.length)
+async function getTotalConfirmedUsersInGroup(subscriptionId) {
+  const subscription = await SubscriptionLocator.promises.getSubscription(
+    subscriptionId
   )
+
+  return subscription?.member_ids?.length
 }
 
-function _replaceInArray(model, property, oldValue, newValue, callback) {
+async function _replaceInArray(model, property, oldValue, newValue) {
   // Mongo won't let us pull and addToSet in the same query, so do it in
   // two. Note we need to add first, since the query is based on the old user.
   const query = {}
@@ -66,23 +47,19 @@ function _replaceInArray(model, property, oldValue, newValue, callback) {
   const setOldValue = {}
   setOldValue[property] = oldValue
 
-  model.updateMany(query, { $addToSet: setNewValue }, function (error) {
-    if (error) {
-      return callback(error)
-    }
-    model.updateMany(query, { $pull: setOldValue }, callback)
-  })
+  await model.updateMany(query, { $addToSet: setNewValue })
+  await model.updateMany(query, { $pull: setOldValue })
 }
 
 module.exports = {
-  removeUserFromGroup,
-  replaceUserReferencesInGroups,
-  getTotalConfirmedUsersInGroup,
-  isUserPartOfGroup,
+  removeUserFromGroup: callbackify(removeUserFromGroup),
+  replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
+  getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
+  isUserPartOfGroup: callbackify(isUserPartOfGroup),
   promises: {
-    removeUserFromGroup: promisify(removeUserFromGroup),
-    replaceUserReferencesInGroups: promisify(replaceUserReferencesInGroups),
-    getTotalConfirmedUsersInGroup: promisify(getTotalConfirmedUsersInGroup),
-    isUserPartOfGroup: promisify(isUserPartOfGroup),
+    removeUserFromGroup,
+    replaceUserReferencesInGroups,
+    getTotalConfirmedUsersInGroup,
+    isUserPartOfGroup,
   },
 }

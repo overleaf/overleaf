@@ -20,99 +20,57 @@ describe('SubscriptionGroupHandler', function () {
     }
 
     this.SubscriptionLocator = {
-      getUsersSubscription: sinon.stub(),
-      getSubscriptionByMemberIdAndId: sinon.stub(),
-      getSubscription: sinon.stub().callsArgWith(1, null, this.subscription),
-    }
-
-    this.UserCreator = {
-      getUserOrCreateHoldingAccount: sinon
-        .stub()
-        .callsArgWith(1, null, this.user),
+      promises: {
+        getUsersSubscription: sinon.stub(),
+        getSubscriptionByMemberIdAndId: sinon.stub(),
+        getSubscription: sinon.stub().resolves(this.subscription),
+      },
     }
 
     this.SubscriptionUpdater = {
-      removeUserFromGroup: sinon.stub().callsArgWith(2),
-      getSubscription: sinon.stub().callsArgWith(2),
+      promises: {
+        removeUserFromGroup: sinon.stub().resolves(),
+        getSubscription: sinon.stub().resolves(),
+      },
     }
-
-    this.TeamInvitesHandler = { createInvite: sinon.stub().callsArgWith(2) }
-
-    this.UserGetter = {
-      getUser: sinon.stub(),
-      getUserByAnyEmail: sinon.stub(),
-    }
-
-    this.LimitationsManager = { hasGroupMembersLimitReached: sinon.stub() }
-
-    this.OneTimeTokenHandler = {
-      getValueFromTokenAndExpire: sinon.stub(),
-      getNewToken: sinon.stub(),
-    }
-
-    this.EmailHandler = { sendEmail: sinon.stub() }
 
     this.Subscription = {
-      updateOne: sinon.stub().yields(),
-      updateMany: sinon.stub().yields(),
-      findOne: sinon.stub().yields(),
-    }
-
-    this.settings = { siteUrl: 'http://www.overleaf.com' }
-
-    this.readStub = sinon.stub()
-    this.NotificationsBuilder = {
-      groupPlan: sinon.stub().returns({ read: this.readStub }),
-    }
-
-    this.UserMembershipViewModel = {
-      build(email) {
-        return { email }
-      },
+      updateOne: sinon.stub().returns({ exec: sinon.stub().resolves }),
+      updateMany: sinon.stub().returns({ exec: sinon.stub().resolves }),
+      findOne: sinon.stub().returns({ exec: sinon.stub().resolves }),
     }
 
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
-        '../User/UserCreator': this.UserCreator,
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
         '../../models/Subscription': {
           Subscription: this.Subscription,
         },
-        '../User/UserGetter': this.UserGetter,
-        './LimitationsManager': this.LimitationsManager,
-        '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
-        '../Email/EmailHandler': this.EmailHandler,
-        '@overleaf/settings': this.settings,
-        '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
-        '../UserMembership/UserMembershipViewModel':
-          this.UserMembershipViewModel,
       },
     })
   })
 
   describe('removeUserFromGroup', function () {
-    it('should call the subscription updater to remove the user', function (done) {
-      this.Handler.removeUserFromGroup(
+    it('should call the subscription updater to remove the user', async function () {
+      await this.Handler.promises.removeUserFromGroup(
         this.adminUser_id,
-        this.user._id,
-        err => {
-          if (err) return done(err)
-          this.SubscriptionUpdater.removeUserFromGroup
-            .calledWith(this.adminUser_id, this.user._id)
-            .should.equal(true)
-          done()
-        }
+        this.user._id
       )
+
+      this.SubscriptionUpdater.promises.removeUserFromGroup
+        .calledWith(this.adminUser_id, this.user._id)
+        .should.equal(true)
     })
   })
 
   describe('replaceUserReferencesInGroups', function () {
-    beforeEach(function (done) {
+    beforeEach(async function () {
       this.oldId = 'ba5eba11'
       this.newId = '5ca1ab1e'
-      this.Handler.replaceUserReferencesInGroups(this.oldId, this.newId, () =>
-        done()
+      await this.Handler.promises.replaceUserReferencesInGroups(
+        this.oldId,
+        this.newId
       )
     })
 
@@ -160,37 +118,28 @@ describe('SubscriptionGroupHandler', function () {
       this.subscription_id = '123ed13123'
     })
 
-    it('should return true when user is part of subscription', function (done) {
-      this.SubscriptionLocator.getSubscriptionByMemberIdAndId.callsArgWith(
-        2,
-        null,
-        { _id: this.subscription_id }
-      )
-      this.Handler.isUserPartOfGroup(
-        this.user_id,
-        this.subscription_id,
-        (err, partOfGroup) => {
-          if (err) return done(err)
-          partOfGroup.should.equal(true)
-          done()
+    it('should return true when user is part of subscription', async function () {
+      this.SubscriptionLocator.promises.getSubscriptionByMemberIdAndId.resolves(
+        {
+          _id: this.subscription_id,
         }
       )
+      const partOfGroup = await this.Handler.promises.isUserPartOfGroup(
+        this.user_id,
+        this.subscription_id
+      )
+      partOfGroup.should.equal(true)
     })
 
-    it('should return false when no subscription is found', function (done) {
-      this.SubscriptionLocator.getSubscriptionByMemberIdAndId.callsArgWith(
-        2,
+    it('should return false when no subscription is found', async function () {
+      this.SubscriptionLocator.promises.getSubscriptionByMemberIdAndId.resolves(
         null
       )
-      this.Handler.isUserPartOfGroup(
+      const partOfGroup = await this.Handler.promises.isUserPartOfGroup(
         this.user_id,
-        this.subscription_id,
-        (err, partOfGroup) => {
-          if (err) return done(err)
-          partOfGroup.should.equal(false)
-          done()
-        }
+        this.subscription_id
       )
+      partOfGroup.should.equal(false)
     })
   })
 
@@ -199,27 +148,22 @@ describe('SubscriptionGroupHandler', function () {
       beforeEach(function () {
         this.subscription.member_ids = ['12321', '3121321']
       })
-      it('should call the subscription locator and return 2 users', function (done) {
-        this.Handler.getTotalConfirmedUsersInGroup(
-          this.subscription_id,
-          (err, count) => {
-            if (err) return done(err)
-            this.SubscriptionLocator.getSubscription
-              .calledWith(this.subscription_id)
-              .should.equal(true)
-            count.should.equal(2)
-            done()
-          }
+      it('should call the subscription locator and return 2 users', async function () {
+        const count = await this.Handler.promises.getTotalConfirmedUsersInGroup(
+          this.subscription_id
         )
+        this.SubscriptionLocator.promises.getSubscription
+          .calledWith(this.subscription_id)
+          .should.equal(true)
+        count.should.equal(2)
       })
     })
     describe('for nonexistent subscriptions', function () {
-      it('should return undefined', function (done) {
-        this.Handler.getTotalConfirmedUsersInGroup('fake-id', (err, count) => {
-          if (err) return done(err)
-          expect(count).not.to.exist
-          done()
-        })
+      it('should return undefined', async function () {
+        const count = await this.Handler.promises.getTotalConfirmedUsersInGroup(
+          'fake-id'
+        )
+        expect(count).not.to.exist
       })
     })
   })
