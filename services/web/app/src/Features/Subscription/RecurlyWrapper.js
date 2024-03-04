@@ -1041,7 +1041,18 @@ const RecurlyWrapper = {
 }
 
 RecurlyWrapper.promises = {
+  attemptInvoiceCollection: promisify(RecurlyWrapper.attemptInvoiceCollection),
+  createSubscription: promisify(RecurlyWrapper.createSubscription),
+  extendTrial: promisify(RecurlyWrapper.extendTrial),
+  getBillingInfo: promisify(RecurlyWrapper.getBillingInfo),
+  getAccountPastDueInvoices: promisify(
+    RecurlyWrapper.getAccountPastDueInvoices
+  ),
   getSubscription: promisify(RecurlyWrapper.getSubscription),
+  listAccountActiveSubscriptions: promisify(
+    RecurlyWrapper.listAccountActiveSubscriptions
+  ),
+  redeemCoupon: promisify(RecurlyWrapper.redeemCoupon),
   updateAccountEmailAddress: promisify(updateAccountEmailAddress),
 }
 
