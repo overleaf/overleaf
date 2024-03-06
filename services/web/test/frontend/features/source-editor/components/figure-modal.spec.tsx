@@ -3,6 +3,7 @@ import { EditorProviders } from '../../../helpers/editor-providers'
 import { mockScope, rootFolderId } from '../helpers/mock-scope'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import { ExposedSettings } from '../../../../../types/exposed-settings'
 
 const Container: FC = ({ children }) => (
   <div style={{ width: 1500, height: 785 }}>{children}</div>
@@ -40,14 +41,8 @@ const matchUrl = (urlToMatch: RegExp | string) =>
 describe('<FigureModal />', function () {
   // TODO: rewrite these tests to be in source mode when toolbar is added there
   // TODO: Write tests for width toggle, when we can match on source code
-  beforeEach(function () {
-    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    cy.interceptMathJax()
-    cy.interceptEvents()
-    cy.interceptSpelling()
-
+  function mount() {
     const content = ''
-
     const scope = mockScope(content)
     scope.editor.showVisual = true
 
@@ -74,6 +69,22 @@ describe('<FigureModal />', function () {
         </EditorProviders>
       </Container>
     )
+  }
+
+  let previousExposedSettings: ExposedSettings
+  before(function () {
+    previousExposedSettings = window.ExposedSettings
+  })
+  afterEach(function () {
+    window.ExposedSettings = previousExposedSettings
+  })
+
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
+    cy.interceptMathJax()
+    cy.interceptEvents()
+    cy.interceptSpelling()
+    mount()
   })
 
   describe('Upload from computer source', function () {
@@ -255,6 +266,98 @@ describe('<FigureModal />', function () {
         'have.text',
         '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
       )
+    })
+  })
+
+  describe('Feature flags', function () {
+    describe('with hasLinkUrlFeature=false', function () {
+      beforeEach(function () {
+        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+          hasLinkedProjectFileFeature: true,
+          hasLinkedProjectOutputFileFeature: true,
+          hasLinkUrlFeature: false,
+        })
+        mount()
+        clickToolbarButton('Insert Figure')
+      })
+      it('should not have import from url option', function () {
+        cy.findByRole('menu').within(() => {
+          cy.findByText('From URL').should('not.exist')
+        })
+      })
+    })
+    describe('with hasLinkedProjectFileFeature=false and hasLinkedProjectOutputFileFeature=false', function () {
+      beforeEach(function () {
+        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+          hasLinkedProjectFileFeature: false,
+          hasLinkedProjectOutputFileFeature: false,
+          hasLinkUrlFeature: true,
+        })
+        mount()
+        clickToolbarButton('Insert Figure')
+      })
+      it('should not have import from project file option', function () {
+        cy.findByRole('menu').within(() => {
+          cy.findByText('From another project').should('not.exist')
+        })
+      })
+    })
+
+    function setupFromAnotherProject() {
+      mount()
+      cy.interceptProjectListing()
+      clickToolbarButton('Insert Figure')
+      cy.findByRole('menu').within(() => {
+        cy.findByText('From another project').click()
+      })
+      cy.findByText('Select a project').click()
+      cy.findByRole('listbox').within(() => {
+        cy.findByText('My first project').click()
+      })
+    }
+    function expectNoOutputSwitch() {
+      it('should hide output switch', function () {
+        cy.findByText('select from output files').should('not.exist')
+        cy.findByText('select from source files').should('not.exist')
+      })
+    }
+
+    describe('with hasLinkedProjectFileFeature=false', function () {
+      beforeEach(function () {
+        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+          hasLinkedProjectFileFeature: false,
+          hasLinkedProjectOutputFileFeature: true,
+          hasLinkUrlFeature: true,
+        })
+        cy.interceptCompile()
+        setupFromAnotherProject()
+      })
+      expectNoOutputSwitch()
+      it('should show output file selector', function () {
+        cy.findByText('Select an output file').click()
+        cy.findByRole('listbox').within(() => {
+          cy.findByText('output.pdf').click()
+        })
+      })
+    })
+
+    describe('with hasLinkedProjectOutputFileFeature=false', function () {
+      beforeEach(function () {
+        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+          hasLinkedProjectFileFeature: true,
+          hasLinkedProjectOutputFileFeature: false,
+          hasLinkUrlFeature: true,
+        })
+        setupFromAnotherProject()
+      })
+      expectNoOutputSwitch()
+
+      it('should show source file selector', function () {
+        cy.findByText('Select a file').click()
+        cy.findByRole('listbox').within(() => {
+          cy.findByText('frog.jpg').click()
+        })
+      })
     })
   })
 

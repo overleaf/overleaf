@@ -136,7 +136,7 @@ const initialize = () => {
     emailConfirmationDisabled: false,
     enableSubscriptions: true,
     hasAffiliationsFeature: false,
-    hasLinkUrlFeature: false,
+    hasLinkUrlFeature: true,
     hasLinkedProjectFileFeature: true,
     hasLinkedProjectOutputFileFeature: true,
     hasSamlFeature: true,

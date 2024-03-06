@@ -22,6 +22,11 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
     },
     [view]
   )
+  const {
+    hasLinkedProjectFileFeature,
+    hasLinkedProjectOutputFileFeature,
+    hasLinkUrlFeature,
+  } = window.ExposedSettings
   return (
     <ToolbarButtonMenu
       id="toolbar-figure"
@@ -43,18 +48,24 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
       >
         <Icon type="archive" fw /> From project files
       </ListGroupItem>
-      <ListGroupItem
-        onClick={() =>
-          openFigureModal(FigureModalSource.OTHER_PROJECT, 'other-project')
-        }
-      >
-        <Icon type="folder-open" fw /> From another project
-      </ListGroupItem>
-      <ListGroupItem
-        onClick={() => openFigureModal(FigureModalSource.FROM_URL, 'from-url')}
-      >
-        <Icon type="globe" fw /> From URL
-      </ListGroupItem>
+      {(hasLinkedProjectFileFeature || hasLinkedProjectOutputFileFeature) && (
+        <ListGroupItem
+          onClick={() =>
+            openFigureModal(FigureModalSource.OTHER_PROJECT, 'other-project')
+          }
+        >
+          <Icon type="folder-open" fw /> From another project
+        </ListGroupItem>
+      )}
+      {hasLinkUrlFeature && (
+        <ListGroupItem
+          onClick={() =>
+            openFigureModal(FigureModalSource.FROM_URL, 'from-url')
+          }
+        >
+          <Icon type="globe" fw /> From URL
+        </ListGroupItem>
+      )}
     </ToolbarButtonMenu>
   )
 })

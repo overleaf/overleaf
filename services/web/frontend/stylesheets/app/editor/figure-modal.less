@@ -99,9 +99,11 @@
   cursor: pointer;
 }
 
-.figure-modal-source-button-row {
-  display: flex;
+.figure-modal-source-button-grid {
+  display: grid;
   justify-content: space-between;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr;
   margin: 0 auto;
 
   &:not(:first-of-type) {
@@ -119,14 +121,6 @@
   border-radius: 4px;
   border: none;
   padding: 0 8px;
-
-  &:nth-child(even) {
-    margin-left: 4px;
-  }
-
-  &:nth-child(odd) {
-    margin-right: 4px;
-  }
 
   &-title {
     flex: 1 1 auto;

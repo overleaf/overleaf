@@ -35,7 +35,11 @@ export const FigureModalOtherProjectSource: FC = () => {
   const { _id: projectId } = useProjectContext()
   const { loading: projectsLoading, data: projects, error } = useUserProjects()
   const [selectedProject, setSelectedProject] = useState<null | Project>(null)
-  const [usingOutputFiles, setUsingOutputFiles] = useState<boolean>(false)
+  const { hasLinkedProjectFileFeature, hasLinkedProjectOutputFileFeature } =
+    window.ExposedSettings
+  const [usingOutputFiles, setUsingOutputFiles] = useState<boolean>(
+    !hasLinkedProjectFileFeature
+  )
   const [nameDirty, setNameDirty] = useState<boolean>(false)
   const [name, setName] = useState<string>('')
   const [folder, setFolder] = useState<File | null>(null)
@@ -158,21 +162,23 @@ export const FigureModalOtherProjectSource: FC = () => {
           })
         }}
       />
-      <div>
-        or{' '}
-        <Button
-          className="p-0"
-          bsStyle="link"
-          type="button"
-          onClick={() => setUsingOutputFiles(value => !value)}
-        >
-          <span>
-            {usingOutputFiles
-              ? t('select_from_project_files')
-              : t('select_from_output_files')}
-          </span>
-        </Button>
-      </div>
+      {hasLinkedProjectFileFeature && hasLinkedProjectOutputFileFeature && (
+        <div>
+          or{' '}
+          <Button
+            className="p-0"
+            bsStyle="link"
+            type="button"
+            onClick={() => setUsingOutputFiles(value => !value)}
+          >
+            <span>
+              {usingOutputFiles
+                ? t('select_from_project_files')
+                : t('select_from_output_files')}
+            </span>
+          </Button>
+        </div>
+      )}
       <FileRelocator
         folder={folder}
         name={name}

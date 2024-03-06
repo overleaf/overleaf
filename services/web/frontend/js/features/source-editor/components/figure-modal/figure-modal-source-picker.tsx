@@ -9,9 +9,14 @@ import { useTranslation } from 'react-i18next'
 
 export const FigureModalSourcePicker: FC = () => {
   const { t } = useTranslation()
+  const {
+    hasLinkedProjectFileFeature,
+    hasLinkedProjectOutputFileFeature,
+    hasLinkUrlFeature,
+  } = window.ExposedSettings
   return (
     <div className="figure-modal-source-selector">
-      <div className="figure-modal-source-button-row">
+      <div className="figure-modal-source-button-grid">
         <FigureModalSourceButton
           type={FigureModalSource.FILE_UPLOAD}
           title={t('replace_from_computer')}
@@ -22,18 +27,20 @@ export const FigureModalSourcePicker: FC = () => {
           title={t('replace_from_project_files')}
           icon="archive"
         />
-      </div>
-      <div className="figure-modal-source-button-row">
-        <FigureModalSourceButton
-          type={FigureModalSource.OTHER_PROJECT}
-          title={t('replace_from_another_project')}
-          icon="folder-open"
-        />
-        <FigureModalSourceButton
-          type={FigureModalSource.FROM_URL}
-          title={t('replace_from_url')}
-          icon="globe"
-        />
+        {(hasLinkedProjectFileFeature || hasLinkedProjectOutputFileFeature) && (
+          <FigureModalSourceButton
+            type={FigureModalSource.OTHER_PROJECT}
+            title={t('replace_from_another_project')}
+            icon="folder-open"
+          />
+        )}
+        {hasLinkUrlFeature && (
+          <FigureModalSourceButton
+            type={FigureModalSource.FROM_URL}
+            title={t('replace_from_url')}
+            icon="globe"
+          />
+        )}
       </div>
     </div>
   )
