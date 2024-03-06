@@ -977,10 +977,10 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache = window.metaAttributesCache || new Map()
     })
 
-    describe('when writefull-integration split test is not enabled', function () {
+    describe('when writefull-oauth-promotion split test is not enabled', function () {
       beforeEach(function () {
         window.metaAttributesCache.set('ol-splitTestVariants', {
-          'writefull-integration': 'default',
+          'writefull-oauth-promotion': 'default',
         })
         window.metaAttributesCache.set('ol-user', {
           writefull: { enabled: false },
@@ -1017,10 +1017,10 @@ describe('<UserNotifications />', function () {
       })
     })
 
-    describe('when writefull-integration split test is enabled', function () {
+    describe('when writefull-oauth-promotion split test is enabled', function () {
       beforeEach(function () {
         window.metaAttributesCache.set('ol-splitTestVariants', {
-          'writefull-integration': 'enabled',
+          'writefull-oauth-promotion': 'enabled',
         })
       })
 

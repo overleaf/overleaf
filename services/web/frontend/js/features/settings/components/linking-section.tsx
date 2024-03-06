@@ -59,7 +59,7 @@ function LinkingSection() {
   // even if they arent in the split test, if they have it enabled let them toggle it off
   const user = getMeta('ol-user')
   const shouldLoadWritefull =
-    (splitTestVariants['writefull-integration'] === 'enabled' ||
+    (splitTestVariants['writefull-oauth-promotion'] === 'enabled' ||
       user.writefull?.enabled === true) &&
     !window.writefull // check if the writefull extension is installed, in which case we dont handle the integration
 

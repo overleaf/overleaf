@@ -86,7 +86,7 @@ async function settingsPage(req, res) {
   await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'writefull-integration'
+    'writefull-oauth-promotion'
   )
 
   let personalAccessTokens

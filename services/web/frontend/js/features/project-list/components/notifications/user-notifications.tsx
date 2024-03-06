@@ -45,8 +45,8 @@ function UserNotifications() {
   )
   const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
   const showBrlGeoBanner = getMeta('ol-showBrlGeoBanner', false)
-  const writefullIntegrationSplitTestEnabled = isSplitTestEnabled(
-    'writefull-integration'
+  const writefullOauthPromotionSplitTestEnabled = isSplitTestEnabled(
+    'writefull-oauth-promotion'
   )
   const user = getMeta('ol-user')
 
@@ -61,7 +61,7 @@ function UserNotifications() {
 
     const show =
       user?.writefull?.enabled === true || // show to any users who have writefull enabled regardless of split test
-      (!writefullIntegrationSplitTestEnabled && // show old banner to users who are not in the split test, who are on chrome and havent dismissed
+      (!writefullOauthPromotionSplitTestEnabled && // show old banner to users who are not in the split test, who are on chrome and havent dismissed
         isChromium() &&
         getMeta('ol-showWritefullPromoBanner'))
 
@@ -71,7 +71,7 @@ function UserNotifications() {
         page: '/project',
         name:
           user?.writefull?.enabled === true ||
-          writefullIntegrationSplitTestEnabled
+          writefullOauthPromotionSplitTestEnabled
             ? 'writefull-premium'
             : 'writefull',
       })
@@ -84,7 +84,7 @@ function UserNotifications() {
   const hasWritefullExtensionAlreadyInstalled =
     window.writefull?.type === 'extension'
   const usesWritefullIntegration =
-    writefullIntegrationSplitTestEnabled || user?.writefull?.enabled
+    writefullOauthPromotionSplitTestEnabled || user?.writefull?.enabled
   const writefullBannerVariant =
     hasWritefullExtensionAlreadyInstalled || usesWritefullIntegration
       ? 'plans-page'
