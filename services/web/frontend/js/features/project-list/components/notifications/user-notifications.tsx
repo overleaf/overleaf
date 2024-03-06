@@ -14,6 +14,7 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import classNames from 'classnames'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import BRLBanner from './ads/brl-banner'
 
 const isChromium = () =>
   (window.navigator as any).userAgentData?.brands?.some(
@@ -42,8 +43,8 @@ function UserNotifications() {
     'ol-groupSubscriptionsPendingEnrollment',
     []
   )
-
   const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
+  const showBrlGeoBanner = getMeta('ol-showBrlGeoBanner', false)
   const writefullIntegrationSplitTestEnabled = isSplitTestEnabled(
     'writefull-integration'
   )
@@ -111,6 +112,7 @@ function UserNotifications() {
         <ReconfirmationInfo />
         {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
         {showInrGeoBanner && <INRBanner />}
+        {showBrlGeoBanner && <BRLBanner />}
         {writefullBannerVariant === 'plans-page' ? (
           <WritefullPremiumPromoBanner
             show={showWritefull}

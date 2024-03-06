@@ -364,6 +364,7 @@ async function projectListPage(req, res, next) {
   )
 
   let showInrGeoBanner = false
+  let showBrlGeoBanner = false
   let recommendedCurrency
 
   if (usersBestSubscription?.type === 'free') {
@@ -372,6 +373,7 @@ async function projectListPage(req, res, next) {
     if (countryCode === 'IN') {
       showInrGeoBanner = true
     }
+    showBrlGeoBanner = countryCode === 'BR'
   }
 
   let hasIndividualRecurlySubscription = false
@@ -423,6 +425,7 @@ async function projectListPage(req, res, next) {
     showWritefullPromoBanner,
     recommendedCurrency,
     showInrGeoBanner,
+    showBrlGeoBanner,
     projectDashboardReact: true, // used in navbar
     groupSsoSetupSuccess,
     groupSubscriptionsPendingEnrollment:

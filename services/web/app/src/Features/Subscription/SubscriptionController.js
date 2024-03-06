@@ -32,7 +32,6 @@ const validGroupPlanModalOptions = {
 
 async function plansPage(req, res) {
   const plans = SubscriptionViewModelBuilder.buildPlansList()
-
   let currency = null
   const queryCurrency = req.query.currency?.toUpperCase()
   if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
@@ -66,7 +65,6 @@ async function plansPage(req, res) {
     currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
     usage: getDefault('usage', 'usage', 'enterprise'),
   }
-
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
@@ -94,6 +92,7 @@ async function plansPage(req, res) {
     initialLocalizedGroupPrice:
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
     showInrGeoBanner: countryCode === 'IN',
+    showBrlGeoBanner: countryCode === 'BR',
   })
 }
 
@@ -210,7 +209,6 @@ async function interstitialPaymentPage(req, res) {
 
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
-
   const showSkipLink = req.query?.skipLink === 'true'
 
   if (hasSubscription) {
@@ -235,6 +233,7 @@ async function interstitialPaymentPage(req, res) {
       interstitialPaymentConfig,
       showSkipLink,
       showInrGeoBanner: countryCode === 'IN',
+      showBrlGeoBanner: countryCode === 'BR',
     })
   }
 }
@@ -552,7 +551,7 @@ async function _getRecommendedCurrency(req, res) {
   const countryCode = currencyLookup.countryCode
   let recommendedCurrency = currencyLookup.currencyCode
 
-  if (['BRL', 'MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency)) {
+  if (['MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency)) {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
 
