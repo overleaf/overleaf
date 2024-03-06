@@ -608,7 +608,7 @@ const ProjectController = {
             SplitTestHandler.getAssignment(
               req,
               res,
-              'writefull-integration',
+              'writefull-oauth-promotion',
               cb
             )
           }

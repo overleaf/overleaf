@@ -6,6 +6,7 @@ const VALID_KEYS = [
   'react-history-buttons-tutorial',
   'table-generator-promotion',
   'writefull-integration',
+  'writefull-oauth-promotion',
 ]
 
 async function completeTutorial(req, res, next) {
