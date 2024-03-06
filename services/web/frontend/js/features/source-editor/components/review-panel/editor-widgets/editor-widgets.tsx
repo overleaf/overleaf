@@ -9,6 +9,7 @@ import {
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
 import { useIdeContext } from '@/shared/context/ide-context'
+import { useEditorContext } from '@/shared/context/editor-context'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
@@ -38,6 +39,7 @@ function EditorWidgets() {
     )
   const view = useCodeMirrorViewContext()
   const { reviewPanelOpen } = useLayoutContext()
+  const { isRestrictedTokenMember } = useEditorContext()
 
   const {
     entries,
@@ -99,6 +101,7 @@ function EditorWidgets() {
           )}
           {hasTrackChangesFeature &&
             permissions.comment &&
+            !isRestrictedTokenMember &&
             currentDocEntries?.['add-comment'] && (
               <AddCommentButton onClick={handleAddNewCommentClick}>
                 <Icon type="comment" /> {t('add_comment')}

@@ -10,6 +10,7 @@ import AddCommentEntry from './entries/add-comment-entry'
 import BulkActionsEntry from './entries/bulk-actions-entry/bulk-actions-entry'
 import PositionedEntries from './positioned-entries'
 import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
+import { useEditorContext } from '../../../../shared/context/editor-context'
 import useCodeMirrorContentHeight from '../../hooks/use-codemirror-content-height'
 import { ReviewPanelEntry } from '../../../../../../types/review-panel/entry'
 import {
@@ -32,6 +33,7 @@ function CurrentFileContainer() {
     nVisibleSelectedChanges: nChanges,
   } = useReviewPanelValueContext()
   const contentHeight = useCodeMirrorContentHeight()
+  const { isRestrictedTokenMember } = useEditorContext()
 
   const currentDocEntries =
     openDocId && openDocId in entries ? entries[openDocId] : undefined
@@ -123,7 +125,11 @@ function CurrentFileContainer() {
                 )
               }
 
-              if (entry.type === 'add-comment' && permissions.comment) {
+              if (
+                entry.type === 'add-comment' &&
+                permissions.comment &&
+                !isRestrictedTokenMember
+              ) {
                 return <AddCommentEntry key={id} />
               }
 
