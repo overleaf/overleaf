@@ -248,7 +248,7 @@ export default ConnectionManager = (function () {
         this.updateConnectionManagerState('inactive')
         this.shuttingDown = true // prevent reconnection attempts
         this.$scope.$apply(() => {
-          this.$scope.permissions.write = false
+          this.$scope.permissions = { ...this.$scope.permissions, write: false }
           return (this.$scope.connection.forced_disconnect = true)
         })
         // flush changes before disconnecting
