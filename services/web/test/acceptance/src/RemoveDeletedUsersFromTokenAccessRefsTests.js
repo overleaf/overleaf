@@ -20,6 +20,7 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
   const projectId1 = new ObjectId('65d726e807c024c8db43be22')
   const projectId2 = new ObjectId('65d726e807c024c8db43be23')
   const projectId3 = new ObjectId('65d726e807c024c8db43be24')
+  const projectId4 = new ObjectId('65d726e807c024c8db43be25')
 
   let insertedProjects
   beforeEach('insert projects', async function () {
@@ -37,7 +38,9 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
       {
         _id: projectId3,
         tokenAccessReadAndWrite_refs: [userId3],
-        tokenAccessReadOnly_refs: [],
+      },
+      {
+        _id: projectId4,
       },
     ])
   })
@@ -96,6 +99,20 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
       )
     })
 
+    it('should show projects with non-existing token access fields', function () {
+      expect(stdOut)
+        .to.match(
+          new RegExp(
+            `DRY RUN - would fix non-existing token access fields in project ${projectId3.toString()}`
+          )
+        )
+        .and.match(
+          new RegExp(
+            `DRY RUN - would fix non-existing token access fields in project ${projectId4.toString()}`
+          )
+        )
+    })
+
     it('should show the user ids (and their count) to be deleted', function () {
       expect(stdOut).to.match(
         new RegExp(
@@ -116,12 +133,25 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
       const projects = await db.projects
         .find({}, { $sort: { _id: 1 } })
         .toArray()
-      const users = [userId1, userId2, userId3]
-      projects.forEach((project, i) => {
-        expect(project.tokenAccessReadAndWrite_refs[0].toString()).to.eq(
-          users[i].toString()
-        )
-      })
+      expect(projects).to.deep.equal([
+        {
+          _id: projectId1,
+          tokenAccessReadAndWrite_refs: [userId1],
+          tokenAccessReadOnly_refs: [],
+        },
+        {
+          _id: projectId2,
+          tokenAccessReadAndWrite_refs: [userId2],
+          tokenAccessReadOnly_refs: [],
+        },
+        {
+          _id: projectId3,
+          tokenAccessReadAndWrite_refs: [userId3],
+        },
+        {
+          _id: projectId4,
+        },
+      ])
     })
   })
 
@@ -154,6 +184,20 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
       )
     })
 
+    it('should show fixed projects with non-existing token access fields', function () {
+      expect(stdOut)
+        .to.match(
+          new RegExp(
+            `Fixed non-existing token access fields in project ${projectId3.toString()}`
+          )
+        )
+        .and.match(
+          new RegExp(
+            `Fixed non-existing token access fields in project ${projectId4.toString()}`
+          )
+        )
+    })
+
     it('should show the deleted user ids (and their count) that were removed', function () {
       expect(stdOut).to.match(
         new RegExp(
@@ -184,6 +228,11 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
           _id: projectId3,
           tokenAccessReadAndWrite_refs: [],
           tokenAccessReadOnly_refs: [],
+        },
+        {
+          _id: projectId4,
+          tokenAccessReadOnly_refs: [],
+          tokenAccessReadAndWrite_refs: [],
         },
       ])
     })

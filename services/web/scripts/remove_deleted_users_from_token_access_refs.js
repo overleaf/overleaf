@@ -69,9 +69,11 @@ async function fixProjectsWithInvalidTokenAccessRefsIds(
   // get a set of all users ids as an in-memory cache
   const userIds = await findUserIds()
 
-  // default query for finding all projects with non-empty token access fields
+  // default query for finding all projects with non-existing/null or non-empty token access fields
   let query = {
     $or: [
+      { tokenAccessReadOnly_refs: { $not: { $type: 'array' } } },
+      { tokenAccessReadAndWrite_refs: { $not: { $type: 'array' } } },
       { 'tokenAccessReadOnly_refs.0': { $exists: true } },
       { 'tokenAccessReadAndWrite_refs.0': { $exists: true } },
     ],
@@ -91,6 +93,38 @@ async function fixProjectsWithInvalidTokenAccessRefsIds(
     query,
     async projects => {
       for (const project of projects) {
+        const isTokenAccessFieldMissing =
+          !project.tokenAccessReadOnly_refs ||
+          !project.tokenAccessReadAndWrite_refs
+        project.tokenAccessReadOnly_refs ??= []
+        project.tokenAccessReadAndWrite_refs ??= []
+
+        // update the token access fields if necessary
+        if (isTokenAccessFieldMissing) {
+          if (DRY_RUN) {
+            console.log(
+              `=> DRY RUN - would fix non-existing token access fields in project ${project._id.toString()}`
+            )
+          } else {
+            const fields = [
+              'tokenAccessReadOnly_refs',
+              'tokenAccessReadAndWrite_refs',
+            ]
+            for (const field of fields) {
+              await db.projects.updateOne(
+                {
+                  _id: project._id,
+                  [field]: { $not: { $type: 'array' } },
+                },
+                { $set: { [field]: [] } }
+              )
+            }
+            console.log(
+              `=> Fixed non-existing token access fields in project ${project._id.toString()}`
+            )
+          }
+        }
+
         // find the set of user ids that are in the token access fields
         // i.e. the set of collaborators
         const collaboratorIds = new Set()
