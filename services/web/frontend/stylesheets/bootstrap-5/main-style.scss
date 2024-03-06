@@ -36,5 +36,6 @@ $is-overleaf-light: false;
 @import 'scss/bootstrap-rule-overrides';
 
 // Components
+@import 'scss/components/button';
 @import 'scss/components/dropdown-menu';
 @import 'scss/components/split-button';

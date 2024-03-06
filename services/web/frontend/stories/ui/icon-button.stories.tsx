@@ -1,18 +1,18 @@
-import Button from '@/features/ui/components/bootstrap-5/button'
-import { Meta } from '@storybook/react'
+import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
+import type { Meta } from '@storybook/react'
 
-type Args = React.ComponentProps<typeof Button>
+type Args = React.ComponentProps<typeof IconButton>
 
-export const NewButton = (args: Args) => {
-  return <Button {...args} />
+export const Icon = (args: Args) => {
+  return <IconButton disabled {...args} />
 }
 
-const meta: Meta<typeof Button> = {
-  title: 'Shared / Components / Bootstrap 5 / Button',
-  component: Button,
+const meta: Meta<typeof IconButton> = {
+  title: 'Shared / Components / Bootstrap 5 / IconButton',
+  component: IconButton,
   args: {
-    children: 'A Bootstrap 5 Button',
     disabled: false,
+    icon: 'add',
     isLoading: false,
   },
   argTypes: {

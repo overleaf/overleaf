@@ -1,0 +1,57 @@
+.button-loading {
+  align-items: center;
+  display: inline-grid;
+  grid-template-areas: 'container'; // Define a single grid area
+}
+
+.button-loading > * {
+  grid-area: container; // Position all the direct children within the single grid area
+}
+
+.button-loading .spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .loading-spinner-small {
+    border-width: 0.2em;
+    height: 20px;
+    width: 20px;
+  }
+  .loading-spinner-large {
+    border-width: 0.2em;
+    height: 24px;
+    width: 24px;
+  }
+}
+
+// Hide the text when the spinner is visible
+.button-loading > [aria-hidden='true'] {
+  visibility: hidden;
+}
+
+.button-content {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-04); // Add gap between text and icons
+
+  .leading-trailing-icon-small {
+    font-size: 20px;
+  }
+
+  .leading-trailing-icon-large {
+    font-size: 24px;
+  }
+}
+
+.icon-button-small {
+  padding: var(--spacing-01);
+}
+
+.icon-button-default {
+  padding: var(--spacing-04);
+}
+
+.icon-button-large {
+  padding: var(--spacing-05);
+}
