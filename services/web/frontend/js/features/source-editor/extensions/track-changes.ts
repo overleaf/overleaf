@@ -346,8 +346,14 @@ const trackChangesTheme = EditorView.baseTheme({
     position: 'absolute',
     left: 0,
     bottom: 0,
-    width: '10000px',
+    width: '100vw',
     borderBottom: '1px dashed black',
+  },
+  // disable callout line in Firefox
+  '@supports (-moz-appearance:none)': {
+    '.ol-cm-change-callout-inner': {
+      display: 'none',
+    },
   },
   '.ol-cm-change-callout-i .ol-cm-change-callout-inner': {
     borderColor: '#2c8e30',
