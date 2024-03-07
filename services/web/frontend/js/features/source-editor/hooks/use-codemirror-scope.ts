@@ -267,8 +267,8 @@ function useCodeMirrorScope(view: EditorView) {
         ol_editor_mode: visualRef.current.visual ? 'visual' : 'code',
         // which editor keybindings are active ('default' | 'vim' | 'emacs')
         ol_editor_keybindings: settingsRef.current.mode,
-        // whether Writefull is present ('extension' | 'integration')
-        ol_extensions_writefull: window.writefull?.type,
+        // whether Writefull is present ('extension' | 'integration' | 'none')
+        ol_extensions_writefull: window.writefull?.type ?? 'none',
         // whether Grammarly is present
         ol_extensions_grammarly: grammarlyExtensionPresent(),
       },
