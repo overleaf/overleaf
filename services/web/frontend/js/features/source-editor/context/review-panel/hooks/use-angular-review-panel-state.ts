@@ -2,8 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useLayoutToLeft from '@/features/ide-react/context/review-panel/hooks/useLayoutToLeft'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
-import { ReviewPanelState } from '../types/review-panel-state'
-import * as ReviewPanel from '../types/review-panel-state'
+import type * as ReviewPanel from '../types/review-panel-state'
 import {
   SubView,
   ThreadId,
@@ -11,7 +10,7 @@ import {
 import { DocId } from '../../../../../../../types/project-settings'
 import { dispatchReviewPanelLayout as handleLayoutChange } from '../../../extensions/changes/change-manager'
 
-function useAngularReviewPanelState(): ReviewPanelState {
+function useAngularReviewPanelState(): ReviewPanel.ReviewPanelState {
   const [subView, setSubView] = useScopeValue<ReviewPanel.Value<'subView'>>(
     'reviewPanel.subView'
   )
@@ -155,7 +154,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
   const [layoutSuspended, setLayoutSuspended] = useState(false)
   const [unsavedComment, setUnsavedComment] = useState('')
 
-  const values = useMemo<ReviewPanelState['values']>(
+  const values = useMemo<ReviewPanel.ReviewPanelState['values']>(
     () => ({
       collapsed,
       commentThreads,
@@ -212,7 +211,7 @@ function useAngularReviewPanelState(): ReviewPanelState {
     ]
   )
 
-  const updaterFns = useMemo<ReviewPanelState['updaterFns']>(
+  const updaterFns = useMemo<ReviewPanel.ReviewPanelState['updaterFns']>(
     () => ({
       handleSetSubview,
       handleLayoutChange,

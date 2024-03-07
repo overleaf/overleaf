@@ -3,15 +3,13 @@ import EditorWidgets from './editor-widgets/editor-widgets'
 import CurrentFileContainer from './current-file-container'
 import OverviewContainer from './overview-container'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
-import {
-  ReviewPanelProvider,
-  useReviewPanelValueContext,
-} from '../../context/review-panel/review-panel-context'
-import { ReviewPanelReactIdeProvider } from '@/features/ide-react/context/review-panel/review-panel-context'
+import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import { isCurrentFileView } from '../../utils/sub-view'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { useIdeContext } from '@/shared/context/ide-context'
 import classnames from 'classnames'
+import { lazy, memo } from 'react'
+import getMeta from '@/utils/meta'
 
 type ReviewPanelViewProps = {
   parentDomNode: Element
@@ -58,19 +56,22 @@ function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
   )
 }
 
+const isReactIde: boolean = getMeta('ol-idePageReact')
+
+const ReviewPanelProvider = lazy(() =>
+  isReactIde
+    ? import('@/features/ide-react/context/review-panel/review-panel-provider')
+    : import('../../context/review-panel/review-panel-provider')
+)
+
 function ReviewPanel() {
   const view = useCodeMirrorViewContext()
-  const { isReactIde } = useIdeContext()
 
-  return isReactIde ? (
-    <ReviewPanelReactIdeProvider>
-      <ReviewPanelView parentDomNode={view.scrollDOM} />
-    </ReviewPanelReactIdeProvider>
-  ) : (
+  return (
     <ReviewPanelProvider>
       <ReviewPanelView parentDomNode={view.scrollDOM} />
     </ReviewPanelProvider>
   )
 }
 
-export default ReviewPanel
+export default memo(ReviewPanel)

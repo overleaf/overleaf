@@ -28,7 +28,7 @@ import { useEditorContext } from '@/shared/context/editor-context'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import ColorManager from '@/ide/colors/ColorManager'
 import RangesTracker from '@overleaf/ranges-tracker'
-import * as ReviewPanel from '../types/review-panel-state'
+import type * as ReviewPanel from '@/features/source-editor/context/review-panel/types/review-panel-state'
 import {
   CommentId,
   ReviewPanelCommentThreadMessage,
@@ -39,7 +39,6 @@ import {
 } from '../../../../../../../types/review-panel/review-panel'
 import { UserId } from '../../../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../../../types/public-access-level'
-import { ReviewPanelStateReactIde } from '../types/review-panel-state'
 import {
   DeepReadonly,
   Entries,
@@ -125,7 +124,7 @@ const formatComment = (
   return commentTyped
 }
 
-function useReviewPanelState(): ReviewPanelStateReactIde {
+function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   const { t } = useTranslation()
   const { reviewPanelOpen, setReviewPanelOpen, setMiniReviewPanelVisible } =
     useLayoutContext()
@@ -1510,7 +1509,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     }
   }, [users])
 
-  const values = useMemo<ReviewPanelStateReactIde['values']>(
+  const values = useMemo<ReviewPanel.ReviewPanelState['values']>(
     () => ({
       collapsed,
       commentThreads,
@@ -1567,7 +1566,7 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     ]
   )
 
-  const updaterFns = useMemo<ReviewPanelStateReactIde['updaterFns']>(
+  const updaterFns = useMemo<ReviewPanel.ReviewPanelState['updaterFns']>(
     () => ({
       handleSetSubview,
       handleLayoutChange,

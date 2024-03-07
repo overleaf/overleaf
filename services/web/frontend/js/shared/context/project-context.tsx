@@ -3,7 +3,7 @@ import useScopeValue from '../hooks/use-scope-value'
 import getMeta from '@/utils/meta'
 import { UserId } from '../../../../types/user'
 import { PublicAccessLevel } from '../../../../types/public-access-level'
-import * as ReviewPanel from '@/features/ide-react/context/review-panel/types/review-panel-state'
+import type * as ReviewPanel from '@/features/source-editor/context/review-panel/types/review-panel-state'
 
 const ProjectContext = createContext<
   | {
