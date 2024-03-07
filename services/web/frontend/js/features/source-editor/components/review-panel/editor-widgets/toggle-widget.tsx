@@ -3,6 +3,7 @@ import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/r
 import { useCodeMirrorStateContext } from '../../codemirror-editor'
 import { EditorView } from '@codemirror/view'
 import classnames from 'classnames'
+import { memo } from 'react'
 
 function ToggleWidget() {
   const { toggleReviewPanel } = useReviewPanelUpdaterFnsContext()
@@ -16,12 +17,16 @@ function ToggleWidget() {
       })}
       onClick={toggleReviewPanel}
     >
-      <Trans
-        i18nKey="track_changes_is_on"
-        components={{ strong: <strong /> }}
-      />
+      <TrackChangesOn />
     </button>
   )
 }
+
+const TrackChangesOn = memo(() => {
+  return (
+    <Trans i18nKey="track_changes_is_on" components={{ strong: <strong /> }} />
+  )
+})
+TrackChangesOn.displayName = 'TrackChangesOn'
 
 export default ToggleWidget

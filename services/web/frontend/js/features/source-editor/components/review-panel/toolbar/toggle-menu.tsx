@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { Trans } from 'react-i18next'
 import Icon from '../../../../../shared/components/icon'
 import TrackChangesMenu from '@/features/source-editor/components/review-panel/toolbar/track-changes-menu'
@@ -47,17 +47,7 @@ function ToggleMenu() {
           className="review-panel-toolbar-collapse-button"
           onClick={handleToggleFullTCStateCollapse}
         >
-          {wantTrackChanges ? (
-            <Trans
-              i18nKey="track_changes_is_on"
-              components={{ strong: <strong /> }}
-            />
-          ) : (
-            <Trans
-              i18nKey="track_changes_is_off"
-              components={{ strong: <strong /> }}
-            />
-          )}
+          {wantTrackChanges ? <TrackChangesOn /> : <TrackChangesOff />}
           <span
             className={classnames('rp-tc-state-collapse', {
               'rp-tc-state-collapse-on': shouldCollapse,
@@ -75,4 +65,16 @@ function ToggleMenu() {
   )
 }
 
-export default ToggleMenu
+const TrackChangesOn = memo(() => {
+  return (
+    <Trans i18nKey="track_changes_is_on" components={{ strong: <strong /> }} />
+  )
+})
+TrackChangesOn.displayName = 'TrackChangesOn'
+
+const TrackChangesOff = memo(() => (
+  <Trans i18nKey="track_changes_is_off" components={{ strong: <strong /> }} />
+))
+TrackChangesOff.displayName = 'TrackChangesOff'
+
+export default memo(ToggleMenu)
