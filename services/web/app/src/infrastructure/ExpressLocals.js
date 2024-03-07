@@ -413,6 +413,9 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       templateLinks: Settings.templateLinks,
       labsEnabled: Settings.labs && Settings.labs.enable,
       groupSSOEnabled: Settings.groupSSO?.enabled,
+      wikiEnabled: Settings.overleaf != null || Settings.proxyLearn,
+      templatesEnabled:
+        Settings.overleaf != null || Settings.templates?.user_id != null,
     }
     next()
   })

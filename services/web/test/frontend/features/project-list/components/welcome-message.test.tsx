@@ -1,8 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import WelcomeMessage from '../../../../../frontend/js/features/project-list/components/welcome-message'
 import { expect } from 'chai'
+import { ExposedSettings } from '../../../../../types/exposed-settings'
 
 describe('<WelcomeMessage />', function () {
+  const exposedSettings: Partial<ExposedSettings> = {}
+
+  beforeEach(function () {
+    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
+    exposedSettings.isOverleaf = true
+    exposedSettings.wikiEnabled = true
+    exposedSettings.templatesEnabled = true
+  })
+
   afterEach(function () {
     window.metaAttributesCache = new Map()
   })
@@ -100,5 +111,49 @@ describe('<WelcomeMessage />', function () {
     })
 
     expect(link.getAttribute('href')).to.equal('/templates')
+  })
+
+  describe('when not in SaaS', function () {
+    beforeEach(function () {
+      exposedSettings.isOverleaf = false
+    })
+
+    it('renders welcome page correctly', function () {
+      render(<WelcomeMessage />)
+
+      screen.getByText('Welcome to Overleaf')
+      screen.getByText('Create a new project')
+      screen.getByText('Learn LaTeX with a tutorial')
+      screen.getByText('Browse templates')
+    })
+
+    it("doesn't display github in the dropdown when clicking create a new project", function () {
+      render(<WelcomeMessage />)
+
+      const button = screen.getByRole('button', {
+        name: 'Create a new project',
+      })
+
+      fireEvent.click(button)
+
+      screen.getByText('Blank Project')
+      screen.getByText('Example Project')
+      screen.getByText('Upload Project')
+      expect(screen.queryByText('Import from GitHub')).to.not.exist
+    })
+
+    it('does not render the tutorial link when the learn wiki is not configured', function () {
+      exposedSettings.wikiEnabled = false
+      render(<WelcomeMessage />)
+
+      expect(screen.queryByText('Learn LaTeX with a tutorial')).to.not.exist
+    })
+
+    it('does not render the templates link when templates are not configured', function () {
+      exposedSettings.templatesEnabled = false
+      render(<WelcomeMessage />)
+
+      expect(screen.queryByText('Browse templates')).to.not.exist
+    })
   })
 })

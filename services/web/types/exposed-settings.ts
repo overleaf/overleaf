@@ -47,4 +47,6 @@ export type ExposedSettings = {
   labsEnabled: boolean
   managedUsersEnabled?: boolean
   groupSSOEnabled?: boolean
+  wikiEnabled?: boolean
+  templatesEnabled?: boolean
 }

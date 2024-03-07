@@ -4,6 +4,7 @@ import type { PortalTemplate } from '../../../../../../types/portal-template'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import getMeta from '../../../../utils/meta'
 import { NewProjectButtonModalVariant } from '../new-project-button/new-project-button-modal'
+import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 type WelcomeMessageCreateNewProjectDropdownProps = {
   setActiveModal: (modal: NewProjectButtonModalVariant) => void
@@ -17,6 +18,8 @@ function WelcomeMessageCreateNewProjectDropdown({
   const portalTemplates = getMeta('ol-portalTemplates') as
     | PortalTemplate[]
     | undefined
+
+  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
 
   const handleClick = useCallback(() => {
     sendMB('welcome-page-create-first-project-click', {
@@ -119,17 +122,19 @@ function WelcomeMessageCreateNewProjectDropdown({
           >
             {t('upload_project')}
           </button>
-          <button
-            onClick={e =>
-              handleDropdownItemClick(
-                e,
-                'import_from_github',
-                'import-from-github'
-              )
-            }
-          >
-            {t('import_from_github')}
-          </button>
+          {isOverleaf && (
+            <button
+              onClick={e =>
+                handleDropdownItemClick(
+                  e,
+                  'import_from_github',
+                  'import-from-github'
+                )
+              }
+            >
+              {t('import_from_github')}
+            </button>
+          )}
           {(portalTemplates?.length ?? 0) > 0 ? (
             <>
               <hr />
