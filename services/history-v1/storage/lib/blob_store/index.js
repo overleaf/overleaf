@@ -206,7 +206,7 @@ class BlobStore {
   }
 
   /**
-   * Stores an object as a gzipped JSON string in a blob.
+   * Stores an object as a JSON string in a blob.
    *
    * @param {object} obj
    * @returns {Promise.<core.Blob>}
@@ -214,15 +214,7 @@ class BlobStore {
   async putObject(obj) {
     assert.object(obj, 'bad object')
     const string = JSON.stringify(obj)
-    const hash = blobHash.fromString(string)
-    const stream = await streams.gzipStringToStream(string)
-    const newBlob = new Blob(hash, Buffer.byteLength(string), string.length)
-    await uploadBlob(this.projectId, newBlob, stream, {
-      contentEncoding: 'gzip',
-      contentType: 'application/json',
-    })
-    await this.backend.insertBlob(this.projectId, newBlob)
-    return newBlob
+    return this.putString(string)
   }
 
   /**
@@ -247,8 +239,7 @@ class BlobStore {
   }
 
   /**
-   * Fetch a JSON encoded gzipped blob by its hash, decompress and deserialize
-   * it.
+   * Fetch a JSON encoded blob by its hash and deserialize it.
    *
    * @template [T=unknown]
    * @param {string} hash hexadecimal SHA-1 hash
@@ -259,9 +250,17 @@ class BlobStore {
     const projectId = this.projectId
     logger.debug({ projectId, hash }, 'getObject started')
     try {
+      const jsonString = await this.getString(hash)
+      const object = JSON.parse(jsonString)
+      return object
+    } catch (error) {
+      // Maybe this is blob is gzipped. Try to gunzip it.
+      // TODO: Remove once we've ensured this is not reached
       const stream = await this.getStream(hash)
       const buffer = await streams.gunzipStreamToBuffer(stream)
-      return JSON.parse(buffer.toString())
+      const object = JSON.parse(buffer.toString())
+      logger.warn('getObject: Gzipped object in BlobStore')
+      return object
     } finally {
       logger.debug({ projectId, hash }, 'getObject finished')
     }
