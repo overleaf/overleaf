@@ -1,15 +1,11 @@
-import { FC, memo, useCallback } from 'react'
-import { EditorSelection, EditorState } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
+import { FC, memo } from 'react'
+import { EditorState } from '@codemirror/state'
 import { useEditorContext } from '../../../../shared/context/editor-context'
-import useScopeEventEmitter from '../../../../shared/hooks/use-scope-event-emitter'
-import { useLayoutContext } from '../../../../shared/context/layout-context'
 import { withinFormattingCommand } from '../../utils/tree-operations/ancestors'
 import { ToolbarButton } from './toolbar-button'
 import { redo, undo } from '@codemirror/commands'
 import * as commands from '../../extensions/toolbar/commands'
 import { SectionHeadingDropdown } from './section-heading-dropdown'
-import { canAddComment } from '../../extensions/toolbar/comments'
 import getMeta from '../../../../utils/meta'
 import { InsertFigureDropdown } from './insert-figure-dropdown'
 import { useTranslation } from 'react-i18next'
@@ -34,22 +30,6 @@ export const ToolbarItems: FC<{
   const { t } = useTranslation()
   const { toggleSymbolPalette, showSymbolPalette } = useEditorContext()
   const isActive = withinFormattingCommand(state)
-  const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
-  const { setReviewPanelOpen } = useLayoutContext()
-  const addComment = useCallback(
-    (view: EditorView) => {
-      const range = view.state.selection.main
-      if (range.empty) {
-        const line = view.state.doc.lineAt(range.head)
-        view.dispatch({
-          selection: EditorSelection.range(line.from, line.to),
-        })
-      }
-      setReviewPanelOpen(true)
-      addCommentEmitter()
-    },
-    [addCommentEmitter, setReviewPanelOpen]
-  )
 
   const symbolPaletteAvailable = getMeta('ol-symbolPaletteAvailable')
   const showGroup = (group: string) => !overflowed || overflowed.has(group)
@@ -145,14 +125,6 @@ export const ToolbarItems: FC<{
                 label={t('toolbar_insert_citation')}
                 command={commands.insertCite}
                 icon="book"
-              />
-              <ToolbarButton
-                id="toolbar-add-comment"
-                label={t('toolbar_add_comment')}
-                command={addComment}
-                disabled={!canAddComment(state)}
-                icon="comment"
-                hidden // enable this if an alternative to the floating "Add Comment" button is needed
               />
               <InsertFigureDropdown />
               <TableInserterDropdown />
