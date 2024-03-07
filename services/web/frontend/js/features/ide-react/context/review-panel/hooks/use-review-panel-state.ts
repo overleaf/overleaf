@@ -956,19 +956,18 @@ function useReviewPanelState(): ReviewPanelStateReactIde {
     [onThreadDeleted, projectId]
   )
 
-  const onCommentEdited: ReviewPanel.UpdaterFn<'saveEdit'> = (
-    threadId: ThreadId,
-    commentId: CommentId,
-    content: string
-  ) => {
-    setCommentThreads(prevState => {
-      const thread = { ...getThread(threadId) }
-      thread.messages = thread.messages.map(message => {
-        return message.id === commentId ? { ...message, content } : message
+  const onCommentEdited = useCallback(
+    (threadId: ThreadId, commentId: CommentId, content: string) => {
+      setCommentThreads(prevState => {
+        const thread = { ...getThread(threadId) }
+        thread.messages = thread.messages.map(message => {
+          return message.id === commentId ? { ...message, content } : message
+        })
+        return { ...prevState, [threadId]: thread }
       })
-      return { ...prevState, [threadId]: thread }
-    })
-  }
+    },
+    [getThread]
+  )
 
   const saveEdit = useCallback(
     (threadId: ThreadId, commentId: CommentId, content: string) => {
