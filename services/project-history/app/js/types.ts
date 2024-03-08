@@ -1,4 +1,4 @@
-export type Update = TextUpdate | AddDocUpdate | AddFileUpdate | RenameUpdate | DeleteCommentUpdate
+export type Update = TextUpdate | AddDocUpdate | AddFileUpdate | RenameUpdate
 
 export type UpdateMeta = {
   user_id: string
@@ -16,12 +16,6 @@ export type TextUpdate = {
     pathname: string
     doc_length: number
   }
-}
-
-export type DeleteCommentUpdate = {
-  pathname: string
-  deleteComment: string
-  meta: UpdateMeta
 }
 
 type ProjectUpdateBase = {

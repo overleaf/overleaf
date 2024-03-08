@@ -212,14 +212,11 @@ function acceptChanges(projectId, docId, changeIds, callback) {
   )
 }
 
-function deleteThread(projectId, docId, threadId, userId, callback) {
+function deleteThread(projectId, docId, threadId, callback) {
   _makeRequest(
     {
       path: `/project/${projectId}/doc/${docId}/comment/${threadId}`,
       method: 'DELETE',
-      json: {
-        user_id: userId,
-      },
     },
     projectId,
     'delete-thread',

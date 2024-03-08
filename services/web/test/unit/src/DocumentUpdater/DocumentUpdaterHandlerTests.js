@@ -766,7 +766,6 @@ describe('DocumentUpdaterHandler', function () {
           this.project_id,
           this.doc_id,
           this.thread_id,
-          this.user_id,
           this.callback
         )
       })
@@ -797,7 +796,6 @@ describe('DocumentUpdaterHandler', function () {
           this.project_id,
           this.doc_id,
           this.thread_id,
-          this.user_id,
           this.callback
         )
       })
@@ -816,7 +814,6 @@ describe('DocumentUpdaterHandler', function () {
           this.project_id,
           this.doc_id,
           this.thread_id,
-          this.user_id,
           this.callback
         )
       })

@@ -422,7 +422,7 @@ const DocumentManager = {
     )
   },
 
-  deleteComment(projectId, docId, commentId, userId, _callback) {
+  deleteComment(projectId, docId, commentId, _callback) {
     const timer = new Metrics.Timer('docManager.deleteComment')
     const callback = (...args) => {
       timer.done()
@@ -432,17 +432,7 @@ const DocumentManager = {
     DocumentManager.getDoc(
       projectId,
       docId,
-      (
-        error,
-        lines,
-        version,
-        ranges,
-        pathname,
-        projectHistoryId,
-        unflushedTime,
-        alreadyLoaded,
-        historyRangesSupport
-      ) => {
+      (error, lines, version, ranges) => {
         if (error) {
           return callback(error)
         }
@@ -471,27 +461,7 @@ const DocumentManager = {
             if (error) {
               return callback(error)
             }
-            if (historyRangesSupport) {
-              ProjectHistoryRedisManager.queueOps(
-                projectId,
-                JSON.stringify({
-                  pathname,
-                  deleteComment: commentId,
-                  meta: {
-                    ts: new Date(),
-                    user_id: userId,
-                  },
-                }),
-                error => {
-                  if (error) {
-                    return callback(error)
-                  }
-                  callback()
-                }
-              )
-            } else {
-              callback()
-            }
+            callback()
           }
         )
       }
@@ -689,14 +659,13 @@ const DocumentManager = {
     )
   },
 
-  deleteCommentWithLock(projectId, docId, threadId, userId, callback) {
+  deleteCommentWithLock(projectId, docId, threadId, callback) {
     const UpdateManager = require('./UpdateManager')
     UpdateManager.lockUpdatesAndDo(
       DocumentManager.deleteComment,
       projectId,
       docId,
       threadId,
-      userId,
       callback
     )
   },

@@ -307,23 +307,16 @@ function deleteComment(req, res, next) {
     doc_id: docId,
     comment_id: commentId,
   } = req.params
-  const userId = req.body.user_id
   logger.debug({ projectId, docId, commentId }, 'deleting comment via http')
   const timer = new Metrics.Timer('http.deleteComment')
-  DocumentManager.deleteCommentWithLock(
-    projectId,
-    docId,
-    commentId,
-    userId,
-    error => {
-      timer.done()
-      if (error) {
-        return next(error)
-      }
-      logger.debug({ projectId, docId, commentId }, 'deleted comment via http')
-      res.sendStatus(204) // No Content
+  DocumentManager.deleteCommentWithLock(projectId, docId, commentId, error => {
+    timer.done()
+    if (error) {
+      return next(error)
     }
-  )
+    logger.debug({ projectId, docId, commentId }, 'deleted comment via http')
+    res.sendStatus(204) // No Content
+  })
 }
 
 function updateProject(req, res, next) {
