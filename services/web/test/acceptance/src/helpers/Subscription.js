@@ -1,6 +1,6 @@
 const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
 const { expect } = require('chai')
-const { promisify } = require('util')
+const { promisifyClass } = require('@overleaf/promise-utils')
 const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
 const PermissionsManager = require('../../../../app/src/Features/Authorization/PermissionsManager')
 const SSOConfigManager = require('../../../../modules/group-settings/app/src/sso/SSOConfigManager')
@@ -192,16 +192,8 @@ class Subscription {
   }
 }
 
-Subscription.promises = class extends Subscription {}
-
-// promisify User class methods - works for methods with 0-1 output parameters,
-// otherwise we will need to implement the method manually instead
-const nonPromiseMethods = ['constructor', 'getCapabilities']
-Object.getOwnPropertyNames(Subscription.prototype).forEach(methodName => {
-  const method = Subscription.prototype[methodName]
-  if (typeof method === 'function' && !nonPromiseMethods.includes(methodName)) {
-    Subscription.promises.prototype[methodName] = promisify(method)
-  }
+Subscription.promises = promisifyClass(Subscription, {
+  without: ['getCapabilities'],
 })
 
 Subscription.promises.prototype.inviteUser = async function (adminUser, email) {

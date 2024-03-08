@@ -8,6 +8,7 @@ module.exports = {
   promisifyMultiResult,
   callbackify,
   callbackifyAll,
+  callbackifyClass,
   callbackifyMultiResult,
   expressify,
   expressifyErrorHandler,
@@ -178,6 +179,34 @@ function callbackifyAll(module, opts = {}) {
 }
 
 /**
+ * Callbackify all methods in a class.
+ *
+ * Options are the same as for callbackifyAll
+ */
+function callbackifyClass(cls, opts = {}) {
+  const callbackified = class extends cls {}
+  const { without = [], multiResult = {} } = opts
+  for (const propName of Object.getOwnPropertyNames(cls.prototype)) {
+    if (propName === 'constructor' || without.includes(propName)) {
+      continue
+    }
+    const propValue = cls.prototype[propName]
+    if (typeof propValue !== 'function') {
+      continue
+    }
+    if (multiResult[propName] != null) {
+      callbackified.prototype[propName] = callbackifyMultiResult(
+        propValue,
+        multiResult[propName]
+      )
+    } else {
+      callbackified.prototype[propName] = callbackify(propValue)
+    }
+  }
+  return callbackified
+}
+
+/**
  * Reverse the effect of `promisifyMultiResult`.
  *
  * This is meant for providing a temporary backward compatible callback
@@ -186,7 +215,7 @@ function callbackifyAll(module, opts = {}) {
 function callbackifyMultiResult(fn, resultNames) {
   function callbackified(...args) {
     const [callback] = args.splice(-1)
-    fn(...args)
+    fn.apply(this, args)
       .then(result => {
         const cbResults = resultNames.map(resultName => result[resultName])
         callback(null, ...cbResults)

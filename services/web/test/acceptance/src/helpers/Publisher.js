@@ -1,6 +1,6 @@
 const { ObjectId } = require('mongodb')
 const PublisherModel = require('../../../../app/src/models/Publisher').Publisher
-const { callbackify } = require('util')
+const { callbackifyClass } = require('@overleaf/promise-utils')
 
 let count = parseInt(Math.random() * 999999)
 
@@ -32,21 +32,7 @@ class PromisifiedPublisher {
   }
 }
 
-class Publisher extends PromisifiedPublisher {}
+const Publisher = callbackifyClass(PromisifiedPublisher)
 Publisher.promises = class extends PromisifiedPublisher {}
-
-// callbackify publisher class methods
-const nonPromiseMethods = ['constructor']
-Object.getOwnPropertyNames(PromisifiedPublisher.prototype).forEach(
-  methodName => {
-    const method = PromisifiedPublisher.prototype[methodName]
-    if (
-      typeof method === 'function' &&
-      !nonPromiseMethods.includes(methodName)
-    ) {
-      Publisher.prototype[methodName] = callbackify(method)
-    }
-  }
-)
 
 module.exports = Publisher

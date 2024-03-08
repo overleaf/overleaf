@@ -3,6 +3,7 @@ const {
   promisifyAll,
   promisifyClass,
   callbackifyMultiResult,
+  callbackifyClass,
   callbackifyAll,
   expressify,
   expressifyErrorHandler,
@@ -322,6 +323,108 @@ describe('callbackifyAll', function () {
         expect(err).not.to.exist
         expect(sum).to.equal(11)
         expect(product).to.equal(30)
+      })
+    })
+  })
+})
+
+describe('callbackifyClass', function () {
+  describe('basic functionality', function () {
+    before(function () {
+      this.Class = class {
+        constructor(a) {
+          this.a = a
+        }
+
+        async asyncAdd(b) {
+          return this.a + b
+        }
+      }
+      this.Callbackified = callbackifyClass(this.Class)
+    })
+
+    it('callbackifies the class methods', function (done) {
+      const adder = new this.Callbackified(1)
+      adder.asyncAdd(2, (err, sum) => {
+        expect(err).not.to.exist
+        expect(sum).to.equal(3)
+        done()
+      })
+    })
+  })
+
+  describe('without option', function () {
+    before(function () {
+      this.Class = class {
+        constructor(a) {
+          this.a = a
+        }
+
+        async asyncAdd(b) {
+          return this.a + b
+        }
+
+        syncAdd(b) {
+          return this.a + b
+        }
+      }
+      this.Callbackified = callbackifyClass(this.Class, {
+        without: ['syncAdd'],
+      })
+    })
+
+    it('does not callbackify excluded functions', function () {
+      const adder = new this.Callbackified(10)
+      const sum = adder.syncAdd(12)
+      expect(sum).to.equal(22)
+    })
+
+    it('callbackifies other functions', function (done) {
+      const adder = new this.Callbackified(1)
+      adder.asyncAdd(2, (err, sum) => {
+        expect(err).not.to.exist
+        expect(sum).to.equal(3)
+        done()
+      })
+    })
+  })
+
+  describe('multiResult option', function () {
+    before(function () {
+      this.Class = class {
+        constructor(a) {
+          this.a = a
+        }
+
+        async asyncAdd(b) {
+          return this.a + b
+        }
+
+        async asyncArithmetic(b) {
+          return { sum: this.a + b, product: this.a * b }
+        }
+      }
+      this.Callbackified = callbackifyClass(this.Class, {
+        multiResult: { asyncArithmetic: ['sum', 'product'] },
+      })
+    })
+
+    it('callbackifies multi-result functions', function (done) {
+      const adder = new this.Callbackified(3)
+      adder.asyncArithmetic(6, (err, sum, product) => {
+        expect(err).not.to.exist
+        expect(sum).to.equal(9)
+        expect(product).to.equal(18)
+        done()
+      })
+    })
+
+    it('callbackifies other functions normally', function (done) {
+      const adder = new this.Callbackified(6)
+      adder.asyncAdd(2, (err, sum) => {
+        expect(err).not.to.exist
+        expect(sum).to.equal(8)
+        done()
       })
     })
   })
