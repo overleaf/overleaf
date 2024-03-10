@@ -1521,7 +1521,6 @@
   "too_many_requests": "Der kom for mange forespørgsler inden for et kort tidsrum. Det kan hjælpe, hvis du venter lidt før du prøver igen.",
   "too_many_search_results": "Der var mere end 100 resultater. Indskrænk venligst din søgning.",
   "too_recently_compiled": "Dette projekt er lige blevet kompileret, hvorfor denne kompilering er blevet udsat.",
-  "toolbar_add_comment": "Tilføj kommentar",
   "toolbar_bullet_list": "Punktliste",
   "toolbar_choose_section_heading_level": "Vælg overskriftsniveau",
   "toolbar_decrease_indent": "Formindsk indryk",
