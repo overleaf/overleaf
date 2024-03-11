@@ -27,7 +27,7 @@ module.exports = {
     },
 
     load_balancer_agent: {
-      report_load: true,
+      report_load: process.env.LOAD_BALANCER_AGENT_REPORT_LOAD !== 'false',
       load_port: 3048,
       local_port: 3049,
     },
