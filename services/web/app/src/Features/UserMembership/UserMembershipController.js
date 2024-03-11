@@ -1,15 +1,3 @@
-/* eslint-disable
-   max-len,
- */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SessionManager = require('../Authentication/SessionManager')
 const UserMembershipHandler = require('./UserMembershipHandler')
 const Errors = require('../Errors/Errors')
@@ -22,39 +10,32 @@ const {
 } = require('./UserMembershipErrors')
 const { SSOConfig } = require('../../models/SSOConfig')
 const CSVParser = require('json2csv').Parser
+const { expressify } = require('@overleaf/promise-utils')
 
 async function manageGroupMembers(req, res, next) {
-  const { entity, entityConfig } = req
+  const { entity: subscription, entityConfig } = req
 
-  const ssoConfig = await SSOConfig.findById(entity.ssoConfig).exec()
-  return entity.fetchV1Data(function (error, entity) {
-    if (error != null) {
-      return next(error)
-    }
-    return UserMembershipHandler.getUsers(
-      entity,
-      entityConfig,
-      function (error, users) {
-        let entityName
-        if (error != null) {
-          return next(error)
-        }
-        const entityPrimaryKey =
-          entity[entityConfig.fields.primaryKey].toString()
-        if (entityConfig.fields.name) {
-          entityName = entity[entityConfig.fields.name]
-        }
+  const entityPrimaryKey =
+    subscription[entityConfig.fields.primaryKey].toString()
 
-        return res.render('user_membership/group-members-react', {
-          name: entityName,
-          groupId: entityPrimaryKey,
-          users,
-          groupSize: entity.membersLimit,
-          managedUsersActive: entity.managedUsersEnabled,
-          groupSSOActive: ssoConfig?.enabled,
-        })
-      }
-    )
+  let entityName
+  if (entityConfig.fields.name) {
+    entityName = subscription[entityConfig.fields.name]
+  }
+
+  const users = await UserMembershipHandler.promises.getUsers(
+    subscription,
+    entityConfig
+  )
+  const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
+
+  res.render('user_membership/group-members-react', {
+    name: entityName,
+    groupId: entityPrimaryKey,
+    users,
+    groupSize: subscription.membersLimit,
+    managedUsersActive: subscription.managedUsersEnabled,
+    groupSSOActive: ssoConfig?.enabled,
   })
 }
 
@@ -87,38 +68,42 @@ async function managePublisherManagers(req, res, next) {
 
 async function _renderManagersPage(req, res, next, template) {
   const { entity, entityConfig } = req
-  return entity.fetchV1Data(function (error, entity) {
-    if (error != null) {
-      return next(error)
-    }
-    return UserMembershipHandler.getUsers(
-      entity,
-      entityConfig,
-      function (error, users) {
-        let entityName
-        if (error != null) {
-          return next(error)
-        }
-        const entityPrimaryKey =
-          entity[entityConfig.fields.primaryKey].toString()
-        if (entityConfig.fields.name) {
-          entityName = entity[entityConfig.fields.name]
-        }
-        return res.render(template, {
-          name: entityName,
-          users,
-          groupId: entityPrimaryKey,
-        })
+
+  const fetchV1Data = new Promise((resolve, reject) => {
+    entity.fetchV1Data((error, entity) => {
+      if (error) {
+        reject(error)
+      } else {
+        resolve(entity)
       }
-    )
+    })
+  })
+
+  const entityWithV1Data = await fetchV1Data
+
+  const entityPrimaryKey =
+    entityWithV1Data[entityConfig.fields.primaryKey].toString()
+  let entityName
+  if (entityConfig.fields.name) {
+    entityName = entityWithV1Data[entityConfig.fields.name]
+  }
+  const users = await UserMembershipHandler.promises.getUsers(
+    entityWithV1Data,
+    entityConfig
+  )
+
+  res.render(template, {
+    name: entityName,
+    users,
+    groupId: entityPrimaryKey,
   })
 }
 
 module.exports = {
-  manageGroupMembers,
-  manageGroupManagers,
-  manageInstitutionManagers,
-  managePublisherManagers,
+  manageGroupMembers: expressify(manageGroupMembers),
+  manageGroupManagers: expressify(manageGroupManagers),
+  manageInstitutionManagers: expressify(manageInstitutionManagers),
+  managePublisherManagers: expressify(managePublisherManagers),
   add(req, res, next) {
     const { entity, entityConfig } = req
     const email = EmailHelper.parseEmail(req.body.email)
@@ -135,7 +120,7 @@ module.exports = {
       return next(new Errors.NotFoundError('Cannot add users to entity'))
     }
 
-    return UserMembershipHandler.addUser(
+    UserMembershipHandler.addUser(
       entity,
       entityConfig,
       email,
@@ -159,7 +144,7 @@ module.exports = {
         if (error != null) {
           return next(error)
         }
-        return res.json({ user })
+        res.json({ user })
       }
     )
   },
@@ -181,7 +166,7 @@ module.exports = {
       })
     }
 
-    return UserMembershipHandler.removeUser(
+    UserMembershipHandler.removeUser(
       entity,
       entityConfig,
       userId,
@@ -197,7 +182,7 @@ module.exports = {
         if (error != null) {
           return next(error)
         }
-        return res.sendStatus(200)
+        res.sendStatus(200)
       }
     )
   },
@@ -205,7 +190,7 @@ module.exports = {
     const { entity, entityConfig } = req
     const fields = ['email', 'last_logged_in_at', 'last_active_at']
 
-    return UserMembershipHandler.getUsers(
+    UserMembershipHandler.getUsers(
       entity,
       entityConfig,
       function (error, users) {
@@ -218,7 +203,7 @@ module.exports = {
     )
   },
   new(req, res, next) {
-    return res.render('user_membership/new', {
+    res.render('user_membership/new', {
       entityName: req.params.name,
       entityId: req.params.id,
     })
@@ -227,14 +212,14 @@ module.exports = {
     const entityId = req.params.id
     const entityConfig = req.entityConfig
 
-    return UserMembershipHandler.createEntity(
+    UserMembershipHandler.createEntity(
       entityId,
       entityConfig,
       function (error, entity) {
         if (error != null) {
           return next(error)
         }
-        return res.redirect(entityConfig.pathsFor(entityId).index)
+        res.redirect(entityConfig.pathsFor(entityId).index)
       }
     )
   },

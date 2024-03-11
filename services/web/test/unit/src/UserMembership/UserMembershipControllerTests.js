@@ -1,19 +1,6 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
-const assertNotCalled = sinon.assert.notCalled
-const { assert, expect } = require('chai')
+const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipController.js'
 const SandboxedModule = require('sandboxed-module')
@@ -43,7 +30,7 @@ describe('UserMembershipController', function () {
       fetchV1Data: callback => {
         const institution = Object.assign({}, this.institution)
         institution.name = 'Test Institution Name'
-        return callback(null, institution)
+        callback(null, institution)
       },
     }
     this.users = [
@@ -82,6 +69,9 @@ describe('UserMembershipController', function () {
       getUsers: sinon.stub().yields(null, this.users),
       addUser: sinon.stub().yields(null, this.newUser),
       removeUser: sinon.stub().yields(null),
+      promises: {
+        getUsers: sinon.stub().resolves(this.users),
+      },
     }
     this.SplitTestHandler = {
       promises: {
@@ -89,36 +79,33 @@ describe('UserMembershipController', function () {
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }
-    return (this.UserMembershipController = SandboxedModule.require(
-      modulePath,
-      {
-        requires: {
-          './UserMembershipErrors': {
-            UserIsManagerError,
-            UserNotFoundError,
-            UserAlreadyAddedError,
-          },
-          '../Authentication/SessionManager': this.SessionManager,
-          '../SplitTests/SplitTestHandler': this.SplitTestHandler,
-          './UserMembershipHandler': this.UserMembershipHandler,
-          '@overleaf/settings': this.Settings,
-          '../../models/SSOConfig': { SSOConfig: this.SSOConfig },
+    this.UserMembershipController = SandboxedModule.require(modulePath, {
+      requires: {
+        './UserMembershipErrors': {
+          UserIsManagerError,
+          UserNotFoundError,
+          UserAlreadyAddedError,
         },
-      }
-    ))
+        '../Authentication/SessionManager': this.SessionManager,
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        './UserMembershipHandler': this.UserMembershipHandler,
+        '@overleaf/settings': this.Settings,
+        '../../models/SSOConfig': { SSOConfig: this.SSOConfig },
+      },
+    })
   })
 
   describe('index', function () {
     beforeEach(function () {
       this.req.entity = this.subscription
-      return (this.req.entityConfig = EntityConfigs.group)
+      this.req.entityConfig = EntityConfigs.group
     })
 
     it('get users', async function () {
-      return await this.UserMembershipController.manageGroupMembers(this.req, {
+      await this.UserMembershipController.manageGroupMembers(this.req, {
         render: () => {
           sinon.assert.calledWithMatch(
-            this.UserMembershipHandler.getUsers,
+            this.UserMembershipHandler.promises.getUsers,
             this.subscription,
             { modelName: 'Subscription' }
           )
@@ -128,7 +115,7 @@ describe('UserMembershipController', function () {
 
     it('render group view', async function () {
       this.subscription.managedUsersEnabled = false
-      return await this.UserMembershipController.manageGroupMembers(this.req, {
+      await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
           expect(viewParams.users).to.deep.equal(this.users)
@@ -140,7 +127,7 @@ describe('UserMembershipController', function () {
 
     it('render group view with managed users', async function () {
       this.subscription.managedUsersEnabled = true
-      return await this.UserMembershipController.manageGroupMembers(this.req, {
+      await this.UserMembershipController.manageGroupMembers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-members-react')
           expect(viewParams.users).to.deep.equal(this.users)
@@ -152,7 +139,7 @@ describe('UserMembershipController', function () {
 
     it('render group managers view', async function () {
       this.req.entityConfig = EntityConfigs.groupManagers
-      return await this.UserMembershipController.manageGroupManagers(this.req, {
+      await this.UserMembershipController.manageGroupManagers(this.req, {
         render: (viewPath, viewParams) => {
           expect(viewPath).to.equal('user_membership/group-managers-react')
           expect(viewParams.groupSize).to.equal(undefined)
@@ -163,18 +150,15 @@ describe('UserMembershipController', function () {
     it('render institution view', async function () {
       this.req.entity = this.institution
       this.req.entityConfig = EntityConfigs.institution
-      return await this.UserMembershipController.manageInstitutionManagers(
-        this.req,
-        {
-          render: (viewPath, viewParams) => {
-            expect(viewPath).to.equal(
-              'user_membership/institution-managers-react'
-            )
-            expect(viewParams.name).to.equal('Test Institution Name')
-            expect(viewParams.groupSize).to.equal(undefined)
-          },
-        }
-      )
+      await this.UserMembershipController.manageInstitutionManagers(this.req, {
+        render: (viewPath, viewParams) => {
+          expect(viewPath).to.equal(
+            'user_membership/institution-managers-react'
+          )
+          expect(viewParams.name).to.equal('Test Institution Name')
+          expect(viewParams.groupSize).to.equal(undefined)
+        },
+      })
     })
   })
 
@@ -182,11 +166,11 @@ describe('UserMembershipController', function () {
     beforeEach(function () {
       this.req.body.email = this.newUser.email
       this.req.entity = this.subscription
-      return (this.req.entityConfig = EntityConfigs.groupManagers)
+      this.req.entityConfig = EntityConfigs.groupManagers
     })
 
     it('add user', function (done) {
-      return this.UserMembershipController.add(this.req, {
+      this.UserMembershipController.add(this.req, {
         json: () => {
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.addUser,
@@ -194,36 +178,36 @@ describe('UserMembershipController', function () {
             { modelName: 'Subscription' },
             this.newUser.email
           )
-          return done()
+          done()
         },
       })
     })
 
     it('return user object', function (done) {
-      return this.UserMembershipController.add(this.req, {
+      this.UserMembershipController.add(this.req, {
         json: payload => {
           payload.user.should.equal(this.newUser)
-          return done()
+          done()
         },
       })
     })
 
     it('handle readOnly entity', function (done) {
       this.req.entityConfig = EntityConfigs.group
-      return this.UserMembershipController.add(this.req, null, error => {
+      this.UserMembershipController.add(this.req, null, error => {
         expect(error).to.exist
         expect(error).to.be.an.instanceof(Errors.NotFoundError)
-        return done()
+        done()
       })
     })
 
     it('handle user already added', function (done) {
       this.UserMembershipHandler.addUser.yields(new UserAlreadyAddedError())
-      return this.UserMembershipController.add(this.req, {
+      this.UserMembershipController.add(this.req, {
         status: () => ({
           json: payload => {
             expect(payload.error.code).to.equal('user_already_added')
-            return done()
+            done()
           },
         }),
       })
@@ -231,11 +215,11 @@ describe('UserMembershipController', function () {
 
     it('handle user not found', function (done) {
       this.UserMembershipHandler.addUser.yields(new UserNotFoundError())
-      return this.UserMembershipController.add(this.req, {
+      this.UserMembershipController.add(this.req, {
         status: () => ({
           json: payload => {
             expect(payload.error.code).to.equal('user_not_found')
-            return done()
+            done()
           },
         }),
       })
@@ -243,11 +227,11 @@ describe('UserMembershipController', function () {
 
     it('handle invalid email', function (done) {
       this.req.body.email = 'not_valid_email'
-      return this.UserMembershipController.add(this.req, {
+      this.UserMembershipController.add(this.req, {
         status: () => ({
           json: payload => {
             expect(payload.error.code).to.equal('invalid_email')
-            return done()
+            done()
           },
         }),
       })
@@ -258,11 +242,11 @@ describe('UserMembershipController', function () {
     beforeEach(function () {
       this.req.params.userId = this.newUser._id
       this.req.entity = this.subscription
-      return (this.req.entityConfig = EntityConfigs.groupManagers)
+      this.req.entityConfig = EntityConfigs.groupManagers
     })
 
     it('remove user', function (done) {
-      return this.UserMembershipController.remove(this.req, {
+      this.UserMembershipController.remove(this.req, {
         sendStatus: () => {
           sinon.assert.calledWithMatch(
             this.UserMembershipHandler.removeUser,
@@ -270,27 +254,27 @@ describe('UserMembershipController', function () {
             { modelName: 'Subscription' },
             this.newUser._id
           )
-          return done()
+          done()
         },
       })
     })
 
     it('handle readOnly entity', function (done) {
       this.req.entityConfig = EntityConfigs.group
-      return this.UserMembershipController.remove(this.req, null, error => {
+      this.UserMembershipController.remove(this.req, null, error => {
         expect(error).to.exist
         expect(error).to.be.an.instanceof(Errors.NotFoundError)
-        return done()
+        done()
       })
     })
 
     it('prevent self removal', function (done) {
       this.req.params.userId = this.user._id
-      return this.UserMembershipController.remove(this.req, {
+      this.UserMembershipController.remove(this.req, {
         status: () => ({
           json: payload => {
             expect(payload.error.code).to.equal('managers_cannot_remove_self')
-            return done()
+            done()
           },
         }),
       })
@@ -298,11 +282,11 @@ describe('UserMembershipController', function () {
 
     it('prevent admin removal', function (done) {
       this.UserMembershipHandler.removeUser.yields(new UserIsManagerError())
-      return this.UserMembershipController.remove(this.req, {
+      this.UserMembershipController.remove(this.req, {
         status: () => ({
           json: payload => {
             expect(payload.error.code).to.equal('managers_cannot_remove_admin')
-            return done()
+            done()
           },
         }),
       })
@@ -314,11 +298,11 @@ describe('UserMembershipController', function () {
       this.req.entity = this.subscription
       this.req.entityConfig = EntityConfigs.groupManagers
       this.res = new MockResponse()
-      return this.UserMembershipController.exportCsv(this.req, this.res)
+      this.UserMembershipController.exportCsv(this.req, this.res)
     })
 
     it('get users', function () {
-      return sinon.assert.calledWithMatch(
+      sinon.assert.calledWithMatch(
         this.UserMembershipHandler.getUsers,
         this.subscription,
         { modelName: 'Subscription' }
@@ -326,11 +310,11 @@ describe('UserMembershipController', function () {
     })
 
     it('should set the correct content type on the request', function () {
-      return assertCalledWith(this.res.contentType, 'text/csv; charset=utf-8')
+      assertCalledWith(this.res.contentType, 'text/csv; charset=utf-8')
     })
 
     it('should name the exported csv file', function () {
-      return assertCalledWith(
+      assertCalledWith(
         this.res.header,
         'Content-Disposition',
         'attachment; filename="Group.csv"'
@@ -338,7 +322,7 @@ describe('UserMembershipController', function () {
     })
 
     it('should export the correct csv', function () {
-      return assertCalledWith(
+      assertCalledWith(
         this.res.send,
         '"email","last_logged_in_at","last_active_at"\n"mock-email-1@foo.com","2020-08-09T12:43:11.467Z","2021-08-09T12:43:11.467Z"\n"mock-email-2@foo.com","2020-05-20T10:41:11.407Z","2021-05-20T10:41:11.407Z"'
       )
@@ -348,15 +332,15 @@ describe('UserMembershipController', function () {
   describe('new', function () {
     beforeEach(function () {
       this.req.params.name = 'publisher'
-      return (this.req.params.id = 'abc')
+      this.req.params.id = 'abc'
     })
 
     it('renders view', function (done) {
-      return this.UserMembershipController.new(this.req, {
+      this.UserMembershipController.new(this.req, {
         render: (viewPath, data) => {
           expect(data.entityName).to.eq('publisher')
           expect(data.entityId).to.eq('abc')
-          return done()
+          done()
         },
       })
     })
@@ -366,11 +350,11 @@ describe('UserMembershipController', function () {
     beforeEach(function () {
       this.req.params.name = 'institution'
       this.req.entityConfig = EntityConfigs.institution
-      return (this.req.params.id = 123)
+      this.req.params.id = 123
     })
 
     it('creates institution', function (done) {
-      return this.UserMembershipController.create(this.req, {
+      this.UserMembershipController.create(this.req, {
         redirect: path => {
           expect(path).to.eq(EntityConfigs.institution.pathsFor(123).index)
           sinon.assert.calledWithMatch(
@@ -378,7 +362,7 @@ describe('UserMembershipController', function () {
             123,
             { modelName: 'Institution' }
           )
-          return done()
+          done()
         },
       })
     })
