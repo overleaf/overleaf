@@ -1,33 +1,20 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const path = require('path')
 const sinon = require('sinon')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Security/OneTimeTokenHandler'
 )
-const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const tk = require('timekeeper')
+const { expect } = require('chai')
 
 describe('OneTimeTokenHandler', function () {
   beforeEach(function () {
     tk.freeze(Date.now()) // freeze the time for these tests
     this.stubbedToken = 'mock-token'
     this.callback = sinon.stub()
-    return (this.OneTimeTokenHandler = SandboxedModule.require(modulePath, {
+    this.OneTimeTokenHandler = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
         crypto: {
@@ -37,21 +24,21 @@ describe('OneTimeTokenHandler', function () {
           db: (this.db = { tokens: {} }),
         },
       },
-    }))
+    })
   })
 
   afterEach(function () {
-    return tk.reset()
+    tk.reset()
   })
 
   describe('getNewToken', function () {
     beforeEach(function () {
-      return (this.db.tokens.insertOne = sinon.stub().yields())
+      this.db.tokens.insertOne = sinon.stub().yields()
     })
 
     describe('normally', function () {
       beforeEach(function () {
-        return this.OneTimeTokenHandler.getNewToken(
+        this.OneTimeTokenHandler.getNewToken(
           'password',
           'mock-data-to-store',
           this.callback
@@ -59,7 +46,7 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should insert a generated token with a 1 hour expiry', function () {
-        return this.db.tokens.insertOne
+        this.db.tokens.insertOne
           .calledWith({
             use: 'password',
             token: this.stubbedToken,
@@ -71,15 +58,13 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should call the callback with the token', function () {
-        return this.callback
-          .calledWith(null, this.stubbedToken)
-          .should.equal(true)
+        this.callback.calledWith(null, this.stubbedToken).should.equal(true)
       })
     })
 
     describe('with an optional expiresIn parameter', function () {
       beforeEach(function () {
-        return this.OneTimeTokenHandler.getNewToken(
+        this.OneTimeTokenHandler.getNewToken(
           'password',
           'mock-data-to-store',
           { expiresIn: 42 },
@@ -88,7 +73,7 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should insert a generated token with a custom expiry', function () {
-        return this.db.tokens.insertOne
+        this.db.tokens.insertOne
           .calledWith({
             use: 'password',
             token: this.stubbedToken,
@@ -100,29 +85,27 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should call the callback with the token', function () {
-        return this.callback
-          .calledWith(null, this.stubbedToken)
-          .should.equal(true)
+        this.callback.calledWith(null, this.stubbedToken).should.equal(true)
       })
     })
   })
 
   describe('peekValueFromToken', function () {
     describe('successfully', function () {
-      const data = 'some-mock-data'
-      beforeEach(function () {
+      const data = { email: 'some-mock-data' }
+      let result
+      beforeEach(async function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
-          .yields(null, { value: { data } })
-        return this.OneTimeTokenHandler.peekValueFromToken(
+          .resolves({ value: { data, peekCount: 1 } })
+        result = await this.OneTimeTokenHandler.promises.peekValueFromToken(
           'password',
-          'mock-token',
-          this.callback
+          'mock-token'
         )
       })
 
       it('should increment the peekCount', function () {
-        return this.db.tokens.findOneAndUpdate
+        this.db.tokens.findOneAndUpdate
           .calledWith(
             {
               use: 'password',
@@ -139,26 +122,22 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should return the data', function () {
-        return this.callback.calledWith(null, data).should.equal(true)
+        expect(result).to.deep.equal({ data, remainingPeeks: 3 })
       })
     })
 
     describe('when a valid token is not found', function () {
       beforeEach(function () {
-        this.db.tokens.findOneAndUpdate = sinon
-          .stub()
-          .yields(null, { value: null })
-        return this.OneTimeTokenHandler.peekValueFromToken(
-          'password',
-          'mock-token',
-          this.callback
-        )
+        this.db.tokens.findOneAndUpdate = sinon.stub().resolves({ value: null })
       })
 
-      it('should return a NotFoundError', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should return a NotFoundError', async function () {
+        await expect(
+          this.OneTimeTokenHandler.promises.peekValueFromToken(
+            'password',
+            'mock-token'
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
   })
@@ -197,7 +176,7 @@ describe('OneTimeTokenHandler', function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
           .yields(null, { value: { data: 'mock-data' } })
-        return this.OneTimeTokenHandler.getValueFromTokenAndExpire(
+        this.OneTimeTokenHandler.getValueFromTokenAndExpire(
           'password',
           'mock-token',
           this.callback
@@ -205,7 +184,7 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should expire the token', function () {
-        return this.db.tokens.findOneAndUpdate
+        this.db.tokens.findOneAndUpdate
           .calledWith(
             {
               use: 'password',
@@ -222,7 +201,7 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should return the data', function () {
-        return this.callback.calledWith(null, 'mock-data').should.equal(true)
+        this.callback.calledWith(null, 'mock-data').should.equal(true)
       })
     })
 
@@ -231,7 +210,7 @@ describe('OneTimeTokenHandler', function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
           .yields(null, { value: null })
-        return this.OneTimeTokenHandler.getValueFromTokenAndExpire(
+        this.OneTimeTokenHandler.getValueFromTokenAndExpire(
           'password',
           'mock-token',
           this.callback
@@ -239,7 +218,7 @@ describe('OneTimeTokenHandler', function () {
       })
 
       it('should return a NotFoundError', function () {
-        return this.callback
+        this.callback
           .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
           .should.equal(true)
       })

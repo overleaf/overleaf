@@ -220,8 +220,10 @@ describe('PasswordResetHandler', function () {
         this.OneTimeTokenHandler.peekValueFromToken
           .withArgs('password', this.token)
           .yields(null, {
-            user_id: this.user._id,
-            email: this.email,
+            data: {
+              user_id: this.user._id,
+              email: this.email,
+            },
           })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
@@ -424,8 +426,10 @@ describe('PasswordResetHandler', function () {
         this.OneTimeTokenHandler.peekValueFromToken
           .withArgs('password', this.token)
           .yields(null, {
-            v1_user_id: this.user.overleaf.id,
-            email: this.email,
+            data: {
+              v1_user_id: this.user.overleaf.id,
+              email: this.email,
+            },
           })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
