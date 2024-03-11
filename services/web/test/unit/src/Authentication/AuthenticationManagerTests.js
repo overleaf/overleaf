@@ -14,14 +14,18 @@ describe('AuthenticationManager', function () {
     this.settings = { security: { bcryptRounds: 4 } }
     this.metrics = { inc: sinon.stub().returns() }
     this.HaveIBeenPwned = {
-      checkPasswordForReuse: sinon.stub().yields(null, false),
+      promises: {
+        checkPasswordForReuse: sinon.stub().resolves(false),
+      },
       checkPasswordForReuseInBackground: sinon.stub(),
     }
     this.AuthenticationManager = SandboxedModule.require(modulePath, {
       requires: {
         '../../models/User': {
           User: (this.User = {
-            updateOne: sinon.stub().callsArgWith(3, null, { modifiedCount: 1 }),
+            updateOne: sinon
+              .stub()
+              .returns({ exec: sinon.stub().resolves({ modifiedCount: 1 }) }),
           }),
         },
         '../../infrastructure/mongodb': {
@@ -32,16 +36,17 @@ describe('AuthenticationManager', function () {
           getRounds: sinon.stub().returns(4),
         }),
         '@overleaf/settings': this.settings,
-        '../User/UserGetter': (this.UserGetter = {}),
+        '../User/UserGetter': (this.UserGetter = { promises: {} }),
         './AuthenticationErrors': AuthenticationErrors,
         './HaveIBeenPwned': this.HaveIBeenPwned,
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
-          addEntry: sinon.stub().callsArgWith(5, null),
+          promises: {
+            addEntry: sinon.stub().resolves(null),
+          },
         }),
         '@overleaf/metrics': this.metrics,
       },
     })
-    this.callback = sinon.stub()
   })
 
   afterEach(function () {
@@ -67,22 +72,20 @@ describe('AuthenticationManager', function () {
           email: (this.email = 'USER@overleaf.com'),
         }
         this.user.hashedPassword = this.testPassword
-        this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
+        this.User.findOne = sinon
+          .stub()
+          .returns({ exec: sinon.stub().resolves(this.user) })
         this.metrics.inc.reset()
       })
 
       describe('when the hashed password matches', function () {
-        beforeEach(function (done) {
+        beforeEach(async function () {
           this.unencryptedPassword = 'testpassword'
-          this.AuthenticationManager.authenticate(
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             this.unencryptedPassword,
             null,
-            { skipHIBPCheck: true },
-            (error, user) => {
-              this.callback(error, user)
-              done()
-            }
+            { skipHIBPCheck: true }
           )
         })
 
@@ -104,7 +107,7 @@ describe('AuthenticationManager', function () {
         })
 
         it('should return the user', function () {
-          this.callback.should.have.been.calledWith(null, this.user)
+          this.result.should.equal(this.user)
         })
 
         it('should send metrics', function () {
@@ -115,16 +118,12 @@ describe('AuthenticationManager', function () {
       })
 
       describe('when the encrypted passwords do not match', function () {
-        beforeEach(function (done) {
-          this.AuthenticationManager.authenticate(
+        beforeEach(async function () {
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             'notthecorrectpassword',
             null,
-            { skipHIBPCheck: true },
-            (...args) => {
-              this.callback(...args)
-              done()
-            }
+            { skipHIBPCheck: true }
           )
         })
 
@@ -142,7 +141,7 @@ describe('AuthenticationManager', function () {
         })
 
         it('should not return the user', function () {
-          this.callback.calledWith(null, null).should.equal(true)
+          expect(this.result).to.equal(null)
         })
       })
 
@@ -150,50 +149,37 @@ describe('AuthenticationManager', function () {
         beforeEach(function () {
           this.User.updateOne = sinon
             .stub()
-            .callsArgWith(3, null, { modifiedCount: 0 })
+            .returns({ exec: sinon.stub().resolves({ modifiedCount: 0 }) })
         })
 
         describe('correct password', function () {
-          beforeEach(function (done) {
-            this.AuthenticationManager.authenticate(
-              { email: this.email },
-              'testpassword',
-              null,
-              { skipHIBPCheck: true },
-              (...args) => {
-                this.callback(...args)
-                done()
-              }
-            )
-          })
-
-          it('should return an error', function () {
-            this.callback.should.have.been.calledWith(
-              sinon.match.instanceOf(AuthenticationErrors.ParallelLoginError)
-            )
+          it('should return an error', async function () {
+            await expect(
+              this.AuthenticationManager.promises.authenticate(
+                { email: this.email },
+                'testpassword',
+                null,
+                { skipHIBPCheck: true }
+              )
+            ).to.be.rejectedWith(AuthenticationErrors.ParallelLoginError)
           })
         })
 
         describe('bad password', function () {
-          beforeEach(function (done) {
+          beforeEach(function () {
             this.User.updateOne = sinon
               .stub()
-              .yields(null, { modifiedCount: 0 })
-            this.AuthenticationManager.authenticate(
-              { email: this.email },
-              'notthecorrectpassword',
-              null,
-              { skipHIBPCheck: true },
-              (...args) => {
-                this.callback(...args)
-                done()
-              }
-            )
+              .returns({ exec: sinon.stub().resolves({ modifiedCount: 0 }) })
           })
-          it('should return an error', function () {
-            this.callback.should.have.been.calledWith(
-              sinon.match.instanceOf(AuthenticationErrors.ParallelLoginError)
-            )
+          it('should return an error', async function () {
+            await expect(
+              this.AuthenticationManager.promises.authenticate(
+                { email: this.email },
+                'notthecorrectpassword',
+                null,
+                { skipHIBPCheck: true }
+              )
+            ).to.be.rejectedWith(AuthenticationErrors.ParallelLoginError)
           })
         })
       })
@@ -206,50 +192,41 @@ describe('AuthenticationManager', function () {
           email: (this.email = 'USER@overleaf.com'),
         }
         this.db.users.updateOne = sinon
-        this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
-        this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
-        this.db.users.updateOne = sinon
+        this.User.findOne = sinon
           .stub()
-          .callsArgWith(2, null, { modifiedCount: 1 })
+          .returns({ exec: sinon.stub().resolves(this.user) })
+        this.bcrypt.compare = sinon.stub().resolves(false)
+        this.db.users.updateOne = sinon.stub().resolves({ modifiedCount: 1 })
       })
 
-      it('should not produce an error', function (done) {
-        this.AuthenticationManager.setUserPasswordInV2(
-          this.user,
-          'testpassword',
-          (err, updated) => {
-            expect(err).to.not.exist
-            expect(updated).to.equal(true)
-            done()
-          }
-        )
+      it('should not produce an error', async function () {
+        const updated =
+          await this.AuthenticationManager.promises.setUserPasswordInV2(
+            this.user,
+            'testpassword'
+          )
+        expect(updated).to.equal(true)
       })
 
-      it('should set the hashed password', function (done) {
-        this.AuthenticationManager.setUserPasswordInV2(
+      it('should set the hashed password', async function () {
+        await this.AuthenticationManager.promises.setUserPasswordInV2(
           this.user,
-          'testpassword',
-          err => {
-            expect(err).to.not.exist
-            const { hashedPassword } =
-              this.db.users.updateOne.lastCall.args[1].$set
-            expect(hashedPassword).to.exist
-            expect(hashedPassword.length).to.equal(60)
-            expect(hashedPassword).to.match(/^\$2a\$04\$[a-zA-Z0-9/.]{53}$/)
-            done()
-          }
+          'testpassword'
         )
+
+        const { hashedPassword } = this.db.users.updateOne.lastCall.args[1].$set
+        expect(hashedPassword).to.exist
+        expect(hashedPassword.length).to.equal(60)
+        expect(hashedPassword).to.match(/^\$2a\$04\$[a-zA-Z0-9/.]{53}$/)
       })
     })
   })
 
   describe('hashPassword', function () {
-    it('should block too long passwords', function (done) {
-      this.AuthenticationManager.hashPassword('x'.repeat(100), err => {
-        expect(err).to.exist
-        expect(err.message).to.equal('password is too long')
-        done()
-      })
+    it('should block too long passwords', async function () {
+      await expect(
+        this.AuthenticationManager.promises.hashPassword('x'.repeat(100))
+      ).to.be.rejectedWith('password is too long')
     })
   })
 
@@ -261,24 +238,22 @@ describe('AuthenticationManager', function () {
           email: (this.email = 'USER@overleaf.com'),
         }
         this.unencryptedPassword = 'banana'
-        this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
+        this.User.findOne = sinon
+          .stub()
+          .returns({ exec: sinon.stub().resolves(this.user) })
         this.metrics.inc.reset()
       })
 
       describe('when the hashed password matches', function () {
-        beforeEach(function (done) {
+        beforeEach(async function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
-          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
+          this.bcrypt.compare = sinon.stub().resolves(true)
           this.bcrypt.getRounds = sinon.stub().returns(4)
-          this.AuthenticationManager.authenticate(
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             this.unencryptedPassword,
             null,
-            { skipHIBPCheck: true },
-            (error, user) => {
-              this.callback(error, user)
-              done()
-            }
+            { skipHIBPCheck: true }
           )
         })
 
@@ -301,70 +276,65 @@ describe('AuthenticationManager', function () {
         })
 
         it('should return the user', function () {
-          this.callback.calledWith(null, this.user).should.equal(true)
+          this.result.should.equal(this.user)
         })
 
         describe('HIBP', function () {
           it('should not check HIBP if not requested', function () {
-            this.HaveIBeenPwned.checkPasswordForReuse.should.not.have.been
-              .called
+            this.HaveIBeenPwned.promises.checkPasswordForReuse.should.not.have
+              .been.called
           })
 
-          it('should check HIBP if requested', function (done) {
-            this.AuthenticationManager.authenticate(
+          it('should check HIBP if requested', async function () {
+            await this.AuthenticationManager.promises.authenticate(
               { email: this.email },
               this.unencryptedPassword,
               null,
-              { skipHIBPCheck: false },
-              error => {
-                if (error) return done(error)
-                this.HaveIBeenPwned.checkPasswordForReuse.should.have.been.calledWith(
-                  this.unencryptedPassword
-                )
-                done()
-              }
+              { skipHIBPCheck: false }
+            )
+
+            this.HaveIBeenPwned.promises.checkPasswordForReuse.should.have.been.calledWith(
+              this.unencryptedPassword
             )
           })
         })
       })
 
       describe('when the encrypted passwords do not match', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
-          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
-          this.AuthenticationManager.authenticate(
+          this.bcrypt.compare = sinon.stub().resolves(false)
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             this.unencryptedPassword,
             null,
-            { skipHIBPCheck: true },
-            this.callback
+            { skipHIBPCheck: true }
           )
         })
 
         it('should not return the user', function () {
-          this.callback.calledWith(null, null).should.equal(true)
-          this.UserAuditLogHandler.addEntry.callCount.should.equal(0)
+          expect(this.result).to.equal(null)
+          this.UserAuditLogHandler.promises.addEntry.callCount.should.equal(0)
         })
       })
 
       describe('when the encrypted passwords do not match, with auditLog', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
-          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
+          this.bcrypt.compare = sinon.stub().resolves(false)
           this.auditLog = { ipAddress: 'ip', info: { method: 'foo' } }
-          this.AuthenticationManager.authenticate(
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             this.unencryptedPassword,
             this.auditLog,
-            { skipHIBPCheck: true },
-            this.callback
+            { skipHIBPCheck: true }
           )
         })
 
         it('should not return the user, but add entry to audit log', function () {
-          this.callback.calledWith(null, null).should.equal(true)
-          this.UserAuditLogHandler.addEntry.callCount.should.equal(1)
-          this.UserAuditLogHandler.addEntry
+          expect(this.result).to.equal(null)
+          this.UserAuditLogHandler.promises.addEntry.callCount.should.equal(1)
+          this.UserAuditLogHandler.promises.addEntry
             .calledWith(
               this.user._id,
               'failed-password-match',
@@ -377,22 +347,18 @@ describe('AuthenticationManager', function () {
       })
 
       describe('when the hashed password matches but the number of rounds is too low', function () {
-        beforeEach(function (done) {
+        beforeEach(async function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
-          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
+          this.bcrypt.compare = sinon.stub().resolves(true)
           this.bcrypt.getRounds = sinon.stub().returns(1)
-          this.AuthenticationManager._setUserPasswordInMongo = sinon
+          this.AuthenticationManager.promises._setUserPasswordInMongo = sinon
             .stub()
-            .callsArgWith(2, null)
-          this.AuthenticationManager.authenticate(
+            .resolves()
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             this.unencryptedPassword,
             null,
-            { skipHIBPCheck: true },
-            (error, user) => {
-              this.callback(error, user)
-              done()
-            }
+            { skipHIBPCheck: true }
           )
         })
 
@@ -415,34 +381,30 @@ describe('AuthenticationManager', function () {
         })
 
         it('should set the users password (with a higher number of rounds)', function () {
-          this.AuthenticationManager._setUserPasswordInMongo
+          this.AuthenticationManager.promises._setUserPasswordInMongo
             .calledWith(this.user, this.unencryptedPassword)
             .should.equal(true)
         })
 
         it('should return the user', function () {
-          this.callback.calledWith(null, this.user).should.equal(true)
+          this.result.should.equal(this.user)
         })
       })
 
       describe('when the hashed password matches but the number of rounds is too low, but upgrades disabled', function () {
-        beforeEach(function (done) {
+        beforeEach(async function () {
           this.settings.security.disableBcryptRoundsUpgrades = true
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
-          this.bcrypt.compare = sinon.stub().callsArgWith(2, null, true)
+          this.bcrypt.compare = sinon.stub().resolves(true)
           this.bcrypt.getRounds = sinon.stub().returns(1)
-          this.AuthenticationManager.setUserPassword = sinon
+          this.AuthenticationManager.promises.setUserPassword = sinon
             .stub()
-            .callsArgWith(2, null)
-          this.AuthenticationManager.authenticate(
+            .resolves()
+          this.result = await this.AuthenticationManager.promises.authenticate(
             { email: this.email },
             this.unencryptedPassword,
             null,
-            { skipHIBPCheck: true },
-            (error, user) => {
-              this.callback(error, user)
-              done()
-            }
+            { skipHIBPCheck: true }
           )
         })
 
@@ -455,31 +417,32 @@ describe('AuthenticationManager', function () {
         })
 
         it('should not set the users password (with a higher number of rounds)', function () {
-          this.AuthenticationManager.setUserPassword
+          this.AuthenticationManager.promises.setUserPassword
             .calledWith(this.user, this.unencryptedPassword)
             .should.equal(false)
         })
 
         it('should return the user', function () {
-          this.callback.calledWith(null, this.user).should.equal(true)
+          this.result.should.equal(this.user)
         })
       })
     })
 
     describe('when the user does not exist in the database', function () {
-      beforeEach(function () {
-        this.User.findOne = sinon.stub().callsArgWith(1, null, null)
-        this.AuthenticationManager.authenticate(
+      beforeEach(async function () {
+        this.User.findOne = sinon
+          .stub()
+          .returns({ exec: sinon.stub().resolves(null) })
+        this.result = await this.AuthenticationManager.promises.authenticate(
           { email: this.email },
           this.unencrpytedPassword,
           null,
-          { skipHIBPCheck: true },
-          this.callback
+          { skipHIBPCheck: true }
         )
       })
 
       it('should not return a user', function () {
-        this.callback.calledWith(null, null).should.equal(true)
+        expect(this.result).to.equal(null)
       })
     })
   })
@@ -799,28 +762,27 @@ describe('AuthenticationManager', function () {
         email: 'user@example.com',
         hashedPassword: this.hashedPassword,
       }
-      this.bcrypt.compare = sinon.stub().callsArgWith(2, null, false)
-      this.bcrypt.genSalt = sinon.stub().callsArgWith(2, null, this.salt)
-      this.bcrypt.hash = sinon.stub().callsArgWith(2, null, this.hashedPassword)
-      this.User.findOne = sinon.stub().callsArgWith(1, null, this.user)
-      this.db.users.updateOne = sinon.stub().callsArg(2)
+      this.bcrypt.compare = sinon.stub().resolves(false)
+      this.bcrypt.genSalt = sinon.stub().resolves(this.salt)
+      this.bcrypt.hash = sinon.stub().resolves(this.hashedPassword)
+      this.User.findOne = sinon
+        .stub()
+        .returns({ exec: sinon.stub().resolves(this.user) })
+      this.db.users.updateOne = sinon.stub().resolves()
     })
 
     describe('same as previous password', function () {
       beforeEach(function () {
-        this.bcrypt.compare.callsArgWith(2, null, true)
+        this.bcrypt.compare.resolves(true)
       })
 
-      it('should return an error', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.exist
-            expect(err.name).to.equal('PasswordMustBeDifferentError')
-            done()
-          }
-        )
+      it('should be rejected', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejectedWith(AuthenticationErrors.PasswordMustBeDifferentError)
       })
     })
 
@@ -834,27 +796,25 @@ describe('AuthenticationManager', function () {
         this.password = 'dsdsadsadsadsadsadkjsadjsadjsadljs'
       })
 
-      it('should return and error', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.exist
-            done()
-          }
-        )
+      it('should return and error', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejectedWith('password is too long')
       })
 
-      it('should not start the bcrypt process', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          () => {
-            this.bcrypt.genSalt.called.should.equal(false)
-            this.bcrypt.hash.called.should.equal(false)
-            done()
-          }
-        )
+      it('should not start the bcrypt process', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejected
+
+        this.bcrypt.genSalt.called.should.equal(false)
+        this.bcrypt.hash.called.should.equal(false)
       })
     })
 
@@ -863,16 +823,13 @@ describe('AuthenticationManager', function () {
         this.password = `some${this.user.email}password`
       })
 
-      it('should reject the password', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.exist
-            expect(err.name).to.equal('InvalidPasswordError')
-            done()
-          }
-        )
+      it('should reject the password', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejectedWith(AuthenticationErrors.InvalidPasswordError)
       })
     })
 
@@ -881,16 +838,13 @@ describe('AuthenticationManager', function () {
         this.password = `some${this.user.email.split('@')[0]}password`
       })
 
-      it('should reject the password', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.exist
-            expect(err.name).to.equal('InvalidPasswordError')
-            done()
-          }
-        )
+      it('should reject the password', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejectedWith(AuthenticationErrors.InvalidPasswordError)
       })
     })
 
@@ -901,13 +855,17 @@ describe('AuthenticationManager', function () {
         user = { _id: 'some-user-id', email: 'someuser@somedomain.com' }
       })
 
-      it('should reject the password', function (done) {
-        this.AuthenticationManager.setUserPassword(user, password, err => {
-          expect(err).to.exist
+      it('should reject the password', async function () {
+        try {
+          await this.AuthenticationManager.promises.setUserPassword(
+            user,
+            password
+          )
+          expect.fail('should have thrown')
+        } catch (err) {
           expect(err.name).to.equal('InvalidPasswordError')
           expect(err?.info?.code).to.equal('contains_email')
-          done()
-        })
+        }
       })
     })
 
@@ -922,27 +880,25 @@ describe('AuthenticationManager', function () {
         this.password = 'dsd'
       })
 
-      it('should return and error', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.exist
-            done()
-          }
-        )
+      it('should return and error', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejectedWith('password is too short')
       })
 
-      it('should not start the bcrypt process', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          () => {
-            this.bcrypt.genSalt.called.should.equal(false)
-            this.bcrypt.hash.called.should.equal(false)
-            done()
-          }
-        )
+      it('should not start the bcrypt process', async function () {
+        await expect(
+          this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+        ).to.be.rejected
+
+        this.bcrypt.genSalt.called.should.equal(false)
+        this.bcrypt.hash.called.should.equal(false)
       })
     })
 
@@ -953,45 +909,54 @@ describe('AuthenticationManager', function () {
         this.metrics.inc.reset()
       })
 
-      it('should produce an error when the password is too similar to the email', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password,
-          err => {
-            expect(err).to.exist
-            expect(err?.info?.code).to.equal('too_similar')
-            expect(
-              this.metrics.inc.calledWith('password-too-similar-to-email')
-            ).to.equal(true)
-            done()
-          }
-        )
+      it('should produce an error when the password is too similar to the email', async function () {
+        try {
+          await this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password
+          )
+          expect.fail('should have thrown')
+        } catch (err) {
+          expect(err.message).to.equal(
+            'password is too similar to email address'
+          )
+          expect(err?.info?.code).to.equal('too_similar')
+        }
+
+        expect(
+          this.metrics.inc.calledWith('password-too-similar-to-email')
+        ).to.equal(true)
       })
 
-      it('should produce an error when the password is too similar to the email, regardless of case', function (done) {
-        this.AuthenticationManager.setUserPassword(
-          this.user,
-          this.password.toUpperCase(),
-          err => {
-            expect(err).to.exist
-            expect(err?.info?.code).to.equal('too_similar')
-            expect(
-              this.metrics.inc.calledWith('password-too-similar-to-email')
-            ).to.equal(true)
-            done()
-          }
-        )
+      it('should produce an error when the password is too similar to the email, regardless of case', async function () {
+        try {
+          await this.AuthenticationManager.promises.setUserPassword(
+            this.user,
+            this.password.toUpperCase()
+          )
+          expect.fail('should have thrown')
+        } catch (err) {
+          expect(err.message).to.equal(
+            'password is too similar to email address'
+          )
+          expect(err?.info?.code).to.equal('too_similar')
+        }
+
+        expect(
+          this.metrics.inc.calledWith('password-too-similar-to-email')
+        ).to.equal(true)
       })
     })
 
     describe('successful password set attempt', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.metrics.inc.reset()
-        this.UserGetter.getUser = sinon.stub().yields(null, { overleaf: null })
-        this.AuthenticationManager.setUserPassword(
+        this.UserGetter.promises.getUser = sinon
+          .stub()
+          .resolves({ overleaf: null })
+        await this.AuthenticationManager.promises.setUserPassword(
           this.user,
-          this.password,
-          this.callback
+          this.password
         )
       })
 
@@ -1019,11 +984,6 @@ describe('AuthenticationManager', function () {
         expect(
           this.metrics.inc.calledWith('password-too-similar-to-email')
         ).to.equal(false)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-        expect(this.callback.lastCall.args[0]).to.not.be.instanceOf(Error)
       })
     })
   })
