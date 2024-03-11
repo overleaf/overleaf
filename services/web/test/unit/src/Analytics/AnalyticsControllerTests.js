@@ -5,6 +5,7 @@ const modulePath = path.join(
   '../../../../app/src/Features/Analytics/AnalyticsController'
 )
 const sinon = require('sinon')
+const MockResponse = require('../helpers/MockResponse')
 
 describe('AnalyticsController', function () {
   beforeEach(function () {
@@ -32,10 +33,7 @@ describe('AnalyticsController', function () {
       },
     })
 
-    this.res = {
-      send() {},
-      sendStatus() {},
-    }
+    this.res = new MockResponse()
   })
 
   describe('updateEditingSession', function () {
@@ -56,16 +54,19 @@ describe('AnalyticsController', function () {
         .resolves({ country_code: 'XY' })
     })
 
-    it('delegates to the AnalyticsManager', async function () {
+    it('delegates to the AnalyticsManager', function (done) {
       this.SessionManager.getLoggedInUserId.returns('1234')
-      await this.controller.updateEditingSession(this.req, this.res)
-      sinon.assert.calledWith(
-        this.AnalyticsManager.updateEditingSession,
-        '1234',
-        'a project id',
-        'XY',
-        { editorType: 'abc' }
-      )
+      this.res.callback = () => {
+        sinon.assert.calledWith(
+          this.AnalyticsManager.updateEditingSession,
+          '1234',
+          'a project id',
+          'XY',
+          { editorType: 'abc' }
+        )
+        done()
+      }
+      this.controller.updateEditingSession(this.req, this.res)
     })
   })
 

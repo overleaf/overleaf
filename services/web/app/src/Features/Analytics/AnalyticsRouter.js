@@ -3,7 +3,6 @@ const AnalyticsController = require('./AnalyticsController')
 const AnalyticsProxy = require('./AnalyticsProxy')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
-const { expressify } = require('@overleaf/promise-utils')
 
 const rateLimiters = {
   recordEvent: new RateLimiter('analytics-record-event', {
@@ -33,7 +32,7 @@ module.exports = {
       RateLimiterMiddleware.rateLimit(rateLimiters.updateEditingSession, {
         params: ['projectId'],
       }),
-      expressify(AnalyticsController.updateEditingSession)
+      AnalyticsController.updateEditingSession
     )
 
     publicApiRouter.use(

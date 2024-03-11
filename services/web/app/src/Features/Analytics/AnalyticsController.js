@@ -3,6 +3,7 @@ const AnalyticsManager = require('./AnalyticsManager')
 const SessionManager = require('../Authentication/SessionManager')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const Features = require('../../infrastructure/Features')
+const { expressify } = require('@overleaf/promise-utils')
 
 async function updateEditingSession(req, res, next) {
   if (!Features.hasFeature('analytics')) {
@@ -46,6 +47,6 @@ function recordEvent(req, res, next) {
 }
 
 module.exports = {
-  updateEditingSession,
+  updateEditingSession: expressify(updateEditingSession),
   recordEvent,
 }

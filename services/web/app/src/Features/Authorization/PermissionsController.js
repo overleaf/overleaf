@@ -5,13 +5,14 @@ const {
 } = require('./PermissionsManager')
 const { checkUserPermissions } = require('./PermissionsManager').promises
 const Modules = require('../../infrastructure/Modules')
+const { expressify } = require('@overleaf/promise-utils')
 
 /**
  * Function that returns middleware to add an `assertPermission` function to the request object to check if the user has a specific capability.
  * @returns {Function} The middleware function that adds the `assertPermission` function to the request object.
  */
 function useCapabilities() {
-  return async function (req, res, next) {
+  const middleware = async function (req, res, next) {
     // attach the user's capabilities to the request object
     req.capabilitySet = new Set()
     // provide a function to assert that a capability is present
@@ -57,6 +58,7 @@ function useCapabilities() {
       }
     }
   }
+  return expressify(middleware)
 }
 
 /**
