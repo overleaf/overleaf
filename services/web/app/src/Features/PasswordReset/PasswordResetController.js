@@ -121,6 +121,13 @@ async function requestReset(req, res, next) {
     OError.tag(err, 'failed to generate and email password reset token', {
       email,
     })
+    if (err.message === 'user does not have permission for change-password') {
+      return res.status(403).json({
+        message: {
+          key: 'no-password-allowed-due-to-sso',
+        },
+      })
+    }
     throw err
   }
 
