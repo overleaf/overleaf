@@ -14,3 +14,10 @@ export type SSOConfig = {
   validated?: boolean
   enabled?: boolean
 }
+
+export type GroupSSOLinkingStatus = {
+  groupId: string
+  linked?: boolean
+  groupName?: string
+  adminEmail: string
+}

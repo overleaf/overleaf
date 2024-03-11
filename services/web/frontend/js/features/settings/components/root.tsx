@@ -1,3 +1,4 @@
+import SecuritySection from '@/features/settings/components/security-section'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
@@ -64,6 +65,7 @@ function SettingsPageContent() {
             </div>
           </div>
           <hr />
+          <SecuritySection />
           <SplitTestProvider>
             <SSOProvider>
               <LinkingSection />

@@ -252,3 +252,54 @@ tbody > tr.affiliations-table-warning-row > td {
     text-decoration: underline;
   }
 }
+
+.security-row {
+  .line-header > b {
+    color: @ol-blue-gray-6;
+  }
+
+  line-height: 24px;
+  color: @ol-blue-gray-4;
+  display: flex;
+  flex-direction: row;
+  padding: 6px 0;
+
+  .icon {
+    color: @ol-blue-gray-6;
+    display: flex;
+    flex: 1 1 7%;
+    padding: 0 16px;
+    margin-top: 16px;
+  }
+
+  .text {
+    flex: 1 1 93%;
+    display: flex;
+    flex-direction: column;
+    margin-right: 16px;
+  }
+
+  .button-column {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-label {
+    font-size: @font-size-small;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-top: 4px;
+    margin-left: 8px;
+    flex-shrink: 0;
+
+    &.status-label-configured {
+      background-color: @ol-green;
+      color: @neutral-10;
+    }
+
+    &.status-label-ready {
+      background-color: @neutral-20;
+      color: @neutral-90;
+    }
+  }
+}

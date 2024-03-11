@@ -1,9 +1,9 @@
 import { expect } from 'chai'
 import { screen, render } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
-import LinkingSection from '../../../../../frontend/js/features/settings/components/linking-section'
-import { UserProvider } from '../../../../../frontend/js/shared/context/user-context'
-import { SSOProvider } from '../../../../../frontend/js/features/settings/context/sso-context'
+import LinkingSection from '@/features/settings/components/linking-section'
+import { UserProvider } from '@/shared/context/user-context'
+import { SSOProvider } from '@/features/settings/context/sso-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 function renderSectionWithProviders() {

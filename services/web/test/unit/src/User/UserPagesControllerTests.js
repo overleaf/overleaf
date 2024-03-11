@@ -1,15 +1,3 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const path = require('path')
@@ -19,6 +7,8 @@ const modulePath = path.join(
   '../../../../app/src/Features/User/UserPagesController'
 )
 const { expect } = require('chai')
+const MockResponse = require('../helpers/MockResponse')
+const MockRequest = require('../helpers/MockRequest')
 
 describe('UserPagesController', function () {
   beforeEach(function () {
@@ -80,11 +70,19 @@ describe('UserPagesController', function () {
     this.SubscriptionLocator = {
       promises: {
         getAdminEmail: sinon.stub().returns(this.adminEmail),
+        getMemberSubscriptions: sinon.stub().resolves(),
       },
     }
     this.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().returns('default'),
+      },
+    }
+    this.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
       },
     }
     this.UserPagesController = SandboxedModule.require(modulePath, {
@@ -102,67 +100,71 @@ describe('UserPagesController', function () {
           this.PersonalAccessTokenManager,
         '../Authentication/SessionManager': this.SessionManager,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        '../../infrastructure/Modules': this.Modules,
         request: (this.request = sinon.stub()),
       },
     })
-    this.req = {
-      query: {},
-      session: {
-        user: this.user,
-      },
-    }
-    return (this.res = {})
+    this.req = new MockRequest()
+    this.req.session.user = this.user
+    this.res = new MockResponse()
   })
 
   describe('registerPage', function () {
     it('should render the register page', function (done) {
-      this.res.render = page => {
-        page.should.equal('user/register')
-        return done()
+      this.res.callback = () => {
+        this.res.renderedTemplate.should.equal('user/register')
+        done()
       }
-      return this.UserPagesController.registerPage(this.req, this.res)
+      this.UserPagesController.registerPage(this.req, this.res, done)
     })
 
     it('should set sharedProjectData', function (done) {
       this.req.query.project_name = 'myProject'
       this.req.query.user_first_name = 'user_first_name_here'
 
-      this.res.render = (page, opts) => {
-        opts.sharedProjectData.project_name.should.equal('myProject')
-        opts.sharedProjectData.user_first_name.should.equal(
+      this.res.callback = () => {
+        this.res.renderedVariables.sharedProjectData.project_name.should.equal(
+          'myProject'
+        )
+        this.res.renderedVariables.sharedProjectData.user_first_name.should.equal(
           'user_first_name_here'
         )
-        return done()
+        done()
       }
-      return this.UserPagesController.registerPage(this.req, this.res)
+      this.UserPagesController.registerPage(this.req, this.res, done)
     })
 
     it('should set newTemplateData', function (done) {
       this.req.session.templateData = { templateName: 'templateName' }
 
-      this.res.render = (page, opts) => {
-        opts.newTemplateData.templateName.should.equal('templateName')
-        return done()
+      this.res.callback = () => {
+        this.res.renderedVariables.newTemplateData.templateName.should.equal(
+          'templateName'
+        )
+        done()
       }
-      return this.UserPagesController.registerPage(this.req, this.res)
+      this.UserPagesController.registerPage(this.req, this.res, done)
     })
 
     it('should not set the newTemplateData if there is nothing in the session', function (done) {
-      this.res.render = (page, opts) => {
-        assert.equal(opts.newTemplateData.templateName, undefined)
-        return done()
+      this.res.callback = () => {
+        assert.equal(
+          this.res.renderedVariables.newTemplateData.templateName,
+          undefined
+        )
+        done()
       }
-      return this.UserPagesController.registerPage(this.req, this.res)
+      this.UserPagesController.registerPage(this.req, this.res, done)
     })
   })
 
   describe('loginForm', function () {
     it('should render the login page', function (done) {
-      this.res.render = page => {
-        page.should.equal('user/login')
-        return done()
+      this.res.callback = () => {
+        this.res.renderedTemplate.should.equal('user/login')
+        done()
       }
-      return this.UserPagesController.loginPage(this.req, this.res)
+      this.UserPagesController.loginPage(this.req, this.res, done)
     })
 
     describe('when an explicit redirect is set via query string', function () {
@@ -171,63 +173,59 @@ describe('UserPagesController', function () {
           .stub()
           .returns(null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return (this.req.query.redir = '/somewhere/in/particular')
+        this.req.query.redir = '/somewhere/in/particular'
       })
 
       it('should set a redirect', function (done) {
-        this.res.render = page => {
+        this.res.callback = page => {
           this.AuthenticationController.setRedirectInSession.callCount.should.equal(
             1
           )
           expect(
             this.AuthenticationController.setRedirectInSession.lastCall.args[1]
           ).to.equal(this.req.query.redir)
-          return done()
+          done()
         }
-        return this.UserPagesController.loginPage(this.req, this.res)
+        this.UserPagesController.loginPage(this.req, this.res, done)
       })
     })
   })
 
   describe('sessionsPage', function () {
     beforeEach(function () {
-      return this.UserSessionsManager.getAllUserSessions.callsArgWith(
-        2,
-        null,
-        []
-      )
+      this.UserSessionsManager.getAllUserSessions.callsArgWith(2, null, [])
     })
 
     it('should render user/sessions', function (done) {
-      this.res.render = function (page) {
-        page.should.equal('user/sessions')
-        return done()
+      this.res.callback = () => {
+        this.res.renderedTemplate.should.equal('user/sessions')
+        done()
       }
-      return this.UserPagesController.sessionsPage(this.req, this.res)
+      this.UserPagesController.sessionsPage(this.req, this.res, done)
     })
 
     it('should include current session data in the view', function (done) {
-      this.res.render = (page, opts) => {
-        expect(opts.currentSession).to.deep.equal({
+      this.res.callback = () => {
+        expect(this.res.renderedVariables.currentSession).to.deep.equal({
           ip_address: '1.1.1.1',
           session_created: 'timestamp',
         })
-        return done()
+        done()
       }
-      return this.UserPagesController.sessionsPage(this.req, this.res)
+      this.UserPagesController.sessionsPage(this.req, this.res, done)
     })
 
     it('should have called getAllUserSessions', function (done) {
-      this.res.render = page => {
+      this.res.callback = page => {
         this.UserSessionsManager.getAllUserSessions.callCount.should.equal(1)
-        return done()
+        done()
       }
-      return this.UserPagesController.sessionsPage(this.req, this.res)
+      this.UserPagesController.sessionsPage(this.req, this.res, done)
     })
 
     describe('when getAllUserSessions produces an error', function () {
       beforeEach(function () {
-        return this.UserSessionsManager.getAllUserSessions.callsArgWith(
+        this.UserSessionsManager.getAllUserSessions.callsArgWith(
           2,
           new Error('woops')
         )
@@ -237,13 +235,9 @@ describe('UserPagesController', function () {
         this.next = err => {
           assert(err !== null)
           assert(err instanceof Error)
-          return done()
+          done()
         }
-        return this.UserPagesController.sessionsPage(
-          this.req,
-          this.res,
-          this.next
-        )
+        this.UserPagesController.sessionsPage(this.req, this.res, this.next)
       })
     })
   })
@@ -255,24 +249,24 @@ describe('UserPagesController', function () {
 
     it('render page with subscribed status', function (done) {
       this.NewsletterManager.subscribed.yields(null, true)
-      this.res.render = function (page, data) {
-        page.should.equal('user/email-preferences')
-        data.title.should.equal('newsletter_info_title')
-        data.subscribed.should.equal(true)
-        return done()
+      this.res.callback = () => {
+        this.res.renderedTemplate.should.equal('user/email-preferences')
+        this.res.renderedVariables.title.should.equal('newsletter_info_title')
+        this.res.renderedVariables.subscribed.should.equal(true)
+        done()
       }
-      return this.UserPagesController.emailPreferencesPage(this.req, this.res)
+      this.UserPagesController.emailPreferencesPage(this.req, this.res, done)
     })
 
     it('render page with unsubscribed status', function (done) {
       this.NewsletterManager.subscribed.yields(null, false)
-      this.res.render = function (page, data) {
-        page.should.equal('user/email-preferences')
-        data.title.should.equal('newsletter_info_title')
-        data.subscribed.should.equal(false)
-        return done()
+      this.res.callback = () => {
+        this.res.renderedTemplate.should.equal('user/email-preferences')
+        this.res.renderedVariables.title.should.equal('newsletter_info_title')
+        this.res.renderedVariables.subscribed.should.equal(false)
+        done()
       }
-      return this.UserPagesController.emailPreferencesPage(this.req, this.res)
+      this.UserPagesController.emailPreferencesPage(this.req, this.res, done)
     })
   })
 
@@ -285,103 +279,180 @@ describe('UserPagesController', function () {
     })
 
     it('should render user/settings', function (done) {
-      this.res.render = function (page) {
-        page.should.equal('user/settings')
-        return done()
+      this.res.callback = () => {
+        this.res.renderedTemplate.should.equal('user/settings')
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     it('should send user', function (done) {
-      this.res.render = (page, opts) => {
-        opts.user.id.should.equal(this.user._id)
-        opts.user.email.should.equal(this.user.email)
-        return done()
+      this.res.callback = () => {
+        this.res.renderedVariables.user.id.should.equal(this.user._id)
+        this.res.renderedVariables.user.email.should.equal(this.user.email)
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     it("should set 'shouldAllowEditingDetails' to true", function (done) {
-      this.res.render = (page, opts) => {
-        opts.shouldAllowEditingDetails.should.equal(true)
-        return done()
+      this.res.callback = () => {
+        this.res.renderedVariables.shouldAllowEditingDetails.should.equal(true)
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     it('should restructure thirdPartyIdentifiers data for template use', function (done) {
       const expectedResult = {
         google: 'testId',
       }
-      this.res.render = (page, opts) => {
-        expect(opts.thirdPartyIds).to.include(expectedResult)
-        return done()
+      this.res.callback = () => {
+        expect(this.res.renderedVariables.thirdPartyIds).to.include(
+          expectedResult
+        )
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     it("should set and clear 'projectSyncSuccessMessage'", function (done) {
       this.req.session.projectSyncSuccessMessage = 'Some Sync Success'
-      this.res.render = (page, opts) => {
-        opts.projectSyncSuccessMessage.should.equal('Some Sync Success')
+      this.res.callback = () => {
+        this.res.renderedVariables.projectSyncSuccessMessage.should.equal(
+          'Some Sync Success'
+        )
         expect(this.req.session.projectSyncSuccessMessage).to.not.exist
-        return done()
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     it('should cast refProviders to booleans', function (done) {
-      this.res.render = function (page, opts) {
-        expect(opts.user.refProviders).to.deep.equal({
+      this.res.callback = () => {
+        expect(this.res.renderedVariables.user.refProviders).to.deep.equal({
           mendeley: true,
           zotero: true,
         })
-        return done()
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     it('should send the correct managed user admin email', function (done) {
-      this.res.render = (page, opts) => {
-        expect(opts.currentManagedUserAdminEmail).to.equal(this.adminEmail)
-        return done()
+      this.res.callback = () => {
+        expect(
+          this.res.renderedVariables.currentManagedUserAdminEmail
+        ).to.equal(this.adminEmail)
+        done()
       }
-      return this.UserPagesController.settingsPage(this.req, this.res)
+      this.UserPagesController.settingsPage(this.req, this.res, done)
+    })
+
+    it('should send info for groups with SSO enabled', function (done) {
+      this.user.enrollment = {
+        sso: [
+          {
+            groupId: 'abc123abc123',
+            primary: true,
+            linkedAt: new Date(),
+          },
+        ],
+      }
+      const group1 = {
+        _id: 'abc123abc123',
+        teamName: 'Group SSO Rulz',
+        admin_id: {
+          email: 'admin.email@ssolove.com',
+        },
+      }
+      const group2 = {
+        _id: 'def456def456',
+        admin_id: {
+          email: 'someone.else@noname.co.uk',
+        },
+      }
+      const group3 = {
+        _id: 'fff999fff999',
+        admin_id: {
+          email: 'foo@bar.baz',
+        },
+      }
+      this.SubscriptionLocator.promises.getMemberSubscriptions.resolves([
+        group1,
+        group2,
+        group3,
+      ])
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', group1)
+        .resolves([true])
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', group2)
+        .resolves([true])
+      this.Modules.promises.hooks.fire
+        .withArgs('hasGroupSSOEnabled', group3)
+        .resolves([false])
+
+      this.res.callback = () => {
+        expect(
+          this.res.renderedVariables.memberOfSSOEnabledGroups
+        ).to.deep.equal([
+          {
+            groupId: 'abc123abc123',
+            groupName: 'Group SSO Rulz',
+            adminEmail: 'admin.email@ssolove.com',
+            linked: true,
+          },
+          {
+            groupId: 'def456def456',
+            groupName: undefined,
+            adminEmail: 'someone.else@noname.co.uk',
+            linked: false,
+          },
+        ])
+        done()
+      }
+
+      this.UserPagesController.settingsPage(this.req, this.res, done)
     })
 
     describe('when ldap.updateUserDetailsOnLogin is true', function () {
       beforeEach(function () {
-        return (this.settings.ldap = { updateUserDetailsOnLogin: true })
+        this.settings.ldap = { updateUserDetailsOnLogin: true }
       })
 
       afterEach(function () {
-        return delete this.settings.ldap
+        delete this.settings.ldap
       })
 
       it('should set "shouldAllowEditingDetails" to false', function (done) {
-        this.res.render = (page, opts) => {
-          opts.shouldAllowEditingDetails.should.equal(false)
-          return done()
+        this.res.callback = () => {
+          this.res.renderedVariables.shouldAllowEditingDetails.should.equal(
+            false
+          )
+          done()
         }
-        return this.UserPagesController.settingsPage(this.req, this.res)
+        this.UserPagesController.settingsPage(this.req, this.res, done)
       })
     })
 
     describe('when saml.updateUserDetailsOnLogin is true', function () {
       beforeEach(function () {
-        return (this.settings.saml = { updateUserDetailsOnLogin: true })
+        this.settings.saml = { updateUserDetailsOnLogin: true }
       })
 
       afterEach(function () {
-        return delete this.settings.saml
+        delete this.settings.saml
       })
 
       it('should set "shouldAllowEditingDetails" to false', function (done) {
-        this.res.render = (page, opts) => {
-          opts.shouldAllowEditingDetails.should.equal(false)
-          return done()
+        this.res.callback = () => {
+          this.res.renderedVariables.shouldAllowEditingDetails.should.equal(
+            false
+          )
+          done()
         }
-        return this.UserPagesController.settingsPage(this.req, this.res)
+        this.UserPagesController.settingsPage(this.req, this.res, done)
       })
     })
   })
