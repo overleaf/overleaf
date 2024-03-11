@@ -11,6 +11,7 @@ describe('HttpController', function () {
         './HistoryManager': (this.HistoryManager = {
           flushProjectChangesAsync: sinon.stub(),
         }),
+        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         './ProjectManager': (this.ProjectManager = {}),
         './ProjectFlusher': { flushAllProjects() {} },
         './DeleteQueueManager': (this.DeleteQueueManager = {}),
@@ -651,6 +652,7 @@ describe('HttpController', function () {
 
   describe('deleteComment', function () {
     beforeEach(function () {
+      this.user_id = 'user-id-123'
       this.req = {
         params: {
           project_id: this.project_id,
@@ -658,7 +660,9 @@ describe('HttpController', function () {
           comment_id: (this.comment_id = 'mock-comment-id'),
         },
         query: {},
-        body: {},
+        body: {
+          user_id: this.user_id,
+        },
       }
     })
 
@@ -666,13 +670,20 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.DocumentManager.deleteCommentWithLock = sinon
           .stub()
-          .callsArgWith(3)
+          .callsArgWith(4)
+
+        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
         this.HttpController.deleteComment(this.req, this.res, this.next)
       })
 
       it('should accept the change', function () {
         this.DocumentManager.deleteCommentWithLock
-          .calledWith(this.project_id, this.doc_id, this.comment_id)
+          .calledWith(
+            this.project_id,
+            this.doc_id,
+            this.comment_id,
+            this.user_id
+          )
           .should.equal(true)
       })
 
@@ -702,7 +713,7 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.DocumentManager.deleteCommentWithLock = sinon
           .stub()
-          .callsArgWith(3, new Error('oops'))
+          .callsArgWith(4, new Error('oops'))
         this.HttpController.deleteComment(this.req, this.res, this.next)
       })
 

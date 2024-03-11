@@ -14,6 +14,7 @@ import * as OperationsCompressor from './OperationsCompressor.js'
  * @typedef {import('./types.ts').Op} Op
  * @typedef {import('./types.ts').RenameUpdate} RenameUpdate
  * @typedef {import('./types.ts').TextUpdate} TextUpdate
+ * @typedef {import('./types.ts').DeleteCommentUpdate} DeleteCommentUpdate
  * @typedef {import('./types.ts').Update} Update
  * @typedef {import('./types.ts').UpdateWithBlob} UpdateWithBlob
  */
@@ -77,6 +78,13 @@ function _convertToChange(projectId, updateWithBlob) {
     if (update.v != null) {
       v2DocVersions[update.doc] = { pathname, v: update.v }
     }
+  } else if (isDeleteCommentUpdate(update)) {
+    operations = [
+      {
+        pathname: _convertPathname(update.pathname),
+        deleteComment: update.deleteComment,
+      },
+    ]
   } else {
     const error = new Errors.UpdateWithUnknownFormatError(
       'update with unknown format',
@@ -178,6 +186,14 @@ export function isProjectStructureUpdate(update) {
  */
 export function isAddUpdate(update) {
   return _isAddDocUpdate(update) || _isAddFileUpdate(update)
+}
+
+/**
+ * @param {Update} update
+ * @returns {update is DeleteCommentUpdate}
+ */
+export function isDeleteCommentUpdate(update) {
+  return 'deleteComment' in update
 }
 
 export function _convertPathname(pathname) {
