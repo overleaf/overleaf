@@ -13,6 +13,7 @@ describe('PasswordResetHandler', function () {
     this.OneTimeTokenHandler = {
       promises: {
         getNewToken: sinon.stub(),
+        peekValueFromToken: sinon.stub(),
       },
       peekValueFromToken: sinon.stub(),
       expireToken: sinon.stub(),
@@ -22,6 +23,7 @@ describe('PasswordResetHandler', function () {
       getUser: sinon.stub(),
       promises: {
         getUserByAnyEmail: sinon.stub(),
+        getUserByMainEmail: sinon.stub(),
       },
     }
     this.EmailHandler = { promises: { sendEmail: sinon.stub() } }
@@ -195,7 +197,7 @@ describe('PasswordResetHandler', function () {
     })
     describe('when no data is found', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.peekValueFromToken.yields(null, null)
+        this.OneTimeTokenHandler.promises.peekValueFromToken.resolves(null)
       })
 
       it('should return found == false and reset == false', function () {
@@ -217,14 +219,12 @@ describe('PasswordResetHandler', function () {
 
     describe('when the token has a user_id and email', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.peekValueFromToken
-          .withArgs('password', this.token)
-          .yields(null, {
-            data: {
-              user_id: this.user._id,
-              email: this.email,
-            },
-          })
+        this.OneTimeTokenHandler.promises.peekValueFromToken.resolves({
+          data: {
+            user_id: this.user._id,
+            email: this.email,
+          },
+        })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
           .resolves(true)
@@ -285,7 +285,7 @@ describe('PasswordResetHandler', function () {
       describe('when the email and user match', function () {
         describe('success', function () {
           beforeEach(function () {
-            this.UserGetter.getUserByMainEmail.yields(null, this.user)
+            this.UserGetter.promises.getUserByMainEmail.resolves(this.user)
             this.OneTimeTokenHandler.expireToken = sinon
               .stub()
               .callsArgWith(2, null)
@@ -370,7 +370,7 @@ describe('PasswordResetHandler', function () {
           describe('via setUserPassword', function () {
             beforeEach(function () {
               this.PasswordResetHandler.promises.getUserForPasswordResetToken =
-                sinon.stub().withArgs(this.token).resolves(this.user)
+                sinon.stub().withArgs(this.token).resolves({ user: this.user })
               this.AuthenticationManager.promises.setUserPassword
                 .withArgs(this.user, this.password)
                 .rejects()
@@ -394,7 +394,7 @@ describe('PasswordResetHandler', function () {
           describe('via UserAuditLogHandler', function () {
             beforeEach(function () {
               this.PasswordResetHandler.promises.getUserForPasswordResetToken =
-                sinon.stub().withArgs(this.token).resolves(this.user)
+                sinon.stub().withArgs(this.token).resolves({ user: this.user })
               this.UserAuditLogHandler.promises.addEntry.rejects(
                 new Error('oops')
               )
@@ -423,14 +423,12 @@ describe('PasswordResetHandler', function () {
     describe('when the token has a v1_user_id and email', function () {
       beforeEach(function () {
         this.user.overleaf = { id: 184 }
-        this.OneTimeTokenHandler.peekValueFromToken
-          .withArgs('password', this.token)
-          .yields(null, {
-            data: {
-              v1_user_id: this.user.overleaf.id,
-              email: this.email,
-            },
-          })
+        this.OneTimeTokenHandler.promises.peekValueFromToken.resolves({
+          data: {
+            v1_user_id: this.user.overleaf.id,
+            email: this.email,
+          },
+        })
         this.AuthenticationManager.promises.setUserPassword
           .withArgs(this.user, this.password)
           .resolves(true)
@@ -493,9 +491,7 @@ describe('PasswordResetHandler', function () {
 
       describe('when the email and user match', function () {
         beforeEach(function () {
-          this.UserGetter.getUserByMainEmail
-            .withArgs(this.email)
-            .yields(null, this.user)
+          this.UserGetter.promises.getUserByMainEmail.resolves(this.user)
         })
 
         it('should return reset == true and the user id', function (done) {

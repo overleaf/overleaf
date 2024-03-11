@@ -43,7 +43,7 @@ describe('PasswordResetController', function () {
       getUserForPasswordResetToken: sinon
         .stub()
         .withArgs(this.token)
-        .yields(null, { _id: this.user_id }, 1),
+        .yields(null, { user: { _id: this.user_id }, remainingPeeks: 1 }),
     }
     this.UserSessionsManager = {
       promises: {
@@ -377,7 +377,7 @@ describe('PasswordResetController', function () {
         this.PasswordResetHandler.getUserForPasswordResetToken = sinon
           .stub()
           .withArgs(this.token)
-          .yields(null, { _id: this.user_id }, 0)
+          .yields(null, { user: { _id: this.user_id }, remainingPeeks: 0 })
       })
 
       it('should redirect to the reset request page with an error message', function (done) {

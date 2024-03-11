@@ -46,50 +46,50 @@ function expirePasswordResetToken(token, callback) {
   })
 }
 
-function getUserForPasswordResetToken(token, callback) {
-  OneTimeTokenHandler.peekValueFromToken('password', token, (err, result) => {
-    const { data, remainingPeeks } = result || {}
-    if (err != null) {
-      if (err.name === 'NotFoundError') {
-        return callback(null, null)
-      } else {
-        return callback(err)
-      }
-    }
-    if (data == null || data.email == null) {
-      return callback(null, null, remainingPeeks)
-    }
-    UserGetter.getUserByMainEmail(
-      data.email,
-      { _id: 1, 'overleaf.id': 1, email: 1 },
-      (err, user) => {
-        if (err != null) {
-          callback(err)
-        } else if (user == null) {
-          callback(null, null, 0)
-        } else if (
-          data.user_id != null &&
-          data.user_id === user._id.toString()
-        ) {
-          callback(null, user, remainingPeeks)
-        } else if (
-          data.v1_user_id != null &&
-          user.overleaf != null &&
-          data.v1_user_id === user.overleaf.id
-        ) {
-          callback(null, user, remainingPeeks)
-        } else {
-          callback(null, null, 0)
-        }
-      }
+async function getUserForPasswordResetToken(token) {
+  let result
+  try {
+    result = await OneTimeTokenHandler.promises.peekValueFromToken(
+      'password',
+      token
     )
+  } catch (err) {
+    if (err.name === 'NotFoundError') {
+      return
+    } else {
+      throw err
+    }
+  }
+  const { data, remainingPeeks } = result || {}
+
+  if (data == null || data.email == null) {
+    return { user: null, remainingPeeks }
+  }
+
+  const user = await UserGetter.promises.getUserByMainEmail(data.email, {
+    _id: 1,
+    'overleaf.id': 1,
+    email: 1,
   })
+  if (user == null) {
+    return { user: null, remainingPeeks: 0 }
+  } else if (data.user_id != null && data.user_id === user._id.toString()) {
+    return { user, remainingPeeks }
+  } else if (
+    data.v1_user_id != null &&
+    user.overleaf != null &&
+    data.v1_user_id === user.overleaf.id
+  ) {
+    return { user, remainingPeeks }
+  } else {
+    return { user: null, remainingPeeks: 0 }
+  }
 }
 
 async function setNewUserPassword(token, password, auditLog) {
-  const user = await PasswordResetHandler.promises.getUserForPasswordResetToken(
-    token
-  )
+  const result =
+    await PasswordResetHandler.promises.getUserForPasswordResetToken(token)
+  const { user } = result || {}
 
   if (!user) {
     return {
@@ -98,7 +98,6 @@ async function setNewUserPassword(token, password, auditLog) {
       userId: null,
     }
   }
-
   await UserAuditLogHandler.promises.addEntry(
     user._id,
     'reset-password',
@@ -122,16 +121,14 @@ const PasswordResetHandler = {
 
   setNewUserPassword: callbackify(setNewUserPassword),
 
-  getUserForPasswordResetToken,
+  getUserForPasswordResetToken: callbackify(getUserForPasswordResetToken),
 
   expirePasswordResetToken,
 }
 
 PasswordResetHandler.promises = {
   generateAndEmailResetToken,
-  getUserForPasswordResetToken: promisify(
-    PasswordResetHandler.getUserForPasswordResetToken
-  ),
+  getUserForPasswordResetToken,
   expirePasswordResetToken: promisify(
     PasswordResetHandler.expirePasswordResetToken
   ),

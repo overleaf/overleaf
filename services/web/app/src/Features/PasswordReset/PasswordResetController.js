@@ -165,8 +165,9 @@ module.exports = {
     if (req.query.passwordResetToken != null) {
       return PasswordResetHandler.getUserForPasswordResetToken(
         req.query.passwordResetToken,
-        (err, user, remainingUses) => {
-          if (err || !user || remainingUses <= 0) {
+        (err, result) => {
+          const { user, remainingPeeks } = result || {}
+          if (err || !user || remainingPeeks <= 0) {
             return res.redirect('/user/password/reset?error=token_expired')
           }
           req.session.resetToken = req.query.passwordResetToken
