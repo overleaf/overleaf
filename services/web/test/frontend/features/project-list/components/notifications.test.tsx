@@ -977,23 +977,19 @@ describe('<UserNotifications />', function () {
       window.metaAttributesCache = window.metaAttributesCache || new Map()
     })
 
-    describe('when writefull-oauth-promotion split test is not enabled', function () {
+    describe('when the writefull integration is enabled', function () {
       beforeEach(function () {
-        window.metaAttributesCache.set('ol-splitTestVariants', {
-          'writefull-oauth-promotion': 'default',
-        })
         window.metaAttributesCache.set('ol-user', {
-          writefull: { enabled: false },
+          writefull: { enabled: true },
         })
       })
-
-      it('shows the older banner', function () {
+      it('shows the banner', function () {
         renderWithinProjectListProvider(UserNotifications)
         const ctaLink = screen.getByRole('link', {
-          name: 'Get Writefull for Overleaf',
+          name: 'Get Writefull Premium',
         })
         expect(ctaLink.getAttribute('href')).to.equal(
-          'https://my.writefull.com/overleaf-invite?code=OVERLEAF10'
+          'https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans'
         )
       })
 
@@ -1010,67 +1006,23 @@ describe('<UserNotifications />', function () {
       it("doesn't show the banner if it has been dismissed", function () {
         localStorage.setItem(
           'has_dismissed_writefull_promo_banner',
-          new Date(Date.now() - 1000)
+          new Date(Date.now() - 500)
         )
         renderWithinProjectListProvider(UserNotifications)
         expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
       })
     })
 
-    describe('when writefull-oauth-promotion split test is enabled', function () {
+    describe('when the writefull integration is not enabled', function () {
       beforeEach(function () {
-        window.metaAttributesCache.set('ol-splitTestVariants', {
-          'writefull-oauth-promotion': 'enabled',
+        window.metaAttributesCache.set('ol-user', {
+          writefull: { enabled: false },
         })
       })
 
-      describe('when the writefull integration is enabled', function () {
-        beforeEach(function () {
-          window.metaAttributesCache.set('ol-user', {
-            writefull: { enabled: true },
-          })
-        })
-        it('shows the banner', function () {
-          renderWithinProjectListProvider(UserNotifications)
-          const ctaLink = screen.getByRole('link', {
-            name: 'Get Writefull Premium',
-          })
-          expect(ctaLink.getAttribute('href')).to.equal(
-            'https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans'
-          )
-        })
-
-        it('dismisses the banner when the close button is clicked', function () {
-          renderWithinProjectListProvider(UserNotifications)
-          screen.getByRole('link', { name: /Writefull/ })
-          const closeButton = screen.getByRole('button', { name: 'Close' })
-          fireEvent.click(closeButton)
-          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
-          expect(localStorage.getItem('has_dismissed_writefull_promo_banner'))
-            .to.exist
-        })
-
-        it("doesn't show the banner if it has been dismissed", function () {
-          localStorage.setItem(
-            'has_dismissed_writefull_promo_banner',
-            new Date(Date.now() - 500)
-          )
-          renderWithinProjectListProvider(UserNotifications)
-          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
-        })
-      })
-
-      describe('when the writefull integration is not enabled', function () {
-        beforeEach(function () {
-          window.metaAttributesCache.set('ol-user', {
-            writefull: { enabled: false },
-          })
-        })
-
-        it("doesn't show the banner", function () {
-          renderWithinProjectListProvider(UserNotifications)
-          expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
-        })
+      it("doesn't show the banner", function () {
+        renderWithinProjectListProvider(UserNotifications)
+        expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
       })
     })
   })

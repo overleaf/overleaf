@@ -357,12 +357,6 @@ async function projectListPage(req, res, next) {
     }
   }
 
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'writefull-oauth-promotion'
-  )
-
   let showInrGeoBanner = false
   let showBrlGeoBanner = false
   let recommendedCurrency
