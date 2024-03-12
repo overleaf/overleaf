@@ -29,6 +29,15 @@ const safePathname = require('./lib/safe_pathname')
 const Snapshot = require('./lib/snapshot')
 const util = require('./lib/util')
 const V2DocVersions = require('./lib/v2_doc_versions')
+const {
+  InsertOp,
+  RemoveOp,
+  RetainOp,
+  ScanOp,
+} = require('./lib/operation/scan_op')
+const TrackedChange = require('./lib/file_data/tracked_change')
+const TrackedChangeList = require('./lib/file_data/tracked_change_list')
+const Range = require('./lib/range')
 
 exports.AddCommentOperation = AddCommentOperation
 exports.Author = Author
@@ -61,3 +70,10 @@ exports.safePathname = safePathname
 exports.Snapshot = Snapshot
 exports.util = util
 exports.V2DocVersions = V2DocVersions
+exports.ScanOp = ScanOp
+exports.InsertOp = InsertOp
+exports.RetainOp = RetainOp
+exports.RemoveOp = RemoveOp
+exports.TrackedChangeList = TrackedChangeList
+exports.TrackedChange = TrackedChange
+exports.Range = Range
