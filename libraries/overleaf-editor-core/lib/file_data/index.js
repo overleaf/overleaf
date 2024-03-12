@@ -90,9 +90,10 @@ class FileData {
 
   /**
    * @see File#getContent
+   * @param {import('../file').FileGetContentOptions} [opts]
    * @return {string | null | undefined}
    */
-  getContent() {
+  getContent(opts = {}) {
     return null
   }
 

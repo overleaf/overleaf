@@ -1,7 +1,7 @@
 import Blob from './blob'
 
 export type BlobStore = {
-  getBlob(hash: string): Promise<Blob>
+  getBlob(hash: string): Promise<Blob | null>
   getString(hash: string): Promise<string>
   putString(content: string): Promise<Blob>
   putObject(obj: object): Promise<Blob>

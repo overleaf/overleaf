@@ -22,6 +22,8 @@ const postgresBackend = require('./postgres')
 const mongoBackend = require('./mongo')
 const logger = require('@overleaf/logger')
 
+/** @typedef {import('stream').Readable} Readable */
+
 const GLOBAL_BLOBS = new Map()
 
 function makeGlobalKey(hash) {
@@ -273,7 +275,7 @@ class BlobStore {
    * failure, so the caller must be prepared to retry on errors, if appropriate.
    *
    * @param {string} hash hexadecimal SHA-1 hash
-   * @return {stream} a stream to read the file
+   * @return {Promise.<Readable>} a stream to read the file
    */
   async getStream(hash) {
     assert.blobHash(hash, 'bad hash')

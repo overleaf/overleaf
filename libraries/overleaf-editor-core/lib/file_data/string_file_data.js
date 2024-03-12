@@ -66,9 +66,29 @@ class StringFileData extends FileData {
     return true
   }
 
-  /** @inheritdoc */
-  getContent() {
-    return this.content
+  /**
+   * @inheritdoc
+   * @param {import('../file').FileGetContentOptions} [opts]
+   */
+  getContent(opts = {}) {
+    let content = ''
+    let cursor = 0
+    if (opts.filterTrackedDeletes) {
+      for (const tc of this.trackedChanges.trackedChanges) {
+        if (tc.tracking.type !== 'delete') {
+          continue
+        }
+        if (cursor < tc.range.start) {
+          content += this.content.slice(cursor, tc.range.start)
+        }
+        // skip the tracked change
+        cursor = tc.range.end
+      }
+    }
+    if (cursor < this.content.length) {
+      content += this.content.slice(cursor)
+    }
+    return content
   }
 
   /** @inheritdoc */

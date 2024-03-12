@@ -14,6 +14,7 @@ const StringFileData = require('./file_data/string_file_data')
  * @typedef {import("./types").StringFileRawData} StringFileRawData
  * @typedef {import("./types").CommentRawData} CommentRawData
  * @typedef {import("./operation/text_operation")} TextOperation
+ * @typedef {{filterTrackedDeletes?: boolean}} FileGetContentOptions
  */
 
 class NotEditableError extends OError {
@@ -133,10 +134,11 @@ class File {
    * The content of the file, if it is known and if this file has UTF-8 encoded
    * content.
    *
+   * @param {FileGetContentOptions} [opts]
    * @return {string | null | undefined}
    */
-  getContent() {
-    return this.data.getContent()
+  getContent(opts = {}) {
+    return this.data.getContent(opts)
   }
 
   /**

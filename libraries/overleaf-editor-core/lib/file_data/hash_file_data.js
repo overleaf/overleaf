@@ -90,6 +90,9 @@ class HashFileData extends FileData {
     let rangesBlob
     if (this.rangesHash) {
       rangesBlob = await blobStore.getBlob(this.rangesHash)
+      if (!rangesBlob) {
+        throw new Error('Failed to look up rangesHash in blobStore')
+      }
     }
     if (!blob) throw new Error('blob not found: ' + this.hash)
     return FileData.createLazyFromBlobs(blob, rangesBlob)
@@ -102,6 +105,9 @@ class HashFileData extends FileData {
    */
   async toHollow(blobStore) {
     const blob = await blobStore.getBlob(this.hash)
+    if (!blob) {
+      throw new Error('Failed to look up hash in blobStore')
+    }
     return FileData.createHollow(blob.getByteLength(), blob.getStringLength())
   }
 

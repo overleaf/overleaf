@@ -101,4 +101,68 @@ describe('StringFileData', function () {
       { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: true },
     ])
   })
+
+  it('getContent should filter out tracked deletions when passed option', function () {
+    const fileData = new StringFileData(
+      'the quick brown fox jumps over the lazy dog',
+      undefined,
+      [
+        {
+          range: { pos: 4, length: 6 },
+          tracking: {
+            type: 'delete',
+            ts: '2024-01-01T00:00:00.000Z',
+            userId: 'user1',
+          },
+        },
+        {
+          range: { pos: 35, length: 5 },
+          tracking: {
+            type: 'delete',
+            ts: '2023-01-01T00:00:00.000Z',
+            userId: 'user2',
+          },
+        },
+      ]
+    )
+
+    expect(fileData.getContent()).to.equal(
+      'the quick brown fox jumps over the lazy dog'
+    )
+    expect(fileData.getContent({ filterTrackedDeletes: true })).to.equal(
+      'the brown fox jumps over the dog'
+    )
+  })
+
+  it('getContent should keep tracked insertions when passed option to remove tracked changes', function () {
+    const fileData = new StringFileData(
+      'the quick brown fox jumps over the lazy dog',
+      undefined,
+      [
+        {
+          range: { pos: 4, length: 6 },
+          tracking: {
+            type: 'insert',
+            ts: '2024-01-01T00:00:00.000Z',
+            userId: 'user1',
+          },
+        },
+        {
+          range: { pos: 35, length: 5 },
+          tracking: {
+            type: 'delete',
+            ts: '2023-01-01T00:00:00.000Z',
+            userId: 'user2',
+          },
+        },
+      ]
+    )
+
+    expect(fileData.getContent()).to.equal(
+      'the quick brown fox jumps over the lazy dog'
+    )
+    expect(fileData.getContent({ filterTrackedDeletes: true })).to.equal(
+      'the quick brown fox jumps over the dog'
+    )
+  })
 })
