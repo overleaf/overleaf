@@ -152,7 +152,7 @@ async function updateSplitTestConfig({ name, configuration, comment }, userId) {
     versionNumber: lastVersion.versionNumber + 1,
     phase: configuration.phase,
     active: configuration.active,
-    analyticsEnabled: configuration.active && configuration.analyticsEnabled,
+    analyticsEnabled: configuration.analyticsEnabled,
     variants: updatedVariants,
     author: userId,
     comment,
