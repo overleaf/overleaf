@@ -1,7 +1,6 @@
 const { SplitTest } = require('../../models/SplitTest')
 const SplitTestUtils = require('./SplitTestUtils')
 const OError = require('@overleaf/o-error')
-const Settings = require('@overleaf/settings')
 const _ = require('lodash')
 const { CacheFlow } = require('cache-flow')
 
@@ -52,7 +51,7 @@ async function getSplitTests({ name, phase, type, active, archived }) {
     return await SplitTest.find(filters)
       .populate('archivedBy', ['email', 'first_name', 'last_name'])
       .populate('versions.author', ['email', 'first_name', 'last_name'])
-      .limit(100)
+      .limit(300)
       .exec()
   } catch (error) {
     throw OError.tag(error, 'Failed to get split tests list')
@@ -414,13 +413,13 @@ async function _saveSplitTest(splitTest) {
 }
 
 /*
- * As this is only used for utility in local dev, we want to prevent this running in any other env
- *  since deleting all records in staging or prod would be very bad...
+ * As this is only used for utility in local dev environment, we should make sure this isn't run in
+ * any other deployment environment.
  */
 function _checkEnvIsSafe(operation) {
-  if (Settings.splitTest.devToolbar.enabled) {
-    throw OError.tag(
-      `attempted to ${operation} all feature flags outside of local env`
+  if (process.env.NODE_ENV !== 'development') {
+    throw new OError(
+      `Attempted to ${operation} all feature flags outside of local env`
     )
   }
 }
@@ -432,11 +431,11 @@ async function _deleteSplitTests() {
   try {
     deleted = await SplitTest.deleteMany({}).exec()
   } catch (error) {
-    throw OError.tag('Failed to delete all split tests')
+    throw new OError('Failed to delete all split tests')
   }
 
   if (!deleted.acknowledged) {
-    throw OError.tag('Error deleting split tests, split tests have not updated')
+    throw new OError('Error deleting split tests, split tests have not updated')
   }
 }
 
