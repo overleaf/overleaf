@@ -516,6 +516,37 @@ templates.groupSSOLinkingInvite = ctaTemplate({
   },
 })
 
+templates.groupSSOReauthenticate = ctaTemplate({
+  subject(opts) {
+    return 'Action required: Reauthenticate your Overleaf account'
+  },
+  title(opts) {
+    return 'Action required: Reauthenticate SSO'
+  },
+  message(opts) {
+    return [
+      `Hi,
+      <div>
+      Single sign-on for your Overleaf group has been updated. 
+      This means you need to reauthenticate your Overleaf account with your group’s SSO provider. 
+      </div>
+      `,
+    ]
+  },
+  secondaryMessage(opts) {
+    return [``]
+  },
+  ctaURL(opts) {
+    return opts.authenticateWithSSO
+  },
+  ctaText(opts) {
+    return 'Reauthenticate now'
+  },
+  greeting() {
+    return ''
+  },
+})
+
 templates.groupSSODisabled = ctaTemplate({
   subject(opts) {
     return `Action required: Set your Overleaf password`
