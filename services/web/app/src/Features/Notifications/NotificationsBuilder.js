@@ -281,6 +281,9 @@ function personalAndGroupSubscriptions(userId) {
   }
 }
 
+/**
+ * @param {string} [userId]
+ */
 function ieeeCollabratecRetirement(userId) {
   return {
     key: 'notification-ieee-collabratec-retirement',
@@ -295,8 +298,8 @@ function ieeeCollabratecRetirement(userId) {
         callback
       )
     },
-    read(callback) {
-      NotificationsHandler.markAsReadByKeyOnly(this.key, callback)
+    deleteAllUnread(callback) {
+      NotificationsHandler.markAsReadByKeyOnlyBulk(this.key, callback)
     },
   }
 }
