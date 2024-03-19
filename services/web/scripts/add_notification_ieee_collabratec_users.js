@@ -85,9 +85,9 @@ async function main() {
 
   // First we remove all existing Collabratec retirement notifications
   if (COMMIT) {
-    await NotificationsBuilder.promises
-      .ieeeCollabratecRetirement()
-      .deleteAllUnread()
+    await db.notifications.deleteMany({
+      key: 'notification-ieee-collabratec-retirement',
+    })
   }
 
   let totalUsers = 0
