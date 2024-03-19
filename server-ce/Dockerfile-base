@@ -47,35 +47,35 @@ RUN rm -rf \
 # # docker build \
 #     --build-arg TEXLIVE_MIRROR=https://ctan.crest.fr/tex-archive/systems/texlive/tlnet \
 #     -f Dockerfile-base -t sharelatex/sharelatex-base .
-ARG TEXLIVE_MIRROR=https://mirror.ox.ac.uk/sites/ctan.org/systems/texlive/tlnet
+ARG TEXLIVE_MIRROR=https://ctan.crest.fr/tex-archive/systems/texlive/tlnet
 
 RUN mkdir /install-tl-unx
-RUN wget --quiet https://tug.org/texlive/files/texlive.asc
+RUN wget https://tug.org/texlive/files/texlive.asc
 RUN gpg --import texlive.asc
-RUN  rm texlive.asc
-RUN  wget --quiet ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz
-RUN  wget --quiet ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz.sha512
-RUN  wget --quiet ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz.sha512.asc
-RUN  gpg --verify install-tl-unx.tar.gz.sha512.asc
-RUN  sha512sum -c install-tl-unx.tar.gz.sha512
-RUN  tar -xz -C /install-tl-unx --strip-components=1 -f install-tl-unx.tar.gz
-RUN  rm install-tl-unx.tar.gz*
-RUN  echo "tlpdbopt_autobackup 0" >> /install-tl-unx/texlive.profile
-RUN  echo "tlpdbopt_install_docfiles 0" >> /install-tl-unx/texlive.profile
-RUN  echo "tlpdbopt_install_srcfiles 0" >> /install-tl-unx/texlive.profile
-RUN  echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile
-RUN  /install-tl-unx/install-tl \
+RUN rm texlive.asc
+RUN wget ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz
+RUN wget ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz.sha512
+RUN wget ${TEXLIVE_MIRROR}/install-tl-unx.tar.gz.sha512.asc
+RUN gpg --verify install-tl-unx.tar.gz.sha512.asc
+RUN sha512sum -c install-tl-unx.tar.gz.sha512
+RUN tar -xz -C /install-tl-unx --strip-components=1 -f install-tl-unx.tar.gz
+RUN rm install-tl-unx.tar.gz*
+RUN echo "tlpdbopt_autobackup 0" >> /install-tl-unx/texlive.profile
+RUN echo "tlpdbopt_install_docfiles 0" >> /install-tl-unx/texlive.profile
+RUN echo "tlpdbopt_install_srcfiles 0" >> /install-tl-unx/texlive.profile
+RUN echo "selected_scheme scheme-basic" >> /install-tl-unx/texlive.profile
+RUN /install-tl-unx/install-tl \
       -profile /install-tl-unx/texlive.profile \
       -repository ${TEXLIVE_MIRROR}
-RUN  $(find /usr/local/texlive -name tlmgr) path add
-RUN  tlmgr install --repository ${TEXLIVE_MIRROR} \
+RUN $(find /usr/local/texlive -name tlmgr) path add
+RUN tlmgr install --repository ${TEXLIVE_MIRROR} \
       latexmk \
       texcount \
       synctex \
       etoolbox \
       xetex
-RUN  tlmgr path add
-RUN  rm -rf /install-tl-unx
+RUN tlmgr path add
+RUN rm -rf /install-tl-unx
 
 
 # Set up overleaf user and home directory
