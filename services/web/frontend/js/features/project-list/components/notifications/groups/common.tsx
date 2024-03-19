@@ -64,11 +64,6 @@ function CommonNotification({ notification }: CommonNotificationProps) {
 
   const { _id: id, templateKey, html } = notification
 
-  // Temporarily remove IEEE Collabratec notification
-  if (templateKey === 'notification_ieee_collabratec_retirement') {
-    return null
-  }
-
   return (
     <>
       {templateKey === 'notification_project_invite' ? (
