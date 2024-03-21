@@ -224,6 +224,8 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.passportLogin
   )
 
+  webRouter.get('/account-suspended', UserPagesController.accountSuspended)
+
   if (Settings.enableLegacyLogin) {
     AuthenticationController.addEndpointToLoginWhitelist('/login/legacy')
     webRouter.get('/login/legacy', UserPagesController.loginPage)

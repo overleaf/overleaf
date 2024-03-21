@@ -1188,6 +1188,28 @@ describe('AuthenticationController', function () {
       })
     })
 
+    describe('when user account is suspended', function () {
+      beforeEach(function () {
+        this.req.session = {}
+        this.user.suspended = true
+      })
+      it('should not log in and instead redirect to suspended account page', function () {
+        this.AuthenticationController.finishLogin(
+          this.user,
+          this.req,
+          this.res,
+          this.next
+        )
+        sinon.assert.notCalled(this.req.login)
+        sinon.assert.calledWith(
+          this.AsyncFormHelper.redirect,
+          this.req,
+          this.res,
+          '/account-suspended'
+        )
+      })
+    })
+
     describe('preFinishLogin hook', function () {
       it('call hook and proceed', function () {
         this.Modules.hooks.fire = sinon.stub().yields(null, [])

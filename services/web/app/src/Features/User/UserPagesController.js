@@ -196,7 +196,18 @@ async function settingsPage(req, res) {
   })
 }
 
+async function accountSuspended(req, res) {
+  if (SessionManager.isUserLoggedIn(req.session)) {
+    return res.redirect('/project')
+  }
+  res.render('user/accountSuspended', {
+    title: 'your_account_is_suspended',
+  })
+}
+
 const UserPagesController = {
+  accountSuspended: expressify(accountSuspended),
+
   registerPage(req, res) {
     const sharedProjectData = {
       project_name: req.query.project_name,

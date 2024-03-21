@@ -1,0 +1,14 @@
+extends ../layout-marketing
+
+block vars
+	- var suppressNavbar = true
+	- var suppressFooter = true
+	- metadata.robotsNoindexNofollow = true
+
+block content
+	main.content.content-alt#main-content
+		.container-custom-sm.mx-auto
+			.card
+				h3 #{translate('your_account_is_suspended')}
+				p #{translate('sorry_this_account_has_been_suspended')}
+				p !{translate('please_contact_us_if_you_think_this_is_in_error', {}, [{name: 'a', attrs: {href: `mailto:${settings.adminEmail}`}}])}

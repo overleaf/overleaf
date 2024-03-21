@@ -237,6 +237,10 @@ class User {
     UserModel.updateOne({ _id: this.id }, { emails }, callback)
   }
 
+  setSuspended(suspended, callback) {
+    UserModel.updateOne({ _id: this.id }, { suspended }, callback)
+  }
+
   logout(callback) {
     this.getCsrfToken(error => {
       if (error != null) {

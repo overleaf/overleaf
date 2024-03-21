@@ -121,6 +121,10 @@ const AuthenticationController = {
       return AsyncFormHelper.redirect(req, res, '/login')
     } // OAuth2 'state' mismatch
 
+    if (user.suspended) {
+      return AsyncFormHelper.redirect(req, res, '/account-suspended')
+    }
+
     if (Settings.adminOnlyLogin && !hasAdminAccess(user)) {
       return res.status(403).json({
         message: { type: 'error', text: 'Admin only panel' },
