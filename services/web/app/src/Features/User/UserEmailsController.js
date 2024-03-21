@@ -156,6 +156,13 @@ async function primaryEmailCheck(req, res) {
   AsyncFormHelper.redirect(req, res, '/project')
 }
 
+async function showConfirm(req, res, next) {
+  res.render('user/confirm_email', {
+    token: req.query.token,
+    title: 'confirm_email',
+  })
+}
+
 const UserEmailsController = {
   list(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
@@ -254,12 +261,7 @@ const UserEmailsController = {
 
   primaryEmailCheck: expressify(primaryEmailCheck),
 
-  showConfirm(req, res, next) {
-    res.render('user/confirm_email', {
-      token: req.query.token,
-      title: 'confirm_email',
-    })
-  },
+  showConfirm: expressify(showConfirm),
 
   confirm(req, res, next) {
     const { token } = req.body
@@ -269,10 +271,18 @@ const UserEmailsController = {
       })
     }
     UserEmailsConfirmationHandler.confirmEmailFromToken(
+      req,
       token,
       function (error, userData) {
         if (error) {
-          if (error instanceof Errors.NotFoundError) {
+          if (error instanceof Errors.ForbiddenError) {
+            res.status(403).json({
+              message: {
+                key: 'confirm-email-wrong-user',
+                text: `We can’t confirm this email. You must be logged in with the Overleaf account that requested the new secondary email.`,
+              },
+            })
+          } else if (error instanceof Errors.NotFoundError) {
             res.status(404).json({
               message: req.i18n.translate('confirmation_token_invalid'),
             })

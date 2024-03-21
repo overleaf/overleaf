@@ -303,9 +303,14 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     UserController.promises.ensureAffiliationMiddleware,
     UserEmailsController.list
   )
-  webRouter.get('/user/emails/confirm', UserEmailsController.showConfirm)
+  webRouter.get(
+    '/user/emails/confirm',
+    AuthenticationController.requireLogin(),
+    UserEmailsController.showConfirm
+  )
   webRouter.post(
     '/user/emails/confirm',
+    AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.confirmEmail),
     UserEmailsController.confirm
   )

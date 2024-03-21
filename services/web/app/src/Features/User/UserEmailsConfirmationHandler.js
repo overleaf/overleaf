@@ -7,6 +7,7 @@ const UserUpdater = require('./UserUpdater')
 const UserGetter = require('./UserGetter')
 const { callbackify, promisify } = require('util')
 const crypto = require('crypto')
+const SessionManager = require('../Authentication/SessionManager')
 
 // Reject email confirmation tokens after 90 days
 const TOKEN_EXPIRY_IN_S = 90 * 24 * 60 * 60
@@ -85,58 +86,51 @@ async function sendReconfirmationEmail(userId, email) {
   await EmailHandler.promises.sendEmail('reconfirmEmail', emailOptions)
 }
 
+async function confirmEmailFromToken(req, token) {
+  const { data } = await OneTimeTokenHandler.promises.peekValueFromToken(
+    TOKEN_USE,
+    token
+  )
+  if (!data) {
+    throw new Errors.NotFoundError('no token found')
+  }
+
+  const loggedInUserId = SessionManager.getLoggedInUserId(req.session)
+  // user_id may be stored as an ObjectId or string
+  const userId = data.user_id?.toString()
+  const email = data.email
+  if (!userId || email !== EmailHelper.parseEmail(email)) {
+    throw new Errors.NotFoundError('invalid data')
+  }
+  if (loggedInUserId !== userId) {
+    throw new Errors.ForbiddenError('logged in user does not match token user')
+  }
+  const user = await UserGetter.promises.getUser(userId, { emails: 1 })
+  if (!user) {
+    throw new Errors.NotFoundError('user not found')
+  }
+  const emailExists = user.emails.some(emailData => emailData.email === email)
+  if (!emailExists) {
+    throw new Errors.NotFoundError('email missing for user')
+  }
+
+  await OneTimeTokenHandler.promises.expireToken(TOKEN_USE, token)
+  await UserUpdater.promises.confirmEmail(userId, email)
+
+  return { userId, email }
+}
+
 const UserEmailsConfirmationHandler = {
   sendConfirmationEmail,
 
   sendReconfirmationEmail: callbackify(sendReconfirmationEmail),
 
-  confirmEmailFromToken(token, callback) {
-    OneTimeTokenHandler.getValueFromTokenAndExpire(
-      TOKEN_USE,
-      token,
-      function (error, data) {
-        if (error) {
-          return callback(error)
-        }
-        if (!data) {
-          return callback(new Errors.NotFoundError('no token found'))
-        }
-        const userId = data.user_id
-        const email = data.email
-
-        if (!userId || email !== EmailHelper.parseEmail(email)) {
-          return callback(new Errors.NotFoundError('invalid data'))
-        }
-        UserGetter.getUser(userId, { emails: 1 }, function (error, user) {
-          if (error) {
-            return callback(error)
-          }
-          if (!user) {
-            return callback(new Errors.NotFoundError('user not found'))
-          }
-          const emailExists = user.emails.some(
-            emailData => emailData.email === email
-          )
-          if (!emailExists) {
-            return callback(new Errors.NotFoundError('email missing for user'))
-          }
-          UserUpdater.confirmEmail(userId, email, function (error) {
-            if (error) {
-              return callback(error)
-            }
-            callback(null, { userId, email })
-          })
-        })
-      }
-    )
-  },
+  confirmEmailFromToken: callbackify(confirmEmailFromToken),
 }
 
 UserEmailsConfirmationHandler.promises = {
   sendConfirmationEmail: promisify(sendConfirmationEmail),
-  confirmEmailFromToken: promisify(
-    UserEmailsConfirmationHandler.confirmEmailFromToken
-  ),
+  confirmEmailFromToken,
   sendConfirmationCode,
 }
 

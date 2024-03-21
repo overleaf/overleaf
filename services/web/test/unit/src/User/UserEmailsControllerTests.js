@@ -440,7 +440,7 @@ describe('UserEmailsController', function () {
 
       it('should confirm the email from the token', function () {
         this.UserEmailsConfirmationHandler.confirmEmailFromToken
-          .calledWith(this.token)
+          .calledWith(this.req, this.token)
           .should.equal(true)
       })
 

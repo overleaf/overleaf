@@ -24,20 +24,6 @@ const EmailHelper = require('../../../../app/src/Features/Helpers/EmailHelper')
 
 describe('UserEmailsConfirmationHandler', function () {
   beforeEach(function () {
-    this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': (this.settings = {
-          siteUrl: 'https://emails.example.com',
-        }),
-        '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {}),
-        './UserUpdater': (this.UserUpdater = {}),
-        './UserGetter': (this.UserGetter = {
-          getUser: sinon.stub().yields(null, this.mockUser),
-        }),
-        '../Email/EmailHandler': (this.EmailHandler = {}),
-        '../Helpers/EmailHelper': EmailHelper,
-      },
-    })
     this.mockUser = {
       _id: 'mock-user-id',
       email: 'mock@example.com',
@@ -45,6 +31,31 @@ describe('UserEmailsConfirmationHandler', function () {
     }
     this.user_id = this.mockUser._id
     this.email = this.mockUser.email
+    this.req = {}
+    this.UserEmailsConfirmationHandler = SandboxedModule.require(modulePath, {
+      requires: {
+        '@overleaf/settings': (this.settings = {
+          siteUrl: 'https://emails.example.com',
+        }),
+        '../Security/OneTimeTokenHandler': (this.OneTimeTokenHandler = {
+          promises: {},
+        }),
+        './UserUpdater': (this.UserUpdater = {
+          promises: {},
+        }),
+        './UserGetter': (this.UserGetter = {
+          getUser: sinon.stub().yields(null, this.mockUser),
+          promises: {
+            getUser: sinon.stub().resolves(this.mockUser),
+          },
+        }),
+        '../Email/EmailHandler': (this.EmailHandler = {}),
+        '../Helpers/EmailHelper': EmailHelper,
+        '../Authentication/SessionManager': (this.SessionManager = {
+          getLoggedInUserId: sinon.stub().returns(this.mockUser._id),
+        }),
+      },
+    })
     return (this.callback = sinon.stub())
   })
 
@@ -127,122 +138,139 @@ describe('UserEmailsConfirmationHandler', function () {
 
   describe('confirmEmailFromToken', function () {
     beforeEach(function () {
-      this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
+      this.OneTimeTokenHandler.promises.peekValueFromToken = sinon
         .stub()
-        .yields(null, { user_id: this.user_id, email: this.email })
-      return (this.UserUpdater.confirmEmail = sinon.stub().yields())
+        .resolves({ data: { user_id: this.user_id, email: this.email } })
+      this.OneTimeTokenHandler.promises.expireToken = sinon.stub().resolves()
+      this.UserUpdater.promises.confirmEmail = sinon.stub().resolves()
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
-          (this.token = 'mock-token'),
-          this.callback
+      beforeEach(async function () {
+        await this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+          this.req,
+          (this.token = 'mock-token')
         )
       })
 
-      it('should call getValueFromTokenAndExpire', function () {
-        return this.OneTimeTokenHandler.getValueFromTokenAndExpire
+      it('should call peekValueFromToken', function () {
+        return this.OneTimeTokenHandler.promises.peekValueFromToken
+          .calledWith('email_confirmation', this.token)
+          .should.equal(true)
+      })
+
+      it('should call expireToken', function () {
+        return this.OneTimeTokenHandler.promises.expireToken
           .calledWith('email_confirmation', this.token)
           .should.equal(true)
       })
 
       it('should confirm the email of the user_id', function () {
-        return this.UserUpdater.confirmEmail
+        return this.UserUpdater.promises.confirmEmail
           .calledWith(this.user_id, this.email)
           .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        return this.callback.called.should.equal(true)
       })
     })
 
     describe('with an expired token', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
+        this.OneTimeTokenHandler.promises.peekValueFromToken = sinon
           .stub()
-          .yields(null, null)
-        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
-          (this.token = 'mock-token'),
-          this.callback
-        )
+          .rejects(new Errors.NotFoundError('no token found'))
       })
 
-      it('should call the callback with a NotFoundError', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should reject with a NotFoundError', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+            this.req,
+            (this.token = 'mock-token')
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
 
     describe('with no user_id in the token', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
+        this.OneTimeTokenHandler.promises.peekValueFromToken = sinon
           .stub()
-          .yields(null, { email: this.email })
-        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
-          (this.token = 'mock-token'),
-          this.callback
-        )
+          .resolves({ data: { email: this.email } })
       })
 
-      it('should call the callback with a NotFoundError', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should reject with a NotFoundError', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+            this.req,
+            (this.token = 'mock-token')
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
 
     describe('with no email in the token', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
+        this.OneTimeTokenHandler.promises.peekValueFromToken = sinon
           .stub()
-          .yields(null, { user_id: this.user_id })
-        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
-          (this.token = 'mock-token'),
-          this.callback
-        )
+          .resolves({ data: { user_id: this.user_id } })
       })
 
-      it('should call the callback with a NotFoundError', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should reject with a NotFoundError', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+            this.req,
+            (this.token = 'mock-token')
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
 
     describe('with no user found', function () {
       beforeEach(function () {
-        this.UserGetter.getUser.yields(null, null)
-        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
-          (this.token = 'mock-token'),
-          this.callback
-        )
+        this.UserGetter.promises.getUser.resolves(null)
       })
 
-      it('should call the callback with a NotFoundError', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should reject with a NotFoundError', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+            this.req,
+            (this.token = 'mock-token')
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
 
     describe('with secondary email missing on user', function () {
       beforeEach(function () {
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire = sinon
+        this.OneTimeTokenHandler.promises.peekValueFromToken = sinon
           .stub()
-          .yields(null, { user_id: this.user_id, email: 'deleted@email.com' })
-        return this.UserEmailsConfirmationHandler.confirmEmailFromToken(
-          (this.token = 'mock-token'),
-          this.callback
-        )
+          .resolves({
+            data: { user_id: this.user_id, email: 'deleted@email.com' },
+          })
       })
 
-      it('should call the callback with a NotFoundError', function () {
-        return this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+      it('should reject with a NotFoundError', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+            this.req,
+            (this.token = 'mock-token')
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
+      })
+    })
+
+    describe('when the logged in user is not the token user', function () {
+      beforeEach(function () {
+        this.SessionManager.getLoggedInUserId = sinon
+          .stub()
+          .returns('other-user-id')
+      })
+
+      it('should reject with a ForbiddenError', async function () {
+        await expect(
+          this.UserEmailsConfirmationHandler.promises.confirmEmailFromToken(
+            this.req,
+            (this.token = 'mock-token')
+          )
+        ).to.be.rejectedWith(Errors.ForbiddenError)
       })
     })
   })
