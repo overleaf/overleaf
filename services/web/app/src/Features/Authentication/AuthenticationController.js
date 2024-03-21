@@ -233,7 +233,7 @@ const AuthenticationController = {
                       'password_compromised_try_again_or_use_known_device_or_reset'
                     )
                     .replace('<0>', '')
-                    .replace('</0>', ' (https://haveibeenpwned.com)')
+                    .replace('</0>', ' (https://haveibeenpwned.com/passwords)')
                     .replace('<1>', '')
                     .replace(
                       '</1>',

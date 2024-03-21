@@ -174,7 +174,7 @@ function PasswordForm() {
                   components={[
                     /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
                     <a
-                      href="https://haveibeenpwned.com"
+                      href="https://haveibeenpwned.com/passwords"
                       target="_blank"
                       rel="noreferrer noopener"
                     />,

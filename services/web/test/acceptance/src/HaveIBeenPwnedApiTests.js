@@ -92,7 +92,7 @@ describe('HaveIBeenPwnedApi', function () {
           message: {
             type: 'error',
             key: 'password-compromised',
-            text: `The password you’ve entered is on a public list of compromised passwords (https://haveibeenpwned.com). Please try logging in from a device you’ve previously used or reset your password (${Settings.siteUrl}/user/password/reset).`,
+            text: `The password you’ve entered is on a public list of compromised passwords (https://haveibeenpwned.com/passwords). Please try logging in from a device you’ve previously used or reset your password (${Settings.siteUrl}/user/password/reset).`,
           },
         })
       }
