@@ -147,6 +147,7 @@ function unlink(userId, providerId, auditLog, callback) {
     auditLog.initiatorId,
     auditLog.ipAddress,
     {
+      ...(auditLog.extraInfo || {}),
       providerId,
     },
     error => {
