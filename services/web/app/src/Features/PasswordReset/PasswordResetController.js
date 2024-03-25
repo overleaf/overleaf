@@ -114,9 +114,8 @@ async function requestReset(req, res, next) {
 
   let status
   try {
-    status = await PasswordResetHandler.promises.generateAndEmailResetToken(
-      email
-    )
+    status =
+      await PasswordResetHandler.promises.generateAndEmailResetToken(email)
   } catch (err) {
     OError.tag(err, 'failed to generate and email password reset token', {
       email,

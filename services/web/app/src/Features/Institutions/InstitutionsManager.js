@@ -105,9 +105,8 @@ const InstitutionsManager = {
   async refreshInstitutionUsers(institutionId, notify) {
     const refreshFunction = notify ? refreshFeaturesAndNotify : refreshFeatures
 
-    const { institution, affiliations } = await fetchInstitutionAndAffiliations(
-      institutionId
-    )
+    const { institution, affiliations } =
+      await fetchInstitutionAndAffiliations(institutionId)
 
     for (const affiliation of affiliations) {
       affiliation.institutionName = institution.name
@@ -316,9 +315,8 @@ async function refreshFeaturesAndNotify(affiliation) {
 
 const getUserInfo = async userId => {
   const user = await UserGetter.promises.getUser(userId, { _id: 1 })
-  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
-    user
-  )
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(user)
   return { user, subscription }
 }
 

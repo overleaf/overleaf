@@ -747,9 +747,8 @@ export const setColumnWidth = (
       const alignmentCharacter = getParagraphAlignmentCharacter(
         columnSpecification[i]
       )
-      columnSpecification[
-        i
-      ].content = `${alignmentCharacter}{${widthValue}${suffix}}`
+      columnSpecification[i].content =
+        `${alignmentCharacter}{${widthValue}${suffix}}`
     }
   }
   const newSpecification = generateColumnSpecification(columnSpecification)

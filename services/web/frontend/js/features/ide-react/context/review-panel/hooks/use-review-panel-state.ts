@@ -226,8 +226,8 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
             MergeAndOverride<
               ReviewPanelCommentThread,
               ReviewPanelCommentThreadsApi[ThreadId]
-            >
-          ]
+            >,
+          ],
         ]
         for (const [threadId, thread] of threadsEntries) {
           for (const comment of thread.messages) {
@@ -565,8 +565,8 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
           [
             UserId,
             NonNullable<
-              typeof trackChangesState[keyof typeof trackChangesState]
-            >
+              (typeof trackChangesState)[keyof typeof trackChangesState]
+            >,
           ]
         >
         for (const [userId, { value }] of entries) {
@@ -605,7 +605,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
       }
       const state =
         newTrackChangesState[userId] ??
-        ({} as NonNullable<typeof newTrackChangesState[UserId]>)
+        ({} as NonNullable<(typeof newTrackChangesState)[UserId]>)
       newTrackChangesState[userId] = state
 
       if (state.syncState == null || state.syncState === 'synced') {

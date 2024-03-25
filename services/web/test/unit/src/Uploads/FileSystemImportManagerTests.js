@@ -64,9 +64,8 @@ describe('FileSystemImportManager', function () {
         },
         symlink: mockFs.symlink({ path: 'import-test' }),
       })
-      this.entries = await this.FileSystemImportManager.promises.importDir(
-        'import-test'
-      )
+      this.entries =
+        await this.FileSystemImportManager.promises.importDir('import-test')
       this.projectPaths = this.entries.map(x => x.projectPath)
     })
 

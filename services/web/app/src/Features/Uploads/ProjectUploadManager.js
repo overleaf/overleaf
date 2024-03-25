@@ -119,12 +119,10 @@ async function _initializeProjectWithZipContents(
   project,
   contentsPath
 ) {
-  const topLevelDir = await ArchiveManager.promises.findTopLevelDirectory(
-    contentsPath
-  )
-  const importEntries = await FileSystemImportManager.promises.importDir(
-    topLevelDir
-  )
+  const topLevelDir =
+    await ArchiveManager.promises.findTopLevelDirectory(contentsPath)
+  const importEntries =
+    await FileSystemImportManager.promises.importDir(topLevelDir)
   const { fileEntries, docEntries } = await _createEntriesFromImports(
     project._id,
     importEntries

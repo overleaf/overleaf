@@ -10,10 +10,10 @@ type DeepReadonlyObject<T> = {
 export type DeepReadonly<T> = T extends (infer R)[]
   ? DeepReadonlyArray<R>
   : T extends (...args: any[]) => void
-  ? T
-  : T extends object
-  ? DeepReadonlyObject<T>
-  : T
+    ? T
+    : T extends object
+      ? DeepReadonlyObject<T>
+      : T
 
 export type DeepPartial<T> = Partial<{ [P in keyof T]: DeepPartial<T[P]> }>
 

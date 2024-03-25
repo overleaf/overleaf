@@ -69,8 +69,8 @@ export function useEditingSessionHeartbeat() {
       heartbeatsSent <= 2
         ? 30
         : heartbeatsSent <= 6
-        ? (heartbeatsSent - 2) * 60
-        : 300
+          ? (heartbeatsSent - 2) * 60
+          : 300
 
     setNextHeartbeatAt(moment().add(backoffSecs, 'seconds').toDate())
   }, [getEditorType, heartbeatsSent, nextHeartbeatAt, projectId])

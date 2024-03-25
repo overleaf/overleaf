@@ -354,9 +354,8 @@ async function maybeCreateRedundantSubscriptionNotification(userId, email) {
     return
   }
 
-  const affiliations = await InstitutionsAPI.promises.getUserAffiliations(
-    userId
-  )
+  const affiliations =
+    await InstitutionsAPI.promises.getUserAffiliations(userId)
   const confirmedAffiliation = affiliations.find(a => a.email === email)
   if (!confirmedAffiliation || confirmedAffiliation.licence === 'free') {
     return

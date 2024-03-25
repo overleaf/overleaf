@@ -11,7 +11,7 @@ const testData = [1, 2, 3].map(index => ({
   sub: `Subtitle ${index}`,
 }))
 
-type RenderProps = Partial<SelectProps<typeof testData[number]>> & {
+type RenderProps = Partial<SelectProps<(typeof testData)[number]>> & {
   onSubmit?: (formData: object) => void
 }
 

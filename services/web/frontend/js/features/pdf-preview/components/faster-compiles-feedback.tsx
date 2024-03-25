@@ -111,8 +111,8 @@ function FasterCompilesFeedbackContent() {
                 {feedback === 'faster'
                   ? t('faster_compiles_feedback_seems_faster')
                   : feedback === 'same'
-                  ? t('faster_compiles_feedback_seems_same')
-                  : t('faster_compiles_feedback_seems_slower')}
+                    ? t('faster_compiles_feedback_seems_same')
+                    : t('faster_compiles_feedback_seems_slower')}
               </Button>
             ))}
           </div>

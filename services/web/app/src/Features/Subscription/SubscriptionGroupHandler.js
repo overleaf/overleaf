@@ -28,9 +28,8 @@ async function isUserPartOfGroup(userId, subscriptionId) {
 }
 
 async function getTotalConfirmedUsersInGroup(subscriptionId) {
-  const subscription = await SubscriptionLocator.promises.getSubscription(
-    subscriptionId
-  )
+  const subscription =
+    await SubscriptionLocator.promises.getSubscription(subscriptionId)
 
   return subscription?.member_ids?.length
 }

@@ -1,39 +1,39 @@
 module.exports = [
   {
-    name: 'web'
+    name: 'web',
   },
   {
-    name: 'real-time'
+    name: 'real-time',
   },
   {
-    name: 'document-updater'
+    name: 'document-updater',
   },
   {
-    name: 'clsi'
+    name: 'clsi',
   },
   {
-    name: 'filestore'
+    name: 'filestore',
   },
   {
-    name: 'docstore'
+    name: 'docstore',
   },
   {
-    name: 'chat'
+    name: 'chat',
   },
   {
-    name: 'spelling'
+    name: 'spelling',
   },
   {
-    name: 'contacts'
+    name: 'contacts',
   },
   {
-    name: 'notifications'
+    name: 'notifications',
   },
   {
-    name: 'project-history'
+    name: 'project-history',
   },
   {
-    name: 'history-v1'
+    name: 'history-v1',
   },
 ]
 

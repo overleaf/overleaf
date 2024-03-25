@@ -74,9 +74,8 @@ const UpdateManager = {
       doc_id: docId,
     })
 
-    const updates = await RealTimeRedisManager.promises.getPendingUpdatesForDoc(
-      docId
-    )
+    const updates =
+      await RealTimeRedisManager.promises.getPendingUpdatesForDoc(docId)
     logger.debug(
       { projectId, docId, count: updates.length },
       'processing updates'

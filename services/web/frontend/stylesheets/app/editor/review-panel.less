@@ -231,10 +231,15 @@
   border-radius: 3px;
   color: #fff;
   cursor: pointer;
-  transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
+  transition:
+    top @rp-entry-animation-speed,
+    left 0.1s,
+    right 0.1s;
 
   .no-animate & {
-    transition: left 0.1s, right 0.1s;
+    transition:
+      left 0.1s,
+      right 0.1s;
   }
 
   &-focused {
@@ -381,10 +386,15 @@
   border-left: solid @rp-entry-ribbon-width transparent;
   border-radius: 3px;
   background-color: #fff;
-  transition: top @rp-entry-animation-speed, left 0.1s, right 0.1s;
+  transition:
+    top @rp-entry-animation-speed,
+    left 0.1s,
+    right 0.1s;
 
   .no-animate & {
-    transition: left 0.1s, right 0.1s;
+    transition:
+      left 0.1s,
+      right 0.1s;
   }
 
   &-insert,
@@ -407,8 +417,11 @@
     z-index: 3;
     transform: scale(0.1);
     transform-origin: 0 0;
-    transition: top 0.35s ease-out, left 0.35s ease-out,
-      transform 0.35s ease-out, opacity 0.35s ease-out 0.2s;
+    transition:
+      top 0.35s ease-out,
+      left 0.35s ease-out,
+      transform 0.35s ease-out,
+      opacity 0.35s ease-out 0.2s;
   }
 
   &-comment-resolved {
@@ -654,7 +667,9 @@
 }
 
 .rp-entry-callout {
-  transition: top @rp-entry-animation-speed, height @rp-entry-animation-speed;
+  transition:
+    top @rp-entry-animation-speed,
+    height @rp-entry-animation-speed;
 
   .rp-state-current-file & {
     position: absolute;

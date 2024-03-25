@@ -4,7 +4,7 @@ const shallowEqual = (arr1: unknown[], arr2: unknown[]) =>
 // Compares props for a component, but comparing the specified props using
 // shallow array comparison rather than identity
 export default function comparePropsWithShallowArrayCompare<
-  T extends Record<string, unknown>
+  T extends Record<string, unknown>,
 >(...args: Array<keyof T>) {
   return (prevProps: T, nextProps: T) => {
     for (const k in prevProps) {

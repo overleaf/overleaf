@@ -160,9 +160,8 @@ describe('SubscriptionGroupHandler', function () {
     })
     describe('for nonexistent subscriptions', function () {
       it('should return undefined', async function () {
-        const count = await this.Handler.promises.getTotalConfirmedUsersInGroup(
-          'fake-id'
-        )
+        const count =
+          await this.Handler.promises.getTotalConfirmedUsersInGroup('fake-id')
         expect(count).not.to.exist
       })
     })

@@ -25,9 +25,8 @@ async function main() {
   let clearedTimestamps = 0
   let processed = 0
   for (const projectId of projectIdsWithFirstOpTimestamps) {
-    const result = await RedisManager.promises.clearDanglingFirstOpTimestamp(
-      projectId
-    )
+    const result =
+      await RedisManager.promises.clearDanglingFirstOpTimestamp(projectId)
     processed++
     clearedTimestamps += result
     if (processed % 1000 === 0) {

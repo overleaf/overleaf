@@ -152,17 +152,15 @@ async function joinProject(req, res, next) {
 }
 
 async function _buildJoinProjectView(req, projectId, userId) {
-  const project = await ProjectGetter.promises.getProjectWithoutDocLines(
-    projectId
-  )
+  const project =
+    await ProjectGetter.promises.getProjectWithoutDocLines(projectId)
   if (project == null) {
     throw new Errors.NotFoundError('project not found')
   }
   let deletedDocsFromDocstore = []
   try {
-    deletedDocsFromDocstore = await DocstoreManager.promises.getAllDeletedDocs(
-      projectId
-    )
+    deletedDocsFromDocstore =
+      await DocstoreManager.promises.getAllDeletedDocs(projectId)
   } catch (err) {
     // The query in docstore is not optimized at this time and fails for
     // projects with many very large, deleted documents.
@@ -187,9 +185,8 @@ async function _buildJoinProjectView(req, projectId, userId) {
   if (privilegeLevel == null || privilegeLevel === PrivilegeLevels.NONE) {
     return { project: null, privilegeLevel: null, isRestrictedUser: false }
   }
-  const invites = await CollaboratorsInviteHandler.promises.getAllInvites(
-    projectId
-  )
+  const invites =
+    await CollaboratorsInviteHandler.promises.getAllInvites(projectId)
   const isTokenMember = await CollaboratorsHandler.promises.userIsTokenMember(
     userId,
     projectId

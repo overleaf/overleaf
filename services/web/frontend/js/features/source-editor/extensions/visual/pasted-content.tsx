@@ -13,8 +13,10 @@ import { SplitTestProvider } from '../../../../shared/context/split-test-context
 
 export type PastedContent = { latex: string; text: string }
 
-const pastedContentEffect =
-  StateEffect.define<{ content: PastedContent; formatted: boolean }>()
+const pastedContentEffect = StateEffect.define<{
+  content: PastedContent
+  formatted: boolean
+}>()
 
 export const insertPastedContent = (
   view: EditorView,

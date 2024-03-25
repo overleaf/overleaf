@@ -7,7 +7,7 @@ import { useProjectListContext } from '../../context/project-list-context'
 import { useTranslation } from 'react-i18next'
 
 const variants = ['did-you-know', 'on-premise', 'people', 'FOMO'] as const
-type GroupsAndEnterpriseBannerVariant = typeof variants[number]
+type GroupsAndEnterpriseBannerVariant = (typeof variants)[number]
 
 let viewEventSent = false
 

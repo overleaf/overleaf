@@ -68,9 +68,8 @@ async function getUserFullEmails(userId) {
     return decorateFullEmails(user.email, user.emails, [], [])
   }
 
-  const affiliationsData = await InstitutionsAPIPromises.getUserAffiliations(
-    userId
-  )
+  const affiliationsData =
+    await InstitutionsAPIPromises.getUserAffiliations(userId)
 
   return decorateFullEmails(
     user.email,

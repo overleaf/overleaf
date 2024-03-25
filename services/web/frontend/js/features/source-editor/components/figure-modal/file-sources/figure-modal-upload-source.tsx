@@ -209,8 +209,8 @@ export const FigureModalUploadFileSource: FC = () => {
               uploading
                 ? FileUploadStatus.UPLOADING
                 : uploadError
-                ? FileUploadStatus.ERROR
-                : FileUploadStatus.NOT_ATTEMPTED
+                  ? FileUploadStatus.ERROR
+                  : FileUploadStatus.NOT_ATTEMPTED
             }
             onDelete={() => {
               uppy.removeFile(file.id)

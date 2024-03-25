@@ -382,9 +382,7 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
 
 // i18n
 if (process.env.OVERLEAF_LANG_DOMAIN_MAPPING != null) {
-  settings.i18n.subdomainLang = parse(
-    process.env.OVERLEAF_LANG_DOMAIN_MAPPING
-  )
+  settings.i18n.subdomainLang = parse(process.env.OVERLEAF_LANG_DOMAIN_MAPPING)
 }
 
 // Password Settings

@@ -68,9 +68,8 @@ async function main() {
         new Set(docs.map(doc => doc.project_id.toString()))
       ).map(id => new ObjectId(id))
       console.log('Checking projects', JSON.stringify(projectIds))
-      const { nProjectsWithOrphanedDocs, nDeletedDocs } = await processBatch(
-        projectIds
-      )
+      const { nProjectsWithOrphanedDocs, nDeletedDocs } =
+        await processBatch(projectIds)
       nProjectsProcessedTotal += projectIds.length
       nProjectsWithOrphanedDocsTotal += nProjectsWithOrphanedDocs
       nDeletedDocsTotal += nDeletedDocs

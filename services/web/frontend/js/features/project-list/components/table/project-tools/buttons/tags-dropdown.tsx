@@ -116,8 +116,8 @@ function TagsDropdown() {
                       containsAllSelectedProjects(tag)
                         ? 'check-square-o'
                         : containsSomeSelectedProjects(tag)
-                        ? 'minus-square-o'
-                        : 'square-o'
+                          ? 'minus-square-o'
+                          : 'square-o'
                     }
                     className="tag-checkbox"
                   />{' '}

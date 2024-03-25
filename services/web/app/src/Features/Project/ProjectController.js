@@ -751,8 +751,8 @@ const ProjectController = {
                 ? // TODO: Create React version of detached page
                   'project/editor_detached'
                 : idePageReact
-                ? 'project/ide-react'
-                : 'project/editor'
+                  ? 'project/ide-react'
+                  : 'project/editor'
 
             res.render(template, {
               title: project.name,

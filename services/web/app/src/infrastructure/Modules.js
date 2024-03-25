@@ -30,11 +30,9 @@ function loadModules() {
   }
 
   for (const moduleName of Settings.moduleImportSequence || []) {
-    const loadedModule = require(Path.join(
-      MODULE_BASE_PATH,
-      moduleName,
-      'index.js'
-    ))
+    const loadedModule = require(
+      Path.join(MODULE_BASE_PATH, moduleName, 'index.js')
+    )
     loadedModule.name = moduleName
     _modules.push(loadedModule)
   }

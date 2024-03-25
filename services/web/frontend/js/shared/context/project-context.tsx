@@ -94,8 +94,8 @@ export const ProjectProvider: FC = ({ children }) => {
     forceNewCompileTimeout === 'active'
       ? 'active'
       : forceNewCompileTimeout === 'changing'
-      ? 'changing'
-      : undefined
+        ? 'changing'
+        : undefined
 
   const value = useMemo(() => {
     return {

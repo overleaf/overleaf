@@ -265,9 +265,8 @@ async function mkdirp(projectId, path, options = {}) {
   // to make matching case-sensitive
   const folders = path.split('/').filter(folder => folder.length !== 0)
 
-  const project = await ProjectGetter.promises.getProjectWithOnlyFolders(
-    projectId
-  )
+  const project =
+    await ProjectGetter.promises.getProjectWithOnlyFolders(projectId)
   if (path === '/') {
     return { newFolders: [], folder: project.rootFolder[0] }
   }

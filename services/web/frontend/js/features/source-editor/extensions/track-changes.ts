@@ -221,7 +221,10 @@ class ChangeDeletedWidget extends WidgetType {
 }
 
 class ChangeCalloutWidget extends WidgetType {
-  constructor(public change: Change, public opType: string) {
+  constructor(
+    public change: Change,
+    public opType: string
+  ) {
     super()
   }
 

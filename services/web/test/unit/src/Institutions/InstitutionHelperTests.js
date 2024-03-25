@@ -1,9 +1,11 @@
 const { expect } = require('chai')
 const path = require('path')
-const InstitutionsHelper = require(path.join(
-  __dirname,
-  '/../../../../app/src/Features/Institutions/InstitutionsHelper'
-))
+const InstitutionsHelper = require(
+  path.join(
+    __dirname,
+    '/../../../../app/src/Features/Institutions/InstitutionsHelper'
+  )
+)
 
 describe('InstitutionsHelper', function () {
   describe('emailHasLicence', function () {

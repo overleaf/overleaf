@@ -590,7 +590,9 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     background-clip: padding-box; /* needed for firefox when there is bg color */
     text-align: center;
 
-    &:not(.plans-v2-table-cell-before-green-highlighted-column):not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
+    &:not(.plans-v2-table-cell-before-green-highlighted-column):not(
+        .plans-v2-table-green-highlighted
+      ):not(.plans-v2-table-divider-highlighted) {
       border-right: 1px solid @ol-blue-gray-0;
 
       @media (max-width: @screen-xs-max) {
@@ -623,7 +625,9 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
     vertical-align: middle;
     height: 100%;
 
-    &:last-child:not(.plans-v2-table-green-highlighted):not(.plans-v2-table-divider-highlighted) {
+    &:last-child:not(.plans-v2-table-green-highlighted):not(
+        .plans-v2-table-divider-highlighted
+      ) {
       border-right: 0;
     }
   }
@@ -649,7 +653,9 @@ span.plans-v2-license-picker-educational-discount-learn-more-container {
       }
     }
 
-    &:not(.plans-v2-table-row-last-row-per-section):not(.plans-v2-table-divider):not(:last-of-type) {
+    &:not(.plans-v2-table-row-last-row-per-section):not(
+        .plans-v2-table-divider
+      ):not(:last-of-type) {
       th > .plans-v2-table-th > .plans-v2-table-th-content,
       td > .plans-v2-table-feature-name,
       td > .plans-v2-table-cell > .plans-v2-table-cell-content {

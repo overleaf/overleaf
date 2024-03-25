@@ -375,10 +375,10 @@ module.exports = _.template(`\
                       ? `${settings.email.template.customFooter}<br>`
                       : ''
                   }${settings.appName} &bull; <a href="${
-  settings.siteUrl
-}" style="Margin: 0; color: #0F7A06; font-family: Helvetica, Arial, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;">${
-  settings.siteUrl
-}</a>
+                    settings.siteUrl
+                  }" style="Margin: 0; color: #0F7A06; font-family: Helvetica, Arial, sans-serif; font-weight: normal; line-height: 1.3; margin: 0; padding: 0; text-align: left; text-decoration: none;">${
+                    settings.siteUrl
+                  }</a>
 								</small></p>
 							</td></tr></table>
 						</td></tr></tbody></table>

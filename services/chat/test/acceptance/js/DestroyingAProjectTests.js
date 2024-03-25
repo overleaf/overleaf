@@ -47,9 +47,8 @@ describe('Destroying a project', async function () {
       const globalThreadMessage = await getMessage(this.globalThreadMessageId)
       expect(globalThreadMessage).to.exist
 
-      const { response: responseDestroy } = await ChatClient.destroyProject(
-        projectId
-      )
+      const { response: responseDestroy } =
+        await ChatClient.destroyProject(projectId)
       expect(responseDestroy.statusCode).to.equal(204)
     })
 

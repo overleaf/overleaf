@@ -418,9 +418,8 @@ let deletedFilesProjectIdIndexExist
 async function doesDeletedFilesProjectIdIndexExist() {
   if (typeof deletedFilesProjectIdIndexExist !== 'boolean') {
     // Resolve this about once. No need for locking or retry handling.
-    deletedFilesProjectIdIndexExist = await db.deletedFiles.indexExists(
-      'projectId_1'
-    )
+    deletedFilesProjectIdIndexExist =
+      await db.deletedFiles.indexExists('projectId_1')
   }
   return deletedFilesProjectIdIndexExist
 }

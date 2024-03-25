@@ -45,9 +45,8 @@ async function checkActiveSubscriptions() {
 
     if (subscriptions.length) {
       const groupIds = subscriptions.map(sub => sub._id)
-      const bigQueryGroupMemberships = await fetchBigQueryMembershipStatuses(
-        groupIds
-      )
+      const bigQueryGroupMemberships =
+        await fetchBigQueryMembershipStatuses(groupIds)
       const membershipsByGroupId = _.groupBy(
         bigQueryGroupMemberships,
         'group_id'
@@ -85,9 +84,8 @@ async function checkDeletedSubscriptions() {
 
     if (deletedSubscriptions.length) {
       const groupIds = deletedSubscriptions.map(sub => sub._id.toString())
-      const bigQueryGroupMemberships = await fetchBigQueryMembershipStatuses(
-        groupIds
-      )
+      const bigQueryGroupMemberships =
+        await fetchBigQueryMembershipStatuses(groupIds)
 
       const membershipsByGroupId = _.groupBy(
         bigQueryGroupMemberships,

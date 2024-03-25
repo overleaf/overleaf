@@ -207,9 +207,8 @@ async function syncSubscription(recurlySubscription, requesterData) {
 // This is used because Recurly doesn't always attempt collection of paast due
 // invoices after Paypal billing info were updated.
 async function attemptPaypalInvoiceCollection(recurlyAccountCode) {
-  const billingInfo = await RecurlyWrapper.promises.getBillingInfo(
-    recurlyAccountCode
-  )
+  const billingInfo =
+    await RecurlyWrapper.promises.getBillingInfo(recurlyAccountCode)
 
   if (!billingInfo.paypal_billing_agreement_id) {
     // this is not a Paypal user

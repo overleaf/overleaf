@@ -4,7 +4,8 @@
  */
 @font-face {
   font-family: 'FontAwesome';
-  src: url('font-awesome-v470.woff2') format('woff2'),
+  src:
+    url('font-awesome-v470.woff2') format('woff2'),
     url('font-awesome-v470.woff') format('woff');
   font-weight: normal;
   font-style: normal;

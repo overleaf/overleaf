@@ -47,9 +47,8 @@ async function syncSubscription(
   adminUserId,
   requesterData = {}
 ) {
-  let subscription = await SubscriptionLocator.promises.getUsersSubscription(
-    adminUserId
-  )
+  let subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(adminUserId)
   if (subscription == null) {
     subscription = await _createNewSubscription(adminUserId)
   }

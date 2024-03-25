@@ -166,9 +166,8 @@ const AuthenticationManager = {
 
     let isPasswordReused
     try {
-      isPasswordReused = await HaveIBeenPwned.promises.checkPasswordForReuse(
-        password
-      )
+      isPasswordReused =
+        await HaveIBeenPwned.promises.checkPasswordForReuse(password)
     } catch (err) {
       logger.err({ err }, 'cannot check password for re-use')
     }
@@ -333,9 +332,8 @@ const AuthenticationManager = {
 
     let isPasswordReused
     try {
-      isPasswordReused = await HaveIBeenPwned.promises.checkPasswordForReuse(
-        password
-      )
+      isPasswordReused =
+        await HaveIBeenPwned.promises.checkPasswordForReuse(password)
     } catch (error) {
       logger.err({ error }, 'cannot check password for re-use')
     }

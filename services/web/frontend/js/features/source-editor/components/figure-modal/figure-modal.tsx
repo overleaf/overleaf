@@ -268,8 +268,8 @@ const FigureModalContent = () => {
           {helpShown
             ? t('help')
             : sourcePickerShown
-            ? t('replace_figure')
-            : getTitle(source)}{' '}
+              ? t('replace_figure')
+              : getTitle(source)}{' '}
           <FeedbackBadge
             id="figure-modal-feedback"
             url="https://forms.gle/PfEtwceYBNQ32DF4A"

@@ -803,9 +803,8 @@ describe('<ProjectListRoot />', function () {
             fireEvent.click(allCheckboxes[1]) // select a project owned by the current user
 
             const actionsToolbar = screen.getAllByRole('toolbar')[0]
-            const moreDropdown = await within(
-              actionsToolbar
-            ).findByText<HTMLElement>('More')
+            const moreDropdown =
+              await within(actionsToolbar).findByText<HTMLElement>('More')
             fireEvent.click(moreDropdown)
 
             const editButton =
@@ -851,9 +850,8 @@ describe('<ProjectListRoot />', function () {
                 status: 200,
               }
             )
-            const moreDropdown = await within(
-              actionsToolbar
-            ).findByText<HTMLElement>('More')
+            const moreDropdown =
+              await within(actionsToolbar).findByText<HTMLElement>('More')
             fireEvent.click(moreDropdown)
 
             const renameButton =
@@ -888,9 +886,8 @@ describe('<ProjectListRoot />', function () {
             within(table).getByText(newProjectName)
             expect(within(table).queryByText(oldName)).to.be.null
 
-            const allCheckboxesInTable = await within(
-              table
-            ).findAllByRole<HTMLInputElement>('checkbox')
+            const allCheckboxesInTable =
+              await within(table).findAllByRole<HTMLInputElement>('checkbox')
             const allCheckboxesChecked = allCheckboxesInTable.filter(
               c => c.checked
             )

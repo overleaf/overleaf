@@ -34,9 +34,8 @@ const CollaboratorsInviteController = {
   async getAllInvites(req, res) {
     const projectId = req.params.Project_id
     logger.debug({ projectId }, 'getting all active invites for project')
-    const invites = await CollaboratorsInviteHandler.promises.getAllInvites(
-      projectId
-    )
+    const invites =
+      await CollaboratorsInviteHandler.promises.getAllInvites(projectId)
     res.json({ invites })
   },
 
@@ -115,9 +114,8 @@ const CollaboratorsInviteController = {
       return res.status(400).json({ errorReason: 'invalid_email' })
     }
 
-    const underRateLimit = await CollaboratorsInviteController._checkRateLimit(
-      sendingUserId
-    )
+    const underRateLimit =
+      await CollaboratorsInviteController._checkRateLimit(sendingUserId)
     if (!underRateLimit) {
       return res.sendStatus(429)
     }

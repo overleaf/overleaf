@@ -58,4 +58,6 @@ for (const domain of commonDomains) {
   }
 }
 
-export default domainBlocklist as ReadonlyArray<typeof domainBlocklist[number]>
+export default domainBlocklist as ReadonlyArray<
+  (typeof domainBlocklist)[number]
+>

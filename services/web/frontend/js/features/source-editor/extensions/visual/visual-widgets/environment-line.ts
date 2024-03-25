@@ -1,7 +1,10 @@
 import { EditorView, WidgetType } from '@codemirror/view'
 
 export class EnvironmentLineWidget extends WidgetType {
-  constructor(public environment: string, public line?: 'begin' | 'end') {
+  constructor(
+    public environment: string,
+    public line?: 'begin' | 'end'
+  ) {
     super()
   }
 

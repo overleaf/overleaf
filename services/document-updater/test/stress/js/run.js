@@ -162,9 +162,12 @@ class StressTestClient {
   continue() {
     if (this.updateCount > 0) {
       this.updateCount--
-      return setTimeout(() => {
-        return this.sendUpdate()
-      }, this.options.updateDelay * (0.5 + Math.random()))
+      return setTimeout(
+        () => {
+          return this.sendUpdate()
+        },
+        this.options.updateDelay * (0.5 + Math.random())
+      )
     } else {
       return this.updateCallback()
     }

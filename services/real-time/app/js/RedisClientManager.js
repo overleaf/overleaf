@@ -8,10 +8,10 @@ module.exports = {
       const redisType = x.cluster
         ? 'cluster'
         : x.sentinels
-        ? 'sentinel'
-        : x.host
-        ? 'single'
-        : 'unknown'
+          ? 'sentinel'
+          : x.host
+            ? 'single'
+            : 'unknown'
       logger.debug({ redis: redisType }, 'creating redis client')
       return redis.createClient(x)
     })

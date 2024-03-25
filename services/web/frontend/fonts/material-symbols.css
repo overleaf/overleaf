@@ -15,7 +15,11 @@
   font-weight: normal;
   font-style: normal;
   font-size: 20px;
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;

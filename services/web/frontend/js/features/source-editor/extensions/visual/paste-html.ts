@@ -542,7 +542,7 @@ const createSelector = <
   T extends string,
   E extends HTMLElement = T extends keyof HTMLElementTagNameMap
     ? HTMLElementTagNameMap[T]
-    : HTMLElement
+    : HTMLElement,
 >({
   selector,
   ...elementSelector

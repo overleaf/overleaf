@@ -75,16 +75,19 @@ function getFilesWithOps(
 
     return filesWithOps
   } else {
-    const filesWithOps = files.reduce((curFilesWithOps, file) => {
-      if ('operation' in file) {
-        curFilesWithOps.push({
-          pathname: file.pathname,
-          editable: isFileEditable(file),
-          operation: file.operation,
-        })
-      }
-      return curFilesWithOps
-    }, <FileWithOps[]>[])
+    const filesWithOps = files.reduce(
+      (curFilesWithOps, file) => {
+        if ('operation' in file) {
+          curFilesWithOps.push({
+            pathname: file.pathname,
+            editable: isFileEditable(file),
+            operation: file.operation,
+          })
+        }
+        return curFilesWithOps
+      },
+      <FileWithOps[]>[]
+    )
 
     return filesWithOps
   }

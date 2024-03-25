@@ -9,7 +9,8 @@ type CountryInputProps = {
   inputRef?: React.ForwardedRef<HTMLInputElement>
 } & React.InputHTMLAttributes<HTMLInputElement>
 
-const itemToString = (item: typeof countries[number] | null) => item?.name ?? ''
+const itemToString = (item: (typeof countries)[number] | null) =>
+  item?.name ?? ''
 
 function Downshift({ setValue, inputRef }: CountryInputProps) {
   const { t } = useTranslation()

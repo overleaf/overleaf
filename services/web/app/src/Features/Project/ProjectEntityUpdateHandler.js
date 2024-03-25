@@ -645,153 +645,159 @@ const ProjectEntityUpdateHandler = {
     )
   },
 
-  upsertDoc: wrapWithLock(function (
-    projectId,
-    folderId,
-    docName,
-    docLines,
-    source,
-    userId,
-    callback
-  ) {
-    if (!SafePath.isCleanFilename(docName)) {
-      return callback(new Errors.InvalidNameError('invalid element name'))
-    }
-    ProjectLocator.findElement(
-      { project_id: projectId, element_id: folderId, type: 'folder' },
-      (error, folder, folderPath) => {
-        if (error != null) {
-          if (error instanceof Errors.NotFoundError && folder == null) {
-            return callback(new Error('folder_not_found'))
-          }
-          return callback(error)
-        }
-        if (folder == null) {
-          return callback(new Error("Couldn't find folder"))
-        }
-        const existingDoc = folder.docs.find(({ name }) => name === docName)
-        const existingFile = folder.fileRefs.find(
-          ({ name }) => name === docName
-        )
-        if (existingFile) {
-          const doc = new Doc({ name: docName })
-          const filePath = `${folderPath.fileSystem}/${existingFile.name}`
-          DocstoreManager.updateDoc(
-            projectId.toString(),
-            doc._id.toString(),
-            docLines,
-            0,
-            {},
-            (err, modified, rev) => {
-              if (err != null) {
-                return callback(err)
-              }
-              doc.rev = rev
-              ProjectEntityMongoUpdateHandler.replaceFileWithDoc(
-                projectId,
-                existingFile._id,
-                doc,
-                (err, project) => {
-                  if (err) {
-                    return callback(err)
-                  }
-                  TpdsUpdateSender.addDoc(
-                    {
-                      projectId,
-                      docId: doc._id,
-                      path: filePath,
-                      projectName: project.name,
-                      rev: existingFile.rev + 1,
-                      folderId,
-                    },
-                    err => {
-                      if (err) {
-                        return callback(err)
-                      }
-                      const projectHistoryId =
-                        project.overleaf &&
-                        project.overleaf.history &&
-                        project.overleaf.history.id
-                      const newDocs = [
-                        {
-                          doc,
-                          path: filePath,
-                          docLines: docLines.join('\n'),
-                        },
-                      ]
-                      const oldFiles = [
-                        {
-                          file: existingFile,
-                          path: filePath,
-                        },
-                      ]
-                      DocumentUpdaterHandler.updateProjectStructure(
-                        projectId,
-                        projectHistoryId,
-                        userId,
-                        { oldFiles, newDocs, newProject: project },
-                        source,
-                        error => {
-                          if (error != null) {
-                            return callback(error)
-                          }
-                          EditorRealTimeController.emitToRoom(
-                            projectId,
-                            'removeEntity',
-                            existingFile._id,
-                            'convertFileToDoc'
-                          )
-                          callback(null, doc, true)
-                        }
-                      )
-                    }
-                  )
-                }
-              )
-            }
-          )
-        } else if (existingDoc) {
-          DocumentUpdaterHandler.setDocument(
-            projectId,
-            existingDoc._id,
-            userId,
-            docLines,
-            source,
-            (err, result) => {
-              if (err != null) {
-                return callback(err)
-              }
-              logger.debug(
-                { projectId, docId: existingDoc._id },
-                'notifying users that the document has been updated'
-              )
-              // there is no need to flush the doc to mongo at this point as docupdater
-              // flushes it as part of setDoc.
-              //
-              // combine rev from response with existing doc metadata
-              callback(null, { ...existingDoc, ...result }, existingDoc == null)
-            }
-          )
-        } else {
-          ProjectEntityUpdateHandler.addDocWithRanges.withoutLock(
-            projectId,
-            folderId,
-            docName,
-            docLines,
-            {},
-            userId,
-            source,
-            (err, doc) => {
-              if (err != null) {
-                return callback(err)
-              }
-              callback(null, doc, existingDoc == null)
-            }
-          )
-        }
+  upsertDoc: wrapWithLock(
+    function (
+      projectId,
+      folderId,
+      docName,
+      docLines,
+      source,
+      userId,
+      callback
+    ) {
+      if (!SafePath.isCleanFilename(docName)) {
+        return callback(new Errors.InvalidNameError('invalid element name'))
       }
-    )
-  }),
+      ProjectLocator.findElement(
+        { project_id: projectId, element_id: folderId, type: 'folder' },
+        (error, folder, folderPath) => {
+          if (error != null) {
+            if (error instanceof Errors.NotFoundError && folder == null) {
+              return callback(new Error('folder_not_found'))
+            }
+            return callback(error)
+          }
+          if (folder == null) {
+            return callback(new Error("Couldn't find folder"))
+          }
+          const existingDoc = folder.docs.find(({ name }) => name === docName)
+          const existingFile = folder.fileRefs.find(
+            ({ name }) => name === docName
+          )
+          if (existingFile) {
+            const doc = new Doc({ name: docName })
+            const filePath = `${folderPath.fileSystem}/${existingFile.name}`
+            DocstoreManager.updateDoc(
+              projectId.toString(),
+              doc._id.toString(),
+              docLines,
+              0,
+              {},
+              (err, modified, rev) => {
+                if (err != null) {
+                  return callback(err)
+                }
+                doc.rev = rev
+                ProjectEntityMongoUpdateHandler.replaceFileWithDoc(
+                  projectId,
+                  existingFile._id,
+                  doc,
+                  (err, project) => {
+                    if (err) {
+                      return callback(err)
+                    }
+                    TpdsUpdateSender.addDoc(
+                      {
+                        projectId,
+                        docId: doc._id,
+                        path: filePath,
+                        projectName: project.name,
+                        rev: existingFile.rev + 1,
+                        folderId,
+                      },
+                      err => {
+                        if (err) {
+                          return callback(err)
+                        }
+                        const projectHistoryId =
+                          project.overleaf &&
+                          project.overleaf.history &&
+                          project.overleaf.history.id
+                        const newDocs = [
+                          {
+                            doc,
+                            path: filePath,
+                            docLines: docLines.join('\n'),
+                          },
+                        ]
+                        const oldFiles = [
+                          {
+                            file: existingFile,
+                            path: filePath,
+                          },
+                        ]
+                        DocumentUpdaterHandler.updateProjectStructure(
+                          projectId,
+                          projectHistoryId,
+                          userId,
+                          { oldFiles, newDocs, newProject: project },
+                          source,
+                          error => {
+                            if (error != null) {
+                              return callback(error)
+                            }
+                            EditorRealTimeController.emitToRoom(
+                              projectId,
+                              'removeEntity',
+                              existingFile._id,
+                              'convertFileToDoc'
+                            )
+                            callback(null, doc, true)
+                          }
+                        )
+                      }
+                    )
+                  }
+                )
+              }
+            )
+          } else if (existingDoc) {
+            DocumentUpdaterHandler.setDocument(
+              projectId,
+              existingDoc._id,
+              userId,
+              docLines,
+              source,
+              (err, result) => {
+                if (err != null) {
+                  return callback(err)
+                }
+                logger.debug(
+                  { projectId, docId: existingDoc._id },
+                  'notifying users that the document has been updated'
+                )
+                // there is no need to flush the doc to mongo at this point as docupdater
+                // flushes it as part of setDoc.
+                //
+                // combine rev from response with existing doc metadata
+                callback(
+                  null,
+                  { ...existingDoc, ...result },
+                  existingDoc == null
+                )
+              }
+            )
+          } else {
+            ProjectEntityUpdateHandler.addDocWithRanges.withoutLock(
+              projectId,
+              folderId,
+              docName,
+              docLines,
+              {},
+              userId,
+              source,
+              (err, doc) => {
+                if (err != null) {
+                  return callback(err)
+                }
+                callback(null, doc, existingDoc == null)
+              }
+            )
+          }
+        }
+      )
+    }
+  ),
 
   upsertFile: wrapWithLock({
     beforeLock(next) {
@@ -983,43 +989,38 @@ const ProjectEntityUpdateHandler = {
     },
   }),
 
-  upsertDocWithPath: wrapWithLock(function (
-    projectId,
-    elementPath,
-    docLines,
-    source,
-    userId,
-    callback
-  ) {
-    if (!SafePath.isCleanPath(elementPath)) {
-      return callback(new Errors.InvalidNameError('invalid element name'))
-    }
-    const docName = Path.basename(elementPath)
-    const folderPath = Path.dirname(elementPath)
-    ProjectEntityUpdateHandler.mkdirp.withoutLock(
-      projectId,
-      folderPath,
-      (err, newFolders, folder) => {
-        if (err != null) {
-          return callback(err)
-        }
-        ProjectEntityUpdateHandler.upsertDoc.withoutLock(
-          projectId,
-          folder._id,
-          docName,
-          docLines,
-          source,
-          userId,
-          (err, doc, isNewDoc) => {
-            if (err != null) {
-              return callback(err)
-            }
-            callback(null, doc, isNewDoc, newFolders, folder)
-          }
-        )
+  upsertDocWithPath: wrapWithLock(
+    function (projectId, elementPath, docLines, source, userId, callback) {
+      if (!SafePath.isCleanPath(elementPath)) {
+        return callback(new Errors.InvalidNameError('invalid element name'))
       }
-    )
-  }),
+      const docName = Path.basename(elementPath)
+      const folderPath = Path.dirname(elementPath)
+      ProjectEntityUpdateHandler.mkdirp.withoutLock(
+        projectId,
+        folderPath,
+        (err, newFolders, folder) => {
+          if (err != null) {
+            return callback(err)
+          }
+          ProjectEntityUpdateHandler.upsertDoc.withoutLock(
+            projectId,
+            folder._id,
+            docName,
+            docLines,
+            source,
+            userId,
+            (err, doc, isNewDoc) => {
+              if (err != null) {
+                return callback(err)
+              }
+              callback(null, doc, isNewDoc, newFolders, folder)
+            }
+          )
+        }
+      )
+    }
+  ),
 
   upsertFileWithPath: wrapWithLock({
     beforeLock(next) {
@@ -1115,64 +1116,62 @@ const ProjectEntityUpdateHandler = {
     },
   }),
 
-  deleteEntity: wrapWithLock(function (
-    projectId,
-    entityId,
-    entityType,
-    userId,
-    source,
-    callback
-  ) {
-    logger.debug({ entityId, entityType, projectId }, 'deleting project entity')
-    if (entityType == null) {
-      logger.warn({ err: 'No entityType set', projectId, entityId })
-      return callback(new Error('No entityType set'))
-    }
-    entityType = entityType.toLowerCase()
-    ProjectEntityMongoUpdateHandler.deleteEntity(
-      projectId,
-      entityId,
-      entityType,
-      (error, entity, path, projectBeforeDeletion, newProject) => {
-        if (error != null) {
-          return callback(error)
-        }
-        ProjectEntityUpdateHandler._cleanUpEntity(
-          projectBeforeDeletion,
-          newProject,
-          entity,
-          entityType,
-          path.fileSystem,
-          userId,
-          source,
-          (error, subtreeListing) => {
-            if (error != null) {
-              return callback(error)
-            }
-            const subtreeEntityIds = subtreeListing.map(entry =>
-              entry.entity._id.toString()
-            )
-            TpdsUpdateSender.deleteEntity(
-              {
-                projectId,
-                path: path.fileSystem,
-                projectName: projectBeforeDeletion.name,
-                entityId,
-                entityType,
-                subtreeEntityIds,
-              },
-              error => {
-                if (error != null) {
-                  return callback(error)
-                }
-                callback(null, entityId)
-              }
-            )
-          }
-        )
+  deleteEntity: wrapWithLock(
+    function (projectId, entityId, entityType, userId, source, callback) {
+      logger.debug(
+        { entityId, entityType, projectId },
+        'deleting project entity'
+      )
+      if (entityType == null) {
+        logger.warn({ err: 'No entityType set', projectId, entityId })
+        return callback(new Error('No entityType set'))
       }
-    )
-  }),
+      entityType = entityType.toLowerCase()
+      ProjectEntityMongoUpdateHandler.deleteEntity(
+        projectId,
+        entityId,
+        entityType,
+        (error, entity, path, projectBeforeDeletion, newProject) => {
+          if (error != null) {
+            return callback(error)
+          }
+          ProjectEntityUpdateHandler._cleanUpEntity(
+            projectBeforeDeletion,
+            newProject,
+            entity,
+            entityType,
+            path.fileSystem,
+            userId,
+            source,
+            (error, subtreeListing) => {
+              if (error != null) {
+                return callback(error)
+              }
+              const subtreeEntityIds = subtreeListing.map(entry =>
+                entry.entity._id.toString()
+              )
+              TpdsUpdateSender.deleteEntity(
+                {
+                  projectId,
+                  path: path.fileSystem,
+                  projectName: projectBeforeDeletion.name,
+                  entityId,
+                  entityType,
+                  subtreeEntityIds,
+                },
+                error => {
+                  if (error != null) {
+                    return callback(error)
+                  }
+                  callback(null, entityId)
+                }
+              )
+            }
+          )
+        }
+      )
+    }
+  ),
 
   deleteEntityWithPath: wrapWithLock(
     (projectId, path, userId, source, callback) =>
@@ -1225,166 +1224,167 @@ const ProjectEntityUpdateHandler = {
     )
   }),
 
-  addFolder: wrapWithLock(function (
-    projectId,
-    parentFolderId,
-    folderName,
-    callback
-  ) {
-    if (!SafePath.isCleanFilename(folderName)) {
-      return callback(new Errors.InvalidNameError('invalid element name'))
+  addFolder: wrapWithLock(
+    function (projectId, parentFolderId, folderName, callback) {
+      if (!SafePath.isCleanFilename(folderName)) {
+        return callback(new Errors.InvalidNameError('invalid element name'))
+      }
+      ProjectEntityMongoUpdateHandler.addFolder(
+        projectId,
+        parentFolderId,
+        folderName,
+        callback
+      )
     }
-    ProjectEntityMongoUpdateHandler.addFolder(
+  ),
+
+  moveEntity: wrapWithLock(
+    function (
       projectId,
-      parentFolderId,
-      folderName,
+      entityId,
+      destFolderId,
+      entityType,
+      userId,
+      source,
       callback
-    )
-  }),
-
-  moveEntity: wrapWithLock(function (
-    projectId,
-    entityId,
-    destFolderId,
-    entityType,
-    userId,
-    source,
-    callback
-  ) {
-    logger.debug(
-      { entityType, entityId, projectId, destFolderId },
-      'moving entity'
-    )
-    if (entityType == null) {
-      logger.warn({ err: 'No entityType set', projectId, entityId })
-      return callback(new Error('No entityType set'))
-    }
-    entityType = entityType.toLowerCase()
-    DocumentUpdaterHandler.flushProjectToMongo(projectId, err => {
-      if (err) {
-        return callback(err)
-      }
-      ProjectEntityMongoUpdateHandler.moveEntity(
-        projectId,
-        entityId,
-        destFolderId,
-        entityType,
-        (err, project, startPath, endPath, rev, changes) => {
-          if (err != null) {
-            return callback(err)
-          }
-          const projectHistoryId =
-            project.overleaf &&
-            project.overleaf.history &&
-            project.overleaf.history.id
-          TpdsUpdateSender.moveEntity(
-            {
-              projectId,
-              projectName: project.name,
-              startPath,
-              endPath,
-              rev,
-              entityId,
-              entityType,
-              folderId: destFolderId,
-            },
-            err => {
-              if (err) {
-                logger.error({ err }, 'error sending tpds update')
-              }
-              DocumentUpdaterHandler.updateProjectStructure(
-                projectId,
-                projectHistoryId,
-                userId,
-                changes,
-                source,
-                callback
-              )
-            }
-          )
-        }
+    ) {
+      logger.debug(
+        { entityType, entityId, projectId, destFolderId },
+        'moving entity'
       )
-    })
-  }),
-
-  renameEntity: wrapWithLock(function (
-    projectId,
-    entityId,
-    entityType,
-    newName,
-    userId,
-    source,
-    callback
-  ) {
-    if (!newName || typeof newName !== 'string') {
-      const err = new OError('invalid newName value', {
-        value: newName,
-        type: typeof newName,
-        projectId,
-        entityId,
-        entityType,
-        userId,
-        source,
+      if (entityType == null) {
+        logger.warn({ err: 'No entityType set', projectId, entityId })
+        return callback(new Error('No entityType set'))
+      }
+      entityType = entityType.toLowerCase()
+      DocumentUpdaterHandler.flushProjectToMongo(projectId, err => {
+        if (err) {
+          return callback(err)
+        }
+        ProjectEntityMongoUpdateHandler.moveEntity(
+          projectId,
+          entityId,
+          destFolderId,
+          entityType,
+          (err, project, startPath, endPath, rev, changes) => {
+            if (err != null) {
+              return callback(err)
+            }
+            const projectHistoryId =
+              project.overleaf &&
+              project.overleaf.history &&
+              project.overleaf.history.id
+            TpdsUpdateSender.moveEntity(
+              {
+                projectId,
+                projectName: project.name,
+                startPath,
+                endPath,
+                rev,
+                entityId,
+                entityType,
+                folderId: destFolderId,
+              },
+              err => {
+                if (err) {
+                  logger.error({ err }, 'error sending tpds update')
+                }
+                DocumentUpdaterHandler.updateProjectStructure(
+                  projectId,
+                  projectHistoryId,
+                  userId,
+                  changes,
+                  source,
+                  callback
+                )
+              }
+            )
+          }
+        )
       })
-      logger.error({ err }, 'Invalid newName passed to renameEntity')
-      return callback(err)
     }
-    if (!SafePath.isCleanFilename(newName)) {
-      return callback(new Errors.InvalidNameError('invalid element name'))
-    }
-    logger.debug({ entityId, projectId }, `renaming ${entityType}`)
-    if (entityType == null) {
-      logger.warn({ err: 'No entityType set', projectId, entityId })
-      return callback(new Error('No entityType set'))
-    }
-    entityType = entityType.toLowerCase()
+  ),
 
-    DocumentUpdaterHandler.flushProjectToMongo(projectId, err => {
-      if (err) {
+  renameEntity: wrapWithLock(
+    function (
+      projectId,
+      entityId,
+      entityType,
+      newName,
+      userId,
+      source,
+      callback
+    ) {
+      if (!newName || typeof newName !== 'string') {
+        const err = new OError('invalid newName value', {
+          value: newName,
+          type: typeof newName,
+          projectId,
+          entityId,
+          entityType,
+          userId,
+          source,
+        })
+        logger.error({ err }, 'Invalid newName passed to renameEntity')
         return callback(err)
       }
-      ProjectEntityMongoUpdateHandler.renameEntity(
-        projectId,
-        entityId,
-        entityType,
-        newName,
-        (err, project, startPath, endPath, rev, changes) => {
-          if (err != null) {
-            return callback(err)
-          }
-          const projectHistoryId =
-            project.overleaf &&
-            project.overleaf.history &&
-            project.overleaf.history.id
-          TpdsUpdateSender.moveEntity(
-            {
-              projectId,
-              projectName: project.name,
-              startPath,
-              endPath,
-              rev,
-              entityId,
-              entityType,
-              folderId: null, // this means the folder has not changed
-            },
-            err => {
-              if (err) {
-                logger.error({ err }, 'error sending tpds update')
-              }
-              DocumentUpdaterHandler.updateProjectStructure(
-                projectId,
-                projectHistoryId,
-                userId,
-                changes,
-                source,
-                callback
-              )
-            }
-          )
+      if (!SafePath.isCleanFilename(newName)) {
+        return callback(new Errors.InvalidNameError('invalid element name'))
+      }
+      logger.debug({ entityId, projectId }, `renaming ${entityType}`)
+      if (entityType == null) {
+        logger.warn({ err: 'No entityType set', projectId, entityId })
+        return callback(new Error('No entityType set'))
+      }
+      entityType = entityType.toLowerCase()
+
+      DocumentUpdaterHandler.flushProjectToMongo(projectId, err => {
+        if (err) {
+          return callback(err)
         }
-      )
-    })
-  }),
+        ProjectEntityMongoUpdateHandler.renameEntity(
+          projectId,
+          entityId,
+          entityType,
+          newName,
+          (err, project, startPath, endPath, rev, changes) => {
+            if (err != null) {
+              return callback(err)
+            }
+            const projectHistoryId =
+              project.overleaf &&
+              project.overleaf.history &&
+              project.overleaf.history.id
+            TpdsUpdateSender.moveEntity(
+              {
+                projectId,
+                projectName: project.name,
+                startPath,
+                endPath,
+                rev,
+                entityId,
+                entityType,
+                folderId: null, // this means the folder has not changed
+              },
+              err => {
+                if (err) {
+                  logger.error({ err }, 'error sending tpds update')
+                }
+                DocumentUpdaterHandler.updateProjectStructure(
+                  projectId,
+                  projectHistoryId,
+                  userId,
+                  changes,
+                  source,
+                  callback
+                )
+              }
+            )
+          }
+        )
+      })
+    }
+  ),
 
   // This doesn't directly update project structure but we need to take the lock
   // to prevent anything else being queued before the resync update
@@ -1471,8 +1471,8 @@ const ProjectEntityUpdateHandler = {
       const originalName = entity.folder
         ? entity.folder.name
         : entity.doc
-        ? entity.doc.name
-        : entity.file.name
+          ? entity.doc.name
+          : entity.file.name
 
       let newPath = entity.path
       let newName = originalName
@@ -1540,8 +1540,8 @@ const ProjectEntityUpdateHandler = {
       const entityId = entity.folder
         ? entity.folder._id
         : entity.doc
-        ? entity.doc._id
-        : entity.file._id
+          ? entity.doc._id
+          : entity.file._id
       const entityType = entity.folder ? 'folder' : entity.doc ? 'doc' : 'file'
       ProjectEntityMongoUpdateHandler.renameEntity(
         projectId,

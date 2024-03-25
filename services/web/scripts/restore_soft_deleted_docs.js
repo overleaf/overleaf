@@ -8,9 +8,8 @@ const PROJECT_ID = ARGV.shift()
 const FILE_NAMES_TO_RESTORE = ARGV
 
 async function main() {
-  const deletedDocs = await DocstoreManager.promises.getAllDeletedDocs(
-    PROJECT_ID
-  )
+  const deletedDocs =
+    await DocstoreManager.promises.getAllDeletedDocs(PROJECT_ID)
   const docsToRestore = deletedDocs.filter(doc =>
     FILE_NAMES_TO_RESTORE.includes(doc.name)
   )

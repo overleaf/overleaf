@@ -114,16 +114,14 @@ async function computeFeatures(userId) {
 }
 
 async function _getIndividualFeatures(userId) {
-  const sub = await SubscriptionLocator.promises.getUserIndividualSubscription(
-    userId
-  )
+  const sub =
+    await SubscriptionLocator.promises.getUserIndividualSubscription(userId)
   return _subscriptionToFeatures(sub)
 }
 
 async function _getGroupFeatureSets(userId) {
-  const subs = await SubscriptionLocator.promises.getGroupSubscriptionsMemberOf(
-    userId
-  )
+  const subs =
+    await SubscriptionLocator.promises.getGroupSubscriptionsMemberOf(userId)
   return (subs || []).map(_subscriptionToFeatures)
 }
 

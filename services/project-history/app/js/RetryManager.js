@@ -175,9 +175,8 @@ async function checkProjectHasHistoryId(projectId) {
 
 async function waitUntilRedisQueueIsEmpty(projectId) {
   for (let attempts = 0; attempts < 30; attempts++) {
-    const updatesCount = await RedisManager.promises.countUnprocessedUpdates(
-      projectId
-    )
+    const updatesCount =
+      await RedisManager.promises.countUnprocessedUpdates(projectId)
     if (updatesCount === 0) {
       return
     }

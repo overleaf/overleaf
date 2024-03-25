@@ -47,7 +47,11 @@
 }
 
 .toolbar-pdf-hybrid {
-  .btn:not(.detach-compile-button):not(.btn-orphan):not(.detach-synctex-control):not(.switch-to-editor-btn):not(.split-menu-dropdown-toggle):not(.split-menu-button) {
+  .btn:not(.detach-compile-button):not(.btn-orphan):not(
+      .detach-synctex-control
+    ):not(.switch-to-editor-btn):not(.split-menu-dropdown-toggle):not(
+      .split-menu-button
+    ) {
     display: inline-block;
     color: @toolbar-btn-color;
     background-color: transparent;
@@ -208,7 +212,9 @@
     z-index: 10; // above the PDF viewer
 
     .btn-group {
-      transition: opacity 0.5s ease, visibility 0 linear 0.5s;
+      transition:
+        opacity 0.5s ease,
+        visibility 0 linear 0.5s;
       visibility: hidden;
       opacity: 0;
     }

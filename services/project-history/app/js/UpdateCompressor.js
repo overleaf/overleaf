@@ -252,12 +252,12 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     firstOp.p === secondOp.p
   ) {
     offset = firstOp.p
-    const diffUpdates = diffAsShareJsOps(firstOp.d, secondOp.i).map(function (
-      op
-    ) {
-      op.p += offset
-      return mergeUpdatesWithOp(firstUpdate, secondUpdate, op)
-    })
+    const diffUpdates = diffAsShareJsOps(firstOp.d, secondOp.i).map(
+      function (op) {
+        op.p += offset
+        return mergeUpdatesWithOp(firstUpdate, secondUpdate, op)
+      }
+    )
 
     // Doing a diff like this loses track of the doc lengths for each
     // update, so recalculate them

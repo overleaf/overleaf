@@ -93,19 +93,18 @@ const AdminController = {
       })()
     }
 
-    return SystemMessageManager.getMessagesFromDB(function (
-      error,
-      systemMessages
-    ) {
-      if (error != null) {
-        return next(error)
+    return SystemMessageManager.getMessagesFromDB(
+      function (error, systemMessages) {
+        if (error != null) {
+          return next(error)
+        }
+        return res.render('admin/index', {
+          title: 'System Admin',
+          openSockets,
+          systemMessages,
+        })
       }
-      return res.render('admin/index', {
-        title: 'System Admin',
-        openSockets,
-        systemMessages,
-      })
-    })
+    )
   },
 
   disconnectAllUsers: (req, res) => {

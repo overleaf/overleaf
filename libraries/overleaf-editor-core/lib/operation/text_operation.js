@@ -792,8 +792,8 @@ function getSimpleOp(operation) {
       return ops[0] instanceof RetainOp
         ? ops[1]
         : ops[1] instanceof RetainOp
-        ? ops[0]
-        : null
+          ? ops[0]
+          : null
     case 3:
       if (ops[0] instanceof RetainOp && ops[2] instanceof RetainOp) {
         return ops[1]

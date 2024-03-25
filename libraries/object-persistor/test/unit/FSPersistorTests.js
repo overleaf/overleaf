@@ -114,9 +114,8 @@ describe('FSPersistorTests', function () {
             })
 
             it('should not write the target file', async function () {
-              await expect(
-                fsPromises.access(scenario.fsPath(files.wombat))
-              ).to.be.rejected
+              await expect(fsPromises.access(scenario.fsPath(files.wombat))).to
+                .be.rejected
             })
 
             it('should delete the temporary file', async function () {
@@ -135,9 +134,8 @@ describe('FSPersistorTests', function () {
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(
-                contents.equals(localFiles['/uploads/info.txt'])
-              ).to.be.true
+              expect(contents.equals(localFiles['/uploads/info.txt'])).to.be
+                .true
             })
           })
 
@@ -151,9 +149,8 @@ describe('FSPersistorTests', function () {
             })
 
             it('should not write the target file', async function () {
-              await expect(
-                fsPromises.access(scenario.fsPath(files.wombat))
-              ).to.be.rejected
+              await expect(fsPromises.access(scenario.fsPath(files.wombat))).to
+                .be.rejected
             })
 
             it('should delete the temporary file', async function () {
@@ -203,9 +200,8 @@ describe('FSPersistorTests', function () {
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(
-                contents.equals(localFiles['/uploads/info.txt'])
-              ).to.be.true
+              expect(contents.equals(localFiles['/uploads/info.txt'])).to.be
+                .true
             })
 
             it('should delete the temporary file', async function () {
@@ -224,9 +220,8 @@ describe('FSPersistorTests', function () {
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(
-                contents.equals(localFiles['/uploads/other.txt'])
-              ).to.be.true
+              expect(contents.equals(localFiles['/uploads/other.txt'])).to.be
+                .true
             })
           })
 
@@ -243,9 +238,8 @@ describe('FSPersistorTests', function () {
               const contents = await fsPromises.readFile(
                 scenario.fsPath(files.wombat)
               )
-              expect(
-                contents.equals(localFiles['/uploads/info.txt'])
-              ).to.be.true
+              expect(contents.equals(localFiles['/uploads/info.txt'])).to.be
+                .true
             })
 
             it('should delete the temporary file', async function () {
@@ -280,9 +274,8 @@ describe('FSPersistorTests', function () {
           )
           const contents = await streamToBuffer(stream)
           // end is inclusive in ranges, but exclusive in slice()
-          expect(
-            contents.equals(localFiles['/uploads/info.txt'].slice(5, 17))
-          ).to.be.true
+          expect(contents.equals(localFiles['/uploads/info.txt'].slice(5, 17)))
+            .to.be.true
         })
 
         it('should give a NotFoundError if the file does not exist', async function () {
@@ -332,9 +325,8 @@ describe('FSPersistorTests', function () {
 
         it('should delete the file', async function () {
           await persistor.deleteObject(location, files.wombat)
-          await expect(
-            fsPromises.access(scenario.fsPath(files.wombat))
-          ).to.be.rejected
+          await expect(fsPromises.access(scenario.fsPath(files.wombat))).to.be
+            .rejected
         })
 
         it("should ignore files that don't exist", async function () {

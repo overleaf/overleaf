@@ -66,9 +66,8 @@ async function viewInvite(req, res, next) {
   const { token } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  const { invite, subscription } = await TeamInvitesHandler.promises.getInvite(
-    token
-  )
+  const { invite, subscription } =
+    await TeamInvitesHandler.promises.getInvite(token)
   if (!invite) {
     return ErrorController.notFound(req, res)
   }

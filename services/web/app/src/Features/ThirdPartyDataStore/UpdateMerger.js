@@ -43,9 +43,8 @@ async function writeUpdateToDisk(projectId, updateStream) {
 }
 
 async function _findExistingFileType(projectId, path) {
-  const { docs, files } = await ProjectEntityHandler.promises.getAllEntities(
-    projectId
-  )
+  const { docs, files } =
+    await ProjectEntityHandler.promises.getAllEntities(projectId)
   if (_.some(docs, d => d.path === path)) {
     return 'doc'
   }

@@ -19,9 +19,8 @@ waitForDb()
   })
 
 async function main() {
-  const result = await SAMLUserIdMigrationHandler.promises.checkMigration(
-    institutionId
-  )
+  const result =
+    await SAMLUserIdMigrationHandler.promises.checkMigration(institutionId)
 
   if (emitUsers) {
     console.log(

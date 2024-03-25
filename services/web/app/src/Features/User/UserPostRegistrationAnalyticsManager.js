@@ -24,9 +24,8 @@ async function postRegistrationAnalytics(userId) {
 }
 
 async function checkAffiliations(userId) {
-  const affiliationsData = await InstitutionsAPIPromises.getUserAffiliations(
-    userId
-  )
+  const affiliationsData =
+    await InstitutionsAPIPromises.getUserAffiliations(userId)
   const hasCommonsAccountAffiliation = affiliationsData.some(
     affiliationData =>
       affiliationData.institution && affiliationData.institution.commonsAccount

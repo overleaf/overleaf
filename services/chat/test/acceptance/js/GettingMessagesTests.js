@@ -46,9 +46,8 @@ describe('Getting messages', async function () {
     })
 
     it('should contain the messages and populated users when getting the messages', async function () {
-      const { response, body: messages } = await ChatClient.getGlobalMessages(
-        projectId
-      )
+      const { response, body: messages } =
+        await ChatClient.getGlobalMessages(projectId)
       expect(response.statusCode).to.equal(200)
       expect(messages.length).to.equal(2)
       messages.reverse()

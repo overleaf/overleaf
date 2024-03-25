@@ -19,9 +19,8 @@ waitForDb()
   })
 
 async function main() {
-  const result = await SAMLUserIdMigrationHandler.promises.removeNotMigrated(
-    institutionId
-  )
+  const result =
+    await SAMLUserIdMigrationHandler.promises.removeNotMigrated(institutionId)
 
   if (emitUsers) {
     console.log(

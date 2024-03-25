@@ -28,10 +28,10 @@ export default {
   ie_version: ieUpTo10
     ? doc.documentMode || 6
     : ie11Up
-    ? +ie11Up[1]
-    : ieEdge
-    ? +ieEdge[1]
-    : 0,
+      ? +ie11Up[1]
+      : ieEdge
+        ? +ieEdge[1]
+        : 0,
   gecko,
   gecko_version: gecko
     ? +(/Firefox\/(\d+)/.exec(nav.userAgent) || [0, 0])[1]

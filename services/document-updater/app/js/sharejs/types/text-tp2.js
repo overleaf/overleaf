@@ -129,8 +129,8 @@ type._takeDoc = takeDoc = function (
         ? part.slice(position.offset, position.offset + maxlength)
         : part.slice(position.offset)
       : maxlength === undefined || tombsIndivisible
-      ? part - position.offset
-      : Math.min(maxlength, part - position.offset)
+        ? part - position.offset
+        : Math.min(maxlength, part - position.offset)
 
   const resultLen = result.length || result
 

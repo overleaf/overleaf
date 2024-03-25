@@ -103,9 +103,8 @@ async function expireDeletedUsersAfterDuration() {
 }
 
 async function ensureCanDeleteUser(user) {
-  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
-    user
-  )
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(user)
   if (subscription) {
     throw new Errors.SubscriptionAdminDeletionError({})
   }

@@ -371,9 +371,8 @@ export default App.controller('ReviewPanelController', [
                 ide.$scope.reviewPanel.overview.docsCollapsedState[doc.id] ==
                 null
               ) {
-                ide.$scope.reviewPanel.overview.docsCollapsedState[
-                  doc.id
-                ] = false
+                ide.$scope.reviewPanel.overview.docsCollapsedState[doc.id] =
+                  false
               }
               if (doc.id !== $scope.editor.open_doc_id) {
                 // this is kept up to date in real-time, don't overwrite

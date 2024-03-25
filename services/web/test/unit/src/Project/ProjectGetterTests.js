@@ -440,9 +440,8 @@ describe('ProjectGetter', function () {
     })
 
     it('should pass the found projects to the callback', async function () {
-      const docs = await this.ProjectGetter.promises.getUsersDeletedProjects(
-        'giraffe'
-      )
+      const docs =
+        await this.ProjectGetter.promises.getUsersDeletedProjects('giraffe')
       expect(docs).to.deep.equal([this.deletedProject])
     })
   })
