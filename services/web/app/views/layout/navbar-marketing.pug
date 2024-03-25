@@ -5,7 +5,7 @@ nav.navbar.navbar-default.navbar-main
 				button.navbar-toggle.collapsed(
 					type="button",
 					data-toggle="collapse",
-					data-target="[data-ol-navbar-main-collapse]"
+					data-target="#navbar-main-collapse"
 					aria-label="Toggle " + translate('navigation')
 				)
 					i.fa.fa-bars(aria-hidden="true")
@@ -32,7 +32,7 @@ nav.navbar.navbar-default.navbar-main
 		- var canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
 
 		if (typeof(suppressNavbarRight) == "undefined")
-			.navbar-collapse.collapse(data-ol-navbar-main-collapse)
+			.navbar-collapse.collapse#navbar-main-collapse
 				ul.nav.navbar-nav.navbar-right
 					if (canDisplayAdminMenu || canDisplayAdminRedirect || canDisplaySplitTestMenu)
 						li.dropdown.subdued

@@ -508,13 +508,17 @@
   }
 
   .navbar-toggle {
-    border-color: @navbar-default-toggle-border-color;
-    color: @navbar-default-link-color;
-    &:hover,
-    &.active {
+    &.collapsed {
+      border-color: @navbar-default-toggle-border-color;
+      color: @navbar-default-link-color;
+      transition: 0.2s ease-out;
+    }
+
+    &:not(.collapsed) {
       background-color: @navbar-default-toggle-hover-bg;
       border-color: @navbar-default-toggle-hover-bg;
       color: #fff;
+      transition: 0.2s ease-in;
     }
   }
 
@@ -690,13 +694,17 @@
     }
 
     .navbar-toggle {
-      border-color: @navbar-default-toggle-border-color-website-redesign;
-      color: @navbar-default-link-color-website-redesign;
-      &:hover,
-      &.active {
+      &.collapsed {
+        border-color: @navbar-default-toggle-border-color-website-redesign;
+        color: @navbar-default-link-color-website-redesign;
+        transition: 0.2s ease-out;
+      }
+
+      &:not(.collapsed) {
         background-color: @navbar-default-toggle-hover-bg-website-redesign;
         border-color: @navbar-default-toggle-hover-bg-website-redesign;
         color: #fff;
+        transition: 0.2s ease-in;
       }
     }
 
