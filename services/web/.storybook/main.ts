@@ -1,5 +1,6 @@
 import type { StorybookConfig } from '@storybook/react-webpack5'
 import path from 'node:path'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 
 const rootDir = path.resolve(__dirname, '..')
 
@@ -25,6 +26,29 @@ const config: StorybookConfig = {
     getAbsolutePath('@storybook/addon-interactions'),
     getAbsolutePath('@storybook/addon-a11y'),
     getAbsolutePath('@storybook/addon-webpack5-compiler-babel'),
+    {
+      name: getAbsolutePath('@storybook/addon-styling-webpack'),
+      options: {
+        rules: [
+          {
+            test: /\.css$/,
+            use: [
+              { loader: MiniCssExtractPlugin.loader },
+              { loader: 'css-loader' },
+            ],
+          },
+          {
+            test: /\.less$/,
+            use: [
+              { loader: MiniCssExtractPlugin.loader },
+              { loader: 'css-loader' },
+              { loader: 'less-loader' },
+            ],
+          },
+        ],
+        plugins: [new MiniCssExtractPlugin()],
+      },
+    },
   ],
   framework: {
     name: getAbsolutePath('@storybook/react-webpack5'),
