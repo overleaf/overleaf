@@ -50,7 +50,7 @@ services:
       - 6379
 
   e2e:
-    image: cypress/included:13.3.3
+    image: cypress/included:13.6.6
     links:
       - sharelatex
     working_dir: /e2e
@@ -64,7 +64,7 @@ services:
         condition: service_healthy
 
   e2e-open:
-    image: cypress/included:13.3.3
+    image: cypress/included:13.6.6
     entrypoint: npm
     command: run cypress:open
     links:

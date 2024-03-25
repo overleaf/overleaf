@@ -275,7 +275,7 @@
     "crypto-js": "^4.2.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
-    "cypress": "13.3.3",
+    "cypress": "13.6.6",
     "cypress-plugin-tab": "^1.0.5",
     "d3": "^3.5.16",
     "daterangepicker": "overleaf/daterangepicker#e496d2d44ca53e208c930e4cb4bcf29bcefa4550",
