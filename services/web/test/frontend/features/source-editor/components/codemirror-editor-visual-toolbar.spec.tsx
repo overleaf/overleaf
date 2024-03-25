@@ -1,7 +1,7 @@
-import { FC } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
+import { TestContainer } from '../helpers/test-container'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -12,25 +12,21 @@ const selectAll = () => {
   )
 }
 
-const clickToolbarButton = (text: string) => {
-  cy.findByLabelText(text).click()
-  cy.findByLabelText(text).trigger('mouseout')
+const clickToolbarButton = (name: string) => {
+  cy.findByRole('button', { name }).click()
+  cy.findByRole('button', { name }).trigger('mouseout')
 }
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 1500, height: 785 }}>{children}</div>
-)
 
 const mountEditor = (content: string) => {
   const scope = mockScope(content)
   scope.editor.showVisual = true
 
   cy.mount(
-    <Container>
+    <TestContainer>
       <EditorProviders scope={scope}>
         <CodemirrorEditor />
       </EditorProviders>
-    </Container>
+    </TestContainer>
   )
 
   // wait for the content to be parsed and revealed
@@ -126,6 +122,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
+    clickToolbarButton('More')
     clickToolbarButton('Bullet List')
 
     cy.get('.cm-content').should('have.text', ' test')
@@ -138,6 +135,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     cy.get('.cm-content').should('have.text', ' test')
@@ -150,6 +148,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     // expose the markup
@@ -182,6 +181,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test')
     selectAll()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     // expose the markup
@@ -206,6 +206,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test\ntest')
     selectAll()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     // expose the markup
@@ -242,6 +243,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(1).click()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     cy.get('.cm-line').eq(0).type('{upArrow}')
@@ -262,6 +264,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     mountEditor('test\ntest')
     selectAll()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     // expose the markup
@@ -298,6 +301,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
 
     cy.get('.cm-line').eq(0).click()
 
+    clickToolbarButton('More')
     clickToolbarButton('Numbered List')
 
     // expose the markup

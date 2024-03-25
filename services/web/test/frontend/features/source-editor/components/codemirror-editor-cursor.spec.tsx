@@ -1,13 +1,8 @@
-import { FC } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
-
+import { TestContainer } from '../helpers/test-container'
 const isMac = /Mac/.test(window.navigator?.platform)
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
-)
 
 describe('Cursor and active line highlight', function () {
   const content = `line 1
@@ -30,11 +25,11 @@ ${'long line '.repeat(200)}`
     const scope = mockScope(content)
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodemirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
   })
 

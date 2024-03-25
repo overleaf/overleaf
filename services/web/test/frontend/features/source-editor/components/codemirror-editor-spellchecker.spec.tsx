@@ -1,11 +1,7 @@
 import { mockScope } from '../helpers/mock-scope'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
-import { FC } from 'react'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 describe('Spellchecker', function () {
   const content = `
@@ -31,11 +27,11 @@ describe('Spellchecker', function () {
     const scope = mockScope(content)
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-line').eq(13).as('line')

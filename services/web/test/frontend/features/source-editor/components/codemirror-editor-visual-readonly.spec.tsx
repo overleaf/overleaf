@@ -3,10 +3,7 @@ import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { FC, ComponentProps } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 const mountEditor = (
   content: string,
@@ -17,11 +14,11 @@ const mountEditor = (
   scope.editor.showVisual = true
 
   cy.mount(
-    <Container>
+    <TestContainer>
       <EditorProviders scope={scope} {...props}>
         <CodemirrorEditor />
       </EditorProviders>
-    </Container>
+    </TestContainer>
   )
 
   // wait for the content to be parsed and revealed

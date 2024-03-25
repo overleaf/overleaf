@@ -4,10 +4,7 @@ import { mockScope, rootFolderId } from '../helpers/mock-scope'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 1500, height: 785 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 const clickToolbarButton = (text: string) => {
   cy.findByLabelText(text).click()
@@ -63,11 +60,11 @@ describe('<FigureModal />', function () {
     )
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope} providers={{ FileTreePathProvider }}>
           <CodemirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
   }
 

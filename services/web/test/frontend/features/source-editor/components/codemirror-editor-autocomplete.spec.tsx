@@ -1,4 +1,3 @@
-import { FC } from 'react'
 import { Folder } from '../../../../../types/folder'
 import { docId, mockDocContent } from '../helpers/mock-doc'
 import { Metadata } from '../../../../../types/metadata'
@@ -7,10 +6,7 @@ import { EditorProviders } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { activeEditorLine } from '../helpers/active-editor-line'
 import { User, UserId } from '../../../../../types/user'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 describe('autocomplete', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -93,7 +89,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     scope.project.rootFolder = rootFolder
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders
           scope={scope}
           metadataManager={metadataManager}
@@ -101,7 +97,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         >
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -268,7 +264,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     scope.$root._references.keys = ['foo']
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders
           scope={scope}
           metadataManager={metadataManager}
@@ -276,7 +272,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         >
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -386,7 +382,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders
           scope={scope}
           metadataManager={metadataManager}
@@ -394,7 +390,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         >
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -461,7 +457,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     scope.$root._references.keys = ['ref-1', 'ref-2', 'ref-3']
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders
           scope={scope}
           metadataManager={metadataManager}
@@ -469,7 +465,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         >
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -531,7 +527,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     scope.project.rootFolder = rootFolder
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders
           scope={scope}
           metadataManager={metadataManager}
@@ -539,7 +535,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         >
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -573,11 +569,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // put the cursor on a blank line to type in
@@ -619,11 +615,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // put the cursor on a blank line to type in
@@ -654,11 +650,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // put the cursor on a blank line to type in
@@ -689,11 +685,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -728,11 +724,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -764,11 +760,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -837,11 +833,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope} metadataManager={metadataManager}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-editor').as('editor')
@@ -865,11 +861,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
       email: 'testuser@example.com',
     } as User
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders user={user} scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
     // put the cursor on a blank line to type in
     cy.get('.cm-line').eq(16).as('line')
@@ -897,11 +893,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
       email: 'testuser@example.com',
     }
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders user={user} scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
     // put the cursor on a blank line to type in
     cy.get('.cm-line').eq(16).as('line')
@@ -921,11 +917,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // Put the cursor on a blank line to type in
@@ -945,11 +941,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope(mockDocContent('\\begin{}'))
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // Put the cursor on a blank line above target line
@@ -968,11 +964,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope(mockDocContent('\\begin{'))
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // Put the cursor on a blank line above target line
@@ -1026,7 +1022,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     scope.project.rootFolder = rootFolder
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders
           scope={scope}
           metadataManager={metadataManager}
@@ -1034,7 +1030,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
         >
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // Put the cursor on a blank line and type
@@ -1090,11 +1086,11 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     const scope = mockScope(mockDocContent(''))
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-line').eq(21).type('\\fff \\ff')

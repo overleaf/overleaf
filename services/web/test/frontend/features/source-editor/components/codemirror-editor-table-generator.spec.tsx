@@ -1,14 +1,10 @@
 // Needed since eslint gets confused by mocha-each
 /* eslint-disable mocha/prefer-arrow-callback */
-import { FC } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { mockScope } from '../helpers/mock-scope'
 import forEach from 'mocha-each'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 1000, height: 800 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 const mountEditor = (content: string | string[]) => {
   if (Array.isArray(content)) {
@@ -21,11 +17,11 @@ const mountEditor = (content: string | string[]) => {
   scope.editor.showVisual = true
   cy.viewport(1000, 800)
   cy.mount(
-    <Container>
+    <TestContainer style={{ width: 1000, height: 800 }}>
       <EditorProviders scope={scope}>
         <CodemirrorEditor />
       </EditorProviders>
-    </Container>
+    </TestContainer>
   )
 
   // wait for the content to be parsed and revealed

@@ -2,12 +2,8 @@ import { mockScope } from '../helpers/mock-scope'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { metaKey } from '../helpers/meta-key'
-import { FC } from 'react'
 import { activeEditorLine } from '../helpers/active-editor-line'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 const CHARACTERS =
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\\0123456789'
@@ -21,11 +17,11 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
     const scope = mockScope()
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.get('.cm-line').eq(16).as('line')
@@ -143,11 +139,11 @@ contentLine3
     const userSettings = { mode: 'emacs' }
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
     cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').scrollIntoView()
@@ -248,11 +244,11 @@ contentLine3
     const userSettings = { mode: 'vim' }
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope} userSettings={userSettings}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
     cy.get('.cm-line').eq(1).as('line')
     cy.get('@line').scrollIntoView()

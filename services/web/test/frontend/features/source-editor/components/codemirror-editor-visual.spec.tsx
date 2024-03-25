@@ -6,10 +6,7 @@ import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/
 import { mockScope } from '../helpers/mock-scope'
 import forEach from 'mocha-each'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
-
-const Container: FC = ({ children }) => (
-  <div style={{ width: 785, height: 785 }}>{children}</div>
-)
+import { TestContainer } from '../helpers/test-container'
 
 describe('<CodeMirrorEditor/> in Visual mode', function () {
   beforeEach(function () {
@@ -41,11 +38,11 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     )
 
     cy.mount(
-      <Container>
+      <TestContainer>
         <EditorProviders scope={scope} providers={{ FileTreePathProvider }}>
           <CodemirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     // wait for the content to be parsed and revealed

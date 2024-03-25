@@ -1,15 +1,7 @@
 import CodeMirrorEditor from '../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { EditorProviders } from '../../helpers/editor-providers'
 import { mockScope } from '../source-editor/helpers/mock-scope'
-
-type ContainerProps = {
-  children: React.ReactNode
-  className?: string
-}
-
-function Container(props: ContainerProps) {
-  return <div style={{ width: 785, height: 785 }} {...props} />
-}
+import { TestContainer } from '../source-editor/helpers/test-container'
 
 describe('<ReviewPanel />', function () {
   beforeEach(function () {
@@ -27,11 +19,11 @@ describe('<ReviewPanel />', function () {
     cy.wrap(scope).as('scope')
 
     cy.mount(
-      <Container className="rp-size-expanded">
+      <TestContainer className="rp-size-expanded">
         <EditorProviders scope={scope}>
           <CodeMirrorEditor />
         </EditorProviders>
-      </Container>
+      </TestContainer>
     )
 
     cy.findByTestId('review-panel').as('review-panel')
@@ -103,11 +95,11 @@ describe('<ReviewPanel />', function () {
         scope.editor.wantTrackChanges = true
 
         cy.mount(
-          <Container className="rp-size-expanded">
+          <TestContainer className="rp-size-expanded">
             <EditorProviders scope={scope}>
               <CodeMirrorEditor />
             </EditorProviders>
-          </Container>
+          </TestContainer>
         )
 
         cy.findByTestId('review-panel').within(() => {
