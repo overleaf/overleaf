@@ -43,6 +43,14 @@ export default {
   component: CloneProjectModal,
   args: {
     show: true,
+    projectName: 'Project 1',
+    projectTags: [
+      {
+        _id: 'tag-1',
+        name: 'Category 1',
+        color: '#c0ffee',
+      },
+    ],
   },
   argTypes: {
     handleHide: { action: 'close modal' },

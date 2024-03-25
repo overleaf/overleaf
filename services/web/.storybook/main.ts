@@ -6,6 +6,10 @@ const rootDir = path.resolve(__dirname, '..')
 // NOTE: must be set before webpack config is imported
 process.env.OVERLEAF_CONFIG = path.join(rootDir, 'config/settings.webpack.js')
 
+function getAbsolutePath(value: string): any {
+  return path.dirname(require.resolve(path.join(value, 'package.json')))
+}
+
 const config: StorybookConfig = {
   core: {
     disableTelemetry: true,
@@ -16,19 +20,20 @@ const config: StorybookConfig = {
     path.join(rootDir, 'modules/**/stories/**/*.stories.{js,jsx,ts,tsx}'),
   ],
   addons: [
-    '@storybook/addon-links',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
-    '@storybook/addon-a11y',
+    getAbsolutePath('@storybook/addon-links'),
+    getAbsolutePath('@storybook/addon-essentials'),
+    getAbsolutePath('@storybook/addon-interactions'),
+    getAbsolutePath('@storybook/addon-a11y'),
+    getAbsolutePath('@storybook/addon-webpack5-compiler-babel'),
   ],
   framework: {
-    name: '@storybook/react-webpack5',
+    name: getAbsolutePath('@storybook/react-webpack5'),
     options: {},
   },
   docs: {
     autodocs: 'tag',
   },
-  babel: options => {
+  babel: (options: Record<string, any>) => {
     return {
       ...options,
       plugins: [
