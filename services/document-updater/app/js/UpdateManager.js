@@ -162,7 +162,7 @@ const UpdateManager = {
       )
       profile.log('RedisManager.updateDocument')
 
-      UpdateManager._addMetadataToHistoryUpdates(
+      UpdateManager._adjustHistoryUpdatesMetadata(
         historyUpdates,
         pathname,
         projectHistoryId,
@@ -311,7 +311,7 @@ const UpdateManager = {
    * @param {Ranges} ranges
    * @param {boolean} historyRangesSupport
    */
-  _addMetadataToHistoryUpdates(
+  _adjustHistoryUpdatesMetadata(
     updates,
     pathname,
     projectHistoryId,
@@ -367,6 +367,11 @@ const UpdateManager = {
             historyDocLength -= op.d.length
           }
         }
+      }
+
+      if (!historyRangesSupport) {
+        // Prevent project-history from processing tracked changes
+        delete update.meta.tc
       }
     }
   },

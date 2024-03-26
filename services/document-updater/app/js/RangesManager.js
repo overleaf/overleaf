@@ -13,6 +13,7 @@ const { isInsert, isDelete, isComment } = require('./Utils')
  * @typedef {import('./types').DeleteOp} DeleteOp
  * @typedef {import('./types').HistoryCommentOp} HistoryCommentOp
  * @typedef {import('./types').HistoryDeleteOp} HistoryDeleteOp
+ * @typedef {import('./types').HistoryDeleteTrackedChange} HistoryDeleteTrackedChange
  * @typedef {import('./types').HistoryInsertOp} HistoryInsertOp
  * @typedef {import('./types').HistoryOp} HistoryOp
  * @typedef {import('./types').HistoryUpdate} HistoryUpdate
@@ -277,22 +278,44 @@ function getHistoryOpForInsert(op, comments, changes) {
  */
 function getHistoryOpForDelete(op, changes, opts = {}) {
   let hpos = op.p
-  const hsplits = []
+  const opEnd = op.p + op.d.length
+  /** @type HistoryDeleteTrackedChange[] */
+  const changesInsideDelete = []
   for (const change of changes) {
-    if (!isDelete(change.op)) {
-      // We're only interested in tracked deletes
-      continue
-    }
-
     if (change.op.p <= op.p) {
-      // Tracked delete is before or at the position of the incoming delete.
-      // Move the op forward.
-      hpos += change.op.d.length
+      if (isDelete(change.op)) {
+        // Tracked delete is before or at the position of the incoming delete.
+        // Move the op forward.
+        hpos += change.op.d.length
+      } else if (isInsert(change.op)) {
+        const changeEnd = change.op.p + change.op.i.length
+        const endPos = Math.min(changeEnd, opEnd)
+        if (endPos > op.p) {
+          // Part of the tracked insert is inside the delete
+          changesInsideDelete.push({
+            type: 'insert',
+            offset: 0,
+            length: endPos - op.p,
+          })
+        }
+      }
     } else if (change.op.p < op.p + op.d.length) {
-      // Tracked delete inside the deleted text. Record a split for the history system.
-      hsplits.push({ offset: change.op.p - op.p, length: change.op.d.length })
+      // Tracked change inside the deleted text. Record it for the history system.
+      if (isDelete(change.op)) {
+        changesInsideDelete.push({
+          type: 'delete',
+          offset: change.op.p - op.p,
+          length: change.op.d.length,
+        })
+      } else if (isInsert(change.op)) {
+        changesInsideDelete.push({
+          type: 'insert',
+          offset: change.op.p - op.p,
+          length: Math.min(change.op.i.length, opEnd - change.op.p),
+        })
+      }
     } else {
-      // We've seen all tracked deletes before or inside the delete
+      // We've seen all tracked changes before or inside the delete
       break
     }
   }
@@ -302,8 +325,8 @@ function getHistoryOpForDelete(op, changes, opts = {}) {
   if (hpos !== op.p) {
     historyOp.hpos = hpos
   }
-  if (hsplits.length > 0) {
-    historyOp.hsplits = hsplits
+  if (changesInsideDelete.length > 0) {
+    historyOp.trackedChanges = changesInsideDelete
   }
   return historyOp
 }

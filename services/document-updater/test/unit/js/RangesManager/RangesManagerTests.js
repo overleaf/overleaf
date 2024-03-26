@@ -323,7 +323,7 @@ describe('RangesManager', function () {
         })
       })
 
-      describe('deletes among tracked deletes', function () {
+      describe('deletes over tracked changes', function () {
         beforeEach(function () {
           // original text is "on[1]e [22](three) f[333]ou[4444]r [55555]five"
           // [] denotes tracked deletes
@@ -362,16 +362,78 @@ describe('RangesManager', function () {
                 d: 'four ',
                 p: 10,
                 hpos: 13,
-                hsplits: [
-                  { offset: 1, length: 3 },
-                  { offset: 3, length: 4 },
+                trackedChanges: [
+                  { type: 'delete', offset: 1, length: 3 },
+                  { type: 'delete', offset: 3, length: 4 },
                 ],
               },
             ],
 
             // the "three" delete is offset to the right by the two first tracked
             // deletes
-            [{ d: 'three ', p: 4, hpos: 7 }],
+            [
+              {
+                d: 'three ',
+                p: 4,
+                hpos: 7,
+                trackedChanges: [{ type: 'insert', offset: 0, length: 5 }],
+              },
+            ],
+          ])
+        })
+      })
+
+      describe('deletes that overlap tracked inserts', function () {
+        beforeEach(function () {
+          // original text is "(one) (three) (four) five"
+          // [] denotes tracked deletes
+          // () denotes tracked inserts
+          this.ranges = {
+            comments: [],
+            changes: makeRanges([
+              { i: 'one', p: 0 },
+              { i: 'three', p: 4 },
+              { i: 'four', p: 10 },
+            ]),
+          }
+          this.updates = makeUpdates(
+            [
+              { d: 'ne th', p: 1 },
+              { d: 'ou', p: 6 },
+            ],
+            { tc: 'tracked-change-id' }
+          )
+          this.newDocLines = ['oree fr five']
+          this.result = this.RangesManager.applyUpdate(
+            this.project_id,
+            this.doc_id,
+            this.ranges,
+            this.updates,
+            this.newDocLines,
+            { historyRangesSupport: true }
+          )
+        })
+
+        it('should split and offset deletes appropriately', function () {
+          expect(this.result.historyUpdates.map(x => x.op)).to.deep.equal([
+            [
+              {
+                d: 'ne th',
+                p: 1,
+                trackedChanges: [
+                  { type: 'insert', offset: 0, length: 2 },
+                  { type: 'insert', offset: 3, length: 2 },
+                ],
+              },
+            ],
+            [
+              {
+                d: 'ou',
+                p: 6,
+                hpos: 7,
+                trackedChanges: [{ type: 'insert', offset: 0, length: 2 }],
+              },
+            ],
           ])
         })
       })

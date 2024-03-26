@@ -62,10 +62,11 @@ export type HistoryInsertOp = InsertOp & {
 
 export type HistoryDeleteOp = DeleteOp & {
   hpos?: number
-  hsplits?: HistoryDeleteSplit[]
+  trackedChanges?: HistoryDeleteTrackedChange[]
 }
 
-export type HistoryDeleteSplit = {
+export type HistoryDeleteTrackedChange = {
+  type: 'insert' | 'delete'
   offset: number
   length: number
 }
