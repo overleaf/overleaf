@@ -6,19 +6,17 @@ import * as Errors from './Errors.js'
 import * as OperationsCompressor from './OperationsCompressor.js'
 
 /**
- * @typedef {import('./types').AddDocUpdate} AddDocUpdate
- * @typedef {import('./types').AddFileUpdate} AddFileUpdate
- * @typedef {import('./types').CommentOp} CommentOp
- * @typedef {import('./types').DeleteOp} DeleteCommentUpdate
- * @typedef {import('./types').DeleteOp} DeleteOp
- * @typedef {import('./types').InsertOp} InsertOp
- * @typedef {import('./types').Op} Op
- * @typedef {import('./types').RawScanOp} RawScanOp
- * @typedef {import('./types').RenameUpdate} RenameUpdate
- * @typedef {import('./types').TextUpdate} TextUpdate
- * @typedef {import('./types').TrackingProps} TrackingProps
- * @typedef {import('./types').Update} Update
- * @typedef {import('./types').UpdateWithBlob} UpdateWithBlob
+ * @typedef {import('./types.ts').AddDocUpdate} AddDocUpdate
+ * @typedef {import('./types.ts').AddFileUpdate} AddFileUpdate
+ * @typedef {import('./types.ts').CommentOp} CommentOp
+ * @typedef {import('./types.ts').DeleteOp} DeleteOp
+ * @typedef {import('./types.ts').InsertOp} InsertOp
+ * @typedef {import('./types.ts').Op} Op
+ * @typedef {import('./types.ts').RenameUpdate} RenameUpdate
+ * @typedef {import('./types.ts').TextUpdate} TextUpdate
+ * @typedef {import('./types.ts').DeleteCommentUpdate} DeleteCommentUpdate
+ * @typedef {import('./types.ts').Update} Update
+ * @typedef {import('./types.ts').UpdateWithBlob} UpdateWithBlob
  */
 
 /**
@@ -65,14 +63,15 @@ function _convertToChange(projectId, updateWithBlob) {
     ]
     projectVersion = update.version
   } else if (isTextUpdate(update)) {
-    const docLength = update.meta.history_doc_length ?? update.meta.doc_length
+    const docLength = update.meta.doc_length
     let pathname = update.meta.pathname
 
     pathname = _convertPathname(pathname)
     const builder = new OperationsBuilder(docLength, pathname)
     // convert ops
     for (const op of update.op) {
-      builder.addOp(op, update)
+      // if this throws an exception it will be caught in convertToChanges
+      builder.addOp(op)
     }
     operations = builder.finish()
     // add doc version information if present
@@ -233,7 +232,7 @@ class OperationsBuilder {
     /**
      * Currently built text operation
      *
-     * @type {RawScanOp[]}
+     * @type {(number | string)[]}
      */
     this.textOperation = []
 
@@ -248,15 +247,9 @@ class OperationsBuilder {
 
   /**
    * @param {Op} op
-   * @param {Update} update
    * @returns {void}
    */
-  addOp(op, update) {
-    // We sometimes receive operations that operate at positions outside the
-    // docLength. Document updater coerces the position to the end of the
-    // document. We do the same here.
-    const pos = Math.min(op.hpos ?? op.p, this.docLength)
-
+  addOp(op) {
     if (isComment(op)) {
       // Close the current text operation
       this.pushTextOperation()
@@ -267,8 +260,8 @@ class OperationsBuilder {
         commentId: op.t,
         ranges: [
           {
-            pos,
-            length: op.hlen ?? op.c.length,
+            pos: op.p,
+            length: op.c.length,
           },
         ],
       })
@@ -278,6 +271,11 @@ class OperationsBuilder {
     if (!isInsert(op) && !isDelete(op)) {
       throw new Errors.UnexpectedOpTypeError('unexpected op type', { op })
     }
+
+    // We sometimes receive operations that operate at positions outside the
+    // docLength. Document updater coerces the position to the end of the
+    // document. We do the same here.
+    const pos = Math.min(op.p, this.docLength)
 
     if (pos < this.cursor) {
       this.pushTextOperation()
@@ -289,128 +287,26 @@ class OperationsBuilder {
     }
 
     if (isInsert(op)) {
-      if (op.trackedDeleteRejection) {
-        this.retain(op.i.length, {
-          tracking: {
-            type: 'none',
-            userId: update.meta.user_id,
-            ts: new Date(update.meta.ts).toISOString(),
-          },
-        })
-      } else if (update.meta.tc != null) {
-        this.insert(op.i, {
-          tracking: {
-            type: 'insert',
-            userId: update.meta.user_id,
-            ts: new Date(update.meta.ts).toISOString(),
-          },
-        })
-      } else {
-        this.insert(op.i)
-      }
+      this.insert(op.i)
     }
 
     if (isDelete(op)) {
-      const changes = op.trackedChanges ?? []
-
-      // Tracked changes should already be ordered by offset, but let's make
-      // sure they are.
-      changes.sort((a, b) => {
-        const posOrder = a.offset - b.offset
-        if (posOrder !== 0) {
-          return posOrder
-        } else if (a.type === 'insert' && b.type === 'delete') {
-          return 1
-        } else if (a.type === 'delete' && b.type === 'insert') {
-          return -1
-        } else {
-          return 0
-        }
-      })
-
-      let offset = 0
-      for (const change of changes) {
-        if (change.offset > offset) {
-          // Handle the portion before the tracked change
-          if (update.meta.tc != null && op.u == null) {
-            // This is a tracked delete
-            this.retain(change.offset - offset, {
-              tracking: {
-                type: 'delete',
-                userId: update.meta.user_id,
-                ts: new Date(update.meta.ts).toISOString(),
-              },
-            })
-          } else {
-            // This is a regular delete
-            this.delete(change.offset - offset)
-          }
-          offset = change.offset
-        }
-
-        // Now, handle the portion inside the tracked change
-        if (change.type === 'delete') {
-          // Tracked deletes are skipped over when deleting
-          this.retain(change.length)
-        } else if (change.type === 'insert') {
-          // Deletes inside tracked inserts are always regular deletes
-          this.delete(change.length)
-          offset += change.length
-        }
-      }
-      if (offset < op.d.length) {
-        // Handle the portion after the last tracked change
-        if (update.meta.tc != null && op.u == null) {
-          // This is a tracked delete
-          this.retain(op.d.length - offset, {
-            tracking: {
-              type: 'delete',
-              userId: update.meta.user_id,
-              ts: new Date(update.meta.ts).toISOString(),
-            },
-          })
-        } else {
-          // This is a regular delete
-          this.delete(op.d.length - offset)
-        }
-      }
+      this.delete(op.d.length)
     }
   }
 
-  /**
-   * @param {number} length
-   * @param {object} opts
-   * @param {TrackingProps} [opts.tracking]
-   */
-  retain(length, opts = {}) {
-    if (opts.tracking) {
-      this.textOperation.push({ r: length, ...opts })
-    } else {
-      this.textOperation.push(length)
-    }
+  retain(length) {
+    this.textOperation.push(length)
     this.cursor += length
   }
 
-  /**
-   * @param {string} str
-   * @param {object} opts
-   * @param {TrackingProps} [opts.tracking]
-   */
-  insert(str, opts = {}) {
-    if (opts.tracking) {
-      this.textOperation.push({ i: str, ...opts })
-    } else {
-      this.textOperation.push(str)
-    }
+  insert(str) {
+    this.textOperation.push(str)
     this.cursor += str.length
     this.docLength += str.length
   }
 
-  /**
-   * @param {number} length
-   * @param {object} opts
-   */
-  delete(length, opts = {}) {
+  delete(length) {
     this.textOperation.push(-length)
     this.docLength -= length
   }
