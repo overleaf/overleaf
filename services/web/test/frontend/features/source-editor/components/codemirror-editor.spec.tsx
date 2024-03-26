@@ -5,6 +5,7 @@ import { metaKey } from '../helpers/meta-key'
 import { docId } from '../helpers/mock-doc'
 import { activeEditorLine } from '../helpers/active-editor-line'
 import { TestContainer } from '../helpers/test-container'
+import customLocalStorage from '@/infrastructure/local-storage'
 
 describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -555,13 +556,10 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   it('restores stored cursor and scroll position', function () {
     const scope = mockScope()
 
-    window.localStorage.setItem(
-      `doc.position.${docId}`,
-      JSON.stringify({
-        cursorPosition: { row: 50, column: 5 },
-        firstVisibleLine: 45,
-      })
-    )
+    customLocalStorage.setItem(`doc.position.${docId}`, {
+      cursorPosition: { row: 50, column: 5 },
+      firstVisibleLine: 45,
+    })
 
     cy.mount(
       <TestContainer>

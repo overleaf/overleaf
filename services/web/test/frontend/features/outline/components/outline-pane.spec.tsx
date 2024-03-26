@@ -1,6 +1,7 @@
 import OutlinePane from '@/features/outline/components/outline-pane'
 import { EditorProviders, PROJECT_ID } from '../../../helpers/editor-providers'
 import { useState } from 'react'
+import customLocalStorage from '@/infrastructure/local-storage'
 
 describe('<OutlinePane />', function () {
   it('renders expanded outline', function () {
@@ -38,7 +39,7 @@ describe('<OutlinePane />', function () {
   })
 
   it('expand outline and use local storage', function () {
-    window.localStorage.setItem(`file_outline.expanded.${PROJECT_ID}`, 'false')
+    customLocalStorage.setItem(`file_outline.expanded.${PROJECT_ID}`, false)
 
     const onToggle = cy.stub()
 
@@ -53,9 +54,9 @@ describe('<OutlinePane />', function () {
           onToggle={onToggle}
           expanded={expanded}
           toggleExpanded={() => {
-            window.localStorage.setItem(
+            customLocalStorage.setItem(
               `file_outline.expanded.${PROJECT_ID}`,
-              expanded ? 'false' : 'true'
+              !expanded
             )
             setExpanded(!expanded)
           }}
@@ -78,8 +79,8 @@ describe('<OutlinePane />', function () {
     cy.findByRole('tree').then(() => {
       expect(onToggle).to.be.calledTwice
       expect(
-        window.localStorage.getItem(`file_outline.expanded.${PROJECT_ID}`)
-      ).to.equal('true')
+        customLocalStorage.getItem(`file_outline.expanded.${PROJECT_ID}`)
+      ).to.equal(true)
     })
   })
 

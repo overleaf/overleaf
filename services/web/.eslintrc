@@ -132,40 +132,6 @@
       ]
     },
     {
-      // React component specific rules
-      //
-      "files": ["**/frontend/js/**/components/**/*.{js,jsx,ts,tsx}", "**/frontend/js/**/hooks/**/*.{js,jsx,ts,tsx}"],
-      "rules": {
-        "@overleaf/no-unnecessary-trans": "error",
-        "@overleaf/should-unescape-trans": "error",
-
-        // https://astexplorer.net/
-        "no-restricted-syntax": [
-          "error",
-          // prohibit direct calls to methods of window.location
-          {
-            "selector": "CallExpression[callee.object.object.name='window'][callee.object.property.name='location']",
-            "message": "Modify location via useLocation instead of calling window.location methods directly"
-          },
-          // prohibit assignment to window.location
-          {
-            "selector": "AssignmentExpression[left.object.name='window'][left.property.name='location']",
-            "message": "Modify location via useLocation instead of calling window.location methods directly"
-          },
-          // prohibit assignment to window.location.href
-          {
-            "selector": "AssignmentExpression[left.object.object.name='window'][left.object.property.name='location'][left.property.name='href']",
-            "message": "Modify location via useLocation instead of calling window.location methods directly"
-          },
-          // prohibit using lookbehinds due to incidents with Safari simply crashing when the script is parsed
-          {
-            "selector": "Literal[regex.pattern=/\\(\\?<[!=]/]",
-            "message": "Lookbehind is not supported in older Safari versions."
-          }
-        ]
-      }
-    },
-    {
       // Frontend specific rules
       "files": ["**/frontend/js/**/*.{js,jsx,ts,tsx}", "**/frontend/stories/**/*.{js,jsx,ts,tsx}", "**/*.stories.{js,jsx,ts,tsx}", "**/test/frontend/**/*.{js,jsx,ts,tsx}", "**/test/frontend/components/**/*.spec.{js,jsx,ts,tsx}"],
       "env": {
@@ -274,8 +240,53 @@
           {
             "selector": "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression[elements.length=0]",
             "message": "Array must not be empty. Add parameters and a function. E.g ['param1', function(param1) {}]"
-          }
+          },
           // End: Make sure angular can withstand minification
+          // prohibit direct calls to methods of window.localStorage
+          {
+            "selector": "CallExpression[callee.object.object.name='window'][callee.object.property.name='localStorage']",
+            "message": "Modify location via customLocalStorage instead of calling window.localStorage methods directly"
+          }
+        ]
+      }
+    },
+    {
+      // React component specific rules
+      //
+      "files": ["**/frontend/js/**/components/**/*.{js,jsx,ts,tsx}", "**/frontend/js/**/hooks/**/*.{js,jsx,ts,tsx}"],
+      "rules": {
+        "@overleaf/no-unnecessary-trans": "error",
+        "@overleaf/should-unescape-trans": "error",
+
+        // https://astexplorer.net/
+        "no-restricted-syntax": [
+          "error",
+          // prohibit direct calls to methods of window.location
+          {
+            "selector": "CallExpression[callee.object.object.name='window'][callee.object.property.name='location']",
+            "message": "Modify location via useLocation instead of calling window.location methods directly"
+          },
+          // prohibit assignment to window.location
+          {
+            "selector": "AssignmentExpression[left.object.name='window'][left.property.name='location']",
+            "message": "Modify location via useLocation instead of calling window.location methods directly"
+          },
+          // prohibit assignment to window.location.href
+          {
+            "selector": "AssignmentExpression[left.object.object.name='window'][left.object.property.name='location'][left.property.name='href']",
+            "message": "Modify location via useLocation instead of calling window.location methods directly"
+          },
+          // prohibit using lookbehinds due to incidents with Safari simply crashing when the script is parsed
+          {
+            "selector": "Literal[regex.pattern=/\\(\\?<[!=]/]",
+            "message": "Lookbehind is not supported in older Safari versions."
+          },
+          // prohibit direct calls to methods of window.localStorage
+          // NOTE: this rule is also defined for all frontend files, but those rules are overriden by the React component-specific config
+          {
+            "selector": "CallExpression[callee.object.object.name='window'][callee.object.property.name='localStorage']",
+            "message": "Modify location via customLocalStorage instead of calling window.localStorage methods directly"
+          }
         ]
       }
     },
