@@ -320,7 +320,10 @@ const UpdateManager = {
     historyRangesSupport
   ) {
     let docLength = _.reduce(lines, (chars, line) => chars + line.length, 0)
-    docLength += lines.length - 1 // count newline characters
+    // Add newline characters. Lines are joined by newlines, but the last line
+    // doesn't include a newline. We must make a special case for an empty list
+    // so that it doesn't report a doc length of -1.
+    docLength += Math.max(lines.length - 1, 0)
     let historyDocLength = docLength
     for (const change of ranges.changes ?? []) {
       if ('d' in change.op) {

@@ -678,6 +678,29 @@ describe('UpdateManager', function () {
         },
       ])
     })
+
+    it('should calculate the right doc length for an empty document', function () {
+      this.historyUpdates = [{ v: 42, op: [{ i: 'foobar', p: 0 }] }]
+      this.UpdateManager._adjustHistoryUpdatesMetadata(
+        this.historyUpdates,
+        this.pathname,
+        this.projectHistoryId,
+        [],
+        {},
+        false
+      )
+      this.historyUpdates.should.deep.equal([
+        {
+          projectHistoryId: this.projectHistoryId,
+          v: 42,
+          op: [{ i: 'foobar', p: 0 }],
+          meta: {
+            pathname: this.pathname,
+            doc_length: 0,
+          },
+        },
+      ])
+    })
   })
 
   describe('lockUpdatesAndDo', function () {
