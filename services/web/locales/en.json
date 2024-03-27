@@ -2247,7 +2247,6 @@
   "youre_about_to_enable_single_sign_on_sso_only": "You’re about to enable single sign-on (SSO). Before you do this, you should ensure you’re confident the SSO configuration is correct.",
   "youre_already_setup_for_sso": "You’re already set up for SSO",
   "youre_on_free_trial_which_ends_on": "You’re on a free trial which ends on <0>__date__</0>.",
-  "youre_signed_in_as": "You’re signed in as <0>__email__</0>.",
   "youre_signed_in_as_logout": "You’re signed in as <0>__email__</0>. <1>Log out.</1>",
   "youve_unlinked_all_users": "You’ve unlinked all users",
   "zh-CN": "Chinese",
