@@ -10,10 +10,7 @@ export default function IconTextButton({
   trailingIcon,
   ...props
 }: IconTextButtonProps) {
-  const materialIconClassName =
-    size === 'large'
-      ? 'leading-trailing-icon-large'
-      : 'leading-trailing-icon-small'
+  const materialIconClassName = size === 'large' ? 'icon-large' : 'icon-small'
 
   return (
     <Button size={size} {...props}>

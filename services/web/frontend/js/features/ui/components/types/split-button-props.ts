@@ -19,6 +19,7 @@ export type SplitButtonVariants = Extract<
 >
 
 export type SplitButtonProps = PropsWithChildren<{
+  accessibilityLabel?: string
   align?: DropdownProps['align']
   disabled?: boolean
   id: DropdownToggleProps['id']

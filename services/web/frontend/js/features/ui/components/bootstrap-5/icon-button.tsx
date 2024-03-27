@@ -1,22 +1,17 @@
-import { useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
 import Button from './button'
 import type { IconButtonProps } from '@/features/ui/components/types/icon-button-props'
 import classNames from 'classnames'
 
 export default function IconButton({
+  accessibilityLabel,
   icon,
   isLoading = false,
   size = 'default',
   ...props
 }: IconButtonProps) {
-  const { t } = useTranslation()
-
   const iconButtonClassName = `icon-button-${size}`
-  const iconSizeClassName =
-    size === 'large'
-      ? 'leading-trailing-icon-large'
-      : 'leading-trailing-icon-small'
+  const iconSizeClassName = size === 'large' ? 'icon-large' : 'icon-small'
   const materialIconClassName = classNames(iconSizeClassName, {
     'button-content-hidden': isLoading,
   })
@@ -24,7 +19,7 @@ export default function IconButton({
   return (
     <Button className={iconButtonClassName} isLoading={isLoading} {...props}>
       <MaterialIcon
-        accessibilityLabel={t('add')}
+        accessibilityLabel={accessibilityLabel}
         className={materialIconClassName}
         type={icon}
       />

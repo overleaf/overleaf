@@ -10,6 +10,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import type { SplitButtonProps } from '@/features/ui/components/types/split-button-props'
 
 export function SplitButton({
+  accessibilityLabel,
   align,
   id,
   items,
@@ -31,7 +32,11 @@ export function SplitButton({
           variant={variant}
           {...props}
         >
-          <MaterialIcon className="split-button-caret" type="expand_more" />
+          <MaterialIcon
+            className="split-button-caret"
+            type="expand_more"
+            accessibilityLabel={accessibilityLabel}
+          />
         </DropdownToggle>
         <DropdownMenu>
           {items.map((item, index) => (

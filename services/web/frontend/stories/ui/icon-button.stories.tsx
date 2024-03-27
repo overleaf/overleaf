@@ -1,10 +1,13 @@
 import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
 import type { Meta } from '@storybook/react'
+import { useTranslation } from 'react-i18next'
 
 type Args = React.ComponentProps<typeof IconButton>
 
 export const Icon = (args: Args) => {
-  return <IconButton disabled {...args} />
+  const { t } = useTranslation()
+
+  return <IconButton accessibilityLabel={t('add')} disabled {...args} />
 }
 
 const meta: Meta<typeof IconButton> = {

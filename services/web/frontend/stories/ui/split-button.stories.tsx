@@ -1,10 +1,13 @@
 import { SplitButton } from '@/features/ui/components/bootstrap-5/split-button'
 import type { Meta } from '@storybook/react'
+import { useTranslation } from 'react-i18next'
 
 type Args = React.ComponentProps<typeof SplitButton>
 
 export const Dropdown = (args: Args) => {
-  return <SplitButton {...args} />
+  const { t } = useTranslation()
+
+  return <SplitButton accessibilityLabel={t('expand')} {...args} />
 }
 const meta: Meta<typeof SplitButton> = {
   title: 'Shared/Components/Bootstrap 5/SplitButton',
