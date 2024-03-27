@@ -27,15 +27,5 @@ $is-overleaf-light: false;
 // Bootstrap's Sass variable must use @import rather than @use because
 // Bootstrap relies on its variables, mixins etc. all being global.
 
-// Include Bootstrap 5 itself, plus overrides of its Sass variable
-@import 'scss/bootstrap';
-
-// Override and extend Bootstrap styles. This can include overriding CSS
-// variables in the usual CSS way, and can also refer to (but not override)
-// Bootstrap Sass variables.
-@import 'scss/bootstrap-rule-overrides';
-
-// Components
-@import 'scss/components/button';
-@import 'scss/components/dropdown-menu';
-@import 'scss/components/split-button';
+// Include Bootstrap 5 itself, plus overrides and extend Bootstrap styles.
+@import 'bootstrap';

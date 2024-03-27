@@ -7,7 +7,8 @@
 // Bootstrap itself because Bootstrap uses them to create the CSS variables it
 // uses, and in calculations to determine, for example, what color text to use
 // on a button based on contrast.
-@import 'bootstrap-variable-overrides';
+@import 'abstracts/all';
+@import 'foundations/all';
 
 // Include remainder of required Bootstrap stylesheets (including any separate color mode stylesheets)
 @import 'bootstrap-5/scss/variables';
@@ -31,3 +32,6 @@
 @import 'bootstrap-5/scss/modal';
 @import 'bootstrap-5/scss/utilities/api';
 @import 'bootstrap-5/scss/spinners';
+
+// Components custom style
+@import 'components/all';

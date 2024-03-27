@@ -1,0 +1,21 @@
+// Overrides for Bootstrap 5's default Sass variables
+
+// Fonts
+$font-family-sans-serif: 'Noto Sans', sans-serif;
+$font-family-serif: 'Merriweather', serif;
+$font-family-monospace: 'DM Mono', monospace;
+$font-size-base: $default-font-size;
+$line-height-base: $default-line-height;
+
+// Buttons
+$btn-font-family: $font-family-sans-serif;
+$btn-font-weight: 700;
+$btn-padding-x: $spacing-06;
+$btn-padding-y: $spacing-02;
+$btn-border-radius: $border-radius-full;
+$btn-border-radius-lg: $border-radius-full;
+$btn-border-radius-sm: $border-radius-full;
+
+// Colors
+$primary: $bg-accent-01;
+$secondary: $bg-light-primary;

@@ -1,8 +1,0 @@
-// This file is included before Bootstrap and is used to override Bootstrap
-// default variables and styles
-@import 'bootstrap-variable-overrides/fonts';
-@import 'bootstrap-variable-overrides/buttons';
-
-// This isn't great but is necessary to persuade Bootstrap to render white text
-// on our green buttons
-$min-contrast-ratio: 3;
