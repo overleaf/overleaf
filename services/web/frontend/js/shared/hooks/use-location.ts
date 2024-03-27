@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import useIsMounted from './use-is-mounted'
+import { location } from '@/shared/components/location'
 
 export const useLocation = () => {
   const isMounted = useIsMounted()
@@ -7,8 +8,7 @@ export const useLocation = () => {
   const assign = useCallback(
     url => {
       if (isMounted.current) {
-        // eslint-disable-next-line no-restricted-syntax
-        window.location.assign(url)
+        location.assign(url)
       }
     },
     [isMounted]
@@ -16,8 +16,7 @@ export const useLocation = () => {
 
   const reload = useCallback(() => {
     if (isMounted.current) {
-      // eslint-disable-next-line no-restricted-syntax
-      window.location.reload()
+      location.reload()
     }
   }, [isMounted])
 
