@@ -148,6 +148,61 @@ describe('UpdateCompressor', function () {
         },
       ])
     })
+
+    it('should take tracked changes into account when calculating the doc length', function () {
+      const meta = {
+        ts: this.ts1,
+        user_id: this.user_id,
+        tc: 'tracked-change-id',
+      }
+      expect(
+        this.UpdateCompressor.convertToSingleOpUpdates([
+          {
+            op: [
+              { p: 6, i: 'orange' }, // doc_length += 6
+              { p: 22, d: 'apple' }, // doc_length doesn't change
+              { p: 12, i: 'melon', u: true }, // doc_length += 5
+              { p: 18, i: 'banana', u: true, trackedDeleteRejection: true }, // doc_length doesn't change
+              { p: 8, d: 'pineapple', u: true }, // doc_length -= 9
+              { p: 11, i: 'fruit salad' },
+            ],
+            meta: { ...meta, doc_length: 20, history_doc_length: 30 },
+            v: 42,
+          },
+        ])
+      ).to.deep.equal([
+        {
+          op: { p: 6, i: 'orange' },
+          meta: { ...meta, doc_length: 30 },
+          v: 42,
+        },
+        {
+          op: { p: 22, d: 'apple' },
+          meta: { ...meta, doc_length: 36 },
+          v: 42,
+        },
+        {
+          op: { p: 12, i: 'melon', u: true },
+          meta: { ...meta, doc_length: 36 },
+          v: 42,
+        },
+        {
+          op: { p: 18, i: 'banana', u: true, trackedDeleteRejection: true },
+          meta: { ...meta, doc_length: 41 },
+          v: 42,
+        },
+        {
+          op: { p: 8, d: 'pineapple', u: true },
+          meta: { ...meta, doc_length: 41 },
+          v: 42,
+        },
+        {
+          op: { p: 11, i: 'fruit salad' },
+          meta: { ...meta, doc_length: 32 },
+          v: 42,
+        },
+      ])
+    })
   })
 
   describe('concatUpdatesWithSameVersion', function () {
@@ -571,6 +626,153 @@ describe('UpdateCompressor', function () {
           },
         ])
       })
+
+      it("should not merge updates that track changes and updates that don't", function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              pathname: 'main.tex',
+              op: { p: 3, i: 'foo' },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              pathname: 'main.tex',
+              op: { p: 6, i: 'bar' },
+              meta: { ts: this.ts2, user_id: this.user_id, tc: 'tracking-id' },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            pathname: 'main.tex',
+            op: { p: 3, i: 'foo' },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            pathname: 'main.tex',
+            op: { p: 6, i: 'bar' },
+            meta: { ts: this.ts2, user_id: this.user_id, tc: 'tracking-id' },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge undos with regular ops', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              pathname: 'main.tex',
+              op: { p: 3, i: 'foo' },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              pathname: 'main.tex',
+              op: { p: 6, i: 'bar', u: true },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            pathname: 'main.tex',
+            op: { p: 3, i: 'foo' },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            pathname: 'main.tex',
+            op: { p: 6, i: 'bar', u: true },
+            meta: { ts: this.ts2, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge tracked delete rejections', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              pathname: 'main.tex',
+              op: { p: 3, i: 'foo' },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              pathname: 'main.tex',
+              op: { p: 6, i: 'bar', trackedDeleteRejection: true },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            pathname: 'main.tex',
+            op: { p: 3, i: 'foo' },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            pathname: 'main.tex',
+            op: { p: 6, i: 'bar', trackedDeleteRejection: true },
+            meta: { ts: this.ts2, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should preserve history metadata', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, i: 'foo', hpos: 13 },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 6, i: 'bar', hpos: 16 },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'foobar', hpos: 13 },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge updates from different users', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, i: 'foo', hpos: 13 },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 6, i: 'bar', hpos: 16 },
+              meta: { ts: this.ts2, user_id: this.other_user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'foo', hpos: 13 },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            op: { p: 6, i: 'bar', hpos: 16 },
+            meta: { ts: this.ts2, user_id: this.other_user_id },
+            v: 43,
+          },
+        ])
+      })
     })
 
     describe('delete - delete', function () {
@@ -643,6 +845,95 @@ describe('UpdateCompressor', function () {
           {
             op: { p: 9, d: 'bar' },
             meta: { ts: this.ts2, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge deletes over tracked changes', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'foo' },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: {
+                p: 3,
+                d: 'bar',
+                trackedChanges: [{ type: 'delete', pos: 2, length: 10 }],
+              },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'foo' },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 42,
+          },
+          {
+            op: {
+              p: 3,
+              d: 'bar',
+              trackedChanges: [{ type: 'delete', pos: 2, length: 10 }],
+            },
+            meta: { ts: this.ts2, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should preserve history metadata', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'foo' },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 3, d: 'bar' },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'foobar' },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge when the deletes are tracked', function () {
+        // TODO: We should be able to lift that constraint, but it would
+        // require recalculating the hpos on the second op.
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'foo' },
+              meta: { ts: this.ts1, user_id: this.user_id, tc: 'tracking-id' },
+              v: 42,
+            },
+            {
+              op: { p: 3, d: 'bar' },
+              meta: { ts: this.ts2, user_id: this.user_id, tc: 'tracking-id' },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'foo' },
+            meta: { ts: this.ts1, user_id: this.user_id, tc: 'tracking-id' },
+            v: 42,
+          },
+          {
+            op: { p: 3, d: 'bar' },
+            meta: { ts: this.ts2, user_id: this.user_id, tc: 'tracking-id' },
             v: 43,
           },
         ])
@@ -768,6 +1059,29 @@ describe('UpdateCompressor', function () {
           },
         ])
       })
+
+      it('should preserver history metadata', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, i: 'foo', hpos: 13 },
+              meta: { ts: this.ts1, user_id: this.user_id },
+              v: 42,
+            },
+            {
+              op: { p: 5, d: 'o', hpos: 15 },
+              meta: { ts: this.ts2, user_id: this.user_id },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, i: 'fo', hpos: 13 },
+            meta: { ts: this.ts1, user_id: this.user_id },
+            v: 43,
+          },
+        ])
+      })
     })
 
     describe('delete - insert', function () {
@@ -814,6 +1128,90 @@ describe('UpdateCompressor', function () {
             },
           ])
         ).to.deep.equal([])
+      })
+
+      it('should preserver history metadata', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: {
+                p: 3,
+                d: 'one two three four five six seven eight',
+                hpos: 13,
+              },
+              meta: { ts: this.ts1, user_id: this.user_id, doc_length: 100 },
+              v: 42,
+            },
+            {
+              op: {
+                p: 3,
+                i: 'one 2 three four five six seven eight',
+                hpos: 13,
+              },
+              meta: { ts: this.ts2, user_id: this.user_id, doc_length: 100 },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 7, d: 'two', hpos: 17 },
+            meta: { ts: this.ts1, user_id: this.user_id, doc_length: 100 },
+            v: 43,
+          },
+          {
+            op: { p: 7, i: '2', hpos: 17 },
+            meta: { ts: this.ts1, user_id: this.user_id, doc_length: 97 },
+            v: 43,
+          },
+        ])
+      })
+
+      it('should not merge when tracking changes', function () {
+        expect(
+          this.UpdateCompressor.compressUpdates([
+            {
+              op: { p: 3, d: 'one two three four five six seven eight' },
+              meta: {
+                ts: this.ts1,
+                user_id: this.user_id,
+                doc_length: 100,
+                tc: 'tracking-id',
+              },
+              v: 42,
+            },
+            {
+              op: { p: 3, i: 'one 2 three four five six seven eight' },
+              meta: {
+                ts: this.ts2,
+                user_id: this.user_id,
+                doc_length: 100,
+                tc: 'tracking-id',
+              },
+              v: 43,
+            },
+          ])
+        ).to.deep.equal([
+          {
+            op: { p: 3, d: 'one two three four five six seven eight' },
+            meta: {
+              ts: this.ts1,
+              user_id: this.user_id,
+              doc_length: 100,
+              tc: 'tracking-id',
+            },
+            v: 42,
+          },
+          {
+            op: { p: 3, i: 'one 2 three four five six seven eight' },
+            meta: {
+              ts: this.ts2,
+              user_id: this.user_id,
+              doc_length: 100,
+              tc: 'tracking-id',
+            },
+            v: 43,
+          },
+        ])
       })
     })
 
