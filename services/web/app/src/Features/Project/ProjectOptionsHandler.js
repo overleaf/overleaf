@@ -1,6 +1,7 @@
 const { Project } = require('../../models/Project')
 const settings = require('@overleaf/settings')
 const { callbackify } = require('util')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const safeCompilers = ['xelatex', 'pdflatex', 'latex', 'lualatex']
 
 const ProjectOptionsHandler = {
@@ -62,6 +63,14 @@ const ProjectOptionsHandler = {
     const update = { $unset: { brandVariationId: 1 } }
     return Project.updateOne(conditions, update, {})
   },
+
+  async enableHistoryRangesSupport(projectId) {
+    const conditions = { _id: new ObjectId(projectId) }
+    const update = { $set: { 'overleaf.history.rangesSupportEnabled': true } }
+    // NOTE: Updating the Mongoose model with the same query doesn't work. Maybe
+    // because rangesSupportEnabled is not part of the schema?
+    return db.projects.updateOne(conditions, update)
+  },
 }
 
 module.exports = {
@@ -73,6 +82,9 @@ module.exports = {
   setBrandVariationId: callbackify(ProjectOptionsHandler.setBrandVariationId),
   unsetBrandVariationId: callbackify(
     ProjectOptionsHandler.unsetBrandVariationId
+  ),
+  enableHistoryRangesSupport: callbackify(
+    ProjectOptionsHandler.enableHistoryRangesSupport
   ),
   promises: ProjectOptionsHandler,
 }

@@ -17,6 +17,7 @@ const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Project/ProjectOptionsHandler.js'
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb')
 
 describe('ProjectOptionsHandler', function () {
   const projectId = '4eecaffcbffa66588e000008'
@@ -27,6 +28,12 @@ describe('ProjectOptionsHandler', function () {
       constructor(options) {}
     }
     this.projectModel.updateOne = sinon.stub().resolves()
+
+    this.db = {
+      projects: {
+        updateOne: sinon.stub().resolves(),
+      },
+    }
 
     this.handler = SandboxedModule.require(modulePath, {
       requires: {
@@ -42,6 +49,7 @@ describe('ProjectOptionsHandler', function () {
             { imageName: 'texlive-1234.5', imageDesc: 'test image 1' },
           ],
         },
+        '../../infrastructure/mongodb': { db: this.db, ObjectId },
       },
     })
   })
@@ -176,6 +184,28 @@ describe('ProjectOptionsHandler', function () {
 
       it('should be rejected', async function () {
         expect(this.handler.promises.setBrandVariationId(projectId, '123')).to
+          .be.rejected
+      })
+    })
+  })
+
+  describe('setting the rangesSupportEnabled', function () {
+    it('should perform and update on mongo', async function () {
+      await this.handler.promises.enableHistoryRangesSupport(projectId)
+      sinon.assert.calledWith(
+        this.db.projects.updateOne,
+        { _id: new ObjectId(projectId) },
+        { $set: { 'overleaf.history.rangesSupportEnabled': true } }
+      )
+    })
+
+    describe('when mongo update error occurs', function () {
+      beforeEach(function () {
+        this.db.projects.updateOne = sinon.stub().yields('error')
+      })
+
+      it('should be rejected', async function () {
+        expect(this.handler.promises.enableHistoryRangesSupport(projectId)).to
           .be.rejected
       })
     })
