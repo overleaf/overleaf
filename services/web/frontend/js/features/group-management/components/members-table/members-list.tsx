@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { User } from '../../../../../../types/group-management/user'
 import Tooltip from '@/shared/components/tooltip'
 import { useGroupMembersContext } from '../../context/group-members-context'
-import type { ManagedUserAlert } from '../../utils/types'
+import type { GroupUserAlert } from '../../utils/types'
 import MemberRow from './member-row'
 import OffboardManagedUserModal from './offboard-managed-user-modal'
 import ListAlert from './list-alert'
@@ -21,19 +21,19 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   const [userToOffboard, setUserToOffboard] = useState<User | undefined>(
     undefined
   )
-  const [managedUserAlert, setManagedUserAlert] =
-    useState<ManagedUserAlert>(undefined)
+  const [groupUserAlert, setGroupUserAlert] =
+    useState<GroupUserAlert>(undefined)
   const { users } = useGroupMembersContext()
   const managedUsersActive: any = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (
     <div>
-      {managedUsersActive && managedUserAlert && (
+      {groupUserAlert && (
         <ListAlert
-          variant={managedUserAlert.variant}
-          invitedUserEmail={managedUserAlert.email}
-          onDismiss={() => setManagedUserAlert(undefined)}
+          variant={groupUserAlert.variant}
+          userEmail={groupUserAlert.email}
+          onDismiss={() => setGroupUserAlert(undefined)}
         />
       )}
       <ul
@@ -100,7 +100,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
                       key={user.email}
                       user={user}
                       openOffboardingModalForUser={setUserToOffboard}
-                      setManagedUserAlert={setManagedUserAlert}
+                      setGroupUserAlert={setGroupUserAlert}
                       groupId={groupId}
                     />
                   ))}

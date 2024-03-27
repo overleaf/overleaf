@@ -1,4 +1,4 @@
-export type ManagedUserAlertVariant =
+export type GroupUserAlertVariant =
   | 'resendManagedUserInviteSuccess'
   | 'resendManagedUserInviteFailed'
   | 'resendGroupInviteSuccess'
@@ -7,9 +7,9 @@ export type ManagedUserAlertVariant =
   | 'resendSSOLinkInviteSuccess'
   | 'resendSSOLinkInviteFailed'
 
-export type ManagedUserAlert =
+export type GroupUserAlert =
   | {
-      variant: ManagedUserAlertVariant
+      variant: GroupUserAlertVariant
       email?: string
     }
   | undefined

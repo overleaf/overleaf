@@ -24,7 +24,7 @@ function mountDropDownComponent(user: User, subscriptionId: string) {
         user={user}
         openOffboardingModalForUser={sinon.stub()}
         groupId={subscriptionId}
-        setManagedUserAlert={sinon.stub()}
+        setGroupUserAlert={sinon.stub()}
       />
     </Wrapper>
   )

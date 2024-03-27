@@ -1,87 +1,76 @@
 import { type PropsWithChildren, useState } from 'react'
 import { Alert, type AlertProps } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
-import type { ManagedUserAlertVariant } from '../../utils/types'
+import type { GroupUserAlertVariant } from '../../utils/types'
 
-type ManagedUsersListAlertProps = {
-  variant: ManagedUserAlertVariant
-  invitedUserEmail?: string
+type GroupUsersListAlertProps = {
+  variant: GroupUserAlertVariant
+  userEmail?: string
   onDismiss: () => void
 }
 
 export default function ListAlert({
   variant,
-  invitedUserEmail,
+  userEmail,
   onDismiss,
-}: ManagedUsersListAlertProps) {
+}: GroupUsersListAlertProps) {
   switch (variant) {
     case 'resendManagedUserInviteSuccess':
       return (
         <ResendManagedUserInviteSuccess
           onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
+          userEmail={userEmail}
         />
       )
     case 'resendSSOLinkInviteSuccess':
       return (
         <ResendSSOLinkInviteSuccess
           onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
+          userEmail={userEmail}
         />
       )
     case 'resendManagedUserInviteFailed':
       return (
         <FailedToResendManagedInvite
           onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
+          userEmail={userEmail}
         />
       )
     case 'resendSSOLinkInviteFailed':
       return (
-        <FailedToResendSSOLink
-          onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
-        />
+        <FailedToResendSSOLink onDismiss={onDismiss} userEmail={userEmail} />
       )
     case 'resendGroupInviteSuccess':
       return (
-        <ResendGroupInviteSuccess
-          onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
-        />
+        <ResendGroupInviteSuccess onDismiss={onDismiss} userEmail={userEmail} />
       )
     case 'resendGroupInviteFailed':
       return (
         <FailedToResendGroupInvite
           onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
+          userEmail={userEmail}
         />
       )
     case 'resendInviteTooManyRequests':
-      return (
-        <TooManyRequests
-          onDismiss={onDismiss}
-          invitedUserEmail={invitedUserEmail}
-        />
-      )
+      return <TooManyRequests onDismiss={onDismiss} userEmail={userEmail} />
   }
 }
 
-type ManagedUsersListAlertComponentProps = {
+type GroupUsersListAlertComponentProps = {
   onDismiss: () => void
-  invitedUserEmail?: string
+  userEmail?: string
 }
 
 function ResendManagedUserInviteSuccess({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="success" onDismiss={onDismiss}>
       <Trans
         i18nKey="managed_user_invite_has_been_sent_to_email"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
@@ -96,14 +85,14 @@ function ResendManagedUserInviteSuccess({
 
 function ResendSSOLinkInviteSuccess({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="success" onDismiss={onDismiss}>
       <Trans
         i18nKey="sso_link_invite_has_been_sent_to_email"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
@@ -118,14 +107,14 @@ function ResendSSOLinkInviteSuccess({
 
 function FailedToResendManagedInvite({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
       <Trans
         i18nKey="failed_to_send_managed_user_invite_to_email"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
@@ -139,14 +128,14 @@ function FailedToResendManagedInvite({
 }
 function FailedToResendSSOLink({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
       <Trans
         i18nKey="failed_to_send_sso_link_invite_to_email"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
@@ -161,14 +150,14 @@ function FailedToResendSSOLink({
 
 function ResendGroupInviteSuccess({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="success" onDismiss={onDismiss}>
       <Trans
         i18nKey="group_invite_has_been_sent_to_email"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
@@ -183,14 +172,14 @@ function ResendGroupInviteSuccess({
 
 function FailedToResendGroupInvite({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
       <Trans
         i18nKey="failed_to_send_group_invite_to_email"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
@@ -205,14 +194,14 @@ function FailedToResendGroupInvite({
 
 function TooManyRequests({
   onDismiss,
-  invitedUserEmail,
-}: ManagedUsersListAlertComponentProps) {
+  userEmail,
+}: GroupUsersListAlertComponentProps) {
   return (
     <AlertComponent bsStyle="danger" onDismiss={onDismiss}>
       <Trans
         i18nKey="an_email_has_already_been_sent_to"
         values={{
-          email: invitedUserEmail,
+          email: userEmail,
         }}
         shouldUnescape
         tOptions={{ interpolation: { escapeValue: true } }}
