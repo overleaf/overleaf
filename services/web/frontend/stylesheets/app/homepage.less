@@ -183,26 +183,6 @@
   }
 }
 
-.hp-login-btn {
-  .login-btn;
-  min-width: 220px;
-}
-
-.hp-login-btn-large {
-  .hp-login-btn;
-
-  min-width: 256px;
-  padding-left: 30px;
-  font-size: 20px;
-}
-
-.hp-login-btn-icon-large {
-  .login-btn-icon;
-
-  width: 32px;
-  height: 32px;
-}
-
 .hp-register-form-email-pwd {
   position: relative;
 }
@@ -432,7 +412,18 @@
 
       .form-group {
         .hp-login-btn {
+          .login-btn;
+
           width: 100%;
+          min-width: 220px;
+
+          .login-btn-icon {
+            position: absolute;
+            left: 6px;
+            top: 7px;
+            width: 20px;
+            height: 20px;
+          }
         }
       }
     }

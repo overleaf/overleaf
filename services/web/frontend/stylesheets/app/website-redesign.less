@@ -944,11 +944,20 @@
 
   .inline-green-link {
     color: var(--emerald-green);
+    text-decoration: underline;
+    // text-decoration-;skip-ink is for letter with descender (like 'g' and 'y')
+    // this will force underline to not skip the descender
+    text-decoration-skip-ink: none;
 
     &:hover {
       color: var(--emerald-green-dark);
     }
-    text-decoration: underline;
+
+    // for accessibility with keyboard navigation
+    &:focus {
+      outline: 2px solid var(--emerald-green);
+      outline-offset: 1px;
+    }
   }
 
   .white-link {

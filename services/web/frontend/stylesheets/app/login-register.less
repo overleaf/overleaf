@@ -48,6 +48,7 @@
 
 .login-register-text {
   padding-bottom: 25px;
+  font-size: 90%;
   &:last-child {
     padding-bottom: 0;
   }
@@ -124,4 +125,120 @@
 
 .registration-block-separator {
   margin-bottom: 0px;
+}
+
+.website-redesign {
+  .login-register-container {
+    max-width: 320px;
+  }
+
+  .login-overleaf-logo-container {
+    padding: 15px;
+    width: 65px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .login-overleaf-logo {
+      width: 35px;
+    }
+
+    @media (max-width: @screen-xs-max) {
+      margin-top: @margin-lg;
+    }
+  }
+
+  .login-register-text {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    text-align: left;
+
+    &.login-register-text-center {
+      text-align: center;
+    }
+  }
+
+  .login-register-other-links {
+    padding: @line-height-computed 0;
+    a {
+      color: var(--emerald-green);
+      text-decoration: underline;
+      // text-decoration-;skip-ink is for letter with descender (like 'g' and 'y')
+      // this will force underline to not skip the descender
+      text-decoration-skip-ink: none;
+
+      &:hover {
+        color: var(--emerald-green-dark);
+      }
+
+      // for accessibility with keyboard navigation
+      &:focus {
+        outline: 2px solid var(--emerald-green);
+        outline-offset: 1px;
+      }
+    }
+  }
+
+  .login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 0;
+  }
+
+  .login-btn-icon {
+    position: relative;
+    top: unset;
+    left: unset;
+    background: unset;
+    border-radius: unset;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+
+    &::before {
+      content: unset;
+    }
+  }
+
+  .form-group {
+    text-align: left;
+    position: relative;
+
+    label {
+      font-size: @font-size-small;
+    }
+  }
+
+  .form-group-password {
+    display: flex;
+    position: relative;
+
+    input.form-control {
+      padding-right: 35px;
+    }
+
+    .visibility-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: @input-height-base;
+      height: @input-height-base;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: unset;
+      background-color: unset;
+
+      #visibility-icon-off {
+        margin-top: 2px; // workaround for the icon not having the same center as the non-slashed one
+      }
+    }
+  }
+
+  .form-group-password-input {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
 }
