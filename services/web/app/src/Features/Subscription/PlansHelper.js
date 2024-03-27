@@ -10,6 +10,12 @@ function isProfessionalPlan(planCode) {
   )
 }
 
+function isProfessionalGroupPlan(subscription) {
+  const isProfessional = isProfessionalPlan(subscription.planCode)
+  return subscription.groupPlan && isProfessional
+}
+
 module.exports = {
   isProfessionalPlan,
+  isProfessionalGroupPlan,
 }
