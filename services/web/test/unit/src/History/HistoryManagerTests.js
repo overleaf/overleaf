@@ -48,9 +48,9 @@ describe('HistoryManager', function () {
       },
     }
 
-    this.ProjectModel = {
-      Project: {
-        findById: sinon.stub().returns(sinon.stub().resolves(this.project)),
+    this.ProjectGetter = {
+      promises: {
+        getProject: sinon.stub().resolves(this.project),
       },
     }
 
@@ -59,7 +59,7 @@ describe('HistoryManager', function () {
         '@overleaf/fetch-utils': this.FetchUtils,
         '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
-        '../../models/Project': this.ProjectModel,
+        '../Project/ProjectGetter': this.ProjectGetter,
       },
     })
   })

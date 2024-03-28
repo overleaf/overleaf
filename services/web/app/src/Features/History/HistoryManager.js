@@ -3,7 +3,7 @@ const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
-const { Project } = require('../../models/Project')
+const ProjectGetter = require('../Project/ProjectGetter')
 
 async function initializeProject(projectId) {
   const body = await fetchJson(`${settings.apis.project_history.url}/project`, {
@@ -115,7 +115,9 @@ async function _deleteProjectInFullProjectHistory(historyId) {
  * @returns Promise<object>
  */
 async function getCurrentContent(projectId) {
-  const project = await Project.findById(projectId).exec()
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    overleaf: true,
+  })
   const historyId = project?.overleaf?.history?.id
   if (!historyId) {
     throw new OError('project does not have a history id', { projectId })
