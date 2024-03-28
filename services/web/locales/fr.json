@@ -8,6 +8,8 @@
   "Subscription": "Abonnement",
   "Terms": "Conditions",
   "Universities": "Universités",
+  "a_file_with_that_name_already_exists_and_will_be_overriden": "Il existe déjà un fichier du même nom. Ce fichier va sera écrasé.",
+  "a_more_comprehensive_list_of_keyboard_shortcuts": "Une liste de raccourcis clavier plus complète est disponible dans <0>ce modèle de projet __appName__</0>",
   "about": "À propos",
   "about_to_archive_projects": "Vous êtes sur le point d’archiver les projets suivants :",
   "about_to_delete_projects": "Vous allez supprimer les projets suivants :",
