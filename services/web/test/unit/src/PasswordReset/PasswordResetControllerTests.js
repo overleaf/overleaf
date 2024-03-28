@@ -39,11 +39,14 @@ describe('PasswordResetController', function () {
         setNewUserPassword: sinon
           .stub()
           .resolves({ found: true, reset: true, userID: this.user_id }),
+        getUserForPasswordResetToken: sinon
+          .stub()
+          .withArgs(this.token)
+          .resolves({
+            user: { _id: this.user_id },
+            remainingPeeks: 1,
+          }),
       },
-      getUserForPasswordResetToken: sinon
-        .stub()
-        .withArgs(this.token)
-        .yields(null, { user: { _id: this.user_id }, remainingPeeks: 1 }),
     }
     this.UserSessionsManager = {
       promises: {
@@ -259,15 +262,6 @@ describe('PasswordResetController', function () {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should clear the session.resetToken', function (done) {
-      this.res.sendStatus = code => {
-        code.should.equal(200)
-        this.req.session.should.not.have.property('resetToken')
-        done()
-      }
-      this.PasswordResetController.setNewUserPassword(this.req, this.res)
-    })
-
     it('should clear sessions', function (done) {
       this.res.sendStatus = code => {
         this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
@@ -374,10 +368,10 @@ describe('PasswordResetController', function () {
     describe('with expired token in query', function () {
       beforeEach(function () {
         this.req.query.passwordResetToken = this.token
-        this.PasswordResetHandler.getUserForPasswordResetToken = sinon
+        this.PasswordResetHandler.promises.getUserForPasswordResetToken = sinon
           .stub()
           .withArgs(this.token)
-          .yields(null, { user: { _id: this.user_id }, remainingPeeks: 0 })
+          .resolves({ user: { _id: this.user_id }, remainingPeeks: 0 })
       })
 
       it('should redirect to the reset request page with an error message', function (done) {
@@ -452,7 +446,15 @@ describe('PasswordResetController', function () {
 
         it('should render the page, passing the reset token', function (done) {
           this.res.render = (templatePath, options) => {
-            options.passwordResetToken.should.equal(this.req.session.resetToken)
+            options.passwordResetToken.should.equal(this.token)
+            done()
+          }
+          this.PasswordResetController.renderSetPasswordForm(this.req, this.res)
+        })
+
+        it('should clear the req.session.resetToken', function (done) {
+          this.res.render = (templatePath, options) => {
+            this.req.session.should.not.have.property('resetToken')
             done()
           }
           this.PasswordResetController.renderSetPasswordForm(this.req, this.res)

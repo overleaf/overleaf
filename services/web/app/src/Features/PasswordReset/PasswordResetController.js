@@ -30,7 +30,6 @@ async function setNewUserPassword(req, res, next) {
   }
 
   passwordResetToken = passwordResetToken.trim()
-  delete req.session.resetToken
 
   const initiatorId = SessionManager.getLoggedInUserId(req.session)
   // password reset via tokens can be done while logged in, or not
@@ -145,6 +144,51 @@ async function requestReset(req, res, next) {
   }
 }
 
+async function renderSetPasswordForm(req, res, next) {
+  if (req.query.passwordResetToken != null) {
+    try {
+      const result =
+        await PasswordResetHandler.promises.getUserForPasswordResetToken(
+          req.query.passwordResetToken
+        )
+
+      const { user, remainingPeeks } = result || {}
+      if (!user || remainingPeeks <= 0) {
+        return res.redirect('/user/password/reset?error=token_expired')
+      }
+      req.session.resetToken = req.query.passwordResetToken
+      let emailQuery = ''
+
+      if (typeof req.query.email === 'string') {
+        const email = EmailsHelper.parseEmail(req.query.email)
+        if (email) {
+          emailQuery = `?email=${encodeURIComponent(email)}`
+        }
+      }
+
+      return res.redirect('/user/password/set' + emailQuery)
+    } catch (err) {
+      return res.redirect('/user/password/reset?error=token_expired')
+    }
+  }
+
+  if (req.session.resetToken == null) {
+    return res.redirect('/user/password/reset')
+  }
+
+  const email = EmailsHelper.parseEmail(req.query.email)
+
+  // clean up to avoid leaking the token in the session object
+  const passwordResetToken = req.session.resetToken
+  delete req.session.resetToken
+
+  res.render('user/setPassword', {
+    title: 'set_password',
+    email,
+    passwordResetToken,
+  })
+}
+
 module.exports = {
   renderRequestResetForm(req, res) {
     const errorQuery = req.query.error
@@ -159,38 +203,6 @@ module.exports = {
   },
 
   requestReset: expressify(requestReset),
-
-  renderSetPasswordForm(req, res) {
-    if (req.query.passwordResetToken != null) {
-      return PasswordResetHandler.getUserForPasswordResetToken(
-        req.query.passwordResetToken,
-        (err, result) => {
-          const { user, remainingPeeks } = result || {}
-          if (err || !user || remainingPeeks <= 0) {
-            return res.redirect('/user/password/reset?error=token_expired')
-          }
-          req.session.resetToken = req.query.passwordResetToken
-          let emailQuery = ''
-          if (typeof req.query.email === 'string') {
-            const email = EmailsHelper.parseEmail(req.query.email)
-            if (email) {
-              emailQuery = `?email=${encodeURIComponent(email)}`
-            }
-          }
-          return res.redirect('/user/password/set' + emailQuery)
-        }
-      )
-    }
-    if (req.session.resetToken == null) {
-      return res.redirect('/user/password/reset')
-    }
-    const email = EmailsHelper.parseEmail(req.query.email)
-    res.render('user/setPassword', {
-      title: 'set_password',
-      email,
-      passwordResetToken: req.session.resetToken,
-    })
-  },
-
+  renderSetPasswordForm: expressify(renderSetPasswordForm),
   setNewUserPassword: expressify(setNewUserPassword),
 }
