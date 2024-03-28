@@ -109,16 +109,23 @@ function selectTab(viewTab) {
     .querySelector('[data-ol-plans-v2-m-a-switch-container]')
     .setAttribute('data-ol-current-view', viewTab)
 
+  if (viewTab === 'group') {
+    updateMainGroupPlanPricing()
+  }
+
+  updateMonthlyAnnualSwitchValue(viewTab)
+
+  toggleUniversityInfo(viewTab)
+}
+
+function updateMonthlyAnnualSwitchValue(viewTab) {
   // group tab is special because group plan only has annual value
   // so we need to perform some UI changes whenever user click the group tab
   if (viewTab === 'group') {
-    updateMainGroupPlanPricing()
     toggleMonthlyAnnualSwitching(viewTab, 'annual')
   } else {
     toggleMonthlyAnnualSwitching(viewTab, currentMonthlyAnnualSwitchValue)
   }
-
-  toggleUniversityInfo(viewTab)
 }
 
 function setUpTabSwitching() {
@@ -188,11 +195,20 @@ function selectViewFromHash() {
     const params = new URLSearchParams(window.location.hash.substring(1))
     const view = params.get('view')
     if (view) {
+      // View params are expected to be of the format e.g. individual or individual-monthly
+      const [tab, cadence] = view.split('-')
       // make sure the selected view is valid
-      if (document.querySelector(`[data-ol-plans-v2-view-tab="${view}"]`)) {
-        // set annual as the default
-        currentMonthlyAnnualSwitchValue = 'annual'
-        selectTab(view)
+      if (document.querySelector(`[data-ol-plans-v2-view-tab="${tab}"]`)) {
+        selectTab(tab)
+
+        if (['monthly', 'annual'].includes(cadence)) {
+          currentMonthlyAnnualSwitchValue = cadence
+        } else {
+          // set annual as the default
+          currentMonthlyAnnualSwitchValue = 'annual'
+        }
+
+        updateMonthlyAnnualSwitchValue(tab)
 
         // clear the hash so it doesn't persist when switching plans
         const currentURL = window.location.pathname + window.location.search
