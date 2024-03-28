@@ -40,11 +40,26 @@ describe('HistoryManager', function () {
       },
     }
 
+    this.project = {
+      overleaf: {
+        history: {
+          id: this.historyId,
+        },
+      },
+    }
+
+    this.ProjectModel = {
+      Project: {
+        findById: sinon.stub().returns(sinon.stub().resolves(this.project)),
+      },
+    }
+
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/fetch-utils': this.FetchUtils,
         '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,
+        '../../models/Project': this.ProjectModel,
       },
     })
   })
