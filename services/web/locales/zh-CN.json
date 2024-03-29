@@ -2189,7 +2189,6 @@
   "youre_about_to_enable_single_sign_on": "您即将启用单点登录（SSO）。在执行此操作之前，您应该确保您确信SSO配置是正确的，并且您的所有组成员都具有托管用户帐户。",
   "youre_already_setup_for_sso": "您已完成 SSO 设置",
   "youre_on_free_trial_which_ends_on": "您正在享受免费试用，试用期将于<0>__date__</0>结束。",
-  "youre_signed_in_as": "您已登录为 <0>__email__</0>。",
   "zh-CN": "中文",
   "zip_contents_too_large": "压缩包太大",
   "zoom_in": "放大",
