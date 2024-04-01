@@ -1,0 +1,23 @@
+--- services/web/frontend/js/features/source-editor/components/grammarly-advert.tsx
++++ services/web/frontend/js/features/source-editor/components/grammarly-advert.tsx
+@@ -6,8 +6,12 @@ import useRemindMeLater from '@/shared/hooks/use-remind-me-later'
+ import GrammarlyLogo from '@/shared/svgs/grammarly-logo'
+ import * as eventTracking from '../../../infrastructure/event-tracking'
+ import useWaitForGrammarlyCheck from '@/shared/hooks/use-wait-for-grammarly-check'
++import getMeta from '@/utils/meta'
++import { ExposedSettings } from '../../../../../types/exposed-settings'
+
+ export default function GrammarlyAdvert() {
++  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
++
+   const [show, setShow] = useState(false)
+   const { t } = useTranslation()
+
+@@ -57,7 +61,7 @@ export default function GrammarlyAdvert() {
+     remindThemLater()
+   }, [remindThemLater])
+
+-  if (!show) {
++  if (!isOverleaf || !show) {
+     return null
+   }

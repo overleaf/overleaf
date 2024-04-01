@@ -1,0 +1,63 @@
+--- deactivate-projects.sh
++++ deactivate-projects.sh
+@@ -14,7 +14,7 @@ if [[ "${ENABLE_CRON_RESOURCE_DELETION:-null}" != "true" ]]; then
+   exit 0
+ fi
+
+-WEB_URL='http://localhost:3000'
++WEB_URL='http://127.0.0.1:3000'
+
+ USER=$(cat /etc/container_environment/WEB_API_USER)
+ PASS=$(cat /etc/container_environment/WEB_API_PASSWORD)
+--- delete-projects.sh
++++ delete-projects.sh
+@@ -14,7 +14,7 @@ if [[ "${ENABLE_CRON_RESOURCE_DELETION:-null}" != "true" ]]; then
+   exit 0
+ fi
+
+-WEB_URL='http://localhost:3000'
++WEB_URL='http://127.0.0.1:3000'
+
+ USER=$(cat /etc/container_environment/WEB_API_USER)
+ PASS=$(cat /etc/container_environment/WEB_API_PASSWORD)
+--- delete-users.sh
++++ delete-users.sh
+@@ -14,7 +14,7 @@ if [[ "${ENABLE_CRON_RESOURCE_DELETION:-null}" != "true" ]]; then
+   exit 0
+ fi
+
+-WEB_URL='http://localhost:3000'
++WEB_URL='http://127.0.0.1:3000'
+
+ USER=$(cat /etc/container_environment/WEB_API_USER)
+ PASS=$(cat /etc/container_environment/WEB_API_PASSWORD)
+--- project-history-periodic-flush.sh
++++ project-history-periodic-flush.sh
+@@ -7,6 +7,6 @@ echo "Flush project-history queue"
+ echo "--------------------------"
+ date
+
+-PROJECT_HISTORY_URL='http://localhost:3054'
++PROJECT_HISTORY_URL='http://127.0.0.1:3054'
+
+ curl -X POST "${PROJECT_HISTORY_URL}/flush/old?timeout=3600000&limit=5000&background=1"
+--- project-history-retry-hard.sh
++++ project-history-retry-hard.sh
+@@ -7,6 +7,6 @@ echo "Retry project-history errors (hard)"
+ echo "-----------------------------------"
+ date
+
+-PROJECT_HISTORY_URL='http://localhost:3054'
++PROJECT_HISTORY_URL='http://127.0.0.1:3054'
+
+ curl -X POST "${PROJECT_HISTORY_URL}/retry/failures?failureType=hard&timeout=3600000&limit=10000"
+--- project-history-retry-soft.sh
++++ project-history-retry-soft.sh
+@@ -6,6 +6,6 @@ echo "-----------------------------------"
+ echo "Retry project-history errors (soft)"
+ echo "-----------------------------------"
+
+-PROJECT_HISTORY_URL='http://localhost:3054'
++PROJECT_HISTORY_URL='http://127.0.0.1:3054'
+
+ curl -X POST "${PROJECT_HISTORY_URL}/retry/failures?failureType=soft&timeout=3600000&limit=10000"

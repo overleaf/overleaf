@@ -1,0 +1,46 @@
+--- overleaf.conf
++++ overleaf.conf
+@@ -10,7 +10,7 @@ server {
+ 	}
+
+ 	location / {
+-		proxy_pass http://localhost:4000;
++		proxy_pass http://127.0.0.1:4000;
+ 		proxy_http_version 1.1;
+ 		proxy_set_header Upgrade $http_upgrade;
+ 		proxy_set_header Connection "upgrade";
+@@ -22,7 +22,7 @@ server {
+ 	}
+
+ 	location /socket.io {
+-		proxy_pass http://localhost:3026;
++		proxy_pass http://127.0.0.1:3026;
+ 		proxy_http_version 1.1;
+ 		proxy_set_header Upgrade $http_upgrade;
+ 		proxy_set_header Connection "upgrade";
+@@ -48,22 +48,22 @@ server {
+
+   # handle output files for specific users
+   location ~ ^/project/([0-9a-f]+)/user/([0-9a-f]+)/build/([0-9a-f-]+)/output/output\.([a-z]+)$ {
+-		proxy_pass http://localhost:8080; # clsi-nginx.conf
++		proxy_pass http://127.0.0.1:8080; # clsi-nginx.conf
+ 		proxy_http_version 1.1;
+   }
+   # handle output files for anonymous users
+   location ~ ^/project/([0-9a-f]+)/build/([0-9a-f-]+)/output/output\.([a-z]+)$ {
+-		proxy_pass http://localhost:8080; # clsi-nginx.conf
++		proxy_pass http://127.0.0.1:8080; # clsi-nginx.conf
+ 		proxy_http_version 1.1;
+   }
+   # PDF range for specific users
+   location ~ ^/project/([0-9a-f]+)/user/([0-9a-f]+)/content/([0-9a-f-]+/[0-9a-f]+)$ {
+-		proxy_pass http://localhost:8080; # clsi-nginx.conf
++		proxy_pass http://127.0.0.1:8080; # clsi-nginx.conf
+ 		proxy_http_version 1.1;
+   }
+   # PDF range for anonymous users
+   location ~ ^/project/([0-9a-f]+)/content/([0-9a-f-]+/[0-9a-f]+)$ {
+-		proxy_pass http://localhost:8080; # clsi-nginx.conf
++		proxy_pass http://127.0.0.1:8080; # clsi-nginx.conf
+ 		proxy_http_version 1.1;
+   }

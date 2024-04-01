@@ -1,0 +1,118 @@
+--- chat-overleaf/run
++++ chat-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30100"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/chat/app.js >> /var/log/overleaf/chat.log 2>&1
+--- clsi-overleaf/run
++++ clsi-overleaf/run
+@@ -15,4 +15,7 @@ if [ -e '/var/run/docker.sock' ]; then
+   usermod -aG dockeronhost www-data
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/clsi/app.js >> /var/log/overleaf/clsi.log 2>&1
+--- contacts-overleaf/run
++++ contacts-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30360"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/contacts/app.js >> /var/log/overleaf/contacts.log 2>&1
+--- docstore-overleaf/run
++++ docstore-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30160"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/docstore/app.js >> /var/log/overleaf/docstore.log 2>&1
+--- document-updater-overleaf/run
++++ document-updater-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30030"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/document-updater/app.js >> /var/log/overleaf/document-updater.log 2>&1
+--- filestore-overleaf/run
++++ filestore-overleaf/run
+@@ -1,2 +1,6 @@
+ #!/bin/bash
++
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node /overleaf/services/filestore/app.js >> /var/log/overleaf/filestore.log 2>&1
+--- notifications-overleaf/run
++++ notifications-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30420"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/notifications/app.js >> /var/log/overleaf/notifications.log 2>&1
+--- project-history-overleaf/run
++++ project-history-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30540"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/project-history/app.js >> /var/log/overleaf/project-history.log 2>&1
+--- real-time-overleaf/run
++++ real-time-overleaf/run
+@@ -1,2 +1,6 @@
+ #!/bin/bash
++
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node /overleaf/services/real-time/app.js >> /var/log/overleaf/real-time.log 2>&1
+--- spelling-overleaf/run
++++ spelling-overleaf/run
+@@ -6,4 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30050"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
++
+ exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/spelling/app.js >> /var/log/overleaf/spelling.log 2>&1
+--- web-api-overleaf/run
++++ web-api-overleaf/run
+@@ -6,6 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:30000"
+ fi
+
++source /etc/overleaf/env.sh
+ export LISTEN_ADDRESS=0.0.0.0
+ export ENABLED_SERVICES="api"
+ export METRICS_APP_NAME="web-api"
+--- web-overleaf/run
++++ web-overleaf/run
+@@ -6,6 +6,8 @@ if [ "$DEBUG_NODE" == "true" ]; then
+     NODE_PARAMS="--inspect=0.0.0.0:40000"
+ fi
+
++source /etc/overleaf/env.sh
++export LISTEN_ADDRESS=127.0.0.1
+ export ENABLED_SERVICES="web"
+ export WEB_PORT="4000"
