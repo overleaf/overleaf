@@ -200,80 +200,76 @@ const DocumentManager = {
           { docId, projectId, oldLines, newLines },
           'setting a document via http'
         )
-        DiffCodec.diffAsShareJsOp(oldLines, newLines, (error, op) => {
+        const op = DiffCodec.diffAsShareJsOp(oldLines, newLines)
+        if (undoing) {
+          for (const o of op || []) {
+            o.u = true
+          } // Turn on undo flag for each op for track changes
+        }
+        const update = {
+          doc: docId,
+          op,
+          v: version,
+          meta: {
+            type: 'external',
+            source,
+            user_id: userId,
+          },
+        }
+        // Keep track of external updates, whether they are for live documents
+        // (flush) or unloaded documents (evict), and whether the update is a no-op.
+        Metrics.inc('external-update', 1, {
+          status: op.length > 0 ? 'diff' : 'noop',
+          method: alreadyLoaded ? 'flush' : 'evict',
+          path: source,
+        })
+        const applyUpdateIfNeeded = cb => {
+          if (op.length === 0) {
+            // Do not notify the frontend about a noop update.
+            // We still want to execute the callback code below
+            // to evict the doc if we loaded it into redis for
+            // this update, otherwise the doc would never be
+            // removed from redis.
+            return cb(null)
+          }
+          UpdateManager.applyUpdate(projectId, docId, update, cb)
+        }
+        applyUpdateIfNeeded(error => {
           if (error) {
             return callback(error)
           }
-          if (undoing) {
-            for (const o of op || []) {
-              o.u = true
-            } // Turn on undo flag for each op for track changes
-          }
-          const update = {
-            doc: docId,
-            op,
-            v: version,
-            meta: {
-              type: 'external',
-              source,
-              user_id: userId,
-            },
-          }
-          // Keep track of external updates, whether they are for live documents
-          // (flush) or unloaded documents (evict), and whether the update is a no-op.
-          Metrics.inc('external-update', 1, {
-            status: op.length > 0 ? 'diff' : 'noop',
-            method: alreadyLoaded ? 'flush' : 'evict',
-            path: source,
-          })
-          const applyUpdateIfNeeded = cb => {
-            if (op.length === 0) {
-              // Do not notify the frontend about a noop update.
-              // We still want to execute the callback code below
-              // to evict the doc if we loaded it into redis for
-              // this update, otherwise the doc would never be
-              // removed from redis.
-              return cb(null)
-            }
-            UpdateManager.applyUpdate(projectId, docId, update, cb)
-          }
-          applyUpdateIfNeeded(error => {
-            if (error) {
-              return callback(error)
-            }
-            // If the document was loaded already, then someone has it open
-            // in a project, and the usual flushing mechanism will happen.
-            // Otherwise we should remove it immediately since nothing else
-            // is using it.
-            if (alreadyLoaded) {
-              DocumentManager.flushDocIfLoaded(
-                projectId,
-                docId,
-                (error, result) => {
-                  if (error) {
-                    return callback(error)
-                  }
-                  callback(null, result)
+          // If the document was loaded already, then someone has it open
+          // in a project, and the usual flushing mechanism will happen.
+          // Otherwise we should remove it immediately since nothing else
+          // is using it.
+          if (alreadyLoaded) {
+            DocumentManager.flushDocIfLoaded(
+              projectId,
+              docId,
+              (error, result) => {
+                if (error) {
+                  return callback(error)
                 }
-              )
-            } else {
-              DocumentManager.flushAndDeleteDoc(
-                projectId,
-                docId,
-                {},
-                (error, result) => {
-                  // There is no harm in flushing project history if the previous
-                  // call failed and sometimes it is required
-                  HistoryManager.flushProjectChangesAsync(projectId)
+                callback(null, result)
+              }
+            )
+          } else {
+            DocumentManager.flushAndDeleteDoc(
+              projectId,
+              docId,
+              {},
+              (error, result) => {
+                // There is no harm in flushing project history if the previous
+                // call failed and sometimes it is required
+                HistoryManager.flushProjectChangesAsync(projectId)
 
-                  if (error) {
-                    return callback(error)
-                  }
-                  callback(null, result)
+                if (error) {
+                  return callback(error)
                 }
-              )
-            }
-          })
+                callback(null, result)
+              }
+            )
+          }
         })
       }
     )

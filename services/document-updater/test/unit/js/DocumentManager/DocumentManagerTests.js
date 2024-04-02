@@ -463,9 +463,7 @@ describe('DocumentManager', function () {
             this.unflushedTime,
             true
           )
-        this.DiffCodec.diffAsShareJsOp = sinon
-          .stub()
-          .callsArgWith(2, null, this.ops)
+        this.DiffCodec.diffAsShareJsOp = sinon.stub().returns(this.ops)
         this.UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
         this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
         this.DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(3)
@@ -473,7 +471,7 @@ describe('DocumentManager', function () {
 
       describe('when not loaded but with the same content', function () {
         beforeEach(function () {
-          this.DiffCodec.diffAsShareJsOp = sinon.stub().yields(null, [])
+          this.DiffCodec.diffAsShareJsOp = sinon.stub().returns([])
           this.DocumentManager.getDoc = sinon
             .stub()
             .yields(
@@ -520,7 +518,7 @@ describe('DocumentManager', function () {
 
       describe('when already loaded with the same content', function () {
         beforeEach(function () {
-          this.DiffCodec.diffAsShareJsOp = sinon.stub().yields(null, [])
+          this.DiffCodec.diffAsShareJsOp = sinon.stub().returns([])
           this.DocumentManager.setDoc(
             this.project_id,
             this.doc_id,
@@ -700,9 +698,7 @@ describe('DocumentManager', function () {
             { i: 'foo', p: 4 },
             { d: 'bar', p: 42 },
           ]
-          this.DiffCodec.diffAsShareJsOp = sinon
-            .stub()
-            .callsArgWith(2, null, this.ops)
+          this.DiffCodec.diffAsShareJsOp = sinon.stub().returns(this.ops)
           this.DocumentManager.setDoc(
             this.project_id,
             this.doc_id,

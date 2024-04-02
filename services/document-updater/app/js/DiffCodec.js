@@ -9,7 +9,7 @@ module.exports = {
   REMOVED: -1,
   UNCHANGED: 0,
 
-  diffAsShareJsOp(before, after, callback) {
+  diffAsShareJsOp(before, after) {
     const diffs = dmp.diff_main(before.join('\n'), after.join('\n'))
     dmp.diff_cleanupSemantic(diffs)
 
@@ -35,6 +35,6 @@ module.exports = {
         throw new Error('Unknown type')
       }
     }
-    callback(null, ops)
+    return ops
   },
 }
