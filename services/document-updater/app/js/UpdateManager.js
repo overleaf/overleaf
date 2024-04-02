@@ -231,8 +231,6 @@ const UpdateManager = {
     }
   },
 
-  // lockUpdatesAndDo can't be promisified yet because it expects a
-  // callback-style function
   async lockUpdatesAndDo(method, projectId, docId, ...args) {
     const profile = new Profiler('lockUpdatesAndDo', {
       project_id: projectId,
@@ -242,21 +240,12 @@ const UpdateManager = {
     const lockValue = await LockManager.promises.getLock(docId)
     profile.log('getLock')
 
-    let responseArgs
+    let result
     try {
       await UpdateManager.processOutstandingUpdates(projectId, docId)
       profile.log('processOutstandingUpdates')
 
-      // TODO: method is still a callback-style function. Change this when promisifying DocumentManager
-      responseArgs = await new Promise((resolve, reject) => {
-        method(projectId, docId, ...args, (error, ...responseArgs) => {
-          if (error) {
-            reject(error)
-          } else {
-            resolve(responseArgs)
-          }
-        })
-      })
+      result = await method(projectId, docId, ...args)
       profile.log('method')
     } finally {
       await LockManager.promises.releaseLock(docId, lockValue)
@@ -277,7 +266,7 @@ const UpdateManager = {
       }
     )
 
-    return responseArgs
+    return result
   },
 
   _sanitizeUpdate(update) {
@@ -380,29 +369,4 @@ const UpdateManager = {
   },
 }
 
-const CallbackifiedUpdateManager = callbackifyAll(UpdateManager)
-
-module.exports = CallbackifiedUpdateManager
-module.exports.promises = UpdateManager
-
-module.exports.lockUpdatesAndDo = function lockUpdatesAndDo(
-  method,
-  projectId,
-  docId,
-  ...rest
-) {
-  const adjustedLength = Math.max(rest.length, 1)
-  const args = rest.slice(0, adjustedLength - 1)
-  const callback = rest[adjustedLength - 1]
-
-  // TODO: During the transition to promises, UpdateManager.lockUpdatesAndDo
-  // returns the potentially multiple arguments that must be provided to the
-  // callback in an array.
-  UpdateManager.lockUpdatesAndDo(method, projectId, docId, ...args)
-    .then(responseArgs => {
-      callback(null, ...responseArgs)
-    })
-    .catch(err => {
-      callback(err)
-    })
-}
+module.exports = { ...callbackifyAll(UpdateManager), promises: UpdateManager }

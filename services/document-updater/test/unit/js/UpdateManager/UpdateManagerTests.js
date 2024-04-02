@@ -705,12 +705,9 @@ describe('UpdateManager', function () {
 
   describe('lockUpdatesAndDo', function () {
     beforeEach(function () {
-      this.method = sinon
-        .stub()
-        .yields(null, this.response_arg1, this.response_arg2)
+      this.methodResult = 'method result'
+      this.method = sinon.stub().resolves(this.methodResult)
       this.arg1 = 'argument 1'
-      this.response_arg1 = 'response argument 1'
-      this.response_arg2 = 'response argument 2'
     })
 
     describe('successfully', function () {
@@ -749,10 +746,7 @@ describe('UpdateManager', function () {
       })
 
       it('should return the method response arguments', function () {
-        expect(this.response).to.deep.equal([
-          this.response_arg1,
-          this.response_arg2,
-        ])
+        expect(this.response).to.equal(this.methodResult)
       })
 
       it('should release the lock', function () {
@@ -797,7 +791,7 @@ describe('UpdateManager', function () {
         this.UpdateManager.promises.processOutstandingUpdates = sinon
           .stub()
           .resolves()
-        this.method = sinon.stub().yields(this.error)
+        this.method = sinon.stub().rejects(this.error)
         await expect(
           this.UpdateManager.promises.lockUpdatesAndDo(
             this.method,

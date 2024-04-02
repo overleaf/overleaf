@@ -1,4 +1,5 @@
 const sinon = require('sinon')
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/DocumentManager.js'
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
@@ -13,19 +14,55 @@ describe('DocumentManager', function () {
     }
     this.Metrics.Timer.prototype.done = sinon.stub()
 
+    this.RedisManager = {
+      promises: {
+        clearUnflushedTime: sinon.stub().resolves(),
+        getDoc: sinon.stub(),
+        getPreviousDocOps: sinon.stub(),
+        putDocInMemory: sinon.stub().resolves(),
+        removeDocFromMemory: sinon.stub().resolves(),
+        renameDoc: sinon.stub().resolves(),
+        updateDocument: sinon.stub().resolves(),
+      },
+    }
+    this.ProjectHistoryRedisManager = {
+      promises: {
+        queueOps: sinon.stub().resolves(),
+        queueResyncDocContent: sinon.stub().resolves(),
+      },
+    }
+    this.PersistenceManager = {
+      promises: {
+        getDoc: sinon.stub(),
+        setDoc: sinon.stub().resolves(),
+      },
+    }
+    this.HistoryManager = {
+      flushProjectChangesAsync: sinon.stub(),
+    }
+    this.DiffCodec = {
+      diffAsShareJsOp: sinon.stub(),
+    }
+    this.UpdateManager = {
+      promises: {
+        applyUpdate: sinon.stub().resolves(),
+      },
+    }
+    this.RangesManager = {
+      acceptChanges: sinon.stub(),
+      deleteComment: sinon.stub(),
+    }
+
     this.DocumentManager = SandboxedModule.require(modulePath, {
       requires: {
-        './RedisManager': (this.RedisManager = {}),
-        './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
-        './PersistenceManager': (this.PersistenceManager = {}),
-        './HistoryManager': (this.HistoryManager = {
-          flushProjectChangesAsync: sinon.stub(),
-        }),
+        './RedisManager': this.RedisManager,
+        './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
+        './PersistenceManager': this.PersistenceManager,
+        './HistoryManager': this.HistoryManager,
         './Metrics': this.Metrics,
-        './RealTimeRedisManager': (this.RealTimeRedisManager = {}),
-        './DiffCodec': (this.DiffCodec = {}),
-        './UpdateManager': (this.UpdateManager = {}),
-        './RangesManager': (this.RangesManager = {}),
+        './DiffCodec': this.DiffCodec,
+        './UpdateManager': this.UpdateManager,
+        './RangesManager': this.RangesManager,
         './Errors': Errors,
       },
     })
@@ -33,7 +70,6 @@ describe('DocumentManager', function () {
     this.projectHistoryId = 'history-id-123'
     this.doc_id = 'doc-id-123'
     this.user_id = 1234
-    this.callback = sinon.stub()
     this.lines = ['one', 'two', 'three']
     this.version = 42
     this.ranges = { comments: 'mock', entries: 'mock' }
@@ -51,72 +87,57 @@ describe('DocumentManager', function () {
 
   describe('flushAndDeleteDoc', function () {
     describe('successfully', function () {
-      beforeEach(function () {
-        this.RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
-        this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArgWith(2)
-        this.DocumentManager.flushAndDeleteDoc(
+      beforeEach(async function () {
+        this.DocumentManager.promises.flushDocIfLoaded = sinon.stub().resolves()
+        await this.DocumentManager.promises.flushAndDeleteDoc(
           this.project_id,
           this.doc_id,
-          {},
-          this.callback
+          {}
         )
       })
 
       it('should flush the doc', function () {
-        this.DocumentManager.flushDocIfLoaded
+        this.DocumentManager.promises.flushDocIfLoaded
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should remove the doc from redis', function () {
-        this.RedisManager.removeDocFromMemory
+        this.RedisManager.promises.removeDocFromMemory
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
-      })
-
-      it('should call the callback without error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
       })
     })
 
     describe('when a flush error occurs', function () {
-      beforeEach(function () {
-        this.DocumentManager.flushDocIfLoaded = sinon
+      beforeEach(async function () {
+        this.DocumentManager.promises.flushDocIfLoaded = sinon
           .stub()
-          .callsArgWith(2, new Error('boom!'))
-        this.RedisManager.removeDocFromMemory = sinon.stub().callsArg(2)
+          .rejects(new Error('boom!'))
+        await expect(
+          this.DocumentManager.promises.flushAndDeleteDoc(
+            this.project_id,
+            this.doc_id,
+            {}
+          )
+        ).to.be.rejected
       })
 
-      it('should not remove the doc from redis', function (done) {
-        this.DocumentManager.flushAndDeleteDoc(
-          this.project_id,
-          this.doc_id,
-          {},
-          error => {
-            error.should.exist
-            this.RedisManager.removeDocFromMemory.called.should.equal(false)
-            done()
-          }
+      it('should not remove the doc from redis', function () {
+        this.RedisManager.promises.removeDocFromMemory.called.should.equal(
+          false
         )
       })
 
       describe('when ignoring flush errors', function () {
-        it('should remove the doc from redis', function (done) {
-          this.DocumentManager.flushAndDeleteDoc(
+        it('should remove the doc from redis', async function () {
+          await this.DocumentManager.promises.flushAndDeleteDoc(
             this.project_id,
             this.doc_id,
-            { ignoreFlushErrors: true },
-            error => {
-              if (error) {
-                return done(error)
-              }
-              this.RedisManager.removeDocFromMemory.called.should.equal(true)
-              done()
-            }
+            { ignoreFlushErrors: true }
+          )
+          this.RedisManager.promises.removeDocFromMemory.called.should.equal(
+            true
           )
         })
       })
@@ -125,40 +146,31 @@ describe('DocumentManager', function () {
 
   describe('flushDocIfLoaded', function () {
     describe('when the doc is in Redis', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.unflushedTime,
-            this.lastUpdatedAt,
-            this.lastUpdatedBy
-          )
-        this.RedisManager.clearUnflushedTime = sinon
-          .stub()
-          .callsArgWith(1, null)
-        this.PersistenceManager.setDoc = sinon.stub().yields()
-        this.DocumentManager.flushDocIfLoaded(
+      beforeEach(async function () {
+        this.RedisManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: this.unflushedTime,
+          lastUpdatedAt: this.lastUpdatedAt,
+          lastUpdatedBy: this.lastUpdatedBy,
+        })
+        await this.DocumentManager.promises.flushDocIfLoaded(
           this.project_id,
-          this.doc_id,
-          this.callback
+          this.doc_id
         )
       })
 
       it('should get the doc from redis', function () {
-        this.RedisManager.getDoc
+        this.RedisManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should write the doc lines to the persistence layer', function () {
-        this.PersistenceManager.setDoc
+        this.PersistenceManager.promises.setDoc
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -170,242 +182,192 @@ describe('DocumentManager', function () {
           )
           .should.equal(true)
       })
-
-      it('should call the callback without error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
-      })
     })
 
     describe('when the document is not in Redis', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc = sinon
-          .stub()
-          .callsArgWith(2, null, null, null, null)
-        this.PersistenceManager.setDoc = sinon.stub().yields()
-        this.DocumentManager.flushDocIfLoaded(
+      beforeEach(async function () {
+        this.RedisManager.promises.getDoc.resolves({
+          lines: null,
+          version: null,
+          ranges: null,
+        })
+        await this.DocumentManager.promises.flushDocIfLoaded(
           this.project_id,
-          this.doc_id,
-          this.callback
+          this.doc_id
         )
       })
 
       it('should get the doc from redis', function () {
-        this.RedisManager.getDoc
+        this.RedisManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should not write anything to the persistence layer', function () {
-        this.PersistenceManager.setDoc.called.should.equal(false)
-      })
-
-      it('should call the callback without error', function () {
-        this.callback.calledWith(null).should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
+        this.PersistenceManager.promises.setDoc.called.should.equal(false)
       })
     })
   })
 
   describe('getDocAndRecentOps', function () {
     describe('with a previous version specified', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
-        this.RedisManager.getPreviousDocOps = sinon
-          .stub()
-          .callsArgWith(3, null, this.ops)
-        this.DocumentManager.getDocAndRecentOps(
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+        })
+        this.RedisManager.promises.getPreviousDocOps.resolves(this.ops)
+        this.result = await this.DocumentManager.promises.getDocAndRecentOps(
           this.project_id,
           this.doc_id,
-          this.fromVersion,
-          this.callback
+          this.fromVersion
         )
       })
 
       it('should get the doc', function () {
-        this.DocumentManager.getDoc
+        this.DocumentManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should get the doc ops', function () {
-        this.RedisManager.getPreviousDocOps
+        this.RedisManager.promises.getPreviousDocOps
           .calledWith(this.doc_id, this.fromVersion, this.version)
           .should.equal(true)
       })
 
-      it('should call the callback with the doc info', function () {
-        this.callback
-          .calledWith(
-            null,
-            this.lines,
-            this.version,
-            this.ops,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
-          .should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should return the doc info', function () {
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+          ops: this.ops,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+        })
       })
     })
 
     describe('with no previous version specified', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
-        this.RedisManager.getPreviousDocOps = sinon
-          .stub()
-          .callsArgWith(3, null, this.ops)
-        this.DocumentManager.getDocAndRecentOps(
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+        })
+        this.RedisManager.promises.getPreviousDocOps.resolves(this.ops)
+        this.result = await this.DocumentManager.promises.getDocAndRecentOps(
           this.project_id,
           this.doc_id,
-          -1,
-          this.callback
+          -1
         )
       })
 
       it('should get the doc', function () {
-        this.DocumentManager.getDoc
+        this.DocumentManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should not need to get the doc ops', function () {
-        this.RedisManager.getPreviousDocOps.called.should.equal(false)
+        this.RedisManager.promises.getPreviousDocOps.called.should.equal(false)
       })
 
-      it('should call the callback with the doc info', function () {
-        this.callback
-          .calledWith(
-            null,
-            this.lines,
-            this.version,
-            [],
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
-          .should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should return the doc info', function () {
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+          ops: [],
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+        })
       })
     })
   })
 
   describe('getDoc', function () {
     describe('when the doc exists in Redis', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.unflushedTime,
-            this.lastUpdatedAt,
-            this.lastUpdatedBy,
-            this.historyRangesSupport
-          )
-        this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
+      beforeEach(async function () {
+        this.RedisManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: this.unflushedTime,
+          lastUpdatedAt: this.lastUpdatedAt,
+          lastUpdatedBy: this.lastUpdatedBy,
+          historyRangesSupport: this.historyRangesSupport,
+        })
+        this.result = await this.DocumentManager.promises.getDoc(
+          this.project_id,
+          this.doc_id
+        )
       })
 
       it('should get the doc from Redis', function () {
-        this.RedisManager.getDoc
+        this.RedisManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
-      it('should call the callback with the doc info', function () {
-        this.callback
-          .calledWith(
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.unflushedTime,
-            true,
-            this.historyRangesSupport
-          )
-          .should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should return the doc info', function () {
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: this.unflushedTime,
+          alreadyLoaded: true,
+          historyRangesSupport: this.historyRangesSupport,
+        })
       })
     })
 
     describe('when the doc does not exist in Redis', function () {
-      beforeEach(function () {
-        this.RedisManager.getDoc = sinon
-          .stub()
-          .callsArgWith(2, null, null, null, null, null, null)
-        this.PersistenceManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.historyRangesSupport
-          )
-        this.RedisManager.putDocInMemory = sinon.stub().yields()
-        this.DocumentManager.getDoc(this.project_id, this.doc_id, this.callback)
+      beforeEach(async function () {
+        this.RedisManager.promises.getDoc.resolves({
+          lines: null,
+          version: null,
+          ranges: null,
+          pathname: null,
+          projectHistoryId: null,
+        })
+        this.PersistenceManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          historyRangesSupport: this.historyRangesSupport,
+        })
+        this.result = await this.DocumentManager.promises.getDoc(
+          this.project_id,
+          this.doc_id
+        )
       })
 
       it('should try to get the doc from Redis', function () {
-        this.RedisManager.getDoc
+        this.RedisManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should get the doc from the PersistenceManager', function () {
-        this.PersistenceManager.getDoc
+        this.PersistenceManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should set the doc in Redis', function () {
-        this.RedisManager.putDocInMemory
+        this.RedisManager.promises.putDocInMemory
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -419,24 +381,17 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
 
-      it('should call the callback with the doc info', function () {
-        this.callback
-          .calledWith(
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            null,
-            false,
-            this.historyRangesSupport
-          )
-          .should.equal(true)
-      })
-
-      it('should time the execution', function () {
-        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      it('should return doc info', function () {
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: null,
+          alreadyLoaded: false,
+          historyRangesSupport: this.historyRangesSupport,
+        })
       })
     })
   })
@@ -450,53 +405,46 @@ describe('DocumentManager', function () {
           { i: 'foo', p: 4 },
           { d: 'bar', p: 42 },
         ]
-        this.DocumentManager.getDoc = sinon
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.beforeLines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          unflushedTime: this.unflushedTime,
+          alreadyLoaded: true,
+        })
+        this.DiffCodec.diffAsShareJsOp.returns(this.ops)
+        this.DocumentManager.promises.flushDocIfLoaded = sinon.stub().resolves()
+        this.DocumentManager.promises.flushAndDeleteDoc = sinon
           .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.beforeLines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId,
-            this.unflushedTime,
-            true
-          )
-        this.DiffCodec.diffAsShareJsOp = sinon.stub().returns(this.ops)
-        this.UpdateManager.applyUpdate = sinon.stub().callsArgWith(3, null)
-        this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
-        this.DocumentManager.flushAndDeleteDoc = sinon.stub().callsArg(3)
+          .resolves()
       })
 
       describe('when not loaded but with the same content', function () {
-        beforeEach(function () {
-          this.DiffCodec.diffAsShareJsOp = sinon.stub().returns([])
-          this.DocumentManager.getDoc = sinon
-            .stub()
-            .yields(
-              null,
-              this.beforeLines,
-              this.version,
-              this.ranges,
-              this.pathname,
-              this.projectHistoryId,
-              this.unflushedTime,
-              false
-            )
-          this.DocumentManager.setDoc(
+        beforeEach(async function () {
+          this.DiffCodec.diffAsShareJsOp.returns([])
+          this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+            lines: this.beforeLines,
+            version: this.version,
+            ranges: this.ranges,
+            pathname: this.pathname,
+            projectHistoryId: this.projectHistoryId,
+            unflushedTime: this.unflushedTime,
+            alreadyLoaded: false,
+          })
+          await this.DocumentManager.promises.setDoc(
             this.project_id,
             this.doc_id,
             this.beforeLines,
             this.source,
             this.user_id,
-            false,
-            this.callback
+            false
           )
         })
 
         it('should not apply the diff as a ShareJS op', function () {
-          this.UpdateManager.applyUpdate.called.should.equal(false)
+          this.UpdateManager.promises.applyUpdate.called.should.equal(false)
         })
 
         it('should increment the external update metric', function () {
@@ -510,28 +458,27 @@ describe('DocumentManager', function () {
         })
 
         it('should flush and delete the doc from redis', function () {
-          this.DocumentManager.flushAndDeleteDoc
+          this.DocumentManager.promises.flushAndDeleteDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
       })
 
       describe('when already loaded with the same content', function () {
-        beforeEach(function () {
-          this.DiffCodec.diffAsShareJsOp = sinon.stub().returns([])
-          this.DocumentManager.setDoc(
+        beforeEach(async function () {
+          this.DiffCodec.diffAsShareJsOp.returns([])
+          await this.DocumentManager.promises.setDoc(
             this.project_id,
             this.doc_id,
             this.beforeLines,
             this.source,
             this.user_id,
-            false,
-            this.callback
+            false
           )
         })
 
         it('should not apply the diff as a ShareJS op', function () {
-          this.UpdateManager.applyUpdate.called.should.equal(false)
+          this.UpdateManager.promises.applyUpdate.called.should.equal(false)
         })
 
         it('should increment the external update metric', function () {
@@ -545,27 +492,26 @@ describe('DocumentManager', function () {
         })
 
         it('should flush the doc to Mongo', function () {
-          this.DocumentManager.flushDocIfLoaded
+          this.DocumentManager.promises.flushDocIfLoaded
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
       })
 
       describe('when already loaded', function () {
-        beforeEach(function () {
-          this.DocumentManager.setDoc(
+        beforeEach(async function () {
+          await this.DocumentManager.promises.setDoc(
             this.project_id,
             this.doc_id,
             this.afterLines,
             this.source,
             this.user_id,
-            false,
-            this.callback
+            false
           )
         })
 
         it('should get the current doc lines', function () {
-          this.DocumentManager.getDoc
+          this.DocumentManager.promises.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
@@ -577,7 +523,7 @@ describe('DocumentManager', function () {
         })
 
         it('should apply the diff as a ShareJS op', function () {
-          this.UpdateManager.applyUpdate
+          this.UpdateManager.promises.applyUpdate
             .calledWith(this.project_id, this.doc_id, {
               doc: this.doc_id,
               v: this.version,
@@ -602,7 +548,7 @@ describe('DocumentManager', function () {
         })
 
         it('should flush the doc to Mongo', function () {
-          this.DocumentManager.flushDocIfLoaded
+          this.DocumentManager.promises.flushDocIfLoaded
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
@@ -612,42 +558,29 @@ describe('DocumentManager', function () {
             false
           )
         })
-
-        it('should call the callback', function () {
-          this.callback.calledWith(null).should.equal(true)
-        })
-
-        it('should time the execution', function () {
-          this.Metrics.Timer.prototype.done.called.should.equal(true)
-        })
       })
 
       describe('when not already loaded', function () {
-        beforeEach(function () {
-          this.DocumentManager.getDoc = sinon
-            .stub()
-            .callsArgWith(
-              2,
-              null,
-              this.beforeLines,
-              this.version,
-              this.pathname,
-              null,
-              false
-            )
-          this.DocumentManager.setDoc(
+        beforeEach(async function () {
+          this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+            lines: this.beforeLines,
+            version: this.version,
+            pathname: this.pathname,
+            unflushedTime: null,
+            alreadyLoaded: false,
+          })
+          await this.DocumentManager.promises.setDoc(
             this.project_id,
             this.doc_id,
             this.afterLines,
             this.source,
             this.user_id,
-            false,
-            this.callback
+            false
           )
         })
 
         it('should flush and delete the doc from the doc updater', function () {
-          this.DocumentManager.flushAndDeleteDoc
+          this.DocumentManager.promises.flushAndDeleteDoc
             .calledWith(this.project_id, this.doc_id, {})
             .should.equal(true)
         })
@@ -670,43 +603,39 @@ describe('DocumentManager', function () {
       })
 
       describe('without new lines', function () {
-        beforeEach(function () {
-          this.DocumentManager.setDoc(
-            this.project_id,
-            this.doc_id,
-            null,
-            this.source,
-            this.user_id,
-            false,
-            this.callback
-          )
-        })
-
-        it('should return the callback with an error', function () {
-          this.callback.calledWith(new Error('No lines were passed to setDoc'))
+        beforeEach(async function () {
+          await expect(
+            this.DocumentManager.promises.setDoc(
+              this.project_id,
+              this.doc_id,
+              null,
+              this.source,
+              this.user_id,
+              false
+            )
+          ).to.be.rejectedWith('No lines were provided to setDoc')
         })
 
         it('should not try to get the doc lines', function () {
-          this.DocumentManager.getDoc.called.should.equal(false)
+          this.DocumentManager.promises.getDoc.called.should.equal(false)
         })
       })
 
       describe('with the undoing flag', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           // Copy ops so we don't interfere with other tests
           this.ops = [
             { i: 'foo', p: 4 },
             { d: 'bar', p: 42 },
           ]
-          this.DiffCodec.diffAsShareJsOp = sinon.stub().returns(this.ops)
-          this.DocumentManager.setDoc(
+          this.DiffCodec.diffAsShareJsOp.returns(this.ops)
+          await this.DocumentManager.promises.setDoc(
             this.project_id,
             this.doc_id,
             this.afterLines,
             this.source,
             this.user_id,
-            true,
-            this.callback
+            true
           )
         })
 
@@ -730,39 +659,38 @@ describe('DocumentManager', function () {
       this.lines = ['original', 'lines']
       this.ranges = { entries: 'mock', comments: 'mock' }
       this.updated_ranges = { entries: 'updated', comments: 'updated' }
-      this.DocumentManager.getDoc = sinon
-        .stub()
-        .yields(null, this.lines, this.version, this.ranges)
-      this.RangesManager.acceptChanges = sinon
-        .stub()
-        .returns(this.updated_ranges)
-      this.RedisManager.updateDocument = sinon.stub().yields()
+      this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+        lines: this.lines,
+        version: this.version,
+        ranges: this.ranges,
+      })
+      this.RangesManager.acceptChanges.returns(this.updated_ranges)
     })
 
     describe('successfully with a single change', function () {
-      beforeEach(function () {
-        this.DocumentManager.acceptChanges(
+      beforeEach(async function () {
+        await this.DocumentManager.promises.acceptChanges(
           this.project_id,
           this.doc_id,
-          [this.change_id],
-          this.callback
+          [this.change_id]
         )
       })
 
       it("should get the document's current ranges", function () {
-        this.DocumentManager.getDoc
+        this.DocumentManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should apply the accept change to the ranges', function () {
-        this.RangesManager.acceptChanges
-          .calledWith([this.change_id], this.ranges)
-          .should.equal(true)
+        this.RangesManager.acceptChanges.should.have.been.calledWith(
+          [this.change_id],
+          this.ranges
+        )
       })
 
       it('should save the updated ranges', function () {
-        this.RedisManager.updateDocument
+        this.RedisManager.promises.updateDocument
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -774,19 +702,14 @@ describe('DocumentManager', function () {
           )
           .should.equal(true)
       })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
 
     describe('successfully with multiple changes', function () {
-      beforeEach(function () {
-        this.DocumentManager.acceptChanges(
+      beforeEach(async function () {
+        await this.DocumentManager.promises.acceptChanges(
           this.project_id,
           this.doc_id,
-          this.change_ids,
-          this.callback
+          this.change_ids
         )
       })
 
@@ -798,26 +721,21 @@ describe('DocumentManager', function () {
     })
 
     describe('when the doc is not found', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDoc = sinon
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon
           .stub()
-          .yields(null, null, null, null)
-        this.DocumentManager.acceptChanges(
-          this.project_id,
-          this.doc_id,
-          [this.change_id],
-          this.callback
-        )
+          .resolves({ lines: null, version: null, ranges: null })
+        await expect(
+          this.DocumentManager.promises.acceptChanges(
+            this.project_id,
+            this.doc_id,
+            [this.change_id]
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
 
       it('should not save anything', function () {
-        this.RedisManager.updateDocument.called.should.equal(false)
-      })
-
-      it('should call the callback with a not found error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+        this.RedisManager.promises.updateDocument.called.should.equal(false)
       })
     })
   })
@@ -830,39 +748,31 @@ describe('DocumentManager', function () {
       this.ranges = { comments: ['one', 'two', 'three'] }
       this.updated_ranges = { comments: ['one', 'three'] }
       this.historyRangesSupport = true
-      this.DocumentManager.getDoc = sinon
-        .stub()
-        .yields(
-          null,
-          this.lines,
-          this.version,
-          this.ranges,
-          this.pathname,
-          this.projectHistoryId,
-          Date.now() - 1e9,
-          true,
-          this.historyRangesSupport
-        )
-      this.RangesManager.deleteComment = sinon
-        .stub()
-        .returns(this.updated_ranges)
-      this.RedisManager.updateDocument = sinon.stub().yields()
-      this.ProjectHistoryRedisManager.queueOps = sinon.stub().yields()
+      this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+        lines: this.lines,
+        version: this.version,
+        ranges: this.ranges,
+        pathname: this.pathname,
+        projectHistoryId: this.projectHistoryId,
+        unflushedTime: Date.now() - 1e9,
+        alreadyLoaded: true,
+        historyRangesSupport: this.historyRangesSupport,
+      })
+      this.RangesManager.deleteComment.returns(this.updated_ranges)
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.deleteComment(
+      beforeEach(async function () {
+        await this.DocumentManager.promises.deleteComment(
           this.project_id,
           this.doc_id,
           this.comment_id,
-          this.user_id,
-          this.callback
+          this.user_id
         )
       })
 
       it("should get the document's current ranges", function () {
-        this.DocumentManager.getDoc
+        this.DocumentManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
@@ -874,7 +784,7 @@ describe('DocumentManager', function () {
       })
 
       it('should save the updated ranges', function () {
-        this.RedisManager.updateDocument
+        this.RedisManager.promises.updateDocument
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -888,172 +798,151 @@ describe('DocumentManager', function () {
       })
 
       it('should queue the delete comment operation', function () {
-        this.ProjectHistoryRedisManager.queueOps
-          .calledWith(
-            this.project_id,
-            JSON.stringify({
-              pathname: this.pathname,
-              deleteComment: this.comment_id,
-              meta: {
-                ts: new Date(),
-                user_id: this.user_id,
-              },
-            }),
-            sinon.match.func
-          )
-          .should.equal(true)
-      })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
+        this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWith(
+          this.project_id,
+          JSON.stringify({
+            pathname: this.pathname,
+            deleteComment: this.comment_id,
+            meta: {
+              ts: new Date(),
+              user_id: this.user_id,
+            },
+          })
+        )
       })
     })
 
     describe('when the doc is not found', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDoc = sinon
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon
           .stub()
-          .yields(null, null, null, null)
-        this.DocumentManager.acceptChanges(
-          this.project_id,
-          this.doc_id,
-          [this.comment_id],
-          this.callback
-        )
+          .resolves({ lines: null, version: null, ranges: null })
+        await expect(
+          this.DocumentManager.promises.acceptChanges(
+            this.project_id,
+            this.doc_id,
+            [this.comment_id]
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
 
       it('should not save anything', function () {
-        this.RedisManager.updateDocument.called.should.equal(false)
-      })
-
-      it('should call the callback with a not found error', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
+        this.RedisManager.promises.updateDocument.called.should.equal(false)
       })
     })
   })
 
   describe('getDocAndFlushIfOld', function () {
     beforeEach(function () {
-      this.DocumentManager.flushDocIfLoaded = sinon.stub().callsArg(2)
+      this.DocumentManager.promises.flushDocIfLoaded = sinon.stub().resolves()
     })
 
     describe('when the doc is in Redis', function () {
       describe('and has changes to be flushed', function () {
-        beforeEach(function () {
-          this.DocumentManager.getDoc = sinon
-            .stub()
-            .callsArgWith(
-              2,
-              null,
-              this.lines,
-              this.version,
-              this.ranges,
-              this.projectHistoryId,
-              this.pathname,
-              Date.now() - 1e9,
-              true
-            )
-          this.DocumentManager.getDocAndFlushIfOld(
+        beforeEach(async function () {
+          this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+            lines: this.lines,
+            version: this.version,
+            ranges: this.ranges,
+            projectHistoryId: this.projectHistoryId,
+            pathname: this.pathname,
+            unflushedTime: Date.now() - 1e9,
+            alreadyLoaded: true,
+          })
+          this.result = await this.DocumentManager.promises.getDocAndFlushIfOld(
             this.project_id,
-            this.doc_id,
-            this.callback
+            this.doc_id
           )
         })
 
         it('should get the doc', function () {
-          this.DocumentManager.getDoc
+          this.DocumentManager.promises.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
         it('should flush the doc', function () {
-          this.DocumentManager.flushDocIfLoaded
+          this.DocumentManager.promises.flushDocIfLoaded
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
-        it('should call the callback with the lines and versions', function () {
-          this.callback
-            .calledWith(null, this.lines, this.version)
-            .should.equal(true)
+        it('should return the lines and versions', function () {
+          expect(this.result).to.deep.equal({
+            lines: this.lines,
+            version: this.version,
+          })
         })
       })
 
       describe("and has only changes that don't need to be flushed", function () {
-        beforeEach(function () {
-          this.DocumentManager.getDoc = sinon
-            .stub()
-            .callsArgWith(
-              2,
-              null,
-              this.lines,
-              this.version,
-              this.ranges,
-              this.pathname,
-              Date.now() - 100,
-              true
-            )
-          this.DocumentManager.getDocAndFlushIfOld(
+        beforeEach(async function () {
+          this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+            lines: this.lines,
+            version: this.version,
+            ranges: this.ranges,
+            pathname: this.pathname,
+            unflushedTime: Date.now() - 100,
+            alreadyLoaded: true,
+          })
+          this.result = await this.DocumentManager.promises.getDocAndFlushIfOld(
             this.project_id,
-            this.doc_id,
-            this.callback
+            this.doc_id
           )
         })
 
         it('should get the doc', function () {
-          this.DocumentManager.getDoc
+          this.DocumentManager.promises.getDoc
             .calledWith(this.project_id, this.doc_id)
             .should.equal(true)
         })
 
         it('should not flush the doc', function () {
-          this.DocumentManager.flushDocIfLoaded.called.should.equal(false)
+          this.DocumentManager.promises.flushDocIfLoaded.called.should.equal(
+            false
+          )
         })
 
-        it('should call the callback with the lines and versions', function () {
-          this.callback
-            .calledWith(null, this.lines, this.version)
-            .should.equal(true)
+        it('should return the lines and versions', function () {
+          expect(this.result).to.deep.equal({
+            lines: this.lines,
+            version: this.version,
+          })
         })
       })
     })
 
     describe('when the doc is not in Redis', function () {
-      beforeEach(function () {
-        this.DocumentManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            null,
-            false
-          )
-        this.DocumentManager.getDocAndFlushIfOld(
+      beforeEach(async function () {
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          alreadyLoaded: false,
+        })
+        this.result = await this.DocumentManager.promises.getDocAndFlushIfOld(
           this.project_id,
-          this.doc_id,
-          this.callback
+          this.doc_id
         )
       })
 
       it('should get the doc', function () {
-        this.DocumentManager.getDoc
+        this.DocumentManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('should not flush the doc', function () {
-        this.DocumentManager.flushDocIfLoaded.called.should.equal(false)
+        this.DocumentManager.promises.flushDocIfLoaded.called.should.equal(
+          false
+        )
       })
 
-      it('should call the callback with the lines and versions', function () {
-        this.callback
-          .calledWith(null, this.lines, this.version)
-          .should.equal(true)
+      it('should return the lines and versions', function () {
+        expect(this.result).to.deep.equal({
+          lines: this.lines,
+          version: this.version,
+        })
       })
     })
   })
@@ -1061,23 +950,21 @@ describe('DocumentManager', function () {
   describe('renameDoc', function () {
     beforeEach(function () {
       this.update = 'some-update'
-      this.RedisManager.renameDoc = sinon.stub().yields()
     })
 
     describe('successfully', function () {
-      beforeEach(function () {
-        this.DocumentManager.renameDoc(
+      beforeEach(async function () {
+        await this.DocumentManager.promises.renameDoc(
           this.project_id,
           this.doc_id,
           this.user_id,
           this.update,
-          this.projectHistoryId,
-          this.callback
+          this.projectHistoryId
         )
       })
 
       it('should rename the document', function () {
-        this.RedisManager.renameDoc
+        this.RedisManager.promises.renameDoc
           .calledWith(
             this.project_id,
             this.doc_id,
@@ -1087,103 +974,86 @@ describe('DocumentManager', function () {
           )
           .should.equal(true)
       })
-
-      it('should call the callback', function () {
-        this.callback.called.should.equal(true)
-      })
     })
   })
 
   describe('resyncDocContents', function () {
     describe('when doc is loaded in redis', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.pathnameFromProjectStructureUpdate = '/foo/bar.tex'
-        this.RedisManager.getDoc = sinon
-          .stub()
-          .callsArgWith(
-            2,
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
-        this.ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
-        this.DocumentManager.resyncDocContents(
+        this.RedisManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+        })
+        await this.DocumentManager.promises.resyncDocContents(
           this.project_id,
           this.doc_id,
-          this.pathnameFromProjectStructureUpdate,
-          this.callback
+          this.pathnameFromProjectStructureUpdate
         )
       })
 
       it('gets the doc contents from redis', function () {
-        this.RedisManager.getDoc
+        this.RedisManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('queues a resync doc content update', function () {
-        this.ProjectHistoryRedisManager.queueResyncDocContent
+        this.ProjectHistoryRedisManager.promises.queueResyncDocContent
           .calledWith(
             this.project_id,
             this.projectHistoryId,
             this.doc_id,
             this.lines,
             this.version,
-            this.pathnameFromProjectStructureUpdate,
-            this.callback
+            this.pathnameFromProjectStructureUpdate
           )
           .should.equal(true)
       })
     })
 
     describe('when doc is not loaded in redis', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.pathnameFromProjectStructureUpdate = '/foo/bar.tex'
-        this.RedisManager.getDoc = sinon.stub().callsArgWith(2, null)
-        this.PersistenceManager.getDoc = sinon
-          .stub()
-          .yields(
-            null,
-            this.lines,
-            this.version,
-            this.ranges,
-            this.pathname,
-            this.projectHistoryId
-          )
-        this.ProjectHistoryRedisManager.queueResyncDocContent = sinon.stub()
-        this.DocumentManager.resyncDocContents(
+        this.RedisManager.promises.getDoc.resolves({})
+        this.PersistenceManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: this.ranges,
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+        })
+        await this.DocumentManager.promises.resyncDocContents(
           this.project_id,
           this.doc_id,
-          this.pathnameFromProjectStructureUpdate,
-          this.callback
+          this.pathnameFromProjectStructureUpdate
         )
       })
 
       it('tries to get the doc contents from redis', function () {
-        this.RedisManager.getDoc
+        this.RedisManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id)
           .should.equal(true)
       })
 
       it('gets the doc contents from web', function () {
-        this.PersistenceManager.getDoc
+        this.PersistenceManager.promises.getDoc
           .calledWith(this.project_id, this.doc_id, { peek: true })
           .should.equal(true)
       })
 
       it('queues a resync doc content update', function () {
-        this.ProjectHistoryRedisManager.queueResyncDocContent
+        this.ProjectHistoryRedisManager.promises.queueResyncDocContent
           .calledWith(
             this.project_id,
             this.projectHistoryId,
             this.doc_id,
             this.lines,
             this.version,
-            this.pathnameFromProjectStructureUpdate,
-            this.callback
+            this.pathnameFromProjectStructureUpdate
           )
           .should.equal(true)
       })
