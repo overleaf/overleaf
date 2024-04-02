@@ -4,11 +4,15 @@ import StartFreeTrialButton from '../../../shared/components/start-free-trial-bu
 import { memo } from 'react'
 import PdfLogEntry from './pdf-log-entry'
 import UpgradeBenefits from '../../../shared/components/upgrade-benefits'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 function TimeoutUpgradePrompt() {
   const { t } = useTranslation()
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
+
+  const { splitTestVariants } = useSplitTestContext()
+  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
 
   if (!window.ExposedSettings.enableSubscriptions || hasPremiumCompile) {
     return null
@@ -36,7 +40,11 @@ function TimeoutUpgradePrompt() {
                   bsStyle: 'success',
                   className: 'row-spaced-small',
                 }}
-              />
+              >
+                {hasNewPaywallCta
+                  ? t('get_more_compile_time')
+                  : t('start_free_trial')}
+              </StartFreeTrialButton>
             </p>
           )}
         </>

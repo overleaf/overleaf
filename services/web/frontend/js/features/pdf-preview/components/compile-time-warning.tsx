@@ -5,6 +5,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 import { useDetachCompileContext } from '../../../shared/context/detach-compile-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 const TWENTY_FOUR_DAYS = 24 * 60 * 60 * 24 * 1000
 
@@ -23,6 +24,9 @@ function CompileTimeWarning() {
     deliveryLatencies,
     isProjectOwner,
   } = useDetachCompileContext()
+
+  const { splitTestVariants } = useSplitTestContext()
+  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
 
   useEffect(() => {
     if (deliveryLatencies && deliveryLatencies.compileTimeServerE2E) {
@@ -101,7 +105,7 @@ function CompileTimeWarning() {
             handleClick={handleUpgradeClick}
             source="compile-time-warning"
           >
-            {t('upgrade')}
+            {hasNewPaywallCta ? t('get_more_compile_time') : t('upgrade')}
           </StartFreeTrialButton>
         </div>
       </div>

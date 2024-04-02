@@ -616,6 +616,9 @@ const ProjectController = {
         compileLogEventsAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'compile-log-events', cb)
         },
+        paywallCtaAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'paywall-cta', cb)
+        },
         projectTags(cb) {
           if (!userId) {
             return cb(null, [])

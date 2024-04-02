@@ -18,6 +18,7 @@ export default function AddCollaboratorsUpgrade() {
   const { splitTestVariants } = useSplitTestContext()
 
   const variant = splitTestVariants['project-share-modal-paywall']
+  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
 
   return (
     <div className={variant === 'default' ? 'add-collaborators-upgrade' : ''}>
@@ -33,7 +34,11 @@ export default function AddCollaboratorsUpgrade() {
             buttonProps={{ bsStyle: 'success' }}
             handleClick={() => setStartedFreeTrial(true)}
             source="project-sharing"
-          />
+          >
+            {hasNewPaywallCta
+              ? t('add_more_collaborators')
+              : t('start_free_trial')}
+          </StartFreeTrialButton>
         ) : (
           <Button
             bsStyle="primary"

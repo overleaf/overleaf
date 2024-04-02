@@ -400,6 +400,15 @@ async function projectListPage(req, res, next) {
     )
   }
 
+  try {
+    await SplitTestHandler.promises.getAssignment(req, res, 'paywall-cta')
+  } catch (error) {
+    logger.error(
+      { err: error },
+      'failed to get "paywall-cta" split test assignment'
+    )
+  }
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,

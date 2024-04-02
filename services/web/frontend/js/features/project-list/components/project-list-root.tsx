@@ -25,6 +25,7 @@ import LoadMore from './load-more'
 import { useEffect } from 'react'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '../../../shared/components/generic-error-boundary-fallback'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -40,7 +41,9 @@ export function ProjectListRootInner() {
   return (
     <ProjectListProvider>
       <ColorPickerProvider>
-        <ProjectListPageContent />
+        <SplitTestProvider>
+          <ProjectListPageContent />
+        </SplitTestProvider>
       </ColorPickerProvider>
     </ProjectListProvider>
   )

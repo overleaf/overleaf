@@ -3,6 +3,7 @@ import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import { Trans, useTranslation } from 'react-i18next'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import { FC } from 'react'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 const sendInfoClickEvent = () => {
   eventTracking.sendMB('paywall-info-click', {
@@ -16,6 +17,9 @@ export const CompileTimeoutChangingSoon: FC<{
   handleDismissChangingSoon: () => void
 }> = ({ isProjectOwner = false, handleDismissChangingSoon }) => {
   const { t } = useTranslation()
+
+  const { splitTestVariants } = useSplitTestContext()
+  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
 
   const compileTimeoutChangesBlogLink = (
     /* eslint-disable-next-line jsx-a11y/anchor-has-content */
@@ -51,7 +55,9 @@ export const CompileTimeoutChangingSoon: FC<{
               className: 'btn-secondary-compile-timeout-override',
             }}
           >
-            {t('start_free_trial_without_exclamation')}
+            {hasNewPaywallCta
+              ? t('get_more_compile_time')
+              : t('start_free_trial_without_exclamation')}
           </StartFreeTrialButton>
         }
         ariaLive="polite"

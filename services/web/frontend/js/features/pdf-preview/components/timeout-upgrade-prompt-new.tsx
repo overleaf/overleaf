@@ -6,6 +6,7 @@ import PdfLogEntry from './pdf-log-entry'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import { Button } from 'react-bootstrap'
 import * as eventTracking from '../../../infrastructure/event-tracking'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -58,6 +59,10 @@ const CompileTimeout = memo(function CompileTimeout({
   isProjectOwner,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
+
+  const { splitTestVariants } = useSplitTestContext()
+  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
+
   return (
     <PdfLogEntry
       headerTitle={t('your_compile_timed_out')}
@@ -107,7 +112,9 @@ const CompileTimeout = memo(function CompileTimeout({
                   block: true,
                 }}
               >
-                {t('start_a_free_trial')}
+                {hasNewPaywallCta
+                  ? t('get_more_compile_time')
+                  : t('start_a_free_trial')}
               </StartFreeTrialButton>
             </p>
           )}

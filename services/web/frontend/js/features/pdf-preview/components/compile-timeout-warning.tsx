@@ -2,12 +2,16 @@ import Notification from '@/shared/components/notification'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import { useTranslation } from 'react-i18next'
 import { FC } from 'react'
+import { useSplitTestContext } from '@/shared/context/split-test-context'
 
 export const CompileTimeoutWarning: FC<{
   handleDismissWarning: () => void
   showNewCompileTimeoutUI?: string
 }> = ({ handleDismissWarning, showNewCompileTimeoutUI }) => {
   const { t } = useTranslation()
+
+  const { splitTestVariants } = useSplitTestContext()
+  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
 
   return (
     <Notification
@@ -19,7 +23,9 @@ export const CompileTimeoutWarning: FC<{
             className: 'btn-secondary-compile-timeout-override',
           }}
         >
-          {t('start_free_trial_without_exclamation')}
+          {hasNewPaywallCta
+            ? t('get_more_compile_time')
+            : t('start_free_trial_without_exclamation')}
         </StartFreeTrialButton>
       }
       ariaLive="polite"

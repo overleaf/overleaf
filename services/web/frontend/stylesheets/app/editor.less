@@ -654,24 +654,24 @@ CodeMirror
 .compile-time-warning {
   padding: @padding-sm;
   background-color: @ol-green;
-  width: 420px;
+  max-width: 420px;
   box-shadow: 5px 5px 6px rgba(0, 0, 0, 0.3);
 
   .warning-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-right: 32px;
+    flex-wrap: wrap;
+    gap: @alert-padding;
   }
 
   .warning-text {
-    max-width: 300px;
-    padding-right: @alert-padding;
     display: inline-block;
     font-size: @font-size-small;
   }
   .upgrade-prompt {
     display: inline-flex;
+    margin-left: auto;
   }
 
   button.btn {
