@@ -1,4 +1,9 @@
-export type Update = TextUpdate | AddDocUpdate | AddFileUpdate | RenameUpdate | DeleteCommentUpdate
+export type Update =
+  | TextUpdate
+  | AddDocUpdate
+  | AddFileUpdate
+  | RenameUpdate
+  | DeleteCommentUpdate
 
 export type UpdateMeta = {
   user_id: string
@@ -57,6 +62,7 @@ export type InsertOp = {
   u?: boolean
   hpos?: number
   trackedDeleteRejection?: boolean
+  commentIds?: string[]
 }
 
 export type DeleteOp = {

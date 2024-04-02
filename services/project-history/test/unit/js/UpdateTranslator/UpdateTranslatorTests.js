@@ -476,7 +476,7 @@ describe('UpdateTranslator', function () {
               doc: this.doc_id,
               op: [
                 { p: 3, i: 'foo' },
-                { p: 15, i: 'bar' },
+                { p: 15, i: 'bar', commentIds: ['comment1'] },
               ],
               v: this.version,
               meta: {
@@ -501,7 +501,13 @@ describe('UpdateTranslator', function () {
             operations: [
               {
                 pathname: 'main.tex',
-                textOperation: [3, 'foo', 9, 'bar', 8],
+                textOperation: [
+                  3,
+                  'foo',
+                  9,
+                  { i: 'bar', commentIds: ['comment1'] },
+                  8,
+                ],
               },
             ],
             v2Authors: [this.user_id],

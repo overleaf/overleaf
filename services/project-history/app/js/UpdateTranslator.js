@@ -297,16 +297,19 @@ class OperationsBuilder {
             ts: new Date(update.meta.ts).toISOString(),
           },
         })
-      } else if (update.meta.tc != null) {
-        this.insert(op.i, {
-          tracking: {
+      } else {
+        const opts = {}
+        if (update.meta.tc != null) {
+          opts.tracking = {
             type: 'insert',
             userId: update.meta.user_id,
             ts: new Date(update.meta.ts).toISOString(),
-          },
-        })
-      } else {
-        this.insert(op.i)
+          }
+        }
+        if (op.commentIds != null) {
+          opts.commentIds = op.commentIds
+        }
+        this.insert(op.i, opts)
       }
     }
 
@@ -395,9 +398,10 @@ class OperationsBuilder {
    * @param {string} str
    * @param {object} opts
    * @param {TrackingProps} [opts.tracking]
+   * @param {string[]} [opts.commentIds]
    */
   insert(str, opts = {}) {
-    if (opts.tracking) {
+    if (opts.tracking || opts.commentIds) {
       this.textOperation.push({ i: str, ...opts })
     } else {
       this.textOperation.push(str)
