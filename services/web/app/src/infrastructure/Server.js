@@ -16,7 +16,7 @@ const SessionAutostartMiddleware = require('./SessionAutostartMiddleware')
 const SessionStoreManager = require('./SessionStoreManager')
 const AnalyticsManager = require('../Features/Analytics/AnalyticsManager')
 const session = require('express-session')
-const RedisStore = require('connect-redis')(session)
+const CustomSessionStore = require('./CustomSessionStore')
 const bodyParser = require('./BodyParserWrapper')
 const methodOverride = require('method-override')
 const cookieParser = require('cookie-parser')
@@ -48,42 +48,8 @@ const STATIC_CACHE_AGE = Settings.cacheStaticAssets
   ? oneDayInMilliseconds * 365
   : 0
 
-// Define a custom session store to record the largest session sizes
-// seen for anonymous users
-class CustomSessionStore extends RedisStore {
-  static largestSessionSize = 2048 // ignore sessions smaller than 2KB
-
-  static trackAnonymousSessionSize(sess) {
-    const isLoggedIn = SessionManager.isUserLoggedIn(sess)
-    if (!isLoggedIn) {
-      const len = JSON.stringify(sess, (key, value) => {
-        if (key === 'hashedPassword' && value?.length > 0) {
-          return '*'.repeat(value.length)
-        }
-        return value
-      }).length
-      if (len > CustomSessionStore.largestSessionSize) {
-        CustomSessionStore.largestSessionSize = len
-        logger.warn({ sess, sessionSize: len }, 'largest session size seen')
-      }
-    }
-  }
-
-  set(sid, sess, cb) {
-    CustomSessionStore.trackAnonymousSessionSize(sess)
-    super.set(sid, sess, cb)
-  }
-
-  touch(sid, sess, cb) {
-    CustomSessionStore.trackAnonymousSessionSize(sess)
-    super.touch(sid, sess, cb)
-  }
-}
-
 // Init the session store
-const sessionStore = new CustomSessionStore(
-  new RedisStore({ client: sessionsRedisClient })
-)
+const sessionStore = new CustomSessionStore({ client: sessionsRedisClient })
 
 const app = express()
 
