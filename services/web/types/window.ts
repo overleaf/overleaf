@@ -52,6 +52,7 @@ declare global {
     writefull?: {
       type: 'extension' | 'integration'
     }
+    WritefullStub?: any
     io?: any
     overleaf: {
       unstable: {
