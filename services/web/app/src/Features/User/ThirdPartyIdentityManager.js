@@ -100,7 +100,11 @@ function link(
       // projection includes thirdPartyIdentifiers for tests
       User.findOneAndUpdate(query, update, { new: 1 }, (err, res) => {
         if (err && err.code === 11000) {
-          callback(new Errors.ThirdPartyIdentityExistsError())
+          callback(
+            new Errors.ThirdPartyIdentityExistsError({
+              info: { externalUserId },
+            })
+          )
         } else if (err != null) {
           callback(err)
         } else if (res) {
