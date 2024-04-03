@@ -18,6 +18,7 @@ import { isValidEmail } from '../../../../shared/utils/email'
 import getMeta from '../../../../utils/meta'
 import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
+import { bsClassName } from '@/features/utils/bootstrap-5'
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -133,7 +134,10 @@ function AddEmail() {
 
   const InputComponent = (
     <>
-      <label htmlFor="affiliations-email" className="sr-only">
+      <label
+        htmlFor="affiliations-email"
+        className={bsClassName({ bs5: 'visually-hidden', bs3: 'sr-only' })}
+      >
         {t('email')}
       </label>
       <Input
@@ -157,7 +161,12 @@ function AddEmail() {
             </Cell>
           </Col>
           <Col md={4}>
-            <Cell className="text-md-right">
+            <Cell
+              className={bsClassName({
+                bs5: 'text-md-end',
+                bs3: 'text-md-right',
+              })}
+            >
               <AddNewEmailBtn email={newEmail} disabled />
             </Cell>
           </Col>
@@ -197,7 +206,12 @@ function AddEmail() {
         </Col>
         {!isSsoAvailableForDomain ? (
           <Col md={4}>
-            <Cell className="text-md-right">
+            <Cell
+              className={bsClassName({
+                bs5: 'text-md-end',
+                bs3: 'text-md-right',
+              })}
+            >
               <AddNewEmailBtn
                 email={newEmail}
                 disabled={isLoading || state.isLoading}

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import countries, { CountryCode } from '../../../data/countries-list'
+import { bsClassName } from '@/features/utils/bootstrap-5'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
@@ -55,7 +56,10 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
     >
       <div {...getComboboxProps()} className="ui-select-toggle">
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
-        <label {...getLabelProps()} className="sr-only">
+        <label
+          {...getLabelProps()}
+          className={bsClassName({ bs5: 'visually-hidden', bs3: 'sr-only' })}
+        >
           {t('country')}
         </label>
         <input

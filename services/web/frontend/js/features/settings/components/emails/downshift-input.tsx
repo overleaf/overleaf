@@ -2,6 +2,7 @@ import { useState, useEffect, forwardRef } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import { escapeRegExp } from 'lodash'
+import { bsClassName } from '@/features/utils/bootstrap-5'
 
 type DownshiftInputProps = {
   highlightMatches?: boolean
@@ -86,7 +87,14 @@ function Downshift({
     >
       <div {...getComboboxProps()}>
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
-        <label {...getLabelProps()} className={showLabel ? '' : 'sr-only'}>
+        <label
+          {...getLabelProps()}
+          className={
+            showLabel
+              ? ''
+              : bsClassName({ bs5: 'visually-hidden', bs3: 'sr-only' })
+          }
+        >
           {label}
         </label>
         <input

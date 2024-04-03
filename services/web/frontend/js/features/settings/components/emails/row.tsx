@@ -13,6 +13,7 @@ import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../utils/sso'
 import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
+import { bsClassName } from '@/features/utils/bootstrap-5'
 
 type EmailsRowProps = {
   userEmailData: UserEmailData
@@ -40,7 +41,12 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
           )}
         </Col>
         <Col md={3}>
-          <EmailCell className="text-md-right">
+          <EmailCell
+            className={bsClassName({
+              bs5: 'text-md-end',
+              bs3: 'text-md-right',
+            })}
+          >
             <Actions userEmailData={userEmailData} />
           </EmailCell>
         </Col>
@@ -144,7 +150,13 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
               </p>
             </EmailCell>
           </Col>
-          <Col md={3} className="text-md-right">
+          <Col
+            md={3}
+            className={bsClassName({
+              bs5: 'text-md-end',
+              bs3: 'text-md-right',
+            })}
+          >
             <EmailCell>
               <Button
                 bsStyle="primary"
