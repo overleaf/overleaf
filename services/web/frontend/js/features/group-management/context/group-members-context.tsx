@@ -28,6 +28,7 @@ export type GroupMembersContextValue = {
   removeMember: (user: User) => Promise<void>
   removeMemberLoading: boolean
   removeMemberError?: APIError
+  updateMemberView: (userId: string, updatedUser: User) => void
   inviteMemberLoading: boolean
   inviteError?: APIError
   paths: { [key: string]: string }
@@ -140,6 +141,21 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
     [selectedUsers, removeMember]
   )
 
+  const updateMemberView = useCallback(
+    (userId, updatedUser) => {
+      setUsers(
+        users.map(u => {
+          if (u._id === userId) {
+            return updatedUser
+          } else {
+            return u
+          }
+        })
+      )
+    },
+    [setUsers, users]
+  )
+
   const value = useMemo<GroupMembersContextValue>(
     () => ({
       users,
@@ -149,6 +165,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
       selectAllNonManagedUsers,
       selectUser,
       unselectUser,
+      updateMemberView,
       addMembers,
       removeMembers,
       removeMember,
@@ -166,6 +183,7 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
       selectAllNonManagedUsers,
       selectUser,
       unselectUser,
+      updateMemberView,
       addMembers,
       removeMembers,
       removeMember,

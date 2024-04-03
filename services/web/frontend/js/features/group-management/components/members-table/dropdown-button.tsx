@@ -22,6 +22,7 @@ type resendInviteResponse = {
 type ManagedUserDropdownButtonProps = {
   user: User
   openOffboardingModalForUser: (user: User) => void
+  openUnlinkUserModal: (user: User) => void
   groupId: string
   setGroupUserAlert: Dispatch<SetStateAction<GroupUserAlert>>
 }
@@ -29,6 +30,7 @@ type ManagedUserDropdownButtonProps = {
 export default function DropdownButton({
   user,
   openOffboardingModalForUser,
+  openUnlinkUserModal,
   groupId,
   setGroupUserAlert,
 }: ManagedUserDropdownButtonProps) {
@@ -178,6 +180,10 @@ export default function DropdownButton({
     removeMember(user)
   }
 
+  const onUnlinkUserClick = () => {
+    openUnlinkUserModal(user)
+  }
+
   const buttons = []
 
   if (userPending) {
@@ -205,6 +211,17 @@ export default function DropdownButton({
         {isResendingManagedUserInvite ? (
           <Icon type="spinner" spin style={{ marginLeft: '5px' }} />
         ) : null}
+      </MenuItemButton>
+    )
+  }
+  if (groupSSOActive && isGroupSSOLinked) {
+    buttons.push(
+      <MenuItemButton
+        onClick={onUnlinkUserClick}
+        key="unlink-user-action"
+        data-testid="unlink-user-action"
+      >
+        {t('unlink_user')}
       </MenuItemButton>
     )
   }

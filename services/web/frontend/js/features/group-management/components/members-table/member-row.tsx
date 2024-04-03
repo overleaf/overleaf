@@ -14,6 +14,7 @@ import getMeta from '@/utils/meta'
 type ManagedUserRowProps = {
   user: User
   openOffboardingModalForUser: (user: User) => void
+  openUnlinkUserModal: (user: User) => void
   groupId: string
   setGroupUserAlert: Dispatch<SetStateAction<GroupUserAlert>>
 }
@@ -21,6 +22,7 @@ type ManagedUserRowProps = {
 export default function MemberRow({
   user,
   openOffboardingModalForUser,
+  openUnlinkUserModal,
   setGroupUserAlert,
   groupId,
 }: ManagedUserRowProps) {
@@ -95,6 +97,7 @@ export default function MemberRow({
         <DropdownButton
           user={user}
           openOffboardingModalForUser={openOffboardingModalForUser}
+          openUnlinkUserModal={openUnlinkUserModal}
           setGroupUserAlert={setGroupUserAlert}
           groupId={groupId}
         />

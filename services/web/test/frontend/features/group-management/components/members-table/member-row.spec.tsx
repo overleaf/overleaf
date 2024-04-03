@@ -36,6 +36,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -87,6 +88,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -122,6 +124,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -157,6 +160,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -205,6 +209,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -255,6 +260,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -290,6 +296,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -325,6 +332,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -373,6 +381,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -425,6 +434,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -460,6 +470,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -495,6 +506,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -544,6 +556,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -596,6 +609,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -631,6 +645,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />
@@ -666,6 +681,7 @@ describe('MemberRow', function () {
             <MemberRow
               user={user}
               openOffboardingModalForUser={sinon.stub()}
+              openUnlinkUserModal={sinon.stub()}
               groupId={subscriptionId}
               setGroupUserAlert={sinon.stub()}
             />

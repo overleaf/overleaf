@@ -2,6 +2,7 @@ import { type PropsWithChildren, useState } from 'react'
 import { Alert, type AlertProps } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import type { GroupUserAlertVariant } from '../../utils/types'
+import NotificationScrolledTo from '@/shared/components/notification-scrolled-to'
 
 type GroupUsersListAlertProps = {
   variant: GroupUserAlertVariant
@@ -53,6 +54,25 @@ export default function ListAlert({
       )
     case 'resendInviteTooManyRequests':
       return <TooManyRequests onDismiss={onDismiss} userEmail={userEmail} />
+    case 'unlinkedSSO':
+      return (
+        <NotificationScrolledTo
+          type="success"
+          content={
+            <Trans
+              i18nKey="sso_reauth_request"
+              values={{ email: userEmail }}
+              components={[<strong />]} // eslint-disable-line react/jsx-key
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+            />
+          }
+          id="sso-user-unlinked"
+          ariaLive="polite"
+          isDismissible
+          onDismiss={onDismiss}
+        />
+      )
   }
 }
 

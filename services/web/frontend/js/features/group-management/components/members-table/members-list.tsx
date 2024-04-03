@@ -11,6 +11,7 @@ import ListAlert from './list-alert'
 import SelectAllCheckbox from './select-all-checkbox'
 import classNames from 'classnames'
 import getMeta from '@/utils/meta'
+import UnlinkUserModal from './unlink-user-modal'
 
 type ManagedUsersListProps = {
   groupId: string
@@ -23,6 +24,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
   )
   const [groupUserAlert, setGroupUserAlert] =
     useState<GroupUserAlert>(undefined)
+  const [userToUnlink, setUserToUnlink] = useState<User | undefined>(undefined)
   const { users } = useGroupMembersContext()
   const managedUsersActive: any = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
@@ -100,6 +102,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
                       key={user.email}
                       user={user}
                       openOffboardingModalForUser={setUserToOffboard}
+                      openUnlinkUserModal={setUserToUnlink}
                       setGroupUserAlert={setGroupUserAlert}
                       groupId={groupId}
                     />
@@ -116,6 +119,13 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
           groupId={groupId}
           allMembers={users}
           onClose={() => setUserToOffboard(undefined)}
+        />
+      )}
+      {userToUnlink && (
+        <UnlinkUserModal
+          user={userToUnlink}
+          onClose={() => setUserToUnlink(undefined)}
+          setGroupUserAlert={setGroupUserAlert}
         />
       )}
     </div>

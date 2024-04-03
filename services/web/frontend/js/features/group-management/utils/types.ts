@@ -6,6 +6,7 @@ export type GroupUserAlertVariant =
   | 'resendInviteTooManyRequests'
   | 'resendSSOLinkInviteSuccess'
   | 'resendSSOLinkInviteFailed'
+  | 'unlinkedSSO'
 
 export type GroupUserAlert =
   | {
