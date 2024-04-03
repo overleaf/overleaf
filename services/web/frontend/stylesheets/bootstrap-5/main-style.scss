@@ -1,18 +1,18 @@
 // Web fonts
 @import '../../fonts/noto-sans';
 @import '../../fonts/dm-mono';
-@import '../../fonts/merriweather.css';
-@import '../../fonts/source-code-pro.css';
-@import '../../fonts/stix-two-math.css';
-@import '../../fonts/noto-serif.css';
-@import '../../fonts/material-symbols.css';
-@import '../../fonts/font-awesome.css';
+@import '../../fonts/merriweather';
+@import '../../fonts/source-code-pro';
+@import '../../fonts/stix-two-math';
+@import '../../fonts/noto-serif';
+@import '../../fonts/material-symbols';
+@import '../../fonts/font-awesome';
 
 $is-overleaf-light: false;
 
 // Vendor CSS
 // TODO Bootstrap 5: Check whether this works with Bootstrap 5, and whether we can replace it
-@import '../vendor/select/select.css';
+@import '../vendor/select/select';
 
 // Sass and CSS variables from Overleaf foundations
 @import 'foundations/colors';
