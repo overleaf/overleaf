@@ -1,5 +1,5 @@
 const Settings = require('@overleaf/settings')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const { callbackifyAll } = require('@overleaf/promise-utils')
 const projectHistoryKeys = Settings.redis?.project_history?.key_schema
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.project_history
@@ -7,12 +7,11 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const { docIsTooLarge } = require('./Limits')
+const OError = require('@overleaf/o-error')
 
 const ProjectHistoryRedisManager = {
-  queueOps(projectId, ...rest) {
+  async queueOps(projectId, ...ops) {
     // Record metric for ops pushed onto queue
-    const callback = rest.pop()
-    const ops = rest
     for (const op of ops) {
       metrics.summary('redis.projectHistoryOps', op.length, { status: 'push' })
     }
@@ -30,24 +29,18 @@ const ProjectHistoryRedisManager = {
       }),
       Date.now()
     )
-    multi.exec(function (error, result) {
-      if (error) {
-        return callback(error)
-      }
-      // return the number of entries pushed onto the project history queue
-      callback(null, result[0])
-    })
+    const result = await multi.exec()
+    return result[0]
   },
 
-  queueRenameEntity(
+  async queueRenameEntity(
     projectId,
     projectHistoryId,
     entityType,
     entityId,
     userId,
     projectUpdate,
-    source,
-    callback
+    source
   ) {
     projectUpdate = {
       pathname: projectUpdate.pathname,
@@ -73,18 +66,17 @@ const ProjectHistoryRedisManager = {
     )
     const jsonUpdate = JSON.stringify(projectUpdate)
 
-    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
+    return await ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate)
   },
 
-  queueAddEntity(
+  async queueAddEntity(
     projectId,
     projectHistoryId,
     entityType,
     entityId,
     userId,
     projectUpdate,
-    source,
-    callback
+    source
   ) {
     projectUpdate = {
       pathname: projectUpdate.pathname,
@@ -111,16 +103,10 @@ const ProjectHistoryRedisManager = {
     )
     const jsonUpdate = JSON.stringify(projectUpdate)
 
-    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
+    return await ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate)
   },
 
-  queueResyncProjectStructure(
-    projectId,
-    projectHistoryId,
-    docs,
-    files,
-    callback
-  ) {
+  async queueResyncProjectStructure(projectId, projectHistoryId, docs, files) {
     logger.debug({ projectId, docs, files }, 'queue project structure resync')
     const projectUpdate = {
       resyncProjectStructure: { docs, files },
@@ -130,17 +116,16 @@ const ProjectHistoryRedisManager = {
       },
     }
     const jsonUpdate = JSON.stringify(projectUpdate)
-    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
+    return await ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate)
   },
 
-  queueResyncDocContent(
+  async queueResyncDocContent(
     projectId,
     projectHistoryId,
     docId,
     lines,
     version,
-    pathname,
-    callback
+    pathname
   ) {
     logger.debug(
       { projectId, docId, lines, version, pathname },
@@ -163,15 +148,16 @@ const ProjectHistoryRedisManager = {
     // project update length as an upper bound
     const sizeBound = jsonUpdate.length
     if (docIsTooLarge(sizeBound, lines, Settings.max_doc_length)) {
-      const err = new Error(
-        'blocking resync doc content insert into project history queue: doc is too large'
+      throw new OError(
+        'blocking resync doc content insert into project history queue: doc is too large',
+        { projectId, docId, docSize: sizeBound }
       )
-      logger.error({ projectId, docId, err, docSize: sizeBound }, err.message)
-      return callback(err)
     }
-    ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate, callback)
+    return await ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate)
   },
 }
 
-module.exports = ProjectHistoryRedisManager
-module.exports.promises = promisifyAll(ProjectHistoryRedisManager)
+module.exports = {
+  ...callbackifyAll(ProjectHistoryRedisManager),
+  promises: ProjectHistoryRedisManager,
+}

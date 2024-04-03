@@ -1,4 +1,5 @@
 const sinon = require('sinon')
+const { expect } = require('chai')
 const modulePath = '../../../../app/js/ProjectHistoryRedisManager.js'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
@@ -8,7 +9,6 @@ describe('ProjectHistoryRedisManager', function () {
     this.project_id = 'project-id-123'
     this.projectHistoryId = 'history-id-123'
     this.user_id = 'user-id-123'
-    this.callback = sinon.stub()
     this.rclient = {}
     this.source = 'editor'
     tk.freeze(new Date())
@@ -48,17 +48,15 @@ describe('ProjectHistoryRedisManager', function () {
   })
 
   describe('queueOps', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.ops = ['mock-op-1', 'mock-op-2']
-      this.multi = { exec: sinon.stub() }
+      this.multi = { exec: sinon.stub().resolves([1]) }
       this.multi.rpush = sinon.stub()
       this.multi.setnx = sinon.stub()
       this.rclient.multi = () => this.multi
-      // @rclient = multi: () => @multi
-      this.ProjectHistoryRedisManager.queueOps(
+      await this.ProjectHistoryRedisManager.promises.queueOps(
         this.project_id,
-        ...this.ops,
-        this.callback
+        ...this.ops
       )
     })
 
@@ -83,7 +81,7 @@ describe('ProjectHistoryRedisManager', function () {
   })
 
   describe('queueRenameEntity', function () {
-    beforeEach(function () {
+    beforeEach(async function () {
       this.file_id = 1234
 
       this.rawUpdate = {
@@ -92,16 +90,17 @@ describe('ProjectHistoryRedisManager', function () {
         version: (this.version = 2),
       }
 
-      this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-      this.ProjectHistoryRedisManager.queueRenameEntity(
+      this.ProjectHistoryRedisManager.promises.queueOps = sinon
+        .stub()
+        .resolves()
+      await this.ProjectHistoryRedisManager.promises.queueRenameEntity(
         this.project_id,
         this.projectHistoryId,
         'file',
         this.file_id,
         this.user_id,
         this.rawUpdate,
-        this.source,
-        this.callback
+        this.source
       )
     })
 
@@ -119,19 +118,14 @@ describe('ProjectHistoryRedisManager', function () {
         file: this.file_id,
       }
 
-      this.ProjectHistoryRedisManager.queueOps
-        .calledWithExactly(
-          this.project_id,
-          JSON.stringify(update),
-          this.callback
-        )
+      this.ProjectHistoryRedisManager.promises.queueOps
+        .calledWithExactly(this.project_id, JSON.stringify(update))
         .should.equal(true)
     })
   })
 
   describe('queueAddEntity', function () {
-    beforeEach(function () {
-      this.rclient.rpush = sinon.stub().yields()
+    beforeEach(async function () {
       this.doc_id = 1234
 
       this.rawUpdate = {
@@ -141,16 +135,17 @@ describe('ProjectHistoryRedisManager', function () {
         url: (this.url = 'filestore.example.com'),
       }
 
-      this.ProjectHistoryRedisManager.queueOps = sinon.stub()
-      this.ProjectHistoryRedisManager.queueAddEntity(
+      this.ProjectHistoryRedisManager.promises.queueOps = sinon
+        .stub()
+        .resolves()
+      await this.ProjectHistoryRedisManager.promises.queueAddEntity(
         this.project_id,
         this.projectHistoryId,
         'doc',
         this.doc_id,
         this.user_id,
         this.rawUpdate,
-        this.source,
-        this.callback
+        this.source
       )
     })
 
@@ -169,12 +164,8 @@ describe('ProjectHistoryRedisManager', function () {
         doc: this.doc_id,
       }
 
-      this.ProjectHistoryRedisManager.queueOps
-        .calledWithExactly(
-          this.project_id,
-          JSON.stringify(update),
-          this.callback
-        )
+      this.ProjectHistoryRedisManager.promises.queueOps
+        .calledWithExactly(this.project_id, JSON.stringify(update))
         .should.equal(true)
     })
 
@@ -202,19 +193,20 @@ describe('ProjectHistoryRedisManager', function () {
           },
         }
 
-        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
+        this.ProjectHistoryRedisManager.promises.queueOps = sinon
+          .stub()
+          .resolves()
       })
 
       describe('with a good doc', function () {
-        beforeEach(function () {
-          this.ProjectHistoryRedisManager.queueResyncDocContent(
+        beforeEach(async function () {
+          await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
             this.project_id,
             this.projectHistoryId,
             this.doc_id,
             this.lines,
             this.version,
-            this.pathname,
-            this.callback
+            this.pathname
           )
         })
         it('should check if the doc is too large', function () {
@@ -228,34 +220,31 @@ describe('ProjectHistoryRedisManager', function () {
         })
 
         it('should queue an update', function () {
-          this.ProjectHistoryRedisManager.queueOps
-            .calledWithExactly(
-              this.project_id,
-              JSON.stringify(this.update),
-              this.callback
-            )
+          this.ProjectHistoryRedisManager.promises.queueOps
+            .calledWithExactly(this.project_id, JSON.stringify(this.update))
             .should.equal(true)
         })
       })
 
       describe('with a doc that is too large', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.Limits.docIsTooLarge.returns(true)
-          this.ProjectHistoryRedisManager.queueResyncDocContent(
-            this.project_id,
-            this.projectHistoryId,
-            this.doc_id,
-            this.lines,
-            this.version,
-            this.pathname,
-            this.callback
-          )
+          await expect(
+            this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
+              this.project_id,
+              this.projectHistoryId,
+              this.doc_id,
+              this.lines,
+              this.version,
+              this.pathname
+            )
+          ).to.be.rejected
         })
+
         it('should not queue an update if the doc is too large', function () {
-          this.ProjectHistoryRedisManager.queueOps.called.should.equal(false)
-          this.callback
-            .calledWith(sinon.match.instanceOf(Error))
-            .should.equal(true)
+          this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
+            false
+          )
         })
       })
     })
