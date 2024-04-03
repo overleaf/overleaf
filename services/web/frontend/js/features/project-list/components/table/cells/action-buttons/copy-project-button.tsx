@@ -13,9 +13,14 @@ import {
 import { useProjectTags } from '@/features/project-list/hooks/use-project-tags'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
 
+type HandleOpenModal = (fn?: () => void) => void
+
 type CopyButtonProps = {
   project: Project
-  children: (text: string, handleOpenModal: () => void) => React.ReactElement
+  children: (
+    text: string,
+    handleOpenModal: HandleOpenModal
+  ) => React.ReactElement
 }
 
 function CopyProjectButton({ project, children }: CopyButtonProps) {
@@ -31,9 +36,13 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
   const isMounted = useIsMounted()
   const projectTags = useProjectTags(project.id)
 
-  const handleOpenModal = useCallback(() => {
-    setShowModal(true)
-  }, [])
+  const handleOpenModal = useCallback(
+    (onOpen?: Parameters<HandleOpenModal>[0]) => {
+      setShowModal(true)
+      onOpen?.()
+    },
+    []
+  )
 
   const handleCloseModal = useCallback(() => {
     if (isMounted.current) {
@@ -97,7 +106,7 @@ const CopyProjectButtonTooltip = memo(function CopyProjectButtonTooltip({
           <button
             className="btn btn-link action-btn"
             aria-label={text}
-            onClick={handleOpenModal}
+            onClick={() => handleOpenModal()}
           >
             <Icon type="files-o" fw />
           </button>

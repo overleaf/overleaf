@@ -21,8 +21,11 @@ type ActionButtonProps = {
 function CopyProjectButtonMenuItem({ project, onClick }: ActionButtonProps) {
   return (
     <CopyProjectButton project={project}>
-      {text => (
-        <MenuItemButton onClick={onClick} className="projects-action-menu-item">
+      {(text, handleOpenModal) => (
+        <MenuItemButton
+          onClick={() => handleOpenModal(onClick)}
+          className="projects-action-menu-item"
+        >
           <Icon type="files-o" className="menu-item-button-icon" />{' '}
           <span className="menu-item-button-text">{text}</span>
         </MenuItemButton>
