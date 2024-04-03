@@ -6,6 +6,7 @@ if [ "$DEBUG_NODE" == "true" ]; then
     NODE_PARAMS="--inspect=0.0.0.0:30000"
 fi
 
+source /etc/overleaf/env.sh
 export LISTEN_ADDRESS=0.0.0.0
 export ENABLED_SERVICES="api"
 export METRICS_APP_NAME="web-api"

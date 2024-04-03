@@ -15,4 +15,7 @@ if [ -e '/var/run/docker.sock' ]; then
   usermod -aG dockeronhost www-data
 fi
 
+source /etc/overleaf/env.sh
+export LISTEN_ADDRESS=127.0.0.1
+
 exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/clsi/app.js >> /var/log/overleaf/clsi.log 2>&1

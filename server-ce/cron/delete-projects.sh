@@ -14,7 +14,7 @@ if [[ "${ENABLE_CRON_RESOURCE_DELETION:-null}" != "true" ]]; then
   exit 0
 fi
 
-WEB_URL='http://localhost:3000'
+WEB_URL='http://127.0.0.1:3000'
 
 USER=$(cat /etc/container_environment/WEB_API_USER)
 PASS=$(cat /etc/container_environment/WEB_API_PASSWORD)

@@ -6,6 +6,8 @@ if [ "$DEBUG_NODE" == "true" ]; then
     NODE_PARAMS="--inspect=0.0.0.0:40000"
 fi
 
+source /etc/overleaf/env.sh
+export LISTEN_ADDRESS=127.0.0.1
 export ENABLED_SERVICES="web"
 export WEB_PORT="4000"
 

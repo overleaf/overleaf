@@ -37,6 +37,9 @@ RUN node genScript compile | bash
 # --------------------------------------------------
 ADD server-ce/runit /etc/service
 
+# Copy runit global settings to its location
+# ------------------------------------------
+ADD server-ce/config/env.sh /etc/overleaf/env.sh
 
 # Configure nginx
 # ---------------
