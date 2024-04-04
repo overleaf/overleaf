@@ -23,7 +23,7 @@ export default function HotkeysModal({
       animation={animation}
     >
       <Modal.Header closeButton>
-        <Modal.Title>{t('hotkeys')} (Source editor)</Modal.Title>
+        <Modal.Title>{t('hotkeys')}</Modal.Title>
       </Modal.Header>
 
       <Modal.Body className="hotkeys-modal">
@@ -192,7 +192,7 @@ export default function HotkeysModal({
 
       <Modal.Footer>
         <Button bsStyle={null} className="btn-secondary" onClick={handleHide}>
-          {t('ok')}
+          {t('close')}
         </Button>
       </Modal.Footer>
     </AccessibleModal>

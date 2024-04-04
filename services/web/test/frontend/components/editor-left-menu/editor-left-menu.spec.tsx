@@ -800,7 +800,7 @@ describe('<EditorLeftMenu />', function () {
         )
 
         cy.findByRole('button', { name: 'Show Hotkeys' }).click()
-        cy.findByText('Hotkeys (Source editor)')
+        cy.findByText('Hotkeys')
       })
 
       it('shows correct url for documentation', function () {

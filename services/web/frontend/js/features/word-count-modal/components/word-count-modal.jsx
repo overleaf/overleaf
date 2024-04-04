@@ -13,7 +13,7 @@ const WordCountModal = React.memo(function WordCountModal({
       animation
       show={show}
       onHide={handleHide}
-      id="clone-project-modal"
+      id="word-count-modal"
     >
       <WordCountModalContent handleHide={handleHide} />
     </AccessibleModal>

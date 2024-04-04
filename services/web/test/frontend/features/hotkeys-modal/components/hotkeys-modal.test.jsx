@@ -14,7 +14,7 @@ describe('<HotkeysModal />', function () {
     const { baseElement } = render(<HotkeysModal {...modalProps} />)
 
     expect(baseElement.querySelector('.modal-title').textContent).to.equal(
-      'Hotkeys (Source editor)'
+      'Hotkeys'
     )
   })
 
