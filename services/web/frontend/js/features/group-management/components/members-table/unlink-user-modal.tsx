@@ -32,10 +32,11 @@ export default function UnlinkUserModal({
     if (!user.enrollment?.sso) {
       return
     }
+    const enrollment = Object.assign({}, user.enrollment, {
+      sso: user.enrollment.sso.filter(sso => sso.groupId !== groupId),
+    })
     const updatedUser = Object.assign({}, user, {
-      enrollment: {
-        sso: user.enrollment.sso.filter(sso => sso.groupId !== groupId),
-      },
+      enrollment,
     })
     updateMemberView(user._id, updatedUser)
   }, [groupId, updateMemberView, user])
