@@ -7,6 +7,11 @@
     ],
     "syscalls": [
         {
+          "name": "getrandom",
+          "action": "SCMP_ACT_ALLOW",
+          "args": []
+        },
+        {
             "name": "access",
             "action": "SCMP_ACT_ALLOW",
             "args": []
