@@ -4,6 +4,12 @@ mixin formMessages()
 		role="alert"
 	)
 
+mixin formMessagesNewStyle()
+	div(
+		data-ol-form-messages-new-style='',
+		role="alert"
+	)
+
 mixin customFormMessage(key, kind)
 	if kind === 'success'
 		div.alert.alert-success(

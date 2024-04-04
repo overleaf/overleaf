@@ -80,7 +80,10 @@ function formSubmitHelper(formEl) {
       // Let the user re-submit the form.
       formEl.dispatchEvent(new Event('idle'))
     } finally {
+      // call old and new notification builder functions
+      // but only one will be rendered
       showMessages(formEl, messageBag)
+      showMessagesNewStyle(formEl, messageBag)
     }
   })
 }
@@ -126,6 +129,8 @@ function hideFormElements(formEl) {
   }
 }
 
+// TODO: remove the showMessages function after every form alerts are updated to use the new style
+// TODO: rename showMessagesNewStyle to showMessages after the above is done
 function showMessages(formEl, messageBag) {
   const messagesEl = formEl.querySelector('[data-ol-form-messages]')
   if (!messagesEl) return
@@ -171,6 +176,81 @@ function showMessages(formEl, messageBag) {
         messageEl.append(listEl)
       }
       messagesEl.append(messageEl)
+    }
+    if (message.key) {
+      // Hide the form elements on specific message types
+      const hideOnError = formEl.attributes['data-ol-hide-on-error']
+      if (
+        hideOnError &&
+        hideOnError.value &&
+        hideOnError.value.match(message.key)
+      ) {
+        hideFormElements(formEl)
+      }
+      // Hide any elements with specific `data-ol-hide-on-error-message` message
+      document
+        .querySelectorAll(`[data-ol-hide-on-error-message="${message.key}"]`)
+        .forEach(el => {
+          el.hidden = true
+        })
+    }
+  })
+}
+
+function showMessagesNewStyle(formEl, messageBag) {
+  const messagesEl = formEl.querySelector('[data-ol-form-messages-new-style]')
+  if (!messagesEl) return
+
+  // Clear content
+  messagesEl.textContent = ''
+  formEl.querySelectorAll('[data-ol-custom-form-message]').forEach(el => {
+    el.hidden = true
+  })
+
+  // Render messages
+  messageBag.forEach(message => {
+    const customErrorElements = message.key
+      ? formEl.querySelectorAll(
+          `[data-ol-custom-form-message="${message.key}"]`
+        )
+      : []
+    if (message.key && customErrorElements.length > 0) {
+      // Found at least one custom error element for key, show them
+      customErrorElements.forEach(el => {
+        el.hidden = false
+      })
+    } else {
+      // No custom error element for key on page, append a new error message
+      const messageElContainer = document.createElement('div')
+      messageElContainer.className = classNames(
+        'notification',
+        'text-centered',
+        {
+          'notification-type-error': message.type === 'error',
+          'notification-type-success': message.type !== 'error',
+        }
+      )
+      const messageEl = document.createElement('div')
+
+      messageEl.className = 'notification-content'
+      messageEl.textContent = message.text || `Error: ${message.key}`
+      messageEl.setAttribute('aria-live', 'assertive')
+      messageEl.setAttribute(
+        'role',
+        message.type === 'error' ? 'alert' : 'status'
+      )
+      if (message.hints && message.hints.length) {
+        const listEl = document.createElement('ul')
+        message.hints.forEach(hint => {
+          const listItemEl = document.createElement('li')
+          listItemEl.textContent = hint
+          listEl.append(listItemEl)
+        })
+        messageEl.append(listEl)
+      }
+
+      messageElContainer.appendChild(messageEl)
+      messagesEl.append(messageElContainer)
     }
     if (message.key) {
       // Hide the form elements on specific message types
