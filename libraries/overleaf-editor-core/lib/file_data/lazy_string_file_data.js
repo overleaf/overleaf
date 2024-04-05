@@ -110,16 +110,19 @@ class LazyStringFileData extends FileData {
    * @returns {Promise<EagerStringFileData>}
    */
   async toEager(blobStore) {
-    const content = await blobStore.getString(this.hash)
-    let comments
-    let trackedChanges
-    if (this.rangesHash) {
-      /** @type {RangesBlob} */
-      const ranges = await blobStore.getObject(this.rangesHash)
-      comments = ranges.comments
-      trackedChanges = ranges.trackedChanges
-    }
-    const file = new EagerStringFileData(content, comments, trackedChanges)
+    const [content, ranges] = await Promise.all([
+      blobStore.getString(this.hash),
+      this.rangesHash
+        ? /** @type {Promise<RangesBlob>} */ (
+            blobStore.getObject(this.rangesHash)
+          )
+        : Promise.resolve(undefined),
+    ])
+    const file = new EagerStringFileData(
+      content,
+      ranges?.comments,
+      ranges?.trackedChanges
+    )
     applyOperations(this.operations, file)
     return file
   }

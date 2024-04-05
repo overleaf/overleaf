@@ -86,13 +86,15 @@ class HashFileData extends FileData {
    * @returns {Promise<LazyStringFileData>}
    */
   async toLazy(blobStore) {
-    const blob = await blobStore.getBlob(this.hash)
-    let rangesBlob
-    if (this.rangesHash) {
-      rangesBlob = await blobStore.getBlob(this.rangesHash)
-      if (!rangesBlob) {
-        throw new Error('Failed to look up rangesHash in blobStore')
-      }
+    const [blob, rangesBlob] = await Promise.all([
+      blobStore.getBlob(this.hash),
+      this.rangesHash
+        ? blobStore.getBlob(this.rangesHash)
+        : Promise.resolve(undefined),
+    ])
+    if (rangesBlob === null) {
+      // We attempted to look up the blob, but none was found
+      throw new Error('Failed to look up rangesHash in blobStore')
     }
     if (!blob) throw new Error('blob not found: ' + this.hash)
     return FileData.createLazyFromBlobs(blob, rangesBlob)
