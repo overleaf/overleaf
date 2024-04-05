@@ -11,9 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const sinon = require('sinon')
 const { RequestFailedError } = require('@overleaf/fetch-utils')
+const { ReadableString } = require('@overleaf/stream-utils')
 
 const modulePath = '../../../../app/src/Features/Templates/TemplatesManager'
 
@@ -30,6 +30,9 @@ describe('TemplatesManager', function () {
     this.user_id = 'user-id'
     this.dumpPath = `${this.dumpFolder}/${this.uuid}`
     this.callback = sinon.stub()
+    this.pipeline = sinon.stub().callsFake(async (stream, res) => {
+      if (res.callback) res.callback()
+    })
     this.request = sinon.stub().returns({
       pipe() {},
       on() {},
@@ -38,31 +41,50 @@ describe('TemplatesManager', function () {
       },
     })
     this.fs = {
+      promises: { unlink: sinon.stub() },
       unlink: sinon.stub(),
       createWriteStream: sinon.stub().returns({ on: sinon.stub().yields() }),
     }
     this.ProjectUploadManager = {
-      createProjectFromZipArchiveWithName: sinon
-        .stub()
-        .callsArgWith(4, null, { _id: this.project_id }),
+      promises: {
+        createProjectFromZipArchiveWithName: sinon
+          .stub()
+          .resolves({ _id: this.project_id }),
+      },
     }
     this.dumpFolder = 'dump/path'
     this.ProjectOptionsHandler = {
-      setCompiler: sinon.stub().callsArgWith(2),
-      setImageName: sinon.stub().callsArgWith(2),
-      setBrandVariationId: sinon.stub().callsArgWith(2),
+      promises: {
+        setCompiler: sinon.stub().resolves(),
+        setImageName: sinon.stub().resolves(),
+        setBrandVariationId: sinon.stub().resolves(),
+      },
     }
     this.uuid = '1234'
     this.ProjectRootDocManager = {
-      setRootDocFromName: sinon.stub().callsArgWith(2),
+      promises: {
+        setRootDocFromName: sinon.stub().resolves(),
+      },
     }
     this.ProjectDetailsHandler = {
       getProjectDescription: sinon.stub(),
       fixProjectName: sinon.stub().returns(this.templateName),
     }
-    this.Project = { updateOne: sinon.stub().callsArgWith(3, null) }
+    this.Project = { updateOne: sinon.stub().resolves() }
+    this.mockStream = new ReadableString('{}')
+    this.mockResponse = {
+      status: 200,
+      headers: new Headers({
+        'Content-Length': '2',
+        'Content-Type': 'application/json',
+      }),
+    }
     this.FetchUtils = {
       fetchJson: sinon.stub(),
+      fetchStreamWithResponse: sinon.stub().resolves({
+        stream: this.mockStream,
+        response: this.mockResponse,
+      }),
       RequestFailedError,
     }
     this.TemplatesManager = SandboxedModule.require(modulePath, {
@@ -85,6 +107,7 @@ describe('TemplatesManager', function () {
               url: (this.v1Url = 'http://overleaf.com'),
               user: 'overleaf',
               pass: 'password',
+              timeout: 10,
             },
           },
           overleaf: {
@@ -97,8 +120,9 @@ describe('TemplatesManager', function () {
         request: this.request,
         fs: this.fs,
         '../../models/Project': { Project: this.Project },
+        'stream/promises': { pipeline: this.pipeline },
       },
-    })
+    }).promises
     return (this.zipUrl =
       '%2Ftemplates%2F52fb86a81ae1e566597a25f6%2Fv%2F4%2Fzip&templateName=Moderncv%20Banking&compiler=pdflatex')
   })
@@ -114,13 +138,12 @@ describe('TemplatesManager', function () {
           this.templateName,
           this.templateVersionId,
           this.user_id,
-          this.imageName,
-          this.callback
+          this.imageName
         )
       })
 
       it('should fetch zip from v1 based on template id', function () {
-        return this.request.should.have.been.calledWith(
+        return this.FetchUtils.fetchStreamWithResponse.should.have.been.calledWith(
           `${this.v1Url}/api/v1/overleaf/templates/${this.templateVersionId}`
         )
       })
@@ -132,7 +155,7 @@ describe('TemplatesManager', function () {
       })
 
       it('should create project', function () {
-        return this.ProjectUploadManager.createProjectFromZipArchiveWithName.should.have.been.calledWithMatch(
+        return this.ProjectUploadManager.promises.createProjectFromZipArchiveWithName.should.have.been.calledWithMatch(
           this.user_id,
           this.templateName,
           this.dumpPath,
@@ -144,23 +167,25 @@ describe('TemplatesManager', function () {
       })
 
       it('should unlink file', function () {
-        return this.fs.unlink.should.have.been.calledWith(this.dumpPath)
+        return this.fs.promises.unlink.should.have.been.calledWith(
+          this.dumpPath
+        )
       })
 
       it('should set project options when passed', function () {
-        this.ProjectOptionsHandler.setCompiler.should.have.been.calledWithMatch(
+        this.ProjectOptionsHandler.promises.setCompiler.should.have.been.calledWithMatch(
           this.project_id,
           this.compiler
         )
-        this.ProjectOptionsHandler.setImageName.should.have.been.calledWithMatch(
+        this.ProjectOptionsHandler.promises.setImageName.should.have.been.calledWithMatch(
           this.project_id,
           this.imageName
         )
-        this.ProjectRootDocManager.setRootDocFromName.should.have.been.calledWithMatch(
+        this.ProjectRootDocManager.promises.setRootDocFromName.should.have.been.calledWithMatch(
           this.project_id,
           this.mainFile
         )
-        return this.ProjectOptionsHandler.setBrandVariationId.should.have.been.calledWithMatch(
+        return this.ProjectOptionsHandler.promises.setBrandVariationId.should.have.been.calledWithMatch(
           this.project_id,
           this.brandVariationId
         )
@@ -187,18 +212,21 @@ describe('TemplatesManager', function () {
           this.templateName,
           this.templateVersionId,
           this.user_id,
-          null,
-          this.callback
+          null
         )
       })
 
       it('should not set missing project options', function () {
-        this.ProjectOptionsHandler.setCompiler.called.should.equal(false)
-        this.ProjectRootDocManager.setRootDocFromName.called.should.equal(false)
-        this.ProjectOptionsHandler.setBrandVariationId.called.should.equal(
+        this.ProjectOptionsHandler.promises.setCompiler.called.should.equal(
           false
         )
-        return this.ProjectOptionsHandler.setImageName.should.have.been.calledWithMatch(
+        this.ProjectRootDocManager.promises.setRootDocFromName.called.should.equal(
+          false
+        )
+        this.ProjectOptionsHandler.promises.setBrandVariationId.called.should.equal(
+          false
+        )
+        return this.ProjectOptionsHandler.promises.setImageName.should.have.been.calledWithMatch(
           this.project_id,
           'wl_texlive:2018.1'
         )

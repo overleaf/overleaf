@@ -1,22 +1,25 @@
 const { Project } = require('../../models/Project')
-const OError = require('@overleaf/o-error')
 const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
-const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
-const ProjectRootDocManager = require('../Project/ProjectRootDocManager')
+const ProjectOptionsHandler =
+  require('../Project/ProjectOptionsHandler').promises
+const ProjectRootDocManager =
+  require('../Project/ProjectRootDocManager').promises
 const ProjectUploadManager = require('../Uploads/ProjectUploadManager')
-const async = require('async')
 const fs = require('fs')
 const util = require('util')
 const logger = require('@overleaf/logger')
-const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
-const request = require('request')
+const {
+  fetchJson,
+  fetchStreamWithResponse,
+  RequestFailedError,
+} = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
 const crypto = require('crypto')
 const Errors = require('../Errors/Errors')
-const _ = require('lodash')
+const { pipeline } = require('stream/promises')
 
 const TemplatesManager = {
-  createProjectFromV1Template(
+  async createProjectFromV1Template(
     brandVariationId,
     compiler,
     mainFile,
@@ -24,153 +27,113 @@ const TemplatesManager = {
     templateName,
     templateVersionId,
     userId,
-    imageName,
-    _callback
+    imageName
   ) {
-    const callback = _.once(_callback)
     const zipUrl = `${settings.apis.v1.url}/api/v1/overleaf/templates/${templateVersionId}`
-    const zipReq = request(zipUrl, {
-      auth: {
+    const zipReq = await fetchStreamWithResponse(zipUrl, {
+      basicAuth: {
         user: settings.apis.v1.user,
-        pass: settings.apis.v1.pass,
+        password: settings.apis.v1.pass,
       },
-      timeout: settings.apis.v1.timeout,
-    })
-    zipReq.on('error', function (err) {
-      logger.warn({ err }, 'error getting zip from template API')
-      return callback(err)
+      signal: AbortSignal.timeout(settings.apis.v1.timeout),
     })
 
     const projectName = ProjectDetailsHandler.fixProjectName(templateName)
     const dumpPath = `${settings.path.dumpFolder}/${crypto.randomUUID()}`
     const writeStream = fs.createWriteStream(dumpPath)
-    const attributes = {
-      fromV1TemplateId: templateId,
-      fromV1TemplateVersionId: templateVersionId,
-    }
-    writeStream.on('close', function () {
-      if (zipReq.response.statusCode !== 200) {
+    try {
+      const attributes = {
+        fromV1TemplateId: templateId,
+        fromV1TemplateVersionId: templateVersionId,
+      }
+      await pipeline(zipReq.stream, writeStream)
+
+      if (zipReq.response.status !== 200) {
         logger.warn(
-          { uri: zipUrl, statusCode: zipReq.response.statusCode },
+          { uri: zipUrl, statusCode: zipReq.response.status },
           'non-success code getting zip from template API'
         )
-        return callback(new Error('get zip failed'))
+        throw new Error(`get zip failed: ${zipReq.response.status}`)
       }
-      ProjectUploadManager.createProjectFromZipArchiveWithName(
-        userId,
-        projectName,
-        dumpPath,
-        attributes,
-        function (err, project) {
-          if (err) {
-            OError.tag(err, 'problem building project from zip', {
-              zipReq,
-            })
-            return callback(err)
-          }
-          async.series(
-            [
-              cb => TemplatesManager._setCompiler(project._id, compiler, cb),
-              cb => TemplatesManager._setImage(project._id, imageName, cb),
-              cb => TemplatesManager._setMainFile(project._id, mainFile, cb),
-              cb =>
-                TemplatesManager._setBrandVariationId(
-                  project._id,
-                  brandVariationId,
-                  cb
-                ),
-            ],
-            function (err) {
-              if (err) {
-                return callback(err)
-              }
-              fs.unlink(dumpPath, function (err) {
-                if (err) {
-                  return logger.err({ err }, 'error unlinking template zip')
-                }
-              })
-              const update = {
-                fromV1TemplateId: templateId,
-                fromV1TemplateVersionId: templateVersionId,
-              }
-              Project.updateOne(
-                { _id: project._id },
-                update,
-                {},
-                function (err) {
-                  if (err) {
-                    return callback(err)
-                  }
-                  callback(null, project)
-                }
-              )
-            }
-          )
-        }
-      )
-    })
-    zipReq.pipe(writeStream)
-  },
+      const project =
+        await ProjectUploadManager.promises.createProjectFromZipArchiveWithName(
+          userId,
+          projectName,
+          dumpPath,
+          attributes
+        )
 
-  _setCompiler(projectId, compiler, callback) {
-    if (compiler == null) {
-      return callback()
+      await TemplatesManager._setCompiler(project._id, compiler)
+      await TemplatesManager._setImage(project._id, imageName)
+      await TemplatesManager._setMainFile(project._id, mainFile)
+      await TemplatesManager._setBrandVariationId(project._id, brandVariationId)
+
+      const update = {
+        fromV1TemplateId: templateId,
+        fromV1TemplateVersionId: templateVersionId,
+      }
+      await Project.updateOne({ _id: project._id }, update, {})
+
+      return project
+    } finally {
+      await fs.promises.unlink(dumpPath)
     }
-    ProjectOptionsHandler.setCompiler(projectId, compiler, callback)
   },
 
-  _setImage(projectId, imageName, callback) {
+  async _setCompiler(projectId, compiler) {
+    if (compiler == null) {
+      return
+    }
+    await ProjectOptionsHandler.setCompiler(projectId, compiler)
+  },
+
+  async _setImage(projectId, imageName) {
     if (!imageName) {
       imageName = 'wl_texlive:2018.1'
     }
-    ProjectOptionsHandler.setImageName(projectId, imageName, callback)
+
+    await ProjectOptionsHandler.setImageName(projectId, imageName)
   },
 
-  _setMainFile(projectId, mainFile, callback) {
+  async _setMainFile(projectId, mainFile) {
     if (mainFile == null) {
-      return callback()
+      return
     }
-    ProjectRootDocManager.setRootDocFromName(projectId, mainFile, callback)
+    await ProjectRootDocManager.setRootDocFromName(projectId, mainFile)
   },
 
-  _setBrandVariationId(projectId, brandVariationId, callback) {
+  async _setBrandVariationId(projectId, brandVariationId) {
     if (brandVariationId == null) {
-      return callback()
+      return
     }
-    ProjectOptionsHandler.setBrandVariationId(
-      projectId,
-      brandVariationId,
-      callback
-    )
+    await ProjectOptionsHandler.setBrandVariationId(projectId, brandVariationId)
   },
 
-  promises: {
-    async fetchFromV1(templateId) {
-      const url = new URL(
-        `/api/v2/templates/${templateId}`,
-        settings.apis.v1.url
-      )
+  async fetchFromV1(templateId) {
+    const url = new URL(`/api/v2/templates/${templateId}`, settings.apis.v1.url)
 
-      try {
-        return await fetchJson(url, {
-          basicAuth: {
-            user: settings.apis.v1.user,
-            password: settings.apis.v1.pass,
-          },
-          signal: AbortSignal.timeout(settings.apis.v1.timeout),
-        })
-      } catch (err) {
-        if (err instanceof RequestFailedError && err.response.status === 404) {
-          throw new Errors.NotFoundError()
-        } else {
-          throw err
-        }
+    try {
+      return await fetchJson(url, {
+        basicAuth: {
+          user: settings.apis.v1.user,
+          password: settings.apis.v1.pass,
+        },
+        signal: AbortSignal.timeout(settings.apis.v1.timeout),
+      })
+    } catch (err) {
+      if (err instanceof RequestFailedError && err.response.status === 404) {
+        throw new Errors.NotFoundError()
+      } else {
+        throw err
       }
-    },
+    }
   },
 }
 
-TemplatesManager.fetchFromV1 = util.callbackify(
-  TemplatesManager.promises.fetchFromV1
-)
-module.exports = TemplatesManager
+module.exports = {
+  promises: TemplatesManager,
+  createProjectFromV1Template: util.callbackify(
+    TemplatesManager.createProjectFromV1Template
+  ),
+  fetchFromV1: util.callbackify(TemplatesManager.fetchFromV1),
+}
