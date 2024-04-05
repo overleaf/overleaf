@@ -123,18 +123,16 @@ describe('SnapshotManager', function () {
     describe('of a text file with no tracked changes', function () {
       beforeEach(function (done) {
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
-          getString: BPromise.promisify(
-            (this.getString = sinon.stub().yields(
-              null,
-              `\
+          getString: (this.getString = sinon.stub().resolves(
+            `\
 Hello world
 
 One two three
 
 Four five six\
 `.replace(/^\t/g, '')
-            ))
-          ),
+          )),
+          getObject: sinon.stub().rejects(),
         })
         this.SnapshotManager.getFileSnapshotStream(
           this.projectId,
@@ -185,7 +183,8 @@ Seven eight nine\
           this.HistoryStoreManager.getBlobStore
             .withArgs(this.historyId)
             .returns({
-              getString: BPromise.promisify(sinon.stub().throws(this.error)),
+              getString: sinon.stub().rejects(this.error),
+              getObject: sinon.stub().rejects(this.error),
             })
         })
 
@@ -503,7 +502,8 @@ Four five six\
       beforeEach(function () {
         this.error = new Error('ESOCKETTIMEDOUT')
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
-          getString: BPromise.promisify(sinon.stub().yields(this.error)),
+          getString: sinon.stub().rejects(this.error),
+          getObject: sinon.stub().resolves(),
         })
       })
 
@@ -571,18 +571,16 @@ Four five six\
         })
 
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
-          getString: BPromise.promisify(
-            (this.getString = sinon.stub().yields(
-              null,
-              `\
+          getString: (this.getString = sinon.stub().resolves(
+            `\
 Hello world
 
 One two three
 
 Four five six\
 `.replace(/^\t/g, '')
-            ))
-          ),
+          )),
+          getObject: sinon.stub().rejects(),
         })
         this.SnapshotManager.getLatestSnapshot(
           this.projectId,
