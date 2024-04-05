@@ -105,6 +105,40 @@ const parseTextExtensions = function (extensions) {
   }
 }
 
+const httpPermissionsPolicy = {
+  blocked: [
+    'accelerometer',
+    'attribution-reporting',
+    'browsing-topics',
+    'camera',
+    'display-capture',
+    'encrypted-media',
+    'fullscreen',
+    'gamepad',
+    'geolocation',
+    'gyroscope',
+    'hid',
+    'identity-credentials-get',
+    'idle-detection',
+    'local-fonts',
+    'magnetometer',
+    'microphone',
+    'midi',
+    'otp-credentials',
+    'payment',
+    'picture-in-picture',
+    'screen-wake-lock',
+    'serial',
+    'storage-access',
+    'usb',
+    'window-management',
+    'xr-spatial-tracking',
+  ],
+  allowed: {
+    autoplay: 'self "https://videos.ctfassets.net"',
+  },
+}
+
 module.exports = {
   env: 'server-ce',
 
@@ -274,6 +308,11 @@ module.exports = {
     v1: {},
     recurly: {},
   },
+
+  // Defines which features are allowed in the
+  // Permissions-Policy HTTP header
+  httpPermissions: httpPermissionsPolicy,
+  useHttpPermissionsPolicy: true,
 
   jwt: {
     key: process.env.OT_JWT_AUTH_KEY,

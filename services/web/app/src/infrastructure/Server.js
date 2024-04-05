@@ -9,6 +9,7 @@ const Router = require('../router')
 const helmet = require('helmet')
 const UserSessionsRedis = require('../Features/User/UserSessionsRedis')
 const Csrf = require('./Csrf')
+const HttpPermissionsPolicyMiddleware = require('./HttpPermissionsPolicy')
 
 const sessionsRedisClient = UserSessionsRedis.client()
 
@@ -141,6 +142,15 @@ app.use(bearerTokenMiddleware())
 
 if (Settings.blockCrossOriginRequests) {
   app.use(Csrf.blockCrossOriginRequests())
+}
+
+if (Settings.useHttpPermissionsPolicy) {
+  const httpPermissionsPolicy = new HttpPermissionsPolicyMiddleware(
+    Settings.httpPermissions
+  )
+  logger.debug('adding permissions policy config', Settings.httpPermissions)
+
+  webRouter.use(httpPermissionsPolicy.middleware)
 }
 
 RedirectManager.apply(webRouter)
