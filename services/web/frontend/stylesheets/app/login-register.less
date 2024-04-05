@@ -158,6 +158,14 @@
     }
   }
 
+  .login-register-hr-text-container {
+    padding: @line-height-computed 0 calc(@line-height-computed / 2) 0;
+  }
+
+  .login-register-error-container {
+    padding-bottom: calc(@line-height-computed / 2);
+  }
+
   .login-register-other-links {
     padding: @line-height-computed 0;
     a {
@@ -240,5 +248,109 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+  }
+
+  .register-container {
+    .register-content-container {
+      display: flex;
+      background-color: #f2f4f7;
+      min-height: 100vh;
+    }
+
+    .register-form {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      padding-top: @line-height-computed * 7;
+      background-color: @white;
+
+      @media (max-width: @screen-sm-max) {
+        height: 100%;
+        padding-top: @line-height-computed * 2;
+      }
+
+      .login-register-card {
+        max-width: 320px;
+        padding-bottom: @line-height-computed * 5; // for cookie banner
+      }
+    }
+
+    .register-illustration-container {
+      height: 100%;
+      display: flex;
+      align-items: center;
+
+      .register-illustration {
+        position: absolute;
+        left: 80px;
+
+        // for wide screen
+        @media (min-width: 1700px) {
+          position: relative;
+          left: unset;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+
+        .register-main-image {
+          max-width: 850px;
+
+          @media (max-width: 1350px) {
+            max-width: 750px;
+          }
+
+          @media (max-width: 1150px) {
+            max-width: 670px;
+          }
+        }
+
+        .sticky-tags {
+          position: absolute;
+          height: 210px;
+          bottom: -135px;
+          right: 130px;
+
+          // for wide screen
+          @media (min-width: 1700px) {
+            right: calc(50% - 300px);
+          }
+        }
+      }
+    }
+  }
+
+  .tos-agreement-notice {
+    text-align: left;
+    font-size: 12px;
+
+    a {
+      color: var(--emerald-green);
+      text-decoration: underline;
+      // text-decoration-;skip-ink is for letter with descender (like 'g' and 'y')
+      // this will force underline to not skip the descender
+      text-decoration-skip-ink: none;
+
+      &:hover {
+        color: var(--emerald-green-dark);
+      }
+
+      // for accessibility with keyboard navigation
+      &:focus {
+        outline: 2px solid var(--emerald-green);
+        outline-offset: 1px;
+      }
+    }
+  }
+
+  // for accessibility with keyboard navigation
+  .login-register-newsletter {
+    .checkbox {
+      input[type='checkbox']:focus {
+        outline: 1px solid var(--emerald-green);
+      }
+    }
   }
 }

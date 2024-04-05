@@ -11,7 +11,9 @@
   a,
   strong,
   span {
-    font-family: 'Noto Sans', sans-serif;
+    &:not(.material-symbols) {
+      font-family: 'Noto Sans', sans-serif;
+    }
   }
 
   h1 {
