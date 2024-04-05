@@ -184,7 +184,7 @@
   "bulk_reject_confirm": "Are you sure you want to reject the selected __nChanges__ changes?",
   "buy_now_no_exclamation_mark": "Buy now",
   "by": "by",
-  "by_registering_you_agree_to_our_terms_of_service": "By registering, you agree to our <0>terms of service</0>.",
+  "by_registering_you_agree_to_our_terms_of_service": "By registering, you agree to our <0>terms of service</0> and <1>privacy notice</1>.",
   "by_subscribing_you_agree_to_our_terms_of_service": "By subscribing, you agree to our <0>terms of service</0>.",
   "can_edit": "Can Edit",
   "can_link_institution_email_acct_to_institution_acct": "You can now link your <b>__email__</b> <b>__appName__</b> account to your <b>__institutionName__</b> institutional account.",
