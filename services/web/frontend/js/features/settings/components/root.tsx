@@ -20,6 +20,8 @@ import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import useScrollToIdOnLoad from '../../../shared/hooks/use-scroll-to-id-on-load'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { SSOAlert } from './emails/sso-alert'
+import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
+import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
@@ -31,11 +33,11 @@ function SettingsPageRoot() {
 
   return (
     <div className="container">
-      <div className="row">
-        <div className="col-md-12 col-lg-10 col-lg-offset-1">
+      <RowWrapper>
+        <ColWrapper md={12} lg={{ span: 10, offset: 1 }}>
           {isReady ? <SettingsPageContent /> : null}
-        </div>
-      </div>
+        </ColWrapper>
+      </RowWrapper>
     </div>
   )
 }
@@ -56,14 +58,14 @@ function SettingsPageContent() {
           <ManagedAccountAlert />
           <EmailsSection />
           <SSOAlert />
-          <div className="row">
-            <div className="col-md-5">
+          <RowWrapper>
+            <ColWrapper md={5}>
               <AccountInfoSection />
-            </div>
-            <div className="col-md-5 col-md-offset-1">
+            </ColWrapper>
+            <ColWrapper md={{ span: 5, offset: 1 }}>
               <PasswordSection />
-            </div>
-          </div>
+            </ColWrapper>
+          </RowWrapper>
           <hr />
           <SecuritySection />
           <SplitTestProvider>

@@ -1,10 +1,11 @@
 import { ReactNode } from 'react'
 import { UserEmailData } from '../../../../../../types/user-email'
-import { Row, Col } from 'react-bootstrap'
 import classNames from 'classnames'
 import getMeta from '../../../../utils/meta'
 import ReconfirmationInfoSuccess from './reconfirmation-info/reconfirmation-info-success'
 import ReconfirmationInfoPrompt from './reconfirmation-info/reconfirmation-info-prompt'
+import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
+import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
 
 type ReconfirmationInfoProps = {
   userEmailData: UserEmailData
@@ -60,8 +61,8 @@ function ReconfirmationInfoContentWrapper({
   children,
 }: ReconfirmationInfoContentWrapperProps) {
   return (
-    <Row>
-      <Col md={12}>
+    <RowWrapper>
+      <ColWrapper md={12}>
         <div
           className={classNames('settings-reconfirm-info', 'small', {
             'alert alert-info': asAlertInfo,
@@ -69,8 +70,8 @@ function ReconfirmationInfoContentWrapper({
         >
           {children}
         </div>
-      </Col>
-    </Row>
+      </ColWrapper>
+    </RowWrapper>
   )
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
-import { Button, Row, Col } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 import Email from './email'
 import InstitutionAndRole from './institution-and-role'
 import EmailCell from './cell'
@@ -13,6 +13,8 @@ import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../utils/sso'
 import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
+import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
+import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
 import { bsClassName } from '@/features/utils/bootstrap-5'
 
 type EmailsRowProps = {
@@ -27,20 +29,20 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
 
   return (
     <>
-      <Row>
-        <Col md={4}>
+      <RowWrapper>
+        <ColWrapper md={4}>
           <EmailCell>
             <Email userEmailData={userEmailData} />
           </EmailCell>
-        </Col>
-        <Col md={5}>
+        </ColWrapper>
+        <ColWrapper md={5}>
           {userEmailData.affiliation?.institution && (
             <EmailCell>
               <InstitutionAndRole userEmailData={userEmailData} />
             </EmailCell>
           )}
-        </Col>
-        <Col md={3}>
+        </ColWrapper>
+        <ColWrapper md={3}>
           <EmailCell
             className={bsClassName({
               bs5: 'text-md-end',
@@ -49,8 +51,8 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
           >
             <Actions userEmailData={userEmailData} />
           </EmailCell>
-        </Col>
-      </Row>
+        </ColWrapper>
+      </RowWrapper>
 
       {hasSSOAffiliation && (
         <SSOAffiliationInfo userEmailData={userEmailData} />
@@ -91,8 +93,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
 
   if (userEmailData.samlProviderId) {
     return (
-      <Row>
-        <Col md={8} mdOffset={4}>
+      <RowWrapper>
+        <ColWrapper md={{ span: 8, offset: 4 }}>
           <EmailCell>
             <p>
               <Trans
@@ -109,17 +111,17 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
               />
             </p>
           </EmailCell>
-        </Col>
-      </Row>
+        </ColWrapper>
+      </RowWrapper>
     )
   }
 
   return (
-    <Row>
-      <Col md={8} mdOffset={4}>
+    <RowWrapper>
+      <ColWrapper md={{ span: 8, offset: 4 }}>
         <div className="horizontal-divider" />
-        <Row>
-          <Col md={9}>
+        <RowWrapper>
+          <ColWrapper md={9}>
             <EmailCell>
               <p className="small">
                 <Trans
@@ -149,8 +151,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                 </a>
               </p>
             </EmailCell>
-          </Col>
-          <Col
+          </ColWrapper>
+          <ColWrapper
             md={3}
             className={bsClassName({
               bs5: 'text-md-end',
@@ -167,10 +169,10 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                 {t('link_accounts')}
               </Button>
             </EmailCell>
-          </Col>
-        </Row>
-      </Col>
-    </Row>
+          </ColWrapper>
+        </RowWrapper>
+      </ColWrapper>
+    </RowWrapper>
   )
 }
 

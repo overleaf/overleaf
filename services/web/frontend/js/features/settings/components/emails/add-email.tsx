@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { Col } from 'react-bootstrap'
 import Cell from './cell'
 import Layout from './add-email/layout'
 import Input, { DomainInfo } from './add-email/input'
@@ -18,6 +17,7 @@ import { isValidEmail } from '../../../../shared/utils/email'
 import getMeta from '../../../../utils/meta'
 import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
+import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
 import { bsClassName } from '@/features/utils/bootstrap-5'
 
 function AddEmail() {
@@ -109,7 +109,7 @@ function AddEmail() {
   if (!isFormVisible) {
     return (
       <Layout isError={isError} error={error}>
-        <Col md={12}>
+        <ColWrapper md={12}>
           <Cell>
             {state.data.emailCount >= emailAddressLimit ? (
               <span className="small">
@@ -127,7 +127,7 @@ function AddEmail() {
               <AddAnotherEmailBtn onClick={handleShowAddEmailForm} />
             )}
           </Cell>
-        </Col>
+        </ColWrapper>
       </Layout>
     )
   }
@@ -152,15 +152,15 @@ function AddEmail() {
       <Layout isError={isError} error={error}>
         <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
         <form>
-          <Col md={8}>
+          <ColWrapper md={8}>
             <Cell>
               {InputComponent}
               <div className="affiliations-table-cell-tabbed">
                 <div>{t('start_by_adding_your_email')}</div>
               </div>
             </Cell>
-          </Col>
-          <Col md={4}>
+          </ColWrapper>
+          <ColWrapper md={4}>
             <Cell
               className={bsClassName({
                 bs5: 'text-md-end',
@@ -169,7 +169,7 @@ function AddEmail() {
             >
               <AddNewEmailBtn email={newEmail} disabled />
             </Cell>
-          </Col>
+          </ColWrapper>
         </form>
       </Layout>
     )
@@ -182,7 +182,7 @@ function AddEmail() {
     <Layout isError={isError} error={error}>
       <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
       <form>
-        <Col md={8}>
+        <ColWrapper md={8}>
           <Cell>
             {InputComponent}
             {!isSsoAvailableForDomain ? (
@@ -203,9 +203,9 @@ function AddEmail() {
               </div>
             ) : null}
           </Cell>
-        </Col>
+        </ColWrapper>
         {!isSsoAvailableForDomain ? (
-          <Col md={4}>
+          <ColWrapper md={4}>
             <Cell
               className={bsClassName({
                 bs5: 'text-md-end',
@@ -218,9 +218,9 @@ function AddEmail() {
                 onClick={handleAddNewEmail}
               />
             </Cell>
-          </Col>
+          </ColWrapper>
         ) : (
-          <Col md={12}>
+          <ColWrapper md={12}>
             <Cell>
               <div className="affiliations-table-cell-tabbed">
                 <SsoLinkingInfo
@@ -229,7 +229,7 @@ function AddEmail() {
                 />
               </div>
             </Cell>
-          </Col>
+          </ColWrapper>
         )}
       </form>
     </Layout>

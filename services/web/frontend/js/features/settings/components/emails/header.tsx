@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { Row, Col } from 'react-bootstrap'
 import EmailCell from './cell'
+import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
+import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
 import classnames from 'classnames'
 import { bsClassName } from '@/features/utils/bootstrap-5'
 
@@ -9,8 +10,8 @@ function Header() {
 
   return (
     <>
-      <Row>
-        <Col
+      <RowWrapper>
+        <ColWrapper
           md={4}
           className={bsClassName({
             bs5: 'd-none d-sm-block',
@@ -20,8 +21,8 @@ function Header() {
           <EmailCell>
             <strong>{t('email')}</strong>
           </EmailCell>
-        </Col>
-        <Col
+        </ColWrapper>
+        <ColWrapper
           md={8}
           className={bsClassName({
             bs5: 'd-none d-sm-block',
@@ -31,8 +32,8 @@ function Header() {
           <EmailCell>
             <strong>{t('institution_and_role')}</strong>
           </EmailCell>
-        </Col>
-      </Row>
+        </ColWrapper>
+      </RowWrapper>
       <div
         className={classnames(
           bsClassName({ bs5: 'd-none d-sm-block', bs3: 'hidden-xs' }),
