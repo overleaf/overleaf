@@ -361,8 +361,13 @@ class BlobStore {
     this.projectId = projectId
   }
 
-  getString(hash) {
-    return getProjectBlobAsync(this.projectId, hash)
+  async getString(hash) {
+    return await getProjectBlobAsync(this.projectId, hash)
+  }
+
+  async getObject(hash) {
+    const string = await this.getString(hash)
+    return JSON.parse(string)
   }
 }
 

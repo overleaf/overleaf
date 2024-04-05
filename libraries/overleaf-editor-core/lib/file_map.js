@@ -1,3 +1,4 @@
+// @ts-check
 'use strict'
 
 const _ = require('lodash')
@@ -64,11 +65,12 @@ class FileMap {
   static FileNotFoundError = FileNotFoundError
 
   /**
-   * @param {Object.<String, File>} files
+   * @param {Record<String, File | null>} files
    */
   constructor(files) {
     // create bare object for use as Map
     // http://ryanmorr.com/true-hash-maps-in-javascript/
+    /** @type {Record<String, File | null>} */
     this.files = Object.create(null)
     _.assign(this.files, files)
     checkPathnamesAreUnique(this.files)
@@ -221,8 +223,9 @@ class FileMap {
 
   /**
    * Map the files in this map to new values.
-   * @param {function} iteratee
-   * @return {Object}
+   * @template T
+   * @param {(file: File | null) => T} iteratee
+   * @return {Record<String, T>}
    */
   map(iteratee) {
     return _.mapValues(this.files, iteratee)

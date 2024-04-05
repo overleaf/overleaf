@@ -15,6 +15,7 @@ let StringFileData = null
 
 /**
  * @typedef {import("../types").BlobStore} BlobStore
+ * @typedef {import("../types").ReadonlyBlobStore} ReadonlyBlobStore
  * @typedef {import("../operation/edit_operation")} EditOperation
  * @typedef {import("../types").CommentRawData} CommentRawData
  */
@@ -131,7 +132,7 @@ class FileData {
 
   /**
    * @function
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise<FileData>}
    * @abstract
    * @see FileData#load
@@ -142,7 +143,7 @@ class FileData {
 
   /**
    * @function
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise<FileData>}
    * @abstract
    * @see FileData#load
@@ -153,7 +154,7 @@ class FileData {
 
   /**
    * @function
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise<FileData>}
    * @abstract
    * @see FileData#load
@@ -165,7 +166,7 @@ class FileData {
   /**
    * @see File#load
    * @param {string} kind
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise<FileData>}
    */
   async load(kind, blobStore) {

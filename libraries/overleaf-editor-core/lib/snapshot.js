@@ -10,6 +10,7 @@ const FILE_LOAD_CONCURRENCY = 50
 
 /**
  * @typedef {import("./types").BlobStore} BlobStore
+ * @typedef {import("./types").ReadonlyBlobStore} ReadonlyBlobStore
  * @typedef {import("./change")} Change
  * @typedef {import("./operation/text_operation")} TextOperation
  */
@@ -167,7 +168,7 @@ class Snapshot {
    * Ignore recoverable errors (caused by historical bad data) unless opts.strict is true
    *
    * @param {Change[]} changes
-   * @param {object} opts
+   * @param {object} [opts]
    * @param {boolean} opts.strict - do not ignore recoverable errors
    */
   applyAll(changes, opts) {
@@ -196,7 +197,7 @@ class Snapshot {
    * Load all of the files in this snapshot.
    *
    * @param {string} kind see {File#load}
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise<Object>} an object where keys are the pathnames and
    * values are the files in the snapshot
    */

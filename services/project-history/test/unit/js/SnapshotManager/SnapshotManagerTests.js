@@ -44,13 +44,39 @@ describe('SnapshotManager', function () {
   describe('getFileSnapshotStream', function () {
     beforeEach(function () {
       this.WebApiManager.getHistoryId.yields(null, this.historyId)
-      return this.HistoryStoreManager.getChunkAtVersion.yields(null, {
+      this.ranges = {
+        comments: [],
+        trackedChanges: [
+          {
+            range: { pos: 4, length: 6 },
+            tracking: {
+              userId: 'user-1',
+              ts: '2024-01-01T00:00:00.000Z',
+              type: 'delete',
+            },
+          },
+          {
+            range: { pos: 35, length: 5 },
+            tracking: {
+              userId: 'user-1',
+              ts: '2024-01-01T00:00:00.000Z',
+              type: 'insert',
+            },
+          },
+        ],
+      }
+      this.HistoryStoreManager.getChunkAtVersion.yields(null, {
         chunk: {
           history: {
             snapshot: {
               files: {
                 'main.tex': {
                   hash: '35c9bd86574d61dcadbce2fdd3d4a0684272c6ea',
+                  stringLength: 41,
+                },
+                'file_with_ranges.tex': {
+                  hash: '5d2781d78fa5a97b7bafa849fe933dfc9dc93eba',
+                  rangesHash: '73061952d41ce54825e2fc1c36b4cf736d5fb62f',
                   stringLength: 41,
                 },
                 'binary.png': {
@@ -94,7 +120,7 @@ describe('SnapshotManager', function () {
       })
     })
 
-    describe('of a text file', function () {
+    describe('of a text file with no tracked changes', function () {
       beforeEach(function (done) {
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
           getString: BPromise.promisify(
@@ -178,6 +204,56 @@ Seven eight nine\
       })
     })
 
+    describe('of a text file with tracked changes', function () {
+      beforeEach(function (done) {
+        this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
+          getString: (this.getString = sinon
+            .stub()
+            .resolves('the quick brown fox jumps over the lazy dog')),
+          getObject: (this.getObject = sinon.stub().resolves(this.ranges)),
+        })
+        this.SnapshotManager.getFileSnapshotStream(
+          this.projectId,
+          5,
+          'file_with_ranges.tex',
+          (error, stream) => {
+            this.stream = stream
+            done(error)
+          }
+        )
+      })
+
+      it('should get the overleaf id', function () {
+        this.WebApiManager.getHistoryId
+          .calledWith(this.projectId)
+          .should.equal(true)
+      })
+
+      it('should get the chunk', function () {
+        this.HistoryStoreManager.getChunkAtVersion
+          .calledWith(this.projectId, this.historyId, 5)
+          .should.equal(true)
+      })
+
+      it('should get the blob of the starting snapshot', function () {
+        this.getString
+          .calledWith('5d2781d78fa5a97b7bafa849fe933dfc9dc93eba')
+          .should.equal(true)
+      })
+
+      it('should get the blob of the ranges', function () {
+        this.getObject
+          .calledWith('73061952d41ce54825e2fc1c36b4cf736d5fb62f')
+          .should.equal(true)
+      })
+
+      it('should return a string stream with the text content without the tracked deletes', function () {
+        expect(this.stream.read().toString()).to.equal(
+          'the brown fox jumps over the lazy dog'
+        )
+      })
+    })
+
     describe('of a binary file', function () {
       beforeEach(function (done) {
         this.HistoryStoreManager.getProjectBlobStream
@@ -245,6 +321,27 @@ Seven eight nine\
   describe('getProjectSnapshot', function () {
     beforeEach(function () {
       this.WebApiManager.getHistoryId.yields(null, this.historyId)
+      this.ranges = {
+        comments: [],
+        trackedChanges: [
+          {
+            range: { pos: 5, length: 6 },
+            tracking: {
+              userId: 'user-1',
+              ts: '2024-01-01T00:00:00.000Z',
+              type: 'delete',
+            },
+          },
+          {
+            range: { pos: 12, length: 5 },
+            tracking: {
+              userId: 'user-1',
+              ts: '2024-01-01T00:00:00.000Z',
+              type: 'insert',
+            },
+          },
+        ],
+      }
       return this.HistoryStoreManager.getChunkAtVersion.yields(null, {
         chunk: (this.chunk = {
           history: {
@@ -256,6 +353,16 @@ Seven eight nine\
                 },
                 'unchanged.tex': {
                   hash: '35c9bd86574d61dcadbce2fdd3d4a0684272c6ea',
+                  stringLength: 41,
+                },
+                'with_ranges_unchanged.tex': {
+                  hash: '35c9bd86574d61dcadbce2fdd3d4a0684272c6ea',
+                  rangesHash: '2e59fe3dbd5310703f89236d589d0b35db169cdf',
+                  stringLength: 41,
+                },
+                'with_ranges_changed.tex': {
+                  hash: '35c9bd86574d61dcadbce2fdd3d4a0684272c6ea',
+                  rangesHash: '2e59fe3dbd5310703f89236d589d0b35db169cdf',
                   stringLength: 41,
                 },
                 'binary.png': {
@@ -285,6 +392,16 @@ Seven eight nine\
                 timestamp: '2017-12-04T10:29:22.905Z',
                 authors: [31],
               },
+              {
+                operations: [
+                  {
+                    pathname: 'with_ranges_changed.tex',
+                    textOperation: [41, '\n\nSeven eight'],
+                  },
+                ],
+                timestamp: '2017-12-04T10:29:25.905Z',
+                authors: [31],
+              },
             ],
           },
           startVersion: 3,
@@ -302,22 +419,20 @@ Seven eight nine\
     describe('of project', function () {
       beforeEach(function (done) {
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
-          getString: BPromise.promisify(
-            (this.getString = sinon.stub().yields(
-              null,
-              `\
+          getString: (this.getString = sinon.stub().resolves(
+            `\
 Hello world
 
 One two three
 
 Four five six\
-`.replace(/^\t/g, '')
-            ))
-          ),
+`
+          )),
+          getObject: (this.getObject = sinon.stub().resolves(this.ranges)),
         })
         this.SnapshotManager.getProjectSnapshot(
           this.projectId,
-          5,
+          6,
           (error, data) => {
             this.data = data
             done(error)
@@ -326,36 +441,61 @@ Four five six\
       })
 
       it('should get the overleaf id', function () {
-        return this.WebApiManager.getHistoryId
+        this.WebApiManager.getHistoryId
           .calledWith(this.projectId)
           .should.equal(true)
       })
 
       it('should get the chunk', function () {
-        return this.HistoryStoreManager.getChunkAtVersion
-          .calledWith(this.projectId, this.historyId, 5)
+        this.HistoryStoreManager.getChunkAtVersion
+          .calledWith(this.projectId, this.historyId, 6)
           .should.equal(true)
       })
 
-      return it('should produce the snapshot file data', function () {
-        expect(this.data).to.have.all.keys(['files', 'projectId'])
-        expect(this.data.projectId).to.equal('project-id-123')
-        expect(this.data.files['main.tex']).to.exist
-        expect(this.data.files['unchanged.tex']).to.exist
-        expect(this.data.files['binary.png']).to.exist
-        // files with operations in the chunk should return content only
-        expect(this.data.files['main.tex'].data.content).to.equal(
-          'Hello world\n\nOne two three\n\nFour five six\n\nSeven eight nine'
-        )
-        expect(this.data.files['main.tex'].data.hash).to.not.exist
-        // unchanged files in the chunk should return hash only
-        expect(this.data.files['unchanged.tex'].data.hash).to.equal(
-          '35c9bd86574d61dcadbce2fdd3d4a0684272c6ea'
-        )
-        expect(this.data.files['unchanged.tex'].data.content).to.not.exist
-        return expect(this.data.files['binary.png'].data.hash).to.equal(
-          'c6654ea913979e13e22022653d284444f284a172'
-        )
+      it('should get the ranges for the file with tracked changes', function () {
+        this.getObject.calledWith('2e59fe3dbd5310703f89236d589d0b35db169cdf')
+      })
+
+      it('should produce the snapshot file data', function () {
+        expect(this.data).to.deep.equal({
+          files: {
+            'main.tex': {
+              // files with operations in the chunk should return content only
+              data: {
+                content:
+                  'Hello world\n\nOne two three\n\nFour five six\n\nSeven eight nine',
+              },
+            },
+            'unchanged.tex': {
+              // unchanged files in the chunk should return hash only
+              data: {
+                hash: '35c9bd86574d61dcadbce2fdd3d4a0684272c6ea',
+              },
+            },
+            'with_ranges_changed.tex': {
+              // files in the chunk with tracked changes should return content
+              // without the tracked deletes
+              data: {
+                content:
+                  'Hello\n\nOne two three\n\nFour five six\n\nSeven eight',
+              },
+            },
+            'with_ranges_unchanged.tex': {
+              // files in the chunk with tracked changes should return content
+              // without the tracked deletes, even if they are unchanged
+              data: {
+                content: 'Hello\n\nOne two three\n\nFour five six',
+              },
+            },
+            'binary.png': {
+              // binary files in the chunk should return hash only
+              data: {
+                hash: 'c6654ea913979e13e22022653d284444f284a172',
+              },
+            },
+          },
+          projectId: 'project-id-123',
+        })
       })
     })
 

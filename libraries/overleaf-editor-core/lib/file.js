@@ -1,3 +1,4 @@
+// @ts-check
 'use strict'
 
 const _ = require('lodash')
@@ -11,6 +12,7 @@ const StringFileData = require('./file_data/string_file_data')
 /**
  * @typedef {import("./blob")} Blob
  * @typedef {import("./types").BlobStore} BlobStore
+ * @typedef {import("./types").ReadonlyBlobStore} ReadonlyBlobStore
  * @typedef {import("./types").StringFileRawData} StringFileRawData
  * @typedef {import("./types").CommentRawData} CommentRawData
  * @typedef {import("./operation/text_operation")} TextOperation
@@ -97,7 +99,7 @@ class File {
 
   /**
    * @param {Blob} blob
-   * @param {Blob} [blob]
+   * @param {Blob} [rangesBlob]
    * @param {Object} [metadata]
    * @return {File}
    */
@@ -213,7 +215,7 @@ class File {
    * @return {File} a new object of the same type
    */
   clone() {
-    return File.fromRaw(this.toRaw())
+    return /** @type {File} */ (File.fromRaw(this.toRaw()))
   }
 
   /**
@@ -222,7 +224,7 @@ class File {
    * operation.
    *
    * @param {string} kind
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @return {Promise.<File>} for this
    */
   async load(kind, blobStore) {

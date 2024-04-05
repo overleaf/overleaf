@@ -8,6 +8,8 @@ export type BlobStore = {
   getObject<T = unknown>(hash: string): Promise<T>
 }
 
+export type ReadonlyBlobStore = Pick<BlobStore, 'getString' | 'getObject'>
+
 export type RangesBlob = {
   comments: CommentsListRawData
   trackedChanges: TrackedChangeRawData[]

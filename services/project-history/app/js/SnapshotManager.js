@@ -1,3 +1,4 @@
+// @ts-check
 import Core from 'overleaf-editor-core'
 import { Readable as StringStream } from 'stream'
 import BPromise from 'bluebird'
@@ -6,10 +7,19 @@ import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as WebApiManager from './WebApiManager.js'
 import * as Errors from './Errors.js'
 
+/** @typedef {import('overleaf-editor-core').Snapshot} Snapshot */
+
 StringStream.prototype._read = function () {}
 
 const MAX_REQUESTS = 4 // maximum number of parallel requests to v1 history service
 
+/**
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @param {string} pathname
+ * @param {Function} callback
+ */
 export function getFileSnapshotStream(projectId, version, pathname, callback) {
   _getSnapshotAtVersion(projectId, version, (error, snapshot) => {
     if (error) {
@@ -34,7 +44,7 @@ export function getFileSnapshotStream(projectId, version, pathname, callback) {
           .load('eager', HistoryStoreManager.getBlobStore(historyId))
           .then(() => {
             const stream = new StringStream()
-            stream.push(file.getContent())
+            stream.push(file.getContent({ filterTrackedDeletes: true }))
             stream.push(null)
             callback(null, stream)
           })
@@ -70,7 +80,18 @@ export function getProjectSnapshot(projectId, version, callback) {
         .then(() => {
           const data = {
             projectId,
-            files: snapshot.getFileMap().files,
+            files: snapshot.getFileMap().map(file => {
+              if (!file) {
+                return null
+              }
+              const content = file.getContent({
+                filterTrackedDeletes: true,
+              })
+              if (content === null) {
+                return { data: { hash: file.getHash() } }
+              }
+              return { data: { content } }
+            }),
           }
           callback(null, data)
         })
@@ -79,6 +100,12 @@ export function getProjectSnapshot(projectId, version, callback) {
   })
 }
 
+/**
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @param {Function} callback
+ */
 function _getSnapshotAtVersion(projectId, version, callback) {
   WebApiManager.getHistoryId(projectId, (error, historyId) => {
     if (error) {
@@ -133,10 +160,10 @@ function _loadFilesLimit(snapshot, kind, blobStore) {
   return BPromise.map(
     fileList,
     file => {
-      // only load changed files, others can be dereferenced from their
-      // blobs (this method is only used by the git bridge which
-      // understands how to load blobs).
-      if (!file.isEditable() || file.getHash()) {
+      // only load changed files or files with tracked changes, others can be
+      // dereferenced from their blobs (this method is only used by the git
+      // bridge which understands how to load blobs).
+      if (!file.isEditable() || (file.getHash() && !file.getRangesHash())) {
         return
       }
       return file.load(kind, blobStore)

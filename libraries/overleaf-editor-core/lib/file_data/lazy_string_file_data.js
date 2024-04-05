@@ -12,6 +12,7 @@ const EditOperationBuilder = require('../operation/edit_operation_builder')
 
 /**
  *  @typedef {import('../types').BlobStore} BlobStore
+ *  @typedef {import('../types').ReadonlyBlobStore} ReadonlyBlobStore
  *  @typedef {import('../types').RangesBlob} RangesBlob
  */
 
@@ -106,7 +107,7 @@ class LazyStringFileData extends FileData {
 
   /**
    * @inheritdoc
-   * @param {BlobStore} blobStore
+   * @param {ReadonlyBlobStore} blobStore
    * @returns {Promise<EagerStringFileData>}
    */
   async toEager(blobStore) {
