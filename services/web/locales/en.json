@@ -1177,7 +1177,6 @@
   "new_tag": "New Tag",
   "new_tag_name": "New tag name",
   "newsletter": "Newsletter",
-  "newsletter-accept": "I’d like emails about product offers and company news and events.",
   "newsletter_info_note": "Please note: you will still receive important emails, such as project invites and security notifications (password resets, account linking, etc).",
   "newsletter_info_subscribed": "You are currently <0>subscribed</0> to the __appName__ newsletter. If you would prefer not to receive this email then you can unsubscribe at any time.",
   "newsletter_info_summary": "Every few months we send a newsletter out summarizing the new features available.",

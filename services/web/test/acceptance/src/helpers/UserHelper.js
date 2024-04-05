@@ -141,6 +141,33 @@ class UserHelper {
   }
 
   /**
+   * Requests user session
+   */
+  async getSession() {
+    const response = await this.fetch('/dev/session')
+    const body = await response.text()
+
+    if (response.status !== 200) {
+      throw new Error(
+        `get session failed: status=${response.status} body=${JSON.stringify(
+          body
+        )}`
+      )
+    }
+    return JSON.parse(body)
+  }
+
+  async getEmailConfirmationCode() {
+    const session = await this.getSession()
+
+    const code = session.pendingUserRegistration?.confirmCode
+    if (!code) {
+      throw new Error('No confirmation code found in session')
+    }
+    return code
+  }
+
+  /**
    * Make request to POST /logout
    * @param {object} [options] options to pass to request
    * @returns {object} http response
@@ -353,6 +380,30 @@ class UserHelper {
         `cannot register intitutional email: ${options.json.email}`
       )
     }
+
+    const code = await userHelper.getEmailConfirmationCode()
+
+    const confirmationResponse = await userHelper.fetch(
+      '/registration/confirm-email',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ code }),
+        ...options,
+      }
+    )
+
+    if (confirmationResponse.status !== 200) {
+      throw new Error(
+        `email confirmation failed: status=${
+          response.status
+        } body=${JSON.stringify(body)}`
+      )
+    }
+
     userHelper.user = await UserGetter.promises.getUser({
       email: userData.email,
     })

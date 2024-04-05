@@ -32,6 +32,46 @@ class User {
     })
   }
 
+  getSession(callback) {
+    this.request.get(
+      {
+        url: '/dev/session',
+      },
+      (err, response, body) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `get session failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
+
+        const session = JSON.parse(response.body)
+        callback(null, session)
+      }
+    )
+  }
+
+  getEmailConfirmationCode(callback) {
+    this.getSession((err, session) => {
+      if (err != null) {
+        return callback(err)
+      }
+
+      const code = session.pendingUserRegistration?.confirmCode
+      if (!code) {
+        return callback(new Error('No confirmation code found in session'))
+      }
+
+      callback(null, code)
+    })
+  }
+
   resetCookies() {
     this.jar = request.jar()
     this.request = request.defaults({
@@ -114,12 +154,40 @@ class User {
               )
             )
           }
-          db.users.findOne({ email: this.email }, (error, user) => {
+
+          this.getEmailConfirmationCode((error, code) => {
             if (error != null) {
               return callback(error)
             }
-            this.setExtraAttributes(user)
-            callback(null, user)
+
+            this.request.post(
+              {
+                url: '/registration/confirm-email',
+                json: { code },
+              },
+              (error, response, body) => {
+                if (error != null) {
+                  return callback(error)
+                }
+                if (response.statusCode !== 200) {
+                  return callback(
+                    new Error(
+                      `email confirmation failed: status=${
+                        response.statusCode
+                      } body=${JSON.stringify(body)}`
+                    )
+                  )
+                }
+
+                db.users.findOne({ email: this.email }, (error, user) => {
+                  if (error != null) {
+                    return callback(error)
+                  }
+                  this.setExtraAttributes(user)
+                  callback(null, user)
+                })
+              }
+            )
           })
         }
       )

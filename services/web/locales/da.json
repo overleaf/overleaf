@@ -945,7 +945,6 @@
   "new_tag": "Nyt tag",
   "new_tag_name": "Navn til nyt tag",
   "newsletter": "Nyhedsbrev",
-  "newsletter-accept": "Jeg vil gerne modtage e-mails om produkttilbud, virksomhedsnyheder og begivenheder.",
   "newsletter_info_note": "Du vil stadig modtage vigtige e-mails såsom projektinvitationer og sikkerhedsbeskeder (nulstilling af kode, kontoforbindelser, osv.).",
   "newsletter_info_subscribed": "Du er <0>tilmeldt</0> til __appName__s nyhedsbrev. Hvis du foretrækker ikke at modtage disse e-mails, kan du altid framelde dig.",
   "newsletter_info_summary": "Hvert par måneder sender vi et nyhedsbrev som opsummerer de nyeste tilgængelige funktioner.",

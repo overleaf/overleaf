@@ -7,7 +7,6 @@ const fs = require('fs')
 const ErrorController = require('../Errors/ErrorController')
 const SessionManager = require('../Authentication/SessionManager')
 
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const { expressify } = require('@overleaf/promise-utils')
 const logger = require('@overleaf/logger')
 
@@ -32,17 +31,11 @@ async function index(req, res) {
 
 async function home(req, res) {
   if (Features.hasFeature('homepage') && homepageExists) {
-    const onboardingFlowAssignment =
-      await SplitTestHandler.promises.getAssignment(req, res, 'onboarding-flow')
     AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
       page: req.path,
     })
 
-    res.render('external/home/website-redesign/index', {
-      onboardingFlowVariant: onboardingFlowAssignment.variant,
-      hideNewsletterCheckbox:
-        onboardingFlowAssignment.variant === 'token-confirmation-odc',
-    })
+    res.render('external/home/website-redesign/index')
   } else {
     res.redirect('/login')
   }
