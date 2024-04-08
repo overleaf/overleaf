@@ -1,3 +1,5 @@
+// @ts-check
+
 const Settings = require('@overleaf/settings')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const projectHistoryKeys = Settings.redis?.project_history?.key_schema
@@ -7,7 +9,12 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const { docIsTooLarge } = require('./Limits')
+const { addTrackedDeletesToContent } = require('./Utils')
 const OError = require('@overleaf/o-error')
+
+/**
+ * @typedef {import('./types').Ranges} Ranges
+ */
 
 const ProjectHistoryRedisManager = {
   async queueOps(projectId, ...ops) {
@@ -119,23 +126,41 @@ const ProjectHistoryRedisManager = {
     return await ProjectHistoryRedisManager.queueOps(projectId, jsonUpdate)
   },
 
+  /**
+   * Add a resync doc update to the project-history queue
+   *
+   * @param {string} projectId
+   * @param {string} projectHistoryId
+   * @param {string} docId
+   * @param {string[]} lines
+   * @param {Ranges} ranges
+   * @param {number} version
+   * @param {string} pathname
+   * @param {boolean} historyRangesSupport
+   * @return {Promise<number>} the number of ops added
+   */
   async queueResyncDocContent(
     projectId,
     projectHistoryId,
     docId,
     lines,
+    ranges,
     version,
-    pathname
+    pathname,
+    historyRangesSupport
   ) {
     logger.debug(
       { projectId, docId, lines, version, pathname },
       'queue doc content resync'
     )
+
+    let content = lines.join('\n')
+    if (historyRangesSupport) {
+      content = addTrackedDeletesToContent(content, ranges.changes ?? [])
+    }
+
     const projectUpdate = {
-      resyncDocContent: {
-        content: lines.join('\n'),
-        version,
-      },
+      resyncDocContent: { content, version },
       projectHistoryId,
       path: pathname,
       doc: docId,

@@ -987,6 +987,7 @@ describe('DocumentManager', function () {
           ranges: this.ranges,
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
+          historyRangesSupport: this.historyRangesSupport,
         })
         await this.DocumentManager.promises.resyncDocContents(
           this.project_id,
@@ -1008,8 +1009,10 @@ describe('DocumentManager', function () {
             this.projectHistoryId,
             this.doc_id,
             this.lines,
+            this.ranges,
             this.version,
-            this.pathnameFromProjectStructureUpdate
+            this.pathnameFromProjectStructureUpdate,
+            this.historyRangesSupport
           )
           .should.equal(true)
       })
@@ -1025,6 +1028,7 @@ describe('DocumentManager', function () {
           ranges: this.ranges,
           pathname: this.pathname,
           projectHistoryId: this.projectHistoryId,
+          historyRangesSupport: this.historyRangesSupport,
         })
         await this.DocumentManager.promises.resyncDocContents(
           this.project_id,
@@ -1052,8 +1056,10 @@ describe('DocumentManager', function () {
             this.projectHistoryId,
             this.doc_id,
             this.lines,
+            this.ranges,
             this.version,
-            this.pathnameFromProjectStructureUpdate
+            this.pathnameFromProjectStructureUpdate,
+            this.historyRangesSupport
           )
           .should.equal(true)
       })

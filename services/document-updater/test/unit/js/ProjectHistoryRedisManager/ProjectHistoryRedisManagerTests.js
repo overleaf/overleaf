@@ -177,21 +177,11 @@ describe('ProjectHistoryRedisManager', function () {
       beforeEach(function () {
         this.doc_id = 1234
         this.lines = ['one', 'two']
+        this.ranges = {
+          changes: [{ op: { i: 'ne', p: 1 } }, { op: { d: 'deleted', p: 3 } }],
+        }
         this.version = 2
         this.pathname = '/path'
-
-        this.update = {
-          resyncDocContent: {
-            content: this.lines.join('\n'),
-            version: this.version,
-          },
-          projectHistoryId: this.projectHistoryId,
-          path: this.pathname,
-          doc: this.doc_id,
-          meta: {
-            ts: new Date(),
-          },
-        }
 
         this.ProjectHistoryRedisManager.promises.queueOps = sinon
           .stub()
@@ -200,15 +190,29 @@ describe('ProjectHistoryRedisManager', function () {
 
       describe('with a good doc', function () {
         beforeEach(async function () {
+          this.update = {
+            resyncDocContent: {
+              content: 'one\ntwo',
+              version: this.version,
+            },
+            projectHistoryId: this.projectHistoryId,
+            path: this.pathname,
+            doc: this.doc_id,
+            meta: { ts: new Date() },
+          }
+
           await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
             this.project_id,
             this.projectHistoryId,
             this.doc_id,
             this.lines,
+            this.ranges,
             this.version,
-            this.pathname
+            this.pathname,
+            false
           )
         })
+
         it('should check if the doc is too large', function () {
           this.Limits.docIsTooLarge
             .calledWith(
@@ -235,8 +239,10 @@ describe('ProjectHistoryRedisManager', function () {
               this.projectHistoryId,
               this.doc_id,
               this.lines,
+              this.ranges,
               this.version,
-              this.pathname
+              this.pathname,
+              false
             )
           ).to.be.rejected
         })
@@ -244,6 +250,47 @@ describe('ProjectHistoryRedisManager', function () {
         it('should not queue an update if the doc is too large', function () {
           this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
             false
+          )
+        })
+      })
+
+      describe('when history ranges support is enabled', function () {
+        beforeEach(async function () {
+          this.update = {
+            resyncDocContent: {
+              content: 'onedeleted\ntwo',
+              version: this.version,
+            },
+            projectHistoryId: this.projectHistoryId,
+            path: this.pathname,
+            doc: this.doc_id,
+            meta: { ts: new Date() },
+          }
+
+          await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
+            this.project_id,
+            this.projectHistoryId,
+            this.doc_id,
+            this.lines,
+            this.ranges,
+            this.version,
+            this.pathname,
+            true
+          )
+        })
+
+        it('should include tracked deletes in the update', function () {
+          this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWithExactly(
+            this.project_id,
+            JSON.stringify(this.update)
+          )
+        })
+
+        it('should check the doc length without tracked deletes', function () {
+          this.Limits.docIsTooLarge.should.have.been.calledWith(
+            JSON.stringify(this.update).length,
+            this.lines,
+            this.settings.max_doc_length
           )
         })
       })

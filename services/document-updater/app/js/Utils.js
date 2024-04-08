@@ -5,6 +5,7 @@
  * @typedef {import('./types').DeleteOp} DeleteOp
  * @typedef {import('./types').InsertOp} InsertOp
  * @typedef {import('./types').Op} Op
+ * @typedef {import('./types').TrackedChange} TrackedChange
  */
 
 /**
@@ -37,4 +38,32 @@ function isComment(op) {
   return 'c' in op && op.c != null
 }
 
-module.exports = { isInsert, isDelete, isComment }
+/**
+ * Adds given tracked deletes to the given content.
+ *
+ * The history system includes tracked deletes in the document content.
+ *
+ * @param {string} content
+ * @param {TrackedChange[]} trackedChanges
+ * @return {string} content for the history service
+ */
+function addTrackedDeletesToContent(content, trackedChanges) {
+  let cursor = 0
+  let result = ''
+  for (const change of trackedChanges) {
+    if (isDelete(change.op)) {
+      // Add the content before the tracked delete
+      result += content.slice(cursor, change.op.p)
+      cursor = change.op.p
+      // Add the content of the tracked delete
+      result += change.op.d
+    }
+  }
+
+  // Add the content after all tracked deletes
+  result += content.slice(cursor)
+
+  return result
+}
+
+module.exports = { isInsert, isDelete, isComment, addTrackedDeletesToContent }
