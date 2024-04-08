@@ -260,6 +260,7 @@ describe('ProjectHistoryRedisManager', function () {
             resyncDocContent: {
               content: 'onedeleted\ntwo',
               version: this.version,
+              ranges: this.ranges,
             },
             projectHistoryId: this.projectHistoryId,
             path: this.pathname,

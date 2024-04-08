@@ -168,6 +168,11 @@ const ProjectHistoryRedisManager = {
         ts: new Date(),
       },
     }
+
+    if (historyRangesSupport) {
+      projectUpdate.resyncDocContent.ranges = ranges
+    }
+
     const jsonUpdate = JSON.stringify(projectUpdate)
     // Do an optimised size check on the docLines using the serialised
     // project update length as an upper bound
