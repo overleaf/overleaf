@@ -10,6 +10,7 @@ import { FigureModalFooter } from './figure-modal-footer'
 import { lazy, memo, Suspense, useCallback, useEffect } from 'react'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { ChangeSpec } from '@codemirror/state'
+import { snippet } from '@codemirror/autocomplete'
 import {
   FigureData,
   PastedImageData,
@@ -206,29 +207,26 @@ const FigureModalContent = () => {
         effects: editFigureDataEffect.of(null),
       })
     } else {
-      view.dispatch(
-        view.state.changeByRange(range => {
-          const { pos, suffix } = ensureEmptyLine(view.state, range)
-          const widthArgument =
-            width !== undefined ? `[width=${width}\\linewidth]` : ''
-          const changes: ChangeSpec = view.state.changes({
-            insert: prepareLines(
-              [
-                '\\begin{figure}',
-                '\t\\centering',
-                `\t\\includegraphics${widthArgument}{${path}}`,
-                `\t${captionCommand}`,
-                `\t${labelCommand}`,
-                `\\end{figure}${suffix}`,
-              ],
-              view.state,
-              pos
-            ),
-            from: pos,
-          })
+      const { pos, suffix } = ensureEmptyLine(
+        view.state,
+        view.state.selection.main
+      )
 
-          return { range: range.map(changes), changes }
-        })
+      const widthArgument =
+        width !== undefined ? `[width=${width}\\linewidth]` : ''
+      const caption = includeCaption ? `\n\t\\caption{\${Enter Caption}}` : ''
+      const label = includeLabel ? `\n\t\\label{\${fig:enter-label}}` : ''
+
+      snippet(
+        `\\begin{figure}
+\t\\centering
+\t\\includegraphics${widthArgument}{${path}}${caption}${label}
+\\end{figure}${suffix}\${}`
+      )(
+        { state: view.state, dispatch: view.dispatch },
+        { label: 'figure' },
+        pos,
+        pos
       )
     }
     hide()

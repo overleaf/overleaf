@@ -113,7 +113,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -159,7 +159,7 @@ describe('<FigureModal />', function () {
       cy.findByText('Insert figure').click()
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
   })
@@ -233,7 +233,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
 
@@ -261,7 +261,7 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
       )
     })
   })
@@ -403,7 +403,89 @@ describe('<FigureModal />', function () {
 
       cy.get('.cm-content').should(
         'have.text',
-        '\\begin{figure}    \\centering    Enter Caption    🏷fig:enter-label\\end{figure}'
+        '\\begin{figure}    \\centering    \\caption{Enter Caption}    🏷fig:enter-label\\end{figure}'
+      )
+    })
+
+    it('Selects the caption when the figure is inserted with a caption', function () {
+      cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
+      cy.findByText('Insert figure').click()
+
+      cy.get('@linked-file-request').should('have.been.calledWithMatch', {
+        body: {
+          provider: 'url',
+          data: {
+            url: 'https://my-fake-website.com/frog.jpg',
+          },
+        },
+      })
+
+      cy.get('.cm-selectionLayer .cm-selectionBackground').should(
+        'have.length',
+        1
+      )
+
+      // If caption is selected then typing will replace the whole caption
+      cy.focused().type('My caption')
+      cy.get('.cm-content').should(
+        'have.text',
+        '\\begin{figure}    \\centering    \\caption{My caption}    🏷fig:enter-label\\end{figure}'
+      )
+    })
+
+    it('Selects the label when the figure is inserted without a caption', function () {
+      cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
+      cy.get('@include-caption-checkbox').uncheck()
+      cy.findByText('Insert figure').click()
+
+      cy.get('@linked-file-request').should('have.been.calledWithMatch', {
+        body: {
+          provider: 'url',
+          data: {
+            url: 'https://my-fake-website.com/frog.jpg',
+          },
+        },
+      })
+
+      cy.get('.cm-selectionLayer .cm-selectionBackground').should(
+        'have.length',
+        1
+      )
+
+      // If label is selected then typing will replace the whole label
+      cy.focused().type('fig:my-label')
+      cy.get('.cm-content').should(
+        'have.text',
+        '\\begin{figure}    \\centering    \\label{fig:my-label}\\end{figure}'
+      )
+    })
+
+    it('Places the cursor after the figure if it is inserted without a caption or a label', function () {
+      cy.get('@image-url-input').type('https://my-fake-website.com/frog.jpg')
+      cy.get('@include-caption-checkbox').uncheck()
+      cy.get('@include-label-checkbox').uncheck()
+
+      cy.findByText('Insert figure').click()
+
+      cy.get('@linked-file-request').should('have.been.calledWithMatch', {
+        body: {
+          provider: 'url',
+          data: {
+            url: 'https://my-fake-website.com/frog.jpg',
+          },
+        },
+      })
+
+      cy.get('.cm-content').should(
+        'have.text',
+        '\\begin{figure}    \\centering\\end{figure}'
+      )
+
+      cy.focused().type('Some more text')
+
+      cy.get('.cm-content').should(
+        'have.text',
+        '\\begin{figure}    \\centering\\end{figure}Some more text'
       )
     })
   })
