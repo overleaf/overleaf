@@ -23,6 +23,9 @@ block content
 					if showBrlGeoBanner
 						div.notification.notification-type-success.text-centered
 							div.notification-content !{translate("brl_discount_offer_plans_page_banner", {flag: '🇧🇷'})}
+					if showLATAMBanner
+						div.notification.notification-type-success.text-centered
+							div.notification-content !{translate("latam_discount_offer_plans_page_banner", {flag: latamCountryBannerDetails.latamCountryFlag, country: latamCountryBannerDetails.country, discount: latamCountryBannerDetails.discount })}
 
 					.row
 						.col-md-12

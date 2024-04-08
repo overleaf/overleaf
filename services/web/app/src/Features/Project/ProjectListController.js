@@ -359,15 +359,32 @@ async function projectListPage(req, res, next) {
 
   let showInrGeoBanner = false
   let showBrlGeoBanner = false
+  let showLATAMBanner = false
   let recommendedCurrency
 
   if (usersBestSubscription?.type === 'free') {
-    const { countryCode } = await GeoIpLookup.promises.getCurrencyCode(req.ip)
+    const latamGeoPricingAssignment =
+      await SplitTestHandler.promises.getAssignment(
+        req,
+        res,
+        'geo-pricing-latam-v2'
+      )
+
+    const { countryCode, currencyCode } =
+      await GeoIpLookup.promises.getCurrencyCode(req.ip)
 
     if (countryCode === 'IN') {
       showInrGeoBanner = true
     }
     showBrlGeoBanner = countryCode === 'BR'
+
+    showLATAMBanner =
+      latamGeoPricingAssignment.variant === 'latam' &&
+      ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
+    // LATAM Banner needs to know which currency to display
+    if (showLATAMBanner) {
+      recommendedCurrency = currencyCode
+    }
   }
 
   let hasIndividualRecurlySubscription = false
@@ -426,6 +443,7 @@ async function projectListPage(req, res, next) {
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant,
     showWritefullPromoBanner,
+    showLATAMBanner,
     recommendedCurrency,
     showInrGeoBanner,
     showBrlGeoBanner,

@@ -6,13 +6,12 @@ import ReconfirmationInfo from './groups/affiliation/reconfirmation-info'
 import GroupsAndEnterpriseBanner from './groups-and-enterprise-banner'
 import WritefullPremiumPromoBanner from './writefull-premium-promo-banner'
 import GroupSsoSetupSuccess from './groups/group-sso-setup-success'
-import INRBanner from './ads/inr-banner'
 import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import classNames from 'classnames'
-import BRLBanner from './ads/brl-banner'
+import GeoBanners from './geo-banners'
 
 type Subscription = {
   groupId: string
@@ -36,8 +35,6 @@ function UserNotifications() {
     'ol-groupSubscriptionsPendingEnrollment',
     []
   )
-  const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
-  const showBrlGeoBanner = getMeta('ol-showBrlGeoBanner', false)
   const user = getMeta('ol-user')
 
   // Temporary workaround to prevent also showing groups/enterprise banner
@@ -85,8 +82,8 @@ function UserNotifications() {
         <Institution />
         <ConfirmEmail />
         <ReconfirmationInfo />
+        <GeoBanners />
         {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
-        {showInrGeoBanner && <INRBanner />}
 
         <WritefullPremiumPromoBanner
           show={showWritefull}
@@ -95,7 +92,6 @@ function UserNotifications() {
             setDismissedWritefull(true)
           }}
         />
-        {showBrlGeoBanner && <BRLBanner />}
       </ul>
     </div>
   )

@@ -37,10 +37,10 @@ async function plansPage(req, res) {
   if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
     currency = queryCurrency
   }
-  const { recommendedCurrency, countryCode } = await _getRecommendedCurrency(
-    req,
-    res
-  )
+  const { recommendedCurrency, countryCode, geoPricingLATAMTestVariant } =
+    await _getRecommendedCurrency(req, res)
+
+  const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
   if (recommendedCurrency && currency == null) {
     currency = recommendedCurrency
   }
@@ -68,6 +68,7 @@ async function plansPage(req, res) {
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
+    'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
   }
 
   AnalyticsManager.recordEventForSession(
@@ -75,6 +76,10 @@ async function plansPage(req, res) {
     'plans-page-view',
     plansPageViewSegmentation
   )
+
+  const showLATAMBanner =
+    geoPricingLATAMTestVariant === 'latam' &&
+    ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
 
   res.render('subscriptions/plans', {
     title: 'plans_and_pricing',
@@ -93,6 +98,8 @@ async function plansPage(req, res) {
       SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
     showInrGeoBanner: countryCode === 'IN',
     showBrlGeoBanner: countryCode === 'BR',
+    showLATAMBanner,
+    latamCountryBannerDetails,
   })
 }
 
@@ -202,10 +209,10 @@ async function userSubscriptionPage(req, res) {
 
 async function interstitialPaymentPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
-  const { recommendedCurrency, countryCode } = await _getRecommendedCurrency(
-    req,
-    res
-  )
+  const { recommendedCurrency, countryCode, geoPricingLATAMTestVariant } =
+    await _getRecommendedCurrency(req, res)
+
+  const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
 
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
@@ -217,12 +224,17 @@ async function interstitialPaymentPage(req, res) {
     const paywallPlansPageViewSegmentation = {
       currency: recommendedCurrency,
       countryCode,
+      'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
     }
     AnalyticsManager.recordEventForSession(
       req.session,
       'paywall-plans-page-view',
       paywallPlansPageViewSegmentation
     )
+
+    const showLATAMBanner =
+      geoPricingLATAMTestVariant === 'latam' &&
+      ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
 
     res.render('subscriptions/interstitial-payment', {
       title: 'subscribe',
@@ -234,6 +246,8 @@ async function interstitialPaymentPage(req, res) {
       showSkipLink,
       showInrGeoBanner: countryCode === 'IN',
       showBrlGeoBanner: countryCode === 'BR',
+      showLATAMBanner,
+      latamCountryBannerDetails,
     })
   }
 }
@@ -551,14 +565,63 @@ async function _getRecommendedCurrency(req, res) {
   const countryCode = currencyLookup.countryCode
   let recommendedCurrency = currencyLookup.currencyCode
 
-  if (['MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency)) {
+  const assignmentLATAM = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'geo-pricing-latam-v2'
+  )
+
+  if (
+    ['MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency) &&
+    assignmentLATAM?.variant === 'default'
+  ) {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
 
   return {
     recommendedCurrency,
     countryCode,
+    geoPricingLATAMTestVariant: assignmentLATAM?.variant,
   }
+}
+
+async function getLatamCountryBannerDetails(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  let ip = req.ip
+  if (
+    req.query?.ip &&
+    (await AuthorizationManager.promises.isUserSiteAdmin(userId))
+  ) {
+    ip = req.query.ip
+  }
+  const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
+  const countryCode = currencyLookup.countryCode
+  const latamCountryBannerDetails = {}
+
+  switch (countryCode) {
+    case `MX`:
+      latamCountryBannerDetails.latamCountryFlag = '🇲🇽'
+      latamCountryBannerDetails.country = 'Mexico'
+      latamCountryBannerDetails.discount = '25%'
+      break
+    case `CO`:
+      latamCountryBannerDetails.latamCountryFlag = '🇨🇴'
+      latamCountryBannerDetails.country = 'Colombia'
+      latamCountryBannerDetails.discount = '60%'
+      break
+    case `CL`:
+      latamCountryBannerDetails.latamCountryFlag = '🇨🇱'
+      latamCountryBannerDetails.country = 'Chile'
+      latamCountryBannerDetails.discount = '30%'
+      break
+    case `PE`:
+      latamCountryBannerDetails.latamCountryFlag = '🇵🇪'
+      latamCountryBannerDetails.country = 'Peru'
+      latamCountryBannerDetails.discount = '40%'
+      break
+  }
+
+  return latamCountryBannerDetails
 }
 
 module.exports = {

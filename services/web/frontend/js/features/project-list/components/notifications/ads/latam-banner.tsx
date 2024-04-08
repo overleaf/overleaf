@@ -4,15 +4,50 @@ import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import { Modal, Button } from 'react-bootstrap'
 import AccessibleModal from '../../../../../shared/components/accessible-modal'
 import { useTranslation } from 'react-i18next'
+import getMeta from '@/utils/meta'
 
-export default function BRLBanner() {
+const LATAM_CURRENCIES = {
+  MXN: {
+    name: 'Mexican Pesos',
+    countryCode: 'MX',
+    discountCode: '25',
+    imageSource: '/img/subscriptions/mexico-discount-modal.png',
+  },
+  COP: {
+    name: 'Colombian Pesos',
+    countryCode: 'CO',
+    discountCode: '60',
+    imageSource: '/img/subscriptions/colombia-discount-modal.png',
+  },
+  CLP: {
+    name: 'Chilean Pesos',
+    countryCode: 'CL',
+    discountCode: '30',
+    imageSource: '/img/subscriptions/chile-discount-modal.png',
+  },
+  PEN: {
+    name: 'Peruvian Soles',
+    countryCode: 'PE',
+    discountCode: '40',
+    imageSource: '/img/subscriptions/peru-discount-modal.png',
+  },
+}
+
+export default function LATAMBanner() {
   const { t } = useTranslation()
   const [dismissedUntil, setDismissedUntil] = usePersistedState<
     Date | undefined
-  >(`has_dismissed_brl_banner_until`)
+  >(`has_dismissed_latam_banner_until`)
   const viewEventSent = useRef<boolean>(false)
-
   const [showModal, setShowModal] = useState(true)
+
+  const currency = getMeta('ol-recommendedCurrency')
+  const {
+    imageSource,
+    name: currencyName,
+    discountCode,
+    countryCode,
+  } = LATAM_CURRENCIES[currency as keyof typeof LATAM_CURRENCIES]
 
   useEffect(() => {
     if (dismissedUntil && new Date(dismissedUntil) > new Date()) {
@@ -24,11 +59,11 @@ export default function BRLBanner() {
         name: 'geo-pricing',
         page: '/project',
         content: 'modal',
-        country: 'BR',
+        country: countryCode,
       })
       viewEventSent.current = true
     }
-  }, [dismissedUntil])
+  }, [dismissedUntil, countryCode])
 
   const handleClick = useCallback(() => {
     eventTracking.sendMB('promo-click', {
@@ -36,14 +71,14 @@ export default function BRLBanner() {
       name: 'geo-pricing',
       page: '/project',
       content: 'modal',
-      country: 'BR',
+      country: countryCode,
       type: 'click',
     })
 
     setShowModal(false)
 
     window.open('/user/subscription/plans')
-  }, [])
+  }, [countryCode])
 
   const bannerDismissed = useCallback(() => {
     eventTracking.sendMB('promo-dismiss', {
@@ -51,12 +86,12 @@ export default function BRLBanner() {
       name: 'geo-pricing',
       page: '/project',
       content: 'modal',
-      country: 'BR',
+      country: countryCode,
     })
     const until = new Date()
     until.setDate(until.getDate() + 30) // 30 days
     setDismissedUntil(until)
-  }, [setDismissedUntil])
+  }, [setDismissedUntil, countryCode])
 
   const handleHide = useCallback(() => {
     setShowModal(false)
@@ -69,21 +104,26 @@ export default function BRLBanner() {
       name: 'geo-pricing',
       page: '/project',
       content: 'modal',
-      country: 'BR',
+      country: countryCode,
       type: 'pause',
     })
     setShowModal(false)
     const until = new Date()
     until.setDate(until.getDate() + 1) // 1 day
     setDismissedUntil(until)
-  }, [setDismissedUntil])
+  }, [setDismissedUntil, countryCode])
 
   if (dismissedUntil && new Date(dismissedUntil) > new Date()) {
     return null
   }
 
+  // Safety, but should always be a valid LATAM currency if ol-showLATAMBanner is true
+  if (!(currency in LATAM_CURRENCIES)) {
+    return null
+  }
+
   return (
-    <AccessibleModal show={showModal} onHide={handleHide}>
+    <AccessibleModal show={showModal} onHide={handleHide} backdrop="static">
       <Modal.Header closeButton>
         <Modal.Title>{t('latam_discount_modal_title')}</Modal.Title>
       </Modal.Header>
@@ -91,7 +131,7 @@ export default function BRLBanner() {
         <p>
           <img
             alt={t('latam_discount_modal_title')}
-            src="/img/subscriptions/blr-discount-modal.png"
+            src={imageSource}
             style={{
               width: '100%',
             }}
@@ -99,8 +139,8 @@ export default function BRLBanner() {
         </p>
         <p>
           {t('latam_discount_modal_info', {
-            discount: '50%',
-            currencyName: 'Brazilian Reais',
+            discount: discountCode,
+            currencyName,
           })}
         </p>
       </Modal.Body>
