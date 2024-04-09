@@ -1151,7 +1151,6 @@
   "new_tag": "新建标签",
   "new_tag_name": "新标签名",
   "newsletter": "电子邮件",
-  "newsletter-accept": "我想要关于产品报价和公司新闻和事件的电子邮件。",
   "newsletter_info_note": "请注意：您仍然会收到重要的电子邮件，例如项目邀请和安全通知（密码重置、帐户链接等）。",
   "newsletter_info_subscribed": "您当前<0>订阅了</0>__appName__ 新闻资讯。 如果您不想收到此电子邮件，则可以随时取消订阅。",
   "newsletter_info_summary": "每隔几个月，我们就会发送一份简讯，总结可用的新功能。",
