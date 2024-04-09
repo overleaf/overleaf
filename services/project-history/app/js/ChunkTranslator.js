@@ -447,32 +447,52 @@ class TextUpdateBuilder {
    * @param {RetainOp} retain
    */
   applyRetain(retain) {
-    const rangeOfRetention = new Range(this.sourceCursor, retain.length)
-    let cursor = this.sourceCursor
+    const resultRetentionRange = new Range(this.result.length, retain.length)
+    const sourceRetentionRange = new Range(this.sourceCursor, retain.length)
+
+    let scanCursor = this.result.length
     if (retain.tracking) {
       // We are modifying existing tracked deletes. We need to treat removal
       // (type insert/none) of a tracked delete as an insertion. Similarly, any
       // range we introduce as a tracked deletion must be reported as a deletion.
       const trackedDeletes = this.trackedChanges.trackedChanges.filter(
         tc =>
-          tc.tracking.type === 'delete' && tc.range.overlaps(rangeOfRetention)
+          tc.tracking.type === 'delete' &&
+          tc.range.overlaps(resultRetentionRange)
       )
+
       for (const trackedDelete of trackedDeletes) {
-        if (cursor < trackedDelete.range.start) {
+        const resultTrackedDelete = trackedDelete.range
+        const sourceTrackedDelete = trackedDelete.range.moveBy(
+          this.sourceCursor - this.result.length
+        )
+
+        if (scanCursor < resultTrackedDelete.start) {
           if (retain.tracking.type === 'delete') {
             this.changes.push({
-              d: this.source.slice(cursor, trackedDelete.range.start),
+              d: this.source.slice(
+                this.sourceCursor,
+                sourceTrackedDelete.start
+              ),
               p: this.result.length,
             })
           }
-          this.result += this.source.slice(cursor, trackedDelete.range.start)
-          cursor = trackedDelete.range.start
+          this.result += this.source.slice(
+            this.sourceCursor,
+            sourceTrackedDelete.start
+          )
+          scanCursor = resultTrackedDelete.start
+          this.sourceCursor = sourceTrackedDelete.start
         }
-        const endOfInsertion = Math.min(
-          trackedDelete.range.end,
-          rangeOfRetention.end
+        const endOfInsertionResult = Math.min(
+          resultTrackedDelete.end,
+          resultRetentionRange.end
         )
-        const text = this.source.slice(cursor, endOfInsertion)
+        const endOfInsertionSource = Math.min(
+          sourceTrackedDelete.end,
+          sourceRetentionRange.end
+        )
+        const text = this.source.slice(this.sourceCursor, endOfInsertionSource)
         if (
           retain.tracking.type === 'none' ||
           retain.tracking.type === 'insert'
@@ -483,16 +503,22 @@ class TextUpdateBuilder {
           })
         }
         this.result += text
-        cursor = endOfInsertion
-        if (cursor >= rangeOfRetention.end) {
+        // skip the tracked delete itself
+        scanCursor = endOfInsertionResult
+        this.sourceCursor = endOfInsertionSource
+
+        if (scanCursor >= resultRetentionRange.end) {
           break
         }
       }
     }
-    if (cursor < rangeOfRetention.end) {
+    if (scanCursor < resultRetentionRange.end) {
       // The last region is not a tracked delete. But we should still handle
       // a new tracked delete as a deletion.
-      const text = this.source.slice(cursor, rangeOfRetention.end)
+      const text = this.source.slice(
+        this.sourceCursor,
+        sourceRetentionRange.end
+      )
       if (retain.tracking?.type === 'delete') {
         this.changes.push({
           d: text,
@@ -501,7 +527,7 @@ class TextUpdateBuilder {
       }
       this.result += text
     }
-    this.sourceCursor += retain.length
+    this.sourceCursor = sourceRetentionRange.end
   }
 
   /**
@@ -525,34 +551,49 @@ class TextUpdateBuilder {
    * @param {RemoveOp} deletion
    */
   applyDelete(deletion) {
-    const rangeOfDeletion = new Range(this.sourceCursor, deletion.length)
+    const sourceDeletionRange = new Range(this.sourceCursor, deletion.length)
+    const resultDeletionRange = new Range(this.result.length, deletion.length)
+
     const trackedDeletes = this.trackedChanges.trackedChanges
       .filter(
         tc =>
-          tc.tracking.type === 'delete' && tc.range.overlaps(rangeOfDeletion)
+          tc.tracking.type === 'delete' &&
+          tc.range.overlaps(resultDeletionRange)
       )
       .sort((a, b) => a.range.start - b.range.start)
-    let cursor = this.sourceCursor
+
+    let scanCursor = this.result.length
+
     for (const trackedDelete of trackedDeletes) {
-      if (cursor < trackedDelete.range.start) {
+      const resultTrackDeleteRange = trackedDelete.range
+      const sourceTrackDeleteRange = trackedDelete.range.moveBy(
+        this.sourceCursor - this.result.length
+      )
+
+      if (scanCursor < resultTrackDeleteRange.start) {
         this.changes.push({
-          d: this.source.slice(cursor, trackedDelete.range.start),
+          d: this.source.slice(this.sourceCursor, sourceTrackDeleteRange.start),
           p: this.result.length,
         })
       }
       // skip the tracked delete itself
-      cursor = Math.min(trackedDelete.range.end, rangeOfDeletion.end)
-      if (cursor >= rangeOfDeletion.end) {
+      scanCursor = Math.min(resultTrackDeleteRange.end, resultDeletionRange.end)
+      this.sourceCursor = Math.min(
+        sourceTrackDeleteRange.end,
+        sourceDeletionRange.end
+      )
+
+      if (scanCursor >= resultDeletionRange.end) {
         break
       }
     }
-    if (cursor < rangeOfDeletion.end) {
+    if (scanCursor < resultDeletionRange.end) {
       this.changes.push({
-        d: this.source.slice(cursor, rangeOfDeletion.end),
+        d: this.source.slice(this.sourceCursor, sourceDeletionRange.end),
         p: this.result.length,
       })
     }
-    this.sourceCursor = rangeOfDeletion.end
+    this.sourceCursor = sourceDeletionRange.end
   }
 
   finish() {
