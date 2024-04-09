@@ -527,8 +527,8 @@ templates.groupSSOReauthenticate = ctaTemplate({
     return [
       `Hi,
       <div>
-      Single sign-on for your Overleaf group has been updated. 
-      This means you need to reauthenticate your Overleaf account with your group’s SSO provider. 
+      Single sign-on for your Overleaf group has been updated.
+      This means you need to reauthenticate your Overleaf account with your group’s SSO provider.
       </div>
       `,
     ]
@@ -782,6 +782,31 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
       `Lee`,
       `Lee Shalit<br />CEO<br />${siteLink}<hr>`,
       `You're receiving this email because you've recently signed up for an Overleaf account. If you've previously subscribed to emails about product offers and company news and events, you can unsubscribe ${userSettingsLink}.`,
+    ]
+  },
+})
+
+templates.deletedAccount = NoCTAEmailTemplate({
+  subject() {
+    return 'Overleaf security note: account deletion confirmation'
+  },
+  title() {
+    return 'Account deleted'
+  },
+  message(opts, isPlainText) {
+    const dateFormatted = moment().format('dddd D MMMM YYYY')
+    const timeFormatted = moment().format('HH:mm')
+    const helpLink = EmailMessageHelper.displayLink(
+      'quick guide',
+      `${settings.siteUrl}/learn/how-to/Keeping_your_account_secure`,
+      isPlainText
+    )
+
+    return [
+      `We are writing to let you know that your ${settings.appName} account was deleted on ${dateFormatted} at ${timeFormatted} GMT.`,
+      `If this was you, you're all set and can ignore this email.`,
+      `If you did not take this action, please get in touch with our support team at ${settings.adminEmail} to report this as potentially suspicious activity on your account.`,
+      `For tips on keeping your ${settings.appName} account secure, read our ${helpLink}.`,
     ]
   },
 })

@@ -16,6 +16,7 @@ const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const Modules = require('../../infrastructure/Modules')
 const Errors = require('../Errors/Errors')
 const OnboardingDataCollectionManager = require('../OnboardingDataCollection/OnboardingDataCollectionManager')
+const EmailHandler = require('../Email/EmailHandler')
 
 module.exports = {
   deleteUser: callbackify(deleteUser),
@@ -48,6 +49,7 @@ async function deleteUser(userId, options) {
     await Modules.promises.hooks.fire('deleteUser', userId)
     await _createDeletedUser(user, options)
     await ProjectDeleter.promises.deleteUsersProjects(user._id)
+    await _sendDeleteEmail(user)
     await deleteMongoUser(user._id)
   } catch (error) {
     logger.warn({ error, userId }, 'something went wrong deleting the user')
@@ -108,6 +110,13 @@ async function ensureCanDeleteUser(user) {
   if (subscription) {
     throw new Errors.SubscriptionAdminDeletionError({})
   }
+}
+
+async function _sendDeleteEmail(user) {
+  const emailOptions = {
+    to: user.email,
+  }
+  await EmailHandler.promises.sendEmail('deletedAccount', emailOptions)
 }
 
 async function _createDeletedUser(user, options) {
