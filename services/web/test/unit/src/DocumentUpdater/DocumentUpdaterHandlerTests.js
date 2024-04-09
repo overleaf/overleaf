@@ -838,6 +838,174 @@ describe('DocumentUpdaterHandler', function () {
     })
   })
 
+  describe('resolveThread', function () {
+    beforeEach(function () {
+      this.thread_id = 'mock-thread-id-1'
+    })
+
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
+        this.handler.resolveThread(
+          this.project_id,
+          this.doc_id,
+          this.thread_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should resolve the thread in the document updater', function () {
+        this.request
+          .calledWithMatch({
+            url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/resolve`,
+            method: 'POST',
+          })
+          .should.equal(true)
+      })
+
+      it('should call the callback', function () {
+        this.callback.calledWith(null).should.equal(true)
+      })
+    })
+
+    describe('when the document updater API returns an error', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(
+          1,
+          new Error('something went wrong'),
+          null,
+          null
+        )
+        this.handler.resolveThread(
+          this.project_id,
+          this.doc_id,
+          this.thread_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should return an error to the callback', function () {
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
+      })
+    })
+
+    describe('when the document updater returns a failure error code', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 500 }, '')
+        this.handler.resolveThread(
+          this.project_id,
+          this.doc_id,
+          this.thread_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should return the callback with an error', function () {
+        this.callback
+          .calledWith(
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
+          )
+          .should.equal(true)
+      })
+    })
+  })
+
+  describe('reopenThread', function () {
+    beforeEach(function () {
+      this.thread_id = 'mock-thread-id-1'
+    })
+
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 200 }, this.body)
+        this.handler.reopenThread(
+          this.project_id,
+          this.doc_id,
+          this.thread_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should reopen the thread in the document updater', function () {
+        this.request
+          .calledWithMatch({
+            url: `${this.settings.apis.documentupdater.url}/project/${this.project_id}/doc/${this.doc_id}/comment/${this.thread_id}/reopen`,
+            method: 'POST',
+          })
+          .should.equal(true)
+      })
+
+      it('should call the callback', function () {
+        this.callback.calledWith(null).should.equal(true)
+      })
+    })
+
+    describe('when the document updater API returns an error', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(
+          1,
+          new Error('something went wrong'),
+          null,
+          null
+        )
+        this.handler.reopenThread(
+          this.project_id,
+          this.doc_id,
+          this.thread_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should return an error to the callback', function () {
+        this.callback
+          .calledWith(sinon.match.instanceOf(Error))
+          .should.equal(true)
+      })
+    })
+
+    describe('when the document updater returns a failure error code', function () {
+      beforeEach(function () {
+        this.request.callsArgWith(1, null, { statusCode: 500 }, '')
+        this.handler.reopenThread(
+          this.project_id,
+          this.doc_id,
+          this.thread_id,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('should return the callback with an error', function () {
+        this.callback
+          .calledWith(
+            sinon.match
+              .instanceOf(Error)
+              .and(
+                sinon.match.has(
+                  'message',
+                  'document updater returned a failure status code: 500'
+                )
+              )
+          )
+          .should.equal(true)
+      })
+    })
+  })
+
   describe('updateProjectStructure ', function () {
     beforeEach(function () {
       this.user_id = 1234

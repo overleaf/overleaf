@@ -4,6 +4,7 @@ export type Update =
   | AddFileUpdate
   | RenameUpdate
   | DeleteCommentUpdate
+  | SetCommentStateUpdate
 
 export type UpdateMeta = {
   user_id: string
@@ -23,6 +24,13 @@ export type TextUpdate = {
     doc_length: number
     history_doc_length?: number
   }
+}
+
+export type SetCommentStateUpdate = {
+  pathname: string
+  commentId: string
+  resolved: boolean
+  meta: UpdateMeta
 }
 
 export type DeleteCommentUpdate = {

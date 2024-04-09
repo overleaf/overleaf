@@ -171,6 +171,14 @@ app.post(
   '/project/:project_id/doc/:doc_id/change/accept',
   HttpController.acceptChanges
 )
+app.post(
+  '/project/:project_id/doc/:doc_id/comment/:comment_id/resolve',
+  HttpController.resolveComment
+)
+app.post(
+  '/project/:project_id/doc/:doc_id/comment/:comment_id/reopen',
+  HttpController.reopenComment
+)
 app.delete(
   '/project/:project_id/doc/:doc_id/comment/:comment_id',
   HttpController.deleteComment

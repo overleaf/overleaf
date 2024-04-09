@@ -898,7 +898,9 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
         },
       }))
 
-      postJSON(`/project/${projectId}/thread/${entry.thread_id}/resolve`)
+      postJSON(
+        `/project/${projectId}/doc/${docId}/thread/${entry.thread_id}/resolve`
+      )
       onCommentResolved(entry.thread_id, user)
       sendMB('rp-comment-resolve', { view })
     },
@@ -925,9 +927,9 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   )
 
   const unresolveComment = useCallback(
-    (threadId: ThreadId) => {
+    (docId: DocId, threadId: ThreadId) => {
       onCommentReopened(threadId)
-      const url = `/project/${projectId}/thread/${threadId}/reopen`
+      const url = `/project/${projectId}/doc/${docId}/thread/${threadId}/reopen`
       postJSON(url).catch(debugConsole.error)
       sendMB('rp-comment-reopen')
     },

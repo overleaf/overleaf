@@ -17,6 +17,7 @@ import * as OperationsCompressor from './OperationsCompressor.js'
  * @typedef {import('./types').RenameUpdate} RenameUpdate
  * @typedef {import('./types').TextUpdate} TextUpdate
  * @typedef {import('./types').TrackingProps} TrackingProps
+ * @typedef {import('./types').SetCommentStateUpdate} SetCommentStateUpdate
  * @typedef {import('./types').Update} Update
  * @typedef {import('./types').UpdateWithBlob} UpdateWithBlob
  */
@@ -79,6 +80,14 @@ function _convertToChange(projectId, updateWithBlob) {
     if (update.v != null) {
       v2DocVersions[update.doc] = { pathname, v: update.v }
     }
+  } else if (isSetCommentStateUpdate(update)) {
+    operations = [
+      {
+        pathname: _convertPathname(update.pathname),
+        commentId: update.commentId,
+        resolved: update.resolved,
+      },
+    ]
   } else if (isDeleteCommentUpdate(update)) {
     operations = [
       {
@@ -187,6 +196,14 @@ export function isProjectStructureUpdate(update) {
  */
 export function isAddUpdate(update) {
   return _isAddDocUpdate(update) || _isAddFileUpdate(update)
+}
+
+/**
+ * @param {Update} update
+ * @returns {update is SetCommentStateUpdate}
+ */
+export function isSetCommentStateUpdate(update) {
+  return 'commentId' in update && 'resolved' in update
 }
 
 /**

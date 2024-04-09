@@ -38,7 +38,7 @@ function ResolvedCommentEntry({
     : thread.content
 
   const handleUnresolve = () => {
-    unresolveComment(thread.threadId)
+    unresolveComment(thread.docId, thread.threadId)
   }
 
   const handleDelete = () => {

@@ -650,6 +650,149 @@ describe('HttpController', function () {
     })
   })
 
+  describe('resolveComment', function () {
+    beforeEach(function () {
+      this.user_id = 'user-id-123'
+      this.req = {
+        params: {
+          project_id: this.project_id,
+          doc_id: this.doc_id,
+          comment_id: (this.comment_id = 'mock-comment-id'),
+        },
+        query: {},
+        body: {
+          user_id: this.user_id,
+        },
+      }
+      this.resolved = true
+    })
+
+    describe('successfully', function () {
+      beforeEach(function (done) {
+        this.DocumentManager.updateCommentStateWithLock = sinon
+          .stub()
+          .callsArgWith(5)
+
+        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
+        this.res.sendStatus.callsFake(() => done())
+        this.HttpController.resolveComment(this.req, this.res, this.next)
+      })
+
+      it('should accept the change', function () {
+        this.DocumentManager.updateCommentStateWithLock
+          .calledWith(
+            this.project_id,
+            this.doc_id,
+            this.comment_id,
+            this.user_id,
+            this.resolved
+          )
+          .should.equal(true)
+      })
+
+      it('should return a successful No Content response', function () {
+        this.res.sendStatus.calledWith(204).should.equal(true)
+      })
+
+      it('should log the request', function () {
+        this.logger.debug
+          .calledWith(
+            {
+              projectId: this.project_id,
+              docId: this.doc_id,
+              commentId: this.comment_id,
+            },
+            'resolving comment via http'
+          )
+          .should.equal(true)
+      })
+    })
+
+    describe('when an errors occurs', function () {
+      beforeEach(function () {
+        this.DocumentManager.updateCommentStateWithLock = sinon
+          .stub()
+          .callsArgWith(5, new Error('oops'))
+        this.HttpController.resolveComment(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+    })
+  })
+
+  describe('reopenComment', function () {
+    beforeEach(function () {
+      this.user_id = 'user-id-123'
+      this.req = {
+        params: {
+          project_id: this.project_id,
+          doc_id: this.doc_id,
+          comment_id: (this.comment_id = 'mock-comment-id'),
+        },
+        query: {},
+        body: {
+          user_id: this.user_id,
+        },
+      }
+      this.resolved = false
+    })
+
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.DocumentManager.updateCommentStateWithLock = sinon
+          .stub()
+          .callsArgWith(5)
+
+        this.ProjectHistoryRedisManager.queueOps = sinon.stub()
+        this.HttpController.reopenComment(this.req, this.res, this.next)
+      })
+
+      it('should accept the change', function () {
+        this.DocumentManager.updateCommentStateWithLock
+          .calledWith(
+            this.project_id,
+            this.doc_id,
+            this.comment_id,
+            this.user_id,
+            this.resolved
+          )
+          .should.equal(true)
+      })
+
+      it('should return a successful No Content response', function () {
+        this.res.sendStatus.calledWith(204).should.equal(true)
+      })
+
+      it('should log the request', function () {
+        this.logger.debug
+          .calledWith(
+            {
+              projectId: this.project_id,
+              docId: this.doc_id,
+              commentId: this.comment_id,
+            },
+            'reopening comment via http'
+          )
+          .should.equal(true)
+      })
+    })
+
+    describe('when an errors occurs', function () {
+      beforeEach(function () {
+        this.DocumentManager.updateCommentStateWithLock = sinon
+          .stub()
+          .callsArgWith(5, new Error('oops'))
+        this.HttpController.reopenComment(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+    })
+  })
+
   describe('deleteComment', function () {
     beforeEach(function () {
       this.user_id = 'user-id-123'

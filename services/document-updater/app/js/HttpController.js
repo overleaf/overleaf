@@ -23,6 +23,8 @@ module.exports = {
   deleteProject,
   deleteMultipleProjects,
   acceptChanges,
+  resolveComment,
+  reopenComment,
   deleteComment,
   updateProject,
   resyncProjectHistory,
@@ -299,6 +301,54 @@ function acceptChanges(req, res, next) {
     )
     res.sendStatus(204) // No Content
   })
+}
+
+function resolveComment(req, res, next) {
+  const {
+    project_id: projectId,
+    doc_id: docId,
+    comment_id: commentId,
+  } = req.params
+  const userId = req.body.user_id
+  logger.debug({ projectId, docId, commentId }, 'resolving comment via http')
+  DocumentManager.updateCommentStateWithLock(
+    projectId,
+    docId,
+    commentId,
+    userId,
+    true,
+    error => {
+      if (error) {
+        return next(error)
+      }
+      logger.debug({ projectId, docId, commentId }, 'resolved comment via http')
+      res.sendStatus(204) // No Content
+    }
+  )
+}
+
+function reopenComment(req, res, next) {
+  const {
+    project_id: projectId,
+    doc_id: docId,
+    comment_id: commentId,
+  } = req.params
+  const userId = req.body.user_id
+  logger.debug({ projectId, docId, commentId }, 'reopening comment via http')
+  DocumentManager.updateCommentStateWithLock(
+    projectId,
+    docId,
+    commentId,
+    userId,
+    false,
+    error => {
+      if (error) {
+        return next(error)
+      }
+      logger.debug({ projectId, docId, commentId }, 'reopened comment via http')
+      res.sendStatus(204) // No Content
+    }
+  )
 }
 
 function deleteComment(req, res, next) {

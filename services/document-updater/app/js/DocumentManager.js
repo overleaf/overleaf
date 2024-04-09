@@ -258,6 +258,30 @@ const DocumentManager = {
     )
   },
 
+  async updateCommentState(projectId, docId, commentId, userId, resolved) {
+    const { lines, version, pathname, historyRangesSupport } =
+      await DocumentManager.getDoc(projectId, docId)
+
+    if (lines == null || version == null) {
+      throw new Errors.NotFoundError(`document not found: ${docId}`)
+    }
+
+    if (historyRangesSupport) {
+      await ProjectHistoryRedisManager.promises.queueOps(
+        projectId,
+        JSON.stringify({
+          pathname,
+          commentId,
+          resolved,
+          meta: {
+            ts: new Date(),
+            user_id: userId,
+          },
+        })
+      )
+    }
+  },
+
   async deleteComment(projectId, docId, commentId, userId) {
     const { lines, version, ranges, pathname, historyRangesSupport } =
       await DocumentManager.getDoc(projectId, docId)
@@ -424,6 +448,24 @@ const DocumentManager = {
       projectId,
       docId,
       changeIds
+    )
+  },
+
+  async updateCommentStateWithLock(
+    projectId,
+    docId,
+    threadId,
+    userId,
+    resolved
+  ) {
+    const UpdateManager = require('./UpdateManager')
+    await UpdateManager.promises.lockUpdatesAndDo(
+      DocumentManager.updateCommentState,
+      projectId,
+      docId,
+      threadId,
+      userId,
+      resolved
     )
   },
 

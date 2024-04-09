@@ -849,7 +849,7 @@ export default App.controller('ReviewPanelController', [
       const entry = getDocEntries(doc_id)[entry_id]
       entry.focused = false
       $http.post(
-        `/project/${$scope.project_id}/thread/${entry.thread_id}/resolve`,
+        `/project/${$scope.project_id}/doc/${doc_id}/thread/${entry.thread_id}/resolve`,
         { _csrf: window.csrfToken }
       )
       _onCommentResolved(entry.thread_id, ide.$scope.user)
@@ -860,11 +860,14 @@ export default App.controller('ReviewPanelController', [
       })
     }
 
-    ide.$scope.unresolveComment = function (thread_id) {
+    ide.$scope.unresolveComment = function (doc_id, thread_id) {
       _onCommentReopened(thread_id)
-      $http.post(`/project/${$scope.project_id}/thread/${thread_id}/reopen`, {
-        _csrf: window.csrfToken,
-      })
+      $http.post(
+        `/project/${$scope.project_id}/doc/${doc_id}/thread/${thread_id}/reopen`,
+        {
+          _csrf: window.csrfToken,
+        }
+      )
       eventTracking.sendMB('rp-comment-reopen')
     }
 

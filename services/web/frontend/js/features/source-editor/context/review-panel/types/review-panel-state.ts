@@ -71,7 +71,7 @@ export interface ReviewPanelState {
       commentId: CommentId,
       content: string
     ) => void
-    unresolveComment: (threadId: ThreadId) => void
+    unresolveComment: (docId: DocId, threadId: ThreadId) => void
     deleteThread: (docId: DocId, threadId: ThreadId) => void
     refreshResolvedCommentsDropdown: () => Promise<
       void | ReviewPanelDocEntries[]

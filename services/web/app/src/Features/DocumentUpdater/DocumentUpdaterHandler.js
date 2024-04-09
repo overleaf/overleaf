@@ -19,6 +19,8 @@ module.exports = {
   getProjectDocsIfMatch,
   clearProjectState,
   acceptChanges,
+  resolveThread,
+  reopenThread,
   deleteThread,
   resyncProjectHistory,
   updateProjectStructure,
@@ -38,6 +40,8 @@ module.exports = {
     getProjectDocsIfMatch: promisify(getProjectDocsIfMatch),
     clearProjectState: promisify(clearProjectState),
     acceptChanges: promisify(acceptChanges),
+    resolveThread: promisify(resolveThread),
+    reopenThread: promisify(reopenThread),
     deleteThread: promisify(deleteThread),
     resyncProjectHistory: promisify(resyncProjectHistory),
     updateProjectStructure: promisify(updateProjectStructure),
@@ -208,6 +212,36 @@ function acceptChanges(projectId, docId, changeIds, callback) {
     },
     projectId,
     'accept-changes',
+    callback
+  )
+}
+
+function resolveThread(projectId, docId, threadId, userId, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/doc/${docId}/comment/${threadId}/resolve`,
+      method: 'POST',
+      json: {
+        user_id: userId,
+      },
+    },
+    projectId,
+    'resolve-thread',
+    callback
+  )
+}
+
+function reopenThread(projectId, docId, threadId, userId, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/doc/${docId}/comment/${threadId}/reopen`,
+      method: 'POST',
+      json: {
+        user_id: userId,
+      },
+    },
+    projectId,
+    'reopen-thread',
     callback
   )
 }
