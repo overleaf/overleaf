@@ -165,39 +165,6 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
       headerTitle={t('reasons_for_compile_timeouts')}
       formattedContent={
         <>
-          <p>
-            <em>
-              {compileTimeChanging ? (
-                <>
-                  {isProjectOwner ? (
-                    <Trans
-                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_your_project"
-                      components={[compileTimeoutChangesBlogLink]}
-                    />
-                  ) : (
-                    <Trans
-                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_this_project"
-                      components={[compileTimeoutChangesBlogLink]}
-                    />
-                  )}
-                </>
-              ) : (
-                <>
-                  {isProjectOwner ? (
-                    <Trans
-                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_your_project"
-                      components={[compileTimeoutChangesBlogLink]}
-                    />
-                  ) : (
-                    <Trans
-                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_this_project"
-                      components={[compileTimeoutChangesBlogLink]}
-                    />
-                  )}
-                </>
-              )}
-            </em>
-          </p>
           <p>{t('common_causes_of_compile_timeouts_include')}:</p>
           <ul>
             <li>
@@ -257,6 +224,39 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
                 />,
               ]}
             />
+          </p>
+          <p>
+            <em>
+              {compileTimeChanging ? (
+                <>
+                  {isProjectOwner ? (
+                    <Trans
+                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_your_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  ) : (
+                    <Trans
+                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_this_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  )}
+                </>
+              ) : (
+                <>
+                  {isProjectOwner ? (
+                    <Trans
+                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_your_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  ) : (
+                    <Trans
+                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_this_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  )}
+                </>
+              )}
+            </em>
           </p>
         </>
       }
