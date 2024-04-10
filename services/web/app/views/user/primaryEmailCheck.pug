@@ -3,11 +3,11 @@ extends ../layout-marketing
 block content
 	main.content.content-alt#main-content
 		.login-register-container.primary-email-check-container
-			.card.login-register-card
-				.login-register-header
-					h1.login-register-header-heading #{translate("keep_your_account_safe")}
-				.login-register-form(data-ol-multi-submit)
-					p
+			.card.primary-email-check-card
+				img.primary-email-check-logo(src=buildImgPath("ol-brand/overleaf.svg") alt=settings.appName)
+				h3.primary-email-check-header #{translate("keep_your_account_safe")}
+				.login-register-form.primary-email-check-form(data-ol-multi-submit)
+					p.small
 						| !{translate("primary_email_check_question", { email: getUserEmail() }, ["strong"])}
 					form(
 						data-ol-async-form
@@ -17,14 +17,14 @@ block content
 						input(name='_csrf', type='hidden', value=csrfToken)
 						+formMessages()
 
-						button.btn-primary.btn.btn-block.btn-primary-email-check-button(
+						button.btn-primary.btn.btn-block.btn-primary-email-check-button.primary-email-confirm-button(
 							type='submit'
 							data-ol-disabled-inflight
 						)
 							span(data-ol-inflight="idle") #{translate("yes_that_is_correct")}
 							span(hidden data-ol-inflight="pending") #{translate("confirming")}…
 
-					a.btn-secondary.btn.btn-block.btn-primary-email-check-button(
+					a.btn-secondary.btn.btn-block.btn-primary-email-check-button.primary-email-change-button(
 						href="/user/settings#add-email"
 						data-ol-slow-link
 						event-tracking="primary-email-check-change-email"
@@ -33,7 +33,7 @@ block content
 					)
 						span(data-ol-inflight="idle") #{translate("no_update_email")}
 						span(hidden data-ol-inflight="pending") #{translate("redirecting")}…	
-					p
+					p.small
 						|  #{translate("keep_your_email_updated")}
-					p
+					p.small
 						|  !{translate("learn_more_about_emails", {}, [{name: 'a', attrs: {href: '/learn/how-to/Keeping_your_account_secure', 'event-tracking': 'primary-email-check-learn-more', 'event-tracking-mb': 'true', 'event-tracking-trigger': 'click' }}])}
