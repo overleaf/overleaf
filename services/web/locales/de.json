@@ -1497,7 +1497,7 @@
   "use_your_own_machine": "Verwende deine eigene Maschine mit deinem eigenen Setup",
   "user_already_added": "Nutzer bereits hinzugefügt",
   "user_deletion_error": "Entschuldigung, beim Löschen deines Kontos ist etwas schief gelaufen. Bitte versuche es in einer Minute erneut.",
-  "user_deletion_password_reset_tip": "Wenn du dich nicht mehr an dein Passwort erinnern kannst oder wenn du Single-Sign-On mit einem anderen Anbieter verwendest, um dich anzumelden (z.B. Twitter oder Google), <0>setze dein Passwort zurück</0> und versuche es erneut.",
+  "user_deletion_password_reset_tip": "Wenn du dich nicht mehr an dein Passwort erinnern kannst oder wenn du Single-Sign-On mit einem anderen Anbieter verwendest, um dich anzumelden (z.B. ORCID oder Google), <0>setze dein Passwort zurück</0> und versuche es erneut.",
   "user_management": "Nutzerverwaltung",
   "user_management_info": "Gruppen-Abonnement-Administratoren haben Zugriff auf ein Admin-Panel, wo die Nutzer einfach hinzugefügt oder entfernt werden können. Bei standortweiten Abonnements werden die Nutzer automatisch „Professionell“-Funktionen zugewiesen, wenn sie sich registrieren oder ihre E-Mail-Adresse zu Overleaf hinzufügen (domänenbasierte Registrierung oder SSO).",
   "user_not_found": "Nutzer wurde nicht gefunden",

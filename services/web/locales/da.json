@@ -1636,7 +1636,7 @@
   "used_when_referring_to_the_figure_elsewhere_in_the_document": "Bliver brugt til at henvise til figuren fra andre steder i dokumentet",
   "user_already_added": "Bruger allerede tilføjet",
   "user_deletion_error": "Beklager, sletningen af din konto mislykkedes. Vær venlig at vente et minuts tid, og prøv så igen.",
-  "user_deletion_password_reset_tip": "Hvis du ikke kan huske dit kodeord, eller hvis du bruger en Single-Sign-On-løsning til at skrive dig ind (såsom Twitter eller Google), må du <0>nulstille dit kodeord</0>, og derefter prøve igen.",
+  "user_deletion_password_reset_tip": "Hvis du ikke kan huske dit kodeord, eller hvis du bruger en Single-Sign-On-løsning til at skrive dig ind (såsom ORCID eller Google), må du <0>nulstille dit kodeord</0>, og derefter prøve igen.",
   "user_management": "Brugeradminstration",
   "user_management_info": "Gruppeadministratorer har adgang til et administrationspanel hvor brugere nemt kan tilføjes og fjernes. For organisationsdækkende abonnementer bliver brugere automatisk opgraderet når de registerer sig eller tilføjer deres e-mailaddresse til Overleaf (domæne-baseret tilmelding eller SSO).",
   "user_not_found": "Bruger ikke fundet",
