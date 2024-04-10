@@ -319,7 +319,7 @@ describe('change list', function () {
       cy.findByLabelText(/labels/i).click({ force: true })
     })
 
-    it('does not show the dropdown menu item for adding new labels', function () {
+    it('shows the dropdown menu item for adding new labels', function () {
       cy.findAllByTestId('history-version-details')
         .eq(1)
         .within(() => {
@@ -327,7 +327,7 @@ describe('change list', function () {
           cy.findByRole('menu').within(() => {
             cy.findByRole('menuitem', {
               name: /label this version/i,
-            }).should('not.exist')
+            }).should('exist')
           })
         })
     })

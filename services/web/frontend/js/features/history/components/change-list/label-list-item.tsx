@@ -8,11 +8,11 @@ import { LoadedLabel } from '../../services/types/label'
 import { useTranslation } from 'react-i18next'
 import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
 import { HistoryContextValue } from '../../context/types/history-context-value'
-import LabelDropdownContent from './dropdown/label-dropdown-content'
 import CompareItems from './dropdown/menu-item/compare-items'
 import { ItemSelectionState } from '../../utils/history-details'
 import CompareVersionDropdown from './dropdown/compare-version-dropdown'
 import { CompareVersionDropdownContentLabelsList } from './dropdown/compare-version-dropdown-content'
+import HistoryDropdownContent from '@/features/history/components/change-list/dropdown/history-dropdown-content'
 
 type LabelListItemProps = {
   version: Version
@@ -87,7 +87,7 @@ function LabelListItem({
         setIsOpened={setIsOpened}
       >
         {dropdownActive ? (
-          <LabelDropdownContent
+          <HistoryDropdownContent
             version={version}
             projectId={projectId}
             closeDropdownForItem={closeDropdownForItem}

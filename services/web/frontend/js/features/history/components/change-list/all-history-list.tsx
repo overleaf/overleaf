@@ -201,7 +201,7 @@ function AllHistoryList() {
             update.toV
           )
           const dropdownActive =
-            update === activeDropdownItem.item &&
+            update.toV === activeDropdownItem.item &&
             activeDropdownItem.whichDropDown === 'moreOptions'
           const compareDropdownActive =
             update === activeDropdownItem.item &&

@@ -15,7 +15,7 @@ import {
 } from '../../utils/history-details'
 import { ActiveDropdown } from '../../hooks/use-dropdown-active-item'
 import { HistoryContextValue } from '../../context/types/history-context-value'
-import VersionDropdownContent from './dropdown/version-dropdown-content'
+import HistoryDropdownContent from './dropdown/history-dropdown-content'
 import CompareItems from './dropdown/menu-item/compare-items'
 import CompareVersionDropdown from './dropdown/compare-version-dropdown'
 import { CompareVersionDropdownContentAllHistory } from './dropdown/compare-version-dropdown-content'
@@ -55,7 +55,7 @@ function HistoryVersion({
 }: HistoryVersionProps) {
   const orderedLabels = orderBy(update.labels, ['created_at'], ['desc'])
   const closeDropdown = useCallback(() => {
-    closeDropdownForItem(update, 'moreOptions')
+    closeDropdownForItem(update.toV, 'moreOptions')
   }, [closeDropdownForItem, update])
 
   const updateRange = updateRangeForUpdate(update)
@@ -102,15 +102,15 @@ function HistoryVersion({
               isOpened={dropdownOpen}
               setIsOpened={(isOpened: boolean) =>
                 setActiveDropdownItem({
-                  item: update,
+                  item: update.toV,
                   isOpened,
                   whichDropDown: 'moreOptions',
                 })
               }
             >
               {dropdownActive ? (
-                <VersionDropdownContent
-                  update={update}
+                <HistoryDropdownContent
+                  version={update.toV}
                   projectId={projectId}
                   closeDropdownForItem={closeDropdownForItem}
                 />
