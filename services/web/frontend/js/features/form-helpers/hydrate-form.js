@@ -222,17 +222,14 @@ function showMessagesNewStyle(formEl, messageBag) {
     } else {
       // No custom error element for key on page, append a new error message
       const messageElContainer = document.createElement('div')
-      messageElContainer.className = classNames(
-        'notification',
-        'text-centered',
-        {
-          'notification-type-error': message.type === 'error',
-          'notification-type-success': message.type !== 'error',
-        }
-      )
+      messageElContainer.className = classNames('notification', {
+        'notification-type-error': message.type === 'error',
+        'notification-type-success': message.type !== 'error',
+      })
       const messageEl = document.createElement('div')
 
-      messageEl.className = 'notification-content'
+      // create the message text
+      messageEl.className = 'notification-content text-left'
       messageEl.textContent = message.text || `Error: ${message.key}`
       messageEl.setAttribute('aria-live', 'assertive')
       messageEl.setAttribute(
@@ -249,6 +246,17 @@ function showMessagesNewStyle(formEl, messageBag) {
         messageEl.append(listEl)
       }
 
+      // create the left icon
+      const icon = document.createElement('span')
+      icon.className = 'material-symbols'
+      icon.setAttribute('aria-hidden', 'true')
+      icon.innerText = message.type === 'error' ? 'error' : 'check_circle'
+      const messageIcon = document.createElement('div')
+      messageIcon.className = 'notification-icon'
+      messageIcon.appendChild(icon)
+
+      // append icon first so it's on the left
+      messageElContainer.appendChild(messageIcon)
       messageElContainer.appendChild(messageEl)
       messagesEl.append(messageElContainer)
     }
