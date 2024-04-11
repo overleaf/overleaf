@@ -30,11 +30,8 @@ module.exports = {
       this.initing = true
       this.callbacks.push(callback)
       return app.listen(
-        __guard__(
-          Settings.internal != null ? Settings.internal.clsi : undefined,
-          x => x.port
-        ),
-        'localhost',
+        Settings.internal.clsi.port,
+        Settings.internal.clsi.host,
         error => {
           if (error != null) {
             throw error
@@ -53,9 +50,4 @@ module.exports = {
       )
     }
   },
-}
-function __guard__(value, transform) {
-  return typeof value !== 'undefined' && value !== null
-    ? transform(value)
-    : undefined
 }

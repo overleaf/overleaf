@@ -368,8 +368,8 @@ loadHttpServer.post('/state/maint', function (req, res, next) {
   res.sendStatus(204)
 })
 
-const port = Settings.internal?.clsi?.port || 3013
-const host = Settings.internal?.clsi?.host || 'localhost'
+const port = Settings.internal.clsi.port
+const host = Settings.internal.clsi.host
 
 const loadTcpPort = Settings.internal.load_balancer_agent.load_port
 const loadHttpPort = Settings.internal.load_balancer_agent.local_port

@@ -63,7 +63,7 @@ let server
 
 before('start main app', function (done) {
   addSessionEndpoint(app)
-  server = App.listen(23000, 'localhost', done)
+  server = App.listen(23000, '127.0.0.1', done)
 })
 
 before('start queue workers', function () {
