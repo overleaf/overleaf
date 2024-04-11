@@ -107,7 +107,9 @@ async function doCompile(request) {
   timings.sync = writeToDiskTimer.done()
 
   // set up environment variables for chktex
-  const env = {}
+  const env = {
+    OVERLEAF_PROJECT_ID: request.project_id,
+  }
   if (Settings.texliveOpenoutAny && Settings.texliveOpenoutAny !== '') {
     // override default texlive openout_any environment variable
     env.openout_any = Settings.texliveOpenoutAny
