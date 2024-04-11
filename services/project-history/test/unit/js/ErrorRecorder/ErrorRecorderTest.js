@@ -1,16 +1,5 @@
-/* eslint-disable
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import sinon from 'sinon'
+import { expect } from 'chai'
 import { strict as esmock } from 'esmock'
 import tk from 'timekeeper'
 
@@ -20,11 +9,10 @@ describe('ErrorRecorder', function () {
   beforeEach(async function () {
     this.now = new Date()
     tk.freeze(this.now)
-    this.callback = sinon.stub()
     this.db = {
       projectHistoryFailures: {
-        deleteOne: sinon.stub().yields(),
-        updateOne: sinon.stub().yields(),
+        deleteOne: sinon.stub().resolves(),
+        updateOne: sinon.stub().resolves(),
       },
     }
     this.mongodb = { db: this.db }
@@ -35,27 +23,28 @@ describe('ErrorRecorder', function () {
     })
 
     this.project_id = 'project-id-123'
-    return (this.queueSize = 445)
+    this.queueSize = 445
   })
 
   afterEach(function () {
-    return tk.reset()
+    tk.reset()
   })
 
-  return describe('record', function () {
+  describe('record', function () {
     describe('with an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.error = new Error('something bad')
-        return this.ErrorRecorder.record(
-          this.project_id,
-          this.queueSize,
-          this.error,
-          this.callback
-        )
+        await expect(
+          this.ErrorRecorder.promises.record(
+            this.project_id,
+            this.queueSize,
+            this.error
+          )
+        ).to.be.rejected
       })
 
       it('should record the error to mongo', function () {
-        return this.db.projectHistoryFailures.updateOne
+        this.db.projectHistoryFailures.updateOne
           .calledWithMatch(
             {
               project_id: this.project_id,
@@ -91,32 +80,25 @@ describe('ErrorRecorder', function () {
           )
           .should.equal(true)
       })
-
-      return it('should call the callback', function () {
-        return this.callback
-          .calledWith(this.error, this.queueSize)
-          .should.equal(true)
-      })
     })
 
-    return describe('without an error', function () {
-      beforeEach(function () {
-        return this.ErrorRecorder.record(
+    describe('without an error', function () {
+      beforeEach(async function () {
+        this.result = await this.ErrorRecorder.promises.record(
           this.project_id,
           this.queueSize,
-          this.error,
-          this.callback
+          this.error
         )
       })
 
       it('should remove any error from mongo', function () {
-        return this.db.projectHistoryFailures.deleteOne
+        this.db.projectHistoryFailures.deleteOne
           .calledWithMatch({ project_id: this.project_id })
           .should.equal(true)
       })
 
-      return it('should call the callback', function () {
-        return this.callback.calledWith(null, this.queueSize).should.equal(true)
+      it('should return the queue size', function () {
+        expect(this.result).to.equal(this.queueSize)
       })
     })
   })
