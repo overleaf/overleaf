@@ -269,7 +269,25 @@ describe('SubscriptionViewModelBuilder', function () {
         )
       assert.deepEqual(usersBestSubscription, {
         type: 'group',
-        subscription: this.groupSubscription,
+        subscription: {},
+        plan: this.groupPlan,
+        remainingTrialDays: -1,
+      })
+    })
+
+    it('should return a group subscription with team name when user has one', async function () {
+      this.SubscriptionLocator.promises.getMemberSubscriptions
+        .withArgs(this.user)
+        .resolves([
+          Object.assign({}, this.groupSubscription, { teamName: 'test team' }),
+        ])
+      const usersBestSubscription =
+        await this.SubscriptionViewModelBuilder.promises.getBestSubscription(
+          this.user
+        )
+      assert.deepEqual(usersBestSubscription, {
+        type: 'group',
+        subscription: { teamName: 'test team' },
         plan: this.groupPlan,
         remainingTrialDays: -1,
       })
@@ -345,7 +363,7 @@ describe('SubscriptionViewModelBuilder', function () {
 
       assert.deepEqual(usersBestSubscription, {
         type: 'group',
-        subscription: this.groupSubscription,
+        subscription: {},
         plan: this.groupPlan,
         remainingTrialDays: -1,
       })
@@ -434,7 +452,7 @@ describe('SubscriptionViewModelBuilder', function () {
 
       assert.deepEqual(usersBestSubscription, {
         type: 'group',
-        subscription: this.groupSubscription,
+        subscription: {},
         plan: this.groupPlan,
         remainingTrialDays: -1,
       })

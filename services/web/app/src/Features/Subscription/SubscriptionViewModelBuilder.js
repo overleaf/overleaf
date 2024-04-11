@@ -404,10 +404,14 @@ async function getBestSubscription(user) {
         groupSubscription.planCode
       )
       if (_isPlanEqualOrBetter(plan, bestSubscription.plan)) {
+        const groupDataForView = {}
+        if (groupSubscription.teamName) {
+          groupDataForView.teamName = groupSubscription.teamName
+        }
         const remainingTrialDays = _getRemainingTrialDays(groupSubscription)
         bestSubscription = {
           type: 'group',
-          subscription: groupSubscription,
+          subscription: groupDataForView,
           plan,
           remainingTrialDays,
         }
