@@ -248,6 +248,7 @@ async function interstitialPaymentPage(req, res) {
       showBrlGeoBanner: countryCode === 'BR',
       showLATAMBanner,
       latamCountryBannerDetails,
+      skipLinkTarget: req.session?.postCheckoutRedirect || '/project',
     })
   }
 }
