@@ -1,4 +1,6 @@
 // @ts-check
+
+import { promisify } from 'util'
 import Core from 'overleaf-editor-core'
 import { Readable as StringStream } from 'stream'
 import BPromise from 'bluebird'
@@ -170,4 +172,10 @@ function _loadFilesLimit(snapshot, kind, blobStore) {
     },
     { concurrency: MAX_REQUESTS }
   )
+}
+
+export const promises = {
+  getFileSnapshotStream: promisify(getFileSnapshotStream),
+  getProjectSnapshot: promisify(getProjectSnapshot),
+  getLatestSnapshot: promisify(getLatestSnapshot),
 }

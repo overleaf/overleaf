@@ -7,6 +7,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import { promisify } from 'util'
 import async from 'async'
 import metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
@@ -272,4 +273,42 @@ class Lock {
       return callback()
     })
   }
+}
+
+/**
+ * Promisified version of runWithLock.
+ *
+ * @param {string} key
+ * @param {(extendLock: Function) => Promise<any>} runner
+ */
+async function runWithLockPromises(key, runner) {
+  const runnerCb = (extendLock, callback) => {
+    const extendLockPromises = promisify(extendLock)
+    runner(extendLockPromises)
+      .then(result => {
+        callback(null, result)
+      })
+      .catch(err => {
+        callback(err)
+      })
+  }
+
+  return new Promise((resolve, reject) => {
+    runWithLock(key, runnerCb, (err, result) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(result)
+      }
+    })
+  })
+}
+
+export const promises = {
+  tryLock: promisify(tryLock),
+  extendLock: promisify(extendLock),
+  getLock: promisify(getLock),
+  checkLock: promisify(checkLock),
+  releaseLock: promisify(releaseLock),
+  runWithLock: runWithLockPromises,
 }

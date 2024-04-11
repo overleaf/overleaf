@@ -10,6 +10,7 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
+import { promisify } from 'util'
 import fs from 'fs'
 import crypto from 'crypto'
 import OError from '@overleaf/o-error'
@@ -50,4 +51,8 @@ export function _getBlobHash(fsPath, callback) {
       }
     })
   })
+}
+
+export const promises = {
+  _getBlobHash: promisify(_getBlobHash),
 }

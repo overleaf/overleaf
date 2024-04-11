@@ -305,6 +305,11 @@ export function getFailures(callback) {
 
 export const promises = {
   getFailedProjects: promisify(getFailedProjects),
-  record: promisify(record),
   getFailureRecord: promisify(getFailureRecord),
+  getLastFailure: promisify(getLastFailure),
+  getFailuresByType: promisify(getFailuresByType),
+  getFailures: promisify(getFailures),
+  record: promisify(record),
+  recordSyncStart: promisify(recordSyncStart),
+  setForceDebug: promisify(setForceDebug),
 }

@@ -1,9 +1,9 @@
+import { promisify } from 'util'
 import fs from 'fs'
 import request from 'request'
 import stream from 'stream'
 import logger from '@overleaf/logger'
 import _ from 'lodash'
-import BPromise from 'bluebird'
 import { URL } from 'url'
 import OError from '@overleaf/o-error'
 import Settings from '@overleaf/settings'
@@ -354,7 +354,7 @@ export function deleteProject(projectId, callback) {
   )
 }
 
-const getProjectBlobAsync = BPromise.promisify(getProjectBlob)
+const getProjectBlobAsync = promisify(getProjectBlob)
 
 class BlobStore {
   constructor(projectId) {
@@ -434,4 +434,16 @@ function _requestHistoryService(options, callback) {
       callback(error)
     }
   })
+}
+
+export const promises = {
+  getMostRecentChunk: promisify(getMostRecentChunk),
+  getChunkAtVersion: promisify(getChunkAtVersion),
+  getMostRecentVersion: promisify(getMostRecentVersion),
+  getProjectBlob: promisify(getProjectBlob),
+  getProjectBlobStream: promisify(getProjectBlobStream),
+  sendChanges: promisify(sendChanges),
+  createBlobForUpdate: promisify(createBlobForUpdate),
+  initializeProject: promisify(initializeProject),
+  deleteProject: promisify(deleteProject),
 }

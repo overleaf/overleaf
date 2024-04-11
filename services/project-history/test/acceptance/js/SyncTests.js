@@ -162,7 +162,7 @@ describe('Syncing with web and doc-updater', function () {
             ],
             error => {
               if (error) {
-                throw error
+                return done(error)
               }
               assert(
                 createBlob.isDone(),

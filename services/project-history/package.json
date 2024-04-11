@@ -22,6 +22,7 @@
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
+    "@overleaf/promise-utils": "*",
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
     "async": "^3.2.2",
