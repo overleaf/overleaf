@@ -20,9 +20,9 @@ before(function () {
 describe('ProjectStructureChanges', function () {
   let owner
 
-  beforeEach(function (done) {
+  beforeEach(async function () {
     owner = new User()
-    owner.login(done)
+    await owner.login()
   })
 
   async function createExampleProject(owner) {
