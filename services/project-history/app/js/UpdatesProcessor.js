@@ -237,7 +237,7 @@ export function _getHistoryId(projectId, updates, callback) {
     }
   }
 
-  WebApiManager.getHistoryId(projectId, (error, idFromWeb, cached) => {
+  WebApiManager.getHistoryId(projectId, (error, idFromWeb) => {
     if (error != null && idFromUpdates != null) {
       // present only on updates
       // 404s from web are an error
@@ -266,7 +266,6 @@ export function _getHistoryId(projectId, updates, callback) {
           projectId,
           idFromWeb,
           idFromUpdates,
-          idWasCached: cached,
           updates,
         },
         'inconsistent project history id between updates and web'

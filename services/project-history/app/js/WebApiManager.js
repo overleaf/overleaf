@@ -1,96 +1,104 @@
-import { promisify } from 'util'
-import request from 'requestretry' // allow retry on error https://github.com/FGRibreau/node-request-retry
+import { callbackify } from 'util'
+import { setTimeout } from 'timers/promises'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
-import OError from '@overleaf/o-error'
 import Settings from '@overleaf/settings'
+import {
+  fetchNothing,
+  fetchJson,
+  RequestFailedError,
+} from '@overleaf/fetch-utils'
 import * as Errors from './Errors.js'
 import * as RedisManager from './RedisManager.js'
 
-// Don't let HTTP calls hang for a long time
-const DEFAULT_MAX_HTTP_REQUEST_LENGTH = 16000 // 16 seconds
+let RETRY_TIMEOUT_MS = 5000
 
-export function getHistoryId(projectId, callback) {
+async function getHistoryId(projectId) {
   Metrics.inc('history_id_cache_requests_total')
-  RedisManager.getCachedHistoryId(projectId, (err, cachedHistoryId) => {
-    if (err) return callback(err)
-    if (cachedHistoryId) {
-      Metrics.inc('history_id_cache_hits_total')
-      callback(null, cachedHistoryId, true)
+  const cachedHistoryId =
+    await RedisManager.promises.getCachedHistoryId(projectId)
+  if (cachedHistoryId) {
+    Metrics.inc('history_id_cache_hits_total')
+    return cachedHistoryId
+  } else {
+    const project = await _getProjectDetails(projectId)
+    const historyId =
+      project.overleaf &&
+      project.overleaf.history &&
+      project.overleaf.history.id
+    if (historyId != null) {
+      await RedisManager.promises.setCachedHistoryId(projectId, historyId)
+    }
+    return historyId
+  }
+}
+
+async function requestResync(projectId) {
+  try {
+    await fetchNothing(
+      `${Settings.apis.web.url}/project/${projectId}/history/resync`,
+      {
+        method: 'POST',
+        signal: AbortSignal.timeout(6 * 60000),
+        basicAuth: {
+          user: Settings.apis.web.user,
+          password: Settings.apis.web.pass,
+        },
+      }
+    )
+  } catch (err) {
+    if (err instanceof RequestFailedError && err.response.status === 404) {
+      throw new Errors.NotFoundError('got a 404 from web api').withCause(err)
     } else {
-      _getProjectDetails(projectId, function (error, project) {
-        if (error) {
-          return callback(error)
-        }
-        const historyId =
-          project.overleaf &&
-          project.overleaf.history &&
-          project.overleaf.history.id
-        if (historyId != null) {
-          RedisManager.setCachedHistoryId(projectId, historyId, err => {
-            if (err) return callback(err)
-            callback(null, historyId, false)
-          })
-        } else {
-          callback(null, historyId, false)
-        }
-      })
+      throw err
     }
-  })
+  }
 }
 
-export function requestResync(projectId, callback) {
-  const path = `/project/${projectId}/history/resync`
-  _sendRequest(
-    { path, timeout: 6 * 60000, maxAttempts: 1, method: 'POST' },
-    callback
-  )
-}
-
-function _getProjectDetails(projectId, callback) {
-  const path = `/project/${projectId}/details`
+async function _getProjectDetails(projectId, callback) {
   logger.debug({ projectId }, 'getting project details from web')
-  _sendRequest({ path, json: true }, callback)
-}
-
-function _sendRequest(options, callback) {
-  const url = `${Settings.apis.web.url}${options.path}`
-  request(
-    {
-      method: options.method || 'GET',
-      url,
-      json: options.json || false,
-      timeout: options.timeout || DEFAULT_MAX_HTTP_REQUEST_LENGTH,
-      maxAttempts: options.maxAttempts || 2, // for node-request-retry
-      auth: {
-        user: Settings.apis.web.user,
-        pass: Settings.apis.web.pass,
-        sendImmediately: true,
-      },
-    },
-    function (error, res, body) {
-      if (error != null) {
-        return callback(OError.tag(error))
-      }
-      if (res.statusCode === 404) {
-        logger.debug({ url }, 'got 404 from web api')
-        error = new Errors.NotFoundError('got a 404 from web api')
-        return callback(error)
-      }
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        callback(null, body)
+  let attempts = 0
+  while (true) {
+    attempts += 1
+    try {
+      return await fetchJson(
+        `${Settings.apis.web.url}/project/${projectId}/details`,
+        {
+          signal: AbortSignal.timeout(16000),
+          basicAuth: {
+            user: Settings.apis.web.user,
+            password: Settings.apis.web.pass,
+          },
+        }
+      )
+    } catch (err) {
+      if (err instanceof RequestFailedError && err.response.status === 404) {
+        throw new Errors.NotFoundError('got a 404 from web api').withCause(err)
+      } else if (attempts < 2) {
+        // retry after 5 seconds
+        await setTimeout(RETRY_TIMEOUT_MS)
       } else {
-        error = new OError(
-          `web returned a non-success status code: ${res.statusCode} (attempts: ${res.attempts})`,
-          { url, res }
-        )
-        callback(error)
+        throw err
       }
     }
-  )
+  }
 }
+
+/**
+ * Adjust the retry timeout in tests
+ */
+export async function setRetryTimeoutMs(timeoutMs) {
+  RETRY_TIMEOUT_MS = timeoutMs
+}
+
+// EXPORTS
+
+const getHistoryIdCb = callbackify(getHistoryId)
+const requestResyncCb = callbackify(requestResync)
+
+export { getHistoryIdCb as getHistoryId, requestResyncCb as requestResync }
 
 export const promises = {
-  getHistoryId: promisify(getHistoryId),
-  requestResync: promisify(requestResync),
+  getHistoryId,
+  requestResync,
 }
