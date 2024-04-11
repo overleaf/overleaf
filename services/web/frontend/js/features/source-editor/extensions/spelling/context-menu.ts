@@ -189,7 +189,7 @@ const createSpellingSuggestionList = (word: Word, view: EditorView) => {
 
         // get next option
         let nextElement = selectedButton.parentElement?.nextElementSibling
-        if (nextElement?.role !== 'option') {
+        if (nextElement?.getAttribute('role') !== 'option') {
           nextElement = nextElement?.nextElementSibling
         }
         nextElement?.querySelector('button')?.focus()
@@ -211,7 +211,7 @@ const createSpellingSuggestionList = (word: Word, view: EditorView) => {
         // get previous option
         let previousElement =
           selectedButton.parentElement?.previousElementSibling
-        if (previousElement?.role !== 'option') {
+        if (previousElement?.getAttribute('role') !== 'option') {
           previousElement = previousElement?.previousElementSibling
         }
         previousElement?.querySelector('button')?.focus()
