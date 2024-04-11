@@ -15,6 +15,7 @@ const CollaboratorsEmailHandler = {
   },
 
   async notifyUserOfProjectInvite(projectId, email, invite, sendingUser) {
+    // eslint-disable-next-line no-restricted-syntax
     const project = await Project.findOne({ _id: projectId })
       .select('name owner_ref')
       .populate('owner_ref')

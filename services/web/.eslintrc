@@ -93,22 +93,35 @@
           // do not allow importing of devDependencies.
           "devDependencies": false
         }],
-
-        // do not allow node-fetch in backend code
         "no-restricted-syntax": [
           "error",
+          // do not allow node-fetch in backend code
           {
             "selector": "CallExpression[callee.name='require'] > .arguments[value='node-fetch']",
             "message": "Requiring node-fetch is not allowed in production services, please use fetch-utils."
+          },
+          // mongoose populate must set fields to populate
+          {
+            "selector": "CallExpression[callee.property.name='populate'][arguments.length<2]",
+            "message": "Populate without a second argument returns the whole document. Use populate('field',['prop1','prop2']) instead"
+          },
+          // Require `new` when constructing ObjectId (For mongo + mongoose upgrade)
+          {
+            "selector": "CallExpression[callee.name='ObjectId'], CallExpression[callee.property.name='ObjectId']",
+            "message": "Construct ObjectId with `new ObjectId()` instead of `ObjectId()`"
+          },
+          // Require `new` when mapping a list of ids to a list of ObjectId (For mongo + mongoose upgrade)
+          {
+            "selector": "CallExpression[callee.property.name='map'] Identifier[name='ObjectId']:first-child, CallExpression[callee.property.name='map'] MemberExpression[property.name='ObjectId']:first-child",
+            "message": "Don't map ObjectId directly. Use `id => new ObjectId(id)` instead"
           }
         ]
       }
     },
     {
-      // Backend + backend tests specific rules
-      "files": ["**/app/src/**/*.js", "app.js", "**/test/**/*.*", "**/scripts/*.*"],
+      // Backend tests and scripts specific rules
+      "files": ["**/test/**/*.*", "**/scripts/*.*"],
       "rules": {
-        // do not allow node-fetch in backend code
         "no-restricted-syntax": [
           "error",
           // Require `new` when constructing ObjectId (For mongo + mongoose upgrade)

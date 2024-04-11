@@ -90,6 +90,7 @@ async function viewInvite(req, res, next) {
 
     if (subscription?.groupPolicy) {
       if (!subscription.populated('groupPolicy')) {
+        // eslint-disable-next-line no-restricted-syntax
         await subscription.populate('groupPolicy')
       }
 

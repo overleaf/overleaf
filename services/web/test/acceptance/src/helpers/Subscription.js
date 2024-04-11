@@ -46,6 +46,7 @@ class PromisifiedSubscription {
   }
 
   async getWithGroupPolicy() {
+    // eslint-disable-next-line no-restricted-syntax
     return await SubscriptionModel.findById(this._id)
       .populate('groupPolicy')
       .exec()
