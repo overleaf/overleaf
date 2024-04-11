@@ -4,6 +4,7 @@ html(
 	class=(fixedSizeDocument ? 'fixed-size-document' : undefined)
 )
 	- metadata = metadata || {}
+	- bootstrap5EnabledPage = false
 
 	block entrypointVar
 
@@ -11,9 +12,11 @@ html(
 
 	head
 		include ./_metadata.pug
+			
+		- var bootstrapVersion = bootstrap5EnabledPage && splitTestVariants['bootstrap-5'] === 'enabled' ? 5 : 3
 
 		//- Stylesheet
-		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation)), id="main-stylesheet")
+		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation), bootstrapVersion), id="main-stylesheet")
 		block css
 			each file in entrypointStyles(entrypoint)
 				link(rel='stylesheet', href=file)

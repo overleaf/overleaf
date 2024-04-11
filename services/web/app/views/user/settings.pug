@@ -2,6 +2,9 @@ extends ../layout-marketing
 
 block entrypointVar
 	- entrypoint = 'pages/user/settings'
+		
+block vars
+	- bootstrap5EnabledPage = true
 
 block append meta
 	meta(name="ol-hasPassword" data-type="boolean" content=hasPassword)

@@ -204,10 +204,12 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       return staticFilesBase + webpackManifest[cssFileName]
     }
 
-    res.locals.buildCssPath = function (themeModifier = '') {
+    res.locals.buildCssPath = function (
+      themeModifier = '',
+      bootstrapVersion = 3
+    ) {
       // Pick which main stylesheet to use based on Bootstrap version
-      const bootstrap5Modifier =
-        res.locals.bootstrapVersion === 5 ? '-bootstrap-5' : ''
+      const bootstrap5Modifier = bootstrapVersion === 5 ? '-bootstrap-5' : ''
 
       return res.locals.buildStylesheetPath(
         `main-${themeModifier}style${bootstrap5Modifier}.css`
@@ -357,13 +359,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function (req, res, next) {
     res.locals.showThinFooter = !Features.hasFeature('saas')
-    next()
-  })
-
-  webRouter.use(function (req, res, next) {
-    // Set the Bootstrap version to 3 in all cases for now. This will come from
-    // a split test/feature flag in future.
-    res.locals.bootstrapVersion = 3
     next()
   })
 
