@@ -154,10 +154,59 @@ async function buildUsersSubscriptionViewModel(user) {
 
   if (memberGroupSubscriptions == null) {
     memberGroupSubscriptions = []
+  } else {
+    memberGroupSubscriptions = memberGroupSubscriptions.map(group => {
+      const userIsGroupManager = group.manager_ids?.some(
+        id => id.toString() === user._id.toString()
+      )
+
+      const groupDataForView = {
+        _id: group._id,
+        planCode: group.planCode,
+        teamName: group.teamName,
+        admin_id: {
+          email: group.admin_id.email,
+        },
+        userIsGroupManager,
+      }
+
+      if (group.teamNotice) {
+        groupDataForView.teamNotice = sanitizeHtml(group.teamNotice)
+      }
+
+      buildGroupSubscriptionForView(groupDataForView)
+
+      return groupDataForView
+    })
   }
+
   if (managedGroupSubscriptions == null) {
     managedGroupSubscriptions = []
+  } else {
+    managedGroupSubscriptions = managedGroupSubscriptions.map(group => {
+      const userIsGroupMember = group.member_ids?.some(
+        id => id.toString() === user._id.toString()
+      )
+
+      const groupDataForView = {
+        _id: group._id,
+        planCode: group.planCode,
+        groupPlan: group.groupPlan,
+        teamName: group.teamName,
+        admin_id: {
+          _id: group.admin_id._id,
+          email: group.admin_id.email,
+        },
+        features: group.features,
+        userIsGroupMember,
+      }
+
+      buildGroupSubscriptionForView(groupDataForView)
+
+      return groupDataForView
+    })
   }
+
   if (managedInstitutions == null) {
     managedInstitutions = []
   }
@@ -166,12 +215,7 @@ async function buildUsersSubscriptionViewModel(user) {
   }
 
   personalSubscription = serializeMongooseObject(personalSubscription)
-  memberGroupSubscriptions = memberGroupSubscriptions.map(
-    serializeMongooseObject
-  )
-  managedGroupSubscriptions = managedGroupSubscriptions.map(
-    serializeMongooseObject
-  )
+
   managedInstitutions = managedInstitutions.map(serializeMongooseObject)
   await Promise.all(
     managedInstitutions.map(InstitutionsManager.promises.fetchV1Data)
@@ -294,33 +338,6 @@ async function buildUsersSubscriptionViewModel(user) {
           recurlySubscription.currency
         )
     }
-  }
-
-  for (const memberGroupSubscription of memberGroupSubscriptions) {
-    if (
-      memberGroupSubscription.manager_ids?.some(
-        id => id.toString() === user._id.toString()
-      )
-    ) {
-      memberGroupSubscription.userIsGroupManager = true
-    }
-    if (memberGroupSubscription.teamNotice) {
-      memberGroupSubscription.teamNotice = sanitizeHtml(
-        memberGroupSubscription.teamNotice
-      )
-    }
-    buildGroupSubscriptionForView(memberGroupSubscription)
-  }
-
-  for (const managedGroupSubscription of managedGroupSubscriptions) {
-    if (
-      managedGroupSubscription.member_ids?.some(
-        id => id.toString() === user._id.toString()
-      )
-    ) {
-      managedGroupSubscription.userIsGroupMember = true
-    }
-    buildGroupSubscriptionForView(managedGroupSubscription)
   }
 
   return {
