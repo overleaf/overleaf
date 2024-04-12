@@ -13,6 +13,7 @@ function TimeoutUpgradePromptNew() {
     startCompile,
     lastCompileOptions,
     setAnimateCompileDropdownArrow,
+    showNewCompileTimeoutUI,
     isProjectOwner,
   } = useDetachCompileContext()
 
@@ -26,25 +27,35 @@ function TimeoutUpgradePromptNew() {
     setAnimateCompileDropdownArrow(true)
   }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
 
+  if (!window.ExposedSettings.enableSubscriptions) {
+    return null
+  }
+
+  const compileTimeChanging = showNewCompileTimeoutUI === 'changing'
+
   return (
     <>
-      <CompileTimeout isProjectOwner={isProjectOwner} />
-      {window.ExposedSettings.enableSubscriptions && (
-        <PreventTimeoutHelpMessage
-          handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
-          lastCompileOptions={lastCompileOptions}
-          isProjectOwner={isProjectOwner}
-        />
-      )}
+      <CompileTimeout
+        compileTimeChanging={compileTimeChanging}
+        isProjectOwner={isProjectOwner}
+      />
+      <PreventTimeoutHelpMessage
+        compileTimeChanging={compileTimeChanging}
+        handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
+        lastCompileOptions={lastCompileOptions}
+        isProjectOwner={isProjectOwner}
+      />
     </>
   )
 }
 
 type CompileTimeoutProps = {
+  compileTimeChanging?: boolean
   isProjectOwner: boolean
 }
 
 const CompileTimeout = memo(function CompileTimeout({
+  compileTimeChanging,
   isProjectOwner,
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
@@ -56,48 +67,58 @@ const CompileTimeout = memo(function CompileTimeout({
     <PdfLogEntry
       headerTitle={t('your_compile_timed_out')}
       formattedContent={
-        window.ExposedSettings.enableSubscriptions && (
-          <>
+        <>
+          <p>
+            {isProjectOwner
+              ? t('your_project_exceeded_compile_timeout_limit_on_free_plan')
+              : t('this_project_exceeded_compile_timeout_limit_on_free_plan')}
+          </p>
+          {isProjectOwner ? (
             <p>
-              {isProjectOwner
-                ? t('your_project_exceeded_compile_timeout_limit_on_free_plan')
-                : t('this_project_exceeded_compile_timeout_limit_on_free_plan')}
+              {compileTimeChanging ? (
+                <>
+                  <strong>{t('upgrade_for_plenty_more_compile_time')}</strong>{' '}
+                  {t(
+                    'plus_additional_collaborators_document_history_track_changes_and_more'
+                  )}
+                </>
+              ) : (
+                <>
+                  <strong>{t('upgrade_for_12x_more_compile_time')}</strong>{' '}
+                  {t(
+                    'plus_additional_collaborators_document_history_track_changes_and_more'
+                  )}
+                </>
+              )}
             </p>
-            {isProjectOwner ? (
-              <p>
-                <strong>{t('upgrade_for_12x_more_compile_time')}</strong>{' '}
-                {t(
-                  'plus_additional_collaborators_document_history_track_changes_and_more'
-                )}
-              </p>
-            ) : (
-              <Trans
-                i18nKey="tell_the_project_owner_and_ask_them_to_upgrade"
-                components={[
-                  // eslint-disable-next-line react/jsx-key
-                  <strong />,
-                ]}
-              />
-            )}
+          ) : (
+            <Trans
+              i18nKey="tell_the_project_owner_and_ask_them_to_upgrade"
+              components={[
+                // eslint-disable-next-line react/jsx-key
+                <strong />,
+              ]}
+            />
+          )}
 
-            {isProjectOwner && (
-              <p className="text-center">
-                <StartFreeTrialButton
-                  source="compile-timeout"
-                  buttonProps={{
-                    bsStyle: 'success',
-                    className: 'row-spaced-small',
-                    block: true,
-                  }}
-                >
-                  {hasNewPaywallCta
-                    ? t('get_more_compile_time')
-                    : t('start_a_free_trial')}
-                </StartFreeTrialButton>
-              </p>
-            )}
-          </>
-        )
+          {isProjectOwner && (
+            <p className="text-center">
+              <StartFreeTrialButton
+                variant={compileTimeChanging ? 'new-changing' : 'new-20s'}
+                source="compile-timeout"
+                buttonProps={{
+                  bsStyle: 'success',
+                  className: 'row-spaced-small',
+                  block: true,
+                }}
+              >
+                {hasNewPaywallCta
+                  ? t('get_more_compile_time')
+                  : t('start_a_free_trial')}
+              </StartFreeTrialButton>
+            </p>
+          )}
+        </>
       }
       // @ts-ignore
       entryAriaLabel={t('your_compile_timed_out')}
@@ -107,12 +128,14 @@ const CompileTimeout = memo(function CompileTimeout({
 })
 
 type PreventTimeoutHelpMessageProps = {
+  compileTimeChanging?: boolean
   lastCompileOptions: any
   handleEnableStopOnFirstErrorClick: () => void
   isProjectOwner: boolean
 }
 
 const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
+  compileTimeChanging,
   lastCompileOptions,
   handleEnableStopOnFirstErrorClick,
   isProjectOwner,
@@ -204,19 +227,35 @@ const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
           </p>
           <p>
             <em>
-              <>
-                {isProjectOwner ? (
-                  <Trans
-                    i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_your_project"
-                    components={[compileTimeoutChangesBlogLink]}
-                  />
-                ) : (
-                  <Trans
-                    i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_this_project"
-                    components={[compileTimeoutChangesBlogLink]}
-                  />
-                )}
-              </>
+              {compileTimeChanging ? (
+                <>
+                  {isProjectOwner ? (
+                    <Trans
+                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_your_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  ) : (
+                    <Trans
+                      i18nKey="were_in_the_process_of_reducing_compile_timeout_which_may_affect_this_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  )}
+                </>
+              ) : (
+                <>
+                  {isProjectOwner ? (
+                    <Trans
+                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_your_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  ) : (
+                    <Trans
+                      i18nKey="weve_recently_reduced_the_compile_timeout_limit_which_may_have_affected_this_project"
+                      components={[compileTimeoutChangesBlogLink]}
+                    />
+                  )}
+                </>
+              )}
             </em>
           </p>
         </>
