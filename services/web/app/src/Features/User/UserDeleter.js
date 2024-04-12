@@ -115,8 +115,10 @@ async function ensureCanDeleteUser(user) {
 async function _sendDeleteEmail(user) {
   const emailOptions = {
     to: user.email,
+    action: 'account deleted',
+    actionDescribed: 'your Overleaf account was deleted',
   }
-  await EmailHandler.promises.sendEmail('deletedAccount', emailOptions)
+  await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
 
 async function _createDeletedUser(user, options) {

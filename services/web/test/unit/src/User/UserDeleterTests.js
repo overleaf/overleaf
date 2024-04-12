@@ -263,10 +263,12 @@ describe('UserDeleter', function () {
             await this.UserDeleter.promises.deleteUser(this.userId, {})
             const emailOptions = {
               to: 'bob@bob.com',
+              action: 'account deleted',
+              actionDescribed: 'your Overleaf account was deleted',
             }
             expect(
               this.EmailHandler.promises.sendEmail
-            ).to.have.been.calledWith('deletedAccount', emailOptions)
+            ).to.have.been.calledWith('securityAlert', emailOptions)
           })
         })
 

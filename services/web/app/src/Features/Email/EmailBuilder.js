@@ -786,31 +786,6 @@ templates.userOnboardingEmail = NoCTAEmailTemplate({
   },
 })
 
-templates.deletedAccount = NoCTAEmailTemplate({
-  subject() {
-    return 'Overleaf security note: account deletion confirmation'
-  },
-  title() {
-    return 'Account deleted'
-  },
-  message(opts, isPlainText) {
-    const dateFormatted = moment().format('dddd D MMMM YYYY')
-    const timeFormatted = moment().format('HH:mm')
-    const helpLink = EmailMessageHelper.displayLink(
-      'quick guide',
-      `${settings.siteUrl}/learn/how-to/Keeping_your_account_secure`,
-      isPlainText
-    )
-
-    return [
-      `We are writing to let you know that your ${settings.appName} account was deleted on ${dateFormatted} at ${timeFormatted} GMT.`,
-      `If this was you, you're all set and can ignore this email.`,
-      `If you did not take this action, please get in touch with our support team at ${settings.adminEmail} to report this as potentially suspicious activity on your account.`,
-      `For tips on keeping your ${settings.appName} account secure, read our ${helpLink}.`,
-    ]
-  },
-})
-
 templates.securityAlert = NoCTAEmailTemplate({
   subject(opts) {
     return `Overleaf security note: ${opts.action}`
