@@ -198,6 +198,7 @@ function checkAndClear(project, callback) {
 // find all the broken projects from the failure records
 const errorsToResync = [
   'Error: history store a non-success status code: 422',
+  'OError: history store a non-success status code: 422',
   'OpsOutOfOrderError: project structure version out of order',
 ]
 

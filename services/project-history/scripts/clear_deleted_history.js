@@ -143,7 +143,7 @@ function checkAndClear(project, callback) {
 // find all the broken projects from the failure records
 async function main() {
   const results = await db.projectHistoryFailures
-    .find({ error: 'Error: history store a non-success status code: 422' })
+    .find({ error: /history store a non-success status code: 422/ })
     .toArray()
 
   console.log('number of queues without history store 442 =', results.length)
