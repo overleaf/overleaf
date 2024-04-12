@@ -36,10 +36,16 @@ _mocks.getMostRecentChunk = (projectId, historyId, callback) => {
   _requestChunk({ path, json: true }, callback)
 }
 
-export function getMostRecentChunk(...args) {
-  _mocks.getMostRecentChunk(...args)
+/**
+ * @param {Callback} callback
+ */
+export function getMostRecentChunk(projectId, historyId, callback) {
+  _mocks.getMostRecentChunk(projectId, historyId, callback)
 }
 
+/**
+ * @param {Callback} callback
+ */
 export function getChunkAtVersion(projectId, historyId, version, callback) {
   const path = `projects/${historyId}/versions/${version}/history`
   logger.debug(
@@ -172,6 +178,9 @@ export function getProjectBlob(historyId, blobHash, callback) {
   )
 }
 
+/**
+ * @param {Callback} callback
+ */
 export function getProjectBlobStream(historyId, blobHash, callback) {
   const url = `${Settings.overleaf.history.host}/projects/${historyId}/blobs/${blobHash}`
   logger.debug(

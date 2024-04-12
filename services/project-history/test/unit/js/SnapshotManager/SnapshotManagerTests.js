@@ -1,20 +1,7 @@
-/* eslint-disable
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { strict as esmock } from 'esmock'
 import Core from 'overleaf-editor-core'
-import BPromise from 'bluebird'
 import * as Errors from '../../../../app/js/Errors.js'
 
 const MODULE_PATH = '../../../../app/js/SnapshotManager.js'
@@ -23,12 +10,16 @@ describe('SnapshotManager', function () {
   beforeEach(async function () {
     this.HistoryStoreManager = {
       getBlobStore: sinon.stub(),
-      getChunkAtVersion: sinon.stub(),
-      getMostRecentChunk: sinon.stub(),
-      getProjectBlobStream: sinon.stub(),
+      promises: {
+        getChunkAtVersion: sinon.stub(),
+        getMostRecentChunk: sinon.stub(),
+        getProjectBlobStream: sinon.stub(),
+      },
     }
     this.WebApiManager = {
-      getHistoryId: sinon.stub(),
+      promises: {
+        getHistoryId: sinon.stub(),
+      },
     }
     this.SnapshotManager = await esmock(MODULE_PATH, {
       'overleaf-editor-core': Core,
@@ -38,12 +29,12 @@ describe('SnapshotManager', function () {
     })
     this.projectId = 'project-id-123'
     this.historyId = 'ol-project-id-123'
-    return (this.callback = sinon.stub())
+    this.callback = sinon.stub()
   })
 
   describe('getFileSnapshotStream', function () {
     beforeEach(function () {
-      this.WebApiManager.getHistoryId.yields(null, this.historyId)
+      this.WebApiManager.promises.getHistoryId.resolves(this.historyId)
       this.ranges = {
         comments: [],
         trackedChanges: [
@@ -65,7 +56,7 @@ describe('SnapshotManager', function () {
           },
         ],
       }
-      this.HistoryStoreManager.getChunkAtVersion.yields(null, {
+      this.HistoryStoreManager.promises.getChunkAtVersion.resolves({
         chunk: {
           history: {
             snapshot: {
@@ -121,7 +112,7 @@ describe('SnapshotManager', function () {
     })
 
     describe('of a text file with no tracked changes', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
           getString: (this.getString = sinon.stub().resolves(
             `\
@@ -134,37 +125,33 @@ Four five six\
           )),
           getObject: sinon.stub().rejects(),
         })
-        this.SnapshotManager.getFileSnapshotStream(
+        this.stream = await this.SnapshotManager.promises.getFileSnapshotStream(
           this.projectId,
           5,
-          'main.tex',
-          (error, stream) => {
-            this.stream = stream
-            return done(error)
-          }
+          'main.tex'
         )
       })
 
       it('should get the overleaf id', function () {
-        return this.WebApiManager.getHistoryId
+        this.WebApiManager.promises.getHistoryId
           .calledWith(this.projectId)
           .should.equal(true)
       })
 
       it('should get the chunk', function () {
-        return this.HistoryStoreManager.getChunkAtVersion
+        this.HistoryStoreManager.promises.getChunkAtVersion
           .calledWith(this.projectId, this.historyId, 5)
           .should.equal(true)
       })
 
       it('should get the blob of the starting snapshot', function () {
-        return this.getString
+        this.getString
           .calledWith('35c9bd86574d61dcadbce2fdd3d4a0684272c6ea')
           .should.equal(true)
       })
 
       it('should return a string stream with the text content', function () {
-        return expect(this.stream.read().toString()).to.equal(
+        expect(this.stream.read().toString()).to.equal(
           `\
 Hello world
 
@@ -188,48 +175,41 @@ Seven eight nine\
             })
         })
 
-        it('should call back with error', function (done) {
-          this.SnapshotManager.getFileSnapshotStream(
-            this.projectId,
-            5,
-            'main.tex',
-            error => {
-              expect(error).to.exist
-              expect(error.name).to.equal(this.error.name)
-              done()
-            }
-          )
+        it('should call back with error', async function () {
+          await expect(
+            this.SnapshotManager.promises.getFileSnapshotStream(
+              this.projectId,
+              5,
+              'main.tex'
+            )
+          ).to.be.rejectedWith(this.error)
         })
       })
     })
 
     describe('of a text file with tracked changes', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
           getString: (this.getString = sinon
             .stub()
             .resolves('the quick brown fox jumps over the lazy dog')),
           getObject: (this.getObject = sinon.stub().resolves(this.ranges)),
         })
-        this.SnapshotManager.getFileSnapshotStream(
+        this.stream = await this.SnapshotManager.promises.getFileSnapshotStream(
           this.projectId,
           5,
-          'file_with_ranges.tex',
-          (error, stream) => {
-            this.stream = stream
-            done(error)
-          }
+          'file_with_ranges.tex'
         )
       })
 
       it('should get the overleaf id', function () {
-        this.WebApiManager.getHistoryId
+        this.WebApiManager.promises.getHistoryId
           .calledWith(this.projectId)
           .should.equal(true)
       })
 
       it('should get the chunk', function () {
-        this.HistoryStoreManager.getChunkAtVersion
+        this.HistoryStoreManager.promises.getChunkAtVersion
           .calledWith(this.projectId, this.historyId, 5)
           .should.equal(true)
       })
@@ -254,35 +234,32 @@ Seven eight nine\
     })
 
     describe('of a binary file', function () {
-      beforeEach(function (done) {
-        this.HistoryStoreManager.getProjectBlobStream
+      beforeEach(async function () {
+        this.HistoryStoreManager.promises.getProjectBlobStream
           .withArgs(this.historyId)
-          .yields(null, (this.stream = 'mock-stream'))
-        return this.SnapshotManager.getFileSnapshotStream(
-          this.projectId,
-          5,
-          'binary.png',
-          (error, returnedStream) => {
-            this.returnedStream = returnedStream
-            return done(error)
-          }
-        )
+          .resolves((this.stream = 'mock-stream'))
+        this.returnedStream =
+          await this.SnapshotManager.promises.getFileSnapshotStream(
+            this.projectId,
+            5,
+            'binary.png'
+          )
       })
 
       it('should get the overleaf id', function () {
-        return this.WebApiManager.getHistoryId
+        this.WebApiManager.promises.getHistoryId
           .calledWith(this.projectId)
           .should.equal(true)
       })
 
       it('should get the chunk', function () {
-        return this.HistoryStoreManager.getChunkAtVersion
+        this.HistoryStoreManager.promises.getChunkAtVersion
           .calledWith(this.projectId, this.historyId, 5)
           .should.equal(true)
       })
 
       it('should get the blob of the starting snapshot', function () {
-        return this.HistoryStoreManager.getProjectBlobStream
+        this.HistoryStoreManager.promises.getProjectBlobStream
           .calledWith(
             this.historyId,
             'c6654ea913979e13e22022653d284444f284a172'
@@ -290,36 +267,27 @@ Seven eight nine\
           .should.equal(true)
       })
 
-      return it('should return a stream with the blob content', function () {
-        return expect(this.returnedStream).to.equal(this.stream)
+      it('should return a stream with the blob content', function () {
+        expect(this.returnedStream).to.equal(this.stream)
       })
     })
 
-    return describe("when the file doesn't exist", function () {
-      beforeEach(function (done) {
-        return this.SnapshotManager.getFileSnapshotStream(
-          this.projectId,
-          5,
-          'not-here.png',
-          (error, returnedStream) => {
-            this.error = error
-            this.returnedStream = returnedStream
-            return done()
-          }
-        )
-      })
-
-      return it('should return a NotFoundError', function () {
-        expect(this.error).to.exist
-        expect(this.error.message).to.equal('not-here.png not found')
-        return expect(this.error).to.be.an.instanceof(Errors.NotFoundError)
+    describe("when the file doesn't exist", function () {
+      it('should return a NotFoundError', async function () {
+        await expect(
+          this.SnapshotManager.promises.getFileSnapshotStream(
+            this.projectId,
+            5,
+            'not-here.png'
+          )
+        ).to.be.rejectedWith(Errors.NotFoundError)
       })
     })
   })
 
   describe('getProjectSnapshot', function () {
     beforeEach(function () {
-      this.WebApiManager.getHistoryId.yields(null, this.historyId)
+      this.WebApiManager.promises.getHistoryId.resolves(this.historyId)
       this.ranges = {
         comments: [],
         trackedChanges: [
@@ -341,7 +309,7 @@ Seven eight nine\
           },
         ],
       }
-      return this.HistoryStoreManager.getChunkAtVersion.yields(null, {
+      this.HistoryStoreManager.promises.getChunkAtVersion.resolves({
         chunk: (this.chunk = {
           history: {
             snapshot: {
@@ -416,7 +384,7 @@ Seven eight nine\
     })
 
     describe('of project', function () {
-      beforeEach(function (done) {
+      beforeEach(async function () {
         this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
           getString: (this.getString = sinon.stub().resolves(
             `\
@@ -429,24 +397,20 @@ Four five six\
           )),
           getObject: (this.getObject = sinon.stub().resolves(this.ranges)),
         })
-        this.SnapshotManager.getProjectSnapshot(
+        this.data = await this.SnapshotManager.promises.getProjectSnapshot(
           this.projectId,
-          6,
-          (error, data) => {
-            this.data = data
-            done(error)
-          }
+          6
         )
       })
 
       it('should get the overleaf id', function () {
-        this.WebApiManager.getHistoryId
+        this.WebApiManager.promises.getHistoryId
           .calledWith(this.projectId)
           .should.equal(true)
       })
 
       it('should get the chunk', function () {
-        this.HistoryStoreManager.getChunkAtVersion
+        this.HistoryStoreManager.promises.getChunkAtVersion
           .calledWith(this.projectId, this.historyId, 6)
           .should.equal(true)
       })
@@ -507,21 +471,18 @@ Four five six\
         })
       })
 
-      it('should call back with error', function (done) {
-        this.SnapshotManager.getProjectSnapshot(this.projectId, 5, error => {
-          expect(error).to.exist
-          expect(error.message).to.equal(this.error.message)
-
-          done()
-        })
+      it('should call back with error', async function () {
+        expect(
+          this.SnapshotManager.promises.getProjectSnapshot(this.projectId, 5)
+        ).to.be.rejectedWith(this.error.message)
       })
     })
   })
 
-  return describe('getLatestSnapshot', function () {
+  describe('getLatestSnapshot', function () {
     describe('for a project', function () {
-      beforeEach(function (done) {
-        this.HistoryStoreManager.getMostRecentChunk.yields(null, {
+      beforeEach(async function () {
+        this.HistoryStoreManager.promises.getMostRecentChunk.resolves({
           chunk: (this.chunk = {
             history: {
               snapshot: {
@@ -582,57 +543,39 @@ Four five six\
           )),
           getObject: sinon.stub().rejects(),
         })
-        this.SnapshotManager.getLatestSnapshot(
+        this.data = await this.SnapshotManager.promises.getLatestSnapshot(
           this.projectId,
-          this.historyId,
-          (error, data) => {
-            this.data = data
-            done(error)
-          }
+          this.historyId
         )
       })
 
       it('should get the chunk', function () {
-        return this.HistoryStoreManager.getMostRecentChunk
+        this.HistoryStoreManager.promises.getMostRecentChunk
           .calledWith(this.projectId, this.historyId)
           .should.equal(true)
       })
 
-      return it('should produce the snapshot file data', function () {
+      it('should produce the snapshot file data', function () {
         expect(this.data).to.have.all.keys(['main.tex', 'binary.png'])
         expect(this.data['main.tex']).to.exist
         expect(this.data['binary.png']).to.exist
         expect(this.data['main.tex'].getStringLength()).to.equal(59)
         expect(this.data['binary.png'].getByteLength()).to.equal(41)
-        return expect(this.data['binary.png'].getHash()).to.equal(
+        expect(this.data['binary.png'].getHash()).to.equal(
           'c6654ea913979e13e22022653d284444f284a172'
         )
       })
     })
 
-    return describe('when the chunk is empty', function () {
-      beforeEach(function (done) {
-        this.HistoryStoreManager.getMostRecentChunk.yields(null)
-        return this.SnapshotManager.getLatestSnapshot(
-          this.projectId,
-          this.historyId,
-          (error, data) => {
-            this.error = error
-            this.data = data
-            return done()
-          }
-        )
-      })
-
-      it('should get the chunk', function () {
-        return this.HistoryStoreManager.getMostRecentChunk
-          .calledWith(this.projectId, this.historyId)
-          .should.equal(true)
-      })
-
-      return it('return an error', function () {
-        expect(this.error).to.exist
-        return expect(this.error.message).to.equal('undefined chunk')
+    describe('when the chunk is empty', function () {
+      beforeEach(async function () {
+        this.HistoryStoreManager.promises.getMostRecentChunk.resolves(null)
+        expect(
+          this.SnapshotManager.promises.getLatestSnapshot(
+            this.projectId,
+            this.historyId
+          )
+        ).to.be.rejectedWith('undefined chunk')
       })
     })
   })

@@ -1,15 +1,17 @@
 // @ts-check
 
-import { promisify } from 'util'
+import { callbackify } from 'util'
 import Core from 'overleaf-editor-core'
 import { Readable as StringStream } from 'stream'
-import BPromise from 'bluebird'
 import OError from '@overleaf/o-error'
 import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as WebApiManager from './WebApiManager.js'
 import * as Errors from './Errors.js'
 
-/** @typedef {import('overleaf-editor-core').Snapshot} Snapshot */
+/**
+ * @typedef {import('stream').Readable} ReadableStream
+ * @typedef {import('overleaf-editor-core').Snapshot} Snapshot
+ */
 
 StringStream.prototype._read = function () {}
 
@@ -20,162 +22,128 @@ const MAX_REQUESTS = 4 // maximum number of parallel requests to v1 history serv
  * @param {string} projectId
  * @param {number} version
  * @param {string} pathname
- * @param {Function} callback
  */
-export function getFileSnapshotStream(projectId, version, pathname, callback) {
-  _getSnapshotAtVersion(projectId, version, (error, snapshot) => {
-    if (error) {
-      return callback(OError.tag(error))
-    }
-    const file = snapshot.getFile(pathname)
-    if (file == null) {
-      error = new Errors.NotFoundError(`${pathname} not found`, {
-        projectId,
-        version,
-        pathname,
-      })
-      return callback(error)
-    }
+async function getFileSnapshotStream(projectId, version, pathname) {
+  const snapshot = await _getSnapshotAtVersion(projectId, version)
 
-    WebApiManager.getHistoryId(projectId, (err, historyId) => {
-      if (err) {
-        return callback(OError.tag(err))
-      }
-      if (file.isEditable()) {
-        file
-          .load('eager', HistoryStoreManager.getBlobStore(historyId))
-          .then(() => {
-            const stream = new StringStream()
-            stream.push(file.getContent({ filterTrackedDeletes: true }))
-            stream.push(null)
-            callback(null, stream)
-          })
-          .catch(err => callback(err))
-      } else {
-        HistoryStoreManager.getProjectBlobStream(
-          historyId,
-          file.getHash(),
-          callback
-        )
-      }
+  const file = snapshot.getFile(pathname)
+  if (file == null) {
+    throw new Errors.NotFoundError(`${pathname} not found`, {
+      projectId,
+      version,
+      pathname,
     })
-  })
+  }
+
+  const historyId = await WebApiManager.promises.getHistoryId(projectId)
+  if (file.isEditable()) {
+    await file.load('eager', HistoryStoreManager.getBlobStore(historyId))
+    const stream = new StringStream()
+    stream.push(file.getContent({ filterTrackedDeletes: true }))
+    stream.push(null)
+    return stream
+  } else {
+    return await HistoryStoreManager.promises.getProjectBlobStream(
+      historyId,
+      file.getHash()
+    )
+  }
 }
 
 // Returns project snapshot containing the document content for files with
 // text operations in the relevant chunk, and hashes for unmodified/binary
 // files. Used by git bridge to get the state of the project.
-export function getProjectSnapshot(projectId, version, callback) {
-  _getSnapshotAtVersion(projectId, version, (error, snapshot) => {
-    if (error) {
-      return callback(OError.tag(error))
-    }
-    WebApiManager.getHistoryId(projectId, (err, historyId) => {
-      if (err) {
-        return callback(OError.tag(err))
+async function getProjectSnapshot(projectId, version) {
+  const snapshot = await _getSnapshotAtVersion(projectId, version)
+  const historyId = await WebApiManager.promises.getHistoryId(projectId)
+  await _loadFilesLimit(
+    snapshot,
+    'eager',
+    HistoryStoreManager.getBlobStore(historyId)
+  )
+  return {
+    projectId,
+    files: snapshot.getFileMap().map(file => {
+      if (!file) {
+        return null
       }
-      _loadFilesLimit(
-        snapshot,
-        'eager',
-        HistoryStoreManager.getBlobStore(historyId)
-      )
-        .then(() => {
-          const data = {
-            projectId,
-            files: snapshot.getFileMap().map(file => {
-              if (!file) {
-                return null
-              }
-              const content = file.getContent({
-                filterTrackedDeletes: true,
-              })
-              if (content === null) {
-                return { data: { hash: file.getHash() } }
-              }
-              return { data: { content } }
-            }),
-          }
-          callback(null, data)
-        })
-        .catch(callback)
-    })
-  })
+      const content = file.getContent({
+        filterTrackedDeletes: true,
+      })
+      if (content === null) {
+        return { data: { hash: file.getHash() } }
+      }
+      return { data: { content } }
+    }),
+  }
 }
 
 /**
  *
  * @param {string} projectId
  * @param {number} version
- * @param {Function} callback
  */
-function _getSnapshotAtVersion(projectId, version, callback) {
-  WebApiManager.getHistoryId(projectId, (error, historyId) => {
-    if (error) {
-      return callback(OError.tag(error))
-    }
-    HistoryStoreManager.getChunkAtVersion(
-      projectId,
-      historyId,
-      version,
-      (error, data) => {
-        if (error) {
-          return callback(OError.tag(error))
-        }
-        const chunk = Core.Chunk.fromRaw(data.chunk)
-        const snapshot = chunk.getSnapshot()
-        const changes = chunk
-          .getChanges()
-          .slice(0, version - chunk.getStartVersion())
-        snapshot.applyAll(changes)
-        callback(null, snapshot)
-      }
-    )
-  })
-}
-
-export function getLatestSnapshot(projectId, historyId, callback) {
-  HistoryStoreManager.getMostRecentChunk(projectId, historyId, (err, data) => {
-    if (err) {
-      return callback(err)
-    }
-    if (data == null || data.chunk == null) {
-      return callback(new OError('undefined chunk'))
-    }
-    // apply all the changes in the chunk to get the current snapshot
-    const chunk = Core.Chunk.fromRaw(data.chunk)
-    const snapshot = chunk.getSnapshot()
-    const changes = chunk.getChanges()
-    snapshot.applyAll(changes)
-    snapshot
-      .loadFiles('lazy', HistoryStoreManager.getBlobStore(historyId))
-      .then(snapshotFiles => callback(null, snapshotFiles))
-      .catch(err => callback(err))
-  })
-}
-
-function _loadFilesLimit(snapshot, kind, blobStore) {
-  // bluebird promises only support a limit on concurrency for map()
-  // so make an array of the files we need to load
-  const fileList = []
-  snapshot.fileMap.map(file => fileList.push(file))
-  // load the files in parallel with a limit on the concurrent requests
-  return BPromise.map(
-    fileList,
-    file => {
-      // only load changed files or files with tracked changes, others can be
-      // dereferenced from their blobs (this method is only used by the git
-      // bridge which understands how to load blobs).
-      if (!file.isEditable() || (file.getHash() && !file.getRangesHash())) {
-        return
-      }
-      return file.load(kind, blobStore)
-    },
-    { concurrency: MAX_REQUESTS }
+async function _getSnapshotAtVersion(projectId, version) {
+  const historyId = await WebApiManager.promises.getHistoryId(projectId)
+  const data = await HistoryStoreManager.promises.getChunkAtVersion(
+    projectId,
+    historyId,
+    version
   )
+  const chunk = Core.Chunk.fromRaw(data.chunk)
+  const snapshot = chunk.getSnapshot()
+  const changes = chunk.getChanges().slice(0, version - chunk.getStartVersion())
+  snapshot.applyAll(changes)
+  return snapshot
+}
+
+async function getLatestSnapshot(projectId, historyId) {
+  const data = await HistoryStoreManager.promises.getMostRecentChunk(
+    projectId,
+    historyId
+  )
+  if (data == null || data.chunk == null) {
+    throw new OError('undefined chunk')
+  }
+
+  // apply all the changes in the chunk to get the current snapshot
+  const chunk = Core.Chunk.fromRaw(data.chunk)
+  const snapshot = chunk.getSnapshot()
+  const changes = chunk.getChanges()
+  snapshot.applyAll(changes)
+  const snapshotFiles = await snapshot.loadFiles(
+    'lazy',
+    HistoryStoreManager.getBlobStore(historyId)
+  )
+  return snapshotFiles
+}
+
+async function _loadFilesLimit(snapshot, kind, blobStore) {
+  await snapshot.fileMap.mapAsync(async file => {
+    // only load changed files or files with tracked changes, others can be
+    // dereferenced from their blobs (this method is only used by the git
+    // bridge which understands how to load blobs).
+    if (!file.isEditable() || (file.getHash() && !file.getRangesHash())) {
+      return
+    }
+    await file.load(kind, blobStore)
+  }, MAX_REQUESTS)
+}
+
+// EXPORTS
+
+const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
+const getProjectSnapshotCb = callbackify(getProjectSnapshot)
+const getLatestSnapshotCb = callbackify(getLatestSnapshot)
+
+export {
+  getFileSnapshotStreamCb as getFileSnapshotStream,
+  getProjectSnapshotCb as getProjectSnapshot,
+  getLatestSnapshotCb as getLatestSnapshot,
 }
 
 export const promises = {
-  getFileSnapshotStream: promisify(getFileSnapshotStream),
-  getProjectSnapshot: promisify(getProjectSnapshot),
-  getLatestSnapshot: promisify(getLatestSnapshot),
+  getFileSnapshotStream,
+  getProjectSnapshot,
+  getLatestSnapshot,
 }
