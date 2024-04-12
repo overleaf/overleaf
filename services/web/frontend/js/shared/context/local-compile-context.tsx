@@ -72,8 +72,6 @@ export type CompileContext = {
   setStopOnValidationError: (value: boolean) => void
   showCompileTimeWarning: boolean
   showLogs: boolean
-  showNewCompileTimeoutUI?: string
-  showFasterCompilesFeedbackUI: boolean
   stopOnFirstError: boolean
   stopOnValidationError: boolean
   stoppedOnFirstError: boolean
@@ -103,11 +101,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
 
-  const {
-    _id: projectId,
-    rootDocId,
-    showNewCompileTimeoutUI,
-  } = useProjectContext()
+  const { _id: projectId, rootDocId } = useProjectContext()
 
   const { pdfPreviewOpen } = useLayoutContext()
 
@@ -181,10 +175,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   // whether the logs should be visible
   const [showLogs, setShowLogs] = useState(false)
-
-  // whether the faster compiles feedback UI should be displayed
-  const [showFasterCompilesFeedbackUI, setShowFasterCompilesFeedbackUI] =
-    useState(false)
 
   // whether the compile dropdown arrow should be animated
   const [animateCompileDropdownArrow, setAnimateCompileDropdownArrow] =
@@ -358,9 +348,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
       if (data.clsiServerId) {
         setClsiServerId(data.clsiServerId) // set in scope, for PdfSynctexController
       }
-      setShowFasterCompilesFeedbackUI(
-        Boolean(data.showFasterCompilesFeedbackUI)
-      )
 
       if (data.outputFiles) {
         const outputFiles = new Map()
@@ -633,8 +620,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
       setStopOnFirstError,
       setStopOnValidationError,
       showLogs,
-      showNewCompileTimeoutUI,
-      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -683,8 +668,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
-      showNewCompileTimeoutUI,
-      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,

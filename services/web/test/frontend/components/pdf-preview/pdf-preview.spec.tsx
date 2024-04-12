@@ -314,7 +314,7 @@ describe('<PdfPreview/>', function () {
       'project-too-large': 'Project too large',
       'rate-limited': 'Compile rate limit hit',
       terminated: 'Compilation cancelled',
-      timedout: 'Timed out',
+      timedout: 'Your compile timed out',
       'too-recently-compiled':
         'This project was compiled very recently, so this compile has been skipped.',
       unavailable:

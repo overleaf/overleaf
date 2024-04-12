@@ -23,7 +23,7 @@ describe('CompileManager', function () {
       requires: {
         '@overleaf/settings': (this.settings = {
           apis: {
-            clsi: { defaultBackendClass: 'e2', submissionBackendClass: 'n2d' },
+            clsi: { submissionBackendClass: 'n2d' },
           },
           redis: { web: { host: 'localhost', port: 42 } },
           rateLimit: { autoCompile: {} },
@@ -235,9 +235,8 @@ describe('CompileManager', function () {
         .calledWith(null, {
           timeout: this.timeout,
           compileGroup: this.group,
-          compileBackendClass: 'e2',
+          compileBackendClass: 'c2d',
           ownerAnalyticsId: 'abc',
-          showFasterCompilesFeedbackUI: false,
         })
         .should.equal(true)
     })
@@ -303,7 +302,7 @@ describe('CompileManager', function () {
             this.callback
           )
           this.callback
-            .calledWith(null, sinon.match({ timeout: 60 }))
+            .calledWith(null, sinon.match({ timeout: 20 }))
             .should.equal(true)
         })
         describe('user is in the compile-timeout-20s-existing-users treatment', function () {
@@ -388,20 +387,12 @@ describe('CompileManager', function () {
               this.callback
             )
             this.callback
-              .calledWith(null, sinon.match({ timeout: 60 }))
+              .calledWith(null, sinon.match({ timeout: 20 }))
               .should.equal(true)
           })
         })
 
         describe('user signed up after the second phase rollout', function () {
-          beforeEach(function () {
-            const signUpDate = new Date(
-              this.CompileManager.NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF_DEFAULT_BASELINE
-            )
-            signUpDate.setDate(signUpDate.getDate() + 1)
-            this.user.signUpDate = signUpDate
-          })
-
           it('should reduce compile timeout to 20s', function () {
             this.CompileManager.getProjectCompileLimits(
               this.project_id,
@@ -441,13 +432,12 @@ describe('CompileManager', function () {
             variant: 'default',
           })
         })
-        it('should return the e2 class and disable the ui', function (done) {
+        it('should return the n2d class and disable the ui', function (done) {
           this.CompileManager.getProjectCompileLimits(
             this.project_id,
-            (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+            (err, { compileBackendClass }) => {
               if (err) return done(err)
-              expect(compileBackendClass).to.equal('e2')
-              expect(showFasterCompilesFeedbackUI).to.equal(false)
+              expect(compileBackendClass).to.equal('n2d')
               done()
             }
           )
@@ -463,10 +453,9 @@ describe('CompileManager', function () {
         it('should return the n2d class and disable the ui', function (done) {
           this.CompileManager.getProjectCompileLimits(
             this.project_id,
-            (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+            (err, { compileBackendClass }) => {
               if (err) return done(err)
               expect(compileBackendClass).to.equal('n2d')
-              expect(showFasterCompilesFeedbackUI).to.equal(false)
               done()
             }
           )
@@ -489,10 +478,9 @@ describe('CompileManager', function () {
         it('should return the default class and disable ui', function (done) {
           this.CompileManager.getProjectCompileLimits(
             this.project_id,
-            (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+            (err, { compileBackendClass }) => {
               if (err) return done(err)
-              expect(compileBackendClass).to.equal('e2')
-              expect(showFasterCompilesFeedbackUI).to.equal(false)
+              expect(compileBackendClass).to.equal('c2d')
               done()
             }
           )
@@ -510,10 +498,9 @@ describe('CompileManager', function () {
           it('should return the default class and enable ui', function (done) {
             this.CompileManager.getProjectCompileLimits(
               this.project_id,
-              (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+              (err, { compileBackendClass }) => {
                 if (err) return done(err)
-                expect(compileBackendClass).to.equal('e2')
-                expect(showFasterCompilesFeedbackUI).to.equal(true)
+                expect(compileBackendClass).to.equal('c2d')
                 done()
               }
             )
@@ -530,10 +517,9 @@ describe('CompileManager', function () {
           it('should return the c2d class and enable ui', function (done) {
             this.CompileManager.getProjectCompileLimits(
               this.project_id,
-              (err, { compileBackendClass, showFasterCompilesFeedbackUI }) => {
+              (err, { compileBackendClass }) => {
                 if (err) return done(err)
                 expect(compileBackendClass).to.equal('c2d')
-                expect(showFasterCompilesFeedbackUI).to.equal(true)
                 done()
               }
             )

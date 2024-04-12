@@ -52,8 +52,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
     showCompileTimeWarning: _showCompileTimeWarning,
-    showNewCompileTimeoutUI: _showNewCompileTimeoutUI,
-    showFasterCompilesFeedbackUI: _showFasterCompilesFeedbackUI,
     stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
     stoppedOnFirstError: _stoppedOnFirstError,
@@ -189,18 +187,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
   const [showLogs] = useDetachStateWatcher(
     'showLogs',
     _showLogs,
-    'detacher',
-    'detached'
-  )
-  const [showNewCompileTimeoutUI] = useDetachStateWatcher(
-    'showNewCompileTimeoutUI',
-    _showNewCompileTimeoutUI,
-    'detacher',
-    'detached'
-  )
-  const [showFasterCompilesFeedbackUI] = useDetachStateWatcher(
-    'showFasterCompilesFeedbackUI',
-    _showFasterCompilesFeedbackUI,
     'detacher',
     'detached'
   )
@@ -413,8 +399,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
       setStopOnValidationError,
       showLogs,
       showCompileTimeWarning,
-      showNewCompileTimeoutUI,
-      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -466,8 +450,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
-      showNewCompileTimeoutUI,
-      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,
