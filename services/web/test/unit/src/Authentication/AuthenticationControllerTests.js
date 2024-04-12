@@ -24,6 +24,34 @@ describe('AuthenticationController', function () {
       referal_id: 1234,
       isAdmin: false,
     }
+    this.staffUser = {
+      ...this.user,
+      staffAccess: {
+        publisherMetrics: true,
+        publisherManagement: false,
+        institutionMetrics: true,
+        institutionManagement: false,
+        groupMetrics: true,
+        groupManagement: false,
+        adminMetrics: true,
+        splitTestMetrics: false,
+        splitTestManagement: true,
+      },
+    }
+    this.noStaffAccessUser = {
+      ...this.user,
+      staffAccess: {
+        publisherMetrics: false,
+        publisherManagement: false,
+        institutionMetrics: false,
+        institutionManagement: false,
+        groupMetrics: false,
+        groupManagement: false,
+        adminMetrics: false,
+        splitTestMetrics: false,
+        splitTestManagement: false,
+      },
+    }
     this.password = 'banana'
     this.req = new MockRequest()
     this.res = new MockResponse()
@@ -177,6 +205,57 @@ describe('AuthenticationController', function () {
         this.SessionManager.getSessionUser.called.should.equal(true)
         expect(err).to.exist
         done()
+      })
+    })
+  })
+
+  describe('serializeUser', function () {
+    describe('when isAdmin is false', function () {
+      it('does not return an isAdmin field', function () {
+        const isAdminMatcher = sinon.match(value => {
+          return !('isAdmin' in value)
+        })
+
+        this.AuthenticationController.serializeUser(this.user, this.callback)
+        expect(this.callback).to.have.been.calledWith(null, isAdminMatcher)
+      })
+    })
+
+    describe('when staffAccess fields are provided', function () {
+      it('only returns the fields set to true', function () {
+        const expectedStaffAccess = {
+          publisherMetrics: true,
+          institutionMetrics: true,
+          groupMetrics: true,
+          adminMetrics: true,
+          splitTestManagement: true,
+        }
+        const staffAccessMatcher = sinon.match(value => {
+          return (
+            Object.keys(value.staffAccess).length ===
+            Object.keys(expectedStaffAccess).length
+          )
+        })
+
+        this.AuthenticationController.serializeUser(
+          this.staffUser,
+          this.callback
+        )
+        expect(this.callback).to.have.been.calledWith(null, staffAccessMatcher)
+      })
+    })
+
+    describe('when all staffAccess fields are false', function () {
+      it('no staffAccess attribute is set', function () {
+        const staffAccessMatcher = sinon.match(value => {
+          return !('staffAccess' in value)
+        })
+
+        this.AuthenticationController.serializeUser(
+          this.noStaffAccessUser,
+          this.callback
+        )
+        expect(this.callback).to.have.been.calledWith(null, staffAccessMatcher)
       })
     })
   })

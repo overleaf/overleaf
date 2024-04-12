@@ -50,6 +50,20 @@ function checkCredentials(userDetailsMap, user, password) {
   return isValid
 }
 
+function reduceStaffAccess(staffAccess) {
+  const reducedStaffAccess = {}
+  for (const field in staffAccess) {
+    if (staffAccess[field]) {
+      reducedStaffAccess[field] = true
+    }
+  }
+  return reducedStaffAccess
+}
+
+function userHasStaffAccess(user) {
+  return user.staffAccess && Object.values(user.staffAccess).includes(true)
+}
+
 const AuthenticationController = {
   serializeUser(user, callback) {
     if (!user._id || !user.email) {
@@ -61,8 +75,6 @@ const AuthenticationController = {
       _id: user._id,
       first_name: user.first_name,
       last_name: user.last_name,
-      isAdmin: user.isAdmin,
-      staffAccess: user.staffAccess,
       email: user.email,
       referal_id: user.referal_id,
       session_created: new Date().toISOString(),
@@ -73,6 +85,13 @@ const AuthenticationController = {
       alphaProgram: user.alphaProgram || undefined, // only store if set
       betaProgram: user.betaProgram || undefined, // only store if set
     }
+    if (user.isAdmin) {
+      lightUser.isAdmin = true
+    }
+    if (userHasStaffAccess(user)) {
+      lightUser.staffAccess = reduceStaffAccess(user.staffAccess)
+    }
+
     callback(null, lightUser)
   },
 
