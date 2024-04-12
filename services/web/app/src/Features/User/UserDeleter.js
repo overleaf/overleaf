@@ -12,6 +12,7 @@ const SubscriptionUpdater = require('../Subscription/SubscriptionUpdater')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const UserMembershipsHandler = require('../UserMembership/UserMembershipsHandler')
 const UserSessionsManager = require('./UserSessionsManager')
+const UserAuditLogHandler = require('./UserAuditLogHandler')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')
 const Modules = require('../../infrastructure/Modules')
 const Errors = require('../Errors/Errors')
@@ -47,6 +48,12 @@ async function deleteUser(userId, options) {
     await ensureCanDeleteUser(user)
     await _cleanupUser(user)
     await Modules.promises.hooks.fire('deleteUser', userId)
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'delete-account',
+      options.deleterUser ? options.deleterUser._id : userId,
+      options.ipAddress
+    )
     await _createDeletedUser(user, options)
     await ProjectDeleter.promises.deleteUsersProjects(user._id)
     await _sendDeleteEmail(user)
