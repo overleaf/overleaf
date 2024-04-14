@@ -1074,7 +1074,6 @@
   "managed_users": "托管用户",
   "managed_users_accounts": "托管用户帐户",
   "managed_users_accounts_plan_info": "托管用户使您可以更好地控制您的组对 Overleaf 的使用。 它确保对用户访问和删除进行更严格的管理，并允许您在有人离开组时保持对项目的控制。",
-  "managed_users_beta_tooltip": "我们正在引入一系列新的组管理功能，包括托管用户。 我们很想听听您的想法 - 将反馈发送至product@overleaf.com",
   "managed_users_explanation": "托管用户确保您能够控制组织的项目以及项目的所有者<0>阅读有关托管用户的更多信息</0>",
   "managed_users_is_enabled": "托管用户已启用",
   "managed_users_terms": "要使用托管用户功能，您必须代表您的组织在 <0>__link__</0> 上选择下面的“我同意”，同意最新版本的客户条款。 这些条款将适用于您的组织对 Overleaf 的使用，以取代任何先前商定的 Overleaf 条款。 例外情况是我们与您签署了协议，在这种情况下，签署的协议将继续有效。 请保留一份副本作为记录。",
