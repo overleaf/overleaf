@@ -1,13 +1,13 @@
 import Icon from '../../../../../shared/components/icon'
-import Tooltip from '../../../../../shared/components/tooltip'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../../context/user-email-context'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
+import TooltipWrapper from '@/features/ui/components/bootstrap-5/wrappers/tooltip-wrapper'
 
-function DeleteButton({ children, disabled, onClick }: Button.ButtonProps) {
+function DeleteButton({ disabled, onClick }: Button.ButtonProps) {
   const { t } = useTranslation()
 
   return (
@@ -53,7 +53,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   }
 
   return (
-    <Tooltip
+    <TooltipWrapper
       id={userEmailData.email}
       description={
         userEmailData.default
@@ -68,7 +68,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
           onClick={handleRemoveUserEmail}
         />
       </span>
-    </Tooltip>
+    </TooltipWrapper>
   )
 }
 

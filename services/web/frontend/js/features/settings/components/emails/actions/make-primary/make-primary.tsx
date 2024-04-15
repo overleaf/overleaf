@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import Tooltip from '../../../../../../shared/components/tooltip'
 import PrimaryButton from './primary-button'
 import { useTranslation } from 'react-i18next'
 import {
@@ -15,6 +14,7 @@ import { UserEmailData } from '../../../../../../../../types/user-email'
 import { UseAsyncReturnType } from '../../../../../../shared/hooks/use-async'
 import { ssoAvailableForInstitution } from '../../../../utils/sso'
 import ConfirmationModal from './confirmation-modal'
+import TooltipWrapper from '@/features/ui/components/bootstrap-5/wrappers/tooltip-wrapper'
 
 const getDescription = (
   t: (s: string) => string,
@@ -86,7 +86,7 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
           {t('processing_uppercase')}&hellip;
         </PrimaryButton>
       ) : (
-        <Tooltip
+        <TooltipWrapper
           id={`make-primary-${userEmailData.email}`}
           description={getDescription(t, state, userEmailData)}
         >
@@ -102,7 +102,7 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
               {t('make_primary')}
             </PrimaryButton>
           </span>
-        </Tooltip>
+        </TooltipWrapper>
       )}
       <ConfirmationModal
         email={userEmailData.email}

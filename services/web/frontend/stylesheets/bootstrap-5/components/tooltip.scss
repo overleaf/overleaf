@@ -1,0 +1,27 @@
+.tooltip {
+  line-height: 20px;
+  @include shadow-md;
+
+  &.#{$prefix}tooltip-top {
+    bottom: -1px !important;
+  }
+  &.#{$prefix}tooltip-end {
+    top: 1px !important;
+    left: -1px !important;
+  }
+  &.#{$prefix}tooltip-bottom {
+    top: -1px !important;
+  }
+  &.#{$prefix}tooltip-start {
+    top: 1px !important;
+    right: -1px !important;
+  }
+}
+
+.tooltip-inner {
+  text-align: initial;
+
+  .tooltip-wide & {
+    max-width: unset;
+  }
+}
