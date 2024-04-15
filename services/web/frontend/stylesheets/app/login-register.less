@@ -75,16 +75,6 @@
   padding: 0 (@line-height-computed / 2);
 }
 
-.login-register-newsletter {
-  font-size: 90%;
-  margin-top: @line-height-computed;
-  text-align: left;
-
-  & > .checkbox {
-    margin-bottom: 0;
-  }
-}
-
 .login-btn-icon {
   position: absolute;
   top: 4px;
@@ -341,15 +331,6 @@
       &:focus {
         outline: 2px solid var(--emerald-green);
         outline-offset: 1px;
-      }
-    }
-  }
-
-  // for accessibility with keyboard navigation
-  .login-register-newsletter {
-    .checkbox {
-      input[type='checkbox']:focus {
-        outline: 1px solid var(--emerald-green);
       }
     }
   }
