@@ -105,15 +105,6 @@ module.exports = CompileController = {
       stopOnFirstError,
     }
 
-    // temporary override to force the new compile timeout
-    const forceNewCompileTimeout = req.query.force_new_compile_timeout
-    if (
-      forceNewCompileTimeout === 'active' ||
-      forceNewCompileTimeout === 'changing'
-    ) {
-      options.forceNewCompileTimeout = forceNewCompileTimeout
-    }
-
     if (req.body.rootDoc_id) {
       options.rootDoc_id = req.body.rootDoc_id
     } else if (

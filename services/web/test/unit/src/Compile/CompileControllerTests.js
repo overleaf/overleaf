@@ -32,7 +32,6 @@ describe('CompileController', function () {
       apis: {
         clsi: {
           url: 'http://clsi.example.com',
-          defaultBackendClass: 'e2',
           submissionBackendClass: 'n2d',
         },
         clsi_priority: {

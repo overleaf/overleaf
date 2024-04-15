@@ -30,7 +30,6 @@ const ProjectContext = createContext<
         _id: UserId
         email: string
       }
-      showNewCompileTimeoutUI?: string
       tags: {
         _id: string
         name: string
@@ -74,7 +73,6 @@ export const ProjectProvider: FC = ({ children }) => {
     features,
     publicAccesLevel: publicAccessLevel,
     owner,
-    showNewCompileTimeoutUI,
     trackChangesState,
   } = project || projectFallback
 
@@ -86,17 +84,6 @@ export const ProjectProvider: FC = ({ children }) => {
     []
   )
 
-  // temporary override for new compile timeout
-  const forceNewCompileTimeout = new URLSearchParams(
-    window.location.search
-  ).get('force_new_compile_timeout')
-  const newCompileTimeoutOverride =
-    forceNewCompileTimeout === 'active'
-      ? 'active'
-      : forceNewCompileTimeout === 'changing'
-        ? 'changing'
-        : undefined
-
   const value = useMemo(() => {
     return {
       _id,
@@ -107,8 +94,6 @@ export const ProjectProvider: FC = ({ children }) => {
       features,
       publicAccessLevel,
       owner,
-      showNewCompileTimeoutUI:
-        newCompileTimeoutOverride || showNewCompileTimeoutUI,
       tags,
       trackChangesState,
     }
@@ -121,8 +106,6 @@ export const ProjectProvider: FC = ({ children }) => {
     features,
     publicAccessLevel,
     owner,
-    showNewCompileTimeoutUI,
-    newCompileTimeoutOverride,
     tags,
     trackChangesState,
   ])

@@ -4,10 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { FC } from 'react'
 import { useSplitTestContext } from '@/shared/context/split-test-context'
 
-export const CompileTimeoutWarning: FC<{
+export const CompileTimeWarningUpgradePromptInner: FC<{
   handleDismissWarning: () => void
-  showNewCompileTimeoutUI?: string
-}> = ({ handleDismissWarning, showNewCompileTimeoutUI }) => {
+}> = ({ handleDismissWarning }) => {
   const { t } = useTranslation()
 
   const { splitTestVariants } = useSplitTestContext()
@@ -34,14 +33,8 @@ export const CompileTimeoutWarning: FC<{
           <div>
             <span>{t('your_project_near_compile_timeout_limit')}</span>
           </div>
-          {showNewCompileTimeoutUI === 'active' ? (
-            <>
-              <strong>{t('upgrade_for_12x_more_compile_time')}</strong>
-              {'. '}
-            </>
-          ) : (
-            <strong>{t('upgrade_for_plenty_more_compile_time')}</strong>
-          )}
+          <strong>{t('upgrade_for_12x_more_compile_time')}</strong>
+          {'. '}
         </div>
       }
       type="warning"

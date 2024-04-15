@@ -29,6 +29,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
     error: _error,
     fileList: _fileList,
     hasChanges: _hasChanges,
+    hasShortCompileTimeout: _hasShortCompileTimeout,
     highlights: _highlights,
     isProjectOwner: _isProjectOwner,
     lastCompileOptions: _lastCompileOptions,
@@ -52,8 +53,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
     setStopOnValidationError: _setStopOnValidationError,
     showLogs: _showLogs,
     showCompileTimeWarning: _showCompileTimeWarning,
-    showNewCompileTimeoutUI: _showNewCompileTimeoutUI,
-    showFasterCompilesFeedbackUI: _showFasterCompilesFeedbackUI,
     stopOnFirstError: _stopOnFirstError,
     stopOnValidationError: _stopOnValidationError,
     stoppedOnFirstError: _stoppedOnFirstError,
@@ -126,6 +125,12 @@ export const DetachCompileProvider: FC = ({ children }) => {
     'detacher',
     'detached'
   )
+  const [hasShortCompileTimeout] = useDetachStateWatcher(
+    'hasShortCompileTimeout',
+    _hasShortCompileTimeout,
+    'detacher',
+    'detached'
+  )
   const [highlights] = useDetachStateWatcher(
     'highlights',
     _highlights,
@@ -189,18 +194,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
   const [showLogs] = useDetachStateWatcher(
     'showLogs',
     _showLogs,
-    'detacher',
-    'detached'
-  )
-  const [showNewCompileTimeoutUI] = useDetachStateWatcher(
-    'showNewCompileTimeoutUI',
-    _showNewCompileTimeoutUI,
-    'detacher',
-    'detached'
-  )
-  const [showFasterCompilesFeedbackUI] = useDetachStateWatcher(
-    'showFasterCompilesFeedbackUI',
-    _showFasterCompilesFeedbackUI,
     'detacher',
     'detached'
   )
@@ -386,6 +379,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
       error,
       fileList,
       hasChanges,
+      hasShortCompileTimeout,
       highlights,
       isProjectOwner,
       lastCompileOptions,
@@ -413,8 +407,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
       setStopOnValidationError,
       showLogs,
       showCompileTimeWarning,
-      showNewCompileTimeoutUI,
-      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,
@@ -437,10 +429,11 @@ export const DetachCompileProvider: FC = ({ children }) => {
       compiling,
       deliveryLatencies,
       draft,
-      error,
       editedSinceCompileStarted,
+      error,
       fileList,
       hasChanges,
+      hasShortCompileTimeout,
       highlights,
       isProjectOwner,
       lastCompileOptions,
@@ -466,8 +459,6 @@ export const DetachCompileProvider: FC = ({ children }) => {
       setStopOnValidationError,
       showCompileTimeWarning,
       showLogs,
-      showNewCompileTimeoutUI,
-      showFasterCompilesFeedbackUI,
       startCompile,
       stopCompile,
       stopOnFirstError,

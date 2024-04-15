@@ -3,7 +3,6 @@ import { memo } from 'react'
 import classnames from 'classnames'
 import PdfValidationIssue from './pdf-validation-issue'
 import StopOnFirstErrorPrompt from './stop-on-first-error-prompt'
-import TimeoutUpgradePrompt from './timeout-upgrade-prompt'
 import TimeoutUpgradePromptNew from './timeout-upgrade-prompt-new'
 import PdfPreviewError from './pdf-preview-error'
 import PdfClearCacheButton from './pdf-clear-cache-button'
@@ -20,12 +19,12 @@ function PdfLogsViewer() {
   const {
     codeCheckFailed,
     error,
+    hasShortCompileTimeout,
     logEntries,
     rawLog,
     validationIssues,
     showLogs,
     stoppedOnFirstError,
-    showNewCompileTimeoutUI,
   } = useCompileContext()
 
   const { loadingError } = usePdfPreviewContext()
@@ -45,13 +44,10 @@ function PdfLogsViewer() {
 
         {loadingError && <PdfPreviewError error="pdf-viewer-loading-error" />}
 
-        {showNewCompileTimeoutUI && error === 'timedout' ? (
+        {hasShortCompileTimeout && error === 'timedout' ? (
           <TimeoutUpgradePromptNew />
         ) : (
-          <>
-            {error && <PdfPreviewError error={error} />}
-            {error === 'timedout' && <TimeoutUpgradePrompt />}
-          </>
+          <>{error && <PdfPreviewError error={error} />}</>
         )}
 
         {validationIssues &&
