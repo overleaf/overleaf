@@ -1,9 +1,6 @@
 // This file provides CSS variables for font size and line height, plus Sass variables for base text size for Bootstrap
 @use 'sass:math';
 
-$default-font-size: 1rem;
-$default-line-height: 1.5;
-
 :root {
   --font-size-01: 0.75rem; // 12px
   --font-size-02: 0.875rem; // 14px

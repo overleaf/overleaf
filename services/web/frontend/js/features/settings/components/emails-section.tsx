@@ -9,7 +9,7 @@ import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
 import Icon from '../../../shared/components/icon'
-import { Alert } from 'react-bootstrap'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { LeaversSurveyAlert } from './leavers-survey-alert'
 
@@ -67,10 +67,14 @@ function EmailsSectionContent() {
         {isInitializingSuccess && <LeaversSurveyAlert />}
         {isInitializingSuccess && !hideAddSecondaryEmail && <AddEmail />}
         {isInitializingError && (
-          <Alert bsStyle="danger" className="text-center">
-            <Icon type="exclamation-triangle" fw />{' '}
-            {t('error_performing_request')}
-          </Alert>
+          <NotificationWrapper
+            type="error"
+            content={t('error_performing_request')}
+            bs3Props={{
+              icon: <Icon type="exclamation-triangle" fw />,
+              className: 'text-center',
+            }}
+          />
         )}
       </>
     </>
