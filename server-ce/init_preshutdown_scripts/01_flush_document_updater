@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /etc/container_environment.sh
+. /etc/overleaf/env.sh
+
 cd /overleaf/services/document-updater && node scripts/flush_all.js >> /var/log/overleaf/document-updater.log 2>&1
 
 EXIT_CODE="$?"

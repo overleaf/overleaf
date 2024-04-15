@@ -1,5 +1,8 @@
 #!/bin/sh
 
+. /etc/container_environment.sh
+. /etc/overleaf/env.sh
+
 SITE_MAINTENANCE_FILE_BAK="$SITE_MAINTENANCE_FILE.bak.shutdown"
 
 mv "${SITE_MAINTENANCE_FILE}" "${SITE_MAINTENANCE_FILE_BAK}"
