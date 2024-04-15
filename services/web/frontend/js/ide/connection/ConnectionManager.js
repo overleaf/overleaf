@@ -253,7 +253,7 @@ export default ConnectionManager = (function () {
         })
         // flush changes before disconnecting
         this.ide.$scope.$broadcast('flush-changes')
-        setTimeout(() => this.ide.socket.disconnect(), 1000)
+        window.setTimeout(() => this.ide.socket.disconnect(), 1000 * delay)
         this.ide.showLockEditorMessageModal(
           'Please wait',
           `\

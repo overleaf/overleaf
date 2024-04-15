@@ -219,13 +219,15 @@ export class ConnectionManager extends EventTarget {
     clearInterval(this.idleDisconnectInterval)
     clearTimeout(this.reconnectCountdownInterval)
     window.removeEventListener('online', this.onOnline)
+
+    window.setTimeout(() => this.disconnect(), 1000 * delay)
+
     this.changeState({
       ...this.state,
       forceDisconnected: true,
       forcedDisconnectDelay: delay,
       error,
     })
-    setTimeout(() => this.disconnect(), 1000)
   }
 
   private onJoinProjectResponse({
