@@ -10,7 +10,6 @@
  */
 import './main/token-access' // used in project/token/access
 import './main/event' // used in various controllers
-import './main/bonus' // used in referal/bonus
 import './main/system-messages' // used in project/editor
 import './main/annual-upgrade' // used in subscriptions/upgradeToAnnual
 import './main/subscription/team-invite-controller' // used in subscriptions/team/invite

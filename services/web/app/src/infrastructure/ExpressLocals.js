@@ -257,30 +257,6 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
-    res.locals.buildReferalUrl = function (referalMedium) {
-      let url = Settings.siteUrl
-      const currentUser = SessionManager.getSessionUser(req.session)
-      if (
-        currentUser != null &&
-        (currentUser != null ? currentUser.referal_id : undefined) != null
-      ) {
-        url += `?r=${currentUser.referal_id}&rm=${referalMedium}&rs=b` // Referal source = bonus
-      }
-      return url
-    }
-    res.locals.getReferalId = function () {
-      const currentUser = SessionManager.getSessionUser(req.session)
-      if (
-        currentUser != null &&
-        (currentUser != null ? currentUser.referal_id : undefined) != null
-      ) {
-        return currentUser.referal_id
-      }
-    }
-    next()
-  })
-
-  webRouter.use(function (req, res, next) {
     res.locals.csrfToken = req != null ? req.csrfToken() : undefined
     next()
   })
