@@ -263,9 +263,9 @@ class UpdateSetBuilder {
 function removeTrackedDeletesFromString(content, trackedChanges) {
   let result = ''
   let cursor = 0
-  const trackedDeletes = trackedChanges.trackedChanges.filter(
-    tc => tc.tracking.type === 'delete'
-  )
+  const trackedDeletes = trackedChanges
+    .asSorted()
+    .filter(tc => tc.tracking.type === 'delete')
   for (const trackedChange of trackedDeletes) {
     if (cursor < trackedChange.range.start) {
       result += content.slice(cursor, trackedChange.range.start)
@@ -455,11 +455,13 @@ class TextUpdateBuilder {
       // We are modifying existing tracked deletes. We need to treat removal
       // (type insert/none) of a tracked delete as an insertion. Similarly, any
       // range we introduce as a tracked deletion must be reported as a deletion.
-      const trackedDeletes = this.trackedChanges.trackedChanges.filter(
-        tc =>
-          tc.tracking.type === 'delete' &&
-          tc.range.overlaps(resultRetentionRange)
-      )
+      const trackedDeletes = this.trackedChanges
+        .asSorted()
+        .filter(
+          tc =>
+            tc.tracking.type === 'delete' &&
+            tc.range.overlaps(resultRetentionRange)
+        )
 
       for (const trackedDelete of trackedDeletes) {
         const resultTrackedDelete = trackedDelete.range
@@ -554,7 +556,8 @@ class TextUpdateBuilder {
     const sourceDeletionRange = new Range(this.sourceCursor, deletion.length)
     const resultDeletionRange = new Range(this.result.length, deletion.length)
 
-    const trackedDeletes = this.trackedChanges.trackedChanges
+    const trackedDeletes = this.trackedChanges
+      .asSorted()
       .filter(
         tc =>
           tc.tracking.type === 'delete' &&
@@ -604,7 +607,8 @@ class TextUpdateBuilder {
       if ('p' in op && typeof op.p === 'number') {
         // Maybe we have to move the position of the deletion to account for
         // tracked changes that we're hiding in the UI.
-        op.p -= this.trackedChanges.trackedChanges
+        op.p -= this.trackedChanges
+          .asSorted()
           .filter(tc => tc.tracking.type === 'delete' && tc.range.start < op.p)
           .map(tc => {
             if (tc.range.end < op.p) {

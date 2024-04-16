@@ -25,7 +25,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(1)
+        expect(trackedChanges.length).to.equal(1)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 6 },
@@ -56,7 +56,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(1)
+        expect(trackedChanges.length).to.equal(1)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 16 },
@@ -87,7 +87,7 @@ describe('TrackedChangeList', function () {
             ts: '2023-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(1)
+        expect(trackedChanges.length).to.equal(1)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 6 },
@@ -118,7 +118,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(2)
+        expect(trackedChanges.length).to.equal(2)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 3 },
@@ -157,7 +157,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(2)
+        expect(trackedChanges.length).to.equal(2)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 4, length: 3 },
@@ -198,7 +198,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(2)
+        expect(trackedChanges.length).to.equal(2)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 3 },
@@ -237,7 +237,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(2)
+        expect(trackedChanges.length).to.equal(2)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 3 },
@@ -276,7 +276,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(3)
+        expect(trackedChanges.length).to.equal(3)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 5 },
@@ -323,7 +323,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(2)
+        expect(trackedChanges.length).to.equal(2)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 5 },
@@ -362,7 +362,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(3)
+        expect(trackedChanges.length).to.equal(3)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 0, length: 4 },
@@ -409,7 +409,7 @@ describe('TrackedChangeList', function () {
             ts: '2024-01-01T00:00:00.000Z',
           }),
         })
-        expect(trackedChanges.trackedChanges.length).to.equal(2)
+        expect(trackedChanges.length).to.equal(2)
         expect(trackedChanges.toRaw()).to.deep.equal([
           {
             range: { pos: 5, length: 6 },
@@ -445,7 +445,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyDelete(5, 2)
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 8 },
@@ -470,7 +470,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyDelete(0, 10)
-      expect(trackedChanges.trackedChanges.length).to.equal(0)
+      expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
 
@@ -486,7 +486,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyDelete(0, 25)
-      expect(trackedChanges.trackedChanges.length).to.equal(0)
+      expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
 
@@ -502,7 +502,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyDelete(1, 9)
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 1 },
@@ -527,7 +527,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyDelete(0, 9)
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 1 },
@@ -574,7 +574,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 10 },
@@ -605,7 +605,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(2)
+      expect(trackedChanges.length).to.equal(2)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 5 },
@@ -644,7 +644,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(3)
+      expect(trackedChanges.length).to.equal(3)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 5 },
@@ -691,7 +691,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 13 },
@@ -716,7 +716,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyRetain(0, 10)
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 10 },
@@ -741,7 +741,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyRetain(4, 1)
-      expect(trackedChanges.trackedChanges.length).to.equal(1)
+      expect(trackedChanges.length).to.equal(1)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 0, length: 10 },
@@ -772,7 +772,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(0)
+      expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
 
@@ -794,7 +794,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(0)
+      expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
 
@@ -816,7 +816,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(0)
+      expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
 
@@ -838,7 +838,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(0)
+      expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
     })
 
@@ -860,7 +860,7 @@ describe('TrackedChangeList', function () {
           ts: '2024-01-01T00:00:00.000Z',
         }),
       })
-      expect(trackedChanges.trackedChanges.length).to.equal(2)
+      expect(trackedChanges.length).to.equal(2)
       expect(trackedChanges.toRaw()).to.deep.equal([
         {
           range: { pos: 4, length: 4 },

@@ -94,13 +94,10 @@ describe('Comment', function () {
     expect(comment.ranges).to.eql([new Range(5, 30), new Range(50, 10)])
   })
 
-  it('should ignore overlapped range', function () {
-    const comment = new Comment([
-      new Range(5, 10),
-      new Range(10, 5),
-      new Range(50, 10),
-    ])
-    expect(comment.ranges).to.eql([new Range(5, 10), new Range(50, 10)])
+  it('should throw error when ranges overlap', function () {
+    expect(
+      () => new Comment([new Range(5, 10), new Range(10, 5), new Range(50, 10)])
+    ).to.throw()
   })
 
   it('should join touching ranges', function () {

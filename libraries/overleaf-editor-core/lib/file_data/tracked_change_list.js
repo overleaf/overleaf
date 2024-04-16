@@ -13,7 +13,10 @@ class TrackedChangeList {
    * @param {TrackedChange[]} trackedChanges
    */
   constructor(trackedChanges) {
-    this.trackedChanges = trackedChanges
+    /**
+     * @type {TrackedChange[]}
+     */
+    this._trackedChanges = trackedChanges
   }
 
   /**
@@ -30,11 +33,20 @@ class TrackedChangeList {
    * @returns {TrackedChangeRawData[]}
    */
   toRaw() {
-    return this.trackedChanges.map(change => change.toRaw())
+    return this._trackedChanges.map(change => change.toRaw())
   }
 
   get length() {
-    return this.trackedChanges.length
+    return this._trackedChanges.length
+  }
+
+  /**
+   * @returns {readonly TrackedChange[]}
+   */
+  asSorted() {
+    // NOTE: Once all code dependent on this is typed, we can just return
+    // _trackedChanges.
+    return Array.from(this._trackedChanges)
   }
 
   /**
@@ -43,7 +55,7 @@ class TrackedChangeList {
    * @returns {TrackedChange[]}
    */
   inRange(range) {
-    return this.trackedChanges.filter(change => range.contains(change.range))
+    return this._trackedChanges.filter(change => range.contains(change.range))
   }
 
   /**
@@ -52,7 +64,7 @@ class TrackedChangeList {
    * @returns {TrackingProps | undefined}
    */
   propsAtRange(range) {
-    return this.trackedChanges.find(change => change.range.contains(range))
+    return this._trackedChanges.find(change => change.range.contains(range))
       ?.tracking
   }
 
@@ -61,7 +73,7 @@ class TrackedChangeList {
    * @param {Range} range
    */
   removeInRange(range) {
-    this.trackedChanges = this.trackedChanges.filter(
+    this._trackedChanges = this._trackedChanges.filter(
       change => !range.contains(change.range)
     )
   }
@@ -71,7 +83,7 @@ class TrackedChangeList {
    * @param {TrackedChange} trackedChange
    */
   add(trackedChange) {
-    this.trackedChanges.push(trackedChange)
+    this._trackedChanges.push(trackedChange)
     this._mergeRanges()
   }
 
@@ -80,22 +92,28 @@ class TrackedChangeList {
    * @returns {void}
    */
   _mergeRanges() {
-    if (this.trackedChanges.length < 2) {
+    if (this._trackedChanges.length < 2) {
       return
     }
     // ranges are non-overlapping so we can sort based on their first indices
-    this.trackedChanges.sort((a, b) => a.range.start - b.range.start)
-    const newTrackedChanges = [this.trackedChanges[0]]
-    for (let i = 1; i < this.trackedChanges.length; i++) {
+    this._trackedChanges.sort((a, b) => a.range.start - b.range.start)
+    const newTrackedChanges = [this._trackedChanges[0]]
+    for (let i = 1; i < this._trackedChanges.length; i++) {
       const last = newTrackedChanges[newTrackedChanges.length - 1]
-      const current = this.trackedChanges[i]
+      const current = this._trackedChanges[i]
+      if (last.range.overlaps(current.range)) {
+        throw new Error('Ranges cannot overlap')
+      }
+      if (current.range.isEmpty()) {
+        throw new Error('Tracked changes range cannot be empty')
+      }
       if (last.canMerge(current)) {
         newTrackedChanges[newTrackedChanges.length - 1] = last.merge(current)
       } else {
         newTrackedChanges.push(current)
       }
     }
-    this.trackedChanges = newTrackedChanges
+    this._trackedChanges = newTrackedChanges
   }
 
   /**
@@ -106,7 +124,7 @@ class TrackedChangeList {
    */
   applyInsert(cursor, insertedText, opts = {}) {
     const newTrackedChanges = []
-    for (const trackedChange of this.trackedChanges) {
+    for (const trackedChange of this._trackedChanges) {
       if (
         // If the cursor is before or at the insertion point, we need to move
         // the tracked change
@@ -152,7 +170,7 @@ class TrackedChangeList {
       )
       newTrackedChanges.push(newTrackedChange)
     }
-    this.trackedChanges = newTrackedChanges
+    this._trackedChanges = newTrackedChanges
     this._mergeRanges()
   }
 
@@ -163,7 +181,7 @@ class TrackedChangeList {
    */
   applyDelete(cursor, length) {
     const newTrackedChanges = []
-    for (const trackedChange of this.trackedChanges) {
+    for (const trackedChange of this._trackedChanges) {
       const deletedRange = new Range(cursor, length)
       // If the tracked change is after the deletion, we need to move it
       if (deletedRange.contains(trackedChange.range)) {
@@ -186,7 +204,7 @@ class TrackedChangeList {
         newTrackedChanges.push(trackedChange)
       }
     }
-    this.trackedChanges = newTrackedChanges
+    this._trackedChanges = newTrackedChanges
     this._mergeRanges()
   }
 
@@ -202,7 +220,7 @@ class TrackedChangeList {
     }
     const newTrackedChanges = []
     const retainedRange = new Range(cursor, length)
-    for (const trackedChange of this.trackedChanges) {
+    for (const trackedChange of this._trackedChanges) {
       if (retainedRange.contains(trackedChange.range)) {
         // Remove the range
       } else if (retainedRange.overlaps(trackedChange.range)) {
@@ -250,7 +268,7 @@ class TrackedChangeList {
       const newTrackedChange = new TrackedChange(retainedRange, opts.tracking)
       newTrackedChanges.push(newTrackedChange)
     }
-    this.trackedChanges = newTrackedChanges
+    this._trackedChanges = newTrackedChanges
     this._mergeRanges()
   }
 }

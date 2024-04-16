@@ -74,7 +74,7 @@ class StringFileData extends FileData {
     let content = ''
     let cursor = 0
     if (opts.filterTrackedDeletes) {
-      for (const tc of this.trackedChanges.trackedChanges) {
+      for (const tc of this.trackedChanges.asSorted()) {
         if (tc.tracking.type !== 'delete') {
           continue
         }

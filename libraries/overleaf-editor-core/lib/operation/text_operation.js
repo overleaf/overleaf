@@ -31,6 +31,7 @@ const TrackingProps = require('../file_data/tracking_props')
  * @typedef {import('../file_data/string_file_data')} StringFileData
  * @typedef {import('../types').RawTextOperation} RawTextOperation
  * @typedef {import('../operation/scan_op').ScanOp} ScanOp
+ * @typedef {import('../file_data/tracked_change_list')} TrackedChangeList
  */
 
 /**
@@ -826,7 +827,7 @@ function getStartIndex(operation) {
  * @param {number} cursor
  * @param {number} length
  * @param {import('../file_data/comment_list')} commentsList
- * @param {import('../file_data/tracked_change_list')} trackedChangeList
+ * @param {TrackedChangeList} trackedChangeList
  * @returns {{length: number, commentIds?: string[], tracking?: TrackingProps}[]}
  */
 function calculateTrackingCommentSegments(
@@ -853,7 +854,7 @@ function calculateTrackingCommentSegments(
     }
   }
   // Add tracked change boundaries
-  for (const trackedChange of trackedChangeList.trackedChanges) {
+  for (const trackedChange of trackedChangeList.asSorted()) {
     addBreak(trackedChange.range.start)
     addBreak(trackedChange.range.end)
   }

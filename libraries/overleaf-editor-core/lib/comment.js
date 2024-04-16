@@ -167,7 +167,12 @@ class Comment {
         continue
       }
       const lastMerged = mergedRanges[mergedRanges.length - 1]
-
+      if (lastMerged?.overlaps(range)) {
+        throw new Error('Ranges cannot overlap')
+      }
+      if (range.isEmpty()) {
+        throw new Error('Comment range cannot be empty')
+      }
       if (lastMerged?.canMerge(range)) {
         mergedRanges[mergedRanges.length - 1] = lastMerged.merge(range)
       } else {
