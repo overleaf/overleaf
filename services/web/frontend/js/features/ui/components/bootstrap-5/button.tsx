@@ -1,7 +1,8 @@
-import { Button as B5Button, Spinner } from 'react-bootstrap-5'
+import { Button as BS5Button, Spinner } from 'react-bootstrap-5'
 import type { ButtonProps } from '@/features/ui/components/types/button-props'
 import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const sizeClasses = new Map<ButtonProps['size'], string>([
   ['small', 'btn-sm'],
@@ -12,8 +13,11 @@ const sizeClasses = new Map<ButtonProps['size'], string>([
 export default function Button({
   children,
   className,
+  leadingIcon,
   isLoading = false,
   size = 'default',
+  trailingIcon,
+  variant = 'primary',
   ...props
 }: ButtonProps) {
   const { t } = useTranslation()
@@ -24,9 +28,10 @@ export default function Button({
   })
   const loadingSpinnerClassName =
     size === 'large' ? 'loading-spinner-large' : 'loading-spinner-small'
+  const materialIconClassName = size === 'large' ? 'icon-large' : 'icon-small'
 
   return (
-    <B5Button className={buttonClassName} {...props}>
+    <BS5Button className={buttonClassName} variant={variant} {...props}>
       {isLoading && (
         <span className="spinner-container">
           <Spinner
@@ -40,8 +45,14 @@ export default function Button({
         </span>
       )}
       <span className="button-content" aria-hidden={isLoading}>
+        {leadingIcon && (
+          <MaterialIcon type={leadingIcon} className={materialIconClassName} />
+        )}
         {children}
+        {trailingIcon && (
+          <MaterialIcon type={trailingIcon} className={materialIconClassName} />
+        )}
       </span>
-    </B5Button>
+    </BS5Button>
   )
 }

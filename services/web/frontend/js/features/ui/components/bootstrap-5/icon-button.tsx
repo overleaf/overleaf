@@ -1,7 +1,7 @@
+import classNames from 'classnames'
 import MaterialIcon from '@/shared/components/material-icon'
 import Button from './button'
 import type { IconButtonProps } from '@/features/ui/components/types/icon-button-props'
-import classNames from 'classnames'
 
 export default function IconButton({
   accessibilityLabel,

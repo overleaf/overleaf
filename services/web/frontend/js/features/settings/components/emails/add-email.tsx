@@ -18,7 +18,7 @@ import getMeta from '../../../../utils/meta'
 import { ReCaptcha2 } from '../../../../shared/components/recaptcha-2'
 import { useRecaptcha } from '../../../../shared/hooks/use-recaptcha'
 import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
-import { bsClassName } from '@/features/utils/bootstrap-5'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function AddEmail() {
   const { t } = useTranslation()
@@ -136,7 +136,7 @@ function AddEmail() {
     <>
       <label
         htmlFor="affiliations-email"
-        className={bsClassName({ bs5: 'visually-hidden', bs3: 'sr-only' })}
+        className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}
       >
         {t('email')}
       </label>
@@ -162,7 +162,7 @@ function AddEmail() {
           </ColWrapper>
           <ColWrapper md={4}>
             <Cell
-              className={bsClassName({
+              className={bsVersion({
                 bs5: 'text-md-end',
                 bs3: 'text-md-right',
               })}
@@ -207,7 +207,7 @@ function AddEmail() {
         {!isSsoAvailableForDomain ? (
           <ColWrapper md={4}>
             <Cell
-              className={bsClassName({
+              className={bsVersion({
                 bs5: 'text-md-end',
                 bs3: 'text-md-right',
               })}

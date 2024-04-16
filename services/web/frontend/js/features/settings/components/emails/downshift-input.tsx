@@ -2,7 +2,7 @@ import { useState, useEffect, forwardRef } from 'react'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import { escapeRegExp } from 'lodash'
-import { bsClassName } from '@/features/utils/bootstrap-5'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type DownshiftInputProps = {
   highlightMatches?: boolean
@@ -92,7 +92,7 @@ function Downshift({
           className={
             showLabel
               ? ''
-              : bsClassName({ bs5: 'visually-hidden', bs3: 'sr-only' })
+              : bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })
           }
         >
           {label}

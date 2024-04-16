@@ -15,7 +15,7 @@ import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
 import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
-import { bsClassName } from '@/features/utils/bootstrap-5'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type EmailsRowProps = {
   userEmailData: UserEmailData
@@ -44,7 +44,7 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
         </ColWrapper>
         <ColWrapper md={3}>
           <EmailCell
-            className={bsClassName({
+            className={bsVersion({
               bs5: 'text-md-end',
               bs3: 'text-md-right',
             })}
@@ -154,7 +154,7 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
           </ColWrapper>
           <ColWrapper
             md={3}
-            className={bsClassName({
+            className={bsVersion({
               bs5: 'text-md-end',
               bs3: 'text-md-right',
             })}

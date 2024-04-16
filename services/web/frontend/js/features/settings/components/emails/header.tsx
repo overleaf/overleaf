@@ -3,7 +3,7 @@ import EmailCell from './cell'
 import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
 import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
 import classnames from 'classnames'
-import { bsClassName } from '@/features/utils/bootstrap-5'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function Header() {
   const { t } = useTranslation()
@@ -13,7 +13,7 @@ function Header() {
       <RowWrapper>
         <ColWrapper
           md={4}
-          className={bsClassName({
+          className={bsVersion({
             bs5: 'd-none d-sm-block',
             bs3: 'hidden-xs',
           })}
@@ -24,7 +24,7 @@ function Header() {
         </ColWrapper>
         <ColWrapper
           md={8}
-          className={bsClassName({
+          className={bsVersion({
             bs5: 'd-none d-sm-block',
             bs3: 'hidden-xs',
           })}
@@ -36,13 +36,13 @@ function Header() {
       </RowWrapper>
       <div
         className={classnames(
-          bsClassName({ bs5: 'd-none d-sm-block', bs3: 'hidden-xs' }),
+          bsVersion({ bs5: 'd-none d-sm-block', bs3: 'hidden-xs' }),
           'horizontal-divider'
         )}
       />
       <div
         className={classnames(
-          bsClassName({ bs5: 'd-none d-sm-block', bs3: 'hidden-xs' }),
+          bsVersion({ bs5: 'd-none d-sm-block', bs3: 'hidden-xs' }),
           'horizontal-divider'
         )}
       />

@@ -1,16 +1,22 @@
-import { Button } from 'react-bootstrap'
+import ButtonWrapper, {
+  ButtonWrapperProps,
+} from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
-function PrimaryButton({ children, disabled, onClick }: Button.ButtonProps) {
+function PrimaryButton({ children, disabled, onClick }: ButtonWrapperProps) {
   return (
-    <Button
-      bsSize="small"
-      bsStyle={null}
-      className="btn-secondary-info btn-secondary"
+    <ButtonWrapper
+      size="small"
       disabled={disabled}
       onClick={onClick}
+      variant="secondary"
+      bs3Props={{ bsStyle: null }}
+      className={bsVersion({
+        bs3: 'btn-secondary btn-secondary-info',
+      })}
     >
       {children}
-    </Button>
+    </ButtonWrapper>
   )
 }
 

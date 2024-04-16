@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  Alert,
-  Button,
-  ControlLabel,
-  FormControl,
-  FormGroup,
-} from 'react-bootstrap'
+import { Alert, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   getUserFacingMessage,
@@ -16,6 +10,7 @@ import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { PasswordStrengthOptions } from '../../../../../types/password-strength-options'
 import useAsync from '../../../shared/hooks/use-async'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 type PasswordUpdateResult = {
   message?: {
@@ -198,14 +193,17 @@ function PasswordForm() {
           </Alert>
         </FormGroup>
       ) : null}
-      <Button
+      <ButtonWrapper
         form="password-change-form"
         type="submit"
-        bsStyle="primary"
+        variant="primary"
         disabled={isLoading || !isFormValid}
+        bs3Props={{
+          loading: isLoading ? `${t('saving')}…` : t('change'),
+        }}
       >
-        {isLoading ? <>{t('saving')}…</> : t('change')}
-      </Button>
+        {t('change')}
+      </ButtonWrapper>
     </form>
   )
 }

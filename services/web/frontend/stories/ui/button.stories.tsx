@@ -7,6 +7,18 @@ export const NewButton = (args: Args) => {
   return <Button {...args} />
 }
 
+export const ButtonWithLeadingIcon = (args: Args) => {
+  return <Button leadingIcon="add" {...args} />
+}
+
+export const ButtonWithTrailingIcon = (args: Args) => {
+  return <Button trailingIcon="add" {...args} />
+}
+
+export const ButtonWithIcons = (args: Args) => {
+  return <Button trailingIcon="add" leadingIcon="add" {...args} />
+}
+
 const meta: Meta<typeof Button> = {
   title: 'Shared / Components / Bootstrap 5 / Button',
   component: Button,

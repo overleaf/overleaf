@@ -1,24 +1,38 @@
-import Icon from '../../../../../shared/components/icon'
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../../context/user-email-context'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
 import TooltipWrapper from '@/features/ui/components/bootstrap-5/wrappers/tooltip-wrapper'
+import IconButtonWrapper, {
+  IconButtonWrapperProps,
+} from '@/features/ui/components/bootstrap-5/wrappers/icon-button-wrapper'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
-function DeleteButton({ disabled, onClick }: Button.ButtonProps) {
+type DeleteButtonProps = Pick<
+  IconButtonWrapperProps,
+  'disabled' | 'isLoading' | 'onClick'
+>
+
+function DeleteButton({ disabled, isLoading, onClick }: DeleteButtonProps) {
   const { t } = useTranslation()
 
   return (
-    <Button
-      bsSize="small"
-      bsStyle="danger"
+    <IconButtonWrapper
+      variant="danger"
       disabled={disabled}
+      isLoading={isLoading}
+      size="small"
       onClick={onClick}
-    >
-      <Icon type="trash" fw accessibilityLabel={t('remove')} />
-    </Button>
+      accessibilityLabel={t('remove') || ''}
+      icon={
+        bsVersion({
+          bs5: 'delete',
+          bs3: 'trash',
+        }) || 'trash'
+      }
+      bs3Props={{ fw: true }}
+    />
   )
 }
 
@@ -49,7 +63,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   }
 
   if (deleteEmailAsync.isLoading) {
-    return <DeleteButton disabled />
+    return <DeleteButton isLoading />
   }
 
   return (

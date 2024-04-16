@@ -1,10 +1,10 @@
 import React from 'react'
 import {
-  Dropdown as B5Dropdown,
-  DropdownToggle as B5DropdownToggle,
-  DropdownMenu as B5DropdownMenu,
-  DropdownItem as B5DropdownItem,
-  DropdownDivider as B5DropdownDivider,
+  Dropdown as BS5Dropdown,
+  DropdownToggle as BS5DropdownToggle,
+  DropdownMenu as BS5DropdownMenu,
+  DropdownItem as BS5DropdownItem,
+  DropdownDivider as BS5DropdownDivider,
 } from 'react-bootstrap-5'
 import type {
   DropdownProps,
@@ -15,7 +15,7 @@ import type {
 import MaterialIcon from '@/shared/components/material-icon'
 
 export function Dropdown({ ...props }: DropdownProps) {
-  return <B5Dropdown {...props} />
+  return <BS5Dropdown {...props} />
 }
 
 export function DropdownItem({
@@ -29,7 +29,7 @@ export function DropdownItem({
   const trailingIconType = active ? 'check' : trailingIcon
   return (
     <li>
-      <B5DropdownItem
+      <BS5DropdownItem
         active={active}
         className={description ? 'dropdown-item-description-container' : ''}
         role="menuitem"
@@ -51,19 +51,19 @@ export function DropdownItem({
         {description && (
           <span className="dropdown-item-description">{description}</span>
         )}
-      </B5DropdownItem>
+      </BS5DropdownItem>
     </li>
   )
 }
 
 export function DropdownToggle({ ...props }: DropdownToggleProps) {
-  return <B5DropdownToggle {...props} />
+  return <BS5DropdownToggle {...props} />
 }
 
 export function DropdownMenu({ as = 'ul', ...props }: DropdownMenuProps) {
-  return <B5DropdownMenu as={as} role="menubar" {...props} />
+  return <BS5DropdownMenu as={as} role="menubar" {...props} />
 }
 
 export function DropdownDivider() {
-  return <B5DropdownDivider aria-hidden="true" />
+  return <BS5DropdownDivider aria-hidden="true" />
 }

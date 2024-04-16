@@ -1,11 +1,5 @@
 import { useState } from 'react'
-import {
-  Alert,
-  Button,
-  ControlLabel,
-  FormControl,
-  FormGroup,
-} from 'react-bootstrap'
+import { Alert, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import {
   getUserFacingMessage,
@@ -15,6 +9,7 @@ import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import useAsync from '../../../shared/hooks/use-async'
 import { useUserContext } from '../../../shared/context/user-context'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 function AccountInfoSection() {
   const { t } = useTranslation()
@@ -118,14 +113,17 @@ function AccountInfoSection() {
           </FormGroup>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (
-          <Button
-            form="account-info-form"
+          <ButtonWrapper
             type="submit"
-            bsStyle="primary"
-            disabled={isLoading || !isFormValid}
+            variant="primary"
+            form="account-info-form"
+            isLoading={isLoading || !isFormValid}
+            bs3Props={{
+              loading: isLoading ? `${t('saving')}…` : t('update'),
+            }}
           >
-            {isLoading ? <>{t('saving')}…</> : t('update')}
-          </Button>
+            {t('update')}
+          </ButtonWrapper>
         ) : null}
       </form>
     </>
