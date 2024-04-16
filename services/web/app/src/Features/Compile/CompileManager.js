@@ -147,8 +147,6 @@ module.exports = CompileManager = {
             analyticsId: 1,
             betaProgram: 1,
             features: 1,
-            splitTests: 1,
-            signUpDate: 1, // for compile-timeout-20s
           },
           function (err, owner) {
             if (err) {
@@ -168,16 +166,10 @@ module.exports = CompileManager = {
                 const compileGroup =
                   ownerFeatures.compileGroup ||
                   Settings.defaultFeatures.compileGroup
-                const compileTimeout =
-                  ownerFeatures.compileTimeout ||
-                  Settings.defaultFeatures.compileTimeout
-
                 const limits = {
                   timeout:
-                    // temporary override until users' compileTimeout is migrated
-                    compileGroup === 'standard' && compileTimeout <= 60
-                      ? 20
-                      : compileTimeout,
+                    ownerFeatures.compileTimeout ||
+                    Settings.defaultFeatures.compileTimeout,
                   compileGroup,
                   compileBackendClass:
                     compileGroup === 'standard' ? 'n2d' : 'c2d',

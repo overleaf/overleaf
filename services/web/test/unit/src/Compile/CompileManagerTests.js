@@ -42,13 +42,6 @@ describe('CompileManager', function () {
             get: sinon.stub().yields(null, 'abc'),
           },
         }),
-        '../SplitTests/SplitTestHandler': {
-          getAssignmentForMongoUser: (this.getAssignmentForMongoUser = sinon
-            .stub()
-            .yields(null, {
-              variant: 'default',
-            })),
-        },
       },
     })
     this.project_id = 'mock-project-id-123'
@@ -224,8 +217,6 @@ describe('CompileManager', function () {
           analyticsId: 1,
           betaProgram: 1,
           features: 1,
-          splitTests: 1,
-          signUpDate: 1,
         })
         .should.equal(true)
     })
@@ -239,171 +230,6 @@ describe('CompileManager', function () {
           ownerAnalyticsId: 'abc',
         })
         .should.equal(true)
-    })
-  })
-
-  describe('getProjectCompileLimits with reduced compile timeout', function () {
-    beforeEach(function () {
-      this.getAssignmentForMongoUser.callsFake((user, test, cb) => {
-        if (test === 'compile-backend-class-n2d') {
-          cb(null, { variant: 'n2d' })
-        }
-        if (test === 'compile-timeout-20s') {
-          cb(null, { variant: '20s' })
-        }
-      })
-      this.features = {
-        compileTimeout: (this.timeout = 60),
-        compileGroup: (this.group = 'standard'),
-      }
-      this.ProjectGetter.getProject = sinon
-        .stub()
-        .callsArgWith(
-          2,
-          null,
-          (this.project = { owner_ref: (this.owner_id = 'owner-id-123') })
-        )
-      this.UserGetter.getUser = sinon
-        .stub()
-        .callsArgWith(
-          2,
-          null,
-          (this.user = { features: this.features, analyticsId: 'abc' })
-        )
-    })
-
-    describe('user is in the n2d group and compile-timeout-20s split test variant', function () {
-      describe('user has a timeout of more than 60s', function () {
-        beforeEach(function () {
-          this.features.compileTimeout = 120
-        })
-        it('should keep the users compile timeout', function () {
-          this.CompileManager.getProjectCompileLimits(
-            this.project_id,
-            this.callback
-          )
-          this.callback
-            .calledWith(null, sinon.match({ timeout: 120 }))
-            .should.equal(true)
-        })
-      })
-      describe('user registered before the cut off date', function () {
-        beforeEach(function () {
-          this.features.compileTimeout = 60
-          const signUpDate = new Date(
-            this.CompileManager.NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
-          )
-          signUpDate.setDate(signUpDate.getDate() - 1)
-          this.user.signUpDate = signUpDate
-        })
-        it('should keep the users compile timeout', function () {
-          this.CompileManager.getProjectCompileLimits(
-            this.project_id,
-            this.callback
-          )
-          this.callback
-            .calledWith(null, sinon.match({ timeout: 20 }))
-            .should.equal(true)
-        })
-        describe('user is in the compile-timeout-20s-existing-users treatment', function () {
-          beforeEach(function () {
-            this.getAssignmentForMongoUser.callsFake((user, test, cb) => {
-              if (test === 'compile-backend-class-n2d') {
-                cb(null, { variant: 'n2d' })
-              }
-              if (test === 'compile-timeout-20s') {
-                cb(null, { variant: '20s' })
-              }
-              if (test === 'compile-timeout-20s-existing-users') {
-                cb(null, { variant: '20s' })
-              }
-            })
-          })
-
-          it('should reduce compile timeout to 20s', function () {
-            this.CompileManager.getProjectCompileLimits(
-              this.project_id,
-              this.callback
-            )
-            this.callback
-              .calledWith(null, sinon.match({ timeout: 20 }))
-              .should.equal(true)
-          })
-        })
-      })
-      describe('user registered after the cut off date', function () {
-        beforeEach(function () {
-          this.timeout = 60
-          const signUpDate = new Date(
-            this.CompileManager.NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
-          )
-          signUpDate.setDate(signUpDate.getDate() + 1)
-          this.user.signUpDate = signUpDate
-        })
-        it('should reduce compile timeout to 20s', function () {
-          this.CompileManager.getProjectCompileLimits(
-            this.project_id,
-            this.callback
-          )
-          this.callback
-            .calledWith(null, sinon.match({ timeout: 20 }))
-            .should.equal(true)
-        })
-      })
-
-      describe('user was in the default n2d variant at the baseline test version', function () {
-        beforeEach(function () {
-          this.UserGetter.getUser = sinon.stub().callsArgWith(
-            2,
-            null,
-            (this.user = {
-              features: this.features,
-              analyticsId: 'abc',
-              splitTests: {
-                'compile-backend-class-n2d': [
-                  {
-                    variantName: 'default',
-                    versionNumber: 8,
-                    phase: 'release',
-                  },
-                ],
-              },
-            })
-          )
-        })
-
-        describe('user signed up after the original rollout but before the second phase rollout', function () {
-          beforeEach(function () {
-            const signUpDate = new Date(
-              this.CompileManager.NEW_COMPILE_TIMEOUT_ENFORCED_CUTOFF
-            )
-            signUpDate.setDate(signUpDate.getDate() + 1)
-            this.user.signUpDate = signUpDate
-          })
-
-          it('should keep the users compile timeout', function () {
-            this.CompileManager.getProjectCompileLimits(
-              this.project_id,
-              this.callback
-            )
-            this.callback
-              .calledWith(null, sinon.match({ timeout: 20 }))
-              .should.equal(true)
-          })
-        })
-
-        describe('user signed up after the second phase rollout', function () {
-          it('should reduce compile timeout to 20s', function () {
-            this.CompileManager.getProjectCompileLimits(
-              this.project_id,
-              this.callback
-            )
-            this.callback
-              .calledWith(null, sinon.match({ timeout: 20 }))
-              .should.equal(true)
-          })
-        })
-      })
     })
   })
 
@@ -421,110 +247,19 @@ describe('CompileManager', function () {
         .yields(null, { features: this.features, analyticsId: 'abc' })
     })
 
-    describe('with standard compile', function () {
-      beforeEach(function () {
-        this.features.compileGroup = 'standard'
-      })
-
-      describe('default', function () {
-        beforeEach(function () {
-          this.getAssignmentForMongoUser.yields(null, {
-            variant: 'default',
-          })
-        })
-        it('should return the n2d class and disable the ui', function (done) {
-          this.CompileManager.getProjectCompileLimits(
-            this.project_id,
-            (err, { compileBackendClass }) => {
-              if (err) return done(err)
-              expect(compileBackendClass).to.equal('n2d')
-              done()
-            }
-          )
-        })
-      })
-
-      describe('n2d variant', function () {
-        beforeEach(function () {
-          this.getAssignmentForMongoUser.yields(null, {
-            variant: 'n2d',
-          })
-        })
-        it('should return the n2d class and disable the ui', function (done) {
-          this.CompileManager.getProjectCompileLimits(
-            this.project_id,
-            (err, { compileBackendClass }) => {
-              if (err) return done(err)
-              expect(compileBackendClass).to.equal('n2d')
-              done()
-            }
-          )
-        })
-      })
-    })
-
     describe('with priority compile', function () {
       beforeEach(function () {
         this.features.compileGroup = 'priority'
       })
-      describe('split test not active', function () {
-        beforeEach(function () {
-          this.getAssignmentForMongoUser.yields(null, {
-            analytics: { segmentation: {} },
-            variant: 'default',
-          })
-        })
-
-        it('should return the default class and disable ui', function (done) {
-          this.CompileManager.getProjectCompileLimits(
-            this.project_id,
-            (err, { compileBackendClass }) => {
-              if (err) return done(err)
-              expect(compileBackendClass).to.equal('c2d')
-              done()
-            }
-          )
-        })
-      })
-
-      describe('split test active', function () {
-        describe('default variant', function () {
-          beforeEach(function () {
-            this.getAssignmentForMongoUser.yields(null, {
-              analytics: { segmentation: { splitTest: 'foo' } },
-              variant: 'default',
-            })
-          })
-          it('should return the default class and enable ui', function (done) {
-            this.CompileManager.getProjectCompileLimits(
-              this.project_id,
-              (err, { compileBackendClass }) => {
-                if (err) return done(err)
-                expect(compileBackendClass).to.equal('c2d')
-                done()
-              }
-            )
-          })
-        })
-
-        describe('c2d variant', function () {
-          beforeEach(function () {
-            this.getAssignmentForMongoUser.yields(null, {
-              analytics: { segmentation: { splitTest: 'foo' } },
-              variant: 'c2d',
-            })
-          })
-          it('should return the c2d class and enable ui', function (done) {
-            this.CompileManager.getProjectCompileLimits(
-              this.project_id,
-              (err, { compileBackendClass }) => {
-                if (err) return done(err)
-                expect(compileBackendClass).to.equal('c2d')
-                done()
-              }
-            )
-          })
-        })
+      it('should return the default class', function (done) {
+        this.CompileManager.getProjectCompileLimits(
+          this.project_id,
+          (err, { compileBackendClass }) => {
+            if (err) return done(err)
+            expect(compileBackendClass).to.equal('c2d')
+            done()
+          }
+        )
       })
     })
   })
