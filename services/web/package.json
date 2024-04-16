@@ -183,7 +183,7 @@
     "@codemirror/lint": "^6.5.0",
     "@codemirror/search": "github:overleaf/codemirror-search#29f7a871969ad64b89341bacbe5d46dda02eee12",
     "@codemirror/state": "^6.4.1",
-    "@codemirror/view": "^6.24.1",
+    "@codemirror/view": "^6.26.3",
     "@juggle/resize-observer": "^3.3.1",
     "@lezer/common": "^1.1.0",
     "@lezer/generator": "^1.5.1",
