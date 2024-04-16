@@ -1,4 +1,5 @@
 // @ts-check
+const _ = require('lodash')
 
 /**
  * @typedef {import('./types').CommentOp} CommentOp
@@ -39,6 +40,22 @@ function isComment(op) {
 }
 
 /**
+ * Get the length of a document from its lines
+ *
+ * @param {string[]} lines
+ * @returns {number}
+ */
+function getDocLength(lines) {
+  let docLength = _.reduce(lines, (chars, line) => chars + line.length, 0)
+  // Add newline characters. Lines are joined by newlines, but the last line
+  // doesn't include a newline. We must make a special case for an empty list
+  // so that it doesn't report a doc length of -1.
+  docLength += Math.max(lines.length - 1, 0)
+
+  return docLength
+}
+
+/**
  * Adds given tracked deletes to the given content.
  *
  * The history system includes tracked deletes in the document content.
@@ -66,4 +83,10 @@ function addTrackedDeletesToContent(content, trackedChanges) {
   return result
 }
 
-module.exports = { isInsert, isDelete, isComment, addTrackedDeletesToContent }
+module.exports = {
+  isInsert,
+  isDelete,
+  isComment,
+  addTrackedDeletesToContent,
+  getDocLength,
+}

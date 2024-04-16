@@ -568,6 +568,118 @@ describe('UpdateTranslator', function () {
         ])
       })
 
+      it('should translate retains without tracking data', function () {
+        const updates = [
+          {
+            update: {
+              doc: this.doc_id,
+              op: [
+                {
+                  p: 3,
+                  r: 'lo',
+                },
+              ],
+              v: this.version,
+              meta: {
+                user_id: this.user_id,
+                ts: new Date(this.timestamp).getTime(),
+                pathname: '/main.tex',
+                doc_length: 20,
+              },
+            },
+          },
+        ]
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [20],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              [this.doc_id]: {
+                pathname: 'main.tex',
+                v: 0,
+              },
+            },
+          },
+        ])
+      })
+
+      it('can translate retains with tracking data', function () {
+        const updates = [
+          {
+            update: {
+              doc: this.doc_id,
+              op: [
+                {
+                  p: 3,
+                  r: 'lo',
+                  tracking: {
+                    type: 'none',
+                    ts: this.timestamp,
+                    userId: this.user_id,
+                  },
+                },
+              ],
+              v: this.version,
+              meta: {
+                user_id: this.user_id,
+                ts: new Date(this.timestamp).getTime(),
+                pathname: '/main.tex',
+                doc_length: 20,
+              },
+            },
+          },
+        ]
+
+        const changes = this.UpdateTranslator.convertToChanges(
+          this.project_id,
+          updates
+        ).map(change => change.toRaw())
+
+        expect(changes).to.deep.equal([
+          {
+            authors: [],
+            operations: [
+              {
+                pathname: 'main.tex',
+                textOperation: [
+                  3,
+                  {
+                    r: 2,
+                    tracking: {
+                      type: 'none',
+                      ts: this.timestamp,
+                      userId: this.user_id,
+                    },
+                  },
+                  15,
+                ],
+              },
+            ],
+            v2Authors: [this.user_id],
+            timestamp: this.timestamp,
+            v2DocVersions: {
+              '59bfd450e3028c4d40a1e9ab': {
+                pathname: 'main.tex',
+                v: 0,
+              },
+            },
+          },
+        ])
+      })
+
       it('can translate insertions at the start and end (with zero retained)', function () {
         const updates = [
           {

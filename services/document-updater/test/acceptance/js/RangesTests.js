@@ -6,6 +6,9 @@ const { db, ObjectId } = require('../../../app/js/mongodb')
 const MockWebApi = require('./helpers/MockWebApi')
 const DocUpdaterClient = require('./helpers/DocUpdaterClient')
 const DocUpdaterApp = require('./helpers/DocUpdaterApp')
+const RangesManager = require('../../../app/js/RangesManager')
+
+const sandbox = sinon.createSandbox()
 
 describe('Ranges', function () {
   before(function (done) {
@@ -309,7 +312,7 @@ describe('Ranges', function () {
 
   describe('accepting a change', function () {
     beforeEach(function (done) {
-      sinon.spy(MockWebApi, 'setDocument')
+      sandbox.spy(MockWebApi, 'setDocument')
       this.project_id = DocUpdaterClient.randomId()
       this.user_id = DocUpdaterClient.randomId()
       this.id_seed = '587357bd35e64f6157'
@@ -361,7 +364,7 @@ describe('Ranges', function () {
       })
     })
     afterEach(function () {
-      MockWebApi.setDocument.restore()
+      sandbox.restore()
     })
 
     it('should remove the change after accepting', function (done) {
@@ -421,6 +424,219 @@ describe('Ranges', function () {
           }
         )
       })
+    })
+  })
+
+  describe('accepting multiple changes', function () {
+    beforeEach(function (done) {
+      this.getHistoryUpdatesSpy = sandbox.spy(
+        RangesManager,
+        'getHistoryUpdatesForAcceptedChanges'
+      )
+
+      this.project_id = DocUpdaterClient.randomId()
+      this.user_id = DocUpdaterClient.randomId()
+      this.doc = {
+        id: DocUpdaterClient.randomId(),
+        lines: ['aaa', 'bbb', 'ccc', 'ddd', 'eee'],
+      }
+
+      DocUpdaterClient.enableHistoryRangesSupport(this.doc.id, (error, res) => {
+        if (error) {
+          throw error
+        }
+        MockWebApi.insertDoc(this.project_id, this.doc.id, {
+          lines: this.doc.lines,
+          version: 0,
+        })
+
+        DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+          if (error != null) {
+            throw error
+          }
+
+          this.id_seed_1 = 'tc_1'
+          this.id_seed_2 = 'tc_2'
+          this.id_seed_3 = 'tc_3'
+
+          this.updates = [
+            {
+              doc: this.doc.id,
+              op: [{ d: 'bbb', p: 4 }],
+              v: 0,
+              meta: {
+                user_id: this.user_id,
+                tc: this.id_seed_1,
+              },
+            },
+            {
+              doc: this.doc.id,
+              op: [{ d: 'ccc', p: 5 }],
+              v: 1,
+              meta: {
+                user_id: this.user_id,
+                tc: this.id_seed_2,
+              },
+            },
+            {
+              doc: this.doc.id,
+              op: [{ d: 'ddd', p: 6 }],
+              v: 2,
+              meta: {
+                user_id: this.user_id,
+                tc: this.id_seed_3,
+              },
+            },
+          ]
+
+          DocUpdaterClient.sendUpdates(
+            this.project_id,
+            this.doc.id,
+            this.updates,
+            error => {
+              if (error != null) {
+                throw error
+              }
+              setTimeout(() => {
+                DocUpdaterClient.getDoc(
+                  this.project_id,
+                  this.doc.id,
+                  (error, res, data) => {
+                    if (error != null) {
+                      throw error
+                    }
+                    const { ranges } = data
+                    const changeOps = ranges.changes
+                      .map(change => change.op)
+                      .flat()
+                    changeOps.should.deep.equal([
+                      { d: 'bbb', p: 4 },
+                      { d: 'ccc', p: 5 },
+                      { d: 'ddd', p: 6 },
+                    ])
+                    done()
+                  }
+                )
+              }, 200)
+            }
+          )
+        })
+      })
+    })
+    afterEach(function () {
+      sandbox.restore()
+    })
+
+    it('accepting changes in order', function (done) {
+      DocUpdaterClient.acceptChanges(
+        this.project_id,
+        this.doc.id,
+        [
+          this.id_seed_1 + '000001',
+          this.id_seed_2 + '000001',
+          this.id_seed_3 + '000001',
+        ],
+        error => {
+          if (error != null) {
+            throw error
+          }
+
+          const historyUpdates = this.getHistoryUpdatesSpy.returnValues[0]
+          expect(historyUpdates[0]).to.deep.equal({
+            doc: this.doc.id,
+            meta: {
+              pathname: '/a/b/c.tex',
+              doc_length: 10,
+              history_doc_length: 19,
+              ts: historyUpdates[0].meta.ts,
+              user_id: this.user_id,
+            },
+            op: [{ p: 4, d: 'bbb' }],
+          })
+
+          expect(historyUpdates[1]).to.deep.equal({
+            doc: this.doc.id,
+            meta: {
+              pathname: '/a/b/c.tex',
+              doc_length: 10,
+              history_doc_length: 16,
+              ts: historyUpdates[1].meta.ts,
+              user_id: this.user_id,
+            },
+            op: [{ p: 5, d: 'ccc' }],
+          })
+
+          expect(historyUpdates[2]).to.deep.equal({
+            doc: this.doc.id,
+            meta: {
+              pathname: '/a/b/c.tex',
+              doc_length: 10,
+              history_doc_length: 13,
+              ts: historyUpdates[2].meta.ts,
+              user_id: this.user_id,
+            },
+            op: [{ p: 6, d: 'ddd' }],
+          })
+
+          done()
+        }
+      )
+    })
+
+    it('accepting changes in reverse order', function (done) {
+      DocUpdaterClient.acceptChanges(
+        this.project_id,
+        this.doc.id,
+        [
+          this.id_seed_3 + '000001',
+          this.id_seed_2 + '000001',
+          this.id_seed_1 + '000001',
+        ],
+        error => {
+          if (error != null) {
+            throw error
+          }
+
+          const historyUpdates = this.getHistoryUpdatesSpy.returnValues[0]
+          expect(historyUpdates[0]).to.deep.equal({
+            doc: this.doc.id,
+            meta: {
+              pathname: '/a/b/c.tex',
+              doc_length: 10,
+              history_doc_length: 19,
+              ts: historyUpdates[0].meta.ts,
+              user_id: this.user_id,
+            },
+            op: [{ p: 4, d: 'bbb' }],
+          })
+
+          expect(historyUpdates[1]).to.deep.equal({
+            doc: this.doc.id,
+            meta: {
+              pathname: '/a/b/c.tex',
+              doc_length: 10,
+              history_doc_length: 16,
+              ts: historyUpdates[1].meta.ts,
+              user_id: this.user_id,
+            },
+            op: [{ p: 5, d: 'ccc' }],
+          })
+
+          expect(historyUpdates[2]).to.deep.equal({
+            doc: this.doc.id,
+            meta: {
+              pathname: '/a/b/c.tex',
+              doc_length: 10,
+              history_doc_length: 13,
+              ts: historyUpdates[2].meta.ts,
+              user_id: this.user_id,
+            },
+            op: [{ p: 6, d: 'ddd' }],
+          })
+
+          done()
+        }
+      )
     })
   })
 

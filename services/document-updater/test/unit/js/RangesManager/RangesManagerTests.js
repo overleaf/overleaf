@@ -637,6 +637,265 @@ describe('RangesManager', function () {
       })
     })
   })
+
+  describe('getHistoryUpdatesForAcceptedChanges', function () {
+    beforeEach(function () {
+      this.RangesManager = SandboxedModule.require(MODULE_PATH, {
+        requires: {
+          '@overleaf/ranges-tracker': (this.RangesTracker =
+            SandboxedModule.require('@overleaf/ranges-tracker')),
+          '@overleaf/metrics': {},
+        },
+      })
+    })
+
+    it('should create history updates for accepted track inserts', function () {
+      // 'one two three four five' <-- text before changes
+      const ranges = {
+        comments: [],
+        changes: makeRanges([
+          { i: 'lorem', p: 0 },
+          { i: 'ipsum', p: 15 },
+        ]),
+      }
+      const lines = ['loremone two thipsumree four five']
+
+      const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
+        docId: this.doc_id,
+        acceptedChangeIds: ranges.changes.map(change => change.id),
+        changes: ranges.changes,
+        pathname: '',
+        projectHistoryId: '',
+        lines,
+      })
+
+      expect(result).to.deep.equal([
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 33,
+            pathname: '',
+            ts: ranges.changes[0].metadata.ts,
+          },
+          op: [
+            {
+              r: 'lorem',
+              p: 0,
+              tracking: {
+                type: 'none',
+                userId: this.user_id,
+                ts: ranges.changes[0].metadata.ts,
+              },
+            },
+          ],
+        },
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 33,
+            pathname: '',
+            ts: ranges.changes[1].metadata.ts,
+          },
+          op: [
+            {
+              r: 'ipsum',
+              p: 15,
+              tracking: {
+                type: 'none',
+                userId: this.user_id,
+                ts: ranges.changes[1].metadata.ts,
+              },
+            },
+          ],
+        },
+      ])
+    })
+
+    it('should create history updates for accepted track deletes', function () {
+      // 'one two three four five' <-- text before changes
+      const ranges = {
+        comments: [],
+        changes: makeRanges([
+          { d: 'two', p: 4 },
+          { d: 'three', p: 5 },
+        ]),
+      }
+      const lines = ['one   four five']
+
+      const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
+        docId: this.doc_id,
+        acceptedChangeIds: ranges.changes.map(change => change.id),
+        changes: ranges.changes,
+        pathname: '',
+        projectHistoryId: '',
+        lines,
+      })
+
+      expect(result).to.deep.equal([
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 15,
+            history_doc_length: 23,
+            pathname: '',
+            ts: ranges.changes[0].metadata.ts,
+          },
+          op: [
+            {
+              d: 'two',
+              p: 4,
+            },
+          ],
+        },
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 15,
+            history_doc_length: 20,
+            pathname: '',
+            ts: ranges.changes[1].metadata.ts,
+          },
+          op: [
+            {
+              d: 'three',
+              p: 5,
+            },
+          ],
+        },
+      ])
+    })
+
+    it('should create history updates with unaccepted deletes', function () {
+      // 'one two three four five' <-- text before changes
+      const ranges = {
+        comments: [],
+        changes: makeRanges([
+          { d: 'two', p: 4 },
+          { d: 'three', p: 5 },
+        ]),
+      }
+      const lines = ['one   four five']
+
+      const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
+        docId: this.doc_id,
+        acceptedChangeIds: [ranges.changes[1].id],
+        changes: ranges.changes,
+        pathname: '',
+        projectHistoryId: '',
+        lines,
+      })
+
+      expect(result).to.deep.equal([
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 15,
+            history_doc_length: 23,
+            pathname: '',
+            ts: ranges.changes[1].metadata.ts,
+          },
+          op: [
+            {
+              d: 'three',
+              p: 5,
+              hpos: 8,
+            },
+          ],
+        },
+      ])
+    })
+
+    it('should create history updates with mixed track changes', function () {
+      // 'one two three four five' <-- text before changes
+      const ranges = {
+        comments: [],
+        changes: makeRanges([
+          { d: 'two', p: 4 },
+          { d: 'three', p: 5 },
+          { i: 'xxx ', p: 6 },
+          { d: 'five', p: 15 },
+        ]),
+      }
+      const lines = ['one   xxx four ']
+
+      const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
+        docId: this.doc_id,
+        acceptedChangeIds: [
+          ranges.changes[0].id,
+          // ranges.changes[1].id - second delete is not accepted
+          ranges.changes[2].id,
+          ranges.changes[3].id,
+        ],
+        changes: ranges.changes,
+        pathname: '',
+        projectHistoryId: '',
+        lines,
+      })
+
+      expect(result).to.deep.equal([
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 15,
+            history_doc_length: 27,
+            pathname: '',
+            ts: ranges.changes[0].metadata.ts,
+          },
+          op: [
+            {
+              d: 'two',
+              p: 4,
+            },
+          ],
+        },
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 15,
+            history_doc_length: 24,
+            pathname: '',
+            ts: ranges.changes[1].metadata.ts,
+          },
+          op: [
+            {
+              r: 'xxx ',
+              p: 6,
+              hpos: 11,
+              tracking: {
+                type: 'none',
+                userId: this.user_id,
+                ts: ranges.changes[1].metadata.ts,
+              },
+            },
+          ],
+        },
+        {
+          doc: this.doc_id,
+          meta: {
+            user_id: TEST_USER_ID,
+            doc_length: 15,
+            history_doc_length: 24,
+            pathname: '',
+            ts: ranges.changes[2].metadata.ts,
+          },
+          op: [
+            {
+              d: 'five',
+              p: 15,
+              hpos: 20,
+            },
+          ],
+        },
+      ])
+    })
+  })
 })
 
 function makeRanges(ops) {
@@ -646,7 +905,7 @@ function makeRanges(ops) {
     changes.push({
       id: id.toString(),
       op,
-      metadata: { user_id: TEST_USER_ID },
+      metadata: { user_id: TEST_USER_ID, ts: new Date() },
     })
     id += 1
   }

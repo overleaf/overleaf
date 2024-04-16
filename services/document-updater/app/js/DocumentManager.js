@@ -237,10 +237,14 @@ const DocumentManager = {
       changeIds = []
     }
 
-    const { lines, version, ranges } = await DocumentManager.getDoc(
-      projectId,
-      docId
-    )
+    const {
+      lines,
+      version,
+      ranges,
+      pathname,
+      projectHistoryId,
+      historyRangesSupport,
+    } = await DocumentManager.getDoc(projectId, docId)
     if (lines == null || version == null) {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
@@ -256,6 +260,26 @@ const DocumentManager = {
       newRanges,
       {}
     )
+
+    if (historyRangesSupport) {
+      const historyUpdates = RangesManager.getHistoryUpdatesForAcceptedChanges({
+        docId,
+        acceptedChangeIds: changeIds,
+        changes: ranges.changes || [],
+        lines,
+        pathname,
+        projectHistoryId,
+      })
+
+      if (historyUpdates.length === 0) {
+        return
+      }
+
+      await ProjectHistoryRedisManager.promises.queueOps(
+        projectId,
+        ...historyUpdates.map(op => JSON.stringify(op))
+      )
+    }
   },
 
   async updateCommentState(projectId, docId, commentId, userId, resolved) {

@@ -119,6 +119,10 @@ module.exports = DocUpdaterClient = {
     )
   },
 
+  enableHistoryRangesSupport(docId, cb) {
+    rclient.sadd(keys.historyRangesSupport(), docId, cb)
+  },
+
   preloadDoc(projectId, docId, callback) {
     DocUpdaterClient.getDoc(projectId, docId, callback)
   },
@@ -189,6 +193,16 @@ module.exports = DocUpdaterClient = {
   acceptChange(projectId, docId, changeId, callback) {
     request.post(
       `http://localhost:3003/project/${projectId}/doc/${docId}/change/${changeId}/accept`,
+      callback
+    )
+  },
+
+  acceptChanges(projectId, docId, changeIds, callback) {
+    request.post(
+      {
+        url: `http://localhost:3003/project/${projectId}/doc/${docId}/change/accept`,
+        json: { change_ids: changeIds },
+      },
       callback
     )
   },

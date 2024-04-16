@@ -62,7 +62,14 @@ export type RenameUpdate = ProjectUpdateBase & {
   new_pathname: string
 }
 
-export type Op = InsertOp | DeleteOp | CommentOp
+export type Op = RetainOp | InsertOp | DeleteOp | CommentOp
+
+export type RetainOp = {
+  r: string
+  p: number
+  hpos?: number
+  tracking?: TrackingProps
+}
 
 export type InsertOp = {
   i: string

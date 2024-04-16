@@ -7,7 +7,6 @@ const ProjectHistoryRedisManager = require('./ProjectHistoryRedisManager')
 const RealTimeRedisManager = require('./RealTimeRedisManager')
 const ShareJsUpdateManager = require('./ShareJsUpdateManager')
 const HistoryManager = require('./HistoryManager')
-const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const Errors = require('./Errors')
@@ -15,7 +14,7 @@ const DocumentManager = require('./DocumentManager')
 const RangesManager = require('./RangesManager')
 const SnapshotManager = require('./SnapshotManager')
 const Profiler = require('./Profiler')
-const { isInsert, isDelete } = require('./Utils')
+const { isInsert, isDelete, getDocLength } = require('./Utils')
 
 /**
  * @typedef {import("./types").DeleteOp} DeleteOp
@@ -308,11 +307,7 @@ const UpdateManager = {
     ranges,
     historyRangesSupport
   ) {
-    let docLength = _.reduce(lines, (chars, line) => chars + line.length, 0)
-    // Add newline characters. Lines are joined by newlines, but the last line
-    // doesn't include a newline. We must make a special case for an empty list
-    // so that it doesn't report a doc length of -1.
-    docLength += Math.max(lines.length - 1, 0)
+    let docLength = getDocLength(lines)
     let historyDocLength = docLength
     for (const change of ranges.changes ?? []) {
       if ('d' in change.op) {

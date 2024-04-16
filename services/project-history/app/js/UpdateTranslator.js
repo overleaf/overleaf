@@ -12,6 +12,7 @@ import * as OperationsCompressor from './OperationsCompressor.js'
  * @typedef {import('./types').DeleteOp} DeleteCommentUpdate
  * @typedef {import('./types').DeleteOp} DeleteOp
  * @typedef {import('./types').InsertOp} InsertOp
+ * @typedef {import('./types').RetainOp} RetainOp
  * @typedef {import('./types').Op} Op
  * @typedef {import('./types').RawScanOp} RawScanOp
  * @typedef {import('./types').RenameUpdate} RenameUpdate
@@ -292,7 +293,7 @@ class OperationsBuilder {
       return
     }
 
-    if (!isInsert(op) && !isDelete(op)) {
+    if (!isInsert(op) && !isDelete(op) && !isRetain(op)) {
       throw new Errors.UnexpectedOpTypeError('unexpected op type', { op })
     }
 
@@ -327,6 +328,14 @@ class OperationsBuilder {
           opts.commentIds = op.commentIds
         }
         this.insert(op.i, opts)
+      }
+    }
+
+    if (isRetain(op)) {
+      if (op.tracking) {
+        this.retain(op.r.length, { tracking: op.tracking })
+      } else {
+        this.retain(op.r.length)
       }
     }
 
@@ -463,6 +472,14 @@ class OperationsBuilder {
  */
 function isInsert(op) {
   return 'i' in op && op.i != null
+}
+
+/**
+ * @param {Op} op
+ * @returns {op is RetainOp}
+ */
+function isRetain(op) {
+  return 'r' in op && op.r != null
 }
 
 /**

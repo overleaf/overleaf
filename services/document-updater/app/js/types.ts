@@ -1,4 +1,7 @@
+import { TrackingPropsRawData } from 'overleaf-editor-core/types/lib/types'
+
 export type Update = {
+  doc: string
   op: Op[]
   v: number
   meta?: {
@@ -8,12 +11,17 @@ export type Update = {
   projectHistoryId?: string
 }
 
-export type Op = InsertOp | DeleteOp | CommentOp
+export type Op = InsertOp | DeleteOp | CommentOp | RetainOp
 
 export type InsertOp = {
   i: string
   p: number
   u?: boolean
+}
+
+export type RetainOp = {
+  r: string
+  p: number
 }
 
 export type DeleteOp = {
@@ -52,12 +60,17 @@ export type TrackedChange = {
   }
 }
 
-export type HistoryOp = HistoryInsertOp | HistoryDeleteOp | HistoryCommentOp
+export type HistoryOp = HistoryInsertOp | HistoryDeleteOp | HistoryCommentOp | HistoryRetainOp
 
 export type HistoryInsertOp = InsertOp & {
   commentIds?: string[]
   hpos?: number
   trackedDeleteRejection?: boolean
+}
+
+export type HistoryRetainOp = RetainOp & {
+  hpos?: number
+  tracking?: TrackingPropsRawData
 }
 
 export type HistoryDeleteOp = DeleteOp & {
@@ -78,7 +91,8 @@ export type HistoryCommentOp = CommentOp & {
 
 export type HistoryUpdate = {
   op: HistoryOp[]
-  v: number
+  doc: string
+  v?: number
   meta?: {
     pathname?: string
     doc_length?: number

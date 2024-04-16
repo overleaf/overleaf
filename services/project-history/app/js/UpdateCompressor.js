@@ -71,6 +71,8 @@ function adjustLengthByOp(length, op, opts = {}) {
     } else {
       return length - op.d.length
     }
+  } else if ('r' in op && op.r != null) {
+    return length
   } else if ('c' in op && op.c != null) {
     return length
   } else {

@@ -97,6 +97,42 @@ describe('UpdateCompressor', function () {
       ])
     })
 
+    it('should not ignore retain ops with tracking data', function () {
+      expect(
+        this.UpdateCompressor.convertToSingleOpUpdates([
+          {
+            op: [
+              (this.op1 = { p: 0, i: 'Foo' }),
+              (this.op2 = {
+                p: 9,
+                r: 'baz',
+                tracking: { type: 'none', ts: this.ts1, userId: this.user_id },
+              }),
+              (this.op3 = { p: 6, i: 'bar' }),
+            ],
+            meta: { ts: this.ts1, user_id: this.user_id, doc_length: 10 },
+            v: 42,
+          },
+        ])
+      ).to.deep.equal([
+        {
+          op: this.op1,
+          meta: { ts: this.ts1, user_id: this.user_id, doc_length: 10 },
+          v: 42,
+        },
+        {
+          op: this.op2,
+          meta: { ts: this.ts1, user_id: this.user_id, doc_length: 13 },
+          v: 42,
+        },
+        {
+          op: this.op3,
+          meta: { ts: this.ts1, user_id: this.user_id, doc_length: 13 },
+          v: 42,
+        },
+      ])
+    })
+
     it('should update doc_length when splitting after an insert', function () {
       expect(
         this.UpdateCompressor.convertToSingleOpUpdates([

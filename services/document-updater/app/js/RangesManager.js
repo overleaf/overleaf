@@ -5,7 +5,7 @@ const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const Metrics = require('./Metrics')
 const _ = require('lodash')
-const { isInsert, isDelete, isComment } = require('./Utils')
+const { isInsert, isDelete, isComment, getDocLength } = require('./Utils')
 
 /**
  * @typedef {import('./types').Comment} Comment
@@ -15,6 +15,7 @@ const { isInsert, isDelete, isComment } = require('./Utils')
  * @typedef {import('./types').HistoryDeleteOp} HistoryDeleteOp
  * @typedef {import('./types').HistoryDeleteTrackedChange} HistoryDeleteTrackedChange
  * @typedef {import('./types').HistoryInsertOp} HistoryInsertOp
+ * @typedef {import('./types').HistoryRetainOp} HistoryRetainOp
  * @typedef {import('./types').HistoryOp} HistoryOp
  * @typedef {import('./types').HistoryUpdate} HistoryUpdate
  * @typedef {import('./types').InsertOp} InsertOp
@@ -136,6 +137,118 @@ const RangesManager = {
     rangesTracker.removeCommentId(commentId)
     const newRanges = RangesManager._getRanges(rangesTracker)
     return newRanges
+  },
+
+  /**
+   *
+   * @param {object} args
+   * @param {string} args.docId
+   * @param {string[]} args.acceptedChangeIds
+   * @param {TrackedChange[]} args.changes
+   * @param {string} args.pathname
+   * @param {string} args.projectHistoryId
+   * @param {string[]} args.lines
+   */
+  getHistoryUpdatesForAcceptedChanges({
+    docId,
+    acceptedChangeIds,
+    changes,
+    pathname,
+    projectHistoryId,
+    lines,
+  }) {
+    /** @type {(change: TrackedChange) => boolean} */
+    const isAccepted = change => acceptedChangeIds.includes(change.id)
+
+    const historyOps = []
+
+    // Keep ops in order of offset, with deletes before inserts
+    const sortedChanges = changes.slice().sort(function (c1, c2) {
+      const result = c1.op.p - c2.op.p
+      if (result !== 0) {
+        return result
+      } else if (isInsert(c1.op) && isDelete(c2.op)) {
+        return 1
+      } else if (isDelete(c1.op) && isInsert(c2.op)) {
+        return -1
+      } else {
+        return 0
+      }
+    })
+
+    const docLength = getDocLength(lines)
+    let historyDocLength = docLength
+    for (const change of sortedChanges) {
+      if (isDelete(change.op)) {
+        historyDocLength += change.op.d.length
+      }
+    }
+
+    let unacceptedDeletes = 0
+    for (const change of sortedChanges) {
+      /** @type {HistoryOp | undefined} */
+      let op
+
+      if (isDelete(change.op)) {
+        if (isAccepted(change)) {
+          op = {
+            p: change.op.p,
+            d: change.op.d,
+          }
+          if (unacceptedDeletes > 0) {
+            op.hpos = op.p + unacceptedDeletes
+          }
+        } else {
+          unacceptedDeletes += change.op.d.length
+        }
+      } else if (isInsert(change.op)) {
+        if (isAccepted(change)) {
+          op = {
+            p: change.op.p,
+            r: change.op.i,
+            tracking: {
+              type: 'none',
+              userId: change.metadata.user_id,
+              ts: change.metadata.ts,
+            },
+          }
+          if (unacceptedDeletes > 0) {
+            op.hpos = op.p + unacceptedDeletes
+          }
+        }
+      }
+
+      if (!op) {
+        continue
+      }
+
+      /** @type {HistoryUpdate} */
+      const historyOp = {
+        doc: docId,
+        op: [op],
+        meta: {
+          ...change.metadata,
+          doc_length: docLength,
+          pathname,
+        },
+      }
+
+      if (projectHistoryId) {
+        historyOp.projectHistoryId = projectHistoryId
+      }
+
+      if (historyOp.meta && historyDocLength !== docLength) {
+        historyOp.meta.history_doc_length = historyDocLength
+      }
+
+      historyOps.push(historyOp)
+
+      if (isDelete(change.op) && isAccepted(change)) {
+        historyDocLength -= change.op.d.length
+      }
+    }
+
+    return historyOps
   },
 
   _getRanges(rangesTracker) {
