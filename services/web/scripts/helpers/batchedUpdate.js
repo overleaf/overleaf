@@ -107,6 +107,7 @@ async function getIdEdgePast(collection) {
   const [first] = await collection
     .find({})
     .project({ _id: 1 })
+    .sort({ _id: 1 })
     .limit(1)
     .toArray()
   if (!first) return null
