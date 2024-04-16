@@ -91,6 +91,6 @@ describe('File', function () {
 
   it('getComments() returns an empty comment list', function () {
     const file = File.fromString('foo')
-    expect(file.getComments()).to.eql([])
+    expect(file.getComments().toRaw()).to.eql([])
   })
 })

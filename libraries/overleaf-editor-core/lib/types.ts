@@ -11,7 +11,7 @@ export type BlobStore = {
 export type ReadonlyBlobStore = Pick<BlobStore, 'getString' | 'getObject'>
 
 export type RangesBlob = {
-  comments: CommentsListRawData
+  comments: CommentRawData[]
   trackedChanges: TrackedChangeRawData[]
 }
 
@@ -21,6 +21,7 @@ type Range = {
 }
 
 export type CommentRawData = {
+  id: string
   ranges: Range[]
   resolved?: boolean
 }
@@ -36,11 +37,9 @@ export type TrackingPropsRawData = {
   ts: string
 }
 
-export type CommentsListRawData = Array<{ id: string } & CommentRawData>
-
 export type StringFileRawData = {
   content: string
-  comments?: CommentsListRawData
+  comments?: CommentRawData[]
   trackedChanges?: TrackedChangeRawData[]
 }
 
@@ -69,11 +68,18 @@ export type RawTextOperation = {
   textOperation: RawScanOp[]
 }
 
-export type RawAddCommentOperation = CommentRawData & { commentId: string }
+export type RawAddCommentOperation = {
+  commentId: string
+  ranges: Range[]
+  resolved?: boolean
+}
 
 export type RawDeleteCommentOperation = { deleteComment: string }
 
-export type RawSetCommentStateOperation = { commentId: string; resolved: boolean }
+export type RawSetCommentStateOperation = {
+  commentId: string
+  resolved: boolean
+}
 
 export type RawEditOperation =
   | RawTextOperation

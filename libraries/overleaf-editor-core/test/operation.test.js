@@ -98,7 +98,9 @@ describe('Operation', function () {
           const file = this.snapshot.getFile(pathname)
           expect(file.getContent()).to.equal(expectedFile.content)
           expect(file.getMetadata()).to.eql(expectedFile.metadata)
-          expect(file.getComments()).to.deep.equal(expectedFile.comments)
+          expect(file.getComments().toRaw()).to.deep.equal(
+            expectedFile.comments
+          )
         })
         return this
       },

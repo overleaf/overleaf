@@ -15,6 +15,7 @@ const StringFileData = require('./file_data/string_file_data')
  * @typedef {import("./types").ReadonlyBlobStore} ReadonlyBlobStore
  * @typedef {import("./types").StringFileRawData} StringFileRawData
  * @typedef {import("./types").CommentRawData} CommentRawData
+ * @typedef {import("./file_data/comment_list")} CommentList
  * @typedef {import("./operation/text_operation")} TextOperation
  * @typedef {{filterTrackedDeletes?: boolean}} FileGetContentOptions
  */
@@ -203,7 +204,7 @@ class File {
   /**
    * Get the comments for this file.
    *
-   * @return {CommentRawData[]}
+   * @return {CommentList}
    */
   getComments() {
     return this.data.getComments()

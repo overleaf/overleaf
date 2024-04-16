@@ -106,7 +106,7 @@ describe('HashFileData', function () {
       expect(eagerFileData).to.be.instanceOf(StringFileData)
       expect(eagerFileData.getContent()).to.equal('content')
       expect(eagerFileData.trackedChanges.toRaw()).to.deep.equal(trackedChanges)
-      expect(eagerFileData.getComments()).to.deep.equal(comments)
+      expect(eagerFileData.getComments().toRaw()).to.deep.equal(comments)
     })
 
     it('should convert HashFileData to StringFileData without ranges', async function () {
@@ -119,7 +119,7 @@ describe('HashFileData', function () {
       expect(eagerFileData).to.be.instanceOf(StringFileData)
       expect(eagerFileData.getContent()).to.equal('content')
       expect(eagerFileData.trackedChanges.toRaw()).to.deep.equal([])
-      expect(eagerFileData.getComments()).to.deep.equal([])
+      expect(eagerFileData.getComments().toRaw()).to.deep.equal([])
     })
   })
 })

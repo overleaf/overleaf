@@ -1,3 +1,5 @@
+// @ts-check
+
 'use strict'
 
 const assert = require('check-types').assert
@@ -17,6 +19,7 @@ let StringFileData = null
  * @typedef {import("../types").BlobStore} BlobStore
  * @typedef {import("../types").ReadonlyBlobStore} ReadonlyBlobStore
  * @typedef {import("../operation/edit_operation")} EditOperation
+ * @typedef {import("../file_data/comment_list")} CommentList
  * @typedef {import("../types").CommentRawData} CommentRawData
  */
 
@@ -190,7 +193,7 @@ class FileData {
   /**
    * @see File#getComments
    * @function
-   * @return {CommentRawData[]}
+   * @return {CommentList}
    * @abstract
    */
   getComments() {

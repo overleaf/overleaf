@@ -11,7 +11,7 @@ const TrackedChangeList = require('./tracked_change_list')
  * @typedef {import("../types").StringFileRawData} StringFileRawData
  * @typedef {import("../operation/edit_operation")} EditOperation
  * @typedef {import("../types").BlobStore} BlobStore
- * @typedef {import("../types").CommentsListRawData} CommentsListRawData
+ * @typedef {import("../types").CommentRawData} CommentRawData
  * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
  * @typedef {import('../types').RangesBlob} RangesBlob
  */
@@ -19,7 +19,7 @@ const TrackedChangeList = require('./tracked_change_list')
 class StringFileData extends FileData {
   /**
    * @param {string} content
-   * @param {CommentsListRawData} [rawComments]
+   * @param {CommentRawData[]} [rawComments]
    * @param {TrackedChangeRawData[]} [rawTrackedChanges]
    */
   constructor(content, rawComments = [], rawTrackedChanges = []) {
@@ -49,9 +49,8 @@ class StringFileData extends FileData {
   toRaw() {
     const raw = { content: this.content }
 
-    const comments = this.getComments()
-    if (comments.length) {
-      raw.comments = comments
+    if (this.comments.length) {
+      raw.comments = this.comments.toRaw()
     }
 
     if (this.trackedChanges.length) {
@@ -110,7 +109,7 @@ class StringFileData extends FileData {
 
   /** @inheritdoc */
   getComments() {
-    return this.comments.getComments()
+    return this.comments
   }
 
   /**
@@ -135,7 +134,7 @@ class StringFileData extends FileData {
     if (this.comments.comments.size || this.trackedChanges.length) {
       /** @type {RangesBlob} */
       const ranges = {
-        comments: this.getComments(),
+        comments: this.getComments().toRaw(),
         trackedChanges: this.trackedChanges.toRaw(),
       }
       const rangesBlob = await blobStore.putObject(ranges)

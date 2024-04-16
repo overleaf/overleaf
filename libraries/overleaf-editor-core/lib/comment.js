@@ -21,10 +21,12 @@ class Comment {
   resolved = false
 
   /**
+   * @param {string} id
    * @param {ReadonlyArray<Range>} ranges
    * @param {boolean} [resolved]
    */
-  constructor(ranges, resolved = false) {
+  constructor(id, ranges, resolved = false) {
+    this.id = id
     this.resolved = resolved
     this.ranges = this.mergeRanges(ranges)
   }
@@ -87,7 +89,7 @@ class Comment {
       newRanges.push(new Range(cursor, length))
     }
 
-    return new Comment(newRanges, this.resolved)
+    return new Comment(this.id, newRanges, this.resolved)
   }
 
   /**
@@ -108,7 +110,7 @@ class Comment {
       }
     }
 
-    return new Comment(newRanges, this.resolved)
+    return new Comment(this.id, newRanges, this.resolved)
   }
 
   /**
@@ -148,6 +150,7 @@ class Comment {
    */
   toRaw() {
     return {
+      id: this.id,
       resolved: this.resolved,
       ranges: this.ranges.map(range => range.toRaw()),
     }
@@ -189,6 +192,7 @@ class Comment {
    */
   static fromRaw(rawComment) {
     return new Comment(
+      rawComment.id,
       rawComment.ranges.map(range => Range.fromRaw(range)),
       rawComment.resolved
     )

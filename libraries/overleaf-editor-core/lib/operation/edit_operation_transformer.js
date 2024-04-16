@@ -29,8 +29,16 @@ class EditOperationTransformer {
       createTransformer(TextOperation, SetCommentStateOperation, noConflict),
       createTransformer(TextOperation, AddCommentOperation, (a, b) => {
         // apply the text operation to the comment
-        const movedComment = b.comment.applyTextOperation(a, b.commentId)
-        return [a, new AddCommentOperation(b.commentId, movedComment)]
+        const originalComment = new Comment(b.commentId, b.ranges, b.resolved)
+        const movedComment = originalComment.applyTextOperation(a, b.commentId)
+        return [
+          a,
+          new AddCommentOperation(
+            movedComment.id,
+            movedComment.ranges,
+            movedComment.resolved
+          ),
+        ]
       }),
       createTransformer(AddCommentOperation, AddCommentOperation, (a, b) => {
         if (a.commentId === b.commentId) {
@@ -50,8 +58,11 @@ class EditOperationTransformer {
         SetCommentStateOperation,
         (a, b) => {
           if (a.commentId === b.commentId) {
-            const mergedComment = new Comment(a.comment.ranges, b.resolved)
-            const newA = new AddCommentOperation(a.commentId, mergedComment)
+            const newA = new AddCommentOperation(
+              a.commentId,
+              a.ranges,
+              b.resolved
+            )
             return [newA, b]
           }
           return [a, b]

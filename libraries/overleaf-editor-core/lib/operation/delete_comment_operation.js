@@ -50,7 +50,11 @@ class DeleteCommentOperation extends EditOperation {
       return new EditNoOperation()
     }
 
-    return new core.AddCommentOperation(this.commentId, comment)
+    return new core.AddCommentOperation(
+      comment.id,
+      comment.ranges.slice(),
+      comment.resolved
+    )
   }
 
   /**

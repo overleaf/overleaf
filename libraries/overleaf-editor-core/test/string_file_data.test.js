@@ -38,7 +38,7 @@ describe('StringFileData', function () {
 
   it('getComments() should return an empty array', function () {
     const fileData = new StringFileData('test')
-    expect(fileData.getComments()).to.eql([])
+    expect(fileData.getComments().toRaw()).to.eql([])
   })
 
   it('creates StringFileData with comments', function () {
@@ -63,7 +63,7 @@ describe('StringFileData', function () {
       },
     ])
 
-    expect(fileData.getComments()).to.eql([
+    expect(fileData.getComments().toRaw()).to.eql([
       { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
       { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: false },
     ])
@@ -96,7 +96,7 @@ describe('StringFileData', function () {
       ],
     })
 
-    expect(fileData.getComments()).to.eql([
+    expect(fileData.getComments().toRaw()).to.eql([
       { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
       { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: true },
     ])

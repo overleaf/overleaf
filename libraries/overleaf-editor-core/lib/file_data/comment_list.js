@@ -2,28 +2,45 @@
 const Comment = require('../comment')
 
 /**
- * @typedef {import("../types").CommentsListRawData} CommentsListRawData
+ * @typedef {import("../types").CommentRawData} CommentRawData
  * @typedef {import("../range")} Range
  */
 
 class CommentList {
   /**
-   * @param {Map<string, Comment>} comments
+   * @param {Comment[]} comments
    */
   constructor(comments) {
-    this.comments = comments
+    this.comments = new Map(comments.map(comment => [comment.id, comment]))
   }
 
   /**
-   * @returns {CommentsListRawData}
+   * @returns {IterableIterator<Comment>}
    */
-  getComments() {
-    return Array.from(this.comments).map(([commentId, comment]) => {
-      return {
-        id: commentId,
-        ...comment.toRaw(),
-      }
-    })
+  [Symbol.iterator]() {
+    return this.comments.values()
+  }
+
+  /**
+   * Return the length of the comment list
+   *
+   * @returns {number}
+   */
+  get length() {
+    return this.comments.size
+  }
+
+  /**
+   * Return the raw version of the comment list
+   *
+   * @returns {CommentRawData[]}
+   */
+  toRaw() {
+    const raw = []
+    for (const comment of this.comments.values()) {
+      raw.push(comment.toRaw())
+    }
+    return raw
   }
 
   /**
@@ -35,11 +52,10 @@ class CommentList {
   }
 
   /**
-   * @param {string} id
    * @param {Comment} newComment
    */
-  add(id, newComment) {
-    this.comments.set(id, newComment)
+  add(newComment) {
+    this.comments.set(newComment.id, newComment)
   }
 
   /**
@@ -50,14 +66,10 @@ class CommentList {
   }
 
   /**
-   * @param {CommentsListRawData} rawComments
+   * @param {CommentRawData[]} rawComments
    */
   static fromRaw(rawComments) {
-    const comments = new Map()
-    for (const rawComment of rawComments) {
-      comments.set(rawComment.id, Comment.fromRaw(rawComment))
-    }
-    return new CommentList(comments)
+    return new CommentList(rawComments.map(Comment.fromRaw))
   }
 
   /**

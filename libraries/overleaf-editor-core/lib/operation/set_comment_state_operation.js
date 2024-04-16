@@ -42,8 +42,8 @@ class SetCommentStateOperation extends EditOperation {
   apply(fileData) {
     const comment = fileData.comments.getComment(this.commentId)
     if (comment) {
-      const newComment = new Comment(comment.ranges, this.resolved)
-      fileData.comments.add(this.commentId, newComment)
+      const newComment = new Comment(comment.id, comment.ranges, this.resolved)
+      fileData.comments.add(newComment)
     }
   }
 

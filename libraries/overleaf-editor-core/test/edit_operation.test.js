@@ -8,7 +8,6 @@ const random = require('./support/random')
 const AddCommentOperation = require('../lib/operation/add_comment_operation')
 const DeleteCommentOperation = require('../lib/operation/delete_comment_operation')
 const SetCommentStateOperation = require('../lib/operation/set_comment_state_operation')
-const Comment = require('../lib/comment')
 const Range = require('../lib/range')
 const EditNoOperation = require('../lib/operation/edit_no_operation')
 
@@ -38,16 +37,16 @@ describe('EditOperationTransformer', function () {
   })
 
   it('Transforms two AddCommentOperations with same commentId', function () {
-    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
-    const b = new AddCommentOperation('comm1', new Comment([new Range(2, 3)]))
+    const a = new AddCommentOperation('comm1', [new Range(0, 1)])
+    const b = new AddCommentOperation('comm1', [new Range(2, 3)])
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(EditNoOperation)
     expect(bPrime).to.be.an.instanceof(AddCommentOperation)
   })
 
   it('Transforms two AddCommentOperations with different commentId', function () {
-    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
-    const b = new AddCommentOperation('comm2', new Comment([new Range(2, 3)]))
+    const a = new AddCommentOperation('comm1', [new Range(0, 1)])
+    const b = new AddCommentOperation('comm2', [new Range(2, 3)])
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(AddCommentOperation)
     expect(aPrime.toJSON()).to.eql(a.toJSON())
@@ -74,7 +73,7 @@ describe('EditOperationTransformer', function () {
   })
 
   it('Transforms AddCommentOperation and DeleteCommentOperation with same commentId', function () {
-    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const a = new AddCommentOperation('comm1', [new Range(0, 1)])
     const b = new DeleteCommentOperation('comm1')
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(EditNoOperation)
@@ -84,7 +83,7 @@ describe('EditOperationTransformer', function () {
 
   it('Transforms DeleteCommentOperation and AddCommentOperation with same commentId', function () {
     const a = new DeleteCommentOperation('comm1')
-    const b = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const b = new AddCommentOperation('comm1', [new Range(0, 1)])
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(DeleteCommentOperation)
     expect(aPrime.toJSON()).to.eql(a.toJSON())
@@ -96,7 +95,7 @@ describe('EditOperationTransformer', function () {
     // abc hello |xyz| -   addComment(10, 3, "comment_id")
 
     const a = new TextOperation().retain(9).insert(' world')
-    const b = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+    const b = new AddCommentOperation('comm1', [new Range(10, 3)])
 
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(TextOperation)
@@ -113,7 +112,7 @@ describe('EditOperationTransformer', function () {
     // abc hello |xyz| -   addComment(10, 3, "comment_id")
     // abc hello[ world] xyz - insert(9, " world")
 
-    const a = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+    const a = new AddCommentOperation('comm1', [new Range(10, 3)])
     const b = new TextOperation().retain(9).insert(' world')
 
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
@@ -132,7 +131,7 @@ describe('EditOperationTransformer', function () {
     // abc |hello| xyz - addComment(5, 5, "comment_id")
 
     const a = new TextOperation().remove(13)
-    const b = new AddCommentOperation('comm1', new Comment([new Range(5, 5)]))
+    const b = new AddCommentOperation('comm1', [new Range(5, 5)])
 
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(TextOperation)
@@ -151,7 +150,7 @@ describe('EditOperationTransformer', function () {
     // abc hell|z|
 
     const a = new TextOperation().retain(8).remove(4)
-    const b = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+    const b = new AddCommentOperation('comm1', [new Range(10, 3)])
 
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(TextOperation)
@@ -170,7 +169,7 @@ describe('EditOperationTransformer', function () {
     // foo abc hell|z|
 
     const a = new TextOperation().insert('foo ').retain(8).remove(4)
-    const b = new AddCommentOperation('comm1', new Comment([new Range(10, 3)]))
+    const b = new AddCommentOperation('comm1', [new Range(10, 3)])
 
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
     expect(aPrime).to.be.an.instanceof(TextOperation)
@@ -206,7 +205,7 @@ describe('EditOperationTransformer', function () {
   })
 
   it('Transforms SetCommentStateOperation and AddCommentOperation', function () {
-    const a = new AddCommentOperation('comm1', new Comment([new Range(0, 1)]))
+    const a = new AddCommentOperation('comm1', [new Range(0, 1)])
     const b = new SetCommentStateOperation('comm1', true)
 
     const [aPrime, bPrime] = EditOperationTransformer.transform(a, b)
