@@ -71,7 +71,9 @@ const RangesManager = {
         }
         rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
       }
-      historyUpdates.push({ ...update, op: historyOps })
+      if (historyOps.length > 0) {
+        historyUpdates.push({ ...update, op: historyOps })
+      }
     }
 
     if (
