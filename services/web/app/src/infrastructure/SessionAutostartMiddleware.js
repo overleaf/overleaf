@@ -77,7 +77,10 @@ class SessionAutostartMiddleware {
   }
 
   middleware(req, _res, next) {
-    if (!req.signedCookies[this._cookieName]) {
+    if (
+      !req.signedCookies[this._cookieName] &&
+      req.query?.autostartSession !== 'true'
+    ) {
       const callback = this.autostartCallbackForRequest(req)
       if (callback) {
         req.session = {

@@ -48,8 +48,21 @@ describe('SessionAutostartMiddleware', function () {
       expect(req.session.noSessionCallback).to.equal(excludedCallback)
     })
 
+    it('does not execute the callback for the excluded route with ?autostartSession=true set', function () {
+      req.query = { autostartSession: 'true' }
+      middleware.middleware(req, {}, next)
+      expect(req.session).not.to.exist
+    })
+
     it('does not execute the callback if the method is not excluded', function () {
       req.method = 'GET'
+      middleware.middleware(req, {}, next)
+      expect(req.session).not.to.exist
+    })
+
+    it('does not execute the callback if the method is not excluded and ?autostartSession=true is set', function () {
+      req.method = 'GET'
+      req.query = { autostartSession: 'true' }
       middleware.middleware(req, {}, next)
       expect(req.session).not.to.exist
     })
