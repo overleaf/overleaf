@@ -34,11 +34,6 @@ const mockOauthProviders = {
     name: 'ORCID',
     linkPath: '/auth/orcid',
   },
-  twitter: {
-    hideWhenNotLinked: true,
-    name: 'Twitter',
-    linkPath: '/auth/twitter',
-  },
 }
 
 describe('<LinkingSection />', function () {
@@ -89,8 +84,6 @@ describe('<LinkingSection />', function () {
     expect(helpLink.getAttribute('href')).to.equal('/blog/434')
     const linkButton = screen.getByRole('link', { name: 'Link' })
     expect(linkButton.getAttribute('href')).to.equal('/auth/orcid?intent=link')
-
-    expect(screen.queryByText('Twitter')).to.not.exist
   })
 
   it('shows SSO error message', async function () {

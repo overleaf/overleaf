@@ -232,11 +232,6 @@ function SSOLinkingWidgetContainer({
         service: subscription.provider.name,
       })}.`
       break
-    case 'twitter':
-      description = t('login_with_service_will_stop_working_soon', {
-        service: subscription.provider.name,
-      })
-      break
     case 'orcid':
       description = t('oauth_orcid_description')
       break

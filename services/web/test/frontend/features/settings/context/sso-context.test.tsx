@@ -22,11 +22,6 @@ const mockOauthProviders = {
     name: 'ORCID',
     linkPath: '/auth/orcid',
   },
-  twitter: {
-    hideWhenNotLinked: true,
-    name: 'Twitter',
-    linkPath: '/auth/twitter',
-  },
 }
 
 describe('SSOContext', function () {

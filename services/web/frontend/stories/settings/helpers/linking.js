@@ -24,7 +24,6 @@ export function setDefaultMeta() {
   window.metaAttributesCache.set('ol-thirdPartyIds', {
     collabratec: 'collabratec-id',
     google: 'google-id',
-    twitter: 'twitter-id',
   })
 
   window.metaAttributesCache.set('ol-oauthProviders', {
@@ -49,11 +48,6 @@ export function setDefaultMeta() {
       },
       name: 'ORCID',
       linkPath: '/auth/orcid',
-    },
-    twitter: {
-      hideWhenNotLinked: true,
-      name: 'Twitter',
-      linkPath: '/auth/twitter',
     },
   })
   window.metaAttributesCache.delete('integrationLinkingWidgets')
