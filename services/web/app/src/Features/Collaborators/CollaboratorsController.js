@@ -82,8 +82,8 @@ async function setCollaboratorInfo(req, res, next) {
     )
     EditorRealTimeController.emitToRoom(
       projectId,
-      'project:membership:changed',
-      { members: true }
+      'project:collaboratorAccessLevel:changed',
+      { userId }
     )
     res.sendStatus(204)
   } catch (err) {

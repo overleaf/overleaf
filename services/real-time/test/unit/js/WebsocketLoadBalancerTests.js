@@ -69,6 +69,39 @@ describe('WebsocketLoadBalancer', function () {
       ).to.equal(false)
     })
 
+    describe('collaborator access level changed', function () {
+      const messageName = 'project:collaboratorAccessLevel:changed'
+      const client = {
+        ol_context: { user_id: 'abcd' },
+      }
+      it('should return true if the user id matches', function () {
+        const message = {
+          message: messageName,
+          payload: [
+            {
+              userId: 'abcd',
+            },
+          ],
+        }
+        expect(
+          this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+        ).to.equal(true)
+      })
+      it('should return false if the user id does not match', function () {
+        const message = {
+          message: messageName,
+          payload: [
+            {
+              userId: 'xyz',
+            },
+          ],
+        }
+        expect(
+          this.WebsocketLoadBalancer.shouldDisconnectClient(client, message)
+        ).to.equal(false)
+      })
+    })
+
     describe('user removed from project', function () {
       const messageName = 'userRemovedFromProject'
       const client = {

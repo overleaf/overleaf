@@ -44,6 +44,9 @@ module.exports = WebsocketLoadBalancer = {
       ) {
         return true
       }
+    } else if (message?.message === 'project:collaboratorAccessLevel:changed') {
+      const changedUserId = message.payload[0].userId
+      return userId === changedUserId
     }
     return false
   },
@@ -181,7 +184,11 @@ module.exports = WebsocketLoadBalancer = {
                 },
                 'disconnecting client'
               )
-              client.emit('project:access:revoked')
+              if (
+                message?.message !== 'project:collaboratorAccessLevel:changed'
+              ) {
+                client.emit('project:access:revoked')
+              }
               client.disconnect()
             } else {
               if (isRestrictedMessage && client.ol_context.is_restricted_user) {

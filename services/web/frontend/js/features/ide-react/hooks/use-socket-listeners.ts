@@ -60,6 +60,22 @@ function useSocketListeners() {
 
   useSocketListener(
     socket,
+    'project:collaboratorAccessLevel:changed',
+    useCallback(() => {
+      listProjectMembers(projectId)
+        .then(({ members }) => {
+          if (members) {
+            setProjectMembers(members)
+          }
+        })
+        .catch(err => {
+          debugConsole.error('Error fetching members for project', err)
+        })
+    }, [projectId, setProjectMembers])
+  )
+
+  useSocketListener(
+    socket,
     'project:membership:changed',
     useCallback(
       (data: { members?: boolean; invites?: boolean }) => {
