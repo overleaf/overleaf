@@ -12,9 +12,7 @@ class SplitTestCache extends CacheLoader {
   async load() {
     Metrics.inc('split_test_get_split_test_from_mongo', 1, {})
     const splitTests = await SplitTestManager.getRuntimeTests()
-    return new Map(
-      splitTests.map(splitTest => [splitTest.name, splitTest.toObject()])
-    )
+    return new Map(splitTests.map(splitTest => [splitTest.name, splitTest]))
   }
 
   serialize(value) {

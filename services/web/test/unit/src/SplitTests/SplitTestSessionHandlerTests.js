@@ -15,6 +15,45 @@ describe('SplitTestSessionHandler', function () {
     }
     this.SplitTestUserGetter = {}
     this.Metrics = {}
+
+    this.SplitTestCache.get = sinon.stub().resolves(
+      new Map(
+        Object.entries({
+          'anon-test-1': {
+            _id: '661f92a4669764bb03f73e37',
+            name: 'anon-test-1',
+            versions: [
+              {
+                versionNumber: 1,
+                variants: [
+                  {
+                    name: 'enabled',
+                  },
+                ],
+              },
+            ],
+          },
+          'anon-test-2': {
+            _id: '661f92a9d68ea711d6bf2df4',
+            name: 'anon-test-2',
+            versions: [
+              {
+                versionNumber: 1,
+                variants: [
+                  {
+                    name: 'v-1',
+                  },
+                  {
+                    name: 'v-2',
+                  },
+                ],
+              },
+            ],
+          },
+        })
+      )
+    )
+
     this.SplitTestSessionHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './SplitTestCache': this.SplitTestCache,
@@ -152,43 +191,6 @@ describe('SplitTestSessionHandler', function () {
   })
 
   it('should merge assignments from both splitTests and sta fields', async function () {
-    this.SplitTestCache.get = sinon.stub().resolves(
-      new Map(
-        Object.entries({
-          'anon-test-1': {
-            _id: '661f92a4669764bb03f73e37',
-            name: 'anon-test-1',
-            versions: [
-              {
-                versionNumber: 1,
-                variants: [
-                  {
-                    name: 'enabled',
-                  },
-                ],
-              },
-            ],
-          },
-          'anon-test-2': {
-            _id: '661f92a9d68ea711d6bf2df4',
-            name: 'anon-test-2',
-            versions: [
-              {
-                versionNumber: 1,
-                variants: [
-                  {
-                    name: 'v-1',
-                  },
-                  {
-                    name: 'v-2',
-                  },
-                ],
-              },
-            ],
-          },
-        })
-      )
-    )
     const session = {
       splitTests: {
         'anon-test-1': [
@@ -224,16 +226,16 @@ describe('SplitTestSessionHandler', function () {
       ],
       'anon-test-2': [
         {
-          variantName: 'default',
-          versionNumber: 1,
-          phase: 'release',
-          assignedAt: new Date(1712307600000),
-        },
-        {
           variantName: 'v-2',
           versionNumber: 2,
           phase: 'release',
           assignedAt: new Date(1712858400000),
+        },
+        {
+          variantName: 'default',
+          versionNumber: 1,
+          phase: 'release',
+          assignedAt: new Date(1712307600000),
         },
       ],
     })
