@@ -141,14 +141,6 @@ async function userSubscriptionPage(req, res) {
 
   AnalyticsManager.recordEventForSession(req.session, 'subscription-page-view')
 
-  const cancelButtonAssignment = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'subscription-cancel-button'
-  )
-
-  const cancelButtonNewCopy = cancelButtonAssignment?.variant === 'new-copy'
-
   const groupPlansDataForDash = formatGroupPlansDataForDash()
 
   // display the Group Settings button only to admins of group subscriptions with either/or the Managed Users or Group SSO feature available
@@ -198,7 +190,6 @@ async function userSubscriptionPage(req, res) {
     managedInstitutions,
     managedPublishers,
     currentInstitutionsWithLicence,
-    cancelButtonNewCopy,
     groupPlans: groupPlansDataForDash,
     groupSettingsEnabledFor,
     isManagedAccount: !!req.managedBy,
