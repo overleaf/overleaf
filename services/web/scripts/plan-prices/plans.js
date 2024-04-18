@@ -39,117 +39,37 @@ const plansMap = {
   professional: 'professional',
 }
 
-const currencies = {
-  USD: {
-    symbol: '$',
-    placement: 'before',
-  },
-  EUR: {
-    symbol: '€',
-    placement: 'before',
-  },
-  GBP: {
-    symbol: '£',
-    placement: 'before',
-  },
-  SEK: {
-    symbol: ' kr',
-    placement: 'after',
-  },
-  CAD: {
-    symbol: '$',
-    placement: 'before',
-  },
-  NOK: {
-    symbol: ' kr',
-    placement: 'after',
-  },
-  DKK: {
-    symbol: ' kr',
-    placement: 'after',
-  },
-  AUD: {
-    symbol: '$',
-    placement: 'before',
-  },
-  NZD: {
-    symbol: '$',
-    placement: 'before',
-  },
-  CHF: {
-    symbol: 'Fr ',
-    placement: 'before',
-  },
-  SGD: {
-    symbol: '$',
-    placement: 'before',
-  },
-  INR: {
-    symbol: '₹',
-    placement: 'before',
-  },
-  BRL: {
-    code: 'BRL',
-    locale: 'pt-BR',
-    symbol: 'R$ ',
-    placement: 'before',
-  },
-  MXN: {
-    code: 'MXN',
-    locale: 'es-MX',
-    symbol: '$ ',
-    placement: 'before',
-  },
-  COP: {
-    code: 'COP',
-    locale: 'es-CO',
-    symbol: '$ ',
-    placement: 'before',
-  },
-  CLP: {
-    code: 'CLP',
-    locale: 'es-CL',
-    symbol: '$ ',
-    placement: 'before',
-  },
-  PEN: {
-    code: 'PEN',
-    locale: 'es-PE',
-    symbol: 'S/ ',
-    placement: 'before',
-  },
-}
-
-const buildCurrencyValue = (amount, currency) => {
-  // Test using toLocaleString to format currencies for new LATAM regions
-  if (currency.locale && currency.code) {
-    return amount.toLocaleString(currency.locale, {
-      style: 'currency',
-      currency: currency.code,
-      minimumFractionDigits: 0,
-    })
-  }
-  return currency.placement === 'before'
-    ? `${currency.symbol}${amount}`
-    : `${amount}${currency.symbol}`
-}
+const currencies = [
+  'AUD',
+  'BRL',
+  'CAD',
+  'CHF',
+  'CLP',
+  'COP',
+  'DKK',
+  'EUR',
+  'GBP',
+  'INR',
+  'MXN',
+  'NOK',
+  'NZD',
+  'PEN',
+  'SEK',
+  'SGD',
+  'USD',
+]
 
 function generatePlans(workSheetJSON) {
   // localizedPlanPricing object for settings.overrides.saas.js
   const localizedPlanPricing = {}
   // plans object for main/plans.js
-  const plans = {}
 
-  for (const [currency, currencyDetails] of Object.entries(currencies)) {
+  for (const currency of currencies) {
     localizedPlanPricing[currency] = {
-      symbol: currencyDetails.symbol.trim(),
       free: {
-        monthly: buildCurrencyValue(0, currencyDetails),
-        annual: buildCurrencyValue(0, currencyDetails),
+        monthly: 0,
+        annual: 0,
       },
-    }
-    plans[currency] = {
-      symbol: currencyDetails.symbol.trim(),
     }
 
     for (const [outputKey, actualKey] of Object.entries(plansMap)) {
@@ -174,24 +94,17 @@ function generatePlans(workSheetJSON) {
           `Missing currency "${currency}" for plan "${actualKeyAnnual}"`
         )
 
-      const monthly = buildCurrencyValue(monthlyPlan[currency], currencyDetails)
-      const monthlyTimesTwelve = buildCurrencyValue(
-        monthlyPlan[currency] * 12,
-        currencyDetails
-      )
-      const annual = buildCurrencyValue(annualPlan[currency], currencyDetails)
+      const monthly = Number(monthlyPlan[currency])
+      const monthlyTimesTwelve = Number(monthlyPlan[currency] * 12)
+      const annual = Number(annualPlan[currency])
 
       localizedPlanPricing[currency] = {
         ...localizedPlanPricing[currency],
         [outputKey]: { monthly, monthlyTimesTwelve, annual },
       }
-      plans[currency] = {
-        ...plans[currency],
-        [outputKey]: { monthly, annual },
-      }
     }
   }
-  return { localizedPlanPricing, plans }
+  return { localizedPlanPricing }
 }
 
 function generateGroupPlans(workSheetJSON) {
@@ -199,25 +112,6 @@ function generateGroupPlans(workSheetJSON) {
     data.plan_code.startsWith('group')
   )
 
-  const currencies = [
-    'AUD',
-    'BRL',
-    'CAD',
-    'CHF',
-    'CLP',
-    'COP',
-    'DKK',
-    'EUR',
-    'GBP',
-    'INR',
-    'MXN',
-    'NOK',
-    'NZD',
-    'SEK',
-    'SGD',
-    'USD',
-    'PEN',
-  ]
   const sizes = ['2', '3', '4', '5', '10', '20', '50']
 
   const result = {}
@@ -275,7 +169,7 @@ function writeFile(outputFile, data) {
   fs.writeFileSync(outputFile, data)
 }
 
-const { localizedPlanPricing, plans } = generatePlans(input)
+const { localizedPlanPricing } = generatePlans(input)
 const groupPlans = generateGroupPlans(input)
 
 if (argv.output) {
@@ -291,10 +185,8 @@ if (argv.output) {
     process.exit(1)
   }
   writeFile(`${dir}/localizedPlanPricing.json`, formatJS(localizedPlanPricing))
-  writeFile(`${dir}/plans.json`, formatJS(plans))
   writeFile(`${dir}/groups.json`, formatJSON(groupPlans))
 } else {
-  console.log('PLANS', plans)
   console.log('LOCALIZED', localizedPlanPricing)
   console.log('GROUP PLANS', JSON.stringify(groupPlans, null, 2))
 }

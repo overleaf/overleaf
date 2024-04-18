@@ -21,6 +21,8 @@ const SubscriptionHelper = require('./SubscriptionHelper')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const Modules = require('../../infrastructure/Modules')
 const async = require('async')
+const { formatCurrencyLocalized } = require('../../util/currency')
+const SubscriptionFormatters = require('./SubscriptionFormatters')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -31,6 +33,8 @@ const validGroupPlanModalOptions = {
 }
 
 async function plansPage(req, res) {
+  const language = req.i18n.language || 'en'
+
   const plans = SubscriptionViewModelBuilder.buildPlansList()
   let currency = null
   const queryCurrency = req.query.currency?.toUpperCase()
@@ -81,6 +85,16 @@ async function plansPage(req, res) {
     geoPricingLATAMTestVariant === 'latam' &&
     ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
 
+  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'local-ccy-format'
+  )
+  const formatCurrency =
+    localCcyAssignment.variant === 'enabled'
+      ? formatCurrencyLocalized
+      : SubscriptionHelper.formatCurrencyDefault
+
   res.render('subscriptions/plans', {
     title: 'plans_and_pricing',
     currentView,
@@ -88,6 +102,8 @@ async function plansPage(req, res) {
     itm_content: req.query?.itm_content,
     itm_referrer: req.query?.itm_referrer,
     itm_campaign: 'plans',
+    language,
+    formatCurrency,
     recommendedCurrency: currency,
     planFeatures,
     plansConfig,
@@ -95,7 +111,11 @@ async function plansPage(req, res) {
     groupPlanModalOptions,
     groupPlanModalDefaults,
     initialLocalizedGroupPrice:
-      SubscriptionHelper.generateInitialLocalizedGroupPrice(currency),
+      SubscriptionHelper.generateInitialLocalizedGroupPrice(
+        currency ?? 'USD',
+        language,
+        formatCurrency
+      ),
     showInrGeoBanner: countryCode === 'IN',
     showBrlGeoBanner: countryCode === 'BR',
     showLATAMBanner,
@@ -119,9 +139,20 @@ function formatGroupPlansDataForDash() {
  */
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
+
+  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'local-ccy-format'
+  )
+
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
-      user
+      user,
+      req.i18n.language,
+      localCcyAssignment.variant === 'enabled'
+        ? SubscriptionFormatters.formatPriceLocalized
+        : SubscriptionFormatters.formatPriceDefault
     )
   const {
     personalSubscription,
@@ -227,6 +258,12 @@ async function interstitialPaymentPage(req, res) {
       geoPricingLATAMTestVariant === 'latam' &&
       ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
 
+    const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'local-ccy-format'
+    )
+
     res.render('subscriptions/interstitial-payment', {
       title: 'subscribe',
       itm_content: req.query?.itm_content,
@@ -235,6 +272,11 @@ async function interstitialPaymentPage(req, res) {
       recommendedCurrency,
       interstitialPaymentConfig,
       showSkipLink,
+      formatCurrency:
+        localCcyAssignment.variant === 'enabled'
+          ? formatCurrencyLocalized
+          : SubscriptionHelper.formatCurrencyDefault,
+      showCurrencyAndPaymentMethods: localCcyAssignment.variant === 'enabled',
       showInrGeoBanner: countryCode === 'IN',
       showBrlGeoBanner: countryCode === 'BR',
       showLATAMBanner,
@@ -251,9 +293,18 @@ async function interstitialPaymentPage(req, res) {
  */
 async function successfulSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
+  const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'local-ccy-format'
+  )
   const { personalSubscription } =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
-      user
+      user,
+      req.i18n.language,
+      localCcyAssignment.variant === 'enabled'
+        ? SubscriptionFormatters.formatPriceLocalized
+        : SubscriptionFormatters.formatPriceDefault
     )
 
   const postCheckoutRedirect = req.session?.postCheckoutRedirect

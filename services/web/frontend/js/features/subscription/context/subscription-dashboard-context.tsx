@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   CustomSubscription,
   ManagedGroupSubscription,
@@ -22,12 +23,15 @@ import { Institution as ManagedInstitution } from '../components/dashboard/manag
 import { Publisher as ManagedPublisher } from '../components/dashboard/managed-publishers'
 import getMeta from '../../../utils/meta'
 import {
+  formatCurrencyDefault,
   loadDisplayPriceWithTaxPromise,
   loadGroupDisplayPriceWithTaxPromise,
 } from '../util/recurly-pricing'
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
 import { debugConsole } from '@/utils/debugging'
+import { getSplitTestVariant } from '@/utils/splitTestUtils'
+import { formatCurrencyLocalized } from '@/shared/utils/currency'
 
 type SubscriptionDashboardContextValue = {
   groupPlanToChangeToCode: string
@@ -76,11 +80,17 @@ export const SubscriptionDashboardContext = createContext<
   SubscriptionDashboardContextValue | undefined
 >(undefined)
 
+const getFormatCurrencies = () =>
+  getSplitTestVariant('local-ccy-format') === 'enabled'
+    ? formatCurrencyLocalized
+    : formatCurrencyDefault
+
 export function SubscriptionDashboardProvider({
   children,
 }: {
   children: ReactNode
 }) {
+  const { i18n } = useTranslation()
   const [modalIdShown, setModalIdShown] = useState<
     SubscriptionDashModalIds | undefined
   >()
@@ -154,6 +164,7 @@ export function SubscriptionDashboardProvider({
       plansWithoutDisplayPrice &&
       personalSubscription?.recurly
     ) {
+      const formatCurrency = getFormatCurrencies()
       const { currency, taxRate } = personalSubscription.recurly
       const fetchPlansDisplayPrices = async () => {
         for (const plan of plansWithoutDisplayPrice) {
@@ -161,10 +172,16 @@ export function SubscriptionDashboardProvider({
             const priceData = await loadDisplayPriceWithTaxPromise(
               plan.planCode,
               currency,
-              taxRate
+              taxRate,
+              i18n.language,
+              formatCurrency
             )
-            if (priceData?.totalForDisplay) {
-              plan.displayPrice = priceData.totalForDisplay
+            if (priceData?.totalAsNumber !== undefined) {
+              plan.displayPrice = formatCurrency(
+                priceData.totalAsNumber,
+                currency,
+                i18n.language
+              )
             }
           } catch (error) {
             debugConsole.error(error)
@@ -175,7 +192,7 @@ export function SubscriptionDashboardProvider({
       }
       fetchPlansDisplayPrices().catch(debugConsole.error)
     }
-  }, [personalSubscription, plansWithoutDisplayPrice])
+  }, [personalSubscription, plansWithoutDisplayPrice, i18n.language])
 
   useEffect(() => {
     if (
@@ -192,12 +209,15 @@ export function SubscriptionDashboardProvider({
         setGroupPlanToChangeToPriceError(false)
         let priceData
         try {
+          const formatCurrency = getFormatCurrencies()
           priceData = await loadGroupDisplayPriceWithTaxPromise(
             groupPlanToChangeToCode,
             currency,
             taxRate,
             groupPlanToChangeToSize,
-            groupPlanToChangeToUsage
+            groupPlanToChangeToUsage,
+            i18n.language,
+            formatCurrency
           )
         } catch (e) {
           debugConsole.error(e)
@@ -213,6 +233,7 @@ export function SubscriptionDashboardProvider({
     groupPlanToChangeToSize,
     personalSubscription,
     groupPlanToChangeToCode,
+    i18n.language,
   ])
 
   const updateManagedInstitution = useCallback(

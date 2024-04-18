@@ -1,5 +1,47 @@
 import getMeta from '../../../utils/meta'
 
+/**
+ * @typedef {import('@/shared/utils/currency').CurrencyCode} CurrencyCode
+ */
+
+// plan: 'collaborator' or 'professional'
+// the rest of available arguments can be seen in the groupPlans value
+/**
+ * @param {'collaborator' | 'professional'} plan
+ * @param {string} licenseSize
+ * @param {CurrencyCode} currency
+ * @param {'enterprise' | 'educational'} usage
+ * @param {string?} locale
+ * @param {(amount: number, currency: CurrencyCode, locale: string, includeSymbol: boolean) => string} formatCurrency
+ * @returns {{localizedPrice: string, localizedPerUserPrice: string}}
+ */
+export function createLocalizedGroupPlanPrice({
+  plan,
+  licenseSize,
+  currency,
+  usage,
+  locale = window.i18n.currentLangCode || 'en',
+  formatCurrency,
+}) {
+  const groupPlans = getMeta('ol-groupPlans')
+  const priceInCents =
+    groupPlans[usage][plan][currency][licenseSize].price_in_cents
+
+  const price = priceInCents / 100
+  const perUserPrice = price / parseInt(licenseSize)
+
+  /**
+   * @param {number} price
+   * @returns {string}
+   */
+  const formatPrice = price => formatCurrency(price, currency, locale, true)
+
+  return {
+    localizedPrice: formatPrice(price),
+    localizedPerUserPrice: formatPrice(perUserPrice),
+  }
+}
+
 const LOCALES = {
   BRL: 'pt-BR',
   MXN: 'es-MX',
@@ -8,30 +50,12 @@ const LOCALES = {
   PEN: 'es-PE',
 }
 
-// plan: 'collaborator' or 'professional'
-// the rest of available arguments can be seen in the groupPlans value
-export function createLocalizedGroupPlanPrice({
-  plan,
-  licenseSize,
-  currency,
-  usage,
-}) {
-  const groupPlans = getMeta('ol-groupPlans')
+/**
+ * @param {number} amount
+ * @param {string} currency
+ */
+export function formatCurrencyDefault(amount, currency) {
   const currencySymbols = getMeta('ol-currencySymbols')
-  const priceInCents =
-    groupPlans[usage][plan][currency][licenseSize].price_in_cents
-
-  const price = priceInCents / 100
-  const perUserPrice = price / parseInt(licenseSize)
-
-  const strPrice = price.toFixed()
-  let strPerUserPrice = ''
-
-  if (Number.isInteger(perUserPrice)) {
-    strPerUserPrice = String(perUserPrice)
-  } else {
-    strPerUserPrice = perUserPrice.toFixed(2)
-  }
 
   const currencySymbol = currencySymbols[currency]
 
@@ -42,35 +66,19 @@ export function createLocalizedGroupPlanPrice({
     case 'CLP':
     case 'PEN':
       // Test using toLocaleString to format currencies for new LATAM regions
-      return {
-        localizedPrice: price.toLocaleString(LOCALES[currency], {
-          style: 'currency',
-          currency,
-          minimumFractionDigits: 0,
-        }),
-        localizedPerUserPrice: perUserPrice.toLocaleString(LOCALES[currency], {
-          style: 'currency',
-          currency,
-          minimumFractionDigits: Number.isInteger(perUserPrice) ? 0 : null,
-        }),
-      }
+      return amount.toLocaleString(LOCALES[currency], {
+        style: 'currency',
+        currency,
+        minimumFractionDigits: Number.isInteger(amount) ? 0 : null,
+      })
     case 'CHF':
-      return {
-        localizedPrice: `${currencySymbol} ${strPrice}`,
-        localizedPerUserPrice: `${currencySymbol} ${strPerUserPrice}`,
-      }
+      return `${currencySymbol} ${amount}`
     case 'DKK':
     case 'SEK':
     case 'NOK':
-      return {
-        localizedPrice: `${strPrice} ${currencySymbol}`,
-        localizedPerUserPrice: `${strPerUserPrice} ${currencySymbol}`,
-      }
+      return `${amount} ${currencySymbol}`
     default: {
-      return {
-        localizedPrice: `${currencySymbol}${strPrice}`,
-        localizedPerUserPrice: `${currencySymbol}${strPerUserPrice}`,
-      }
+      return `${currencySymbol}${amount}`
     }
   }
 }

@@ -66,7 +66,11 @@ async function getRedirectToHostedPage(userId, pageType) {
   ].join('')
 }
 
-async function buildUsersSubscriptionViewModel(user) {
+async function buildUsersSubscriptionViewModel(
+  user,
+  locale = 'en',
+  formatPrice = SubscriptionFormatters.formatPriceDefault
+) {
   let {
     personalSubscription,
     memberGroupSubscriptions,
@@ -312,19 +316,19 @@ async function buildUsersSubscriptionViewModel(user) {
       const pendingSubscriptionTax =
         personalSubscription.recurly.taxRate *
         recurlySubscription.pending_subscription.unit_amount_in_cents
-      personalSubscription.recurly.displayPrice =
-        SubscriptionFormatters.formatPrice(
-          recurlySubscription.pending_subscription.unit_amount_in_cents +
-            pendingAddOnPrice +
-            pendingAddOnTax +
-            pendingSubscriptionTax,
-          recurlySubscription.currency
-        )
-      personalSubscription.recurly.currentPlanDisplayPrice =
-        SubscriptionFormatters.formatPrice(
-          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-          recurlySubscription.currency
-        )
+      personalSubscription.recurly.displayPrice = formatPrice(
+        recurlySubscription.pending_subscription.unit_amount_in_cents +
+          pendingAddOnPrice +
+          pendingAddOnTax +
+          pendingSubscriptionTax,
+        recurlySubscription.currency,
+        locale
+      )
+      personalSubscription.recurly.currentPlanDisplayPrice = formatPrice(
+        recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+        recurlySubscription.currency,
+        locale
+      )
       const pendingTotalLicenses =
         (pendingPlan.membersLimit || 0) + pendingAdditionalLicenses
       personalSubscription.recurly.pendingAdditionalLicenses =
@@ -332,11 +336,11 @@ async function buildUsersSubscriptionViewModel(user) {
       personalSubscription.recurly.pendingTotalLicenses = pendingTotalLicenses
       personalSubscription.pendingPlan = pendingPlan
     } else {
-      personalSubscription.recurly.displayPrice =
-        SubscriptionFormatters.formatPrice(
-          recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
-          recurlySubscription.currency
-        )
+      personalSubscription.recurly.displayPrice = formatPrice(
+        recurlySubscription.unit_amount_in_cents + addOnPrice + tax,
+        recurlySubscription.currency,
+        locale
+      )
     }
   }
 

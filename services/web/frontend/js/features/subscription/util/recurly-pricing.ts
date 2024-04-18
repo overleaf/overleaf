@@ -20,17 +20,32 @@ function queryRecurlyPlanPrice(planCode: string, currency: CurrencyCode) {
   })
 }
 
-function priceToWithCents(price: number) {
-  return price % 1 !== 0 ? price.toFixed(2) : price
+type FormatCurrency = (
+  price: number,
+  currency: CurrencyCode,
+  locale: string,
+  stripIfInteger?: boolean
+) => string
+
+export const formatCurrencyDefault: FormatCurrency = (
+  price: number,
+  currency: CurrencyCode,
+  _locale: string,
+  stripIfInteger = false
+) => {
+  const currencySymbol = currencies[currency]
+  const number =
+    stripIfInteger && price % 1 === 0 ? Number(price) : price.toFixed(2)
+  return `${currencySymbol}${number}`
 }
 
 export function formatPriceForDisplayData(
   price: string,
   taxRate: number,
-  currencyCode: CurrencyCode
+  currencyCode: CurrencyCode,
+  locale: string,
+  formatCurrency: FormatCurrency
 ): PriceForDisplayData {
-  const currencySymbol = currencies[currencyCode]
-
   const totalPriceExTax = parseFloat(price)
   let taxAmount = totalPriceExTax * taxRate
   if (isNaN(taxAmount)) {
@@ -39,26 +54,30 @@ export function formatPriceForDisplayData(
   const totalWithTax = totalPriceExTax + taxAmount
 
   return {
-    totalForDisplay: `${currencySymbol}${priceToWithCents(totalWithTax)}`,
+    totalForDisplay: formatCurrency(totalWithTax, currencyCode, locale, true),
     totalAsNumber: totalWithTax,
-    subtotal: `${currencySymbol}${totalPriceExTax.toFixed(2)}`,
-    tax: `${currencySymbol}${taxAmount.toFixed(2)}`,
+    subtotal: formatCurrency(totalPriceExTax, currencyCode, locale),
+    tax: formatCurrency(taxAmount, currencyCode, locale),
     includesTax: taxAmount !== 0,
   }
 }
 
 function getPerUserDisplayPrice(
   totalPrice: number,
-  currencySymbol: string,
-  size: string
+  currency: CurrencyCode,
+  size: string,
+  locale: string,
+  formatCurrency: FormatCurrency
 ): string {
-  return `${currencySymbol}${priceToWithCents(totalPrice / parseInt(size))}`
+  return formatCurrency(totalPrice / parseInt(size), currency, locale, true)
 }
 
 export async function loadDisplayPriceWithTaxPromise(
   planCode: string,
   currencyCode: CurrencyCode,
-  taxRate: number
+  taxRate: number,
+  locale: string,
+  formatCurrency: FormatCurrency
 ) {
   if (!recurly) return
 
@@ -67,7 +86,13 @@ export async function loadDisplayPriceWithTaxPromise(
     currencyCode
   )) as SubscriptionPricingState['price']
   if (price)
-    return formatPriceForDisplayData(price.next.total, taxRate, currencyCode)
+    return formatPriceForDisplayData(
+      price.next.total,
+      taxRate,
+      currencyCode,
+      locale,
+      formatCurrency
+    )
 }
 
 export async function loadGroupDisplayPriceWithTaxPromise(
@@ -75,7 +100,9 @@ export async function loadGroupDisplayPriceWithTaxPromise(
   currencyCode: CurrencyCode,
   taxRate: number,
   size: string,
-  usage: string
+  usage: string,
+  locale: string,
+  formatCurrency: FormatCurrency
 ) {
   if (!recurly) return
 
@@ -83,15 +110,18 @@ export async function loadGroupDisplayPriceWithTaxPromise(
   const price = await loadDisplayPriceWithTaxPromise(
     planCode,
     currencyCode,
-    taxRate
+    taxRate,
+    locale,
+    formatCurrency
   )
 
   if (price) {
-    const currencySymbol = currencies[currencyCode]
     price.perUserDisplayPrice = getPerUserDisplayPrice(
       price.totalAsNumber,
-      currencySymbol,
-      size
+      currencyCode,
+      size,
+      locale,
+      formatCurrency
     )
   }
 

@@ -31,20 +31,8 @@ block content
 								h1.text-capitalize(ng-non-bindable) #{translate('choose_your_plan')}
 
 					include ./plans/_cards_controls_tables
-					.row.row-spaced-large.text-centered
-						.col-xs-12
-							p.text-centered
-								strong #{translate("all_prices_displayed_are_in_currency", {recommendedCurrency})}
-								| &nbsp;
-								span #{translate("subject_to_additional_vat")}
-							i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Mastercard' })}
-							i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Visa' })}
-							i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Amex' })}
-							i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
-							span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Paypal' })}
+					
+					+currency_and_payment_methods()
 
 					include ./plans/_university_info
 

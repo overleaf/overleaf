@@ -48,6 +48,9 @@ block content
 								table.card.plans-v2-table.plans-v2-table-individual
 									+plans_v2_table('annual', interstitialPaymentConfig)
 
+					if (showCurrencyAndPaymentMethods)
+						+currency_and_payment_methods()
+
 					//- sticky header on mobile will be "hidden" (by removing its sticky position) if it reaches this div
 					.invisible(aria-hidden="true" data-ol-plans-v2-table-sticky-header-stop)
 
