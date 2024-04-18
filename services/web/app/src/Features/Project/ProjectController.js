@@ -619,6 +619,9 @@ const ProjectController = {
         paywallCtaAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'paywall-cta', cb)
         },
+        revertFileAssignment(cb) {
+          SplitTestHandler.getAssignment(req, res, 'revert-file', cb)
+        },
         projectTags(cb) {
           if (!userId) {
             return cb(null, [])

@@ -8,6 +8,7 @@ import { FetchUpdatesResponse } from './types/update'
 import { Label } from './types/label'
 import { DocDiffResponse } from './types/doc'
 import { RestoreFileResponse } from './types/restore-file'
+import { RevertFileResponse } from './types/revert-file'
 
 const BATCH_SIZE = 10
 
@@ -91,6 +92,19 @@ export function restoreFile(projectId: string, selectedFile: FileRemoved) {
     body: {
       version: selectedFile.deletedAtV,
       pathname: selectedFile.pathname,
+    },
+  })
+}
+
+export function revertFile(
+  projectId: string,
+  pathname: string,
+  version: number
+) {
+  return postJSON<RevertFileResponse>(`/project/${projectId}/revert_file`, {
+    body: {
+      version,
+      pathname,
     },
   })
 }
