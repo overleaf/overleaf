@@ -102,8 +102,12 @@ describe('ProjectListController', function () {
     }
     this.SplitTestHandler = {
       promises: {
-        sessionMaintenance: sinon.stub().resolves(),
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
+    this.SplitTestSessionHandler = {
+      promises: {
+        sessionMaintenance: sinon.stub().resolves(),
       },
     }
     this.SubscriptionViewModelBuilder = {
@@ -141,6 +145,7 @@ describe('ProjectListController', function () {
         '@overleaf/settings': this.settings,
         '@overleaf/metrics': this.Metrics,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        '../SplitTests/SplitTestSessionHandler': this.SplitTestSessionHandler,
         '../User/UserController': this.UserController,
         './ProjectHelper': this.ProjectHelper,
         '../Subscription/LimitationsManager': this.LimitationsManager,
@@ -223,7 +228,7 @@ describe('ProjectListController', function () {
     it('should invoke the session maintenance', function (done) {
       this.Features.hasFeature.withArgs('saas').returns(true)
       this.res.render = () => {
-        this.SplitTestHandler.promises.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
           this.req,
           this.user
         )

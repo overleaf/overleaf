@@ -136,6 +136,8 @@ describe('ProjectController', function () {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
+    }
+    this.SplitTestSessionHandler = {
       sessionMaintenance: sinon.stub().yields(),
     }
     this.InstitutionsFeatures = {
@@ -160,6 +162,7 @@ describe('ProjectController', function () {
         '@overleaf/settings': this.settings,
         '@overleaf/metrics': this.Metrics,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        '../SplitTests/SplitTestSessionHandler': this.SplitTestSessionHandler,
         './ProjectDeleter': this.ProjectDeleter,
         './ProjectDuplicator': this.ProjectDuplicator,
         './ProjectCreationHandler': this.ProjectCreationHandler,
@@ -536,7 +539,7 @@ describe('ProjectController', function () {
 
     it('should invoke the session maintenance for logged in user', function (done) {
       this.res.render = () => {
-        this.SplitTestHandler.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.sessionMaintenance.should.have.been.calledWith(
           this.req,
           this.user
         )
@@ -548,7 +551,7 @@ describe('ProjectController', function () {
     it('should invoke the session maintenance for anonymous user', function (done) {
       this.SessionManager.getLoggedInUserId.returns(null)
       this.res.render = () => {
-        this.SplitTestHandler.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.sessionMaintenance.should.have.been.calledWith(
           this.req
         )
         done()

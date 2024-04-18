@@ -3,14 +3,14 @@ const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SplitTestSessionHandler = require('../SplitTests/SplitTestSessionHandler')
 const { expressify } = require('@overleaf/promise-utils')
 
 async function optIn(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   await BetaProgramHandler.promises.optIn(userId)
   try {
-    await SplitTestHandler.promises.sessionMaintenance(req, null)
+    await SplitTestSessionHandler.promises.sessionMaintenance(req, null)
   } catch (error) {
     logger.error(
       { err: error },
@@ -24,7 +24,7 @@ async function optOut(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   await BetaProgramHandler.promises.optOut(userId)
   try {
-    await SplitTestHandler.promises.sessionMaintenance(req, null)
+    await SplitTestSessionHandler.promises.sessionMaintenance(req, null)
   } catch (error) {
     logger.error(
       { err: error },

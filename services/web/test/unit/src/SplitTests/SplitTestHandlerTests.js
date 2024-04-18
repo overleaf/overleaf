@@ -27,12 +27,6 @@ describe('SplitTestHandler', function () {
       this.cachedSplitTests.set(splitTest.name, splitTest)
     }
 
-    this.UserGetter = {
-      promises: {
-        getUser: sinon.stub().resolves(null),
-      },
-    }
-
     this.SplitTest = {
       find: sinon.stub().returns({
         exec: sinon.stub().resolves(this.splitTests),
@@ -54,10 +48,19 @@ describe('SplitTestHandler', function () {
     }
     this.AnalyticsManager = {
       getIdsFromSession: sinon.stub(),
+      setUserPropertyForAnalyticsId: sinon.stub(),
     }
     this.LocalsHelper = {
       setSplitTestVariant: sinon.stub(),
       setSplitTestInfo: sinon.stub(),
+    }
+    this.SplitTestSessionHandler = {
+      collectSessionStats: sinon.stub(),
+    }
+    this.SplitTestUserGetter = {
+      promises: {
+        getUser: sinon.stub().resolves(null),
+      },
     }
 
     this.SplitTestHandler = SandboxedModule.require(MODULE_PATH, {
@@ -68,6 +71,8 @@ describe('SplitTestHandler', function () {
         '../User/UserUpdater': {},
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         './LocalsHelper': this.LocalsHelper,
+        './SplitTestSessionHandler': this.SplitTestSessionHandler,
+        './SplitTestUserGetter': this.SplitTestUserGetter,
         '@overleaf/settings': this.Settings,
       },
     })
@@ -100,9 +105,7 @@ describe('SplitTestHandler', function () {
           ],
         },
       }
-      this.UserGetter.promises.getUser
-        .withArgs(this.user._id)
-        .resolves(this.user)
+      this.SplitTestUserGetter.promises.getUser.resolves(this.user)
       this.assignments =
         await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
           this.user._id
@@ -164,9 +167,7 @@ describe('SplitTestHandler', function () {
   describe('with a user without assignments', function () {
     beforeEach(async function () {
       this.user = { _id: new ObjectId() }
-      this.UserGetter.promises.getUser
-        .withArgs(this.user._id)
-        .resolves(this.user)
+      this.SplitTestUserGetter.promises.getUser.resolves(this.user)
       this.assignments =
         await this.SplitTestHandler.promises.getActiveAssignmentsForUser(
           this.user._id

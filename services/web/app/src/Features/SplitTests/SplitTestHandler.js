@@ -1,5 +1,4 @@
 const Metrics = require('@overleaf/metrics')
-const UserGetter = require('../User/UserGetter')
 const UserUpdater = require('../User/UserUpdater')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const LocalsHelper = require('./LocalsHelper')
@@ -14,11 +13,12 @@ const SplitTestUtils = require('./SplitTestUtils')
 const Settings = require('@overleaf/settings')
 const SessionManager = require('../Authentication/SessionManager')
 const logger = require('@overleaf/logger')
+const SplitTestSessionHandler = require('./SplitTestSessionHandler')
+const SplitTestUserGetter = require('./SplitTestUserGetter')
 
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
-const CACHE_TOMBSTONE_SPLIT_TEST_NOT_ACTIVE_FOR_USER = null
 const DEFAULT_ASSIGNMENT = {
   variant: DEFAULT_VARIANT,
   analytics: {
@@ -85,7 +85,7 @@ async function getAssignment(req, res, splitTestName, { sync = false } = {}) {
           session: req.session,
           sync,
         })
-        _collectSessionStats(req.session)
+        SplitTestSessionHandler.collectSessionStats(req.session)
       }
     }
   } catch (error) {
@@ -175,7 +175,7 @@ async function getActiveAssignmentsForUser(userId, removeArchived = false) {
     return {}
   }
 
-  const user = await _getUser(userId)
+  const user = await SplitTestUserGetter.promises.getUser(userId)
   if (user == null) {
     return {}
   }
@@ -207,34 +207,6 @@ async function getActiveAssignmentsForUser(userId, removeArchived = false) {
     }
   }
   return assignments
-}
-
-/**
- * @param {import('express').Request} req
- * @param {Object|null} user optional, prefetched user with alphaProgram and betaProgram field
- * @return {Promise<void>}
- */
-async function sessionMaintenance(req, user) {
-  const session = req.session
-  const sessionUser = SessionManager.getSessionUser(session)
-
-  Metrics.inc('split_test_session_maintenance', 1, { status: 'start' })
-  if (sessionUser) {
-    user = user || (await _getUser(sessionUser._id))
-    if (
-      Boolean(sessionUser.alphaProgram) !== Boolean(user.alphaProgram) ||
-      Boolean(sessionUser.betaProgram) !== Boolean(user.betaProgram)
-    ) {
-      Metrics.inc('split_test_session_maintenance', 1, {
-        status: 'program-change',
-      })
-      sessionUser.alphaProgram = user.alphaProgram || undefined // only store if set
-      sessionUser.betaProgram = user.betaProgram || undefined // only store if set
-      session.cachedSplitTestAssignments = {}
-    }
-  }
-
-  // TODO: After changing the split test config fetching: remove split test assignments for archived split tests
 }
 
 /**
@@ -285,18 +257,22 @@ async function _getAssignment(
   }
 
   if (canUseSessionCache) {
-    const cachedVariant = _getCachedVariantFromSession(
+    const cachedVariant = SplitTestSessionHandler.getCachedVariant(
       session,
       splitTest.name,
       currentVersion
     )
-    if (cachedVariant === CACHE_TOMBSTONE_SPLIT_TEST_NOT_ACTIVE_FOR_USER) {
-      Metrics.inc('split_test_get_assignment_source', 1, { status: 'cache' })
-      return DEFAULT_ASSIGNMENT
-    }
+
     if (cachedVariant) {
       Metrics.inc('split_test_get_assignment_source', 1, { status: 'cache' })
-      return _makeAssignment(splitTest, cachedVariant, currentVersion)
+      if (
+        cachedVariant ===
+        SplitTestSessionHandler.CACHE_TOMBSTONE_SPLIT_TEST_NOT_ACTIVE_FOR_USER
+      ) {
+        return DEFAULT_ASSIGNMENT
+      } else {
+        return _makeAssignment(splitTest, cachedVariant, currentVersion)
+      }
     }
   }
 
@@ -308,11 +284,14 @@ async function _getAssignment(
     Metrics.inc('split_test_get_assignment_source', 1, { status: 'none' })
   }
 
-  user = user || (userId && (await _getUser(userId, splitTestName)))
+  user =
+    user ||
+    (userId &&
+      (await SplitTestUserGetter.promises.getUser(userId, splitTestName)))
   const { activeForUser, selectedVariantName, phase, versionNumber } =
     await _getAssignmentMetadata(analyticsId, user, splitTest)
   if (canUseSessionCache) {
-    _setVariantInSession({
+    SplitTestSessionHandler.setVariantInCache({
       session,
       splitTestName,
       currentVersion,
@@ -321,22 +300,40 @@ async function _getAssignment(
     })
   }
   if (activeForUser) {
-    const assignmentConfig = {
-      user,
-      userId,
-      analyticsId,
-      session,
-      splitTestName,
-      variantName: selectedVariantName,
-      phase,
-      versionNumber,
-    }
     if (currentVersion.analyticsEnabled) {
-      if (sync === true) {
-        await _updateVariantAssignment(assignmentConfig)
-      } else {
-        _updateVariantAssignment(assignmentConfig)
+      // if the user is logged in, persist the assignment
+      if (userId) {
+        const assignmentData = {
+          user,
+          userId,
+          splitTestName,
+          phase,
+          versionNumber,
+          variantName: selectedVariantName,
+        }
+        if (sync === true) {
+          await _recordAssignment(assignmentData)
+        } else {
+          _recordAssignment(assignmentData)
+        }
       }
+      // otherwise this is an anonymous user, we store assignments in session to persist them on registration
+      else {
+        await SplitTestSessionHandler.promises.appendAssignment(session, {
+          splitTestId: splitTest._id,
+          splitTestName,
+          phase,
+          versionNumber,
+          variantName: selectedVariantName,
+          assignedAt: new Date(),
+        })
+      }
+
+      AnalyticsManager.setUserPropertyForAnalyticsId(
+        user?.analyticsId || analyticsId || userId,
+        `split-test-${splitTestName}-${versionNumber}`,
+        selectedVariantName
+      )
     }
     return _makeAssignment(splitTest, selectedVariantName, currentVersion)
   }
@@ -404,11 +401,9 @@ function _getVariantFromPercentile(variants, percentile) {
   }
 }
 
-async function _updateVariantAssignment({
+async function _recordAssignment({
   user,
   userId,
-  analyticsId,
-  session,
   splitTestName,
   phase,
   versionNumber,
@@ -420,45 +415,18 @@ async function _updateVariantAssignment({
     phase,
     assignedAt: new Date(),
   }
-  // if the user is logged in
-  if (userId) {
-    user = user || (await _getUser(userId, splitTestName))
-    if (user) {
-      const assignedSplitTests = user.splitTests || []
-      const assignmentLog = assignedSplitTests[splitTestName] || []
-      const existingAssignment = _.find(assignmentLog, { versionNumber })
-      if (!existingAssignment) {
-        await UserUpdater.promises.updateUser(userId, {
-          $addToSet: {
-            [`splitTests.${splitTestName}`]: persistedAssignment,
-          },
-        })
-        AnalyticsManager.setUserPropertyForAnalyticsId(
-          user.analyticsId || analyticsId || userId,
-          `split-test-${splitTestName}-${versionNumber}`,
-          variantName
-        )
-      }
-    }
-  }
-  // otherwise this is an anonymous user, we store assignments in session to persist them on registration
-  else if (session) {
-    if (!session.splitTests) {
-      session.splitTests = {}
-    }
-    if (!session.splitTests[splitTestName]) {
-      session.splitTests[splitTestName] = []
-    }
-    const existingAssignment = _.find(session.splitTests[splitTestName], {
-      versionNumber,
-    })
+  user =
+    user || (await SplitTestUserGetter.promises.getUser(userId, splitTestName))
+  if (user) {
+    const assignedSplitTests = user.splitTests || []
+    const assignmentLog = assignedSplitTests[splitTestName] || []
+    const existingAssignment = _.find(assignmentLog, { versionNumber })
     if (!existingAssignment) {
-      session.splitTests[splitTestName].push(persistedAssignment)
-      AnalyticsManager.setUserPropertyForAnalyticsId(
-        analyticsId,
-        `split-test-${splitTestName}-${versionNumber}`,
-        variantName
-      )
+      await UserUpdater.promises.updateUser(userId, {
+        $addToSet: {
+          [`splitTests.${splitTestName}`]: persistedAssignment,
+        },
+      })
     }
   }
 }
@@ -477,63 +445,6 @@ function _makeAssignment(splitTest, variant, currentVersion) {
         : {},
     },
   }
-}
-
-function _getCachedVariantFromSession(session, splitTestName, currentVersion) {
-  if (!session.cachedSplitTestAssignments) {
-    session.cachedSplitTestAssignments = {}
-  }
-  const cacheKey = `${splitTestName}-${currentVersion.versionNumber}`
-  return session.cachedSplitTestAssignments[cacheKey]
-}
-
-function _setVariantInSession({
-  session,
-  splitTestName,
-  currentVersion,
-  selectedVariantName,
-  activeForUser,
-}) {
-  if (!session.cachedSplitTestAssignments) {
-    session.cachedSplitTestAssignments = {}
-  }
-
-  // clean up previous entries from this split test
-  for (const cacheKey of Object.keys(session.cachedSplitTestAssignments)) {
-    // drop '-versionNumber'
-    const name = cacheKey.split('-').slice(0, -1).join('-')
-    if (name === splitTestName) {
-      delete session.cachedSplitTestAssignments[cacheKey]
-    }
-  }
-
-  const cacheKey = `${splitTestName}-${currentVersion.versionNumber}`
-  if (activeForUser) {
-    session.cachedSplitTestAssignments[cacheKey] = selectedVariantName
-  } else {
-    session.cachedSplitTestAssignments[cacheKey] =
-      CACHE_TOMBSTONE_SPLIT_TEST_NOT_ACTIVE_FOR_USER
-  }
-}
-
-async function _getUser(id, splitTestName) {
-  const projection = {
-    analyticsId: 1,
-    alphaProgram: 1,
-    betaProgram: 1,
-  }
-  if (splitTestName) {
-    projection[`splitTests.${splitTestName}`] = 1
-  } else {
-    projection.splitTests = 1
-  }
-  const user = await UserGetter.promises.getUser(id, projection)
-  Metrics.histogram(
-    'split_test_get_user_from_mongo_size',
-    JSON.stringify(user).length,
-    [0, 100, 500, 1000, 2000, 5000, 10000, 15000, 20000, 50000, 100000]
-  )
-  return user
 }
 
 async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
@@ -579,41 +490,16 @@ function _getNonSaasAssignment(splitTestName) {
   return DEFAULT_ASSIGNMENT
 }
 
-function _collectSessionStats(session) {
-  if (session.cachedSplitTestAssignments) {
-    Metrics.summary(
-      'split_test_session_cache_count',
-      Object.keys(session.cachedSplitTestAssignments).length
-    )
-    Metrics.summary(
-      'split_test_session_cache_size',
-      JSON.stringify(session.cachedSplitTestAssignments).length
-    )
-  }
-  if (session.splitTests) {
-    Metrics.summary(
-      'split_test_session_storage_count',
-      Object.keys(session.splitTests).length
-    )
-    Metrics.summary(
-      'split_test_session_storage_size',
-      JSON.stringify(session.splitTests).length
-    )
-  }
-}
-
 async function _getSplitTest(name) {
   const splitTests = await SplitTestCache.get('')
   return splitTests?.get(name)
 }
 
 module.exports = {
-  getPercentile,
   getAssignment: callbackify(getAssignment),
   getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
-  sessionMaintenance: callbackify(sessionMaintenance),
   setOverrideInSession,
   clearOverridesInSession,
   promises: {
@@ -621,6 +507,5 @@ module.exports = {
     getAssignmentForMongoUser,
     getAssignmentForUser,
     getActiveAssignmentsForUser,
-    sessionMaintenance,
   },
 }

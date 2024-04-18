@@ -24,6 +24,7 @@ const LimitationsManager = require('../Subscription/LimitationsManager')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SplitTestSessionHandler = require('../SplitTests/SplitTestSessionHandler')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 
 /** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
@@ -115,7 +116,7 @@ async function projectListPage(req, res, next) {
   }
 
   if (isSaas) {
-    await SplitTestHandler.promises.sessionMaintenance(req, user)
+    await SplitTestSessionHandler.promises.sessionMaintenance(req, user)
 
     try {
       usersBestSubscription =

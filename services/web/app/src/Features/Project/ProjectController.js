@@ -31,6 +31,7 @@ const BrandVariationsHandler = require('../BrandVariations/BrandVariationsHandle
 const UserController = require('../User/UserController')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const SplitTestSessionHandler = require('../SplitTests/SplitTestSessionHandler')
 const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
@@ -431,7 +432,7 @@ const ProjectController = {
         },
         user(cb) {
           if (userId == null) {
-            SplitTestHandler.sessionMaintenance(req, null, () => {})
+            SplitTestSessionHandler.sessionMaintenance(req, null, () => {})
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
             User.updateOne(
@@ -453,7 +454,7 @@ const ProjectController = {
                   return cb(err)
                 }
                 logger.debug({ projectId, userId }, 'got user')
-                SplitTestHandler.sessionMaintenance(req, user, () => {})
+                SplitTestSessionHandler.sessionMaintenance(req, user, () => {})
                 if (FeaturesUpdater.featuresEpochIsCurrent(user)) {
                   return cb(null, user)
                 }

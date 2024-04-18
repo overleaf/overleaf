@@ -23,14 +23,14 @@ describe('BetaProgramController', function () {
         user: this.user,
       },
     }
-    this.SplitTestHandler = {
+    this.SplitTestSessionHandler = {
       promises: {
         sessionMaintenance: sinon.stub(),
       },
     }
     this.BetaProgramController = SandboxedModule.require(modulePath, {
       requires: {
-        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        '../SplitTests/SplitTestSessionHandler': this.SplitTestSessionHandler,
         './BetaProgramHandler': (this.BetaProgramHandler = {
           promises: {
             optIn: sinon.stub().resolves(),
@@ -76,7 +76,7 @@ describe('BetaProgramController', function () {
 
     it('should invoke the session maintenance', function (done) {
       this.res.callback = () => {
-        this.SplitTestHandler.promises.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
           this.req
         )
         done()
@@ -130,7 +130,7 @@ describe('BetaProgramController', function () {
 
     it('should invoke the session maintenance', function (done) {
       this.res.callback = () => {
-        this.SplitTestHandler.promises.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
           this.req,
           null
         )
