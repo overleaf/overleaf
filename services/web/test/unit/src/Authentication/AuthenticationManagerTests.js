@@ -81,12 +81,13 @@ describe('AuthenticationManager', function () {
       describe('when the hashed password matches', function () {
         beforeEach(async function () {
           this.unencryptedPassword = 'testpassword'
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            this.unencryptedPassword,
-            null,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              null,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should look up the correct user in the database', function () {
@@ -119,12 +120,13 @@ describe('AuthenticationManager', function () {
 
       describe('when the encrypted passwords do not match', function () {
         beforeEach(async function () {
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            'notthecorrectpassword',
-            null,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              'notthecorrectpassword',
+              null,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should persist the login failure and bump epoch', function () {
@@ -159,7 +161,7 @@ describe('AuthenticationManager', function () {
                 { email: this.email },
                 'testpassword',
                 null,
-                { skipHIBPCheck: true }
+                { enforceHIBPCheck: false }
               )
             ).to.be.rejectedWith(AuthenticationErrors.ParallelLoginError)
           })
@@ -177,7 +179,7 @@ describe('AuthenticationManager', function () {
                 { email: this.email },
                 'notthecorrectpassword',
                 null,
-                { skipHIBPCheck: true }
+                { enforceHIBPCheck: false }
               )
             ).to.be.rejectedWith(AuthenticationErrors.ParallelLoginError)
           })
@@ -249,12 +251,13 @@ describe('AuthenticationManager', function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().resolves(true)
           this.bcrypt.getRounds = sinon.stub().returns(4)
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            this.unencryptedPassword,
-            null,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              null,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should look up the correct user in the database', function () {
@@ -280,22 +283,62 @@ describe('AuthenticationManager', function () {
         })
 
         describe('HIBP', function () {
-          it('should not check HIBP if not requested', function () {
-            this.HaveIBeenPwned.promises.checkPasswordForReuse.should.not.have
-              .been.called
+          it('should enforce HIBP if requested', async function () {
+            this.HaveIBeenPwned.promises.checkPasswordForReuse.resolves(true)
+
+            await expect(
+              this.AuthenticationManager.promises.authenticate(
+                { email: this.email },
+                this.unencryptedPassword,
+                null,
+                { enforceHIBPCheck: true }
+              )
+            ).to.be.rejectedWith(AuthenticationErrors.PasswordReusedError)
           })
 
-          it('should check HIBP if requested', async function () {
-            await this.AuthenticationManager.promises.authenticate(
-              { email: this.email },
-              this.unencryptedPassword,
-              null,
-              { skipHIBPCheck: false }
-            )
+          it('should check but not enforce HIBP if not requested', async function () {
+            this.HaveIBeenPwned.promises.checkPasswordForReuse.resolves(true)
+
+            const { user } =
+              await this.AuthenticationManager.promises.authenticate(
+                { email: this.email },
+                this.unencryptedPassword,
+                null,
+                { enforceHIBPCheck: false }
+              )
 
             this.HaveIBeenPwned.promises.checkPasswordForReuse.should.have.been.calledWith(
               this.unencryptedPassword
             )
+            expect(user).to.equal(this.user)
+          })
+
+          it('should report password reused when check not enforced', async function () {
+            this.HaveIBeenPwned.promises.checkPasswordForReuse.resolves(true)
+
+            const { isPasswordReused } =
+              await this.AuthenticationManager.promises.authenticate(
+                { email: this.email },
+                this.unencryptedPassword,
+                null,
+                { enforceHIBPCheck: false }
+              )
+
+            expect(isPasswordReused).to.equal(true)
+          })
+
+          it('should report password not reused when check not enforced', async function () {
+            this.HaveIBeenPwned.promises.checkPasswordForReuse.resolves(false)
+
+            const { isPasswordReused } =
+              await this.AuthenticationManager.promises.authenticate(
+                { email: this.email },
+                this.unencryptedPassword,
+                null,
+                { enforceHIBPCheck: false }
+              )
+
+            expect(isPasswordReused).to.equal(false)
           })
         })
       })
@@ -304,12 +347,13 @@ describe('AuthenticationManager', function () {
         beforeEach(async function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().resolves(false)
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            this.unencryptedPassword,
-            null,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              null,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should not return the user', function () {
@@ -323,12 +367,13 @@ describe('AuthenticationManager', function () {
           this.user.hashedPassword = this.hashedPassword = 'asdfjadflasdf'
           this.bcrypt.compare = sinon.stub().resolves(false)
           this.auditLog = { ipAddress: 'ip', info: { method: 'foo' } }
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            this.unencryptedPassword,
-            this.auditLog,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              this.auditLog,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should not return the user, but add entry to audit log', function () {
@@ -354,12 +399,13 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.promises._setUserPasswordInMongo = sinon
             .stub()
             .resolves()
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            this.unencryptedPassword,
-            null,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              null,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should look up the correct user in the database', function () {
@@ -400,12 +446,13 @@ describe('AuthenticationManager', function () {
           this.AuthenticationManager.promises.setUserPassword = sinon
             .stub()
             .resolves()
-          this.result = await this.AuthenticationManager.promises.authenticate(
-            { email: this.email },
-            this.unencryptedPassword,
-            null,
-            { skipHIBPCheck: true }
-          )
+          ;({ user: this.result } =
+            await this.AuthenticationManager.promises.authenticate(
+              { email: this.email },
+              this.unencryptedPassword,
+              null,
+              { enforceHIBPCheck: false }
+            ))
         })
 
         it('should not check the number of rounds', function () {
@@ -433,12 +480,13 @@ describe('AuthenticationManager', function () {
         this.User.findOne = sinon
           .stub()
           .returns({ exec: sinon.stub().resolves(null) })
-        this.result = await this.AuthenticationManager.promises.authenticate(
-          { email: this.email },
-          this.unencrpytedPassword,
-          null,
-          { skipHIBPCheck: true }
-        )
+        ;({ user: this.result } =
+          await this.AuthenticationManager.promises.authenticate(
+            { email: this.email },
+            this.unencrpytedPassword,
+            null,
+            { enforceHIBPCheck: false }
+          ))
       })
 
       it('should not return a user', function () {

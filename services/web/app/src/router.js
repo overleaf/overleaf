@@ -224,6 +224,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthenticationController.passportLogin
   )
 
+  webRouter.get(
+    '/compromised-password',
+    AuthenticationController.requireLogin(),
+    UserPagesController.compromisedPasswordPage
+  )
+
   webRouter.get('/account-suspended', UserPagesController.accountSuspended)
 
   if (Settings.enableLegacyLogin) {

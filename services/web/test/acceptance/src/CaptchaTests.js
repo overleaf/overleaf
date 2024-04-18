@@ -57,6 +57,14 @@ describe('Captcha', function () {
     expect(body).to.deep.equal({ redir: '/project' })
   }
 
+  function expectSuccessfulLoginWithRedirectToCompromisedPasswordPage(
+    response,
+    body
+  ) {
+    expect(response.statusCode).to.equal(200)
+    expect(body).to.deep.equal({ redir: '/compromised-password' })
+  }
+
   function expectBadLogin(response, body) {
     expect(response.statusCode).to.equal(401)
     expect(body).to.deep.equal({
@@ -226,12 +234,18 @@ describe('Captcha', function () {
       })
       it('should be able to skip HIBP check with deviceHistory and valid captcha', async function () {
         const { response, body } = await loginWithCaptcha('valid')
-        expectSuccessfulLogin(response, body)
+        expectSuccessfulLoginWithRedirectToCompromisedPasswordPage(
+          response,
+          body
+        )
       })
 
       it('should be able to skip HIBP check with deviceHistory and skipped captcha', async function () {
         const { response, body } = await loginWithCaptcha('')
-        expectSuccessfulLogin(response, body)
+        expectSuccessfulLoginWithRedirectToCompromisedPasswordPage(
+          response,
+          body
+        )
       })
 
       it('should not be able to skip HIBP check without deviceHistory', async function () {

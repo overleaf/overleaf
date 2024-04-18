@@ -314,6 +314,10 @@ const UserPagesController = {
     )
   },
 
+  compromisedPasswordPage(_, res) {
+    res.render('user/compromised_password')
+  },
+
   _restructureThirdPartyIds(user) {
     // 3rd party identifiers are an array of objects
     // this turn them into a single object, which

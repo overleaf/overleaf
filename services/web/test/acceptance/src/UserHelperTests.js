@@ -16,12 +16,13 @@ describe('UserHelper', function () {
       it('should create new user with default username and password', async function () {
         const userHelper = await UserHelper.createUser()
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
-        const authedUser = await AuthenticationManager.promises.authenticate(
-          { _id: userHelper.user._id },
-          userHelper.getDefaultPassword(),
-          null,
-          { skipHIBPCheck: true }
-        )
+        const { user: authedUser } =
+          await AuthenticationManager.promises.authenticate(
+            { _id: userHelper.user._id },
+            userHelper.getDefaultPassword(),
+            null,
+            { enforceHIBPCheck: false }
+          )
         expect(authedUser).to.not.be.null
       })
     })
@@ -32,12 +33,13 @@ describe('UserHelper', function () {
           email: 'foo@test.com',
         })
         userHelper.user.email.should.equal('foo@test.com')
-        const authedUser = await AuthenticationManager.promises.authenticate(
-          { _id: userHelper.user._id },
-          userHelper.getDefaultPassword(),
-          null,
-          { skipHIBPCheck: true }
-        )
+        const { user: authedUser } =
+          await AuthenticationManager.promises.authenticate(
+            { _id: userHelper.user._id },
+            userHelper.getDefaultPassword(),
+            null,
+            { enforceHIBPCheck: false }
+          )
         expect(authedUser).to.not.be.null
       })
     })
@@ -48,12 +50,13 @@ describe('UserHelper', function () {
           password: 'foofoofoo',
         })
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
-        const authedUser = await AuthenticationManager.promises.authenticate(
-          { _id: userHelper.user._id },
-          'foofoofoo',
-          null,
-          { skipHIBPCheck: true }
-        )
+        const { user: authedUser } =
+          await AuthenticationManager.promises.authenticate(
+            { _id: userHelper.user._id },
+            'foofoofoo',
+            null,
+            { enforceHIBPCheck: false }
+          )
         expect(authedUser).to.not.be.null
       })
     })
@@ -128,12 +131,13 @@ describe('UserHelper', function () {
       it('should create new user with default username and password', async function () {
         const userHelper = await UserHelper.registerUser()
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
-        const authedUser = await AuthenticationManager.promises.authenticate(
-          { _id: userHelper.user._id },
-          userHelper.getDefaultPassword(),
-          null,
-          { skipHIBPCheck: true }
-        )
+        const { user: authedUser } =
+          await AuthenticationManager.promises.authenticate(
+            { _id: userHelper.user._id },
+            userHelper.getDefaultPassword(),
+            null,
+            { enforceHIBPCheck: false }
+          )
         expect(authedUser).to.not.be.null
       })
     })
@@ -144,12 +148,13 @@ describe('UserHelper', function () {
           email: 'foo2@test.com',
         })
         userHelper.user.email.should.equal('foo2@test.com')
-        const authedUser = await AuthenticationManager.promises.authenticate(
-          { _id: userHelper.user._id },
-          userHelper.getDefaultPassword(),
-          null,
-          { skipHIBPCheck: true }
-        )
+        const { user: authedUser } =
+          await AuthenticationManager.promises.authenticate(
+            { _id: userHelper.user._id },
+            userHelper.getDefaultPassword(),
+            null,
+            { enforceHIBPCheck: false }
+          )
         expect(authedUser).to.not.be.null
       })
     })
@@ -160,12 +165,13 @@ describe('UserHelper', function () {
           password: 'foofoofoo',
         })
         userHelper.user.email.should.equal(userHelper.getDefaultEmail())
-        const authedUser = await AuthenticationManager.promises.authenticate(
-          { _id: userHelper.user._id },
-          'foofoofoo',
-          null,
-          { skipHIBPCheck: true }
-        )
+        const { user: authedUser } =
+          await AuthenticationManager.promises.authenticate(
+            { _id: userHelper.user._id },
+            'foofoofoo',
+            null,
+            { enforceHIBPCheck: false }
+          )
         expect(authedUser).to.not.be.null
       })
     })

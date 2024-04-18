@@ -178,6 +178,7 @@ const AuthenticationController = {
 
         const redir =
           AuthenticationController._getRedirectFromSession(req) || '/project'
+
         _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser)
         const userId = user._id
         UserAuditLogHandler.addEntry(
@@ -241,8 +242,10 @@ const AuthenticationController = {
             { email },
             password,
             auditLog,
-            { skipHIBPCheck: fromKnownDevice },
-            function (error, user) {
+            {
+              enforceHIBPCheck: !fromKnownDevice,
+            },
+            function (error, user, isPasswordReused) {
               if (error != null) {
                 if (error instanceof ParallelLoginError) {
                   return done(null, false, { status: 429 })
@@ -278,6 +281,16 @@ const AuthenticationController = {
                   status: 400,
                 })
               } else if (user) {
+                if (
+                  isPasswordReused &&
+                  AuthenticationController._getRedirectFromSession(req) == null
+                ) {
+                  AuthenticationController.setRedirectInSession(
+                    req,
+                    '/compromised-password'
+                  )
+                }
+
                 // async actions
                 done(null, user)
               } else {

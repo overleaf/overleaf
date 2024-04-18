@@ -70,11 +70,11 @@ async function changePassword(req, res, next) {
   metrics.inc('user.password-change')
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  const user = await AuthenticationManager.promises.authenticate(
+  const { user } = await AuthenticationManager.promises.authenticate(
     { _id: userId },
     req.body.currentPassword,
     null,
-    { skipHIBPCheck: true }
+    { enforceHIBPCheck: false }
   )
   if (!user) {
     return HttpErrorHandler.badRequest(
@@ -228,11 +228,11 @@ async function tryDeleteUser(req, res, next) {
     return res.sendStatus(403)
   }
 
-  const user = await AuthenticationManager.promises.authenticate(
+  const { user } = await AuthenticationManager.promises.authenticate(
     { _id: userId },
     password,
     null,
-    { skipHIBPCheck: true }
+    { enforceHIBPCheck: false }
   )
   if (!user) {
     logger.err({ userId }, 'auth failed during attempt to delete account')

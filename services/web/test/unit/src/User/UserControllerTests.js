@@ -178,7 +178,9 @@ describe('UserController', function () {
       this.SessionManager.getLoggedInUserId = sinon
         .stub()
         .returns(this.user._id)
-      this.AuthenticationManager.promises.authenticate.resolves(this.user)
+      this.AuthenticationManager.promises.authenticate.resolves({
+        user: this.user,
+      })
     })
 
     it('should send 200', function (done) {
@@ -246,7 +248,9 @@ describe('UserController', function () {
 
     describe('when authenticate does not produce a user', function () {
       beforeEach(function () {
-        this.AuthenticationManager.promises.authenticate.resolves(null)
+        this.AuthenticationManager.promises.authenticate.resolves({
+          user: null,
+        })
       })
 
       it('should return 403', function (done) {
@@ -696,7 +700,9 @@ describe('UserController', function () {
   describe('changePassword', function () {
     describe('success', function () {
       beforeEach(function () {
-        this.AuthenticationManager.promises.authenticate.resolves(this.user)
+        this.AuthenticationManager.promises.authenticate.resolves({
+          user: this.user,
+        })
         this.AuthenticationManager.promises.setUserPassword.resolves()
         this.req.body = {
           newPassword1: 'newpass',
@@ -759,7 +765,7 @@ describe('UserController', function () {
 
     describe('errors', function () {
       it('should check the old password is the current one at the moment', function (done) {
-        this.AuthenticationManager.promises.authenticate.resolves()
+        this.AuthenticationManager.promises.authenticate.resolves({})
         this.req.body = { currentPassword: 'oldpasshere' }
         this.HttpErrorHandler.badRequest.callsFake(() => {
           expect(this.HttpErrorHandler.badRequest).to.have.been.calledWith(
@@ -780,7 +786,9 @@ describe('UserController', function () {
       })
 
       it('it should not set the new password if they do not match', function (done) {
-        this.AuthenticationManager.promises.authenticate.resolves({})
+        this.AuthenticationManager.promises.authenticate.resolves({
+          user: this.user,
+        })
         this.req.body = {
           newPassword1: '1',
           newPassword2: '2',
@@ -813,7 +821,9 @@ describe('UserController', function () {
           message
         )
         this.AuthenticationManager.promises.setUserPassword.rejects(err)
-        this.AuthenticationManager.promises.authenticate.resolves({})
+        this.AuthenticationManager.promises.authenticate.resolves({
+          user: this.user,
+        })
         this.req.body = {
           newPassword1: 'newpass',
           newPassword2: 'newpass',
@@ -831,7 +841,9 @@ describe('UserController', function () {
       describe('UserAuditLogHandler error', function () {
         it('should return error and not update password', function (done) {
           this.UserAuditLogHandler.promises.addEntry.rejects(new Error('oops'))
-          this.AuthenticationManager.promises.authenticate.resolves(this.user)
+          this.AuthenticationManager.promises.authenticate.resolves({
+            user: this.user,
+          })
           this.AuthenticationManager.promises.setUserPassword.resolves()
           this.req.body = {
             newPassword1: 'newpass',
@@ -851,7 +863,9 @@ describe('UserController', function () {
       describe('EmailHandler error', function () {
         const anError = new Error('oops')
         beforeEach(function () {
-          this.AuthenticationManager.promises.authenticate.resolves(this.user)
+          this.AuthenticationManager.promises.authenticate.resolves({
+            user: this.user,
+          })
           this.AuthenticationManager.promises.setUserPassword.resolves()
           this.req.body = {
             newPassword1: 'newpass',
