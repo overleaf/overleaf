@@ -84,8 +84,8 @@ async function appendAssignment(session, assignment) {
 
   const assignments = await getAssignments(session)
   if (
-    _.find(assignments[assignment.splitTestName], {
-      splitTestName: assignment.splitTestName,
+    !_.find(assignments[assignment.splitTestName], {
+      variantName: assignment.variantName,
       versionNumber: assignment.versionNumber,
     })
   ) {
@@ -97,7 +97,12 @@ async function appendAssignment(session, assignment) {
     // const assignmentString = _buildAssignmentString(splitTest, assignment)
     // const separator = session.sta.length > 0 ? ';' : ''
     // session.sta += `${separator}${assignmentString}`
-    session.splitTests[assignment.splitTestName].push(assignment)
+    session.splitTests[assignment.splitTestName].push({
+      variantName: assignment.variantName,
+      versionNumber: assignment.versionNumber,
+      phase: assignment.phase,
+      assignedAt: assignment.assignedAt,
+    })
   }
 }
 
