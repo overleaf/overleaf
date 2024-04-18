@@ -492,10 +492,7 @@ function _getNonSaasAssignment(splitTestName) {
 
 async function _getSplitTest(name) {
   const splitTests = await SplitTestCache.get('')
-  const splitTest = splitTests?.get(name)
-  if (splitTest && !splitTest.archived) {
-    return splitTest
-  }
+  return splitTests?.get(name)
 }
 
 module.exports = {

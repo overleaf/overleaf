@@ -60,7 +60,9 @@ async function getSplitTests({ name, phase, type, active, archived }) {
 
 async function getRuntimeTests() {
   try {
-    return SplitTest.find({}).lean().exec()
+    return await SplitTest.find({
+      archived: { $ne: true },
+    }).exec()
   } catch (error) {
     throw OError.tag(error, 'Failed to get active split tests list')
   }
