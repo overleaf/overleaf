@@ -90,7 +90,10 @@ describe('group members, with managed users', function () {
         cy.contains('15th Jan 2023')
         cy.get('.sr-only').contains('Pending invite')
 
-        cy.get('.badge-new-comment').contains('Pending invite')
+        cy.findByTestId('badge-pending-invite').should(
+          'have.text',
+          'Pending invite'
+        )
         cy.get(`.security-state-invite-pending`).should('exist')
       })
 
@@ -98,7 +101,7 @@ describe('group members, with managed users', function () {
         cy.contains('bobby.lapointe@test.com')
         cy.contains('Bobby Lapointe')
         cy.contains('2nd Jan 2023')
-        cy.get('.badge-new-comment').should('not.exist')
+        cy.findByTestId('badge-pending-invite').should('not.exist')
         cy.get('.sr-only').contains('Not managed')
       })
 
@@ -106,7 +109,7 @@ describe('group members, with managed users', function () {
         cy.contains('claire.jennings@test.com')
         cy.contains('Claire Jennings')
         cy.contains('3rd Jan 2023')
-        cy.get('.badge-new-comment').should('not.exist')
+        cy.findByTestId('badge-pending-invite').should('not.exist')
         cy.get('.sr-only').contains('Managed')
       })
     })
@@ -131,7 +134,10 @@ describe('group members, with managed users', function () {
         cy.contains('someone.else@test.com')
         cy.contains('N/A')
         cy.get('.sr-only').contains('Pending invite')
-        cy.get('.badge-new-comment').contains('Pending invite')
+        cy.findByTestId('badge-pending-invite').should(
+          'have.text',
+          'Pending invite'
+        )
         cy.get(`.security-state-invite-pending`).should('exist')
       })
     })

@@ -97,7 +97,10 @@ describe('MemberRow', function () {
       })
 
       it('should render a "Pending invite" badge', function () {
-        cy.get('.badge-new-comment').contains('Pending invite')
+        cy.findByTestId('badge-pending-invite').should(
+          'have.text',
+          'Pending invite'
+        )
       })
     })
 
@@ -269,7 +272,10 @@ describe('MemberRow', function () {
       })
 
       it('should render a "Pending invite" badge', function () {
-        cy.get('.badge-new-comment').contains('Pending invite')
+        cy.findByTestId('badge-pending-invite').should(
+          'have.text',
+          'Pending invite'
+        )
       })
     })
 
@@ -443,7 +449,10 @@ describe('MemberRow', function () {
       })
 
       it('should render a "Pending invite" badge', function () {
-        cy.get('.badge-new-comment').contains('Pending invite')
+        cy.findByTestId('badge-pending-invite').should(
+          'have.text',
+          'Pending invite'
+        )
       })
     })
 
@@ -618,7 +627,10 @@ describe('MemberRow', function () {
       })
 
       it('should render a "Pending invite" badge', function () {
-        cy.get('.badge-new-comment').contains('Pending invite')
+        cy.findByTestId('badge-pending-invite').should(
+          'have.text',
+          'Pending invite'
+        )
       })
     })
 

@@ -44,3 +44,11 @@
     border-color: var(--bs-btn-border-color);
   }
 }
+
+@mixin reset-button() {
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+}

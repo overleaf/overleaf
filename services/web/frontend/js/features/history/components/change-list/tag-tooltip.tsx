@@ -64,16 +64,21 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
     }
   }
 
+  const showCloseButton = Boolean(
+    (isOwnedByCurrentUser || isProjectOwner) && !isPseudoCurrentStateLabel
+  )
+
   return (
     <>
       <Badge
         prepend={<Icon type="tag" fw />}
-        onClose={showConfirmationModal}
-        closeButton={Boolean(
-          (isOwnedByCurrentUser || isProjectOwner) && !isPseudoCurrentStateLabel
-        )}
-        closeBtnProps={{ 'aria-label': t('delete') }}
-        className="history-version-badge"
+        closeBtnProps={
+          showCloseButton
+            ? { 'aria-label': t('delete'), onClick: showConfirmationModal }
+            : undefined
+        }
+        bsStyle={null}
+        className="badge-bs3 history-version-badge"
         data-testid="history-version-badge"
         {...props}
       >

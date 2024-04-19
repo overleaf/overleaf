@@ -1,6 +1,7 @@
 import { useCallback, useState, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
+import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
 import { Button, Modal } from 'react-bootstrap'
 import getMeta from '../../../../utils/meta'
 import { sendMB } from '../../../../infrastructure/event-tracking'
@@ -57,7 +58,7 @@ export function IntegrationLinkingWidget({
         <div className="title-row">
           <h4>{title}</h4>
           {!hasFeature && (
-            <span className="label label-info">{t('premium_feature')}</span>
+            <BadgeWrapper bg="info">{t('premium_feature')}</BadgeWrapper>
           )}
         </div>
         <p className="small">

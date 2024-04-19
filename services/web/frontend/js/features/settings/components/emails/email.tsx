@@ -2,6 +2,9 @@ import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
 import ResendConfirmationEmailButton from './resend-confirmation-email-button'
 import { ssoAvailableForInstitution } from '../../utils/sso'
+import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
+import { isBootstrap5 } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 type EmailProps = {
   userEmailData: UserEmailData
@@ -37,14 +40,14 @@ function Email({ userEmailData }: EmailProps) {
         </div>
       )}
       {hasBadges && (
-        <div className="small">
+        <div className={classnames({ small: !isBootstrap5 })}>
           {isPrimary && (
             <>
-              <span className="label label-info">Primary</span>{' '}
+              <BadgeWrapper bg="info">Primary</BadgeWrapper>{' '}
             </>
           )}
           {isProfessional && (
-            <span className="label label-primary">{t('professional')}</span>
+            <BadgeWrapper bg="primary">{t('professional')}</BadgeWrapper>
           )}
         </div>
       )}

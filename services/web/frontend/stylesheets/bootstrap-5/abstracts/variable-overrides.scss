@@ -1,5 +1,7 @@
 // Overrides for Bootstrap 5's default Sass variables
 
+$prefix: bs-;
+
 // Fonts
 $font-family-sans-serif: 'Noto Sans', sans-serif;
 $font-family-serif: 'Merriweather', serif;
@@ -21,6 +23,18 @@ $btn-border-radius-sm: $border-radius-full;
 // Colors
 $primary: $bg-accent-01;
 $secondary: $bg-light-primary;
+$info: $bg-info-01;
+$warning: $bg-warning-01;
+$danger: $bg-danger-01;
+$light: $bg-light-tertiary;
+$dark: $neutral-90;
+
+// Badges
+$badge-font-size: var(--font-size-01);
+$badge-font-weight: var(--bs-body-font-weight);
+$badge-padding-y: $spacing-01;
+$badge-padding-x: $spacing-02;
+$badge-border-radius: $border-radius-base;
 
 // Tooltips
 $tooltip-max-width: 320px;

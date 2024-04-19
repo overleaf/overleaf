@@ -46,7 +46,12 @@ export default function MemberRow({
                 id={`pending-invite-symbol-${user._id}`}
                 description={t('pending_invite')}
               >
-                <Badge aria-label={t('pending_invite')}>
+                <Badge
+                  bsStyle={null}
+                  className="badge-bs3"
+                  aria-label={t('pending_invite')}
+                  data-testid="badge-pending-invite"
+                >
                   {t('pending_invite')}
                 </Badge>
               </Tooltip>

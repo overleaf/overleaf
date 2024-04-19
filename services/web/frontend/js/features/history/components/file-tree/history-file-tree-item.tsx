@@ -26,7 +26,10 @@ export default function HistoryFileTreeItem({
           {name}
         </div>
         {operation ? (
-          <Badge className="history-file-tree-item-badge" size="sm">
+          <Badge
+            bsStyle={null}
+            className="badge-bs3 history-file-tree-item-badge"
+          >
             {operation}
           </Badge>
         ) : null}

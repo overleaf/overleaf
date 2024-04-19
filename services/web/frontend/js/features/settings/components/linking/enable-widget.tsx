@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import { sendMB } from '@/infrastructure/event-tracking'
+import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
 
 function trackUpgradeClick() {
   sendMB('settings-upgrade-click')
@@ -48,7 +49,7 @@ export function EnableWidget({
         <div className="title-row">
           <h4>{title}</h4>
           {!hasFeature && isPremiumFeature && (
-            <span className="label label-info">{t('premium_feature')}</span>
+            <BadgeWrapper bg="info">{t('premium_feature')}</BadgeWrapper>
           )}
         </div>
         <p className="small">
