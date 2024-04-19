@@ -112,6 +112,11 @@ class StringFileData extends FileData {
     return this.comments
   }
 
+  /** @inheritdoc */
+  getTrackedChanges() {
+    return this.trackedChanges
+  }
+
   /**
    * @inheritdoc
    * @returns {Promise<StringFileData>}

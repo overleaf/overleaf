@@ -21,6 +21,7 @@ let StringFileData = null
  * @typedef {import("../operation/edit_operation")} EditOperation
  * @typedef {import("../file_data/comment_list")} CommentList
  * @typedef {import("../types").CommentRawData} CommentRawData
+ * @typedef {import("../file_data/tracked_change_list")} TrackedChangeList
  */
 
 /**
@@ -198,6 +199,18 @@ class FileData {
    */
   getComments() {
     throw new Error('getComments not implemented for ' + JSON.stringify(this))
+  }
+
+  /**
+   * @see File#getTrackedChanges
+   * @function
+   * @return {TrackedChangeList}
+   * @abstract
+   */
+  getTrackedChanges() {
+    throw new Error(
+      'getTrackedChanges not implemented for ' + JSON.stringify(this)
+    )
   }
 }
 

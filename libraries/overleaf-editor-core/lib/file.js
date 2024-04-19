@@ -17,6 +17,7 @@ const StringFileData = require('./file_data/string_file_data')
  * @typedef {import("./types").CommentRawData} CommentRawData
  * @typedef {import("./file_data/comment_list")} CommentList
  * @typedef {import("./operation/text_operation")} TextOperation
+ * @typedef {import("./file_data/tracked_change_list")} TrackedChangeList
  * @typedef {{filterTrackedDeletes?: boolean}} FileGetContentOptions
  */
 
@@ -208,6 +209,14 @@ class File {
    */
   getComments() {
     return this.data.getComments()
+  }
+
+  /**
+   * Get the tracked changes for this file.
+   * @return {TrackedChangeList}
+   */
+  getTrackedChanges() {
+    return this.data.getTrackedChanges()
   }
 
   /**

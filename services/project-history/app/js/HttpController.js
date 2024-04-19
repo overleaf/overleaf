@@ -201,6 +201,21 @@ export function getFileSnapshot(req, res, next) {
   )
 }
 
+export function getRangesSnapshot(req, res, next) {
+  const { project_id: projectId, version, pathname } = req.params
+  SnapshotManager.getRangesSnapshot(
+    projectId,
+    version,
+    pathname,
+    (err, ranges) => {
+      if (err) {
+        return next(OError.tag(err))
+      }
+      res.json(ranges)
+    }
+  )
+}
+
 export function getProjectSnapshot(req, res, next) {
   const { project_id: projectId, version } = req.params
   SnapshotManager.getProjectSnapshot(

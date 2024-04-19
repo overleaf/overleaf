@@ -579,4 +579,379 @@ Four five six\
       })
     })
   })
+
+  describe('getRangesSnapshot', function () {
+    beforeEach(async function () {
+      this.WebApiManager.promises.getHistoryId.resolves(this.historyId)
+      this.HistoryStoreManager.promises.getChunkAtVersion.resolves({
+        chunk: (this.chunk = {
+          history: {
+            snapshot: {
+              files: {
+                'main.tex': {
+                  hash: (this.fileHash =
+                    '5d2781d78fa5a97b7bafa849fe933dfc9dc93eba'),
+                  rangesHash: (this.rangesHash =
+                    '73061952d41ce54825e2fc1c36b4cf736d5fb62f'),
+                  stringLength: 41,
+                },
+              },
+            },
+            changes: [],
+          },
+          startVersion: 1,
+          authors: [
+            {
+              id: 31,
+              email: 'author@example.com',
+              name: 'Author',
+            },
+          ],
+        }),
+      })
+
+      this.HistoryStoreManager.getBlobStore.withArgs(this.historyId).returns({
+        getString: (this.getString = sinon.stub()),
+        getObject: (this.getObject = sinon.stub()),
+      })
+
+      this.getString.resolves('the quick brown fox jumps over the lazy dog')
+    })
+
+    describe('with tracked deletes', function () {
+      beforeEach(async function () {
+        this.getObject.resolves({
+          trackedChanges: [
+            {
+              // 'quick '
+              range: {
+                pos: 4,
+                length: 6,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'fox '
+              range: {
+                pos: 16,
+                length: 4,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'lazy '
+              range: {
+                pos: 35,
+                length: 5,
+              },
+              tracking: {
+                type: 'insert',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'dog'
+              range: {
+                pos: 40,
+                length: 3,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+          ],
+        })
+        this.data = await this.SnapshotManager.promises.getRangesSnapshot(
+          this.projectId,
+          1,
+          'main.tex'
+        )
+      })
+
+      it("doesn't shift the tracked delete by itself", function () {
+        expect(this.data.changes[0].op.p).to.eq(4)
+      })
+
+      it('should move subsequent tracked changes by the length of previous deletes', function () {
+        expect(this.data.changes[1].op.p).to.eq(16 - 6)
+        expect(this.data.changes[2].op.p).to.eq(35 - 6 - 4)
+      })
+
+      it("shouldn't move subsequent tracked changes by previous inserts", function () {
+        expect(this.data.changes[3].op.p).to.eq(40 - 6 - 4)
+      })
+    })
+
+    describe('with comments and tracked deletes', function () {
+      beforeEach(async function () {
+        this.getObject.resolves({
+          // the quick brown fox jumps over the lazy dog
+          trackedChanges: [
+            {
+              // 'e qui'
+              range: {
+                pos: 2,
+                length: 5,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'r'
+              range: {
+                pos: 11,
+                length: 1,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'er th'
+              range: {
+                pos: 28,
+                length: 5,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+          ],
+          comments: [
+            {
+              id: 'comment-1',
+              ranges: [
+                // 'quick'
+                {
+                  pos: 4,
+                  length: 5,
+                },
+                // 'brown'
+                {
+                  pos: 10,
+                  length: 5,
+                },
+                // 'over'
+                {
+                  pos: 26,
+                  length: 4,
+                },
+              ],
+              resolved: false,
+            },
+          ],
+        })
+        this.data = await this.SnapshotManager.promises.getRangesSnapshot(
+          this.projectId,
+          1,
+          'main.tex'
+        )
+      })
+
+      it('should move the comment to the start of the tracked delete and remove overlapping text', function () {
+        expect(this.data.comments[0].op.p).to.eq(2)
+        expect(this.data.comments[0].op.c).to.eq('ck')
+      })
+
+      it('should remove overlapping text in middle of comment', function () {
+        expect(this.data.comments[1].op.p).to.eq(5)
+        expect(this.data.comments[1].op.c).to.eq('bown')
+      })
+
+      it('should remove overlapping text at end of comment', function () {
+        expect(this.data.comments[2].op.p).to.eq(20)
+        expect(this.data.comments[2].op.c).to.eq('ov')
+      })
+    })
+
+    describe('with multiple tracked changes and comments', function () {
+      beforeEach(async function () {
+        this.getObject.resolves({
+          trackedChanges: [
+            {
+              // 'quick '
+              range: {
+                pos: 4,
+                length: 6,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2023-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'brown '
+              range: {
+                pos: 10,
+                length: 6,
+              },
+              tracking: {
+                type: 'insert',
+                userId: '31',
+                ts: '2024-01-01T00:00:00.000Z',
+              },
+            },
+            {
+              // 'lazy '
+              range: {
+                pos: 35,
+                length: 5,
+              },
+              tracking: {
+                type: 'delete',
+                userId: '31',
+                ts: '2024-01-01T00:00:00.000Z',
+              },
+            },
+          ],
+          comments: [
+            {
+              id: 'comment-1',
+              // 'quick', 'brown', 'lazy'
+              ranges: [
+                {
+                  pos: 4,
+                  length: 5,
+                },
+                {
+                  pos: 10,
+                  length: 5,
+                },
+                {
+                  pos: 35,
+                  length: 4,
+                },
+              ],
+              resolved: false,
+            },
+            {
+              id: 'comment-2',
+              // 'the', 'the'
+              ranges: [
+                {
+                  pos: 0,
+                  length: 3,
+                },
+                {
+                  pos: 31,
+                  length: 3,
+                },
+              ],
+              resolved: true,
+            },
+          ],
+        })
+
+        this.data = await this.SnapshotManager.promises.getRangesSnapshot(
+          this.projectId,
+          1,
+          'main.tex'
+        )
+      })
+
+      it('looks up ranges', function () {
+        expect(this.getObject).to.have.been.calledWith(this.rangesHash)
+        expect(this.getString).to.have.been.calledWith(this.fileHash)
+      })
+
+      it('should get the chunk', function () {
+        expect(
+          this.HistoryStoreManager.promises.getChunkAtVersion
+        ).to.have.been.calledWith(this.projectId, this.historyId, 1)
+      })
+
+      it('returns the ranges with content and adjusted positions to ignore tracked deletes', function () {
+        expect(this.data).to.deep.equal({
+          changes: [
+            {
+              metadata: {
+                ts: '2023-01-01T00:00:00.000Z',
+                user_id: '31',
+              },
+              op: {
+                d: 'quick ',
+                p: 4,
+              },
+            },
+            {
+              metadata: {
+                ts: '2024-01-01T00:00:00.000Z',
+                user_id: '31',
+              },
+              op: {
+                i: 'brown ',
+                p: 4,
+              },
+            },
+            {
+              metadata: {
+                ts: '2024-01-01T00:00:00.000Z',
+                user_id: '31',
+              },
+              op: {
+                d: 'lazy ',
+                p: 29,
+              },
+            },
+          ],
+          comments: [
+            {
+              op: {
+                c: '',
+                p: 4,
+                t: 'comment-1',
+              },
+            },
+            {
+              op: {
+                c: 'brown',
+                p: 4,
+                t: 'comment-1',
+              },
+            },
+            {
+              op: {
+                c: '',
+                p: 29,
+                t: 'comment-1',
+              },
+            },
+            {
+              op: {
+                c: 'the',
+                p: 0,
+                t: 'comment-2',
+              },
+            },
+            {
+              op: {
+                c: 'the',
+                p: 25,
+                t: 'comment-2',
+              },
+            },
+          ],
+        })
+      })
+    })
+  })
 })

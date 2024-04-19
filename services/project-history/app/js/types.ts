@@ -123,3 +123,26 @@ export type RawScanOp =
   | { r: number; tracking?: TrackingProps }
   | { i: string; tracking?: TrackingProps; commentIds?: string[] }
   | { d: number; tracking?: TrackingProps }
+
+export type TrackedChangeSnapshot = {
+  op: {
+    p: number
+  } & ({ d: string } | { i: string })
+  metadata: {
+    ts: string
+    user_id: string
+  }
+}
+
+export type CommentSnapshot = {
+  op: {
+    p: number
+    t: string
+    c: string
+  }
+}
+
+export type RangesSnapshot = {
+  changes: TrackedChangeSnapshot[]
+  comments: CommentSnapshot[]
+}

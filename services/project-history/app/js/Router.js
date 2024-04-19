@@ -144,6 +144,11 @@ export function initialize(app) {
   )
 
   app.get(
+    '/project/:project_id/ranges/version/:version/:pathname',
+    HttpController.getRangesSnapshot
+  )
+
+  app.get(
     '/project/:project_id/version/:version',
     HttpController.getProjectSnapshot
   )

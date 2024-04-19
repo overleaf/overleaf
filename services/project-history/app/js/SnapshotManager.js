@@ -11,6 +11,7 @@ import * as Errors from './Errors.js'
 /**
  * @typedef {import('stream').Readable} ReadableStream
  * @typedef {import('overleaf-editor-core').Snapshot} Snapshot
+ * @typedef {import('./types').RangesSnapshot} RangesSnapshot
  */
 
 StringStream.prototype._read = function () {}
@@ -47,6 +48,151 @@ async function getFileSnapshotStream(projectId, version, pathname) {
       historyId,
       file.getHash()
     )
+  }
+}
+
+/**
+ * Constructs a snapshot of the ranges in a document-updater compatible format.
+ * Positions will be relative to a document where tracked deletes have been
+ * removed from the string. This also means that if a tracked delete overlaps
+ * a comment range, the comment range will be truncated.
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @param {string} pathname
+ * @returns {Promise<RangesSnapshot>}
+ */
+async function getRangesSnapshot(projectId, version, pathname) {
+  const snapshot = await _getSnapshotAtVersion(projectId, version)
+  const file = snapshot.getFile(pathname)
+  if (!file) {
+    throw new Errors.NotFoundError(`${pathname} not found`, {
+      projectId,
+      version,
+      pathname,
+    })
+  }
+  if (!file.isEditable()) {
+    throw new Error('File is not editable')
+  }
+  const historyId = await WebApiManager.promises.getHistoryId(projectId)
+  await file.load('eager', HistoryStoreManager.getBlobStore(historyId))
+  const content = file.getContent()
+  if (!content) {
+    throw new Error('Unable to read file contents')
+  }
+  const trackedChanges = file.getTrackedChanges().asSorted()
+  const comments = file.getComments()
+  const docUpdaterCompatibleTrackedChanges = []
+
+  let trackedDeletionOffset = 0
+  for (const trackedChange of trackedChanges) {
+    const isTrackedDeletion = trackedChange.tracking.type === 'delete'
+    const trackedChangeContent = content.slice(
+      trackedChange.range.start,
+      trackedChange.range.end
+    )
+    const tcContent = isTrackedDeletion
+      ? { d: trackedChangeContent }
+      : { i: trackedChangeContent }
+    docUpdaterCompatibleTrackedChanges.push({
+      op: {
+        p: trackedChange.range.start - trackedDeletionOffset,
+        ...tcContent,
+      },
+      metadata: {
+        ts: trackedChange.tracking.ts.toISOString(),
+        user_id: trackedChange.tracking.userId,
+      },
+    })
+    if (isTrackedDeletion) {
+      trackedDeletionOffset += trackedChange.range.length
+    }
+  }
+
+  //  Comments are shifted left by the length of any previous tracked deletions.
+  //  If they  overlap with a tracked deletion, they are truncated.
+  //
+  // Example:
+  //   { } comment
+  //   [ ] tracked deletion
+  //   the quic[k {b]rown [fox] jum[ps} ove]r the lazy dog
+  //   => rown  jum
+  //      starting at position 8
+  const trackedDeletions = trackedChanges.filter(
+    tc => tc.tracking.type === 'delete'
+  )
+  const docUpdaterCompatibleComments = []
+  for (const comment of comments) {
+    trackedDeletionOffset = 0
+    let trackedDeletionIndex = 0
+    for (const commentRange of comment.ranges) {
+      let commentRangeContent = ''
+      let offsetFromOverlappingRangeAtStart = 0
+      while (
+        trackedDeletionIndex < trackedDeletions.length &&
+        trackedDeletions[trackedDeletionIndex].range.start <
+          commentRange.start &&
+        trackedDeletions[trackedDeletionIndex].range.end <= commentRange.start
+      ) {
+        // Skip over tracked deletions that are before the current comment range
+        trackedDeletionOffset +=
+          trackedDeletions[trackedDeletionIndex].range.length
+        trackedDeletionIndex++
+      }
+
+      if (
+        trackedDeletions[trackedDeletionIndex]?.range.start < commentRange.start
+      ) {
+        // There's overlap with a tracked deletion, move the position left and
+        // truncate the overlap
+        offsetFromOverlappingRangeAtStart =
+          commentRange.start -
+          trackedDeletions[trackedDeletionIndex].range.start
+      }
+
+      // The position of the comment in the document after tracked deletions
+      const position =
+        commentRange.start -
+        trackedDeletionOffset -
+        offsetFromOverlappingRangeAtStart
+
+      let cursor = commentRange.start
+      while (cursor < commentRange.end) {
+        const trackedDeletion = trackedDeletions[trackedDeletionIndex]
+        if (
+          !trackedDeletion ||
+          trackedDeletion.range.start >= commentRange.end
+        ) {
+          // We've run out of relevant tracked changes
+          commentRangeContent += content.slice(cursor, commentRange.end)
+          break
+        }
+        if (trackedDeletion.range.start > cursor) {
+          // There's a gap between the current cursor and the tracked deletion
+          commentRangeContent += content.slice(
+            cursor,
+            trackedDeletion.range.start
+          )
+        }
+        // Skip to the end of the tracked delete
+        cursor = trackedDeletion.range.end
+        trackedDeletionIndex++
+        trackedDeletionOffset += trackedDeletion.range.length
+      }
+      docUpdaterCompatibleComments.push({
+        op: {
+          p: position,
+          c: commentRangeContent,
+          t: comment.id,
+        },
+      })
+    }
+  }
+
+  return {
+    changes: docUpdaterCompatibleTrackedChanges,
+    comments: docUpdaterCompatibleComments,
   }
 }
 
@@ -135,15 +281,18 @@ async function _loadFilesLimit(snapshot, kind, blobStore) {
 const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
 const getProjectSnapshotCb = callbackify(getProjectSnapshot)
 const getLatestSnapshotCb = callbackify(getLatestSnapshot)
+const getRangesSnapshotCb = callbackify(getRangesSnapshot)
 
 export {
   getFileSnapshotStreamCb as getFileSnapshotStream,
   getProjectSnapshotCb as getProjectSnapshot,
   getLatestSnapshotCb as getLatestSnapshot,
+  getRangesSnapshotCb as getRangesSnapshot,
 }
 
 export const promises = {
   getFileSnapshotStream,
   getProjectSnapshot,
   getLatestSnapshot,
+  getRangesSnapshot,
 }
