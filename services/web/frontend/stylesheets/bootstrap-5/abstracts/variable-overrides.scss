@@ -27,3 +27,17 @@ $tooltip-max-width: 320px;
 $tooltip-border-radius: $border-radius-base;
 $tooltip-padding-y: $spacing-04;
 $tooltip-padding-x: $spacing-06;
+
+// Links. Ideally we'd point these to CSS variables but Bootstrap performs
+// calculations on link color during compilation.
+$link-color: $link-ui;
+$link-hover-color: $link-ui-hover;
+$link-hover-decoration: none;
+
+// Headings
+$headings-font-family: $font-family-sans-serif;
+$headings-margin-bottom: $spacing-05;
+
+// Horizontal rules
+$hr-margin-y: $spacing-08;
+$hr-border-color: $border-divider;

@@ -1,0 +1,20 @@
+// Links
+
+// Use CSS variables for link colors to make it easy to override in marketing page
+:root {
+  --link-color: var(--link-ui-visited);
+  --link-hover-color: var(--link-ui-hover);
+  --link-visited-color: var(--link-ui-visited);
+}
+
+a {
+  color: var(--link-color);
+
+  &:hover {
+    color: var(--link-hover-color);
+  }
+
+  &:visited {
+    color: var(--link-visited-color);
+  }
+}

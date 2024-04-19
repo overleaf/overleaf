@@ -1,0 +1,31 @@
+$header-height: 68px;
+$footer-height: 50px;
+
+.content {
+  min-height: 100vh;
+  padding-top: $header-height + $spacing-08;
+  padding-bottom: $spacing-08;
+}
+
+.content-alt {
+  background-color: $bg-light-secondary;
+}
+
+// Page header/separator
+.page-separator,
+.page-header {
+  padding-bottom: $spacing-05;
+  border-bottom: 1px solid $border-divider;
+  margin: 0;
+
+  // Apply margin above or below this header/separator only when it has a sibling
+  * > * + &,
+  * > & + * {
+    margin-top: $spacing-08;
+  }
+}
+
+// Horizontal rule. Override Bootstrap's 25% opacity, which we don't want
+hr {
+  opacity: unset;
+}

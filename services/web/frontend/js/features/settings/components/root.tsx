@@ -22,6 +22,7 @@ import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { SSOAlert } from './emails/sso-alert'
 import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
 import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
+import CardWrapper from '@/features/ui/components/bootstrap-5/wrappers/card-wrapper'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
@@ -50,7 +51,7 @@ function SettingsPageContent() {
 
   return (
     <UserProvider>
-      <div className="card">
+      <CardWrapper>
         <div className="page-header">
           <h1>{t('account_settings')}</h1>
         </div>
@@ -95,7 +96,7 @@ function SettingsPageContent() {
             </>
           ) : null}
         </div>
-      </div>
+      </CardWrapper>
     </UserProvider>
   )
 }

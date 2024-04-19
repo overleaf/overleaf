@@ -17,8 +17,17 @@ $is-overleaf-light: false;
 // Boostrap-related
 
 // Note that files containing Bootstrap or Sass files that interact with
-// Bootstrap's Sass variable must use @import rather than @use because
+// Bootstrap's Sass variables must use @import rather than @use because
 // Bootstrap relies on its variables, mixins etc. all being global.
 
 // Include Bootstrap 5 itself, plus overrides and extend Bootstrap styles.
-@import 'bootstrap';
+@import 'base/bootstrap';
+
+// Typography-related
+@import 'base/typography';
+
+// Link styles
+@import 'base/links';
+
+// Page layout that isn't related to a particular component or page
+@import 'base/layout';

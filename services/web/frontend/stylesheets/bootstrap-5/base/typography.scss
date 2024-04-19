@@ -1,0 +1,54 @@
+// Headings
+
+// Apply margin above the heading only when it has a sibling
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
+  * > * + & {
+    margin-top: $spacing-08;
+  }
+}
+
+h1,
+.h1 {
+  @include heading-xl;
+}
+
+h2,
+.h2 {
+  @include heading-md;
+}
+
+h3,
+.h3 {
+  @include heading-sm;
+}
+
+h4,
+.h4 {
+  @include heading-xs;
+}
+
+h5,
+.h5 {
+  @include body-base;
+}
+
+h6,
+.h6 {
+  @include body-sm;
+}
+
+// Miscellaneous
+.small {
+  @include body-sm;
+}
