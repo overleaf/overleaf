@@ -64,7 +64,6 @@ const InactiveProjectManager = {
         .where('active')
         .equals(true)
         .select('_id')
-        .sort({ _id: 1 })
         .limit(limit)
         .read(READ_PREFERENCE_SECONDARY)
         .exec()
