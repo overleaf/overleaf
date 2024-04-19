@@ -77,7 +77,7 @@ function checkAndClear(project, callback) {
   function startResync(cb) {
     if (force) {
       console.log('2. starting resync for', projectId)
-      SyncManager.startResync(projectId, err => {
+      SyncManager.startHardResync(projectId, err => {
         if (err) {
           console.log('ERR', JSON.stringify(err.message))
           return cb(err)
@@ -195,17 +195,8 @@ function checkAndClear(project, callback) {
   )
 }
 
-// find all the broken projects from the failure records
-const errorsToResync = [
-  'Error: history store a non-success status code: 422',
-  'OError: history store a non-success status code: 422',
-  'OpsOutOfOrderError: project structure version out of order',
-]
-
 async function main() {
-  const results = await db.projectHistoryFailures
-    .find({ error: { $in: errorsToResync } })
-    .toArray()
+  const results = await db.projectHistoryFailures.find().toArray()
 
   console.log('number of queues without history store 442 =', results.length)
   // now check if the project is truly deleted in mongo
