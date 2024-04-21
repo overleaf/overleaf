@@ -2190,7 +2190,7 @@
   "your_git_access_info_bullet_1": "您最多可以拥有 10 个令牌。",
   "your_git_access_info_bullet_2": "如果达到最大限制，您需要先删除令牌，然后才能生成新令牌。",
   "your_git_access_info_bullet_3": "您可以使用<0>生成令牌</0>按钮生成令牌。",
-  "your_git_access_info_bullet_4": "第一次生成完整令牌后，您将无法查看该令牌。请复制并保护其安全",
+  "your_git_access_info_bullet_4": "首次查看生成令牌后，您将无法再次查看该令牌的完整内容。请复制并保证其安全",
   "your_git_access_info_bullet_5": "此处将显示以前生成的令牌。",
   "your_git_access_tokens": "您的 Git 身份验证令牌",
   "your_message_to_collaborators": "向您的合作者发送消息",
