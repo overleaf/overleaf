@@ -136,7 +136,7 @@
     "node-fetch": "^2.6.7",
     "nodemailer": "^6.7.0",
     "nodemailer-ses-transport": "^1.5.1",
-    "openai": "^4.28.4",
+    "openai": "^4.36.0",
     "otplib": "^12.0.1",
     "p-limit": "^2.3.0",
     "parse-data-url": "^2.0.0",
