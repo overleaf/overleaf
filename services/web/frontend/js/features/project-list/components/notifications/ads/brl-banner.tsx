@@ -99,7 +99,7 @@ export default function BRLBanner() {
         </p>
         <p>
           {t('latam_discount_modal_info', {
-            discount: '50%',
+            discount: '50',
             currencyName: 'Brazilian Reais',
           })}
         </p>

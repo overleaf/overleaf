@@ -646,20 +646,24 @@ async function getLatamCountryBannerDetails(req, res) {
       latamCountryBannerDetails.latamCountryFlag = '🇲🇽'
       latamCountryBannerDetails.country = 'Mexico'
       latamCountryBannerDetails.discount = '25%'
+      latamCountryBannerDetails.currency = 'Mexican Pesos'
       break
     case `CO`:
       latamCountryBannerDetails.latamCountryFlag = '🇨🇴'
       latamCountryBannerDetails.country = 'Colombia'
       latamCountryBannerDetails.discount = '60%'
+      latamCountryBannerDetails.currency = 'Colombian Pesos'
       break
     case `CL`:
       latamCountryBannerDetails.latamCountryFlag = '🇨🇱'
       latamCountryBannerDetails.country = 'Chile'
       latamCountryBannerDetails.discount = '30%'
+      latamCountryBannerDetails.currency = 'Chilean Pesos'
       break
     case `PE`:
       latamCountryBannerDetails.latamCountryFlag = '🇵🇪'
       latamCountryBannerDetails.country = 'Peru'
+      latamCountryBannerDetails.currency = 'Peruvian Soles'
       latamCountryBannerDetails.discount = '40%'
       break
   }

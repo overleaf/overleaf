@@ -948,7 +948,7 @@
   "last_used": "last used",
   "latam_discount_modal_info": "Unlock the full potential of Overleaf with a __discount__% discount on premium subscriptions paid in __currencyName__. Get a longer compile timeout, full document history, track changes, additional collaborators, and more.",
   "latam_discount_modal_title": "Premium subscription discount",
-  "latam_discount_offer_plans_page_banner": "__flag__ <b>Great news!</b> We’ve applied a __discount__ discount to premium plans on this page for our users in __country__. Check out the new lower prices.",
+  "latam_discount_offer_plans_page_banner": "__flag__ We’ve applied a __discount__ discount to premium plans on this page for our users in __country__. Check out the new lower prices (in __currency__).",
   "latex_articles_page_summary": "Papers, presentations, reports and more, written in LaTeX and published by our community. Search or browse below.",
   "latex_articles_page_title": "Articles - Papers, Presentations, Reports and more",
   "latex_editor_info": "Everything you need in a modern LaTeX editor --- spell check, intelligent autocomplete, syntax highlighting, dozens of color themes, vim and emacs bindings, help with LaTeX warnings and error messages, and much more.",
