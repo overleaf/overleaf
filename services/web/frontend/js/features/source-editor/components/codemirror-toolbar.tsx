@@ -168,8 +168,6 @@ const Toolbar = memo(function Toolbar() {
             />
           </ToolbarOverflow>
         )}
-
-        <div className="formatting-buttons-wrapper" />
       </div>
 
       <div
