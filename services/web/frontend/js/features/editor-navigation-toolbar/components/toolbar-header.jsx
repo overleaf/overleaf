@@ -39,8 +39,6 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 }) {
   const { t } = useTranslation()
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
-  const shouldDisplayTrackChangesButton =
-    trackChangesVisible && !isRestrictedTokenMember
 
   return (
     <header
@@ -66,7 +64,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
 
-        {shouldDisplayTrackChangesButton && (
+        {trackChangesVisible && (
           <TrackChangesToggleButton
             onMouseDown={toggleReviewPanelOpen}
             disabled={historyIsOpen}

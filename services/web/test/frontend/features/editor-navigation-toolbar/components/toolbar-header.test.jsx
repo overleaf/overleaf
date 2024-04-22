@@ -51,15 +51,6 @@ describe('<ToolbarHeader />', function () {
       screen.getByText('Review')
     })
 
-    it('is not displayed when "isRestrictedTokenMember" prop is set to true', function () {
-      const props = {
-        ...defaultProps,
-        isRestrictedTokenMember: true,
-      }
-      renderWithEditorContext(<ToolbarHeader {...props} />)
-      expect(screen.queryByText('Review')).to.not.exist
-    })
-
     it('is not displayed when "trackChangesVisible" prop is set to false', function () {
       const props = {
         ...defaultProps,
