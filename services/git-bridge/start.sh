@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 /opt/envsubst < /envsubst_template.json > /conf/runtime.json
 

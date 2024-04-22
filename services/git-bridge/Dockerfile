@@ -1,6 +1,6 @@
 # Dockerfile for git-bridge
 
-FROM maven:3-jdk-11 as base
+FROM maven:3-amazoncorretto-11-debian as base
 
 RUN apt-get update && apt-get install -y make git sqlite3 \
  && rm -rf /var/lib/apt/lists
@@ -23,19 +23,18 @@ RUN make package \
       -name 'writelatex-git-bridge*jar-with-dependencies.jar' \
       -exec mv {} /git-bridge.jar \;
 
-FROM openjdk:11-jre
+FROM amazoncorretto:11-alpine
 
-RUN apt-get update && apt-get install -y git sqlite3 procps htop net-tools sockstat libjemalloc2 \
- && rm -rf /var/lib/apt/lists
+RUN apk add --update --no-cache git sqlite procps htop net-tools jemalloc
 
-ENV LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 
 # Install Google Cloud Profiler agent
 RUN mkdir -p /opt/cprof && \
   wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent.tar.gz \
   | tar xzv -C /opt/cprof
 
-RUN useradd --create-home node
+RUN adduser -D node
 
 COPY --from=builder /git-bridge.jar /
 
