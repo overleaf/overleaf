@@ -57,6 +57,135 @@ class User {
     )
   }
 
+  setInSession(params, callback) {
+    this.getCsrfToken(error => {
+      if (error != null) {
+        return callback(error)
+      }
+      this.request.post(
+        {
+          url: '/dev/set_in_session',
+          json: params,
+        },
+        (err, response, body) => {
+          if (err != null) {
+            return callback(err)
+          }
+          if (response.statusCode !== 200) {
+            return callback(
+              new Error(
+                `post set in session failed: status=${
+                  response.statusCode
+                } body=${JSON.stringify(body)}`
+              )
+            )
+          }
+          callback(null)
+        }
+      )
+    })
+  }
+
+  getSplitTestAssignment(splitTestName, query, callback) {
+    if (!callback) {
+      callback = query
+    }
+    const params = new URLSearchParams({
+      splitTestName,
+      ...query,
+    }).toString()
+    this.request.get(
+      {
+        url: `/dev/split_test/get_assignment?${params}`,
+      },
+      (err, response, body) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `get split test assignment failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
+        const assignment = JSON.parse(response.body)
+        callback(null, assignment)
+      }
+    )
+  }
+
+  doSessionMaintenance(callback) {
+    this.request.post(
+      {
+        url: `/dev/split_test/session_maintenance`,
+      },
+      (err, response, body) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (response.statusCode !== 200) {
+          return callback(
+            new Error(
+              `post session maintenance failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
+        callback(null)
+      }
+    )
+  }
+
+  optIntoBeta(callback) {
+    this.request.post(
+      {
+        url: '/beta/opt-in',
+      },
+      (err, response, body) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (response.statusCode !== 302) {
+          return callback(
+            new Error(
+              `post beta opt-in failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
+        callback(null)
+      }
+    )
+  }
+
+  optOutOfBeta(callback) {
+    this.request.post(
+      {
+        url: '/beta/opt-out',
+      },
+      (err, response, body) => {
+        if (err != null) {
+          return callback(err)
+        }
+        if (response.statusCode !== 302) {
+          return callback(
+            new Error(
+              `post beta opt-out failed: status=${
+                response.statusCode
+              } body=${JSON.stringify(body)}`
+            )
+          )
+        }
+        callback(null)
+      }
+    )
+  }
+
   getEmailConfirmationCode(callback) {
     this.getSession((err, session) => {
       if (err != null) {
@@ -317,16 +446,12 @@ class User {
       this.request.post(
         {
           url: '/logout',
-          json: {
-            email: this.email,
-            password: this.password,
-          },
         },
         (error, response, body) => {
           if (error != null) {
             return callback(error)
           }
-          if (response.statusCode !== 200) {
+          if (response.statusCode >= 400) {
             return callback(
               new Error(
                 `logout failed: status=${

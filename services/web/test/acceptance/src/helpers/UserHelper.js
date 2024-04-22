@@ -157,6 +157,22 @@ class UserHelper {
     return JSON.parse(body)
   }
 
+  async getSplitTestAssignment(splitTestName) {
+    const response = await this.fetch(
+      `/dev/split_test/get_assignment?splitTestName=${splitTestName}`
+    )
+    const body = await response.text()
+
+    if (response.status !== 200) {
+      throw new Error(
+        `get split test assignment failed: status=${response.status} body=${JSON.stringify(
+          body
+        )}`
+      )
+    }
+    return JSON.parse(body)
+  }
+
   async getEmailConfirmationCode() {
     const session = await this.getSession()
 

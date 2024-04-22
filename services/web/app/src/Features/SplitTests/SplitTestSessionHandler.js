@@ -224,7 +224,9 @@ function _buildAssignmentString(splitTest, assignment) {
     variantName === 'default'
       ? 'd'
       : _.findIndex(variants, { name: variantName })
-  const timestamp = Math.floor(assignedAt.getTime() / 1000).toString(36)
+  const timestamp = Math.floor(new Date(assignedAt).getTime() / 1000).toString(
+    36
+  )
   return `${splitTestId}${ID_VERSION_SEP}${versionNumber}${KEY_VALUE_SEP}${variantChar}${VARIANT_DATE_SEP}${timestamp}`
 }
 
