@@ -1,9 +1,9 @@
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const crypto = require('crypto')
-const Mailchimp = require('mailchimp-api-v3')
 const OError = require('@overleaf/o-error')
 const { callbackify } = require('util')
+const MailChimpClient = require('./MailChimpClient')
 
 function mailchimpIsConfigured() {
   return Settings.mailchimp != null && Settings.mailchimp.api_key != null
@@ -38,7 +38,7 @@ class NonFatalEmailUpdateError extends OError {
 }
 
 function makeMailchimpProvider(listName, listId) {
-  const mailchimp = new Mailchimp(Settings.mailchimp.api_key)
+  const mailchimp = new MailChimpClient(Settings.mailchimp.api_key)
   const MAILCHIMP_LIST_ID = listId
 
   return {
@@ -54,7 +54,7 @@ function makeMailchimpProvider(listName, listId) {
       const result = await mailchimp.get(path)
       return result?.status === 'subscribed'
     } catch (err) {
-      if (err.status === 404) {
+      if (err?.response?.status === 404) {
         return false
       }
       throw OError.tag(err, 'error getting newsletter subscriptions status', {
@@ -101,7 +101,7 @@ function makeMailchimpProvider(listName, listId) {
         'finished unsubscribing user from newsletter'
       )
     } catch (err) {
-      if (err.status === 404 || err.status === 405) {
+      if ([404, 405].includes(err?.response?.status)) {
         // silently ignore users who were never subscribed (404) or previously deleted (405)
         return
       }

@@ -1,5 +1,6 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 const SandboxedModule = require('sandboxed-module')
 
 const MODULE_PATH = '../../../../app/src/Features/Newsletter/NewsletterManager'
@@ -28,10 +29,14 @@ describe('NewsletterManager', function () {
 
     this.NewsletterManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'mailchimp-api-v3': this.Mailchimp,
+        './MailChimpClient': this.Mailchimp,
         '@overleaf/settings': this.Settings,
       },
+      globals: { AbortController },
     }).promises
+
+    this.NewsletterManager.get = sinon.stub()
+    this.NewsletterManager.delete = sinon.stub()
 
     this.user = {
       _id: 'user_id',
@@ -59,9 +64,14 @@ describe('NewsletterManager', function () {
     })
 
     it('returns false on 404', async function () {
-      const err = new Error()
-      err.status = 404
-      this.mailchimp.get.rejects(err)
+      this.mailchimp.get.rejects(
+        new RequestFailedError(
+          'http://some-url',
+          {},
+          { status: 404 },
+          'Not found'
+        )
+      )
       const subscribed = await this.NewsletterManager.subscribed(this.user)
       expect(subscribed).to.be.false
     })
