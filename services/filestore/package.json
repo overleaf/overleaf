@@ -27,7 +27,7 @@
     "@overleaf/stream-utils": "^0.1.0",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
-    "express": "^4.18.2",
+    "express": "^4.19.2",
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
     "node-fetch": "^2.6.7",
