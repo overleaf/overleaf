@@ -60,12 +60,18 @@ async function getAssignments(session) {
       if (!assignments[splitTestName]) {
         assignments[splitTestName] = []
       }
-      assignments[splitTestName].push({
-        versionNumber,
-        variantName,
-        phase: 'release', // anonymous users can only be exposed to tests in release phase
-        assignedAt,
-      })
+      if (
+        !_.find(assignments[splitTestName], {
+          versionNumber,
+          variantName,
+        })
+      )
+        assignments[splitTestName].push({
+          versionNumber,
+          variantName,
+          phase: 'release', // anonymous users can only be exposed to tests in release phase
+          assignedAt,
+        })
     } catch (error) {
       logger.error(
         { err: error, token },
@@ -193,13 +199,15 @@ async function _convertAnonymousAssignmentsIfNeeded(session) {
       session.sta = ''
     }
     for (const [splitTestName, assignments] of Object.entries(
-      session.splitTests
+      session.splitTests || {}
     )) {
       const splitTest = splitTests.get(splitTestName)
       for (const assignment of assignments) {
         const assignmentString = _buildAssignmentString(splitTest, assignment)
         const separator = session.sta.length > 0 ? TOKEN_SEP : ''
-        session.sta += `${separator}${assignmentString}`
+        if (!session.sta.includes(assignmentString)) {
+          session.sta += `${separator}${assignmentString}`
+        }
       }
     }
     delete session.splitTests
