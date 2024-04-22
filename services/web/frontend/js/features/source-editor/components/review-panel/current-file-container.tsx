@@ -133,7 +133,7 @@ function CurrentFileContainer() {
                 return <AddCommentEntry key={id} />
               }
 
-              if (entry.type === 'bulk-actions') {
+              if (entry.type === 'bulk-actions' && permissions.write) {
                 return (
                   <BulkActionsEntry
                     key={id}

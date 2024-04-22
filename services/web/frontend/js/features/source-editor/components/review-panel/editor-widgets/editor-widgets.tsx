@@ -89,7 +89,7 @@ function EditorWidgets() {
       >
         <div className="rp-in-editor-widgets-inner">
           {wantTrackChanges && <ToggleWidget />}
-          {nChanges > 1 && (
+          {nChanges > 1 && permissions.write && (
             <>
               <BulkActions.Button onClick={handleShowBulkAcceptDialog}>
                 <Icon type="check" /> {t('accept_all')} ({nChanges})
