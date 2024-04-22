@@ -108,6 +108,7 @@ class Csrf {
 
 Csrf.promises = {
   validateRequest: promisify(Csrf.validateRequest),
+  validateToken: promisify(Csrf.validateToken),
 }
 
 module.exports = Csrf
