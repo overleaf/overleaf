@@ -942,7 +942,7 @@
   "last_used": "最近使用",
   "latam_discount_modal_info": "使用__currencyName__支付的高级订阅可享受__discount__%的折扣，充分释放Overleaf的潜力。获得更长的编译超时时间、完整的文档历史记录、跟踪更改、额外的合作者等等。",
   "latam_discount_modal_title": "高级订阅折扣",
-  "latam_discount_offer_plans_page_banner": "__flag__<b>好消息</b> 我们已经为__country__的用户在此页面上的高级计划应用了__discount__折扣。看看新的低价。",
+  "latam_discount_offer_plans_page_banner": "__flag__<b>好消息</b> 我们已经为__country__的用户在此页面上的高级计划应用了__discount__折扣。看看新的低价 (in __currency__)。",
   "latex_articles_page_summary": "用 LaTeX 编写并由我们社区发布的论文、演示文稿、报告等。 在下面搜索或浏览。",
   "latex_articles_page_title": "文章 - 论文、演示、报告等",
   "latex_editor_info": "在一个现代的LaTeX编辑器中，你需要的一切——拼写检查、智能自动完成、语法高亮显示、几十个颜色主题、vim和emacs绑定、LaTeX警告和错误消息帮助等等。",

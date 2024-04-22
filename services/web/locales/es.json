@@ -195,7 +195,7 @@
   "last_name": "Apellido",
   "latam_discount_modal_info": "Aprovecha todo el potencial de Overleaf con un __discount__% de descuento en suscripciones premium pagadas en __currencyName__. Consigue tiempos de compilación más largos, historial completo de documentos, seguimiento de cambios, colaboradores adicionales y más.",
   "latam_discount_modal_title": "Descuento en planes premium",
-  "latam_discount_offer_plans_page_banner": "__flag__ Aplicamos un descuento del __discount__ en los planes premium de esta página para nuestros usuarios de __country__. Consulta los nuevos precios con descuento (en __currency__)",
+  "latam_discount_offer_plans_page_banner": "__flag__ <b>Great news!</b> Aplicamos un descuento del __discount__ en los planes premium de esta página para nuestros usuarios de __country__. Consulta los nuevos precios con descuento (en __currency__)",
   "latex_templates": "Plantillas LaTeX",
   "learn_more": "Más detalles",
   "leave_group": "Abandonar grupo",
