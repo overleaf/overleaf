@@ -1,0 +1,33 @@
+--- 00_close_site
++++ 00_close_site
+@@ -1,5 +1,8 @@
+ #!/bin/sh
+
++. /etc/container_environment.sh
++. /etc/overleaf/env.sh
++
+ SITE_MAINTENANCE_FILE_BAK="$SITE_MAINTENANCE_FILE.bak.shutdown"
+
+ mv "${SITE_MAINTENANCE_FILE}" "${SITE_MAINTENANCE_FILE_BAK}"
+--- 01_flush_document_updater
++++ 01_flush_document_updater
+@@ -1,5 +1,8 @@
+ #!/bin/sh
+
++. /etc/container_environment.sh
++. /etc/overleaf/env.sh
++
+ cd /overleaf/services/document-updater && node scripts/flush_all.js >> /var/log/overleaf/document-updater.log 2>&1
+
+ EXIT_CODE="$?"
+--- 02_flush_project_history
++++ 02_flush_project_history
+@@ -1,5 +1,8 @@
+ #!/bin/sh
+
++. /etc/container_environment.sh
++. /etc/overleaf/env.sh
++
+ cd /overleaf/services/project-history && node scripts/flush_all.js >> /var/log/overleaf/project-history.log 2>&1
+
+ EXIT_CODE="$?"

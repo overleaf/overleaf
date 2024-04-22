@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -euo pipefail
+
+source /etc/container_environment.sh
+source /etc/overleaf/env.sh
+
+LOG_FILE=/var/lib/overleaf/data/history/doc-version-recovery.log
+export DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE=/var/lib/overleaf/data/history/doc-version-recovery-resyncs.log
+
+echo "Checking for doc version recovery. This can take a while if needed. Logs are in $LOG_FILE"
+cd /overleaf/services/history-v1
+LOG_LEVEL=info node storage/scripts/recover_doc_versions.js 2>&1 | tee -a "$LOG_FILE"
+
+function resyncAllProjectsInBackground() {
+  waitForService docstore 3016
+  waitForService document-updater 3003
+  waitForService filestore 3009
+  waitForService history-v1 3100
+  waitForService project-history 3054
+  waitForService web-api 4000
+
+  # Resync files that had their versions updated
+  while read -r project_id; do
+    echo "Resyncing project $project_id..."
+    curl -X POST --silent "http://127.0.0.1:3054/project/$project_id/resync?force=true"
+  done < "$DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE"
+
+  # Resync files that have broken histories
+  /overleaf/bin/force-history-resyncs
+
+  echo "Finished resyncing history for all projects. Adding .done suffix to log file"
+  mv "$DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE" "$DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE.done"
+}
+
+function waitForService() {
+  local name=$1
+  local port=$2
+  while ! curl --fail --silent "http://127.0.0.1:$port/status"; do
+    echo "Waiting for $name service to start up"
+    sleep 10
+  done
+}
+
+if [ -f "$DOC_VERSION_RECOVERY_RESYNCS_NEEDED_FILE" ]; then
+  echo "Finished recovery of doc versions. Resyncing history for all projects in the background."
+  resyncAllProjectsInBackground &
+else
+  echo "No recovery of doc versions needed."
+fi

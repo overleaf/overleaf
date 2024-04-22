@@ -1,0 +1,48 @@
+--- services/project-history/app/js/ErrorRecorder.js
++++ services/project-history/app/js/ErrorRecorder.js
+@@ -210,6 +210,14 @@ export function getFailures(callback) {
+       'Error: bad response from filestore: 404': 'filestore-404',
+       'Error: bad response from filestore: 500': 'filestore-500',
+       'NotFoundError: got a 404 from web api': 'web-api-404',
++      'OError: history store a non-success status code: 413':
++        'history-store-413',
++      'OError: history store a non-success status code: 422':
++        'history-store-422',
++      'OError: history store a non-success status code: 500':
++        'history-store-500',
++      'OError: history store a non-success status code: 503':
++        'history-store-503',
+       'Error: history store a non-success status code: 413':
+         'history-store-413',
+       'Error: history store a non-success status code: 422':
+--- services/project-history/app/js/RetryManager.js
++++ services/project-history/app/js/RetryManager.js
+@@ -20,6 +20,7 @@ const TEMPORARY_FAILURES = [
+
+ const HARD_FAILURES = [
+   'Error: history store a non-success status code: 422',
++  'OError: history store a non-success status code: 422',
+   'OpsOutOfOrderError: project structure version out of order',
+   'OpsOutOfOrderError: project structure version out of order on incoming updates',
+   'OpsOutOfOrderError: doc version out of order',
+--- services/project-history/scripts/clear_deleted_history.js
++++ services/project-history/scripts/clear_deleted_history.js
+@@ -143,7 +143,7 @@ function checkAndClear(project, callback) {
+ // find all the broken projects from the failure records
+ async function main() {
+   const results = await db.projectHistoryFailures
+-    .find({ error: 'Error: history store a non-success status code: 422' })
++    .find({ error: /history store a non-success status code: 422/ })
+     .toArray()
+
+   console.log('number of queues without history store 442 =', results.length)
+--- services/project-history/scripts/force_resync.js
++++ services/project-history/scripts/force_resync.js
+@@ -198,6 +198,7 @@ function checkAndClear(project, callback) {
+ // find all the broken projects from the failure records
+ const errorsToResync = [
+   'Error: history store a non-success status code: 422',
++  'OError: history store a non-success status code: 422',
+   'OpsOutOfOrderError: project structure version out of order',
+ ]
+

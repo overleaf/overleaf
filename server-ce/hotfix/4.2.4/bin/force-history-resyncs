@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -euo pipefail
+
+source /etc/container_environment.sh
+cd /overleaf/services/project-history
+node scripts/force_resync.js 1000 force
