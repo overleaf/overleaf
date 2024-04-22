@@ -29,17 +29,10 @@ export function CompromisedPasswordCard() {
             ]}
           />
         </p>
-        <p>
-          <Trans
-            i18nKey="please_change_your_password_by_going_to_your_account_settings"
-            /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-            components={[<a href="/user/settings" />]}
-          />
-        </p>
       </div>
 
       <Button className="btn-primary" href="/user/settings">
-        {t('go_to_account_settings')}
+        {t('change_password_in_account_settings')}
       </Button>
     </div>
   )
