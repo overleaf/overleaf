@@ -553,9 +553,6 @@ const ProjectController = {
         pdfjsAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'pdfjs-40', cb)
         },
-        latexLogParserAssignment(cb) {
-          SplitTestHandler.getAssignment(req, res, 'latex-log-parser', cb)
-        },
         trackPdfDownloadAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'track-pdf-download', cb)
         },

@@ -9,10 +9,6 @@ const LINES_REGEX = /lines? ([0-9]+)/
 const PACKAGE_REGEX = /^(?:Package|Class|Module) (\b.+\b) Warning/
 const FILE_LINE_ERROR_REGEX = /^([./].*):(\d+): (.*)/
 
-const LATEX_WARNING_REGEX_OLD = /^LaTeX Warning: (.*)$/
-const PACKAGE_WARNING_REGEX_OLD = /^(Package \b.+\b Warning:.*)$/
-const PACKAGE_REGEX_OLD = /^Package (\b.+\b) Warning/
-
 const STATE = {
   NORMAL: 0,
   ERROR: 1,
@@ -27,16 +23,9 @@ export default class LatexParser {
     this.fileStack = []
     this.currentFileList = this.rootFileList = []
     this.openParens = 0
-    // TODO: Needed only for beta release; remove when over. 20220530
-    if (options.oldRegexes) {
-      this.latexWarningRegex = LATEX_WARNING_REGEX_OLD
-      this.packageWarningRegex = PACKAGE_WARNING_REGEX_OLD
-      this.packageRegex = PACKAGE_REGEX_OLD
-    } else {
-      this.latexWarningRegex = LATEX_WARNING_REGEX
-      this.packageWarningRegex = PACKAGE_WARNING_REGEX
-      this.packageRegex = PACKAGE_REGEX
-    }
+    this.latexWarningRegex = LATEX_WARNING_REGEX
+    this.packageWarningRegex = PACKAGE_WARNING_REGEX
+    this.packageRegex = PACKAGE_REGEX
     this.log = new LogText(text)
   }
 

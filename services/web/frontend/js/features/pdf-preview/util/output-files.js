@@ -1,4 +1,3 @@
-import getMeta from '../../../utils/meta'
 import HumanReadableLogs from '../../../ide/human-readable-logs/HumanReadableLogs'
 import BibLogParser from '../../../ide/log-parser/bib-log-parser'
 import { enablePdfCaching } from './pdf-caching-flags'
@@ -86,8 +85,6 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
         result.log,
         {
           ignoreDuplicates: true,
-          oldRegexes:
-            getMeta('ol-splitTestVariants')?.['latex-log-parser'] !== 'new',
         }
       )
 
