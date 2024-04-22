@@ -175,7 +175,7 @@
     "@babel/preset-typescript": "^7.23.2",
     "@babel/register": "^7.22.15",
     "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#v6.12.0-overleaf-1",
-    "@codemirror/commands": "^6.3.3",
+    "@codemirror/commands": "^6.4.0",
     "@codemirror/lang-markdown": "^6.2.4",
     "@codemirror/language": "^6.10.0",
     "@codemirror/lint": "^6.5.0",
