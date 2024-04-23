@@ -1,16 +1,17 @@
 import { keymap } from '@codemirror/view'
-import { EditorSelection, Prec } from '@codemirror/state'
-import { ancestorNodeOfType } from '../../utils/tree-query'
 import {
-  getIndentation,
-  IndentContext,
-  indentString,
-} from '@codemirror/language'
+  ChangeSpec,
+  EditorSelection,
+  Prec,
+  SelectionRange,
+} from '@codemirror/state'
+import { ancestorNodeOfType } from '../../utils/tree-query'
 import {
   cursorIsAtStartOfListItem,
   indentDecrease,
   indentIncrease,
 } from '../toolbar/commands'
+import { createListItem } from '@/features/source-editor/extensions/visual/utils/list-item'
 
 /**
  * A keymap which provides behaviours for the visual editor,
@@ -39,29 +40,53 @@ export const visualKeymap = Prec.highest(
                 if (line.text.trim() === '\\item') {
                   // no content on this line
 
-                  // delete this line
-                  const changes = state.changes({
+                  // outside the end of the current list
+                  const pos = listNode.to + 1
+
+                  // delete the current line
+                  const deleteCurrentLine = {
                     from: line.from,
                     to: line.to + 1,
                     insert: '',
-                  })
+                  }
 
-                  // the start of the line after the list environment
-                  const range = EditorSelection.cursor(endLine.to + 1).map(
-                    changes
-                  )
+                  const changes: ChangeSpec[] = [deleteCurrentLine]
+
+                  // the new cursor position
+                  let range: SelectionRange
+
+                  // if this is a nested list, insert a new empty list item after this list
+                  if (
+                    listNode.parent?.parent?.parent?.parent?.type.is(
+                      'ListEnvironment'
+                    )
+                  ) {
+                    const newListItem = createListItem(state, pos)
+
+                    changes.push({
+                      from: pos,
+                      insert: newListItem + '\n',
+                    })
+
+                    // place the cursor at the end of the new list item
+                    range = EditorSelection.cursor(pos + newListItem.length)
+                  } else {
+                    // place the cursor outside the end of the current list
+                    range = EditorSelection.cursor(pos)
+                  }
 
                   handled = true
 
-                  return { changes, range }
+                  return {
+                    changes,
+                    range: range.map(state.changes(deleteCurrentLine)),
+                  }
                 }
               }
 
-              // create a new list item
-              const cx = new IndentContext(state)
-              const columns = getIndentation(cx, from) ?? 0
-              const indent = indentString(state, columns)
-              const insert = `\n${indent}\\item `
+              // handle a list item that isn't at the end of a list
+
+              const insert = '\n' + createListItem(state, from)
 
               const countWhitespaceAfterPosition = (pos: number) => {
                 const line = state.doc.lineAt(pos)
