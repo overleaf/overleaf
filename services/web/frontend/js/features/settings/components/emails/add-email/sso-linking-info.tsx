@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Button } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import { DomainInfo } from './input'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import getMeta from '../../../../../utils/meta'
 import { useLocation } from '../../../../../shared/hooks/use-location'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 type SSOLinkingInfoProps = {
   domainInfo: DomainInfo
@@ -54,14 +54,15 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           {t('find_out_more_about_institution_login')}.
         </a>
       </p>
-      <Button
-        bsStyle="primary"
-        className="btn-sm btn-link-accounts"
+      <ButtonWrapper
+        variant="primary"
+        className="btn-link-accounts"
+        size="small"
         disabled={linkAccountsButtonDisabled}
         onClick={handleLinkAccountsButtonClick}
       >
         {t('link_accounts_and_add_email')}
-      </Button>
+      </ButtonWrapper>
     </>
   )
 }

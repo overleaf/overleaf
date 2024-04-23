@@ -1,8 +1,8 @@
 import { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import { sendMB } from '@/infrastructure/event-tracking'
 import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 function trackUpgradeClick() {
   sendMB('settings-upgrade-click')
@@ -92,36 +92,39 @@ function ActionButton({
   const { t } = useTranslation()
   if (!hasFeature) {
     return (
-      <Button
-        bsStyle={null}
-        className="btn-primary"
+      <ButtonWrapper
+        variant="primary"
         href="/user/subscription/plans"
         onClick={trackUpgradeClick}
+        bs3Props={{ bsStyle: null, className: 'btn-primary' }}
       >
         <span className="text-capitalize">{t('upgrade')}</span>
-      </Button>
+      </ButtonWrapper>
     )
   } else if (linked) {
     return (
-      <Button
-        className="btn-danger-ghost"
+      <ButtonWrapper
+        variant="danger-ghost"
         onClick={handleUnlinkClick}
-        bsStyle={null}
         disabled={disabled}
+        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('turn_off')}
-      </Button>
+      </ButtonWrapper>
     )
   } else {
     return (
-      <Button
+      <ButtonWrapper
+        variant="secondary"
         disabled={disabled}
-        bsStyle={null}
         onClick={handleLinkClick}
-        className="btn btn-secondary-info btn-secondary text-capitalize"
+        bs3Props={{
+          bsStyle: null,
+          className: 'btn btn-secondary-info btn-secondary',
+        }}
       >
         {t('turn_on')}
-      </Button>
+      </ButtonWrapper>
     )
   }
 }

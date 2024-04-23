@@ -1,12 +1,14 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Modal } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import IEEELogo from '../../../../shared/svgs/ieee-logo'
 import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 const providerLogos: { readonly [p: string]: JSX.Element } = {
   collabratec: <IEEELogo />,
@@ -112,28 +114,37 @@ function ActionButton({
   const { t } = useTranslation()
   if (unlinkRequestInflight) {
     return (
-      <Button className="btn-danger-ghost" bsStyle={null} disabled>
+      <ButtonWrapper
+        variant="danger-ghost"
+        disabled
+        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
+      >
         {t('unlinking')}
-      </Button>
+      </ButtonWrapper>
     )
   } else if (accountIsLinked) {
     return (
-      <Button
-        className="btn-danger-ghost"
-        bsStyle={null}
+      <ButtonWrapper
+        variant="danger-ghost"
         onClick={onUnlinkClick}
+        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('unlink')}
-      </Button>
+      </ButtonWrapper>
     )
   } else {
     return (
-      <a
+      <ButtonWrapper
+        variant="secondary"
         href={linkPath}
-        className="btn btn-secondary-info btn-secondary text-capitalize"
+        bs3Props={{ bsStyle: null }}
+        className={bsVersion({
+          bs3: 'btn btn-secondary-info btn-secondary text-capitalize',
+          bs5: 'text-capitalize',
+        })}
       >
         {t('link')}
-      </a>
+      </ButtonWrapper>
     )
   }
 }
@@ -166,20 +177,23 @@ function UnlinkConfirmModal({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary-info btn-secondary"
+        <ButtonWrapper
+          variant="secondary"
           onClick={handleHide}
+          bs3Props={{
+            bsStyle: null,
+            className: 'btn-secondary-info btn-secondary',
+          }}
         >
           {t('cancel')}
-        </Button>
-        <Button
-          className="btn-danger-ghost"
-          bsStyle={null}
+        </ButtonWrapper>
+        <ButtonWrapper
+          variant="danger-ghost"
           onClick={handleConfirmation}
+          bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
         >
           {t('unlink')}
-        </Button>
+        </ButtonWrapper>
       </Modal.Footer>
     </AccessibleModal>
   )

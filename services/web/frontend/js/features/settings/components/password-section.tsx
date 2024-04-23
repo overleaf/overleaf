@@ -201,7 +201,8 @@ function PasswordForm() {
         form="password-change-form"
         type="submit"
         variant="primary"
-        disabled={isLoading || !isFormValid}
+        disabled={!isFormValid}
+        isLoading={isLoading}
         bs3Props={{
           loading: isLoading ? `${t('saving')}…` : t('change'),
         }}

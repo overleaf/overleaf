@@ -1,7 +1,8 @@
 import { useTranslation, Trans } from 'react-i18next'
-import { Modal, Button } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import AccessibleModal from '../../../../../../shared/components/accessible-modal'
 import { MergeAndOverride } from '../../../../../../../../types/utils'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 type ConfirmationModalProps = MergeAndOverride<
   React.ComponentProps<typeof AccessibleModal>,
@@ -40,22 +41,24 @@ function ConfirmationModal({
         <p className="mb-0">{t('log_in_with_primary_email_address')}</p>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary-info btn-secondary"
+        <ButtonWrapper
+          variant="secondary"
           onClick={onHide}
+          bs3Props={{
+            bsStyle: null,
+            className: 'btn-secondary-info btn-secondary',
+          }}
         >
           {t('cancel')}
-        </Button>
-        <Button
-          type="button"
-          bsStyle={null}
-          className="btn-primary"
+        </ButtonWrapper>
+        <ButtonWrapper
+          variant="primary"
           disabled={isConfirmDisabled}
           onClick={onConfirm}
+          bs3Props={{ bsStyle: null, className: 'btn-primary' }}
         >
           {t('confirm')}
-        </Button>
+        </ButtonWrapper>
       </Modal.Footer>
     </AccessibleModal>
   )

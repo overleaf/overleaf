@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import LeaveModal from './leave/modal'
 import getMeta from '../../../utils/meta'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function LeaveSection() {
   const { t } = useTranslation()
@@ -28,9 +30,16 @@ function LeaveSection() {
   return (
     <>
       {t('need_to_leave')}{' '}
-      <button className="btn btn-inline-link btn-danger" onClick={handleOpen}>
+      <ButtonWrapper
+        className={bsVersion({
+          bs3: 'btn btn-inline-link btn-danger',
+          bs5: 'btn-link',
+        })}
+        variant="danger"
+        onClick={handleOpen}
+      >
         {t('delete_your_account')}
-      </button>
+      </ButtonWrapper>
       <LeaveModal isOpen={isModalOpen} handleClose={handleClose} />
     </>
   )

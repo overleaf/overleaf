@@ -124,7 +124,8 @@ function AccountInfoSection() {
             type="submit"
             variant="primary"
             form="account-info-form"
-            isLoading={isLoading || !isFormValid}
+            disabled={!isFormValid}
+            isLoading={isLoading}
             bs3Props={{
               loading: isLoading ? `${t('saving')}…` : t('update'),
             }}

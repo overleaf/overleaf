@@ -7,6 +7,7 @@ import Button from '../button'
 export type ButtonWrapperProps = ButtonProps & {
   bs3Props?: {
     bsStyle?: string | null
+    className?: string
     loading?: React.ReactNode
   }
 }
@@ -26,11 +27,12 @@ export default function ButtonWrapper(props: ButtonWrapperProps) {
   const { bs3Props, ...rest } = props
 
   const bs3ButtonProps: BS3ButtonProps = {
-    bsStyle: rest.variant,
+    bsStyle: rest.variant === 'secondary' ? 'default' : rest.variant,
     bsSize: mapBsButtonSizes(rest.size),
     className: rest.className,
     disabled: rest.isLoading || rest.disabled,
     form: rest.form,
+    href: rest.href,
     onClick: rest.onClick,
     type: rest.type,
     ...bs3Props,

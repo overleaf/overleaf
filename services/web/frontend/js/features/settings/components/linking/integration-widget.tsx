@@ -1,10 +1,12 @@
 import { useCallback, useState, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
+import { Modal } from 'react-bootstrap'
 import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
-import { Button, Modal } from 'react-bootstrap'
 import getMeta from '../../../../utils/meta'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function trackUpgradeClick() {
   sendMB('settings-upgrade-click')
@@ -107,43 +109,52 @@ function ActionButton({
   const { t } = useTranslation()
   if (!hasFeature) {
     return (
-      <Button
-        bsStyle={null}
-        className="btn-primary"
+      <ButtonWrapper
+        variant="primary"
         href="/user/subscription/plans"
         onClick={trackUpgradeClick}
+        bs3Props={{ bsStyle: null, className: 'btn-primary' }}
       >
         <span className="text-capitalize">{t('upgrade')}</span>
-      </Button>
+      </ButtonWrapper>
     )
   } else if (linked) {
     return (
-      <Button
-        className="btn-danger-ghost"
+      <ButtonWrapper
+        variant="danger-ghost"
         onClick={handleUnlinkClick}
-        bsStyle={null}
         disabled={disabled}
+        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('unlink')}
-      </Button>
+      </ButtonWrapper>
     )
   } else {
     return (
       <>
         {disabled ? (
-          <button
+          <ButtonWrapper
             disabled
-            className="btn btn-secondary-info btn-secondary text-capitalize"
+            variant="secondary"
+            className={bsVersion({
+              bs3: 'btn btn-secondary-info btn-secondary text-capitalize',
+              bs5: 'text-capitalize',
+            })}
           >
             {t('link')}
-          </button>
+          </ButtonWrapper>
         ) : (
-          <a
-            className="btn btn-secondary-info btn-secondary text-capitalize"
+          <ButtonWrapper
+            variant="secondary"
             href={linkPath}
+            className={bsVersion({
+              bs3: 'btn btn-secondary-info btn-secondary text-capitalize',
+              bs5: 'text-capitalize',
+            })}
+            bs3Props={{ bsStyle: null }}
           >
             {t('link')}
-          </a>
+          </ButtonWrapper>
         )}
       </>
     )
@@ -167,9 +178,7 @@ function UnlinkConfirmationModal({
 }: UnlinkConfirmModalProps) {
   const { t } = useTranslation()
 
-  const handleCancel = (
-    event: React.MouseEvent<HTMLButtonElement & Button>
-  ) => {
+  const handleCancel = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
     handleHide()
   }
@@ -186,15 +195,23 @@ function UnlinkConfirmationModal({
       <Modal.Footer>
         <form action={unlinkPath} method="POST" className="form-inline">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
-          <Button
-            className="btn-secondary-info btn-secondary"
+          <ButtonWrapper
+            variant="secondary"
             onClick={handleCancel}
+            bs3Props={{
+              bsStyle: null,
+              className: 'btn-secondary-info btn-secondary',
+            }}
           >
             {t('cancel')}
-          </Button>
-          <Button type="submit" className="btn-danger-ghost" bsStyle={null}>
+          </ButtonWrapper>
+          <ButtonWrapper
+            type="submit"
+            variant="danger-ghost"
+            bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
+          >
             {t('unlink')}
-          </Button>
+          </ButtonWrapper>
         </form>
       </Modal.Footer>
     </AccessibleModal>

@@ -146,9 +146,13 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                       </>
                     ) : (
                       <ButtonWrapper
-                        className="btn-inline-link"
+                        variant="link"
                         disabled={state.isLoading}
                         onClick={handleRequestReconfirmation}
+                        bs3Props={{
+                          className: 'btn-inline-link',
+                          bsStyle: null,
+                        }}
                       >
                         {t('resend_confirmation_email')}
                       </ButtonWrapper>
@@ -157,7 +161,8 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                 ) : (
                   <ButtonWrapper
                     variant="secondary"
-                    disabled={state.isLoading || isPending}
+                    disabled={isPending}
+                    isLoading={isLoading}
                     onClick={handleRequestReconfirmation}
                     bs3Props={{ bsStyle: 'info' }}
                   >
@@ -200,9 +205,10 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                     </>
                   ) : (
                     <ButtonWrapper
-                      className="btn-inline-link"
+                      variant="link"
                       disabled={state.isLoading}
                       onClick={handleRequestReconfirmation}
+                      bs3Props={{ className: 'btn-inline-link', bsStyle: null }}
                     >
                       {t('resend_confirmation_email')}
                     </ButtonWrapper>

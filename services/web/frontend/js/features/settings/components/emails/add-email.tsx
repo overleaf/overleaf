@@ -214,7 +214,8 @@ function AddEmail() {
             >
               <AddNewEmailBtn
                 email={newEmail}
-                disabled={isLoading || state.isLoading}
+                disabled={state.isLoading}
+                isLoading={isLoading}
                 onClick={handleAddNewEmail}
               />
             </Cell>

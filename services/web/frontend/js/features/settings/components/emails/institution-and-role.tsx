@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
-import { Button } from 'react-bootstrap'
 import { isChangingAffiliation } from '../../utils/selectors'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import DownshiftInput from './downshift-input'
@@ -10,6 +9,7 @@ import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
 import defaultRoles from '../../data/roles'
 import defaultDepartments from '../../data/departments'
 import { University } from '../../../../../../types/university'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 type InstitutionAndRoleProps = {
   userEmailData: UserEmailData
@@ -107,11 +107,15 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               <br />
             </>
           )}
-          <Button className="btn-inline-link" onClick={handleChangeAffiliation}>
+          <ButtonWrapper
+            onClick={handleChangeAffiliation}
+            variant="link"
+            bs3Props={{ className: 'btn-inline-link' }}
+          >
             {!affiliation.department && !affiliation.role
               ? t('add_role_and_department')
               : t('change')}
-          </Button>
+          </ButtonWrapper>
         </div>
       ) : (
         <div className="affiliation-change-container small">
@@ -135,23 +139,30 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
                 setValue={setDepartment}
               />
             </div>
-            <Button
-              bsSize="small"
-              bsStyle="primary"
+            <ButtonWrapper
+              size="small"
+              variant="primary"
               type="submit"
-              disabled={!role || !department || isLoading || state.isLoading}
+              disabled={!role || !department}
+              isLoading={isLoading}
+              bs3Props={{
+                loading: isLoading
+                  ? `${t('saving')}…`
+                  : t('save_or_cancel-save'),
+              }}
             >
-              {isLoading ? <>{t('saving')}…</> : t('save_or_cancel-save')}
-            </Button>
+              {t('save_or_cancel-save')}
+            </ButtonWrapper>
             {!isLoading && (
               <>
                 <span className="mx-1">{t('save_or_cancel-or')}</span>
-                <Button
-                  className="btn-inline-link"
+                <ButtonWrapper
+                  variant="link"
                   onClick={handleCancelAffiliationChange}
+                  bs3Props={{ className: 'btn-inline-link' }}
                 >
                   {t('save_or_cancel-cancel')}
-                </Button>
+                </ButtonWrapper>
               </>
             )}
           </form>

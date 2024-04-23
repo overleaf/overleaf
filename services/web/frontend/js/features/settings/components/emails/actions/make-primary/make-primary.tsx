@@ -82,7 +82,7 @@ function MakePrimary({ userEmailData, makePrimaryAsync }: MakePrimaryProps) {
   return (
     <>
       {makePrimaryAsync.isLoading ? (
-        <PrimaryButton disabled>
+        <PrimaryButton disabled isLoading={state.isLoading}>
           {t('processing_uppercase')}&hellip;
         </PrimaryButton>
       ) : (

@@ -87,10 +87,44 @@
   }
 }
 
+// Link buttons
+// -------------------------
+
+// Make a button look and behave like a link
+.btn-link {
+  color: var(--link-ui);
+  font-weight: normal;
+  cursor: pointer;
+  border-radius: 0;
+  text-decoration: underline;
+  padding: 0;
+  font-size: inherit;
+  vertical-align: inherit;
+
+  &,
+  &:active,
+  &[disabled],
+  fieldset[disabled] & {
+    background-color: transparent;
+    @include box-shadow(none);
+  }
+  &:hover,
+  &:focus {
+    color: var(--link-ui-hover);
+    text-decoration: none;
+    background-color: transparent;
+  }
+
+  &.btn-danger {
+    color: var(--content-danger);
+  }
+}
+
 .button-loading {
   align-items: center;
   display: inline-grid;
   grid-template-areas: 'container'; // Define a single grid area
+  pointer-events: none;
 }
 
 .button-loading > * {

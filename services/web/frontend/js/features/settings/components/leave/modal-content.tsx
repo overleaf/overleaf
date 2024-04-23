@@ -1,9 +1,10 @@
 import { useState, Dispatch, SetStateAction } from 'react'
-import { Modal, Button } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
+import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 type LeaveModalContentProps = {
   handleHide: () => void
@@ -68,24 +69,23 @@ function LeaveModalContent({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button
-          type="button"
+        <ButtonWrapper
           disabled={inFlight}
           onClick={handleHide}
-          bsStyle={null}
-          className="btn-secondary"
+          variant="secondary"
+          bs3Props={{ bsStyle: null, className: 'btn-secondary' }}
         >
           {t('cancel')}
-        </Button>
+        </ButtonWrapper>
 
-        <Button
+        <ButtonWrapper
           form="leave-form"
           type="submit"
-          bsStyle="danger"
+          variant="danger"
           disabled={inFlight || !isFormValid}
         >
           {inFlight ? <>{t('deleting')}…</> : t('delete')}
-        </Button>
+        </ButtonWrapper>
       </Modal.Footer>
     </>
   )

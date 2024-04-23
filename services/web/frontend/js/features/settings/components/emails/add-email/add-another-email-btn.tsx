@@ -1,18 +1,20 @@
 import { useTranslation } from 'react-i18next'
-import { Button, ButtonProps } from 'react-bootstrap'
+import ButtonWrapper, {
+  ButtonWrapperProps,
+} from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
-function AddAnotherEmailBtn({ onClick, ...props }: ButtonProps) {
+function AddAnotherEmailBtn({ onClick, ...props }: ButtonWrapperProps) {
   const { t } = useTranslation()
 
   return (
-    <Button
-      className="btn-inline-link"
+    <ButtonWrapper
+      variant="link"
       onClick={onClick}
       {...props}
-      bsStyle={null}
+      bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
     >
       {t('add_another_email')}
-    </Button>
+    </ButtonWrapper>
   )
 }
 

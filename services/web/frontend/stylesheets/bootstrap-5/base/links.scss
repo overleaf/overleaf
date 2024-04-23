@@ -2,12 +2,12 @@
 
 // Use CSS variables for link colors to make it easy to override in marketing page
 :root {
-  --link-color: var(--link-ui-visited);
+  --link-color: var(--link-ui);
   --link-hover-color: var(--link-ui-hover);
   --link-visited-color: var(--link-ui-visited);
 }
 
-a {
+a:not([role='button']) {
   color: var(--link-color);
 
   &:hover {

@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { Button, ButtonProps } from 'react-bootstrap'
+import ButtonWrapper, {
+  ButtonWrapperProps,
+} from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 
 const isValidEmail = (email: string) => {
   return Boolean(email)
@@ -7,20 +9,26 @@ const isValidEmail = (email: string) => {
 
 type AddNewEmailColProps = {
   email: string
-} & ButtonProps
+} & ButtonWrapperProps
 
-function AddNewEmailBtn({ email, disabled, ...props }: AddNewEmailColProps) {
+function AddNewEmailBtn({
+  email,
+  disabled,
+  isLoading,
+  ...props
+}: AddNewEmailColProps) {
   const { t } = useTranslation()
 
   return (
-    <Button
-      bsSize="small"
-      bsStyle="primary"
-      disabled={disabled || !isValidEmail(email)}
+    <ButtonWrapper
+      size="small"
+      variant="primary"
+      disabled={(disabled && !isLoading) || !isValidEmail(email)}
+      isLoading={isLoading}
       {...props}
     >
       {t('add_new_email')}
-    </Button>
+    </ButtonWrapper>
   )
 }
 
