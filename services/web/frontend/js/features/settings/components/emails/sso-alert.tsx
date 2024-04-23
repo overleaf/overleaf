@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { Alert } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 import getMeta from '../../../../utils/meta'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
 
 type InstitutionLink = {
   universityName: string
@@ -36,18 +36,28 @@ export function SSOAlert() {
 
   if (samlError) {
     return !errorClosed ? (
-      <Alert bsStyle="danger" className="mb-0" onDismiss={handleErrorClosed}>
-        <p className="text-center">
-          <Icon
-            type="exclamation-triangle"
-            accessibilityLabel={t('generic_something_went_wrong')}
-          />{' '}
-          {samlError.translatedMessage
-            ? samlError.translatedMessage
-            : samlError.message}
-        </p>
-        {samlError.tryAgain && <p className="text-center">{t('try_again')}</p>}
-      </Alert>
+      <NotificationWrapper
+        type="error"
+        content={
+          <>
+            {samlError.translatedMessage
+              ? samlError.translatedMessage
+              : samlError.message}
+            {samlError.tryAgain && <p>{t('try_again')}</p>}
+          </>
+        }
+        isDismissible
+        onDismiss={handleErrorClosed}
+        bs3Props={{
+          icon: (
+            <Icon
+              type="exclamation-triangle"
+              accessibilityLabel={t('generic_something_went_wrong')}
+            />
+          ),
+          className: 'mb-0 text-center',
+        }}
+      />
     ) : null
   }
 
@@ -58,40 +68,43 @@ export function SSOAlert() {
   return (
     <>
       {!infoClosed && (
-        <Alert bsStyle="info" className="mb-0" onDismiss={handleInfoClosed}>
-          <p className="text-center">
-            <Trans
-              i18nKey="institution_acct_successfully_linked_2"
-              components={[<strong />]} // eslint-disable-line react/jsx-key
-              values={{ institutionName: institutionLinked.universityName }}
-              shouldUnescape
-              tOptions={{ interpolation: { escapeValue: true } }}
-            />
-          </p>
-          {institutionLinked.hasEntitlement && (
-            <p className="text-center">
-              <Trans
-                i18nKey="this_grants_access_to_features_2"
-                components={[<strong />]} // eslint-disable-line react/jsx-key
-                values={{ featureType: t('professional') }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
-              />
-            </p>
-          )}
-        </Alert>
+        <NotificationWrapper
+          type="info"
+          content={
+            <>
+              <p>
+                <Trans
+                  i18nKey="institution_acct_successfully_linked_2"
+                  components={[<strong />]} // eslint-disable-line react/jsx-key
+                  values={{ institutionName: institutionLinked.universityName }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
+                />
+              </p>
+              {institutionLinked.hasEntitlement && (
+                <p>
+                  <Trans
+                    i18nKey="this_grants_access_to_features_2"
+                    components={[<strong />]} // eslint-disable-line react/jsx-key
+                    values={{ featureType: t('professional') }}
+                    shouldUnescape
+                    tOptions={{ interpolation: { escapeValue: true } }}
+                  />
+                </p>
+              )}
+            </>
+          }
+          isDismissible
+          onDismiss={handleInfoClosed}
+          bs3Props={{
+            className: 'mb-0 text-center',
+          }}
+        />
       )}
       {!warningClosed && institutionEmailNonCanonical && (
-        <Alert
-          bsStyle="warning"
-          className="mb-0"
-          onDismiss={handleWarningClosed}
-        >
-          <p className="text-center">
-            <Icon
-              type="exclamation-triangle"
-              accessibilityLabel={t('generic_something_went_wrong')}
-            />{' '}
+        <NotificationWrapper
+          type="warning"
+          content={
             <Trans
               i18nKey="in_order_to_match_institutional_metadata_2"
               components={[<strong />]} // eslint-disable-line react/jsx-key
@@ -99,8 +112,20 @@ export function SSOAlert() {
               shouldUnescape
               tOptions={{ interpolation: { escapeValue: true } }}
             />
-          </p>
-        </Alert>
+          }
+          isDismissible
+          onDismiss={handleWarningClosed}
+          bs3Props={{
+            icon: (
+              <Icon
+                type="exclamation-triangle"
+                accessibilityLabel={t('generic_something_went_wrong')}
+                fw
+              />
+            ),
+            className: 'text-center',
+          }}
+        />
       )}
     </>
   )

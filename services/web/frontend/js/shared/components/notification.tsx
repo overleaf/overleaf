@@ -14,7 +14,7 @@ export type NotificationProps = {
   action?: React.ReactElement
   ariaLive?: 'polite' | 'off' | 'assertive'
   className?: string
-  content: React.ReactElement | string
+  content: React.ReactNode
   customIcon?: React.ReactElement
   disclaimer?: React.ReactElement | string
   isDismissible?: boolean

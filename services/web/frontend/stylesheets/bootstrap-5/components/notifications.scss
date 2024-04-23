@@ -2,7 +2,7 @@
   // will be deprecated once notifications moved to use .notification (see below)
   flex-grow: 1;
   width: 90%;
-  @media (min-width: var(--bs-breakpoint-md)) {
+  @include media-breakpoint-up(md) {
     width: auto;
   }
 }
@@ -13,7 +13,7 @@
   // will be deprecated once notifications moved to use .notification (see below)
   margin-top: calc($line-height-computed / 2); // match paragraph padding
   order: 1;
-  @media (min-width: var(--bs-breakpoint-md)) {
+  @include media-breakpoint-up(md) {
     margin-top: 0;
     order: 0;
     padding-left: $spacing-05;
@@ -43,7 +43,7 @@
     }
   }
 
-  @media (min-width: var(--bs-breakpoint-md)) {
+  @include media-breakpoint-up(md) {
     width: auto;
   }
 }
@@ -167,7 +167,7 @@
     }
   }
 
-  @media (min-width: var(--bs-breakpoint-md)) {
+  @include media-breakpoint-up(md) {
     &:not(.notification-cta-below-content) {
       .notification-content-and-cta {
         flex-wrap: nowrap;

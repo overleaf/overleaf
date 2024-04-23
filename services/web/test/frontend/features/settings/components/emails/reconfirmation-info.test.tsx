@@ -28,6 +28,9 @@ describe('<ReconfirmationInfo/>', function () {
 
   beforeEach(function () {
     window.metaAttributesCache = window.metaAttributesCache || new Map()
+    window.metaAttributesCache.set('ol-ExposedSettings', {
+      samlInitPath: '/saml',
+    })
     fetchMock.get('/user/emails?ensureAffiliation=true', [])
     assignStub = sinon.stub()
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({

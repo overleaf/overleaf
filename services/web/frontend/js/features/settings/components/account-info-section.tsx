@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
+import { ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import {
   getUserFacingMessage,
@@ -10,6 +10,7 @@ import { ExposedSettings } from '../../../../../types/exposed-settings'
 import useAsync from '../../../shared/hooks/use-async'
 import { useUserContext } from '../../../shared/context/user-context'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
 
 function AccountInfoSection() {
   const { t } = useTranslation()
@@ -104,12 +105,18 @@ function AccountInfoSection() {
         />
         {isSuccess ? (
           <FormGroup>
-            <Alert bsStyle="success">{t('thanks_settings_updated')}</Alert>
+            <NotificationWrapper
+              type="success"
+              content={t('thanks_settings_updated')}
+            />
           </FormGroup>
         ) : null}
         {isError ? (
           <FormGroup>
-            <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
+            <NotificationWrapper
+              type="error"
+              content={getUserFacingMessage(error) ?? ''}
+            />
           </FormGroup>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (

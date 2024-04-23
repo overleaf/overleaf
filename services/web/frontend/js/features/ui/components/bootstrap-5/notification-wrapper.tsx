@@ -5,7 +5,7 @@ import classnames from 'classnames'
 
 type NotificationWrapperProps = React.ComponentProps<typeof Notification> & {
   bs3Props?: {
-    icon: React.ReactElement
+    icon?: React.ReactElement
     className?: string
   }
 }

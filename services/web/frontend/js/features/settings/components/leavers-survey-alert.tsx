@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import { useUserEmailsContext } from '../context/user-email-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
 
 function sendMetrics(segmentation: 'view' | 'click' | 'close') {
   sendMB('institutional-leavers-survey-notification', { type: segmentation })
@@ -47,19 +47,25 @@ export function LeaversSurveyAlert() {
   }
 
   return (
-    <Alert className="mb-0" bsStyle="info" onDismiss={handleDismiss}>
-      <p>
-        <strong>{t('limited_offer')}</strong>
-        {`: ${t('institutional_leavers_survey_notification')} `}
-        <a
-          href="https://docs.google.com/forms/d/e/1FAIpQLSfYdeeoY5p1d31r5iUx1jw0O-Gd66vcsBi_Ntu3lJRMjV2EJA/viewform"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={handleLinkClick}
-        >
-          {t('take_short_survey')}
-        </a>
-      </p>
-    </Alert>
+    <NotificationWrapper
+      type="info"
+      content={
+        <>
+          <strong>{t('limited_offer')}</strong>
+          {`: ${t('institutional_leavers_survey_notification')} `}
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLSfYdeeoY5p1d31r5iUx1jw0O-Gd66vcsBi_Ntu3lJRMjV2EJA/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleLinkClick}
+          >
+            {t('take_short_survey')}
+          </a>
+        </>
+      }
+      isDismissible
+      onDismiss={handleDismiss}
+      className="mb-0"
+    />
   )
 }

@@ -1,5 +1,4 @@
 import { useState, ElementType } from 'react'
-import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useSSOContext, SSOSubscription } from '../context/sso-context'
@@ -7,6 +6,7 @@ import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 import { useSplitTestContext } from '@/shared/context/split-test-context'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
 
 function LinkingSection() {
   useBroadcastUser()
@@ -126,7 +126,10 @@ function LinkingSection() {
             {t('project_synchronisation')}
           </h3>
           {projectSyncSuccessMessage ? (
-            <Alert bsStyle="success">{projectSyncSuccessMessage}</Alert>
+            <NotificationWrapper
+              type="success"
+              content={projectSyncSuccessMessage}
+            />
           ) : null}
           <div className="settings-widgets-container">
             {allIntegrationLinkingWidgets.map(
@@ -167,9 +170,10 @@ function LinkingSection() {
             {t('linked_accounts')}
           </h3>
           {ssoErrorMessage ? (
-            <Alert bsStyle="danger">
-              {t('sso_link_error')}: {ssoErrorMessage}
-            </Alert>
+            <NotificationWrapper
+              type="error"
+              content={`${t('sso_link_error')}: ${ssoErrorMessage}`}
+            />
           ) : null}
           <div className="settings-widgets-container">
             {Object.values(subscriptions).map(

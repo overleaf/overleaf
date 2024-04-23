@@ -1,8 +1,8 @@
-import { Alert } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
 
 type LeaveModalFormErrorProps = {
   error: FetchError
@@ -32,15 +32,20 @@ function LeaveModalFormError({ error }: LeaveModalFormErrorProps) {
   }
 
   return (
-    <Alert bsStyle="danger">
-      {errorMessage}
-      {errorTip ? (
+    <NotificationWrapper
+      type="error"
+      content={
         <>
-          <br />
-          {errorTip}
+          {errorMessage}
+          {errorTip ? (
+            <>
+              <br />
+              {errorTip}
+            </>
+          ) : null}
         </>
-      ) : null}
-    </Alert>
+      }
+    />
   )
 }
 
