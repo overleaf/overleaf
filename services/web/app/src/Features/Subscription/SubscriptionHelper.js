@@ -1,5 +1,4 @@
 const GroupPlansData = require('./GroupPlansData')
-const Settings = require('@overleaf/settings')
 
 /**
  * If the user changes to a less expensive plan, we shouldn't apply the change immediately.
@@ -57,21 +56,102 @@ function generateInitialLocalizedGroupPrice(
   }
 }
 
-function formatCurrencyDefault(amount, recommendedCurrency) {
-  const currencySymbols = Settings.groupPlanModalOptions.currencySymbols
-  const recommendedCurrencySymbol = currencySymbols[recommendedCurrency]
+const currencies = {
+  USD: {
+    symbol: '$',
+    placement: 'before',
+  },
+  EUR: {
+    symbol: '€',
+    placement: 'before',
+  },
+  GBP: {
+    symbol: '£',
+    placement: 'before',
+  },
+  SEK: {
+    symbol: ' kr',
+    placement: 'after',
+  },
+  CAD: {
+    symbol: '$',
+    placement: 'before',
+  },
+  NOK: {
+    symbol: ' kr',
+    placement: 'after',
+  },
+  DKK: {
+    symbol: ' kr',
+    placement: 'after',
+  },
+  AUD: {
+    symbol: '$',
+    placement: 'before',
+  },
+  NZD: {
+    symbol: '$',
+    placement: 'before',
+  },
+  CHF: {
+    symbol: 'Fr ',
+    placement: 'before',
+  },
+  SGD: {
+    symbol: '$',
+    placement: 'before',
+  },
+  INR: {
+    symbol: '₹',
+    placement: 'before',
+  },
+  BRL: {
+    code: 'BRL',
+    locale: 'pt-BR',
+    symbol: 'R$ ',
+    placement: 'before',
+  },
+  MXN: {
+    code: 'MXN',
+    locale: 'es-MX',
+    symbol: '$ ',
+    placement: 'before',
+  },
+  COP: {
+    code: 'COP',
+    locale: 'es-CO',
+    symbol: '$ ',
+    placement: 'before',
+  },
+  CLP: {
+    code: 'CLP',
+    locale: 'es-CL',
+    symbol: '$ ',
+    placement: 'before',
+  },
+  PEN: {
+    code: 'PEN',
+    locale: 'es-PE',
+    symbol: 'S/ ',
+    placement: 'before',
+  },
+}
 
-  switch (recommendedCurrency) {
-    case 'CHF': {
-      return `${recommendedCurrencySymbol} ${amount}`
-    }
-    case 'DKK':
-    case 'NOK':
-    case 'SEK':
-      return `${amount} ${recommendedCurrencySymbol}`
-    default:
-      return `${recommendedCurrencySymbol}${amount}`
+function formatCurrencyDefault(amount, recommendedCurrency) {
+  const currency = currencies[recommendedCurrency]
+
+  // Test using toLocaleString to format currencies for new LATAM regions
+  if (currency.locale && currency.code) {
+    return amount.toLocaleString(currency.locale, {
+      style: 'currency',
+      currency: currency.code,
+      minimumFractionDigits: 0,
+    })
   }
+
+  return currency.placement === 'before'
+    ? `${currency.symbol}${amount}`
+    : `${amount}${currency.symbol}`
 }
 
 module.exports = {
