@@ -147,19 +147,6 @@ module.exports = {
       SubscriptionController.extendTrial
     )
 
-    webRouter.get(
-      '/user/subscription/upgrade-annual',
-      AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionController.renderUpgradeToAnnualPlanPage
-    )
-    webRouter.post(
-      '/user/subscription/upgrade-annual',
-      AuthenticationController.requireLogin(),
-      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionController.processUpgradeToAnnualPlan
-    )
-
     webRouter.post(
       '/user/subscription/account/email',
       AuthenticationController.requireLogin(),
