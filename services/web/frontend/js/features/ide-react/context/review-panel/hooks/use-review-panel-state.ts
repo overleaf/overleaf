@@ -428,17 +428,15 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
 
       let localResolvedThreadIds = resolvedThreadIds
 
-      if (!isRestrictedTokenMember) {
-        if (rangesTracker.comments.length > 0) {
-          const threadsLoadResult = await ensureThreadsAreLoaded()
-          if (threadsLoadResult?.resolvedThreadIds) {
-            localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
-          }
-        } else if (loadingThreads) {
-          // ensure that tracked changes are highlighted even if no comments are loaded
-          setLoadingThreads(false)
-          dispatchReviewPanelEvent('loaded_threads')
+      if (!isRestrictedTokenMember && rangesTracker.comments.length > 0) {
+        const threadsLoadResult = await ensureThreadsAreLoaded()
+        if (threadsLoadResult?.resolvedThreadIds) {
+          localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
         }
+      } else if (loadingThreads) {
+        // ensure that tracked changes are highlighted even if no comments are loaded
+        setLoadingThreads(false)
+        dispatchReviewPanelEvent('loaded_threads')
       }
 
       if (!loadingThreadsInProgressRef.current) {
