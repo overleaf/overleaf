@@ -150,6 +150,10 @@
 
   .login-register-hr-text-container {
     padding: @line-height-computed 0 calc(@line-height-computed / 2) 0;
+
+    &::before {
+      top: calc(@line-height-computed + @line-height-computed / 4);
+    }
   }
 
   .login-register-error-container {
