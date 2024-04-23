@@ -8,8 +8,12 @@ import { sendMB } from '../../../../infrastructure/event-tracking'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 
-function trackUpgradeClick() {
-  sendMB('settings-upgrade-click')
+function trackUpgradeClick(integration: string) {
+  sendMB('settings-upgrade-click', { integration })
+}
+
+function trackLinkingClick(integration: string) {
+  sendMB('link-integration-click', { integration, location: 'Settings' })
 }
 
 type IntegrationLinkingWidgetProps = {
@@ -73,6 +77,7 @@ export function IntegrationLinkingWidget({
       </div>
       <div>
         <ActionButton
+          integration={title}
           hasFeature={hasFeature}
           linked={linked}
           handleUnlinkClick={handleUnlinkClick}
@@ -81,6 +86,7 @@ export function IntegrationLinkingWidget({
         />
       </div>
       <UnlinkConfirmationModal
+        integration={title}
         show={showModal}
         title={unlinkConfirmationTitle}
         content={unlinkConfirmationText}
@@ -92,6 +98,7 @@ export function IntegrationLinkingWidget({
 }
 
 type ActionButtonProps = {
+  integration: string
   hasFeature?: boolean
   linked?: boolean
   handleUnlinkClick: () => void
@@ -105,6 +112,7 @@ function ActionButton({
   handleUnlinkClick,
   linkPath,
   disabled,
+  integration,
 }: ActionButtonProps) {
   const { t } = useTranslation()
   if (!hasFeature) {
@@ -112,7 +120,7 @@ function ActionButton({
       <ButtonWrapper
         variant="primary"
         href="/user/subscription/plans"
-        onClick={trackUpgradeClick}
+        onClick={() => trackUpgradeClick(integration)}
         bs3Props={{ bsStyle: null, className: 'btn-primary' }}
       >
         <span className="text-capitalize">{t('upgrade')}</span>
@@ -152,6 +160,7 @@ function ActionButton({
               bs5: 'text-capitalize',
             })}
             bs3Props={{ bsStyle: null }}
+            onClick={() => trackLinkingClick(integration)}
           >
             {t('link')}
           </ButtonWrapper>
@@ -164,6 +173,7 @@ function ActionButton({
 type UnlinkConfirmModalProps = {
   show: boolean
   title: string
+  integration: string
   content: string
   unlinkPath: string
   handleHide: () => void
@@ -172,6 +182,7 @@ type UnlinkConfirmModalProps = {
 function UnlinkConfirmationModal({
   show,
   title,
+  integration,
   content,
   unlinkPath,
   handleHide,
@@ -182,6 +193,13 @@ function UnlinkConfirmationModal({
     event.preventDefault()
     handleHide()
   }
+
+  const handleConfirm = () => {
+    sendMB('unlink-integration-click', {
+      integration,
+    })
+  }
+
   return (
     <AccessibleModal show={show} onHide={handleHide}>
       <Modal.Header closeButton>
@@ -209,6 +227,7 @@ function UnlinkConfirmationModal({
             type="submit"
             variant="danger-ghost"
             bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
+            onClick={handleConfirm}
           >
             {t('unlink')}
           </ButtonWrapper>

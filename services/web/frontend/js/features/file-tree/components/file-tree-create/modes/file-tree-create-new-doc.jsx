@@ -22,7 +22,10 @@ export default function FileTreeCreateNewDoc() {
       event.preventDefault()
 
       finishCreatingDoc({ name })
-      eventTracking.sendMB('new-file-created', { method: 'doc' })
+      eventTracking.sendMB('new-file-created', {
+        method: 'doc',
+        extension: name.split('.').length > 1 ? name.split('.').pop() : '',
+      })
     },
     [finishCreatingDoc, name]
   )

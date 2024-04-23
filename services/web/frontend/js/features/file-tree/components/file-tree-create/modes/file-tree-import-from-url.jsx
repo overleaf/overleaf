@@ -36,7 +36,10 @@ export default function FileTreeImportFromUrl() {
   // form submission: create a linked file with this name, from this URL
   const handleSubmit = event => {
     event.preventDefault()
-    eventTracking.sendMB('new-file-created', { method: 'url' })
+    eventTracking.sendMB('new-file-created', {
+      method: 'url',
+      extension: name.split('.').length > 1 ? name.split('.').pop() : '',
+    })
     finishCreatingLinkedFile({
       name,
       provider: 'url',

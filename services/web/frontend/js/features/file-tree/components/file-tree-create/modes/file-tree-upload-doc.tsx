@@ -145,7 +145,13 @@ export default function FileTreeUploadDoc() {
         })
         // broadcast doc metadata after each successful upload
         .on('upload-success', (file, response) => {
-          eventTracking.sendMB('new-file-created', { method: 'upload' })
+          eventTracking.sendMB('new-file-created', {
+            method: 'upload',
+            extension:
+              file?.name && file?.name.split('.').length > 1
+                ? file?.name.split('.').pop()
+                : '',
+          })
           if (response.body.entity_type === 'doc') {
             window.setTimeout(() => {
               refreshProjectMetadata(projectId, response.body.entity_id)

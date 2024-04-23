@@ -21,6 +21,8 @@ import {
 } from '@/features/ide-react/types/file-tree'
 import { debugConsole } from '@/utils/debugging'
 import { convertFileRefToBinaryFile } from '@/features/ide-react/util/file-view'
+import { sendMB } from '@/infrastructure/event-tracking'
+import { FileRef } from '../../../../../types/file-ref'
 
 const FileTreeOpenContext = createContext<
   | {
@@ -34,7 +36,7 @@ const FileTreeOpenContext = createContext<
 >(undefined)
 
 export const FileTreeOpenProvider: FC = ({ children }) => {
-  const { rootDocId } = useProjectContext()
+  const { rootDocId, owner } = useProjectContext()
   const { eventEmitter, projectJoined } = useIdeReactContext()
   const {
     openDocId: openDocWithId,
@@ -71,8 +73,14 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
       setOpenEntity(selected)
       if (selected.type === 'doc' && fileTreeReady) {
         openDocWithId(selected.entity._id)
+        if (selected.entity.name.endsWith('.bib')) {
+          sendMB('open-bib-file', {
+            projectOwner: owner._id,
+            isSampleFile: selected.entity.name === 'sample.bib',
+            linkedFileProvider: null,
+          })
+        }
       }
-
       // Keep openFile scope value in sync with the file tree
       const openFile =
         selected.type === 'fileRef'
@@ -80,10 +88,18 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
           : null
       setOpenFile(openFile)
       if (openFile) {
+        if (selected?.entity?.name?.endsWith('.bib')) {
+          sendMB('open-bib-file', {
+            projectOwner: owner._id,
+            isSampleFile: false,
+            linkedFileProvider: (selected.entity as FileRef).linkedFileData
+              ?.provider,
+          })
+        }
         window.dispatchEvent(new CustomEvent('file-view:file-opened'))
       }
     },
-    [fileTreeReady, setOpenFile, openDocWithId]
+    [fileTreeReady, setOpenFile, openDocWithId, owner]
   )
 
   const handleFileTreeDelete = useCallback(
