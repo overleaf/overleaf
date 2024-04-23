@@ -313,6 +313,7 @@
   "last_name": "Sobrenome",
   "latam_discount_modal_info": "Aprovecha todo el potencial de Overleaf con un __discount__% de descuento en suscripciones premium pagadas en __currencyName__. Consigue tiempos de compilación más largos, historial completo de documentos, seguimiento de cambios, colaboradores adicionales y más.",
   "latam_discount_modal_title": "Desconto em assinaturas premium",
+  "latam_discount_offer_plans_page_banner": "__flag__ Aplicamos um desconto de __discount__ aos planos premium nesta página para nossos usuários no __country__. Confira os novos preços mais baixos (em __currency__).",
   "latex_editor_info": "Tudo que você precisa num editar moderno de LaTeX - correção ortográfica, auto-completar inteligente, realce de sintaxe, diversas cores de temas, atalhos de vim e emacs, ajuda com mensagens de aviso e erros do LaTeX e muito mais.",
   "latex_templates": "Modelos LaTeX",
   "ldap": "LDAP",
