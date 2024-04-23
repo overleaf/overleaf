@@ -58,7 +58,7 @@ describe('UserPagesController', function () {
       subscribed: sinon.stub().yields(),
     }
     this.AuthenticationController = {
-      _getRedirectFromSession: sinon.stub(),
+      getRedirectFromSession: sinon.stub(),
       setRedirectInSession: sinon.stub(),
     }
     this.Features = {
@@ -169,7 +169,7 @@ describe('UserPagesController', function () {
 
     describe('when an explicit redirect is set via query string', function () {
       beforeEach(function () {
-        this.AuthenticationController._getRedirectFromSession = sinon
+        this.AuthenticationController.getRedirectFromSession = sinon
           .stub()
           .returns(null)
         this.AuthenticationController.setRedirectInSession = sinon.stub()

@@ -236,7 +236,7 @@ const UserPagesController = {
     // such as being sent from the editor to /login, then set the redirect explicitly
     if (
       req.query.redir != null &&
-      AuthenticationController._getRedirectFromSession(req) == null
+      AuthenticationController.getRedirectFromSession(req) == null
     ) {
       AuthenticationController.setRedirectInSession(req, req.query.redir)
     }

@@ -177,7 +177,7 @@ const AuthenticationController = {
         }
 
         const redir =
-          AuthenticationController._getRedirectFromSession(req) || '/project'
+          AuthenticationController.getRedirectFromSession(req) || '/project'
 
         _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser)
         const userId = user._id
@@ -283,7 +283,7 @@ const AuthenticationController = {
               } else if (user) {
                 if (
                   isPasswordReused &&
-                  AuthenticationController._getRedirectFromSession(req) == null
+                  AuthenticationController.getRedirectFromSession(req) == null
                 ) {
                   AuthenticationController.setRedirectInSession(
                     req,
@@ -613,7 +613,7 @@ const AuthenticationController = {
     if (callback) callback()
   },
 
-  _getRedirectFromSession(req) {
+  getRedirectFromSession(req) {
     let safePath
     const value = _.get(req, ['session', 'postLoginRedirect'])
     if (value) {
