@@ -538,14 +538,6 @@ const ProjectController = {
         flushToTpds: cb => {
           TpdsProjectFlusher.flushProjectToTpdsIfNeeded(projectId, cb)
         },
-        sharingModalSplitTest(cb) {
-          SplitTestHandler.getAssignment(
-            req,
-            res,
-            'project-share-modal-paywall',
-            cb
-          )
-        },
         sharingModalNullTest(cb) {
           // null test targeting logged in users, for front-end side
           SplitTestHandler.getAssignment(req, res, 'null-test-share-modal', cb)

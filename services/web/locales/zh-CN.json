@@ -1136,7 +1136,6 @@
   "need_to_add_new_primary_before_remove": "在删除此电子邮件地址之前，您需要添加一个新的主电子邮件地址。",
   "need_to_leave": "确定要删除账号？",
   "need_to_upgrade_for_more_collabs": "您的账户需要升级方可添加更多的合作者",
-  "need_to_upgrade_for_more_collabs_variant": "您已达到协作者的最大数量。 升级您的帐户以添加更多协作者。",
   "new_compile_domain_notice": "我们最近将 PDF 下载迁移到了新域，可能会阻止您的浏览器访问新域 <0>__compilesUserContentDomain__</0>。 这可能是由网络阻止或严格的浏览器插件规则引起的。 请查阅我们的<1>问题排查指南</1>。",
   "new_file": "新建文件",
   "new_folder": "新建目录",

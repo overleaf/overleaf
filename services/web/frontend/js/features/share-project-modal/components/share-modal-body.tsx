@@ -7,14 +7,10 @@ import OwnerInfo from './owner-info'
 import SendInvitesNotice from './send-invites-notice'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
-import { useSplitTestContext } from '../../../shared/context/split-test-context'
 import { useMemo } from 'react'
-import { Row } from 'react-bootstrap'
 import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
 
 export default function ShareModalBody() {
-  const { splitTestVariants } = useSplitTestContext()
-
   const { members, invites, features } = useProjectContext()
   const { isProjectOwner } = useEditorContext()
 
@@ -32,123 +28,37 @@ export default function ShareModalBody() {
     return members.length + invites.length < (features.collaborators ?? 1)
   }, [members, invites, features, isProjectOwner])
 
-  switch (splitTestVariants['project-share-modal-paywall']) {
-    case 'new-copy-top':
-      return (
-        <>
-          {isProjectOwner ? (
-            <>
-              <SendInvites canAddCollaborators={canAddCollaborators} />
-              <Row className="public-access-level" />
-            </>
-          ) : (
-            <SendInvitesNotice />
-          )}
+  return (
+    <>
+      {isProjectOwner && <LinkSharing />}
 
-          <OwnerInfo />
+      <OwnerInfo />
 
-          {members.map(member =>
-            isProjectOwner ? (
-              <EditMember key={member._id} member={member} />
-            ) : (
-              <ViewMember key={member._id} member={member} />
-            )
-          )}
+      {members.map(member =>
+        isProjectOwner ? (
+          <EditMember key={member._id} member={member} />
+        ) : (
+          <ViewMember key={member._id} member={member} />
+        )
+      )}
 
-          {invites.map(invite => (
-            <Invite
-              key={invite._id}
-              invite={invite}
-              isProjectOwner={isProjectOwner}
-            />
-          ))}
+      {invites.map(invite => (
+        <Invite
+          key={invite._id}
+          invite={invite}
+          isProjectOwner={isProjectOwner}
+        />
+      ))}
 
-          {isProjectOwner && (
-            <>
-              <br />
-              <LinkSharing />
-            </>
-          )}
+      {isProjectOwner ? (
+        <SendInvites canAddCollaborators={canAddCollaborators} />
+      ) : (
+        <SendInvitesNotice />
+      )}
 
-          {!window.ExposedSettings.recaptchaDisabled?.invite && (
-            <RecaptchaConditions />
-          )}
-        </>
-      )
-    case 'new-copy-middle':
-      return (
-        <>
-          <OwnerInfo />
-
-          {members.map(member =>
-            isProjectOwner ? (
-              <EditMember key={member._id} member={member} />
-            ) : (
-              <ViewMember key={member._id} member={member} />
-            )
-          )}
-
-          {invites.map(invite => (
-            <Invite
-              key={invite._id}
-              invite={invite}
-              isProjectOwner={isProjectOwner}
-            />
-          ))}
-
-          {isProjectOwner ? (
-            <SendInvites canAddCollaborators={canAddCollaborators} />
-          ) : (
-            <SendInvitesNotice />
-          )}
-
-          {isProjectOwner && (
-            <>
-              <br />
-              <LinkSharing />
-            </>
-          )}
-
-          {!window.ExposedSettings.recaptchaDisabled?.invite && (
-            <RecaptchaConditions />
-          )}
-        </>
-      )
-    case 'new-copy-bottom':
-    case 'default':
-    default:
-      return (
-        <>
-          {isProjectOwner && <LinkSharing />}
-
-          <OwnerInfo />
-
-          {members.map(member =>
-            isProjectOwner ? (
-              <EditMember key={member._id} member={member} />
-            ) : (
-              <ViewMember key={member._id} member={member} />
-            )
-          )}
-
-          {invites.map(invite => (
-            <Invite
-              key={invite._id}
-              invite={invite}
-              isProjectOwner={isProjectOwner}
-            />
-          ))}
-
-          {isProjectOwner ? (
-            <SendInvites canAddCollaborators={canAddCollaborators} />
-          ) : (
-            <SendInvitesNotice />
-          )}
-
-          {!window.ExposedSettings.recaptchaDisabled?.invite && (
-            <RecaptchaConditions />
-          )}
-        </>
-      )
-  }
+      {!window.ExposedSettings.recaptchaDisabled?.invite && (
+        <RecaptchaConditions />
+      )}
+    </>
+  )
 }

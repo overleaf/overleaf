@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
-
 import { useUserContext } from '../../../shared/context/user-context'
-
 import { upgradePlan } from '../../../main/account-upgrade'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
-import AddCollaboratorsUpgradeContentDefault from './add-collaborators-upgrade-content-default'
-import AddCollaboratorsUpgradeContentVariant from './add-collaborators-upgrade-content-variant'
+import Icon from '../../../shared/components/icon'
 import { useSplitTestContext } from '../../../shared/context/split-test-context'
 
 export default function AddCollaboratorsUpgrade() {
@@ -17,17 +14,47 @@ export default function AddCollaboratorsUpgrade() {
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
   const { splitTestVariants } = useSplitTestContext()
 
-  const variant = splitTestVariants['project-share-modal-paywall']
   const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
 
   return (
-    <div className={variant === 'default' ? 'add-collaborators-upgrade' : ''}>
-      {!variant || variant === 'default' ? (
-        <AddCollaboratorsUpgradeContentDefault />
-      ) : (
-        <AddCollaboratorsUpgradeContentVariant />
-      )}
-
+    <div className="add-collaborators-upgrade">
+      <p className="text-center">
+        {t('need_to_upgrade_for_more_collabs')}. {t('also')}:
+      </p>
+      <ul className="list-unstyled">
+        <li>
+          <Icon type="check" />
+          &nbsp;
+          {t('unlimited_projects')}
+        </li>
+        <li>
+          <Icon type="check" />
+          &nbsp;
+          {t('collabs_per_proj', {
+            collabcount: 'Multiple',
+          })}
+        </li>
+        <li>
+          <Icon type="check" />
+          &nbsp;
+          {t('full_doc_history')}
+        </li>
+        <li>
+          <Icon type="check" />
+          &nbsp;
+          {t('sync_to_dropbox')}
+        </li>
+        <li>
+          <Icon type="check" />
+          &nbsp;
+          {t('sync_to_github')}
+        </li>
+        <li>
+          <Icon type="check" />
+          &nbsp;
+          {t('compile_larger_projects')}
+        </li>
+      </ul>
       <p className="text-center row-spaced-thin">
         {user.allowedFreeTrial ? (
           <StartFreeTrialButton
