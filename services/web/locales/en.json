@@ -1744,7 +1744,7 @@
   "sso_is_enabled_explanation_1": "Group members will <0>only</0> be able to sign in via SSO after linking their accounts with your IdP.",
   "sso_is_enabled_explanation_1_sso_only": "Group members will have the option to sign in via SSO.",
   "sso_is_enabled_explanation_2": "If there are any problems with the configuration, only you (as the group administrator) will be able to disable SSO.",
-  "sso_link_account_with_idp": "This group uses SSO. This means we need to authenticate your account with the group identity provider. Click <0>Set up SSO</0> to authenticate now.",
+  "sso_link_account_with_idp": "Your group uses SSO. This means we need to authenticate your account with the group identity provider. Click <0>Set up SSO</0> to authenticate now.",
   "sso_link_error": "Error linking account",
   "sso_link_invite_has_been_sent_to_email": "An SSO invite reminder has been sent to <0>__email__</0>",
   "sso_login": "SSO login",
