@@ -30,6 +30,14 @@ describe('Range', function () {
     expect(range0length.isEmpty()).to.be.true
   })
 
+  it('should not create a range with a negative position', function () {
+    expect(() => new Range(-1, 10)).to.throw
+  })
+
+  it('should not create a range with a negative length', function () {
+    expect(() => new Range(0, -2)).to.throw
+  })
+
   describe('overlaps', function () {
     it('same ranges should overlap', function () {
       const range1 = new Range(1, 3)

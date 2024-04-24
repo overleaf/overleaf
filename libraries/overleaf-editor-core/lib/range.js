@@ -1,10 +1,16 @@
 // @ts-check
+
+const OError = require('@overleaf/o-error')
+
 class Range {
   /**
    * @param {number} pos
    * @param {number} length
    */
   constructor(pos, length) {
+    if (pos < 0 || length < 0) {
+      throw new OError('Invalid range', { pos, length })
+    }
     /** @readonly */
     this.pos = pos
     /** @readonly */
