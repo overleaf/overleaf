@@ -10,6 +10,8 @@
     "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
     "@overleaf/object-persistor": "*",
+    "@overleaf/redis-wrapper": "*",
+    "@overleaf/settings": "*",
     "@overleaf/stream-utils": "^0.1.0",
     "archiver": "^5.3.0",
     "basic-auth": "^2.0.1",
