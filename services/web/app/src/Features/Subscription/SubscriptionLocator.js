@@ -23,20 +23,18 @@ const SubscriptionLocator = {
   },
 
   async getManagedGroupSubscriptions(userOrId) {
-    // eslint-disable-next-line no-restricted-syntax
     return await Subscription.find({
       manager_ids: userOrId,
       groupPlan: true,
     })
-      .populate('admin_id')
+      .populate('admin_id', ['_id', 'email'])
       .exec()
   },
 
   async getMemberSubscriptions(userOrId) {
     const userId = SubscriptionLocator._getUserId(userOrId)
-    // eslint-disable-next-line no-restricted-syntax
     return await Subscription.find({ member_ids: userId })
-      .populate('admin_id')
+      .populate('admin_id', 'email')
       .exec()
   },
 
