@@ -157,6 +157,10 @@ h3.group-settings-title {
   .sso-config-info-section {
     margin-bottom: @margin-md;
     padding: 0 @padding-base-horizontal;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .sso-config-info-label {
@@ -329,16 +333,30 @@ h3.group-settings-title {
 }
 
 .certificate-wrapper {
-  display: flex;
-  align-items: baseline;
-
-  &.certificate-full {
-    flex-wrap: wrap;
+  .certificate-delete {
+    text-decoration: none;
+    margin-left: 16px;
+    span {
+      vertical-align: middle;
+    }
   }
 
+  .certificate-delete,
+  .view-more {
+    padding: 0;
+  }
+}
+
+.certificate-truncated {
+  display: flex;
+  align-items: center;
   .view-more {
     flex-grow: 0;
     flex-shrink: 0;
+    margin-left: 16px;
+  }
+  .certificate-delete {
+    display: inline-flex;
   }
 }
 
@@ -354,11 +372,7 @@ h3.group-settings-title {
   }
   .certificate-full & {
     word-break: break-all;
-
-    .break {
-      flex-basis: 100%;
-      height: 0;
-    }
+    display: block;
   }
 }
 
