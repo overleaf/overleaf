@@ -486,6 +486,7 @@
   "educational_percent_discount_applied": "__percent__% educational discount applied!",
   "email": "Email",
   "email_address": "Email address",
+  "email_address_is_invalid": "Email address is invalid",
   "email_already_associated_with": "The <b>__email1__</b> email is already associated with the <b>__email2__</b> <b>__appName__</b> account.",
   "email_already_registered": "This email is already registered",
   "email_already_registered_secondary": "This email is already registered as a secondary email",
