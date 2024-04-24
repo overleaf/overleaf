@@ -48,3 +48,4 @@ if [ -f "$RESYNCS_NEEDED_FILE" ]; then
 else
   echo "No recovery of doc versions needed."
 fi
+
