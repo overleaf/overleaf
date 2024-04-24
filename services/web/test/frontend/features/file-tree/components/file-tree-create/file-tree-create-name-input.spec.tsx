@@ -5,7 +5,7 @@ describe('<FileTreeCreateNameInput/>', function () {
   it('renders an empty input', function () {
     cy.mount(
       <FileTreeCreateNameProvider>
-        <FileTreeCreateNameInput />
+        <FileTreeCreateNameInput inFlight={false} />
       </FileTreeCreateNameProvider>
     )
 
@@ -19,6 +19,7 @@ describe('<FileTreeCreateNameInput/>', function () {
         <FileTreeCreateNameInput
           label="File name in this project"
           placeholder="Enter a file name…"
+          inFlight={false}
         />
       </FileTreeCreateNameProvider>
     )
@@ -30,7 +31,7 @@ describe('<FileTreeCreateNameInput/>', function () {
   it('uses an initial name', function () {
     cy.mount(
       <FileTreeCreateNameProvider initialName="test.tex">
-        <FileTreeCreateNameInput />
+        <FileTreeCreateNameInput inFlight={false} />
       </FileTreeCreateNameProvider>
     )
 
@@ -42,7 +43,7 @@ describe('<FileTreeCreateNameInput/>', function () {
 
     cy.mount(
       <FileTreeCreateNameProvider initialName="test.tex">
-        <FileTreeCreateNameInput focusName />
+        <FileTreeCreateNameInput focusName inFlight={false} />
       </FileTreeCreateNameProvider>
     )
 
@@ -64,6 +65,28 @@ describe('<FileTreeCreateNameInput/>', function () {
     cy.get<HTMLInputElement>('@input').then(element => {
       expect(element.get(0).selectionStart).to.equal(0)
       expect(element.get(0).selectionEnd).to.equal(4)
+    })
+  })
+
+  it('disables the input when in flight', function () {
+    cy.mount(
+      <FileTreeCreateNameProvider initialName="test.tex">
+        <FileTreeCreateNameInput inFlight={false} />
+      </FileTreeCreateNameProvider>
+    ).then(({ rerender }) => {
+      cy.findByLabelText('File Name').should('not.be.disabled')
+      rerender(
+        <FileTreeCreateNameProvider initialName="test.tex">
+          <FileTreeCreateNameInput inFlight />
+        </FileTreeCreateNameProvider>
+      )
+      cy.findByLabelText('File Name').should('be.disabled')
+      rerender(
+        <FileTreeCreateNameProvider initialName="test.tex">
+          <FileTreeCreateNameInput inFlight={false} />
+        </FileTreeCreateNameProvider>
+      )
+      cy.findByLabelText('File Name').should('not.be.disabled')
     })
   })
 })

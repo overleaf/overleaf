@@ -12,7 +12,7 @@ export default function FileTreeImportFromUrl() {
   const { t } = useTranslation()
   const { name, setName, validName } = useFileTreeCreateName()
   const { setValid } = useFileTreeCreateForm()
-  const { finishCreatingLinkedFile, error } = useFileTreeActionable()
+  const { finishCreatingLinkedFile, error, inFlight } = useFileTreeActionable()
 
   const [url, setUrl] = useState('')
 
@@ -70,6 +70,7 @@ export default function FileTreeImportFromUrl() {
         label={t('file_name_in_this_project')}
         placeholder="my_file"
         error={error}
+        inFlight={inFlight}
       />
 
       {error && <ErrorMessage error={error} />}

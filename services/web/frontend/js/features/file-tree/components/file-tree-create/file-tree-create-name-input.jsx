@@ -21,6 +21,7 @@ export default function FileTreeCreateNameInput({
   classes = {},
   placeholder,
   error,
+  inFlight,
 }) {
   const { t } = useTranslation()
 
@@ -51,6 +52,7 @@ export default function FileTreeCreateNameInput({
         value={name}
         onChange={event => setName(event.target.value)}
         inputRef={inputRef}
+        disabled={inFlight}
       />
 
       <FormControl.Feedback />
@@ -74,6 +76,7 @@ FileTreeCreateNameInput.propTypes = {
   }),
   placeholder: PropTypes.string,
   error: PropTypes.oneOfType([PropTypes.object, PropTypes.string]),
+  inFlight: PropTypes.bool.isRequired,
 }
 
 function ErrorMessage({ error }) {

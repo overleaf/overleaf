@@ -31,7 +31,7 @@ export default function FileTreeImportFromProject() {
 
   const { name, setName, validName } = useFileTreeCreateName()
   const { setValid } = useFileTreeCreateForm()
-  const { error, finishCreatingLinkedFile } = useFileTreeActionable()
+  const { error, finishCreatingLinkedFile, inFlight } = useFileTreeActionable()
 
   const [selectedProject, setSelectedProject] = useState<Project>()
   const [selectedProjectEntity, setSelectedProjectEntity] = useState<Entity>()
@@ -168,6 +168,7 @@ export default function FileTreeImportFromProject() {
         }}
         placeholder="example.tex"
         error={error}
+        inFlight={inFlight}
       />
 
       {error && <ErrorMessage error={error} />}

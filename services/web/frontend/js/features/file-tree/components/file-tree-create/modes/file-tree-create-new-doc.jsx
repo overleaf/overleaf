@@ -9,7 +9,7 @@ import ErrorMessage from '../error-message'
 export default function FileTreeCreateNewDoc() {
   const { name, validName } = useFileTreeCreateName()
   const { setValid } = useFileTreeCreateForm()
-  const { error, finishCreatingDoc } = useFileTreeActionable()
+  const { error, finishCreatingDoc, inFlight } = useFileTreeActionable()
 
   // form validation: name is valid
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function FileTreeCreateNewDoc() {
 
   return (
     <form noValidate id="create-file" onSubmit={handleSubmit}>
-      <FileTreeCreateNameInput focusName error={error} />
+      <FileTreeCreateNameInput focusName error={error} inFlight={inFlight} />
 
       {error && <ErrorMessage error={error} />}
     </form>

@@ -61,4 +61,7 @@ export default {
   title: 'Editor / Modals / Create File / File Name Input',
   component: FileTreeCreateNameInput,
   decorators: [ModalBodyDecorator, ModalContentDecorator],
+  args: {
+    inFlight: false,
+  },
 }
