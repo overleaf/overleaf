@@ -299,7 +299,7 @@ class UserHelper {
    * @param {string} userData.password
    * @returns {UserHelper}
    */
-  static async loginUser(userData) {
+  static async loginUser(userData, expectedRedirect) {
     if (!userData || !userData.email || !userData.password) {
       throw new Error('email and password required')
     }
@@ -327,7 +327,11 @@ class UserHelper {
     }
 
     const body = await response.json()
-    if (body.redir !== '/project') {
+    if (
+      body.redir !== '/project' &&
+      expectedRedirect &&
+      body.redir !== expectedRedirect
+    ) {
       const error = new Error(
         `login should redirect to /project: status=${
           response.status
