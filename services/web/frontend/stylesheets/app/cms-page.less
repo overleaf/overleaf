@@ -4,17 +4,16 @@
   including About and Blog
 */
 .cms-page {
-  &.page-style {
-    /*
-    Links and Buttons
-  */
-
-    a {
-      color: @link-color;
-      &:hover {
-        color: @link-hover-color;
-      }
+  &.website-redesign {
+    h1 {
+      font-size: 2rem; // 32px
     }
+
+    h2 {
+      font-size: 1.5rem; // 24px
+    }
+
+    /* Buttons */
     // correct color property set on <a> above:
     .reset-btns;
     .alert {
@@ -24,6 +23,31 @@
       .btn-info {
         .btn-alert-info;
       }
+    }
+
+    blockquote.quote-picture-bottom {
+      padding: (@line-height-computed / 2) @line-height-computed;
+
+      .quote-picture-and-person {
+        font-size: 18px;
+      }
+
+      .quote-by-position {
+        font-weight: 400;
+      }
+    }
+  }
+
+  .section-row {
+    margin: 0 auto;
+    /* match .col-sm-12 */
+    /* @grid-gutter-width  is used for margins */
+    max-width: (@screen-sm) - @grid-gutter-width!important;
+    @media (min-width: @screen-md-min) {
+      max-width: (@screen-md) - @grid-gutter-width!important;
+    }
+    @media (min-width: @screen-lg-min) {
+      max-width: (@screen-lg) - @grid-gutter-width!important;
     }
   }
 
