@@ -71,6 +71,9 @@ async function getUserForPasswordResetToken(token) {
     'overleaf.id': 1,
     email: 1,
   })
+
+  await checkUserPermissions(user, ['change-password'])
+
   if (user == null) {
     return { user: null, remainingPeeks: 0 }
   } else if (data.user_id != null && data.user_id === user._id.toString()) {

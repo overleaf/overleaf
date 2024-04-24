@@ -168,6 +168,9 @@ async function renderSetPasswordForm(req, res, next) {
 
       return res.redirect('/user/password/set' + emailQuery)
     } catch (err) {
+      if (err.name === 'ForbiddenError') {
+        return next(err)
+      }
       return res.redirect('/user/password/reset?error=token_expired')
     }
   }

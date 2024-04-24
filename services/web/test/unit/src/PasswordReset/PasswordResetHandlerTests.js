@@ -45,6 +45,11 @@ describe('PasswordResetHandler', function () {
         '../Email/EmailHandler': this.EmailHandler,
         '../Authentication/AuthenticationManager': this.AuthenticationManager,
         '@overleaf/settings': this.settings,
+        '../Authorization/PermissionsManager': (this.PermissionsManager = {
+          promises: {
+            checkUserPermissions: sinon.stub(),
+          },
+        }),
       },
     })
     this.token = '12312321i'
@@ -509,6 +514,48 @@ describe('PasswordResetHandler', function () {
             }
           )
         })
+      })
+    })
+  })
+
+  describe('getUserForPasswordResetToken', function () {
+    beforeEach(function () {
+      this.OneTimeTokenHandler.promises.peekValueFromToken.resolves({
+        data: {
+          user_id: this.user._id,
+          email: this.email,
+        },
+        remainingPeeks: 1,
+      })
+
+      this.UserGetter.promises.getUserByMainEmail.resolves({
+        _id: this.user._id,
+        email: this.email,
+      })
+    })
+
+    it('should returns errors from user permissions', async function () {
+      let error
+      const err = new Error('nope')
+      this.PermissionsManager.promises.checkUserPermissions.rejects(err)
+      try {
+        await this.PasswordResetHandler.promises.getUserForPasswordResetToken(
+          'abc123'
+        )
+      } catch (e) {
+        error = e
+      }
+      expect(error).to.deep.equal(error)
+    })
+
+    it('returns user when user has permissions and remaining peaks', async function () {
+      const result =
+        await this.PasswordResetHandler.promises.getUserForPasswordResetToken(
+          'abc123'
+        )
+      expect(result).to.deep.equal({
+        user: { _id: this.user._id, email: this.email },
+        remainingPeeks: 1,
       })
     })
   })
