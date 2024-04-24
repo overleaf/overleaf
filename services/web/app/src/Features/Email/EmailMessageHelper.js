@@ -1,8 +1,9 @@
 const sanitizeHtml = require('sanitize-html')
 const sanitizeOptions = {
   html: {
-    allowedTags: ['span', 'b', 'br', 'i'],
+    allowedTags: ['a', 'span', 'b', 'br', 'i'],
     allowedAttributes: {
+      a: ['href', 'style'],
       span: ['style', 'class'],
     },
   },

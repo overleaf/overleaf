@@ -628,6 +628,109 @@ describe('EmailBuilder', function () {
           })
         })
       })
+
+      describe('groupSSODisabled', function () {
+        it('should build the email for non managed and linked users', function () {
+          const setNewPasswordUrl = `${this.settings.siteUrl}/user/password/reset`
+          const emailAddress = 'example@overleaf.com'
+          const opts = {
+            to: emailAddress,
+            setNewPasswordUrl,
+            userIsManaged: false,
+          }
+          const email = this.EmailBuilder.buildEmail('groupSSODisabled', opts)
+          expect(email.subject).to.equal(
+            'A change to your Overleaf login options'
+          )
+          const dom = cheerio.load(email.html)
+          expect(email.html).to.exist
+          expect(email.html).to.contain(
+            'Your group administrator has disabled single sign-on for your group.'
+          )
+          expect(email.html).to.contain(
+            'You can still log in to Overleaf using one of our other'
+          )
+          const links = dom('a')
+          expect(links[0].attribs.href).to.equal(
+            `${this.settings.siteUrl}/login`
+          )
+          expect(links[1].attribs.href).to.equal(setNewPasswordUrl)
+          expect(email.html).to.contain(
+            "If you don't have a password, you can set one now."
+          )
+          expect(email.text).to.exist
+          const expectedPlainText = [
+            'Hi,',
+            '',
+            'Your group administrator has disabled single sign-on for your group.',
+            '',
+            '',
+            '',
+            'What does this mean for you?',
+            '',
+            'You can still log in to Overleaf using one of our other login options or with your email address and password.',
+            '',
+            "If you don't have a password, you can set one now.",
+            '',
+            `Set your new password: ${setNewPasswordUrl}`,
+            '',
+            '',
+            '',
+            'Regards,',
+            `The ${this.settings.appName} Team - ${this.settings.siteUrl}`,
+          ]
+          expect(email.text.split(/\r?\n/)).to.deep.equal(expectedPlainText)
+        })
+
+        it('should build the email for managed and linked users', function () {
+          const emailAddress = 'example@overleaf.com'
+          const setNewPasswordUrl = `${this.settings.siteUrl}/user/password/reset`
+          const opts = {
+            to: emailAddress,
+            setNewPasswordUrl,
+            userIsManaged: true,
+          }
+          const email = this.EmailBuilder.buildEmail('groupSSODisabled', opts)
+          expect(email.subject).to.equal(
+            'Action required: Set your Overleaf password'
+          )
+          const dom = cheerio.load(email.html)
+          expect(email.html).to.exist
+          expect(email.html).to.contain(
+            'Your group administrator has disabled single sign-on for your group.'
+          )
+          expect(email.html).to.contain(
+            'You now need an email address and password to sign in to your Overleaf account.'
+          )
+          const links = dom('a')
+          expect(links[0].attribs.href).to.equal(
+            `${this.settings.siteUrl}/user/password/reset`
+          )
+
+          expect(email.text).to.exist
+
+          const expectedPlainText = [
+            'Hi,',
+            '',
+            'Your group administrator has disabled single sign-on for your group.',
+            '',
+            '',
+            '',
+            'What does this mean for you?',
+            '',
+            'You now need an email address and password to sign in to your Overleaf account.',
+            '',
+            `Set your new password: ${setNewPasswordUrl}`,
+            '',
+            '',
+            '',
+            'Regards,',
+            `The ${this.settings.appName} Team - ${this.settings.siteUrl}`,
+          ]
+
+          expect(email.text.split(/\r?\n/)).to.deep.equal(expectedPlainText)
+        })
+      })
     })
 
     describe('no CTA', function () {
