@@ -1,8 +1,11 @@
 import { UserRef } from '../../../../../types/project/dashboard/api'
+import { useTranslation } from 'react-i18next'
 
 export function getUserName(user: UserRef) {
+  const { t } = useTranslation()
+  
   if (user?.id === window.user_id) {
-    return 'You'
+    return t('you')
   }
 
   if (user) {

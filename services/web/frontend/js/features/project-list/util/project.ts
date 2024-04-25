@@ -1,9 +1,12 @@
 import { getUserName } from './user'
 import { Project } from '../../../../../types/project/dashboard/api'
+import { useTranslation } from 'react-i18next'
 
 export function getOwnerName(project: Project) {
+  const { t } = useTranslation()
+
   if (project.accessLevel === 'owner') {
-    return 'You'
+    return t('you')
   }
 
   if (project.owner != null) {
