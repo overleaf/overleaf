@@ -71,4 +71,7 @@ module.exports = {
       return false
     }
   },
+
+  computeValidationToken,
+  checkValidationToken,
 }

@@ -88,10 +88,15 @@ function loadViewIncludes(app) {
   }
 }
 
-function registerAppMiddleware(app) {
+function registerMiddleware(appOrRouter, middlewareName, options) {
+  if (!middlewareName) {
+    throw new Error(
+      'middleware name must be provided to register module middleware'
+    )
+  }
   for (const module of modules()) {
-    if (module.appMiddleware) {
-      module.appMiddleware(app)
+    if (module[middlewareName]) {
+      module[middlewareName](appOrRouter, options)
     }
   }
 }
@@ -164,7 +169,7 @@ module.exports = {
   loadViewIncludes,
   moduleIncludes,
   moduleIncludesAvailable,
-  registerAppMiddleware,
+  registerMiddleware,
   hooks: {
     attach: attachHook,
     fire: fireHook,

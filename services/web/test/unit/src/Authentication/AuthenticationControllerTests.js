@@ -624,7 +624,7 @@ describe('AuthenticationController', function () {
       beforeEach(function () {
         this.req.session = {
           user: this.user,
-          regenerate: sinon.stub().yields(),
+          destroy: sinon.stub().yields(),
         }
         this.req.user = this.user
         this.AuthenticationController._redirectToLoginOrRegisterPage =
@@ -637,7 +637,7 @@ describe('AuthenticationController', function () {
       })
 
       it('should destroy the current session', function () {
-        this.req.session.regenerate.called.should.equal(true)
+        this.req.session.destroy.called.should.equal(true)
       })
 
       it('should redirect to the register or login page', function () {

@@ -28,6 +28,11 @@ before('start main app', function (done) {
     route => route.path && route.path === '/dev/csrf',
     router => {
       router.get('/dev/session', (req, res) => {
+        // allow changing the session directly for testing, assign any
+        // properties in the query string to req.session
+        if (req.query && Object.keys(req.query).length > 0) {
+          Object.assign(req.session, req.query)
+        }
         return res.json(req.session)
       })
     }
@@ -75,6 +80,27 @@ before('start main app', function (done) {
       })
     }
   )
+  injectRouteAfter(
+    app,
+    route => route.path && route.path === '/dev/csrf',
+    router => {
+      router.csrf.disableDefaultCsrfProtection(
+        '/dev/no_autostart_post_gateway',
+        'POST'
+      )
+      router.sessionAutostartMiddleware.disableSessionAutostartForRoute(
+        '/dev/no_autostart_post_gateway',
+        'POST',
+        (req, res, next) => {
+          next()
+        }
+      )
+      router.post('/dev/no_autostart_post_gateway', (req, res) => {
+        res.status(200).json({ message: 'no autostart' })
+      })
+    }
+  )
+
   server = App.listen(23000, '127.0.0.1', done)
 })
 

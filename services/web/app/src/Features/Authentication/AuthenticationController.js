@@ -419,8 +419,9 @@ const AuthenticationController = {
     return function (req, res, next) {
       // check that the session store is returning valid results
       if (req.session && !SessionStoreManager.hasValidationToken(req)) {
-        // force user to update session
-        req.session.regenerate(() => {
+        // Force user to update session by destroying the current one.
+        // A new session will be created on the next request.
+        req.session.destroy(() => {
           // need to destroy the existing session and generate a new one
           // otherwise they will already be logged in when they are redirected
           // to the login page

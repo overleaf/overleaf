@@ -133,7 +133,7 @@ Modules.loadViewIncludes(app)
 
 app.use(metrics.http.monitor(logger))
 
-Modules.registerAppMiddleware(app)
+Modules.registerMiddleware(app, 'appMiddleware')
 app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }))
 app.use(bodyParser.json({ limit: Settings.max_json_request_size }))
 app.use(methodOverride())
@@ -157,6 +157,9 @@ RedirectManager.apply(webRouter)
 
 webRouter.use(cookieParser(Settings.security.sessionSecret))
 SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
+Modules.registerMiddleware(webRouter, 'sessionMiddleware', {
+  store: sessionStore,
+})
 webRouter.use(
   session({
     resave: false,

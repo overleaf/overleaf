@@ -8,6 +8,8 @@ const AuthenticationManager = require('../../../../app/src/Features/Authenticati
 const { promisifyClass } = require('@overleaf/promise-utils')
 const fs = require('fs')
 const Path = require('path')
+const { Cookie } = require('tough-cookie')
+const COOKIE_DOMAIN = settings.cookieDomain
 
 let count = settings.test.counterInit
 
@@ -32,10 +34,15 @@ class User {
     })
   }
 
-  getSession(callback) {
+  getSession(options, callback) {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
     this.request.get(
       {
         url: '/dev/session',
+        qs: options.set,
       },
       (err, response, body) => {
         if (err != null) {
@@ -184,6 +191,22 @@ class User {
         callback(null)
       }
     )
+  }
+
+  /* Return the session cookie, url decoded. Use the option {raw:true} to get the original undecoded value */
+
+  sessionCookie(options) {
+    const cookie = Cookie.parse(
+      this.jar.getCookieString(
+        // The cookie domain has a leading '.' but
+        // the cookie jar stores it without.
+        'https://' + COOKIE_DOMAIN.replace(/^\./, '') + '/'
+      )
+    )
+    if (cookie?.value && !options?.raw) {
+      cookie.value = decodeURIComponent(cookie.value)
+    }
+    return cookie
   }
 
   getEmailConfirmationCode(callback) {
@@ -1224,7 +1247,7 @@ class User {
 }
 
 User.promises = promisifyClass(User, {
-  without: ['setExtraAttributes'],
+  without: ['setExtraAttributes', 'sessionCookie'],
 })
 
 User.promises.prototype.doRequest = async function (method, params) {
