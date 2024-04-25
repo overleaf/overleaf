@@ -549,6 +549,7 @@
   "need_to_add_new_primary_before_remove": "Du måste lägga till en ny primär e-post-adress innan du kan ta bort den här.",
   "need_to_leave": "Vill du lämna?",
   "need_to_upgrade_for_more_collabs": "Du måste uppgradera ditt konto för att lägga till fler samarbetspartners",
+  "need_to_upgrade_for_more_collabs_variant": "Du har nått det maximala antalet medarbetare. Uppgradera ditt konto för att lägga till fler.",
   "new_file": "Ny fil",
   "new_folder": "Ny mapp",
   "new_name": "Nytt namn",

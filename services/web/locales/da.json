@@ -909,6 +909,7 @@
   "need_to_add_new_primary_before_remove": "Du bliver nødt til at tilføje en ny primær e-mailaddresse før du kan slette denne.",
   "need_to_leave": "Nød til at gå?",
   "need_to_upgrade_for_more_collabs": "Du bliver nød til at opgradere din konto for at tilføje flere samarbejdspartnere",
+  "need_to_upgrade_for_more_collabs_variant": "Du har nået det maksimale antal samarbejdspartnere. Opgradér din konto for at tilføje flere.",
   "new_file": "Ny fil",
   "new_folder": "Ny mappe",
   "new_name": "Nyt navn",

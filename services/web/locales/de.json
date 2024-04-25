@@ -903,6 +903,7 @@
   "need_to_add_new_primary_before_remove": "Du musst eine neue primäre E-Mail-Adresse hinzufügen, bevor du diese entfernen kannst.",
   "need_to_leave": "Du musst gehen?",
   "need_to_upgrade_for_more_collabs": "Du musst dein Konto upgraden um mehr Mitarbeiter hinzuzufügen",
+  "need_to_upgrade_for_more_collabs_variant": "Du hast die maximale Anzahl an Mitbearbeitern erreicht. Führe ein Upgrade für dein Konto aus, um weitere hinzuzufügen.",
   "new_file": "Neue Datei",
   "new_folder": "Neuer Ordner",
   "new_name": "Neuer Name",
