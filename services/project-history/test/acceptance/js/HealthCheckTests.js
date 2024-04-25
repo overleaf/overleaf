@@ -18,8 +18,8 @@ import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
 
-const MockHistoryStore = () => nock('http://localhost:3100')
-const MockWeb = () => nock('http://localhost:3000')
+const MockHistoryStore = () => nock('http://127.0.0.1:3100')
+const MockWeb = () => nock('http://127.0.0.1:3000')
 
 describe('Health Check', function () {
   beforeEach(function (done) {
@@ -62,7 +62,7 @@ describe('Health Check', function () {
   return it('should respond to the health check', function (done) {
     return request.get(
       {
-        url: 'http://localhost:3054/health_check',
+        url: 'http://127.0.0.1:3054/health_check',
       },
       (error, res, body) => {
         if (error != null) {

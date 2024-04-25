@@ -87,7 +87,7 @@ const makeRequest = function (correctWords, incorrectWords, callback) {
     }
   }
   return request.post(
-    'http://localhost:3005/user/1/check',
+    'http://127.0.0.1:3005/user/1/check',
     { json: true, body: { words: full } },
     function (err, req, body) {
       let m

@@ -18,7 +18,7 @@ describe('fetch-utils', function () {
   before(async function () {
     this.server = new TestServer()
     await this.server.start(PORT)
-    this.url = path => `http://localhost:${PORT}${path}`
+    this.url = path => `http://127.0.0.1:${PORT}${path}`
   })
 
   after(async function () {

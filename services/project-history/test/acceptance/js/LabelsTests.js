@@ -19,9 +19,9 @@ import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
 
-const MockHistoryStore = () => nock('http://localhost:3100')
-const MockFileStore = () => nock('http://localhost:3009')
-const MockWeb = () => nock('http://localhost:3000')
+const MockHistoryStore = () => nock('http://127.0.0.1:3100')
+const MockFileStore = () => nock('http://127.0.0.1:3009')
+const MockWeb = () => nock('http://127.0.0.1:3000')
 
 const fixture = path => new URL(`../fixtures/${path}`, import.meta.url)
 

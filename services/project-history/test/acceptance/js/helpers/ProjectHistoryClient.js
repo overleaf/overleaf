@@ -14,7 +14,7 @@ export function resetDatabase(callback) {
 export function initializeProject(historyId, callback) {
   request.post(
     {
-      url: 'http://localhost:3054/project',
+      url: 'http://127.0.0.1:3054/project',
       json: { historyId },
     },
     (error, res, body) => {
@@ -37,7 +37,7 @@ export function flushProject(projectId, options, callback) {
   }
   request.post(
     {
-      url: `http://localhost:3054/project/${projectId}/flush`,
+      url: `http://127.0.0.1:3054/project/${projectId}/flush`,
     },
     (error, res, body) => {
       if (error) {
@@ -54,7 +54,7 @@ export function flushProject(projectId, options, callback) {
 export function getSummarizedUpdates(projectId, query, callback) {
   request.get(
     {
-      url: `http://localhost:3054/project/${projectId}/updates`,
+      url: `http://127.0.0.1:3054/project/${projectId}/updates`,
       qs: query,
       json: true,
     },
@@ -71,7 +71,7 @@ export function getSummarizedUpdates(projectId, query, callback) {
 export function getDiff(projectId, pathname, from, to, callback) {
   request.get(
     {
-      url: `http://localhost:3054/project/${projectId}/diff`,
+      url: `http://127.0.0.1:3054/project/${projectId}/diff`,
       qs: {
         pathname,
         from,
@@ -92,7 +92,7 @@ export function getDiff(projectId, pathname, from, to, callback) {
 export function getFileTreeDiff(projectId, from, to, callback) {
   request.get(
     {
-      url: `http://localhost:3054/project/${projectId}/filetree/diff`,
+      url: `http://127.0.0.1:3054/project/${projectId}/filetree/diff`,
       qs: {
         from,
         to,
@@ -118,7 +118,7 @@ export function getSnapshot(projectId, pathname, version, options, callback) {
   }
   request.get(
     {
-      url: `http://localhost:3054/project/${projectId}/version/${version}/${encodeURIComponent(
+      url: `http://127.0.0.1:3054/project/${projectId}/version/${version}/${encodeURIComponent(
         pathname
       )}`,
     },
@@ -171,7 +171,7 @@ export function getQueueLength(projectId, callback) {
 export function getQueueCounts(callback) {
   return request.get(
     {
-      url: 'http://localhost:3054/status/queue',
+      url: 'http://127.0.0.1:3054/status/queue',
       json: true,
     },
     callback
@@ -181,7 +181,7 @@ export function getQueueCounts(callback) {
 export function resyncHistory(projectId, callback) {
   request.post(
     {
-      url: `http://localhost:3054/project/${projectId}/resync`,
+      url: `http://127.0.0.1:3054/project/${projectId}/resync`,
       json: true,
       body: { origin: { kind: 'test-origin' } },
     },
@@ -205,7 +205,7 @@ export function createLabel(
 ) {
   request.post(
     {
-      url: `http://localhost:3054/project/${projectId}/user/${userId}/labels`,
+      url: `http://127.0.0.1:3054/project/${projectId}/user/${userId}/labels`,
       json: { comment, version, created_at: createdAt },
     },
     (error, res, body) => {
@@ -221,7 +221,7 @@ export function createLabel(
 export function getLabels(projectId, callback) {
   request.get(
     {
-      url: `http://localhost:3054/project/${projectId}/labels`,
+      url: `http://127.0.0.1:3054/project/${projectId}/labels`,
       json: true,
     },
     (error, res, body) => {
@@ -237,7 +237,7 @@ export function getLabels(projectId, callback) {
 export function deleteLabelForUser(projectId, userId, labelId, callback) {
   request.delete(
     {
-      url: `http://localhost:3054/project/${projectId}/user/${userId}/labels/${labelId}`,
+      url: `http://127.0.0.1:3054/project/${projectId}/user/${userId}/labels/${labelId}`,
     },
     (error, res, body) => {
       if (error) {
@@ -252,7 +252,7 @@ export function deleteLabelForUser(projectId, userId, labelId, callback) {
 export function deleteLabel(projectId, labelId, callback) {
   request.delete(
     {
-      url: `http://localhost:3054/project/${projectId}/labels/${labelId}`,
+      url: `http://127.0.0.1:3054/project/${projectId}/labels/${labelId}`,
     },
     (error, res, body) => {
       if (error) {
@@ -279,7 +279,7 @@ export function setFailure(failureEntry, callback) {
 export function transferLabelOwnership(fromUser, toUser, callback) {
   request.post(
     {
-      url: `http://localhost:3054/user/${fromUser}/labels/transfer/${toUser}`,
+      url: `http://127.0.0.1:3054/user/${fromUser}/labels/transfer/${toUser}`,
     },
     (error, res, body) => {
       if (error) {
@@ -293,7 +293,7 @@ export function transferLabelOwnership(fromUser, toUser, callback) {
 
 export function getDump(projectId, callback) {
   request.get(
-    `http://localhost:3054/project/${projectId}/dump`,
+    `http://127.0.0.1:3054/project/${projectId}/dump`,
     (err, res, body) => {
       if (err) {
         return callback(err)
@@ -305,7 +305,7 @@ export function getDump(projectId, callback) {
 }
 
 export function deleteProject(projectId, callback) {
-  request.delete(`http://localhost:3054/project/${projectId}`, (err, res) => {
+  request.delete(`http://127.0.0.1:3054/project/${projectId}`, (err, res) => {
     if (err) {
       return callback(err)
     }

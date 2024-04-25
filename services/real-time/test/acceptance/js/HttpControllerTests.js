@@ -8,7 +8,7 @@
 const async = require('async')
 const { expect } = require('chai')
 const request = require('request').defaults({
-  baseUrl: 'http://localhost:3026',
+  baseUrl: 'http://127.0.0.1:3026',
 })
 
 const RealTimeClient = require('./helpers/RealTimeClient')

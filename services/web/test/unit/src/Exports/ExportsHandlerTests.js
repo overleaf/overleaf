@@ -503,7 +503,7 @@ describe('ExportsHandler', function () {
     beforeEach(function (done) {
       this.settings.apis = {
         v1: {
-          url: 'http://localhost:5000',
+          url: 'http://127.0.0.1:5000',
           user: 'overleaf',
           pass: 'pass',
           timeout: 15000,
@@ -596,7 +596,7 @@ describe('ExportsHandler', function () {
     beforeEach(function (done) {
       this.settings.apis = {
         v1: {
-          url: 'http://localhost:5000',
+          url: 'http://127.0.0.1:5000',
           user: 'overleaf',
           pass: 'pass',
           timeout: 15000,
@@ -648,7 +648,7 @@ describe('ExportsHandler', function () {
     beforeEach(function (done) {
       this.settings.apis = {
         v1: {
-          url: 'http://localhost:5000',
+          url: 'http://127.0.0.1:5000',
           user: 'overleaf',
           pass: 'pass',
           timeout: 15000,

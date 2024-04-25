@@ -14,7 +14,7 @@ module.exports = {
     }
     this.initing = true
     this.callbacks.push(callback)
-    app.listen(settings.internal.docstore.port, 'localhost', error => {
+    app.listen(settings.internal.docstore.port, '127.0.0.1', error => {
       if (error != null) {
         throw error
       }

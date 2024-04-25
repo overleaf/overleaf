@@ -8,8 +8,8 @@ import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
 
-const MockHistoryStore = () => nock('http://localhost:3100')
-const MockWeb = () => nock('http://localhost:3000')
+const MockHistoryStore = () => nock('http://127.0.0.1:3100')
+const MockWeb = () => nock('http://127.0.0.1:3000')
 
 describe('Flushing old queues', function () {
   const historyId = new ObjectId().toString()
@@ -90,7 +90,7 @@ describe('Flushing old queues', function () {
       it('flushes the project history queue', function (done) {
         request.post(
           {
-            url: 'http://localhost:3054/flush/old?maxAge=10800',
+            url: 'http://127.0.0.1:3054/flush/old?maxAge=10800',
           },
           (error, res, body) => {
             if (error) {
@@ -109,7 +109,7 @@ describe('Flushing old queues', function () {
       it('flushes the project history queue in the background when requested', function (done) {
         request.post(
           {
-            url: 'http://localhost:3054/flush/old?maxAge=10800&background=1',
+            url: 'http://127.0.0.1:3054/flush/old?maxAge=10800&background=1',
           },
           (error, res, body) => {
             if (error) {
@@ -166,7 +166,7 @@ describe('Flushing old queues', function () {
       it('does not flush the project history queue', function (done) {
         request.post(
           {
-            url: `http://localhost:3054/flush/old?maxAge=${3 * 3600}`,
+            url: `http://127.0.0.1:3054/flush/old?maxAge=${3 * 3600}`,
           },
           (error, res, body) => {
             if (error) {
@@ -213,7 +213,7 @@ describe('Flushing old queues', function () {
       it('flushes the project history queue anyway', function (done) {
         request.post(
           {
-            url: `http://localhost:3054/flush/old?maxAge=${3 * 3600}`,
+            url: `http://127.0.0.1:3054/flush/old?maxAge=${3 * 3600}`,
           },
           (error, res, body) => {
             if (error) {

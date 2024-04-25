@@ -16,7 +16,7 @@ const request = require('request')
 const drain = function (rate, callback) {
   request.post(
     {
-      url: `http://localhost:3026/drain?rate=${rate}`,
+      url: `http://127.0.0.1:3026/drain?rate=${rate}`,
     },
     (error, response, data) => callback(error, data)
   )

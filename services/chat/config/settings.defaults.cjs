@@ -1,14 +1,14 @@
 module.exports = {
   internal: {
     chat: {
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
       port: 3010,
     },
   },
 
   apis: {
     web: {
-      url: `http://${process.env.WEB_HOST || 'localhost'}:${
+      url: `http://${process.env.WEB_HOST || '127.0.0.1'}:${
         process.env.WEB_PORT || 3000
       }`,
       user: process.env.WEB_API_USER || 'overleaf',
@@ -19,7 +19,7 @@ module.exports = {
   mongo: {
     url:
       process.env.MONGO_CONNECTION_STRING ||
-      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`,
+      `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`,
     options: {
       monitorCommands: true,
     },

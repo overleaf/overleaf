@@ -49,7 +49,7 @@ app.get('/health_check', (req, res) =>
 
 app.get('*', (req, res) => res.sendStatus(404))
 
-const host = Settings.internal?.notifications?.host || 'localhost'
+const host = Settings.internal?.notifications?.host || '127.0.0.1'
 const port = Settings.internal?.notifications?.port || 3042
 
 mongoClient

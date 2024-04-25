@@ -36,7 +36,7 @@ const BackendSettings = require('./TestConfig')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)
-  const filestoreUrl = `http://localhost:${Settings.internal.filestore.port}`
+  const filestoreUrl = `http://127.0.0.1:${Settings.internal.filestore.port}`
 
   const seenSockets = []
   async function expectNoSockets() {

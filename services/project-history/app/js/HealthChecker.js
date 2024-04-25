@@ -18,12 +18,12 @@ const { port } = settings.internal.history
 
 export function check(callback) {
   const projectId = new ObjectId(settings.history.healthCheck.project_id)
-  const url = `http://localhost:${port}/project/${projectId}`
+  const url = `http://127.0.0.1:${port}/project/${projectId}`
   logger.debug({ projectId }, 'running health check')
   const jobs = [
     cb =>
       request.get(
-        { url: `http://localhost:${port}/check_lock`, timeout: 3000 },
+        { url: `http://127.0.0.1:${port}/check_lock`, timeout: 3000 },
         function (err, res, body) {
           if (err != null) {
             OError.tag(err, 'error checking lock for health check', {

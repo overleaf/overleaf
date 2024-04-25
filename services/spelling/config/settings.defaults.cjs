@@ -4,7 +4,7 @@ module.exports = {
   internal: {
     spelling: {
       port: 3005,
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },
 

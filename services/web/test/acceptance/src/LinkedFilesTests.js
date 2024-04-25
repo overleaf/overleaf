@@ -370,7 +370,7 @@ describe('LinkedFiles', function () {
         json: {
           provider: 'url',
           data: {
-            url: 'ftp://localhost',
+            url: 'ftp://127.0.0.1',
           },
           parent_folder_id: projectOneRootFolderId,
           name: 'url-test-file-5',

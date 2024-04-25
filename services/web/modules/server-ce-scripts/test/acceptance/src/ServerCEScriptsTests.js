@@ -34,7 +34,7 @@ describe('ServerCEScripts', function () {
       try {
         run(
           'MONGO_SERVER_SELECTION_TIMEOUT=1' +
-            'MONGO_CONNECTION_STRING=mongodb://localhost:4242 ' +
+            'MONGO_CONNECTION_STRING=mongodb://127.0.0.1:4242 ' +
             'node modules/server-ce-scripts/scripts/check-mongodb'
         )
       } catch (e) {

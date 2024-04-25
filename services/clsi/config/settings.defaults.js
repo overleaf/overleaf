@@ -23,7 +23,7 @@ module.exports = {
   internal: {
     clsi: {
       port: 3013,
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
 
     load_balancer_agent: {
@@ -35,12 +35,12 @@ module.exports = {
   apis: {
     clsi: {
       // Internal requests (used by tests only at the time of writing).
-      url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`,
+      url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:3013`,
       // External url prefix for output files, e.g. for requests via load-balancers.
       outputUrlPrefix: `${process.env.ZONE ? `/zone/${process.env.ZONE}` : ''}`,
     },
     clsiPerf: {
-      host: `${process.env.CLSI_PERF_HOST || 'localhost'}:${
+      host: `${process.env.CLSI_PERF_HOST || '127.0.0.1'}:${
         process.env.CLSI_PERF_PORT || '3043'
       }`,
     },

@@ -24,7 +24,7 @@ module.exports = {
 
     let notificationKey = `smoke-test-notification-${new ObjectId()}`
     const getOpts = endPath => ({
-      url: `http://localhost:${port}/user/${userId}${endPath}`,
+      url: `http://127.0.0.1:${port}/user/${userId}${endPath}`,
       timeout: 5000,
     })
     logger.debug(

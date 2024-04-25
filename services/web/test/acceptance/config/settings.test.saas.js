@@ -12,13 +12,13 @@ const overrides = {
 
   apis: {
     thirdPartyDataStore: {
-      url: `http://localhost:23002`,
+      url: `http://127.0.0.1:23002`,
     },
     analytics: {
-      url: `http://localhost:23050`,
+      url: `http://127.0.0.1:23050`,
     },
     recurly: {
-      url: 'http://localhost:26034',
+      url: 'http://127.0.0.1:26034',
       subdomain: 'test',
       apiKey: 'private-nonsense',
       webhookUser: 'recurly',
@@ -31,7 +31,7 @@ const overrides = {
     },
 
     v1: {
-      url: `http://localhost:25000`,
+      url: `http://127.0.0.1:25000`,
       user: 'overleaf',
       pass: 'password',
     },
@@ -66,7 +66,7 @@ const overrides = {
 module.exports = baseApp.mergeWith(baseTest.mergeWith(overrides))
 
 for (const redisKey of Object.keys(module.exports.redis)) {
-  module.exports.redis[redisKey].host = process.env.REDIS_HOST || 'localhost'
+  module.exports.redis[redisKey].host = process.env.REDIS_HOST || '127.0.0.1'
 }
 
 module.exports.mergeWith = function (overrides) {

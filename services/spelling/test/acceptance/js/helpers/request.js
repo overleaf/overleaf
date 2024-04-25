@@ -3,7 +3,7 @@ import Request from 'request'
 
 export const PORT = 3005
 
-const BASE_URL = `http://${process.env.HTTP_TEST_HOST || 'localhost'}:${PORT}`
+const BASE_URL = `http://${process.env.HTTP_TEST_HOST || '127.0.0.1'}:${PORT}`
 
 const request = Request.defaults({
   baseUrl: BASE_URL,

@@ -9,9 +9,9 @@ import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
 
-const MockHistoryStore = () => nock('http://localhost:3100')
-const MockFileStore = () => nock('http://localhost:3009')
-const MockWeb = () => nock('http://localhost:3000')
+const MockHistoryStore = () => nock('http://127.0.0.1:3100')
+const MockFileStore = () => nock('http://127.0.0.1:3009')
+const MockWeb = () => nock('http://127.0.0.1:3000')
 
 // Some helper methods to make the tests more compact
 function slTextUpdate(historyId, doc, userId, v, ts, op) {
@@ -57,7 +57,7 @@ function slAddFileUpdate(historyId, file, userId, ts, projectId) {
   return {
     projectHistoryId: historyId,
     pathname: file.pathname,
-    url: `http://localhost:3009/project/${projectId}/file/${file.id}`,
+    url: `http://127.0.0.1:3009/project/${projectId}/file/${file.id}`,
     file: file.id,
     meta: { user_id: userId, ts: ts.getTime() },
   }

@@ -7,7 +7,7 @@ import { app } from './app/js/server.js'
 import * as ASpell from './app/js/ASpell.js'
 import Metrics from '@overleaf/metrics'
 
-const { host = 'localhost', port = 3005 } = Settings.internal?.spelling ?? {}
+const { host = '127.0.0.1', port = 3005 } = Settings.internal?.spelling ?? {}
 
 ASpell.startCacheDump()
 

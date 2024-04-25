@@ -10,9 +10,9 @@ const { ObjectId } = mongodb
 
 const EMPTY_FILE_HASH = 'e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
 
-const MockHistoryStore = () => nock('http://localhost:3100')
-const MockFileStore = () => nock('http://localhost:3009')
-const MockWeb = () => nock('http://localhost:3000')
+const MockHistoryStore = () => nock('http://127.0.0.1:3100')
+const MockFileStore = () => nock('http://127.0.0.1:3009')
+const MockWeb = () => nock('http://127.0.0.1:3000')
 
 describe('Syncing with web and doc-updater', function () {
   const historyId = new ObjectId().toString()
@@ -68,7 +68,7 @@ describe('Syncing with web and doc-updater', function () {
       it('404s if project-history is not enabled', function (done) {
         request.post(
           {
-            url: `http://localhost:3054/project/${this.project_id}/resync`,
+            url: `http://127.0.0.1:3054/project/${this.project_id}/resync`,
           },
           (error, res, body) => {
             if (error) {
@@ -244,7 +244,7 @@ describe('Syncing with web and doc-updater', function () {
                       {
                         file: this.file_id,
                         path: '/test.png',
-                        url: `http://localhost:3009/project/${this.project_id}/file/${this.file_id}`,
+                        url: `http://127.0.0.1:3009/project/${this.project_id}/file/${this.file_id}`,
                       },
                       { path: '/persistedFile' },
                     ],

@@ -8,10 +8,10 @@ import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'
 import * as ProjectHistoryApp from './helpers/ProjectHistoryApp.js'
 const { ObjectId } = mongodb
 
-const MockHistoryStore = () => nock('http://localhost:3100')
-const MockWeb = () => nock('http://localhost:3000')
+const MockHistoryStore = () => nock('http://127.0.0.1:3100')
+const MockWeb = () => nock('http://127.0.0.1:3000')
 
-const MockCallback = () => nock('http://localhost')
+const MockCallback = () => nock('http://127.0.0.1')
 
 describe('Retrying failed projects', function () {
   const historyId = new ObjectId().toString()
@@ -95,7 +95,7 @@ describe('Retrying failed projects', function () {
       it('flushes the project history queue', function (done) {
         request.post(
           {
-            url: 'http://localhost:3054/retry/failures?failureType=soft&limit=1&timeout=10000',
+            url: 'http://127.0.0.1:3054/retry/failures?failureType=soft&limit=1&timeout=10000',
           },
           (error, res, body) => {
             if (error) {
@@ -118,7 +118,7 @@ describe('Retrying failed projects', function () {
           .reply(200)
         request.post(
           {
-            url: 'http://localhost:3054/retry/failures?failureType=soft&limit=1&timeout=10000&callbackUrl=http%3A%2F%2Flocalhost%2Fping',
+            url: 'http://127.0.0.1:3054/retry/failures?failureType=soft&limit=1&timeout=10000&callbackUrl=http%3A%2F%2F127.0.0.1%2Fping',
             headers: {
               'X-CALLBACK-Authorization': '123',
             },
@@ -177,7 +177,7 @@ describe('Retrying failed projects', function () {
 
         request.post(
           {
-            url: 'http://localhost:3054/retry/failures?failureType=hard&limit=1&timeout=10000',
+            url: 'http://127.0.0.1:3054/retry/failures?failureType=hard&limit=1&timeout=10000',
           },
           (error, res, body) => {
             if (error) {

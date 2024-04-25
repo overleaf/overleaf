@@ -2,7 +2,7 @@ module.exports = {
   mongo: {
     url:
       process.env.MONGO_CONNECTION_STRING ||
-      `mongodb://${process.env.MONGO_HOST || 'localhost'}/sharelatex`,
+      `mongodb://${process.env.MONGO_HOST || '127.0.0.1'}/sharelatex`,
     options: {
       monitorCommands: true,
     },
@@ -10,25 +10,25 @@ module.exports = {
   internal: {
     history: {
       port: 3054,
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },
   apis: {
     documentupdater: {
-      url: `http://${process.env.DOCUPDATER_HOST || 'localhost'}:3003`,
+      url: `http://${process.env.DOCUPDATER_HOST || '127.0.0.1'}:3003`,
     },
     docstore: {
-      url: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`,
+      url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
     },
     filestore: {
-      url: `http://${process.env.FILESTORE_HOST || 'localhost'}:3009`,
+      url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
     },
     history_v1: {
       requestTimeout: parseInt(process.env.V1_REQUEST_TIMEOUT || '300000', 10),
     },
     web: {
       url: `http://${
-        process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+        process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'
       }:${process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'overleaf',
       pass: process.env.WEB_API_PASSWORD || 'password',
@@ -40,7 +40,7 @@ module.exports = {
   },
   redis: {
     lock: {
-      host: process.env.REDIS_HOST || 'localhost',
+      host: process.env.REDIS_HOST || '127.0.0.1',
       password: process.env.REDIS_PASSWORD,
       port: process.env.REDIS_PORT || 6379,
       key_schema: {
@@ -51,7 +51,7 @@ module.exports = {
     },
     project_history: {
       host:
-        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || '127.0.0.1',
       port: process.env.HISTORY_REDIS_PORT || process.env.REDIS_PORT || 6379,
       password:
         process.env.HISTORY_REDIS_PASSWORD || process.env.REDIS_PASSWORD,
@@ -82,7 +82,7 @@ module.exports = {
         `http://${
           process.env.V1_HISTORY_HOST ||
           process.env.HISTORY_V1_HOST ||
-          'localhost'
+          '127.0.0.1'
         }:3100/api`,
       user: process.env.V1_HISTORY_USER || 'staging',
       pass: process.env.V1_HISTORY_PASSWORD || 'password',

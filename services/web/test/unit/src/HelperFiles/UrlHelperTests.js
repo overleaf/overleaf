@@ -9,7 +9,7 @@ describe('UrlHelper', function () {
   beforeEach(function () {
     this.settings = {
       apis: { linkedUrlProxy: { url: undefined } },
-      siteUrl: 'http://localhost:3000',
+      siteUrl: 'http://127.0.0.1:3000',
     }
     this.UrlHelper = SandboxedModule.require(modulePath, {
       requires: { '@overleaf/settings': this.settings },

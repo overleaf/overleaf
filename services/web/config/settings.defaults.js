@@ -174,7 +174,7 @@ module.exports = {
 
   redis: {
     web: {
-      host: process.env.REDIS_HOST || 'localhost',
+      host: process.env.REDIS_HOST || '127.0.0.1',
       port: process.env.REDIS_PORT || '6379',
       password: process.env.REDIS_PASSWORD || '',
       db: process.env.REDIS_DB,
@@ -185,36 +185,36 @@ module.exports = {
 
     // websessions:
     // 	cluster: [
-    // 		{host: 'localhost', port: 7000}
-    // 		{host: 'localhost', port: 7001}
-    // 		{host: 'localhost', port: 7002}
-    // 		{host: 'localhost', port: 7003}
-    // 		{host: 'localhost', port: 7004}
-    // 		{host: 'localhost', port: 7005}
+    // 		{host: '127.0.0.1', port: 7000}
+    // 		{host: '127.0.0.1', port: 7001}
+    // 		{host: '127.0.0.1', port: 7002}
+    // 		{host: '127.0.0.1', port: 7003}
+    // 		{host: '127.0.0.1', port: 7004}
+    // 		{host: '127.0.0.1', port: 7005}
     // 	]
 
     // ratelimiter:
     // 	cluster: [
-    // 		{host: 'localhost', port: 7000}
-    // 		{host: 'localhost', port: 7001}
-    // 		{host: 'localhost', port: 7002}
-    // 		{host: 'localhost', port: 7003}
-    // 		{host: 'localhost', port: 7004}
-    // 		{host: 'localhost', port: 7005}
+    // 		{host: '127.0.0.1', port: 7000}
+    // 		{host: '127.0.0.1', port: 7001}
+    // 		{host: '127.0.0.1', port: 7002}
+    // 		{host: '127.0.0.1', port: 7003}
+    // 		{host: '127.0.0.1', port: 7004}
+    // 		{host: '127.0.0.1', port: 7005}
     // 	]
 
     // cooldown:
     // 	cluster: [
-    // 		{host: 'localhost', port: 7000}
-    // 		{host: 'localhost', port: 7001}
-    // 		{host: 'localhost', port: 7002}
-    // 		{host: 'localhost', port: 7003}
-    // 		{host: 'localhost', port: 7004}
-    // 		{host: 'localhost', port: 7005}
+    // 		{host: '127.0.0.1', port: 7000}
+    // 		{host: '127.0.0.1', port: 7001}
+    // 		{host: '127.0.0.1', port: 7002}
+    // 		{host: '127.0.0.1', port: 7003}
+    // 		{host: '127.0.0.1', port: 7004}
+    // 		{host: '127.0.0.1', port: 7005}
     // 	]
 
     api: {
-      host: process.env.REDIS_HOST || 'localhost',
+      host: process.env.REDIS_HOST || '127.0.0.1',
       port: process.env.REDIS_PORT || '6379',
       password: process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
@@ -232,7 +232,7 @@ module.exports = {
   internal: {
     web: {
       port: process.env.WEB_PORT || 3000,
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },
 
@@ -242,7 +242,7 @@ module.exports = {
   apis: {
     web: {
       url: `http://${
-        process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+        process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'
       }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: httpAuthUser,
       pass: httpAuthPass,
@@ -251,25 +251,25 @@ module.exports = {
       url: `http://${
         process.env.DOCUPDATER_HOST ||
         process.env.DOCUMENT_UPDATER_HOST ||
-        'localhost'
+        '127.0.0.1'
       }:3003`,
     },
     spelling: {
-      url: `http://${process.env.SPELLING_HOST || 'localhost'}:3005`,
+      url: `http://${process.env.SPELLING_HOST || '127.0.0.1'}:3005`,
       host: process.env.SPELLING_HOST,
     },
     docstore: {
-      url: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`,
-      pubUrl: `http://${process.env.DOCSTORE_HOST || 'localhost'}:3016`,
+      url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
+      pubUrl: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
     },
     chat: {
-      internal_url: `http://${process.env.CHAT_HOST || 'localhost'}:3010`,
+      internal_url: `http://${process.env.CHAT_HOST || '127.0.0.1'}:3010`,
     },
     filestore: {
-      url: `http://${process.env.FILESTORE_HOST || 'localhost'}:3009`,
+      url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
     },
     clsi: {
-      url: `http://${process.env.CLSI_HOST || 'localhost'}:3013`,
+      url: `http://${process.env.CLSI_HOST || '127.0.0.1'}:3013`,
       // url: "http://#{process.env['CLSI_LB_HOST']}:3014"
       backendGroupName: undefined,
       submissionBackendClass:
@@ -277,19 +277,19 @@ module.exports = {
     },
     project_history: {
       sendProjectStructureOps: true,
-      url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`,
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
     },
     realTime: {
-      url: `http://${process.env.REALTIME_HOST || 'localhost'}:3026`,
+      url: `http://${process.env.REALTIME_HOST || '127.0.0.1'}:3026`,
     },
     contacts: {
-      url: `http://${process.env.CONTACTS_HOST || 'localhost'}:3036`,
+      url: `http://${process.env.CONTACTS_HOST || '127.0.0.1'}:3036`,
     },
     notifications: {
-      url: `http://${process.env.NOTIFICATIONS_HOST || 'localhost'}:3042`,
+      url: `http://${process.env.NOTIFICATIONS_HOST || '127.0.0.1'}:3042`,
     },
     webpack: {
-      url: `http://${process.env.WEBPACK_HOST || 'localhost'}:3808`,
+      url: `http://${process.env.WEBPACK_HOST || '127.0.0.1'}:3808`,
     },
     wiki: {
       url: process.env.WIKI_URL || 'https://learn.sharelatex.com',
@@ -328,7 +328,7 @@ module.exports = {
 
   // Where your instance of Overleaf Community Edition/Server Pro can be found publicly. Used in emails
   // that are sent out, generated links, etc.
-  siteUrl: (siteUrl = process.env.PUBLIC_URL || 'http://localhost:3000'),
+  siteUrl: (siteUrl = process.env.PUBLIC_URL || 'http://127.0.0.1:3000'),
 
   lockManager: {
     lockTestInterval: intFromEnv('LOCK_MANAGER_LOCK_TEST_INTERVAL', 50),

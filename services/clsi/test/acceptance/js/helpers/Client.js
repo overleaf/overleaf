@@ -72,7 +72,7 @@ module.exports = Client = {
           done(new Error('error starting server: ' + error.message))
         } else {
           const addr = server.address()
-          Settings.filestoreDomainOveride = `http://localhost:${addr.port}`
+          Settings.filestoreDomainOveride = `http://127.0.0.1:${addr.port}`
           done()
         }
       })

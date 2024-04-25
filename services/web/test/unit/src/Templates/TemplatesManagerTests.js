@@ -101,7 +101,7 @@ describe('TemplatesManager', function () {
           path: {
             dumpFolder: this.dumpFolder,
           },
-          siteUrl: (this.siteUrl = 'http://localhost:3000'),
+          siteUrl: (this.siteUrl = 'http://127.0.0.1:3000'),
           apis: {
             v1: {
               url: (this.v1Url = 'http://overleaf.com'),

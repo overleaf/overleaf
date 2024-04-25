@@ -33,7 +33,7 @@ module.exports = {
           Settings.internal != null ? Settings.internal.realtime : undefined,
           x => x.port
         ),
-        'localhost',
+        '127.0.0.1',
         error => {
           if (error != null) {
             throw error

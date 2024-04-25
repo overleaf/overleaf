@@ -129,7 +129,7 @@ const fetch = require('node-fetch')
 globalThis.fetch =
   global.fetch =
   window.fetch =
-    (url, ...options) => fetch(new URL(url, 'http://localhost'), ...options)
+    (url, ...options) => fetch(new URL(url, 'http://127.0.0.1'), ...options)
 
 // ignore CSS files
 const { addHook } = require('pirates')

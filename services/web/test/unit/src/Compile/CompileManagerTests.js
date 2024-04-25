@@ -25,7 +25,7 @@ describe('CompileManager', function () {
           apis: {
             clsi: { submissionBackendClass: 'n2d' },
           },
-          redis: { web: { host: 'localhost', port: 42 } },
+          redis: { web: { host: '127.0.0.1', port: 42 } },
           rateLimit: { autoCompile: {} },
         }),
         '../../infrastructure/RedisWrapper': {

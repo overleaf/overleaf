@@ -16,7 +16,7 @@ const Swagger = require('swagger-client')
 const app = require('../../../../../app')
 
 function testUrl(pathname, opts = {}) {
-  const url = new URL('http://localhost')
+  const url = new URL('http://127.0.0.1')
   url.port = exports.server.address().port
   url.pathname = pathname
   if (opts.qs) {

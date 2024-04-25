@@ -5,7 +5,7 @@ import OError from '@overleaf/o-error'
 
 export function healthCheck(req, res) {
   const opts = {
-    url: `http://localhost:3005/user/${settings.healthCheckUserId}/check`,
+    url: `http://127.0.0.1:3005/user/${settings.healthCheckUserId}/check`,
     json: {
       words: ['helllo'],
       language: 'en',

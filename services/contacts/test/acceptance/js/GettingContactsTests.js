@@ -3,11 +3,11 @@ import request from 'request'
 import async from 'async'
 import { app } from '../../../app/js/server.js'
 
-const HOST = 'http://localhost:3036'
+const HOST = 'http://127.0.0.1:3036'
 
 describe('Getting Contacts', function () {
   before(function (done) {
-    this.server = app.listen(3036, 'localhost', error => {
+    this.server = app.listen(3036, '127.0.0.1', error => {
       if (error != null) {
         throw error
       }

@@ -4,7 +4,7 @@ const rclient1 = redis.createClient({
   cluster: [
     {
       port: '7000',
-      host: 'localhost',
+      host: '127.0.0.1',
     },
   ],
 })
@@ -13,7 +13,7 @@ const rclient2 = redis.createClient({
   cluster: [
     {
       port: '7000',
-      host: 'localhost',
+      host: '127.0.0.1',
     },
   ],
 })

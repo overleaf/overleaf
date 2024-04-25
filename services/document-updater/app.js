@@ -245,7 +245,7 @@ const port =
     Settings.api.documentupdater &&
     Settings.api.documentupdater.port) ||
   3003
-const host = Settings.internal.documentupdater.host || 'localhost'
+const host = Settings.internal.documentupdater.host || '127.0.0.1'
 
 if (!module.parent) {
   // Called directly

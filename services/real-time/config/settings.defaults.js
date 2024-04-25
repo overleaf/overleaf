@@ -4,7 +4,7 @@ const settings = {
   redis: {
     pubsub: {
       host:
-        process.env.PUBSUB_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+        process.env.PUBSUB_REDIS_HOST || process.env.REDIS_HOST || '127.0.0.1',
       port: process.env.PUBSUB_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
         process.env.PUBSUB_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
@@ -19,7 +19,7 @@ const settings = {
       host:
         process.env.REAL_TIME_REDIS_HOST ||
         process.env.REDIS_HOST ||
-        'localhost',
+        '127.0.0.1',
       port:
         process.env.REAL_TIME_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
@@ -45,7 +45,7 @@ const settings = {
       host:
         process.env.DOC_UPDATER_REDIS_HOST ||
         process.env.REDIS_HOST ||
-        'localhost',
+        '127.0.0.1',
       port:
         process.env.DOC_UPDATER_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
@@ -68,7 +68,7 @@ const settings = {
       host:
         process.env.SESSIONS_REDIS_HOST ||
         process.env.REDIS_HOST ||
-        'localhost',
+        '127.0.0.1',
       port: process.env.SESSIONS_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
         process.env.SESSIONS_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
@@ -83,14 +83,14 @@ const settings = {
   internal: {
     realTime: {
       port: 3026,
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
     },
   },
 
   apis: {
     web: {
       url: `http://${
-        process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+        process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'
       }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'overleaf',
       pass: process.env.WEB_API_PASSWORD || 'password',
@@ -99,7 +99,7 @@ const settings = {
       url: `http://${
         process.env.DOCUMENT_UPDATER_HOST ||
         process.env.DOCUPDATER_HOST ||
-        'localhost'
+        '127.0.0.1'
       }:3003`,
     },
   },

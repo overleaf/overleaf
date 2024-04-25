@@ -41,58 +41,58 @@ module.exports = {
     },
 
     web: {
-      url: 'http://localhost:23000',
+      url: 'http://127.0.0.1:23000',
       user: httpAuthUser,
       pass: httpAuthPass,
     },
 
     haveIBeenPwned: {
       enabled: false,
-      url: 'http://localhost:1337',
+      url: 'http://127.0.0.1:1337',
     },
     documentupdater: {
-      url: 'http://localhost:23003',
+      url: 'http://127.0.0.1:23003',
     },
     spelling: {
-      url: 'http://localhost:23005',
-      host: 'localhost',
+      url: 'http://127.0.0.1:23005',
+      host: '127.0.0.1',
     },
     docstore: {
-      url: 'http://localhost:23016',
-      pubUrl: 'http://localhost:23016',
+      url: 'http://127.0.0.1:23016',
+      pubUrl: 'http://127.0.0.1:23016',
     },
     chat: {
-      internal_url: 'http://localhost:23010',
+      internal_url: 'http://127.0.0.1:23010',
     },
     filestore: {
-      url: 'http://localhost:23009',
+      url: 'http://127.0.0.1:23009',
     },
     clsi: {
-      url: 'http://localhost:23013',
+      url: 'http://127.0.0.1:23013',
     },
     realTime: {
-      url: 'http://localhost:23026',
+      url: 'http://127.0.0.1:23026',
     },
     contacts: {
-      url: 'http://localhost:23036',
+      url: 'http://127.0.0.1:23036',
     },
     notifications: {
-      url: 'http://localhost:23042',
+      url: 'http://127.0.0.1:23042',
     },
     project_history: {
       sendProjectStructureOps: true,
-      url: `http://localhost:23054`,
+      url: `http://127.0.0.1:23054`,
     },
     v1_history: {
-      url: `http://localhost:23100/api`,
+      url: `http://127.0.0.1:23100/api`,
       user: 'overleaf',
       pass: 'password',
     },
     webpack: {
-      url: 'http://localhost:23808',
+      url: 'http://127.0.0.1:23808',
     },
     gitBridge: {
-      url: 'http://localhost:28000',
+      url: 'http://127.0.0.1:28000',
     },
   },
 

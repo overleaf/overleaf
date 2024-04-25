@@ -48,7 +48,7 @@ if (Settings.catchErrors) {
 FileWriter.ensureDumpFolderExists()
 
 const port = Settings.port || Settings.internal.web.port || 3000
-const host = Settings.internal.web.host || 'localhost'
+const host = Settings.internal.web.host || '127.0.0.1'
 if (!module.parent) {
   // Called directly
 

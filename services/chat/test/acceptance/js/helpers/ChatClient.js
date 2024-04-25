@@ -1,7 +1,7 @@
 import Request from 'request'
 
 const request = Request.defaults({
-  baseUrl: 'http://localhost:3010',
+  baseUrl: 'http://127.0.0.1:3010',
 })
 
 async function asyncRequest(options) {

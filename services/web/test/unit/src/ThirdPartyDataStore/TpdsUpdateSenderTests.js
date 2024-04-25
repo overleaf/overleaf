@@ -16,7 +16,7 @@ const collaberatorRef = new ObjectId()
 const projectName = 'project_name_here'
 
 const thirdPartyDataStoreApiUrl = 'http://third-party-json-store.herokuapp.com'
-const siteUrl = 'http://www.localhost:3000'
+const siteUrl = 'http://127.0.0.1:3000'
 const filestoreUrl = 'filestore.overleaf.com'
 
 describe('TpdsUpdateSender', function () {

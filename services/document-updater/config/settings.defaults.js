@@ -1,7 +1,7 @@
 module.exports = {
   internal: {
     documentupdater: {
-      host: process.env.LISTEN_ADDRESS || 'localhost',
+      host: process.env.LISTEN_ADDRESS || '127.0.0.1',
       port: 3003,
     },
   },
@@ -9,20 +9,20 @@ module.exports = {
   apis: {
     web: {
       url: `http://${
-        process.env.WEB_API_HOST || process.env.WEB_HOST || 'localhost'
+        process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'
       }:${process.env.WEB_API_PORT || process.env.WEB_PORT || 3000}`,
       user: process.env.WEB_API_USER || 'overleaf',
       pass: process.env.WEB_API_PASSWORD || 'password',
     },
     project_history: {
-      url: `http://${process.env.PROJECT_HISTORY_HOST || 'localhost'}:3054`,
+      url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
     },
   },
 
   redis: {
     pubsub: {
       host:
-        process.env.PUBSUB_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+        process.env.PUBSUB_REDIS_HOST || process.env.REDIS_HOST || '127.0.0.1',
       port: process.env.PUBSUB_REDIS_PORT || process.env.REDIS_PORT || '6379',
       password:
         process.env.PUBSUB_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
@@ -34,7 +34,7 @@ module.exports = {
     history: {
       port: process.env.HISTORY_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
-        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || '127.0.0.1',
       password:
         process.env.HISTORY_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
@@ -45,7 +45,7 @@ module.exports = {
     project_history: {
       port: process.env.HISTORY_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
-        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+        process.env.HISTORY_REDIS_HOST || process.env.REDIS_HOST || '127.0.0.1',
       password:
         process.env.HISTORY_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
@@ -64,7 +64,7 @@ module.exports = {
     lock: {
       port: process.env.LOCK_REDIS_PORT || process.env.REDIS_PORT || '6379',
       host:
-        process.env.LOCK_REDIS_HOST || process.env.REDIS_HOST || 'localhost',
+        process.env.LOCK_REDIS_HOST || process.env.REDIS_HOST || '127.0.0.1',
       password:
         process.env.LOCK_REDIS_PASSWORD || process.env.REDIS_PASSWORD || '',
       maxRetriesPerRequest: parseInt(
@@ -83,7 +83,7 @@ module.exports = {
       host:
         process.env.DOC_UPDATER_REDIS_HOST ||
         process.env.REDIS_HOST ||
-        'localhost',
+        '127.0.0.1',
       password:
         process.env.DOC_UPDATER_REDIS_PASSWORD ||
         process.env.REDIS_PASSWORD ||
