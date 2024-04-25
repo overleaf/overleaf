@@ -24,6 +24,14 @@ export default function SettingsDocument() {
       label: doc.path,
     }))
 
+    if (!rootDocId) {
+      mappedDocs.unshift({
+        value: '',
+        label: 'None',
+        disabled: true,
+      })
+    }
+
     return mappedDocs
   }, [docs, rootDocId])
 
@@ -34,7 +42,7 @@ export default function SettingsDocument() {
   return (
     <SettingsMenuSelect
       onChange={setRootDocId}
-      value={rootDocId}
+      value={rootDocId ?? ''}
       options={validDocsOptions}
       label={t('main_document')}
       name="rootDocId"
