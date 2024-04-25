@@ -2,14 +2,30 @@ const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
+const Settings = require('@overleaf/settings')
 const SessionManager = require('../Features/Authentication/SessionManager')
 
 const MAX_SESSION_SIZE_THRESHOLD = 4096
 
 // Define a custom session store to record session metrics and log large
 // anonymous sessions for debugging purposes
+// Also make the SET calls more robust/consistent by adding flags
+// - XX: ensure update in place, expect that the old session value is still in redis at that key
+// - NX: ensure initial set, expect that there is no other session at that key already
 class CustomSessionStore extends RedisStore {
   static largestSessionSize = 3 * 1024 // ignore sessions smaller than 3KB
+  #initialSetStore
+  #updateInPlaceStore
+
+  constructor({ client }) {
+    super({ client })
+    this.#initialSetStore = new RedisStore({
+      client: new CustomSetRedisClient(client, 'NX'),
+    })
+    this.#updateInPlaceStore = new RedisStore({
+      client: new CustomSetRedisClient(client, 'XX'),
+    })
+  }
 
   static metric(method, sess) {
     let type // type of session: 'logged-in', 'anonymous', or 'na' (not available)
@@ -51,7 +67,14 @@ class CustomSessionStore extends RedisStore {
 
   set(sid, sess, cb) {
     CustomSessionStore.metric('set', sess)
-    super.set(sid, sess, cb)
+    const originalId = sess.req.signedCookies[Settings.cookieName]
+    if (sid === originalId || sid === sess.req.newSessionId) {
+      this.#updateInPlaceStore.set(sid, sess, cb)
+    } else {
+      // Multiple writes can get issued with the new sid. Keep track of it.
+      Object.defineProperty(sess.req, 'newSessionId', { value: sid })
+      this.#initialSetStore.set(sid, sess, cb)
+    }
   }
 
   touch(sid, sess, cb) {
@@ -79,6 +102,26 @@ function redactSession(sess) {
       return value
     })
   )
+}
+
+class CustomSetRedisClient {
+  #client
+  #flag
+  constructor(client, flag) {
+    this.#client = client
+    this.#flag = flag
+  }
+
+  set(args, cb) {
+    args.push(this.#flag)
+    this.#client.set(args, (err, ok) => {
+      metrics.inc('session.store.set', 1, {
+        path: this.#flag,
+        status: err ? 'error' : ok ? 'success' : 'failure',
+      })
+      cb(err, ok)
+    })
+  }
 }
 
 module.exports = CustomSessionStore
