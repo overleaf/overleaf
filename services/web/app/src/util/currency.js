@@ -14,19 +14,23 @@
  * @returns {string}
  */
 function formatCurrencyLocalized(amount, currency, locale, stripIfInteger) {
+  const options = { style: 'currency', currency }
   if (stripIfInteger && Number.isInteger(amount)) {
+    options.minimumFractionDigits = 0
+  }
+
+  try {
     return amount.toLocaleString(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
+      ...options,
       currencyDisplay: 'narrowSymbol',
     })
-  }
-  return amount.toLocaleString(locale, {
-    style: 'currency',
-    currency,
-    currencyDisplay: 'narrowSymbol',
-  })
+  } catch {}
+
+  try {
+    return amount.toLocaleString(locale, options)
+  } catch {}
+
+  return `${currency} ${amount}`
 }
 
 module.exports = {

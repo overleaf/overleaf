@@ -23,17 +23,21 @@ export function formatCurrencyLocalized(
   locale: string,
   stripIfInteger = false
 ): string {
+  const options: Intl.NumberFormatOptions = { style: 'currency', currency }
   if (stripIfInteger && Number.isInteger(amount)) {
+    options.minimumFractionDigits = 0
+  }
+
+  try {
     return amount.toLocaleString(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 0,
+      ...options,
       currencyDisplay: 'narrowSymbol',
     })
-  }
-  return amount.toLocaleString(locale, {
-    style: 'currency',
-    currency,
-    currencyDisplay: 'narrowSymbol',
-  })
+  } catch {}
+
+  try {
+    return amount.toLocaleString(locale, options)
+  } catch {}
+
+  return `${currency} ${amount}`
 }
