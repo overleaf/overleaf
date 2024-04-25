@@ -88,7 +88,7 @@ async function plansPage(req, res) {
   const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'local-ccy-format'
+    'local-ccy-format-v2'
   )
   const formatCurrency =
     localCcyAssignment.variant === 'enabled'
@@ -143,7 +143,7 @@ async function userSubscriptionPage(req, res) {
   const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'local-ccy-format'
+    'local-ccy-format-v2'
   )
 
   const results =
@@ -261,7 +261,7 @@ async function interstitialPaymentPage(req, res) {
     const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
       req,
       res,
-      'local-ccy-format'
+      'local-ccy-format-v2'
     )
 
     res.render('subscriptions/interstitial-payment', {
@@ -296,7 +296,7 @@ async function successfulSubscription(req, res) {
   const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
     req,
     res,
-    'local-ccy-format'
+    'local-ccy-format-v2'
   )
   const { personalSubscription } =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(

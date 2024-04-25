@@ -81,7 +81,7 @@ export const SubscriptionDashboardContext = createContext<
 >(undefined)
 
 const getFormatCurrencies = () =>
-  getSplitTestVariant('local-ccy-format') === 'enabled'
+  getSplitTestVariant('local-ccy-format-v2') === 'enabled'
     ? formatCurrencyLocalized
     : formatCurrencyDefault
 

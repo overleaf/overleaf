@@ -25,7 +25,7 @@ export function updateGroupModalPlanPricing() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
   const { planCode, size, currency, usage } = getFormValues()
 
-  const localCcyVariant = getSplitTestVariant('local-ccy-format')
+  const localCcyVariant = getSplitTestVariant('local-ccy-format-v2')
 
   const { localizedPrice, localizedPerUserPrice } =
     createLocalizedGroupPlanPrice({

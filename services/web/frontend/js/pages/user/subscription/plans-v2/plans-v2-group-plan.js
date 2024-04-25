@@ -26,7 +26,7 @@ export function updateMainGroupPlanPricing() {
     ? 'educational'
     : 'enterprise'
 
-  const localCcyVariant = getSplitTestVariant('local-ccy-format')
+  const localCcyVariant = getSplitTestVariant('local-ccy-format-v2')
   const formatCurrency =
     localCcyVariant === 'enabled'
       ? formatCurrencyLocalized
