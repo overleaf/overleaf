@@ -1,3 +1,4 @@
+const AuthenticationController = require('../Authentication/AuthenticationController')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const SessionManager = require('../Authentication/SessionManager')
@@ -15,8 +16,33 @@ const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
+const { RateLimiter } = require('../../infrastructure/RateLimiter')
+const tsscmp = require('tsscmp')
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
+
+const sendSecondaryConfirmCodeRateLimiter = new RateLimiter(
+  'send-secondary-confirmation-code',
+  {
+    points: 1,
+    duration: 60,
+  }
+)
+const checkSecondaryConfirmCodeRateLimiter = new RateLimiter(
+  'check-secondary-confirmation-code-per-email',
+  {
+    points: 10,
+    duration: 60,
+  }
+)
+
+const resendSecondaryConfirmCodeRateLimiter = new RateLimiter(
+  'resend-secondary-confirmation-code',
+  {
+    points: 1,
+    duration: 60,
+  }
+)
 
 async function _sendSecurityAlertEmail(user, email) {
   const emailOptions = {
@@ -30,6 +56,10 @@ async function _sendSecurityAlertEmail(user, email) {
   await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
 }
 
+/**
+ * This method is for adding a secondary email to be confirmed via an emailed link.
+ * For code confirmation, see the `addWithConfirmationCode` method in this file.
+ */
 async function add(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
@@ -127,6 +157,263 @@ function sendReconfirmation(req, res, next) {
   })
 }
 
+/**
+ * This method is for adding a secondary email to be confirmed via a code.
+ * For email link confirmation see the `add` method in this file.
+ */
+async function addWithConfirmationCode(req, res) {
+  delete req.session.pendingSecondaryEmail
+
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.sendStatus(422)
+  }
+
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    'emails.email': 1,
+  })
+
+  if (user.emails.length >= Settings.emailAddressLimit) {
+    return res.status(422).json({ message: 'secondary email limit exceeded' })
+  }
+
+  try {
+    await UserGetter.promises.ensureUniqueEmailAddress(email)
+
+    await sendSecondaryConfirmCodeRateLimiter.consume(email, 1, {
+      method: 'email',
+    })
+
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'request-add-email-code',
+      userId,
+      req.ip,
+      {
+        newSecondaryEmail: email,
+      }
+    )
+
+    const { confirmCode, confirmCodeExpiresTimestamp } =
+      await UserEmailsConfirmationHandler.promises.sendConfirmationCode(
+        email,
+        true
+      )
+
+    req.session.pendingSecondaryEmail = {
+      email,
+      confirmCode,
+      confirmCodeExpiresTimestamp,
+    }
+
+    return res.json({
+      redir: '/user/emails/confirm-secondary',
+    })
+  } catch (err) {
+    if (err.name === 'EmailExistsError') {
+      return res.status(409).json({
+        message: {
+          type: 'error',
+          text: req.i18n.translate('email_already_registered'),
+        },
+      })
+    }
+
+    if (err?.remainingPoints === 0) {
+      return res.status(429).json({})
+    }
+
+    logger.err({ err }, 'failed to send confirmation code')
+
+    delete req.session.pendingSecondaryEmail
+
+    return res.status(500).json({
+      message: {
+        key: 'error_performing_request',
+      },
+    })
+  }
+}
+
+async function checkSecondaryEmailConfirmationCode(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const code = req.body.code
+  const user = await UserGetter.promises.getUser(userId, {
+    email: 1,
+    'emails.email': 1,
+  })
+
+  if (!req.session.pendingSecondaryEmail) {
+    logger.err(
+      {},
+      'error checking confirmation code. missing pendingSecondaryEmail'
+    )
+
+    return res.status(500).json({
+      message: {
+        key: 'error_performing_request',
+      },
+    })
+  }
+
+  try {
+    await checkSecondaryConfirmCodeRateLimiter.consume(
+      req.session.pendingSecondaryEmail.email,
+      1,
+      { method: 'email' }
+    )
+  } catch (err) {
+    if (err?.remainingPoints === 0) {
+      return res.sendStatus(429)
+    } else {
+      return res.status(500).json({
+        message: {
+          key: 'error_performing_request',
+        },
+      })
+    }
+  }
+
+  if (
+    req.session.pendingSecondaryEmail.confirmCodeExpiresTimestamp < Date.now()
+  ) {
+    return res.status(403).json({
+      message: { key: 'expired_confirmation_code' },
+    })
+  }
+
+  if (!tsscmp(req.session.pendingSecondaryEmail.confirmCode, code)) {
+    return res.status(403).json({
+      message: { key: 'invalid_confirmation_code' },
+    })
+  }
+
+  try {
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'add-email-via-code',
+      userId,
+      req.ip,
+      {
+        newSecondaryEmail: req.session.pendingSecondaryEmail.email,
+      }
+    )
+
+    await UserUpdater.promises.addEmailAddress(
+      userId,
+      req.session.pendingSecondaryEmail.email,
+      {},
+      {
+        initiatorId: user._id,
+        ipAddress: req.ip,
+      }
+    )
+
+    await UserUpdater.promises.confirmEmail(
+      userId,
+      req.session.pendingSecondaryEmail.email,
+      {}
+    )
+
+    delete req.session.pendingSecondaryEmail
+
+    AnalyticsManager.recordEventForUser(user._id, 'email-verified', {
+      provider: 'email',
+      verification_type: 'token',
+      isPrimary: false,
+    })
+
+    const redirectUrl =
+      AuthenticationController.getRedirectFromSession(req) || '/project'
+
+    return res.json({
+      redir: redirectUrl,
+    })
+  } catch (error) {
+    if (error.name === 'EmailExistsError') {
+      return res.status(409).json({
+        message: {
+          type: 'error',
+          text: req.i18n.translate('email_already_registered'),
+        },
+      })
+    }
+
+    logger.err({ error }, 'failed to check confirmation code')
+
+    return res.status(500).json({
+      message: {
+        key: 'error_performing_request',
+      },
+    })
+  }
+}
+
+async function resendSecondaryEmailConfirmationCode(req, res) {
+  if (!req.session.pendingSecondaryEmail) {
+    logger.err(
+      {},
+      'error resending confirmation code. missing pendingSecondaryEmail'
+    )
+
+    return res.status(500).json({
+      message: {
+        key: 'error_performing_request',
+      },
+    })
+  }
+
+  const email = req.session.pendingSecondaryEmail.email
+
+  try {
+    await resendSecondaryConfirmCodeRateLimiter.consume(email, 1, {
+      method: 'email',
+    })
+  } catch (err) {
+    if (err?.remainingPoints === 0) {
+      return res.status(429).json({})
+    } else {
+      throw err
+    }
+  }
+
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'resend-add-email-code',
+      userId,
+      req.ip,
+      {
+        newSecondaryEmail: email,
+      }
+    )
+
+    const { confirmCode, confirmCodeExpiresTimestamp } =
+      await UserEmailsConfirmationHandler.promises.sendConfirmationCode(
+        email,
+        true
+      )
+
+    req.session.pendingSecondaryEmail.confirmCode = confirmCode
+    req.session.pendingSecondaryEmail.confirmCodeExpiresTimestamp =
+      confirmCodeExpiresTimestamp
+
+    return res.status(200).json({
+      message: { key: 'we_sent_new_code' },
+    })
+  } catch (err) {
+    logger.err({ err, email }, 'failed to send confirmation code')
+
+    return res.status(500).json({
+      key: 'error_performing_request',
+    })
+  }
+}
+
 async function primaryEmailCheckPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const user = await UserGetter.promises.getUser(userId, {
@@ -175,6 +462,13 @@ const UserEmailsController = {
   },
 
   add: expressify(add),
+  addWithConfirmationCode: expressify(addWithConfirmationCode),
+  checkSecondaryEmailConfirmationCode: expressify(
+    checkSecondaryEmailConfirmationCode
+  ),
+  resendSecondaryEmailConfirmationCode: expressify(
+    resendSecondaryEmailConfirmationCode
+  ),
 
   remove(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)

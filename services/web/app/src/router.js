@@ -366,6 +366,30 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       RateLimiterMiddleware.rateLimit(rateLimiters.endorseEmail),
       UserEmailsController.endorse
     )
+
+    webRouter.post(
+      '/user/emails/secondary',
+      AuthenticationController.requireLogin(),
+      PermissionsController.requirePermission('add-secondary-email'),
+      RateLimiterMiddleware.rateLimit(rateLimiters.addEmail),
+      UserEmailsController.addWithConfirmationCode
+    )
+
+    webRouter.post(
+      '/user/emails/confirm-secondary',
+      AuthenticationController.requireLogin(),
+      PermissionsController.requirePermission('add-secondary-email'),
+      RateLimiterMiddleware.rateLimit(rateLimiters.checkEmailConfirmationCode),
+      UserEmailsController.checkSecondaryEmailConfirmationCode
+    )
+
+    webRouter.post(
+      '/user/emails/resend-secondary-confirmation',
+      AuthenticationController.requireLogin(),
+      PermissionsController.requirePermission('add-secondary-email'),
+      RateLimiterMiddleware.rateLimit(rateLimiters.resendConfirmationCode),
+      UserEmailsController.resendSecondaryEmailConfirmationCode
+    )
   }
 
   webRouter.get(
