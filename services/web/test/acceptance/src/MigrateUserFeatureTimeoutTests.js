@@ -32,6 +32,21 @@ async function runFixupScript(args = []) {
   }
 }
 
+async function runSecondFixupScript(args = []) {
+  try {
+    return await promisify(exec)(
+      [
+        'node',
+        'scripts/migration_compile_timeout_60s_to_20s_fixup_new_users.js',
+        ...args,
+      ].join(' ')
+    )
+  } catch (error) {
+    logger.error({ error }, 'script failed')
+    throw error
+  }
+}
+
 describe('MigrateUserFeatureTimeoutTests', function () {
   describe('initial script', function () {
     const usersInput = {
@@ -186,6 +201,8 @@ describe('MigrateUserFeatureTimeoutTests', function () {
     })
   })
 
+  const FEATURES_UPDATED_AT = new Date('2024-04-16T12:41:00Z')
+
   describe('fixup script', function () {
     const usersInput = {
       timeout20s1: {
@@ -246,7 +263,6 @@ describe('MigrateUserFeatureTimeoutTests', function () {
     })
 
     it("updates users featuresUpdatedAt when '--commit' is set", async function () {
-      const FEATURES_UPDATED_AT = new Date('2024-04-16T12:41:00Z')
       const users = await db.users.find().toArray()
       expect(users).to.have.lengthOf(usersKeys.length)
       const result = await runFixupScript(['--commit'])
@@ -297,6 +313,134 @@ describe('MigrateUserFeatureTimeoutTests', function () {
 
       expect(result2.stdout).to.contain(
         'Found 0 users needing their featuresUpdatedAt updated'
+      )
+    })
+  })
+
+  describe('fixup recent users', function () {
+    const usersInput = {
+      timeout20sNewerUser: {
+        features: { compileTimeout: 20 },
+        signUpDate: new Date('2026-01-01'),
+      },
+      // only this user should get updated
+      timeout20sNewUser: {
+        features: { compileTimeout: 20 },
+        signUpDate: new Date('2025-01-01'),
+        featuresUpdatedAt: FEATURES_UPDATED_AT,
+      },
+      timeout20sOldUser: {
+        features: { compileTimeout: 20 },
+        signUpDate: new Date('2023-01-01'),
+        featuresUpdatedAt: FEATURES_UPDATED_AT,
+      },
+
+      timeout240sNewerUser: {
+        features: { compileTimeout: 240 },
+        signUpDate: new Date('2026-01-01'),
+      },
+      // We didn't produce such mismatch (featuresUpdatedAt < signUpDate) on premium users.
+      // But we should still test that the script doesn't update them.
+      timeout240sNewUser: {
+        features: { compileTimeout: 240 },
+        signUpDate: new Date('2025-01-01'),
+        featuresUpdatedAt: FEATURES_UPDATED_AT,
+      },
+      timeout240sOldUser: {
+        features: { compileTimeout: 240 },
+        signUpDate: new Date('2023-01-01'),
+        featuresUpdatedAt: FEATURES_UPDATED_AT,
+      },
+    }
+
+    const usersKeys = Object.keys(usersInput)
+    const userIds = {}
+
+    beforeEach('insert users', async function () {
+      const usersInsertedValues = await db.users.insertMany(
+        usersKeys.map(key => ({
+          ...usersInput[key],
+          email: `${key}@example.com`,
+        }))
+      )
+      usersKeys.forEach(
+        (key, index) => (userIds[key] = usersInsertedValues.insertedIds[index])
+      )
+    })
+    afterEach('clear users', async function () {
+      await db.users.deleteMany({})
+    })
+
+    it('gives correct counts in dry mode', async function () {
+      const users = await db.users.find().toArray()
+      expect(users).to.have.lengthOf(usersKeys.length)
+      const result = await runSecondFixupScript([])
+      expect(result.stderr).to.contain(
+        'Doing dry run. Add --commit to commit changes'
+      )
+      expect(result.stdout).to.contain(
+        'Found 1 users needing their featuresUpdatedAt removed'
+      )
+      expect(result.stdout).not.to.contain('Updated 1 records')
+      const usersAfter = await db.users.find().toArray()
+      expect(usersAfter).to.deep.equal(users)
+    })
+
+    it("removes users featuresUpdatedAt when '--commit' is set", async function () {
+      const users = await db.users.find().toArray()
+      expect(users).to.have.lengthOf(usersKeys.length)
+      const result = await runSecondFixupScript(['--commit'])
+      expect(result.stdout).to.contain(
+        'Found 1 users needing their featuresUpdatedAt removed'
+      )
+      expect(result.stdout).to.contain('Updated 1 records')
+      const usersAfter = await db.users.find().toArray()
+      expect(usersAfter).to.deep.equal([
+        {
+          _id: userIds.timeout20sNewerUser,
+          email: 'timeout20sNewerUser@example.com',
+          features: { compileTimeout: 20 },
+          signUpDate: new Date('2026-01-01'),
+        },
+        {
+          _id: userIds.timeout20sNewUser,
+          email: 'timeout20sNewUser@example.com',
+          features: { compileTimeout: 20 },
+          signUpDate: new Date('2025-01-01'),
+        },
+        {
+          _id: userIds.timeout20sOldUser,
+          email: 'timeout20sOldUser@example.com',
+          features: { compileTimeout: 20 },
+          featuresUpdatedAt: FEATURES_UPDATED_AT,
+          signUpDate: new Date('2023-01-01'),
+        },
+        {
+          _id: userIds.timeout240sNewerUser,
+          email: 'timeout240sNewerUser@example.com',
+          features: { compileTimeout: 240 },
+          signUpDate: new Date('2026-01-01'),
+        },
+        {
+          _id: userIds.timeout240sNewUser,
+          email: 'timeout240sNewUser@example.com',
+          features: { compileTimeout: 240 },
+          featuresUpdatedAt: FEATURES_UPDATED_AT,
+          signUpDate: new Date('2025-01-01'),
+        },
+        {
+          _id: userIds.timeout240sOldUser,
+          email: 'timeout240sOldUser@example.com',
+          features: { compileTimeout: 240 },
+          featuresUpdatedAt: FEATURES_UPDATED_AT,
+          signUpDate: new Date('2023-01-01'),
+        },
+      ])
+
+      const result2 = await runSecondFixupScript([])
+
+      expect(result2.stdout).to.contain(
+        'Found 0 users needing their featuresUpdatedAt removed'
       )
     })
   })
