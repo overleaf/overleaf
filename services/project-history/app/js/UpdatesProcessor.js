@@ -170,10 +170,11 @@ _mocks._countAndProcessUpdates = (
           _processUpdatesBatch(projectId, updates, extendLock, cb)
         },
         error => {
-          if (error) {
-            return callback(error)
-          }
-          callback(null, queueSize)
+          // Unconventional callback signature. The caller needs the queue size
+          // even when an error is thrown in order to record the queue size in
+          // the projectHistoryFailures collection. We'll have to find another
+          // way to achieve this when we promisify.
+          callback(error, queueSize)
         }
       )
     } else {
