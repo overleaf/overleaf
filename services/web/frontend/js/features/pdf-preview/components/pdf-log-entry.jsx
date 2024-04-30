@@ -46,6 +46,7 @@ function PdfLogEntry({
     <div
       className={classNames('log-entry', customClass)}
       aria-label={entryAriaLabel}
+      data-ruleid={ruleId}
     >
       <PreviewLogEntryHeader
         level={level}
