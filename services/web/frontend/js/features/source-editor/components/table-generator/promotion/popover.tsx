@@ -14,7 +14,7 @@ import { Button, Overlay, Popover } from 'react-bootstrap'
 import Close from '../../../../../shared/components/close'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { sendMB } from '../../../../../infrastructure/event-tracking'
-import { useSplitTestContext } from '../../../../../shared/context/split-test-context'
+import { useFeatureFlag } from '../../../../../shared/context/split-test-context'
 import { User } from '../../../../../../../types/user'
 import { useUserContext } from '../../../../../shared/context/user-context'
 import grammarlyExtensionPresent from '../../../../../shared/utils/grammarly'
@@ -30,10 +30,8 @@ export const PromotionOverlay: FC = ({ children }) => {
 
   const { inactiveTutorials, currentPopup, setCurrentPopup } =
     useEditorContext()
-  const {
-    splitTestVariants,
-  }: { splitTestVariants: Record<string, string | undefined> } =
-    useSplitTestContext()
+
+  const hasTableGeneratorPromotion = useFeatureFlag('table-generator-promotion')
 
   const user = useUserContext() as User | undefined
 
@@ -50,7 +48,7 @@ export const PromotionOverlay: FC = ({ children }) => {
     currentPopup && currentPopup !== 'table-generator-promotion'
 
   const showPromotion =
-    splitTestVariants['table-generator-promotion'] === 'enabled' &&
+    hasTableGeneratorPromotion &&
     !popupPresent &&
     !inactiveTutorials.includes('table-generator-promotion') &&
     !hideBecauseNewUser

@@ -39,3 +39,8 @@ export function useSplitTestContext() {
 
   return context
 }
+
+export function useFeatureFlag(name: string) {
+  const { splitTestVariants } = useSplitTestContext()
+  return splitTestVariants[name] === 'enabled'
+}

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import StartFreeTrialButton from '../../../../shared/components/start-free-trial-button'
 import { paywallPrompt } from '../../../../main/account-upgrade'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function FeatureItem({ text }: { text: string }) {
   return (
@@ -18,8 +18,7 @@ export function OwnerPaywallPrompt() {
   const { t } = useTranslation()
   const [clickedFreeTrialButton, setClickedFreeTrialButton] = useState(false)
 
-  const { splitTestVariants } = useSplitTestContext()
-  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
+  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   useEffect(() => {
     eventTracking.send('subscription-funnel', 'editor-click-feature', 'history')

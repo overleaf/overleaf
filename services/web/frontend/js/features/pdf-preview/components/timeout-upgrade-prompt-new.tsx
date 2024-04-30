@@ -6,7 +6,7 @@ import PdfLogEntry from './pdf-log-entry'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
 import { Button } from 'react-bootstrap'
 import * as eventTracking from '../../../infrastructure/event-tracking'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -49,8 +49,7 @@ const CompileTimeout = memo(function CompileTimeout({
 }: CompileTimeoutProps) {
   const { t } = useTranslation()
 
-  const { splitTestVariants } = useSplitTestContext()
-  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
+  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <PdfLogEntry

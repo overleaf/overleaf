@@ -5,6 +5,7 @@ import fetchMock from 'fetch-mock'
 import ManagedPublishers, {
   Publisher,
 } from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-publishers'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const userId = 'fff999fff999'
 const publisher1 = {
@@ -36,9 +37,11 @@ describe('<ManagedPublishers />', function () {
 
   it('renders all managed publishers', function () {
     render(
-      <SubscriptionDashboardProvider>
-        <ManagedPublishers />
-      </SubscriptionDashboardProvider>
+      <SplitTestProvider>
+        <SubscriptionDashboardProvider>
+          <ManagedPublishers />
+        </SubscriptionDashboardProvider>
+      </SplitTestProvider>
     )
 
     const elements = screen.getAllByText('You are a', {
@@ -63,9 +66,11 @@ describe('<ManagedPublishers />', function () {
     window.metaAttributesCache.set('ol-managedPublishers', undefined)
 
     render(
-      <SubscriptionDashboardProvider>
-        <ManagedPublishers />
-      </SubscriptionDashboardProvider>
+      <SplitTestProvider>
+        <SubscriptionDashboardProvider>
+          <ManagedPublishers />
+        </SubscriptionDashboardProvider>
+      </SplitTestProvider>
     )
     const elements = screen.queryAllByText('You are a', {
       exact: false,

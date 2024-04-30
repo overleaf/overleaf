@@ -6,7 +6,7 @@ import { useProjectContext } from '../../../../shared/context/project-context'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { startFreeTrial, upgradePlan } from '../../../../main/account-upgrade'
 import { memo } from 'react'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type UpgradeTrackChangesModalProps = {
   show: boolean
@@ -21,8 +21,7 @@ function UpgradeTrackChangesModal({
   const project = useProjectContext()
   const user = useUserContext()
 
-  const { splitTestVariants } = useSplitTestContext()
-  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
+  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <AccessibleModal show={show} onHide={() => setShow(false)}>

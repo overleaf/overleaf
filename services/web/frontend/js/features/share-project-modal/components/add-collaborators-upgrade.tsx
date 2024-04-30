@@ -5,16 +5,14 @@ import { useUserContext } from '../../../shared/context/user-context'
 import { upgradePlan } from '../../../main/account-upgrade'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 import Icon from '../../../shared/components/icon'
-import { useSplitTestContext } from '../../../shared/context/split-test-context'
+import { useFeatureFlag } from '../../../shared/context/split-test-context'
 
 export default function AddCollaboratorsUpgrade() {
   const { t } = useTranslation()
   const user = useUserContext()
 
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
-  const { splitTestVariants } = useSplitTestContext()
-
-  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
+  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <div className="add-collaborators-upgrade">

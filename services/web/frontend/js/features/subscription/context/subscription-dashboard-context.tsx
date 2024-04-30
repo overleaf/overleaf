@@ -30,7 +30,7 @@ import {
 import { isRecurlyLoaded } from '../util/is-recurly-loaded'
 import { SubscriptionDashModalIds } from '../../../../../types/subscription/dashboard/modal-ids'
 import { debugConsole } from '@/utils/debugging'
-import { getSplitTestVariant } from '@/utils/splitTestUtils'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { formatCurrencyLocalized } from '@/shared/utils/currency'
 
 type SubscriptionDashboardContextValue = {
@@ -79,11 +79,6 @@ type SubscriptionDashboardContextValue = {
 export const SubscriptionDashboardContext = createContext<
   SubscriptionDashboardContextValue | undefined
 >(undefined)
-
-const getFormatCurrencies = () =>
-  getSplitTestVariant('local-ccy-format-v2') === 'enabled'
-    ? formatCurrencyLocalized
-    : formatCurrencyDefault
 
 export function SubscriptionDashboardProvider({
   children,
@@ -150,6 +145,10 @@ export function SubscriptionDashboardProvider({
       memberGroupSubscriptions?.length > 0
   )
 
+  const formatCurrency = useFeatureFlag('local-ccy-format-v2')
+    ? formatCurrencyLocalized
+    : formatCurrencyDefault
+
   useEffect(() => {
     if (!isRecurlyLoaded()) {
       setRecurlyLoadError(true)
@@ -164,7 +163,6 @@ export function SubscriptionDashboardProvider({
       plansWithoutDisplayPrice &&
       personalSubscription?.recurly
     ) {
-      const formatCurrency = getFormatCurrencies()
       const { currency, taxRate } = personalSubscription.recurly
       const fetchPlansDisplayPrices = async () => {
         for (const plan of plansWithoutDisplayPrice) {
@@ -192,7 +190,12 @@ export function SubscriptionDashboardProvider({
       }
       fetchPlansDisplayPrices().catch(debugConsole.error)
     }
-  }, [personalSubscription, plansWithoutDisplayPrice, i18n.language])
+  }, [
+    personalSubscription,
+    plansWithoutDisplayPrice,
+    i18n.language,
+    formatCurrency,
+  ])
 
   useEffect(() => {
     if (
@@ -209,7 +212,6 @@ export function SubscriptionDashboardProvider({
         setGroupPlanToChangeToPriceError(false)
         let priceData
         try {
-          const formatCurrency = getFormatCurrencies()
           priceData = await loadGroupDisplayPriceWithTaxPromise(
             groupPlanToChangeToCode,
             currency,
@@ -233,6 +235,7 @@ export function SubscriptionDashboardProvider({
     groupPlanToChangeToSize,
     personalSubscription,
     groupPlanToChangeToCode,
+    formatCurrency,
     i18n.language,
   ])
 

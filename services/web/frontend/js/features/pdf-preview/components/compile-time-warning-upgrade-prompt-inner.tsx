@@ -2,15 +2,14 @@ import Notification from '@/shared/components/notification'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import { useTranslation } from 'react-i18next'
 import { FC } from 'react'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const CompileTimeWarningUpgradePromptInner: FC<{
   handleDismissWarning: () => void
 }> = ({ handleDismissWarning }) => {
   const { t } = useTranslation()
 
-  const { splitTestVariants } = useSplitTestContext()
-  const hasNewPaywallCta = splitTestVariants['paywall-cta'] === 'enabled'
+  const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
     <Notification

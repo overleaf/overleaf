@@ -6,7 +6,7 @@ import ToolbarFileInfo from './toolbar-file-info'
 import ToolbarRestoreFileButton from './toolbar-restore-file-button'
 import { isFileRemoved } from '../../../utils/file-diff'
 import ToolbarRevertFileButton from './toolbar-revert-file-button'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type ToolbarProps = {
   diff: Nullable<Diff>
@@ -14,13 +14,13 @@ type ToolbarProps = {
 }
 
 export default function Toolbar({ diff, selection }: ToolbarProps) {
-  const { splitTestVariants } = useSplitTestContext()
+  const hasRevertFiles = useFeatureFlag('revert-files')
 
   const showRestoreFileButton =
     selection.selectedFile && isFileRemoved(selection.selectedFile)
 
   const showRevertFileButton =
-    splitTestVariants['revert-file'] === 'enabled' &&
+    hasRevertFiles &&
     selection.selectedFile &&
     !isFileRemoved(selection.selectedFile)
 

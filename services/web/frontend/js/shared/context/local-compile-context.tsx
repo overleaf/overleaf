@@ -34,7 +34,7 @@ import { useUserContext } from './user-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
-import { useSplitTestContext } from '@/shared/context/split-test-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 type PdfFile = Record<string, any>
 
@@ -342,7 +342,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
     }
   }, [compiling, isProjectOwner, hasShortCompileTimeout])
 
-  const { splitTestVariants } = useSplitTestContext()
+  const hasCompileLogsEvents = useFeatureFlag('compile-log-events')
 
   // handle the data returned from a compile request
   // note: this should _only_ run when `data` changes,
@@ -401,7 +401,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
                 )
               }
 
-              if (splitTestVariants['compile-log-events'] === 'enabled') {
+              if (hasCompileLogsEvents) {
                 sendMB('compile-log-entries', {
                   status: data.status,
                   stopOnFirstError: data.options.stopOnFirstError,
@@ -479,6 +479,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   }, [
     data,
     ide,
+    hasCompileLogsEvents,
     hasPremiumCompile,
     isProjectOwner,
     projectId,
@@ -487,7 +488,6 @@ export const LocalCompileProvider: FC = ({ children }) => {
     setLogEntries,
     setLogEntryAnnotations,
     setPdfFile,
-    splitTestVariants,
   ])
 
   // switch to logs if there's an error

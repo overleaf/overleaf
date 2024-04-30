@@ -5,6 +5,7 @@ import ManagedInstitutions, {
 } from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-institutions'
 import { SubscriptionDashboardProvider } from '../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 import fetchMock from 'fetch-mock'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const userId = 'fff999fff999'
 const institution1 = {
@@ -45,9 +46,11 @@ describe('<ManagedInstitutions />', function () {
 
   it('renders all managed institutions', function () {
     render(
-      <SubscriptionDashboardProvider>
-        <ManagedInstitutions />
-      </SubscriptionDashboardProvider>
+      <SplitTestProvider>
+        <SubscriptionDashboardProvider>
+          <ManagedInstitutions />
+        </SubscriptionDashboardProvider>
+      </SplitTestProvider>
     )
 
     const elements = screen.getAllByText('You are a', {
@@ -90,9 +93,11 @@ describe('<ManagedInstitutions />', function () {
     })
 
     render(
-      <SubscriptionDashboardProvider>
-        <ManagedInstitutions />
-      </SubscriptionDashboardProvider>
+      <SplitTestProvider>
+        <SubscriptionDashboardProvider>
+          <ManagedInstitutions />
+        </SubscriptionDashboardProvider>
+      </SplitTestProvider>
     )
 
     const unsubscribeLink = screen.getByText('Unsubscribe')
@@ -114,9 +119,11 @@ describe('<ManagedInstitutions />', function () {
     })
 
     render(
-      <SubscriptionDashboardProvider>
-        <ManagedInstitutions />
-      </SubscriptionDashboardProvider>
+      <SplitTestProvider>
+        <SubscriptionDashboardProvider>
+          <ManagedInstitutions />
+        </SubscriptionDashboardProvider>
+      </SplitTestProvider>
     )
 
     const subscribeLink = screen.getByText('Subscribe')
@@ -132,9 +139,11 @@ describe('<ManagedInstitutions />', function () {
     window.metaAttributesCache.set('ol-managedInstitutions', undefined)
 
     render(
-      <SubscriptionDashboardProvider>
-        <ManagedInstitutions />
-      </SubscriptionDashboardProvider>
+      <SplitTestProvider>
+        <SubscriptionDashboardProvider>
+          <ManagedInstitutions />
+        </SubscriptionDashboardProvider>
+      </SplitTestProvider>
     )
     const elements = screen.queryAllByText('You are a', {
       exact: false,

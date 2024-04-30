@@ -1,6 +1,7 @@
 import useWaitForI18n from '../../../../shared/hooks/use-wait-for-i18n'
 import { SubscriptionDashboardProvider } from '../../context/subscription-dashboard-context'
 import SuccessfulSubscription from './successful-subscription'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 function Root() {
   const { isReady } = useWaitForI18n()
@@ -10,9 +11,11 @@ function Root() {
   }
 
   return (
-    <SubscriptionDashboardProvider>
-      <SuccessfulSubscription />
-    </SubscriptionDashboardProvider>
+    <SplitTestProvider>
+      <SubscriptionDashboardProvider>
+        <SuccessfulSubscription />
+      </SubscriptionDashboardProvider>
+    </SplitTestProvider>
   )
 }
 
