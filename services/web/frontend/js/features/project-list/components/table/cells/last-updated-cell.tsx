@@ -1,22 +1,14 @@
-import { useTranslation } from 'react-i18next'
 import { formatDate, fromNowDate } from '../../../../../utils/dates'
 import { Project } from '../../../../../../../types/project/dashboard/api'
 import Tooltip from '../../../../../shared/components/tooltip'
-import { getUserName } from '../../../util/user'
+import { LastUpdatedBy } from '@/features/project-list/components/table/cells/last-updated-by'
 
 type LastUpdatedCellProps = {
   project: Project
 }
 
 export default function LastUpdatedCell({ project }: LastUpdatedCellProps) {
-  const { t } = useTranslation()
-
-  const displayText = project.lastUpdatedBy
-    ? t('last_updated_date_by_x', {
-        lastUpdatedDate: fromNowDate(project.lastUpdated),
-        person: getUserName(project.lastUpdatedBy),
-      })
-    : fromNowDate(project.lastUpdated)
+  const lastUpdatedDate = fromNowDate(project.lastUpdated)
 
   const tooltipText = formatDate(project.lastUpdated)
   return (
@@ -26,8 +18,14 @@ export default function LastUpdatedCell({ project }: LastUpdatedCellProps) {
       description={tooltipText}
       overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
     >
-      {/* OverlayTrigger won't fire unless icon is wrapped in a span */}
-      <span>{displayText}</span>
+      {project.lastUpdatedBy ? (
+        <LastUpdatedBy
+          lastUpdatedBy={project.lastUpdatedBy}
+          lastUpdatedDate={lastUpdatedDate}
+        />
+      ) : (
+        <span>{lastUpdatedDate}</span>
+      )}
     </Tooltip>
   )
 }

@@ -8,12 +8,14 @@ import ActionsDropdown from '../dropdown/actions-dropdown'
 import { getOwnerName } from '../../util/project'
 import { Project } from '../../../../../../types/project/dashboard/api'
 import { ProjectCheckbox } from './project-checkbox'
+import { ProjectListOwnerName } from '@/features/project-list/components/table/project-list-owner-name'
 
 type ProjectListTableRowProps = {
   project: Project
 }
 function ProjectListTableRow({ project }: ProjectListTableRowProps) {
   const { t } = useTranslation()
+
   const ownerName = getOwnerName(project)
 
   return (
@@ -30,7 +32,7 @@ function ProjectListTableRow({ project }: ProjectListTableRowProps) {
       </td>
       <td className="dash-cell-date-owner visible-xs pb-0">
         <LastUpdatedCell project={project} />
-        {ownerName ? <> — {t('owned_by_x', { x: ownerName })}</> : null}
+        {ownerName ? <ProjectListOwnerName ownerName={ownerName} /> : null}
       </td>
       <td className="dash-cell-owner hidden-xs">
         <OwnerCell project={project} />

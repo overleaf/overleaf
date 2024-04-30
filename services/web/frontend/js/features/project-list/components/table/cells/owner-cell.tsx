@@ -41,11 +41,13 @@ type OwnerCellProps = {
 }
 
 export default function OwnerCell({ project }: OwnerCellProps) {
+  const { t } = useTranslation()
+
   const ownerName = getOwnerName(project)
 
   return (
     <>
-      {ownerName}
+      {ownerName === 'You' ? t('you') : ownerName}
       {project.source === 'token' ? (
         <LinkSharingIcon
           className="hidden-xs"
