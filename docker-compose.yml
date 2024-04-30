@@ -1,4 +1,3 @@
-version: '2.2'
 services:
     sharelatex:
         restart: always
@@ -108,6 +107,7 @@ services:
         restart: always
         image: mongo:5.0
         container_name: mongo
+        command: "--replSet overleaf"
         expose:
             - 27017
         volumes:
@@ -117,6 +117,20 @@ services:
             interval: 10s
             timeout: 10s
             retries: 5
+
+    mongoinit:
+        image: mongo:5.0
+        # this container will exit after executing the command
+        restart: no
+        depends_on:
+            mongo:
+                condition: service_healthy
+        command:
+            - mongo
+            - --host
+            - mongo:27017
+            - --eval
+            - 'rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] })'
 
     redis:
         restart: always
