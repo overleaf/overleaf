@@ -11,7 +11,7 @@
 }
 
 .badge-close {
-  @include reset-button();
+  @include reset-button;
 
   display: flex;
   align-items: center;
@@ -20,6 +20,7 @@
   // a random number that would cause the close button to expand enough
   // so that it won't be affected by badge's padding
   $expand: 100px;
+
   padding: $expand $spacing-01;
   margin: (-$expand) (-$spacing-02) (-$expand) $spacing-02;
   user-select: none;

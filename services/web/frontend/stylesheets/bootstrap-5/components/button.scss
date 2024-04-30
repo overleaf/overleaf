@@ -83,6 +83,7 @@
       $color: var(--content-primary-dark),
       $background: var(--blue-70)
     );
+
     background: var(--premium-gradient);
   }
 }
@@ -141,6 +142,7 @@
     height: 20px;
     width: 20px;
   }
+
   .loading-spinner-large {
     border-width: 0.2em;
     height: 24px;

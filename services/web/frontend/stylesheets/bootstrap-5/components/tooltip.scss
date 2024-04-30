@@ -1,5 +1,6 @@
 .tooltip {
   line-height: 20px;
+
   @include shadow-md;
 
   &.#{$prefix}tooltip-top {

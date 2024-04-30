@@ -4,6 +4,7 @@
 
 .dropdown-menu {
   @include shadow-sm;
+
   border: none;
   border-radius: var(--border-radius-base);
   padding: var(--spacing-02);
@@ -13,6 +14,7 @@
 
 .dropdown-item {
   @include body-sm;
+
   border-radius: var(--border-radius-base);
   color: var(--neutral-90);
   display: grid;
@@ -22,14 +24,14 @@
   padding: var(--spacing-05) var(--spacing-04);
   position: relative;
 
-  &:hover:not(.active) {
-    background-color: var(--bg-light-secondary);
-    cursor: pointer;
-  }
-
   &:active {
     background-color: var(--bg-accent-03);
     color: inherit;
+  }
+
+  &:hover:not(.active) {
+    background-color: var(--bg-light-secondary);
+    cursor: pointer;
   }
 
   &[variant='danger'] {
@@ -54,6 +56,7 @@
 
 .dropdown-item-description {
   @include body-xs;
+
   color: var(--content-secondary);
   margin-top: var(--spacing-01);
 }
@@ -97,6 +100,7 @@
   &.btn-danger {
     border-left: 1px solid rgb($neutral-90, 0.16);
   }
+
   &.btn-secondary {
     border-left: 1px solid var(--neutral-60);
   }

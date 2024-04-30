@@ -2,6 +2,7 @@
   // will be deprecated once notifications moved to use .notification (see below)
   flex-grow: 1;
   width: 90%;
+
   @include media-breakpoint-up(md) {
     width: auto;
   }
@@ -13,6 +14,7 @@
   // will be deprecated once notifications moved to use .notification (see below)
   margin-top: calc($line-height-computed / 2); // match paragraph padding
   order: 1;
+
   @include media-breakpoint-up(md) {
     margin-top: 0;
     order: 0;
@@ -38,7 +40,7 @@
 
     &:hover,
     &:focus {
-      background-color: rgba(var(--neutral-90), 0.08);
+      background-color: rgb(var(--neutral-90) 0.08);
       color: var(--content-secondary);
     }
   }
@@ -108,9 +110,6 @@
     height: $spacing-12;
     align-items: center;
     display: flex;
-  }
-
-  .notification-close-btn {
     padding: 0 0 0 $spacing-06;
 
     button {
@@ -125,7 +124,7 @@
 
       &:hover,
       &:focus {
-        background-color: rgba(var(--neutral-90), 0.08);
+        background-color: rgb(var(--neutral-90) 0.08);
         color: var(--content-secondary);
       }
     }
@@ -134,34 +133,43 @@
   &.notification-type-info {
     background-color: var(--bg-info-03);
     border: 1px solid var(--blue-20);
+
     .notification-icon {
       color: var(--blue-50);
     }
   }
+
   &.notification-type-success {
     background-color: var(--bg-accent-03);
     border: 1px solid var(--green-20);
+
     .notification-icon {
       color: var(--green-50);
     }
   }
+
   &.notification-type-warning {
     background-color: var(--bg-warning-03);
     border: 1px solid var(--yellow-20);
+
     .notification-icon {
       color: var(--yellow-40);
     }
   }
+
   &.notification-type-error {
     background-color: var(--bg-danger-03);
     border: 1px solid var(--red-20);
+
     .notification-icon {
       color: var(--red-50);
     }
   }
+
   &.notification-type-offer {
     background-color: var(--bg-light-primary);
     border: 1px solid var(--neutral-20);
+
     .notification-icon {
       color: var(--neutral-50);
     }
@@ -203,9 +211,11 @@
 .reconfirm-notification {
   display: flex;
   width: 100%;
+
   .fa-warning {
     margin-right: $spacing-05;
   }
+
   .btn-reconfirm {
     float: right;
     margin-left: $spacing-05;
@@ -238,6 +248,7 @@
         .reconfirm-notification {
           background-color: var(--neutral-10);
           border-radius: $border-radius-base;
+
           .fa-warning {
             color: var(--yellow-40);
           }

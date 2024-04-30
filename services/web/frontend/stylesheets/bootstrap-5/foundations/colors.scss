@@ -8,7 +8,7 @@
 /* ====== Sass color variables ====== */
 
 /* Neutral */
-$white: #ffffff;
+$white: #fff;
 $neutral-10: #f4f5f6;
 $neutral-20: #e7e9ee;
 $neutral-30: #d0d5dd;
@@ -60,28 +60,22 @@ $bg-light-primary: $white;
 $bg-light-secondary: $neutral-10;
 $bg-light-tertiary: $neutral-20;
 $bg-light-disabled: $neutral-20;
-
 $bg-dark-primary: $neutral-90;
 $bg-dark-secondary: $neutral-80;
 $bg-dark-tertiary: $neutral-70;
 $bg-dark-disabled: $neutral-70;
-
 $bg-accent-01: $green-50;
 $bg-accent-02: $green-60;
 $bg-accent-03: $green-10;
-
 $bg-danger-01: $red-50;
 $bg-danger-02: $red-60;
 $bg-danger-03: $red-10;
-
 $bg-warning-01: $yellow-50;
 $bg-warning-02: $yellow-60;
 $bg-warning-03: $yellow-10;
-
 $bg-info-01: $blue-50;
 $bg-info-02: $blue-60;
 $bg-info-03: $blue-10;
-
 $content-primary: $neutral-90;
 $content-secondary: $neutral-70;
 $content-disabled: $neutral-40;
@@ -89,21 +83,18 @@ $content-placeholder: $neutral-60;
 $content-danger: $red-50;
 $content-warning: $yellow-50;
 $content-positive: $green-50;
-
 $border-primary: $neutral-60;
 $border-hover: $neutral-70;
 $border-disabled: $neutral-20;
 $border-active: $blue-50;
 $border-danger: $red-50;
 $border-divider: $neutral-20;
-
 $link-web: $green-60;
 $link-web-hover: $green-70;
 $link-web-visited: $green-70;
 $link-ui: $blue-50;
 $link-ui-hover: $blue-60;
 $link-ui-visited: $blue-60;
-
 $content-primary-dark: $white;
 $content-secondary-dark: $neutral-20;
 $content-disabled-dark: $neutral-60;
@@ -111,14 +102,12 @@ $content-placeholder-dark: $neutral-50;
 $content-danger-dark: $red-40;
 $content-warning-dark: $yellow-40;
 $content-positive-dark: $green-40;
-
 $border-primary-dark: $neutral-30;
 $border-hover-dark: $neutral-20;
 $border-disabled-dark: $neutral-80;
 $border-active-dark: $blue-30;
 $border-danger-dark: $red-40;
 $border-divider-dark: $neutral-80;
-
 $link-web-dark: $green-30;
 $link-web-hover-dark: $green-40;
 $link-web-visited-dark: $green-40;
@@ -181,28 +170,22 @@ $link-ui-visited-dark: $blue-40;
   --bg-light-secondary: var(--neutral-10);
   --bg-light-tertiary: var(--neutral-20);
   --bg-light-disabled: var(--neutral-20);
-
   --bg-dark-primary: var(--neutral-90);
   --bg-dark-secondary: var(--neutral-80);
   --bg-dark-tertiary: var(--neutral-70);
   --bg-dark-disabled: var(--neutral-70);
-
   --bg-accent-01: var(--green-50);
   --bg-accent-02: var(--green-60);
   --bg-accent-03: var(--green-10);
-
   --bg-danger-01: var(--red-50);
   --bg-danger-02: var(--red-60);
   --bg-danger-03: var(--red-10);
-
   --bg-warning-01: var(--yellow-50);
   --bg-warning-02: var(--yellow-60);
   --bg-warning-03: var(--yellow-10);
-
   --bg-info-01: var(--blue-50);
   --bg-info-02: var(--blue-60);
   --bg-info-03: var(--blue-10);
-
   --content-primary: var(--neutral-90);
   --content-secondary: var(--neutral-70);
   --content-disabled: var(--neutral-40);
@@ -210,21 +193,18 @@ $link-ui-visited-dark: $blue-40;
   --content-danger: var(--red-50);
   --content-warning: var(--yellow-50);
   --content-positive: var(--green-50);
-
   --border-primary: var(--neutral-60);
   --border-hover: var(--neutral-70);
   --border-disabled: var(--neutral-20);
   --border-active: var(--blue-50);
   --border-danger: var(--red-50);
   --border-divider: var(--neutral-20);
-
   --link-web: var(--green-60);
   --link-web-hover: var(--green-70);
   --link-web-visited: var(--green-70);
   --link-ui: var(--blue-50);
   --link-ui-hover: var(--blue-60);
   --link-ui-visited: var(--blue-60);
-
   --content-primary-dark: var(--white);
   --content-secondary-dark: var(--neutral-20);
   --content-disabled-dark: var(--neutral-60);
@@ -232,14 +212,12 @@ $link-ui-visited-dark: $blue-40;
   --content-danger-dark: var(--red-40);
   --content-warning-dark: var(--yellow-40);
   --content-positive-dark: var(--green-40);
-
   --border-primary-dark: var(--neutral-30);
   --border-hover-dark: var(--neutral-20);
   --border-disabled-dark: var(--neutral-80);
   --border-active-dark: var(--blue-30);
   --border-danger-dark: var(--red-40);
   --border-divider-dark: var(--neutral-80);
-
   --link-web-dark: var(--green-30);
   --link-web-hover-dark: var(--green-40);
   --link-web-visited-dark: var(--green-40);

@@ -15,7 +15,6 @@
   --font-size-11: 3.75rem; // 60px
   --font-size-12: 4.5rem; // 72px
   --font-size-13: 6em; // 96px
-
   --line-height-01: 1rem; // 16px
   --line-height-02: 1.25rem; // 20px
   --line-height-03: 1.5rem; // 24px
@@ -40,6 +39,7 @@
   font-size: var(--font-size-12);
   line-height: var(--line-height-11);
 }
+
 @mixin display-sm {
   font-size: var(--font-size-11);
   line-height: var(--line-height-10);
