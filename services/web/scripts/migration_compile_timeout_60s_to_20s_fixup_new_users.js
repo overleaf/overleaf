@@ -8,17 +8,22 @@ const {
 } = require('../app/src/infrastructure/mongodb')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 
+// A few seconds after the previous migration script was run
+const FEATURES_UPDATED_AT = new Date('2024-04-16T12:41:00Z')
+
+const query = {
+  'features.compileTimeout': 20,
+  featuresUpdatedAt: FEATURES_UPDATED_AT,
+  signUpDate: { $gt: FEATURES_UPDATED_AT },
+}
+
 async function logCount() {
-  const count60s = await db.users.countDocuments(
-    { 'features.compileTimeout': { $lte: 60, $ne: 20 } },
-    { readPreference: READ_PREFERENCE_SECONDARY }
+  const usersToUpdate = await db.users.countDocuments(query, {
+    readPreference: READ_PREFERENCE_SECONDARY,
+  })
+  console.log(
+    `Found ${usersToUpdate} users needing their featuresUpdatedAt removed`
   )
-  console.log(`Found ${count60s} users with compileTimeout <= 60s && != 20s`)
-  const count20s = await db.users.countDocuments(
-    { 'features.compileTimeout': 20 },
-    { readPreference: READ_PREFERENCE_SECONDARY }
-  )
-  console.log(`Found ${count20s} users with compileTimeout == 20s`)
 }
 
 const main = async ({ COMMIT, SKIP_COUNT }) => {
@@ -31,12 +36,9 @@ const main = async ({ COMMIT, SKIP_COUNT }) => {
   }
 
   if (COMMIT) {
-    const nModified = await batchedUpdate(
-      'users',
-      { 'features.compileTimeout': { $lte: 60, $ne: 20 } },
-      // NOTE: Always update featuresUpdatedAt to ensure the user's features synced with BigQuery
-      { $set: { 'features.compileTimeout': 20, featuresUpdatedAt: new Date() } }
-    )
+    const nModified = await batchedUpdate('users', query, {
+      $unset: { featuresUpdatedAt: 1 },
+    })
     console.log(`Updated ${nModified} records`)
   }
 

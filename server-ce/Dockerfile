@@ -80,6 +80,13 @@ COPY server-ce/config/custom-environment-variables.json /overleaf/services/histo
 ADD server-ce/bin/grunt /usr/local/bin/grunt
 RUN chmod +x /usr/local/bin/grunt
 
+# Copy history helper scripts
+# ---------------------------
+ADD server-ce/bin/flush-history-queues /overleaf/bin/flush-history-queues
+RUN chmod +x /overleaf/bin/flush-history-queues
+ADD server-ce/bin/force-history-resyncs /overleaf/bin/force-history-resyncs
+RUN chmod +x /overleaf/bin/force-history-resyncs
+
 # File that controls open|closed status of the site
 # -------------------------------------------------
 ENV SITE_MAINTENANCE_FILE "/etc/overleaf/site_status"
