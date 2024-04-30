@@ -40,5 +40,11 @@
 // Utilities
 @import 'bootstrap-5/scss/utilities/api';
 
+// Mixins
+@import 'bootstrap-5/scss/mixins/breakpoints';
+
 // Components custom style
 @import '../components/all';
+
+// Pages custom style
+@import '../pages/all';

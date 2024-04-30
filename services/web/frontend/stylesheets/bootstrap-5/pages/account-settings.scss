@@ -1,0 +1,208 @@
+.affiliations-table {
+  table-layout: fixed;
+}
+
+.affiliations-table-cell {
+  padding: var(--spacing-04);
+  overflow-wrap: break-word;
+}
+
+.affiliations-table-cell-tabbed {
+  margin: var(--spacing-04) 0 0 var(--spacing-07);
+  padding-left: var(--spacing-04);
+}
+
+.affiliations-table-row--highlighted {
+  background-color: var(--bg-light-secondary);
+}
+
+.affiliations-table-inline-action {
+  text-transform: capitalize;
+}
+
+.affiliation-change-container {
+  margin-top: var(--spacing-04);
+}
+
+.affiliations-table-label {
+  padding-top: var(--spacing-02);
+}
+
+.btn-link-accounts {
+  margin-bottom: var(--spacing-03);
+}
+
+.settings-widget-status-icon,
+.dropbox-sync-icon {
+  position: relative;
+  font-size: 1.3em;
+  line-height: 1.3em;
+  vertical-align: top;
+  &.status-error,
+  &.dropbox-sync-icon-error {
+    color: var(--bg-danger-01);
+  }
+  &.status-success,
+  &.dropbox-sync-icon-success {
+    color: var(--content-positive);
+  }
+  &.status-pending,
+  &.dropbox-sync-icon-updating {
+    color: var(--bg-info-01);
+    &::after {
+      content: '\f021';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      margin-left: -20%;
+      font-size: 60%;
+      color: #fff;
+      animation: fa-spin 2s infinite linear;
+    }
+  }
+}
+
+.settings-widgets-container {
+  border: 1px solid var(--border-divider);
+
+  hr {
+    margin: 0 var(--spacing-05);
+  }
+}
+
+.settings-widget-container {
+  display: grid;
+  grid-template-columns: 50px 1fr auto;
+  gap: var(--spacing-07);
+  align-items: center;
+  padding: var(--spacing-05);
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    padding-right: var(--spacing-07);
+
+    &:last-child {
+      padding-right: var(--spacing-00);
+    }
+  }
+
+  img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .description-container {
+    flex-grow: 1;
+  }
+
+  .title-row {
+    margin: var(--spacing-00);
+    margin-bottom: var(--spacing-05);
+
+    > h4 {
+      margin: 0;
+      margin-right: var(--spacing-05);
+    }
+  }
+
+  p {
+    margin-bottom: var(--spacing-05);
+
+    &:last-child {
+      margin-bottom: var(--spacing-00);
+    }
+  }
+}
+
+@include media-breakpoint-down(sm) {
+  .settings-widget-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Prevents icon from large account linking sections, such as the git bridge,
+// from rendering in the center of the widget, anchoring it to the top
+.linking-icon-fixed-position {
+  align-self: start;
+  padding-top: var(--spacing-05);
+}
+
+// overrides the default `Col` padding, as the inner `affiliations-table-cell` has its own padding, and
+// the content length of the git-bridge token table is pretty much fixed (tokens and dates)
+.linking-git-bridge-table-cell {
+  padding-right: 0;
+}
+
+.linking-git-bridge-revoke-button {
+  padding: var(--spacing-01) var(--spacing-02);
+}
+
+.enrollment-alert {
+  width: 100%;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-05);
+  background-color: var(--bg-info-03);
+  border: 1px solid var(--border-divider);
+  display: flex;
+  flex-direction: row;
+
+  .icon {
+    flex: 1 1 auto;
+    padding: 0 var(--spacing-06) 0 var(--spacing-02);
+  }
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+.security-row {
+  .line-header > b {
+    color: var(--content-primary);
+  }
+
+  color: var(--content-secondary);
+  display: flex;
+  flex-direction: row;
+  padding: var(--spacing-03) 0;
+
+  .icon {
+    color: var(--content-primary);
+    display: flex;
+    flex: 1 1 7%;
+    padding: 0 var(--spacing-06);
+    margin-top: var(--spacing-06);
+  }
+
+  .text {
+    flex: 1 1 93%;
+    display: flex;
+    flex-direction: column;
+    margin-right: var(--spacing-06);
+  }
+
+  .button-column {
+    display: flex;
+    align-items: center;
+  }
+
+  .status-label {
+    @include body-sm;
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-01) var(--spacing-02);
+    margin-top: var(--spacing-02);
+    margin-left: var(--spacing-04);
+    flex-shrink: 0;
+
+    &.status-label-configured {
+      background-color: var(--bg-accent-01);
+      color: var(--content-secondary-dark);
+    }
+
+    &.status-label-ready {
+      background-color: var(--bg-light-tertiary);
+      color: var(--content-primary);
+    }
+  }
+}

@@ -157,6 +157,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-04); // Add gap between text and icons
+  justify-content: center;
 
   .icon-small {
     font-size: 20px;

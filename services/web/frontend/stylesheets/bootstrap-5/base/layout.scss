@@ -29,3 +29,7 @@ $footer-height: 50px;
 hr {
   opacity: unset;
 }
+
+.horizontal-divider {
+  border-top: 1px solid var(--border-divider);
+}
