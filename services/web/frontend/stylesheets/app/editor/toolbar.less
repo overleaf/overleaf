@@ -22,9 +22,19 @@
 
   .toolbar-right,
   .toolbar-left {
-    button {
+    button:not(.back-to-editor-btn) {
       background: transparent;
       box-shadow: none;
+    }
+  }
+
+  .toolbar-right .back-to-editor-btn {
+    margin-right: 25px;
+    display: flex;
+    align-items: center;
+
+    .toolbar-label {
+      margin-bottom: 0;
     }
   }
 
@@ -38,7 +48,7 @@
   .toolbar-left > a:not(.btn),
   .toolbar-left > button,
   .toolbar-right > a:not(.btn),
-  .toolbar-right > button {
+  .toolbar-right > button:not(.back-to-editor-btn) {
     display: inline-block;
     color: @toolbar-icon-btn-color;
     background-color: transparent;

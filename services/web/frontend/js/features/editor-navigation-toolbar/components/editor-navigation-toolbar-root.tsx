@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import ToolbarHeader from './toolbar-header'
 import { useEditorContext } from '../../../shared/context/editor-context'
 import { useChatContext } from '../../chat/context/chat-context'
@@ -66,11 +66,21 @@ const EditorNavigationToolbarRoot = React.memo(
       [reviewPanelOpen, setReviewPanelOpen]
     )
 
+    const [shouldReopenChat, setShouldReopenChat] = useState(chatIsOpen)
     const toggleHistoryOpen = useCallback(() => {
       const action = view === 'history' ? 'close' : 'open'
       eventTracking.sendMB('navigation-clicked-history', { action })
+
+      if (chatIsOpen && action === 'open') {
+        setShouldReopenChat(true)
+        toggleChatOpen()
+      }
+      if (shouldReopenChat && action === 'close') {
+        setShouldReopenChat(false)
+        toggleChatOpen()
+      }
       setView(view === 'history' ? 'editor' : 'history')
-    }, [view, setView])
+    }, [view, chatIsOpen, shouldReopenChat, setView, toggleChatOpen])
 
     const openShareModal = useCallback(() => {
       eventTracking.sendMB('navigation-clicked-share')

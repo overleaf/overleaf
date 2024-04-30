@@ -13,6 +13,7 @@ import TrackChangesToggleButton from './track-changes-toggle-button'
 import HistoryToggleButton from './history-toggle-button'
 import ShareProjectButton from './share-project-button'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import BackToEditorButton from './back-to-editor-button'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
@@ -64,34 +65,37 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
       <div className="toolbar-right">
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
 
-        {trackChangesVisible && (
-          <TrackChangesToggleButton
-            onMouseDown={toggleReviewPanelOpen}
-            disabled={historyIsOpen}
-            trackChangesIsOpen={reviewPanelOpen}
-          />
-        )}
+        {historyIsOpen ? (
+          <BackToEditorButton onClick={toggleHistoryOpen} />
+        ) : (
+          <>
+            {trackChangesVisible && (
+              <TrackChangesToggleButton
+                onMouseDown={toggleReviewPanelOpen}
+                disabled={historyIsOpen}
+                trackChangesIsOpen={reviewPanelOpen}
+              />
+            )}
 
-        <ShareProjectButton onClick={openShareModal} />
-        {shouldDisplayPublishButton && (
-          <PublishButton cobranding={cobranding} />
-        )}
+            <ShareProjectButton onClick={openShareModal} />
+            {shouldDisplayPublishButton && (
+              <PublishButton cobranding={cobranding} />
+            )}
 
-        {!isRestrictedTokenMember && (
-          <HistoryToggleButton
-            historyIsOpen={historyIsOpen}
-            onClick={toggleHistoryOpen}
-          />
-        )}
+            {!isRestrictedTokenMember && (
+              <HistoryToggleButton onClick={toggleHistoryOpen} />
+            )}
 
-        <LayoutDropdownButton />
+            <LayoutDropdownButton />
 
-        {!isRestrictedTokenMember && (
-          <ChatToggleButton
-            chatIsOpen={chatIsOpen}
-            onClick={toggleChatOpen}
-            unreadMessageCount={unreadMessageCount}
-          />
+            {!isRestrictedTokenMember && (
+              <ChatToggleButton
+                chatIsOpen={chatIsOpen}
+                onClick={toggleChatOpen}
+                unreadMessageCount={unreadMessageCount}
+              />
+            )}
+          </>
         )}
       </div>
     </header>
