@@ -18,7 +18,7 @@ block content
 				.col-md-8.col-md-offset-2.text-center(ng-cloak)
 					.card(ng-controller="TeamInviteController")
 						.page-header
-							h1.text-centered(ng-non-bindable) #{translate("invited_to_group", {inviterName: inviterName, appName: appName})}
+							h1.text-centered(ng-non-bindable) !{translate("invited_to_group", {inviterName: inviterName, appName: appName}, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
 
 						div(ng-show="view =='restrictedByManagedGroup'")
 							.alert.alert-info

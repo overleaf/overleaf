@@ -42,7 +42,7 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.findByRole('alert')
 
-      cy.findByText(
+      cy.contains(
         'inviter@overleaf.com has invited you to join a group subscription on Overleaf'
       )
 
@@ -73,13 +73,13 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.findByRole('alert')
 
-      cy.findByText(
+      cy.contains(
         'inviter@overleaf.com has invited you to join a group Overleaf subscription. If you join this group, you may not need your individual subscription. Would you like to cancel it?'
       )
 
       cy.findByRole('button', { name: 'Not now' }).click()
 
-      cy.findByText(
+      cy.contains(
         'inviter@overleaf.com has invited you to join a group subscription on Overleaf'
       )
 
@@ -105,7 +105,7 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.findByRole('alert')
 
-      cy.findByText(
+      cy.contains(
         'inviter@overleaf.com has invited you to join a group Overleaf subscription. If you join this group, you may not need your individual subscription. Would you like to cancel it?'
       )
 
@@ -113,7 +113,7 @@ describe('<GroupInvitationNotification />', function () {
 
       cy.wait('@cancelPersonalSubscription')
 
-      cy.findByText(
+      cy.contains(
         'inviter@overleaf.com has invited you to join a group subscription on Overleaf'
       )
 

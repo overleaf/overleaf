@@ -415,8 +415,9 @@ describe('<UserNotifications />', function () {
           await fetchMock.flush(true)
           fetchMock.delete(`/notifications/${notificationGroupInvite._id}`, 200)
           screen.getByRole('alert')
+          screen.getByText('inviter@overleaf.com')
           screen.getByText(
-            /inviter@overleaf.com has invited you to join a group subscription on Overleaf/
+            /has invited you to join a group subscription on Overleaf/
           )
           screen.getByRole('button', { name: 'Join now' })
           screen.getByRole('button', { name: /close/i })

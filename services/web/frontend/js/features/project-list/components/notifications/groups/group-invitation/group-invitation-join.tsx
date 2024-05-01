@@ -1,5 +1,5 @@
 import { Button } from 'react-bootstrap'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import Notification from '../../notification'
 import type { NotificationGroupInvitation } from '../../../../../../../../types/project/dashboard/notification'
 import getMeta from '@/utils/meta'
@@ -30,7 +30,18 @@ export default function GroupInvitationNotificationJoin({
     <Notification
       bsStyle="info"
       onDismiss={dismissGroupInviteNotification}
-      body={t('invited_to_group', { inviterName })}
+      body={
+        <Trans
+          i18nKey="invited_to_group"
+          values={{ inviterName }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
+          components={
+            /* eslint-disable-next-line react/jsx-key */
+            [<span className="team-invite-name" />]
+          }
+        />
+      }
       action={
         <Button
           bsStyle={newNotificationStyle ? null : 'info'}
