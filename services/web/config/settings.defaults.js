@@ -364,7 +364,7 @@ module.exports = {
 
   robotsNoindex: process.env.ROBOTS_NOINDEX === 'true' || false,
 
-  maxEntitiesPerProject: 2000,
+  maxEntitiesPerProject: parseInt(process.env.MAX_ENTITIES_PER_PROJECT || '2000', 10),
 
   projectUploadTimeout: parseInt(
     process.env.PROJECT_UPLOAD_TIMEOUT || '120000',
