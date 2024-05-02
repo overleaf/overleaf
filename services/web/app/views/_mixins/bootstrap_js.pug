@@ -1,3 +1,0 @@
-mixin bootstrap-js(bootstrapVersion)
-	each file in (entrypointScripts(bootstrapVersion === 5 ? 'bootstrap-5' : 'bootstrap-3'))
-		script(type="text/javascript", nonce=scriptNonce, src=file)

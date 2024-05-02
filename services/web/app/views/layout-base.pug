@@ -4,7 +4,7 @@ html(
 	class=(fixedSizeDocument ? 'fixed-size-document' : undefined)
 )
 	- metadata = metadata || {}
-	- let bootstrap5EnabledPage = false
+	- bootstrap5EnabledPage = false
 
 	block entrypointVar
 
@@ -13,7 +13,7 @@ html(
 	head
 		include ./_metadata.pug
 			
-		- const bootstrapVersion = bootstrap5EnabledPage && splitTestVariants['bootstrap-5'] === 'enabled' ? 5 : 3
+		- var bootstrapVersion = bootstrap5EnabledPage && splitTestVariants['bootstrap-5'] === 'enabled' ? 5 : 3
 
 		//- Stylesheet
 		link(rel='stylesheet', href=buildCssPath(getCssThemeModifier(userSettings, brandVariation), bootstrapVersion), id="main-stylesheet")

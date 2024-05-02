@@ -1,7 +1,6 @@
 extends ./layout-base
 
 include ./_mixins/formMessages
-include ./_mixins/bootstrap_js
 
 block entrypointVar
 	- entrypoint = 'marketing'
@@ -22,6 +21,3 @@ block body
 		include _cookie_banner
 
 	!= moduleIncludes("contactModal-marketing", locals)
-
-block prepend foot-scripts
-	+bootstrap-js(bootstrapVersion)
