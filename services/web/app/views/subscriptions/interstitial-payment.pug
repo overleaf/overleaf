@@ -1,6 +1,7 @@
 extends ../layout
 
 include ./plans/_mixins
+include ../_mixins/bootstrap_js
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
@@ -65,3 +66,6 @@ block content
 					| #{translate("continue_with_free_plan")}			
 
 	!= moduleIncludes("contactModalGeneral-marketing", locals)
+
+block prepend foot-scripts
+	+bootstrap-js(bootstrapVersion)
