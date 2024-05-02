@@ -10,6 +10,7 @@ const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const { docIsTooLarge } = require('./Limits')
 const { addTrackedDeletesToContent } = require('./Utils')
+const HistoryConversions = require('./HistoryConversions')
 const OError = require('@overleaf/o-error')
 
 /**
@@ -170,7 +171,8 @@ const ProjectHistoryRedisManager = {
     }
 
     if (historyRangesSupport) {
-      projectUpdate.resyncDocContent.ranges = ranges
+      projectUpdate.resyncDocContent.ranges =
+        HistoryConversions.toHistoryRanges(ranges)
     }
 
     const jsonUpdate = JSON.stringify(projectUpdate)
