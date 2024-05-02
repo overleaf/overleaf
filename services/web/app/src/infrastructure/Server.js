@@ -14,7 +14,6 @@ const HttpPermissionsPolicyMiddleware = require('./HttpPermissionsPolicy')
 const sessionsRedisClient = UserSessionsRedis.client()
 
 const SessionAutostartMiddleware = require('./SessionAutostartMiddleware')
-const SessionStoreManager = require('./SessionStoreManager')
 const AnalyticsManager = require('../Features/Analytics/AnalyticsManager')
 const session = require('express-session')
 const CustomSessionStore = require('./CustomSessionStore')
@@ -180,11 +179,6 @@ webRouter.use(
 if (Features.hasFeature('saas')) {
   webRouter.use(AnalyticsManager.analyticsIdMiddleware)
 }
-
-// patch the session store to generate a validation token for every new session
-SessionStoreManager.enableValidationToken(sessionStore)
-// use middleware to reject all requests with invalid tokens
-webRouter.use(SessionStoreManager.validationMiddleware)
 
 // passport
 webRouter.use(passport.initialize())

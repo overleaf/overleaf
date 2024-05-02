@@ -513,7 +513,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       RateLimiterMiddleware.rateLimit(openProjectRateLimiter, {
         params: ['Project_id'],
       }),
-      AuthenticationController.validateUserSession(),
       AuthorizationMiddleware.ensureUserCanReadProject,
       ProjectController.loadEditor
     )

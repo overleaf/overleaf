@@ -92,8 +92,6 @@ describe('AuthenticationController', function () {
           identifyUser: sinon.stub(),
           getIdsFromSession: sinon.stub().returns({ userId: this.user._id }),
         }),
-        '../../infrastructure/SessionStoreManager': (this.SessionStoreManager =
-          {}),
         '@overleaf/settings': (this.Settings = {
           siteUrl: 'http://www.foo.bar',
           httpAuthUsers: this.httpAuthUsers,
@@ -589,55 +587,6 @@ describe('AuthenticationController', function () {
         this.req.query = {}
         this.SessionManager.isUserLoggedIn = sinon.stub().returns(false)
         this.middleware(this.req, this.res, this.next)
-      })
-
-      it('should redirect to the register or login page', function () {
-        this.AuthenticationController._redirectToLoginOrRegisterPage
-          .calledWith(this.req, this.res)
-          .should.equal(true)
-      })
-    })
-  })
-
-  describe('validateUserSession', function () {
-    beforeEach(function () {
-      this.user = {
-        _id: 'user-id-123',
-        email: 'user@overleaf.com',
-      }
-      this.middleware = this.AuthenticationController.validateUserSession()
-    })
-
-    describe('when the user has a session token', function () {
-      beforeEach(function () {
-        this.req.user = this.user
-        this.SessionStoreManager.hasValidationToken = sinon.stub().returns(true)
-        this.middleware(this.req, this.res, this.next)
-      })
-
-      it('should call the next method in the chain', function () {
-        this.next.called.should.equal(true)
-      })
-    })
-
-    describe('when the user does not have a session token', function () {
-      beforeEach(function () {
-        this.req.session = {
-          user: this.user,
-          destroy: sinon.stub().yields(),
-        }
-        this.req.user = this.user
-        this.AuthenticationController._redirectToLoginOrRegisterPage =
-          sinon.stub()
-        this.req.query = {}
-        this.SessionStoreManager.hasValidationToken = sinon
-          .stub()
-          .returns(false)
-        this.middleware(this.req, this.res, this.next)
-      })
-
-      it('should destroy the current session', function () {
-        this.req.session.destroy.called.should.equal(true)
       })
 
       it('should redirect to the register or login page', function () {
