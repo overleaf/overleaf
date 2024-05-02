@@ -52,6 +52,19 @@ describe('SessionStoreManager', function () {
       )
       expect(this.next).to.be.calledWithExactly()
     })
+    it('should not allow the token to be overwritten', function () {
+      this.req = {
+        sessionID: '123456789',
+        session: { validationToken: 'v1:6789' },
+      }
+      this.SessionStoreManager.validationMiddleware(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.req.session.validationToken = 'try-to-overwrite-token'
+      expect(this.req.session.validationToken).to.equal('v1:6789')
+    })
     it('should destroy the session and return an error when the session id does not match the validation token', function () {
       this.req.sessionID = 'abcdefghijklmnopqrstuvwxyz'
       this.next = sinon.stub()
@@ -67,15 +80,20 @@ describe('SessionStoreManager', function () {
           .and(sinon.match.has('message', 'invalid session'))
       )
     })
-    it('should accept the request when the session does not have a validation token', function () {
-      this.req = { sessionID: '123456789', session: {} }
+    it('should destroy the request when the session does not have a validation token', function () {
+      this.req.session = { destroy: sinon.stub().yields() }
       this.next = sinon.stub()
       this.SessionStoreManager.validationMiddleware(
         this.req,
         this.res,
         this.next
       )
-      expect(this.next).to.be.calledWithExactly()
+      expect(this.req.session.destroy).to.be.called
+      expect(this.next).to.be.calledWithExactly(
+        sinon.match
+          .instanceOf(Error)
+          .and(sinon.match.has('message', 'invalid session'))
+      )
     })
   })
   describe('hasValidationToken', function () {

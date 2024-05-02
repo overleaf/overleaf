@@ -31,9 +31,9 @@ function checkValidationToken(req) {
       }
     } else {
       Metrics.inc('security.session', 1, { status: 'missing' })
+      return false
     }
   }
-  return true // fallback to allowing session
 }
 
 module.exports = {
@@ -53,13 +53,22 @@ module.exports = {
   },
 
   validationMiddleware(req, res, next) {
-    if (!req.session.noSessionCallback) {
+    if (
+      !req.session.noSessionCallback &&
+      req.session.constructor.name !== 'ClientSession'
+    ) {
       if (!checkValidationToken(req)) {
         // the session must exist for it to fail validation
         return req.session.destroy(() => {
           return next(new Error('invalid session'))
         })
       }
+      // add the validation token as a property that cannot be overwritten
+      Object.defineProperty(req.session, 'validationToken', {
+        value: req.session.validationToken,
+        enumerable: true,
+        writable: false,
+      })
     }
     next()
   },

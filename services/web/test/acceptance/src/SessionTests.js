@@ -2,6 +2,8 @@ const { expect } = require('chai')
 const async = require('async')
 const User = require('./helpers/User')
 const redis = require('./helpers/redis')
+const UserSessionsRedis = require('../../../app/src/Features/User/UserSessionsRedis')
+const rclient = UserSessionsRedis.client()
 
 describe('Sessions', function () {
   beforeEach(function (done) {
@@ -479,6 +481,79 @@ describe('Sessions', function () {
           done()
         }
       )
+    })
+  })
+
+  describe('validationToken', function () {
+    const User = require('./helpers/User').promises
+
+    async function tryWithValidationToken(validationToken) {
+      const user = new User()
+      await user.login()
+
+      await checkSessionIsValid(user)
+
+      const [, sid] = user.sessionCookie().value.match(/^s:(.+?)\./)
+      const key = `sess:${sid}`
+      const sess = JSON.parse(await rclient.get(key))
+
+      expect(sess.validationToken).to.equal('v1:' + sid.slice(-4))
+
+      sess.validationToken = validationToken
+      await rclient.set(key, JSON.stringify(sess))
+
+      {
+        // The current code destroys the session and throws an error/500.
+        // Check for login redirect on page reload.
+        await user.doRequest('GET', '/project')
+
+        const { response } = await user.doRequest('GET', '/project')
+        expect(response.statusCode).to.equal(302)
+        expect(response.headers.location).to.equal('/login?')
+      }
+    }
+
+    async function getOtherUsersValidationToken() {
+      const otherUser = new User()
+      await otherUser.login()
+      await checkSessionIsValid(otherUser)
+      const { validationToken } = await otherUser.getSession()
+      expect(validationToken).to.match(/^v1:.{4}$/)
+      return validationToken
+    }
+    async function checkSessionIsValid(user) {
+      const { response } = await user.doRequest('GET', '/project')
+      expect(response.statusCode).to.equal(200)
+    }
+
+    it('should reject the redis value when missing', async function () {
+      await tryWithValidationToken(undefined)
+    })
+    it('should reject the redis value when empty', async function () {
+      await tryWithValidationToken('')
+    })
+    it('should reject the redis value when out of sync', async function () {
+      await tryWithValidationToken(await getOtherUsersValidationToken())
+    })
+    it('should ignore overwrites in app code', async function () {
+      const otherUsersValidationToken = getOtherUsersValidationToken()
+
+      const user = new User()
+      await user.login()
+      await checkSessionIsValid(user)
+
+      const { validationToken: token1 } = await user.getSession()
+      const allowedUpdateValue = 'allowed-update-value'
+      await user.setInSession({
+        validationToken: otherUsersValidationToken,
+        // also update another field to check that the write operation went through
+        allowedUpdate: allowedUpdateValue,
+      })
+      const { validationToken: token2, allowedUpdate } = await user.getSession()
+      expect(allowedUpdate).to.equal(allowedUpdateValue)
+      expect(token1).to.equal(token2)
+
+      await checkSessionIsValid(user)
     })
   })
 })
