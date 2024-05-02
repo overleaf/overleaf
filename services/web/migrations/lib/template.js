@@ -6,6 +6,11 @@ exports.tags = ['server-ce', 'server-pro', 'saas']
 
 exports.migrate = async client => {
   const { db } = client
+  // Are there migrations that need to run before this migration?
+  // Use the following helper to enforce the dependency:
+  //
+  // await Helpers.assertDependency('20200101000000_another_migration')
+
   // await Helpers.addIndexesToCollection(db.wombats, [{ name: 1 }])
 }
 

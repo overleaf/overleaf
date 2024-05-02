@@ -1,3 +1,5 @@
+// @ts-check
+
 const {
   db,
   getCollectionNames,
@@ -42,8 +44,25 @@ async function dropCollection(collectionName) {
   await collection.drop()
 }
 
+/**
+ * Asserts that a dependent migration has run. Throws an error otherwise.
+ *
+ * @param {string} migrationName
+ */
+async function assertDependency(migrationName) {
+  await waitForDb()
+  const migrations = await getCollectionInternal('migrations')
+  const migration = await migrations.findOne({ name: migrationName })
+  if (migration == null) {
+    throw new Error(
+      `Bad migration order: ${migrationName} should run before this migration`
+    )
+  }
+}
+
 module.exports = {
   addIndexesToCollection,
   dropIndexesFromCollection,
   dropCollection,
+  assertDependency,
 }
