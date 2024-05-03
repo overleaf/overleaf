@@ -82,7 +82,7 @@ async function getRangesSnapshot(projectId, version, pathname) {
     throw new Error('Unable to read file contents')
   }
   const trackedChanges = file.getTrackedChanges().asSorted()
-  const comments = file.getComments()
+  const comments = file.getComments().toArray()
   const docUpdaterCompatibleTrackedChanges = []
 
   let trackedDeletionOffset = 0

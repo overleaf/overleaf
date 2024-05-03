@@ -22,6 +22,15 @@ class CommentList {
   }
 
   /**
+   * Returns the contents of this list in an array
+   *
+   * @returns {Comment[]}
+   */
+  toArray() {
+    return Array.from(this)
+  }
+
+  /**
    * Return the length of the comment list
    *
    * @returns {number}

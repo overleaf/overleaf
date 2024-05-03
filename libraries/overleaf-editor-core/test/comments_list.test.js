@@ -128,6 +128,12 @@ describe('commentList', function () {
     ])
   })
 
+  it('should be iterable', function () {
+    const comment = new Comment('comm1', [new Range(5, 10)])
+    const commentList = new CommentList([comment])
+    expect(Array.from(commentList)).to.deep.equal([comment])
+  })
+
   describe('inserting a comment between ranges', function () {
     it('should expand comment on the left', function () {
       const commentList = CommentList.fromRaw([

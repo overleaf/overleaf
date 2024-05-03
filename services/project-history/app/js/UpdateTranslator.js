@@ -9,7 +9,7 @@ import * as OperationsCompressor from './OperationsCompressor.js'
  * @typedef {import('./types').AddDocUpdate} AddDocUpdate
  * @typedef {import('./types').AddFileUpdate} AddFileUpdate
  * @typedef {import('./types').CommentOp} CommentOp
- * @typedef {import('./types').DeleteOp} DeleteCommentUpdate
+ * @typedef {import('./types').DeleteCommentUpdate} DeleteCommentUpdate
  * @typedef {import('./types').DeleteOp} DeleteOp
  * @typedef {import('./types').InsertOp} InsertOp
  * @typedef {import('./types').RetainOp} RetainOp
@@ -266,7 +266,7 @@ class OperationsBuilder {
 
   /**
    * @param {Op} op
-   * @param {Update} update
+   * @param {TextUpdate} update
    * @returns {void}
    */
   addOp(op, update) {

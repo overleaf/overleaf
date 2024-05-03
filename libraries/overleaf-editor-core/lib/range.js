@@ -26,6 +26,16 @@ class Range {
   }
 
   /**
+   * Is this range equal to the given range?
+   *
+   * @param {Range} other
+   * @returns {boolean}
+   */
+  equals(other) {
+    return this.pos === other.pos && this.length === other.length
+  }
+
+  /**
    * @param {Range} range
    * @returns {boolean}
    */

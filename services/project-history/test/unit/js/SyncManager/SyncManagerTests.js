@@ -1,7 +1,10 @@
+// @ts-check
+
 import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import tk from 'timekeeper'
+import { Comment, Range } from 'overleaf-editor-core'
 import { strict as esmock } from 'esmock'
 const { ObjectId } = mongodb
 
@@ -9,26 +12,47 @@ const MODULE_PATH = '../../../../app/js/SyncManager.js'
 
 const timestamp = new Date()
 
-const resyncProjectStructureUpdate = (docs, files) => ({
-  resyncProjectStructure: { docs, files },
+function resyncProjectStructureUpdate(docs, files) {
+  return {
+    resyncProjectStructure: { docs, files },
 
-  meta: {
-    ts: timestamp,
-  },
-})
+    meta: {
+      ts: timestamp,
+    },
+  }
+}
 
-const docContentSyncUpdate = (doc, content) => ({
-  path: doc.path,
-  doc: doc.doc,
+function docContentSyncUpdate(
+  doc,
+  content,
+  ranges = {},
+  resolvedComments = []
+) {
+  return {
+    path: doc.path,
+    doc: doc.doc,
 
-  resyncDocContent: {
-    content,
-  },
+    resyncDocContent: {
+      content,
+      ranges,
+      resolvedComments,
+    },
 
-  meta: {
-    ts: timestamp,
-  },
-})
+    meta: {
+      ts: timestamp,
+    },
+  }
+}
+
+function makeComment(commentId, pos, text) {
+  return {
+    id: commentId,
+    op: { p: pos, c: text, t: commentId },
+    meta: {
+      ts: timestamp,
+    },
+  }
+}
 
 describe('SyncManager', function () {
   beforeEach(async function () {
@@ -54,7 +78,7 @@ describe('SyncManager', function () {
     }
 
     this.UpdateCompressor = {
-      diffAsShareJsOps: sinon.stub(),
+      diffAsShareJsOps: sinon.stub().returns([]),
     }
 
     this.UpdateTranslator = {
@@ -451,22 +475,33 @@ describe('SyncManager', function () {
   describe('expandSyncUpdates', function () {
     beforeEach(function () {
       this.persistedDoc = {
-        doc: { data: { hash: 'abcdef' } },
+        doc: 'doc-id',
         path: 'main.tex',
-        content: 'asdf',
       }
+      this.persistedDocContent = 'the quick brown fox jumps over the lazy fox'
       this.persistedFile = {
-        file: { data: { hash: '123456789a' } },
+        file: 'file-id',
         path: '1.png',
+        _hash: 'abcde',
+      }
+      this.loadedSnapshotDoc = {
+        isEditable: sinon.stub().returns(true),
+        getContent: sinon.stub().returns(this.persistedDocContent),
+        getComments: sinon
+          .stub()
+          .returns({ toArray: sinon.stub().returns([]) }),
+        getHash: sinon.stub().returns(null),
       }
       this.fileMap = {
         'main.tex': {
           isEditable: sinon.stub().returns(true),
-          content: this.persistedDoc.content,
+          getContent: sinon.stub().returns(null),
+          getHash: sinon.stub().returns(null),
+          load: sinon.stub().resolves(this.loadedSnapshotDoc),
         },
         '1.png': {
           isEditable: sinon.stub().returns(false),
-          data: { hash: this.persistedFile.file.data.hash },
+          data: { hash: this.persistedFile._hash },
         },
       }
       this.UpdateTranslator._convertPathname
@@ -777,7 +812,7 @@ describe('SyncManager', function () {
       })
 
       it('preserves other updates', async function () {
-        const update = 'mock-update'
+        const update = { mock: 'update' }
         const updates = [
           update,
           resyncProjectStructureUpdate(
@@ -807,7 +842,7 @@ describe('SyncManager', function () {
             [this.persistedDoc],
             [this.persistedFile]
           ),
-          docContentSyncUpdate(this.persistedDoc, this.persistedDoc.content),
+          docContentSyncUpdate(this.persistedDoc, this.persistedDocContent),
         ]
         await expect(
           this.SyncManager.promises.expandSyncUpdates(
@@ -838,7 +873,7 @@ describe('SyncManager', function () {
             [this.persistedDoc],
             [this.persistedFile]
           ),
-          docContentSyncUpdate(this.persistedDoc, this.persistedDoc.content),
+          docContentSyncUpdate(this.persistedDoc, this.persistedDocContent),
         ]
         this.UpdateCompressor.diffAsShareJsOps.returns([])
         const expandedUpdates =
@@ -859,9 +894,14 @@ describe('SyncManager', function () {
             [this.persistedDoc],
             [this.persistedFile]
           ),
-          docContentSyncUpdate(this.persistedDoc, 'a'),
+          docContentSyncUpdate(
+            this.persistedDoc,
+            'the fox jumps over the lazy dog'
+          ),
         ]
-        this.UpdateCompressor.diffAsShareJsOps.returns([{ d: 'sdf', p: 1 }])
+        this.UpdateCompressor.diffAsShareJsOps.returns([
+          { d: 'quick brown ', p: 4 },
+        ])
         const expandedUpdates =
           await this.SyncManager.promises.expandSyncUpdates(
             this.projectId,
@@ -873,10 +913,10 @@ describe('SyncManager', function () {
         expect(expandedUpdates).to.deep.equal([
           {
             doc: this.persistedDoc.doc,
-            op: [{ d: 'sdf', p: 1 }],
+            op: [{ d: 'quick brown ', p: 4 }],
             meta: {
               pathname: this.persistedDoc.path,
-              doc_length: 4,
+              doc_length: this.persistedDocContent.length,
               resync: true,
               ts: timestamp,
               origin: { kind: 'history-resync' },
@@ -891,14 +931,14 @@ describe('SyncManager', function () {
         const newDoc = {
           path: 'another.tex',
           doc: new ObjectId().toString(),
-          content: 'a',
         }
+        const newDocContent = 'a'
         const updates = [
           resyncProjectStructureUpdate(
             [this.persistedDoc, newDoc],
             [this.persistedFile]
           ),
-          docContentSyncUpdate(newDoc, newDoc.content),
+          docContentSyncUpdate(newDoc, newDocContent),
         ]
         const expandedUpdates =
           await this.SyncManager.promises.expandSyncUpdates(
@@ -935,7 +975,7 @@ describe('SyncManager', function () {
       })
 
       it('skips text updates for docs when hashes match', async function () {
-        this.fileMap['main.tex'].getHash = sinon.stub().returns('special-hash')
+        this.fileMap['main.tex'].getHash.returns('special-hash')
         this.HashManager._getBlobHashFromString.returns('special-hash')
         const updates = [
           resyncProjectStructureUpdate(
@@ -957,7 +997,7 @@ describe('SyncManager', function () {
       })
 
       it('computes text updates for docs when hashes differ', async function () {
-        this.fileMap['main.tex'].getHash = sinon.stub().returns('first-hash')
+        this.fileMap['main.tex'].getHash.returns('first-hash')
         this.HashManager._getBlobHashFromString.returns('second-hash')
         this.UpdateCompressor.diffAsShareJsOps.returns([
           { i: 'test diff', p: 0 },
@@ -983,7 +1023,7 @@ describe('SyncManager', function () {
             op: [{ i: 'test diff', p: 0 }],
             meta: {
               pathname: this.persistedDoc.path,
-              doc_length: 4,
+              doc_length: this.persistedDocContent.length,
               resync: true,
               ts: timestamp,
               origin: { kind: 'history-resync' },
@@ -1002,8 +1042,7 @@ describe('SyncManager', function () {
             ),
             docContentSyncUpdate(this.persistedDoc, 'a'),
           ]
-          const file = { getContent: sinon.stub().returns('stored content') }
-          this.fileMap['main.tex'].load = sinon.stub().resolves(file)
+          this.loadedSnapshotDoc.getContent.returns('stored content')
           this.UpdateCompressor.diffAsShareJsOps.returns([{ d: 'sdf', p: 1 }])
           this.expandedUpdates =
             await this.SyncManager.promises.expandSyncUpdates(
@@ -1030,6 +1069,196 @@ describe('SyncManager', function () {
           ])
           expect(this.extendLock).to.have.been.called
         })
+      })
+    })
+
+    describe('syncing comments', function () {
+      beforeEach(function () {
+        this.loadedSnapshotDoc.getComments.returns({
+          toArray: sinon
+            .stub()
+            .returns([
+              new Comment('comment1', [new Range(4, 5)]),
+              new Comment('comment2', [new Range(10, 5)], true),
+            ]),
+        })
+        this.comments = [
+          makeComment('comment1', 4, 'quick'),
+          makeComment('comment2', 10, 'brown'),
+        ]
+        this.resolvedComments = ['comment2']
+      })
+
+      it('does nothing if comments have not changed', async function () {
+        const updates = [
+          docContentSyncUpdate(
+            this.persistedDoc,
+            this.persistedDocContent,
+            {
+              comments: this.comments,
+            },
+            this.resolvedComments
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([])
+      })
+
+      it('adds missing comments', async function () {
+        this.comments.push(makeComment('comment3', 20, 'jumps'))
+        const updates = [
+          docContentSyncUpdate(
+            this.persistedDoc,
+            this.persistedDocContent,
+            {
+              comments: this.comments,
+            },
+            this.resolvedComments
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([
+          {
+            doc: this.persistedDoc.doc,
+            op: [
+              {
+                c: 'jumps',
+                p: 20,
+                t: 'comment3',
+              },
+            ],
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              pathname: this.persistedDoc.path,
+              resync: true,
+              ts: timestamp,
+              doc_length: this.persistedDocContent.length,
+            },
+          },
+        ])
+      })
+
+      it('deletes extra comments', async function () {
+        this.comments.splice(0, 1)
+        const updates = [
+          docContentSyncUpdate(
+            this.persistedDoc,
+            this.persistedDocContent,
+            {
+              comments: this.comments,
+            },
+            this.resolvedComments
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: this.persistedDoc.path,
+            deleteComment: 'comment1',
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              resync: true,
+              ts: timestamp,
+            },
+          },
+        ])
+      })
+
+      it('updates comments when ranges differ', async function () {
+        this.comments[1] = makeComment('comment2', 16, 'fox')
+        const updates = [
+          docContentSyncUpdate(
+            this.persistedDoc,
+            this.persistedDocContent,
+            {
+              comments: this.comments,
+            },
+            this.resolvedComments
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([
+          {
+            doc: 'doc-id',
+            op: [
+              {
+                c: 'fox',
+                p: 16,
+                t: 'comment2',
+              },
+            ],
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              resync: true,
+              ts: timestamp,
+              pathname: this.persistedDoc.path,
+              doc_length: this.persistedDocContent.length,
+            },
+          },
+        ])
+      })
+
+      it('sets the resolved state when it differs', async function () {
+        this.resolvedComments = ['comment1']
+        const updates = [
+          docContentSyncUpdate(
+            this.persistedDoc,
+            this.persistedDocContent,
+            {
+              comments: this.comments,
+            },
+            this.resolvedComments
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.have.deep.members([
+          {
+            pathname: this.persistedDoc.path,
+            commentId: 'comment1',
+            resolved: true,
+          },
+          {
+            pathname: this.persistedDoc.path,
+            commentId: 'comment2',
+            resolved: false,
+          },
+        ])
       })
     })
   })

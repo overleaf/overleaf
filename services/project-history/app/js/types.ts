@@ -5,6 +5,8 @@ export type Update =
   | RenameUpdate
   | DeleteCommentUpdate
   | SetCommentStateUpdate
+  | ResyncProjectStructureUpdate
+  | ResyncDocContentUpdate
 
 export type UpdateMeta = {
   user_id: string
@@ -13,6 +15,7 @@ export type UpdateMeta = {
   type?: string
   origin?: RawOrigin
   tc?: string
+  resync?: boolean
 }
 
 export type TextUpdate = {
@@ -60,6 +63,32 @@ export type AddFileUpdate = ProjectUpdateBase & {
 export type RenameUpdate = ProjectUpdateBase & {
   pathname: string
   new_pathname: string
+}
+
+export type ResyncProjectStructureUpdate = {
+  resyncProjectStructure: {
+    docs: Doc[]
+    files: File[]
+  }
+  projectHistoryId: string
+  meta: {
+    ts: string
+  }
+}
+
+export type ResyncDocContentUpdate = {
+  resyncDocContent: {
+    content: string
+    version: number
+    ranges?: Ranges
+    resolvedComments?: string[]
+  }
+  projectHistoryId: string
+  path: string
+  doc: string
+  meta: {
+    ts: string
+  }
 }
 
 export type Op = RetainOp | InsertOp | DeleteOp | CommentOp
@@ -145,4 +174,40 @@ export type CommentSnapshot = {
 export type RangesSnapshot = {
   changes: TrackedChangeSnapshot[]
   comments: CommentSnapshot[]
+}
+
+export type Doc = {
+  doc: string
+  path: string
+}
+
+export type File = {
+  file: string
+  url: string
+  path: string
+}
+
+export type Entity = Doc | File
+
+export type Ranges = {
+  comments?: Comment[]
+  changes?: TrackedChange[]
+}
+
+export type Comment = {
+  id: string
+  op: CommentOp
+  metadata: {
+    user_id: string
+    ts: string
+  }
+}
+
+export type TrackedChange = {
+  id: string
+  op: Op
+  metadata: {
+    user_id: string
+    ts: string
+  }
 }
