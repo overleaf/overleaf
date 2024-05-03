@@ -87,6 +87,11 @@ const _buildPortalTemplatesList = affiliations => {
  * @returns {Promise<void>}
  */
 async function projectListPage(req, res, next) {
+  // cleanup redirects at the end of the redirect chain
+  delete req.session.postCheckoutRedirect
+  delete req.session.postLoginRedirect
+  delete req.session.postOnboardingRedirect
+
   // can have two values:
   // - undefined - when there's no "saas" feature or couldn't get subscription data
   // - object - the subscription data object
