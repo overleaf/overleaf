@@ -276,7 +276,7 @@ describe('FileTree Create Folder Flow', function () {
   })
 
   function createFolder(name: string) {
-    cy.findByRole('button', { name: 'New Folder' }).click()
+    cy.findByRole('button', { name: 'New folder' }).click()
     cy.findByRole('textbox').type(name)
     cy.findByRole('button', { name: 'Create' }).click()
   }

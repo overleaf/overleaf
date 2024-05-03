@@ -39,14 +39,16 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
           openFigureModal(FigureModalSource.FILE_UPLOAD, 'file-upload')
         }
       >
-        <Icon type="upload" fw /> Upload from computer
+        <Icon type="upload" fw />
+        {t('upload_from_computer')}
       </ListGroupItem>
       <ListGroupItem
         onClick={() =>
           openFigureModal(FigureModalSource.FILE_TREE, 'current-project')
         }
       >
-        <Icon type="archive" fw /> From project files
+        <Icon type="archive" fw />
+        {t('from_project_files')}
       </ListGroupItem>
       {(hasLinkedProjectFileFeature || hasLinkedProjectOutputFileFeature) && (
         <ListGroupItem
@@ -54,7 +56,8 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
             openFigureModal(FigureModalSource.OTHER_PROJECT, 'other-project')
           }
         >
-          <Icon type="folder-open" fw /> From another project
+          <Icon type="folder-open" fw />
+          {t('from_another_project')}
         </ListGroupItem>
       )}
       {hasLinkUrlFeature && (
@@ -63,7 +66,8 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
             openFigureModal(FigureModalSource.FROM_URL, 'from-url')
           }
         >
-          <Icon type="globe" fw /> From URL
+          <Icon type="globe" fw />
+          {t('from_url')}
         </ListGroupItem>
       )}
     </ToolbarButtonMenu>
