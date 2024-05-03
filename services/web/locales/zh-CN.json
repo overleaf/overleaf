@@ -2129,7 +2129,7 @@
   "what_happens_when_sso_is_enabled": "开启单点登录后会发生什么？",
   "what_should_we_call_you": "我们该怎么称呼你？",
   "when_you_tick_the_include_caption_box": "当您勾选“包含标题”框时，图像将带有占位符标题插入到文档中。 要编辑它，您只需选择占位符文本并键入以将其替换为您自己的文本。",
-  "why_latex": "为什么 LaTeX?",
+  "why_latex": "为何用 LaTeX?",
   "wide": "宽松的",
   "will_need_to_log_out_from_and_in_with": "您需要从 <b>__email1__</b> 帐户<b>注销</b>，然后使用 <b>__email2__</b> 登录。",
   "with_premium_subscription_you_also_get": "通过Overleaf Premium订阅，您还可以获得",
