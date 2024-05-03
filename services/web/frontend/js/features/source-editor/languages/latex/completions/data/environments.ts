@@ -18,6 +18,12 @@ export const environments = new Map([
 \\end{array}`,
   ],
   ['center', snippet('center')],
+  [
+    'description',
+    `\\begin{description}
+\t\\item[$1] $2
+\\end{description}`,
+  ],
   ['document', snippetNoIndent('document')],
   ['equation', snippet('equation')],
   ['equation*', snippet('equation*')],

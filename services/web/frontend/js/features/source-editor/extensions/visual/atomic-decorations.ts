@@ -51,6 +51,9 @@ import { EditableInlineGraphicsWidget } from './visual-widgets/editable-inline-g
 import {
   CloseBrace,
   OpenBrace,
+  CloseBracket,
+  OpenBracket,
+  OptionalArgument,
   ShortTextArgument,
   TextArgument,
 } from '../../lezer-latex/latex.terms.mjs'
@@ -74,6 +77,7 @@ import {
   validateParsedTable,
 } from '../../components/table-generator/utils'
 import { debugConsole } from '@/utils/debugging'
+import { DescriptionItemWidget } from './visual-widgets/description-item'
 
 type Options = {
   previewByPath: (path: string) => PreviewPath | null
@@ -101,13 +105,17 @@ function decorateArgumentBraces(
   argumentNode: SyntaxNode | null | undefined,
   start: number,
   decorateEmptyArguments = false,
-  endWidget?: WidgetType
+  endWidget?: WidgetType,
+  braceTypes = {
+    open: OpenBrace,
+    close: CloseBrace,
+  }
 ): Range<Decoration>[] {
   if (!argumentNode) {
     return []
   }
-  const openBrace = argumentNode.getChild('OpenBrace')
-  const closeBrace = argumentNode.getChild('CloseBrace')
+  const openBrace = argumentNode.getChild(braceTypes.open)
+  const closeBrace = argumentNode.getChild(braceTypes.close)
 
   if (openBrace && closeBrace) {
     if (
@@ -120,10 +128,9 @@ function decorateArgumentBraces(
           widget: startWidget,
         }).range(start, openBrace.to),
 
-        Decoration.replace({ widget: endWidget }).range(
-          closeBrace.from,
-          closeBrace.to
-        ),
+        Decoration.replace({
+          widget: endWidget,
+        }).range(closeBrace.from, closeBrace.to),
       ]
     }
   }
@@ -377,6 +384,7 @@ export const atomicDecorations = (options: Options) => {
             switch (envName) {
               case 'itemize':
               case 'enumerate':
+              case 'description':
                 startListEnvironment(envName)
                 listDepth++
                 break
@@ -480,6 +488,7 @@ export const atomicDecorations = (options: Options) => {
             switch (envName) {
               case 'itemize':
               case 'enumerate':
+              case 'description':
                 if (currentListEnvironment === envName) {
                   endListEnvironment()
                 }
@@ -963,16 +972,51 @@ export const atomicDecorations = (options: Options) => {
               state.sliceDoc(line.from, nodeRef.from)
             )
             const from = onlySpaceBeforeNode ? line.from : nodeRef.from
-            decorations.push(
-              Decoration.replace({
-                widget: new ItemWidget(
-                  currentListEnvironment || 'document',
-                  currentOrdinal,
-                  listDepth
-                ),
-              }).range(from, nodeRef.to)
-            )
-            return false
+
+            if (currentListEnvironment === 'description') {
+              const argumentNode = nodeRef.node.getChild(OptionalArgument)
+              const to = argumentNode ? argumentNode.from : nodeRef.to
+
+              const onlySpaceAfterNode =
+                !argumentNode &&
+                /^\s*$/.test(state.sliceDoc(nodeRef.to, line.to))
+
+              if (!onlySpaceAfterNode) {
+                // decorate the \item command and subsequent whitespace, if there is other content on the line
+                decorations.push(
+                  Decoration.replace({
+                    widget: new DescriptionItemWidget(listDepth),
+                  }).range(from, to)
+                )
+              }
+
+              if (argumentNode) {
+                // decorate the optional argument
+                const decorateBrackets = shouldDecorate(state, argumentNode)
+
+                decorations.push(
+                  ...decorateArgumentBraces(
+                    new BraceWidget(decorateBrackets ? '' : '['),
+                    argumentNode,
+                    from,
+                    false,
+                    new BraceWidget(decorateBrackets ? '' : ']'),
+                    { open: OpenBracket, close: CloseBracket }
+                  )
+                )
+              }
+            } else {
+              decorations.push(
+                Decoration.replace({
+                  widget: new ItemWidget(
+                    currentListEnvironment || 'document',
+                    currentOrdinal,
+                    listDepth
+                  ),
+                }).range(from, nodeRef.to)
+              )
+              return false
+            }
           }
         } else if (nodeRef.type.is('NewTheoremCommand')) {
           const result = parseTheoremArguments(state, nodeRef.node)

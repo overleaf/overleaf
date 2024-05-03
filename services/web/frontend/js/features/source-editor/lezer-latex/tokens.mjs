@@ -744,6 +744,7 @@ const otherKnownEnvNames = {
   enumerate: ListEnvName,
   itemize: ListEnvName,
   table: TableEnvName,
+  description: ListEnvName,
 }
 
 export const specializeEnvName = (name, terms) => {

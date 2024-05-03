@@ -155,6 +155,7 @@ export const LaTeXLanguage = LRLanguage.define({
         'DocumentClass/OptionalArgument/ShortOptionalArg/Normal':
           t.attributeValue,
         'DocumentClass/ShortTextArgument/ShortArg/Normal': t.typeName,
+        'ListEnvironment/BeginEnv/OptionalArgument/...': t.monospace,
         Number: t.number,
         OpenBrace: t.brace,
         CloseBrace: t.brace,
@@ -193,6 +194,7 @@ export const LaTeXLanguage = LRLanguage.define({
         'BareFilePathArgument/SpaceDelimitedLiteralArgContent':
           t.attributeValue,
         TrailingContent: t.comment,
+        'Item/OptionalArgument/ShortOptionalArg/...': t.strong,
         // TODO: t.strong, t.emphasis
       }),
     ],

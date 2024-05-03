@@ -354,7 +354,7 @@ KnownCommand {
         CenteringCtrlSeq
     } |
     Item {
-        ItemCtrlSeq optionalWhitespace?
+        ItemCtrlSeq OptionalArgument? optionalWhitespace?
     } |
     Maketitle {
         MaketitleCtrlSeq optionalWhitespace?

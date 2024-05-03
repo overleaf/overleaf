@@ -10,8 +10,10 @@ import {
   ancestorListType,
   toggleListForRanges,
   unwrapBulletList,
+  unwrapDescriptionList,
   unwrapNumberedList,
   wrapInBulletList,
+  wrapInDescriptionList,
   wrapInNumberedList,
 } from './lists'
 import { snippet } from '@codemirror/autocomplete'
@@ -114,6 +116,8 @@ export const indentDecrease: Command = view => {
       return unwrapBulletList(view)
     case 'enumerate':
       return unwrapNumberedList(view)
+    case 'description':
+      return unwrapDescriptionList(view)
     default:
       return false
   }
@@ -136,6 +140,8 @@ export const indentIncrease: Command = view => {
       return wrapInBulletList(view)
     case 'enumerate':
       return wrapInNumberedList(view)
+    case 'description':
+      return wrapInDescriptionList(view)
     default:
       return false
   }

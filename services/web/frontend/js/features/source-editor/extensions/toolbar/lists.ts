@@ -343,5 +343,7 @@ export const toggleListForRanges =
 
 export const wrapInBulletList = wrapRangesInList('itemize')
 export const wrapInNumberedList = wrapRangesInList('enumerate')
+export const wrapInDescriptionList = wrapRangesInList('description')
 export const unwrapBulletList = unwrapRangesFromList('itemize')
 export const unwrapNumberedList = unwrapRangesFromList('enumerate')
+export const unwrapDescriptionList = unwrapRangesFromList('description')

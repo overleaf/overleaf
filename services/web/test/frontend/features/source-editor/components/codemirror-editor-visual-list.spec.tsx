@@ -285,4 +285,32 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
       [' foo', ' bar', ' baz', ' ', ' test'].join('')
     )
   })
+
+  it('decorates a description list', function () {
+    const content = [
+      '\\begin{description}',
+      '\\item[foo] Bar',
+      '\\item Test',
+      '\\end{description}',
+    ].join('\n')
+    mountEditor(content)
+
+    cy.get('.cm-line').eq(1).click()
+
+    cy.get('.cm-content').should('have.text', ['foo Bar', 'Test'].join(''))
+
+    cy.get('.cm-line').eq(1).type('{Enter}baz')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      ['foo Bar', 'Test', '[baz] '].join('')
+    )
+
+    cy.get('.cm-line').eq(2).type('{rightArrow}{rightArrow}Test')
+
+    cy.get('.cm-content').should(
+      'have.text',
+      ['foo Bar', 'Test', 'baz Test'].join('')
+    )
+  })
 })

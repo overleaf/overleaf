@@ -12,6 +12,7 @@ import {
   indentIncrease,
 } from '../toolbar/commands'
 import { createListItem } from '@/features/source-editor/extensions/visual/utils/list-item'
+import { getListType } from '../../utils/tree-operations/lists'
 
 /**
  * A keymap which provides behaviours for the visual editor,
@@ -37,7 +38,7 @@ export const visualKeymap = Prec.highest(
 
               if (line.number === endLine.number - 1) {
                 // last item line
-                if (line.text.trim() === '\\item') {
+                if (/^\\item(\[])?$/.test(line.text.trim())) {
                   // no content on this line
 
                   // outside the end of the current list
@@ -85,8 +86,7 @@ export const visualKeymap = Prec.highest(
               }
 
               // handle a list item that isn't at the end of a list
-
-              const insert = '\n' + createListItem(state, from)
+              let insert = '\n' + createListItem(state, from)
 
               const countWhitespaceAfterPosition = (pos: number) => {
                 const line = state.doc.lineAt(pos)
@@ -95,9 +95,16 @@ export const visualKeymap = Prec.highest(
                 return matches ? matches[1].length : 0
               }
 
-              // move the cursor past any whitespace on the new line
-              const pos =
-                from + insert.length + countWhitespaceAfterPosition(from)
+              let pos: number
+
+              if (getListType(state, listNode) === 'description') {
+                insert = insert.replace(/\\item $/, '\\item[] ')
+                // position the cursor inside the square brackets
+                pos = from + insert.length - 2
+              } else {
+                // move the cursor past any whitespace on the new line
+                pos = from + insert.length + countWhitespaceAfterPosition(from)
+              }
 
               handled = true
 

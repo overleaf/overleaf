@@ -16,6 +16,7 @@ export const visualHighlightStyle = syntaxHighlighting(
     { tag: tags.string, class: 'ol-cm-monospace' },
     { tag: tags.punctuation, class: 'ol-cm-punctuation' },
     { tag: tags.literal, class: 'ol-cm-monospace' },
+    { tag: tags.strong, class: 'ol-cm-strong' },
     {
       tag: tags.monospace,
       fontFamily: 'var(--source-font-family)',
@@ -69,6 +70,9 @@ const mainVisualTheme = EditorView.theme({
     fontStyle: 'normal',
     fontVariant: 'normal',
     textDecoration: 'none',
+  },
+  '.ol-cm-strong': {
+    fontWeight: 700,
   },
   '.ol-cm-punctuation': {
     fontFamily: 'var(--source-font-family)',
@@ -184,7 +188,7 @@ const mainVisualTheme = EditorView.theme({
   '.ol-cm-begin-theorem > .ol-cm-environment-padding:first-of-type': {
     flex: 0,
   },
-  '.ol-cm-item': {
+  '.ol-cm-item, .ol-cm-description-item': {
     paddingInlineStart: 'calc(var(--list-depth) * 2ch)',
   },
   '.ol-cm-item::before': {

@@ -49,7 +49,10 @@ const chooseTargetPosition = (
     targetNode = node
   } else if (node.type.is('ItemCtrlSeq')) {
     targetNode = node.parent
-  } else if (node.type.is('Whitespace')) {
+  } else if (
+    node.type.is('Whitespace') &&
+    node.nextSibling?.type.is('Command')
+  ) {
     targetNode = node.nextSibling?.firstChild?.firstChild
   }
 

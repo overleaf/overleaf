@@ -257,7 +257,7 @@ export const withinFormattingCommand = (state: EditorState) => {
   }
 }
 
-export type ListEnvironmentName = 'itemize' | 'enumerate'
+export type ListEnvironmentName = 'itemize' | 'enumerate' | 'description'
 
 export const listDepthForNode = (node: SyntaxNode) => {
   let depth = 0
