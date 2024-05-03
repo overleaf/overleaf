@@ -12,6 +12,7 @@ const {
   handleAdminDomainRedirect,
 } = require('../Authorization/AuthorizationMiddleware')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -97,7 +98,18 @@ async function tokenAccessPage(req, res, next) {
       }
     }
 
-    res.render('project/token/access', {
+    const { variant } = await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'token-access-page'
+    )
+
+    const view =
+      variant === 'react'
+        ? 'project/token/access-react'
+        : 'project/token/access'
+
+    res.render(view, {
       postUrl: makePostUrl(token),
     })
   } catch (err) {

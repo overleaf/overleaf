@@ -1,0 +1,124 @@
+import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
+import withErrorBoundary from '@/infrastructure/error-boundary'
+import { GenericErrorBoundaryFallback } from '@/shared/components/generic-error-boundary-fallback'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import getMeta from '@/utils/meta'
+import { postJSON } from '@/infrastructure/fetch-json'
+import { debugConsole } from '@/utils/debugging'
+import { useLocation } from '@/shared/hooks/use-location'
+import {
+  V1ImportData,
+  V1ImportDataScreen,
+} from '@/features/token-access/components/v1-import-data-screen'
+import { AccessAttemptScreen } from '@/features/token-access/components/access-attempt-screen'
+import {
+  RequireAcceptData,
+  RequireAcceptScreen,
+} from '@/features/token-access/components/require-accept-screen'
+import Icon from '@/shared/components/icon'
+
+type Mode = 'access-attempt' | 'v1Import' | 'requireAccept'
+
+function TokenAccessRoot() {
+  const [mode, setMode] = useState<Mode>('access-attempt')
+  const [inflight, setInflight] = useState(false)
+  const [accessError, setAccessError] = useState<string | boolean>(false)
+  const [v1ImportData, setV1ImportData] = useState<V1ImportData>()
+  const [requireAcceptData, setRequireAcceptData] =
+    useState<RequireAcceptData>()
+  const [loadingScreenBrandHeight, setLoadingScreenBrandHeight] =
+    useState('0px')
+  const location = useLocation()
+
+  const sendPostRequest = useCallback(
+    (confirmedByUser = false) => {
+      setInflight(true)
+
+      postJSON(getMeta('ol-postUrl'), {
+        body: {
+          confirmedByUser,
+          tokenHashPrefix: document.location.hash,
+        },
+      })
+        .then(async data => {
+          setAccessError(false)
+
+          if (data.redirect) {
+            location.replace(data.redirect)
+          } else if (data.v1Import) {
+            setMode('v1Import')
+            setV1ImportData(data.v1Import)
+          } else if (data.requireAccept) {
+            setMode('requireAccept')
+            setRequireAcceptData(data.requireAccept)
+          } else {
+            debugConsole.warn(
+              'invalid data from server in success response',
+              data
+            )
+            setAccessError(true)
+          }
+        })
+        .catch(error => {
+          debugConsole.warn('error response from server', error)
+          setAccessError(error.response?.status === 404 ? 'not_found' : 'error')
+        })
+        .finally(() => {
+          setInflight(false)
+        })
+    },
+    [location]
+  )
+
+  const postedRef = useRef(false)
+  useEffect(() => {
+    if (!postedRef.current) {
+      postedRef.current = true
+      sendPostRequest()
+      setTimeout(() => {
+        setLoadingScreenBrandHeight('20%')
+      }, 500)
+    }
+  }, [sendPostRequest])
+
+  const { isReady } = useWaitForI18n()
+
+  if (!isReady) {
+    return null
+  }
+
+  return (
+    <div className="full-size">
+      <div>
+        <a
+          href="/project"
+          // TODO: class name
+          style={{ fontSize: '2rem', marginLeft: '1rem', color: '#ddd' }}
+        >
+          <Icon type="arrow-left" />
+        </a>
+      </div>
+
+      {mode === 'access-attempt' && (
+        <AccessAttemptScreen
+          accessError={accessError}
+          inflight={inflight}
+          loadingScreenBrandHeight={loadingScreenBrandHeight}
+        />
+      )}
+
+      {mode === 'v1Import' && v1ImportData && (
+        <V1ImportDataScreen v1ImportData={v1ImportData} />
+      )}
+
+      {mode === 'requireAccept' && requireAcceptData && (
+        <RequireAcceptScreen
+          requireAcceptData={requireAcceptData}
+          sendPostRequest={sendPostRequest}
+        />
+      )}
+    </div>
+  )
+}
+
+export default withErrorBoundary(TokenAccessRoot, GenericErrorBoundaryFallback)

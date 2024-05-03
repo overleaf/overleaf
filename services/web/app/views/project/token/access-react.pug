@@ -1,0 +1,16 @@
+extends ../../layout-marketing
+
+block entrypointVar
+	- entrypoint = 'pages/token-access'
+
+block vars
+	- var suppressFooter = true
+	- var suppressCookieBanner = true
+	- var suppressSkipToContent = true
+		
+block append meta
+	meta(name="ol-postUrl" data-type="string" content=postUrl)
+	meta(name="ol-user" data-type="json" content=user)
+
+block content
+	div#token-access-page

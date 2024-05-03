@@ -66,6 +66,12 @@ describe('TokenAccessController', function () {
       },
     }
 
+    this.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
+
     this.TokenAccessController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -77,6 +83,7 @@ describe('TokenAccessController', function () {
         '../Authorization/AuthorizationMiddleware':
           this.AuthorizationMiddleware,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../Errors/Errors': (this.Errors = { NotFoundError: sinon.stub() }),
       },
     })

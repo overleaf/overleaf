@@ -88,6 +88,7 @@ describe('<ShareProjectModal/>', function () {
   beforeEach(function () {
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
       assign: sinon.stub(),
+      replace: sinon.stub(),
       reload: sinon.stub(),
     })
     fetchMock.get('/user/contacts', { contacts })

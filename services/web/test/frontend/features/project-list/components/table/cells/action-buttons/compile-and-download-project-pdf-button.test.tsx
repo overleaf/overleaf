@@ -17,6 +17,7 @@ describe('<CompileAndDownloadProjectPDFButton />', function () {
     assignStub = sinon.stub()
     locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
       assign: assignStub,
+      replace: sinon.stub(),
       reload: sinon.stub(),
     })
     render(

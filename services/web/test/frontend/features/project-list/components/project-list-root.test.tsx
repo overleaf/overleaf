@@ -57,6 +57,7 @@ describe('<ProjectListRoot />', function () {
     assignStub = sinon.stub()
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
       assign: assignStub,
+      replace: sinon.stub(),
       reload: sinon.stub(),
     })
   })

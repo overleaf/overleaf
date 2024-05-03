@@ -31,6 +31,7 @@ describe('<ChangePlanModal />', function () {
     reloadStub = sinon.stub()
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
       assign: sinon.stub(),
+      replace: sinon.stub(),
       reload: reloadStub,
     })
   })

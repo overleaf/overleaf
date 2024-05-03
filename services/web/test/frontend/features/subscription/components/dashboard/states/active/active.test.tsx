@@ -196,6 +196,7 @@ describe('<ActiveSubscription />', function () {
     beforeEach(function () {
       this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
         assign: assignStub,
+        replace: sinon.stub(),
         reload: reloadStub,
       })
     })

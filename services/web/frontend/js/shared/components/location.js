@@ -5,6 +5,10 @@ export const location = {
     // eslint-disable-next-line no-restricted-syntax
     window.location.assign(url)
   },
+  replace(url) {
+    // eslint-disable-next-line no-restricted-syntax
+    window.location.replace(url)
+  },
   reload() {
     // eslint-disable-next-line no-restricted-syntax
     window.location.reload()

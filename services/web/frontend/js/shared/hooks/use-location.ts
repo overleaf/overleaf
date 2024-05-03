@@ -14,11 +14,20 @@ export const useLocation = () => {
     [isMounted]
   )
 
+  const replace = useCallback(
+    url => {
+      if (isMounted.current) {
+        location.replace(url)
+      }
+    },
+    [isMounted]
+  )
+
   const reload = useCallback(() => {
     if (isMounted.current) {
       location.reload()
     }
   }, [isMounted])
 
-  return useMemo(() => ({ assign, reload }), [assign, reload])
+  return useMemo(() => ({ assign, replace, reload }), [assign, replace, reload])
 }
