@@ -499,6 +499,7 @@ async function _getSplitTest(name) {
 }
 
 module.exports = {
+  getPercentile,
   getAssignment: callbackify(getAssignment),
   getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),
