@@ -48,10 +48,7 @@ lint:
 lint_fix:
 	$(RUN_LINTING) lint:fix
 
-build_types:
-	$(RUN_LINTING_MONOREPO) --workspaces --if-present types:build
-
-typecheck: build_types
+typecheck:
 	$(RUN_LINTING) types:check
 
 test: format lint typecheck test_unit test_acceptance

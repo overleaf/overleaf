@@ -13,10 +13,8 @@
     "verror"
   ],
   "main": "index.cjs",
-  "types": "types/index.d.cts",
   "files": [
-    "index.cjs",
-    "types/index.d.cts"
+    "index.cjs"
   ],
   "scripts": {
     "build": "npm run --silent test",
@@ -27,9 +25,7 @@
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "author": "Overleaf (https://www.overleaf.com)",
   "license": "MIT",

@@ -1,4 +1,3 @@
-// @ts-check
 /**
  * The purpose of this class is to track a set of inserts and deletes to a document, like
  * track changes in Word. We store these as a set of ShareJs style ranges:

@@ -3,7 +3,6 @@
   "version": "3.0.0",
   "description": "",
   "main": "index.js",
-  "types": "./types/index.d.ts",
   "scripts": {
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
@@ -12,9 +11,7 @@
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "author": "",
   "license": "AGPL-3.0-only",

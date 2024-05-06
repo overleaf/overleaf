@@ -1,7 +1,7 @@
 // @ts-check
 'use strict'
 
-/** @typedef {import('overleaf-editor-core/types').Snapshot} Snapshot */
+/** @typedef {import('overleaf-editor-core').Snapshot} Snapshot */
 
 const Archive = require('archiver')
 const BPromise = require('bluebird')

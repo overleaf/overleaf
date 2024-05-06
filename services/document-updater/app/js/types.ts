@@ -1,4 +1,4 @@
-import { TrackingPropsRawData } from 'overleaf-editor-core/types/lib/types'
+import { TrackingPropsRawData } from 'overleaf-editor-core/lib/types'
 
 /**
  * An update coming from the editor

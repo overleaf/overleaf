@@ -7,7 +7,6 @@
     "url": "https://github.com/overleaf/metrics-module.git"
   },
   "main": "index.js",
-  "types": "types/index.d.ts",
   "dependencies": {
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.1.0",
     "@google-cloud/profiler": "^6.0.0",
@@ -38,9 +37,7 @@
     "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
     "test:ci": "npm run test:unit",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "peerDependencies": {
     "@overleaf/logger": "*"

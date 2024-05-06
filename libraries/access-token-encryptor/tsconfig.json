@@ -1,9 +1,5 @@
 {
   "extends": "../../tsconfig.backend.json",
-  "compilerOptions": {
-    "declaration": true,
-    "outDir": "types"
-  },
   "include": [
     "**/*.js",
     "**/*.cjs"

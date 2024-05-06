@@ -96,6 +96,9 @@ module.exports = class RedisLocker {
     return `locked:host=${HOST}:pid=${PID}:random=${RND}:time=${time}:count=${COUNT++}`
   }
 
+  /**
+   * @param {Callback} callback
+   */
   tryLock(id, callback) {
     if (callback == null) {
       callback = function () {}
@@ -135,6 +138,9 @@ module.exports = class RedisLocker {
     )
   }
 
+  /**
+   * @param {Callback} callback
+   */
   getLock(id, callback) {
     if (callback == null) {
       callback = function () {}
@@ -166,6 +172,9 @@ module.exports = class RedisLocker {
     attempt()
   }
 
+  /**
+   * @param {Callback} callback
+   */
   checkLock(id, callback) {
     if (callback == null) {
       callback = function () {}
@@ -186,6 +195,9 @@ module.exports = class RedisLocker {
     })
   }
 
+  /**
+   * @param {Callback} callback
+   */
   releaseLock(id, lockValue, callback) {
     const key = this.getKey(id)
     return this.rclient.eval(

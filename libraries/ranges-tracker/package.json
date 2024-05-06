@@ -2,7 +2,6 @@
   "name": "@overleaf/ranges-tracker",
   "description": "Shared logic for syncing comments and tracked changes with operational transforms",
   "main": "index.cjs",
-  "types": "types/index.d.cts",
   "files": [
     "index.cjs",
     "types"
@@ -17,9 +16,7 @@
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "devDependencies": {
     "mocha": "^10.2.0",

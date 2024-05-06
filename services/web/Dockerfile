@@ -35,9 +35,7 @@ FROM deps-prod as deps
 ENV CYPRESS_INSTALL_BINARY=0
 
 COPY tsconfig.backend.json /overleaf/
-RUN cd /overleaf \
- && npm install \
- && npm run --workspaces --if-present types:build
+RUN cd /overleaf && npm install
 
 # the web image with only production dependencies but no webpack production build, for development
 FROM deps-prod as app-only

@@ -7,7 +7,6 @@
     "url": "https://github.com/overleaf/overleaf"
   },
   "main": "index.js",
-  "types": "types/index.d.ts",
   "license": "AGPL-3.0-only",
   "version": "3.1.1",
   "scripts": {
@@ -18,9 +17,7 @@
     "lint:fix": "eslint --fix --ext .js --ext .cjs .",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "dependencies": {
     "@google-cloud/logging-bunyan": "^5.0.0",

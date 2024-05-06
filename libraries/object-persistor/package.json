@@ -3,7 +3,6 @@
   "version": "1.0.2",
   "description": "Module for storing objects in multiple backends, with fallback on 404 to assist migration between them",
   "main": "index.js",
-  "types": "types/index.d.ts",
   "scripts": {
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
@@ -12,9 +11,7 @@
     "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
     "test:ci": "npm run test:unit",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",

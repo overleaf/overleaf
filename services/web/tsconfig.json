@@ -12,7 +12,9 @@
     "skipLibCheck": true /* Skip type checking of declaration files. */,
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
     "paths": {
-      "@/*": ["./frontend/js/*"]
+      "@/*": ["./frontend/js/*"],
+      "@overleaf/o-error": ["../../libraries/o-error"],
+      "@overleaf/ranges-tracker": ["../../libraries/ranges-tracker"]
     },
     "types": ["cypress", "@testing-library/cypress"]
   },

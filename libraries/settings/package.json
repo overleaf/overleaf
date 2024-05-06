@@ -4,7 +4,6 @@
   "version": "3.0.0",
   "repository": "overleaf/settings-module",
   "main": "index.js",
-  "types": "types/index.d.ts",
   "scripts": {
     "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
     "lint:fix": "eslint --fix --ext .js --ext .cjs .",
@@ -13,9 +12,7 @@
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
     "test:ci": "npm run test:unit",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
-    "types:build": "[ -d types ] || tsc --noEmit false --emitDeclarationOnly",
-    "types:check": "tsc --noEmit",
-    "types:rebuild": "rm -rf types && npm run types:build"
+    "types:check": "tsc --noEmit"
   },
   "devDependencies": {
     "mocha": "^10.2.0",
