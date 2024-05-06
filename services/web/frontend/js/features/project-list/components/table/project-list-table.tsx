@@ -51,6 +51,7 @@ function ProjectListTable() {
             <input
               type="checkbox"
               id="project-list-table-select-all"
+              autoComplete="off"
               onChange={handleAllProjectsCheckboxChange}
               checked={
                 visibleProjects.length === selectedProjects.length &&

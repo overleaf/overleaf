@@ -284,6 +284,7 @@ export function ChangeToGroupModal() {
                     <input
                       id="usage"
                       type="checkbox"
+                      autoComplete="off"
                       checked={groupPlanToChangeToUsage === 'educational'}
                       onChange={e => {
                         if (e.target.checked) {

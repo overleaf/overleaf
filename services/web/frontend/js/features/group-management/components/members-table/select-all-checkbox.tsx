@@ -36,6 +36,7 @@ export default function SelectAllCheckbox() {
         className="select-all"
         id="select-all"
         type="checkbox"
+        autoComplete="off"
         onChange={handleSelectAllNonManagedClick}
         checked={selectedUsers.length === nonManagedUsers.length}
       />

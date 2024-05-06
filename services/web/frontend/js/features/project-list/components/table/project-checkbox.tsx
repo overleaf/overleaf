@@ -15,6 +15,7 @@ export const ProjectCheckbox = memo<{ projectId: string }>(({ projectId }) => {
     <input
       type="checkbox"
       id={`select-project-${projectId}`}
+      autoComplete="off"
       checked={selectedProjectIds.has(projectId)}
       onChange={handleCheckboxChange}
       data-project-id={projectId}

@@ -175,6 +175,7 @@ export function ManagersTable({
                         className="select-all"
                         id="select-all"
                         type="checkbox"
+                        autoComplete="off"
                         onChange={handleSelectAllClick}
                         checked={selectedUsers.length === users.length}
                       />

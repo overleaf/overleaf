@@ -19,6 +19,7 @@ function TrackChangesToggle({
         id={`input-switch-${id}`}
         disabled={disabled}
         type="checkbox"
+        autoComplete="off"
         className="input-switch-hidden-input"
         onChange={handleToggle}
         checked={value}

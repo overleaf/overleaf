@@ -49,6 +49,7 @@ export default function SelectUserCheckbox({
             className="select-item"
             id={`select-user-${user.email}`}
             type="checkbox"
+            autoComplete="off"
             checked={selected}
             onChange={e => handleSelectUser(e, user)}
           />
