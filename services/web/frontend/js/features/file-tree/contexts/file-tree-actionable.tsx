@@ -58,6 +58,7 @@ const FileTreeActionableContext = createContext<
       canRename: boolean
       canCreate: boolean
       parentFolderId: string
+      selectedFileName: string | null
       isDuplicate: (parentFolderId: string, name: string) => boolean
       startRenaming: any
       finishRenaming: any
@@ -386,6 +387,16 @@ export const FileTreeActionableProvider: FC<{
     )
   }, [fileTreeData, selectedEntityIds, isRootFolderSelected])
 
+  // return the name of the selected file or doc if there is only one selected
+  const selectedFileName = useMemo(() => {
+    if (selectedEntityIds.size === 1) {
+      const [selectedEntityId] = selectedEntityIds
+      const selectedEntity = findInTree(fileTreeData, selectedEntityId)
+      return selectedEntity?.entity?.name
+    }
+    return null
+  }, [fileTreeData, selectedEntityIds])
+
   const finishCreatingEntity = useCallback(
     entity => {
       const error = validateCreate(fileTreeData, parentFolderId, entity)
@@ -498,6 +509,7 @@ export const FileTreeActionableProvider: FC<{
     canCreate: selectedEntityIds.size < 2,
     ...state,
     parentFolderId,
+    selectedFileName,
     isDuplicate,
     startRenaming,
     finishRenaming,
