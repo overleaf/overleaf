@@ -87,3 +87,22 @@
     .responsive-invisibility();
   }
 }
+
+// Container visibility utilities
+//if these dont appear to work, ensure that the parent container has their container-type set
+@container (max-width: @screen-xs-min) {
+  .hidden-xs-container {
+    .responsive-invisibility();
+  }
+}
+@container (max-width: @screen-sm-min) {
+  .hidden-sm-container {
+    .responsive-invisibility();
+  }
+}
+
+@container (max-width: @screen-md-min) {
+  .hidden-md-container {
+    .responsive-invisibility();
+  }
+}

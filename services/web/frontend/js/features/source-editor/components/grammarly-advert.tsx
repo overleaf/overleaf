@@ -84,7 +84,7 @@ export default function GrammarlyAdvert() {
     <Notification
       action={actions}
       ariaLive="polite"
-      className="editor-notification ol-overlay"
+      className="editor-notification ol-overlay hidden-xs-container"
       content={
         <div>
           <p>
