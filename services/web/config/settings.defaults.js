@@ -903,7 +903,7 @@ module.exports = {
     editorToolbarButtons: [],
     sourceEditorExtensions: [],
     sourceEditorComponents: [],
-    pdfLogsComponents: [],
+    pdfLogEntryComponents: [],
     sourceEditorCompletionSources: [],
     sourceEditorSymbolPalette: [],
     sourceEditorToolbarComponents: [],

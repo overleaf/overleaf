@@ -23,6 +23,8 @@ function PdfLogEntry({
   contentDetails,
   onSourceLocationClick,
   onClose,
+  index,
+  logEntry,
 }) {
   if (ruleId && HumanReadableLogsHints[ruleId]) {
     const hint = HumanReadableLogsHints[ruleId]
@@ -59,11 +61,14 @@ function PdfLogEntry({
         showCloseButton={showCloseButton}
         onClose={onClose}
       />
+
       {(rawContent || formattedContent) && (
         <PdfLogEntryContent
           rawContent={rawContent}
           formattedContent={formattedContent}
           extraInfoURL={extraInfoURL}
+          index={index}
+          logEntry={logEntry}
         />
       )}
     </div>
@@ -94,6 +99,8 @@ PdfLogEntry.propTypes = {
   contentDetails: PropTypes.arrayOf(PropTypes.string),
   onSourceLocationClick: PropTypes.func,
   onClose: PropTypes.func,
+  index: PropTypes.number,
+  logEntry: PropTypes.any,
 }
 
 export default memo(PdfLogEntry)
