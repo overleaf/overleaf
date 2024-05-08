@@ -16,7 +16,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
       emitToolbarEvent(view, `toolbar-figure-modal-${sourceName}`)
       window.dispatchEvent(
         new CustomEvent('figure-modal:open', {
-          detail: source,
+          detail: { source },
         })
       )
     },

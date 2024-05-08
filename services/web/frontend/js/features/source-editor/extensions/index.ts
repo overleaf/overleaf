@@ -46,7 +46,8 @@ import { effectListeners } from './effect-listeners'
 import { highlightSpecialChars } from './highlight-special-chars'
 import { toolbarPanel } from './toolbar/toolbar-panel'
 import { geometryChangeEvent } from './geometry-change-event'
-import { docName } from '@/features/source-editor/extensions/doc-name'
+import { docName } from './doc-name'
+import { fileTreeItemDrop } from './file-tree-item-drop'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -138,4 +139,5 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   thirdPartyExtensions(),
   effectListeners(),
   geometryChangeEvent(),
+  fileTreeItemDrop(),
 ]

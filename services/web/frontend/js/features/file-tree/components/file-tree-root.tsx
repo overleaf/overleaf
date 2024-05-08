@@ -17,6 +17,7 @@ import FileTreeModalCreateFile from './modals/file-tree-modal-create-file'
 import FileTreeInner from './file-tree-inner'
 import { useDragLayer } from 'react-dnd'
 import classnames from 'classnames'
+import { pathInFolder } from '@/features/file-tree/util/path'
 
 const FileTreeRoot = React.memo<{
   onSelect: () => void
@@ -42,6 +43,41 @@ const FileTreeRoot = React.memo<{
   const { _id: projectId } = useProjectContext()
   const { fileTreeData } = useFileTreeData()
   const isReady = Boolean(projectId && fileTreeData)
+
+  useEffect(() => {
+    if (fileTreeContainer) {
+      const listener = (event: DragEvent) => {
+        if (event.dataTransfer) {
+          // store the dragged entity in dataTransfer
+          const { dataset } = event.target as HTMLDivElement
+          if (
+            dataset.fileId &&
+            dataset.fileType &&
+            dataset.fileType !== 'folder'
+          ) {
+            event.dataTransfer.setData(
+              'application/x-overleaf-file-id',
+              dataset.fileId
+            )
+
+            const filePath = pathInFolder(fileTreeData, dataset.fileId)
+            if (filePath) {
+              event.dataTransfer.setData(
+                'application/x-overleaf-file-path',
+                filePath
+              )
+            }
+          }
+        }
+      }
+
+      fileTreeContainer.addEventListener('dragstart', listener)
+
+      return () => {
+        fileTreeContainer.removeEventListener('dragstart', listener)
+      }
+    }
+  }, [fileTreeContainer, fileTreeData])
 
   useEffect(() => {
     if (isReady) onInit()

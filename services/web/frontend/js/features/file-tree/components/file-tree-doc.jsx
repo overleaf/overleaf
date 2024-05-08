@@ -9,9 +9,11 @@ import iconTypeFromName from '../util/icon-type-from-name'
 import classnames from 'classnames'
 
 function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
+  const type = isFile ? 'file' : 'doc'
+
   const { isSelected, props: selectableEntityProps } = useSelectableEntity(
     id,
-    isFile ? 'file' : 'doc'
+    type
   )
 
   return (
@@ -26,6 +28,7 @@ function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
       <FileTreeItemInner
         id={id}
         name={name}
+        type={type}
         isSelected={isSelected}
         icons={<FileTreeIcon isLinkedFile={isLinkedFile} name={name} />}
       />

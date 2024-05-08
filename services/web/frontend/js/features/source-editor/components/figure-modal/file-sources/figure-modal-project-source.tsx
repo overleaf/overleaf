@@ -12,7 +12,7 @@ export const FigureModalCurrentProjectSource: FC = () => {
     () => filterFiles(rootFolder)?.filter(isImageFile),
     [rootFolder]
   )
-  const { dispatch } = useFigureModalContext()
+  const { dispatch, selectedItemId } = useFigureModalContext()
   const noFiles = files?.length === 0
   return (
     <Select
@@ -20,6 +20,11 @@ export const FigureModalCurrentProjectSource: FC = () => {
       itemToString={file => (file ? file.name : '')}
       itemToSubtitle={item => item?.path ?? ''}
       itemToKey={item => item.id}
+      defaultItem={
+        files && selectedItemId
+          ? files.find(item => item.id === selectedItemId)
+          : undefined
+      }
       defaultText={
         noFiles
           ? t('no_image_files_found')

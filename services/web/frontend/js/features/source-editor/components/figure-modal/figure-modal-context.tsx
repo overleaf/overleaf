@@ -22,6 +22,7 @@ type FigureModalState = {
   includeLabel: boolean
   error?: string
   pastedImageData?: PastedImageData
+  selectedItemId?: string
 }
 
 type FigureModalStateUpdate = Partial<FigureModalState>

@@ -9,7 +9,13 @@ describe('<FileTreeitemInner />', function () {
       cy.mount(
         <EditorProviders>
           <FileTreeProvider>
-            <FileTreeitemInner id="123abc" name="bar.tex" isSelected={false} />,
+            <FileTreeitemInner
+              id="123abc"
+              name="bar.tex"
+              isSelected={false}
+              type="doc"
+            />
+            ,
           </FileTreeProvider>
         </EditorProviders>
       )
@@ -23,7 +29,12 @@ describe('<FileTreeitemInner />', function () {
       cy.mount(
         <EditorProviders permissionsLevel="readOnly">
           <FileTreeProvider>
-            <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+            <FileTreeitemInner
+              id="123abc"
+              name="bar.tex"
+              isSelected
+              type="doc"
+            />
             <FileTreeContextMenu />
           </FileTreeProvider>
         </EditorProviders>
@@ -37,7 +48,12 @@ describe('<FileTreeitemInner />', function () {
       cy.mount(
         <EditorProviders>
           <FileTreeProvider>
-            <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+            <FileTreeitemInner
+              id="123abc"
+              name="bar.tex"
+              isSelected
+              type="doc"
+            />
             <FileTreeContextMenu />
           </FileTreeProvider>
         </EditorProviders>
@@ -60,7 +76,12 @@ describe('<FileTreeitemInner />', function () {
       cy.mount(
         <EditorProviders>
           <FileTreeProvider>
-            <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+            <FileTreeitemInner
+              id="123abc"
+              name="bar.tex"
+              isSelected
+              type="doc"
+            />
           </FileTreeProvider>
         </EditorProviders>
       )
@@ -83,7 +104,12 @@ describe('<FileTreeitemInner />', function () {
       cy.mount(
         <EditorProviders rootDocId="123abc" rootFolder={rootFolder as any}>
           <FileTreeProvider>
-            <FileTreeitemInner id="123abc" name="bar.tex" isSelected />
+            <FileTreeitemInner
+              id="123abc"
+              name="bar.tex"
+              isSelected
+              type="doc"
+            />
             <FileTreeContextMenu />
           </FileTreeProvider>
         </EditorProviders>

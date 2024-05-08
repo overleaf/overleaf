@@ -70,8 +70,16 @@ const FigureModalContent = () => {
 
   const listener = useCallback(
     (event: Event) => {
-      const { detail: source } = event as CustomEvent<FigureModalSource>
-      dispatch({ source })
+      const { detail } = event as CustomEvent<{
+        source: FigureModalSource
+        fileId?: string
+        filePath?: string
+      }>
+      dispatch({
+        source: detail.source,
+        selectedItemId: detail.fileId,
+        getPath: detail.filePath ? async () => detail.filePath! : undefined,
+      })
     },
     [dispatch]
   )

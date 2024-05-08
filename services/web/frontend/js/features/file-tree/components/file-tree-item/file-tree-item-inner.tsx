@@ -15,11 +15,13 @@ import { useDragDropManager } from 'react-dnd'
 function FileTreeItemInner({
   id,
   name,
+  type,
   isSelected,
   icons,
 }: {
   id: string
   name: string
+  type: string
   isSelected: boolean
   icons?: ReactNode
 }) {
@@ -76,6 +78,8 @@ function FileTreeItemInner({
       ref={dragRef}
       draggable={!isRenaming}
       onContextMenu={handleContextMenu}
+      data-file-id={id}
+      data-file-type={type}
     >
       <div
         className="entity-name entity-name-react"

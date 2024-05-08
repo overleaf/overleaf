@@ -80,6 +80,7 @@ function FileTreeFolder({ name, id, folders, docs, files }) {
         <FileTreeItemInner
           id={id}
           name={name}
+          type="folder"
           isSelected={isSelected}
           icons={icons}
         />

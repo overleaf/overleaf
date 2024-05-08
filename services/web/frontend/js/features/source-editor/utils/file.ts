@@ -49,8 +49,8 @@ export const filterFolders = filterByType('folder')
 
 const IMAGE_FILE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'pdf']
 
-export function isImageFile(file: File) {
-  const parts = file.name.split('.')
+export const hasImageExtension = (filename: string) => {
+  const parts = filename.split('.')
   if (parts.length < 2) {
     return false
   }
@@ -58,11 +58,10 @@ export function isImageFile(file: File) {
   return IMAGE_FILE_EXTENSIONS.includes(extension)
 }
 
+export function isImageFile(file: File) {
+  return hasImageExtension(file.name)
+}
+
 export function isImageEntity(file: Entity | OutputEntity) {
-  const parts = file.path.split('.')
-  if (parts.length < 2) {
-    return false
-  }
-  const extension = parts[parts.length - 1].toLowerCase()
-  return IMAGE_FILE_EXTENSIONS.includes(extension)
+  return hasImageExtension(file.path)
 }
