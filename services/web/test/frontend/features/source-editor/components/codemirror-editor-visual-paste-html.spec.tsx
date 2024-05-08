@@ -69,6 +69,36 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('.ol-cm-item').should('have.length', 2)
   })
 
+  it('handles a pasted nested bullet list', function () {
+    mountEditor()
+
+    const data =
+      '<ul><li>foo</li><li><ul><li>bar</li><li>baz</li></ul></li></ul>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', ' foo  bar baz')
+    cy.get('.ol-cm-item').should('have.length', 4)
+    cy.get('.cm-line').should('have.length', 6)
+  })
+
+  it('handles a pasted nested numbered list', function () {
+    mountEditor()
+
+    const data =
+      '<ol><li>foo</li><li><ol><li>bar</li><li>baz</li></ol></li></ol>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', ' foo  bar baz')
+    cy.get('.ol-cm-item').should('have.length', 4)
+    cy.get('.cm-line').should('have.length', 6)
+  })
+
   it('removes a solitary item from a list', function () {
     mountEditor()
 

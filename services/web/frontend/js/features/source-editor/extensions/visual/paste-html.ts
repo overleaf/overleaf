@@ -522,13 +522,13 @@ const tabular = (element: HTMLTableElement) => {
     .join(' ')
 }
 
-const listDepth = (
-  element: HTMLOListElement | HTMLUListElement | HTMLLIElement
-): number => Math.max(0, matchingParents(element, 'ul,ol').length - 1)
+const listDepth = (element: HTMLElement): number =>
+  Math.max(0, matchingParents(element, 'ul,ol').length)
 
-const listIndent = (
-  element: HTMLOListElement | HTMLUListElement | HTMLLIElement
-): string => '\t'.repeat(listDepth(element))
+const indentUnit = '    ' // TODO: replace hard-coded indent unit?
+
+const listIndent = (element: HTMLElement | null): string =>
+  element ? indentUnit.repeat(listDepth(element)) : ''
 
 type ElementSelector<T extends string, E extends HTMLElement = HTMLElement> = {
   selector: T
@@ -609,6 +609,37 @@ const startMultirow = (element: HTMLTableCellElement): string => {
   // NOTE: it would be useful to read cell width if specified, using `*` as a starting point
   return `\\multirow{${rowspan}}{*}{`
 }
+
+const listPrefix = (element: HTMLOListElement | HTMLUListElement) => {
+  if (isListOrListItemElement(element.parentElement)) {
+    // within a list = newline
+    return '\n'
+  }
+  // outside a list = double newline
+  return '\n\n'
+}
+
+const listSuffix = (element: HTMLOListElement | HTMLUListElement) => {
+  if (listDepth(element) === 0) {
+    // a top-level list => newline
+    return '\n'
+  } else {
+    // a nested list => no extra newline
+    return ''
+  }
+}
+
+const isListElement = (
+  element: Element | null
+): element is HTMLOListElement | HTMLUListElement =>
+  element !== null && listNodeNames.includes(element.nodeName)
+
+const isListOrListItemElement = (
+  element: Element | null
+): element is HTMLOListElement | HTMLUListElement =>
+  element !== null && (isListElement(element) || element.nodeName === 'LI')
+
+const listNodeNames = ['OL', 'UL']
 
 const selectors = [
   createSelector({
@@ -826,18 +857,28 @@ const selectors = [
   createSelector({
     // selector: 'ul:has(> li:nth-child(2))', // only select lists with at least 2 items (once Firefox supports :has())
     selector: 'ul',
-    start: element => `\n\n${listIndent(element)}\\begin{itemize}`,
-    end: element => `\n${listIndent(element)}\\end{itemize}\n`,
+    start: element => {
+      return `${listPrefix(element)}${listIndent(element)}\\begin{itemize}`
+    },
+    end: element => {
+      return `\n${listIndent(element)}\\end{itemize}${listSuffix(element)}`
+    },
   }),
   createSelector({
     // selector: 'ol:has(> li:nth-child(2))', // only select lists with at least 2 items (once Firefox supports :has())
     selector: 'ol',
-    start: element => `\n\n${listIndent(element)}\\begin{enumerate}`,
-    end: element => `\n${listIndent(element)}\\end{enumerate}\n`,
+    start: element => {
+      return `${listPrefix(element)}${listIndent(element)}\\begin{enumerate}`
+    },
+    end: element => {
+      return `\n${listIndent(element)}\\end{enumerate}${listSuffix(element)}`
+    },
   }),
   createSelector({
     selector: 'li',
-    start: element => `\n${listIndent(element)}\t\\item `,
+    start: element => {
+      return `\n${listIndent(element.parentElement)}${indentUnit}\\item `
+    },
   }),
   createSelector({
     selector: 'p',
