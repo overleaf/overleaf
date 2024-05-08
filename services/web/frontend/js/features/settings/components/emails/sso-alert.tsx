@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import getMeta from '../../../../utils/meta'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 
 type InstitutionLink = {
   universityName: string

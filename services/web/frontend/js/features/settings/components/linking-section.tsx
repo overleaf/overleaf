@@ -6,7 +6,7 @@ import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 
 function LinkingSection() {
   useBroadcastUser()

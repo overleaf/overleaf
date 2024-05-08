@@ -2,7 +2,7 @@ import Icon from '../../../../../shared/components/icon'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
 import { getUserFacingMessage } from '../../../../../infrastructure/fetch-json'
 import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 
 type LayoutProps = {
   children: React.ReactNode

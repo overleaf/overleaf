@@ -11,7 +11,7 @@ import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { PasswordStrengthOptions } from '../../../../../types/password-strength-options'
 import useAsync from '../../../shared/hooks/use-async'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 
 type PasswordUpdateResult = {
   message?: {

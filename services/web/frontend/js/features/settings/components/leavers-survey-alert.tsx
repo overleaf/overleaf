@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import { useUserEmailsContext } from '../context/user-email-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 
 function sendMetrics(segmentation: 'view' | 'click' | 'close') {
   sendMB('institutional-leavers-survey-notification', { type: segmentation })

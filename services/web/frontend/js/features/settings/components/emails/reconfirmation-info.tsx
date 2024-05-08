@@ -5,7 +5,7 @@ import ReconfirmationInfoSuccess from './reconfirmation-info/reconfirmation-info
 import ReconfirmationInfoPromptText from './reconfirmation-info/reconfirmation-info-prompt-text'
 import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
 import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import Icon from '@/shared/components/icon'
 import { useUserEmailsContext } from '@/features/settings/context/user-email-context'

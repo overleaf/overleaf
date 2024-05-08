@@ -1,6 +1,6 @@
 // Headings
 
-// Apply margin above the heading only when it has a sibling
+// Headings
 h1,
 h2,
 h3,
@@ -13,7 +13,9 @@ h6,
 .h4,
 .h5,
 .h6 {
-  * > * + & {
+  // Apply margin above the heading only when it has a preceding sibling or is inside a row with a preceding sibling
+  * > * + &,
+  * + .row & {
     margin-top: $spacing-08;
   }
 }

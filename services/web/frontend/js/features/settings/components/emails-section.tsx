@@ -9,7 +9,7 @@ import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
 import Icon from '../../../shared/components/icon'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { LeaversSurveyAlert } from './leavers-survey-alert'
 

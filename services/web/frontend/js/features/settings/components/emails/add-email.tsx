@@ -149,9 +149,9 @@ function AddEmail() {
 
   if (!isValidEmail(newEmail)) {
     return (
-      <Layout isError={isError} error={error}>
-        <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
-        <form>
+      <form>
+        <Layout isError={isError} error={error}>
+          <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
           <ColWrapper md={8}>
             <Cell>
               {InputComponent}
@@ -170,8 +170,8 @@ function AddEmail() {
               <AddNewEmailBtn email={newEmail} disabled />
             </Cell>
           </ColWrapper>
-        </form>
-      </Layout>
+        </Layout>
+      </form>
     )
   }
 
@@ -179,9 +179,9 @@ function AddEmail() {
     newEmailMatchedDomain && ssoAvailableForDomain(newEmailMatchedDomain)
 
   return (
-    <Layout isError={isError} error={error}>
-      <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
-      <form>
+    <form>
+      <Layout isError={isError} error={error}>
+        <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
         <ColWrapper md={8}>
           <Cell>
             {InputComponent}
@@ -232,8 +232,8 @@ function AddEmail() {
             </Cell>
           </ColWrapper>
         )}
-      </form>
-    </Layout>
+      </Layout>
+    </form>
   )
 }
 

@@ -118,6 +118,15 @@
 
   &.btn-danger {
     color: var(--content-danger);
+    //since it's a link, override the button states
+    &:active {
+      color: var(--content-danger);
+      background-color: transparent;
+    }
+    &:focus-visible {
+      background-color: transparent;
+      outline: -webkit-focus-ring-color auto 1px;
+    }
   }
 }
 

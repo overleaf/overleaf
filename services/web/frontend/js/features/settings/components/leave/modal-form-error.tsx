@@ -2,7 +2,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/notification-wrapper'
+import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
 
 type LeaveModalFormErrorProps = {
   error: FetchError
