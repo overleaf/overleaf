@@ -29,7 +29,7 @@ export default function FileTreeUploadDoc() {
   const [folderConflicts, setFolderConflicts] = useState<FileTreeEntity[]>([])
   const [overwrite, setOverwrite] = useState(false)
 
-  const maxNumberOfFiles = 40
+  const maxNumberOfFiles = 180
   const maxFileSize = window.ExposedSettings.maxUploadSize
 
   // calculate conflicts
