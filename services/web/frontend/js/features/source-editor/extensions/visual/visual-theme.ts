@@ -62,6 +62,7 @@ const mainVisualTheme = EditorView.theme({
   '.ol-cm-link-text': {
     textDecoration: 'underline',
     fontFamily: 'inherit',
+    textUnderlineOffset: '2px',
   },
   '.ol-cm-monospace': {
     fontFamily: 'var(--source-font-family)',
