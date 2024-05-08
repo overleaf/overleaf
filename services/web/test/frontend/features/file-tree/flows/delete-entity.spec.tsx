@@ -1,7 +1,6 @@
-// @ts-ignore
-import MockedSocket from 'socket.io-mock'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 
 describe('FileTree Delete Entity Flow', function () {
   beforeEach(function () {
@@ -11,7 +10,9 @@ describe('FileTree Delete Entity Flow', function () {
   })
 
   describe('single entity', function () {
+    let socket: SocketIOMock
     beforeEach(function () {
+      socket = new SocketIOMock()
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -30,7 +31,7 @@ describe('FileTree Delete Entity Flow', function () {
           <EditorProviders
             rootFolder={rootFolder as any}
             projectId="123abc"
-            socket={new MockedSocket()}
+            socket={socket}
           >
             <FileTreeRoot
               refProviders={{}}
@@ -64,9 +65,8 @@ describe('FileTree Delete Entity Flow', function () {
 
       cy.wait('@deleteDoc')
 
-      cy.window().then(win => {
-        // @ts-ignore
-        win._ide.socket.socketClient.emit('removeEntity', '456def')
+      cy.then(() => {
+        socket.emitToClient('removeEntity', '456def')
       })
 
       cy.findByRole('treeitem', {
@@ -99,9 +99,8 @@ describe('FileTree Delete Entity Flow', function () {
 
       cy.findByRole('button', { name: 'Delete' }).click()
 
-      cy.window().then(win => {
-        // @ts-ignore
-        win._ide.socket.socketClient.emit('removeEntity', '456def')
+      cy.then(() => {
+        socket.emitToClient('removeEntity', '456def')
       })
 
       cy.findByRole('treeitem', {
@@ -133,7 +132,9 @@ describe('FileTree Delete Entity Flow', function () {
   })
 
   describe('folders', function () {
+    let socket: SocketIOMock
     beforeEach(function () {
+      socket = new SocketIOMock()
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -157,7 +158,7 @@ describe('FileTree Delete Entity Flow', function () {
           <EditorProviders
             rootFolder={rootFolder as any}
             projectId="123abc"
-            socket={new MockedSocket()}
+            socket={socket}
           >
             <FileTreeRoot
               refProviders={{}}
@@ -179,9 +180,8 @@ describe('FileTree Delete Entity Flow', function () {
         cmdKey: true,
       })
 
-      cy.window().then(win => {
-        // @ts-ignore
-        win._ide.socket.socketClient.emit('removeEntity', '123abc')
+      cy.then(() => {
+        socket.emitToClient('removeEntity', '123abc')
       })
     })
 
@@ -204,7 +204,9 @@ describe('FileTree Delete Entity Flow', function () {
   })
 
   describe('multiple entities', function () {
+    let socket: SocketIOMock
     beforeEach(function () {
+      socket = new SocketIOMock()
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -220,7 +222,7 @@ describe('FileTree Delete Entity Flow', function () {
           <EditorProviders
             rootFolder={rootFolder as any}
             projectId="123abc"
-            socket={new MockedSocket()}
+            socket={socket}
           >
             <FileTreeRoot
               refProviders={{}}
@@ -264,11 +266,9 @@ describe('FileTree Delete Entity Flow', function () {
 
       cy.findByRole('button', { name: 'Delete' }).click()
 
-      cy.window().then(win => {
-        // @ts-ignore
-        win._ide.socket.socketClient.emit('removeEntity', '456def')
-        // @ts-ignore
-        win._ide.socket.socketClient.emit('removeEntity', '789ghi')
+      cy.then(() => {
+        socket.emitToClient('removeEntity', '456def')
+        socket.emitToClient('removeEntity', '789ghi')
       })
 
       for (const name of ['main.tex', 'my.bib']) {

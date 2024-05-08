@@ -1,18 +1,3 @@
-/* eslint-disable
-    camelcase,
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 // Simple event emitter implementation, but has a slightly unusual API for
 // removing specific listeners. If a specific listener needs to be removed
 // (instead of all listeners), then it needs to use a "namespace":
@@ -23,43 +8,44 @@
 
 export default class EventEmitter {
   on(event, callback) {
-    let namespace
     if (!this.events) {
       this.events = {}
     }
+    let namespace
     ;[event, namespace] = Array.from(event.split('.'))
     if (!this.events[event]) {
       this.events[event] = []
     }
-    return this.events[event].push({
+    this.events[event].push({
       callback,
       namespace,
     })
   }
 
-  off(event) {
+  off(event, cb) {
     if (!this.events) {
       this.events = {}
     }
-    if (event != null) {
+    if (event) {
       let namespace
-      ;[event, namespace] = Array.from(event.split('.'))
-      if (namespace == null) {
+      ;[event, namespace] = event.split('.')
+      if (!this.events[event]) {
+        this.events[event] = []
+      }
+      if (cb) {
+        this.events[event] = this.events[event].filter(e => e.callback !== cb)
+      } else if (!namespace) {
         // Clear all listeners for event
-        return delete this.events[event]
+        delete this.events[event]
       } else {
         // Clear only namespaced listeners
-        const remaining_events = []
-        for (const callback of Array.from(this.events[event] || [])) {
-          if (callback.namespace !== namespace) {
-            remaining_events.push(callback)
-          }
-        }
-        return (this.events[event] = remaining_events)
+        this.events[event] = this.events[event].filter(
+          e => e.namespace !== namespace
+        )
       }
     } else {
       // Remove all listeners
-      return (this.events = {})
+      this.events = {}
     }
   }
 
@@ -67,12 +53,12 @@ export default class EventEmitter {
     if (!this.events) {
       this.events = {}
     }
-    return Array.from(this.events[event] || []).map(callback =>
-      callback.callback(...Array.from(args || []))
-    )
+    if (this.events[event]) {
+      this.events[event].forEach(e => e.callback(...args))
+    }
   }
 
   emit(...args) {
-    return this.trigger(...Array.from(args || []))
+    this.trigger(...args)
   }
 }

@@ -1,7 +1,6 @@
-// @ts-ignore
-import MockedSocket from 'socket.io-mock'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 
 describe('FileTree Rename Entity Flow', function () {
   beforeEach(function () {
@@ -10,7 +9,9 @@ describe('FileTree Rename Entity Flow', function () {
     })
   })
 
+  let socket: SocketIOMock
   beforeEach(function () {
+    socket = new SocketIOMock()
     const rootFolder = [
       {
         _id: 'root-folder-id',
@@ -37,7 +38,7 @@ describe('FileTree Rename Entity Flow', function () {
         <EditorProviders
           rootFolder={rootFolder as any}
           projectId="123abc"
-          socket={new MockedSocket()}
+          socket={socket}
         >
           <FileTreeRoot
             refProviders={{}}
@@ -146,13 +147,8 @@ describe('FileTree Rename Entity Flow', function () {
     it('renames doc', function () {
       cy.findByRole('treeitem', { name: 'a.tex' })
 
-      cy.window().then(win => {
-        // @ts-ignore
-        win._ide.socket.socketClient.emit(
-          'reciveEntityRename',
-          '456def',
-          'socket.tex'
-        )
+      cy.then(() => {
+        socket.emitToClient('reciveEntityRename', '456def', 'socket.tex')
       })
 
       cy.findByRole('treeitem', { name: 'socket.tex' })

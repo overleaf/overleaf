@@ -1,6 +1,7 @@
 /* global io */
 
 import { debugConsole } from '@/utils/debugging'
+import EventEmitter from '@/utils/EventEmitter'
 
 class SocketShimBase {
   static connect(url, options) {
@@ -216,6 +217,25 @@ if (typeof io === 'undefined' || !io) {
   // socket.io v2 does not have a global io.version attribute.
   debugConsole.log('[socket.io] Shim: detected v2')
   current = SocketShimV2
+}
+
+export class SocketIOMock extends EventEmitter {
+  addListener(event, listener) {
+    this.on(event, listener)
+  }
+
+  removeListener(event, listener) {
+    this.off(event, listener)
+  }
+
+  disconnect() {
+    this.emitToClient('disconnect')
+  }
+
+  emitToClient(...args) {
+    // Round-trip through JSON.parse/stringify to simulate (de-)serializing on network layer.
+    this.emit(...JSON.parse(JSON.stringify(args)))
+  }
 }
 
 export default {

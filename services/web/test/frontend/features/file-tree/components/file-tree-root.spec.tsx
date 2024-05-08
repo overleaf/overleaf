@@ -1,7 +1,6 @@
-// @ts-ignore
-import MockedSocket from 'socket.io-mock'
 import FileTreeRoot from '../../../../../frontend/js/features/file-tree/components/file-tree-root'
 import { EditorProviders } from '../../../helpers/editor-providers'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 
 describe('<FileTreeRoot/>', function () {
   beforeEach(function () {
@@ -287,7 +286,9 @@ describe('<FileTreeRoot/>', function () {
   })
 
   describe('when deselecting files', function () {
+    let socket: SocketIOMock
     beforeEach(function () {
+      socket = new SocketIOMock()
       const rootFolder = [
         {
           _id: 'root-folder-id',
@@ -313,7 +314,7 @@ describe('<FileTreeRoot/>', function () {
           rootDocId="456def"
           features={{} as any}
           permissionsLevel="owner"
-          socket={new MockedSocket()}
+          socket={socket}
         >
           <FileTreeRoot
             refProviders={{}}
@@ -356,9 +357,8 @@ describe('<FileTreeRoot/>', function () {
       cy.findByRole('button', { name: /new file/i }).click()
       cy.findByRole('button', { name: /create/i }).click()
 
-      cy.window().then(win => {
-        // @ts-ignore
-        win._ide.socket.socketClient.emit('reciveNewDoc', 'root-folder-id', {
+      cy.then(() => {
+        socket.emitToClient('reciveNewDoc', 'root-folder-id', {
           _id: '12345',
           name: 'abcdef.tex',
           docs: [],

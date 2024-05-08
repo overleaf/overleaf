@@ -24,6 +24,7 @@ import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-pa
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 import { ChatProvider } from '@/features/chat/context/chat-context'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -105,10 +106,7 @@ const initialize = () => {
 
   const ide = {
     $scope: scope,
-    socket: {
-      on: () => {},
-      removeListener: () => {},
-    },
+    socket: new SocketIOMock(),
     editorManager: {
       getCurrentDocId: () => 'foo',
       openDoc: (id: string, options: unknown) => {

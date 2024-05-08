@@ -16,6 +16,7 @@ import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/pro
 import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { OutlineProvider } from '@/features/ide-react/context/outline-context'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -46,10 +47,7 @@ export function EditorProviders({
     email: 'owner@example.com',
   },
   rootDocId = '_root_doc_id',
-  socket = {
-    on: sinon.stub(),
-    removeListener: sinon.stub(),
-  },
+  socket = new SocketIOMock(),
   isRestrictedTokenMember = false,
   clsiServerId = '1234',
   scope = {},

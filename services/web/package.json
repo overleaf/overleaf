@@ -347,7 +347,6 @@
     "sinon": "^7.5.0",
     "sinon-chai": "^3.7.0",
     "sinon-mongoose": "^2.3.0",
-    "socket.io-mock": "^1.3.1",
     "storybook": "^8.0.4",
     "stylelint-config-standard-scss": "^13.1.0",
     "terser-webpack-plugin": "^5.3.9",

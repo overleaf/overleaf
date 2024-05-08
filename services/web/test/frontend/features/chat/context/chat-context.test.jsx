@@ -5,7 +5,6 @@ import { renderHook, act } from '@testing-library/react-hooks/dom'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
-import EventEmitter from 'events'
 import {
   useChatContext,
   chatClientIdGenerator,
@@ -15,6 +14,7 @@ import {
   cleanUpContext,
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from '../components/stubs'
+import { SocketIOMock } from '@/ide/connection/SocketIoShim'
 
 describe('ChatContext', function () {
   const user = {
@@ -57,26 +57,26 @@ describe('ChatContext', function () {
     })
 
     it('subscribes when mounted', function () {
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       renderChatContextHook({ socket })
 
       // Assert that there is 1 listener
-      expect(socket.rawListeners('new-chat-message').length).to.equal(1)
+      expect(socket.events['new-chat-message'].length).to.equal(1)
     })
 
     it('unsubscribes when unmounted', function () {
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { unmount } = renderChatContextHook({ socket })
 
       unmount()
 
       // Assert that there is 0 listeners
-      expect(socket.rawListeners('new-chat-message').length).to.equal(0)
+      expect(socket.events['new-chat-message'].length).to.equal(0)
     })
 
     it('adds received messages to the list', async function () {
       // Mock socket: we only need to emit events, not mock actual connections
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result, waitForNextUpdate } = renderChatContextHook({
         socket,
       })
@@ -89,7 +89,7 @@ describe('ChatContext', function () {
       expect(result.current.messages).to.deep.equal([])
 
       // Mock message being received from another user
-      socket.emit('new-chat-message', {
+      socket.emitToClient('new-chat-message', {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
@@ -107,7 +107,7 @@ describe('ChatContext', function () {
 
     it('deduplicate messages from preloading', async function () {
       // Mock socket: we only need to emit events, not mock actual connections
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result, waitForNextUpdate } = renderChatContextHook({
         socket,
       })
@@ -130,7 +130,7 @@ describe('ChatContext', function () {
       )
 
       // Mock message being received from another user
-      socket.emit('new-chat-message', {
+      socket.emitToClient('new-chat-message', {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
@@ -158,7 +158,7 @@ describe('ChatContext', function () {
 
     it('deduplicate messages from websocket', async function () {
       // Mock socket: we only need to emit events, not mock actual connections
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result, waitForNextUpdate } = renderChatContextHook({
         socket,
       })
@@ -188,7 +188,7 @@ describe('ChatContext', function () {
       expect(result.current.messages).to.have.length(1)
 
       // Mock message being received from another user
-      socket.emit('new-chat-message', {
+      socket.emitToClient('new-chat-message', {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
@@ -208,7 +208,7 @@ describe('ChatContext', function () {
     })
 
     it("doesn't add received messages from the current user if a message was just sent", async function () {
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result, waitForNextUpdate } = renderChatContextHook({
         socket,
       })
@@ -223,7 +223,7 @@ describe('ChatContext', function () {
 
       act(() => {
         // Receive a message from the current user
-        socket.emit('new-chat-message', {
+        socket.emitToClient('new-chat-message', {
           id: 'msg_1',
           content: 'received message',
           timestamp: Date.now(),
@@ -240,7 +240,7 @@ describe('ChatContext', function () {
     })
 
     it('adds the new message from the current user if another message was received after sending', async function () {
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result, waitForNextUpdate } = renderChatContextHook({
         socket,
       })
@@ -260,7 +260,7 @@ describe('ChatContext', function () {
 
       act(() => {
         // Receive a message from another user.
-        socket.emit('new-chat-message', {
+        socket.emitToClient('new-chat-message', {
           id: 'msg_1',
           content: otherMsg,
           timestamp: Date.now(),
@@ -278,7 +278,7 @@ describe('ChatContext', function () {
 
       act(() => {
         // Receive a message from the current user
-        socket.emit('new-chat-message', {
+        socket.emitToClient('new-chat-message', {
           id: 'msg_2',
           content: 'received message from current user',
           timestamp: Date.now(),
@@ -441,7 +441,7 @@ describe('ChatContext', function () {
         })
       )
 
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result, waitForNextUpdate } = renderChatContextHook({
         socket,
       })
@@ -451,7 +451,7 @@ describe('ChatContext', function () {
 
       // Mock message being received from the socket while the request is in
       // flight
-      socket.emit('new-chat-message', {
+      socket.emitToClient('new-chat-message', {
         id: 'socket_msg',
         content: 'socket message',
         timestamp: Date.now(),
@@ -563,11 +563,11 @@ describe('ChatContext', function () {
     })
 
     it('increments unreadMessageCount when a new message is received', function () {
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result } = renderChatContextHook({ socket })
 
       // Receive a new message from the socket
-      socket.emit('new-chat-message', {
+      socket.emitToClient('new-chat-message', {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
@@ -578,12 +578,12 @@ describe('ChatContext', function () {
     })
 
     it('resets unreadMessageCount when markMessagesAsRead is called', function () {
-      const socket = new EventEmitter()
+      const socket = new SocketIOMock()
       const { result } = renderChatContextHook({ socket })
 
       // Receive a new message from the socket, incrementing unreadMessageCount
       // by 1
-      socket.emit('new-chat-message', {
+      socket.emitToClient('new-chat-message', {
         id: 'msg_1',
         content: 'new message',
         timestamp: Date.now(),
