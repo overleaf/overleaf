@@ -47,6 +47,12 @@ describe('ProjectRootDocManager', function () {
         './ProjectEntityHandler': (this.ProjectEntityHandler = {}),
         './ProjectEntityUpdateHandler': (this.ProjectEntityUpdateHandler = {}),
         './ProjectGetter': (this.ProjectGetter = {}),
+        '../../infrastructure/GracefulShutdown': {
+          BackgroundTaskTracker: class {
+            add() {}
+            done() {}
+          },
+        },
         globby: this.globby,
         fs: this.fs,
       },

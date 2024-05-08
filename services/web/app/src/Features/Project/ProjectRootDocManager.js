@@ -19,13 +19,34 @@ const ProjectGetter = require('./ProjectGetter')
 const DocumentHelper = require('../Documents/DocumentHelper')
 const Path = require('path')
 const fs = require('fs')
-const { promisify } = require('util')
 const async = require('async')
 const globby = require('globby')
 const _ = require('lodash')
 const { promisifyAll } = require('@overleaf/promise-utils')
+const logger = require('@overleaf/logger')
+const {
+  BackgroundTaskTracker,
+} = require('../../infrastructure/GracefulShutdown')
+
+const rootDocResets = new BackgroundTaskTracker('root doc resets')
 
 module.exports = ProjectRootDocManager = {
+  setRootDocAutomaticallyInBackground(projectId) {
+    rootDocResets.add()
+    setTimeout(async () => {
+      try {
+        await ProjectRootDocManager.promises.setRootDocAutomatically(projectId)
+      } catch (err) {
+        logger.warn(
+          { err },
+          'failed to set root doc automatically in background'
+        )
+      } finally {
+        rootDocResets.done()
+      }
+    }, 30 * 1000)
+  },
+
   setRootDocAutomatically(projectId, callback) {
     if (callback == null) {
       callback = function () {}
@@ -302,7 +323,7 @@ module.exports = ProjectRootDocManager = {
 
 module.exports = ProjectRootDocManager
 module.exports.promises = promisifyAll(module.exports, {
-  without: ['_rootDocSort'],
+  without: ['_rootDocSort', 'setRootDocAutomaticallyInBackground'],
   multiResult: {
     findRootDocFileFromDirectory: ['path', 'content'],
   },

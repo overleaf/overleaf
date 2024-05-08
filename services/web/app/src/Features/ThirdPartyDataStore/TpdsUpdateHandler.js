@@ -11,13 +11,6 @@ const FileTypeManager = require('../Uploads/FileTypeManager')
 const CooldownManager = require('../Cooldown/CooldownManager')
 const Errors = require('../Errors/Errors')
 const Modules = require('../../infrastructure/Modules')
-const {
-  BackgroundTaskTracker,
-} = require('../../infrastructure/GracefulShutdown')
-
-const ROOT_DOC_TIMEOUT_LENGTH = 30 * 1000
-
-const rootDocResets = new BackgroundTaskTracker('root doc resets')
 
 async function newUpdate(
   userId,
@@ -137,17 +130,7 @@ async function getOrCreateProjectByName(userId, projectName) {
     // have a crack at setting the root doc after a while, on creation
     // we won't have it yet, but should have been sent it it within 30
     // seconds
-    rootDocResets.add()
-    setTimeout(() => {
-      ProjectRootDocManager.promises
-        .setRootDocAutomatically(project._id)
-        .then(() => {
-          rootDocResets.done()
-        })
-        .catch(err => {
-          logger.warn({ err }, 'failed to set root doc after project creation')
-        })
-    }, ROOT_DOC_TIMEOUT_LENGTH)
+    ProjectRootDocManager.setRootDocAutomaticallyInBackground(project._id)
     return project
   }
 

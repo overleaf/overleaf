@@ -9,14 +9,6 @@ const MODULE_PATH =
 
 describe('TpdsUpdateHandler', function () {
   beforeEach(function () {
-    this.clock = sinon.useFakeTimers()
-  })
-
-  afterEach(function () {
-    this.clock.restore()
-  })
-
-  beforeEach(function () {
     this.projectName = 'My recipes'
     this.projects = {
       active1: { _id: new ObjectId(), name: this.projectName },
@@ -93,9 +85,7 @@ describe('TpdsUpdateHandler', function () {
       .withArgs(this.projects.archived2, this.userId)
       .returns(true)
     this.RootDocManager = {
-      promises: {
-        setRootDocAutomatically: sinon.stub().resolves(),
-      },
+      setRootDocAutomaticallyInBackground: sinon.stub(),
     }
     this.UpdateMerger = {
       promises: {
@@ -503,10 +493,8 @@ function expectProjectCreated() {
   })
 
   it('sets the root doc', function () {
-    // Fire pending timers
-    this.clock.next()
     expect(
-      this.RootDocManager.promises.setRootDocAutomatically
+      this.RootDocManager.setRootDocAutomaticallyInBackground
     ).to.have.been.calledWith(this.projects.active1._id)
   })
 }
@@ -518,9 +506,7 @@ function expectProjectNotCreated() {
   })
 
   it('does not set the root doc', function () {
-    // Fire pending timers
-    this.clock.next()
-    expect(this.RootDocManager.promises.setRootDocAutomatically).not.to.have
+    expect(this.RootDocManager.setRootDocAutomaticallyInBackground).not.to.have
       .been.called
   })
 }
