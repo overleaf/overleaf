@@ -101,13 +101,7 @@ export function useGroupInvitationNotification(
   const cancelPersonalSubscription = useCallback(() => {
     setGroupInvitationStatus(GroupInvitationStatus.AskToJoin)
 
-    runAsync(
-      postJSON('/user/subscription/cancel', {
-        body: {
-          _csrf: getMeta('ol-csrfToken'),
-        },
-      })
-    ).catch(debugConsole.error)
+    runAsync(postJSON('/user/subscription/cancel')).catch(debugConsole.error)
   }, [runAsync])
 
   const dismissGroupInviteNotification = useCallback(() => {
