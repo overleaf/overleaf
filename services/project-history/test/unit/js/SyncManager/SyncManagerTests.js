@@ -1,5 +1,3 @@
-// @ts-check
-
 import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
