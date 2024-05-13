@@ -14,15 +14,14 @@ type ToolbarProps = {
 }
 
 export default function Toolbar({ diff, selection }: ToolbarProps) {
-  const hasRevertFiles = useFeatureFlag('revert-files')
+  const hasRevertFile = useFeatureFlag('revert-file')
+
+  const showRevertFileButton = hasRevertFile && selection.selectedFile
 
   const showRestoreFileButton =
-    selection.selectedFile && isFileRemoved(selection.selectedFile)
-
-  const showRevertFileButton =
-    hasRevertFiles &&
     selection.selectedFile &&
-    !isFileRemoved(selection.selectedFile)
+    isFileRemoved(selection.selectedFile) &&
+    !showRevertFileButton
 
   return (
     <div className="history-react-toolbar">

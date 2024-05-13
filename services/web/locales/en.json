@@ -1549,6 +1549,8 @@
   "return_to_login_page": "Return to Login page",
   "reverse_x_sort_order": "Reverse __x__ sort order",
   "revert_file": "Revert file",
+  "revert_file_confirmation_message": "Your current file will revert to the version from __date__ at __time__.",
+  "revert_file_confirmation_title": "Restore this version?",
   "revert_file_error_message": "There was a problem reverting the file version. Please try again in a few moments. If the problem continues please contact us.",
   "revert_file_error_title": "Revert File Error",
   "revert_pending_plan_change": "Revert scheduled plan change",
