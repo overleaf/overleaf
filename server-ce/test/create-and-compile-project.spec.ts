@@ -24,7 +24,7 @@ describe('Project creation and compilation', function () {
     cy.visit('/project')
     createProject('test-project')
     // FIXME: Add aria-label maybe? or at least data-test-id
-    cy.findByText('New File').click({ force: true })
+    cy.findByText('New file').click({ force: true })
     cy.findByRole('dialog').within(() => {
       cy.get('input').clear()
       cy.get('input').type(fileName)
@@ -54,9 +54,9 @@ describe('Project creation and compilation', function () {
     createProject(targetProjectName)
 
     // link the image from `projectName` into this project
-    cy.findByText('New File').click({ force: true })
+    cy.findByText('New file').click({ force: true })
     cy.findByRole('dialog').within(() => {
-      cy.findByText('From Another Project').click()
+      cy.findByText('From another project').click()
       cy.findByLabelText('Select a Project').select(sourceProjectName)
       cy.findByLabelText('Select a File').select('frog.jpg')
       cy.findByText('Create').click()
@@ -85,9 +85,9 @@ describe('Project creation and compilation', function () {
     createProject(targetProjectName).as('targetProjectId')
 
     // link the image from `projectName` into this project
-    cy.findByText('New File').click({ force: true })
+    cy.findByText('New file').click({ force: true })
     cy.findByRole('dialog').within(() => {
-      cy.findByText('From Another Project').click()
+      cy.findByText('From another project').click()
       cy.findByLabelText('Select a Project').select(sourceProjectName)
       cy.findByLabelText('Select a File').select('frog.jpg')
       cy.findByText('Create').click()
