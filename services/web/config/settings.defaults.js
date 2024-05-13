@@ -43,7 +43,7 @@ if (httpAuthUser && httpAuthPass) {
   httpAuthUsers[httpAuthUser] = httpAuthPass
 }
 
-const sessionSecret = process.env.SESSION_SECRET || 'secret-please-change'
+const sessionSecret = process.env.SESSION_SECRET
 
 const intFromEnv = function (name, defaultValue) {
   if (

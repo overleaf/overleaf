@@ -154,6 +154,10 @@ if (Settings.useHttpPermissionsPolicy) {
 
 RedirectManager.apply(webRouter)
 
+if (!Settings.security.sessionSecret) {
+  throw new Error('Session secret is not set - refusing to start server')
+}
+
 webRouter.use(cookieParser(Settings.security.sessionSecret))
 SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
 Modules.registerMiddleware(webRouter, 'sessionMiddleware', {
