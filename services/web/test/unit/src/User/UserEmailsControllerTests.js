@@ -301,8 +301,8 @@ describe('UserEmailsController', function () {
 
     it('sends an email confirmation', function (done) {
       this.UserEmailsController.addWithConfirmationCode(this.req, {
-        sendStatus: code => {
-          code.should.equal(200)
+        json: ({ redir }) => {
+          redir.should.equal('/user/emails/confirm-secondary')
           assertCalledWith(
             this.UserEmailsConfirmationHandler.promises.sendConfirmationCode,
             this.newEmail,

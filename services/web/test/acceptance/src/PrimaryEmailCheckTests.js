@@ -2,15 +2,9 @@ const UserHelper = require('./helpers/UserHelper')
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const Features = require('../../../app/src/infrastructure/Features')
-const MockV1ApiClass = require('./mocks/MockV1Api')
 
 describe('PrimaryEmailCheck', function () {
   let userHelper
-  let MockV1Api
-
-  before(function () {
-    MockV1Api = MockV1ApiClass.instance()
-  })
 
   beforeEach(async function () {
     userHelper = await UserHelper.createUser()
@@ -206,84 +200,18 @@ describe('PrimaryEmailCheck', function () {
       await UserHelper.updateUser(userHelper.user._id, {
         $set: { lastPrimaryEmailCheck: new Date(time) },
       })
+
+      checkResponse = await userHelper.fetch(
+        '/user/emails/primary-email-check',
+        { method: 'POST' }
+      )
     })
 
-    describe('when the user has a secondary email address', function () {
-      before(async function () {
-        if (!Features.hasFeature('saas')) {
-          this.skip()
-        }
-      })
-
-      beforeEach(async function () {
-        await userHelper.confirmEmail(
-          userHelper.user._id,
-          userHelper.user.email
-        )
-        await userHelper.addEmailAndConfirm(
-          userHelper.user._id,
-          'secondary@overleaf.com'
-        )
-
-        checkResponse = await userHelper.fetch(
-          '/user/emails/primary-email-check',
-          { method: 'POST' }
-        )
-      })
-
-      it('should be redirected to the project list page', function () {
-        expect(checkResponse.status).to.equal(302)
-        expect(checkResponse.headers.get('location')).to.equal(
-          UserHelper.url('/project').toString()
-        )
-      })
-    })
-
-    describe('when the user has an institutional email and no secondary', function () {
-      before(async function () {
-        if (!Features.hasFeature('saas')) {
-          this.skip()
-        }
-
-        if (!Features.hasFeature('saml')) {
-          this.skip()
-        }
-      })
-
-      beforeEach(async function () {
-        MockV1Api.createInstitution({
-          name: 'Exampe Institution',
-          hostname: 'example.com',
-          licence: 'pro_plus',
-          confirmed: true,
-        })
-        MockV1Api.addAffiliation(userHelper.user._id, userHelper.user.email)
-
-        checkResponse = await userHelper.fetch(
-          '/user/emails/primary-email-check',
-          { method: 'POST' }
-        )
-      })
-
-      it('should be redirected to the add secondary email page', function () {
-        expect(checkResponse.status).to.equal(302)
-        expect(checkResponse.headers.get('location')).to.equal(
-          UserHelper.url('/user/emails/add-secondary').toString()
-        )
-      })
-    })
-  })
-
-  describe('when user has checked their primary email address', function () {
-    beforeEach(async function () {
-      const time = Date.now() - Settings.primary_email_check_expiration * 2
-      await UserHelper.updateUser(userHelper.user._id, {
-        $set: { lastPrimaryEmailCheck: new Date(time) },
-      })
-
-      await userHelper.fetch('/user/emails/primary-email-check', {
-        method: 'POST',
-      })
+    it('should be redirected to the project list page', function () {
+      expect(checkResponse.status).to.equal(302)
+      expect(checkResponse.headers.get('location')).to.equal(
+        UserHelper.url('/project').toString()
+      )
     })
 
     it("shouldn't be redirected from project list to the primary email check page any longer", async function () {

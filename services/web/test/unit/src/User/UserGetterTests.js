@@ -1008,45 +1008,6 @@ describe('UserGetter', function () {
     })
   })
 
-  describe('getUserConfirmedEmails', function () {
-    beforeEach(function () {
-      this.fakeUser = {
-        emails: [
-          {
-            email: 'email1@foo.bar',
-            reversedHostname: 'rab.oof',
-            confirmedAt: new Date(),
-          },
-          { email: 'email2@foo.bar', reversedHostname: 'rab.oof' },
-          {
-            email: 'email3@foo.bar',
-            reversedHostname: 'rab.oof',
-            confirmedAt: new Date(),
-          },
-        ],
-      }
-      this.UserGetter.promises.getUser = sinon.stub().resolves(this.fakeUser)
-    })
-
-    it('should get user', async function () {
-      const projection = { emails: 1 }
-      await this.UserGetter.promises.getUserConfirmedEmails(this.fakeUser._id)
-
-      this.UserGetter.promises.getUser
-        .calledWith(this.fakeUser._id, projection)
-        .should.equal(true)
-    })
-
-    it('should return only confirmed emails', async function () {
-      const confirmedEmails =
-        await this.UserGetter.promises.getUserConfirmedEmails(this.fakeUser._id)
-
-      expect(confirmedEmails.length).to.equal(2)
-      expect(confirmedEmails[0].email).to.equal('email1@foo.bar')
-      expect(confirmedEmails[1].email).to.equal('email3@foo.bar')
-    })
-  })
-
   describe('getUserbyMainEmail', function () {
     it('query user by main email', function (done) {
       const email = 'hello@world.com'
