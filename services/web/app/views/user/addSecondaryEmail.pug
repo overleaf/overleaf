@@ -1,0 +1,14 @@
+extends ../layout-marketing
+
+block vars
+	- var suppressNavbar = true
+	- var suppressSkipToContent = true
+
+block entrypointVar
+	- entrypoint = 'pages/user/add-secondary-email'
+
+block append meta
+
+block content
+	main.content.content-alt
+		#add-secondary-email

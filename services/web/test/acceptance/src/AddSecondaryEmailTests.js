@@ -46,9 +46,8 @@ describe('Add secondary email address confirmation code email', function () {
     spy.restore()
   })
 
-  it('should redirect to confirm secondary email page', function () {
+  it('should send email with confirmation code', function () {
     expect(res.response.statusCode).to.equal(200)
-    expect(res.body.redir).to.equal('/user/emails/confirm-secondary')
     expect(confirmCode.length).to.equal(6)
   })
 

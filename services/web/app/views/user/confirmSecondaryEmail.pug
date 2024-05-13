@@ -1,0 +1,15 @@
+extends ../layout-marketing
+
+block vars
+	- var suppressNavbar = true
+	- var suppressSkipToContent = true
+
+block entrypointVar
+	- entrypoint = 'pages/user/confirm-secondary-email'
+
+block append meta
+	meta(name="ol-email" content=email)
+
+block content
+	main.content.content-alt
+		#confirm-secondary-email

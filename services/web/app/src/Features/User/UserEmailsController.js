@@ -17,7 +17,9 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const UserPrimaryEmailCheckHandler = require('../User/UserPrimaryEmailCheckHandler')
 const UserAuditLogHandler = require('./UserAuditLogHandler')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
+const Features = require('../../infrastructure/Features')
 const tsscmp = require('tsscmp')
+const Modules = require('../../infrastructure/Modules')
 
 const AUDIT_LOG_TOKEN_PREFIX_LENGTH = 10
 
@@ -208,9 +210,7 @@ async function addWithConfirmationCode(req, res) {
       confirmCodeExpiresTimestamp,
     }
 
-    return res.json({
-      redir: '/user/emails/confirm-secondary',
-    })
+    return res.sendStatus(200)
   } catch (err) {
     if (err.name === 'EmailExistsError') {
       return res.status(409).json({
@@ -414,6 +414,45 @@ async function resendSecondaryEmailConfirmationCode(req, res) {
   }
 }
 
+async function confirmSecondaryEmailPage(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+
+  if (!req.session.pendingSecondaryEmail) {
+    const redirectURL =
+      AuthenticationController.getRedirectFromSession(req) || '/project'
+    return res.redirect(redirectURL)
+  }
+
+  AnalyticsManager.recordEventForUser(
+    userId,
+    'confirm-secondary-email-page-displayed'
+  )
+
+  res.render('user/confirmSecondaryEmail', {
+    email: req.session.pendingSecondaryEmail.email,
+  })
+}
+
+async function addSecondaryEmailPage(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+
+  const confirmedEmails =
+    await UserGetter.promises.getUserConfirmedEmails(userId)
+
+  if (confirmedEmails.length >= 2) {
+    const redirectURL =
+      AuthenticationController.getRedirectFromSession(req) || '/project'
+    return res.redirect(redirectURL)
+  }
+
+  AnalyticsManager.recordEventForUser(
+    userId,
+    'add-secondary-email-page-displayed'
+  )
+
+  res.render('user/addSecondaryEmail')
+}
+
 async function primaryEmailCheckPage(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const user = await UserGetter.promises.getUser(userId, {
@@ -440,6 +479,30 @@ async function primaryEmailCheck(req, res) {
     $set: { lastPrimaryEmailCheck: new Date() },
   })
   AnalyticsManager.recordEventForUser(userId, 'primary-email-check-done')
+
+  // We want to redirect to prompt a user to add a secondary email if their primary
+  // is an institutional email and they dont' already have a secondary.
+  if (Features.hasFeature('affiliations')) {
+    const confirmedEmails =
+      await UserGetter.promises.getUserConfirmedEmails(userId)
+
+    if (confirmedEmails.length < 2) {
+      const primaryEmail = await UserGetter.promises.getUserEmail(userId)
+      const primaryEmailDomain = EmailHelper.getDomain(primaryEmail)
+
+      const institution = (
+        await Modules.promises.hooks.fire(
+          'getInstitutionViaDomain',
+          primaryEmailDomain
+        )
+      )?.[0]
+
+      if (institution) {
+        return AsyncFormHelper.redirect(req, res, '/user/emails/add-secondary')
+      }
+    }
+  }
+
   AsyncFormHelper.redirect(req, res, '/project')
 }
 
@@ -550,6 +613,10 @@ const UserEmailsController = {
   resendConfirmation,
 
   sendReconfirmation,
+
+  addSecondaryEmailPage: expressify(addSecondaryEmailPage),
+
+  confirmSecondaryEmailPage: expressify(confirmSecondaryEmailPage),
 
   primaryEmailCheckPage: expressify(primaryEmailCheckPage),
 

@@ -348,6 +348,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       CaptchaMiddleware.validateCaptcha('addEmail'),
       UserEmailsController.add
     )
+
     webRouter.post(
       '/user/emails/delete',
       AuthenticationController.requireLogin(),
@@ -389,6 +390,20 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       PermissionsController.requirePermission('add-secondary-email'),
       RateLimiterMiddleware.rateLimit(rateLimiters.resendConfirmationCode),
       UserEmailsController.resendSecondaryEmailConfirmationCode
+    )
+
+    webRouter.get(
+      '/user/emails/add-secondary',
+      AuthenticationController.requireLogin(),
+      PermissionsController.requirePermission('add-secondary-email'),
+      UserEmailsController.addSecondaryEmailPage
+    )
+
+    webRouter.get(
+      '/user/emails/confirm-secondary',
+      AuthenticationController.requireLogin(),
+      PermissionsController.requirePermission('add-secondary-email'),
+      UserEmailsController.confirmSecondaryEmailPage
     )
   }
 

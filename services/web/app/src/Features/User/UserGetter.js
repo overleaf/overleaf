@@ -79,6 +79,18 @@ async function getUserFullEmails(userId) {
   )
 }
 
+async function getUserConfirmedEmails(userId) {
+  const user = await UserGetter.promises.getUser(userId, {
+    emails: 1,
+  })
+
+  if (!user) {
+    throw new Error('User not Found')
+  }
+
+  return user.emails.filter(email => !!email.confirmedAt)
+}
+
 async function getSsoUsersAtInstitution(institutionId, projection) {
   if (!projection) {
     throw new Error('missing projection')
@@ -123,6 +135,8 @@ const UserGetter = {
   },
 
   getUserFullEmails: callbackify(getUserFullEmails),
+
+  getUserConfirmedEmails: callbackify(getUserConfirmedEmails),
 
   getUserByMainEmail(email, projection, callback) {
     email = email.trim()
