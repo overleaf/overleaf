@@ -42,14 +42,14 @@ block content
 
 					.row.row-spaced-large
 						.col-md-12
-							.plans-header.plans-subheader.text-centered
+							.plans-header.text-centered
 								hr
-								h2.header-with-btn #{translate('still_have_questions')}
+								h2 #{translate('still_have_questions')}
 								button.btn.plans-v2-btn-header.text-capitalize(
 									data-ol-open-contact-form-modal="general"
 								) #{translate('contact_us')}
 
-					.row.row-spaced
+					.row.row-spaced-large
 
 	include ./plans/_group_plan_modal
 	!= moduleIncludes("contactModalGeneral-marketing", locals)
