@@ -1,9 +1,4 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitForElementToBeRemoved,
-} from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { expect } from 'chai'
 import sinon from 'sinon'
 import fetchMock from 'fetch-mock'
@@ -55,19 +50,19 @@ describe('<AddEmailInput/>', function () {
           handleAddNewEmail={handleAddNewEmailStub}
         />
       )
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user' },
       })
     })
 
     it('should render the text being typed', function () {
-      const input = screen.getByRole('textbox') as HTMLInputElement
+      const input = screen.getByTestId('affiliations-email') as HTMLInputElement
       expect(input.value).to.equal('user')
     })
 
     it('should dispatch a `change` event on every stroke', function () {
       expect(onChangeStub.calledWith('user')).to.equal(true)
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 's' },
       })
       expect(onChangeStub.calledWith('s')).to.equal(true)
@@ -78,18 +73,22 @@ describe('<AddEmailInput/>', function () {
     })
 
     it('should submit on Enter if email looks valid', async function () {
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user@domain.com' },
       })
-      fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' })
+      fireEvent.keyDown(screen.getByTestId('affiliations-email'), {
+        key: 'Enter',
+      })
       expect(handleAddNewEmailStub.calledWith()).to.equal(true)
     })
 
     it('should not submit on Enter if email does not look valid', async function () {
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user@' },
       })
-      fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' })
+      fireEvent.keyDown(screen.getByTestId('affiliations-email'), {
+        key: 'Enter',
+      })
       expect(handleAddNewEmailStub.calledWith()).to.equal(false)
     })
   })
@@ -105,13 +104,15 @@ describe('<AddEmailInput/>', function () {
     describe('when there are no matches', function () {
       beforeEach(function () {
         fetchMock.get('express:/institutions/domains', 200)
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@d' },
         })
       })
 
       it('should render the text being typed', function () {
-        const input = screen.getByRole('textbox') as HTMLInputElement
+        const input = screen.getByTestId(
+          'affiliations-email'
+        ) as HTMLInputElement
         expect(input.value).to.equal('user@d')
       })
     })
@@ -119,15 +120,22 @@ describe('<AddEmailInput/>', function () {
     describe('when there is a domain match', function () {
       beforeEach(function () {
         fetchMock.get('express:/institutions/domains', testInstitutionData)
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@d' },
         })
       })
 
       it('should render the text being typed along with the suggestion', async function () {
-        const input = screen.getByRole('textbox') as HTMLInputElement
+        const input = screen.getByTestId(
+          'affiliations-email'
+        ) as HTMLInputElement
         expect(input.value).to.equal('user@d')
-        await screen.findByText('user@domain.edu')
+        await waitFor(() => {
+          const shadowInput = screen.getByTestId(
+            'affiliations-email-shadow'
+          ) as HTMLInputElement
+          expect(shadowInput.value).to.equal('user@domain.edu')
+        })
       })
 
       it('should dispatch a `change` event with the typed text', function () {
@@ -135,7 +143,7 @@ describe('<AddEmailInput/>', function () {
       })
 
       it('should dispatch a `change` event with institution data when the typed email contains the institution domain', async function () {
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@domain.edu' },
         })
         await fetchMock.flush(true)
@@ -148,8 +156,13 @@ describe('<AddEmailInput/>', function () {
       })
 
       it('should clear the suggestion when the potential domain match is completely deleted', async function () {
-        await screen.findByText('user@domain.edu')
-        fireEvent.change(screen.getByRole('textbox'), {
+        await waitFor(() => {
+          const shadowInput = screen.getByTestId(
+            'affiliations-email-shadow'
+          ) as HTMLInputElement
+          expect(shadowInput.value).to.equal('user@domain.edu')
+        })
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: '' },
         })
         expect(screen.queryByText('user@domain.edu')).to.be.null
@@ -157,12 +170,22 @@ describe('<AddEmailInput/>', function () {
 
       describe('when there is a suggestion and "Tab" key is pressed', function () {
         beforeEach(async function () {
-          await screen.findByText('user@domain.edu') // wait until autocompletion available
-          fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Tab' })
+          // wait until autocompletion available
+          await waitFor(() => {
+            const shadowInput = screen.getByTestId(
+              'affiliations-email-shadow'
+            ) as HTMLInputElement
+            expect(shadowInput.value).to.equal('user@domain.edu')
+          })
+          fireEvent.keyDown(screen.getByTestId('affiliations-email'), {
+            key: 'Tab',
+          })
         })
 
         it('it should autocomplete the input', async function () {
-          const input = screen.getByRole('textbox') as HTMLInputElement
+          const input = screen.getByTestId(
+            'affiliations-email'
+          ) as HTMLInputElement
           expect(input.value).to.equal('user@domain.edu')
         })
 
@@ -178,12 +201,22 @@ describe('<AddEmailInput/>', function () {
 
       describe('when there is a suggestion and "Enter" key is pressed', function () {
         beforeEach(async function () {
-          await screen.findByText('user@domain.edu') // wait until autocompletion available
-          fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' })
+          // wait until autocompletion available
+          await waitFor(() => {
+            const shadowInput = screen.getByTestId(
+              'affiliations-email-shadow'
+            ) as HTMLInputElement
+            expect(shadowInput.value).to.equal('user@domain.edu')
+          })
+          fireEvent.keyDown(screen.getByTestId('affiliations-email'), {
+            key: 'Enter',
+          })
         })
 
         it('it should autocomplete the input', async function () {
-          const input = screen.getByRole('textbox') as HTMLInputElement
+          const input = screen.getByTestId(
+            'affiliations-email'
+          ) as HTMLInputElement
           expect(input.value).to.equal('user@domain.edu')
         })
 
@@ -201,17 +234,22 @@ describe('<AddEmailInput/>', function () {
         fetchMock.reset()
 
         // clear input
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: '' },
         })
         // type a hint to trigger the domain search
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@d' },
         })
 
         expect(fetchMock.called()).to.be.false
         expect(onChangeStub.calledWith('user@d')).to.equal(true)
-        await screen.findByText('user@domain.edu')
+        await waitFor(() => {
+          const shadowInput = screen.getByTestId(
+            'affiliations-email-shadow'
+          ) as HTMLInputElement
+          expect(shadowInput.value).to.equal('user@domain.edu')
+        })
       })
     })
 
@@ -228,7 +266,7 @@ describe('<AddEmailInput/>', function () {
           { university: { id: 1 }, hostname: blockedDomain },
         ]
         fetchMock.get('express:/institutions/domains', blockedInstitution)
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: `user@${blockedDomain.split('.')[0]}` },
         })
         await fetchMock.flush(true)
@@ -243,7 +281,7 @@ describe('<AddEmailInput/>', function () {
           },
         ]
         fetchMock.get('express:/institutions/domains', blockedInstitution)
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: {
             value: `user@subdomain.${blockedDomain.split('.')[0]}`,
           },
@@ -257,10 +295,15 @@ describe('<AddEmailInput/>', function () {
       beforeEach(async function () {
         // type an initial suggestion
         fetchMock.get('express:/institutions/domains', testInstitutionData)
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@d' },
         })
-        await screen.findByText('user@domain.edu')
+        await waitFor(() => {
+          const shadowInput = screen.getByTestId(
+            'affiliations-email-shadow'
+          ) as HTMLInputElement
+          expect(shadowInput.value).to.equal('user@domain.edu')
+        })
 
         // make sure the next suggestions are delayed
         clearDomainCache()
@@ -269,17 +312,25 @@ describe('<AddEmailInput/>', function () {
       })
 
       it('should keep the suggestion if the hint matches the previously matched domain', async function () {
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@do' },
         })
-        screen.getByText('user@domain.edu')
+        const shadowInput = screen.getByTestId(
+          'affiliations-email-shadow'
+        ) as HTMLInputElement
+        expect(shadowInput.value).to.equal('user@domain.edu')
       })
 
       it('should remove the suggestion if the hint does not match the previously matched domain', async function () {
-        fireEvent.change(screen.getByRole('textbox'), {
+        fireEvent.change(screen.getByTestId('affiliations-email'), {
           target: { value: 'user@foo' },
         })
-        expect(screen.queryByText('user@domain.edu')).to.be.null
+        await waitFor(() => {
+          const shadowInput = screen.getByTestId(
+            'affiliations-email-shadow'
+          ) as HTMLInputElement
+          expect(shadowInput.value).to.equal('')
+        })
       })
     })
   })
@@ -292,10 +343,15 @@ describe('<AddEmailInput/>', function () {
       fetchMock.get('express:/institutions/domains', testInstitutionData)
       onChangeStub = sinon.stub()
       render(<Input {...defaultProps} onChange={onChangeStub} />)
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user@d' },
       })
-      await screen.findByText('user@domain.edu')
+      await waitFor(() => {
+        const shadowInput = screen.getByTestId(
+          'affiliations-email-shadow'
+        ) as HTMLInputElement
+        expect(shadowInput.value).to.equal('user@domain.edu')
+      })
 
       // subsequent requests fail
       fetchMock.reset()
@@ -303,16 +359,19 @@ describe('<AddEmailInput/>', function () {
     })
 
     it('should clear suggestions', async function () {
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user@dom' },
       })
 
-      const input = screen.getByRole('textbox') as HTMLInputElement
+      const input = screen.getByTestId('affiliations-email') as HTMLInputElement
       expect(input.value).to.equal('user@dom')
 
-      await waitForElementToBeRemoved(() =>
-        screen.queryByText('user@domain.edu')
-      )
+      await waitFor(() => {
+        const shadowInput = screen.getByTestId(
+          'affiliations-email-shadow'
+        ) as HTMLInputElement
+        expect(shadowInput.value).to.equal('')
+      })
 
       expect(fetchMock.called()).to.be.true // ensures `domainCache` hasn't been hit
     })
@@ -322,11 +381,14 @@ describe('<AddEmailInput/>', function () {
     it('should clear suggestion', async function () {
       fetchMock.get('express:/institutions/domains', testInstitutionData)
       render(<Input {...defaultProps} onChange={sinon.stub()} />)
-      fireEvent.change(screen.getByRole('textbox'), {
+      fireEvent.change(screen.getByTestId('affiliations-email'), {
         target: { value: 'user@other' },
       })
       await fetchMock.flush(true)
-      expect(screen.queryByText('user@domain.edu')).to.not.exist
+      const shadowInput = screen.getByTestId(
+        'affiliations-email-shadow'
+      ) as HTMLInputElement
+      expect(shadowInput.value).to.equal('')
     })
   })
 })

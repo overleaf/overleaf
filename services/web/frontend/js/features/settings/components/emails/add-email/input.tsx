@@ -11,6 +11,7 @@ import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAbortController from '../../../../../shared/hooks/use-abort-controller'
 import domainBlocklist from '../../../domain-blocklist'
 import { debugConsole } from '@/utils/debugging'
+import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
 
 const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 
@@ -48,7 +49,7 @@ type InputProps = {
 function Input({ onChange, handleAddNewEmail }: InputProps) {
   const { signal } = useAbortController()
 
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const [suggestion, setSuggestion] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState<string | null>(null)
   const [matchedDomain, setMatchedDomain] = useState<DomainInfo | null>(null)
@@ -161,15 +162,16 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
 
   return (
     <div className="input-suggestions">
-      <div className="form-control input-suggestions-shadow">
-        <div className="input-suggestions-shadow-suggested">
-          {suggestion || ''}
-        </div>
-      </div>
-
-      <input
+      <FormControlWrapper
+        data-testid="affiliations-email-shadow"
+        readOnly
+        className="input-suggestions-shadow"
+        value={suggestion || ''}
+      />
+      <FormControlWrapper
         id="affiliations-email"
-        className="form-control input-suggestions-main"
+        data-testid="affiliations-email"
+        className="input-suggestions-main"
         type="email"
         onChange={handleEmailChange}
         onKeyDown={handleKeyDownEvent}

@@ -1,10 +1,13 @@
 import { useState, useEffect, Dispatch, SetStateAction } from 'react'
-import { Checkbox, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import { postJSON, FetchError } from '../../../../infrastructure/fetch-json'
 import getMeta from '../../../../utils/meta'
 import LeaveModalFormError from './modal-form-error'
 import { useLocation } from '../../../../shared/hooks/use-location'
+import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
+import FormLabelWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-label-wrapper'
+import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import FormCheckboxWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-checkbox-wrapper'
 
 export type LeaveModalFormProps = {
   setInFlight: Dispatch<SetStateAction<boolean>>
@@ -26,15 +29,11 @@ function LeaveModalForm({
   const [confirmation, setConfirmation] = useState(false)
   const [error, setError] = useState<FetchError | null>(null)
 
-  const handleEmailChange = (
-    event: React.ChangeEvent<HTMLFormElement & FormControl>
-  ) => {
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(event.target.value)
   }
 
-  const handlePasswordChange = (
-    event: React.ChangeEvent<HTMLFormElement & FormControl>
-  ) => {
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(event.target.value)
   }
 
@@ -74,43 +73,43 @@ function LeaveModalForm({
 
   return (
     <form id="leave-form" onSubmit={handleSubmit}>
-      <FormGroup>
-        <ControlLabel htmlFor="email-input">{t('email')}</ControlLabel>
-        <FormControl
-          id="email-input"
+      <FormGroupWrapper controlId="email-input">
+        <FormLabelWrapper>{t('email')}</FormLabelWrapper>
+        <FormControlWrapper
           type="text"
           placeholder={t('email')}
           required
           value={email}
           onChange={handleEmailChange}
         />
-      </FormGroup>
-      <FormGroup>
-        <ControlLabel htmlFor="password-input">{t('password')}</ControlLabel>
-        <FormControl
-          id="password-input"
+      </FormGroupWrapper>
+      <FormGroupWrapper controlId="password-input">
+        <FormLabelWrapper>{t('password')}</FormLabelWrapper>
+        <FormControlWrapper
           type="password"
           placeholder={t('password')}
           required
           value={password}
           onChange={handlePasswordChange}
         />
-      </FormGroup>
-      <Checkbox
+      </FormGroupWrapper>
+      <FormCheckboxWrapper
+        id="confirm-account-deletion"
         required
         checked={confirmation}
         onChange={handleConfirmationChange}
-      >
-        <Trans
-          i18nKey="delete_account_confirmation_label"
-          components={[<i />]} // eslint-disable-line react/jsx-key
-          values={{
-            userDefaultEmail,
-          }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-        />
-      </Checkbox>
+        label={
+          <Trans
+            i18nKey="delete_account_confirmation_label"
+            components={[<i />]} // eslint-disable-line react/jsx-key
+            values={{
+              userDefaultEmail,
+            }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+          />
+        }
+      />
       {error ? <LeaveModalFormError error={error} /> : null}
     </form>
   )

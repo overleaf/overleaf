@@ -11,6 +11,7 @@ import { DomainInfo } from './input'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAsync from '../../../../../shared/hooks/use-async'
 import UniversityName from './university-name'
+import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
 
 type InstitutionFieldsProps = {
   countryCode: CountryCode | null
@@ -151,17 +152,15 @@ function InstitutionFields({
       ) : (
         // Display the country and university fields
         <>
-          <div className="form-group mb-2">
+          <FormGroupWrapper className="mb-2">
             <CountryInput
               id="new-email-country-input"
               setValue={setCountryCode}
               ref={countryRef}
             />
-          </div>
-          <div
-            className={`form-group ${
-              isRoleAndDepartmentVisible ? 'mb-2' : 'mb-0'
-            }`}
+          </FormGroupWrapper>
+          <FormGroupWrapper
+            className={isRoleAndDepartmentVisible ? 'mb-2' : 'mb-0'}
           >
             <DownshiftInput
               items={getUniversityItems()}
@@ -171,12 +170,12 @@ function InstitutionFields({
               setValue={setUniversityName}
               disabled={!countryCode}
             />
-          </div>
+          </FormGroupWrapper>
         </>
       )}
       {isRoleAndDepartmentVisible && (
         <>
-          <div className="form-group mb-2">
+          <FormGroupWrapper className="mb-2">
             <DownshiftInput
               items={[...defaultRoles]}
               inputValue={role}
@@ -184,8 +183,8 @@ function InstitutionFields({
               label={t('role')}
               setValue={setRole}
             />
-          </div>
-          <div className="form-group mb-0">
+          </FormGroupWrapper>
+          <FormGroupWrapper className="mb-0">
             <DownshiftInput
               items={departments}
               inputValue={department}
@@ -193,7 +192,7 @@ function InstitutionFields({
               label={t('department')}
               setValue={setDepartment}
             />
-          </div>
+          </FormGroupWrapper>
         </>
       )}
     </>

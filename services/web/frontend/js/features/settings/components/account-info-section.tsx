@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import {
   getUserFacingMessage,
@@ -11,6 +10,10 @@ import useAsync from '../../../shared/hooks/use-async'
 import { useUserContext } from '../../../shared/context/user-context'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
+import FormLabelWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-label-wrapper'
+import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
 
 function AccountInfoSection() {
   const { t } = useTranslation()
@@ -104,20 +107,20 @@ function AccountInfoSection() {
           required={false}
         />
         {isSuccess ? (
-          <FormGroup>
+          <FormGroupWrapper>
             <NotificationWrapper
               type="success"
               content={t('thanks_settings_updated')}
             />
-          </FormGroup>
+          </FormGroupWrapper>
         ) : null}
         {isError ? (
-          <FormGroup>
+          <FormGroupWrapper>
             <NotificationWrapper
               type="error"
               content={getUserFacingMessage(error) ?? ''}
             />
-          </FormGroup>
+          </FormGroupWrapper>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (
           <ButtonWrapper
@@ -159,14 +162,12 @@ function ReadOrWriteFormGroup({
 }: ReadOrWriteFormGroupProps) {
   const [validationMessage, setValidationMessage] = useState('')
 
-  const handleInvalid = (
-    event: React.InvalidEvent<HTMLInputElement & FormControl>
-  ) => {
+  const handleInvalid = (event: React.InvalidEvent<HTMLInputElement>) => {
     event.preventDefault()
   }
 
   const handleChangeAndValidity = (
-    event: React.ChangeEvent<HTMLInputElement & FormControl>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleChange(event)
     setValidationMessage(event.target.validationMessage)
@@ -174,18 +175,17 @@ function ReadOrWriteFormGroup({
 
   if (!canEdit) {
     return (
-      <FormGroup>
-        <ControlLabel htmlFor={id}>{label}</ControlLabel>
-        <FormControl id={id} type="text" readOnly value={value} />
-      </FormGroup>
+      <FormGroupWrapper controlId={id}>
+        <FormLabelWrapper>{label}</FormLabelWrapper>
+        <FormControlWrapper type="text" readOnly value={value} />
+      </FormGroupWrapper>
     )
   }
 
   return (
-    <FormGroup>
-      <ControlLabel htmlFor={id}>{label}</ControlLabel>
-      <FormControl
-        id={id}
+    <FormGroupWrapper controlId={id}>
+      <FormLabelWrapper>{label}</FormLabelWrapper>
+      <FormControlWrapper
         type={type}
         required={required}
         value={value}
@@ -193,10 +193,8 @@ function ReadOrWriteFormGroup({
         onChange={handleChangeAndValidity}
         onInvalid={handleInvalid}
       />
-      {validationMessage ? (
-        <span className="small text-danger">{validationMessage}</span>
-      ) : null}
-    </FormGroup>
+      {validationMessage && <FormText isError>{validationMessage}</FormText>}
+    </FormGroupWrapper>
   )
 }
 

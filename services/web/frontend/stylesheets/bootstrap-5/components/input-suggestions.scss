@@ -9,6 +9,12 @@
 }
 
 .input-suggestions-shadow {
-  background-color: @input-bg !important;
-  color: lighten(@input-color, 25%);
+  background-color: $input-bg;
+  color: var(--content-placeholder);
+
+  & + .input-suggestions-main {
+    &:focus {
+      background-color: transparent;
+    }
+  }
 }

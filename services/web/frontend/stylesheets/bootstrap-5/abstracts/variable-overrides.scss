@@ -2,6 +2,12 @@
 
 $prefix: bs-;
 
+// Options
+//
+// Quickly modify global styling by enabling or disabling optional features.
+
+$enable-validation-icons: false;
+
 // Fonts
 $font-family-sans-serif: 'Noto Sans', sans-serif;
 $font-family-serif: 'Merriweather', serif;
@@ -9,6 +15,15 @@ $font-family-monospace: 'DM Mono', monospace;
 $font-size-base: 1rem;
 $font-size-sm: var(--font-size-02);
 $line-height-base: 1.5;
+
+// Components
+//
+// Define common padding and border radius sizes and more.
+
+$focus-ring-width: 2px;
+$focus-ring-opacity: 1;
+$focus-ring-color: $blue-30;
+$focus-ring-blur: 0;
 
 // Buttons
 $btn-font-family: $font-family-sans-serif;
@@ -20,9 +35,105 @@ $btn-border-radius-lg: $border-radius-full;
 $btn-border-radius-sm: $border-radius-full;
 $btn-white-space: nowrap;
 
+// Forms
+
+// form-text-variables
+$form-text-margin-top: $spacing-04;
+$form-text-font-size: var(--font-size-02);
+$form-text-color: var(--content-secondary);
+
+// form-label-variables
+$form-label-margin-bottom: $spacing-02;
+$form-label-font-size: var(--font-size-02);
+$form-label-font-weight: 600;
+$form-label-color: var(--content-secondary);
+
+// form-input-variables
+$input-padding-y: $spacing-03;
+$input-padding-x: $spacing-04;
+$input-font-size: var(--font-size-03);
+$input-line-height: 1.5; // equivalent of var(--line-height-03) - BS expects a unitless value for further calculations
+
+$input-padding-y-sm: $spacing-01;
+$input-padding-x-sm: $spacing-03;
+$input-font-size-sm: var(--font-size-02);
+$input-line-height-sm: 1.25; // equivalent of var(--line-height-02) - BS expects a unitless value for further calculations
+
+$input-padding-y-lg: $spacing-05;
+$input-padding-x-lg: $spacing-05;
+$input-font-size-lg: var(--font-size-03);
+
+$input-bg: $bg-light-primary;
+$input-disabled-color: var(--content-disabled);
+$input-disabled-bg: $bg-light-disabled;
+$input-disabled-border-color: var(--border-disabled);
+
+$input-color: $content-primary;
+$input-border-color: $neutral-60;
+$input-border-width: var(--bs-border-width);
+
+$input-border-radius: $border-radius-base;
+$input-border-radius-sm: $border-radius-base;
+$input-border-radius-lg: $border-radius-base;
+
+$input-focus-border-color: var(--border-active);
+
+$input-placeholder-color: var(--content-placeholder);
+$input-plaintext-color: $content-primary;
+
+$input-height-border: calc(
+  #{$input-border-width} * 2
+); // stylelint-disable-line function-disallowed-list
+
+$input-height: add(
+  $input-line-height * 1em,
+  add($input-padding-y * 2, $input-height-border, false)
+);
+$input-height-sm: add(
+  $input-line-height-sm * 1em,
+  add($input-padding-y-sm * 2, $input-height-border, false)
+);
+$input-height-lg: add(
+  $input-line-height * 1em,
+  add($input-padding-y-lg * 2, $input-height-border, false)
+);
+
+// form-check-variables
+$form-check-label-color: var(--content-primary);
+
+$form-check-input-border: var(--bs-border-width) solid var(--border-primary);
+$form-check-input-border-radius: $border-radius-base;
+$form-check-input-focus-border: var(--border-primary);
+
+$form-check-input-disabled-opacity: 1;
+
+// Form validation
+
+// form-feedback-variables
+$form-feedback-invalid-color: $bg-danger-01;
+$form-feedback-icon-invalid: null;
+
+// form-validation-colors
+$form-invalid-color: $form-feedback-invalid-color;
+$form-invalid-border-color: $bg-danger-01;
+
+// form-validation-states
+$form-validation-states: (
+  'invalid': (
+    'color': $bg-danger-01,
+    'icon': $form-feedback-icon-invalid,
+    'tooltip-color': #fff,
+    'tooltip-bg-color': var(--bs-danger),
+    'focus-box-shadow': 0 0 $focus-ring-blur $focus-ring-width
+      rgba($red-30, $focus-ring-opacity),
+    'border-color': var(--#{$prefix}form-invalid-border-color),
+  ),
+);
+
 // Colors
 $primary: $bg-accent-01;
 $secondary: $bg-light-primary;
+$success: $bg-accent-01;
 $info: $bg-info-01;
 $warning: $bg-warning-01;
 $danger: $bg-danger-01;

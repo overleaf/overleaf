@@ -10,6 +10,7 @@ import defaultRoles from '../../data/roles'
 import defaultDepartments from '../../data/departments'
 import { University } from '../../../../../../types/university'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
 
 type InstitutionAndRoleProps = {
   userEmailData: UserEmailData
@@ -120,7 +121,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
       ) : (
         <div className="affiliation-change-container small">
           <form onSubmit={handleSubmit}>
-            <div className="form-group mb-2">
+            <FormGroupWrapper className="mb-2">
               <DownshiftInput
                 items={[...defaultRoles]}
                 inputValue={role}
@@ -129,8 +130,8 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
                 setValue={setRole}
                 ref={roleRef}
               />
-            </div>
-            <div className="form-group mb-2">
+            </FormGroupWrapper>
+            <FormGroupWrapper className="mb-2">
               <DownshiftInput
                 items={departments}
                 inputValue={department}
@@ -138,7 +139,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
                 label={t('department')}
                 setValue={setDepartment}
               />
-            </div>
+            </FormGroupWrapper>
             <ButtonWrapper
               size="small"
               variant="primary"

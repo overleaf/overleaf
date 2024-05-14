@@ -1,0 +1,4 @@
+.grecaptcha-badge {
+  visibility: hidden;
+  height: 0 !important; // Prevent layout shift
+}

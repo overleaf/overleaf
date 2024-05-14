@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   getUserFacingMessage,
@@ -12,6 +11,10 @@ import { PasswordStrengthOptions } from '../../../../../types/password-strength-
 import useAsync from '../../../shared/hooks/use-async'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
+import FormLabelWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-label-wrapper'
+import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import FormTextWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-text-wrapper'
 
 type PasswordUpdateResult = {
   message?: {
@@ -156,12 +159,12 @@ function PasswordForm() {
         autoComplete="new-password"
       />
       {isSuccess && data?.message?.text ? (
-        <FormGroup>
+        <FormGroupWrapper>
           <NotificationWrapper type="success" content={data.message.text} />
-        </FormGroup>
+        </FormGroupWrapper>
       ) : null}
       {isError ? (
-        <FormGroup>
+        <FormGroupWrapper>
           <NotificationWrapper
             type="error"
             content={
@@ -195,7 +198,7 @@ function PasswordForm() {
               )
             }
           />
-        </FormGroup>
+        </FormGroupWrapper>
       ) : null}
       <ButtonWrapper
         form="password-change-form"
@@ -235,25 +238,26 @@ function PasswordFormGroup({
   const [validationMessage, setValidationMessage] = useState('')
   const [hadInteraction, setHadInteraction] = useState(false)
 
-  const handleInvalid = (
-    event: React.InvalidEvent<HTMLInputElement & FormControl>
-  ) => {
+  const handleInvalid = (event: React.InvalidEvent<HTMLInputElement>) => {
     event.preventDefault()
   }
 
   const handleChangeAndValidity = (
-    event: React.ChangeEvent<HTMLInputElement & FormControl>
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     handleChange(event)
     setHadInteraction(true)
     setValidationMessage(event.target.validationMessage)
   }
 
+  const isInvalid = Boolean(
+    hadInteraction && (parentValidationMessage || validationMessage)
+  )
+
   return (
-    <FormGroup>
-      <ControlLabel htmlFor={id}>{label}</ControlLabel>
-      <FormControl
-        id={id}
+    <FormGroupWrapper controlId={id}>
+      <FormLabelWrapper>{label}</FormLabelWrapper>
+      <FormControlWrapper
         type="password"
         placeholder="*********"
         autoComplete={autoComplete}
@@ -263,13 +267,14 @@ function PasswordFormGroup({
         onInvalid={handleInvalid}
         required={hadInteraction}
         minLength={minLength}
+        isInvalid={isInvalid}
       />
-      {hadInteraction && (parentValidationMessage || validationMessage) ? (
-        <span className="small text-danger">
+      {isInvalid && (
+        <FormTextWrapper isError>
           {parentValidationMessage || validationMessage}
-        </span>
-      ) : null}
-    </FormGroup>
+        </FormTextWrapper>
+      )}
+    </FormGroupWrapper>
   )
 }
 

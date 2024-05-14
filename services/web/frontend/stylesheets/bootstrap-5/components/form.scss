@@ -1,0 +1,82 @@
+.form-check-input {
+  @function form-check-box-svg($color) {
+    @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/></svg>");
+  }
+  @function form-check-radio-svg($color) {
+    @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2' fill='#{$color}'/></svg>");
+  }
+  @function form-check-indeterminate-svg($color) {
+    @return url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>");
+  }
+
+  &:hover {
+    &:not(:disabled) {
+      border-color: var(--border-hover);
+
+      &:checked,
+      &[type='checkbox']:indeterminate {
+        background-color: var(--bg-accent-02);
+        border-color: var(--bg-accent-02);
+      }
+    }
+  }
+
+  &:disabled {
+    @mixin input-disabled-styles {
+      background-color: $input-disabled-bg;
+      border-color: $input-disabled-border-color;
+    }
+
+    @include input-disabled-styles;
+
+    &[type='checkbox']:indeterminate {
+      @include input-disabled-styles;
+
+      background-image: escape-svg(form-check-indeterminate-svg($neutral-40));
+    }
+  }
+
+  // Use disabled attribute in addition of :disabled pseudo-class
+  // See: https://github.com/twbs/bootstrap/issues/28247
+  &[disabled],
+  &:disabled {
+    ~ .form-check-label {
+      color: $input-disabled-color;
+    }
+
+    &:checked {
+      &[type='checkbox'] {
+        background-image: escape-svg(form-check-box-svg($neutral-40));
+      }
+
+      &[type='radio'] {
+        background-image: escape-svg(form-check-radio-svg($neutral-40));
+      }
+    }
+  }
+}
+
+.form-control {
+  &[disabled],
+  &:disabled {
+    &::placeholder {
+      color: var(--content-disabled);
+    }
+  }
+}
+
+.form-text {
+  display: inline-flex;
+  gap: $spacing-02;
+  line-height: var(--line-height-02);
+
+  .form-control[disabled] ~ & {
+    color: var(--content-disabled);
+  }
+}
+
+.form-label {
+  &:has(+ .form-control[disabled]) {
+    color: var(--content-disabled);
+  }
+}
