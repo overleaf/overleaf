@@ -583,7 +583,7 @@ const RecurlyWrapper = {
         }
         return RecurlyWrapper._parseXml(body, function (err, data) {
           if (err) {
-            logger.warn({ err }, 'could not get accoutns')
+            logger.warn({ err }, 'could not get accounts')
             return callback(err)
           }
           const items = data[resource]
