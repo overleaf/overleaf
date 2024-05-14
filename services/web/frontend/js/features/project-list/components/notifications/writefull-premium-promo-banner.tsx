@@ -31,32 +31,34 @@ function WritefullPremiumPromoBanner({
   }
 
   return (
-    <Notification
-      bsStyle="info"
-      newNotificationStyle
-      onDismiss={handleClose}
-      body={
-        <>
-          Enjoying Writefull? Get <strong>10% off Writefull Premium</strong>,
-          giving you access to TeXGPT—AI assistance to generate LaTeX code. Use{' '}
-          <strong>OVERLEAF10</strong> at the checkout.
-        </>
-      }
-      action={
-        <a
-          className="btn btn-secondary btn-sm"
-          href="https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans"
-          target="_blank"
-          rel="noreferrer"
-          onClick={() => {
-            sendMB('promo-click', eventSegmentation)
-          }}
-        >
-          <WritefullLogo width="16" height="16" />{' '}
-          <span>Get Writefull Premium</span>
-        </a>
-      }
-    />
+    <div data-testid="writefull-premium-promo-banner">
+      <Notification
+        bsStyle="info"
+        newNotificationStyle
+        onDismiss={handleClose}
+        body={
+          <>
+            Enjoying Writefull? Get <strong>10% off Writefull Premium</strong>,
+            giving you access to TeXGPT—AI assistance to generate LaTeX code.
+            Use <strong>OVERLEAF10</strong> at the checkout.
+          </>
+        }
+        action={
+          <a
+            className="btn btn-secondary btn-sm"
+            href="https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans"
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => {
+              sendMB('promo-click', eventSegmentation)
+            }}
+          >
+            <WritefullLogo width="16" height="16" />{' '}
+            <span>Get Writefull Premium</span>
+          </a>
+        }
+      />
+    </div>
   )
 }
 

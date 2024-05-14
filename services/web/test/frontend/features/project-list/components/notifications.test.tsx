@@ -998,7 +998,12 @@ describe('<UserNotifications />', function () {
       it('dismisses the banner when the close button is clicked', function () {
         renderWithinProjectListProvider(UserNotifications)
         screen.getByRole('link', { name: /Writefull/ })
-        const closeButton = screen.getByRole('button', { name: 'Close' })
+        const WritefullPromoBanner = screen.getByTestId(
+          'writefull-premium-promo-banner'
+        )
+        const closeButton = within(WritefullPromoBanner).getByRole('button', {
+          name: 'Close',
+        })
         fireEvent.click(closeButton)
         expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
         expect(localStorage.getItem('has_dismissed_writefull_promo_banner')).to

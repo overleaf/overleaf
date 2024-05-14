@@ -12,6 +12,7 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import classNames from 'classnames'
 import GeoBanners from './geo-banners'
+import AccessibilitySurveyBanner from './accessibility-survey-banner'
 
 type Subscription = {
   groupId: string
@@ -84,6 +85,8 @@ function UserNotifications() {
         <ReconfirmationInfo />
         <GeoBanners />
         {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
+
+        <AccessibilitySurveyBanner />
 
         <WritefullPremiumPromoBanner
           show={showWritefull}

@@ -78,6 +78,7 @@ function ProjectListPageContent() {
   ) : (
     <>
       <SystemMessages />
+
       <div className="project-list-wrapper clearfix container mx-0 px-0">
         {totalProjectsCount > 0 ? (
           <>
