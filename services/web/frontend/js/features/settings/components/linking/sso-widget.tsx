@@ -1,14 +1,18 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Modal } from 'react-bootstrap'
 import { FetchError } from '../../../../infrastructure/fetch-json'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import IEEELogo from '../../../../shared/svgs/ieee-logo'
 import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
 
 const providerLogos: { readonly [p: string]: JSX.Element } = {
   collabratec: <IEEELogo />,
@@ -165,18 +169,18 @@ function UnlinkConfirmModal({
   const { t } = useTranslation()
 
   return (
-    <AccessibleModal show={show} onHide={handleHide}>
-      <Modal.Header closeButton>
-        <Modal.Title>
+    <OLModal show={show} onHide={handleHide}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>
           {t('unlink_provider_account_title', { provider: title })}
-        </Modal.Title>
-      </Modal.Header>
+        </OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body className="modal-body-share">
+      <OLModalBody>
         <p>{t('unlink_provider_account_warning', { provider: title })}</p>
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
+      <OLModalFooter>
         <ButtonWrapper
           variant="secondary"
           onClick={handleHide}
@@ -194,7 +198,7 @@ function UnlinkConfirmModal({
         >
           {t('unlink')}
         </ButtonWrapper>
-      </Modal.Footer>
-    </AccessibleModal>
+      </OLModalFooter>
+    </OLModal>
   )
 }

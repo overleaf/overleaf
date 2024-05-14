@@ -1,10 +1,15 @@
 import { useState, Dispatch, SetStateAction } from 'react'
-import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
 
 type LeaveModalContentProps = {
   handleHide: () => void
@@ -50,11 +55,11 @@ function LeaveModalContent({
 
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('delete_account')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('delete_account')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <p>
           <Trans
             i18nKey="delete_account_warning_message_3"
@@ -66,9 +71,9 @@ function LeaveModalContent({
           isFormValid={isFormValid}
           setIsFormValid={setIsFormValid}
         />
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
+      <OLModalFooter>
         <ButtonWrapper
           disabled={inFlight}
           onClick={handleHide}
@@ -86,7 +91,7 @@ function LeaveModalContent({
         >
           {inFlight ? <>{t('deleting')}…</> : t('delete')}
         </ButtonWrapper>
-      </Modal.Footer>
+      </OLModalFooter>
     </>
   )
 }

@@ -1,12 +1,16 @@
 import { useCallback, useState, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
-import { Modal } from 'react-bootstrap'
 import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
 import getMeta from '../../../../utils/meta'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
 
 function trackUpgradeClick(integration: string) {
   sendMB('settings-upgrade-click', { integration })
@@ -201,16 +205,16 @@ function UnlinkConfirmationModal({
   }
 
   return (
-    <AccessibleModal show={show} onHide={handleHide}>
-      <Modal.Header closeButton>
-        <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
+    <OLModal show={show} onHide={handleHide}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{title}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body className="modal-body-share">
+      <OLModalBody>
         <p>{content}</p>
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
+      <OLModalFooter>
         <form action={unlinkPath} method="POST" className="form-inline">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
           <ButtonWrapper
@@ -232,7 +236,7 @@ function UnlinkConfirmationModal({
             {t('unlink')}
           </ButtonWrapper>
         </form>
-      </Modal.Footer>
-    </AccessibleModal>
+      </OLModalFooter>
+    </OLModal>
   )
 }

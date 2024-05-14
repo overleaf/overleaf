@@ -129,6 +129,11 @@ $form-validation-states: (
     'border-color': var(--#{$prefix}form-invalid-border-color),
   ),
 );
+// Close buttons
+// Close button
+$btn-close-color: $content-primary;
+$btn-close-opacity: 1;
+$btn-close-width: 10px;
 
 // Colors
 $primary: $bg-accent-01;
@@ -166,3 +171,15 @@ $headings-margin-bottom: $spacing-05;
 // Horizontal rules
 $hr-margin-y: $spacing-08;
 $hr-border-color: $border-divider;
+
+// Modals
+$modal-content-color: $content-secondary;
+$modal-content-border-color: $border-divider;
+$modal-backdrop-bg: $bg-dark-primary;
+$modal-backdrop-opacity: 0.72;
+$box-shadow: shadow-lg();
+$box-shadow-sm: shadow-lg();
+$box-shadow-lg: shadow-lg();
+$modal-header-padding: $spacing-05 $spacing-06;
+$modal-header-padding-x: $spacing-08;
+$modal-header-padding-y: $spacing-08;

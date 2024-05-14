@@ -1,0 +1,35 @@
+:root {
+  --bs-heading-color: var(--content-primary);
+}
+
+@include media-breakpoint-up(sm) {
+  .modal-dialog {
+    @include modal-md();
+  }
+
+  .modal-sm {
+    @include modal-sm();
+  }
+}
+
+@include media-breakpoint-up(md) {
+  .modal-md {
+    @include modal-md();
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  .modal-lg {
+    @include modal-lg();
+  }
+}
+
+.modal-content {
+  @include shadow-lg();
+}
+
+.modal-header {
+  .btn-close {
+    margin: var(--spacing-00);
+  }
+}

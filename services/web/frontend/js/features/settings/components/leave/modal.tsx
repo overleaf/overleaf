@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import LeaveModalContent from './modal-content'
+import OLModal from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
 
 type LeaveModalProps = {
   isOpen: boolean
@@ -17,19 +17,19 @@ function LeaveModal({ isOpen, handleClose }: LeaveModalProps) {
   }, [handleClose, inFlight])
 
   return (
-    <AccessibleModal
+    <OLModal
       animation
       show={isOpen}
       onHide={handleHide}
       id="leave-modal"
-      backdrop="static"
+      bs3Props={{ backdrop: 'static' }}
     >
       <LeaveModalContent
         handleHide={handleHide}
         inFlight={inFlight}
         setInFlight={setInFlight}
       />
-    </AccessibleModal>
+    </OLModal>
   )
 }
 

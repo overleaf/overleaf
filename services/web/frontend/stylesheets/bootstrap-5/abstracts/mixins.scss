@@ -52,3 +52,13 @@
   border: 0;
   appearance: none;
 }
+
+@mixin modal-lg {
+  max-width: 960px;
+}
+@mixin modal-md {
+  max-width: 640px;
+}
+@mixin modal-sm {
+  max-width: 480px;
+}
