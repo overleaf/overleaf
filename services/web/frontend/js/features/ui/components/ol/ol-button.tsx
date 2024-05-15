@@ -1,10 +1,10 @@
-import BootstrapVersionSwitcher from '../bootstrap-version-switcher'
+import BootstrapVersionSwitcher from '../bootstrap-5/bootstrap-version-switcher'
 import { Button as BS3Button } from 'react-bootstrap'
 import type { ButtonProps } from '@/features/ui/components/types/button-props'
 import type { ButtonProps as BS3ButtonPropsBase } from 'react-bootstrap'
-import Button from '../button'
+import Button from '../bootstrap-5/button'
 
-export type ButtonWrapperProps = ButtonProps & {
+export type OLButtonProps = ButtonProps & {
   bs3Props?: {
     bsStyle?: string | null
     className?: string
@@ -23,7 +23,7 @@ export const mapBsButtonSizes = (
 ): 'sm' | 'lg' | undefined =>
   size === 'small' ? 'sm' : size === 'large' ? 'lg' : undefined
 
-export default function ButtonWrapper(props: ButtonWrapperProps) {
+export default function OLButton(props: OLButtonProps) {
   const { bs3Props, ...rest } = props
 
   const bs3ButtonProps: BS3ButtonProps = {

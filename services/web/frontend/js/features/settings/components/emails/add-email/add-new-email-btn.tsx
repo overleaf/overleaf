@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import ButtonWrapper, {
-  ButtonWrapperProps,
-} from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton, { OLButtonProps } from '@/features/ui/components/ol/ol-button'
 
 const isValidEmail = (email: string) => {
   return Boolean(email)
@@ -9,7 +7,7 @@ const isValidEmail = (email: string) => {
 
 type AddNewEmailColProps = {
   email: string
-} & ButtonWrapperProps
+} & OLButtonProps
 
 function AddNewEmailBtn({
   email,
@@ -20,7 +18,7 @@ function AddNewEmailBtn({
   const { t } = useTranslation()
 
   return (
-    <ButtonWrapper
+    <OLButton
       size="small"
       variant="primary"
       disabled={(disabled && !isLoading) || !isValidEmail(email)}
@@ -28,7 +26,7 @@ function AddNewEmailBtn({
       {...props}
     >
       {t('add_new_email')}
-    </ButtonWrapper>
+    </OLButton>
   )
 }
 

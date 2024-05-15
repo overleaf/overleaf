@@ -1,16 +1,16 @@
 import { useCallback, useState, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
+import OLBadge from '@/features/ui/components/ol/ol-badge'
 import getMeta from '../../../../utils/meta'
 import { sendMB } from '../../../../infrastructure/event-tracking'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
+} from '@/features/ui/components/ol/ol-modal'
 
 function trackUpgradeClick(integration: string) {
   sendMB('settings-upgrade-click', { integration })
@@ -67,9 +67,7 @@ export function IntegrationLinkingWidget({
       <div className="description-container">
         <div className="title-row">
           <h4>{title}</h4>
-          {!hasFeature && (
-            <BadgeWrapper bg="info">{t('premium_feature')}</BadgeWrapper>
-          )}
+          {!hasFeature && <OLBadge bg="info">{t('premium_feature')}</OLBadge>}
         </div>
         <p className="small">
           {description}{' '}
@@ -121,31 +119,31 @@ function ActionButton({
   const { t } = useTranslation()
   if (!hasFeature) {
     return (
-      <ButtonWrapper
+      <OLButton
         variant="primary"
         href="/user/subscription/plans"
         onClick={() => trackUpgradeClick(integration)}
         bs3Props={{ bsStyle: null, className: 'btn-primary' }}
       >
         <span className="text-capitalize">{t('upgrade')}</span>
-      </ButtonWrapper>
+      </OLButton>
     )
   } else if (linked) {
     return (
-      <ButtonWrapper
+      <OLButton
         variant="danger-ghost"
         onClick={handleUnlinkClick}
         disabled={disabled}
         bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('unlink')}
-      </ButtonWrapper>
+      </OLButton>
     )
   } else {
     return (
       <>
         {disabled ? (
-          <ButtonWrapper
+          <OLButton
             disabled
             variant="secondary"
             className={bsVersion({
@@ -154,9 +152,9 @@ function ActionButton({
             })}
           >
             {t('link')}
-          </ButtonWrapper>
+          </OLButton>
         ) : (
-          <ButtonWrapper
+          <OLButton
             variant="secondary"
             href={linkPath}
             className={bsVersion({
@@ -167,7 +165,7 @@ function ActionButton({
             onClick={() => trackLinkingClick(integration)}
           >
             {t('link')}
-          </ButtonWrapper>
+          </OLButton>
         )}
       </>
     )
@@ -217,7 +215,7 @@ function UnlinkConfirmationModal({
       <OLModalFooter>
         <form action={unlinkPath} method="POST" className="form-inline">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
-          <ButtonWrapper
+          <OLButton
             variant="secondary"
             onClick={handleCancel}
             bs3Props={{
@@ -226,15 +224,15 @@ function UnlinkConfirmationModal({
             }}
           >
             {t('cancel')}
-          </ButtonWrapper>
-          <ButtonWrapper
+          </OLButton>
+          <OLButton
             type="submit"
             variant="danger-ghost"
             bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
             onClick={handleConfirm}
           >
             {t('unlink')}
-          </ButtonWrapper>
+          </OLButton>
         </form>
       </OLModalFooter>
     </OLModal>

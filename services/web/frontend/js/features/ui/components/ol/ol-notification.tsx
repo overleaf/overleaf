@@ -3,14 +3,14 @@ import { Alert, AlertProps } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import classnames from 'classnames'
 
-type NotificationWrapperProps = React.ComponentProps<typeof Notification> & {
+type OLNotificationProps = React.ComponentProps<typeof Notification> & {
   bs3Props?: {
     icon?: React.ReactElement
     className?: string
   }
 }
 
-function NotificationWrapper(props: NotificationWrapperProps) {
+function OLNotification(props: OLNotificationProps) {
   const { bs3Props, ...notificationProps } = props
 
   const alertProps = {
@@ -39,4 +39,4 @@ function NotificationWrapper(props: NotificationWrapperProps) {
   )
 }
 
-export default NotificationWrapper
+export default OLNotification

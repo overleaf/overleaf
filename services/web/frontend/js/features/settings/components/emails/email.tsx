@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { UserEmailData } from '../../../../../../types/user-email'
 import ResendConfirmationEmailButton from './resend-confirmation-email-button'
 import { ssoAvailableForInstitution } from '../../utils/sso'
-import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
+import OLBadge from '@/features/ui/components/ol/ol-badge'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import classnames from 'classnames'
 
@@ -43,11 +43,11 @@ function Email({ userEmailData }: EmailProps) {
         <div className={classnames({ small: !isBootstrap5 })}>
           {isPrimary && (
             <>
-              <BadgeWrapper bg="info">Primary</BadgeWrapper>{' '}
+              <OLBadge bg="info">Primary</OLBadge>{' '}
             </>
           )}
           {isProfessional && (
-            <BadgeWrapper bg="primary">{t('professional')}</BadgeWrapper>
+            <OLBadge bg="primary">{t('professional')}</OLBadge>
           )}
         </div>
       )}

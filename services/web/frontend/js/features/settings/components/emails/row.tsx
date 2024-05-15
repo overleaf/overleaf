@@ -12,10 +12,10 @@ import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../utils/sso'
 import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
-import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
-import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
 import { bsVersion } from '@/features/utils/bootstrap-5'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type EmailsRowProps = {
   userEmailData: UserEmailData
@@ -29,20 +29,20 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
 
   return (
     <>
-      <RowWrapper>
-        <ColWrapper md={4}>
+      <OLRow>
+        <OLCol md={4}>
           <EmailCell>
             <Email userEmailData={userEmailData} />
           </EmailCell>
-        </ColWrapper>
-        <ColWrapper md={5}>
+        </OLCol>
+        <OLCol md={5}>
           {userEmailData.affiliation?.institution && (
             <EmailCell>
               <InstitutionAndRole userEmailData={userEmailData} />
             </EmailCell>
           )}
-        </ColWrapper>
-        <ColWrapper md={3}>
+        </OLCol>
+        <OLCol md={3}>
           <EmailCell
             className={bsVersion({
               bs5: 'text-md-end',
@@ -51,8 +51,8 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
           >
             <Actions userEmailData={userEmailData} />
           </EmailCell>
-        </ColWrapper>
-      </RowWrapper>
+        </OLCol>
+      </OLRow>
 
       {hasSSOAffiliation && (
         <SSOAffiliationInfo userEmailData={userEmailData} />
@@ -93,8 +93,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
 
   if (userEmailData.samlProviderId) {
     return (
-      <RowWrapper>
-        <ColWrapper md={{ span: 8, offset: 4 }}>
+      <OLRow>
+        <OLCol md={{ span: 8, offset: 4 }}>
           <EmailCell>
             <p>
               <Trans
@@ -111,17 +111,17 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
               />
             </p>
           </EmailCell>
-        </ColWrapper>
-      </RowWrapper>
+        </OLCol>
+      </OLRow>
     )
   }
 
   return (
-    <RowWrapper>
-      <ColWrapper md={{ span: 8, offset: 4 }}>
+    <OLRow>
+      <OLCol md={{ span: 8, offset: 4 }}>
         <div className="horizontal-divider" />
-        <RowWrapper>
-          <ColWrapper md={9}>
+        <OLRow>
+          <OLCol md={9}>
             <EmailCell>
               <p className="small">
                 <Trans
@@ -151,8 +151,8 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                 </a>
               </p>
             </EmailCell>
-          </ColWrapper>
-          <ColWrapper
+          </OLCol>
+          <OLCol
             md={3}
             className={bsVersion({
               bs5: 'text-md-end',
@@ -160,7 +160,7 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
             })}
           >
             <EmailCell>
-              <ButtonWrapper
+              <OLButton
                 variant="primary"
                 className="btn-link-accounts"
                 disabled={linkAccountsButtonDisabled}
@@ -168,12 +168,12 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                 size="small"
               >
                 {t('link_accounts')}
-              </ButtonWrapper>
+              </OLButton>
             </EmailCell>
-          </ColWrapper>
-        </RowWrapper>
-      </ColWrapper>
-    </RowWrapper>
+          </OLCol>
+        </OLRow>
+      </OLCol>
+    </OLRow>
   )
 }
 

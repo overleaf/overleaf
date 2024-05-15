@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import LeaveModal from './leave/modal'
 import getMeta from '../../../utils/meta'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function LeaveSection() {
@@ -30,7 +30,7 @@ function LeaveSection() {
   return (
     <>
       {t('need_to_leave')}{' '}
-      <ButtonWrapper
+      <OLButton
         className={bsVersion({
           bs3: 'btn btn-inline-link btn-danger',
           bs5: 'btn-link',
@@ -39,7 +39,7 @@ function LeaveSection() {
         onClick={handleOpen}
       >
         {t('delete_your_account')}
-      </ButtonWrapper>
+      </OLButton>
       <LeaveModal isOpen={isModalOpen} handleClose={handleClose} />
     </>
   )

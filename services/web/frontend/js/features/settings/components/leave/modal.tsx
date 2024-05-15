@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import LeaveModalContent from './modal-content'
-import OLModal from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
+import OLModal from '@/features/ui/components/ol/ol-modal'
 
 type LeaveModalProps = {
   isOpen: boolean

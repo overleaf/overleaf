@@ -2,11 +2,11 @@ import { Form } from 'react-bootstrap-5'
 import { Checkbox as BS3Checkbox } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type FormCheckboxWrapperProps = React.ComponentProps<(typeof Form)['Check']> & {
+type OLFormCheckboxProps = React.ComponentProps<(typeof Form)['Check']> & {
   bs3Props?: Record<string, unknown>
 }
 
-function FormCheckboxWrapper(props: FormCheckboxWrapperProps) {
+function OLFormCheckbox(props: OLFormCheckboxProps) {
   const { bs3Props, ...rest } = props
 
   const bs3FormLabelProps: React.ComponentProps<typeof BS3Checkbox> = {
@@ -29,4 +29,4 @@ function FormCheckboxWrapper(props: FormCheckboxWrapperProps) {
   )
 }
 
-export default FormCheckboxWrapper
+export default OLFormCheckbox

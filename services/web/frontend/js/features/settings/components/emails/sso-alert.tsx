@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import getMeta from '../../../../utils/meta'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type InstitutionLink = {
   universityName: string
@@ -36,7 +36,7 @@ export function SSOAlert() {
 
   if (samlError) {
     return !errorClosed ? (
-      <NotificationWrapper
+      <OLNotification
         type="error"
         content={
           <>
@@ -68,7 +68,7 @@ export function SSOAlert() {
   return (
     <>
       {!infoClosed && (
-        <NotificationWrapper
+        <OLNotification
           type="info"
           content={
             <>
@@ -102,7 +102,7 @@ export function SSOAlert() {
         />
       )}
       {!warningClosed && institutionEmailNonCanonical && (
-        <NotificationWrapper
+        <OLNotification
           type="warning"
           content={
             <Trans

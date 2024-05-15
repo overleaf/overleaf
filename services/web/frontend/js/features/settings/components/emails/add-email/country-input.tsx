@@ -4,7 +4,7 @@ import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import countries, { CountryCode } from '../../../data/countries-list'
 import { bsVersion } from '@/features/utils/bootstrap-5'
-import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
@@ -63,7 +63,7 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
         >
           {t('country')}
         </label>
-        <FormControlWrapper
+        <OLFormControl
           {...getInputProps({
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
               setInputValue(event.target.value)

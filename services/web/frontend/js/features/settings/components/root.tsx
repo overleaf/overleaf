@@ -20,9 +20,9 @@ import useWaitForI18n from '../../../shared/hooks/use-wait-for-i18n'
 import useScrollToIdOnLoad from '../../../shared/hooks/use-scroll-to-id-on-load'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { SSOAlert } from './emails/sso-alert'
-import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
-import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
-import CardWrapper from '@/features/ui/components/bootstrap-5/wrappers/card-wrapper'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLCard from '@/features/ui/components/ol/ol-card'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
@@ -34,11 +34,11 @@ function SettingsPageRoot() {
 
   return (
     <div className="container">
-      <RowWrapper>
-        <ColWrapper md={12} lg={{ span: 10, offset: 1 }}>
+      <OLRow>
+        <OLCol md={12} lg={{ span: 10, offset: 1 }}>
           {isReady ? <SettingsPageContent /> : null}
-        </ColWrapper>
-      </RowWrapper>
+        </OLCol>
+      </OLRow>
     </div>
   )
 }
@@ -51,7 +51,7 @@ function SettingsPageContent() {
 
   return (
     <UserProvider>
-      <CardWrapper>
+      <OLCard>
         <div className="page-header">
           <h1>{t('account_settings')}</h1>
         </div>
@@ -59,14 +59,14 @@ function SettingsPageContent() {
           <ManagedAccountAlert />
           <EmailsSection />
           <SSOAlert />
-          <RowWrapper>
-            <ColWrapper md={5}>
+          <OLRow>
+            <OLCol md={5}>
               <AccountInfoSection />
-            </ColWrapper>
-            <ColWrapper md={{ span: 5, offset: 1 }}>
+            </OLCol>
+            <OLCol md={{ span: 5, offset: 1 }}>
               <PasswordSection />
-            </ColWrapper>
-          </RowWrapper>
+            </OLCol>
+          </OLRow>
           <hr />
           <SecuritySection />
           <SplitTestProvider>
@@ -96,7 +96,7 @@ function SettingsPageContent() {
             </>
           ) : null}
         </div>
-      </CardWrapper>
+      </OLCard>
     </UserProvider>
   )
 }

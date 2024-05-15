@@ -3,13 +3,13 @@ import Badge from '@/features/ui/components/bootstrap-5/badge'
 import BS3Badge from '@/shared/components/badge'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type BadgeWrapperProps = React.ComponentProps<typeof Badge> & {
+type OLBadgeProps = React.ComponentProps<typeof Badge> & {
   bs3Props?: {
     bsStyle?: React.ComponentProps<typeof Label>['bsStyle'] | null
   }
 }
 
-function BadgeWrapper(props: BadgeWrapperProps) {
+function OLBadge(props: OLBadgeProps) {
   const { bs3Props, ...rest } = props
 
   let bs3BadgeProps: React.ComponentProps<typeof BS3Badge> = {
@@ -38,4 +38,4 @@ function BadgeWrapper(props: BadgeWrapperProps) {
   )
 }
 
-export default BadgeWrapper
+export default OLBadge

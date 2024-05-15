@@ -9,8 +9,8 @@ import { getJSON, postJSON } from '../../../../infrastructure/fetch-json'
 import defaultRoles from '../../data/roles'
 import defaultDepartments from '../../data/departments'
 import { University } from '../../../../../../types/university'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
-import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 
 type InstitutionAndRoleProps = {
   userEmailData: UserEmailData
@@ -108,7 +108,7 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               <br />
             </>
           )}
-          <ButtonWrapper
+          <OLButton
             onClick={handleChangeAffiliation}
             variant="link"
             bs3Props={{ className: 'btn-inline-link' }}
@@ -116,12 +116,12 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
             {!affiliation.department && !affiliation.role
               ? t('add_role_and_department')
               : t('change')}
-          </ButtonWrapper>
+          </OLButton>
         </div>
       ) : (
         <div className="affiliation-change-container small">
           <form onSubmit={handleSubmit}>
-            <FormGroupWrapper className="mb-2">
+            <OLFormGroup className="mb-2">
               <DownshiftInput
                 items={[...defaultRoles]}
                 inputValue={role}
@@ -130,8 +130,8 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
                 setValue={setRole}
                 ref={roleRef}
               />
-            </FormGroupWrapper>
-            <FormGroupWrapper className="mb-2">
+            </OLFormGroup>
+            <OLFormGroup className="mb-2">
               <DownshiftInput
                 items={departments}
                 inputValue={department}
@@ -139,8 +139,8 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
                 label={t('department')}
                 setValue={setDepartment}
               />
-            </FormGroupWrapper>
-            <ButtonWrapper
+            </OLFormGroup>
+            <OLButton
               size="small"
               variant="primary"
               type="submit"
@@ -153,17 +153,17 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               }}
             >
               {t('save_or_cancel-save')}
-            </ButtonWrapper>
+            </OLButton>
             {!isLoading && (
               <>
                 <span className="mx-1">{t('save_or_cancel-or')}</span>
-                <ButtonWrapper
+                <OLButton
                   variant="link"
                   onClick={handleCancelAffiliationChange}
                   bs3Props={{ className: 'btn-inline-link' }}
                 >
                   {t('save_or_cancel-cancel')}
-                </ButtonWrapper>
+                </OLButton>
               </>
             )}
           </form>

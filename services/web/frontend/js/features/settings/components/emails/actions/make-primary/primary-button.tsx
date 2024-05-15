@@ -1,15 +1,13 @@
-import ButtonWrapper, {
-  ButtonWrapperProps,
-} from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton, { OLButtonProps } from '@/features/ui/components/ol/ol-button'
 
 function PrimaryButton({
   children,
   disabled,
   isLoading,
   onClick,
-}: ButtonWrapperProps) {
+}: OLButtonProps) {
   return (
-    <ButtonWrapper
+    <OLButton
       size="small"
       disabled={disabled && !isLoading}
       isLoading={isLoading}
@@ -21,7 +19,7 @@ function PrimaryButton({
       }}
     >
       {children}
-    </ButtonWrapper>
+    </OLButton>
   )
 }
 

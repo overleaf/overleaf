@@ -5,11 +5,11 @@ import PolymorphicComponent from '@/shared/components/polymorphic-component'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import classnames from 'classnames'
 
-type FormTextWrapperProps = React.ComponentProps<typeof FormText> & {
+type OLFormTextProps = React.ComponentProps<typeof FormText> & {
   bs3Props?: Record<string, unknown>
 }
 
-function FormTextWrapper(props: FormTextWrapperProps) {
+function OLFormText(props: OLFormTextProps) {
   const { bs3Props, ...rest } = props
 
   const bs3HelpBlockProps = {
@@ -35,4 +35,4 @@ function FormTextWrapper(props: FormTextWrapperProps) {
   )
 }
 
-export default FormTextWrapper
+export default OLFormText

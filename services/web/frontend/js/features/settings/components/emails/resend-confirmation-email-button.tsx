@@ -5,7 +5,7 @@ import { FetchError, postJSON } from '../../../../infrastructure/fetch-json'
 import useAsync from '../../../../shared/hooks/use-async'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../context/user-email-context'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type ResendConfirmationEmailButtonProps = {
   email: UserEmailData['email']
@@ -47,14 +47,14 @@ function ResendConfirmationEmailButton({
 
   return (
     <>
-      <ButtonWrapper
+      <OLButton
         variant="link"
         disabled={state.isLoading || isLoading}
         onClick={handleResendConfirmationEmail}
         bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
       >
         {t('resend_confirmation_email')}
-      </ButtonWrapper>
+      </OLButton>
       <br />
       {isError && (
         <div className="text-danger">

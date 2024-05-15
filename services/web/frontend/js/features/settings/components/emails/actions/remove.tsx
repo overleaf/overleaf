@@ -3,14 +3,14 @@ import { UserEmailData } from '../../../../../../../types/user-email'
 import { useUserEmailsContext } from '../../../context/user-email-context'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
-import TooltipWrapper from '@/features/ui/components/bootstrap-5/wrappers/tooltip-wrapper'
-import IconButtonWrapper, {
-  IconButtonWrapperProps,
-} from '@/features/ui/components/bootstrap-5/wrappers/icon-button-wrapper'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton, {
+  OLIconButtonProps,
+} from '@/features/ui/components/ol/ol-icon-button'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type DeleteButtonProps = Pick<
-  IconButtonWrapperProps,
+  OLIconButtonProps,
   'disabled' | 'isLoading' | 'onClick'
 >
 
@@ -18,7 +18,7 @@ function DeleteButton({ disabled, isLoading, onClick }: DeleteButtonProps) {
   const { t } = useTranslation()
 
   return (
-    <IconButtonWrapper
+    <OLIconButton
       variant="danger"
       disabled={disabled}
       isLoading={isLoading}
@@ -67,7 +67,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   }
 
   return (
-    <TooltipWrapper
+    <OLTooltip
       id={userEmailData.email}
       description={
         userEmailData.default
@@ -82,7 +82,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
           onClick={handleRemoveUserEmail}
         />
       </span>
-    </TooltipWrapper>
+    </OLTooltip>
   )
 }
 

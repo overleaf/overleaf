@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type UniversityNameProps = {
   name: string
@@ -14,13 +14,13 @@ function UniversityName({ name, onClick }: UniversityNameProps) {
       {name}
       <span className="small">
         {' '}
-        <ButtonWrapper
+        <OLButton
           variant="link"
           onClick={onClick}
           bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
         >
           {t('change')}
-        </ButtonWrapper>
+        </OLButton>
       </span>
     </p>
   )

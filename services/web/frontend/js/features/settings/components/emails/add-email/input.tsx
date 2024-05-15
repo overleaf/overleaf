@@ -11,7 +11,7 @@ import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAbortController from '../../../../../shared/hooks/use-abort-controller'
 import domainBlocklist from '../../../domain-blocklist'
 import { debugConsole } from '@/utils/debugging'
-import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 
 const LOCAL_AND_DOMAIN_REGEX = /([^@]+)@(.+)/
 
@@ -162,13 +162,13 @@ function Input({ onChange, handleAddNewEmail }: InputProps) {
 
   return (
     <div className="input-suggestions">
-      <FormControlWrapper
+      <OLFormControl
         data-testid="affiliations-email-shadow"
         readOnly
         className="input-suggestions-shadow"
         value={suggestion || ''}
       />
-      <FormControlWrapper
+      <OLFormControl
         id="affiliations-email"
         data-testid="affiliations-email"
         className="input-suggestions-main"

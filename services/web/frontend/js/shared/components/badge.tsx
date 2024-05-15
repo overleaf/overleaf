@@ -1,6 +1,6 @@
 import classnames from 'classnames'
 import { MergeAndOverride } from '../../../../types/utils'
-import BadgeWrapper from '@/features/ui/components/bootstrap-5/wrappers/badge-wrapper'
+import OLBadge from '@/features/ui/components/ol/ol-badge'
 
 type BadgeProps = MergeAndOverride<
   React.ComponentProps<'span'>,
@@ -10,7 +10,7 @@ type BadgeProps = MergeAndOverride<
     closeBtnProps?: React.ComponentProps<'button'>
     className?: string
     bsStyle?: NonNullable<
-      React.ComponentProps<typeof BadgeWrapper>['bs3Props']
+      React.ComponentProps<typeof OLBadge>['bs3Props']
     >['bsStyle']
   }
 >

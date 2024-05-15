@@ -1,18 +1,18 @@
-import { BS3ButtonProps, mapBsButtonSizes } from './button-wrapper'
+import { BS3ButtonProps, mapBsButtonSizes } from './ol-button'
 import { Button as BS3Button } from 'react-bootstrap'
 import type { IconButtonProps } from '@/features/ui/components/types/icon-button-props'
-import BootstrapVersionSwitcher from '../bootstrap-version-switcher'
+import BootstrapVersionSwitcher from '../bootstrap-5/bootstrap-version-switcher'
 import Icon, { IconProps } from '@/shared/components/icon'
-import IconButton from '../icon-button'
+import IconButton from '../bootstrap-5/icon-button'
 
-export type IconButtonWrapperProps = IconButtonProps & {
+export type OLIconButtonProps = IconButtonProps & {
   bs3Props?: {
     loading?: React.ReactNode
     fw?: IconProps['fw']
   }
 }
 
-export default function IconButtonWrapper(props: IconButtonWrapperProps) {
+export default function OLIconButton(props: OLIconButtonProps) {
   const { bs3Props, ...rest } = props
 
   const { fw, ...filterBs3Props } = bs3Props || {}

@@ -2,11 +2,11 @@ import { Form } from 'react-bootstrap-5'
 import { ControlLabel as BS3FormLabel } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type FormLabelWrapperProps = React.ComponentProps<(typeof Form)['Label']> & {
+type OLFormLabelProps = React.ComponentProps<(typeof Form)['Label']> & {
   bs3Props?: Record<string, unknown>
 }
 
-function FormLabelWrapper(props: FormLabelWrapperProps) {
+function OLFormLabel(props: OLFormLabelProps) {
   const { bs3Props, ...rest } = props
 
   const bs3FormLabelProps: React.ComponentProps<typeof BS3FormLabel> = {
@@ -24,4 +24,4 @@ function FormLabelWrapper(props: FormLabelWrapperProps) {
   )
 }
 
-export default FormLabelWrapper
+export default OLFormLabel

@@ -3,7 +3,7 @@ import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 import { escapeRegExp } from 'lodash'
 import { bsVersion } from '@/features/utils/bootstrap-5'
-import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 
 type DownshiftInputProps = {
   highlightMatches?: boolean
@@ -98,7 +98,7 @@ function Downshift({
         >
           {label}
         </label>
-        <FormControlWrapper
+        <OLFormControl
           {...getInputProps({
             onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
               setValue(event.target.value)

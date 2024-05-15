@@ -2,11 +2,11 @@ import { Form } from 'react-bootstrap-5'
 import { FormGroup as BS3FormGroup } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type FormGroupWrapperProps = React.ComponentProps<(typeof Form)['Group']> & {
+type OLFormGroupProps = React.ComponentProps<(typeof Form)['Group']> & {
   bs3Props?: Record<string, unknown>
 }
 
-function FormGroupWrapper(props: FormGroupWrapperProps) {
+function OLFormGroup(props: OLFormGroupProps) {
   const { bs3Props, className, ...rest } = props
 
   const classNames = className ?? 'mb-3'
@@ -26,4 +26,4 @@ function FormGroupWrapper(props: FormGroupWrapperProps) {
   )
 }
 
-export default FormGroupWrapper
+export default OLFormGroup

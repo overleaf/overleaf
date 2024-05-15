@@ -1,8 +1,8 @@
 import Icon from '../../../../../shared/components/icon'
 import { UseAsyncReturnType } from '../../../../../shared/hooks/use-async'
 import { getUserFacingMessage } from '../../../../../infrastructure/fetch-json'
-import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type LayoutProps = {
   children: React.ReactNode
@@ -13,9 +13,9 @@ type LayoutProps = {
 function Layout({ isError, error, children }: LayoutProps) {
   return (
     <div className="affiliations-table-row--highlighted">
-      <RowWrapper>{children}</RowWrapper>
+      <OLRow>{children}</OLRow>
       {isError && (
-        <NotificationWrapper
+        <OLNotification
           type="error"
           content={getUserFacingMessage(error) ?? ''}
           bs3Props={{

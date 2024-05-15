@@ -2,11 +2,11 @@ import Tooltip from '@/features/ui/components/bootstrap-5/tooltip'
 import BS3Tooltip from '@/shared/components/tooltip'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type TooltipWrapperProps = React.ComponentProps<typeof Tooltip> & {
+type OLTooltipProps = React.ComponentProps<typeof Tooltip> & {
   bs3Props?: Record<string, unknown>
 }
 
-function TooltipWrapper(props: TooltipWrapperProps) {
+function OLTooltip(props: OLTooltipProps) {
   const { bs3Props, ...bs5Props } = props
 
   const bs3TooltipProps: React.ComponentProps<typeof BS3Tooltip> = {
@@ -38,4 +38,4 @@ function TooltipWrapper(props: TooltipWrapperProps) {
   )
 }
 
-export default TooltipWrapper
+export default OLTooltip

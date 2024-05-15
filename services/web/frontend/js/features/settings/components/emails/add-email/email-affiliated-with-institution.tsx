@@ -1,25 +1,20 @@
 import { useTranslation } from 'react-i18next'
-import ButtonWrapper, {
-  ButtonWrapperProps,
-} from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton, { OLButtonProps } from '@/features/ui/components/ol/ol-button'
 
-function EmailAffiliatedWithInstitution({
-  onClick,
-  ...props
-}: ButtonWrapperProps) {
+function EmailAffiliatedWithInstitution({ onClick, ...props }: OLButtonProps) {
   const { t } = useTranslation()
 
   return (
     <div className="mt-1">
       {t('is_email_affiliated')}
-      <ButtonWrapper
+      <OLButton
         variant="link"
         onClick={onClick}
         bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
         {...props}
       >
         {t('let_us_know')}
-      </ButtonWrapper>
+      </OLButton>
     </div>
   )
 }

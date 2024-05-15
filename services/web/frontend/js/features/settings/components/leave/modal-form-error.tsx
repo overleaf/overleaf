@@ -2,7 +2,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type LeaveModalFormErrorProps = {
   error: FetchError
@@ -32,7 +32,7 @@ function LeaveModalFormError({ error }: LeaveModalFormErrorProps) {
   }
 
   return (
-    <NotificationWrapper
+    <OLNotification
       type="error"
       content={
         <>

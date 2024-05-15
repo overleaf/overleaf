@@ -8,11 +8,11 @@ import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import useAsync from '../../../shared/hooks/use-async'
 import { useUserContext } from '../../../shared/context/user-context'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
-import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
-import FormLabelWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-label-wrapper'
-import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
 
 function AccountInfoSection() {
@@ -107,23 +107,23 @@ function AccountInfoSection() {
           required={false}
         />
         {isSuccess ? (
-          <FormGroupWrapper>
-            <NotificationWrapper
+          <OLFormGroup>
+            <OLNotification
               type="success"
               content={t('thanks_settings_updated')}
             />
-          </FormGroupWrapper>
+          </OLFormGroup>
         ) : null}
         {isError ? (
-          <FormGroupWrapper>
-            <NotificationWrapper
+          <OLFormGroup>
+            <OLNotification
               type="error"
               content={getUserFacingMessage(error) ?? ''}
             />
-          </FormGroupWrapper>
+          </OLFormGroup>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (
-          <ButtonWrapper
+          <OLButton
             type="submit"
             variant="primary"
             form="account-info-form"
@@ -134,7 +134,7 @@ function AccountInfoSection() {
             }}
           >
             {t('update')}
-          </ButtonWrapper>
+          </OLButton>
         ) : null}
       </form>
     </>
@@ -175,17 +175,17 @@ function ReadOrWriteFormGroup({
 
   if (!canEdit) {
     return (
-      <FormGroupWrapper controlId={id}>
-        <FormLabelWrapper>{label}</FormLabelWrapper>
-        <FormControlWrapper type="text" readOnly value={value} />
-      </FormGroupWrapper>
+      <OLFormGroup controlId={id}>
+        <OLFormLabel>{label}</OLFormLabel>
+        <OLFormControl type="text" readOnly value={value} />
+      </OLFormGroup>
     )
   }
 
   return (
-    <FormGroupWrapper controlId={id}>
-      <FormLabelWrapper>{label}</FormLabelWrapper>
-      <FormControlWrapper
+    <OLFormGroup controlId={id}>
+      <OLFormLabel>{label}</OLFormLabel>
+      <OLFormControl
         type={type}
         required={required}
         value={value}
@@ -194,7 +194,7 @@ function ReadOrWriteFormGroup({
         onInvalid={handleInvalid}
       />
       {validationMessage && <FormText isError>{validationMessage}</FormText>}
-    </FormGroupWrapper>
+    </OLFormGroup>
   )
 }
 

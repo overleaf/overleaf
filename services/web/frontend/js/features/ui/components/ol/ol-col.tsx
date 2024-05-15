@@ -2,11 +2,11 @@ import { Col } from 'react-bootstrap-5'
 import { Col as BS3Col } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type ColWrapperProps = React.ComponentProps<typeof Col> & {
+type OLColProps = React.ComponentProps<typeof Col> & {
   bs3Props?: Record<string, unknown>
 }
 
-function ColWrapper(props: ColWrapperProps) {
+function OLCol(props: OLColProps) {
   const { bs3Props, ...rest } = props
   const sizes = new Set(['xs', 'sm', 'md', 'lg', 'xl', 'xxl'])
 
@@ -42,4 +42,4 @@ function ColWrapper(props: ColWrapperProps) {
   )
 }
 
-export default ColWrapper
+export default OLCol

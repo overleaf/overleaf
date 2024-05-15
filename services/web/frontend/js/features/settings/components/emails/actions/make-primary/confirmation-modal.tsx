@@ -1,13 +1,13 @@
 import { useTranslation, Trans } from 'react-i18next'
 import AccessibleModal from '../../../../../../shared/components/accessible-modal'
 import { MergeAndOverride } from '../../../../../../../../types/utils'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
+} from '@/features/ui/components/ol/ol-modal'
 
 type ConfirmationModalProps = MergeAndOverride<
   React.ComponentProps<typeof AccessibleModal>,
@@ -46,7 +46,7 @@ function ConfirmationModal({
         <p className="mb-0">{t('log_in_with_primary_email_address')}</p>
       </OLModalBody>
       <OLModalFooter>
-        <ButtonWrapper
+        <OLButton
           variant="secondary"
           onClick={onHide}
           bs3Props={{
@@ -55,15 +55,15 @@ function ConfirmationModal({
           }}
         >
           {t('cancel')}
-        </ButtonWrapper>
-        <ButtonWrapper
+        </OLButton>
+        <OLButton
           variant="primary"
           disabled={isConfirmDisabled}
           onClick={onConfirm}
           bs3Props={{ bsStyle: null, className: 'btn-primary' }}
         >
           {t('confirm')}
-        </ButtonWrapper>
+        </OLButton>
       </OLModalFooter>
     </OLModal>
   )

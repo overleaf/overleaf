@@ -5,14 +5,14 @@ import IEEELogo from '../../../../shared/svgs/ieee-logo'
 import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
+} from '@/features/ui/components/ol/ol-modal'
 
 const providerLogos: { readonly [p: string]: JSX.Element } = {
   collabratec: <IEEELogo />,
@@ -118,27 +118,27 @@ function ActionButton({
   const { t } = useTranslation()
   if (unlinkRequestInflight) {
     return (
-      <ButtonWrapper
+      <OLButton
         variant="danger-ghost"
         disabled
         bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('unlinking')}
-      </ButtonWrapper>
+      </OLButton>
     )
   } else if (accountIsLinked) {
     return (
-      <ButtonWrapper
+      <OLButton
         variant="danger-ghost"
         onClick={onUnlinkClick}
         bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('unlink')}
-      </ButtonWrapper>
+      </OLButton>
     )
   } else {
     return (
-      <ButtonWrapper
+      <OLButton
         variant="secondary"
         href={linkPath}
         bs3Props={{ bsStyle: null }}
@@ -148,7 +148,7 @@ function ActionButton({
         })}
       >
         {t('link')}
-      </ButtonWrapper>
+      </OLButton>
     )
   }
 }
@@ -181,7 +181,7 @@ function UnlinkConfirmModal({
       </OLModalBody>
 
       <OLModalFooter>
-        <ButtonWrapper
+        <OLButton
           variant="secondary"
           onClick={handleHide}
           bs3Props={{
@@ -190,14 +190,14 @@ function UnlinkConfirmModal({
           }}
         >
           {t('cancel')}
-        </ButtonWrapper>
-        <ButtonWrapper
+        </OLButton>
+        <OLButton
           variant="danger-ghost"
           onClick={handleConfirmation}
           bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
         >
           {t('unlink')}
-        </ButtonWrapper>
+        </OLButton>
       </OLModalFooter>
     </OLModal>
   )

@@ -3,9 +3,9 @@ import { UserEmailData } from '../../../../../../types/user-email'
 import getMeta from '../../../../utils/meta'
 import ReconfirmationInfoSuccess from './reconfirmation-info/reconfirmation-info-success'
 import ReconfirmationInfoPromptText from './reconfirmation-info/reconfirmation-info-prompt-text'
-import RowWrapper from '@/features/ui/components/bootstrap-5/wrappers/row-wrapper'
-import ColWrapper from '@/features/ui/components/bootstrap-5/wrappers/col-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 import Icon from '@/shared/components/icon'
 import { useUserEmailsContext } from '@/features/settings/context/user-email-context'
@@ -16,7 +16,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import useAsync from '@/shared/hooks/use-async'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { useLocation } from '@/shared/hooks/use-location'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import classnames from 'classnames'
 
 type ReconfirmationInfoProps = {
@@ -80,9 +80,9 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
     userEmailData.samlProviderId === reconfirmedViaSAML
   ) {
     return (
-      <RowWrapper>
-        <ColWrapper md={12}>
-          <NotificationWrapper
+      <OLRow>
+        <OLCol md={12}>
+          <OLNotification
             type="info"
             content={
               <ReconfirmationInfoSuccess
@@ -91,17 +91,17 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
             }
             bs3Props={{ className: 'settings-reconfirm-info small' }}
           />
-        </ColWrapper>
-      </RowWrapper>
+        </OLCol>
+      </OLRow>
     )
   }
 
   if (userEmailData.affiliation.inReconfirmNotificationPeriod) {
     return (
-      <RowWrapper>
-        <ColWrapper md={12}>
+      <OLRow>
+        <OLCol md={12}>
           {isBootstrap5 ? (
-            <NotificationWrapper
+            <OLNotification
               type="info"
               content={
                 <>
@@ -145,7 +145,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                         <Icon type="refresh" spin fw /> {t('sending')}...
                       </>
                     ) : (
-                      <ButtonWrapper
+                      <OLButton
                         variant="link"
                         disabled={state.isLoading}
                         onClick={handleRequestReconfirmation}
@@ -155,11 +155,11 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                         }}
                       >
                         {t('resend_confirmation_email')}
-                      </ButtonWrapper>
+                      </OLButton>
                     )}
                   </>
                 ) : (
-                  <ButtonWrapper
+                  <OLButton
                     variant="secondary"
                     disabled={isPending}
                     isLoading={isLoading}
@@ -173,7 +173,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                     ) : (
                       t('confirm_affiliation')
                     )}
-                  </ButtonWrapper>
+                  </OLButton>
                 )
               }
             />
@@ -204,14 +204,14 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                       <Icon type="refresh" spin fw /> {t('sending')}...
                     </>
                   ) : (
-                    <ButtonWrapper
+                    <OLButton
                       variant="link"
                       disabled={state.isLoading}
                       onClick={handleRequestReconfirmation}
                       bs3Props={{ className: 'btn-inline-link', bsStyle: null }}
                     >
                       {t('resend_confirmation_email')}
-                    </ButtonWrapper>
+                    </OLButton>
                   )}
                   <br />
                   {isError && (
@@ -236,7 +236,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                     />
                   </div>
                   <div className="setting-reconfirm-info-right">
-                    <ButtonWrapper
+                    <OLButton
                       variant="secondary"
                       disabled={state.isLoading || isPending}
                       onClick={handleRequestReconfirmation}
@@ -249,7 +249,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                       ) : (
                         t('confirm_affiliation')
                       )}
-                    </ButtonWrapper>
+                    </OLButton>
                     <br />
                     {isError && (
                       <div className="text-danger">
@@ -263,8 +263,8 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
               )}
             </div>
           )}
-        </ColWrapper>
-      </RowWrapper>
+        </OLCol>
+      </OLRow>
     )
   }
 

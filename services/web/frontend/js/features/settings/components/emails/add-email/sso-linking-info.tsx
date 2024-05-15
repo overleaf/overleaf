@@ -4,7 +4,7 @@ import { DomainInfo } from './input'
 import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import getMeta from '../../../../../utils/meta'
 import { useLocation } from '../../../../../shared/hooks/use-location'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type SSOLinkingInfoProps = {
   domainInfo: DomainInfo
@@ -54,7 +54,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
           {t('find_out_more_about_institution_login')}.
         </a>
       </p>
-      <ButtonWrapper
+      <OLButton
         variant="primary"
         className="btn-link-accounts"
         size="small"
@@ -62,7 +62,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
         onClick={handleLinkAccountsButtonClick}
       >
         {t('link_accounts_and_add_email')}
-      </ButtonWrapper>
+      </OLButton>
     </>
   )
 }

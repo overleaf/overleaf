@@ -11,7 +11,7 @@ import { DomainInfo } from './input'
 import { getJSON } from '../../../../../infrastructure/fetch-json'
 import useAsync from '../../../../../shared/hooks/use-async'
 import UniversityName from './university-name'
-import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 
 type InstitutionFieldsProps = {
   countryCode: CountryCode | null
@@ -152,16 +152,14 @@ function InstitutionFields({
       ) : (
         // Display the country and university fields
         <>
-          <FormGroupWrapper className="mb-2">
+          <OLFormGroup className="mb-2">
             <CountryInput
               id="new-email-country-input"
               setValue={setCountryCode}
               ref={countryRef}
             />
-          </FormGroupWrapper>
-          <FormGroupWrapper
-            className={isRoleAndDepartmentVisible ? 'mb-2' : 'mb-0'}
-          >
+          </OLFormGroup>
+          <OLFormGroup className={isRoleAndDepartmentVisible ? 'mb-2' : 'mb-0'}>
             <DownshiftInput
               items={getUniversityItems()}
               inputValue={universityName}
@@ -170,12 +168,12 @@ function InstitutionFields({
               setValue={setUniversityName}
               disabled={!countryCode}
             />
-          </FormGroupWrapper>
+          </OLFormGroup>
         </>
       )}
       {isRoleAndDepartmentVisible && (
         <>
-          <FormGroupWrapper className="mb-2">
+          <OLFormGroup className="mb-2">
             <DownshiftInput
               items={[...defaultRoles]}
               inputValue={role}
@@ -183,8 +181,8 @@ function InstitutionFields({
               label={t('role')}
               setValue={setRole}
             />
-          </FormGroupWrapper>
-          <FormGroupWrapper className="mb-0">
+          </OLFormGroup>
+          <OLFormGroup className="mb-0">
             <DownshiftInput
               items={departments}
               inputValue={department}
@@ -192,7 +190,7 @@ function InstitutionFields({
               label={t('department')}
               setValue={setDepartment}
             />
-          </FormGroupWrapper>
+          </OLFormGroup>
         </>
       )}
     </>

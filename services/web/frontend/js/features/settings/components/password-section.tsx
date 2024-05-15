@@ -9,12 +9,12 @@ import getMeta from '../../../utils/meta'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { PasswordStrengthOptions } from '../../../../../types/password-strength-options'
 import useAsync from '../../../shared/hooks/use-async'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
-import FormGroupWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-group-wrapper'
-import FormLabelWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-label-wrapper'
-import FormControlWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-control-wrapper'
-import FormTextWrapper from '@/features/ui/components/bootstrap-5/wrappers/form-text-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormText from '@/features/ui/components/ol/ol-form-text'
 
 type PasswordUpdateResult = {
   message?: {
@@ -159,13 +159,13 @@ function PasswordForm() {
         autoComplete="new-password"
       />
       {isSuccess && data?.message?.text ? (
-        <FormGroupWrapper>
-          <NotificationWrapper type="success" content={data.message.text} />
-        </FormGroupWrapper>
+        <OLFormGroup>
+          <OLNotification type="success" content={data.message.text} />
+        </OLFormGroup>
       ) : null}
       {isError ? (
-        <FormGroupWrapper>
-          <NotificationWrapper
+        <OLFormGroup>
+          <OLNotification
             type="error"
             content={
               getErrorMessageKey(error) === 'password-must-be-strong' ? (
@@ -198,9 +198,9 @@ function PasswordForm() {
               )
             }
           />
-        </FormGroupWrapper>
+        </OLFormGroup>
       ) : null}
-      <ButtonWrapper
+      <OLButton
         form="password-change-form"
         type="submit"
         variant="primary"
@@ -211,7 +211,7 @@ function PasswordForm() {
         }}
       >
         {t('change')}
-      </ButtonWrapper>
+      </OLButton>
     </form>
   )
 }
@@ -255,9 +255,9 @@ function PasswordFormGroup({
   )
 
   return (
-    <FormGroupWrapper controlId={id}>
-      <FormLabelWrapper>{label}</FormLabelWrapper>
-      <FormControlWrapper
+    <OLFormGroup controlId={id}>
+      <OLFormLabel>{label}</OLFormLabel>
+      <OLFormControl
         type="password"
         placeholder="*********"
         autoComplete={autoComplete}
@@ -270,11 +270,11 @@ function PasswordFormGroup({
         isInvalid={isInvalid}
       />
       {isInvalid && (
-        <FormTextWrapper isError>
+        <OLFormText isError>
           {parentValidationMessage || validationMessage}
-        </FormTextWrapper>
+        </OLFormText>
       )}
-    </FormGroupWrapper>
+    </OLFormGroup>
   )
 }
 

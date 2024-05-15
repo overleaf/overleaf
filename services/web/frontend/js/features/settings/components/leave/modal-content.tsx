@@ -3,13 +3,13 @@ import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
   OLModalTitle,
-} from '@/features/ui/components/bootstrap-5/wrappers/ol-modal'
+} from '@/features/ui/components/ol/ol-modal'
 
 type LeaveModalContentProps = {
   handleHide: () => void
@@ -74,23 +74,23 @@ function LeaveModalContent({
       </OLModalBody>
 
       <OLModalFooter>
-        <ButtonWrapper
+        <OLButton
           disabled={inFlight}
           onClick={handleHide}
           variant="secondary"
           bs3Props={{ bsStyle: null, className: 'btn-secondary' }}
         >
           {t('cancel')}
-        </ButtonWrapper>
+        </OLButton>
 
-        <ButtonWrapper
+        <OLButton
           form="leave-form"
           type="submit"
           variant="danger"
           disabled={inFlight || !isFormValid}
         >
           {inFlight ? <>{t('deleting')}…</> : t('delete')}
-        </ButtonWrapper>
+        </OLButton>
       </OLModalFooter>
     </>
   )

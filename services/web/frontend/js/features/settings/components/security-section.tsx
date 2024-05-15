@@ -2,7 +2,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { Trans, useTranslation } from 'react-i18next'
 import { GroupSSOLinkingStatus } from '../../../../../types/subscription/sso'
 import getMeta from '../../../utils/meta'
-import ButtonWrapper from '@/features/ui/components/bootstrap-5/wrappers/button-wrapper'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function SecuritySection() {
   const { t } = useTranslation()
@@ -85,13 +85,13 @@ function SecuritySection() {
                 </div>
                 {linked ? null : (
                   <div className="button-column">
-                    <ButtonWrapper
+                    <OLButton
                       variant="primary"
                       bs3Props={{ className: 'btn btn-primary', bsStyle: null }}
                       href={`/subscription/${groupId}/sso_enrollment`}
                     >
                       {t('set_up_sso')}
-                    </ButtonWrapper>
+                    </OLButton>
                   </div>
                 )}
               </div>

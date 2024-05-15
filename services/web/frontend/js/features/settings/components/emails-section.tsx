@@ -9,7 +9,7 @@ import EmailsHeader from './emails/header'
 import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
 import Icon from '../../../shared/components/icon'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { LeaversSurveyAlert } from './leavers-survey-alert'
 
@@ -67,7 +67,7 @@ function EmailsSectionContent() {
         {isInitializingSuccess && <LeaversSurveyAlert />}
         {isInitializingSuccess && !hideAddSecondaryEmail && <AddEmail />}
         {isInitializingError && (
-          <NotificationWrapper
+          <OLNotification
             type="error"
             content={t('error_performing_request')}
             bs3Props={{

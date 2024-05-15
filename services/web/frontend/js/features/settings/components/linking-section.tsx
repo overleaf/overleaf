@@ -6,7 +6,7 @@ import { SSOLinkingWidget } from './linking/sso-widget'
 import getMeta from '../../../utils/meta'
 import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
-import NotificationWrapper from '@/features/ui/components/bootstrap-5/wrappers/notification-wrapper'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function LinkingSection() {
   useBroadcastUser()
@@ -122,7 +122,7 @@ function LinkingSection() {
             {t('project_synchronisation')}
           </h3>
           {projectSyncSuccessMessage ? (
-            <NotificationWrapper
+            <OLNotification
               type="success"
               content={projectSyncSuccessMessage}
             />
@@ -166,7 +166,7 @@ function LinkingSection() {
             {t('linked_accounts')}
           </h3>
           {ssoErrorMessage ? (
-            <NotificationWrapper
+            <OLNotification
               type="error"
               content={`${t('sso_link_error')}: ${ssoErrorMessage}`}
             />
