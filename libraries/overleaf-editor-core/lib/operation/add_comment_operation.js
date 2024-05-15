@@ -38,11 +38,14 @@ class AddCommentOperation extends EditOperation {
    * @returns {RawAddCommentOperation}
    */
   toJSON() {
-    return {
+    const raw = {
       commentId: this.commentId,
       ranges: this.ranges.map(range => range.toRaw()),
-      resolved: this.resolved,
     }
+    if (this.resolved) {
+      raw.resolved = true
+    }
+    return raw
   }
 
   /**

@@ -149,11 +149,14 @@ class Comment {
    * @returns {CommentRawData}
    */
   toRaw() {
-    return {
+    const raw = {
       id: this.id,
-      resolved: this.resolved,
       ranges: this.ranges.map(range => range.toRaw()),
     }
+    if (this.resolved) {
+      raw.resolved = true
+    }
+    return raw
   }
 
   /**

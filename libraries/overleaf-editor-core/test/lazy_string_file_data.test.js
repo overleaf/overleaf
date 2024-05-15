@@ -26,9 +26,7 @@ describe('LazyStringFileData', function () {
       .withArgs(this.fileHash)
       .resolves('the quick brown fox')
     this.blobStore.getObject.withArgs(this.rangesHash).resolves({
-      comments: [
-        { id: 'foo', ranges: [{ pos: 0, length: 3 }], resolved: false },
-      ],
+      comments: [{ id: 'foo', ranges: [{ pos: 0, length: 3 }] }],
       trackedChanges: [
         {
           range: { pos: 4, length: 5 },
@@ -121,7 +119,7 @@ describe('LazyStringFileData', function () {
     expect(eagerString).to.be.instanceOf(EagerStringFileData)
     expect(eagerString.getContent()).to.equal('the quick brown fox')
     expect(eagerString.getComments().toRaw()).to.deep.equal([
-      { id: 'foo', ranges: [{ pos: 0, length: 3 }], resolved: false },
+      { id: 'foo', ranges: [{ pos: 0, length: 3 }] },
     ])
     expect(eagerString.trackedChanges.toRaw()).to.deep.equal([
       {

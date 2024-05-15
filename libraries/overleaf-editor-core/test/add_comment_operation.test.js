@@ -21,7 +21,6 @@ describe('AddCommentOperation', function () {
     const op = new AddCommentOperation('123', [new Range(0, 1)])
     expect(op.toJSON()).to.eql({
       commentId: '123',
-      resolved: false,
       ranges: [
         {
           pos: 0,
@@ -39,7 +38,6 @@ describe('AddCommentOperation', function () {
       {
         id: '123',
         ranges: [{ pos: 0, length: 1 }],
-        resolved: false,
       },
     ])
   })
@@ -54,10 +52,8 @@ describe('AddCommentOperation', function () {
         {
           id: '123',
           ranges: [{ pos: 0, length: 1 }],
-          resolved: false,
         },
       ])
-
       const invertedOp = op.invert(initialFileData)
       invertedOp.apply(fileData)
       expect(fileData.getComments().toRaw()).to.eql([])
@@ -68,7 +64,6 @@ describe('AddCommentOperation', function () {
         {
           id: '123',
           ranges: [{ pos: 0, length: 1 }],
-          resolved: false,
         },
       ]
 
@@ -97,7 +92,6 @@ describe('AddCommentOperation', function () {
         {
           id: '123',
           ranges: [{ pos: 0, length: 1 }],
-          resolved: false,
         },
       ]
 

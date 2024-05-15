@@ -87,7 +87,6 @@ describe('HashFileData', function () {
         {
           id: 'comment-1',
           ranges: [{ pos: 1, length: 4 }],
-          resolved: false,
         },
       ]
       const fileData = new HashFileData(this.fileHash, this.rangesHash)

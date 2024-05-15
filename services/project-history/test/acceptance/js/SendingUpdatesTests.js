@@ -100,7 +100,6 @@ function olAddCommentOperation(doc, commentId, pos, length) {
     pathname: doc.pathname.replace(/^\//, ''), // Strip leading /
     commentId,
     ranges: [{ pos, length }],
-    resolved: false,
   }
 }
 

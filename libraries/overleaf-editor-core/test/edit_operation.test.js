@@ -104,7 +104,6 @@ describe('EditOperationTransformer', function () {
     expect(bPrime.toJSON()).to.eql({
       commentId: 'comm1',
       ranges: [{ pos: 16, length: 3 }],
-      resolved: false,
     })
   })
 
@@ -122,7 +121,6 @@ describe('EditOperationTransformer', function () {
     expect(aPrime.toJSON()).to.eql({
       commentId: 'comm1',
       ranges: [{ pos: 16, length: 3 }],
-      resolved: false,
     })
   })
 
@@ -140,7 +138,6 @@ describe('EditOperationTransformer', function () {
     expect(bPrime.toJSON()).to.eql({
       commentId: 'comm1',
       ranges: [],
-      resolved: false,
     })
   })
 
@@ -159,7 +156,6 @@ describe('EditOperationTransformer', function () {
     expect(bPrime.toJSON()).to.eql({
       commentId: 'comm1',
       ranges: [{ pos: 8, length: 1 }],
-      resolved: false,
     })
   })
 
@@ -178,7 +174,6 @@ describe('EditOperationTransformer', function () {
     expect(bPrime.toJSON()).to.eql({
       commentId: 'comm1',
       ranges: [{ pos: 12, length: 1 }],
-      resolved: false,
     })
   })
 
@@ -267,7 +262,6 @@ describe('EditOperationBuilder', function () {
     const raw = {
       commentId: 'comm1',
       ranges: [{ pos: 0, length: 1 }],
-      resolved: false,
     }
     const op = EditOperationBuilder.fromJSON(raw)
     expect(op).to.be.an.instanceof(AddCommentOperation)

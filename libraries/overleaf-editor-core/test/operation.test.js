@@ -819,7 +819,6 @@ describe('Operation', function () {
                     length: 1,
                   },
                 ],
-                resolved: false,
               },
             ],
           },
@@ -851,9 +850,7 @@ describe('Operation', function () {
           foo: {
             content: 'xyz',
             metadata: {},
-            comments: [
-              { id: '1', ranges: [{ pos: 3, length: 1 }], resolved: false },
-            ],
+            comments: [{ id: '1', ranges: [{ pos: 3, length: 1 }] }],
           },
         })
         .expectSymmetry()
@@ -886,9 +883,7 @@ describe('Operation', function () {
           foo: {
             content: 'xyz',
             metadata: {},
-            comments: [
-              { id: '1', ranges: [{ pos: 0, length: 4 }], resolved: false },
-            ],
+            comments: [{ id: '1', ranges: [{ pos: 0, length: 4 }] }],
           },
         })
         .expectSymmetry()
@@ -1070,9 +1065,7 @@ describe('Operation', function () {
           foo: {
             content: 'xyz',
             metadata: {},
-            comments: [
-              { id: '1', ranges: [{ pos: 0, length: 3 }], resolved: false },
-            ],
+            comments: [{ id: '1', ranges: [{ pos: 0, length: 3 }] }],
           },
         })
         .expectSymmetry()

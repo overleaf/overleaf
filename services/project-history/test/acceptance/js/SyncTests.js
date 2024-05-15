@@ -543,7 +543,6 @@ describe('Syncing with web and doc-updater', function () {
                       pathname: 'main.tex',
                       commentId,
                       ranges: [{ pos: 1, length: 10 }],
-                      resolved: false,
                     },
                   ],
                   origin: { kind: 'test-origin' },

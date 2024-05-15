@@ -814,13 +814,11 @@ describe('UpdateTranslator', function () {
                 pathname: 'main.tex',
                 commentId: 'comment-id-1',
                 ranges: [{ pos: 5, length: 12 }],
-                resolved: false,
               },
               {
                 pathname: 'main.tex',
                 commentId: 'comment-id-2',
                 ranges: [{ pos: 7, length: 15 }],
-                resolved: false,
               },
               {
                 pathname: 'main.tex',
@@ -999,7 +997,6 @@ describe('UpdateTranslator', function () {
                 pathname: 'main.tex',
                 commentId: 'comment-id',
                 ranges: [{ pos: 11, length: 14 }],
-                resolved: false,
               },
             ],
             v2Authors: [this.user_id],

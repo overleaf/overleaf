@@ -15,12 +15,11 @@ describe('commentList', function () {
     ])
 
     expect(commentList.toRaw()).to.eql([
-      { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-      { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: false },
+      { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+      { id: 'comm2', ranges: [{ pos: 20, length: 5 }] },
       {
         id: 'comm3',
         ranges: [{ pos: 30, length: 15 }],
-        resolved: false,
       },
     ])
   })
@@ -41,7 +40,6 @@ describe('commentList', function () {
           length: 5,
         },
       ],
-      resolved: false,
     })
   })
 
@@ -54,17 +52,15 @@ describe('commentList', function () {
 
     commentList.add(new Comment('comm4', [new Range(40, 10)]))
     expect(commentList.toRaw()).to.eql([
-      { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-      { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: false },
+      { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+      { id: 'comm2', ranges: [{ pos: 20, length: 5 }] },
       {
         id: 'comm3',
         ranges: [{ pos: 30, length: 15 }],
-        resolved: false,
       },
       {
         id: 'comm4',
         ranges: [{ pos: 40, length: 10 }],
-        resolved: false,
       },
     ])
   })
@@ -89,7 +85,6 @@ describe('commentList', function () {
       {
         id: 'comm3',
         ranges: [{ pos: 30, length: 15 }],
-        resolved: false,
       },
     ])
   })
@@ -103,8 +98,8 @@ describe('commentList', function () {
 
     commentList.delete('comm3')
     expect(commentList.toRaw()).to.eql([
-      { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-      { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: false },
+      { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+      { id: 'comm2', ranges: [{ pos: 20, length: 5 }] },
     ])
   })
 
@@ -118,12 +113,11 @@ describe('commentList', function () {
     commentList.delete('comm5')
 
     expect(commentList.toRaw()).to.eql([
-      { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-      { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: false },
+      { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+      { id: 'comm2', ranges: [{ pos: 20, length: 5 }] },
       {
         id: 'comm3',
         ranges: [{ pos: 30, length: 15 }],
-        resolved: false,
       },
     ])
   })
@@ -149,8 +143,8 @@ describe('commentList', function () {
 
       commentList.applyInsert(new Range(15, 5), { commentIds: ['comm1'] })
       expect(commentList.toRaw()).to.eql([
-        { id: 'comm1', ranges: [{ pos: 5, length: 15 }], resolved: false },
-        { id: 'comm2', ranges: [{ pos: 20, length: 10 }], resolved: false },
+        { id: 'comm1', ranges: [{ pos: 5, length: 15 }] },
+        { id: 'comm2', ranges: [{ pos: 20, length: 10 }] },
       ])
     })
 
@@ -168,8 +162,8 @@ describe('commentList', function () {
 
       commentList.applyInsert(new Range(15, 5), { commentIds: ['comm2'] })
       expect(commentList.toRaw()).to.eql([
-        { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-        { id: 'comm2', ranges: [{ pos: 15, length: 15 }], resolved: false },
+        { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+        { id: 'comm2', ranges: [{ pos: 15, length: 15 }] },
       ])
     })
   })
@@ -188,8 +182,8 @@ describe('commentList', function () {
 
     commentList.applyDelete(new Range(10, 10)) // 10-19
     expect(commentList.toRaw()).to.eql([
-      { id: 'comm1', ranges: [{ pos: 5, length: 5 }], resolved: false },
-      { id: 'comm2', ranges: [{ pos: 10, length: 5 }], resolved: false },
+      { id: 'comm1', ranges: [{ pos: 5, length: 5 }] },
+      { id: 'comm2', ranges: [{ pos: 10, length: 5 }] },
     ])
   })
 
@@ -212,9 +206,9 @@ describe('commentList', function () {
 
       commentList.applyInsert(new Range(7, 5), { commentIds: ['comm1'] })
       expect(commentList.toRaw()).to.eql([
-        { id: 'comm1', ranges: [{ pos: 5, length: 15 }], resolved: false },
-        { id: 'comm2', ranges: [{ pos: 25, length: 5 }], resolved: false },
-        { id: 'comm3', ranges: [{ pos: 35, length: 15 }], resolved: false },
+        { id: 'comm1', ranges: [{ pos: 5, length: 15 }] },
+        { id: 'comm2', ranges: [{ pos: 25, length: 5 }] },
+        { id: 'comm3', ranges: [{ pos: 35, length: 15 }] },
       ])
     })
 
@@ -242,7 +236,6 @@ describe('commentList', function () {
             { pos: 5, length: 2 },
             { pos: 12, length: 8 },
           ],
-          resolved: false,
         },
         {
           id: 'comm2',
@@ -250,9 +243,8 @@ describe('commentList', function () {
             { pos: 7, length: 5 },
             { pos: 25, length: 5 },
           ],
-          resolved: false,
         },
-        { id: 'comm3', ranges: [{ pos: 35, length: 15 }], resolved: false },
+        { id: 'comm3', ranges: [{ pos: 35, length: 15 }] },
       ])
     })
 
@@ -279,7 +271,6 @@ describe('commentList', function () {
         {
           id: 'comm1',
           ranges: [{ pos: 5, length: 20 }],
-          resolved: false,
         },
         {
           id: 'comm2',
@@ -287,9 +278,8 @@ describe('commentList', function () {
             { pos: 7, length: 5 },
             { pos: 25, length: 5 },
           ],
-          resolved: false,
         },
-        { id: 'comm3', ranges: [{ pos: 35, length: 15 }], resolved: false },
+        { id: 'comm3', ranges: [{ pos: 35, length: 15 }] },
       ])
     })
 
@@ -311,9 +301,9 @@ describe('commentList', function () {
 
       commentList.applyInsert(new Range(16, 5))
       expect(commentList.toRaw()).to.eql([
-        { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-        { id: 'comm2', ranges: [{ pos: 25, length: 5 }], resolved: false },
-        { id: 'comm3', ranges: [{ pos: 35, length: 15 }], resolved: false },
+        { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+        { id: 'comm2', ranges: [{ pos: 25, length: 5 }] },
+        { id: 'comm3', ranges: [{ pos: 35, length: 15 }] },
       ])
     })
 
@@ -335,9 +325,9 @@ describe('commentList', function () {
 
       commentList.applyInsert(new Range(50, 5))
       expect(commentList.toRaw()).to.eql([
-        { id: 'comm1', ranges: [{ pos: 5, length: 10 }], resolved: false },
-        { id: 'comm2', ranges: [{ pos: 20, length: 5 }], resolved: false },
-        { id: 'comm3', ranges: [{ pos: 30, length: 15 }], resolved: false },
+        { id: 'comm1', ranges: [{ pos: 5, length: 10 }] },
+        { id: 'comm2', ranges: [{ pos: 20, length: 5 }] },
+        { id: 'comm3', ranges: [{ pos: 30, length: 15 }] },
       ])
     })
 
@@ -359,9 +349,9 @@ describe('commentList', function () {
 
       commentList.applyDelete(new Range(0, 4))
       expect(commentList.toRaw()).to.eql([
-        { id: 'comm1', ranges: [{ pos: 1, length: 10 }], resolved: false },
-        { id: 'comm2', ranges: [{ pos: 16, length: 5 }], resolved: false },
-        { id: 'comm3', ranges: [{ pos: 26, length: 15 }], resolved: false },
+        { id: 'comm1', ranges: [{ pos: 1, length: 10 }] },
+        { id: 'comm2', ranges: [{ pos: 16, length: 5 }] },
+        { id: 'comm3', ranges: [{ pos: 26, length: 15 }] },
       ])
     })
 
@@ -376,7 +366,7 @@ describe('commentList', function () {
 
         commentList.applyDelete(new Range(0, 6))
         expect(commentList.toRaw()).to.eql([
-          { id: 'comm1', ranges: [{ pos: 0, length: 9 }], resolved: false },
+          { id: 'comm1', ranges: [{ pos: 0, length: 9 }] },
         ])
       })
 
@@ -389,7 +379,7 @@ describe('commentList', function () {
         ])
         commentList.applyDelete(new Range(7, 10))
         expect(commentList.toRaw()).to.eql([
-          { id: 'comm1', ranges: [{ pos: 5, length: 2 }], resolved: false },
+          { id: 'comm1', ranges: [{ pos: 5, length: 2 }] },
         ])
       })
 
@@ -402,7 +392,7 @@ describe('commentList', function () {
         ])
         commentList.applyDelete(new Range(6, 2))
         expect(commentList.toRaw()).to.eql([
-          { id: 'comm1', ranges: [{ pos: 5, length: 8 }], resolved: false },
+          { id: 'comm1', ranges: [{ pos: 5, length: 8 }] },
         ])
       })
     })
@@ -428,13 +418,11 @@ describe('commentList', function () {
         {
           id: 'comm1',
           ranges: [{ pos: 5, length: 10 }],
-          resolved: false,
         },
-        { id: 'comm2', ranges: [], resolved: false },
+        { id: 'comm2', ranges: [] },
         {
           id: 'comm3',
           ranges: [{ pos: 20, length: 15 }],
-          resolved: false,
         },
       ])
     })

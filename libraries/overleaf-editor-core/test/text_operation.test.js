@@ -369,7 +369,7 @@ describe('TextOperation', function () {
         )
       ).to.deep.equal({
         content: 'foo baz',
-        comments: [{ id: 'comment1', ranges: [], resolved: false }],
+        comments: [{ id: 'comment1', ranges: [] }],
       })
     })
 
@@ -473,8 +473,8 @@ describe('TextOperation', function () {
       ).to.deep.equal({
         content: 'foo baaar bbbaz',
         comments: [
-          { id: 'comment1', ranges: [{ pos: 4, length: 5 }], resolved: false },
-          { id: 'comment2', ranges: [{ pos: 10, length: 5 }], resolved: false },
+          { id: 'comment1', ranges: [{ pos: 4, length: 5 }] },
+          { id: 'comment2', ranges: [{ pos: 10, length: 5 }] },
         ],
       })
     })
@@ -722,9 +722,7 @@ describe('TextOperation', function () {
         )
       ).to.deep.equal({
         content: 'foo qux baz',
-        comments: [
-          { id: 'comment1', ranges: [{ pos: 4, length: 4 }], resolved: false },
-        ],
+        comments: [{ id: 'comment1', ranges: [{ pos: 4, length: 4 }] }],
       })
     })
 
@@ -751,9 +749,7 @@ describe('TextOperation', function () {
         )
       ).to.deep.equal({
         content: 'foo qux corge bar baz',
-        comments: [
-          { id: 'comment1', ranges: [{ pos: 4, length: 13 }], resolved: false },
-        ],
+        comments: [{ id: 'comment1', ranges: [{ pos: 4, length: 13 }] }],
       })
     })
 
