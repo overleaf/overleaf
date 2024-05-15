@@ -11,7 +11,7 @@ import { useGlobalAlertsContainer } from '@/features/ide-react/context/global-al
 const MAX_UNSAVED_SECONDS = 15 // lock the editor after this time if unsaved
 
 export const UnsavedDocs: FC = () => {
-  const { openDocs } = useEditorManagerContext()
+  const { openDocs, debugTimers } = useEditorManagerContext()
   const { permissionsLevel, setPermissionsLevel } = useEditorContext()
   const [isLocked, setIsLocked] = useState(false)
   const [unsavedDocs, setUnsavedDocs] = useState(new Map<string, number>())
@@ -47,6 +47,7 @@ export const UnsavedDocs: FC = () => {
   // NOTE: openDocs should never change, so it's safe to use as a dependency here
   useEffect(() => {
     const interval = window.setInterval(() => {
+      debugTimers.current.CheckUnsavedDocs = Date.now()
       const unsavedDocs = new Map()
 
       const unsavedDocIds = openDocs.unsavedDocIds()
@@ -67,7 +68,7 @@ export const UnsavedDocs: FC = () => {
     return () => {
       window.clearInterval(interval)
     }
-  }, [openDocs])
+  }, [openDocs, debugTimers])
 
   const maxUnsavedSeconds = Math.max(0, ...unsavedDocs.values())
 

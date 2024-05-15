@@ -30,6 +30,7 @@ import useEventListener from '@/shared/hooks/use-event-listener'
 import { EditorType } from '@/features/ide-react/editor/types/editor-type'
 import { DocId } from '../../../../../types/project-settings'
 import { Update } from '@/features/history/services/types/update'
+import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -60,6 +61,7 @@ export type EditorManager = {
   setWantTrackChanges: React.Dispatch<
     React.SetStateAction<EditorManager['wantTrackChanges']>
   >
+  debugTimers: React.MutableRefObject<Record<string, number>>
 }
 
 function hasGotoLine(options: OpenDocOptions): options is GotoLineOptions {
@@ -126,12 +128,32 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
   const [ignoringExternalUpdates, setIgnoringExternalUpdates] = useState(false)
 
+  const { createDebugDiff, debugTimers } = useDebugDiffTracker(
+    projectId,
+    currentDocument
+  )
+
   const [globalEditorWatchdogManager] = useState(
     () =>
       new EditorWatchdogManager({
         onTimeoutHandler: (meta: Record<string, any>) => {
-          sendMB('losing-edits', meta)
-          reportError('losing-edits', meta)
+          let diffSize: number | null = null
+          createDebugDiff()
+            .then(calculatedDiffSize => {
+              diffSize = calculatedDiffSize
+            })
+            .finally(() => {
+              sendMB('losing-edits', {
+                ...meta,
+                diffSize,
+                timers: debugTimers.current,
+              })
+              reportError('losing-edits', {
+                ...meta,
+                diffSize,
+                timers: debugTimers.current,
+              })
+            })
         },
       })
   )
@@ -616,6 +638,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       jumpToLine,
       wantTrackChanges,
       setWantTrackChanges,
+      debugTimers,
     }),
     [
       getEditorType,
@@ -633,6 +656,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
       jumpToLine,
       wantTrackChanges,
       setWantTrackChanges,
+      debugTimers,
     ]
   )
 
