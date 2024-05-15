@@ -3,6 +3,7 @@ const { FetchError, AbortError } = require('node-fetch')
 const { Readable } = require('stream')
 const { once } = require('events')
 const { TestServer } = require('./helpers/TestServer')
+const selfsigned = require('selfsigned')
 const {
   fetchJson,
   fetchStream,
@@ -10,15 +11,41 @@ const {
   fetchRedirect,
   fetchString,
   RequestFailedError,
+  CustomHttpAgent,
+  CustomHttpsAgent,
 } = require('../..')
 
-const PORT = 30001
+const HTTP_PORT = 30001
+const HTTPS_PORT = 30002
+
+const attrs = [{ name: 'commonName', value: 'example.com' }]
+const pems = selfsigned.generate(attrs, { days: 365 })
+
+const PRIVATE_KEY = pems.private
+const PUBLIC_CERT = pems.cert
+
+const dns = require('dns')
+const _originalLookup = dns.lookup
+// Custom DNS resolver function
+dns.lookup = (hostname, options, callback) => {
+  if (hostname === 'example.com') {
+    // If the hostname is our test case, return the ip address for the test server
+    callback(null, '127.0.0.1', 4)
+  } else {
+    // Otherwise, use the default lookup
+    _originalLookup(hostname, options, callback)
+  }
+}
 
 describe('fetch-utils', function () {
   before(async function () {
     this.server = new TestServer()
-    await this.server.start(PORT)
-    this.url = path => `http://127.0.0.1:${PORT}${path}`
+    await this.server.start(HTTP_PORT, HTTPS_PORT, {
+      key: PRIVATE_KEY,
+      cert: PUBLIC_CERT,
+    })
+    this.url = path => `http://example.com:${HTTP_PORT}${path}`
+    this.httpsUrl = path => `https://example.com:${HTTPS_PORT}${path}`
   })
 
   after(async function () {
@@ -234,6 +261,55 @@ describe('fetch-utils', function () {
         RequestFailedError
       )
       await expectRequestAborted(this.server.lastReq)
+    })
+  })
+
+  describe('CustomHttpAgent', function () {
+    it('makes an http request successfully', async function () {
+      const agent = new CustomHttpAgent({ connectTimeout: 100 })
+      const body = await fetchString(this.url('/hello'), { agent })
+      expect(body).to.equal('hello')
+    })
+
+    it('times out when accessing a non-routable address', async function () {
+      const agent = new CustomHttpAgent({ connectTimeout: 10 })
+      await expect(fetchString('http://10.255.255.255/', { agent }))
+        .to.be.rejectedWith(FetchError)
+        .and.eventually.have.property('message')
+        .and.to.equal(
+          'request to http://10.255.255.255/ failed, reason: connect timeout'
+        )
+    })
+  })
+
+  describe('CustomHttpsAgent', function () {
+    it('makes an https request successfully', async function () {
+      const agent = new CustomHttpsAgent({
+        connectTimeout: 100,
+        ca: PUBLIC_CERT,
+      })
+      const body = await fetchString(this.httpsUrl('/hello'), { agent })
+      expect(body).to.equal('hello')
+    })
+
+    it('rejects an untrusted server', async function () {
+      const agent = new CustomHttpsAgent({
+        connectTimeout: 100,
+      })
+      await expect(fetchString(this.httpsUrl('/hello'), { agent }))
+        .to.be.rejectedWith(FetchError)
+        .and.eventually.have.property('code')
+        .and.to.equal('DEPTH_ZERO_SELF_SIGNED_CERT')
+    })
+
+    it('times out when accessing a non-routable address', async function () {
+      const agent = new CustomHttpsAgent({ connectTimeout: 10 })
+      await expect(fetchString('https://10.255.255.255/', { agent }))
+        .to.be.rejectedWith(FetchError)
+        .and.eventually.have.property('message')
+        .and.to.equal(
+          'request to https://10.255.255.255/ failed, reason: connect timeout'
+        )
     })
   })
 })

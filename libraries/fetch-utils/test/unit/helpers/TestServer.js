@@ -1,8 +1,11 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const http = require('http')
+const https = require('https')
+const { promisify } = require('util')
 
 class TestServer {
-  constructor(port) {
+  constructor() {
     this.app = express()
 
     this.app.use(bodyParser.json())
@@ -87,9 +90,9 @@ class TestServer {
     })
   }
 
-  start(port) {
-    return new Promise((resolve, reject) => {
-      this.server = this.app.listen(port, err => {
+  start(port, httpsPort, httpsOptions) {
+    const startHttp = new Promise((resolve, reject) => {
+      this.server = http.createServer(this.app).listen(port, err => {
         if (err) {
           reject(err)
         } else {
@@ -97,18 +100,24 @@ class TestServer {
         }
       })
     })
+    const startHttps = new Promise((resolve, reject) => {
+      this.https_server = https
+        .createServer(httpsOptions, this.app)
+        .listen(httpsPort, err => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve()
+          }
+        })
+    })
+    return Promise.all([startHttp, startHttps])
   }
 
   stop() {
-    return new Promise((resolve, reject) => {
-      this.server.close(err => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve()
-        }
-      })
-    })
+    const stopHttp = promisify(this.server.close).bind(this.server)
+    const stopHttps = promisify(this.https_server.close).bind(this.https_server)
+    return Promise.all([stopHttp(), stopHttps()])
   }
 }
 

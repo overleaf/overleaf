@@ -2,6 +2,8 @@ const _ = require('lodash')
 const { Readable } = require('stream')
 const OError = require('@overleaf/o-error')
 const fetch = require('node-fetch')
+const http = require('http')
+const https = require('https')
 
 /**
  * Make a request and return the parsed JSON response.
@@ -245,6 +247,42 @@ async function maybeGetResponseBody(response) {
   }
 }
 
+// Define custom http and https agents with support for connect timeouts
+
+class ConnectTimeoutError extends OError {
+  constructor(options) {
+    super('connect timeout', options)
+  }
+}
+
+function withTimeout(createConnection, options, callback) {
+  if (options.connectTimeout) {
+    // Wrap createConnection in a timeout
+    const timer = setTimeout(() => {
+      socket.destroy(new ConnectTimeoutError(options))
+    }, options.connectTimeout)
+    const socket = createConnection(options, (err, stream) => {
+      clearTimeout(timer)
+      callback(err, stream)
+    })
+    return socket
+  } else {
+    // Fallback to default createConnection
+    return createConnection(options, callback)
+  }
+}
+
+class CustomHttpAgent extends http.Agent {
+  createConnection(options, callback) {
+    return withTimeout(super.createConnection.bind(this), options, callback)
+  }
+}
+class CustomHttpsAgent extends https.Agent {
+  createConnection(options, callback) {
+    return withTimeout(super.createConnection.bind(this), options, callback)
+  }
+}
+
 module.exports = {
   fetchJson,
   fetchJsonWithResponse,
@@ -255,4 +293,7 @@ module.exports = {
   fetchString,
   fetchStringWithResponse,
   RequestFailedError,
+  ConnectTimeoutError,
+  CustomHttpAgent,
+  CustomHttpsAgent,
 }

@@ -26,6 +26,7 @@
   "dependencies": {
     "@overleaf/o-error": "*",
     "lodash": "^4.17.21",
-    "node-fetch": "^2.6.11"
+    "node-fetch": "^2.6.11",
+    "selfsigned": "^2.4.1"
   }
 }
