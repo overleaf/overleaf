@@ -4,6 +4,7 @@ const User = require('./helpers/User')
 const settings = require('@overleaf/settings')
 const CollaboratorsEmailHandler = require('../../../app/src/Features/Collaborators/CollaboratorsEmailHandler')
 const Features = require('../../../app/src/infrastructure/Features')
+const cheerio = require('cheerio')
 
 const createInvite = (sendingUser, projectId, email, callback) => {
   sendingUser.getCsrfToken(err => {
@@ -107,24 +108,6 @@ const tryAcceptInvite = (user, invite, callback) => {
   })
 }
 
-const tryRegisterUser = (user, email, callback) => {
-  user.getCsrfToken(error => {
-    if (error != null) {
-      return callback(error)
-    }
-    user.request.post(
-      {
-        url: '/register',
-        json: {
-          email,
-          password: 'some_weird_password',
-        },
-      },
-      callback
-    )
-  })
-}
-
 const tryFollowLoginLink = (user, loginLink, callback) => {
   user.getCsrfToken(error => {
     if (error != null) {
@@ -220,7 +203,7 @@ const expectInvalidInvitePage = (user, link, callback) => {
   // view invalid invite
   tryFollowInviteLink(user, link, (err, response, body) => {
     expect(err).not.to.exist
-    expect(response.statusCode).to.equal(200)
+    expect(response.statusCode).to.equal(404)
     expect(body).to.match(/<title>Invalid Invite - .*<\/title>/)
     callback()
   })
@@ -232,7 +215,15 @@ const expectInviteRedirectToRegister = (user, link, callback) => {
     expect(err).not.to.exist
     expect(response.statusCode).to.equal(302)
     expect(response.headers.location).to.match(/^\/register.*$/)
-    callback()
+
+    user.getSession((err, session) => {
+      if (err) return callback(err)
+      expect(session.sharedProjectData).deep.equals({
+        project_name: PROJECT_NAME,
+        user_first_name: OWNER_NAME,
+      })
+      callback()
+    })
   })
 }
 
@@ -253,11 +244,26 @@ const expectLoginRedirectToInvite = (user, link, callback) => {
   })
 }
 
-const expectRegistrationRedirectToInvite = (user, email, link, callback) => {
-  tryRegisterUser(user, email, (err, response) => {
+const expectRegistrationRedirectToInvite = (user, link, callback) => {
+  user.register((err, _user, response) => {
     expect(err).not.to.exist
     expect(response.statusCode).to.equal(200)
-    callback()
+
+    if (response.body.redir === '/registration/try-premium') {
+      user.request.get('/registration/onboarding', (err, response) => {
+        if (err) return callback(err)
+        expect(response.statusCode).to.equal(200)
+        const dom = cheerio.load(response.body)
+        const skipUrl = dom('meta[name="ol-skipUrl"]')[0].attribs.content
+        expect(new URL(skipUrl, settings.siteUrl).href).to.equal(
+          new URL(link, settings.siteUrl).href
+        )
+        callback()
+      })
+    } else {
+      expect(response.body.redir).to.equal(link)
+      callback()
+    }
   })
 }
 
@@ -301,19 +307,26 @@ const expectInvitesInJoinProjectCount = (user, projectId, count, callback) => {
   })
 }
 
-// eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('ProjectInviteTests', function () {
+const PROJECT_NAME = 'project name for sharing test'
+const OWNER_NAME = 'sending user name'
+
+describe('ProjectInviteTests', function () {
   beforeEach(function (done) {
     this.sendingUser = new User()
     this.user = new User()
-    this.site_admin = new User({ email: 'admin@example.com' })
-    this.email = 'smoketestuser@example.com'
-    this.projectName = 'sharing test'
+    this.site_admin = new User({ email: `admin+${Math.random()}@example.com` })
+    this.email = `smoketestuser+${Math.random()}@example.com`
     Async.series(
       [
-        cb => this.user.ensureUserExists(cb),
         cb => this.sendingUser.login(cb),
         cb => this.sendingUser.setFeatures({ collaborators: 10 }, cb),
+        cb =>
+          this.sendingUser.mongoUpdate(
+            {
+              $set: { first_name: OWNER_NAME },
+            },
+            cb
+          ),
         cb =>
           this.sendingUser.setFeaturesOverride(
             {
@@ -328,15 +341,11 @@ describe.skip('ProjectInviteTests', function () {
   })
 
   describe('creating invites', function () {
-    beforeEach(function () {
-      this.projectName = 'wat'
-    })
-
     describe('creating two invites', function () {
       beforeEach(function (done) {
         createProject(
           this.sendingUser,
-          this.projectName,
+          PROJECT_NAME,
           (err, projectId, project) => {
             expect(err).not.to.exist
             this.projectId = projectId
@@ -504,7 +513,7 @@ describe.skip('ProjectInviteTests', function () {
     beforeEach(function (done) {
       createProjectAndInvite(
         this.sendingUser,
-        this.projectName,
+        PROJECT_NAME,
         this.email,
         (err, project, invite, link) => {
           expect(err).not.to.exist
@@ -657,12 +666,7 @@ describe.skip('ProjectInviteTests', function () {
             [
               cb => expectInviteRedirectToRegister(this.user, this.link, cb),
               cb =>
-                expectRegistrationRedirectToInvite(
-                  this.user,
-                  'some_email@example.com',
-                  this.link,
-                  cb
-                ),
+                expectRegistrationRedirectToInvite(this.user, this.link, cb),
               cb => expectInvitePage(this.user, this.link, cb),
               cb => expectAcceptInviteAndRedirect(this.user, this.invite, cb),
               cb => expectProjectAccess(this.user, this.invite.projectId, cb),
@@ -689,21 +693,13 @@ describe.skip('ProjectInviteTests', function () {
           )
         })
 
-        it('should display invalid-invite if the user registers a new account', function (done) {
+        it('should display invalid-invite right away', function (done) {
           const badLink = this.link.replace(
             this.invite.token,
             'not_a_real_token'
           )
           Async.series(
             [
-              cb => expectInviteRedirectToRegister(this.user, badLink, cb),
-              cb =>
-                expectRegistrationRedirectToInvite(
-                  this.user,
-                  'some_email@example.com',
-                  badLink,
-                  cb
-                ),
               cb => expectInvalidInvitePage(this.user, badLink, cb),
               cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],
@@ -713,6 +709,10 @@ describe.skip('ProjectInviteTests', function () {
       })
 
       describe('login workflow with valid token', function () {
+        beforeEach(function (done) {
+          this.user.ensureUserExists(done)
+        })
+
         it('should redirect to the register page', function (done) {
           Async.series(
             [
@@ -762,20 +762,13 @@ describe.skip('ProjectInviteTests', function () {
           )
         })
 
-        it('should show the invalid-invite page once the user has logged in', function (done) {
+        it('should show the invalid-invite page right away', function (done) {
           const badLink = this.link.replace(
             this.invite.token,
             'not_a_real_token'
           )
           Async.series(
             [
-              cb => {
-                return expectInviteRedirectToRegister(this.user, badLink, cb)
-              },
-              cb => {
-                return expectLoginPage(this.user, cb)
-              },
-              cb => expectLoginRedirectToInvite(this.user, badLink, cb),
               cb => expectInvalidInvitePage(this.user, badLink, cb),
               cb => expectNoProjectAccess(this.user, this.invite.projectId, cb),
             ],

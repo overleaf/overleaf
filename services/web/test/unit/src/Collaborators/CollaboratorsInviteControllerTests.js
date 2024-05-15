@@ -92,6 +92,10 @@ describe('CollaboratorsInviteController', function () {
       addEntryInBackground: sinon.stub(),
     }
 
+    this.AuthenticationController = {
+      setRedirectInSession: sinon.stub(),
+    }
+
     this.CollaboratorsInviteController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Project/ProjectGetter': this.ProjectGetter,
@@ -105,6 +109,8 @@ describe('CollaboratorsInviteController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '@overleaf/settings': this.settings,
         '../../infrastructure/RateLimiter': this.RateLimiter,
+        '../Authentication/AuthenticationController':
+          this.AuthenticationController,
       },
     })
 
@@ -623,6 +629,35 @@ describe('CollaboratorsInviteController', function () {
         this.ProjectGetter.promises.getProject
           .calledWith(this.projectId)
           .should.equal(true)
+      })
+    })
+
+    describe('when not logged in', function () {
+      beforeEach(function (done) {
+        this.SessionManager.getSessionUser.returns(null)
+
+        this.res.callback = () => done()
+        this.CollaboratorsInviteController.viewInvite(
+          this.req,
+          this.res,
+          this.next
+        )
+      })
+      it('should not check member status', function () {
+        expect(this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject)
+          .to.not.have.been.called
+      })
+
+      it('should set redirect back to invite', function () {
+        expect(
+          this.AuthenticationController.setRedirectInSession
+        ).to.have.been.calledWith(this.req)
+      })
+
+      it('should redirect to the register page', function () {
+        expect(this.res.render).to.not.have.been.called
+        expect(this.res.redirect).to.have.been.calledOnce
+        expect(this.res.redirect).to.have.been.calledWith('/register')
       })
     })
 

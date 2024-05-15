@@ -537,12 +537,7 @@ describe('EmailBuilder', function () {
           }
           this.projectName = 'Top Secret'
           this.opts = {
-            inviteUrl:
-              `${this.settings.siteUrl}/project/projectId123/invite/token/aToken123?` +
-              [
-                `project_name=${encodeURIComponent(this.projectName)}`,
-                `user_first_name=${encodeURIComponent(this.owner.name)}`,
-              ].join('&'),
+            inviteUrl: `${this.settings.siteUrl}/project/projectId123/invite/token/aToken123`,
             owner: {
               email: this.owner.email,
             },

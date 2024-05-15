@@ -26,6 +26,10 @@ const rateLimiters = {
     points: 200,
     duration: 60 * 10,
   }),
+  viewProjectInvite: new RateLimiter('view-project-invite', {
+    points: 20,
+    duration: 60,
+  }),
 }
 
 module.exports = {
@@ -128,7 +132,7 @@ module.exports = {
         'collaboration',
         'project-invite'
       ),
-      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(rateLimiters.viewProjectInvite),
       CollaboratorsInviteController.viewInvite,
       AnalyticsRegistrationSourceMiddleware.clearSource()
     )

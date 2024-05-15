@@ -80,6 +80,17 @@ const _buildPortalTemplatesList = affiliations => {
   return portalTemplates
 }
 
+function cleanupSession(req) {
+  // cleanup redirects at the end of the redirect chain
+  delete req.session.postCheckoutRedirect
+  delete req.session.postLoginRedirect
+  delete req.session.postOnboardingRedirect
+
+  // cleanup details from register page
+  delete req.session.sharedProjectData
+  delete req.session.templateData
+}
+
 /**
  * @param {import("express").Request} req
  * @param {import("express").Response} res
@@ -87,10 +98,7 @@ const _buildPortalTemplatesList = affiliations => {
  * @returns {Promise<void>}
  */
 async function projectListPage(req, res, next) {
-  // cleanup redirects at the end of the redirect chain
-  delete req.session.postCheckoutRedirect
-  delete req.session.postLoginRedirect
-  delete req.session.postOnboardingRedirect
+  cleanupSession(req)
 
   // can have two values:
   // - undefined - when there's no "saas" feature or couldn't get subscription data

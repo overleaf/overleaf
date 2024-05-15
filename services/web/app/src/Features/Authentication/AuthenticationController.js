@@ -522,7 +522,7 @@ const AuthenticationController = {
   _redirectToLoginOrRegisterPage(req, res) {
     if (
       req.query.zipUrl != null ||
-      req.query.project_name != null ||
+      req.session.sharedProjectData ||
       req.path === '/user/subscription/new'
     ) {
       AuthenticationController._redirectToRegisterPage(req, res)

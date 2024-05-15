@@ -336,7 +336,7 @@ class User {
                     return callback(error)
                   }
                   this.setExtraAttributes(user)
-                  callback(null, user)
+                  callback(null, user, response)
                 })
               }
             )

@@ -211,10 +211,7 @@ const UserPagesController = {
   accountSuspended: expressify(accountSuspended),
 
   registerPage(req, res) {
-    const sharedProjectData = {
-      project_name: req.query.project_name,
-      user_first_name: req.query.user_first_name,
-    }
+    const sharedProjectData = req.session.sharedProjectData || {}
 
     const newTemplateData = {}
     if (req.session.templateData != null) {

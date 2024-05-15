@@ -119,8 +119,10 @@ describe('UserPagesController', function () {
     })
 
     it('should set sharedProjectData', function (done) {
-      this.req.query.project_name = 'myProject'
-      this.req.query.user_first_name = 'user_first_name_here'
+      this.req.session.sharedProjectData = {
+        project_name: 'myProject',
+        user_first_name: 'user_first_name_here',
+      }
 
       this.res.callback = () => {
         this.res.renderedVariables.sharedProjectData.project_name.should.equal(

@@ -906,7 +906,10 @@ describe('AuthenticationController', function () {
 
     describe('they have been invited to a project', function () {
       beforeEach(function () {
-        this.req.query.project_name = 'something'
+        this.req.session.sharedProjectData = {
+          project_name: 'something',
+          user_first_name: 'else',
+        }
         this.SessionManager.isUserLoggedIn = sinon.stub().returns(false)
         this.middleware(this.req, this.res, this.next)
       })

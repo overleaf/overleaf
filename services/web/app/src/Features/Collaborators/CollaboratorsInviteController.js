@@ -14,6 +14,7 @@ const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const { expressify } = require('@overleaf/promise-utils')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const Errors = require('../Errors/Errors')
+const AuthenticationController = require('../Authentication/AuthenticationController')
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -234,23 +235,26 @@ const CollaboratorsInviteController = {
     const projectId = req.params.Project_id
     const { token } = req.params
     const _renderInvalidPage = function () {
+      res.status(404)
       logger.debug({ projectId }, 'invite not valid, rendering not-valid page')
       res.render('project/invite/not-valid', { title: 'Invalid Invite' })
     }
 
     // check if the user is already a member of the project
     const currentUser = SessionManager.getSessionUser(req.session)
-    const isMember =
-      await CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
-        currentUser._id,
-        projectId
-      )
-    if (isMember) {
-      logger.debug(
-        { projectId, userId: currentUser._id },
-        'user is already a member of this project, redirecting'
-      )
-      return res.redirect(`/project/${projectId}`)
+    if (currentUser) {
+      const isMember =
+        await CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+          currentUser._id,
+          projectId
+        )
+      if (isMember) {
+        logger.debug(
+          { projectId, userId: currentUser._id },
+          'user is already a member of this project, redirecting'
+        )
+        return res.redirect(`/project/${projectId}`)
+      }
     }
 
     // get the invite
@@ -283,6 +287,18 @@ const CollaboratorsInviteController = {
       logger.debug({ projectId }, 'no project found')
       return _renderInvalidPage()
     }
+
+    if (!currentUser) {
+      req.session.sharedProjectData = {
+        project_name: project.name,
+        user_first_name: owner.first_name,
+      }
+      AuthenticationController.setRedirectInSession(req)
+      return res.redirect('/register')
+    }
+
+    // cleanup if set for register page
+    delete req.session.sharedProjectData
 
     // finally render the invite
     res.render('project/invite/show', {
