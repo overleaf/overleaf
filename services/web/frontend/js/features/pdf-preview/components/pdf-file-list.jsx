@@ -33,6 +33,18 @@ function PdfFileList({ fileList }) {
           <b>{file.path}</b>
         </MenuItem>
       ))}
+
+      {fileList.other.length + fileList.top.length > 0 && fileList.archive && (
+        <MenuItem
+          download={basename(fileList.archive)}
+          href={fileList.archive.url}
+          key={fileList.archive.path}
+        >
+          <b>
+            {t('download_all')} ({fileList.other.length + fileList.top.length})
+          </b>
+        </MenuItem>
+      )}
     </>
   )
 }
@@ -48,6 +60,10 @@ PdfFileList.propTypes = {
   fileList: PropTypes.shape({
     top: FilesArray,
     other: FilesArray,
+    archive: PropTypes.shape({
+      path: PropTypes.string.isRequired,
+      url: PropTypes.string.isRequired,
+    }),
   }),
 }
 

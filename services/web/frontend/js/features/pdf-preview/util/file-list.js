@@ -1,5 +1,5 @@
 const topFileTypes = ['bbl', 'gls', 'ind']
-const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
+const ignoreFiles = ['output.fls', 'output.fdb_latexmk', 'output.zip']
 
 export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
   const files = { top: [], other: [] }
@@ -18,6 +18,8 @@ export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
 
     const allFiles = []
 
+    let outputArchiveFile
+
     // filter out ignored files and set some properties
     for (const file of outputFiles.values()) {
       if (!ignoreFiles.includes(file.path)) {
@@ -28,6 +30,8 @@ export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
         }
 
         allFiles.push(file)
+      } else if (file.type === 'zip') {
+        outputArchiveFile = file
       }
     }
 
@@ -51,6 +55,14 @@ export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
       } else if (!(file.type === 'pdf' && file.main === true)) {
         files.other.push(file)
       }
+    }
+
+    if (outputArchiveFile) {
+      allFiles.forEach(
+        file => file.type !== 'pdf' && params.append('files', file.path)
+      )
+      outputArchiveFile.url += `?${params.toString()}`
+      files.archive = outputArchiveFile
     }
   }
 

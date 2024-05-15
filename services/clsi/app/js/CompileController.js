@@ -12,6 +12,17 @@ function timeSinceLastSuccessfulCompile() {
   return Date.now() - lastSuccessfulCompileTimestamp
 }
 
+function addUrlToOutputFile(outputFile, projectId, userId) {
+  return {
+    url:
+      `${Settings.apis.clsi.url}/project/${projectId}` +
+      (userId != null ? `/user/${userId}` : '') +
+      (outputFile.build != null ? `/build/${outputFile.build}` : '') +
+      `/output/${outputFile.path}`,
+    ...outputFile,
+  }
+}
+
 function compile(req, res, next) {
   const timer = new Metrics.Timer('compile-request')
   RequestParser.parse(req.body, function (error, request) {
@@ -30,7 +41,7 @@ function compile(req, res, next) {
           return next(error)
         }
         CompileManager.doCompileWithLock(request, (error, result) => {
-          let { outputFiles, stats, timings } = result || {}
+          let { buildId, outputFiles, stats, timings } = result || {}
           let code, status
           if (outputFiles == null) {
             outputFiles = []
@@ -98,6 +109,7 @@ function compile(req, res, next) {
 
           if (error) {
             outputFiles = error.outputFiles || []
+            buildId = error.buildId
           }
 
           timer.done()
@@ -108,14 +120,28 @@ function compile(req, res, next) {
               stats,
               timings,
               outputUrlPrefix: Settings.apis.clsi.outputUrlPrefix,
-              outputFiles: outputFiles.map(file => ({
-                url:
-                  `${Settings.apis.clsi.url}/project/${request.project_id}` +
-                  (request.user_id != null ? `/user/${request.user_id}` : '') +
-                  (file.build != null ? `/build/${file.build}` : '') +
-                  `/output/${file.path}`,
-                ...file,
-              })),
+              outputFiles:
+                outputFiles.length === 0
+                  ? []
+                  : outputFiles
+                      .map(file =>
+                        addUrlToOutputFile(
+                          file,
+                          request.project_id,
+                          request.user_id
+                        )
+                      )
+                      .concat(
+                        addUrlToOutputFile(
+                          {
+                            build: buildId,
+                            path: 'output.zip',
+                            type: 'zip',
+                          },
+                          request.project_id,
+                          request.user_id
+                        )
+                      ),
             },
           })
         })

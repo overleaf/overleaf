@@ -50,6 +50,7 @@ function tryImageNameValidation(method, imageNameField) {
 
 describe('CompileController', function () {
   beforeEach(function () {
+    this.buildId = 'build-id-123'
     this.CompileController = SandboxedModule.require(modulePath, {
       requires: {
         './CompileManager': (this.CompileManager = {}),
@@ -118,6 +119,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -140,21 +142,32 @@ describe('CompileController', function () {
 
       it('should return the JSON response', function () {
         this.res.status.calledWith(200).should.equal(true)
-        this.res.send
-          .calledWith({
-            compile: {
+        console.log(this.res.send.args[0][0].compile)
+        sinon.assert.calledWith(
+          this.res.send,
+          sinon.match.has(
+            'compile',
+            sinon.match({
               status: 'success',
               error: null,
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => ({
-                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                ...file,
-              })),
-            },
-          })
-          .should.equal(true)
+              outputFiles: [
+                ...this.output_files.map(file => ({
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  ...file,
+                })),
+                {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${this.buildId}/output/output.zip`,
+                  build: this.buildId,
+                  path: 'output.zip',
+                  type: 'zip',
+                },
+              ],
+            })
+          )
+        )
       })
     })
 
@@ -165,6 +178,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -179,10 +193,18 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '',
-              outputFiles: this.output_files.map(file => ({
-                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                ...file,
-              })),
+              outputFiles: [
+                ...this.output_files.map(file => ({
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  ...file,
+                })),
+                {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${this.buildId}/output/output.zip`,
+                  build: this.buildId,
+                  path: 'output.zip',
+                  type: 'zip',
+                },
+              ],
             },
           })
           .should.equal(true)
@@ -207,6 +229,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -221,10 +244,18 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => ({
-                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                ...file,
-              })),
+              outputFiles: [
+                ...this.output_files.map(file => ({
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  ...file,
+                })),
+                {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${this.buildId}/output/output.zip`,
+                  build: this.buildId,
+                  path: 'output.zip',
+                  type: 'zip',
+                },
+              ],
             },
           })
           .should.equal(true)
@@ -250,6 +281,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -264,10 +296,18 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
-              outputFiles: this.output_files.map(file => ({
-                url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
-                ...file,
-              })),
+              outputFiles: [
+                ...this.output_files.map(file => ({
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
+                  ...file,
+                })),
+                {
+                  url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${this.buildId}/output/output.zip`,
+                  build: this.buildId,
+                  path: 'output.zip',
+                  type: 'zip',
+                },
+              ],
             },
           })
           .should.equal(true)
@@ -276,9 +316,11 @@ describe('CompileController', function () {
 
     describe('with an error', function () {
       beforeEach(function () {
+        const error = new Error((this.message = 'error message'))
+        error.buildId = this.buildId
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, new Error((this.message = 'error message')), null)
+          .callsArgWith(1, error, null)
         this.CompileController.compile(this.req, this.res)
       })
 

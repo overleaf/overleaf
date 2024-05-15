@@ -208,7 +208,7 @@ async function doCompile(request) {
       Metrics.inc('compiles-timeout', 1, request.metricsOpts)
     }
 
-    const { outputFiles, allEntries } = await _saveOutputFiles({
+    const { outputFiles, allEntries, buildId } = await _saveOutputFiles({
       request,
       compileDir,
       resourceList,
@@ -216,7 +216,7 @@ async function doCompile(request) {
       timings,
     })
     error.outputFiles = outputFiles // return output files so user can check logs
-
+    error.buildId = buildId
     // Clear project if this compile was abruptly terminated
     if (error.terminated || error.timedout) {
       await clearProjectWithListing(
@@ -280,7 +280,7 @@ async function doCompile(request) {
   // Emit compile time.
   timings.compile = ts
 
-  const { outputFiles } = await _saveOutputFiles({
+  const { outputFiles, buildId } = await _saveOutputFiles({
     request,
     compileDir,
     resourceList,
@@ -296,7 +296,7 @@ async function doCompile(request) {
     emitPdfStats(stats, timings, request)
   }
 
-  return { outputFiles, stats, timings }
+  return { outputFiles, stats, timings, buildId }
 }
 
 async function _saveOutputFiles({
@@ -316,20 +316,24 @@ async function _saveOutputFiles({
   let { outputFiles, allEntries } =
     await OutputFileFinder.promises.findOutputFiles(resourceList, compileDir)
 
+  let buildId
+
   try {
-    outputFiles = await OutputCacheManager.promises.saveOutputFiles(
+    const saveResult = await OutputCacheManager.promises.saveOutputFiles(
       { request, stats, timings },
       outputFiles,
       compileDir,
       outputDir
     )
+    buildId = saveResult.buildId
+    outputFiles = saveResult.outputFiles
   } catch (err) {
     const { project_id: projectId, user_id: userId } = request
     logger.err({ projectId, userId, err }, 'failed to save output files')
   }
 
   timings.output = timer.done()
-  return { outputFiles, allEntries }
+  return { outputFiles, allEntries, buildId }
 }
 
 async function stopCompile(projectId, userId) {

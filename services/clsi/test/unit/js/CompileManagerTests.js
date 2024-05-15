@@ -35,6 +35,7 @@ describe('CompileManager', function () {
         build: 1234,
       },
     ]
+    this.buildId = 'build-id-123'
     this.commandOutput = 'Dummy output'
     this.compileBaseDir = '/compile/dir'
     this.outputBaseDir = '/output/dir'
@@ -61,7 +62,9 @@ describe('CompileManager', function () {
     }
     this.OutputCacheManager = {
       promises: {
-        saveOutputFiles: sinon.stub().resolves(this.buildFiles),
+        saveOutputFiles: sinon
+          .stub()
+          .resolves({ outputFiles: this.buildFiles, buildId: this.buildId }),
       },
     }
     this.Settings = {
