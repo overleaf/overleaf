@@ -55,11 +55,21 @@ class AddCommentOperation extends EditOperation {
   }
 
   /**
-   *
-   * @returns {DeleteCommentOperation}
+   * @inheritdoc
+   * @param {StringFileData} previousState
+   * @returns {EditOperation}
    */
-  invert() {
-    return new core.DeleteCommentOperation(this.commentId)
+  invert(previousState) {
+    const comment = previousState.comments.getComment(this.commentId)
+    if (!comment) {
+      return new core.DeleteCommentOperation(this.commentId)
+    }
+
+    return new core.AddCommentOperation(
+      comment.id,
+      comment.ranges.slice(),
+      comment.resolved
+    )
   }
 
   /**
