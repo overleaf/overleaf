@@ -1,5 +1,3 @@
-import 'jquery'
-import 'bootstrap'
 import './../../../utils/meta'
 import './../../../utils/webpack-public-path'
 import './../../../infrastructure/error-reporter'
