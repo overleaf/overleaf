@@ -1,10 +1,18 @@
 const fs = require('fs')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
-const { fetchStream } = require('@overleaf/fetch-utils')
+const {
+  CustomHttpAgent,
+  CustomHttpsAgent,
+  fetchStream,
+} = require('@overleaf/fetch-utils')
 const { URL } = require('url')
 const { pipeline } = require('stream/promises')
 const Metrics = require('./Metrics')
+
+const MAX_CONNECT_TIME = 1000
+const httpAgent = new CustomHttpAgent({ connectTimeout: MAX_CONNECT_TIME })
+const httpsAgent = new CustomHttpsAgent({ connectTimeout: MAX_CONNECT_TIME })
 
 async function pipeUrlToFileWithRetry(url, filePath) {
   let remainingAttempts = 3
@@ -40,6 +48,10 @@ async function pipeUrlToFile(url, filePath) {
 
   const stream = await fetchStream(url, {
     signal: AbortSignal.timeout(60 * 1000),
+    // provide a function to get the agent for each request
+    // as there may be multiple requests with different protocols
+    // due to redirects.
+    agent: _url => (_url.protocol === 'https:' ? httpsAgent : httpAgent),
   })
 
   const atomicWrite = filePath + '~'
