@@ -133,6 +133,11 @@
           {
             "selector": "CallExpression[callee.property.name='map'] Identifier[name='ObjectId']:first-child, CallExpression[callee.property.name='map'] MemberExpression[property.name='ObjectId']:first-child",
             "message": "Don't map ObjectId directly. Use `id => new ObjectId(id)` instead"
+          },
+          // Catch incorrect usage of `await db.collection.find()`
+          {
+            "selector": "AwaitExpression > CallExpression > MemberExpression[property.name='find'][object.object.name='db']",
+            "message": "Mongo find returns a cursor not a promise, use `for await (const result of cursor)` or `.toArray()` instead."
           }
         ]
       }

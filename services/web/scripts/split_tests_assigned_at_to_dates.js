@@ -2,7 +2,7 @@ const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 
 async function updateStringDates() {
   await waitForDb()
-  const users = await db.users.find({
+  const users = db.users.find({
     splitTests: { $exists: true },
   })
 
