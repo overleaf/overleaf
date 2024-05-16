@@ -208,11 +208,7 @@ const RangesManager = {
           op = {
             p: change.op.p,
             r: change.op.i,
-            tracking: {
-              type: 'none',
-              userId: change.metadata.user_id,
-              ts: change.metadata.ts,
-            },
+            tracking: { type: 'none' },
           }
           if (unacceptedDeletes > 0) {
             op.hpos = op.p + unacceptedDeletes

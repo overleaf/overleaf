@@ -5,6 +5,7 @@ const {
   InvalidInsertionError,
   UnprocessableError,
 } = require('../errors')
+const ClearTrackingProps = require('../file_data/clear_tracking_props')
 const TrackingProps = require('../file_data/tracking_props')
 
 /**
@@ -13,6 +14,7 @@ const TrackingProps = require('../file_data/tracking_props')
  * @typedef {import('../types').RawInsertOp} RawInsertOp
  * @typedef {import('../types').RawRetainOp} RawRetainOp
  * @typedef {import('../types').RawRemoveOp} RawRemoveOp
+ * @typedef {import('../types').TrackingDirective} TrackingDirective
  */
 
 class ScanOp {
@@ -218,7 +220,7 @@ class InsertOp extends ScanOp {
 class RetainOp extends ScanOp {
   /**
    * @param {number} length
-   * @param {TrackingProps | undefined} tracking
+   * @param {TrackingDirective | undefined} tracking
    */
   constructor(length, tracking = undefined) {
     super()
@@ -227,7 +229,7 @@ class RetainOp extends ScanOp {
     }
     /** @type {number} */
     this.length = length
-    /** @type {TrackingProps | undefined} */
+    /** @type {TrackingDirective | undefined} */
     this.tracking = tracking
   }
 
@@ -263,7 +265,11 @@ class RetainOp extends ScanOp {
       throw new Error('retain operation must have a number property')
     }
     if (op.tracking) {
-      return new RetainOp(op.r, TrackingProps.fromRaw(op.tracking))
+      const tracking =
+        op.tracking.type === 'none'
+          ? new ClearTrackingProps()
+          : TrackingProps.fromRaw(op.tracking)
+      return new RetainOp(op.r, tracking)
     }
     return new RetainOp(op.r)
   }

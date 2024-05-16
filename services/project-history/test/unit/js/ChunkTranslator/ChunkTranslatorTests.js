@@ -2142,11 +2142,7 @@ describe('ChunkTranslator', function () {
                         4, //  Hell|o [planet ]world, this is a test
                         {
                           r: 4,
-                          tracking: {
-                            type: 'none',
-                            userId: this.author1.id,
-                            ts: '2024-01-01T00:00:00.000Z',
-                          },
+                          tracking: { type: 'none' },
                         }, //  Hello pl|[anet ]world, this is a test
                         {
                           r: 3,
@@ -2375,11 +2371,7 @@ describe('ChunkTranslator', function () {
                         2, // Heo |{TEST }planet world, [this] is a test
                         {
                           r: 5,
-                          tracking: {
-                            type: 'none',
-                            userId: '65f1baeb3cee7c3563fbd1d1',
-                            ts: '2024-03-27T13:20:23.253Z',
-                          },
+                          tracking: { type: 'none' },
                         }, // Heo TEST| planet world, [this] is a test
                         14, // Heo TEST planet world, |[this] is a test
                         -4, // Heo TEST planet world, | is a test
@@ -2557,11 +2549,7 @@ describe('ChunkTranslator', function () {
                         -2, // He|o planet world, [this] {TEST }is a test
                         {
                           r: 39,
-                          tracking: {
-                            type: 'none',
-                            userId: this.author1.id,
-                            ts: this.date.toISOString(),
-                          },
+                          tracking: { type: 'none' },
                         },
                       ], // He|o planet world, this TEST is a test
                     },

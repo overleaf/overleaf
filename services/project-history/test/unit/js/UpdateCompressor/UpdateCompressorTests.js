@@ -106,7 +106,7 @@ describe('UpdateCompressor', function () {
               (this.op2 = {
                 p: 9,
                 r: 'baz',
-                tracking: { type: 'none', ts: this.ts1, userId: this.user_id },
+                tracking: { type: 'none' },
               }),
               (this.op3 = { p: 6, i: 'bar' }),
             ],

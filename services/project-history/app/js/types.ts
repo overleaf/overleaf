@@ -140,11 +140,13 @@ export type RawOrigin = {
   kind: string
 }
 
-export type TrackingProps = {
-  type: 'insert' | 'delete' | 'none'
-  userId: string
-  ts: string
-}
+export type TrackingProps =
+  | { type: 'none' }
+  | {
+      type: 'insert' | 'delete'
+      userId: string
+      ts: string
+    }
 
 export type RawScanOp =
   | number

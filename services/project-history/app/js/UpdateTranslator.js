@@ -309,11 +309,7 @@ class OperationsBuilder {
     if (isInsert(op)) {
       if (op.trackedDeleteRejection) {
         this.retain(op.i.length, {
-          tracking: {
-            type: 'none',
-            userId: update.meta.user_id,
-            ts: new Date(update.meta.ts).toISOString(),
-          },
+          tracking: { type: 'none' },
         })
       } else {
         const opts = {}

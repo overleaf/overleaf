@@ -26,12 +26,15 @@ const {
   TooLongError,
 } = require('../errors')
 const Range = require('../range')
+const ClearTrackingProps = require('../file_data/clear_tracking_props')
 const TrackingProps = require('../file_data/tracking_props')
+
 /**
  * @typedef {import('../file_data/string_file_data')} StringFileData
  * @typedef {import('../types').RawTextOperation} RawTextOperation
  * @typedef {import('../operation/scan_op').ScanOp} ScanOp
  * @typedef {import('../file_data/tracked_change_list')} TrackedChangeList
+ * @typedef {import('../types').TrackingDirective} TrackingDirective
  */
 
 /**
@@ -91,7 +94,7 @@ class TextOperation extends EditOperation {
   /**
    * Skip over a given number of characters.
    * @param {number | {r: number}} n
-   * @param {{tracking?: TrackingProps}} opts
+   * @param {{tracking?: TrackingDirective}} opts
    * @returns {TextOperation}
    */
   retain(n, opts = {}) {
@@ -376,11 +379,7 @@ class TextOperation extends EditOperation {
 
         let removeTrackingInfoIfNeeded
         if (op.tracking) {
-          removeTrackingInfoIfNeeded = new TrackingProps(
-            'none',
-            op.tracking.userId,
-            op.tracking.ts
-          )
+          removeTrackingInfoIfNeeded = new ClearTrackingProps()
         }
 
         for (const trackedChange of previousRanges) {
@@ -575,9 +574,14 @@ class TextOperation extends EditOperation {
         }
       } else if (op1 instanceof InsertOp && op2 instanceof RetainOp) {
         const opts = {
-          // Prefer the latter tracking info
-          tracking: op2.tracking ?? op1.tracking,
           commentIds: op1.commentIds,
+        }
+        if (op2.tracking instanceof TrackingProps) {
+          // Prefer the tracking info on the second operation
+          opts.tracking = op2.tracking
+        } else if (!(op2.tracking instanceof ClearTrackingProps)) {
+          // The second operation does not cancel the first operation's tracking
+          opts.tracking = op1.tracking
         }
         if (op1.insertion.length > op2.length) {
           operation.insert(op1.insertion.slice(0, op2.length), opts)
@@ -692,9 +696,9 @@ class TextOperation extends EditOperation {
         // Simple case: retain/retain
 
         // If both have tracking info, we use the one from op1
-        /** @type {TrackingProps | undefined} */
+        /** @type {TrackingProps | ClearTrackingProps | undefined} */
         let operation1primeTracking
-        /** @type {TrackingProps | undefined} */
+        /** @type {TrackingProps | ClearTrackingProps | undefined} */
         let operation2primeTracking
         if (op1.tracking) {
           operation1primeTracking = op1.tracking

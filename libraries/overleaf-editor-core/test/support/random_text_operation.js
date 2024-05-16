@@ -1,4 +1,5 @@
 const TrackingProps = require('../../lib/file_data/tracking_props')
+const ClearTrackingProps = require('../../lib/file_data/clear_tracking_props')
 const TextOperation = require('../../lib/operation/text_operation')
 const random = require('./random')
 
@@ -19,7 +20,7 @@ function randomTextOperation(str, commentIds) {
     const trackedChange =
       Math.random() < 0.1
         ? new TrackingProps(
-            random.element(['insert', 'delete', 'none']),
+            random.element(['insert', 'delete']),
             random.element(['user1', 'user2', 'user3']),
             new Date(
               random.element([
@@ -41,6 +42,8 @@ function randomTextOperation(str, commentIds) {
       })
     } else if (r < 0.4) {
       operation.remove(l)
+    } else if (r < 0.5) {
+      operation.retain(l, { tracking: new ClearTrackingProps() })
     } else {
       operation.retain(l, { tracking: trackedChange })
     }

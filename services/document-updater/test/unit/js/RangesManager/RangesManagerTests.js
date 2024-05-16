@@ -682,11 +682,7 @@ describe('RangesManager', function () {
             {
               r: 'lorem',
               p: 0,
-              tracking: {
-                type: 'none',
-                userId: this.user_id,
-                ts: ranges.changes[0].metadata.ts,
-              },
+              tracking: { type: 'none' },
             },
           ],
         },
@@ -702,11 +698,7 @@ describe('RangesManager', function () {
             {
               r: 'ipsum',
               p: 15,
-              tracking: {
-                type: 'none',
-                userId: this.user_id,
-                ts: ranges.changes[1].metadata.ts,
-              },
+              tracking: { type: 'none' },
             },
           ],
         },
@@ -868,11 +860,7 @@ describe('RangesManager', function () {
               r: 'xxx ',
               p: 6,
               hpos: 11,
-              tracking: {
-                type: 'none',
-                userId: this.user_id,
-                ts: ranges.changes[1].metadata.ts,
-              },
+              tracking: { type: 'none' },
             },
           ],
         },

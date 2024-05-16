@@ -1,6 +1,7 @@
 // @ts-check
 const TrackedChangeList = require('../lib/file_data/tracked_change_list')
 const TrackingProps = require('../lib/file_data/tracking_props')
+const ClearTrackingProps = require('../lib/file_data/clear_tracking_props')
 const { expect } = require('chai')
 /** @typedef {import('../lib/types').TrackedChangeRawData} TrackedChangeRawData */
 
@@ -766,11 +767,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyRetain(0, 10, {
-        tracking: TrackingProps.fromRaw({
-          type: 'none',
-          userId: 'user1',
-          ts: '2024-01-01T00:00:00.000Z',
-        }),
+        tracking: new ClearTrackingProps(),
       })
       expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
@@ -788,11 +785,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyRetain(0, 10, {
-        tracking: TrackingProps.fromRaw({
-          type: 'none',
-          userId: 'user2',
-          ts: '2024-01-01T00:00:00.000Z',
-        }),
+        tracking: new ClearTrackingProps(),
       })
       expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
@@ -810,11 +803,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyRetain(0, 10, {
-        tracking: TrackingProps.fromRaw({
-          type: 'none',
-          userId: 'user1',
-          ts: '2024-01-01T00:00:00.000Z',
-        }),
+        tracking: new ClearTrackingProps(),
       })
       expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])
@@ -832,11 +821,7 @@ describe('TrackedChangeList', function () {
         },
       ])
       trackedChanges.applyRetain(0, 10, {
-        tracking: TrackingProps.fromRaw({
-          type: 'none',
-          userId: 'user2',
-          ts: '2024-01-01T00:00:00.000Z',
-        }),
+        tracking: new ClearTrackingProps(),
       })
       expect(trackedChanges.length).to.equal(0)
       expect(trackedChanges.toRaw()).to.deep.equal([])

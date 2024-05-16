@@ -6,14 +6,14 @@
 class TrackingProps {
   /**
    *
-   * @param {'insert' | 'delete' | 'none'} type
+   * @param {'insert' | 'delete'} type
    * @param {string} userId
    * @param {Date} ts
    */
   constructor(type, userId, ts) {
     /**
      * @readonly
-     * @type {'insert' | 'delete' | 'none'}
+     * @type {'insert' | 'delete'}
      */
     this.type = type
     /**

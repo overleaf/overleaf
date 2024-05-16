@@ -1,4 +1,6 @@
 import Blob from './blob'
+import TrackingProps from './file_data/tracking_props'
+import ClearTrackingProps from './file_data/clear_tracking_props'
 
 export type BlobStore = {
   getBlob(hash: string): Promise<Blob | null>
@@ -32,10 +34,16 @@ export type TrackedChangeRawData = {
 }
 
 export type TrackingPropsRawData = {
-  type: 'insert' | 'delete' | 'none'
+  type: 'insert' | 'delete'
   userId: string
   ts: string
 }
+
+export type ClearTrackingPropsRawData = {
+  type: 'none'
+}
+
+export type TrackingDirective = TrackingProps | ClearTrackingProps
 
 export type StringFileRawData = {
   content: string
@@ -58,7 +66,7 @@ export type RawRetainOp =
   | {
       r: number
       commentIds?: string[]
-      tracking?: TrackingPropsRawData
+      tracking?: TrackingPropsRawData | ClearTrackingPropsRawData
     }
   | number
 

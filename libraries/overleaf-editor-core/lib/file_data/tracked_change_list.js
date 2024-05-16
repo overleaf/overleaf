@@ -1,10 +1,11 @@
 // @ts-check
 const Range = require('../range')
 const TrackedChange = require('./tracked_change')
+const TrackingProps = require('../file_data/tracking_props')
 
 /**
+ * @typedef {import("../types").TrackingDirective} TrackingDirective
  * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
- * @typedef {import("../file_data/tracking_props")} TrackingProps
  */
 
 class TrackedChangeList {
@@ -211,7 +212,7 @@ class TrackedChangeList {
   /**
    * @param {number} cursor
    * @param {number} length
-   * @param {{tracking?: TrackingProps}} opts
+   * @param {{tracking?: TrackingDirective}} opts
    */
   applyRetain(cursor, length, opts = {}) {
     // If there's no tracking info, leave everything as-is
@@ -263,7 +264,7 @@ class TrackedChangeList {
         newTrackedChanges.push(trackedChange)
       }
     }
-    if (opts.tracking?.type === 'delete' || opts.tracking?.type === 'insert') {
+    if (opts.tracking instanceof TrackingProps) {
       // This is a new tracked change
       const newTrackedChange = new TrackedChange(retainedRange, opts.tracking)
       newTrackedChanges.push(newTrackedChange)

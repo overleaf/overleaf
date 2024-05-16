@@ -1,4 +1,7 @@
-import { TrackingPropsRawData } from 'overleaf-editor-core/lib/types'
+import {
+  TrackingPropsRawData,
+  ClearTrackingPropsRawData,
+} from 'overleaf-editor-core/lib/types'
 
 /**
  * An update coming from the editor
@@ -97,7 +100,7 @@ export type HistoryInsertOp = InsertOp & {
 
 export type HistoryRetainOp = RetainOp & {
   hpos?: number
-  tracking?: TrackingPropsRawData
+  tracking?: TrackingPropsRawData | ClearTrackingPropsRawData
 }
 
 export type HistoryDeleteOp = DeleteOp & {
