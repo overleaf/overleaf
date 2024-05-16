@@ -126,7 +126,9 @@ class Reporter {
       // Another handler processed the 'meta' entry already
       if (!this.queue.length) return
 
-      const maybeLocalMeta = this.getMetaPreferLocal()
+      // There is always an item on the queue at this point,
+      // so getMetaPreferLocal will always return a Meta object
+      const maybeLocalMeta = this.getMetaPreferLocal() as Meta
 
       // Discard other, newly arrived 'meta's
       this.queue.length = 0
@@ -135,7 +137,7 @@ class Reporter {
       // Do not flood the server with losing-edits events
       const reportedRecently =
         this.lastReport !== null && now - this.lastReport < REPORT_EVERY
-      if (!reportedRecently && maybeLocalMeta) {
+      if (!reportedRecently) {
         this.lastReport = now
         this.onTimeoutHandler(maybeLocalMeta)
       }
