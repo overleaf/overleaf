@@ -19,6 +19,7 @@ import { ReactScopeValueStore } from '@/features/ide-react/scope-value-store/rea
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
 import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
+import { debugConsole } from '@/utils/debugging'
 
 type References = {
   keys: string[]
@@ -74,9 +75,14 @@ export const ReferencesProvider: FC = ({ children }) => {
         body: {
           shouldBroadcast,
         },
-      }).then((response: IndexReferencesResponse) => {
-        storeReferencesKeys(response.keys, true)
       })
+        .then((response: IndexReferencesResponse) => {
+          storeReferencesKeys(response.keys, true)
+        })
+        .catch(error => {
+          // allow the request to fail
+          debugConsole.error(error)
+        })
     },
     [projectId, storeReferencesKeys]
   )
