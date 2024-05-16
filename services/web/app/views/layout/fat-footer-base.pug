@@ -5,7 +5,10 @@
 			a(href="/legal") #{translate('privacy_and_terms')}
 			a(href="https://www.digital-science.com/security-certifications/") #{translate('compliance')}
 		ul.fat-footer-base-item.list-unstyled.fat-footer-base-language
-			include language-picker
+			if bootstrapVersion === 5
+				include language-picker-bootstrap-5
+			else
+				include language-picker
 	.fat-footer-base-section.fat-footer-base-social
 		.fat-footer-base-item
 			a.fat-footer-social(href="https://twitter.com/overleaf")

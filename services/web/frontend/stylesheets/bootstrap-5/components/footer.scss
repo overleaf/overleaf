@@ -145,15 +145,12 @@ footer.site-footer {
         display: none; /* hiding rather than removing as still needed in the thin footer */
       }
 
-      a {
-        color: var(--content-secondary);
-
-        &:hover {
-          color: white;
+      .dropdown-item {
+        &.active {
+          color: var(--green-70);
         }
-
-        &:visited {
-          color: var(--content-secondary);
+        &:hover {
+          text-decoration: none;
         }
       }
     }
