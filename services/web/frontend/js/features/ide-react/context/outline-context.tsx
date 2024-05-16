@@ -91,7 +91,7 @@ export const OutlineProvider: FC = ({ children }) => {
   useEventListener(
     'doc:after-opened',
     useCallback(evt => {
-      if (evt.detail) {
+      if (evt.detail.isNewDoc) {
         setIgnoreNextCursorUpdate(true)
       }
       setBinaryFileOpened(false)

@@ -428,7 +428,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
       const done = (isNewDoc: boolean) => {
         window.dispatchEvent(
-          new CustomEvent('doc:after-opened', { detail: isNewDoc })
+          new CustomEvent('doc:after-opened', {
+            detail: { isNewDoc, docId: doc._id },
+          })
         )
         if (hasGotoLine(options)) {
           window.setTimeout(() => jumpToLine(options))
