@@ -1,0 +1,6 @@
+mixin foot-scripts()
+	each file in entrypointScripts(entrypoint)
+		script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
+	if (settings.splitTest.devToolbar.enabled)
+		each file in entrypointScripts("devToolbar")
+			script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)

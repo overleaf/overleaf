@@ -1,3 +1,5 @@
+include ./_mixins/foot_scripts
+
 doctype html
 html(
 	lang=(currentLngCode || 'en')
@@ -82,12 +84,8 @@ html(
 			div#dev-toolbar
 
 	block foot-scripts
-		each file in entrypointScripts(entrypoint)
-			script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
-		if (settings.splitTest.devToolbar.enabled)
-			each file in entrypointScripts("devToolbar")
-				script(type="text/javascript", nonce=scriptNonce, src=file, defer=deferScripts)
-	
+		+foot-scripts
+
 	script(type="text/javascript", nonce=scriptNonce).
 		window.addEventListener('DOMContentLoaded', function() {
 			//- Look for bundle
