@@ -21,6 +21,8 @@ const commandSuggestions = [
   ['\\Box', { name: 'amssymb', command: '\\usepackage{amssymb}' }],
   ['\\citep', { name: 'natbib', command: '\\usepackage{natbib}' }],
   ['\\citet', { name: 'natbib', command: '\\usepackage{natbib}' }],
+  ['\\citepalias', { name: 'natbib', command: '\\usepackage{natbib}' }],
+  ['\\citetalias', { name: 'natbib', command: '\\usepackage{natbib}' }],
   ['\\url', { name: 'url', command: '\\usepackage{url}' }],
   ['\\href', { name: 'hyperref', command: '\\usepackage{hyperref}' }],
   ['\\texorpdfstring', { name: 'hyperref', command: '\\usepackage{hyperref}' }],

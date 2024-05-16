@@ -574,11 +574,13 @@ const citeStarredCommands = new Set([
   '\\Citeauthor',
   '\\citedate',
   '\\citep',
+  '\\citepalias',
   '\\Citep',
   '\\citetitle',
   '\\citeyear',
   '\\parencite',
   '\\citet',
+  '\\citetalias',
   '\\autocite',
   '\\Autocite',
 ])
