@@ -25,7 +25,7 @@ describe('<HelpContactUs />', function () {
     expect(screen.queryByRole('dialog')).to.equal(null)
     fireEvent.click(screen.getByRole('button', { name: 'Contact Us' }))
     const modal = screen.getAllByRole('dialog')[0]
-    within(modal).getAllByText('Contact Us')
+    within(modal).getAllByText('Get in touch')
     within(modal).getByText('Subject')
   })
 })
