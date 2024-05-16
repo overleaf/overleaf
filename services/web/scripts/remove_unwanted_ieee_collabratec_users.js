@@ -9,7 +9,7 @@ const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const _ = require('lodash')
 
 /**
- * This script is used to remove some users from the IEEECollabratec group.
+ * This script is used to remove some users from the IEEEPublications group.
  *
  * Parameters:
  *  --filename: the filename of the JSON file containing emails of users that
@@ -43,7 +43,7 @@ function getActiveUserEmails(filename) {
 async function getIEEEUsers() {
   const results = await db.subscriptions
     .aggregate([
-      { $match: { teamName: 'IEEECollabratec' } },
+      { $match: { teamName: 'IEEEPublications' } },
       { $unwind: '$member_ids' },
       {
         $lookup: {
@@ -79,11 +79,11 @@ async function main() {
 
   await waitForDb()
   const subscription = await Subscription.findOne({
-    teamName: 'IEEECollabratec',
+    teamName: 'IEEEPublications',
   })
 
   if (!subscription) {
-    console.error(`No IEEECollabratec group subscription found so quitting`)
+    console.error(`No IEEEPublications group subscription found so quitting`)
     return
   }
 
@@ -93,12 +93,12 @@ async function main() {
   const oldMemberIds = subscription.member_ids.map(id => id.toString())
 
   console.log(
-    `Found ${oldMemberIds.length} members_ids in IEEECollabratec group`
+    `Found ${oldMemberIds.length} members_ids in IEEEPublications group`
   )
 
   const usersArray = await getIEEEUsers()
   console.log(
-    `Found ${usersArray.length} users in IEEECollabratec group. (${oldMemberIds.length - usersArray.length} missing)`
+    `Found ${usersArray.length} users in IEEEPublications group. (${oldMemberIds.length - usersArray.length} missing)`
   )
 
   const activeUsers = getActiveUserEmails(EMAILS_FILENAME)
@@ -150,7 +150,7 @@ async function main() {
 
   if (COMMIT) {
     await Subscription.updateOne(
-      { teamName: 'IEEECollabratec' },
+      { teamName: 'IEEEPublications' },
       { member_ids: memberIdsToKeep }
     )
   }
@@ -165,10 +165,10 @@ async function main() {
   console.log(activeUsersNotFound)
 
   const subscriptionAfter = await Subscription.findOne({
-    teamName: 'IEEECollabratec',
+    teamName: 'IEEEPublications',
   })
   console.log(
-    `There are now ${subscriptionAfter?.member_ids?.length} members_ids in IEEECollabratec group`
+    `There are now ${subscriptionAfter?.member_ids?.length} members_ids in IEEEPublications group`
   )
 
   const end = performance.now()

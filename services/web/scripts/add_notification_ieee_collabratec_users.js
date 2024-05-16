@@ -8,7 +8,7 @@ const { db } = require('../app/src/infrastructure/mongodb')
 const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 
 /**
- * This script is used to notify some users in the IEEECollabratec group that
+ * This script is used to notify some users in the IEEEPublications group that
  * they will lose access to Overleaf.
  *
  * Parameters:
@@ -43,7 +43,7 @@ function getActiveUserEmails(filename) {
 async function getIEEEUsers() {
   return await db.subscriptions
     .aggregate([
-      { $match: { teamName: 'IEEECollabratec' } },
+      { $match: { teamName: 'IEEEPublications' } },
       { $unwind: '$member_ids' },
       {
         $lookup: {
@@ -75,11 +75,11 @@ async function main() {
 
   await waitForDb()
   const subscription = await Subscription.findOne({
-    teamName: 'IEEECollabratec',
+    teamName: 'IEEEPublications',
   })
 
   if (!subscription) {
-    console.error(`No IEEECollabratec group subscription found so quitting`)
+    console.error(`No IEEEPublications group subscription found so quitting`)
     return
   }
 
@@ -125,10 +125,10 @@ async function main() {
     totalUsersNotified += 1
   })
 
-  console.log(`Found ${totalUsers} users in IEEECollabratec group`)
+  console.log(`Found ${totalUsers} users in IEEEPublications group`)
 
   console.log(
-    `Found ${totalUsersNotified} users in IEEECollabratec group to notify`
+    `Found ${totalUsersNotified} users in IEEEPublications group to notify`
   )
 
   console.log(`Found ${activeUsersFound.size} active users`)
