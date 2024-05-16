@@ -62,7 +62,7 @@ function PdfLogEntry({
         onClose={onClose}
       />
 
-      {(rawContent || formattedContent) && (
+      {(rawContent || formattedContent || window.user.alphaProgram) && (
         <PdfLogEntryContent
           rawContent={rawContent}
           formattedContent={formattedContent}
