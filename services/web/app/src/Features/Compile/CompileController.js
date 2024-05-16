@@ -398,13 +398,6 @@ module.exports = CompileController = {
       if (error) {
         return next(error)
       }
-
-      const qs = {}
-
-      if (req.params.file === 'output.zip') {
-        qs.files = req.query.files
-      }
-
       const url = CompileController._getFileUrl(
         projectId,
         userId,
@@ -415,7 +408,7 @@ module.exports = CompileController = {
         projectId,
         'output-file',
         url,
-        qs,
+        {},
         req,
         res,
         next
@@ -580,20 +573,10 @@ module.exports = CompileController = {
           return next(err)
         }
         url = new URL(`${Settings.apis.clsi.url}${url}`)
-
-        const params = new URLSearchParams(persistenceOptions.qs)
-
-        for (const [key, value] of Object.entries(qs)) {
-          if (Array.isArray(value)) {
-            for (const v of value) {
-              params.append(key, v)
-            }
-            continue
-          }
-          params.append(key, value)
-        }
-
-        url.search = params.toString()
+        url.search = new URLSearchParams({
+          ...persistenceOptions.qs,
+          ...qs,
+        }).toString()
         const timer = new Metrics.Timer(
           'proxy_to_clsi',
           1,
@@ -621,10 +604,7 @@ module.exports = CompileController = {
             })
 
             for (const key of ['Content-Length', 'Content-Type']) {
-              const headerValue = response.headers.get(key)
-              if (headerValue) {
-                res.setHeader(key, headerValue)
-              }
+              res.setHeader(key, response.headers.get(key))
             }
             res.writeHead(response.status)
             return pipeline(stream, res)
