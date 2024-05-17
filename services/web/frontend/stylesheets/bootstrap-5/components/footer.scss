@@ -65,7 +65,6 @@ footer.site-footer {
   color: var(--content-secondary-dark);
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;
 
   .fat-footer-container {
     margin: var(--spacing-11) auto;
@@ -136,6 +135,10 @@ footer.site-footer {
 
     @include body-sm;
 
+    #language-picker-toggle {
+      color: var(--content-secondary-dark);
+    }
+
     .fat-footer-base-meta a:not(.dropdown-toggle) {
       color: inherit;
     }
@@ -149,6 +152,7 @@ footer.site-footer {
         &.active {
           color: var(--green-70);
         }
+
         &:hover {
           text-decoration: none;
         }
@@ -171,7 +175,6 @@ footer.site-footer {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: var(--spacing-07) auto var(--spacing-07);
 
       .fat-footer-base-section {
         display: flex;
@@ -190,16 +193,23 @@ footer.site-footer {
       }
 
       .fat-footer-base-item {
+        flex-wrap: wrap;
         padding: var(--spacing-02);
         margin: var(--spacing-06);
       }
 
       .fat-footer-base-meta .fat-footer-base-item {
         gap: var(--spacing-09);
+        justify-content: center;
+
+        @include media-breakpoint-down(sm) {
+          gap: var(--spacing-06);
+        }
       }
 
       .fat-footer-base-social .fat-footer-base-item {
         gap: var(--spacing-07);
+        margin-top: var(--spacing-00);
       }
 
       .fat-footer-social {
