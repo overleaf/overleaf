@@ -75,7 +75,7 @@ describe('UserDeleter', function () {
 
     this.UserSessionsManager = {
       promises: {
-        revokeAllUserSessions: sinon.stub().resolves(),
+        removeSessionsFromRedis: sinon.stub().resolves(),
       },
     }
 
@@ -250,8 +250,8 @@ describe('UserDeleter', function () {
               ipAddress: this.ipAddress,
             })
             expect(
-              this.UserSessionsManager.promises.revokeAllUserSessions
-            ).to.have.been.calledWith(this.userId, [])
+              this.UserSessionsManager.promises.removeSessionsFromRedis
+            ).to.have.been.calledWith(this.user)
           })
 
           it('should remove user from group subscriptions', async function () {

@@ -64,8 +64,11 @@ async function settingsPage(req, res) {
   const user = await UserGetter.promises.getUser(userId)
   if (!user) {
     // The user has just deleted their account.
-    return UserSessionsManager.revokeAllUserSessions({ _id: userId }, [], () =>
-      res.redirect('/')
+    return UserSessionsManager.removeSessionsFromRedis(
+      { _id: userId },
+      req,
+      { stayLoggedIn: false },
+      () => res.redirect('/')
     )
   }
 

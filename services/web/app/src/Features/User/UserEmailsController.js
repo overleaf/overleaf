@@ -510,9 +510,10 @@ const UserEmailsController = {
         }
         SessionManager.setInSessionUser(req.session, { email })
         const user = SessionManager.getSessionUser(req.session)
-        UserSessionsManager.revokeAllUserSessions(
+        UserSessionsManager.removeSessionsFromRedis(
           user,
-          [req.sessionID],
+          req,
+          { stayLoggedIn: true },
           err => {
             if (err)
               logger.warn(

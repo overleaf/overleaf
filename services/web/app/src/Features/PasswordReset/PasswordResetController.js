@@ -57,10 +57,7 @@ async function setNewUserPassword(req, res, next) {
         message: req.i18n.translate('error_performing_request'),
       })
     }
-    await UserSessionsManager.promises.revokeAllUserSessions(
-      { _id: userId },
-      []
-    )
+    await UserSessionsManager.promises.removeSessionsFromRedis({ _id: userId })
     await UserUpdater.promises.removeReconfirmFlag(userId)
     if (!req.session.doLoginAfterPasswordReset) {
       return res.sendStatus(200)

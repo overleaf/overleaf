@@ -50,7 +50,7 @@ describe('PasswordResetController', function () {
     }
     this.UserSessionsManager = {
       promises: {
-        revokeAllUserSessions: sinon.stub().resolves(),
+        removeSessionsFromRedis: sinon.stub().resolves(),
       },
     }
     this.UserUpdater = {
@@ -264,7 +264,7 @@ describe('PasswordResetController', function () {
 
     it('should clear sessions', function (done) {
       this.res.sendStatus = code => {
-        this.UserSessionsManager.promises.revokeAllUserSessions.callCount.should.equal(
+        this.UserSessionsManager.promises.removeSessionsFromRedis.callCount.should.equal(
           1
         )
         done()

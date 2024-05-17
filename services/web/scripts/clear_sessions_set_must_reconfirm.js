@@ -37,15 +37,20 @@ function _handleUser(userId, callback) {
       processLogger.failedSet.push(userId)
       return callback()
     } else {
-      UserSessionsManager.revokeAllUserSessions({ _id: userId }, [], error => {
-        if (error) {
-          console.log(`Failed to clear sessions for ${userId}`, error)
-          processLogger.failedClear.push(userId)
-        } else {
-          processLogger.success.push(userId)
+      UserSessionsManager.removeSessionsFromRedis(
+        { _id: userId },
+        null,
+        null,
+        error => {
+          if (error) {
+            console.log(`Failed to clear sessions for ${userId}`, error)
+            processLogger.failedClear.push(userId)
+          } else {
+            processLogger.success.push(userId)
+          }
+          return callback()
         }
-        return callback()
-      })
+      )
     }
   })
 }

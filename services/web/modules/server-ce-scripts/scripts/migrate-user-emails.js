@@ -142,9 +142,9 @@ async function doMigration(emails) {
         `Updating user ${userWithEmail._id} email "${oldEmail}" to "${newEmail}"\n`
       )
       try {
-        await UserSessionsManager.promises.revokeAllUserSessions(
-          userWithEmail,
-          [] // log out all the user's sessions before changing the email address
+        // log out all the user's sessions before changing the email address
+        await UserSessionsManager.promises.removeSessionsFromRedis(
+          userWithEmail
         )
 
         await UserUpdater.promises.migrateDefaultEmailAddress(

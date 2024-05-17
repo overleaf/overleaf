@@ -38,7 +38,7 @@ describe('UserEmailsController', function () {
       hasFeature: sinon.stub(),
     }
     this.UserSessionsManager = {
-      revokeAllUserSessions: sinon.stub().yields(),
+      removeSessionsFromRedis: sinon.stub().yields(),
     }
     this.UserUpdater = {
       addEmailAddress: sinon.stub(),
@@ -565,8 +565,8 @@ describe('UserEmailsController', function () {
 
       this.res.callback = () => {
         expect(
-          this.UserSessionsManager.revokeAllUserSessions
-        ).to.have.been.calledWith(this.user, [this.req.sessionID])
+          this.UserSessionsManager.removeSessionsFromRedis
+        ).to.have.been.calledWith(this.user, this.req)
         done()
       }
 
@@ -576,7 +576,7 @@ describe('UserEmailsController', function () {
     it('handles error from revoking sessions and returns 200', function (done) {
       this.UserUpdater.setDefaultEmailAddress.yields()
       const redisError = new Error('redis error')
-      this.UserSessionsManager.revokeAllUserSessions = sinon
+      this.UserSessionsManager.removeSessionsFromRedis = sinon
         .stub()
         .yields(redisError)
 

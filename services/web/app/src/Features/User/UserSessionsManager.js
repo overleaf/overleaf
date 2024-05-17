@@ -126,11 +126,14 @@ const UserSessionsManager = {
     })
   },
 
-  revokeAllUserSessions(user, retain, callback) {
-    if (!retain) {
-      retain = []
-    }
-    retain = retain.map(i => UserSessionsManager._sessionKey(i))
+  /**
+   * @param {{_id: string}} user
+   * @param {(import('express').Request & {sessionID?: string}) | undefined} req - the request object. Can be omitted if stayLoggedIn is false.
+   * @param {{stayLoggedIn: boolean}?} options
+   * @param {(err: Error | null, data?: unknown) => void} callback
+   */
+  removeSessionsFromRedis(user, req, options, callback) {
+    const stayLoggedIn = options?.stayLoggedIn ?? false
     if (!user) {
       return callback(null)
     }
@@ -143,10 +146,13 @@ const UserSessionsManager = {
         })
         return callback(err)
       }
-      const keysToDelete = _.filter(
-        sessionKeys,
-        k => !Array.from(retain).includes(k)
-      )
+      const keysToDelete =
+        stayLoggedIn && req?.sessionID
+          ? _.without(
+              sessionKeys,
+              UserSessionsManager._sessionKey(req.sessionID)
+            )
+          : sessionKeys
       if (keysToDelete.length === 0) {
         logger.debug(
           { userId: user._id },
@@ -242,7 +248,8 @@ const UserSessionsManager = {
 
 UserSessionsManager.promises = {
   getAllUserSessions: promisify(UserSessionsManager.getAllUserSessions),
-  revokeAllUserSessions: promisify(UserSessionsManager.revokeAllUserSessions),
+  removeSessionsFromRedis: (user, req = null, options = null) =>
+    promisify(UserSessionsManager.removeSessionsFromRedis)(user, req, options),
   untrackSession: promisify(UserSessionsManager.untrackSession),
 }
 

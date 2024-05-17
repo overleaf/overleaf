@@ -103,7 +103,7 @@ describe('AuthenticationController', function () {
         '../User/UserSessionsManager': (this.UserSessionsManager = {
           trackSession: sinon.stub(),
           untrackSession: sinon.stub(),
-          revokeAllUserSessions: sinon.stub().yields(null),
+          removeSessionsFromRedis: sinon.stub().yields(null),
         }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub().yields(null, []) },

@@ -91,7 +91,7 @@ describe('UserController', function () {
     this.UserSessionsManager = {
       promises: {
         getAllUserSessions: sinon.stub().resolves(),
-        revokeAllUserSessions: sinon.stub().resolves(),
+        removeSessionsFromRedis: sinon.stub().resolves(),
         untrackSession: sinon.stub().resolves(),
       },
     }
@@ -603,9 +603,9 @@ describe('UserController', function () {
 
   describe('clearSessions', function () {
     describe('success', function () {
-      it('should call revokeAllUserSessions', function (done) {
+      it('should call removeSessionsFromRedis', function (done) {
         this.res.sendStatus.callsFake(() => {
-          this.UserSessionsManager.promises.revokeAllUserSessions.should.have
+          this.UserSessionsManager.promises.removeSessionsFromRedis.should.have
             .been.calledOnce
           done()
         })
@@ -662,9 +662,9 @@ describe('UserController', function () {
         })
       })
 
-      describe('when revokeAllUserSessions produces an error', function () {
+      describe('when removeSessionsFromRedis produces an error', function () {
         it('should call next with an error', function (done) {
-          this.UserSessionsManager.promises.revokeAllUserSessions.rejects(
+          this.UserSessionsManager.promises.removeSessionsFromRedis.rejects(
             new Error('woops')
           )
           this.UserController.clearSessions(this.req, this.res, error => {

@@ -152,7 +152,7 @@ async function _createDeletedUser(user, options) {
 }
 
 async function _cleanupUser(user) {
-  await UserSessionsManager.promises.revokeAllUserSessions(user._id, [])
+  await UserSessionsManager.promises.removeSessionsFromRedis(user)
   await NewsletterManager.promises.unsubscribe(user, { delete: true })
   await SubscriptionHandler.promises.cancelSubscription(user)
   await InstitutionsAPI.promises.deleteAffiliations(user._id)

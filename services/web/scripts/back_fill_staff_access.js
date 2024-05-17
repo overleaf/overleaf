@@ -77,7 +77,7 @@ async function main() {
         { $set: { staffAccess: FULL_STAFF_ACCESS } }
       )
       if (!KEEP_SESSIONS) {
-        await UserSessionsManager.promises.revokeAllUserSessions(user, [])
+        await UserSessionsManager.promises.removeSessionsFromRedis(user)
       }
     }
   } else {
