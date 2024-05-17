@@ -1,190 +1,120 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let ChatApiHandler
-const OError = require('@overleaf/o-error')
-const request = require('request')
+// @ts-check
+
+const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
 const settings = require('@overleaf/settings')
-const { promisify } = require('util')
+const { callbackify } = require('util')
 
-function getThreads(projectId, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
-  return ChatApiHandler._apiRequest(
+async function getThreads(projectId) {
+  return await fetchJson(chatApiUrl(`/project/${projectId}/threads`))
+}
+
+async function destroyProject(projectId) {
+  await fetchNothing(chatApiUrl(`/project/${projectId}`), { method: 'DELETE' })
+}
+
+async function sendGlobalMessage(projectId, userId, content) {
+  const message = await fetchJson(
+    chatApiUrl(`/project/${projectId}/messages`),
     {
-      url: `${settings.apis.chat.internal_url}/project/${projectId}/threads`,
-      method: 'GET',
-      json: true,
-    },
-    callback
+      method: 'POST',
+      json: { user_id: userId, content },
+    }
+  )
+  return message
+}
+
+async function getGlobalMessages(projectId, limit, before) {
+  const url = chatApiUrl(`/project/${projectId}/messages`)
+  if (limit != null) {
+    url.searchParams.set('limit', limit)
+  }
+  if (before != null) {
+    url.searchParams.set('before', before)
+  }
+
+  return await fetchJson(url)
+}
+
+async function sendComment(projectId, threadId, userId, content) {
+  const comment = await fetchJson(
+    chatApiUrl(`/project/${projectId}/thread/${threadId}/messages`),
+    {
+      method: 'POST',
+      json: { user_id: userId, content },
+    }
+  )
+  return comment
+}
+
+async function resolveThread(projectId, threadId, userId) {
+  await fetchNothing(
+    chatApiUrl(`/project/${projectId}/thread/${threadId}/resolve`),
+    {
+      method: 'POST',
+      json: { user_id: userId },
+    }
   )
 }
 
-function destroyProject(projectId, callback) {
-  if (callback == null) {
-    callback = function () {}
-  }
-  return ChatApiHandler._apiRequest(
-    {
-      url: `${settings.apis.chat.internal_url}/project/${projectId}`,
-      method: 'DELETE',
-    },
-    callback
+async function reopenThread(projectId, threadId) {
+  await fetchNothing(
+    chatApiUrl(`/project/${projectId}/thread/${threadId}/reopen`),
+    { method: 'POST' }
   )
 }
 
-module.exports = ChatApiHandler = {
-  _apiRequest(opts, callback) {
-    if (callback == null) {
-      callback = function () {}
+async function deleteThread(projectId, threadId) {
+  await fetchNothing(chatApiUrl(`/project/${projectId}/thread/${threadId}`), {
+    method: 'DELETE',
+  })
+}
+
+async function editMessage(projectId, threadId, messageId, userId, content) {
+  await fetchNothing(
+    chatApiUrl(
+      `/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`
+    ),
+    {
+      method: 'POST',
+      json: { content, userId },
     }
-    return request(opts, function (error, response, data) {
-      if (error != null) {
-        return callback(error)
-      }
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return callback(null, data)
-      } else {
-        error = new OError(
-          `chat api returned non-success code: ${response.statusCode}`,
-          opts
-        )
-        error.statusCode = response.statusCode
-        return callback(error)
-      }
-    })
-  },
+  )
+}
 
-  sendGlobalMessage(projectId, userId, content, callback) {
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/messages`,
-        method: 'POST',
-        json: { user_id: userId, content },
-      },
-      callback
-    )
-  },
+async function deleteMessage(projectId, threadId, messageId) {
+  await fetchNothing(
+    chatApiUrl(
+      `/project/${projectId}/thread/${threadId}/messages/${messageId}`
+    ),
+    { method: 'DELETE' }
+  )
+}
 
-  getGlobalMessages(projectId, limit, before, callback) {
-    const qs = {}
-    if (limit != null) {
-      qs.limit = limit
-    }
-    if (before != null) {
-      qs.before = before
-    }
+function chatApiUrl(path) {
+  return new URL(path, settings.apis.chat.internal_url)
+}
 
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/messages`,
-        method: 'GET',
-        qs,
-        json: true,
-      },
-      callback
-    )
-  },
-
-  sendComment(projectId, threadId, userId, content, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/thread/${threadId}/messages`,
-        method: 'POST',
-        json: { user_id: userId, content },
-      },
-      callback
-    )
-  },
-
-  resolveThread(projectId, threadId, userId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/thread/${threadId}/resolve`,
-        method: 'POST',
-        json: { user_id: userId },
-      },
-      callback
-    )
-  },
-
-  reopenThread(projectId, threadId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/thread/${threadId}/reopen`,
-        method: 'POST',
-      },
-      callback
-    )
-  },
-
-  deleteThread(projectId, threadId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/thread/${threadId}`,
-        method: 'DELETE',
-      },
-      callback
-    )
-  },
-
-  editMessage(projectId, threadId, messageId, userId, content, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/thread/${threadId}/messages/${messageId}/edit`,
-        method: 'POST',
-        json: {
-          content,
-          userId,
-        },
-      },
-      callback
-    )
-  },
-
-  deleteMessage(projectId, threadId, messageId, callback) {
-    if (callback == null) {
-      callback = function () {}
-    }
-    return ChatApiHandler._apiRequest(
-      {
-        url: `${settings.apis.chat.internal_url}/project/${projectId}/thread/${threadId}/messages/${messageId}`,
-        method: 'DELETE',
-      },
-      callback
-    )
-  },
-
-  getThreads,
-  destroyProject,
-
+module.exports = {
+  getThreads: callbackify(getThreads),
+  destroyProject: callbackify(destroyProject),
+  sendGlobalMessage: callbackify(sendGlobalMessage),
+  getGlobalMessages: callbackify(getGlobalMessages),
+  sendComment: callbackify(sendComment),
+  resolveThread: callbackify(resolveThread),
+  reopenThread: callbackify(reopenThread),
+  deleteThread: callbackify(deleteThread),
+  editMessage: callbackify(editMessage),
+  deleteMessage: callbackify(deleteMessage),
   promises: {
-    getThreads: promisify(getThreads),
-    destroyProject: promisify(destroyProject),
+    getThreads,
+    destroyProject,
+    sendGlobalMessage,
+    getGlobalMessages,
+    sendComment,
+    resolveThread,
+    reopenThread,
+    deleteThread,
+    editMessage,
+    deleteMessage,
   },
 }
