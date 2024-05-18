@@ -528,6 +528,7 @@
   "generic_something_went_wrong": "Sorry, irgendetwas ist schief gelaufen",
   "get_collaborative_benefits": "Profitiere von den kollaborativen Vorteilen von __appName__, auch wenn du lieber offline arbeitest",
   "get_discounted_plan": "Erhalte ein heruntergesetztes Abonnement",
+  "get_in_touch": "Kontaktiere uns",
   "get_in_touch_having_problems": "<a href=\"__link__\">Wende dich an den Support</a>, wenn du Probleme hast",
   "get_involved": "Mach mit",
   "get_most_subscription_by_checking_features": "Hole das meiste aus deinem __appName__-Abonnement heraus, indem Du dir die <0>__appName__-Funktionen</0> ansiehst.",

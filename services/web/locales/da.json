@@ -523,6 +523,7 @@
   "generic_something_went_wrong": "Beklager, noget gik galt",
   "get_collaborative_benefits": "Få samarbejdsfordelene fra __appName__ selv hvis du foretrækker at arbejde offline",
   "get_discounted_plan": "Få nedsat abonnement",
+  "get_in_touch": "Kom i kontakt med os",
   "get_in_touch_having_problems": "<a href=\"__link__\">Kontakt support</a>, hvis du oplever problemer",
   "get_involved": "Bliv involveret",
   "get_most_subscription_by_checking_features": "Få det meste ud af dit __appName__ abonnement ved tjekke <0>__appName__s funktioner</0>.",

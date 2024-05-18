@@ -105,6 +105,7 @@
   "free_dropbox_and_history": "Zdarma Dropbox a Historie",
   "full_doc_history": "Celá historie dokumentu",
   "generic_something_went_wrong": "Omlouváme se, ale něco je špatně.",
+  "get_in_touch": "Buďte v kontaktu",
   "github_commit_message_placeholder": "Commit zprávy pro změny udělané v __appName__u...",
   "github_is_premium": "Synchronizace s GitHubem je prémiová funkce",
   "github_no_master_branch_error": "Tento repozitář nemůže být importován, protože nemá master branch. Prosím zajistěte, aby projekt měl master branch.",

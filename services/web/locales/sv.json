@@ -330,6 +330,7 @@
   "generic_if_problem_continues_contact_us": "Om problemet kvarstår, vänligen kontakta oss.",
   "generic_linked_file_compile_error": "Projektets utdatafiler är inte tillgängliga eftersom det inte gick att kompilera. Vänligen öppna projektet för att se information om kompileringsfel.",
   "generic_something_went_wrong": "Ursäkta, något gick snett",
+  "get_in_touch": "Kom i kontakt",
   "get_in_touch_having_problems": "<a href=\"__link__\">Kontakta support</a> om du har problem",
   "github_commit_message_placeholder": "Commit meddelande för ändringar gjorda i __appName__...",
   "github_credentials_expired": "Din auktorisering för GitHub har löpt ut",
