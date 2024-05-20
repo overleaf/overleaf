@@ -42,8 +42,8 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
       })
       cy.findByRole('button', { name: 'Go to page' }).click()
       cy.get('@open-window').should(
-        'have.been.calledOnceWithExactly',
-        'https://example.com/foo',
+        'have.been.calledWithMatch',
+        Cypress.sinon.match.has('href', 'https://example.com/foo'),
         '_blank'
       )
       cy.findByRole('button', { name: 'Remove link' }).click()
@@ -62,8 +62,8 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
       })
       cy.findByRole('button', { name: 'Go to page' }).click()
       cy.get('@open-window').should(
-        'have.been.calledOnceWithExactly',
-        'https://example.com',
+        'have.been.calledWithMatch',
+        Cypress.sinon.match.has('href', 'https://example.com/'),
         '_blank'
       )
     })

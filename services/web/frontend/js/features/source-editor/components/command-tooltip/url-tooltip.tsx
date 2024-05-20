@@ -9,6 +9,7 @@ import {
 } from '../../lezer-latex/latex.terms.mjs'
 import Icon from '../../../../shared/components/icon'
 import { EditorState } from '@codemirror/state'
+import { openURL } from '@/features/source-editor/utils/url'
 
 export const UrlTooltipContent: FC = () => {
   const { t } = useTranslation()
@@ -23,7 +24,7 @@ export const UrlTooltipContent: FC = () => {
         onClick={() => {
           const url = readUrl(state)
           if (url) {
-            window.open(url, '_blank')
+            openURL(url)
           }
         }}
       >

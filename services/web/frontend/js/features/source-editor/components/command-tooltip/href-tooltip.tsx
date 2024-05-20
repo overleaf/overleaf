@@ -17,6 +17,7 @@ import {
 import { Button, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 import { EditorState } from '@codemirror/state'
+import { openURL } from '@/features/source-editor/utils/url'
 
 export const HrefTooltipContent: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -108,7 +109,7 @@ export const HrefTooltipContent: FC = () => {
         className="ol-cm-command-tooltip-link"
         onClick={() => {
           // TODO: unescape content
-          window.open(url, '_blank')
+          openURL(url)
         }}
       >
         <Icon type="external-link" fw />
