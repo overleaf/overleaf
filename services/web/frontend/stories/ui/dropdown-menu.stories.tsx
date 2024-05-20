@@ -10,16 +10,22 @@ type Args = React.ComponentProps<typeof DropdownMenu>
 export const Default = (args: Args) => {
   return (
     <DropdownMenu show>
-      <DropdownItem eventKey="1" href="#/action-1">
-        Example
-      </DropdownItem>
-      <DropdownItem eventKey="2" href="#/action-2">
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem eventKey="1" href="#/action-1">
+          Example
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem eventKey="2" href="#/action-2">
+          Example
+        </DropdownItem>
+      </li>
       <DropdownDivider />
-      <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
+          Example
+        </DropdownItem>
+      </li>
     </DropdownMenu>
   )
 }
@@ -27,16 +33,27 @@ export const Default = (args: Args) => {
 export const Active = (args: Args) => {
   return (
     <DropdownMenu show>
-      <DropdownItem eventKey="1" href="#/action-1">
-        Example
-      </DropdownItem>
-      <DropdownItem eventKey="2" active href="#/action-2" trailingIcon="check">
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem eventKey="1" href="#/action-1">
+          Example
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem
+          eventKey="2"
+          active
+          href="#/action-2"
+          trailingIcon="check"
+        >
+          Example
+        </DropdownItem>
+      </li>
       <DropdownDivider />
-      <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
+          Example
+        </DropdownItem>
+      </li>
     </DropdownMenu>
   )
 }
@@ -44,16 +61,22 @@ export const Active = (args: Args) => {
 export const Danger = (args: Args) => {
   return (
     <DropdownMenu show>
-      <DropdownItem eventKey="1" disabled={args.disabled} href="#/action-1">
-        Example
-      </DropdownItem>
-      <DropdownItem eventKey="2" href="#/action-2">
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem eventKey="1" disabled={args.disabled} href="#/action-1">
+          Example
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem eventKey="2" href="#/action-2">
+          Example
+        </DropdownItem>
+      </li>
       <DropdownDivider />
-      <DropdownItem eventKey="3" href="#/action-3" variant="danger">
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem eventKey="3" href="#/action-3" variant="danger">
+          Example
+        </DropdownItem>
+      </li>
     </DropdownMenu>
   )
 }
@@ -61,23 +84,27 @@ export const Danger = (args: Args) => {
 export const Description = (args: Args) => {
   return (
     <DropdownMenu show>
-      <DropdownItem
-        disabled={args.disabled}
-        eventKey="1"
-        href="#/action-1"
-        description="Description of the menu"
-      >
-        Example
-      </DropdownItem>
-      <DropdownItem
-        active
-        eventKey="2"
-        href="#/action-2"
-        description="Description of the menu"
-        trailingIcon="check"
-      >
-        Example
-      </DropdownItem>
+      <li>
+        <DropdownItem
+          disabled={args.disabled}
+          eventKey="1"
+          href="#/action-1"
+          description="Description of the menu"
+        >
+          Example
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem
+          active
+          eventKey="2"
+          href="#/action-2"
+          description="Description of the menu"
+          trailingIcon="check"
+        >
+          Example
+        </DropdownItem>
+      </li>
     </DropdownMenu>
   )
 }
@@ -85,28 +112,44 @@ export const Description = (args: Args) => {
 export const Icon = (args: Args) => {
   return (
     <DropdownMenu show>
-      <DropdownItem
-        disabled={args.disabled}
-        eventKey="1"
-        href="#/action-1"
-        leadingIcon="view_column_2"
-      >
-        Editor & PDF
-      </DropdownItem>
-      <DropdownItem
-        active
-        eventKey="2"
-        href="#/action-2"
-        leadingIcon="terminal"
-      >
-        Editor only
-      </DropdownItem>
-      <DropdownItem eventKey="2" href="#/action-2" leadingIcon="picture_as_pdf">
-        PDF only
-      </DropdownItem>
-      <DropdownItem eventKey="2" href="#/action-2" leadingIcon="select_window">
-        PDF in separate tab
-      </DropdownItem>
+      <li>
+        <DropdownItem
+          disabled={args.disabled}
+          eventKey="1"
+          href="#/action-1"
+          leadingIcon="view_column_2"
+        >
+          Editor & PDF
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem
+          active
+          eventKey="2"
+          href="#/action-2"
+          leadingIcon="terminal"
+        >
+          Editor only
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem
+          eventKey="2"
+          href="#/action-2"
+          leadingIcon="picture_as_pdf"
+        >
+          PDF only
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem
+          eventKey="2"
+          href="#/action-2"
+          leadingIcon="select_window"
+        >
+          PDF in separate tab
+        </DropdownItem>
+      </li>
     </DropdownMenu>
   )
 }

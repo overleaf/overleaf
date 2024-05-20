@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { forwardRef } from 'react'
 import {
   Dropdown as BS5Dropdown,
   DropdownToggle as BS5DropdownToggle,
@@ -18,22 +18,22 @@ export function Dropdown({ ...props }: DropdownProps) {
   return <BS5Dropdown {...props} />
 }
 
-export function DropdownItem({
-  active,
-  children,
-  description,
-  leadingIcon,
-  trailingIcon,
-  ...props
-}: DropdownItemProps) {
-  const trailingIconType = active ? 'check' : trailingIcon
-  return (
-    <li>
+export const DropdownItem = forwardRef<
+  typeof BS5DropdownItem,
+  DropdownItemProps
+>(
+  (
+    { active, children, description, leadingIcon, trailingIcon, ...props },
+    ref
+  ) => {
+    const trailingIconType = active ? 'check' : trailingIcon
+    return (
       <BS5DropdownItem
         active={active}
         className={description ? 'dropdown-item-description-container' : ''}
         role="menuitem"
         {...props}
+        ref={ref}
       >
         {leadingIcon && (
           <MaterialIcon
@@ -52,9 +52,10 @@ export function DropdownItem({
           <span className="dropdown-item-description">{description}</span>
         )}
       </BS5DropdownItem>
-    </li>
-  )
-}
+    )
+  }
+)
+DropdownItem.displayName = 'DropdownItem'
 
 export function DropdownToggle({ ...props }: DropdownToggleProps) {
   return <BS5DropdownToggle {...props} />

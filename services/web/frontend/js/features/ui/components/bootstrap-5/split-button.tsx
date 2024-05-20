@@ -40,9 +40,9 @@ export function SplitButton({
         </DropdownToggle>
         <DropdownMenu>
           {items.map((item, index) => (
-            <DropdownItem key={index} eventKey={item.eventKey}>
-              {item.label}
-            </DropdownItem>
+            <li key={index}>
+              <DropdownItem eventKey={item.eventKey}>{item.label}</DropdownItem>
+            </li>
           ))}
         </DropdownMenu>
       </Dropdown>

@@ -5,6 +5,8 @@ import classnames from 'classnames'
 import countries, { CountryCode } from '../../../data/countries-list'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type CountryInputProps = {
   setValue: React.Dispatch<React.SetStateAction<CountryCode | null>>
@@ -46,16 +48,24 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
     },
   })
 
+  const shouldOpen = isOpen && inputItems.length
+
   return (
     <div
       className={classnames(
-        'ui-select-container ui-select-bootstrap dropdown',
-        {
-          open: isOpen && inputItems.length,
-        }
+        'dropdown',
+        bsVersion({
+          bs5: 'd-block',
+          bs3: classnames('ui-select-container ui-select-bootstrap', {
+            open: shouldOpen,
+          }),
+        })
       )}
     >
-      <div {...getComboboxProps()} className="ui-select-toggle">
+      <div
+        {...getComboboxProps()}
+        className={bsVersion({ bs3: 'ui-select-toggle' })}
+      >
         {/* eslint-disable-next-line jsx-a11y/label-has-for */}
         <label
           {...getLabelProps()}
@@ -81,25 +91,52 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
       </div>
       <ul
         {...getMenuProps()}
-        className="ui-select-choices ui-select-choices-content ui-select-dropdown dropdown-menu"
+        className={classnames(
+          'dropdown-menu',
+          bsVersion({
+            bs5: classnames('select-dropdown-menu', { show: shouldOpen }),
+            bs3: 'ui-select-choices ui-select-choices-content ui-select-dropdown',
+          })
+        )}
       >
         {inputItems.map((item, index) => (
+          // eslint-disable-next-line jsx-a11y/role-supports-aria-props
           <li
-            className="ui-select-choices-group"
+            className={bsVersion({ bs3: 'ui-select-choices-group' })}
             key={`${item.name}-${index}`}
             {...getItemProps({ item, index })}
+            aria-selected={selectedItem?.name === item.name}
           >
-            <div
-              className={classnames('ui-select-choices-row', {
-                active: selectedItem?.name === item.name,
-                'ui-select-choices-row--highlighted':
-                  highlightedIndex === index,
-              })}
-            >
-              <span className="ui-select-choices-row-inner">
-                <span>{item.name}</span>
-              </span>
-            </div>
+            <BootstrapVersionSwitcher
+              bs3={
+                <div
+                  className={classnames('ui-select-choices-row', {
+                    active: selectedItem?.name === item.name,
+                    'ui-select-choices-row--highlighted':
+                      highlightedIndex === index,
+                  })}
+                >
+                  <span className="ui-select-choices-row-inner">
+                    <span>{item.name}</span>
+                  </span>
+                </div>
+              }
+              bs5={
+                <DropdownItem
+                  as="span"
+                  role={undefined}
+                  className={classnames({
+                    active: selectedItem?.name === item.name,
+                    'dropdown-item--highlighted': highlightedIndex === index,
+                  })}
+                  trailingIcon={
+                    selectedItem?.name === item.name ? 'check' : undefined
+                  }
+                >
+                  {item.name}
+                </DropdownItem>
+              }
+            />
           </li>
         ))}
       </ul>

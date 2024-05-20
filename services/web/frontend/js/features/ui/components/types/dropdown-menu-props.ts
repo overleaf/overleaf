@@ -22,12 +22,14 @@ export type DropdownItemProps = PropsWithChildren<{
   as?: ElementType
   description?: string
   disabled?: boolean
-  eventKey: string | number
+  eventKey?: string | number
   href?: string
   leadingIcon?: string
   onClick?: () => void
   trailingIcon?: string
   variant?: 'default' | 'danger'
+  className?: string
+  role?: string
 }>
 
 export type DropdownToggleProps = PropsWithChildren<{
