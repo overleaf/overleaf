@@ -50,6 +50,7 @@ export const EditorContext = createContext<
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
       writefullAdClicked: writefullAdButtons
       setWritefullAdClicked: Dispatch<SetStateAction<writefullAdButtons>>
+      setOutOfSync: (value: boolean) => void
     }
   | undefined
 >(undefined)
@@ -81,6 +82,7 @@ export const EditorProvider: FC = ({ children }) => {
   const [projectName, setProjectName] = useScopeValue('project.name')
   const [permissionsLevel, setPermissionsLevel] =
     useScopeValue('permissionsLevel')
+  const [outOfSync, setOutOfSync] = useState(false)
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
@@ -171,7 +173,7 @@ export const EditorProvider: FC = ({ children }) => {
       hasPremiumCompile: features?.compileGroup === 'priority',
       loading,
       renameProject,
-      permissionsLevel,
+      permissionsLevel: outOfSync ? 'readOnly' : permissionsLevel,
       setPermissionsLevel,
       isProjectOwner: owner?._id === userId,
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
@@ -184,6 +186,7 @@ export const EditorProvider: FC = ({ children }) => {
       setCurrentPopup,
       writefullAdClicked,
       setWritefullAdClicked,
+      setOutOfSync,
     }),
     [
       cobranding,
@@ -203,6 +206,8 @@ export const EditorProvider: FC = ({ children }) => {
       setCurrentPopup,
       writefullAdClicked,
       setWritefullAdClicked,
+      outOfSync,
+      setOutOfSync,
     ]
   )
 

@@ -31,6 +31,7 @@ import { EditorType } from '@/features/ide-react/editor/types/editor-type'
 import { DocId } from '../../../../../types/project-settings'
 import { Update } from '@/features/history/services/types/update'
 import { useDebugDiffTracker } from '../hooks/use-debug-diff-tracker'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 interface GotoOffsetOptions {
   gotoOffset: number
@@ -93,6 +94,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
   const ide = useIdeContext()
   const { projectId } = useIdeReactContext()
   const { reportError, eventEmitter, eventLog } = useIdeReactContext()
+  const { setOutOfSync } = useEditorContext()
   const { socket, disconnect, connectionState } = useConnectionContext()
   const { view, setView } = useLayoutContext()
   const { showGenericMessageModal, genericModalVisible, showOutOfSyncModal } =
@@ -566,6 +568,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
         // Tell the user about the error state.
         setIsInErrorState(true)
+        // Ensure that the editor is locked
+        setOutOfSync(true)
+        // Display the "out of sync" modal
         showOutOfSyncModal(editorContent || '')
 
         // Do not forceReopen the document.
@@ -592,6 +597,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
     setIsInErrorState,
     showGenericMessageModal,
     showOutOfSyncModal,
+    setOutOfSync,
     t,
   ])
 
