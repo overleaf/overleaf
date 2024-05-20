@@ -42,7 +42,7 @@ export function removeProjectFromTag(tagId: string, projectId: string) {
 }
 
 export function removeProjectsFromTag(tagId: string, projectIds: string[]) {
-  return deleteJSON(`/tag/${tagId}/projects`, {
+  return postJSON(`/tag/${tagId}/projects/remove`, {
     body: {
       projectIds,
     },

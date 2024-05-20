@@ -682,8 +682,8 @@ describe('<ProjectListRoot />', function () {
         })
 
         it('opens the tags dropdown and remove a tag from selected projects', async function () {
-          const deleteProjectsFromTagMock = fetchMock.delete(
-            `express:/tag/:id/projects`,
+          const deleteProjectsFromTagMock = fetchMock.post(
+            `express:/tag/:id/projects/remove`,
             {
               status: 204,
             }
@@ -702,11 +702,14 @@ describe('<ProjectListRoot />', function () {
           await fetchMock.flush(true)
 
           expect(
-            deleteProjectsFromTagMock.called(`/tag/${this.tagId}/projects`, {
-              body: {
-                projectIds: [projectsData[0].id, projectsData[1].id],
-              },
-            })
+            deleteProjectsFromTagMock.called(
+              `/tag/${this.tagId}/projects/remove`,
+              {
+                body: {
+                  projectIds: [projectsData[0].id, projectsData[1].id],
+                },
+              }
+            )
           ).to.be.true
           screen.getByRole('button', { name: `${this.tagName} (0)` })
         })
