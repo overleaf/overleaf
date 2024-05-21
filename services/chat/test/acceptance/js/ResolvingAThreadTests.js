@@ -38,6 +38,13 @@ describe('Resolving a thread', async function () {
       const resolvedAt = new Date(threads[threadId].resolved_at)
       expect(new Date() - resolvedAt).to.be.below(1000)
     })
+
+    it('should list the thread id in the resolved thread ids endpoint', async function () {
+      const { response, body } =
+        await ChatClient.getResolvedThreadIds(projectId)
+      expect(response.statusCode).to.equal(200)
+      expect(body.resolvedThreadIds).to.include(threadId)
+    })
   })
 
   describe('when a thread is not resolved', async function () {
@@ -57,6 +64,13 @@ describe('Resolving a thread', async function () {
       const { response, body: threads } = await ChatClient.getThreads(projectId)
       expect(response.statusCode).to.equal(200)
       expect(threads[threadId].resolved).to.be.undefined
+    })
+
+    it('should not list the thread in the resolved thread ids endpoint', async function () {
+      const { response, body } =
+        await ChatClient.getResolvedThreadIds(projectId)
+      expect(response.statusCode).to.equal(200)
+      expect(body.resolvedThreadIds).not.to.include(threadId)
     })
   })
 
@@ -88,6 +102,13 @@ describe('Resolving a thread', async function () {
       const { response, body: threads } = await ChatClient.getThreads(projectId)
       expect(response.statusCode).to.equal(200)
       expect(threads[threadId].resolved).to.be.undefined
+    })
+
+    it('should not list the thread in the resolved thread ids endpoint', async function () {
+      const { response, body } =
+        await ChatClient.getResolvedThreadIds(projectId)
+      expect(response.statusCode).to.equal(200)
+      expect(body.resolvedThreadIds).not.to.include(threadId)
     })
   })
 })

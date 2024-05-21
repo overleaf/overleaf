@@ -64,6 +64,14 @@ export async function resolveThread(projectId, threadId, userId) {
   })
 }
 
+export async function getResolvedThreadIds(projectId) {
+  return asyncRequest({
+    method: 'get',
+    url: `/project/${projectId}/resolved-thread-ids`,
+    json: true,
+  })
+}
+
 export async function editMessage(projectId, threadId, messageId, content) {
   return asyncRequest({
     method: 'post',

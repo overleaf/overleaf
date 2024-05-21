@@ -82,7 +82,7 @@ paths:
               $ref: '#/components/schemas/Message'
         description: |-
           JSON object with :
-          - user_id: Id of the user 
+          - user_id: Id of the user
           - content: Content of the message
   '/project/{projectId}/threads':
     parameters:
@@ -206,7 +206,7 @@ paths:
               required:
                 - user_id
         description: |-
-          JSON object with : 
+          JSON object with :
           - user_id: Id of the user.
       description: Mark Thread with ThreadID and ProjectID provided owned by the user with UserID provided as resolved.
   '/project/{projectId}/thread/{threadId}/reopen':
@@ -228,7 +228,7 @@ paths:
         '204':
           description: No Content
       description: |-
-        Reopen Thread with ThreadID and ProjectID provided. 
+        Reopen Thread with ThreadID and ProjectID provided.
         i.e unmark it as resolved.
   '/project/{projectId}/thread/{threadId}':
     parameters:
@@ -249,6 +249,19 @@ paths:
         '204':
           description: No Content
       description: Delete thread with ThreadID and ProjectID provided
+  '/project/{projectId}/resolved-thread-ids':
+    parameters:
+      - schema:
+          type: string
+        name: projectId
+        in: path
+        required: true
+    get:
+      summary: Get resolved thread ids
+      operationId: getResolvedThreadIds
+      responses:
+        '200':
+          description: Resolved thread ids
   '/project/{projectId}':
     parameters:
       - schema:

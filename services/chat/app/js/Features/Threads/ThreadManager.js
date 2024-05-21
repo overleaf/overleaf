@@ -109,3 +109,18 @@ export async function deleteAllThreadsInProject(projectId) {
     project_id: new ObjectId(projectId.toString()),
   })
 }
+
+export async function getResolvedThreadIds(projectId) {
+  const resolvedThreadIds = await db.rooms
+    .find(
+      {
+        project_id: new ObjectId(projectId),
+        thread_id: { $exists: true },
+        resolved: { $exists: true },
+      },
+      { projection: { thread_id: 1 } }
+    )
+    .map(record => record.thread_id.toString())
+    .toArray()
+  return resolvedThreadIds
+}
