@@ -96,6 +96,7 @@ export default class PDFJSWrapper {
         rangeChunkSize,
         disableAutoFetch: true,
         disableStream,
+        isEvalSupported: false,
         textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
         range: rangeTransport,
       })

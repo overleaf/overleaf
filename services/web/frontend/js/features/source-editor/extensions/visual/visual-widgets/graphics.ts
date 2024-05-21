@@ -143,7 +143,7 @@ export class GraphicsWidget extends WidgetType {
       return
     }
 
-    const pdf = await PDFJS.getDocument(url).promise
+    const pdf = await PDFJS.getDocument({ url, isEvalSupported: false }).promise
     const page = await pdf.getPage(1)
 
     // bail out if loading the PDF took too long

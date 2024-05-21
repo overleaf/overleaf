@@ -33,7 +33,10 @@ const FileViewPdf: FC<{
           return
         }
 
-        const pdf = await PDFJS.getDocument(preview.url).promise
+        const pdf = await PDFJS.getDocument({
+          url: preview.url,
+          isEvalSupported: false,
+        }).promise
 
         // bail out if loading the PDF took too long
         if (!mountedRef.current) {
