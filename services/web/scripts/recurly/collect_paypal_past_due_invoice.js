@@ -76,7 +76,7 @@ const main = async () => {
       'invoices',
       { state: 'past_due' },
       (error, invoices) => {
-        logger.info('invoices', invoices.length)
+        logger.info('invoices', invoices?.length)
         if (error) {
           return callback(error)
         }
@@ -90,7 +90,7 @@ const main = async () => {
   const INVOICES_COLLECTED_SUCCESS = []
   const USERS_COLLECTED = []
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     attemptInvoicesCollection(error => {
       logger.info(
         `DONE (DRY_RUN=${DRY_RUN}). ${INVOICES_COLLECTED.length} invoices collection attempts for ${USERS_COLLECTED.length} users. ${INVOICES_COLLECTED_SUCCESS.length} successful collections`
@@ -105,11 +105,11 @@ const main = async () => {
       )
 
       if (error) {
-        throw error
+        reject(error)
       }
 
       if (INVOICES_COLLECTED_SUCCESS.length === 0) {
-        throw new Error('No invoices collected')
+        reject(new Error('No invoices collected'))
       }
 
       resolve({

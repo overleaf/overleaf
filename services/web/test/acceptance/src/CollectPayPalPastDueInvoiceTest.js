@@ -155,44 +155,32 @@ const invoiceCollectXml = `
 </invoice>
 `
 
-// from our logs
-const invoiceCollectErrXml2 = `
-<?xml version="1.0" encoding="UTF-8"?>
-<error>
-  <symbol>not_found</symbol>
-  <description lang="en-US">Couldn't find BillingInfo with account_code = abcdef87654321</description>
-</error>
-`
-
 describe('CollectPayPalPastDueInvoice', function () {
   let apiRequestStub
   const fakeApiRequests = invoiceIdsAndReturnCode => {
-    apiRequestStub = sinon.stub(RecurlyWrapper, 'apiRequest')
-    apiRequestStub.callsFake((options, callback) => {
+    apiRequestStub = sinon.stub(RecurlyWrapper.promises, 'apiRequest')
+    apiRequestStub.callsFake(options => {
       switch (options.url) {
         case 'invoices':
-          callback(
-            null,
-            { statusCode: 200, headers: {} },
-            invoicesXml(invoiceIdsAndReturnCode)
-          )
-          return
+          return {
+            response: { statusCode: 200, headers: {} },
+            body: invoicesXml(invoiceIdsAndReturnCode),
+          }
         case 'accounts/200/billing_info':
         case 'accounts/404/billing_info':
-          callback(null, { statusCode: 200, headers: {} }, billingInfoXml)
-          return
+          return {
+            response: { statusCode: 200, headers: {} },
+            body: billingInfoXml,
+          }
         case 'invoices/200/collect':
-          callback(null, { statusCode: 200, headers: {} }, invoiceCollectXml)
-          return
+          return {
+            response: { statusCode: 200, headers: {} },
+            body: invoiceCollectXml,
+          }
         case 'invoices/404/collect':
-          callback(
-            new OError(`Recurly API returned with status code: 404`, {
-              statusCode: 404,
-            }),
-            { statusCode: 404, headers: {} },
-            invoiceCollectErrXml2
-          )
-          return
+          throw new OError(`Recurly API returned with status code: 404`, {
+            statusCode: 404,
+          })
         default:
           throw new Error(`Unexpected URL: ${options.url}`)
       }

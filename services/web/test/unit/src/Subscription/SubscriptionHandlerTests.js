@@ -582,7 +582,7 @@ describe('SubscriptionHandler', function () {
           )
       })
 
-      it('should call RecurlyWrapper.listAccountActiveSubscriptions with the user id', function () {
+      it('should call RecurlyWrapper.promises.listAccountActiveSubscriptions with the user id', function () {
         this.RecurlyWrapper.promises.listAccountActiveSubscriptions
           .calledWith(this.user_id)
           .should.equal(true)

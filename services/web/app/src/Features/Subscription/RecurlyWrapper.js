@@ -3,12 +3,11 @@ const request = require('request')
 const Settings = require('@overleaf/settings')
 const xml2js = require('xml2js')
 const logger = require('@overleaf/logger')
-const Async = require('async')
 const Errors = require('../Errors/Errors')
 const SubscriptionErrors = require('./Errors')
-const { promisify } = require('util')
+const { callbackify } = require('@overleaf/promise-utils')
 
-function updateAccountEmailAddress(accountId, newEmail, callback) {
+async function updateAccountEmailAddress(accountId, newEmail) {
   const data = {
     email: newEmail,
   }
@@ -16,93 +15,76 @@ function updateAccountEmailAddress(accountId, newEmail, callback) {
   try {
     requestBody = RecurlyWrapper._buildXml('account', data)
   } catch (error) {
-    return callback(
-      OError.tag(error, 'error building xml', { accountId, newEmail })
-    )
+    throw OError.tag(error, 'error building xml', { accountId, newEmail })
   }
 
-  RecurlyWrapper.apiRequest(
-    {
-      url: `accounts/${accountId}`,
-      method: 'PUT',
-      body: requestBody,
-    },
-    (error, response, body) => {
-      if (error) {
-        return callback(error)
-      }
-      RecurlyWrapper._parseAccountXml(body, callback)
-    }
-  )
+  const { body } = await RecurlyWrapper.promises.apiRequest({
+    url: `accounts/${accountId}`,
+    method: 'PUT',
+    body: requestBody,
+  })
+  return await RecurlyWrapper.promises._parseAccountXml(body)
 }
 
-const RecurlyWrapper = {
-  apiUrl: Settings.apis.recurly.url || 'https://api.recurly.com/v2',
-
+const promises = {
   _paypal: {
-    checkAccountExists(cache, next) {
+    async checkAccountExists(cache) {
       const { user } = cache
       logger.debug(
         { userId: user._id },
         'checking if recurly account exists for user'
       )
-      RecurlyWrapper.apiRequest(
-        {
+      let response, body
+      try {
+        ;({ response, body } = await RecurlyWrapper.promises.apiRequest({
           url: `accounts/${user._id}`,
           method: 'GET',
           expect404: true,
-        },
-        function (error, response, responseBody) {
-          if (error) {
-            OError.tag(
-              error,
-              'error response from recurly while checking account',
-              {
-                user_id: user._id,
-              }
-            )
-            return next(error)
+        }))
+      } catch (error) {
+        OError.tag(
+          error,
+          'error response from recurly while checking account',
+          {
+            user_id: user._id,
           }
-          if (response.statusCode === 404) {
-            // actually not an error in this case, just no existing account
-            logger.debug(
-              { userId: user._id },
-              'user does not currently exist in recurly, proceed'
-            )
-            cache.userExists = false
-            return next(null, cache)
-          }
-          logger.debug({ userId: user._id }, 'user appears to exist in recurly')
-          RecurlyWrapper._parseAccountXml(
-            responseBody,
-            function (err, account) {
-              if (err) {
-                OError.tag(err, 'error parsing account', {
-                  user_id: user._id,
-                })
-                return next(err)
-              }
-              cache.userExists = true
-              cache.account = account
-              next(null, cache)
-            }
-          )
-        }
-      )
+        )
+        throw error
+      }
+      if (response.statusCode === 404) {
+        // actually not an error in this case, just no existing account
+        logger.debug(
+          { userId: user._id },
+          'user does not currently exist in recurly, proceed'
+        )
+        cache.userExists = false
+        return cache
+      }
+      logger.debug({ userId: user._id }, 'user appears to exist in recurly')
+      try {
+        const account = await RecurlyWrapper.promises._parseAccountXml(body)
+        cache.userExists = true
+        cache.account = account
+        return cache
+      } catch (err) {
+        OError.tag(err, 'error parsing account', {
+          user_id: user._id,
+        })
+        throw err
+      }
     },
-    createAccount(cache, next) {
+    async createAccount(cache) {
       const { user } = cache
       const { subscriptionDetails } = cache
       if (cache.userExists) {
-        return next(null, cache)
+        return cache
       }
 
-      let address
-      try {
-        address = getAddressFromSubscriptionDetails(subscriptionDetails, false)
-      } catch (error) {
-        return next(error)
-      }
+      const address = getAddressFromSubscriptionDetails(
+        subscriptionDetails,
+        false
+      )
+
       const data = {
         account_code: user._id,
         email: user.email,
@@ -114,97 +96,78 @@ const RecurlyWrapper = {
       try {
         requestBody = RecurlyWrapper._buildXml('account', data)
       } catch (error) {
-        return next(
-          OError.tag(error, 'error building xml', { user_id: user._id })
-        )
+        throw OError.tag(error, 'error building xml', { user_id: user._id })
       }
 
-      RecurlyWrapper.apiRequest(
-        {
+      let body
+      try {
+        ;({ body } = await RecurlyWrapper.promises.apiRequest({
           url: 'accounts',
           method: 'POST',
           body: requestBody,
-        },
-        (error, response, responseBody) => {
-          if (error) {
-            OError.tag(
-              error,
-              'error response from recurly while creating account',
-              {
-                user_id: user._id,
-              }
-            )
-            return next(error)
-          }
-          RecurlyWrapper._parseAccountXml(
-            responseBody,
-            function (err, account) {
-              if (err) {
-                OError.tag(err, 'error creating account', {
-                  user_id: user._id,
-                })
-                return next(err)
-              }
-              cache.account = account
-              next(null, cache)
-            }
-          )
-        }
-      )
+        }))
+      } catch (error) {
+        OError.tag(
+          error,
+          'error response from recurly while creating account',
+          { user_id: user._id }
+        )
+        throw error
+      }
+      try {
+        cache.account = await RecurlyWrapper.promises._parseAccountXml(body)
+        return cache
+      } catch (err) {
+        OError.tag(err, 'error creating account', {
+          user_id: user._id,
+        })
+        throw err
+      }
     },
-    createBillingInfo(cache, next) {
+    async createBillingInfo(cache) {
       const { user } = cache
       const { recurlyTokenIds } = cache
       logger.debug({ userId: user._id }, 'creating billing info in recurly')
       const accountCode = cache?.account?.account_code
       if (!accountCode) {
-        return next(new Error('no account code at createBillingInfo stage'))
+        throw new Error('no account code at createBillingInfo stage')
       }
       const data = { token_id: recurlyTokenIds.billing }
       let requestBody
       try {
         requestBody = RecurlyWrapper._buildXml('billing_info', data)
       } catch (error) {
-        return next(
-          OError.tag(error, 'error building xml', { user_id: user._id })
-        )
+        throw OError.tag(error, 'error building xml', { user_id: user._id })
       }
-      RecurlyWrapper.apiRequest(
-        {
+      let body
+      try {
+        ;({ body } = await RecurlyWrapper.promises.apiRequest({
           url: `accounts/${accountCode}/billing_info`,
           method: 'POST',
           body: requestBody,
-        },
-        (error, response, responseBody) => {
-          if (error) {
-            OError.tag(
-              error,
-              'error response from recurly while creating billing info',
-              {
-                user_id: user._id,
-              }
-            )
-            return next(error)
-          }
-          RecurlyWrapper._parseBillingInfoXml(
-            responseBody,
-            function (err, billingInfo) {
-              if (err) {
-                OError.tag(err, 'error creating billing info', {
-                  user_id: user._id,
-                  accountCode,
-                })
-                return next(err)
-              }
-              cache.billingInfo = billingInfo
-              next(null, cache)
-            }
-          )
-        }
-      )
+        }))
+      } catch (error) {
+        OError.tag(
+          error,
+          'error response from recurly while creating billing info',
+          { user_id: user._id }
+        )
+        throw error
+      }
+      try {
+        cache.billingInfo =
+          await RecurlyWrapper.promises._parseBillingInfoXml(body)
+        return cache
+      } catch (err) {
+        OError.tag(err, 'error creating billing info', {
+          user_id: user._id,
+          accountCode,
+        })
+        throw err
+      }
     },
 
-    setAddressAndCompanyBillingInfo(cache, next) {
+    async setAddressAndCompanyBillingInfo(cache) {
       const { user } = cache
       const { subscriptionDetails } = cache
       logger.debug(
@@ -213,20 +176,15 @@ const RecurlyWrapper = {
       )
       const accountCode = cache?.account?.account_code
       if (!accountCode) {
-        return next(
-          new Error('no account code at setAddressAndCompanyBillingInfo stage')
+        throw new Error(
+          'no account code at setAddressAndCompanyBillingInfo stage'
         )
       }
 
-      let addressAndCompanyBillingInfo
-      try {
-        addressAndCompanyBillingInfo = getAddressFromSubscriptionDetails(
-          subscriptionDetails,
-          true
-        )
-      } catch (error) {
-        return next(error)
-      }
+      const addressAndCompanyBillingInfo = getAddressFromSubscriptionDetails(
+        subscriptionDetails,
+        true
+      )
 
       let requestBody
       try {
@@ -235,45 +193,36 @@ const RecurlyWrapper = {
           addressAndCompanyBillingInfo
         )
       } catch (error) {
-        return next(
-          OError.tag(error, 'error building xml', { user_id: user._id })
-        )
+        throw OError.tag(error, 'error building xml', { user_id: user._id })
       }
 
-      RecurlyWrapper.apiRequest(
-        {
+      let body
+      try {
+        ;({ body } = await RecurlyWrapper.promises.apiRequest({
           url: `accounts/${accountCode}/billing_info`,
           method: 'PUT',
           body: requestBody,
-        },
-        (error, response, responseBody) => {
-          if (error) {
-            OError.tag(
-              error,
-              'error response from recurly while setting address',
-              {
-                user_id: user._id,
-              }
-            )
-            return next(error)
-          }
-          RecurlyWrapper._parseBillingInfoXml(
-            responseBody,
-            function (err, billingInfo) {
-              if (err) {
-                OError.tag(err, 'error updating billing info', {
-                  user_id: user._id,
-                })
-                return next(err)
-              }
-              cache.billingInfo = billingInfo
-              next(null, cache)
-            }
-          )
+        }))
+      } catch (error) {
+        OError.tag(error, 'error response from recurly while setting address', {
+          user_id: user._id,
+        })
+        throw error
+      }
+      try {
+        cache.billingInfo =
+          await RecurlyWrapper.promises._parseBillingInfoXml(body)
+        return cache
+      } catch (err) {
+        if (err) {
+          OError.tag(err, 'error updating billing info', {
+            user_id: user._id,
+          })
+          throw err
         }
-      )
+      }
     },
-    createSubscription(cache, next) {
+    async createSubscription(cache) {
       const { user } = cache
       const { subscriptionDetails } = cache
       logger.debug({ userId: user._id }, 'creating subscription in recurly')
@@ -294,96 +243,80 @@ const RecurlyWrapper = {
       try {
         requestBody = RecurlyWrapper._buildXml('subscription', data)
       } catch (error) {
-        return next(
-          OError.tag(error, 'error building xml', { user_id: user._id })
-        )
+        throw OError.tag(error, 'error building xml', { user_id: user._id })
       }
 
-      RecurlyWrapper.apiRequest(
-        {
+      let body
+      try {
+        ;({ body } = await RecurlyWrapper.promises.apiRequest({
           url: 'subscriptions',
           method: 'POST',
           body: requestBody,
-        },
-        (error, response, responseBody) => {
-          if (error) {
-            OError.tag(
-              error,
-              'error response from recurly while creating subscription',
-              {
-                user_id: user._id,
-              }
-            )
-            return next(error)
-          }
-          RecurlyWrapper._parseSubscriptionXml(
-            responseBody,
-            function (err, subscription) {
-              if (err) {
-                OError.tag(err, 'error creating subscription', {
-                  user_id: user._id,
-                })
-                return next(err)
-              }
-              cache.subscription = subscription
-              next(null, cache)
-            }
-          )
-        }
-      )
+        }))
+      } catch (error) {
+        OError.tag(
+          error,
+          'error response from recurly while creating subscription',
+          { user_id: user._id }
+        )
+        throw error
+      }
+      try {
+        cache.subscription =
+          await RecurlyWrapper.promises._parseSubscriptionXml(body)
+        return cache
+      } catch (err) {
+        OError.tag(err, 'error creating subscription', {
+          user_id: user._id,
+        })
+        throw err
+      }
     },
   },
 
-  _createPaypalSubscription(
-    user,
-    subscriptionDetails,
-    recurlyTokenIds,
-    callback
-  ) {
+  async _createPaypalSubscription(user, subscriptionDetails, recurlyTokenIds) {
     logger.debug(
       { userId: user._id },
       'starting process of creating paypal subscription'
     )
-    // We use `async.waterfall` to run each of these actions in sequence
+    // We use waterfall through each of these actions in sequence
     // passing a `cache` object along the way. The cache is initialized
     // with required data, and `async.apply` to pass the cache to the first function
     const cache = { user, recurlyTokenIds, subscriptionDetails }
-    Async.waterfall(
-      [
-        Async.apply(RecurlyWrapper._paypal.checkAccountExists, cache),
-        RecurlyWrapper._paypal.createAccount,
-        RecurlyWrapper._paypal.createBillingInfo,
-        RecurlyWrapper._paypal.setAddressAndCompanyBillingInfo,
-        RecurlyWrapper._paypal.createSubscription,
-      ],
-      function (err, result) {
-        if (err) {
-          OError.tag(err, 'error in paypal subscription creation process', {
-            user_id: user._id,
-          })
-          return callback(err)
-        }
-        if (!result.subscription) {
-          err = new Error('no subscription object in result')
-          OError.tag(err, 'error in paypal subscription creation process', {
-            user_id: user._id,
-          })
-          return callback(err)
-        }
-        logger.debug(
-          { userId: user._id },
-          'done creating paypal subscription for user'
+    let result
+    try {
+      result = await RecurlyWrapper.promises._paypal.checkAccountExists(cache)
+      result = await RecurlyWrapper.promises._paypal.createAccount(result)
+      result = await RecurlyWrapper.promises._paypal.createBillingInfo(result)
+      result =
+        await RecurlyWrapper.promises._paypal.setAddressAndCompanyBillingInfo(
+          result
         )
-        callback(null, result.subscription)
-      }
+      result = await RecurlyWrapper.promises._paypal.createSubscription(result)
+    } catch (err) {
+      OError.tag(err, 'error in paypal subscription creation process', {
+        user_id: user._id,
+      })
+      throw err
+    }
+    if (!result.subscription) {
+      const err = new Error('no subscription object in result')
+      OError.tag(err, 'error in paypal subscription creation process', {
+        user_id: user._id,
+      })
+      throw err
+    }
+    logger.debug(
+      { userId: user._id },
+      'done creating paypal subscription for user'
     )
+    return result.subscription
   },
 
-  _createCreditCardSubscription(
+  async _createCreditCardSubscription(
     user,
     subscriptionDetails,
-    recurlyTokenIds,
-    callback
+    recurlyTokenIds
   ) {
     const data = {
       plan_code: subscriptionDetails.plan_code,
@@ -412,45 +345,40 @@ const RecurlyWrapper = {
     try {
       requestBody = RecurlyWrapper._buildXml('subscription', data)
     } catch (error) {
-      return callback(
-        OError.tag(error, 'error building xml', { user_id: user._id })
-      )
+      throw OError.tag(error, 'error building xml', { user_id: user._id })
     }
 
-    RecurlyWrapper.apiRequest(
-      {
-        url: 'subscriptions',
-        method: 'POST',
-        body: requestBody,
-        expect422: true,
-      },
-      (error, response, responseBody) => {
-        if (error) {
-          return callback(error)
-        }
+    const { response, body } = await RecurlyWrapper.promises.apiRequest({
+      url: 'subscriptions',
+      method: 'POST',
+      body: requestBody,
+      expect422: true,
+    })
 
-        if (response.statusCode === 422) {
-          RecurlyWrapper._handle422Response(responseBody, callback)
-        } else {
-          RecurlyWrapper._parseSubscriptionXml(responseBody, callback)
-        }
-      }
-    )
+    if (response.statusCode === 422) {
+      return await RecurlyWrapper.promises._handle422Response(body)
+    } else {
+      return await RecurlyWrapper.promises._parseSubscriptionXml(body)
+    }
   },
 
-  createSubscription(user, subscriptionDetails, recurlyTokenIds, callback) {
+  async createSubscription(user, subscriptionDetails, recurlyTokenIds) {
     const { isPaypal } = subscriptionDetails
     logger.debug(
       { userId: user._id, isPaypal },
       'setting up subscription in recurly'
     )
     const fn = isPaypal
-      ? RecurlyWrapper._createPaypalSubscription
-      : RecurlyWrapper._createCreditCardSubscription
-    return fn(user, subscriptionDetails, recurlyTokenIds, callback)
+      ? RecurlyWrapper.promises._createPaypalSubscription
+      : RecurlyWrapper.promises._createCreditCardSubscription
+    return fn(user, subscriptionDetails, recurlyTokenIds)
   },
 
-  apiRequest(options, callback) {
+  /**
+   * @param options - the options to pass to the request library
+   * @returns {Promise<{ response: unknown, body: string}>}
+   */
+  apiRequest(options) {
     options.url = RecurlyWrapper.apiUrl + '/' + options.url
     options.headers = {
       Authorization: `Basic ${Buffer.from(
@@ -463,55 +391,48 @@ const RecurlyWrapper = {
     const { expect404, expect422 } = options
     delete options.expect404
     delete options.expect422
-    request(options, function (error, response, body) {
-      if (
-        !error &&
-        response.statusCode !== 200 &&
-        response.statusCode !== 201 &&
-        response.statusCode !== 204 &&
-        (response.statusCode !== 404 || !expect404) &&
-        (response.statusCode !== 422 || !expect422)
-      ) {
-        if (options.headers.Authorization) {
-          options.headers.Authorization = 'REDACTED'
+    return new Promise((resolve, reject) => {
+      request(options, function (error, response, body) {
+        if (
+          !error &&
+          response.statusCode !== 200 &&
+          response.statusCode !== 201 &&
+          response.statusCode !== 204 &&
+          (response.statusCode !== 404 || !expect404) &&
+          (response.statusCode !== 422 || !expect422)
+        ) {
+          if (options.headers.Authorization) {
+            options.headers.Authorization = 'REDACTED'
+          }
+          logger.warn(
+            {
+              err: error,
+              body,
+              options,
+              statusCode: response ? response.statusCode : undefined,
+            },
+            'error returned from recurly'
+          )
+          error = new OError(
+            `Recurly API returned with status code: ${response.statusCode}`,
+            { statusCode: response.statusCode }
+          )
+          reject(error)
         }
-        logger.warn(
-          {
-            err: error,
-            body,
-            options,
-            statusCode: response ? response.statusCode : undefined,
-          },
-          'error returned from recurly'
-        )
-        error = new OError(
-          `Recurly API returned with status code: ${response.statusCode}`,
-          { statusCode: response.statusCode }
-        )
-      }
-      callback(error, response, body)
+        resolve({ response, body })
+      })
     })
   },
 
-  getSubscriptions(accountId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `accounts/${accountId}/subscriptions`,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseXml(body, callback)
-      }
-    )
+  async getSubscriptions(accountId) {
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `accounts/${accountId}/subscriptions`,
+    })
+    return await RecurlyWrapper.promises._parseXml(body)
   },
 
-  getSubscription(subscriptionId, options, callback) {
+  async getSubscription(subscriptionId, options) {
     let url
-    if (!callback) {
-      callback = options
-    }
     if (!options) {
       options = {}
     }
@@ -522,54 +443,34 @@ const RecurlyWrapper = {
       url = `subscriptions/${subscriptionId}`
     }
 
-    RecurlyWrapper.apiRequest(
-      {
-        url,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseSubscriptionXml(
-          body,
-          (error, recurlySubscription) => {
-            if (error) {
-              return callback(error)
-            }
-            if (options.includeAccount) {
-              let accountId
-              if (
-                recurlySubscription.account &&
-                recurlySubscription.account.url
-              ) {
-                accountId =
-                  recurlySubscription.account.url.match(/accounts\/(.*)/)[1]
-              } else {
-                return callback(
-                  new Error("I don't understand the response from Recurly")
-                )
-              }
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url,
+    })
 
-              RecurlyWrapper.getAccount(accountId, function (error, account) {
-                if (error) {
-                  return callback(error)
-                }
-                recurlySubscription.account = account
-                callback(null, recurlySubscription)
-              })
-            } else {
-              callback(null, recurlySubscription)
-            }
-          }
-        )
+    const recurlySubscription =
+      await RecurlyWrapper.promises._parseSubscriptionXml(body)
+
+    if (options.includeAccount) {
+      let accountId
+      if (recurlySubscription.account && recurlySubscription.account.url) {
+        accountId = recurlySubscription.account.url.match(/accounts\/(.*)/)[1]
+      } else {
+        throw new Error("I don't understand the response from Recurly")
       }
-    )
+
+      recurlySubscription.account =
+        await RecurlyWrapper.promises.getAccount(accountId)
+
+      return recurlySubscription
+    } else {
+      return recurlySubscription
+    }
   },
 
-  getPaginatedEndpoint(resource, queryParams, callback) {
+  async getPaginatedEndpoint(resource, queryParams) {
     queryParams.per_page = queryParams.per_page || 200
     let allItems = []
-    const getPage = (cursor = null) => {
+    const getPage = async (cursor = null) => {
       const opts = {
         url: resource,
         qs: queryParams,
@@ -577,139 +478,86 @@ const RecurlyWrapper = {
       if (cursor) {
         opts.qs.cursor = cursor
       }
-      return RecurlyWrapper.apiRequest(opts, (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        return RecurlyWrapper._parseXml(body, function (err, data) {
-          if (err) {
-            logger.warn({ err }, 'could not get accounts')
-            return callback(err)
-          }
-          const items = data[resource]
-          allItems = allItems.concat(items)
-          logger.debug(
-            `got another ${items.length}, total now ${allItems.length}`
-          )
-          const match = response.headers.link?.match(
-            /cursor=([0-9.]+%3A[0-9.]+)&/
-          )
-          cursor = match && match[1]
-          if (cursor) {
-            cursor = decodeURIComponent(cursor)
-            return getPage(cursor)
-          } else {
-            callback(err, allItems)
-          }
-        })
-      })
+      const { response, body } = await RecurlyWrapper.promises.apiRequest(opts)
+
+      const data = await RecurlyWrapper.promises._parseXml(body)
+
+      const items = data[resource]
+      allItems = allItems.concat(items)
+      logger.debug(`got another ${items.length}, total now ${allItems.length}`)
+      const match = response.headers.link?.match(/cursor=([0-9.]+%3A[0-9.]+)&/)
+      cursor = match && match[1]
+      if (cursor) {
+        cursor = decodeURIComponent(cursor)
+        return getPage(cursor)
+      } else {
+        return allItems
+      }
     }
 
-    getPage()
+    await getPage()
+
+    return allItems
   },
 
-  getAccount(accountId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `accounts/${accountId}`,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseAccountXml(body, callback)
-      }
-    )
+  async getAccount(accountId) {
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `accounts/${accountId}`,
+    })
+    return await RecurlyWrapper.promises._parseAccountXml(body)
   },
 
   updateAccountEmailAddress,
 
-  getAccountActiveCoupons(accountId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `accounts/${accountId}/redemptions`,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseRedemptionsXml(
-          body,
-          function (error, redemptions) {
-            if (error) {
-              return callback(error)
-            }
-            const activeRedemptions = redemptions.filter(
-              redemption => redemption.state === 'active'
-            )
-            const couponCodes = activeRedemptions.map(
-              redemption => redemption.coupon_code
-            )
-            Async.map(
-              couponCodes,
-              RecurlyWrapper.getCoupon,
-              function (error, coupons) {
-                if (error) {
-                  return callback(error)
-                }
-                return callback(null, coupons)
-              }
-            )
-          }
-        )
-      }
+  async getAccountActiveCoupons(accountId) {
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `accounts/${accountId}/redemptions`,
+    })
+
+    const redemptions = await RecurlyWrapper.promises._parseRedemptionsXml(body)
+
+    const activeRedemptions = redemptions.filter(
+      redemption => redemption.state === 'active'
+    )
+    const couponCodes = activeRedemptions.map(
+      redemption => redemption.coupon_code
+    )
+
+    return await Promise.all(
+      couponCodes.map(couponCode =>
+        RecurlyWrapper.promises.getCoupon(couponCode)
+      )
     )
   },
 
-  getCoupon(couponCode, callback) {
+  async getCoupon(couponCode) {
     const opts = { url: `coupons/${couponCode}` }
-    RecurlyWrapper.apiRequest(opts, (error, response, body) => {
-      if (error) {
-        return callback(error)
-      }
-      RecurlyWrapper._parseCouponXml(body, callback)
+    const { body } = await RecurlyWrapper.promises.apiRequest(opts)
+    return await RecurlyWrapper.promises._parseCouponXml(body)
+  },
+
+  async getBillingInfo(accountId) {
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `accounts/${accountId}/billing_info`,
+    })
+    return await RecurlyWrapper.promises._parseXml(body)
+  },
+
+  async getAccountPastDueInvoices(accountId) {
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `accounts/${accountId}/invoices?state=past_due`,
+    })
+    return await RecurlyWrapper.promises._parseInvoicesXml(body)
+  },
+
+  async attemptInvoiceCollection(invoiceId) {
+    return await RecurlyWrapper.promises.apiRequest({
+      url: `invoices/${invoiceId}/collect`,
+      method: 'put',
     })
   },
 
-  getBillingInfo(accountId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `accounts/${accountId}/billing_info`,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseXml(body, callback)
-      }
-    )
-  },
-
-  getAccountPastDueInvoices(accountId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `accounts/${accountId}/invoices?state=past_due`,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseInvoicesXml(body, callback)
-      }
-    )
-  },
-
-  attemptInvoiceCollection(invoiceId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `invoices/${invoiceId}/collect`,
-        method: 'put',
-      },
-      callback
-    )
-  },
-
-  updateSubscription(subscriptionId, options, callback) {
+  async updateSubscription(subscriptionId, options) {
     logger.debug(
       { subscriptionId, options },
       'telling recurly to update subscription'
@@ -722,33 +570,23 @@ const RecurlyWrapper = {
     try {
       requestBody = RecurlyWrapper._buildXml('subscription', data)
     } catch (error) {
-      return callback(
-        OError.tag(error, 'error building xml', { subscriptionId })
-      )
+      throw OError.tag(error, 'error building xml', { subscriptionId })
     }
 
-    RecurlyWrapper.apiRequest(
-      {
-        url: `subscriptions/${subscriptionId}`,
-        method: 'put',
-        body: requestBody,
-      },
-      (error, response, responseBody) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseSubscriptionXml(responseBody, callback)
-      }
-    )
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `subscriptions/${subscriptionId}`,
+      method: 'put',
+      body: requestBody,
+    })
+    return await RecurlyWrapper.promises._parseSubscriptionXml(body)
   },
 
-  createFixedAmmountCoupon(
+  async createFixedAmmountCoupon(
     couponCode,
     name,
     currencyCode,
     discountInCents,
-    planCode,
-    callback
+    planCode
   ) {
     const data = {
       coupon_code: couponCode,
@@ -765,45 +603,33 @@ const RecurlyWrapper = {
     try {
       requestBody = RecurlyWrapper._buildXml('coupon', data)
     } catch (error) {
-      return callback(
-        OError.tag(error, 'error building xml', {
-          couponCode,
-          name,
-        })
-      )
+      throw OError.tag(error, 'error building xml', {
+        couponCode,
+        name,
+      })
     }
 
     logger.debug({ couponCode, requestBody }, 'creating coupon')
-    RecurlyWrapper.apiRequest(
-      {
+    try {
+      await RecurlyWrapper.promises.apiRequest({
         url: 'coupons',
         method: 'post',
         body: requestBody,
-      },
-      (error, response, responseBody) => {
-        if (error) {
-          logger.warn({ err: error, couponCode }, 'error creating coupon')
-        }
-        callback(error)
-      }
-    )
+      })
+    } catch (error) {
+      logger.warn({ err: error, couponCode }, 'error creating coupon')
+      throw error
+    }
   },
 
-  lookupCoupon(couponCode, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `coupons/${couponCode}`,
-      },
-      (error, response, body) => {
-        if (error) {
-          return callback(error)
-        }
-        RecurlyWrapper._parseXml(body, callback)
-      }
-    )
+  async lookupCoupon(couponCode) {
+    const { body } = await RecurlyWrapper.promises.apiRequest({
+      url: `coupons/${couponCode}`,
+    })
+    return await RecurlyWrapper.promises._parseCouponXml(body)
   },
 
-  redeemCoupon(accountCode, couponCode, callback) {
+  async redeemCoupon(accountCode, couponCode) {
     const data = {
       account_code: accountCode,
       currency: 'USD',
@@ -812,37 +638,32 @@ const RecurlyWrapper = {
     try {
       requestBody = RecurlyWrapper._buildXml('redemption', data)
     } catch (error) {
-      return callback(
-        OError.tag(error, 'error building xml', {
-          accountCode,
-          couponCode,
-        })
-      )
+      throw OError.tag(error, 'error building xml', {
+        accountCode,
+        couponCode,
+      })
     }
 
     logger.debug(
       { accountCode, couponCode, requestBody },
       'redeeming coupon for user'
     )
-    RecurlyWrapper.apiRequest(
-      {
+    try {
+      await RecurlyWrapper.promises.apiRequest({
         url: `coupons/${couponCode}/redeem`,
         method: 'post',
         body: requestBody,
-      },
-      (error, response, responseBody) => {
-        if (error) {
-          logger.warn(
-            { err: error, accountCode, couponCode },
-            'error redeeming coupon'
-          )
-        }
-        callback(error)
-      }
-    )
+      })
+    } catch (error) {
+      logger.warn(
+        { err: error, accountCode, couponCode },
+        'error redeeming coupon'
+      )
+      throw error
+    }
   },
 
-  extendTrial(subscriptionId, daysUntilExpire, callback) {
+  async extendTrial(subscriptionId, daysUntilExpire) {
     if (daysUntilExpire == null) {
       daysUntilExpire = 7
     }
@@ -852,128 +673,121 @@ const RecurlyWrapper = {
       { subscriptionId, daysUntilExpire },
       'Exending Free trial for user'
     )
-    RecurlyWrapper.apiRequest(
-      {
+    try {
+      await RecurlyWrapper.promises.apiRequest({
         url: `/subscriptions/${subscriptionId}/postpone?next_bill_date=${nextRenewalDate}&bulk=false`,
         method: 'put',
-      },
-      (error, response, responseBody) => {
-        if (error) {
-          logger.warn(
-            { err: error, subscriptionId, daysUntilExpire },
-            'error exending trial'
-          )
-        }
-        callback(error)
-      }
-    )
+      })
+    } catch (error) {
+      logger.warn(
+        { err: error, subscriptionId, daysUntilExpire },
+        'error exending trial'
+      )
+      throw error
+    }
   },
 
-  listAccountActiveSubscriptions(accountId, callback) {
-    RecurlyWrapper.apiRequest(
-      {
-        url: `accounts/${accountId}/subscriptions`,
-        qs: {
-          state: 'active',
+  async listAccountActiveSubscriptions(accountId) {
+    const { response, body } = await RecurlyWrapper.promises.apiRequest({
+      url: `accounts/${accountId}/subscriptions`,
+      qs: {
+        state: 'active',
+      },
+      expect404: true,
+    })
+    if (response.statusCode === 404) {
+      return []
+    } else {
+      return await RecurlyWrapper.promises._parseSubscriptionsXml(body)
+    }
+  },
+
+  async _handle422Response(body) {
+    const data = await RecurlyWrapper.promises._parseErrorsXml(body)
+    let errorData = {}
+    if (data.transaction_error) {
+      errorData = {
+        message: data.transaction_error.merchant_message,
+        info: {
+          category: data.transaction_error.error_category,
+          gatewayCode: data.transaction_error.gateway_error_code,
+          public: {
+            code: data.transaction_error.error_code,
+            message: data.transaction_error.customer_message,
+          },
         },
-        expect404: true,
-      },
-      function (error, response, body) {
-        if (error) {
-          return callback(error)
-        }
-        if (response.statusCode === 404) {
-          callback(null, [])
-        } else {
-          RecurlyWrapper._parseSubscriptionsXml(body, callback)
-        }
       }
+      if (data.transaction_error.three_d_secure_action_token_id) {
+        errorData.info.public.threeDSecureActionTokenId =
+          data.transaction_error.three_d_secure_action_token_id
+      }
+    } else if (data.error && data.error._) {
+      // fallback for errors that don't have a `transaction_error` field, but
+      // instead a `error` field with a message (e.g. VATMOSS errors)
+      errorData = {
+        info: {
+          public: {
+            message: data.error._,
+          },
+        },
+      }
+    }
+    throw new SubscriptionErrors.RecurlyTransactionError(errorData)
+  },
+
+  async _parseSubscriptionsXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(
+      xml,
+      'subscriptions'
+    )
+  },
+  async _parseSubscriptionXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(
+      xml,
+      'subscription'
+    )
+  },
+  async _parseAccountXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(
+      xml,
+      'account'
+    )
+  },
+  async _parseBillingInfoXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(
+      xml,
+      'billing_info'
+    )
+  },
+  async _parseRedemptionsXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(
+      xml,
+      'redemptions'
+    )
+  },
+  async _parseCouponXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(xml, 'coupon')
+  },
+  async _parseErrorsXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(xml, 'errors')
+  },
+  async _parseInvoicesXml(xml) {
+    return await RecurlyWrapper.promises._parseXmlAndGetAttribute(
+      xml,
+      'invoices'
     )
   },
 
-  _handle422Response(body, callback) {
-    RecurlyWrapper._parseErrorsXml(body, (error, data) => {
-      if (error) {
-        return callback(error)
-      }
-
-      let errorData = {}
-      if (data.transaction_error) {
-        errorData = {
-          message: data.transaction_error.merchant_message,
-          info: {
-            category: data.transaction_error.error_category,
-            gatewayCode: data.transaction_error.gateway_error_code,
-            public: {
-              code: data.transaction_error.error_code,
-              message: data.transaction_error.customer_message,
-            },
-          },
-        }
-        if (data.transaction_error.three_d_secure_action_token_id) {
-          errorData.info.public.threeDSecureActionTokenId =
-            data.transaction_error.three_d_secure_action_token_id
-        }
-      } else if (data.error && data.error._) {
-        // fallback for errors that don't have a `transaction_error` field, but
-        // instead a `error` field with a message (e.g. VATMOSS errors)
-        errorData = {
-          info: {
-            public: {
-              message: data.error._,
-            },
-          },
-        }
-      }
-      callback(new SubscriptionErrors.RecurlyTransactionError(errorData))
-    })
-  },
-  _parseSubscriptionsXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'subscriptions', callback)
+  async _parseXmlAndGetAttribute(xml, attribute) {
+    const data = await RecurlyWrapper.promises._parseXml(xml)
+    if (data && data[attribute] != null) {
+      return data[attribute]
+    } else {
+      throw new Error("I don't understand the response from Recurly")
+    }
   },
 
-  _parseSubscriptionXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'subscription', callback)
-  },
-
-  _parseAccountXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'account', callback)
-  },
-
-  _parseBillingInfoXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'billing_info', callback)
-  },
-
-  _parseRedemptionsXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'redemptions', callback)
-  },
-
-  _parseCouponXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'coupon', callback)
-  },
-
-  _parseErrorsXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'errors', callback)
-  },
-
-  _parseInvoicesXml(xml, callback) {
-    RecurlyWrapper._parseXmlAndGetAttribute(xml, 'invoices', callback)
-  },
-
-  _parseXmlAndGetAttribute(xml, attribute, callback) {
-    RecurlyWrapper._parseXml(xml, function (error, data) {
-      if (error) {
-        return callback(error)
-      }
-      if (data && data[attribute] != null) {
-        callback(null, data[attribute])
-      } else {
-        callback(new Error("I don't understand the response from Recurly"))
-      }
-    })
-  },
-
-  _parseXml(xml, callback) {
+  _parseXml(xml) {
     function convertDataTypes(data) {
       let key, value
       if (data && data.$) {
@@ -1017,43 +831,54 @@ const RecurlyWrapper = {
       explicitArray: false,
       emptyTag: '',
     })
-    parser.parseString(xml, function (error, data) {
-      if (error) {
-        return callback(error)
-      }
-      const result = convertDataTypes(data)
-      callback(null, result)
-    })
-  },
-
-  _buildXml(rootName, data) {
-    const options = {
-      headless: true,
-      renderOpts: {
-        pretty: true,
-        indent: '\t',
-      },
-      rootName,
-    }
-    const builder = new xml2js.Builder(options)
-    return builder.buildObject(data)
+    return new Promise((resolve, reject) =>
+      parser.parseString(xml, function (error, data) {
+        if (error) {
+          return reject(error)
+        }
+        const result = convertDataTypes(data)
+        resolve(result)
+      })
+    )
   },
 }
 
+function _buildXml(rootName, data) {
+  const options = {
+    headless: true,
+    renderOpts: {
+      pretty: true,
+      indent: '\t',
+    },
+    rootName,
+  }
+  const builder = new xml2js.Builder(options)
+  return builder.buildObject(data)
+}
+
+const RecurlyWrapper = {
+  apiUrl: Settings.apis.recurly.url || 'https://api.recurly.com/v2',
+  _buildXml,
+  _parseXml: callbackify(promises._parseXml),
+  // This one needs to be callbackified manually because we need to transform {response, body} to (err, response, body)
+  attemptInvoiceCollection: (invoiceId, callback) => {
+    promises
+      .attemptInvoiceCollection(invoiceId)
+      .then(({ response, body }) => callback(null, response, body))
+      .catch(callback)
+  },
+  createFixedAmmountCoupon: callbackify(promises.createFixedAmmountCoupon),
+  getAccountActiveCoupons: callbackify(promises.getAccountActiveCoupons),
+  getBillingInfo: callbackify(promises.getBillingInfo),
+  getPaginatedEndpoint: callbackify(promises.getPaginatedEndpoint),
+  getSubscription: callbackify(promises.getSubscription),
+  getSubscriptions: callbackify(promises.getSubscriptions),
+  updateAccountEmailAddress: callbackify(promises.updateAccountEmailAddress),
+}
+
 RecurlyWrapper.promises = {
-  attemptInvoiceCollection: promisify(RecurlyWrapper.attemptInvoiceCollection),
-  createSubscription: promisify(RecurlyWrapper.createSubscription),
-  extendTrial: promisify(RecurlyWrapper.extendTrial),
-  getBillingInfo: promisify(RecurlyWrapper.getBillingInfo),
-  getAccountPastDueInvoices: promisify(
-    RecurlyWrapper.getAccountPastDueInvoices
-  ),
-  getSubscription: promisify(RecurlyWrapper.getSubscription),
-  listAccountActiveSubscriptions: promisify(
-    RecurlyWrapper.listAccountActiveSubscriptions
-  ),
-  redeemCoupon: promisify(RecurlyWrapper.redeemCoupon),
-  updateAccountEmailAddress: promisify(updateAccountEmailAddress),
+  ...promises,
+  updateAccountEmailAddress,
 }
 
 module.exports = RecurlyWrapper
