@@ -17,7 +17,8 @@ function UniversityName({ name, onClick }: UniversityNameProps) {
         <OLButton
           variant="link"
           onClick={onClick}
-          bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
+          className="btn-inline-link"
+          bs3Props={{ bsStyle: null }}
         >
           {t('change')}
         </OLButton>

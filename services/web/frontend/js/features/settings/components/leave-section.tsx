@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import LeaveModal from './leave/modal'
 import getMeta from '../../../utils/meta'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function LeaveSection() {
   const { t } = useTranslation()
@@ -31,10 +30,7 @@ function LeaveSection() {
     <>
       {t('need_to_leave')}{' '}
       <OLButton
-        className={bsVersion({
-          bs3: 'btn btn-inline-link btn-danger',
-          bs5: 'btn-link',
-        })}
+        className="btn-inline-link"
         variant="danger"
         onClick={handleOpen}
       >

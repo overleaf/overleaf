@@ -30,3 +30,11 @@ hr {
 .horizontal-divider {
   border-top: 1px solid var(--border-divider);
 }
+
+.hidden {
+  @extend .d-none;
+}
+
+.hidden-print {
+  @extend .d-print-none;
+}

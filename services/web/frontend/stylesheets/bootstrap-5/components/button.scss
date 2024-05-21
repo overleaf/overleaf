@@ -98,7 +98,6 @@
   cursor: pointer;
   border-radius: 0;
   text-decoration: underline;
-  padding: 0;
   font-size: inherit;
   vertical-align: inherit;
 
@@ -128,6 +127,13 @@
       outline: -webkit-focus-ring-color auto 1px;
     }
   }
+}
+
+.btn-inline-link {
+  @extend .btn-link;
+  font-size: inherit;
+  padding: 0;
+  vertical-align: inherit;
 }
 
 .button-loading {

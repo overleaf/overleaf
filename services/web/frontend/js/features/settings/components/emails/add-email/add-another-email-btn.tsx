@@ -8,8 +8,9 @@ function AddAnotherEmailBtn({ onClick, ...props }: OLButtonProps) {
     <OLButton
       variant="link"
       onClick={onClick}
+      className="btn-inline-link"
+      bs3Props={{ bsStyle: null }}
       {...props}
-      bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
     >
       {t('add_another_email')}
     </OLButton>

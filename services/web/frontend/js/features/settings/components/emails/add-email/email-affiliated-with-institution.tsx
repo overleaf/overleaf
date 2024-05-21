@@ -10,7 +10,8 @@ function EmailAffiliatedWithInstitution({ onClick, ...props }: OLButtonProps) {
       <OLButton
         variant="link"
         onClick={onClick}
-        bs3Props={{ bsStyle: null, className: 'btn-inline-link' }}
+        className="btn-inline-link"
+        bs3Props={{ bsStyle: null }}
         {...props}
       >
         {t('let_us_know')}

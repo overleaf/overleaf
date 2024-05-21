@@ -149,8 +149,8 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                         variant="link"
                         disabled={state.isLoading}
                         onClick={handleRequestReconfirmation}
+                        className="btn-inline-link"
                         bs3Props={{
-                          className: 'btn-inline-link',
                           bsStyle: null,
                         }}
                       >
@@ -208,7 +208,8 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
                       variant="link"
                       disabled={state.isLoading}
                       onClick={handleRequestReconfirmation}
-                      bs3Props={{ className: 'btn-inline-link', bsStyle: null }}
+                      className="btn-inline-link"
+                      bs3Props={{ bsStyle: null }}
                     >
                       {t('resend_confirmation_email')}
                     </OLButton>
