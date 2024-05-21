@@ -1,11 +1,15 @@
 import { Minimatch } from 'minimatch'
 
-const fileIgnoreMatcher = new Minimatch(
-  window.ExposedSettings.fileIgnorePattern,
-  { nocase: true, dot: true }
-)
+let fileIgnoreMatcher: Minimatch
 
 export const isAcceptableFile = (name?: string, relativePath?: string) => {
+  if (!fileIgnoreMatcher) {
+    fileIgnoreMatcher = new Minimatch(
+      window.ExposedSettings.fileIgnorePattern,
+      { nocase: true, dot: true }
+    )
+  }
+
   if (!name) {
     // the file must have a name, of course
     return false
