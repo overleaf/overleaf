@@ -865,7 +865,7 @@ const RecurlyWrapper = {
     promises
       .attemptInvoiceCollection(invoiceId)
       .then(({ response, body }) => callback(null, response, body))
-      .catch(callback)
+      .catch(err => callback(err))
   },
   createFixedAmmountCoupon: callbackify(promises.createFixedAmmountCoupon),
   getAccountActiveCoupons: callbackify(promises.getAccountActiveCoupons),
