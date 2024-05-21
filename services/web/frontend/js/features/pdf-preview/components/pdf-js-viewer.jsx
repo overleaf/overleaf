@@ -402,6 +402,36 @@ function PdfJsViewer({ url, pdfFile }) {
     [initialised, setZoom]
   )
 
+  /**
+   * Work around an issue in Chrome 125 that causes canvas elements to become blank
+   * when a tab is inactive, by making the canvas redraw when the tab becomes active.
+   * https://github.com/mozilla/pdf.js/issues/18100
+   * https://issues.chromium.org/issues/339654395
+   * This can be removed once Chrome 127 is widely available.
+   */
+  useEffect(() => {
+    const listener = () => {
+      if (document.visibilityState !== 'hidden' && pdfJsWrapper) {
+        window.setTimeout(() => {
+          for (const canvas of pdfJsWrapper.container.querySelectorAll(
+            'canvas'
+          )) {
+            canvas.style.display = 'none'
+            window.setTimeout(() => {
+              canvas.style.display = 'block'
+            }, 1)
+          }
+        }, 100)
+      }
+    }
+
+    document.addEventListener('visibilitychange', listener)
+
+    return () => {
+      document.removeEventListener('visibilitychange', listener)
+    }
+  }, [pdfJsWrapper])
+
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
   /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
