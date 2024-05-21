@@ -40,7 +40,6 @@ function _handleUser(userId, callback) {
       UserSessionsManager.removeSessionsFromRedis(
         { _id: userId },
         null,
-        null,
         error => {
           if (error) {
             console.log(`Failed to clear sessions for ${userId}`, error)

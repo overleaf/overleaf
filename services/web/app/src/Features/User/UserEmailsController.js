@@ -512,8 +512,7 @@ const UserEmailsController = {
         const user = SessionManager.getSessionUser(req.session)
         UserSessionsManager.removeSessionsFromRedis(
           user,
-          req,
-          { stayLoggedIn: true },
+          req.sessionID, // remove all sessions except the current session
           err => {
             if (err)
               logger.warn(

@@ -66,8 +66,7 @@ async function settingsPage(req, res) {
     // The user has just deleted their account.
     return UserSessionsManager.removeSessionsFromRedis(
       { _id: userId },
-      req,
-      { stayLoggedIn: false },
+      null,
       () => res.redirect('/')
     )
   }

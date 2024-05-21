@@ -344,15 +344,13 @@ describe('UserSessionsManager', function () {
     beforeEach(function () {
       this.sessionKeys = ['sess:one', 'sess:two']
       this.currentSessionID = undefined
-      this.stayLoggedIn = false
       this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
       this.rclient.del = sinon.stub().callsArgWith(1, null)
       this.rclient.srem = sinon.stub().callsArgWith(2, null)
       return (this.call = callback => {
         return this.UserSessionsManager.removeSessionsFromRedis(
           this.user,
-          { sessionID: this.currentSessionID },
-          { stayLoggedIn: this.stayLoggedIn },
+          this.currentSessionID,
           callback
         )
       })
@@ -390,14 +388,12 @@ describe('UserSessionsManager', function () {
       beforeEach(function () {
         this.sessionKeys = ['sess:one', 'sess:two', 'sess:three', 'sess:four']
         this.currentSessionID = 'two'
-        this.stayLoggedIn = true
         this.rclient.smembers.callsArgWith(1, null, this.sessionKeys)
         this.rclient.del = sinon.stub().callsArgWith(1, null)
         return (this.call = callback => {
           return this.UserSessionsManager.removeSessionsFromRedis(
             this.user,
-            { sessionID: this.currentSessionID },
-            { stayLoggedIn: this.stayLoggedIn },
+            this.currentSessionID,
             callback
           )
         })
@@ -463,8 +459,7 @@ describe('UserSessionsManager', function () {
         return (this.call = callback => {
           return this.UserSessionsManager.removeSessionsFromRedis(
             null,
-            { sessionID: this.currentSessionID },
-            { stayLoggedIn: this.stayLoggedIn },
+            this.currentSessionID,
             callback
           )
         })

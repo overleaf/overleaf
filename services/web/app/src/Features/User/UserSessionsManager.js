@@ -128,12 +128,10 @@ const UserSessionsManager = {
 
   /**
    * @param {{_id: string}} user
-   * @param {(import('express').Request & {sessionID?: string}) | undefined} req - the request object. Can be omitted if stayLoggedIn is false.
-   * @param {{stayLoggedIn: boolean}?} options
+   * @param {string | null | undefined} retainSessionID - the session ID to exclude from deletion
    * @param {(err: Error | null, data?: unknown) => void} callback
    */
-  removeSessionsFromRedis(user, req, options, callback) {
-    const stayLoggedIn = options?.stayLoggedIn ?? false
+  removeSessionsFromRedis(user, retainSessionID, callback) {
     if (!user) {
       return callback(null)
     }
@@ -146,13 +144,12 @@ const UserSessionsManager = {
         })
         return callback(err)
       }
-      const keysToDelete =
-        stayLoggedIn && req?.sessionID
-          ? _.without(
-              sessionKeys,
-              UserSessionsManager._sessionKey(req.sessionID)
-            )
-          : sessionKeys
+      const keysToDelete = retainSessionID
+        ? _.without(
+            sessionKeys,
+            UserSessionsManager._sessionKey(retainSessionID)
+          )
+        : sessionKeys
       if (keysToDelete.length === 0) {
         logger.debug(
           { userId: user._id },
@@ -248,8 +245,11 @@ const UserSessionsManager = {
 
 UserSessionsManager.promises = {
   getAllUserSessions: promisify(UserSessionsManager.getAllUserSessions),
-  removeSessionsFromRedis: (user, req = null, options = null) =>
-    promisify(UserSessionsManager.removeSessionsFromRedis)(user, req, options),
+  removeSessionsFromRedis: (user, retainSessionID = null) =>
+    promisify(UserSessionsManager.removeSessionsFromRedis)(
+      user,
+      retainSessionID
+    ),
   untrackSession: promisify(UserSessionsManager.untrackSession),
 }
 

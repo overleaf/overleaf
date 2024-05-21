@@ -566,7 +566,7 @@ describe('UserEmailsController', function () {
       this.res.callback = () => {
         expect(
           this.UserSessionsManager.removeSessionsFromRedis
-        ).to.have.been.calledWith(this.user, this.req)
+        ).to.have.been.calledWith(this.user, this.req.sessionID)
         done()
       }
 

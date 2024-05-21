@@ -130,9 +130,10 @@ async function changePassword(req, res, next) {
   // no need to wait, errors are logged and not passed back
   _sendSecurityAlertPasswordChanged(user)
 
-  await UserSessionsManager.promises.removeSessionsFromRedis(user, req, {
-    stayLoggedIn: true,
-  })
+  await UserSessionsManager.promises.removeSessionsFromRedis(
+    user,
+    req.sessionID // remove all sessions except the current session
+  )
 
   await OneTimeTokenHandler.promises.expireAllTokensForUser(
     userId.toString(),
@@ -162,9 +163,10 @@ async function clearSessions(req, res, next) {
     req.ip,
     { sessions }
   )
-  await UserSessionsManager.promises.removeSessionsFromRedis(user, req, {
-    stayLoggedIn: true,
-  })
+  await UserSessionsManager.promises.removeSessionsFromRedis(
+    user,
+    req.sessionID // remove all sessions except the current session
+  )
 
   await _sendSecurityAlertClearedSessions(user)
 
