@@ -26,10 +26,24 @@
 
 .modal-content {
   @include shadow-lg();
-}
+  border-radius: var(--border-radius-base);
 
-.modal-header {
-  .btn-close {
-    margin: var(--spacing-00);
+  .modal-header {
+    .modal-title {
+      @include heading-sm;
+
+      line-height: 35px;
+    }
+    .btn-close {
+      margin-right: 0;
+    }
+  }
+
+  .modal-footer {
+    padding: var(--spacing-06);
+    gap: var(--spacing-04);
+    > * {
+      margin: 0;
+    }
   }
 }
