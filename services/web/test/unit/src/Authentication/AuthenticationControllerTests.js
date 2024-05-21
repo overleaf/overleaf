@@ -88,7 +88,7 @@ describe('AuthenticationController', function () {
           setupLoginData: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          recordEventForUser: sinon.stub(),
+          recordEventForUserInBackground: sinon.stub(),
           identifyUser: sinon.stub(),
           getIdsFromSession: sinon.stub().returns({ userId: this.user._id }),
         }),
@@ -1476,7 +1476,7 @@ describe('AuthenticationController', function () {
 
       it('should track the login event', function () {
         sinon.assert.calledWith(
-          this.AnalyticsManager.recordEventForUser,
+          this.AnalyticsManager.recordEventForUserInBackground,
           this.user._id,
           'user-logged-in'
         )

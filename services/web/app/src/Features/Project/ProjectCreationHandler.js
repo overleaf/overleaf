@@ -55,13 +55,13 @@ async function createBlankProject(
   Object.assign(segmentation, attributes.segmentation)
   segmentation.projectId = project._id
   if (isImport) {
-    AnalyticsManager.recordEventForUser(
+    AnalyticsManager.recordEventForUserInBackground(
       ownerId,
       'project-imported',
       segmentation
     )
   } else {
-    AnalyticsManager.recordEventForUser(
+    AnalyticsManager.recordEventForUserInBackground(
       ownerId,
       'project-created',
       segmentation
@@ -72,7 +72,7 @@ async function createBlankProject(
 
 async function createProjectFromSnippet(ownerId, projectName, docLines) {
   const project = await _createBlankProject(ownerId, projectName)
-  AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+  AnalyticsManager.recordEventForUserInBackground(ownerId, 'project-created', {
     projectId: project._id,
   })
   await _createRootDoc(project, ownerId, docLines)
@@ -85,7 +85,7 @@ async function createBasicProject(ownerId, projectName) {
   const docLines = await _buildTemplate('mainbasic.tex', ownerId, projectName)
   await _createRootDoc(project, ownerId, docLines)
 
-  AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+  AnalyticsManager.recordEventForUserInBackground(ownerId, 'project-created', {
     projectId: project._id,
   })
 
@@ -97,7 +97,7 @@ async function createExampleProject(ownerId, projectName) {
 
   await _addExampleProjectFiles(ownerId, projectName, project)
 
-  AnalyticsManager.recordEventForUser(ownerId, 'project-created', {
+  AnalyticsManager.recordEventForUserInBackground(ownerId, 'project-created', {
     projectId: project._id,
   })
 

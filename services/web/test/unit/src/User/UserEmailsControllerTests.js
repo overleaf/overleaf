@@ -57,7 +57,7 @@ describe('UserEmailsController', function () {
     }
     this.HttpErrorHandler = { conflict: sinon.stub() }
     this.AnalyticsManager = {
-      recordEventForUser: sinon.stub(),
+      recordEventForUserInBackground: sinon.stub(),
     }
     this.UserAuditLogHandler = {
       addEntry: sinon.stub().yields(),

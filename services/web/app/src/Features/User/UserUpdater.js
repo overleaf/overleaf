@@ -75,7 +75,10 @@ async function addEmailAddress(userId, newEmail, affiliationOptions, auditLog) {
 
   await UserGetter.promises.ensureUniqueEmailAddress(newEmail)
 
-  AnalyticsManager.recordEventForUser(userId, 'secondary-email-added')
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'secondary-email-added'
+  )
 
   await UserAuditLogHandler.promises.addEntry(
     userId,
@@ -201,7 +204,10 @@ async function setDefaultEmailAddress(
     throw new Error('email update error')
   }
 
-  AnalyticsManager.recordEventForUser(userId, 'primary-email-address-updated')
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'primary-email-address-updated'
+  )
 
   if (sendSecurityAlert) {
     // no need to wait, errors are logged and not passed back

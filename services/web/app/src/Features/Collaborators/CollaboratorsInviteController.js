@@ -348,7 +348,7 @@ const CollaboratorsInviteController = {
       'project:membership:changed',
       { invites: true, members: true }
     )
-    AnalyticsManager.recordEventForUser(
+    AnalyticsManager.recordEventForUserInBackground(
       currentUser._id,
       'project-invite-accept',
       {

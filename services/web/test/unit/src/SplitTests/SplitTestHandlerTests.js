@@ -48,7 +48,7 @@ describe('SplitTestHandler', function () {
     }
     this.AnalyticsManager = {
       getIdsFromSession: sinon.stub(),
-      setUserPropertyForAnalyticsId: sinon.stub(),
+      setUserPropertyForAnalyticsId: sinon.stub().resolves(),
     }
     this.LocalsHelper = {
       setSplitTestVariant: sinon.stub(),

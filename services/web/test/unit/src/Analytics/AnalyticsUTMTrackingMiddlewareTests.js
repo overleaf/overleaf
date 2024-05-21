@@ -29,7 +29,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
       requires: {
         './AnalyticsManager': (this.AnalyticsManager = {
           recordEventForSession: sinon.stub().resolves(),
-          setUserPropertyForSession: sinon.stub().resolves(),
+          setUserPropertyForSessionInBackground: sinon.stub(),
         }),
         '@overleaf/settings': {
           siteUrl: 'https://www.overleaf.com',
@@ -56,7 +56,9 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
 
     it('no event or user property is recorded', function () {
       sinon.assert.notCalled(this.AnalyticsManager.recordEventForSession)
-      sinon.assert.notCalled(this.AnalyticsManager.setUserPropertyForSession)
+      sinon.assert.notCalled(
+        this.AnalyticsManager.setUserPropertyForSessionInBackground
+      )
     })
   })
 
@@ -101,7 +103,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
 
     it('utm-tags user property is set for session', function () {
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForSession,
+        this.AnalyticsManager.setUserPropertyForSessionInBackground,
         this.req.session,
         'utm-tags',
         'Organic;Facebook;Some Campaign;foo-bar'
@@ -146,7 +148,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
 
     it('utm-tags user property is set for session', function () {
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForSession,
+        this.AnalyticsManager.setUserPropertyForSessionInBackground,
         this.req.session,
         'utm-tags',
         'N/A;Facebook;Some Campaign;foo'
@@ -190,7 +192,7 @@ describe('AnalyticsUTMTrackingMiddleware', function () {
 
     it('utm-tags user property is set for session', function () {
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForSession,
+        this.AnalyticsManager.setUserPropertyForSessionInBackground,
         this.req.session,
         'utm-tags',
         'N/A;Facebook;Some Campaign;N/A'

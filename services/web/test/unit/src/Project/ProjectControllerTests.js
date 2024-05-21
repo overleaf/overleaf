@@ -189,7 +189,9 @@ describe('ProjectController', function () {
           this.BrandVariationsHandler,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../../models/Project': {},
-        '../Analytics/AnalyticsManager': { recordEventForUser: () => {} },
+        '../Analytics/AnalyticsManager': {
+          recordEventForUserInBackground: () => {},
+        },
         '../Subscription/SubscriptionViewModelBuilder':
           this.SubscriptionViewModelBuilder,
         '../Spelling/SpellingHandler': {

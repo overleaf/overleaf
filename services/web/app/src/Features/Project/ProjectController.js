@@ -435,12 +435,16 @@ const ProjectController = {
             SplitTestSessionHandler.sessionMaintenance(req, null, () => {})
             cb(null, defaultSettingsForAnonymousUser(userId))
           } else {
+            // Ignore spurious floating promises warning until we promisify
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             User.updateOne(
               { _id: new ObjectId(userId) },
               { $set: { lastActive: new Date() } },
               {},
               () => {}
             )
+            // Ignore spurious floating promises warning until we promisify
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
             User.findById(
               userId,
               'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials writefull',
@@ -693,9 +697,13 @@ const ProjectController = {
             metrics.inc(metricName)
 
             if (userId) {
-              AnalyticsManager.recordEventForUser(userId, 'project-opened', {
-                projectId: project._id,
-              })
+              AnalyticsManager.recordEventForUserInBackground(
+                userId,
+                'project-opened',
+                {
+                  projectId: project._id,
+                }
+              )
             }
 
             // should not be used in place of split tests query param overrides (?my-split-test-name=my-variant)

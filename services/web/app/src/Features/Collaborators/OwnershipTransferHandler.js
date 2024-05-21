@@ -38,7 +38,7 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
   }
 
   // Track the change of ownership in BigQuery.
-  AnalyticsManager.recordEventForUser(
+  AnalyticsManager.recordEventForUserInBackground(
     previousOwnerId,
     'project-ownership-transfer',
     { projectId, newOwnerId }

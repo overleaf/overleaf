@@ -314,7 +314,19 @@ async function _getAssignment(
         if (sync === true) {
           await _recordAssignment(assignmentData)
         } else {
-          _recordAssignment(assignmentData)
+          _recordAssignment(assignmentData).catch(err => {
+            logger.warn(
+              {
+                err,
+                userId,
+                splitTestName,
+                phase,
+                versionNumber,
+                variantName: selectedVariantName,
+              },
+              'failed to record split test assignment'
+            )
+          })
         }
       }
       // otherwise this is an anonymous user, we store assignments in session to persist them on registration
@@ -329,11 +341,23 @@ async function _getAssignment(
         })
       }
 
+      const effectiveAnalyticsId = user?.analyticsId || analyticsId || userId
       AnalyticsManager.setUserPropertyForAnalyticsId(
-        user?.analyticsId || analyticsId || userId,
+        effectiveAnalyticsId,
         `split-test-${splitTestName}-${versionNumber}`,
         selectedVariantName
-      )
+      ).catch(err => {
+        logger.warn(
+          {
+            err,
+            analyticsId: effectiveAnalyticsId,
+            splitTest: splitTestName,
+            versionNumber,
+            variant: selectedVariantName,
+          },
+          'failed to set user property for analytics id'
+        )
+      })
     }
     return _makeAssignment(splitTest, selectedVariantName, currentVersion)
   }

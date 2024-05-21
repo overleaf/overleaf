@@ -154,7 +154,7 @@ const TokenAccessHandler = {
   async addReadOnlyUserToProject(userId, projectId) {
     userId = new ObjectId(userId.toString())
     projectId = new ObjectId(projectId.toString())
-    Analytics.recordEventForUser(userId, 'project-joined', {
+    Analytics.recordEventForUserInBackground(userId, 'project-joined', {
       mode: 'read-only',
     })
 
@@ -171,7 +171,7 @@ const TokenAccessHandler = {
   async addReadAndWriteUserToProject(userId, projectId) {
     userId = new ObjectId(userId.toString())
     projectId = new ObjectId(projectId.toString())
-    Analytics.recordEventForUser(userId, 'project-joined', {
+    Analytics.recordEventForUserInBackground(userId, 'project-joined', {
       mode: 'read-write',
     })
 

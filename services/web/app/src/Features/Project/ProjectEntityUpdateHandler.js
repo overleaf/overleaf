@@ -245,6 +245,8 @@ const ProjectEntityUpdateHandler = {
           return callback(err)
         }
         if (ProjectEntityUpdateHandler.isPathValidForRootDoc(docPath)) {
+          // Ignore spurious floating promises warning until we promisify
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           Project.updateOne(
             { _id: projectId },
             { rootDoc_id: newRootDocID },
@@ -264,6 +266,8 @@ const ProjectEntityUpdateHandler = {
 
   unsetRootDoc(projectId, callback) {
     logger.debug({ projectId }, 'removing root doc')
+    // Ignore spurious floating promises warning until we promisify
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     Project.updateOne(
       { _id: projectId },
       { $unset: { rootDoc_id: true } },

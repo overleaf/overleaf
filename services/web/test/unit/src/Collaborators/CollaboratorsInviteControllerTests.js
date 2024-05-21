@@ -33,7 +33,7 @@ describe('CollaboratorsInviteController', function () {
       getSessionUser: sinon.stub().returns(this.currentUser),
     }
 
-    this.AnalyticsManger = { recordEventForUser: sinon.stub() }
+    this.AnalyticsManger = { recordEventForUserInBackground: sinon.stub() }
 
     this.rateLimiter = {
       consume: sinon.stub().resolves(),

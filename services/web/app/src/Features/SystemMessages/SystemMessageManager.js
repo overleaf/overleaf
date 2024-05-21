@@ -3,6 +3,7 @@ const {
   addRequiredCleanupHandlerBeforeDrainingConnections,
 } = require('../../infrastructure/GracefulShutdown')
 const { callbackifyAll } = require('@overleaf/promise-utils')
+const logger = require('@overleaf/logger')
 
 const SystemMessageManager = {
   getMessages() {
@@ -22,9 +23,14 @@ const SystemMessageManager = {
     await message.save()
   },
 
-  async refreshCache() {
-    const messages = await this.getMessagesFromDB()
-    this._cachedMessages = messages
+  refreshCache() {
+    this.getMessagesFromDB()
+      .then(messages => {
+        this._cachedMessages = messages
+      })
+      .catch(err => {
+        logger.warn({ err }, 'failed to refresh system messages cache')
+      })
   },
 }
 

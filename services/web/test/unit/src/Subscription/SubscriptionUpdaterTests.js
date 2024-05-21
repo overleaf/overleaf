@@ -146,8 +146,8 @@ describe('SubscriptionUpdater', function () {
     }
 
     this.AnalyticsManager = {
-      recordEventForUser: sinon.stub().resolves(),
-      setUserPropertyForUser: sinon.stub(),
+      recordEventForUserInBackground: sinon.stub().resolves(),
+      setUserPropertyForUserInBackground: sinon.stub(),
     }
 
     this.Features = {
@@ -448,7 +448,7 @@ describe('SubscriptionUpdater', function () {
         .calledWith(searchOps, insertOperation)
         .should.equal(true)
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForUser,
+        this.AnalyticsManager.recordEventForUserInBackground,
         this.otherUserId,
         'group-subscription-joined',
         {
@@ -477,7 +477,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserPropertyForUserInBackground,
         this.otherUserId,
         'group-subscription-plan-code',
         'group_subscription'
@@ -493,7 +493,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserPropertyForUserInBackground,
         this.otherUserId,
         'group-subscription-plan-code',
         'better_group_subscription'
@@ -509,7 +509,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserPropertyForUserInBackground,
         this.otherUserId,
         'group-subscription-plan-code',
         'better_group_subscription'
@@ -567,7 +567,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForUser,
+        this.AnalyticsManager.recordEventForUserInBackground,
         this.otherUserId,
         'group-subscription-left',
         {
@@ -583,7 +583,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserPropertyForUserInBackground,
         this.otherUserId,
         'group-subscription-plan-code',
         null
@@ -635,7 +635,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.setUserPropertyForUser,
+        this.AnalyticsManager.setUserPropertyForUserInBackground,
         this.otherUserId,
         'group-subscription-plan-code',
         null
@@ -682,7 +682,7 @@ describe('SubscriptionUpdater', function () {
         this.otherUserId
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForUser,
+        this.AnalyticsManager.recordEventForUserInBackground,
         this.otherUserId,
         'group-subscription-left',
         {
@@ -691,7 +691,7 @@ describe('SubscriptionUpdater', function () {
         }
       )
       sinon.assert.calledWith(
-        this.AnalyticsManager.recordEventForUser,
+        this.AnalyticsManager.recordEventForUserInBackground,
         this.otherUserId,
         'group-subscription-left',
         {

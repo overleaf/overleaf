@@ -27,7 +27,7 @@ function recordUTMTags() {
         };${utmValues.utm_campaign || 'N/A'};${
           utmValues.utm_content || utmValues.utm_term || 'N/A'
         }`
-        AnalyticsManager.setUserPropertyForSession(
+        AnalyticsManager.setUserPropertyForSessionInBackground(
           req.session,
           'utm-tags',
           propertyValue

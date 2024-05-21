@@ -158,7 +158,7 @@ const CollaboratorsInviteHandler = {
   },
 
   async acceptInvite(invite, projectId, user) {
-    CollaboratorsHandler.promises.addUserIdToProject(
+    await CollaboratorsHandler.promises.addUserIdToProject(
       projectId,
       invite.sendingUserId,
       user._id,

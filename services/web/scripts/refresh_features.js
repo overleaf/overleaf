@@ -81,7 +81,7 @@ const checkAndUpdateUser = (user, callback) =>
     }
 
     const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(freshFeatures)
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserPropertyForUserInBackground(
       user._id,
       'feature-set',
       matchedFeatureSet

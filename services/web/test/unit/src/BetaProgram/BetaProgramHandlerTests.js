@@ -28,7 +28,7 @@ describe('BetaProgramHandler', function () {
           },
         }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
-          setUserPropertyForUser: sinon.stub().resolves(),
+          setUserPropertyForUserInBackground: sinon.stub(),
         }),
       },
     })
@@ -54,7 +54,7 @@ describe('BetaProgramHandler', function () {
       this.call(err => {
         expect(err).to.not.exist
         sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUser,
+          this.AnalyticsManager.setUserPropertyForUserInBackground,
           this.user_id,
           'beta-program',
           true
@@ -105,7 +105,7 @@ describe('BetaProgramHandler', function () {
       this.call(err => {
         expect(err).to.not.exist
         sinon.assert.calledWith(
-          this.AnalyticsManager.setUserPropertyForUser,
+          this.AnalyticsManager.setUserPropertyForUserInBackground,
           this.user_id,
           'beta-program',
           false

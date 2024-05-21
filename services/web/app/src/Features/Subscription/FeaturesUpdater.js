@@ -43,7 +43,7 @@ async function refreshFeatures(userId, reason) {
   logger.debug({ userId, features }, 'updating user features')
 
   const matchedFeatureSet = FeaturesHelper.getMatchedFeatureSet(features)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'feature-set',
     matchedFeatureSet

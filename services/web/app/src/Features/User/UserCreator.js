@@ -43,7 +43,11 @@ async function recordRegistrationEvent(user) {
     if (user.thirdPartyIdentifiers && user.thirdPartyIdentifiers.length > 0) {
       segmentation.provider = user.thirdPartyIdentifiers[0].providerId
     }
-    Analytics.recordEventForUser(user._id, 'user-registered', segmentation)
+    Analytics.recordEventForUserInBackground(
+      user._id,
+      'user-registered',
+      segmentation
+    )
   } catch (err) {
     logger.warn({ err }, 'there was an error recording `user-registered` event')
   }

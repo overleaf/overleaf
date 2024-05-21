@@ -144,7 +144,7 @@ describe('ThirdPartyIdentityManager', function () {
 
       describe('EmailHandler', function () {
         beforeEach(function () {
-          this.EmailHandler.promises.sendEmail.throws(anError)
+          this.EmailHandler.promises.sendEmail.rejects(anError)
         })
         it('should log but not return the error', async function () {
           await expect(
@@ -219,7 +219,7 @@ describe('ThirdPartyIdentityManager', function () {
 
       describe('EmailHandler', function () {
         beforeEach(function () {
-          this.EmailHandler.promises.sendEmail.throws(anError)
+          this.EmailHandler.promises.sendEmail.rejects(anError)
         })
         it('should log but not return the error', async function () {
           await expect(

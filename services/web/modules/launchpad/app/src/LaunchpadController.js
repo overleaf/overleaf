@@ -169,6 +169,8 @@ module.exports = LaunchpadController = {
             return next(err)
           }
 
+          // Ignore spurious floating promises warning until we promisify
+          // eslint-disable-next-line @typescript-eslint/no-floating-promises
           User.updateOne(
             { _id: user._id },
             {
@@ -245,6 +247,8 @@ module.exports = LaunchpadController = {
         }
 
         logger.debug({ userId: user._id }, 'making user an admin')
+        // Ignore spurious floating promises warning until we promisify
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         User.updateOne(
           { _id: user._id },
           {

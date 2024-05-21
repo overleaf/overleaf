@@ -43,7 +43,7 @@ describe('UserCreator', function () {
           },
         }),
         '../Analytics/AnalyticsManager': (this.Analytics = {
-          recordEventForUser: sinon.stub(),
+          recordEventForUserInBackground: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
         '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
@@ -278,7 +278,7 @@ describe('UserCreator', function () {
         })
         assert.equal(user.email, this.email)
         sinon.assert.calledWith(
-          this.Analytics.recordEventForUser,
+          this.Analytics.recordEventForUserInBackground,
           user._id,
           'user-registered'
         )

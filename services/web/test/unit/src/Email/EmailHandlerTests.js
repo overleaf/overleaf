@@ -21,7 +21,7 @@ describe('EmailHandler', function () {
       },
     }
     this.Queues = {
-      createScheduledJob: sinon.stub(),
+      createScheduledJob: sinon.stub().resolves(),
     }
     this.EmailHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {

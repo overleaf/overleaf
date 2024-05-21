@@ -94,9 +94,13 @@ module.exports = LinkedFilesController = {
           return LinkedFilesController.handleError(err, req, res, next)
         }
         if (name.endsWith('.bib')) {
-          AnalyticsManager.recordEventForUser(userId, 'linked-bib-file', {
-            integration: provider,
-          })
+          AnalyticsManager.recordEventForUserInBackground(
+            userId,
+            'linked-bib-file',
+            {
+              integration: provider,
+            }
+          )
         }
         return res.json({ new_file_id: newFileId })
       }

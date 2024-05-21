@@ -57,6 +57,15 @@ async function recordEventForUser(userId, event, segmentation) {
   }
 }
 
+function recordEventForUserInBackground(userId, event, segmentation) {
+  recordEventForUser(userId, event, segmentation).catch(err => {
+    logger.warn(
+      { err, userId, event, segmentation },
+      'failed to record event for user'
+    )
+  })
+}
+
 function recordEventForSession(session, event, segmentation) {
   const { analyticsId, userId } = getIdsFromSession(session)
   if (!analyticsId) {
@@ -88,6 +97,15 @@ async function setUserPropertyForUser(userId, propertyName, propertyValue) {
   }
 }
 
+function setUserPropertyForUserInBackground(userId, property, value) {
+  setUserPropertyForUser(userId, property, value).catch(err => {
+    logger.warn(
+      { err, userId, property, value },
+      'failed to set user property for user'
+    )
+  })
+}
+
 async function setUserPropertyForAnalyticsId(
   analyticsId,
   propertyName,
@@ -113,6 +131,16 @@ async function setUserPropertyForSession(session, propertyName, propertyValue) {
   if (analyticsId) {
     await _setUserProperty({ analyticsId, propertyName, propertyValue })
   }
+}
+
+function setUserPropertyForSessionInBackground(session, property, value) {
+  setUserPropertyForSession(session, property, value).catch(err => {
+    const { analyticsId, userId } = getIdsFromSession(session)
+    logger.warn(
+      { err, analyticsId, userId, property, value },
+      'failed to set user property for session'
+    )
+  })
 }
 
 function updateEditingSession(userId, projectId, countryCode, segmentation) {
@@ -310,8 +338,11 @@ module.exports = {
   identifyUser,
   recordEventForSession,
   recordEventForUser,
+  recordEventForUserInBackground,
   setUserPropertyForUser,
+  setUserPropertyForUserInBackground,
   setUserPropertyForSession,
+  setUserPropertyForSessionInBackground,
   setUserPropertyForAnalyticsId,
   updateEditingSession,
   getIdsFromSession,

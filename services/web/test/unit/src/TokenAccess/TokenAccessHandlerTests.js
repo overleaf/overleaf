@@ -32,7 +32,7 @@ describe('TokenAccessHandler', function () {
         }),
         crypto: (this.Crypto = require('crypto')),
         '../Analytics/AnalyticsManager': (this.Analytics = {
-          recordEventForUser: sinon.stub(),
+          recordEventForUserInBackground: sinon.stub(),
         }),
       },
     })
@@ -127,7 +127,7 @@ describe('TokenAccessHandler', function () {
         'tokenAccessReadOnly_refs'
       )
       sinon.assert.calledWith(
-        this.Analytics.recordEventForUser,
+        this.Analytics.recordEventForUserInBackground,
         this.userId,
         'project-joined',
         { mode: 'read-only' }
@@ -175,7 +175,7 @@ describe('TokenAccessHandler', function () {
         'tokenAccessReadAndWrite_refs'
       )
       sinon.assert.calledWith(
-        this.Analytics.recordEventForUser,
+        this.Analytics.recordEventForUserInBackground,
         this.userId,
         'project-joined',
         { mode: 'read-write' }

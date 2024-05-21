@@ -65,7 +65,7 @@ describe('UserUpdater', function () {
       },
     }
     this.AnalyticsManager = {
-      recordEventForUser: sinon.stub(),
+      recordEventForUserInBackground: sinon.stub(),
     }
     this.InstitutionsAPI = {
       promises: {

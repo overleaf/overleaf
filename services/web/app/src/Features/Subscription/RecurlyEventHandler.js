@@ -51,19 +51,27 @@ async function sendRecurlyAnalyticsEvent(event, eventData) {
 async function _sendSubscriptionStartedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-started', {
-    plan_code: planCode,
-    quantity,
-    is_trial: isTrial,
-    subscriptionId,
-  })
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'subscription-started',
+    {
+      plan_code: planCode,
+      quantity,
+      is_trial: isTrial,
+      subscriptionId,
+    }
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-plan-code',
     planCode
   )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
+    userId,
+    'subscription-state',
+    state
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     isTrial
@@ -77,19 +85,27 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
 async function _sendSubscriptionUpdatedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-updated', {
-    plan_code: planCode,
-    quantity,
-    is_trial: isTrial,
-    subscriptionId,
-  })
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'subscription-updated',
+    {
+      plan_code: planCode,
+      quantity,
+      is_trial: isTrial,
+      subscriptionId,
+    }
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-plan-code',
     planCode
   )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
+    userId,
+    'subscription-state',
+    state
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     isTrial
@@ -99,14 +115,22 @@ async function _sendSubscriptionUpdatedEvent(userId, eventData) {
 async function _sendSubscriptionCancelledEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-cancelled', {
-    plan_code: planCode,
-    quantity,
-    is_trial: isTrial,
-    subscriptionId,
-  })
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'subscription-cancelled',
+    {
+      plan_code: planCode,
+      quantity,
+      is_trial: isTrial,
+      subscriptionId,
+    }
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
+    userId,
+    'subscription-state',
+    state
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     isTrial
@@ -116,19 +140,27 @@ async function _sendSubscriptionCancelledEvent(userId, eventData) {
 async function _sendSubscriptionExpiredEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-expired', {
-    plan_code: planCode,
-    quantity,
-    is_trial: isTrial,
-    subscriptionId,
-  })
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'subscription-expired',
+    {
+      plan_code: planCode,
+      quantity,
+      is_trial: isTrial,
+      subscriptionId,
+    }
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-plan-code',
     planCode
   )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
+    userId,
+    'subscription-state',
+    state
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     isTrial
@@ -138,19 +170,27 @@ async function _sendSubscriptionExpiredEvent(userId, eventData) {
 async function _sendSubscriptionRenewedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-renewed', {
-    plan_code: planCode,
-    quantity,
-    is_trial: isTrial,
-    subscriptionId,
-  })
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'subscription-renewed',
+    {
+      plan_code: planCode,
+      quantity,
+      is_trial: isTrial,
+      subscriptionId,
+    }
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-plan-code',
     planCode
   )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
+    userId,
+    'subscription-state',
+    state
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     isTrial
@@ -160,18 +200,26 @@ async function _sendSubscriptionRenewedEvent(userId, eventData) {
 async function _sendSubscriptionReactivatedEvent(userId, eventData) {
   const { planCode, quantity, state, isTrial, subscriptionId } =
     _getSubscriptionData(eventData)
-  AnalyticsManager.recordEventForUser(userId, 'subscription-reactivated', {
-    plan_code: planCode,
-    quantity,
-    subscriptionId,
-  })
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'subscription-reactivated',
+    {
+      plan_code: planCode,
+      quantity,
+      subscriptionId,
+    }
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-plan-code',
     planCode
   )
-  AnalyticsManager.setUserPropertyForUser(userId, 'subscription-state', state)
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
+    userId,
+    'subscription-state',
+    state
+  )
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     isTrial
@@ -195,7 +243,7 @@ async function _sendInvoicePaidEvent(userId, eventData) {
       subscriptionIds[`subscriptionId${idx + 1}`] = e
     }
   })
-  AnalyticsManager.recordEventForUser(
+  AnalyticsManager.recordEventForUserInBackground(
     userId,
     'subscription-invoice-collected',
     {
@@ -208,7 +256,7 @@ async function _sendInvoicePaidEvent(userId, eventData) {
       ...subscriptionIds,
     }
   )
-  AnalyticsManager.setUserPropertyForUser(
+  AnalyticsManager.setUserPropertyForUserInBackground(
     userId,
     'subscription-is-trial',
     false

@@ -165,21 +165,21 @@ function _getUserQuery(providerId, externalUserId) {
   return query
 }
 
-async function _sendSecurityAlert(accountLinked, providerId, user, userId) {
+function _sendSecurityAlert(accountLinked, providerId, user, userId) {
   const providerName = oauthProviders[providerId].name
   const emailOptions = EmailOptionsHelper.linkOrUnlink(
     accountLinked,
     providerName,
     user.email
   )
-  try {
-    await EmailHandler.promises.sendEmail('securityAlert', emailOptions)
-  } catch (error) {
-    logger.error(
-      { err: error, userId },
-      `could not send security alert email when ${emailOptions.action.toLowerCase()}`
-    )
-  }
+  EmailHandler.promises
+    .sendEmail('securityAlert', emailOptions)
+    .catch(error => {
+      logger.error(
+        { err: error, userId },
+        `could not send security alert email when ${emailOptions.action.toLowerCase()}`
+      )
+    })
 }
 
 function _thirdPartyIdentifierUpdate(

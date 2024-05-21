@@ -319,11 +319,15 @@ async function checkSecondaryEmailConfirmationCode(req, res) {
 
     delete req.session.pendingSecondaryEmail
 
-    AnalyticsManager.recordEventForUser(user._id, 'email-verified', {
-      provider: 'email',
-      verification_type: 'token',
-      isPrimary: false,
-    })
+    AnalyticsManager.recordEventForUserInBackground(
+      user._id,
+      'email-verified',
+      {
+        provider: 'email',
+        verification_type: 'token',
+        isPrimary: false,
+      }
+    )
 
     const redirectUrl =
       AuthenticationController.getRedirectFromSession(req) || '/project'
@@ -427,7 +431,7 @@ async function primaryEmailCheckPage(req, res) {
     return res.redirect('/project')
   }
 
-  AnalyticsManager.recordEventForUser(
+  AnalyticsManager.recordEventForUserInBackground(
     userId,
     'primary-email-check-page-displayed'
   )
@@ -439,7 +443,10 @@ async function primaryEmailCheck(req, res) {
   await UserUpdater.promises.updateUser(userId, {
     $set: { lastPrimaryEmailCheck: new Date() },
   })
-  AnalyticsManager.recordEventForUser(userId, 'primary-email-check-done')
+  AnalyticsManager.recordEventForUserInBackground(
+    userId,
+    'primary-email-check-done'
+  )
   AsyncFormHelper.redirect(req, res, '/project')
 }
 
@@ -610,7 +617,7 @@ const UserEmailsController = {
                     )
                   }
                   const isPrimary = user?.email === userData.email
-                  AnalyticsManager.recordEventForUser(
+                  AnalyticsManager.recordEventForUserInBackground(
                     userData.userId,
                     'email-verified',
                     {

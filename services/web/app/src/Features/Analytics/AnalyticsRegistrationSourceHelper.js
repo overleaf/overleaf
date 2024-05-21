@@ -31,25 +31,25 @@ function addUserProperties(userId, session) {
   }
 
   if (session.required_login_from_product_medium) {
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserPropertyForUserInBackground(
       userId,
       `registered-from-product-medium`,
       session.required_login_from_product_medium
     )
     if (session.required_login_from_product_source) {
-      AnalyticsManager.setUserPropertyForUser(
+      AnalyticsManager.setUserPropertyForUserInBackground(
         userId,
         `registered-from-product-source`,
         session.required_login_from_product_source
       )
     }
   } else if (session.referal_id) {
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserPropertyForUserInBackground(
       userId,
       `registered-from-bonus-scheme`,
       true
     )
-    AnalyticsManager.setUserPropertyForUser(
+    AnalyticsManager.setUserPropertyForUserInBackground(
       userId,
       `registered-from-product-medium`,
       'bonus-scheme'
@@ -58,7 +58,7 @@ function addUserProperties(userId, session) {
 
   if (session.inbound) {
     if (session.inbound.referrer && session.inbound.referrer.medium) {
-      AnalyticsManager.setUserPropertyForUser(
+      AnalyticsManager.setUserPropertyForUserInBackground(
         userId,
         `registered-from-referrer-medium`,
         `${session.inbound.referrer.medium
@@ -66,7 +66,7 @@ function addUserProperties(userId, session) {
           .toUpperCase()}${session.inbound.referrer.medium.slice(1)}`
       )
       if (session.inbound.referrer.source) {
-        AnalyticsManager.setUserPropertyForUser(
+        AnalyticsManager.setUserPropertyForUserInBackground(
           userId,
           `registered-from-referrer-source`,
           session.inbound.referrer.source
@@ -77,7 +77,7 @@ function addUserProperties(userId, session) {
     if (session.inbound.utm) {
       for (const utmKey of RequestHelper.UTM_KEYS) {
         if (session.inbound.utm[utmKey]) {
-          AnalyticsManager.setUserPropertyForUser(
+          AnalyticsManager.setUserPropertyForUserInBackground(
             userId,
             `registered-from-${utmKey.replace('_', '-')}`,
             session.inbound.utm[utmKey]

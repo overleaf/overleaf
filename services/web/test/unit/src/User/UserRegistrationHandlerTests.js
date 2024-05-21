@@ -40,7 +40,7 @@ describe('UserRegistrationHandler', function () {
       subscribe: sinon.stub(),
     }
     this.EmailHandler = {
-      promises: { sendEmail: sinon.stub() },
+      promises: { sendEmail: sinon.stub().resolves() },
     }
     this.OneTimeTokenHandler = { promises: { getNewToken: sinon.stub() } }
     this.handler = SandboxedModule.require(modulePath, {

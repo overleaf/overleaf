@@ -76,6 +76,9 @@ i18n
     supportedLngs: availableLanguageCodes,
     fallbackLng: fallbackLanguageCode,
   })
+  .catch(err => {
+    logger.error({ err }, 'failed to initialize i18next library')
+  })
 
 // Make custom language detector for Accept-Language header
 const headerLangDetector = new middleware.LanguageDetector(i18n.services, {

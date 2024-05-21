@@ -74,7 +74,8 @@ describe('OwnershipTransferHandler', function () {
         '../Email/EmailHandler': this.EmailHandler,
         './CollaboratorsHandler': this.CollaboratorsHandler,
         '../Analytics/AnalyticsManager': {
-          recordEventForUser: (this.recordEventForUser = sinon.stub()),
+          recordEventForUserInBackground: (this.recordEventForUserInBackground =
+            sinon.stub()),
         },
       },
     })
@@ -214,7 +215,7 @@ describe('OwnershipTransferHandler', function () {
         this.collaborator._id,
         { sessionUserId }
       )
-      expect(this.recordEventForUser).to.have.been.calledWith(
+      expect(this.recordEventForUserInBackground).to.have.been.calledWith(
         this.user._id,
         'project-ownership-transfer',
         {
