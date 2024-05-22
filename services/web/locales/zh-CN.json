@@ -297,7 +297,6 @@
   "confirm_primary_email_change": "确认主电子邮件更改",
   "confirm_remove_sso_config_enter_email": "要确认您要删除 SSO 配置，请输入您的电子邮件地址：",
   "confirm_your_email": "确认您的电子邮件地址",
-  "confirmation_code_message": "我们已向__email__发送了一个6位数的验证码。请在下面输入以确认您的电子邮件地址。",
   "confirmation_link_broken": "抱歉，您的确认链接有问题。请尝试复制并粘贴邮件底部的链接。",
   "confirmation_token_invalid": "抱歉，您的确认令牌无效或已过期。请请求新的电子邮件确认链接。",
   "confirming": "确认",

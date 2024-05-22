@@ -336,6 +336,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/user/emails/primary-email-check',
     AuthenticationController.requireLogin(),
+    PermissionsController.useCapabilities(),
     UserEmailsController.primaryEmailCheck
   )
 
@@ -348,6 +349,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       CaptchaMiddleware.validateCaptcha('addEmail'),
       UserEmailsController.add
     )
+
     webRouter.post(
       '/user/emails/delete',
       AuthenticationController.requireLogin(),
@@ -366,29 +368,21 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       RateLimiterMiddleware.rateLimit(rateLimiters.endorseEmail),
       UserEmailsController.endorse
     )
+  }
 
-    webRouter.post(
-      '/user/emails/secondary',
+  if (Features.hasFeature('saas')) {
+    webRouter.get(
+      '/user/emails/add-secondary',
       AuthenticationController.requireLogin(),
       PermissionsController.requirePermission('add-secondary-email'),
-      RateLimiterMiddleware.rateLimit(rateLimiters.addEmail),
-      UserEmailsController.addWithConfirmationCode
+      UserEmailsController.addSecondaryEmailPage
     )
 
-    webRouter.post(
+    webRouter.get(
       '/user/emails/confirm-secondary',
       AuthenticationController.requireLogin(),
       PermissionsController.requirePermission('add-secondary-email'),
-      RateLimiterMiddleware.rateLimit(rateLimiters.checkEmailConfirmationCode),
-      UserEmailsController.checkSecondaryEmailConfirmationCode
-    )
-
-    webRouter.post(
-      '/user/emails/resend-secondary-confirmation',
-      AuthenticationController.requireLogin(),
-      PermissionsController.requirePermission('add-secondary-email'),
-      RateLimiterMiddleware.rateLimit(rateLimiters.resendConfirmationCode),
-      UserEmailsController.resendSecondaryEmailConfirmationCode
+      UserEmailsController.confirmSecondaryEmailPage
     )
   }
 

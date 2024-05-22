@@ -2,9 +2,16 @@ const UserHelper = require('./helpers/UserHelper')
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const Features = require('../../../app/src/infrastructure/Features')
+const MockV1ApiClass = require('./mocks/MockV1Api')
+const Subscription = require('./helpers/Subscription').promises
 
 describe('PrimaryEmailCheck', function () {
   let userHelper
+  let MockV1Api
+
+  before(function () {
+    MockV1Api = MockV1ApiClass.instance()
+  })
 
   beforeEach(async function () {
     userHelper = await UserHelper.createUser()
@@ -200,18 +207,109 @@ describe('PrimaryEmailCheck', function () {
       await UserHelper.updateUser(userHelper.user._id, {
         $set: { lastPrimaryEmailCheck: new Date(time) },
       })
-
-      checkResponse = await userHelper.fetch(
-        '/user/emails/primary-email-check',
-        { method: 'POST' }
-      )
     })
 
-    it('should be redirected to the project list page', function () {
-      expect(checkResponse.status).to.equal(302)
-      expect(checkResponse.headers.get('location')).to.equal(
-        UserHelper.url('/project').toString()
-      )
+    describe('when the user has a secondary email address', function () {
+      before(async function () {
+        if (!Features.hasFeature('saas')) {
+          this.skip()
+        }
+      })
+
+      beforeEach(async function () {
+        await userHelper.confirmEmail(
+          userHelper.user._id,
+          userHelper.user.email
+        )
+        await userHelper.addEmailAndConfirm(
+          userHelper.user._id,
+          'secondary@overleaf.com'
+        )
+
+        checkResponse = await userHelper.fetch(
+          '/user/emails/primary-email-check',
+          { method: 'POST' }
+        )
+      })
+
+      it('should be redirected to the project list page', function () {
+        expect(checkResponse.status).to.equal(302)
+        expect(checkResponse.headers.get('location')).to.equal(
+          UserHelper.url('/project').toString()
+        )
+      })
+    })
+
+    describe('when the user has an institutional email and no secondary', function () {
+      before(async function () {
+        if (!Features.hasFeature('saas')) {
+          this.skip()
+        }
+
+        if (!Features.hasFeature('saml')) {
+          this.skip()
+        }
+      })
+
+      beforeEach(async function () {
+        MockV1Api.createInstitution({
+          name: 'Exampe Institution',
+          hostname: 'example.com',
+          licence: 'pro_plus',
+          confirmed: true,
+        })
+        MockV1Api.addAffiliation(userHelper.user._id, userHelper.user.email)
+      })
+
+      it('should be redirected to the add secondary email page', async function () {
+        const response = await userHelper.fetch(
+          '/user/emails/primary-email-check',
+          { method: 'POST' }
+        )
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url('/user/emails/add-secondary').toString()
+        )
+      })
+    })
+
+    describe('when the user is a managed user', function () {
+      beforeEach(async function () {
+        const adminUser = await UserHelper.createUser()
+        this.subscription = new Subscription({
+          adminId: adminUser._id,
+          memberIds: [userHelper.user._id],
+          groupPlan: true,
+          planCode: 'group_professional_5_enterprise',
+        })
+        await this.subscription.ensureExists()
+        await this.subscription.enableManagedUsers()
+      })
+
+      it('should be redirected to the project list page', async function () {
+        const response = await userHelper.fetch(
+          '/user/emails/primary-email-check',
+          { method: 'POST' }
+        )
+
+        expect(response.status).to.equal(302)
+        expect(response.headers.get('location')).to.equal(
+          UserHelper.url('/project').toString()
+        )
+      })
+    })
+  })
+
+  describe('when user has checked their primary email address', function () {
+    beforeEach(async function () {
+      const time = Date.now() - Settings.primary_email_check_expiration * 2
+      await UserHelper.updateUser(userHelper.user._id, {
+        $set: { lastPrimaryEmailCheck: new Date(time) },
+      })
+
+      await userHelper.fetch('/user/emails/primary-email-check', {
+        method: 'POST',
+      })
     })
 
     it("shouldn't be redirected from project list to the primary email check page any longer", async function () {
