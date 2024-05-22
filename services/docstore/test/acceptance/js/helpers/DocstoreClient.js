@@ -5,7 +5,7 @@ const Persistor = require('../../../../app/js/PersistorManager')
 
 async function streamToString(stream) {
   const chunks = []
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     stream.on('data', chunk => chunks.push(chunk))
     stream.on('error', reject)
     stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
@@ -15,7 +15,7 @@ async function streamToString(stream) {
 async function getStringFromPersistor(persistor, bucket, key) {
   const stream = await persistor.getObjectStream(bucket, key, {})
   stream.resume()
-  return streamToString(stream)
+  return await streamToString(stream)
 }
 
 module.exports = DocstoreClient = {

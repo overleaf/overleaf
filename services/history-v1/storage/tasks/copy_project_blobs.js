@@ -82,7 +82,7 @@ async function run(options) {
       const results = await BPromise.map(
         projectIds,
         async projectId =>
-          processProject(
+          await processProject(
             projectId,
             chunkIdsByProject.get(projectId),
             globalBlobs

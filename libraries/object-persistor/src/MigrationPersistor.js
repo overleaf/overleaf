@@ -17,55 +17,65 @@ const { NotFoundError, WriteError } = require('./Errors')
 // }
 
 module.exports = class MigrationPersistor extends AbstractPersistor {
+  /**
+   * @param {AbstractPersistor} primaryPersistor
+   * @param {AbstractPersistor} fallbackPersistor
+   * @param settings
+   */
   constructor(primaryPersistor, fallbackPersistor, settings) {
     super()
 
+    /**
+     * @type {AbstractPersistor}
+     */
     this.primaryPersistor = primaryPersistor
+    /**
+     * @type {AbstractPersistor}
+     */
     this.fallbackPersistor = fallbackPersistor
     this.settings = settings
   }
 
   async sendFile(...args) {
-    return this.primaryPersistor.sendFile(...args)
+    return await this.primaryPersistor.sendFile(...args)
   }
 
   async sendStream(...args) {
-    return this.primaryPersistor.sendStream(...args)
+    return await this.primaryPersistor.sendStream(...args)
   }
 
   async getRedirectUrl(...args) {
-    return this.primaryPersistor.getRedirectUrl(...args)
+    return await this.primaryPersistor.getRedirectUrl(...args)
   }
 
   async getObjectMd5Hash(...args) {
-    return this._runWithFallback('getObjectMd5Hash', ...args)
+    return await this._runWithFallback('getObjectMd5Hash', ...args)
   }
 
   async checkIfObjectExists(...args) {
-    return this._runWithFallback('checkIfObjectExists', ...args)
+    return await this._runWithFallback('checkIfObjectExists', ...args)
   }
 
   async getObjectSize(...args) {
-    return this._runWithFallback('getObjectSize', ...args)
+    return await this._runWithFallback('getObjectSize', ...args)
   }
 
   async directorySize(...args) {
-    return this._runWithFallback('directorySize', ...args)
+    return await this._runWithFallback('directorySize', ...args)
   }
 
   async deleteObject(...args) {
-    return this._runOnBoth('deleteObject', ...args)
+    return await this._runOnBoth('deleteObject', ...args)
   }
 
   async deleteDirectory(...args) {
-    return this._runOnBoth('deleteDirectory', ...args)
+    return await this._runOnBoth('deleteDirectory', ...args)
   }
 
   async getObjectStream(bucket, key, opts = {}) {
     const shouldCopy = this.settings.copyOnMiss && !opts.start && !opts.end
 
     try {
-      // 'return await' so we catch NotFoundError before returning
       return await this.primaryPersistor.getObjectStream(bucket, key, opts)
     } catch (err) {
       if (err instanceof NotFoundError) {
@@ -140,7 +150,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
           })
         }
         // copy from sourceKey -> destKey
-        return this._copyStreamFromFallbackAndVerify(
+        return await this._copyStreamFromFallbackAndVerify(
           copyStream,
           fallbackBucket,
           bucket,
@@ -217,9 +227,14 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
     ])
   }
 
+  /**
+   * @param {keyof AbstractPersistor} methodName
+   * @param bucket
+   * @param key
+   * @param moreArgs
+   */
   async _runWithFallback(methodName, bucket, key, ...moreArgs) {
     try {
-      // 'return await' so we catch NotFoundError before returning
       return await this.primaryPersistor[methodName](bucket, key, ...moreArgs)
     } catch (err) {
       if (err instanceof NotFoundError) {
@@ -241,7 +256,7 @@ module.exports = class MigrationPersistor extends AbstractPersistor {
             Logger.warn({ err }, 'failed to copy file from fallback')
           })
         }
-        return this.fallbackPersistor[methodName](
+        return await this.fallbackPersistor[methodName](
           fallbackBucket,
           key,
           ...moreArgs

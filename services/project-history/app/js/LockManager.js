@@ -293,7 +293,7 @@ async function runWithLockPromises(key, runner) {
       })
   }
 
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     runWithLock(key, runnerCb, (err, result) => {
       if (err) {
         reject(err)

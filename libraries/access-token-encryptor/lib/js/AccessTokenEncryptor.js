@@ -80,7 +80,13 @@ class AccessTokenSchemeWithGenericKeyFn extends AbstractAccessTokenScheme {
 class AccessTokenSchemeV3 extends AccessTokenSchemeWithGenericKeyFn {
   async keyFn(salt) {
     const optionalInfo = ''
-    return cryptoHkdf('sha512', this.cipherPassword, salt, optionalInfo, 32)
+    return await cryptoHkdf(
+      'sha512',
+      this.cipherPassword,
+      salt,
+      optionalInfo,
+      32
+    )
   }
 }
 

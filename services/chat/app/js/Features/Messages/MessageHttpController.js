@@ -7,7 +7,7 @@ import { ObjectId } from '../../mongodb.js'
 const DEFAULT_MESSAGE_LIMIT = 50
 const MAX_MESSAGE_LENGTH = 10 * 1024 // 10kb, about 1,500 words
 
-async function readContext(context, req) {
+function readContext(context, req) {
   req.body = context.requestBody
   req.params = context.params.path
   req.query = context.params.query
@@ -23,6 +23,11 @@ async function readContext(context, req) {
   }
 }
 
+/**
+ * @param context
+ * @param {(req: unknown, res: unknown) => Promise<unknown>} ControllerMethod
+ * @returns {Promise<*>}
+ */
 export async function callMessageHttpController(context, ControllerMethod) {
   const req = {}
   readContext(context, req)

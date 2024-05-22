@@ -155,7 +155,7 @@ class LazyStringFileData extends FileData {
     }
     const eager = await this.toEager(blobStore)
     this.operations.length = 0
-    return eager.store(blobStore)
+    return await eager.store(blobStore)
   }
 }
 

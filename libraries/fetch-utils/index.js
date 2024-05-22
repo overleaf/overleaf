@@ -239,6 +239,11 @@ async function discardResponseBody(response) {
   }
 }
 
+/**
+ * @typedef {import('node-fetch').Response} Response
+ *
+ * @param {Response} response
+ */
 async function maybeGetResponseBody(response) {
   try {
     return await response.text()

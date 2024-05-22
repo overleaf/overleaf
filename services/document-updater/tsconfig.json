@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.backend.json",
   "include": [
     "app.js",
-    "app/src/**/*",
+    "expire_docops.js",
+    "app/js/**/*",
+    "benchmarks/**/*",
+    "config/**/*",
     "scripts/**/*",
     "test/**/*"
   ]

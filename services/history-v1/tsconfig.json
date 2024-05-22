@@ -2,7 +2,12 @@
   "extends": "../../tsconfig.backend.json",
   "include": [
     "app.js",
-    "app/src/**/*",
+    "api/**/*",
+    "app/js/**/*",
+    "benchmarks/**/*",
+    "config/**/*",
+    "migrations/**/*",
+    "storage/**/*",
     "scripts/**/*",
     "test/**/*"
   ]

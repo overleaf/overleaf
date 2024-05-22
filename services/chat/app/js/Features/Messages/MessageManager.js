@@ -19,11 +19,15 @@ export async function getMessages(roomId, limit, before) {
     query.timestamp = { $lt: before }
   }
   query = _ensureIdsAreObjectIds(query)
-  return db.messages.find(query).sort({ timestamp: -1 }).limit(limit).toArray()
+  return await db.messages
+    .find(query)
+    .sort({ timestamp: -1 })
+    .limit(limit)
+    .toArray()
 }
 
 export async function findAllMessagesInRooms(roomIds) {
-  return db.messages
+  return await db.messages
     .find({
       room_id: { $in: roomIds },
     })

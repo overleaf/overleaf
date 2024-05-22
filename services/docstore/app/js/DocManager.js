@@ -8,7 +8,19 @@ const Settings = require('@overleaf/settings')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const { setTimeout } = require('timers/promises')
 
+/**
+ * @typedef {import('mongodb').Document} Document
+ * @typedef {import('mongodb').WithId} WithId
+ */
+
 const DocManager = {
+  /**
+   * @param {string} projectId
+   * @param {string} docId
+   * @param {{inS3: boolean}} filter
+   * @returns {Promise<WithId<Document>>}
+   * @private
+   */
   async _getDoc(projectId, docId, filter) {
     if (filter == null) {
       filter = {}

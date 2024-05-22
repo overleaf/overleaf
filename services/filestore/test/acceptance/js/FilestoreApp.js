@@ -23,7 +23,7 @@ class FilestoreApp {
     }
 
     if (this.initing) {
-      return this.waitForInit()
+      return await this.waitForInit()
     }
     this.initing = true
 

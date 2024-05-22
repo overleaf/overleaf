@@ -18,6 +18,9 @@ const {
 const workerpool = require('workerpool')
 const Metrics = require('@overleaf/metrics')
 
+/**
+ * @type {import('workerpool').WorkerPool}
+ */
 let WORKER_POOL
 // NOTE: Check for main thread to avoid recursive start of pool.
 if (Settings.pdfCachingEnableWorkerPool && workerpool.isMainThread) {

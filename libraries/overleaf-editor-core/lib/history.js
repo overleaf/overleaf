@@ -25,6 +25,7 @@ class History {
     assert.maybe.array.of.instance(changes, Change, 'bad changes')
 
     this.snapshot = snapshot
+    /** @type {Array<Change>} */
     this.changes = changes || []
   }
 
@@ -113,6 +114,9 @@ class History {
   async store(blobStore, concurrency) {
     assert.maybe.number(concurrency, 'bad concurrency')
 
+    /**
+     * @param {Change} change
+     */
     async function storeChange(change) {
       return await change.store(blobStore, concurrency)
     }

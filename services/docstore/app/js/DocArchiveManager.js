@@ -203,7 +203,7 @@ async function _streamToBuffer(projectId, docId, stream) {
     )
     logged = true
   }
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     stream.on('data', chunk => {
       size += chunk.byteLength
       logIfTooLarge(false)

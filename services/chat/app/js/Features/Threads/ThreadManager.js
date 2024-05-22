@@ -37,7 +37,7 @@ export async function findOrCreateThread(projectId, threadId) {
 }
 
 export async function findAllThreadRooms(projectId) {
-  return db.rooms
+  return await db.rooms
     .find(
       {
         project_id: new ObjectId(projectId.toString()),
@@ -52,7 +52,7 @@ export async function findAllThreadRooms(projectId) {
 }
 
 export async function findAllThreadRoomsAndGlobalThread(projectId) {
-  return db.rooms
+  return await db.rooms
     .find(
       {
         project_id: new ObjectId(projectId.toString()),

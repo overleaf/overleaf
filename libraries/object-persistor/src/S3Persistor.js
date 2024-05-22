@@ -24,7 +24,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
   }
 
   async sendFile(bucketName, key, fsPath) {
-    return this.sendStream(bucketName, key, fs.createReadStream(fsPath))
+    return await this.sendStream(bucketName, key, fs.createReadStream(fsPath))
   }
 
   async sendStream(bucketName, key, readStream, opts = {}) {
@@ -231,7 +231,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       if (this.settings.Metrics) {
         this.settings.Metrics.inc('s3.md5Download')
       }
-      return PersistorHelper.calculateStreamMd5(
+      return await PersistorHelper.calculateStreamMd5(
         await this.getObjectStream(bucketName, key)
       )
     } catch (err) {

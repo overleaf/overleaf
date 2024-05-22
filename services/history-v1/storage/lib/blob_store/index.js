@@ -216,7 +216,7 @@ class BlobStore {
   async putObject(obj) {
     assert.object(obj, 'bad object')
     const string = JSON.stringify(obj)
-    return this.putString(string)
+    return await this.putString(string)
   }
 
   /**

@@ -74,7 +74,7 @@ async function runBulkCleanup() {
 }
 
 async function cleanupDirectory(dir, options) {
-  return queueDirOperation(dir, async () => {
+  return await queueDirOperation(dir, async () => {
     try {
       await OutputCacheManager.promises.expireOutputFiles(dir, options)
     } catch (err) {

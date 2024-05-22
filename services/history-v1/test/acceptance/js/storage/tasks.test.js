@@ -99,7 +99,7 @@ async function expectChunksExist(minChunkId, maxChunkId, expected) {
     keys.push(`100/000/000/${i.toString().padStart(9, '0')}`)
     keys.push(`fed/cba/fedcbafedcbafedcba/${i.toString().padStart(24, '0')}`)
   }
-  return Promise.all(
+  return await Promise.all(
     keys.map(async key => {
       const exists = await persistor.checkIfObjectExists(
         CHUNK_STORE_BUCKET,

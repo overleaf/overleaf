@@ -225,7 +225,7 @@ describe('MigrationPersistorTests', function () {
           newPersistor(false),
           Settings
         )
-        return expect(
+        await expect(
           migrationPersistor.getObjectStream(bucket, key)
         ).to.eventually.be.rejected.and.be.an.instanceOf(Errors.NotFoundError)
       })
@@ -322,7 +322,7 @@ describe('MigrationPersistorTests', function () {
     describe('when the primary persistor throws an error', function () {
       it('returns the error', async function () {
         primaryPersistor.sendStream.rejects(notFoundError)
-        return expect(
+        await expect(
           migrationPersistor.sendStream(bucket, key, fileStream)
         ).to.eventually.be.rejected.and.be.an.instanceOf(Errors.NotFoundError)
       })

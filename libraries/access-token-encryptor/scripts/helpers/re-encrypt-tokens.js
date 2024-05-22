@@ -10,7 +10,7 @@ const DRY_RUN = !process.argv.includes('--dry-run=false')
  * @return {Promise<string>}
  */
 async function reEncryptTokens(accessTokenEncryptor, encryptedJson) {
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     accessTokenEncryptor.decryptToJson(encryptedJson, (err, json) => {
       if (err) return reject(err)
       accessTokenEncryptor.encryptJson(json, (err, reEncryptedJson) => {

@@ -42,7 +42,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
   }
 
   async sendFile(bucketName, key, fsPath) {
-    return this.sendStream(bucketName, key, fs.createReadStream(fsPath))
+    return await this.sendStream(bucketName, key, fs.createReadStream(fsPath))
   }
 
   async sendStream(bucketName, key, readStream, opts = {}) {

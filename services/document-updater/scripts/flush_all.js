@@ -2,7 +2,7 @@ const ProjectFlusher = require('../app/js/ProjectFlusher')
 
 async function main() {
   console.log('Flushing all projects')
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     const options = {
       limit: 100000,
       concurrency: 5,

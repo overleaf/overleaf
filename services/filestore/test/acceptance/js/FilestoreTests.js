@@ -332,7 +332,7 @@ describe('Filestore', function () {
         ]
 
         before(async function () {
-          return Promise.all([
+          return await Promise.all([
             fsWriteFile(localFileReadPaths[0], constantFileContents[0]),
             fsWriteFile(localFileReadPaths[1], constantFileContents[1]),
             fsWriteFile(localFileReadPaths[2], constantFileContents[2]),
