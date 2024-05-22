@@ -97,7 +97,7 @@ export type RetainOp = {
   r: string
   p: number
   hpos?: number
-  tracking?: TrackingProps
+  tracking?: TrackingDirective
 }
 
 export type InsertOp = {
@@ -140,20 +140,22 @@ export type RawOrigin = {
   kind: string
 }
 
-export type TrackingProps =
-  | { type: 'none' }
-  | {
-      type: 'insert' | 'delete'
-      userId: string
-      ts: string
-    }
+export type TrackingProps = {
+  type: 'insert' | 'delete'
+  userId: string
+  ts: string
+}
+
+export type TrackingDirective = TrackingProps | { type: 'none' }
+
+export type TrackingType = 'insert' | 'delete' | 'none'
 
 export type RawScanOp =
   | number
   | string
-  | { r: number; tracking?: TrackingProps }
+  | { r: number; tracking?: TrackingDirective }
   | { i: string; tracking?: TrackingProps; commentIds?: string[] }
-  | { d: number; tracking?: TrackingProps }
+  | { d: number }
 
 export type TrackedChangeSnapshot = {
   op: {
@@ -207,9 +209,15 @@ export type Comment = {
 
 export type TrackedChange = {
   id: string
-  op: Op
+  op: InsertOp | DeleteOp
   metadata: {
     user_id: string
     ts: string
   }
+}
+
+export type TrackedChangeTransition = {
+  pos: number
+  tracking: TrackingDirective
+  stage: 'persisted' | 'expected'
 }

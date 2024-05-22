@@ -4,19 +4,17 @@ import _ from 'lodash'
 import Core from 'overleaf-editor-core'
 import * as Errors from './Errors.js'
 import * as OperationsCompressor from './OperationsCompressor.js'
+import { isInsert, isRetain, isDelete, isComment } from './Utils.js'
 
 /**
  * @typedef {import('./types').AddDocUpdate} AddDocUpdate
  * @typedef {import('./types').AddFileUpdate} AddFileUpdate
- * @typedef {import('./types').CommentOp} CommentOp
  * @typedef {import('./types').DeleteCommentUpdate} DeleteCommentUpdate
- * @typedef {import('./types').DeleteOp} DeleteOp
- * @typedef {import('./types').InsertOp} InsertOp
- * @typedef {import('./types').RetainOp} RetainOp
  * @typedef {import('./types').Op} Op
  * @typedef {import('./types').RawScanOp} RawScanOp
  * @typedef {import('./types').RenameUpdate} RenameUpdate
  * @typedef {import('./types').TextUpdate} TextUpdate
+ * @typedef {import('./types').TrackingDirective} TrackingDirective
  * @typedef {import('./types').TrackingProps} TrackingProps
  * @typedef {import('./types').SetCommentStateUpdate} SetCommentStateUpdate
  * @typedef {import('./types').Update} Update
@@ -405,7 +403,7 @@ class OperationsBuilder {
   /**
    * @param {number} length
    * @param {object} opts
-   * @param {TrackingProps} [opts.tracking]
+   * @param {TrackingDirective} [opts.tracking]
    */
   retain(length, opts = {}) {
     if (opts.tracking) {
@@ -460,36 +458,4 @@ class OperationsBuilder {
     this.pushTextOperation()
     return this.operations
   }
-}
-
-/**
- * @param {Op} op
- * @returns {op is InsertOp}
- */
-function isInsert(op) {
-  return 'i' in op && op.i != null
-}
-
-/**
- * @param {Op} op
- * @returns {op is RetainOp}
- */
-function isRetain(op) {
-  return 'r' in op && op.r != null
-}
-
-/**
- * @param {Op} op
- * @returns {op is DeleteOp}
- */
-function isDelete(op) {
-  return 'd' in op && op.d != null
-}
-
-/**
- * @param {Op} op
- * @returns {op is CommentOp}
- */
-function isComment(op) {
-  return 'c' in op && op.c != null && 't' in op && op.t != null
 }

@@ -19,12 +19,19 @@ import * as ErrorRecorder from './ErrorRecorder.js'
 import * as RedisManager from './RedisManager.js'
 import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as HashManager from './HashManager.js'
+import { isInsert } from './Utils.js'
 
 /**
  * @typedef {import('overleaf-editor-core').Comment} HistoryComment
+ * @typedef {import('overleaf-editor-core').TrackedChange} HistoryTrackedChange
  * @typedef {import('./types').Comment} Comment
  * @typedef {import('./types').Entity} Entity
  * @typedef {import('./types').ResyncDocContentUpdate} ResyncDocContentUpdate
+ * @typedef {import('./types').RetainOp} RetainOp
+ * @typedef {import('./types').TrackedChange} TrackedChange
+ * @typedef {import('./types').TrackedChangeTransition} TrackedChangeTransition
+ * @typedef {import('./types').TrackingDirective} TrackingDirective
+ * @typedef {import('./types').TrackingType} TrackingType
  * @typedef {import('./types').Update} Update
  */
 const MAX_RESYNC_HISTORY_RECORDS = 100 // keep this many records of previous resyncs
@@ -639,11 +646,17 @@ class SyncUpdateExpander {
     }
 
     const persistedComments = file.getComments().toArray()
-    await this.queueUpdateForOutOfSyncComments(
+    await this.queueUpdatesForOutOfSyncComments(
       update,
       pathname,
-      persistedContent,
       persistedComments
+    )
+
+    const persistedChanges = file.getTrackedChanges().asSorted()
+    await this.queueUpdatesForOutOfSyncTrackedChanges(
+      update,
+      pathname,
+      persistedChanges
     )
   }
 
@@ -694,19 +707,14 @@ class SyncUpdateExpander {
   }
 
   /**
-   * Queue update for out of sync comments
+   * Queue updates for out of sync comments
    *
    * @param {ResyncDocContentUpdate} update
    * @param {string} pathname
-   * @param {string} persistedContent
    * @param {HistoryComment[]} persistedComments
    */
-  async queueUpdateForOutOfSyncComments(
-    update,
-    pathname,
-    persistedContent,
-    persistedComments
-  ) {
+  async queueUpdatesForOutOfSyncComments(update, pathname, persistedComments) {
+    const expectedContent = update.resyncDocContent.content
     const expectedComments = update.resyncDocContent.ranges?.comments ?? []
     const resolvedComments = new Set(
       update.resyncDocContent.resolvedComments ?? []
@@ -760,10 +768,127 @@ class SyncUpdateExpander {
             origin: this.origin,
             ts: update.meta.ts,
             pathname,
-            doc_length: persistedContent.length,
+            doc_length: expectedContent.length,
           },
         })
       }
+    }
+  }
+
+  /**
+   * Queue updates for out of sync tracked changes
+   *
+   * @param {ResyncDocContentUpdate} update
+   * @param {string} pathname
+   * @param {readonly HistoryTrackedChange[]} persistedChanges
+   */
+  async queueUpdatesForOutOfSyncTrackedChanges(
+    update,
+    pathname,
+    persistedChanges
+  ) {
+    const expectedChanges = update.resyncDocContent.ranges?.changes ?? []
+    const expectedContent = update.resyncDocContent.content
+
+    /**
+     * A cursor on the expected content
+     */
+    let cursor = 0
+
+    /**
+     * The persisted tracking at cursor
+     *
+     * @type {TrackingDirective}
+     */
+    let persistedTracking = { type: 'none' }
+
+    /**
+     * The expected tracking at cursor
+     *
+     * @type {TrackingDirective}
+     */
+    let expectedTracking = { type: 'none' }
+
+    /**
+     * The retain ops for the update
+     *
+     * @type {RetainOp[]}
+     */
+    const ops = []
+
+    /**
+     * The retain op being built
+     *
+     * @type {RetainOp | null}
+     */
+    let currentOp = null
+
+    for (const transition of getTrackedChangesTransitions(
+      persistedChanges,
+      expectedChanges,
+      expectedContent.length
+    )) {
+      if (transition.pos > cursor) {
+        // The next transition will move the cursor. Decide what to do with the interval.
+        if (trackingDirectivesEqual(expectedTracking, persistedTracking)) {
+          // Expected tracking and persisted tracking are in sync. Emit the
+          // current op and skip this interval.
+          if (currentOp != null) {
+            ops.push(currentOp)
+            currentOp = null
+          }
+        } else {
+          // Expected tracking and persisted tracking are different.
+          const retainedText = expectedContent.slice(cursor, transition.pos)
+          if (
+            currentOp?.tracking != null &&
+            trackingDirectivesEqual(expectedTracking, currentOp.tracking)
+          ) {
+            // The current op has the right tracking. Extend it.
+            currentOp.r += retainedText
+          } else {
+            // The current op doesn't have the right tracking. Emit the current
+            // op and start a new one.
+            if (currentOp != null) {
+              ops.push(currentOp)
+            }
+            currentOp = {
+              r: retainedText,
+              p: cursor,
+              tracking: expectedTracking,
+            }
+          }
+        }
+
+        // Advance cursor
+        cursor = transition.pos
+      }
+
+      // Update the expected and persisted tracking
+      if (transition.stage === 'persisted') {
+        persistedTracking = transition.tracking
+      } else {
+        expectedTracking = transition.tracking
+      }
+    }
+
+    // Emit the last op
+    if (currentOp != null) {
+      ops.push(currentOp)
+    }
+
+    if (ops.length > 0) {
+      this.expandedUpdates.push({
+        doc: update.doc,
+        op: ops,
+        meta: {
+          resync: true,
+          origin: this.origin,
+          ts: update.meta.ts,
+          pathname,
+          doc_length: expectedContent.length,
+        },
+      })
     }
   }
 }
@@ -786,6 +911,116 @@ function commentRangesAreInSync(persistedComment, expectedComment) {
     persistedRange.pos === expectedPos &&
     persistedRange.length === expectedLength
   )
+}
+
+/**
+ * Iterates through expected tracked changes and persisted tracked changes and
+ * returns all transitions, sorted by position.
+ *
+ * @param {readonly HistoryTrackedChange[]} persistedChanges
+ * @param {TrackedChange[]} expectedChanges
+ * @param {number} docLength
+ */
+function getTrackedChangesTransitions(
+  persistedChanges,
+  expectedChanges,
+  docLength
+) {
+  /** @type {TrackedChangeTransition[]} */
+  const transitions = []
+
+  for (const change of persistedChanges) {
+    transitions.push({
+      stage: 'persisted',
+      pos: change.range.start,
+      tracking: {
+        type: change.tracking.type,
+        userId: change.tracking.userId,
+        ts: change.tracking.ts.toISOString(),
+      },
+    })
+    transitions.push({
+      stage: 'persisted',
+      pos: change.range.end,
+      tracking: { type: 'none' },
+    })
+  }
+
+  for (const change of expectedChanges) {
+    const op = change.op
+    const pos = op.hpos ?? op.p
+    if (isInsert(op)) {
+      transitions.push({
+        stage: 'expected',
+        pos,
+        tracking: {
+          type: 'insert',
+          userId: change.metadata.user_id,
+          ts: change.metadata.ts,
+        },
+      })
+      transitions.push({
+        stage: 'expected',
+        pos: pos + op.i.length,
+        tracking: { type: 'none' },
+      })
+    } else {
+      transitions.push({
+        stage: 'expected',
+        pos,
+        tracking: {
+          type: 'delete',
+          userId: change.metadata.user_id,
+          ts: change.metadata.ts,
+        },
+      })
+      transitions.push({
+        stage: 'expected',
+        pos: pos + op.d.length,
+        tracking: { type: 'none' },
+      })
+    }
+  }
+
+  transitions.push({
+    stage: 'expected',
+    pos: docLength,
+    tracking: { type: 'none' },
+  })
+
+  transitions.sort((a, b) => {
+    if (a.pos < b.pos) {
+      return -1
+    } else if (a.pos > b.pos) {
+      return 1
+    } else if (a.tracking.type === 'none' && b.tracking.type !== 'none') {
+      // none type comes before other types so that it can be overridden at the
+      // same position
+      return -1
+    } else if (a.tracking.type !== 'none' && b.tracking.type === 'none') {
+      // none type comes before other types so that it can be overridden at the
+      // same position
+      return 1
+    } else {
+      return 0
+    }
+  })
+
+  return transitions
+}
+
+/**
+ * Returns true if both tracking directives are equal
+ *
+ * @param {TrackingDirective} a
+ * @param {TrackingDirective} b
+ */
+function trackingDirectivesEqual(a, b) {
+  if (a.type === 'none') {
+    return b.type === 'none'
+  } else {
+    return a.type === b.type && a.userId === b.userId && a.ts === b.ts
+  }
 }
 
 // EXPORTS

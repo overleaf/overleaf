@@ -2,20 +2,20 @@ import sinon from 'sinon'
 import { expect } from 'chai'
 import mongodb from 'mongodb-legacy'
 import tk from 'timekeeper'
-import { Comment, Range } from 'overleaf-editor-core'
+import { Comment, TrackedChange, Range } from 'overleaf-editor-core'
 import { strict as esmock } from 'esmock'
 const { ObjectId } = mongodb
 
 const MODULE_PATH = '../../../../app/js/SyncManager.js'
-
-const timestamp = new Date()
+const TIMESTAMP = new Date().toISOString()
+const USER_ID = 'user-id'
 
 function resyncProjectStructureUpdate(docs, files) {
   return {
     resyncProjectStructure: { docs, files },
 
     meta: {
-      ts: timestamp,
+      ts: TIMESTAMP,
     },
   }
 }
@@ -37,7 +37,7 @@ function docContentSyncUpdate(
     },
 
     meta: {
-      ts: timestamp,
+      ts: TIMESTAMP,
     },
   }
 }
@@ -46,9 +46,18 @@ function makeComment(commentId, pos, text) {
   return {
     id: commentId,
     op: { p: pos, c: text, t: commentId },
-    meta: {
-      ts: timestamp,
+    metadata: {
+      user_id: USER_ID,
+      ts: TIMESTAMP,
     },
+  }
+}
+
+function makeTrackedChange(id, op) {
+  return {
+    id,
+    op,
+    metadata: { user_id: USER_ID, ts: TIMESTAMP },
   }
 }
 
@@ -476,7 +485,7 @@ describe('SyncManager', function () {
         doc: 'doc-id',
         path: 'main.tex',
       }
-      this.persistedDocContent = 'the quick brown fox jumps over the lazy fox'
+      this.persistedDocContent = 'the quick brown fox jumps over the lazy dog'
       this.persistedFile = {
         file: 'file-id',
         path: '1.png',
@@ -488,6 +497,9 @@ describe('SyncManager', function () {
         getComments: sinon
           .stub()
           .returns({ toArray: sinon.stub().returns([]) }),
+        getTrackedChanges: sinon
+          .stub()
+          .returns({ asSorted: sinon.stub().returns([]) }),
         getHash: sinon.stub().returns(null),
       }
       this.fileMap = {
@@ -566,7 +578,7 @@ describe('SyncManager', function () {
             new_pathname: '',
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -590,7 +602,7 @@ describe('SyncManager', function () {
             new_pathname: '',
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -625,7 +637,7 @@ describe('SyncManager', function () {
             url: newFile.url,
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -659,7 +671,7 @@ describe('SyncManager', function () {
             docLines: '',
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -694,7 +706,7 @@ describe('SyncManager', function () {
             new_pathname: '',
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -704,7 +716,7 @@ describe('SyncManager', function () {
             url: fileWichWasADoc.url,
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -791,7 +803,7 @@ describe('SyncManager', function () {
             new_pathname: '',
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -801,7 +813,7 @@ describe('SyncManager', function () {
             url: persistedFileWithNewContent.url,
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -916,7 +928,7 @@ describe('SyncManager', function () {
               pathname: this.persistedDoc.path,
               doc_length: this.persistedDocContent.length,
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -953,7 +965,7 @@ describe('SyncManager', function () {
             docLines: '',
             meta: {
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -964,7 +976,7 @@ describe('SyncManager', function () {
               pathname: newDoc.path,
               doc_length: 0,
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -1023,7 +1035,7 @@ describe('SyncManager', function () {
               pathname: this.persistedDoc.path,
               doc_length: this.persistedDocContent.length,
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               origin: { kind: 'history-resync' },
             },
           },
@@ -1060,7 +1072,7 @@ describe('SyncManager', function () {
                 pathname: this.persistedDoc.path,
                 doc_length: 'stored content'.length,
                 resync: true,
-                ts: timestamp,
+                ts: TIMESTAMP,
                 origin: { kind: 'history-resync' },
               },
             },
@@ -1143,7 +1155,7 @@ describe('SyncManager', function () {
               },
               pathname: this.persistedDoc.path,
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               doc_length: this.persistedDocContent.length,
             },
           },
@@ -1178,7 +1190,7 @@ describe('SyncManager', function () {
                 kind: 'history-resync',
               },
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
             },
           },
         ])
@@ -1218,7 +1230,7 @@ describe('SyncManager', function () {
                 kind: 'history-resync',
               },
               resync: true,
-              ts: timestamp,
+              ts: TIMESTAMP,
               pathname: this.persistedDoc.path,
               doc_length: this.persistedDocContent.length,
             },
@@ -1255,6 +1267,206 @@ describe('SyncManager', function () {
             pathname: this.persistedDoc.path,
             commentId: 'comment2',
             resolved: false,
+          },
+        ])
+      })
+    })
+
+    describe('syncing tracked changes', function () {
+      beforeEach(function () {
+        this.loadedSnapshotDoc.getTrackedChanges.returns({
+          asSorted: sinon.stub().returns([
+            new TrackedChange(new Range(4, 6), {
+              type: 'delete',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP),
+            }),
+            new TrackedChange(new Range(10, 6), {
+              type: 'insert',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP),
+            }),
+            new TrackedChange(new Range(20, 6), {
+              type: 'delete',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP),
+            }),
+            new TrackedChange(new Range(40, 3), {
+              type: 'insert',
+              userId: USER_ID,
+              ts: new Date(TIMESTAMP),
+            }),
+          ]),
+        })
+        this.changes = [
+          makeTrackedChange('td1', { p: 4, d: 'quick ' }),
+          makeTrackedChange('ti1', { p: 4, hpos: 10, i: 'brown ' }),
+          makeTrackedChange('td2', { p: 14, hpos: 20, d: 'jumps ' }),
+          makeTrackedChange('ti2', { p: 28, hpos: 40, i: 'dog' }),
+        ]
+      })
+
+      it('does nothing if tracked changes have not changed', async function () {
+        const updates = [
+          docContentSyncUpdate(this.persistedDoc, this.persistedDocContent, {
+            changes: this.changes,
+          }),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([])
+      })
+
+      it('adds new tracked changes', async function () {
+        this.changes.splice(
+          3,
+          0,
+          makeTrackedChange('td3', { p: 29, hpos: 35, d: 'lazy ' })
+        )
+        const updates = [
+          docContentSyncUpdate(this.persistedDoc, this.persistedDocContent, {
+            changes: this.changes,
+          }),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([
+          {
+            doc: this.persistedDoc.doc,
+            op: [
+              {
+                p: 35,
+                r: 'lazy ',
+                tracking: {
+                  type: 'delete',
+                  userId: USER_ID,
+                  ts: TIMESTAMP,
+                },
+              },
+            ],
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              pathname: this.persistedDoc.path,
+              resync: true,
+              ts: TIMESTAMP,
+              doc_length: this.persistedDocContent.length,
+            },
+          },
+        ])
+      })
+
+      it('removes extra tracked changes', async function () {
+        this.changes.splice(0, 1)
+        const updates = [
+          docContentSyncUpdate(this.persistedDoc, this.persistedDocContent, {
+            changes: this.changes,
+          }),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+        expect(expandedUpdates).to.deep.equal([
+          {
+            doc: this.persistedDoc.doc,
+            op: [
+              {
+                p: 4,
+                r: 'quick ',
+                tracking: { type: 'none' },
+              },
+            ],
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              pathname: this.persistedDoc.path,
+              resync: true,
+              ts: TIMESTAMP,
+              doc_length: this.persistedDocContent.length,
+            },
+          },
+        ])
+      })
+
+      it('handles overlapping ranges', async function () {
+        this.changes = [
+          makeTrackedChange('ti1', { p: 0, i: 'the quic' }),
+          makeTrackedChange('td1', { p: 8, d: 'k br' }),
+          makeTrackedChange('ti2', { p: 14, hpos: 23, i: 'ps over' }),
+        ]
+        const updates = [
+          docContentSyncUpdate(this.persistedDoc, this.persistedDocContent, {
+            changes: this.changes,
+          }),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        // Before: the [quick ][brown ] fox [jumps ]over the lazy dog
+        // After:  [the quic][k br]own fox jum[ps over] the lazy dog
+        expect(expandedUpdates).to.deep.equal([
+          {
+            doc: this.persistedDoc.doc,
+            op: [
+              {
+                p: 0,
+                r: 'the quic',
+                tracking: { type: 'insert', userId: USER_ID, ts: TIMESTAMP },
+              },
+              {
+                p: 10,
+                r: 'br',
+                tracking: { type: 'delete', userId: USER_ID, ts: TIMESTAMP },
+              },
+              {
+                p: 12,
+                r: 'own ',
+                tracking: { type: 'none' },
+              },
+              {
+                p: 20,
+                r: 'jum',
+                tracking: { type: 'none' },
+              },
+              {
+                p: 23,
+                r: 'ps over',
+                tracking: { type: 'insert', userId: USER_ID, ts: TIMESTAMP },
+              },
+              {
+                p: 40,
+                r: 'dog',
+                tracking: { type: 'none' },
+              },
+            ],
+            meta: {
+              origin: { kind: 'history-resync' },
+              pathname: this.persistedDoc.path,
+              resync: true,
+              ts: TIMESTAMP,
+              doc_length: this.persistedDocContent.length,
+            },
           },
         ])
       })
