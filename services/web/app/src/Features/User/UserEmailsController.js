@@ -427,7 +427,7 @@ async function confirmSecondaryEmailPage(req, res) {
     return res.redirect(redirectURL)
   }
 
-  AnalyticsManager.recordEventForUser(
+  AnalyticsManager.recordEventForUserInBackground(
     userId,
     'confirm-secondary-email-page-displayed'
   )
@@ -449,7 +449,7 @@ async function addSecondaryEmailPage(req, res) {
     return res.redirect(redirectURL)
   }
 
-  AnalyticsManager.recordEventForUser(
+  AnalyticsManager.recordEventForUserInBackground(
     userId,
     'add-secondary-email-page-displayed'
   )
