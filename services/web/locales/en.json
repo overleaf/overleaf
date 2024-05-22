@@ -2217,6 +2217,7 @@
   "youll_need_to_ask_the_github_repository_owner": "You’ll need to ask the GitHub repository owner (<0>__repoOwnerEmail__</0>) to reconnect the project.",
   "youll_no_longer_need_to_remember_credentials": "You’ll no longer need to remember a separate email address and password. Instead, you will use single-sign on to login to Overleaf. <0>Read more about SSO</0>.",
   "your_account_is_managed_by_admin_cant_join_additional_group": "Your __appName__ account is managed by your current group admin (__admin__). This means you can’t join additional group subscriptions. <0>Read more about Managed Users.</0>",
+  "your_account_is_managed_by_your_group_admin": "Your account is managed by your group admin. You can’t change or delete your email address.",
   "your_account_is_suspended": "Your account is suspended",
   "your_affiliation_is_confirmed": "Your <0>__institutionName__</0> affiliation is confirmed.",
   "your_browser_does_not_support_this_feature": "Sorry, your browser doesn’t support this feature. Please update your browser to its latest version.",
