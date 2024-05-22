@@ -138,25 +138,6 @@
   padding: var(--spacing-01) var(--spacing-02);
 }
 
-.enrollment-alert {
-  width: 100%;
-  border-radius: var(--border-radius-base);
-  padding: var(--spacing-05);
-  background-color: var(--bg-info-03);
-  border: 1px solid var(--border-divider);
-  display: flex;
-  flex-direction: row;
-
-  .icon {
-    flex: 1 1 auto;
-    padding: 0 var(--spacing-06) 0 var(--spacing-02);
-  }
-
-  a {
-    text-decoration: underline;
-  }
-}
-
 .security-row {
   .line-header > b {
     color: var(--content-primary);

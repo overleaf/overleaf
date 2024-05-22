@@ -1,5 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next'
-import getMeta from '../../../utils/meta'
+import getMeta from '@/utils/meta'
+import Notification from '@/shared/components/notification'
 
 export default function ManagedAccountAlert() {
   const { t } = useTranslation()
@@ -14,19 +15,17 @@ export default function ManagedAccountAlert() {
   }
 
   return (
-    <div className="enrollment-alert">
-      <div className="icon">
-        <span className="info-badge" />
-      </div>
-      <div>
-        <div>
-          <strong>
-            {t('account_managed_by_group_administrator', {
-              admin: currentManagedUserAdminEmail,
-            })}
-          </strong>
-        </div>
-        <div>
+    <Notification
+      type="info"
+      content={
+        <>
+          <div>
+            <strong>
+              {t('account_managed_by_group_administrator', {
+                admin: currentManagedUserAdminEmail,
+              })}
+            </strong>
+          </div>
           <Trans
             i18nKey="need_contact_group_admin_to_make_changes"
             components={[
@@ -37,8 +36,8 @@ export default function ManagedAccountAlert() {
               />,
             ]}
           />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   )
 }
