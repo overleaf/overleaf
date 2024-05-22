@@ -440,6 +440,10 @@ async function projectListPage(req, res, next) {
     )
   }
 
+  // Get the user's assignment for the Bootstrap 5 split test, which populates
+  // splitTestVariants with a value for 'bootstrap-5' and allows Pug to read it
+  await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5')
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
