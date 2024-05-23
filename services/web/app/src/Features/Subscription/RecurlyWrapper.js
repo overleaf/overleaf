@@ -467,9 +467,32 @@ const promises = {
     }
   },
 
+  /**
+   * @typedef {{getNextPage: () => Promise<PageData>, items: any[]}} PageData
+   */
+
   async getPaginatedEndpoint(resource, queryParams) {
-    queryParams.per_page = queryParams.per_page || 200
     let allItems = []
+    let items
+
+    /** @type {() => Promise<PageData>} */
+    let getNextPage = promises.getPaginatedEndpointIterator(
+      resource,
+      queryParams
+    )
+    while (getNextPage) {
+      ;({ items, getNextPage } = await getNextPage())
+      allItems = allItems.concat(items)
+      logger.debug(`total now ${allItems.length}`)
+    }
+    return allItems
+  },
+
+  /**
+   * @returns {() => Promise<PageData>}
+   */
+  getPaginatedEndpointIterator(resource, queryParams) {
+    queryParams.per_page = queryParams.per_page || 200
     const getPage = async (cursor = null) => {
       const opts = {
         url: resource,
@@ -483,21 +506,16 @@ const promises = {
       const data = await RecurlyWrapper.promises._parseXml(body)
 
       const items = data[resource]
-      allItems = allItems.concat(items)
-      logger.debug(`got another ${items.length}, total now ${allItems.length}`)
+      logger.debug(`got ${items.length} items in this page`)
       const match = response.headers.link?.match(/cursor=([0-9.]+%3A[0-9.]+)&/)
-      cursor = match && match[1]
-      if (cursor) {
-        cursor = decodeURIComponent(cursor)
-        return getPage(cursor)
-      } else {
-        return allItems
+      const nextCursor = match && match[1]
+      return {
+        items,
+        getNextPage:
+          nextCursor && (() => getPage(decodeURIComponent(nextCursor))),
       }
     }
-
-    await getPage()
-
-    return allItems
+    return getPage
   },
 
   async getAccount(accountId) {
@@ -860,13 +878,6 @@ const RecurlyWrapper = {
   apiUrl: Settings.apis.recurly.url || 'https://api.recurly.com/v2',
   _buildXml,
   _parseXml: callbackify(promises._parseXml),
-  // This one needs to be callbackified manually because we need to transform {response, body} to (err, response, body)
-  attemptInvoiceCollection: (invoiceId, callback) => {
-    promises
-      .attemptInvoiceCollection(invoiceId)
-      .then(({ response, body }) => callback(null, response, body))
-      .catch(err => callback(err))
-  },
   createFixedAmmountCoupon: callbackify(promises.createFixedAmmountCoupon),
   getAccountActiveCoupons: callbackify(promises.getAccountActiveCoupons),
   getBillingInfo: callbackify(promises.getBillingInfo),

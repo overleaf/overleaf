@@ -155,34 +155,55 @@ const invoiceCollectXml = `
 </invoice>
 `
 
+const ITEMS_PER_PAGE = 3
+
+const getInvoicePage = fullInvoicesIds => queryOptions => {
+  const cursor = queryOptions.qs.cursor
+  const startEnd = cursor?.split(':').map(Number) || []
+  const start = startEnd[0] || 0
+  const end = startEnd[1] || ITEMS_PER_PAGE
+  const body = invoicesXml(fullInvoicesIds.slice(start, end))
+  const hasMore = end < fullInvoicesIds.length
+  const nextPageCursor = hasMore ? `${end}%3A${end + ITEMS_PER_PAGE}&v=2` : null
+  const response = {
+    statusCode: 200,
+    headers: {
+      link: hasMore
+        ? `https://fakerecurly.com/v2/invoices?cursor=${nextPageCursor}`
+        : undefined,
+    },
+  }
+
+  return { response, body }
+}
+
 describe('CollectPayPalPastDueInvoice', function () {
   let apiRequestStub
-  const fakeApiRequests = invoiceIdsAndReturnCode => {
+  const fakeApiRequests = invoiceIds => {
     apiRequestStub = sinon.stub(RecurlyWrapper.promises, 'apiRequest')
     apiRequestStub.callsFake(options => {
-      switch (options.url) {
-        case 'invoices':
-          return {
-            response: { statusCode: 200, headers: {} },
-            body: invoicesXml(invoiceIdsAndReturnCode),
-          }
-        case 'accounts/200/billing_info':
-        case 'accounts/404/billing_info':
-          return {
-            response: { statusCode: 200, headers: {} },
-            body: billingInfoXml,
-          }
-        case 'invoices/200/collect':
+      if (options.url === 'invoices') {
+        return getInvoicePage(invoiceIds)(options)
+      }
+
+      if (/accounts\/(\d+)\/billing_info/.test(options.url)) {
+        return {
+          response: { statusCode: 200, headers: {} },
+          body: billingInfoXml,
+        }
+      }
+
+      if (/invoices\/(\d+)\/collect/.test(options.url)) {
+        const invoiceId = options.url.match(/invoices\/(\d+)\/collect/)[1]
+        if (invoiceId < 400) {
           return {
             response: { statusCode: 200, headers: {} },
             body: invoiceCollectXml,
           }
-        case 'invoices/404/collect':
-          throw new OError(`Recurly API returned with status code: 404`, {
-            statusCode: 404,
-          })
-        default:
-          throw new Error(`Unexpected URL: ${options.url}`)
+        }
+        throw new OError(`Recurly API returned with status code: 404`, {
+          statusCode: 404,
+        })
       }
     })
   }
@@ -194,11 +215,41 @@ describe('CollectPayPalPastDueInvoice', function () {
   it('collects one valid invoice', async function () {
     fakeApiRequests([200])
     const r = await main()
-    await expect(r).to.eql({
+    expect(r).to.eql({
       INVOICES_COLLECTED: [200],
       INVOICES_COLLECTED_SUCCESS: [200],
       USERS_COLLECTED: ['200'],
     })
+  })
+
+  it('collects several pages', async function () {
+    // 10 invoices, from 200 to 209
+    fakeApiRequests([...Array(10).keys()].map(i => i + 200))
+    const r = await main()
+
+    expect(r).to.eql({
+      INVOICES_COLLECTED: [200, 201, 202, 203, 204, 205, 206, 207, 208, 209],
+      INVOICES_COLLECTED_SUCCESS: [
+        200, 201, 202, 203, 204, 205, 206, 207, 208, 209,
+      ],
+      USERS_COLLECTED: [
+        '200',
+        '201',
+        '202',
+        '203',
+        '204',
+        '205',
+        '206',
+        '207',
+        '208',
+        '209',
+      ],
+    })
+
+    // 4 calls to get the invoices
+    // 10 calls to get the billing info
+    // 10 calls to collect the invoices
+    expect(apiRequestStub.callCount).to.eql(24)
   })
 
   it('rejects with no invoices are processed because of errors', async function () {
@@ -214,7 +265,7 @@ describe('CollectPayPalPastDueInvoice', function () {
   it('resolves when some invoices are partially successful', async function () {
     fakeApiRequests([200, 404])
     const r = await main()
-    await expect(r).to.eql({
+    expect(r).to.eql({
       INVOICES_COLLECTED: [200, 404],
       INVOICES_COLLECTED_SUCCESS: [200],
       USERS_COLLECTED: ['200', '404'],
