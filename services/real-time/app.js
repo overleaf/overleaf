@@ -56,7 +56,17 @@ const io = require('socket.io').listen(server, {
 
 // Bind to sessions
 const sessionStore = new RedisStore({ client: sessionRedisClient })
-const cookieParser = CookieParser(Settings.security.sessionSecret)
+
+if (!Settings.security.sessionSecret) {
+  throw new Error('No SESSION_SECRET provided.')
+}
+
+const sessionSecrets = [
+  Settings.security.sessionSecret,
+  Settings.security.sessionSecretUpcoming,
+  Settings.security.sessionSecretFallback,
+].filter(Boolean)
+const cookieParser = CookieParser(sessionSecrets)
 
 const sessionSockets = new SessionSockets(
   io,

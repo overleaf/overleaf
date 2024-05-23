@@ -21,8 +21,6 @@
     "check-types": "^11.1.2",
     "command-line-args": "^3.0.3",
     "config": "^1.19.0",
-    "cookie-parser": "~1.4.5",
-    "cors": "^2.8.5",
     "express": "^4.19.2",
     "fs-extra": "^9.0.1",
     "generic-pool": "^2.1.1",

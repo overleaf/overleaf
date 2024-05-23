@@ -43,8 +43,6 @@ if (httpAuthUser && httpAuthPass) {
   httpAuthUsers[httpAuthUser] = httpAuthPass
 }
 
-const sessionSecret = process.env.SESSION_SECRET
-
 const intFromEnv = function (name, defaultValue) {
   if (
     [null, undefined].includes(defaultValue) ||
@@ -386,7 +384,9 @@ module.exports = {
   // Security
   // --------
   security: {
-    sessionSecret,
+    sessionSecret: process.env.SESSION_SECRET,
+    sessionSecretUpcoming: process.env.SESSION_SECRET_UPCOMING,
+    sessionSecretFallback: process.env.SESSION_SECRET_FALLBACK,
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS, 10) || 12,
   }, // number of rounds used to hash user passwords (raised to power 2)
 

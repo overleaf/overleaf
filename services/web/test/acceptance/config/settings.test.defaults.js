@@ -17,6 +17,8 @@ module.exports = {
   secureCookie: false,
   security: {
     sessionSecret: 'static-secret-for-tests',
+    sessionSecretUpcoming: 'static-secret-upcoming-for-tests',
+    sessionSecretFallback: 'static-secret-fallback-for-tests',
   },
   adminDomains: process.env.ADMIN_DOMAINS
     ? JSON.parse(process.env.ADMIN_DOMAINS)

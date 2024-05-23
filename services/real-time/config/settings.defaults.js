@@ -105,7 +105,9 @@ const settings = {
   },
 
   security: {
-    sessionSecret: process.env.SESSION_SECRET || 'secret-please-change',
+    sessionSecret: process.env.SESSION_SECRET,
+    sessionSecretUpcoming: process.env.SESSION_SECRET_UPCOMING,
+    sessionSecretFallback: process.env.SESSION_SECRET_FALLBACK,
   },
 
   cookieName: process.env.COOKIE_NAME || 'overleaf.sid',
