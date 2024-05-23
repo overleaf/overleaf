@@ -431,6 +431,7 @@
   "doing_this_will_verify_affiliation_and_allow_log_in_2": "Doing this will verify your affiliation with <0>__institutionName__</0> and will allow you to log in to <0>__appName__</0> through your institution.",
   "done": "Done",
   "dont_have_account": "Don’t have an account?",
+  "dont_have_account_without_question_mark": "Don’t have an account",
   "download": "Download",
   "download_metadata": "Download Overleaf metadata",
   "download_pdf": "Download PDF",

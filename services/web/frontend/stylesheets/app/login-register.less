@@ -181,6 +181,11 @@
     }
   }
 
+  .flex-center {
+    display: flex;
+    justify-content: center;
+  }
+
   .login-btn {
     display: flex;
     align-items: center;
@@ -216,8 +221,10 @@
     display: flex;
     position: relative;
 
-    input.form-control {
-      padding-right: 35px;
+    .form-group-password-input {
+      input.form-control {
+        padding-right: 35px;
+      }
     }
 
     .visibility-toggle {
@@ -238,6 +245,10 @@
     }
   }
 
+  .top-padding-computed-2 {
+    padding-top: @line-height-computed * 2;
+  }
+
   .form-group-password-input {
     display: flex;
     flex-direction: column;
@@ -249,6 +260,12 @@
       display: flex;
       background-color: #f2f4f7;
       min-height: 100vh;
+    }
+
+    // TODO: One of these two classes should be removed when test is tearing down.
+    .register-content-container-light {
+      .register-content-container;
+      background-color: @white;
     }
 
     .register-form {
@@ -334,6 +351,32 @@
       &:focus {
         outline: 2px solid var(--emerald-green);
         outline-offset: 1px;
+      }
+    }
+  }
+
+  // TODO: This is Temporary class for split test to center align the text, we can remove this during the tear down of the test based on the winner variant.
+  .light-variant {
+    .tos-agreement-notice {
+      text-align: center;
+      font-size: 12px;
+
+      a {
+        color: var(--emerald-green);
+        text-decoration: underline;
+        // text-decoration-;skip-ink is for letter with descender (like 'g' and 'y')
+        // this will force underline to not skip the descender
+        text-decoration-skip-ink: none;
+
+        &:hover {
+          color: var(--emerald-green-dark);
+        }
+
+        // for accessibility with keyboard navigation
+        &:focus {
+          outline: 2px solid var(--emerald-green);
+          outline-offset: 1px;
+        }
       }
     }
   }
