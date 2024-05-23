@@ -50,26 +50,35 @@ export const useTutorial = (
   }, [completeTutorial])
 
   // try to show the popup if we don't already have one showing, returns true if it can show, false if it can't
-  const tryShowingPopup = useCallback(() => {
-    if (currentPopup === null) {
+  const tryShowingPopup = useCallback(
+    (eventName: string = 'promo-prompt') => {
+      if (currentPopup === null) {
+        setCurrentPopup(tutorialKey)
+        setShowPopup(true)
+        eventTracking.sendMB(eventName, eventData)
+        return true
+      }
+      return false
+    },
+    [currentPopup, setCurrentPopup, tutorialKey, eventData]
+  )
+
+  const clearPopup = useCallback(() => {
+    // popups should only clear themselves, in cases they need to cleanup or shouldnt show anymore
+    // allow forcing the clear if needed, eg: higher prio alert needs to show
+    if (currentPopup === tutorialKey) {
+      setCurrentPopup(null)
+      setShowPopup(false)
+    }
+  }, [setCurrentPopup, setShowPopup, currentPopup, tutorialKey])
+
+  const clearAndShow = useCallback(
+    (eventName: string = 'promo-prompt') => {
       setCurrentPopup(tutorialKey)
       setShowPopup(true)
-      eventTracking.sendMB('promo-prompt', eventData)
-      return true
-    }
-    return false
-  }, [currentPopup, setCurrentPopup, tutorialKey, eventData])
-
-  const clearPopup = useCallback(
-    (force: boolean = false) => {
-      // popups should only clear themselves, in cases they need to cleanup or shouldnt show anymore
-      // allow forcing the clear if needed, eg: higher prio alert needs to show
-      if (force || currentPopup === tutorialKey) {
-        setCurrentPopup(null)
-        setShowPopup(false)
-      }
+      eventTracking.sendMB(eventName, eventData)
     },
-    [setCurrentPopup, setShowPopup, currentPopup, tutorialKey]
+    [setCurrentPopup, setShowPopup, tutorialKey, eventData]
   )
 
   return {
@@ -78,6 +87,7 @@ export const useTutorial = (
     maybeLater,
     tryShowingPopup,
     clearPopup,
+    clearAndShow,
     showPopup,
   }
 }

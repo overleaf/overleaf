@@ -7,6 +7,7 @@ const VALID_KEYS = [
   'table-generator-promotion',
   'writefull-integration',
   'writefull-oauth-promotion',
+  'bib-file-tpr-prompt',
 ]
 
 async function completeTutorial(req, res, next) {

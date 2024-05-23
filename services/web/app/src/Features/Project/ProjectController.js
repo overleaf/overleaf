@@ -607,6 +607,13 @@ const ProjectController = {
             )
           }
         },
+        tprPromptAssignment(cb) {
+          if (anonymous) {
+            cb()
+          } else {
+            SplitTestHandler.getAssignment(req, res, 'bib-file-tpr-prompt', cb)
+          }
+        },
         compileLogEventsAssignment(cb) {
           SplitTestHandler.getAssignment(req, res, 'compile-log-events', cb)
         },
