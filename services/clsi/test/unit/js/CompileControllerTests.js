@@ -50,6 +50,7 @@ function tryImageNameValidation(method, imageNameField) {
 
 describe('CompileController', function () {
   beforeEach(function () {
+    this.buildId = 'build-id-123'
     this.CompileController = SandboxedModule.require(modulePath, {
       requires: {
         './CompileManager': (this.CompileManager = {}),
@@ -118,6 +119,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -147,6 +149,7 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
+              buildId: this.buildId,
               outputUrlPrefix: '/zone/b',
               outputFiles: this.output_files.map(file => ({
                 url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
@@ -165,6 +168,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -178,6 +182,7 @@ describe('CompileController', function () {
               error: null,
               stats: this.stats,
               timings: this.timings,
+              buildId: this.buildId,
               outputUrlPrefix: '',
               outputFiles: this.output_files.map(file => ({
                 url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
@@ -207,6 +212,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -221,6 +227,7 @@ describe('CompileController', function () {
               stats: this.stats,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
+              buildId: this.buildId,
               outputFiles: this.output_files.map(file => ({
                 url: `${this.Settings.apis.clsi.url}/project/${this.project_id}/build/${file.build}/output/${file.path}`,
                 ...file,
@@ -250,6 +257,7 @@ describe('CompileController', function () {
           outputFiles: this.output_files,
           stats: this.stats,
           timings: this.timings,
+          buildId: this.buildId,
         })
         this.CompileController.compile(this.req, this.res)
       })
@@ -262,6 +270,7 @@ describe('CompileController', function () {
               status: 'failure',
               error: null,
               stats: this.stats,
+              buildId: this.buildId,
               timings: this.timings,
               outputUrlPrefix: '/zone/b',
               outputFiles: this.output_files.map(file => ({
@@ -276,9 +285,11 @@ describe('CompileController', function () {
 
     describe('with an error', function () {
       beforeEach(function () {
+        const error = new Error((this.message = 'error message'))
+        error.buildId = this.buildId
         this.CompileManager.doCompileWithLock = sinon
           .stub()
-          .callsArgWith(1, new Error((this.message = 'error message')), null)
+          .callsArgWith(1, error, null)
         this.CompileController.compile(this.req, this.res)
       })
 
@@ -291,6 +302,7 @@ describe('CompileController', function () {
               error: this.message,
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
+              buildId: this.buildId,
               // JSON.stringify will omit these
               stats: undefined,
               timings: undefined,
@@ -320,6 +332,7 @@ describe('CompileController', function () {
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
               // JSON.stringify will omit these
+              buildId: undefined,
               stats: undefined,
               timings: undefined,
             },
@@ -346,6 +359,7 @@ describe('CompileController', function () {
               outputUrlPrefix: '/zone/b',
               outputFiles: [],
               // JSON.stringify will omit these
+              buildId: undefined,
               stats: undefined,
               timings: undefined,
             },

@@ -164,7 +164,7 @@ module.exports = OutputCacheManager = {
             outputDir,
             stats,
             (err, outputFiles) => {
-              if (err) return callback(err, outputFiles)
+              if (err) return callback(err, { outputFiles, buildId })
 
               const enablePdfCaching = request.enablePdfCaching
               const enablePdfCachingDark =
@@ -173,7 +173,7 @@ module.exports = OutputCacheManager = {
                 !Settings.enablePdfCaching ||
                 (!enablePdfCaching && !enablePdfCachingDark)
               ) {
-                return callback(null, outputFiles)
+                return callback(null, { outputFiles, buildId })
               }
 
               OutputCacheManager.saveStreamsInContentDir(
@@ -191,9 +191,9 @@ module.exports = OutputCacheManager = {
                       { err, outputDir, stats, timings },
                       'pdf caching failed'
                     )
-                    return callback(null, outputFiles)
+                    return callback(null, { outputFiles, buildId })
                   }
-                  callback(err, outputFiles)
+                  callback(err, { outputFiles, buildId })
                 }
               )
             }
