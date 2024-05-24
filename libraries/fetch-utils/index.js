@@ -9,8 +9,8 @@ const https = require('https')
  * Make a request and return the parsed JSON response.
  *
  * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
- * @return {Promise<any>} the parsed JSON response
+ * @param {object} opts - fetch options
+ * @return {Promise<object>} the parsed JSON response
  * @throws {RequestFailedError} if the response has a failure status code
  */
 async function fetchJson(url, opts = {}) {
@@ -39,7 +39,7 @@ async function fetchJsonWithResponse(url, opts = {}) {
  * If the response body is destroyed, the request is aborted.
  *
  * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
+ * @param {object} opts - fetch options
  * @return {Promise<Readable>}
  * @throws {RequestFailedError} if the response has a failure status code
  */
@@ -67,7 +67,7 @@ async function fetchStreamWithResponse(url, opts = {}) {
  * Make a request and discard the response.
  *
  * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
+ * @param {object} opts - fetch options
  * @return {Promise<Response>}
  * @throws {RequestFailedError} if the response has a failure status code
  */
@@ -86,7 +86,7 @@ async function fetchNothing(url, opts = {}) {
  * Make a request and extract the redirect from the response.
  *
  * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
+ * @param {object} opts - fetch options
  * @return {Promise<string>}
  * @throws {RequestFailedError} if the response has a non redirect status code or missing Location header
  */
@@ -115,7 +115,7 @@ async function fetchRedirect(url, opts = {}) {
  * Make a request and return a string.
  *
  * @param {string | URL} url - request URL
- * @param {any} [opts] - fetch options
+ * @param {object} opts - fetch options
  * @return {Promise<string>}
  * @throws {RequestFailedError} if the response has a failure status code
  */

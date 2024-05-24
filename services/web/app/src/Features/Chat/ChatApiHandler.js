@@ -90,13 +90,6 @@ async function deleteMessage(projectId, threadId, messageId) {
   )
 }
 
-async function getResolvedThreadIds(projectId) {
-  const body = await fetchJson(
-    chatApiUrl(`/project/${projectId}/resolved-thread-ids`)
-  )
-  return body.resolvedThreadIds
-}
-
 function chatApiUrl(path) {
   return new URL(path, settings.apis.chat.internal_url)
 }
@@ -112,7 +105,6 @@ module.exports = {
   deleteThread: callbackify(deleteThread),
   editMessage: callbackify(editMessage),
   deleteMessage: callbackify(deleteMessage),
-  getResolvedThreadIds: callbackify(getResolvedThreadIds),
   promises: {
     getThreads,
     destroyProject,
@@ -124,6 +116,5 @@ module.exports = {
     deleteThread,
     editMessage,
     deleteMessage,
-    getResolvedThreadIds,
   },
 }

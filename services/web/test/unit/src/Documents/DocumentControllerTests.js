@@ -15,26 +15,7 @@ describe('DocumentController', function () {
     this.doc = { _id: 'doc-id-123' }
     this.doc_lines = ['one', 'two', 'three']
     this.version = 42
-    this.ranges = {
-      comments: [
-        {
-          id: 'comment1',
-          op: {
-            c: 'foo',
-            p: 123,
-            t: 'comment1',
-          },
-        },
-        {
-          id: 'comment2',
-          op: {
-            c: 'bar',
-            p: 456,
-            t: 'comment2',
-          },
-        },
-      ],
-    }
+    this.ranges = { mock: 'ranges' }
     this.pathname = '/a/b/c/file.tex'
     this.lastUpdatedAt = new Date().getTime()
     this.lastUpdatedBy = 'fake-last-updater-id'
@@ -48,10 +29,6 @@ describe('DocumentController', function () {
         },
       },
     }
-    this.resolvedThreadIds = [
-      'comment2',
-      'comment4', // Comment in project but not in doc
-    ]
 
     this.ProjectGetter = {
       promises: {
@@ -81,12 +58,6 @@ describe('DocumentController', function () {
       },
     }
 
-    this.ChatApiHandler = {
-      promises: {
-        getResolvedThreadIds: sinon.stub().resolves(this.resolvedThreadIds),
-      },
-    }
-
     this.DocumentController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../Project/ProjectGetter': this.ProjectGetter,
@@ -94,7 +65,6 @@ describe('DocumentController', function () {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../Project/ProjectEntityUpdateHandler':
           this.ProjectEntityUpdateHandler,
-        '../Chat/ChatApiHandler': this.ChatApiHandler,
       },
     })
   })
@@ -117,16 +87,17 @@ describe('DocumentController', function () {
 
       it('should return the history id and display setting to the client as JSON', function () {
         this.res.type.should.equal('application/json')
-        JSON.parse(this.res.body).should.deep.equal({
-          lines: this.doc_lines,
-          version: this.version,
-          ranges: this.ranges,
-          pathname: this.pathname,
-          projectHistoryId: this.project.overleaf.history.id,
-          projectHistoryType: 'project-history',
-          resolvedCommentIds: ['comment2'],
-          historyRangesSupport: false,
-        })
+        this.res.body.should.equal(
+          JSON.stringify({
+            lines: this.doc_lines,
+            version: this.version,
+            ranges: this.ranges,
+            pathname: this.pathname,
+            projectHistoryId: this.project.overleaf.history.id,
+            projectHistoryType: 'project-history',
+            historyRangesSupport: false,
+          })
+        )
       })
     })
 
