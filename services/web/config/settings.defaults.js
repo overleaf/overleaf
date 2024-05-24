@@ -316,10 +316,8 @@ module.exports = {
     algorithm: process.env.OT_JWT_AUTH_ALG || 'HS256',
   },
 
-  splitTest: {
-    devToolbar: {
-      enabled: false,
-    },
+  devToolbar: {
+    enabled: false,
   },
 
   splitTests: [],

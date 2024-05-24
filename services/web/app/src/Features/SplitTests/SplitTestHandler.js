@@ -237,7 +237,7 @@ async function _getAssignment(
   const splitTest = await _getSplitTest(splitTestName)
   const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
 
-  if (Settings.splitTest.devToolbar.enabled) {
+  if (Settings.devToolbar.enabled) {
     const override = session?.splitTestOverrides?.[splitTestName]
     if (override) {
       return _makeAssignment(splitTest, override, currentVersion)
@@ -402,7 +402,7 @@ function getPercentile(analyticsId, splitTestName, splitTestPhase) {
 }
 
 function setOverrideInSession(session, splitTestName, variantName) {
-  if (!Settings.splitTest.devToolbar.enabled) {
+  if (!Settings.devToolbar.enabled) {
     return
   }
   if (!session.splitTestOverrides) {
@@ -477,7 +477,7 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
     const override = session?.splitTestOverrides?.[splitTestName]
 
     const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
-    if (!currentVersion.active && !Settings.splitTest.devToolbar.enabled) {
+    if (!currentVersion.active && !Settings.devToolbar.enabled) {
       return
     }
 
@@ -486,7 +486,7 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
       phase,
       badgeInfo: splitTest.badgeInfo?.[phase],
     }
-    if (Settings.splitTest.devToolbar.enabled) {
+    if (Settings.devToolbar.enabled) {
       info.active = currentVersion.active
       info.variants = currentVersion.variants.map(variant => ({
         name: variant.name,
@@ -495,7 +495,7 @@ async function _loadSplitTestInfoInLocals(locals, splitTestName, session) {
       info.hasOverride = !!override
     }
     LocalsHelper.setSplitTestInfo(locals, splitTestName, info)
-  } else if (Settings.splitTest.devToolbar.enabled) {
+  } else if (Settings.devToolbar.enabled) {
     LocalsHelper.setSplitTestInfo(locals, splitTestName, {
       missing: true,
     })

@@ -40,10 +40,8 @@ describe('SplitTestHandler', function () {
     this.Settings = {
       moduleImportSequence: [],
       overleaf: {},
-      splitTest: {
-        devToolbar: {
-          enabled: false,
-        },
+      devToolbar: {
+        enabled: false,
       },
     }
     this.AnalyticsManager = {

@@ -260,10 +260,8 @@ module.exports = {
     counterInit: 0,
   },
 
-  splitTest: {
-    devToolbar: {
-      enabled: false,
-    },
+  devToolbar: {
+    enabled: false,
   },
 }
 
