@@ -1,3 +1,4 @@
+const ChatApiHandler = require('../Chat/ChatApiHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectLocator = require('../Project/ProjectLocator')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
@@ -31,6 +32,17 @@ async function getDocument(req, res) {
     { peek }
   )
 
+  const resolvedCommentIdsInProject =
+    await ChatApiHandler.promises.getResolvedThreadIds(projectId)
+
+  const commentIdsInDoc = new Set(
+    ranges?.comments?.map(comment => comment.id) ?? []
+  )
+
+  const resolvedCommentIds = resolvedCommentIdsInProject.filter(commentId =>
+    commentIdsInDoc.has(commentId)
+  )
+
   if (plain) {
     plainTextResponse(res, lines.join('\n'))
   } else {
@@ -53,6 +65,7 @@ async function getDocument(req, res) {
       projectHistoryId,
       projectHistoryType,
       historyRangesSupport,
+      resolvedCommentIds,
     })
   }
 }
