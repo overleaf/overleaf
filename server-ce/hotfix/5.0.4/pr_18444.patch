@@ -1,0 +1,41 @@
+diff --git a/services/web/frontend/js/features/file-view/components/file-view-pdf.tsx b/services/web/frontend/js/features/file-view/components/file-view-pdf.tsx
+index 4d3b80bb9a2..3efc61a2199 100644
+--- a/services/web/frontend/js/features/file-view/components/file-view-pdf.tsx
++++ b/services/web/frontend/js/features/file-view/components/file-view-pdf.tsx
+@@ -33,7 +33,10 @@ const FileViewPdf: FC<{
+           return
+         }
+ 
+-        const pdf = await PDFJS.getDocument(preview.url).promise
++        const pdf = await PDFJS.getDocument({
++          url: preview.url,
++          isEvalSupported: false,
++        }).promise
+ 
+         // bail out if loading the PDF took too long
+         if (!mountedRef.current) {
+diff --git a/services/web/frontend/js/features/pdf-preview/util/pdf-js-wrapper.js b/services/web/frontend/js/features/pdf-preview/util/pdf-js-wrapper.js
+index 9b419b1397f..6a92630a215 100644
+--- a/services/web/frontend/js/features/pdf-preview/util/pdf-js-wrapper.js
++++ b/services/web/frontend/js/features/pdf-preview/util/pdf-js-wrapper.js
+@@ -96,6 +96,7 @@ export default class PDFJSWrapper {
+         rangeChunkSize,
+         disableAutoFetch: true,
+         disableStream,
++        isEvalSupported: false,
+         textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
+         range: rangeTransport,
+       })
+diff --git a/services/web/frontend/js/features/source-editor/extensions/visual/visual-widgets/graphics.ts b/services/web/frontend/js/features/source-editor/extensions/visual/visual-widgets/graphics.ts
+index 7321f9e02b5..f6c744aaec2 100644
+--- a/services/web/frontend/js/features/source-editor/extensions/visual/visual-widgets/graphics.ts
++++ b/services/web/frontend/js/features/source-editor/extensions/visual/visual-widgets/graphics.ts
+@@ -143,7 +143,7 @@ export class GraphicsWidget extends WidgetType {
+       return
+     }
+ 
+-    const pdf = await PDFJS.getDocument(url).promise
++    const pdf = await PDFJS.getDocument({ url, isEvalSupported: false }).promise
+     const page = await pdf.getPage(1)
+ 
+     // bail out if loading the PDF took too long

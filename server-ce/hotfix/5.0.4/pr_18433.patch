@@ -1,0 +1,63 @@
+diff --git a/package-lock.json b/package-lock.json
+index b9eba6086b..bb1a5cebaf 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -70674,8 +70674,7 @@
+       "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="
+     },
+     "multer": {
+-      "version": "1.4.4",
+-      "resolved": "https://registry.npmjs.org/multer/-/multer-1.4.4.tgz",
++      "version": "https://registry.npmjs.org/multer/-/multer-1.4.4.tgz",
+       "integrity": "sha512-2wY2+xD4udX612aMqMcB8Ws2Voq6NIUPEtD1be6m411T4uDH/VtL9i//xvcyFlTVfRdaBsk7hV5tgrGQqhuBiw==",
+       "requires": {
+         "append-field": "^1.0.0",
+@@ -76995,10 +76994,10 @@
+         "js-yaml": "^3.3.1",
+         "json-refs": "^3.0.2",
+         "lodash": "^4.17.4",
+-        "multer": "^1.1.0",
++        "multer": "1.4.5-lts.1",
+         "parseurl": "^1.3.0",
+         "path-to-regexp": "^2.0.0",
+-        "qs": "^6.0.3",
++        "qs": "6.5.3",
+         "serve-static": "^1.10.0",
+         "spark-md5": "^3.0.0",
+         "superagent": "^3.5.2",
+@@ -77035,7 +77034,7 @@
+             "http-errors": "~1.6.2",
+             "iconv-lite": "0.4.19",
+             "on-finished": "~2.3.0",
+-            "qs": "6.5.1",
++            "qs": "6.5.3",
+             "raw-body": "2.3.2",
+             "type-is": "~1.6.15"
+           },
+@@ -77109,8 +77108,7 @@
+           "integrity": "sha512-G6zHoVqC6GGTQkZwF4lkuEyMbVOjoBKAEybQUypI1WTkqinCOrq2x6U2+phkJ1XsEMTy4LjtwPI7HW+NVrRR2w=="
+         },
+         "qs": {
+-          "version": "6.5.1",
+-          "resolved": "https://registry.npmjs.org/qs/-/qs-6.5.1.tgz",
++          "version": "https://registry.npmjs.org/qs/-/qs-6.5.1.tgz",
+           "integrity": "sha512-eRzhrN1WSINYCDCbrz796z37LOe3m5tmW7RQf6oBntukAG1nmovJvhnwHHRMAfeoItc1m2Hk02WER2aQ/iqs+A=="
+         },
+         "raw-body": {
+diff --git a/package.json b/package.json
+index f092472caf..329d4fc5ce 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,12 @@
+ {
+   "name": "overleaf",
+   "private": true,
++  "overrides": {
++    "swagger-tools": {
++      "multer": "1.4.5-lts.1",
++      "qs": "6.5.3"
++    }
++  },
+   "dependencies": {
+     "patch-package": "^8.0.0"
+   },

@@ -1,0 +1,111 @@
+diff --git a/services/web/frontend/js/features/source-editor/components/command-tooltip/href-tooltip.tsx b/services/web/frontend/js/features/source-editor/components/command-tooltip/href-tooltip.tsx
+index a0d681d9cb5..2f9a4333cd6 100644
+--- a/services/web/frontend/js/features/source-editor/components/command-tooltip/href-tooltip.tsx
++++ b/services/web/frontend/js/features/source-editor/components/command-tooltip/href-tooltip.tsx
+@@ -17,6 +17,7 @@ import {
+ import { Button, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
+ import Icon from '../../../../shared/components/icon'
+ import { EditorState } from '@codemirror/state'
++import { openURL } from '@/features/source-editor/utils/url'
+ 
+ export const HrefTooltipContent: FC = () => {
+   const state = useCodeMirrorStateContext()
+@@ -108,7 +109,7 @@ export const HrefTooltipContent: FC = () => {
+         className="ol-cm-command-tooltip-link"
+         onClick={() => {
+           // TODO: unescape content
+-          window.open(url, '_blank')
++          openURL(url)
+         }}
+       >
+         <Icon type="external-link" fw />
+diff --git a/services/web/frontend/js/features/source-editor/components/command-tooltip/url-tooltip.tsx b/services/web/frontend/js/features/source-editor/components/command-tooltip/url-tooltip.tsx
+index c51b497de01..632d71dd031 100644
+--- a/services/web/frontend/js/features/source-editor/components/command-tooltip/url-tooltip.tsx
++++ b/services/web/frontend/js/features/source-editor/components/command-tooltip/url-tooltip.tsx
+@@ -9,6 +9,7 @@ import {
+ } from '../../lezer-latex/latex.terms.mjs'
+ import Icon from '../../../../shared/components/icon'
+ import { EditorState } from '@codemirror/state'
++import { openURL } from '@/features/source-editor/utils/url'
+ 
+ export const UrlTooltipContent: FC = () => {
+   const { t } = useTranslation()
+@@ -23,7 +24,7 @@ export const UrlTooltipContent: FC = () => {
+         onClick={() => {
+           const url = readUrl(state)
+           if (url) {
+-            window.open(url, '_blank')
++            openURL(url)
+           }
+         }}
+       >
+diff --git a/services/web/frontend/js/features/source-editor/utils/url.ts b/services/web/frontend/js/features/source-editor/utils/url.ts
+new file mode 100644
+index 00000000000..8bfc9bdeab8
+--- /dev/null
++++ b/services/web/frontend/js/features/source-editor/utils/url.ts
+@@ -0,0 +1,11 @@
++const ALLOWED_PROTOCOLS = ['https:', 'http:']
++
++export const openURL = (content: string) => {
++  const url = new URL(content, document.location.href)
++
++  if (!ALLOWED_PROTOCOLS.includes(url.protocol)) {
++    throw new Error(`Not opening URL with protocol ${url.protocol}`)
++  }
++
++  window.open(url, '_blank')
++}
+diff --git a/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-command-tooltip.spec.tsx b/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-command-tooltip.spec.tsx
+index 837f90a64ab..d46b522a116 100644
+--- a/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-command-tooltip.spec.tsx
++++ b/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-command-tooltip.spec.tsx
+@@ -54,8 +54,8 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
+     // open the link
+     cy.findByRole('button', { name: 'Go to page' }).click()
+     cy.get('@window-open').should(
+-      'have.been.calledOnceWithExactly',
+-      'https://example.com',
++      'have.been.calledWithMatch',
++      Cypress.sinon.match.has('href', 'https://example.com/'),
+       '_blank'
+     )
+ 
+@@ -112,8 +112,8 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
+     // open the link
+     cy.findByRole('button', { name: 'Go to page' }).click()
+     cy.get('@window-open').should(
+-      'have.been.calledOnceWithExactly',
+-      'https://example.com',
++      'have.been.calledWithMatch',
++      Cypress.sinon.match.has('href', 'https://example.com/'),
+       '_blank'
+     )
+   })
+diff --git a/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-tooltips.spec.tsx b/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-tooltips.spec.tsx
+index c6e28f9eeeb..106a80ba187 100644
+--- a/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-tooltips.spec.tsx
++++ b/services/web/test/frontend/features/source-editor/components/codemirror-editor-visual-tooltips.spec.tsx
+@@ -42,8 +42,8 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
+       })
+       cy.findByRole('button', { name: 'Go to page' }).click()
+       cy.get('@open-window').should(
+-        'have.been.calledOnceWithExactly',
+-        'https://example.com/foo',
++        'have.been.calledWithMatch',
++        Cypress.sinon.match.has('href', 'https://example.com/foo'),
+         '_blank'
+       )
+       cy.findByRole('button', { name: 'Remove link' }).click()
+@@ -62,8 +62,8 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
+       })
+       cy.findByRole('button', { name: 'Go to page' }).click()
+       cy.get('@open-window').should(
+-        'have.been.calledOnceWithExactly',
+-        'https://example.com',
++        'have.been.calledWithMatch',
++        Cypress.sinon.match.has('href', 'https://example.com/'),
+         '_blank'
+       )
+     })
