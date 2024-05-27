@@ -34,6 +34,7 @@ describe('SamlLogHandler', function () {
         {
           session: { saml: { universityId: providerId } },
           sessionID: sessionId,
+          path: '/saml/ukamf',
         },
         data
       )
@@ -62,6 +63,7 @@ describe('SamlLogHandler', function () {
         {
           session: { saml: { universityId: providerId } },
           sessionID: sessionId,
+          path: '/saml/ukamf',
         },
         circularRef
       )
@@ -91,6 +93,7 @@ describe('SamlLogHandler', function () {
         {
           session: { saml: { universityId: providerId } },
           sessionID: sessionId,
+          path: '/saml/ukamf',
         },
         data
       )
@@ -104,6 +107,56 @@ describe('SamlLogHandler', function () {
         },
         'SamlLog Error'
       )
+    })
+  })
+
+  describe('with /saml/group-sso path', function () {
+    let err
+
+    beforeEach(async function () {
+      err = new Error()
+      samlLog.save = sinon.stub().rejects(err)
+
+      await SamlLogHandler.promises.log(
+        {
+          session: { saml: { universityId: providerId } },
+          sessionID: sessionId,
+          path: '/saml/group-sso',
+        },
+        data
+      )
+    })
+
+    it('should log error', function () {
+      this.logger.error.should.have.been.calledOnce.and.calledWithMatch(
+        {
+          err,
+          sessionId: sessionId.substr(0, 8),
+        },
+        'SamlLog Error'
+      )
+    })
+  })
+
+  describe('with a path not in the allow list', function () {
+    let err
+
+    beforeEach(async function () {
+      err = new Error()
+      samlLog.save = sinon.stub().rejects(err)
+
+      await SamlLogHandler.promises.log(
+        {
+          session: { saml: { universityId: providerId } },
+          sessionID: sessionId,
+          path: '/unsupported',
+        },
+        data
+      )
+    })
+
+    it('should not log any error', function () {
+      this.logger.error.should.not.have.been.called
     })
   })
 })

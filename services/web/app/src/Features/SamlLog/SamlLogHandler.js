@@ -3,6 +3,9 @@ const SessionManager = require('../Authentication/SessionManager')
 const logger = require('@overleaf/logger')
 const { err: errSerializer } = require('@overleaf/logger/serializers')
 const { callbackify } = require('util')
+const Settings = require('@overleaf/settings')
+
+const ALLOWED_PATHS = Settings.saml?.logAllowList || ['/saml/']
 
 async function log(req, data, samlAssertion) {
   let providerId, sessionId
@@ -10,14 +13,18 @@ async function log(req, data, samlAssertion) {
   data = data || {}
 
   try {
-    const samlLog = new SamlLog()
     const { path, query } = req
+    if (!ALLOWED_PATHS.some(allowedPath => path.startsWith(allowedPath))) {
+      return
+    }
+
     const { saml } = req.session
     const userId = SessionManager.getLoggedInUserId(req.session)
 
     providerId = (req.session.saml?.universityId || '').toString()
     sessionId = (req.sessionID || '').toString().substr(0, 8)
 
+    const samlLog = new SamlLog()
     samlLog.providerId = providerId
     samlLog.sessionId = sessionId
     samlLog.path = path
