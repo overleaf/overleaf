@@ -1,11 +1,10 @@
-import Badge from '@/shared/components/badge'
+import BS3Badge from '@/shared/components/badge'
 import Icon from '@/shared/components/icon'
 import type { Meta, StoryObj } from '@storybook/react'
-import classnames from 'classnames'
 
-const meta: Meta<typeof Badge> = {
+const meta: Meta<typeof BS3Badge> = {
   title: 'Shared / Components / Badge / Bootstrap 3',
-  component: Badge,
+  component: BS3Badge,
   parameters: {
     bootstrap5: false,
   },
@@ -19,15 +18,10 @@ const meta: Meta<typeof Badge> = {
       },
     },
     bsStyle: {
-      options: [null, 'primary', 'warning', 'danger'],
+      options: ['info', 'primary', 'warning', 'danger'],
       control: { type: 'radio' },
     },
     className: {
-      table: {
-        disable: true,
-      },
-    },
-    closeBtnProps: {
       table: {
         disable: true,
       },
@@ -36,58 +30,30 @@ const meta: Meta<typeof Badge> = {
 }
 export default meta
 
-type Story = StoryObj<typeof Badge>
+type Story = StoryObj<typeof BS3Badge>
 
 export const BadgeDefault: Story = {
   render: args => {
     return (
-      <Badge
-        className={classnames({ 'badge-bs3': args.bsStyle === null })}
-        {...args}
-      />
+      <div className="small">
+        <BS3Badge {...args} />
+      </div>
     )
   },
 }
 BadgeDefault.args = {
-  bsStyle: null,
+  bsStyle: meta.argTypes!.bsStyle!.options[0],
 }
 
 export const BadgePrepend: Story = {
   render: args => {
     return (
-      <Badge
-        className={classnames({ 'badge-bs3': args.bsStyle === null })}
-        prepend={<Icon type="tag" fw />}
-        {...args}
-      />
+      <div className="small">
+        <BS3Badge prepend={<Icon type="star" fw />} {...args} />
+      </div>
     )
   },
 }
 BadgePrepend.args = {
-  bsStyle: null,
-}
-
-export const BadgeWithCloseButton: Story = {
-  render: args => {
-    return (
-      <Badge
-        className={classnames({ 'badge-bs3': args.bsStyle === null })}
-        prepend={<Icon type="tag" fw />}
-        closeBtnProps={{
-          onClick: () => alert('Close triggered!'),
-        }}
-        {...args}
-      />
-    )
-  },
-}
-BadgeWithCloseButton.args = {
-  bsStyle: null,
-}
-BadgeWithCloseButton.argTypes = {
-  bsStyle: {
-    table: {
-      disable: true,
-    },
-  },
+  bsStyle: meta.argTypes!.bsStyle!.options[0],
 }

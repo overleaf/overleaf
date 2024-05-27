@@ -48,7 +48,7 @@ export default function MemberRow({
               >
                 <Badge
                   bsStyle={null}
-                  className="badge-bs3"
+                  className="badge-tag-bs3"
                   aria-label={t('pending_invite')}
                   data-testid="badge-pending-invite"
                 >

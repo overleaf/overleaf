@@ -49,7 +49,7 @@ export const BadgeDefault: Story = {
   },
 }
 BadgeDefault.args = {
-  bg: 'light',
+  bg: meta.argTypes!.bg!.options[0],
 }
 
 export const BadgePrepend: Story = {
@@ -57,37 +57,12 @@ export const BadgePrepend: Story = {
     return (
       <Badge
         className={classnames({ 'text-dark': args.bg === 'light' })}
-        prepend={<Icon type="tag" fw />}
+        prepend={<Icon type="star" fw />}
         {...args}
       />
     )
   },
 }
 BadgePrepend.args = {
-  bg: 'light',
-}
-
-export const BadgeWithCloseButton: Story = {
-  render: args => {
-    return (
-      <Badge
-        className={classnames({ 'text-dark': args.bg === 'light' })}
-        prepend={<Icon type="tag" fw />}
-        closeBtnProps={{
-          onClick: () => alert('Close triggered!'),
-        }}
-        {...args}
-      />
-    )
-  },
-}
-BadgeWithCloseButton.args = {
-  bg: 'light',
-}
-BadgeWithCloseButton.argTypes = {
-  bg: {
-    table: {
-      disable: true,
-    },
-  },
+  bg: meta.argTypes!.bg!.options[0],
 }

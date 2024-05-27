@@ -1,10 +1,10 @@
-.badge-bs3 {
+.badge-tag-bs3 {
   @size: 24px;
   @padding: 4px;
   display: inline-flex;
   align-items: center;
-  overflow: hidden;
   height: @size;
+  max-width: 100%;
   min-height: @size;
   padding: 0 @padding;
   white-space: nowrap;
@@ -26,10 +26,14 @@
     margin-left: 4px;
     font-size: 20px;
     height: @size;
+    line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     margin-right: -@padding;
+    border-top-right-radius: inherit;
+    border-bottom-right-radius: inherit;
     color: inherit;
 
     &:hover {
@@ -37,13 +41,7 @@
     }
   }
 
-  &-sm {
-    @size-sm: 20px;
-    height: @size-sm;
-    font-size: @font-size-extra-small;
-    .badge-bs3-close {
-      width: @size-sm;
-      font-size: @size-sm;
-    }
+  &-content {
+    .text-overflow();
   }
 }

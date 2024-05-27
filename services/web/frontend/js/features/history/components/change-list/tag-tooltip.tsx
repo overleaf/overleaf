@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { Modal } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 import Tooltip from '../../../../shared/components/tooltip'
-import Badge from '../../../../shared/components/badge'
 import AccessibleModal from '../../../../shared/components/accessible-modal'
 import ModalError from './modal-error'
 import useAbortController from '../../../../shared/hooks/use-abort-controller'
@@ -16,13 +15,14 @@ import { LoadedLabel } from '../../services/types/label'
 import { debugConsole } from '@/utils/debugging'
 import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 import { useEditorContext } from '@/shared/context/editor-context'
+import Tag from '@/shared/components/tag'
 
 type TagProps = {
   label: LoadedLabel
   currentUserId: string
 }
 
-function Tag({ label, currentUserId, ...props }: TagProps) {
+function ChangeTag({ label, currentUserId, ...props }: TagProps) {
   const { isProjectOwner } = useEditorContext()
 
   const { t } = useTranslation()
@@ -70,22 +70,21 @@ function Tag({ label, currentUserId, ...props }: TagProps) {
 
   return (
     <>
-      <Badge
+      <Tag
         prepend={<Icon type="tag" fw />}
         closeBtnProps={
           showCloseButton
             ? { 'aria-label': t('delete'), onClick: showConfirmationModal }
             : undefined
         }
-        bsStyle={null}
-        className="badge-bs3 history-version-badge"
+        className="history-version-badge"
         data-testid="history-version-badge"
         {...props}
       >
         {isPseudoCurrentStateLabel
           ? t('history_label_project_current_state')
           : label.comment}
-      </Badge>
+      </Tag>
       {!isPseudoCurrentStateLabel && (
         <AccessibleModal
           show={showDeleteModal}
@@ -167,10 +166,10 @@ function TagTooltip({ label, currentUserId, showTooltip }: LabelBadgesProps) {
       id={label.id}
       overlayProps={{ placement: 'left' }}
     >
-      <Tag label={label} currentUserId={currentUserId} />
+      <ChangeTag label={label} currentUserId={currentUserId} />
     </Tooltip>
   ) : (
-    <Tag label={label} currentUserId={currentUserId} />
+    <ChangeTag label={label} currentUserId={currentUserId} />
   )
 }
 

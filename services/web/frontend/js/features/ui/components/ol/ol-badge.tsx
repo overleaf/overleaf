@@ -15,7 +15,6 @@ function OLBadge(props: OLBadgeProps) {
   let bs3BadgeProps: React.ComponentProps<typeof BS3Badge> = {
     prepend: rest.prepend,
     children: rest.children,
-    closeBtnProps: rest.closeBtnProps,
     className: rest.className,
     bsStyle: rest.bg,
   }
