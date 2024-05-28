@@ -13,6 +13,11 @@ import {
   updateMainGroupPlanPricing,
 } from './plans-v2-group-plan'
 import { setUpGroupSubscriptionButtonAction } from './plans-v2-subscription-button'
+import {
+  getViewInfoFromHash,
+  handleForStudentsLinkInFooter,
+  setHashFromViewTab,
+} from './plans-v2-hash'
 import getMeta from '../../../../utils/meta'
 
 const currentCurrencyCode = getMeta('ol-recommendedCurrency')
@@ -116,6 +121,9 @@ function selectTab(viewTab) {
   updateMonthlyAnnualSwitchValue(viewTab)
 
   toggleUniversityInfo(viewTab)
+
+  // update the hash to reflect the current view when switching individual, group, or student tabs
+  setHashFromViewTab(viewTab, currentMonthlyAnnualSwitchValue)
 }
 
 function updateMonthlyAnnualSwitchValue(viewTab) {
@@ -190,19 +198,22 @@ function toggleUniversityInfo(viewTab) {
   el.hidden = viewTab !== 'student'
 }
 
-function selectViewFromHash() {
+// This is the old scheme for hashing redirection
+// This is deprecated and should be removed in the future
+// This is only used for backward compatibility
+function selectViewFromHashDeprecated() {
   try {
     const params = new URLSearchParams(window.location.hash.substring(1))
     const view = params.get('view')
     if (view) {
       // View params are expected to be of the format e.g. individual or individual-monthly
-      const [tab, cadence] = view.split('-')
+      const [tab, period] = view.split('-')
       // make sure the selected view is valid
       if (document.querySelector(`[data-ol-plans-v2-view-tab="${tab}"]`)) {
         selectTab(tab)
 
-        if (['monthly', 'annual'].includes(cadence)) {
-          currentMonthlyAnnualSwitchValue = cadence
+        if (['monthly', 'annual'].includes(period)) {
+          currentMonthlyAnnualSwitchValue = period
         } else {
           // set annual as the default
           currentMonthlyAnnualSwitchValue = 'annual'
@@ -210,28 +221,41 @@ function selectViewFromHash() {
 
         updateMonthlyAnnualSwitchValue(tab)
 
-        // clear the hash so it doesn't persist when switching plans
-        const currentURL = window.location.pathname + window.location.search
-        history.replaceState('', document.title, currentURL)
-
-        // Add a small delay since it seems the scroll won't behave correctly on this scenario:
-        // 1. Open plans page
-        // 2. Click on "Group Plans"
-        // 3. Scroll down to footer
-        // 4. Click "For students" link
-        //
-        // I assume this is happening because the `selectTab` function above is doing a lot
-        // of computation to change the view and it somehow prevents the `window.scrollTo` command
-        // to behave correctly.
-        const SCROLL_TO_TOP_DELAY = 50
-
-        window.setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        }, SCROLL_TO_TOP_DELAY)
+        // change the hash with the new scheme
+        setHashFromViewTab(tab, currentMonthlyAnnualSwitchValue)
       }
     }
   } catch {
     // do nothing
+  }
+}
+
+function selectViewAndPeriodFromHash() {
+  const [viewTab, period] = getViewInfoFromHash()
+
+  // the sequence of these three lines is important
+  // because `currentMonthlyAnnualSwitchValue` is mutable.
+  // `selectTab` and `updateMonthlyAnnualSwitchValue` depend on the value of `currentMonthlyAnnualSwitchValue`
+  // to determine the UI state
+  currentMonthlyAnnualSwitchValue = period
+  selectTab(viewTab)
+  updateMonthlyAnnualSwitchValue(viewTab)
+
+  // handle the case where user access plans page while still on the plans page
+  // current example would the the "For students" link on the footer
+  const SCROLL_TO_TOP_DELAY = 50
+  window.setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, SCROLL_TO_TOP_DELAY)
+}
+
+// call the function to select the view and period from the hash value
+// this is called once when the page is loaded
+if (window.location.hash) {
+  if (window.location.hash.includes('view')) {
+    selectViewFromHashDeprecated()
+  } else {
+    selectViewAndPeriodFromHash()
   }
 }
 
@@ -249,6 +273,15 @@ document
     }
 
     switchMonthlyAnnual(currentMonthlyAnnualSwitchValue)
+
+    // update the hash to reflect the current view when pressing the monthly-annual switch
+    const DEFAULT_VIEW_TAB = 'individual'
+    const viewTab =
+      document
+        .querySelector('[data-ol-plans-v2-m-a-switch-container]')
+        .getAttribute('data-ol-current-view') ?? DEFAULT_VIEW_TAB
+
+    setHashFromViewTab(viewTab, currentMonthlyAnnualSwitchValue)
   })
 
 document
@@ -261,6 +294,14 @@ setUpMonthlyAnnualSwitching()
 setUpGroupSubscriptionButtonAction()
 setUpStickyHeaderObserver()
 updateLinkTargets()
+handleForStudentsLinkInFooter()
 
-selectViewFromHash()
-window.addEventListener('hashchange', selectViewFromHash)
+window.addEventListener('hashchange', () => {
+  if (window.location.hash) {
+    if (window.location.hash.includes('view')) {
+      selectViewFromHashDeprecated()
+    } else {
+      selectViewAndPeriodFromHash()
+    }
+  }
+})

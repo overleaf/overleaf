@@ -49,7 +49,10 @@ footer.fat-footer.hidden-print
 					li
 						a(href="/for/universities") #{translate('for_universities')}
 					li
-						a(href="/user/subscription/plans?itm_referrer=footer-for-students#view=student") #{translate('for_students')}
+						a(
+							data-ol-for-students-link
+							href="/user/subscription/plans?itm_referrer=footer-for-students#student-annual"
+						) #{translate('for_students')}
 						
 			.footer-section
 				h2.footer-section-heading #{translate('get_involved')}
