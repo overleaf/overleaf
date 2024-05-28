@@ -7,12 +7,15 @@ block entrypointVar
 	- entrypoint = 'marketing'
 
 block body
-	if (typeof(suppressNavbar) == "undefined")
-		include layout/navbar-marketing
+	if (typeof suppressNavbar === "undefined")
+		if bootstrapVersion === 5
+			include layout/navbar-marketing-bootstrap-5
+		else
+			include layout/navbar-marketing
 
 	block content
 
-	if (typeof(suppressFooter) == "undefined")
+	if (typeof suppressFooter === "undefined")
 		if showThinFooter
 			include layout/footer-marketing
 		else

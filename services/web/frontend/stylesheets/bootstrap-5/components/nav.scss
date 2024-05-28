@@ -1,0 +1,56 @@
+@import 'bootstrap-5/scss/functions';
+
+:root {
+  // Basics
+  --navbar-item-spacing-horizontal: var(--spacing-06);
+
+  --navbar-bg: var(--bg-dark-primary);
+  --navbar-border: transparent;
+
+  --navbar-padding-h: var(--spacing-05);
+  --navbar-padding: 0 var(--navbar-padding-h);
+
+  --navbar-brand-width: 130px;
+  --navbar-brand-image-url: url(../../../../public/img/ol-brand/overleaf-white.svg);
+
+  // Title, when used instead of a logo
+  --navbar-title-font-size: var(--font-size-05);
+  --navbar-title-color: var(--neutral-20);
+  --navbar-title-color-hover: var(--neutral-40);
+
+  // Button-like top-level items
+  --navbar-btn-font-size: #{$font-size-base};
+  --navbar-btn-border-radius: #{$border-radius-full};
+  --navbar-btn-border-width: #{$spacing-01};
+  --navbar-btn-font-weight: #{$font-weight-base};
+  --navbar-btn-padding-v: #{$spacing-02};
+  --navbar-btn-padding-h: #{$spacing-06};
+  --navbar-btn-line-height: #{$line-height-base};
+
+  // Properties of "subdued" items
+  --navbar-subdued-padding: calc(
+      var(--navbar-btn-padding-v) + var(--navbar-btn-border-width)
+    )
+    calc(var(--navbar-btn-padding-h) + 1px);
+  --navbar-subdued-color: var(--white);
+  --navbar-subdued-hover-bg: var(--white);
+  --navbar-subdued-hover-color: var(--green-50);
+
+  // Links
+  --navbar-link-color: var(--white);
+  --navbar-link-border-color: var(--navbar-link-color);
+
+  --navbar-link-hover-color: var(--white);
+  --navbar-link-hover-bg: var(--green-50);
+  --navbar-link-hover-border-color: var(--navbar-link-hover-bg);
+
+  // Toggler
+  --navbar-toggler-expanded-color: var(--navbar-link-color);
+  --navbar-toggler-expanded-bg: var(--blue-60);
+
+  // Mobile view
+  --navbar-hamburger-submenu-bg: var(--bg-dark-secondary);
+  --navbar-hamburger-submenu-item-color: var(--navbar-link-color);
+  --navbar-hamburger-submenu-item-hover-color: var(--navbar-link-color);
+  --navbar-hamburger-submenu-item-hover-bg: var(--navbar-link-hover-bg);
+}

@@ -130,7 +130,6 @@ $form-validation-states: (
   ),
 );
 // Close buttons
-// Close button
 $btn-close-color: $content-primary;
 $btn-close-opacity: 1;
 $btn-close-width: 10px;
@@ -144,6 +143,14 @@ $warning: $bg-warning-01;
 $danger: $bg-danger-01;
 $light: $bg-light-tertiary;
 $dark: $neutral-90;
+
+// Body colors
+$body-color: $content-primary;
+$body-bg: $bg-light-primary;
+$body-secondary-color: $content-secondary;
+$body-secondary-bg: $bg-light-secondary;
+$body-tertiary-color: $content-disabled;
+$body-tertiary-bg: $bg-light-tertiary;
 
 // Badges
 $badge-font-size: var(--font-size-01);
@@ -183,3 +190,30 @@ $box-shadow-lg: shadow-lg();
 $modal-header-padding: $spacing-05 $spacing-06;
 $modal-header-padding-x: $spacing-08;
 $modal-header-padding-y: $spacing-08;
+
+// Nav toggler
+$navbar-toggler-font-size: 30px;
+$navbar-toggler-padding-x: var(--spacing-05);
+$navbar-toggler-padding-y: var(--spacing-02);
+$navbar-toggler-border-radius: var(--border-radius-base);
+
+// Spacing scale used by Bootstrap utilities
+$spacer: $spacing-06;
+$spacers: (
+  0: 0,
+  1: $spacing-02,
+  2: $spacing-04,
+  3: $spacing-06,
+  4: $spacing-08,
+  5: $spacing-11,
+);
+
+// Dropdowns
+$dropdown-link-disabled-color: var(--content-disabled);
+$dropdown-spacer: var(--spacing-01);
+$dropdown-border-width: 0;
+$dropdown-border-radius: var(--border-radius-base);
+$dropdown-padding-x: var(--spacing-02);
+$dropdown-padding-y: var(--spacing-02);
+$dropdown-item-padding-x: var(--spacing-04);
+$dropdown-item-padding-y: var(--spacing-05);

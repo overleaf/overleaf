@@ -22,6 +22,7 @@
 // Layout & components
 @import 'bootstrap-5/scss/root';
 @import 'bootstrap-5/scss/reboot';
+@import 'bootstrap-5/scss/transitions';
 @import 'bootstrap-5/scss/type';
 @import 'bootstrap-5/scss/images';
 @import 'bootstrap-5/scss/containers';
@@ -35,6 +36,8 @@
 @import 'bootstrap-5/scss/spinners';
 @import 'bootstrap-5/scss/card';
 @import 'bootstrap-5/scss/close';
+@import 'bootstrap-5/scss/nav';
+@import 'bootstrap-5/scss/navbar';
 
 // Helpers
 @import 'bootstrap-5/scss/helpers';

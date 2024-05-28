@@ -11,6 +11,7 @@ import type {
   DropdownItemProps,
   DropdownToggleProps,
   DropdownMenuProps,
+  DropdownDividerProps,
 } from '@/features/ui/components/types/dropdown-menu-props'
 import MaterialIcon from '@/shared/components/material-icon'
 
@@ -62,9 +63,9 @@ export function DropdownToggle({ ...props }: DropdownToggleProps) {
 }
 
 export function DropdownMenu({ as = 'ul', ...props }: DropdownMenuProps) {
-  return <BS5DropdownMenu as={as} role="menubar" {...props} />
+  return <BS5DropdownMenu as={as} role="menu" {...props} />
 }
 
-export function DropdownDivider() {
-  return <BS5DropdownDivider aria-hidden="true" />
+export function DropdownDivider({ as = 'li' }: DropdownDividerProps) {
+  return <BS5DropdownDivider as={as} />
 }

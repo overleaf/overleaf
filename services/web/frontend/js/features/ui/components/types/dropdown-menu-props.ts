@@ -45,3 +45,7 @@ export type DropdownMenuProps = PropsWithChildren<{
   disabled?: boolean
   show?: boolean
 }>
+
+export type DropdownDividerProps = PropsWithChildren<{
+  as?: ElementType
+}>
