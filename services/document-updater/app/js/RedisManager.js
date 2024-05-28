@@ -35,6 +35,7 @@ const RedisManager = {
     docLines,
     version,
     ranges,
+    resolvedCommentIds,
     pathname,
     projectHistoryId,
     historyRangesSupport,
@@ -101,6 +102,13 @@ const RedisManager = {
           })
           if (historyRangesSupport) {
             multi.sadd(keys.historyRangesSupport(), docId)
+            multi.del(keys.resolvedCommentIds({ doc_id: docId }))
+            if (resolvedCommentIds.length > 0) {
+              multi.sadd(
+                keys.resolvedCommentIds({ doc_id: docId }),
+                ...resolvedCommentIds
+              )
+            }
           }
           multi.exec(callback)
         }
@@ -132,7 +140,8 @@ const RedisManager = {
       keys.projectHistoryId({ doc_id: docId }),
       keys.unflushedTime({ doc_id: docId }),
       keys.lastUpdatedAt({ doc_id: docId }),
-      keys.lastUpdatedBy({ doc_id: docId })
+      keys.lastUpdatedBy({ doc_id: docId }),
+      keys.resolvedCommentIds({ doc_id: docId })
     )
     multi.exec((error, response) => {
       if (error) {
@@ -209,70 +218,85 @@ const RedisManager = {
         if (error) {
           return callback(error)
         }
-        const historyRangesSupport = result === 1
+        rclient.smembers(
+          keys.resolvedCommentIds({ doc_id: docId }),
+          (error, resolvedCommentIds) => {
+            if (error) {
+              return callback(error)
+            }
 
-        const timeSpan = timer.done()
-        // check if request took too long and bail out.  only do this for
-        // get, because it is the first call in each update, so if this
-        // passes we'll assume others have a reasonable chance to succeed.
-        if (timeSpan > MAX_REDIS_REQUEST_LENGTH) {
-          error = new Error('redis getDoc exceeded timeout')
-          return callback(error)
-        }
-        // record bytes loaded from redis
-        if (docLines != null) {
-          metrics.summary('redis.docLines', docLines.length, { status: 'get' })
-        }
-        // check sha1 hash value if present
-        if (docLines != null && storedHash != null) {
-          const computedHash = RedisManager._computeHash(docLines)
-          if (logHashReadErrors && computedHash !== storedHash) {
-            logger.error(
-              {
-                projectId,
-                docId,
-                docProjectId,
-                computedHash,
-                storedHash,
-                docLines,
-              },
-              'hash mismatch on retrieved document'
+            const historyRangesSupport = result === 1
+
+            const timeSpan = timer.done()
+            // check if request took too long and bail out.  only do this for
+            // get, because it is the first call in each update, so if this
+            // passes we'll assume others have a reasonable chance to succeed.
+            if (timeSpan > MAX_REDIS_REQUEST_LENGTH) {
+              error = new Error('redis getDoc exceeded timeout')
+              return callback(error)
+            }
+            // record bytes loaded from redis
+            if (docLines != null) {
+              metrics.summary('redis.docLines', docLines.length, {
+                status: 'get',
+              })
+            }
+            // check sha1 hash value if present
+            if (docLines != null && storedHash != null) {
+              const computedHash = RedisManager._computeHash(docLines)
+              if (logHashReadErrors && computedHash !== storedHash) {
+                logger.error(
+                  {
+                    projectId,
+                    docId,
+                    docProjectId,
+                    computedHash,
+                    storedHash,
+                    docLines,
+                  },
+                  'hash mismatch on retrieved document'
+                )
+              }
+            }
+
+            try {
+              docLines = JSON.parse(docLines)
+              ranges = RedisManager._deserializeRanges(ranges)
+            } catch (e) {
+              return callback(e)
+            }
+
+            version = parseInt(version || 0, 10)
+            // check doc is in requested project
+            if (docProjectId != null && docProjectId !== projectId) {
+              logger.error(
+                { projectId, docId, docProjectId },
+                'doc not in project'
+              )
+              return callback(new Errors.NotFoundError('document not found'))
+            }
+
+            if (docLines && version && !pathname) {
+              metrics.inc('pathname', 1, {
+                path: 'RedisManager.getDoc',
+                status: pathname === '' ? 'zero-length' : 'undefined',
+              })
+            }
+
+            callback(
+              null,
+              docLines,
+              version,
+              ranges,
+              pathname,
+              projectHistoryId,
+              unflushedTime,
+              lastUpdatedAt,
+              lastUpdatedBy,
+              historyRangesSupport,
+              resolvedCommentIds
             )
           }
-        }
-
-        try {
-          docLines = JSON.parse(docLines)
-          ranges = RedisManager._deserializeRanges(ranges)
-        } catch (e) {
-          return callback(e)
-        }
-
-        version = parseInt(version || 0, 10)
-        // check doc is in requested project
-        if (docProjectId != null && docProjectId !== projectId) {
-          logger.error({ projectId, docId, docProjectId }, 'doc not in project')
-          return callback(new Errors.NotFoundError('document not found'))
-        }
-
-        if (docLines && version && !pathname) {
-          metrics.inc('pathname', 1, {
-            path: 'RedisManager.getDoc',
-            status: pathname === '' ? 'zero-length' : 'undefined',
-          })
-        }
-
-        callback(
-          null,
-          docLines,
-          version,
-          ranges,
-          pathname,
-          projectHistoryId,
-          unflushedTime,
-          lastUpdatedAt,
-          lastUpdatedBy,
-          historyRangesSupport
         )
       })
     })
@@ -513,6 +537,22 @@ const RedisManager = {
     rclient.del(keys.unflushedTime({ doc_id: docId }), callback)
   },
 
+  updateCommentState(docId, commentId, resolved, callback) {
+    if (resolved) {
+      rclient.sadd(
+        keys.resolvedCommentIds({ doc_id: docId }),
+        commentId,
+        callback
+      )
+    } else {
+      rclient.srem(
+        keys.resolvedCommentIds({ doc_id: docId }),
+        commentId,
+        callback
+      )
+    }
+  },
+
   getDocIdsInProject(projectId, callback) {
     rclient.smembers(keys.docsInProject({ project_id: projectId }), callback)
   },
@@ -629,6 +669,7 @@ module.exports.promises = promisifyAll(RedisManager, {
       'lastUpdatedAt',
       'lastUpdatedBy',
       'historyRangesSupport',
+      'resolvedCommentIds',
     ],
     getNextProjectToFlushAndDelete: [
       'projectId',

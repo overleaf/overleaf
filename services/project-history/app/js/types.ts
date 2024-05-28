@@ -81,7 +81,7 @@ export type ResyncDocContentUpdate = {
     content: string
     version: number
     ranges?: Ranges
-    resolvedComments?: string[]
+    resolvedCommentIds?: string[]
   }
   projectHistoryId: string
   path: string
@@ -129,6 +129,7 @@ export type CommentOp = {
   t: string
   hpos?: number
   hlen?: number
+  resolved?: boolean
 }
 
 export type UpdateWithBlob = {

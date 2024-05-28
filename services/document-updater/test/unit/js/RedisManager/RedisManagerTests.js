@@ -66,6 +66,9 @@ describe('RedisManager', function () {
                 historyRangesSupport() {
                   return 'HistoryRangesSupport'
                 },
+                resolvedCommentIds({ doc_id: docId }) {
+                  return `ResolvedCommentIds:${docId}`
+                },
               },
             },
           },
@@ -112,6 +115,7 @@ describe('RedisManager', function () {
         .update(this.jsonlines, 'utf8')
         .digest('hex')
       this.ranges = { comments: 'mock', entries: 'mock' }
+      this.resolvedCommentIds = ['comment-1']
       this.json_ranges = JSON.stringify(this.ranges)
       this.unflushed_time = 12345
       this.pathname = '/a/b/c.tex'
@@ -131,6 +135,10 @@ describe('RedisManager', function () {
       this.rclient.sismember
         .withArgs('HistoryRangesSupport', this.docId)
         .yields(null, 0)
+      this.rclient.smembers = sinon.stub()
+      this.rclient.smembers
+        .withArgs(`ResolvedCommentIds:${this.docId}`)
+        .yields(null, this.resolvedCommentIds)
     })
 
     describe('successfully', function () {
@@ -166,7 +174,8 @@ describe('RedisManager', function () {
           this.unflushed_time,
           this.lastUpdatedAt,
           this.lastUpdatedBy,
-          this.historyRangesSupport
+          this.historyRangesSupport,
+          this.resolvedCommentIds
         )
       })
 
@@ -274,7 +283,8 @@ describe('RedisManager', function () {
           this.unflushed_time,
           this.lastUpdatedAt,
           this.lastUpdatedBy,
-          true
+          true,
+          this.resolvedCommentIds
         )
       })
     })
@@ -771,6 +781,7 @@ describe('RedisManager', function () {
     beforeEach(function () {
       this.multi.mset = sinon.stub()
       this.multi.sadd = sinon.stub()
+      this.multi.del = sinon.stub()
       this.rclient.sadd = sinon.stub().yields()
       this.lines = ['one', 'two', 'three', 'これは']
       this.version = 42
@@ -779,6 +790,7 @@ describe('RedisManager', function () {
         .update(JSON.stringify(this.lines), 'utf8')
         .digest('hex')
       this.ranges = { comments: 'mock', entries: 'mock' }
+      this.resolvedCommentIds = ['comment-1']
       this.pathname = '/a/b/c.tex'
     })
 
@@ -790,6 +802,7 @@ describe('RedisManager', function () {
           this.lines,
           this.version,
           this.ranges,
+          this.resolvedCommentIds,
           this.pathname,
           this.projectHistoryId,
           this.historyRangesSupport,
@@ -824,6 +837,12 @@ describe('RedisManager', function () {
       it('should not add the document to the HistoryRangesSupport set in Redis', function () {
         this.multi.sadd.should.not.have.been.calledWith('HistoryRangesSupport')
       })
+
+      it('should not store the resolved comments in Redis', function () {
+        this.multi.sadd.should.not.have.been.calledWith(
+          `ResolvedCommentIds:${this.docId}`
+        )
+      })
     })
 
     describe('with empty ranges', function () {
@@ -834,6 +853,7 @@ describe('RedisManager', function () {
           this.lines,
           this.version,
           {},
+          [],
           this.pathname,
           this.projectHistoryId,
           this.historyRangesSupport,
@@ -865,6 +885,7 @@ describe('RedisManager', function () {
           this.lines,
           this.version,
           this.ranges,
+          this.resolvedCommentIds,
           this.pathname,
           this.projectHistoryId,
           this.historyRangesSupport,
@@ -898,6 +919,7 @@ describe('RedisManager', function () {
           this.lines,
           this.version,
           this.ranges,
+          this.resolvedCommentIds,
           this.pathname,
           this.projectHistoryId,
           this.historyRangesSupport,
@@ -925,6 +947,7 @@ describe('RedisManager', function () {
           this.lines,
           this.version,
           this.ranges,
+          this.resolvedCommentIds,
           this.pathname,
           this.projectHistoryId,
           this.historyRangesSupport,
@@ -936,6 +959,16 @@ describe('RedisManager', function () {
         this.multi.sadd.should.have.been.calledWith(
           'HistoryRangesSupport',
           this.docId
+        )
+      })
+
+      it('should store the resolved comments in Redis', function () {
+        this.multi.del.should.have.been.calledWith(
+          `ResolvedCommentIds:${this.docId}`
+        )
+        this.multi.sadd.should.have.been.calledWith(
+          `ResolvedCommentIds:${this.docId}`,
+          ...this.resolvedCommentIds
         )
       })
     })
@@ -966,7 +999,8 @@ describe('RedisManager', function () {
           `ProjectHistoryId:${this.docId}`,
           `UnflushedTime:${this.docId}`,
           `lastUpdatedAt:${this.docId}`,
-          `lastUpdatedBy:${this.docId}`
+          `lastUpdatedBy:${this.docId}`,
+          `ResolvedCommentIds:${this.docId}`
         )
         .should.equal(true)
     })

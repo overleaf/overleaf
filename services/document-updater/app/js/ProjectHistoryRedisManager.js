@@ -135,6 +135,7 @@ const ProjectHistoryRedisManager = {
    * @param {string} docId
    * @param {string[]} lines
    * @param {Ranges} ranges
+   * @param {string[]} resolvedCommentIds
    * @param {number} version
    * @param {string} pathname
    * @param {boolean} historyRangesSupport
@@ -146,6 +147,7 @@ const ProjectHistoryRedisManager = {
     docId,
     lines,
     ranges,
+    resolvedCommentIds,
     version,
     pathname,
     historyRangesSupport
@@ -173,6 +175,7 @@ const ProjectHistoryRedisManager = {
     if (historyRangesSupport) {
       projectUpdate.resyncDocContent.ranges =
         HistoryConversions.toHistoryRanges(ranges)
+      projectUpdate.resyncDocContent.resolvedCommentIds = resolvedCommentIds
     }
 
     const jsonUpdate = JSON.stringify(projectUpdate)

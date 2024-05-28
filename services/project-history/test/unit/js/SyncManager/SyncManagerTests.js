@@ -24,7 +24,7 @@ function docContentSyncUpdate(
   doc,
   content,
   ranges = {},
-  resolvedComments = []
+  resolvedCommentIds = []
 ) {
   return {
     path: doc.path,
@@ -33,7 +33,7 @@ function docContentSyncUpdate(
     resyncDocContent: {
       content,
       ranges,
-      resolvedComments,
+      resolvedCommentIds,
     },
 
     meta: {
@@ -1096,7 +1096,7 @@ describe('SyncManager', function () {
           makeComment('comment1', 4, 'quick'),
           makeComment('comment2', 10, 'brown'),
         ]
-        this.resolvedComments = ['comment2']
+        this.resolvedCommentIds = ['comment2']
       })
 
       it('does nothing if comments have not changed', async function () {
@@ -1107,7 +1107,7 @@ describe('SyncManager', function () {
             {
               comments: this.comments,
             },
-            this.resolvedComments
+            this.resolvedCommentIds
           ),
         ]
         const expandedUpdates =
@@ -1129,7 +1129,7 @@ describe('SyncManager', function () {
             {
               comments: this.comments,
             },
-            this.resolvedComments
+            this.resolvedCommentIds
           ),
         ]
         const expandedUpdates =
@@ -1147,6 +1147,7 @@ describe('SyncManager', function () {
                 c: 'jumps',
                 p: 20,
                 t: 'comment3',
+                resolved: false,
               },
             ],
             meta: {
@@ -1171,7 +1172,7 @@ describe('SyncManager', function () {
             {
               comments: this.comments,
             },
-            this.resolvedComments
+            this.resolvedCommentIds
           ),
         ]
         const expandedUpdates =
@@ -1205,7 +1206,7 @@ describe('SyncManager', function () {
             {
               comments: this.comments,
             },
-            this.resolvedComments
+            this.resolvedCommentIds
           ),
         ]
         const expandedUpdates =
@@ -1223,6 +1224,7 @@ describe('SyncManager', function () {
                 c: 'fox',
                 p: 16,
                 t: 'comment2',
+                resolved: true,
               },
             ],
             meta: {
@@ -1239,7 +1241,7 @@ describe('SyncManager', function () {
       })
 
       it('sets the resolved state when it differs', async function () {
-        this.resolvedComments = ['comment1']
+        this.resolvedCommentIds = ['comment1']
         const updates = [
           docContentSyncUpdate(
             this.persistedDoc,
@@ -1247,7 +1249,7 @@ describe('SyncManager', function () {
             {
               comments: this.comments,
             },
-            this.resolvedComments
+            this.resolvedCommentIds
           ),
         ]
         const expandedUpdates =
@@ -1262,11 +1264,25 @@ describe('SyncManager', function () {
             pathname: this.persistedDoc.path,
             commentId: 'comment1',
             resolved: true,
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              resync: true,
+              ts: TIMESTAMP,
+            },
           },
           {
             pathname: this.persistedDoc.path,
             commentId: 'comment2',
             resolved: false,
+            meta: {
+              origin: {
+                kind: 'history-resync',
+              },
+              resync: true,
+              ts: TIMESTAMP,
+            },
           },
         ])
       })

@@ -137,6 +137,9 @@ module.exports = {
         lastUpdatedAt({ doc_id: docId }) {
           return `lastUpdatedAt:{${docId}}`
         },
+        resolvedCommentIds({ doc_id: docId }) {
+          return `ResolvedCommentIds:{${docId}}`
+        },
         flushAndDeleteQueue() {
           return 'DocUpdaterFlushAndDeleteQueue'
         },

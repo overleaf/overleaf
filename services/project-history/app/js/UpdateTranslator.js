@@ -278,7 +278,7 @@ class OperationsBuilder {
       this.pushTextOperation()
 
       // Add a comment operation
-      this.operations.push({
+      const commentOp = {
         pathname: this.pathname,
         commentId: op.t,
         ranges: [
@@ -287,7 +287,11 @@ class OperationsBuilder {
             length: op.hlen ?? op.c.length,
           },
         ],
-      })
+      }
+      if ('resolved' in op) {
+        commentOp.resolved = op.resolved
+      }
+      this.operations.push(commentOp)
       return
     }
 

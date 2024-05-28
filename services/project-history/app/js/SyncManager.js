@@ -716,8 +716,8 @@ class SyncUpdateExpander {
   async queueUpdatesForOutOfSyncComments(update, pathname, persistedComments) {
     const expectedContent = update.resyncDocContent.content
     const expectedComments = update.resyncDocContent.ranges?.comments ?? []
-    const resolvedComments = new Set(
-      update.resyncDocContent.resolvedComments ?? []
+    const resolvedCommentIds = new Set(
+      update.resyncDocContent.resolvedCommentIds ?? []
     )
     const expectedCommentsById = new Map(
       expectedComments.map(comment => [comment.id, comment])
@@ -743,11 +743,11 @@ class SyncUpdateExpander {
 
     for (const expectedComment of expectedComments) {
       const persistedComment = persistedCommentsById.get(expectedComment.id)
+      const expectedCommentResolved = resolvedCommentIds.has(expectedComment.id)
       if (
         persistedComment != null &&
         commentRangesAreInSync(persistedComment, expectedComment)
       ) {
-        const expectedCommentResolved = resolvedComments.has(expectedComment.id)
         if (expectedCommentResolved === persistedComment.resolved) {
           // Both comments are identical; do nothing
         } else {
@@ -756,13 +756,19 @@ class SyncUpdateExpander {
             pathname,
             commentId: expectedComment.id,
             resolved: expectedCommentResolved,
+            meta: {
+              resync: true,
+              origin: this.origin,
+              ts: update.meta.ts,
+            },
           })
         }
       } else {
+        const op = { ...expectedComment.op, resolved: expectedCommentResolved }
         // New comment or ranges differ
         this.expandedUpdates.push({
           doc: update.doc,
-          op: [expectedComment.op],
+          op: [op],
           meta: {
             resync: true,
             origin: this.origin,

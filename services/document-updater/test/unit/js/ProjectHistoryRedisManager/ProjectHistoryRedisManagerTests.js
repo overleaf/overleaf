@@ -180,6 +180,7 @@ describe('ProjectHistoryRedisManager', function () {
         this.ranges = {
           changes: [{ op: { i: 'ne', p: 1 } }, { op: { d: 'deleted', p: 3 } }],
         }
+        this.resolvedCommentIds = ['comment-1']
         this.version = 2
         this.pathname = '/path'
 
@@ -207,6 +208,7 @@ describe('ProjectHistoryRedisManager', function () {
             this.doc_id,
             this.lines,
             this.ranges,
+            this.resolvedCommentIds,
             this.version,
             this.pathname,
             false
@@ -240,6 +242,7 @@ describe('ProjectHistoryRedisManager', function () {
               this.doc_id,
               this.lines,
               this.ranges,
+              this.resolvedCommentIds,
               this.version,
               this.pathname,
               false
@@ -261,6 +264,7 @@ describe('ProjectHistoryRedisManager', function () {
               content: 'onedeleted\ntwo',
               version: this.version,
               ranges: this.ranges,
+              resolvedCommentIds: this.resolvedCommentIds,
             },
             projectHistoryId: this.projectHistoryId,
             path: this.pathname,
@@ -274,6 +278,7 @@ describe('ProjectHistoryRedisManager', function () {
             this.doc_id,
             this.lines,
             this.ranges,
+            this.resolvedCommentIds,
             this.version,
             this.pathname,
             true

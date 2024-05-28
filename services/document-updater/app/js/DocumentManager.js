@@ -17,6 +17,7 @@ const DocumentManager = {
       lines,
       version,
       ranges,
+      resolvedCommentIds,
       pathname,
       projectHistoryId,
       unflushedTime,
@@ -31,6 +32,7 @@ const DocumentManager = {
         lines,
         version,
         ranges,
+        resolvedCommentIds,
         pathname,
         projectHistoryId,
         historyRangesSupport,
@@ -40,6 +42,8 @@ const DocumentManager = {
           projectId,
           docId,
           lines,
+          ranges,
+          resolvedCommentIds,
           version,
           pathname,
           projectHistoryId,
@@ -53,6 +57,7 @@ const DocumentManager = {
         lines,
         version,
         ranges,
+        resolvedCommentIds,
         pathname,
         projectHistoryId,
         historyRangesSupport
@@ -61,6 +66,7 @@ const DocumentManager = {
         lines,
         version,
         ranges: ranges || {},
+        resolvedCommentIds,
         pathname,
         projectHistoryId,
         unflushedTime: null,
@@ -74,6 +80,7 @@ const DocumentManager = {
         ranges,
         pathname,
         projectHistoryId,
+        resolvedCommentIds,
         unflushedTime,
         alreadyLoaded: true,
         historyRangesSupport,
@@ -291,6 +298,8 @@ const DocumentManager = {
     }
 
     if (historyRangesSupport) {
+      await RedisManager.promises.updateCommentState(docId, commentId, resolved)
+
       await ProjectHistoryRedisManager.promises.queueOps(
         projectId,
         JSON.stringify({
@@ -326,6 +335,7 @@ const DocumentManager = {
     )
 
     if (historyRangesSupport) {
+      await RedisManager.promises.updateCommentState(docId, commentId, false)
       await ProjectHistoryRedisManager.promises.queueOps(
         projectId,
         JSON.stringify({
@@ -368,8 +378,14 @@ const DocumentManager = {
 
   async resyncDocContents(projectId, docId, path) {
     logger.debug({ projectId, docId, path }, 'start resyncing doc contents')
-    let { lines, ranges, version, projectHistoryId, historyRangesSupport } =
-      await RedisManager.promises.getDoc(projectId, docId)
+    let {
+      lines,
+      ranges,
+      resolvedCommentIds,
+      version,
+      projectHistoryId,
+      historyRangesSupport,
+    } = await RedisManager.promises.getDoc(projectId, docId)
 
     // To avoid issues where the same docId appears with different paths,
     // we use the path from the resyncProjectStructure update.  If we used
@@ -381,10 +397,16 @@ const DocumentManager = {
         { projectId, docId },
         'resyncing doc contents - not found in redis - retrieving from web'
       )
-      ;({ lines, ranges, version, projectHistoryId, historyRangesSupport } =
-        await PersistenceManager.promises.getDoc(projectId, docId, {
-          peek: true,
-        }))
+      ;({
+        lines,
+        ranges,
+        resolvedCommentIds,
+        version,
+        projectHistoryId,
+        historyRangesSupport,
+      } = await PersistenceManager.promises.getDoc(projectId, docId, {
+        peek: true,
+      }))
     } else {
       logger.debug(
         { projectId, docId },
@@ -398,6 +420,7 @@ const DocumentManager = {
       docId,
       lines,
       ranges,
+      resolvedCommentIds,
       version,
       // use the path from the resyncProjectStructure update
       path,
