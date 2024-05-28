@@ -35,7 +35,7 @@ function SettingsPageRoot() {
   return (
     <div className="container">
       <OLRow>
-        <OLCol md={12} lg={{ span: 10, offset: 1 }}>
+        <OLCol xl={{ span: 10, offset: 1 }}>
           {isReady ? <SettingsPageContent /> : null}
         </OLCol>
       </OLRow>
@@ -60,10 +60,10 @@ function SettingsPageContent() {
           <EmailsSection />
           <SSOAlert />
           <OLRow>
-            <OLCol md={5}>
+            <OLCol lg={5}>
               <AccountInfoSection />
             </OLCol>
-            <OLCol md={{ span: 5, offset: 1 }}>
+            <OLCol lg={{ span: 5, offset: 1 }}>
               <PasswordSection />
             </OLCol>
           </OLRow>

@@ -109,7 +109,7 @@ function AddEmail() {
   if (!isFormVisible) {
     return (
       <Layout isError={isError} error={error}>
-        <OLCol md={12}>
+        <OLCol lg={12}>
           <Cell>
             {state.data.emailCount >= emailAddressLimit ? (
               <span className="small">
@@ -152,7 +152,7 @@ function AddEmail() {
       <form>
         <Layout isError={isError} error={error}>
           <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
-          <OLCol md={8}>
+          <OLCol lg={8}>
             <Cell>
               {InputComponent}
               <div className="affiliations-table-cell-tabbed">
@@ -160,10 +160,10 @@ function AddEmail() {
               </div>
             </Cell>
           </OLCol>
-          <OLCol md={4}>
+          <OLCol lg={4}>
             <Cell
               className={bsVersion({
-                bs5: 'text-md-end',
+                bs5: 'text-lg-end',
                 bs3: 'text-md-right',
               })}
             >
@@ -182,7 +182,7 @@ function AddEmail() {
     <form>
       <Layout isError={isError} error={error}>
         <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
-        <OLCol md={8}>
+        <OLCol lg={8}>
           <Cell>
             {InputComponent}
             {!isSsoAvailableForDomain ? (
@@ -205,10 +205,10 @@ function AddEmail() {
           </Cell>
         </OLCol>
         {!isSsoAvailableForDomain ? (
-          <OLCol md={4}>
+          <OLCol lg={4}>
             <Cell
               className={bsVersion({
-                bs5: 'text-md-end',
+                bs5: 'text-lg-end',
                 bs3: 'text-md-right',
               })}
             >
@@ -221,7 +221,7 @@ function AddEmail() {
             </Cell>
           </OLCol>
         ) : (
-          <OLCol md={12}>
+          <OLCol lg={12}>
             <Cell>
               <div className="affiliations-table-cell-tabbed">
                 <SsoLinkingInfo

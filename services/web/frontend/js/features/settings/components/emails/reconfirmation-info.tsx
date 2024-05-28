@@ -81,7 +81,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
   ) {
     return (
       <OLRow>
-        <OLCol md={12}>
+        <OLCol lg={12}>
           <OLNotification
             type="info"
             content={
@@ -99,7 +99,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
   if (userEmailData.affiliation.inReconfirmNotificationPeriod) {
     return (
       <OLRow>
-        <OLCol md={12}>
+        <OLCol lg={12}>
           {isBootstrap5 ? (
             <OLNotification
               type="info"

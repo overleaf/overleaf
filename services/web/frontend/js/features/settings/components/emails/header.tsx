@@ -12,7 +12,7 @@ function Header() {
     <>
       <OLRow>
         <OLCol
-          md={4}
+          lg={4}
           className={bsVersion({
             bs5: 'd-none d-sm-block',
             bs3: 'hidden-xs',
@@ -23,7 +23,7 @@ function Header() {
           </EmailCell>
         </OLCol>
         <OLCol
-          md={8}
+          lg={8}
           className={bsVersion({
             bs5: 'd-none d-sm-block',
             bs3: 'hidden-xs',
