@@ -34,7 +34,7 @@ describe('UpdateTranslator', function () {
               ts: this.timestamp,
             },
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -72,7 +72,7 @@ describe('UpdateTranslator', function () {
               ts: this.timestamp,
             },
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -180,7 +180,7 @@ describe('UpdateTranslator', function () {
               ts: this.timestamp,
             },
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
         {
           update: {
@@ -192,7 +192,7 @@ describe('UpdateTranslator', function () {
               ts: this.timestamp,
             },
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -291,7 +291,7 @@ describe('UpdateTranslator', function () {
             },
             url: 'filestore.example.com/test*test.png',
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -329,7 +329,7 @@ describe('UpdateTranslator', function () {
             },
             url: 'filestore.example.com/test.png',
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -367,7 +367,7 @@ describe('UpdateTranslator', function () {
             },
             url: 'filestore.example.com/folder/test.png',
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -405,7 +405,7 @@ describe('UpdateTranslator', function () {
               ts: this.timestamp,
             },
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 
@@ -442,7 +442,7 @@ describe('UpdateTranslator', function () {
               ts: this.timestamp,
             },
           },
-          blobHash: this.mockBlobHash,
+          blobHashes: { file: this.mockBlobHash },
         },
       ]
 

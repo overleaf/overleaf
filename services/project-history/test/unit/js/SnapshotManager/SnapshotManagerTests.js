@@ -780,6 +780,12 @@ Four five six\
         expect(this.data.comments[2].op.p).to.eq(20)
         expect(this.data.comments[2].op.c).to.eq('ov')
       })
+
+      it('should put resolved status in op', function () {
+        expect(this.data.comments[0].op.resolved).to.be.false
+        expect(this.data.comments[1].op.resolved).to.be.false
+        expect(this.data.comments[2].op.resolved).to.be.false
+      })
     })
 
     describe('with multiple tracked changes and comments', function () {
@@ -919,6 +925,7 @@ Four five six\
                 c: '',
                 p: 4,
                 t: 'comment-1',
+                resolved: false,
               },
             },
             {
@@ -926,6 +933,7 @@ Four five six\
                 c: 'brown',
                 p: 4,
                 t: 'comment-1',
+                resolved: false,
               },
             },
             {
@@ -933,6 +941,7 @@ Four five six\
                 c: '',
                 p: 29,
                 t: 'comment-1',
+                resolved: false,
               },
             },
             {
@@ -940,6 +949,7 @@ Four five six\
                 c: 'the',
                 p: 0,
                 t: 'comment-2',
+                resolved: true,
               },
             },
             {
@@ -947,6 +957,7 @@ Four five six\
                 c: 'the',
                 p: 25,
                 t: 'comment-2',
+                resolved: true,
               },
             },
           ],

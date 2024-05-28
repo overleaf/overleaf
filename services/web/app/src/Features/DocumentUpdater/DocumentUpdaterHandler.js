@@ -7,6 +7,7 @@ const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
 const { promisifyMultiResult } = require('@overleaf/promise-utils')
+const ProjectGetter = require('../Project/ProjectGetter')
 
 module.exports = {
   flushProjectToMongo,
@@ -296,54 +297,78 @@ function updateProjectStructure(
     return callback()
   }
 
-  const {
-    deletes: docDeletes,
-    adds: docAdds,
-    renames: docRenames,
-  } = _getUpdates('doc', changes.oldDocs, changes.newDocs)
-  const {
-    deletes: fileDeletes,
-    adds: fileAdds,
-    renames: fileRenames,
-  } = _getUpdates('file', changes.oldFiles, changes.newFiles)
-  const updates = [].concat(
-    docDeletes,
-    fileDeletes,
-    docAdds,
-    fileAdds,
-    docRenames,
-    fileRenames
-  )
-  const projectVersion =
-    changes && changes.newProject && changes.newProject.version
-
-  if (updates.length < 1) {
-    return callback()
-  }
-
-  if (projectVersion == null) {
-    logger.warn(
-      { projectId, changes, projectVersion },
-      'did not receive project version in changes'
-    )
-    return callback(new Error('did not receive project version in changes'))
-  }
-
-  _makeRequest(
-    {
-      path: `/project/${projectId}`,
-      json: {
-        updates,
-        userId,
-        version: projectVersion,
-        projectHistoryId,
-        source,
-      },
-      method: 'POST',
-    },
+  ProjectGetter.getProjectWithoutLock(
     projectId,
-    'update-project-structure',
-    callback
+    { overleaf: true },
+    (err, project) => {
+      if (err) {
+        return callback(err)
+      }
+      const historyRangesSupport = _.get(
+        project,
+        'overleaf.history.rangesSupportEnabled',
+        false
+      )
+      const {
+        deletes: docDeletes,
+        adds: docAdds,
+        renames: docRenames,
+      } = _getUpdates(
+        'doc',
+        changes.oldDocs,
+        changes.newDocs,
+        historyRangesSupport
+      )
+      const {
+        deletes: fileDeletes,
+        adds: fileAdds,
+        renames: fileRenames,
+      } = _getUpdates(
+        'file',
+        changes.oldFiles,
+        changes.newFiles,
+        historyRangesSupport
+      )
+      const updates = [].concat(
+        docDeletes,
+        fileDeletes,
+        docAdds,
+        fileAdds,
+        docRenames,
+        fileRenames
+      )
+      const projectVersion =
+        changes && changes.newProject && changes.newProject.version
+
+      if (updates.length < 1) {
+        return callback()
+      }
+
+      if (projectVersion == null) {
+        logger.warn(
+          { projectId, changes, projectVersion },
+          'did not receive project version in changes'
+        )
+        return callback(new Error('did not receive project version in changes'))
+      }
+
+      _makeRequest(
+        {
+          path: `/project/${projectId}`,
+          json: {
+            updates,
+            userId,
+            version: projectVersion,
+            projectHistoryId,
+            source,
+          },
+          method: 'POST',
+        },
+        projectId,
+        'update-project-structure',
+        callback
+      )
+    }
   )
 }
 
@@ -380,7 +405,12 @@ function _makeRequest(options, projectId, metricsKey, callback) {
   )
 }
 
-function _getUpdates(entityType, oldEntities, newEntities) {
+function _getUpdates(
+  entityType,
+  oldEntities,
+  newEntities,
+  historyRangesSupport
+) {
   if (!oldEntities) {
     oldEntities = []
   }
@@ -431,6 +461,8 @@ function _getUpdates(entityType, oldEntities, newEntities) {
         id,
         pathname: newEntity.path,
         docLines: newEntity.docLines,
+        ranges: newEntity.ranges,
+        historyRangesSupport,
         url: newEntity.url,
         hash: newEntity.file != null ? newEntity.file.hash : undefined,
       })

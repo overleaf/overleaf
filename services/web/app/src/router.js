@@ -769,6 +769,11 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserCanWriteProjectContent,
     HistoryController.restoreFileFromV2
   )
+  webRouter.post(
+    '/project/:project_id/revert_file',
+    AuthorizationMiddleware.ensureUserCanWriteProjectContent,
+    HistoryController.revertFile
+  )
   webRouter.get(
     '/project/:project_id/version/:version/zip',
     RateLimiterMiddleware.rateLimit(rateLimiters.downloadProjectRevision),

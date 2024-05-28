@@ -100,6 +100,27 @@ module.exports = HistoryController = {
     )
   },
 
+  revertFile(req, res, next) {
+    const { project_id: projectId } = req.params
+    const { version, pathname } = req.body
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    RestoreManager.revertFile(
+      userId,
+      projectId,
+      version,
+      pathname,
+      function (err, entity) {
+        if (err) {
+          return next(err)
+        }
+        res.json({
+          type: entity.type,
+          id: entity._id,
+        })
+      }
+    )
+  },
+
   getLabels(req, res, next) {
     const projectId = req.params.Project_id
     HistoryController._makeRequest(

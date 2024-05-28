@@ -16,6 +16,7 @@ import * as Versions from './Versions.js'
 import * as Errors from './Errors.js'
 import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
+import * as HistoryBlobTranslator from './HistoryBlobTranslator.js'
 
 const HTTP_REQUEST_TIMEOUT = Settings.apis.history_v1.requestTimeout
 
@@ -230,22 +231,60 @@ export function sendChanges(
   )
 }
 
+function createBlobFromString(historyId, data, fileId, callback) {
+  const stringStream = new StringStream()
+  stringStream.push(data)
+  stringStream.push(null)
+  LocalFileWriter.bufferOnDisk(
+    stringStream,
+    '',
+    fileId,
+    (fsPath, cb) => {
+      _createBlob(historyId, fsPath, cb)
+    },
+    callback
+  )
+}
+
 export function createBlobForUpdate(projectId, historyId, update, callback) {
   callback = _.once(callback)
 
   if (update.doc != null && update.docLines != null) {
-    const stringStream = new StringStream()
-    stringStream.push(update.docLines)
-    stringStream.push(null)
-
-    LocalFileWriter.bufferOnDisk(
-      stringStream,
-      '',
+    let ranges
+    try {
+      ranges = HistoryBlobTranslator.createRangeBlobDataFromUpdate(update)
+    } catch (error) {
+      return callback(error)
+    }
+    createBlobFromString(
+      historyId,
+      update.docLines,
       `project-${projectId}-doc-${update.doc}`,
-      (fsPath, cb) => {
-        _createBlob(historyId, fsPath, cb)
-      },
-      callback
+      (err, fileHash) => {
+        if (err) {
+          return callback(err)
+        }
+        if (ranges) {
+          createBlobFromString(
+            historyId,
+            JSON.stringify(ranges),
+            `project-${projectId}-doc-${update.doc}-ranges`,
+            (err, rangesHash) => {
+              if (err) {
+                return callback(err)
+              }
+              logger.debug(
+                { fileHash, rangesHash },
+                'created blobs for both ranges and content'
+              )
+              return callback(null, { file: fileHash, ranges: rangesHash })
+            }
+          )
+        } else {
+          logger.debug({ fileHash }, 'created blob for content')
+          return callback(null, { file: fileHash })
+        }
+      }
     )
   } else if (update.file != null && update.url != null) {
     // Rewrite the filestore url to point to the location in the local
@@ -274,7 +313,13 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
           (fsPath, cb) => {
             _createBlob(historyId, fsPath, cb)
           },
-          callback
+          (err, fileHash) => {
+            if (err) {
+              return callback(err)
+            }
+            logger.debug({ fileHash }, 'created blob for file')
+            callback(null, { file: fileHash })
+          }
         )
       })
       .catch(err => {
@@ -291,7 +336,13 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
             (fsPath, cb) => {
               _createBlob(historyId, fsPath, cb)
             },
-            callback
+            (err, fileHash) => {
+              if (err) {
+                return callback(err)
+              }
+              logger.debug({ fileHash }, 'created empty blob for file')
+              callback(null, { file: fileHash })
+            }
           )
           emptyStream.push(null) // send an EOF signal
         } else {

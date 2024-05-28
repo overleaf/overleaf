@@ -1,3 +1,5 @@
+import { HistoryRanges } from '../../../document-updater/app/js/types'
+
 export type Update =
   | TextUpdate
   | AddDocUpdate
@@ -51,7 +53,8 @@ type ProjectUpdateBase = {
 
 export type AddDocUpdate = ProjectUpdateBase & {
   pathname: string
-  docLines: string[]
+  docLines: string
+  ranges?: HistoryRanges
 }
 
 export type AddFileUpdate = ProjectUpdateBase & {
@@ -134,7 +137,10 @@ export type CommentOp = {
 
 export type UpdateWithBlob = {
   update: Update
-  blobHash: string
+  blobHashes: {
+    file: string
+    ranges?: string
+  }
 }
 
 export type RawOrigin = {
@@ -173,6 +179,7 @@ export type CommentSnapshot = {
     p: number
     t: string
     c: string
+    resolved: boolean
   }
 }
 

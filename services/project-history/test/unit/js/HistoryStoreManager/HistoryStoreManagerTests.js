@@ -390,7 +390,7 @@ describe('HistoryStoreManager', function () {
           this.projectId,
           this.historyId,
           this.update,
-          (err, hash) => {
+          (err, { file: hash }) => {
             if (err) {
               return done(err)
             }

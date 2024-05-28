@@ -38,7 +38,9 @@ const {
 } = require('./lib/operation/scan_op')
 const TrackedChange = require('./lib/file_data/tracked_change')
 const TrackedChangeList = require('./lib/file_data/tracked_change_list')
+const TrackingProps = require('./lib/file_data/tracking_props')
 const Range = require('./lib/range')
+const CommentList = require('./lib/file_data/comment_list')
 
 exports.AddCommentOperation = AddCommentOperation
 exports.Author = Author
@@ -79,3 +81,5 @@ exports.RemoveOp = RemoveOp
 exports.TrackedChangeList = TrackedChangeList
 exports.TrackedChange = TrackedChange
 exports.Range = Range
+exports.CommentList = CommentList
+exports.TrackingProps = TrackingProps

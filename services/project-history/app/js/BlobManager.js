@@ -59,7 +59,7 @@ export function createBlobsForUpdates(
             projectId,
             historyId,
             update,
-            (err, hash) => {
+            (err, hashes) => {
               if (err) {
                 OError.tag(err, 'retry: error creating blob', {
                   projectId,
@@ -68,18 +68,18 @@ export function createBlobsForUpdates(
                 })
                 _cb(err)
               } else {
-                _cb(null, hash)
+                _cb(null, hashes)
               }
             }
           )
         })
       },
-      (error, blobHash) => {
+      (error, blobHashes) => {
         if (error) {
           if (!firstBlobCreationError) {
             firstBlobCreationError = error
           }
-          return cb(null, { update, blobHash })
+          return cb(null, { update, blobHashes })
         }
 
         extendLock(error => {
@@ -88,7 +88,7 @@ export function createBlobsForUpdates(
               firstBlobCreationError = error
             }
           }
-          cb(null, { update, blobHash })
+          cb(null, { update, blobHashes })
         })
       }
     )

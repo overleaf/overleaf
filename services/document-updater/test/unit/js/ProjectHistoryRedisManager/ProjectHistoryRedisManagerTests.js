@@ -125,19 +125,22 @@ describe('ProjectHistoryRedisManager', function () {
   })
 
   describe('queueAddEntity', function () {
-    beforeEach(async function () {
+    beforeEach(function () {
       this.doc_id = 1234
 
       this.rawUpdate = {
         pathname: (this.pathname = '/old'),
         docLines: (this.docLines = 'a\nb'),
         version: (this.version = 2),
-        url: (this.url = 'filestore.example.com'),
       }
 
       this.ProjectHistoryRedisManager.promises.queueOps = sinon
         .stub()
         .resolves()
+    })
+
+    it('should queue an update', async function () {
+      this.rawUpdate.url = this.url = 'filestore.example.com'
       await this.ProjectHistoryRedisManager.promises.queueAddEntity(
         this.project_id,
         this.projectHistoryId,
@@ -147,9 +150,7 @@ describe('ProjectHistoryRedisManager', function () {
         this.rawUpdate,
         this.source
       )
-    })
 
-    it('should queue an update', function () {
       const update = {
         pathname: this.pathname,
         docLines: this.docLines,
@@ -169,136 +170,325 @@ describe('ProjectHistoryRedisManager', function () {
         .should.equal(true)
     })
 
-    describe('queueResyncProjectStructure', function () {
-      it('should queue an update', function () {})
+    it('should forward history compatible ranges if history ranges support is enabled', async function () {
+      this.rawUpdate.historyRangesSupport = true
+      this.docLines = 'the quick fox jumps over the lazy dog'
+
+      const ranges = {
+        changes: [
+          {
+            op: { p: 4, i: 'quick' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { p: 9, d: ' brown' },
+            metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { p: 14, i: 'jumps' },
+            metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+        ],
+        comments: [
+          {
+            op: { p: 29, c: 'lazy', t: 'comment-1' },
+            metadata: { resolved: false },
+          },
+        ],
+      }
+      this.rawUpdate.ranges = ranges
+      this.rawUpdate.docLines = this.docLines
+
+      await this.ProjectHistoryRedisManager.promises.queueAddEntity(
+        this.project_id,
+        this.projectHistoryId,
+        'doc',
+        this.doc_id,
+        this.user_id,
+        this.rawUpdate,
+        this.source
+      )
+
+      const historyCompatibleRanges = {
+        comments: [
+          {
+            op: { p: 29, c: 'lazy', t: 'comment-1', hpos: 35 },
+            metadata: { resolved: false },
+          },
+        ],
+        changes: [
+          {
+            op: { p: 4, i: 'quick' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { p: 9, d: ' brown' },
+            metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { p: 14, i: 'jumps', hpos: 20 },
+            metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+        ],
+      }
+
+      const update = {
+        pathname: this.pathname,
+        docLines: 'the quick brown fox jumps over the lazy dog',
+        meta: {
+          user_id: this.user_id,
+          ts: new Date(),
+          source: this.source,
+        },
+        version: this.version,
+        projectHistoryId: this.projectHistoryId,
+        ranges: historyCompatibleRanges,
+        doc: this.doc_id,
+      }
+
+      expect(
+        this.ProjectHistoryRedisManager.promises.queueOps
+      ).to.have.been.calledWithExactly(this.project_id, JSON.stringify(update))
     })
 
-    describe('queueResyncDocContent', function () {
-      beforeEach(function () {
-        this.doc_id = 1234
-        this.lines = ['one', 'two']
-        this.ranges = {
-          changes: [{ op: { i: 'ne', p: 1 } }, { op: { d: 'deleted', p: 3 } }],
+    it('should not forward ranges if history ranges support is disabled', async function () {
+      this.rawUpdate.historyRangesSupport = false
+
+      const ranges = {
+        changes: [
+          {
+            op: { p: 0, i: 'foo' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { p: 7, d: ' baz' },
+            metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+        ],
+        comments: [
+          {
+            op: { p: 4, c: 'bar', t: 'comment-1' },
+            metadata: { resolved: false },
+          },
+        ],
+      }
+      this.rawUpdate.ranges = ranges
+
+      await this.ProjectHistoryRedisManager.promises.queueAddEntity(
+        this.project_id,
+        this.projectHistoryId,
+        'doc',
+        this.doc_id,
+        this.user_id,
+        this.rawUpdate,
+        this.source
+      )
+
+      const update = {
+        pathname: this.pathname,
+        docLines: this.docLines,
+        meta: {
+          user_id: this.user_id,
+          ts: new Date(),
+          source: this.source,
+        },
+        version: this.version,
+        projectHistoryId: this.projectHistoryId,
+        doc: this.doc_id,
+      }
+
+      this.ProjectHistoryRedisManager.promises.queueOps
+        .calledWithExactly(this.project_id, JSON.stringify(update))
+        .should.equal(true)
+    })
+
+    it('should not forward ranges if history ranges support is undefined', async function () {
+      this.rawUpdate.historyRangesSupport = false
+
+      const ranges = {
+        changes: [
+          {
+            op: { p: 0, i: 'foo' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { p: 7, d: ' baz' },
+            metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+        ],
+        comments: [
+          {
+            op: { p: 4, c: 'bar', t: 'comment-1' },
+            metadata: { resolved: false },
+          },
+        ],
+      }
+      this.rawUpdate.ranges = ranges
+
+      await this.ProjectHistoryRedisManager.promises.queueAddEntity(
+        this.project_id,
+        this.projectHistoryId,
+        'doc',
+        this.doc_id,
+        this.user_id,
+        this.rawUpdate,
+        this.source
+      )
+
+      const update = {
+        pathname: this.pathname,
+        docLines: this.docLines,
+        meta: {
+          user_id: this.user_id,
+          ts: new Date(),
+          source: this.source,
+        },
+        version: this.version,
+        projectHistoryId: this.projectHistoryId,
+        doc: this.doc_id,
+      }
+
+      this.ProjectHistoryRedisManager.promises.queueOps
+        .calledWithExactly(this.project_id, JSON.stringify(update))
+        .should.equal(true)
+    })
+  })
+
+  describe('queueResyncProjectStructure', function () {
+    it('should queue an update', function () {})
+  })
+
+  describe('queueResyncDocContent', function () {
+    beforeEach(function () {
+      this.doc_id = 1234
+      this.lines = ['one', 'two']
+      this.ranges = {
+        changes: [{ op: { i: 'ne', p: 1 } }, { op: { d: 'deleted', p: 3 } }],
+      }
+      this.resolvedCommentIds = ['comment-1']
+      this.version = 2
+      this.pathname = '/path'
+
+      this.ProjectHistoryRedisManager.promises.queueOps = sinon
+        .stub()
+        .resolves()
+    })
+
+    describe('with a good doc', function () {
+      beforeEach(async function () {
+        this.update = {
+          resyncDocContent: {
+            content: 'one\ntwo',
+            version: this.version,
+          },
+          projectHistoryId: this.projectHistoryId,
+          path: this.pathname,
+          doc: this.doc_id,
+          meta: { ts: new Date() },
         }
-        this.resolvedCommentIds = ['comment-1']
-        this.version = 2
-        this.pathname = '/path'
 
-        this.ProjectHistoryRedisManager.promises.queueOps = sinon
-          .stub()
-          .resolves()
+        await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
+          this.project_id,
+          this.projectHistoryId,
+          this.doc_id,
+          this.lines,
+          this.ranges,
+          this.resolvedCommentIds,
+          this.version,
+          this.pathname,
+          false
+        )
       })
 
-      describe('with a good doc', function () {
-        beforeEach(async function () {
-          this.update = {
-            resyncDocContent: {
-              content: 'one\ntwo',
-              version: this.version,
-            },
-            projectHistoryId: this.projectHistoryId,
-            path: this.pathname,
-            doc: this.doc_id,
-            meta: { ts: new Date() },
-          }
-
-          await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
-            this.project_id,
-            this.projectHistoryId,
-            this.doc_id,
-            this.lines,
-            this.ranges,
-            this.resolvedCommentIds,
-            this.version,
-            this.pathname,
-            false
-          )
-        })
-
-        it('should check if the doc is too large', function () {
-          this.Limits.docIsTooLarge
-            .calledWith(
-              JSON.stringify(this.update).length,
-              this.lines,
-              this.settings.max_doc_length
-            )
-            .should.equal(true)
-        })
-
-        it('should queue an update', function () {
-          this.ProjectHistoryRedisManager.promises.queueOps
-            .calledWithExactly(this.project_id, JSON.stringify(this.update))
-            .should.equal(true)
-        })
-      })
-
-      describe('with a doc that is too large', function () {
-        beforeEach(async function () {
-          this.Limits.docIsTooLarge.returns(true)
-          await expect(
-            this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
-              this.project_id,
-              this.projectHistoryId,
-              this.doc_id,
-              this.lines,
-              this.ranges,
-              this.resolvedCommentIds,
-              this.version,
-              this.pathname,
-              false
-            )
-          ).to.be.rejected
-        })
-
-        it('should not queue an update if the doc is too large', function () {
-          this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
-            false
-          )
-        })
-      })
-
-      describe('when history ranges support is enabled', function () {
-        beforeEach(async function () {
-          this.update = {
-            resyncDocContent: {
-              content: 'onedeleted\ntwo',
-              version: this.version,
-              ranges: this.ranges,
-              resolvedCommentIds: this.resolvedCommentIds,
-            },
-            projectHistoryId: this.projectHistoryId,
-            path: this.pathname,
-            doc: this.doc_id,
-            meta: { ts: new Date() },
-          }
-
-          await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
-            this.project_id,
-            this.projectHistoryId,
-            this.doc_id,
-            this.lines,
-            this.ranges,
-            this.resolvedCommentIds,
-            this.version,
-            this.pathname,
-            true
-          )
-        })
-
-        it('should include tracked deletes in the update', function () {
-          this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWithExactly(
-            this.project_id,
-            JSON.stringify(this.update)
-          )
-        })
-
-        it('should check the doc length without tracked deletes', function () {
-          this.Limits.docIsTooLarge.should.have.been.calledWith(
+      it('should check if the doc is too large', function () {
+        this.Limits.docIsTooLarge
+          .calledWith(
             JSON.stringify(this.update).length,
             this.lines,
             this.settings.max_doc_length
           )
-        })
+          .should.equal(true)
+      })
+
+      it('should queue an update', function () {
+        this.ProjectHistoryRedisManager.promises.queueOps
+          .calledWithExactly(this.project_id, JSON.stringify(this.update))
+          .should.equal(true)
+      })
+    })
+
+    describe('with a doc that is too large', function () {
+      beforeEach(async function () {
+        this.Limits.docIsTooLarge.returns(true)
+        await expect(
+          this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
+            this.project_id,
+            this.projectHistoryId,
+            this.doc_id,
+            this.lines,
+            this.ranges,
+            this.resolvedCommentIds,
+            this.version,
+            this.pathname,
+            false
+          )
+        ).to.be.rejected
+      })
+
+      it('should not queue an update if the doc is too large', function () {
+        this.ProjectHistoryRedisManager.promises.queueOps.called.should.equal(
+          false
+        )
+      })
+    })
+
+    describe('when history ranges support is enabled', function () {
+      beforeEach(async function () {
+        this.update = {
+          resyncDocContent: {
+            content: 'onedeleted\ntwo',
+            version: this.version,
+            ranges: this.ranges,
+            resolvedCommentIds: this.resolvedCommentIds,
+          },
+          projectHistoryId: this.projectHistoryId,
+          path: this.pathname,
+          doc: this.doc_id,
+          meta: { ts: new Date() },
+        }
+
+        await this.ProjectHistoryRedisManager.promises.queueResyncDocContent(
+          this.project_id,
+          this.projectHistoryId,
+          this.doc_id,
+          this.lines,
+          this.ranges,
+          this.resolvedCommentIds,
+          this.version,
+          this.pathname,
+          true
+        )
+      })
+
+      it('should include tracked deletes in the update', function () {
+        this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWithExactly(
+          this.project_id,
+          JSON.stringify(this.update)
+        )
+      })
+
+      it('should check the doc length without tracked deletes', function () {
+        this.Limits.docIsTooLarge.should.have.been.calledWith(
+          JSON.stringify(this.update).length,
+          this.lines,
+          this.settings.max_doc_length
+        )
+      })
+
+      it('should queue an update', function () {
+        this.ProjectHistoryRedisManager.promises.queueOps
+          .calledWithExactly(this.project_id, JSON.stringify(this.update))
+          .should.equal(true)
       })
     })
   })

@@ -10,9 +10,11 @@ const logger = require('@overleaf/logger')
 module.exports = {
   addEntity: callbackify(addEntity),
   importDir: callbackify(importDir),
+  importFile: callbackify(importDir),
   promises: {
     addEntity,
     importDir,
+    importFile,
   },
 }
 

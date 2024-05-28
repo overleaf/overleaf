@@ -185,6 +185,7 @@ async function getRangesSnapshot(projectId, version, pathname) {
           p: position,
           c: commentRangeContent,
           t: comment.id,
+          resolved: comment.resolved,
         },
       })
     }

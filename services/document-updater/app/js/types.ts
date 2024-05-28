@@ -41,6 +41,8 @@ export type CommentOp = {
   p: number
   t: string
   u?: boolean
+  // Used by project-history when restoring CommentSnapshots
+  resolved?: boolean
 }
 
 /**
@@ -54,7 +56,7 @@ export type Ranges = {
 export type Comment = {
   id: string
   op: CommentOp
-  metadata: {
+  metadata?: {
     user_id: string
     ts: string
   }

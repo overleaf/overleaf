@@ -30,10 +30,11 @@ function slTextUpdate(historyId, doc, userId, v, ts, op) {
   }
 }
 
-function slAddDocUpdate(historyId, doc, userId, ts, docLines) {
+function slAddDocUpdate(historyId, doc, userId, ts, docLines, ranges = {}) {
   return {
     projectHistoryId: historyId,
     pathname: doc.pathname,
+    ranges,
     docLines,
     doc: doc.id,
     meta: { user_id: userId, ts: ts.getTime() },
@@ -46,9 +47,10 @@ function slAddDocUpdateWithVersion(
   userId,
   ts,
   docLines,
-  projectVersion
+  projectVersion,
+  ranges = {}
 ) {
-  const result = slAddDocUpdate(historyId, doc, userId, ts, docLines)
+  const result = slAddDocUpdate(historyId, doc, userId, ts, docLines, ranges)
   result.version = projectVersion
   return result
 }
@@ -59,6 +61,7 @@ function slAddFileUpdate(historyId, file, userId, ts, projectId) {
     pathname: file.pathname,
     url: `http://127.0.0.1:3009/project/${projectId}/file/${file.id}`,
     file: file.id,
+    ranges: undefined,
     meta: { user_id: userId, ts: ts.getTime() },
   }
 }
@@ -132,8 +135,8 @@ function olRenameUpdate(doc, userId, ts, pathname, newPathname) {
   }
 }
 
-function olAddDocUpdate(doc, userId, ts, fileHash) {
-  return {
+function olAddDocUpdate(doc, userId, ts, fileHash, rangesHash = undefined) {
+  const update = {
     v2Authors: [userId],
     timestamp: ts.toJSON(),
     authors: [],
@@ -147,10 +150,21 @@ function olAddDocUpdate(doc, userId, ts, fileHash) {
       },
     ],
   }
+  if (rangesHash) {
+    update.operations[0].file.rangesHash = rangesHash
+  }
+  return update
 }
 
-function olAddDocUpdateWithVersion(doc, userId, ts, fileHash, version) {
-  const result = olAddDocUpdate(doc, userId, ts, fileHash)
+function olAddDocUpdateWithVersion(
+  doc,
+  userId,
+  ts,
+  fileHash,
+  version,
+  rangesHash = undefined
+) {
+  const result = olAddDocUpdate(doc, userId, ts, fileHash, rangesHash)
   result.projectVersion = version
   return result
 }
@@ -271,6 +285,115 @@ describe('Sending Updates', function () {
           assert(
             createBlob.isDone(),
             '/api/projects/:historyId/blobs/:hash should have been called'
+          )
+          assert(
+            addFile.isDone(),
+            `/api/projects/${historyId}/changes should have been called`
+          )
+          done()
+        }
+      )
+    })
+
+    it('should send ranges to the history store', function (done) {
+      const fileHash = '49e886093b3eacbc12b99a1eb5aeaa44a6b9d90e'
+      const rangesHash = 'fa9a429ff518bc9e5b2507a96ff0646b566eca65'
+
+      const historyRanges = {
+        trackedChanges: [
+          {
+            range: { pos: 4, length: 3 },
+            tracking: {
+              type: 'delete',
+              userId: 'user-id-1',
+              ts: '2024-01-01T00:00:00.000Z',
+            },
+          },
+        ],
+        comments: [
+          {
+            ranges: [{ pos: 0, length: 3 }],
+            id: 'comment-id-1',
+          },
+        ],
+      }
+
+      // We need to set up the ranges mock first, as we will call it last..
+      const createRangesBlob = MockHistoryStore()
+        .put(`/api/projects/${historyId}/blobs/${rangesHash}`, historyRanges)
+        .reply(201)
+
+      const createBlob = MockHistoryStore()
+        .put(`/api/projects/${historyId}/blobs/${fileHash}`, 'foo barbaz')
+        .reply(201)
+
+      const addFile = MockHistoryStore()
+        .post(`/api/projects/${historyId}/legacy_changes`, body => {
+          expect(body).to.deep.equal([
+            olAddDocUpdate(
+              this.doc,
+              this.userId,
+              this.timestamp,
+              fileHash,
+              rangesHash
+            ),
+          ])
+          return true
+        })
+        .query({ end_version: 0 })
+        .reply(204)
+
+      async.series(
+        [
+          cb => {
+            ProjectHistoryClient.pushRawUpdate(
+              this.projectId,
+              slAddDocUpdate(
+                historyId,
+                this.doc,
+                this.userId,
+                this.timestamp,
+                'foo barbaz',
+                {
+                  changes: [
+                    {
+                      op: { p: 4, d: 'bar' },
+                      metadata: {
+                        ts: 1704067200000,
+                        user_id: 'user-id-1',
+                      },
+                    },
+                  ],
+                  comments: [
+                    {
+                      op: {
+                        p: 0,
+                        c: 'foo',
+                        t: 'comment-id-1',
+                      },
+                      metadata: { resolved: false },
+                    },
+                  ],
+                }
+              ),
+              cb
+            )
+          },
+          cb => {
+            ProjectHistoryClient.flushProject(this.projectId, cb)
+          },
+        ],
+        error => {
+          if (error) {
+            return done(error)
+          }
+          assert(
+            createBlob.isDone(),
+            '/api/projects/:historyId/blobs/:hash should have been called to create content blob'
+          )
+          assert(
+            createRangesBlob.isDone(),
+            '/api/projects/:historyId/blobs/:hash should have been called to create ranges blob'
           )
           assert(
             addFile.isDone(),

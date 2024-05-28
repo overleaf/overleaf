@@ -53,7 +53,9 @@ describe('BlobManager', function () {
       beforeEach(function (done) {
         this.UpdateTranslator.isAddUpdate.returns(true)
         this.blobHash = 'test hash'
-        this.HistoryStoreManager.createBlobForUpdate.yields(null, this.blobHash)
+        this.HistoryStoreManager.createBlobForUpdate.yields(null, {
+          file: this.blobHash,
+        })
         this.BlobManager.createBlobsForUpdates(
           this.project_id,
           this.historyId,
@@ -79,7 +81,7 @@ describe('BlobManager', function () {
       it('should call the callback with the updates', function () {
         const updatesWithBlobs = this.updates.map(update => ({
           update,
-          blobHash: this.blobHash,
+          blobHashes: { file: this.blobHash },
         }))
         this.callback.calledWith(null, updatesWithBlobs).should.equal(true)
       })
@@ -92,7 +94,9 @@ describe('BlobManager', function () {
         this.HistoryStoreManager.createBlobForUpdate
           .onFirstCall()
           .yields(new Error('random failure'))
-        this.HistoryStoreManager.createBlobForUpdate.yields(null, this.blobHash)
+        this.HistoryStoreManager.createBlobForUpdate.yields(null, {
+          file: this.blobHash,
+        })
         this.BlobManager.createBlobsForUpdates(
           this.project_id,
           this.historyId,
@@ -118,7 +122,7 @@ describe('BlobManager', function () {
       it('should call the callback with the updates', function () {
         const updatesWithBlobs = this.updates.map(update => ({
           update,
-          blobHash: this.blobHash,
+          blobHashes: { file: this.blobHash },
         }))
         this.callback.calledWith(null, updatesWithBlobs).should.equal(true)
       })

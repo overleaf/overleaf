@@ -554,6 +554,7 @@ describe('ProjectEntityUpdateHandler', function () {
             doc: this.newDoc,
             path: this.path,
             docLines: this.docLines.join('\n'),
+            ranges: {},
           },
         ]
         this.DocumentUpdaterHandler.updateProjectStructure.should.have.been.calledWith(

@@ -22,6 +22,7 @@ describe('RestoreManager', function () {
         '../Editor/EditorController': (this.EditorController = {
           promises: {},
         }),
+        '../Project/ProjectLocator': (this.ProjectLocator = { promises: {} }),
       },
     })
     this.user_id = 'mock-user-id'
@@ -193,6 +194,121 @@ describe('RestoreManager', function () {
 
       it('should return the entity', function () {
         expect(this.result).to.equal(this.entity)
+      })
+    })
+  })
+
+  describe('revertFile', function () {
+    beforeEach(function () {
+      this.RestoreManager.promises._writeFileVersionToDisk = sinon
+        .stub()
+        .resolves((this.fsPath = '/tmp/path/on/disk'))
+      this.RestoreManager.promises._findOrCreateFolder = sinon
+        .stub()
+        .resolves((this.folder_id = 'mock-folder-id'))
+      this.FileSystemImportManager.promises.addEntity = sinon
+        .stub()
+        .resolves((this.entity = 'mock-entity'))
+      this.RestoreManager.promises._getRangesFromHistory = sinon
+        .stub()
+        .rejects()
+    })
+
+    describe('with an existing file in the current project', function () {
+      beforeEach(function () {
+        this.pathname = 'foo.tex'
+        this.ProjectLocator.promises.findElementByPath = sinon.stub().resolves()
+      })
+
+      it('should reject', function () {
+        expect(
+          this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        )
+          .to.eventually.be.rejectedWith('File already exists')
+          .and.be.instanceOf(Errors.InvalidError)
+      })
+    })
+
+    describe('when reverting a binary file', function () {
+      beforeEach(function () {
+        this.pathname = 'foo.png'
+        this.FileSystemImportManager.promises.importFile = sinon
+          .stub()
+          .resolves({ type: 'binary' })
+      })
+      it('should reject', function () {
+        expect(
+          this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        )
+          .to.eventually.be.rejectedWith('File is not editable')
+          .and.be.instanceOf(Errors.InvalidError)
+      })
+    })
+
+    describe("when reverting a file that doesn't current exist", function () {
+      beforeEach(async function () {
+        this.pathname = 'foo.tex'
+        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
+        this.tracked_changes = [
+          {
+            op: { pos: 4, i: 'bar' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { pos: 8, d: 'qux' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-2' },
+          },
+        ]
+        this.comments = [{ op: { t: 'comment-1', p: 0, c: 'foo' } }]
+        this.FileSystemImportManager.promises.importFile = sinon
+          .stub()
+          .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
+        this.RestoreManager.promises._getRangesFromHistory = sinon
+          .stub()
+          .resolves({ changes: this.tracked_changes, comment: this.comments })
+        this.EditorController.promises.addDocWithRanges = sinon
+          .stub()
+          .resolves(
+            (this.addedFile = { doc: 'mock-doc', folderId: 'mock-folder' })
+          )
+        this.data = await this.RestoreManager.promises.revertFile(
+          this.user_id,
+          this.project_id,
+          this.version,
+          this.pathname
+        )
+      })
+
+      it('should import the file', function () {
+        expect(
+          this.EditorController.promises.addDocWithRanges
+        ).to.have.been.calledWith(
+          this.project_id,
+          this.folder_id,
+          'foo.tex',
+          ['foo', 'bar', 'baz'],
+          { changes: this.tracked_changes, comment: this.comments }
+        )
+      })
+
+      it('should return the created entity', function () {
+        expect(this.data).to.equal(this.addedFile)
+      })
+
+      it('should look up ranges', function () {
+        expect(
+          this.RestoreManager.promises._getRangesFromHistory
+        ).to.have.been.calledWith(this.project_id, this.version, this.pathname)
       })
     })
   })

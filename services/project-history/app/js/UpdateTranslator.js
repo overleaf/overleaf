@@ -55,14 +55,16 @@ function _convertToChange(projectId, updateWithBlob) {
     ]
     projectVersion = update.version
   } else if (isAddUpdate(update)) {
-    operations = [
-      {
-        pathname: _convertPathname(update.pathname),
-        file: {
-          hash: updateWithBlob.blobHash,
-        },
+    const op = {
+      pathname: _convertPathname(update.pathname),
+      file: {
+        hash: updateWithBlob.blobHashes.file,
       },
-    ]
+    }
+    if (_isAddDocUpdate(update)) {
+      op.file.rangesHash = updateWithBlob.blobHashes.ranges
+    }
+    operations = [op]
     projectVersion = update.version
   } else if (isTextUpdate(update)) {
     const docLength = update.meta.history_doc_length ?? update.meta.doc_length

@@ -86,9 +86,19 @@ const ProjectHistoryRedisManager = {
     projectUpdate,
     source
   ) {
+    let docLines = projectUpdate.docLines
+    let ranges
+    if (projectUpdate.historyRangesSupport && projectUpdate.ranges) {
+      docLines = addTrackedDeletesToContent(
+        docLines,
+        projectUpdate.ranges.changes ?? []
+      )
+      ranges = HistoryConversions.toHistoryRanges(projectUpdate.ranges)
+    }
+
     projectUpdate = {
       pathname: projectUpdate.pathname,
-      docLines: projectUpdate.docLines,
+      docLines,
       url: projectUpdate.url,
       meta: {
         user_id: userId,
@@ -96,6 +106,9 @@ const ProjectHistoryRedisManager = {
       },
       version: projectUpdate.version,
       projectHistoryId,
+    }
+    if (ranges) {
+      projectUpdate.ranges = ranges
     }
     projectUpdate[entityType] = entityId
     if (source != null) {

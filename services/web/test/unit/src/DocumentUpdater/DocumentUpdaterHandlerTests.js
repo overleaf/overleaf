@@ -44,6 +44,9 @@ describe('DocumentUpdaterHandler', function () {
         '../../models/Project': {
           Project: (this.Project = {}),
         },
+        '../Project/ProjectGetter': (this.ProjectGetter = {
+          getProjectWithoutLock: sinon.stub(),
+        }),
         '../../Features/Project/ProjectLocator': {},
         '@overleaf/metrics': {
           Timer: class {
@@ -52,6 +55,9 @@ describe('DocumentUpdaterHandler', function () {
         },
       },
     })
+    this.ProjectGetter.getProjectWithoutLock
+      .withArgs(this.project_id)
+      .yields(null, this.project)
   })
 
   describe('flushProjectToMongo', function () {
@@ -1116,8 +1122,10 @@ describe('DocumentUpdaterHandler', function () {
               id: this.docId.toString(),
               pathname: '/foo',
               docLines: 'a\nb',
+              historyRangesSupport: false,
               url: undefined,
               hash: undefined,
+              ranges: undefined,
             },
           ]
 
@@ -1169,7 +1177,9 @@ describe('DocumentUpdaterHandler', function () {
               pathname: '/bar',
               url: 'filestore.example.com/file',
               docLines: undefined,
+              historyRangesSupport: false,
               hash: '12345',
+              ranges: undefined,
             },
           ]
 
@@ -1280,8 +1290,10 @@ describe('DocumentUpdaterHandler', function () {
               id: this.docId.toString(),
               pathname: '/foo.doc',
               docLines: 'hello there',
+              historyRangesSupport: false,
               url: undefined,
               hash: undefined,
+              ranges: undefined,
             },
           ]
 
@@ -1334,6 +1346,128 @@ describe('DocumentUpdaterHandler', function () {
           const firstCallArgs = this.callback.args[0]
           firstCallArgs[0].message.should.equal(
             'did not receive project version in changes'
+          )
+        })
+      })
+
+      describe('when ranges are present', function () {
+        beforeEach(function () {
+          this.docId = new ObjectId()
+          this.ranges = {
+            changes: [
+              {
+                op: { p: 0, i: 'foo' },
+                metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+              },
+              {
+                op: { p: 7, d: ' baz' },
+                metadata: { ts: '2024-02-01T00:00:00.000Z', user_id: 'user-1' },
+              },
+            ],
+            comments: [
+              {
+                op: { p: 4, c: 'bar', t: 'comment-1' },
+                metadata: { resolved: false },
+              },
+            ],
+          }
+          this.changes = {
+            newDocs: [
+              {
+                path: '/foo',
+                docLines: 'foo\nbar',
+                doc: { _id: this.docId },
+                ranges: this.ranges,
+              },
+            ],
+            newProject: { version: this.version },
+          }
+        })
+
+        it('should forward ranges', function (done) {
+          const updates = [
+            {
+              type: 'add-doc',
+              id: this.docId.toString(),
+              pathname: '/foo',
+              docLines: 'foo\nbar',
+              historyRangesSupport: false,
+              url: undefined,
+              hash: undefined,
+              ranges: this.ranges,
+            },
+          ]
+
+          this.handler.updateProjectStructure(
+            this.project_id,
+            this.projectHistoryId,
+            this.user_id,
+            this.changes,
+            this.source,
+            () => {
+              this.request
+                .calledWith({
+                  url: this.url,
+                  method: 'POST',
+                  json: {
+                    updates,
+                    userId: this.user_id,
+                    version: this.version,
+                    projectHistoryId: this.projectHistoryId,
+                    source: this.source,
+                  },
+                  timeout: 30 * 1000,
+                })
+                .should.equal(true)
+              done()
+            }
+          )
+        })
+
+        it('should include flag when history ranges support is enabled', function (done) {
+          this.ProjectGetter.getProjectWithoutLock
+            .withArgs(this.project_id)
+            .yields(null, {
+              _id: this.project_id,
+              overleaf: { history: { rangesSupportEnabled: true } },
+            })
+
+          const updates = [
+            {
+              type: 'add-doc',
+              id: this.docId.toString(),
+              pathname: '/foo',
+              docLines: 'foo\nbar',
+              historyRangesSupport: true,
+              url: undefined,
+              hash: undefined,
+              ranges: this.ranges,
+            },
+          ]
+
+          this.handler.updateProjectStructure(
+            this.project_id,
+            this.projectHistoryId,
+            this.user_id,
+            this.changes,
+            this.source,
+            () => {
+              this.request
+                .calledWith({
+                  url: this.url,
+                  method: 'POST',
+                  json: {
+                    updates,
+                    userId: this.user_id,
+                    version: this.version,
+                    projectHistoryId: this.projectHistoryId,
+                    source: this.source,
+                  },
+                  timeout: 30 * 1000,
+                })
+                .should.equal(true)
+              done()
+            }
           )
         })
       })

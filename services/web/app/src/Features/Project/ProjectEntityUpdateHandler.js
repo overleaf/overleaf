@@ -397,6 +397,7 @@ const ProjectEntityUpdateHandler = {
               doc,
               path: docPath,
               docLines: docLines.join('\n'),
+              ranges,
             },
           ]
           DocumentUpdaterHandler.updateProjectStructure(
