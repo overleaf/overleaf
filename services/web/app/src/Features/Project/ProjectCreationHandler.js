@@ -15,6 +15,7 @@ const { callbackify } = require('util')
 const _ = require('lodash')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const MONTH_NAMES = [
   'January',
@@ -180,8 +181,19 @@ async function _createBlankProject(
     }
   }
   project.rootFolder[0] = rootFolder
-  const user = await User.findById(ownerId, 'ace.spellCheckLanguage')
+  const user = await User.findById(ownerId, {
+    'ace.spellCheckLanguage': 1,
+    _id: 1,
+  })
   project.spellCheckLanguage = user.ace.spellCheckLanguage
+  const historyRangesSupportAssignment =
+    await SplitTestHandler.promises.getAssignmentForUser(
+      user._id,
+      'history-ranges-support'
+    )
+  if (historyRangesSupportAssignment.variant === 'enabled') {
+    project.overleaf.history.rangesSupportEnabled = true
+  }
   await project.save()
   if (!skipCreatingInTPDS) {
     await TpdsUpdateSender.promises.createProject({
