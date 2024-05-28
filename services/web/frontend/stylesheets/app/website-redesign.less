@@ -1002,11 +1002,13 @@
   }
 
   .btn-primary {
-    background: var(--emerald-green);
-    color: var(--white);
+    &:not([disabled]) {
+      background: var(--emerald-green);
+      color: var(--white);
 
-    &:hover {
-      background: var(--emerald-green-dark);
+      &:hover {
+        background: var(--emerald-green-dark);
+      }
     }
   }
 
