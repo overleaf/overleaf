@@ -26,6 +26,8 @@ import { populateReferenceScope } from '@/features/ide-react/context/references-
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
 
+const LOADED_AT = new Date()
+
 type IdeReactContextValue = {
   projectId: string
   eventEmitter: IdeEventEmitter
@@ -94,6 +96,7 @@ export const IdeReactProvider: FC = ({ children }) => {
   )
   const [eventLog] = useState(() => new EventLog())
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
+  const release = getMeta('ol-ExposedSettings')?.sentryRelease ?? null
 
   // Set to true only after project:joined has fired and all its listeners have
   // been called
@@ -112,6 +115,8 @@ export const IdeReactProvider: FC = ({ children }) => {
         // @ts-ignore
         transport: socket.socket?.transport?.name,
         client_now: new Date(),
+        release,
+        client_load: LOADED_AT,
       }
 
       const errorObj: Record<string, any> = {}
@@ -130,7 +135,7 @@ export const IdeReactProvider: FC = ({ children }) => {
         },
       })
     },
-    [socket.socket]
+    [socket.socket, release]
   )
 
   // Populate scope values when joining project, then fire project:joined event
