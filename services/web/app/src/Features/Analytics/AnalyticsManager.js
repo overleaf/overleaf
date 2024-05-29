@@ -331,6 +331,9 @@ async function analyticsIdMiddleware(req, res, next) {
     // generate an `analyticsId` if needed
     session.analyticsId = crypto.randomUUID()
   }
+
+  res.locals.getSessionAnalyticsId = () => session.analyticsId
+
   next()
 }
 

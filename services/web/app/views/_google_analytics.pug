@@ -1,16 +1,18 @@
 if (typeof(ExposedSettings.gaTokenV4) != "undefined" || typeof(ExposedSettings.gaToken) != "undefined")
-    script(type="text/javascript", nonce=scriptNonce, id="ga-loader" data-ga-token=ExposedSettings.gaToken data-ga-token-v4=ExposedSettings.gaTokenV4 data-cookie-domain=ExposedSettings.cookieDomain).
+    script(type="text/javascript", nonce=scriptNonce, id="ga-loader" data-ga-token=ExposedSettings.gaToken data-ga-token-v4=ExposedSettings.gaTokenV4 data-cookie-domain=ExposedSettings.cookieDomain data-session-analytics-id=getSessionAnalyticsId()).
         var gaSettings = document.querySelector('#ga-loader').dataset;
         var gaid = gaSettings.gaTokenV4;
         var gaToken = gaSettings.gaToken;
         var cookieDomain = gaSettings.cookieDomain;
+        var sessionAnalyticsId = gaSettings.sessionAnalyticsId;
         if(gaid) {
+            var additionalGaConfig = sessionAnalyticsId ? { 'user_id': sessionAnalyticsId } : {};
             window.dataLayer = window.dataLayer || [];
             function gtag(){
                 dataLayer.push(arguments);
             }
             gtag('js', new Date());
-            gtag('config', gaid, { 'anonymize_ip': true });
+            gtag('config', gaid, { 'anonymize_ip': true, ...additionalGaConfig });
         }
         if (gaToken) {
             window.ga = window.ga || function () {
@@ -31,6 +33,9 @@ if (typeof(ExposedSettings.gaTokenV4) != "undefined" || typeof(ExposedSettings.g
                 })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
                 ga('create', gaToken, cookieDomain.replace(/^\./, ""));
                 ga('set', 'anonymizeIp', true);
+                if (sessionAnalyticsId) {
+                    ga('set', 'userId', sessionAnalyticsId);
+                }
                 ga('send', 'pageview');
             }
         };
