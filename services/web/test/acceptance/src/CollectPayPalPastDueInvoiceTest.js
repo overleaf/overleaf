@@ -252,23 +252,27 @@ describe('CollectPayPalPastDueInvoice', function () {
     expect(apiRequestStub.callCount).to.eql(24)
   })
 
-  it('rejects with no invoices are processed because of errors', async function () {
+  it('rejects when some invoice processing failed', async function () {
     fakeApiRequests([404])
-    await expect(main()).to.be.rejectedWith('No invoices collected')
+    await expect(main()).to.be.rejectedWith(
+      'Invoices collection failed for 1 invoices'
+    )
   })
 
-  it('rejects when there are no invoices', async function () {
+  it('doesnt reject when there are no invoices', async function () {
     fakeApiRequests([])
-    await expect(main()).to.be.rejectedWith('No invoices collected')
+    const r = await main()
+    expect(r).to.eql({
+      INVOICES_COLLECTED: [],
+      INVOICES_COLLECTED_SUCCESS: [],
+      USERS_COLLECTED: [],
+    })
   })
 
   it('resolves when some invoices are partially successful', async function () {
     fakeApiRequests([200, 404])
-    const r = await main()
-    expect(r).to.eql({
-      INVOICES_COLLECTED: [200, 404],
-      INVOICES_COLLECTED_SUCCESS: [200],
-      USERS_COLLECTED: ['200', '404'],
-    })
+    await expect(main()).to.be.rejectedWith(
+      'Invoices collection failed for 1 invoices'
+    )
   })
 })

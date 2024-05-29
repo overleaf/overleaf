@@ -91,8 +91,9 @@ const main = async () => {
   try {
     await attemptInvoicesCollection()
 
-    if (INVOICES_COLLECTED_SUCCESS.length === 0) {
-      throw new Error('No invoices collected')
+    const diff = INVOICES_COLLECTED.length - INVOICES_COLLECTED_SUCCESS.length
+    if (diff !== 0) {
+      throw new Error(`Invoices collection failed for ${diff} invoices`)
     }
 
     return {
