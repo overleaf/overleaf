@@ -8,6 +8,7 @@ const moment = require('moment')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 const { fetchJson } = require('@overleaf/fetch-utils')
 const ProjectLocator = require('../Project/ProjectLocator')
+const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 
 const RestoreManager = {
   async restoreFileFromV2(userId, projectId, version, pathname) {
@@ -42,6 +43,7 @@ const RestoreManager = {
   },
 
   async revertFile(userId, projectId, version, pathname) {
+    const source = 'file-revert'
     const fsPath = await RestoreManager._writeFileVersionToDisk(
       projectId,
       version,
@@ -50,34 +52,53 @@ const RestoreManager = {
     const basename = Path.basename(pathname)
     let dirname = Path.dirname(pathname)
     if (dirname === '.') {
-      // no directory
-      dirname = ''
+      // root directory
+      dirname = '/'
     }
     const parentFolderId = await RestoreManager._findOrCreateFolder(
       projectId,
       dirname
     )
-    let fileExists = true
-    try {
-      // TODO: Is there a better way of doing this?
-      await ProjectLocator.promises.findElementByPath({
-        projectId,
+    const file = await ProjectLocator.promises
+      .findElementByPath({
+        project_id: projectId,
         path: pathname,
       })
-    } catch (error) {
-      fileExists = false
-    }
-    if (fileExists) {
-      throw new Errors.InvalidError('File already exists')
-    }
+      .catch(() => null)
 
     const importInfo = await FileSystemImportManager.promises.importFile(
       fsPath,
       pathname
     )
-    if (importInfo.type !== 'doc') {
-      // TODO: Handle binary files
-      throw new Errors.InvalidError('File is not editable')
+    if (importInfo.type === 'file') {
+      const newFile = await EditorController.promises.upsertFile(
+        projectId,
+        parentFolderId,
+        basename,
+        fsPath,
+        file?.element?.linkedFileData,
+        source,
+        userId
+      )
+
+      return {
+        _id: newFile._id,
+        type: importInfo.type,
+      }
+    }
+
+    if (file) {
+      await DocumentUpdaterHandler.promises.setDocument(
+        projectId,
+        file.element._id,
+        userId,
+        importInfo.lines,
+        source
+      )
+      return {
+        _id: file.element._id,
+        type: importInfo.type,
+      }
     }
 
     const ranges = await RestoreManager._getRangesFromHistory(

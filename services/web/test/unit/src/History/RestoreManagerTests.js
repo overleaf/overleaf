@@ -23,6 +23,8 @@ describe('RestoreManager', function () {
           promises: {},
         }),
         '../Project/ProjectLocator': (this.ProjectLocator = { promises: {} }),
+        '../DocumentUpdater/DocumentUpdaterHandler':
+          (this.DocumentUpdaterHandler = { promises: {} }),
       },
     })
     this.user_id = 'mock-user-id'
@@ -217,41 +219,78 @@ describe('RestoreManager', function () {
     describe('with an existing file in the current project', function () {
       beforeEach(function () {
         this.pathname = 'foo.tex'
-        this.ProjectLocator.promises.findElementByPath = sinon.stub().resolves()
+        this.FileSystemImportManager.promises.importFile = sinon
+          .stub()
+          .resolves({ type: 'doc' })
+        this.ProjectLocator.promises.findElementByPath = sinon
+          .stub()
+          .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
+        this.FileSystemImportManager.promises.importFile = sinon
+          .stub()
+          .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
+        this.DocumentUpdaterHandler.promises.setDocument = sinon
+          .stub()
+          .resolves()
       })
 
-      it('should reject', function () {
-        expect(
-          this.RestoreManager.promises.revertFile(
-            this.user_id,
-            this.project_id,
-            this.version,
-            this.pathname
-          )
+      it('should call setDocument in document updater and revert file', async function () {
+        const revertRes = await this.RestoreManager.promises.revertFile(
+          this.user_id,
+          this.project_id,
+          this.version,
+          this.pathname
         )
-          .to.eventually.be.rejectedWith('File already exists')
-          .and.be.instanceOf(Errors.InvalidError)
+
+        expect(
+          this.DocumentUpdaterHandler.promises.setDocument
+        ).to.have.been.calledWith(
+          this.project_id,
+          'mock-file-id',
+          this.user_id,
+          ['foo', 'bar', 'baz'],
+          'file-revert'
+        )
+        expect(revertRes).to.deep.equal({ _id: 'mock-file-id', type: 'doc' })
       })
     })
 
     describe('when reverting a binary file', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this.pathname = 'foo.png'
         this.FileSystemImportManager.promises.importFile = sinon
           .stub()
-          .resolves({ type: 'binary' })
+          .resolves({ type: 'file' })
+        this.EditorController.promises.upsertFile = sinon
+          .stub()
+          .resolves({ _id: 'mock-file-id', type: 'file' })
       })
-      it('should reject', function () {
-        expect(
-          this.RestoreManager.promises.revertFile(
-            this.user_id,
-            this.project_id,
-            this.version,
-            this.pathname
-          )
+
+      it('should return the created entity if file exists', async function () {
+        this.ProjectLocator.promises.findElementByPath = sinon
+          .stub()
+          .resolves({ type: 'file' })
+
+        const revertRes = await this.RestoreManager.promises.revertFile(
+          this.user_id,
+          this.project_id,
+          this.version,
+          this.pathname
         )
-          .to.eventually.be.rejectedWith('File is not editable')
-          .and.be.instanceOf(Errors.InvalidError)
+
+        expect(revertRes).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
+      })
+
+      it('should return the created entity if file does not exists', async function () {
+        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
+
+        const revertRes = await this.RestoreManager.promises.revertFile(
+          this.user_id,
+          this.project_id,
+          this.version,
+          this.pathname
+        )
+
+        expect(revertRes).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
       })
     })
 

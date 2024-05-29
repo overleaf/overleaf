@@ -442,6 +442,9 @@ export default EditorManager = (function () {
         ) {
           return
         }
+        if (update?.meta?.source === 'file-revert') {
+          return
+        }
         return this.ide.showGenericMessageModal(
           'Document Updated Externally',
           'This document was just updated externally. Any recent changes you have made may have been overwritten. To see previous versions please look in the history.'

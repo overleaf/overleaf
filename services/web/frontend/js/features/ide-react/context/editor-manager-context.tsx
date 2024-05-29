@@ -283,6 +283,9 @@ export const EditorManagerProvider: FC = ({ children }) => {
         ) {
           return
         }
+        if (update.meta.source === 'file-revert') {
+          return
+        }
         showGenericMessageModal(
           t('document_updated_externally'),
           t('document_updated_externally_detail')
