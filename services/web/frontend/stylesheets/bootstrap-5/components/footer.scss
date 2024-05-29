@@ -305,8 +305,7 @@ footer.site-footer {
   z-index: 100;
   color: var(--content-secondary);
   background: var(--bg-light-secondary);
-  box-shadow: var(--spacing-00) var(--spacing-02) var(--spacing-04)
-    var(--spacing-00) #0000001a;
+  box-shadow: 0px -5px 8px 0px #0000001a;
 
   .cookie-banner-actions {
     padding-top: var(--spacing-04);

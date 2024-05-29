@@ -180,13 +180,10 @@ $hr-margin-y: $spacing-08;
 $hr-border-color: $border-divider;
 
 // Modals
-$modal-content-color: $content-secondary;
-$modal-content-border-color: $border-divider;
 $modal-backdrop-bg: $bg-dark-primary;
 $modal-backdrop-opacity: 0.72;
-$box-shadow: shadow-lg();
-$box-shadow-sm: shadow-lg();
-$box-shadow-lg: shadow-lg();
+$modal-content-color: $content-secondary;
+$modal-content-border-color: $border-divider;
 $modal-header-padding: $spacing-05 $spacing-06;
 $modal-header-padding-x: $spacing-08;
 $modal-header-padding-y: $spacing-08;
