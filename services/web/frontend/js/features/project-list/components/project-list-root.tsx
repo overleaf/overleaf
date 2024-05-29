@@ -26,6 +26,8 @@ import { useEffect } from 'react'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '../../../shared/components/generic-error-boundary-fallback'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -79,7 +81,12 @@ function ProjectListPageContent() {
     <>
       <SystemMessages />
 
-      <div className="project-list-wrapper clearfix container mx-0 px-0">
+      <div
+        className={classnames(
+          'project-list-wrapper',
+          bsVersion({ bs3: 'clearfix container mx-0 px-0' })
+        )}
+      >
         {totalProjectsCount > 0 ? (
           <>
             <Sidebar />
