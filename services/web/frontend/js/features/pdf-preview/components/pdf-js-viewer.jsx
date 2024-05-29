@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { debounce, throttle } from 'lodash'
 import PdfViewerControls from './pdf-viewer-controls'
+import PdfViewerControlsToolbar from './pdf-viewer-controls-toolbar'
 import { useProjectContext } from '../../../shared/context/project-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import { buildHighlightElement } from '../util/highlights'
@@ -14,6 +15,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import { getPdfCachingMetrics } from '../util/metrics'
 import { debugConsole } from '@/utils/debugging'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function PdfJsViewer({ url, pdfFile }) {
   const { _id: projectId } = useProjectContext()
@@ -23,15 +25,33 @@ function PdfJsViewer({ url, pdfFile }) {
 
   const { setLoadingError } = usePdfPreviewContext()
 
+  const hasNewPdfToolbar = useFeatureFlag('pdf-controls')
+
   // state values persisted in localStorage to restore on load
   const [scale, setScale] = usePersistedState(
     `pdf-viewer-scale:${projectId}`,
     'page-width'
   )
 
+  // rawScale is different from scale as it is always a number.
+  // This is relevant when scale is e.g. 'page-width'.
+  const [rawScale, setRawScale] = useState(null)
+  const [page, setPage] = useState(null)
+  const [totalPages, setTotalPages] = useState(null)
+
   // local state values
   const [pdfJsWrapper, setPdfJsWrapper] = useState()
   const [initialised, setInitialised] = useState(false)
+
+  const handlePageChange = useCallback(
+    newPage => {
+      setPage(newPage)
+      if (pdfJsWrapper?.viewer) {
+        pdfJsWrapper.viewer.currentPageNumber = newPage
+      }
+    },
+    [pdfJsWrapper, setPage]
+  )
 
   // create the viewer when the container is mounted
   const handleContainer = useCallback(
@@ -109,13 +129,27 @@ function PdfJsViewer({ url, pdfFile }) {
       pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
     }
 
+    const handleRenderedInitialPageNumber = () => {
+      setPage(pdfJsWrapper.viewer.currentPageNumber)
+    }
+
+    const handleScaleChanged = () => {
+      setRawScale(pdfJsWrapper.viewer.currentScale)
+    }
+
     // `pagesinit` fires when the data for rendering the first page is ready.
     pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
     // `pagerendered` fires when a page was actually rendered.
     pdfJsWrapper.eventBus.on('pagerendered', handleRendered)
+    // Once a page has been rendered we know the scale that it has been rendered to.
+    pdfJsWrapper.eventBus.on('pagerendered', handleScaleChanged)
+    // Once a page has been rendered we can set the initial current page number.
+    pdfJsWrapper.eventBus.on('pagerendered', handleRenderedInitialPageNumber)
     return () => {
       pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
       pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
+      pdfJsWrapper.eventBus.off('pagerendered', handleScaleChanged)
+      pdfJsWrapper.eventBus.off('pagerendered', handleRenderedInitialPageNumber)
     }
   }, [pdfJsWrapper, firstRenderDone, startFetch])
 
@@ -138,6 +172,9 @@ function PdfJsViewer({ url, pdfFile }) {
       }
       pdfJsWrapper
         .loadDocument({ url, pdfFile, abortController, handleFetchError })
+        .then(doc => {
+          setTotalPages(doc.numPages)
+        })
         .catch(error => {
           if (abortController.signal.aborted) return
           debugConsole.error(error)
@@ -175,6 +212,7 @@ function PdfJsViewer({ url, pdfFile }) {
 
       const scrollListener = () => {
         storePosition(pdfJsWrapper)
+        setPage(pdfJsWrapper.viewer.currentPageNumber)
       }
 
       pdfJsWrapper.container.addEventListener('scroll', scrollListener)
@@ -233,7 +271,6 @@ function PdfJsViewer({ url, pdfFile }) {
     }
   }, [pdfJsWrapper])
 
-  // restore the saved scale and scroll position
   const positionRef = useRef(position)
   useEffect(() => {
     positionRef.current = position
@@ -244,6 +281,7 @@ function PdfJsViewer({ url, pdfFile }) {
     scaleRef.current = scale
   }, [scale])
 
+  // restore the saved scale and scroll position
   useEffect(() => {
     if (initialised && pdfJsWrapper) {
       if (!pdfJsWrapper.isVisible()) {
@@ -332,6 +370,8 @@ function PdfJsViewer({ url, pdfFile }) {
   const setZoom = useCallback(
     zoom => {
       switch (zoom) {
+        // TODO: We can remove fit-width and fit-height once the
+        // pdf toolbar is fully rolled out
         case 'fit-width':
           setScale('page-width')
           break
@@ -339,7 +379,6 @@ function PdfJsViewer({ url, pdfFile }) {
         case 'fit-height':
           setScale('page-height')
           break
-
         case 'zoom-in':
           if (pdfJsWrapper) {
             setScale(pdfJsWrapper.viewer.currentScale * 1.25)
@@ -351,6 +390,9 @@ function PdfJsViewer({ url, pdfFile }) {
             setScale(pdfJsWrapper.viewer.currentScale * 0.75)
           }
           break
+
+        default:
+          setScale(zoom)
       }
     },
     [pdfJsWrapper, setScale]
@@ -394,7 +436,7 @@ function PdfJsViewer({ url, pdfFile }) {
 
           case '0':
             event.preventDefault()
-            setZoom('fit-width')
+            setZoom('page-width')
             break
         }
       }
@@ -432,20 +474,37 @@ function PdfJsViewer({ url, pdfFile }) {
     }
   }, [pdfJsWrapper])
 
+  // Don't render the toolbar until we have the necessary information
+  const toolbarInfoLoaded =
+    rawScale !== null && page !== null && totalPages !== null
+
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
   /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
-    <div className="pdfjs-viewer pdfjs-viewer-outer" ref={handleContainer}>
-      <div
-        className="pdfjs-viewer-inner"
-        role="tabpanel"
-        tabIndex="0"
-        onKeyDown={handleKeyDown}
-      >
+    <div
+      className="pdfjs-viewer pdfjs-viewer-outer"
+      ref={handleContainer}
+      onKeyDown={handleKeyDown}
+      role="tabpanel"
+      tabIndex={0}
+    >
+      <div className="pdfjs-viewer-inner">
         <div className="pdfViewer" />
       </div>
       <div className="pdfjs-controls" tabIndex="0">
-        <PdfViewerControls setZoom={setZoom} />
+        {hasNewPdfToolbar ? (
+          toolbarInfoLoaded && (
+            <PdfViewerControlsToolbar
+              setZoom={setZoom}
+              rawScale={rawScale}
+              setPage={handlePageChange}
+              page={page}
+              totalPages={totalPages}
+            />
+          )
+        ) : (
+          <PdfViewerControls setZoom={setZoom} />
+        )}
       </div>
     </div>
   )
