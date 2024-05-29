@@ -3,6 +3,7 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
 )
 const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 const { promisifyAll } = require('@overleaf/promise-utils')
 const metrics = require('./Metrics')
 const Errors = require('./Errors')
@@ -110,7 +111,21 @@ const RedisManager = {
               )
             }
           }
-          multi.exec(callback)
+          multi.exec(err => {
+            if (err) {
+              callback(
+                OError.tag(err, 'failed to write doc to Redis in MULTI', {
+                  previousErrors: err.previousErrors.map(e => ({
+                    name: e.name,
+                    message: e.message,
+                    command: e.command,
+                  })),
+                })
+              )
+            } else {
+              callback()
+            }
+          })
         }
       )
     })
