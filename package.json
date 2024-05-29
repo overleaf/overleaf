@@ -19,9 +19,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "prettier": "3.2.5",
-    "resolve-url-loader": "^5.0.0",
-    "sass": "^1.69.5",
-    "sass-loader": "^13.3.2",
     "typescript": "^5.0.4"
   },
   "scripts": {
