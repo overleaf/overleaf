@@ -339,6 +339,12 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   })
 
   webRouter.use(function (req, res, next) {
+    res.locals.bootstrap5Override =
+      req.query['bootstrap-5-override'] === 'enabled'
+    next()
+  })
+
+  webRouter.use(function (req, res, next) {
     res.locals.ExposedSettings = {
       isOverleaf: Settings.overleaf != null,
       appName: Settings.appName,

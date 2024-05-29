@@ -5,9 +5,7 @@ block entrypointVar
 
 block vars
 	- var suppressNavContentLinks = true
-
-block vars
-	- bootstrap5EnabledPage = true
+	- bootstrap5PageStatus = 'queryStringOnly' // One of 'disabled', 'enabled', and 'queryStringOnly'
 
 block append meta
 	meta(name="ol-usersBestSubscription" data-type="json" content=usersBestSubscription)
