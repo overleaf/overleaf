@@ -834,8 +834,11 @@ describe('RedisManager', function () {
         this.logger.error.calledWith().should.equal(false)
       })
 
-      it('should not add the document to the HistoryRangesSupport set in Redis', function () {
-        this.multi.sadd.should.not.have.been.calledWith('HistoryRangesSupport')
+      it('should remove the document from the HistoryRangesSupport set in Redis', function () {
+        this.rclient.srem.should.have.been.calledWith(
+          'HistoryRangesSupport',
+          this.docId
+        )
       })
 
       it('should not store the resolved comments in Redis', function () {
@@ -956,7 +959,7 @@ describe('RedisManager', function () {
       })
 
       it('should add the document to the HistoryRangesSupport set in Redis', function () {
-        this.multi.sadd.should.have.been.calledWith(
+        this.rclient.sadd.should.have.been.calledWith(
           'HistoryRangesSupport',
           this.docId
         )

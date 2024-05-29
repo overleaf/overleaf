@@ -32,6 +32,11 @@ const MAX_OPS_PER_ITERATION = 8 // process a limited number of ops for safety
 
 const RealTimeRedisManager = {
   getPendingUpdatesForDoc(docId, callback) {
+    // Make sure that this MULTI operation only operates on doc
+    // specific keys, i.e. keys that have the doc id in curly braces.
+    // The curly braces identify a hash key for Redis and ensures that
+    // the MULTI's operations are all done on the same node in a
+    // cluster environment.
     const multi = rclient.multi()
     multi.lrange(
       Keys.pendingUpdates({ doc_id: docId }),

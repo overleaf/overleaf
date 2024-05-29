@@ -23,6 +23,12 @@ const ProjectHistoryRedisManager = {
     for (const op of ops) {
       metrics.summary('redis.projectHistoryOps', op.length, { status: 'push' })
     }
+
+    // Make sure that this MULTI operation only operates on project
+    // specific keys, i.e. keys that have the project id in curly braces.
+    // The curly braces identify a hash key for Redis and ensures that
+    // the MULTI's operations are all done on the same node in a
+    // cluster environment.
     const multi = rclient.multi()
     // Push the ops onto the project history queue
     multi.rpush(

@@ -441,88 +441,85 @@ describe('Ranges', function () {
         lines: ['aaa', 'bbb', 'ccc', 'ddd', 'eee'],
       }
 
-      DocUpdaterClient.enableHistoryRangesSupport(this.doc.id, (error, res) => {
-        if (error) {
+      MockWebApi.insertDoc(this.project_id, this.doc.id, {
+        lines: this.doc.lines,
+        version: 0,
+        historyRangesSupport: true,
+      })
+
+      DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
+        if (error != null) {
           throw error
         }
-        MockWebApi.insertDoc(this.project_id, this.doc.id, {
-          lines: this.doc.lines,
-          version: 0,
-        })
 
-        DocUpdaterClient.preloadDoc(this.project_id, this.doc.id, error => {
-          if (error != null) {
-            throw error
-          }
+        this.id_seed_1 = 'tc_1'
+        this.id_seed_2 = 'tc_2'
+        this.id_seed_3 = 'tc_3'
 
-          this.id_seed_1 = 'tc_1'
-          this.id_seed_2 = 'tc_2'
-          this.id_seed_3 = 'tc_3'
-
-          this.updates = [
-            {
-              doc: this.doc.id,
-              op: [{ d: 'bbb', p: 4 }],
-              v: 0,
-              meta: {
-                user_id: this.user_id,
-                tc: this.id_seed_1,
-              },
+        this.updates = [
+          {
+            doc: this.doc.id,
+            op: [{ d: 'bbb', p: 4 }],
+            v: 0,
+            meta: {
+              user_id: this.user_id,
+              tc: this.id_seed_1,
             },
-            {
-              doc: this.doc.id,
-              op: [{ d: 'ccc', p: 5 }],
-              v: 1,
-              meta: {
-                user_id: this.user_id,
-                tc: this.id_seed_2,
-              },
+          },
+          {
+            doc: this.doc.id,
+            op: [{ d: 'ccc', p: 5 }],
+            v: 1,
+            meta: {
+              user_id: this.user_id,
+              tc: this.id_seed_2,
             },
-            {
-              doc: this.doc.id,
-              op: [{ d: 'ddd', p: 6 }],
-              v: 2,
-              meta: {
-                user_id: this.user_id,
-                tc: this.id_seed_3,
-              },
+          },
+          {
+            doc: this.doc.id,
+            op: [{ d: 'ddd', p: 6 }],
+            v: 2,
+            meta: {
+              user_id: this.user_id,
+              tc: this.id_seed_3,
             },
-          ]
+          },
+        ]
 
-          DocUpdaterClient.sendUpdates(
-            this.project_id,
-            this.doc.id,
-            this.updates,
-            error => {
-              if (error != null) {
-                throw error
-              }
-              setTimeout(() => {
-                DocUpdaterClient.getDoc(
-                  this.project_id,
-                  this.doc.id,
-                  (error, res, data) => {
-                    if (error != null) {
-                      throw error
-                    }
-                    const { ranges } = data
-                    const changeOps = ranges.changes
-                      .map(change => change.op)
-                      .flat()
-                    changeOps.should.deep.equal([
-                      { d: 'bbb', p: 4 },
-                      { d: 'ccc', p: 5 },
-                      { d: 'ddd', p: 6 },
-                    ])
-                    done()
-                  }
-                )
-              }, 200)
+        DocUpdaterClient.sendUpdates(
+          this.project_id,
+          this.doc.id,
+          this.updates,
+          error => {
+            if (error != null) {
+              throw error
             }
-          )
-        })
+            setTimeout(() => {
+              DocUpdaterClient.getDoc(
+                this.project_id,
+                this.doc.id,
+                (error, res, data) => {
+                  if (error != null) {
+                    throw error
+                  }
+                  const { ranges } = data
+                  const changeOps = ranges.changes
+                    .map(change => change.op)
+                    .flat()
+                  changeOps.should.deep.equal([
+                    { d: 'bbb', p: 4 },
+                    { d: 'ccc', p: 5 },
+                    { d: 'ddd', p: 6 },
+                  ])
+                  done()
+                }
+              )
+            }, 200)
+          }
+        )
       })
     })
+
     afterEach(function () {
       sandbox.restore()
     })

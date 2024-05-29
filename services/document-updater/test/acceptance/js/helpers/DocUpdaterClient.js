@@ -119,10 +119,6 @@ module.exports = DocUpdaterClient = {
     )
   },
 
-  enableHistoryRangesSupport(docId, cb) {
-    rclient.sadd(keys.historyRangesSupport(), docId, cb)
-  },
-
   preloadDoc(projectId, docId, callback) {
     DocUpdaterClient.getDoc(projectId, docId, callback)
   },
