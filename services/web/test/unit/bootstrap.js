@@ -50,6 +50,7 @@ SandboxedModule.configure({
   ignoreMissing: true,
   requires: getSandboxedModuleRequires(),
   globals: {
+    AbortController,
     AbortSignal,
     Buffer,
     Promise,

@@ -4,9 +4,13 @@ const settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const V1Api = require('../V1/V1Api')
 const sanitizeHtml = require('sanitize-html')
+const { promisify } = require('@overleaf/promise-utils')
 
 module.exports = {
   getBrandVariationById,
+  promises: {
+    getBrandVariationById: promisify(getBrandVariationById),
+  },
 }
 
 function getBrandVariationById(brandVariationId, callback) {

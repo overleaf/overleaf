@@ -38,48 +38,73 @@ describe('ProjectController', function () {
     }
     this.token = 'some-token'
     this.ProjectDeleter = {
-      deleteProject: sinon.stub().callsArg(2),
-      restoreProject: sinon.stub().callsArg(1),
+      promises: {
+        deleteProject: sinon.stub().resolves(),
+        restoreProject: sinon.stub().resolves(),
+      },
       findArchivedProjects: sinon.stub(),
     }
     this.ProjectDuplicator = {
-      duplicate: sinon.stub().callsArgWith(4, null, { _id: this.project_id }),
+      promises: {
+        duplicate: sinon.stub().resolves({ _id: this.project_id }),
+      },
     }
     this.ProjectCreationHandler = {
-      createExampleProject: sinon
-        .stub()
-        .callsArgWith(2, null, { _id: this.project_id }),
-      createBasicProject: sinon
-        .stub()
-        .callsArgWith(2, null, { _id: this.project_id }),
+      promises: {
+        createExampleProject: sinon.stub().resolves({ _id: this.project_id }),
+        createBasicProject: sinon.stub().resolves({ _id: this.project_id }),
+      },
     }
-    this.SubscriptionLocator = { getUsersSubscription: sinon.stub() }
+    this.SubscriptionLocator = {
+      promises: {
+        getUsersSubscription: sinon.stub().resolves(),
+      },
+    }
     this.LimitationsManager = {
       hasPaidSubscription: sinon.stub(),
-      userIsMemberOfGroupSubscription: sinon
-        .stub()
-        .callsArgWith(1, null, false),
+      promises: {
+        userIsMemberOfGroupSubscription: sinon.stub().resolves(false),
+      },
     }
     this.TagsHandler = {
-      getTagsForProject: sinon.stub().callsArgWith(2, null, [
-        {
-          name: 'test',
-          project_ids: [this.project_id],
-        },
-      ]),
+      promises: {
+        getTagsForProject: sinon.stub().resolves([
+          {
+            name: 'test',
+            project_ids: [this.project_id],
+          },
+        ]),
+      },
       addProjectToTags: sinon.stub(),
     }
-    this.UserModel = { findById: sinon.stub(), updateOne: sinon.stub() }
+    this.UserModel = {
+      findById: sinon.stub().returns({ exec: sinon.stub().resolves() }),
+      updateOne: sinon.stub().returns({ exec: sinon.stub().resolves() }),
+    }
     this.AuthorizationManager = {
-      getPrivilegeLevelForProject: sinon.stub(),
+      promises: {
+        getPrivilegeLevelForProject: sinon.stub(),
+      },
       isRestrictedUser: sinon.stub().returns(false),
     }
-    this.EditorController = { renameProject: sinon.stub() }
-    this.InactiveProjectManager = { reactivateProjectIfRequired: sinon.stub() }
-    this.ProjectUpdateHandler = { markAsOpened: sinon.stub() }
+    this.EditorController = {
+      promises: {
+        renameProject: sinon.stub().resolves(),
+      },
+    }
+    this.InactiveProjectManager = {
+      promises: { reactivateProjectIfRequired: sinon.stub() },
+    }
+    this.ProjectUpdateHandler = {
+      promises: {
+        markAsOpened: sinon.stub().resolves(),
+      },
+    }
     this.ProjectGetter = {
-      findAllUsersProjects: sinon.stub(),
-      getProject: sinon.stub(),
+      promises: {
+        findAllUsersProjects: sinon.stub().resolves(),
+        getProject: sinon.stub().resolves(),
+      },
     }
     this.ProjectHelper = {
       isArchived: sinon.stub(),
@@ -88,7 +113,6 @@ describe('ProjectController', function () {
       getAllowedImagesForUser: sinon.stub().returns([]),
     }
     this.SessionManager = {
-      getLoggedInUser: sinon.stub().callsArgWith(1, null, this.user),
       getLoggedInUserId: sinon.stub().returns(this.user._id),
       getSessionUser: sinon.stub().returns(this.user),
       isUserLoggedIn: sinon.stub().returns(true),
@@ -100,30 +124,36 @@ describe('ProjectController', function () {
       getRequestToken: sinon.stub().returns(this.token),
     }
     this.CollaboratorsGetter = {
-      userIsTokenMember: sinon.stub().callsArgWith(2, null, false),
-      isUserInvitedMemberOfProject: sinon.stub().callsArgWith(2, null, true),
+      promises: {
+        userIsTokenMember: sinon.stub().resolves(false),
+        isUserInvitedMemberOfProject: sinon.stub().resolves(true),
+      },
     }
     this.ProjectEntityHandler = {}
     this.UserGetter = {
       getUserFullEmails: sinon.stub().yields(null, []),
-      getUser: sinon
-        .stub()
-        .callsArgWith(2, null, { lastLoginIp: '192.170.18.2' }),
+      getUser: sinon.stub().resolves({ lastLoginIp: '192.170.18.2' }),
     }
     this.Features = {
       hasFeature: sinon.stub(),
     }
     this.FeaturesUpdater = {
       featuresEpochIsCurrent: sinon.stub().returns(true),
-      refreshFeatures: sinon.stub().yields(null, this.user),
+      promises: {
+        refreshFeatures: sinon.stub().resolves(this.user),
+      },
     }
     this.BrandVariationsHandler = {
-      getBrandVariationById: sinon
-        .stub()
-        .callsArgWith(1, null, this.brandVariationDetails),
+      promises: {
+        getBrandVariationById: sinon
+          .stub()
+          .resolves(this.brandVariationDetails),
+      },
     }
     this.TpdsProjectFlusher = {
-      flushProjectToTpdsIfNeeded: sinon.stub().yields(),
+      promises: {
+        flushProjectToTpdsIfNeeded: sinon.stub().resolves(),
+      },
     }
     this.Metrics = {
       Timer: class {
@@ -138,10 +168,14 @@ describe('ProjectController', function () {
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }
     this.SplitTestSessionHandler = {
-      sessionMaintenance: sinon.stub().yields(),
+      promises: {
+        sessionMaintenance: sinon.stub().resolves(),
+      },
     }
     this.InstitutionsFeatures = {
-      hasLicence: sinon.stub().callsArgWith(1, null, false),
+      promises: {
+        hasLicence: sinon.stub().resolves(false),
+      },
     }
     this.SubscriptionViewModelBuilder = {
       getBestSubscription: sinon.stub().yields(null, { type: 'free' }),
@@ -150,7 +184,9 @@ describe('ProjectController', function () {
       getSurvey: sinon.stub().yields(null, {}),
     }
     this.ProjectAuditLogHandler = {
-      addEntry: sinon.stub().yields(),
+      promises: {
+        addEntry: sinon.stub().resolves(),
+      },
     }
     this.TutorialHandler = {
       getInactiveTutorials: sinon.stub().returns([]),
@@ -195,7 +231,9 @@ describe('ProjectController', function () {
         '../Subscription/SubscriptionViewModelBuilder':
           this.SubscriptionViewModelBuilder,
         '../Spelling/SpellingHandler': {
-          getUserDictionary: sinon.stub().yields(null, []),
+          promises: {
+            getUserDictionary: sinon.stub().resolves([]),
+          },
         },
         '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
         '../Survey/SurveyHandler': this.SurveyHandler,
@@ -235,10 +273,10 @@ describe('ProjectController', function () {
 
   describe('updateProjectSettings', function () {
     it('should update the name', function (done) {
-      this.EditorController.renameProject = sinon.stub().callsArg(2)
+      this.EditorController.promises.renameProject = sinon.stub().resolves()
       this.req.body = { name: (this.name = 'New name') }
       this.res.sendStatus = code => {
-        this.EditorController.renameProject
+        this.EditorController.promises.renameProject
           .calledWith(this.project_id, this.name)
           .should.equal(true)
         code.should.equal(204)
@@ -248,10 +286,10 @@ describe('ProjectController', function () {
     })
 
     it('should update the compiler', function (done) {
-      this.EditorController.setCompiler = sinon.stub().callsArg(2)
+      this.EditorController.promises.setCompiler = sinon.stub().resolves()
       this.req.body = { compiler: (this.compiler = 'pdflatex') }
       this.res.sendStatus = code => {
-        this.EditorController.setCompiler
+        this.EditorController.promises.setCompiler
           .calledWith(this.project_id, this.compiler)
           .should.equal(true)
         code.should.equal(204)
@@ -261,10 +299,10 @@ describe('ProjectController', function () {
     })
 
     it('should update the imageName', function (done) {
-      this.EditorController.setImageName = sinon.stub().callsArg(2)
+      this.EditorController.promises.setImageName = sinon.stub().resolves()
       this.req.body = { imageName: (this.imageName = 'texlive-1234.5') }
       this.res.sendStatus = code => {
-        this.EditorController.setImageName
+        this.EditorController.promises.setImageName
           .calledWith(this.project_id, this.imageName)
           .should.equal(true)
         code.should.equal(204)
@@ -274,10 +312,12 @@ describe('ProjectController', function () {
     })
 
     it('should update the spell check language', function (done) {
-      this.EditorController.setSpellCheckLanguage = sinon.stub().callsArg(2)
+      this.EditorController.promises.setSpellCheckLanguage = sinon
+        .stub()
+        .resolves()
       this.req.body = { spellCheckLanguage: (this.languageCode = 'fr') }
       this.res.sendStatus = code => {
-        this.EditorController.setSpellCheckLanguage
+        this.EditorController.promises.setSpellCheckLanguage
           .calledWith(this.project_id, this.languageCode)
           .should.equal(true)
         code.should.equal(204)
@@ -287,10 +327,10 @@ describe('ProjectController', function () {
     })
 
     it('should update the root doc', function (done) {
-      this.EditorController.setRootDoc = sinon.stub().callsArg(2)
+      this.EditorController.promises.setRootDoc = sinon.stub().resolves()
       this.req.body = { rootDocId: (this.rootDocId = 'root-doc-id') }
       this.res.sendStatus = code => {
-        this.EditorController.setRootDoc
+        this.EditorController.promises.setRootDoc
           .calledWith(this.project_id, this.rootDocId)
           .should.equal(true)
         code.should.equal(204)
@@ -302,12 +342,14 @@ describe('ProjectController', function () {
 
   describe('updateProjectAdminSettings', function () {
     it('should update the public access level', function (done) {
-      this.EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
+      this.EditorController.promises.setPublicAccessLevel = sinon
+        .stub()
+        .resolves()
       this.req.body = {
         publicAccessLevel: 'readOnly',
       }
       this.res.sendStatus = code => {
-        this.EditorController.setPublicAccessLevel
+        this.EditorController.promises.setPublicAccessLevel
           .calledWith(this.project_id, 'readOnly')
           .should.equal(true)
         code.should.equal(204)
@@ -317,12 +359,14 @@ describe('ProjectController', function () {
     })
 
     it('should record the change in the project audit log', function (done) {
-      this.EditorController.setPublicAccessLevel = sinon.stub().callsArg(2)
+      this.EditorController.promises.setPublicAccessLevel = sinon
+        .stub()
+        .resolves()
       this.req.body = {
         publicAccessLevel: 'readOnly',
       }
       this.res.sendStatus = code => {
-        this.ProjectAuditLogHandler.addEntry
+        this.ProjectAuditLogHandler.promises.addEntry
           .calledWith(
             this.project_id,
             'toggle-access-level',
@@ -343,7 +387,7 @@ describe('ProjectController', function () {
   describe('deleteProject', function () {
     it('should call the project deleter', function (done) {
       this.res.sendStatus = code => {
-        this.ProjectDeleter.deleteProject
+        this.ProjectDeleter.promises.deleteProject
           .calledWith(this.project_id, {
             deleterUser: this.user,
             ipAddress: this.req.ip,
@@ -359,7 +403,7 @@ describe('ProjectController', function () {
   describe('restoreProject', function () {
     it('should tell the project deleter', function (done) {
       this.res.sendStatus = code => {
-        this.ProjectDeleter.restoreProject
+        this.ProjectDeleter.promises.restoreProject
           .calledWith(this.project_id)
           .should.equal(true)
         code.should.equal(200)
@@ -372,7 +416,7 @@ describe('ProjectController', function () {
   describe('cloneProject', function () {
     it('should call the project duplicator', function (done) {
       this.res.json = json => {
-        this.ProjectDuplicator.duplicate
+        this.ProjectDuplicator.promises.duplicate
           .calledWith(this.user, this.project_id, this.projectName)
           .should.equal(true)
         json.project_id.should.equal(this.project_id)
@@ -386,10 +430,10 @@ describe('ProjectController', function () {
     it('should call the projectCreationHandler with createExampleProject', function (done) {
       this.req.body.template = 'example'
       this.res.json = json => {
-        this.ProjectCreationHandler.createExampleProject
+        this.ProjectCreationHandler.promises.createExampleProject
           .calledWith(this.user._id, this.projectName)
           .should.equal(true)
-        this.ProjectCreationHandler.createBasicProject.called.should.equal(
+        this.ProjectCreationHandler.promises.createBasicProject.called.should.equal(
           false
         )
         done()
@@ -400,10 +444,10 @@ describe('ProjectController', function () {
     it('should call the projectCreationHandler with createBasicProject', function (done) {
       this.req.body.template = 'basic'
       this.res.json = json => {
-        this.ProjectCreationHandler.createExampleProject.called.should.equal(
+        this.ProjectCreationHandler.promises.createExampleProject.called.should.equal(
           false
         )
-        this.ProjectCreationHandler.createBasicProject
+        this.ProjectCreationHandler.promises.createBasicProject
           .calledWith(this.user._id, this.projectName)
           .should.equal(true)
         done()
@@ -419,10 +463,10 @@ describe('ProjectController', function () {
     })
 
     it('should call the editor controller', function (done) {
-      this.EditorController.renameProject.callsArgWith(2)
+      this.EditorController.promises.renameProject.resolves()
       this.res.sendStatus = code => {
         code.should.equal(200)
-        this.EditorController.renameProject
+        this.EditorController.promises.renameProject
           .calledWith(this.project_id, this.newProjectName)
           .should.equal(true)
         done()
@@ -432,8 +476,7 @@ describe('ProjectController', function () {
 
     it('should send an error to next() if there is a problem', function (done) {
       let error
-      this.EditorController.renameProject.callsArgWith(
-        2,
+      this.EditorController.promises.renameProject.rejects(
         (error = new Error('problem'))
       )
       const next = e => {
@@ -470,17 +513,17 @@ describe('ProjectController', function () {
           zotero: { encrypted: 'bbbb' },
         },
       }
-      this.ProjectGetter.getProject.callsArgWith(2, null, this.project)
-      this.UserModel.findById.callsArgWith(2, null, this.user)
-      this.SubscriptionLocator.getUsersSubscription.callsArgWith(1, null, {})
-      this.AuthorizationManager.getPrivilegeLevelForProject.callsArgWith(
-        3,
-        null,
+      this.ProjectGetter.promises.getProject.resolves(this.project)
+      this.UserModel.findById.returns({
+        exec: sinon.stub().resolves(this.user),
+      })
+      this.SubscriptionLocator.promises.getUsersSubscription.resolves({})
+      this.AuthorizationManager.promises.getPrivilegeLevelForProject.resolves(
         'owner'
       )
       this.ProjectDeleter.unmarkAsDeletedByExternalSource = sinon.stub()
-      this.InactiveProjectManager.reactivateProjectIfRequired.callsArgWith(1)
-      this.ProjectUpdateHandler.markAsOpened.callsArgWith(1)
+      this.InactiveProjectManager.promises.reactivateProjectIfRequired.resolves()
+      this.ProjectUpdateHandler.promises.markAsOpened.resolves()
     })
 
     it('should render the project/editor page', function (done) {
@@ -526,7 +569,7 @@ describe('ProjectController', function () {
         opts.isRestrictedTokenMember.should.equal(false)
         return done()
       }
-      return this.ProjectController.loadEditor(this.req, this.res)
+      this.ProjectController.loadEditor(this.req, this.res)
     })
 
     it('should set isRestrictedTokenMember when appropriate', function (done) {
@@ -536,12 +579,12 @@ describe('ProjectController', function () {
         opts.isRestrictedTokenMember.should.equal(true)
         return done()
       }
-      return this.ProjectController.loadEditor(this.req, this.res)
+      this.ProjectController.loadEditor(this.req, this.res)
     })
 
     it('should invoke the session maintenance for logged in user', function (done) {
       this.res.render = () => {
-        this.SplitTestSessionHandler.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
           this.req,
           this.user
         )
@@ -553,7 +596,7 @@ describe('ProjectController', function () {
     it('should invoke the session maintenance for anonymous user', function (done) {
       this.SessionManager.getLoggedInUserId.returns(null)
       this.res.render = () => {
-        this.SplitTestSessionHandler.sessionMaintenance.should.have.been.calledWith(
+        this.SplitTestSessionHandler.promises.sessionMaintenance.should.have.been.calledWith(
           this.req
         )
         done()
@@ -571,11 +614,16 @@ describe('ProjectController', function () {
     })
 
     it('should not render the page if the project can not be accessed', function (done) {
-      this.AuthorizationManager.getPrivilegeLevelForProject = sinon
+      this.AuthorizationManager.promises.getPrivilegeLevelForProject = sinon
         .stub()
-        .callsArgWith(3, null, null)
+        .resolves(null)
       this.res.sendStatus = (resCode, opts) => {
         resCode.should.equal(401)
+        this.AuthorizationManager.promises.getPrivilegeLevelForProject.should.have.been.calledWith(
+          this.user._id,
+          this.project_id,
+          'some-token'
+        )
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)
@@ -583,7 +631,7 @@ describe('ProjectController', function () {
 
     it('should reactivateProjectIfRequired', function (done) {
       this.res.render = (pageName, opts) => {
-        this.InactiveProjectManager.reactivateProjectIfRequired
+        this.InactiveProjectManager.promises.reactivateProjectIfRequired
           .calledWith(this.project_id)
           .should.equal(true)
         done()
@@ -605,7 +653,7 @@ describe('ProjectController', function () {
 
     it('should mark project as opened', function (done) {
       this.res.render = (pageName, opts) => {
-        this.ProjectUpdateHandler.markAsOpened
+        this.ProjectUpdateHandler.promises.markAsOpened
           .calledWith(this.project_id)
           .should.equal(true)
         done()
@@ -614,9 +662,9 @@ describe('ProjectController', function () {
     })
 
     it('should call the brand variations handler for branded projects', function (done) {
-      this.ProjectGetter.getProject.callsArgWith(2, null, this.brandedProject)
+      this.ProjectGetter.promises.getProject.resolves(this.brandedProject)
       this.res.render = (pageName, opts) => {
-        this.BrandVariationsHandler.getBrandVariationById
+        this.BrandVariationsHandler.promises.getBrandVariationById
           .calledWith()
           .should.equal(true)
         done()
@@ -626,7 +674,7 @@ describe('ProjectController', function () {
 
     it('should not call the brand variations handler for unbranded projects', function (done) {
       this.res.render = (pageName, opts) => {
-        this.BrandVariationsHandler.getBrandVariationById.called.should.equal(
+        this.BrandVariationsHandler.promises.getBrandVariationById.called.should.equal(
           false
         )
         done()
@@ -635,7 +683,7 @@ describe('ProjectController', function () {
     })
 
     it('should expose the brand variation details as locals for branded projects', function (done) {
-      this.ProjectGetter.getProject.callsArgWith(2, null, this.brandedProject)
+      this.ProjectGetter.promises.getProject.resolves(this.brandedProject)
       this.res.render = (pageName, opts) => {
         opts.brandVariation.should.deep.equal(this.brandVariationDetails)
         done()
@@ -645,7 +693,7 @@ describe('ProjectController', function () {
 
     it('flushes the project to TPDS if a flush is pending', function (done) {
       this.res.render = () => {
-        this.TpdsProjectFlusher.flushProjectToTpdsIfNeeded.should.have.been.calledWith(
+        this.TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded.should.have.been.calledWith(
           this.project_id
         )
         done()
@@ -656,7 +704,7 @@ describe('ProjectController', function () {
     it('should refresh the user features if the epoch is outdated', function (done) {
       this.FeaturesUpdater.featuresEpochIsCurrent = sinon.stub().returns(false)
       this.res.render = () => {
-        this.FeaturesUpdater.refreshFeatures.should.have.been.calledWith(
+        this.FeaturesUpdater.promises.refreshFeatures.should.have.been.calledWith(
           this.user._id,
           'load-editor'
         )
@@ -898,9 +946,9 @@ describe('ProjectController', function () {
         // default to saas enabled
         this.Features.hasFeature.withArgs('saas').returns(true)
         // default to without a subscription
-        this.SubscriptionLocator.getUsersSubscription = sinon
+        this.SubscriptionLocator.promises.getUsersSubscription = sinon
           .stub()
-          .callsArgWith(1, null, null)
+          .resolves(null)
       })
       it('should not show without the saas feature', function (done) {
         this.Features.hasFeature.withArgs('saas').returns(false)
@@ -918,9 +966,9 @@ describe('ProjectController', function () {
         this.ProjectController.loadEditor(this.req, this.res)
       })
       it('should not show for a user with a personal subscription', function (done) {
-        this.SubscriptionLocator.getUsersSubscription = sinon
+        this.SubscriptionLocator.promises.getUsersSubscription = sinon
           .stub()
-          .callsArgWith(1, null, {})
+          .resolves({})
         this.res.render = (pageName, opts) => {
           expect(opts.showUpgradePrompt).to.equal(false)
           done()
@@ -928,9 +976,9 @@ describe('ProjectController', function () {
         this.ProjectController.loadEditor(this.req, this.res)
       })
       it('should not show for a user who is a member of a group subscription', function (done) {
-        this.LimitationsManager.userIsMemberOfGroupSubscription = sinon
+        this.LimitationsManager.promises.userIsMemberOfGroupSubscription = sinon
           .stub()
-          .callsArgWith(1, null, true)
+          .resolves(true)
         this.res.render = (pageName, opts) => {
           expect(opts.showUpgradePrompt).to.equal(false)
           done()
@@ -938,9 +986,9 @@ describe('ProjectController', function () {
         this.ProjectController.loadEditor(this.req, this.res)
       })
       it('should not show for a user with an affiliated paid university', function (done) {
-        this.InstitutionsFeatures.hasLicence = sinon
+        this.InstitutionsFeatures.promises.hasLicence = sinon
           .stub()
-          .callsArgWith(1, null, true)
+          .resolves(true)
         this.res.render = (pageName, opts) => {
           expect(opts.showUpgradePrompt).to.equal(false)
           done()
@@ -999,9 +1047,9 @@ describe('ProjectController', function () {
         .withArgs(projects[3], this.user._id)
         .returns(false)
 
-      this.ProjectGetter.findAllUsersProjects = sinon
+      this.ProjectGetter.promises.findAllUsersProjects = sinon
         .stub()
-        .callsArgWith(2, null, [])
+        .resolves([])
       this.ProjectController._buildProjectList = sinon.stub().returns(projects)
       this.SessionManager.getLoggedInUserId = sinon
         .stub()
@@ -1033,9 +1081,9 @@ describe('ProjectController', function () {
         { path: '/main.tex', doc: true },
       ]
       this.files = [{ path: '/things/a.txt' }]
-      this.ProjectGetter.getProject = sinon
+      this.ProjectGetter.promises.getProject = sinon
         .stub()
-        .callsArgWith(1, null, this.project)
+        .resolves(this.project)
       this.ProjectEntityHandler.getAllEntitiesFromProject = sinon
         .stub()
         .returns({ docs: this.docs, files: this.files })
@@ -1051,7 +1099,7 @@ describe('ProjectController', function () {
             { path: '/things/b.txt', type: 'doc' },
           ],
         })
-        expect(this.ProjectGetter.getProject.callCount).to.equal(1)
+        expect(this.ProjectGetter.promises.getProject.callCount).to.equal(1)
         expect(
           this.ProjectEntityHandler.getAllEntitiesFromProject.callCount
         ).to.equal(1)
