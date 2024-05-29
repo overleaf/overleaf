@@ -24,7 +24,7 @@ export function getViewInfoFromHash() {
  */
 export function setHashFromViewTab(viewTab, period) {
   const newHash = viewTab === 'group' ? 'group' : `${viewTab}-${period}`
-  if (window.location.hash.substring(1)) {
+  if (window.location.hash.substring(1) !== newHash) {
     window.location.hash = newHash
   }
 }
