@@ -1,53 +1,75 @@
 ---
 
 steps:
-  - id: build-base
+  - id: build_base
     name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
     dir: server-ce
     args:
       - 'build-base'
-      - 'OVERLEAF_BASE_CACHE=${_IMAGE_BASE_CACHE}'
-      - 'OVERLEAF_BASE_TAG=${_IMAGE_BASE}'
-  - id: build-community
-    name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
-    dir: server-ce
-    args:
-      - build-community
-      - 'OVERLEAF_BASE_CACHE=${_IMAGE_BASE_CACHE}'
-      - 'OVERLEAF_BASE_TAG=${_IMAGE_BASE}'
-      - 'OVERLEAF_TAG=${_IMAGE_TAG}'
   - id: tag_main_latest_base
     name: gcr.io/cloud-builders/docker
     script: |
       #!/usr/bin/env bash
       set -e
       if [ ${BRANCH_NAME} == main ]; then
-        docker tag ${_IMAGE_BASE} ${_IMAGE_BASE_CACHE};
-        docker push ${_IMAGE_BASE_CACHE};
+        docker tag ${_IMAGE_BASE} ${_IMAGE_BASE_LATEST};
+        docker push ${_IMAGE_BASE_LATEST};
       fi
     automapSubstitutions: true
+  - id: prefetch_ce
+    name: gcr.io/cloud-builders/docker
+    script: |
+      #!/usr/bin/env bash
+      set +e # Ignore pull failures
+      docker pull ${_IMAGE_TAG_BRANCH}
+      docker pull ${_IMAGE_TAG_LATEST}
+      exit 0
+    automapSubstitutions: true
+    waitFor:
+      - '-'
+  - id: build_community
+    name: us-east1-docker.pkg.dev/overleaf-ops/ol-docker/cloud-builder
+    dir: server-ce
+    args:
+      - build-community
+    waitFor:
+      # do not wait for prefetch_ce, docker buildx will pull it as needed
+      - build_base
   - id: tag_main_latest
     name: gcr.io/cloud-builders/docker
     script: |
       #!/usr/bin/env bash
       set -e
       if [ $BRANCH_NAME == main ]; then
-        docker tag ${_IMAGE_TAG} ${_IMAGE_CE};
-        docker push ${_IMAGE_CE};
+        docker tag ${_IMAGE_TAG} ${_IMAGE_TAG_LATEST};
+        docker push ${_IMAGE_TAG_LATEST};
       fi
     automapSubstitutions: true
+    waitFor:
+      - build_community
 timeout: 3600s
 options:
   machineType: E2_HIGHCPU_32
   env:
     - 'BRANCH_NAME=${BRANCH_NAME}'
+    # docker build
+    - 'OVERLEAF_BASE_BRANCH=${_IMAGE_BASE_BRANCH}'
+    - 'OVERLEAF_BASE_LATEST=${_IMAGE_BASE_LATEST}'
+    - 'OVERLEAF_BASE_TAG=${_IMAGE_BASE}'
+    - 'OVERLEAF_BRANCH=${_IMAGE_TAG_BRANCH}'
+    - 'OVERLEAF_LATEST=${_IMAGE_TAG_LATEST}'
+    - 'OVERLEAF_TAG=${_IMAGE_TAG}'
 images:
   - '${_IMAGE_BASE}'
+  - '${_IMAGE_BASE_BRANCH}'
   - '${_IMAGE_TAG}'
+  - '${_IMAGE_TAG_BRANCH}'
 substitutions:
   _IMAGE_BASE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
-  _IMAGE_BASE_CACHE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:latest'
-  _IMAGE_CE: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:latest'
+  _IMAGE_BASE_BRANCH: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:${BRANCH_NAME}'
+  _IMAGE_BASE_LATEST: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf-base:latest'
+  _IMAGE_TAG_BRANCH: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}'
+  _IMAGE_TAG_LATEST: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:latest'
   _IMAGE_TAG: 'us-east1-docker.pkg.dev/overleaf-ops/ol-docker/overleaf:${BRANCH_NAME}-${SHORT_SHA}_${BUILD_ID}'
 tags:
   - 'overleaf-public'

@@ -1,24 +1,42 @@
 # Makefile
 
-export OVERLEAF_BASE_TAG := sharelatex/sharelatex-base
-export OVERLEAF_TAG := sharelatex/sharelatex
-export OVERLEAF_BASE_CACHE := $(shell echo $(OVERLEAF_BASE_TAG) | sed -E 's/(.+):.+/\1:latest/')
-export MONOREPO_REVISION := $(shell git rev-parse HEAD)
 MONOREPO_ROOT := ../
+export MONOREPO_REVISION := $(shell git rev-parse HEAD)
+export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
+export OVERLEAF_BASE_BRANCH ?= sharelatex/sharelatex-base:$(BRANCH_NAME)
+export OVERLEAF_BASE_LATEST ?= sharelatex/sharelatex-base
+export OVERLEAF_BASE_TAG ?= sharelatex/sharelatex-base:$(BRANCH_NAME)-$(MONOREPO_REVISION)
+export OVERLEAF_TAG_BRANCH ?= sharelatex/sharelatex:$(BRANCH_NAME)
+export OVERLEAF_TAG_LATEST ?= sharelatex/sharelatex
+export OVERLEAF_TAG ?= sharelatex/sharelatex:$(BRANCH_NAME)-$(MONOREPO_REVISION)
 
 all: build-base build-community
 
 build-base:
 	cp .dockerignore $(MONOREPO_ROOT)
-ifeq ($(shell uname -m),x86_64)
-	docker pull $(OVERLEAF_BASE_CACHE) || echo "nothing cached yet"
-endif
-	docker build -f Dockerfile-base --pull --cache-from $(OVERLEAF_BASE_CACHE) -t $(OVERLEAF_BASE_TAG) $(MONOREPO_ROOT)
+	docker build \
+	  --build-arg BUILDKIT_INLINE_CACHE=1 \
+	  --file Dockerfile-base \
+	  --pull \
+	  --cache-from $(OVERLEAF_BASE_LATEST) \
+	  --cache-from $(OVERLEAF_BASE_BRANCH) \
+	  --tag $(OVERLEAF_BASE_TAG) \
+	  --tag $(OVERLEAF_BASE_BRANCH) \
+	  $(MONOREPO_ROOT)
 
 
 build-community:
 	cp .dockerignore $(MONOREPO_ROOT)
-	docker build --build-arg OVERLEAF_BASE_TAG --build-arg MONOREPO_REVISION -f Dockerfile -t $(OVERLEAF_TAG) $(MONOREPO_ROOT)
+	docker build \
+	  --build-arg BUILDKIT_INLINE_CACHE=1 \
+	  --build-arg OVERLEAF_BASE_TAG \
+	  --build-arg MONOREPO_REVISION \
+	  --cache-from $(OVERLEAF_LATEST) \
+	  --cache-from $(OVERLEAF_BRANCH) \
+	  --file Dockerfile \
+	  --tag $(OVERLEAF_TAG) \
+	  --tag $(OVERLEAF_BRANCH) \
+	  $(MONOREPO_ROOT)
 
 
 .PHONY: all build-base build-community
