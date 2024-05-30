@@ -258,6 +258,7 @@ Hello world
       cy.visit('/project')
       createProject('maybe git')
       cy.get('header').findByText('Menu').click()
+      cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('Sync').should('not.exist')
       cy.findByText('Git').should('not.exist')
     })

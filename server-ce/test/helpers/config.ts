@@ -2,8 +2,14 @@ import { reconfigure } from './hostAdminClient'
 
 let lastConfig: string
 
-export function startWith({ pro = false, version = 'latest', vars = {} }) {
+export function startWith({
+  pro = false,
+  version = 'latest',
+  vars = {},
+  varsFn = () => ({}),
+}) {
   before(async function () {
+    Object.assign(vars, varsFn())
     const cfg = JSON.stringify({ pro, version, vars })
     if (lastConfig === cfg) return
 

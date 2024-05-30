@@ -61,6 +61,7 @@ describe('SandboxedCompiles', function () {
       cy.get('[aria-label="View logs"]').click()
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2024\) /)
       cy.get('header').findByText('Menu').click()
+      cy.findByText('Word Count') // wait for lazy loading
       cy.findByText('TeX Live version').should('not.exist')
     })
   }

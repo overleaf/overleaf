@@ -52,13 +52,18 @@ export function ensureUserExists({
 }
 
 export function login(username: string, password = DEFAULT_PASSWORD) {
-  cy.session([username, password, new Date()], () => {
-    cy.visit('/login')
-    cy.get('input[name="email"]').type(username)
-    cy.get('input[name="password"]').type(password)
-    cy.findByRole('button', { name: 'Login' }).click()
-    cy.url().should('contain', '/project')
-  })
+  const id = [username, password, new Date()]
+  function startOrResumeSession() {
+    cy.session(id, () => {
+      cy.visit('/login')
+      cy.get('input[name="email"]').type(username)
+      cy.get('input[name="password"]').type(password)
+      cy.findByRole('button', { name: 'Login' }).click()
+      cy.url().should('contain', '/project')
+    })
+  }
+  startOrResumeSession()
+  return startOrResumeSession
 }
 
 export function activateUser(url: string, password = DEFAULT_PASSWORD) {

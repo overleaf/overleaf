@@ -147,6 +147,8 @@ const allowedVars = Joi.object(
       'SANDBOXED_COMPILES',
       'SANDBOXED_COMPILES_SIBLING_CONTAINERS',
       'ALL_TEX_LIVE_DOCKER_IMAGE_NAMES',
+      'OVERLEAF_TEMPLATES_USER_ID',
+      'OVERLEAF_NEW_PROJECT_TEMPLATE_LINKS',
     ].map(name => [name, Joi.string()])
   )
 )
