@@ -1,9 +1,16 @@
 import { startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
+import { v4 as uuid } from 'uuid'
 
 describe('LearnWiki', function () {
   const COPYING_A_PROJECT_URL = '/learn/how-to/Copying_a_project'
   const UPLOADING_A_PROJECT_URL = '/learn/how-to/Uploading_a_project'
+
+  const WITHOUT_PROJECTS_USER = 'user-without-projects@example.com'
+  const REGULAR_USER = 'user@example.com'
+
+  ensureUserExists({ email: WITHOUT_PROJECTS_USER })
+  ensureUserExists({ email: REGULAR_USER })
 
   describe('enabled in Pro', () => {
     startWith({
@@ -12,16 +19,21 @@ describe('LearnWiki', function () {
         OVERLEAF_PROXY_LEARN: 'true',
       },
     })
-    ensureUserExists({ email: 'user@example.com' })
 
     it('should add a documentation entry to the nav bar', () => {
-      login('user@example.com')
+      login(REGULAR_USER)
       cy.visit('/project')
       cy.get('nav').findByText('Documentation')
     })
 
+    it('should display a tutorial link in the welcome page', () => {
+      login(WITHOUT_PROJECTS_USER)
+      cy.visit('/project')
+      cy.findByText('Learn LaTeX with a tutorial')
+    })
+
     it('should render wiki page', () => {
-      login('user@example.com')
+      login(REGULAR_USER)
       cy.visit(UPLOADING_A_PROJECT_URL)
       // Wiki content
       cy.get('.page').findByText('Uploading a project')
@@ -36,7 +48,7 @@ describe('LearnWiki', function () {
     })
 
     it('should navigate back and forth', function () {
-      login('user@example.com')
+      login(REGULAR_USER)
       cy.visit(COPYING_A_PROJECT_URL)
       cy.get('.page').findByText('Copying a project')
       cy.get('.contents').findByText('Uploading a project').click()
@@ -60,24 +72,29 @@ describe('LearnWiki', function () {
         OVERLEAF_PROXY_LEARN: 'true',
       },
     })
+
     checkDisabled()
   })
 
   function checkDisabled() {
-    ensureUserExists({ email: 'user@example.com' })
-
     it('should not add a documentation entry to the nav bar', () => {
-      login('user@example.com')
+      login(REGULAR_USER)
       cy.visit('/project')
       cy.findByText('Documentation').should('not.exist')
     })
 
     it('should not render wiki page', () => {
-      login('user@example.com')
+      login(REGULAR_USER)
       cy.visit(COPYING_A_PROJECT_URL, {
         failOnStatusCode: false,
       })
       cy.findByText('Not found')
+    })
+
+    it('should not display a tutorial link in the welcome page', () => {
+      login(WITHOUT_PROJECTS_USER)
+      cy.visit('/project')
+      cy.findByText('Learn LaTeX with a tutorial').should('not.exist')
     })
   }
 })
