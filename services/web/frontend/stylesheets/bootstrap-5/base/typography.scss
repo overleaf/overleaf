@@ -54,3 +54,12 @@ h6,
 .small {
   @include body-sm;
 }
+
+// Peformatted text, sample output, code, keyboard input elements
+// E.g.: Git authentication token
+code,
+kbd,
+pre,
+samp {
+  @include body-base;
+}

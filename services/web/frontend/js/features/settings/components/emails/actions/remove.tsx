@@ -30,7 +30,7 @@ function DeleteButton({ disabled, isLoading, onClick }: DeleteButtonProps) {
         bsVersion({
           bs5: 'delete',
           bs3: 'trash',
-        }) || 'trash'
+        }) as string
       }
       bs3Props={{ fw: true }}
     />

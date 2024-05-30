@@ -1,8 +1,9 @@
 import { FC, memo, MouseEventHandler, useCallback, useState } from 'react'
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import Tooltip from './tooltip'
-import Icon from './icon'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 export const CopyToClipboard = memo<{
   content: string
@@ -27,13 +28,10 @@ export const CopyToClipboard = memo<{
   }
 
   return (
-    <Tooltip
+    <OLTooltip
       id={tooltipId}
       description={copied ? `${t('copied')}!` : t('copy')}
-      overlayProps={{
-        delayHide: copied ? 1000 : 250,
-        shouldUpdatePosition: true,
-      }}
+      overlayProps={{ delay: copied ? 1000 : 250 }}
     >
       <span>
         {kind === 'text' ? (
@@ -42,43 +40,51 @@ export const CopyToClipboard = memo<{
           <IconButton handleClick={handleClick} copied={copied} />
         )}
       </span>
-    </Tooltip>
+    </OLTooltip>
   )
 })
 CopyToClipboard.displayName = 'CopyToClipboard'
 
 const TextButton: FC<{
-  handleClick: MouseEventHandler<Button>
+  handleClick: MouseEventHandler<HTMLButtonElement>
 }> = ({ handleClick }) => {
   const { t } = useTranslation()
 
   return (
-    <Button
+    <OLButton
       onClick={handleClick}
-      bsSize="xsmall"
-      bsStyle={null}
-      className="copy-button btn-secondary"
+      size="small"
+      variant="secondary"
+      bs3Props={{
+        bsStyle: null,
+        className: 'btn-secondary copy-button',
+        bsSize: 'xsmall',
+      }}
     >
       {t('copy')}
-    </Button>
+    </OLButton>
   )
 }
 
 const IconButton: FC<{
-  handleClick: MouseEventHandler<Button>
+  handleClick: MouseEventHandler<HTMLButtonElement>
   copied: boolean
 }> = ({ handleClick, copied }) => {
   const { t } = useTranslation()
 
   return (
-    <Button
+    <OLIconButton
       onClick={handleClick}
-      bsSize="xsmall"
-      bsStyle="link"
+      variant="link"
+      accessibilityLabel={t('copy')}
       className="copy-button"
-      aria-label={t('copy')}
-    >
-      <Icon type={copied ? 'check' : 'clipboard'} />
-    </Button>
+      bs3Props={{ bsSize: 'xsmall' }}
+      icon={
+        bsVersion({
+          bs5: copied ? 'check' : 'content_copy',
+          bs3: copied ? 'check' : 'clipboard',
+        }) || ''
+      }
+    />
   )
 }

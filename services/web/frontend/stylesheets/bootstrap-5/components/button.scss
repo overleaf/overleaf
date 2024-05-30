@@ -201,3 +201,8 @@
 a[role='button']:visited {
   color: var(--bs-btn-color);
 }
+
+// Copy icon button
+.copy-button {
+  text-decoration: none;
+}

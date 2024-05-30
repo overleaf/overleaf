@@ -4,11 +4,14 @@ import type { ButtonProps } from '@/features/ui/components/types/button-props'
 import type { ButtonProps as BS3ButtonPropsBase } from 'react-bootstrap'
 import Button from '../bootstrap-5/button'
 
+export type BS3ButtonSize = 'xsmall' | 'sm' | 'medium' | 'lg'
+
 export type OLButtonProps = ButtonProps & {
   bs3Props?: {
     bsStyle?: string | null
     className?: string
     loading?: React.ReactNode
+    bsSize?: BS3ButtonSize
   }
 }
 
