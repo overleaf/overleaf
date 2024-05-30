@@ -481,14 +481,19 @@ function PdfJsViewer({ url, pdfFile }) {
   /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
   /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
   return (
+    /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */
     <div
       className="pdfjs-viewer pdfjs-viewer-outer"
       ref={handleContainer}
       onKeyDown={handleKeyDown}
-      role="tabpanel"
-      tabIndex={0}
+      tabIndex={-1}
     >
-      <div className="pdfjs-viewer-inner">
+      <div
+        className="pdfjs-viewer-inner"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        role="tabpanel"
+      >
         <div className="pdfViewer" />
       </div>
       <div className="pdfjs-controls" tabIndex="0">
