@@ -47,7 +47,7 @@ describe('mongoose', function () {
     })
   })
 
-  describe('Subsription', function () {
+  describe('Subscription', function () {
     let user
 
     beforeEach(async function () {
@@ -56,7 +56,11 @@ describe('mongoose', function () {
 
     it('allows the creation of a subscription', async function () {
       await expect(
-        Subscription.create({ admin_id: user._id, manager_ids: [user._id] })
+        Subscription.create({
+          admin_id: user._id,
+          manager_ids: [user._id],
+          salesforce_id: 'a0a0a00000AAA0AAAA',
+        })
       ).to.be.fulfilled
       await expect(Subscription.findOne({ admin_id: user._id })).to.eventually
         .exist
@@ -64,6 +68,16 @@ describe('mongoose', function () {
 
     it('does not allow the creation of a subscription without a manager', async function () {
       await expect(Subscription.create({ admin_id: user._id })).to.be.rejected
+    })
+
+    it('does not allow the creation of a subscription with an invalid salesforce_id', async function () {
+      await expect(
+        Subscription.create({
+          admin_id: user._id,
+          manager_ids: [user._id],
+          salesforce_id: 'a00aaaAAa0000a',
+        })
+      ).to.be.rejected
     })
   })
 })

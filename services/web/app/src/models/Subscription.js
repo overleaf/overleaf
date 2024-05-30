@@ -56,6 +56,24 @@ const SubscriptionSchema = new Schema(
         type: Date,
       },
     },
+    v1_id: {
+      type: Number,
+      required: false,
+      min: 1,
+    },
+    salesforce_id: {
+      type: String,
+      required: false,
+      validate: {
+        validator: function (salesforceId) {
+          return (
+            salesforceId == null ||
+            salesforceId === '' ||
+            salesforceId.match(/^(?:[A-Za-z0-9]{15}|[A-Za-z0-9]{18})$/)
+          )
+        },
+      },
+    },
     ssoConfig: { type: ObjectId, ref: 'SSOConfig' },
   },
   { minimize: false }

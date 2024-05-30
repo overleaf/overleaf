@@ -11,4 +11,6 @@ export type Subscription = {
   customAccount: boolean
   ssoConfig: SSOConfig
   managedUsersEnabled: boolean
+  v1_id: number
+  salesforce_id: string
 }
