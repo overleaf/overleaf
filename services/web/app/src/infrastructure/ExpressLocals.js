@@ -186,12 +186,16 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     res.locals.isIEEE = brandVariation =>
       brandVariation?.brand_id === IEEE_BRAND_ID
 
-    res.locals.getCssThemeModifier = function (userSettings, brandVariation) {
+    res.locals.getCssThemeModifier = function (
+      userSettings,
+      brandVariation,
+      ieeeStylesheetEnabled
+    ) {
       // Themes only exist in OL v2
       if (Settings.overleaf != null) {
         // The IEEE theme takes precedence over the user personal setting, i.e. a user with
         // a theme setting of "light" will still get the IEE theme in IEEE branded projects.
-        if (res.locals.isIEEE(brandVariation)) {
+        if (ieeeStylesheetEnabled && res.locals.isIEEE(brandVariation)) {
           return 'ieee-'
         } else if (userSettings && userSettings.overallTheme != null) {
           return userSettings.overallTheme

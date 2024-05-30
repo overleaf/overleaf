@@ -335,6 +335,7 @@ const _ProjectController = {
         'table-generator-promotion',
         'track-pdf-download',
         !anonymous && 'writefull-oauth-promotion',
+        'ieee-stylesheet',
       ].filter(Boolean)
 
       const responses = await pProps(
