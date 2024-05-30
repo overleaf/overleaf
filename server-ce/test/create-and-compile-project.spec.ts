@@ -1,12 +1,17 @@
-import { login } from './helpers/login'
+import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
+import { startWith } from './helpers/config'
 
 describe('Project creation and compilation', function () {
+  startWith({})
+  ensureUserExists({ email: 'user@example.com' })
+  ensureUserExists({ email: 'collaborator@example.com' })
+
   it('users can create project and compile it', function () {
     login('user@example.com')
     cy.visit('/project')
     // this is the first project created, the welcome screen is displayed instead of the project list
-    createProject('test-project', { isFirstProject: true })
+    createProject('test-project')
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     cy.findByText('\\maketitle').parent().click()
     cy.findByText('\\maketitle').parent().type('\n\\section{{}Test Section}')

@@ -3,8 +3,9 @@ const { defineConfig } = require('cypress')
 const specPattern = process.env.SPEC_PATTERN || './**/*.spec.{js,ts,tsx}'
 
 module.exports = defineConfig({
+  defaultCommandTimeout: 10_000,
   fixturesFolder: 'cypress/fixtures',
-  video: !!process.env.CI,
+  video: process.env.CYPRESS_VIDEO === 'true',
   screenshotsFolder: 'cypress/results',
   videosFolder: 'cypress/results',
   videoUploadOnPasses: false,

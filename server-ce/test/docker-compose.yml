@@ -1,18 +1,18 @@
 version: '2.2'
 services:
   sharelatex:
-    image: ${IMAGE_TAG:-sharelatex/sharelatex:latest}
-    container_name: sharelatex
+    image: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
+    # TODO(das7pad): increase timeout after speeding up the graceful shutdown procedure
+    # stop_grace_period: 60s
+    stop_grace_period: 0s
     depends_on:
       mongo:
         condition: service_healthy
       redis:
         condition: service_started
-    ports:
-      - 127.0.0.2:80:80
-    links:
-      - mongo
-      - redis
+      host-admin:
+        # The host-admin service initiates the mongo replica set
+        condition: service_healthy
     environment:
       OVERLEAF_APP_NAME: Overleaf Community Edition
       OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
@@ -23,36 +23,27 @@ services:
       EMAIL_CONFIRMATION_DISABLED: 'true'
     healthcheck:
       test: curl --fail http://localhost:3000/status || exit 1
-      interval: 10s
+      interval: 3s
       timeout: 10s
       retries: 10
-    volumes:
-      - ./util/seed-mongo.sh:/etc/my_init.d/99_seed-mongo.sh
-      - ./util/seed-mongo.js:/overleaf/services/web/modules/server-ce-scripts/scripts/seed-mongo.js
 
   mongo:
     image: mongo:5.0.17
-    container_name: mongo
     command: '--replSet overleaf'
-    expose:
-      - 27017
     healthcheck:
-      # FIXME: silly hack to make sure replicaset is initialized
-      test: 'echo ''rs.initiate({ _id: "overleaf", members: [{ _id: 0, host: "mongo:27017" }] })'' | mongo localhost:27017/test --quiet'
+      test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
       interval: 10s
       timeout: 10s
       retries: 5
 
   redis:
     image: redis:7.2.1
-    container_name: redis
-    expose:
-      - 6379
 
   e2e:
     image: cypress/included:13.6.6
-    links:
-      - sharelatex
+    stop_grace_period: 0s
+    entrypoint: npm
+    command: run cypress:run
     working_dir: /e2e
     volumes:
       - ./:/e2e
@@ -62,13 +53,14 @@ services:
     depends_on:
       sharelatex:
         condition: service_healthy
+      host-admin:
+        condition: service_healthy
 
   e2e-open:
     image: cypress/included:13.6.6
+    stop_grace_period: 0s
     entrypoint: npm
     command: run cypress:open
-    links:
-      - sharelatex
     working_dir: /e2e
     volumes:
       - ./:/e2e
@@ -81,3 +73,27 @@ services:
     depends_on:
       sharelatex:
         condition: service_healthy
+      host-admin:
+        condition: service_healthy
+
+  host-admin:
+    build: .
+    entrypoint: ["node", "--watch", "host-admin.js"]
+    # See comment in Makefile regarding matching file paths
+    working_dir: $PWD
+    volumes:
+      - $PWD:$PWD
+      - /var/run/docker.sock:/var/run/docker.sock
+    stop_grace_period: 0s
+    environment:
+      PWD:
+      IMAGE_TAG_CE: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
+      IMAGE_TAG_PRO: ${IMAGE_TAG_PRO:-quay.io/sharelatex/sharelatex-pro:latest}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail http://localhost/status || exit 1
+      interval: 3s
+      timeout: 10s
+      retries: 10

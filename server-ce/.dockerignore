@@ -1,3 +1,4 @@
 .DS_Store
 .git/
 services/git-bridge
+server-ce/test
