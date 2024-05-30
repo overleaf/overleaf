@@ -5,16 +5,24 @@ console.log('set -ex')
 
 switch (process.argv.pop()) {
   case 'install':
-    console.log('npm ci')
+    console.log('npm install --omit=dev')
     break
   case 'compile':
     for (const service of services) {
       console.log('pushd', `services/${service.name}`)
       switch (service.name) {
         case 'web':
+          // Avoid downloading of cypress
+          console.log('export CYPRESS_INSTALL_BINARY=0')
+
+          // install webpack and frontend dependencies
+          console.log('npm install --include=dev')
+          // run webpack
           console.log('npm run webpack:production')
           // drop webpack/babel cache
           console.log('rm -rf node_modules/.cache')
+          // uninstall webpack and frontend dependencies
+          console.log('npm install --omit=dev')
           break
         default:
           console.log(`echo ${service.name} does not require a compilation`)

@@ -21,7 +21,6 @@ ADD patches/ /overleaf/patches
 
 # Install npm dependencies
 # ------------------------
-ENV CYPRESS_INSTALL_BINARY=0
 RUN node genScript install | bash
 
 # Compile
