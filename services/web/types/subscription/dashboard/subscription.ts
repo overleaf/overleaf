@@ -73,14 +73,18 @@ export type GroupSubscription = RecurlySubscription & {
   teamNotice?: string
 }
 
-export type ManagedGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
+export type ManagedGroupSubscription = {
+  _id: string
   userIsGroupMember: boolean
   planLevelName: string
-  admin_id: User
+  admin_id: {
+    email: string
+  }
   features: {
     groupSSO: boolean | null
     managedUsers: boolean | null
   }
+  teamName?: string
 }
 
 export type MemberGroupSubscription = Omit<GroupSubscription, 'admin_id'> & {
