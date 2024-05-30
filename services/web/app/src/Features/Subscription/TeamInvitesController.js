@@ -14,7 +14,6 @@ const EmailHandler = require('../Email/EmailHandler')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const Modules = require('../../infrastructure/Modules')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const rateLimiters = {
   resendGroupInvite: new RateLimiter('resend-group-invite', {
@@ -72,12 +71,6 @@ async function viewInvite(req, res, next) {
   if (!invite) {
     return ErrorController.notFound(req, res)
   }
-
-  const { variant } = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'team-invite-react'
-  )
 
   let validationStatus = new Map()
   if (userId) {
@@ -152,30 +145,16 @@ async function viewInvite(req, res, next) {
         logger.error({ err }, 'error getting subscription admin email')
       }
 
-      if (variant === 'enabled') {
-        return res.render('subscriptions/team/invite-react', {
-          inviterName: invite.inviterName,
-          inviteToken: invite.token,
-          hasIndividualRecurlySubscription,
-          expired: req.query.expired,
-          userRestrictions: Array.from(req.userRestrictions || []),
-          currentManagedUserAdminEmail,
-          groupSSOActive,
-          subscriptionId: subscription._id.toString(),
-        })
-      } else {
-        return res.render('subscriptions/team/invite', {
-          inviterName: invite.inviterName,
-          inviteToken: invite.token,
-          hasIndividualRecurlySubscription,
-          appName: settings.appName,
-          expired: req.query.expired,
-          userRestrictions: Array.from(req.userRestrictions || []),
-          currentManagedUserAdminEmail,
-          groupSSOActive,
-          subscriptionId: subscription._id.toString(),
-        })
-      }
+      return res.render('subscriptions/team/invite', {
+        inviterName: invite.inviterName,
+        inviteToken: invite.token,
+        hasIndividualRecurlySubscription,
+        expired: req.query.expired,
+        userRestrictions: Array.from(req.userRestrictions || []),
+        currentManagedUserAdminEmail,
+        groupSSOActive,
+        subscriptionId: subscription._id.toString(),
+      })
     }
   } else {
     const userByEmail = await UserGetter.promises.getUserByMainEmail(

@@ -195,54 +195,14 @@ describe('TeamInvitesController', function () {
       })
     })
 
-    describe('Feature rollout of React migration', function () {
-      describe('feature rollout is not active', function () {
-        it('renders old Angular template', function (done) {
-          const res = {
-            render: template => {
-              expect(template).to.equal('subscriptions/team/invite')
-              done()
-            },
-          }
-          this.Controller.viewInvite(req, res)
-        })
-      })
-
-      describe('user is on default variant', function () {
-        beforeEach(function () {
-          this.SplitTestHandler.promises.getAssignment.resolves({
-            variant: 'default',
-          })
-        })
-
-        it('renders old Angular template', function (done) {
-          const res = {
-            render: template => {
-              expect(template).to.equal('subscriptions/team/invite')
-              done()
-            },
-          }
-          this.Controller.viewInvite(req, res)
-        })
-      })
-
-      describe('user is on enabled variant', function () {
-        beforeEach(function () {
-          this.SplitTestHandler.promises.getAssignment.resolves({
-            variant: 'enabled',
-          })
-        })
-
-        it('renders React template', function (done) {
-          const res = {
-            render: template => {
-              expect(template).to.equal('subscriptions/team/invite-react')
-              done()
-            },
-          }
-          this.Controller.viewInvite(req, res)
-        })
-      })
+    it('renders the view', function (done) {
+      const res = {
+        render: template => {
+          expect(template).to.equal('subscriptions/team/invite')
+          done()
+        },
+      }
+      this.Controller.viewInvite(req, res)
     })
   })
 })
