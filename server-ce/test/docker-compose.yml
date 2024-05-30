@@ -14,6 +14,7 @@ services:
         # The host-admin service initiates the mongo replica set
         condition: service_healthy
     environment:
+      OVERLEAF_SITE_URL: 'http://sharelatex'
       OVERLEAF_APP_NAME: Overleaf Community Edition
       OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
       OVERLEAF_REDIS_HOST: redis
@@ -38,6 +39,16 @@ services:
 
   redis:
     image: redis:7.2.1
+
+  git-bridge:
+    image: quay.io/sharelatex/git-bridge:latest
+    environment:
+      GIT_BRIDGE_API_BASE_URL: "http://sharelatex:3000/api/v0/" # "http://sharelatex/api/v0/" for version 4.1.6 and earlier
+      GIT_BRIDGE_OAUTH2_SERVER: "http://sharelatex"
+      GIT_BRIDGE_POSTBACK_BASE_URL: "http://git-bridge:8000"
+      GIT_BRIDGE_ROOT_DIR: "/data/git-bridge"
+    user: root
+    command: ["/server-pro-start.sh"]
 
   e2e:
     image: cypress/included:13.6.6
@@ -87,6 +98,8 @@ services:
     stop_grace_period: 0s
     environment:
       PWD:
+      TEX_LIVE_DOCKER_IMAGE:
+      ALL_TEX_LIVE_DOCKER_IMAGES:
       IMAGE_TAG_CE: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
       IMAGE_TAG_PRO: ${IMAGE_TAG_PRO:-quay.io/sharelatex/sharelatex-pro:latest}
     depends_on:

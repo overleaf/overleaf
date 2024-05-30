@@ -1,6 +1,7 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { startWith } from './helpers/config'
+import { throttledRecompile } from './helpers/compile'
 
 describe('Project creation and compilation', function () {
   startWith({})
@@ -13,12 +14,10 @@ describe('Project creation and compilation', function () {
     // this is the first project created, the welcome screen is displayed instead of the project list
     createProject('test-project')
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
+    const recompile = throttledRecompile()
     cy.findByText('\\maketitle').parent().click()
     cy.findByText('\\maketitle').parent().type('\n\\section{{}Test Section}')
-    // Wait for the PDF compilation throttling
-    // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.wait(3000)
-    cy.findByText('Recompile').click()
+    recompile()
     cy.get('.pdf-viewer').should('contain.text', 'Test Section')
   })
 

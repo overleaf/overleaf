@@ -1,4 +1,5 @@
 const fs = require('fs')
+const Path = require('path')
 const { execFile } = require('child_process')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -9,8 +10,9 @@ const {
 } = require('celebrate')
 const YAML = require('js-yaml')
 
-const FILES = {
-  DOCKER_COMPOSE: 'docker-compose.override.yml',
+const PATHS = {
+  DOCKER_COMPOSE_OVERRIDE: 'docker-compose.override.yml',
+  SANDBOXED_COMPILES_HOST_DIR: Path.join(__dirname, 'cypress/compiles'),
 }
 const IMAGES = {
   CE: process.env.IMAGE_TAG_CE.replace(/:.+/, ''),
@@ -21,7 +23,7 @@ let mongoIsInitialized = false
 
 function readDockerComposeOverride() {
   try {
-    return YAML.load(fs.readFileSync(FILES.DOCKER_COMPOSE, 'utf-8'))
+    return YAML.load(fs.readFileSync(PATHS.DOCKER_COMPOSE_OVERRIDE, 'utf-8'))
   } catch (error) {
     if (error.code !== 'ENOENT') {
       throw error
@@ -31,13 +33,14 @@ function readDockerComposeOverride() {
         sharelatex: {
           environment: {},
         },
+        'git-bridge': {},
       },
     }
   }
 }
 
 function writeDockerComposeOverride(cfg) {
-  fs.writeFileSync(FILES.DOCKER_COMPOSE, YAML.dump(cfg))
+  fs.writeFileSync(PATHS.DOCKER_COMPOSE_OVERRIDE, YAML.dump(cfg))
 }
 
 const app = express()
@@ -95,6 +98,7 @@ function setVersionDockerCompose({ pro, version }) {
   const cfg = readDockerComposeOverride()
 
   cfg.services.sharelatex.image = `${pro ? IMAGES.PRO : IMAGES.CE}:${version}`
+  cfg.services['git-bridge'].image = `quay.io/sharelatex/git-bridge:${version}`
 
   writeDockerComposeOverride(cfg)
 }
@@ -128,16 +132,51 @@ app.post(
   }
 )
 
-const allowedVars = Joi.object().keys({
-  OVERLEAF_APP_NAME: Joi.string(),
-  OVERLEAF_LEFT_FOOTER: Joi.string(),
-  OVERLEAF_RIGHT_FOOTER: Joi.string(),
-})
+const allowedVars = Joi.object(
+  Object.fromEntries(
+    [
+      'OVERLEAF_APP_NAME',
+      'OVERLEAF_LEFT_FOOTER',
+      'OVERLEAF_RIGHT_FOOTER',
+      'OVERLEAF_PROXY_LEARN',
+      'GIT_BRIDGE_ENABLED',
+      'GIT_BRIDGE_HOST',
+      'GIT_BRIDGE_PORT',
+      'V1_HISTORY_URL',
+      'DOCKER_RUNNER',
+      'SANDBOXED_COMPILES',
+      'SANDBOXED_COMPILES_SIBLING_CONTAINERS',
+      'ALL_TEX_LIVE_DOCKER_IMAGE_NAMES',
+    ].map(name => [name, Joi.string()])
+  )
+)
 
 function setVarsDockerCompose({ vars }) {
   const cfg = readDockerComposeOverride()
 
   cfg.services.sharelatex.environment = vars
+
+  if (cfg.services.sharelatex.environment.GIT_BRIDGE_ENABLED === 'true') {
+    cfg.services.sharelatex.depends_on = ['git-bridge']
+  }
+
+  if (
+    cfg.services.sharelatex.environment
+      .SANDBOXED_COMPILES_SIBLING_CONTAINERS === 'true'
+  ) {
+    cfg.services.sharelatex.environment.SANDBOXED_COMPILES_HOST_DIR =
+      PATHS.SANDBOXED_COMPILES_HOST_DIR
+    cfg.services.sharelatex.environment.TEX_LIVE_DOCKER_IMAGE =
+      process.env.TEX_LIVE_DOCKER_IMAGE
+    cfg.services.sharelatex.environment.ALL_TEX_LIVE_DOCKER_IMAGES =
+      process.env.ALL_TEX_LIVE_DOCKER_IMAGES
+    cfg.services.sharelatex.volumes = [
+      '/var/run/docker.sock:/var/run/docker.sock',
+      `${PATHS.SANDBOXED_COMPILES_HOST_DIR}:/var/lib/overleaf/data/compiles`,
+    ]
+  } else {
+    cfg.services.sharelatex.volumes = []
+  }
 
   writeDockerComposeOverride(cfg)
 }
@@ -182,6 +221,7 @@ app.post(
           '--timeout',
           '0',
           'sharelatex',
+          'git-bridge',
           'mongo',
           'redis'
         ),

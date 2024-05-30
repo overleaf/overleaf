@@ -57,6 +57,8 @@ async function fetchJSON(
   const { error, stdout, stderr } = await res.json()
   if (error) {
     console.error(input, init, 'failed:', error)
+    if (stdout) console.log(stdout)
+    if (stderr) console.warn(stderr)
     const err = new Error(error.message)
     Object.assign(err, error)
     throw err
