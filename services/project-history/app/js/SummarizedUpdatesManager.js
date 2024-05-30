@@ -71,6 +71,7 @@ export function getSummarizedProjectUpdates(projectId, options, callback) {
         if (error) return callback(error)
         let chunksRequested = 0
         let summarizedUpdates = []
+        let toV = null
 
         const shouldRequestMoreUpdates = cb => {
           return cb(
@@ -93,11 +94,12 @@ export function getSummarizedProjectUpdates(projectId, options, callback) {
               // Updates are returned in time order, but we want to go back in time
               updateSet.reverse()
               updateSet = discardUnwantedUpdates(updateSet)
-              summarizedUpdates = _summarizeUpdates(
+              ;({ summarizedUpdates, toV } = _summarizeUpdates(
                 updateSet,
                 labelsByVersion,
-                summarizedUpdates
-              )
+                summarizedUpdates,
+                toV
+              ))
               nextVersionToRequest = startVersion
               chunksRequested += 1
               cb()
@@ -176,12 +178,24 @@ function _getProjectUpdates(projectId, historyId, version, callback) {
   })
 }
 
-function _summarizeUpdates(updates, labels, existingSummarizedUpdates) {
+function _summarizeUpdates(updates, labels, existingSummarizedUpdates, toV) {
   if (existingSummarizedUpdates == null) {
     existingSummarizedUpdates = []
   }
   const summarizedUpdates = existingSummarizedUpdates.slice()
   for (const update of updates) {
+    if (toV == null) {
+      // This is the first update we've seen. Initialize toV.
+      toV = update.v + 1
+    }
+
+    // Skip empty updates (only record their version). Empty updates are
+    // updates that only contain comment operations. We don't have a UI for
+    // these yet.
+    if (isUpdateEmpty(update)) {
+      continue
+    }
+
     // The client needs to know the exact version that a delete happened, in order
     // to be able to restore. So even when summarizing, retain the version that each
     // projectOp happened at.
@@ -199,7 +213,7 @@ function _summarizeUpdates(updates, labels, existingSummarizedUpdates) {
     } else {
       const newUpdate = {
         fromV: update.v,
-        toV: update.v + 1,
+        toV,
         meta: {
           users: update.meta.users,
           start_ts: update.meta.start_ts,
@@ -215,9 +229,10 @@ function _summarizeUpdates(updates, labels, existingSummarizedUpdates) {
 
       summarizedUpdates.push(newUpdate)
     }
+    toV = update.v
   }
 
-  return summarizedUpdates
+  return { summarizedUpdates, toV }
 }
 
 /**
@@ -317,4 +332,8 @@ function _mergeUpdate(update, summarizedUpdate) {
   for (const pathname of update.pathnames || []) {
     summarizedUpdate.pathnames.add(pathname)
   }
+}
+
+function isUpdateEmpty(update) {
+  return update.project_ops.length === 0 && update.pathnames.length === 0
 }

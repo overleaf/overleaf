@@ -655,6 +655,35 @@ describe('SummarizedUpdatesManager', function () {
         )
       })
 
+      describe('empty updates', function () {
+        setupChunks([
+          [
+            makeUpdate({ startTs: 0, v: 1, pathnames: ['main.tex'] }),
+            makeUpdate({ startTs: 10, v: 2, pathnames: [] }),
+            makeUpdate({ startTs: 20, v: 3, pathnames: ['main.tex'] }),
+            makeUpdate({ startTs: 30, v: 4, pathnames: [] }),
+            makeUpdate({ startTs: 40, v: 5, pathnames: [] }),
+          ],
+          [
+            makeUpdate({ startTs: 50, v: 6, pathnames: [] }),
+            makeUpdate({ startTs: LATER, v: 7, pathnames: [] }),
+            makeUpdate({ startTs: LATER + 10, v: 8, pathnames: ['main.tex'] }),
+            makeUpdate({ startTs: LATER + 20, v: 9, pathnames: ['main.tex'] }),
+            makeUpdate({ startTs: LATER + 30, v: 10, pathnames: [] }),
+          ],
+        ])
+
+        expectSummaries('should skip empty updates', {}, [
+          makeSummary({
+            startTs: LATER + 10,
+            endTs: LATER + 30,
+            fromV: 8,
+            toV: 11,
+          }),
+          makeSummary({ startTs: 0, endTs: 30, fromV: 1, toV: 8 }),
+        ])
+      })
+
       describe('history resync updates', function () {
         setupChunks([
           [
