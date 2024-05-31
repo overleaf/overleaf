@@ -16,7 +16,6 @@ const RedisManager = require('./RedisManager')
 const ProjectManager = require('./ProjectManager')
 const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
-const async = require('async')
 
 // Maintain a sorted set of project flushAndDelete requests, ordered by timestamp
 // (ZADD), and process them from oldest to newest. A flushAndDelete request comes
