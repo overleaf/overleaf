@@ -39,7 +39,7 @@ export default function PdfViewerControlsMenuButton({
         overlayProps={{ placement: 'bottom' }}
       >
         <Button
-          className="pdfjs-toolbar-popover-button"
+          className="pdf-toolbar-btn pdfjs-toolbar-popover-button"
           onClick={togglePopover}
           ref={targetRef}
         >

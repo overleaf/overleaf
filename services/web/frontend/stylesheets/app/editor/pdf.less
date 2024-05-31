@@ -118,6 +118,15 @@
   }
 }
 
+.pdf-toolbar-btn {
+  border-radius: @border-radius-base;
+  &:hover {
+    &:not(:disabled) {
+      background-color: @pdf-toolbar-btn-hover-color !important;
+    }
+  }
+}
+
 .pdf {
   background-color: @pdf-bg;
 }

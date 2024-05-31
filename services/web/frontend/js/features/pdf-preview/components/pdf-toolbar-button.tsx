@@ -34,7 +34,7 @@ export default function PDFToolbarButton({
         aria-label={label}
         bsSize="large"
         bsStyle={null}
-        className="pdfjs-toolbar-button"
+        className="pdf-toolbar-btn pdfjs-toolbar-button"
         disabled={disabled}
         onClick={onClick}
       >

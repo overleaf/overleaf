@@ -34,7 +34,7 @@ function PdfHybridLogsButton() {
         bsStyle="link"
         disabled={Boolean(error || stoppedOnFirstError)}
         active={showLogs}
-        className="toolbar-item log-btn"
+        className="pdf-toolbar-btn toolbar-item log-btn"
         onClick={handleClick}
         style={{ position: 'relative' }}
         aria-label={showLogs ? t('view_pdf') : t('view_logs')}

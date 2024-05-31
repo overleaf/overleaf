@@ -34,6 +34,7 @@ function PdfHybridDownloadButton() {
       <Button
         onClick={handleOnClick}
         bsStyle="link"
+        className="pdf-toolbar-btn"
         draggable="false"
         disabled={!pdfDownloadUrl}
         download
