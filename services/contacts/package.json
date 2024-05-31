@@ -21,7 +21,7 @@
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
     "@overleaf/settings": "*",
-    "async": "^3.2.2",
+    "async": "^3.2.5",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "express": "^4.19.2",

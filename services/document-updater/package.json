@@ -26,7 +26,7 @@
     "@overleaf/redis-wrapper": "*",
     "@overleaf/settings": "*",
     "@types/chai-as-promised": "^7.1.8",
-    "async": "^3.2.2",
+    "async": "^3.2.5",
     "body-parser": "^1.19.0",
     "bunyan": "^1.8.15",
     "diff-match-patch": "overleaf/diff-match-patch#89805f9c671a77a263fc53461acd62aa7498f688",

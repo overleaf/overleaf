@@ -28,7 +28,7 @@
     "@overleaf/o-error": "*"
   },
   "dependencies": {
-    "async": "^3.2.2",
+    "async": "^3.2.5",
     "ioredis": "~4.27.1"
   },
   "devDependencies": {

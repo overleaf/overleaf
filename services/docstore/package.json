@@ -24,7 +24,7 @@
     "@overleaf/promise-utils": "*",
     "@overleaf/settings": "*",
     "@overleaf/stream-utils": "^0.1.0",
-    "async": "^3.2.2",
+    "async": "^3.2.5",
     "body-parser": "^1.19.0",
     "bson": "^1.1.4",
     "bunyan": "^1.8.15",
