@@ -67,7 +67,6 @@ module.exports = ExportsHandler = {
       project(cb) {
         return ProjectGetter.getProject(projectId, cb)
       },
-      // TODO: when we update async, signature will change from (cb, results) to (results, cb)
       rootDoc: [
         'project',
         (results, cb) =>
