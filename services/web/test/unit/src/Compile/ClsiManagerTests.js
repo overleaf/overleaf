@@ -156,19 +156,21 @@ describe('ClsiManager', function () {
 
   describe('sendRequest', function () {
     describe('with a successful compile', function () {
+      const buildId = '18fbe9e7564-30dcb2f71250c690'
+
       beforeEach(async function () {
         this.outputFiles = [
           {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.pdf`,
             path: 'output.pdf',
             type: 'pdf',
-            build: 1234,
+            build: buildId,
           },
           {
             url: `/project/${this.project_id}/user/${this.user_id}/build/1234/output/output.log`,
             path: 'output.log',
             type: 'log',
-            build: 1234,
+            build: buildId,
           },
         ]
         this.responseBody.compile.outputFiles = this.outputFiles.map(
@@ -177,6 +179,7 @@ describe('ClsiManager', function () {
             url: `http://${CLSI_HOST}${outputFile.url}`,
           })
         )
+        this.responseBody.compile.buildId = buildId
         this.timeout = 100
         this.result = await this.ClsiManager.promises.sendRequest(
           this.project._id,
@@ -262,6 +265,10 @@ describe('ClsiManager', function () {
         expect(this.result.outputFiles.map(f => f.path)).to.have.members(
           this.outputFiles.map(f => f.path)
         )
+      })
+
+      it('should return the buildId', function () {
+        expect(this.result.buildId).to.equal(buildId)
       })
 
       it('should persist the cookie from the response', function () {

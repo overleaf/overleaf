@@ -110,8 +110,10 @@ describe('CompileController', function () {
       },
     })
     this.projectId = 'project-id'
+    this.build_id = '18fbe9e7564-30dcb2f71250c690'
     this.next = sinon.stub()
     this.req = new MockRequest()
+    this.res = new MockResponse()
     this.res = new MockResponse()
   })
 
@@ -129,7 +131,14 @@ describe('CompileController', function () {
             url: `/project/${this.projectId}/user/${this.user_id}/build/id/output.pdf`,
             type: 'pdf',
           },
-        ])
+        ]),
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        this.build_id
       )
     })
 
@@ -156,6 +165,11 @@ describe('CompileController', function () {
                   type: 'pdf',
                 },
               ],
+              outputFilesArchive: {
+                path: 'output.zip',
+                url: `/project/${this.projectId}/user/wat/build/${this.build_id}/output/output.zip`,
+                type: 'zip',
+              },
               pdfDownloadDomain: 'https://compiles.overleaf.test',
             })
           )
@@ -181,7 +195,8 @@ describe('CompileController', function () {
             undefined, // validationProblems
             undefined, // stats
             undefined, // timings
-            '/zone/b'
+            '/zone/b',
+            this.build_id
           )
           this.CompileController.compile(this.req, this.res, this.next)
         })
@@ -198,6 +213,12 @@ describe('CompileController', function () {
                   type: 'pdf',
                 },
               ],
+              outputFilesArchive: {
+                path: 'output.zip',
+                url: `/project/${this.projectId}/user/wat/build/${this.build_id}/output/output.zip`,
+                type: 'zip',
+              },
+              outputUrlPrefix: '/zone/b',
               pdfDownloadDomain: 'https://compiles.overleaf.test/zone/b',
             })
           )
@@ -240,6 +261,11 @@ describe('CompileController', function () {
           JSON.stringify({
             status: this.status,
             outputFiles: this.outputFiles,
+            outputFilesArchive: {
+              path: 'output.zip',
+              url: `/project/${this.projectId}/user/wat/build/${this.build_id}/output/output.zip`,
+              type: 'zip',
+            },
           })
         )
       })
@@ -429,9 +455,9 @@ describe('CompileController', function () {
       })
     })
 
-    describe('when the a build-id is provided', function () {
+    describe('when a build-id is provided', function () {
       beforeEach(function (done) {
-        this.req.params.build_id = this.buildId = '1234-5678'
+        this.req.params.build_id = this.build_id
         this.CompileController.proxyToClsi = sinon
           .stub()
           .callsFake(() => done())
@@ -443,7 +469,7 @@ describe('CompileController', function () {
           .calledWith(
             this.projectId,
             'output-file',
-            `/project/${this.projectId}/user/${this.user_id}/build/${this.buildId}/output/output.pdf`,
+            `/project/${this.projectId}/user/${this.user_id}/build/${this.build_id}/output/output.pdf`,
             {},
             this.req,
             this.res,
@@ -457,7 +483,6 @@ describe('CompileController', function () {
   describe('getFileFromClsiWithoutUser', function () {
     beforeEach(function () {
       this.submission_id = 'sub-1234'
-      this.build_id = 123456
       this.file = 'project.pdf'
       this.req.params = {
         submission_id: this.submission_id,

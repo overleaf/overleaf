@@ -54,6 +54,7 @@ export type CompileContext = {
   isProjectOwner: boolean
   logEntries?: Record<string, any>
   logEntryAnnotations?: Record<string, any>
+  outputFilesArchive?: string
   pdfDownloadUrl?: string
   pdfFile?: PdfFile
   pdfUrl?: string
@@ -368,7 +369,12 @@ export const LocalCompileProvider: FC = ({ children }) => {
         }
 
         setFileList(
-          buildFileList(outputFiles, data.clsiServerId, data.compileGroup)
+          buildFileList(
+            outputFiles,
+            data.clsiServerId,
+            data.compileGroup,
+            data.outputFilesArchive
+          )
         )
 
         // handle log files

@@ -1,7 +1,12 @@
 const topFileTypes = ['bbl', 'gls', 'ind']
 const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
 
-export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
+export const buildFileList = (
+  outputFiles,
+  clsiServerId,
+  compileGroup,
+  outputFilesArchive
+) => {
   const files = { top: [], other: [] }
 
   if (outputFiles) {
@@ -50,6 +55,18 @@ export const buildFileList = (outputFiles, clsiServerId, compileGroup) => {
         files.top.push(file)
       } else if (!(file.type === 'pdf' && file.main === true)) {
         files.other.push(file)
+      }
+    }
+
+    const archivableFiles = [...files.top, ...files.other]
+
+    if (outputFilesArchive && archivableFiles.length > 0) {
+      archivableFiles.forEach(file => params.append('files', file.path))
+
+      files.archive = {
+        ...outputFilesArchive,
+        fileCount: archivableFiles.length,
+        url: `${outputFilesArchive.url}?${params.toString()}`,
       }
     }
   }

@@ -77,6 +77,7 @@ async function compile(projectId, userId, options = {}) {
     stats,
     timings,
     outputUrlPrefix,
+    buildId,
   } = await ClsiManager.promises.sendRequest(projectId, compileAsUser, options)
 
   return {
@@ -88,6 +89,7 @@ async function compile(projectId, userId, options = {}) {
     stats,
     timings,
     outputUrlPrefix,
+    buildId,
   }
 }
 
@@ -173,6 +175,7 @@ module.exports = CompileManager = {
     'stats',
     'timings',
     'outputUrlPrefix',
+    'buildId',
   ]),
 
   stopCompile: callbackify(stopCompile),

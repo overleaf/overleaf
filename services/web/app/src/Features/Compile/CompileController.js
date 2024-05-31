@@ -30,6 +30,15 @@ const pdfDownloadRateLimiter = new RateLimiter('full-pdf-download', {
   duration: 60 * 60,
 })
 
+function getOutputFilesArchiveSpecification(projectId, userId, buildId) {
+  const fileName = 'output.zip'
+  return {
+    path: fileName,
+    url: CompileController._getFileUrl(projectId, userId, buildId, fileName),
+    type: 'zip',
+  }
+}
+
 function getImageNameForProject(projectId, callback) {
   ProjectGetter.getProject(projectId, { imageName: 1 }, (err, project) => {
     if (err) return callback(err)
@@ -149,7 +158,8 @@ module.exports = CompileController = {
           validationProblems,
           stats,
           timings,
-          outputUrlPrefix
+          outputUrlPrefix,
+          buildId
         ) => {
           if (error) {
             Metrics.inc('compile-error')
@@ -187,14 +197,21 @@ module.exports = CompileController = {
               }
             )
           }
+
+          const outputFilesArchive = buildId
+            ? getOutputFilesArchiveSpecification(projectId, userId, buildId)
+            : null
+
           res.json({
             status,
             outputFiles,
+            outputFilesArchive,
             compileGroup: limits?.compileGroup,
             clsiServerId,
             validationProblems,
             stats,
             timings,
+            outputUrlPrefix,
             pdfDownloadDomain,
             pdfCachingMinChunkSize,
           })
@@ -398,6 +415,22 @@ module.exports = CompileController = {
       if (error) {
         return next(error)
       }
+
+      const qs = {}
+
+      if (req.params.file === 'output.zip' && req.query?.files) {
+        /**
+         * The output.zip file is generated on the fly and allows either:
+         *
+         * 1. All files to be downloaded (no files query parameter)
+         * 2. A specific set of files to be downloaded (files query parameter)
+         *
+         * As the frontend separates the PDF download and ignores several other output
+         * files we will generally need to tell CLSI specifically what is required.
+         */
+        qs.files = req.query.files
+      }
+
       const url = CompileController._getFileUrl(
         projectId,
         userId,
@@ -408,7 +441,7 @@ module.exports = CompileController = {
         projectId,
         'output-file',
         url,
-        {},
+        qs,
         req,
         res,
         next
@@ -573,10 +606,20 @@ module.exports = CompileController = {
           return next(err)
         }
         url = new URL(`${Settings.apis.clsi.url}${url}`)
-        url.search = new URLSearchParams({
-          ...persistenceOptions.qs,
-          ...qs,
-        }).toString()
+
+        const params = new URLSearchParams(persistenceOptions.qs)
+
+        for (const [key, value] of Object.entries(qs)) {
+          if (Array.isArray(value)) {
+            for (const v of value) {
+              params.append(key, v)
+            }
+            continue
+          }
+          params.append(key, value)
+        }
+
+        url.search = params.toString()
         const timer = new Metrics.Timer(
           'proxy_to_clsi',
           1,
@@ -604,7 +647,9 @@ module.exports = CompileController = {
             })
 
             for (const key of ['Content-Length', 'Content-Type']) {
-              res.setHeader(key, response.headers.get(key))
+              if (response.headers.has(key)) {
+                res.setHeader(key, response.headers.get(key))
+              }
             }
             res.writeHead(response.status)
             return pipeline(stream, res)

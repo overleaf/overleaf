@@ -193,6 +193,7 @@ async function _sendBuiltRequest(projectId, userId, req, options, callback) {
     status: compile.status,
     outputFiles,
     clsiServerId,
+    buildId: compile.buildId,
     stats: compile.stats,
     timings: compile.timings,
     outputUrlPrefix: compile.outputUrlPrefix,
@@ -817,6 +818,7 @@ module.exports = {
     'stats',
     'timings',
     'outputUrlPrefix',
+    'buildId',
   ]),
   sendExternalRequest: callbackifyMultiResult(sendExternalRequest, [
     'status',
