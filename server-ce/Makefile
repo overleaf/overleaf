@@ -6,8 +6,8 @@ export BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 export OVERLEAF_BASE_BRANCH ?= sharelatex/sharelatex-base:$(BRANCH_NAME)
 export OVERLEAF_BASE_LATEST ?= sharelatex/sharelatex-base
 export OVERLEAF_BASE_TAG ?= sharelatex/sharelatex-base:$(BRANCH_NAME)-$(MONOREPO_REVISION)
-export OVERLEAF_TAG_BRANCH ?= sharelatex/sharelatex:$(BRANCH_NAME)
-export OVERLEAF_TAG_LATEST ?= sharelatex/sharelatex
+export OVERLEAF_BRANCH ?= sharelatex/sharelatex:$(BRANCH_NAME)
+export OVERLEAF_LATEST ?= sharelatex/sharelatex
 export OVERLEAF_TAG ?= sharelatex/sharelatex:$(BRANCH_NAME)-$(MONOREPO_REVISION)
 
 all: build-base build-community
