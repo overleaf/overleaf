@@ -31,11 +31,11 @@ build-community:
 	  --build-arg BUILDKIT_INLINE_CACHE=1 \
 	  --build-arg OVERLEAF_BASE_TAG \
 	  --build-arg MONOREPO_REVISION \
-	  --cache-from $(OVERLEAF_LATEST) \
-	  --cache-from $(OVERLEAF_BRANCH) \
+	  --cache-from $(OVERLEAF_TAG_LATEST) \
+	  --cache-from $(OVERLEAF_TAG_BRANCH) \
 	  --file Dockerfile \
 	  --tag $(OVERLEAF_TAG) \
-	  --tag $(OVERLEAF_BRANCH) \
+	  --tag $(OVERLEAF_TAG_BRANCH) \
 	  $(MONOREPO_ROOT)
 
 
