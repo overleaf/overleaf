@@ -1,4 +1,4 @@
-import md5 from 'crypto-js/md5'
+import { generateMD5Hash } from './md5'
 
 const ANONYMOUS_HUE = 100
 const OWN_HUE = 200 // We will always appear as this color to ourselves
@@ -30,7 +30,7 @@ export function getHueForUserId(userId, currentUserId) {
 }
 
 function getHueForId(id) {
-  const hash = md5(id)
+  const hash = generateMD5Hash(id)
   const hue =
     parseInt(hash.toString().slice(0, 8), 16) %
     (TOTAL_HUES - OWN_HUE_BLOCKED_SIZE * 2)

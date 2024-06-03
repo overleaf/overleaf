@@ -16,7 +16,8 @@
 
 // NOTE: this file is being refactored over to frontend/js/shared/utils/colors.js
 
-import CryptoJS from 'crypto-js/md5'
+import { generateMD5Hash } from './../../shared/utils/md5'
+
 let ColorManager
 
 export default ColorManager = {
@@ -84,7 +85,7 @@ export default ColorManager = {
   },
 
   getHueForId(id) {
-    const hash = CryptoJS(id)
+    const hash = generateMD5Hash(id)
     const hue =
       parseInt(hash.toString().slice(0, 8), 16) %
       (this.TOTAL_HUES - this.OWN_HUE_BLOCKED_SIZE * 2)

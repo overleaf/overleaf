@@ -15,7 +15,6 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 import ColorManager from '../colors/ColorManager'
-import 'crypto-js/md5'
 
 let OnlineUsersManager
 
