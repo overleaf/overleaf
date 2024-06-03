@@ -131,6 +131,9 @@ function PdfJsViewer({ url, pdfFile }) {
 
     const handleRenderedInitialPageNumber = () => {
       setPage(pdfJsWrapper.viewer.currentPageNumber)
+
+      // Only need to set the initial page number once.
+      pdfJsWrapper.eventBus.off('pagerendered', handleRenderedInitialPageNumber)
     }
 
     const handleScaleChanged = () => {
