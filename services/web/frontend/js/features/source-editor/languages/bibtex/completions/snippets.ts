@@ -39,7 +39,7 @@ const environments: Environment[] = [
     requiredAttributes: ['key', 'title'],
   },
   {
-    name: 'masterthesis',
+    name: 'mastersthesis',
     requiredAttributes: ['author', 'title', 'school', 'year'],
   },
   {
