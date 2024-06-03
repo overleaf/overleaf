@@ -79,7 +79,11 @@ export type CompileContext = {
   stoppedOnFirstError: boolean
   uncompiled?: boolean
   validationIssues?: Record<string, any>
-  firstRenderDone: () => void
+  firstRenderDone: (metrics: {
+    latencyFetch: number
+    latencyRender: number | undefined
+    pdfCachingMetrics: { viewerId: string }
+  }) => void
   cleanupCompileResult?: () => void
   animateCompileDropdownArrow: boolean
   editedSinceCompileStarted: boolean

@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { debounce, throttle } from 'lodash'
 import PdfViewerControls from './pdf-viewer-controls'
@@ -17,7 +16,12 @@ import { debugConsole } from '@/utils/debugging'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
-function PdfJsViewer({ url, pdfFile }) {
+type PdfJsViewerProps = {
+  url: string
+  pdfFile: Record<string, any>
+}
+
+function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   const { _id: projectId } = useProjectContext()
 
   const { setError, firstRenderDone, highlights, position, setPosition } =
@@ -40,7 +44,7 @@ function PdfJsViewer({ url, pdfFile }) {
   const [totalPages, setTotalPages] = useState(null)
 
   // local state values
-  const [pdfJsWrapper, setPdfJsWrapper] = useState()
+  const [pdfJsWrapper, setPdfJsWrapper] = useState<PDFJSWrapper | null>()
   const [initialised, setInitialised] = useState(false)
 
   const handlePageChange = useCallback(
@@ -84,8 +88,8 @@ function PdfJsViewer({ url, pdfFile }) {
   useEffect(() => {
     if (!pdfJsWrapper || !firstRenderDone) return
 
-    let timePDFFetched
-    let timePDFRendered
+    let timePDFFetched: number
+    let timePDFRendered: number
     const submitLatencies = () => {
       if (!timePDFFetched) {
         // The pagerendered event was attached after pagesinit fired. :/
@@ -164,7 +168,7 @@ function PdfJsViewer({ url, pdfFile }) {
       setStartFetch(performance.now())
 
       const abortController = new AbortController()
-      const handleFetchError = err => {
+      const handleFetchError = (err: Error) => {
         if (abortController.signal.aborted) return
         // The error is already logged at the call-site with additional context.
         if (err instanceof pdfJsWrapper.PDFJS.MissingPDFException) {
@@ -192,7 +196,7 @@ function PdfJsViewer({ url, pdfFile }) {
 
   // listen for scroll events
   useEffect(() => {
-    let storePositionTimer
+    let storePositionTimer: number
 
     if (initialised && pdfJsWrapper) {
       if (!pdfJsWrapper.isVisible()) {
@@ -233,7 +237,7 @@ function PdfJsViewer({ url, pdfFile }) {
   // listen for double-click events
   useEffect(() => {
     if (pdfJsWrapper) {
-      const handleTextlayerrendered = textLayer => {
+      const handleTextlayerrendered = (textLayer: any) => {
         // handle both versions for backwards-compatibility
         const textLayerDiv =
           textLayer.source.textLayerDiv ?? textLayer.source.textLayer.div
@@ -243,7 +247,7 @@ function PdfJsViewer({ url, pdfFile }) {
         if (!pageElement.dataset.listeningForDoubleClick) {
           pageElement.dataset.listeningForDoubleClick = true
 
-          const doubleClickListener = event => {
+          const doubleClickListener = (event: Event) => {
             const clickPosition = pdfJsWrapper.clickPosition(
               event,
               pageElement,
@@ -291,6 +295,10 @@ function PdfJsViewer({ url, pdfFile }) {
         return
       }
       if (positionRef.current) {
+        // Typescript is incorrectly inferring the type of the scale argument to
+        // scrollToPosition from its default value. We can remove this ignore once
+        // pdfJsWrapper is converted to using tyepscript.
+        // @ts-ignore
         pdfJsWrapper.scrollToPosition(positionRef.current, scaleRef.current)
       } else {
         pdfJsWrapper.viewer.currentScaleValue = scaleRef.current
@@ -307,8 +315,8 @@ function PdfJsViewer({ url, pdfFile }) {
 
   // when highlights are created, build the highlight elements
   useEffect(() => {
-    const timers = []
-    let intersectionObserver
+    const timers: number[] = []
+    let intersectionObserver: IntersectionObserver
 
     if (pdfJsWrapper && highlights?.length) {
       // watch for the highlight elements to scroll into view
@@ -318,12 +326,14 @@ function PdfJsViewer({ url, pdfFile }) {
             if (entry.isIntersecting) {
               intersectionObserver.unobserve(entry.target)
 
+              const element = entry.target as HTMLElement
+
               // fade the element in and out
-              entry.target.style.opacity = '0.5'
+              element.style.opacity = '0.5'
 
               timers.push(
                 window.setTimeout(() => {
-                  entry.target.style.opacity = '0'
+                  element.style.opacity = '0'
                 }, 1000)
               )
             }
@@ -334,7 +344,7 @@ function PdfJsViewer({ url, pdfFile }) {
         }
       )
 
-      const elements = []
+      const elements: HTMLDivElement[] = []
 
       for (const highlight of highlights) {
         try {
@@ -384,13 +394,13 @@ function PdfJsViewer({ url, pdfFile }) {
           break
         case 'zoom-in':
           if (pdfJsWrapper) {
-            setScale(pdfJsWrapper.viewer.currentScale * 1.25)
+            setScale(`${pdfJsWrapper.viewer.currentScale * 1.25}`)
           }
           break
 
         case 'zoom-out':
           if (pdfJsWrapper) {
-            setScale(pdfJsWrapper.viewer.currentScale * 0.75)
+            setScale(`${pdfJsWrapper.viewer.currentScale * 0.75}`)
           }
           break
 
@@ -499,7 +509,7 @@ function PdfJsViewer({ url, pdfFile }) {
       >
         <div className="pdfViewer" />
       </div>
-      <div className="pdfjs-controls" tabIndex="0">
+      <div className="pdfjs-controls" tabIndex={0}>
         {hasNewPdfToolbar ? (
           toolbarInfoLoaded && (
             <PdfViewerControlsToolbar
@@ -516,11 +526,6 @@ function PdfJsViewer({ url, pdfFile }) {
       </div>
     </div>
   )
-}
-
-PdfJsViewer.propTypes = {
-  url: PropTypes.string.isRequired,
-  pdfFile: PropTypes.object,
 }
 
 export default withErrorBoundary(memo(PdfJsViewer), () => (
