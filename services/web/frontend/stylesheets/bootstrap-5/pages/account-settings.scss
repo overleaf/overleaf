@@ -97,7 +97,8 @@
   }
 
   .title-row {
-    margin: var(--spacing-00);
+    display: flex;
+    align-items: center;
     margin-bottom: var(--spacing-05);
 
     > h4 {
@@ -115,9 +116,13 @@
   }
 }
 
-@include media-breakpoint-down(sm) {
+@include media-breakpoint-down(md) {
   .settings-widget-container {
     grid-template-columns: 1fr;
+
+    .title-row {
+      display: unset;
+    }
   }
 }
 
