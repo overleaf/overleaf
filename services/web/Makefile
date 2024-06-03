@@ -393,56 +393,9 @@ WITH_NODE_MODULES_PATH = \
 
 $(WITH_NODE_MODULES_PATH): export PATH=$(NODE_MODULES_PATH)
 
-lint: lint_backend
-lint_backend:
-	npx eslint \
-		'app.{js,jsx,mjs,ts,tsx}' \
-		'app/**/*.{js,jsx,mjs,ts,tsx}' \
-		'modules/*/index.{js,jsx,mjs,ts,tsx}' \
-		'modules/*/app/**/*.{js,jsx,mjs,ts,tsx}' \
-		--max-warnings=0
-
-lint: lint_frontend
-lint_frontend:
-	npx eslint \
-		'frontend/**/*.{js,jsx,mjs,ts,tsx}' \
-		'modules/**/frontend/**/*.{js,jsx,mjs,ts,tsx}' \
-		--max-warnings=0
-
-lint: lint_test
-lint_test: lint_test_app
-lint_test_app: lint_test_app_unit
-lint_test_app_unit:
-	npx eslint \
-		'test/unit/**/*.{js,jsx,mjs,ts,tsx}' \
-		--max-warnings=0
-
-lint_test_app: lint_test_app_rest
-lint_test_app_rest:
-	npx eslint \
-		'test/**/*.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'test/unit/**/*.{js,jsx,mjs,ts,tsx}' \
-		--max-warnings=0
-
-lint_test: lint_test_modules
-lint_test_modules:
-	npx eslint \
-		'modules/*/test/**/*.{js,jsx,mjs,ts,tsx}' \
-		--max-warnings=0
-
-lint: lint_misc
-# migrations, scripts, webpack config
-lint_misc:
-	npx eslint . \
-		--ignore-pattern 'app.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'app/**/*.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/*/app/**/*.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/*/index.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'frontend/**/*.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/**/frontend/**/*.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'test/**/*.{js,jsx,mjs,ts,tsx}' \
-		--ignore-pattern 'modules/*/test/**/*.{js,jsx,mjs,ts,tsx}' \
-		--max-warnings=0
+lint: lint_eslint
+lint_eslint:
+	npm run lint
 
 lint: lint_pug
 lint_pug:
