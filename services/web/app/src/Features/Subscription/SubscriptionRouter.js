@@ -30,6 +30,12 @@ module.exports = {
     )
 
     webRouter.get(
+      '/user/subscription/plans-3',
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.plansPageLightDesign
+    )
+
+    webRouter.get(
       '/user/subscription',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),

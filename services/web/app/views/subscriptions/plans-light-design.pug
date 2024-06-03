@@ -1,0 +1,13 @@
+extends ../layout-website-redesign
+
+block vars
+	- var suppressRelAlternateLinks = true
+	- metadata.canonicalURL = (settings.siteUrl ? settings.siteUrl : '') + '/user/subscription/plans'
+
+//- TODO: uncomment after bringing all of the elements from the old plans page
+//- block entrypointVar
+//- 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
+
+block content
+	main.content.website-redesign#main-content
+		p plans page light-design variant

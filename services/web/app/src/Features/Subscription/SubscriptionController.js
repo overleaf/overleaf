@@ -33,6 +33,19 @@ const validGroupPlanModalOptions = {
 }
 
 async function plansPage(req, res) {
+  const websiteRedesignPlansAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'website-redesign-plans'
+    )
+
+  if (websiteRedesignPlansAssignment.variant === 'new-design') {
+    return res.redirect(302, '/user/subscription/plans-2')
+  } else if (websiteRedesignPlansAssignment.variant === 'light-design') {
+    return res.redirect(302, '/user/subscription/plans-3')
+  }
+
   const language = req.i18n.language || 'en'
 
   const plans = SubscriptionViewModelBuilder.buildPlansList()
@@ -120,6 +133,12 @@ async function plansPage(req, res) {
     showBrlGeoBanner: countryCode === 'BR',
     showLATAMBanner,
     latamCountryBannerDetails,
+  })
+}
+
+async function plansPageLightDesign(req, res) {
+  res.render('subscriptions/plans-light-design', {
+    title: 'plans_and_pricing',
   })
 }
 
@@ -615,6 +634,7 @@ async function getLatamCountryBannerDetails(req, res) {
 
 module.exports = {
   plansPage: expressify(plansPage),
+  plansPageLightDesign: expressify(plansPageLightDesign),
   userSubscriptionPage: expressify(userSubscriptionPage),
   interstitialPaymentPage: expressify(interstitialPaymentPage),
   successfulSubscription: expressify(successfulSubscription),
