@@ -19,7 +19,6 @@ function AddNewEmailBtn({
 
   return (
     <OLButton
-      size="small"
       variant="primary"
       disabled={(disabled && !isLoading) || !isValidEmail(email)}
       isLoading={isLoading}

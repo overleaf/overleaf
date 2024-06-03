@@ -141,7 +141,6 @@ function InstitutionAndRole({ userEmailData }: InstitutionAndRoleProps) {
               />
             </OLFormGroup>
             <OLButton
-              size="small"
               variant="primary"
               type="submit"
               disabled={!role || !department}
