@@ -94,3 +94,30 @@
     border-radius: 24px;
   }
 }
+
+.card {
+  &.card-dark-green-bg {
+    background: var(--dark-jungle-green);
+    border-radius: 16px;
+    color: white;
+
+    a:not(.btn) {
+      color: var(--mint-green);
+
+      &:hover {
+        color: var(--mint-green);
+      }
+    }
+  }
+
+  &.card-purple-top-border {
+    background-color: white;
+    border-radius: 8px;
+    height: 100%;
+    box-shadow:
+      0px 2px 4px 0px #1e253014,
+      0px 4px 12px 0px #1e25301f;
+    border-top: 8px solid var(--sapphire-blue);
+    padding: 32px 40px 32px 40px;
+  }
+}
