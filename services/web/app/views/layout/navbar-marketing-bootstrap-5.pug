@@ -88,7 +88,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg
 											if child.divider
 												+dropdown-menu-divider
 											else if child.isContactUs
-												+dropdown-menu-link-item()(data-ol-open-contact-form-modal="contact-us" href)
+												+dropdown-menu-link-item()(data-ol-open-contact-form-modal="contact-us" data-bs-target="#contactUsModal" href data-bs-toggle="modal")
 													span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
 														| #{translate("contact_us")}
 											else

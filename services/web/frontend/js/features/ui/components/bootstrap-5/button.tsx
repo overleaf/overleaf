@@ -41,7 +41,7 @@ export default function Button({
             className={loadingSpinnerClassName}
             role="status"
           />
-          <span className="sr-only">{t('loading')}</span>
+          <span className="visually-hidden">{t('loading')}</span>
         </span>
       )}
       <span className="button-content" aria-hidden={isLoading}>

@@ -24,7 +24,10 @@ block body
 	if (typeof(suppressCookieBanner) == 'undefined')
 		include _cookie_banner
 
-	!= moduleIncludes("contactModal-marketing", locals)
+	if bootstrapVersion === 5
+		!= moduleIncludes("contactModal-marketing-bootstrap-5", locals)
+	else
+		!= moduleIncludes("contactModal-marketing", locals)
 
 block prepend foot-scripts
 	+bootstrap-js(bootstrapVersion)
