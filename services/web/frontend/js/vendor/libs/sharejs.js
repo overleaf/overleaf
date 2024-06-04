@@ -1,4 +1,4 @@
-import { generateSHA1Hash } from '../../shared/utils/sha1'
+import CryptoJSSHA1 from 'crypto-js/sha1'
 import { debugging, debugConsole } from '@/utils/debugging'
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1286,7 +1286,7 @@ export const { Doc } = (() => {
           var needToRecomputeHash = !this.__lastSubmitTimestamp || (age > RECOMPUTE_HASH_INTERVAL) || (age < 0)
           if (needToRecomputeHash || debugging) {
             // send git hash of current snapshot
-            var sha1 = generateSHA1Hash("blob " + this.snapshot.length + "\x00" + this.snapshot)
+            var sha1 = CryptoJSSHA1("blob " + this.snapshot.length + "\x00" + this.snapshot).toString()
             this.__lastSubmitTimestamp = now;
           }
         }

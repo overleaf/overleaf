@@ -1,5 +1,5 @@
 // @ts-ignore
-import { generateSHA1Hash } from '../../../shared/utils/sha1'
+import CryptoJSSHA1 from 'crypto-js/sha1'
 import {
   createContext,
   useContext,
@@ -94,9 +94,9 @@ export const ReferencesProvider: FC = ({ children }) => {
       const docId = doc.doc_id
       const snapshot = doc._doc.snapshot
       const now = Date.now()
-      const sha1 = generateSHA1Hash(
+      const sha1 = CryptoJSSHA1(
         'blob ' + snapshot.length + '\x00' + snapshot
-      )
+      ).toString()
       const CACHE_LIFETIME = 6 * 3600 * 1000 // allow reindexing every 6 hours
       const cacheEntry = existingIndexHash[docId]
       const isCached =

@@ -13,7 +13,7 @@ import _ from 'lodash'
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { generateSHA1Hash } from '../../shared/utils/sha1'
+import CryptoJSSHA1 from 'crypto-js/sha1'
 let ReferencesManager
 
 export default ReferencesManager = class ReferencesManager {
@@ -75,7 +75,9 @@ export default ReferencesManager = class ReferencesManager {
     const docId = doc.doc_id
     const snapshot = doc._doc.snapshot
     const now = Date.now()
-    const sha1 = generateSHA1Hash('blob ' + snapshot.length + '\x00' + snapshot)
+    const sha1 = CryptoJSSHA1(
+      'blob ' + snapshot.length + '\x00' + snapshot
+    ).toString()
     const CACHE_LIFETIME = 6 * 3600 * 1000 // allow reindexing every 6 hours
     const cacheEntry = this.existingIndexHash[docId]
     const isCached =
