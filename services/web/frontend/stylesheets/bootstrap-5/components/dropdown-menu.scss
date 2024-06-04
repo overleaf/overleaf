@@ -5,7 +5,7 @@
 .dropdown-menu {
   @include shadow-md;
 
-  width: 240px;
+  min-width: 240px;
 }
 
 .dropdown-item {
