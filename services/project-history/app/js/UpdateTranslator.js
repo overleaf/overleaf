@@ -280,15 +280,11 @@ class OperationsBuilder {
       this.pushTextOperation()
 
       // Add a comment operation
+      const commentLength = op.hlen ?? op.c.length
       const commentOp = {
         pathname: this.pathname,
         commentId: op.t,
-        ranges: [
-          {
-            pos,
-            length: op.hlen ?? op.c.length,
-          },
-        ],
+        ranges: commentLength > 0 ? [{ pos, length: commentLength }] : [],
       }
       if ('resolved' in op) {
         commentOp.resolved = op.resolved

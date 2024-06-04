@@ -23,6 +23,12 @@ class AddCommentOperation extends EditOperation {
   constructor(commentId, ranges, resolved = false) {
     super()
 
+    for (const range of ranges) {
+      if (range.isEmpty()) {
+        throw new Error("AddCommentOperation can't be built with empty ranges")
+      }
+    }
+
     /** @readonly */
     this.commentId = commentId
 

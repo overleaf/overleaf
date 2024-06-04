@@ -776,6 +776,7 @@ describe('UpdateTranslator', function () {
                 { p: 3, d: 'bar' },
                 { p: 5, c: 'comment this', t: 'comment-id-1' },
                 { p: 7, c: 'another comment', t: 'comment-id-2' },
+                { p: 9, c: '', t: 'comment-id-3' },
                 { p: 10, i: 'baz' },
               ],
               v: this.version,
@@ -811,6 +812,11 @@ describe('UpdateTranslator', function () {
                 pathname: 'main.tex',
                 commentId: 'comment-id-2',
                 ranges: [{ pos: 7, length: 15 }],
+              },
+              {
+                pathname: 'main.tex',
+                commentId: 'comment-id-3',
+                ranges: [],
               },
               {
                 pathname: 'main.tex',

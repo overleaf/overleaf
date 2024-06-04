@@ -56,20 +56,36 @@ const RangesManager = {
       RangesManager._emptyRangesCount(rangesTracker)
     const historyUpdates = []
     for (const update of updates) {
-      rangesTracker.track_changes = Boolean(update.meta?.tc)
+      const trackingChanges = Boolean(update.meta?.tc)
+      rangesTracker.track_changes = trackingChanges
       if (update.meta?.tc) {
         rangesTracker.setIdSeed(update.meta.tc)
       }
       const historyOps = []
       for (const op of update.op) {
+        let croppedCommentOps = []
         if (opts.historyRangesSupport) {
           historyOps.push(
             getHistoryOp(op, rangesTracker.comments, rangesTracker.changes)
           )
+          if (isDelete(op) && trackingChanges) {
+            // If a tracked delete overlaps a comment, the comment must be
+            // cropped. The extent of the cropping is calculated before the
+            // delete is applied, but the cropping operations are applied
+            // later, after the delete is applied.
+            croppedCommentOps = getCroppedCommentOps(op, rangesTracker.comments)
+          }
         } else if (isInsert(op) || isDelete(op)) {
           historyOps.push(op)
         }
         rangesTracker.applyOp(op, { user_id: update.meta?.user_id })
+        if (croppedCommentOps.length > 0) {
+          historyOps.push(
+            ...croppedCommentOps.map(op =>
+              getHistoryOpForComment(op, rangesTracker.changes)
+            )
+          )
+        }
       }
       if (historyOps.length > 0) {
         historyUpdates.push({ ...update, op: historyOps })
@@ -484,6 +500,72 @@ function getHistoryOpForComment(op, changes) {
     historyOp.hlen = hlen
   }
   return historyOp
+}
+
+/**
+ * Return the ops necessary to properly crop comments when a tracked delete is
+ * received
+ *
+ * The editor treats a tracked delete as a proper delete and updates the
+ * comment range accordingly. The history doesn't do that and remembers the
+ * extent of the comment in the tracked delete. In order to keep the history
+ * consistent with the editor, we'll send ops that will crop the comment in
+ * the history.
+ *
+ * @param {DeleteOp} op
+ * @param {Comment[]} comments
+ * @returns {CommentOp[]}
+ */
+function getCroppedCommentOps(op, comments) {
+  const deleteStart = op.p
+  const deleteLength = op.d.length
+  const deleteEnd = deleteStart + deleteLength
+
+  /** @type {HistoryCommentOp[]} */
+  const historyCommentOps = []
+  for (const comment of comments) {
+    const commentStart = comment.op.p
+    const commentLength = comment.op.c.length
+    const commentEnd = commentStart + commentLength
+
+    if (deleteStart <= commentStart && deleteEnd > commentStart) {
+      // The comment overlaps the start of the comment or all of it.
+      const overlapLength = Math.min(deleteEnd, commentEnd) - commentStart
+
+      /** @type {CommentOp} */
+      const commentOp = {
+        p: deleteStart,
+        c: comment.op.c.slice(overlapLength),
+        t: comment.op.t,
+      }
+      if (comment.op.resolved) {
+        commentOp.resolved = true
+      }
+
+      historyCommentOps.push(commentOp)
+    } else if (
+      deleteStart > commentStart &&
+      deleteStart < commentEnd &&
+      deleteEnd >= commentEnd
+    ) {
+      // The comment overlaps the end of the comment.
+      const overlapLength = commentEnd - deleteStart
+
+      /** @type {CommentOp} */
+      const commentOp = {
+        p: commentStart,
+        c: comment.op.c.slice(0, -overlapLength),
+        t: comment.op.t,
+      }
+      if (comment.op.resolved) {
+        commentOp.resolved = true
+      }
+
+      historyCommentOps.push(commentOp)
+    }
+  }
+
+  return historyCommentOps
 }
 
 module.exports = RangesManager
