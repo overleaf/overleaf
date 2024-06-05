@@ -139,6 +139,14 @@ async function plansPage(req, res) {
 }
 
 async function plansPageLightDesign(req, res) {
+  const splitTestActive = await SplitTestHandler.promises.isSplitTestActive(
+    'website-redesign-plans'
+  )
+
+  if (!splitTestActive && req.query.preview !== 'true') {
+    return res.redirect(302, '/user/subscription/plans')
+  }
+
   res.render('subscriptions/plans-light-design', {
     title: 'plans_and_pricing',
   })
