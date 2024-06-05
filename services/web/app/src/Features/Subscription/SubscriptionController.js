@@ -32,6 +32,28 @@ const validGroupPlanModalOptions = {
   usage: groupPlanModalOptions.usages.map(item => item.code),
 }
 
+function _getGroupPlanModalDefaults(req, currency) {
+  function getDefault(param, category, defaultValue) {
+    const v = req.query && req.query[param]
+    if (v && validGroupPlanModalOptions[category].includes(v)) {
+      return v
+    }
+    return defaultValue
+  }
+
+  let defaultGroupPlanModalCurrency = 'USD'
+  if (validGroupPlanModalOptions.currency.includes(currency)) {
+    defaultGroupPlanModalCurrency = currency
+  }
+
+  return {
+    plan_code: getDefault('plan', 'plan_code', 'collaborator'),
+    size: getDefault('number', 'size', '2'),
+    currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
+    usage: getDefault('usage', 'usage', 'enterprise'),
+  }
+}
+
 async function plansPage(req, res) {
   const websiteRedesignPlansAssignment =
     await SplitTestHandler.promises.getAssignment(
@@ -58,26 +80,10 @@ async function plansPage(req, res) {
   } = await _getRecommendedCurrency(req, res)
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
-  function getDefault(param, category, defaultValue) {
-    const v = req.query && req.query[param]
-    if (v && validGroupPlanModalOptions[category].includes(v)) {
-      return v
-    }
-    return defaultValue
-  }
+  const groupPlanModalDefaults = _getGroupPlanModalDefaults(req, currency)
 
   const currentView = 'annual'
 
-  let defaultGroupPlanModalCurrency = 'USD'
-  if (validGroupPlanModalOptions.currency.includes(currency)) {
-    defaultGroupPlanModalCurrency = currency
-  }
-  const groupPlanModalDefaults = {
-    plan_code: getDefault('plan', 'plan_code', 'collaborator'),
-    size: getDefault('number', 'size', '2'),
-    currency: getDefault('currency', 'currency', defaultGroupPlanModalCurrency),
-    usage: getDefault('usage', 'usage', 'enterprise'),
-  }
   const plansPageViewSegmentation = {
     currency: recommendedCurrency,
     countryCode,
