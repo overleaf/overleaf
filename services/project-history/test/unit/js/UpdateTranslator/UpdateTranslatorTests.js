@@ -1069,7 +1069,11 @@ describe('UpdateTranslator', function () {
                 { i: 'inserted', p: 5 },
                 { d: 'deleted', p: 20 },
                 { i: 'rejected deletion', p: 30, trackedDeleteRejection: true },
-                { d: 'rejected insertion', p: 50, u: true },
+                {
+                  d: 'rejected insertion',
+                  p: 50,
+                  trackedChanges: [{ type: 'insert', offset: 0, length: 18 }],
+                },
               ],
               v: this.version,
               meta: {

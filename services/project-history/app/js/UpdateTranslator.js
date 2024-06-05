@@ -357,7 +357,7 @@ class OperationsBuilder {
       for (const change of changes) {
         if (change.offset > offset) {
           // Handle the portion before the tracked change
-          if (update.meta.tc != null && op.u == null) {
+          if (update.meta.tc != null) {
             // This is a tracked delete
             this.retain(change.offset - offset, {
               tracking: {
@@ -385,7 +385,7 @@ class OperationsBuilder {
       }
       if (offset < op.d.length) {
         // Handle the portion after the last tracked change
-        if (update.meta.tc != null && op.u == null) {
+        if (update.meta.tc != null) {
           // This is a tracked delete
           this.retain(op.d.length - offset, {
             tracking: {

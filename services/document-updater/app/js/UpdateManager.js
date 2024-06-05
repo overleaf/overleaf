@@ -346,11 +346,18 @@ const UpdateManager = {
         }
         if (isDelete(op)) {
           docLength -= op.d.length
-          if (!update.meta.tc || op.u) {
-            // This is either a regular delete or a tracked insert rejection.
-            // It will be translated to a delete in history.  Tracked deletes
-            // are translated into retains and don't change the history doc
-            // length.
+          if (update.meta.tc) {
+            // This is a tracked delete. It will be translated into a retain in
+            // history, except any enclosed tracked inserts, which will be
+            // translated into regular deletes.
+            for (const change of op.trackedChanges ?? []) {
+              if (change.type === 'insert') {
+                historyDocLength -= change.length
+              }
+            }
+          } else {
+            // This is a regular delete.  It will be translated to a delete in
+            // history.
             historyDocLength -= op.d.length
           }
         }

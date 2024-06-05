@@ -540,7 +540,11 @@ describe('UpdateManager', function () {
           op: [
             { d: 'qux', p: 4 },
             { i: 'bazbaz', p: 14 },
-            { d: 'bong', p: 28, u: true },
+            {
+              d: 'bong',
+              p: 28,
+              trackedChanges: [{ type: 'insert', offset: 0, length: 4 }],
+            },
           ],
           meta: {
             tc: 'tracking-info',
@@ -589,7 +593,11 @@ describe('UpdateManager', function () {
           op: [
             { d: 'qux', p: 4 },
             { i: 'bazbaz', p: 14 },
-            { d: 'bong', p: 28, u: true },
+            {
+              d: 'bong',
+              p: 28,
+              trackedChanges: [{ type: 'insert', offset: 0, length: 4 }],
+            },
           ],
           meta: {
             pathname: this.pathname,
@@ -647,7 +655,11 @@ describe('UpdateManager', function () {
           op: [
             { d: 'qux', p: 4 },
             { i: 'bazbaz', p: 14 },
-            { d: 'bong', p: 28, u: true },
+            {
+              d: 'bong',
+              p: 28,
+              trackedChanges: [{ type: 'insert', offset: 0, length: 4 }],
+            },
           ],
           meta: {
             pathname: this.pathname,

@@ -60,7 +60,7 @@ function adjustLengthByOp(length, op, opts = {}) {
       return length + op.i.length
     }
   } else if ('d' in op && op.d != null) {
-    if (opts.tracked && op.u == null) {
+    if (opts.tracked) {
       // Tracked delete: will be translated into a retain, except where it overlaps tracked inserts.
       for (const change of op.trackedChanges ?? []) {
         if (change.type === 'insert') {

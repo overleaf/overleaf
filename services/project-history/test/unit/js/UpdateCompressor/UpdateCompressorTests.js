@@ -199,7 +199,11 @@ describe('UpdateCompressor', function () {
               { p: 22, d: 'apple' }, // doc_length doesn't change
               { p: 12, i: 'melon', u: true }, // doc_length += 5
               { p: 18, i: 'banana', u: true, trackedDeleteRejection: true }, // doc_length doesn't change
-              { p: 8, d: 'pineapple', u: true }, // doc_length -= 9
+              {
+                p: 8,
+                d: 'pineapple',
+                trackedChanges: [{ type: 'insert', offset: 0, length: 9 }],
+              }, // doc_length -= 9
               { p: 11, i: 'fruit salad' },
             ],
             meta: { ...meta, doc_length: 20, history_doc_length: 30 },
@@ -228,7 +232,11 @@ describe('UpdateCompressor', function () {
           v: 42,
         },
         {
-          op: { p: 8, d: 'pineapple', u: true },
+          op: {
+            p: 8,
+            d: 'pineapple',
+            trackedChanges: [{ type: 'insert', offset: 0, length: 9 }],
+          },
           meta: { ...meta, doc_length: 41 },
           v: 42,
         },
