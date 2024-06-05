@@ -49,19 +49,15 @@ async function plansPage(req, res) {
   const language = req.i18n.language || 'en'
 
   const plans = SubscriptionViewModelBuilder.buildPlansList()
-  let currency = null
-  const queryCurrency = req.query.currency?.toUpperCase()
-  if (GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
-    currency = queryCurrency
-  }
-  const { recommendedCurrency, countryCode, geoPricingLATAMTestVariant } =
-    await _getRecommendedCurrency(req, res)
+
+  const {
+    currency,
+    recommendedCurrency,
+    countryCode,
+    geoPricingLATAMTestVariant,
+  } = await _getRecommendedCurrency(req, res)
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
-  if (recommendedCurrency && currency == null) {
-    currency = recommendedCurrency
-  }
-
   function getDefault(param, category, defaultValue) {
     const v = req.query && req.query[param]
     if (v && validGroupPlanModalOptions[category].includes(v)) {
@@ -582,7 +578,16 @@ async function _getRecommendedCurrency(req, res) {
     recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
   }
 
+  let currency = null
+  const queryCurrency = req.query.currency?.toUpperCase()
+  if (queryCurrency && GeoIpLookup.isValidCurrencyParam(queryCurrency)) {
+    currency = queryCurrency
+  } else if (recommendedCurrency) {
+    currency = recommendedCurrency
+  }
+
   return {
+    currency,
     recommendedCurrency,
     countryCode,
     geoPricingLATAMTestVariant: assignmentLATAM?.variant,
