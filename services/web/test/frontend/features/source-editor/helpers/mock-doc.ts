@@ -76,6 +76,13 @@ export const mockDoc = (content = defaultContent) => {
     ranges: {
       changes: [],
       comments: [],
+      getIdSeed: () => '123',
+      setIdSeed: () => {},
     },
+    setTrackChangesIdSeeds: () => {},
+    getTrackingChanges: () => true,
+    setTrackingChanges: () => {},
+    getInflightOp: () => null,
+    getPendingOp: () => null,
   }
 }

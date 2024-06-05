@@ -37,6 +37,7 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
+    cy.interceptMetadata()
     cy.interceptSpelling()
   })
 

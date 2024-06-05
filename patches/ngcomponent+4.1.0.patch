@@ -1,9 +1,0 @@
-diff --git a/node_modules/ngcomponent/index.ts b/node_modules/ngcomponent/index.ts
-index 5fe33c5..8e1c6fc 100644
---- a/node_modules/ngcomponent/index.ts
-+++ b/node_modules/ngcomponent/index.ts
-@@ -1,3 +1,4 @@
-+// @ts-nocheck
- import { IChangesObject } from 'angular'
- import assign = require('lodash/assign')
- import mapValues = require('lodash/mapValues')

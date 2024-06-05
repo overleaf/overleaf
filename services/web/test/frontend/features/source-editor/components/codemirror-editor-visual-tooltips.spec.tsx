@@ -7,6 +7,7 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptMathJax()
+    cy.interceptMetadata()
     cy.interceptEvents()
     cy.interceptSpelling()
 

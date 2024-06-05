@@ -87,7 +87,9 @@ export type EditorScopeValue = {
   error_state: boolean
 }
 
-const EditorManagerContext = createContext<EditorManager | undefined>(undefined)
+export const EditorManagerContext = createContext<EditorManager | undefined>(
+  undefined
+)
 
 export const EditorManagerProvider: FC = ({ children }) => {
   const { t } = useTranslation()

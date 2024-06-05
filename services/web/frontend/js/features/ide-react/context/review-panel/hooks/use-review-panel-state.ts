@@ -170,10 +170,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
     ReviewPanel.Value<'commentThreads'>
   >({})
   const [entries, setEntries] = useState<ReviewPanel.Value<'entries'>>({})
-  const [users, setUsers] = useScopeValue<ReviewPanel.Value<'users'>>(
-    'users',
-    true
-  )
+  const [users, setUsers] = useScopeValue<ReviewPanel.Value<'users'>>('users')
   const [resolvedComments, setResolvedComments] = useState<
     ReviewPanel.Value<'resolvedComments'>
   >({})
@@ -532,7 +529,6 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
     if (!user) {
       return 'anonymous'
     }
-    // FIXME: check this
     if (project.owner._id === user.id) {
       return 'member'
     }

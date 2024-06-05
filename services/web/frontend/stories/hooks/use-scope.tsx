@@ -11,6 +11,16 @@ export const useScope = (scope: Record<string, unknown>) => {
   }
 
   useLayoutEffect(() => {
-    merge(window._ide.$scope, scopeRef.current)
+    if (scopeRef.current) {
+      for (const [path, value] of Object.entries(scopeRef.current)) {
+        let existingValue: typeof value | undefined
+        try {
+          existingValue = window.overleaf.unstable.store.get(path)
+        } catch {
+          // allowed not to exist
+        }
+        window.overleaf.unstable.store.set(path, merge(existingValue, value))
+      }
+    }
   }, [])
 }

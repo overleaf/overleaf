@@ -20,8 +20,6 @@ const entryPoints = {
   'bootstrap-3': './frontend/js/bootstrap-3.ts',
   'bootstrap-5': './frontend/js/bootstrap-5.ts',
   devToolbar: './frontend/js/dev-toolbar.js',
-  main: './frontend/js/main.js',
-  ide: './frontend/js/ide.js',
   'ide-detached': './frontend/js/ide-detached.js',
   marketing: './frontend/js/marketing.js',
   'main-style': './frontend/stylesheets/main-style.less',

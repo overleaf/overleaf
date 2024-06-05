@@ -4,6 +4,7 @@ import { useScope } from '../hooks/use-scope'
 import { useMeta } from '../hooks/use-meta'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import RangesTracker from '@overleaf/ranges-tracker'
 
 const FileTreePathProvider: FC = ({ children }) => (
   <FileTreePathContext.Provider
@@ -66,6 +67,7 @@ const permissions = {
 }
 
 export const Latex = (args: any, { globals: { theme } }: any) => {
+  // FIXME: useScope has no effect
   useScope({
     editor: {
       sharejs_doc: mockDoc(content.tex, changes.tex),
@@ -205,10 +207,22 @@ const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
     off: () => {
       // Do nothing
     },
-    ranges: {
-      changes,
-      comments: [],
+    setTrackChangesIdSeeds: () => {
+      // Do nothing
     },
+    setTrackingChanges: () => {
+      // Do nothing
+    },
+    getTrackingChanges: () => {
+      return true
+    },
+    getInflightOp: () => {
+      return null
+    },
+    getPendingOp: () => {
+      return null
+    },
+    ranges: new RangesTracker(changes, []),
   }
 }
 

@@ -8,7 +8,7 @@ import { debugConsole } from '@/utils/debugging'
 
 export default function useProjectWideSettings() {
   // The value will be undefined on mount
-  const [project] = useScopeValue<ProjectSettings | undefined>('project', true)
+  const [project] = useScopeValue<ProjectSettings | undefined>('project')
   const saveProjectSettings = useSaveProjectSettings()
 
   const setCompiler = useCallback(

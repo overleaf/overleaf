@@ -26,7 +26,6 @@ import {
   setMetadata,
   setSyntaxValidation,
 } from '../extensions/language'
-import { useIdeContext } from '../../../shared/context/ide-context'
 import { restoreScrollPosition } from '../extensions/scroll-position'
 import { setEditable } from '../extensions/editable'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
@@ -59,10 +58,9 @@ import grammarlyExtensionPresent from '@/shared/utils/grammarly'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { debugConsole } from '@/utils/debugging'
+import { useMetadataContext } from '@/features/ide-react/context/metadata-context'
 
 function useCodeMirrorScope(view: EditorView) {
-  const ide = useIdeContext()
-
   const { fileTreeData } = useFileTreeData()
 
   const [permissions] = useScopeValue<{ write: boolean }>('permissions')
@@ -73,6 +71,8 @@ function useCodeMirrorScope(view: EditorView) {
     useCompileContext()
 
   const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
+
+  const { metadata } = useMetadataContext()
 
   const [loadingThreads] = useScopeValue<boolean>('loadingThreads')
 
@@ -211,22 +211,16 @@ function useCodeMirrorScope(view: EditorView) {
   // set the project metadata, mostly for use in autocomplete
   // TODO: read this data from the scope?
   const metadataRef = useRef({
-    documents: ide.metadataManager.metadata.state.documents,
+    documents: metadata.state.documents,
     references: references.keys,
     fileTreeData,
   })
 
   // listen to project metadata (docs + packages) updates
   useEffect(() => {
-    const listener = (event: Event) => {
-      metadataRef.current.documents = (
-        event as CustomEvent<Record<string, any>>
-      ).detail
-      view.dispatch(setMetadata(metadataRef.current))
-    }
-    window.addEventListener('project:metadata', listener)
-    return () => window.removeEventListener('project:metadata', listener)
-  }, [view])
+    metadataRef.current.documents = metadata.state.documents
+    view.dispatch(setMetadata(metadataRef.current))
+  }, [view, metadata.state.documents])
 
   // listen to project reference keys updates
   useEffect(() => {

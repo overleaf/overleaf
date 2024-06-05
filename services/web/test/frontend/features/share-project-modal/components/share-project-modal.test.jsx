@@ -744,20 +744,10 @@ describe('<ShareProjectModal/>', function () {
   it('handles switching between access levels', async function () {
     fetchMock.post('express:/project/:projectId/settings/admin', 204)
 
-    const watchCallbacks = {}
-
-    const scopeWithProject = project => {
-      return {
-        $watch: (path, callback) => {
-          watchCallbacks[path] = callback
-          return () => {}
-        },
-        project,
-      }
-    }
-
     renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
-      scope: scopeWithProject({ ...project, publicAccesLevel: 'private' }),
+      scope: {
+        project: { ...project, publicAccesLevel: 'private' },
+      },
     })
 
     await screen.findByText(
@@ -777,7 +767,11 @@ describe('<ShareProjectModal/>', function () {
 
     // NOTE: updating the scoped project data manually,
     // as the project data is usually updated via the websocket connection
-    watchCallbacks.project({ ...project, publicAccesLevel: 'tokenBased' })
+    window.overleaf.unstable.store.set('project', {
+      ...project,
+      publicAccesLevel: 'tokenBased',
+    })
+    // watchCallbacks.project({ ...project, publicAccesLevel: 'tokenBased' })
 
     await screen.findByText('Link sharing is on')
     const disableButton = await screen.findByRole('button', {
@@ -793,7 +787,11 @@ describe('<ShareProjectModal/>', function () {
 
     // NOTE: updating the scoped project data manually,
     // as the project data is usually updated via the websocket connection
-    watchCallbacks.project({ ...project, publicAccesLevel: 'private' })
+    window.overleaf.unstable.store.set('project', {
+      ...project,
+      publicAccesLevel: 'private',
+    })
+    // watchCallbacks.project({ ...project, publicAccesLevel: 'private' })
 
     await screen.findByText(
       'Link sharing is off, only invited users can view this project.'

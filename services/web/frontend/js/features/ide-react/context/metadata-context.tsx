@@ -15,7 +15,6 @@ import _ from 'lodash'
 import { getJSON, postJSON } from '@/infrastructure/fetch-json'
 import { useOnlineUsersContext } from '@/features/ide-react/context/online-users-context'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { useIdeContext } from '@/shared/context/ide-context'
 import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
@@ -42,13 +41,12 @@ type MetadataContextValue = {
 
 type DocMetadataResponse = { docId: string; meta: DocumentMetadata }
 
-const MetadataContext = createContext<MetadataContextValue | undefined>(
+export const MetadataContext = createContext<MetadataContextValue | undefined>(
   undefined
 )
 
 export const MetadataProvider: FC = ({ children }) => {
   const { t } = useTranslation()
-  const ide = useIdeContext()
   const { eventEmitter, projectId } = useIdeReactContext()
   const { socket } = useConnectionContext()
   const { onlineUsersCount } = useOnlineUsersContext()
@@ -224,10 +222,6 @@ export const MetadataProvider: FC = ({ children }) => {
     }),
     [documents, getAllLabels, getAllPackages]
   )
-
-  // Expose metadataManager via ide object because useCodeMirrorScope relies on
-  // it, for now
-  ide.metadataManager = value
 
   return (
     <MetadataContext.Provider value={value}>

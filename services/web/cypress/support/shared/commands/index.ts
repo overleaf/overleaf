@@ -11,6 +11,7 @@ import { interceptFileUpload } from './upload'
 import { interceptProjectListing } from './project-list'
 import { interceptLinkedFile } from './linked-file'
 import { interceptMathJax } from './mathjax'
+import { interceptMetadata } from './metadata'
 
 // eslint-disable-next-line no-unused-vars,@typescript-eslint/no-namespace
 declare global {
@@ -21,6 +22,7 @@ declare global {
       interceptAsync: typeof interceptAsync
       interceptCompile: typeof interceptCompile
       interceptEvents: typeof interceptEvents
+      interceptMetadata: typeof interceptMetadata
       interceptSpelling: typeof interceptSpelling
       waitForCompile: typeof waitForCompile
       interceptDeferredCompile: typeof interceptDeferredCompile
@@ -35,6 +37,7 @@ declare global {
 Cypress.Commands.add('interceptAsync', interceptAsync)
 Cypress.Commands.add('interceptCompile', interceptCompile)
 Cypress.Commands.add('interceptEvents', interceptEvents)
+Cypress.Commands.add('interceptMetadata', interceptMetadata)
 Cypress.Commands.add('interceptSpelling', interceptSpelling)
 Cypress.Commands.add('waitForCompile', waitForCompile)
 Cypress.Commands.add('interceptDeferredCompile', interceptDeferredCompile)

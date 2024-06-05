@@ -9,12 +9,10 @@ import {
   useChatContext,
   chatClientIdGenerator,
 } from '@/features/chat/context/chat-context'
-import {
-  ChatProviders,
-  cleanUpContext,
-} from '../../../helpers/render-with-context'
+import { cleanUpContext } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from '../components/stubs'
 import { SocketIOMock } from '@/ide/connection/SocketIoShim'
+import { EditorProviders } from '../../../helpers/editor-providers'
 
 describe('ChatContext', function () {
   const user = {
@@ -59,9 +57,8 @@ describe('ChatContext', function () {
     it('subscribes when mounted', function () {
       const socket = new SocketIOMock()
       renderChatContextHook({ socket })
-
       // Assert that there is 1 listener
-      expect(socket.events['new-chat-message'].length).to.equal(1)
+      expect(socket.events['new-chat-message']).to.have.length(1)
     })
 
     it('unsubscribes when unmounted', function () {
@@ -602,7 +599,7 @@ function renderChatContextHook(props) {
     // Wrap with ChatContext.Provider (and the other editor context providers)
     // eslint-disable-next-line react/display-name
     wrapper: ({ children }) => (
-      <ChatProviders {...props}>{children}</ChatProviders>
+      <EditorProviders {...props}>{children}</EditorProviders>
     ),
   })
 }

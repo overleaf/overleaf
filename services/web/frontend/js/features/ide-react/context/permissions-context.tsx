@@ -9,7 +9,9 @@ import {
 import useScopeValue from '@/shared/hooks/use-scope-value'
 import { DeepReadonly } from '../../../../../types/utils'
 
-const PermissionsContext = createContext<Permissions | undefined>(undefined)
+export const PermissionsContext = createContext<Permissions | undefined>(
+  undefined
+)
 
 const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
   readOnly: {

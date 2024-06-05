@@ -23,6 +23,7 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
+    cy.interceptMetadata()
     cy.interceptSpelling()
   })
 

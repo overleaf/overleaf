@@ -1,9 +1,0 @@
-div(
-	ng-controller="FileViewController"
-	ng-show="ui.view == 'file'"
-	ng-if="openFile && editor.multiSelectedCount === 0"
-)
-	file-view(
-		file='file'
-		store-references-keys='storeReferencesKeys'
-	)

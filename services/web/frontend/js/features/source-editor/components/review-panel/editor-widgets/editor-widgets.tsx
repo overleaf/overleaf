@@ -8,12 +8,10 @@ import {
   useReviewPanelUpdaterFnsContext,
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
-import { useIdeContext } from '@/shared/context/ide-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
-import useScopeValue from '../../../../../shared/hooks/use-scope-value'
 import useScopeEventListener from '@/shared/hooks/use-scope-event-listener'
 import { memo, useCallback } from 'react'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -29,14 +27,8 @@ function EditorWidgets() {
     handleShowBulkRejectDialog,
     handleConfirmDialog,
   } = useBulkActionsModal()
-  const { setIsAddingComment, handleSetSubview } =
-    useReviewPanelUpdaterFnsContext()
-  const { isReactIde } = useIdeContext()
+  const { setIsAddingComment } = useReviewPanelUpdaterFnsContext()
   const { toggleReviewPanel } = useReviewPanelUpdaterFnsContext()
-  const [addNewComment] =
-    useScopeValue<(e: React.MouseEvent<HTMLButtonElement>) => void>(
-      'addNewComment'
-    )
   const view = useCodeMirrorViewContext()
   const { reviewPanelOpen } = useLayoutContext()
   const { isRestrictedTokenMember } = useEditorContext()
@@ -55,20 +47,9 @@ function EditorWidgets() {
     openDocId && openDocId in entries ? entries[openDocId] : undefined
 
   const handleAddNewCommentClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (isReactIde) {
-      e.preventDefault()
-      setIsAddingComment(true)
-      toggleReviewPanel()
-      return
-    }
-
-    addNewComment(e)
-    setTimeout(() => {
-      // Re-render the comment box in order to add autofocus every time
-      handleSetSubview('cur_file')
-      setIsAddingComment(false)
-      setIsAddingComment(true)
-    }, 0)
+    e.preventDefault()
+    setIsAddingComment(true)
+    toggleReviewPanel()
   }
 
   useScopeEventListener(

@@ -20,8 +20,10 @@ mixin launchpad-check(section)
 				div.alert.alert-danger
 					span(data-ol-error)
 
-block vars
+block entrypointVar
 	- entrypoint = 'modules/launchpad/pages/launchpad'
+					
+block vars
 	- metadata = metadata || {}
 
 block append meta

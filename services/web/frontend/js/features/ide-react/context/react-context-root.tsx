@@ -40,10 +40,10 @@ export const ReactContextRoot: FC = ({ children }) => {
                             <PermissionsProvider>
                               <ProjectSettingsProvider>
                                 <LayoutProvider>
-                                  <LocalCompileProvider>
-                                    <DetachCompileProvider>
-                                      <ChatProvider>
-                                        <EditorManagerProvider>
+                                  <EditorManagerProvider>
+                                    <LocalCompileProvider>
+                                      <DetachCompileProvider>
+                                        <ChatProvider>
                                           <FileTreeOpenProvider>
                                             <OnlineUsersProvider>
                                               <MetadataProvider>
@@ -53,10 +53,10 @@ export const ReactContextRoot: FC = ({ children }) => {
                                               </MetadataProvider>
                                             </OnlineUsersProvider>
                                           </FileTreeOpenProvider>
-                                        </EditorManagerProvider>
-                                      </ChatProvider>
-                                    </DetachCompileProvider>
-                                  </LocalCompileProvider>
+                                        </ChatProvider>
+                                      </DetachCompileProvider>
+                                    </LocalCompileProvider>
+                                  </EditorManagerProvider>
                                 </LayoutProvider>
                               </ProjectSettingsProvider>
                             </PermissionsProvider>

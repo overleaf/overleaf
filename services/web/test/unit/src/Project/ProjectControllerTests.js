@@ -526,9 +526,9 @@ describe('ProjectController', function () {
       this.ProjectUpdateHandler.promises.markAsOpened.resolves()
     })
 
-    it('should render the project/editor page', function (done) {
+    it('should render the project/ide-react page', function (done) {
       this.res.render = (pageName, opts) => {
-        pageName.should.equal('project/editor')
+        pageName.should.equal('project/ide-react')
         done()
       }
       this.ProjectController.loadEditor(this.req, this.res)

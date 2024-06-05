@@ -6,7 +6,7 @@ export default function useSaveProjectSettings() {
   // projectSettings value will be undefined on mount
   const [projectSettings, setProjectSettings] = useScopeValue<
     ProjectSettings | undefined
-  >('project', true)
+  >('project')
   const { _id: projectId } = useProjectContext()
 
   return async (

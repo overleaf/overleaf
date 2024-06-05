@@ -12,6 +12,7 @@ describe('keyboard shortcuts', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
+    cy.interceptMetadata()
     cy.interceptSpelling()
 
     const scope = mockScope()

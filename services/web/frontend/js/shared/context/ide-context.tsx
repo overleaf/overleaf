@@ -1,22 +1,18 @@
 import { createContext, FC, useContext, useEffect, useMemo } from 'react'
 import { ScopeValueStore } from '../../../../types/ide/scope-value-store'
-import { Scope } from '../../../../types/angular/scope'
-import getMeta from '@/utils/meta'
 import { ScopeEventEmitter } from '../../../../types/ide/scope-event-emitter'
 
 export type Ide = {
   [key: string]: any // TODO: define the rest of the `ide` and `$scope` properties
-  $scope: Scope
+  $scope: Record<string, any>
 }
 
 type IdeContextValue = Ide & {
-  isReactIde: boolean
   scopeStore: ScopeValueStore
   scopeEventEmitter: ScopeEventEmitter
 }
 
-const IdeContext = createContext<IdeContextValue | undefined>(undefined)
-const isReactIde: boolean = getMeta('ol-idePageReact')
+export const IdeContext = createContext<IdeContextValue | undefined>(undefined)
 
 export const IdeProvider: FC<{
   ide: Ide
@@ -45,7 +41,6 @@ export const IdeProvider: FC<{
   const value = useMemo<IdeContextValue>(() => {
     return {
       ...ide,
-      isReactIde,
       scopeStore,
       scopeEventEmitter,
     }

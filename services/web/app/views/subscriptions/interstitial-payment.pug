@@ -1,10 +1,11 @@
-extends ../layout
+extends ../layout-marketing
 
 include ./plans/_mixins
-include ../_mixins/bootstrap_js
+	
+block entrypointVar
+	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
 
 block vars
-	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
 	- var suppressFooter = true
 	- var suppressNavbarRight = true
 	- var suppressCookieBanner = true
@@ -66,6 +67,3 @@ block content
 					| #{translate("continue_with_free_plan")}			
 
 	!= moduleIncludes("contactModalGeneral-marketing", locals)
-
-block prepend foot-scripts
-	+bootstrap-js(bootstrapVersion)

@@ -7,8 +7,7 @@ export default function useProjectWideSettingsSocketListener() {
   const ide = useIdeContext()
 
   const [project, setProject] = useScopeValue<ProjectSettings | undefined>(
-    'project',
-    true
+    'project'
   )
 
   const setCompiler = useCallback(

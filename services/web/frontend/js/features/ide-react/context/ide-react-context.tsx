@@ -40,7 +40,7 @@ type IdeReactContextValue = {
   projectJoined: boolean
 }
 
-const IdeReactContext = createContext<IdeReactContextValue | undefined>(
+export const IdeReactContext = createContext<IdeReactContextValue | undefined>(
   undefined
 )
 
@@ -63,7 +63,7 @@ function populatePdfScope(store: ReactScopeValueStore) {
   store.allowNonExistentPath('pdf', true)
 }
 
-function createReactScopeValueStore(projectId: string) {
+export function createReactScopeValueStore(projectId: string) {
   const scopeStore = new ReactScopeValueStore()
 
   // Populate the scope value store with default values that will be used by

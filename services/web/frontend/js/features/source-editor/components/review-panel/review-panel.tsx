@@ -8,26 +8,14 @@ import { isCurrentFileView } from '../../utils/sub-view'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import classnames from 'classnames'
 import { lazy, memo } from 'react'
-import getMeta from '@/utils/meta'
 import { SubView } from '../../../../../../types/review-panel/review-panel'
-
-const isReactIde: boolean = getMeta('ol-idePageReact')
 
 type ReviewPanelViewProps = {
   parentDomNode: Element
 }
 
 function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
-  const { subView } = useReviewPanelValueContext()
-
-  return ReactDOM.createPortal(
-    isReactIde ? (
-      <ReviewPanelContainer />
-    ) : (
-      <ReviewPanelContent subView={subView} />
-    ),
-    parentDomNode
-  )
+  return ReactDOM.createPortal(<ReviewPanelContainer />, parentDomNode)
 }
 
 const ReviewPanelContainer = memo(() => {
@@ -65,10 +53,9 @@ const ReviewPanelContent = memo<{ subView: SubView }>(({ subView }) => (
 ))
 ReviewPanelContent.displayName = 'ReviewPanelContent'
 
-const ReviewPanelProvider = lazy(() =>
-  isReactIde
-    ? import('@/features/ide-react/context/review-panel/review-panel-provider')
-    : import('../../context/review-panel/review-panel-provider')
+const ReviewPanelProvider = lazy(
+  () =>
+    import('@/features/ide-react/context/review-panel/review-panel-provider')
 )
 
 function ReviewPanel() {

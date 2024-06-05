@@ -7,6 +7,10 @@
 // Remove a listener for the foo event with the bar namespace: .off 'foo.bar'
 
 export default class EventEmitter {
+  constructor() {
+    this.events = {}
+  }
+
   on(event, callback) {
     if (!this.events) {
       this.events = {}

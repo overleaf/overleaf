@@ -8,8 +8,8 @@ import fetchMock from 'fetch-mock'
 
 import ChatPane from '../../../../../frontend/js/features/chat/components/chat-pane'
 import {
-  renderWithChatContext,
   cleanUpContext,
+  renderWithEditorContext,
 } from '../../../helpers/render-with-context'
 import { stubMathJax, tearDownMathJaxStubs } from './stubs'
 
@@ -59,7 +59,7 @@ describe('<ChatPane />', function () {
   it('renders multiple messages', async function () {
     fetchMock.get(/messages/, testMessages)
 
-    renderWithChatContext(<ChatPane />, { user })
+    renderWithEditorContext(<ChatPane />, { user })
 
     await screen.findByText('a message')
     await screen.findByText('another message')
@@ -68,7 +68,7 @@ describe('<ChatPane />', function () {
   it('provides error message with reload button on FetchError', async function () {
     fetchMock.get(/messages/, 500)
 
-    renderWithChatContext(<ChatPane />, { user })
+    renderWithEditorContext(<ChatPane />, { user })
 
     // should have hit a FetchError and will prompt user to reconnect
     await screen.findByText('Try again')
@@ -90,7 +90,7 @@ describe('<ChatPane />', function () {
   it('a loading spinner is rendered while the messages are loading, then disappears', async function () {
     fetchMock.get(/messages/, [], { delay: 1000 })
 
-    renderWithChatContext(<ChatPane />, { user })
+    renderWithEditorContext(<ChatPane />, { user })
 
     // not displayed initially
     expect(screen.queryByText('Loading…')).to.not.exist
@@ -106,7 +106,7 @@ describe('<ChatPane />', function () {
     it('is rendered when there are no messages ', async function () {
       fetchMock.get(/messages/, [])
 
-      renderWithChatContext(<ChatPane />, { user })
+      renderWithEditorContext(<ChatPane />, { user })
 
       await screen.findByText('Send your first message to your collaborators')
     })
@@ -114,7 +114,7 @@ describe('<ChatPane />', function () {
     it('is not rendered when messages are displayed', function () {
       fetchMock.get(/messages/, testMessages)
 
-      renderWithChatContext(<ChatPane />, { user })
+      renderWithEditorContext(<ChatPane />, { user })
 
       expect(
         screen.queryByText('Send your first message to your collaborators')

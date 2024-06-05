@@ -4,6 +4,10 @@ import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { FindResult } from '@/features/file-tree/util/path'
 import { FC } from 'react'
+import {
+  EditorManager,
+  EditorManagerContext,
+} from '@/features/ide-react/context/editor-manager-context'
 
 describe('<PdfLogsEntries/>', function () {
   const fakeFindEntityResult: FindResult = {
@@ -27,6 +31,18 @@ describe('<PdfLogsEntries/>', function () {
     </FileTreePathContext.Provider>
   )
 
+  const EditorManagerProvider: FC = ({ children }) => {
+    const value = {
+      openDocId: cy.spy().as('openDocId'),
+    } as unknown as EditorManager
+
+    return (
+      <EditorManagerContext.Provider value={value}>
+        {children}
+      </EditorManagerContext.Provider>
+    )
+  }
+
   const logEntries = [
     {
       file: 'main.tex',
@@ -41,22 +57,14 @@ describe('<PdfLogsEntries/>', function () {
     },
   ]
 
-  let props: Record<string, any>
-
   beforeEach(function () {
-    props = {
-      editorManager: {
-        openDocId: cy.spy().as('openDocId'),
-      },
-    }
-
     cy.interceptCompile()
     cy.interceptEvents()
   })
 
   it('displays human readable hint', function () {
     cy.mount(
-      <EditorProviders {...props}>
+      <EditorProviders>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     )
@@ -66,7 +74,9 @@ describe('<PdfLogsEntries/>', function () {
 
   it('opens doc on click', function () {
     cy.mount(
-      <EditorProviders {...props} providers={{ FileTreePathProvider }}>
+      <EditorProviders
+        providers={{ EditorManagerProvider, FileTreePathProvider }}
+      >
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     )
@@ -75,7 +85,7 @@ describe('<PdfLogsEntries/>', function () {
       name: 'Navigate to log position in source code: main.tex, 9',
     }).click()
 
-    cy.get('@findEntityByPath').should('have.been.calledOnce')
+    cy.get('@findEntityByPath').should('have.been.calledOnceWith', 'main.tex')
     cy.get('@openDocId').should(
       'have.been.calledOnceWith',
       fakeFindEntityResult.entity._id,
@@ -92,7 +102,9 @@ describe('<PdfLogsEntries/>', function () {
     })
 
     cy.mount(
-      <EditorProviders {...props} providers={{ FileTreePathProvider }}>
+      <EditorProviders
+        providers={{ EditorManagerProvider, FileTreePathProvider }}
+      >
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     ).then(() => {
@@ -128,7 +140,9 @@ describe('<PdfLogsEntries/>', function () {
     })
 
     cy.mount(
-      <EditorProviders {...props} providers={{ FileTreePathProvider }}>
+      <EditorProviders
+        providers={{ EditorManagerProvider, FileTreePathProvider }}
+      >
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     )

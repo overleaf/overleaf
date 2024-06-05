@@ -35,6 +35,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 type PdfFile = Record<string, any>
 
@@ -106,6 +107,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   const ide = useIdeContext()
 
   const { hasPremiumCompile, isProjectOwner } = useEditorContext()
+  const { openDocId } = useEditorManagerContext()
 
   const { _id: projectId, rootDocId } = useProjectContext()
 
@@ -574,13 +576,13 @@ export const LocalCompileProvider: FC = ({ children }) => {
       const result = findEntityByPath(entry.file)
 
       if (result && result.type === 'doc') {
-        ide.editorManager.openDocId(result.entity._id, {
+        openDocId(result.entity._id, {
           gotoLine: entry.line ?? undefined,
           gotoColumn: entry.column ?? undefined,
         })
       }
     },
-    [findEntityByPath, ide.editorManager]
+    [findEntityByPath, openDocId]
   )
 
   // clear the cache then run a compile, triggered by a menu item

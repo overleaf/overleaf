@@ -55,6 +55,8 @@ export const mockScope = (content?: string) => {
       features: {
         trackChanges: true,
       },
+      trackChangesState: {},
+      members: [],
     },
     permissions: {
       comment: true,

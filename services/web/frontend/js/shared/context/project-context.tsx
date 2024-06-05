@@ -62,7 +62,7 @@ const projectFallback = {
 }
 
 export const ProjectProvider: FC = ({ children }) => {
-  const [project] = useScopeValue('project', true)
+  const [project] = useScopeValue('project')
 
   const {
     _id,

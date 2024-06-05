@@ -1,32 +1,5 @@
-const fs = require('fs')
 const Path = require('path')
 const { merge } = require('@overleaf/settings/merge')
-
-// Automatically detect module imports that are included in this version of the application (SaaS, Server-CE, Server Pro).
-// E.g. during a Server-CE build, we will not find imports for proprietary modules.
-//
-// Restart webpack after adding/removing modules.
-const MODULES_PATH = Path.join(__dirname, '../modules')
-const entryPointsIde = []
-const entryPointsMain = []
-fs.readdirSync(MODULES_PATH).forEach(module => {
-  const entryPathIde = Path.join(
-    MODULES_PATH,
-    module,
-    '/frontend/js/ide/index.js'
-  )
-  if (fs.existsSync(entryPathIde)) {
-    entryPointsIde.push(entryPathIde)
-  }
-  const entryPathMain = Path.join(
-    MODULES_PATH,
-    module,
-    '/frontend/js/main/index.js'
-  )
-  if (fs.existsSync(entryPathMain)) {
-    entryPointsMain.push(entryPathMain)
-  }
-})
 
 let defaultFeatures, siteUrl
 
@@ -918,9 +891,6 @@ module.exports = {
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
     ssoCertificateInfo: [],
-    // See comment at the definition of these variables.
-    entryPointsIde,
-    entryPointsMain,
   },
 
   moduleImportSequence: [
@@ -935,7 +905,7 @@ module.exports = {
     reportOnly: process.env.CSP_REPORT_ONLY === 'true',
     reportPercentage: parseFloat(process.env.CSP_REPORT_PERCENTAGE) || 0,
     reportUri: process.env.CSP_REPORT_URI,
-    exclude: ['app/views/project/editor'],
+    exclude: [],
   },
 
   unsupportedBrowsers: {

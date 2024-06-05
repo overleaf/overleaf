@@ -3,9 +3,5 @@ export interface ScopeValueStore {
   // there is no entry for the path
   get: (path: string) => any
   set: (path: string, value: unknown) => void
-  watch: <T>(
-    path: string,
-    callback: (newValue: T) => void,
-    deep: boolean
-  ) => () => void
+  watch: <T>(path: string, callback: (newValue: T) => void) => () => void
 }

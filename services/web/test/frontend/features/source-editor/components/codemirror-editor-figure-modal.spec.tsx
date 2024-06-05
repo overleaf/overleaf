@@ -80,6 +80,7 @@ describe('<FigureModal />', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptMathJax()
     cy.interceptEvents()
+    cy.interceptMetadata()
     cy.interceptSpelling()
     mount()
   })

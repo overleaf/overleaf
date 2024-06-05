@@ -603,15 +603,10 @@ const _ProjectController = {
         !showPersonalAccessToken &&
         splitTestAssignments['personal-access-token'].variant === 'enabled' // `?personal-access-token=enabled`
 
-      const idePageReact = splitTestAssignments['ide-page'].variant === 'react'
-
       const template =
         detachRole === 'detached'
-          ? // TODO: Create React version of detached page
-            'project/editor_detached'
-          : idePageReact
-            ? 'project/ide-react'
-            : 'project/editor'
+          ? 'project/ide-react-detached'
+          : 'project/ide-react'
 
       res.render(template, {
         title: project.name,
@@ -681,7 +676,6 @@ const _ProjectController = {
         showUpgradePrompt,
         fixedSizeDocument: true,
         useOpenTelemetry: Settings.useOpenTelemetryClient,
-        idePageReact,
         showPersonalAccessToken,
         optionalPersonalAccessToken,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),

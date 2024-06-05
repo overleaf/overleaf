@@ -27,9 +27,9 @@ type ConnectionContextValue = {
   disconnect: () => void
 }
 
-const ConnectionContext = createContext<ConnectionContextValue | undefined>(
-  undefined
-)
+export const ConnectionContext = createContext<
+  ConnectionContextValue | undefined
+>(undefined)
 
 export const ConnectionProvider: FC = ({ children }) => {
   const location = useLocation()
