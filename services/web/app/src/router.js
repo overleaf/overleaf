@@ -951,18 +951,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     RateLimiterMiddleware.rateLimit(rateLimiters.removeProjectFromTag),
     TagsController.removeProjectFromTag
   )
-  // Deprecated
-  webRouter.delete(
-    '/tag/:tagId/projects',
-    AuthenticationController.requireLogin(),
-    RateLimiterMiddleware.rateLimit(rateLimiters.removeProjectsFromTag),
-    validate({
-      body: Joi.object({
-        projectIds: Joi.array().items(Joi.string()).required(),
-      }),
-    }),
-    TagsController.removeProjectsFromTag
-  )
   webRouter.post(
     '/tag/:tagId/projects/remove',
     AuthenticationController.requireLogin(),
