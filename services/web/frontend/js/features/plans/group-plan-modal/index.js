@@ -8,6 +8,8 @@ import {
 import { getSplitTestVariant } from '@/utils/splitTestUtils'
 import { formatCurrencyLocalized } from '@/shared/utils/currency'
 
+export const GROUP_PLAN_MODAL_HASH = '#groups'
+
 function getFormValues() {
   const modalEl = document.querySelector('[data-ol-group-plan-modal]')
   const planCode = modalEl.querySelector(
@@ -71,11 +73,11 @@ const modalEl = $('[data-ol-group-plan-modal]')
 modalEl
   .on('shown.bs.modal', function () {
     const path = `${window.location.pathname}${window.location.search}`
-    history.replaceState(null, document.title, path + '#groups')
+    history.replaceState(null, document.title, path + GROUP_PLAN_MODAL_HASH)
     eventTracking.sendMB('form-submitted-groups-modal-open')
   })
   .on('hidden.bs.modal', function () {
-    const path = `${window.location.pathname}${window.location.search}`
+    const path = `${window.location.pathname}${window.location.search}${window.location.hash}`
     history.replaceState(null, document.title, path)
   })
 
@@ -166,6 +168,6 @@ window.addEventListener('load', () => {
   updateGroupModalPlanPricingIfAvailable()
 })
 
-if (window.location.hash === '#groups') {
+if (window.location.hash === GROUP_PLAN_MODAL_HASH) {
   showGroupPlanModal()
 }

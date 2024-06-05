@@ -1,11 +1,16 @@
-export function getViewInfoFromHash() {
-  const hash = window.location.hash.substring(1)
+import { GROUP_PLAN_MODAL_HASH } from '@/features/plans/group-plan-modal'
 
-  switch (hash) {
+export function getViewInfoFromHash() {
+  const hashValue = window.location.hash.replace('#', '')
+
+  const groupPlanModalHashValue = GROUP_PLAN_MODAL_HASH.replace('#', '')
+
+  switch (hashValue) {
     case 'individual-monthly':
       return ['individual', 'monthly']
     case 'individual-annual':
       return ['individual', 'annual']
+    case groupPlanModalHashValue:
     case 'group':
       return ['group', 'annual']
     case 'student-monthly':
@@ -24,7 +29,7 @@ export function getViewInfoFromHash() {
  */
 export function setHashFromViewTab(viewTab, period) {
   const newHash = viewTab === 'group' ? 'group' : `${viewTab}-${period}`
-  if (window.location.hash.substring(1) !== newHash) {
+  if (window.location.hash.replace('#', '') !== newHash) {
     window.location.hash = newHash
   }
 }
