@@ -208,6 +208,10 @@ const settings = {
       process.env.OVERLEAF_SESSION_SECRET || process.env.CRYPTO_RANDOM,
   },
 
+  csp: {
+    enabled: process.env.OVERLEAF_CSP_ENABLED !== 'false',
+  },
+
   // These credentials are used for authenticating api requests
   // between services that may need to go over public channels
   httpAuthUsers,
