@@ -522,6 +522,16 @@ async function _getSplitTest(name) {
   }
 }
 
+async function isSplitTestActive(splitTestName) {
+  try {
+    const splitTest = await _getSplitTest(splitTestName)
+    const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+    return currentVersion?.active
+  } catch (e) {
+    logger.log('unable to check if split test is active ', splitTestName)
+  }
+}
+
 module.exports = {
   getPercentile,
   getAssignment: callbackify(getAssignment),
@@ -535,5 +545,6 @@ module.exports = {
     getAssignmentForMongoUser,
     getAssignmentForUser,
     getActiveAssignmentsForUser,
+    isSplitTestActive,
   },
 }
