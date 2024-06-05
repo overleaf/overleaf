@@ -1,25 +1,10 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let LaunchpadController
 const OError = require('@overleaf/o-error')
+const { expressify } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 const Path = require('path')
-const Url = require('url')
 const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
 const UserRegistrationHandler = require('../../../../app/src/Features/User/UserRegistrationHandler')
 const EmailHandler = require('../../../../app/src/Features/Email/EmailHandler')
-const _ = require('lodash')
 const UserGetter = require('../../../../app/src/Features/User/UserGetter')
 const { User } = require('../../../../app/src/models/User')
 const AuthenticationManager = require('../../../../app/src/Features/Authentication/AuthenticationManager')
@@ -29,7 +14,7 @@ const {
   hasAdminAccess,
 } = require('../../../../app/src/Features/Helpers/AdminAuthorizationHelper')
 
-module.exports = LaunchpadController = {
+const _LaunchpadController = {
   _getAuthMethod() {
     if (Settings.ldap) {
       return 'ldap'
@@ -40,65 +25,47 @@ module.exports = LaunchpadController = {
     }
   },
 
-  launchpadPage(req, res, next) {
+  async launchpadPage(req, res) {
     // TODO: check if we're using external auth?
     //   * how does all this work with ldap and saml?
     const sessionUser = SessionManager.getSessionUser(req.session)
     const authMethod = LaunchpadController._getAuthMethod()
-    LaunchpadController._atLeastOneAdminExists(function (err, adminUserExists) {
-      if (err != null) {
-        return next(err)
-      }
-      if (!sessionUser) {
-        if (!adminUserExists) {
-          res.render(Path.resolve(__dirname, '../views/launchpad'), {
-            adminUserExists,
-            authMethod,
-          })
-        } else {
-          AuthenticationController.setRedirectInSession(req)
-          res.redirect('/login')
-        }
+    const adminUserExists = await LaunchpadController._atLeastOneAdminExists()
+    if (!sessionUser) {
+      if (!adminUserExists) {
+        res.render(Path.resolve(__dirname, '../views/launchpad'), {
+          adminUserExists,
+          authMethod,
+        })
       } else {
-        UserGetter.getUser(
-          sessionUser._id,
-          { isAdmin: 1 },
-          function (err, user) {
-            if (err != null) {
-              return next(err)
-            }
-            if (hasAdminAccess(user)) {
-              res.render(Path.resolve(__dirname, '../views/launchpad'), {
-                wsUrl: Settings.wsUrl,
-                adminUserExists,
-                authMethod,
-              })
-            } else {
-              res.redirect('/restricted')
-            }
-          }
-        )
+        AuthenticationController.setRedirectInSession(req)
+        res.redirect('/login')
       }
-    })
-  },
-
-  _atLeastOneAdminExists(callback) {
-    if (callback == null) {
-      callback = function () {}
+    } else {
+      const user = await UserGetter.promises.getUser(sessionUser._id, {
+        isAdmin: 1,
+      })
+      if (hasAdminAccess(user)) {
+        res.render(Path.resolve(__dirname, '../views/launchpad'), {
+          wsUrl: Settings.wsUrl,
+          adminUserExists,
+          authMethod,
+        })
+      } else {
+        res.redirect('/restricted')
+      }
     }
-    UserGetter.getUser(
-      { isAdmin: true },
-      { _id: 1, isAdmin: 1 },
-      function (err, user) {
-        if (err != null) {
-          return callback(err)
-        }
-        callback(null, user != null)
-      }
-    )
   },
 
-  sendTestEmail(req, res, next) {
+  async _atLeastOneAdminExists() {
+    const user = await UserGetter.promises.getUser(
+      { isAdmin: true },
+      { _id: 1, isAdmin: 1 }
+    )
+    return Boolean(user)
+  },
+
+  async sendTestEmail(req, res) {
     const { email } = req.body
     if (!email) {
       logger.debug({}, 'no email address supplied')
@@ -108,20 +75,20 @@ module.exports = LaunchpadController = {
     }
     logger.debug({ email }, 'sending test email')
     const emailOptions = { to: email }
-    EmailHandler.sendEmail('testEmail', emailOptions, function (err) {
-      if (err != null) {
-        OError.tag(err, 'error sending test email', {
-          email,
-        })
-        return next(err)
-      }
+    try {
+      await EmailHandler.promises.sendEmail('testEmail', emailOptions)
       logger.debug({ email }, 'sent test email')
       res.json({ message: res.locals.translate('email_sent') })
-    })
+    } catch (err) {
+      OError.tag(err, 'error sending test email', {
+        email,
+      })
+      throw err
+    }
   },
 
   registerExternalAuthAdmin(authMethod) {
-    return function (req, res, next) {
+    return expressify(async function (req, res) {
       if (LaunchpadController._getAuthMethod() !== authMethod) {
         logger.debug(
           { authMethod },
@@ -136,70 +103,65 @@ module.exports = LaunchpadController = {
       }
 
       logger.debug({ email }, 'attempted register first admin user')
-      LaunchpadController._atLeastOneAdminExists(function (err, exists) {
-        if (err != null) {
-          return next(err)
-        }
 
-        if (exists) {
-          logger.debug(
-            { email },
-            'already have at least one admin user, disallow'
-          )
-          return res.sendStatus(403)
-        }
+      const exists = await LaunchpadController._atLeastOneAdminExists()
 
-        const body = {
-          email,
-          password: 'password_here',
-          first_name: email,
-          last_name: '',
-        }
+      if (exists) {
         logger.debug(
-          { body, authMethod },
-          'creating admin account for specified external-auth user'
+          { email },
+          'already have at least one admin user, disallow'
         )
+        return res.sendStatus(403)
+      }
 
-        UserRegistrationHandler.registerNewUser(body, function (err, user) {
-          if (err != null) {
-            OError.tag(err, 'error with registerNewUser', {
-              email,
-              authMethod,
-            })
-            return next(err)
-          }
+      const body = {
+        email,
+        password: 'password_here',
+        first_name: email,
+        last_name: '',
+      }
+      logger.debug(
+        { body, authMethod },
+        'creating admin account for specified external-auth user'
+      )
 
-          // Ignore spurious floating promises warning until we promisify
-          // eslint-disable-next-line @typescript-eslint/no-floating-promises
-          User.updateOne(
-            { _id: user._id },
-            {
-              $set: { isAdmin: true },
-              emails: [{ email }],
-            },
-            function (err) {
-              if (err != null) {
-                OError.tag(err, 'error setting user to admin', {
-                  user_id: user._id,
-                })
-                return next(err)
-              }
-
-              AuthenticationController.setRedirectInSession(req, '/launchpad')
-              logger.debug(
-                { email, userId: user._id, authMethod },
-                'created first admin account'
-              )
-
-              res.json({ redir: '/launchpad', email })
-            }
-          )
+      let user
+      try {
+        user = await UserRegistrationHandler.promises.registerNewUser(body)
+      } catch (err) {
+        OError.tag(err, 'error with registerNewUser', {
+          email,
+          authMethod,
         })
-      })
-    }
+        throw err
+      }
+
+      try {
+        await User.updateOne(
+          { _id: user._id },
+          {
+            $set: { isAdmin: true },
+            emails: [{ email }],
+          }
+        ).exec()
+      } catch (err) {
+        OError.tag(err, 'error setting user to admin', {
+          user_id: user._id,
+        })
+        throw err
+      }
+
+      AuthenticationController.setRedirectInSession(req, '/launchpad')
+      logger.debug(
+        { email, userId: user._id, authMethod },
+        'created first admin account'
+      )
+
+      res.json({ redir: '/launchpad', email })
+    })
   },
 
-  registerAdmin(req, res, next) {
+  async registerAdmin(req, res) {
     const { email } = req.body
     const { password } = req.body
     if (!email || !password) {
@@ -208,71 +170,70 @@ module.exports = LaunchpadController = {
     }
 
     logger.debug({ email }, 'attempted register first admin user')
-    LaunchpadController._atLeastOneAdminExists(function (err, exists) {
-      if (err != null) {
-        return next(err)
-      }
+    const exists = await LaunchpadController._atLeastOneAdminExists()
 
-      if (exists) {
-        logger.debug(
-          { email: req.body.email },
-          'already have at least one admin user, disallow'
-        )
-        return res.status(403).json({
-          message: { type: 'error', text: 'admin user already exists' },
-        })
-      }
-
-      const invalidEmail = AuthenticationManager.validateEmail(email)
-      if (invalidEmail) {
-        return res
-          .status(400)
-          .json({ message: { type: 'error', text: invalidEmail.message } })
-      }
-
-      const invalidPassword = AuthenticationManager.validatePassword(
-        password,
-        email
+    if (exists) {
+      logger.debug(
+        { email: req.body.email },
+        'already have at least one admin user, disallow'
       )
-      if (invalidPassword) {
-        return res
-          .status(400)
-          .json({ message: { type: 'error', text: invalidPassword.message } })
-      }
-
-      const body = { email, password }
-      UserRegistrationHandler.registerNewUser(body, function (err, user) {
-        if (err != null) {
-          return next(err)
-        }
-
-        logger.debug({ userId: user._id }, 'making user an admin')
-        // Ignore spurious floating promises warning until we promisify
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        User.updateOne(
-          { _id: user._id },
-          {
-            $set: {
-              isAdmin: true,
-              emails: [{ email }],
-            },
-          },
-          function (err) {
-            if (err != null) {
-              OError.tag(err, 'error setting user to admin', {
-                user_id: user._id,
-              })
-              return next(err)
-            }
-
-            logger.debug(
-              { email, userId: user._id },
-              'created first admin account'
-            )
-            res.json({ redir: '/launchpad' })
-          }
-        )
+      return res.status(403).json({
+        message: { type: 'error', text: 'admin user already exists' },
       })
-    })
+    }
+
+    const invalidEmail = AuthenticationManager.validateEmail(email)
+    if (invalidEmail) {
+      return res
+        .status(400)
+        .json({ message: { type: 'error', text: invalidEmail.message } })
+    }
+
+    const invalidPassword = AuthenticationManager.validatePassword(
+      password,
+      email
+    )
+    if (invalidPassword) {
+      return res
+        .status(400)
+        .json({ message: { type: 'error', text: invalidPassword.message } })
+    }
+
+    const body = { email, password }
+
+    const user = await UserRegistrationHandler.promises.registerNewUser(body)
+
+    logger.debug({ userId: user._id }, 'making user an admin')
+
+    try {
+      await User.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            isAdmin: true,
+            emails: [{ email }],
+          },
+        }
+      ).exec()
+    } catch (err) {
+      OError.tag(err, 'error setting user to admin', {
+        user_id: user._id,
+      })
+      throw err
+    }
+
+    logger.debug({ email, userId: user._id }, 'created first admin account')
+    res.json({ redir: '/launchpad' })
   },
 }
+
+const LaunchpadController = {
+  launchpadPage: expressify(_LaunchpadController.launchpadPage),
+  registerAdmin: expressify(_LaunchpadController.registerAdmin),
+  registerExternalAuthAdmin: _LaunchpadController.registerExternalAuthAdmin,
+  sendTestEmail: expressify(_LaunchpadController.sendTestEmail),
+  _atLeastOneAdminExists: _LaunchpadController._atLeastOneAdminExists,
+  _getAuthMethod: _LaunchpadController._getAuthMethod,
+}
+
+module.exports = LaunchpadController
