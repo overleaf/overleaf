@@ -28,7 +28,7 @@ const {
 } = require('./AuthenticationErrors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Modules = require('../../infrastructure/Modules')
-const { expressify } = require('@overleaf/promise-utils')
+const { expressify, promisify } = require('@overleaf/promise-utils')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -63,6 +63,7 @@ function userHasStaffAccess(user) {
   return user.staffAccess && Object.values(user.staffAccess).includes(true)
 }
 
+// TODO: Finish making these methods async
 const AuthenticationController = {
   serializeUser(user, callback) {
     if (!user._id || !user.email) {
@@ -134,7 +135,7 @@ const AuthenticationController = {
     )(req, res, next)
   },
 
-  finishLogin(user, req, res, next) {
+  async _finishLoginAsync(user, req, res) {
     if (user === false) {
       return AsyncFormHelper.redirect(req, res, '/login')
     } // OAuth2 'state' mismatch
@@ -154,54 +155,46 @@ const AuthenticationController = {
     const anonymousAnalyticsId = req.session.analyticsId
     const isNewUser = req.session.justRegistered || false
 
-    Modules.hooks.fire(
+    const results = await Modules.promises.hooks.fire(
       'preFinishLogin',
       req,
       res,
-      user,
-      function (error, results) {
-        if (error) {
-          return next(error)
-        }
-        if (results.some(result => result && result.doNotFinish)) {
-          return
-        }
+      user
+    )
 
-        if (user.must_reconfirm) {
-          return AuthenticationController._redirectToReconfirmPage(
-            req,
-            res,
-            user
-          )
-        }
+    if (results.some(result => result && result.doNotFinish)) {
+      return
+    }
 
-        const redir =
-          AuthenticationController.getRedirectFromSession(req) || '/project'
+    if (user.must_reconfirm) {
+      return AuthenticationController._redirectToReconfirmPage(req, res, user)
+    }
 
-        _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser)
-        const userId = user._id
-        UserAuditLogHandler.addEntry(
-          userId,
-          'login',
-          userId,
-          req.ip,
-          auditInfo,
-          err => {
-            if (err) {
-              return next(err)
-            }
-            _afterLoginSessionSetup(req, user, function (err) {
-              if (err) {
-                return next(err)
-              }
-              AuthenticationController._clearRedirectFromSession(req)
-              AnalyticsRegistrationSourceHelper.clearSource(req.session)
-              AnalyticsRegistrationSourceHelper.clearInbound(req.session)
-              AsyncFormHelper.redirect(req, res, redir)
-            })
-          }
-        )
-      }
+    const redir =
+      AuthenticationController.getRedirectFromSession(req) || '/project'
+
+    _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser)
+    const userId = user._id
+
+    await UserAuditLogHandler.promises.addEntry(
+      userId,
+      'login',
+      userId,
+      req.ip,
+      auditInfo
+    )
+
+    await _afterLoginSessionSetupAsync(req, user)
+
+    AuthenticationController._clearRedirectFromSession(req)
+    AnalyticsRegistrationSourceHelper.clearSource(req.session)
+    AnalyticsRegistrationSourceHelper.clearInbound(req.session)
+    AsyncFormHelper.redirect(req, res, redir)
+  },
+
+  finishLogin(user, req, res, next) {
+    AuthenticationController._finishLoginAsync(user, req, res).catch(err =>
+      next(err)
     )
   },
 
@@ -637,6 +630,8 @@ function _afterLoginSessionSetup(req, user, callback) {
   })
 }
 
+const _afterLoginSessionSetupAsync = promisify(_afterLoginSessionSetup)
+
 function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
   UserHandler.setupLoginData(user, err => {
     if (err != null) {
@@ -661,6 +656,10 @@ function _loginAsyncHandlers(req, user, anonymousAnalyticsId, isNewUser) {
   req.session.justLoggedIn = true
   // capture the request ip for use when creating the session
   return (user._login_req_ip = req.ip)
+}
+
+AuthenticationController.promises = {
+  finishLogin: AuthenticationController._finishLoginAsync,
 }
 
 module.exports = AuthenticationController

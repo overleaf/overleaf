@@ -68,6 +68,9 @@ describe('AuthenticationController', function () {
         './AuthenticationErrors': AuthenticationErrors,
         '../User/UserAuditLogHandler': (this.UserAuditLogHandler = {
           addEntry: sinon.stub().yields(null),
+          promises: {
+            addEntry: sinon.stub().resolves(),
+          },
         }),
         '../Helpers/AsyncFormHelper': (this.AsyncFormHelper = {
           redirect: sinon.stub(),
@@ -107,6 +110,7 @@ describe('AuthenticationController', function () {
         }),
         '../../infrastructure/Modules': (this.Modules = {
           hooks: { fire: sinon.stub().yields(null, []) },
+          promises: { hooks: { fire: sinon.stub().resolves([]) } },
         }),
         '../Notifications/NotificationsBuilder': (this.NotificationsBuilder = {
           ipMatcherAffiliation: sinon.stub().returns({ create: sinon.stub() }),
@@ -350,7 +354,6 @@ describe('AuthenticationController', function () {
     beforeEach(function () {
       this.AuthenticationController._recordFailedLogin = sinon.stub()
       this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
-      this.Modules.hooks.fire = sinon.stub().yields(null, [])
       this.req.body = {
         email: this.email,
         password: this.password,
@@ -1125,8 +1128,8 @@ describe('AuthenticationController', function () {
       this.res.redirect = sinon.stub()
     })
 
-    it('should extract the redirect from the session', function () {
-      this.AuthenticationController.finishLogin(
+    it('should extract the redirect from the session', async function () {
+      await this.AuthenticationController.promises.finishLogin(
         this.user,
         this.req,
         this.res,
@@ -1142,8 +1145,8 @@ describe('AuthenticationController', function () {
       ).to.equal(true)
     })
 
-    it('should clear redirect from session', function () {
-      this.AuthenticationController.finishLogin(
+    it('should clear redirect from session', async function () {
+      await this.AuthenticationController.promises.finishLogin(
         this.user,
         this.req,
         this.res,
@@ -1159,8 +1162,8 @@ describe('AuthenticationController', function () {
       ).to.equal(true)
     })
 
-    it('should issue a json response with a redirect', function () {
-      this.AuthenticationController.finishLogin(
+    it('should issue a json response with a redirect', async function () {
+      await this.AuthenticationController.promises.finishLogin(
         this.user,
         this.req,
         this.res,
@@ -1182,8 +1185,8 @@ describe('AuthenticationController', function () {
         this.res.redirect = sinon.stub()
       })
 
-      it('should issue a plain redirect', function () {
-        this.AuthenticationController.finishLogin(
+      it('should issue a plain redirect', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1204,8 +1207,8 @@ describe('AuthenticationController', function () {
         this.req.session = {}
         this.user.must_reconfirm = true
       })
-      it('should redirect to reconfirm page', function () {
-        this.AuthenticationController.finishLogin(
+      it('should redirect to reconfirm page', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1224,8 +1227,8 @@ describe('AuthenticationController', function () {
         this.req.session = {}
         this.user.suspended = true
       })
-      it('should not log in and instead redirect to suspended account page', function () {
-        this.AuthenticationController.finishLogin(
+      it('should not log in and instead redirect to suspended account page', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1242,16 +1245,15 @@ describe('AuthenticationController', function () {
     })
 
     describe('preFinishLogin hook', function () {
-      it('call hook and proceed', function () {
-        this.Modules.hooks.fire = sinon.stub().yields(null, [])
-        this.AuthenticationController.finishLogin(
+      it('call hook and proceed', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
           this.next
         )
         sinon.assert.calledWith(
-          this.Modules.hooks.fire,
+          this.Modules.promises.hooks.fire,
           'preFinishLogin',
           this.req,
           this.res,
@@ -1260,11 +1262,11 @@ describe('AuthenticationController', function () {
         expect(this.AsyncFormHelper.redirect.called).to.equal(true)
       })
 
-      it('stop if hook has redirected', function (done) {
-        this.Modules.hooks.fire = sinon
+      it('stop if hook has redirected', async function () {
+        this.Modules.promises.hooks.fire = sinon
           .stub()
-          .yields(null, [{ doNotFinish: true }])
-        this.AuthenticationController.finishLogin(
+          .resolves([{ doNotFinish: true }])
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1272,33 +1274,31 @@ describe('AuthenticationController', function () {
         )
         expect(this.next.callCount).to.equal(0)
         expect(this.res.json.callCount).to.equal(0)
-        done()
       })
 
       it('call next with hook errors', function (done) {
-        this.Modules.hooks.fire = sinon.stub().yields(new Error())
-        this.AuthenticationController.finishLogin(
-          this.user,
-          this.req,
-          this.res,
-          error => {
-            expect(error).to.exist
+        this.Modules.promises.hooks.fire = sinon.stub().yields(new Error())
+        this.AuthenticationController.promises
+          .finishLogin(this.user, this.req, this.res)
+          .catch(err => {
+            expect(err).to.exist
             expect(this.res.json.callCount).to.equal(0)
             done()
-          }
-        )
+          })
       })
     })
 
     describe('UserAuditLog', function () {
-      it('should add an audit log entry', function () {
-        this.AuthenticationController.finishLogin(
+      it('should add an audit log entry', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
           this.next
         )
-        expect(this.UserAuditLogHandler.addEntry).to.have.been.calledWith(
+        expect(
+          this.UserAuditLogHandler.promises.addEntry
+        ).to.have.been.calledWith(
           this.user._id,
           'login',
           this.user._id,
@@ -1306,34 +1306,26 @@ describe('AuthenticationController', function () {
         )
       })
 
-      it('should add an audit log entry before logging the user in', function () {
-        this.AuthenticationController.finishLogin(
+      it('should add an audit log entry before logging the user in', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
           this.next
         )
-        expect(this.UserAuditLogHandler.addEntry).to.have.been.calledBefore(
-          this.req.login
-        )
+        expect(
+          this.UserAuditLogHandler.promises.addEntry
+        ).to.have.been.calledBefore(this.req.login)
       })
 
-      it('should not log the user in without an audit log entry', function () {
+      it('should not log the user in without an audit log entry', function (done) {
         const theError = new Error()
-        this.UserAuditLogHandler.addEntry.yields(theError)
-        this.AuthenticationController.finishLogin(
-          this.user,
-          this.req,
-          this.res,
-          this.next
-        )
-        expect(this.next).to.have.been.calledWith(theError)
-        expect(this.req.login).to.not.have.been.called
-      })
-
-      it('should pass along auditInfo when present', function () {
-        this.AuthenticationController.setAuditInfo(this.req, {
-          method: 'Login',
+        this.UserAuditLogHandler.promises.addEntry.rejects(theError)
+        this.next.callsFake(err => {
+          expect(err).to.equal(theError)
+          expect(this.next).to.have.been.calledWith(theError)
+          expect(this.req.login).to.not.have.been.called
+          done()
         })
         this.AuthenticationController.finishLogin(
           this.user,
@@ -1341,7 +1333,20 @@ describe('AuthenticationController', function () {
           this.res,
           this.next
         )
-        expect(this.UserAuditLogHandler.addEntry).to.have.been.calledWith(
+      })
+
+      it('should pass along auditInfo when present', async function () {
+        this.AuthenticationController.setAuditInfo(this.req, {
+          method: 'Login',
+        })
+        await this.AuthenticationController.promises.finishLogin(
+          this.user,
+          this.req,
+          this.res
+        )
+        expect(
+          this.UserAuditLogHandler.promises.addEntry
+        ).to.have.been.calledWith(
           this.user._id,
           'login',
           this.user._id,
@@ -1354,8 +1359,8 @@ describe('AuthenticationController', function () {
     describe('_afterLoginSessionSetup', function () {
       beforeEach(function () {})
 
-      it('should call req.login', function () {
-        this.AuthenticationController.finishLogin(
+      it('should call req.login', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1364,8 +1369,8 @@ describe('AuthenticationController', function () {
         this.req.login.callCount.should.equal(1)
       })
 
-      it('should erase the CSRF secret', function () {
-        this.AuthenticationController.finishLogin(
+      it('should erase the CSRF secret', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1374,8 +1379,8 @@ describe('AuthenticationController', function () {
         expect(this.req.session.csrfSecret).to.not.exist
       })
 
-      it('should call req.session.save', function () {
-        this.AuthenticationController.finishLogin(
+      it('should call req.session.save', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1384,8 +1389,8 @@ describe('AuthenticationController', function () {
         this.req.session.save.callCount.should.equal(1)
       })
 
-      it('should call UserSessionsManager.trackSession', function () {
-        this.AuthenticationController.finishLogin(
+      it('should call UserSessionsManager.trackSession', async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
@@ -1400,36 +1405,30 @@ describe('AuthenticationController', function () {
         })
 
         it('should produce an error', function (done) {
-          this.AuthenticationController.finishLogin(
-            this.user,
-            this.req,
-            this.res,
-            err => {
+          this.AuthenticationController.promises
+            .finishLogin(this.user, this.req, this.res)
+            .catch(err => {
               expect(err).to.not.be.oneOf([null, undefined])
               expect(err).to.be.instanceof(Error)
               done()
-            }
-          )
+            })
         })
 
         it('should not call UserSessionsManager.trackSession', function (done) {
-          this.AuthenticationController.finishLogin(
-            this.user,
-            this.req,
-            this.res,
-            err => {
+          this.AuthenticationController.promises
+            .finishLogin(this.user, this.req, this.res)
+            .catch(err => {
               expect(err).to.exist
               this.UserSessionsManager.trackSession.callCount.should.equal(0)
               done()
-            }
-          )
+            })
         })
       })
     })
 
     describe('_loginAsyncHandlers', function () {
-      beforeEach(function () {
-        this.AuthenticationController.finishLogin(
+      beforeEach(async function () {
+        await this.AuthenticationController.promises.finishLogin(
           this.user,
           this.req,
           this.res,
