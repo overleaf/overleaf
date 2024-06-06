@@ -300,7 +300,8 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
     firstOp.i != null &&
     secondOp.i != null &&
     secondOpInsideFirstOp &&
-    combinedLengthUnderLimit
+    combinedLengthUnderLimit &&
+    insertOpsInsideSameComments(firstOp, secondOp)
   ) {
     return [
       mergeUpdatesWithOp(firstUpdate, secondUpdate, {
@@ -379,6 +380,10 @@ function _concatTwoUpdates(firstUpdate, secondUpdate) {
         if (firstOp.u && secondOp.u) {
           op.u = true
         }
+        if ('i' in op && secondOp.commentIds != null) {
+          // Make sure that commentIds metadata is propagated to inserts
+          op.commentIds = secondOp.commentIds
+        }
         return mergeUpdatesWithOp(firstUpdate, secondUpdate, op)
       }
     )
@@ -435,4 +440,32 @@ export function diffAsShareJsOps(before, after) {
     }
   }
   return ops
+}
+
+/**
+ * Checks if two insert ops are inside the same comments
+ *
+ * @param {InsertOp} op1
+ * @param {InsertOp} op2
+ * @returns {boolean}
+ */
+function insertOpsInsideSameComments(op1, op2) {
+  const commentIds1 = op1.commentIds
+  const commentIds2 = op2.commentIds
+  if (commentIds1 == null && commentIds2 == null) {
+    // None are inside comments
+    return true
+  }
+
+  if (
+    commentIds1 != null &&
+    commentIds2 != null &&
+    commentIds1.every(id => commentIds2.includes(id)) &&
+    commentIds2.every(id => commentIds1.includes(id))
+  ) {
+    // Both are inside the same comments
+    return true
+  }
+
+  return false
 }
