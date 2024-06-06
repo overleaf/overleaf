@@ -1323,7 +1323,7 @@
   "pdf_preview_error": "显示此项目的编译结果时出现问题。",
   "pdf_rendering_error": "PDF渲染错误",
   "pdf_unavailable_for_download": "PDF 无法下载",
-  "pdf_viewer": "PDF阅读器",
+  "pdf_viewer": "PDF 阅读器",
   "pdf_viewer_error": "显示此项目的PDF时出现问题。",
   "pending": "待定",
   "pending_additional_licenses": "您的订阅正在更改为包括<0>__pendingAdditionalLicenses__</0>个附加许可证，总共有<1>__pendingTotalLicenses__</1>个许可证。",
