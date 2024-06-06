@@ -1,0 +1,125 @@
+.plans-new-design {
+  .plans-new-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .plans-new-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    .plans-new-tab {
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      border-top-right-radius: 8px;
+      border-top-left-radius: 8px;
+
+      .plans-new-tab-link {
+        border: unset;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--neutral-70);
+        margin: 0;
+        border-top-right-radius: 8px;
+        border-top-left-radius: 8px;
+        border: 1px solid var(--neutral-20);
+
+        &:focus {
+          background-color: unset;
+          border: 1px solid var(--emerald-green);
+          border-bottom-color: white;
+        }
+
+        &:hover {
+          background-color: var(--neutral-20);
+        }
+      }
+
+      &.active {
+        .plans-new-tab-link {
+          border: 1px solid var(--emerald-green);
+          color: var(--emerald-green);
+          border-bottom-color: white;
+
+          &:hover {
+            background-color: unset;
+          }
+        }
+
+        .plans-new-discount-badge {
+          background-color: #eaf6ef;
+          color: var(--emerald-green);
+        }
+      }
+    }
+  }
+
+  @switcher-container-width: 270px;
+  @switcher-container-height: 44px;
+  @switcher-container-border-radius: @switcher-container-height / 2;
+  @switcher-container-padding: 6px;
+  @switcher-padding-vertical: 2px;
+  @switcher-height: @switcher-container-height - 2 * @switcher-container-padding;
+  @switcher-border-radius: @switcher-height / 2;
+
+  .plans-new-period-switcher-container {
+    display: flex;
+    justify-content: center;
+    background-color: var(--neutral-10);
+    width: @switcher-container-width;
+    height: @switcher-container-height;
+    border-radius: @switcher-container-border-radius;
+    padding: @switcher-container-padding;
+    margin-top: 64px;
+    margin-bottom: 40px;
+
+    .plans-new-period-switcher {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.4;
+      text-align: center;
+      padding: 2px 8px;
+      height: @switcher-height;
+      border-radius: @switcher-border-radius;
+      display: flex;
+      align-items: center;
+      border: unset;
+      background-color: unset;
+
+      &:hover {
+        background-color: var(--neutral-20);
+      }
+
+      &.active {
+        background-color: var(--emerald-green);
+        color: white;
+        box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
+
+        .plans-new-discount-badge {
+          background-color: #eaf6ef;
+          color: var(--emerald-green);
+        }
+      }
+
+      .plans-new-discount-badge {
+        margin-left: 6px;
+      }
+    }
+  }
+
+  .plans-new-discount-badge {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 8px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: var(--neutral-70);
+    color: white;
+    display: flex;
+    align-items: center;
+  }
+}
