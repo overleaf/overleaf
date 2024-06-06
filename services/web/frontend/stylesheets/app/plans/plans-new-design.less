@@ -122,4 +122,20 @@
     display: flex;
     align-items: center;
   }
+
+  .plans-new-mobile {
+    display: none;
+
+    @media (max-width: @screen-xs-max) {
+      display: flex;
+    }
+  }
+
+  .plans-new-desktop {
+    display: flex;
+
+    @media (max-width: @screen-xs-max) {
+      display: none;
+    }
+  }
 }
