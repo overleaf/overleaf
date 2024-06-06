@@ -6,7 +6,6 @@ import GoogleLogo from '../../../../shared/svgs/google-logo'
 import OrcidLogo from '../../../../shared/svgs/orcid-logo'
 import LinkingStatus from './status'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
@@ -118,35 +117,19 @@ function ActionButton({
   const { t } = useTranslation()
   if (unlinkRequestInflight) {
     return (
-      <OLButton
-        variant="danger-ghost"
-        disabled
-        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
-      >
+      <OLButton variant="danger-ghost" disabled>
         {t('unlinking')}
       </OLButton>
     )
   } else if (accountIsLinked) {
     return (
-      <OLButton
-        variant="danger-ghost"
-        onClick={onUnlinkClick}
-        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
-      >
+      <OLButton variant="danger-ghost" onClick={onUnlinkClick}>
         {t('unlink')}
       </OLButton>
     )
   } else {
     return (
-      <OLButton
-        variant="secondary"
-        href={linkPath}
-        bs3Props={{ bsStyle: null }}
-        className={bsVersion({
-          bs3: 'btn btn-secondary-info btn-secondary text-capitalize',
-          bs5: 'text-capitalize',
-        })}
-      >
+      <OLButton variant="secondary" href={linkPath} className="text-capitalize">
         {t('link')}
       </OLButton>
     )
@@ -181,21 +164,10 @@ function UnlinkConfirmModal({
       </OLModalBody>
 
       <OLModalFooter>
-        <OLButton
-          variant="secondary"
-          onClick={handleHide}
-          bs3Props={{
-            bsStyle: null,
-            className: 'btn-secondary-info btn-secondary',
-          }}
-        >
+        <OLButton variant="secondary" onClick={handleHide}>
           {t('cancel')}
         </OLButton>
-        <OLButton
-          variant="danger-ghost"
-          onClick={handleConfirmation}
-          bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
-        >
+        <OLButton variant="danger-ghost" onClick={handleConfirmation}>
           {t('unlink')}
         </OLButton>
       </OLModalFooter>

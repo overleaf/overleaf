@@ -74,12 +74,7 @@ function LeaveModalContent({
       </OLModalBody>
 
       <OLModalFooter>
-        <OLButton
-          disabled={inFlight}
-          onClick={handleHide}
-          variant="secondary"
-          bs3Props={{ bsStyle: null, className: 'btn-secondary' }}
-        >
+        <OLButton disabled={inFlight} onClick={handleHide} variant="secondary">
           {t('cancel')}
         </OLButton>
 

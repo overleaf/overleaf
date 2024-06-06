@@ -4,7 +4,6 @@ import OLBadge from '@/features/ui/components/ol/ol-badge'
 import getMeta from '../../../../utils/meta'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLModal, {
   OLModalBody,
   OLModalFooter,
@@ -123,7 +122,6 @@ function ActionButton({
         variant="primary"
         href="/user/subscription/plans"
         onClick={() => trackUpgradeClick(integration)}
-        bs3Props={{ bsStyle: null, className: 'btn-primary' }}
       >
         <span className="text-capitalize">{t('upgrade')}</span>
       </OLButton>
@@ -134,7 +132,6 @@ function ActionButton({
         variant="danger-ghost"
         onClick={handleUnlinkClick}
         disabled={disabled}
-        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('unlink')}
       </OLButton>
@@ -143,25 +140,14 @@ function ActionButton({
     return (
       <>
         {disabled ? (
-          <OLButton
-            disabled
-            variant="secondary"
-            className={bsVersion({
-              bs3: 'btn btn-secondary-info btn-secondary text-capitalize',
-              bs5: 'text-capitalize',
-            })}
-          >
+          <OLButton disabled variant="secondary" className="text-capitalize">
             {t('link')}
           </OLButton>
         ) : (
           <OLButton
             variant="secondary"
             href={linkPath}
-            className={bsVersion({
-              bs3: 'btn btn-secondary-info btn-secondary text-capitalize',
-              bs5: 'text-capitalize',
-            })}
-            bs3Props={{ bsStyle: null }}
+            className="text-capitalize"
             onClick={() => trackLinkingClick(integration)}
           >
             {t('link')}
@@ -215,20 +201,12 @@ function UnlinkConfirmationModal({
       <OLModalFooter>
         <form action={unlinkPath} method="POST" className="form-inline">
           <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
-          <OLButton
-            variant="secondary"
-            onClick={handleCancel}
-            bs3Props={{
-              bsStyle: null,
-              className: 'btn-secondary-info btn-secondary',
-            }}
-          >
+          <OLButton variant="secondary" onClick={handleCancel}>
             {t('cancel')}
           </OLButton>
           <OLButton
             type="submit"
             variant="danger-ghost"
-            bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
             onClick={handleConfirm}
           >
             {t('unlink')}

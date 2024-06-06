@@ -14,12 +14,7 @@ function UniversityName({ name, onClick }: UniversityNameProps) {
       {name}
       <span className="small">
         {' '}
-        <OLButton
-          variant="link"
-          onClick={onClick}
-          className="btn-inline-link"
-          bs3Props={{ bsStyle: null }}
-        >
+        <OLButton variant="link" onClick={onClick} className="btn-inline-link">
           {t('change')}
         </OLButton>
       </span>

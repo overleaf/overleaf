@@ -55,11 +55,8 @@ const TextButton: FC<{
       onClick={handleClick}
       size="small"
       variant="secondary"
-      bs3Props={{
-        bsStyle: null,
-        className: 'btn-secondary copy-button',
-        bsSize: 'xsmall',
-      }}
+      className="copy-button"
+      bs3Props={{ bsSize: 'xsmall' }}
     >
       {t('copy')}
     </OLButton>

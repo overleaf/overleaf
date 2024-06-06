@@ -87,7 +87,6 @@ function SecuritySection() {
                   <div className="button-column">
                     <OLButton
                       variant="primary"
-                      bs3Props={{ className: 'btn btn-primary', bsStyle: null }}
                       href={`/subscription/${groupId}/sso_enrollment`}
                     >
                       {t('set_up_sso')}

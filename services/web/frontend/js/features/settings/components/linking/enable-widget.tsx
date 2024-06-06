@@ -96,7 +96,6 @@ function ActionButton({
         variant="primary"
         href="/user/subscription/plans"
         onClick={trackUpgradeClick}
-        bs3Props={{ bsStyle: null, className: 'btn-primary' }}
       >
         <span className="text-capitalize">{t('upgrade')}</span>
       </OLButton>
@@ -107,7 +106,6 @@ function ActionButton({
         variant="danger-ghost"
         onClick={handleUnlinkClick}
         disabled={disabled}
-        bs3Props={{ bsStyle: null, className: 'btn-danger-ghost' }}
       >
         {t('turn_off')}
       </OLButton>
@@ -118,10 +116,6 @@ function ActionButton({
         variant="secondary"
         disabled={disabled}
         onClick={handleLinkClick}
-        bs3Props={{
-          bsStyle: null,
-          className: 'btn btn-secondary-info btn-secondary',
-        }}
       >
         {t('turn_on')}
       </OLButton>

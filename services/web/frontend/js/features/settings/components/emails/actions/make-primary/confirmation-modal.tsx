@@ -46,21 +46,13 @@ function ConfirmationModal({
         <p className="mb-0">{t('log_in_with_primary_email_address')}</p>
       </OLModalBody>
       <OLModalFooter>
-        <OLButton
-          variant="secondary"
-          onClick={onHide}
-          bs3Props={{
-            bsStyle: null,
-            className: 'btn-secondary-info btn-secondary',
-          }}
-        >
+        <OLButton variant="secondary" onClick={onHide}>
           {t('cancel')}
         </OLButton>
         <OLButton
           variant="primary"
           disabled={isConfirmDisabled}
           onClick={onConfirm}
-          bs3Props={{ bsStyle: null, className: 'btn-primary' }}
         >
           {t('confirm')}
         </OLButton>

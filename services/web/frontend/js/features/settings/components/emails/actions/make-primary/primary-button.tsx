@@ -13,10 +13,6 @@ function PrimaryButton({
       isLoading={isLoading}
       onClick={onClick}
       variant="secondary"
-      bs3Props={{
-        bsStyle: null,
-        className: 'btn-secondary btn-secondary-info',
-      }}
     >
       {children}
     </OLButton>
