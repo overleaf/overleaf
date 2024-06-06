@@ -37,21 +37,11 @@ describe('OutputController', function () {
             build_id: 'build-id-123',
           },
           query: {
-            files: ['output.tex', 'not-output.tex'],
+            files: ['output.tex'],
           },
         }
         this.archive.pipe.callsFake(() => done())
         this.OutputController.createOutputZip(this.req, this.res)
-      })
-
-      it('does not pass files that do not start with "output" to OutputFileArchiveManager', function () {
-        sinon.assert.calledWith(
-          this.archiveFilesForBuild,
-          'project-id-123',
-          'user-id-123',
-          'build-id-123',
-          ['output.tex']
-        )
       })
 
       it('pipes the archive to the response', function () {

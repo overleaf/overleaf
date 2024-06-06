@@ -50,9 +50,6 @@ describe('OutputFileArchiveManager', function () {
         './OutputCacheManager': this.OutputCacheManger,
         archiver: this.archiver,
         'node:fs/promises': this.fs,
-        'node:path': {
-          basename: sinon.stub().callsFake(path => path.split('/').pop()),
-        },
         '@overleaf/settings': {
           path: {
             outputDir: this.outputDir,
@@ -140,14 +137,14 @@ describe('OutputFileArchiveManager', function () {
       expect(this.archive.append.callCount).to.equal(2)
       sinon.assert.calledWith(
         this.archive.append,
-        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_1`,
+        `handle: file_1`,
         sinon.match({
           name: 'file_1',
         })
       )
       sinon.assert.calledWith(
         this.archive.append,
-        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_4`,
+        `handle: file_4`,
         sinon.match({
           name: 'file_4',
         })
@@ -185,7 +182,7 @@ describe('OutputFileArchiveManager', function () {
     it('adds the files that were found to the archive', function () {
       sinon.assert.calledWith(
         this.archive.append,
-        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_1`,
+        `handle: file_1`,
         sinon.match({ name: 'file_1' })
       )
     })

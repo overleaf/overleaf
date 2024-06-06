@@ -4,7 +4,7 @@ const OutputCacheManager = require('./OutputCacheManager')
 const OutputFileFinder = require('./OutputFileFinder')
 const Settings = require('@overleaf/settings')
 const { open } = require('node:fs/promises')
-const path = require('node:path')
+const path = require('path')
 const { NotFoundError } = require('./Errors')
 
 function getContentDir(projectId, userId) {
@@ -19,8 +19,6 @@ function getContentDir(projectId, userId) {
 
 module.exports = OutputFileArchiveManager = {
   async archiveFilesForBuild(projectId, userId, build, files = []) {
-    const contentDir = getContentDir(projectId, userId)
-
     const validFiles = await (files.length > 0
       ? this._getRequestedOutputFiles(projectId, userId, build, files)
       : this._getAllOutputFiles(projectId, userId, build))
@@ -33,11 +31,9 @@ module.exports = OutputFileArchiveManager = {
 
     for (const file of validFiles) {
       try {
-        const fileHandle = await open(
-          `${contentDir}${OutputCacheManager.path(build, file)}`
-        )
+        const fileHandle = await open(file, 'r')
         const fileStream = fileHandle.createReadStream()
-        archive.append(fileStream, { name: file })
+        archive.append(fileStream, { name: path.basename(file) })
       } catch (error) {
         missingFiles.push(file)
       }
@@ -63,7 +59,9 @@ module.exports = OutputFileArchiveManager = {
         `${contentDir}${OutputCacheManager.path(build, '.')}`
       )
 
-      return outputFiles.map(({ path }) => path)
+      return outputFiles.map(
+        ({ path }) => `${contentDir}${OutputCacheManager.path(build, path)}`
+      )
     } catch (error) {
       if (
         error.code === 'ENOENT' ||
@@ -77,14 +75,14 @@ module.exports = OutputFileArchiveManager = {
   },
 
   async _getRequestedOutputFiles(projectId, userId, build, files) {
-    const outputFiles = new Set(
-      await OutputFileArchiveManager._getAllOutputFiles(
-        projectId,
-        userId,
-        build
-      )
+    const outputFiles = await OutputFileArchiveManager._getAllOutputFiles(
+      projectId,
+      userId,
+      build
     )
 
-    return files.filter(file => outputFiles.has(file))
+    return files.filter(file =>
+      outputFiles.some(outputFile => file === path.basename(outputFile))
+    )
   },
 }
