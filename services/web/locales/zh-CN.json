@@ -1211,7 +1211,6 @@
   "no_projects": "没有任何项目",
   "no_resolved_threads": "没有未解决线程",
   "no_search_results": "没有搜索到结果",
-  "no_selection_create_new_file": "您的项目当前为空。请创建一个新文件。",
   "no_selection_select_file": "当前未选择任何文件。请从文件树中选择一个文件。",
   "no_symbols_found": "找不到符号",
   "no_thanks_cancel_now": "不，谢谢，我还是想取消",
