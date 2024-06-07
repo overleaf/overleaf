@@ -146,3 +146,12 @@ export async function duplicateThread(projectId, threadId) {
   newRoom._id = confirmation.insertedId
   return { oldRoom: room, newRoom }
 }
+
+export async function findThreadsById(projectId, threadIds) {
+  return await db.rooms
+    .find({
+      project_id: new ObjectId(projectId),
+      thread_id: { $in: threadIds.map(id => new ObjectId(id)) },
+    })
+    .toArray()
+}

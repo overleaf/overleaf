@@ -109,6 +109,16 @@ async function duplicateCommentThreads(projectId, threads) {
   )
 }
 
+async function generateThreadData(projectId, threads) {
+  return await fetchJson(
+    chatApiUrl(`/project/${projectId}/generate-thread-data`),
+    {
+      method: 'POST',
+      json: { threads },
+    }
+  )
+}
+
 function chatApiUrl(path) {
   return new URL(path, settings.apis.chat.internal_url)
 }
@@ -126,6 +136,7 @@ module.exports = {
   deleteMessage: callbackify(deleteMessage),
   getResolvedThreadIds: callbackify(getResolvedThreadIds),
   duplicateCommentThreads: callbackify(duplicateCommentThreads),
+  generateThreadData: callbackify(generateThreadData),
   promises: {
     getThreads,
     destroyProject,
@@ -139,5 +150,6 @@ module.exports = {
     deleteMessage,
     getResolvedThreadIds,
     duplicateCommentThreads,
+    generateThreadData,
   },
 }

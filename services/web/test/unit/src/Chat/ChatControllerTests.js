@@ -19,13 +19,13 @@ const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Chat/ChatController'
 )
-const { expect } = require('chai')
 
 describe('ChatController', function () {
   beforeEach(function () {
     this.user_id = 'mock-user-id'
     this.settings = {}
     this.ChatApiHandler = {}
+    this.ChatManager = {}
     this.EditorRealTimeController = { emitToRoom: sinon.stub() }
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user_id),
@@ -34,6 +34,7 @@ describe('ChatController', function () {
       requires: {
         '@overleaf/settings': this.settings,
         './ChatApiHandler': this.ChatApiHandler,
+        './ChatManager': this.ChatManager,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../Authentication/SessionManager': this.SessionManager,
         '../User/UserInfoManager': (this.UserInfoManager = {}),
@@ -106,7 +107,7 @@ describe('ChatController', function () {
         limit: (this.limit = '30'),
         before: (this.before = '12345'),
       }
-      this.ChatController._injectUserInfoIntoThreads = sinon.stub().yields()
+      this.ChatManager.injectUserInfoIntoThreads = sinon.stub().yields()
       this.ChatApiHandler.getGlobalMessages = sinon
         .stub()
         .yields(null, (this.messages = ['mock', 'messages']))
@@ -121,109 +122,6 @@ describe('ChatController', function () {
 
     it('should return the messages', function () {
       return this.res.json.calledWith(this.messages).should.equal(true)
-    })
-  })
-
-  describe('_injectUserInfoIntoThreads', function () {
-    beforeEach(function () {
-      this.users = {
-        user_id_1: {
-          mock: 'user_1',
-        },
-        user_id_2: {
-          mock: 'user_2',
-        },
-      }
-      this.UserInfoManager.getPersonalInfo = (userId, callback) => {
-        return callback(null, this.users[userId])
-      }
-      sinon.spy(this.UserInfoManager, 'getPersonalInfo')
-      return (this.UserInfoController.formatPersonalInfo = user => ({
-        formatted: user.mock,
-      }))
-    })
-
-    it('should inject a user object into messaged and resolved data', function (done) {
-      return this.ChatController._injectUserInfoIntoThreads(
-        {
-          thread1: {
-            resolved: true,
-            resolved_by_user_id: 'user_id_1',
-            messages: [
-              {
-                user_id: 'user_id_1',
-                content: 'foo',
-              },
-              {
-                user_id: 'user_id_2',
-                content: 'bar',
-              },
-            ],
-          },
-          thread2: {
-            messages: [
-              {
-                user_id: 'user_id_1',
-                content: 'baz',
-              },
-            ],
-          },
-        },
-        (error, threads) => {
-          expect(threads).to.deep.equal({
-            thread1: {
-              resolved: true,
-              resolved_by_user_id: 'user_id_1',
-              resolved_by_user: { formatted: 'user_1' },
-              messages: [
-                {
-                  user_id: 'user_id_1',
-                  user: { formatted: 'user_1' },
-                  content: 'foo',
-                },
-                {
-                  user_id: 'user_id_2',
-                  user: { formatted: 'user_2' },
-                  content: 'bar',
-                },
-              ],
-            },
-            thread2: {
-              messages: [
-                {
-                  user_id: 'user_id_1',
-                  user: { formatted: 'user_1' },
-                  content: 'baz',
-                },
-              ],
-            },
-          })
-          return done()
-        }
-      )
-    })
-
-    it('should only need to look up each user once', function (done) {
-      return this.ChatController._injectUserInfoIntoThreads(
-        [
-          {
-            messages: [
-              {
-                user_id: 'user_id_1',
-                content: 'foo',
-              },
-              {
-                user_id: 'user_id_1',
-                content: 'bar',
-              },
-            ],
-          },
-        ],
-        (error, threads) => {
-          this.UserInfoManager.getPersonalInfo.calledOnce.should.equal(true)
-          return done()
-        }
-      )
     })
   })
 })

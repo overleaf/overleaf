@@ -31,6 +31,9 @@ describe('RestoreManager', function () {
           promises: {},
         }),
         '../Chat/ChatApiHandler': (this.ChatApiHandler = { promises: {} }),
+        '../Chat/ChatManager': (this.ChatManager = { promises: {} }),
+        '../Editor/EditorRealTimeController': (this.EditorRealTimeController =
+          {}),
       },
     })
     this.user_id = 'mock-user-id'
@@ -324,6 +327,13 @@ describe('RestoreManager', function () {
               },
             },
           })
+        this.ChatApiHandler.promises.generateThreadData = sinon
+          .stub()
+          .resolves({})
+        this.ChatManager.promises.injectUserInfoIntoThreads = sinon
+          .stub()
+          .resolves()
+        this.EditorRealTimeController.emitToRoom = sinon.stub()
         this.tracked_changes = [
           {
             op: { pos: 4, i: 'bar' },

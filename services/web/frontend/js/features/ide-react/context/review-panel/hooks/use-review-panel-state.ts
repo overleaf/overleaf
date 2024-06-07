@@ -1452,6 +1452,27 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
       [getThread]
     )
   )
+  useSocketListener(
+    socket,
+    'new-comment-threads',
+    useCallback(
+      (threads: ReviewPanelCommentThreadsApi) => {
+        setCommentThreads(prevState => {
+          const newThreads = { ...prevState }
+          for (const threadIdString of Object.keys(threads)) {
+            const threadId = threadIdString as ThreadId
+            const { submitting: _, ...thread } = getThread(threadId)
+            // Replace already loaded messages with the server provided ones
+            thread.messages = threads[threadId].messages.map(formatComment)
+            newThreads[threadId] = thread
+          }
+          return newThreads
+        })
+        handleLayoutChange({ async: true })
+      },
+      [getThread]
+    )
+  )
 
   const openSubView = useRef<typeof subView>('cur_file')
   useEffect(() => {

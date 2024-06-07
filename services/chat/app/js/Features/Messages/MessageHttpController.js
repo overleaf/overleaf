@@ -86,6 +86,10 @@ export async function duplicateCommentThreads(context) {
   return await callMessageHttpController(context, _duplicateCommentThreads)
 }
 
+export async function generateThreadData(context) {
+  return await callMessageHttpController(context, _generateThreadData)
+}
+
 export async function getStatus(context) {
   const message = 'chat is alive'
   context.res.status(200).setBody(message)
@@ -122,6 +126,18 @@ const _getAllThreads = async (req, res) => {
   const messages = await MessageManager.findAllMessagesInRooms(roomIds)
   const threads = MessageFormatter.groupMessagesByThreads(rooms, messages)
   res.json(threads)
+}
+
+const _generateThreadData = async (req, res) => {
+  const { projectId } = req.params
+  const { threads } = req.body
+  logger.debug({ projectId }, 'getting all threads')
+  const rooms = await ThreadManager.findThreadsById(projectId, threads)
+  const roomIds = rooms.map(r => r._id)
+  const messages = await MessageManager.findAllMessagesInRooms(roomIds)
+  logger.debug({ rooms, messages }, 'looked up messages in the rooms')
+  const threadData = MessageFormatter.groupMessagesByThreads(rooms, messages)
+  res.json(threadData)
 }
 
 const _resolveThread = async (req, res) => {

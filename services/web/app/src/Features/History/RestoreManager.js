@@ -12,6 +12,8 @@ const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandle
 const ChatApiHandler = require('../Chat/ChatApiHandler')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const logger = require('@overleaf/logger')
+const EditorRealTimeController = require('../Editor/EditorRealTimeController')
+const ChatManager = require('../Chat/ChatManager')
 
 const RestoreManager = {
   async restoreFileFromV2(userId, projectId, version, pathname) {
@@ -157,6 +159,19 @@ const RestoreManager = {
     } else {
       newRanges.comments = ranges.comments
     }
+
+    const newCommentThreadData =
+      await ChatApiHandler.promises.generateThreadData(
+        projectId,
+        newRanges.comments.map(({ op: { t } }) => t)
+      )
+    await ChatManager.promises.injectUserInfoIntoThreads(newCommentThreadData)
+    logger.debug({ newCommentThreadData }, 'emitting new comment threads')
+    EditorRealTimeController.emitToRoom(
+      projectId,
+      'new-comment-threads',
+      newCommentThreadData
+    )
 
     return await EditorController.promises.addDocWithRanges(
       projectId,
