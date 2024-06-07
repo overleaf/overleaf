@@ -24,7 +24,13 @@ describe('RestoreManager', function () {
         }),
         '../Project/ProjectLocator': (this.ProjectLocator = { promises: {} }),
         '../DocumentUpdater/DocumentUpdaterHandler':
-          (this.DocumentUpdaterHandler = { promises: {} }),
+          (this.DocumentUpdaterHandler = {
+            promises: { flushProjectToMongo: sinon.stub().resolves() },
+          }),
+        '../Docstore/DocstoreManager': (this.DocstoreManager = {
+          promises: {},
+        }),
+        '../Chat/ChatApiHandler': (this.ChatApiHandler = { promises: {} }),
       },
     })
     this.user_id = 'mock-user-id'
@@ -297,7 +303,27 @@ describe('RestoreManager', function () {
     describe("when reverting a file that doesn't current exist", function () {
       beforeEach(async function () {
         this.pathname = 'foo.tex'
+        this.comments = [
+          (this.comment = { op: { t: 'comment-1', p: 0, c: 'foo' } }),
+        ]
+        this.remappedComments = [{ op: { t: 'comment-2', p: 0, c: 'foo' } }]
         this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
+        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([
+          {
+            ranges: {
+              comments: [this.comment],
+            },
+          },
+        ])
+        this.ChatApiHandler.promises.duplicateCommentThreads = sinon
+          .stub()
+          .resolves({
+            newThreads: {
+              'comment-1': {
+                duplicateId: 'comment-2',
+              },
+            },
+          })
         this.tracked_changes = [
           {
             op: { pos: 4, i: 'bar' },
@@ -308,13 +334,12 @@ describe('RestoreManager', function () {
             metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-2' },
           },
         ]
-        this.comments = [{ op: { t: 'comment-1', p: 0, c: 'foo' } }]
         this.FileSystemImportManager.promises.importFile = sinon
           .stub()
           .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
         this.RestoreManager.promises._getRangesFromHistory = sinon
           .stub()
-          .resolves({ changes: this.tracked_changes, comment: this.comments })
+          .resolves({ changes: this.tracked_changes, comments: this.comments })
         this.EditorController.promises.addDocWithRanges = sinon
           .stub()
           .resolves(
@@ -336,7 +361,7 @@ describe('RestoreManager', function () {
           this.folder_id,
           'foo.tex',
           ['foo', 'bar', 'baz'],
-          { changes: this.tracked_changes, comment: this.comments }
+          { changes: this.tracked_changes, comments: this.remappedComments }
         )
       })
 

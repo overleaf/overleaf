@@ -9,6 +9,9 @@ const { callbackifyAll } = require('@overleaf/promise-utils')
 const { fetchJson } = require('@overleaf/fetch-utils')
 const ProjectLocator = require('../Project/ProjectLocator')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+const ChatApiHandler = require('../Chat/ChatApiHandler')
+const DocstoreManager = require('../Docstore/DocstoreManager')
+const logger = require('@overleaf/logger')
 
 const RestoreManager = {
   async restoreFileFromV2(userId, projectId, version, pathname) {
@@ -107,12 +110,60 @@ const RestoreManager = {
       pathname
     )
 
+    const documentCommentIds = new Set(
+      ranges.comments?.map(({ op: { t } }) => t)
+    )
+
+    await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
+
+    const docsWithRanges =
+      await DocstoreManager.promises.getAllRanges(projectId)
+
+    const nonOrphanedThreadIds = new Set()
+    for (const { ranges } of docsWithRanges) {
+      for (const comment of ranges.comments ?? []) {
+        nonOrphanedThreadIds.add(comment.op.t)
+      }
+    }
+
+    const commentIdsToDuplicate = Array.from(documentCommentIds).filter(id =>
+      nonOrphanedThreadIds.has(id)
+    )
+
+    const newRanges = { changes: ranges.changes, comments: [] }
+
+    if (commentIdsToDuplicate.length > 0) {
+      const { newThreads: newCommentIds } =
+        await ChatApiHandler.promises.duplicateCommentThreads(
+          projectId,
+          commentIdsToDuplicate
+        )
+
+      logger.debug({ mapping: newCommentIds }, 'replacing comment threads')
+
+      for (const comment of ranges.comments ?? []) {
+        if (Object.prototype.hasOwnProperty.call(newCommentIds, comment.op.t)) {
+          const result = newCommentIds[comment.op.t]
+          if (result.error) {
+            // We couldn't duplicate the thread, so we need to delete it from
+            // the resulting ranges.
+            continue
+          }
+          // We have a new id for this comment thread
+          comment.op.t = result.duplicateId
+          newRanges.comments.push(comment)
+        }
+      }
+    } else {
+      newRanges.comments = ranges.comments
+    }
+
     return await EditorController.promises.addDocWithRanges(
       projectId,
       parentFolderId,
       basename,
       importInfo.lines,
-      ranges,
+      newRanges,
       'revert',
       userId
     )
