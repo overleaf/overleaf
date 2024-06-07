@@ -6,6 +6,7 @@ import PdfZoomDropdown from './pdf-zoom-dropdown'
 
 import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
 import PdfViewerControlsMenuButton from './pdf-viewer-controls-menu-button'
+import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 type PdfViewerControlsToolbarProps = {
   setZoom: (zoom: string) => void
@@ -22,6 +23,8 @@ function PdfViewerControlsToolbar({
   page,
   totalPages,
 }: PdfViewerControlsToolbarProps) {
+  const { showLogs } = useCompileContext()
+
   const toolbarControlsElement = document.querySelector('#toolbar-pdf-controls')
 
   const [availableWidth, setAvailableWidth] = useState<number>(1000)
@@ -36,6 +39,10 @@ function PdfViewerControlsToolbar({
   const { elementRef: pdfControlsRef } = useResizeObserver(handleResize)
 
   if (!toolbarControlsElement) {
+    return null
+  }
+
+  if (showLogs) {
     return null
   }
 

@@ -39,9 +39,9 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
   // rawScale is different from scale as it is always a number.
   // This is relevant when scale is e.g. 'page-width'.
-  const [rawScale, setRawScale] = useState(null)
-  const [page, setPage] = useState(null)
-  const [totalPages, setTotalPages] = useState(null)
+  const [rawScale, setRawScale] = useState<number | null>(null)
+  const [page, setPage] = useState<number | null>(null)
+  const [totalPages, setTotalPages] = useState<number | null>(null)
 
   // local state values
   const [pdfJsWrapper, setPdfJsWrapper] = useState<PDFJSWrapper | null>()
@@ -140,23 +140,23 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       pdfJsWrapper.eventBus.off('pagerendered', handleRenderedInitialPageNumber)
     }
 
-    const handleScaleChanged = () => {
-      setRawScale(pdfJsWrapper.viewer.currentScale)
+    const handleScaleChanged = (scale: { scale: number }) => {
+      setRawScale(scale.scale)
     }
 
     // `pagesinit` fires when the data for rendering the first page is ready.
     pdfJsWrapper.eventBus.on('pagesinit', handlePagesinit)
     // `pagerendered` fires when a page was actually rendered.
     pdfJsWrapper.eventBus.on('pagerendered', handleRendered)
-    // Once a page has been rendered we know the scale that it has been rendered to.
-    pdfJsWrapper.eventBus.on('pagerendered', handleScaleChanged)
     // Once a page has been rendered we can set the initial current page number.
     pdfJsWrapper.eventBus.on('pagerendered', handleRenderedInitialPageNumber)
+    pdfJsWrapper.eventBus.on('scalechanging', handleScaleChanged)
+
     return () => {
       pdfJsWrapper.eventBus.off('pagesinit', handlePagesinit)
       pdfJsWrapper.eventBus.off('pagerendered', handleRendered)
-      pdfJsWrapper.eventBus.off('pagerendered', handleScaleChanged)
       pdfJsWrapper.eventBus.off('pagerendered', handleRenderedInitialPageNumber)
+      pdfJsWrapper.eventBus.off('scalechanging', handleScaleChanged)
     }
   }, [pdfJsWrapper, firstRenderDone, startFetch])
 
@@ -394,13 +394,17 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
           break
         case 'zoom-in':
           if (pdfJsWrapper) {
-            setScale(`${pdfJsWrapper.viewer.currentScale * 1.25}`)
+            setScale(
+              `${Math.min(pdfJsWrapper.viewer.currentScale * 1.25, 9.99)}`
+            )
           }
           break
 
         case 'zoom-out':
           if (pdfJsWrapper) {
-            setScale(`${pdfJsWrapper.viewer.currentScale * 0.75}`)
+            setScale(
+              `${Math.max(pdfJsWrapper.viewer.currentScale / 1.25, 0.1)}`
+            )
           }
           break
 
