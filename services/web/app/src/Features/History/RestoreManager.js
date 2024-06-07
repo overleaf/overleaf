@@ -9,11 +9,6 @@ const { callbackifyAll } = require('@overleaf/promise-utils')
 const { fetchJson } = require('@overleaf/fetch-utils')
 const ProjectLocator = require('../Project/ProjectLocator')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
-const ChatApiHandler = require('../Chat/ChatApiHandler')
-const DocstoreManager = require('../Docstore/DocstoreManager')
-const logger = require('@overleaf/logger')
-const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const ChatManager = require('../Chat/ChatManager')
 
 const RestoreManager = {
   async restoreFileFromV2(userId, projectId, version, pathname) {
@@ -93,17 +88,17 @@ const RestoreManager = {
     }
 
     if (file) {
-      logger.debug(
-        { projectId, fileId: file.element._id, type: importInfo.type },
-        'deleting entity before reverting it'
-      )
-      await EditorController.promises.deleteEntity(
+      await DocumentUpdaterHandler.promises.setDocument(
         projectId,
         file.element._id,
-        importInfo.type,
-        'revert',
-        userId
+        userId,
+        importInfo.lines,
+        source
       )
+      return {
+        _id: file.element._id,
+        type: importInfo.type,
+      }
     }
 
     const ranges = await RestoreManager._getRangesFromHistory(
@@ -112,73 +107,12 @@ const RestoreManager = {
       pathname
     )
 
-    const documentCommentIds = new Set(
-      ranges.comments?.map(({ op: { t } }) => t)
-    )
-
-    await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
-
-    const docsWithRanges =
-      await DocstoreManager.promises.getAllRanges(projectId)
-
-    const nonOrphanedThreadIds = new Set()
-    for (const { ranges } of docsWithRanges) {
-      for (const comment of ranges.comments ?? []) {
-        nonOrphanedThreadIds.add(comment.op.t)
-      }
-    }
-
-    const commentIdsToDuplicate = Array.from(documentCommentIds).filter(id =>
-      nonOrphanedThreadIds.has(id)
-    )
-
-    const newRanges = { changes: ranges.changes, comments: [] }
-
-    if (commentIdsToDuplicate.length > 0) {
-      const { newThreads: newCommentIds } =
-        await ChatApiHandler.promises.duplicateCommentThreads(
-          projectId,
-          commentIdsToDuplicate
-        )
-
-      logger.debug({ mapping: newCommentIds }, 'replacing comment threads')
-
-      for (const comment of ranges.comments ?? []) {
-        if (Object.prototype.hasOwnProperty.call(newCommentIds, comment.op.t)) {
-          const result = newCommentIds[comment.op.t]
-          if (result.error) {
-            // We couldn't duplicate the thread, so we need to delete it from
-            // the resulting ranges.
-            continue
-          }
-          // We have a new id for this comment thread
-          comment.op.t = result.duplicateId
-          newRanges.comments.push(comment)
-        }
-      }
-    } else {
-      newRanges.comments = ranges.comments
-    }
-
-    const newCommentThreadData =
-      await ChatApiHandler.promises.generateThreadData(
-        projectId,
-        newRanges.comments.map(({ op: { t } }) => t)
-      )
-    await ChatManager.promises.injectUserInfoIntoThreads(newCommentThreadData)
-    logger.debug({ newCommentThreadData }, 'emitting new comment threads')
-    EditorRealTimeController.emitToRoom(
-      projectId,
-      'new-comment-threads',
-      newCommentThreadData
-    )
-
     return await EditorController.promises.addDocWithRanges(
       projectId,
       parentFolderId,
       basename,
       importInfo.lines,
-      newRanges,
+      ranges,
       'revert',
       userId
     )

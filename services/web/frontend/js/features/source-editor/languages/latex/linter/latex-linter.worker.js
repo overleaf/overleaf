@@ -322,7 +322,7 @@ const read1filename = function (TokeniseResult, k) {
   }
 }
 
-const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
+const readOptionalLabel = function (TokeniseResult, k) {
   // read a label my_label:text..
   const Tokens = TokeniseResult.tokens
   const text = TokeniseResult.text
@@ -348,7 +348,6 @@ const readOptionalArgumentWithUnderscores = function (TokeniseResult, k) {
       label = label + str
       if (str.match(/\]/)) {
         // breaking due to ]
-        j++
         break
       }
     } else if (tok[1] === '_') {
@@ -801,31 +800,6 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
       ) {
         // Environments.push({command: "end", name: "user-defined-equation", token: token});
         seenUserDefinedEndEquation = true
-      } else if (seq === 'documentclass') {
-        // try to read any optional params [LABEL].... allowing for
-        // underscores, advance if found
-        let newPos = readOptionalArgumentWithUnderscores(TokeniseResult, i)
-        if (newPos instanceof Error) {
-          TokenErrorFromTo(
-            Tokens[i + 1],
-            Tokens[Math.min(newPos.pos, len - 1)],
-            'invalid documentclass option'
-          )
-          i = newPos.pos
-        } else if (newPos == null) {
-          /* do nothing */
-        } else {
-          i = newPos
-        }
-        // Read parameter {....}, ignore if missing
-        newPos = readDefinition(TokeniseResult, i)
-        if (newPos === null) {
-          // NOTE: We could choose to throw an error here, as the argument is
-          // required. However, that would show errors as you are typing. So
-          // maybe it's better to be lenient.
-        } else {
-          i = newPos
-        }
       } else if (
         seq === 'newcommand' ||
         seq === 'renewcommand' ||
@@ -1064,7 +1038,7 @@ const InterpretTokens = function (TokeniseResult, ErrorReporter) {
       } else if (seq === 'hyperref') {
         // try to read any optional params [LABEL].... allowing for
         // underscores, advance if found
-        let newPos = readOptionalArgumentWithUnderscores(TokeniseResult, i)
+        let newPos = readOptionalLabel(TokeniseResult, i)
         if (newPos instanceof Error) {
           TokenErrorFromTo(
             Tokens[i + 1],

@@ -303,64 +303,6 @@ paths:
                 description: chat is alive
       operationId: getStatus
       description: Check that the Chat service is alive
-  '/project/{projectId}/duplicate-comment-threads':
-    parameters:
-      - schema:
-          type: string
-        name: projectId
-        in: path
-        required: true
-    post:
-      summary: Duplicate comment threads
-      operationId: duplicateCommentThreads
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                threads:
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  newThreads:
-                    type: object
-                description: Mapping of old thread ids to their duplicated thread ids
-      description: Duplicate a list of comment threads
-  '/project/{projectId}/generate-thread-data':
-    parameters:
-      - schema:
-          type: string
-        name: projectId
-        in: path
-        required: true
-    post:
-      summary: Generate thread data to load into the frontend
-      operationId: generateThreadData
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                threads:
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-      description: Load threads and generate a json blob containing all messages in all the threads
 components:
   schemas:
     Message:

@@ -1,7 +1,5 @@
 import { db, ObjectId } from '../../mongodb.js'
 
-export class MissingThreadError extends Error {}
-
 export const GLOBAL_THREAD = 'GLOBAL'
 
 export async function findOrCreateThread(projectId, threadId) {
@@ -125,33 +123,4 @@ export async function getResolvedThreadIds(projectId) {
     .map(record => record.thread_id.toString())
     .toArray()
   return resolvedThreadIds
-}
-
-export async function duplicateThread(projectId, threadId) {
-  const room = await db.rooms.findOne({
-    project_id: new ObjectId(projectId),
-    thread_id: new ObjectId(threadId),
-  })
-  if (!room) {
-    throw new MissingThreadError('Trying to duplicate a non-existent thread')
-  }
-  const newRoom = {
-    project_id: room.project_id,
-    thread_id: new ObjectId(),
-  }
-  if (room.resolved) {
-    newRoom.resolved = room.resolved
-  }
-  const confirmation = await db.rooms.insertOne(newRoom)
-  newRoom._id = confirmation.insertedId
-  return { oldRoom: room, newRoom }
-}
-
-export async function findThreadsById(projectId, threadIds) {
-  return await db.rooms
-    .find({
-      project_id: new ObjectId(projectId),
-      thread_id: { $in: threadIds.map(id => new ObjectId(id)) },
-    })
-    .toArray()
 }

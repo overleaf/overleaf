@@ -191,18 +191,11 @@
   transition: opacity 0.5s;
 }
 
-// We want to be able to stack modals on top of the left-side menu. So we make
-// it a little lower than the normal modal backdrops. We don't want to go too
-// low, to avoid conflicting with dropdowns etc.
-@left-menu-z-index-backdrop: @zindex-modal-background - 5;
-@left-menu-z-index: @zindex-modal-background - 2;
-
 // Make the Bootstrap Modal behavior as a left sidebar
 #left-menu-modal {
   opacity: 1;
   overflow-y: hidden;
   padding-left: 0 !important; // bootstrap modal may randomly give padding-left when zooming in / out in chrome
-  z-index: @left-menu-z-index;
   .modal-dialog {
     height: 100%;
     margin: 0;
@@ -226,6 +219,5 @@
 // Don't disable backdrop that allows closing the Modal when clicking outside of it,
 // But match its background color with the original mask background color.
 .left-menu-modal-backdrop {
-  z-index: @left-menu-z-index-backdrop;
   background-color: transparent;
 }

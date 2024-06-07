@@ -152,7 +152,8 @@ export const LaTeXLanguage = LRLanguage.define({
         'HrefCommand/ShortTextArgument/ShortArg/...': t.link,
         'HrefCommand/UrlArgument/...': t.monospace,
         'CtrlSeq Csname': t.tagName,
-        'DocumentClass/OptionalArgument/ShortOptionalArg/...': t.attributeValue,
+        'DocumentClass/OptionalArgument/ShortOptionalArg/Normal':
+          t.attributeValue,
         'DocumentClass/ShortTextArgument/ShortArg/Normal': t.typeName,
         'ListEnvironment/BeginEnv/OptionalArgument/...': t.monospace,
         Number: t.number,
