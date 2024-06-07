@@ -93,17 +93,17 @@ const RestoreManager = {
     }
 
     if (file) {
-      await DocumentUpdaterHandler.promises.setDocument(
+      logger.debug(
+        { projectId, fileId: file.element._id, type: importInfo.type },
+        'deleting entity before reverting it'
+      )
+      await EditorController.promises.deleteEntity(
         projectId,
         file.element._id,
-        userId,
-        importInfo.lines,
-        source
+        importInfo.type,
+        'revert',
+        userId
       )
-      return {
-        _id: file.element._id,
-        type: importInfo.type,
-      }
     }
 
     const ranges = await RestoreManager._getRangesFromHistory(
