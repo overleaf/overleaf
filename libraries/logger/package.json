@@ -19,8 +19,13 @@
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "types:check": "tsc --noEmit"
   },
+  "overrides": {
+    "google-gax": {
+      "protobufjs": "^7.2.5"
+    }
+  },
   "dependencies": {
-    "@google-cloud/logging-bunyan": "^5.0.0",
+    "@google-cloud/logging-bunyan": "^5.1.0",
     "@overleaf/fetch-utils": "*",
     "@overleaf/o-error": "*",
     "@sentry/node": "^6.13.2",
