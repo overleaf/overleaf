@@ -89,3 +89,16 @@ function _ensureIdsAreObjectIds(query) {
   }
   return query
 }
+
+export async function duplicateRoomToOtherRoom(sourceRoomId, targetRoomId) {
+  const sourceMessages = await findAllMessagesInRooms([sourceRoomId])
+  const targetMessages = sourceMessages.map(comment => {
+    return _ensureIdsAreObjectIds({
+      room_id: targetRoomId,
+      content: comment.content,
+      timestamp: comment.timestamp,
+      user_id: comment.user_id,
+    })
+  })
+  await db.messages.insertMany(targetMessages)
+}

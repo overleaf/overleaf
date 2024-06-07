@@ -82,6 +82,10 @@ export async function destroyProject(context) {
   return await callMessageHttpController(context, _destroyProject)
 }
 
+export async function duplicateCommentThreads(context) {
+  return await callMessageHttpController(context, _duplicateCommentThreads)
+}
+
 export async function getStatus(context) {
   const message = 'chat is alive'
   context.res.status(200).setBody(message)
@@ -253,4 +257,30 @@ async function _getMessages(clientThreadId, req, res) {
   messages = MessageFormatter.formatMessagesForClientSide(messages)
   logger.debug({ projectId, messages }, 'got messages')
   res.status(200).setBody(messages)
+}
+
+async function _duplicateCommentThreads(req, res) {
+  const { projectId } = req.params
+  const { threads } = req.body
+  const result = {}
+  for (const id of threads) {
+    logger.debug({ projectId, thread: id }, 'duplicating thread')
+    try {
+      const { oldRoom, newRoom } = await ThreadManager.duplicateThread(
+        projectId,
+        id
+      )
+      await MessageManager.duplicateRoomToOtherRoom(oldRoom._id, newRoom._id)
+      result[id] = { duplicateId: newRoom.thread_id }
+    } catch (error) {
+      if (error instanceof ThreadManager.MissingThreadError) {
+        // Expected error when the comment has been deleted prior to duplication
+        result[id] = { error: 'not found' }
+      } else {
+        logger.err({ error }, 'error duplicating thread')
+        result[id] = { error: 'unknown' }
+      }
+    }
+  }
+  res.json({ newThreads: result })
 }
