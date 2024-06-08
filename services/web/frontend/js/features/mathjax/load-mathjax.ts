@@ -40,6 +40,7 @@ export const loadMathJax = async (options?: {
             '[-]': [
               'html', // avoid creating HTML elements/attributes
               'require', // prevent loading disabled packages
+              'unicode', // Prevent CSS injection https://github.com/mathjax/MathJax/issues/3129 / https://github.com/mathjax/MathJax/issues/3241
             ],
           },
           processEscapes: true,
