@@ -70,6 +70,8 @@ services:
     working_dir: /overleaf/services/web
     environment:
       VERBOSE_LOGGING:
+      CYPRESS_SPEC_PATTERN: ${CYPRESS_SPEC_PATTERN:-}
+      CYPRESS_EXCLUDE_SPEC_PATTERN: ${CYPRESS_EXCLUDE_SPEC_PATTERN:-}
     entrypoint: npm
     command:
       - "run"
