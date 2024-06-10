@@ -46,6 +46,8 @@ function makeMailchimpProvider(listName, listId) {
     subscribe,
     unsubscribe,
     changeEmail,
+    tag,
+    removeTag,
   }
 
   async function subscribed(user) {
@@ -81,6 +83,38 @@ function makeMailchimpProvider(listName, listId) {
       throw OError.tag(err, 'error subscribing user to newsletter', {
         userId: user._id,
         listName,
+      })
+    }
+  }
+
+  async function tag(user, tag) {
+    try {
+      const path = getMemberTagsPath(user.email)
+      await mailchimp.post(path, {
+        tags: [{ name: tag, status: 'active' }],
+      })
+      logger.debug({ user, listName }, `finished adding ${tag} to user`)
+    } catch (err) {
+      throw OError.tag(err, `error adding ${tag} to user`, {
+        userId: user._id,
+        listName,
+        tag,
+      })
+    }
+  }
+
+  async function removeTag(user, tag) {
+    try {
+      const path = getMemberTagsPath(user.email)
+      await mailchimp.post(path, {
+        tags: [{ name: tag, status: 'inactive' }],
+      })
+      logger.debug({ user, listName }, `finished removing ${tag} from user`)
+    } catch (err) {
+      throw OError.tag(err, `error removing ${tag} from user`, {
+        userId: user._id,
+        listName,
+        tag,
       })
     }
   }
@@ -206,6 +240,11 @@ function makeMailchimpProvider(listName, listId) {
   function getSubscriberPath(email) {
     const emailHash = hashEmail(email)
     return `/lists/${MAILCHIMP_LIST_ID}/members/${emailHash}`
+  }
+
+  function getMemberTagsPath(email) {
+    const emailHash = hashEmail(email)
+    return `/lists/${MAILCHIMP_LIST_ID}/members/${emailHash}/tags`
   }
 
   function hashEmail(email) {

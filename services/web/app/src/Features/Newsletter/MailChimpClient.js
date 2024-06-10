@@ -41,6 +41,14 @@ class MailChimpClient {
     return await this.request(path, options)
   }
 
+  async post(path, body) {
+    const options = Object.assign({}, this.fetchOptions)
+    options.method = 'POST'
+    options.json = body
+
+    return await this.request(path, options)
+  }
+
   async delete(path) {
     const options = Object.assign({}, this.fetchOptions)
     options.method = 'DELETE'
