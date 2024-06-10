@@ -494,6 +494,23 @@ describe('LatexLinter', function () {
     assert.equal(errors[0].text, 'unclosed group {')
   })
 
+  it('should accept documentclass with no options', function () {
+    const { errors } = Parse('\\documentclass{article}')
+    assert.equal(errors.length, 0)
+  })
+
+  it('should accept documentclass with options', function () {
+    const { errors } = Parse('\\documentclass[a4paper]{article}')
+    assert.equal(errors.length, 0)
+  })
+
+  it('should accept documentclass with underscore in options', function () {
+    const { errors } = Parse(
+      '\\documentclass[my_custom_document_class_option]{my-custom-class}'
+    )
+    assert.equal(errors.length, 0)
+  })
+
   // %novalidate
   // %begin novalidate
   // %end novalidate

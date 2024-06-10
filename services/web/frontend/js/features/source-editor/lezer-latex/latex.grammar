@@ -484,6 +484,7 @@ ShortOptionalArg {
     ( textBase
     | NonEmptyGroup<ShortOptionalArg>
     | "#" // macro character
+    | "_" // underscore is used in some parameter names
     )*
 }
 
