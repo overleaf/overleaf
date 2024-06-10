@@ -93,7 +93,7 @@ const main = async () => {
 
     const diff = INVOICES_COLLECTED.length - INVOICES_COLLECTED_SUCCESS.length
     if (diff !== 0) {
-      throw new Error(`Invoices collection failed for ${diff} invoices`)
+      logger.warn(`Invoices collection failed for ${diff} invoices`)
     }
 
     return {
