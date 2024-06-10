@@ -128,4 +128,103 @@ describe('ChatApiHandler', function () {
       })
     })
   })
+
+  describe('duplicateCommentThreads', function () {
+    beforeEach(async function () {
+      this.FetchUtils.fetchJson.resolves(
+        (this.mapping = {
+          'comment-thread-1': 'comment-thread-1-dup',
+          'comment-thread-2': 'comment-thread-2-dup',
+          'comment-thread-3': 'comment-thread-3-dup',
+        })
+      )
+      this.threads = [
+        'comment-thread-1',
+        'comment-thread-2',
+        'comment-thread-3',
+      ]
+      this.result = await this.ChatApiHandler.promises.duplicateCommentThreads(
+        this.project_id,
+        this.threads
+      )
+    })
+
+    it('should make a post request to the chat api', function () {
+      expect(this.FetchUtils.fetchJson).to.have.been.calledWith(
+        sinon.match(
+          url =>
+            url.toString() ===
+            `${this.settings.apis.chat.internal_url}/project/${this.project_id}/duplicate-comment-threads`
+        ),
+        {
+          method: 'POST',
+          json: {
+            threads: this.threads,
+          },
+        }
+      )
+    })
+
+    it('should return the thread mapping', function () {
+      expect(this.result).to.deep.equal(this.mapping)
+    })
+  })
+
+  describe('generateThreadData', async function () {
+    beforeEach(async function () {
+      this.FetchUtils.fetchJson.resolves(
+        (this.chatResponse = {
+          'comment-thread-1': {
+            messages: [
+              {
+                content: 'message 1',
+                timestamp: '2024-01-01T00:00:00.000Z',
+                user_id: 'user-1',
+              },
+            ],
+          },
+          'comment-thread-2': {
+            messages: [
+              {
+                content: 'message 2',
+                timestamp: '2024-01-01T00:00:00.000Z',
+                user_id: 'user-2',
+              },
+            ],
+          },
+        })
+      )
+      // Chat won't return threads that couldn't be found, so response can have
+      // fewer threads
+      this.threads = [
+        'comment-thread-1',
+        'comment-thread-2',
+        'comment-thread-3',
+      ]
+      this.result = await this.ChatApiHandler.promises.generateThreadData(
+        this.project_id,
+        this.threads
+      )
+    })
+
+    it('should make a post request to the chat api', function () {
+      expect(this.FetchUtils.fetchJson).to.have.been.calledWith(
+        sinon.match(
+          url =>
+            url.toString() ===
+            `${this.settings.apis.chat.internal_url}/project/${this.project_id}/generate-thread-data`
+        ),
+        {
+          method: 'POST',
+          json: {
+            threads: this.threads,
+          },
+        }
+      )
+    })
+
+    it('should return the thread data', function () {
+      expect(this.result).to.deep.equal(this.chatResponse)
+    })
+  })
 })

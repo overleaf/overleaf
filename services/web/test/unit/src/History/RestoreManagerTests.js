@@ -225,55 +225,187 @@ describe('RestoreManager', function () {
         .rejects()
     })
 
-    describe('with an existing file in the current project', function () {
+    describe('reverting a document', function () {
       beforeEach(function () {
         this.pathname = 'foo.tex'
-        this.FileSystemImportManager.promises.importFile = sinon
+        this.comments = [
+          (this.comment = { op: { t: 'comment-1', p: 0, c: 'foo' } }),
+        ]
+        this.remappedComments = [{ op: { t: 'comment-2', p: 0, c: 'foo' } }]
+        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
+        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([
+          {
+            ranges: {
+              comments: [this.comment],
+            },
+          },
+        ])
+        this.ChatApiHandler.promises.duplicateCommentThreads = sinon
           .stub()
-          .resolves({ type: 'doc' })
-        this.ProjectLocator.promises.findElementByPath = sinon
+          .resolves({
+            newThreads: {
+              'comment-1': {
+                duplicateId: 'comment-2',
+              },
+            },
+          })
+        this.ChatApiHandler.promises.generateThreadData = sinon.stub().resolves(
+          (this.threadData = {
+            'comment-2': {
+              messages: [
+                {
+                  content: 'message-content',
+                  timestamp: '2024-01-01T00:00:00.000Z',
+                  user_id: 'user-1',
+                },
+              ],
+            },
+          })
+        )
+        this.ChatManager.promises.injectUserInfoIntoThreads = sinon
           .stub()
-          .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
+          .resolves(this.threadData)
+
+        this.EditorRealTimeController.emitToRoom = sinon.stub()
+        this.tracked_changes = [
+          {
+            op: { pos: 4, i: 'bar' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
+          },
+          {
+            op: { pos: 8, d: 'qux' },
+            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-2' },
+          },
+        ]
         this.FileSystemImportManager.promises.importFile = sinon
           .stub()
           .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
-        this.DocumentUpdaterHandler.promises.setDocument = sinon
-          .stub()
-          .resolves()
-        this.EditorController.promises.deleteEntity = sinon.stub().resolves()
         this.RestoreManager.promises._getRangesFromHistory = sinon
           .stub()
-          .resolves({ changes: [], comments: [] })
-        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([])
-        this.ChatApiHandler.promises.generateThreadData = sinon
-          .stub()
-          .resolves({})
-        this.ChatManager.promises.injectUserInfoIntoThreads = sinon
-          .stub()
-          .resolves()
-        this.EditorRealTimeController.emitToRoom = sinon.stub()
+          .resolves({
+            changes: this.tracked_changes,
+            comments: this.comments,
+          })
         this.EditorController.promises.addDocWithRanges = sinon
           .stub()
-          .resolves()
+          .resolves(
+            (this.addedFile = { doc: 'mock-doc', folderId: 'mock-folder' })
+          )
       })
 
-      it('should delete the existing document', async function () {
-        await this.RestoreManager.promises.revertFile(
-          this.user_id,
-          this.project_id,
-          this.version,
-          this.pathname
-        )
+      describe("when reverting a file that doesn't current exist", function () {
+        beforeEach(async function () {
+          this.data = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
 
-        expect(
-          this.EditorController.promises.deleteEntity
-        ).to.have.been.calledWith(
-          this.project_id,
-          'mock-file-id',
-          'doc',
-          'revert',
-          this.user_id
-        )
+        it('should flush the document before fetching ranges', function () {
+          expect(
+            this.DocumentUpdaterHandler.promises.flushProjectToMongo
+          ).to.have.been.calledBefore(
+            this.DocstoreManager.promises.getAllRanges
+          )
+        })
+
+        it('should import the file', function () {
+          expect(
+            this.EditorController.promises.addDocWithRanges
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.folder_id,
+            'foo.tex',
+            ['foo', 'bar', 'baz'],
+            { changes: this.tracked_changes, comments: this.remappedComments }
+          )
+        })
+
+        it('should return the created entity', function () {
+          expect(this.data).to.equal(this.addedFile)
+        })
+
+        it('should look up ranges', function () {
+          expect(
+            this.RestoreManager.promises._getRangesFromHistory
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
+      })
+
+      describe('with an existing file in the current project', function () {
+        beforeEach(async function () {
+          this.ProjectLocator.promises.findElementByPath = sinon
+            .stub()
+            .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
+          this.EditorController.promises.deleteEntity = sinon.stub().resolves()
+
+          this.data = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
+
+        it('should delete the existing document', async function () {
+          expect(
+            this.EditorController.promises.deleteEntity
+          ).to.have.been.calledWith(
+            this.project_id,
+            'mock-file-id',
+            'doc',
+            'revert',
+            this.user_id
+          )
+        })
+
+        it('should delete the document before flushing', function () {
+          expect(
+            this.EditorController.promises.deleteEntity
+          ).to.have.been.calledBefore(
+            this.DocumentUpdaterHandler.promises.flushProjectToMongo
+          )
+        })
+
+        it('should flush the document before fetching ranges', function () {
+          expect(
+            this.DocumentUpdaterHandler.promises.flushProjectToMongo
+          ).to.have.been.calledBefore(
+            this.DocstoreManager.promises.getAllRanges
+          )
+        })
+
+        it('should import the file', function () {
+          expect(
+            this.EditorController.promises.addDocWithRanges
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.folder_id,
+            'foo.tex',
+            ['foo', 'bar', 'baz'],
+            { changes: this.tracked_changes, comments: this.remappedComments }
+          )
+        })
+
+        it('should return the created entity', function () {
+          expect(this.data).to.equal(this.addedFile)
+        })
+
+        it('should look up ranges', function () {
+          expect(
+            this.RestoreManager.promises._getRangesFromHistory
+          ).to.have.been.calledWith(
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
       })
     })
 
@@ -314,89 +446,6 @@ describe('RestoreManager', function () {
         )
 
         expect(revertRes).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
-      })
-    })
-
-    describe("when reverting a file that doesn't current exist", function () {
-      beforeEach(async function () {
-        this.pathname = 'foo.tex'
-        this.comments = [
-          (this.comment = { op: { t: 'comment-1', p: 0, c: 'foo' } }),
-        ]
-        this.remappedComments = [{ op: { t: 'comment-2', p: 0, c: 'foo' } }]
-        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
-        this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([
-          {
-            ranges: {
-              comments: [this.comment],
-            },
-          },
-        ])
-        this.ChatApiHandler.promises.duplicateCommentThreads = sinon
-          .stub()
-          .resolves({
-            newThreads: {
-              'comment-1': {
-                duplicateId: 'comment-2',
-              },
-            },
-          })
-        this.ChatApiHandler.promises.generateThreadData = sinon
-          .stub()
-          .resolves({})
-        this.ChatManager.promises.injectUserInfoIntoThreads = sinon
-          .stub()
-          .resolves()
-        this.EditorRealTimeController.emitToRoom = sinon.stub()
-        this.tracked_changes = [
-          {
-            op: { pos: 4, i: 'bar' },
-            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-1' },
-          },
-          {
-            op: { pos: 8, d: 'qux' },
-            metadata: { ts: '2024-01-01T00:00:00.000Z', user_id: 'user-2' },
-          },
-        ]
-        this.FileSystemImportManager.promises.importFile = sinon
-          .stub()
-          .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
-        this.RestoreManager.promises._getRangesFromHistory = sinon
-          .stub()
-          .resolves({ changes: this.tracked_changes, comments: this.comments })
-        this.EditorController.promises.addDocWithRanges = sinon
-          .stub()
-          .resolves(
-            (this.addedFile = { doc: 'mock-doc', folderId: 'mock-folder' })
-          )
-        this.data = await this.RestoreManager.promises.revertFile(
-          this.user_id,
-          this.project_id,
-          this.version,
-          this.pathname
-        )
-      })
-
-      it('should import the file', function () {
-        expect(
-          this.EditorController.promises.addDocWithRanges
-        ).to.have.been.calledWith(
-          this.project_id,
-          this.folder_id,
-          'foo.tex',
-          ['foo', 'bar', 'baz'],
-          { changes: this.tracked_changes, comments: this.remappedComments }
-        )
-      })
-
-      it('should return the created entity', function () {
-        expect(this.data).to.equal(this.addedFile)
-      })
-
-      it('should look up ranges', function () {
-        expect(
-          this.RestoreManager.promises._getRangesFromHistory
-        ).to.have.been.calledWith(this.project_id, this.version, this.pathname)
       })
     })
   })

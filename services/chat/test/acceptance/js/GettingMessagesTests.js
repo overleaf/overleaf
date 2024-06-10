@@ -114,4 +114,51 @@ describe('Getting messages', async function () {
       expect(thread2.messages[1].user_id).to.equal(userId2)
     })
   })
+
+  describe('from a list of threads', function () {
+    const projectId = new ObjectId().toString()
+    const threadId1 = new ObjectId().toString()
+    const threadId2 = new ObjectId().toString()
+    const threadId3 = new ObjectId().toString()
+
+    before(async function () {
+      const { response } = await ChatClient.sendMessage(
+        projectId,
+        threadId1,
+        userId1,
+        'one'
+      )
+      expect(response.statusCode).to.equal(201)
+      const { response: response2 } = await ChatClient.sendMessage(
+        projectId,
+        threadId2,
+        userId2,
+        'two'
+      )
+      expect(response2.statusCode).to.equal(201)
+      const { response: response3 } = await ChatClient.sendMessage(
+        projectId,
+        threadId1,
+        userId1,
+        'three'
+      )
+      expect(response3.statusCode).to.equal(201)
+    })
+
+    it('should contain a dictionary of threads with messages with populated users', async function () {
+      const { response, body: threads } = await ChatClient.generateThreadData(
+        projectId,
+        [threadId1, threadId3]
+      )
+      expect(response.statusCode).to.equal(200)
+      expect(Object.keys(threads).length).to.equal(1)
+      const thread1 = threads[threadId1]
+      expect(thread1.messages.length).to.equal(2)
+
+      expect(thread1.messages[0].content).to.equal('one')
+      expect(thread1.messages[0].user_id).to.equal(userId1)
+      expect(thread1.messages[1].content).to.equal('three')
+      expect(thread1.messages[1].user_id).to.equal(userId1)
+    })
+  })
 })

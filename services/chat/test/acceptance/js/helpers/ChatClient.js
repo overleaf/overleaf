@@ -154,3 +154,13 @@ export async function duplicateCommentThreads(projectId, threads) {
     },
   })
 }
+
+export async function generateThreadData(projectId, threads) {
+  return await asyncRequest({
+    method: 'post',
+    url: `/project/${projectId}/generate-thread-data`,
+    json: {
+      threads,
+    },
+  })
+}
