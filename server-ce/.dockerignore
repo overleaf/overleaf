@@ -2,3 +2,8 @@
 .git/
 services/git-bridge
 server-ce/test
+
+# omit scripts with extra dependencies
+services/web/scripts/plan-prices
+services/web/scripts/translations
+services/web/scripts/ukamf
