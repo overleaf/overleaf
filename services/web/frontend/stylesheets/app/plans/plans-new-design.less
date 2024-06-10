@@ -1,14 +1,53 @@
+@z-index-plans-new-tabs: 1;
+@z-index-plans-new-tabs-content: 0;
+
 .plans-new-design {
   .plans-new-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    @media (min-width: @screen-sm-min) {
+      border-left: 1px solid var(--neutral-20);
+      border-right: 1px solid var(--neutral-20);
+      border-bottom: 1px solid var(--neutral-20);
+      border-radius: 8px;
+    }
+
+    // this is the border between the tabs and the content, specifically on the left and right side
+    // this is necessary to enable top border radius on the plans-new-content
+    &::before {
+      content: '';
+      display: block;
+      z-index: @z-index-plans-new-tabs-content;
+      position: absolute;
+      top: -1px; // make border overlap with the border on .plans-new-tabs
+      width: 100%;
+      height: 20px; // arbitrary height since it's transparent, make sure that it's bigger than border radius
+      background: transparent;
+      border-top: 1px solid var(--neutral-20);
+
+      @media (min-width: @screen-sm-min) {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+      }
+    }
+  }
+
+  .plans-new-tabs-container {
+    z-index: @z-index-plans-new-tabs;
+
+    // explicit padding to tell that the bottom left and bottom right
+    // does not have bottom border defined in .plans-new-tabs
+    // technically unnecessary because padding is already defined in bootstrap column
+    padding: 0 16px;
   }
 
   .plans-new-tabs {
     display: flex;
     justify-content: center;
     gap: 8px;
+    border-bottom: 1px solid var(--neutral-20);
 
     .plans-new-tab {
       cursor: pointer;
