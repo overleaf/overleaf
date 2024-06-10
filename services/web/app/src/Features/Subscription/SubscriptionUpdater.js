@@ -186,7 +186,7 @@ async function restoreSubscription(subscriptionId) {
   // 4. notify analytics that members rejoined the subscription
   await _sendSubscriptionEventForAllMembers(
     subscriptionId,
-    'group-subscription-left'
+    'group-subscription-joined'
   )
 }
 
