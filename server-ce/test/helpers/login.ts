@@ -8,7 +8,7 @@ export function resetCreatedUsersCache() {
   createdUsers.clear()
 }
 
-async function createMongoUser({
+export async function createMongoUser({
   email,
   isAdmin = false,
 }: {
