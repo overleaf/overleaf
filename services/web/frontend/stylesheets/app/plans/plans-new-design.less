@@ -70,19 +70,62 @@
         &:focus {
           background-color: unset;
           border: 1px solid var(--emerald-green);
-          border-bottom-color: white;
         }
 
         &:hover {
           background-color: var(--neutral-20);
         }
+
+        // tab navigation focus style
+        &:focus-visible {
+          // https://stackoverflow.com/a/38571103
+          outline: auto 2px Highlight; // firefox
+          outline: auto 5px -webkit-focus-ring-color;
+          background-color: white;
+        }
       }
 
       &.active {
         .plans-new-tab-link {
-          border: 1px solid var(--emerald-green);
-          color: var(--emerald-green);
-          border-bottom-color: white;
+          border: 1px solid white;
+          position: relative;
+
+          // remove the border on tab focus
+          &:focus-visible {
+            &::before {
+              content: unset;
+            }
+          }
+
+          &::before {
+            content: '';
+            position: absolute;
+            background: border-box
+              linear-gradient(
+                to bottom,
+                @emerald-green 0%,
+                @neutral-20 85%,
+                @neutral-20 100%
+              );
+            -webkit-mask:
+              linear-gradient(white 0 0) padding-box,
+              linear-gradient(white 0 0);
+            mask:
+              linear-gradient(white 0 0) padding-box,
+              linear-gradient(white 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            border-top-right-radius: 8px;
+            border-top-left-radius: 8px;
+            border: 1px solid transparent;
+            border-bottom: 1px solid white;
+
+            // make the border overlap with the .plans-new-tab-link border
+            top: 0;
+            bottom: -2px;
+            left: -1px;
+            right: -1px;
+          }
 
           &:hover {
             background-color: unset;
