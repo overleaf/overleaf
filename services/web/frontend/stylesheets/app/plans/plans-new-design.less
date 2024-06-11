@@ -248,6 +248,22 @@
     }
   }
 
+  .plans-new-table-group {
+    thead th {
+      height: 346px;
+
+      .plans-new-table-header-price-container {
+        min-height: 85px;
+      }
+
+      .plans-new-table-header-title {
+        @media (max-width: @screen-md-max) {
+          font-size: 1rem; // 16px
+        }
+      }
+    }
+  }
+
   .plans-new-table-header {
     padding: @spacing-06 @spacing-08;
 
@@ -302,9 +318,21 @@
       color: var(--neutral-90);
     }
 
+    .plans-new-table-header-icon {
+      margin-top: @spacing-02;
+      font-size: 56px;
+      align-self: center;
+      color: var(--neutral-90);
+    }
+
     .plans-new-table-header-price-unit {
       font-size: 0.875rem; // 14px
       line-height: 1.428;
+    }
+
+    .plans-new-table-header-price-unit-total {
+      font-size: 0.75rem; // 12px
+      line-height: 1.333;
     }
 
     .plans-new-table-header-desc {
