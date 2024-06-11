@@ -23,19 +23,19 @@ services:
       ENABLE_CONVERSIONS: 'true'
       EMAIL_CONFIRMATION_DISABLED: 'true'
     healthcheck:
-      test: curl --fail http://localhost:3000/status || exit 1
+      test: curl --fail http://localhost:3000/status
       interval: 3s
-      timeout: 10s
-      retries: 10
+      timeout: 3s
+      retries: 30
 
   mongo:
     image: mongo:5.0.17
     command: '--replSet overleaf'
     healthcheck:
       test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
-      interval: 10s
-      timeout: 10s
-      retries: 5
+      interval: 3s
+      timeout: 3s
+      retries: 30
 
   redis:
     image: redis:7.2.1
@@ -106,7 +106,7 @@ services:
       mongo:
         condition: service_healthy
     healthcheck:
-      test: curl --fail http://localhost/status || exit 1
+      test: curl --fail http://localhost/status
       interval: 3s
-      timeout: 10s
-      retries: 10
+      timeout: 3s
+      retries: 30

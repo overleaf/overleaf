@@ -15,7 +15,7 @@ export function throttledRecompile() {
   return () =>
     cy.then(() => {
       const msSinceLastCompile = Date.now() - lastCompile
-      cy.wait(Math.max(0, 3_000 - msSinceLastCompile))
+      cy.wait(Math.max(0, 1_000 - msSinceLastCompile))
       cy.findByText('Recompile').click()
       queueReset()
     })

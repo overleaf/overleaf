@@ -1,21 +1,3 @@
-export async function setVars(vars = {}) {
-  return await fetchJSON('http://host-admin/set/vars', {
-    method: 'POST',
-    body: JSON.stringify({ vars, path: 'docker-compose.yml' }),
-  })
-}
-
-export async function setVersion({ pro = false, version = 'latest' }) {
-  return await fetchJSON('http://host-admin/set/version', {
-    method: 'POST',
-    body: JSON.stringify({
-      pro,
-      version,
-      path: 'docker-compose.yml',
-    }),
-  })
-}
-
 export async function dockerCompose(cmd: string, ...args: string[]) {
   return await fetchJSON(`http://host-admin/docker/compose/${cmd}`, {
     method: 'POST',
@@ -31,10 +13,17 @@ export async function mongoInit() {
   })
 }
 
+export async function resetData() {
+  return await fetchJSON('http://host-admin/reset/data', {
+    method: 'POST',
+  })
+}
+
 export async function reconfigure({
   pro = false,
   version = 'latest',
   vars = {},
+  withDataDir = false,
 }) {
   return await fetchJSON('http://host-admin/reconfigure', {
     method: 'POST',
@@ -42,6 +31,7 @@ export async function reconfigure({
       pro,
       version,
       vars,
+      withDataDir,
     }),
   })
 }

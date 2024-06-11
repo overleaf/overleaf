@@ -7,14 +7,15 @@ export function startWith({
   version = 'latest',
   vars = {},
   varsFn = () => ({}),
+  withDataDir = false,
 }) {
   before(async function () {
     Object.assign(vars, varsFn())
-    const cfg = JSON.stringify({ pro, version, vars })
+    const cfg = JSON.stringify({ pro, version, vars, withDataDir })
     if (lastConfig === cfg) return
 
     this.timeout(100 * 1000)
-    await reconfigure({ pro, version, vars })
+    await reconfigure({ pro, version, vars, withDataDir })
     lastConfig = cfg
   })
 }

@@ -12,7 +12,8 @@ const YAML = require('js-yaml')
 
 const PATHS = {
   DOCKER_COMPOSE_OVERRIDE: 'docker-compose.override.yml',
-  SANDBOXED_COMPILES_HOST_DIR: Path.join(__dirname, 'cypress/compiles'),
+  DATA_DIR: Path.join(__dirname, 'data'),
+  SANDBOXED_COMPILES_HOST_DIR: Path.join(__dirname, 'data/compiles'),
 }
 const IMAGES = {
   CE: process.env.IMAGE_TAG_CE.replace(/:.+/, ''),
@@ -43,6 +44,10 @@ function writeDockerComposeOverride(cfg) {
   fs.writeFileSync(PATHS.DOCKER_COMPOSE_OVERRIDE, YAML.dump(cfg))
 }
 
+function purgeDataDir() {
+  fs.rmSync(PATHS.DATA_DIR, { recursive: true, force: true })
+}
+
 const app = express()
 app.get('/status', (req, res) => {
   res.send('host-admin is up')
@@ -55,6 +60,7 @@ app.use((req, res, next) => {
   // Add CORS headers
   res.setHeader('Access-Control-Allow-Origin', 'http://sharelatex')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Max-Age', '3600')
   next()
 })
 
@@ -81,7 +87,7 @@ app.post(
         'sharelatex',
         'bash',
         '-c',
-        `source /etc/container_environment.sh && source /etc/overleaf/env.sh && cd ${JSON.stringify(cwd)} && node ${JSON.stringify(script)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
+        `source /etc/container_environment.sh && source /etc/overleaf/env.sh || source /etc/sharelatex/env.sh && cd ${JSON.stringify(cwd)} && node ${JSON.stringify(script)} ${args.map(a => JSON.stringify(a)).join(' ')}`,
       ],
       (error, stdout, stderr) => {
         res.json({
@@ -91,44 +97,6 @@ app.post(
         })
       }
     )
-  }
-)
-
-function setVersionDockerCompose({ pro, version }) {
-  const cfg = readDockerComposeOverride()
-
-  cfg.services.sharelatex.image = `${pro ? IMAGES.PRO : IMAGES.CE}:${version}`
-  cfg.services['git-bridge'].image = `quay.io/sharelatex/git-bridge:${version}`
-
-  writeDockerComposeOverride(cfg)
-}
-
-app.post(
-  '/set/version',
-  validate(
-    {
-      body: {
-        pro: Joi.boolean(),
-        version: Joi.string().required(),
-        path: Joi.allow(
-          'docker-compose.yml'
-          // When extending testing for Toolkit:
-          // 'config/version'
-        ),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    const { pro, version } = req.body
-    if (req.body.path === 'docker-compose.yml') {
-      try {
-        setVersionDockerCompose({ pro, version })
-      } catch (error) {
-        return res.json({ error })
-      }
-    }
-    res.json({})
   }
 )
 
@@ -149,17 +117,37 @@ const allowedVars = Joi.object(
       'ALL_TEX_LIVE_DOCKER_IMAGE_NAMES',
       'OVERLEAF_TEMPLATES_USER_ID',
       'OVERLEAF_NEW_PROJECT_TEMPLATE_LINKS',
+      // Old branding, used for upgrade tests
+      'SHARELATEX_MONGO_URL',
+      'SHARELATEX_REDIS_HOST',
     ].map(name => [name, Joi.string()])
   )
 )
 
-function setVarsDockerCompose({ vars }) {
+function setVarsDockerCompose({ pro, vars, version, withDataDir }) {
   const cfg = readDockerComposeOverride()
+
+  cfg.services.sharelatex.image = `${pro ? IMAGES.PRO : IMAGES.CE}:${version}`
+  cfg.services['git-bridge'].image = `quay.io/sharelatex/git-bridge:${version}`
 
   cfg.services.sharelatex.environment = vars
 
   if (cfg.services.sharelatex.environment.GIT_BRIDGE_ENABLED === 'true') {
     cfg.services.sharelatex.depends_on = ['git-bridge']
+  } else {
+    cfg.services.sharelatex.depends_on = []
+  }
+
+  const dataDirInContainer =
+    version === 'latest' || version >= '5.0'
+      ? '/var/lib/overleaf/data'
+      : '/var/lib/sharelatex/data'
+
+  cfg.services.sharelatex.volumes = []
+  if (withDataDir) {
+    cfg.services.sharelatex.volumes.push(
+      `${PATHS.DATA_DIR}:${dataDirInContainer}`
+    )
   }
 
   if (
@@ -172,44 +160,18 @@ function setVarsDockerCompose({ vars }) {
       process.env.TEX_LIVE_DOCKER_IMAGE
     cfg.services.sharelatex.environment.ALL_TEX_LIVE_DOCKER_IMAGES =
       process.env.ALL_TEX_LIVE_DOCKER_IMAGES
-    cfg.services.sharelatex.volumes = [
-      '/var/run/docker.sock:/var/run/docker.sock',
-      `${PATHS.SANDBOXED_COMPILES_HOST_DIR}:/var/lib/overleaf/data/compiles`,
-    ]
-  } else {
-    cfg.services.sharelatex.volumes = []
+    cfg.services.sharelatex.volumes.push(
+      '/var/run/docker.sock:/var/run/docker.sock'
+    )
+    if (!withDataDir) {
+      cfg.services.sharelatex.volumes.push(
+        `${PATHS.SANDBOXED_COMPILES_HOST_DIR}:${dataDirInContainer}/compiles`
+      )
+    }
   }
 
   writeDockerComposeOverride(cfg)
 }
-
-app.post(
-  '/set/vars',
-  validate(
-    {
-      body: {
-        vars: allowedVars,
-        path: Joi.allow(
-          'docker-compose.yml'
-          // When extending the testing for Toolkit:
-          // 'overleaf.rc', 'variables.env'
-        ),
-      },
-    },
-    { allowUnknown: false }
-  ),
-  (req, res) => {
-    if (req.body.path === 'docker-compose.yml') {
-      const { vars } = req.body
-      try {
-        setVarsDockerCompose({ vars })
-      } catch (error) {
-        return res.json({ error })
-      }
-    }
-    res.json({})
-  }
-)
 
 app.post(
   '/docker/compose/:cmd',
@@ -249,19 +211,27 @@ app.post(
 function mongoInit(callback) {
   execFile(
     'docker',
-    [
-      'compose',
-      'exec',
-      'mongo',
-      'mongo',
-      '--eval',
-      'rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] })',
-    ],
+    ['compose', 'up', '--detach', '--wait', 'mongo'],
     (error, stdout, stderr) => {
-      if (!error) {
-        mongoIsInitialized = true
-      }
-      callback(error, stdout, stderr)
+      if (error) return callback(error, stdout, stderr)
+
+      execFile(
+        'docker',
+        [
+          'compose',
+          'exec',
+          'mongo',
+          'mongo',
+          '--eval',
+          'rs.initiate({ _id: "overleaf", members: [ { _id: 0, host: "mongo:27017" } ] })',
+        ],
+        (error, stdout, stderr) => {
+          if (!error) {
+            mongoIsInitialized = true
+          }
+          callback(error, stdout, stderr)
+        }
+      )
     }
   )
 }
@@ -280,22 +250,22 @@ app.post(
         pro: Joi.boolean().required(),
         version: Joi.string().required(),
         vars: allowedVars,
+        withDataDir: Joi.boolean().optional(),
       },
     },
     { allowUnknown: false }
   ),
   (req, res) => {
+    const { pro, version, vars, withDataDir } = req.body
+    try {
+      setVarsDockerCompose({ pro, version, vars, withDataDir })
+    } catch (error) {
+      return res.json({ error })
+    }
+
     const doMongoInit = mongoIsInitialized ? cb => cb() : mongoInit
     doMongoInit((error, stdout, stderr) => {
       if (error) return res.json({ error, stdout, stderr })
-
-      const { pro, version, vars } = req.body
-      try {
-        setVersionDockerCompose({ pro, version })
-        setVarsDockerCompose({ vars })
-      } catch (error) {
-        return res.json({ error })
-      }
 
       execFile(
         'docker',
@@ -308,7 +278,34 @@ app.post(
   }
 )
 
+app.post('/reset/data', (req, res) => {
+  execFile(
+    'docker',
+    ['compose', 'stop', '--timeout=0', 'sharelatex'],
+    (error, stdout, stderr) => {
+      if (error) return res.json({ error, stdout, stderr })
+
+      try {
+        purgeDataDir()
+      } catch (error) {
+        return res.json({ error })
+      }
+
+      mongoIsInitialized = false
+      execFile(
+        'docker',
+        ['compose', 'down', '--timeout=0', '--volumes', 'mongo', 'redis'],
+        (error, stdout, stderr) => {
+          res.json({ error, stdout, stderr })
+        }
+      )
+    }
+  )
+})
+
 app.use(handleValidationErrors())
+
+purgeDataDir()
 
 // Init on startup
 mongoInit(err => {
