@@ -150,7 +150,7 @@
     "passport-local": "^1.0.0",
     "passport-oauth2": "^1.5.0",
     "passport-orcid": "0.0.4",
-    "pug": "^3.0.1",
+    "pug": "^3.0.3",
     "pug-runtime": "^3.0.1",
     "rate-limiter-flexible": "^2.4.1",
     "recurly": "^4.0.0",
