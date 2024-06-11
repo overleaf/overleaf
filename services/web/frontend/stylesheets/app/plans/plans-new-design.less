@@ -205,6 +205,11 @@
     align-items: center;
   }
 
+  .plans-new-tab-content {
+    width: 100%;
+    border: none;
+  }
+
   .plans-new-mobile {
     display: none;
 
@@ -218,6 +223,98 @@
 
     @media (max-width: @screen-xs-max) {
       display: none;
+    }
+  }
+
+  .plans-new-table {
+    width: 100%;
+
+    // overrides
+    th {
+      font-weight: normal;
+    }
+  }
+
+  .plans-new-table-4-column {
+    th,
+    td {
+      width: 25%;
+    }
+  }
+
+  .plans-new-table-individual {
+    thead th {
+      height: 235px;
+    }
+  }
+
+  .plans-new-table-header {
+    padding: @spacing-06 @spacing-08;
+
+    @media (max-width: @screen-md-max) {
+      padding: @spacing-05;
+    }
+  }
+
+  .plans-new-table-header-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+
+    .plans-new-table-header-title {
+      font-size: 1.25rem; // 20px
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: @spacing-04;
+      color: var(--neutral-90);
+      text-align: center;
+    }
+
+    .plans-new-table-header-nondiscounted-price {
+      position: absolute;
+      top: 50px;
+      left: 25px;
+      font-size: 1.125rem; // 18px
+      line-height: 1.778;
+      color: var(--neutral-40);
+      font-weight: 600;
+
+      @media (max-width: @screen-md-max) {
+        left: 0;
+      }
+
+      @media (max-width: @screen-sm-max) {
+        left: -22px;
+      }
+    }
+
+    .plans-new-table-header-price-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .plans-new-table-header-price {
+      font-size: 2.25rem; // 36px`
+      font-weight: 600;
+      line-height: 1.333;
+      color: var(--neutral-90);
+    }
+
+    .plans-new-table-header-price-unit {
+      font-size: 0.875rem; // 14px
+      line-height: 1.428;
+    }
+
+    .plans-new-table-header-desc {
+      margin-top: @spacing-05;
+      font-size: 0.875rem; // 14px
+      line-height: 1.428;
+    }
+
+    .plans-new-table-button {
+      margin-top: auto;
     }
   }
 }
