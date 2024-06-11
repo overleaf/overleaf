@@ -22,7 +22,7 @@ block content
 					.card
 						h1.card-header.text-capitalize #{translate("reconfirm")} #{translate("Account")}
 						p #{translate('reconfirm_explained')}&nbsp;
-							a(href=`mailto:${settings.adminEmail}`, ng-non-bindable) #{settings.adminEmail}
+							a(href=`mailto:${settings.adminEmail}`) #{settings.adminEmail}
 							| .
 						form(
 							data-ol-async-form

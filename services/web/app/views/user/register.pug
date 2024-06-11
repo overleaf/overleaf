@@ -6,15 +6,15 @@ block content
 			.row
 				.registration_message
 					if sharedProjectData.user_first_name !== undefined
-						h1(ng-non-bindable) #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:""})}
-							em(ng-non-bindable) #{sharedProjectData.project_name}
+						h1 #{translate("user_wants_you_to_see_project", {username:sharedProjectData.user_first_name, projectname:""})}
+							em #{sharedProjectData.project_name}
 						div
 							| #{translate("join_sl_to_view_project")}.
 						div
 							| #{translate("already_have_sl_account")}
 							a(href="/login")  #{translate("login_here")}
 					else if newTemplateData.templateName !== undefined
-						h1(ng-non-bindable) #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
+						h1 #{translate("register_to_edit_template", {templateName:newTemplateData.templateName})}
 
 						div #{translate("already_have_sl_account")}
 							a(href="/login")  #{translate("login_here")}
@@ -27,6 +27,6 @@ block content
 						p
 							| Please contact
 							|
-							strong(ng-non-bindable) #{settings.adminEmail}
+							strong #{settings.adminEmail}
 							|
 							| to create an account.

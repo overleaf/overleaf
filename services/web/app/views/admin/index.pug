@@ -23,7 +23,7 @@ block content
 									id='system-messages'
 								)
 									each message in systemMessages
-										.alert.alert-info.row-spaced(ng-non-bindable) #{message.content}
+										.alert.alert-info.row-spaced #{message.content}
 									hr
 									form(method='post', action='/admin/messages')
 										input(name="_csrf", type="hidden", value=csrfToken)
@@ -43,10 +43,10 @@ block content
 									.row-spaced
 										ul
 											each agents, url in openSockets
-												li(ng-non-bindable) #{url} - total : #{agents.length}
+												li #{url} - total : #{agents.length}
 													ul
 														each agent in agents
-															li(ng-non-bindable) #{agent}
+															li #{agent}
 
 								.tab-pane(
 									role="tabpanel"
