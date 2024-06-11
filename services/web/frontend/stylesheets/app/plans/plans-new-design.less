@@ -233,6 +233,17 @@
     th {
       font-weight: normal;
     }
+
+    // dynamic height on table head
+    thead {
+      tr {
+        height: 100%;
+
+        th {
+          height: 100%;
+        }
+      }
+    }
   }
 
   .plans-new-table-4-column {
@@ -242,24 +253,15 @@
     }
   }
 
-  .plans-new-table-individual {
-    thead th {
-      height: 235px;
-    }
-  }
-
   .plans-new-table-group {
-    thead th {
-      height: 346px;
+    .plans-new-table-header-price-container {
+      min-height: 85px;
+    }
 
-      .plans-new-table-header-price-container {
-        min-height: 85px;
-      }
-
-      .plans-new-table-header-title {
-        @media (max-width: @screen-md-max) {
-          font-size: 1rem; // 16px
-        }
+    // css specificity issue
+    thead tr th .plans-new-table-header-title {
+      @media (max-width: @screen-md-max) {
+        font-size: 1rem; // 16px
       }
     }
   }
