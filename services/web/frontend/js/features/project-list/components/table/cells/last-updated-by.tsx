@@ -12,11 +12,11 @@ export const LastUpdatedBy: FC<{
   const userName = getUserName(lastUpdatedBy)
 
   return (
-    <span>
+    <>
       {t('last_updated_date_by_x', {
         lastUpdatedDate,
         person: userName === 'You' ? t('you') : userName,
       })}
-    </span>
+    </>
   )
 }
