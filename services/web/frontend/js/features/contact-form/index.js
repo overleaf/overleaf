@@ -22,7 +22,7 @@ document
     })
   })
 
-document.querySelectorAll('[data-ol-contact-form').forEach(el => {
+document.querySelectorAll('[data-ol-contact-form]').forEach(el => {
   el.addEventListener('submit', function (e) {
     const emailValue = document.querySelector(
       '[data-ol-contact-form-email-input]'
