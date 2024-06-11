@@ -1,0 +1,17 @@
+--- a/services/web/frontend/js/features/mathjax/load-mathjax.ts
++++ b/services/web/frontend/js/features/mathjax/load-mathjax.ts
+@@ -36,6 +36,15 @@ export const loadMathJax = async () => {
+         },
+         startup: {
+           typeset: false,
++          ready() {
++            window.MathJax.startup.defaultReady()
++            const safe = window.MathJax.startup.document.safe
++            safe.filterAttributes.set('fontfamily', 'filterFontFamily')
++            safe.filterMethods.filterFontFamily = (
++              _safe: any,
++              family: string
++            ) => family.split(/;/)[0]
++          },
+         },
+       }
