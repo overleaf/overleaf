@@ -418,19 +418,6 @@ module.exports = CompileController = {
 
       const qs = {}
 
-      if (req.params.file === 'output.zip' && req.query?.files) {
-        /**
-         * The output.zip file is generated on the fly and allows either:
-         *
-         * 1. All files to be downloaded (no files query parameter)
-         * 2. A specific set of files to be downloaded (files query parameter)
-         *
-         * As the frontend separates the PDF download and ignores several other output
-         * files we will generally need to tell CLSI specifically what is required.
-         */
-        qs.files = req.query.files
-      }
-
       const url = CompileController._getFileUrl(
         projectId,
         userId,
@@ -606,20 +593,10 @@ module.exports = CompileController = {
           return next(err)
         }
         url = new URL(`${Settings.apis.clsi.url}${url}`)
-
-        const params = new URLSearchParams(persistenceOptions.qs)
-
-        for (const [key, value] of Object.entries(qs)) {
-          if (Array.isArray(value)) {
-            for (const v of value) {
-              params.append(key, v)
-            }
-            continue
-          }
-          params.append(key, value)
-        }
-
-        url.search = params.toString()
+        url.search = new URLSearchParams({
+          ...persistenceOptions.qs,
+          ...qs,
+        }).toString()
         const timer = new Metrics.Timer(
           'proxy_to_clsi',
           1,

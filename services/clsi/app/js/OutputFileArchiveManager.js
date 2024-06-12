@@ -1,9 +1,8 @@
-let OutputFileArchiveManager
 const archiver = require('archiver')
 const OutputCacheManager = require('./OutputCacheManager')
 const OutputFileFinder = require('./OutputFileFinder')
 const Settings = require('@overleaf/settings')
-const { open } = require('node:fs/promises')
+const { open, realpath } = require('node:fs/promises')
 const path = require('path')
 const { NotFoundError } = require('./Errors')
 
@@ -17,23 +16,38 @@ function getContentDir(projectId, userId) {
   return `${Settings.path.outputDir}/${subDir}/`
 }
 
-module.exports = OutputFileArchiveManager = {
-  async archiveFilesForBuild(projectId, userId, build, files = []) {
-    const validFiles = await (files.length > 0
-      ? this._getRequestedOutputFiles(projectId, userId, build, files)
-      : this._getAllOutputFiles(projectId, userId, build))
+/**
+ * Is the provided path a symlink?
+ * @param {string} path
+ * @return {Promise<boolean>}
+ */
+async function isSymlink(path) {
+  try {
+    const realPath = await realpath(path)
+    return realPath !== path
+  } catch (error) {
+    if (error.code === 'ELOOP') {
+      return true
+    }
+    throw error
+  }
+}
+
+module.exports = {
+  async archiveFilesForBuild(projectId, userId, build) {
+    const validFiles = await this._getAllOutputFiles(projectId, userId, build)
 
     const archive = archiver('zip')
 
-    const missingFiles = files.filter(
-      file => !validFiles.includes(path.basename(file))
-    )
+    const missingFiles = []
 
     for (const file of validFiles) {
       try {
-        const fileHandle = await open(file, 'r')
-        const fileStream = fileHandle.createReadStream()
-        archive.append(fileStream, { name: path.basename(file) })
+        if (!(await isSymlink(file))) {
+          const fileHandle = await open(file, 'r')
+          const fileStream = fileHandle.createReadStream()
+          archive.append(fileStream, { name: path.basename(file) })
+        }
       } catch (error) {
         missingFiles.push(file)
       }
@@ -59,9 +73,11 @@ module.exports = OutputFileArchiveManager = {
         `${contentDir}${OutputCacheManager.path(build, '.')}`
       )
 
-      return outputFiles.map(
-        ({ path }) => `${contentDir}${OutputCacheManager.path(build, path)}`
-      )
+      return outputFiles
+        .filter(({ path }) => path !== 'output.pdf')
+        .map(
+          ({ path }) => `${contentDir}${OutputCacheManager.path(build, path)}`
+        )
     } catch (error) {
       if (
         error.code === 'ENOENT' ||
@@ -72,17 +88,5 @@ module.exports = OutputFileArchiveManager = {
       }
       throw error
     }
-  },
-
-  async _getRequestedOutputFiles(projectId, userId, build, files) {
-    const outputFiles = await OutputFileArchiveManager._getAllOutputFiles(
-      projectId,
-      userId,
-      build
-    )
-
-    return files.filter(file =>
-      outputFiles.some(outputFile => file === path.basename(outputFile))
-    )
   },
 }

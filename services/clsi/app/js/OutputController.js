@@ -8,14 +8,12 @@ async function createOutputZip(req, res) {
     user_id: userId,
     build_id: buildId,
   } = req.params
-  const files = Array.isArray(req.query.files) ? req.query.files : []
-  logger.debug({ projectId, userId, buildId, files }, 'Will create zip file')
+  logger.debug({ projectId, userId, buildId }, 'Will create zip file')
 
   const archive = await OutputFileArchiveManager.archiveFilesForBuild(
     projectId,
     userId,
-    buildId,
-    files
+    buildId
   )
 
   archive.on('error', err => {
