@@ -6,6 +6,10 @@ const { open, realpath } = require('node:fs/promises')
 const path = require('path')
 const { NotFoundError } = require('./Errors')
 
+// NOTE: Updating this list requires a corresponding change in
+// * services/web/frontend/js/features/pdf-preview/util/file-list.js
+const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
+
 function getContentDir(projectId, userId) {
   let subDir
   if (userId != null) {
@@ -74,7 +78,10 @@ module.exports = {
       )
 
       return outputFiles
-        .filter(({ path }) => path !== 'output.pdf')
+        .filter(
+          // Ignore the pdf and also ignore the files ignored by the frontend.
+          ({ path }) => path !== 'output.pdf' && !ignoreFiles.includes(path)
+        )
         .map(
           ({ path }) => `${contentDir}${OutputCacheManager.path(build, path)}`
         )

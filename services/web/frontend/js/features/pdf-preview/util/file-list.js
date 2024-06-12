@@ -1,4 +1,6 @@
 const topFileTypes = ['bbl', 'gls', 'ind']
+// NOTE: Updating this list requires a corresponding change in
+// * services/clsi/app/js/OutputFileArchiveManager.js
 const ignoreFiles = ['output.fls', 'output.fdb_latexmk']
 
 export const buildFileList = (
