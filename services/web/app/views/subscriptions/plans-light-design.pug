@@ -1,4 +1,5 @@
 extends ../layout-website-redesign
+include ../_mixins/quote
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
@@ -12,7 +13,7 @@ block append meta
 
 block content
 	main.website-redesign#main-content
-		.plans
+		.plans-page
 			.container
 				//- if showInrGeoBanner
 				//- 	div.notification.notification-type-success.text-centered
@@ -37,9 +38,20 @@ block content
 					
 				+currency_and_payment_methods()
 
-				include ./plans/_university_info
+				//- TODO: hide for groups/students
+				.plans-page-quote-row
+					+collinsQuote1()
 
-				include ./plans/_quotes
+				//- TODO: hide for individual/students
+				.plans-page-quote-row
+					+bennettQuote1()
+
+				//- TODO: hide for groups/students
+				.plans-page-quote-row
+					+collinsQuote2()
+
+
+				include ./plans/_university_info
 
 				include ./plans/_faq
 
