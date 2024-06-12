@@ -7,7 +7,6 @@ const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const FeaturesUpdater = require('./FeaturesUpdater')
-const planFeatures = require('./planFeatures')
 const plansConfig = require('./plansConfig')
 const interstitialPaymentConfig = require('./interstitialPaymentConfig')
 const GroupPlansData = require('./GroupPlansData')
@@ -120,7 +119,6 @@ async function plansPage(req, res) {
     language,
     formatCurrency,
     recommendedCurrency: currency,
-    planFeatures,
     plansConfig,
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
@@ -166,7 +164,6 @@ async function plansPageLightDesign(req, res) {
     language,
     formatCurrency,
     recommendedCurrency: currency,
-    planFeatures,
     plansConfig,
     groupPlans: GroupPlansData,
     groupPlanModalOptions,
