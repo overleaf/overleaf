@@ -10,6 +10,8 @@ const fs = require('fs')
 const Path = require('path')
 const { Cookie } = require('tough-cookie')
 const COOKIE_DOMAIN = settings.cookieDomain
+// The cookie domain has a leading '.' but the cookie jar stores it without.
+const DEFAULT_COOKIE_URL = `https://${COOKIE_DOMAIN.replace(/^\./, '')}/`
 
 let count = settings.test.counterInit
 
@@ -196,17 +198,21 @@ class User {
   /* Return the session cookie, url decoded. Use the option {raw:true} to get the original undecoded value */
 
   sessionCookie(options) {
-    const cookie = Cookie.parse(
-      this.jar.getCookieString(
-        // The cookie domain has a leading '.' but
-        // the cookie jar stores it without.
-        'https://' + COOKIE_DOMAIN.replace(/^\./, '') + '/'
-      )
-    )
+    const cookie = Cookie.parse(this.jar.getCookieString(DEFAULT_COOKIE_URL))
     if (cookie?.value && !options?.raw) {
       cookie.value = decodeURIComponent(cookie.value)
     }
     return cookie
+  }
+
+  /* Set the session cookie from a string and store it in the cookie jar, so that it will be used
+     for subsequent requests. */
+
+  setSessionCookie(cookie) {
+    const sessionCookie = request.cookie(
+      `${settings.cookieName}=${cookie}; Domain=${COOKIE_DOMAIN}; Max-age=3600; Path=/; SameSite=Lax`
+    )
+    this.jar.setCookie(sessionCookie, DEFAULT_COOKIE_URL)
   }
 
   getEmailConfirmationCode(callback) {
@@ -1247,7 +1253,7 @@ class User {
 }
 
 User.promises = promisifyClass(User, {
-  without: ['setExtraAttributes', 'sessionCookie'],
+  without: ['setExtraAttributes', 'sessionCookie', 'setSessionCookie'],
 })
 
 User.promises.prototype.doRequest = async function (method, params) {
