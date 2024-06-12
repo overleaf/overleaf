@@ -47,9 +47,20 @@ module.exports = Client = {
       if (error != null) {
         return callback(error)
       }
-      const secret = Settings.security.sessionSecret
-      const cookieKey = 's:' + signature.sign(sessionId, secret)
-      Client.cookie = `${Settings.cookieName}=${cookieKey}`
+      Client.cookieSignedWith = {}
+      // prepare cookie strings for all supported session secrets
+      for (const secretName of [
+        'sessionSecret',
+        'sessionSecretFallback',
+        'sessionSecretUpcoming',
+      ]) {
+        const secret = Settings.security[secretName]
+        const cookieKey = 's:' + signature.sign(sessionId, secret)
+        Client.cookieSignedWith[secretName] =
+          `${Settings.cookieName}=${cookieKey}`
+      }
+      // default to the current session secret
+      Client.cookie = Client.cookieSignedWith.sessionSecret
       return callback()
     })
   },

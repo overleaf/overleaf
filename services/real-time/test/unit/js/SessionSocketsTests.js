@@ -15,8 +15,13 @@ const modulePath = '../../../app/js/SessionSockets'
 const sinon = require('sinon')
 
 describe('SessionSockets', function () {
-  before(function () {
-    this.SessionSocketsModule = SandboxedModule.require(modulePath)
+  beforeEach(function () {
+    this.metrics = { inc: sinon.stub() }
+    this.SessionSocketsModule = SandboxedModule.require(modulePath, {
+      requires: {
+        '@overleaf/metrics': this.metrics,
+      },
+    })
     this.io = new EventEmitter()
     this.id1 = Math.random().toString()
     this.id2 = Math.random().toString()
@@ -49,7 +54,7 @@ describe('SessionSockets', function () {
   })
 
   describe('without cookies', function () {
-    before(function () {
+    beforeEach(function () {
       return (this.socket = { handshake: {} })
     })
 
@@ -61,16 +66,25 @@ describe('SessionSockets', function () {
       })
     })
 
-    return it('should not query redis', function (done) {
+    it('should not query redis', function (done) {
       return this.checkSocket(this.socket, () => {
         expect(this.sessionStore.get.called).to.equal(false)
+        return done()
+      })
+    })
+
+    it('should increment the session.cookie metric with status "none"', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.metrics.inc).to.be.calledWith('session.cookie', 1, {
+          status: 'none',
+        })
         return done()
       })
     })
   })
 
   describe('with a different cookie', function () {
-    before(function () {
+    beforeEach(function () {
       return (this.socket = { handshake: { _signedCookies: { other: 1 } } })
     })
 
@@ -82,7 +96,7 @@ describe('SessionSockets', function () {
       })
     })
 
-    return it('should not query redis', function (done) {
+    it('should not query redis', function (done) {
       return this.checkSocket(this.socket, () => {
         expect(this.sessionStore.get.called).to.equal(false)
         return done()
@@ -90,8 +104,40 @@ describe('SessionSockets', function () {
     })
   })
 
+  describe('with a cookie with an invalid signature', function () {
+    beforeEach(function () {
+      return (this.socket = {
+        handshake: { _signedCookies: { 'ol.sid': false } },
+      })
+    })
+
+    it('should return a lookup error', function (done) {
+      return this.checkSocket(this.socket, error => {
+        expect(error).to.exist
+        expect(error.message).to.equal('could not look up session by key')
+        return done()
+      })
+    })
+
+    it('should not query redis', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.sessionStore.get.called).to.equal(false)
+        return done()
+      })
+    })
+
+    it('should increment the session.cookie metric with status=bad-signature', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.metrics.inc).to.be.calledWith('session.cookie', 1, {
+          status: 'bad-signature',
+        })
+        return done()
+      })
+    })
+  })
+
   describe('with a valid cookie and a failing session lookup', function () {
-    before(function () {
+    beforeEach(function () {
       return (this.socket = {
         handshake: { _signedCookies: { 'ol.sid': 'error' } },
       })
@@ -104,17 +150,26 @@ describe('SessionSockets', function () {
       })
     })
 
-    return it('should return a redis error', function (done) {
+    it('should return a redis error', function (done) {
       return this.checkSocket(this.socket, error => {
         expect(error).to.exist
         expect(error.message).to.equal('Redis: something went wrong')
         return done()
       })
     })
+
+    it('should increment the session.cookie metric with status=error', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.metrics.inc).to.be.calledWith('session.cookie', 1, {
+          status: 'error',
+        })
+        return done()
+      })
+    })
   })
 
   describe('with a valid cookie and no matching session', function () {
-    before(function () {
+    beforeEach(function () {
       return (this.socket = {
         handshake: { _signedCookies: { 'ol.sid': 'unknownId' } },
       })
@@ -127,17 +182,26 @@ describe('SessionSockets', function () {
       })
     })
 
-    return it('should return a lookup error', function (done) {
+    it('should return a lookup error', function (done) {
       return this.checkSocket(this.socket, error => {
         expect(error).to.exist
         expect(error.message).to.equal('could not look up session by key')
         return done()
       })
     })
+
+    it('should increment the session.cookie metric with status=missing', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.metrics.inc).to.be.calledWith('session.cookie', 1, {
+          status: 'missing',
+        })
+        return done()
+      })
+    })
   })
 
   describe('with a valid cookie and a matching session', function () {
-    before(function () {
+    beforeEach(function () {
       return (this.socket = {
         handshake: { _signedCookies: { 'ol.sid': this.id1 } },
       })
@@ -157,17 +221,26 @@ describe('SessionSockets', function () {
       })
     })
 
-    return it('should return the session', function (done) {
+    it('should return the session', function (done) {
       return this.checkSocket(this.socket, (error, s, session) => {
         if (error) return done(error)
         expect(session).to.deep.equal({ user: { _id: '123' } })
         return done()
       })
     })
+
+    it('should increment the session.cookie metric with status=signed', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.metrics.inc).to.be.calledWith('session.cookie', 1, {
+          status: 'signed',
+        })
+        return done()
+      })
+    })
   })
 
-  return describe('with a different valid cookie and matching session', function () {
-    before(function () {
+  describe('with a different valid cookie and matching session', function () {
+    beforeEach(function () {
       return (this.socket = {
         handshake: { _signedCookies: { 'ol.sid': this.id2 } },
       })
@@ -187,10 +260,19 @@ describe('SessionSockets', function () {
       })
     })
 
-    return it('should return the other session', function (done) {
+    it('should return the other session', function (done) {
       return this.checkSocket(this.socket, (error, s, session) => {
         if (error) return done(error)
         expect(session).to.deep.equal({ user: { _id: 'abc' } })
+        return done()
+      })
+    })
+
+    it('should increment the session.cookie metric with status=error', function (done) {
+      return this.checkSocket(this.socket, () => {
+        expect(this.metrics.inc).to.be.calledWith('session.cookie', 1, {
+          status: 'signed',
+        })
         return done()
       })
     })

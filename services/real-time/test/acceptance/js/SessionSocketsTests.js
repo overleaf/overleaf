@@ -1,16 +1,7 @@
-/* eslint-disable
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const RealTimeClient = require('./helpers/RealTimeClient')
 const FixturesManager = require('./helpers/FixturesManager')
 const Settings = require('@overleaf/settings')
+const signature = require('cookie-signature')
 const { expect } = require('chai')
 
 describe('SessionSockets', function () {
@@ -32,28 +23,28 @@ describe('SessionSockets', function () {
 
   describe('without cookies', function () {
     beforeEach(function () {
-      return (RealTimeClient.cookie = null)
+      RealTimeClient.cookie = null
     })
 
-    return it('should return a lookup error', function (done) {
-      return this.checkSocket(error => {
+    it('should return a lookup error', function (done) {
+      this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
-        return done()
+        done()
       })
     })
   })
 
   describe('with a different cookie', function () {
     beforeEach(function () {
-      return (RealTimeClient.cookie = 'some.key=someValue')
+      RealTimeClient.cookie = 'some.key=someValue'
     })
 
-    return it('should return a lookup error', function (done) {
-      return this.checkSocket(error => {
+    it('should return a lookup error', function (done) {
+      this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
-        return done()
+        done()
       })
     })
   })
@@ -67,39 +58,82 @@ describe('SessionSockets', function () {
         RealTimeClient.cookie = `${
           Settings.cookieName
         }=${RealTimeClient.cookie.slice(17, 49)}`
-        return done()
+        done()
       })
-      return null
     })
 
-    return it('should return a lookup error', function (done) {
-      return this.checkSocket(error => {
+    it('should return a lookup error', function (done) {
+      this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
-        return done()
+        done()
       })
     })
   })
 
   describe('with a valid cookie and no matching session', function () {
     beforeEach(function () {
-      return (RealTimeClient.cookie = `${Settings.cookieName}=unknownId`)
+      RealTimeClient.cookie = `${Settings.cookieName}=unknownId`
     })
 
-    return it('should return a lookup error', function (done) {
-      return this.checkSocket(error => {
+    it('should return a lookup error', function (done) {
+      this.checkSocket(error => {
         expect(error).to.exist
         expect(error.message).to.equal('invalid session')
-        return done()
+        done()
       })
     })
   })
 
-  return describe('with a valid cookie and a matching session', function () {
-    return it('should not return an error', function (done) {
-      return this.checkSocket(error => {
+  describe('with a valid cookie and a matching session', function () {
+    it('should not return an error', function (done) {
+      this.checkSocket(error => {
         expect(error).to.not.exist
-        return done()
+        done()
+      })
+    })
+  })
+
+  describe('with a cookie signed by the fallback key and a matching session', function () {
+    beforeEach(function () {
+      RealTimeClient.cookie =
+        RealTimeClient.cookieSignedWith.sessionSecretFallback
+    })
+    it('should not return an error', function (done) {
+      this.checkSocket(error => {
+        expect(error).to.not.exist
+        done()
+      })
+    })
+  })
+
+  describe('with a cookie signed by the upcoming key and a matching session', function () {
+    beforeEach(function () {
+      RealTimeClient.cookie =
+        RealTimeClient.cookieSignedWith.sessionSecretUpcoming
+    })
+    it('should not return an error', function (done) {
+      this.checkSocket(error => {
+        expect(error).to.not.exist
+        done()
+      })
+    })
+  })
+
+  describe('with a cookie signed with an unrecognized secret and a matching session', function () {
+    beforeEach(function () {
+      const [sessionKey] = RealTimeClient.cookie.split('.')
+      // sign the session key with a unrecognized secret
+      RealTimeClient.cookie = signature.sign(
+        sessionKey,
+        'unrecognised-session-secret'
+      )
+    })
+    it('should return a lookup error', function (done) {
+      this.checkSocket(error => {
+        expect(error).to.exist
+        expect(error.message).to.equal('invalid session')
+        done()
       })
     })
   })
