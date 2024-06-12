@@ -1286,6 +1286,35 @@ describe('SyncManager', function () {
           },
         ])
       })
+
+      it('treats zero length comments as detached comments', async function () {
+        this.loadedSnapshotDoc.getComments.returns({
+          toArray: sinon.stub().returns([new Comment('comment1', [])]),
+        })
+        this.comments = [makeComment('comment1', 16, '')]
+        this.resolvedCommentIds = []
+
+        const updates = [
+          docContentSyncUpdate(
+            this.persistedDoc,
+            this.persistedDocContent,
+            {
+              comments: this.comments,
+            },
+            this.resolvedCommentIds
+          ),
+        ]
+
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([])
+      })
     })
 
     describe('syncing tracked changes', function () {

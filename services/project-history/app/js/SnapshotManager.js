@@ -126,6 +126,18 @@ async function getRangesSnapshot(projectId, version, pathname) {
   for (const comment of comments) {
     trackedDeletionOffset = 0
     let trackedDeletionIndex = 0
+    if (comment.ranges.length === 0) {
+      // Translate detached comments into zero length comments at position 0
+      docUpdaterCompatibleComments.push({
+        op: {
+          p: 0,
+          c: '',
+          t: comment.id,
+          resolved: comment.resolved,
+        },
+      })
+      continue
+    }
     for (const commentRange of comment.ranges) {
       let commentRangeContent = ''
       let offsetFromOverlappingRangeAtStart = 0

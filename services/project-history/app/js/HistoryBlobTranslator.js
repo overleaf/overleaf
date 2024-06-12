@@ -91,10 +91,6 @@ export function createRangeBlobDataFromUpdate(update) {
   /** @type {Map<string, {ranges: Range[], resolved: boolean}>} */
   const commentMap = new Map()
   for (const comment of comments) {
-    const range = new Range(
-      comment.op.hpos ?? comment.op.p,
-      comment.op.hlen ?? comment.op.c.length
-    )
     const id = comment.op.t
     if (!commentMap.has(id)) {
       commentMap.set(id, {
@@ -109,7 +105,13 @@ export function createRangeBlobDataFromUpdate(update) {
     if (entry.resolved !== (comment.op.resolved ?? false)) {
       throw new Error('Mismatching resolved status for comment')
     }
-    entry.ranges.push(range)
+
+    const commentLength = comment.op.c.length
+    if (commentLength > 0) {
+      // Empty comments in operations are translated to detached comments
+      const range = new Range(comment.op.hpos ?? comment.op.p, commentLength)
+      entry.ranges.push(range)
+    }
   }
   const commentList = new CommentList(
     [...commentMap.entries()].map(

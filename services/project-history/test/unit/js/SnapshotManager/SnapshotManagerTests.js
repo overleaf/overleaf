@@ -757,6 +757,7 @@ Four five six\
               ],
               resolved: false,
             },
+            { id: 'comment-2', ranges: [], resolved: true },
           ],
         })
         this.data = await this.SnapshotManager.promises.getRangesSnapshot(
@@ -785,6 +786,19 @@ Four five six\
         expect(this.data.comments[0].op.resolved).to.be.false
         expect(this.data.comments[1].op.resolved).to.be.false
         expect(this.data.comments[2].op.resolved).to.be.false
+        expect(this.data.comments[3].op.resolved).to.be.true
+      })
+
+      it('should include thread id', function () {
+        expect(this.data.comments[0].op.t).to.eq('comment-1')
+        expect(this.data.comments[1].op.t).to.eq('comment-1')
+        expect(this.data.comments[2].op.t).to.eq('comment-1')
+        expect(this.data.comments[3].op.t).to.eq('comment-2')
+      })
+
+      it('should translated detached comment to zero length op', function () {
+        expect(this.data.comments[3].op.p).to.eq(0)
+        expect(this.data.comments[3].op.c).to.eq('')
       })
     })
 

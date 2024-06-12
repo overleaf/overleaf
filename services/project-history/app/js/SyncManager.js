@@ -906,13 +906,18 @@ class SyncUpdateExpander {
  * @param {Comment} expectedComment
  */
 function commentRangesAreInSync(persistedComment, expectedComment) {
+  const expectedPos = expectedComment.op.hpos ?? expectedComment.op.p
+  const expectedLength = expectedComment.op.hlen ?? expectedComment.op.c.length
+  if (expectedLength === 0) {
+    // A zero length comment from RangesManager is a detached comment in history
+    return persistedComment.ranges.length === 0
+  }
+
   if (persistedComment.ranges.length !== 1) {
     // The editor only supports single range comments
     return false
   }
   const persistedRange = persistedComment.ranges[0]
-  const expectedPos = expectedComment.op.hpos ?? expectedComment.op.p
-  const expectedLength = expectedComment.op.hlen ?? expectedComment.op.c.length
   return (
     persistedRange.pos === expectedPos &&
     persistedRange.length === expectedLength

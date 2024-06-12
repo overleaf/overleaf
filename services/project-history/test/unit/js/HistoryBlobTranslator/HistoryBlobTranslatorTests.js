@@ -66,6 +66,25 @@ describe('HistoryBlobTranslator', function () {
       })
     })
 
+    describe('for update with zero length comments', function () {
+      beforeEach(function () {
+        this.result = createRangeBlobDataFromUpdate(
+          update('pathname', this.text, {
+            changes: [],
+            comments: [
+              { op: { c: '', p: 4, t: 'comment-1', resolved: false } },
+            ],
+          })
+        )
+      })
+      it('should treat them as detached comments', function () {
+        expect(this.result).to.deep.equal({
+          comments: [{ id: 'comment-1', ranges: [] }],
+          trackedChanges: [],
+        })
+      })
+    })
+
     describe('for update with ranges object with only comments', function () {
       it('should return unmoved ranges', function () {
         const result = createRangeBlobDataFromUpdate(
