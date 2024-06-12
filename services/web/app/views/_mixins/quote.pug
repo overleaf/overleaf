@@ -1,0 +1,15 @@
+mixin quoteLargeTextCentered(quote, person, position, affiliation, link, pictureUrl, pictureAltAttr)
+	blockquote.quote-large-text-centered
+		.quote !{quote}
+		if pictureUrl
+			.quote-img
+				img(src=pictureUrl alt=pictureAltAttr)
+		footer
+			div.quote-person
+				strong #{person}
+			if person && position
+				div #{position}
+				if affiliation
+					div #{affiliation}
+			if link
+				.quote-link !{link}
