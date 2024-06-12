@@ -1,5 +1,6 @@
 const { callbackify } = require('util')
 const request = require('./request')
+const metrics = require('@overleaf/metrics')
 
 async function getMetric(matcher) {
   const { body } = await request.promises.request('/metrics')
@@ -8,8 +9,16 @@ async function getMetric(matcher) {
   return parseInt(found.split(' ')[1], 0)
 }
 
+/* sets all metrics to zero
+   https://github.com/siimon/prom-client?tab=readme-ov-file#resetting-metrics
+*/
+function resetMetrics() {
+  metrics.register.resetMetrics()
+}
+
 module.exports = {
   getMetric: callbackify(getMetric),
+  resetMetrics,
   promises: {
     getMetric,
   },

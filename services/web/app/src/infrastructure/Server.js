@@ -16,6 +16,7 @@ const sessionsRedisClient = UserSessionsRedis.client()
 const SessionAutostartMiddleware = require('./SessionAutostartMiddleware')
 const AnalyticsManager = require('../Features/Analytics/AnalyticsManager')
 const session = require('express-session')
+const CookieMetrics = require('./CookieMetrics')
 const CustomSessionStore = require('./CustomSessionStore')
 const bodyParser = require('./BodyParserWrapper')
 const methodOverride = require('method-override')
@@ -165,6 +166,7 @@ const sessionSecrets = [
 ].filter(Boolean)
 
 webRouter.use(cookieParser(sessionSecrets))
+webRouter.use(CookieMetrics.middleware)
 SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
 Modules.registerMiddleware(webRouter, 'sessionMiddleware', {
   store: sessionStore,
