@@ -247,12 +247,12 @@
     display: none;
 
     @media (max-width: @screen-xs-max) {
-      display: flex;
+      display: block;
     }
   }
 
   .plans-new-desktop {
-    display: flex;
+    display: block;
 
     @media (max-width: @screen-xs-max) {
       display: none;
@@ -279,11 +279,19 @@
     }
   }
 
+  @table-4-column-width: 25%;
+
+  // TODO: review the usage of this class
+  // and check whether we can move the rule directly in the .plans-new-table
   .plans-new-table-4-column {
     th,
     td {
-      width: 25%;
+      width: @table-4-column-width;
     }
+  }
+
+  .plans-new-table-4-column.plans-new-table-student {
+    margin-left: @table-4-column-width / 2;
   }
 
   .plans-new-table-group {
