@@ -2,6 +2,12 @@
   display: inline-flex;
 }
 
+.dropdown-header {
+  @include body-xs;
+  padding: var(--spacing-05) var(--spacing-06) var(--spacing-02)
+    var(--spacing-04);
+}
+
 .dropdown-menu {
   @include shadow-md;
 

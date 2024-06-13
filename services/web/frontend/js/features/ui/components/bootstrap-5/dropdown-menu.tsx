@@ -5,6 +5,7 @@ import {
   DropdownMenu as BS5DropdownMenu,
   DropdownItem as BS5DropdownItem,
   DropdownDivider as BS5DropdownDivider,
+  DropdownHeader as BS5DropdownHeader,
 } from 'react-bootstrap-5'
 import type {
   DropdownProps,
@@ -12,6 +13,7 @@ import type {
   DropdownToggleProps,
   DropdownMenuProps,
   DropdownDividerProps,
+  DropdownHeaderProps,
 } from '@/features/ui/components/types/dropdown-menu-props'
 import MaterialIcon from '@/shared/components/material-icon'
 
@@ -68,4 +70,8 @@ export function DropdownMenu({ as = 'ul', ...props }: DropdownMenuProps) {
 
 export function DropdownDivider({ as = 'li' }: DropdownDividerProps) {
   return <BS5DropdownDivider as={as} />
+}
+
+export function DropdownHeader({ as = 'li', ...props }: DropdownHeaderProps) {
+  return <BS5DropdownHeader as={as} {...props} />
 }

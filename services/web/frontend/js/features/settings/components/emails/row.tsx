@@ -14,7 +14,6 @@ import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
 type EmailsRowProps = {
@@ -43,12 +42,7 @@ function EmailsRow({ userEmailData }: EmailsRowProps) {
           )}
         </OLCol>
         <OLCol lg={3}>
-          <EmailCell
-            className={bsVersion({
-              bs5: 'text-lg-end',
-              bs3: 'text-md-right',
-            })}
-          >
+          <EmailCell className="text-lg-end">
             <Actions userEmailData={userEmailData} />
           </EmailCell>
         </OLCol>
@@ -152,13 +146,7 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
               </p>
             </EmailCell>
           </OLCol>
-          <OLCol
-            lg={3}
-            className={bsVersion({
-              bs5: 'text-lg-end',
-              bs3: 'text-md-right',
-            })}
-          >
+          <OLCol lg={3} className="text-lg-end">
             <EmailCell>
               <OLButton
                 variant="primary"

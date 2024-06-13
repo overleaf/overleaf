@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Alert, Button, Form, FormControl, Modal } from 'react-bootstrap'
+import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import useAsync from '../../../../shared/hooks/use-async'
 import {
@@ -10,6 +10,15 @@ import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-
 import { useLocation } from '../../../../shared/hooks/use-location'
 import getMeta from '@/utils/meta'
 import Notification from '@/shared/components/notification'
+import {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLForm from '@/features/ui/components/ol/ol-form'
 
 type NewProjectData = {
   project_id: string
@@ -56,24 +65,22 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
       .catch(() => {})
   }
 
-  const handleChangeName = (
-    e: React.ChangeEvent<HTMLInputElement & FormControl>
-  ) => {
+  const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProjectName(e.currentTarget.value)
   }
 
-  const handleSubmit = (e: React.FormEvent<Form>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     createNewProject()
   }
 
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('new_project')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('new_project')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         {isError &&
           (newNotificationStyle ? (
             <div className="notification-list">
@@ -85,30 +92,29 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
           ) : (
             <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
           ))}
-        <Form onSubmit={handleSubmit}>
-          <input
+        <OLForm onSubmit={handleSubmit}>
+          <OLFormControl
             type="text"
-            className="form-control"
             ref={autoFocusedRef}
             placeholder={t('project_name')}
             onChange={handleChangeName}
             value={projectName}
           />
-        </Form>
-      </Modal.Body>
+        </OLForm>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <Button bsStyle={null} className="btn-secondary" onClick={onCancel}>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={onCancel}>
           {t('cancel')}
-        </Button>
-        <Button
-          bsStyle="primary"
+        </OLButton>
+        <OLButton
+          variant="primary"
           onClick={createNewProject}
           disabled={projectName === '' || isLoading}
         >
           {isLoading ? `${t('creating')}…` : t('create')}
-        </Button>
-      </Modal.Footer>
+        </OLButton>
+      </OLModalFooter>
     </>
   )
 }

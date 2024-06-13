@@ -26,6 +26,7 @@ import { useEffect } from 'react'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '../../../shared/components/generic-error-boundary-fallback'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import OLCol from '@/features/ui/components/ol/ol-col'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import classnames from 'classnames'
 
@@ -170,20 +171,18 @@ function ProjectListPageContent() {
           <div className="project-list-welcome-wrapper">
             {error ? <DashApiError /> : ''}
             <Row className="row-spaced mx-0">
-              <Col
-                sm={10}
-                smOffset={1}
-                md={8}
-                mdOffset={2}
+              <OLCol
+                md={{ span: 10, offset: 1 }}
+                lg={{ span: 8, offset: 2 }}
                 className="project-list-empty-col"
               >
                 <Row>
-                  <Col xs={12}>
+                  <OLCol>
                     <UserNotifications />
-                  </Col>
+                  </OLCol>
                 </Row>
                 <WelcomeMessage />
-              </Col>
+              </OLCol>
             </Row>
           </div>
         )}
@@ -196,11 +195,16 @@ function DashApiError() {
   const { t } = useTranslation()
   return (
     <Row className="row-spaced">
-      <Col xs={8} xsOffset={2} aria-live="polite" className="text-center">
+      <OLCol
+        xs={{ span: 8, offset: 2 }}
+        bs3Props={{ xs: 8, xsOffset: 2 }}
+        aria-live="polite"
+        className="text-center"
+      >
         <div className="alert alert-danger">
           {t('generic_something_went_wrong')}
         </div>
-      </Col>
+      </OLCol>
     </Row>
   )
 }

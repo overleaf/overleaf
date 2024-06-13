@@ -1,4 +1,4 @@
-import AccessibleModal from '../../../../shared/components/accessible-modal'
+import OLModal from '@/features/ui/components/ol/ol-modal'
 import ModalContentNewProjectForm from './modal-content-new-project-form'
 
 type ExampleProjectModalProps = {
@@ -7,7 +7,7 @@ type ExampleProjectModalProps = {
 
 function ExampleProjectModal({ onHide }: ExampleProjectModalProps) {
   return (
-    <AccessibleModal
+    <OLModal
       show
       animation
       onHide={onHide}
@@ -15,7 +15,7 @@ function ExampleProjectModal({ onHide }: ExampleProjectModalProps) {
       backdrop="static"
     >
       <ModalContentNewProjectForm onCancel={onHide} template="example" />
-    </AccessibleModal>
+    </OLModal>
   )
 }
 

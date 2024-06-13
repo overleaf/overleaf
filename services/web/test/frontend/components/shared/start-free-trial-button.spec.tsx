@@ -38,7 +38,10 @@ describe('start free trial button', function () {
     cy.mount(
       <StartFreeTrialButton
         source="cypress-test"
-        buttonProps={{ bsStyle: 'danger', bsSize: 'lg' }}
+        buttonProps={{
+          variant: 'danger',
+          size: 'large',
+        }}
       />
     )
 

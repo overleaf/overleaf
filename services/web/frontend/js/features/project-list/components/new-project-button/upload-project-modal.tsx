@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Button, Modal } from 'react-bootstrap'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import Uppy from '@uppy/core'
 import { Dashboard } from '@uppy/react'
 import XHRUpload from '@uppy/xhr-upload'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import getMeta from '../../../../utils/meta'
 import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
@@ -85,19 +90,17 @@ function UploadProjectModal({ onHide, openProject }: UploadProjectModalProps) {
   }, [ableToUpload, uppy])
 
   return (
-    <AccessibleModal
+    <OLModal
       show
       animation
       onHide={onHide}
       id="upload-project-modal"
       backdrop="static"
     >
-      <Modal.Header closeButton>
-        <Modal.Title componentClass="h3">
-          {t('upload_zipped_project')}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+      <OLModalHeader closeButton>
+        <OLModalTitle as="h3">{t('upload_zipped_project')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         <Dashboard
           uppy={uppy}
           proudlyDisplayPoweredByUppy={false}
@@ -113,14 +116,13 @@ function UploadProjectModal({ onHide, openProject }: UploadProjectModalProps) {
           }}
           className="project-list-upload-project-modal-uppy-dashboard"
         />
-      </Modal.Body>
-
-      <Modal.Footer>
-        <Button onClick={onHide} bsStyle={null} className="btn-secondary">
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={onHide}>
           {t('cancel')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

@@ -161,12 +161,7 @@ function AddEmail() {
             </Cell>
           </OLCol>
           <OLCol lg={4}>
-            <Cell
-              className={bsVersion({
-                bs5: 'text-lg-end',
-                bs3: 'text-md-right',
-              })}
-            >
+            <Cell className="text-lg-end">
               <AddNewEmailBtn email={newEmail} disabled />
             </Cell>
           </OLCol>
@@ -206,12 +201,7 @@ function AddEmail() {
         </OLCol>
         {!isSsoAvailableForDomain ? (
           <OLCol lg={4}>
-            <Cell
-              className={bsVersion({
-                bs5: 'text-lg-end',
-                bs3: 'text-md-right',
-              })}
-            >
+            <Cell className="text-lg-end">
               <AddNewEmailBtn
                 email={newEmail}
                 disabled={state.isLoading}

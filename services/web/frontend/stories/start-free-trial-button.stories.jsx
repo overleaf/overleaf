@@ -15,7 +15,10 @@ export const ButtonStyle = args => {
   return (
     <StartFreeTrialButton
       {...args}
-      buttonProps={{ bsStyle: 'danger', bsSize: 'lg' }}
+      buttonProps={{
+        variant: 'danger',
+        size: 'large',
+      }}
     />
   )
 }

@@ -84,9 +84,11 @@ const CompileTimeout = memo(function CompileTimeout({
                 <StartFreeTrialButton
                   source="compile-timeout"
                   buttonProps={{
-                    bsStyle: 'success',
+                    variant: 'primary',
                     className: 'row-spaced-small',
-                    block: true,
+                    bs3Props: {
+                      block: true,
+                    },
                   }}
                 >
                   {hasNewPaywallCta

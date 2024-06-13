@@ -135,10 +135,12 @@ cite {
 }
 
 // Alignment
-.text-left {
+.text-left,
+.text-start {
   text-align: left;
 }
-.text-right {
+.text-right,
+.text-end {
   text-align: right;
 }
 .text-center {
@@ -151,7 +153,8 @@ cite {
   direction: rtl;
 }
 @media (min-width: @screen-md-min) {
-  .text-md-right {
+  .text-md-right,
+  .text-lg-end {
     text-align: right;
   }
 }

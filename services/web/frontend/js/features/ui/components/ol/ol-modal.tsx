@@ -42,6 +42,7 @@ export default function OLModal({ children, ...props }: OLModalProps) {
     onHide: bs5Props.onHide,
     backdrop: bs5Props.backdrop,
     animation: bs5Props.animation,
+    id: bs5Props.id,
     ...bs3Props,
   }
 

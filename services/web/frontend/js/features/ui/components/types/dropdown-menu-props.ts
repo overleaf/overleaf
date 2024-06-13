@@ -25,27 +25,35 @@ export type DropdownItemProps = PropsWithChildren<{
   eventKey?: string | number
   href?: string
   leadingIcon?: string
-  onClick?: () => void
+  onClick?: React.MouseEventHandler
   trailingIcon?: string
   variant?: 'default' | 'danger'
   className?: string
   role?: string
+  tabIndex?: number
 }>
 
 export type DropdownToggleProps = PropsWithChildren<{
   bsPrefix?: string
   disabled?: boolean
   split?: boolean
-  id: string // necessary for assistive technologies
-  variant: SplitButtonVariants
+  id?: string // necessary for assistive technologies
+  variant?: SplitButtonVariants
+  as?: ElementType
 }>
 
 export type DropdownMenuProps = PropsWithChildren<{
   as?: ElementType
   disabled?: boolean
   show?: boolean
+  className?: string
+  flip?: boolean
 }>
 
 export type DropdownDividerProps = PropsWithChildren<{
+  as?: ElementType
+}>
+
+export type DropdownHeaderProps = PropsWithChildren<{
   as?: ElementType
 }>

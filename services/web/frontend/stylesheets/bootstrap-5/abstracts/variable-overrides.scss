@@ -35,6 +35,32 @@ $btn-border-radius-lg: $border-radius-full;
 $btn-border-radius-sm: $border-radius-full;
 $btn-white-space: nowrap;
 
+// Tables
+$table-cell-padding-y: $spacing-04;
+$table-cell-padding-x: $spacing-04;
+$table-cell-padding-y-sm: $spacing-02;
+$table-cell-padding-x-sm: $spacing-02;
+
+$table-color: var(--content-secondary);
+$table-bg: var(--bg-light-primary);
+
+$table-th-font-weight: 600;
+
+$table-striped-color: $table-color;
+$table-striped-bg: var(--bg-light-secondary);
+
+$table-active-color: $table-color;
+$table-active-bg: $bg-accent-03;
+
+$table-hover-color: $table-color;
+$table-hover-bg: var(--bg-light-tertiary);
+
+$table-border-color: $border-divider;
+
+$table-striped-order: even;
+
+$table-caption-color: var(--content-secondary);
+
 // Forms
 
 // form-text-variables
@@ -214,3 +240,4 @@ $dropdown-padding-x: var(--spacing-02);
 $dropdown-padding-y: var(--spacing-02);
 $dropdown-item-padding-x: var(--spacing-04);
 $dropdown-item-padding-y: var(--spacing-05);
+$dropdown-header-color: var(--content-secondary);

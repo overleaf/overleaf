@@ -51,7 +51,7 @@ export function OwnerPaywallPrompt() {
       <p>
         <StartFreeTrialButton
           source="history"
-          buttonProps={{ bsStyle: 'default', className: 'btn-premium' }}
+          buttonProps={{ variant: 'premium' }}
           handleClick={handleFreeTrialClick}
         >
           {hasNewPaywallCta

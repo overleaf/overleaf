@@ -11,6 +11,7 @@ export type OLButtonProps = ButtonProps & {
   bs3Props?: {
     loading?: React.ReactNode
     bsSize?: BS3ButtonSize
+    block?: boolean
   }
 }
 
