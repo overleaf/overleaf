@@ -59,7 +59,7 @@ describe('OutputFileArchiveManager', function () {
     })
   })
 
-  describe('when called with no files', function () {
+  describe('when the output cache directory contains only exportable files', function () {
     beforeEach(async function () {
       this.OutputFileFinder.promises.findOutputFiles.resolves({
         outputFiles: [
@@ -111,7 +111,7 @@ describe('OutputFileArchiveManager', function () {
     })
   })
 
-  describe('when called with a list of files that all are in the output directory', function () {
+  describe('when the directory includes files ignored by web', function () {
     beforeEach(async function () {
       this.OutputFileFinder.promises.findOutputFiles.resolves({
         outputFiles: [
@@ -119,88 +119,81 @@ describe('OutputFileArchiveManager', function () {
           { path: 'file_2' },
           { path: 'file_3' },
           { path: 'file_4' },
+          { path: 'output.pdf' },
         ],
       })
       await this.OutputFileArchiveManager.archiveFilesForBuild(
         projectId,
         userId,
-        buildId,
-        ['file_1', 'file_4']
+        buildId
       )
     })
 
-    it('creates a zip archive', function () {
-      sinon.assert.calledWith(this.archiver, 'zip')
-    })
-
-    it('adds only output files from the list of files to the archive', function () {
-      expect(this.archive.append.callCount).to.equal(2)
+    it('only includes the non-ignored files in the archive', function () {
+      expect(this.archive.append.callCount).to.equal(4)
       sinon.assert.calledWith(
         this.archive.append,
-        `handle: file_1`,
-        sinon.match({
-          name: 'file_1',
-        })
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_1`,
+        sinon.match({ name: 'file_1' })
       )
       sinon.assert.calledWith(
         this.archive.append,
-        `handle: file_4`,
-        sinon.match({
-          name: 'file_4',
-        })
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_2`,
+        sinon.match({ name: 'file_2' })
       )
-    })
-
-    it('finalizes the archive after all files are appended', function () {
-      sinon.assert.called(this.archive.finalize)
-      expect(this.archive.finalize.calledBefore(this.archive.append)).to.be
-        .false
+      sinon.assert.calledWith(
+        this.archive.append,
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_3`,
+        sinon.match({ name: 'file_3' })
+      )
+      sinon.assert.calledWith(
+        this.archive.append,
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_4`,
+        sinon.match({ name: 'file_4' })
+      )
     })
   })
 
-  describe('when called with a list of files and one of the files is missing from the output directory', function () {
+  describe('when one of the files is called output.pdf', function () {
     beforeEach(async function () {
       this.OutputFileFinder.promises.findOutputFiles.resolves({
         outputFiles: [
           { path: 'file_1' },
           { path: 'file_2' },
           { path: 'file_3' },
+          { path: 'file_4' },
+          { path: 'output.pdf' },
         ],
       })
       await this.OutputFileArchiveManager.archiveFilesForBuild(
         projectId,
         userId,
-        buildId,
-        ['file_1', 'file_4']
+        buildId
       )
     })
 
-    it('creates a zip archive', function () {
-      sinon.assert.calledWith(this.archiver, 'zip')
-    })
-
-    it('adds the files that were found to the archive', function () {
+    it('does not include that file in the archive', function () {
+      expect(this.archive.append.callCount).to.equal(4)
       sinon.assert.calledWith(
         this.archive.append,
-        `handle: file_1`,
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_1`,
         sinon.match({ name: 'file_1' })
       )
-    })
-
-    it('adds a file listing any missing files', function () {
       sinon.assert.calledWith(
         this.archive.append,
-        'file_4',
-        sinon.match({
-          name: 'missing_files.txt',
-        })
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_2`,
+        sinon.match({ name: 'file_2' })
       )
-    })
-
-    it('finalizes the archive after all files are appended', function () {
-      sinon.assert.called(this.archive.finalize)
-      expect(this.archive.finalize.calledBefore(this.archive.append)).to.be
-        .false
+      sinon.assert.calledWith(
+        this.archive.append,
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_3`,
+        sinon.match({ name: 'file_3' })
+      )
+      sinon.assert.calledWith(
+        this.archive.append,
+        `handle: ${this.outputDir}/${projectId}-${userId}/${buildId}/file_4`,
+        sinon.match({ name: 'file_4' })
+      )
     })
   })
 

@@ -2,7 +2,7 @@ const archiver = require('archiver')
 const OutputCacheManager = require('./OutputCacheManager')
 const OutputFileFinder = require('./OutputFileFinder')
 const Settings = require('@overleaf/settings')
-const { open, realpath } = require('node:fs/promises')
+const { open } = require('node:fs/promises')
 const path = require('path')
 const { NotFoundError } = require('./Errors')
 
@@ -20,23 +20,6 @@ function getContentDir(projectId, userId) {
   return `${Settings.path.outputDir}/${subDir}/`
 }
 
-/**
- * Is the provided path a symlink?
- * @param {string} path
- * @return {Promise<boolean>}
- */
-async function isSymlink(path) {
-  try {
-    const realPath = await realpath(path)
-    return realPath !== path
-  } catch (error) {
-    if (error.code === 'ELOOP') {
-      return true
-    }
-    throw error
-  }
-}
-
 module.exports = {
   async archiveFilesForBuild(projectId, userId, build) {
     const validFiles = await this._getAllOutputFiles(projectId, userId, build)
@@ -47,11 +30,9 @@ module.exports = {
 
     for (const file of validFiles) {
       try {
-        if (!(await isSymlink(file))) {
-          const fileHandle = await open(file, 'r')
-          const fileStream = fileHandle.createReadStream()
-          archive.append(fileStream, { name: path.basename(file) })
-        }
+        const fileHandle = await open(file, 'r')
+        const fileStream = fileHandle.createReadStream()
+        archive.append(fileStream, { name: path.basename(file) })
       } catch (error) {
         missingFiles.push(file)
       }
