@@ -14,8 +14,10 @@ describe('admin panel', function () {
     const deletedProjectName = `deleted-project-${uuid()}`
     let projectToDeleteId = ''
 
-    const findProjectRow = (projectName: string) =>
-      cy.findByText(projectName).parent().parent()
+    const findProjectRow = (projectName: string) => {
+      cy.log('find project row')
+      return cy.findByText(projectName).parent().parent()
+    }
 
     startWith({
       pro: true,

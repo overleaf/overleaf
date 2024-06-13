@@ -1,4 +1,5 @@
 const { defineConfig } = require('cypress')
+const { readPdf, readFileInZip } = require('./helpers/read-file')
 
 const specPattern = process.env.SPEC_PATTERN || './**/*.spec.{js,ts,tsx}'
 
@@ -14,7 +15,10 @@ module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost',
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      on('task', {
+        readPdf,
+        readFileInZip,
+      })
     },
     specPattern,
   },
