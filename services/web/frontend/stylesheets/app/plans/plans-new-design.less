@@ -287,7 +287,7 @@
   }
 
   .plans-new-table-group {
-    .plans-new-table-header-price-container {
+    .plans-new-table-header-grid-container {
       min-height: 85px;
     }
 
@@ -322,52 +322,62 @@
       text-align: center;
     }
 
-    .plans-new-table-header-nondiscounted-price {
-      position: absolute;
-      top: 50px;
-      left: 25px;
-      font-size: var(--font-size-04);
-      line-height: var(--line-height-05);
-      color: var(--neutral-40);
-      font-weight: 600;
+    .plans-new-table-header-grid-container {
+      display: grid;
+      grid-column-gap: var(--spacing-04);
+      // priceUnitTotal is an optional row
+      grid-template:
+        'nonDiscountedPrice price .' 2fr
+        'priceUnit priceUnit priceUnit' 1fr
+        'priceUnitTotal priceUnitTotal priceUnitTotal' auto / 1fr 1fr 1fr;
 
-      @media (max-width: @screen-md-max) {
-        left: 0;
+      .plans-new-table-header-price {
+        grid-area: price;
+        justify-self: center;
+
+        font-size: var(--font-size-08);
+        font-weight: 600;
+        line-height: var(--line-height-07);
+        color: var(--neutral-90);
       }
 
-      @media (max-width: @screen-sm-max) {
-        left: -22px;
+      .plans-new-table-header-price-unit {
+        grid-area: priceUnit;
+        justify-self: center;
+
+        font-size: var(--font-size-02);
+        line-height: var(--line-height-02);
       }
-    }
 
-    .plans-new-table-header-price-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+      .plans-new-table-header-price-unit-total {
+        grid-area: priceUnitTotal;
+        justify-self: center;
 
-    .plans-new-table-header-price {
-      font-size: var(--font-size-08);
-      font-weight: 600;
-      line-height: var(--line-height-07);
-      color: var(--neutral-90);
-    }
+        font-size: var(--font-size-01);
+        line-height: var(--line-height-01);
+      }
 
-    .plans-new-table-header-icon {
-      margin-top: @spacing-02;
-      font-size: 56px;
-      align-self: center;
-      color: var(--neutral-90);
-    }
+      .plans-new-table-header-nondiscounted-price {
+        grid-area: nonDiscountedPrice;
+        justify-self: end;
+        align-self: end;
 
-    .plans-new-table-header-price-unit {
-      font-size: var(--font-size-02);
-      line-height: var(--line-height-02);
-    }
+        font-size: var(--font-size-04);
+        line-height: var(--line-height-05);
+        color: var(--neutral-40);
+        font-weight: 600;
+      }
 
-    .plans-new-table-header-price-unit-total {
-      font-size: var(--font-size-01);
-      line-height: var(--line-height-01);
+      .plans-new-table-header-icon {
+        // this element should only be placed in the grid
+        // where it's the only element in the grid
+        // the grid-area below will make sure that it covers the whole grid
+        grid-area: ~'span 2 / span 3';
+        justify-self: center;
+
+        font-size: 56px;
+        color: var(--neutral-90);
+      }
     }
 
     .plans-new-table-header-desc {
