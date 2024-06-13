@@ -805,7 +805,7 @@ describe('<UserNotifications />', function () {
 
       window.metaAttributesCache.set(
         'ol-groupsAndEnterpriseBannerVariant',
-        'did-you-know'
+        'on-premise'
       )
     })
 
@@ -892,23 +892,6 @@ describe('<UserNotifications />', function () {
         localStorage.clear()
       })
 
-      it('will show the correct text for the `did-you-know` variant', async function () {
-        window.metaAttributesCache.set(
-          'ol-groupsAndEnterpriseBannerVariant',
-          'did-you-know'
-        )
-
-        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-        await fetchMock.flush(true)
-
-        screen.getByText(
-          'Did you know that Overleaf offers group and organization-wide subscription options? Request information or a quote.'
-        )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
-
-        expect(link.getAttribute('href')).to.equal(`/for/contact-sales-1`)
-      })
-
       it('will show the correct text for the `on-premise` variant', async function () {
         window.metaAttributesCache.set(
           'ol-groupsAndEnterpriseBannerVariant',
@@ -924,23 +907,6 @@ describe('<UserNotifications />', function () {
         const link = screen.getByRole('link', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-2`)
-      })
-
-      it('will show the correct text for the `people` variant', async function () {
-        window.metaAttributesCache.set(
-          'ol-groupsAndEnterpriseBannerVariant',
-          'people'
-        )
-
-        renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
-        await fetchMock.flush(true)
-
-        screen.getByText(
-          'Other people at your company may already be using Overleaf. Save money with Overleaf group and company-wide subscriptions. Request more information.'
-        )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
-
-        expect(link.getAttribute('href')).to.equal(`/for/contact-sales-3`)
       })
 
       it('will show the correct text for the `FOMO` variant', async function () {

@@ -352,7 +352,7 @@ async function projectListPage(req, res, next) {
 
   const groupsAndEnterpriseBannerVariant =
     showGroupsAndEnterpriseBanner &&
-    _.sample(['did-you-know', 'on-premise', 'people', 'FOMO'])
+    _.sample(['on-premise', 'FOMO', 'FOMO', 'FOMO'])
 
   let showWritefullPromoBanner = false
   if (Features.hasFeature('saas') && !req.session.justRegistered) {

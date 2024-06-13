@@ -6,7 +6,18 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { useProjectListContext } from '../../context/project-list-context'
 import { useTranslation } from 'react-i18next'
 
-const variants = ['did-you-know', 'on-premise', 'people', 'FOMO'] as const
+type variantsType = 'on-premise' | 'FOMO'
+const variants = ['on-premise', 'FOMO'] as variantsType[]
+
+type urlForVariantsType = {
+  [key in variantsType]: string // eslint-disable-line no-unused-vars
+}
+
+const urlForVariants: urlForVariantsType = {
+  'on-premise': '/for/contact-sales-2',
+  FOMO: '/for/contact-sales-4',
+}
+
 type GroupsAndEnterpriseBannerVariant = (typeof variants)[number]
 
 let viewEventSent = false
@@ -27,9 +38,7 @@ export default function GroupsAndEnterpriseBanner() {
 
   const hasDismissedGroupsAndEnterpriseBanner = hasRecentlyDismissedBanner()
 
-  const contactSalesUrl = `/for/contact-sales-${
-    variants.indexOf(groupsAndEnterpriseBannerVariant) + 1
-  }`
+  const contactSalesUrl = urlForVariants[groupsAndEnterpriseBannerVariant]
 
   const shouldRenderBanner =
     showGroupsAndEnterpriseBanner &&
@@ -98,25 +107,13 @@ function BannerContent({
 }: {
   variant: GroupsAndEnterpriseBannerVariant
 }) {
-  const { t } = useTranslation()
-
   switch (variant) {
-    case 'did-you-know':
-      return <span>{t('did_you_know_that_overleaf_offers')}</span>
     case 'on-premise':
       return (
         <span>
           Overleaf On-Premises: Does your company want to keep its data within
           its firewall? Overleaf offers Server Pro, an on-premises solution for
           companies. Get in touch to learn more.
-        </span>
-      )
-    case 'people':
-      return (
-        <span>
-          Other people at your company may already be using Overleaf. Save money
-          with Overleaf group and company-wide subscriptions. Request more
-          information.
         </span>
       )
     case 'FOMO':
