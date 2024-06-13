@@ -1,5 +1,6 @@
 extends ../layout-website-redesign
 include ../_mixins/quote
+include ../_mixins/eyebrow
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
@@ -28,10 +29,7 @@ block content
 				.row
 					.col-md-12
 						h1.text-centered
-							span.mono-text
-								span.aria-hidden {
-								span #{translate('plans_and_pricing_lowercase')}
-								span.aria-hidden }
+							+eyebrow(translate('plans_and_pricing_lowercase'))
 							| #{translate('choose_your_plan')}
 
 				include ./plans/_cards_controls_tables
