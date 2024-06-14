@@ -3,6 +3,7 @@ const { ProjectInvite } = require('../../models/ProjectInvite')
 const logger = require('@overleaf/logger')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
+const CollaboratorsInviteHelper = require('./CollaboratorsInviteHelper')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const Crypto = require('crypto')
@@ -83,9 +84,11 @@ const CollaboratorsInviteHandler = {
     )
     const buffer = await randomBytes(24)
     const token = buffer.toString('hex')
+    const tokenHmac = CollaboratorsInviteHelper.hashInviteToken(token)
     let invite = new ProjectInvite({
       email,
       token,
+      tokenHmac,
       sendingUserId: sendingUser._id,
       projectId,
       privileges,

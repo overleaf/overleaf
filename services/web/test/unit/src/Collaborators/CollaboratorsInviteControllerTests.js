@@ -13,6 +13,7 @@ describe('CollaboratorsInviteController', function () {
   beforeEach(function () {
     this.projectId = 'project-id-123'
     this.token = 'some-opaque-token'
+    this.tokenHmac = 'some-hmac-token'
     this.targetEmail = 'user@example.com'
     this.privileges = 'readAndWrite'
     this.currentUser = {
@@ -22,6 +23,7 @@ describe('CollaboratorsInviteController', function () {
     this.invite = {
       _id: new ObjectId(),
       token: this.token,
+      tokenHmac: this.tokenHmac,
       sendingUserId: this.currentUser._id,
       projectId: this.projectId,
       email: this.targetEmail,

@@ -41,6 +41,9 @@ describe('CollaboratorsInviteHandler', function () {
     this.UserGetter = { promises: { getUser: sinon.stub() } }
     this.ProjectGetter = { promises: {} }
     this.NotificationsBuilder = { promises: {} }
+    this.CollaboratorsInviteHelper = {
+      hashInviteToken: sinon.stub().returns('abcd'),
+    }
 
     this.CollaboratorsInviteHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -51,6 +54,7 @@ describe('CollaboratorsInviteHandler', function () {
         '../User/UserGetter': this.UserGetter,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
+        './CollaboratorsInviteHelper': this.CollaboratorsInviteHelper,
         crypto: this.Crypto,
       },
     })
@@ -69,11 +73,13 @@ describe('CollaboratorsInviteHandler', function () {
     }
     this.inviteId = new ObjectId()
     this.token = 'hnhteaosuhtaeosuahs'
+    this.tokenHmac = 'jkhajkefhaekjfhkfg'
     this.privileges = 'readAndWrite'
     this.fakeInvite = {
       _id: this.inviteId,
       email: this.email,
       token: this.token,
+      tokenHmac: this.tokenHmac,
       sendingUserId: this.sendingUserId,
       projectId: this.projectId,
       privileges: this.privileges,
@@ -186,6 +192,7 @@ describe('CollaboratorsInviteHandler', function () {
           '_id',
           'email',
           'token',
+          'tokenHmac',
           'sendingUserId',
           'projectId',
           'privileges',
@@ -195,6 +202,11 @@ describe('CollaboratorsInviteHandler', function () {
       it('should have generated a random token', async function () {
         await this.call()
         this.Crypto.randomBytes.callCount.should.equal(1)
+      })
+
+      it('should have generated a HMAC token', async function () {
+        await this.call()
+        this.CollaboratorsInviteHelper.hashInviteToken.callCount.should.equal(1)
       })
 
       it('should have called ProjectInvite.save', async function () {

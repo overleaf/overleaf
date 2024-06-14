@@ -15,6 +15,7 @@ const ProjectInviteSchema = new Schema(
   {
     email: String,
     token: String,
+    tokenHmac: String,
     sendingUserId: ObjectId,
     projectId: ObjectId,
     privileges: String,
