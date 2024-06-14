@@ -15,6 +15,7 @@ import { getPdfCachingMetrics } from '../util/metrics'
 import { debugConsole } from '@/utils/debugging'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import usePresentationMode from '../hooks/use-presentation-mode'
 
 type PdfJsViewerProps = {
   url: string
@@ -48,13 +49,17 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   const [initialised, setInitialised] = useState(false)
 
   const handlePageChange = useCallback(
-    newPage => {
+    (newPage: number) => {
+      if (!totalPages || newPage < 1 || newPage > totalPages) {
+        return
+      }
+
       setPage(newPage)
       if (pdfJsWrapper?.viewer) {
         pdfJsWrapper.viewer.currentPageNumber = newPage
       }
     },
-    [pdfJsWrapper, setPage]
+    [pdfJsWrapper, setPage, totalPages]
   )
 
   // create the viewer when the container is mounted
@@ -461,6 +466,14 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
     [initialised, setZoom]
   )
 
+  const requestPresentationMode = usePresentationMode(
+    pdfJsWrapper,
+    page,
+    handlePageChange,
+    scale,
+    setScale
+  )
+
   // Don't render the toolbar until we have the necessary information
   const toolbarInfoLoaded =
     rawScale !== null && page !== null && totalPages !== null
@@ -487,6 +500,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         {hasNewPdfToolbar ? (
           toolbarInfoLoaded && (
             <PdfViewerControlsToolbar
+              requestPresentationMode={requestPresentationMode}
               setZoom={setZoom}
               rawScale={rawScale}
               setPage={handlePageChange}

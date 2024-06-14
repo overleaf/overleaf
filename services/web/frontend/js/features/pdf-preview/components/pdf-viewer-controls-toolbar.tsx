@@ -9,6 +9,7 @@ import PdfViewerControlsMenuButton from './pdf-viewer-controls-menu-button'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 
 type PdfViewerControlsToolbarProps = {
+  requestPresentationMode: () => void
   setZoom: (zoom: string) => void
   rawScale: number
   setPage: (page: number) => void
@@ -17,6 +18,7 @@ type PdfViewerControlsToolbarProps = {
 }
 
 function PdfViewerControlsToolbar({
+  requestPresentationMode,
   setZoom,
   rawScale,
   setPage,
@@ -54,6 +56,7 @@ function PdfViewerControlsToolbar({
   return createPortal(
     <div className="pdfjs-viewer-controls" ref={pdfControlsRef}>
       <InnerControlsComponent
+        requestPresentationMode={requestPresentationMode}
         setZoom={setZoom}
         rawScale={rawScale}
         setPage={setPage}
@@ -67,6 +70,7 @@ function PdfViewerControlsToolbar({
 }
 
 type InnerControlsProps = {
+  requestPresentationMode: () => void
   setZoom: (zoom: string) => void
   rawScale: number
   setPage: (page: number) => void
@@ -75,6 +79,7 @@ type InnerControlsProps = {
 }
 
 function PdfViewerControlsToolbarFull({
+  requestPresentationMode,
   setZoom,
   rawScale,
   setPage,
@@ -90,13 +95,18 @@ function PdfViewerControlsToolbarFull({
       />
       <div className="pdfjs-zoom-controls">
         <PdfZoomButtons setZoom={setZoom} />
-        <PdfZoomDropdown rawScale={rawScale} setZoom={setZoom} />
+        <PdfZoomDropdown
+          requestPresentationMode={requestPresentationMode}
+          rawScale={rawScale}
+          setZoom={setZoom}
+        />
       </div>
     </>
   )
 }
 
 function PdfViewerControlsToolbarSmall({
+  requestPresentationMode,
   setZoom,
   rawScale,
   setPage,
@@ -105,7 +115,11 @@ function PdfViewerControlsToolbarSmall({
 }: InnerControlsProps) {
   return (
     <div className="pdfjs-viewer-controls-small">
-      <PdfZoomDropdown rawScale={rawScale} setZoom={setZoom} />
+      <PdfZoomDropdown
+        requestPresentationMode={requestPresentationMode}
+        rawScale={rawScale}
+        setZoom={setZoom}
+      />
       <PdfViewerControlsMenuButton
         setZoom={setZoom}
         setPage={setPage}

@@ -19,6 +19,7 @@ const shortcuts = isMac
     }
 
 type PdfZoomDropdownProps = {
+  requestPresentationMode: () => void
   setZoom: (zoom: string) => void
   rawScale: number
 }
@@ -29,7 +30,11 @@ const rawScaleToPercentage = (rawScale: number) => {
   return `${Math.round(rawScale * 100)}%`
 }
 
-function PdfZoomDropdown({ setZoom, rawScale }: PdfZoomDropdownProps) {
+function PdfZoomDropdown({
+  requestPresentationMode,
+  setZoom,
+  rawScale,
+}: PdfZoomDropdownProps) {
   const { t } = useTranslation()
 
   const [customZoomValue, setCustomZoomValue] = useState<string>(
@@ -44,7 +49,16 @@ function PdfZoomDropdown({ setZoom, rawScale }: PdfZoomDropdownProps) {
     <ControlledDropdown
       id="pdf-zoom-dropdown"
       onSelect={eventKey => {
-        if (eventKey !== 'custom-zoom') setZoom(eventKey)
+        if (eventKey === 'custom-zoom') {
+          return
+        }
+
+        if (eventKey === 'present') {
+          requestPresentationMode()
+          return
+        }
+
+        setZoom(eventKey)
       }}
       pullRight
     >
@@ -102,7 +116,14 @@ function PdfZoomDropdown({ setZoom, rawScale }: PdfZoomDropdownProps) {
         <MenuItem draggable={false} key="page-height" eventKey="page-height">
           {t('fit_to_height')}
         </MenuItem>
+        {document.fullscreenEnabled && <MenuItem divider />}
+        {document.fullscreenEnabled && (
+          <MenuItem draggable={false} key="present" eventKey="present">
+            {t('present')}
+          </MenuItem>
+        )}
         <MenuItem divider />
+        <MenuItem header>{t('zoom_to')}</MenuItem>
         {zoomValues.map(value => (
           <MenuItem draggable={false} key={value} eventKey={value}>
             {rawScaleToPercentage(Number(value))}

@@ -84,7 +84,6 @@ const httpPermissionsPolicy = {
     'camera',
     'display-capture',
     'encrypted-media',
-    'fullscreen',
     'gamepad',
     'geolocation',
     'gyroscope',
@@ -107,6 +106,7 @@ const httpPermissionsPolicy = {
   ],
   allowed: {
     autoplay: 'self "https://videos.ctfassets.net"',
+    fullscreen: 'self',
   },
 }
 
