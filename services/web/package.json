@@ -107,6 +107,7 @@
     "csv": "^6.2.5",
     "dateformat": "1.0.4-1.2.3",
     "east": "^2.0.2",
+    "ejs": "^3.1.10",
     "email-addresses": "^5.0.0",
     "express": "^4.19.2",
     "express-bearer-token": "^2.4.0",
@@ -363,5 +364,8 @@
     "webpack-merge": "^5.10.0",
     "worker-loader": "^3.0.8",
     "yup": "^0.32.11"
+  },
+  "overrides": {
+    "ejs": "$ejs"
   }
 }
