@@ -1,17 +1,14 @@
 package uk.ac.ic.wlgitbridge;
 
+import java.util.Arrays;
 import uk.ac.ic.wlgitbridge.application.GitBridgeApp;
-import uk.ac.ic.wlgitbridge.bridge.Bridge;
-import uk.ac.ic.wlgitbridge.server.GitBridgeServer;
 import uk.ac.ic.wlgitbridge.util.Log;
 
-import java.util.Arrays;
-
-/**
+/*
  * Created by Winston on 01/11/14.
  */
 
-/**
+/*
  * This is the entry point into the Git Bridge.
  *
  * It is responsible for creating the {@link GitBridgeApp} and then running it.
@@ -29,21 +26,14 @@ import java.util.Arrays;
  */
 public class Main {
 
-    public static void main(String[] args) {
-        Log.info(
-                "Git Bridge started with args: "
-                        + Arrays.toString(args)
-        );
-        try {
-            new GitBridgeApp(args).run();
-        } catch (Throwable t) {
-            /* So that we get a timestamp */
-            Log.error(
-                    "Fatal exception thrown to top level, exiting: ",
-                    t
-            );
-            System.exit(1);
-        }
+  public static void main(String[] args) {
+    Log.info("Git Bridge started with args: " + Arrays.toString(args));
+    try {
+      new GitBridgeApp(args).run();
+    } catch (Throwable t) {
+      /* So that we get a timestamp */
+      Log.error("Fatal exception thrown to top level, exiting: ", t);
+      System.exit(1);
     }
-
+  }
 }

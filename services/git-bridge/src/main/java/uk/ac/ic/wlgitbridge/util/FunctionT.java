@@ -1,6 +1,6 @@
 package uk.ac.ic.wlgitbridge.util;
 
-/**
+/*
  * Function interface that allows checked exceptions.
  * @param <T>
  * @param <R>
@@ -9,6 +9,5 @@ package uk.ac.ic.wlgitbridge.util;
 @FunctionalInterface
 public interface FunctionT<T, R, E extends Throwable> {
 
-    R apply(T t) throws E;
-
+  R apply(T t) throws E;
 }

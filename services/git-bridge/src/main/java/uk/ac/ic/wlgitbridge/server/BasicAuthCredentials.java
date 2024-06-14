@@ -17,5 +17,4 @@ public class BasicAuthCredentials {
   public String getPassword() {
     return password;
   }
-
 }

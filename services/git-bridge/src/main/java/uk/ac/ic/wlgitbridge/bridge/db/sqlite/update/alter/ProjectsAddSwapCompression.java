@@ -4,8 +4,7 @@ import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 
 public class ProjectsAddSwapCompression implements SQLUpdate {
   private static final String PROJECTS_ADD_SWAP_COMPRESSION =
-    "ALTER TABLE `projects`\n" +
-      "ADD COLUMN `swap_compression` VARCHAR NULL;\n";
+      "ALTER TABLE `projects`\n" + "ADD COLUMN `swap_compression` VARCHAR NULL;\n";
 
   @Override
   public String getSQL() {

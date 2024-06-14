@@ -1,14 +1,13 @@
 package uk.ac.ic.wlgitbridge.bridge.db.sqlite.query;
 
-import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLQuery;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLQuery;
 
 public class GetSwapCompression implements SQLQuery<String> {
   private static final String GET_SWAP_COMPRESSION =
-    "SELECT `swap_compression` FROM `projects` WHERE `name` = ?";
+      "SELECT `swap_compression` FROM `projects` WHERE `name` = ?";
 
   private final String projectName;
 
@@ -31,9 +30,7 @@ public class GetSwapCompression implements SQLQuery<String> {
   }
 
   @Override
-  public void addParametersToStatement(
-    PreparedStatement statement
-  ) throws SQLException {
+  public void addParametersToStatement(PreparedStatement statement) throws SQLException {
     statement.setString(1, projectName);
   }
 }

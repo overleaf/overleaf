@@ -8,19 +8,43 @@
     <artifactId>writelatex-git-bridge</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
+        <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--<maven.test.skip>true</maven.test.skip>-->
+        <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>2.12.4</maven.surefire.plugin.version>
+        <maven.assembly.plugin.version>3.1.0</maven.assembly.plugin.version>
+        <fmt.plugin.version>2.23</fmt.plugin.version>
+        <junit.version>4.13.2</junit.version>
+        <jmock.junit4.version>2.8.4</jmock.junit4.version>
+        <jetty.servlet.version>9.4.51.v20230217</jetty.servlet.version>
+        <gson.version>2.9.0</gson.version>
+        <async.http.client.version>2.12.3</async.http.client.version>
+        <jgit.version>6.6.1.202309021850-r</jgit.version>
+        <sqlite.jdbc.version>3.41.2.2</sqlite.jdbc.version>
+        <joda.time.version>2.9.9</joda.time.version>
+        <google.oauth.client.version>1.34.1</google.oauth.client.version>
+        <google.http.client.version>1.23.0</google.http.client.version>
+        <commons.lang3.version>3.12.0</commons.lang3.version>
+        <logback.classic.version>1.2.3</logback.classic.version>
+        <mockserver.version>5.12.0</mockserver.version>
+        <mockito.version>3.11.1</mockito.version>
+        <aws.java.sdk.version>1.11.274</aws.java.sdk.version>
+        <jakarta.xml.bind.api.version>${jaxb.runtime.version}</jakarta.xml.bind.api.version>
+        <jaxb.runtime.version>2.3.2</jaxb.runtime.version>
+        <httpclient.version>4.5.14</httpclient.version>
+        <commons.io.version>2.10.0</commons.io.version>
+        <commons.compress.version>1.24.0</commons.compress.version>
+        <simpleclient.version>0.10.0</simpleclient.version>
     </properties>
     <build>
         <plugins>
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-compiler-plugin -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <compilerArgument></compilerArgument>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <!-- Workaround, test loader crashes without this configuration option -->
@@ -28,7 +52,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.4</version>
+                <version>${maven.surefire.plugin.version}</version>
                 <configuration>
                   <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
                 </configuration>
@@ -36,7 +60,7 @@
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>${maven.assembly.plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -56,6 +80,11 @@
                     </descriptorRefs>
                 </configuration>
             </plugin>
+          <plugin>
+            <groupId>com.spotify.fmt</groupId>
+            <artifactId>fmt-maven-plugin</artifactId>
+            <version>${fmt.plugin.version}</version>
+          </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -63,169 +92,169 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13.2</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.jmock/jmock-junit4 -->
         <dependency>
             <groupId>org.jmock</groupId>
             <artifactId>jmock-junit4</artifactId>
-            <version>2.8.4</version>
+            <version>${jmock.junit4.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-            <version>9.4.51.v20230217</version>
+            <version>${jetty.servlet.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-server -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.51.v20230217</version>
+            <version>${jetty.servlet.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.0</version>
+            <version>${gson.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.asynchttpclient/async-http-client -->
         <dependency>
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
-            <version>2.12.3</version>
+            <version>${async.http.client.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>6.6.1.202309021850-r</version>
+            <version>${jgit.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit.http.server -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit.http.server</artifactId>
-            <version>6.6.1.202309021850-r</version>
+            <version>${jgit.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.41.2.2</version>
+            <version>${sqlite.jdbc.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.9.9</version>
+            <version>${joda.time.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client -->
         <dependency>
             <groupId>com.google.oauth-client</groupId>
             <artifactId>google-oauth-client</artifactId>
-            <version>1.34.1</version>
+            <version>${google.oauth.client.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.http-client/google-http-client -->
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client</artifactId>
-            <version>1.23.0</version>
+            <version>${google.http.client.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.google.http-client/google-http-client-gson -->
         <dependency>
             <groupId>com.google.http-client</groupId>
             <artifactId>google-http-client-gson</artifactId>
-            <version>1.23.0</version>
+            <version>${google.http.client.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>${commons.lang3.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
+            <version>${logback.classic.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-netty -->
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
-            <version>5.12.0</version>
+            <version>${mockserver.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mock-server/mockserver-junit-rule -->
         <dependency>
           <groupId>org.mock-server</groupId>
           <artifactId>mockserver-junit-rule</artifactId>
-          <version>5.12.0</version>
+          <version>${mockserver.version}</version>
           <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.11.1</version>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk</artifactId>
-            <version>1.11.274</version>
+            <version>${aws.java.sdk.version}</version>
         </dependency>
         <!-- API, java.xml.bind module -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.2</version>
+            <version>${jakarta.xml.bind.api.version}</version>
         </dependency>
 
         <!-- Runtime, com.sun.xml.bind module -->
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
-            <version>2.3.2</version>
+            <version>${jaxb.runtime.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <version>${httpclient.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.10.0</version>
+            <version>${commons.io.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.24.0</version>
+            <version>${commons.compress.version}</version>
         </dependency>
         <!-- prometheus metrics -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
-            <version>0.10.0</version>
+            <version>${simpleclient.version}</version>
         </dependency>
         <!-- Hotspot JVM metrics -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_hotspot</artifactId>
-            <version>0.10.0</version>
+            <version>${simpleclient.version}</version>
         </dependency>
         <!-- Expose metrics via a servlet -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_servlet</artifactId>
-            <version>0.10.0</version>
+            <version>${simpleclient.version}</version>
         </dependency>
     </dependencies>
 </project>

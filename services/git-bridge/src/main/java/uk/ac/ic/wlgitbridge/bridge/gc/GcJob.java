@@ -1,13 +1,8 @@
 package uk.ac.ic.wlgitbridge.bridge.gc;
 
-import uk.ac.ic.wlgitbridge.bridge.Bridge;
-import uk.ac.ic.wlgitbridge.bridge.repo.ProjectRepo;
-import uk.ac.ic.wlgitbridge.data.filestore.RawDirectory;
-
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-/**
+/*
  * Is started by the bridge. Every time a project is updated, we queue it for
  * GC which executes every hour or so.
  *
@@ -20,15 +15,15 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface GcJob {
 
-    void start();
+  void start();
 
-    void stop();
+  void stop();
 
-    void onPreGc(Runnable preGc);
+  void onPreGc(Runnable preGc);
 
-    void onPostGc(Runnable postGc);
+  void onPostGc(Runnable postGc);
 
-    void queueForGc(String projectName);
+  void queueForGc(String projectName);
 
-    CompletableFuture<Void> waitForRun();
+  CompletableFuture<Void> waitForRun();
 }

@@ -2,7 +2,7 @@ package uk.ac.ic.wlgitbridge.bridge.lock;
 
 import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
 
-/**
+/*
  * Project Lock class.
  *
  * The locks should be re-entrant. For example, we are usually holding the lock
@@ -10,16 +10,15 @@ import uk.ac.ic.wlgitbridge.data.CannotAcquireLockException;
  */
 public interface ProjectLock {
 
-    void lockAll();
+  void lockAll();
 
-    void lockForProject(String projectName) throws CannotAcquireLockException;
+  void lockForProject(String projectName) throws CannotAcquireLockException;
 
-    void unlockForProject(String projectName);
+  void unlockForProject(String projectName);
 
-    /* RAII hahaha */
-    default LockGuard lockGuard(String projectName) throws CannotAcquireLockException {
-        lockForProject(projectName);
-        return () -> unlockForProject(projectName);
-    }
-
+  /* RAII hahaha */
+  default LockGuard lockGuard(String projectName) throws CannotAcquireLockException {
+    lockForProject(projectName);
+    return () -> unlockForProject(projectName);
+  }
 }

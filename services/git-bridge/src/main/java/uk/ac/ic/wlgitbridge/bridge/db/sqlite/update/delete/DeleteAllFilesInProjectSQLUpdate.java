@@ -2,7 +2,6 @@ package uk.ac.ic.wlgitbridge.bridge.db.sqlite.update.delete;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
 import uk.ac.ic.wlgitbridge.bridge.db.sqlite.SQLUpdate;
 
 public class DeleteAllFilesInProjectSQLUpdate implements SQLUpdate {

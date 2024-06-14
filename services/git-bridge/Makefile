@@ -16,6 +16,15 @@ $(MVN_TARGET): $(shell find src -type f) pom.xml
 
 build: $(MVN_TARGET)
 
+
+format:
+	mvn $(MVN_OPTS) com.spotify.fmt:fmt-maven-plugin:check
+
+
+format_fix:
+	mvn $(MVN_OPTS) com.spotify.fmt:fmt-maven-plugin:format
+
+
 test:
 	mvn $(MVN_OPTS) test
 
