@@ -267,14 +267,14 @@
       font-weight: normal;
     }
 
-    // dynamic height on table head
-    thead {
-      tr {
-        height: 100%;
+    // the following rules are used to make every .plans-new-table-header-content
+    // occupy the whole height dynamically
+    height: fit-content;
+    thead tr {
+      height: 100%;
 
-        th {
-          height: 100%;
-        }
+      .plans-new-table-header-content {
+        height: 100%;
       }
     }
   }
@@ -318,7 +318,6 @@
   .plans-new-table-header-content {
     display: flex;
     flex-direction: column;
-    height: 100%;
     position: relative;
 
     .plans-new-table-header-title {
