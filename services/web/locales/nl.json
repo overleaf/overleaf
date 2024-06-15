@@ -344,7 +344,6 @@
   "not_now": "Niet nu",
   "notification_project_invite": "<b>__userName__</b> wil dat u deelneemt aan <b>__projectName__</b> <a class=\"btn btn-sm btn-info pull-right\" href=\"’/project/__projectId__/invite/token/__token__’\">Neem deel aan Project</a>",
   "november": "november",
-  "number_collab": "Aantal bijdragers",
   "october": "oktober",
   "off": "Uit",
   "ok": "OK",
