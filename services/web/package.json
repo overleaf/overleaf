@@ -279,7 +279,6 @@
     "classnames": "^2.2.6",
     "cookie-signature": "^1.2.1",
     "copy-webpack-plugin": "^11.0.0",
-    "crypto-js": "^4.2.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
     "cypress": "13.6.6",
