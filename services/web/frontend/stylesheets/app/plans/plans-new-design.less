@@ -400,6 +400,93 @@
     }
   }
 
+  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+  // These comments will be deleted before merging this PR
+  // Below is the styling for plans cards on mobile screen
+
+  .mobile-plans-card-container {
+    width: 100%;
+
+    .mt-spacing-06 {
+      margin-top: @spacing-06;
+    }
+
+    .highlighted-plans-card {
+      border: 2px solid @green-50 !important;
+    }
+
+    .mobile-plans-card {
+      padding: @spacing-09;
+      border: 2px solid @neutral-20;
+      width: 100%; // might need max-width
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+
+      .plans-name {
+        color: @neutral-90;
+        font-size: @font-size-05; // 20px
+        font-weight: 600;
+        line-height: @line-height-04;
+      }
+
+      .old-price {
+        padding: @spacing-04 0 0 0;
+        color: @neutral-40;
+        font-size: @font-size-04; // 18px
+        font-weight: 600;
+        line-height: @line-height-05;
+        margin-bottom: -@spacing-04;
+      }
+
+      .price-container {
+        display: flex;
+        align-items: baseline;
+        .price {
+          color: @neutral-90;
+          font-size: @font-size-08; // 36px
+          font-weight: 600;
+          line-height: @line-height-07;
+          margin-right: @spacing-03;
+        }
+      }
+
+      .light-gray-text {
+        color: @neutral-70;
+        font-size: @font-size-02; // 14px
+        line-height: @line-height-02;
+      }
+
+      .description {
+        .green-round-background {
+          width: 20px;
+          height: 20px;
+        }
+
+        .bullets {
+          list-style-type: none;
+          padding-left: 0;
+          margin-bottom: unset;
+          li {
+            display: flex;
+            margin-top: @spacing-05;
+          }
+        }
+
+        .cta-buy-now {
+          width: 100%;
+          margin-top: @spacing-08;
+          line-height: @line-height-03;
+        }
+      }
+    }
+  }
+  // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+}
+
+.plans-faq {
   .faq-heading-container {
     text-align: center;
 
@@ -501,88 +588,4 @@
       }
     }
   }
-  // ------------------------------------------------------------------
-  // ------------------------------------------------------------------
-  // These comments will be deleted before merging this PR
-  // Below is the styling for plans cards on mobile screen
-
-  .mobile-plans-card-container {
-    width: 100%;
-
-    .mt-spacing-06 {
-      margin-top: @spacing-06;
-    }
-
-    .highlighted-plans-card {
-      border: 2px solid @green-50 !important;
-    }
-
-    .mobile-plans-card {
-      padding: @spacing-09;
-      border: 2px solid @neutral-20;
-      width: 100%; // might need max-width
-      border-radius: 8px;
-      display: flex;
-      flex-direction: column;
-
-      .plans-name {
-        color: @neutral-90;
-        font-size: @font-size-05; // 20px
-        font-weight: 600;
-        line-height: @line-height-04;
-      }
-
-      .old-price {
-        padding: @spacing-04 0 0 0;
-        color: @neutral-40;
-        font-size: @font-size-04; // 18px
-        font-weight: 600;
-        line-height: @line-height-05;
-        margin-bottom: -@spacing-04;
-      }
-
-      .price-container {
-        display: flex;
-        align-items: baseline;
-        .price {
-          color: @neutral-90;
-          font-size: @font-size-08; // 36px
-          font-weight: 600;
-          line-height: @line-height-07;
-          margin-right: @spacing-03;
-        }
-      }
-
-      .light-gray-text {
-        color: @neutral-70;
-        font-size: @font-size-02; // 14px
-        line-height: @line-height-02;
-      }
-
-      .description {
-        .green-round-background {
-          width: 20px;
-          height: 20px;
-        }
-
-        .bullets {
-          list-style-type: none;
-          padding-left: 0;
-          margin-bottom: unset;
-          li {
-            display: flex;
-            margin-top: @spacing-05;
-          }
-        }
-
-        .cta-buy-now {
-          width: 100%;
-          margin-top: @spacing-08;
-          line-height: @line-height-03;
-        }
-      }
-    }
-  }
-  // ------------------------------------------------------------------
-  // ------------------------------------------------------------------
 }
