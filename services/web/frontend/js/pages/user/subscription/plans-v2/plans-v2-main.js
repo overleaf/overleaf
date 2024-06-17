@@ -22,6 +22,18 @@ import getMeta from '../../../../utils/meta'
 
 const currentCurrencyCode = getMeta('ol-recommendedCurrency')
 
+function showQuoteForTab(viewTab) {
+  // hide/display quote rows
+  document.querySelectorAll('.plans-page-quote-row').forEach(quoteRow => {
+    const showForPlanTypes = quoteRow.getAttribute('data-ol-show-for-plan-type')
+    if (showForPlanTypes?.includes(viewTab)) {
+      quoteRow.classList.remove('plans-page-quote-row-hidden')
+    } else {
+      quoteRow.classList.add('plans-page-quote-row-hidden')
+    }
+  })
+}
+
 function setUpSubscriptionTracking(linkEl) {
   linkEl.addEventListener('click', function () {
     const plan =
@@ -124,6 +136,8 @@ function selectTab(viewTab) {
 
   // update the hash to reflect the current view when switching individual, group, or student tabs
   setHashFromViewTab(viewTab, currentMonthlyAnnualSwitchValue)
+
+  showQuoteForTab(viewTab)
 }
 
 function updateMonthlyAnnualSwitchValue(viewTab) {

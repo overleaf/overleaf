@@ -82,14 +82,14 @@
 
 .plans-page {
   p {
-    color: @neutral-70;
+    color: var(--neutral-70);
     margin-bottom: @line-height-computed;
   }
 
   .plans-header {
     h1,
     h2 {
-      color: @neutral-70;
+      color: var(--neutral-70);
     }
   }
 
@@ -102,7 +102,7 @@
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background-color: @brand-secondary;
+    background-color: @green-70;
     color: white;
     white-space: nowrap;
     line-height: 1;
@@ -1369,4 +1369,8 @@ p.plans-v2-table-green-highlighted-text {
 
 .plans-page-quote-row {
   margin: var(--spacing-13) 0;
+}
+
+.plans-page-quote-row-hidden {
+  display: none;
 }
