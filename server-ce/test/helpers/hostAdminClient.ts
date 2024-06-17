@@ -1,5 +1,7 @@
+const hostAdminUrl = Cypress.env('ADMIN_CLIENT_URL') || 'http://host-admin'
+
 export async function dockerCompose(cmd: string, ...args: string[]) {
-  return await fetchJSON(`http://host-admin/docker/compose/${cmd}`, {
+  return await fetchJSON(`${hostAdminUrl}/docker/compose/${cmd}`, {
     method: 'POST',
     body: JSON.stringify({
       args,
@@ -8,13 +10,13 @@ export async function dockerCompose(cmd: string, ...args: string[]) {
 }
 
 export async function mongoInit() {
-  return await fetchJSON('http://host-admin/mongo/init', {
+  return await fetchJSON(`${hostAdminUrl}/mongo/init`, {
     method: 'POST',
   })
 }
 
 export async function resetData() {
-  return await fetchJSON('http://host-admin/reset/data', {
+  return await fetchJSON(`${hostAdminUrl}/reset/data`, {
     method: 'POST',
   })
 }
@@ -25,7 +27,7 @@ export async function reconfigure({
   vars = {},
   withDataDir = false,
 }) {
-  return await fetchJSON('http://host-admin/reconfigure', {
+  return await fetchJSON(`${hostAdminUrl}/reconfigure`, {
     method: 'POST',
     body: JSON.stringify({
       pro,
@@ -65,7 +67,7 @@ export async function runScript({
   script: string
   args?: string[]
 }) {
-  return await fetchJSON('http://host-admin/run/script', {
+  return await fetchJSON(`${hostAdminUrl}/run/script`, {
     method: 'POST',
     body: JSON.stringify({
       cwd,

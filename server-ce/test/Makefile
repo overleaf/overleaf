@@ -10,6 +10,10 @@ export TEX_LIVE_DOCKER_IMAGE ?= quay.io/sharelatex/texlive-full:2023.1
 export ALL_TEX_LIVE_DOCKER_IMAGES ?= quay.io/sharelatex/texlive-full:2023.1,quay.io/sharelatex/texlive-full:2022.1
 export IMAGE_TAG_PRO ?= quay.io/sharelatex/sharelatex-pro:latest
 
+test-e2e-native:
+	docker compose -f docker-compose.yml -f docker-compose.native.yml up --build --no-log-prefix sharelatex host-admin -d
+	CYPRESS_ADMIN_CLIENT_URL='http://localhost:8081' CYPRESS_GIT_BRIDGE_PUBLIC_HOST='localhost' npm run cypress:open
+
 test-e2e:
 	docker compose up --build --no-log-prefix --exit-code-from=e2e e2e
 

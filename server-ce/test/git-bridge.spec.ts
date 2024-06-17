@@ -15,6 +15,9 @@ describe('git-bridge', function () {
     V1_HISTORY_URL: 'http://sharelatex:3100/api',
   }
 
+  const gitBridgePublicHost =
+    Cypress.env('GIT_BRIDGE_PUBLIC_HOST') || 'sharelatex'
+
   describe('enabled in Server Pro', function () {
     startWith({
       pro: true,
@@ -74,7 +77,9 @@ describe('git-bridge', function () {
       cy.findByText('Git').click()
       cy.findByRole('dialog').within(() => {
         cy.get('@projectId').then(id => {
-          cy.get('code').contains(`git clone http://git@sharelatex/git/${id}`)
+          cy.get('code').contains(
+            `git clone http://git@${gitBridgePublicHost}/git/${id}`
+          )
         })
         cy.findByRole('button', {
           name: 'Generate token',
@@ -88,7 +93,9 @@ describe('git-bridge', function () {
       cy.findByText('Git').click()
       cy.findByRole('dialog').within(() => {
         cy.get('@projectId').then(id => {
-          cy.get('code').contains(`git clone http://git@sharelatex/git/${id}`)
+          cy.get('code').contains(
+            `git clone http://git@${gitBridgePublicHost}/git/${id}`
+          )
         })
         cy.findByText('Generate token').should('not.exist')
         cy.findByText(/generate a new one in Account Settings/)
@@ -109,7 +116,7 @@ describe('git-bridge', function () {
       cy.get('@projectId').then(projectId => {
         cy.findByRole('dialog').within(() => {
           cy.get('code').contains(
-            `git clone http://git@sharelatex/git/${projectId}`
+            `git clone http://git@${gitBridgePublicHost}/git/${projectId}`
           )
         })
         cy.findByRole('button', {

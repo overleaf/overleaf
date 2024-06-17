@@ -11,7 +11,9 @@ const {
 const YAML = require('js-yaml')
 
 const PATHS = {
+  DOCKER_COMPOSE_FILE: 'docker-compose.yml',
   DOCKER_COMPOSE_OVERRIDE: 'docker-compose.override.yml',
+  DOCKER_COMPOSE_NATIVE: 'docker-compose.native.yml',
   DATA_DIR: Path.join(__dirname, 'data'),
   SANDBOXED_COMPILES_HOST_DIR: Path.join(__dirname, 'data/compiles'),
 }
@@ -44,6 +46,17 @@ function writeDockerComposeOverride(cfg) {
   fs.writeFileSync(PATHS.DOCKER_COMPOSE_OVERRIDE, YAML.dump(cfg))
 }
 
+function runDockerCompose(command, args, callback) {
+  const files = ['-f', PATHS.DOCKER_COMPOSE_FILE]
+  if (process.env.NATIVE_CYPRESS) {
+    files.push('-f', PATHS.DOCKER_COMPOSE_NATIVE)
+  }
+  if (fs.existsSync(PATHS.DOCKER_COMPOSE_OVERRIDE)) {
+    files.push('-f', PATHS.DOCKER_COMPOSE_OVERRIDE)
+  }
+  execFile('docker', ['compose', ...files, command, ...args], callback)
+}
+
 function purgeDataDir() {
   fs.rmSync(PATHS.DATA_DIR, { recursive: true, force: true })
 }
@@ -58,7 +71,9 @@ app.use((req, res, next) => {
   // Basic access logs
   console.log(req.method, req.url, req.body)
   // Add CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'http://sharelatex')
+  const accessControlAllowOrigin =
+    process.env.ACCESS_CONTROL_ALLOW_ORIGIN || 'http://sharelatex'
+  res.setHeader('Access-Control-Allow-Origin', accessControlAllowOrigin)
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   res.setHeader('Access-Control-Max-Age', '3600')
   next()
@@ -79,11 +94,9 @@ app.post(
   (req, res) => {
     const { cwd, script, args } = req.body
 
-    execFile(
-      'docker',
+    runDockerCompose(
+      'exec',
       [
-        'compose',
-        'exec',
         'sharelatex',
         'bash',
         '-c',
@@ -204,24 +217,22 @@ app.post(
     if (['stop', 'down'].includes(cmd)) {
       mongoIsInitialized = false
     }
-    execFile('docker', ['compose', cmd, ...args], (error, stdout, stderr) => {
+    runDockerCompose(cmd, args, (error, stdout, stderr) => {
       res.json({ error, stdout, stderr })
     })
   }
 )
 
 function mongoInit(callback) {
-  execFile(
-    'docker',
-    ['compose', 'up', '--detach', '--wait', 'mongo'],
+  runDockerCompose(
+    'up',
+    ['--detach', '--wait', 'mongo'],
     (error, stdout, stderr) => {
       if (error) return callback(error, stdout, stderr)
 
-      execFile(
-        'docker',
+      runDockerCompose(
+        'exec',
         [
-          'compose',
-          'exec',
           'mongo',
           'mongo',
           '--eval',
@@ -268,10 +279,9 @@ app.post(
     const doMongoInit = mongoIsInitialized ? cb => cb() : mongoInit
     doMongoInit((error, stdout, stderr) => {
       if (error) return res.json({ error, stdout, stderr })
-
-      execFile(
-        'docker',
-        ['compose', 'up', '--detach', '--wait', 'sharelatex'],
+      runDockerCompose(
+        'up',
+        ['--detach', '--wait', 'sharelatex'],
         (error, stdout, stderr) => {
           res.json({ error, stdout, stderr })
         }
@@ -281,9 +291,9 @@ app.post(
 )
 
 app.post('/reset/data', (req, res) => {
-  execFile(
-    'docker',
-    ['compose', 'stop', '--timeout=0', 'sharelatex'],
+  runDockerCompose(
+    'stop',
+    ['--timeout=0', 'sharelatex'],
     (error, stdout, stderr) => {
       if (error) return res.json({ error, stdout, stderr })
 
@@ -294,9 +304,9 @@ app.post('/reset/data', (req, res) => {
       }
 
       mongoIsInitialized = false
-      execFile(
-        'docker',
-        ['compose', 'down', '--timeout=0', '--volumes', 'mongo', 'redis'],
+      runDockerCompose(
+        'down',
+        ['--timeout=0', '--volumes', 'mongo', 'redis'],
         (error, stdout, stderr) => {
           res.json({ error, stdout, stderr })
         }
