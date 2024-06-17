@@ -222,7 +222,7 @@ const DocumentManager = {
       version,
       ranges,
       lastUpdatedAt,
-      lastUpdatedBy
+      lastUpdatedBy || null
     )
     await RedisManager.promises.clearUnflushedTime(docId)
     return result
