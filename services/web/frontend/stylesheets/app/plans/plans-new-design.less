@@ -400,6 +400,78 @@
     }
   }
 
+  .plans-new-table-heading-row {
+    // this means min-height, min-height does not work in table layout
+    // https://stackoverflow.com/questions/7790222
+    height: 64px;
+  }
+
+  .plans-new-table-heading-text {
+    padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
+      var(--spacing-05);
+    font-weight: 600;
+    font-size: var(--font-size-04);
+    line-height: var(--line-height-03);
+    vertical-align: bottom;
+  }
+
+  .plans-new-table-feature-row {
+    &:nth-child(even) {
+      background-color: var(--neutral-10);
+    }
+  }
+
+  .plans-new-table-section-without-header-row {
+    &:nth-child(odd):not(.plans-new-table-heading-row) {
+      background-color: var(--neutral-10);
+    }
+    &:nth-child(even):not(.plans-new-table-heading-row) {
+      background-color: white;
+    }
+  }
+
+  .plans-new-table-feature-th {
+    padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
+      var(--spacing-05);
+
+    .plans-new-table-feature-th-content {
+      line-height: var(--line-height-03);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .plans-new-table-feature-tooltip-icon {
+        cursor: help;
+        margin-left: var(--spacing-05);
+      }
+
+      .tooltip.in {
+        opacity: 1;
+      }
+
+      .tooltip-inner {
+        padding: var(--spacing-04) var(--spacing-06);
+        max-width: 258px;
+        width: 258px;
+        font-family: Lato, sans-serif;
+        font-size: var(--font-size-02);
+        text-align: left;
+        background-color: var(--neutral-90);
+        border-radius: var(--border-radius-base);
+      }
+    }
+  }
+
+  .plans-new-table-feature-td {
+    padding: var(--spacing-05) var(--spacing-08);
+    text-align: center;
+    line-height: var(--line-height-03);
+
+    .green-round-background {
+      margin-right: 0;
+    }
+  }
+
   // ------------------------------------------------------------------
   // ------------------------------------------------------------------
   // These comments will be deleted before merging this PR
