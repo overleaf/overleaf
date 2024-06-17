@@ -12,6 +12,34 @@ import {
 import { Annotation } from '../../../../../types/annotation'
 import { debugConsole } from '@/utils/debugging'
 import { sendMB } from '@/infrastructure/event-tracking'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+
+interface CompileLogDiagnostic extends Diagnostic {
+  compile?: true
+  ruleId?: string
+  id?: string
+  entryIndex: number
+  firstOnLine?: boolean
+}
+
+type RenderedDiagnostic = Pick<
+  CompileLogDiagnostic,
+  | 'message'
+  | 'severity'
+  | 'ruleId'
+  | 'compile'
+  | 'source'
+  | 'id'
+  | 'firstOnLine'
+>
+
+export type DiagnosticAction = (
+  diagnostic: RenderedDiagnostic
+) => HTMLButtonElement | null
+
+const diagnosticActions = importOverleafModules('diagnosticActions') as {
+  import: { default: DiagnosticAction }
+}[]
 
 const compileLintSourceConf = new Compartment()
 
@@ -56,7 +84,8 @@ export const lintSourceConfig = {
  */
 const compileLogLintSource = (): Extension =>
   linter(view => {
-    const items: Diagnostic[] = []
+    const items: CompileLogDiagnostic[] = []
+    // NOTE: iter() changes the order of diagnostics on the same line
     const cursor = view.state.field(compileDiagnosticsState).iter()
     while (cursor.value !== null) {
       const { diagnostic } = cursor.value
@@ -68,13 +97,10 @@ const compileLogLintSource = (): Extension =>
       })
       cursor.next()
     }
+    // restore the original order of items
+    items.sort((a, b) => a.from - b.from || a.entryIndex - b.entryIndex)
     return items
   }, lintSourceConfig)
-
-interface CompileLogDiagnostic extends Diagnostic {
-  compile?: true
-  ruleId?: string
-}
 
 class CompileLogDiagnosticRangeValue extends RangeValue {
   constructor(public diagnostic: CompileLogDiagnostic) {
@@ -117,7 +143,7 @@ export const compileDiagnosticsState = StateField.define<
 })
 
 export const setAnnotations = (doc: Text, annotations: Annotation[]) => {
-  const diagnostics: Diagnostic[] = []
+  const diagnostics: CompileLogDiagnostic[] = []
 
   for (const annotation of annotations) {
     // ignore "whole document" (row: -1) annotations
@@ -162,19 +188,31 @@ const convertAnnotationToDiagnostic = (
     message: annotation.text,
     ruleId: annotation.ruleId,
     compile: true,
+    id: annotation.id,
+    entryIndex: annotation.entryIndex,
+    source: annotation.source,
+    firstOnLine: annotation.firstOnLine,
   }
 }
 
-export const renderMessage = (
-  diagnostic: Pick<
-    CompileLogDiagnostic,
-    'message' | 'severity' | 'ruleId' | 'compile'
-  >
-) => {
+export const renderMessage = (diagnostic: RenderedDiagnostic) => {
   const { message, severity, ruleId, compile = false } = diagnostic
 
   const div = document.createElement('div')
-  div.textContent = message
+  div.classList.add('ol-cm-diagnostic-message')
+
+  div.append(message)
+
+  const activeDiagnosticActions = diagnosticActions
+    .map(m => m.import.default(diagnostic))
+    .filter(Boolean) as HTMLButtonElement[]
+
+  if (activeDiagnosticActions.length) {
+    const actions = document.createElement('div')
+    actions.classList.add('ol-cm-diagnostic-actions')
+    actions.append(...activeDiagnosticActions)
+    div.append(actions)
+  }
 
   window.setTimeout(() => {
     if (div.isConnected) {

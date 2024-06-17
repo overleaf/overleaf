@@ -10,6 +10,7 @@ const ProjectContext = createContext<
       _id: string
       name: string
       rootDocId?: string
+      compiler: string
       members: { _id: UserId; email: string; privileges: string }[]
       invites: { _id: UserId }[]
       features: {
@@ -66,6 +67,7 @@ export const ProjectProvider: FC = ({ children }) => {
 
   const {
     _id,
+    compiler,
     name,
     rootDoc_id: rootDocId,
     members,
@@ -87,6 +89,7 @@ export const ProjectProvider: FC = ({ children }) => {
   const value = useMemo(() => {
     return {
       _id,
+      compiler,
       name,
       rootDocId,
       members,
@@ -99,6 +102,7 @@ export const ProjectProvider: FC = ({ children }) => {
     }
   }, [
     _id,
+    compiler,
     name,
     rootDocId,
     members,

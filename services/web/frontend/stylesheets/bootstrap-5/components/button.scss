@@ -85,6 +85,10 @@
     );
 
     background: var(--premium-gradient);
+    transition: none;
+    &:hover {
+      background: var(--blue-70);
+    }
   }
 }
 

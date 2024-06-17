@@ -26,6 +26,7 @@ function PdfLogsEntries({ entries, hasErrors }) {
         <PdfLogEntry
           key={logEntry.key}
           index={index}
+          id={logEntry.key}
           logEntry={logEntry}
           ruleId={logEntry.ruleId}
           headerTitle={logEntry.messageComponent ?? logEntry.message}

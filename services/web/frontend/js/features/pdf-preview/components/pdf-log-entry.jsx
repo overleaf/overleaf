@@ -5,6 +5,7 @@ import PreviewLogEntryHeader from '../../preview/components/preview-log-entry-he
 import PdfLogEntryContent from './pdf-log-entry-content'
 import HumanReadableLogsHints from '../../../ide/human-readable-logs/HumanReadableLogsHints'
 import { sendMB } from '@/infrastructure/event-tracking'
+import getMeta from '@/utils/meta'
 
 function PdfLogEntry({
   ruleId,
@@ -25,7 +26,10 @@ function PdfLogEntry({
   onClose,
   index,
   logEntry,
+  id,
 }) {
+  const showAiErrorAssistant = getMeta('ol-showAiErrorAssistant')
+
   if (ruleId && HumanReadableLogsHints[ruleId]) {
     const hint = HumanReadableLogsHints[ruleId]
     formattedContent = hint.formattedContent(contentDetails)
@@ -44,11 +48,29 @@ function PdfLogEntry({
     [level, onSourceLocationClick, ruleId, sourceLocation]
   )
 
+  const logEntryRef = useCallback(
+    element => {
+      if (element) {
+        window.addEventListener('editor:view-compile-log-entry', event => {
+          if (event.detail.id === id) {
+            element.scrollIntoView({ block: 'start', inline: 'nearest' })
+          }
+
+          if (event.detail.suggestFix) {
+            element.querySelector('button[data-action="suggest-fix"]')?.click()
+          }
+        })
+      }
+    },
+    [id]
+  )
+
   return (
     <div
       className={classNames('log-entry', customClass)}
       aria-label={entryAriaLabel}
       data-ruleid={ruleId}
+      ref={logEntryRef}
     >
       <PreviewLogEntryHeader
         level={level}
@@ -62,7 +84,7 @@ function PdfLogEntry({
         onClose={onClose}
       />
 
-      {(rawContent || formattedContent || window.user.alphaProgram) && (
+      {(rawContent || formattedContent || showAiErrorAssistant) && (
         <PdfLogEntryContent
           rawContent={rawContent}
           formattedContent={formattedContent}
@@ -101,6 +123,7 @@ PdfLogEntry.propTypes = {
   onClose: PropTypes.func,
   index: PropTypes.number,
   logEntry: PropTypes.any,
+  id: PropTypes.string,
 }
 
 export default memo(PdfLogEntry)

@@ -596,6 +596,18 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // used for that compile.
   const lastCompileOptions = useMemo(() => data?.options || {}, [data])
 
+  useEffect(() => {
+    const listener = (event: Event) => {
+      setShowLogs((event as CustomEvent<boolean>).detail as boolean)
+    }
+
+    window.addEventListener('editor:show-logs', listener)
+
+    return () => {
+      window.removeEventListener('editor:show-logs', listener)
+    }
+  }, [])
+
   const value = useMemo(
     () => ({
       animateCompileDropdownArrow,

@@ -41,7 +41,7 @@ export function handleOutputFiles(outputFiles, projectId, data) {
 let nextEntryId = 1
 
 function generateEntryKey() {
-  return '' + nextEntryId++
+  return 'compile-log-entry-' + nextEntryId++
 }
 
 export const handleLogFiles = async (outputFiles, data, signal) => {
@@ -140,6 +140,7 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
   const rootDocDirname = dirname(fileTreeData, rootDocId)
 
   const logEntryAnnotations = {}
+  const seenLine = {}
 
   for (const entry of entries) {
     if (entry.file) {
@@ -153,12 +154,17 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
         }
 
         logEntryAnnotations[entity._id].push({
+          id: entry.key,
+          entryIndex: logEntryAnnotations[entity._id].length, // used for maintaining the order of items on the same line
           row: entry.line - 1,
           type: entry.level === 'error' ? 'error' : 'warning',
           text: entry.message,
           source: 'compile', // NOTE: this is used in Ace for filtering the annotations
           ruleId: entry.ruleId,
+          firstOnLine: !seenLine[entry.line],
         })
+
+        seenLine[entry.line] = true
       }
     }
   }

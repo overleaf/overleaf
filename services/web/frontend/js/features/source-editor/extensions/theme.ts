@@ -155,6 +155,15 @@ const baseTheme = EditorView.baseTheme({
     boxShadow: '0 1px 1px rgba(255, 255, 255, 0.7)',
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
+  '.cm-diagnosticSource': {
+    display: 'none',
+  },
+  '.ol-cm-diagnostic-actions': {
+    marginTop: '4px',
+  },
+  '.cm-diagnostic:last-of-type .ol-cm-diagnostic-actions': {
+    marginBottom: '4px',
+  },
 })
 
 /**

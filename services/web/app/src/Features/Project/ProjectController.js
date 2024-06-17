@@ -670,6 +670,7 @@ const _ProjectController = {
         debugPdfDetach,
         showSymbolPalette,
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
+        showAiErrorAssistant: user.alphaProgram, // TODO: labs experiment
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,

@@ -8,6 +8,7 @@ const VALID_KEYS = [
   'writefull-integration',
   'writefull-oauth-promotion',
   'bib-file-tpr-prompt',
+  'ai-error-assistant-consent',
 ]
 
 async function completeTutorial(req, res, next) {
