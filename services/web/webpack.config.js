@@ -255,18 +255,6 @@ module.exports = {
           },
         ],
       },
-      {
-        // Expose jQuery and $ global variables
-        test: require.resolve('jquery'),
-        use: [
-          {
-            loader: 'expose-loader',
-            options: {
-              exposes: ['$', 'jQuery'],
-            },
-          },
-        ],
-      },
     ],
   },
   resolve: {
@@ -307,6 +295,12 @@ module.exports = {
     new webpack.IgnorePlugin({
       resourceRegExp: /^\.\/locale$/,
       contextRegExp: /moment$/,
+    }),
+
+    // Set window.$ and window.jQuery
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
     }),
 
     // Copy the required files for loading MathJax from MathJax NPM package
