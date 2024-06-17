@@ -101,6 +101,7 @@ ENV OPTIMISE_PDF "true"
 # ----------------------------------------------------------
 ENV KILL_PROCESS_TIMEOUT 55
 ENV KILL_ALL_PROCESSES_TIMEOUT 55
+ENV GRACEFUL_SHUTDOWN_DELAY_SECONDS 1
 
 ENV NODE_ENV "production"
 ENV LOG_LEVEL "info"

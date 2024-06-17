@@ -9,6 +9,7 @@ EXIT_CODE="$?"
 if [ $EXIT_CODE -ne 0 ]
 then
   echo "project-history/scripts/flush_all.js failed with exit code $EXIT_CODE"
+  exit 1
 fi
 
 exit 0

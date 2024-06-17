@@ -2,8 +2,6 @@ version: '2.2'
 services:
   sharelatex:
     image: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}
-    # TODO(das7pad): increase timeout after speeding up the graceful shutdown procedure
-    # stop_grace_period: 60s
     stop_grace_period: 0s
     depends_on:
       mongo:

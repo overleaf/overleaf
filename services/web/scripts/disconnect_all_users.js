@@ -19,7 +19,8 @@ async function main() {
     )
     process.exit(1)
   }
-  if (Settings.overleaf && args['confirm-site-url'] !== Settings.siteUrl) {
+  const isSaaS = Boolean(Settings.overleaf)
+  if (isSaaS && args['confirm-site-url'] !== Settings.siteUrl) {
     console.error()
     console.error(
       'Please confirm the environment you want to disconnect ALL USERS from by specifying the site URL aka PUBLIC_URL, e.g. --confirm-site-url=https://www.dev-overleaf.com for the dev-env'
@@ -46,8 +47,10 @@ async function main() {
     `Disconnect all users from ${args['confirm-site-url']}, with delay ${delay}`
   )
 
-  console.error('  Use CTRL+C in the next 5s to abort.')
-  await sleep(5 * 1000)
+  if (isSaaS) {
+    console.error('  Use CTRL+C in the next 5s to abort.')
+    await sleep(5 * 1000)
+  }
 
   await AdminController._sendDisconnectAllUsersMessage(delay)
 }

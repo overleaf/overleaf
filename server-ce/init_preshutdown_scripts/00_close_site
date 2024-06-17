@@ -18,9 +18,12 @@ EXIT_CODE="$?"
 if [ $EXIT_CODE -ne 0 ]
 then
   echo "scripts/disconnect_all_users.js failed with exit code $EXIT_CODE"
+  exit 1
 fi
 
 # wait for disconnection
-sleep 5
+while ! sv stop real-time-overleaf; do
+  sleep 1
+done
 
 exit 0

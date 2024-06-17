@@ -93,10 +93,6 @@ async function gracefulShutdown(server, signal) {
       'optionalAfterDrainingConnections',
       optionalCleanupHandlersAfterDrainingConnections.concat([
         { label: 'metrics module', handler: () => Metrics.close() },
-        {
-          label: 'logger module',
-          handler: () => logger.logLevelChecker?.stop(),
-        },
       ])
     )
   } catch (err) {
