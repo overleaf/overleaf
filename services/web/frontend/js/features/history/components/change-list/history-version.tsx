@@ -19,6 +19,7 @@ import HistoryDropdownContent from './dropdown/history-dropdown-content'
 import CompareItems from './dropdown/menu-item/compare-items'
 import CompareVersionDropdown from './dropdown/compare-version-dropdown'
 import { CompareVersionDropdownContentAllHistory } from './dropdown/compare-version-dropdown-content'
+import FileRestoreChange from './file-restore-change'
 
 type HistoryVersionProps = {
   update: LoadedUpdate
@@ -164,10 +165,14 @@ function HistoryVersion({
                 label={label}
               />
             ))}
-            <Changes
-              pathnames={update.pathnames}
-              projectOps={update.project_ops}
-            />
+            {update.meta.origin?.kind === 'file-restore' ? (
+              <FileRestoreChange origin={update.meta.origin} />
+            ) : (
+              <Changes
+                pathnames={update.pathnames}
+                projectOps={update.project_ops}
+              />
+            )}
             <MetadataUsersList
               users={update.meta.users}
               origin={update.meta.origin}

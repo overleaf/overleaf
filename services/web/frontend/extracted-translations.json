@@ -399,6 +399,7 @@
   "file_action_deleted": "",
   "file_action_edited": "",
   "file_action_renamed": "",
+  "file_action_restored": "",
   "file_already_exists": "",
   "file_already_exists_in_this_location": "",
   "file_name": "",

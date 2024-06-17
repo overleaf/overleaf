@@ -588,6 +588,7 @@
   "file_action_deleted": "Deleted",
   "file_action_edited": "Edited",
   "file_action_renamed": "Renamed",
+  "file_action_restored": "Restored __fileName__ from: __date__",
   "file_already_exists": "A file or folder with this name already exists",
   "file_already_exists_in_this_location": "An item named <0>__fileName__</0> already exists in this location. If you wish to move this file, rename or remove the conflicting file and try again.",
   "file_name": "File Name",
