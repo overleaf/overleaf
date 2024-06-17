@@ -612,10 +612,10 @@ mixin table_sticky_header_all(plansConfig)
 mixin monthly_annual_switch(initialState, eventTracking, eventSegmentation)
 	- var monthlyAnnualToggleChecked = initialState === 'monthly'
 	.row
-		.col-md-4.col-md-offset-4.text-centered.plans-v2-m-a-switch-container(data-ol-plans-v2-m-a-switch-container)
-			.plans-v2-m-a-switch-annual-text-container
+		.col-md-4.col-md-offset-4.text-centered.monthly-annual-switch(data-ol-plans-v2-m-a-switch-container)
+			.monthly-annual-switch-text
 				span.underline(data-ol-plans-v2-m-a-switch-text='annual') #{translate("annual")}
-				.tooltip.in.left.plans-v2-m-a-tooltip(
+				.tooltip.in.left(
 					role="tooltip"
 					data-ol-plans-v2-m-a-tooltip
 					class=monthlyAnnualToggleChecked ? 'plans-v2-m-a-tooltip-monthly-selected' : ''
@@ -625,7 +625,7 @@ mixin monthly_annual_switch(initialState, eventTracking, eventSegmentation)
 						span(hidden=!monthlyAnnualToggleChecked data-ol-tooltip-period='monthly') #{translate("save_20_percent_by_paying_annually")}
 						span(hidden=monthlyAnnualToggleChecked data-ol-tooltip-period='annual') #{translate("saving_20_percent")}
 
-			label.plans-v2-m-a-switch(data-ol-plans-v2-m-a-switch)
+			label(data-ol-plans-v2-m-a-switch)
 				input(
 					type="checkbox"
 					checked=monthlyAnnualToggleChecked

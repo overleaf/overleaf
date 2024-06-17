@@ -1,14 +1,14 @@
 // m-a stands for: monthly annual
 
-@plans-v2-top-switch-item-height: 34px;
-@plans-v2-top-switch-item-border-radius: @plans-v2-top-switch-item-height / 2;
-@plans-v2-m-a-switch-height: 34px;
-@plans-v2-highlighted-text-height-desktop: 30px;
-@plans-v2-highlighted-text-height-mobile: 41px;
-@plans-v2-learn-more-link-color: hsl(206, 100%, 52%);
-@plans-v2-top-switch-group-width-mobile: 46%;
-@plans-v2-table-border-radius: 20px;
-@plans-v2-table-td-mobile-min-height: 34px;
+@plans-top-switch-item-height: 34px;
+@plans-top-switch-item-border-radius: @plans-top-switch-item-height / 2;
+@plans-m-a-switch-height: 34px;
+@plans-highlighted-text-height-desktop: 30px;
+@plans-highlighted-text-height-mobile: 41px;
+@plans-learn-more-link-color: hsl(206, 100%, 52%);
+@plans-top-switch-group-width-mobile: 46%;
+@plans-table-border-radius: 20px;
+@plans-table-td-mobile-min-height: 34px;
 
 .plans-page {
   p {
@@ -68,27 +68,28 @@
     }
   }
 
-  .plans-v2-top-switch ul.plans-v2-nav {
+  .plans-top-switch ul {
     display: flex;
     justify-content: center;
+    margin-top: var(--spacing-09);
 
     li {
       border-top: 1px solid @ol-blue-gray-3;
       border-bottom: 1px solid @ol-blue-gray-3;
-      height: @plans-v2-top-switch-item-height;
+      height: @plans-top-switch-item-height;
 
-      &.plans-v2-top-switch-individual {
+      &.plans-switch-individual {
         border-right: 1px solid @ol-blue-gray-3;
         border-left: 1px solid @ol-blue-gray-3;
-        border-top-left-radius: @plans-v2-top-switch-item-border-radius;
-        border-bottom-left-radius: @plans-v2-top-switch-item-border-radius;
+        border-top-left-radius: @plans-top-switch-item-border-radius;
+        border-bottom-left-radius: @plans-top-switch-item-border-radius;
       }
 
-      &.plans-v2-top-switch-student {
+      &.plans-switch-student {
         border-right: 1px solid @ol-blue-gray-3;
         border-left: 1px solid @ol-blue-gray-3;
-        border-top-right-radius: @plans-v2-top-switch-item-border-radius;
-        border-bottom-right-radius: @plans-v2-top-switch-item-border-radius;
+        border-top-right-radius: @plans-top-switch-item-border-radius;
+        border-bottom-right-radius: @plans-top-switch-item-border-radius;
       }
 
       button {
@@ -128,13 +129,13 @@
       li {
         height: unset;
 
-        &.plans-v2-top-switch-individual,
-        &.plans-v2-top-switch-student {
-          width: (100% - @plans-v2-top-switch-group-width-mobile) / 2;
+        &.plans-switch-individual,
+        &.plans-switch-student {
+          width: (100% - @plans-top-switch-group-width-mobile) / 2;
         }
 
-        &.plans-v2-top-switch-group {
-          width: @plans-v2-top-switch-group-width-mobile;
+        &.plans-switch-group {
+          width: @plans-top-switch-group-width-mobile;
 
           // force newline for the second span
           span:first-child::after {
@@ -147,8 +148,8 @@
           }
         }
 
-        &.plans-v2-top-switch-individual,
-        &.plans-v2-top-switch-student {
+        &.plans-switch-individual,
+        &.plans-switch-student {
           button {
             display: flex;
             align-items: center;
@@ -180,7 +181,7 @@
     }
   }
 
-  .plans-v2-m-a-switch-container {
+  .monthly-annual-switch {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -196,7 +197,7 @@
         color: @ol-blue-gray-2;
       }
 
-      .plans-v2-m-a-switch {
+      label {
         input + span {
           background-color: @ol-blue-gray-2;
           cursor: not-allowed;
@@ -211,107 +212,107 @@
         display: none;
       }
     }
-  }
 
-  .plans-v2-m-a-switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: @plans-v2-m-a-switch-height;
-    margin: 0 @margin-lg;
+    label {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: @plans-m-a-switch-height;
+      margin: 0 @margin-lg;
 
-    input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    input + span {
-      background-color: @ol-green;
-    }
-
-    input:checked + span {
-      background-color: @ol-blue-gray-4;
-    }
-
-    input:checked + span::before {
-      transform: translateX(26px);
-    }
-
-    span {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: @ol-blue-gray-1;
-      transition: 0.4s;
-      border-radius: @plans-v2-m-a-switch-height;
-
-      &::before {
-        position: absolute;
-        content: '';
-        height: 32px;
-        width: 32px;
-        left: 1px;
-        bottom: 1px;
-        background-color: @white;
-        transition: 0.4s;
-        border-radius: 50%;
+      input {
+        opacity: 0;
+        width: 0;
+        height: 0;
       }
-    }
-  }
 
-  .plans-v2-m-a-switch-annual-text-container {
-    position: relative;
-  }
-
-  .plans-v2-m-a-tooltip {
-    position: absolute;
-    color: @white;
-    width: auto;
-    border-radius: 4px;
-    right: 110%;
-    top: 0;
-    z-index: 0;
-
-    &.tooltip.in.left {
-      .tooltip-inner {
+      input + span {
         background-color: @ol-green;
       }
 
-      .tooltip-arrow {
-        border-left-color: @ol-green;
+      input:checked + span {
+        background-color: @ol-blue-gray-4;
+      }
+
+      input:checked + span::before {
+        transform: translateX(26px);
+      }
+
+      span {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: @ol-blue-gray-1;
+        transition: 0.4s;
+        border-radius: @plans-m-a-switch-height;
+
+        &::before {
+          position: absolute;
+          content: '';
+          height: 32px;
+          width: 32px;
+          left: 1px;
+          bottom: 1px;
+          background-color: @white;
+          transition: 0.4s;
+          border-radius: 50%;
+        }
       }
     }
+  }
 
-    span {
-      white-space: nowrap;
-    }
+  .monthly-annual-switch-text {
+    position: relative;
 
-    @media (max-width: @screen-xs-max) {
-      right: -31%;
-      top: unset;
+    .tooltip {
+      position: absolute;
+      color: @white;
+      width: auto;
+      border-radius: 4px;
+      right: 110%;
+      top: 0;
+      z-index: 0;
 
-      &.tooltip.in.bottom {
+      &.tooltip.in.left {
         .tooltip-inner {
           background-color: @ol-green;
         }
 
         .tooltip-arrow {
-          border-left-color: unset;
-          border-bottom-color: @ol-green;
+          border-left-color: @ol-green;
         }
       }
 
-      &.plans-v2-m-a-tooltip-monthly-selected {
-        right: -119%;
+      span {
+        white-space: nowrap;
       }
 
-      span {
-        font-size: @font-size-extra-small;
-        position: relative;
+      @media (max-width: @screen-xs-max) {
+        right: -31%;
+        top: unset;
+
+        &.tooltip.in.bottom {
+          .tooltip-inner {
+            background-color: @ol-green;
+          }
+
+          .tooltip-arrow {
+            border-left-color: unset;
+            border-bottom-color: @ol-green;
+          }
+        }
+
+        &.plans-v2-m-a-tooltip-monthly-selected {
+          right: -119%;
+        }
+
+        span {
+          font-size: @font-size-extra-small;
+          position: relative;
+        }
       }
     }
   }
@@ -421,7 +422,7 @@
       white-space: nowrap;
 
       span.plans-v2-license-picker-educational-discount-learn-more-text {
-        color: @plans-v2-learn-more-link-color;
+        color: @plans-learn-more-link-color;
       }
 
       .tooltip {
@@ -435,10 +436,10 @@
 
   .plans-v2-table-individual,
   .plans-v2-table-student {
-    margin-top: 40px + @plans-v2-highlighted-text-height-desktop;
+    margin-top: 40px + @plans-highlighted-text-height-desktop;
 
     @media (max-width: @screen-xs-max) {
-      margin-top: 60px + @plans-v2-highlighted-text-height-desktop;
+      margin-top: 60px + @plans-highlighted-text-height-desktop;
 
       th .plans-v2-table-th-content {
         min-height: 280px;
@@ -458,7 +459,7 @@
           background-color: @ol-blue-gray-0;
 
           .plans-v2-table-feature-name {
-            border-bottom-left-radius: @plans-v2-table-border-radius;
+            border-bottom-left-radius: @plans-table-border-radius;
 
             @media (max-width: @screen-xs-max) {
               border-bottom-left-radius: 0;
@@ -470,7 +471,7 @@
           background-color: @ol-blue-gray-0;
 
           .plans-v2-table-cell {
-            border-bottom-right-radius: @plans-v2-table-border-radius;
+            border-bottom-right-radius: @plans-table-border-radius;
 
             @media (max-width: @screen-xs-max) {
               border-bottom-right-radius: 0;
@@ -483,7 +484,7 @@
     // only make corners have round borders if the column is not highlighted
     th:not(.plans-v2-table-green-highlighted) {
       &:nth-last-child(2) .plans-v2-table-th {
-        border-top-right-radius: @plans-v2-table-border-radius;
+        border-top-right-radius: @plans-table-border-radius;
 
         @media (max-width: @screen-xs-max) {
           border-top-right-radius: 0;
@@ -491,7 +492,7 @@
       }
 
       &:nth-child(2) .plans-v2-table-th {
-        border-top-left-radius: @plans-v2-table-border-radius;
+        border-top-left-radius: @plans-table-border-radius;
 
         @media (max-width: @screen-xs-max) {
           border-top-right-radius: 0;
@@ -518,7 +519,7 @@
           background-color: @ol-blue-gray-0;
 
           .plans-v2-table-feature-name {
-            border-bottom-left-radius: @plans-v2-table-border-radius;
+            border-bottom-left-radius: @plans-table-border-radius;
 
             @media (max-width: @screen-xs-max) {
               border-bottom-left-radius: 0;
@@ -530,7 +531,7 @@
           background-color: @ol-blue-gray-0;
 
           .plans-v2-table-cell {
-            border-bottom-right-radius: @plans-v2-table-border-radius;
+            border-bottom-right-radius: @plans-table-border-radius;
 
             @media (max-width: @screen-xs-max) {
               border-bottom-right-radius: 0;
@@ -546,7 +547,7 @@
 
     th {
       &:last-child .plans-v2-table-th {
-        border-top-right-radius: @plans-v2-table-border-radius;
+        border-top-right-radius: @plans-table-border-radius;
 
         @media (max-width: @screen-xs-max) {
           border-top-right-radius: 0;
@@ -554,7 +555,7 @@
       }
 
       &:nth-child(2) .plans-v2-table-th {
-        border-top-left-radius: @plans-v2-table-border-radius;
+        border-top-left-radius: @plans-table-border-radius;
 
         @media (max-width: @screen-xs-max) {
           border-top-left-radius: 0;
@@ -564,7 +565,7 @@
   }
 
   .plans-v2-table-group {
-    margin-top: 26px + @plans-v2-highlighted-text-height-desktop;
+    margin-top: 26px + @plans-highlighted-text-height-desktop;
 
     p.plans-v2-table-th-content-title {
       // Reduce font size of table heading for screen size >= @screen-lg (1200px) from 20px to 19px
@@ -588,7 +589,7 @@
       // top right border radius on desktop only
       &:first-of-type {
         th:last-child > .plans-v2-table-th {
-          border-top-right-radius: @plans-v2-table-border-radius;
+          border-top-right-radius: @plans-table-border-radius;
 
           @media (max-width: @screen-xs-max) {
             border-top-right-radius: 0;
@@ -599,7 +600,7 @@
       // bottom right border radius on desktop only
       &:last-of-type {
         td:last-child > .plans-v2-table-cell {
-          border-bottom-right-radius: @plans-v2-table-border-radius;
+          border-bottom-right-radius: @plans-table-border-radius;
 
           @media (max-width: @screen-xs-max) {
             border-bottom-right-radius: 0;
@@ -693,7 +694,7 @@
           background-color: @ol-blue-gray-0;
 
           .plans-v2-table-feature-name {
-            border-top-left-radius: @plans-v2-table-border-radius;
+            border-top-left-radius: @plans-table-border-radius;
 
             @media (max-width: @screen-xs-max) {
               border-top-left-radius: 0;
@@ -828,7 +829,7 @@
     @media (max-width: @screen-xs-max) {
       .plans-v2-table-cell-content {
         padding: 6px;
-        min-height: @plans-v2-table-td-mobile-min-height;
+        min-height: @plans-table-td-mobile-min-height;
       }
     }
   }
@@ -912,7 +913,7 @@
 
     // `plans-v2-table-th-content-title` is visually invisible on screen size less than @screen-xs-max
     // because there is a sticky header (`plans-v2-table-sticky-header` class) that "replace" the content visually
-    // (see the `@plans-v2-table-sticky-header-z-index` variable that make the sticky header element is "above" the whole table)
+    // (see the `@plans-table-sticky-header-z-index` variable that make the sticky header element is "above" the whole table)
     // however, we still need to properly styling the `plans-v2-table-th-content-title` for small screen size to
     // fit this element to the size of the sticky header
     // this trick is used because th element can not have a `position: sticky` rule, at least for our use case
@@ -1025,7 +1026,7 @@
       padding: 6px;
       width: 100%;
       background-color: @ol-blue-gray-0;
-      min-height: @plans-v2-table-td-mobile-min-height;
+      min-height: @plans-table-td-mobile-min-height;
 
       i.plans-v2-table-feature-name-question-icon {
         display: none;
@@ -1038,7 +1039,7 @@
         white-space: nowrap;
 
         span.plans-v2-table-feature-name-learn-more-text {
-          color: @plans-v2-learn-more-link-color;
+          color: @plans-learn-more-link-color;
         }
 
         .tooltip {
@@ -1096,7 +1097,7 @@
             white-space: nowrap;
 
             span.plans-v2-table-divider-learn-more-text {
-              color: @plans-v2-learn-more-link-color;
+              color: @plans-learn-more-link-color;
             }
 
             // force white-space to have initial value since the `white-space: nowrap` rule
@@ -1132,7 +1133,7 @@
   p.plans-v2-table-green-highlighted-text {
     border: 2px solid @ol-green;
     position: absolute;
-    top: -1 * @plans-v2-highlighted-text-height-desktop;
+    top: -1 * @plans-highlighted-text-height-desktop;
     left: 0;
     display: flex;
     justify-content: center;
@@ -1142,15 +1143,14 @@
     line-height: 19px;
     font-weight: 700;
     background-color: @ol-green;
-    border-radius: @plans-v2-table-border-radius @plans-v2-table-border-radius 0
-      0;
+    border-radius: @plans-table-border-radius @plans-table-border-radius 0 0;
     color: @white;
-    height: @plans-v2-highlighted-text-height-desktop;
+    height: @plans-highlighted-text-height-desktop;
     margin: 0;
 
     @media (max-width: @screen-sm-max) {
-      top: -1 * @plans-v2-highlighted-text-height-mobile;
-      height: @plans-v2-highlighted-text-height-mobile;
+      top: -1 * @plans-highlighted-text-height-mobile;
+      height: @plans-highlighted-text-height-mobile;
     }
 
     @media (max-width: @screen-xs-max) {

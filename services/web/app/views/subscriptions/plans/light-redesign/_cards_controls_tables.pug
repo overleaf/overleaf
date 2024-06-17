@@ -1,9 +1,9 @@
 include ./_mixins
 
-.row.plans-v2-top-switch
+.row.plans-top-switch
 	.col-xs-12
-		ul.nav.plans-v2-nav(role="tablist")
-			li.active.plans-v2-top-switch-individual(
+		ul.nav(role="tablist")
+			li.active.plans-switch-individual(
 				data-ol-plans-v2-view-tab='individual'
 				event-tracking="plans-page-toggle-plan"
 				event-tracking-mb="true"
@@ -12,7 +12,7 @@ include ./_mixins
 				role="presentation"
 			)
 				button.btn.btn-default-outline(role="tab" aria-controls="panel-individual" aria-selected="true") #{translate("indvidual_plans")}
-			li.plans-v2-top-switch-group(
+			li.plans-switch-group(
 				data-ol-plans-v2-view-tab='group'
 				event-tracking="plans-page-toggle-plan"
 				event-tracking-mb="true"
@@ -28,7 +28,7 @@ include ./_mixins
 				)
 					span #{translate("group_plans")} 
 					span (#{translate("save_30_percent_or_more")})
-			li.plans-v2-top-switch-student(
+			li.plans-switch-student(
 				data-ol-plans-v2-view-tab='student'
 				event-tracking="plans-page-toggle-plan"
 				event-tracking-mb="true"
