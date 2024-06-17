@@ -5,6 +5,7 @@ const assert = require('check-types').assert
 // Dependencies are loaded at the bottom of the file to mitigate circular
 // dependency
 let RestoreOrigin = null
+let RestoreFileOrigin = null
 
 /**
  * An Origin records where a {@link Change} came from. The Origin class handles
@@ -31,6 +32,8 @@ class Origin {
   static fromRaw(raw) {
     if (!raw) return null
     if (raw.kind === RestoreOrigin.KIND) return RestoreOrigin.fromRaw(raw)
+    if (raw.kind === RestoreFileOrigin.KIND)
+      return RestoreFileOrigin.fromRaw(raw)
     return new Origin(raw.kind)
   }
 
@@ -54,3 +57,4 @@ class Origin {
 module.exports = Origin
 
 RestoreOrigin = require('./restore_origin')
+RestoreFileOrigin = require('./restore_file_origin')

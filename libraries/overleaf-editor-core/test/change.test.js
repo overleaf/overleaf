@@ -34,4 +34,29 @@ describe('Change', function () {
       expect(blobHashes.has(File.EMPTY_FILE_HASH)).to.be.true
     })
   })
+
+  describe('RestoreFileOrigin', function () {
+    it('should convert to and from raw', function () {
+      const origin = new core.RestoreFileOrigin(1, 'path', new Date())
+      const raw = origin.toRaw()
+      const newOrigin = core.Origin.fromRaw(raw)
+      expect(newOrigin).to.eql(origin)
+    })
+
+    it('change should have a correct origin class', function () {
+      const change = Change.fromRaw({
+        operations: [],
+        timestamp: '2015-03-05T12:03:53.035Z',
+        authors: [null],
+        origin: {
+          kind: 'file-restore',
+          version: 1,
+          path: 'path',
+          timestamp: '2015-03-05T12:03:53.035Z',
+        },
+      })
+
+      expect(change.getOrigin()).to.be.an.instanceof(core.RestoreFileOrigin)
+    })
+  })
 })

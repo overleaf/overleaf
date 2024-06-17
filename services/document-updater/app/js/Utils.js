@@ -83,10 +83,28 @@ function addTrackedDeletesToContent(content, trackedChanges) {
   return result
 }
 
+/**
+ * checks if the given originOrSource should be treated as a source or origin
+ * TODO: remove this hack and remove all "source" references
+ */
+function extractOriginOrSource(originOrSource) {
+  let source = null
+  let origin = null
+
+  if (typeof originOrSource === 'string') {
+    source = originOrSource
+  } else if (originOrSource && typeof originOrSource === 'object') {
+    origin = originOrSource
+  }
+
+  return { source, origin }
+}
+
 module.exports = {
   isInsert,
   isDelete,
   isComment,
   addTrackedDeletesToContent,
   getDocLength,
+  extractOriginOrSource,
 }

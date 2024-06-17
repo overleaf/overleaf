@@ -48,7 +48,6 @@ const RestoreManager = {
   },
 
   async revertFile(userId, projectId, version, pathname) {
-    const source = 'file-revert'
     const fsPath = await RestoreManager._writeFileVersionToDisk(
       projectId,
       version,
@@ -71,6 +70,19 @@ const RestoreManager = {
       })
       .catch(() => null)
 
+    const updates = await RestoreManager._getUpdatesFromHistory(
+      projectId,
+      version
+    )
+    const updateAtVersion = updates.find(update => update.toV === version)
+
+    const origin = {
+      kind: 'file-restore',
+      path: pathname,
+      version,
+      timestamp: new Date(updateAtVersion.meta.end_ts).toISOString(),
+    }
+
     const importInfo = await FileSystemImportManager.promises.importFile(
       fsPath,
       pathname
@@ -82,7 +94,7 @@ const RestoreManager = {
         basename,
         fsPath,
         file?.element?.linkedFileData,
-        source,
+        origin,
         userId
       )
 
@@ -101,7 +113,7 @@ const RestoreManager = {
         projectId,
         file.element._id,
         importInfo.type,
-        'revert',
+        origin,
         userId
       )
     }
@@ -179,7 +191,7 @@ const RestoreManager = {
       basename,
       importInfo.lines,
       newRanges,
-      'revert',
+      origin,
       userId
     )
   },
@@ -225,6 +237,12 @@ const RestoreManager = {
       Settings.apis.project_history.url
     }/project/${projectId}/ranges/version/${version}/${encodeURIComponent(pathname)}`
     return await fetchJson(url)
+  },
+
+  async _getUpdatesFromHistory(projectId, version) {
+    const url = `${Settings.apis.project_history.url}/project/${projectId}/updates?before=${version}&min_count=1`
+    const res = await fetchJson(url)
+    return res.updates
   },
 }
 

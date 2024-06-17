@@ -286,6 +286,9 @@ describe('RestoreManager', function () {
             changes: this.tracked_changes,
             comments: this.comments,
           })
+        this.RestoreManager.promises._getUpdatesFromHistory = sinon
+          .stub()
+          .resolves([{ toV: this.version, meta: { end_ts: Date.now() } }])
         this.EditorController.promises.addDocWithRanges = sinon
           .stub()
           .resolves(
@@ -360,7 +363,12 @@ describe('RestoreManager', function () {
             this.project_id,
             'mock-file-id',
             'doc',
-            'revert',
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date().toISOString(),
+            },
             this.user_id
           )
         })
@@ -389,7 +397,13 @@ describe('RestoreManager', function () {
             this.folder_id,
             'foo.tex',
             ['foo', 'bar', 'baz'],
-            { changes: this.tracked_changes, comments: this.remappedComments }
+            { changes: this.tracked_changes, comments: this.remappedComments },
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date().toISOString(),
+            }
           )
         })
 
@@ -418,6 +432,9 @@ describe('RestoreManager', function () {
         this.EditorController.promises.upsertFile = sinon
           .stub()
           .resolves({ _id: 'mock-file-id', type: 'file' })
+        this.RestoreManager.promises._getUpdatesFromHistory = sinon
+          .stub()
+          .resolves([{ toV: this.version, meta: { end_ts: Date.now() } }])
       })
 
       it('should return the created entity if file exists', async function () {

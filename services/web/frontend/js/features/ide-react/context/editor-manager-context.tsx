@@ -285,7 +285,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
         ) {
           return
         }
-        if (update.meta.source === 'file-revert') {
+        if (update.meta.origin?.kind === 'file-restore') {
           return
         }
         showGenericMessageModal(

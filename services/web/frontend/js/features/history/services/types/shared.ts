@@ -12,7 +12,7 @@ export interface Meta {
   start_ts: number
   end_ts: number
   type?: 'external' // TODO
-  source?: 'git-bridge' | 'file-revert' // TODO
+  source?: 'git-bridge' // TODO
   origin?: {
     kind:
       | 'dropbox'
@@ -21,5 +21,6 @@ export interface Meta {
       | 'github'
       | 'history-resync'
       | 'history-migration'
+      | 'file-restore'
   }
 }

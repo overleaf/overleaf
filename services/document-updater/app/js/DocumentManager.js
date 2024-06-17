@@ -8,6 +8,7 @@ const Metrics = require('./Metrics')
 const HistoryManager = require('./HistoryManager')
 const Errors = require('./Errors')
 const RangesManager = require('./RangesManager')
+const { extractOriginOrSource } = require('./Utils')
 
 const MAX_UNFLUSHED_AGE = 300 * 1000 // 5 mins, document should be flushed to mongo this time after a change
 
@@ -111,7 +112,7 @@ const DocumentManager = {
     }
   },
 
-  async setDoc(projectId, docId, newLines, source, userId, undoing) {
+  async setDoc(projectId, docId, newLines, originOrSource, userId, undoing) {
     if (newLines == null) {
       throw new Error('No lines were provided to setDoc')
     }
@@ -141,15 +142,22 @@ const DocumentManager = {
         o.u = true
       } // Turn on undo flag for each op for track changes
     }
+
+    const { origin, source } = extractOriginOrSource(originOrSource)
+
     const update = {
       doc: docId,
       op,
       v: version,
       meta: {
         type: 'external',
-        source,
         user_id: userId,
       },
+    }
+    if (origin) {
+      update.meta.origin = origin
+    } else if (source) {
+      update.meta.source = source
     }
     // Keep track of external updates, whether they are for live documents
     // (flush) or unloaded documents (evict), and whether the update is a no-op.

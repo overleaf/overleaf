@@ -9,7 +9,7 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 const logger = require('@overleaf/logger')
 const metrics = require('./Metrics')
 const { docIsTooLarge } = require('./Limits')
-const { addTrackedDeletesToContent } = require('./Utils')
+const { addTrackedDeletesToContent, extractOriginOrSource } = require('./Utils')
 const HistoryConversions = require('./HistoryConversions')
 const OError = require('@overleaf/o-error')
 
@@ -54,7 +54,7 @@ const ProjectHistoryRedisManager = {
     entityId,
     userId,
     projectUpdate,
-    source
+    originOrSource
   ) {
     projectUpdate = {
       pathname: projectUpdate.pathname,
@@ -67,7 +67,15 @@ const ProjectHistoryRedisManager = {
       projectHistoryId,
     }
     projectUpdate[entityType] = entityId
-    if (source != null) {
+
+    const { origin, source } = extractOriginOrSource(originOrSource)
+
+    if (origin != null) {
+      projectUpdate.meta.origin = origin
+      if (origin.kind !== 'editor') {
+        projectUpdate.meta.type = 'external'
+      }
+    } else if (source != null) {
       projectUpdate.meta.source = source
       if (source !== 'editor') {
         projectUpdate.meta.type = 'external'
@@ -90,7 +98,7 @@ const ProjectHistoryRedisManager = {
     entityId,
     userId,
     projectUpdate,
-    source
+    originOrSource
   ) {
     let docLines = projectUpdate.docLines
     let ranges
@@ -117,7 +125,15 @@ const ProjectHistoryRedisManager = {
       projectUpdate.ranges = ranges
     }
     projectUpdate[entityType] = entityId
-    if (source != null) {
+
+    const { origin, source } = extractOriginOrSource(originOrSource)
+
+    if (origin != null) {
+      projectUpdate.meta.origin = origin
+      if (origin.kind !== 'editor') {
+        projectUpdate.meta.type = 'external'
+      }
+    } else if (source != null) {
       projectUpdate.meta.source = source
       if (source !== 'editor') {
         projectUpdate.meta.type = 'external'
