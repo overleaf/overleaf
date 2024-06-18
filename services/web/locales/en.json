@@ -1313,6 +1313,7 @@
   "out_of_sync_detail": "Sorry, this file has gone out of sync and we need to do a full refresh.<0 /><1>Please see this help guide for more information</1>",
   "output_file": "Output file",
   "over": "over",
+  "over_n_users_at_research_institutions_and_business": "Over __userCountMillion__ million users at research institutions and businesses worldwide love __appName__",
   "overall_theme": "Overall theme",
   "overleaf": "Overleaf",
   "overleaf_group_plans": "Overleaf group plans",

@@ -504,6 +504,29 @@
     border-left: var(--border-width-base) solid var(--green-50);
   }
 
+  .plans-new-organizations {
+    padding: var(--spacing-13) var(--spacing-08);
+
+    .plans-new-organizations-text {
+      text-align: center;
+      font-size: var(--font-size-05);
+      line-height: var(--line-height-04);
+      margin-bottom: var(--spacing-00);
+    }
+
+    .plans-new-organizations-logo {
+      margin-top: var(--spacing-09);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+
+      @media (max-width: @screen-md-max) {
+        flex-wrap: wrap;
+        gap: 30px;
+      }
+    }
+  }
+
   // ------------------------------------------------------------------
   // ------------------------------------------------------------------
   // These comments will be deleted when the cards section is completed for mobile screens.
