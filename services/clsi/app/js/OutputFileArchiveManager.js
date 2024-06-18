@@ -24,16 +24,18 @@ function getContentDir(projectId, userId) {
 module.exports = {
   async archiveFilesForBuild(projectId, userId, build) {
     logger.debug({ projectId, userId, build }, 'Will create zip file')
-    const validFiles = await this._getAllOutputFiles(projectId, userId, build)
+
+    const outputFiles = await this._getAllOutputFiles(projectId, userId, build)
 
     const archive = archiver('zip')
 
     archive.on('error', err => {
       logger.warn({ err }, 'error emitted when creating output files archive')
     })
+
     const missingFiles = []
 
-    for (const file of validFiles) {
+    for (const file of outputFiles) {
       let fileHandle
 
       try {
