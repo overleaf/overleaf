@@ -7,7 +7,7 @@ import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
 import OError from '@overleaf/o-error'
-import { File } from 'overleaf-editor-core'
+import { File, Range } from 'overleaf-editor-core'
 import { SyncError } from './Errors.js'
 import { db, ObjectId } from './mongodb.js'
 import * as SnapshotManager from './SnapshotManager.js'
@@ -19,7 +19,7 @@ import * as ErrorRecorder from './ErrorRecorder.js'
 import * as RedisManager from './RedisManager.js'
 import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as HashManager from './HashManager.js'
-import { isInsert } from './Utils.js'
+import { isInsert, isDelete } from './Utils.js'
 
 /**
  * @typedef {import('overleaf-editor-core').Comment} HistoryComment
@@ -637,12 +637,24 @@ class SyncUpdateExpander {
     }
 
     if (!hashesMatch) {
-      await this.queueUpdateForOutOfSyncContent(
+      const expandedUpdate = await this.queueUpdateForOutOfSyncContent(
         update,
         pathname,
         persistedContent,
         expectedContent
       )
+      if (expandedUpdate != null) {
+        // Adjust the ranges for the changes that have been made to the content
+        for (const op of expandedUpdate.op) {
+          if (isInsert(op)) {
+            file.getComments().applyInsert(new Range(op.p, op.i.length))
+            file.getTrackedChanges().applyInsert(op.p, op.i)
+          } else if (isDelete(op)) {
+            file.getComments().applyDelete(new Range(op.p, op.d.length))
+            file.getTrackedChanges().applyDelete(op.p, op.d.length)
+          }
+        }
+      }
     }
 
     const persistedComments = file.getComments().toArray()
@@ -683,7 +695,7 @@ class SyncUpdateExpander {
       expectedContent
     )
     if (op.length === 0) {
-      return
+      return null
     }
     const expandedUpdate = {
       doc: update.doc,
@@ -704,6 +716,7 @@ class SyncUpdateExpander {
     Metrics.inc('project_history_resync_operation', 1, {
       status: 'update text file contents',
     })
+    return expandedUpdate
   }
 
   /**

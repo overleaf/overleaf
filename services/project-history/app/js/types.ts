@@ -135,12 +135,14 @@ export type CommentOp = {
   resolved?: boolean
 }
 
-export type UpdateWithBlob = {
-  update: Update
-  blobHashes: {
-    file: string
-    ranges?: string
-  }
+export type UpdateWithBlob<T extends Update = Update> = {
+  update: T
+  blobHashes: T extends AddDocUpdate | AddFileUpdate
+    ? {
+        file: string
+        ranges?: string
+      }
+    : never
 }
 
 export type RawOrigin = {
