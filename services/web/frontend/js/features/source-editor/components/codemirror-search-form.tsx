@@ -405,14 +405,6 @@ const CodeMirrorSearchForm: FC = () => {
 
         <div className="ol-cm-search-form-group ol-cm-search-next-previous">
           <ButtonGroup className="ol-cm-search-form-button-group">
-            <Button type="button" bsSize="small" onClick={() => findNext(view)}>
-              <Icon
-                type="chevron-down"
-                fw
-                accessibilityLabel={t('search_next')}
-              />
-            </Button>
-
             <Button
               type="button"
               bsSize="small"
@@ -422,6 +414,14 @@ const CodeMirrorSearchForm: FC = () => {
                 type="chevron-up"
                 fw
                 accessibilityLabel={t('search_previous')}
+              />
+            </Button>
+
+            <Button type="button" bsSize="small" onClick={() => findNext(view)}>
+              <Icon
+                type="chevron-down"
+                fw
+                accessibilityLabel={t('search_next')}
               />
             </Button>
           </ButtonGroup>

@@ -505,8 +505,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       cy.findByLabelText('Within selection').as('within-selection-label')
       cy.findByRole('button', { name: 'Replace' }).as('replace')
       cy.findByRole('button', { name: 'Replace All' }).as('replace-all')
-      cy.findByRole('button', { name: 'next' }).as('find-next')
       cy.findByRole('button', { name: 'previous' }).as('find-previous')
+      cy.findByRole('button', { name: 'next' }).as('find-next')
       cy.findByRole('button', { name: 'Close' }).as('close')
 
       // Tab forwards...
@@ -516,8 +516,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       cy.get('@regexp').should('be.focused').tab()
       cy.get('@whole-word').should('be.focused').tab()
       cy.get('@within-selection').should('be.focused').tab()
-      cy.get('@find-next').should('be.focused').tab()
       cy.get('@find-previous').should('be.focused').tab()
+      cy.get('@find-next').should('be.focused').tab()
       cy.get('@replace').should('be.focused').tab()
       cy.get('@replace-all').should('be.focused').tab()
 
@@ -525,8 +525,8 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
       cy.get('@close').should('be.focused').tab({ shift: true })
       cy.get('@replace-all').should('be.focused').tab({ shift: true })
       cy.get('@replace').should('be.focused').tab({ shift: true })
-      cy.get('@find-previous').should('be.focused').tab({ shift: true })
       cy.get('@find-next').should('be.focused').tab({ shift: true })
+      cy.get('@find-previous').should('be.focused').tab({ shift: true })
       cy.get('@within-selection').should('be.focused').tab({ shift: true })
       cy.get('@whole-word').should('be.focused').tab({ shift: true })
       cy.get('@regexp').should('be.focused').tab({ shift: true })
