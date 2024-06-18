@@ -384,7 +384,7 @@ const DocumentManager = {
     return { lines, version }
   },
 
-  async resyncDocContents(projectId, docId, path) {
+  async resyncDocContents(projectId, docId, path, opts = {}) {
     logger.debug({ projectId, docId, path }, 'start resyncing doc contents')
     let {
       lines,
@@ -422,6 +422,10 @@ const DocumentManager = {
       )
     }
 
+    if (opts.historyRangesMigration) {
+      historyRangesSupport = opts.historyRangesMigration === 'forwards'
+    }
+
     await ProjectHistoryRedisManager.promises.queueResyncDocContent(
       projectId,
       projectHistoryId,
@@ -434,6 +438,13 @@ const DocumentManager = {
       path,
       historyRangesSupport
     )
+
+    if (opts.historyRangesMigration) {
+      await RedisManager.promises.setHistoryRangesSupportFlag(
+        docId,
+        historyRangesSupport
+      )
+    }
   },
 
   async getDocWithLock(projectId, docId) {
@@ -547,14 +558,14 @@ const DocumentManager = {
     )
   },
 
-  async resyncDocContentsWithLock(projectId, docId, path, callback) {
+  async resyncDocContentsWithLock(projectId, docId, path, opts) {
     const UpdateManager = require('./UpdateManager')
     await UpdateManager.promises.lockUpdatesAndDo(
       DocumentManager.resyncDocContents,
       projectId,
       docId,
       path,
-      callback
+      opts
     )
   },
 }

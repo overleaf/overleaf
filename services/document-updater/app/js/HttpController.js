@@ -11,27 +11,6 @@ const DeleteQueueManager = require('./DeleteQueueManager')
 const { getTotalSizeOfLines } = require('./Limits')
 const async = require('async')
 
-module.exports = {
-  getDoc,
-  peekDoc,
-  getProjectDocsAndFlushIfOld,
-  clearProjectState,
-  setDoc,
-  flushDocIfLoaded,
-  deleteDoc,
-  flushProject,
-  deleteProject,
-  deleteMultipleProjects,
-  acceptChanges,
-  resolveComment,
-  reopenComment,
-  deleteComment,
-  updateProject,
-  resyncProjectHistory,
-  flushAllProjects,
-  flushQueuedProjects,
-}
-
 function getDoc(req, res, next) {
   let fromVersion
   const docId = req.params.doc_id
@@ -401,17 +380,24 @@ function updateProject(req, res, next) {
 
 function resyncProjectHistory(req, res, next) {
   const projectId = req.params.project_id
-  const { projectHistoryId, docs, files } = req.body
+  const { projectHistoryId, docs, files, historyRangesMigration } = req.body
 
   logger.debug(
     { projectId, docs, files },
     'queuing project history resync via http'
   )
+
+  const opts = {}
+  if (historyRangesMigration) {
+    opts.historyRangesMigration = historyRangesMigration
+  }
+
   HistoryManager.resyncProjectHistory(
     projectId,
     projectHistoryId,
     docs,
     files,
+    opts,
     error => {
       if (error) {
         return next(error)
@@ -455,4 +441,25 @@ function flushQueuedProjects(req, res, next) {
       res.send({ flushed })
     }
   })
+}
+
+module.exports = {
+  getDoc,
+  peekDoc,
+  getProjectDocsAndFlushIfOld,
+  clearProjectState,
+  setDoc,
+  flushDocIfLoaded,
+  deleteDoc,
+  flushProject,
+  deleteProject,
+  deleteMultipleProjects,
+  acceptChanges,
+  resolveComment,
+  reopenComment,
+  deleteComment,
+  updateProject,
+  resyncProjectHistory,
+  flushAllProjects,
+  flushQueuedProjects,
 }

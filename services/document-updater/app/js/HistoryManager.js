@@ -93,7 +93,14 @@ const HistoryManager = {
 
   MAX_PARALLEL_REQUESTS: 4,
 
-  resyncProjectHistory(projectId, projectHistoryId, docs, files, callback) {
+  resyncProjectHistory(
+    projectId,
+    projectHistoryId,
+    docs,
+    files,
+    opts,
+    callback
+  ) {
     ProjectHistoryRedisManager.queueResyncProjectStructure(
       projectId,
       projectHistoryId,
@@ -109,6 +116,7 @@ const HistoryManager = {
             projectId,
             doc.doc,
             doc.path,
+            opts,
             cb
           )
         }

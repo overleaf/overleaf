@@ -46,7 +46,10 @@ const ProjectHistoryHandler = {
 
     await ProjectHistoryHandler.setHistoryId(projectId, historyId)
 
-    await ProjectEntityUpdateHandler.promises.resyncProjectHistory(projectId)
+    await ProjectEntityUpdateHandler.promises.resyncProjectHistory(
+      projectId,
+      {}
+    )
 
     await HistoryManager.promises.flushProject(projectId)
   },

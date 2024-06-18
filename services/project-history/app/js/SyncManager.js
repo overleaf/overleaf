@@ -103,7 +103,11 @@ async function _startResyncWithoutLock(projectId, options) {
   syncState.setOrigin(options.origin || { kind: 'history-resync' })
   syncState.startProjectStructureSync()
 
-  await WebApiManager.promises.requestResync(projectId)
+  const webOpts = {}
+  if (options.historyRangesMigration) {
+    webOpts.historyRangesMigration = options.historyRangesMigration
+  }
+  await WebApiManager.promises.requestResync(projectId, webOpts)
   await setResyncState(projectId, syncState)
 }
 

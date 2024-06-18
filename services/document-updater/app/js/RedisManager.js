@@ -77,66 +77,70 @@ const RedisManager = {
         logger.error({ err: error, docId, projectId }, error.message)
         return callback(error)
       }
-      setHistoryRangesSupportFlag(docId, historyRangesSupport, err => {
-        if (err) {
-          return callback(err)
-        }
-        // update docsInProject set before writing doc contents
-        rclient.sadd(
-          keys.docsInProject({ project_id: projectId }),
-          docId,
-          error => {
-            if (error) return callback(error)
+      RedisManager.setHistoryRangesSupportFlag(
+        docId,
+        historyRangesSupport,
+        err => {
+          if (err) {
+            return callback(err)
+          }
+          // update docsInProject set before writing doc contents
+          rclient.sadd(
+            keys.docsInProject({ project_id: projectId }),
+            docId,
+            error => {
+              if (error) return callback(error)
 
-            if (!pathname) {
-              metrics.inc('pathname', 1, {
-                path: 'RedisManager.setDoc',
-                status: pathname === '' ? 'zero-length' : 'undefined',
+              if (!pathname) {
+                metrics.inc('pathname', 1, {
+                  path: 'RedisManager.setDoc',
+                  status: pathname === '' ? 'zero-length' : 'undefined',
+                })
+              }
+
+              // Make sure that this MULTI operation only operates on doc
+              // specific keys, i.e. keys that have the doc id in curly braces.
+              // The curly braces identify a hash key for Redis and ensures that
+              // the MULTI's operations are all done on the same node in a
+              // cluster environment.
+              const multi = rclient.multi()
+              multi.mset({
+                [keys.docLines({ doc_id: docId })]: docLines,
+                [keys.projectKey({ doc_id: docId })]: projectId,
+                [keys.docVersion({ doc_id: docId })]: version,
+                [keys.docHash({ doc_id: docId })]: docHash,
+                [keys.ranges({ doc_id: docId })]: ranges,
+                [keys.pathname({ doc_id: docId })]: pathname,
+                [keys.projectHistoryId({ doc_id: docId })]: projectHistoryId,
+              })
+              if (historyRangesSupport) {
+                multi.del(keys.resolvedCommentIds({ doc_id: docId }))
+                if (resolvedCommentIds.length > 0) {
+                  multi.sadd(
+                    keys.resolvedCommentIds({ doc_id: docId }),
+                    ...resolvedCommentIds
+                  )
+                }
+              }
+              multi.exec(err => {
+                if (err) {
+                  callback(
+                    OError.tag(err, 'failed to write doc to Redis in MULTI', {
+                      previousErrors: err.previousErrors.map(e => ({
+                        name: e.name,
+                        message: e.message,
+                        command: e.command,
+                      })),
+                    })
+                  )
+                } else {
+                  callback()
+                }
               })
             }
-
-            // Make sure that this MULTI operation only operates on doc
-            // specific keys, i.e. keys that have the doc id in curly braces.
-            // The curly braces identify a hash key for Redis and ensures that
-            // the MULTI's operations are all done on the same node in a
-            // cluster environment.
-            const multi = rclient.multi()
-            multi.mset({
-              [keys.docLines({ doc_id: docId })]: docLines,
-              [keys.projectKey({ doc_id: docId })]: projectId,
-              [keys.docVersion({ doc_id: docId })]: version,
-              [keys.docHash({ doc_id: docId })]: docHash,
-              [keys.ranges({ doc_id: docId })]: ranges,
-              [keys.pathname({ doc_id: docId })]: pathname,
-              [keys.projectHistoryId({ doc_id: docId })]: projectHistoryId,
-            })
-            if (historyRangesSupport) {
-              multi.del(keys.resolvedCommentIds({ doc_id: docId }))
-              if (resolvedCommentIds.length > 0) {
-                multi.sadd(
-                  keys.resolvedCommentIds({ doc_id: docId }),
-                  ...resolvedCommentIds
-                )
-              }
-            }
-            multi.exec(err => {
-              if (err) {
-                callback(
-                  OError.tag(err, 'failed to write doc to Redis in MULTI', {
-                    previousErrors: err.previousErrors.map(e => ({
-                      name: e.name,
-                      message: e.message,
-                      command: e.command,
-                    })),
-                  })
-                )
-              } else {
-                callback()
-              }
-            })
-          }
-        )
-      })
+          )
+        }
+      )
     })
   },
 
@@ -672,6 +676,14 @@ const RedisManager = {
     )
   },
 
+  setHistoryRangesSupportFlag(docId, historyRangesSupport, callback) {
+    if (historyRangesSupport) {
+      rclient.sadd(keys.historyRangesSupport(), docId, callback)
+    } else {
+      rclient.srem(keys.historyRangesSupport(), docId, callback)
+    }
+  },
+
   _serializeRanges(ranges, callback) {
     let jsonRanges = JSON.stringify(ranges)
     if (jsonRanges && jsonRanges.length > MAX_RANGES_SIZE) {
@@ -699,14 +711,6 @@ const RedisManager = {
     // binary in node < v5
     return crypto.createHash('sha1').update(docLines, 'utf8').digest('hex')
   },
-}
-
-function setHistoryRangesSupportFlag(docId, historyRangesSupport, callback) {
-  if (historyRangesSupport) {
-    rclient.sadd(keys.historyRangesSupport(), docId, callback)
-  } else {
-    rclient.srem(keys.historyRangesSupport(), docId, callback)
-  }
 }
 
 module.exports = RedisManager

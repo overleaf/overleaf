@@ -79,6 +79,9 @@ export function initialize(app) {
         origin: Joi.object({
           kind: Joi.string().required(),
         }),
+        historyRangesMigration: Joi.string()
+          .optional()
+          .valid('forwards', 'backwards'),
       },
     }),
     HttpController.resyncProject

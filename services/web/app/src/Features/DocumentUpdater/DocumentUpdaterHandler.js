@@ -9,46 +9,6 @@ const { promisify } = require('util')
 const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const ProjectGetter = require('../Project/ProjectGetter')
 
-module.exports = {
-  flushProjectToMongo,
-  flushMultipleProjectsToMongo,
-  flushProjectToMongoAndDelete,
-  flushDocToMongo,
-  deleteDoc,
-  getDocument,
-  setDocument,
-  getProjectDocsIfMatch,
-  clearProjectState,
-  acceptChanges,
-  resolveThread,
-  reopenThread,
-  deleteThread,
-  resyncProjectHistory,
-  updateProjectStructure,
-  promises: {
-    flushProjectToMongo: promisify(flushProjectToMongo),
-    flushMultipleProjectsToMongo: promisify(flushMultipleProjectsToMongo),
-    flushProjectToMongoAndDelete: promisify(flushProjectToMongoAndDelete),
-    flushDocToMongo: promisify(flushDocToMongo),
-    deleteDoc: promisify(deleteDoc),
-    getDocument: promisifyMultiResult(getDocument, [
-      'lines',
-      'version',
-      'ranges',
-      'ops',
-    ]),
-    setDocument: promisify(setDocument),
-    getProjectDocsIfMatch: promisify(getProjectDocsIfMatch),
-    clearProjectState: promisify(clearProjectState),
-    acceptChanges: promisify(acceptChanges),
-    resolveThread: promisify(resolveThread),
-    reopenThread: promisify(reopenThread),
-    deleteThread: promisify(deleteThread),
-    resyncProjectHistory: promisify(resyncProjectHistory),
-    updateProjectStructure: promisify(updateProjectStructure),
-  },
-}
-
 function flushProjectToMongo(projectId, callback) {
   _makeRequest(
     {
@@ -267,12 +227,17 @@ function resyncProjectHistory(
   projectHistoryId,
   docs,
   files,
+  opts,
   callback
 ) {
+  const body = { docs, files, projectHistoryId }
+  if (opts.historyRangesMigration) {
+    body.historyRangesMigration = opts.historyRangesMigration
+  }
   _makeRequest(
     {
       path: `/project/${projectId}/history/resync`,
-      json: { docs, files, projectHistoryId },
+      json: body,
       method: 'POST',
       timeout: 6 * 60 * 1000, // allow 6 minutes for resync
     },
@@ -478,4 +443,44 @@ function _getUpdates(
   }
 
   return { deletes, adds, renames }
+}
+
+module.exports = {
+  flushProjectToMongo,
+  flushMultipleProjectsToMongo,
+  flushProjectToMongoAndDelete,
+  flushDocToMongo,
+  deleteDoc,
+  getDocument,
+  setDocument,
+  getProjectDocsIfMatch,
+  clearProjectState,
+  acceptChanges,
+  resolveThread,
+  reopenThread,
+  deleteThread,
+  resyncProjectHistory,
+  updateProjectStructure,
+  promises: {
+    flushProjectToMongo: promisify(flushProjectToMongo),
+    flushMultipleProjectsToMongo: promisify(flushMultipleProjectsToMongo),
+    flushProjectToMongoAndDelete: promisify(flushProjectToMongoAndDelete),
+    flushDocToMongo: promisify(flushDocToMongo),
+    deleteDoc: promisify(deleteDoc),
+    getDocument: promisifyMultiResult(getDocument, [
+      'lines',
+      'version',
+      'ranges',
+      'ops',
+    ]),
+    setDocument: promisify(setDocument),
+    getProjectDocsIfMatch: promisify(getProjectDocsIfMatch),
+    clearProjectState: promisify(clearProjectState),
+    acceptChanges: promisify(acceptChanges),
+    resolveThread: promisify(resolveThread),
+    reopenThread: promisify(reopenThread),
+    deleteThread: promisify(deleteThread),
+    resyncProjectHistory: promisify(resyncProjectHistory),
+    updateProjectStructure: promisify(updateProjectStructure),
+  },
 }

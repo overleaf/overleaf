@@ -68,15 +68,24 @@ module.exports = HistoryController = {
     // increase timeout to 6 minutes
     res.setTimeout(6 * 60 * 1000)
     const projectId = req.params.Project_id
-    ProjectEntityUpdateHandler.resyncProjectHistory(projectId, function (err) {
-      if (err instanceof Errors.ProjectHistoryDisabledError) {
-        return res.sendStatus(404)
+    const opts = {}
+    const historyRangesMigration = req.body.historyRangesMigration
+    if (historyRangesMigration) {
+      opts.historyRangesMigration = historyRangesMigration
+    }
+    ProjectEntityUpdateHandler.resyncProjectHistory(
+      projectId,
+      opts,
+      function (err) {
+        if (err instanceof Errors.ProjectHistoryDisabledError) {
+          return res.sendStatus(404)
+        }
+        if (err) {
+          return next(err)
+        }
+        res.sendStatus(204)
       }
-      if (err) {
-        return next(err)
-      }
-      res.sendStatus(204)
-    })
+    )
   },
 
   restoreFileFromV2(req, res, next) {

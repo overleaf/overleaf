@@ -64,9 +64,11 @@ const ProjectOptionsHandler = {
     return Project.updateOne(conditions, update, {})
   },
 
-  async enableHistoryRangesSupport(projectId) {
+  async setHistoryRangesSupport(projectId, enabled) {
     const conditions = { _id: new ObjectId(projectId) }
-    const update = { $set: { 'overleaf.history.rangesSupportEnabled': true } }
+    const update = {
+      $set: { 'overleaf.history.rangesSupportEnabled': enabled },
+    }
     // NOTE: Updating the Mongoose model with the same query doesn't work. Maybe
     // because rangesSupportEnabled is not part of the schema?
     return db.projects.updateOne(conditions, update)
@@ -83,8 +85,8 @@ module.exports = {
   unsetBrandVariationId: callbackify(
     ProjectOptionsHandler.unsetBrandVariationId
   ),
-  enableHistoryRangesSupport: callbackify(
-    ProjectOptionsHandler.enableHistoryRangesSupport
+  setHistoryRangesSupport: callbackify(
+    ProjectOptionsHandler.setHistoryRangesSupport
   ),
   promises: ProjectOptionsHandler,
 }

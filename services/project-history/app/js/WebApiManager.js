@@ -33,8 +33,12 @@ async function getHistoryId(projectId) {
   }
 }
 
-async function requestResync(projectId) {
+async function requestResync(projectId, opts = {}) {
   try {
+    const body = {}
+    if (opts.historyRangesMigration) {
+      body.historyRangesMigration = opts.historyRangesMigration
+    }
     await fetchNothing(
       `${Settings.apis.web.url}/project/${projectId}/history/resync`,
       {
@@ -44,6 +48,7 @@ async function requestResync(projectId) {
           user: Settings.apis.web.user,
           password: Settings.apis.web.pass,
         },
+        json: body,
       }
     )
   } catch (err) {

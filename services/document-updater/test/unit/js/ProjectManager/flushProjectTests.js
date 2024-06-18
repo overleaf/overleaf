@@ -19,12 +19,17 @@ const SandboxedModule = require('sandboxed-module')
 describe('ProjectManager - flushProject', function () {
   beforeEach(function () {
     let Timer
+    this.LockManager = {
+      getLock: sinon.stub().yields(),
+      releaseLock: sinon.stub().yields(),
+    }
     this.ProjectManager = SandboxedModule.require(modulePath, {
       requires: {
         './RedisManager': (this.RedisManager = {}),
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         './DocumentManager': (this.DocumentManager = {}),
         './HistoryManager': (this.HistoryManager = {}),
+        './LockManager': this.LockManager,
         './Metrics': (this.Metrics = {
           Timer: (Timer = (function () {
             Timer = class Timer {

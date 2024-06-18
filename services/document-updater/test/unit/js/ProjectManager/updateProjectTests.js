@@ -17,6 +17,10 @@ describe('ProjectManager', function () {
       flushProjectChangesAsync: sinon.stub(),
       shouldFlushHistoryOps: sinon.stub().returns(false),
     }
+    this.LockManager = {
+      getLock: sinon.stub().yields(),
+      releaseLock: sinon.stub().yields(),
+    }
     this.Metrics = {
       Timer: class Timer {},
     }
@@ -28,6 +32,7 @@ describe('ProjectManager', function () {
         './ProjectHistoryRedisManager': this.ProjectHistoryRedisManager,
         './DocumentManager': this.DocumentManager,
         './HistoryManager': this.HistoryManager,
+        './LockManager': this.LockManager,
         './Metrics': this.Metrics,
       },
     })

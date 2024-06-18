@@ -258,6 +258,9 @@ export function resyncProject(req, res, next) {
   if (req.body.origin) {
     options.origin = req.body.origin
   }
+  if (req.body.historyRangesMigration) {
+    options.historyRangesMigration = req.body.historyRangesMigration
+  }
   if (req.query.force || req.body.force) {
     // this will delete the queue and clear the sync state
     // use if the project is completely broken

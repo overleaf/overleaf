@@ -8,18 +8,6 @@ const Metrics = require('./Metrics')
 const Errors = require('./Errors')
 const { promisifyAll } = require('@overleaf/promise-utils')
 
-module.exports = {
-  flushProjectWithLocks,
-  flushAndDeleteProjectWithLocks,
-  queueFlushAndDeleteProject,
-  getProjectDocsTimestamps,
-  getProjectDocsAndFlushIfOld,
-  clearProjectState,
-  updateProjectWithLocks,
-}
-
-module.exports.promises = promisifyAll(module.exports)
-
 function flushProjectWithLocks(projectId, _callback) {
   const timer = new Metrics.Timer('projectManager.flushProjectWithLocks')
   const callback = function (...args) {
@@ -339,3 +327,15 @@ function updateProjectWithLocks(
     callback()
   })
 }
+
+module.exports = {
+  flushProjectWithLocks,
+  flushAndDeleteProjectWithLocks,
+  queueFlushAndDeleteProject,
+  getProjectDocsTimestamps,
+  getProjectDocsAndFlushIfOld,
+  clearProjectState,
+  updateProjectWithLocks,
+}
+
+module.exports.promises = promisifyAll(module.exports)

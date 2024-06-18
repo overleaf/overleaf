@@ -83,6 +83,10 @@ function getAllDeletedDocs(projectId, callback) {
   })
 }
 
+/**
+ * @param {string} projectId
+ * @param {Callback} callback
+ */
 function getAllRanges(projectId, callback) {
   const url = `${settings.apis.docstore.url}/project/${projectId}/ranges`
   request.get(

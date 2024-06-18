@@ -15,6 +15,7 @@ const { Project } = require('../../models/Project')
 const ProjectEntityHandler = require('./ProjectEntityHandler')
 const ProjectGetter = require('./ProjectGetter')
 const ProjectLocator = require('./ProjectLocator')
+const ProjectOptionsHandler = require('./ProjectOptionsHandler')
 const ProjectUpdateHandler = require('./ProjectUpdateHandler')
 const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
 const SafePath = require('./SafePath')
@@ -154,6 +155,8 @@ function getDocContext(projectId, docId, callback) {
 }
 
 const ProjectEntityUpdateHandler = {
+  LOCK_NAMESPACE,
+
   updateDocLines(
     projectId,
     docId,
@@ -1394,7 +1397,7 @@ const ProjectEntityUpdateHandler = {
   // This doesn't directly update project structure but we need to take the lock
   // to prevent anything else being queued before the resync update
   resyncProjectHistory: wrapWithLock(
-    (projectId, callback) =>
+    (projectId, opts, callback) =>
       ProjectGetter.getProject(
         projectId,
         { rootFolder: true, overleaf: true },
@@ -1449,7 +1452,21 @@ const ProjectEntityUpdateHandler = {
                 projectHistoryId,
                 docs,
                 files,
-                callback
+                opts,
+                err => {
+                  if (err) {
+                    return callback(err)
+                  }
+                  if (opts.historyRangesMigration) {
+                    ProjectOptionsHandler.setHistoryRangesSupport(
+                      projectId,
+                      opts.historyRangesMigration === 'forwards',
+                      callback
+                    )
+                  } else {
+                    callback()
+                  }
+                }
               )
             }
           )

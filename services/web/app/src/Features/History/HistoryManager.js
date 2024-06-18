@@ -51,6 +51,9 @@ async function resyncProject(projectId, options = {}) {
   if (options.origin) {
     body.origin = options.origin
   }
+  if (options.historyRangesMigration) {
+    body.historyRangesMigration = options.historyRangesMigration
+  }
   try {
     await fetchNothing(
       `${settings.apis.project_history.url}/project/${projectId}/resync`,

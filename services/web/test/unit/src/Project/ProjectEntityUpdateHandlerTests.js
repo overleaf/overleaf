@@ -149,6 +149,9 @@ describe('ProjectEntityUpdateHandler', function () {
     this.EditorRealTimeController = {
       emitToRoom: sinon.stub(),
     }
+    this.ProjectOptionsHandler = {
+      setHistoryRangesSupport: sinon.stub().yields(),
+    }
     this.ProjectEntityUpdateHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': { validRootDocExtensions: ['tex'] },
@@ -167,6 +170,7 @@ describe('ProjectEntityUpdateHandler', function () {
         './ProjectEntityHandler': this.ProjectEntityHandler,
         './ProjectEntityMongoUpdateHandler':
           this.ProjectEntityMongoUpdateHandler,
+        './ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../../infrastructure/FileWriter': this.FileWriter,
@@ -1962,6 +1966,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
         this.ProjectEntityUpdateHandler.resyncProjectHistory(
           projectId,
+          {},
           this.callback
         )
       })
@@ -1987,6 +1992,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
         this.ProjectEntityUpdateHandler.resyncProjectHistory(
           projectId,
+          {},
           this.callback
         )
       })
@@ -2025,6 +2031,7 @@ describe('ProjectEntityUpdateHandler', function () {
         })
         this.ProjectEntityUpdateHandler.resyncProjectHistory(
           projectId,
+          {},
           this.callback
         )
       })
@@ -2113,7 +2120,11 @@ describe('ProjectEntityUpdateHandler', function () {
           files: this.files,
           folders: [],
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+          projectId,
+          {},
+          done
+        )
       })
 
       it('renames the duplicate files', function () {
@@ -2214,7 +2225,11 @@ describe('ProjectEntityUpdateHandler', function () {
           files: this.files,
           folders: [],
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+          projectId,
+          {},
+          done
+        )
       })
 
       it('renames the files', function () {
@@ -2301,7 +2316,11 @@ describe('ProjectEntityUpdateHandler', function () {
           files,
           folders,
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+          projectId,
+          {},
+          done
+        )
       })
 
       it('renames the folder', function () {
@@ -2352,7 +2371,11 @@ describe('ProjectEntityUpdateHandler', function () {
           files,
           folders,
         })
-        this.ProjectEntityUpdateHandler.resyncProjectHistory(projectId, done)
+        this.ProjectEntityUpdateHandler.resyncProjectHistory(
+          projectId,
+          {},
+          done
+        )
       })
 
       it('renames the doc', function () {
@@ -2385,6 +2408,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.ProjectEntityHandler.getAllEntitiesFromProject.throws()
         this.ProjectEntityUpdateHandler.resyncProjectHistory(
           projectId,
+          {},
           this.callback
         )
       })

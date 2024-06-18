@@ -1,3 +1,4 @@
+const { callbackify, promisify } = require('util')
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const os = require('os')
@@ -31,6 +32,14 @@ module.exports = class RedisWebLocker {
     this.SLOW_EXECUTION_THRESHOLD = options.slowExecutionThreshold || 5000
     // read-only copy for unit tests
     this.unlockScript = UNLOCK_SCRIPT
+
+    const promisifiedRunWithLock = promisify(this.runWithLock).bind(this)
+    this.promises = {
+      runWithLock(namespace, id, runner) {
+        const cbRunner = callbackify(runner)
+        return promisifiedRunWithLock(namespace, id, cbRunner)
+      },
+    }
   }
 
   // Use a signed lock value as described in
