@@ -3,8 +3,8 @@ const { Schema } = mongoose
 const { ObjectId } = Schema
 const settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
-const request = require('request')
 const { promisify } = require('@overleaf/promise-utils')
+const { fetchJson } = require('@overleaf/fetch-utils')
 
 const InstitutionSchema = new Schema(
   {
@@ -19,30 +19,22 @@ const InstitutionSchema = new Schema(
 )
 
 // fetch institution's data from v1 API. Errors are ignored
-InstitutionSchema.method('fetchV1Data', function (callback) {
+InstitutionSchema.method('fetchV1Data', async function (callback) {
   const url = `${settings.apis.v1.url}/universities/list/${this.v1Id}`
-  request.get(
-    { url, timeout: settings.apis.v1.timeout },
-    (error, response, body) => {
-      let parsedBody
-      try {
-        parsedBody = JSON.parse(body)
-      } catch (error1) {
-        // log error and carry on without v1 data
-        error = error1
-        logger.err(
-          { model: 'Institution', v1Id: this.v1Id, error },
-          '[fetchV1DataError]'
-        )
-      }
-      this.name = parsedBody != null ? parsedBody.name : undefined
-      this.countryCode =
-        parsedBody != null ? parsedBody.country_code : undefined
-      this.departments = parsedBody != null ? parsedBody.departments : undefined
-      this.portalSlug = parsedBody != null ? parsedBody.portal_slug : undefined
-      callback(null, this)
-    }
-  )
+  try {
+    const parsedBody = await fetchJson(url)
+    this.name = parsedBody != null ? parsedBody.name : undefined
+    this.countryCode = parsedBody != null ? parsedBody.country_code : undefined
+    this.departments = parsedBody != null ? parsedBody.departments : undefined
+    this.portalSlug = parsedBody != null ? parsedBody.portal_slug : undefined
+  } catch (error) {
+    // log error and carry on without v1 data
+    logger.err(
+      { model: 'Institution', v1Id: this.v1Id, error },
+      '[fetchV1DataError]'
+    )
+  }
+  callback(null, this)
 })
 
 InstitutionSchema.method(
