@@ -3,12 +3,6 @@ import { formatPriceForDisplayData } from '../../../../../frontend/js/features/s
 import { formatCurrencyLocalized } from '@/shared/utils/currency'
 
 describe('formatPriceForDisplayData', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
   it('should handle no tax rate', function () {
     const data = formatPriceForDisplayData(
       '1000',
@@ -24,7 +18,6 @@ describe('formatPriceForDisplayData', function () {
       tax: '$0.00',
       includesTax: false,
     })
-    window.metaAttributesCache = new Map()
   })
 
   it('should handle a tax rate', function () {

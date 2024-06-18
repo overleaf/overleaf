@@ -103,3 +103,12 @@ export type Institution = {
     tryAgain?: boolean
   }
 }
+
+export type PendingGroupSubscriptionEnrollment = {
+  groupId: string
+  groupName: string
+}
+
+export const GroupsAndEnterpriseBannerVariants = ['on-premise', 'FOMO'] as const
+export type GroupsAndEnterpriseBannerVariant =
+  (typeof GroupsAndEnterpriseBannerVariants)[number]

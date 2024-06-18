@@ -1,10 +1,8 @@
 import { useCallback, useState, forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { PortalTemplate } from '../../../../../../types/portal-template'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import getMeta from '../../../../utils/meta'
 import { NewProjectButtonModalVariant } from '../new-project-button/new-project-button-modal'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import {
   Dropdown,
   DropdownDivider,
@@ -61,11 +59,9 @@ function WelcomeMessageCreateNewProjectDropdown({
 }: WelcomeMessageCreateNewProjectDropdownProps) {
   const [showDropdown, setShowDropdown] = useState(false)
   const { t } = useTranslation()
-  const portalTemplates = getMeta('ol-portalTemplates') as
-    | PortalTemplate[]
-    | undefined
+  const portalTemplates = getMeta('ol-portalTemplates') || []
 
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
 
   const handleClick = useCallback(() => {
     sendMB('welcome-page-create-first-project-click', {
@@ -184,7 +180,7 @@ function WelcomeMessageCreateNewProjectDropdown({
                   {t('import_from_github')}
                 </button>
               )}
-              {(portalTemplates?.length ?? 0) > 0 ? (
+              {portalTemplates.length > 0 ? (
                 <>
                   <hr />
                   <div className="dropdown-header">

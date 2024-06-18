@@ -1,16 +1,13 @@
 import Notification from '../../notification'
 import ReconfirmAffiliation from './reconfirm-affiliation'
 import getMeta from '../../../../../../utils/meta'
-import { UserEmailData } from '../../../../../../../../types/user-email'
 import ReconfirmationInfoSuccess from '../../../../../settings/components/emails/reconfirmation-info/reconfirmation-info-success'
 
 function ReconfirmationInfo() {
-  const allInReconfirmNotificationPeriods = getMeta(
-    'ol-allInReconfirmNotificationPeriods',
-    []
-  ) as UserEmailData[]
-  const userEmails = getMeta('ol-userEmails', []) as UserEmailData[]
-  const reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML') as string
+  const allInReconfirmNotificationPeriods =
+    getMeta('ol-allInReconfirmNotificationPeriods') || []
+  const userEmails = getMeta('ol-userEmails') || []
+  const reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML')
   return (
     <>
       {allInReconfirmNotificationPeriods.map(userEmail =>

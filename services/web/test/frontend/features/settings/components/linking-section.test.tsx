@@ -38,14 +38,11 @@ const mockOauthProviders = {
 
 describe('<LinkingSection />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
     window.metaAttributesCache.set('ol-user', {})
 
     // suppress integrations and references widgets as they cannot be tested in
     // all environments
-    window.metaAttributesCache.set('integrationLinkingWidgets', [])
-    window.metaAttributesCache.set('referenceLinkingWidgets', [])
-    window.metaAttributesCache.set('integrationLinkingWidgets', [])
+    window.metaAttributesCache.set('ol-hideLinkingWidgets', true)
 
     window.metaAttributesCache.set('ol-thirdPartyIds', {
       google: 'google-id',
@@ -55,7 +52,6 @@ describe('<LinkingSection />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 

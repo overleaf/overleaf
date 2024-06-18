@@ -4,16 +4,13 @@ import { PriceExceptions } from '../shared/price-exceptions'
 import PremiumFeaturesLink from '../dashboard/premium-features-link'
 import getMeta from '../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
   const { personalSubscription: subscription } =
     useSubscriptionDashboardContext()
-  const postCheckoutRedirect = getMeta('ol-postCheckoutRedirect') as
-    | string
-    | undefined
-  const { appName, adminEmail }: ExposedSettings = getMeta('ol-ExposedSettings')
+  const postCheckoutRedirect = getMeta('ol-postCheckoutRedirect')
+  const { appName, adminEmail } = getMeta('ol-ExposedSettings')
 
   if (!subscription || !('recurly' in subscription)) return null
 

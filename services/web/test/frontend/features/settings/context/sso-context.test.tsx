@@ -31,7 +31,6 @@ describe('SSOContext', function () {
     })
 
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-thirdPartyIds', {
       google: 'google-id',
     })

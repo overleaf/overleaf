@@ -11,7 +11,6 @@ import Uppy from '@uppy/core'
 import { Dashboard } from '@uppy/react'
 import XHRUpload from '@uppy/xhr-upload'
 import getMeta from '../../../../utils/meta'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 
 import '@uppy/core/dist/style.css'
 import '@uppy/dashboard/dist/style.css'
@@ -27,9 +26,7 @@ type UploadProjectModalProps = {
 
 function UploadProjectModal({ onHide, openProject }: UploadProjectModalProps) {
   const { t } = useTranslation()
-  const { maxUploadSize, projectUploadTimeout } = getMeta(
-    'ol-ExposedSettings'
-  ) as ExposedSettings
+  const { maxUploadSize, projectUploadTimeout } = getMeta('ol-ExposedSettings')
   const [ableToUpload, setAbleToUpload] = useState(false)
 
   const [uppy] = useState(() => {
@@ -44,7 +41,7 @@ function UploadProjectModal({ onHide, openProject }: UploadProjectModalProps) {
       .use(XHRUpload, {
         endpoint: '/project/new/upload',
         headers: {
-          'X-CSRF-TOKEN': window.csrfToken,
+          'X-CSRF-TOKEN': getMeta('ol-csrfToken'),
         },
         limit: 1,
         fieldName: 'qqfile', // "qqfile" is needed for our express multer middleware

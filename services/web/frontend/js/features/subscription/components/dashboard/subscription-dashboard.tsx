@@ -19,7 +19,7 @@ function SubscriptionDashboard() {
     hasValidActiveSubscription,
   } = useSubscriptionDashboardContext()
 
-  const fromPlansPage: boolean = getMeta('ol-fromPlansPage')
+  const fromPlansPage = getMeta('ol-fromPlansPage')
 
   return (
     <div className="container">

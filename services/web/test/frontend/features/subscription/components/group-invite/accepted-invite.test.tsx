@@ -3,10 +3,6 @@ import AcceptedInvite from '../../../../../../frontend/js/features/subscription/
 import { expect } from 'chai'
 
 describe('accepted group invite', function () {
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('renders', async function () {
     window.metaAttributesCache.set('ol-inviterName', 'example@overleaf.com')
     render(<AcceptedInvite />)

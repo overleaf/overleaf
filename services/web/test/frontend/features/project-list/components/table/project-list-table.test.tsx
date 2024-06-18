@@ -9,14 +9,12 @@ const userId = '624333f147cfd8002622a1d3'
 
 describe('<ProjectListTable />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [])
-    window.user_id = userId
+    window.metaAttributesCache.set('ol-user_id', userId)
     fetchMock.reset()
   })
 
   afterEach(function () {
-    window.user_id = undefined
     fetchMock.reset()
   })
 

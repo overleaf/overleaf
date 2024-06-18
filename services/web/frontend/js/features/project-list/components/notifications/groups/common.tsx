@@ -6,18 +6,16 @@ import getMeta from '../../../../../utils/meta'
 import useAsyncDismiss from '../hooks/useAsyncDismiss'
 import useAsync from '../../../../../shared/hooks/use-async'
 import { FetchError, postJSON } from '../../../../../infrastructure/fetch-json'
-import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import {
   NotificationProjectInvite,
   Notification as NotificationType,
 } from '../../../../../../../types/project/dashboard/notification'
-import { User } from '../../../../../../../types/user'
 import GroupInvitationNotification from './group-invitation/group-invitation'
 import IEEERetirementBanner from '../ieee-retirement-banner'
 import { debugConsole } from '@/utils/debugging'
 
 function Common() {
-  const notifications = getMeta('ol-notifications', []) as NotificationType[]
+  const notifications = getMeta('ol-notifications') || []
   if (!notifications.length) {
     return null
   }
@@ -37,12 +35,9 @@ type CommonNotificationProps = {
 
 function CommonNotification({ notification }: CommonNotificationProps) {
   const { t } = useTranslation()
-  const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
-  const user = getMeta('ol-user', []) as Pick<User, 'features'>
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const { samlInitPath } = getMeta('ol-ExposedSettings')
+  const user = getMeta('ol-user')
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const { isLoading, isSuccess, error, runAsync } = useAsync<
     never,
     FetchError

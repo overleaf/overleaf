@@ -20,7 +20,6 @@ describe('<CurrentPlanWidget />', function () {
 
   beforeEach(function () {
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
   })
   afterEach(function () {
     sendMBSpy.restore()

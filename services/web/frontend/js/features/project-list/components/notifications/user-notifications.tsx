@@ -14,11 +14,6 @@ import classNames from 'classnames'
 import GeoBanners from './geo-banners'
 import AccessibilitySurveyBanner from './accessibility-survey-banner'
 
-type Subscription = {
-  groupId: string
-  groupName: string
-}
-
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
 )
@@ -28,14 +23,9 @@ const EnrollmentNotification: JSXElementConstructor<{
 }> = enrollmentNotificationModule?.import.default
 
 function UserNotifications() {
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
-  const groupSubscriptionsPendingEnrollment: Subscription[] = getMeta(
-    'ol-groupSubscriptionsPendingEnrollment',
-    []
-  )
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
+  const groupSubscriptionsPendingEnrollment =
+    getMeta('ol-groupSubscriptionsPendingEnrollment') || []
   const user = getMeta('ol-user')
 
   // Temporary workaround to prevent also showing groups/enterprise banner

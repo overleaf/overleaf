@@ -59,6 +59,7 @@ import { DocumentContainer } from '@/features/ide-react/editor/document-containe
 import { useLayoutContext } from '@/shared/context/layout-context'
 import { debugConsole } from '@/utils/debugging'
 import { useMetadataContext } from '@/features/ide-react/context/metadata-context'
+import { useUserContext } from '@/shared/context/user-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -82,6 +83,7 @@ function useCodeMirrorScope(view: EditorView) {
   const [docName] = useScopeValue<string>('editor.open_doc_name')
   const [trackChanges] = useScopeValue<boolean>('editor.trackChanges')
 
+  const { id: userId } = useUserContext()
   const { userSettings } = useUserSettingsContext()
   const {
     fontFamily,
@@ -175,12 +177,12 @@ function useCodeMirrorScope(view: EditorView) {
 
     if (currentDoc) {
       if (trackChanges) {
-        currentDoc.track_changes_as = window.user.id || 'anonymous'
+        currentDoc.track_changes_as = userId || 'anonymous'
       } else {
         currentDoc.track_changes_as = null
       }
     }
-  }, [currentDoc, trackChanges])
+  }, [userId, currentDoc, trackChanges])
 
   useEffect(() => {
     if (lineHeight && fontSize) {

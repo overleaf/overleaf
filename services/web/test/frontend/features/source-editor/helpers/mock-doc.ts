@@ -33,7 +33,7 @@ ${content}
 const contentLines = Array.from(Array(100), (e, i) => `contentLine ${i}`)
 const defaultContent = mockDocContent(contentLines.join('\n'))
 
-const MAX_DOC_LENGTH = 2 * 1024 * 1024 // window.maxDocLength
+const MAX_DOC_LENGTH = 2 * 1024 * 1024 // ol-maxDocLength
 
 class MockShareDoc extends EventEmitter {
   constructor(public text: string) {

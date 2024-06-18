@@ -92,7 +92,6 @@ describe('<ShareProjectModal/>', function () {
       reload: sinon.stub(),
     })
     fetchMock.get('/user/contacts', { contacts })
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', { allowedFreeTrial: true })
     window.metaAttributesCache.set('ol-showUpgradePrompt', true)
   })
@@ -101,7 +100,6 @@ describe('<ShareProjectModal/>', function () {
     this.locationStub.restore()
     fetchMock.restore()
     cleanUpContext()
-    window.metaAttributesCache = new Map()
   })
 
   it('renders the modal', async function () {

@@ -3,15 +3,15 @@ import sinon from 'sinon'
 import { screen, render, waitFor } from '@testing-library/react'
 import * as eventTracking from '../../../../../frontend/js/infrastructure/event-tracking'
 import SettingsPageRoot from '../../../../../frontend/js/features/settings/components/root'
+import getMeta from '@/utils/meta'
 
 describe('<SettingsPageRoot />', function () {
   let sendMBSpy: sinon.SinonSpy
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-usersEmail', 'foo@bar.com')
-    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
+    Object.assign(getMeta('ol-ExposedSettings'), { isOverleaf: true })
     window.metaAttributesCache.set('ol-hasPassword', true)
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
       isOverleaf: true,
     })
@@ -29,7 +29,6 @@ describe('<SettingsPageRoot />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     sendMBSpy.restore()
   })
 
@@ -52,7 +51,7 @@ describe('<SettingsPageRoot />', function () {
   })
 
   it('displays page for non-Overleaf', async function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: false,
       isOverleaf: false,
     })

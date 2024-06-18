@@ -5,16 +5,15 @@ import fetchMock, { FetchMockStatic } from 'fetch-mock'
 
 import LeaveModalForm from '../../../../../../frontend/js/features/settings/components/leave/modal-form'
 import * as useLocationModule from '../../../../../../frontend/js/shared/hooks/use-location'
+import getMeta from '@/utils/meta'
 
 describe('<LeaveModalForm />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-usersEmail', 'foo@bar.com')
-    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
+    Object.assign(getMeta('ol-ExposedSettings'), { isOverleaf: true })
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 
@@ -64,7 +63,7 @@ describe('<LeaveModalForm />', function () {
         replace: sinon.stub(),
         reload: sinon.stub(),
       })
-      window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
+      Object.assign(getMeta('ol-ExposedSettings'), { isOverleaf: true })
     })
 
     afterEach(function () {
@@ -111,7 +110,7 @@ describe('<LeaveModalForm />', function () {
   })
 
   it('handles credentials error without Saas tip', async function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: false })
+    Object.assign(getMeta('ol-ExposedSettings'), { isOverleaf: false })
     fetchMock.post('/user/delete', 403)
     render(
       <LeaveModalForm

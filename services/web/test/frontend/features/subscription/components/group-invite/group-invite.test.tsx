@@ -5,12 +5,7 @@ import GroupInvite from '../../../../../../frontend/js/features/subscription/com
 describe('group invite', function () {
   const inviterName = 'example@overleaf.com'
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-inviterName', inviterName)
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
   })
 
   it('renders header', async function () {

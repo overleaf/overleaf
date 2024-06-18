@@ -12,14 +12,9 @@ function setLearnedWords(words) {
   window.dispatchEvent(new CustomEvent('learnedWords:doreset'))
 }
 describe('<DictionaryModalContent />', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
-  })
-
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
-    window.dispatchEvent(new CustomEvent('learnedWords:doreset'))
+    setLearnedWords([])
   })
 
   it('list words', async function () {

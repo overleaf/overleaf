@@ -1,6 +1,8 @@
+import getMeta from '@/utils/meta'
+
 function isValidTeXFile(filename) {
   const validTeXFileRegExp = new RegExp(
-    `\\.(${window.ExposedSettings.validRootDocExtensions.join('|')})$`,
+    `\\.(${getMeta('ol-ExposedSettings').validRootDocExtensions.join('|')})$`,
     'i'
   )
 

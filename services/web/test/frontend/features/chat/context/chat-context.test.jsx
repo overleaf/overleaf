@@ -28,7 +28,6 @@ describe('ChatContext', function () {
 
     stubMathJax()
 
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', user)
 
     this.stub = sinon.stub(chatClientIdGenerator, 'generate').returns(uuidValue)
@@ -37,7 +36,6 @@ describe('ChatContext', function () {
   afterEach(function () {
     tearDownMathJaxStubs()
 
-    window.metaAttributesCache = new Map()
     this.stub.restore()
   })
 

@@ -12,9 +12,9 @@ const components = importOverleafModules('editorLeftMenuManageTemplate') as {
 
 export default function ActionsMenu() {
   const { t } = useTranslation()
-  const anonymous = getMeta('ol-anonymous') as boolean | undefined
+  const anonymous = getMeta('ol-anonymous')
 
-  if (anonymous === true || anonymous === undefined) {
+  if (anonymous) {
     return null
   }
 

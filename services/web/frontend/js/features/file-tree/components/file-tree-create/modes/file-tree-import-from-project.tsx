@@ -20,12 +20,13 @@ import ErrorMessage from '../error-message'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
 import { File } from '@/features/source-editor/utils/file'
 import { Project } from '../../../../../../../types/project'
+import getMeta from '@/utils/meta'
 
 export default function FileTreeImportFromProject() {
   const { t } = useTranslation()
 
   const { hasLinkedProjectFileFeature, hasLinkedProjectOutputFileFeature } =
-    window.ExposedSettings
+    getMeta('ol-ExposedSettings')
   const canSwitchOutputFilesMode =
     hasLinkedProjectFileFeature && hasLinkedProjectOutputFileFeature
 

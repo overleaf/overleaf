@@ -17,13 +17,11 @@ describe('<LayoutDropdownButton />', function () {
   beforeEach(function () {
     openStub = sinon.stub(window, 'open')
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-    window.metaAttributesCache = new Map()
   })
 
   afterEach(function () {
     openStub.restore()
     sendMBSpy.restore()
-    window.metaAttributesCache = new Map()
     fetchMock.restore()
   })
 

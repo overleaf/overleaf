@@ -19,9 +19,9 @@ import SettingsSyntaxValidation from './settings/settings-syntax-validation'
 
 export default function SettingsMenu() {
   const { t } = useTranslation()
-  const anonymous = getMeta('ol-anonymous') as boolean | undefined
+  const anonymous = getMeta('ol-anonymous')
 
-  if (anonymous === true || anonymous === undefined) {
+  if (anonymous) {
     return null
   }
 

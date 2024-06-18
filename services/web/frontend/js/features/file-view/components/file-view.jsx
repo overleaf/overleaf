@@ -7,6 +7,7 @@ import FileViewImage from './file-view-image'
 import FileViewPdf from './file-view-pdf'
 import FileViewText from './file-view-text'
 import Icon from '../../../shared/components/icon'
+import getMeta from '@/utils/meta'
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
 
@@ -16,7 +17,7 @@ export default function FileView({ file }) {
 
   const { t } = useTranslation()
 
-  const { textExtensions, editableFilenames } = window.ExposedSettings
+  const { textExtensions, editableFilenames } = getMeta('ol-ExposedSettings')
 
   const extension = file.name.split('.').pop().toLowerCase()
 

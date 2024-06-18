@@ -6,7 +6,7 @@ import HelpShowHotkeys from './help-show-hotkeys'
 
 export default function HelpMenu() {
   const { t } = useTranslation()
-  const showSupport = getMeta('ol-showSupport') as boolean | undefined
+  const showSupport = getMeta('ol-showSupport')
 
   return (
     <>

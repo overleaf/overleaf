@@ -57,7 +57,7 @@ export function useProjectContext() {
 // scope. A few props are populated to prevent errors in existing React
 // components
 const projectFallback = {
-  _id: window.project_id,
+  _id: getMeta('ol-project_id'),
   name: '',
   features: {},
 }
@@ -80,7 +80,7 @@ export const ProjectProvider: FC = ({ children }) => {
 
   const tags = useMemo(
     () =>
-      getMeta('ol-projectTags', [])
+      (getMeta('ol-projectTags') || [])
         // `tag.name` data may be null for some old users
         .map((tag: any) => ({ ...tag, name: tag.name ?? '' })),
     []

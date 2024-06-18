@@ -1,6 +1,9 @@
 import { SubscriptionPricingState } from '@recurly/recurly-js'
 import { PriceForDisplayData } from '../../../../../types/subscription/plan'
-import { currencies, CurrencyCode } from '../data/currency'
+import {
+  currencies,
+  CurrencyCode,
+} from '../../../../../types/subscription/currency'
 import { getRecurlyGroupPlanCode } from './recurly-group-plan-code'
 import { debugConsole } from '@/utils/debugging'
 

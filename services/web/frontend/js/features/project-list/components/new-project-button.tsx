@@ -1,8 +1,6 @@
 import { type JSXElementConstructor, useCallback, useState } from 'react'
 import { Dropdown, MenuItem } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
-import type { PortalTemplate } from '../../../../../types/portal-template'
 import ControlledDropdown from '../../../shared/components/controlled-dropdown'
 import getMeta from '../../../utils/meta'
 import NewProjectButtonModal, {
@@ -46,10 +44,10 @@ function NewProjectButton({
   showAddAffiliationWidget,
 }: NewProjectButtonProps) {
   const { t } = useTranslation()
-  const { templateLinks } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { templateLinks } = getMeta('ol-ExposedSettings')
   const [modal, setModal] =
     useState<Nullable<NewProjectButtonModalVariant>>(null)
-  const portalTemplates = getMeta('ol-portalTemplates') as PortalTemplate[]
+  const portalTemplates = getMeta('ol-portalTemplates') || []
   const { show: enableAddAffiliationWidget } = useAddAffiliation()
 
   const sendTrackingEvent = useCallback(
@@ -202,7 +200,7 @@ function NewProjectButton({
               }
             />
           )}
-          {portalTemplates?.length > 0 ? (
+          {portalTemplates.length > 0 ? (
             <>
               <MenuItem divider />
               <MenuItem header>

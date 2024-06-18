@@ -65,7 +65,7 @@ async function importPDFJS213() {
 }
 
 async function importPDFJS() {
-  const variant = getMeta('ol-pdfjsVariant', 'default')
+  const variant = getMeta('ol-pdfjsVariant') || 'default'
 
   // NOTE: split test variants must have at least 3 characters
   switch (variant) {

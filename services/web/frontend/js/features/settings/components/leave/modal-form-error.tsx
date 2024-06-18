@@ -1,7 +1,6 @@
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import { FetchError } from '../../../../infrastructure/fetch-json'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type LeaveModalFormErrorProps = {
@@ -10,7 +9,7 @@ type LeaveModalFormErrorProps = {
 
 function LeaveModalFormError({ error }: LeaveModalFormErrorProps) {
   const { t } = useTranslation()
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
 
   let errorMessage
   let errorTip = null

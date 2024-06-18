@@ -28,6 +28,7 @@ import {
   Version,
 } from '@/features/ide-react/editor/types/document'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
+import getMeta from '@/utils/meta'
 
 const MAX_PENDING_OP_SIZE = 64
 
@@ -737,7 +738,7 @@ export class DocumentContainer extends EventEmitter {
   private filterOps(ops: AnyOperation[]) {
     // Read-only token users can't see/edit comment, so we filter out comment
     // ops to avoid highlighting comment ranges.
-    if (window.isRestrictedTokenMember) {
+    if (getMeta('ol-isRestrictedTokenMember')) {
       return ops.filter(op => !isCommentOperation(op))
     } else {
       return ops

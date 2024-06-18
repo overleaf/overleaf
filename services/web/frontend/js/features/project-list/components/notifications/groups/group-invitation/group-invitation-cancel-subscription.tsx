@@ -20,10 +20,7 @@ export default function GroupInvitationCancelIndividualSubscriptionNotification(
   notification,
 }: GroupInvitationCancelIndividualSubscriptionNotificationProps) {
   const { t } = useTranslation()
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const {
     messageOpts: { inviterName },
   } = notification

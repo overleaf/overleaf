@@ -16,8 +16,7 @@ import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
-
-const maxFileSize = window.ExposedSettings.maxUploadSize
+import getMeta from '@/utils/meta'
 
 /* eslint-disable no-unused-vars */
 export enum FileUploadStatus {
@@ -46,7 +45,7 @@ export const FigureModalUploadFileSource: FC = () => {
       allowMultipleUploadBatches: false,
       restrictions: {
         maxNumberOfFiles: 1,
-        maxFileSize: maxFileSize || null,
+        maxFileSize: getMeta('ol-ExposedSettings').maxUploadSize,
         allowedFileTypes: ['image/*', '.pdf'],
       },
       autoProceed: false,
@@ -55,7 +54,7 @@ export const FigureModalUploadFileSource: FC = () => {
       .use(XHRUpload, {
         endpoint: `/project/${projectId}/upload?folder_id=${rootFile.id}`,
         headers: {
-          'X-CSRF-TOKEN': window.csrfToken,
+          'X-CSRF-TOKEN': getMeta('ol-csrfToken'),
         },
         // limit: maxConnections || 1,
         limit: 1,

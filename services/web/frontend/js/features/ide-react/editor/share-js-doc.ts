@@ -17,6 +17,7 @@ import {
 } from '@/features/ide-react/editor/types/document'
 import { EditorFacade } from '@/features/source-editor/extensions/realtime'
 import { recordDocumentFirstChangeEvent } from '@/features/event-tracking/document-first-change-event'
+import getMeta from '@/utils/meta'
 
 // All times below are in milliseconds
 const SINGLE_USER_FLUSH_DELAY = 2000
@@ -327,8 +328,7 @@ export class ShareJsDoc extends EventEmitter {
 
   attachToCM6(cm6: EditorFacade) {
     this.attachToEditor(cm6, () => {
-      // @ts-ignore
-      cm6.attachShareJs(this._doc, window.maxDocLength)
+      cm6.attachShareJs(this._doc, getMeta('ol-maxDocLength'))
     })
   }
 

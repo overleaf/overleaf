@@ -5,12 +5,13 @@ import getMeta from '../../../../utils/meta'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { useProjectListContext } from '../../context/project-list-context'
 import { useTranslation } from 'react-i18next'
-
-type variantsType = 'on-premise' | 'FOMO'
-const variants = ['on-premise', 'FOMO'] as variantsType[]
+import {
+  GroupsAndEnterpriseBannerVariant,
+  GroupsAndEnterpriseBannerVariants,
+} from '../../../../../../types/project/dashboard/notification'
 
 type urlForVariantsType = {
-  [key in variantsType]: string // eslint-disable-line no-unused-vars
+  [key in GroupsAndEnterpriseBannerVariant]: string // eslint-disable-line no-unused-vars
 }
 
 const urlForVariants: urlForVariantsType = {
@@ -18,23 +19,19 @@ const urlForVariants: urlForVariantsType = {
   FOMO: '/for/contact-sales-4',
 }
 
-type GroupsAndEnterpriseBannerVariant = (typeof variants)[number]
-
 let viewEventSent = false
 
 export default function GroupsAndEnterpriseBanner() {
   const { t } = useTranslation()
   const { totalProjectsCount } = useProjectListContext()
 
-  const showGroupsAndEnterpriseBanner: boolean = getMeta(
+  const showGroupsAndEnterpriseBanner = getMeta(
     'ol-showGroupsAndEnterpriseBanner'
   )
-  const groupsAndEnterpriseBannerVariant: GroupsAndEnterpriseBannerVariant =
-    getMeta('ol-groupsAndEnterpriseBannerVariant')
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const groupsAndEnterpriseBannerVariant = getMeta(
+    'ol-groupsAndEnterpriseBannerVariant'
+  )
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   const hasDismissedGroupsAndEnterpriseBanner = hasRecentlyDismissedBanner()
 
@@ -99,7 +96,7 @@ export default function GroupsAndEnterpriseBanner() {
 }
 
 function isVariantValid(variant: GroupsAndEnterpriseBannerVariant) {
-  return variants.includes(variant)
+  return GroupsAndEnterpriseBannerVariants.includes(variant)
 }
 
 function BannerContent({

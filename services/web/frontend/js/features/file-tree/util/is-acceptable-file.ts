@@ -1,11 +1,12 @@
 import { Minimatch } from 'minimatch'
+import getMeta from '@/utils/meta'
 
 let fileIgnoreMatcher: Minimatch
 
 export const isAcceptableFile = (name?: string, relativePath?: string) => {
   if (!fileIgnoreMatcher) {
     fileIgnoreMatcher = new Minimatch(
-      window.ExposedSettings.fileIgnorePattern,
+      getMeta('ol-ExposedSettings').fileIgnorePattern,
       { nocase: true, dot: true }
     )
   }

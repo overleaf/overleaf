@@ -46,7 +46,7 @@ function Remove({ userEmailData, deleteEmailAsync }: RemoveProps) {
   const { t } = useTranslation()
   const { state, deleteEmail, resetLeaversSurveyExpiration } =
     useUserEmailsContext()
-  const isManaged = getMeta('ol-isManagedAccount', false)
+  const isManaged = getMeta('ol-isManagedAccount')
 
   const getTooltipText = () => {
     if (isManaged) {

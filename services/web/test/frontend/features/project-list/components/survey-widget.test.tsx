@@ -9,7 +9,6 @@ describe('<SurveyWidget />', function () {
     this.linkText = 'Click here!'
     this.url = 'https://example.com/my-survey'
 
-    window.metaAttributesCache = new Map()
     localStorage.clear()
   })
 

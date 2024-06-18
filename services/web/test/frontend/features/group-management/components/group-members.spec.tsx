@@ -218,7 +218,6 @@ describe('GroupMembers', function () {
 
     beforeEach(function () {
       cy.window().then(win => {
-        win.metaAttributesCache = new Map()
         win.metaAttributesCache.set('ol-users', [
           JOHN_DOE,
           BOBBY_LAPOINTE,
@@ -427,7 +426,6 @@ describe('GroupMembers', function () {
 
     beforeEach(function () {
       cy.window().then(win => {
-        win.metaAttributesCache = new Map()
         win.metaAttributesCache.set('ol-users', [
           JOHN_DOE,
           BOBBY_LAPOINTE,

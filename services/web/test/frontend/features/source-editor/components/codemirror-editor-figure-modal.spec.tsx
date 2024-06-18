@@ -3,8 +3,8 @@ import { EditorProviders } from '../../../helpers/editor-providers'
 import { mockScope, rootFolderId } from '../helpers/mock-scope'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { TestContainer } from '../helpers/test-container'
+import getMeta from '@/utils/meta'
 
 const clickToolbarButton = (text: string) => {
   cy.findByLabelText(text).click()
@@ -67,14 +67,6 @@ describe('<FigureModal />', function () {
       </TestContainer>
     )
   }
-
-  let previousExposedSettings: ExposedSettings
-  before(function () {
-    previousExposedSettings = window.ExposedSettings
-  })
-  afterEach(function () {
-    window.ExposedSettings = previousExposedSettings
-  })
 
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
@@ -270,7 +262,7 @@ describe('<FigureModal />', function () {
   describe('Feature flags', function () {
     describe('with hasLinkUrlFeature=false', function () {
       beforeEach(function () {
-        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+        Object.assign(getMeta('ol-ExposedSettings'), {
           hasLinkedProjectFileFeature: true,
           hasLinkedProjectOutputFileFeature: true,
           hasLinkUrlFeature: false,
@@ -286,7 +278,7 @@ describe('<FigureModal />', function () {
     })
     describe('with hasLinkedProjectFileFeature=false and hasLinkedProjectOutputFileFeature=false', function () {
       beforeEach(function () {
-        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+        Object.assign(getMeta('ol-ExposedSettings'), {
           hasLinkedProjectFileFeature: false,
           hasLinkedProjectOutputFileFeature: false,
           hasLinkUrlFeature: true,
@@ -322,7 +314,7 @@ describe('<FigureModal />', function () {
 
     describe('with hasLinkedProjectFileFeature=false', function () {
       beforeEach(function () {
-        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+        Object.assign(getMeta('ol-ExposedSettings'), {
           hasLinkedProjectFileFeature: false,
           hasLinkedProjectOutputFileFeature: true,
           hasLinkUrlFeature: true,
@@ -341,7 +333,7 @@ describe('<FigureModal />', function () {
 
     describe('with hasLinkedProjectOutputFileFeature=false', function () {
       beforeEach(function () {
-        window.ExposedSettings = Object.assign({}, previousExposedSettings, {
+        Object.assign(getMeta('ol-ExposedSettings'), {
           hasLinkedProjectFileFeature: true,
           hasLinkedProjectOutputFileFeature: false,
           hasLinkUrlFeature: true,

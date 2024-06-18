@@ -42,16 +42,12 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
   const [projectName, setProjectName] = useState('')
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
   const location = useLocation()
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   const createNewProject = () => {
     runAsync(
       postJSON('/project/new', {
         body: {
-          _csrf: window.csrfToken,
           projectName,
           template,
         },

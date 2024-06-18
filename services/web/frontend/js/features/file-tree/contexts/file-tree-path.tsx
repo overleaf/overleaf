@@ -24,7 +24,7 @@ export const FileTreePathContext = createContext<
 
 export const FileTreePathProvider: FC = ({ children }) => {
   const { fileTreeData }: { fileTreeData: Folder } = useFileTreeData()
-  const projectId = getMeta('ol-project_id') as string
+  const projectId = getMeta('ol-project_id')
 
   const pathInFileTree = useCallback(
     (id: string) => pathInFolder(fileTreeData, id),

@@ -22,7 +22,6 @@ describe('<UnlinkUserModal />', function () {
   const userId = 'user123'
 
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     defaultProps = {
       onClose: sinon.stub(),
       user: { _id: userId },
@@ -32,7 +31,6 @@ describe('<UnlinkUserModal />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 

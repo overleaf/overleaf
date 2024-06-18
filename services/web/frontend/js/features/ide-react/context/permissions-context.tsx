@@ -47,7 +47,7 @@ export const PermissionsProvider: React.FC = ({ children }) => {
   const { permissionsLevel } = useEditorContext() as {
     permissionsLevel: PermissionsLevel
   }
-  const anonymous = getMeta('ol-anonymous') as boolean | undefined
+  const anonymous = getMeta('ol-anonymous')
 
   useEffect(() => {
     const activePermissionsMap = anonymous

@@ -36,10 +36,7 @@ function RenameProjectModal({
   const { error, isError, isLoading, runAsync } = useAsync()
   const { toggleSelectedProject, updateProjectViewData } =
     useProjectListContext()
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   useEffect(() => {
     if (showModal) {

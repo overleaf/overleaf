@@ -6,6 +6,7 @@ import {
 import Icon from '../../../../shared/components/icon'
 import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import getMeta from '@/utils/meta'
 
 export const FigureModalSourcePicker: FC = () => {
   const { t } = useTranslation()
@@ -13,7 +14,7 @@ export const FigureModalSourcePicker: FC = () => {
     hasLinkedProjectFileFeature,
     hasLinkedProjectOutputFileFeature,
     hasLinkUrlFeature,
-  } = window.ExposedSettings
+  } = getMeta('ol-ExposedSettings')
   return (
     <div className="figure-modal-source-selector">
       <div className="figure-modal-source-button-grid">

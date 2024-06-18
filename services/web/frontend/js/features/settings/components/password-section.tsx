@@ -6,8 +6,6 @@ import {
   postJSON,
 } from '../../../infrastructure/fetch-json'
 import getMeta from '../../../utils/meta'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
-import { PasswordStrengthOptions } from '../../../../../types/password-strength-options'
 import useAsync from '../../../shared/hooks/use-async'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
@@ -24,7 +22,7 @@ type PasswordUpdateResult = {
 
 function PasswordSection() {
   const { t } = useTranslation()
-  const hideChangePassword = getMeta('ol-cannot-change-password') as boolean
+  const hideChangePassword = getMeta('ol-cannot-change-password')
   return (
     <>
       <h3>{t('change_password')}</h3>
@@ -53,11 +51,11 @@ function CanOnlyLogInThroughSSO() {
 
 function PasswordInnerSection() {
   const { t } = useTranslation()
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
   const isExternalAuthenticationSystemUsed = getMeta(
     'ol-isExternalAuthenticationSystemUsed'
-  ) as boolean
-  const hasPassword = getMeta('ol-hasPassword') as boolean
+  )
+  const hasPassword = getMeta('ol-hasPassword')
 
   if (isExternalAuthenticationSystemUsed && !isOverleaf) {
     return <p>{t('password_managed_externally')}</p>
@@ -78,9 +76,7 @@ function PasswordInnerSection() {
 
 function PasswordForm() {
   const { t } = useTranslation()
-  const passwordStrengthOptions = getMeta(
-    'ol-passwordStrengthOptions'
-  ) as PasswordStrengthOptions
+  const passwordStrengthOptions = getMeta('ol-passwordStrengthOptions')
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword1, setNewPassword1] = useState('')

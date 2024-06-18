@@ -21,13 +21,11 @@ describe('<ChatPane />', function () {
   }
 
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', user)
   })
 
   afterEach(function () {
     fetchMock.reset()
-    window.metaAttributesCache = new Map()
   })
 
   const testMessages = [

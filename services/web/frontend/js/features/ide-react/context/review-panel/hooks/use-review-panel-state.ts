@@ -65,6 +65,7 @@ import {
   EditOperation,
 } from '../../../../../../../types/change'
 import { RangesTrackerWithResolvedThreadIds } from '@/features/ide-react/editor/document-container'
+import getMeta from '@/utils/meta'
 
 const dispatchReviewPanelEvent = (type: string, payload?: any) => {
   window.dispatchEvent(
@@ -89,7 +90,7 @@ const formatUser = (user: any): any => {
       avatar_text: 'A',
     }
   }
-  if (id === window.user_id) {
+  if (id === getMeta('ol-user_id')) {
     name = 'You'
     isSelf = true
   } else {

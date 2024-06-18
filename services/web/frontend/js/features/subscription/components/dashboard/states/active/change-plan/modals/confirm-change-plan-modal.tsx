@@ -42,7 +42,8 @@ export function ConfirmChangePlanModal() {
   if (!plan) return null
 
   const planWillChangeAtTermEnd =
-    planCodesChangingAtTermEnd?.indexOf(planCodeToChangeTo) > -1
+    planCodesChangingAtTermEnd &&
+    planCodesChangingAtTermEnd.indexOf(planCodeToChangeTo) > -1
 
   return (
     <AccessibleModal

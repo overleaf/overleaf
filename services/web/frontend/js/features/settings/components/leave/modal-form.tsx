@@ -21,7 +21,7 @@ function LeaveModalForm({
   setIsFormValid,
 }: LeaveModalFormProps) {
   const { t } = useTranslation()
-  const userDefaultEmail = getMeta('ol-usersEmail') as string
+  const userDefaultEmail = getMeta('ol-usersEmail')!
   const location = useLocation()
 
   const [email, setEmail] = useState('')

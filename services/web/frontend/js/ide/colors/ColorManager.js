@@ -17,6 +17,7 @@
 // NOTE: this file is being refactored over to frontend/js/shared/utils/colors.js
 
 import { generateMD5Hash } from './../../shared/utils/md5'
+import getMeta from '@/utils/meta'
 
 let ColorManager
 
@@ -61,7 +62,7 @@ export default ColorManager = {
       return this.ANONYMOUS_HUE
     }
 
-    if (window.user.id === user_id) {
+    if (getMeta('ol-user').id === user_id) {
       return this.OWN_HUE
     }
 

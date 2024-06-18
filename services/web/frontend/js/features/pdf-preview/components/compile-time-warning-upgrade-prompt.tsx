@@ -3,6 +3,7 @@ import * as eventTracking from '@/infrastructure/event-tracking'
 import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 import usePersistedState from '@/shared/hooks/use-persisted-state'
 import { CompileTimeWarningUpgradePromptInner } from '@/features/pdf-preview/components/compile-time-warning-upgrade-prompt-inner'
+import getMeta from '@/utils/meta'
 
 function CompileTimeWarningUpgradePrompt() {
   const { isProjectOwner, deliveryLatencies, compiling, showLogs, error } =
@@ -50,7 +51,7 @@ function CompileTimeWarningUpgradePrompt() {
     handleNewCompile(deliveryLatencies.compileTimeServerE2E)
   }, [compiling, error, showLogs, deliveryLatencies, handleNewCompile])
 
-  if (!window.ExposedSettings.enableSubscriptions) {
+  if (!getMeta('ol-ExposedSettings').enableSubscriptions) {
     return null
   }
 

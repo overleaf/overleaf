@@ -10,6 +10,7 @@ import { useFileTreeData } from '../../../../shared/context/file-tree-data-conte
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
+import getMeta from '@/utils/meta'
 
 const createFileModeModules = importOverleafModules('createFileModes')
 
@@ -20,6 +21,11 @@ export default function FileTreeModalCreateFileBody() {
 
   const { newFileCreateMode } = useFileTreeActionable()
   const { fileCount } = useFileTreeData()
+  const {
+    hasLinkedProjectFileFeature,
+    hasLinkedProjectOutputFileFeature,
+    hasLinkUrlFeature,
+  } = getMeta('ol-ExposedSettings')
 
   if (!fileCount || fileCount.status === 'error') {
     return null
@@ -43,8 +49,8 @@ export default function FileTreeModalCreateFileBody() {
                 label={t('upload')}
               />
 
-              {(window.ExposedSettings.hasLinkedProjectFileFeature ||
-                window.ExposedSettings.hasLinkedProjectOutputFileFeature) && (
+              {(hasLinkedProjectFileFeature ||
+                hasLinkedProjectOutputFileFeature) && (
                 <FileTreeModalCreateFileMode
                   mode="project"
                   icon="folder-open"
@@ -52,7 +58,7 @@ export default function FileTreeModalCreateFileBody() {
                 />
               )}
 
-              {window.ExposedSettings.hasLinkUrlFeature && (
+              {hasLinkUrlFeature && (
                 <FileTreeModalCreateFileMode
                   mode="url"
                   icon="globe"

@@ -22,9 +22,7 @@ export default function GroupSubscriptionMembership({
   }
 
   // Hide leave group button for managed users
-  const hideLeaveButton = getMeta(
-    'ol-cannot-leave-group-subscription'
-  ) as boolean
+  const hideLeaveButton = getMeta('ol-cannot-leave-group-subscription')
 
   return (
     <div>

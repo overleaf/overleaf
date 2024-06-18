@@ -9,15 +9,11 @@ import {
   postJSON,
   getUserFacingMessage,
 } from '../../../../../infrastructure/fetch-json'
-import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import { UserEmailData } from '../../../../../../../types/user-email'
 import { debugConsole } from '@/utils/debugging'
-import { Subscription } from '../../../../../../../types/project/dashboard/subscription'
 
 const ssoAvailable = ({ samlProviderId, affiliation }: UserEmailData) => {
-  const { hasSamlFeature, hasSamlBeta } = getMeta(
-    'ol-ExposedSettings'
-  ) as ExposedSettings
+  const { hasSamlFeature, hasSamlBeta } = getMeta('ol-ExposedSettings')
 
   if (!hasSamlFeature) {
     return false
@@ -60,9 +56,7 @@ function emailHasLicenceAfterConfirming(emailData: UserEmailData) {
 }
 
 function isOnFreeOrIndividualPlan() {
-  const subscription: Subscription | undefined = getMeta(
-    'ol-usersBestSubscription'
-  )
+  const subscription = getMeta('ol-usersBestSubscription')
   if (!subscription) {
     return false
   }
@@ -71,9 +65,7 @@ function isOnFreeOrIndividualPlan() {
 }
 
 const showConfirmEmail = (userEmail: UserEmailData) => {
-  const { emailConfirmationDisabled } = getMeta(
-    'ol-ExposedSettings'
-  ) as ExposedSettings
+  const { emailConfirmationDisabled } = getMeta('ol-ExposedSettings')
 
   return (
     !emailConfirmationDisabled &&
@@ -179,7 +171,7 @@ function ConfirmEmailNotification({ userEmail }: { userEmail: UserEmailData }) {
 
 function ConfirmEmail() {
   const { totalProjectsCount } = useProjectListContext()
-  const userEmails = getMeta('ol-userEmails', []) as UserEmailData[]
+  const userEmails = getMeta('ol-userEmails') || []
 
   if (!totalProjectsCount || !userEmails.length) {
     return null

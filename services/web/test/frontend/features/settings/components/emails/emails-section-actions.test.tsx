@@ -12,6 +12,7 @@ import fetchMock from 'fetch-mock'
 import EmailsSection from '../../../../../../frontend/js/features/settings/components/emails-section'
 import { Institution } from '../../../../../../types/institution'
 import { Affiliation } from '../../../../../../types/affiliation'
+import getMeta from '@/utils/meta'
 
 const userEmailData: UserEmailData = {
   confirmedAt: '2022-03-10T10:59:44.139Z',
@@ -33,14 +34,13 @@ const userEmailData2: UserEmailData & { affiliation: Affiliation } = {
 
 describe('email actions - make primary', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
     fetchMock.reset()
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 
@@ -117,7 +117,7 @@ describe('email actions - make primary', function () {
     })
 
     it('when not linked to institution', async function () {
-      window.metaAttributesCache.set('ol-ExposedSettings', {
+      Object.assign(getMeta('ol-ExposedSettings'), {
         hasAffiliationsFeature: true,
         hasSamlFeature: true,
       })
@@ -234,14 +234,13 @@ describe('email actions - make primary', function () {
 
 describe('email actions - delete', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
     fetchMock.reset()
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 

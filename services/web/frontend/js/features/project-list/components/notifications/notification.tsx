@@ -40,8 +40,7 @@ function Notification({
   ...props
 }: NotificationProps) {
   newNotificationStyle =
-    newNotificationStyle ??
-    (getMeta('ol-newNotificationStyle', false) as boolean)
+    newNotificationStyle ?? getMeta('ol-newNotificationStyle')
 
   const [show, setShow] = useState(true)
 

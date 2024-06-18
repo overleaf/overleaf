@@ -98,7 +98,7 @@ describe('<PdfLogsEntries/>', function () {
 
   it('opens doc via detached action', function () {
     cy.window().then(win => {
-      win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
+      win.metaAttributesCache.set('ol-detachRole', 'detacher')
     })
 
     cy.mount(
@@ -136,7 +136,7 @@ describe('<PdfLogsEntries/>', function () {
 
   it('sends open doc clicks via detached action', function () {
     cy.window().then(win => {
-      win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
+      win.metaAttributesCache.set('ol-detachRole', 'detached')
     })
 
     cy.mount(

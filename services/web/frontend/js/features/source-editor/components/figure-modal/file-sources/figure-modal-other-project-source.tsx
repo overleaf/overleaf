@@ -22,6 +22,7 @@ import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import getMeta from '@/utils/meta'
 
 function suggestName(path: string) {
   const parts = path.split('/')
@@ -36,7 +37,7 @@ export const FigureModalOtherProjectSource: FC = () => {
   const { loading: projectsLoading, data: projects, error } = useUserProjects()
   const [selectedProject, setSelectedProject] = useState<null | Project>(null)
   const { hasLinkedProjectFileFeature, hasLinkedProjectOutputFileFeature } =
-    window.ExposedSettings
+    getMeta('ol-ExposedSettings')
   const [usingOutputFiles, setUsingOutputFiles] = useState<boolean>(
     !hasLinkedProjectFileFeature
   )

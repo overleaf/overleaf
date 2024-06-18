@@ -7,6 +7,7 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { leaveProject } from '../../../../util/api'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
+import getMeta from '@/utils/meta'
 
 type LeaveProjectButtonProps = {
   project: Project
@@ -18,7 +19,7 @@ function LeaveProjectButton({ project, children }: LeaveProjectButtonProps) {
   const { t } = useTranslation()
   const text = t('leave')
   const isOwner = useMemo(() => {
-    return project.owner && window.user_id === project.owner.id
+    return project.owner && getMeta('ol-user_id') === project.owner.id
   }, [project])
   const [showModal, setShowModal] = useState(false)
   const isMounted = useIsMounted()

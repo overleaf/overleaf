@@ -1,5 +1,6 @@
 import { generateSHA1Hash } from '../../shared/utils/sha1'
 import { debugging, debugConsole } from '@/utils/debugging'
+import getMeta from '@/utils/meta'
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -1278,7 +1279,7 @@ export const { Doc } = (() => {
 
         this.emit('flipped_pending_to_inflight');
 
-        if (window.useShareJsHash || debugging) {
+        if (getMeta('ol-useShareJsHash') || debugging) {
           var now = Date.now()
           var age = this.__lastSubmitTimestamp && (now - this.__lastSubmitTimestamp)
           var RECOMPUTE_HASH_INTERVAL = 5000

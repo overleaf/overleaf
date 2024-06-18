@@ -5,22 +5,12 @@ import Notification from '../notification'
 import Icon from '../../../../../shared/components/icon'
 import getMeta from '../../../../../utils/meta'
 import useAsyncDismiss from '../hooks/useAsyncDismiss'
-import { ExposedSettings } from '../../../../../../../types/exposed-settings'
-import { Institution as InstitutionType } from '../../../../../../../types/project/dashboard/notification'
 
 function Institution() {
   const { t } = useTranslation()
-  const { samlInitPath, appName } = getMeta(
-    'ol-ExposedSettings'
-  ) as ExposedSettings
-  const notificationsInstitution = getMeta(
-    'ol-notificationsInstitution',
-    []
-  ) as InstitutionType[]
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const { samlInitPath, appName } = getMeta('ol-ExposedSettings')
+  const notificationsInstitution = getMeta('ol-notificationsInstitution') || []
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const { handleDismiss } = useAsyncDismiss()
 
   if (!notificationsInstitution.length) {

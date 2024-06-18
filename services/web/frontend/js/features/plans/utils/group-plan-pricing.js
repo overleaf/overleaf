@@ -20,7 +20,7 @@ export function createLocalizedGroupPlanPrice({
   licenseSize,
   currency,
   usage,
-  locale = window.i18n.currentLangCode || 'en',
+  locale = getMeta('ol-i18n').currentLangCode || 'en',
   formatCurrency,
 }) {
   const groupPlans = getMeta('ol-groupPlans')

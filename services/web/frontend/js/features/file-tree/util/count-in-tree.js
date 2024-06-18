@@ -1,3 +1,5 @@
+import getMeta from '@/utils/meta'
+
 export function countFiles(fileTreeData) {
   if (!fileTreeData) {
     return 0
@@ -5,7 +7,7 @@ export function countFiles(fileTreeData) {
 
   const value = _countElements(fileTreeData)
 
-  const limit = window.ExposedSettings.maxEntitiesPerProject
+  const limit = getMeta('ol-ExposedSettings').maxEntitiesPerProject
   const status = fileCountStatus(value, limit, Math.ceil(limit / 20))
 
   return { value, status, limit }

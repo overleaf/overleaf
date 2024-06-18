@@ -2,10 +2,9 @@ import { expect } from 'chai'
 import { render, screen } from '@testing-library/react'
 import { SubscriptionDashboardProvider } from '../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 import fetchMock from 'fetch-mock'
-import ManagedPublishers, {
-  Publisher,
-} from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-publishers'
+import ManagedPublishers from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-publishers'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { Publisher } from '../../../../../../types/subscription/dashboard/publisher'
 
 const userId = 'fff999fff999'
 const publisher1 = {
@@ -24,14 +23,11 @@ const managedPublishers: Publisher[] = [publisher1, publisher2]
 
 describe('<ManagedPublishers />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-managedPublishers', managedPublishers)
-    window.user_id = userId
+    window.metaAttributesCache.set('ol-user_id', userId)
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
-    delete window.user_id
     fetchMock.reset()
   })
 

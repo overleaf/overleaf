@@ -14,8 +14,8 @@ export default function JoinGroup({
   setView: Dispatch<SetStateAction<InviteViewTypes>>
 }) {
   const { t } = useTranslation()
-  const expired = getMeta('ol-expired') as boolean
-  const inviteToken = getMeta('ol-inviteToken') as string
+  const expired = getMeta('ol-expired')
+  const inviteToken = getMeta('ol-inviteToken')
   const {
     runAsync,
     isLoading: isJoining,

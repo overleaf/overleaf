@@ -6,7 +6,6 @@ import type { Nullable } from '../../../../../types/utils'
 import WelcomeMessageLink from './welcome-message-new/welcome-message-link'
 import WelcomeMessageCreateNewProjectDropdown from './welcome-message-new/welcome-message-create-new-project-dropdown'
 import getMeta from '@/utils/meta'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
 import OLCard from '@/features/ui/components/ol/ol-card'
 
 export default function WelcomeMessage() {
@@ -14,9 +13,7 @@ export default function WelcomeMessage() {
   const [activeModal, setActiveModal] =
     useState<Nullable<NewProjectButtonModalVariant>>(null)
 
-  const { wikiEnabled, templatesEnabled } = getMeta(
-    'ol-ExposedSettings'
-  ) as ExposedSettings
+  const { wikiEnabled, templatesEnabled } = getMeta('ol-ExposedSettings')
 
   return (
     <>

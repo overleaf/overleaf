@@ -18,10 +18,8 @@ export type InviteViewTypes =
 function GroupInviteViews() {
   const hasIndividualRecurlySubscription = getMeta(
     'ol-hasIndividualRecurlySubscription'
-  ) as boolean
-  const cannotJoinSubscription = getMeta(
-    'ol-cannot-join-subscription'
-  ) as boolean
+  )
+  const cannotJoinSubscription = getMeta('ol-cannot-join-subscription')
 
   useEffect(() => {
     if (cannotJoinSubscription) {
@@ -52,8 +50,8 @@ function GroupInviteViews() {
 }
 
 export default function GroupInvite() {
-  const inviterName = getMeta('ol-inviterName') as string
-  const expired = getMeta('ol-expired') as boolean
+  const inviterName = getMeta('ol-inviterName')
+  const expired = getMeta('ol-expired')
   const { isReady } = useWaitForI18n()
   const { t } = useTranslation()
 

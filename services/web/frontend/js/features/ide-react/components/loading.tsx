@@ -54,7 +54,7 @@ export const Loading: FC<{
     }
   }, [projectJoined])
 
-  const LoadingScreenError = () => {
+  const getLoadingScreenError = (): string => {
     if (connectionState.error) {
       // NOTE: translations not ready yet
       return connectionState.error === 'io-not-loaded'
@@ -82,9 +82,7 @@ export const Loading: FC<{
         hasError={hasError}
       />
       {hasError && (
-        <p className="loading-screen-error">
-          <LoadingScreenError />
-        </p>
+        <p className="loading-screen-error">{getLoadingScreenError()}</p>
       )}
     </div>
   )

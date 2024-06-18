@@ -27,7 +27,6 @@ export function renderWithSubscriptionDashContext(
     </SplitTestProvider>
   )
 
-  window.metaAttributesCache = new Map()
   options?.metaTags?.forEach(tag =>
     window.metaAttributesCache.set(tag.name, tag.value)
   )
@@ -92,6 +91,5 @@ export function renderWithSubscriptionDashContext(
 export function cleanUpContext() {
   // @ts-ignore
   delete global.recurly
-  window.metaAttributesCache = new Map()
   fetchMock.reset()
 }

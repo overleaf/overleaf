@@ -1,4 +1,4 @@
-import { useState, ElementType } from 'react'
+import { ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { useSSOContext, SSOSubscription } from '../context/sso-context'
@@ -8,29 +8,33 @@ import { useBroadcastUser } from '@/shared/hooks/user-channel/use-broadcast-user
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
+const availableIntegrationLinkingWidgets = importOverleafModules(
+  'integrationLinkingWidgets'
+) as any[]
+const availableReferenceLinkingWidgets = importOverleafModules(
+  'referenceLinkingWidgets'
+) as any[]
+const availableLangFeedbackLinkingWidgets = importOverleafModules(
+  'langFeedbackLinkingWidgets'
+) as any[]
+
 function LinkingSection() {
   useBroadcastUser()
   const { t } = useTranslation()
   const { subscriptions } = useSSOContext()
-  const ssoErrorMessage = getMeta('ol-ssoErrorMessage') as string
-  const projectSyncSuccessMessage = getMeta(
-    'ol-projectSyncSuccessMessage'
-  ) as string
-  const [integrationLinkingWidgets] = useState<any[]>(
-    () =>
-      getMeta('integrationLinkingWidgets') ||
-      importOverleafModules('integrationLinkingWidgets')
-  )
-  const [referenceLinkingWidgets] = useState<any[]>(
-    () =>
-      getMeta('referenceLinkingWidgets') ||
-      importOverleafModules('referenceLinkingWidgets')
-  )
-  const [langFeedbackLinkingWidgets] = useState<any[]>(
-    () =>
-      getMeta('langFeedbackLinkingWidgets') ||
-      importOverleafModules('langFeedbackLinkingWidgets')
-  )
+  const ssoErrorMessage = getMeta('ol-ssoErrorMessage')
+  const projectSyncSuccessMessage = getMeta('ol-projectSyncSuccessMessage')
+
+  // hide linking widgets in CI
+  const integrationLinkingWidgets = getMeta('ol-hideLinkingWidgets')
+    ? []
+    : availableIntegrationLinkingWidgets
+  const referenceLinkingWidgets = getMeta('ol-hideLinkingWidgets')
+    ? []
+    : availableReferenceLinkingWidgets
+  const langFeedbackLinkingWidgets = getMeta('ol-hideLinkingWidgets')
+    ? []
+    : availableLangFeedbackLinkingWidgets
 
   const oauth2ServerComponents = importOverleafModules('oauth2Server') as {
     import: { default: ElementType }
@@ -40,7 +44,7 @@ function LinkingSection() {
   const renderSyncSection =
     getMeta('ol-isSaas') || getMeta('ol-gitBridgeEnabled')
 
-  const showPersonalAccessTokenComponents: boolean =
+  const showPersonalAccessTokenComponents =
     getMeta('ol-showPersonalAccessToken') ||
     getMeta('ol-optionalPersonalAccessToken')
 

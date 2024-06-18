@@ -8,8 +8,8 @@ export default function InstitutionManagers() {
   const { isReady } = useWaitForI18n()
   const { t } = useTranslation()
 
-  const groupId: string = getMeta('ol-groupId')
-  const groupName: string = getMeta('ol-groupName')
+  const groupId = getMeta('ol-groupId')
+  const groupName = getMeta('ol-groupName')
 
   const paths = useMemo(
     () => ({

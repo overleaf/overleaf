@@ -47,7 +47,6 @@ const projects: Project[] = [
 
 describe('<ProjectTools />', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {})
     window.metaAttributesCache.set('ol-user', {})
     window.metaAttributesCache.set('ol-prefetchedProjectsBlob', {
       projects,

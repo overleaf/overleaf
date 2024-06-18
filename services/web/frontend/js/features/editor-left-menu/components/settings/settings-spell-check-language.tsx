@@ -4,11 +4,10 @@ import getMeta from '../../../../utils/meta'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
-import type { SpellCheckLanguage } from '../../../../../../types/project-settings'
 
 export default function SettingsSpellCheckLanguage() {
   const { t } = useTranslation()
-  const languages = getMeta('ol-languages') as SpellCheckLanguage[] | undefined
+  const languages = getMeta('ol-languages')
 
   const { spellCheckLanguage, setSpellCheckLanguage } =
     useProjectSettingsContext()

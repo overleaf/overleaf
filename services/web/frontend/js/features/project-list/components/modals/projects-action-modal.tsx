@@ -103,10 +103,7 @@ type ErrorNotificationProps = {
 }
 
 function ErrorNotification({ error }: ErrorNotificationProps) {
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   if (newNotificationStyle) {
     return (

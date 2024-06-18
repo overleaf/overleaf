@@ -8,7 +8,6 @@ import { renderWithProjectListContext } from '../../helpers/render-with-context'
 describe('<TagsList />', function () {
   beforeEach(async function () {
     global.localStorage.clear()
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-tags', [
       {
         _id: 'abc123def456',

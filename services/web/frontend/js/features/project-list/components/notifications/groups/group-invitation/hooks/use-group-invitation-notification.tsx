@@ -59,7 +59,7 @@ export function useGroupInvitationNotification(
 
   const hasIndividualRecurlySubscription = getMeta(
     'ol-hasIndividualRecurlySubscription'
-  ) as boolean | undefined
+  )
 
   useEffect(() => {
     if (hasIndividualRecurlySubscription) {

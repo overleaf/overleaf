@@ -42,7 +42,7 @@ function AddEmail() {
     getEmails,
   } = useUserEmailsContext()
 
-  const emailAddressLimit = getMeta('ol-emailAddressLimit', 10)
+  const emailAddressLimit = getMeta('ol-emailAddressLimit') || 10
   const { ref: recaptchaRef, getReCaptchaToken } = useRecaptcha()
 
   useEffect(() => {

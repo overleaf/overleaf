@@ -1,22 +1,10 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let displayNameForUser
+import getMeta from '@/utils/meta'
 
-export default displayNameForUser = function (user) {
+export default function displayNameForUser(user) {
   if (user == null) {
     return 'Anonymous'
   }
-  if (user.id === window.user.id) {
+  if (user.id === getMeta('ol-user').id) {
     return 'you'
   }
   if (user.name != null) {

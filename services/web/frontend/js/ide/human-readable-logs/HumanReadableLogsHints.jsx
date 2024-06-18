@@ -3,9 +3,10 @@ import {
   packageSuggestionsForCommands,
   packageSuggestionsForEnvironments,
 } from './HumanReadableLogsPackageSuggestions'
+import getMeta from '@/utils/meta'
 
 function WikiLink({ url, children }) {
-  if (window.wikiEnabled) {
+  if (getMeta('ol-wikiEnabled')) {
     return (
       <a href={url} target="_blank" rel="noopener">
         {children}
@@ -507,7 +508,7 @@ const hints = {
   },
 }
 
-if (!window.wikiEnabled) {
+if (!getMeta('ol-wikiEnabled')) {
   Object.keys(hints).forEach(ruleId => {
     hints[ruleId].extraInfoURL = null
   })

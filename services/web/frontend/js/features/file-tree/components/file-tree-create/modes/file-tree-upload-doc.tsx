@@ -16,6 +16,7 @@ import { findByNameInFolder } from '@/features/file-tree/util/is-name-unique-in-
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { FileTreeEntity } from '../../../../../../../types/file-tree-entity'
 import { UploadConflicts } from '@/features/file-tree/components/file-tree-create/file-tree-upload-conflicts'
+import getMeta from '@/utils/meta'
 
 export default function FileTreeUploadDoc() {
   const { parentFolderId, cancel, droppedFiles, setDroppedFiles } =
@@ -30,7 +31,7 @@ export default function FileTreeUploadDoc() {
   const [overwrite, setOverwrite] = useState(false)
 
   const maxNumberOfFiles = 180
-  const maxFileSize = window.ExposedSettings.maxUploadSize
+  const maxFileSize = getMeta('ol-ExposedSettings').maxUploadSize
 
   // calculate conflicts
   const buildConflicts = (files: Record<string, any>) => {
@@ -130,7 +131,7 @@ export default function FileTreeUploadDoc() {
         .use(XHRUpload, {
           endpoint,
           headers: {
-            'X-CSRF-TOKEN': window.csrfToken,
+            'X-CSRF-TOKEN': getMeta('ol-csrfToken'),
           },
           // limit: maxConnections || 1,
           limit: 1,

@@ -26,7 +26,7 @@ export default function MembersList({ groupId }: ManagedUsersListProps) {
     useState<GroupUserAlert>(undefined)
   const [userToUnlink, setUserToUnlink] = useState<User | undefined>(undefined)
   const { users } = useGroupMembersContext()
-  const managedUsersActive: any = getMeta('ol-managedUsersActive')
+  const managedUsersActive = getMeta('ol-managedUsersActive')
   const groupSSOActive = getMeta('ol-groupSSOActive')
 
   return (

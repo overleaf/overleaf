@@ -7,10 +7,9 @@ import GrammarlyLogo from '@/shared/svgs/grammarly-logo'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import useWaitForGrammarlyCheck from '@/shared/hooks/use-wait-for-grammarly-check'
 import getMeta from '@/utils/meta'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
 
 export default function GrammarlyAdvert() {
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
 
   const [show, setShow] = useState(false)
   const { t } = useTranslation()

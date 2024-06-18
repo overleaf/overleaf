@@ -14,6 +14,7 @@ import {
   copyableProject,
 } from '../fixtures/projects-data'
 import * as useLocationModule from '../../../../../frontend/js/shared/hooks/use-location'
+import getMeta from '@/utils/meta'
 
 const {
   fullList,
@@ -35,7 +36,6 @@ describe('<ProjectListRoot />', function () {
   beforeEach(async function () {
     global.localStorage.clear()
     sendMBSpy = sinon.spy(eventTracking, 'sendMB')
-    window.metaAttributesCache = new Map()
     this.tagId = '999fff999fff'
     this.tagName = 'First tag name'
     window.metaAttributesCache.set('ol-tags', [
@@ -45,7 +45,7 @@ describe('<ProjectListRoot />', function () {
         project_ids: [projectsData[0].id, projectsData[1].id],
       },
     ])
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       templateLinks: [],
     })
     window.metaAttributesCache.set('ol-userEmails', [
@@ -53,7 +53,7 @@ describe('<ProjectListRoot />', function () {
     ])
     // we need a blank user here since its used in checking if we should display certain ads
     window.metaAttributesCache.set('ol-user', {})
-    window.user_id = userId
+    window.metaAttributesCache.set('ol-user_id', userId)
     assignStub = sinon.stub()
     this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
       assign: assignStub,
@@ -64,7 +64,6 @@ describe('<ProjectListRoot />', function () {
 
   afterEach(function () {
     sendMBSpy.restore()
-    window.user_id = undefined
     fetchMock.reset()
     this.locationStub.restore()
   })

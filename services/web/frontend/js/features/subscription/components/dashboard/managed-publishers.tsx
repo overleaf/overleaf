@@ -1,13 +1,6 @@
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import ManagedPublisher from './managed-publisher'
 
-export type Publisher = {
-  slug: string
-  managerIds: string[]
-  name: string
-  partner: string
-}
-
 export default function ManagedPublishers() {
   const { managedPublishers } = useSubscriptionDashboardContext()
 

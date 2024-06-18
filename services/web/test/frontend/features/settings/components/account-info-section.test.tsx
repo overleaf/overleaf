@@ -3,6 +3,7 @@ import { fireEvent, screen, render } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import AccountInfoSection from '../../../../../frontend/js/features/settings/components/account-info-section'
 import { UserProvider } from '../../../../../frontend/js/shared/context/user-context'
+import getMeta from '@/utils/meta'
 
 function renderSectionWithUserProvider() {
   render(<AccountInfoSection />, {
@@ -12,13 +13,12 @@ function renderSectionWithUserProvider() {
 
 describe('<AccountInfoSection />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
     window.metaAttributesCache.set('ol-user', {
       email: 'sherlock@holmes.co.uk',
       first_name: 'Sherlock',
       last_name: 'Holmes',
     })
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: false,
     })
     window.metaAttributesCache.set(
@@ -29,7 +29,6 @@ describe('<AccountInfoSection />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 
@@ -144,7 +143,7 @@ describe('<AccountInfoSection />', function () {
   })
 
   it('hides email input', async function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
     const updateMock = fetchMock.post('/user/settings', 200)

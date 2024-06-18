@@ -3,9 +3,14 @@ import getMeta from '../utils/meta'
 import OError from '@overleaf/o-error'
 import { debugConsole } from '@/utils/debugging'
 
-const reporterPromise = window.ExposedSettings?.sentryDsn
-  ? sentryReporter()
-  : nullReporter()
+const {
+  sentryAllowedOriginRegex,
+  sentryDsn,
+  sentryEnvironment,
+  sentryRelease,
+} = getMeta('ol-ExposedSettings')
+
+const reporterPromise = sentryDsn ? sentryReporter() : nullReporter()
 
 function sentryReporter() {
   return (
@@ -14,16 +19,14 @@ function sentryReporter() {
         let eventCount = 0
 
         Sentry.init({
-          dsn: window.ExposedSettings.sentryDsn,
-          environment: window.ExposedSettings.sentryEnvironment,
-          release: window.ExposedSettings.sentryRelease,
+          dsn: sentryDsn,
+          environment: sentryEnvironment,
+          release: sentryRelease,
           autoSessionTracking: false,
 
           // Ignore errors unless they come from our origins
           // Adapted from: https://docs.sentry.io/platforms/javascript/configuration/filtering/#decluttering-sentry
-          allowUrls: [
-            new RegExp(window.ExposedSettings.sentryAllowedOriginRegex),
-          ],
+          allowUrls: [new RegExp(sentryAllowedOriginRegex)],
 
           ignoreErrors: [
             // Ignore very noisy error
@@ -70,7 +73,7 @@ function sentryReporter() {
           },
         })
 
-        Sentry.setUser({ id: window.user_id })
+        Sentry.setUser({ id: getMeta('ol-user_id') })
 
         const splitTestAssignments = getMeta('ol-splitTestVariants')
         if (splitTestAssignments) {

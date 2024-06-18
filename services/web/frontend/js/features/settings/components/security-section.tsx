@@ -7,14 +7,11 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 function SecuritySection() {
   const { t } = useTranslation()
 
-  const memberOfSSOEnabledGroups = getMeta(
-    'ol-memberOfSSOEnabledGroups',
-    []
-  ) as GroupSSOLinkingStatus[]
+  const memberOfSSOEnabledGroups = getMeta('ol-memberOfSSOEnabledGroups') || []
 
   return (
     <>
-      {memberOfSSOEnabledGroups?.length > 0 ? (
+      {memberOfSSOEnabledGroups.length > 0 ? (
         <>
           <h3>{t('security')}</h3>
           {memberOfSSOEnabledGroups.map(

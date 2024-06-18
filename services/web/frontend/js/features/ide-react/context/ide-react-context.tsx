@@ -86,9 +86,8 @@ export function createReactScopeValueStore(projectId: string) {
   return scopeStore
 }
 
-const projectId = window.project_id
-
 export const IdeReactProvider: FC = ({ children }) => {
+  const projectId = getMeta('ol-project_id')
   const [scopeStore] = useState(() => createReactScopeValueStore(projectId))
   const [eventEmitter] = useState(createIdeEventEmitter)
   const [scopeEventEmitter] = useState(
@@ -129,11 +128,10 @@ export const IdeReactProvider: FC = ({ children }) => {
         body: {
           error: errorObj,
           meta: metadata,
-          _csrf: window.csrfToken,
         },
       })
     },
-    [socket.socket, release]
+    [socket.socket, release, projectId]
   )
 
   // Populate scope values when joining project, then fire project:joined event
@@ -175,7 +173,14 @@ export const IdeReactProvider: FC = ({ children }) => {
       reportError,
       projectJoined,
     }),
-    [eventEmitter, eventLog, projectJoined, reportError, startedFreeTrial]
+    [
+      eventEmitter,
+      eventLog,
+      projectId,
+      projectJoined,
+      reportError,
+      startedFreeTrial,
+    ]
   )
 
   return (

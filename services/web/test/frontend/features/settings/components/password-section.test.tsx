@@ -2,11 +2,11 @@ import { expect } from 'chai'
 import { fireEvent, screen, render } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 import PasswordSection from '../../../../../frontend/js/features/settings/components/password-section'
+import getMeta from '@/utils/meta'
 
 describe('<PasswordSection />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       isOverleaf: true,
     })
     window.metaAttributesCache.set(
@@ -17,12 +17,11 @@ describe('<PasswordSection />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 
   it('shows password managed externally message', async function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       isOverleaf: false,
     })
     window.metaAttributesCache.set(

@@ -6,6 +6,7 @@ import {
   cleanUpContext,
   renderWithSubscriptionDashContext,
 } from '../../helpers/render-with-subscription-dash-context'
+import getMeta from '@/utils/meta'
 
 function getManagedGroupSubscriptions(
   groupSSO: boolean | null,
@@ -181,7 +182,7 @@ describe('<ManagedGroupSubscriptions />', function () {
 
   describe('with group SSO off by default', function () {
     beforeEach(function () {
-      window.metaAttributesCache.set('ol-ExposedSettings', {
+      Object.assign(getMeta('ol-ExposedSettings'), {
         groupSSOEnabled: false,
       })
     })

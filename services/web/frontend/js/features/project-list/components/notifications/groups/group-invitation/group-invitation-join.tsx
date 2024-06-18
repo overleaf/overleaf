@@ -18,10 +18,7 @@ export default function GroupInvitationNotificationJoin({
   dismissGroupInviteNotification,
 }: GroupInvitationNotificationProps) {
   const { t } = useTranslation()
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const {
     messageOpts: { inviterName },
   } = notification

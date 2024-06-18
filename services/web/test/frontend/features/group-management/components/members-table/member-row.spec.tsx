@@ -7,12 +7,6 @@ describe('MemberRow', function () {
   const subscriptionId = '123abc'
 
   describe('default view', function () {
-    beforeEach(function () {
-      cy.window().then(win => {
-        win.metaAttributesCache = new Map()
-      })
-    })
-
     describe('with an ordinary user', function () {
       let user: User
 
@@ -184,7 +178,6 @@ describe('MemberRow', function () {
   describe('with Managed Users enabled', function () {
     beforeEach(function () {
       cy.window().then(win => {
-        win.metaAttributesCache = new Map()
         win.metaAttributesCache.set('ol-managedUsersActive', true)
       })
     })
@@ -359,7 +352,6 @@ describe('MemberRow', function () {
   describe('with Group SSO enabled', function () {
     beforeEach(function () {
       cy.window().then(win => {
-        win.metaAttributesCache = new Map()
         win.metaAttributesCache.set('ol-groupSSOActive', true)
       })
     })
@@ -536,7 +528,6 @@ describe('MemberRow', function () {
   describe('with Managed Users and Group SSO enabled', function () {
     beforeEach(function () {
       cy.window().then(win => {
-        win.metaAttributesCache = new Map()
         win.metaAttributesCache.set('ol-managedUsersActive', true)
         win.metaAttributesCache.set('ol-groupSSOActive', true)
       })

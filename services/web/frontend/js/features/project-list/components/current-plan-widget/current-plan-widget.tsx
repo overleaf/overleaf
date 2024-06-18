@@ -3,12 +3,9 @@ import IndividualPlan from './individual-plan'
 import GroupPlan from './group-plan'
 import CommonsPlan from './commons-plan'
 import getMeta from '../../../../utils/meta'
-import { Subscription } from '../../../../../../types/project/dashboard/subscription'
 
 function CurrentPlanWidget() {
-  const usersBestSubscription: Subscription | undefined = getMeta(
-    'ol-usersBestSubscription'
-  )
+  const usersBestSubscription = getMeta('ol-usersBestSubscription')
 
   if (!usersBestSubscription) {
     return null

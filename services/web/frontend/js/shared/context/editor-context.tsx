@@ -45,7 +45,7 @@ export const EditorContext = createContext<
       isRestrictedTokenMember?: boolean
       permissionsLevel: 'readOnly' | 'readAndWrite' | 'owner'
       deactivateTutorial: (tutorial: string) => void
-      inactiveTutorials: [string]
+      inactiveTutorials: string[]
       currentPopup: string | null
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
       writefullAdClicked: writefullAdButtons
@@ -63,17 +63,18 @@ export const EditorProvider: FC = ({ children }) => {
   const { owner, features, _id: projectId } = useProjectContext()
 
   const cobranding = useMemo(() => {
+    const brandVariation = getMeta('ol-brandVariation')
     return (
-      window.brandVariation && {
-        logoImgUrl: window.brandVariation.logo_url,
-        brandVariationName: window.brandVariation.name,
-        brandVariationId: window.brandVariation.id,
-        brandId: window.brandVariation.brand_id,
-        brandVariationHomeUrl: window.brandVariation.home_url,
-        publishGuideHtml: window.brandVariation.publish_guide_html,
-        partner: window.brandVariation.partner,
-        brandedMenu: window.brandVariation.branded_menu,
-        submitBtnHtml: window.brandVariation.submit_button_html,
+      brandVariation && {
+        logoImgUrl: brandVariation.logo_url,
+        brandVariationName: brandVariation.name,
+        brandVariationId: brandVariation.id,
+        brandId: brandVariation.brand_id,
+        brandVariationHomeUrl: brandVariation.home_url,
+        publishGuideHtml: brandVariation.publish_guide_html,
+        partner: brandVariation.partner,
+        brandedMenu: brandVariation.branded_menu,
+        submitBtnHtml: brandVariation.submit_button_html,
       }
     )
   }, [])
@@ -86,8 +87,8 @@ export const EditorProvider: FC = ({ children }) => {
   const [showSymbolPalette] = useScopeValue('editor.showSymbolPalette')
   const [toggleSymbolPalette] = useScopeValue('editor.toggleSymbolPalette')
 
-  const [inactiveTutorials, setInactiveTutorials] = useState(() =>
-    getMeta('ol-inactiveTutorials', [])
+  const [inactiveTutorials, setInactiveTutorials] = useState(
+    () => getMeta('ol-inactiveTutorials') || []
   )
 
   const [writefullAdClicked, setWritefullAdClicked] =
@@ -152,7 +153,7 @@ export const EditorProvider: FC = ({ children }) => {
     }
 
     parts.push('Online LaTeX Editor')
-    parts.push(window.ExposedSettings.appName)
+    parts.push(getMeta('ol-ExposedSettings').appName)
 
     const title = parts.join(' ')
 

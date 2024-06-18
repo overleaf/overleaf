@@ -7,10 +7,8 @@ describe('<TokenAccessPage/>', function () {
 
   beforeEach(function () {
     cy.window().then(win => {
-      win.metaAttributesCache = new Map<string, any>([
-        ['ol-postUrl', url],
-        ['ol-user', { email: 'test@example.com' }],
-      ])
+      win.metaAttributesCache.set('ol-postUrl', url)
+      win.metaAttributesCache.set('ol-user', { email: 'test@example.com' })
     })
   })
 

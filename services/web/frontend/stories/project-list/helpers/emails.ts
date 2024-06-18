@@ -7,6 +7,7 @@ import {
 } from '../../../../types/project/dashboard/notification'
 import { DeepPartial, DeepReadonly } from '../../../../types/utils'
 import { Project } from '../../../../types/project/dashboard/api'
+import getMeta from '@/utils/meta'
 
 const MOCK_DELAY = 1000
 
@@ -44,9 +45,7 @@ export function defaultSetupMocks(fetchMock: FetchMockStatic) {
 }
 
 export function setDefaultMeta() {
-  window.metaAttributesCache = new Map()
-  window.metaAttributesCache.set('ol-ExposedSettings', {
-    ...window.metaAttributesCache.get('ol-ExposedSettings'),
+  Object.assign(getMeta('ol-ExposedSettings'), {
     emailConfirmationDisabled: false,
     samlInitPath: '/fakeSaml',
     appName: 'Overleaf',

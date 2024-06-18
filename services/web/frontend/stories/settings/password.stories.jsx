@@ -1,6 +1,7 @@
 import useFetchMock from '../hooks/use-fetch-mock'
 import PasswordSection from '../../js/features/settings/components/password-section'
 import { setDefaultMeta, defaultSetupMocks } from './helpers/password'
+import getMeta from '@/utils/meta'
 
 export const Success = args => {
   setDefaultMeta()
@@ -11,7 +12,7 @@ export const Success = args => {
 
 export const ManagedExternally = args => {
   setDefaultMeta()
-  window.metaAttributesCache.set('ol-ExposedSettings', {
+  Object.assign(getMeta('ol-ExposedSettings'), {
     isOverleaf: false,
   })
   window.metaAttributesCache.set('ol-isExternalAuthenticationSystemUsed', true)

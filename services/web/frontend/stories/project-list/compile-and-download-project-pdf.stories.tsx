@@ -4,7 +4,7 @@ import useFetchMock from '../hooks/use-fetch-mock'
 import { projectsData } from '../../../test/frontend/features/project-list/fixtures/projects-data'
 
 export const Successful = (args: any) => {
-  window.user_id = '624333f147cfd8002622a1d3'
+  window.metaAttributesCache.set('ol-user_id', '624333f147cfd8002622a1d3')
   useFetchMock(fetchMock => {
     fetchMock.post(/\/api\/project/, {
       projects: projectsData,
@@ -32,7 +32,7 @@ export const Successful = (args: any) => {
 }
 
 export const Failure = (args: any) => {
-  window.user_id = '624333f147cfd8002622a1d3'
+  window.metaAttributesCache.set('ol-user_id', '624333f147cfd8002622a1d3')
   useFetchMock(fetchMock => {
     fetchMock.post(/\/api\/project/, {
       projects: projectsData,

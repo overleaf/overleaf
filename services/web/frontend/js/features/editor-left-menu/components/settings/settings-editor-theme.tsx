@@ -7,10 +7,8 @@ import type { Option } from './settings-menu-select'
 
 export default function SettingsEditorTheme() {
   const { t } = useTranslation()
-  const editorThemes = getMeta('ol-editorThemes') as string[] | undefined
-  const legacyEditorThemes = getMeta('ol-legacyEditorThemes') as
-    | string[]
-    | undefined
+  const editorThemes = getMeta('ol-editorThemes')
+  const legacyEditorThemes = getMeta('ol-legacyEditorThemes')
   const { editorTheme, setEditorTheme } = useProjectSettingsContext()
 
   const options = useMemo(() => {

@@ -43,17 +43,14 @@ const memberGroupSubscriptions: MemberGroupSubscription[] = [
 
 describe('<GroupSubscriptionMemberships />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set(
       'ol-memberGroupSubscriptions',
       memberGroupSubscriptions
     )
-    window.user_id = userId
+    window.metaAttributesCache.set('ol-user_id', userId)
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
-    delete window.user_id
     fetchMock.reset()
   })
 

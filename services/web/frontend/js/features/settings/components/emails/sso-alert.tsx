@@ -4,27 +4,14 @@ import Icon from '../../../../shared/components/icon'
 import getMeta from '../../../../utils/meta'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
-type InstitutionLink = {
-  universityName: string
-  hasEntitlement?: boolean
-}
-
-type SAMLError = {
-  translatedMessage?: string
-  message?: string
-  tryAgain?: boolean
-}
-
 export function SSOAlert() {
   const { t } = useTranslation()
 
-  const institutionLinked: InstitutionLink | undefined = getMeta(
-    'ol-institutionLinked'
-  )
-  const institutionEmailNonCanonical: string | undefined = getMeta(
+  const institutionLinked = getMeta('ol-institutionLinked')
+  const institutionEmailNonCanonical = getMeta(
     'ol-institutionEmailNonCanonical'
   )
-  const samlError: SAMLError | undefined = getMeta('ol-samlError')
+  const samlError = getMeta('ol-samlError')
 
   const [infoClosed, setInfoClosed] = useState(false)
   const [warningClosed, setWarningClosed] = useState(false)

@@ -4,6 +4,7 @@ import fetchMock from 'fetch-mock'
 import SettingsOverallTheme from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-overall-theme'
 import type { OverallThemeMeta } from '../../../../../../types/project-settings'
 import { renderWithEditorContext } from '../../../../helpers/render-with-context'
+import getMeta from '@/utils/meta'
 
 const IEEE_BRAND_ID = 1234
 const OTHER_BRAND_ID = 2234
@@ -24,14 +25,13 @@ describe('<SettingsOverallTheme />', function () {
 
   beforeEach(function () {
     window.metaAttributesCache.set('ol-overallThemes', overallThemes)
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       ieeeBrandId: IEEE_BRAND_ID,
     })
   })
 
   afterEach(function () {
     fetchMock.reset()
-    window.metaAttributesCache = new Map()
   })
 
   it('shows correct menu', async function () {

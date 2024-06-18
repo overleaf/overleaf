@@ -2,6 +2,7 @@ import useFetchMock from '../hooks/use-fetch-mock'
 import AccountInfoSection from '../../js/features/settings/components/account-info-section'
 import { setDefaultMeta, defaultSetupMocks } from './helpers/account-info'
 import { UserProvider } from '../../js/shared/context/user-context'
+import getMeta from '@/utils/meta'
 
 export const Success = args => {
   setDefaultMeta()
@@ -28,7 +29,7 @@ export const ReadOnly = args => {
 
 export const NoEmailInput = args => {
   setDefaultMeta()
-  window.metaAttributesCache.set('ol-ExposedSettings', {
+  Object.assign(getMeta('ol-ExposedSettings'), {
     hasAffiliationsFeature: true,
   })
   useFetchMock(defaultSetupMocks)

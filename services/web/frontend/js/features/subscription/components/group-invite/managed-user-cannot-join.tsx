@@ -6,7 +6,7 @@ export default function ManagedUserCannotJoin() {
   const { t } = useTranslation()
   const currentManagedUserAdminEmail = getMeta(
     'ol-currentManagedUserAdminEmail'
-  ) as string
+  )
 
   return (
     <Notification

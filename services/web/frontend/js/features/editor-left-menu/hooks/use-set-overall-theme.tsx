@@ -5,6 +5,7 @@ import type { OverallThemeMeta } from '../../../../../types/project-settings'
 import { saveUserSettings } from '../utils/api'
 import { UserSettings } from '../../../../../types/user-settings'
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
+import getMeta from '@/utils/meta'
 
 export default function useSetOverallTheme() {
   const [chosenTheme, setChosenTheme] = useState<OverallThemeMeta | null>(null)
@@ -56,7 +57,7 @@ export default function useSetOverallTheme() {
     (newOverallTheme: UserSettings['overallTheme']) => {
       if (overallTheme !== newOverallTheme) {
         const chosenTheme = _.find(
-          window.overallThemes,
+          getMeta('ol-overallThemes'),
           theme => theme.val === newOverallTheme
         )
 

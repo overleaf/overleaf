@@ -8,7 +8,7 @@ import { postJSON } from '../../../../infrastructure/fetch-json'
 function PersonalSubscriptionRecurlySyncEmail() {
   const { t } = useTranslation()
   const { personalSubscription } = useSubscriptionDashboardContext()
-  const userEmail = getMeta('ol-usersEmail') as string
+  const userEmail = getMeta('ol-usersEmail')
   const { isLoading, isSuccess, runAsync } = useAsync()
 
   const handleSubmit = (e: React.FormEvent) => {

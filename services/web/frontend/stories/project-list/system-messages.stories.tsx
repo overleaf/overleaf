@@ -18,7 +18,6 @@ export const SystemMessage = (args: any) => {
       },
     ])
   })
-  window.metaAttributesCache = new Map()
 
   return <SystemMessages {...args} />
 }
@@ -28,7 +27,6 @@ export const TranslationMessage = (args: any) => {
     fetchMock.get(/\/system\/messages/, [])
   })
 
-  window.metaAttributesCache = new Map()
   window.metaAttributesCache.set('ol-suggestedLanguage', {
     url: '/dev/null',
     lngName: 'German',

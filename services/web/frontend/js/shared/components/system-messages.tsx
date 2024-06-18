@@ -4,19 +4,14 @@ import TranslationMessage from './translation-message'
 import useAsync from '../hooks/use-async'
 import { getJSON } from '@/infrastructure/fetch-json'
 import getMeta from '../../utils/meta'
-import {
-  SystemMessage as TSystemMessage,
-  SuggestedLanguage,
-} from '../../../../types/system-message'
+import { SystemMessage as TSystemMessage } from '../../../../types/system-message'
 import { debugConsole } from '@/utils/debugging'
 
 const MESSAGE_POLL_INTERVAL = 15 * 60 * 1000
 
 function SystemMessages() {
   const { data: messages, runAsync } = useAsync<TSystemMessage[]>()
-  const suggestedLanguage = getMeta('ol-suggestedLanguage', undefined) as
-    | SuggestedLanguage
-    | undefined
+  const suggestedLanguage = getMeta('ol-suggestedLanguage')
 
   useEffect(() => {
     const pollMessages = () => {

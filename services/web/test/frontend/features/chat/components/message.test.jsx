@@ -12,12 +12,11 @@ describe('<Message />', function () {
   }
 
   beforeEach(function () {
-    window.user = currentUser
+    window.metaAttributesCache.set('ol-user', currentUser)
     stubMathJax()
   })
 
   afterEach(function () {
-    delete window.user
     tearDownMathJaxStubs()
   })
 

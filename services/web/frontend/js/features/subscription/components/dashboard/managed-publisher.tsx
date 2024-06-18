@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { Publisher } from './managed-publishers'
 import { RowLink } from './row-link'
+import { Publisher } from '../../../../../../types/subscription/dashboard/publisher'
 
 type ManagedPublisherProps = {
   publisher: Publisher

@@ -3,17 +3,16 @@ import { fireEvent, screen, render, waitFor } from '@testing-library/react'
 import fetchMock from 'fetch-mock'
 
 import LeaveModal from '../../../../../../frontend/js/features/settings/components/leave/modal'
+import getMeta from '@/utils/meta'
 
 describe('<LeaveModal />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-usersEmail', 'foo@bar.com')
-    window.metaAttributesCache.set('ol-ExposedSettings', { isOverleaf: true })
+    Object.assign(getMeta('ol-ExposedSettings'), { isOverleaf: true })
     window.metaAttributesCache.set('ol-hasPassword', true)
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 

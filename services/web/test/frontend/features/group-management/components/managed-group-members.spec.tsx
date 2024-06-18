@@ -65,7 +65,6 @@ function mountGroupMembersProvider() {
 describe('group members, with managed users', function () {
   beforeEach(function () {
     cy.window().then(win => {
-      win.metaAttributesCache = new Map()
       win.metaAttributesCache.set('ol-users', [
         JOHN_DOE,
         BOBBY_LAPOINTE,
@@ -239,7 +238,6 @@ describe('group members, with managed users', function () {
 describe('Group members when group SSO is enabled', function () {
   beforeEach(function () {
     cy.window().then(win => {
-      win.metaAttributesCache = new Map()
       win.metaAttributesCache.set('ol-users', [
         JOHN_DOE,
         BOBBY_LAPOINTE,

@@ -144,85 +144,13 @@ const initialize = () => {
     },
   }
 
-  window.user = user
-
-  window.ExposedSettings = {
-    adminEmail: 'placeholder@example.com',
-    appName: 'Overleaf',
-    cookieDomain: '.overleaf.stories',
-    dropboxAppName: 'Overleaf-Stories',
-    emailConfirmationDisabled: false,
-    enableSubscriptions: true,
-    hasAffiliationsFeature: false,
-    hasLinkUrlFeature: true,
-    hasLinkedProjectFileFeature: true,
-    hasLinkedProjectOutputFileFeature: true,
-    hasSamlFeature: true,
-    ieeeBrandId: 15,
-    isOverleaf: true,
-    labsEnabled: true,
-    maxEntitiesPerProject: 10,
-    maxUploadSize: 5 * 1024 * 1024,
-    recaptchaDisabled: {
-      invite: true,
-      login: true,
-      passwordReset: true,
-      register: true,
-      addEmail: true,
-    },
-    sentryAllowedOriginRegex: '',
-    siteUrl: 'http://localhost',
-    templateLinks: [],
-    textExtensions: [
-      'tex',
-      'latex',
-      'sty',
-      'cls',
-      'bst',
-      'bib',
-      'bibtex',
-      'txt',
-      'tikz',
-      'mtx',
-      'rtex',
-      'md',
-      'asy',
-      'lbx',
-      'bbx',
-      'cbx',
-      'm',
-      'lco',
-      'dtx',
-      'ins',
-      'ist',
-      'def',
-      'clo',
-      'ldf',
-      'rmd',
-      'lua',
-      'gv',
-      'mf',
-      'lhs',
-      'mk',
-      'xmpdata',
-      'cfg',
-      'rnw',
-      'ltx',
-      'inc',
-    ],
-    editableFilenames: ['latexmkrc', '.latexmkrc', 'makefile', 'gnumakefile'],
-    validRootDocExtensions: ['tex', 'Rtex', 'ltx', 'Rnw'],
-    fileIgnorePattern:
-      '**/{{__MACOSX,.git,.texpadtmp,.R}{,/**},.!(latexmkrc),*.{dvi,aux,log,toc,out,pdfsync,synctex,synctex(busy),fdb_latexmk,fls,nlo,ind,glo,gls,glg,bbl,blg,doc,docx,gz,swp}}',
-    projectUploadTimeout: 12000,
-  }
-
-  window.project_id = project._id
-
-  window.metaAttributesCache = window.metaAttributesCache ?? new Map()
+  // window.metaAttributesCache is reset in preview.tsx
   window.metaAttributesCache.set('ol-user', user)
-
-  window.gitBridgePublicBaseUrl = 'https://git.stories.com'
+  window.metaAttributesCache.set('ol-project_id', project._id)
+  window.metaAttributesCache.set(
+    'ol-gitBridgePublicBaseUrl',
+    'https://git.stories.com'
+  )
 
   window._ide = ide
 }
@@ -256,10 +184,7 @@ export const ScopeDecorator = (
   }, [])
 
   // set values on window.metaAttributesCache (created in initialize, above)
-  useMeta({
-    'ol-ExposedSettings': window.ExposedSettings,
-    ...meta,
-  })
+  useMeta(meta)
 
   const Providers = {
     ChatProvider,
@@ -367,10 +292,11 @@ const ConnectionProvider: FC = ({ children }) => {
 }
 
 const IdeReactProvider: FC = ({ children }) => {
+  const projectId = 'project-123'
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
   const [ideReactContextValue] = useState(() => ({
-    projectId: 'project-123',
+    projectId,
     eventEmitter: new IdeEventEmitter(),
     eventLog: new EventLog(),
     startedFreeTrial,
@@ -381,7 +307,7 @@ const IdeReactProvider: FC = ({ children }) => {
 
   const [ideContextValue] = useState(() => {
     const ide = window._ide
-    const scopeStore = createReactScopeValueStore(window.project_id)
+    const scopeStore = createReactScopeValueStore(projectId)
     for (const [key, value] of Object.entries(ide.$scope)) {
       scopeStore.set(key, value)
     }

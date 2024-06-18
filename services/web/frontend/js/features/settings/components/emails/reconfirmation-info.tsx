@@ -14,7 +14,6 @@ import { debugConsole } from '@/utils/debugging'
 import { ssoAvailableForInstitution } from '@/features/settings/utils/sso'
 import { Trans, useTranslation } from 'react-i18next'
 import useAsync from '@/shared/hooks/use-async'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { useLocation } from '@/shared/hooks/use-location'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import classnames from 'classnames'
@@ -24,13 +23,11 @@ type ReconfirmationInfoProps = {
 }
 
 function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
-  const reconfirmationRemoveEmail = getMeta(
-    'ol-reconfirmationRemoveEmail'
-  ) as string
-  const reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML') as string
+  const reconfirmationRemoveEmail = getMeta('ol-reconfirmationRemoveEmail')
+  const reconfirmedViaSAML = getMeta('ol-reconfirmedViaSAML')
 
   const { t } = useTranslation()
-  const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { samlInitPath } = getMeta('ol-ExposedSettings')
   const { error, isLoading, isError, isSuccess, runAsync } = useAsync()
   const { state, setLoading: setUserEmailsContextLoading } =
     useUserEmailsContext()

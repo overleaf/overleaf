@@ -10,10 +10,10 @@ const components = importOverleafModules('editorLeftMenuSync') as {
 
 export default function SyncMenu() {
   const { t } = useTranslation()
-  const anonymous = getMeta('ol-anonymous') as boolean | undefined
-  const gitBridgeEnabled = getMeta('ol-gitBridgeEnabled', false) as boolean
+  const anonymous = getMeta('ol-anonymous')
+  const gitBridgeEnabled = getMeta('ol-gitBridgeEnabled')
 
-  if (anonymous === true || anonymous === undefined) {
+  if (anonymous) {
     return null
   }
 

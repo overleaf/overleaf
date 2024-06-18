@@ -9,7 +9,6 @@ import {
   postJSON,
 } from '../../../../../../infrastructure/fetch-json'
 import { UserEmailData } from '../../../../../../../../types/user-email'
-import { ExposedSettings } from '../../../../../../../../types/exposed-settings'
 import { Institution } from '../../../../../../../../types/institution'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
@@ -24,11 +23,8 @@ function ReconfirmAffiliation({
   institution,
 }: ReconfirmAffiliationProps) {
   const { t } = useTranslation()
-  const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const { samlInitPath } = getMeta('ol-ExposedSettings')
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const { error, isLoading, isError, isSuccess, runAsync } = useAsync()
   const [hasSent, setHasSent] = useState(false)
   const [isPending, setIsPending] = useState(false)

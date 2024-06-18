@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
 import { insertFigure } from '../../extensions/toolbar/commands'
+import getMeta from '@/utils/meta'
 
 export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
   const { t } = useTranslation()
@@ -26,7 +27,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
     hasLinkedProjectFileFeature,
     hasLinkedProjectOutputFileFeature,
     hasLinkUrlFeature,
-  } = window.ExposedSettings
+  } = getMeta('ol-ExposedSettings')
   return (
     <ToolbarButtonMenu
       id="toolbar-figure"

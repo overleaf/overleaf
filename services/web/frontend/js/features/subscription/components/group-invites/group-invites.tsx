@@ -4,11 +4,10 @@ import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import { useLocation } from '@/shared/hooks/use-location'
 import GroupInvitesItem from './group-invites-item'
-import type { TeamInvite } from '../../../../../../types/team-invite'
 
 function GroupInvites() {
   const { t } = useTranslation()
-  const teamInvites: TeamInvite[] = getMeta('ol-teamInvites')
+  const teamInvites = getMeta('ol-teamInvites')
   const location = useLocation()
 
   useEffect(() => {

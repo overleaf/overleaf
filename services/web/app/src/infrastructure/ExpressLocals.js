@@ -18,6 +18,10 @@ const {
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
 } = require('./GracefulShutdown')
+const { expressify } = require('@overleaf/promise-utils')
+const {
+  loadAssignmentsInLocals,
+} = require('../Features/SplitTests/SplitTestMiddleware')
 
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
@@ -76,6 +80,10 @@ function getWebpackAssets(entrypoint, section) {
 }
 
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
+  webRouter.use(
+    expressify(loadAssignmentsInLocals(['remove-window-attributes']))
+  )
+
   if (process.env.NODE_ENV === 'development') {
     // In the dev-env, delay requests until we fetched the manifest once.
     webRouter.use(function (req, res, next) {

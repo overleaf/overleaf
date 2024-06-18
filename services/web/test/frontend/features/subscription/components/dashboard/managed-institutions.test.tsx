@@ -1,11 +1,10 @@
 import { expect } from 'chai'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import ManagedInstitutions, {
-  Institution,
-} from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-institutions'
+import ManagedInstitutions from '../../../../../../frontend/js/features/subscription/components/dashboard/managed-institutions'
 import { SubscriptionDashboardProvider } from '../../../../../../frontend/js/features/subscription/context/subscription-dashboard-context'
 import fetchMock from 'fetch-mock'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { ManagedInstitution } from '../../../../../../types/subscription/dashboard/managed-institution'
 
 const userId = 'fff999fff999'
 const institution1 = {
@@ -26,21 +25,18 @@ const institution2 = {
   },
   name: 'Inst 2',
 }
-const managedInstitutions: Institution[] = [institution1, institution2]
+const managedInstitutions: ManagedInstitution[] = [institution1, institution2]
 
 describe('<ManagedInstitutions />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set(
       'ol-managedInstitutions',
       managedInstitutions
     )
-    window.user_id = userId
+    window.metaAttributesCache.set('ol-user_id', userId)
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
-    delete window.user_id
     fetchMock.reset()
   })
 

@@ -52,14 +52,14 @@ export function GroupMembersProvider({ children }: GroupMembersProviderProps) {
     selectAllNonManagedUsers,
     selectUser,
     unselectUser,
-  } = useUserSelection(getMeta('ol-users', []))
+  } = useUserSelection(getMeta('ol-users') || [])
 
   const [inviteUserInflightCount, setInviteUserInflightCount] = useState(0)
   const [inviteError, setInviteError] = useState<APIError>()
   const [removeMemberInflightCount, setRemoveMemberInflightCount] = useState(0)
   const [removeMemberError, setRemoveMemberError] = useState<APIError>()
 
-  const groupId: string = getMeta('ol-groupId')
+  const groupId = getMeta('ol-groupId')
 
   const paths = useMemo(
     () => ({

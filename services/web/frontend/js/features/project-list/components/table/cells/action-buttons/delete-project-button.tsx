@@ -7,6 +7,7 @@ import DeleteProjectModal from '../../../modals/delete-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { deleteProject } from '../../../../util/api'
 import { useProjectListContext } from '../../../../context/project-list-context'
+import getMeta from '@/utils/meta'
 
 type DeleteProjectButtonProps = {
   project: Project
@@ -31,7 +32,7 @@ function DeleteProjectButton({ project, children }: DeleteProjectButtonProps) {
   }, [isMounted])
 
   const isOwner = useMemo(() => {
-    return project.owner && window.user_id === project.owner.id
+    return project.owner && getMeta('ol-user_id') === project.owner.id
   }, [project])
 
   const handleDeleteProject = useCallback(async () => {

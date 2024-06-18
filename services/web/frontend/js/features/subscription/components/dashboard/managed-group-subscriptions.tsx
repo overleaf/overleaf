@@ -10,7 +10,7 @@ function ManagedGroupAdministrator({
 }: {
   subscription: ManagedGroupSubscription
 }) {
-  const usersEmail = getMeta('ol-usersEmail') as string
+  const usersEmail = getMeta('ol-usersEmail')
   const values = {
     planName: subscription.planLevelName,
     groupName: subscription.teamName || '',
@@ -90,10 +90,7 @@ export default function ManagedGroupSubscriptions() {
     return null
   }
 
-  const groupSettingsEnabledFor = getMeta(
-    'ol-groupSettingsEnabledFor',
-    []
-  ) as string[]
+  const groupSettingsEnabledFor = getMeta('ol-groupSettingsEnabledFor') || []
 
   return (
     <>

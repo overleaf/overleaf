@@ -56,8 +56,7 @@ export const SectionSSOErrors = args => {
     fetchMock.post('/user/oauth-unlink', 500, { delay: MOCK_DELAY })
   )
   setDefaultMeta()
-  window.metaAttributesCache.set('integrationLinkingWidgets', [])
-  window.metaAttributesCache.set('referenceLinkingWidgets', [])
+  window.metaAttributesCache.set('ol-hideLinkingWidgets', true)
   window.metaAttributesCache.set(
     'ol-ssoErrorMessage',
     'Account already linked to another Overleaf user'

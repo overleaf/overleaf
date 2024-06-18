@@ -2,14 +2,12 @@ import { useTranslation } from 'react-i18next'
 import { Button } from 'react-bootstrap'
 import { useProjectListContext } from '../context/project-list-context'
 import getMeta from '../../../utils/meta'
-import { Affiliation } from '../../../../../types/affiliation'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
 import classNames from 'classnames'
 
 export function useAddAffiliation() {
   const { totalProjectsCount } = useProjectListContext()
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
-  const userAffiliations = getMeta('ol-userAffiliations', []) as Affiliation[]
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
+  const userAffiliations = getMeta('ol-userAffiliations') || []
 
   return {
     show: isOverleaf && totalProjectsCount > 0 && !userAffiliations.length,

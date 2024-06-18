@@ -4,9 +4,9 @@ import INRBanner from './ads/inr-banner'
 import LATAMBanner from './ads/latam-banner'
 
 function GeoBanners() {
-  const showInrGeoBanner = getMeta('ol-showInrGeoBanner', false)
-  const showBrlGeoBanner = getMeta('ol-showBrlGeoBanner', false)
-  const showLATAMBanner = getMeta('ol-showLATAMBanner', false)
+  const showInrGeoBanner = getMeta('ol-showInrGeoBanner')
+  const showBrlGeoBanner = getMeta('ol-showBrlGeoBanner')
+  const showLATAMBanner = getMeta('ol-showLATAMBanner')
   return (
     <>
       {showBrlGeoBanner && <BRLBanner />}

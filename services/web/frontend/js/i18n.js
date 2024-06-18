@@ -1,7 +1,8 @@
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
+import getMeta from '@/utils/meta'
 
-const LANG = window.i18n.currentLangCode
+const LANG = getMeta('ol-i18n').currentLangCode
 
 // Since we are rendering React from Angular, the initialisation is
 // synchronous on page load (but hidden behind the loading screen). This
@@ -44,7 +45,7 @@ i18n.use(initReactI18next).init({
     escapeValue: false,
 
     defaultVariables: {
-      appName: window.ExposedSettings.appName,
+      appName: getMeta('ol-ExposedSettings').appName,
     },
   },
 })

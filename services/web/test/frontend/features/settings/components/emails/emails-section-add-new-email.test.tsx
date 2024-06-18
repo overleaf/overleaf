@@ -11,6 +11,7 @@ import fetchMock from 'fetch-mock'
 import { UserEmailData } from '../../../../../../types/user-email'
 import { Affiliation } from '../../../../../../types/affiliation'
 import withMarkup from '../../../../helpers/with-markup'
+import getMeta from '@/utils/meta'
 
 const userEmailData: UserEmailData & { affiliation: Affiliation } = {
   affiliation: {
@@ -60,7 +61,7 @@ function resetFetchMock() {
 
 describe('<EmailsSection />', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
       hasSamlFeature: true,
       samlInitPath: 'saml/init',
@@ -69,7 +70,6 @@ describe('<EmailsSection />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     resetFetchMock()
   })
 

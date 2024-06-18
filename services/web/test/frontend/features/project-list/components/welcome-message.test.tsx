@@ -1,21 +1,15 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import WelcomeMessage from '../../../../../frontend/js/features/project-list/components/welcome-message'
 import { expect } from 'chai'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
+import getMeta from '@/utils/meta'
 
 describe('<WelcomeMessage />', function () {
-  const exposedSettings: Partial<ExposedSettings> = {}
-
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
-    window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
-    exposedSettings.isOverleaf = true
-    exposedSettings.wikiEnabled = true
-    exposedSettings.templatesEnabled = true
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
+    Object.assign(getMeta('ol-ExposedSettings'), {
+      isOverleaf: true,
+      wikiEnabled: true,
+      templatesEnabled: true,
+    })
   })
 
   it('renders welcome page correctly', function () {
@@ -115,7 +109,7 @@ describe('<WelcomeMessage />', function () {
 
   describe('when not in SaaS', function () {
     beforeEach(function () {
-      exposedSettings.isOverleaf = false
+      getMeta('ol-ExposedSettings').isOverleaf = false
     })
 
     it('renders welcome page correctly', function () {
@@ -143,14 +137,14 @@ describe('<WelcomeMessage />', function () {
     })
 
     it('does not render the tutorial link when the learn wiki is not configured', function () {
-      exposedSettings.wikiEnabled = false
+      getMeta('ol-ExposedSettings').wikiEnabled = false
       render(<WelcomeMessage />)
 
       expect(screen.queryByText('Learn LaTeX with a tutorial')).to.not.exist
     })
 
     it('does not render the templates link when templates are not configured', function () {
-      exposedSettings.templatesEnabled = false
+      getMeta('ol-ExposedSettings').templatesEnabled = false
       render(<WelcomeMessage />)
 
       expect(screen.queryByText('Browse templates')).to.not.exist

@@ -4,10 +4,9 @@ import Notification from '@/shared/components/notification'
 
 export default function ManagedAccountAlert() {
   const { t } = useTranslation()
-  const isManaged = getMeta('ol-isManagedAccount', false)
-  const currentManagedUserAdminEmail: string = getMeta(
-    'ol-currentManagedUserAdminEmail',
-    ''
+  const isManaged = getMeta('ol-isManagedAccount')
+  const currentManagedUserAdminEmail = getMeta(
+    'ol-currentManagedUserAdminEmail'
   )
 
   if (!isManaged) {

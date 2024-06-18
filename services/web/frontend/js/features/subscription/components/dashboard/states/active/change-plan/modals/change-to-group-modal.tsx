@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
-import { GroupPlans } from '../../../../../../../../../../types/subscription/dashboard/group-plans'
 import { Subscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
 import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
 import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
@@ -125,8 +124,8 @@ export function ChangeToGroupModal() {
     setGroupPlanToChangeToSize,
     setGroupPlanToChangeToUsage,
   } = useSubscriptionDashboardContext()
-  const groupPlans: GroupPlans = getMeta('ol-groupPlans')
-  const personalSubscription: Subscription = getMeta('ol-subscription')
+  const groupPlans = getMeta('ol-groupPlans')
+  const personalSubscription = getMeta('ol-subscription') as Subscription
   const [error, setError] = useState(false)
   const [inflight, setInflight] = useState(false)
   const location = useLocation()

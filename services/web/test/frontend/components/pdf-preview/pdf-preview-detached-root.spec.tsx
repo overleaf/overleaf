@@ -1,12 +1,9 @@
 import PdfPreviewDetachedRoot from '../../../../frontend/js/features/pdf-preview/components/pdf-preview-detached-root'
-import { User } from '../../../../types/user'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 
 describe('<PdfPreviewDetachedRoot/>', function () {
   beforeEach(function () {
-    window.user = { id: 'user1' } as User
-
-    window.metaAttributesCache.set('ol-user', window.user)
+    window.metaAttributesCache.set('ol-user', { id: 'user1' })
     window.metaAttributesCache.set('ol-project_id', 'project1')
     window.metaAttributesCache.set('ol-detachRole', 'detached')
     window.metaAttributesCache.set('ol-projectName', 'Project Name')

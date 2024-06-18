@@ -22,7 +22,6 @@ describe('<ActionsMenu />', function () {
 
   afterEach(function () {
     fetchMock.reset()
-    window.metaAttributesCache = new Map()
   })
 
   it('shows correct menu for non-anonymous users', async function () {

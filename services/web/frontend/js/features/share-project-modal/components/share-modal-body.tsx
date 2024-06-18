@@ -9,6 +9,7 @@ import { useEditorContext } from '../../../shared/context/editor-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useMemo } from 'react'
 import RecaptchaConditions from '../../../shared/components/recaptcha-conditions'
+import getMeta from '@/utils/meta'
 
 export default function ShareModalBody() {
   const { members, invites, features } = useProjectContext()
@@ -56,7 +57,7 @@ export default function ShareModalBody() {
         <SendInvitesNotice />
       )}
 
-      {!window.ExposedSettings.recaptchaDisabled?.invite && (
+      {!getMeta('ol-ExposedSettings').recaptchaDisabled?.invite && (
         <RecaptchaConditions />
       )}
     </>

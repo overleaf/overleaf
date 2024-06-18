@@ -4,7 +4,6 @@ import { formatCurrencyLocalized } from '@/shared/utils/currency'
 
 describe('group-plan-pricing', function () {
   beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
     window.metaAttributesCache.set('ol-groupPlans', {
       enterprise: {
         professional: {
@@ -31,10 +30,7 @@ describe('group-plan-pricing', function () {
       DKK: 'kr',
       USD: '$',
     })
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
+    window.metaAttributesCache.set('ol-i18n', { currentLangCode: 'en' })
   })
 
   describe('createLocalizedGroupPlanPrice', function () {

@@ -2,7 +2,6 @@ import { useState, Dispatch, SetStateAction } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
 import getMeta from '../../../../utils/meta'
 import LeaveModalForm, { LeaveModalFormProps } from './modal-form'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import {
   OLModalBody,
@@ -23,8 +22,8 @@ function LeaveModalContentBlock({
   setIsFormValid,
 }: LeaveModalFormProps) {
   const { t } = useTranslation()
-  const { isOverleaf } = getMeta('ol-ExposedSettings') as ExposedSettings
-  const hasPassword = getMeta('ol-hasPassword') as boolean
+  const { isOverleaf } = getMeta('ol-ExposedSettings')
+  const hasPassword = getMeta('ol-hasPassword')
 
   if (isOverleaf && !hasPassword) {
     return (

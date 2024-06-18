@@ -18,7 +18,7 @@ describe('<DeleteProjectButton />', function () {
   })
 
   it('renders tooltip for button', function () {
-    window.user_id = trashedProject?.owner?.id
+    window.metaAttributesCache.set('ol-user_id', trashedProject.owner?.id)
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={trashedProject} />
     )
@@ -28,7 +28,7 @@ describe('<DeleteProjectButton />', function () {
   })
 
   it('does not render button when trashed and not owner', function () {
-    window.user_id = '123abc'
+    window.metaAttributesCache.set('ol-user_id', '123abc')
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={trashedAndNotOwnedProject} />
     )
@@ -44,7 +44,7 @@ describe('<DeleteProjectButton />', function () {
   })
 
   it('opens the modal and deletes the project', async function () {
-    window.user_id = trashedProject?.owner?.id
+    window.metaAttributesCache.set('ol-user_id', trashedProject.owner?.id)
     const project = Object.assign({}, trashedProject)
     const deleteProjectMock = fetchMock.delete(
       `express:/project/:projectId`,

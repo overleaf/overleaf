@@ -4,6 +4,7 @@
 // - throw errors on non-ok response
 // - parse JSON response body, unless response is empty
 import OError from '@overleaf/o-error'
+import getMeta from '@/utils/meta'
 
 type FetchPath = string
 // Custom config types are merged with `fetch`s RequestInit type
@@ -116,7 +117,7 @@ function fetchJSON<T>(
     headers: {
       ...headers,
       'Content-Type': 'application/json',
-      'X-Csrf-Token': window.csrfToken,
+      'X-Csrf-Token': getMeta('ol-csrfToken'),
       Accept: 'application/json',
     },
     credentials,

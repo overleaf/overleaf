@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { DomainInfo } from './input'
-import { ExposedSettings } from '../../../../../../../types/exposed-settings'
 import getMeta from '../../../../../utils/meta'
 import { useLocation } from '../../../../../shared/hooks/use-location'
 import OLButton from '@/features/ui/components/ol/ol-button'
@@ -12,7 +11,7 @@ type SSOLinkingInfoProps = {
 }
 
 function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
-  const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { samlInitPath } = getMeta('ol-ExposedSettings')
   const { t } = useTranslation()
   const location = useLocation()
 

@@ -14,7 +14,6 @@ export const Survey = (args: any) => {
 
 export const UndefinedSurvey = (args: any) => {
   localStorage.clear()
-  window.metaAttributesCache = new Map()
 
   return <SurveyWidget {...args} />
 }

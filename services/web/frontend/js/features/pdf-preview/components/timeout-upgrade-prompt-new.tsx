@@ -7,6 +7,7 @@ import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-err
 import { Button } from 'react-bootstrap'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import getMeta from '@/utils/meta'
 
 function TimeoutUpgradePromptNew() {
   const {
@@ -29,7 +30,7 @@ function TimeoutUpgradePromptNew() {
   return (
     <>
       <CompileTimeout isProjectOwner={isProjectOwner} />
-      {window.ExposedSettings.enableSubscriptions && (
+      {getMeta('ol-ExposedSettings').enableSubscriptions && (
         <PreventTimeoutHelpMessage
           handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
           lastCompileOptions={lastCompileOptions}
@@ -55,7 +56,7 @@ const CompileTimeout = memo(function CompileTimeout({
     <PdfLogEntry
       headerTitle={t('your_compile_timed_out')}
       formattedContent={
-        window.ExposedSettings.enableSubscriptions && (
+        getMeta('ol-ExposedSettings').enableSubscriptions && (
           <>
             <p>
               {isProjectOwner

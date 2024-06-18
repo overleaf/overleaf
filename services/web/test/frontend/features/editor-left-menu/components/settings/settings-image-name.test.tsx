@@ -23,7 +23,6 @@ describe('<SettingsImageName />', function () {
 
   afterEach(function () {
     fetchMock.reset()
-    window.metaAttributesCache = new Map()
   })
 
   it('shows correct menu', async function () {

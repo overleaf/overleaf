@@ -1,3 +1,5 @@
+import getMeta from '@/utils/meta'
+
 const MOCK_DELAY = 1000
 
 const fakeUsersData = [
@@ -195,9 +197,7 @@ export function errorsMocks(fetchMock) {
 }
 
 export function setDefaultMeta() {
-  window.metaAttributesCache = window.metaAttributesCache || new Map()
-  window.metaAttributesCache.set('ol-ExposedSettings', {
-    ...window.metaAttributesCache.get('ol-ExposedSettings'),
+  Object.assign(getMeta('ol-ExposedSettings'), {
     hasAffiliationsFeature: true,
     hasSamlFeature: true,
     samlInitPath: 'saml/init',

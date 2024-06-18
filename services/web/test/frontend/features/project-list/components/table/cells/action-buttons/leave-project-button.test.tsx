@@ -28,7 +28,7 @@ describe('<LeaveProjectButtton />', function () {
   })
 
   it('does not render button when owner', function () {
-    window.user_id = trashedProject?.owner?.id
+    window.metaAttributesCache.set('ol-user_id', trashedProject.owner?.id)
     renderWithProjectListContext(
       <LeaveProjectButtonTooltip project={trashedProject} />
     )

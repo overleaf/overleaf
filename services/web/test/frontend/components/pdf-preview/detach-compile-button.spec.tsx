@@ -12,7 +12,7 @@ describe('<DetachCompileButtonWrapper />', function () {
     cy.interceptCompile()
 
     cy.window().then(win => {
-      win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
+      win.metaAttributesCache.set('ol-detachRole', 'detacher')
     })
 
     const scope = mockScope()
@@ -32,7 +32,7 @@ describe('<DetachCompileButtonWrapper />', function () {
     cy.interceptCompile()
 
     cy.window().then(win => {
-      win.metaAttributesCache = new Map([['ol-detachRole', 'detacher']])
+      win.metaAttributesCache.set('ol-detachRole', 'detacher')
     })
 
     const scope = mockScope()
@@ -59,7 +59,7 @@ describe('<DetachCompileButtonWrapper />', function () {
     cy.interceptCompile()
 
     cy.window().then(win => {
-      win.metaAttributesCache = new Map([['ol-detachRole', 'detached']])
+      win.metaAttributesCache.set('ol-detachRole', 'detached')
     })
 
     const scope = mockScope()

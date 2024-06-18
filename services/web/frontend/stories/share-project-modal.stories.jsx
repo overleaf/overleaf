@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import ShareProjectModal from '../js/features/share-project-modal/components/share-project-modal'
 import useFetchMock from './hooks/use-fetch-mock'
 import { useScope } from './hooks/use-scope'
@@ -68,17 +67,10 @@ export const NonProjectOwnerLinkSharingOn = args => {
 }
 
 export const RestrictedTokenMember = args => {
-  // Override isRestrictedTokenMember to be true, then revert it back to the
-  // original value on unmount
+  // Override isRestrictedTokenMember to be true
   // Currently this is necessary because the context value is set from window,
   // however in the future we should change this to set via props
-  useEffect(() => {
-    const originalIsRestrictedTokenMember = window.isRestrictedTokenMember
-    window.isRestrictedTokenMember = true
-    return () => {
-      window.isRestrictedTokenMember = originalIsRestrictedTokenMember
-    }
-  })
+  window.metaAttributesCache.set('ol-isRestrictedTokenMember', true)
 
   useScope({
     project: {
@@ -143,7 +135,7 @@ export default {
       ...project,
       owner: {
         ...project.owner,
-        _id: window.user.id,
+        _id: 'story-user',
       },
     },
   },

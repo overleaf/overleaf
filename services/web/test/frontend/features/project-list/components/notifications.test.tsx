@@ -44,6 +44,7 @@ import {
   groupSubscription,
   individualSubscription,
 } from '../fixtures/user-subscriptions'
+import getMeta from '@/utils/meta'
 
 const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
@@ -62,7 +63,6 @@ describe('<UserNotifications />', function () {
   }
 
   beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
     fetchMock.reset()
 
     // at least one project is required to show some notifications
@@ -77,18 +77,16 @@ describe('<UserNotifications />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 
   describe('<Common>', function () {
     beforeEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
-      window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
+      window.metaAttributesCache.set('ol-user', {})
+      Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
     })
 
     afterEach(function () {
-      window.metaAttributesCache = new Map()
       fetchMock.reset()
     })
 
@@ -462,8 +460,7 @@ describe('<UserNotifications />', function () {
 
   describe('<Institution>', function () {
     beforeEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
-      window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
+      Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
       fetchMock.reset()
     })
 
@@ -593,7 +590,7 @@ describe('<UserNotifications />', function () {
 
   describe('<ConfirmEmail/>', function () {
     beforeEach(async function () {
-      window.metaAttributesCache.set('ol-ExposedSettings', {
+      Object.assign(getMeta('ol-ExposedSettings'), {
         emailConfirmationDisabled: false,
       })
       window.metaAttributesCache.set('ol-userEmails', [unconfirmedUserData])
@@ -694,8 +691,7 @@ describe('<UserNotifications />', function () {
     let assignStub: sinon.SinonStub
 
     beforeEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
-      window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
+      Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
       assignStub = sinon.stub()
       this.locationStub = sinon.stub(useLocationModule, 'useLocation').returns({
         assign: assignStub,
@@ -706,7 +702,6 @@ describe('<UserNotifications />', function () {
     })
 
     afterEach(function () {
-      window.metaAttributesCache = new Map()
       this.locationStub.restore()
       fetchMock.reset()
     })
@@ -789,7 +784,6 @@ describe('<UserNotifications />', function () {
 
   describe('<GroupsAndEnterpriseBanner />', function () {
     beforeEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
       localStorage.clear()
       fetchMock.reset()
 
@@ -811,7 +805,6 @@ describe('<UserNotifications />', function () {
 
     afterEach(function () {
       fetchMock.reset()
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
     })
 
     it('does not show the banner for users that are in group or are affiliated', async function () {
@@ -885,7 +878,6 @@ describe('<UserNotifications />', function () {
 
       afterEach(function () {
         fetchMock.reset()
-        window.metaAttributesCache = window.metaAttributesCache || new Map()
       })
 
       after(function () {
@@ -930,8 +922,7 @@ describe('<UserNotifications />', function () {
 
   describe('<WritefullPromoBanner>', function () {
     beforeEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
-      window.metaAttributesCache.set('ol-ExposedSettings', exposedSettings)
+      Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
       window.metaAttributesCache.set('ol-showWritefullPromoBanner', true)
 
       // The older banner is only shown to Chrome users
@@ -939,10 +930,6 @@ describe('<UserNotifications />', function () {
       navigator.userAgentData = { brands: [{ brand: 'Chromium' }] }
 
       localStorage.clear()
-    })
-
-    afterEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
     })
 
     describe('when the writefull integration is enabled', function () {
@@ -1001,14 +988,6 @@ describe('<UserNotifications />', function () {
   })
 
   describe('GroupSsoSetupSuccess', function () {
-    beforeEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
-    })
-
-    afterEach(function () {
-      window.metaAttributesCache = window.metaAttributesCache || new Map()
-    })
-
     it('shows group SSO linked notification', function () {
       window.metaAttributesCache.set('ol-groupSsoSetupSuccess', true)
       renderWithinProjectListProvider(GroupSsoSetupSuccess)

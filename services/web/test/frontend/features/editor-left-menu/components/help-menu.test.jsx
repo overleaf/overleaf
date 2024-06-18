@@ -6,7 +6,6 @@ import { renderWithEditorContext } from '../../../helpers/render-with-context'
 
 describe('<HelpMenu />', function () {
   beforeEach(function () {
-    window.metaAttributesCache = new Map()
     window.metaAttributesCache.set('ol-user', {
       email: 'sherlock@holmes.co.uk',
       first_name: 'Sherlock',
@@ -15,7 +14,6 @@ describe('<HelpMenu />', function () {
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 

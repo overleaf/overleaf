@@ -195,9 +195,6 @@ module.exports = {
         $: true,
         angular: true,
         ga: true,
-        // Injected in layout.pug
-        user_id: true,
-        ExposedSettings: true,
       },
       rules: {
         // TODO: remove once https://github.com/standard/eslint-config-standard-react/issues/68 (support eslint@8) is fixed.

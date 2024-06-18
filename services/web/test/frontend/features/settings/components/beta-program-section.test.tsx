@@ -16,10 +16,6 @@ describe('<BetaProgramSection />', function () {
     })
   })
 
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('shows link to sessions', async function () {
     renderSectionWithUserProvider()
 

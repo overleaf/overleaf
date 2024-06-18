@@ -105,10 +105,14 @@ export function EditorProviders({
   userSettings = {},
   providers = {},
 }) {
-  window.user = user || window.user
-  window.gitBridgePublicBaseUrl = 'https://git.overleaf.test'
-  window.project_id = projectId != null ? projectId : window.project_id
-  window.isRestrictedTokenMember = isRestrictedTokenMember
+  window.metaAttributesCache.set(
+    'ol-gitBridgePublicBaseUrl',
+    'https://git.overleaf.test'
+  )
+  window.metaAttributesCache.set(
+    'ol-isRestrictedTokenMember',
+    isRestrictedTokenMember
+  )
   window.metaAttributesCache.set(
     'ol-userSettings',
     merge({}, defaultUserSettings, userSettings)
@@ -116,7 +120,7 @@ export function EditorProviders({
 
   const $scope = merge(
     {
-      user: window.user,
+      user,
       editor: {
         sharejs_doc: {
           doc_id: 'test-doc',
@@ -124,7 +128,7 @@ export function EditorProviders({
         },
       },
       project: {
-        _id: window.project_id,
+        _id: projectId,
         name: PROJECT_NAME,
         owner: projectOwner,
         features,
@@ -154,6 +158,7 @@ export function EditorProviders({
 
   // Add details for useUserContext
   window.metaAttributesCache.set('ol-user', { ...user, features })
+  window.metaAttributesCache.set('ol-project_id', projectId)
   const Providers = {
     ChatProvider,
     ConnectionProvider,
@@ -263,7 +268,7 @@ const IdeReactProvider = ({ children }) => {
   const [startedFreeTrial, setStartedFreeTrial] = useState(false)
 
   const [ideReactContextValue] = useState(() => ({
-    projectId: 'project-123',
+    projectId: PROJECT_ID,
     eventEmitter: new IdeEventEmitter(),
     eventLog: new EventLog(),
     startedFreeTrial,
@@ -275,7 +280,7 @@ const IdeReactProvider = ({ children }) => {
   const [ideContextValue] = useState(() => {
     const ide = window._ide
 
-    const scopeStore = createReactScopeValueStore(window.project_id)
+    const scopeStore = createReactScopeValueStore(PROJECT_ID)
     for (const [key, value] of Object.entries(ide.$scope)) {
       // TODO: path for nested entries
       scopeStore.set(key, value)

@@ -10,6 +10,7 @@ import {
 import { UserEmailData } from '../../../../../../types/user-email'
 import { UserEmailsProvider } from '../../../../../../frontend/js/features/settings/context/user-email-context'
 import { Affiliation } from '../../../../../../types/affiliation'
+import getMeta from '@/utils/meta'
 
 function renderEmailsRow(data: UserEmailData) {
   return render(
@@ -28,8 +29,7 @@ function getByTextContent(text: string) {
 
 describe('<EmailsRow/>', function () {
   beforeEach(function () {
-    window.metaAttributesCache = window.metaAttributesCache || new Map()
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       samlInitPath: '/saml',
       hasSamlBeta: true,
     })

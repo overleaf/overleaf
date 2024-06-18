@@ -5,10 +5,6 @@ import { renderWithSubscriptionDashContext } from '../../helpers/render-with-sub
 import { annualActiveSubscription } from '../../fixtures/subscriptions'
 
 describe('successful subscription page', function () {
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('renders the invoices link', function () {
     const adminEmail = 'foo@example.com'
     const options = {

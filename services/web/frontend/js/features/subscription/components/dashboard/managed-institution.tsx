@@ -2,9 +2,10 @@ import { useCallback, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { postJSON } from '../../../../infrastructure/fetch-json'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import { Institution } from './managed-institutions'
+import { ManagedInstitution as Institution } from '../../../../../../types/subscription/dashboard/managed-institution'
 import { RowLink } from './row-link'
 import { debugConsole } from '@/utils/debugging'
+import getMeta from '@/utils/meta'
 
 type ManagedInstitutionProps = {
   institution: Institution
@@ -84,7 +85,7 @@ export default function ManagedInstitution({
               }
             >
               {institution.metricsEmail.optedOutUserIds.includes(
-                window.user_id!
+                getMeta('ol-user_id')!
               )
                 ? t('subscribe')
                 : t('unsubscribe')}

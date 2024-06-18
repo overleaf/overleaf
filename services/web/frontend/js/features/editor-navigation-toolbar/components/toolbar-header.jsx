@@ -14,6 +14,7 @@ import HistoryToggleButton from './history-toggle-button'
 import ShareProjectButton from './share-project-button'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import BackToEditorButton from './back-to-editor-button'
+import getMeta from '@/utils/meta'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
@@ -54,7 +55,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
         )}
         <BackToProjectsButton />
       </div>
-      {window.showUpgradePrompt && <UpgradePrompt />}
+      {getMeta('ol-showUpgradePrompt') && <UpgradePrompt />}
       <ProjectNameEditableLabel
         className="toolbar-center"
         projectName={projectName}

@@ -8,7 +8,6 @@ import Actions from './actions'
 import { institutionAlreadyLinked } from '../../utils/selectors'
 import { useUserEmailsContext } from '../../context/user-email-context'
 import getMeta from '../../../../utils/meta'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { ssoAvailableForInstitution } from '../../utils/sso'
 import ReconfirmationInfo from './reconfirmation-info'
 import { useLocation } from '../../../../shared/hooks/use-location'
@@ -61,7 +60,7 @@ type SSOAffiliationInfoProps = {
 }
 
 function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
-  const { samlInitPath } = getMeta('ol-ExposedSettings') as ExposedSettings
+  const { samlInitPath } = getMeta('ol-ExposedSettings')
   const { t } = useTranslation()
   const { state } = useUserEmailsContext()
   const location = useLocation()

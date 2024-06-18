@@ -3,14 +3,6 @@ import { ExpiredSubscription } from '../../../../../../../frontend/js/features/s
 import { pastDueExpiredSubscription } from '../../../fixtures/subscriptions'
 
 describe('<ExpiredSubscription />', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
-  afterEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   it('renders the invoices link', function () {
     render(<ExpiredSubscription subscription={pastDueExpiredSubscription} />)
 

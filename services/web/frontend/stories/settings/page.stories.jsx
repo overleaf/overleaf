@@ -23,6 +23,7 @@ import {
 } from './helpers/linking'
 import { UserProvider } from '../../js/shared/context/user-context'
 import { ScopeDecorator } from '../decorators/scope'
+import getMeta from '@/utils/meta'
 
 export const Overleaf = args => {
   setDefaultLeaveMeta()
@@ -59,13 +60,11 @@ export const ServerPro = args => {
     defaultSetupPasswordMocks(fetchMock)
   })
 
-  window.metaAttributesCache.set('ol-ExposedSettings', {
-    ...window.metaAttributesCache.get('ol-ExposedSettings'),
+  Object.assign(getMeta('ol-ExposedSettings'), {
     hasAffiliationsFeature: false,
     isOverleaf: false,
   })
-  window.metaAttributesCache.set('integrationLinkingWidgets', [])
-  window.metaAttributesCache.set('referenceLinkingWidgets', [])
+  window.metaAttributesCache.set('ol-hideLinkingWidgets', true)
   window.metaAttributesCache.delete('ol-oauthProviders')
 
   return (

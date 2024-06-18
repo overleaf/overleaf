@@ -10,7 +10,6 @@ import EmailsRow from './emails/row'
 import AddEmail from './emails/add-email'
 import Icon from '../../../shared/components/icon'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
-import { ExposedSettings } from '../../../../../types/exposed-settings'
 import { LeaversSurveyAlert } from './leavers-survey-alert'
 
 function EmailsSectionContent() {
@@ -24,9 +23,7 @@ function EmailsSectionContent() {
   const userEmails = Object.values(userEmailsData.byId)
 
   // Only show the "add email" button if the user has permission to add a secondary email
-  const hideAddSecondaryEmail = getMeta(
-    'ol-cannot-add-secondary-email'
-  ) as boolean
+  const hideAddSecondaryEmail = getMeta('ol-cannot-add-secondary-email')
 
   return (
     <>
@@ -82,9 +79,7 @@ function EmailsSectionContent() {
 }
 
 function EmailsSection() {
-  const { hasAffiliationsFeature } = getMeta(
-    'ol-ExposedSettings'
-  ) as ExposedSettings
+  const { hasAffiliationsFeature } = getMeta('ol-ExposedSettings')
   if (!hasAffiliationsFeature) {
     return null
   }

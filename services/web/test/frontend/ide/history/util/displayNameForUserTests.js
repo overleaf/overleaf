@@ -13,8 +13,9 @@ import { expect } from 'chai'
 import displayNameForUser from '../../../../../frontend/js/ide/history/util/displayNameForUser'
 
 export default describe('displayNameForUser', function () {
+  const currentUsersId = 42
   beforeEach(function () {
-    return (window.user = { id: 42 })
+    window.metaAttributesCache.set('ol-user', { id: currentUsersId })
   })
 
   it("should return 'Anonymous' with no user", function () {
@@ -24,7 +25,7 @@ export default describe('displayNameForUser', function () {
   it("should return 'you' when the user has the same id as the window", function () {
     return expect(
       displayNameForUser({
-        id: window.user.id,
+        id: currentUsersId,
         email: 'james.allen@overleaf.com',
         first_name: 'James',
         last_name: 'Allen',
@@ -35,7 +36,7 @@ export default describe('displayNameForUser', function () {
   it('should return the first_name and last_name when present', function () {
     return expect(
       displayNameForUser({
-        id: window.user.id + 1,
+        id: currentUsersId + 1,
         email: 'james.allen@overleaf.com',
         first_name: 'James',
         last_name: 'Allen',
@@ -43,10 +44,10 @@ export default describe('displayNameForUser', function () {
     ).to.equal('James Allen')
   })
 
-  it('should return only the firstAname if no last_name', function () {
+  it('should return only the first_name if no last_name', function () {
     return expect(
       displayNameForUser({
-        id: window.user.id + 1,
+        id: currentUsersId + 1,
         email: 'james.allen@overleaf.com',
         first_name: 'James',
         last_name: '',
@@ -57,7 +58,7 @@ export default describe('displayNameForUser', function () {
   it('should return the email username if there are no names', function () {
     return expect(
       displayNameForUser({
-        id: window.user.id + 1,
+        id: currentUsersId + 1,
         email: 'james.allen@overleaf.com',
         first_name: '',
         last_name: '',
@@ -68,7 +69,7 @@ export default describe('displayNameForUser', function () {
   it("should return the '?' if it has nothing", function () {
     return expect(
       displayNameForUser({
-        id: window.user.id + 1,
+        id: currentUsersId + 1,
         email: '',
         first_name: '',
         last_name: '',

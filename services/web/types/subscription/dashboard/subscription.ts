@@ -1,4 +1,4 @@
-import { CurrencyCode } from '../../../frontend/js/features/subscription/data/currency'
+import { CurrencyCode } from '../currency'
 import { Nullable } from '../../utils'
 import { Plan } from '../plan'
 import { User } from '../../user'

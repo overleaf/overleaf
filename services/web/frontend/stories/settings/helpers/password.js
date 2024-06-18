@@ -1,3 +1,5 @@
+import getMeta from '@/utils/meta'
+
 const MOCK_DELAY = 1000
 
 export function defaultSetupMocks(fetchMock) {
@@ -20,9 +22,7 @@ export function defaultSetupMocks(fetchMock) {
 }
 
 export function setDefaultMeta() {
-  window.metaAttributesCache = window.metaAttributesCache || new Map()
-  window.metaAttributesCache.set('ol-ExposedSettings', {
-    ...window.metaAttributesCache.get('ol-ExposedSettings'),
+  Object.assign(getMeta('ol-ExposedSettings'), {
     isOverleaf: true,
   })
   window.metaAttributesCache.set('ol-isExternalAuthenticationSystemUsed', false)

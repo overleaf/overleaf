@@ -15,17 +15,17 @@ import {
   professionalUserData,
   unconfirmedUserData,
 } from '../../fixtures/test-user-email-data'
+import getMeta from '@/utils/meta'
 
 describe('<EmailsSection />', function () {
   beforeEach(function () {
-    window.metaAttributesCache.set('ol-ExposedSettings', {
+    Object.assign(getMeta('ol-ExposedSettings'), {
       hasAffiliationsFeature: true,
     })
     fetchMock.reset()
   })
 
   afterEach(function () {
-    window.metaAttributesCache = new Map()
     fetchMock.reset()
   })
 

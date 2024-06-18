@@ -24,9 +24,9 @@ export default function GroupMembers() {
   } = useGroupMembersContext()
   const [emailString, setEmailString] = useState<string>('')
 
-  const groupId: string = getMeta('ol-groupId')
-  const groupName: string = getMeta('ol-groupName')
-  const groupSize: number = getMeta('ol-groupSize')
+  const groupId = getMeta('ol-groupId')
+  const groupName = getMeta('ol-groupName')
+  const groupSize = getMeta('ol-groupSize')
 
   const handleEmailsChange = useCallback(
     e => {

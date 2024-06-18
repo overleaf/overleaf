@@ -10,11 +10,7 @@ import { postJSON } from '../../../infrastructure/fetch-json'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { set, cloneDeep } from 'lodash'
 import getMeta from '../../../utils/meta'
-import type {
-  OAuthProviders,
-  OAuthProvider,
-} from '../../../../../types/oauth-providers'
-import type { ThirdPartyIds } from '../../../../../types/third-party-ids'
+import type { OAuthProvider } from '../../../../../types/oauth-providers'
 
 export type SSOSubscription = {
   providerId: string
@@ -35,8 +31,8 @@ type SSOProviderProps = {
 
 export function SSOProvider({ children }: SSOProviderProps) {
   const isMounted = useIsMounted()
-  const oauthProviders = getMeta('ol-oauthProviders', {}) as OAuthProviders
-  const thirdPartyIds = getMeta('ol-thirdPartyIds') as ThirdPartyIds
+  const oauthProviders = getMeta('ol-oauthProviders') || {}
+  const thirdPartyIds = getMeta('ol-thirdPartyIds')
 
   const [subscriptions, setSubscriptions] = useState<
     Record<string, SSOSubscription>

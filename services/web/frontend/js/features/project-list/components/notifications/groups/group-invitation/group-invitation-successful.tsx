@@ -11,10 +11,7 @@ export default function GroupInvitationSuccessfulNotification({
   hideNotification,
 }: GroupInvitationSuccessfulNotificationProps) {
   const { t } = useTranslation()
-  const newNotificationStyle = getMeta(
-    'ol-newNotificationStyle',
-    false
-  ) as boolean
+  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   return (
     <Notification

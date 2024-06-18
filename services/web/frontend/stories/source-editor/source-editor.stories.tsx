@@ -169,7 +169,7 @@ export const Bibtex = (args: any, { globals: { theme } }: any) => {
   return <SourceEditor />
 }
 
-const MAX_DOC_LENGTH = 2 * 1024 * 1024 // window.maxDocLength
+const MAX_DOC_LENGTH = 2 * 1024 * 1024 // ol-maxDocLength
 
 const mockDoc = (content: string, changes: Array<Record<string, any>> = []) => {
   const mockShareJSDoc = {

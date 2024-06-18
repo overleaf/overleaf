@@ -113,7 +113,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   const { pdfPreviewOpen } = useLayoutContext()
 
-  const { features } = useUserContext()
+  const { features, alphaProgram } = useUserContext()
 
   const { fileTreeData } = useFileTreeData()
   const { findEntityByPath } = useFileTreePathContext()
@@ -398,7 +398,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
             )
 
             // sample compile stats for real users
-            if (!window.user.alphaProgram) {
+            if (!alphaProgram) {
               if (['success', 'stopped-on-first-error'].includes(data.status)) {
                 sendMBSampled(
                   'compile-result',
@@ -491,6 +491,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   }, [
     data,
     ide,
+    alphaProgram,
     hasCompileLogsEvents,
     hasPremiumCompile,
     isProjectOwner,

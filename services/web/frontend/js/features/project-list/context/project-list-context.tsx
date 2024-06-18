@@ -145,7 +145,7 @@ export function ProjectListProvider({ children }: ProjectListProviderProps) {
   >('project-list-selected-tag-id', undefined)
   const [showCustomPicker, setShowCustomPicker] = useState(false)
 
-  const olTags: Tag[] = getMeta('ol-tags', [])
+  const olTags = getMeta('ol-tags') || []
 
   const [tags, setTags] = useState<Tag[]>(() =>
     // `tag.name` data may be null for some old users

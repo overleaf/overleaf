@@ -1,7 +1,6 @@
 import { RowLink } from '@/features/subscription/components/dashboard/row-link'
 import getMeta from '@/utils/meta'
 import { useTranslation } from 'react-i18next'
-import { ExposedSettings } from '../../../../../../types/exposed-settings'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
 export default function GroupSettingsButton({
@@ -11,10 +10,7 @@ export default function GroupSettingsButton({
 }) {
   const { t } = useTranslation()
 
-  const { groupSSOEnabled } = getMeta(
-    'ol-ExposedSettings',
-    {}
-  ) as ExposedSettings
+  const { groupSSOEnabled } = getMeta('ol-ExposedSettings')
 
   const subscriptionHasManagedUsers =
     subscription.features?.managedUsers !== false

@@ -3,10 +3,6 @@ import { expect } from 'chai'
 import { SSOAlert } from '../../../../../../frontend/js/features/settings/components/emails/sso-alert'
 
 describe('<SSOAlert/>', function () {
-  beforeEach(function () {
-    window.metaAttributesCache = new Map()
-  })
-
   describe('when thereis no institutional linking information', function () {
     it('should be empty', function () {
       render(<SSOAlert />)

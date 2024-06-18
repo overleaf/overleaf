@@ -2,13 +2,12 @@ import { Trans, useTranslation } from 'react-i18next'
 import Close from './close'
 import usePersistedState from '../hooks/use-persisted-state'
 import getMeta from '../../utils/meta'
-import { SuggestedLanguage } from '../../../../types/system-message'
 
 function TranslationMessage() {
   const { t } = useTranslation()
   const [hidden, setHidden] = usePersistedState('hide-i18n-notification', false)
-  const config = getMeta('ol-suggestedLanguage') as SuggestedLanguage
-  const currentUrl = getMeta('ol-currentUrl') as string
+  const config = getMeta('ol-suggestedLanguage')!
+  const currentUrl = getMeta('ol-currentUrl')
 
   if (hidden) {
     return null

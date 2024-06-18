@@ -20,7 +20,5 @@ export function renderWithEditorContext(
 }
 
 export function cleanUpContext() {
-  delete window.user
-  delete window.project_id
   delete window._ide
 }
