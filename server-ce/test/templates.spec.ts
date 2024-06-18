@@ -7,6 +7,9 @@ const ADMIN_USER = 'admin@example.com'
 const REGULAR_USER = 'user@example.com'
 const TEMPLATES_USER = 'templates@example.com'
 
+// Re-use value for "exists" and "does not exist" tests
+const LABEL_BROWSE_TEMPLATES = 'Browse templates'
+
 describe('Templates', () => {
   ensureUserExists({ email: TEMPLATES_USER })
   ensureUserExists({ email: WITHOUT_PROJECTS_USER })
@@ -39,7 +42,7 @@ describe('Templates', () => {
     it('should show templates link on welcome page', () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
-      cy.findByText('Browse templates').click()
+      cy.findByText(LABEL_BROWSE_TEMPLATES).click()
       cy.url().should('match', /\/templates$/)
     })
 
@@ -230,7 +233,7 @@ describe('Templates', () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/')
       cy.findByText(/new project/i) // wait for lazy loading
-      cy.findByText('Browse templates').should('not.exist')
+      cy.findByText(LABEL_BROWSE_TEMPLATES).should('not.exist')
     })
   }
 

@@ -9,6 +9,9 @@ describe('LearnWiki', function () {
   const WITHOUT_PROJECTS_USER = 'user-without-projects@example.com'
   const REGULAR_USER = 'user@example.com'
 
+  // Re-use value for "exists" and "does not exist" tests
+  const LABEL_LEARN_LATEX = 'Learn LaTeX with a tutorial'
+
   ensureUserExists({ email: WITHOUT_PROJECTS_USER })
   ensureUserExists({ email: REGULAR_USER })
 
@@ -29,7 +32,7 @@ describe('LearnWiki', function () {
     it('should display a tutorial link in the welcome page', () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/project')
-      cy.findByText('Learn LaTeX with a tutorial')
+      cy.findByText(LABEL_LEARN_LATEX)
     })
 
     it('should render wiki page', () => {
@@ -94,7 +97,7 @@ describe('LearnWiki', function () {
     it('should not display a tutorial link in the welcome page', () => {
       login(WITHOUT_PROJECTS_USER)
       cy.visit('/project')
-      cy.findByText('Learn LaTeX with a tutorial').should('not.exist')
+      cy.findByText(LABEL_LEARN_LATEX).should('not.exist')
     })
   }
 })
