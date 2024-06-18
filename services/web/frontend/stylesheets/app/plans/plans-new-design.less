@@ -95,12 +95,13 @@
         border: unset;
         display: flex;
         align-items: center;
-        gap: 12px;
         color: var(--neutral-70);
         margin: 0;
         border-top-right-radius: 8px;
         border-top-left-radius: 8px;
         border: 1px solid var(--neutral-20);
+        padding: var(--spacing-05) var(--spacing-08);
+        gap: var(--spacing-04);
 
         &:focus {
           background-color: unset;
@@ -117,6 +118,13 @@
           outline: auto 2px Highlight; // firefox
           outline: auto 5px -webkit-focus-ring-color;
           background-color: white;
+        }
+
+        @media (max-width: @screen-xs-max) {
+          font-size: var(--font-size-02);
+          line-height: var(--line-height-02);
+          padding: var(--spacing-05);
+          gap: var(--spacing-02);
         }
       }
 
