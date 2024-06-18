@@ -34,13 +34,22 @@ module.exports = {
     const missingFiles = []
 
     for (const file of validFiles) {
+      let fileHandle
+
       try {
-        const fileHandle = await open(file, 'r')
-        const fileStream = fileHandle.createReadStream()
-        archive.append(fileStream, { name: path.basename(file) })
+        fileHandle = await open(file, 'r')
       } catch (error) {
+        logger.warn(
+          { file, error },
+          'error opening file to add to output files archive'
+        )
         missingFiles.push(file)
+        continue
       }
+      const fileStream = fileHandle.createReadStream()
+      archive.append(fileStream, {
+        name: path.basename(file),
+      })
     }
 
     if (missingFiles.length > 0) {

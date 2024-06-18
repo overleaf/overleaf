@@ -8,10 +8,9 @@ const MODULE_PATH = require('path').join(
 describe('OutputController', function () {
   describe('createOutputZip', function () {
     beforeEach(function () {
-      this.archive = {
-        on: sinon.stub(),
-        pipe: sinon.stub(),
-      }
+      this.archive = {}
+
+      this.pipeline = sinon.stub().resolves()
 
       this.archiveFilesForBuild = sinon.stub().resolves(this.archive)
 
@@ -19,6 +18,9 @@ describe('OutputController', function () {
         requires: {
           './OutputFileArchiveManager': {
             archiveFilesForBuild: this.archiveFilesForBuild,
+          },
+          'node:stream/promises': {
+            pipeline: this.pipeline,
           },
         },
       })
@@ -40,12 +42,15 @@ describe('OutputController', function () {
             files: ['output.tex'],
           },
         }
-        this.archive.pipe.callsFake(() => done())
+        this.pipeline.callsFake(() => {
+          done()
+          return Promise.resolve()
+        })
         this.OutputController.createOutputZip(this.req, this.res)
       })
 
-      it('pipes the archive to the response', function () {
-        sinon.assert.calledWith(this.archive.pipe, this.res)
+      it('creates a pipeline from the archive to the response', function () {
+        sinon.assert.calledWith(this.pipeline, this.archive, this.res)
       })
 
       it('calls the express convenience method to set attachment headers', function () {

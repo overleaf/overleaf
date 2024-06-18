@@ -1,5 +1,6 @@
 const OutputFileArchiveManager = require('./OutputFileArchiveManager')
 const { expressify } = require('@overleaf/promise-utils')
+const { pipeline } = require('node:stream/promises')
 
 async function createOutputZip(req, res) {
   const {
@@ -16,7 +17,7 @@ async function createOutputZip(req, res) {
 
   res.attachment('output.zip')
   res.setHeader('X-Content-Type-Options', 'nosniff')
-  archive.pipe(res)
+  await pipeline(archive, res)
 }
 
 module.exports = { createOutputZip: expressify(createOutputZip) }
