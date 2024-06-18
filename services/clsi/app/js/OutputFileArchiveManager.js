@@ -5,6 +5,7 @@ const Settings = require('@overleaf/settings')
 const { open } = require('node:fs/promises')
 const path = require('path')
 const { NotFoundError } = require('./Errors')
+const logger = require('@overleaf/logger')
 
 // NOTE: Updating this list requires a corresponding change in
 // * services/web/frontend/js/features/pdf-preview/util/file-list.js
@@ -22,10 +23,14 @@ function getContentDir(projectId, userId) {
 
 module.exports = {
   async archiveFilesForBuild(projectId, userId, build) {
+    logger.debug({ projectId, userId, build }, 'Will create zip file')
     const validFiles = await this._getAllOutputFiles(projectId, userId, build)
 
     const archive = archiver('zip')
 
+    archive.on('error', err => {
+      logger.warn({ err }, 'error emitted when creating output files archive')
+    })
     const missingFiles = []
 
     for (const file of validFiles) {

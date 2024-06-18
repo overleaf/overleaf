@@ -32,6 +32,7 @@ describe('OutputFileArchiveManager', function () {
     this.archive = {
       append: sinon.stub(),
       finalize: sinon.stub(),
+      on: sinon.stub(),
     }
 
     this.archiver = sinon.stub().returns(this.archive)
@@ -78,6 +79,10 @@ describe('OutputFileArchiveManager', function () {
 
     it('creates a zip archive', function () {
       sinon.assert.calledWith(this.archiver, 'zip')
+    })
+
+    it('listens to errors from the archive', function () {
+      sinon.assert.calledWith(this.archive.on, 'error', sinon.match.func)
     })
 
     it('adds all the output files to the archive', function () {
