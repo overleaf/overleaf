@@ -2,6 +2,8 @@
 @z-index-plans-new-tabs-content: 0;
 
 .plans-new-design {
+  padding-top: calc(var(--spacing-16) + var(--header-height));
+
   .main-heading-section {
     text-align: center;
     max-width: 885px;
@@ -68,6 +70,7 @@
 
   .plans-new-tabs-container {
     z-index: @z-index-plans-new-tabs;
+    margin-top: var(--spacing-16);
 
     // explicit padding to tell that the bottom left and bottom right
     // does not have bottom border defined in .plans-new-tabs
