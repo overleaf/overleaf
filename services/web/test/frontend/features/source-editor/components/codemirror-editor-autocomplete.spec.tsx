@@ -902,10 +902,8 @@ describe('autocomplete', { scrollBehavior: false }, function () {
 
     // the symbol completion should exist
     cy.findAllByRole('option', {
-      name: /^\\alpha\s+Greek$/,
+      name: /^\\alpha\s+𝛼\s+Greek$/,
     }).should('have.length', 1)
-
-    cy.get('body').should('contain', 'Lowercase Greek letter alpha')
   })
 
   it('does not display symbol completions in autocomplete when the feature is disabled', function () {
@@ -933,7 +931,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     cy.findAllByRole('listbox').should('have.length', 1)
 
     cy.findAllByRole('option', {
-      name: /^\\alpha\s+Greek$/,
+      name: /^\\alpha\s+𝛼\s+Greek$/,
     }).should('have.length', 0)
   })
 

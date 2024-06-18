@@ -82,6 +82,7 @@ const createAutoComplete = (enabled: boolean) => {
   ]
 }
 
+const AUTOCOMPLETE_LINE_HEIGHT = 1.4
 /**
  * Styles for the autocomplete menu
  */
@@ -113,8 +114,19 @@ const autocompleteTheme = EditorView.baseTheme({
   '.cm-tooltip.cm-tooltip-autocomplete li[role="option"]': {
     display: 'flex',
     justifyContent: 'space-between',
-    lineHeight: 1.4, // increase the line height from default 1.2, for a larger target area
+    lineHeight: AUTOCOMPLETE_LINE_HEIGHT, // increase the line height from default 1.2, for a larger target area
     outline: '1px solid transparent',
+  },
+  '.cm-tooltip .cm-completionDetail': {
+    flex: '1 0 auto',
+    fontSize: 'calc(var(--font-size) * 1.4)',
+    lineHeight: `calc(var(--font-size) * ${AUTOCOMPLETE_LINE_HEIGHT})`,
+    overflow: 'hidden',
+    // By default CodeMirror styles the details as italic
+    fontStyle: 'normal !important',
+    // We use this element for the symbol palette, so change the font to the
+    // symbol palette font
+    fontFamily: "'Stix Two Math', serif",
   },
   '&light .cm-tooltip.cm-tooltip-autocomplete li[role="option"]:hover': {
     outlineColor: '#abbffe',
