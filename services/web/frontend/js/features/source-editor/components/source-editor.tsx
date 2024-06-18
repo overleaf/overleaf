@@ -3,7 +3,6 @@ import { FullSizeLoadingSpinner } from '../../../shared/components/loading-spinn
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { ErrorBoundaryFallback } from '../../../shared/components/error-boundary-fallback'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
-import GrammarlyAdvert from './grammarly-advert'
 
 const editorPromotions = importOverleafModules('editorPromotions') as {
   import: { default: ElementType }
@@ -21,7 +20,6 @@ function SourceEditor() {
       {editorPromotions.map(({ import: { default: Component }, path }) => (
         <Component key={path} />
       ))}
-      <GrammarlyAdvert />
       <CodeMirrorEditor />
     </Suspense>
   )
