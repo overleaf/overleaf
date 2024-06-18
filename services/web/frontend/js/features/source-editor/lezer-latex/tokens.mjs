@@ -80,6 +80,8 @@ import {
   BottomRuleCtrlSeq,
   TableEnvName,
   MultiColumnCtrlSeq,
+  // Marker for end of argument lists
+  endOfArguments,
 } from './latex.terms.mjs'
 
 function nameChar(ch) {
@@ -262,6 +264,22 @@ const CHAR_FULL_STOP = _char('.')
 const CHAR_BACKSLASH = _char('\\')
 const CHAR_OPEN_BRACE = _char('{')
 const CHAR_CLOSE_BRACE = _char('}')
+const CHAR_TAB = _char('\t')
+const CHAR_SPACE = _char(' ')
+const CHAR_NEWLINE = _char('\n')
+
+export const endOfArgumentListTokenizer = new ExternalTokenizer(
+  input => {
+    const { next } = input
+    if (next === CHAR_SPACE || next === CHAR_TAB) {
+      return
+    }
+    if (next !== CHAR_OPEN_BRACE) {
+      input.acceptToken(endOfArguments)
+    }
+  },
+  { contextual: false, fallback: true }
+)
 
 const ALLOWED_DELIMITER_NAMES = [
   'lfloor',
@@ -391,8 +409,6 @@ export const csnameTokenizer = new ExternalTokenizer((input, stack) => {
   return input.acceptToken(Csname, end + 1)
 })
 
-const CHAR_SPACE = _char(' ')
-const CHAR_NEWLINE = _char('\n')
 const END_DOCUMENT_MARK = '\\end{document}'.split('').reverse()
 
 export const trailingContentTokenizer = new ExternalTokenizer(

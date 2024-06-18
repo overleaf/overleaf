@@ -74,14 +74,15 @@ export const enterNode = (
     items.push(thisCommand)
   } else if (
     node.type.is('UnknownCommand') ||
-    node.type.is('MathCommand') ||
-    node.type.is('KnownCommand')
+    node.type.is('KnownCommand') ||
+    node.type.is('MathUnknownCommand') ||
+    node.type.is('MathKnownCommand')
   ) {
     let commandNode: SyntaxNode | null = node.node
-    if (node.type.is('KnownCommand')) {
-      // KnownCommands are defined as
+    if (node.type.is('KnownCommand') || node.type.is('MathKnownCommand')) {
+      // (Math)KnownCommands are defined as
       //
-      // KnownCommand {
+      // (Math)KnownCommand {
       //    CommandName {
       //       CommandCtrlSeq [args]
       //    }

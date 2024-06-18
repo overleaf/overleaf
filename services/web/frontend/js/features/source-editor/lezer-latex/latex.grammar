@@ -142,7 +142,7 @@
 
     Number { $[0-9]+ ("." $[0-9]*)? }
     MathSpecialChar { $[^_=<>()\-+/*]+ }  // FIXME not all of these are special
-    MathChar { ![0-9^_=<>()\-+/*\\{}\[\]\n$%&~]+ }
+    MathChar { ![0-9^_=<>()\-+/*\\{}\[\]$%&~ \t\n]+ }
 
     @precedence { Number, MathSpecialChar, MathChar }
 
@@ -684,14 +684,13 @@ BracketMath {
 // because display math can contain blank lines while inline math cannot.
 
 Math {
-    ( MathTextCommand
-    | MathCommand
-    | MathCtrlSym
-    | MathGroup
+    ( MathCommand
+    | Group<Math>
     | MathDelimitedGroup
     | MathSpecialChar
     | Number
     | NewLine
+    | Whitespace
     | KnownEnvironment
     | Environment
     | MathChar
@@ -699,24 +698,38 @@ Math {
     | CloseBracket
     | Ampersand
     | Tilde
-    | Label {
-        LabelCtrlSeq optionalWhitespace? OptionalArgument? LabelArgument
-    }
-    | Ref {
-        (RefCtrlSeq | RefStarrableCtrlSeq "*"?) optionalWhitespace? OptionalArgument? optionalWhitespace? OptionalArgument? optionalWhitespace? RefArgument
-    }
     )+
 }
 
-MathTextCommand {
-    (MathTextCtrlSeq | HboxCtrlSeq) optionalWhitespace? "*"? TextArgument
+
+MathCommand {
+    MathKnownCommand
+  | MathUnknownCommand
 }
 
-MathCommand { CtrlSeq }
+MathKnownCommand {
+    KnownCtrlSym
+  | Label {
+        LabelCtrlSeq optionalWhitespace? OptionalArgument? LabelArgument
+    }
+  | Ref {
+     (RefCtrlSeq | RefStarrableCtrlSeq "*"?) optionalWhitespace? OptionalArgument? optionalWhitespace? OptionalArgument? optionalWhitespace? RefArgument
+    }
+  | MathTextCommand {
+    (MathTextCtrlSeq | HboxCtrlSeq) optionalWhitespace? "*"? TextArgument
+  }
+}
 
-MathCtrlSym { CtrlSym | KnownCtrlSym }
+@external tokens endOfArgumentListTokenizer from "./tokens.mjs" {
+    endOfArguments
+}
 
-MathGroup {
+MathUnknownCommand {
+    CtrlSeq (optionalWhitespace? MathArgument)* optionalWhitespace? endOfArguments
+  | CtrlSym
+}
+
+MathArgument {
     OpenBrace Math? CloseBrace
 }
 

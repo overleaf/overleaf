@@ -168,7 +168,7 @@ export const LaTeXLanguage = LRLanguage.define({
         'MathGroup/OpenBrace MathGroup/CloseBrace': t.string,
         'MathTextCommand/TextArgument/OpenBrace MathTextCommand/TextArgument/CloseBrace':
           t.string,
-        'MathOpening/LeftCtrlSeq MathClosing/RightCtrlSeq MathCommand/CtrlSeq MathTextCommand/CtrlSeq':
+        'MathOpening/LeftCtrlSeq MathClosing/RightCtrlSeq MathUnknownCommand/CtrlSeq MathTextCommand/CtrlSeq':
           t.literal,
         MathDelimiter: t.literal,
         DoubleDollar: t.keyword,
