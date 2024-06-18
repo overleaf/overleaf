@@ -1,7 +1,5 @@
-import { forwardRef } from 'react'
+import { forwardRef, SyntheticEvent } from 'react'
 import classnames from 'classnames'
-// @ts-ignore
-// eslint-disable-next-line import/no-extraneous-dependencies
 import RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
 import { DropdownProps } from 'react-bootstrap'
 import { MergeAndOverride } from '../../../../../types/utils'
@@ -16,6 +14,7 @@ type DropdownMenuWithRefProps = MergeAndOverride<
     // The props below are passed by react-bootstrap
     labelledBy?: string | undefined
     rootCloseEvent?: 'click' | 'mousedown' | undefined
+    onClose?: (e: SyntheticEvent<any>) => void
   }
 >
 

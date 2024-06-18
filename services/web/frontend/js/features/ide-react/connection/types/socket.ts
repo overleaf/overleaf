@@ -23,6 +23,10 @@ export type Socket = {
   socket: {
     connected: boolean
     connect(): void
+    sessionid: string
+    transport?: {
+      name: string
+    }
   }
   disconnect(): void
 }

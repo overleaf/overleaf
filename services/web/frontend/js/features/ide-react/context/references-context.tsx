@@ -1,4 +1,3 @@
-// @ts-ignore
 import { generateSHA1Hash } from '../../../shared/utils/sha1'
 import {
   createContext,
