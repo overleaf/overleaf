@@ -46,7 +46,39 @@ describe('SandboxedCompiles', function () {
       cy.get('[aria-label="View logs"]').click()
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2022\) /)
     })
+
+    checkXeTeX()
   })
+
+  function checkXeTeX() {
+    it('should be able to use XeLaTeX', () => {
+      cy.visit('/project')
+      createProject('XeLaTeX')
+      const recompile = throttledRecompile()
+      cy.log('wait for compile')
+      cy.get('.pdf-viewer').should('contain.text', 'XeLaTeX')
+
+      cy.log('Check which compiler was used, expect pdfLaTeX')
+      cy.get('[aria-label="View logs"]').click()
+      cy.findByText(/This is pdfTeX/)
+
+      cy.log('Switch compiler to from pdfLaTeX to XeLaTeX')
+      cy.get('header').findByText('Menu').click()
+      cy.findByText('Compiler')
+        .parent()
+        .findByText('pdfLaTeX')
+        .parent()
+        .select('XeLaTeX')
+      cy.get('#left-menu-modal').click()
+
+      cy.log('Trigger compile with other compiler')
+      recompile()
+
+      cy.log('Check which compiler was used, expect XeLaTeX')
+      cy.get('[aria-label="View logs"]').click()
+      cy.findByText(/This is XeTeX/)
+    })
+  }
 
   function checkUsesDefaultCompiler() {
     beforeEach(function () {
@@ -70,11 +102,13 @@ describe('SandboxedCompiles', function () {
     startWith({ pro: true })
 
     checkUsesDefaultCompiler()
+    checkXeTeX()
   })
 
   describe.skip('unavailable in CE', () => {
     startWith({ pro: false, vars: enabledVars })
 
     checkUsesDefaultCompiler()
+    checkXeTeX()
   })
 })
