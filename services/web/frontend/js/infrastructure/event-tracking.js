@@ -68,6 +68,7 @@ export const isSmallDevice = window.screen.width < 768
 
 function sendBeacon(key, data) {
   if (!navigator || !navigator.sendBeacon) return
+  if (!getMeta('ol-ExposedSettings').isOverleaf) return
 
   data._csrf = getMeta('ol-csrfToken')
   const blob = new Blob([JSON.stringify(data)], {
