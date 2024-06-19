@@ -2,6 +2,8 @@ import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { startWith } from './helpers/config'
 import { throttledRecompile } from './helpers/compile'
+import { v4 as uuid } from 'uuid'
+import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
 
 describe('SandboxedCompiles', function () {
   ensureUserExists({ email: 'user@example.com' })
@@ -47,8 +49,107 @@ describe('SandboxedCompiles', function () {
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2022\) /)
     })
 
+    checkSyncTeX()
     checkXeTeX()
   })
+
+  function checkSyncTeX() {
+    describe('SyncTeX', () => {
+      const projectName = `Project ${uuid()}`
+      before(function () {
+        login('user@example.com')
+        cy.visit('/project')
+        createProject(projectName)
+        const recompile = throttledRecompile()
+        cy.findByText('\\maketitle').parent().click()
+        cy.findByText('\\maketitle')
+          .parent()
+          .type(
+            `\n\\pagebreak\n\\section{{}Section A}\n\\pagebreak\n\\section{{}Section B}\n\\pagebreak`
+          )
+        recompile()
+      })
+
+      it('should sync to code', () => {
+        cy.visit('/project')
+        cy.findByText(projectName).click()
+
+        cy.log('navigate to \\maketitle using double click in PDF')
+        cy.get('.pdf-viewer').within(() => {
+          cy.findByText(projectName).dblclick()
+        })
+        cy.get('.cm-activeLine').should('have.text', '\\maketitle')
+
+        cy.log('navigate to Section A using double click in PDF')
+        cy.get('.pdf-viewer').within(() => {
+          cy.findByText('Section A').dblclick()
+        })
+        cy.get('.cm-activeLine').should('have.text', '\\section{Section A}')
+
+        cy.log('navigate to Section B using arrow button')
+        cy.get('.pdfjs-viewer-inner')
+          .should('have.prop', 'scrollTop')
+          .as('start')
+        cy.get('.pdf-viewer').within(() => {
+          cy.findByText('Section B').scrollIntoView()
+        })
+        cy.get('@start').then((start: any) => {
+          waitUntilScrollingFinished('.pdfjs-viewer-inner', start)
+        })
+        cy.get('[aria-label^="Go to PDF location in code"]').click()
+        cy.get('.cm-activeLine').should('have.text', '\\section{Section B}')
+      })
+
+      // Waiting for a fix of https://github.com/overleaf/internal/issues/18603
+      it.skip('should sync to pdf', () => {
+        cy.visit('/project')
+        cy.findByText(projectName).click()
+
+        cy.log('wait for compile')
+        cy.get('.pdf-viewer').within(() => {
+          cy.findByText(projectName)
+        })
+
+        cy.log('zoom in')
+        for (let i = 0; i < 8; i++) {
+          cy.get('[aria-label="Zoom in"]').click({ force: true })
+        }
+        cy.log('scroll to top')
+        cy.get('.pdfjs-viewer-inner').scrollTo('top')
+        waitUntilScrollingFinished('.pdfjs-viewer-inner', -1)
+        cy.get('.pdfjs-viewer-inner')
+          .should('have.prop', 'scrollTop')
+          .as('start')
+
+        cy.log('navigate to title')
+        cy.findByText('\\maketitle').parent().click()
+        cy.get('[aria-label="Go to code location in PDF"]').click()
+        cy.get('@start').then((start: any) => {
+          waitUntilScrollingFinished('.pdfjs-viewer-inner', start)
+            .as('title')
+            .should('be.greaterThan', start)
+        })
+
+        cy.log('navigate to Section A')
+        cy.get('.cm-content').within(() => cy.findByText('Section A').click())
+        cy.get('[aria-label="Go to code location in PDF"]').click()
+        cy.get('@title').then((title: any) => {
+          waitUntilScrollingFinished('.pdfjs-viewer-inner', title)
+            .as('sectionA')
+            .should('be.greaterThan', title)
+        })
+
+        cy.log('navigate to Section B')
+        cy.get('.cm-content').within(() => cy.findByText('Section B').click())
+        cy.get('[aria-label="Go to code location in PDF"]').click()
+        cy.get('@sectionA').then((title: any) => {
+          waitUntilScrollingFinished('.pdfjs-viewer-inner', title)
+            .as('sectionB')
+            .should('be.greaterThan', title)
+        })
+      })
+    })
+  }
 
   function checkXeTeX() {
     it('should be able to use XeLaTeX', () => {
@@ -102,6 +203,7 @@ describe('SandboxedCompiles', function () {
     startWith({ pro: true })
 
     checkUsesDefaultCompiler()
+    checkSyncTeX()
     checkXeTeX()
   })
 
@@ -109,6 +211,7 @@ describe('SandboxedCompiles', function () {
     startWith({ pro: false, vars: enabledVars })
 
     checkUsesDefaultCompiler()
+    checkSyncTeX()
     checkXeTeX()
   })
 })
