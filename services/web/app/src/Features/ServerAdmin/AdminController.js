@@ -46,19 +46,19 @@ const AdminController = {
     logger.warn('disconecting everyone')
     const delay = (req.query && req.query.delay) > 0 ? req.query.delay : 10
     AdminController._sendDisconnectAllUsersMessage(delay)
-    res.sendStatus(200)
+    res.redirect('/admin#open-close-editor')
   },
 
   openEditor(req, res) {
     logger.warn('opening editor')
     Settings.editorIsOpen = true
-    res.sendStatus(200)
+    res.redirect('/admin#open-close-editor')
   },
 
   closeEditor(req, res) {
     logger.warn('closing editor')
     Settings.editorIsOpen = req.body.isOpen
-    res.sendStatus(200)
+    res.redirect('/admin#open-close-editor')
   },
 
   flushProjectToTpds(req, res, next) {
@@ -80,7 +80,7 @@ const AdminController = {
       if (error) {
         return next(error)
       }
-      res.sendStatus(200)
+      res.redirect('/admin#system-messages')
     })
   },
 
@@ -89,7 +89,7 @@ const AdminController = {
       if (error) {
         return next(error)
       }
-      res.sendStatus(200)
+      res.redirect('/admin#system-messages')
     })
   },
 }
