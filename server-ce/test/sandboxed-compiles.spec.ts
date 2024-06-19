@@ -5,6 +5,8 @@ import { throttledRecompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
 
+const LABEL_TEX_LIVE_VERSION = 'TeX Live version'
+
 describe('SandboxedCompiles', function () {
   ensureUserExists({ email: 'user@example.com' })
 
@@ -28,23 +30,26 @@ describe('SandboxedCompiles', function () {
       cy.visit('/project')
       createProject('sandboxed')
       const recompile = throttledRecompile()
-      // check produced PDF
+      cy.log('wait for compile')
       cy.get('.pdf-viewer').should('contain.text', 'sandboxed')
+
+      cy.log('Check which compiler version was used, expect 2023')
       cy.get('[aria-label="View logs"]').click()
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2023\) /)
+
+      cy.log('Switch TeXLive version from 2023 to 2022')
       cy.get('header').findByText('Menu').click()
-      cy.findByText('TeX Live version')
+      cy.findByText(LABEL_TEX_LIVE_VERSION)
         .parent()
         .findByText('2023')
         .parent()
         .select('2022')
-
-      // close editor menu
       cy.get('#left-menu-modal').click()
 
-      // Trigger compile with other TexLive version
+      cy.log('Trigger compile with other TeX Live version')
       recompile()
 
+      cy.log('Check which compiler version was used, expect 2022')
       cy.get('[aria-label="View logs"]').click()
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2022\) /)
     })
@@ -189,13 +194,17 @@ describe('SandboxedCompiles', function () {
     it('should not offer TexLive images and use default compiler', () => {
       cy.visit('/project')
       createProject('sandboxed')
-      // check produced PDF
+      cy.log('wait for compile')
       cy.get('.pdf-viewer').should('contain.text', 'sandboxed')
+
+      cy.log('Check which compiler version was used, expect 2024')
       cy.get('[aria-label="View logs"]').click()
       cy.findByText(/This is pdfTeX, Version .+ \(TeX Live 2024\) /)
+
+      cy.log('Check that there is no TeX Live version toggle')
       cy.get('header').findByText('Menu').click()
       cy.findByText('Word Count') // wait for lazy loading
-      cy.findByText('TeX Live version').should('not.exist')
+      cy.findByText(LABEL_TEX_LIVE_VERSION).should('not.exist')
     })
   }
 
