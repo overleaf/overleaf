@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import PdfPageNumberControl from './pdf-page-number-control'
 import PdfZoomButtons from './pdf-zoom-buttons'
 import PdfZoomDropdown from './pdf-zoom-dropdown'
-
+import SplitTestBadge from '@/shared/components/split-test-badge'
 import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
 import PdfViewerControlsMenuButton from './pdf-viewer-controls-menu-button'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
@@ -55,6 +55,10 @@ function PdfViewerControlsToolbar({
 
   return createPortal(
     <div className="pdfjs-viewer-controls" ref={pdfControlsRef}>
+      <SplitTestBadge
+        splitTestName="pdf-controls"
+        displayOnVariants={['enabled']}
+      />
       <InnerControlsComponent
         requestPresentationMode={requestPresentationMode}
         setZoom={setZoom}
