@@ -19,6 +19,7 @@ const SplitTestUserGetter = require('./SplitTestUserGetter')
 const DEFAULT_VARIANT = 'default'
 const ALPHA_PHASE = 'alpha'
 const BETA_PHASE = 'beta'
+const RELEASE_PHASE = 'release'
 const DEFAULT_ASSIGNMENT = {
   variant: DEFAULT_VARIANT,
   analytics: {
@@ -207,6 +208,42 @@ async function getActiveAssignmentsForUser(userId, removeArchived = false) {
     }
   }
   return assignments
+}
+
+/**
+ * Performs a one-time assignment that is not recorded nor reproducible.
+ * To be used only in cases where we need random assignments that are independent of a user or session.
+ * If the test is in alpha or beta phase, always returns the default variant.
+ * @param splitTestName
+ * @returns {Promise<{variant: string, analytics: {segmentation: {splitTest: string, variant: string, phase: string, versionNumber: number}|{}}}>}
+ */
+async function getOneTimeAssignment(splitTestName) {
+  try {
+    if (!Features.hasFeature('saas')) {
+      return _getNonSaasAssignment(splitTestName)
+    }
+
+    const splitTest = await _getSplitTest(splitTestName)
+    if (!splitTest) {
+      return DEFAULT_ASSIGNMENT
+    }
+    const currentVersion = SplitTestUtils.getCurrentVersion(splitTest)
+
+    if (currentVersion.phase !== RELEASE_PHASE) {
+      return DEFAULT_ASSIGNMENT
+    }
+
+    const randomUUID = crypto.randomUUID()
+    const { selectedVariantName } = await _getAssignmentMetadata(
+      randomUUID,
+      undefined,
+      splitTest
+    )
+    return _makeAssignment(splitTest, selectedVariantName, currentVersion)
+  } catch (error) {
+    logger.error({ err: error }, 'Failed to get one time split test assignment')
+    return DEFAULT_ASSIGNMENT
+  }
 }
 
 /**
@@ -537,6 +574,7 @@ module.exports = {
   getAssignment: callbackify(getAssignment),
   getAssignmentForMongoUser: callbackify(getAssignmentForMongoUser),
   getAssignmentForUser: callbackify(getAssignmentForUser),
+  getOneTimeAssignment: callbackify(getOneTimeAssignment),
   getActiveAssignmentsForUser: callbackify(getActiveAssignmentsForUser),
   setOverrideInSession,
   clearOverridesInSession,
@@ -544,6 +582,7 @@ module.exports = {
     getAssignment,
     getAssignmentForMongoUser,
     getAssignmentForUser,
+    getOneTimeAssignment,
     getActiveAssignmentsForUser,
     isSplitTestActive,
   },
