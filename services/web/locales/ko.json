@@ -331,6 +331,7 @@
   "not_now": "지금은 안 함",
   "notification_project_invite": "<b>__userName__</b>님이 <b>__projectName__</b>에 참여하고자 합니다. <a class=\"btn btn-sm btn-info pull-right\" href=\"’/project/__projectId__/invite/token/__token__’\">Join Project</a>",
   "november": "11월",
+  "number_collab": "공저자 수",
   "october": "10월",
   "off": "끄기",
   "ok": "OK",

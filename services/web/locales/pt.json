@@ -415,6 +415,7 @@
   "not_registered": "Não registrado",
   "notification_project_invite": "<b>__userName__</b> você gostaria de entrar em  <b>__projectName__</b> <a class=\"btn btn-sm btn-info pull-right\" href=\"’/project/__projectId__/invite/token/__token__’\">Entrar no Projeto</a>",
   "november": "Novembro",
+  "number_collab": "Número de colaboradores",
   "october": "Outubro",
   "off": "Desligar",
   "ok": "OK",

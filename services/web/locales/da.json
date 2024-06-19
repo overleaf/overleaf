@@ -956,6 +956,7 @@
   "notification_project_invite_accepted_message": "Du er nu med i <b>__projectName__</b>",
   "notification_project_invite_message": "<b>__userName__</b> vil gerne have dig med i <b>__projectName__</b>",
   "november": "November",
+  "number_collab": "Antal samarbejdspartnere",
   "number_of_users": "Antal brugere",
   "number_of_users_info": "Det antal af brugere der kan opgradere deres Overleaf konto hvis du køber dette abonnement.",
   "number_of_users_with_colon": "Antal brugere:",

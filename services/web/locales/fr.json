@@ -669,6 +669,7 @@
   "notification_project_invite_accepted_message": "Vous avez rejoint <b>__projectName__</b>",
   "notification_project_invite_message": "<b>__userName__</b> souhaiterait que vous rejoigniez <b>__projectName__</b>",
   "november": "Novembre",
+  "number_collab": "Nombre de collaborateur·rice·s",
   "oauth_orcid_description": " <a href=\"__link__\">Justifiez de votre identité de façon sécurisée en liant votre ORCID iD à votre compte __appName__</a>. Vos soumissions aux éditeurs participants incluront automatiquement votre ORCID iD, permettant ainsi d’accroître votre productivité et votre visibilité. ",
   "october": "Octobre",
   "off": "Désactivé",

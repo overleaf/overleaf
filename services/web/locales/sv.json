@@ -585,6 +585,7 @@
   "notification_project_invite": "<b>__userName__</b> vill att du går med i <b>__projectName__</b>, <a class=\"btn btn-sm btn-info pull-right\" href=\"’/project/__projectId__/invite/token/__token__’\">Gå med i projektet</a>",
   "notification_project_invite_accepted_message": "Du har anslutit dig till <b>__projectName__</b>",
   "november": "November",
+  "number_collab": "Antal samarbetspartners",
   "october": "Oktober",
   "off": "Av",
   "official": "Officiell",

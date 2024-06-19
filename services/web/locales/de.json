@@ -944,6 +944,7 @@
   "notification_project_invite_accepted_message": "Du bist <b>__projectName__</b> beigetreten",
   "notification_project_invite_message": "<b>__userName__</b> möchte, dass du <b>__projectName__</b> beitrittst",
   "november": "November",
+  "number_collab": "Anzahl der Mitarbeiter",
   "number_of_users": "Nutzeranzahl",
   "number_of_users_info": "Die Anzahl der Nutzer, die ihr Overleaf-Konto upgraden können, wenn du dieses Abonnement abschließt.",
   "number_of_users_with_colon": "Anzahl der Nutzer:",

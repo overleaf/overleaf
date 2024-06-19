@@ -1234,6 +1234,7 @@
   "notification_project_invite_accepted_message": "您已加入 <b>__projectName__</b>",
   "notification_project_invite_message": "<b>__userName__</b> 希望您加入 <b>__projectName__</b>",
   "november": "十一月",
+  "number_collab": "合作者数量",
   "number_of_users": "用户数量",
   "number_of_users_info": "如果你订阅此计划，可以升级的Overleaf账户的用户数量",
   "number_of_users_with_colon": "用户数量:",
