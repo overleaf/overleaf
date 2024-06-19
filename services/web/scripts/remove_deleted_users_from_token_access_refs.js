@@ -18,21 +18,6 @@ const argv = minimist(process.argv.slice(2), {
   },
 })
 
-if (argv.help || argv._.length > 1) {
-  console.error(`Usage: node scripts/remove_deleted_users_from_token_access_refs.js [OPTS]
-    Finds or removes deleted user ids from token access fields
-    "tokenAccessReadOnly_refs" and "tokenAccessReadAndWrite_refs" in the "projects" collection.
-
-    If no projects are specified, all projects will be processed.
-
-    Options:
-
-        --dry-run         finds projects and deleted users but does not do any updates
-        --projects        list of projects ids to be fixed (comma separated)
-    `)
-  process.exit(1)
-}
-
 const DRY_RUN = argv['dry-run']
 const PROJECTS_LIST = argv.projects
 
@@ -208,6 +193,21 @@ async function main(DRY_RUN, PROJECTS_LIST) {
 module.exports = main
 
 if (require.main === module) {
+  if (argv.help || argv._.length > 1) {
+    console.error(`Usage: node scripts/remove_deleted_users_from_token_access_refs.js [OPTS]
+      Finds or removes deleted user ids from token access fields
+      "tokenAccessReadOnly_refs" and "tokenAccessReadAndWrite_refs" in the "projects" collection.
+
+      If no projects are specified, all projects will be processed.
+
+      Options:
+
+          --dry-run         finds projects and deleted users but does not do any updates
+          --projects        list of projects ids to be fixed (comma separated)
+    `)
+    process.exit(1)
+  }
+
   main(DRY_RUN, PROJECTS_LIST)
     .then(() => {
       console.error('Done')
