@@ -119,7 +119,7 @@ function PdfZoomDropdown({
         {document.fullscreenEnabled && <MenuItem divider />}
         {document.fullscreenEnabled && (
           <MenuItem draggable={false} key="present" eventKey="present">
-            {t('present')}
+            {t('presentation_mode')}
           </MenuItem>
         )}
         <MenuItem divider />
