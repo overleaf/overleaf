@@ -111,7 +111,7 @@
   "beta_feature_badge": "Badge de fonctionnalité bêta",
   "beta_program_already_participating": "Vous participez au programme de bêta",
   "beta_program_badge_description": "Lors de votre utilisation de __appName__, vous pourrez distinguer les fonctionnalités en bêta au badge qui les accompagne :",
-  "beta_program_benefits": "Nous améliorons __appName__ sans cesse. En rejoignant notre programme de bêta, vous pourrez accéder en avant-première aux fonctionnalités à venir et ainsi nous aider à mieux comprendre vos besoins.",
+  "beta_program_benefits": "Nous améliorons __appName__ sans cesse. En rejoignant notre programme de bêta, vous pourrez <0>accéder aux fonctionnalités à venir en avant-première</0> et ainsi nous aider à mieux comprendre vos besoins.",
   "beta_program_opt_in_action": "Participer au programme de bêta",
   "beta_program_opt_out_action": "Quitter le programme de bêta",
   "bibliographies": "Bibliographies",
