@@ -1,14 +1,18 @@
 import { memo, useEffect, useState } from 'react'
-import { Alert, Modal } from 'react-bootstrap'
+import { Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Project } from '../../../../../../types/project/dashboard/api'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import useIsMounted from '../../../../shared/hooks/use-is-mounted'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { isSmallDevice } from '../../../../infrastructure/event-tracking'
-import getMeta from '@/utils/meta'
 import Notification from '@/shared/components/notification'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+} from '@/features/ui/components/ol/ol-modal'
 
 type ProjectsActionModalProps = {
   title?: string
@@ -68,64 +72,44 @@ function ProjectsActionModal({
   }, [action, showModal])
 
   return (
-    <AccessibleModal
+    <OLModal
       animation
       show={showModal}
       onHide={handleCloseModal}
       id="action-project-modal"
       backdrop="static"
     >
-      <Modal.Header closeButton>
+      <OLModalHeader closeButton>
         <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>{children}</Modal.Body>
-      <Modal.Footer>
+      </OLModalHeader>
+      <OLModalBody>
+        {children}
         {!isProcessing &&
           errors.length > 0 &&
-          errors.map((e, i) => <ErrorNotification error={e} key={i} />)}
-        <button className="btn btn-secondary" onClick={handleCloseModal}>
+          errors.map((error, i) => (
+            <div className="notification-list" key={i}>
+              <Notification
+                type="error"
+                title={error.projectName}
+                content={getUserFacingMessage(error.error) as string}
+              />
+            </div>
+          ))}
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={handleCloseModal}>
           {t('cancel')}
-        </button>
-        <button
-          className="btn btn-danger"
+        </OLButton>
+        <OLButton
+          variant="danger"
           onClick={() => handleActionForProjects(projects)}
           disabled={isProcessing}
         >
           {t('confirm')}
-        </button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
-}
-
-type ErrorNotificationProps = {
-  error: any
-}
-
-function ErrorNotification({ error }: ErrorNotificationProps) {
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
-
-  if (newNotificationStyle) {
-    return (
-      // `notification-list` sets the margin-bottom correctly also when used individually in each notification.
-      // Once the legacy alerts are cleaned up we should move the styled div up to the notification list container.
-      <div className="notification-list">
-        <Notification
-          type="error"
-          title={error.projectName}
-          content={getUserFacingMessage(error.error) as string}
-        />
-      </div>
-    )
-  } else {
-    return (
-      <Alert bsStyle="danger" className="text-center" aria-live="polite">
-        <b>{error.projectName}</b>
-        <br />
-        {getUserFacingMessage(error.error)}
-      </Alert>
-    )
-  }
 }
 
 export default memo(ProjectsActionModal)

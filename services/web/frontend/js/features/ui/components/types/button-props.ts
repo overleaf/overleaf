@@ -7,6 +7,8 @@ export type ButtonProps = {
   form?: string
   leadingIcon?: string
   href?: string
+  target?: string
+  rel?: string
   isLoading?: boolean
   onClick?: MouseEventHandler<HTMLButtonElement>
   size?: 'small' | 'default' | 'large'

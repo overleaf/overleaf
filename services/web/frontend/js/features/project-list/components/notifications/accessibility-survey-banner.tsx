@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react'
 import Notification from './notification'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { useTranslation } from 'react-i18next'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function AccessibilitySurveyBanner() {
   const { t } = useTranslation()
@@ -27,18 +28,18 @@ function AccessibilitySurveyBanner() {
   return (
     <Notification
       className="sr-only"
-      bsStyle="info"
+      type="info"
       onDismiss={handleClose}
-      body={<p>{t('help_improve_screen_reader_fill_out_this_survey')}</p>}
+      content={<p>{t('help_improve_screen_reader_fill_out_this_survey')}</p>}
       action={
-        <a
-          className="btn btn-secondary btn-sm pull-right btn-info"
+        <OLButton
+          variant="secondary"
           href="https://docs.google.com/forms/d/e/1FAIpQLSdxKP_biRXvrkmJzlBjMwI_qPSuv4NbBvYUzSOc3OOTIOTmnQ/viewform"
           target="_blank"
           rel="noreferrer"
         >
           {t('take_survey')}
-        </a>
+        </OLButton>
       }
     />
   )

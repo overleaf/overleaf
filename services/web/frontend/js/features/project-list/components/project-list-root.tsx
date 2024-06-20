@@ -29,6 +29,7 @@ import { SplitTestProvider } from '@/shared/context/split-test-context'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import classnames from 'classnames'
+import Notification from '@/shared/components/notification'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -127,7 +128,12 @@ function ProjectListPageContent() {
                   />
                 </Col>
               </Row>
-              <div className="project-list-sidebar-survey-wrapper visible-xs">
+              <div
+                className={classnames(
+                  'project-list-sidebar-survey-wrapper',
+                  bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
+                )}
+              >
                 <SurveyWidget />
               </div>
               <div className="visible-xs mt-1">
@@ -199,10 +205,12 @@ function DashApiError() {
         xs={{ span: 8, offset: 2 }}
         bs3Props={{ xs: 8, xsOffset: 2 }}
         aria-live="polite"
-        className="text-center"
       >
-        <div className="alert alert-danger">
-          {t('generic_something_went_wrong')}
+        <div className="notification-list">
+          <Notification
+            content={t('generic_something_went_wrong')}
+            type="error"
+          />
         </div>
       </OLCol>
     </Row>

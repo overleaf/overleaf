@@ -28,6 +28,8 @@ export function bs3ButtonProps(props: ButtonProps) {
     disabled: props.isLoading || props.disabled,
     form: props.form,
     href: props.href,
+    target: props.target,
+    rel: props.rel,
     onClick: props.onClick,
     type: props.type,
   }

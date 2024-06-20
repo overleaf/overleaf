@@ -67,10 +67,10 @@ describe('<ProjectsActionModal />', function () {
     await waitFor(() => {
       const alerts = screen.getAllByRole('alert')
       expect(alerts.length).to.equal(2)
-      expect(alerts[0].textContent).to.equal(
+      expect(alerts[0].textContent).to.contain(
         `${projectsData[2].name}Something went wrong. Please try again.`
       )
-      expect(alerts[1].textContent).to.equal(
+      expect(alerts[1].textContent).to.contain(
         `${projectsData[3].name}Something went wrong. Please try again.`
       )
     })

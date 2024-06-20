@@ -1,8 +1,7 @@
-import { Button } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import Notification from '../../notification'
 import type { NotificationGroupInvitation } from '../../../../../../../../types/project/dashboard/notification'
-import getMeta from '@/utils/meta'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type GroupInvitationNotificationProps = {
   acceptGroupInvite: () => void
@@ -18,16 +17,15 @@ export default function GroupInvitationNotificationJoin({
   dismissGroupInviteNotification,
 }: GroupInvitationNotificationProps) {
   const { t } = useTranslation()
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const {
     messageOpts: { inviterName },
   } = notification
 
   return (
     <Notification
-      bsStyle="info"
+      type="info"
       onDismiss={dismissGroupInviteNotification}
-      body={
+      content={
         <Trans
           i18nKey="invited_to_group"
           values={{ inviterName }}
@@ -40,15 +38,13 @@ export default function GroupInvitationNotificationJoin({
         />
       }
       action={
-        <Button
-          bsStyle={newNotificationStyle ? null : 'info'}
-          bsSize="sm"
-          className={newNotificationStyle ? 'btn-secondary' : 'pull-right'}
+        <OLButton
+          variant="secondary"
           onClick={acceptGroupInvite}
           disabled={isAcceptingInvitation}
         >
           {t('join_now')}
-        </Button>
+        </OLButton>
       }
     />
   )

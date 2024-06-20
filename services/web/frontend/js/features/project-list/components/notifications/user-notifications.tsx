@@ -10,7 +10,6 @@ import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
-import classNames from 'classnames'
 import GeoBanners from './geo-banners'
 import AccessibilitySurveyBanner from './accessibility-survey-banner'
 
@@ -23,7 +22,6 @@ const EnrollmentNotification: JSXElementConstructor<{
 }> = enrollmentNotificationModule?.import.default
 
 function UserNotifications() {
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const groupSubscriptionsPendingEnrollment =
     getMeta('ol-groupSubscriptionsPendingEnrollment') || []
   const user = getMeta('ol-user')
@@ -54,11 +52,7 @@ function UserNotifications() {
   const [dismissedWritefull, setDismissedWritefull] = useState(false)
 
   return (
-    <div
-      className={classNames('user-notifications', {
-        'notification-list': newNotificationStyle,
-      })}
-    >
+    <div className="user-notifications notification-list">
       <ul className="list-unstyled">
         {EnrollmentNotification &&
           groupSubscriptionsPendingEnrollment.map(subscription => (

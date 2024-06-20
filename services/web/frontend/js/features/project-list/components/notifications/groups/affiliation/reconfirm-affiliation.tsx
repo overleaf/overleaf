@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import Icon from '../../../../../../shared/components/icon'
 import getMeta from '../../../../../../utils/meta'
 import useAsync from '../../../../../../shared/hooks/use-async'
@@ -12,6 +11,8 @@ import { UserEmailData } from '../../../../../../../../types/user-email'
 import { Institution } from '../../../../../../../../types/institution'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import Notification from '@/features/project-list/components/notifications/notification'
 
 type ReconfirmAffiliationProps = {
   email: UserEmailData['email']
@@ -24,7 +25,6 @@ function ReconfirmAffiliation({
 }: ReconfirmAffiliationProps) {
   const { t } = useTranslation()
   const { samlInitPath } = getMeta('ol-ExposedSettings')
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const { error, isLoading, isError, isSuccess, runAsync } = useAsync()
   const [hasSent, setHasSent] = useState(false)
   const [isPending, setIsPending] = useState(false)
@@ -57,91 +57,108 @@ function ReconfirmAffiliation({
 
   if (hasSent) {
     return (
-      <div className="w-100">
-        <Trans
-          i18nKey="please_check_your_inbox_to_confirm"
-          components={[<b />]} // eslint-disable-line react/jsx-key
-          values={{ institutionName: institution.name }}
-          shouldUnescape
-          tOptions={{ interpolation: { escapeValue: true } }}
-        />
-        &nbsp;
-        {isLoading ? (
+      <Notification
+        type="info"
+        content={
           <>
-            <Icon type="refresh" spin fw /> {t('sending')}&hellip;
+            <Trans
+              i18nKey="please_check_your_inbox_to_confirm"
+              components={[<b />]} // eslint-disable-line react/jsx-key
+              values={{ institutionName: institution.name }}
+              shouldUnescape
+              tOptions={{ interpolation: { escapeValue: true } }}
+            />
+            &nbsp;
+            {isError && (
+              <>
+                <br />
+                <div>
+                  {rateLimited
+                    ? t('too_many_requests')
+                    : t('generic_something_went_wrong')}
+                </div>
+              </>
+            )}
           </>
-        ) : (
-          <Button
+        }
+        action={
+          <OLButton
+            variant="link"
+            onClick={handleRequestReconfirmation}
             className="btn-inline-link"
             disabled={isLoading}
-            onClick={handleRequestReconfirmation}
+            isLoading={isLoading}
+            bs3Props={{
+              loading: isLoading ? (
+                <>
+                  <Icon type="refresh" spin fw /> {t('sending')}&hellip;
+                </>
+              ) : null,
+            }}
           >
             {t('resend_confirmation_email')}
-          </Button>
-        )}
-        {isError && (
-          <>
-            <br />
-            <div>
-              {rateLimited
-                ? t('too_many_requests')
-                : t('generic_something_went_wrong')}
-            </div>
-          </>
-        )}
-      </div>
+          </OLButton>
+        }
+      />
     )
   }
 
   return (
-    <div className="w-100">
-      {!newNotificationStyle && <Icon type="warning" />}
-      <Button
-        bsStyle="info"
-        bsSize="sm"
-        className="btn-reconfirm"
-        onClick={handleRequestReconfirmation}
-        disabled={isLoading || isPending}
-      >
-        {isLoading ? (
-          <>
-            <Icon type="refresh" spin fw /> {t('sending')}&hellip;
-          </>
-        ) : (
-          t('confirm_affiliation')
-        )}
-      </Button>
-      <Trans
-        i18nKey="are_you_still_at"
-        components={[<b />]} // eslint-disable-line react/jsx-key
-        values={{ institutionName: institution.name }}
-        shouldUnescape
-        tOptions={{ interpolation: { escapeValue: true } }}
-      />
-      &nbsp;
-      <Trans
-        i18nKey="please_reconfirm_institutional_email"
-        /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
-        components={[<a href={`/user/settings?remove=${email}`} />]}
-      />
-      &nbsp;
-      <a
-        href="/learn/how-to/Institutional_Email_Reconfirmation"
-        target="_blank"
-      >
-        {t('learn_more')}
-      </a>
-      {isError && (
+    <Notification
+      type="info"
+      content={
         <>
-          <br />
-          <div>
-            {rateLimited
-              ? t('too_many_requests')
-              : t('generic_something_went_wrong')}
-          </div>
+          <Trans
+            i18nKey="are_you_still_at"
+            components={[<b />]} // eslint-disable-line react/jsx-key
+            values={{ institutionName: institution.name }}
+            shouldUnescape
+            tOptions={{ interpolation: { escapeValue: true } }}
+          />
+          &nbsp;
+          <Trans
+            i18nKey="please_reconfirm_institutional_email"
+            /* eslint-disable-next-line jsx-a11y/anchor-has-content, react/jsx-key */
+            components={[<a href={`/user/settings?remove=${email}`} />]}
+          />
+          &nbsp;
+          <a
+            href="/learn/how-to/Institutional_Email_Reconfirmation"
+            target="_blank"
+          >
+            {t('learn_more')}
+          </a>
+          {isError && (
+            <>
+              <br />
+              <div>
+                {rateLimited
+                  ? t('too_many_requests')
+                  : t('generic_something_went_wrong')}
+              </div>
+            </>
+          )}
         </>
-      )}
-    </div>
+      }
+      action={
+        <OLButton
+          variant="secondary"
+          bs3Props={{
+            loading:
+              isLoading || isPending ? (
+                <>
+                  <Icon type="refresh" spin fw /> {t('sending')}&hellip;
+                </>
+              ) : null,
+          }}
+          isLoading={isLoading || isPending}
+          disabled={isLoading || isPending}
+          onClick={handleRequestReconfirmation}
+        >
+          {t('confirm_affiliation')}
+        </OLButton>
+      }
+    />
   )
 }
 

@@ -1,16 +1,14 @@
 import { Fragment } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import Notification from '../notification'
-import Icon from '../../../../../shared/components/icon'
 import getMeta from '../../../../../utils/meta'
 import useAsyncDismiss from '../hooks/useAsyncDismiss'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function Institution() {
   const { t } = useTranslation()
   const { samlInitPath, appName } = getMeta('ol-ExposedSettings')
   const notificationsInstitution = getMeta('ol-notificationsInstitution') || []
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
   const { handleDismiss } = useAsyncDismiss()
 
   if (!notificationsInstitution.length) {
@@ -36,10 +34,9 @@ function Institution() {
           <Fragment key={index}>
             {templateKey === 'notification_institution_sso_available' && (
               <Notification
-                bsStyle="info"
-                body={
+                type="info"
+                content={
                   <>
-                    {' '}
                     <p>
                       <Trans
                         i18nKey="can_link_institution_email_acct_to_institution_acct"
@@ -67,22 +64,20 @@ function Institution() {
                   </>
                 }
                 action={
-                  <Button
-                    bsStyle={newNotificationStyle ? null : 'info'}
-                    className={newNotificationStyle ? 'btn-secondary' : ''}
-                    bsSize="sm"
+                  <OLButton
+                    variant="secondary"
                     href={`${samlInitPath}?university_id=${institutionId}&auto=/project&email=${email}`}
                   >
                     {t('link_account')}
-                  </Button>
+                  </OLButton>
                 }
               />
             )}
             {templateKey === 'notification_institution_sso_linked' && (
               <Notification
-                bsStyle="info"
+                type="info"
                 onDismiss={() => id && handleDismiss(id)}
-                body={
+                content={
                   <Trans
                     i18nKey="account_has_been_link_to_institution_account"
                     components={{ b: <b /> }}
@@ -95,15 +90,10 @@ function Institution() {
             )}
             {templateKey === 'notification_institution_sso_non_canonical' && (
               <Notification
-                bsStyle="warning"
+                type="warning"
                 onDismiss={() => id && handleDismiss(id)}
-                body={
+                content={
                   <>
-                    {!newNotificationStyle && (
-                      <>
-                        <Icon type="exclamation-triangle" fw />{' '}
-                      </>
-                    )}
                     <Trans
                       i18nKey="tried_to_log_in_with_email"
                       components={{ b: <b /> }}
@@ -125,9 +115,9 @@ function Institution() {
             {templateKey ===
               'notification_institution_sso_already_registered' && (
               <Notification
-                bsStyle="info"
+                type="info"
                 onDismiss={() => id && handleDismiss(id)}
-                body={
+                content={
                   <>
                     <Trans
                       i18nKey="tried_to_register_with_email"
@@ -140,29 +130,22 @@ function Institution() {
                   </>
                 }
                 action={
-                  <Button
-                    bsStyle={newNotificationStyle ? null : 'info'}
-                    className={newNotificationStyle ? 'btn-secondary' : ''}
-                    bsSize="sm"
+                  <OLButton
+                    variant="secondary"
                     href="/learn/how-to/Institutional_Login"
                     target="_blank"
                   >
                     {t('find_out_more')}
-                  </Button>
+                  </OLButton>
                 }
               />
             )}
             {templateKey === 'notification_institution_sso_error' && (
               <Notification
-                bsStyle="danger"
+                type="error"
                 onDismiss={() => id && handleDismiss(id)}
-                body={
+                content={
                   <>
-                    {!newNotificationStyle && (
-                      <>
-                        <Icon type="exclamation-triangle" fw />{' '}
-                      </>
-                    )}
                     {t('generic_something_went_wrong')}.
                     <div>
                       {error?.translatedMessage

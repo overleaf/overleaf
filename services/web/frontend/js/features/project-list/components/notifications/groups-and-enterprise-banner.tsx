@@ -9,6 +9,7 @@ import {
   GroupsAndEnterpriseBannerVariant,
   GroupsAndEnterpriseBannerVariants,
 } from '../../../../../../types/project/dashboard/notification'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type urlForVariantsType = {
   [key in GroupsAndEnterpriseBannerVariant]: string // eslint-disable-line no-unused-vars
@@ -31,7 +32,6 @@ export default function GroupsAndEnterpriseBanner() {
   const groupsAndEnterpriseBannerVariant = getMeta(
     'ol-groupsAndEnterpriseBannerVariant'
   )
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   const hasDismissedGroupsAndEnterpriseBanner = hasRecentlyDismissedBanner()
 
@@ -73,23 +73,19 @@ export default function GroupsAndEnterpriseBanner() {
 
   return (
     <Notification
-      bsStyle="info"
+      type="info"
       onDismiss={handleClose}
-      body={<BannerContent variant={groupsAndEnterpriseBannerVariant} />}
+      content={<BannerContent variant={groupsAndEnterpriseBannerVariant} />}
       action={
-        <a
-          className={
-            newNotificationStyle
-              ? 'btn btn-secondary btn-sm'
-              : 'pull-right btn btn-info btn-sm'
-          }
+        <OLButton
+          variant="secondary"
           href={contactSalesUrl}
           target="_blank"
           rel="noreferrer"
           onClick={handleClickContact}
         >
           {t('contact_sales')}
-        </a>
+        </OLButton>
       }
     />
   )

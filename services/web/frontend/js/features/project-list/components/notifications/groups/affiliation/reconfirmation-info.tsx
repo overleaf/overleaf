@@ -12,17 +12,10 @@ function ReconfirmationInfo() {
     <>
       {allInReconfirmNotificationPeriods.map(userEmail =>
         userEmail.affiliation?.institution ? (
-          <Notification
+          <ReconfirmAffiliation
+            email={userEmail.email}
+            institution={userEmail.affiliation.institution}
             key={`reconfirmation-period-email-${userEmail.email}`}
-            bsStyle="info"
-            body={
-              <div className="reconfirm-notification">
-                <ReconfirmAffiliation
-                  email={userEmail.email}
-                  institution={userEmail.affiliation.institution}
-                />
-              </div>
-            }
           />
         ) : null
       )}
@@ -31,9 +24,9 @@ function ReconfirmationInfo() {
         userEmail.affiliation?.institution ? (
           <Notification
             key={`samlIdentifier-email-${userEmail.email}`}
-            bsStyle="info"
+            type="info"
             onDismiss={() => {}}
-            body={
+            content={
               <ReconfirmationInfoSuccess
                 institution={userEmail.affiliation?.institution}
               />

@@ -168,3 +168,54 @@
     }
   }
 }
+
+.survey-notification {
+  display: flex;
+  flex-wrap: wrap;
+  padding: var(--spacing-06);
+  background-color: var(--bg-dark-tertiary);
+  border-color: transparent;
+  color: var(--neutral-20);
+  box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.25);
+  border-radius: var(--border-radius-base);
+
+  @include media-breakpoint-up(md) {
+    flex-wrap: nowrap;
+  }
+
+  button.close {
+    @extend .text-white;
+    padding: 0;
+    -webkit-appearance: none;
+  }
+}
+
+.project-list-sidebar-survey-wrapper {
+  position: sticky;
+  bottom: 0;
+
+  .survey-notification {
+    font-size: var(--font-size-02);
+
+    a {
+      text-decoration: none;
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    position: static;
+    margin-top: var(--spacing-05);
+
+    .survey-notification {
+      font-size: unset;
+
+      .project-list-sidebar-survey-link {
+        display: block;
+        align-items: center;
+        min-width: 48px;
+        min-height: 48px;
+        padding-top: var(--spacing-07);
+      }
+    }
+  }
+}

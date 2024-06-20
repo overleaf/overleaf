@@ -1,6 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Alert,
   Button,
   ControlLabel,
   FormControl,
@@ -18,7 +17,6 @@ import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import { isSmallDevice } from '../../../../infrastructure/event-tracking'
 import Notification from '@/shared/components/notification'
-import getMeta from '@/utils/meta'
 
 type RenameProjectModalProps = {
   handleCloseModal: () => void
@@ -36,7 +34,6 @@ function RenameProjectModal({
   const { error, isError, isLoading, runAsync } = useAsync()
   const { toggleSelectedProject, updateProjectViewData } =
     useProjectListContext()
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   useEffect(() => {
     if (showModal) {
@@ -99,19 +96,14 @@ function RenameProjectModal({
         <Modal.Title>{t('rename_project')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {isError &&
-          (newNotificationStyle ? (
-            <div className="notification-list">
-              <Notification
-                type="error"
-                content={getUserFacingMessage(error) as string}
-              />
-            </div>
-          ) : (
-            <Alert bsStyle="danger" className="text-center" aria-live="polite">
-              {getUserFacingMessage(error)}
-            </Alert>
-          ))}
+        {isError && (
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={getUserFacingMessage(error) as string}
+            />
+          </div>
+        )}
         <form id="rename-project-form" onSubmit={handleSubmit}>
           <FormGroup>
             <ControlLabel htmlFor="rename-project-form-name">

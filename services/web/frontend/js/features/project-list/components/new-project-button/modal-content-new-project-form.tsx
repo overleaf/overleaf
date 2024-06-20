@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import useAsync from '../../../../shared/hooks/use-async'
 import {
@@ -8,7 +7,6 @@ import {
 } from '../../../../infrastructure/fetch-json'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { useLocation } from '../../../../shared/hooks/use-location'
-import getMeta from '@/utils/meta'
 import Notification from '@/shared/components/notification'
 import {
   OLModalBody,
@@ -42,7 +40,6 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
   const [projectName, setProjectName] = useState('')
   const { isLoading, isError, error, runAsync } = useAsync<NewProjectData>()
   const location = useLocation()
-  const newNotificationStyle = getMeta('ol-newNotificationStyle')
 
   const createNewProject = () => {
     runAsync(
@@ -77,17 +74,14 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
       </OLModalHeader>
 
       <OLModalBody>
-        {isError &&
-          (newNotificationStyle ? (
-            <div className="notification-list">
-              <Notification
-                type="error"
-                content={getUserFacingMessage(error) as string}
-              />
-            </div>
-          ) : (
-            <Alert bsStyle="danger">{getUserFacingMessage(error)}</Alert>
-          ))}
+        {isError && (
+          <div className="notification-list">
+            <Notification
+              type="error"
+              content={getUserFacingMessage(error) as string}
+            />
+          </div>
+        )}
         <OLForm onSubmit={handleSubmit}>
           <OLFormControl
             type="text"

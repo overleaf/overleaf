@@ -49,10 +49,9 @@ export default function IEEERetirementBanner({
 
   return (
     <Notification
-      bsStyle="warning"
+      type="warning"
       onDismiss={handleClose}
-      newNotificationStyle
-      body={
+      content={
         <Trans
           i18nKey="notification_ieee_collabratec_retirement_message"
           components={[

@@ -3,6 +3,7 @@ import Notification from './notification'
 import { sendMB } from '@/infrastructure/event-tracking'
 import customLocalStorage from '@/infrastructure/local-storage'
 import WritefullLogo from '@/shared/svgs/writefull-logo'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 const eventSegmentation = {
   location: 'dashboard-banner',
@@ -33,10 +34,9 @@ function WritefullPremiumPromoBanner({
   return (
     <div data-testid="writefull-premium-promo-banner">
       <Notification
-        bsStyle="info"
-        newNotificationStyle
+        type="info"
         onDismiss={handleClose}
-        body={
+        content={
           <>
             Enjoying Writefull? Get <strong>10% off Writefull Premium</strong>,
             giving you access to TeXGPT—AI assistance to generate LaTeX code.
@@ -44,8 +44,8 @@ function WritefullPremiumPromoBanner({
           </>
         }
         action={
-          <a
-            className="btn btn-secondary btn-sm"
+          <OLButton
+            variant="secondary"
             href="https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans"
             target="_blank"
             rel="noreferrer"
@@ -55,7 +55,7 @@ function WritefullPremiumPromoBanner({
           >
             <WritefullLogo width="16" height="16" />{' '}
             <span>Get Writefull Premium</span>
-          </a>
+          </OLButton>
         }
       />
     </div>

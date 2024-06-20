@@ -15,7 +15,7 @@ export type NotificationProps = {
   ariaLive?: 'polite' | 'off' | 'assertive'
   className?: string
   content: React.ReactNode
-  customIcon?: React.ReactElement
+  customIcon?: React.ReactElement | null
   disclaimer?: React.ReactElement | string
   isDismissible?: boolean
   isActionBelowContent?: boolean
@@ -78,6 +78,8 @@ function Notification({
     if (onDismiss) onDismiss()
   }
 
+  // return null
+
   if (!show) {
     return null
   }
@@ -89,7 +91,9 @@ function Notification({
       role="alert"
       id={id}
     >
-      <NotificationIcon notificationType={type} customIcon={customIcon} />
+      {customIcon !== null && (
+        <NotificationIcon notificationType={type} customIcon={customIcon} />
+      )}
 
       <div className="notification-content-and-cta">
         <div className="notification-content">

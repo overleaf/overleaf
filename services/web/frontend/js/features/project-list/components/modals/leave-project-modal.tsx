@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ProjectsActionModal from './projects-action-modal'
-import Icon from '../../../../shared/components/icon'
 import ProjectsList from './projects-list'
+import Notification from '@/shared/components/notification'
 
 type LeaveProjectModalProps = Pick<
   React.ComponentProps<typeof ProjectsActionModal>,
@@ -41,10 +41,10 @@ function LeaveProjectModal({
     >
       <p>{t('about_to_leave_projects')}</p>
       <ProjectsList projects={projects} projectsToDisplay={projectsToDisplay} />
-      <div className="project-action-alert alert alert-warning">
-        <Icon type="exclamation-triangle" fw />{' '}
-        {t('this_action_cannot_be_undone')}
-      </div>
+      <Notification
+        content={t('this_action_cannot_be_undone')}
+        type="warning"
+      />
     </ProjectsActionModal>
   )
 }
