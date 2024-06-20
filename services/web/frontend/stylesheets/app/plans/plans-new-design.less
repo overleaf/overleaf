@@ -506,10 +506,10 @@
 
   // ------------------------------------------------------------------
   // ------------------------------------------------------------------
-  // These comments will be deleted before merging this PR
+  // These comments will be deleted when the cards section is completed for mobile screens.
   // Below is the styling for plans cards on mobile screen
 
-  .mobile-plans-card-container {
+  .plans-card-container-mobile {
     width: 100%;
 
     .mt-spacing-06 {
@@ -520,7 +520,7 @@
       border: 2px solid @green-50 !important;
     }
 
-    .mobile-plans-card {
+    .plans-card-mobile {
       padding: @spacing-09;
       border: 2px solid @neutral-20;
       width: 100%; // might need max-width
@@ -528,14 +528,14 @@
       display: flex;
       flex-direction: column;
 
-      .plans-name {
+      .plans-card-title-mobile {
         color: @neutral-90;
         font-size: @font-size-05; // 20px
         font-weight: 600;
         line-height: @line-height-04;
       }
 
-      .old-price {
+      .old-price-plans-card-mobile {
         padding: @spacing-04 0 0 0;
         color: @neutral-40;
         font-size: @font-size-04; // 18px
@@ -544,10 +544,10 @@
         margin-bottom: -@spacing-04;
       }
 
-      .price-container {
+      .plans-card-price-container-mobile {
         display: flex;
         align-items: baseline;
-        .price {
+        .plans-card-price-mobile {
           color: @neutral-90;
           font-size: @font-size-08; // 36px
           font-weight: 600;
@@ -562,13 +562,13 @@
         line-height: @line-height-02;
       }
 
-      .description {
+      .plans-card-description-mobile {
         .green-round-background {
           width: 20px;
           height: 20px;
         }
 
-        .bullets {
+        .plans-card-description-list-mobile {
           list-style-type: none;
           padding-left: 0;
           margin-bottom: unset;
@@ -578,7 +578,7 @@
           }
         }
 
-        .cta-buy-now {
+        .plans-card-cta-buy-now-mobile {
           width: 100%;
           margin-top: @spacing-08;
           line-height: @line-height-03;
