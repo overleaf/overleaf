@@ -54,10 +54,12 @@ function PdfLogEntry({
         window.addEventListener('editor:view-compile-log-entry', event => {
           if (event.detail.id === id) {
             element.scrollIntoView({ block: 'start', inline: 'nearest' })
-          }
 
-          if (event.detail.suggestFix) {
-            element.querySelector('button[data-action="suggest-fix"]')?.click()
+            if (event.detail.suggestFix) {
+              element
+                .querySelector('button[data-action="suggest-fix"]')
+                ?.click()
+            }
           }
         })
       }
