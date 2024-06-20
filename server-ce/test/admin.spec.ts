@@ -43,7 +43,7 @@ describe('admin panel', function () {
         cy.get('nav').findByText('Manage Site').click()
       })
 
-      it.skip('publish and clear admin messages', () => {
+      it('publish and clear admin messages', () => {
         const message = 'Admin Message ' + uuid()
 
         cy.log('create system message')
