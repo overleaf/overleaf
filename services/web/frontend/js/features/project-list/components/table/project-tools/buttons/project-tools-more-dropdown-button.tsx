@@ -12,7 +12,10 @@ function ProjectToolsMoreDropdownButton() {
       <Dropdown.Toggle bsStyle={null} className="btn-secondary">
         {t('more')}
       </Dropdown.Toggle>
-      <Dropdown.Menu className="dropdown-menu-right">
+      <Dropdown.Menu
+        className="dropdown-menu-right"
+        data-testid="project-tools-more-dropdown-menu"
+      >
         <RenameProjectMenuItem />
         <CopyProjectMenuItem />
       </Dropdown.Menu>

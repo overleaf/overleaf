@@ -97,6 +97,8 @@ export const trashedAndNotOwnedProject = <Project>{
 
 export const sharedProject = archiveableProject
 
+export const ownedProject = copyableProject
+
 export const projectsData: Array<Project> = [
   copyableProject,
   archiveableProject,

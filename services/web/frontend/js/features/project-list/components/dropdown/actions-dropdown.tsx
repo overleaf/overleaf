@@ -12,6 +12,7 @@ import LeaveProjectButton from '../table/cells/action-buttons/leave-project-butt
 import DeleteProjectButton from '../table/cells/action-buttons/delete-project-button'
 import { Project } from '../../../../../../types/project/dashboard/api'
 import CompileAndDownloadProjectPDFButton from '../table/cells/action-buttons/compile-and-download-project-pdf-button'
+import RenameProjectButton from '../table/cells/action-buttons/rename-project-button'
 
 type ActionButtonProps = {
   project: Project
@@ -194,6 +195,26 @@ function DeleteProjectButtonMenuItem({ project, onClick }: ActionButtonProps) {
   )
 }
 
+function RenameProjectButtonMenuItem({ project, onClick }: ActionButtonProps) {
+  const handleClick = (handleOpenModal: () => void) => {
+    handleOpenModal()
+    onClick()
+  }
+  return (
+    <RenameProjectButton project={project}>
+      {(text, handleOpenModal) => (
+        <MenuItemButton
+          onClick={() => handleClick(handleOpenModal)}
+          className="projects-action-menu-item"
+        >
+          <Icon type="pencil" className="menu-item-button-icon" />{' '}
+          <span className="menu-item-button-text">{text}</span>
+        </MenuItemButton>
+      )}
+    </RenameProjectButton>
+  )
+}
+
 type ActionDropdownProps = {
   project: Project
 }
@@ -216,6 +237,7 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
         <Icon type="ellipsis-h" fw />
       </Dropdown.Toggle>
       <Dropdown.Menu className="projects-dropdown-menu text-left">
+        <RenameProjectButtonMenuItem project={project} onClick={handleClose} />
         <CopyProjectButtonMenuItem project={project} onClick={handleClose} />
         <DownloadProjectButtonMenuItem
           project={project}

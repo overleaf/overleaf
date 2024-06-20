@@ -64,14 +64,20 @@ describe('<ProjectTools />', function () {
     render(<ProjectListRootInner />)
     screen.getByLabelText('Select Starfleet Report (readAndWrite)').click()
     screen.getByRole('button', { name: 'More' }).click()
-    expect(screen.queryByRole('menuitem', { name: 'Rename' })).to.be.null
+    expect(
+      within(
+        screen.getByTestId('project-tools-more-dropdown-menu')
+      ).queryByRole('menuitem', { name: 'Rename' })
+    ).to.be.null
   })
 
   it('displays the Rename option for a project owned by the current user', function () {
     render(<ProjectListRootInner />)
     screen.getByLabelText('Select Starfleet Report (owner)').click()
     screen.getByRole('button', { name: 'More' }).click()
-    screen.getByRole('menuitem', { name: 'Rename' }).click()
+    within(screen.getByTestId('project-tools-more-dropdown-menu'))
+      .getByRole('menuitem', { name: 'Rename' })
+      .click()
     within(screen.getByRole('dialog')).getByText('Rename Project')
   })
 })
