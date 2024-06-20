@@ -103,6 +103,7 @@ function ProjectListPageContent() {
                 <ProjectListTitle
                   filter={filter}
                   selectedTag={selectedTag}
+                  selectedTagId={selectedTagId}
                   className="hidden-xs text-truncate"
                 />
                 <div className="project-tools">

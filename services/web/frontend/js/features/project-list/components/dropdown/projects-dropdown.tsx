@@ -61,7 +61,7 @@ function ProjectsDropdown() {
     }
 
     if (selectedTagId === UNCATEGORIZED_KEY) {
-      setTitle(t('uncategorized'))
+      setTitle(t('uncategorized_projects'))
     } else {
       const tag = tags.find(({ _id: id }) => id === selectedTagId)
 

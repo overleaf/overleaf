@@ -2085,6 +2085,7 @@
   "unable_to_extract_the_supplied_zip_file": "Opening this content on Overleaf failed because the zip file could not be extracted. Please ensure that it is a valid zip file. If this keeps happening for links on a particular site, please report this to them.",
   "unarchive": "Restore",
   "uncategorized": "Uncategorized",
+  "uncategorized_projects": "Uncategorized Projects",
   "unconfirmed": "Unconfirmed",
   "undelete": "Undelete",
   "undeleting": "Undeleting",
