@@ -50,6 +50,10 @@ function RenameProjectModal({
     [newProjectName, project]
   )
 
+  useEffect(() => {
+    setNewProjectName(project.name)
+  }, [project.name])
+
   const handleSubmit = useCallback(
     event => {
       event.preventDefault()
