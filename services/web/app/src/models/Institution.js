@@ -14,6 +14,7 @@ const InstitutionSchema = new Schema(
       optedOutUserIds: [{ type: ObjectId, ref: 'User' }],
       lastSent: { type: Date },
     },
+    groupPolicy: { type: ObjectId, ref: 'GroupPolicy' },
   },
   { minimize: false }
 )

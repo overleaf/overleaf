@@ -12,7 +12,7 @@ describe('PermissionsManager', function () {
         '../../infrastructure/Modules': (this.Modules = {
           promises: {
             hooks: {
-              fire: (this.hooksFire = sinon.stub().resolves([{}])),
+              fire: (this.hooksFire = sinon.stub().resolves([[]])),
             },
           },
         }),
@@ -399,7 +399,6 @@ describe('PermissionsManager', function () {
       )
     })
   })
-
   describe('checkUserPermissions', function () {
     describe('allowed', function () {
       it('should not error when managedUsersEnabled is not enabled for user', async function () {
@@ -416,10 +415,12 @@ describe('PermissionsManager', function () {
           default: true,
         })
         this.hooksFire.resolves([
-          {
-            managedUsersEnabled: true,
-            groupPolicy: {},
-          },
+          [
+            {
+              managedUsersEnabled: true,
+              groupPolicy: {},
+            },
+          ],
         ])
         const result =
           await this.PermissionsManager.promises.checkUserPermissions(
@@ -437,12 +438,14 @@ describe('PermissionsManager', function () {
           'some-policy-to-check': true,
         })
         this.hooksFire.resolves([
-          {
-            managedUsersEnabled: true,
-            groupPolicy: {
-              userCanDoSomePolicy: true,
+          [
+            {
+              managedUsersEnabled: true,
+              groupPolicy: {
+                userCanDoSomePolicy: true,
+              },
             },
-          },
+          ],
         ])
         const result =
           await this.PermissionsManager.promises.checkUserPermissions(
@@ -455,7 +458,7 @@ describe('PermissionsManager', function () {
 
     describe('not allowed', function () {
       it('should return error when managedUsersEnabled is enabled for user but there is no group policy', async function () {
-        this.hooksFire.resolves([{ managedUsersEnabled: true }])
+        this.hooksFire.resolves([[{ managedUsersEnabled: true }]])
         await expect(
           this.PermissionsManager.promises.checkUserPermissions(
             { _id: 'user123' },
@@ -469,10 +472,12 @@ describe('PermissionsManager', function () {
           default: false,
         })
         this.hooksFire.resolves([
-          {
-            managedUsersEnabled: true,
-            groupPolicy: {},
-          },
+          [
+            {
+              managedUsersEnabled: true,
+              groupPolicy: {},
+            },
+          ],
         ])
         await expect(
           this.PermissionsManager.promises.checkUserPermissions(
@@ -490,10 +495,12 @@ describe('PermissionsManager', function () {
           'some-policy-to-check': false,
         })
         this.hooksFire.resolves([
-          {
-            managedUsersEnabled: true,
-            groupPolicy: { userCannotDoSomePolicy: true },
-          },
+          [
+            {
+              managedUsersEnabled: true,
+              groupPolicy: { userCannotDoSomePolicy: true },
+            },
+          ],
         ])
         await expect(
           this.PermissionsManager.promises.checkUserPermissions(
@@ -501,6 +508,212 @@ describe('PermissionsManager', function () {
             ['some-policy-to-check']
           )
         ).to.be.rejectedWith(ForbiddenError)
+      })
+    })
+  })
+
+  describe('registerAllowedProperty', function () {
+    it('allows us to register a property', async function () {
+      this.PermissionsManager.registerAllowedProperty('metadata1')
+      const result = await this.PermissionsManager.getAllowedProperties()
+      expect(result).to.deep.equal(new Set(['metadata1']))
+    })
+
+    // used if multiple modules would require the same prop, since we dont know which will load first, both must register
+    it('should handle multiple registrations of the same property', async function () {
+      this.PermissionsManager.registerAllowedProperty('metadata1')
+      this.PermissionsManager.registerAllowedProperty('metadata1')
+      const result = await this.PermissionsManager.getAllowedProperties()
+      expect(result).to.deep.equal(new Set(['metadata1']))
+    })
+  })
+
+  describe('combineAllowedProperties', function () {
+    it('should handle multiple occurences of the same property, preserving the first occurence', async function () {
+      const policy1 = {
+        groupPolicy: {
+          policy: false,
+        },
+        prop1: 'some other value here',
+      }
+      const policy2 = {
+        groupPolicy: {
+          policy: false,
+        },
+        prop1: 'some value here',
+      }
+
+      const results = [policy1, policy2]
+      this.PermissionsManager.registerAllowedProperty('prop1')
+
+      const combinedProps =
+        this.PermissionsManager.combineAllowedProperties(results)
+
+      expect(combinedProps).to.deep.equal({
+        prop1: 'some other value here',
+      })
+    })
+
+    it('should add registered properties to the set', async function () {
+      const policy = {
+        groupPolicy: {
+          policy: false,
+        },
+        prop1: 'some value here',
+        propNotMeThough: 'dont copy please',
+      }
+
+      const policy2 = {
+        groupPolicy: {
+          policy: false,
+        },
+        prop2: 'some value here',
+      }
+
+      const results = [policy, policy2]
+      this.PermissionsManager.registerAllowedProperty('prop1')
+      this.PermissionsManager.registerAllowedProperty('prop2')
+
+      const combinedProps =
+        this.PermissionsManager.combineAllowedProperties(results)
+
+      expect(combinedProps).to.deep.equal({
+        prop1: 'some value here',
+        prop2: 'some value here',
+      })
+    })
+
+    it('should not add unregistered properties to the req object', async function () {
+      const policy = {
+        groupPolicy: {
+          policy: false,
+        },
+        prop1: 'some value here',
+      }
+
+      const policy2 = {
+        groupPolicy: {
+          policy: false,
+        },
+        prop2: 'some value here',
+      }
+      this.PermissionsManager.registerAllowedProperty('prop1')
+
+      const results = [policy, policy2]
+
+      const combinedProps =
+        this.PermissionsManager.combineAllowedProperties(results)
+
+      expect(combinedProps).to.deep.equal({ prop1: 'some value here' })
+    })
+
+    it('should handle an empty array', async function () {
+      const results = []
+
+      const combinedProps =
+        this.PermissionsManager.combineAllowedProperties(results)
+
+      expect(combinedProps).to.deep.equal({})
+    })
+  })
+
+  describe('combineGroupPolicies', function () {
+    it('should return an empty object when an empty array is passed', async function () {
+      const results = []
+
+      const combinedPolicy =
+        this.PermissionsManager.combineGroupPolicies(results)
+      expect(combinedPolicy).to.deep.equal({})
+    })
+
+    it('should combine multiple group policies into a single policy object', async function () {
+      const groupPolicy = {
+        policy1: true,
+      }
+
+      const groupPolicy2 = {
+        policy2: false,
+        policy3: true,
+      }
+      this.PermissionsManager.registerAllowedProperty('prop1')
+
+      const results = [groupPolicy, groupPolicy2]
+
+      const combinedPolicy =
+        this.PermissionsManager.combineGroupPolicies(results)
+
+      expect(combinedPolicy).to.deep.equal({
+        policy1: true,
+        policy3: true,
+      })
+    })
+
+    it('should handle duplicate enforced policies across different group policies', async function () {
+      const groupPolicy = {
+        policy1: false,
+        policy2: true,
+      }
+
+      const groupPolicy2 = {
+        policy2: true,
+        policy3: true,
+      }
+      this.PermissionsManager.registerAllowedProperty('prop1')
+
+      const results = [groupPolicy, groupPolicy2]
+
+      const combinedPolicy =
+        this.PermissionsManager.combineGroupPolicies(results)
+
+      expect(combinedPolicy).to.deep.equal({
+        policy2: true,
+        policy3: true,
+      })
+    })
+
+    it('should handle group policies with no enforced policies', async function () {
+      const groupPolicy = {
+        policy1: false,
+        policy2: false,
+      }
+
+      const groupPolicy2 = {
+        policy2: false,
+        policy3: true,
+      }
+      this.PermissionsManager.registerAllowedProperty('prop1')
+
+      const results = [groupPolicy, groupPolicy2]
+
+      const combinedPolicy =
+        this.PermissionsManager.combineGroupPolicies(results)
+
+      expect(combinedPolicy).to.deep.equal({ policy3: true })
+    })
+
+    it('should choose the stricter option between two policy values', async function () {
+      const groupPolicy = {
+        policy1: false,
+        policy2: true,
+        policy4: true,
+      }
+
+      const groupPolicy2 = {
+        policy2: false,
+        policy3: true,
+        policy4: false,
+      }
+      this.PermissionsManager.registerAllowedProperty('prop1')
+
+      const results = [groupPolicy, groupPolicy2]
+
+      const combinedPolicy =
+        this.PermissionsManager.combineGroupPolicies(results)
+
+      expect(combinedPolicy).to.deep.equal({
+        policy2: true,
+        policy3: true,
+        policy4: true,
       })
     })
   })

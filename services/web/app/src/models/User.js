@@ -156,6 +156,7 @@ const UserSchema = new Schema(
           zotero: { type: Boolean },
           referencesSearch: { type: Boolean },
           symbolPalette: { type: Boolean },
+          compileAssistant: { type: Boolean },
         },
       },
     ],

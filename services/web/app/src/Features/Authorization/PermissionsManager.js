@@ -48,6 +48,7 @@ const Modules = require('../../infrastructure/Modules')
 const POLICY_TO_CAPABILITY_MAP = new Map()
 const POLICY_TO_VALIDATOR_MAP = new Map()
 const DEFAULT_PERMISSIONS = new Map()
+const ALLOWED_PROPERTIES = new Set()
 
 /**
  * Throws an error if the given capability is not registered.
@@ -126,6 +127,24 @@ function registerPolicy(name, capabilities, options = {}) {
   }
 }
 
+/**
+ * Registers an allowed property that can be added to the request object.
+ *
+ * @param {string} name - The name of the property to register.
+ * @returns {void}
+ */
+function registerAllowedProperty(name) {
+  ALLOWED_PROPERTIES.add(name)
+}
+
+/**
+ * returns the set of allowed properties that have been registered
+ *
+ * @returns {Set} ALLOWED_PROPERTIES
+ */
+function getAllowedProperties() {
+  return ALLOWED_PROPERTIES
+}
 /**
  * Returns an array of policy names that are enforced based on the provided
  * group policy object.
@@ -241,6 +260,41 @@ function getUserCapabilities(groupPolicy) {
 }
 
 /**
+ * Combines an array of group policies into a single policy object.
+ *
+ * @param {Array} groupPolicies - An array of group policies.
+ * @returns {Object} - The combined group policy object.
+ */
+function combineGroupPolicies(groupPolicies) {
+  const combinedGroupPolicy = {}
+  for (const groupPolicy of groupPolicies) {
+    const enforcedPolicyNames = getEnforcedPolicyNames(groupPolicy)
+    for (const enforcedPolicyName of enforcedPolicyNames) {
+      combinedGroupPolicy[enforcedPolicyName] = true
+    }
+  }
+  return combinedGroupPolicy
+}
+
+/**
+ * Combines the allowed properties from an array of property objects.
+ *
+ * @param {Array<Object>} propertyObjects - An array of property objects.
+ * @returns {Object} - An object containing the combined allowed properties.
+ */
+function combineAllowedProperties(propertyObjects) {
+  const userProperties = {}
+  for (const properties of propertyObjects) {
+    for (const [key, value] of Object.entries(properties)) {
+      if (ALLOWED_PROPERTIES.has(key)) {
+        userProperties[key] ??= value
+      }
+    }
+  }
+  return userProperties
+}
+
+/**
  * Returns a set of capabilities that a user does not have based on their group policy.
  *
  * @param {Object} groupPolicy - The group policy object to check.
@@ -317,6 +371,7 @@ async function getUserValidationStatus({ user, groupPolicy, subscription }) {
 
 /**
  * Checks if a user has permission for a given set of capabilities
+ *  as set out in both their current group subscription, and any institutions they are affiliated with
  *
  * @param {Object} user - The user object to retrieve the group policy for.
  *   Only the user's _id is required
@@ -325,21 +380,17 @@ async function getUserValidationStatus({ user, groupPolicy, subscription }) {
  * @throws {Error} If the user does not have permission
  */
 async function checkUserPermissions(user, requiredCapabilities) {
-  const result =
-    (
-      await Modules.promises.hooks.fire(
-        'getManagedUsersEnrollmentForUser',
-        user
-      )
-    )[0] || {}
-  const { groupPolicy, managedUsersEnabled } = result
-  if (!managedUsersEnabled) {
-    return
-  }
-  // check that the user has all the required capabilities
+  let results = await Modules.promises.hooks.fire('getGroupPolicyForUser', user)
+  results = results.flat()
+
+  if (!results?.length) return
+
+  // get the combined group policy applying to the user
+  const groupPolicies = results.map(result => result.groupPolicy)
+  const combinedGroupPolicy = combineGroupPolicies(groupPolicies)
   for (const requiredCapability of requiredCapabilities) {
     // if the user has the permission, continue
-    if (!hasPermission(groupPolicy, requiredCapability)) {
+    if (!hasPermission(combinedGroupPolicy, requiredCapability)) {
       throw new ForbiddenError(
         `user does not have permission for ${requiredCapability}`
       )
@@ -350,6 +401,10 @@ async function checkUserPermissions(user, requiredCapabilities) {
 module.exports = {
   registerCapability,
   registerPolicy,
+  registerAllowedProperty,
+  combineGroupPolicies,
+  combineAllowedProperties,
+  getAllowedProperties,
   hasPermission,
   getUserCapabilities,
   getUserRestrictions,
