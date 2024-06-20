@@ -882,6 +882,7 @@ module.exports = {
     sourceEditorToolbarComponents: [],
     editorPromotions: [],
     langFeedbackLinkingWidgets: [],
+    labsExperiments: [],
     integrationLinkingWidgets: [],
     referenceLinkingWidgets: [],
     importProjectFromGithubModalWrapper: [],

@@ -602,6 +602,11 @@ const _ProjectController = {
         !showPersonalAccessToken &&
         splitTestAssignments['personal-access-token'].variant === 'enabled' // `?personal-access-token=enabled`
 
+      const showAiErrorAssistant =
+        userId &&
+        (!Features.hasFeature('saas') ||
+          (user.features && user.features.aiErrorAssistant))
+
       const template =
         detachRole === 'detached'
           ? 'project/ide-react-detached'
@@ -670,7 +675,7 @@ const _ProjectController = {
         debugPdfDetach,
         showSymbolPalette,
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
-        showAiErrorAssistant: user.alphaProgram, // TODO: labs experiment
+        showAiErrorAssistant,
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,

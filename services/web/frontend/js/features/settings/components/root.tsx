@@ -80,7 +80,6 @@ function SettingsPageContent() {
           {labsEnabled ? (
             <>
               <LabsProgramSection />
-              <hr />
             </>
           ) : null}
           <SessionsSection />

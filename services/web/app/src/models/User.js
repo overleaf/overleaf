@@ -126,6 +126,10 @@ const UserSchema = new Schema(
         type: Boolean,
         default: Settings.defaultFeatures.symbolPalette,
       },
+      // labs feature, which shouldnt have a default as we havent decided pricing model yet
+      aiErrorAssistant: {
+        type: Boolean,
+      },
     },
     featuresOverrides: [
       {
@@ -138,6 +142,7 @@ const UserSchema = new Schema(
         expiresAt: { type: Date },
         note: { type: String },
         features: {
+          aiErrorAssistant: { type: Boolean },
           collaborators: { type: Number },
           versioning: { type: Boolean },
           dropbox: { type: Boolean },

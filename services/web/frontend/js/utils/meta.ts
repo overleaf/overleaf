@@ -1,4 +1,4 @@
-import { User } from '../../../types/user'
+import { User, Features } from '../../../types/user'
 import { User as MinimalUser } from '../../../types/admin/user'
 import { User as ManagedUser } from '../../../types/group-management/user'
 import { UserSettings } from '../../../types/user-settings'
@@ -82,6 +82,7 @@ export interface Meta {
   'ol-emailAddressLimit': number
   'ol-error': { name: string } | undefined
   'ol-expired': boolean
+  'ol-features': Features
   'ol-fromPlansPage': boolean
   'ol-gitBridgeEnabled': boolean
   'ol-gitBridgePublicBaseUrl': string
@@ -118,6 +119,7 @@ export interface Meta {
   'ol-itm_campaign': string
   'ol-itm_content': string
   'ol-itm_referrer': string
+  'ol-labs': boolean
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': string[]

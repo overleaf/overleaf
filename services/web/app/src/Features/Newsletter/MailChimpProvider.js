@@ -23,6 +23,8 @@ function make(listName, listId) {
     subscribe: callbackify(provider.subscribe),
     unsubscribe: callbackify(provider.unsubscribe),
     changeEmail: callbackify(provider.changeEmail),
+    tag: callbackify(provider.tag),
+    removeTag: callbackify(provider.removeTag),
     promises: provider,
   }
 }
@@ -266,6 +268,8 @@ function makeNullProvider(listName) {
     subscribe,
     unsubscribe,
     changeEmail,
+    tag,
+    removeTag,
   }
 
   async function subscribed(user) {
@@ -294,6 +298,18 @@ function makeNullProvider(listName) {
     logger.debug(
       { userId: user._id, newEmail, listName },
       'Not changing email in newsletter for user because no newsletter provider is configured'
+    )
+  }
+  async function tag(user, tag) {
+    logger.debug(
+      { userId: user._id, tag, listName },
+      'Not tagging user because no newsletter provider is configured'
+    )
+  }
+  async function removeTag(user, tag) {
+    logger.debug(
+      { userId: user._id, tag, listName },
+      'Not removing tag for user because no newsletter provider is configured'
     )
   }
 }
