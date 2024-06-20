@@ -1,5 +1,4 @@
-@z-index-plans-new-tabs: 1;
-@z-index-plans-new-tabs-content: 0;
+@import './plans-new-variables.less';
 
 .plans-new-design {
   padding-top: calc(var(--spacing-16) + var(--header-height));
@@ -184,14 +183,6 @@
     }
   }
 
-  @switcher-container-width: 270px;
-  @switcher-container-height: 44px;
-  @switcher-container-border-radius: @switcher-container-height / 2;
-  @switcher-container-padding: 6px;
-  @switcher-padding-vertical: 2px;
-  @switcher-height: @switcher-container-height - 2 * @switcher-container-padding;
-  @switcher-border-radius: @switcher-height / 2;
-
   .plans-new-period-switcher-container {
     display: flex;
     justify-content: center;
@@ -201,7 +192,7 @@
     border-radius: @switcher-container-border-radius;
     padding: @switcher-container-padding;
     margin-top: @spacing-09;
-    margin-bottom: 40px;
+    margin-bottom: @switcher-container-margin-bottom;
 
     .plans-new-period-switcher {
       font-size: var(--font-size-05);
@@ -320,6 +311,7 @@
   }
 
   .plans-new-table-header {
+    position: relative;
     padding: @spacing-06 @spacing-08;
 
     @media (max-width: @screen-md-max) {
@@ -411,6 +403,14 @@
     }
   }
 
+  .plans-new-table-body:last-of-type {
+    .plans-new-table-feature-row {
+      .plans-new-table-feature-td.plans-new-table-highlighted-cell {
+        border-bottom: var(--border-width-base) solid var(--green-50);
+      }
+    }
+  }
+
   .plans-new-table-heading-row {
     // this means min-height, min-height does not work in table layout
     // https://stackoverflow.com/questions/7790222
@@ -468,7 +468,7 @@
         font-size: var(--font-size-02);
         text-align: left;
         background-color: var(--neutral-90);
-        border-radius: var(--border-radius-base);
+        border-radius: var(--border-radius-base-new);
       }
     }
   }
@@ -481,6 +481,27 @@
     .green-round-background {
       margin-right: 0;
     }
+  }
+
+  .plans-new-table-highlighted-heading {
+    position: absolute;
+    left: calc(-1 * var(--border-width-base));
+    top: -1 * @highlighted-heading-height;
+    height: @highlighted-heading-height;
+    width: calc(100% + (2 * var(--border-width-base)));
+    border-top-left-radius: var(--border-radius-large-new);
+    border-top-right-radius: var(--border-radius-large-new);
+    padding: @highlighted-heading-padding-vertical var(--spacing-04);
+    font-weight: 600;
+    text-align: center;
+    line-height: @highlighted-heading-line-height;
+    background-color: var(--green-50);
+    color: white;
+  }
+
+  .plans-new-table-highlighted-cell {
+    border-right: var(--border-width-base) solid var(--green-50);
+    border-left: var(--border-width-base) solid var(--green-50);
   }
 
   // ------------------------------------------------------------------
