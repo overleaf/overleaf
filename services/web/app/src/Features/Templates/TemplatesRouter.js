@@ -11,6 +11,7 @@ const rateLimiter = new RateLimiter('create-project-from-template', {
 })
 
 module.exports = {
+  rateLimiter,
   apply(app) {
     app.get(
       '/project/new/template/:Template_version_id',
