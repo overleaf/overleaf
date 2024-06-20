@@ -429,7 +429,7 @@ const hints = {
       <>
         You have used a \\ or \newline command where LaTeX was not expecting
         one. Make sure that you only use line breaks after blocks of text, and
-        be careful using linebreaks inside lists and other environments.\
+        be careful using linebreaks inside lists and other environments.
       </>
     ),
   },
