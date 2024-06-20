@@ -18,42 +18,69 @@ export default function usePresentationMode(
 
   const [presentationMode, setPresentationMode] = useState(false)
 
-  const arrowKeyListener = useCallback(
+  const nextPage = useCallback(() => {
+    if (page !== null) {
+      handlePageChange(page + 1)
+    }
+  }, [handlePageChange, page])
+
+  const previousPage = useCallback(() => {
+    if (page !== null) {
+      handlePageChange(page - 1)
+    }
+  }, [handlePageChange, page])
+
+  const clickListener = useCallback(
     event => {
-      if (page !== null) {
-        switch (event.key) {
-          case 'ArrowLeft':
-          case 'ArrowUp':
-            handlePageChange(page - 1)
-            break
+      if (event.target.tagName === 'A') {
+        return
+      }
 
-          case 'ArrowRight':
-          case 'ArrowDown':
-            handlePageChange(page + 1)
-            break
-
-          case ' ':
-            if (event.shiftKey) {
-              handlePageChange(page - 1)
-            } else {
-              handlePageChange(page + 1)
-            }
-            break
-        }
+      if (event.shiftKey) {
+        previousPage()
+      } else {
+        nextPage()
       }
     },
-    [page, handlePageChange]
+    [nextPage, previousPage]
+  )
+
+  const arrowKeyListener = useCallback(
+    event => {
+      switch (event.key) {
+        case 'ArrowLeft':
+        case 'ArrowUp':
+          previousPage()
+          break
+
+        case 'ArrowRight':
+        case 'ArrowDown':
+          nextPage()
+          break
+
+        case ' ':
+          if (event.shiftKey) {
+            previousPage()
+          } else {
+            nextPage()
+          }
+          break
+      }
+    },
+    [nextPage, previousPage]
   )
 
   useEffect(() => {
     if (presentationMode) {
       window.addEventListener('keydown', arrowKeyListener)
+      window.addEventListener('click', clickListener)
 
       return () => {
         window.removeEventListener('keydown', arrowKeyListener)
+        window.removeEventListener('click', clickListener)
       }
     }
-  }, [presentationMode, arrowKeyListener])
+  }, [presentationMode, arrowKeyListener, clickListener])
 
   const requestPresentationMode = useCallback(() => {
     if (pdfJsWrapper) {
