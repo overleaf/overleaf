@@ -41,8 +41,9 @@ describe('CollaboratorsInviteHandler', function () {
     this.UserGetter = { promises: { getUser: sinon.stub() } }
     this.ProjectGetter = { promises: {} }
     this.NotificationsBuilder = { promises: {} }
+    this.tokenHmac = 'jkhajkefhaekjfhkfg'
     this.CollaboratorsInviteHelper = {
-      hashInviteToken: sinon.stub().returns('abcd'),
+      hashInviteToken: sinon.stub().returns(this.tokenHmac),
     }
 
     this.CollaboratorsInviteHandler = SandboxedModule.require(MODULE_PATH, {
@@ -73,7 +74,6 @@ describe('CollaboratorsInviteHandler', function () {
     }
     this.inviteId = new ObjectId()
     this.token = 'hnhteaosuhtaeosuahs'
-    this.tokenHmac = 'jkhajkefhaekjfhkfg'
     this.privileges = 'readAndWrite'
     this.fakeInvite = {
       _id: this.inviteId,
@@ -458,7 +458,7 @@ describe('CollaboratorsInviteHandler', function () {
         await this.call()
         this.ProjectInvite.findOne.callCount.should.equal(1)
         this.ProjectInvite.findOne
-          .calledWith({ projectId: this.projectId, token: this.token })
+          .calledWith({ projectId: this.projectId, tokenHmac: this.tokenHmac })
           .should.equal(true)
       })
     })

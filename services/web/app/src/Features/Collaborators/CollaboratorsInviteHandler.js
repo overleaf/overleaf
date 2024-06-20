@@ -149,7 +149,7 @@ const CollaboratorsInviteHandler = {
     logger.debug({ projectId }, 'fetching invite by token')
     const invite = await ProjectInvite.findOne({
       projectId,
-      token: tokenString,
+      tokenHmac: CollaboratorsInviteHelper.hashInviteToken(tokenString),
     }).exec()
 
     if (invite == null) {
