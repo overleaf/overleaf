@@ -109,12 +109,12 @@ describe('Project creation and compilation', function () {
 
     login('collaborator@example.com')
     cy.visit('/project')
-    // FIXME: Should  have data-test-id
     cy.findByText(targetProjectName)
       .parent()
       .parent()
-      .find('button.btn-info')
-      .click()
+      .within(() => {
+        cy.findByText('Join Project').click()
+      })
     cy.findByText('Open Project').click()
     cy.url().should('match', /\/project\/[a-fA-F0-9]{24}/)
     cy.get('@targetProjectId').then(targetProjectId => {
