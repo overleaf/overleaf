@@ -544,8 +544,8 @@ const _ProjectController = {
 
       const showAiErrorAssistant =
         userId &&
-        (!Features.hasFeature('saas') ||
-          (user.features && user.features.aiErrorAssistant))
+        Features.hasFeature('saas') &&
+        (user.features?.aiErrorAssistant || user.alphaProgram)
 
       const template =
         detachRole === 'detached'

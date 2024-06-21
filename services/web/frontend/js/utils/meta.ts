@@ -66,7 +66,7 @@ export interface Meta {
   'ol-cannot-link-google-sso': boolean
   'ol-cannot-link-other-third-party-sso': boolean
   'ol-cannot-reactivate-subscription': boolean
-
+  'ol-cannot-use-ai': boolean
   'ol-countryCode': PricingFormState['country']
   'ol-couponCode': PricingFormState['coupon']
   'ol-createdAt': Date
