@@ -327,6 +327,7 @@ const _ProjectController = {
       'pdf-caching-prefetch-large',
       'pdf-caching-prefetching',
       'pdf-controls',
+      'pdf-presentation-mode',
       'pdfjs-40',
       'personal-access-token',
       'revert-file',

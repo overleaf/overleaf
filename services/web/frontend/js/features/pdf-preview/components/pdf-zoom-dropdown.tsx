@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ControlledDropdown from '@/shared/components/controlled-dropdown'
 import classNames from 'classnames'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -37,6 +38,8 @@ function PdfZoomDropdown({
 }: PdfZoomDropdownProps) {
   const { t } = useTranslation()
 
+  const enablePresentationMode = useFeatureFlag('pdf-presentation-mode')
+
   const [customZoomValue, setCustomZoomValue] = useState<string>(
     rawScaleToPercentage(rawScale)
   )
@@ -44,6 +47,8 @@ function PdfZoomDropdown({
   useEffect(() => {
     setCustomZoomValue(rawScaleToPercentage(rawScale))
   }, [rawScale])
+
+  const showPresentOption = enablePresentationMode && document.fullscreenEnabled
 
   return (
     <ControlledDropdown
@@ -116,8 +121,8 @@ function PdfZoomDropdown({
         <MenuItem draggable={false} key="page-height" eventKey="page-height">
           {t('fit_to_height')}
         </MenuItem>
-        {document.fullscreenEnabled && <MenuItem divider />}
-        {document.fullscreenEnabled && (
+        {showPresentOption && <MenuItem divider />}
+        {showPresentOption && (
           <MenuItem draggable={false} key="present" eventKey="present">
             {t('presentation_mode')}
           </MenuItem>
