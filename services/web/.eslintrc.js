@@ -23,6 +23,8 @@ module.exports = {
     // do not allow importing of implicit dependencies.
     'import/no-extraneous-dependencies': 'error',
 
+    '@overleaf/prefer-kebab-url': 'error',
+
     // disable some TypeScript rules
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
