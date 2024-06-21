@@ -317,194 +317,111 @@ const _ProjectController = {
       }
     }
 
-    try {
-      const splitTests = [
-        !anonymous && 'bib-file-tpr-prompt',
-        'compile-log-events',
-        'null-test-share-modal',
-        'paywall-cta',
-        'pdf-caching-cached-url-lookup',
-        'pdf-caching-mode',
-        'pdf-caching-prefetch-large',
-        'pdf-caching-prefetching',
-        'pdf-controls',
-        'pdfjs-40',
-        'personal-access-token',
-        'revert-file',
-        'table-generator-promotion',
-        'track-pdf-download',
-        !anonymous && 'writefull-oauth-promotion',
-        'ieee-stylesheet',
-      ].filter(Boolean)
+    const splitTests = [
+      !anonymous && 'bib-file-tpr-prompt',
+      'compile-log-events',
+      'null-test-share-modal',
+      'paywall-cta',
+      'pdf-caching-cached-url-lookup',
+      'pdf-caching-mode',
+      'pdf-caching-prefetch-large',
+      'pdf-caching-prefetching',
+      'pdf-controls',
+      'pdfjs-40',
+      'personal-access-token',
+      'revert-file',
+      'table-generator-promotion',
+      'track-pdf-download',
+      !anonymous && 'writefull-oauth-promotion',
+      'ieee-stylesheet',
+    ].filter(Boolean)
 
-      const responses = await pProps(
-        _.mapValues(
-          {
-            splitTestAssignments: async () => {
-              const assignments = {}
-              await Promise.all(
-                splitTests.map(async splitTest => {
-                  assignments[splitTest] =
-                    await SplitTestHandler.promises.getAssignment(
-                      req,
-                      res,
-                      splitTest
-                    )
-                })
-              )
-              return assignments
-            },
-            project: () =>
-              ProjectGetter.promises.getProject(projectId, {
-                name: 1,
-                lastUpdated: 1,
-                track_changes: 1,
-                owner_ref: 1,
-                brandVariationId: 1,
-                overleaf: 1,
-                tokens: 1,
-              }),
-            user: async () => {
-              if (!userId) {
-                SplitTestSessionHandler.promises
-                  .sessionMaintenance(req, null)
-                  .catch(err => {
-                    logger.error(
-                      { err },
-                      'failed to update split test info in session'
-                    )
-                  })
-                return defaultSettingsForAnonymousUser(userId)
-              } else {
-                User.updateOne(
-                  { _id: new ObjectId(userId) },
-                  { $set: { lastActive: new Date() } }
-                )
-                  .exec()
-                  .catch(err => {
-                    logger.error(
-                      { err, userId },
-                      'failed to update lastActive for user'
-                    )
-                  })
-
-                const user = await User.findById(
-                  userId,
-                  'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials writefull'
-                ).exec()
-                // Handle case of deleted user
-                if (!user) {
-                  UserController.logout(req, res, next)
-                  return
-                }
-
-                logger.debug({ projectId, userId }, 'got user')
-                SplitTestSessionHandler.promises
-                  .sessionMaintenance(req, user)
-                  .catch(err => {
-                    logger.error(
-                      { err },
-                      'failed to update split test info in session'
-                    )
-                  })
-
-                if (FeaturesUpdater.featuresEpochIsCurrent(user)) {
-                  return user
-                }
-
-                return await ProjectController._refreshFeatures(req, user)
-              }
-            },
-            userHasInstitutionLicence: async () => {
-              if (!userId) {
-                return false
-              }
-              try {
-                return await InstitutionsFeatures.promises.hasLicence(userId)
-              } catch {
-                // Don't fail if we can't get affiliation licences
-                return false
-              }
-            },
-            learnedWords() {
-              if (!userId) {
-                return []
-              }
-              return SpellingHandler.promises.getUserDictionary(userId)
-            },
-            subscription() {
-              if (!userId) {
-                return
-              }
-              return SubscriptionLocator.promises.getUsersSubscription(userId)
-            },
-            userIsMemberOfGroupSubscription() {
-              if (!sessionUser) {
-                return false
-              }
-              return LimitationsManager.promises.userIsMemberOfGroupSubscription(
-                sessionUser
-              )
-            },
-            activate() {
-              return InactiveProjectManager.promises.reactivateProjectIfRequired(
-                projectId
-              )
-            },
-            markAsOpened() {
-              // don't need to wait for this to complete
-              ProjectUpdateHandler.promises
-                .markAsOpened(projectId)
-                .catch(err => {
-                  logger.error(
-                    { err, projectId },
-                    'failed to mark project as opened'
-                  )
-                })
-            },
-            isTokenMember() {
-              if (!userId) {
-                return
-              }
-              return CollaboratorsGetter.promises.userIsTokenMember(
-                userId,
-                projectId
-              )
-            },
-            isInvitedMember() {
-              return CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
-                userId,
-                projectId
-              )
-            },
-            flushToTpds: () => {
-              return TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(
-                projectId
-              )
-            },
-            projectTags() {
-              if (!userId) {
-                return []
-              }
-              return TagsHandler.promises.getTagsForProject(userId, projectId)
-            },
-          },
-          promise => promise()
-        )
+    const getUserValues = async userId =>
+      pProps(
+        _.mapValues({
+          user: (async () => {
+            const user = await User.findById(
+              userId,
+              'email first_name last_name referal_id signUpDate featureSwitches features featuresEpoch refProviders alphaProgram betaProgram isAdmin ace labsProgram completedTutorials writefull'
+            ).exec()
+            // Handle case of deleted user
+            if (!user) {
+              UserController.logout(req, res, next)
+              return
+            }
+            logger.debug({ projectId, userId }, 'got user')
+            return FeaturesUpdater.featuresEpochIsCurrent(user)
+              ? user
+              : await ProjectController._refreshFeatures(req, user)
+          })(),
+          learnedWords: SpellingHandler.promises.getUserDictionary(userId),
+          projectTags: TagsHandler.promises.getTagsForProject(
+            userId,
+            projectId
+          ),
+          userHasInstitutionLicence: InstitutionsFeatures.promises
+            .hasLicence(userId)
+            .catch(err => {
+              logger.error({ err, userId }, 'failed to get institution licence')
+              return false
+            }),
+          subscription:
+            SubscriptionLocator.promises.getUsersSubscription(userId),
+          isTokenMember: CollaboratorsGetter.promises.userIsTokenMember(
+            userId,
+            projectId
+          ),
+          isInvitedMember:
+            CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+              userId,
+              projectId
+            ),
+        })
       )
+    const splitTestAssignments = {}
+
+    try {
+      const responses = await pProps({
+        userValues: userId ? getUserValues(userId) : defaultUserValues(),
+        splitTestAssignments: Promise.all(
+          splitTests.map(async splitTest => {
+            splitTestAssignments[splitTest] =
+              await SplitTestHandler.promises.getAssignment(req, res, splitTest)
+          })
+        ),
+        project: ProjectGetter.promises.getProject(projectId, {
+          name: 1,
+          lastUpdated: 1,
+          track_changes: 1,
+          owner_ref: 1,
+          brandVariationId: 1,
+          overleaf: 1,
+          tokens: 1,
+        }),
+        userIsMemberOfGroupSubscription: sessionUser
+          ? LimitationsManager.promises.userIsMemberOfGroupSubscription(
+              sessionUser
+            )
+          : false,
+        _flushToTpds:
+          TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(projectId),
+        _activate:
+          InactiveProjectManager.promises.reactivateProjectIfRequired(
+            projectId
+          ),
+      })
+
+      const { project, userValues, userIsMemberOfGroupSubscription } = responses
 
       const {
-        project,
         user,
-        userHasInstitutionLicence,
         learnedWords,
+        projectTags,
+        userHasInstitutionLicence,
         subscription,
-        userIsMemberOfGroupSubscription,
         isTokenMember,
         isInvitedMember,
-        splitTestAssignments,
-        projectTags,
-      } = responses
+      } = userValues
 
       const brandVariation = project?.brandVariationId
         ? await BrandVariationsHandler.promises.getBrandVariationById(
@@ -560,6 +477,17 @@ const _ProjectController = {
       }
       metrics.inc(metricName)
 
+      // don't need to wait for these to complete
+      ProjectUpdateHandler.promises
+        .markAsOpened(projectId)
+        .catch(err =>
+          logger.error({ err, projectId }, 'failed to mark project as opened')
+        )
+      SplitTestSessionHandler.promises
+        .sessionMaintenance(req, userId ? user : null)
+        .catch(err =>
+          logger.error({ err }, 'failed to update split test info in session')
+        )
       if (userId) {
         AnalyticsManager.recordEventForUserInBackground(
           userId,
@@ -568,6 +496,17 @@ const _ProjectController = {
             projectId: project._id,
           }
         )
+        User.updateOne(
+          { _id: new ObjectId(userId) },
+          { $set: { lastActive: new Date() } }
+        )
+          .exec()
+          .catch(err =>
+            logger.error(
+              { err, userId },
+              'failed to update lastActive for user'
+            )
+          )
       }
 
       const isAdminOrTemplateOwner =
@@ -753,7 +692,6 @@ const _ProjectController = {
       })(),
     ])
   },
-
   _buildProjectList(allProjects, userId) {
     let project
     const { owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly } =
@@ -826,7 +764,6 @@ const _ProjectController = {
 
     return projects
   },
-
   _buildProjectViewModel(project, accessLevel, source, userId) {
     const archived = ProjectHelper.isArchived(project, userId)
     // If a project is simultaneously trashed and archived, we will consider it archived but not trashed.
@@ -851,7 +788,6 @@ const _ProjectController = {
     }
     return model
   },
-
   _buildPortalTemplatesList(affiliations) {
     if (affiliations == null) {
       affiliations = []
@@ -899,6 +835,16 @@ const defaultSettingsForAnonymousUser = userId => ({
   writefull: {
     enabled: false,
   },
+})
+
+const defaultUserValues = () => ({
+  user: defaultSettingsForAnonymousUser(null),
+  learnedWords: [],
+  projectTags: [],
+  userHasInstitutionLicence: false,
+  subscription: undefined,
+  isTokenMember: false,
+  isInvitedMember: false,
 })
 
 const THEME_LIST = [
