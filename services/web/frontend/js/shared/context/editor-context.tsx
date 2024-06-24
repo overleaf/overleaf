@@ -18,6 +18,7 @@ import getMeta from '../../utils/meta'
 import { useUserContext } from './user-context'
 import { saveProjectSettings } from '@/features/editor-left-menu/utils/api'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
 
 type writefullAdButtons = '' | 'try-it' | 'log-in'
 
@@ -59,6 +60,7 @@ export const EditorProvider: FC = ({ children }) => {
   const ide = useIdeContext()
   const { id: userId } = useUserContext()
   const { role } = useDetachContext()
+  const { showGenericMessageModal } = useModalsContext()
 
   const { owner, features, _id: projectId } = useProjectContext()
 
@@ -119,24 +121,18 @@ export const EditorProvider: FC = ({ children }) => {
             (response: any) => {
               setProjectName(oldName)
               const { data, status } = response
-              if (status === 400) {
-                return ide.showGenericMessageModal(
-                  'Error renaming project',
-                  data
-                )
-              } else {
-                return ide.showGenericMessageModal(
-                  'Error renaming project',
-                  'Please try again in a moment'
-                )
-              }
+
+              showGenericMessageModal(
+                'Error renaming project',
+                status === 400 ? data : 'Please try again in a moment'
+              )
             }
           )
         }
         return newName
       })
     },
-    [ide, setProjectName, projectId]
+    [setProjectName, projectId, showGenericMessageModal]
   )
 
   const { setTitle } = useBrowserWindow()
