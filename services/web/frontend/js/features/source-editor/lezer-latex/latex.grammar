@@ -212,19 +212,6 @@ DefinitionArgument {
     !argument NewLine? Whitespace* OpenBrace DefinitionFragment CloseBrace
 }
 
-argument[@isGroup="$Argument"] {
-      TextArgument
-    | SectioningArgument
-    | LabelArgument
-    | RefArgument
-    | BibKeyArgument
-    | PackageArgument
-    | UrlArgument
-    | FilePathArgument
-    | BareFilePathArgument
-    | DefinitionArgument
-}
-
 MacroParameter {
     "#" ("1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9")
 }
