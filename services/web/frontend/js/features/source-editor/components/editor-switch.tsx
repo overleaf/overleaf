@@ -4,7 +4,6 @@ import Tooltip from '../../../shared/components/tooltip'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
-import { PromotionOverlay } from './table-generator/promotion/popover'
 
 function EditorSwitch() {
   const { t } = useTranslation()
@@ -98,7 +97,7 @@ const RichTextToggle: FC<{
     )
   }
 
-  return <PromotionOverlay>{toggle}</PromotionOverlay>
+  return toggle
 }
 
 export default memo(EditorSwitch)

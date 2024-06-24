@@ -110,9 +110,6 @@ describe('<CodeMirrorEditor/> Table editor', function () {
     cy.interceptMathJax()
     cy.interceptCompile('compile', Number.MAX_SAFE_INTEGER)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-    window.metaAttributesCache.set('ol-inactiveTutorials', [
-      'table-generator-promotion',
-    ])
   })
 
   describe('Table rendering', function () {

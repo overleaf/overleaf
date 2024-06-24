@@ -4,7 +4,6 @@ const { expressify } = require('@overleaf/promise-utils')
 
 const VALID_KEYS = [
   'react-history-buttons-tutorial',
-  'table-generator-promotion',
   'writefull-integration',
   'writefull-oauth-promotion',
   'bib-file-tpr-prompt',
