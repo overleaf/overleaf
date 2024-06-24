@@ -153,7 +153,7 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
           logEntryAnnotations[entity._id] = []
         }
 
-        logEntryAnnotations[entity._id].push({
+        const annotation = {
           id: entry.key,
           entryIndex: logEntryAnnotations[entity._id].length, // used for maintaining the order of items on the same line
           row: entry.line - 1,
@@ -161,10 +161,17 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
           text: entry.message,
           source: 'compile', // NOTE: this is used in Ace for filtering the annotations
           ruleId: entry.ruleId,
-          firstOnLine: !seenLine[entry.line],
-        })
+        }
 
-        seenLine[entry.line] = true
+        // set firstOnLine for the first non-typesetting annotation on a line
+        if (entry.level !== 'typesetting') {
+          if (!seenLine[entry.line]) {
+            annotation.firstOnLine = true
+            seenLine[entry.line] = true
+          }
+        }
+
+        logEntryAnnotations[entity._id].push(annotation)
       }
     }
   }

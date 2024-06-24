@@ -544,7 +544,9 @@ const _ProjectController = {
       const showAiErrorAssistant =
         userId &&
         Features.hasFeature('saas') &&
-        (user.features?.aiErrorAssistant || user.alphaProgram)
+        (user.features?.aiErrorAssistant || user.alphaProgram) &&
+        (privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
+          privilegeLevel === PrivilegeLevels.OWNER)
 
       const template =
         detachRole === 'detached'
