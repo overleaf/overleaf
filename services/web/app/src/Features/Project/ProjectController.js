@@ -41,6 +41,7 @@ const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
 const TutorialHandler = require('../Tutorial/TutorialHandler')
+const UserUpdater = require('../User/UserUpdater')
 
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
@@ -422,6 +423,30 @@ const _ProjectController = {
         isTokenMember,
         isInvitedMember,
       } = userValues
+
+      // check if a user is not in the writefull-oauth-promotion, in which case they may be part of the auto trial group
+      if (
+        !anonymous &&
+        splitTestAssignments['writefull-oauth-promotion']?.variant === 'default'
+      ) {
+        // since we are auto-enrolling users into writefull if they are part of the group, we only want to
+        // auto enroll (set writefull to true) if its the first time they have entered the test
+        // this ensures that they can still turn writefull off (otherwise, we would be setting writefull on every time they access their projects)
+        const { variant, metadata } =
+          await SplitTestHandler.promises.getAssignment(
+            req,
+            res,
+            'writefull-auto-load'
+          )
+        if (variant === 'enabled' && metadata?.isFirstNonDefaultAssignment) {
+          await UserUpdater.promises.updateUser(userId, {
+            $set: {
+              writefull: { enabled: true },
+            },
+          })
+          user.writefull.enabled = true
+        }
+      }
 
       const brandVariation = project?.brandVariationId
         ? await BrandVariationsHandler.promises.getBrandVariationById(

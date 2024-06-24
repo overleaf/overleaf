@@ -239,6 +239,11 @@ describe('ProjectController', function () {
         '../Survey/SurveyHandler': this.SurveyHandler,
         './ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Tutorial/TutorialHandler': this.TutorialHandler,
+        '../User/UserUpdater': {
+          promises: {
+            updateUser: sinon.stub().resolves(),
+          },
+        },
       },
     })
 
