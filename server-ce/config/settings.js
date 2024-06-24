@@ -288,7 +288,6 @@ const settings = {
     compileTimeout: parseIntOrFail(process.env.COMPILE_TIMEOUT || 180),
     compileGroup: 'standard',
     trackChanges: true,
-    templates: true,
     references: true,
   },
 }

@@ -383,7 +383,6 @@ module.exports = {
     compileTimeout: 180,
     compileGroup: 'standard',
     references: true,
-    templates: true,
     trackChanges: true,
   }),
 

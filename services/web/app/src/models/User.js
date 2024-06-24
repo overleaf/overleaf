@@ -107,7 +107,6 @@ const UserSchema = new Schema(
         type: String,
         default: Settings.defaultFeatures.compileGroup,
       },
-      templates: { type: Boolean, default: Settings.defaultFeatures.templates },
       references: {
         type: Boolean,
         default: Settings.defaultFeatures.references,
