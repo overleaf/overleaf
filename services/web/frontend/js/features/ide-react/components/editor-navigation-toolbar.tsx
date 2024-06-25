@@ -3,7 +3,9 @@ import { useOnlineUsersContext } from '@/features/ide-react/context/online-users
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import EditorNavigationToolbarRoot from '@/features/editor-navigation-toolbar/components/editor-navigation-toolbar-root'
+import NewShareProjectModal from '@/features/share-project-modal/components/restricted-link-sharing/share-project-modal'
 import ShareProjectModal from '@/features/share-project-modal/components/share-project-modal'
+import getMeta from '@/utils/meta'
 
 function EditorNavigationToolbar() {
   const [showShareModal, setShowShareModal] = useState(false)
@@ -19,6 +21,8 @@ function EditorNavigationToolbar() {
     setShowShareModal(false)
   }, [])
 
+  const showNewShareModal = getMeta('ol-linkSharingWarning')
+
   return (
     <>
       <EditorNavigationToolbarRoot
@@ -26,10 +30,17 @@ function EditorNavigationToolbar() {
         openDoc={openDoc}
         openShareProjectModal={handleOpenShareModal}
       />
-      <ShareProjectModal
-        show={showShareModal}
-        handleHide={handleHideShareModal}
-      />
+      {showNewShareModal ? (
+        <NewShareProjectModal
+          show={showShareModal}
+          handleHide={handleHideShareModal}
+        />
+      ) : (
+        <ShareProjectModal
+          show={showShareModal}
+          handleHide={handleHideShareModal}
+        />
+      )}
     </>
   )
 }

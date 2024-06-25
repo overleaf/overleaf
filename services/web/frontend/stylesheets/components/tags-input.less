@@ -21,15 +21,18 @@
 
 .tags-input .tags {
   .form-control;
+  appearance: textfield;
   -moz-appearance: textfield;
   -webkit-appearance: textfield;
+  padding: 0 0 0 5px;
   overflow: hidden;
   word-wrap: break-word;
   cursor: text;
   background-color: #fff;
   height: 100%;
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  flex-direction: row;
 }
 .tags-input .tags:focus-within {
   &:extend(.input-focus-style);

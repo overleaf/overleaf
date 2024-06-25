@@ -29,6 +29,32 @@ export const WithSubtitles = () => {
   )
 }
 
+export const WithSelectedIcon = () => {
+  return (
+    <Select
+      items={items}
+      itemToString={x => String(x?.value)}
+      itemToKey={x => String(x.key)}
+      itemToSubtitle={x => x?.group ?? ''}
+      defaultText="Choose an item"
+      selectedIcon
+    />
+  )
+}
+
+export const WithDisabledItem = () => {
+  return (
+    <Select
+      items={items}
+      itemToString={x => String(x?.value)}
+      itemToKey={x => String(x.key)}
+      itemToDisabled={x => x?.key === 1}
+      itemToSubtitle={x => x?.group ?? ''}
+      defaultText="Choose an item"
+    />
+  )
+}
+
 export default {
   title: 'Shared / Components / Select',
   component: Select,

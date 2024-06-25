@@ -44,9 +44,12 @@ function render(props: RenderProps) {
           itemToSubtitle={props.itemToSubtitle}
           itemToKey={x => String(x.key)}
           onSelectedItemChanged={props.onSelectedItemChanged}
+          selected={props.selected}
           disabled={props.disabled}
+          itemToDisabled={props.itemToDisabled}
           optionalLabel={props.optionalLabel}
           loading={props.loading}
+          selectedIcon={props.selectedIcon}
         />
         <button type="submit">submit</button>
       </form>
@@ -273,6 +276,57 @@ describe('<Select />', function () {
       cy.findByText('Choose an item').type('{Enter}{downArrow}{Enter}')
       cy.findByText('Demo item 1').should('exist')
       cy.findByText('Demo item 2').should('not.exist')
+    })
+  })
+
+  describe('selectedIcon', function () {
+    it('renders a selected icon if the prop is set', function () {
+      render({
+        defaultText: 'Choose an item',
+        selectedIcon: true,
+      })
+      cy.findByText('Choose an item').click()
+      cy.findByText('Demo item 1').click()
+      cy.findByText('Demo item 1').click()
+
+      cy.get('.fa-check').should('exist')
+    })
+    it('renders no selected icon if the prop is not set', function () {
+      render({
+        defaultText: 'Choose an item',
+        selectedIcon: false,
+      })
+      cy.findByText('Choose an item').click()
+      cy.findByText('Demo item 1').click()
+      cy.findByText('Demo item 1').click()
+
+      cy.get('.fa-check').should('not.exist')
+    })
+  })
+
+  describe('itemToDisabled', function () {
+    it('prevents selecting a disabled item', function () {
+      render({
+        defaultText: 'Choose an item',
+        itemToDisabled: x => x?.key === 2,
+      })
+      cy.findByText('Choose an item').click()
+      cy.findByText('Demo item 2').click()
+      // still showing other list items
+      cy.findByText('Demo item 3').should('exist')
+      cy.findByText('Demo item 1').click()
+      // clicking an enabled item dismisses the list
+      cy.findByText('Demo item 3').should('not.exist')
+    })
+  })
+
+  describe('selected', function () {
+    it('shows the item provided in the selected prop', function () {
+      render({
+        defaultText: 'Choose an item',
+        selected: testData[1],
+      })
+      cy.findByText('Demo item 2').should('exist')
     })
   })
 })

@@ -578,6 +578,12 @@ const _ProjectController = {
           ? 'project/ide-react-detached'
           : 'project/ide-react'
 
+      const assignLink = await SplitTestHandler.promises.getAssignmentForUser(
+        project.owner_ref,
+        'link-sharing-warning'
+      )
+      const linkSharingWarning = assignLink.variant === 'active'
+
       res.render(template, {
         title: project.name,
         priority_title: true,
@@ -651,6 +657,7 @@ const _ProjectController = {
         optionalPersonalAccessToken,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
+        linkSharingWarning,
       })
       timer.done()
     } catch (err) {

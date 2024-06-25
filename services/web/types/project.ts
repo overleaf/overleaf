@@ -1,7 +1,7 @@
 import { MongoUser } from './user'
 import { Folder } from './folder'
 
-type ProjectMember = {
+export type ProjectMember = {
   _id: string
   type: 'user'
   privileges: 'readOnly' | 'readAndWrite'

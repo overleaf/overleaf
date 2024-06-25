@@ -1,45 +1,9 @@
 import { FC, createContext, useContext, useMemo } from 'react'
 import useScopeValue from '../hooks/use-scope-value'
 import getMeta from '@/utils/meta'
-import { UserId } from '../../../../types/user'
-import { PublicAccessLevel } from '../../../../types/public-access-level'
-import type * as ReviewPanel from '@/features/source-editor/context/review-panel/types/review-panel-state'
+import { ProjectContextValue } from './types/project-context'
 
-const ProjectContext = createContext<
-  | {
-      _id: string
-      name: string
-      rootDocId?: string
-      compiler: string
-      members: { _id: UserId; email: string; privileges: string }[]
-      invites: { _id: UserId }[]
-      features: {
-        collaborators?: number
-        compileGroup?: 'alpha' | 'standard' | 'priority'
-        trackChanges?: boolean
-        trackChangesVisible?: boolean
-        references?: boolean
-        mendeley?: boolean
-        zotero?: boolean
-        versioning?: boolean
-        gitBridge?: boolean
-        referencesSearch?: boolean
-        github?: boolean
-      }
-      publicAccessLevel?: PublicAccessLevel
-      owner: {
-        _id: UserId
-        email: string
-      }
-      tags: {
-        _id: string
-        name: string
-        color?: string
-      }[]
-      trackChangesState: ReviewPanel.Value<'trackChangesState'>
-    }
-  | undefined
->(undefined)
+const ProjectContext = createContext<ProjectContextValue | undefined>(undefined)
 
 export function useProjectContext() {
   const context = useContext(ProjectContext)

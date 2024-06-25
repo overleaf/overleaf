@@ -6,6 +6,7 @@ import {
   KeyboardEventHandler,
   useCallback,
   ReactNode,
+  useState,
 } from 'react'
 import classNames from 'classnames'
 import { useSelect } from 'downshift'
@@ -34,12 +35,18 @@ export type SelectProps<T> = {
   itemToKey: (item: T) => string
   // Callback invoked after the selected item is updated.
   onSelectedItemChanged?: (item: T | null | undefined) => void
+  // Optionally directly control the selected item.
+  selected?: T
   // When `true` item selection is disabled.
   disabled?: boolean
+  // Determine which items should be disabled
+  itemToDisabled?: (item: T | null | undefined) => boolean
   // When `true` displays an "Optional" subtext after the `label` caption.
   optionalLabel?: boolean
   // When `true` displays a spinner next to the `label` caption.
   loading?: boolean
+  // Show a checkmark next to the selected item
+  selectedIcon?: boolean
 }
 
 export const Select = <T,>({
@@ -52,14 +59,20 @@ export const Select = <T,>({
   itemToSubtitle,
   itemToKey,
   onSelectedItemChanged,
+  selected,
   disabled = false,
+  itemToDisabled,
   optionalLabel = false,
   loading = false,
+  selectedIcon = false,
 }: SelectProps<T>) => {
+  const [selectedItem, setSelectedItem] = useState<T | undefined | null>(
+    defaultItem
+  )
+
   const { t } = useTranslation()
   const {
     isOpen,
-    selectedItem,
     getToggleButtonProps,
     getLabelProps,
     getMenuProps,
@@ -69,12 +82,18 @@ export const Select = <T,>({
   } = useSelect({
     items: items ?? [],
     itemToString,
+    selectedItem: selected || defaultItem,
     onSelectedItemChange: changes => {
       if (onSelectedItemChanged) {
         onSelectedItemChanged(changes.selectedItem)
       }
+      setSelectedItem(changes.selectedItem)
     },
   })
+
+  useEffect(() => {
+    setSelectedItem(selected)
+  }, [selected])
 
   const rootRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
@@ -153,23 +172,39 @@ export const Select = <T,>({
         {...getMenuProps({ disabled })}
       >
         {isOpen &&
-          items?.map((item, index) => (
-            <li
-              className={classNames({
-                'select-highlighted': highlightedIndex === index,
-                'selected-active': selectedItem === item,
-              })}
-              key={itemToKey(item)}
-              {...getItemProps({ item, index })}
-            >
-              <span className="select-item-title">{itemToString(item)}</span>
-              {itemToSubtitle ? (
-                <span className="text-muted select-item-subtitle">
-                  {itemToSubtitle(item)}
+          items?.map((item, index) => {
+            const isDisabled = itemToDisabled && itemToDisabled(item)
+            return (
+              <li
+                className={classNames({
+                  'select-highlighted': highlightedIndex === index,
+                  'selected-active': selectedItem === item,
+                  'select-icon': selectedIcon,
+                  'select-disabled': isDisabled,
+                })}
+                key={itemToKey(item)}
+                {...getItemProps({ item, index, disabled: isDisabled })}
+              >
+                <span className="select-item-title">
+                  {selectedIcon && (
+                    <div className="select-item-icon">
+                      {(selectedItem === item ||
+                        (!selectedItem && defaultItem === item)) && (
+                        <Icon type="check" fw />
+                      )}
+                    </div>
+                  )}
+                  {itemToString(item)}
                 </span>
-              ) : null}
-            </li>
-          ))}
+
+                {itemToSubtitle ? (
+                  <span className="text-muted select-item-subtitle">
+                    {itemToSubtitle(item)}
+                  </span>
+                ) : null}
+              </li>
+            )
+          })}
       </ul>
     </div>
   )

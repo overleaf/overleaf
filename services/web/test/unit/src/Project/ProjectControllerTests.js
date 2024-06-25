@@ -164,6 +164,7 @@ describe('ProjectController', function () {
     this.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
       },
       getAssignment: sinon.stub().yields(null, { variant: 'default' }),
     }

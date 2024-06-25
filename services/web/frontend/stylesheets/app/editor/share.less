@@ -18,16 +18,21 @@
     font-size: inherit;
   }
 
-  .project-member,
+  .project-member {
+    padding: (@line-height-computed / 2) 0;
+    font-size: 16px;
+    span {
+      padding-right: @line-height-computed / 2;
+    }
+  }
+
   .project-invite,
   .public-access-level {
-    padding: (@line-height-computed / 2) 0;
-    border-bottom: 1px solid @gray-lighter;
     font-size: 14px;
   }
 
   .public-access-level {
-    padding-top: 0;
+    margin-top: @line-height-computed / 4;
     font-size: 13px;
     padding-bottom: @modal-inner-padding;
     .access-token-display-area {
@@ -45,6 +50,14 @@
         }
       }
     }
+    .fa-chevron-down,
+    .fa-chevron-up {
+      vertical-align: top;
+      color: @neutral-70;
+    }
+    .btn-chevron {
+      padding: 0 (@line-height-computed / 2);
+    }
   }
 
   .public-access-level.public-access-level--notice {
@@ -61,14 +74,50 @@
     }
   }
 
+  .project-member {
+    .select-trigger {
+      color: @neutral-70;
+      border: none;
+      padding: 0 10px 5px 10px;
+    }
+
+    .select-items {
+      max-height: 300px;
+      width: 250%;
+      li:last-child {
+        color: @brand-danger;
+      }
+    }
+
+    .project-member-email-icon {
+      display: grid;
+      grid-template-columns: 2em auto;
+      align-items: center;
+      padding-bottom: 5px;
+
+      .fa-warning {
+        color: @brand-warning;
+      }
+
+      .subtitle {
+        font-size: @font-size-small;
+      }
+    }
+  }
+
+  .project-member .text-left,
+  .project-invite .text-left {
+    padding-left: 25px;
+  }
+
   .invite-controls {
     .small {
       padding: 2px;
       margin-bottom: 0;
     }
-    padding: @line-height-computed / 2;
-    background-color: @gray-lightest;
-    margin-top: @line-height-computed / 2;
+    .add-collabs {
+      margin-top: @line-height-computed / 2;
+    }
     form {
       .form-group {
         margin-bottom: @line-height-computed / 2;
@@ -79,14 +128,25 @@
       .privileges {
         display: inline-block;
         width: auto;
+      }
+      .tags-new .privileges {
+        background: transparent;
+        width: auto;
         height: 30px;
         font-size: 14px;
+        border: none;
+        border-right: 5px solid transparent;
       }
     }
     .add-collaborators-upgrade {
       display: flex;
       flex-direction: column;
       align-items: center;
+
+      .upgrade-actions {
+        display: flex;
+        gap: @margin-md;
+      }
     }
   }
 
