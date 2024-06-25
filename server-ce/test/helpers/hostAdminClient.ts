@@ -76,3 +76,10 @@ export async function runScript({
     }),
   })
 }
+
+export async function getRedisKeys() {
+  const { stdout } = await fetchJSON(`${hostAdminUrl}/redis/keys`, {
+    method: 'GET',
+  })
+  return stdout.split('\n')
+}

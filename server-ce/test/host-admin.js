@@ -197,8 +197,7 @@ app.post(
           '--detach',
           '--wait',
           '--volumes',
-          '--timeout',
-          '0',
+          '--timeout=60',
           'sharelatex',
           'git-bridge',
           'mongo',
@@ -311,6 +310,16 @@ app.post('/reset/data', (req, res) => {
           res.json({ error, stdout, stderr })
         }
       )
+    }
+  )
+})
+
+app.get('/redis/keys', (req, res) => {
+  runDockerCompose(
+    'exec',
+    ['redis', 'redis-cli', 'KEYS', '*'],
+    (error, stdout, stderr) => {
+      res.json({ error, stdout, stderr })
     }
   )
 })

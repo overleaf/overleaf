@@ -186,17 +186,17 @@ server.listen(port, host, function (error) {
 // Stop huge stack traces in logs from all the socket.io parsing steps.
 Error.stackTraceLimit = 10
 
-function shutdownCleanly(signal) {
+function shutdownAfterAllClientsHaveDisconnected() {
   const connectedClients = io.sockets.clients().length
   if (connectedClients === 0) {
-    logger.info('no clients connected, exiting')
+    logger.info({}, 'no clients connected, exiting')
     process.exit()
   } else {
     logger.info(
       { connectedClients },
       'clients still connected, not shutting down yet'
     )
-    setTimeout(() => shutdownCleanly(signal), 30 * 1000)
+    setTimeout(() => shutdownAfterAllClientsHaveDisconnected(), 5_000)
   }
 }
 
@@ -218,6 +218,7 @@ function drainAndShutdown(signal) {
         `received interrupt, starting drain over ${shutdownDrainTimeWindow} mins`
       )
       DrainManager.startDrainTimeWindow(io, shutdownDrainTimeWindow, () => {
+        shutdownAfterAllClientsHaveDisconnected()
         setTimeout(() => {
           const staleClients = io.sockets.clients()
           if (staleClients.length !== 0) {
@@ -233,7 +234,6 @@ function drainAndShutdown(signal) {
           Settings.shutDownComplete = true
         }, Settings.gracefulReconnectTimeoutMs)
       })
-      shutdownCleanly(signal)
     }, statusCheckInterval)
   }
 }
