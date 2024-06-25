@@ -219,7 +219,7 @@ OptionalMacroParameter {
 // The autocompletion code in services/web/frontend/js/features/source-editor/utils/tree-operations/commands.ts
 // depends on following the `KnownCommand { Command { CommandCtrlSeq [args] } }`
 // structure
-KnownCommand {
+KnownCommand<ArgumentType> {
     Title {
         TitleCtrlSeq optionalWhitespace? OptionalArgument? TextArgument
     } |
@@ -249,10 +249,10 @@ KnownCommand {
         PackageArgument
     } |
     TextColorCommand {
-        TextColorCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? TextArgument
+        TextColorCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? ArgumentType
     } |
     ColorBoxCommand {
-        ColorBoxCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? TextArgument
+        ColorBoxCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? ArgumentType
     } |
     HrefCommand {
         HrefCtrlSeq optionalWhitespace? UrlArgument ShortTextArgument
@@ -294,12 +294,6 @@ KnownCommand {
     } |
     Hbox {
         HboxCtrlSeq optionalWhitespace? TextArgument
-    } |
-    Left {
-        LeftCtrlSeq optionalWhitespace?
-    } |
-    Right {
-        RightCtrlSeq optionalWhitespace?
     } |
     NewCommand {
         NewCommandCtrlSeq optionalWhitespace?
@@ -350,20 +344,27 @@ KnownCommand {
             optionalWhitespace? SpanArgument { ShortTextArgument }
             optionalWhitespace? ColumnArgument { ShortTextArgument }
             optionalWhitespace? TabularArgument
+    } |
+    MathTextCommand {
+        MathTextCtrlSeq optionalWhitespace? "*"? TextArgument
     }
 }
 
 UnknownCommand {
       (CtrlSeq !argument Whitespace (OptionalArgument | TextArgument)+)
-    | ((CtrlSeq | MathTextCtrlSeq) (OptionalArgument | TextArgument)+)
+    | (CtrlSeq (OptionalArgument | TextArgument)+)
     | CtrlSeq Whitespace?
     | CtrlSym
 }
 
 Command {
-      KnownCommand
+      KnownCommand<TextArgument>
     | UnknownCommand
     | KnownCtrlSym
+    // Not technically allowed in normal mode, but not worth failing the parse over
+    | LeftCtrlSeq
+    | RightCtrlSeq
+
 }
 
 KnownCtrlSym {
@@ -480,7 +481,7 @@ TikzPictureContent {  /// same as Text but with added allowed characters
 }
 
 DefinitionFragment {
-    ( KnownCommand
+    ( KnownCommand<TextArgument>
     | CtrlSeq optionalWhitespace?
     | CtrlSym
     | Begin
@@ -491,6 +492,8 @@ DefinitionFragment {
     | CloseParenCtrlSym
     | OpenBracketCtrlSym
     | CloseBracketCtrlSym
+    | LeftCtrlSeq
+    | RightCtrlSeq
     | KnownCtrlSym
     | BlankLine
     | NewLine
@@ -686,21 +689,9 @@ Math {
 
 
 MathCommand {
-    MathKnownCommand
+    KnownCommand<MathArgument>
   | MathUnknownCommand
-}
-
-MathKnownCommand {
-    KnownCtrlSym
-  | Label {
-        LabelCtrlSeq optionalWhitespace? OptionalArgument? LabelArgument
-    }
-  | Ref {
-     (RefCtrlSeq | RefStarrableCtrlSeq "*"?) optionalWhitespace? OptionalArgument? optionalWhitespace? OptionalArgument? optionalWhitespace? RefArgument
-    }
-  | MathTextCommand {
-    (MathTextCtrlSeq | HboxCtrlSeq) optionalWhitespace? "*"? TextArgument
-  }
+  | KnownCtrlSym
 }
 
 @external tokens endOfArgumentListTokenizer from "./tokens.mjs" {
