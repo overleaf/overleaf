@@ -17,6 +17,7 @@ describe('<ToolbarHeader />', function () {
     renameProject: () => {},
     openShareModal: () => {},
     hasPublishPermissions: true,
+    chatVisible: true,
     trackChangesVisible: true,
     handleChangeLayout: () => {},
     pdfLayout: 'sideBySide',
@@ -83,10 +84,10 @@ describe('<ToolbarHeader />', function () {
       screen.getByText('Chat')
     })
 
-    it('is not displayed when "isRestrictedTokenMember" prop is set to true', function () {
+    it('is not displayed when "chatVisible" prop is set to false', function () {
       const props = {
         ...defaultProps,
-        isRestrictedTokenMember: true,
+        chatVisible: false,
       }
       renderWithEditorContext(<ToolbarHeader {...props} />)
       expect(screen.queryByText('Chat')).to.not.exist

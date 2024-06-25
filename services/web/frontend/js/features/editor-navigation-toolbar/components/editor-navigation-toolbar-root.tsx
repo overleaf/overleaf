@@ -6,6 +6,7 @@ import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { Doc } from '../../../../../types/doc'
+import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 
 function isOpentoString(open: boolean) {
   return open ? 'open' : 'close'
@@ -44,6 +45,7 @@ const EditorNavigationToolbarRoot = React.memo(
     } = useLayoutContext()
 
     const { markMessagesAsRead, unreadMessageCount } = useChatContext()
+    const canViewChatAndTrackChanges = !useViewerPermissions()
 
     const toggleChatOpen = useCallback(() => {
       if (!chatIsOpen) {
@@ -119,11 +121,12 @@ const EditorNavigationToolbarRoot = React.memo(
         hasPublishPermissions={
           permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite'
         }
+        chatVisible={!(isRestrictedTokenMember || !canViewChatAndTrackChanges)}
         projectName={projectName}
         renameProject={renameProject}
         hasRenamePermissions={permissionsLevel === 'owner'}
         openShareModal={openShareModal}
-        trackChangesVisible={trackChangesVisible}
+        trackChangesVisible={canViewChatAndTrackChanges && trackChangesVisible}
       />
     )
   }

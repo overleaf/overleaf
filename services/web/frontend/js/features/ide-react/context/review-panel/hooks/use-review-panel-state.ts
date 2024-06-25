@@ -24,7 +24,6 @@ import {
   useEditorManagerContext,
 } from '@/features/ide-react/context/editor-manager-context'
 import { debugConsole } from '@/utils/debugging'
-import { useEditorContext } from '@/shared/context/editor-context'
 import { deleteJSON, getJSON, postJSON } from '@/infrastructure/fetch-json'
 import ColorManager from '@/ide/colors/ColorManager'
 import RangesTracker from '@overleaf/ranges-tracker'
@@ -65,7 +64,9 @@ import {
   EditOperation,
 } from '../../../../../../../types/change'
 import { RangesTrackerWithResolvedThreadIds } from '@/features/ide-react/editor/document-container'
+import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 import getMeta from '@/utils/meta'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 const dispatchReviewPanelEvent = (type: string, payload?: any) => {
   window.dispatchEvent(
@@ -151,6 +152,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   const permissions = usePermissionsContext()
   const { showGenericMessageModal } = useModalsContext()
   const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
+  const hasViewerPermissions = useViewerPermissions()
 
   const layoutToLeft = useLayoutToLeft('.ide-react-editor-panel')
   const [subView, setSubView] =
@@ -418,7 +420,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
         }
 
         if (!users[change.metadata.user_id]) {
-          if (!isRestrictedTokenMember) {
+          if (!(isRestrictedTokenMember || hasViewerPermissions)) {
             refreshChangeUsers(change.metadata.user_id)
           }
         }
@@ -426,7 +428,10 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
 
       let localResolvedThreadIds = resolvedThreadIds
 
-      if (!isRestrictedTokenMember && rangesTracker.comments.length > 0) {
+      if (
+        !(isRestrictedTokenMember || hasViewerPermissions) &&
+        rangesTracker.comments.length > 0
+      ) {
         const threadsLoadResult = await ensureThreadsAreLoaded()
         if (threadsLoadResult?.resolvedThreadIds) {
           localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
@@ -483,13 +488,14 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
       getChangeTracker,
       getDocEntries,
       getDocResolvedComments,
-      isRestrictedTokenMember,
       refreshChangeUsers,
       resolvedThreadIds,
       users,
       ensureThreadsAreLoaded,
       loadingThreads,
       setLoadingThreads,
+      hasViewerPermissions,
+      isRestrictedTokenMember,
     ]
   )
 

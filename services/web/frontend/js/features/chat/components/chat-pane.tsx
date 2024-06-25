@@ -11,13 +11,14 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { FetchError } from '../../../infrastructure/fetch-json'
 import { useChatContext } from '../context/chat-context'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
+import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 
 const MessageList = lazy(() => import('./message-list'))
 
 const ChatPane = React.memo(function ChatPane() {
   const { t } = useTranslation()
 
-  const { chatIsOpen } = useLayoutContext()
+  const { setChatIsOpen, chatIsOpen } = useLayoutContext()
   const user = useUserContext()
 
   const {
@@ -46,13 +47,17 @@ const ChatPane = React.memo(function ChatPane() {
     0
   )
 
+  const shouldShowChat = !useViewerPermissions()
+
   // Keep the chat pane in the DOM to avoid resetting the form input and re-rendering MathJax content.
   const [chatOpenedOnce, setChatOpenedOnce] = useState(chatIsOpen)
   useEffect(() => {
-    if (chatIsOpen) {
+    if (chatIsOpen && shouldShowChat) {
       setChatOpenedOnce(true)
+    } else if (chatIsOpen && !shouldShowChat) {
+      setChatIsOpen(false)
     }
-  }, [chatIsOpen])
+  }, [chatIsOpen, setChatIsOpen, shouldShowChat])
 
   if (error) {
     // let user try recover from fetch errors

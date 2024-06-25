@@ -33,6 +33,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   goToUser,
   isRestrictedTokenMember,
   hasPublishPermissions,
+  chatVisible,
   projectName,
   renameProject,
   hasRenamePermissions,
@@ -89,7 +90,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 
             <LayoutDropdownButton />
 
-            {!isRestrictedTokenMember && (
+            {chatVisible && (
               <ChatToggleButton
                 chatIsOpen={chatIsOpen}
                 onClick={toggleChatOpen}
@@ -117,6 +118,7 @@ ToolbarHeader.propTypes = {
   goToUser: PropTypes.func.isRequired,
   isRestrictedTokenMember: PropTypes.bool,
   hasPublishPermissions: PropTypes.bool,
+  chatVisible: PropTypes.bool,
   projectName: PropTypes.string.isRequired,
   renameProject: PropTypes.func.isRequired,
   hasRenamePermissions: PropTypes.bool,

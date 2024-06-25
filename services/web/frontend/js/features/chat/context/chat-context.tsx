@@ -17,6 +17,7 @@ import { appendMessage, prependMessages } from '../utils/message-list-appender'
 import useBrowserWindow from '../../../shared/hooks/use-browser-window'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import { useIdeContext } from '@/shared/context/ide-context'
+import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 
 const PAGE_SIZE = 50
 
@@ -286,9 +287,10 @@ export const ChatProvider: FC = ({ children }) => {
   }, [])
 
   // Handling receiving messages over the socket
+  const hasViewerPermissions = useViewerPermissions()
   const { socket } = useIdeContext()
   useEffect(() => {
-    if (!socket) return
+    if (!socket || hasViewerPermissions) return
 
     function receivedMessage(message: any) {
       // If the message is from the current client id, then we are receiving the sent message back from the socket.
@@ -304,7 +306,7 @@ export const ChatProvider: FC = ({ children }) => {
 
       socket.removeListener('new-chat-message', receivedMessage)
     }
-  }, [socket])
+  }, [socket, hasViewerPermissions])
 
   // Handle unread messages
   useEffect(() => {
