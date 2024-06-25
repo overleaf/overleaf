@@ -694,12 +694,13 @@ MathCommand {
   | KnownCtrlSym
 }
 
-@external tokens endOfArgumentListTokenizer from "./tokens.mjs" {
+@external tokens argumentListTokenizer from "./tokens.mjs" {
+    hasMoreArguments,
     endOfArguments
 }
 
 MathUnknownCommand {
-    CtrlSeq (optionalWhitespace? MathArgument)* optionalWhitespace? endOfArguments
+    CtrlSeq (hasMoreArguments optionalWhitespace? MathArgument)* endOfArguments
   | CtrlSym
 }
 

@@ -81,7 +81,10 @@ import {
   MultiColumnCtrlSeq,
   // Marker for end of argument lists
   endOfArguments,
+  hasMoreArguments,
 } from './latex.terms.mjs'
+
+const MAX_ARGUMENT_LOOKAHEAD = 100
 
 function nameChar(ch) {
   // we accept A-Z a-z 0-9 * + @ in environment names
@@ -256,14 +259,20 @@ const CHAR_TAB = _char('\t')
 const CHAR_SPACE = _char(' ')
 const CHAR_NEWLINE = _char('\n')
 
-export const endOfArgumentListTokenizer = new ExternalTokenizer(
+export const argumentListTokenizer = new ExternalTokenizer(
   input => {
-    const { next } = input
-    if (next === CHAR_SPACE || next === CHAR_TAB) {
-      return
-    }
-    if (next !== CHAR_OPEN_BRACE) {
-      input.acceptToken(endOfArguments)
+    for (let i = 0; i < MAX_ARGUMENT_LOOKAHEAD; ++i) {
+      const next = input.peek(i)
+      if (next === CHAR_SPACE || next === CHAR_TAB) {
+        continue
+      }
+      if (next === CHAR_OPEN_BRACE) {
+        input.acceptToken(hasMoreArguments)
+        return
+      } else {
+        input.acceptToken(endOfArguments)
+        return
+      }
     }
   },
   { contextual: false, fallback: true }
