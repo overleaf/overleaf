@@ -41,7 +41,7 @@ export default function ShareProjectModalContent({
         <Modal.Title>{t('share_project')}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body className="modal-body-share">
+      <Modal.Body className="modal-body-share modal-link-share-new">
         <Grid fluid>
           <Suspense fallback={<FullSizeLoadingSpinner minHeight="15rem" />}>
             {isRestrictedTokenMember ? (

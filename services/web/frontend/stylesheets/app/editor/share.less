@@ -29,6 +29,8 @@
   .project-invite,
   .public-access-level {
     font-size: 14px;
+    padding: (@line-height-computed / 2) 0;
+    border-bottom: 1px solid @gray-lighter;
   }
 
   .public-access-level {
@@ -115,6 +117,9 @@
       padding: 2px;
       margin-bottom: 0;
     }
+    padding: @line-height-computed / 2;
+    background-color: @gray-lightest;
+    margin-top: @line-height-computed / 2;
     .add-collabs {
       margin-top: @line-height-computed / 2;
     }
@@ -173,4 +178,16 @@
 
 .copy-button:focus-within {
   outline: none;
+}
+
+.modal-link-share-new {
+  .invite-controls {
+    padding: 0;
+    background-color: transparent;
+    margin-top: 0;
+  }
+  .public-access-level {
+    padding: 0;
+    border: none;
+  }
 }
