@@ -54,7 +54,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg
 									+dropdown-menu-link-item()(href="/admin/user") Manage Users
 									+dropdown-menu-link-item()(href="/admin/project") Project URL Lookup
 								if canDisplayAdminRedirect
-									+dropdown-menu-link-item()(settings.adminUrl) Switch to Admin
+									+dropdown-menu-link-item()(href=settings.adminUrl) Switch to Admin
 								if canDisplaySplitTestMenu
 									+dropdown-menu-link-item()(href="/admin/split-test") Manage Feature Flags
 								if canDisplaySurveyMenu
