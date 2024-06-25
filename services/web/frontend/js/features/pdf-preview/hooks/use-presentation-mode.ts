@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 type StoredPDFState = {
   scrollMode?: number
@@ -83,6 +84,8 @@ export default function usePresentationMode(
   }, [presentationMode, arrowKeyListener, clickListener])
 
   const requestPresentationMode = useCallback(() => {
+    sendMB('pdf-viewer-enter-presentation-mode')
+
     if (pdfJsWrapper) {
       pdfJsWrapper.container.parentNode.requestFullscreen()
     }
