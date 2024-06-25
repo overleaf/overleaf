@@ -187,7 +187,14 @@ describe('MetaHandler', function () {
 
   describe('getMetaForDoc', function () {
     beforeEach(function () {
-      this.fakeLines = ['\\usepackage{abc}', 'one', '\\label{aaa}', 'two']
+      this.fakeLines = [
+        '\\usepackage{abc}',
+        'one',
+        '\\label{aaa}',
+        'two',
+        // bbb should not be in the returned labels
+        'commented label % \\label{bbb}',
+      ]
       this.fakeMeta = { labels: ['aaa'], packages: ['abc'] }
       this.DocumentUpdaterHandler.flushDocToMongo = sinon
         .stub()

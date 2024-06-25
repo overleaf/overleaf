@@ -84,7 +84,8 @@ module.exports = MetaHandler = {
     const labelRe = MetaHandler.labelRegex()
     const packageRe = MetaHandler.usepackageRegex()
     const reqPackageRe = MetaHandler.ReqPackageRegex()
-    for (const line of Array.from(lines)) {
+    for (const rawLine of Array.from(lines)) {
+      const line = MetaHandler._getNonCommentedContent(rawLine)
       let labelMatch
       let clean, messy, packageMatch
       while ((labelMatch = labelRe.exec(line))) {
@@ -127,5 +128,19 @@ module.exports = MetaHandler = {
       projectMeta[doc._id] = MetaHandler.extractMetaFromDoc(doc.lines)
     }
     return projectMeta
+  },
+
+  /**
+   * Trims comment content from line
+   * @param {string} rawLine
+   * @returns {string}
+   */
+  _getNonCommentedContent(rawLine) {
+    const commentStart = /(?:^%)|(?:[^\\]%)/
+    const match = rawLine.match(commentStart)
+    if (match) {
+      return rawLine.slice(0, match.index)
+    }
+    return rawLine
   },
 }
