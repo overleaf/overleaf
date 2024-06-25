@@ -25,10 +25,6 @@
     VerbatimContent
 }
 
-@external tokens mathDelimiterTokenizer from "./tokens.mjs" {
-    MathDelimiter
-}
-
 // external tokenizer to read control sequence names including @ signs
 // (which are often used in TeX definitions).
 @external tokens csnameTokenizer from "./tokens.mjs" {
@@ -731,6 +727,25 @@ MathOpening {
 
 MathClosing {
     RightCtrlSeq optionalWhitespace? MathDelimiter
+}
+
+MathDelimiter {
+    // Allowed delimiters, from the LaTeX manual, table 3.10
+    "/" | "|" | "(" | ")" | "[" | "]" |
+   "\\{" | "\\}" | "\\|" |
+    "\\lfloor" | "\\rfloor" |
+    "\\lceil" | "\\rceil" |
+    "\\langle" | "\\rangle" |
+    "\\backslash" | "\\uparrow" |
+    "\\Uparrow" | "\\Downarrow" |
+    "\\updownarrow" | "\\Updownarrow" |
+    "\\downarrow" | "\\lvert" |
+    "\\lVert" | "\\rVert" |
+    "\\rvert" | "\\vert" | "\\Vert" |
+    "\\lbrace" | "\\rbrace" |
+    "\\lbrack" | "\\rbrack" |
+    // Also allow the empty match
+    "."
 }
 
 // NOTE: precedence works differently for rules and token, in the rule
