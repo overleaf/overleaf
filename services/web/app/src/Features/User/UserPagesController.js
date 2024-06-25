@@ -138,8 +138,9 @@ async function settingsPage(req, res) {
     )
   }
 
-  // Get the user's assignment for the Bootstrap 5 split test, which populates
-  // splitTestVariants with a value for 'bootstrap-5' and allows Pug to read it
+  // Get the user's assignment for this page's Bootstrap 5 split test, which
+  // populates splitTestVariants with a value for the split test name and allows
+  // Pug to read it
   await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5')
 
   res.render('user/settings', {
