@@ -51,11 +51,14 @@ export default function usePresentationMode(
       switch (event.key) {
         case 'ArrowLeft':
         case 'ArrowUp':
+        case 'PageUp':
+        case 'Backspace':
           previousPage()
           break
 
         case 'ArrowRight':
         case 'ArrowDown':
+        case 'PageDown':
           nextPage()
           break
 
