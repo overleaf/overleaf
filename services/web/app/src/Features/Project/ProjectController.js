@@ -467,6 +467,36 @@ const _ProjectController = {
           anonRequestToken
         )
 
+      const linkSharingChanges =
+        await SplitTestHandler.promises.getAssignmentForUser(
+          project.owner_ref,
+          'link-sharing-warning'
+        )
+      if (linkSharingChanges?.variant === 'active') {
+        if (isTokenMember) {
+          // Check explicitly that the user is in read write token refs, while this could be inferred
+          // from the privilege level, the privilege level of token members might later be restricted
+          const isReadWriteTokenMember =
+            await CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+              userId,
+              projectId
+            )
+          if (isReadWriteTokenMember) {
+            // Check for an edge case where a user is both in read write token access refs but also
+            // an invited read write member. Ensure they are not redirected to the sharing updates page
+            // We could also delete the token access ref if the user is already a member of the project
+            const isInvitedReadWriteMember =
+              await CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+                userId,
+                projectId
+              )
+            if (!isInvitedReadWriteMember) {
+              return res.redirect(`/project/${projectId}/sharing-updates`)
+            }
+          }
+        }
+      }
+
       let allowedFreeTrial = true
 
       if (privilegeLevel == null || privilegeLevel === PrivilegeLevels.NONE) {

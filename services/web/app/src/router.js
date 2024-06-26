@@ -51,6 +51,7 @@ const BetaProgramController = require('./Features/BetaProgram/BetaProgramControl
 const AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
 const MetaController = require('./Features/Metadata/MetaController')
 const TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
+const TokenAccessRouter = require('./Features/TokenAccess/TokenAccessRouter')
 const Features = require('./infrastructure/Features')
 const LinkedFilesRouter = require('./Features/LinkedFiles/LinkedFilesRouter')
 const TemplatesRouter = require('./Features/Templates/TemplatesRouter')
@@ -270,6 +271,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   LinkedFilesRouter.apply(webRouter, privateApiRouter, publicApiRouter)
   TemplatesRouter.apply(webRouter)
   UserMembershipRouter.apply(webRouter)
+  TokenAccessRouter.apply(webRouter)
 
   Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 

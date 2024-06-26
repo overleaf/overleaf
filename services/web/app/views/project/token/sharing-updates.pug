@@ -1,0 +1,16 @@
+extends ../../layout-marketing
+
+block entrypointVar
+	- entrypoint = 'pages/sharing-updates'
+
+block vars
+	- var suppressFooter = true
+	- var suppressCookieBanner = true
+	- var suppressSkipToContent = true
+
+block append meta
+	meta(name="ol-project_id" data-type="string" content=projectId)
+
+block content
+	.content.content-alt#main-content
+		div#sharing-updates-page

@@ -187,6 +187,35 @@ const TokenAccessHandler = {
     ).exec()
   },
 
+  async removeReadAndWriteUserFromProject(userId, projectId) {
+    userId = new ObjectId(userId.toString())
+    projectId = new ObjectId(projectId.toString())
+
+    return await Project.updateOne(
+      {
+        _id: projectId,
+      },
+      {
+        $pull: { tokenAccessReadAndWrite_refs: userId },
+      }
+    ).exec()
+  },
+
+  async moveReadAndWriteUserToReadOnly(userId, projectId) {
+    userId = new ObjectId(userId.toString())
+    projectId = new ObjectId(projectId.toString())
+
+    return await Project.updateOne(
+      {
+        _id: projectId,
+      },
+      {
+        $pull: { tokenAccessReadAndWrite_refs: userId },
+        $addToSet: { tokenAccessReadOnly_refs: userId },
+      }
+    ).exec()
+  },
+
   grantSessionTokenAccess(req, projectId, token) {
     if (!req.session) {
       return

@@ -5,6 +5,8 @@ const request = require('./helpers/request')
 const settings = require('@overleaf/settings')
 const { db } = require('../../../app/src/infrastructure/mongodb')
 const expectErrorResponse = require('./helpers/expectErrorResponse')
+const SplitTestHandler = require('../../../app/src/Features/SplitTests/SplitTestHandler')
+const sinon = require('sinon')
 
 const tryEditorAccess = (user, projectId, test, callback) =>
   async.series(
@@ -235,6 +237,47 @@ const tryFetchProjectTokens = (user, projectId, callback) => {
       callback(null, response, body)
     }
   )
+}
+
+const trySharingUpdatesPage = (user, projectId, test, callback) =>
+  user.request.get(
+    `/project/${projectId}/sharing-updates`,
+    (error, response, body) => {
+      if (error != null) {
+        return callback(error)
+      }
+      test(response, body, projectId)
+      callback()
+    }
+  )
+
+const trySharingUpdatesJoin = (user, projectId, test, callback) =>
+  user.request.post(
+    `/project/${projectId}/sharing-updates/join`,
+    (error, response, body) => {
+      if (error != null) {
+        return callback(error)
+      }
+      test(response, body, projectId)
+      callback()
+    }
+  )
+
+const trySharingUpdatesView = (user, projectId, test, callback) =>
+  user.request.post(
+    `/project/${projectId}/sharing-updates/view`,
+    (error, response, body) => {
+      if (error != null) {
+        return callback(error)
+      }
+      test(response, body, projectId)
+      callback()
+    }
+  )
+
+const expectRedirectToProject = (response, body, projectId) => {
+  expect(response.statusCode).to.equal(302)
+  expect(response.headers.location).to.equal(`/project/${projectId}`)
 }
 
 describe('TokenAccess', function () {
@@ -1780,6 +1823,390 @@ describe('TokenAccess', function () {
         ],
         done
       )
+    })
+  })
+
+  describe('link sharing changes', function () {
+    beforeEach(function () {
+      this.getAssignmentForUser = sinon.stub(
+        SplitTestHandler.promises,
+        'getAssignmentForUser'
+      )
+      this.getAssignmentForUser.resolves({ variant: 'default' })
+    })
+
+    afterEach(function () {
+      this.getAssignmentForUser.restore()
+    })
+
+    describe('not a member of the project', function () {
+      beforeEach(function (done) {
+        this.projectName = `token-link-sharing-changes${Math.random()}`
+        this.owner.createProject(this.projectName, (err, projectId) => {
+          if (err != null) {
+            return done(err)
+          }
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
+            if (err != null) {
+              return done(err)
+            }
+            this.owner.getProject(this.projectId, (err, project) => {
+              if (err != null) {
+                return done(err)
+              }
+              this.tokens = project.tokens
+              done()
+            })
+          })
+        })
+      })
+
+      it('should deny access', function (done) {
+        async.series(
+          [
+            cb => {
+              trySharingUpdatesPage(
+                this.other1,
+                this.projectId,
+                expectErrorResponse.restricted.html,
+                cb
+              )
+            },
+            cb => {
+              trySharingUpdatesJoin(
+                this.other1,
+                this.projectId,
+                expectErrorResponse.restricted.html,
+                cb
+              )
+            },
+            cb => {
+              trySharingUpdatesView(
+                this.other1,
+                this.projectId,
+                expectErrorResponse.restricted.html,
+                cb
+              )
+            },
+          ],
+          done
+        )
+      })
+    })
+
+    describe('read and write token member of project', function () {
+      beforeEach(function (done) {
+        this.projectName = `token-link-sharing-changes${Math.random()}`
+        this.owner.createProject(this.projectName, (err, projectId) => {
+          if (err != null) {
+            return done(err)
+          }
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
+            if (err != null) {
+              return done(err)
+            }
+            this.owner.getProject(this.projectId, (err, project) => {
+              if (err != null) {
+                return done(err)
+              }
+              this.tokens = project.tokens
+              // must do token accept before split test enabled
+              // otherwise would be automatically added to named collaborators
+              tryReadAndWriteTokenAccept(
+                this.other1,
+                this.tokens.readAndWrite,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                },
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                  expect(body.redirect).to.equal(`/project/${this.projectId}`)
+                  expect(body.tokenAccessGranted).to.equal('readAndWrite')
+                },
+                done
+              )
+            })
+          })
+        })
+      })
+
+      describe('link sharing changes test not active', function () {
+        it('should redirect to project, same permissions as before', function (done) {
+          async.series(
+            [
+              cb => {
+                trySharingUpdatesPage(
+                  this.other1,
+                  this.projectId,
+                  expectRedirectToProject,
+                  cb
+                )
+              },
+              cb => {
+                trySharingUpdatesJoin(
+                  this.other1,
+                  this.projectId,
+                  expectRedirectToProject,
+                  cb
+                )
+              },
+              cb => {
+                trySharingUpdatesView(
+                  this.other1,
+                  this.projectId,
+                  expectRedirectToProject,
+                  cb
+                )
+              },
+              cb => {
+                tryContentAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(body.privilegeLevel).to.equal('readAndWrite')
+                    expect(body.isRestrictedUser).to.equal(false)
+                    expect(body.isTokenMember).to.equal(true)
+                    expect(body.isInvitedMember).to.equal(false)
+                    expect(body.project.owner).to.have.all.keys(
+                      '_id',
+                      'email',
+                      'first_name',
+                      'last_name',
+                      'privileges',
+                      'signUpDate'
+                    )
+                  },
+                  cb
+                )
+              },
+              cb => {
+                tryEditorAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(200)
+                  },
+                  cb
+                )
+              },
+            ],
+            done
+          )
+        })
+      })
+
+      describe('link sharing changes test is active', function () {
+        beforeEach(function () {
+          this.getAssignmentForUser.resolves({ variant: 'active' })
+        })
+        it('should show sharing updates page', function (done) {
+          trySharingUpdatesPage(
+            this.other1,
+            this.projectId,
+            (response, body) => {
+              expect(response.statusCode).to.equal(200)
+            },
+            done
+          )
+        })
+
+        it('should allow join to named collaborator', function (done) {
+          async.series(
+            [
+              cb => {
+                trySharingUpdatesJoin(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(204)
+                  },
+                  cb
+                )
+              },
+              cb => {
+                tryContentAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(body.privilegeLevel).to.equal('readAndWrite')
+                    expect(body.isRestrictedUser).to.equal(false)
+                    expect(body.isTokenMember).to.equal(false)
+                    expect(body.isInvitedMember).to.equal(true) // now collaborator
+                    expect(body.project.owner).to.have.all.keys(
+                      '_id',
+                      'email',
+                      'first_name',
+                      'last_name',
+                      'privileges',
+                      'signUpDate'
+                    )
+                  },
+                  cb
+                )
+              },
+              cb => {
+                tryEditorAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(200)
+                  },
+                  cb
+                )
+              },
+            ],
+            done
+          )
+        })
+
+        it('should allow move to anonymous viewer', function (done) {
+          async.series(
+            [
+              cb => {
+                trySharingUpdatesView(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(204)
+                  },
+                  cb
+                )
+              },
+              cb => {
+                tryContentAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(body.privilegeLevel).to.equal('readOnly')
+                    expect(body.isRestrictedUser).to.equal(true)
+                    expect(body.isTokenMember).to.equal(true)
+                    expect(body.isInvitedMember).to.equal(false)
+                    expect(body.project.owner).to.have.keys('_id')
+                  },
+                  cb
+                )
+              },
+              cb => {
+                tryEditorAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(200)
+                  },
+                  cb
+                )
+              },
+            ],
+            done
+          )
+        })
+      })
+    })
+
+    describe('read-only token member of project', function () {
+      beforeEach(function (done) {
+        this.projectName = `token-link-sharing-changes${Math.random()}`
+        this.owner.createProject(this.projectName, (err, projectId) => {
+          if (err != null) {
+            return done(err)
+          }
+          this.projectId = projectId
+          this.owner.makeTokenBased(this.projectId, err => {
+            if (err != null) {
+              return done(err)
+            }
+            this.owner.getProject(this.projectId, (err, project) => {
+              if (err != null) {
+                return done(err)
+              }
+              this.tokens = project.tokens
+              tryReadOnlyTokenAccept(
+                this.other1,
+                this.tokens.readOnly,
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                },
+                (response, body) => {
+                  expect(response.statusCode).to.equal(200)
+                  expect(body.redirect).to.equal(`/project/${this.projectId}`)
+                  expect(body.tokenAccessGranted).to.equal('readOnly')
+                },
+                done
+              )
+            })
+          })
+        })
+      })
+
+      describe('link sharing changes test is active', function () {
+        beforeEach(function () {
+          this.getAssignmentForUser.resolves({ variant: 'active' })
+        })
+
+        it('should redirect to project, same view permissions as before', function (done) {
+          async.series(
+            [
+              cb => {
+                trySharingUpdatesPage(
+                  this.other1,
+                  this.projectId,
+                  expectRedirectToProject,
+                  cb
+                )
+              },
+              cb => {
+                trySharingUpdatesJoin(
+                  this.other1,
+                  this.projectId,
+                  expectRedirectToProject,
+                  cb
+                )
+              },
+              cb => {
+                trySharingUpdatesView(
+                  this.other1,
+                  this.projectId,
+                  expectRedirectToProject,
+                  cb
+                )
+              },
+              cb => {
+                // allow content access read-only
+                tryContentAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(body.privilegeLevel).to.equal('readOnly')
+                    expect(body.isRestrictedUser).to.equal(true)
+                    expect(body.isTokenMember).to.equal(true)
+                    expect(body.isInvitedMember).to.equal(false)
+                    expect(body.project.owner).to.have.keys('_id')
+                    expect(body.project.owner).to.not.have.any.keys(
+                      'email',
+                      'first_name',
+                      'last_name'
+                    )
+                  },
+                  cb
+                )
+              },
+              cb => {
+                tryEditorAccess(
+                  this.other1,
+                  this.projectId,
+                  (response, body) => {
+                    expect(response.statusCode).to.equal(200)
+                  },
+                  cb
+                )
+              },
+            ],
+            done
+          )
+        })
+      })
     })
   })
 })

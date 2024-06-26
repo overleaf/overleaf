@@ -200,6 +200,59 @@ describe('TokenAccessHandler', function () {
     })
   })
 
+  describe('removeReadAndWriteUserFromProject', function () {
+    beforeEach(function () {
+      this.Project.updateOne = sinon
+        .stub()
+        .returns({ exec: sinon.stub().resolves(null) })
+    })
+
+    it('should call Project.updateOne', async function () {
+      await this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject(
+        this.userId,
+        this.projectId
+      )
+
+      expect(this.Project.updateOne.callCount).to.equal(1)
+      expect(
+        this.Project.updateOne.calledWith({
+          _id: this.projectId,
+        })
+      ).to.equal(true)
+      expect(this.Project.updateOne.lastCall.args[1].$pull).to.have.keys(
+        'tokenAccessReadAndWrite_refs'
+      )
+    })
+  })
+
+  describe('moveReadAndWriteUserToReadOnly', function () {
+    beforeEach(function () {
+      this.Project.updateOne = sinon
+        .stub()
+        .returns({ exec: sinon.stub().resolves(null) })
+    })
+
+    it('should call Project.updateOne', async function () {
+      await this.TokenAccessHandler.promises.moveReadAndWriteUserToReadOnly(
+        this.userId,
+        this.projectId
+      )
+
+      expect(this.Project.updateOne.callCount).to.equal(1)
+      expect(
+        this.Project.updateOne.calledWith({
+          _id: this.projectId,
+        })
+      ).to.equal(true)
+      expect(this.Project.updateOne.lastCall.args[1].$pull).to.have.keys(
+        'tokenAccessReadAndWrite_refs'
+      )
+      expect(this.Project.updateOne.lastCall.args[1].$addToSet).to.have.keys(
+        'tokenAccessReadOnly_refs'
+      )
+    })
+  })
+
   describe('grantSessionTokenAccess', function () {
     beforeEach(function () {
       this.req = { session: {}, headers: {} }

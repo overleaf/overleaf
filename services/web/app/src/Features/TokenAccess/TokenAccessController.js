@@ -15,6 +15,9 @@ const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
+const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
+const ProjectGetter = require('../Project/ProjectGetter')
+const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -433,6 +436,116 @@ async function grantTokenAccessReadOnly(req, res, next) {
   }
 }
 
+async function ensureUserCanUseSharingUpdatesConsentPage(req, res, next) {
+  const { Project_id: projectId } = req.params
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: 1,
+  })
+  if (!project) {
+    throw new Errors.NotFoundError()
+  }
+  const linkSharingChanges =
+    await SplitTestHandler.promises.getAssignmentForUser(
+      project.owner_ref,
+      'link-sharing-warning'
+    )
+  if (linkSharingChanges?.variant !== 'active') {
+    return AsyncFormHelper.redirect(req, res, `/project/${projectId}`)
+  }
+  const isReadWriteTokenMember =
+    await CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+      userId,
+      projectId
+    )
+  if (!isReadWriteTokenMember) {
+    // If the user is not a read write token member, there are no actions to take
+    return AsyncFormHelper.redirect(req, res, `/project/${projectId}`)
+  }
+  const isReadWriteMember =
+    await CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+      userId,
+      projectId
+    )
+  if (isReadWriteMember) {
+    // If the user is already an invited editor, the actions don't make sense
+    return AsyncFormHelper.redirect(req, res, `/project/${projectId}`)
+  }
+  next()
+}
+
+async function sharingUpdatesConsent(req, res, next) {
+  const { Project_id: projectId } = req.params
+  res.render('project/token/sharing-updates', {
+    projectId,
+  })
+}
+
+async function moveReadWriteToCollaborators(req, res, next) {
+  const { Project_id: projectId } = req.params
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const isInvitedMember =
+    await CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
+      userId,
+      projectId
+    )
+  await ProjectAuditLogHandler.promises.addEntry(
+    projectId,
+    'accept-via-link-sharing',
+    userId,
+    req.ip,
+    {
+      privileges: 'readAndWrite',
+      tokenMember: true,
+      invitedMember: isInvitedMember,
+    }
+  )
+  if (isInvitedMember) {
+    // Read only invited viewer who is gaining edit access via link sharing
+    await TokenAccessHandler.promises.removeReadAndWriteUserFromProject(
+      userId,
+      projectId
+    )
+    await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+      projectId,
+      userId,
+      PrivilegeLevels.READ_AND_WRITE
+    )
+  } else {
+    // Normal case, not invited, joining via link sharing
+    await TokenAccessHandler.promises.removeReadAndWriteUserFromProject(
+      userId,
+      projectId
+    )
+    await CollaboratorsHandler.promises.addUserIdToProject(
+      projectId,
+      undefined,
+      userId,
+      PrivilegeLevels.READ_AND_WRITE
+    )
+  }
+  EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {
+    members: true,
+  })
+  res.sendStatus(204)
+}
+
+async function moveReadWriteToReadOnly(req, res, next) {
+  const { Project_id: projectId } = req.params
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  await ProjectAuditLogHandler.promises.addEntry(
+    projectId,
+    'readonly-via-sharing-updates',
+    userId,
+    req.ip
+  )
+  await TokenAccessHandler.promises.moveReadAndWriteUserToReadOnly(
+    userId,
+    projectId
+  )
+  res.sendStatus(204)
+}
+
 module.exports = {
   READ_ONLY_TOKEN_PATTERN: TokenAccessHandler.READ_ONLY_TOKEN_PATTERN,
   READ_AND_WRITE_TOKEN_PATTERN: TokenAccessHandler.READ_AND_WRITE_TOKEN_PATTERN,
@@ -440,4 +553,10 @@ module.exports = {
   tokenAccessPage: expressify(tokenAccessPage),
   grantTokenAccessReadOnly: expressify(grantTokenAccessReadOnly),
   grantTokenAccessReadAndWrite: expressify(grantTokenAccessReadAndWrite),
+  ensureUserCanUseSharingUpdatesConsentPage: expressify(
+    ensureUserCanUseSharingUpdatesConsentPage
+  ),
+  sharingUpdatesConsent: expressify(sharingUpdatesConsent),
+  moveReadWriteToCollaborators: expressify(moveReadWriteToCollaborators),
+  moveReadWriteToReadOnly: expressify(moveReadWriteToReadOnly),
 }

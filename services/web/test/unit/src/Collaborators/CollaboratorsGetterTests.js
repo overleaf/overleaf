@@ -231,6 +231,38 @@ describe('CollaboratorsGetter', function () {
     })
   })
 
+  describe('isUserInvitedReadWriteMemberOfProject', function () {
+    describe('when user is a read write member of the project', function () {
+      it('should return true', async function () {
+        const isMember =
+          await this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+            this.readWriteRef1
+          )
+        expect(isMember).to.equal(true)
+      })
+    })
+
+    describe('when user is a read only member of the project', function () {
+      it('should return false', async function () {
+        const isMember =
+          await this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+            this.readOnlyRef1
+          )
+        expect(isMember).to.equal(false)
+      })
+    })
+
+    describe('when user is not a member of the project', function () {
+      it('should return false', async function () {
+        const isMember =
+          await this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject(
+            this.nonMemberRef
+          )
+        expect(isMember).to.equal(false)
+      })
+    })
+  })
+
   describe('getProjectsUserIsMemberOf', function () {
     beforeEach(function () {
       this.fields = 'mock fields'
@@ -358,6 +390,28 @@ describe('CollaboratorsGetter', function () {
       this.ProjectMock.expects('findOne').chain('exec').resolves(null)
       const isMember =
         await this.CollaboratorsGetter.promises.userIsTokenMember(
+          this.userId,
+          this.project._id
+        )
+      expect(isMember).to.be.false
+    })
+  })
+
+  describe('userIsReadWriteTokenMember', function () {
+    it('should return true when the project is found', async function () {
+      this.ProjectMock.expects('findOne').chain('exec').resolves(this.project)
+      const isMember =
+        await this.CollaboratorsGetter.promises.userIsReadWriteTokenMember(
+          this.userId,
+          this.project._id
+        )
+      expect(isMember).to.be.true
+    })
+
+    it('should return false when the project is not found', async function () {
+      this.ProjectMock.expects('findOne').chain('exec').resolves(null)
+      const isMember =
+        await this.CollaboratorsGetter.promises.userIsReadWriteTokenMember(
           this.userId,
           this.project._id
         )

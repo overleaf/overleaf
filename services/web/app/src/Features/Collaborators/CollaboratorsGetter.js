@@ -42,8 +42,10 @@ module.exports = {
     getProjectsUserIsMemberOf,
     dangerouslyGetAllProjectsUserIsMemberOf,
     isUserInvitedMemberOfProject,
+    isUserInvitedReadWriteMemberOfProject,
     getPublicShareTokens,
     userIsTokenMember,
+    userIsReadWriteTokenMember,
     getAllInvitedMembers,
   },
 }
@@ -132,6 +134,23 @@ async function isUserInvitedMemberOfProject(userId, projectId) {
     if (
       member.id.toString() === userId.toString() &&
       member.source !== Sources.TOKEN
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
+async function isUserInvitedReadWriteMemberOfProject(userId, projectId) {
+  if (!userId) {
+    return false
+  }
+  const members = await getMemberIdsWithPrivilegeLevels(projectId)
+  for (const member of members) {
+    if (
+      member.id.toString() === userId.toString() &&
+      member.source !== Sources.TOKEN &&
+      member.privilegeLevel === PrivilegeLevels.READ_AND_WRITE
     ) {
       return true
     }
@@ -245,6 +264,21 @@ async function userIsTokenMember(userId, projectId) {
         { tokenAccessReadOnly_refs: userId },
         { tokenAccessReadAndWrite_refs: userId },
       ],
+    },
+    {
+      _id: 1,
+    }
+  ).exec()
+  return project != null
+}
+
+async function userIsReadWriteTokenMember(userId, projectId) {
+  userId = new ObjectId(userId.toString())
+  projectId = new ObjectId(projectId.toString())
+  const project = await Project.findOne(
+    {
+      _id: projectId,
+      tokenAccessReadAndWrite_refs: userId,
     },
     {
       _id: 1,

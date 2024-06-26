@@ -21,6 +21,7 @@ describe('TokenAccessController', function () {
     }
     this.req = new MockRequest()
     this.res = new MockResponse()
+    this.next = sinon.stub().returns()
 
     this.Settings = {}
     this.TokenAccessHandler = {
@@ -40,6 +41,8 @@ describe('TokenAccessController', function () {
         getProjectByToken: sinon.stub().resolves(this.project),
         getV1DocPublishedInfo: sinon.stub().resolves({ allow: true }),
         getV1DocInfo: sinon.stub(),
+        removeReadAndWriteUserFromProject: sinon.stub().resolves(),
+        moveReadAndWriteUserToReadOnly: sinon.stub().resolves(),
       },
     }
 
@@ -77,10 +80,25 @@ describe('TokenAccessController', function () {
     this.CollaboratorsHandler = {
       promises: {
         addUserIdToProject: sinon.stub().resolves(),
+        setCollaboratorPrivilegeLevel: sinon.stub().resolves(),
+      },
+    }
+
+    this.CollaboratorsGetter = {
+      promises: {
+        userIsReadWriteTokenMember: sinon.stub().resolves(),
+        isUserInvitedReadWriteMemberOfProject: sinon.stub().resolves(),
+        isUserInvitedMemberOfProject: sinon.stub().resolves(),
       },
     }
 
     this.EditorRealTimeController = { emitToRoom: sinon.stub() }
+
+    this.ProjectGetter = {
+      promises: {
+        getProject: sinon.stub().resolves(this.project),
+      },
+    }
 
     this.TokenAccessController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -96,7 +114,12 @@ describe('TokenAccessController', function () {
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../Errors/Errors': (this.Errors = { NotFoundError: sinon.stub() }),
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
+        '../Project/ProjectGetter': this.ProjectGetter,
+        '../Helpers/AsyncFormHelper': (this.AsyncFormHelper = {
+          redirect: sinon.stub(),
+        }),
       },
     })
   })
@@ -719,6 +742,206 @@ describe('TokenAccessController', function () {
           done()
         }
       )
+    })
+  })
+
+  describe('ensureUserCanUseSharingUpdatesConsentPage', function () {
+    beforeEach(function () {
+      this.req.params = { Project_id: this.project._id }
+    })
+
+    describe('when not in link sharing changes test', function () {
+      beforeEach(function (done) {
+        this.AsyncFormHelper.redirect = sinon.stub().callsFake(() => done())
+        this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+          this.req,
+          this.res,
+          done
+        )
+      })
+
+      it('redirects to the project/editor', function () {
+        expect(this.AsyncFormHelper.redirect).to.have.been.calledWith(
+          this.req,
+          this.res,
+          `/project/${this.project._id}`
+        )
+      })
+    })
+
+    describe('when link sharing changes test active', function () {
+      beforeEach(function () {
+        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
+          variant: 'active',
+        })
+      })
+
+      describe('when user is not an invited editor and is a read write token member', function () {
+        beforeEach(function (done) {
+          this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
+            false
+          )
+          this.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
+            true
+          )
+          this.next.callsFake(() => done())
+          this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+            this.req,
+            this.res,
+            this.next
+          )
+        })
+
+        it('calls next', function () {
+          expect(
+            this.CollaboratorsGetter.promises
+              .isUserInvitedReadWriteMemberOfProject
+          ).to.have.been.calledWith(this.user._id, this.project._id)
+          expect(
+            this.CollaboratorsGetter.promises.userIsReadWriteTokenMember
+          ).to.have.been.calledWith(this.user._id, this.project._id)
+          expect(this.next).to.have.been.calledOnce
+          expect(this.next.firstCall.args[0]).to.not.exist
+        })
+      })
+
+      describe('when user is already an invited editor', function () {
+        beforeEach(function (done) {
+          this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
+            true
+          )
+          this.AsyncFormHelper.redirect = sinon.stub().callsFake(() => done())
+          this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+            this.req,
+            this.res,
+            done
+          )
+        })
+
+        it('redirects to the project/editor', function () {
+          expect(this.AsyncFormHelper.redirect).to.have.been.calledWith(
+            this.req,
+            this.res,
+            `/project/${this.project._id}`
+          )
+        })
+      })
+
+      describe('when user not a read write token member', function () {
+        beforeEach(function (done) {
+          this.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
+            false
+          )
+          this.AsyncFormHelper.redirect = sinon.stub().callsFake(() => done())
+          this.TokenAccessController.ensureUserCanUseSharingUpdatesConsentPage(
+            this.req,
+            this.res,
+            done
+          )
+        })
+
+        it('redirects to the project/editor', function () {
+          expect(this.AsyncFormHelper.redirect).to.have.been.calledWith(
+            this.req,
+            this.res,
+            `/project/${this.project._id}`
+          )
+        })
+      })
+    })
+  })
+
+  describe('moveReadWriteToCollaborators', function () {
+    beforeEach(function () {
+      this.req.params = { Project_id: this.project._id }
+    })
+
+    describe('read only invited viewer gaining edit access via link sharing', function () {
+      beforeEach(function (done) {
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+          true
+        )
+        this.res.callback = done
+        this.TokenAccessController.moveReadWriteToCollaborators(
+          this.req,
+          this.res,
+          done
+        )
+      })
+
+      it('sets the privilege level to read and write for the invited viewer', function () {
+        expect(
+          this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
+        ).to.have.been.calledWith(
+          this.project._id,
+          this.user._id,
+          PrivilegeLevels.READ_AND_WRITE
+        )
+        expect(this.res.sendStatus).to.have.been.calledWith(204)
+      })
+    })
+    describe('previously joined token access user moving to named collaborator', function () {
+      beforeEach(function (done) {
+        this.CollaboratorsGetter.promises.isUserInvitedMemberOfProject.resolves(
+          false
+        )
+        this.res.callback = done
+        this.TokenAccessController.moveReadWriteToCollaborators(
+          this.req,
+          this.res,
+          done
+        )
+      })
+
+      it('sets the privilege level to read and write for the invited viewer', function () {
+        expect(
+          this.TokenAccessHandler.promises.removeReadAndWriteUserFromProject
+        ).to.have.been.calledWith(this.user._id, this.project._id)
+        expect(
+          this.CollaboratorsHandler.promises.addUserIdToProject
+        ).to.have.been.calledWith(
+          this.project._id,
+          undefined,
+          this.user._id,
+          PrivilegeLevels.READ_AND_WRITE
+        )
+        expect(this.res.sendStatus).to.have.been.calledWith(204)
+      })
+    })
+  })
+
+  describe('moveReadWriteToReadOnly', function () {
+    beforeEach(function () {
+      this.req.params = { Project_id: this.project._id }
+    })
+
+    describe('previously joined token access user moving to anonymous viewer', function () {
+      beforeEach(function (done) {
+        this.res.callback = done
+        this.TokenAccessController.moveReadWriteToReadOnly(
+          this.req,
+          this.res,
+          done
+        )
+      })
+
+      it('removes them from read write token access refs and adds them to read only token access refs', function () {
+        expect(
+          this.TokenAccessHandler.promises.moveReadAndWriteUserToReadOnly
+        ).to.have.been.calledWith(this.user._id, this.project._id)
+        expect(this.res.sendStatus).to.have.been.calledWith(204)
+      })
+
+      it('writes a project audit log', function () {
+        expect(
+          this.ProjectAuditLogHandler.promises.addEntry
+        ).to.have.been.calledWith(
+          this.project._id,
+          'readonly-via-sharing-updates',
+          this.user._id,
+          this.req.ip
+        )
+      })
     })
   })
 })

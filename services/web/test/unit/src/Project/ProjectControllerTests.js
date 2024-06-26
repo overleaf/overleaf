@@ -127,6 +127,8 @@ describe('ProjectController', function () {
       promises: {
         userIsTokenMember: sinon.stub().resolves(false),
         isUserInvitedMemberOfProject: sinon.stub().resolves(true),
+        userIsReadWriteTokenMember: sinon.stub().resolves(false),
+        isUserInvitedReadWriteMemberOfProject: sinon.stub().resolves(true),
       },
     }
     this.ProjectEntityHandler = {}
@@ -1000,6 +1002,53 @@ describe('ProjectController', function () {
           done()
         }
         this.ProjectController.loadEditor(this.req, this.res)
+      })
+    })
+
+    describe('link sharing changes active', function () {
+      beforeEach(function () {
+        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
+          variant: 'active',
+        })
+      })
+
+      describe('when user is a read write token member (and not already a named editor)', function () {
+        beforeEach(function () {
+          this.CollaboratorsGetter.promises.userIsTokenMember.resolves(true)
+          this.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
+            true
+          )
+          this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
+            false
+          )
+        })
+
+        it('should redirect to the sharing-updates page', function (done) {
+          this.res.redirect = url => {
+            expect(url).to.equal(`/project/${this.project_id}/sharing-updates`)
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      })
+
+      describe('when user is a read write token member but also a named editor', function () {
+        beforeEach(function () {
+          this.CollaboratorsGetter.promises.userIsTokenMember.resolves(true)
+          this.CollaboratorsGetter.promises.userIsReadWriteTokenMember.resolves(
+            true
+          )
+          this.CollaboratorsGetter.promises.isUserInvitedReadWriteMemberOfProject.resolves(
+            true
+          )
+        })
+
+        it('should not redirect to the sharing-updates page, and should load the editor', function (done) {
+          this.res.render = (pageName, opts) => {
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
       })
     })
   })
