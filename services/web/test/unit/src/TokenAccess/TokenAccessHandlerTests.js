@@ -130,7 +130,7 @@ describe('TokenAccessHandler', function () {
         this.Analytics.recordEventForUserInBackground,
         this.userId,
         'project-joined',
-        { mode: 'read-only' }
+        { mode: 'read-only', projectId: this.projectId.toString() }
       )
     })
 
@@ -178,7 +178,7 @@ describe('TokenAccessHandler', function () {
         this.Analytics.recordEventForUserInBackground,
         this.userId,
         'project-joined',
-        { mode: 'read-write' }
+        { mode: 'read-write', projectId: this.projectId.toString() }
       )
     })
 

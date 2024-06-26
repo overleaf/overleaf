@@ -156,6 +156,7 @@ const TokenAccessHandler = {
     projectId = new ObjectId(projectId.toString())
     Analytics.recordEventForUserInBackground(userId, 'project-joined', {
       mode: 'read-only',
+      projectId: projectId.toString(),
     })
 
     return await Project.updateOne(
@@ -173,6 +174,7 @@ const TokenAccessHandler = {
     projectId = new ObjectId(projectId.toString())
     Analytics.recordEventForUserInBackground(userId, 'project-joined', {
       mode: 'read-write',
+      projectId: projectId.toString(),
     })
 
     return await Project.updateOne(
