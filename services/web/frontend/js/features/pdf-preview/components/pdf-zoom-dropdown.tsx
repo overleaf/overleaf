@@ -68,6 +68,7 @@ function PdfZoomDropdown({
       pullRight
     >
       <Dropdown.Toggle
+        bsStyle={null}
         className="btn pdf-toolbar-btn pdfjs-zoom-dropdown-button small"
         value={rawScale}
         title={rawScaleToPercentage(rawScale)}

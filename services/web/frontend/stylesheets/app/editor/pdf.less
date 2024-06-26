@@ -57,72 +57,57 @@
   padding-left: @line-height-computed / 4;
 }
 
-.toolbar-pdf-hybrid {
-  .btn:not(.detach-compile-button):not(.btn-orphan):not(
-      .detach-synctex-control
-    ):not(.switch-to-editor-btn):not(.split-menu-dropdown-toggle):not(
-      .split-menu-button
-    ) {
-    display: inline-block;
-    color: @toolbar-btn-color;
-    background-color: transparent;
-    padding: 4px 2px;
-    line-height: 1;
-    height: 24px;
-    border-radius: 2px;
-
-    &:hover,
-    &:active,
-    &:focus {
-      color: @toolbar-btn-color;
-    }
-
-    .label {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 0.15em 0.6em 0.2em;
-      font-size: 60%;
-      pointer-events: none;
-    }
-
-    .btn {
-      display: inline-block;
-      color: #fff;
-      background-color: transparent;
-      padding: 4px 2px;
-      line-height: 1;
-      height: 24px;
-      border-radius: 2px;
-    }
-
-    &.log-btn {
-      border: none;
-      margin-right: 3px;
-
-      &.active {
-        color: white;
-        background-color: @link-color;
-        box-shadow: @toolbar-icon-btn-hover-boxshadow;
-        opacity: 0.65;
-
-        &:hover {
-          color: white;
-        }
-      }
-
-      &:focus {
-        outline: none;
-      }
-    }
-  }
-}
-
 .pdf-toolbar-btn {
+  display: inline-block;
+  color: @toolbar-btn-color;
+  background-color: transparent;
+  padding: 4px 2px;
+  line-height: 1;
+  height: 24px;
+  border-radius: 2px;
   border-radius: @border-radius-base;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: @toolbar-btn-color;
+  }
+
   &:hover {
     &:not(:disabled) {
-      background-color: @pdf-toolbar-btn-hover-color !important;
+      background-color: @pdf-toolbar-btn-hover-color;
+    }
+  }
+
+  .label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.15em 0.6em 0.2em;
+    font-size: 60%;
+    pointer-events: none;
+  }
+
+  &.log-btn {
+    border: none;
+    margin-right: 3px;
+
+    &.active {
+      color: white;
+      background-color: @link-color;
+      box-shadow: @toolbar-icon-btn-hover-boxshadow;
+      opacity: 0.65;
+
+      &:hover {
+        &:not(:disabled) {
+          background-color: transparent;
+          color: @toolbar-btn-color;
+        }
+      }
+    }
+
+    &:focus {
+      outline: none;
     }
   }
 }
