@@ -39,49 +39,67 @@
   }
 }
 
-.website-redesign-ol-tabs {
+.ol-tabs-scrollable {
   // Styling for Website redesign, it will be used in CMS Later on.
-  .nav-tabs {
-    border: 0 !important;
-    margin-bottom: 0;
-    margin-top: -@line-height-computed; //- adjusted for portal-name
-    padding: @padding-lg 0 @padding-md;
-    text-align: center;
-  }
+  max-width: 800px;
+  margin: 0 auto;
 
-  .nav-tabs > li {
-    display: inline-block;
-    float: none;
+  .nav-tabs-container {
+    overflow-x: auto;
+    margin-bottom: var(--spacing-11);
 
-    a {
-      border: 0;
-      color: @neutral-70;
-      border-bottom: 3px solid @neutral-20 !important;
-      margin-right: unset;
-      padding: var(--spacing-04);
+    .nav-tabs {
+      border: 0 !important;
+      margin: 0 auto;
+      padding: 0;
+      text-align: center;
+      min-width: max-content; // This is for horizontal scrolling
 
-      &:focus,
-      &:hover {
+      li {
+        display: inline-block;
+        float: none;
+        margin-bottom: 0; //override navs.less
+
+        a {
+          border: 0;
+          color: @neutral-70;
+          border-bottom: 3px solid @neutral-20 !important;
+          margin-right: unset;
+          padding: var(--spacing-04);
+
+          &:focus,
+          &:hover {
+            background-color: transparent !important;
+            border: 0;
+          }
+        }
+      }
+
+      li.active > a {
         background-color: transparent !important;
-        border: 0;
+        border: 0 !important;
+        border-bottom: 3px solid @emerald-green !important;
+        color: @neutral-90 !important;
+
+        &:hover {
+          border-bottom: 3px solid @emerald-green !important;
+        }
+      }
+
+      @media (max-width: @screen-xs-max) {
+        text-align: left;
       }
     }
   }
 
-  li.active > a {
-    background-color: transparent !important;
-    border: 0 !important;
-    border-bottom: 3px solid @emerald-green !important;
-    color: @neutral-90 !important;
-
-    &:hover {
-      border-bottom: 3px solid @emerald-green !important;
-    }
+  .tab-content {
+    border: 0 !important; //override navs.less
+    padding: 0 !important; //override navs.less
   }
 
-  .tab-content:extend(.container) {
-    background-color: transparent !important;
-    border: none !important;
+  .ol-accordions-container :first-child {
+    // remove top padding so we have spacing-11 between tab nav and tab content
+    padding-top: 0px !important;
   }
 }
 

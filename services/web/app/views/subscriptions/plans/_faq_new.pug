@@ -10,51 +10,53 @@ include ../../_mixins/eyebrow
 			h2
 				+eyebrow(translate("frequently_asked_questions"))
 				| #{translate("your_questions_answered")}
-	.row.plans-faq-header-section
-		.col-xs-12.website-redesign-ol-tabs
-			ul.nav.nav-tabs
-				li.active(role="presentation")
-					a(
-						role="tab"
-						data-toggle="tab"
-						href='#' + managingYourSubscription
-						aria-controls=managingYourSubscription
+
+	.row
+		.col-xs-12
+			.ol-tabs-scrollable
+				.nav-tabs-container
+					ul.nav.nav-tabs
+						li.active(role="presentation")
+							a(
+								role="tab"
+								data-toggle="tab"
+								href='#' + managingYourSubscription
+								aria-controls=managingYourSubscription
+							)
+								| #{translate('managing_your_subscription')}
+						li(role="presentation")
+							a(
+								role="tab"
+								data-toggle="tab"
+								href='#' + overleafIndividualPlans
+								aria-controls=overleafIndividualPlans
+							)
+								| #{translate('overleaf_individual_plans')}
+						li(role="presentation")
+							a(
+								role="tab"
+								data-toggle="tab"
+								href='#' + overleafGroupPlans
+								aria-controls=overleafGroupPlans
+							)
+								| #{translate('overleaf_group_plans')}
+
+				.tab-content
+					.tab-pane.active(
+						role="tabpanel"
+						id=managingYourSubscription
+						data-ol-faq-tab-content=managingYourSubscription
 					)
-						| #{translate('managing_your_subscription')}
-				li(role="presentation")
-					a(
-						role="tab"
-						data-toggle="tab"
-						href='#' + overleafIndividualPlans
-						aria-controls=overleafIndividualPlans
+						+managingYourSubscription()
+					.tab-pane(
+						role="tabpanel"
+						id=overleafIndividualPlans
+						data-ol-faq-tab-content=overleafIndividualPlans
 					)
-						| #{translate('overleaf_individual_plans')}
-				li(role="presentation")
-					a(
-						role="tab"
-						data-toggle="tab"
-						href='#' + overleafGroupPlans
-						aria-controls=overleafGroupPlans
+						+overleafIndividualPlans()
+					.tab-pane(
+						role="tabpanel"
+						id=overleafGroupPlans
+						data-ol-faq-tab-content=overleafGroupPlans
 					)
-						| #{translate('overleaf_group_plans')}
-	.row.plans-faq-questions-section
-		.col-xs-12.faq-questions-container
-			.tab-content
-				.tab-pane.active(
-					role="tabpanel"
-					id=managingYourSubscription
-					data-ol-faq-tab-content=managingYourSubscription
-				)
-					+managingYourSubscription()
-				.tab-pane(
-					role="tabpanel"
-					id=overleafIndividualPlans
-					data-ol-faq-tab-content=overleafIndividualPlans
-				)
-					+overleafIndividualPlans()
-				.tab-pane(
-					role="tabpanel"
-					id=overleafGroupPlans
-					data-ol-faq-tab-content=overleafGroupPlans
-				)
-					+overleafGroupPlans()
+						+overleafGroupPlans()

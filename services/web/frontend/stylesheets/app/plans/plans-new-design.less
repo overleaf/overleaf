@@ -616,99 +616,10 @@
 .plans-faq {
   .faq-heading-container {
     text-align: center;
+    margin-bottom: var(--spacing-13);
 
     @media (max-width: @screen-xs-max) {
       text-align: unset;
-    }
-  }
-
-  .plans-faq-header-section {
-    text-align: center;
-    max-width: 900px;
-    margin-top: var(--spacing-13);
-    margin-left: auto;
-    margin-right: auto;
-
-    .website-redesign-ol-tabs {
-      overflow-x: auto;
-
-      @media (max-width: @screen-xs-max) {
-        padding: unset;
-      }
-
-      .nav-tabs {
-        min-width: max-content; // This is for horizontal scrolling
-
-        @media (max-width: @screen-xs-max) {
-          display: flex;
-        }
-      }
-    }
-  }
-
-  .plans-faq-questions-section {
-    max-width: 850px;
-    margin: auto;
-
-    .faq-questions-container {
-      @media (max-width: @screen-xs-max) {
-        padding: unset;
-      }
-    }
-
-    .tab-content {
-      border: 0px;
-    }
-  }
-
-  .accordions-container :last-child {
-    border: 0px !important;
-  }
-
-  .accordions-container {
-    .custom-accordion-item {
-      width: 100%;
-      padding-top: var(--spacing-08);
-      padding-bottom: var(--spacing-09);
-      border-bottom: 1px solid var(--neutral-20);
-
-      .custom-accordion-header {
-        text-align: left;
-        width: 100%;
-        font-size: var(--font-size-04);
-        font-weight: 600;
-        line-height: var(--line-height-03);
-        color: var(--neutral-90);
-        background-color: unset;
-        border: unset;
-        display: flex;
-        justify-content: space-between;
-        padding: unset;
-
-        .custom-accordion-icon {
-          display: flex;
-          align-items: center;
-          transition: transform 0.35s ease;
-          margin-left: var(--spacing-08);
-        }
-
-        &:not(.collapsed) {
-          .custom-accordion-icon {
-            transform: rotate(180deg);
-            transition: transform 0.35s ease;
-          }
-        }
-      }
-
-      .custom-accordion-body {
-        background-color: unset;
-        text-align: left;
-        padding: unset;
-        padding-right: 2rem;
-        margin-top: var(--spacing-04);
-        font-size: var(--font-size-body-base);
-        line-height: var(--line-height-03);
-      }
     }
   }
 }
