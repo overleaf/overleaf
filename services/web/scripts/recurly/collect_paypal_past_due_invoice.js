@@ -123,7 +123,7 @@ if (require.main === module) {
       process.exit(0)
     })
     .catch(err => {
-      logger.error('Error', err)
+      logger.error({ err }, 'Error')
       process.exit(1)
     })
 }
