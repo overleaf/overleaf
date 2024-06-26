@@ -108,7 +108,8 @@ export const enterNode = (
     }
 
     const optionalArguments = commandNode.getChildren('OptionalArgument')
-    const commandArguments = commandNode.getChildren('$Argument')
+    const commandArgumentsIncludingOptional =
+      commandNode.getChildren('$Argument')
     const text = state.doc.sliceString(ctrlSeq.from, ctrlSeq.to)
 
     const thisCommand = {
@@ -117,7 +118,8 @@ export const enterNode = (
       from: commandNode.from,
       to: commandNode.to,
       optionalArgCount: optionalArguments.length,
-      requiredArgCount: commandArguments.length,
+      requiredArgCount:
+        commandArgumentsIncludingOptional.length - optionalArguments.length,
     }
     items.push(thisCommand)
   }
