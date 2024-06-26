@@ -52,8 +52,6 @@ describe('admin panel', function () {
         cy.get('button').contains('Post Message').click()
         cy.findByText(message)
 
-        cy.log('wait for system message propagation')
-        cy.wait(13000)
         const resumeUser1Session = login(user1)
         cy.visit('/project')
         cy.findByText(message)

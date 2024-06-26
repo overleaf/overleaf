@@ -6,6 +6,8 @@ const { callbackifyAll } = require('@overleaf/promise-utils')
 const logger = require('@overleaf/logger')
 
 const SystemMessageManager = {
+  _cachedMessages: [],
+
   getMessages() {
     return this._cachedMessages
   },
@@ -16,28 +18,30 @@ const SystemMessageManager = {
 
   async clearMessages() {
     await SystemMessage.deleteMany({}).exec()
+    await this.refreshCache()
   },
 
   async createMessage(content) {
     const message = new SystemMessage({ content })
     await message.save()
+    await this.refreshCache()
   },
 
-  refreshCache() {
-    this.getMessagesFromDB()
-      .then(messages => {
-        this._cachedMessages = messages
-      })
-      .catch(err => {
-        logger.warn({ err }, 'failed to refresh system messages cache')
-      })
+  async refreshCache() {
+    this._cachedMessages = await this.getMessagesFromDB()
+  },
+
+  refreshCacheInBackground() {
+    this.refreshCache().catch(err => {
+      logger.warn({ err }, 'failed to refresh system messages cache')
+    })
   },
 }
 
 const CACHE_TIMEOUT = 10 * 1000 * (Math.random() + 2) // 20-30 seconds
-SystemMessageManager.refreshCache()
+SystemMessageManager.refreshCacheInBackground()
 const intervalHandle = setInterval(
-  () => SystemMessageManager.refreshCache(),
+  () => SystemMessageManager.refreshCacheInBackground(),
   CACHE_TIMEOUT
 )
 
