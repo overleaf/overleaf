@@ -205,7 +205,7 @@ BareFilePathArgument {
 }
 
 DefinitionArgument {
-    !argument NewLine? Whitespace* OpenBrace DefinitionFragment CloseBrace
+    !argument NewLine? Whitespace* OpenBrace DefinitionFragment? CloseBrace
 }
 
 MacroParameter {
@@ -481,12 +481,10 @@ TikzPictureContent {  /// same as Text but with added allowed characters
 }
 
 DefinitionFragment {
-    ( KnownCommand<TextArgument>
-    | CtrlSeq optionalWhitespace?
-    | CtrlSym
+    ( DefinitionFragmentCommand
     | Begin
     | End
-    | NonEmptyGroup<DefinitionFragment>
+    | Group<DefinitionFragment>
     | Dollar
     | OpenParenCtrlSym
     | CloseParenCtrlSym
@@ -494,7 +492,6 @@ DefinitionFragment {
     | CloseBracketCtrlSym
     | LeftCtrlSeq
     | RightCtrlSeq
-    | KnownCtrlSym
     | BlankLine
     | NewLine
     | Normal
@@ -515,8 +512,17 @@ DefinitionFragment {
         ParagraphCtrlSeq |
         SubParagraphCtrlSeq
       >
-    )*
+    )+
+}
 
+DefinitionFragmentArgument {
+    OpenBrace DefinitionFragment? CloseBrace
+}
+
+DefinitionFragmentCommand {
+      KnownCommand<TextArgument>
+    | UnknownCommand { genericUnknownCommandWithOptionalArguments<DefinitionFragmentArgument, OptionalArgument> }
+    | KnownCtrlSym
 }
 
 KnownEnvironment {
@@ -690,7 +696,7 @@ Math {
 
 MathCommand {
     KnownCommand<MathArgument>
-  | MathUnknownCommand
+  | MathUnknownCommand { genericUnknownCommand<MathArgument> }
   | KnownCtrlSym
 }
 
@@ -699,8 +705,18 @@ MathCommand {
     endOfArguments
 }
 
-MathUnknownCommand {
-    CtrlSeq (hasMoreArguments optionalWhitespace? MathArgument)* endOfArguments
+@external tokens argumentListWithOptionalTokenizer from "./tokens.mjs" {
+    hasMoreArgumentsOrOptionals,
+    endOfArgumentsAndOptionals
+}
+
+genericUnknownCommand<ArgumentType> {
+    CtrlSeq (hasMoreArguments optionalWhitespace? ArgumentType)* endOfArguments
+  | CtrlSym
+}
+
+genericUnknownCommandWithOptionalArguments<ArgumentType, OptionalArgumentType> {
+    CtrlSeq (hasMoreArgumentsOrOptionals optionalWhitespace? (ArgumentType | OptionalArgumentType))* endOfArgumentsAndOptionals
   | CtrlSym
 }
 

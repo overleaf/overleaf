@@ -82,6 +82,8 @@ import {
   // Marker for end of argument lists
   endOfArguments,
   hasMoreArguments,
+  hasMoreArgumentsOrOptionals,
+  endOfArgumentsAndOptionals,
 } from './latex.terms.mjs'
 
 const MAX_ARGUMENT_LOOKAHEAD = 100
@@ -254,29 +256,45 @@ function _char(s) {
 
 const CHAR_BACKSLASH = _char('\\')
 const CHAR_OPEN_BRACE = _char('{')
+const CHAR_OPEN_BRACKET = _char('[')
 const CHAR_CLOSE_BRACE = _char('}')
 const CHAR_TAB = _char('\t')
 const CHAR_SPACE = _char(' ')
 const CHAR_NEWLINE = _char('\n')
 
-export const argumentListTokenizer = new ExternalTokenizer(
-  input => {
-    for (let i = 0; i < MAX_ARGUMENT_LOOKAHEAD; ++i) {
-      const next = input.peek(i)
-      if (next === CHAR_SPACE || next === CHAR_TAB) {
-        continue
+const lookaheadTokenizer = getToken =>
+  new ExternalTokenizer(
+    input => {
+      for (let i = 0; i < MAX_ARGUMENT_LOOKAHEAD; ++i) {
+        const next = input.peek(i)
+        if (next === CHAR_SPACE || next === CHAR_TAB) {
+          continue
+        }
+        const token = getToken(next)
+        if (token) {
+          input.acceptToken(token)
+          return
+        }
       }
-      if (next === CHAR_OPEN_BRACE) {
-        input.acceptToken(hasMoreArguments)
-        return
-      } else {
-        input.acceptToken(endOfArguments)
-        return
-      }
-    }
-  },
-  { contextual: false, fallback: true }
-)
+    },
+    { contextual: false, fallback: true }
+  )
+
+export const argumentListTokenizer = lookaheadTokenizer(next => {
+  if (next === CHAR_OPEN_BRACE) {
+    return hasMoreArguments
+  } else {
+    return endOfArguments
+  }
+})
+
+export const argumentListWithOptionalTokenizer = lookaheadTokenizer(next => {
+  if (next === CHAR_OPEN_BRACE || next === CHAR_OPEN_BRACKET) {
+    return hasMoreArgumentsOrOptionals
+  } else {
+    return endOfArgumentsAndOptionals
+  }
+})
 
 const CHAR_AT_SYMBOL = _char('@')
 
