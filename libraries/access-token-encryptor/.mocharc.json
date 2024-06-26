@@ -1,0 +1,6 @@
+{
+  "ui": "bdd",
+  "recursive": "true",
+  "reporter": "spec",
+  "require": "test/setup.js"
+}

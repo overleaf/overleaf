@@ -122,103 +122,183 @@ describe('AccessTokenEncryptor', function () {
     })
   })
 
-  describe('encrypt', function () {
-    it('should encrypt the object', function (done) {
-      this.encryptor.encryptJson(this.testObject, (err, encrypted) => {
-        expect(err).to.be.null
-        encrypted.should.match(
-          /^2023.1-v3:[0-9a-f]{32}:[a-zA-Z0-9=+/]+:[0-9a-f]{32}$/
-        )
-        done()
+  describe('sync', function () {
+    describe('encrypt', function () {
+      it('should encrypt the object', function (done) {
+        this.encryptor.encryptJson(this.testObject, (err, encrypted) => {
+          expect(err).to.be.null
+          encrypted.should.match(
+            /^2023.1-v3:[0-9a-f]{32}:[a-zA-Z0-9=+/]+:[0-9a-f]{32}$/
+          )
+          done()
+        })
+      })
+
+      it('should encrypt the object differently the next time', function (done) {
+        this.encryptor.encryptJson(this.testObject, (err, encrypted1) => {
+          expect(err).to.be.null
+          this.encryptor.encryptJson(this.testObject, (err, encrypted2) => {
+            expect(err).to.be.null
+            encrypted1.should.not.equal(encrypted2)
+            done()
+          })
+        })
       })
     })
 
-    it('should encrypt the object differently the next time', function (done) {
-      this.encryptor.encryptJson(this.testObject, (err, encrypted1) => {
-        expect(err).to.be.null
-        this.encryptor.encryptJson(this.testObject, (err, encrypted2) => {
+    describe('decrypt', function () {
+      it('should decrypt the string to get the same object', function (done) {
+        this.encryptor.encryptJson(this.testObject, (err, encrypted) => {
           expect(err).to.be.null
-          encrypted1.should.not.equal(encrypted2)
+          this.encryptor.decryptToJson(encrypted, (err, decrypted) => {
+            expect(err).to.be.null
+            expect(decrypted).to.deep.equal(this.testObject)
+            done()
+          })
+        })
+      })
+
+      it('should not be able to decrypt 2015 string', function (done) {
+        this.encryptor.decryptToJson(this.encrypted2015, (err, decrypted) => {
+          expect(err).to.exist
+          expect(err.message).to.equal(
+            'unknown access-token-encryptor label 2015.1'
+          )
+          expect(decrypted).to.not.exist
+          done()
+        })
+      })
+
+      it('should not be able to decrypt a 2016 string', function (done) {
+        this.encryptor.decryptToJson(this.encrypted2016, (err, decrypted) => {
+          expect(err).to.exist
+          expect(err.message).to.equal(
+            'unknown access-token-encryptor label 2016.1'
+          )
+          expect(decrypted).to.not.exist
+          done()
+        })
+      })
+
+      it('should not be able to decrypt a 2019 string', function (done) {
+        this.encryptor.decryptToJson(this.encrypted2019, (err, decrypted) => {
+          expect(err).to.exist
+          expect(err.message).to.equal(
+            'unknown access-token-encryptor label 2019.1'
+          )
+          expect(decrypted).to.not.exist
+          done()
+        })
+      })
+
+      it('should decrypt an 2023 string to get the same object', function (done) {
+        this.encryptor.decryptToJson(this.encrypted2023, (err, decrypted) => {
+          expect(err).to.be.null
+          expect(decrypted).to.deep.equal(this.testObject)
+          done()
+        })
+      })
+
+      it('should return an error when decrypting an invalid label', function (done) {
+        this.encryptor.decryptToJson(this.badLabel, (err, decrypted) => {
+          expect(err).to.be.instanceof(Error)
+          expect(decrypted).to.be.undefined
+          done()
+        })
+      })
+
+      it('should return an error when decrypting an invalid key', function (done) {
+        this.encryptor.decryptToJson(this.badKey, (err, decrypted) => {
+          expect(err).to.be.instanceof(Error)
+          expect(decrypted).to.be.undefined
+          done()
+        })
+      })
+
+      it('should return an error when decrypting an invalid ciphertext', function (done) {
+        this.encryptor.decryptToJson(this.badCipherText, (err, decrypted) => {
+          expect(err).to.be.instanceof(Error)
+          expect(decrypted).to.be.undefined
           done()
         })
       })
     })
   })
 
-  describe('decrypt', function () {
-    it('should decrypt the string to get the same object', function (done) {
-      this.encryptor.encryptJson(this.testObject, (err, encrypted) => {
-        expect(err).to.be.null
-        this.encryptor.decryptToJson(encrypted, (err, decrypted) => {
-          expect(err).to.be.null
-          expect(decrypted).to.deep.equal(this.testObject)
-          done()
-        })
+  describe('async', function () {
+    describe('encrypt', function () {
+      it('should encrypt the object', async function () {
+        const encrypted = await this.encryptor.promises.encryptJson(
+          this.testObject
+        )
+        encrypted.should.match(
+          /^2023.1-v3:[0-9a-f]{32}:[a-zA-Z0-9=+/]+:[0-9a-f]{32}$/
+        )
+      })
+
+      it('should encrypt the object differently the next time', async function () {
+        const encrypted1 = await this.encryptor.promises.encryptJson(
+          this.testObject
+        )
+        const encrypted2 = await this.encryptor.promises.encryptJson(
+          this.testObject
+        )
+        encrypted1.should.not.equal(encrypted2)
       })
     })
 
-    it('should not be able to decrypt 2015 string', function (done) {
-      this.encryptor.decryptToJson(this.encrypted2015, (err, decrypted) => {
-        expect(err).to.exist
-        expect(err.message).to.equal(
+    describe('decrypt', function () {
+      it('should decrypt the string to get the same object', async function () {
+        const encrypted = await this.encryptor.promises.encryptJson(
+          this.testObject
+        )
+        const decrypted = await this.encryptor.promises.decryptToJson(encrypted)
+        expect(decrypted).to.deep.equal(this.testObject)
+      })
+
+      it('should not be able to decrypt 2015 string', async function () {
+        await expect(
+          this.encryptor.promises.decryptToJson(this.encrypted2015)
+        ).to.eventually.be.rejectedWith(
           'unknown access-token-encryptor label 2015.1'
         )
-        expect(decrypted).to.not.exist
-        done()
       })
-    })
 
-    it('should not be able to decrypt a 2016 string', function (done) {
-      this.encryptor.decryptToJson(this.encrypted2016, (err, decrypted) => {
-        expect(err).to.exist
-        expect(err.message).to.equal(
-          'unknown access-token-encryptor label 2016.1'
+      it('should not be able to decrypt a 2016 string', async function () {
+        await expect(
+          this.encryptor.promises.decryptToJson(this.encrypted2016)
+        ).to.be.rejectedWith('unknown access-token-encryptor label 2016.1')
+      })
+
+      it('should not be able to decrypt a 2019 string', async function () {
+        await expect(
+          this.encryptor.promises.decryptToJson(this.encrypted2019)
+        ).to.be.rejectedWith('unknown access-token-encryptor label 2019.1')
+      })
+
+      it('should decrypt an 2023 string to get the same object', async function () {
+        const decrypted = await this.encryptor.promises.decryptToJson(
+          this.encrypted2023
         )
-        expect(decrypted).to.not.exist
-        done()
-      })
-    })
-
-    it('should not be able to decrypt a 2019 string', function (done) {
-      this.encryptor.decryptToJson(this.encrypted2019, (err, decrypted) => {
-        expect(err).to.exist
-        expect(err.message).to.equal(
-          'unknown access-token-encryptor label 2019.1'
-        )
-        expect(decrypted).to.not.exist
-        done()
-      })
-    })
-
-    it('should decrypt an 2023 string to get the same object', function (done) {
-      this.encryptor.decryptToJson(this.encrypted2023, (err, decrypted) => {
-        expect(err).to.be.null
         expect(decrypted).to.deep.equal(this.testObject)
-        done()
       })
-    })
 
-    it('should return an error when decrypting an invalid label', function (done) {
-      this.encryptor.decryptToJson(this.badLabel, (err, decrypted) => {
-        expect(err).to.be.instanceof(Error)
-        expect(decrypted).to.be.undefined
-        done()
+      it('should return an error when decrypting an invalid label', async function () {
+        await expect(
+          this.encryptor.promises.decryptToJson(this.badLabel)
+        ).to.be.rejectedWith('unknown access-token-encryptor label xxxxxx')
       })
-    })
 
-    it('should return an error when decrypting an invalid key', function (done) {
-      this.encryptor.decryptToJson(this.badKey, (err, decrypted) => {
-        expect(err).to.be.instanceof(Error)
-        expect(decrypted).to.be.undefined
-        done()
+      it('should return an error when decrypting an invalid key', async function () {
+        await expect(
+          this.encryptor.promises.decryptToJson(this.badKey)
+        ).to.be.rejectedWith('unknown access-token-encryptor label 2015.1')
       })
-    })
 
-    it('should return an error when decrypting an invalid ciphertext', function (done) {
-      this.encryptor.decryptToJson(this.badCipherText, (err, decrypted) => {
-        expect(err).to.be.instanceof(Error)
-        expect(decrypted).to.be.undefined
-        done()
+      it('should return an error when decrypting an invalid ciphertext', async function () {
+        await expect(
+          this.encryptor.promises.decryptToJson(this.badCipherText)
+        ).to.be.rejectedWith('unknown access-token-encryptor label 2015.1')
       })
     })
   })

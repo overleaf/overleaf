@@ -92,6 +92,9 @@ class AccessTokenSchemeV3 extends AccessTokenSchemeWithGenericKeyFn {
 
 class AccessTokenEncryptor {
   constructor(settings) {
+    /**
+     * @type {Map<string, AbstractAccessTokenScheme>}
+     */
     this.schemeByCipherLabel = new Map()
     for (const cipherLabel of Object.keys(settings.cipherPasswords)) {
       if (!cipherLabel) {
@@ -128,25 +131,33 @@ class AccessTokenEncryptor {
       this.schemeByCipherLabel.set(cipherLabel, scheme)
     }
 
+    /** @type {AbstractAccessTokenScheme} */
     this.defaultScheme = this.schemeByCipherLabel.get(settings.cipherLabel)
     if (!this.defaultScheme) {
       throw new Error(`unknown default cipherLabel ${settings.cipherLabel}`)
     }
   }
 
+  promises = {
+    encryptJson: async json => await this.defaultScheme.encryptJson(json),
+    decryptToJson: async encryptedJson => {
+      const [label] = encryptedJson.split(':', 1)
+      const scheme = this.schemeByCipherLabel.get(label)
+      if (!scheme) {
+        throw new Error('unknown access-token-encryptor label ' + label)
+      }
+      return await scheme.decryptToJson(encryptedJson)
+    },
+  }
+
   encryptJson(json, callback) {
-    this.defaultScheme.encryptJson(json).then(s => callback(null, s), callback)
+    this.promises.encryptJson(json).then(s => callback(null, s), callback)
   }
 
   decryptToJson(encryptedJson, callback) {
-    const [label] = encryptedJson.split(':', 1)
-    const scheme = this.schemeByCipherLabel.get(label)
-    if (!scheme) {
-      return callback(
-        new Error('unknown access-token-encryptor label ' + label)
-      )
-    }
-    scheme.decryptToJson(encryptedJson).then(o => callback(null, o), callback)
+    this.promises
+      .decryptToJson(encryptedJson)
+      .then(o => callback(null, o), callback)
   }
 }
 
