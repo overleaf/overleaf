@@ -22,10 +22,24 @@ describe('History', function () {
     })
   }
 
+  function downloadVersion(name: string) {
+    cy.log(`download version ${JSON.stringify(name)}`)
+    cy.findByText('Labels').click()
+    cy.findByText(name)
+      .parent()
+      .parent()
+      .parent()
+      .parent()
+      .within(() => {
+        cy.get('.history-version-dropdown-menu-btn').click()
+        cy.findByText('Download this version').click()
+      })
+  }
+
   const CLASS_ADDITION = 'ol-cm-addition-marker'
   const CLASS_DELETION = 'ol-cm-deletion-marker'
 
-  it('should support labels and comparison', () => {
+  it('should support labels, comparison and download', () => {
     cy.visit('/project')
     createProject('labels')
     const recompile = throttledRecompile()
@@ -80,5 +94,32 @@ describe('History', function () {
       cy.findByText('% added').should('not.have.class', CLASS_ADDITION)
       cy.findByText('% more').should('not.exist')
     })
+
+    downloadVersion('Before removal')
+    cy.task('readFileInZip', {
+      pathToZip: `cypress/downloads/labels (Version 2).zip`,
+      fileToRead: 'main.tex',
+    })
+      .should('contain', '% added')
+      .should('contain', '% to be removed')
+      .should('not.contain', '% more')
+
+    downloadVersion('After removal')
+    cy.task('readFileInZip', {
+      pathToZip: `cypress/downloads/labels (Version 3).zip`,
+      fileToRead: 'main.tex',
+    })
+      .should('contain', '% added')
+      .should('not.contain', '% to be removed')
+      .should('not.contain', '% more')
+
+    downloadVersion('Current state')
+    cy.task('readFileInZip', {
+      pathToZip: `cypress/downloads/labels (Version 4).zip`,
+      fileToRead: 'main.tex',
+    })
+      .should('contain', '% added')
+      .should('not.contain', '% to be removed')
+      .should('contain', '% more')
   })
 })
