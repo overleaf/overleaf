@@ -449,27 +449,8 @@
 
   .plans-table-student {
     tr {
-      // "hide" the last column on desktop by making the background-color as the default background color
-      th:last-of-type > .plans-table-th {
-        background-color: @ol-blue-gray-0;
-      }
-
       &:last-child {
-        td:first-child {
-          background-color: @ol-blue-gray-0;
-
-          .plans-v2-table-feature-name {
-            border-bottom-left-radius: @plans-table-border-radius;
-
-            @media (max-width: @screen-xs-max) {
-              border-bottom-left-radius: 0;
-            }
-          }
-        }
-
         td:last-child {
-          background-color: @ol-blue-gray-0;
-
           .plans-table-cell {
             border-bottom-right-radius: @plans-table-border-radius;
 
@@ -515,21 +496,7 @@
   .plans-table-individual {
     tr {
       &:last-child {
-        td:first-child {
-          background-color: @ol-blue-gray-0;
-
-          .plans-v2-table-feature-name {
-            border-bottom-left-radius: @plans-table-border-radius;
-
-            @media (max-width: @screen-xs-max) {
-              border-bottom-left-radius: 0;
-            }
-          }
-        }
-
         td:last-child {
-          background-color: @ol-blue-gray-0;
-
           .plans-table-cell {
             border-bottom-right-radius: @plans-table-border-radius;
 
@@ -538,10 +505,6 @@
             }
           }
         }
-      }
-
-      &:not(.plans-v2-table-divider) td {
-        background-color: @white;
       }
     }
 
@@ -611,7 +574,7 @@
   }
 
   .plans-table {
-    background-color: @ol-blue-gray-0;
+    background-color: white;
     margin-bottom: 15px;
     table-layout: fixed;
     width: 100%;
@@ -660,7 +623,6 @@
       vertical-align: top;
       padding: 0;
       position: relative;
-      background-color: @ol-blue-gray-0;
 
       &:first-child {
         border-left: 0;
@@ -691,8 +653,6 @@
       // css hack for table border-radius on the first feature name
       &:nth-child(2) {
         .plans-table-row-header:first-child {
-          background-color: @ol-blue-gray-0;
-
           .plans-v2-table-feature-name {
             border-top-left-radius: @plans-table-border-radius;
 
@@ -798,7 +758,6 @@
       // will have the full width of viewport,
       // and making the first td appear like the it is in its own row (although it's technically still on the same tr as the other tds)
       .plans-table-row-header {
-        background: @gray-lightest;
         width: 100vw;
 
         span.plans-v2-table-feature-name {
@@ -816,7 +775,6 @@
   // that doesn't contain divider or feature name
   // (i.e it contains either check mark icon or a dash)
   .plans-table-cell {
-    background-color: @white;
     height: 100%;
 
     .plans-table-cell-content {
@@ -836,7 +794,6 @@
 
   .plans-table-th {
     height: 100%;
-    background-color: @white;
 
     .plans-table-th-content {
       display: flex;
@@ -1006,7 +963,6 @@
   }
 
   .plans-v2-table-feature-name {
-    background-color: @white;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1284,7 +1240,6 @@
     margin-top: var(--spacing-09);
   }
 
-  .plans-table,
   .plans-table-column-header {
     background-color: transparent; // remove colors set by default variant
   }
