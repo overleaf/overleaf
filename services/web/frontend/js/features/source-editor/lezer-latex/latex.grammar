@@ -521,7 +521,7 @@ DefinitionFragmentArgument {
 
 DefinitionFragmentCommand {
       KnownCommand<TextArgument>
-    | UnknownCommand { genericUnknownCommandWithOptionalArguments<DefinitionFragmentArgument, OptionalArgument> }
+    | DefinitionFragmentUnknownCommand { genericUnknownCommandWithOptionalArguments<DefinitionFragmentArgument, OptionalArgument> }
     | KnownCtrlSym
 }
 

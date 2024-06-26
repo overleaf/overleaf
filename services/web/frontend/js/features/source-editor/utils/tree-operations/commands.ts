@@ -75,7 +75,8 @@ export const enterNode = (
   } else if (
     node.type.is('UnknownCommand') ||
     node.type.is('KnownCommand') ||
-    node.type.is('MathUnknownCommand')
+    node.type.is('MathUnknownCommand') ||
+    node.type.is('DefinitionFragmentUnknownCommand')
   ) {
     let commandNode: SyntaxNode | null = node.node
     if (node.type.is('KnownCommand')) {
