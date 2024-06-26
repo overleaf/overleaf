@@ -33,16 +33,29 @@
     align-items: center;
   }
 
-  .symbol-palette-tab-list[data-reach-tab-list] {
+  .symbol-palette-tab-list[role='tablist'] {
     background: none;
     border-bottom: none;
     flex-wrap: wrap;
   }
 
-  .symbol-palette-tab[data-reach-tab][data-selected] {
-    background: @symbol-palette-selected-tab-bg;
-    color: @symbol-palette-selected-tab-color;
-    border-bottom-color: transparent;
+  .symbol-palette-tab[role='tab'] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: none;
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: inherit;
+    cursor: pointer;
+    display: inline-block;
+    font: inherit;
+    margin: 0;
+    padding: 0.25em 0.5em;
+
+    &[aria-selected='true'] {
+      background: @symbol-palette-selected-tab-bg;
+      color: @symbol-palette-selected-tab-color;
+    }
   }
 
   .symbol-palette-body {
