@@ -87,6 +87,23 @@ function TokenAccessRoot() {
     return null
   }
 
+  // We don't want the full-size div and back link(?) on
+  // the new page, but we do this so the original page
+  // doesn't change. When tearing down we can clean up
+  // the DOM in the main return
+  if (
+    mode === 'requireAccept' &&
+    requireAcceptData &&
+    requireAcceptData.linkSharingChanges
+  ) {
+    return (
+      <RequireAcceptScreen
+        requireAcceptData={requireAcceptData}
+        sendPostRequest={sendPostRequest}
+      />
+    )
+  }
+
   return (
     <div className="full-size">
       <div>

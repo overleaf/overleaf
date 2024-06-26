@@ -15,6 +15,7 @@ describe('TokenAccessController', function () {
     this.user = { _id: new ObjectId() }
     this.project = {
       _id: new ObjectId(),
+      name: 'test',
       tokenAccessReadAndWrite_refs: [],
       tokenAccessReadOnly_refs: [],
     }
@@ -69,8 +70,17 @@ describe('TokenAccessController', function () {
     this.SplitTestHandler = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
       },
     }
+
+    this.CollaboratorsHandler = {
+      promises: {
+        addUserIdToProject: sinon.stub().resolves(),
+      },
+    }
+
+    this.EditorRealTimeController = { emitToRoom: sinon.stub() }
 
     this.TokenAccessController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -85,6 +95,8 @@ describe('TokenAccessController', function () {
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../Errors/Errors': (this.Errors = { NotFoundError: sinon.stub() }),
+        '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Editor/EditorRealTimeController': this.EditorRealTimeController,
       },
     })
   })
@@ -130,6 +142,90 @@ describe('TokenAccessController', function () {
           this.user._id,
           { projectId: this.project._id, action: 'continue' }
         )
+      })
+    })
+
+    describe('when project owner in link-sharing-warning split test', function () {
+      beforeEach(function () {
+        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
+          variant: 'active',
+        })
+      })
+
+      it('tells the ui to show the link-sharing-warning variant', async function () {
+        this.req.params = { token: this.token }
+        this.req.body = { tokenHashPrefix: '#prefix' }
+        await this.TokenAccessController.grantTokenAccessReadAndWrite(
+          this.req,
+          {
+            json: content => {
+              expect(content).to.deep.equal({
+                requireAccept: {
+                  linkSharingChanges: true,
+                  projectName: this.project.name,
+                },
+              })
+            },
+          }
+        )
+      })
+
+      describe('normal case', function () {
+        beforeEach(function (done) {
+          this.req.params = { token: this.token }
+          this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
+          this.res.callback = done
+          this.TokenAccessController.grantTokenAccessReadAndWrite(
+            this.req,
+            this.res,
+            done
+          )
+        })
+
+        it('adds the user as a read and write invited member', function () {
+          expect(
+            this.CollaboratorsHandler.promises.addUserIdToProject
+          ).to.have.been.calledWith(
+            this.project._id,
+            undefined,
+            this.user._id,
+            PrivilegeLevels.READ_AND_WRITE
+          )
+        })
+
+        it('writes a project audit log', function () {
+          expect(
+            this.ProjectAuditLogHandler.promises.addEntry
+          ).to.have.been.calledWith(
+            this.project._id,
+            'accept-via-link-sharing',
+            this.user._id,
+            this.req.ip,
+            { privileges: 'readAndWrite' }
+          )
+        })
+
+        it('emits a project membership changed event', function () {
+          expect(
+            this.EditorRealTimeController.emitToRoom
+          ).to.have.been.calledWith(
+            this.project._id,
+            'project:membership:changed',
+            { members: true }
+          )
+        })
+
+        it('checks token hash', function () {
+          expect(
+            this.TokenAccessHandler.checkTokenHashPrefix
+          ).to.have.been.calledWith(
+            this.token,
+            '#prefix',
+            'readAndWrite',
+            this.user._id,
+            { projectId: this.project._id, action: 'continue' }
+          )
+        })
       })
     })
 

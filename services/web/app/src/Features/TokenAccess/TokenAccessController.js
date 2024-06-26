@@ -12,6 +12,9 @@ const {
   handleAdminDomainRedirect,
 } = require('../Authorization/AuthorizationMiddleware')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
+const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -271,33 +274,77 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
       return next(new Errors.NotFoundError())
     }
 
-    if (!confirmedByUser) {
-      return res.json({
-        requireAccept: {
-          projectName: project.name,
-        },
-      })
-    }
+    const linkSharingChanges =
+      await SplitTestHandler.promises.getAssignmentForUser(
+        project.owner_ref,
+        'link-sharing-warning'
+      )
 
-    if (!project.tokenAccessReadAndWrite_refs.some(id => id.equals(userId))) {
+    if (linkSharingChanges?.variant === 'active') {
+      if (!confirmedByUser) {
+        return res.json({
+          requireAccept: {
+            linkSharingChanges: true,
+            projectName: project.name,
+          },
+        })
+      }
+
       await ProjectAuditLogHandler.promises.addEntry(
         project._id,
-        'join-via-token',
+        'accept-via-link-sharing',
         userId,
         req.ip,
         { privileges: 'readAndWrite' }
       )
+      // Currently does not enforce the collaborator limit (warning phase)
+      await CollaboratorsHandler.promises.addUserIdToProject(
+        project._id,
+        undefined,
+        userId,
+        PrivilegeLevels.READ_AND_WRITE
+      )
+      // Does not remove any pending invite or the invite notification
+      // Should be a noop if the user is already a member,
+      // and would redirect transparently into the project.
+      EditorRealTimeController.emitToRoom(
+        project._id,
+        'project:membership:changed',
+        { members: true }
+      )
+
+      return res.json({
+        redirect: `/project/${project._id}`,
+      })
+    } else {
+      if (!confirmedByUser) {
+        return res.json({
+          requireAccept: {
+            projectName: project.name,
+          },
+        })
+      }
+
+      if (!project.tokenAccessReadAndWrite_refs.some(id => id.equals(userId))) {
+        await ProjectAuditLogHandler.promises.addEntry(
+          project._id,
+          'join-via-token',
+          userId,
+          req.ip,
+          { privileges: 'readAndWrite' }
+        )
+      }
+
+      await TokenAccessHandler.promises.addReadAndWriteUserToProject(
+        userId,
+        project._id
+      )
+
+      return res.json({
+        redirect: `/project/${project._id}`,
+        tokenAccessGranted: tokenType,
+      })
     }
-
-    await TokenAccessHandler.promises.addReadAndWriteUserToProject(
-      userId,
-      project._id
-    )
-
-    return res.json({
-      redirect: `/project/${project._id}`,
-      tokenAccessGranted: tokenType,
-    })
   } catch (err) {
     return next(
       OError.tag(
