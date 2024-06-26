@@ -51,7 +51,7 @@ include ./_mixins
 
 +table_sticky_header_all(plansConfig)
 
-.row.plans-v2-table-container(hidden data-ol-plans-v2-period='monthly')
+.row.plans-table-container(hidden data-ol-plans-v2-period='monthly')
 	.col-sm-12(data-ol-plans-v2-view='individual' role="tabpanel")
 		.row
 			+table_individual('monthly')
@@ -59,7 +59,7 @@ include ./_mixins
 		.row
 			+table_student('monthly')
 
-.row.plans-v2-table-container(data-ol-plans-v2-period='annual')
+.row.plans-table-container(data-ol-plans-v2-period='annual')
 	.col-sm-12(data-ol-plans-v2-view='individual' id="panel-individual" role="tabpanel")
 		.row
 			+table_individual('annual')

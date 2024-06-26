@@ -27,11 +27,11 @@ mixin currency_and_payment_methods()
 			span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Paypal' })}
 
 
-mixin plans_v2_table(period, config)
+mixin plans_table(period, config)
 	- var baseColspan = config.baseColspan || 1
 	- var maxColumn = config.maxColumn || 4
 	- var tableHeadKeys = Object.keys(config.tableHead)
-	tr(class=`plans-v2-table-cols-${tableHeadKeys.length}`)
+	tr(class=`plans-table-cols-${tableHeadKeys.length}`)
 		th(colspan=baseColspan)
 		- for (var i = 0; i < maxColumn; i++)
 			- var tableHeadKey = tableHeadKeys[i]
@@ -42,13 +42,13 @@ mixin plans_v2_table(period, config)
 			- var additionalEventSegmentation = config.additionalEventSegmentation || {}
 			-
 				if (highlighted) {
-					var thClass = 'plans-v2-table-green-highlighted'
+					var thClass = 'plans-table-green-highlighted'
 				} else if (i === config.highlightedColumn.index - 1) {
-					var thClass = 'plans-v2-table-cell-before-green-highlighted-column'
+					var thClass = 'plans-table-cell-before-green-highlighted-column'
 				} else {
 					var thClass = ''
 				}
-				thClass += ' plans-v2-table-column-header'
+				thClass += ' plans-table-column-header'
 				if (colspan > 1) {
 					var scopeValue = 'colgroup'
 				}
@@ -82,9 +82,9 @@ mixin plans_v2_table(period, config)
 				colspan=colspan
 				scope=scopeValue
 			)
-				.plans-v2-table-th
+				.plans-table-th
 					if (highlighted)
-						p.plans-v2-table-green-highlighted-text #{translate(config.highlightedColumn.text[period]).toUpperCase()}
+						p.plans-table-green-highlighted-text #{translate(config.highlightedColumn.text[period]).toUpperCase()}
 					case tableHeadKey
 						when 'individual_free'
 							+table_head_individual_free(highlighted, period)
@@ -133,10 +133,10 @@ mixin plans_v2_table(period, config)
 						span.sr-only #{translate(featuresPerSection.dividerInfo)}
 		for feature, featureIndex in featuresPerSection.items
 			tr(
-				class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-v2-table-row-last-row-per-section plans-v2-table-cols-${tableHeadKeys.length}` : `plans-v2-table-cols-${tableHeadKeys.length}`)
+				class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-table-row-last-row-per-section plans-table-cols-${tableHeadKeys.length}` : `plans-table-cols-${tableHeadKeys.length}`)
 			)
 				th(
-					class="plans-v2-table-row-header"
+					class="plans-table-row-header"
 					event-tracking="plans-page-table"
 					event-tracking-trigger="hover"
 					event-tracking-ga="subscription-funnel"
@@ -170,9 +170,9 @@ mixin plans_v2_table(period, config)
 					- var colspan = tableHeadOptions.colspan || baseColspan
 					-
 						if (planIndex === config.highlightedColumn.index) {
-							var tdClass = 'plans-v2-table-green-highlighted'
+							var tdClass = 'plans-table-green-highlighted'
 						} else if (planIndex === config.highlightedColumn.index - 1) {
-							var tdClass = 'plans-v2-table-cell-before-green-highlighted-column'
+							var tdClass = 'plans-table-cell-before-green-highlighted-column'
 						} else {
 							var tdClass = ''
 						}
@@ -183,55 +183,55 @@ mixin plans_v2_table(period, config)
 						+table_cell(feature, plan)
 
 mixin table_individual(period)
-	table.card.plans-v2-table.plans-v2-table-individual
-		+plans_v2_table(period, plansConfig.individual)
+	table.card.plans-table.plans-table-individual
+		+plans_table(period, plansConfig.individual)
 
 mixin table_group
-	table.card.plans-v2-table.plans-v2-table-group
-		+plans_v2_table('annual', plansConfig.group)
+	table.card.plans-table.plans-table-group
+		+plans_table('annual', plansConfig.group)
 
 mixin table_student(period)
-	table.card.plans-v2-table.plans-v2-table-student
-		+plans_v2_table(period, plansConfig.student)
+	table.card.plans-table.plans-table-student
+		+plans_table(period, plansConfig.student)
 
 mixin table_head_individual_free(highlighted, period)
-	.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("free")}
+	.plans-table-th-content
+		p.plans-table-th-content-title #{translate("free")}
 		+table_head_price('free', period)
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_individual_free(highlighted)
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li #{translate("one_collaborator")}
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_individual_free(highlighted)
 
 mixin table_head_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-	.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("standard")}
+	.plans-table-th-content
+		p.plans-table-th-content-title #{translate("standard")}
 		+table_head_price('collaborator', period)
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
 			li #{translate("all_premium_features")}
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 mixin table_head_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-	.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("professional")}
+	.plans-table-th-content
+		p.plans-table-th-content-title #{translate("professional")}
 		+table_head_price('professional', period)
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li !{translate("unlimited_collabs_rt",{},["b"])}
 			li #{translate("all_premium_features")}
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_individual_professional(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 mixin table_head_group_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation)
-	.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("group_standard")}
+	.plans-table-th-content
+		p.plans-table-th-content-title #{translate("group_standard")}
 		.plans-v2-table-price-container
 			strike.plans-v2-table-price-before-discount
 				+gen_localized_price_for_plan_view('collaborator', 'annual')
@@ -239,20 +239,20 @@ mixin table_head_group_collaborator(highlighted, eventTrackingKey, additionalEve
 				span(data-ol-plans-v2-group-price-per-user='collaborator') #{initialLocalizedGroupPrice.pricePerUser.collaborator}
 			p.plans-v2-table-price-period-label
 				| #{translate('per_user_year')}
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_group_collaborator(highlighted, eventTrackingKey)
 			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_collaborator')
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li #{translate("up_to")} !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
 			li
 				+table_head_group_total_per_year('collaborator')
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_group_collaborator(highlighted, eventTrackingKey)
 			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_collaborator')
 
 mixin table_head_group_professional(highlighted, eventTrackingKey, additionalEventSegmentation)
-	.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("group_professional")}
+	.plans-table-th-content
+		p.plans-table-th-content-title #{translate("group_professional")}
 		.plans-v2-table-price-container
 			strike.plans-v2-table-price-before-discount
 				+gen_localized_price_for_plan_view('professional', 'annual')
@@ -260,14 +260,14 @@ mixin table_head_group_professional(highlighted, eventTrackingKey, additionalEve
 				span(data-ol-plans-v2-group-price-per-user='professional') #{initialLocalizedGroupPrice.pricePerUser.professional}
 			p.plans-v2-table-price-period-label
 				| #{translate('per_user_year')}
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_group_professional(highlighted, eventTrackingKey)
 			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_professional')
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li #{translate("unlimited_collaborators_in_each_project")}
 			li
 				+table_head_group_total_per_year('professional')
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_group_professional(highlighted, eventTrackingKey)
 			+additional_link_group(eventTrackingKey, additionalEventSegmentation, 'group_professional')
 
@@ -283,14 +283,14 @@ mixin table_head_group_total_per_year(groupPlan)
 
 mixin table_head_group_organization(highlighted, eventTrackingKey, additionalEventSegmentation)
 	- var segmentation = JSON.stringify(Object.assign({}, {button: 'group_organization-link', location: 'table-header-list', period: 'annual'}, additionalEventSegmentation))
-	.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("organization")}
+	.plans-table-th-content
+		p.plans-table-th-content-title #{translate("organization")}
 		.plans-v2-table-comments-icon
 			i.fa.fa-comments-o
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_group_organization(highlighted, eventTrackingKey)
-			small.plans-v2-table-th-content-additional-link.invisible(aria-hidden="true")
-		ul.plans-v2-table-th-content-benefit
+			small.plans-table-th-content-additional-link.invisible(aria-hidden="true")
+		ul.plans-table-th-content-benefit
 			li #{translate("best_choices_companies_universities_non_profits")}
 			li #{translate("for_groups_or_site_wide")}
 			li
@@ -302,46 +302,46 @@ mixin table_head_group_organization(highlighted, eventTrackingKey, additionalEve
 					event-tracking-trigger="click"
 					event-segmentation=segmentation
 				) #{translate("also_available_as_on_premises")}
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_group_organization(highlighted, eventTrackingKey)
-			small.plans-v2-table-th-content-additional-link.invisible(aria-hidden="true")
+			small.plans-table-th-content-additional-link.invisible(aria-hidden="true")
 
 mixin table_head_student_free(highlighted, period)
-	div.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("free")}
+	div.plans-table-th-content
+		p.plans-table-th-content-title #{translate("free")}
 		+table_head_price('free', period)
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_student_free(highlighted)
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li #{translate("one_collaborator")}
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_student_free(highlighted)
 
 mixin table_head_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period, showExtraContent)
-	div.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("student")}
+	div.plans-table-th-content
+		p.plans-table-th-content-title #{translate("student")}
 		+table_head_price('student', period)
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-		ul.plans-v2-table-th-content-benefit
+		ul.plans-table-th-content-benefit
 			li !{translate("x_collaborators_per_project", {collaboratorsCount: '6'})}
 			li #{translate("all_premium_features")}
 			if showExtraContent
 				li 
 					b !{translate("for_students_only")}
 
-		.plans-v2-table-btn-buy-container-desktop
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 mixin table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-	div.plans-v2-table-th-content
-		p.plans-v2-table-th-content-title #{translate("university")}
+	div.plans-table-th-content
+		p.plans-table-th-content-title #{translate("university")}
 		div.plans-v2-table-comments-icon
 			i.fa.fa-comments-o
-		.plans-v2-table-btn-buy-container-mobile
+		.plans-table-btn-buy-container-mobile
 			+btn_buy_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-		p.plans-v2-table-th-content-benefit !{translate("all_our_group_plans_offer_educational_discount", {}, [{name: 'b'}, {name: 'b'}])}
-		.plans-v2-table-btn-buy-container-desktop
+		p.plans-table-th-content-benefit !{translate("all_our_group_plans_offer_educational_discount", {}, [{name: 'b'}, {name: 'b'}])}
+		.plans-table-btn-buy-container-desktop
 			+btn_buy_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 mixin table_head_price(plan, period)
@@ -361,8 +361,8 @@ mixin table_cell(feature, plan)
 	- var planValue = feature.plans[plan]
 	- var featureName = feature.feature
 
-	.plans-v2-table-cell
-		.plans-v2-table-cell-content(
+	.plans-table-cell
+		.plans-table-cell-content(
 			data-ol-plans-v2-table-cell-plan=plan
 			data-ol-plans-v2-table-cell-feature=featureName
 		)
@@ -538,7 +538,7 @@ mixin btn_buy_student_university(highlighted, eventTrackingKey, additionalEventS
 mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 	- var buttonSegmentation = plan + '-link'
 	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header'}, additionalEventSegmentation))
-	small.plans-v2-table-th-content-additional-link
+	small.plans-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
 			href="/for/contact-sales"
@@ -555,7 +555,7 @@ mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, p
 	- var itmCampaign = itm_campaign ? { itm_campaign } : {itm_campaign: 'plans'}
 	- var itmReferrer = itm_referrer ? { itm_referrer } : {}
 	- var qs = new URLSearchParams({planCode: plan, currency: recommendedCurrency, itm_content: 'card', ...itmCampaign, ...itmReferrer})
-	small.plans-v2-table-th-content-additional-link
+	small.plans-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
 			href=`/user/subscription/new?${qs.toString()}`
