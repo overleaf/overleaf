@@ -96,7 +96,7 @@ export type CompileContext = {
   stopCompile: () => void
   setChangedAt: (value: any) => void
   clearCache: () => void
-  syncToEntry: (value: any) => void
+  syncToEntry: (value: any, keepCurrentView?: boolean) => void
 }
 
 export const LocalCompileContext = createContext<CompileContext | undefined>(
@@ -573,13 +573,14 @@ export const LocalCompileProvider: FC = ({ children }) => {
   }, [compiler])
 
   const syncToEntry = useCallback(
-    entry => {
+    (entry, keepCurrentView = false) => {
       const result = findEntityByPath(entry.file)
 
       if (result && result.type === 'doc') {
         openDocId(result.entity._id, {
           gotoLine: entry.line ?? undefined,
           gotoColumn: entry.column ?? undefined,
+          keepCurrentView,
         })
       }
     },

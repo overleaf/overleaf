@@ -92,6 +92,7 @@ describe('<PdfLogsEntries/>', function () {
       {
         gotoLine: 9,
         gotoColumn: 8,
+        keepCurrentView: false,
       }
     )
   })
@@ -130,6 +131,7 @@ describe('<PdfLogsEntries/>', function () {
       {
         gotoLine: 7,
         gotoColumn: 6,
+        keepCurrentView: false,
       }
     )
   })

@@ -3,6 +3,7 @@ import { CompileContext, useLocalCompileContext } from './local-compile-context'
 import useDetachStateWatcher from '../hooks/use-detach-state-watcher'
 import useDetachAction from '../hooks/use-detach-action'
 import useCompileTriggers from '../../features/pdf-preview/hooks/use-compile-triggers'
+import { useLogEvents } from '@/features/pdf-preview/hooks/use-log-events'
 
 export const DetachCompileContext = createContext<CompileContext | undefined>(
   undefined
@@ -363,6 +364,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
   )
 
   useCompileTriggers(startCompile, setChangedAt)
+  useLogEvents(setShowLogs)
 
   const value = useMemo(
     () => ({

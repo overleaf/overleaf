@@ -42,6 +42,7 @@ interface OpenDocOptions
     Partial<GotoOffsetOptions> {
   gotoOffset?: number
   forceReopen?: boolean
+  keepCurrentView?: boolean
 }
 
 export type EditorManager = {
@@ -431,7 +432,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
         // store position of previous doc before switching docs
         eventEmitter.emit('store-doc-position')
       }
-      setView('editor')
+
+      if (!options.keepCurrentView) {
+        setView('editor')
+      }
 
       const done = (isNewDoc: boolean) => {
         window.dispatchEvent(

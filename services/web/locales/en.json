@@ -888,6 +888,7 @@
   "in_order_to_match_institutional_metadata_associated": "In order to match your institutional metadata, your account is associated with the email <b>__email__</b>.",
   "include_caption": "Include caption",
   "include_label": "Include label",
+  "include_the_error_message_and_ai_response": "Include the error message and AI response",
   "increased_compile_timeout": "Increased compile timeout",
   "individuals": "Individuals",
   "indvidual_plans": "Individual Plans",

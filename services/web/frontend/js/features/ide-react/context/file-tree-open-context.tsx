@@ -73,7 +73,7 @@ export const FileTreeOpenProvider: FC = ({ children }) => {
 
       setOpenEntity(selected)
       if (selected.type === 'doc' && fileTreeReady) {
-        openDocWithId(selected.entity._id)
+        openDocWithId(selected.entity._id, { keepCurrentView: true })
         if (selected.entity.name.endsWith('.bib')) {
           sendMB('open-bib-file', {
             projectOwner: owner._id,
