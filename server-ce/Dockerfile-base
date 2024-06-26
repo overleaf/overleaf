@@ -2,7 +2,7 @@
 # Overleaf Base Image (sharelatex/sharelatex-base)
 # --------------------------------------------------
 
-FROM phusion/baseimage:jammy-1.0.3
+FROM phusion/baseimage:jammy-1.0.4
 
 # Makes sure LuaTex cache is writable
 # -----------------------------------
@@ -10,7 +10,7 @@ ENV TEXMFVAR=/var/lib/overleaf/tmp/texmf-var
 
 # Update to ensure dependencies are updated
 # ------------------------------------------
-ENV REBUILT_AFTER="2024-05-14"
+ENV REBUILT_AFTER="2024-06-26"
 
 # Install dependencies
 # --------------------
