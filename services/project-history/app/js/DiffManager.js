@@ -37,7 +37,18 @@ export function getDiff(projectId, pathname, fromVersion, toVersion, callback) {
         if (binary) {
           diff = { binary: true }
         } else {
-          diff = DiffGenerator.buildDiff(initialContent, updates)
+          try {
+            diff = DiffGenerator.buildDiff(initialContent, updates)
+          } catch (err) {
+            return callback(
+              OError.tag(err, 'failed to build diff', {
+                projectId,
+                pathname,
+                fromVersion,
+                toVersion,
+              })
+            )
+          }
         }
         callback(null, diff)
       }
