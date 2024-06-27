@@ -15,7 +15,7 @@ export function waitUntilScrollingFinished(selector: string, start = -1) {
         const current = el.scrollTop()!
         if (current !== prev) {
           setTimeout(() => waitForStable(current, 0), pollFast)
-        } else if (stableFor < 3) {
+        } else if (stableFor < 5) {
           setTimeout(() => waitForStable(current, stableFor + 1), pollFast)
         } else {
           resolve(current)

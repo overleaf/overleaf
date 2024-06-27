@@ -2,6 +2,7 @@ import { startWith } from './helpers/config'
 import { activateUser, ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
 import { createProject } from './helpers/project'
+import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('admin panel', function () {
   describe('in server pro', () => {
@@ -26,7 +27,7 @@ describe('admin panel', function () {
     ensureUserExists({ email: user1 })
     ensureUserExists({ email: user2 })
 
-    before(() => {
+    beforeWithReRunOnTestRetry(() => {
       login(user1)
       cy.visit('/project')
       createProject(testProjectName).then(id => (testProjectId = id))

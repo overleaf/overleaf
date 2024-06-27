@@ -2,6 +2,7 @@ import { createProject } from './helpers/project'
 import { startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
+import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('editor', () => {
   startWith({ pro: true })
@@ -168,7 +169,7 @@ describe('editor', () => {
   describe('editor', () => {
     let projectId: string
 
-    before(() => {
+    beforeWithReRunOnTestRetry(() => {
       login('user@example.com')
       cy.visit(`/project`)
       createProject(`project-${uuid()}`, { type: 'Example Project' }).then(

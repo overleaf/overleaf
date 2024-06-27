@@ -4,6 +4,7 @@ import { startWith } from './helpers/config'
 import { throttledRecompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
+import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 const LABEL_TEX_LIVE_VERSION = 'TeX Live version'
 
@@ -60,8 +61,9 @@ describe('SandboxedCompiles', function () {
 
   function checkSyncTeX() {
     describe('SyncTeX', () => {
-      const projectName = `Project ${uuid()}`
-      before(function () {
+      let projectName: string
+      beforeWithReRunOnTestRetry(function () {
+        projectName = `Project ${uuid()}`
         login('user@example.com')
         cy.visit('/project')
         createProject(projectName)
@@ -101,6 +103,10 @@ describe('SandboxedCompiles', function () {
         cy.get('@start').then((start: any) => {
           waitUntilScrollingFinished('.pdfjs-viewer-inner', start)
         })
+        // The sync button is swapped as the position in the PDF changes.
+        // Cypress appears to click on a button that references a stale position.
+        // Adding a cy.wait() statement is the most reliable "fix" so far :/
+        cy.wait(1000)
         cy.get('[aria-label^="Go to PDF location in code"]').click()
         cy.get('.cm-activeLine').should('have.text', '\\section{Section B}')
       })

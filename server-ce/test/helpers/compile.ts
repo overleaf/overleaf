@@ -19,5 +19,7 @@ export function throttledRecompile() {
       cy.wait(Math.max(0, 1_000 - msSinceLastCompile))
       cy.findByText('Recompile').click()
       queueReset()
+      cy.log('Wait for recompile to finish')
+      cy.findByText('Recompile')
     })
 }

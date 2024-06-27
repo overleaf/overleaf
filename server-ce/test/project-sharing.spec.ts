@@ -3,13 +3,14 @@ import { startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
+import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('Project Sharing', function () {
   ensureUserExists({ email: 'user@example.com' })
   startWith({ withDataDir: true })
 
   let projectName: string
-  before(function () {
+  beforeWithReRunOnTestRetry(function () {
     projectName = `Project ${uuid()}`
     setupTestProject()
   })
@@ -175,7 +176,7 @@ describe('Project Sharing', function () {
     const email = 'collaborator-ro@example.com'
     ensureUserExists({ email })
 
-    before(function () {
+    beforeWithReRunOnTestRetry(function () {
       shareProjectByEmailAndAcceptInvite(email, 'Read Only')
     })
 
@@ -192,7 +193,7 @@ describe('Project Sharing', function () {
     const email = 'collaborator-rw@example.com'
     ensureUserExists({ email })
 
-    before(function () {
+    beforeWithReRunOnTestRetry(function () {
       shareProjectByEmailAndAcceptInvite(email, 'Can Edit')
     })
 
