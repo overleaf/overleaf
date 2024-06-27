@@ -1,7 +1,7 @@
 import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 
-export function RevertFileErrorModal({
+export function RestoreFileErrorModal({
   resetErrorBoundary,
 }: {
   resetErrorBoundary: VoidFunction
@@ -11,9 +11,9 @@ export function RevertFileErrorModal({
   return (
     <Modal show onHide={resetErrorBoundary}>
       <Modal.Header closeButton>
-        <Modal.Title>{t('revert_file_error_title')}</Modal.Title>
+        <Modal.Title>{t('restore_file_error_title')}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>{t('revert_file_error_message')}</Modal.Body>
+      <Modal.Body>{t('restore_file_error_message')}</Modal.Body>
       <Modal.Footer>
         <Button
           bsStyle={null}

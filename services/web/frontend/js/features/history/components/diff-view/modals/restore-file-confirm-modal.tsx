@@ -3,19 +3,19 @@ import { useMemo } from 'react'
 import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 
-type RevertFileConfirmModalProps = {
+type RestoreFileConfirmModalProps = {
   show: boolean
   timestamp: number
   onConfirm: () => void
   onHide: () => void
 }
 
-export function RevertFileConfirmModal({
+export function RestoreFileConfirmModal({
   show,
   timestamp,
   onConfirm,
   onHide,
-}: RevertFileConfirmModalProps) {
+}: RestoreFileConfirmModalProps) {
   const { t } = useTranslation()
   const date = useMemo(() => formatTime(timestamp, 'Do MMMM'), [timestamp])
   const time = useMemo(() => formatTime(timestamp, 'h:mm a'), [timestamp])
@@ -23,10 +23,10 @@ export function RevertFileConfirmModal({
   return (
     <Modal show={show} onHide={onHide}>
       <Modal.Header closeButton>
-        <Modal.Title>{t('revert_file_confirmation_title')}</Modal.Title>
+        <Modal.Title>{t('restore_file_confirmation_title')}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {t('revert_file_confirmation_message', { date, time })}
+        {t('restore_file_confirmation_message', { date, time })}
       </Modal.Body>
       <Modal.Footer>
         <Button bsStyle={null} className="btn-secondary" onClick={onHide}>

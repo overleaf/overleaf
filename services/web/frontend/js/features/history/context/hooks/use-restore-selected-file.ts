@@ -1,6 +1,6 @@
 import { useIdeContext } from '../../../../shared/context/ide-context'
 import { useLayoutContext } from '../../../../shared/context/layout-context'
-import { revertFile } from '../../services/api'
+import { restoreFileToVersion } from '../../services/api'
 import { isFileRemoved } from '../../utils/file-diff'
 import { useHistoryContext } from '../history-context'
 import type { HistoryContextValue } from '../types/history-context-value'
@@ -8,33 +8,33 @@ import { useErrorHandler } from 'react-error-boundary'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findInTree } from '@/features/file-tree/util/find-in-tree'
 import { useCallback, useEffect, useState } from 'react'
-import { RevertFileResponse } from '@/features/history/services/types/revert-file'
+import { RestoreFileResponse } from '../../services/types/restore-file'
 
-const REVERT_FILE_TIMEOUT = 3000
+const RESTORE_FILE_TIMEOUT = 3000
 
-type RevertState =
+type RestoreState =
   | 'idle'
-  | 'reverting'
+  | 'restoring'
   | 'waitingForFileTree'
   | 'complete'
   | 'error'
   | 'timedOut'
 
-export function useRevertSelectedFile() {
+export function useRestoreSelectedFile() {
   const { projectId } = useHistoryContext()
   const ide = useIdeContext()
   const { setView } = useLayoutContext()
   const handleError = useErrorHandler()
   const { fileTreeData } = useFileTreeData()
-  const [state, setState] = useState<RevertState>('idle')
-  const [revertedFileMetadata, setRevertedFileMetadata] =
-    useState<RevertFileResponse | null>(null)
+  const [state, setState] = useState<RestoreState>('idle')
+  const [restoredFileMetadata, setRestoredFileMetadata] =
+    useState<RestoreFileResponse | null>(null)
 
-  const isLoading = state === 'reverting' || state === 'waitingForFileTree'
+  const isLoading = state === 'restoring' || state === 'waitingForFileTree'
 
   useEffect(() => {
-    if (state === 'waitingForFileTree' && revertedFileMetadata) {
-      const result = findInTree(fileTreeData, revertedFileMetadata.id)
+    if (state === 'waitingForFileTree' && restoredFileMetadata) {
+      const result = findInTree(fileTreeData, restoredFileMetadata.id)
       if (result) {
         setState('complete')
         const { _id: id } = result.entity
@@ -42,7 +42,7 @@ export function useRevertSelectedFile() {
 
         // Once Angular is gone, these can be replaced with calls to context
         // methods
-        if (revertedFileMetadata.type === 'doc') {
+        if (restoredFileMetadata.type === 'doc') {
           ide.editorManager.openDocId(id)
         } else {
           ide.binaryFilesManager.openFileWithId(id)
@@ -52,7 +52,7 @@ export function useRevertSelectedFile() {
   }, [
     state,
     fileTreeData,
-    revertedFileMetadata,
+    restoredFileMetadata,
     ide.editorManager,
     ide.binaryFilesManager,
     setView,
@@ -63,7 +63,7 @@ export function useRevertSelectedFile() {
       const timer = window.setTimeout(() => {
         setState('timedOut')
         handleError(new Error('timed out'))
-      }, REVERT_FILE_TIMEOUT)
+      }, RESTORE_FILE_TIMEOUT)
 
       return () => {
         window.clearTimeout(timer)
@@ -71,7 +71,7 @@ export function useRevertSelectedFile() {
     }
   }, [handleError, state])
 
-  const revertSelectedFile = useCallback(
+  const restoreSelectedFile = useCallback(
     (selection: HistoryContextValue['selection']) => {
       const { selectedFile, files } = selection
 
@@ -84,11 +84,11 @@ export function useRevertSelectedFile() {
           if (!toVersion) {
             return
           }
-          setState('reverting')
+          setState('restoring')
 
-          revertFile(projectId, file.pathname, toVersion).then(
-            (data: RevertFileResponse) => {
-              setRevertedFileMetadata(data)
+          restoreFileToVersion(projectId, file.pathname, toVersion).then(
+            (data: RestoreFileResponse) => {
+              setRestoredFileMetadata(data)
               setState('waitingForFileTree')
             },
             error => {
@@ -102,5 +102,5 @@ export function useRevertSelectedFile() {
     [handleError, projectId]
   )
 
-  return { revertSelectedFile, isLoading }
+  return { restoreSelectedFile, isLoading }
 }
