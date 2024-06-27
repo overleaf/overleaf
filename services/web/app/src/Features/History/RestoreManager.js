@@ -185,7 +185,7 @@ const RestoreManager = {
       newCommentThreadData
     )
 
-    return await EditorController.promises.addDocWithRanges(
+    const { _id } = await EditorController.promises.addDocWithRanges(
       projectId,
       parentFolderId,
       basename,
@@ -194,6 +194,11 @@ const RestoreManager = {
       origin,
       userId
     )
+
+    return {
+      _id,
+      type: importInfo.type,
+    }
   },
 
   async _findOrCreateFolder(projectId, dirname) {

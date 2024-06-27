@@ -291,9 +291,7 @@ describe('RestoreManager', function () {
           .resolves([{ toV: this.version, meta: { end_ts: Date.now() } }])
         this.EditorController.promises.addDocWithRanges = sinon
           .stub()
-          .resolves(
-            (this.addedFile = { doc: 'mock-doc', folderId: 'mock-folder' })
-          )
+          .resolves((this.addedFile = { _id: 'mock-doc', type: 'doc' }))
       })
 
       describe("when reverting a file that doesn't current exist", function () {
@@ -327,7 +325,7 @@ describe('RestoreManager', function () {
         })
 
         it('should return the created entity', function () {
-          expect(this.data).to.equal(this.addedFile)
+          expect(this.data).to.deep.equal(this.addedFile)
         })
 
         it('should look up ranges', function () {
@@ -408,7 +406,7 @@ describe('RestoreManager', function () {
         })
 
         it('should return the created entity', function () {
-          expect(this.data).to.equal(this.addedFile)
+          expect(this.data).to.deep.equal(this.addedFile)
         })
 
         it('should look up ranges', function () {
