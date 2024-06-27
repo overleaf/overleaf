@@ -180,6 +180,8 @@ describe('editor', () => {
     beforeEach(() => {
       login('user@example.com')
       cy.visit(`/project/${projectId}`)
+      // wait until the main document is rendered
+      cy.findByText(/Loading/).should('not.exist')
     })
 
     it('renders jpg', () => {
