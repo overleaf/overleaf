@@ -5,6 +5,8 @@ import * as eventTracking from '@/infrastructure/event-tracking'
 import EditorNavigationToolbarRoot from '@/features/editor-navigation-toolbar/components/editor-navigation-toolbar-root'
 import NewShareProjectModal from '@/features/share-project-modal/components/restricted-link-sharing/share-project-modal'
 import ShareProjectModal from '@/features/share-project-modal/components/share-project-modal'
+import EditorOverLimitModal from '@/features/share-project-modal/components/restricted-link-sharing/editor-over-limit-modal'
+
 import getMeta from '@/utils/meta'
 
 function EditorNavigationToolbar() {
@@ -31,10 +33,13 @@ function EditorNavigationToolbar() {
         openShareProjectModal={handleOpenShareModal}
       />
       {showNewShareModal ? (
-        <NewShareProjectModal
-          show={showShareModal}
-          handleHide={handleHideShareModal}
-        />
+        <>
+          <EditorOverLimitModal />
+          <NewShareProjectModal
+            show={showShareModal}
+            handleHide={handleHideShareModal}
+          />
+        </>
       ) : (
         <ShareProjectModal
           show={showShareModal}

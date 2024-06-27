@@ -11,6 +11,7 @@ import { sendMB } from '@/infrastructure/event-tracking'
 import { Select } from '@/shared/components/select'
 import type { ProjectContextMember } from '@/shared/context/types/project-context'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
+import { linkSharingEnforcementDate } from '../../utils/link-sharing'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess'
 
@@ -129,7 +130,7 @@ export default function EditMember({
               {shouldWarnMember() && (
                 <div className="subtitle">
                   {t('will_lose_edit_access_on_date', {
-                    date: '[date]',
+                    date: linkSharingEnforcementDate,
                   })}
                 </div>
               )}
@@ -180,6 +181,7 @@ function SelectPrivilege({
   canAddCollaborators,
 }: SelectPrivilegeProps) {
   const { t } = useTranslation()
+  const { features } = useProjectContext()
 
   const privileges = useMemo(
     (): Privilege[] => [
@@ -195,7 +197,7 @@ function SelectPrivilege({
     return !canAddCollaborators &&
       privilege === 'readAndWrite' &&
       value !== 'readAndWrite'
-      ? t('limited_to_n_editors_per_project')
+      ? t('limited_to_n_editors_per_project', { count: features.collaborators })
       : ''
   }
 
