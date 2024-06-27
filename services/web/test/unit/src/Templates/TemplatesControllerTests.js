@@ -1,17 +1,4 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const ProjectHelper = require('../../../../app/src/Features/Project/ProjectHelper')
@@ -29,7 +16,7 @@ describe('TemplatesController', function () {
             getLoggedInUserId: sinon.stub().returns(this.user_id),
           }),
         './TemplatesManager': (this.TemplatesManager = {
-          createProjectFromV1Template: sinon.stub(),
+          promises: { createProjectFromV1Template: sinon.stub() },
         }),
       },
     })
@@ -55,13 +42,13 @@ describe('TemplatesController', function () {
 
   describe('createProjectFromV1Template', function () {
     describe('on success', function () {
-      beforeEach(function () {
+      beforeEach(function (done) {
         this.project = { _id: 'project-id' }
-        this.TemplatesManager.createProjectFromV1Template.yields(
-          null,
+        this.TemplatesManager.promises.createProjectFromV1Template.resolves(
           this.project
         )
-        return this.TemplatesController.createProjectFromV1Template(
+        this.res.redirect.callsFake(() => done())
+        this.TemplatesController.createProjectFromV1Template(
           this.req,
           this.res,
           this.next
@@ -69,7 +56,7 @@ describe('TemplatesController', function () {
       })
 
       it('should call TemplatesManager', function () {
-        return this.TemplatesManager.createProjectFromV1Template.should.have.been.calledWithMatch(
+        return this.TemplatesManager.promises.createProjectFromV1Template.should.have.been.calledWithMatch(
           'brand-variation-id',
           'compiler',
           'main-file',
@@ -92,8 +79,11 @@ describe('TemplatesController', function () {
     })
 
     describe('on error', function () {
-      beforeEach(function () {
-        this.TemplatesManager.createProjectFromV1Template.yields('error')
+      beforeEach(function (done) {
+        this.TemplatesManager.promises.createProjectFromV1Template.rejects(
+          'error'
+        )
+        this.next.callsFake(() => done())
         return this.TemplatesController.createProjectFromV1Template(
           this.req,
           this.res,
@@ -102,7 +92,9 @@ describe('TemplatesController', function () {
       })
 
       it('should call next with error', function () {
-        return this.next.should.have.been.calledWith('error')
+        return this.next.should.have.been.calledWithMatch(
+          sinon.match.instanceOf(Error)
+        )
       })
 
       it('should not redirect', function () {
