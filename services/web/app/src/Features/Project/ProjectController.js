@@ -42,6 +42,8 @@ const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
 const TutorialHandler = require('../Tutorial/TutorialHandler')
 const UserUpdater = require('../User/UserUpdater')
+const { checkUserPermissions } =
+  require('../Authorization/PermissionsManager').promises
 
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
@@ -596,10 +598,19 @@ const _ProjectController = {
         !showPersonalAccessToken &&
         splitTestAssignments['personal-access-token'].variant === 'enabled' // `?personal-access-token=enabled`
 
+      let canUseAi
+      try {
+        await checkUserPermissions(user, ['use-ai'])
+        canUseAi = true
+      } catch (err) {
+        canUseAi = false
+      }
+
       const showAiErrorAssistant =
         userId &&
         Features.hasFeature('saas') &&
-        (user.features?.aiErrorAssistant || user.alphaProgram) &&
+        user.features?.aiErrorAssistant &&
+        canUseAi &&
         (privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
           privilegeLevel === PrivilegeLevels.OWNER)
 

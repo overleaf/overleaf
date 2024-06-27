@@ -3,12 +3,7 @@ import { useUserContext } from '../../../shared/context/user-context'
 
 function LabsProgramSection() {
   const { t } = useTranslation()
-  const { labsProgram, alphaProgram } = useUserContext()
-
-  // keeping alpha only as we test AI experiment in preparation for general labs release
-  if (!alphaProgram) {
-    return null
-  }
+  const { labsProgram } = useUserContext()
 
   const labsStatusText = labsProgram
     ? t('youre_a_member_of_overleaf_labs')
