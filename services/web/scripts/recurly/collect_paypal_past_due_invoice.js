@@ -119,7 +119,7 @@ const main = async () => {
 if (require.main === module) {
   main()
     .then(() => {
-      logger.error('Done.')
+      logger.info('Done.')
       process.exit(0)
     })
     .catch(err => {

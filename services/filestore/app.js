@@ -165,7 +165,7 @@ if (!module.parent) {
   // Called directly
   app.listen(port, host, error => {
     if (error) {
-      logger.error('Error starting Filestore', error)
+      logger.error({ err: error }, 'Error starting Filestore')
       throw error
     }
     logger.debug(`Filestore starting up, listening on ${host}:${port}`)

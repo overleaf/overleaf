@@ -35,7 +35,10 @@ module.exports = {
 
     if (url === '/check') {
       if (!language) {
-        logger.error('"language" field should be included for spell checking')
+        logger.error(
+          {},
+          '"language" field should be included for spell checking'
+        )
         return res.status(422).json({ misspellings: [] })
       }
 
