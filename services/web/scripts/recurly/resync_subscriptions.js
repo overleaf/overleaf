@@ -7,6 +7,8 @@ const { setTimeout } = require('node:timers/promises')
 // make sure all `allMismatchReasons` are displayed in the output
 const util = require('util')
 const pLimit = require('p-limit')
+const { waitForDb } = require('../../app/src/infrastructure/mongodb')
+
 util.inspect.defaultOptions.maxArrayLength = null
 
 const ScriptLogger = {
@@ -144,6 +146,8 @@ const loopForSubscriptions = async skipInitial => {
 
 let retryCounter = 0
 const run = async () => {
+  await waitForDb()
+
   while (true) {
     try {
       await loopForSubscriptions(
