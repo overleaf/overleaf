@@ -80,7 +80,7 @@ export function AddSecondaryEmailPrompt() {
     <>
       <Interstitial showLogo title={t('add_a_recovery_email_address')}>
         <form className="add-secondary-email" onSubmit={handleSubmit}>
-          <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
+          <ReCaptcha2 page="addEmail" recaptchaRef={recaptchaRef} />
           <p>{t('keep_your_account_safe_add_another_email')}</p>
 
           <EmailInput

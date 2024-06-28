@@ -1,14 +1,18 @@
-import { forwardRef } from 'react'
 import ReCAPTCHA from 'react-google-recaptcha'
 import getMeta from '@/utils/meta'
 import { ExposedSettings } from '../../../../types/exposed-settings'
 
-type Page = keyof ExposedSettings['recaptchaDisabled']
+interface ReCaptcha2Props
+  extends Pick<React.ComponentProps<typeof ReCAPTCHA>, 'onChange'> {
+  page: keyof ExposedSettings['recaptchaDisabled']
+  recaptchaRef: React.LegacyRef<ReCAPTCHA>
+}
 
-export const ReCaptcha2 = forwardRef<
-  ReCAPTCHA,
-  { page: Page; onChange?: (token: string | null) => void }
->(function ReCaptcha2({ page: site, onChange }, ref) {
+export function ReCaptcha2({
+  page: site,
+  onChange,
+  recaptchaRef,
+}: ReCaptcha2Props) {
   const { recaptchaSiteKey, recaptchaDisabled } = getMeta('ol-ExposedSettings')
 
   if (!recaptchaSiteKey) {
@@ -19,11 +23,11 @@ export const ReCaptcha2 = forwardRef<
   }
   return (
     <ReCAPTCHA
-      ref={ref}
+      ref={recaptchaRef}
       size="invisible"
       sitekey={recaptchaSiteKey}
       onChange={onChange}
       badge="inline"
     />
   )
-})
+}

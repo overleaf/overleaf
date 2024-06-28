@@ -151,7 +151,7 @@ function AddEmail() {
     return (
       <form>
         <Layout isError={isError} error={error}>
-          <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
+          <ReCaptcha2 page="addEmail" recaptchaRef={recaptchaRef} />
           <OLCol lg={8}>
             <Cell>
               {InputComponent}
@@ -176,7 +176,7 @@ function AddEmail() {
   return (
     <form>
       <Layout isError={isError} error={error}>
-        <ReCaptcha2 page="addEmail" ref={recaptchaRef} />
+        <ReCaptcha2 page="addEmail" recaptchaRef={recaptchaRef} />
         <OLCol lg={8}>
           <Cell>
             {InputComponent}
