@@ -14,10 +14,10 @@ function EditorNavigationToolbar() {
   const { onlineUsersArray } = useOnlineUsersContext()
   const { openDoc } = useEditorManagerContext()
 
-  const handleOpenShareModal = () => {
+  const handleOpenShareModal = useCallback(() => {
     eventTracking.sendMBOnce('ide-open-share-modal-once')
     setShowShareModal(true)
-  }
+  }, [])
 
   const handleHideShareModal = useCallback(() => {
     setShowShareModal(false)
@@ -37,6 +37,7 @@ function EditorNavigationToolbar() {
           <EditorOverLimitModal />
           <NewShareProjectModal
             show={showShareModal}
+            handleOpen={handleOpenShareModal}
             handleHide={handleHideShareModal}
           />
         </>
