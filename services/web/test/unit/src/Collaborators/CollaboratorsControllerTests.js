@@ -59,6 +59,24 @@ describe('CollaboratorsController', function () {
       addEntryInBackground: sinon.stub(),
     }
 
+    this.ProjectGetter = {
+      promises: {
+        getProject: sinon.stub().resolves({ owner_ref: this.user._id }),
+      },
+    }
+
+    this.SplitTestHandler = {
+      promises: {
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
+      },
+    }
+
+    this.LimitationsManager = {
+      promises: {
+        canAddXEditCollaborators: sinon.stub().resolves(),
+      },
+    }
+
     this.CollaboratorsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         mongodb: { ObjectId },
@@ -71,6 +89,9 @@ describe('CollaboratorsController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
+        '../Project/ProjectGetter': this.ProjectGetter,
+        '../SplitTests/SplitTestHandler': this.SplitTestHandler,
+        '../Subscription/LimitationsManager': this.LimitationsManager,
       },
     })
   })
@@ -270,6 +291,93 @@ describe('CollaboratorsController', function () {
         this.res,
         this.next
       )
+    })
+
+    describe('when link-sharing-warning test active', function () {
+      beforeEach(function () {
+        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
+          variant: 'active',
+        })
+      })
+
+      describe('when setting privilege level to readAndWrite', function () {
+        beforeEach(function () {
+          this.req.body = { privilegeLevel: 'readAndWrite' }
+        })
+
+        describe('when owner can add new edit collaborators', function () {
+          beforeEach(function () {
+            this.LimitationsManager.promises.canAddXEditCollaborators.resolves(
+              true
+            )
+          })
+
+          it('should set privilege level after checking collaborators can be added', function (done) {
+            this.res.sendStatus = status => {
+              expect(status).to.equal(204)
+              expect(
+                this.LimitationsManager.promises.canAddXEditCollaborators
+              ).to.have.been.calledWith(this.projectId, 1)
+              done()
+            }
+            this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
+          })
+        })
+
+        describe('when owner cannot add edit collaborators', function () {
+          beforeEach(function () {
+            this.LimitationsManager.promises.canAddXEditCollaborators.resolves(
+              false
+            )
+          })
+
+          it('should return a 403 if trying to set a new edit collaborator', function (done) {
+            this.HttpErrorHandler.forbidden = sinon.spy((req, res) => {
+              expect(req).to.equal(this.req)
+              expect(res).to.equal(this.res)
+              expect(
+                this.LimitationsManager.promises.canAddXEditCollaborators
+              ).to.have.been.calledWith(this.projectId, 1)
+              expect(
+                this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
+              ).to.not.have.been.called
+              done()
+            })
+            this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
+          })
+        })
+      })
+
+      describe('when setting privilege level to readOnly', function () {
+        beforeEach(function () {
+          this.req.body = { privilegeLevel: 'readOnly' }
+        })
+
+        describe('when owner cannot add edit collaborators', function () {
+          beforeEach(function () {
+            this.LimitationsManager.promises.canAddXEditCollaborators.resolves(
+              false
+            )
+          })
+
+          it('should always allow setting a collaborator to viewer even if user cant add edit collaborators', function (done) {
+            this.res.sendStatus = status => {
+              expect(status).to.equal(204)
+              expect(this.LimitationsManager.promises.canAddXEditCollaborators)
+                .to.not.have.been.called
+              expect(
+                this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel
+              ).to.have.been.calledWith(
+                this.projectId,
+                this.user._id,
+                'readOnly'
+              )
+              done()
+            }
+            this.CollaboratorsController.setCollaboratorInfo(this.req, this.res)
+          })
+        })
+      })
     })
   })
 

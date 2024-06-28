@@ -39,6 +39,7 @@ module.exports = {
     getInvitedMembersWithPrivilegeLevelsFromFields,
     getMemberIdPrivilegeLevel,
     getInvitedCollaboratorCount,
+    getInvitedEditCollaboratorCount,
     getProjectsUserIsMemberOf,
     dangerouslyGetAllProjectsUserIsMemberOf,
     isUserInvitedMemberOfProject,
@@ -123,6 +124,16 @@ async function getMemberIdPrivilegeLevel(userId, projectId) {
 async function getInvitedCollaboratorCount(projectId) {
   const count = await _getInvitedMemberCount(projectId)
   return count - 1 // Don't count project owner
+}
+
+async function getInvitedEditCollaboratorCount(projectId) {
+  // Only counts invited members with readAndWrite privilege
+  const members = await getMemberIdsWithPrivilegeLevels(projectId)
+  return members.filter(
+    m =>
+      m.source === Sources.INVITE &&
+      m.privilegeLevel === PrivilegeLevels.READ_AND_WRITE
+  ).length
 }
 
 async function isUserInvitedMemberOfProject(userId, projectId) {

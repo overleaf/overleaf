@@ -474,4 +474,14 @@ describe('CollaboratorsGetter', function () {
       })
     })
   })
+
+  describe('getInvitedEditCollaboratorCount', function () {
+    it('should return the count of invited edit collaborators (token, readAndWrite)', async function () {
+      const count =
+        await this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount(
+          this.project._id
+        )
+      expect(count).to.equal(2)
+    })
+  })
 })

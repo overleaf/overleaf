@@ -8,6 +8,7 @@ const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const Crypto = require('crypto')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
+const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 
 const randomBytes = promisify(Crypto.randomBytes)
 
@@ -25,6 +26,15 @@ const CollaboratorsInviteHandler = {
   async getInviteCount(projectId) {
     logger.debug({ projectId }, 'counting invites for project')
     const count = await ProjectInvite.countDocuments({ projectId }).exec()
+    return count
+  },
+
+  async getEditInviteCount(projectId) {
+    logger.debug({ projectId }, 'counting edit invites for project')
+    const count = await ProjectInvite.countDocuments({
+      projectId,
+      privileges: { $ne: PrivilegeLevels.READ_ONLY },
+    }).exec()
     return count
   },
 

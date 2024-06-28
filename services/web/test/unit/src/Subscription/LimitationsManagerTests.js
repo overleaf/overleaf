@@ -54,11 +54,17 @@ describe('LimitationsManager', function () {
     }
 
     this.CollaboratorsGetter = {
-      promises: { getInvitedCollaboratorCount: sinon.stub().resolves() },
+      promises: {
+        getInvitedCollaboratorCount: sinon.stub().resolves(),
+        getInvitedEditCollaboratorCount: sinon.stub().resolves(),
+      },
     }
 
     this.CollaboratorsInviteHandler = {
-      promises: { getInviteCount: sinon.stub().resolves() },
+      promises: {
+        getInviteCount: sinon.stub().resolves(),
+        getEditInviteCount: sinon.stub().resolves(),
+      },
     }
 
     this.LimitationsManager = SandboxedModule.require(modulePath, {
@@ -309,6 +315,168 @@ describe('LimitationsManager', function () {
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
         this.LimitationsManager.canAddXCollaborators(
+          this.projectId,
+          1,
+          this.callback
+        )
+      })
+
+      it('should return false', function () {
+        this.callback.calledWith(null, false).should.equal(true)
+      })
+    })
+  })
+  describe('canAddXEditCollaborators', function () {
+    describe('when the project has fewer collaborators than allowed', function () {
+      beforeEach(function (done) {
+        this.current_number = 1
+        this.user.features.collaborators = 2
+        this.invite_count = 0
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
+          this.projectId,
+          1,
+          this.callback
+        )
+      })
+
+      it('should return true', function () {
+        this.callback.calledWith(null, true).should.equal(true)
+      })
+    })
+
+    describe('when the project has fewer collaborators and invites than allowed', function () {
+      beforeEach(function (done) {
+        this.current_number = 1
+        this.user.features.collaborators = 4
+        this.invite_count = 1
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
+          this.projectId,
+          1,
+          this.callback
+        )
+      })
+
+      it('should return true', function () {
+        this.callback.calledWith(null, true).should.equal(true)
+      })
+    })
+
+    describe('when the project has fewer collaborators than allowed but I want to add more than allowed', function () {
+      beforeEach(function (done) {
+        this.current_number = 1
+        this.user.features.collaborators = 2
+        this.invite_count = 0
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
+          this.projectId,
+          2,
+          this.callback
+        )
+      })
+
+      it('should return false', function () {
+        this.callback.calledWith(null, false).should.equal(true)
+      })
+    })
+
+    describe('when the project has more collaborators than allowed', function () {
+      beforeEach(function (done) {
+        this.current_number = 3
+        this.user.features.collaborators = 2
+        this.invite_count = 0
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
+          this.projectId,
+          1,
+          this.callback
+        )
+      })
+
+      it('should return false', function () {
+        this.callback.calledWith(null, false).should.equal(true)
+      })
+    })
+
+    describe('when the project has infinite collaborators', function () {
+      beforeEach(function (done) {
+        this.current_number = 100
+        this.user.features.collaborators = -1
+        this.invite_count = 0
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
+          this.projectId,
+          1,
+          this.callback
+        )
+      })
+
+      it('should return true', function () {
+        this.callback.calledWith(null, true).should.equal(true)
+      })
+    })
+
+    describe('when the project has more invites than allowed', function () {
+      beforeEach(function (done) {
+        this.current_number = 0
+        this.user.features.collaborators = 2
+        this.invite_count = 2
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
+          this.projectId,
+          1,
+          this.callback
+        )
+      })
+
+      it('should return false', function () {
+        this.callback.calledWith(null, false).should.equal(true)
+      })
+    })
+
+    describe('when the project has more invites and collaborators than allowed', function () {
+      beforeEach(function (done) {
+        this.current_number = 1
+        this.user.features.collaborators = 2
+        this.invite_count = 1
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+          .stub()
+          .resolves(this.invite_count)
+        this.callback = sinon.stub().callsFake(() => done())
+        this.LimitationsManager.canAddXEditCollaborators(
           this.projectId,
           1,
           this.callback
