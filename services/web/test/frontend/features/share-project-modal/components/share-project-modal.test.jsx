@@ -615,7 +615,7 @@ describe('<ShareProjectModal/>', function () {
       },
     })
 
-    const privilegesElement = screen.getByDisplayValue('Can Edit')
+    const privilegesElement = screen.getByDisplayValue('Can edit')
     fireEvent.change(privilegesElement, { target: { value: 'readOnly' } })
 
     const submitButton = screen.getByRole('button', { name: 'Share' })

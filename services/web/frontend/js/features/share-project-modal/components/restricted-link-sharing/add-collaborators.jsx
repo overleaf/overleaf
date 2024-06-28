@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Col, Form, Button } from 'react-bootstrap'
+import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
 import { useShareProjectContext } from './share-project-modal'
 import SelectCollaborators from './select-collaborators'
@@ -141,7 +141,7 @@ export default function AddCollaborators({ readOnly }) {
 
   return (
     <Form className="add-collabs">
-      <Col xs={10}>
+      <FormGroup>
         <SelectCollaborators
           loading={!nonMemberContacts}
           options={nonMemberContacts || []}
@@ -151,11 +151,21 @@ export default function AddCollaborators({ readOnly }) {
           setPrivileges={setPrivileges}
           readOnly={readOnly}
         />
-      </Col>
+      </FormGroup>
 
-      <Col xs={2}>
-        <div>
-          <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      <FormGroup>
+        <div className="pull-right">
+          <FormControl
+            componentClass="select"
+            className="privileges"
+            bsSize="sm"
+            value={privileges}
+            onChange={event => setPrivileges(event.target.value)}
+          >
+            <option value="readAndWrite">{t('can_edit')}</option>
+            <option value="readOnly">{t('can_view')}</option>
+          </FormControl>
+          <span>&nbsp;&nbsp;</span>
           <ClickableElementEnhancer
             as={Button}
             onClick={handleSubmit}
@@ -164,7 +174,7 @@ export default function AddCollaborators({ readOnly }) {
             {t('invite')}
           </ClickableElementEnhancer>
         </div>
-      </Col>
+      </FormGroup>
     </Form>
   )
 }

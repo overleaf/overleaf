@@ -9,7 +9,7 @@ export default function CollaboratorsLimitUpgrade() {
   const { features } = useProjectContext()
 
   return (
-    <div>
+    <div className="invite-warning">
       <Notification
         type="info"
         customIcon={<div />}

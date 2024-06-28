@@ -53,6 +53,7 @@ export default function LinkSharing() {
           setAccessLevel={setAccessLevel}
           inflight={inflight}
           projectId={projectId}
+          setShowLinks={setShowLinks}
         />
       )
 
@@ -83,7 +84,7 @@ export default function LinkSharing() {
   }
 }
 
-function PrivateSharing({ setAccessLevel, inflight, projectId }) {
+function PrivateSharing({ setAccessLevel, inflight, projectId, setShowLinks }) {
   const { t } = useTranslation()
   return (
     <Row className="public-access-level">
@@ -97,6 +98,7 @@ function PrivateSharing({ setAccessLevel, inflight, projectId }) {
           onClick={() => {
             setAccessLevel('tokenBased')
             eventTracking.sendMB('link-sharing-click', { projectId })
+            setShowLinks(true)
           }}
           disabled={inflight}
         >
@@ -113,6 +115,7 @@ PrivateSharing.propTypes = {
   setAccessLevel: PropTypes.func.isRequired,
   inflight: PropTypes.bool,
   projectId: PropTypes.string,
+  setShowLinks: PropTypes.func.isRequired,
 }
 
 function TokenBasedSharing({

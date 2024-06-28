@@ -30,8 +30,7 @@
   background-color: #fff;
   height: 100%;
   display: flex;
-  justify-content: space-between;
-  flex-direction: row;
+  flex-wrap: wrap;
 }
 .tags-input .tags:focus-within {
   &:extend(.input-focus-style);
@@ -159,10 +158,4 @@
 .tags-input .autocomplete .suggestion-item em {
   font-weight: bold;
   font-style: normal;
-}
-
-.modal-link-share-new {
-  .tags-input .tags {
-    padding: 0 0 0 5px;
-  }
 }

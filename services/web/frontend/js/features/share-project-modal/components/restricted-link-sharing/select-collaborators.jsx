@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { matchSorter } from 'match-sorter'
 import { useCombobox } from 'downshift'
 import classnames from 'classnames'
-import { FormControl } from 'react-bootstrap'
 
 import Icon from '@/shared/components/icon'
 
@@ -158,8 +157,7 @@ export default function SelectCollaborators({
 
       <div className="host">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-
-        <div {...getComboboxProps()} className="tags">
+        <div {...getComboboxProps()} className="tags" onClick={focusInput}>
           <div className="tags-main">
             {selectedItems.map((selectedItem, index) => (
               <SelectedItem
@@ -242,16 +240,6 @@ export default function SelectCollaborators({
               )}
             />
           </div>
-          <FormControl
-            componentClass="select"
-            className="privileges"
-            bsSize="sm"
-            value={privileges}
-            onChange={event => setPrivileges(event.target.value)}
-          >
-            {!readOnly && <option value="readAndWrite">{t('can_edit')}</option>}
-            <option value="readOnly">{t('read_only')}</option>
-          </FormControl>
         </div>
 
         <div className={classnames({ autocomplete: isOpen })}>
