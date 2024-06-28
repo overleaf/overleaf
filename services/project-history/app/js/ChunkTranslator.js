@@ -463,11 +463,10 @@ class TextUpdateBuilder {
             tc.range.overlaps(resultRetentionRange)
         )
 
+      const sourceOffset = this.sourceCursor - this.result.length
       for (const trackedDelete of trackedDeletes) {
         const resultTrackedDelete = trackedDelete.range
-        const sourceTrackedDelete = trackedDelete.range.moveBy(
-          this.sourceCursor - this.result.length
-        )
+        const sourceTrackedDelete = trackedDelete.range.moveBy(sourceOffset)
 
         if (scanCursor < resultTrackedDelete.start) {
           if (retain.tracking.type === 'delete') {
@@ -566,12 +565,11 @@ class TextUpdateBuilder {
       .sort((a, b) => a.range.start - b.range.start)
 
     let scanCursor = this.result.length
+    const sourceOffset = this.sourceCursor - this.result.length
 
     for (const trackedDelete of trackedDeletes) {
       const resultTrackDeleteRange = trackedDelete.range
-      const sourceTrackDeleteRange = trackedDelete.range.moveBy(
-        this.sourceCursor - this.result.length
-      )
+      const sourceTrackDeleteRange = trackedDelete.range.moveBy(sourceOffset)
 
       if (scanCursor < resultTrackDeleteRange.start) {
         this.changes.push({
