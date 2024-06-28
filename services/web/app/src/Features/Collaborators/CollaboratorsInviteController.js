@@ -15,6 +15,8 @@ const { expressify } = require('@overleaf/promise-utils')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const Errors = require('../Errors/Errors')
 const AuthenticationController = require('../Authentication/AuthenticationController')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 
 // This rate limiter allows a different number of requests depending on the
 // number of callaborators a user is allowed. This is implemented by providing
@@ -97,10 +99,33 @@ const CollaboratorsInviteController = {
 
     logger.debug({ projectId, email, sendingUserId }, 'inviting to project')
 
-    const allowed = await LimitationsManager.promises.canAddXCollaborators(
-      projectId,
-      1
-    )
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      owner_ref: 1,
+    })
+    const linkSharingChanges =
+      await SplitTestHandler.promises.getAssignmentForUser(
+        project.owner_ref,
+        'link-sharing-warning'
+      )
+
+    let allowed = false
+    if (linkSharingChanges?.variant === 'active') {
+      // if link-sharing-warning is active, can always invite read-only collaborators
+      if (privileges === PrivilegeLevels.READ_ONLY) {
+        allowed = true
+      } else {
+        allowed = await LimitationsManager.promises.canAddXEditCollaborators(
+          projectId,
+          1
+        )
+      }
+    } else {
+      allowed = await LimitationsManager.promises.canAddXCollaborators(
+        projectId,
+        1
+      )
+    }
+
     if (!allowed) {
       logger.debug(
         { projectId, email, sendingUserId },
