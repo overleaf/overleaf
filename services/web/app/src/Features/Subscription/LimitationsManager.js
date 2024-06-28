@@ -1,4 +1,3 @@
-const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const ProjectGetter = require('../Project/ProjectGetter')
 const UserGetter = require('../User/UserGetter')
@@ -8,208 +7,166 @@ const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInvitesHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const { V1ConnectionError } = require('../Errors/Errors')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const {
+  callbackify,
+  callbackifyMultiResult,
+} = require('@overleaf/promise-utils')
+
+async function allowedNumberOfCollaboratorsInProject(projectId) {
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: true,
+  })
+  return await allowedNumberOfCollaboratorsForUser(project.owner_ref)
+}
+
+async function allowedNumberOfCollaboratorsForUser(userId) {
+  const user = await UserGetter.promises.getUser(userId, { features: 1 })
+  if (user.features && user.features.collaborators) {
+    return user.features.collaborators
+  } else {
+    return Settings.defaultFeatures.collaborators
+  }
+}
+
+async function canAddXCollaborators(projectId, numberOfNewCollaborators) {
+  const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
+  const currentNumber =
+    await CollaboratorsGetter.promises.getInvitedCollaboratorCount(projectId)
+  const inviteCount =
+    await CollaboratorsInvitesHandler.promises.getInviteCount(projectId)
+  return (
+    currentNumber + inviteCount + numberOfNewCollaborators <= allowedNumber ||
+    allowedNumber < 0
+  )
+}
+
+async function hasPaidSubscription(user) {
+  const { hasSubscription, subscription } = await userHasV2Subscription(user)
+  const { isMember } = await userIsMemberOfGroupSubscription(user)
+  try {
+    const hasV1Subscription = await userHasV1Subscription(user)
+    return {
+      hasPaidSubscription: hasSubscription || isMember || hasV1Subscription,
+      subscription,
+    }
+  } catch (err) {
+    throw new V1ConnectionError('error getting subscription from v1').withCause(
+      err
+    )
+  }
+}
+
+// alias for backward-compatibility with modules. Use `haspaidsubscription` instead
+async function userHasSubscriptionOrIsGroupMember(user) {
+  return await hasPaidSubscription(user)
+}
+
+async function userHasV2Subscription(user) {
+  const subscription = await SubscriptionLocator.promises.getUsersSubscription(
+    user._id
+  )
+  let hasValidSubscription = false
+  if (subscription) {
+    if (subscription.recurlySubscription_id || subscription.customAccount) {
+      hasValidSubscription = true
+    }
+  }
+  return {
+    hasSubscription: hasValidSubscription,
+    subscription,
+  }
+}
+
+async function userHasV1OrV2Subscription(user) {
+  const { hasSubscription: hasV2Subscription } =
+    await userHasV2Subscription(user)
+  if (hasV2Subscription) {
+    return true
+  }
+  const hasV1Subscription = await userHasV1Subscription(user)
+  if (hasV1Subscription) {
+    return true
+  }
+  return false
+}
+
+async function userIsMemberOfGroupSubscription(user) {
+  const subscriptions =
+    (await SubscriptionLocator.promises.getMemberSubscriptions(user._id)) || []
+  return { isMember: subscriptions.length > 0, subscriptions }
+}
+
+async function userHasV1Subscription(user, callback) {
+  const v1Subscription =
+    await V1SubscriptionManager.promises.getSubscriptionsFromV1(user._id)
+  return !!(v1Subscription ? v1Subscription.has_subscription : undefined)
+}
+
+function teamHasReachedMemberLimit(subscription) {
+  const currentTotal =
+    (subscription.member_ids || []).length +
+    (subscription.teamInvites || []).length +
+    (subscription.invited_emails || []).length
+
+  return currentTotal >= subscription.membersLimit
+}
+
+async function hasGroupMembersLimitReached(subscriptionId, callback) {
+  const subscription =
+    await SubscriptionLocator.promises.getSubscription(subscriptionId)
+  if (!subscription) {
+    logger.warn({ subscriptionId }, 'no subscription found')
+    throw new Error('no subscription found')
+  }
+  const limitReached = teamHasReachedMemberLimit(subscription)
+  return { limitReached, subscription }
+}
 
 const LimitationsManager = {
-  allowedNumberOfCollaboratorsInProject(projectId, callback) {
-    ProjectGetter.getProject(
-      projectId,
-      { owner_ref: true },
-      (error, project) => {
-        if (error) {
-          return callback(error)
-        }
-        this.allowedNumberOfCollaboratorsForUser(project.owner_ref, callback)
-      }
-    )
-  },
+  allowedNumberOfCollaboratorsInProject: callbackify(
+    allowedNumberOfCollaboratorsInProject
+  ),
+  allowedNumberOfCollaboratorsForUser: callbackify(
+    allowedNumberOfCollaboratorsForUser
+  ),
+  canAddXCollaborators: callbackify(canAddXCollaborators),
+  hasPaidSubscription: callbackifyMultiResult(hasPaidSubscription, [
+    'hasPaidSubscription',
+    'subscription',
+  ]),
+  userHasSubscriptionOrIsGroupMember: callbackifyMultiResult(
+    userHasSubscriptionOrIsGroupMember,
+    ['hasPaidSubscription', 'subscription']
+  ),
+  userHasV2Subscription: callbackifyMultiResult(userHasV2Subscription, [
+    'hasSubscription',
+    'subscription',
+  ]),
+  userHasV1OrV2Subscription: callbackify(userHasV1OrV2Subscription),
+  userIsMemberOfGroupSubscription: callbackifyMultiResult(
+    userIsMemberOfGroupSubscription,
+    ['isMember', 'subscriptions']
+  ),
+  userHasV1Subscription: callbackify(userHasV1Subscription),
+  hasGroupMembersLimitReached: callbackifyMultiResult(
+    hasGroupMembersLimitReached,
+    ['limitReached', 'subscription']
+  ),
 
-  allowedNumberOfCollaboratorsForUser(userId, callback) {
-    UserGetter.getUser(userId, { features: 1 }, function (error, user) {
-      if (error) {
-        return callback(error)
-      }
-      if (user.features && user.features.collaborators) {
-        callback(null, user.features.collaborators)
-      } else {
-        callback(null, Settings.defaultFeatures.collaborators)
-      }
-    })
-  },
+  teamHasReachedMemberLimit,
 
-  canAddXCollaborators(projectId, numberOfNewCollaborators, callback) {
-    this.allowedNumberOfCollaboratorsInProject(
-      projectId,
-      (error, allowedNumber) => {
-        if (error) {
-          return callback(error)
-        }
-        CollaboratorsGetter.getInvitedCollaboratorCount(
-          projectId,
-          (error, currentNumber) => {
-            if (error) {
-              return callback(error)
-            }
-            CollaboratorsInvitesHandler.getInviteCount(
-              projectId,
-              (error, inviteCount) => {
-                if (error) {
-                  return callback(error)
-                }
-                if (
-                  currentNumber + inviteCount + numberOfNewCollaborators <=
-                    allowedNumber ||
-                  allowedNumber < 0
-                ) {
-                  callback(null, true)
-                } else {
-                  callback(null, false)
-                }
-              }
-            )
-          }
-        )
-      }
-    )
-  },
-
-  hasPaidSubscription(user, callback) {
-    this.userHasV2Subscription(user, (err, hasSubscription, subscription) => {
-      if (err) {
-        return callback(err)
-      }
-      this.userIsMemberOfGroupSubscription(user, (err, isMember) => {
-        if (err) {
-          return callback(err)
-        }
-        this.userHasV1Subscription(user, (err, hasV1Subscription) => {
-          if (err) {
-            return callback(
-              new V1ConnectionError(
-                'error getting subscription from v1'
-              ).withCause(err)
-            )
-          }
-          callback(
-            err,
-            isMember || hasSubscription || hasV1Subscription,
-            subscription
-          )
-        })
-      })
-    })
-  },
-
-  // alias for backward-compatibility with modules. Use `haspaidsubscription` instead
-  userHasSubscriptionOrIsGroupMember(user, callback) {
-    this.hasPaidSubscription(user, callback)
-  },
-
-  userHasV2Subscription(user, callback) {
-    SubscriptionLocator.getUsersSubscription(
-      user._id,
-      function (err, subscription) {
-        if (err) {
-          return callback(err)
-        }
-        let hasValidSubscription = false
-        if (subscription) {
-          if (
-            subscription.recurlySubscription_id ||
-            subscription.customAccount
-          ) {
-            hasValidSubscription = true
-          }
-        }
-        callback(err, hasValidSubscription, subscription)
-      }
-    )
-  },
-
-  userHasV1OrV2Subscription(user, callback) {
-    this.userHasV2Subscription(user, (err, hasV2Subscription) => {
-      if (err) {
-        return callback(err)
-      }
-      if (hasV2Subscription) {
-        return callback(null, true)
-      }
-      this.userHasV1Subscription(user, (err, hasV1Subscription) => {
-        if (err) {
-          return callback(err)
-        }
-        if (hasV1Subscription) {
-          return callback(null, true)
-        }
-        callback(null, false)
-      })
-    })
-  },
-
-  userIsMemberOfGroupSubscription(user, callback) {
-    SubscriptionLocator.getMemberSubscriptions(
-      user._id,
-      function (err, subscriptions) {
-        if (!subscriptions) {
-          subscriptions = []
-        }
-        if (err) {
-          return callback(err)
-        }
-        callback(err, subscriptions.length > 0, subscriptions)
-      }
-    )
-  },
-
-  userHasV1Subscription(user, callback) {
-    V1SubscriptionManager.getSubscriptionsFromV1(
-      user._id,
-      function (err, v1Subscription) {
-        callback(
-          err,
-          !!(v1Subscription ? v1Subscription.has_subscription : undefined)
-        )
-      }
-    )
-  },
-
-  teamHasReachedMemberLimit(subscription) {
-    const currentTotal =
-      (subscription.member_ids || []).length +
-      (subscription.teamInvites || []).length +
-      (subscription.invited_emails || []).length
-
-    return currentTotal >= subscription.membersLimit
-  },
-
-  hasGroupMembersLimitReached(subscriptionId, callback) {
-    SubscriptionLocator.getSubscription(
-      subscriptionId,
-      function (err, subscription) {
-        if (err) {
-          OError.tag(err, 'error getting subscription', {
-            subscriptionId,
-          })
-          return callback(err)
-        }
-        if (!subscription) {
-          logger.warn({ subscriptionId }, 'no subscription found')
-          return callback(new Error('no subscription found'))
-        }
-
-        const limitReached =
-          LimitationsManager.teamHasReachedMemberLimit(subscription)
-        callback(err, limitReached, subscription)
-      }
-    )
+  promises: {
+    allowedNumberOfCollaboratorsInProject,
+    allowedNumberOfCollaboratorsForUser,
+    canAddXCollaborators,
+    hasPaidSubscription,
+    userHasSubscriptionOrIsGroupMember,
+    userHasV2Subscription,
+    userHasV1OrV2Subscription,
+    userIsMemberOfGroupSubscription,
+    userHasV1Subscription,
+    hasGroupMembersLimitReached,
   },
 }
 
-LimitationsManager.promises = promisifyAll(LimitationsManager, {
-  multiResult: {
-    userHasV2Subscription: ['hasSubscription', 'subscription'],
-    userIsMemberOfGroupSubscription: ['isMember', 'subscriptions'],
-    hasGroupMembersLimitReached: ['limitReached', 'subscription'],
-  },
-})
 module.exports = LimitationsManager
