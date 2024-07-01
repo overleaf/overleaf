@@ -188,6 +188,26 @@ export const buildRuleCounts = (entries = []) => {
   return counts
 }
 
+export const buildRuleDeltas = (ruleCounts, previousRuleCounts) => {
+  const counts = {}
+
+  // keys that are defined in the current log entries
+  for (const [key, value] of Object.entries(ruleCounts)) {
+    const previousValue = previousRuleCounts[key] ?? 0
+    counts[`delta_${key}`] = value - previousValue
+  }
+
+  // keys that are no longer defined in the current log entries
+  for (const [key, value] of Object.entries(previousRuleCounts)) {
+    if (!(key in counts)) {
+      counts[key] = 0
+      counts[`delta_${key}`] = -value
+    }
+  }
+
+  return counts
+}
+
 function buildURL(file, pdfDownloadDomain) {
   if (file.build && pdfDownloadDomain) {
     // Downloads from the compiles domain must include a build id.

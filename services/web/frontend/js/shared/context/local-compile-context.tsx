@@ -22,6 +22,7 @@ import {
 import {
   buildLogEntryAnnotations,
   buildRuleCounts,
+  buildRuleDeltas,
   handleLogFiles,
   handleOutputFiles,
 } from '../../features/pdf-preview/util/output-files'
@@ -97,6 +98,7 @@ export type CompileContext = {
   setChangedAt: (value: any) => void
   clearCache: () => void
   syncToEntry: (value: any, keepCurrentView?: boolean) => void
+  recordAction: (action: string) => void
 }
 
 export const LocalCompileContext = createContext<CompileContext | undefined>(
@@ -113,7 +115,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   const { pdfPreviewOpen } = useLayoutContext()
 
-  const { features, alphaProgram } = useUserContext()
+  const { features, alphaProgram, labsProgram } = useUserContext()
 
   const { fileTreeData } = useFileTreeData()
   const { findEntityByPath } = useFileTreePathContext()
@@ -351,11 +353,22 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   const hasCompileLogsEvents = useFeatureFlag('compile-log-events')
 
+  // compare log entry counts with the previous compile, and record actions between compiles
+  // these are refs rather than state so they don't trigger the effect to run
+  const previousRuleCountsRef = useRef<Record<string, number> | null>(null)
+  const recordedActionsRef = useRef<Record<string, boolean>>({})
+  const recordAction = useCallback((action: string) => {
+    recordedActionsRef.current[action] = true
+  }, [])
+
   // handle the data returned from a compile request
   // note: this should _only_ run when `data` changes,
   // the other dependencies must all be static
   useEffect(() => {
     const abortController = new AbortController()
+
+    const recordedActions = recordedActionsRef.current
+    recordedActionsRef.current = {}
 
     if (data) {
       if (data.clsiServerId) {
@@ -413,13 +426,26 @@ export const LocalCompileProvider: FC = ({ children }) => {
                 )
               }
 
-              if (hasCompileLogsEvents) {
+              if (hasCompileLogsEvents || labsProgram) {
+                const ruleCounts = buildRuleCounts(
+                  result.logEntries.all
+                ) as Record<string, number>
+
+                const previousRuleCounts = previousRuleCountsRef.current
+                previousRuleCountsRef.current = ruleCounts
+
+                const ruleDeltas = previousRuleCounts
+                  ? buildRuleDeltas(ruleCounts, previousRuleCounts)
+                  : {}
+
                 sendMB('compile-log-entries', {
                   status: data.status,
                   stopOnFirstError: data.options.stopOnFirstError,
                   isAutoCompileOnLoad: !!data.options.isAutoCompileOnLoad,
                   isAutoCompileOnChange: !!data.options.isAutoCompileOnChange,
-                  ...buildRuleCounts(result.logEntries.all),
+                  ...recordedActions,
+                  ...ruleCounts,
+                  ...ruleDeltas,
                 })
               }
             }
@@ -492,6 +518,8 @@ export const LocalCompileProvider: FC = ({ children }) => {
     data,
     ide,
     alphaProgram,
+    labsProgram,
+    features,
     hasCompileLogsEvents,
     hasPremiumCompile,
     isProjectOwner,
@@ -664,6 +692,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
       setChangedAt,
       cleanupCompileResult,
       syncToEntry,
+      recordAction,
     }),
     [
       animateCompileDropdownArrow,
@@ -715,6 +744,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
       setShowLogs,
       toggleLogs,
       syncToEntry,
+      recordAction,
     ]
   )
 

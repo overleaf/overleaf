@@ -68,6 +68,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
     setChangedAt: _setChangedAt,
     clearCache: _clearCache,
     syncToEntry: _syncToEntry,
+    recordAction: _recordAction,
   } = localCompileContext
 
   const [animateCompileDropdownArrow] = useDetachStateWatcher(
@@ -363,6 +364,13 @@ export const DetachCompileProvider: FC = ({ children }) => {
     'detacher'
   )
 
+  const recordAction = useDetachAction(
+    'record-action',
+    _recordAction,
+    'detached',
+    'detacher'
+  )
+
   useCompileTriggers(startCompile, setChangedAt)
   useLogEvents(setShowLogs)
 
@@ -420,6 +428,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
       setChangedAt,
       cleanupCompileResult,
       syncToEntry,
+      recordAction,
     }),
     [
       animateCompileDropdownArrow,
@@ -472,6 +481,7 @@ export const DetachCompileProvider: FC = ({ children }) => {
       setChangedAt,
       cleanupCompileResult,
       syncToEntry,
+      recordAction,
     ]
   )
 
