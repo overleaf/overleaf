@@ -288,6 +288,9 @@ const mainVisualTheme = EditorView.theme({
     overflowWrap: 'break-word',
     hyphens: 'auto',
   },
+  '.ol-cm-space': {
+    display: 'inline-block',
+  },
   '.ol-cm-environment-centered': {
     '&.ol-cm-label-line, &.ol-cm-caption-line': {
       textAlign: 'center',

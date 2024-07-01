@@ -642,6 +642,22 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('@second-line').click()
       cy.get('@first-line').should('have.text', 'Test ↩ test')
     })
+
+    it('decorates spacing commands', function () {
+      cy.get('@first-line').type('\\thinspace')
+      cy.get('@second-line').click()
+      cy.get('@first-line')
+        .find('.ol-cm-space')
+        .should('have.attr', 'style', 'width: calc(0.166667em);')
+    })
+
+    it('decorates spacing symbols', function () {
+      cy.get('@first-line').type('\\,')
+      cy.get('@second-line').click()
+      cy.get('@first-line')
+        .find('.ol-cm-space')
+        .should('have.attr', 'style', 'width: calc(0.166667em);')
+    })
   })
 
   describe('decorates theorems', function () {

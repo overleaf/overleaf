@@ -78,6 +78,10 @@ import {
 } from '../../components/table-generator/utils'
 import { debugConsole } from '@/utils/debugging'
 import { DescriptionItemWidget } from './visual-widgets/description-item'
+import {
+  createSpaceCommand,
+  hasSpaceSubstitution,
+} from '@/features/source-editor/extensions/visual/visual-widgets/space'
 
 type Options = {
   previewByPath: (path: string) => PreviewPath | null
@@ -1190,6 +1194,18 @@ export const atomicDecorations = (options: Options) => {
               } else if (hasCharacterSubstitution(commandName)) {
                 if (shouldDecorate(state, nodeRef)) {
                   const replacement = createCharacterCommand(commandName)
+                  if (replacement) {
+                    decorations.push(
+                      Decoration.replace({
+                        widget: replacement,
+                      }).range(nodeRef.from, nodeRef.to)
+                    )
+                    return false
+                  }
+                }
+              } else if (hasSpaceSubstitution(commandName)) {
+                if (shouldDecorate(state, nodeRef)) {
+                  const replacement = createSpaceCommand(commandName)
                   if (replacement) {
                     decorations.push(
                       Decoration.replace({
