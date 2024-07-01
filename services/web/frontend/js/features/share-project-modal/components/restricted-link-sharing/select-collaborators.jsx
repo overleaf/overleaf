@@ -18,9 +18,6 @@ export default function SelectCollaborators({
   options,
   placeholder,
   multipleSelectionProps,
-  privileges,
-  setPrivileges,
-  readOnly,
 }) {
   const { t } = useTranslation()
   const {
@@ -136,13 +133,10 @@ export default function SelectCollaborators({
 
   // close and reset the menu when there are no matching items
   useEffect(() => {
-    if (readOnly) {
-      setPrivileges('readOnly')
-    }
     if (isOpen && filteredOptions.length === 0) {
       reset()
     }
-  }, [reset, isOpen, filteredOptions.length, readOnly, setPrivileges])
+  }, [reset, isOpen, filteredOptions.length])
 
   return (
     <div className="tags-input tags-new">
@@ -271,9 +265,6 @@ SelectCollaborators.propTypes = {
     removeSelectedItem: PropTypes.func.isRequired,
     selectedItems: PropTypes.array.isRequired,
   }).isRequired,
-  privileges: PropTypes.string.isRequired,
-  setPrivileges: PropTypes.func.isRequired,
-  readOnly: PropTypes.bool.isRequired,
 }
 
 function Option({ selected, item, getItemProps, index }) {

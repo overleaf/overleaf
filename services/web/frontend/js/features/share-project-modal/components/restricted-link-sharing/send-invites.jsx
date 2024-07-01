@@ -14,9 +14,7 @@ export default function SendInvites({
       {!canAddCollaborators && !hasExceededCollaboratorLimit && (
         <CollaboratorsLimitUpgrade />
       )}
-      {!hasExceededCollaboratorLimit && (
-        <AddCollaborators readOnly={!canAddCollaborators} />
-      )}
+      <AddCollaborators readOnly={!canAddCollaborators} />
     </Row>
   )
 }

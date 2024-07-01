@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
@@ -46,6 +46,12 @@ export default function AddCollaborators({ readOnly }) {
   })
 
   const { reset, selectedItems } = multipleSelectionProps
+
+  useEffect(() => {
+    if (readOnly && privileges === 'readAndWrite') {
+      setPrivileges('readOnly')
+    }
+  }, [privileges, readOnly])
 
   const handleSubmit = useCallback(async () => {
     if (!selectedItems.length) {
@@ -147,9 +153,6 @@ export default function AddCollaborators({ readOnly }) {
           options={nonMemberContacts || []}
           placeholder="Email, comma separated"
           multipleSelectionProps={multipleSelectionProps}
-          privileges={privileges}
-          setPrivileges={setPrivileges}
-          readOnly={readOnly}
         />
       </FormGroup>
 
@@ -162,7 +165,9 @@ export default function AddCollaborators({ readOnly }) {
             value={privileges}
             onChange={event => setPrivileges(event.target.value)}
           >
-            <option value="readAndWrite">{t('can_edit')}</option>
+            <option disabled={readOnly} value="readAndWrite">
+              {t('can_edit')}
+            </option>
             <option value="readOnly">{t('can_view')}</option>
           </FormControl>
           <span>&nbsp;&nbsp;</span>
