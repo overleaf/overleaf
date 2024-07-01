@@ -295,6 +295,64 @@ describe('editor', () => {
       })
     })
   })
+
+  describe('layout selector', () => {
+    let projectId: string
+    beforeEach(() => {
+      login('user@example.com')
+      cy.visit(`/project`)
+      createProject(`project-${uuid()}`, { type: 'Example Project' })
+    })
+
+    it('show editor only and switch between editor and pdf', () => {
+      cy.get('.pdf-viewer').should('be.visible')
+      cy.get('.cm-editor').should('be.visible')
+
+      cy.findByText('Layout').click()
+      cy.findByText('Editor only').click()
+
+      cy.get('.pdf-viewer').should('not.exist')
+      cy.get('.cm-editor').should('be.visible')
+
+      cy.findByText('Switch to PDF').click()
+
+      cy.get('.pdf-viewer').should('be.visible')
+      cy.get('.cm-editor').should('not.be.visible')
+
+      cy.findByText('Switch to editor').click()
+
+      cy.get('.pdf-viewer').should('not.exist')
+      cy.get('.cm-editor').should('be.visible')
+    })
+
+    it('show PDF only and go back to Editor & PDF', () => {
+      cy.get('.pdf-viewer').should('be.visible')
+      cy.get('.cm-editor').should('be.visible')
+
+      cy.findByText('Layout').click()
+      cy.findByText('PDF only').click()
+
+      cy.get('.pdf-viewer').should('be.visible')
+      cy.get('.cm-editor').should('not.be.visible')
+
+      cy.findByText('Layout').click()
+      cy.findByText('Editor & PDF').click()
+
+      cy.get('.pdf-viewer').should('be.visible')
+      cy.get('.cm-editor').should('be.visible')
+    })
+
+    it('PDF in a separate tab (tests editor only)', () => {
+      cy.get('.pdf-viewer').should('be.visible')
+      cy.get('.cm-editor').should('be.visible')
+
+      cy.findByText('Layout').click()
+      cy.findByText('PDF in separate tab').click()
+
+      cy.get('.pdf-viewer').should('not.exist')
+      cy.get('.cm-editor').should('be.visible')
+    })
+  })
 })
 
 function createRandomLetterString() {
