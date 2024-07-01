@@ -14,7 +14,7 @@ export type ProjectContextValue = {
   rootDocId?: string
   compiler: string
   members: ProjectContextMember[]
-  invites: { _id: UserId }[]
+  invites: ProjectContextMember[]
   features: {
     collaborators?: number
     compileGroup?: 'alpha' | 'standard' | 'priority'
