@@ -14,7 +14,12 @@ export function startWith({
 }) {
   before(async function () {
     Object.assign(vars, varsFn())
-    const cfg = JSON.stringify({ pro, version, vars, withDataDir })
+    const cfg = JSON.stringify({
+      pro,
+      version,
+      vars,
+      withDataDir,
+    })
     if (lastConfig === cfg) return
 
     this.timeout(STARTUP_TIMEOUT)

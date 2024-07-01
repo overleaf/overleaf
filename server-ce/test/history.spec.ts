@@ -1,8 +1,10 @@
 import { createProject } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 import { ensureUserExists, login } from './helpers/login'
+import { startWith } from './helpers/config'
 
 describe('History', function () {
+  startWith({})
   ensureUserExists({ email: 'user@example.com' })
   beforeEach(function () {
     login('user@example.com')

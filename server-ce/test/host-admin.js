@@ -132,6 +132,25 @@ const allowedVars = Joi.object(
       'OVERLEAF_NEW_PROJECT_TEMPLATE_LINKS',
       'OVERLEAF_ALLOW_PUBLIC_ACCESS',
       'OVERLEAF_ALLOW_ANONYMOUS_READ_AND_WRITE_SHARING',
+      'EXTERNAL_AUTH',
+      'OVERLEAF_SAML_ENTRYPOINT',
+      'OVERLEAF_SAML_CALLBACK_URL',
+      'OVERLEAF_SAML_ISSUER',
+      'OVERLEAF_SAML_IDENTITY_SERVICE_NAME',
+      'OVERLEAF_SAML_EMAIL_FIELD',
+      'OVERLEAF_SAML_FIRST_NAME_FIELD',
+      'OVERLEAF_SAML_LAST_NAME_FIELD',
+      'OVERLEAF_SAML_UPDATE_USER_DETAILS_ON_LOGIN',
+      'OVERLEAF_SAML_CERT',
+      'OVERLEAF_LDAP_URL',
+      'OVERLEAF_LDAP_SEARCH_BASE',
+      'OVERLEAF_LDAP_SEARCH_FILTER',
+      'OVERLEAF_LDAP_BIND_DN',
+      'OVERLEAF_LDAP_BIND_CREDENTIALS',
+      'OVERLEAF_LDAP_EMAIL_ATT',
+      'OVERLEAF_LDAP_NAME_ATT',
+      'OVERLEAF_LDAP_LAST_NAME_ATT',
+      'OVERLEAF_LDAP_UPDATE_USER_DETAILS_ON_LOGIN',
       // Old branding, used for upgrade tests
       'SHARELATEX_MONGO_URL',
       'SHARELATEX_REDIS_HOST',
@@ -151,6 +170,10 @@ function setVarsDockerCompose({ pro, vars, version, withDataDir }) {
     cfg.services.sharelatex.depends_on = ['git-bridge']
   } else {
     cfg.services.sharelatex.depends_on = []
+  }
+
+  if (['ldap', 'saml'].includes(vars.EXTERNAL_AUTH)) {
+    cfg.services.sharelatex.depends_on.push(vars.EXTERNAL_AUTH)
   }
 
   const dataDirInContainer =

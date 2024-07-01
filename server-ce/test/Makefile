@@ -12,7 +12,7 @@ export IMAGE_TAG_PRO ?= quay.io/sharelatex/sharelatex-pro:latest
 
 test-e2e-native:
 	docker compose -f docker-compose.yml -f docker-compose.native.yml up --build --no-log-prefix sharelatex host-admin -d
-	CYPRESS_ADMIN_CLIENT_URL='http://localhost:8081' CYPRESS_GIT_BRIDGE_PUBLIC_HOST='localhost' npm run cypress:open
+	CYPRESS_ADMIN_CLIENT_URL='http://localhost:8081' CYPRESS_GIT_BRIDGE_PUBLIC_HOST='localhost' CYPRESS_SAML_PUBLIC_HOST='localhost:8082' CYPRESS_OVERLEAF_PUBLIC_HOST='localhost:8082' npm run cypress:open
 
 test-e2e:
 	docker compose up --build --no-log-prefix --exit-code-from=e2e e2e
@@ -24,7 +24,7 @@ clean:
 	docker compose down --volumes --timeout 0
 
 prefetch:
-	docker compose pull e2e mongo redis
+	docker compose pull e2e mongo redis saml ldap
 	docker compose build
 	echo -n "$$ALL_TEX_LIVE_DOCKER_IMAGES" | xargs -d, -I% \
 	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/}; docker pull $$tag; docker tag $$tag $$re_tag'

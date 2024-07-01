@@ -108,3 +108,15 @@ services:
       interval: 3s
       timeout: 3s
       retries: 30
+
+  saml:
+    restart: always
+    image: gcr.io/overleaf-ops/saml-test
+    environment:
+      SAML_TEST_SP_ENTITY_ID: 'sharelatex-test-saml'
+      SAML_BASE_URL_PATH: 'http://saml/simplesaml/'
+      SAML_TEST_SP_LOCATION: 'http://sharelatex/saml/callback'
+
+  ldap:
+    restart: always
+    image: rroemhild/test-openldap:1.1

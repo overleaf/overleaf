@@ -12,3 +12,10 @@ services:
     environment:
       NATIVE_CYPRESS: 'true'
       ACCESS_CONTROL_ALLOW_ORIGIN: 'http://localhost'
+
+  saml:
+    ports:
+      - 127.0.0.1:8082:80
+    environment:
+      SAML_BASE_URL_PATH: 'http://localhost:8082/simplesaml/'
+      SAML_TEST_SP_LOCATION: 'http://localhost/saml/callback'
