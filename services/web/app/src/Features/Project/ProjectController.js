@@ -44,6 +44,7 @@ const TutorialHandler = require('../Tutorial/TutorialHandler')
 const UserUpdater = require('../User/UserUpdater')
 const { checkUserPermissions } =
   require('../Authorization/PermissionsManager').promises
+const UserGetter = require('../User/UserGetter')
 
 /**
  * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
@@ -400,6 +401,8 @@ const _ProjectController = {
           brandVariationId: 1,
           overleaf: 1,
           tokens: 1,
+          tokenAccessReadAndWrite_refs: 1, // used for link sharing analytics
+          collaberator_refs: 1, // used for link sharing analytics
         }),
         userIsMemberOfGroupSubscription: sessionUser
           ? LimitationsManager.promises.userIsMemberOfGroupSubscription(
@@ -546,12 +549,24 @@ const _ProjectController = {
           logger.error({ err }, 'failed to update split test info in session')
         )
       if (userId) {
+        const ownerFeatures = await UserGetter.promises.getUserFeatures(
+          project.owner_ref
+        )
+        const projectOpenedSegmentation = {
+          projectId: project._id,
+          // temporary link sharing segmentation:
+          linkSharingWarning: linkSharingChanges?.variant,
+          namedEditors: project.collaberator_refs?.length || 0,
+          tokenEditors: project.tokenAccessReadAndWrite_refs?.length || 0,
+          planLimit: ownerFeatures?.collaborators || 0,
+        }
+        projectOpenedSegmentation.exceedAtLimit =
+          projectOpenedSegmentation.namedEditors >=
+          projectOpenedSegmentation.planLimit
         AnalyticsManager.recordEventForUserInBackground(
           userId,
           'project-opened',
-          {
-            projectId: project._id,
-          }
+          projectOpenedSegmentation
         )
         User.updateOne(
           { _id: new ObjectId(userId) },
@@ -618,12 +633,6 @@ const _ProjectController = {
         detachRole === 'detached'
           ? 'project/ide-react-detached'
           : 'project/ide-react'
-
-      const assignLink = await SplitTestHandler.promises.getAssignmentForUser(
-        project.owner_ref,
-        'link-sharing-warning'
-      )
-      const linkSharingWarning = assignLink.variant === 'active'
 
       res.render(template, {
         title: project.name,
@@ -698,7 +707,7 @@ const _ProjectController = {
         optionalPersonalAccessToken,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
-        linkSharingWarning,
+        linkSharingWarning: linkSharingChanges.variant === 'active',
       })
       timer.done()
     } catch (err) {

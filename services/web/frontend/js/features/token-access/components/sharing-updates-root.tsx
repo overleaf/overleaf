@@ -8,6 +8,7 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import useAsync from '@/shared/hooks/use-async'
 import Notification from '@/shared/components/notification'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 function SharingUpdatesRoot() {
   const { isReady } = useWaitForI18n()
@@ -16,6 +17,10 @@ function SharingUpdatesRoot() {
   const projectId = getMeta('ol-project_id')
 
   const joinProject = useCallback(() => {
+    sendMB('notification-click', {
+      name: 'link-sharing-collaborator',
+      button: 'ok',
+    })
     runAsync(postJSON(`/project/${projectId}/sharing-updates/join`))
       .then(() => {
         location.assign(`/project/${projectId}`)
@@ -24,6 +29,10 @@ function SharingUpdatesRoot() {
   }, [runAsync, projectId])
 
   const viewProject = useCallback(() => {
+    sendMB('notification-click', {
+      name: 'link-sharing-collaborator',
+      button: 'anonymous',
+    })
     runAsync(postJSON(`/project/${projectId}/sharing-updates/view`))
       .then(() => {
         location.assign(`/project/${projectId}`)
@@ -32,6 +41,10 @@ function SharingUpdatesRoot() {
   }, [runAsync, projectId])
 
   const leaveProject = useCallback(() => {
+    sendMB('notification-click', {
+      name: 'link-sharing-collaborator',
+      button: 'leave',
+    })
     runAsync(postJSON(`/project/${projectId}/leave`))
       .then(() => {
         location.assign('/project')
@@ -67,6 +80,12 @@ function SharingUpdatesRoot() {
                         href="/blog/changes-to-project-sharing"
                         rel="noopener noreferrer"
                         target="_blank"
+                        onClick={() => {
+                          sendMB('notification-click', {
+                            name: 'link-sharing-collaborator',
+                            button: 'learn',
+                          })
+                        }}
                       />,
                     ]}
                   />

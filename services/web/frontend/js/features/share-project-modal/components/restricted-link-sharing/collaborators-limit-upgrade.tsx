@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 import Notification from '@/shared/components/notification'
 import { upgradePlan } from '@/main/account-upgrade'
 import { useProjectContext } from '@/shared/context/project-context'
+import { useUserContext } from '@/shared/context/user-context'
+import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 
 export default function CollaboratorsLimitUpgrade() {
   const { t } = useTranslation()
   const { features } = useProjectContext()
+  const user = useUserContext()
 
   return (
     <div className="invite-warning">
@@ -22,13 +25,25 @@ export default function CollaboratorsLimitUpgrade() {
           </p>
         }
         action={
-          <Button
-            bsSize="sm"
-            className="btn-secondary"
-            onClick={() => upgradePlan('project-sharing')}
-          >
-            {t('upgrade')}
-          </Button>
+          user.allowedFreeTrial ? (
+            <StartFreeTrialButton
+              buttonProps={{ variant: 'secondary', size: 'small' }}
+              source="project-sharing"
+              variant="limit"
+            >
+              {t('upgrade')}
+            </StartFreeTrialButton>
+          ) : (
+            <Button
+              bsSize="sm"
+              className="btn-secondary"
+              onClick={() => {
+                upgradePlan('project-sharing')
+              }}
+            >
+              {t('upgrade')}
+            </Button>
+          )
         }
       />
     </div>

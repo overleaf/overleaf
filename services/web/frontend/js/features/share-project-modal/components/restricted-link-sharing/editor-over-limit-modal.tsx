@@ -4,6 +4,7 @@ import EditorOverLimitModalContent from './editor-over-limit-modal-content'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorContext } from '@/shared/context/editor-context'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 const EditorOverLimitModal = () => {
   const [show, setShow] = useState(false)
@@ -46,6 +47,9 @@ const EditorOverLimitModal = () => {
       ) {
         setShow(true)
         customLocalStorage.setItem(localStorageKey, Date.now())
+        sendMB('notification-prompt', {
+          name: 'link-sharing-collaborator-limit',
+        })
       }
     }
   }, [features, isProjectOwner, members, permissionsLevel, projectId])
@@ -54,7 +58,12 @@ const EditorOverLimitModal = () => {
     <AccessibleModal
       animation
       show={show}
-      onHide={handleHide}
+      onHide={() => {
+        sendMB('notification-dismiss', {
+          name: 'link-sharing-collaborator-limit',
+        })
+        handleHide()
+      }}
       id="editor-over-limit-modal"
     >
       <EditorOverLimitModalContent handleHide={handleHide} />

@@ -1,6 +1,7 @@
 import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { linkSharingEnforcementDate } from '../../utils/link-sharing'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 type EditorOverLimitModalContentProps = {
   handleHide: () => void
@@ -32,10 +33,25 @@ export default function EditorOverLimitModalContent({
           href="/blog/changes-to-project-sharing"
           target="_blank"
           rel="noreferrer"
+          onClick={() => {
+            sendMB('notification-click', {
+              name: 'link-sharing-collaborator-limit',
+              button: 'learn',
+            })
+          }}
         >
           {t('learn_more')}
         </Button>
-        <Button className="btn-primary" onClick={handleHide}>
+        <Button
+          className="btn-primary"
+          onClick={() => {
+            sendMB('notification-click', {
+              name: 'link-sharing-collaborator-limit',
+              button: 'ok',
+            })
+            handleHide()
+          }}
+        >
           {t('ok')}
         </Button>
       </Modal.Footer>

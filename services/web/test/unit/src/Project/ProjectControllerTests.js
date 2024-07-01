@@ -135,6 +135,9 @@ describe('ProjectController', function () {
     this.UserGetter = {
       getUserFullEmails: sinon.stub().yields(null, []),
       getUser: sinon.stub().resolves({ lastLoginIp: '192.170.18.2' }),
+      promises: {
+        getUserFeatures: sinon.stub().resolves(null, { collaborators: 1 }),
+      },
     }
     this.Features = {
       hasFeature: sinon.stub(),
