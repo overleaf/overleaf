@@ -49,8 +49,11 @@ describe('editor', () => {
       cy.findByText(word)
         .parent()
         .within(() => cy.get('button').click())
+
+      // the modal has 2 close buttons, this ensures the one with the visible label is
+      // clicked, otherwise it would need `force: true`
+      cy.get('.btn').contains('Close').click()
     })
-    cy.get('button').contains('Close').click({ force: true })
 
     cy.log('close left panel')
     cy.get('[id="left-menu"]').type('{esc}')
