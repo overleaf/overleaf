@@ -443,6 +443,35 @@ function flushQueuedProjects(req, res, next) {
   })
 }
 
+/**
+ * Block a project from getting loaded in docupdater
+ *
+ * The project is blocked only if it's not already loaded in docupdater. The
+ * response indicates whether the project has been blocked or not.
+ */
+function blockProject(req, res, next) {
+  const projectId = req.params.project_id
+  RedisManager.blockProject(projectId, (err, blocked) => {
+    if (err) {
+      return next(err)
+    }
+    res.json({ blocked })
+  })
+}
+
+/**
+ * Unblock a project
+ */
+function unblockProject(req, res, next) {
+  const projectId = req.params.project_id
+  RedisManager.unblockProject(projectId, (err, wasBlocked) => {
+    if (err) {
+      return next(err)
+    }
+    res.json({ wasBlocked })
+  })
+}
+
 module.exports = {
   getDoc,
   peekDoc,
@@ -462,4 +491,6 @@ module.exports = {
   resyncProjectHistory,
   flushAllProjects,
   flushQueuedProjects,
+  blockProject,
+  unblockProject,
 }

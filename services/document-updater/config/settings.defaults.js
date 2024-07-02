@@ -128,6 +128,9 @@ module.exports = {
         projectState({ project_id: projectId }) {
           return `ProjectState:{${projectId}}`
         },
+        projectBlock({ project_id: projectId }) {
+          return `ProjectBlock:{${projectId}}`
+        },
         pendingUpdates({ doc_id: docId }) {
           return `PendingUpdates:{${docId}}`
         },
