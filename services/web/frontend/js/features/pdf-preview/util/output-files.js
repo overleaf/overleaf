@@ -199,7 +199,7 @@ export const buildRuleDeltas = (ruleCounts, previousRuleCounts) => {
 
   // keys that are no longer defined in the current log entries
   for (const [key, value] of Object.entries(previousRuleCounts)) {
-    if (!(key in counts)) {
+    if (!(key in ruleCounts)) {
       counts[key] = 0
       counts[`delta_${key}`] = -value
     }
