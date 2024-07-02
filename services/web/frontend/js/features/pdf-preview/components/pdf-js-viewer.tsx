@@ -446,6 +446,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       }
       if (event.metaKey || event.ctrlKey) {
         switch (event.key) {
+          case '+':
           case '=':
             event.preventDefault()
             setZoom('zoom-in')
