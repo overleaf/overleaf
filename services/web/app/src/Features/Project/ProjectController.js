@@ -613,10 +613,10 @@ const _ProjectController = {
         !showPersonalAccessToken &&
         splitTestAssignments['personal-access-token'].variant === 'enabled' // `?personal-access-token=enabled`
 
+      // still allow users to access project if we cant get their permissions, but disable AI feature
       let canUseAi
       try {
-        await checkUserPermissions(user, ['use-ai'])
-        canUseAi = true
+        canUseAi = await checkUserPermissions(user, ['use-ai'])
       } catch (err) {
         canUseAi = false
       }

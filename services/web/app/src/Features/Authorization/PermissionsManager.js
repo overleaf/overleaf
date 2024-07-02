@@ -450,9 +450,11 @@ module.exports = {
   getUserRestrictions,
   getUserValidationStatus: callbackify(getUserValidationStatus),
   checkCollaboratorsPermission: callbackify(checkUserListPermissions),
+  checkUserPermissions: callbackify(checkUserPermissions),
   promises: {
     assertUserPermissions,
     getUserValidationStatus,
     checkUserListPermissions,
+    checkUserPermissions,
   },
 }
