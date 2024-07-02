@@ -149,8 +149,14 @@ describe('editor', () => {
 
       cy.log('enable visual editor and make changes in main file')
       cy.findByText('Visual Editor').click()
-      cy.contains('Introduction').dblclick()
-      cy.contains('Introduction').type('{del}{enter}{enter}')
+
+      // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
+      // Go down to the lower level event based typing, the frontend tests in web use similar events.
+      cy.get('.cm-editor').as('editor')
+      cy.get('@editor').contains('Introduction').dblclick()
+      cy.get('@editor').trigger('keydown', { key: 'Delete' })
+      cy.get('@editor').trigger('keydown', { key: 'Enter' })
+      cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
       cy.log('recompile to force flush')
       cy.findByText('Recompile').click()
