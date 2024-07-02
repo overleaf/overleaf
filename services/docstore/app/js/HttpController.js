@@ -130,6 +130,16 @@ function getAllRanges(req, res, next) {
   )
 }
 
+function projectHasRanges(req, res, next) {
+  const { project_id: projectId } = req.params
+  DocManager.projectHasRanges(projectId, (err, projectHasRanges) => {
+    if (err) {
+      return next(err)
+    }
+    res.json({ projectHasRanges })
+  })
+}
+
 function updateDoc(req, res, next) {
   const { doc_id: docId, project_id: projectId } = req.params
   const lines = req.body?.lines
@@ -298,6 +308,7 @@ module.exports = {
   getAllDocs,
   getAllDeletedDocs,
   getAllRanges,
+  projectHasRanges,
   updateDoc,
   patchDoc,
   archiveAllDocs,

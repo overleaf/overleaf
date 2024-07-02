@@ -50,6 +50,7 @@ app.param('doc_id', function (req, res, next, docId) {
 app.get('/project/:project_id/doc-deleted', HttpController.getAllDeletedDocs)
 app.get('/project/:project_id/doc', HttpController.getAllDocs)
 app.get('/project/:project_id/ranges', HttpController.getAllRanges)
+app.get('/project/:project_id/has-ranges', HttpController.projectHasRanges)
 app.get('/project/:project_id/doc/:doc_id', HttpController.getDoc)
 app.get('/project/:project_id/doc/:doc_id/deleted', HttpController.isDocDeleted)
 app.get('/project/:project_id/doc/:doc_id/raw', HttpController.getRawDoc)

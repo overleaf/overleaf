@@ -13,6 +13,7 @@ async function main() {
     direction,
     force,
     stopOnError,
+    quickOnly,
   } = parseArgs()
   await HistoryRangesSupportMigration.promises.migrateProjects({
     projectIds,
@@ -23,6 +24,7 @@ async function main() {
     direction,
     force,
     stopOnError,
+    quickOnly,
   })
 }
 
@@ -41,12 +43,13 @@ Options:
     --backwards      Disable history ranges support for selected project ids
     --force          Migrate projects even if they were already migrated
     --stop-on-error  Stop after first migration error
+    --quick-only     Do not try a resync migration if quick migration fails
 `)
 }
 
 function parseArgs() {
   const args = minimist(process.argv.slice(2), {
-    boolean: ['backwards', 'help', 'all', 'force'],
+    boolean: ['backwards', 'help', 'all', 'force', 'quick-only'],
     string: ['owner-id', 'project-id', 'min-id', 'max-id'],
   })
 
@@ -63,6 +66,7 @@ function parseArgs() {
   const maxCount = args['max-count']
   const force = args.force
   const stopOnError = args['stop-on-error']
+  const quickOnly = args['quick-only']
   const all = args.all
 
   if (
@@ -89,6 +93,7 @@ function parseArgs() {
     direction,
     force,
     stopOnError,
+    quickOnly,
   }
 }
 

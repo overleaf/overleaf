@@ -247,6 +247,46 @@ function resyncProjectHistory(
   )
 }
 
+/**
+ * Block a project from being loaded in docupdater
+ *
+ * @param {string} projectId
+ * @param {Callback} callback
+ */
+function blockProject(projectId, callback) {
+  _makeRequest(
+    { path: `/project/${projectId}/block`, method: 'POST', json: true },
+    projectId,
+    'block-project',
+    (err, body) => {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, body.blocked)
+    }
+  )
+}
+
+/**
+ * Unblock a previously blocked project
+ *
+ * @param {string} projectId
+ * @param {Callback} callback
+ */
+function unblockProject(projectId, callback) {
+  _makeRequest(
+    { path: `/project/${projectId}/unblock`, method: 'POST', json: true },
+    projectId,
+    'unblock-project',
+    (err, body) => {
+      if (err) {
+        return callback(err)
+      }
+      callback(null, body.wasBlocked)
+    }
+  )
+}
+
 function updateProjectStructure(
   projectId,
   projectHistoryId,
@@ -460,6 +500,8 @@ module.exports = {
   reopenThread,
   deleteThread,
   resyncProjectHistory,
+  blockProject,
+  unblockProject,
   updateProjectStructure,
   promises: {
     flushProjectToMongo: promisify(flushProjectToMongo),
@@ -481,6 +523,8 @@ module.exports = {
     reopenThread: promisify(reopenThread),
     deleteThread: promisify(deleteThread),
     resyncProjectHistory: promisify(resyncProjectHistory),
+    blockProject: promisify(blockProject),
+    unblockProject: promisify(unblockProject),
     updateProjectStructure: promisify(updateProjectStructure),
   },
 }

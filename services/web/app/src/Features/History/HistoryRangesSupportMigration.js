@@ -2,8 +2,12 @@
 
 const { callbackify } = require('util')
 const { ObjectId } = require('mongodb')
+const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const HistoryManager = require('../History/HistoryManager')
+const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
+const DocstoreManager = require('../Docstore/DocstoreManager')
+const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
 const { db } = require('../../infrastructure/mongodb')
 
 /**
@@ -18,6 +22,7 @@ const { db } = require('../../infrastructure/mongodb')
  * @param {"forwards" | "backwards"} [opts.direction]
  * @param {boolean} [opts.force]
  * @param {boolean} [opts.stopOnError]
+ * @param {boolean} [opts.quickOnly]
  */
 async function migrateProjects(opts = {}) {
   const {
@@ -29,6 +34,7 @@ async function migrateProjects(opts = {}) {
     direction = 'forwards',
     force = false,
     stopOnError = false,
+    quickOnly = false,
   } = opts
 
   const clauses = []
@@ -76,11 +82,22 @@ async function migrateProjects(opts = {}) {
     }
 
     const startTimeMs = Date.now()
+    let quickMigrationSuccess
     try {
-      await migrateProject(projectId, direction)
+      quickMigrationSuccess = await quickMigration(projectId, direction)
+      if (!quickMigrationSuccess) {
+        if (quickOnly) {
+          logger.info(
+            { projectId, direction },
+            'Quick migration failed, skipping project'
+          )
+        } else {
+          await migrateProject(projectId, direction)
+        }
+      }
     } catch (err) {
       logger.error(
-        { projectId, direction, projectsProcessed },
+        { err, projectId, direction, projectsProcessed },
         'Failed to migrate history ranges support'
       )
       projectsProcessed += 1
@@ -93,10 +110,71 @@ async function migrateProjects(opts = {}) {
     const elapsedMs = Date.now() - startTimeMs
     projectsProcessed += 1
     logger.info(
-      { projectId, direction, projectsProcessed, elapsedMs },
+      {
+        projectId,
+        direction,
+        projectsProcessed,
+        elapsedMs,
+        quick: quickMigrationSuccess,
+      },
       'Migrated history ranges support'
     )
   }
+}
+
+/**
+ * Attempt a quick migration (without resync)
+ *
+ * @param {string} projectId
+ * @param {"forwards" | "backwards"} direction
+ * @return {Promise<boolean>} whether or not the quick migration was a success
+ */
+async function quickMigration(projectId, direction = 'forwards') {
+  const blockSuccess =
+    await DocumentUpdaterHandler.promises.blockProject(projectId)
+  if (!blockSuccess) {
+    return false
+  }
+
+  let projectHasRanges
+  try {
+    projectHasRanges =
+      await DocstoreManager.promises.projectHasRanges(projectId)
+  } catch (err) {
+    await DocumentUpdaterHandler.promises.unblockProject(projectId)
+    throw err
+  }
+  if (projectHasRanges) {
+    await DocumentUpdaterHandler.promises.unblockProject(projectId)
+    return false
+  }
+
+  try {
+    await ProjectOptionsHandler.promises.setHistoryRangesSupport(
+      projectId,
+      direction === 'forwards'
+    )
+  } catch (err) {
+    await DocumentUpdaterHandler.promises.unblockProject(projectId)
+    await hardResyncProject(projectId)
+    throw err
+  }
+
+  let wasBlocked
+  try {
+    wasBlocked = await DocumentUpdaterHandler.promises.unblockProject(projectId)
+  } catch (err) {
+    await hardResyncProject(projectId)
+    throw err
+  }
+  if (!wasBlocked) {
+    await hardResyncProject(projectId)
+    throw new OError('Tried to unblock project but it was not blocked', {
+      projectId,
+    })
+  }
+
+  return true
 }
 
 /**
@@ -110,6 +188,19 @@ async function migrateProject(projectId, direction = 'forwards') {
   await HistoryManager.promises.resyncProject(projectId, {
     historyRangesMigration: direction,
   })
+}
+
+/**
+ * Hard resync a project
+ *
+ * This is used when something goes wrong with the quick migration after we've
+ * changed the history ranges support flag on a project.
+ *
+ * @param {string} projectId
+ */
+async function hardResyncProject(projectId) {
+  await HistoryManager.promises.flushProject(projectId)
+  await HistoryManager.promises.resyncProject(projectId, { force: true })
 }
 
 module.exports = {
