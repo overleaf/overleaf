@@ -117,7 +117,7 @@ async function projectListPage(req, res, next) {
   })
   const user = await User.findById(
     userId,
-    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate${
+    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck labsProgram signUpDate${
       isSaas ? ' enrollment writefull' : ''
     }`
   )
@@ -462,6 +462,7 @@ async function projectListPage(req, res, next) {
         groupName: subscription.teamName,
       })),
     hasIndividualRecurlySubscription,
+    userRestrictions: Array.from(req.userRestrictions || []),
   })
 }
 

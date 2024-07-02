@@ -12,6 +12,7 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import GeoBanners from './geo-banners'
 import AccessibilitySurveyBanner from './accessibility-survey-banner'
+import LabsAiPromoBanner from './labs-ai-promo-banner'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
@@ -79,6 +80,7 @@ function UserNotifications() {
             setDismissedWritefull(true)
           }}
         />
+        <LabsAiPromoBanner />
       </ul>
     </div>
   )
