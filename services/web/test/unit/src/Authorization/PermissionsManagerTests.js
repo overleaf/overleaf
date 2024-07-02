@@ -399,11 +399,11 @@ describe('PermissionsManager', function () {
       )
     })
   })
-  describe('checkUserPermissions', function () {
+  describe('assertUserPermissions', function () {
     describe('allowed', function () {
       it('should not error when managedUsersEnabled is not enabled for user', async function () {
         const result =
-          await this.PermissionsManager.promises.checkUserPermissions(
+          await this.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['add-secondary-email']
           )
@@ -423,7 +423,7 @@ describe('PermissionsManager', function () {
           ],
         ])
         const result =
-          await this.PermissionsManager.promises.checkUserPermissions(
+          await this.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
@@ -448,7 +448,7 @@ describe('PermissionsManager', function () {
           ],
         ])
         const result =
-          await this.PermissionsManager.promises.checkUserPermissions(
+          await this.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
@@ -460,7 +460,7 @@ describe('PermissionsManager', function () {
       it('should return error when managedUsersEnabled is enabled for user but there is no group policy', async function () {
         this.hooksFire.resolves([[{ managedUsersEnabled: true }]])
         await expect(
-          this.PermissionsManager.promises.checkUserPermissions(
+          this.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['add-secondary-email']
           )
@@ -480,7 +480,7 @@ describe('PermissionsManager', function () {
           ],
         ])
         await expect(
-          this.PermissionsManager.promises.checkUserPermissions(
+          this.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )
@@ -503,7 +503,7 @@ describe('PermissionsManager', function () {
           ],
         ])
         await expect(
-          this.PermissionsManager.promises.checkUserPermissions(
+          this.PermissionsManager.promises.assertUserPermissions(
             { _id: 'user123' },
             ['some-policy-to-check']
           )

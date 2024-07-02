@@ -370,8 +370,9 @@ async function getUserValidationStatus({ user, groupPolicy, subscription }) {
 }
 
 /**
- * Checks if a user has permission for a given set of capabilities
- *  as set out in both their current group subscription, and any institutions they are affiliated with
+ * asserts that a user has permission for a given set of capabilities
+ *    as set out in both their current group subscription, and any institutions they are affiliated with,
+ *    throwing an ForbiddenError if they do not
  *
  * @param {Object} user - The user object to retrieve the group policy for.
  *   Only the user's _id is required
@@ -379,11 +380,31 @@ async function getUserValidationStatus({ user, groupPolicy, subscription }) {
  * @returns {Promise<void>}
  * @throws {Error} If the user does not have permission
  */
+async function assertUserPermissions(user, requiredCapabilities) {
+  const hasAllPermissions = await checkUserPermissions(
+    user,
+    requiredCapabilities
+  )
+  if (!hasAllPermissions) {
+    throw new ForbiddenError(
+      `user does not have one or more permissions within ${requiredCapabilities}`
+    )
+  }
+}
+
+/**
+ * Checks if a user has permission for a given set of capabilities
+ *  as set out in both their current group subscription, and any institutions they are affiliated with
+ *
+ * @param {Object} user - The user object to retrieve the group policy for.
+ *   Only the user's _id is required
+ * @param {Array} capabilities - The list of the capabilities to check permission for.
+ * @returns {Promise<Boolean>} - true if the user has all permissions, false if not
+ */
 async function checkUserPermissions(user, requiredCapabilities) {
   let results = await Modules.promises.hooks.fire('getGroupPolicyForUser', user)
   results = results.flat()
-
-  if (!results?.length) return
+  if (!results?.length) return true
 
   // get the combined group policy applying to the user
   const groupPolicies = results.map(result => result.groupPolicy)
@@ -391,11 +412,30 @@ async function checkUserPermissions(user, requiredCapabilities) {
   for (const requiredCapability of requiredCapabilities) {
     // if the user has the permission, continue
     if (!hasPermission(combinedGroupPolicy, requiredCapability)) {
-      throw new ForbiddenError(
-        `user does not have permission for ${requiredCapability}`
-      )
+      return false
     }
   }
+  return true
+}
+
+/**
+ * checks if all collaborators of a given project have the specified capability, including the owner
+ *
+ * @async
+ * @function checkCollaboratorsPermission
+ * @param {string} userList - An array of all user to check permissions for
+ * @param {Array} capabilities - The list of the capabilities to check permission for.
+ * @returns {Promise<boolean>} - A promise that resolves to `true` if all collaborators have the specified capability, otherwise `false`.
+ */
+async function checkUserListPermissions(userList, capabilities) {
+  for (const user of userList) {
+    // mimic a user object with only id, since we need it to fetch permissions
+    const allowed = await checkUserPermissions(user, capabilities)
+    if (!allowed) {
+      return false
+    }
+  }
+  return true
 }
 
 module.exports = {
@@ -409,5 +449,10 @@ module.exports = {
   getUserCapabilities,
   getUserRestrictions,
   getUserValidationStatus: callbackify(getUserValidationStatus),
-  promises: { checkUserPermissions, getUserValidationStatus },
+  checkCollaboratorsPermission: callbackify(checkUserListPermissions),
+  promises: {
+    assertUserPermissions,
+    getUserValidationStatus,
+    checkUserListPermissions,
+  },
 }

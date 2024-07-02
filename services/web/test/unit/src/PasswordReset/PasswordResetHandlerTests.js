@@ -47,7 +47,7 @@ describe('PasswordResetHandler', function () {
         '@overleaf/settings': this.settings,
         '../Authorization/PermissionsManager': (this.PermissionsManager = {
           promises: {
-            checkUserPermissions: sinon.stub(),
+            assertUserPermissions: sinon.stub(),
           },
         }),
       },
@@ -537,7 +537,7 @@ describe('PasswordResetHandler', function () {
     it('should returns errors from user permissions', async function () {
       let error
       const err = new Error('nope')
-      this.PermissionsManager.promises.checkUserPermissions.rejects(err)
+      this.PermissionsManager.promises.assertUserPermissions.rejects(err)
       try {
         await this.PasswordResetHandler.promises.getUserForPasswordResetToken(
           'abc123'

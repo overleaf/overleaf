@@ -5,7 +5,7 @@ const {
   combineGroupPolicies,
   combineAllowedProperties,
 } = require('./PermissionsManager')
-const { checkUserPermissions } = require('./PermissionsManager').promises
+const { assertUserPermissions } = require('./PermissionsManager').promises
 const Modules = require('../../infrastructure/Modules')
 const { expressify } = require('@overleaf/promise-utils')
 
@@ -84,7 +84,7 @@ function requirePermission(...requiredCapabilities) {
       return next(new Error('no user'))
     }
     try {
-      await checkUserPermissions(req.user, requiredCapabilities)
+      await assertUserPermissions(req.user, requiredCapabilities)
       next()
     } catch (error) {
       next(error)
