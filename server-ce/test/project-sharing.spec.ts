@@ -53,7 +53,7 @@ describe('Project Sharing', function () {
 
   function shareProjectByEmailAndAcceptInvite(
     email: string,
-    level: 'Read Only' | 'Can Edit'
+    level: 'Read Only' | 'Can edit'
   ) {
     login('user@example.com')
     cy.visit('/project')
@@ -63,7 +63,7 @@ describe('Project Sharing', function () {
       cy.get('input').type(`${email},`)
       cy.get('input')
         .parents('form')
-        .within(() => cy.findByText('Can Edit').parent().select(level))
+        .within(() => cy.findByText('Can edit').parent().select(level))
       cy.findByText('Share').click({ force: true })
     })
 
@@ -194,7 +194,7 @@ describe('Project Sharing', function () {
     ensureUserExists({ email })
 
     beforeWithReRunOnTestRetry(function () {
-      shareProjectByEmailAndAcceptInvite(email, 'Can Edit')
+      shareProjectByEmailAndAcceptInvite(email, 'Can edit')
     })
 
     it('should grant the collaborator write access', () => {
