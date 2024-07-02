@@ -114,8 +114,10 @@ export default function TagsList() {
             onClick={() => selectTag(UNCATEGORIZED_KEY)}
             bsStyle={null}
           >
-            <span className="name">{t('uncategorized')}</span>
-            <span className="subdued"> ({untaggedProjectsCount})</span>
+            <span className="name">
+              {t('uncategorized')}{' '}
+              <span className="subdued">({untaggedProjectsCount})</span>
+            </span>
           </Button>
         </li>
       )}
