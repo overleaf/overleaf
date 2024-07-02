@@ -457,7 +457,7 @@ describe('<ShareProjectModal/>', function () {
 
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
 
-    const select = screen.getByDisplayValue('Read Only')
+    const select = screen.getByDisplayValue('Read only')
     await fireEvent.change(select, { target: { value: 'readAndWrite' } })
 
     const changeButton = screen.getByRole('button', { name: 'Change' })
@@ -534,7 +534,7 @@ describe('<ShareProjectModal/>', function () {
 
     expect(screen.queryAllByText('member-viewer@example.com')).to.have.length(1)
 
-    const select = screen.getByDisplayValue('Read Only')
+    const select = screen.getByDisplayValue('Read only')
     fireEvent.change(select, { target: { value: 'owner' } })
 
     const changeButton = screen.getByRole('button', { name: 'Change' })

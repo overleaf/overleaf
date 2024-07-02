@@ -53,7 +53,7 @@ describe('Project Sharing', function () {
 
   function shareProjectByEmailAndAcceptInvite(
     email: string,
-    level: 'Read Only' | 'Can edit'
+    level: 'Read only' | 'Can edit'
   ) {
     login('user@example.com')
     cy.visit('/project')
@@ -177,7 +177,7 @@ describe('Project Sharing', function () {
     ensureUserExists({ email })
 
     beforeWithReRunOnTestRetry(function () {
-      shareProjectByEmailAndAcceptInvite(email, 'Read Only')
+      shareProjectByEmailAndAcceptInvite(email, 'Read only')
     })
 
     it('should grant the collaborator read access', () => {
