@@ -34,7 +34,7 @@ Metrics.leaked_sockets.monitor(logger)
 // We may have fairly large JSON bodies when receiving large Changes. Clients
 // may have to handle 413 status codes and try creating files instead of sending
 // text content in changes.
-app.use(bodyParser.json({ limit: '4MB' }))
+app.use(bodyParser.json({ limit: '6MB' }))
 app.use(
   bodyParser.urlencoded({
     extended: false,
