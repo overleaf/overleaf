@@ -79,6 +79,7 @@ import {
   BottomRuleCtrlSeq,
   TableEnvName,
   MultiColumnCtrlSeq,
+  ParBoxCtrlSeq,
   // Marker for end of argument lists
   endOfArguments,
   hasMoreArguments,
@@ -575,6 +576,7 @@ const otherKnowncommands = {
   '\\midrule': MidRuleCtrlSeq,
   '\\bottomrule': BottomRuleCtrlSeq,
   '\\multicolumn': MultiColumnCtrlSeq,
+  '\\parbox': ParBoxCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

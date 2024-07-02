@@ -93,7 +93,8 @@
     TopRuleCtrlSeq,
     MidRuleCtrlSeq,
     BottomRuleCtrlSeq,
-    MultiColumnCtrlSeq
+    MultiColumnCtrlSeq,
+    ParBoxCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -347,6 +348,12 @@ KnownCommand<ArgumentType> {
     } |
     MathTextCommand {
         MathTextCtrlSeq optionalWhitespace? "*"? TextArgument
+    } |
+    ParBoxCommand {
+        ParBoxCtrlSeq
+            (optionalWhitespace? OptionalArgument)*
+            ShortTextArgument
+            optionalWhitespace? TextArgument
     }
 }
 
