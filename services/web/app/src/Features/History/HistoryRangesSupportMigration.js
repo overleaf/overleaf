@@ -38,6 +38,10 @@ async function migrateProjects(opts = {}) {
   } = opts
 
   const clauses = []
+
+  // skip projects that don't have full project history
+  clauses.push({ 'overleaf.history': { $exists: true } })
+
   if (projectIds != null) {
     clauses.push({ _id: { $in: projectIds.map(id => new ObjectId(id)) } })
   }
