@@ -43,6 +43,7 @@ describe('CollaboratorsInviteHandler', function () {
     this.NotificationsBuilder = { promises: {} }
     this.tokenHmac = 'jkhajkefhaekjfhkfg'
     this.CollaboratorsInviteHelper = {
+      generateToken: sinon.stub().returns(this.Crypto.randomBytes(24)),
       hashInviteToken: sinon.stub().returns(this.tokenHmac),
     }
 
@@ -80,6 +81,16 @@ describe('CollaboratorsInviteHandler', function () {
       email: this.email,
       token: this.token,
       tokenHmac: this.tokenHmac,
+      sendingUserId: this.sendingUserId,
+      projectId: this.projectId,
+      privileges: this.privileges,
+      createdAt: new Date(),
+    }
+    this.newFakeInvite = {
+      _id: new ObjectId(),
+      email: this.email,
+      token: 'new-token',
+      tokenHmac: 'new-hmac-token',
       sendingUserId: this.sendingUserId,
       projectId: this.projectId,
       privileges: this.privileges,
@@ -158,6 +169,7 @@ describe('CollaboratorsInviteHandler', function () {
         { _id: new ObjectId(), two: 2 },
       ]
       this.ProjectInvite.find.returns({
+        select: sinon.stub().returnsThis(),
         exec: sinon.stub().resolves(this.fakeInvites),
       })
       this.call = async () => {
@@ -188,6 +200,7 @@ describe('CollaboratorsInviteHandler', function () {
     describe('when ProjectInvite.find produces an error', function () {
       beforeEach(function () {
         this.ProjectInvite.find.returns({
+          select: sinon.stub().returnsThis(),
           exec: sinon.stub().rejects(new Error('woops')),
         })
       })
@@ -201,6 +214,14 @@ describe('CollaboratorsInviteHandler', function () {
   describe('inviteToProject', function () {
     beforeEach(function () {
       this.ProjectInvite.prototype.save.callsFake(async function () {
+        Object.defineProperty(this, 'toObject', {
+          value: function () {
+            return this
+          },
+          writable: true,
+          configurable: true,
+          enumerable: false,
+        })
         return this
       })
       this.CollaboratorsInviteHandler.promises._sendMessages = sinon
@@ -225,8 +246,6 @@ describe('CollaboratorsInviteHandler', function () {
         expect(invite).to.have.all.keys([
           '_id',
           'email',
-          'token',
-          'tokenHmac',
           'sendingUserId',
           'projectId',
           'privileges',
@@ -392,16 +411,16 @@ describe('CollaboratorsInviteHandler', function () {
     })
   })
 
-  describe('resendInvite', function () {
+  describe('generateNewInvite', function () {
     beforeEach(function () {
-      this.ProjectInvite.findOne.returns({
-        exec: sinon.stub().resolves(this.fakeInvite),
-      })
-      this.CollaboratorsInviteHandler.promises._sendMessages = sinon
+      this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
         .stub()
-        .resolves()
+        .resolves(this.fakeInvite)
+      this.CollaboratorsInviteHandler.promises.inviteToProject = sinon
+        .stub()
+        .resolves(this.newFakeInvite)
       this.call = async () => {
-        return await this.CollaboratorsInviteHandler.promises.resendInvite(
+        return await this.CollaboratorsInviteHandler.promises.generateNewInvite(
           this.projectId,
           this.sendingUser,
           this.inviteId
@@ -410,44 +429,51 @@ describe('CollaboratorsInviteHandler', function () {
     })
 
     describe('when all goes well', function () {
-      it('should call ProjectInvite.findOne', async function () {
+      it('should call revokeInvite', async function () {
         await this.call()
-        this.ProjectInvite.findOne.callCount.should.equal(1)
-        this.ProjectInvite.findOne
-          .calledWith({ _id: this.inviteId, projectId: this.projectId })
+        this.CollaboratorsInviteHandler.promises.revokeInvite.callCount.should.equal(
+          1
+        )
+        this.CollaboratorsInviteHandler.promises.revokeInvite
+          .calledWith(this.projectId, this.inviteId)
           .should.equal(true)
       })
 
-      it('should have called _sendMessages', async function () {
+      it('should have called inviteToProject', async function () {
         await this.call()
-        this.CollaboratorsInviteHandler.promises._sendMessages.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           1
         )
-        this.CollaboratorsInviteHandler.promises._sendMessages
-          .calledWith(this.projectId, this.sendingUser, this.fakeInvite)
+        this.CollaboratorsInviteHandler.promises.inviteToProject
+          .calledWith(
+            this.projectId,
+            this.sendingUser,
+            this.fakeInvite.email,
+            this.fakeInvite.privileges
+          )
           .should.equal(true)
       })
 
       it('should return the invite', async function () {
         const invite = await this.call()
-        expect(invite).to.deep.equal(this.fakeInvite)
+        expect(invite).to.deep.equal(this.newFakeInvite)
       })
     })
 
-    describe('when findOne produces an error', function () {
+    describe('when revokeInvite produces an error', function () {
       beforeEach(function () {
-        this.ProjectInvite.findOne.returns({
-          exec: sinon.stub().rejects(new Error('woops')),
-        })
+        this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
+          .stub()
+          .rejects(new Error('woops'))
       })
 
       it('should produce an error', async function () {
         await expect(this.call()).to.be.rejectedWith(Error)
       })
 
-      it('should not have called _sendMessages', async function () {
+      it('should not have called inviteToProject', async function () {
         await expect(this.call()).to.be.rejected
-        this.CollaboratorsInviteHandler.promises._sendMessages.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })
@@ -455,14 +481,14 @@ describe('CollaboratorsInviteHandler', function () {
 
     describe('when findOne does not find an invite', function () {
       beforeEach(function () {
-        this.ProjectInvite.findOne.returns({
-          exec: sinon.stub().resolves(null),
-        })
+        this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
+          .stub()
+          .resolves(null)
       })
 
-      it('should not have called _sendMessages', async function () {
+      it('should not have called inviteToProject', async function () {
         await this.call()
-        this.CollaboratorsInviteHandler.promises._sendMessages.callCount.should.equal(
+        this.CollaboratorsInviteHandler.promises.inviteToProject.callCount.should.equal(
           0
         )
       })

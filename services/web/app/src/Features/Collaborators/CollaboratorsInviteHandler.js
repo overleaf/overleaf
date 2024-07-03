@@ -1,4 +1,4 @@
-const { callbackify, promisify } = require('util')
+const { callbackify } = require('util')
 const { ProjectInvite } = require('../../models/ProjectInvite')
 const logger = require('@overleaf/logger')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
@@ -6,16 +6,16 @@ const CollaboratorsHandler = require('./CollaboratorsHandler')
 const CollaboratorsInviteHelper = require('./CollaboratorsInviteHelper')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
-const Crypto = require('crypto')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
-
-const randomBytes = promisify(Crypto.randomBytes)
+const _ = require('lodash')
 
 const CollaboratorsInviteHandler = {
   async getAllInvites(projectId) {
     logger.debug({ projectId }, 'fetching invites for project')
-    const invites = await ProjectInvite.find({ projectId }).exec()
+    const invites = await ProjectInvite.find({ projectId })
+      .select('_id email sendingUserId projectId privileges createdAt expires')
+      .exec()
     logger.debug(
       { projectId, count: invites.length },
       'found invites for project'
@@ -92,25 +92,31 @@ const CollaboratorsInviteHandler = {
       { projectId, sendingUserId: sendingUser._id, email, privileges },
       'adding invite'
     )
-    const buffer = await randomBytes(24)
-    const token = buffer.toString('hex')
+    const token = CollaboratorsInviteHelper.generateToken()
     const tokenHmac = CollaboratorsInviteHelper.hashInviteToken(token)
     let invite = new ProjectInvite({
       email,
-      token,
       tokenHmac,
       sendingUserId: sendingUser._id,
       projectId,
       privileges,
     })
     invite = await invite.save()
+    invite = _.pick(invite.toObject(), [
+      'email',
+      'sendingUserId',
+      'projectId',
+      'privileges',
+      '_id',
+      'createdAt',
+      'expires',
+    ])
 
     // Send email and notification in background
-    CollaboratorsInviteHandler._sendMessages(
-      projectId,
-      sendingUser,
-      invite
-    ).catch(err => {
+    CollaboratorsInviteHandler._sendMessages(projectId, sendingUser, {
+      ...invite,
+      token,
+    }).catch(err => {
       logger.err({ err, projectId, email }, 'error sending messages for invite')
     })
 
@@ -134,25 +140,24 @@ const CollaboratorsInviteHandler = {
     return invite
   },
 
-  async resendInvite(projectId, sendingUser, inviteId) {
-    logger.debug({ projectId, inviteId }, 'resending invite email')
-    const invite = await ProjectInvite.findOne({
-      _id: inviteId,
-      projectId,
-    }).exec()
+  async generateNewInvite(projectId, sendingUser, inviteId) {
+    logger.debug({ projectId, inviteId }, 'generating new invite email')
+    const invite = await this.revokeInvite(projectId, inviteId)
 
     if (invite == null) {
-      logger.warn({ projectId, inviteId }, 'no invite found, nothing to resend')
+      logger.warn(
+        { projectId, inviteId },
+        'no invite found, nothing to generate'
+      )
       return null
     }
 
-    await CollaboratorsInviteHandler._sendMessages(
+    return await this.inviteToProject(
       projectId,
       sendingUser,
-      invite
+      invite.email,
+      invite.privileges
     )
-
-    return invite
   },
 
   async getInviteByToken(projectId, tokenString) {
@@ -199,7 +204,7 @@ module.exports = {
   getInviteCount: callbackify(CollaboratorsInviteHandler.getInviteCount),
   inviteToProject: callbackify(CollaboratorsInviteHandler.inviteToProject),
   revokeInvite: callbackify(CollaboratorsInviteHandler.revokeInvite),
-  resendInvite: callbackify(CollaboratorsInviteHandler.resendInvite),
+  generateNewInvite: callbackify(CollaboratorsInviteHandler.generateNewInvite),
   getInviteByToken: callbackify(CollaboratorsInviteHandler.getInviteByToken),
   acceptInvite: callbackify(CollaboratorsInviteHandler.acceptInvite),
   _trySendInviteNotification: callbackify(

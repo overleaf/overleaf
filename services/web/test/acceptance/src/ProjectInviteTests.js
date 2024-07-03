@@ -3,8 +3,12 @@ const Async = require('async')
 const User = require('./helpers/User')
 const settings = require('@overleaf/settings')
 const CollaboratorsEmailHandler = require('../../../app/src/Features/Collaborators/CollaboratorsEmailHandler')
+const CollaboratorsInviteHelper = require('../../../app/src/Features/Collaborators/CollaboratorsInviteHelper')
 const Features = require('../../../app/src/infrastructure/Features')
 const cheerio = require('cheerio')
+const sinon = require('sinon')
+
+let generateTokenSpy
 
 const createInvite = (sendingUser, projectId, email, callback) => {
   sendingUser.getCsrfToken(err => {
@@ -55,6 +59,8 @@ const createProjectAndInvite = (owner, projectName, email, callback) => {
       if (err) {
         return callback(err)
       }
+      // attach the token to the invite
+      invite.token = generateTokenSpy.getCall(0).returnValue
       const link = CollaboratorsEmailHandler._buildInviteUrl(project, invite)
       callback(null, project, invite, link)
     })
@@ -316,6 +322,9 @@ describe('ProjectInviteTests', function () {
     this.user = new User()
     this.site_admin = new User({ email: `admin+${Math.random()}@example.com` })
     this.email = `smoketestuser+${Math.random()}@example.com`
+
+    generateTokenSpy = sinon.spy(CollaboratorsInviteHelper, 'generateToken')
+
     Async.series(
       [
         cb => this.sendingUser.login(cb),
@@ -338,6 +347,10 @@ describe('ProjectInviteTests', function () {
       ],
       done
     )
+  })
+
+  afterEach(function () {
+    generateTokenSpy.restore()
   })
 
   describe('creating invites', function () {

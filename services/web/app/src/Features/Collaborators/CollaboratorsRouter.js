@@ -123,7 +123,7 @@ module.exports = {
       }),
       AuthenticationController.requireLogin(),
       AuthorizationMiddleware.ensureUserCanAdminProject,
-      CollaboratorsInviteController.resendInvite
+      CollaboratorsInviteController.generateNewInvite
     )
 
     webRouter.get(

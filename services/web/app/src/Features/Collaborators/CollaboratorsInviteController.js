@@ -220,7 +220,7 @@ const CollaboratorsInviteController = {
     res.sendStatus(204)
   },
 
-  async resendInvite(req, res) {
+  async generateNewInvite(req, res) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
     const user = SessionManager.getSessionUser(req.session)
@@ -234,7 +234,7 @@ const CollaboratorsInviteController = {
       return res.sendStatus(429)
     }
 
-    const invite = await CollaboratorsInviteHandler.promises.resendInvite(
+    const invite = await CollaboratorsInviteHandler.promises.generateNewInvite(
       projectId,
       sendingUser,
       inviteId
@@ -253,7 +253,7 @@ const CollaboratorsInviteController = {
       )
     }
 
-    res.sendStatus(201)
+    res.status(201).json({ newInviteId: invite._id })
   },
 
   async viewInvite(req, res) {
@@ -394,7 +394,9 @@ module.exports = {
   getAllInvites: expressify(CollaboratorsInviteController.getAllInvites),
   inviteToProject: expressify(CollaboratorsInviteController.inviteToProject),
   revokeInvite: expressify(CollaboratorsInviteController.revokeInvite),
-  resendInvite: expressify(CollaboratorsInviteController.resendInvite),
+  generateNewInvite: expressify(
+    CollaboratorsInviteController.generateNewInvite
+  ),
   viewInvite: expressify(CollaboratorsInviteController.viewInvite),
   acceptInvite: expressify(CollaboratorsInviteController.acceptInvite),
   _checkShouldInviteEmail: callbackify(
