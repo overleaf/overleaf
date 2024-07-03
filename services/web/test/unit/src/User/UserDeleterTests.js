@@ -142,6 +142,7 @@ describe('UserDeleter', function () {
     this.DeletedUserMock.restore()
     this.UserMock.restore()
     this.mockedUser.restore()
+    tk.reset()
   })
 
   describe('deleteUser', function () {
