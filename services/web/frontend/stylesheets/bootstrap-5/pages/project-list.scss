@@ -129,11 +129,14 @@
         top: 100% !important;
         left: var(--spacing-06) !important;
         right: var(--spacing-06) !important;
+        margin-top: var(--spacing-04);
+        margin-left: var(--spacing-06);
+        margin-right: var(--spacing-06);
 
         @include media-breakpoint-down(lg) {
           left: 0 !important;
           right: 0 !important;
-          margin-top: calc(var(--spacing-05) * -1);
+          margin-top: calc((var(--spacing-05) - var(--spacing-04)) * -1);
         }
       }
 
