@@ -23,6 +23,8 @@ switch (process.argv.pop()) {
           console.log('rm -rf node_modules/.cache')
           // uninstall webpack and frontend dependencies
           console.log('npm install --omit=dev')
+          // precompile pug
+          console.log('npm run precompile-pug')
           break
         default:
           console.log(`echo ${service.name} does not require a compilation`)

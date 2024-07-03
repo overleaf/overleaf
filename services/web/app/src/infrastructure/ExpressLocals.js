@@ -314,7 +314,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
   webRouter.use(function (req, res, next) {
     if (Settings.reloadModuleViewsOnEachRequest) {
-      Modules.loadViewIncludes()
+      Modules.loadViewIncludes(req.app)
     }
     res.locals.moduleIncludes = Modules.moduleIncludes
     res.locals.moduleIncludesAvailable = Modules.moduleIncludesAvailable

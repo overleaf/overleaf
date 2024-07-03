@@ -43,6 +43,7 @@
     "routes": "bin/routes",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "precompile-pug": "node app/src/infrastructure/Views",
     "local:nodemon": "set -a;. ../../config/dev-environment.env;. ./docker-compose.common.env;. ../../config/local-dev.env;. ./local-dev.env;. ../../config/local.env; set +a; echo $OVERLEAF_CONFIG; WEB_PORT=13000 LISTEN_ADDRESS=0.0.0.0 npm run nodemon",
     "local:webpack": "set -a;. ../../config/dev-environment.env;. ./docker-compose.common.env;. ../../config/local-dev.env;. ./local-dev.env;. ../../config/local.env; set +a; PORT=13808 OVERLEAF_CONFIG=$(pwd)/config/settings.webpack.js npm run webpack",
     "local:test:acceptance:run_dir": "set -a;. $(pwd)/docker-compose.common.env;. $(pwd)/local-test.env; set +a; npm run test:acceptance:run_dir",

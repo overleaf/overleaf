@@ -20,6 +20,7 @@ RUN mkdir -p /overleaf/services/web/data/dumpFolder \
     &&  chmod -R 0755 /overleaf/services/web/data \
     &&  chown -R node:node /overleaf/services/web/data
 
+
 # the deps image is used for caching npm ci
 FROM base as deps-prod
 
@@ -37,13 +38,6 @@ ENV CYPRESS_INSTALL_BINARY=0
 COPY tsconfig.backend.json /overleaf/
 RUN cd /overleaf && npm install
 
-# the web image with only production dependencies but no webpack production build, for development
-FROM deps-prod as app-only
-
-COPY services/web /overleaf/services/web
-USER node
-
-CMD ["node", "--expose-gc", "app.js"]
 
 # the dev is suitable for running tests
 FROM deps as dev
@@ -60,22 +54,33 @@ USER node
 
 # the webpack image has deps+src+webpack artifacts
 FROM dev as webpack
-
 USER root
 RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 
 
-# the final production image without webpack source maps
+# intermediate image for removing source maps ahead of copying into final production image
 FROM webpack as webpack-no-sourcemaps
 RUN find /overleaf/services/web/public -name '*.js.map' -delete
 
-FROM deps-prod as app
 
+# copy source code and precompile pug images
+FROM deps-prod as pug
+COPY services/web /overleaf/services/web
+# Omit Server Pro/CE specific scripts from SaaS image
+RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
+RUN OVERLEAF_CONFIG=/overleaf/services/web/config/settings.overrides.saas.js npm run precompile-pug
+
+
+# the web image with only production dependencies but no webpack production build, for development
+FROM pug as app-only
+USER node
+CMD ["node", "--expose-gc", "app.js"]
+
+
+# the final production image, with webpack production build but without source maps
+FROM pug as app
 ARG SENTRY_RELEASE
 ENV SENTRY_RELEASE=$SENTRY_RELEASE
-COPY services/web /overleaf/services/web
 COPY --from=webpack-no-sourcemaps /overleaf/services/web/public /overleaf/services/web/public
-RUN rm /overleaf/services/web/modules/server-ce-scripts -rf
 USER node
-
 CMD ["node", "--expose-gc", "app.js"]

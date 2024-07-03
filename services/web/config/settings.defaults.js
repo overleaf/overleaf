@@ -900,6 +900,7 @@ module.exports = {
     'server-ce-scripts',
     'user-activate',
   ],
+  viewIncludes: {},
 
   csp: {
     enabled: process.env.CSP_ENABLED === 'true',

@@ -1,9 +1,9 @@
 const fs = require('fs')
 const Path = require('path')
-const pug = require('pug')
 const async = require('async')
 const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
+const Views = require('./Views')
 
 const MODULE_BASE_PATH = Path.join(__dirname, '/../../../modules')
 
@@ -35,6 +35,11 @@ function loadModules() {
     )
     loadedModule.name = moduleName
     _modules.push(loadedModule)
+    if (loadedModule.viewIncludes) {
+      throw new Error(
+        `${moduleName}: module.viewIncludes moved into Settings.viewIncludes`
+      )
+    }
   }
   _modulesLoaded = true
   attachHooks()
@@ -64,28 +69,7 @@ function applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter) {
 }
 
 function loadViewIncludes(app) {
-  _viewIncludes = {}
-  for (const module of modules()) {
-    const object = module.viewIncludes || {}
-    for (const view in object) {
-      const partial = object[view]
-      if (!_viewIncludes[view]) {
-        _viewIncludes[view] = []
-      }
-      const filePath = Path.join(
-        MODULE_BASE_PATH,
-        module.name,
-        'app/views',
-        partial + '.pug'
-      )
-      _viewIncludes[view].push(
-        pug.compileFile(filePath, {
-          doctype: 'html',
-          compileDebug: Settings.debugPugTemplates,
-        })
-      )
-    }
-  }
+  _viewIncludes = Views.compileViewIncludes(app)
 }
 
 function registerMiddleware(appOrRouter, middlewareName, options) {

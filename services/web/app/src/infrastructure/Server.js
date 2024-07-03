@@ -129,7 +129,18 @@ webRouter.use(
 )
 app.set('views', Path.join(__dirname, '/../../views'))
 app.set('view engine', 'pug')
-Modules.loadViewIncludes(app)
+
+if (Settings.enabledServices.includes('web')) {
+  if (app.get('env') !== 'development') {
+    logger.debug('enabling view cache for production or acceptance tests')
+    app.enable('view cache')
+  }
+  if (Settings.precompilePugTemplatesAtBootTime) {
+    logger.debug('precompiling views for web in production environment')
+    Views.precompileViews(app)
+  }
+  Modules.loadViewIncludes(app)
+}
 
 app.use(metrics.http.monitor(logger))
 
@@ -334,16 +345,6 @@ if (Settings.enabledServices.includes('api')) {
 
 if (Settings.enabledServices.includes('web')) {
   logger.debug('providing web router')
-
-  if (Settings.precompilePugTemplatesAtBootTime) {
-    logger.debug('precompiling views for web in production environment')
-    Views.precompileViews(app)
-  }
-  if (app.get('env') === 'test') {
-    logger.debug('enabling view cache for acceptance tests')
-    app.enable('view cache')
-  }
-
   app.use(publicApiRouter) // public API goes with web router for public access
   app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)

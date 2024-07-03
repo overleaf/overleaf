@@ -492,10 +492,20 @@ build_webpack_once:
 		--file Dockerfile \
 		../..
 
+build_pug:
+	docker build \
+		--build-arg SENTRY_RELEASE \
+		--cache-from $(IMAGE_CI)-dev \
+		--tag $(IMAGE_CI)-pug \
+		--target pug \
+		--file Dockerfile \
+		../..
+
 build:
 	docker build \
 		--build-arg SENTRY_RELEASE \
 		--cache-from $(IMAGE_CI)-webpack \
+		--cache-from $(IMAGE_CI)-pug \
 		--cache-from $(IMAGE_REPO_FINAL) \
 		--tag $(IMAGE_REPO_FINAL) \
 		--target app \

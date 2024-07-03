@@ -72,6 +72,9 @@ config/*.js
 
 modules/**/Makefile
 
+# Precompiled pug files
+**/app/views/**/*.js
+
 # Sentry secrets file (injected by CI)
 .sentryclirc
 
