@@ -51,8 +51,13 @@ const overrides = {
 
   saml: undefined,
 
-  // Disable contentful module.
-  contentful: undefined,
+  contentful: {
+    spaceId: 'a',
+    deliveryToken: 'b',
+    previewToken: 'c',
+    deliveryApiHost: 'cdn.contentful.com',
+    previewApiHost: 'preview.contentful.com',
+  },
 
   twoFactorAuthentication: {
     accessTokenEncryptorOptions: {
