@@ -14,6 +14,7 @@ import { sendMB } from '../../../../infrastructure/event-tracking'
 import { getJSON } from '../../../../infrastructure/fetch-json'
 import useAbortController from '@/shared/hooks/use-abort-controller'
 import { debugConsole } from '@/utils/debugging'
+import getMeta from '@/utils/meta'
 
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
@@ -273,7 +274,7 @@ function AccessToken({ token, tokenHashPrefix, path, tooltipId }) {
 
   let origin = window.location.origin
   if (isAdmin) {
-    origin = window.ExposedSettings.siteUrl
+    origin = getMeta('ol-ExposedSettings').siteUrl
   }
   const link = `${origin}${path}${token}${
     tokenHashPrefix ? `#${tokenHashPrefix}` : ''
