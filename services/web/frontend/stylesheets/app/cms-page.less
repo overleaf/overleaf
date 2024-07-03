@@ -398,6 +398,23 @@
   bottom: 1px;
 }
 
+// `Layout | Grid` display options
+.row-equal-column-heights {
+  @media (min-width: @screen-sm-min) {
+    display: flex;
+    flex-flow: row wrap;
+
+    div[class*='col-'] {
+      display: flex;
+      flex-direction: column;
+      .card,
+      .no-card {
+        height: 100%;
+      }
+    }
+  }
+}
+
 .vertically-center-col {
   // remove margin to better vertically align
   // some elements need to be nested within a container, and others are directly within .no-card/.card
@@ -615,6 +632,16 @@
       .col-xs-12:not(:first-child) {
         padding-top: @padding-xxl;
       }
+    }
+  }
+}
+
+.bottom-align-last-entry {
+  display: flex;
+  flex-direction: column;
+  * {
+    &:last-child {
+      margin-top: auto;
     }
   }
 }
