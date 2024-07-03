@@ -20,10 +20,10 @@ block content
 								form.form(
 									data-ol-regular-form
 									method="POST",
-									action="/project/"+invite.projectId+"/invite/token/"+invite.token+"/accept"
+									action="/project/"+invite.projectId+"/invite/token/"+token+"/accept"
 								)
 									input(name='_csrf', type='hidden', value=csrfToken)
-									input(name='token', type='hidden', value=invite.token)
+									input(name='token', type='hidden', value=token)
 									.form-group.text-center
 										button.btn.btn-lg.btn-primary(
 											type="submit"

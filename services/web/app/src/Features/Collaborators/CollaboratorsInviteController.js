@@ -328,6 +328,7 @@ const CollaboratorsInviteController = {
     // finally render the invite
     res.render('project/invite/show', {
       invite,
+      token,
       project,
       owner,
       title: 'Project Invite',
