@@ -216,6 +216,9 @@ const ButtonsTemplate = (args, { globals: { theme } }) => {
                 <Button className="btn-bg-ghost" bsStyle={null}>
                   Background (bg) Ghost
                 </Button>
+                <Button className="btn-premium" bsStyle={null}>
+                  Premium
+                </Button>
               </div>
 
               <h3>Sizes</h3>
