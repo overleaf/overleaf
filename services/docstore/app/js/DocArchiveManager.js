@@ -8,9 +8,7 @@ const { ReadableString } = require('@overleaf/stream-utils')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')
 const pMap = require('p-map')
-
-const Bson = require('bson')
-const BSON = new Bson()
+const { BSON } = require('bson')
 
 const PARALLEL_JOBS = Settings.parallelArchiveJobs
 const UN_ARCHIVE_BATCH_SIZE = Settings.unArchiveBatchSize
