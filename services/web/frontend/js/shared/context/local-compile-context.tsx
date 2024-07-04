@@ -355,7 +355,10 @@ export const LocalCompileProvider: FC = ({ children }) => {
 
   // compare log entry counts with the previous compile, and record actions between compiles
   // these are refs rather than state so they don't trigger the effect to run
-  const previousRuleCountsRef = useRef<Record<string, number> | null>(null)
+  const previousRuleCountsRef = useRef<{
+    ruleCounts: Record<string, number>
+    rootDocId: string
+  } | null>(null)
   const recordedActionsRef = useRef<Record<string, boolean>>({})
   const recordAction = useCallback((action: string) => {
     recordedActionsRef.current[action] = true
@@ -431,18 +434,23 @@ export const LocalCompileProvider: FC = ({ children }) => {
                   result.logEntries.all
                 ) as Record<string, number>
 
-                const previousRuleCounts = previousRuleCountsRef.current
-                previousRuleCountsRef.current = ruleCounts
+                const rootDocId = data.rootDocId || compiler.projectRootDocId
 
-                const ruleDeltas = previousRuleCounts
-                  ? buildRuleDeltas(ruleCounts, previousRuleCounts)
-                  : {}
+                const previousRuleCounts = previousRuleCountsRef.current
+                previousRuleCountsRef.current = { ruleCounts, rootDocId }
+
+                const ruleDeltas =
+                  previousRuleCounts &&
+                  previousRuleCounts.rootDocId === rootDocId
+                    ? buildRuleDeltas(ruleCounts, previousRuleCounts.ruleCounts)
+                    : {}
 
                 sendMB('compile-log-entries', {
                   status: data.status,
                   stopOnFirstError: data.options.stopOnFirstError,
                   isAutoCompileOnLoad: !!data.options.isAutoCompileOnLoad,
                   isAutoCompileOnChange: !!data.options.isAutoCompileOnChange,
+                  rootDocId,
                   ...recordedActions,
                   ...ruleCounts,
                   ...ruleDeltas,
@@ -529,6 +537,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
     setLogEntries,
     setLogEntryAnnotations,
     setPdfFile,
+    compiler,
   ])
 
   // switch to logs if there's an error
