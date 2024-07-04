@@ -12,11 +12,13 @@ const shortcuts = isMac
       'zoom-in': ['⌘', '+'],
       'zoom-out': ['⌘', '-'],
       'fit-to-width': ['⌘', '0'],
+      'fit-to-height': ['⌘', '9'],
     }
   : {
       'zoom-in': ['Ctrl', '+'],
       'zoom-out': ['Ctrl', '-'],
       'fit-to-width': ['Ctrl', '0'],
+      'fit-to-height': ['Ctrl', '9'],
     }
 
 type PdfZoomDropdownProps = {
@@ -121,6 +123,7 @@ function PdfZoomDropdown({
         </MenuItem>
         <MenuItem draggable={false} key="page-height" eventKey="page-height">
           {t('fit_to_height')}
+          <Shortcut keys={shortcuts['fit-to-height']} />
         </MenuItem>
         {showPresentOption && <MenuItem divider />}
         {showPresentOption && (

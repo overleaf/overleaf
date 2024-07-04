@@ -462,6 +462,11 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
             event.preventDefault()
             setZoom('page-width')
             break
+
+          case '9':
+            event.preventDefault()
+            setZoom('page-height')
+            break
         }
       }
     },
