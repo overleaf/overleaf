@@ -145,8 +145,12 @@ async function quickMigration(projectId, direction = 'forwards') {
     projectHasRanges =
       await DocstoreManager.promises.projectHasRanges(projectId)
   } catch (err) {
-    await DocumentUpdaterHandler.promises.unblockProject(projectId)
-    throw err
+    // Docstore request probably timed out. Assume the project has ranges
+    logger.warn(
+      { err, projectId },
+      'Failed to check if project has ranges; proceeding with a resync migration'
+    )
+    projectHasRanges = true
   }
   if (projectHasRanges) {
     await DocumentUpdaterHandler.promises.unblockProject(projectId)
