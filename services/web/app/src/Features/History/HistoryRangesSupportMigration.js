@@ -8,7 +8,10 @@ const HistoryManager = require('../History/HistoryManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const ProjectOptionsHandler = require('../Project/ProjectOptionsHandler')
-const { db } = require('../../infrastructure/mongodb')
+const {
+  db,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../infrastructure/mongodb')
 
 /**
  * Migrate projects based on a query.
@@ -40,7 +43,7 @@ async function migrateProjects(opts = {}) {
   const clauses = []
 
   // skip projects that don't have full project history
-  clauses.push({ 'overleaf.history': { $exists: true } })
+  clauses.push({ 'overleaf.history.id': { $exists: true } })
 
   if (projectIds != null) {
     clauses.push({ _id: { $in: projectIds.map(id => new ObjectId(id)) } })
@@ -62,6 +65,7 @@ async function migrateProjects(opts = {}) {
 
   const projects = db.projects
     .find(filter, {
+      readPreference: READ_PREFERENCE_SECONDARY,
       projection: { _id: 1, overleaf: 1 },
     })
     .sort({ _id: -1 })
