@@ -8,9 +8,9 @@
     <artifactId>writelatex-git-bridge</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+        <maven.compiler.plugin.version>3.13.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>2.12.4</maven.surefire.plugin.version>
         <maven.assembly.plugin.version>3.1.0</maven.assembly.plugin.version>
         <fmt.plugin.version>2.23</fmt.plugin.version>
@@ -27,7 +27,7 @@
         <commons.lang3.version>3.12.0</commons.lang3.version>
         <logback.classic.version>1.2.3</logback.classic.version>
         <mockserver.version>5.12.0</mockserver.version>
-        <mockito.version>3.11.1</mockito.version>
+        <mockito.version>5.12.0</mockito.version>
         <aws.java.sdk.version>1.11.274</aws.java.sdk.version>
         <jakarta.xml.bind.api.version>${jaxb.runtime.version}</jakarta.xml.bind.api.version>
         <jaxb.runtime.version>2.3.2</jaxb.runtime.version>
@@ -35,6 +35,7 @@
         <commons.io.version>2.10.0</commons.io.version>
         <commons.compress.version>1.24.0</commons.compress.version>
         <simpleclient.version>0.10.0</simpleclient.version>
+        <bouncycastle.crypto.version>1.70</bouncycastle.crypto.version>
     </properties>
     <build>
         <plugins>
@@ -45,6 +46,7 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <release>${java.version}</release>
                 </configuration>
             </plugin>
             <!-- Workaround, test loader crashes without this configuration option -->
@@ -255,6 +257,19 @@
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient_servlet</artifactId>
             <version>${simpleclient.version}</version>
+        </dependency>
+        <!-- Require by MockServerClient to load 'sun.security.x509' / 'sun.security.util' -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bouncycastle.crypto.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+           <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.crypto.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

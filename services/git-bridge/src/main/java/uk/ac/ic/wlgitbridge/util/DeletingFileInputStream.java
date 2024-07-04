@@ -43,7 +43,7 @@ public class DeletingFileInputStream extends FileInputStream {
    * We shouldn't rely on this for correctness!
    */
   @Override
-  protected void finalize() throws IOException {
+  protected void finalize() throws Throwable {
     try {
       super.finalize();
     } finally {

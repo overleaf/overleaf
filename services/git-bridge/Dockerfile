@@ -1,6 +1,6 @@
 # Dockerfile for git-bridge
 
-FROM maven:3-amazoncorretto-11-debian as base
+FROM maven:3-amazoncorretto-21-debian as base
 
 RUN apt-get update && apt-get install -y make git sqlite3 \
  && rm -rf /var/lib/apt/lists
@@ -23,7 +23,7 @@ RUN make package \
       -name 'writelatex-git-bridge*jar-with-dependencies.jar' \
       -exec mv {} /git-bridge.jar \;
 
-FROM amazoncorretto:11-alpine
+FROM amazoncorretto:21-alpine
 
 RUN apk add --update --no-cache bash git sqlite procps htop net-tools jemalloc
 
