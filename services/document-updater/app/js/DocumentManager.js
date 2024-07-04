@@ -431,7 +431,7 @@ const DocumentManager = {
       projectHistoryId,
       docId,
       lines,
-      ranges,
+      ranges ?? {},
       resolvedCommentIds,
       version,
       // use the path from the resyncProjectStructure update

@@ -1085,5 +1085,48 @@ describe('DocumentManager', function () {
           .should.equal(true)
       })
     })
+
+    describe('when a doc has no ranges in docstore', function () {
+      beforeEach(async function () {
+        this.pathnameFromProjectStructureUpdate = '/foo/bar.tex'
+        this.RedisManager.promises.getDoc.resolves({})
+        this.PersistenceManager.promises.getDoc.resolves({
+          lines: this.lines,
+          version: this.version,
+          ranges: undefined,
+          resolvedCommentIds: [],
+          pathname: this.pathname,
+          projectHistoryId: this.projectHistoryId,
+          historyRangesSupport: this.historyRangesSupport,
+        })
+        await this.DocumentManager.promises.resyncDocContents(
+          this.project_id,
+          this.doc_id,
+          this.pathnameFromProjectStructureUpdate
+        )
+      })
+
+      it('gets the doc contents from web', function () {
+        this.PersistenceManager.promises.getDoc
+          .calledWith(this.project_id, this.doc_id, { peek: true })
+          .should.equal(true)
+      })
+
+      it('queues a resync doc content update with an empty ranges object', function () {
+        this.ProjectHistoryRedisManager.promises.queueResyncDocContent
+          .calledWith(
+            this.project_id,
+            this.projectHistoryId,
+            this.doc_id,
+            this.lines,
+            {},
+            [],
+            this.version,
+            this.pathnameFromProjectStructureUpdate,
+            this.historyRangesSupport
+          )
+          .should.equal(true)
+      })
+    })
   })
 })
