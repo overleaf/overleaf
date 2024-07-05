@@ -23,6 +23,9 @@ describe('LatexRunner', function () {
     }
     this.fs = {
       writeFile: sinon.stub().yields(),
+      unlink: sinon
+        .stub()
+        .yields(new Error('ENOENT: no such file or directory, unlink ...')),
     }
     this.LatexRunner = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -99,11 +102,19 @@ describe('LatexRunner', function () {
       it('should record the stdout and stderr', function () {
         this.fs.writeFile.should.have.been.calledWith(
           this.directory + '/' + 'output.stdout',
-          'this is stdout'
+          'this is stdout',
+          { flag: 'wx' }
         )
         this.fs.writeFile.should.have.been.calledWith(
           this.directory + '/' + 'output.stderr',
-          'this is stderr'
+          'this is stderr',
+          { flag: 'wx' }
+        )
+        this.fs.unlink.should.have.been.calledWith(
+          this.directory + '/' + 'output.stdout'
+        )
+        this.fs.unlink.should.have.been.calledWith(
+          this.directory + '/' + 'output.stderr'
         )
       })
 
