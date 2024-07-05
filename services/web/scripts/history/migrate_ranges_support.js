@@ -14,6 +14,7 @@ async function main() {
     force,
     stopOnError,
     quickOnly,
+    concurrency,
   } = parseArgs()
   await HistoryRangesSupportMigration.promises.migrateProjects({
     projectIds,
@@ -25,6 +26,7 @@ async function main() {
     force,
     stopOnError,
     quickOnly,
+    concurrency,
   })
 }
 
@@ -44,6 +46,7 @@ Options:
     --force          Migrate projects even if they were already migrated
     --stop-on-error  Stop after first migration error
     --quick-only     Do not try a resync migration if quick migration fails
+    --concurrency    How many jobs to run in parallel
 `)
 }
 
@@ -67,6 +70,7 @@ function parseArgs() {
   const force = args.force
   const stopOnError = args['stop-on-error']
   const quickOnly = args['quick-only']
+  const concurrency = args.concurrency ?? 1
   const all = args.all
 
   if (
@@ -94,6 +98,7 @@ function parseArgs() {
     force,
     stopOnError,
     quickOnly,
+    concurrency,
   }
 }
 
