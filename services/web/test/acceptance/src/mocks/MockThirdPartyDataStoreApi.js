@@ -7,8 +7,15 @@ class MockThirdPartyDataStoreApi extends AbstractMockApi {
     res.sendStatus(200)
   }
 
+  unlinkUser(req, res) {
+    res.sendStatus(200)
+  }
+
   applyRoutes() {
     this.app.delete('/user/:user_id', (req, res) => this.deleteUser(req, res))
+    this.app.delete('/user/:user_id/dropbox', (req, res) =>
+      this.unlinkUser(req, res)
+    )
   }
 }
 
