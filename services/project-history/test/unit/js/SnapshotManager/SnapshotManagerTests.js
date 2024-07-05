@@ -978,5 +978,24 @@ Four five six\
         })
       })
     })
+
+    describe('with an empty file', function () {
+      beforeEach(async function () {
+        this.getString.resolves('')
+        this.getObject.resolves({})
+        this.data = await this.SnapshotManager.promises.getRangesSnapshot(
+          this.projectId,
+          1,
+          'main.tex'
+        )
+      })
+
+      it('should return empty comments and changes', function () {
+        expect(this.data).to.deep.equal({
+          changes: [],
+          comments: [],
+        })
+      })
+    })
   })
 })

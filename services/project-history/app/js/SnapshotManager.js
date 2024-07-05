@@ -78,7 +78,7 @@ async function getRangesSnapshot(projectId, version, pathname) {
   const historyId = await WebApiManager.promises.getHistoryId(projectId)
   await file.load('eager', HistoryStoreManager.getBlobStore(historyId))
   const content = file.getContent()
-  if (!content) {
+  if (content == null) {
     throw new Error('Unable to read file contents')
   }
   const trackedChanges = file.getTrackedChanges().asSorted()
