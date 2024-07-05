@@ -94,6 +94,23 @@ describe('StaticServerForbidSymlinks', function () {
     })
   })
 
+  describe('with a new line', function () {
+    beforeEach(function () {
+      this.req.url = '/12345/output.pdf\nother file'
+      this.fs.realpath = sinon.stub().yields()
+    })
+
+    it('should process the correct file', function (done) {
+      this.res.sendStatus = () => {
+        this.fs.realpath.should.have.been.calledWith(
+          `${this.settings.path.compilesDir}/12345/output.pdf\nother file`
+        )
+        done()
+      }
+      this.StaticServerForbidSymlinks(this.req, this.res)
+    })
+  })
+
   describe('with a symlink file', function () {
     beforeEach(function () {
       return (this.fs.realpath = sinon
