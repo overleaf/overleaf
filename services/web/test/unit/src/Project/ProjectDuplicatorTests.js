@@ -18,6 +18,7 @@ describe('ProjectDuplicator', function () {
     this.file2 = {
       name: 'file2',
       _id: 'file2',
+      created: '2024-07-05T14:18:31.401+00:00',
       linkedFileData: { provider: 'url' },
       hash: '123456',
     }

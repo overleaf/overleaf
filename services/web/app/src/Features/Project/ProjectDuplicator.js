@@ -194,6 +194,7 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
       const file = new File({ name: SafePath.clean(sourceFile.name) })
       if (sourceFile.linkedFileData != null) {
         file.linkedFileData = sourceFile.linkedFileData
+        file.created = sourceFile.created
       }
       if (sourceFile.hash != null) {
         file.hash = sourceFile.hash
