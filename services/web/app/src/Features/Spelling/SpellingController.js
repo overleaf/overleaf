@@ -28,40 +28,33 @@ module.exports = {
     })
   },
 
-  proxyRequestToSpellingApi(req, res) {
+  proxyCheckRequestToSpellingApi(req, res) {
     const { language } = req.body
 
-    let url = req.url.slice('/spelling'.length)
+    if (!language) {
+      logger.error({}, '"language" field should be included for spell checking')
+      return res.status(422).json({ misspellings: [] })
+    }
 
-    if (url === '/check') {
-      if (!language) {
-        logger.error(
-          {},
-          '"language" field should be included for spell checking'
-        )
-        return res.status(422).json({ misspellings: [] })
-      }
-
-      if (!languageCodeIsSupported(language)) {
-        // this log statement can be changed to 'error' once projects with
-        // unsupported languages are removed from the DB
-        logger.debug({ language }, 'language not supported')
-        return res.status(422).json({ misspellings: [] })
-      }
+    if (!languageCodeIsSupported(language)) {
+      // this log statement can be changed to 'error' once projects with
+      // unsupported languages are removed from the DB
+      logger.debug({ language }, 'language not supported')
+      return res.status(422).json({ misspellings: [] })
     }
 
     const userId = SessionManager.getLoggedInUserId(req.session)
-    url = `/user/${userId}${url}`
+    const url = `${Settings.apis.spelling.url}/user/${userId}/check`
     req.headers.Host = Settings.apis.spelling.host
     return request({
-      url: Settings.apis.spelling.url + url,
-      method: req.method,
+      url,
+      method: 'POST',
       headers: req.headers,
       json: req.body,
       timeout: TEN_SECONDS,
     })
       .on('error', function (error) {
-        logger.error({ err: error }, 'Spelling API error')
+        logger.error({ err: error }, 'Spelling Check API error')
         return res.status(500).end()
       })
       .pipe(res)

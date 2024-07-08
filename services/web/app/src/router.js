@@ -1083,7 +1083,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/spelling/check',
     AuthenticationController.requireLogin(),
-    SpellingController.proxyRequestToSpellingApi
+    SpellingController.proxyCheckRequestToSpellingApi
   )
   webRouter.post(
     '/spelling/learn',

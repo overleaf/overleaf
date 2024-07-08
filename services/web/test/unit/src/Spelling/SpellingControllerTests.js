@@ -56,12 +56,12 @@ describe('SpellingController', function () {
     this.res = new MockResponse()
   })
 
-  describe('proxyRequestToSpellingApi', function () {
+  describe('proxyCheckRequestToSpellingApi', function () {
     describe('on successful call', function () {
       beforeEach(function () {
         this.req.session.user._id = this.userId = 'user-id-123'
         this.req.body = { language: 'en', words: ['blab'] }
-        this.controller.proxyRequestToSpellingApi(this.req, this.res)
+        this.controller.proxyCheckRequestToSpellingApi(this.req, this.res)
       })
 
       it('should send a request to the spelling host', function () {
@@ -89,35 +89,19 @@ describe('SpellingController', function () {
       beforeEach(function () {
         this.req.session.user._id = this.userId = 'user-id-123'
         this.req.body = { language: 'fi', words: ['blab'] }
+        this.controller.proxyCheckRequestToSpellingApi(this.req, this.res)
       })
 
-      describe('when the request is a check request', function () {
-        beforeEach(function () {
-          this.controller.proxyRequestToSpellingApi(this.req, this.res)
-        })
-
-        it('should not send a request to the spelling host', function () {
-          this.request.called.should.equal(false)
-        })
-
-        it('should return an empty misspellings array', function () {
-          this.res.json.calledWith({ misspellings: [] }).should.equal(true)
-        })
-
-        it('should return a 422 status', function () {
-          this.res.status.calledWith(422).should.equal(true)
-        })
+      it('should not send a request to the spelling host', function () {
+        this.request.called.should.equal(false)
       })
 
-      describe('when the request is not a check request', function () {
-        beforeEach(function () {
-          this.req.url = '/spelling/learn'
-          this.controller.proxyRequestToSpellingApi(this.req, this.res)
-        })
+      it('should return an empty misspellings array', function () {
+        this.res.json.calledWith({ misspellings: [] }).should.equal(true)
+      })
 
-        it('should send a request to the spelling host', function () {
-          this.request.called.should.equal(true)
-        })
+      it('should return a 422 status', function () {
+        this.res.status.calledWith(422).should.equal(true)
       })
     })
 
@@ -125,35 +109,19 @@ describe('SpellingController', function () {
       beforeEach(function () {
         this.req.session.user._id = this.userId = 'user-id-123'
         this.req.body = { words: ['blab'] }
+        this.controller.proxyCheckRequestToSpellingApi(this.req, this.res)
       })
 
-      describe('when the request is a check request', function () {
-        beforeEach(function () {
-          this.controller.proxyRequestToSpellingApi(this.req, this.res)
-        })
-
-        it('should not send a request to the spelling host', function () {
-          this.request.called.should.equal(false)
-        })
-
-        it('should return an empty misspellings array', function () {
-          this.res.json.calledWith({ misspellings: [] }).should.equal(true)
-        })
-
-        it('should return a 422 status', function () {
-          this.res.status.calledWith(422).should.equal(true)
-        })
+      it('should not send a request to the spelling host', function () {
+        this.request.called.should.equal(false)
       })
 
-      describe('when the request is not a check request', function () {
-        beforeEach(function () {
-          this.req.url = '/spelling/learn'
-          this.controller.proxyRequestToSpellingApi(this.req, this.res)
-        })
+      it('should return an empty misspellings array', function () {
+        this.res.json.calledWith({ misspellings: [] }).should.equal(true)
+      })
 
-        it('should send a request to the spelling host', function () {
-          this.request.called.should.equal(true)
-        })
+      it('should return a 422 status', function () {
+        this.res.status.calledWith(422).should.equal(true)
       })
     })
   })
