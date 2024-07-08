@@ -34,6 +34,7 @@ describe('RestoreManager', function () {
         '../Chat/ChatManager': (this.ChatManager = { promises: {} }),
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController =
           {}),
+        '../Project/ProjectGetter': (this.ProjectGetter = { promises: {} }),
       },
     })
     this.user_id = 'mock-user-id'
@@ -211,6 +212,10 @@ describe('RestoreManager', function () {
 
   describe('revertFile', function () {
     beforeEach(function () {
+      this.ProjectGetter.promises.getProject = sinon.stub()
+      this.ProjectGetter.promises.getProject
+        .withArgs(this.project_id)
+        .resolves({ overleaf: { history: { rangesSupportEnabled: true } } })
       this.RestoreManager.promises._writeFileVersionToDisk = sinon
         .stub()
         .resolves((this.fsPath = '/tmp/path/on/disk'))
@@ -223,6 +228,25 @@ describe('RestoreManager', function () {
       this.RestoreManager.promises._getRangesFromHistory = sinon
         .stub()
         .rejects()
+    })
+
+    describe('reverting a project without ranges support', function () {
+      beforeEach(function () {
+        this.ProjectGetter.promises.getProject = sinon.stub().resolves({
+          overleaf: { history: { rangesSupportEnabled: false } },
+        })
+      })
+
+      it('should throw an error', async function () {
+        await expect(
+          this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        ).to.eventually.be.rejectedWith('project does not have ranges support')
+      })
     })
 
     describe('reverting a document', function () {

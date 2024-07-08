@@ -14,6 +14,8 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const logger = require('@overleaf/logger')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const ChatManager = require('../Chat/ChatManager')
+const OError = require('@overleaf/o-error')
+const ProjectGetter = require('../Project/ProjectGetter')
 
 const RestoreManager = {
   async restoreFileFromV2(userId, projectId, version, pathname) {
@@ -48,6 +50,13 @@ const RestoreManager = {
   },
 
   async revertFile(userId, projectId, version, pathname) {
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      overleaf: true,
+    })
+    if (!project?.overleaf?.history?.rangesSupportEnabled) {
+      throw new OError('project does not have ranges support', { projectId })
+    }
+
     const fsPath = await RestoreManager._writeFileVersionToDisk(
       projectId,
       version,
