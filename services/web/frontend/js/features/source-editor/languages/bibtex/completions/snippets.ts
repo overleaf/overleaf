@@ -20,7 +20,7 @@ const environments: Environment[] = [
   },
   {
     name: 'conference',
-    requiredAttributes: ['key', 'title', 'year'],
+    requiredAttributes: ['author', 'booktitle', 'title', 'year'],
   },
   {
     name: 'inbook',
