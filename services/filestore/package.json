@@ -35,7 +35,7 @@
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {
-    "@google-cloud/storage": "^7.11.2",
+    "@google-cloud/storage": "^6.10.1",
     "aws-sdk": "^2.718.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
