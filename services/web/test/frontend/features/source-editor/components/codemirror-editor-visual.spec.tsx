@@ -249,8 +249,8 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
       cy.get('@third-line').type('path/to/image')
 
       cy.get('@third-line').should(
-        'have.text',
-        '    \\includegraphics{path/to/image}'
+        'contain.text',
+        '    \\includegraphics[width=0.5\\linewidth]{path/to/image}'
       )
 
       // move the cursor out of the figure
@@ -258,8 +258,8 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
 
       // Should be removed from dom when line is hidden
       cy.get('.cm-content').should(
-        'not.contain',
-        '\\includegraphics{path/to/image}'
+        'not.contain.text',
+        '\\includegraphics[width=0.5\\linewidth]{path/to/image}'
       )
 
       cy.get('img.ol-cm-graphics').should('have.attr', 'src', 'path/to/image')
