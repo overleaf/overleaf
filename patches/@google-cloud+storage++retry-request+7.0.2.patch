@@ -1,25 +1,25 @@
 diff --git a/node_modules/@google-cloud/storage/node_modules/retry-request/index.js b/node_modules/@google-cloud/storage/node_modules/retry-request/index.js
-index a293298..df21af6 100644
+index 2fae107..32ec707 100644
 --- a/node_modules/@google-cloud/storage/node_modules/retry-request/index.js
 +++ b/node_modules/@google-cloud/storage/node_modules/retry-request/index.js
 @@ -1,6 +1,6 @@
  'use strict';
  
 -const {PassThrough} = require('stream');
-+const { PassThrough, pipeline } = require('stream');
- const debug = require('debug')('retry-request');
++const {PassThrough, pipeline} = require('stream');
  const extend = require('extend');
  
-@@ -166,7 +166,7 @@ function retryRequest(requestOpts, opts, callback) {
-         })
-         .on('complete', retryStream.emit.bind(retryStream, 'complete'));
+ let debug = () => {};
+@@ -185,7 +185,7 @@ function retryRequest(requestOpts, opts, callback) {
+         .on('complete', (...params) => handleFinish(params))
+         .on('finish', (...params) => handleFinish(params));
  
 -      requestStream.pipe(delayStream);
 +      pipeline(requestStream, delayStream, () => {});
      } else {
        activeRequest = opts.request(requestOpts, onResponse);
      }
-@@ -232,7 +232,7 @@ function retryRequest(requestOpts, opts, callback) {
+@@ -251,7 +251,7 @@ function retryRequest(requestOpts, opts, callback) {
      // No more attempts need to be made, just continue on.
      if (streamMode) {
        retryStream.emit('response', response);
