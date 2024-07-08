@@ -42,8 +42,12 @@ CommentDeclaration {
   "}"
 }
 
+EntryName {
+  "@" EntryTypeName
+}
+
 Declaration {
-  EntryName { "@" EntryTypeName }  "{"
+  EntryName "{"
       Identifier
       
       fieldEntry { 
