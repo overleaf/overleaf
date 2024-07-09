@@ -361,7 +361,7 @@ describe('RecurlyWrapper', function () {
       this.requestOptions.url.should.equal(
         `subscriptions/${this.recurlySubscriptionId}`
       )
-      this.requestOptions.method.should.equal('put')
+      this.requestOptions.method.should.equal('PUT')
     })
 
     it('should return the updated subscription', function () {

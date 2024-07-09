@@ -601,7 +601,7 @@ const promises = {
 
     const { body } = await RecurlyWrapper.promises.apiRequest({
       url: `subscriptions/${subscriptionId}`,
-      method: 'put',
+      method: 'PUT',
       body: requestBody,
     })
     return await RecurlyWrapper.promises._parseSubscriptionXml(body)
