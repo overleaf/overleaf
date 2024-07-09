@@ -399,7 +399,7 @@ describe('RecurlyWrapper', function () {
     })
   })
 
-  describe('createFixedAmmountCoupon', function () {
+  describe('createFixedAmountCoupon', function () {
     beforeEach(async function () {
       this.couponCode = 'a-coupon-code'
       this.couponName = 'a-coupon-name'
@@ -409,7 +409,7 @@ describe('RecurlyWrapper', function () {
       this.apiRequest = sinon
         .stub(this.RecurlyWrapper.promises, 'apiRequest')
         .resolves()
-      await this.RecurlyWrapper.promises.createFixedAmmountCoupon(
+      await this.RecurlyWrapper.promises.createFixedAmountCoupon(
         this.couponCode,
         this.couponName,
         this.currencyCode,

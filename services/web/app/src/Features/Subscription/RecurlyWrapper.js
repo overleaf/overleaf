@@ -599,7 +599,7 @@ const promises = {
     return await RecurlyWrapper.promises._parseSubscriptionXml(body)
   },
 
-  async createFixedAmmountCoupon(
+  async createFixedAmountCoupon(
     couponCode,
     name,
     currencyCode,
@@ -878,7 +878,7 @@ const RecurlyWrapper = {
   apiUrl: Settings.apis.recurly.url || 'https://api.recurly.com/v2',
   _buildXml,
   _parseXml: callbackify(promises._parseXml),
-  createFixedAmmountCoupon: callbackify(promises.createFixedAmmountCoupon),
+  createFixedAmountCoupon: callbackify(promises.createFixedAmountCoupon),
   getAccountActiveCoupons: callbackify(promises.getAccountActiveCoupons),
   getBillingInfo: callbackify(promises.getBillingInfo),
   getPaginatedEndpoint: callbackify(promises.getPaginatedEndpoint),
