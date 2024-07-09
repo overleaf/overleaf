@@ -822,6 +822,7 @@ module.exports = {
           h4: ['class', 'id'],
           h5: ['class', 'id'],
           h6: ['class', 'id'],
+          p: ['class'],
           col: ['width'],
           figure: ['class', 'id', 'style'],
           figcaption: ['class', 'id', 'style'],

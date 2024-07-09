@@ -120,4 +120,23 @@
     border-top: 8px solid var(--sapphire-blue);
     padding: 32px 40px 32px 40px;
   }
+
+  &.card-premium-border {
+    h2,
+    h3,
+    h4 {
+      color: var(--blue-60);
+    }
+    border-radius: 8px;
+    padding: var(--spacing-10);
+    border: 2px solid transparent;
+    background:
+      linear-gradient(white, white) padding-box,
+      linear-gradient(to right, var(--blue-40), #254c84, var(--blue-70))
+        border-box;
+
+    .btn {
+      width: 100%;
+    }
+  }
 }

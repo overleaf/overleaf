@@ -353,20 +353,37 @@ export const ProgressBars = () => {
 
 export const Cards = () => {
   return (
-    <div className="content content-alt">
-      <Grid>
-        <Row>
-          <Col md={8} mdOffset={2}>
-            <div className="card">
-              <p>
-                Cards look best on a <code>.content.content-alt</code>{' '}
-                background
-              </p>
-            </div>
-          </Col>
-        </Row>
-      </Grid>
-    </div>
+    <>
+      <div className="content content-alt">
+        <Grid>
+          <Row>
+            <Col md={8} mdOffset={2}>
+              <div className="card">
+                <p>
+                  Cards look best on a <code>.content.content-alt</code>{' '}
+                  background
+                </p>
+              </div>
+            </Col>
+          </Row>
+        </Grid>
+      </div>
+      <div className="content website-redesign">
+        <Grid>
+          <Row>
+            <Col md={8} mdOffset={2}>
+              <h2>New card styles</h2>
+              <div className="card card-premium-border">
+                <h2>Header 2</h2>
+                <h3>Header 3</h3>
+                <h3>Header 4</h3>
+                <p>Dolor sit amet, consectetur adipiscing elit.</p>
+              </div>
+            </Col>
+          </Row>
+        </Grid>
+      </div>
+    </>
   )
 }
 

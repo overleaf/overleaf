@@ -50,6 +50,25 @@
       }
     }
 
+    .p-no-text-nodes:has(.btn) {
+      margin-top: var(--spacing-09);
+
+      @media (max-width: @screen-xs-max) {
+        .btn {
+          width: 100%;
+          margin-left: 0;
+          margin-top: var(--spacing-05);
+        }
+        .btn:first-child {
+          margin-top: 0;
+        }
+      }
+    }
+
+    .btn + .btn {
+      margin-left: var(--spacing-06);
+    }
+
     blockquote.quote-picture-bottom {
       padding: (@line-height-computed / 2) @line-height-computed;
 
@@ -641,7 +660,8 @@
   flex-direction: column;
   * {
     &:last-child {
-      margin-top: auto;
+      flex: 1;
+      align-content: end;
     }
   }
 }
