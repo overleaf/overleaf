@@ -196,7 +196,7 @@ describe('RecurlyWrapper', function () {
           })
         })
 
-        describe('with ReculyJS token', function () {
+        describe('with RecurlyJS token', function () {
           beforeEach(async function () {
             this.apiRequest = sinon
               .stub(this.RecurlyWrapper.promises, 'apiRequest')

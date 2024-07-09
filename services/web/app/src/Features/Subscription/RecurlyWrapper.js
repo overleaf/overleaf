@@ -708,7 +708,7 @@ const promises = {
     } catch (error) {
       logger.warn(
         { err: error, subscriptionId, daysUntilExpire },
-        'error exending trial'
+        'error extending trial'
       )
       throw error
     }
