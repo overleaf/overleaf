@@ -16,19 +16,21 @@
   }
 
   h1 {
-    font-size: 3rem;
     font-weight: 600;
-    line-height: 4rem;
+    .heading-2xl();
+
+    @media (max-width: @screen-sm-max) {
+      .heading-xl();
+    }
   }
 
   h2 {
     font-weight: 600;
-    font-size: 2.25rem;
-    line-height: 1.333;
     margin-top: 0;
+    .heading-xl();
 
     @media (max-width: @screen-sm-max) {
-      font-size: 1.875rem;
+      .heading-lg();
     }
   }
 
@@ -230,13 +232,6 @@
   }
 
   .customer-story-content {
-    h1 {
-      @media (max-width: @screen-sm-max) {
-        font-size: 2.25rem;
-        line-height: 1.333;
-      }
-    }
-
     .table-of-contents-section {
       padding-right: 64px;
       @media (max-width: @screen-sm-max) {
@@ -462,11 +457,6 @@
       justify-content: center;
 
       h1 {
-        @media (max-width: @screen-sm-max) {
-          font-size: 2.25rem;
-          line-height: 1.333;
-        }
-
         &.features-card-hero-smaller-title {
           @media (min-width: @screen-lg-min) {
             // 3rem is the default, this is a workaround for big screen
