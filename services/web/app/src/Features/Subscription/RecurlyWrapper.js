@@ -570,7 +570,8 @@ const promises = {
 
   async getAccountPastDueInvoices(accountId) {
     const { body } = await RecurlyWrapper.promises.apiRequest({
-      url: `accounts/${accountId}/invoices?state=past_due`,
+      url: `accounts/${accountId}/invoices`,
+      qs: { state: 'past_due' },
     })
     return await RecurlyWrapper.promises._parseInvoicesXml(body)
   },
@@ -700,7 +701,8 @@ const promises = {
     )
     try {
       await RecurlyWrapper.promises.apiRequest({
-        url: `/subscriptions/${subscriptionId}/postpone?next_bill_date=${nextRenewalDate}&bulk=false`,
+        url: `subscriptions/${subscriptionId}/postpone`,
+        qs: { bulk: false, next_bill_date: nextRenewalDate },
         method: 'put',
       })
     } catch (error) {
