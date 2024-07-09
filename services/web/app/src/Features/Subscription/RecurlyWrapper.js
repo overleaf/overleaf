@@ -1,5 +1,8 @@
 const OError = require('@overleaf/o-error')
-const request = require('request')
+const {
+  fetchStringWithResponse,
+  RequestFailedError,
+} = require('@overleaf/fetch-utils')
 const Settings = require('@overleaf/settings')
 const xml2js = require('xml2js')
 const logger = require('@overleaf/logger')
@@ -378,9 +381,17 @@ const promises = {
    * @param options - the options to pass to the request library
    * @returns {Promise<{ response: unknown, body: string}>}
    */
-  apiRequest(options) {
-    options.url = RecurlyWrapper.apiUrl + '/' + options.url
-    options.headers = {
+  async apiRequest({ expect404, expect422, url, qs, ...fetchOptions }) {
+    const fetchUrl = new URL(RecurlyWrapper.apiUrl)
+    fetchUrl.pathname =
+      fetchUrl.pathname !== '/' ? `${fetchUrl.pathname}/${url}` : url
+
+    if (qs) {
+      for (const [key, value] of Object.entries(qs)) {
+        fetchUrl.searchParams.set(key, value)
+      }
+    }
+    fetchOptions.headers = {
       Authorization: `Basic ${Buffer.from(
         Settings.apis.recurly.apiKey
       ).toString('base64')}`,
@@ -388,40 +399,36 @@ const promises = {
       'Content-Type': 'application/xml; charset=utf-8',
       'X-Api-Version': Settings.apis.recurly.apiVersion,
     }
-    const { expect404, expect422 } = options
-    delete options.expect404
-    delete options.expect422
-    return new Promise((resolve, reject) => {
-      request(options, function (error, response, body) {
-        if (
-          !error &&
-          response.statusCode !== 200 &&
-          response.statusCode !== 201 &&
-          response.statusCode !== 204 &&
-          (response.statusCode !== 404 || !expect404) &&
-          (response.statusCode !== 422 || !expect422)
-        ) {
-          if (options.headers.Authorization) {
-            options.headers.Authorization = 'REDACTED'
-          }
-          logger.warn(
-            {
-              err: error,
-              body,
-              options,
-              statusCode: response ? response.statusCode : undefined,
-            },
-            'error returned from recurly'
-          )
-          error = new OError(
-            `Recurly API returned with status code: ${response.statusCode}`,
-            { statusCode: response.statusCode }
-          )
-          reject(error)
+
+    try {
+      return await fetchStringWithResponse(fetchUrl, fetchOptions)
+    } catch (error) {
+      if (error instanceof RequestFailedError) {
+        if (error.response.status === 404 && expect404) {
+          return { response: error.response, body: null }
+        } else if (error.response.status === 422 && expect422) {
+          return { response: error.response, body: error.body }
         }
-        resolve({ response, body })
-      })
-    })
+
+        if (fetchOptions.headers.Authorization) {
+          fetchOptions.headers.Authorization = 'REDACTED'
+        }
+        logger.warn(
+          {
+            err: error,
+            body: error.body,
+            options: fetchOptions,
+            url: fetchUrl.href,
+            statusCode: error.response?.status,
+          },
+          'error returned from recurly'
+        )
+        throw new OError(
+          `Recurly API returned with status code: ${error.response.status}`,
+          { statusCode: error.response.status }
+        )
+      }
+    }
   },
 
   async getSubscriptions(accountId) {

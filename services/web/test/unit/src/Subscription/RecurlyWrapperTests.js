@@ -5,6 +5,7 @@ const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SubscriptionErrors = require('../../../../app/src/Features/Subscription/Errors')
+const { RequestFailedError } = require('@overleaf/fetch-utils')
 
 const fixtures = {
   'subscriptions/44f83d7cba354d5b84812419f923ea96':
@@ -129,11 +130,15 @@ describe('RecurlyWrapper', function () {
       },
     }
 
+    this.fetchUtils = {
+      fetchStringWithResponse: sinon.stub(),
+      RequestFailedError,
+    }
     tk.freeze(Date.now()) // freeze the time for these tests
     this.RecurlyWrapper = SandboxedModule.require(modulePath, {
       requires: {
         '@overleaf/settings': this.settings,
-        request: sinon.stub(),
+        '@overleaf/fetch-utils': this.fetchUtils,
         './Errors': SubscriptionErrors,
       },
     })
