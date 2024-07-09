@@ -80,12 +80,17 @@ async function migrateProjects(opts = {}) {
   process.on('SIGINT', handleSignal)
   process.on('SIGTERM', handleSignal)
 
-  let projectsProcessed = 0
+  const projectsProcessed = {
+    quick: 0,
+    skipped: 0,
+    resync: 0,
+    total: 0,
+  }
   const jobsByProjectId = new Map()
   let errors = 0
 
   for await (const project of projects) {
-    if (projectsProcessed >= maxCount) {
+    if (projectsProcessed.total >= maxCount) {
       break
     }
 
@@ -119,8 +124,9 @@ async function migrateProjects(opts = {}) {
     const job = processProject(projectId, direction, quickOnly)
       .then(info => {
         jobsByProjectId.delete(projectId)
-        projectsProcessed += 1
-        logger.info(
+        projectsProcessed[info.migrationType] += 1
+        projectsProcessed.total += 1
+        logger.debug(
           {
             projectId,
             direction,
@@ -130,6 +136,12 @@ async function migrateProjects(opts = {}) {
           },
           'History ranges support migration'
         )
+        if (projectsProcessed.total % 10000 === 0) {
+          logger.info(
+            { projectsProcessed, errors, lastProjectId: projectId },
+            'History ranges support migration progress'
+          )
+        }
       })
       .catch(err => {
         jobsByProjectId.delete(projectId)
