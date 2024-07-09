@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Uppy from '@uppy/core'
 import XHRUpload from '@uppy/xhr-upload'
 import { Dashboard } from '@uppy/react'
@@ -87,11 +87,6 @@ export default function FileTreeUploadDoc() {
     return endpoint
   }
 
-  const overwriteRef = useRef(overwrite)
-  useEffect(() => {
-    overwriteRef.current = overwrite
-  }, [overwrite])
-
   // initialise the Uppy object
   const [uppy] = useState(() => {
     const endpoint = buildEndpoint(projectId, parentFolderId)
@@ -115,15 +110,11 @@ export default function FileTreeUploadDoc() {
           }
         },
         onBeforeUpload(files) {
-          if (overwriteRef.current) {
-            return true
-          } else {
-            const conflicts = buildConflicts(files)
-            const folderConflicts = buildFolderConflicts(files)
-            setConflicts(conflicts)
-            setFolderConflicts(folderConflicts)
-            return conflicts.length === 0 && folderConflicts.length === 0
-          }
+          const conflicts = buildConflicts(files)
+          const folderConflicts = buildFolderConflicts(files)
+          setConflicts(conflicts)
+          setFolderConflicts(folderConflicts)
+          return conflicts.length === 0 && folderConflicts.length === 0
         },
         autoProceed: true,
       })
@@ -214,9 +205,13 @@ export default function FileTreeUploadDoc() {
   // handle forced overwriting of conflicting files
   const handleOverwrite = useCallback(() => {
     setOverwrite(true)
-    window.setTimeout(() => {
-      uppy.upload()
-    }, 10)
+    uppy.setOptions({
+      onBeforeUpload() {
+        // don't check for file conflicts
+        return true
+      },
+    })
+    uppy.upload()
   }, [uppy])
 
   // whether to show a message about conflicting files
