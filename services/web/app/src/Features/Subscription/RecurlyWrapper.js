@@ -51,7 +51,7 @@ const promises = {
         )
         throw error
       }
-      if (response.statusCode === 404) {
+      if (response.status === 404) {
         // actually not an error in this case, just no existing account
         logger.debug(
           { userId: user._id },
@@ -355,7 +355,7 @@ const promises = {
       expect422: true,
     })
 
-    if (response.statusCode === 422) {
+    if (response.status === 422) {
       return await RecurlyWrapper.promises._handle422Response(body)
     } else {
       return await RecurlyWrapper.promises._parseSubscriptionXml(body)
@@ -713,7 +713,7 @@ const promises = {
       },
       expect404: true,
     })
-    if (response.statusCode === 404) {
+    if (response.status === 404) {
       return []
     } else {
       return await RecurlyWrapper.promises._parseSubscriptionsXml(body)

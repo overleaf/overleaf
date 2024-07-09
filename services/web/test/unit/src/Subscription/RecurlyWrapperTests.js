@@ -94,13 +94,12 @@ const mockApiRequest = function (options) {
   if (fixtures[options.url]) {
     return {
       err: null,
-      response: { statusCode: 200 },
+      response: { status: 200 },
       body: fixtures[options.url],
     }
   } else {
     return {
       err: new Error('Not found'),
-      response: { statusCode: 404 },
     }
   }
 }
@@ -585,7 +584,7 @@ describe('RecurlyWrapper', function () {
         threeDSecureActionResult: 'a-3d-token-id',
       }
       this.apiRequest = sinon.stub(this.RecurlyWrapper.promises, 'apiRequest')
-      this.response = { statusCode: 200 }
+      this.response = { status: 200 }
       this.body = '<xml>is_bad</xml>'
       this.apiRequest.resolves({
         response: this.response,
@@ -684,7 +683,7 @@ describe('RecurlyWrapper', function () {
         `
         // this.apiRequest.yields(null, { statusCode: 422 }, body)
         this.apiRequest.resolves({
-          response: { statusCode: 422 },
+          response: { status: 422 },
           body,
         })
       })
@@ -948,7 +947,7 @@ describe('RecurlyWrapper', function () {
           const resultXml =
             '<account><account_code>abc</account_code></account>'
           this.apiRequest.resolves({
-            response: { statusCode: 200 },
+            response: { status: 200 },
             body: resultXml,
           })
         })
@@ -987,7 +986,7 @@ describe('RecurlyWrapper', function () {
       describe('when the account does not exist', function () {
         beforeEach(function () {
           this.apiRequest.resolves({
-            response: { statusCode: 404 },
+            response: { status: 404 },
             body: '',
           })
         })
@@ -1095,7 +1094,7 @@ describe('RecurlyWrapper', function () {
           const resultXml =
             '<account><account_code>abc</account_code></account>'
           this.apiRequest.resolves({
-            response: { statusCode: 200 },
+            response: { status: 200 },
             body: resultXml,
           })
         })
@@ -1174,7 +1173,7 @@ describe('RecurlyWrapper', function () {
         beforeEach(function () {
           const resultXml = '<billing_info><a>1</a></billing_info>'
           this.apiRequest.resolves({
-            response: { statusCode: 200 },
+            response: { status: 200 },
             body: resultXml,
           })
         })
@@ -1260,7 +1259,7 @@ describe('RecurlyWrapper', function () {
         beforeEach(function () {
           const resultXml = '<billing_info><city>London</city></billing_info>'
           this.apiRequest.resolves({
-            response: { statusCode: 200 },
+            response: { status: 200 },
             body: resultXml,
           })
         })
@@ -1328,7 +1327,7 @@ describe('RecurlyWrapper', function () {
         beforeEach(function () {
           const resultXml = '<subscription><a>1</a></subscription>'
           this.apiRequest.resolves({
-            response: { statusCode: 200 },
+            response: { status: 200 },
             body: resultXml,
           })
         })
@@ -1437,7 +1436,7 @@ describe('RecurlyWrapper', function () {
 
     describe('without an account', function () {
       beforeEach(async function () {
-        this.response.statusCode = 404
+        this.response.status = 404
         this.accountActiveSubscriptions =
           await this.RecurlyWrapper.promises.listAccountActiveSubscriptions(
             this.user_id

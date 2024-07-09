@@ -166,7 +166,7 @@ const getInvoicePage = fullInvoicesIds => queryOptions => {
   const hasMore = end < fullInvoicesIds.length
   const nextPageCursor = hasMore ? `${end}%3A${end + ITEMS_PER_PAGE}&v=2` : null
   const response = {
-    statusCode: 200,
+    status: 200,
     headers: {
       link: hasMore
         ? `https://fakerecurly.com/v2/invoices?cursor=${nextPageCursor}`
@@ -188,7 +188,7 @@ describe('CollectPayPalPastDueInvoice', function () {
 
       if (/accounts\/(\d+)\/billing_info/.test(options.url)) {
         return {
-          response: { statusCode: 200, headers: {} },
+          response: { status: 200, headers: {} },
           body: billingInfoXml,
         }
       }
@@ -197,7 +197,7 @@ describe('CollectPayPalPastDueInvoice', function () {
         const invoiceId = options.url.match(/invoices\/(\d+)\/collect/)[1]
         if (invoiceId < 400) {
           return {
-            response: { statusCode: 200, headers: {} },
+            response: { status: 200, headers: {} },
             body: invoiceCollectXml,
           }
         }
