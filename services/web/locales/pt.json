@@ -309,7 +309,7 @@
   "language": "Idioma",
   "last_modified": "Última Modificação",
   "last_name": "Sobrenome",
-  "latam_discount_modal_info": "Aprovecha todo el potencial de Overleaf con un __discount__% de descuento en suscripciones premium pagadas en __currencyName__. Consigue tiempos de compilación más largos, historial completo de documentos, seguimiento de cambios, colaboradores adicionales y más.",
+  "latam_discount_modal_info": "Obtenha todo o potencial do Overleaf com desconto de __discount__% em assinaturas premium pagas em __currencyName__. Obtenha um tempo limite de compilação mais longo, histórico completo de documentos, controle de alterações, colaboradores adicionais e muito mais.",
   "latam_discount_modal_title": "Desconto em assinaturas premium",
   "latam_discount_offer_plans_page_banner": "__flag__ Aplicamos um desconto de __discount__ aos planos premium nesta página para nossos usuários no __country__. Confira os novos preços mais baixos (em __currency__).",
   "latex_templates": "Modelos LaTeX",
