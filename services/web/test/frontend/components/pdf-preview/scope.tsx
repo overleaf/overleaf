@@ -1,3 +1,5 @@
+import { EditorView } from '@codemirror/view'
+
 export const mockScope = () => ({
   settings: {
     syntaxValidation: false,
@@ -8,6 +10,9 @@ export const mockScope = () => ({
       doc_id: 'test-doc',
       getSnapshot: () => 'some doc content',
     },
+    view: new EditorView({
+      doc: '\\documentclass{article}',
+    }),
   },
   hasLintingError: false,
   ui: {

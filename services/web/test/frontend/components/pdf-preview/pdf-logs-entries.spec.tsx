@@ -8,6 +8,7 @@ import {
   EditorManager,
   EditorManagerContext,
 } from '@/features/ide-react/context/editor-manager-context'
+import { EditorView } from '@codemirror/view'
 
 describe('<PdfLogsEntries/>', function () {
   const fakeFindEntityResult: FindResult = {
@@ -57,6 +58,10 @@ describe('<PdfLogsEntries/>', function () {
     },
   ]
 
+  const scope = {
+    'editor.view': new EditorView({ doc: '\\documentclass{article}' }),
+  }
+
   beforeEach(function () {
     cy.interceptCompile()
     cy.interceptEvents()
@@ -64,7 +69,7 @@ describe('<PdfLogsEntries/>', function () {
 
   it('displays human readable hint', function () {
     cy.mount(
-      <EditorProviders>
+      <EditorProviders scope={scope}>
         <PdfLogsEntries entries={logEntries} />
       </EditorProviders>
     )
@@ -75,6 +80,7 @@ describe('<PdfLogsEntries/>', function () {
   it('opens doc on click', function () {
     cy.mount(
       <EditorProviders
+        scope={scope}
         providers={{ EditorManagerProvider, FileTreePathProvider }}
       >
         <PdfLogsEntries entries={logEntries} />
@@ -104,6 +110,7 @@ describe('<PdfLogsEntries/>', function () {
 
     cy.mount(
       <EditorProviders
+        scope={scope}
         providers={{ EditorManagerProvider, FileTreePathProvider }}
       >
         <PdfLogsEntries entries={logEntries} />
@@ -143,6 +150,7 @@ describe('<PdfLogsEntries/>', function () {
 
     cy.mount(
       <EditorProviders
+        scope={scope}
         providers={{ EditorManagerProvider, FileTreePathProvider }}
       >
         <PdfLogsEntries entries={logEntries} />
