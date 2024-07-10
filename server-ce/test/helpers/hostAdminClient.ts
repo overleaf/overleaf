@@ -9,23 +9,12 @@ export async function dockerCompose(cmd: string, ...args: string[]) {
   })
 }
 
-export async function mongoInit() {
-  return await fetchJSON(`${hostAdminUrl}/mongo/init`, {
-    method: 'POST',
-  })
-}
-
-export async function resetData() {
-  return await fetchJSON(`${hostAdminUrl}/reset/data`, {
-    method: 'POST',
-  })
-}
-
 export async function reconfigure({
   pro = false,
   version = 'latest',
   vars = {},
   withDataDir = false,
+  resetData = false,
 }) {
   return await fetchJSON(`${hostAdminUrl}/reconfigure`, {
     method: 'POST',
@@ -34,6 +23,7 @@ export async function reconfigure({
       version,
       vars,
       withDataDir,
+      resetData,
     }),
   })
 }

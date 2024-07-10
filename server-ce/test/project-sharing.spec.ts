@@ -1,11 +1,12 @@
 import { v4 as uuid } from 'uuid'
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('Project Sharing', function () {
+  if (isExcludedBySharding('CE_CUSTOM_2')) return
   ensureUserExists({ email: 'user@example.com' })
   startWith({ withDataDir: true })
 

@@ -10,12 +10,19 @@ const {
 } = require('celebrate')
 const YAML = require('js-yaml')
 
+const DATA_DIR = Path.join(
+  __dirname,
+  'data',
+  // Give each shard their own data dir.
+  process.env.CYPRESS_SHARD || 'default'
+)
 const PATHS = {
   DOCKER_COMPOSE_FILE: 'docker-compose.yml',
-  DOCKER_COMPOSE_OVERRIDE: 'docker-compose.override.yml',
+  // Give each shard their own override file.
+  DOCKER_COMPOSE_OVERRIDE: `docker-compose.${process.env.CYPRESS_SHARD || 'override'}.yml`,
   DOCKER_COMPOSE_NATIVE: 'docker-compose.native.yml',
-  DATA_DIR: Path.join(__dirname, 'data'),
-  SANDBOXED_COMPILES_HOST_DIR: Path.join(__dirname, 'data/compiles'),
+  DATA_DIR,
+  SANDBOXED_COMPILES_HOST_DIR: Path.join(DATA_DIR, 'compiles'),
 }
 const IMAGES = {
   CE: process.env.IMAGE_TAG_CE.replace(/:.+/, ''),
@@ -245,7 +252,8 @@ app.post(
   }
 )
 
-function mongoInit(callback) {
+function maybeMongoInit(mongoInit, callback) {
+  if (!mongoInit) return callback()
   runDockerCompose(
     'up',
     ['--detach', '--wait', 'mongo'],
@@ -271,11 +279,30 @@ function mongoInit(callback) {
   )
 }
 
-app.post('/mongo/init', (req, res) => {
-  mongoInit((error, stdout, stderr) => {
-    res.json({ error, stdout, stderr })
-  })
-})
+function maybeResetData(resetData, callback) {
+  if (!resetData) return callback()
+
+  runDockerCompose(
+    'stop',
+    ['--timeout=0', 'sharelatex'],
+    (error, stdout, stderr) => {
+      if (error) return callback(error, stdout, stderr)
+
+      try {
+        purgeDataDir()
+      } catch (error) {
+        return callback(error)
+      }
+
+      mongoIsInitialized = false
+      runDockerCompose(
+        'down',
+        ['--timeout=0', '--volumes', 'mongo', 'redis'],
+        callback
+      )
+    }
+  )
+}
 
 app.post(
   '/reconfigure',
@@ -286,56 +313,35 @@ app.post(
         version: Joi.string().required(),
         vars: allowedVars,
         withDataDir: Joi.boolean().optional(),
+        resetData: Joi.boolean().optional(),
       },
     },
     { allowUnknown: false }
   ),
   (req, res) => {
-    const { pro, version, vars, withDataDir } = req.body
-    try {
-      setVarsDockerCompose({ pro, version, vars, withDataDir })
-    } catch (error) {
-      return res.json({ error })
-    }
-
-    const doMongoInit = mongoIsInitialized ? cb => cb() : mongoInit
-    doMongoInit((error, stdout, stderr) => {
-      if (error) return res.json({ error, stdout, stderr })
-      runDockerCompose(
-        'up',
-        ['--detach', '--wait', 'sharelatex'],
-        (error, stdout, stderr) => {
-          res.json({ error, stdout, stderr })
-        }
-      )
-    })
-  }
-)
-
-app.post('/reset/data', (req, res) => {
-  runDockerCompose(
-    'stop',
-    ['--timeout=0', 'sharelatex'],
-    (error, stdout, stderr) => {
+    const { pro, version, vars, withDataDir, resetData } = req.body
+    maybeResetData(resetData, (error, stdout, stderr) => {
       if (error) return res.json({ error, stdout, stderr })
 
       try {
-        purgeDataDir()
+        setVarsDockerCompose({ pro, version, vars, withDataDir })
       } catch (error) {
         return res.json({ error })
       }
 
-      mongoIsInitialized = false
-      runDockerCompose(
-        'down',
-        ['--timeout=0', '--volumes', 'mongo', 'redis'],
-        (error, stdout, stderr) => {
-          res.json({ error, stdout, stderr })
-        }
-      )
-    }
-  )
-})
+      maybeMongoInit(!mongoIsInitialized, (error, stdout, stderr) => {
+        if (error) return res.json({ error, stdout, stderr })
+        runDockerCompose(
+          'up',
+          ['--detach', '--wait', 'sharelatex'],
+          (error, stdout, stderr) => {
+            res.json({ error, stdout, stderr })
+          }
+        )
+      })
+    })
+  }
+)
 
 app.get('/redis/keys', (req, res) => {
   runDockerCompose(
@@ -352,7 +358,7 @@ app.use(handleValidationErrors())
 purgeDataDir()
 
 // Init on startup
-mongoInit(err => {
+maybeMongoInit(true, err => {
   if (err) {
     console.error('mongo init failed', err)
     process.exit(1)

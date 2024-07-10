@@ -1,12 +1,13 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { v4 as uuid } from 'uuid'
 
 const WITHOUT_PROJECTS_USER = 'user-without-projects@example.com'
 const REGULAR_USER = 'user@example.com'
 
 describe('Project List', () => {
+  if (isExcludedBySharding('PRO_DEFAULT_2')) return
   startWith({ pro: true })
 
   const findProjectRow = (projectName: string) => {

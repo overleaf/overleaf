@@ -1,4 +1,4 @@
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 
@@ -32,6 +32,7 @@ describe('Templates', () => {
   }
 
   describe('enabled in Server Pro', () => {
+    if (isExcludedBySharding('PRO_CUSTOM_2')) return
     startWith({
       pro: true,
       varsFn,
@@ -238,11 +239,13 @@ describe('Templates', () => {
   }
 
   describe('disabled Server Pro', () => {
+    if (isExcludedBySharding('PRO_DEFAULT_2')) return
     startWith({ pro: true })
     checkDisabled()
   })
 
   describe('unavailable in CE', () => {
+    if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({
       pro: false,
       varsFn,

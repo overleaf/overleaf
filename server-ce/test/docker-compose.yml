@@ -57,6 +57,7 @@ services:
     volumes:
       - ./:/e2e
     environment:
+      CYPRESS_SHARD:
       CYPRESS_BASE_URL: http://sharelatex
       SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
     depends_on:
@@ -76,6 +77,7 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     user: "${DOCKER_USER:-1000:1000}"
     environment:
+      CYPRESS_SHARD:
       CYPRESS_BASE_URL: http://sharelatex
       SPEC_PATTERN: '**/*.spec.{js,jsx,ts,tsx}'
       DISPLAY: ${DISPLAY:-:0}
@@ -96,6 +98,8 @@ services:
     stop_grace_period: 0s
     environment:
       PWD:
+      CYPRESS_SHARD:
+      COMPOSE_PROJECT_NAME:
       TEX_LIVE_DOCKER_IMAGE:
       ALL_TEX_LIVE_DOCKER_IMAGES:
       IMAGE_TAG_CE: ${IMAGE_TAG_CE:-sharelatex/sharelatex:latest}

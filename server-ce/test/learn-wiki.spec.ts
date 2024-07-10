@@ -1,4 +1,4 @@
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
 
@@ -16,6 +16,7 @@ describe('LearnWiki', function () {
   ensureUserExists({ email: REGULAR_USER })
 
   describe('enabled in Pro', () => {
+    if (isExcludedBySharding('PRO_CUSTOM_2')) return
     startWith({
       pro: true,
       vars: {
@@ -64,11 +65,13 @@ describe('LearnWiki', function () {
   })
 
   describe('disabled in Pro', () => {
+    if (isExcludedBySharding('PRO_DEFAULT_1')) return
     startWith({ pro: true })
     checkDisabled()
   })
 
   describe('unavailable in CE', () => {
+    if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({
       pro: false,
       vars: {

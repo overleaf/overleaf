@@ -1,9 +1,10 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { throttledRecompile } from './helpers/compile'
 
 describe('Project creation and compilation', function () {
+  if (isExcludedBySharding('CE_DEFAULT')) return
   startWith({})
   ensureUserExists({ email: 'user@example.com' })
   ensureUserExists({ email: 'collaborator@example.com' })

@@ -1,7 +1,8 @@
 import { createMongoUser, ensureUserExists, login } from './helpers/login'
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 
 describe('Accounts', function () {
+  if (isExcludedBySharding('CE_DEFAULT')) return
   startWith({})
   ensureUserExists({ email: 'user@example.com' })
 

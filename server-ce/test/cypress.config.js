@@ -23,6 +23,6 @@ module.exports = defineConfig({
     specPattern,
   },
   retries: {
-    runMode: 1,
+    runMode: 3,
   },
 })

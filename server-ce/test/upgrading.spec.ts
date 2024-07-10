@@ -1,10 +1,6 @@
-import {
-  ensureUserExists,
-  login,
-  resetCreatedUsersCache,
-} from './helpers/login'
-import { startWith } from './helpers/config'
-import { dockerCompose, resetData, runScript } from './helpers/hostAdminClient'
+import { ensureUserExists, login } from './helpers/login'
+import { isExcludedBySharding, startWith } from './helpers/config'
+import { dockerCompose, runScript } from './helpers/hostAdminClient'
 import { createProject } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
@@ -13,6 +9,8 @@ const USER = 'user@example.com'
 const PROJECT_NAME = 'Old Project'
 
 describe('Upgrading', function () {
+  if (isExcludedBySharding('PRO_CUSTOM_3')) return
+
   function testUpgrade(
     steps: {
       version: string
@@ -24,16 +22,13 @@ describe('Upgrading', function () {
     const startOptions = steps.shift()!
 
     before(async () => {
-      cy.log('Reset mongo/redis/on-disk data')
-      resetCreatedUsersCache()
-      await resetData()
-
       cy.log('Create old instance')
     })
     startWith({
       pro: true,
       version: startOptions.version,
       withDataDir: true,
+      resetData: true,
       vars: startOptions.vars,
     })
     before(function () {

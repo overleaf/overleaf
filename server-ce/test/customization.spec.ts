@@ -1,6 +1,7 @@
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 
 describe('Customization', () => {
+  if (isExcludedBySharding('CE_CUSTOM_1')) return
   startWith({
     vars: {
       OVERLEAF_APP_NAME: 'CUSTOM APP NAME',

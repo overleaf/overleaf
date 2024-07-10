@@ -1,4 +1,4 @@
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { activateUser, ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
 import { createProject } from './helpers/project'
@@ -20,6 +20,7 @@ describe('admin panel', function () {
       return cy.findByText(projectName).parent().parent()
     }
 
+    if (isExcludedBySharding('PRO_DEFAULT_2')) return
     startWith({
       pro: true,
     })

@@ -1,10 +1,11 @@
 import { createProject } from './helpers/project'
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('editor', () => {
+  if (isExcludedBySharding('PRO_DEFAULT_1')) return
   startWith({ pro: true })
   ensureUserExists({ email: 'user@example.com' })
   ensureUserExists({ email: 'collaborator@example.com' })

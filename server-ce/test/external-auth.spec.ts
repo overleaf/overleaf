@@ -1,6 +1,7 @@
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 
 describe('SAML', () => {
+  if (isExcludedBySharding('PRO_CUSTOM_1')) return
   const overleafPublicHost = Cypress.env('OVERLEAF_PUBLIC_HOST') || 'sharelatex'
   const samlPublicHost = Cypress.env('SAML_PUBLIC_HOST') || 'saml'
 
@@ -36,6 +37,7 @@ describe('SAML', () => {
 })
 
 describe('LDAP', () => {
+  if (isExcludedBySharding('PRO_CUSTOM_1')) return
   startWith({
     pro: true,
     vars: {

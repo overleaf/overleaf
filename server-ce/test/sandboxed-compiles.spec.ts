@@ -1,6 +1,6 @@
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { throttledRecompile } from './helpers/compile'
 import { v4 as uuid } from 'uuid'
 import { waitUntilScrollingFinished } from './helpers/waitUntilScrollingFinished'
@@ -19,6 +19,7 @@ describe('SandboxedCompiles', function () {
   }
 
   describe('enabled in Server Pro', () => {
+    if (isExcludedBySharding('PRO_CUSTOM_2')) return
     startWith({
       pro: true,
       vars: enabledVars,
@@ -215,6 +216,7 @@ describe('SandboxedCompiles', function () {
   }
 
   describe('disabled in Server Pro', () => {
+    if (isExcludedBySharding('PRO_DEFAULT_2')) return
     startWith({ pro: true })
 
     checkUsesDefaultCompiler()
@@ -223,6 +225,7 @@ describe('SandboxedCompiles', function () {
   })
 
   describe.skip('unavailable in CE', () => {
+    if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({ pro: false, vars: enabledVars })
 
     checkUsesDefaultCompiler()

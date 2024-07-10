@@ -1,4 +1,4 @@
-import { startWith } from './helpers/config'
+import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { createProject } from './helpers/project'
 
@@ -19,6 +19,7 @@ describe('git-bridge', function () {
     Cypress.env('GIT_BRIDGE_PUBLIC_HOST') || 'sharelatex'
 
   describe('enabled in Server Pro', function () {
+    if (isExcludedBySharding('PRO_CUSTOM_1')) return
     startWith({
       pro: true,
       vars: ENABLED_VARS,
@@ -272,6 +273,7 @@ Hello world
   }
 
   describe('disabled in Server Pro', () => {
+    if (isExcludedBySharding('PRO_DEFAULT_1')) return
     startWith({
       pro: true,
     })
@@ -279,6 +281,7 @@ Hello world
   })
 
   describe('unavailable in CE', () => {
+    if (isExcludedBySharding('CE_CUSTOM_1')) return
     startWith({
       pro: false,
       vars: ENABLED_VARS,

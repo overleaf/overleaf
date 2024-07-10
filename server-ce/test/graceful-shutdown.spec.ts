@@ -1,14 +1,10 @@
+import { ensureUserExists, login } from './helpers/login'
 import {
-  ensureUserExists,
-  login,
-  resetCreatedUsersCache,
-} from './helpers/login'
-import { STARTUP_TIMEOUT, startWith } from './helpers/config'
-import {
-  dockerCompose,
-  getRedisKeys,
-  resetData,
-} from './helpers/hostAdminClient'
+  isExcludedBySharding,
+  STARTUP_TIMEOUT,
+  startWith,
+} from './helpers/config'
+import { dockerCompose, getRedisKeys } from './helpers/hostAdminClient'
 import { createProject } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 
@@ -23,13 +19,11 @@ function bringServerProBackUp() {
 }
 
 describe('GracefulShutdown', function () {
-  before(async () => {
-    resetCreatedUsersCache()
-    await resetData()
-  })
+  if (isExcludedBySharding('PRO_CUSTOM_1')) return
   startWith({
     pro: true,
     withDataDir: true,
+    resetData: true,
   })
   ensureUserExists({ email: USER })
 
