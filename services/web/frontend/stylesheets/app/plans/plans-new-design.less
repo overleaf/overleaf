@@ -610,6 +610,138 @@
       }
     }
   }
+
+  .plans-features-table-section-container-mobile {
+    margin-top: var(--spacing-13);
+    .plans-features-section-heading-mobile {
+      font-size: var(--font-size-06);
+      font-weight: 600;
+      line-height: var(--line-height-05);
+      color: var(--neutral-90);
+      text-align: center;
+      margin-bottom: var(--spacing-08);
+    }
+
+    .plans-features-table-mobile {
+      width: 100%;
+      .plans-features-table-header {
+        margin-bottom: var(--space-08);
+      }
+
+      .plans-features-table-header-container-mobile {
+        margin: var(--spacing-08) auto;
+        border-bottom: unset;
+        width: 100%;
+        max-width: 544px;
+
+        .plans-features-table-header-item-mobile {
+          width: 33%;
+          min-width: 114px;
+
+          .plans-features-table-header-item-content-mobile {
+            margin-bottom: var(--spacing-08);
+            padding: var(--spacing-04);
+            text-align: center;
+            background-color: var(--neutral-10);
+          }
+
+          .plans-features-table-header-item-title-mobile {
+            color: var(--neutral-90);
+            line-height: var(--line-height-03);
+            font-weight: 600;
+          }
+
+          .plans-features-table-header-item-price-mobile {
+            font-weight: 400;
+            color: var(--neutral-70);
+            line-height: var(--line-height-01);
+            font-size: var(--spacing-05);
+          }
+        }
+
+        .plans-features-table-header-item-content-mobile.active {
+          background-color: var(--neutral-80);
+          .plans-features-table-header-item-title-mobile {
+            color: var(--white);
+          }
+
+          .plans-features-table-header-item-price-mobile {
+            color: var(--white);
+          }
+        }
+      }
+
+      .plans-features-table-body-container-mobile {
+        .plans-features-table-row-heading-mobile {
+          font-weight: 600;
+          text-align: center;
+          line-height: var(--line-height-03);
+          .plans-features-table-row-section-heading-content-mobile {
+            padding-top: var(--spacing-08);
+            padding-bottom: var(--spacing-05);
+            font-size: var(--font-size-04);
+            color: var(--neutral-90);
+          }
+        }
+
+        // .plans-features-table-row-title-mobile and .plans-features-table-row-mobile are combined together to make one row visually, so we are using factors of 4 to alternatively color their backgrounds.
+        .plans-features-table-row-title-mobile {
+          &.plans-features-table-row-title-mobile-without-heading {
+            &:nth-child(4n - 3) {
+              background-color: var(--neutral-10);
+            }
+
+            &:nth-child(4n - 1) {
+              background-color: var(--white);
+            }
+          }
+
+          &:nth-child(4n - 2) {
+            background-color: var(--neutral-10);
+          }
+
+          &:nth-child(4n) {
+            background-color: var(--white);
+          }
+
+          .plans-features-table-row-title-content-mobile {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: var(--spacing-06);
+            font-weight: 600;
+            line-height: var(--line-height-03);
+          }
+        }
+
+        .plans-features-table-row-mobile {
+          &.plans-features-table-row-mobile-without-heading {
+            &:nth-child(4n - 2) {
+              background-color: var(--neutral-10);
+            }
+
+            &:nth-child(4n) {
+              background-color: var(--white);
+            }
+          }
+
+          &:nth-child(4n - 3) {
+            background-color: var(--white);
+          }
+
+          &:nth-child(4n - 1) {
+            background-color: var(--neutral-10);
+          }
+
+          .plans-features-table-cell-content-mobile {
+            text-align: center;
+            padding-top: var(--spacing-05);
+            padding-bottom: var(--spacing-06);
+          }
+        }
+      }
+    }
+  }
 }
 
 .plans-faq {

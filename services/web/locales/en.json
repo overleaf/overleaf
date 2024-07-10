@@ -293,6 +293,7 @@
   "compact": "Compact",
   "company_name": "Company Name",
   "compare": "Compare",
+  "compare_features": "Compare features",
   "comparing_from_x_to_y": "Comparing from <0>__startTime__</0> to <0>__endTime__</0>",
   "compile_error_entry_description": "An error which prevented this project from compiling",
   "compile_error_handling": "Compile Error Handling",
