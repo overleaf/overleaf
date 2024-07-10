@@ -144,7 +144,7 @@ const bibEntryValidationRules = new Map<string, BibEntryValidationRule>([
   [
     'misc',
     {
-      requiredAttributes: [['author', 'key'], 'note'],
+      requiredAttributes: [['author', 'key']],
     },
   ],
   [
