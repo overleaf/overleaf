@@ -318,7 +318,7 @@
     padding: @spacing-06 @spacing-08;
 
     @media (max-width: @screen-md-max) {
-      padding: @spacing-05;
+      padding: var(--spacing-05);
     }
   }
 
@@ -331,7 +331,7 @@
       font-size: var(--font-size-05);
       font-weight: 600;
       line-height: var(--line-height-04);
-      margin-bottom: @spacing-04;
+      margin-bottom: var(--spacing-04);
       color: var(--neutral-90);
       text-align: center;
     }
@@ -395,8 +395,8 @@
     }
 
     .plans-new-table-header-desc {
-      margin-top: @spacing-05;
-      margin-bottom: @spacing-08;
+      margin-top: var(--spacing-05);
+      margin-bottom: var(--spacing-08);
       font-size: var(--font-size-02);
       line-height: var(--line-height-02);
     }
@@ -440,7 +440,7 @@
       background-color: var(--neutral-10);
     }
     &:nth-child(even):not(.plans-new-table-heading-row) {
-      background-color: white;
+      background-color: var(--white);
     }
   }
 
@@ -499,7 +499,7 @@
     text-align: center;
     line-height: @highlighted-heading-line-height;
     background-color: var(--green-50);
-    color: white;
+    color: var(--white);
   }
 
   .plans-new-table-highlighted-cell {
@@ -530,62 +530,60 @@
     }
   }
 
-  // ------------------------------------------------------------------
-  // ------------------------------------------------------------------
-  // These comments will be deleted when the cards section is completed for mobile screens.
-  // Below is the styling for plans cards on mobile screen
-
   .plans-card-container-mobile {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-06);
 
     .mt-spacing-06 {
-      margin-top: @spacing-06;
+      margin-top: var(--spacing-06);
     }
 
     .highlighted-plans-card {
-      border: 2px solid @green-50 !important;
+      border: 2px solid var(--green-50) !important;
     }
 
     .plans-card-mobile {
-      padding: @spacing-09;
-      border: 2px solid @neutral-20;
+      padding: var(--spacing-09);
+      border: 2px solid var(--neutral-20);
       width: 100%; // might need max-width
       border-radius: 8px;
       display: flex;
       flex-direction: column;
 
       .plans-card-title-mobile {
-        color: @neutral-90;
-        font-size: @font-size-05; // 20px
+        color: var(--neutral-90);
+        font-size: var(--font-size-05); // 20px
         font-weight: 600;
-        line-height: @line-height-04;
+        line-height: var(--line-height-04);
       }
 
       .old-price-plans-card-mobile {
-        padding: @spacing-04 0 0 0;
-        color: @neutral-40;
-        font-size: @font-size-04; // 18px
+        padding: var(--spacing-04) 0 0 0;
+        color: var(--neutral-40);
+        font-size: var(--font-size-04); // 18px
         font-weight: 600;
-        line-height: @line-height-05;
-        margin-bottom: -@spacing-04;
+        line-height: var(--line-height-05);
+        margin-bottom: var(--spacing-04);
       }
 
       .plans-card-price-container-mobile {
         display: flex;
         align-items: baseline;
         .plans-card-price-mobile {
-          color: @neutral-90;
-          font-size: @font-size-08; // 36px
+          color: var(--neutral-90);
+          font-size: var(--font-size-08); // 36px
           font-weight: 600;
-          line-height: @line-height-07;
-          margin-right: @spacing-03;
+          line-height: var(--line-height-07);
+          margin-right: var(--spacing-03);
         }
       }
 
       .light-gray-text {
-        color: @neutral-70;
-        font-size: @font-size-02; // 14px
-        line-height: @line-height-02;
+        color: var(--neutral-70);
+        font-size: var(--font-size-02); // 14px
+        line-height: var(--line-height-02);
       }
 
       .plans-card-description-mobile {
@@ -600,20 +598,18 @@
           margin-bottom: unset;
           li {
             display: flex;
-            margin-top: @spacing-05;
+            margin-top: var(--spacing-05);
           }
         }
 
         .plans-card-cta-buy-now-mobile {
           width: 100%;
-          margin-top: @spacing-08;
-          line-height: @line-height-03;
+          margin-top: var(--spacing-08);
+          line-height: var(--line-height-03);
         }
       }
     }
   }
-  // ------------------------------------------------------------------
-  // ------------------------------------------------------------------
 }
 
 .plans-faq {
