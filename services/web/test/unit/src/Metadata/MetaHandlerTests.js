@@ -95,6 +95,7 @@ describe('MetaHandler', function () {
             },
           ],
         },
+        packageNames: ['foo', 'amsmath', 'booktabs'],
       })
     })
   })
@@ -138,9 +139,9 @@ describe('MetaHandler', function () {
     it('should extract all metadata', function () {
       const projectMeta = this.MetaHandler.extractMetaFromProjectDocs(this.docs)
       return expect(projectMeta).to.deep.equal({
-        id_one: { labels: ['aaa'], packages: {} },
-        id_two: { labels: [], packages: {} },
-        id_three: { labels: ['bbb', 'ccc'], packages: {} },
+        id_one: { labels: ['aaa'], packages: {}, packageNames: [] },
+        id_two: { labels: [], packages: {}, packageNames: [] },
+        id_three: { labels: ['bbb', 'ccc'], packages: {}, packageNames: [] },
         id_four: {
           labels: [],
           packages: {
@@ -153,6 +154,7 @@ describe('MetaHandler', function () {
               },
             ],
           },
+          packageNames: ['baz', 'amsmath'],
         },
         id_five: {
           labels: ['sec:intro'],
@@ -180,6 +182,7 @@ describe('MetaHandler', function () {
               },
             ],
           },
+          packageNames: ['foo', 'baz', 'hello'],
         },
       })
     })
@@ -195,7 +198,11 @@ describe('MetaHandler', function () {
         // bbb should not be in the returned labels
         'commented label % \\label{bbb}',
       ]
-      this.fakeMeta = { labels: ['aaa'], packages: ['abc'] }
+      this.fakeMeta = {
+        labels: ['aaa'],
+        packages: { abc: [] },
+        packageNames: ['abc'],
+      }
       this.DocumentUpdaterHandler.flushDocToMongo = sinon
         .stub()
         .callsArgWith(2, null)
@@ -283,6 +290,7 @@ describe('MetaHandler', function () {
             },
           ],
         },
+        packageNames: ['foo'],
       }
       this.DocumentUpdaterHandler.flushProjectToMongo = sinon
         .stub()

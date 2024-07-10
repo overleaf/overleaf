@@ -118,6 +118,7 @@ module.exports = MetaHandler = {
         docMeta.packages[pkg] = packageMapping[pkg]
       }
     }
+    docMeta.packageNames = packages
     return docMeta
   },
 
