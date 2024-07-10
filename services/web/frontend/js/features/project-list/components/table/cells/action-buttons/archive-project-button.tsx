@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 import { memo, useCallback, useState } from 'react'
-import Icon from '../../../../../../shared/components/icon'
-import Tooltip from '../../../../../../shared/components/tooltip'
 import ArchiveProjectModal from '../../../modals/archive-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type ArchiveProjectButtonProps = {
   project: Project
@@ -65,20 +66,28 @@ const ArchiveProjectButtonTooltip = memo(function ArchiveProjectButtonTooltip({
   return (
     <ArchiveProjectButton project={project}>
       {(text, handleOpenModal) => (
-        <Tooltip
+        <OLTooltip
           key={`tooltip-archive-project-${project.id}`}
           id={`archive-project-${project.id}`}
           description={text}
           overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
         >
-          <button
-            className="btn btn-link action-btn"
-            aria-label={text}
-            onClick={handleOpenModal}
-          >
-            <Icon type="inbox" fw />
-          </button>
-        </Tooltip>
+          <span>
+            <OLIconButton
+              onClick={handleOpenModal}
+              variant="link"
+              accessibilityLabel={text}
+              className="action-btn"
+              icon={
+                bsVersion({
+                  bs5: 'inbox',
+                  bs3: 'inbox',
+                }) as string
+              }
+              bs3Props={{ fw: true }}
+            />
+          </span>
+        </OLTooltip>
       )}
     </ArchiveProjectButton>
   )

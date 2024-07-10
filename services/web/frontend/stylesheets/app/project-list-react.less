@@ -417,11 +417,13 @@
       border: 0;
       text-align: left;
       color: @ol-type-color;
+      background-color: transparent;
       padding: 0;
       font-weight: bold;
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-decoration: none;
 
       &:hover,
       &:focus {
@@ -436,6 +438,14 @@
 
       input[type='checkbox'] {
         margin-top: 5px;
+      }
+
+      .dash-cell-checkbox-wrapper {
+        label {
+          display: block;
+          margin: 0;
+          line-height: 1;
+        }
       }
     }
 
@@ -825,13 +835,6 @@
       top: 30%;
     }
   }
-}
-
-.project-list-load-more {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 .project-list-load-more-button {

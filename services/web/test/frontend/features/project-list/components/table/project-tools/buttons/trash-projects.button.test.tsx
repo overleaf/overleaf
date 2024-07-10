@@ -12,14 +12,14 @@ describe('<TrashProjectsButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(<TrashProjectsButton />)
-    const btn = screen.getByLabelText('Trash')
+    const btn = screen.getByRole('button', { name: 'Trash' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Trash' })
   })
 
   it('opens the modal when clicked', function () {
     renderWithProjectListContext(<TrashProjectsButton />)
-    const btn = screen.getByLabelText('Trash')
+    const btn = screen.getByRole('button', { name: 'Trash' })
     fireEvent.click(btn)
     screen.getByText('Trash Projects')
   })

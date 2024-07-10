@@ -12,7 +12,7 @@ describe('<DownloadProjectsButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(<DownloadProjectsButton />)
-    const btn = screen.getByLabelText('Download')
+    const btn = screen.getByRole('button', { name: 'Download' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Download' })
   })

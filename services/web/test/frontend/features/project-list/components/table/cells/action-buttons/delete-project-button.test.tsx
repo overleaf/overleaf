@@ -22,7 +22,7 @@ describe('<DeleteProjectButton />', function () {
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={trashedProject} />
     )
-    const btn = screen.getByLabelText('Delete')
+    const btn = screen.getByRole('button', { name: 'Delete' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Delete' })
   })
@@ -32,7 +32,7 @@ describe('<DeleteProjectButton />', function () {
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={trashedAndNotOwnedProject} />
     )
-    const btn = screen.queryByLabelText('Delete')
+    const btn = screen.queryByRole('button', { name: 'Delete' })
     expect(btn).to.be.null
   })
 
@@ -40,7 +40,7 @@ describe('<DeleteProjectButton />', function () {
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={archiveableProject} />
     )
-    expect(screen.queryByLabelText('Delete')).to.be.null
+    expect(screen.queryByRole('button', { name: 'Delete' })).to.be.null
   })
 
   it('opens the modal and deletes the project', async function () {
@@ -56,7 +56,7 @@ describe('<DeleteProjectButton />', function () {
     renderWithProjectListContext(
       <DeleteProjectButtonTooltip project={project} />
     )
-    const btn = screen.getByLabelText('Delete')
+    const btn = screen.getByRole('button', { name: 'Delete' })
     fireEvent.click(btn)
     screen.getByText('Delete Projects')
     screen.getByText('You are about to delete the following projects:')

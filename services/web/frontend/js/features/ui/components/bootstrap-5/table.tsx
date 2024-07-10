@@ -1,22 +1,40 @@
 import { Table as BS5Table } from 'react-bootstrap-5'
 import classnames from 'classnames'
 
-function Table({ responsive, ...rest }: React.ComponentProps<typeof BS5Table>) {
-  const content = (
+export function TableContainer({
+  responsive,
+  bordered,
+  children,
+}: React.ComponentProps<typeof BS5Table>) {
+  return (
     <div
       className={classnames('table-container', {
-        'table-container-bordered': rest.bordered,
+        'table-container-bordered': bordered,
+        'table-responsive': responsive,
       })}
     >
-      <BS5Table {...rest} />
+      {children}
     </div>
   )
+}
 
-  if (responsive) {
-    return <div className="table-responsive d-flex">{content}</div>
-  }
+type TableProps = React.ComponentProps<typeof BS5Table> & {
+  container?: boolean
+}
 
-  return content
+function Table({
+  container = true,
+  responsive,
+  bordered,
+  ...rest
+}: TableProps) {
+  return container ? (
+    <TableContainer responsive={responsive} bordered={bordered}>
+      <BS5Table {...rest} />
+    </TableContainer>
+  ) : (
+    <BS5Table {...rest} />
+  )
 }
 
 export default Table

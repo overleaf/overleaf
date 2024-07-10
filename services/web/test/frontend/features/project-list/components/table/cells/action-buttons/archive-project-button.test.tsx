@@ -20,7 +20,7 @@ describe('<ArchiveProjectButton />', function () {
     renderWithProjectListContext(
       <ArchiveProjectButtonTooltip project={archiveableProject} />
     )
-    const btn = screen.getByLabelText('Archive')
+    const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Archive' })
   })
@@ -29,7 +29,7 @@ describe('<ArchiveProjectButton />', function () {
     renderWithProjectListContext(
       <ArchiveProjectButtonTooltip project={archiveableProject} />
     )
-    const btn = screen.getByLabelText('Archive')
+    const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.click(btn)
     screen.getByText('Archive Projects')
     screen.getByText(archiveableProject.name)
@@ -39,7 +39,7 @@ describe('<ArchiveProjectButton />', function () {
     renderWithProjectListContext(
       <ArchiveProjectButtonTooltip project={archivedProject} />
     )
-    expect(screen.queryByLabelText('Archive')).to.be.null
+    expect(screen.queryByRole('button', { name: 'Archive' })).to.be.null
   })
 
   it('should archive the projects', async function () {
@@ -54,7 +54,7 @@ describe('<ArchiveProjectButton />', function () {
     renderWithProjectListContext(
       <ArchiveProjectButtonTooltip project={project} />
     )
-    const btn = screen.getByLabelText('Archive')
+    const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.click(btn)
     screen.getByText('Archive Projects')
     screen.getByText('You are about to archive the following projects:')

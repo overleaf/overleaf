@@ -92,6 +92,11 @@
 
 .dropdown-item-leading-icon {
   padding-right: var(--spacing-04);
+
+  &.spinner {
+    margin-left: var(--spacing-01);
+    margin-right: var(--spacing-01);
+  }
 }
 
 // description text should look disabled when the dropdown item is disabled

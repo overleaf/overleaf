@@ -29,7 +29,44 @@ export const DropdownItem = forwardRef<
     { active, children, description, leadingIcon, trailingIcon, ...props },
     ref
   ) => {
-    const trailingIconType = active ? 'check' : trailingIcon
+    let leadingIconComponent = null
+    if (leadingIcon) {
+      if (typeof leadingIcon === 'string') {
+        leadingIconComponent = (
+          <MaterialIcon
+            className="dropdown-item-leading-icon"
+            type={leadingIcon}
+          />
+        )
+      } else {
+        leadingIconComponent = (
+          <span className="dropdown-item-leading-icon" aria-hidden="true">
+            {leadingIcon}
+          </span>
+        )
+      }
+    }
+
+    let trailingIconComponent = null
+    if (trailingIcon) {
+      if (typeof trailingIcon === 'string') {
+        const trailingIconType = active ? 'check' : trailingIcon
+
+        trailingIconComponent = (
+          <MaterialIcon
+            className="dropdown-item-trailing-icon"
+            type={trailingIconType}
+          />
+        )
+      } else {
+        trailingIconComponent = (
+          <span className="dropdown-item-leading-icon" aria-hidden="true">
+            {trailingIcon}
+          </span>
+        )
+      }
+    }
+
     return (
       <BS5DropdownItem
         active={active}
@@ -38,19 +75,9 @@ export const DropdownItem = forwardRef<
         {...props}
         ref={ref}
       >
-        {leadingIcon && (
-          <MaterialIcon
-            className="dropdown-item-leading-icon"
-            type={leadingIcon}
-          />
-        )}
+        {leadingIconComponent}
         {children}
-        {trailingIconType && (
-          <MaterialIcon
-            className="dropdown-item-trailing-icon"
-            type={trailingIconType}
-          />
-        )}
+        {trailingIconComponent}
         {description && (
           <span className="dropdown-item-description">{description}</span>
         )}

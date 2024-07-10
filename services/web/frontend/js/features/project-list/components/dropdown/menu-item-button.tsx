@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 
 type MenuItemButtonProps = {
   children: ReactNode
-  onClick?: (...args: unknown[]) => void
+  onClick?: (e?: React.MouseEvent) => void
   className?: string
   afterNode?: React.ReactNode
 }

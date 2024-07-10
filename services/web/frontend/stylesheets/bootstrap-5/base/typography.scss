@@ -63,3 +63,7 @@ pre,
 samp {
   @include body-base;
 }
+
+.list-style-check-green {
+  list-style-image: url('../../../../public/img/fa-check-green.svg');
+}

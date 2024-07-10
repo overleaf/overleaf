@@ -20,7 +20,7 @@ describe('<TrashProjectButton />', function () {
     renderWithProjectListContext(
       <TrashProjectButtonTooltip project={archivedProject} />
     )
-    const btn = screen.getByLabelText('Trash')
+    const btn = screen.getByRole('button', { name: 'Trash' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Trash' })
   })
@@ -29,7 +29,7 @@ describe('<TrashProjectButton />', function () {
     renderWithProjectListContext(
       <TrashProjectButtonTooltip project={trashedProject} />
     )
-    expect(screen.queryByLabelText('Trash')).to.be.null
+    expect(screen.queryByRole('button', { name: 'Trash' })).to.be.null
   })
 
   it('opens the modal and trashes the project', async function () {
@@ -44,7 +44,7 @@ describe('<TrashProjectButton />', function () {
     renderWithProjectListContext(
       <TrashProjectButtonTooltip project={project} />
     )
-    const btn = screen.getByLabelText('Trash')
+    const btn = screen.getByRole('button', { name: 'Trash' })
     fireEvent.click(btn)
     screen.getByText('Trash Projects')
     screen.getByText('You are about to trash the following projects:')

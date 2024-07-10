@@ -8,7 +8,7 @@ type ProjectsToDisplayProps = {
 
 function ProjectsList({ projects, projectsToDisplay }: ProjectsToDisplayProps) {
   return (
-    <ul className="projects-action-list">
+    <ul>
       {projectsToDisplay.map(project => (
         <li
           key={`projects-action-list-${project.id}`}

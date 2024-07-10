@@ -7,7 +7,7 @@ type OLFormProps = React.ComponentProps<typeof Table> & {
 }
 
 function OLTable(props: OLFormProps) {
-  const { bs3Props, ...rest } = props
+  const { bs3Props, container, ...rest } = props
 
   const bs3FormProps: React.ComponentProps<typeof BS3Table> = {
     bsClass: rest.className,
@@ -21,7 +21,7 @@ function OLTable(props: OLFormProps) {
   return (
     <BootstrapVersionSwitcher
       bs3={<BS3Table {...bs3FormProps} />}
-      bs5={<Table {...rest} />}
+      bs5={<Table container={container} {...rest} />}
     />
   )
 }

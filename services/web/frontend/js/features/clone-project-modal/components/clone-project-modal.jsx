@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useState } from 'react'
 import PropTypes from 'prop-types'
 import CloneProjectModalContent from './clone-project-modal-content'
-import AccessibleModal from '../../../shared/components/accessible-modal'
+import OLModal from '@/features/ui/components/ol/ol-modal'
 
 function CloneProjectModal({
   show,
@@ -20,7 +20,7 @@ function CloneProjectModal({
   }, [handleHide, inFlight])
 
   return (
-    <AccessibleModal
+    <OLModal
       animation
       show={show}
       onHide={onHide}
@@ -38,7 +38,7 @@ function CloneProjectModal({
         projectName={projectName}
         projectTags={projectTags}
       />
-    </AccessibleModal>
+    </OLModal>
   )
 }
 

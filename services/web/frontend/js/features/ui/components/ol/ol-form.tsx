@@ -13,6 +13,7 @@ function OLForm(props: OLFormProps) {
     componentClass: rest.as,
     bsClass: rest.className,
     children: rest.children,
+    id: rest.id,
     onSubmit: rest.onSubmit as React.FormEventHandler<BS3Form> | undefined,
     ...bs3Props,
   }

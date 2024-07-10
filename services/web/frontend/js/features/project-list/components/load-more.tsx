@@ -1,6 +1,6 @@
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useProjectListContext } from '../context/project-list-context'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function LoadMore() {
   const {
@@ -13,16 +13,17 @@ export default function LoadMore() {
   const { t } = useTranslation()
 
   return (
-    <div className="text-centered">
+    <div className="text-center">
       {hiddenProjectsCount > 0 ? (
-        <Button
-          bsStyle={null}
-          className="project-list-load-more-button btn-secondary-info btn-secondary"
-          onClick={() => loadMoreProjects()}
-          aria-label={t('show_x_more_projects', { x: loadMoreCount })}
-        >
-          {t('show_x_more', { x: loadMoreCount })}
-        </Button>
+        <>
+          <OLButton
+            variant="secondary"
+            className="project-list-load-more-button"
+            onClick={() => loadMoreProjects()}
+          >
+            {t('show_x_more_projects', { x: loadMoreCount })}
+          </OLButton>
+        </>
       ) : null}
       <p>
         {hiddenProjectsCount > 0 ? (
@@ -33,15 +34,13 @@ export default function LoadMore() {
                 n: visibleProjects.length + hiddenProjectsCount,
               })}
             </span>{' '}
-            <button
-              type="button"
+            <OLButton
+              variant="link"
               onClick={() => showAllProjects()}
-              style={{ padding: 0 }}
-              className="btn-link"
-              aria-label={t('show_all_projects')}
+              className="btn-inline-link"
             >
-              {t('show_all_uppercase')}
-            </button>
+              {t('show_all_projects')}
+            </OLButton>
           </>
         ) : (
           <span aria-live="polite">

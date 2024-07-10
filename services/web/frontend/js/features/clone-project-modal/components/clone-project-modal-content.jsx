@@ -2,16 +2,20 @@
 import PropTypes from 'prop-types'
 import { useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Modal,
-  Alert,
-  Button,
-  ControlLabel,
-  FormControl,
-  FormGroup,
-} from 'react-bootstrap'
 import { postJSON } from '../../../infrastructure/fetch-json'
 import { CloneProjectTag } from './clone-project-tag'
+import {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import Notification from '@/shared/components/notification'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function CloneProjectModalContent({
   handleHide,
@@ -77,19 +81,15 @@ export default function CloneProjectModalContent({
 
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('copy_project')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('copy_project')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
-        <form id="clone-project-form" onSubmit={handleSubmit}>
-          <FormGroup>
-            <ControlLabel htmlFor="clone-project-form-name">
-              {t('new_name')}
-            </ControlLabel>
-
-            <FormControl
-              id="clone-project-form-name"
+      <OLModalBody>
+        <OLForm id="clone-project-form" onSubmit={handleSubmit}>
+          <OLFormGroup controlId="clone-project-form-name">
+            <OLFormLabel>{t('new_name')}</OLFormLabel>
+            <OLFormControl
               type="text"
               placeholder="New Project Name"
               required
@@ -97,13 +97,14 @@ export default function CloneProjectModalContent({
               onChange={event => setClonedProjectName(event.target.value)}
               autoFocus
             />
-          </FormGroup>
+          </OLFormGroup>
 
           {clonedProjectTags.length > 0 && (
-            <FormGroup className="clone-project-tag">
-              <ControlLabel htmlFor="clone-project-tags-list">
-                {t('tags')}:{' '}
-              </ControlLabel>
+            <OLFormGroup
+              controlId="clone-project-tags-list"
+              className="clone-project-tag mb-3"
+            >
+              <OLFormLabel>{t('tags')}: </OLFormLabel>
               <div role="listbox" id="clone-project-tags-list">
                 {clonedProjectTags.map(tag => (
                   <CloneProjectTag
@@ -113,37 +114,31 @@ export default function CloneProjectModalContent({
                   />
                 ))}
               </div>
-            </FormGroup>
+            </OLFormGroup>
           )}
-        </form>
+        </OLForm>
 
         {error && (
-          <Alert bsStyle="danger">
-            {error.length ? error : t('generic_something_went_wrong')}
-          </Alert>
+          <Notification
+            content={error.length ? error : t('generic_something_went_wrong')}
+            type="error"
+          />
         )}
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <Button
-          type="button"
-          bsStyle={null}
-          className="btn-secondary"
-          disabled={inFlight}
-          onClick={handleHide}
-        >
+      <OLModalFooter>
+        <OLButton variant="secondary" disabled={inFlight} onClick={handleHide}>
           {t('cancel')}
-        </Button>
-
-        <Button
+        </OLButton>
+        <OLButton
+          variant="primary"
+          disabled={inFlight || !valid}
           form="clone-project-form"
           type="submit"
-          bsStyle="primary"
-          disabled={inFlight || !valid}
         >
           {inFlight ? <>{t('copying')}…</> : t('copy')}
-        </Button>
-      </Modal.Footer>
+        </OLButton>
+      </OLModalFooter>
     </>
   )
 }

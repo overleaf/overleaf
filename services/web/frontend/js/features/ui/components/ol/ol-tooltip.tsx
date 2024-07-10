@@ -13,7 +13,9 @@ function OLTooltip(props: OLTooltipProps) {
     children: bs5Props.children,
     id: bs5Props.id,
     description: bs5Props.description,
-    overlayProps: {},
+    overlayProps: {
+      placement: bs5Props.overlayProps?.placement,
+    },
     ...bs3Props,
   }
 

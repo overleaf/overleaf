@@ -12,14 +12,14 @@ describe('<ArchiveProjectsButton />', function () {
 
   it('renders tooltip for button', function () {
     renderWithProjectListContext(<ArchiveProjectsButton />)
-    const btn = screen.getByLabelText('Archive')
+    const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Archive' })
   })
 
   it('opens the modal when clicked', function () {
     renderWithProjectListContext(<ArchiveProjectsButton />)
-    const btn = screen.getByLabelText('Archive')
+    const btn = screen.getByRole('button', { name: 'Archive' })
     fireEvent.click(btn)
     screen.getByText('Archive Projects')
   })

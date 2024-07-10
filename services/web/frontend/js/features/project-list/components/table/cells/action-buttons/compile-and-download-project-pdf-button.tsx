@@ -2,21 +2,31 @@ import { useTranslation } from 'react-i18next'
 import { memo, useCallback, useState } from 'react'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
 import Icon from '../../../../../../shared/components/icon'
-import Tooltip from '../../../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
 import useAbortController from '../../../../../../shared/hooks/use-abort-controller'
 import { postJSON } from '../../../../../../infrastructure/fetch-json'
-import AccessibleModal from '../../../../../../shared/components/accessible-modal'
-import { Button, Modal } from 'react-bootstrap'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 
 type CompileAndDownloadProjectPDFButtonProps = {
   project: Project
   children: (
     text: string,
     pendingDownload: boolean,
-    downloadProject: (fn: () => void) => void
+    downloadProject: <T extends React.MouseEvent>(
+      e?: T,
+      fn?: (e?: T) => void
+    ) => void
   ) => React.ReactElement
 }
 
@@ -31,7 +41,7 @@ function CompileAndDownloadProjectPDFButton({
   const [pendingCompile, setPendingCompile] = useState(false)
 
   const downloadProject = useCallback(
-    onDone => {
+    <T extends React.MouseEvent>(e?: T, onDone?: (e?: T) => void) => {
       setPendingCompile(pendingCompile => {
         if (pendingCompile) return true
         eventTracking.sendMB('project-list-page-interaction', {
@@ -72,7 +82,7 @@ function CompileAndDownloadProjectPDFButton({
               location.assign(
                 `/download/project/${project.id}/build/${outputFile.build}/output/output.pdf?${params}`
               )
-              onDone()
+              onDone?.(e)
             } else {
               setShowErrorModal(true)
             }
@@ -111,19 +121,19 @@ function CompileErrorModal({
   const { t } = useTranslation()
   return (
     <>
-      <AccessibleModal show onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>
+      <OLModal show onHide={handleClose}>
+        <OLModalHeader closeButton>
+          <OLModalTitle>
             {project.name}: {t('pdf_unavailable_for_download')}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{t('generic_linked_file_compile_error')}</Modal.Body>
-        <Modal.Footer>
-          <a href={`/project/${project.id}`}>
-            <Button bsStyle="primary">{t('open_project')}</Button>
-          </a>
-        </Modal.Footer>
-      </AccessibleModal>
+          </OLModalTitle>
+        </OLModalHeader>
+        <OLModalBody>{t('generic_linked_file_compile_error')}</OLModalBody>
+        <OLModalFooter>
+          <OLButton variant="primary" href={`/project/${project.id}`}>
+            {t('open_project')}
+          </OLButton>
+        </OLModalFooter>
+      </OLModal>
     </>
   )
 }
@@ -135,24 +145,35 @@ const CompileAndDownloadProjectPDFButtonTooltip = memo(
     return (
       <CompileAndDownloadProjectPDFButton project={project}>
         {(text, pendingCompile, compileAndDownloadProject) => (
-          <Tooltip
+          <OLTooltip
             key={`tooltip-compile-and-download-project-${project.id}`}
             id={`compile-and-download-project-${project.id}`}
             description={text}
             overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
           >
-            <button
-              className="btn btn-link action-btn"
-              aria-label={text}
-              onClick={() => compileAndDownloadProject(() => {})}
-            >
-              {pendingCompile ? (
-                <Icon type="spinner" spin />
-              ) : (
-                <Icon type="file-pdf-o" />
-              )}
-            </button>
-          </Tooltip>
+            <span>
+              <OLIconButton
+                onClick={compileAndDownloadProject}
+                variant="link"
+                accessibilityLabel={text}
+                loadingLabel={text}
+                isLoading={pendingCompile}
+                className="action-btn"
+                icon={
+                  bsVersion({
+                    bs5: 'picture_as_pdf',
+                    bs3: 'file-pdf-o',
+                  }) as string
+                }
+                bs3Props={{
+                  fw: true,
+                  loading: pendingCompile ? (
+                    <Icon type="spinner" fw accessibilityLabel={text} spin />
+                  ) : null,
+                }}
+              />
+            </span>
+          </OLTooltip>
         )}
       </CompileAndDownloadProjectPDFButton>
     )

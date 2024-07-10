@@ -17,18 +17,19 @@ export type OLIconButtonProps = IconButtonProps & {
 export default function OLIconButton(props: OLIconButtonProps) {
   const { bs3Props, ...rest } = props
 
-  const { fw, ...bs3Rest } = bs3Props || {}
+  const { fw, loading, ...bs3Rest } = bs3Props || {}
 
   return (
     <BootstrapVersionSwitcher
       bs3={
         <BS3Button {...bs3ButtonProps(rest)} {...bs3Rest}>
-          {bs3Props?.loading}
-          <Icon
-            type={rest.icon}
-            fw={fw}
-            accessibilityLabel={rest.accessibilityLabel}
-          />
+          {loading || (
+            <Icon
+              type={rest.icon}
+              fw={fw}
+              accessibilityLabel={rest.accessibilityLabel}
+            />
+          )}
         </BS3Button>
       }
       bs5={<IconButton {...rest} />}

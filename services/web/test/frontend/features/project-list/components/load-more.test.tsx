@@ -72,9 +72,9 @@ describe('<LoadMore />', function () {
     })
 
     await waitFor(() => {
-      screen.getByLabelText(
-        `Show ${currentList.length - 20 - 20} more projects`
-      )
+      screen.getByRole('button', {
+        name: `Show ${currentList.length - 20 - 20} more projects`,
+      })
       screen.getByText(`Showing 40 out of ${currentList.length} projects.`)
     })
   })

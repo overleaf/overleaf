@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../../shared/components/icon'
-import Tooltip from '../../../../../shared/components/tooltip'
 import { getOwnerName } from '../../../util/project'
 import { Project } from '../../../../../../../types/project/dashboard/api'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 type LinkSharingIconProps = {
   prependSpace: boolean
@@ -17,7 +17,7 @@ function LinkSharingIcon({
 }: LinkSharingIconProps) {
   const { t } = useTranslation()
   return (
-    <Tooltip
+    <OLTooltip
       key={`tooltip-link-sharing-${project.id}`}
       id={`tooltip-link-sharing-${project.id}`}
       description={t('link_sharing')}
@@ -32,7 +32,7 @@ function LinkSharingIcon({
           accessibilityLabel={t('link_sharing')}
         />
       </span>
-    </Tooltip>
+    </OLTooltip>
   )
 }
 

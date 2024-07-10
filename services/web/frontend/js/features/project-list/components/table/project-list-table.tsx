@@ -1,21 +1,37 @@
-import { useCallback } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../../shared/components/icon'
 import ProjectListTableRow from './project-list-table-row'
 import { useProjectListContext } from '../../context/project-list-context'
 import useSort from '../../hooks/use-sort'
 import withContent, { SortBtnProps } from '../sort/with-content'
-import { Project } from '../../../../../../types/project/dashboard/api'
+import OLTable from '@/features/ui/components/ol/ol-table'
+import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
   return (
     <button
-      className="btn-link table-header-sort-btn hidden-xs"
+      className={classnames(
+        'table-header-sort-btn',
+        bsVersion({
+          bs5: 'd-none d-md-inline-block',
+          bs3: 'hidden-xs',
+        })
+      )}
       onClick={onClick}
       aria-label={screenReaderText}
     >
-      <span className="tablesort-text">{text}</span>
-      {iconType && <Icon type={iconType} />}
+      <span className={bsVersion({ bs3: 'tablesort-text' })}>{text}</span>
+      {iconType && (
+        <BootstrapVersionSwitcher
+          bs3={<Icon type={iconType} />}
+          bs5={<MaterialIcon type={iconType} />}
+        />
+      )}
     </button>
   )
 }
@@ -31,6 +47,7 @@ function ProjectListTable() {
     selectOrUnselectAllProjects,
   } = useProjectListContext()
   const { handleSort } = useSort()
+  const checkAllRef = useRef<HTMLInputElement>()
 
   const handleAllProjectsCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,18 +56,39 @@ function ProjectListTable() {
     [selectOrUnselectAllProjects]
   )
 
+  useEffect(() => {
+    if (checkAllRef.current) {
+      checkAllRef.current.indeterminate =
+        selectedProjects.length > 0 &&
+        selectedProjects.length !== visibleProjects.length
+    }
+  }, [selectedProjects, visibleProjects])
+
   return (
-    <table className="project-dash-table">
-      <caption className="sr-only">{t('projects_list')}</caption>
-      <thead className="sr-only-xs">
+    <OLTable className="project-dash-table" container={false} hover>
+      <caption
+        className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}
+      >
+        {t('projects_list')}
+      </caption>
+      <thead
+        className={bsVersion({
+          bs5: 'visually-hidden-max-md',
+          bs3: 'sr-only-xs',
+        })}
+      >
         <tr>
           <th
-            className="dash-cell-checkbox hidden-xs"
+            className={classnames(
+              'dash-cell-checkbox',
+              bsVersion({
+                bs5: 'd-none d-md-table-cell',
+                bs3: 'hidden-xs',
+              })
+            )}
             aria-label={t('select_projects')}
           >
-            <input
-              type="checkbox"
-              id="project-list-table-select-all"
+            <OLFormCheckbox
               autoComplete="off"
               onChange={handleAllProjectsCheckboxChange}
               checked={
@@ -58,10 +96,13 @@ function ProjectListTable() {
                 visibleProjects.length !== 0
               }
               disabled={visibleProjects.length === 0}
+              aria-label={t('select_all_projects')}
+              bs3Props={{
+                bsClass: 'dash-cell-checkbox-wrapper',
+                inputRef: undefined,
+              }}
+              inputRef={checkAllRef}
             />
-            <label htmlFor="project-list-table-select-all" className="sr-only">
-              {t('select_all_projects')}
-            </label>
           </th>
           <th
             className="dash-cell-name"
@@ -82,13 +123,22 @@ function ProjectListTable() {
             />
           </th>
           <th
-            className="dash-cell-date-owner visible-xs"
+            className={classnames(
+              'dash-cell-date-owner',
+              bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
+            )}
             aria-label={t('date_and_owner')}
           >
             {t('date_and_owner')}
           </th>
           <th
-            className="dash-cell-owner hidden-xs"
+            className={classnames(
+              'dash-cell-owner',
+              bsVersion({
+                bs5: 'd-none d-md-table-cell',
+                bs3: 'hidden-xs',
+              })
+            )}
             aria-label={t('owner')}
             aria-sort={
               sort.by === 'owner'
@@ -106,7 +156,13 @@ function ProjectListTable() {
             />
           </th>
           <th
-            className="dash-cell-date hidden-xs"
+            className={classnames(
+              'dash-cell-date',
+              bsVersion({
+                bs5: 'd-none d-md-table-cell',
+                bs3: 'hidden-xs',
+              })
+            )}
             aria-label={t('last_modified')}
             aria-sort={
               sort.by === 'lastUpdated'
@@ -123,7 +179,13 @@ function ProjectListTable() {
               onClick={() => handleSort('lastUpdated')}
             />
           </th>
-          <th className="dash-cell-tag visible-xs" aria-label={t('tags')}>
+          <th
+            className={classnames(
+              'dash-cell-tag',
+              bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
+            )}
+            aria-label={t('tags')}
+          >
             {t('tags')}
           </th>
           <th className="dash-cell-actions" aria-label={t('actions')}>
@@ -131,21 +193,24 @@ function ProjectListTable() {
           </th>
         </tr>
       </thead>
-
       <tbody>
-        {visibleProjects.length ? (
-          visibleProjects.map((p: Project) => (
-            <ProjectListTableRow project={p} key={p.id} />
+        {visibleProjects.length > 0 ? (
+          visibleProjects.map(p => (
+            <ProjectListTableRow
+              project={p}
+              selected={selectedProjects.some(({ id }) => id === p.id)}
+              key={p.id}
+            />
           ))
         ) : (
           <tr className="no-projects">
-            <td className="project-list-table-no-projects-cell" colSpan={5}>
+            <td className="text-center" colSpan={5}>
               {t('no_projects')}
             </td>
           </tr>
         )}
       </tbody>
-    </table>
+    </OLTable>
   )
 }
 

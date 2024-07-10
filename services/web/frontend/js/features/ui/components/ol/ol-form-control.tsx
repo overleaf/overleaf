@@ -2,6 +2,7 @@ import { forwardRef } from 'react'
 import { Form } from 'react-bootstrap-5'
 import { FormControl as BS3FormControl } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 
 type OLFormControlProps = React.ComponentProps<(typeof Form)['Control']> & {
   bs3Props?: Record<string, unknown>
@@ -22,6 +23,7 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       placeholder: rest.placeholder,
       readOnly: rest.readOnly,
       autoComplete: rest.autoComplete,
+      autoFocus: rest.autoFocus,
       minLength: rest.minLength,
       maxLength: rest.maxLength,
       onChange: rest.onChange as (e: React.ChangeEvent<unknown>) => void,
@@ -38,20 +40,9 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       ...bs3Props,
     }
 
-    // get all `aria-*` and `data-*` attributes
-    const extraProps = Object.entries(rest).reduce(
-      (acc, [key, value]) => {
-        if (key.startsWith('aria-') || key.startsWith('data-')) {
-          acc[key] = value
-        }
-        return acc
-      },
-      {} as Record<string, string>
-    )
-
     bs3FormControlProps = {
       ...bs3FormControlProps,
-      ...extraProps,
+      ...getAriaAndDataProps(rest),
       'data-ol-dirty': rest['data-ol-dirty'],
     } as typeof bs3FormControlProps & Record<string, unknown>
 

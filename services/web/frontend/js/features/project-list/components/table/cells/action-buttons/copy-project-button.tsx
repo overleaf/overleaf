@@ -1,7 +1,5 @@
 import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../../../shared/components/icon'
-import Tooltip from '../../../../../../shared/components/tooltip'
 import CloneProjectModal from '../../../../../clone-project-modal/components/clone-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
@@ -12,14 +10,18 @@ import {
 } from '../../../../../../../../types/project/dashboard/api'
 import { useProjectTags } from '@/features/project-list/hooks/use-project-tags'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
-
-type HandleOpenModal = (fn?: () => void) => void
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type CopyButtonProps = {
   project: Project
   children: (
     text: string,
-    handleOpenModal: HandleOpenModal
+    handleOpenModal: <T extends React.MouseEvent>(
+      e?: T,
+      fn?: (e?: T) => void
+    ) => void
   ) => React.ReactElement
 }
 
@@ -37,9 +39,9 @@ function CopyProjectButton({ project, children }: CopyButtonProps) {
   const projectTags = useProjectTags(project.id)
 
   const handleOpenModal = useCallback(
-    (onOpen?: Parameters<HandleOpenModal>[0]) => {
+    <T extends React.MouseEvent>(e?: T, onOpen?: (e?: T) => void) => {
       setShowModal(true)
-      onOpen?.()
+      onOpen?.(e)
     },
     []
   )
@@ -97,20 +99,28 @@ const CopyProjectButtonTooltip = memo(function CopyProjectButtonTooltip({
   return (
     <CopyProjectButton project={project}>
       {(text, handleOpenModal) => (
-        <Tooltip
+        <OLTooltip
           key={`tooltip-copy-project-${project.id}`}
           id={`copy-project-${project.id}`}
           description={text}
           overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
         >
-          <button
-            className="btn btn-link action-btn"
-            aria-label={text}
-            onClick={() => handleOpenModal()}
-          >
-            <Icon type="files-o" fw />
-          </button>
-        </Tooltip>
+          <span>
+            <OLIconButton
+              onClick={handleOpenModal}
+              variant="link"
+              accessibilityLabel={text}
+              className="action-btn"
+              icon={
+                bsVersion({
+                  bs5: 'file_copy',
+                  bs3: 'files-o',
+                }) as string
+              }
+              bs3Props={{ fw: true }}
+            />
+          </span>
+        </OLTooltip>
       )}
     </CopyProjectButton>
   )

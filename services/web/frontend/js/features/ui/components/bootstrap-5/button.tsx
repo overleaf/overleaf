@@ -15,6 +15,7 @@ export default function Button({
   className,
   leadingIcon,
   isLoading = false,
+  loadingLabel,
   size = 'default',
   trailingIcon,
   variant = 'primary',
@@ -41,7 +42,9 @@ export default function Button({
             className={loadingSpinnerClassName}
             role="status"
           />
-          <span className="visually-hidden">{t('loading')}</span>
+          <span className="visually-hidden">
+            {loadingLabel ?? t('loading')}
+          </span>
         </span>
       )}
       <span className="button-content" aria-hidden={isLoading}>

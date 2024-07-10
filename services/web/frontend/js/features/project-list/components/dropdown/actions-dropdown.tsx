@@ -1,5 +1,13 @@
 import { useState, useCallback } from 'react'
-import { Dropdown } from 'react-bootstrap'
+import { useTranslation } from 'react-i18next'
+import { Dropdown as BS3Dropdown } from 'react-bootstrap'
+import { Spinner } from 'react-bootstrap-5'
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownToggle,
+} from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import MenuItemButton from './menu-item-button'
 import Icon from '../../../../shared/components/icon'
 import CopyProjectButton from '../table/cells/action-buttons/copy-project-button'
@@ -13,10 +21,12 @@ import DeleteProjectButton from '../table/cells/action-buttons/delete-project-bu
 import { Project } from '../../../../../../types/project/dashboard/api'
 import CompileAndDownloadProjectPDFButton from '../table/cells/action-buttons/compile-and-download-project-pdf-button'
 import RenameProjectButton from '../table/cells/action-buttons/rename-project-button'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type ActionButtonProps = {
   project: Project
-  onClick: () => void // eslint-disable-line react/no-unused-prop-types
+  onClick: <T extends React.MouseEvent>(e?: T, fn?: (e?: T) => void) => void
 }
 
 function CopyProjectButtonMenuItem({ project, onClick }: ActionButtonProps) {
@@ -24,7 +34,7 @@ function CopyProjectButtonMenuItem({ project, onClick }: ActionButtonProps) {
     <CopyProjectButton project={project}>
       {(text, handleOpenModal) => (
         <MenuItemButton
-          onClick={() => handleOpenModal(onClick)}
+          onClick={e => handleOpenModal(e, onClick)}
           className="projects-action-menu-item"
         >
           <Icon type="files-o" className="menu-item-button-icon" />{' '}
@@ -43,7 +53,7 @@ function CompileAndDownloadProjectPDFButtonMenuItem({
     <CompileAndDownloadProjectPDFButton project={project}>
       {(text, pendingCompile, downloadProject) => (
         <MenuItemButton
-          onClick={() => downloadProject(onClick)}
+          onClick={e => downloadProject(e, onClick)}
           className="projects-action-menu-item"
         >
           {pendingCompile ? (
@@ -219,7 +229,7 @@ type ActionDropdownProps = {
   project: Project
 }
 
-function ActionsDropdown({ project }: ActionDropdownProps) {
+export function BS3ActionsDropdown({ project }: ActionDropdownProps) {
   const [isOpened, setIsOpened] = useState(false)
 
   const handleClose = useCallback(() => {
@@ -227,16 +237,16 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
   }, [setIsOpened])
 
   return (
-    <Dropdown
+    <BS3Dropdown
       id={`project-actions-dropdown-${project.id}`}
       pullRight
       open={isOpened}
       onToggle={open => setIsOpened(open)}
     >
-      <Dropdown.Toggle noCaret className="btn-transparent">
+      <BS3Dropdown.Toggle noCaret className="btn-transparent">
         <Icon type="ellipsis-h" fw />
-      </Dropdown.Toggle>
-      <Dropdown.Menu className="projects-dropdown-menu text-left">
+      </BS3Dropdown.Toggle>
+      <BS3Dropdown.Menu className="projects-dropdown-menu text-left">
         <RenameProjectButtonMenuItem project={project} onClick={handleClose} />
         <CopyProjectButtonMenuItem project={project} onClick={handleClose} />
         <DownloadProjectButtonMenuItem
@@ -256,8 +266,180 @@ function ActionsDropdown({ project }: ActionDropdownProps) {
         <UntrashProjectButtonMenuItem project={project} onClick={handleClose} />
         <LeaveProjectButtonMenuItem project={project} onClick={handleClose} />
         <DeleteProjectButtonMenuItem project={project} onClick={handleClose} />
-      </Dropdown.Menu>
+      </BS3Dropdown.Menu>
+    </BS3Dropdown>
+  )
+}
+
+function BS5ActionsDropdown({ project }: ActionDropdownProps) {
+  const { t } = useTranslation()
+
+  return (
+    <Dropdown align="end">
+      <DropdownToggle
+        id={`project-actions-dropdown-toggle-btn-${project.id}`}
+        bsPrefix="dropdown-table-button-toggle"
+      >
+        <MaterialIcon type="more_vert" accessibilityLabel={t('actions')} />
+      </DropdownToggle>
+      <DropdownMenu flip={false}>
+        <RenameProjectButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="edit"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </RenameProjectButton>
+        <CopyProjectButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="file_copy"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </CopyProjectButton>
+        <DownloadProjectButton project={project}>
+          {(text, downloadProject) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={downloadProject}
+                leadingIcon="cloud_download"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </DownloadProjectButton>
+        <CompileAndDownloadProjectPDFButton project={project}>
+          {(text, pendingCompile, downloadProject) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={e => {
+                  e.stopPropagation()
+                  downloadProject()
+                }}
+                leadingIcon={
+                  pendingCompile ? (
+                    <Spinner
+                      animation="border"
+                      aria-hidden="true"
+                      as="span"
+                      className="dropdown-item-leading-icon spinner"
+                      size="sm"
+                      role="status"
+                    />
+                  ) : (
+                    'picture_as_pdf'
+                  )
+                }
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </CompileAndDownloadProjectPDFButton>
+        <ArchiveProjectButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="inbox"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </ArchiveProjectButton>
+        <TrashProjectButton project={project}>
+          {(text, handleOpenModal) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={handleOpenModal}
+                leadingIcon="delete"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </TrashProjectButton>
+        <UnarchiveProjectButton project={project}>
+          {(text, unarchiveProject) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={unarchiveProject}
+                leadingIcon="restore_page"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </UnarchiveProjectButton>
+        <UntrashProjectButton project={project}>
+          {(text, untrashProject) => (
+            <li role="none">
+              <DropdownItem
+                as="button"
+                tabIndex={-1}
+                onClick={untrashProject}
+                leadingIcon="restore_page"
+              >
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </UntrashProjectButton>
+        <LeaveProjectButton project={project}>
+          {text => (
+            <li role="none">
+              <DropdownItem as="button" tabIndex={-1} leadingIcon="logout">
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </LeaveProjectButton>
+        <DeleteProjectButton project={project}>
+          {text => (
+            <li role="none">
+              <DropdownItem as="button" tabIndex={-1} leadingIcon="block">
+                {text}
+              </DropdownItem>
+            </li>
+          )}
+        </DeleteProjectButton>
+      </DropdownMenu>
     </Dropdown>
+  )
+}
+
+function ActionsDropdown({ project }: ActionDropdownProps) {
+  return (
+    <BootstrapVersionSwitcher
+      bs3={<BS3ActionsDropdown project={project} />}
+      bs5={<BS5ActionsDropdown project={project} />}
+    />
   )
 }
 

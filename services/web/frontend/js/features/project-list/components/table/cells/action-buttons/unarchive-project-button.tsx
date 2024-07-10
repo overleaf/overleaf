@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { memo, useCallback } from 'react'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
-import Icon from '../../../../../../shared/components/icon'
-import Tooltip from '../../../../../../shared/components/tooltip'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { unarchiveProject } from '../../../../util/api'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type UnarchiveProjectButtonProps = {
   project: Project
@@ -41,20 +42,28 @@ const UnarchiveProjectButtonTooltip = memo(
     return (
       <UnarchiveProjectButton project={project}>
         {(text, handleUnarchiveProject) => (
-          <Tooltip
+          <OLTooltip
             key={`tooltip-unarchive-project-${project.id}`}
             id={`unarchive-project-${project.id}`}
             description={text}
             overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
           >
-            <button
-              className="btn btn-link action-btn"
-              aria-label={text}
-              onClick={handleUnarchiveProject}
-            >
-              <Icon type="reply" fw />
-            </button>
-          </Tooltip>
+            <span>
+              <OLIconButton
+                onClick={handleUnarchiveProject}
+                variant="link"
+                accessibilityLabel={text}
+                className="action-btn"
+                icon={
+                  bsVersion({
+                    bs5: 'restore_page',
+                    bs3: 'reply',
+                  }) as string
+                }
+                bs3Props={{ fw: true }}
+              />
+            </span>
+          </OLTooltip>
         )}
       </UnarchiveProjectButton>
     )

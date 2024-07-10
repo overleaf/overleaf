@@ -10,6 +10,7 @@ export type ButtonProps = {
   target?: string
   rel?: string
   isLoading?: boolean
+  loadingLabel?: string
   onClick?: MouseEventHandler<HTMLButtonElement>
   size?: 'small' | 'default' | 'large'
   trailingIcon?: string

@@ -1,5 +1,4 @@
 import { memo, useEffect, useState } from 'react'
-import { Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Project } from '../../../../../../types/project/dashboard/api'
 import { getUserFacingMessage } from '../../../../infrastructure/fetch-json'
@@ -12,6 +11,7 @@ import OLModal, {
   OLModalBody,
   OLModalFooter,
   OLModalHeader,
+  OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
 
 type ProjectsActionModalProps = {
@@ -80,7 +80,7 @@ function ProjectsActionModal({
       backdrop="static"
     >
       <OLModalHeader closeButton>
-        <Modal.Title>{title}</Modal.Title>
+        <OLModalTitle>{title}</OLModalTitle>
       </OLModalHeader>
       <OLModalBody>
         {children}

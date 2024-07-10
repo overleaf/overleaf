@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { memo, useCallback } from 'react'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
-import Icon from '../../../../../../shared/components/icon'
-import Tooltip from '../../../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type DownloadProjectButtonProps = {
   project: Project
@@ -39,20 +40,28 @@ const DownloadProjectButtonTooltip = memo(
     return (
       <DownloadProjectButton project={project}>
         {(text, downloadProject) => (
-          <Tooltip
+          <OLTooltip
             key={`tooltip-download-project-${project.id}`}
             id={`download-project-${project.id}`}
             description={text}
             overlayProps={{ placement: 'top', trigger: ['hover', 'focus'] }}
           >
-            <button
-              className="btn btn-link action-btn"
-              aria-label={text}
-              onClick={downloadProject}
-            >
-              <Icon type="cloud-download" fw />
-            </button>
-          </Tooltip>
+            <span>
+              <OLIconButton
+                onClick={downloadProject}
+                variant="link"
+                accessibilityLabel={text}
+                className="action-btn"
+                icon={
+                  bsVersion({
+                    bs5: 'cloud_download',
+                    bs3: 'cloud-download',
+                  }) as string
+                }
+                bs3Props={{ fw: true }}
+              />
+            </span>
+          </OLTooltip>
         )}
       </DownloadProjectButton>
     )

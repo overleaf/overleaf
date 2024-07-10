@@ -12,6 +12,10 @@
   }
 }
 
+.action-btn {
+  padding: 0 var(--spacing-02);
+}
+
 .project-list-react {
   body > &.content {
     padding-top: $header-height;
@@ -155,6 +159,240 @@
     overflow-x: hidden;
     padding: var(--spacing-08) var(--spacing-06);
   }
+
+  .project-dash-table {
+    width: 100%;
+    table-layout: fixed;
+
+    @include media-breakpoint-down(md) {
+      tr:not(:last-child) {
+        border-bottom: 1px solid $table-border-color;
+      }
+
+      td {
+        border-bottom-width: 0;
+      }
+    }
+
+    tbody {
+      tr.no-projects:hover {
+        td {
+          box-shadow: none;
+        }
+      }
+    }
+
+    .table-header-sort-btn {
+      border: 0;
+      text-align: left;
+      color: var(--content-secondary);
+      background-color: transparent;
+      padding: 0;
+      font-weight: bold;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        color: var(--content-secondary);
+        text-decoration: none;
+      }
+
+      .material-symbols {
+        vertical-align: bottom;
+        font-size: var(--font-size-06);
+      }
+    }
+
+    .dash-cell-name {
+      hyphens: auto;
+      width: 50%;
+      word-break: break-word;
+    }
+
+    .dash-cell-owner {
+      width: 20%;
+    }
+
+    .dash-cell-date {
+      width: 25%;
+    }
+
+    .dash-cell-actions {
+      display: none;
+      text-align: right;
+
+      .btn {
+        text-decoration: none;
+      }
+    }
+
+    .dash-cell-date-owner {
+      font-size: $font-size-sm;
+      @include text-truncate();
+    }
+
+    @include media-breakpoint-up(sm) {
+      .dash-cell-checkbox {
+        width: 4%;
+      }
+
+      .dash-cell-name {
+        width: 50%;
+      }
+
+      .dash-cell-owner {
+        width: 21%;
+      }
+
+      .dash-cell-date {
+        width: 25%;
+      }
+
+      .dash-cell-actions {
+        width: 0%;
+      }
+    }
+
+    @include media-breakpoint-up(md) {
+      .dash-cell-checkbox {
+        width: 4%;
+      }
+
+      .dash-cell-name {
+        width: 44%;
+      }
+
+      .dash-cell-owner {
+        width: 16%;
+      }
+
+      .dash-cell-date {
+        width: 21%;
+      }
+
+      .dash-cell-actions {
+        display: table-cell;
+        width: 15%;
+      }
+
+      .project-tools {
+        float: none;
+      }
+    }
+
+    @include media-breakpoint-up(lg) {
+      .dash-cell-checkbox {
+        width: 3%;
+      }
+
+      .dash-cell-name {
+        width: 46%;
+      }
+
+      .dash-cell-owner {
+        width: 13%;
+      }
+
+      .dash-cell-date {
+        width: 16%;
+      }
+
+      .dash-cell-actions {
+        width: 22%;
+      }
+
+      tbody {
+        .dash-cell-actions {
+          white-space: nowrap;
+        }
+      }
+    }
+
+    @include media-breakpoint-up(xl) {
+      .dash-cell-checkbox {
+        width: 3%;
+      }
+
+      .dash-cell-name {
+        width: 46%;
+      }
+
+      .dash-cell-owner {
+        width: 15%;
+      }
+
+      .dash-cell-date {
+        width: 19%;
+      }
+
+      .dash-cell-actions {
+        width: 17%;
+      }
+    }
+
+    @include media-breakpoint-up(xxl) {
+      .dash-cell-checkbox {
+        width: 2%;
+      }
+
+      .dash-cell-name {
+        width: 49%;
+      }
+
+      .dash-cell-owner {
+        width: 16%;
+      }
+
+      .dash-cell-date {
+        width: 19%;
+      }
+
+      .dash-cell-actions {
+        width: 14%;
+      }
+    }
+
+    @include media-breakpoint-down(md) {
+      tr {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .dash-cell-name,
+      .dash-cell-owner,
+      .dash-cell-date,
+      .dash-cell-tag,
+      .dash-cell-actions {
+        display: block;
+        width: auto;
+      }
+
+      .dash-cell-actions {
+        position: absolute;
+        top: var(--spacing-04);
+        right: var(--spacing-04);
+        padding: 0 !important;
+      }
+
+      .dropdown-table-button-toggle {
+        padding: var(--spacing-04);
+        font-size: 0;
+        line-height: 1;
+        border-radius: 50%;
+        color: var(--content-primary);
+        background-color: transparent;
+
+        &:hover,
+        &:active {
+          background-color: rgba($neutral-90, 0.08);
+        }
+      }
+    }
+  }
 }
 
 .project-list-upload-project-modal-uppy-dashboard .uppy-Root {
@@ -221,4 +459,8 @@
       }
     }
   }
+}
+
+.project-list-load-more-button {
+  margin-bottom: var(--spacing-05);
 }

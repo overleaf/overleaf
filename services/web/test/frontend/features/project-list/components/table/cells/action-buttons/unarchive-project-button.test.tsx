@@ -21,7 +21,7 @@ describe('<UnarchiveProjectButton />', function () {
     renderWithProjectListContext(
       <UnarchiveProjectButtonTooltip project={archivedProject} />
     )
-    const btn = screen.getByLabelText('Restore')
+    const btn = screen.getByRole('button', { name: 'Restore' })
     fireEvent.mouseOver(btn)
     screen.getByRole('tooltip', { name: 'Restore' })
   })
@@ -30,14 +30,14 @@ describe('<UnarchiveProjectButton />', function () {
     renderWithProjectListContext(
       <UnarchiveProjectButtonTooltip project={trashedProject} />
     )
-    expect(screen.queryByLabelText('Restore')).to.be.null
+    expect(screen.queryByRole('button', { name: 'Restore' })).to.be.null
   })
 
   it('does not render the button when project is current', function () {
     renderWithProjectListContext(
       <UnarchiveProjectButtonTooltip project={archiveableProject} />
     )
-    expect(screen.queryByLabelText('Restore')).to.be.null
+    expect(screen.queryByRole('button', { name: 'Restore' })).to.be.null
   })
 
   it('unarchive the project and updates the view data', async function () {
@@ -52,7 +52,7 @@ describe('<UnarchiveProjectButton />', function () {
     renderWithProjectListContext(
       <UnarchiveProjectButtonTooltip project={project} />
     )
-    const btn = screen.getByLabelText('Restore')
+    const btn = screen.getByRole('button', { name: 'Restore' })
     fireEvent.click(btn)
 
     await waitFor(

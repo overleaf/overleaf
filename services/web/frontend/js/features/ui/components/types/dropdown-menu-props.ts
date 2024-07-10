@@ -24,9 +24,9 @@ export type DropdownItemProps = PropsWithChildren<{
   disabled?: boolean
   eventKey?: string | number
   href?: string
-  leadingIcon?: string
+  leadingIcon?: string | React.ReactNode
   onClick?: React.MouseEventHandler
-  trailingIcon?: string
+  trailingIcon?: string | React.ReactNode
   variant?: 'default' | 'danger'
   className?: string
   role?: string

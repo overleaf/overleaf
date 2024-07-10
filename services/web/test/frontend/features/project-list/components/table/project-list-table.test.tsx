@@ -108,15 +108,25 @@ describe('<ProjectListTable />', function () {
 
     // Action Column
     // temporary count tests until we add filtering for archived/trashed
-    const copyButtons = screen.getAllByLabelText('Copy')
+    const copyButtons = screen.getAllByRole('button', {
+      name: 'Copy',
+    })
     expect(copyButtons.length).to.equal(currentProjects.length)
-    const downloadButtons = screen.getAllByLabelText('Download .zip file')
+    const downloadButtons = screen.getAllByRole('button', {
+      name: 'Download .zip file',
+    })
     expect(downloadButtons.length).to.equal(currentProjects.length)
-    const downloadPDFButtons = screen.getAllByLabelText('Download PDF')
+    const downloadPDFButtons = screen.getAllByRole('button', {
+      name: 'Download PDF',
+    })
     expect(downloadPDFButtons.length).to.equal(currentProjects.length)
-    const archiveButtons = screen.getAllByLabelText('Archive')
+    const archiveButtons = screen.getAllByRole('button', {
+      name: 'Archive',
+    })
     expect(archiveButtons.length).to.equal(currentProjects.length)
-    const trashButtons = screen.getAllByLabelText('Trash')
+    const trashButtons = screen.getAllByRole('button', {
+      name: 'Trash',
+    })
     expect(trashButtons.length).to.equal(currentProjects.length)
 
     // TODO to be implemented when the component renders trashed & archived projects
