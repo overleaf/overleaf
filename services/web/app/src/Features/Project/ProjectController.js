@@ -553,17 +553,18 @@ const _ProjectController = {
         const ownerFeatures = await UserGetter.promises.getUserFeatures(
           project.owner_ref
         )
+        const planLimit = ownerFeatures?.collaborators || 0
+        const namedEditors = project.collaberator_refs?.length || 0
+        const exceedAtLimit = planLimit > -1 && namedEditors >= planLimit
         const projectOpenedSegmentation = {
           projectId: project._id,
           // temporary link sharing segmentation:
           linkSharingWarning: linkSharingChanges?.variant,
-          namedEditors: project.collaberator_refs?.length || 0,
+          namedEditors,
           tokenEditors: project.tokenAccessReadAndWrite_refs?.length || 0,
-          planLimit: ownerFeatures?.collaborators || 0,
+          planLimit,
+          exceedAtLimit,
         }
-        projectOpenedSegmentation.exceedAtLimit =
-          projectOpenedSegmentation.namedEditors >=
-          projectOpenedSegmentation.planLimit
         AnalyticsManager.recordEventForUserInBackground(
           userId,
           'project-opened',

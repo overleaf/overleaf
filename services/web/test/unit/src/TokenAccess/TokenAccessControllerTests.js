@@ -100,6 +100,10 @@ describe('TokenAccessController', function () {
       },
     }
 
+    this.AnalyticsManager = {
+      recordEventForSession: sinon.stub(),
+    }
+
     this.TokenAccessController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -120,6 +124,7 @@ describe('TokenAccessController', function () {
         '../Helpers/AsyncFormHelper': (this.AsyncFormHelper = {
           redirect: sinon.stub(),
         }),
+        '../Analytics/AnalyticsManager': this.AnalyticsManager,
       },
     })
   })

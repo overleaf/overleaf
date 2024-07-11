@@ -18,6 +18,7 @@ const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const AsyncFormHelper = require('../Helpers/AsyncFormHelper')
+const AnalyticsManager = require('../Analytics/AnalyticsManager')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -476,6 +477,10 @@ async function ensureUserCanUseSharingUpdatesConsentPage(req, res, next) {
 
 async function sharingUpdatesConsent(req, res, next) {
   const { Project_id: projectId } = req.params
+  AnalyticsManager.recordEventForSession(req.session, 'notification-prompt', {
+    page: req.path,
+    name: 'link-sharing-collaborator',
+  })
   res.render('project/token/sharing-updates', {
     projectId,
   })
