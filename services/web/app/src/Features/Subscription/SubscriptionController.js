@@ -284,6 +284,25 @@ async function userSubscriptionPage(req, res) {
 }
 
 async function interstitialPaymentPage(req, res) {
+  const websiteRedesignPlansAssignment =
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'website-redesign-plans'
+    )
+
+  let template = 'subscriptions/interstitial-payment'
+
+  if (websiteRedesignPlansAssignment.variant === 'new-design') {
+    return await Modules.promises.hooks.fire(
+      'interstitialPaymentPageNewDesign',
+      req,
+      res
+    )
+  } else if (websiteRedesignPlansAssignment.variant === 'light-design') {
+    template = 'subscriptions/interstitial-payment-light-design'
+  }
+
   const user = SessionManager.getSessionUser(req.session)
   const { recommendedCurrency, countryCode, geoPricingLATAMTestVariant } =
     await _getRecommendedCurrency(req, res)
@@ -318,7 +337,7 @@ async function interstitialPaymentPage(req, res) {
       'local-ccy-format-v2'
     )
 
-    res.render('subscriptions/interstitial-payment', {
+    res.render(template, {
       title: 'subscribe',
       itm_content: req.query?.itm_content,
       itm_campaign: req.query?.itm_campaign,

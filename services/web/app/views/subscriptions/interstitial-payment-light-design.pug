@@ -1,0 +1,16 @@
+extends ../layout-marketing
+
+include ./plans/_mixins
+	
+//- TODO: uncomment this
+//- block entrypointVar
+//- 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
+
+block vars
+	- var suppressFooter = true
+	- var suppressNavbarRight = true
+	- var suppressCookieBanner = true
+
+block content
+	main.website-redesign.content#main-content
+		p interstitial payment light design
