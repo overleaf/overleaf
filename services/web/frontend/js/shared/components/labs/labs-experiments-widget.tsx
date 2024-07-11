@@ -48,6 +48,7 @@ export function LabsExperimentWidget({
       setErrorMessage(experimentsErrorMessage)
     }
   }, [experimentName, setErrorMessage, experimentsErrorMessage])
+
   const handleDisable = useCallback(async () => {
     try {
       const disablePath = `/labs/participate/experiments/${experimentName}/opt-out`
