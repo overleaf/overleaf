@@ -1075,7 +1075,7 @@
   "publishing": "Veröffentlichen",
   "pull_github_changes_into_sharelatex": "GitHub-Änderungen nach __appName__ ziehen",
   "purchase_now": "Jetzt kaufen",
-  "push_sharelatex_changes_to_github": "__appName__-Änderungen in GitHub drücken",
+  "push_sharelatex_changes_to_github": "__appName__-Änderungen an GitHub senden",
   "quoted_text_in": "Zitierter Text in",
   "raw_logs": "Raw Logs",
   "raw_logs_description": "Raw Logs vom LaTeX-Compiler",
