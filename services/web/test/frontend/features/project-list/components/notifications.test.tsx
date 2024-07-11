@@ -28,6 +28,7 @@ import ConfirmEmail from '../../../../../frontend/js/features/project-list/compo
 import ReconfirmationInfo from '../../../../../frontend/js/features/project-list/components/notifications/groups/affiliation/reconfirmation-info'
 import UserNotifications from '../../../../../frontend/js/features/project-list/components/notifications/user-notifications'
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 import {
   Notification,
   Institution as InstitutionType,
@@ -50,7 +51,9 @@ const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
     wrapper: ({ children }) => (
       <ProjectListProvider>
-        <ul className="list-unstyled">{children}</ul>
+        <SplitTestProvider>
+          <ul className="list-unstyled">{children}</ul>
+        </SplitTestProvider>
       </ProjectListProvider>
     ),
   })

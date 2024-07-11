@@ -1,4 +1,4 @@
-import { JSXElementConstructor, useState } from 'react'
+import { JSXElementConstructor, useState, ElementType } from 'react'
 import Common from './groups/common'
 import Institution from './groups/institution'
 import ConfirmEmail from './groups/confirm-email'
@@ -12,11 +12,16 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import GeoBanners from './geo-banners'
 import AccessibilitySurveyBanner from './accessibility-survey-banner'
-import LabsAiPromoBanner from './labs-ai-promo-banner'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
 )
+
+const moduleNotifications = importOverleafModules('userNotifications') as {
+  import: { default: ElementType }
+  path: string
+}[]
+
 const EnrollmentNotification: JSXElementConstructor<{
   groupId: string
   groupName: string
@@ -80,7 +85,11 @@ function UserNotifications() {
             setDismissedWritefull(true)
           }}
         />
-        <LabsAiPromoBanner />
+        {moduleNotifications.map(({ import: { default: Component }, path }) => (
+          <li key={path}>
+            <Component />
+          </li>
+        ))}
       </ul>
     </div>
   )

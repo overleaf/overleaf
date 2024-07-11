@@ -892,6 +892,7 @@ module.exports = {
     editorLeftMenuManageTemplate: [],
     oauth2Server: [],
     managedGroupSubscriptionEnrollmentNotification: [],
+    userNotifications: [],
     managedGroupEnrollmentInvite: [],
     ssoCertificateInfo: [],
   },
