@@ -137,11 +137,6 @@ module.exports = MetaHandler = {
    * @returns {string}
    */
   _getNonCommentedContent(rawLine) {
-    const commentStart = /(?:^%)|(?:[^\\]%)/
-    const match = rawLine.match(commentStart)
-    if (match) {
-      return rawLine.slice(0, match.index)
-    }
-    return rawLine
+    return rawLine.replace(/(^|[^\\])%.*/, '$1')
   },
 }

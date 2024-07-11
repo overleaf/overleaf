@@ -197,9 +197,11 @@ describe('MetaHandler', function () {
         'two',
         // bbb should not be in the returned labels
         'commented label % \\label{bbb}',
+        '\\label{ccc}%bar',
+        '\\label{ddd} % bar',
       ]
       this.fakeMeta = {
-        labels: ['aaa'],
+        labels: ['aaa', 'ccc', 'ddd'],
         packages: { abc: [] },
         packageNames: ['abc'],
       }
