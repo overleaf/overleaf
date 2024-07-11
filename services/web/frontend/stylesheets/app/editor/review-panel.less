@@ -1231,3 +1231,45 @@ button when (@is-overleaf-light = true) {
     border: 0;
   }
 }
+
+.rp-empty-state {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  .rp-empty-state-inner {
+    position: sticky;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    p {
+      margin-bottom: 0;
+      text-align: center;
+    }
+  }
+
+  .rp-empty-state-comment-icon {
+    width: 80px;
+    height: 80px;
+    background-color: white;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    .material-symbols {
+      font-size: 32px;
+    }
+  }
+}
