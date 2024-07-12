@@ -30,10 +30,8 @@ services:
       - .:/overleaf/services/clsi
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
+      - /var/run/docker.sock:/var/run/docker.sock
     working_dir: /overleaf/services/clsi
-    extends:
-      file: docker-compose-config.yml
-      service: dev
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
@@ -44,5 +42,11 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
+      ALLOWED_IMAGES: quay.io/sharelatex/texlive-full:2017.1
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
+      TEX_LIVE_IMAGE_NAME_OVERRIDE: gcr.io/overleaf-ops
+      TEXLIVE_IMAGE_USER: "tex"
+      DOCKER_RUNNER: "true"
+      COMPILES_HOST_DIR: $PWD/compiles
     command: npm run --silent test:acceptance
 

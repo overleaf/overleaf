@@ -26,9 +26,6 @@ services:
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/docstore
-    extends:
-      file: docker-compose-config.yml
-      service: dev
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo

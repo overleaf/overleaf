@@ -16,9 +16,6 @@ services:
   test_acceptance:
     build: .
     image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
-    extends:
-      file: docker-compose-config.yml
-      service: ci
     environment:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
@@ -26,9 +23,17 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
-      TEXLIVE_IMAGE:
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
+      ALLOWED_IMAGES: quay.io/sharelatex/texlive-full:2017.1
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
+      TEX_LIVE_IMAGE_NAME_OVERRIDE: gcr.io/overleaf-ops
+      TEXLIVE_IMAGE_USER: "tex"
+      DOCKER_RUNNER: "true"
+      COMPILES_HOST_DIR: $PWD/compiles
+    volumes:
+      - ./compiles:/overleaf/services/clsi/compiles
+      - /var/run/docker.sock:/var/run/docker.sock
     command: npm run test:acceptance
 
 

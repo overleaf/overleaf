@@ -2,10 +2,9 @@ clsi
 --data-dirs=cache,compiles,output
 --dependencies=
 --docker-repos=gcr.io/overleaf-ops,us-east1-docker.pkg.dev/overleaf-ops/ol-docker
---env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true"
---env-pass-through=TEXLIVE_IMAGE
+--env-add=ENABLE_PDF_CACHING="true",PDF_CACHING_ENABLE_WORKER_POOL="true",ALLOWED_IMAGES=quay.io/sharelatex/texlive-full:2017.1,TEXLIVE_IMAGE=quay.io/sharelatex/texlive-full:2017.1,TEX_LIVE_IMAGE_NAME_OVERRIDE=gcr.io/overleaf-ops,TEXLIVE_IMAGE_USER="tex",DOCKER_RUNNER="true",COMPILES_HOST_DIR=$PWD/compiles
+--env-pass-through=
 --esmock-loader=False
---has-custom-cloudbuild=True
 --node-version=18.20.2
 --public-repo=True
 --script-version=4.5.0
