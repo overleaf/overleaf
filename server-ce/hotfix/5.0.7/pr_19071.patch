@@ -1,0 +1,37 @@
+--- a/services/web/app/src/Features/Collaborators/CollaboratorsInviteHandler.js
++++ b/services/web/app/src/Features/Collaborators/CollaboratorsInviteHandler.js
+@@ -7,13 +7,16 @@ const UserGetter = require('../User/UserGetter')
+ const ProjectGetter = require('../Project/ProjectGetter')
+ const Crypto = require('crypto')
+ const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
++const _ = require('lodash')
+
+ const randomBytes = promisify(Crypto.randomBytes)
+
+ const CollaboratorsInviteHandler = {
+   async getAllInvites(projectId) {
+     logger.debug({ projectId }, 'fetching invites for project')
+-    const invites = await ProjectInvite.find({ projectId }).exec()
++    const invites = await ProjectInvite.find({ projectId })
++      .select('_id email sendingUserId projectId privileges createdAt expires')
++      .exec()
+     logger.debug(
+       { projectId, count: invites.length },
+       'found invites for project'
+@@ -101,7 +104,15 @@ const CollaboratorsInviteHandler = {
+       logger.err({ err, projectId, email }, 'error sending messages for invite')
+     })
+
+-    return invite
++    return _.pick(invite.toObject(), [
++      'email',
++      'sendingUserId',
++      'projectId',
++      'privileges',
++      '_id',
++      'createdAt',
++      'expires',
++    ])
+   },
+
+   async revokeInvite(projectId, inviteId) {
