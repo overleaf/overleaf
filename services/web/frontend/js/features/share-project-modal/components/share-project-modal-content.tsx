@@ -98,6 +98,12 @@ function ErrorMessage({ error }: Pick<ShareProjectModalContentProps, 'error'>) {
     case 'too_many_requests':
       return <>{t('too_many_requests')}</>
 
+    case 'invite_expired':
+      return <>{t('invite_expired')}</>
+
+    case 'invite_resend_limit_hit':
+      return <>{t('invite_resend_limit_hit')}</>
+
     default:
       return <>{t('generic_something_went_wrong')}</>
   }

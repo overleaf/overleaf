@@ -43,21 +43,30 @@ Invite.propTypes = {
 
 function ResendInvite({ invite }) {
   const { t } = useTranslation()
-  const { monitorRequest } = useShareProjectContext()
+  const { monitorRequest, setError, inFlight } = useShareProjectContext()
   const { _id: projectId } = useProjectContext()
 
   // const buttonRef = useRef(null)
   //
   const handleClick = useCallback(
     () =>
-      monitorRequest(() => resendInvite(projectId, invite)).finally(() => {
-        // NOTE: disabled as react-bootstrap v0.33.1 isn't forwarding the ref to the `button`
-        // if (buttonRef.current) {
-        //   buttonRef.current.blur()
-        // }
-        document.activeElement.blur()
-      }),
-    [invite, monitorRequest, projectId]
+      monitorRequest(() => resendInvite(projectId, invite))
+        .catch(error => {
+          if (error?.response?.status === 404) {
+            setError('invite_expired')
+          }
+          if (error?.response?.status === 429) {
+            setError('invite_resend_limit_hit')
+          }
+        })
+        .finally(() => {
+          // NOTE: disabled as react-bootstrap v0.33.1 isn't forwarding the ref to the `button`
+          // if (buttonRef.current) {
+          //   buttonRef.current.blur()
+          // }
+          document.activeElement.blur()
+        }),
+    [invite, monitorRequest, projectId, setError]
   )
 
   return (
@@ -65,6 +74,7 @@ function ResendInvite({ invite }) {
       bsStyle="link"
       className="btn-inline-link"
       onClick={handleClick}
+      disabled={inFlight}
       // ref={buttonRef}
     >
       {t('resend')}

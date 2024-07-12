@@ -240,6 +240,12 @@ const CollaboratorsInviteController = {
       inviteId
     )
 
+    EditorRealTimeController.emitToRoom(
+      projectId,
+      'project:membership:changed',
+      { invites: true }
+    )
+
     if (invite != null) {
       ProjectAuditLogHandler.addEntryInBackground(
         projectId,
@@ -251,9 +257,11 @@ const CollaboratorsInviteController = {
           privileges: invite.privileges,
         }
       )
-    }
 
-    res.status(201).json({ newInviteId: invite._id })
+      res.sendStatus(201)
+    } else {
+      res.sendStatus(404)
+    }
   },
 
   async viewInvite(req, res) {
