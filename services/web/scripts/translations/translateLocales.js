@@ -84,7 +84,7 @@ async function translateLocales() {
       keysToUpload.push(key)
       const formattedKeysToUpload =
         JSON.stringify(Array.from(new Set(keysToUpload)), null, 2) + '\n'
-      await fs.writeFileSync(localeKeysToUploadPath, formattedKeysToUpload)
+      fs.writeFileSync(localeKeysToUploadPath, formattedKeysToUpload)
 
       console.log(`"${key}": "${value}" added to ${locale}.json`)
     }
