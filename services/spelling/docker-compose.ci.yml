@@ -25,7 +25,7 @@ services:
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict"
     user: node
-    command: npm run test:acceptance:_run
+    command: npm run test:acceptance
 
 
   tar:

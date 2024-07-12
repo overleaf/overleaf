@@ -1,3 +1,4 @@
+const fs = require('fs')
 const Path = require('path')
 
 // use functions to get a fresh copy, not a reference, each time
@@ -64,26 +65,26 @@ function fallbackStores(primaryConfig, fallbackConfig) {
 }
 
 module.exports = {
-  FSPersistor: {
+  SHARD_01_FSPersistor: {
     backend: 'fs',
     stores: fsStores(),
   },
-  S3Persistor: {
+  SHARD_01_S3Persistor: {
     backend: 's3',
     s3: s3Config(),
     stores: s3Stores(),
   },
-  S3PersistorDefaultProviderCredentials: {
+  SHARD_01_S3PersistorDefaultProviderCredentials: {
     backend: 's3',
     s3: s3ConfigDefaultProviderCredentials(),
     stores: s3Stores(),
   },
-  GcsPersistor: {
+  SHARD_01_GcsPersistor: {
     backend: 'gcs',
     gcs: gcsConfig(),
     stores: gcsStores(),
   },
-  FallbackS3ToFSPersistor: {
+  SHARD_02_FallbackS3ToFSPersistor: {
     backend: 's3',
     s3: s3Config(),
     stores: s3Stores(),
@@ -92,7 +93,7 @@ module.exports = {
       buckets: fallbackStores(s3Stores(), fsStores()),
     },
   },
-  FallbackFSToS3Persistor: {
+  SHARD_02_FallbackFSToS3Persistor: {
     backend: 'fs',
     s3: s3Config(),
     stores: fsStores(),
@@ -101,7 +102,7 @@ module.exports = {
       buckets: fallbackStores(fsStores(), s3Stores()),
     },
   },
-  FallbackGcsToS3Persistor: {
+  SHARD_03_FallbackGcsToS3Persistor: {
     backend: 'gcs',
     gcs: gcsConfig(),
     stores: gcsStores(),
@@ -111,7 +112,7 @@ module.exports = {
       buckets: fallbackStores(gcsStores(), s3Stores()),
     },
   },
-  FallbackS3ToGcsPersistor: {
+  SHARD_03_FallbackS3ToGcsPersistor: {
     backend: 's3',
     // can use the same bucket names for gcs and s3 (in tests)
     stores: s3Stores(),
@@ -123,3 +124,20 @@ module.exports = {
     },
   },
 }
+
+function checkForUnexpectedTestFile() {
+  const awareOfSharding = [
+    'FilestoreApp.js',
+    'FilestoreTests.js',
+    'TestConfig.js',
+    'TestHelper.js',
+  ]
+  for (const file of fs.readdirSync(__dirname).sort()) {
+    if (!awareOfSharding.includes(file)) {
+      throw new Error(
+        `Found new test file ${file}: All tests must be aware of the SHARD_ prefix.`
+      )
+    }
+  }
+}
+checkForUnexpectedTestFile()

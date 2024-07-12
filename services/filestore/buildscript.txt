@@ -8,3 +8,4 @@ filestore
 --node-version=18.20.2
 --public-repo=True
 --script-version=4.5.0
+--test-acceptance-shards=SHARD_01_,SHARD_02_,SHARD_03_

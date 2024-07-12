@@ -29,7 +29,7 @@ services:
       TEXLIVE_IMAGE:
       ENABLE_PDF_CACHING: "true"
       PDF_CACHING_ENABLE_WORKER_POOL: "true"
-    command: npm run test:acceptance:_run
+    command: npm run test:acceptance
 
 
   tar:

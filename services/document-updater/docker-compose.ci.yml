@@ -33,7 +33,7 @@ services:
       redis:
         condition: service_healthy
     user: node
-    command: npm run test:acceptance:_run
+    command: npm run test:acceptance
 
 
   tar:
