@@ -43,8 +43,6 @@ mixin plans_table(period, config)
 			-
 				if (highlighted) {
 					var thClass = 'plans-table-green-highlighted'
-				} else if (i === config.highlightedColumn.index - 1) {
-					var thClass = 'plans-table-cell-before-green-highlighted-column'
 				} else {
 					var thClass = ''
 				}
@@ -133,7 +131,7 @@ mixin plans_table(period, config)
 						span.sr-only #{translate(featuresPerSection.dividerInfo)}
 		for feature, featureIndex in featuresPerSection.items
 			tr(
-				class=(featureIndex === (featuresPerSection.items.length - 1) ? `plans-table-row-last-row-per-section plans-table-cols-${tableHeadKeys.length}` : `plans-table-cols-${tableHeadKeys.length}`)
+				class=`plans-table-cols-${tableHeadKeys.length}`
 			)
 				th(
 					class="plans-table-row-header"

@@ -1,5 +1,4 @@
 // m-a stands for: monthly annual
-
 @plans-top-switch-item-height: 34px;
 @plans-top-switch-item-border-radius: @plans-top-switch-item-height / 2;
 @plans-m-a-switch-height: 34px;
@@ -7,8 +6,11 @@
 @plans-highlighted-text-height-mobile: 41px;
 @plans-learn-more-link-color: hsl(206, 100%, 52%);
 @plans-top-switch-group-width-mobile: 46%;
-@plans-table-border-radius: 20px;
+@plans-table-border-radius: var(--border-radius-medium-new);
 @plans-table-td-mobile-min-height: 34px;
+@highlighted-border: var(--border-width-base) solid var(--green-50);
+@table-border-size: 2px;
+@table-border: @table-border-size solid var(--neutral-10);
 
 .plans-page {
   p {
@@ -245,7 +247,6 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: @ol-blue-gray-1;
         transition: 0.4s;
         border-radius: @plans-m-a-switch-height;
 
@@ -449,39 +450,6 @@
   }
 
   .plans-table-student {
-    tr {
-      &:last-child {
-        td:last-child {
-          .plans-table-cell {
-            border-bottom-right-radius: @plans-table-border-radius;
-
-            @media (max-width: @screen-xs-max) {
-              border-bottom-right-radius: 0;
-            }
-          }
-        }
-      }
-    }
-
-    // only make corners have round borders if the column is not highlighted
-    th:not(.plans-table-green-highlighted) {
-      &:nth-last-child(2) .plans-table-th {
-        border-top-right-radius: @plans-table-border-radius;
-
-        @media (max-width: @screen-xs-max) {
-          border-top-right-radius: 0;
-        }
-      }
-
-      &:nth-child(2) .plans-table-th {
-        border-top-left-radius: @plans-table-border-radius;
-
-        @media (max-width: @screen-xs-max) {
-          border-top-right-radius: 0;
-        }
-      }
-    }
-
     @media (max-width: @screen-md-max) {
       tr:first-of-type {
         th:last-of-type {
@@ -489,40 +457,6 @@
           // We need to hide it for mobile to have the full table fully visible on mobile
           // without any empty horizontal space.
           display: none;
-        }
-      }
-    }
-  }
-
-  .plans-table-individual {
-    tr {
-      &:last-child {
-        td:last-child {
-          .plans-table-cell {
-            border-bottom-right-radius: @plans-table-border-radius;
-
-            @media (max-width: @screen-xs-max) {
-              border-bottom-right-radius: 0;
-            }
-          }
-        }
-      }
-    }
-
-    th {
-      &:last-child .plans-table-th {
-        border-top-right-radius: @plans-table-border-radius;
-
-        @media (max-width: @screen-xs-max) {
-          border-top-right-radius: 0;
-        }
-      }
-
-      &:nth-child(2) .plans-table-th {
-        border-top-left-radius: @plans-table-border-radius;
-
-        @media (max-width: @screen-xs-max) {
-          border-top-left-radius: 0;
         }
       }
     }
@@ -548,30 +482,6 @@
         font-size: @font-size-small;
       }
     }
-
-    tr {
-      // top right border radius on desktop only
-      &:first-of-type {
-        th:last-child > .plans-table-th {
-          border-top-right-radius: @plans-table-border-radius;
-
-          @media (max-width: @screen-xs-max) {
-            border-top-right-radius: 0;
-          }
-        }
-      }
-
-      // bottom right border radius on desktop only
-      &:last-of-type {
-        td:last-child > .plans-table-cell {
-          border-bottom-right-radius: @plans-table-border-radius;
-
-          @media (max-width: @screen-xs-max) {
-            border-bottom-right-radius: 0;
-          }
-        }
-      }
-    }
   }
 
   .plans-table {
@@ -579,6 +489,62 @@
     margin-bottom: 15px;
     table-layout: fixed;
     width: 100%;
+
+    // cannot add border to td,th directly due to highlighted column border
+    td > div,
+    th > div {
+      border-left: @table-border;
+      border-top: @table-border;
+      border-right: @table-border;
+      border-bottom: 0;
+
+      @media (max-width: @screen-xs-max) {
+        border-left: unset;
+        border-right: unset;
+      }
+    }
+
+    // remove left border for all col after highlighted column
+    .plans-table-green-highlighted ~ td > div,
+    .plans-table-green-highlighted ~ th > div {
+      border-left: 0;
+    }
+    // remove right border for all col before highlighted column
+    td:has(~ .plans-table-green-highlighted) > div,
+    th:has(~ .plans-table-green-highlighted) > div {
+      border-right: 0;
+    }
+
+    // highlighted column border
+    th.plans-table-green-highlighted > div,
+    td.plans-table-green-highlighted > div {
+      border-left: @highlighted-border;
+      border-right: @highlighted-border;
+      // remove top gray border so that there is
+      // no shared corner with left/right green border
+      // and then apply the gray top border to the inner div, .plans-table-cell-content
+      border-top: 0;
+
+      .plans-table-cell-content {
+        border-top: @table-border;
+      }
+
+      @media (max-width: @screen-xs-max) {
+        border-left: unset;
+        border-right: unset;
+      }
+    }
+
+    th {
+      &:nth-child(2):not(.plans-table-green-highlighted) .plans-table-th {
+        border-top-left-radius: @plans-table-border-radius;
+
+        @media (max-width: @screen-xs-max) {
+          border-top-left-radius: 0;
+        }
+      }
+    }
+
     // We want these `div` inside `th` and `td` to have a 100% height since
     // white backgrounds are defined here:
     // 1. `td > div.plans-table-cell`
@@ -597,26 +563,65 @@
 
     tr {
       height: 100%;
-    }
 
-    .plans-table-column-header,
-    td {
-      background-clip: padding-box; /* needed for firefox when there is bg color */
-      text-align: center;
+      // top right border radius on desktop only
+      &:first-of-type {
+        th:last-child > .plans-table-th {
+          border-top-right-radius: @plans-table-border-radius;
 
-      &:not(.plans-table-cell-before-green-highlighted-column):not(
-          .plans-table-green-highlighted
-        ):not(.plans-table-last-col-highlighted) {
-        border-right: 1px solid @ol-blue-gray-0;
+          @media (max-width: @screen-xs-max) {
+            border-top-right-radius: 0;
+          }
+        }
+      }
 
-        @media (max-width: @screen-xs-max) {
-          border-right: none;
+      // bottom right border radius on desktop only
+      &:last-child {
+        td:last-child {
+          .plans-table-cell {
+            border-bottom-right-radius: @plans-table-border-radius;
+
+            @media (max-width: @screen-xs-max) {
+              border-bottom-right-radius: 0;
+            }
+          }
+        }
+
+        th {
+          .plans-table-feature-name {
+            @media (min-width: @screen-sm-min) {
+              border-bottom-left-radius: @plans-table-border-radius;
+            }
+          }
+        }
+
+        td > div,
+        th > div {
+          border-bottom: @table-border;
+        }
+
+        .plans-table-green-highlighted > div {
+          border-bottom: @highlighted-border;
+
+          @media (max-width: @screen-xs-max) {
+            // column is not highlighted on mobile, so
+            // match non-highlighted column border on mobile
+            border-top: @table-border;
+            border-bottom: @table-border;
+            .plans-table-cell-content {
+              border-color: transparent;
+            }
+          }
         }
       }
     }
 
+    .plans-table-column-header,
+    td {
+      text-align: center;
+    }
+
     .plans-table-column-header {
-      border-top: 0;
       font-family: @headings-font-family;
       font-size: @font-size-h2;
       font-weight: @headings-font-weight;
@@ -625,24 +630,16 @@
       padding: 0;
       position: relative;
 
-      &:first-child {
-        border-left: 0;
-      }
-
-      &:last-child {
-        border-right: 0;
+      &.plans-table-green-highlighted {
+        .plans-table-th {
+          border-top: @table-border-size solid @ol-green;
+        }
       }
     }
 
     td {
       vertical-align: middle;
       height: 100%;
-
-      &:last-child:not(.plans-table-green-highlighted):not(
-          .plans-table-last-col-highlighted
-        ) {
-        border-right: 0;
-      }
     }
 
     tr {
@@ -663,29 +660,94 @@
           }
         }
       }
+    }
 
-      &:not(.plans-table-row-last-row-per-section):not(
-          .plans-table-divider
-        ):not(:last-of-type) {
-        th > .plans-table-th > .plans-table-th-content,
-        td > .plans-table-feature-name,
-        td > .plans-table-cell > .plans-table-cell-content {
-          border-bottom: 1px solid @ol-blue-gray-0;
+    tr.plans-table-divider {
+      background-color: var(--neutral-10);
+      th > div,
+      td > div {
+        border-top: 0;
+        border-bottom: 0;
+      }
 
-          @media (max-width: @screen-xs-max) {
-            border-bottom: unset;
-          }
+      // direct child selector to NOT affect the generated tooltip
+      td > div {
+        text-align: center;
+        padding: 6px;
+
+        .plans-table-divider-label {
+          margin-bottom: 0;
+          margin-right: 5px;
+        }
+
+        .plans-table-divider-learn-more-container {
+          display: none;
         }
       }
 
-      // this will show highlghted border-bottom on the last row
-      &:last-child td.plans-table-green-highlighted {
-        > .plans-table-cell {
-          border-bottom: 2px solid @ol-green;
+      // highlighted divider will only show if the highlighted column is on the last visible column
+      .plans-table-last-col-highlighted > div {
+        border-right: @highlighted-border;
+      }
 
-          @media (max-width: @screen-xs-max) {
-            border-bottom: unset;
+      @media (max-width: @screen-xs-max) {
+        padding-top: 0;
+        padding-right: 0;
+        padding-left: 0;
+        background-color: var(--neutral-20);
+        border: 0;
+
+        // direct child selector to NOT affect the generated tooltip
+        th > div,
+        td > div {
+          background-color: var(--neutral-20);
+          border: 0;
+          padding: 15px 5px;
+
+          i {
+            display: none;
           }
+
+          .plans-table-divider-learn-more-container {
+            display: inline;
+            // this white-space is important to ensure the "learn more" text won't get separated by a newline
+            white-space: nowrap;
+
+            span.plans-table-divider-learn-more-text {
+              color: @plans-learn-more-link-color;
+            }
+
+            // force white-space to have initial value since the `white-space: nowrap` rule
+            // on .plans-table-divider-learn-more-container selector (the current code block) above
+            // will also affect every child inside of it, including the generated tooltip
+            .tooltip {
+              white-space: initial;
+            }
+          }
+        }
+
+        .plans-table-last-col-highlighted > div {
+          border-right: none;
+        }
+      }
+    }
+
+    tr.plans-table-divider + tr {
+      td > div,
+      th > div {
+        border-top: 0;
+      }
+      .plans-table-green-highlighted {
+        .plans-table-cell-content {
+          border-top: 0;
+        }
+      }
+    }
+
+    tr.plans-table-cols-2 {
+      th:last-child {
+        div {
+          border: 0;
         }
       }
     }
@@ -697,8 +759,6 @@
     @media (min-width: @screen-sm-min) {
       // highlight rows on hover
       tr:not(.plans-table-divider):not(:first-child):hover {
-        background-color: @table-hover-bg;
-
         .plans-table-feature-name,
         .plans-table-cell {
           background-color: @table-hover-bg;
@@ -724,13 +784,6 @@
       // The forced width below (plans-table-cols-n) is to ensure the table columns have an equal width
       // because on mobile, the first column (empty cell on first `tr` and feature name on the rest of `tr`) will be shown as its own row
       // and the rest of the `tr` will incorporate a full width of the viewport
-      tr.plans-table-cols-4:not(.plans-table-divider) {
-        td,
-        th:not(:first-of-type) {
-          width: 25%;
-        }
-      }
-
       tr.plans-table-cols-3:not(.plans-table-divider) {
         td,
         th:not(:first-of-type) {
@@ -1009,84 +1062,6 @@
     }
   }
 
-  tr.plans-table-divider {
-    background-color: @ol-blue-gray-1;
-
-    // direct child selector to NOT affect the generated tooltip
-    td > div {
-      text-align: center;
-      padding: 6px;
-
-      .plans-table-divider-label {
-        margin-bottom: 0;
-        margin-right: 5px;
-      }
-
-      .plans-table-divider-learn-more-container {
-        display: none;
-      }
-    }
-
-    // highlighted divider will only show if the highlighted column is on the last visible column
-    .plans-table-last-col-highlighted > div {
-      border-right: 2px solid @ol-green;
-    }
-
-    @media (max-width: @screen-xs-max) {
-      // need the colspan attribute selector to increase specificity to override more specific css rule on another selector
-      td[colspan] {
-        padding-top: 0;
-        padding-right: 0;
-        padding-left: 0;
-
-        // direct child selector to NOT affect the generated tooltip
-        > div {
-          background-color: @ol-blue-gray-1;
-          padding: 15px 5px;
-
-          i {
-            display: none;
-          }
-
-          .plans-table-divider-learn-more-container {
-            display: inline;
-            // this white-space is important to ensure the "learn more" text won't get separated by a newline
-            white-space: nowrap;
-
-            span.plans-table-divider-learn-more-text {
-              color: @plans-learn-more-link-color;
-            }
-
-            // force white-space to have initial value since the `white-space: nowrap` rule
-            // on .plans-table-divider-learn-more-container selector (the current code block) above
-            // will also affect every child inside of it, including the generated tooltip
-            .tooltip {
-              white-space: initial;
-            }
-          }
-        }
-      }
-
-      .plans-table-last-col-highlighted > div {
-        border-right: none;
-      }
-    }
-  }
-
-  // the `.plans-table-green-highlighted` class below can be applied to both `th` and `td`
-  .plans-table-green-highlighted {
-    > .plans-table-cell,
-    > .plans-table-th {
-      border-left: 2px solid @ol-green;
-      border-right: 2px solid @ol-green;
-
-      @media (max-width: @screen-xs-max) {
-        border-left: unset;
-        border-right: unset;
-      }
-    }
-  }
-
   p.plans-table-green-highlighted-text {
     border: 2px solid @ol-green;
     position: absolute;
@@ -1095,15 +1070,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
     font-size: @font-size-small;
     line-height: 19px;
     font-weight: 700;
     background-color: @ol-green;
-    border-radius: @plans-table-border-radius @plans-table-border-radius 0 0;
+    border-radius: var(--border-radius-large-new) var(--border-radius-large-new)
+      0 0;
     color: @white;
     height: @plans-highlighted-text-height-desktop;
     margin: 0;
+    width: 100%;
 
     @media (max-width: @screen-sm-max) {
       top: -1 * @plans-highlighted-text-height-mobile;
@@ -1149,7 +1125,7 @@
       top: 0;
       left: 0;
       z-index: @z-index-plans-page-table-header-mobile;
-      height: 40px;
+      height: 42px;
 
       // separate sticky class because we want to remove the class (to visually remove the sticky header)
       // with javascript whenever the table is not visible anymore
@@ -1201,7 +1177,7 @@
 
   .plans-v2-university-info {
     padding: @padding-lg @padding-xxl;
-    background-color: @ol-blue-gray-1;
+    background-color: var(--neutral-20);
     border-radius: 20px;
 
     h3.plans-v2-university-info-header {
@@ -1239,10 +1215,6 @@
   }
   .plans-v2-top-switch {
     margin-top: var(--spacing-09);
-  }
-
-  .plans-table-column-header {
-    background-color: transparent; // remove colors set by default variant
   }
 
   .plans-page-quote-row {
