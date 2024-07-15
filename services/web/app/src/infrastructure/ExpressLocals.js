@@ -5,7 +5,7 @@ const _ = require('lodash')
 const { URL } = require('url')
 const Path = require('path')
 const moment = require('moment')
-const { fetchJson, RequestFailedError } = require('@overleaf/fetch-utils')
+const { fetchJson } = require('@overleaf/fetch-utils')
 const contentDisposition = require('content-disposition')
 const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
@@ -60,13 +60,7 @@ function loadManifestFromWebpackDevServer(done = function () {}) {
       webpackManifest = json
       done()
     })
-    .catch(err => {
-      let error = err
-      if (err instanceof RequestFailedError) {
-        error = new Error(
-          `webpack responded with statusCode: ${err.response.status}`
-        )
-      }
+    .catch(error => {
       logger.err({ error }, 'cannot fetch webpack manifest')
       done(error)
     })
