@@ -113,7 +113,8 @@ mixin plans_table(period, config)
 							+table_price_group_professional()
 						when 'group_organization'
 							.plans-table-comments-icon
-								i.fa.fa-comments-o
+								.match-non-discounted-price-alignment &nbsp;
+								i.material-symbols.material-symbols-outlined(aria-hidden="true") forum
 						when 'student_free'
 							+table_head_price('free', period)
 						when 'student_student'
@@ -241,15 +242,15 @@ mixin plans_table(period, config)
 						+table_cell(feature, plan)
 
 mixin table_individual(period)
-	table.card.plans-table.plans-table-individual
+	table.plans-table.plans-table-individual
 		+plans_table(period, plansConfig.individual)
 
 mixin table_group
-	table.card.plans-table.plans-table-group
+	table.plans-table.plans-table-group
 		+plans_table('annual', plansConfig.group)
 
 mixin table_student(period)
-	table.card.plans-table.plans-table-student
+	table.plans-table.plans-table-student
 		+plans_table(period, plansConfig.student)
 
 //- free plan mixins
@@ -284,9 +285,9 @@ mixin table_price_group_collaborator()
 	.plans-table-price-container
 		s
 			+gen_localized_price_for_plan_view('collaborator', 'annual')
-		p.plans-v2-table-price
+		p.plans-table-price
 			span(data-ol-plans-v2-group-price-per-user='collaborator') #{initialLocalizedGroupPrice.pricePerUser.collaborator}
-		p.plans-v2-table-price-period-label
+		p.plans-table-price-period-label
 			| #{translate('per_user_year')}
 
 //- group_professional plan mixins
@@ -301,16 +302,16 @@ mixin table_price_group_professional()
 	.plans-table-price-container
 		s
 			+gen_localized_price_for_plan_view('professional', 'annual')
-		p.plans-v2-table-price
+		p.plans-table-price
 			span(data-ol-plans-v2-group-price-per-user='professional') #{initialLocalizedGroupPrice.pricePerUser.professional}
-		p.plans-v2-table-price-period-label
+		p.plans-table-price-period-label
 			| #{translate('per_user_year')}
 
 //- group mixins
 
 mixin table_head_group_total_per_year(groupPlan)
 	- var initialLicenseSize = '2'
-	span.plans-v2-group-total-price(data-ol-plans-v2-group-total-price=groupPlan) #{initialLocalizedGroupPrice.price[groupPlan]}
+	span.plans-group-total-price(data-ol-plans-v2-group-total-price=groupPlan) #{initialLocalizedGroupPrice.price[groupPlan]}
 	| &nbsp;
 	for licenseSize in groupPlanModalOptions.sizes
 		span(
@@ -324,7 +325,7 @@ mixin table_short_feature_list_group_organization(additionalEventSegmentation)
 		li #{translate("best_choices_companies_universities_non_profits")}
 		li #{translate("for_groups_or_site_wide")}
 		li
-			a(
+			a.inline-green-link(
 				target="_blank"
 				href="/for/contact-sales"
 				event-tracking="plans-page-click"
@@ -401,9 +402,11 @@ mixin table_head_price(plan, period)
 		if plan !== 'free' && period === 'annual'
 			s
 				+gen_localized_price_for_plan_view(plan, 'monthlyTimesTwelve')
-		p.plans-v2-table-price
+		else
+			.match-non-discounted-price-alignment &nbsp;
+		p.plans-table-price
 			+gen_localized_price_for_plan_view(plan, period)
-		p.plans-v2-table-price-period-label
+		p.plans-table-price-period-label
 			if period == 'annual'
 				| #{translate("per_year")}
 			else
@@ -431,11 +434,11 @@ mixin table_cell(feature, plan)
 //- CTA mixins
 
 mixin btn_buy_individual(highlighted, eventTrackingKey, subscriptionPlan, period) 
-	a.btn.plans-v2-table-btn-buy(
+	a.btn(
 		data-ol-start-new-subscription=subscriptionPlan
 		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view=period
-		class=(highlighted ? 'btn-primary' : 'btn-default')
+		class=(highlighted ? 'btn-primary' : 'btn-secondary')
 	)
 		if (period === 'monthly')
 			span #{translate("try_for_free")}
@@ -444,15 +447,15 @@ mixin btn_buy_individual(highlighted, eventTrackingKey, subscriptionPlan, period
 
 mixin btn_buy_individual_free()
 	if (!getSessionUser())
-		a.btn.plans-v2-table-btn-buy(
+		a.btn(
 			href="/register"
-			class=(highlighted ? 'btn-primary' : 'btn-default')
+			class=(highlighted ? 'btn-primary' : 'btn-secondary')
 		)
 			span #{translate("try_for_free")}
 	else
-		a.btn.plans-v2-table-btn-buy.invisible(
+		a.btn.invisible(
 			aria-hidden="true"
-			class=(highlighted ? 'btn-primary' : 'btn-default')
+			class=(highlighted ? 'btn-primary' : 'btn-secondary')
 		)
 
 mixin btn_buy_individual_collaborator(highlighted, eventTrackingKey, additionalEventSegmentation, period)
@@ -466,31 +469,31 @@ mixin btn_buy_individual_professional(highlighted, eventTrackingKey, additionalE
 		+additional_link_buy(eventTrackingKey, additionalEventSegmentation, 'professional', period)
 
 mixin btn_buy_group_collaborator(highlighted, eventTrackingKey) 
-	a.btn.plans-v2-table-btn-buy(
+	a.btn(
 		data-ol-start-new-subscription='group_collaborator'
 		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view='annual'
 		data-ol-has-custom-href
 		data-ol-location='table-header'
-		class=(highlighted ? 'btn-primary' : 'btn-default')
+		class=(highlighted ? 'btn-primary' : 'btn-secondary')
 	)
 		span.hidden-desktop #{translate("customize")} 
 		span.hidden-mobile #{translate("customize_your_plan")}
 
 mixin btn_buy_group_professional(highlighted, eventTrackingKey) 
-	a.btn.plans-v2-table-btn-buy(
+	a.btn(
 		data-ol-start-new-subscription='group_professional'
 		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view='annual'
 		data-ol-has-custom-href
 		data-ol-location='table-header'
-		class=(highlighted ? 'btn-primary' : 'btn-default')
+		class=(highlighted ? 'btn-primary' : 'btn-secondary')
 	)
 		span.hidden-desktop #{translate("customize")} 
 		span.hidden-mobile #{translate("customize_your_plan")}
 
 mixin btn_buy_group_organization(highlighted, eventTrackingKey) 
-	a.btn.plans-v2-table-btn-buy(
+	a.btn(
 		data-ol-start-new-subscription='group_organization'
 		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view='annual'
@@ -498,25 +501,25 @@ mixin btn_buy_group_organization(highlighted, eventTrackingKey)
 		data-ol-location='table-header'
 		href='/for/contact-sales'
 		target='_blank'
-		class=(highlighted ? 'btn-primary' : 'btn-default')
+		class=(highlighted ? 'btn-primary' : 'btn-secondary')
 	)
 		span #{translate("contact_us_lowercase")}
 
 mixin btn_buy_student_free(highlighted)
 	if (!getSessionUser())
-		a.btn.plans-v2-table-btn-buy(
+		a.btn(
 			href="/register"
-			class=(highlighted ? 'btn-primary' : 'btn-default')
+			class=(highlighted ? 'btn-primary' : 'btn-secondary')
 		)
 			span #{translate("try_for_free")}
 
 mixin btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegmentation, period)
-	a.btn.plans-v2-table-btn-buy(
+	a.btn(
 		data-ol-start-new-subscription='student'
 		data-ol-event-tracking-key=eventTrackingKey
 		data-ol-item-view=period
 		data-ol-location='card'
-		class=(highlighted ? 'btn-primary' : 'btn-default')
+		class=(highlighted ? 'btn-primary' : 'btn-secondary')
 	)
 		if (period === 'monthly')
 			span #{translate("try_for_free")}
@@ -528,16 +531,15 @@ mixin btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegm
 mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 	- var buttonSegmentation = plan + '-link'
 	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header'}, additionalEventSegmentation))
-	small.plans-table-th-content-additional-link
-		| #{translate("or")} 
-		a(
-			href="/for/contact-sales"
-			target="_blank"
-			event-tracking=eventTrackingKey
-			event-tracking-mb="true"
-			event-tracking-trigger="click"
-			event-segmentation=segmentation
-		) #{translate("contact_us_lowercase")}
+
+	a.btn.btn-bg-ghost(
+		href="/for/contact-sales"
+		target="_blank"
+		event-tracking=eventTrackingKey
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation=segmentation
+	) #{translate("contact_us_lowercase")}
 
 mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, period)
 	- var buttonSegmentation = plan + '-link'
@@ -545,15 +547,14 @@ mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, p
 	- var itmCampaign = itm_campaign ? { itm_campaign } : {itm_campaign: 'plans'}
 	- var itmReferrer = itm_referrer ? { itm_referrer } : {}
 	- var qs = new URLSearchParams({planCode: plan, currency: recommendedCurrency, itm_content: 'card', ...itmCampaign, ...itmReferrer})
-	small.plans-table-th-content-additional-link
-		| #{translate("or")} 
-		a(
-			href=`/user/subscription/new?${qs.toString()}`
-			event-tracking=eventTrackingKey
-			event-tracking-mb="true"
-			event-tracking-trigger="click"
-			event-segmentation=segmentation
-		) #{translate("buy_now_no_exclamation_mark")}
+
+	a.btn.btn-bg-ghost(
+		href=`/user/subscription/new?${qs.toString()}`
+		event-tracking=eventTrackingKey
+		event-tracking-mb="true"
+		event-tracking-trigger="click"
+		event-segmentation=segmentation
+	) #{translate("buy_now_no_exclamation_mark")}
 
 //- table header and control mixins
 

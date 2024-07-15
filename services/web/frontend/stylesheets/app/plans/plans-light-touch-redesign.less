@@ -333,14 +333,8 @@
   }
 
   .plans-table-comments-icon {
-    height: 65px;
-
     i {
-      font-size: 50px;
-    }
-
-    @media (max-width: @screen-xs-max) {
-      height: 58px;
+      font-size: 64px;
     }
   }
 
@@ -468,6 +462,13 @@
     table-layout: fixed;
     width: 100%;
 
+    .plans-table-th-content,
+    .plans-table-price,
+    .plans-table-comments-icon,
+    .plans-table-th-content-benefit {
+      color: var(--neutral-90);
+    }
+
     // cannot add border to td,th directly due to highlighted column border
     td > div,
     th > div {
@@ -550,6 +551,26 @@
     tr.plans-table-divider > td > div {
       // td style above not applied since there is only 1 level of div within divider cells
       padding: var(--spacing-05) var(--spacing-08);
+    }
+
+    tr.plans-table-price-row > td > div > div {
+      padding-top: 0;
+      padding-bottom: var(--spacing-06);
+    }
+    tr.plans-table-short-feature-list > td > div > div {
+      padding-top: 0;
+      padding-bottom: 0;
+
+      @media (max-width: @screen-xs-max) {
+        padding-bottom: var(--spacing-06);
+      }
+    }
+    tr.plans-table-cta-desktop > td > div > div {
+      padding-top: var(--spacing-08);
+    }
+    tr.plans-table-cta-mobile > td > div > div {
+      padding-top: 0;
+      padding-bottom: var(--spacing-06);
     }
 
     // We want these `div` inside `th` and `td` to have a 100% height since
@@ -866,12 +887,14 @@
     }
   }
 
+  .plans-table-btn-buy-container-desktop,
+  .plans-table-btn-buy-container-mobile {
+    gap: var(--spacing-04);
+  }
+
   .plans-table-btn-buy-container-desktop {
-    margin-top: auto;
     display: flex;
     flex-direction: column;
-    min-height: 60px;
-
     @media (max-width: @screen-xs-max) {
       display: none;
     }
@@ -883,112 +906,62 @@
     @media (max-width: @screen-xs-max) {
       display: flex;
       flex-direction: column;
-      min-height: 50px;
-      margin-top: @padding-sm;
     }
   }
 
-  .plans-v2-table-btn-buy {
-    padding: 4px 15px 5px;
-
-    @media (min-width: (@screen-xs-max+1)) {
-      .hidden-desktop {
-        display: none;
-      }
+  @media (min-width: (@screen-xs-max+1)) {
+    .hidden-desktop {
+      display: none;
     }
-
-    @media (max-width: @screen-sm-max) {
-      font-size: @font-size-small;
-    }
-
-    @media (max-width: @screen-xs-max) {
-      padding-left: 9px;
-      padding-right: 9px;
-      // truncating group plans long button text for mobile
-      .hidden-mobile {
-        display: none;
-      }
+  }
+  @media (max-width: @screen-xs-max) {
+    .hidden-mobile {
+      display: none;
     }
   }
 
-  p.plans-table-th-content-benefit,
   ul.plans-table-th-content-benefit {
-    padding-top: 15px;
-    font-size: @font-size-small;
-    font-family: @font-family-sans-serif;
-    line-height: 23px;
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
     hyphens: auto;
-  }
-
-  ul.plans-table-th-content-benefit {
     padding-left: 15px;
     text-align: left;
     margin-bottom: 0;
-
-    li a {
-      color: @ol-blue-gray-3;
-      text-decoration: underline;
-    }
   }
 
   // this class should only appear on the group table
-  .plans-v2-group-total-price {
+  .plans-group-total-price {
     font-weight: 700;
   }
 
-  .plans-table-price-container {
-    position: relative;
-
+  .plans-table-price-row {
+    .match-non-discounted-price-alignment,
     s {
-      position: absolute;
-      left: 0;
-      top: -27px;
-      font-weight: 700;
-      font-size: @font-size-small;
-      line-height: 42px;
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      color: @ol-blue-gray-2;
-
-      @media (max-width: @screen-xs-max) {
-        font-size: @font-size-extra-small;
-      }
+      display: block;
+      font-weight: 600;
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
+      color: var(--neutral-60);
     }
-  }
 
-  p.plans-v2-table-price-period-label {
-    margin: 0;
-    font-size: @font-size-small;
-    line-height: 23px;
-    color: @ol-blue-gray-3;
-  }
-
-  p.plans-v2-table-price {
-    margin: 0;
-
-    span {
-      font-weight: 700;
-      font-size: 32px;
-      line-height: 42px;
-
-      @media (max-width: @screen-xs-max) {
-        line-height: 35px;
-        font-size: @font-size-large;
+    .plans-table-price-container {
+      p.plans-table-price-period-label {
+        margin: 0;
+        font-size: var(--font-size-02);
+        line-height: var(--line-height-02);
+        color: @ol-blue-gray-3;
+        font-weight: 400;
       }
-    }
-  }
 
-  small.plans-table-th-content-additional-link {
-    text-transform: lowercase;
-    margin-top: @margin-xs;
-    font-size: @font-size-extra-small;
-    height: 16px;
-    font-family: @font-family-sans-serif;
+      p.plans-table-price {
+        margin: 0;
 
-    a {
-      color: @ol-blue-gray-5;
-      text-decoration: underline;
+        span {
+          font-weight: 600;
+          font-size: var(--font-size-07);
+          line-height: var(--line-height-06);
+        }
+      }
     }
   }
 
@@ -1095,11 +1068,12 @@
 
     @media (max-width: @screen-xs-max) {
       display: flex;
-      width: 100vw;
+      width: 100%;
       top: 0;
       left: 0;
       z-index: @z-index-plans-page-table-header-mobile;
       height: 42px;
+      border-bottom: @table-border;
 
       // separate sticky class because we want to remove the class (to visually remove the sticky header)
       // with javascript whenever the table is not visible anymore
@@ -1114,18 +1088,17 @@
     flex: 1 1 0px;
 
     span {
-      margin: @margin-xs;
-      border-bottom: 1px solid #cccccc;
       height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: @font-family-serif;
 
       @media (max-width: @screen-xs-max) {
-        font-size: @font-size-small;
+        color: var(--neutral-90);
+        font-size: var(--font-size-03);
+        font-weight: 600;
         text-align: center;
-        line-height: 19px;
+        line-height: var(--line-height-02);
       }
     }
   }
