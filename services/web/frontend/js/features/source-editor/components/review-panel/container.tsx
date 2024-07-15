@@ -1,7 +1,5 @@
 import classnames from 'classnames'
 
-const reviewPanelClasses = ['ol-cm-review-panel']
-
 type ContainerProps = {
   children?: React.ReactNode
   className?: string
@@ -10,7 +8,7 @@ type ContainerProps = {
 function Container({ children, className, ...rest }: ContainerProps) {
   return (
     <div
-      className={classnames(...reviewPanelClasses, className)}
+      className={classnames('review-panel', className)}
       {...rest}
       data-testid="review-panel"
     >

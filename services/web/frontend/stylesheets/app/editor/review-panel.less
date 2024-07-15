@@ -64,34 +64,6 @@
   }
 }
 
-#review-panel {
-  display: block;
-
-  .rp-size-expanded & {
-    display: flex;
-    flex-direction: column;
-    width: @review-panel-width;
-    overflow: visible;
-    border-left-width: 1px;
-  }
-
-  .rp-size-mini & {
-    width: @review-off-width;
-    z-index: 6;
-    border-left-width: 1px;
-  }
-
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  right: 0px;
-  background-color: @rp-bg-blue;
-  border-left: solid 0px @rp-border-grey;
-  font-size: @rp-base-font-size;
-  color: @rp-type-blue;
-  z-index: 6;
-}
-
 .loading-panel {
   .rp-size-expanded & {
     right: @review-panel-width;
@@ -780,8 +752,7 @@
   }
 }
 
-.rp-loading,
-.rp-empty {
+.rp-loading {
   text-align: center;
   padding: 5px;
 }
@@ -812,6 +783,10 @@
   color: lighten(@rp-type-blue, 25%);
   flex: 0 0 50%;
   border-top: solid 3px transparent;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: none;
   padding-bottom: 2px;
 
   &:hover,
@@ -840,48 +815,6 @@
     right: @review-panel-width;
     left: 0px;
     width: auto;
-  }
-}
-
-#editor.review-panel-react {
-  right: 0;
-}
-
-.cm-editor-wrapper {
-  @rp-yellow-for-cm: fade(
-    @rp-yellow,
-    40%
-  ); // Get the RGBA colour with transparency
-  @rp-green-for-cm: fade(
-    @rp-green,
-    40%
-  ); // Get the RGBA colour with transparency
-
-  .track-changes-marker {
-    border-radius: 0;
-  }
-
-  .track-changes-added-marker {
-    // Uses rgba so not to affect the opacity of the text - doesn't layer like ace
-    background-color: @rp-green-for-cm;
-    color: black;
-  }
-
-  .track-changes-deleted-marker {
-    border-left: 2px dotted #c5060b;
-    // Commented out styles for callout to be reimplemented later
-    // border-bottom: 1px dashed #c5060b;
-    // width: 100%;
-  }
-
-  .track-changes-comment-marker {
-    // Uses rgba so not to affect the opacity of the text - doesn't layer like ace
-    background-color: @rp-yellow-for-cm;
-    color: black;
-  }
-
-  .track-changes-added-marker.track-changes-comment-marker {
-    background-color: mix(@rp-yellow-for-cm, @rp-green-for-cm);
   }
 }
 
@@ -996,18 +929,6 @@ button when (@is-overleaf-light = true) {
   }
 }
 
-.rp-in-editor-widgets {
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 11px;
-  z-index: 2;
-
-  .rp-offset-widgets & {
-    top: 32px;
-  }
-}
-
 .rp-track-changes-indicator {
   display: block;
   padding: 5px 10px;
@@ -1048,6 +969,14 @@ button when (@is-overleaf-light = true) {
   z-index: 1;
   background-color: transparent;
   transition: background 0.1s;
+  flex-direction: column;
+  padding: 0;
+  border: 0;
+
+  .rp-size-mini &,
+  .rp-size-expanded & {
+    display: flex;
+  }
 
   .rp-size-expanded & {
     &::after {
@@ -1069,23 +998,16 @@ button when (@is-overleaf-light = true) {
     -moz-osx-font-smoothing: grayscale;
     font-size: 16px;
     display: block;
-    position: absolute;
+    position: sticky;
     top: 50%;
+    bottom: 50%;
     width: 100%;
     text-align: center;
     margin-top: -0.5em;
   }
 }
 
-// Helper class for elements which aren't treated as flex-items by IE10, e.g:
-// * inline items;
-// * unknown elements (elements which aren't standard DOM elements, such as custom element directives)
-.rp-flex-block {
-  display: block;
-}
-
-// CM6-specific review panel rules
-.ol-cm-review-panel {
+.review-panel {
   position: relative;
   z-index: 6;
   flex-shrink: 0;
@@ -1110,23 +1032,6 @@ button when (@is-overleaf-light = true) {
     width: @review-off-width;
     z-index: 6;
     border-left-width: 1px;
-  }
-
-  .review-panel-toggler {
-    flex-direction: column;
-    padding: 0;
-    border: 0;
-
-    .rp-size-mini &,
-    .rp-size-expanded & {
-      display: flex;
-    }
-
-    &:after {
-      position: sticky;
-      top: 50%;
-      bottom: 50%;
-    }
   }
 
   .review-panel-toolbar-collapse-button {
@@ -1183,13 +1088,6 @@ button when (@is-overleaf-light = true) {
     flex-direction: column;
     height: 100%;
   }
-
-  .rp-nav-item {
-    border-right: 0;
-    border-bottom: 0;
-    border-left: 0;
-    background: none;
-  }
 }
 
 .rp-floating-entry {
@@ -1198,8 +1096,8 @@ button when (@is-overleaf-light = true) {
   color: @rp-type-blue;
 }
 
-.ol-cm-review-panel,
-.rp-floating-entry {
+.rp-floating-entry,
+.review-panel {
   .rp-entry-metadata {
     button {
       padding: 0;
@@ -1215,8 +1113,12 @@ button when (@is-overleaf-light = true) {
   }
 }
 
-.react-rp-in-editor-widgets {
+.rp-in-editor-widgets {
   position: sticky;
+  top: 0;
+  right: 0;
+  font-size: 11px;
+  z-index: 2;
   font-family: @font-family-sans-serif;
 
   .rp-in-editor-widgets-inner {

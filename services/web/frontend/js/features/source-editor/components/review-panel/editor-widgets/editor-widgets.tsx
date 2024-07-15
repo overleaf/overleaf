@@ -62,11 +62,9 @@ function EditorWidgets() {
   return ReactDOM.createPortal(
     <>
       <div
-        className={classnames(
-          'rp-in-editor-widgets',
-          'react-rp-in-editor-widgets',
-          { hidden: reviewPanelOpen }
-        )}
+        className={classnames('rp-in-editor-widgets', {
+          hidden: reviewPanelOpen,
+        })}
       >
         <div className="rp-in-editor-widgets-inner">
           {wantTrackChanges && <ToggleWidget />}
