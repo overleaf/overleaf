@@ -51,14 +51,11 @@ switch (process.env.NODE_ENV) {
     webpackManifest = {}
 }
 function loadManifestFromWebpackDevServer(done = function () {}) {
-  webpackManifest = fetchJson(
-    new URL(`/manifest.json`, Settings.apis.webpack.url),
-    {
-      headers: {
-        Host: 'localhost',
-      },
-    }
-  )
+  fetchJson(new URL(`/manifest.json`, Settings.apis.webpack.url), {
+    headers: {
+      Host: 'localhost',
+    },
+  })
     .then(json => {
       webpackManifest = json
       done()
