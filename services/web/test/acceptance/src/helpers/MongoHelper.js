@@ -10,12 +10,12 @@ const DEFAULT_ENV = 'saas'
 
 module.exports = {
   initialize() {
-    before(waitForDb)
+    before('wait for db', waitForDb)
     if (process.env.CLEANUP_MONGO === 'true') {
-      before(dropTestDatabase)
+      before('drop test database', dropTestDatabase)
     }
 
-    before(function (done) {
+    before('run migrations', function (done) {
       const args = [
         'run',
         'migrations',
@@ -32,7 +32,7 @@ module.exports = {
       })
     })
 
-    afterEach(async function () {
+    afterEach('purge mongo data', async function () {
       return Promise.all(
         Object.values(db).map(async collection => {
           if (collection === db.migrations) {
