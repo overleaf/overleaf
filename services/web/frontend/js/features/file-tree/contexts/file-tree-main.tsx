@@ -5,7 +5,6 @@ type ContextMenuCoords = { top: number; left: number }
 const FileTreeMainContext = createContext<
   | {
       refProviders: object
-      reindexReferences: () => void
       setRefProviderEnabled: (provider: string, value: boolean) => void
       setStartedFreeTrial: (value: boolean) => void
       contextMenuCoords: ContextMenuCoords | null
@@ -27,13 +26,11 @@ export function useFileTreeMainContext() {
 }
 
 export const FileTreeMainProvider: FC<{
-  reindexReferences: () => void
   refProviders: object
   setRefProviderEnabled: (provider: string, value: boolean) => void
   setStartedFreeTrial: (value: boolean) => void
 }> = ({
   refProviders,
-  reindexReferences,
   setRefProviderEnabled,
   setStartedFreeTrial,
   children,
@@ -45,7 +42,6 @@ export const FileTreeMainProvider: FC<{
     <FileTreeMainContext.Provider
       value={{
         refProviders,
-        reindexReferences,
         setRefProviderEnabled,
         setStartedFreeTrial,
         contextMenuCoords,

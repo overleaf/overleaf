@@ -24,7 +24,7 @@ type Metadata = {
   labels: Set<string>
   packageNames: Set<string>
   commands: Command[]
-  references: string[]
+  referenceKeys: Set<string>
   fileTreeData: Folder
 }
 

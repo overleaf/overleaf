@@ -12,7 +12,6 @@ export const FileTreeProvider: FC<{
 
   if (propsRef.current === undefined) {
     propsRef.current = {
-      reindexReferences: cy.stub().as('reindexReferences'),
       setRefProviderEnabled: cy.stub().as('setRefProviderEnabled'),
       setStartedFreeTrial: cy.stub().as('setStartedFreeTrial'),
       onSelect: cy.stub(),

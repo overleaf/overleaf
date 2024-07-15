@@ -155,9 +155,6 @@ export default {
       console.log('started free trial')
     },
     refProviders: {},
-    reindexReferences: () => {
-      console.log('reindex references')
-    },
     setRefProviderEnabled: provider => {
       console.log(`ref provider ${provider} enabled`)
     },

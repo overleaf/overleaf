@@ -80,10 +80,5 @@ export const mockScope = (content?: string) => {
     $on: cy.stub().log(false),
     $broadcast: cy.stub().log(false),
     $emit: cy.stub().log(false),
-    $root: {
-      _references: {
-        keys: ['foo'],
-      },
-    },
   }
 }

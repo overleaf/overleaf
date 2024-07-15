@@ -16,10 +16,10 @@ export function buildReferenceCompletions(
     return
   }
 
-  for (const reference of metadata.references) {
+  for (const referenceKey of metadata.referenceKeys) {
     completions.references.push({
       type: 'reference',
-      label: reference,
+      label: referenceKey,
       extend: extendRequiredParameter,
     })
   }

@@ -27,7 +27,6 @@ describe('FileTree Context Menu Flow', function () {
       >
         <FileTreeRoot
           refProviders={{}}
-          reindexReferences={cy.stub()}
           setRefProviderEnabled={cy.stub()}
           setStartedFreeTrial={cy.stub()}
           onSelect={cy.stub()}
@@ -64,7 +63,6 @@ describe('FileTree Context Menu Flow', function () {
       >
         <FileTreeRoot
           refProviders={{}}
-          reindexReferences={cy.stub()}
           setRefProviderEnabled={cy.stub()}
           setStartedFreeTrial={cy.stub()}
           onSelect={cy.stub()}
@@ -101,7 +99,6 @@ describe('FileTree Context Menu Flow', function () {
       >
         <FileTreeRoot
           refProviders={{}}
-          reindexReferences={cy.stub()}
           setRefProviderEnabled={cy.stub()}
           setStartedFreeTrial={cy.stub()}
           onSelect={cy.stub()}

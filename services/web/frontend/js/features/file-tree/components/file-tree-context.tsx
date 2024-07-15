@@ -10,7 +10,6 @@ import { FC } from 'react'
 // FileTreeMutable: provides entities mutation operations
 // FileTreeSelectable: handles selection and multi-selection
 const FileTreeContext: FC<{
-  reindexReferences: () => void
   refProviders: Record<string, boolean>
   setRefProviderEnabled: (provider: string, value: boolean) => void
   setStartedFreeTrial: (value: boolean) => void
@@ -18,7 +17,6 @@ const FileTreeContext: FC<{
   fileTreeContainer?: HTMLDivElement
 }> = ({
   refProviders,
-  reindexReferences,
   setRefProviderEnabled,
   setStartedFreeTrial,
   onSelect,
@@ -30,10 +28,9 @@ const FileTreeContext: FC<{
       refProviders={refProviders}
       setRefProviderEnabled={setRefProviderEnabled}
       setStartedFreeTrial={setStartedFreeTrial}
-      reindexReferences={reindexReferences}
     >
       <FileTreeSelectableProvider onSelect={onSelect}>
-        <FileTreeActionableProvider reindexReferences={reindexReferences}>
+        <FileTreeActionableProvider>
           <FileTreeDraggableProvider fileTreeContainer={fileTreeContainer}>
             {children}
           </FileTreeDraggableProvider>

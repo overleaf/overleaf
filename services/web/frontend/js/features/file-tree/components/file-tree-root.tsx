@@ -26,11 +26,9 @@ const FileTreeRoot = React.memo<{
   isConnected: boolean
   setRefProviderEnabled: () => void
   setStartedFreeTrial: () => void
-  reindexReferences: () => void
   refProviders: Record<string, boolean>
 }>(function FileTreeRoot({
   refProviders,
-  reindexReferences,
   setRefProviderEnabled,
   setStartedFreeTrial,
   onSelect,
@@ -95,7 +93,6 @@ const FileTreeRoot = React.memo<{
           refProviders={refProviders}
           setRefProviderEnabled={setRefProviderEnabled}
           setStartedFreeTrial={setStartedFreeTrial}
-          reindexReferences={reindexReferences}
           onSelect={onSelect}
           fileTreeContainer={fileTreeContainer}
         >

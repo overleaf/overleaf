@@ -42,7 +42,6 @@ describe('FileTree Rename Entity Flow', function () {
         >
           <FileTreeRoot
             refProviders={{}}
-            reindexReferences={cy.stub()}
             setRefProviderEnabled={cy.stub()}
             setStartedFreeTrial={cy.stub()}
             onSelect={cy.stub().as('onSelect')}

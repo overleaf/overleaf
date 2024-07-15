@@ -8,6 +8,7 @@ import { User, UserId } from '../../../../../types/user'
 import { TestContainer } from '../helpers/test-container'
 import { FC } from 'react'
 import { MetadataContext } from '@/features/ide-react/context/metadata-context'
+import { ReferencesContext } from '@/features/ide-react/context/references-context'
 
 describe('autocomplete', { scrollBehavior: false }, function () {
   beforeEach(function () {
@@ -62,7 +63,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.$root._references.keys = ['foo']
     scope.project.rootFolder = rootFolder
 
     cy.mount(
@@ -209,7 +209,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.$root._references.keys = ['foo']
 
     cy.mount(
       <TestContainer>
@@ -373,11 +372,27 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.$root._references.keys = ['ref-1', 'ref-2', 'ref-3']
+
+    const ReferencesProvider: FC = ({ children }) => {
+      return (
+        <ReferencesContext.Provider
+          value={{
+            referenceKeys: new Set(['ref-1', 'ref-2', 'ref-3']),
+            indexAllReferences: cy.stub(),
+          }}
+        >
+          {children}
+        </ReferencesContext.Provider>
+      )
+    }
 
     cy.mount(
       <TestContainer>
-        <EditorProviders scope={scope} rootFolder={rootFolder as any}>
+        <EditorProviders
+          scope={scope}
+          providers={{ ReferencesProvider }}
+          rootFolder={rootFolder as any}
+        >
           <CodeMirrorEditor />
         </EditorProviders>
       </TestContainer>
@@ -428,7 +443,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.$root._references.keys = ['foo']
     scope.project.rootFolder = rootFolder
 
     cy.mount(
@@ -893,7 +907,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     ]
 
     const scope = mockScope()
-    scope.$root._references.keys = ['foo']
     scope.project.rootFolder = rootFolder
 
     cy.mount(

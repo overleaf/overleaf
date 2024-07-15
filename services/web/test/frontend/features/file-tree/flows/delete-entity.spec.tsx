@@ -35,7 +35,6 @@ describe('FileTree Delete Entity Flow', function () {
           >
             <FileTreeRoot
               refProviders={{}}
-              reindexReferences={cy.stub().as('reindexReferences')}
               setRefProviderEnabled={cy.stub()}
               setStartedFreeTrial={cy.stub()}
               onSelect={cy.stub()}
@@ -84,7 +83,6 @@ describe('FileTree Delete Entity Flow', function () {
       ).should('not.exist')
 
       cy.get('@deleteDoc.all').should('have.length', 1)
-      cy.get('@reindexReferences').should('not.have.been.called')
     })
 
     it('continues delete on 404s', function () {
@@ -162,7 +160,6 @@ describe('FileTree Delete Entity Flow', function () {
           >
             <FileTreeRoot
               refProviders={{}}
-              reindexReferences={cy.stub().as('reindexReferences')}
               setRefProviderEnabled={cy.stub()}
               setStartedFreeTrial={cy.stub()}
               onSelect={cy.stub()}
@@ -226,7 +223,6 @@ describe('FileTree Delete Entity Flow', function () {
           >
             <FileTreeRoot
               refProviders={{}}
-              reindexReferences={cy.stub().as('reindexReferences')}
               setRefProviderEnabled={cy.stub()}
               setStartedFreeTrial={cy.stub()}
               onSelect={cy.stub()}
@@ -282,7 +278,6 @@ describe('FileTree Delete Entity Flow', function () {
 
       cy.get('@deleteDoc.all').should('have.length', 1)
       cy.get('@deleteFile.all').should('have.length', 1)
-      cy.get('@reindexReferences').should('have.been.calledOnce')
     })
   })
 })

@@ -7,9 +7,6 @@ import PropTypes from 'prop-types'
 
 const defaultFileTreeContextProps = {
   refProviders: { mendeley: false, zotero: false },
-  reindexReferences: () => {
-    console.log('reindex references')
-  },
   setRefProviderEnabled: provider => {
     console.log(`ref provider ${provider} enabled`)
   },

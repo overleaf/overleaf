@@ -22,7 +22,6 @@ import { populateEditorScope } from '@/features/ide-react/scope-adapters/editor-
 import { postJSON } from '@/infrastructure/fetch-json'
 import { EventLog } from '@/features/ide-react/editor/event-log'
 import { populateOnlineUsersScope } from '@/features/ide-react/context/online-users-context'
-import { populateReferenceScope } from '@/features/ide-react/context/references-context'
 import { ReactScopeEventEmitter } from '@/features/ide-react/scope-event-emitter/react-scope-event-emitter'
 import getMeta from '@/utils/meta'
 
@@ -77,7 +76,6 @@ export function createReactScopeValueStore(projectId: string) {
   populateProjectScope(scopeStore)
   populatePdfScope(scopeStore)
   populateOnlineUsersScope(scopeStore)
-  populateReferenceScope(scopeStore)
   populateReviewPanelScope(scopeStore)
 
   scopeStore.allowNonExistentPath('hasLintingError')

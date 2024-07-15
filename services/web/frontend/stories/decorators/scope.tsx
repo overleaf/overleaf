@@ -97,11 +97,6 @@ const initialize = () => {
       //
     },
     $broadcast: () => {},
-    $root: {
-      _references: {
-        keys: ['bibkeyExample'],
-      },
-    },
     ui: {
       chatOpen: true,
       pdfLayout: 'flat',

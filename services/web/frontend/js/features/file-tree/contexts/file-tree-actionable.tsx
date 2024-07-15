@@ -33,6 +33,7 @@ import {
   DuplicateFilenameMoveError,
 } from '../errors'
 import { Folder } from '../../../../../types/folder'
+import { useReferencesContext } from '@/features/ide-react/context/references-context'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -216,11 +217,10 @@ function fileTreeActionableReducer(state: State, action: Action) {
   }
 }
 
-export const FileTreeActionableProvider: FC<{
-  reindexReferences: () => void
-}> = ({ reindexReferences, children }) => {
+export const FileTreeActionableProvider: FC = ({ children }) => {
   const { _id: projectId } = useProjectContext()
   const { permissionsLevel } = useEditorContext()
+  const { indexAllReferences } = useReferencesContext()
 
   const [state, dispatch] = useReducer(
     permissionsLevel === 'readOnly'
@@ -305,7 +305,7 @@ export const FileTreeActionableProvider: FC<{
         // @ts-ignore (TODO: improve mapSeries types)
         .then(() => {
           if (shouldReindexReferences) {
-            reindexReferences()
+            indexAllReferences(true)
           }
           dispatch({ type: ACTION_TYPES.CLEAR })
         })
@@ -314,7 +314,7 @@ export const FileTreeActionableProvider: FC<{
           dispatch({ type: ACTION_TYPES.ERROR, error })
         })
     )
-  }, [fileTreeData, projectId, selectedEntityIds, reindexReferences])
+  }, [fileTreeData, projectId, selectedEntityIds, indexAllReferences])
 
   // moves entities. Tree is updated immediately and data are sync'd after.
   const finishMoving = useCallback(

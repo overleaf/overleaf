@@ -60,6 +60,7 @@ import { useLayoutContext } from '@/shared/context/layout-context'
 import { debugConsole } from '@/utils/debugging'
 import { useMetadataContext } from '@/features/ide-react/context/metadata-context'
 import { useUserContext } from '@/shared/context/user-context'
+import { useReferencesContext } from '@/features/ide-react/context/references-context'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -107,7 +108,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const [visual] = useScopeValue<boolean>('editor.showVisual')
 
-  const [references] = useScopeValue<{ keys: string[] }>('$root._references')
+  const { referenceKeys } = useReferencesContext()
 
   // build the translation phrases
   const phrases = usePhrases()
@@ -214,7 +215,7 @@ function useCodeMirrorScope(view: EditorView) {
   // TODO: read this data from the scope?
   const metadataRef = useRef({
     ...metadata,
-    references: references.keys,
+    referenceKeys,
     fileTreeData,
   })
 
@@ -226,13 +227,9 @@ function useCodeMirrorScope(view: EditorView) {
 
   // listen to project reference keys updates
   useEffect(() => {
-    const listener = (event: Event) => {
-      metadataRef.current.references = (event as CustomEvent<string[]>).detail
-      view.dispatch(setMetadata(metadataRef.current))
-    }
-    window.addEventListener('project:references', listener)
-    return () => window.removeEventListener('project:references', listener)
-  }, [view])
+    metadataRef.current.referenceKeys = referenceKeys
+    view.dispatch(setMetadata(metadataRef.current))
+  }, [view, referenceKeys])
 
   // listen to project root folder updates
   useEffect(() => {
