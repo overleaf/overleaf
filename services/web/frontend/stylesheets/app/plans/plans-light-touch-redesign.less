@@ -442,10 +442,6 @@
 
     @media (max-width: @screen-xs-max) {
       margin-top: 60px + @plans-highlighted-text-height-desktop;
-
-      th .plans-table-th-content {
-        min-height: 280px;
-      }
     }
   }
 
@@ -464,24 +460,6 @@
 
   .plans-table-group {
     margin-top: 26px + @plans-highlighted-text-height-desktop;
-
-    p.plans-table-th-content-title {
-      // Reduce font size of table heading for screen size >= @screen-lg (1200px) from 20px to 19px
-      // In the English version of overleaf, 20px is enough for the text to not be wrapped to the next line, the longest text is the 2nd column of group tab: "Group Professional".
-      // In the English version, "Group Professional" won't be wrapped to two separate lines with 20px font size for big screen.
-      // In other languages, for example, German (subdomain `de`), 20px is too big so the text is wrapped and breaks the UI. 19px is enough to fit the text on one line on the German site.
-      // This font-size reduction is a case-to-case basis since we don't have any way to know the max length of every language unless we've translated them all.
-      // There's probably a smarter way to do it, but probably also more complex. This change in font should be acceptable and we can revisit it every time there's a longer text.
-      font-size: 19px;
-
-      @media (max-width: @screen-md-max) {
-        font-size: @font-size-base;
-      }
-
-      @media (max-width: @screen-xs-max) {
-        font-size: @font-size-small;
-      }
-    }
   }
 
   .plans-table {
@@ -543,6 +521,35 @@
           border-top-left-radius: 0;
         }
       }
+    }
+
+    .plans-table-cta-desktop,
+    .plans-table-cta-mobile,
+    .plans-table-short-feature-list,
+    .plans-table-price-row {
+      td > div {
+        border-top: 0;
+      }
+    }
+
+    th[scope='col'] > div {
+      padding: var(--spacing-06) var(--spacing-08);
+    }
+    th[scope='row'] > div {
+      padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
+        var(--spacing-05);
+    }
+    td > div > div {
+      // apply spacing to inner div to not interfere with border
+      padding: var(--spacing-05) var(--spacing-08);
+
+      @media (max-width: @screen-xs-max) {
+        padding: var(--spacing-05);
+      }
+    }
+    tr.plans-table-divider > td > div {
+      // td style above not applied since there is only 1 level of div within divider cells
+      padding: var(--spacing-05) var(--spacing-08);
     }
 
     // We want these `div` inside `th` and `td` to have a 100% height since
@@ -622,12 +629,11 @@
     }
 
     th[scope='col'] {
-      font-family: @headings-font-family;
-      font-size: @font-size-h2;
-      font-weight: @headings-font-weight;
-      line-height: @headings-line-height;
+      font-family: 'Noto Sans', sans-serif;
+      font-size: var(--font-size-05);
+      font-weight: 600;
+      line-height: var(--line-height-04);
       vertical-align: top;
-      padding: 0;
       position: relative;
 
       &.plans-table-green-highlighted {
@@ -648,15 +654,12 @@
         position: relative;
       }
 
-      // css hack for table border-radius on the first feature name
-      &:nth-child(2) {
-        th[scope='row']:first-child {
-          .plans-table-feature-name {
-            border-top-left-radius: @plans-table-border-radius;
+      .plans-table-first-feature-header {
+        .plans-table-feature-name {
+          border-top-left-radius: @plans-table-border-radius;
 
-            @media (max-width: @screen-xs-max) {
-              border-top-left-radius: 0;
-            }
+          @media (max-width: @screen-xs-max) {
+            border-top-left-radius: 0;
           }
         }
       }
@@ -673,7 +676,6 @@
       // direct child selector to NOT affect the generated tooltip
       td > div {
         text-align: center;
-        padding: 6px;
 
         .plans-table-divider-label {
           margin-bottom: 0;
@@ -702,8 +704,6 @@
         td > div {
           background-color: var(--neutral-20);
           border: 0;
-          padding: 15px 5px;
-
           i {
             display: none;
           }
@@ -758,7 +758,7 @@
 
     @media (min-width: @screen-sm-min) {
       // highlight rows on hover
-      tr:not(.plans-table-divider):not(:first-child):hover {
+      .plans-table-feature-row:hover {
         .plans-table-feature-name,
         .plans-table-cell {
           background-color: @table-hover-bg;
@@ -802,9 +802,15 @@
         font-size: 12px;
       }
 
-      // hide the first column header
-      tr:first-child th:first-child {
-        display: none;
+      // hide the first cell (which has no content)
+      tr:first-child,
+      .plans-table-price-row,
+      .plans-table-cta-mobile,
+      .plans-table-short-feature-list {
+        th:first-child,
+        td:first-child {
+          display: none;
+        }
       }
 
       // for mobile, we need to show the feature name (the first td) as its own row
@@ -840,7 +846,6 @@
 
     @media (max-width: @screen-xs-max) {
       .plans-table-cell-content {
-        padding: 6px;
         min-height: @plans-table-td-mobile-min-height;
       }
     }
@@ -852,13 +857,7 @@
     .plans-table-th-content {
       display: flex;
       flex-direction: column;
-      min-height: 321px;
       height: 100%;
-      padding: 10px 13px;
-
-      @media (max-width: @screen-md-max) {
-        min-height: 330px;
-      }
 
       @media (max-width: @screen-sm-max) {
         padding-left: @padding-xs;
@@ -912,30 +911,6 @@
     }
   }
 
-  p.plans-table-th-content-title {
-    font-size: @font-size-large;
-    padding-bottom: @padding-sm;
-    border-bottom: 1px solid @gray-lighter;
-    margin-bottom: @margin-lg;
-
-    @media (max-width: @screen-md-max) {
-      font-size: @font-size-base;
-    }
-
-    // `plans-table-th-content-title` is visually invisible on screen size less than @screen-xs-max
-    // because there is a sticky header (`plans-v2-table-sticky-header` class) that "replace" the content visually
-    // (see the `@plans-table-sticky-header-z-index` variable that make the sticky header element is "above" the whole table)
-    // however, we still need to properly styling the `plans-table-th-content-title` for small screen size to
-    // fit this element to the size of the sticky header
-    // this trick is used because th element can not have a `position: sticky` rule, at least for our use case
-    @media (max-width: @screen-xs-max) {
-      min-height: 40px;
-      margin-bottom: @margin-md;
-      font-size: @font-size-small;
-      padding-bottom: 0;
-    }
-  }
-
   p.plans-table-th-content-benefit,
   ul.plans-table-th-content-benefit {
     padding-top: 15px;
@@ -961,8 +936,25 @@
     font-weight: 700;
   }
 
-  .plans-v2-table-price-container {
+  .plans-table-price-container {
     position: relative;
+
+    s {
+      position: absolute;
+      left: 0;
+      top: -27px;
+      font-weight: 700;
+      font-size: @font-size-small;
+      line-height: 42px;
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      color: @ol-blue-gray-2;
+
+      @media (max-width: @screen-xs-max) {
+        font-size: @font-size-extra-small;
+      }
+    }
   }
 
   p.plans-v2-table-price-period-label {
@@ -987,22 +979,6 @@
     }
   }
 
-  strike.plans-v2-table-price-before-discount {
-    position: absolute;
-    top: -27px;
-    font-weight: 700;
-    font-size: @font-size-small;
-    line-height: 42px;
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    color: @ol-blue-gray-2;
-
-    @media (max-width: @screen-xs-max) {
-      font-size: @font-size-extra-small;
-    }
-  }
-
   small.plans-table-th-content-additional-link {
     text-transform: lowercase;
     margin-top: @margin-xs;
@@ -1020,7 +996,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 6px 6px 18px;
 
     i.plans-table-feature-question-icon {
       margin-left: 10px;
@@ -1033,7 +1008,6 @@
     @media (max-width: @screen-xs-max) {
       display: inline-block;
       text-align: left;
-      padding: 6px;
       width: 100%;
       background-color: @ol-blue-gray-0;
       min-height: @plans-table-td-mobile-min-height;
@@ -1140,7 +1114,7 @@
     flex: 1 1 0px;
 
     span {
-      margin: 0px @margin-xs;
+      margin: @margin-xs;
       border-bottom: 1px solid #cccccc;
       height: 100%;
       display: flex;
