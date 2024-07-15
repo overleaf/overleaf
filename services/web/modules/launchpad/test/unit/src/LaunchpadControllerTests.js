@@ -68,6 +68,8 @@ describe('LaunchpadController', function () {
         return key
       },
     }
+
+    this.next = sinon.stub()
   })
 
   describe('launchpadPage', function () {
@@ -89,10 +91,8 @@ describe('LaunchpadController', function () {
       })
 
       describe('when there are no admins', function () {
-        beforeEach(function (done) {
+        beforeEach(function () {
           this._atLeastOneAdminExists.resolves(false)
-          this.res.callback = done
-          this.next = sinon.stub().callsFake(() => done())
           return this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
@@ -116,10 +116,8 @@ describe('LaunchpadController', function () {
       })
 
       describe('when there is at least one admin', function () {
-        beforeEach(function (done) {
+        beforeEach(function () {
           this._atLeastOneAdminExists.resolves(true)
-          this.res.callback = done
-          this.next = sinon.stub().callsFake(() => done())
           return this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
@@ -151,12 +149,10 @@ describe('LaunchpadController', function () {
       })
 
       describe('when the user is an admin', function () {
-        beforeEach(function (done) {
+        beforeEach(function () {
           this.UserGetter.promises.getUser = sinon
             .stub()
             .resolves({ isAdmin: true })
-          this.res.callback = done
-          this.next = sinon.stub().callsFake(() => done())
           return this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
@@ -170,7 +166,7 @@ describe('LaunchpadController', function () {
             '../../../app/views/launchpad'
           )
           this.res.render.callCount.should.equal(1)
-          return this.res.render
+          this.res.render
             .calledWith(viewPath, {
               wsUrl: undefined,
               adminUserExists: true,
@@ -181,12 +177,10 @@ describe('LaunchpadController', function () {
       })
 
       describe('when the user is not an admin', function () {
-        beforeEach(function (done) {
+        beforeEach(function () {
           this.UserGetter.promises.getUser = sinon
             .stub()
             .resolves({ isAdmin: false })
-          this.res.callback = done
-          this.next = sinon.stub().callsFake(() => done())
           return this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
@@ -244,15 +238,15 @@ describe('LaunchpadController', function () {
     beforeEach(function () {
       this.EmailHandler.promises.sendEmail = sinon.stub().resolves()
       this.req.body.email = 'someone@example.com'
-      return (this.next = sinon.stub())
     })
 
-    it('should produce a 200 response', function (done) {
-      this.res.callback = () => {
-        this.res.json.calledWith({ message: 'email_sent' }).should.equal(true)
-        done()
-      }
-      this.LaunchpadController.sendTestEmail(this.req, this.res, this.next)
+    it('should produce a 200 response', async function () {
+      await this.LaunchpadController.sendTestEmail(
+        this.req,
+        this.res,
+        this.next
+      )
+      this.res.json.calledWith({ message: 'email_sent' }).should.equal(true)
     })
 
     it('should not call next with an error', function () {
@@ -260,8 +254,12 @@ describe('LaunchpadController', function () {
       return this.next.callCount.should.equal(0)
     })
 
-    it('should have called sendEmail', function () {
-      this.LaunchpadController.sendTestEmail(this.req, this.res, this.next)
+    it('should have called sendEmail', async function () {
+      await this.LaunchpadController.sendTestEmail(
+        this.req,
+        this.res,
+        this.next
+      )
       this.EmailHandler.promises.sendEmail.callCount.should.equal(1)
       return this.EmailHandler.promises.sendEmail
         .calledWith('testEmail')
@@ -315,7 +313,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -334,8 +332,6 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        this.next = sinon.stub().callsFake(() => done())
-        this.res.callback = done
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -391,7 +387,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.next = sinon.stub()
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -429,7 +424,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.next = sinon.stub()
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -454,7 +448,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when an invalid email is supplied', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'invalid password'
@@ -471,8 +465,6 @@ describe('LaunchpadController', function () {
           .stub()
           .returns(new Error('bad email'))
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -496,7 +488,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when an invalid password is supplied', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'invalid password'
@@ -513,8 +505,6 @@ describe('LaunchpadController', function () {
         this.AuthenticationManager.validatePassword = sinon
           .stub()
           .returns(new Error('bad password'))
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -538,7 +528,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when there are already existing admins', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(true)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -553,8 +543,6 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -575,7 +563,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when checking admins produces an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.rejects(new Error('woops'))
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -588,8 +576,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -614,7 +600,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when registerNewUser produces an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -631,8 +617,6 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -664,7 +648,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when user update produces an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -683,8 +667,6 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -712,7 +694,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when overleaf', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.Settings.overleaf = { one: 1 }
         this.Settings.createV1AccountOnLogin = true
         this._atLeastOneAdminExists.resolves(false)
@@ -736,8 +718,6 @@ describe('LaunchpadController', function () {
         this.UserGetter.promises.getUser = sinon
           .stub()
           .resolves({ _id: '1234' })
-        this.next = sinon.stub().callsFake(() => done())
-        this.res.callback = done
         return this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
@@ -793,7 +773,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when all goes well', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -808,8 +788,6 @@ describe('LaunchpadController', function () {
           .stub()
           .returns({ exec: sinon.stub().resolves() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
@@ -875,7 +853,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.next = sinon.stub()
         return this.LaunchpadController.registerExternalAuthAdmin(
           'NOTAVALIDAUTHMETHOD'
         )(this.req, this.res, this.next)
@@ -909,7 +886,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.next = sinon.stub()
         return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
@@ -934,7 +910,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when there are already existing admins', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(true)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -945,8 +921,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
@@ -967,7 +941,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when checking admins produces an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.rejects(new Error('woops'))
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -978,8 +952,6 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
@@ -1004,7 +976,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when registerNewUser produces an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -1017,8 +989,6 @@ describe('LaunchpadController', function () {
           .rejects(new Error('woops'))
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
@@ -1055,7 +1025,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when user update produces an error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -1070,8 +1040,6 @@ describe('LaunchpadController', function () {
           exec: sinon.stub().rejects(new Error('woops')),
         })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        this.res.callback = done
-        this.next = sinon.stub().callsFake(() => done())
         return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,

@@ -42,13 +42,12 @@ describe('TemplatesController', function () {
 
   describe('createProjectFromV1Template', function () {
     describe('on success', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.project = { _id: 'project-id' }
         this.TemplatesManager.promises.createProjectFromV1Template.resolves(
           this.project
         )
-        this.res.redirect.callsFake(() => done())
-        this.TemplatesController.createProjectFromV1Template(
+        return this.TemplatesController.createProjectFromV1Template(
           this.req,
           this.res,
           this.next
@@ -79,11 +78,10 @@ describe('TemplatesController', function () {
     })
 
     describe('on error', function () {
-      beforeEach(function (done) {
+      beforeEach(function () {
         this.TemplatesManager.promises.createProjectFromV1Template.rejects(
           'error'
         )
-        this.next.callsFake(() => done())
         return this.TemplatesController.createProjectFromV1Template(
           this.req,
           this.res,
