@@ -1,6 +1,9 @@
 const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
+const {
+  getSafeAdminDomainRedirect,
+} = require('../../../app/src/Features/Helpers/UrlHelper')
 
 describe('AdminPrivilegeAvailable', function () {
   let adminUser, otherUser
@@ -22,7 +25,10 @@ describe('AdminPrivilegeAvailable', function () {
   })
 
   beforeEach('create other user and project', async function () {
-    otherUser = new User()
+    otherUser = new User({
+      email: 'test@non-staff.com',
+      confirmedAt: new Date(),
+    })
     await otherUser.login()
 
     otherUsersProjectId = await otherUser.createProject('other users project')
@@ -66,6 +72,16 @@ describe('AdminPrivilegeAvailable', function () {
     it('should display token access page for regular user', async function () {
       await displayTokenAccessPage(otherUser)
     })
+    it('should redirect a token grant request to project page', async function () {
+      const { response } = await adminUser.doRequest('POST', {
+        url: `${otherUsersProjectTokenAccessURL}/grant`,
+        json: {
+          confirmedByUser: true,
+        },
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(response.body.redirect).to.equal(`/project/${otherUsersProjectId}`)
+    })
   })
 
   describe('adminPrivilegeAvailable=false', function () {
@@ -78,18 +94,49 @@ describe('AdminPrivilegeAvailable', function () {
     it('should block the admin from non-owned project', async function () {
       expect(await hasAccess(otherUsersProjectId)).to.equal(false)
     })
-    it('should redirect a token access request to admin panel', async function () {
-      const { response } = await adminUser.doRequest(
-        'GET',
-        otherUsersProjectTokenAccessURL
-      )
-      expect(response.statusCode).to.equal(302)
-      expect(response.headers.location).to.equal(
-        Settings.adminUrl + otherUsersProjectTokenAccessURL
-      )
+    it('should display token access page for admin', async function () {
+      displayTokenAccessPage(adminUser)
     })
     it('should display token access page for regular user', async function () {
       await displayTokenAccessPage(otherUser)
+    })
+    it('should redirect a token grant request to admin panel if belongs to non-staff', async function () {
+      const { response } = await adminUser.doRequest('POST', {
+        url: `${otherUsersProjectTokenAccessURL}/grant`,
+        json: {
+          confirmedByUser: true,
+        },
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(response.body.redirect).to.equal(
+        getSafeAdminDomainRedirect(otherUsersProjectTokenAccessURL)
+      )
+    })
+
+    it('should redirect a token grant request to project page if belongs to staff', async function () {
+      const staff = new User({
+        email: `test@${Settings.adminDomains[0]}`,
+        confirmedAt: new Date(),
+      })
+      await staff.ensureUserExists()
+      await staff.ensureAdmin()
+      await staff.login()
+
+      const staffProjectId = await staff.createProject('staff user project')
+      await staff.makeTokenBased(staffProjectId)
+      const {
+        tokens: { readOnly: readOnlyTokenAdmin },
+      } = await staff.getProject(staffProjectId)
+      const staffProjectTokenAccessURL = `/read/${readOnlyTokenAdmin}`
+
+      const { response } = await adminUser.doRequest('POST', {
+        url: `${staffProjectTokenAccessURL}/grant`,
+        json: {
+          confirmedByUser: true,
+        },
+      })
+      expect(response.statusCode).to.equal(200)
+      expect(response.body.redirect).to.equal(`/project/${staffProjectId}`)
     })
   })
 })

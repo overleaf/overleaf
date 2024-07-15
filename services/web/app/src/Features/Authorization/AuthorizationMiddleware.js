@@ -12,7 +12,7 @@ const {
 } = require('../Helpers/AdminAuthorizationHelper')
 const { getSafeAdminDomainRedirect } = require('../Helpers/UrlHelper')
 
-function handleAdminDomainRedirect(req, res) {
+function _handleAdminDomainRedirect(req, res) {
   if (canRedirectToAdminDomain(SessionManager.getSessionUser(req.session))) {
     logger.warn({ req }, 'redirecting admin user to admin domain')
     res.redirect(getSafeAdminDomainRedirect(req.originalUrl))
@@ -150,7 +150,7 @@ async function ensureUserIsSiteAdmin(req, res, next) {
     logger.debug({ userId }, 'allowing user admin access to site')
     return next()
   }
-  if (handleAdminDomainRedirect(req, res)) return
+  if (_handleAdminDomainRedirect(req, res)) return
   logger.debug({ userId }, 'denying user admin access to site')
   _redirectToRestricted(req, res, next)
 }
@@ -205,6 +205,5 @@ module.exports = {
   ),
   ensureUserCanAdminProject: expressify(ensureUserCanAdminProject),
   ensureUserIsSiteAdmin: expressify(ensureUserIsSiteAdmin),
-  handleAdminDomainRedirect,
   restricted,
 }

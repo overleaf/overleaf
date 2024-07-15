@@ -23,7 +23,12 @@ describe('TokenAccessController', function () {
     this.res = new MockResponse()
     this.next = sinon.stub().returns()
 
-    this.Settings = {}
+    this.Settings = {
+      siteUrl: 'https://www.dev-overleaf.com',
+      adminPrivilegeAvailable: false,
+      adminUrl: 'https://admin.dev-overleaf.com',
+      adminDomains: ['overleaf.com'],
+    }
     this.TokenAccessHandler = {
       TOKEN_TYPES: {
         READ_ONLY: 'readOnly',
@@ -48,6 +53,7 @@ describe('TokenAccessController', function () {
 
     this.SessionManager = {
       getLoggedInUserId: sinon.stub().returns(this.user._id),
+      getSessionUser: sinon.stub().returns(this.user._id),
     }
 
     this.AuthenticationController = {
@@ -104,6 +110,18 @@ describe('TokenAccessController', function () {
       recordEventForSession: sinon.stub(),
     }
 
+    this.UserGetter = {
+      promises: {
+        getUser: sinon.stub().callsFake(async (userId, filter) => {
+          if (userId === this.userId) {
+            return this.user
+          } else {
+            return null
+          }
+        }),
+      },
+    }
+
     this.TokenAccessController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '@overleaf/settings': this.Settings,
@@ -125,6 +143,7 @@ describe('TokenAccessController', function () {
           redirect: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
+        '../User/UserGetter': this.UserGetter,
       },
     })
   })
@@ -536,6 +555,58 @@ describe('TokenAccessController', function () {
 
             done()
           }
+        )
+      })
+    })
+
+    describe('when user is admin', function () {
+      const admin = { _id: new ObjectId(), isAdmin: true }
+      beforeEach(function () {
+        this.SessionManager.getLoggedInUserId.returns(admin._id)
+        this.SessionManager.getSessionUser.returns(admin)
+        this.req.params = { token: this.token }
+        this.req.body = { confirmedByUser: true, tokenHashPrefix: '#prefix' }
+      })
+
+      it('redirects if project owner is non-admin', function () {
+        this.UserGetter.promises.getUserConfirmedEmails = sinon
+          .stub()
+          .resolves([{ email: 'test@not-overleaf.com' }])
+        this.res.callback = () => {
+          expect(this.res.json).to.have.been.calledWith({
+            redirect: `${this.Settings.adminUrl}/#prefix`,
+          })
+        }
+        this.TokenAccessController.grantTokenAccessReadAndWrite(
+          this.req,
+          this.res
+        )
+      })
+
+      it('grants access if project owner is an internal staff', function () {
+        const internalStaff = { _id: new ObjectId(), isAdmin: true }
+        const projectFromInternalStaff = {
+          _id: new ObjectId(),
+          name: 'test',
+          tokenAccessReadAndWrite_refs: [],
+          tokenAccessReadOnly_refs: [],
+          owner_ref: internalStaff._id,
+        }
+        this.UserGetter.promises.getUser = sinon.stub().resolves(internalStaff)
+        this.UserGetter.promises.getUserConfirmedEmails = sinon
+          .stub()
+          .resolves([{ email: 'test@overleaf.com' }])
+        this.TokenAccessHandler.promises.getProjectByToken = sinon
+          .stub()
+          .resolves(projectFromInternalStaff)
+        this.res.callback = () => {
+          expect(
+            this.TokenAccessHandler.promises.addReadAndWriteUserToProject
+          ).to.have.been.calledWith(admin._id, projectFromInternalStaff._id)
+        }
+        this.TokenAccessController.grantTokenAccessReadAndWrite(
+          this.req,
+          this.res
         )
       })
     })
