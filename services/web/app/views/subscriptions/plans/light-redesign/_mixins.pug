@@ -108,23 +108,23 @@ mixin plans_table(period, config)
 	for featuresPerSection in config.features
 		- var dividerColspan = Object.values(config.tableHead).reduce((prev, curr) => (prev) + (curr.colspan || 1), baseColspan)
 		if featuresPerSection.divider
-			tr.plans-v2-table-divider
+			tr.plans-table-divider
 				td(
 					colspan=dividerColspan
-					class=((config.highlightedColumn.index === Object.keys(config.tableHead).length - 1) ? 'plans-v2-table-divider-highlighted' : '')
+					class=((config.highlightedColumn.index === Object.keys(config.tableHead).length - 1) ? 'plans-table-last-col-highlighted' : '')
 				)
 					div
-						b.plans-v2-table-divider-label #{translate(featuresPerSection.dividerLabel)}
+						b.plans-table-divider-label #{translate(featuresPerSection.dividerLabel)}
 						//- will only appear on screen width >= 768px (using CSS)
-						i.fa.fa-question-circle.plans-v2-table-divider-question-icon(
+						i.fa.fa-question-circle(
 							data-toggle="tooltip"
 							title=translate(featuresPerSection.dividerInfo),
 							data-placement="top"
 						)
 						//- will only appear on screen width < 768px (using CSS)
-						span.plans-v2-table-divider-learn-more-container
+						span.plans-table-divider-learn-more-container
 							span (
-							span.plans-v2-table-divider-learn-more-text(
+							span.plans-table-divider-learn-more-text(
 								data-toggle="tooltip"
 								title=translate(featuresPerSection.dividerInfo),
 								data-placement="top"
@@ -144,19 +144,19 @@ mixin plans_table(period, config)
 					colspan=baseColspan
 					scope="row"
 				)
-					.plans-v2-table-feature-name
+					.plans-table-feature-name
 						if feature.info
 							span #{translate(feature.feature)}
 							//- will only appear on screen width >= 768px (using CSS)
-							i.fa.fa-question-circle.plans-v2-table-feature-name-question-icon(
+							i.fa.fa-question-circle.plans-table-feature-question-icon(
 								data-toggle="tooltip"
 								title=translate(feature.info),
 								data-placement="right"
 							)
 							//- will only appear on screen width < 768px (using CSS)
-							span.plans-v2-table-feature-name-learn-more-container
+							span.plans-table-feature-learn-more-container
 								span (
-								span.plans-v2-table-feature-name-learn-more-text(
+								span.plans-table-feature-learn-more-text(
 									data-toggle="tooltip"
 									title=translate(feature.info),
 									data-placement="top"
@@ -285,7 +285,7 @@ mixin table_head_group_organization(highlighted, eventTrackingKey, additionalEve
 	- var segmentation = JSON.stringify(Object.assign({}, {button: 'group_organization-link', location: 'table-header-list', period: 'annual'}, additionalEventSegmentation))
 	.plans-table-th-content
 		p.plans-table-th-content-title #{translate("organization")}
-		.plans-v2-table-comments-icon
+		.plans-table-comments-icon
 			i.fa.fa-comments-o
 		.plans-table-btn-buy-container-mobile
 			+btn_buy_group_organization(highlighted, eventTrackingKey)
@@ -336,7 +336,7 @@ mixin table_head_student_student(highlighted, eventTrackingKey, additionalEventS
 mixin table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 	div.plans-table-th-content
 		p.plans-table-th-content-title #{translate("university")}
-		div.plans-v2-table-comments-icon
+		div.plans-table-comments-icon
 			i.fa.fa-comments-o
 		.plans-table-btn-buy-container-mobile
 			+btn_buy_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
@@ -377,7 +377,7 @@ mixin table_cell(feature, plan)
 					span.sr-only #{translate("feature_not_included")}
 
 mixin group_plans_license_picker()
-	form.plans-v2-license-picker-form(data-ol-plans-v2-license-picker-form)
+	form.plans-license-picker-form(data-ol-plans-v2-license-picker-form)
 		.plans-v2-license-picker-select-container
 			span #{translate("number_of_users_with_colon")}
 			select.plans-v2-license-picker-select(
@@ -567,20 +567,20 @@ mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, p
 
 mixin plans_v2_table_sticky_header(withSwitch, config)
 	- var tableHeadKeys = Object.keys(config.tableHead)
-	.row.plans-v2-table-sticky-header.sticky(
+	.row.plans-table-sticky-header.sticky(
 		data-ol-plans-v2-table-sticky-header
-		class=(withSwitch ? 'plans-v2-table-sticky-header-with-switch' : 'plans-v2-table-sticky-header-without-switch')
+		class=(withSwitch ? 'plans-table-sticky-header-with-switch' : 'plans-table-sticky-header-without-switch')
 	)
 		- for (var i = 0; i < tableHeadKeys.length; i++)
 			- var tableHeadKey = tableHeadKeys[i]
 			- var translateKey = tableHeadKey.split('_')[1]
 			-
 				if (config.highlightedColumn.index === i) {
-					var elClass = 'plans-v2-table-sticky-header-item-green-highlighted'
+					var elClass = 'plans-table-sticky-header-item-green-highlighted'
 				} else {
 					var elClass = ''
 				}
-			.plans-v2-table-sticky-header-item(
+			.plans-table-sticky-header-item(
 				class=elClass
 			)
 				case tableHeadKey
@@ -594,16 +594,16 @@ mixin plans_v2_table_sticky_header(withSwitch, config)
 						span #{translate(translateKey)}
 
 mixin table_sticky_header_all(plansConfig)
-	.row.plans-v2-table-sticky-header-container(
+	.row.plans-table-sticky-header-container(
 		data-ol-plans-v2-view='individual'
 	)
 		+plans_v2_table_sticky_header(true, plansConfig.individual)
-	.row.plans-v2-table-sticky-header-container(
+	.row.plans-table-sticky-header-container(
 		hidden
 		data-ol-plans-v2-view='group'
 	)
 		+plans_v2_table_sticky_header(false, plansConfig.group)
-	.row.plans-v2-table-sticky-header-container(
+	.row.plans-table-sticky-header-container(
 		hidden
 		data-ol-plans-v2-view='student'
 	)

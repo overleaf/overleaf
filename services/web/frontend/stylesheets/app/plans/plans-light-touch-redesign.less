@@ -305,6 +305,7 @@
           }
         }
 
+        //- class toggled by JS
         &.plans-v2-m-a-tooltip-monthly-selected {
           right: -119%;
         }
@@ -330,7 +331,7 @@
     }
   }
 
-  .plans-v2-table-comments-icon {
+  .plans-table-comments-icon {
     height: 65px;
 
     i {
@@ -346,7 +347,7 @@
     position: relative;
   }
 
-  .plans-v2-license-picker-form {
+  .plans-license-picker-form {
     margin-top: 25px;
     display: flex;
     align-items: center;
@@ -605,7 +606,7 @@
 
       &:not(.plans-table-cell-before-green-highlighted-column):not(
           .plans-table-green-highlighted
-        ):not(.plans-v2-table-divider-highlighted) {
+        ):not(.plans-table-last-col-highlighted) {
         border-right: 1px solid @ol-blue-gray-0;
 
         @media (max-width: @screen-xs-max) {
@@ -638,7 +639,7 @@
       height: 100%;
 
       &:last-child:not(.plans-table-green-highlighted):not(
-          .plans-v2-table-divider-highlighted
+          .plans-table-last-col-highlighted
         ) {
         border-right: 0;
       }
@@ -653,7 +654,7 @@
       // css hack for table border-radius on the first feature name
       &:nth-child(2) {
         .plans-table-row-header:first-child {
-          .plans-v2-table-feature-name {
+          .plans-table-feature-name {
             border-top-left-radius: @plans-table-border-radius;
 
             @media (max-width: @screen-xs-max) {
@@ -664,10 +665,10 @@
       }
 
       &:not(.plans-table-row-last-row-per-section):not(
-          .plans-v2-table-divider
+          .plans-table-divider
         ):not(:last-of-type) {
         th > .plans-table-th > .plans-table-th-content,
-        td > .plans-v2-table-feature-name,
+        td > .plans-table-feature-name,
         td > .plans-table-cell > .plans-table-cell-content {
           border-bottom: 1px solid @ol-blue-gray-0;
 
@@ -695,10 +696,10 @@
 
     @media (min-width: @screen-sm-min) {
       // highlight rows on hover
-      tr:not(.plans-v2-table-divider):not(:first-child):hover {
+      tr:not(.plans-table-divider):not(:first-child):hover {
         background-color: @table-hover-bg;
 
-        .plans-v2-table-feature-name,
+        .plans-table-feature-name,
         .plans-table-cell {
           background-color: @table-hover-bg;
         }
@@ -723,21 +724,21 @@
       // The forced width below (plans-table-cols-n) is to ensure the table columns have an equal width
       // because on mobile, the first column (empty cell on first `tr` and feature name on the rest of `tr`) will be shown as its own row
       // and the rest of the `tr` will incorporate a full width of the viewport
-      tr.plans-table-cols-4:not(.plans-v2-table-divider) {
+      tr.plans-table-cols-4:not(.plans-table-divider) {
         td,
         th:not(:first-of-type) {
           width: 25%;
         }
       }
 
-      tr.plans-table-cols-3:not(.plans-v2-table-divider) {
+      tr.plans-table-cols-3:not(.plans-table-divider) {
         td,
         th:not(:first-of-type) {
           width: calc(100% / 3);
         }
       }
 
-      tr.plans-table-cols-2:not(.plans-v2-table-divider) {
+      tr.plans-table-cols-2:not(.plans-table-divider) {
         td,
         th:not(:first-of-type) {
           width: 50%;
@@ -760,7 +761,7 @@
       .plans-table-row-header {
         width: 100vw;
 
-        span.plans-v2-table-feature-name {
+        span.plans-table-feature-name {
           width: 100%;
 
           span {
@@ -962,17 +963,17 @@
     }
   }
 
-  .plans-v2-table-feature-name {
+  .plans-table-feature-name {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 6px 6px 6px 18px;
 
-    i.plans-v2-table-feature-name-question-icon {
+    i.plans-table-feature-question-icon {
       margin-left: 10px;
     }
 
-    span.plans-v2-table-feature-name-learn-more-container {
+    span.plans-table-feature-learn-more-container {
       display: none;
     }
 
@@ -984,23 +985,23 @@
       background-color: @ol-blue-gray-0;
       min-height: @plans-table-td-mobile-min-height;
 
-      i.plans-v2-table-feature-name-question-icon {
+      i.plans-table-feature-question-icon {
         display: none;
       }
 
-      span.plans-v2-table-feature-name-learn-more-container {
+      span.plans-table-feature-learn-more-container {
         margin-left: 5px;
         display: inline;
         // this white-space is important to ensure the "learn more" text won't get separated by a newline
         white-space: nowrap;
 
-        span.plans-v2-table-feature-name-learn-more-text {
+        span.plans-table-feature-learn-more-text {
           color: @plans-learn-more-link-color;
         }
 
         .tooltip {
           // force white-space to have initial value since the `white-space: nowrap` rule
-          // on .plans-v2-table-feature-name-learn-more-container selector (the current code block) above
+          // on .plans-table-feature-learn-more-container selector (the current code block) above
           // will also affect every child inside of it, including the generated tooltip
           white-space: initial;
         }
@@ -1008,7 +1009,7 @@
     }
   }
 
-  tr.plans-v2-table-divider {
+  tr.plans-table-divider {
     background-color: @ol-blue-gray-1;
 
     // direct child selector to NOT affect the generated tooltip
@@ -1016,18 +1017,18 @@
       text-align: center;
       padding: 6px;
 
-      .plans-v2-table-divider-label {
+      .plans-table-divider-label {
         margin-bottom: 0;
         margin-right: 5px;
       }
 
-      .plans-v2-table-divider-learn-more-container {
+      .plans-table-divider-learn-more-container {
         display: none;
       }
     }
 
     // highlighted divider will only show if the highlighted column is on the last visible column
-    .plans-v2-table-divider-highlighted > div {
+    .plans-table-last-col-highlighted > div {
       border-right: 2px solid @ol-green;
     }
 
@@ -1043,21 +1044,21 @@
           background-color: @ol-blue-gray-1;
           padding: 15px 5px;
 
-          i.plans-v2-table-divider-question-icon {
+          i {
             display: none;
           }
 
-          .plans-v2-table-divider-learn-more-container {
+          .plans-table-divider-learn-more-container {
             display: inline;
             // this white-space is important to ensure the "learn more" text won't get separated by a newline
             white-space: nowrap;
 
-            span.plans-v2-table-divider-learn-more-text {
+            span.plans-table-divider-learn-more-text {
               color: @plans-learn-more-link-color;
             }
 
             // force white-space to have initial value since the `white-space: nowrap` rule
-            // on .plans-v2-table-divider-learn-more-container selector (the current code block) above
+            // on .plans-table-divider-learn-more-container selector (the current code block) above
             // will also affect every child inside of it, including the generated tooltip
             .tooltip {
               white-space: initial;
@@ -1066,7 +1067,7 @@
         }
       }
 
-      .plans-v2-table-divider-highlighted > div {
+      .plans-table-last-col-highlighted > div {
         border-right: none;
       }
     }
@@ -1117,7 +1118,7 @@
     }
   }
 
-  .plans-v2-table-sticky-header-container {
+  .plans-table-sticky-header-container {
     @media (max-width: @screen-xs-max) {
       // `height: 60%` is just an arbitrary percentage
       // since we need to cover the whole plans_v2_table
@@ -1129,17 +1130,17 @@
     }
   }
 
-  .plans-v2-table-sticky-header-without-switch {
+  .plans-table-sticky-header-without-switch {
     margin-bottom: -107px;
     margin-top: 67px;
   }
 
-  .plans-v2-table-sticky-header-with-switch {
+  .plans-table-sticky-header-with-switch {
     margin-bottom: -140px;
     margin-top: 100px;
   }
 
-  .plans-v2-table-sticky-header {
+  .plans-table-sticky-header {
     display: none;
 
     @media (max-width: @screen-xs-max) {
@@ -1158,7 +1159,7 @@
     }
   }
 
-  .plans-v2-table-sticky-header-item {
+  .plans-table-sticky-header-item {
     background-color: @white;
     flex: 1 1 0px;
 
@@ -1179,7 +1180,7 @@
     }
   }
 
-  .plans-v2-table-sticky-header-item-green-highlighted span {
+  .plans-table-sticky-header-item-green-highlighted span {
     color: @ol-green;
   }
 
