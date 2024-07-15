@@ -28,31 +28,20 @@ mixin currency_and_payment_methods()
 
 
 mixin plans_table(period, config)
-	- var baseColspan = config.baseColspan || 1
 	- var maxColumn = config.maxColumn || 4
 	- var tableHeadKeys = Object.keys(config.tableHead)
+	- var highlightedColKey = tableHeadKeys[config.highlightedColumn.index]
+
 	tr(class=`plans-table-cols-${tableHeadKeys.length}`)
-		th(colspan=baseColspan)
+		th
 		- for (var i = 0; i < maxColumn; i++)
 			- var tableHeadKey = tableHeadKeys[i]
 			- var tableHeadOptions = Object.values(config.tableHead)[i] || {}
-			- var colspan = tableHeadOptions.colspan || baseColspan
-			- var highlighted = i === config.highlightedColumn.index
+			- var highlighted = highlightedColKey === tableHeadKey
 			- var eventTrackingKey = config.eventTrackingKey
 			- var additionalEventSegmentation = config.additionalEventSegmentation || {}
-			-
-				if (highlighted) {
-					var thClass = 'plans-table-green-highlighted'
-				} else {
-					var thClass = ''
-				}
-				thClass += ' plans-table-column-header'
-				if (colspan > 1) {
-					var scopeValue = 'colgroup'
-				}
-				else {
-					var scopeValue = 'col'
-				}
+			- var thClass = highlighted ? 'plans-table-green-highlighted' : ''
+
 			case tableHeadKey
 				when 'individual_free'
 					- var ariaLabel = translate("free")
@@ -77,8 +66,7 @@ mixin plans_table(period, config)
 			th(
 				aria-label=ariaLabel
 				class=thClass
-				colspan=colspan
-				scope=scopeValue
+				scope="col"
 			)
 				.plans-table-th
 					if (highlighted)
@@ -104,7 +92,7 @@ mixin plans_table(period, config)
 							+table_head_student_university(highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
 	for featuresPerSection in config.features
-		- var dividerColspan = Object.values(config.tableHead).reduce((prev, curr) => (prev) + (curr.colspan || 1), baseColspan)
+		- var dividerColspan = Object.values(config.tableHead).length + 1
 		if featuresPerSection.divider
 			tr.plans-table-divider
 				td(
@@ -134,12 +122,10 @@ mixin plans_table(period, config)
 				class=`plans-table-cols-${tableHeadKeys.length}`
 			)
 				th(
-					class="plans-table-row-header"
 					event-tracking="plans-page-table"
 					event-tracking-trigger="hover"
 					event-tracking-ga="subscription-funnel"
 					event-tracking-label=`${feature.feature}`
-					colspan=baseColspan
 					scope="row"
 				)
 					.plans-table-feature-name
@@ -165,19 +151,9 @@ mixin plans_table(period, config)
 							| #{translate(feature.feature)}
 				for plan, planIndex in Object.keys(feature.plans)
 					- var tableHeadOptions = Object.values(config.tableHead)[planIndex] || {}
-					- var colspan = tableHeadOptions.colspan || baseColspan
-					-
-						if (planIndex === config.highlightedColumn.index) {
-							var tdClass = 'plans-table-green-highlighted'
-						} else if (planIndex === config.highlightedColumn.index - 1) {
-							var tdClass = 'plans-table-cell-before-green-highlighted-column'
-						} else {
-							var tdClass = ''
-						}
-					td(
-						class=tdClass
-						colspan=colspan
-					)
+					- var tdClass = planIndex === config.highlightedColumn.index ? 'plans-table-green-highlighted' : ''
+
+					td(class=tdClass)
 						+table_cell(feature, plan)
 
 mixin table_individual(period)
