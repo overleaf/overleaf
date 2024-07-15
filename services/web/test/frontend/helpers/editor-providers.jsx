@@ -95,13 +95,6 @@ export function EditorProviders({
     getCurrentDocValue: () => {},
     openDoc: sinon.stub(),
   },
-  metadataManager = {
-    metadata: {
-      state: {
-        documents: {},
-      },
-    },
-  },
   userSettings = {},
   providers = {},
 }) {
@@ -153,7 +146,6 @@ export function EditorProviders({
     clsiServerId,
     editorManager,
     fileTreeManager,
-    metadataManager,
   }
 
   // Add details for useUserContext

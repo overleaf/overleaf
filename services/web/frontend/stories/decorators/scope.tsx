@@ -133,15 +133,6 @@ const initialize = () => {
         console.log('open doc', id, options)
       },
     },
-    metadataManager: {
-      metadata: {
-        state: {
-          documents: {
-            'test-file-id': { labels: ['sec:section-label'], packages: [] },
-          },
-        },
-      },
-    },
   }
 
   // window.metaAttributesCache is reset in preview.tsx

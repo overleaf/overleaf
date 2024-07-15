@@ -21,24 +21,24 @@ export function buildPackageCompletions(
     return
   }
 
-  const uniquePackageNames = new Set<string>(packageNames)
-
-  // package names and commands from packages in the project
-  for (const doc of Object.values(metadata.documents)) {
-    for (const [packageName, commands] of Object.entries(doc.packages)) {
-      uniquePackageNames.add(packageName)
-
-      for (const item of commands) {
-        completions.commands.push({
-          type: item.meta,
-          label: item.caption,
-          apply: applySnippet(item.snippet),
-          extend: extendOverUnpairedClosingBrace,
-        })
-      }
-    }
+  // commands from packages in the project
+  for (const command of metadata.commands) {
+    completions.commands.push({
+      type: command.meta,
+      label: command.caption,
+      apply: applySnippet(command.snippet),
+      extend: extendOverUnpairedClosingBrace,
+    })
   }
 
+  const uniquePackageNames = new Set<string>(packageNames)
+
+  // package names from packages in the project
+  for (const packageName of metadata.packageNames) {
+    uniquePackageNames.add(packageName)
+  }
+
+  // exclude package names that are already in this document
   const existingPackageNames = findExistingPackageNames(context)
 
   for (const item of uniquePackageNames) {

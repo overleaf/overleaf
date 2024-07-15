@@ -7,8 +7,9 @@ import {
 import { languages } from '../languages'
 import { ViewPlugin } from '@codemirror/view'
 import { indentUnit, LanguageDescription } from '@codemirror/language'
-import { Metadata } from '../../../../../types/metadata'
 import { updateHasEffect } from '../utils/effects'
+import { Folder } from '../../../../../types/folder'
+import { Command } from '@/features/ide-react/context/metadata-context'
 
 export const languageLoadedEffect = StateEffect.define()
 export const hasLanguageLoadedEffect = updateHasEffect(languageLoadedEffect)
@@ -17,6 +18,14 @@ const languageConf = new Compartment()
 
 type Options = {
   syntaxValidation: boolean
+}
+
+type Metadata = {
+  labels: Set<string>
+  packageNames: Set<string>
+  commands: Command[]
+  references: string[]
+  fileTreeData: Folder
 }
 
 /**

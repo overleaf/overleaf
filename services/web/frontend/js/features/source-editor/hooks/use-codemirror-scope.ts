@@ -73,7 +73,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
 
-  const { metadata } = useMetadataContext()
+  const metadata = useMetadataContext()
 
   const [loadingThreads] = useScopeValue<boolean>('loadingThreads')
 
@@ -213,16 +213,16 @@ function useCodeMirrorScope(view: EditorView) {
   // set the project metadata, mostly for use in autocomplete
   // TODO: read this data from the scope?
   const metadataRef = useRef({
-    documents: metadata.state.documents,
+    ...metadata,
     references: references.keys,
     fileTreeData,
   })
 
-  // listen to project metadata (docs + packages) updates
+  // listen to project metadata (commands, labels and package names) updates
   useEffect(() => {
-    metadataRef.current.documents = metadata.state.documents
+    metadataRef.current = { ...metadataRef.current, ...metadata }
     view.dispatch(setMetadata(metadataRef.current))
-  }, [view, metadata.state.documents])
+  }, [view, metadata])
 
   // listen to project reference keys updates
   useEffect(() => {
