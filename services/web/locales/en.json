@@ -349,6 +349,8 @@
   "copy_project": "Copy Project",
   "copy_response": "Copy response",
   "copying": "Copying",
+  "could_not_connect_to_collaboration_server": "Could not connect to collaboration server",
+  "could_not_connect_to_websocket_server": "Could not connect to WebSocket server",
   "could_not_load_translations": "Could not load translations",
   "country": "Country",
   "country_flag": "__country__ country flag",

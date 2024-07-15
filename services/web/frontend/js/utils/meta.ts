@@ -191,6 +191,9 @@ export interface Meta {
   'ol-teamInvites': TeamInvite[]
   'ol-thirdPartyIds': ThirdPartyIds
   'ol-translationLoadErrorMessage': string
+  'ol-translationIoNotLoaded': string
+  'ol-translationUnableToJoin': string
+  'ol-translationMaintenance': string
   'ol-useShareJsHash': boolean
   'ol-user': User
   'ol-userAffiliations': Affiliation[]

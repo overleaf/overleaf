@@ -37,8 +37,12 @@ meta(name="ol-hasTrackChangesFeature", data-type="boolean" content=hasTrackChang
 meta(name="ol-inactiveTutorials", data-type="json" content=user.inactiveTutorials)
 meta(name="ol-projectTags" data-type="json" content=projectTags)
 meta(name="ol-linkSharingWarning" data-type="boolean" content=linkSharingWarning)
+
+// translations for the loading page, before i18n has loaded in the client
 meta(name="ol-loadingText", data-type="string" content=translate("loading"))
+meta(name="ol-translationIoNotLoaded", data-type="string" content=translate("could_not_connect_to_websocket_server"))
 meta(name="ol-translationLoadErrorMessage", data-type="string" content=translate("could_not_load_translations"))
+meta(name="ol-translationUnableToJoin", data-type="string" content=translate("could_not_connect_to_collaboration_server"))
 
 if (settings.overleaf != null)
 	meta(name="ol-overallThemes" data-type="json" content=overallThemes)
