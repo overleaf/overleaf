@@ -4,6 +4,9 @@ const config = require('config')
 const fetch = require('node-fetch')
 const { knex, mongodb } = require('../storage')
 
+// ensure every ObjectId has the id string as a property for correct comparisons
+require('mongodb').ObjectId.cacheHexString = true
+
 chai.use(chaiAsPromised)
 
 async function setupPostgresDatabase() {

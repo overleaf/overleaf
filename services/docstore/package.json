@@ -31,7 +31,6 @@
     "celebrate": "^15.0.3",
     "express": "^4.19.2",
     "lodash": "^4.17.21",
-    "mongodb": "^6.2.0",
     "mongodb-legacy": "^6.0.1",
     "p-map": "^4.0.0",
     "request": "^2.88.2"

@@ -16,7 +16,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/RangeManager'
 )
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('RangeManager', function () {
   beforeEach(function () {

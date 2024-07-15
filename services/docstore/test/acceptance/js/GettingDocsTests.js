@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const DocstoreApp = require('./helpers/DocstoreApp')
 
 const DocstoreClient = require('./helpers/DocstoreClient')

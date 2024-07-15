@@ -1,21 +1,9 @@
-const chai = require('chai')
 const sinon = require('sinon')
-const sinonChai = require('sinon-chai')
-const chaiAsPromised = require('chai-as-promised')
 const SandboxedModule = require('sandboxed-module')
-const timersPromises = require('timers/promises')
 
 // ensure every ObjectId has the id string as a property for correct comparisons
-require('mongodb-legacy').ObjectId.cacheHexString = true
+require('mongodb').ObjectId.cacheHexString = true
 
-process.env.BACKEND = 'gcs'
-
-// Chai configuration
-chai.should()
-chai.use(sinonChai)
-chai.use(chaiAsPromised)
-
-// Global stubs
 const sandbox = sinon.createSandbox()
 const stubs = {
   logger: {
@@ -29,15 +17,10 @@ const stubs = {
   },
 }
 
-// SandboxedModule configuration
 SandboxedModule.configure({
   requires: {
     '@overleaf/logger': stubs.logger,
-    'timers/promises': timersPromises,
-    'mongodb-legacy': require('mongodb-legacy'),
-    bson: require('bson'),
   },
-  globals: { Buffer, JSON, Math, console, process },
 })
 
 exports.mochaHooks = {

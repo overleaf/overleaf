@@ -5,7 +5,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/HttpController'
 )
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../app/js/Errors')
 
 describe('HttpController', function () {

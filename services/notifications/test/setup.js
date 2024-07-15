@@ -4,6 +4,9 @@ const SandboxedModule = require('sandboxed-module')
 // Chai configuration
 chai.should()
 
+// ensure every ObjectId has the id string as a property for correct comparisons
+require('mongodb-legacy').ObjectId.cacheHexString = true
+
 // SandboxedModule configuration
 SandboxedModule.configure({
   requires: {
@@ -16,6 +19,7 @@ SandboxedModule.configure({
       error() {},
       fatal() {},
     },
+    'mongodb-legacy': require('mongodb-legacy'), // for ObjectId comparisons
   },
   globals: { Buffer, JSON, console, process },
 })

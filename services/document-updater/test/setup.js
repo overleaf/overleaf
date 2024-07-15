@@ -4,6 +4,9 @@ const sinonChai = require('sinon-chai')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 
+// ensure every ObjectId has the id string as a property for correct comparisons
+require('mongodb-legacy').ObjectId.cacheHexString = true
+
 // Chai configuration
 chai.should()
 chai.use(chaiAsPromised)
@@ -27,6 +30,7 @@ const stubs = {
 SandboxedModule.configure({
   requires: {
     '@overleaf/logger': stubs.logger,
+    'mongodb-legacy': require('mongodb-legacy'), // for ObjectId comparisons
   },
   globals: { Buffer, JSON, Math, console, process },
 })

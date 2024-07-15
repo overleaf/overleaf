@@ -6,20 +6,16 @@ const { FailedCommandError } = require('../../../app/js/Errors')
 const SandboxedModule = require('sandboxed-module')
 
 describe('ImageOptimiser', function () {
-  let ImageOptimiser, SafeExec, logger
+  let ImageOptimiser, SafeExec
   const sourcePath = '/wombat/potato.eps'
 
   beforeEach(function () {
     SafeExec = {
       promises: sinon.stub().resolves(),
     }
-    logger = {
-      warn: sinon.stub(),
-    }
     ImageOptimiser = SandboxedModule.require(modulePath, {
       requires: {
         './SafeExec': SafeExec,
-        '@overleaf/logger': logger,
         '@overleaf/metrics': {
           Timer: sinon.stub().returns({ done: sinon.stub() }),
         },
@@ -65,7 +61,7 @@ describe('ImageOptimiser', function () {
     })
 
     it('should log a warning', function () {
-      expect(logger.warn).to.have.been.calledOnce
+      expect(this.logger.warn).to.have.been.calledOnce
     })
   })
 })

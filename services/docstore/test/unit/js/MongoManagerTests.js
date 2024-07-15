@@ -4,7 +4,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/MongoManager'
 )
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { assert, expect } = require('chai')
 const Errors = require('../../../app/js/Errors')
 

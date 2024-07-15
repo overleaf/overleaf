@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../app/js/DocArchiveManager.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../app/js/Errors')
 
 describe('DocArchiveManager', function () {
