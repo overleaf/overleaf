@@ -1,4 +1,5 @@
 import { isExcludedBySharding, startWith } from './helpers/config'
+import { createProject } from './helpers/project'
 
 describe('SAML', () => {
   if (isExcludedBySharding('PRO_CUSTOM_1')) return
@@ -32,7 +33,7 @@ describe('SAML', () => {
       cy.get('button[type="submit"]').click()
     })
 
-    cy.findByText('Create a new project')
+    createProject('via SAML')
   })
 })
 
@@ -62,6 +63,6 @@ describe('LDAP', () => {
     cy.get('input[name="password"]').type('fry')
     cy.get('button[type="submit"]').click()
 
-    cy.findByText('Create a new project')
+    createProject('via LDAP')
   })
 })

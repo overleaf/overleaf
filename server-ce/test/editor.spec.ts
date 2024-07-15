@@ -2,7 +2,6 @@ import { createProject } from './helpers/project'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
 import { v4 as uuid } from 'uuid'
-import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
 describe('editor', () => {
   if (isExcludedBySharding('PRO_DEFAULT_1')) return
@@ -66,13 +65,11 @@ describe('editor', () => {
   })
 
   describe('collaboration', () => {
-    let projectName: string
     let projectId: string
     let resumeUserSession: () => void
     let resumeCollaboratorSession: () => void
 
     beforeEach(() => {
-      projectName = `project-${uuid()}`
       resumeUserSession = login('user@example.com')
       cy.visit(`/project`)
       createProject('test-editor', { type: 'Example Project' }).then(
@@ -80,7 +77,6 @@ describe('editor', () => {
           projectId = id
 
           cy.log('make project shareable')
-          cy.visit(`/project/${projectId}`)
           cy.findByText('Share').click()
           cy.findByText('Turn on link sharing').click()
 
@@ -93,6 +89,10 @@ describe('editor', () => {
               resumeCollaboratorSession = login('collaborator@example.com')
               cy.visit(linkSharingReadAndWrite)
               cy.get('button').contains('Join Project').click()
+              cy.log(
+                'navigate to project dashboard to avoid cross session requests from editor'
+              )
+              cy.visit('/project')
             })
 
           resumeUserSession()
@@ -116,8 +116,13 @@ describe('editor', () => {
       cy.visit(`/project/${projectId}`)
 
       cy.log('make changes in main file')
-      cy.contains('\\maketitle').dblclick()
-      cy.contains('\\maketitle').type('{del}{enter}{enter}')
+      // cy.type() "clicks" in the center of the selected element before typing. This "click" discards the text as selected by the dblclick.
+      // Go down to the lower level event based typing, the frontend tests in web use similar events.
+      cy.get('.cm-editor').as('editor')
+      cy.get('@editor').findByText('\\maketitle').dblclick()
+      cy.get('@editor').trigger('keydown', { key: 'Delete' })
+      cy.get('@editor').trigger('keydown', { key: 'Enter' })
+      cy.get('@editor').trigger('keydown', { key: 'Enter' })
 
       cy.log('recompile to force flush')
       cy.findByText('Recompile').click()
@@ -125,12 +130,13 @@ describe('editor', () => {
       resumeUserSession()
       cy.visit(`/project/${projectId}`)
 
-      cy.log('accept changes')
+      cy.log('reject changes')
       cy.findByText('Review').click()
-      cy.findByText('Accept').click()
+      cy.get('.cm-content').should('not.contain.text', '\\maketitle')
+      cy.findByText('Reject').click({ force: true })
 
       cy.log('verify the changes are applied')
-      cy.get('.cm-content').should('not.contain.text', '\\maketitle')
+      cy.get('.cm-content').should('contain.text', '\\maketitle')
     })
 
     it('track-changes rich text', () => {
@@ -165,7 +171,7 @@ describe('editor', () => {
       resumeUserSession()
       cy.visit(`/project/${projectId}`)
 
-      cy.log('accept changes')
+      cy.log('reject changes')
       cy.findByText('Review').click()
       cy.get('.cm-content').should('not.contain.text', 'Introduction')
       cy.findAllByText('Reject').first().click({ force: true })
@@ -177,19 +183,10 @@ describe('editor', () => {
   })
 
   describe('editor', () => {
-    let projectId: string
-
-    beforeWithReRunOnTestRetry(() => {
-      login('user@example.com')
-      cy.visit(`/project`)
-      createProject(`project-${uuid()}`, { type: 'Example Project' }).then(
-        (id: string) => (projectId = id)
-      )
-    })
-
     beforeEach(() => {
       login('user@example.com')
-      cy.visit(`/project/${projectId}`)
+      cy.visit(`/project`)
+      createProject(`project-${uuid()}`, { type: 'Example Project' })
       // wait until the main document is rendered
       cy.findByText(/Loading/).should('not.exist')
     })
@@ -218,12 +215,8 @@ describe('editor', () => {
       projectName = `project-${uuid()}`
       login('user@example.com')
       cy.visit(`/project`)
-      createProject(projectName, { type: 'Example Project' }).then(
-        (id: string) => {
-          cy.visit(`/project/${id}`)
-          cy.get('button').contains('New file').click({ force: true })
-        }
-      )
+      createProject(projectName, { type: 'Example Project' })
+      cy.get('button').contains('New file').click({ force: true })
     })
 
     it('can upload file', () => {
@@ -254,12 +247,8 @@ describe('editor', () => {
       projectName = `project-${uuid()}`
       login('user@example.com')
       cy.visit(`/project`)
-      createProject(projectName, { type: 'Example Project' }).then(
-        (id: string) => {
-          cy.visit(`/project/${id}`)
-          cy.get('button').contains('Menu').click()
-        }
-      )
+      createProject(projectName, { type: 'Example Project' })
+      cy.get('button').contains('Menu').click()
     })
 
     it('can download project sources', () => {
