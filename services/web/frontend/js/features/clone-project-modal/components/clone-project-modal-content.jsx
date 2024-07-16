@@ -102,7 +102,7 @@ export default function CloneProjectModalContent({
           {clonedProjectTags.length > 0 && (
             <OLFormGroup
               controlId="clone-project-tags-list"
-              className="clone-project-tag mb-3"
+              className="clone-project-tag"
             >
               <OLFormLabel>{t('tags')}: </OLFormLabel>
               <div role="listbox" id="clone-project-tags-list">

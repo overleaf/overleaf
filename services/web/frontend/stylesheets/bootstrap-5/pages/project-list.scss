@@ -464,3 +464,13 @@
 .project-list-load-more-button {
   margin-bottom: var(--spacing-05);
 }
+
+form.project-search {
+  .form-group {
+    margin-bottom: 0;
+  }
+}
+
+.project-search-clear-btn {
+  @include reset-button;
+}

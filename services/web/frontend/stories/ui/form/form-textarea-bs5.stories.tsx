@@ -1,49 +1,51 @@
 import { Form } from 'react-bootstrap-5'
 import type { Meta, StoryObj } from '@storybook/react'
+import FormGroup from '@/features/ui/components/bootstrap-5/form/form-group'
 import FormText from '@/features/ui/components/bootstrap-5/form/form-text'
+import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
 
-const meta: Meta<(typeof Form)['Control']> = {
+const meta: Meta<React.ComponentProps<typeof FormControl>> = {
   title: 'Shared / Components / Bootstrap 5 / Form / Textarea',
-  component: Form.Control,
+  component: FormControl,
   parameters: {
     bootstrap5: true,
   },
 }
 export default meta
 
-type Story = StoryObj<(typeof Form)['Control']>
+type Story = StoryObj<React.ComponentProps<typeof FormControl>>
 
 export const Default: Story = {
   render: args => {
     return (
       <>
-        <Form.Group controlId="id-1">
+        <FormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             defaultValue="Large input"
             size="lg"
             {...args}
           />
           <FormText>Helper</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-2">
+        <FormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <Form.Control as="textarea" defaultValue="Regular input" {...args} />
+          <FormControl as="textarea" defaultValue="Regular input" {...args} />
           <FormText>Helper</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-3">
+        <FormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             defaultValue="Small input"
             size="sm"
             {...args}
           />
           <FormText>Helper</FormText>
-        </Form.Group>
+        </FormGroup>
       </>
     )
   },
@@ -56,9 +58,9 @@ export const Info: Story = {
   render: args => {
     return (
       <>
-        <Form.Group controlId="id-1">
+        <FormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
@@ -66,22 +68,22 @@ export const Info: Story = {
             {...args}
           />
           <FormText isInfo>Info</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-2">
+        <FormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
           <FormText isInfo>Info</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-3">
+        <FormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
@@ -89,7 +91,7 @@ export const Info: Story = {
             {...args}
           />
           <FormText isInfo>Info</FormText>
-        </Form.Group>
+        </FormGroup>
       </>
     )
   },
@@ -99,9 +101,9 @@ export const Error: Story = {
   render: args => {
     return (
       <>
-        <Form.Group controlId="id-1">
+        <FormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
@@ -110,11 +112,11 @@ export const Error: Story = {
             {...args}
           />
           <FormText isError>Error</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-2">
+        <FormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
@@ -122,11 +124,11 @@ export const Error: Story = {
             {...args}
           />
           <FormText isError>Error</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-3">
+        <FormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
@@ -135,7 +137,7 @@ export const Error: Story = {
             {...args}
           />
           <FormText isError>Error</FormText>
-        </Form.Group>
+        </FormGroup>
       </>
     )
   },
@@ -145,9 +147,9 @@ export const Warning: Story = {
   render: args => {
     return (
       <>
-        <Form.Group controlId="id-1">
+        <FormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
@@ -155,22 +157,22 @@ export const Warning: Story = {
             {...args}
           />
           <FormText isWarning>Warning</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-2">
+        <FormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
           <FormText isWarning>Warning</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-3">
+        <FormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
@@ -178,7 +180,7 @@ export const Warning: Story = {
             {...args}
           />
           <FormText isWarning>Warning</FormText>
-        </Form.Group>
+        </FormGroup>
       </>
     )
   },
@@ -188,9 +190,9 @@ export const Success: Story = {
   render: args => {
     return (
       <>
-        <Form.Group controlId="id-1">
+        <FormGroup controlId="id-1">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Large input"
@@ -198,22 +200,22 @@ export const Success: Story = {
             {...args}
           />
           <FormText isSuccess>Success</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-2">
+        <FormGroup controlId="id-2">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Regular input"
             {...args}
           />
           <FormText isSuccess>Success</FormText>
-        </Form.Group>
+        </FormGroup>
         <hr />
-        <Form.Group controlId="id-3">
+        <FormGroup controlId="id-3">
           <Form.Label>Label</Form.Label>
-          <Form.Control
+          <FormControl
             as="textarea"
             placeholder="Placeholder"
             defaultValue="Small input"
@@ -221,7 +223,7 @@ export const Success: Story = {
             {...args}
           />
           <FormText isSuccess>Success</FormText>
-        </Form.Group>
+        </FormGroup>
       </>
     )
   },

@@ -97,7 +97,6 @@ function ProjectListPageContent() {
           filter={filter}
           selectedTag={selectedTag}
           className="overflow-hidden"
-          formGroupProps={{ className: 'mb-0' }}
         />
       </div>
     </div>

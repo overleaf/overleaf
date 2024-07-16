@@ -1,36 +1,38 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Form,
-  FormGroup,
-  FormGroupProps,
-  Col,
-  FormControl,
-} from 'react-bootstrap'
+import { FormControl } from 'react-bootstrap'
 import Icon from '../../../shared/components/icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import classnames from 'classnames'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
+import { MergeAndOverride } from '../../../../../types/utils'
 import { Filter } from '../context/project-list-context'
 import { isSmallDevice } from '../../../infrastructure/event-tracking'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type SearchFormOwnProps = {
   inputValue: string
   setInputValue: (input: string) => void
   filter: Filter
   selectedTag: Tag | undefined
-  formGroupProps?: FormGroupProps &
-    Omit<React.ComponentProps<'div'>, keyof FormGroupProps>
 }
 
-type SearchFormProps = SearchFormOwnProps &
-  Omit<React.ComponentProps<typeof Form>, keyof SearchFormOwnProps>
+type SearchFormProps = MergeAndOverride<
+  React.ComponentProps<typeof OLForm>,
+  SearchFormOwnProps
+>
 
 function SearchForm({
   inputValue,
   setInputValue,
   filter,
   selectedTag,
-  formGroupProps,
+  className,
   ...props
 }: SearchFormProps) {
   const { t } = useTranslation()
@@ -57,8 +59,6 @@ function SearchForm({
     }
   }
   const placeholder = `${placeholderMessage}…`
-  const { className: formGroupClassName, ...restFormGroupProps } =
-    formGroupProps || {}
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -75,44 +75,49 @@ function SearchForm({
   const handleClear = () => setInputValue('')
 
   return (
-    <Form
-      horizontal
-      className="project-search"
+    <OLForm
+      className={classnames('project-search', className)}
       role="search"
       onSubmit={e => e.preventDefault()}
+      bs3Props={{ horizontal: true }}
       {...props}
     >
-      <FormGroup
-        className={classnames(
-          'has-feedback has-feedback-left',
-          formGroupClassName
-        )}
-        {...restFormGroupProps}
+      <OLFormGroup
+        className={bsVersion({ bs3: 'has-feedback has-feedback-left' })}
       >
-        <Col xs={12}>
-          <FormControl
+        <OLCol>
+          <OLFormControl
             type="text"
             value={inputValue}
             onChange={handleChange}
             placeholder={placeholder}
             aria-label={placeholder}
+            prepend={BootstrapVersionSwitcher({
+              bs3: <Icon type="search" />,
+              bs5: <MaterialIcon type="search" />,
+            })}
+            append={
+              inputValue.length > 0 && (
+                <button
+                  type="button"
+                  className={bsVersion({
+                    bs3: 'project-search-clear-btn btn-link',
+                    bs5: 'project-search-clear-btn',
+                  })}
+                  aria-label={t('clear_search')}
+                  onClick={handleClear}
+                >
+                  <BootstrapVersionSwitcher
+                    bs3={<Icon type="times" />}
+                    bs5={<MaterialIcon type="clear" />}
+                  />
+                </button>
+              )
+            }
           />
-          <Icon type="search" className="form-control-feedback-left" />
-          {inputValue.length ? (
-            <div className="form-control-feedback">
-              <button
-                type="button"
-                className="project-search-clear-btn btn-link"
-                aria-label={t('clear_search')}
-                onClick={handleClear}
-              >
-                <Icon type="times" />
-              </button>
-            </div>
-          ) : null}
-        </Col>
-      </FormGroup>
-    </Form>
+        </OLCol>
+      </OLFormGroup>
+    </OLForm>
   )
 }
 

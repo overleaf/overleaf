@@ -11,10 +11,11 @@ function OLForm(props: OLFormProps) {
 
   const bs3FormProps: React.ComponentProps<typeof BS3Form> = {
     componentClass: rest.as,
-    bsClass: rest.className,
     children: rest.children,
     id: rest.id,
     onSubmit: rest.onSubmit as React.FormEventHandler<BS3Form> | undefined,
+    className: rest.className,
+    role: rest.role,
     ...bs3Props,
   }
 
