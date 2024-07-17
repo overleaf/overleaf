@@ -61,6 +61,7 @@ async function setupDb() {
   db.githubSyncUserCredentials = internalDb.collection(
     'githubSyncUserCredentials'
   )
+  db.globalMetrics = internalDb.collection('globalMetrics')
   db.grouppolicies = internalDb.collection('grouppolicies')
   db.institutions = internalDb.collection('institutions')
   db.messages = internalDb.collection('messages')
