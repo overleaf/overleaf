@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import {
   Filter,
   useProjectListContext,
@@ -19,9 +18,9 @@ export function SidebarFilter({ filter, text }: SidebarFilterProps) {
     <ProjectsFilterMenu filter={filter}>
       {isActive => (
         <li className={isActive ? 'active' : ''}>
-          <Button onClick={() => selectFilter(filter)} bsStyle={null}>
+          <button type="button" onClick={() => selectFilter(filter)}>
             {text}
-          </Button>
+          </button>
         </li>
       )}
     </ProjectsFilterMenu>

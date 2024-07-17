@@ -12,6 +12,7 @@ export type DropdownProps = {
     | { xxl: 'start' | 'end' }
   as?: ElementType
   children: ReactNode
+  className?: string
   onSelect?: (eventKey: any, event: object) => any
   onToggle?: (show: boolean) => void
   show?: boolean

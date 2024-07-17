@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Button, ControlLabel, Form, FormGroup, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useProjectListContext } from '../../context/project-list-context'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
@@ -11,6 +9,17 @@ import { editTag } from '../../util/api'
 import { getTagColor, MAX_TAG_LENGTH } from '../../util/tag'
 import { ColorPicker } from '../color-picker/color-picker'
 import { debugConsole } from '@/utils/debugging'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type EditTagModalProps = {
   id: string
@@ -77,14 +86,14 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
   }
 
   return (
-    <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
-      <Modal.Header closeButton>
-        <Modal.Title>{t('edit_tag')}</Modal.Title>
-      </Modal.Header>
+    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('edit_tag')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
-        <Form name="renameTagForm" onSubmit={handleSubmit}>
-          <FormGroup>
+      <OLModalBody>
+        <OLForm onSubmit={handleSubmit}>
+          <OLFormGroup>
             <input
               ref={autoFocusedRef}
               className="form-control"
@@ -95,40 +104,32 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
               required
               onChange={e => setNewTagName(e.target.value)}
             />
-          </FormGroup>
-          <FormGroup aria-hidden="true">
-            <ControlLabel>{t('tag_color')}</ControlLabel>:{' '}
+          </OLFormGroup>
+          <OLFormGroup aria-hidden="true">
+            <OLFormLabel>{t('tag_color')}</OLFormLabel>:{' '}
             <div>
               <ColorPicker />
             </div>
-          </FormGroup>
-        </Form>
-      </Modal.Body>
-
-      <Modal.Footer>
+          </OLFormGroup>
+        </OLForm>
         {validationError && (
-          <div className="modal-footer-left">
-            <span className="text-danger error">{validationError}</span>
-          </div>
+          <OLNotification type="error" content={validationError} />
         )}
         {isError && (
-          <div className="modal-footer-left">
-            <span className="text-danger error">
-              {t('generic_something_went_wrong')}
-            </span>
-          </div>
+          <OLNotification
+            type="error"
+            content={t('generic_something_went_wrong')}
+          />
         )}
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          onClick={onClose}
-          disabled={isLoading}
-        >
+      </OLModalBody>
+
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={onClose} disabled={isLoading}>
           {t('cancel')}
-        </Button>
-        <Button
+        </OLButton>
+        <OLButton
           onClick={() => runEditTag(tag._id)}
-          bsStyle="primary"
+          variant="primary"
           disabled={
             isLoading ||
             status === 'pending' ||
@@ -136,10 +137,14 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
             (newTagName === tag?.name && selectedColor === getTagColor(tag)) ||
             !!validationError
           }
+          isLoading={isLoading}
+          bs3Props={{
+            loading: isLoading ? `${t('saving')}…` : t('save'),
+          }}
         >
-          {isLoading ? <>{t('saving')} &hellip;</> : t('save')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+          {t('save')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

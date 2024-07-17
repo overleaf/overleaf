@@ -4,6 +4,7 @@
 
 .dropdown-header {
   @include body-xs;
+
   padding: var(--spacing-05) var(--spacing-06) var(--spacing-02)
     var(--spacing-04);
 }
@@ -12,16 +13,20 @@
   @include shadow-md;
 
   min-width: 240px;
+
+  &.sm {
+    min-width: 160px;
+  }
 }
 
 .dropdown-item {
   @include body-sm;
 
   --bs-dropdown-item-border-radius: var(--border-radius-base);
+
   display: grid;
   grid-auto-flow: column;
-  justify-content: start;
-  align-content: center;
+  place-content: center start;
   min-height: 44px; // a minimum height of 44px to be accessible for touch screens
   position: relative;
 

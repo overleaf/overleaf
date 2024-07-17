@@ -1,11 +1,17 @@
 import { useCallback } from 'react'
-import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { Tag } from '../../../../../../app/src/Features/Tags/types'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
 import { deleteTag } from '../../util/api'
 import { debugConsole } from '@/utils/debugging'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type DeleteTagModalProps = {
   id: string
@@ -39,42 +45,40 @@ export default function DeleteTagModal({
   }
 
   return (
-    <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
-      <Modal.Header closeButton>
-        <Modal.Title>{t('delete_tag')}</Modal.Title>
-      </Modal.Header>
+    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('delete_tag')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         {t('about_to_delete_tag')}
         <ul>
           <li>{tag.name}</li>
         </ul>
-      </Modal.Body>
-
-      <Modal.Footer>
         {isError && (
-          <div className="modal-footer-left">
-            <span className="text-danger error">
-              {t('generic_something_went_wrong')}
-            </span>
-          </div>
+          <OLNotification
+            type="error"
+            content={t('generic_something_went_wrong')}
+          />
         )}
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          onClick={onClose}
-          disabled={isLoading}
-        >
+      </OLModalBody>
+
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={onClose} disabled={isLoading}>
           {t('cancel')}
-        </Button>
-        <Button
+        </OLButton>
+        <OLButton
           onClick={() => runDeleteTag(tag._id)}
-          bsStyle="danger"
+          variant="danger"
           disabled={isLoading}
+          isLoading={isLoading}
+          bs3Props={{
+            loading: isLoading ? `${t('deleting')}…` : t('delete'),
+          }}
         >
-          {isLoading ? <>{t('deleting')} &hellip;</> : t('delete')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+          {t('delete')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

@@ -1,9 +1,9 @@
-import Icon from '../../../../shared/components/icon'
 import useSelectColor from '../../hooks/use-select-color'
 import { SketchPicker } from 'react-color'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Tooltip from '../../../../shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const PRESET_COLORS: ReadonlyArray<{ color: string; name: string }> = [
   { color: '#A7B1C2', name: 'Grey' },
@@ -48,7 +48,7 @@ function ColorPickerItem({ color, name }: ColorPickerItemProps) {
         {t('select_color', { name })}
       </span>
       {!pickingCustomColor && color === selectedColor && (
-        <Icon type="check" className="color-picker-item-icon" />
+        <MaterialIcon type="check" className="color-picker-item-icon" />
       )}
     </div>
   )
@@ -95,19 +95,25 @@ function MoreButton() {
         tabIndex={0}
         onKeyDown={handleKeyDown}
       >
-        <Tooltip
+        <OLTooltip
+          key="tooltip-color-picker-plus"
           id="tooltip-color-picker-plus"
           description={t('choose_a_custom_color')}
-          overlayProps={{ delay: 0, placement: 'bottom' }}
+          overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
         >
-          {isCustomColorSelected ? (
-            <Icon type="check" className="color-picker-item-icon" />
-          ) : showCustomPicker ? (
-            <Icon type="chevron-down" className="color-picker-more-open" />
-          ) : (
-            <Icon type="plus" className="color-picker-more" />
-          )}
-        </Tooltip>
+          <div>
+            {isCustomColorSelected ? (
+              <MaterialIcon type="check" className="color-picker-item-icon" />
+            ) : showCustomPicker ? (
+              <MaterialIcon
+                type="expand_more"
+                className="color-picker-more-open"
+              />
+            ) : (
+              <MaterialIcon type="add" className="color-picker-more" />
+            )}
+          </div>
+        </OLTooltip>
       </div>
       {showCustomPicker && (
         <>
