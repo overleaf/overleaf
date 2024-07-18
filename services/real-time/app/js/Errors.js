@@ -1,9 +1,10 @@
 const OError = require('@overleaf/o-error')
 
 class ClientRequestedMissingOpsError extends OError {
-  constructor(statusCode) {
+  constructor(statusCode, info = {}) {
     super('doc updater could not load requested ops', {
       statusCode,
+      ...info,
     })
   }
 }

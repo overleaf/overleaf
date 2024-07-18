@@ -26,6 +26,13 @@ describe('ShareJsDB', function () {
       requires: {
         './RedisManager': (this.RedisManager = {}),
         './Errors': Errors,
+        '@overleaf/metrics': {
+          inc: sinon.stub(),
+          histogram: sinon.stub(),
+          Timer: class Timer {
+            done() {}
+          },
+        },
       },
     })
 
@@ -89,6 +96,7 @@ describe('ShareJsDB', function () {
       beforeEach(function () {
         this.start = 35
         this.end = 42
+        this.ops = new Array(this.end - this.start)
         this.RedisManager.getPreviousDocOps = sinon
           .stub()
           .callsArgWith(3, null, this.ops)
@@ -110,6 +118,7 @@ describe('ShareJsDB', function () {
       beforeEach(function () {
         this.start = 35
         this.end = null
+        this.ops = []
         this.RedisManager.getPreviousDocOps = sinon
           .stub()
           .callsArgWith(3, null, this.ops)

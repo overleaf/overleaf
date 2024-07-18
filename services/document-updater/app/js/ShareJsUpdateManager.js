@@ -128,9 +128,14 @@ const ShareJsUpdateManager = {
   },
 
   _sendOp(projectId, docId, op) {
-    return RealTimeRedisManager.sendData({
+    RealTimeRedisManager.sendData({
       project_id: projectId,
       doc_id: docId,
+      op,
+    })
+    RealTimeRedisManager.sendCanaryAppliedOp({
+      projectId,
+      docId,
       op,
     })
   },

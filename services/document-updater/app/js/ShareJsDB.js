@@ -11,6 +11,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ShareJsDB
+const logger = require('@overleaf/logger')
+const Metrics = require('@overleaf/metrics')
 const Keys = require('./UpdateKeys')
 const RedisManager = require('./RedisManager')
 const Errors = require('./Errors')
@@ -25,10 +27,15 @@ module.exports = ShareJsDB = class ShareJsDB {
     // ShareJS calls this detacted from the instance, so we need
     // bind it to keep our context that can access @appliedOps
     this.writeOp = this._writeOp.bind(this)
+    this.startTimeShareJsDB = performance.now()
   }
 
   getOps(docKey, start, end, callback) {
     if (start === end) {
+      Metrics.inc('transform-updates', 1, {
+        status: 'is-up-to-date',
+        path: 'sharejs',
+      })
       return callback(null, [])
     }
 
@@ -40,7 +47,60 @@ module.exports = ShareJsDB = class ShareJsDB {
     }
 
     const [projectId, docId] = Array.from(Keys.splitProjectIdAndDocId(docKey))
-    return RedisManager.getPreviousDocOps(docId, start, end, callback)
+    const timer = new Metrics.Timer(
+      'transform-updates.timing',
+      1,
+      { path: 'sharejs' },
+      [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100, 200, 500, 1000]
+    )
+    RedisManager.getPreviousDocOps(docId, start, end, (err, ops) => {
+      let status
+      if (err) {
+        if (err instanceof Errors.OpRangeNotAvailableError) {
+          status = 'out-of-range'
+        } else {
+          status = 'error'
+        }
+      } else {
+        if (ops.length === 0) {
+          status = 'fetched-zero'
+        } else {
+          status = 'fetched'
+
+          if (start === this.version && end === -1) {
+            // The sharejs processing is happening under a lock.
+            // this.version is the version as read from redis under lock.
+            // In case there are any new ops available, something bypassed the lock (or we overran it).
+            logger.warn(
+              {
+                projectId,
+                docId,
+                start,
+                nOps: ops.length,
+                timeSinceShareJsDBInit:
+                  performance.now() - this.startTimeShareJsDB,
+              },
+              'concurrent update of docOps while transforming update'
+            )
+          }
+        }
+        Metrics.histogram(
+          'transform-updates.count',
+          ops.length,
+          [
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50, 75, 100,
+            // prepare buckets for full-project history/larger buffer experiments
+            150,
+            200, 300, 400,
+          ],
+          { path: 'sharejs', status }
+        )
+      }
+
+      timer.done({ status })
+      Metrics.inc('transform-updates', 1, { status, path: 'sharejs' })
+      callback(err, ops)
+    })
   }
 
   _writeOp(docKey, opData, callback) {

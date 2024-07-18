@@ -44,6 +44,7 @@ function getDoc(req, res, next) {
         ops,
         ranges,
         pathname,
+        ttlInS: RedisManager.DOC_OPS_TTL,
       })
     }
   )

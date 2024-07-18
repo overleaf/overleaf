@@ -149,7 +149,7 @@ function getProjectDocsAndFlushIfOld(
       // we can't return docs if project structure has changed
       if (projectStateChanged) {
         return callback(
-          Errors.ProjectStateChangedError('project state changed')
+          new Errors.ProjectStateChangedError('project state changed')
         )
       }
       // project structure hasn't changed, return doc content from redis

@@ -407,6 +407,18 @@ describe('RedisManager', function () {
           .should.equal(true)
       })
 
+      it('should send details for metrics', function () {
+        this.callback.should.have.been.calledWith(
+          sinon.match({
+            info: {
+              firstVersionInRedis: this.first_version_in_redis,
+              version: this.version,
+              ttlInS: this.RedisManager.DOC_OPS_TTL,
+            },
+          })
+        )
+      })
+
       it('should log out the problem as a debug message', function () {
         this.logger.debug.called.should.equal(true)
       })

@@ -55,7 +55,10 @@ describe('DocumentUpdaterController', function () {
         }),
         './EventLogger': (this.EventLogger = { checkEventOrder: sinon.stub() }),
         './HealthCheckManager': { check: sinon.stub() },
-        '@overleaf/metrics': (this.metrics = { inc: sinon.stub() }),
+        '@overleaf/metrics': (this.metrics = {
+          inc: sinon.stub(),
+          histogram: sinon.stub(),
+        }),
         './RoomManager': (this.RoomManager = {
           eventSource: sinon.stub().returns(this.RoomEvents),
         }),

@@ -15,7 +15,9 @@ describe('HttpController', function () {
         './ProjectManager': (this.ProjectManager = {}),
         './ProjectFlusher': { flushAllProjects() {} },
         './DeleteQueueManager': (this.DeleteQueueManager = {}),
-        './RedisManager': (this.RedisManager = {}),
+        './RedisManager': (this.RedisManager = {
+          DOC_OPS_TTL: 42,
+        }),
         './Metrics': (this.Metrics = {}),
         './Errors': Errors,
         '@overleaf/settings': { max_doc_length: 2 * 1024 * 1024 },
@@ -84,6 +86,7 @@ describe('HttpController', function () {
             ops: [],
             ranges: this.ranges,
             pathname: this.pathname,
+            ttlInS: 42,
           })
           .should.equal(true)
       })
@@ -134,6 +137,7 @@ describe('HttpController', function () {
             ops: this.ops,
             ranges: this.ranges,
             pathname: this.pathname,
+            ttlInS: 42,
           })
           .should.equal(true)
       })

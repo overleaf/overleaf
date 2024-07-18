@@ -257,6 +257,10 @@ export class ShareJsDoc extends EventEmitter {
     return this._doc.version
   }
 
+  getTimeSinceLastServerActivity() {
+    return Math.floor(performance.now() - this._doc.lastServerActivity)
+  }
+
   getType() {
     return this.type
   }

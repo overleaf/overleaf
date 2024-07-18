@@ -396,7 +396,8 @@ const RedisManager = {
 
         if (start < firstVersionInRedis || end > version) {
           error = new Errors.OpRangeNotAvailableError(
-            'doc ops range is not loaded in redis'
+            'doc ops range is not loaded in redis',
+            { firstVersionInRedis, version, ttlInS: RedisManager.DOC_OPS_TTL }
           )
           logger.debug(
             { err: error, docId, length, version, start, end },

@@ -49,7 +49,10 @@ describe('RealTimeRedisManager', function () {
             .returns(Buffer.from([0x1, 0x2, 0x3, 0x4])),
         }),
         os: (this.os = { hostname: sinon.stub().returns('somehost') }),
-        './Metrics': (this.metrics = { summary: sinon.stub() }),
+        './Metrics': (this.metrics = {
+          summary: sinon.stub(),
+          histogram: sinon.stub(),
+        }),
       },
     })
 
@@ -60,6 +63,7 @@ describe('RealTimeRedisManager', function () {
 
   describe('getPendingUpdatesForDoc', function () {
     beforeEach(function () {
+      this.rclient.llen = sinon.stub()
       this.rclient.lrange = sinon.stub()
       return (this.rclient.ltrim = sinon.stub())
     })
@@ -71,9 +75,7 @@ describe('RealTimeRedisManager', function () {
           { op: [{ i: 'foo', p: 4 }] },
         ]
         this.jsonUpdates = this.updates.map(update => JSON.stringify(update))
-        this.rclient.exec = sinon
-          .stub()
-          .callsArgWith(0, null, [this.jsonUpdates])
+        this.rclient.exec = sinon.stub().yields(null, [2, this.jsonUpdates])
         return this.RealTimeRedisManager.getPendingUpdatesForDoc(
           this.doc_id,
           this.callback
@@ -103,9 +105,7 @@ describe('RealTimeRedisManager', function () {
           JSON.stringify({ op: [{ i: 'foo', p: 4 }] }),
           'broken json',
         ]
-        this.rclient.exec = sinon
-          .stub()
-          .callsArgWith(0, null, [this.jsonUpdates])
+        this.rclient.exec = sinon.stub().yields(null, [2, this.jsonUpdates])
         return this.RealTimeRedisManager.getPendingUpdatesForDoc(
           this.doc_id,
           this.callback

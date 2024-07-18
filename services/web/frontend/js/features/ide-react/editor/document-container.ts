@@ -459,7 +459,7 @@ export class DocumentContainer extends EventEmitter {
         'joinDoc',
         this.doc_id,
         this.doc.getVersion(),
-        { encodeRanges: true },
+        { encodeRanges: true, age: this.doc.getTimeSinceLastServerActivity() },
         (error, docLines, version, updates, ranges) => {
           if (error) {
             callback?.(error)

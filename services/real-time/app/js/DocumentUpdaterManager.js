@@ -42,7 +42,16 @@ const DocumentUpdaterManager = {
           return callback(error)
         }
         body = body || {}
-        callback(null, body.lines, body.version, body.ranges, body.ops)
+        callback(
+          null,
+          body.lines,
+          body.version,
+          body.ranges,
+          body.ops,
+          body.ttlInS
+        )
+      } else if (res.statusCode === 422 && body?.firstVersionInRedis) {
+        callback(new ClientRequestedMissingOpsError(422, body))
       } else if ([404, 422].includes(res.statusCode)) {
         callback(new ClientRequestedMissingOpsError(res.statusCode))
       } else {

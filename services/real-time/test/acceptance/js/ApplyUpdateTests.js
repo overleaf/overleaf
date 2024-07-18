@@ -129,7 +129,7 @@ describe('applyOtUpdate', function () {
           let [update] = Array.from(rest[0])
           update = JSON.parse(update)
           update.op.should.deep.equal(this.update.op)
-          update.meta.should.deep.equal({
+          update.meta.should.include({
             source: this.client.publicId,
             user_id: this.user_id,
           })
@@ -408,7 +408,7 @@ describe('applyOtUpdate', function () {
           let [update] = Array.from(rest[0])
           update = JSON.parse(update)
           update.op.should.deep.equal(this.comment_update.op)
-          update.meta.should.deep.equal({
+          update.meta.should.include({
             source: this.client.publicId,
             user_id: this.user_id,
           })

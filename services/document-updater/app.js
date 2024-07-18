@@ -205,7 +205,7 @@ app.use((error, req, res, next) => {
   if (error instanceof Errors.NotFoundError) {
     return res.sendStatus(404)
   } else if (error instanceof Errors.OpRangeNotAvailableError) {
-    return res.sendStatus(422) // Unprocessable Entity
+    return res.status(422).json(error.info)
   } else if (error instanceof Errors.FileTooLargeError) {
     return res.sendStatus(413)
   } else if (error.statusCode === 413) {

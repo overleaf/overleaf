@@ -909,6 +909,7 @@ export const { Doc } = (() => {
         openData = {};
       }
       this.version = openData.v;
+      this.lastServerActivity = performance.now()
       this.snapshot = openData.snaphot;
       if (openData.type) {
         this._setType(openData.type);
@@ -1169,6 +1170,7 @@ export const { Doc } = (() => {
             }
 
             this.version++;
+            this.lastServerActivity = performance.now()
             this.emit('acknowledge', oldInflightOp);
             var _iteratorNormalCompletion13 = true;
             var _didIteratorError13 = false;
@@ -1236,6 +1238,7 @@ export const { Doc } = (() => {
           }
 
           this.version++;
+          this.lastServerActivity = performance.now()
           // Finally, apply the op to @snapshot and trigger any event listeners
           return this._otApply(docOp, true, msg);
         } else if (msg.meta) {

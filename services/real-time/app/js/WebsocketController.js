@@ -11,7 +11,27 @@ const {
   JoinLeaveEpochMismatchError,
   NotAuthorizedError,
   NotJoinedError,
+  ClientRequestedMissingOpsError,
 } = require('./Errors')
+
+const JOIN_DOC_CATCH_UP_LENGTH_BUCKETS = [
+  0, 5, 10, 25, 50, 100, 150, 200, 250, 500, 1000,
+]
+const JOIN_DOC_CATCH_UP_AGE = [
+  0,
+  1,
+  2,
+  5,
+  10,
+  20,
+  30,
+  60,
+  120,
+  240,
+  600,
+  60 * 60,
+  24 * 60 * 60,
+].map(x => x * 1000)
 
 let WebsocketController
 module.exports = WebsocketController = {
@@ -195,6 +215,38 @@ module.exports = WebsocketController = {
       'client joining doc'
     )
 
+    const emitJoinDocCatchUpMetrics = (
+      status,
+      { firstVersionInRedis, version, ttlInS }
+    ) => {
+      if (fromVersion === -1) return // full joinDoc call
+      if (typeof options.age !== 'number') return // old frontend
+      if (!ttlInS) return // old document-updater pod
+
+      const isStale = options.age > ttlInS * 1000
+      const method = isStale ? 'stale' : 'recent'
+      metrics.histogram(
+        'join-doc-catch-up-length',
+        version - fromVersion,
+        JOIN_DOC_CATCH_UP_LENGTH_BUCKETS,
+        { status, method, path: client.transport }
+      )
+      if (firstVersionInRedis) {
+        metrics.histogram(
+          'join-doc-catch-up-length-extra-needed',
+          firstVersionInRedis - fromVersion,
+          JOIN_DOC_CATCH_UP_LENGTH_BUCKETS,
+          { status, method, path: client.transport }
+        )
+      }
+      metrics.histogram(
+        'join-doc-catch-up-age',
+        options.age,
+        JOIN_DOC_CATCH_UP_AGE,
+        { status, path: client.transport }
+      )
+    }
+
     WebsocketController._assertClientAuthorization(
       client,
       docId,
@@ -231,10 +283,14 @@ module.exports = WebsocketController = {
             projectId,
             docId,
             fromVersion,
-            function (error, lines, version, ranges, ops) {
+            function (error, lines, version, ranges, ops, ttlInS) {
               if (error) {
+                if (error instanceof ClientRequestedMissingOpsError) {
+                  emitJoinDocCatchUpMetrics('missing', error.info)
+                }
                 return callback(error)
               }
+              emitJoinDocCatchUpMetrics('success', { version, ttlInS })
               if (client.disconnected) {
                 metrics.inc('editor.join-doc.disconnected', 1, {
                   status: 'after-doc-updater-call',
@@ -503,6 +559,7 @@ module.exports = WebsocketController = {
         }
         update.meta.source = client.publicId
         update.meta.user_id = userId
+        update.meta.tsRT = performance.now()
         metrics.inc('editor.doc-update', 0.3, { status: client.transport })
 
         logger.debug(

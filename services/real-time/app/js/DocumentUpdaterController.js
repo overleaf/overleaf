@@ -105,6 +105,11 @@ module.exports = DocumentUpdaterController = {
     if (clientList.length === 0) {
       return
     }
+
+    update.meta = update.meta || {}
+    const { tsRT: realTimeIngestionTime } = update.meta
+    delete update.meta.tsRT
+
     // send updates to clients
     logger.debug(
       {
@@ -128,6 +133,15 @@ module.exports = DocumentUpdaterController = {
               source: update.meta.source,
             },
             'distributing update to sender'
+          )
+          metrics.histogram(
+            'update-processing-time',
+            performance.now() - realTimeIngestionTime,
+            [
+              0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 50, 100, 200, 500, 1000,
+              2000, 5000, 10000,
+            ],
+            { path: 'sharejs' }
           )
           client.emit('otUpdateApplied', { v: update.v, doc: update.doc })
         } else if (!update.dup) {
