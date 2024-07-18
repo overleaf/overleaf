@@ -8,12 +8,7 @@ type FormControlProps = BS3FormControlProps & {
   append?: React.ReactNode
 }
 
-function FormControl({
-  prepend,
-  append,
-  className,
-  ...props
-}: FormControlProps) {
+function FormControl({ prepend, append, ...props }: FormControlProps) {
   return (
     <>
       {prepend && <div className="form-control-feedback-left">{prepend}</div>}
