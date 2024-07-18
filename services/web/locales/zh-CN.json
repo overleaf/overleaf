@@ -1262,7 +1262,6 @@
   "not_registered": "未注册",
   "note_features_under_development": "<0>请注意</0>此计划中的功能仍在测试和快速开发中。 这意味着它们可能<0>改变</0>、<0>被删除</0>或<0>成为高级计划的一部分</0>",
   "notification_features_upgraded_by_affiliation": "好消息！您的组织__institutionName__已有 Overleaf 订阅，并且您现在可以访问 Overleaf 的所有专业功能。",
-  "notification_ieee_collabratec_retirement_message": "从 2024年 1 月 31日起, IEEE 不再提供 Overleaf premium 功能给协作者。有问题请联系 <0>authors@ieee.org</0>。需要升级吗? <1>查看我们的订阅计划</1>",
   "notification_personal_and_group_subscriptions": "我们发现您有<0>多个活跃的 __appName__ 订阅</0>。 为避免支付超出您需要的费用，请<1>检查您的订阅</1>。",
   "notification_personal_subscription_not_required_due_to_affiliation": " 好消息！您的组织 __institutionName__ 与 Overleaf 有合作关系。您可以取消您的个人订阅，而不会失去访问您的任何利益。",
   "notification_project_invite": "<b>__userName__</b> 想让您加入 <b>__projectName__</b> <a class=\"btn btn-sm btn-info pull-right\" href=\"’/project/__projectId__/invite/token/__token__’\">加入项目</a>",

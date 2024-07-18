@@ -10,7 +10,6 @@ import {
   Notification as NotificationType,
 } from '../../../../../../../types/project/dashboard/notification'
 import GroupInvitationNotification from './group-invitation/group-invitation'
-import IEEERetirementBanner from '../ieee-retirement-banner'
 import { debugConsole } from '@/utils/debugging'
 import OLButton from '@/features/ui/components/ol/ol-button'
 
@@ -279,8 +278,6 @@ function CommonNotification({ notification }: CommonNotificationProps) {
         />
       ) : templateKey === 'notification_group_invitation' ? (
         <GroupInvitationNotification notification={notification} />
-      ) : templateKey === 'notification_ieee_collabratec_retirement' ? (
-        <IEEERetirementBanner id={id} />
       ) : templateKey === 'notification_personal_and_group_subscriptions' ? (
         <Notification
           type="warning"
