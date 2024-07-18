@@ -18,7 +18,7 @@ import getMeta from '@/utils/meta'
 
 export default function LinkSharing() {
   const [inflight, setInflight] = useState(false)
-  const [showLinks, setShowLinks] = useState(false)
+  const [showLinks, setShowLinks] = useState(true)
 
   const { monitorRequest } = useShareProjectContext()
 
