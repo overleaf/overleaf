@@ -2,7 +2,7 @@ import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import { Trans, useTranslation } from 'react-i18next'
 import withErrorBoundary from '@/infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '@/shared/components/generic-error-boundary-fallback'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import getMeta from '@/utils/meta'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
@@ -10,7 +10,10 @@ import useAsync from '@/shared/hooks/use-async'
 import Notification from '@/shared/components/notification'
 import { sendMB } from '@/infrastructure/event-tracking'
 
+import LeaveProjectModal from './leave-project-modal'
+
 function SharingUpdatesRoot() {
+  const [showModal, setShowModal] = useState(false)
   const { isReady } = useWaitForI18n()
   const { t } = useTranslation()
   const { isLoading, isSuccess, isError, runAsync } = useAsync()
@@ -58,6 +61,11 @@ function SharingUpdatesRoot() {
 
   return (
     <div className="container">
+      <LeaveProjectModal
+        handleLeaveAction={leaveProject}
+        showModal={showModal}
+        handleCloseModal={() => setShowModal(false)}
+      />
       <div className="row">
         <div className="col-md-6 col-md-offset-3">
           <div className="card sharing-updates">
@@ -132,7 +140,7 @@ function SharingUpdatesRoot() {
                         // eslint-disable-next-line react/jsx-key
                         <button
                           className="btn btn-inline-link"
-                          onClick={() => leaveProject()}
+                          onClick={() => setShowModal(true)}
                           disabled={isLoading || isSuccess}
                         />,
                       ]}
