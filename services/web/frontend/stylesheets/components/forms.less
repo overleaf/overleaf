@@ -338,6 +338,20 @@ input[type='checkbox'],
   }
 }
 
+.form-control:invalid {
+  &:focus {
+    border-color: @form-feedback-invalid-color;
+    box-shadow: @form-feedback-invalid-box-shadow;
+  }
+}
+
+.form-control[data-ol-dirty]:invalid {
+  &:focus-visible {
+    border-color: @form-feedback-invalid-color;
+    box-shadow: @form-feedback-invalid-box-shadow;
+  }
+}
+
 // Static form control text
 //
 // Apply class to a `p` element to make any string of text align with labels in
