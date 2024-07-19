@@ -9,7 +9,6 @@ import PdfHybridDownloadButton from './pdf-hybrid-download-button'
 import PdfHybridCodeCheckButton from './pdf-hybrid-code-check-button'
 import PdfOrphanRefreshButton from './pdf-orphan-refresh-button'
 import { DetachedSynctexControl } from './detach-synctex-control'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import Icon from '../../../shared/components/icon'
 
 const ORPHAN_UI_TIMEOUT_MS = 5000
@@ -55,8 +54,6 @@ function PdfPreviewHybridToolbar() {
 }
 
 function PdfPreviewHybridToolbarInner() {
-  const hasNewPdfToolbar = useFeatureFlag('pdf-controls')
-
   return (
     <>
       <div className="toolbar-pdf-left">
@@ -65,9 +62,7 @@ function PdfPreviewHybridToolbarInner() {
         <PdfHybridDownloadButton />
       </div>
       <div className="toolbar-pdf-right">
-        {hasNewPdfToolbar && (
-          <div className="toolbar-pdf-controls" id="toolbar-pdf-controls" />
-        )}
+        <div className="toolbar-pdf-controls" id="toolbar-pdf-controls" />
         <PdfHybridCodeCheckButton />
         <SwitchToEditorButton />
         <DetachedSynctexControl />

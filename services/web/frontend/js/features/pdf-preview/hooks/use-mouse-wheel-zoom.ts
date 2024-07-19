@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 // We need this to work for both a traditional mouse wheel and a touchpad "pinch to zoom".
 // From experimentation, trackpads tend to fire a lot of events with small deltaY's where
@@ -15,8 +14,6 @@ export default function useMouseWheelZoom(
   pdfJsWrapper: PDFJSWrapper | null | undefined,
   setScale: (scale: string) => void
 ) {
-  const isEnabled = useFeatureFlag('pdf-controls')
-
   const isZoomingRef = useRef(false)
 
   const performZoom = useCallback(
@@ -62,7 +59,7 @@ export default function useMouseWheelZoom(
   )
 
   useEffect(() => {
-    if (pdfJsWrapper && isEnabled) {
+    if (pdfJsWrapper) {
       const wheelListener = (event: WheelEvent) => {
         if (event.metaKey || event.ctrlKey) {
           event.preventDefault()
@@ -85,5 +82,5 @@ export default function useMouseWheelZoom(
         pdfJsWrapper.container.removeEventListener('wheel', wheelListener)
       }
     }
-  }, [pdfJsWrapper, setScale, isEnabled, performZoom])
+  }, [pdfJsWrapper, setScale, performZoom])
 }

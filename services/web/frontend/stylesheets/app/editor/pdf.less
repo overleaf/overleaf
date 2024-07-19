@@ -210,52 +210,6 @@
   }
 }
 
-// TODO: remove this block once the new pdfjs toolbar is fully rolled out
-.pdfjs-controls {
-  position: absolute;
-  padding: @line-height-computed / 2;
-  top: 0;
-  left: 0;
-  display: inline-block;
-  z-index: 10; // above the PDF viewer
-
-  .btn-group {
-    transition:
-      opacity 0.5s ease,
-      visibility 0 linear 0.5s;
-    visibility: hidden;
-    opacity: 0;
-  }
-
-  &:focus-within,
-  &:hover {
-    // make .pdfjs-controls and its children visible when it or any of its descendants are focused
-    .btn-group {
-      transition: none;
-      visibility: visible;
-      opacity: 1;
-    }
-  }
-
-  &:hover,
-  &.flash {
-    .btn-group {
-      transition: none;
-      visibility: visible;
-      opacity: 1;
-    }
-  }
-
-  i.fa-arrows-h {
-    border-right: 2px solid @content-primary;
-    border-left: 2px solid @content-primary;
-  }
-  i.fa-arrows-v {
-    border-top: 2px solid @content-primary;
-    border-bottom: 2px solid @content-primary;
-  }
-}
-
 .pdfjs-viewer-controls {
   display: flex;
   align-items: center;
