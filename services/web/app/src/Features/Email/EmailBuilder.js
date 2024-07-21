@@ -234,7 +234,7 @@ templates.confirmEmail = ctaTemplate({
   },
   secondaryMessage() {
     return [
-      'If you did not request this, please let us know at <a href="mailto:support@overleaf.com">support@overleaf.com</a>.',
+      `If you did not request this, please let us know at <a href="mailto:${settings.adminEmail}">${settings.adminEmail}</a>.`,
       `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`,
     ]
   },
