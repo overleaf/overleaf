@@ -4,28 +4,29 @@
 
 @include media-breakpoint-up(sm) {
   .modal-dialog {
-    @include modal-md();
+    @include modal-md;
   }
 
   .modal-sm {
-    @include modal-sm();
+    @include modal-sm;
   }
 }
 
 @include media-breakpoint-up(md) {
   .modal-md {
-    @include modal-md();
+    @include modal-md;
   }
 }
 
 @include media-breakpoint-up(lg) {
   .modal-lg {
-    @include modal-lg();
+    @include modal-lg;
   }
 }
 
 .modal-content {
-  @include shadow-lg();
+  @include shadow-lg;
+
   border-radius: var(--border-radius-base);
 
   .modal-header {
@@ -34,6 +35,7 @@
 
       line-height: 35px;
     }
+
     .btn-close {
       margin-right: 0;
     }
@@ -42,6 +44,7 @@
   .modal-footer {
     padding: var(--spacing-06);
     gap: var(--spacing-04);
+
     > * {
       margin: 0;
     }

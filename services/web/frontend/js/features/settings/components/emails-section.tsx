@@ -46,7 +46,7 @@ function EmailsSectionContent() {
       <>
         <EmailsHeader />
         {isInitializing ? (
-          <div className="affiliations-table-row--highlighted">
+          <div className="affiliations-table-row-highlighted">
             <div className="affiliations-table-cell text-center">
               <Icon type="refresh" fw spin /> {t('loading')}...
             </div>

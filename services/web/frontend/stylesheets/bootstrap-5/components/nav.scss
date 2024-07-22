@@ -3,15 +3,12 @@
 :root {
   // Basics
   --navbar-item-spacing-horizontal: var(--spacing-06);
-
   --navbar-bg: var(--bg-dark-primary);
   --navbar-border: transparent;
-
   --navbar-padding-h: var(--spacing-05);
   --navbar-padding: 0 var(--navbar-padding-h);
-
   --navbar-brand-width: 130px;
-  --navbar-brand-image-url: url(../../../../public/img/ol-brand/overleaf-white.svg);
+  --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-white.svg');
 
   // Title, when used instead of a logo
   --navbar-title-font-size: var(--font-size-05);
@@ -39,7 +36,6 @@
   // Links
   --navbar-link-color: var(--white);
   --navbar-link-border-color: var(--navbar-link-color);
-
   --navbar-link-hover-color: var(--white);
   --navbar-link-hover-bg: var(--green-50);
   --navbar-link-hover-border-color: var(--navbar-link-hover-bg);

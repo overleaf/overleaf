@@ -1,3 +1,9 @@
 {
-  "extends": ["stylelint-config-standard-scss"]
+  "extends": ["stylelint-config-standard-scss"],
+  "rules": {
+    "function-url-quotes": null,
+    "no-descending-specificity": null,
+    "scss/at-extend-no-missing-placeholder": null,
+    "scss/operator-no-newline-after": null
+  }
 }

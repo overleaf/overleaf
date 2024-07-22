@@ -139,8 +139,8 @@
         // Dropdowns get custom display when collapsed
         .dropdown-menu.show {
           --bs-dropdown-spacer: 0;
-          box-shadow: none;
 
+          box-shadow: none;
           background-color: var(--navbar-hamburger-submenu-bg);
           width: auto;
 
@@ -191,19 +191,15 @@
 .website-redesign-navbar {
   --navbar-title-color: var(--content-primary);
   --navbar-title-color-hover: var(--content-secondary);
-
-  --navbar-brand-image-url: url(../../../../public/img/ol-brand/overleaf-black.svg);
-
+  --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-black.svg');
   --navbar-subdued-color: var(--content-primary);
   --navbar-subdued-hover-bg: var(--bg-dark-primary);
   --navbar-subdued-hover-color: var(--content-primary-dark);
-
   --navbar-bg: var(--bg-light-primary);
 
   // Navbar links
   --navbar-link-color: var(--content-primary);
   --navbar-link-border-color: var(--border-primary);
-
   --navbar-link-hover-color: var(--navbar-link-color);
   --navbar-link-hover-bg: var(--bg-light-tertiary);
   --navbar-link-hover-border-color: var(--navbar-link-border-color);

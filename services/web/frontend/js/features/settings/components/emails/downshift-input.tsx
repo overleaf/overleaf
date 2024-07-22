@@ -171,7 +171,7 @@ function Downshift({
                   role={undefined}
                   className={classnames({
                     active: selectedItem === item,
-                    'dropdown-item--highlighted': highlightedIndex === index,
+                    'dropdown-item-highlighted': highlightedIndex === index,
                   })}
                   trailingIcon={selectedItem === item ? 'check' : undefined}
                 >

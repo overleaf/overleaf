@@ -19,6 +19,6 @@ li.dropdown.dropup.subdued(dropdown).language-picker
 		li.dropdown-header #{translate("language")}
 		each subdomainDetails, subdomain in settings.i18n.subdomainLang
 			if !subdomainDetails.hide
-				li.lngOption
+				li.lng-option
 					a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams role="menuitem")
 						| #{settings.translatedLanguages[subdomainDetails.lngCode]}

@@ -20,7 +20,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-
   padding: 0 $spacing-02;
   margin: 0 (-$spacing-02) 0 $spacing-02;
   border-top-right-radius: inherit;
@@ -39,11 +38,13 @@
 
 .badge-content {
   @include text-truncate;
+
   padding: var(--bs-badge-padding-y) 0;
 }
 
 .badge-tag {
   @include body-sm;
+
   color: $dark;
 
   &:hover {

@@ -1,5 +1,6 @@
 .project-list-sidebar-survey-link {
   @extend .text-white;
+
   font-weight: bold;
 }
 
@@ -7,6 +8,7 @@
   &:hover {
     background-color: transparent !important;
   }
+
   &:focus {
     background-color: transparent !important;
   }

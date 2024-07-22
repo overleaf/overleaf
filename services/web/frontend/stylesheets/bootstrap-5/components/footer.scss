@@ -1,3 +1,5 @@
+@use 'sass:map';
+
 footer.site-footer {
   background-color: var(--bg-light-primary);
   border-top: 1px solid var(--border-primary-dark);
@@ -23,7 +25,7 @@ footer.site-footer {
     }
   }
 
-  li.lngOption {
+  li.lng-option {
     text-align: left;
     display: list-item;
 
@@ -224,7 +226,7 @@ footer.site-footer {
 
   @include media-breakpoint-up(md) {
     .fat-footer-container {
-      width: (map-get($grid-breakpoints, 'md') - ($spacing-04 * 2));
+      width: (map.get($grid-breakpoints, 'md') - ($spacing-04 * 2));
     }
 
     #footer-brand {
@@ -270,7 +272,7 @@ footer.site-footer {
 
   @include media-breakpoint-up(lg) {
     .fat-footer-container {
-      width: (map-get($grid-breakpoints, 'lg') - $spacing-07);
+      width: (map.get($grid-breakpoints, 'lg') - $spacing-07);
     }
 
     .fat-footer-sections {
@@ -280,7 +282,7 @@ footer.site-footer {
 
   @include media-breakpoint-up(xl) {
     .fat-footer-container {
-      width: (map-get($grid-breakpoints, 'xl') - $spacing-09);
+      width: (map.get($grid-breakpoints, 'xl') - $spacing-09);
     }
 
     .fat-footer-sections {
@@ -305,7 +307,7 @@ footer.site-footer {
   z-index: 100;
   color: var(--content-secondary);
   background: var(--bg-light-secondary);
-  box-shadow: 0px -5px 8px 0px #0000001a;
+  box-shadow: 0 -5px 8px 0 #0000001a;
 
   .cookie-banner-actions {
     padding-top: var(--spacing-04);

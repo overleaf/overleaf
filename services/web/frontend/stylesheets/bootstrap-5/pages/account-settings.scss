@@ -12,7 +12,7 @@
   padding-left: var(--spacing-04);
 }
 
-.affiliations-table-row--highlighted {
+.affiliations-table-row-highlighted {
   background-color: var(--bg-light-secondary);
 }
 
@@ -38,17 +38,21 @@
   font-size: 1.3em;
   line-height: 1.3em;
   vertical-align: top;
+
   &.status-error,
   &.dropbox-sync-icon-error {
     color: var(--bg-danger-01);
   }
+
   &.status-success,
   &.dropbox-sync-icon-success {
     color: var(--content-positive);
   }
+
   &.status-pending,
   &.dropbox-sync-icon-updating {
     color: var(--bg-info-01);
+
     &::after {
       content: '\f021';
       position: absolute;
@@ -175,6 +179,7 @@
 
   .status-label {
     @include body-sm;
+
     border-radius: var(--border-radius-base);
     padding: var(--spacing-01) var(--spacing-02);
     margin-top: var(--spacing-02);

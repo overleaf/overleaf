@@ -20,7 +20,7 @@ li.dropdown.dropup.subdued(dropdown).language-picker
 		each subdomainDetails, subdomain in settings.i18n.subdomainLang
 			if !subdomainDetails.hide
 				- let isActive = subdomainDetails.lngCode === currentLngCode
-				li.lngOption
+				li.lng-option
 					a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams, role="menuitem", class=isActive ? 'dropdown-item active' : 'dropdown-item', aria-selected=isActive ? 'true' : 'false')
 						| #{settings.translatedLanguages[subdomainDetails.lngCode]}
 						if subdomainDetails.lngCode === currentLngCode

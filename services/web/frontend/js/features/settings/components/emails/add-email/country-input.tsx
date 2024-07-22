@@ -127,7 +127,7 @@ function Downshift({ setValue, inputRef }: CountryInputProps) {
                   role={undefined}
                   className={classnames({
                     active: selectedItem?.name === item.name,
-                    'dropdown-item--highlighted': highlightedIndex === index,
+                    'dropdown-item-highlighted': highlightedIndex === index,
                   })}
                   trailingIcon={
                     selectedItem?.name === item.name ? 'check' : undefined

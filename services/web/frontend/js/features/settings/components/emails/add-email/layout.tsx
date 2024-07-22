@@ -12,7 +12,7 @@ type LayoutProps = {
 
 function Layout({ isError, error, children }: LayoutProps) {
   return (
-    <div className="affiliations-table-row--highlighted">
+    <div className="affiliations-table-row-highlighted">
       <OLRow>{children}</OLRow>
       {isError && (
         <OLNotification
