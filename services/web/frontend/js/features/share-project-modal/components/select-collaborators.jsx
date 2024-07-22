@@ -77,6 +77,15 @@ export default function SelectCollaborators({
     return true
   }, [inputValue, selectedItems])
 
+  function stateReducer(state, actionAndChanges) {
+    const { type, changes } = actionAndChanges
+    // force selected item to be null so that adding, removing, then re-adding the same collaborator is recognised as a selection change
+    if (type === useCombobox.stateChangeTypes.InputChange) {
+      return { ...changes, selectedItem: null }
+    }
+    return changes
+  }
+
   const {
     isOpen,
     getLabelProps,
@@ -91,6 +100,7 @@ export default function SelectCollaborators({
     defaultHighlightedIndex: 0,
     items: filteredOptions,
     itemToString: item => item && item.name,
+    stateReducer,
     onStateChange: ({ inputValue, type, selectedItem }) => {
       switch (type) {
         // add a selected item on Enter (keypress), click or blur

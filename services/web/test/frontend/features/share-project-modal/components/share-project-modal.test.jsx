@@ -888,4 +888,96 @@ describe('<ShareProjectModal/>', function () {
       )
     })
   })
+
+  it('selects contact by typing a partial email and selecting the suggestion', async function () {
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      scope: { project },
+    })
+
+    const [inputElement] = await screen.findAllByLabelText(
+      'Share with your collaborators'
+    )
+
+    // Wait for contacts to load
+    await waitFor(() => {
+      expect(fetchMock.called('express:/user/contacts')).to.be.true
+    })
+
+    // Enter a prefix that matches a contact
+    await userEvent.type(inputElement, 'pto')
+
+    // The matching contact should now be present and selected
+    await userEvent.click(
+      screen.getByRole('option', {
+        name: `Claudius Ptolemy <ptolemy@example.com>`,
+        selected: true,
+      })
+    )
+
+    // Click anywhere on the form to blur the input
+    await userEvent.click(screen.getByRole('dialog'))
+
+    // The contact should be added
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+        1
+      )
+    })
+  })
+
+  it('allows an email address to be selected, removed, then re-added', async function () {
+    renderWithEditorContext(<ShareProjectModal {...modalProps} />, {
+      scope: { project },
+    })
+
+    const [inputElement] = await screen.findAllByLabelText(
+      'Share with your collaborators'
+    )
+
+    // Wait for contacts to load
+    await waitFor(() => {
+      expect(fetchMock.called('express:/user/contacts')).to.be.true
+    })
+
+    // Enter a prefix that matches a contact
+    await userEvent.type(inputElement, 'pto')
+
+    // Select the suggested contact
+    await userEvent.click(
+      screen.getByRole('option', {
+        name: `Claudius Ptolemy <ptolemy@example.com>`,
+        selected: true,
+      })
+    )
+
+    // Click anywhere on the form to blur the input
+    await userEvent.click(screen.getByRole('dialog'))
+
+    // Remove the just-added collaborator
+    await userEvent.click(screen.getByRole('button', { name: 'Remove' }))
+
+    // Remove button should now be gone
+    expect(screen.queryByRole('button', { name: 'Remove' })).to.be.null
+
+    // Add the same collaborator again
+    await userEvent.type(inputElement, 'pto')
+
+    // Click the suggested contact again
+    await userEvent.click(
+      screen.getByRole('option', {
+        name: `Claudius Ptolemy <ptolemy@example.com>`,
+        selected: true,
+      })
+    )
+
+    // Click anywhere on the form to blur the input
+    await userEvent.click(screen.getByRole('dialog'))
+
+    // The contact should be added
+    await waitFor(() => {
+      expect(screen.getAllByRole('button', { name: 'Remove' })).to.have.length(
+        1
+      )
+    })
+  })
 })
