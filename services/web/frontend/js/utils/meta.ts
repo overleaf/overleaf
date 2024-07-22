@@ -190,10 +190,10 @@ export interface Meta {
   'ol-tags': Tag[]
   'ol-teamInvites': TeamInvite[]
   'ol-thirdPartyIds': ThirdPartyIds
-  'ol-translationLoadErrorMessage': string
   'ol-translationIoNotLoaded': string
-  'ol-translationUnableToJoin': string
+  'ol-translationLoadErrorMessage': string
   'ol-translationMaintenance': string
+  'ol-translationUnableToJoin': string
   'ol-useShareJsHash': boolean
   'ol-user': User
   'ol-userAffiliations': Affiliation[]

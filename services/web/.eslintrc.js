@@ -311,6 +311,16 @@ module.exports = {
       },
     },
     {
+      // Sorting for Meta
+      files: ['frontend/js/utils/meta.ts'],
+      rules: {
+        '@typescript-eslint/member-ordering': [
+          'error',
+          { interfaces: { order: 'alphabetically' } },
+        ],
+      },
+    },
+    {
       // React component specific rules
       //
       files: [
