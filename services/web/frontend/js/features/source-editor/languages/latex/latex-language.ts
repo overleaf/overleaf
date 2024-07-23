@@ -129,7 +129,10 @@ export const LaTeXLanguage = LRLanguage.define({
           ) {
             types.push('$TextArgument')
           }
-        } else if (type.name.endsWith('Environment')) {
+        } else if (
+          type.name.endsWith('Environment') &&
+          !['NewEnvironment', 'RenewEnvironment'].includes(type.name)
+        ) {
           types.push('$Environment')
         } else if (type.name.endsWith('Brace')) {
           types.push('$Brace')

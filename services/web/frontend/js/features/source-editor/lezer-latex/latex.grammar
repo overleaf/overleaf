@@ -60,6 +60,7 @@
     IncludeGraphicsCtrlSeq,
     CaptionCtrlSeq,
     DefCtrlSeq,
+    LetCtrlSeq,
     LeftCtrlSeq,
     RightCtrlSeq,
     NewCommandCtrlSeq,
@@ -292,6 +293,9 @@ KnownCommand<ArgumentType> {
     Def {
         // allow more general Csname argument to \def commands, since other symbols such as '@' are often used in definitions
         DefCtrlSeq optionalWhitespace? (Csname | CtrlSym) optionalWhitespace? (MacroParameter | OptionalMacroParameter)* optionalWhitespace? DefinitionArgument
+    } |
+    Let {
+        LetCtrlSeq Csname optionalWhitespace? "="? optionalWhitespace? Csname
     } |
     Hbox {
         HboxCtrlSeq optionalWhitespace? TextArgument

@@ -616,14 +616,46 @@ export const atomicDecorations = (options: Options) => {
           return false // no markup in verbatim content
         } else if (
           nodeRef.type.is('NewCommand') ||
-          nodeRef.type.is('RenewCommand')
+          nodeRef.type.is('RenewCommand') ||
+          nodeRef.type.is('Def')
         ) {
-          const argumentNode = nodeRef.node.getChild('LiteralArgContent')
-          if (argumentNode) {
-            const argument = state
-              .sliceDoc(argumentNode.from, argumentNode.to)
-              .trim()
-            if (/^\\\w+/.test(argument)) {
+          const nameNode =
+            nodeRef.node.getChild('LiteralArgContent') ??
+            nodeRef.node.getChild('Csname') ??
+            nodeRef.node.getChild('CtrlSym')
+          if (nameNode) {
+            const name = state.sliceDoc(nameNode.from, nameNode.to).trim()
+            if (/^\\\w+/.test(name)) {
+              const content = state.sliceDoc(nodeRef.from, nodeRef.to)
+              if (content) {
+                commandDefinitions += `${content}\n`
+              }
+            }
+          }
+        } else if (
+          nodeRef.type.is('RenewEnvironment') ||
+          nodeRef.type.is('NewEnvironment')
+        ) {
+          const nameNode = nodeRef.node.getChild('LiteralArgContent')
+          if (nameNode) {
+            const name = state.sliceDoc(nameNode.from, nameNode.to).trim()
+            if (/^\w+/.test(name)) {
+              const content = state.sliceDoc(nodeRef.from, nodeRef.to)
+              if (content) {
+                commandDefinitions += `${content}\n`
+              }
+            }
+          }
+        } else if (nodeRef.type.is('Let')) {
+          const commandNodes = nodeRef.node.getChildren('Csname')
+          if (commandNodes.length !== 2) {
+            return
+          }
+          const nameNode = commandNodes[0]
+          if (nameNode) {
+            // We support more flexible names in let (Csname) than in newcommand
+            const name = state.sliceDoc(nameNode.from, nameNode.to).trim()
+            if (name.length > 1 && name.startsWith('\\')) {
               const content = state.sliceDoc(nodeRef.from, nodeRef.to)
               if (content) {
                 commandDefinitions += `${content}\n`
