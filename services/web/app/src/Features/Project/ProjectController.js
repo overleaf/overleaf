@@ -338,6 +338,7 @@ const _ProjectController = {
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'ieee-stylesheet',
+      'write-and-cite',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

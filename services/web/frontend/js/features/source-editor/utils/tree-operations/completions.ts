@@ -21,7 +21,7 @@ export const ifInType = (
   }
 }
 
-export function isInEmptyArgumentNodeForAutocomplete(state: EditorState) {
+function isInEmptyArgumentNodeOfType(state: EditorState, types: string[]) {
   const main = state.selection.main
   if (!main.empty) {
     return false
@@ -44,8 +44,16 @@ export function isInEmptyArgumentNodeForAutocomplete(state: EditorState) {
     return false
   }
 
-  const ancestor = ancestorOfNodeWithType(
-    nodeLeft,
+  const ancestor = ancestorOfNodeWithType(nodeLeft, ...types)
+  if (!ancestor) {
+    return false
+  }
+
+  return ancestor.from === nodeLeft.from && ancestor.to === nodeRight.to
+}
+
+export function isInEmptyArgumentNodeForAutocomplete(state: EditorState) {
+  return isInEmptyArgumentNodeOfType(state, [
     'EnvNameGroup',
     'BibliographyStyleArgument',
     'BibliographyArgument',
@@ -53,11 +61,10 @@ export function isInEmptyArgumentNodeForAutocomplete(state: EditorState) {
     'DocumentClassArgument',
     'FilePathArgument',
     'RefArgument',
-    'PackageArgument'
-  )
-  if (!ancestor) {
-    return false
-  }
+    'PackageArgument',
+  ])
+}
 
-  return ancestor.from === nodeLeft.from && ancestor.to === nodeRight.to
+export function isInEmptyCiteArgumentNode(state: EditorState) {
+  return isInEmptyArgumentNodeOfType(state, ['BibKeyArgument'])
 }

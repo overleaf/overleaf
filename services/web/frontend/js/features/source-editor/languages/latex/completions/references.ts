@@ -21,6 +21,10 @@ export function buildReferenceCompletions(
       type: 'reference',
       label: referenceKey,
       extend: extendRequiredParameter,
+      deduplicate: {
+        key: referenceKey,
+        priority: 1,
+      },
     })
   }
 }
