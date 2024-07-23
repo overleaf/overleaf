@@ -24,7 +24,9 @@ describe('ShareJsDB', function () {
     this.callback = sinon.stub()
     this.ShareJsDB = SandboxedModule.require(modulePath, {
       requires: {
-        './RedisManager': (this.RedisManager = {}),
+        './RedisManager': (this.RedisManager = {
+          getPreviousDocOps: sinon.stub(),
+        }),
         './Errors': Errors,
         '@overleaf/metrics': {
           inc: sinon.stub(),
@@ -87,8 +89,28 @@ describe('ShareJsDB', function () {
         return this.db.getOps(this.doc_key, this.start, this.end, this.callback)
       })
 
+      it('should not talk to redis', function () {
+        this.RedisManager.getPreviousDocOps.should.not.have.been.called
+      })
+
       return it('should return an empty array', function () {
         return this.callback.calledWith(null, []).should.equal(true)
+      })
+    })
+
+    describe('with start == redis-version and end unset', function () {
+      beforeEach(function () {
+        const start = this.version
+        const end = null
+        this.db.getOps(this.doc_key, start, end, this.callback)
+      })
+
+      it('should not talk to redis', function () {
+        this.RedisManager.getPreviousDocOps.should.not.have.been.called
+      })
+
+      it('should return an empty array', function () {
+        this.callback.should.have.been.calledWith(null, [])
       })
     })
 

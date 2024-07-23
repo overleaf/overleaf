@@ -17,6 +17,12 @@ const Keys = require('./UpdateKeys')
 const RedisManager = require('./RedisManager')
 const Errors = require('./Errors')
 
+const TRANSFORM_UPDATES_COUNT_BUCKETS = [
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50, 75, 100,
+  // prepare buckets for full-project history/larger buffer experiments
+  150, 200, 300, 400,
+]
+
 module.exports = ShareJsDB = class ShareJsDB {
   constructor(projectId, docId, lines, version) {
     this.project_id = projectId
@@ -31,11 +37,18 @@ module.exports = ShareJsDB = class ShareJsDB {
   }
 
   getOps(docKey, start, end, callback) {
-    if (start === end) {
+    if (start === end || (start === this.version && end === null)) {
+      const status = 'is-up-to-date'
       Metrics.inc('transform-updates', 1, {
-        status: 'is-up-to-date',
+        status,
         path: 'sharejs',
       })
+      Metrics.histogram(
+        'transform-updates.count',
+        0,
+        TRANSFORM_UPDATES_COUNT_BUCKETS,
+        { path: 'sharejs', status }
+      )
       return callback(null, [])
     }
 
@@ -64,35 +77,27 @@ module.exports = ShareJsDB = class ShareJsDB {
       } else {
         if (ops.length === 0) {
           status = 'fetched-zero'
+
+          // The sharejs processing is happening under a lock.
+          // In case there are no other ops available, something bypassed the lock (or we overran it).
+          logger.warn(
+            {
+              projectId,
+              docId,
+              start,
+              end,
+              timeSinceShareJsDBInit:
+                performance.now() - this.startTimeShareJsDB,
+            },
+            'found zero docOps while transforming update'
+          )
         } else {
           status = 'fetched'
-
-          if (start === this.version && end === -1) {
-            // The sharejs processing is happening under a lock.
-            // this.version is the version as read from redis under lock.
-            // In case there are any new ops available, something bypassed the lock (or we overran it).
-            logger.warn(
-              {
-                projectId,
-                docId,
-                start,
-                nOps: ops.length,
-                timeSinceShareJsDBInit:
-                  performance.now() - this.startTimeShareJsDB,
-              },
-              'concurrent update of docOps while transforming update'
-            )
-          }
         }
         Metrics.histogram(
           'transform-updates.count',
           ops.length,
-          [
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50, 75, 100,
-            // prepare buckets for full-project history/larger buffer experiments
-            150,
-            200, 300, 400,
-          ],
+          TRANSFORM_UPDATES_COUNT_BUCKETS,
           { path: 'sharejs', status }
         )
       }
