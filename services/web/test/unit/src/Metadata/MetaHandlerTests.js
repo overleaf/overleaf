@@ -1,15 +1,3 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-return-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { expect } = require('chai')
 const sinon = require('sinon')
 const modulePath = '../../../../app/src/Features/Metadata/MetaHandler'
@@ -19,13 +7,40 @@ describe('MetaHandler', function () {
   beforeEach(function () {
     this.projectId = 'someprojectid'
     this.docId = 'somedocid'
+
+    this.lines = [
+      '\\usepackage{ foo, bar }',
+      '\\usepackage{baz}',
+      'one',
+      '\\label{aaa}',
+      'two',
+      'commented label % \\label{bbb}', // bbb should not be in the returned labels
+      '\\label{ccc}%bar', // ccc should be in the returned labels
+      '\\label{ddd} % bar', // ddd should be in the returned labels
+      '\\label{ e,f,g }', // e,f,g should be in the returned labels
+    ]
+
+    this.docs = {
+      [this.docId]: {
+        _id: this.docId,
+        lines: this.lines,
+      },
+    }
+
     this.ProjectEntityHandler = {
-      getAllDocs: sinon.stub(),
-      getDoc: sinon.stub(),
+      promises: {
+        getAllDocs: sinon.stub().resolves(this.docs),
+        getDoc: sinon.stub().resolves(this.docs[this.docId]),
+      },
     }
+
     this.DocumentUpdaterHandler = {
-      flushDocToMongo: sinon.stub(),
+      promises: {
+        flushDocToMongo: sinon.stub().resolves(),
+        flushProjectToMongo: sinon.stub().resolves(),
+      },
     }
+
     this.packageMapping = {
       foo: [
         {
@@ -51,58 +66,47 @@ describe('MetaHandler', function () {
       ],
     }
 
-    return (this.MetaHandler = SandboxedModule.require(modulePath, {
+    this.MetaHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../Project/ProjectEntityHandler': this.ProjectEntityHandler,
         '../DocumentUpdater/DocumentUpdaterHandler':
           this.DocumentUpdaterHandler,
         './packageMapping': this.packageMapping,
       },
-    }))
+    })
   })
 
-  describe('extractMetaFromDoc', function () {
-    beforeEach(function () {
-      return (this.lines = [
-        '\\usepackage{foo}',
-        '\\usepackage{amsmath, booktabs}',
-        'one',
-        'two',
-        'three \\label{aaa}',
-        'four five',
-        '\\label{bbb}',
-        'six seven',
-      ])
-    })
+  describe('getMetaForDoc', function () {
+    it('should extract all the labels and packages', async function () {
+      const result = await this.MetaHandler.promises.getMetaForDoc(
+        this.projectId,
+        this.docId
+      )
 
-    it('should extract all the labels and packages', function () {
-      const docMeta = this.MetaHandler.extractMetaFromDoc(this.lines)
-      return expect(docMeta).to.deep.equal({
-        labels: ['aaa', 'bbb'],
+      expect(result).to.deep.equal({
+        labels: ['aaa', 'ccc', 'ddd', 'e,f,g'],
         packages: {
-          foo: [
-            {
-              caption: '\\bar',
-              snippet: '\\bar',
-              meta: 'foo-cmd',
-              score: 12,
-            },
-            {
-              caption: '\\bat[]{}',
-              snippet: '\\bar[$1]{$2}',
-              meta: 'foo-cmd',
-              score: 10,
-            },
-          ],
+          foo: this.packageMapping.foo,
+          baz: this.packageMapping.baz,
         },
-        packageNames: ['foo', 'amsmath', 'booktabs'],
+        packageNames: ['foo', 'bar', 'baz'],
       })
+
+      this.DocumentUpdaterHandler.promises.flushDocToMongo.should.be.calledWith(
+        this.projectId,
+        this.docId
+      )
+
+      this.ProjectEntityHandler.promises.getDoc.should.be.calledWith(
+        this.projectId,
+        this.docId
+      )
     })
   })
 
-  describe('extractMetaFromProjectDocs', function () {
-    beforeEach(function () {
-      return (this.docs = {
+  describe('getAllMetaForProject', function () {
+    it('should extract all metadata', async function () {
+      this.ProjectEntityHandler.promises.getAllDocs = sinon.stub().resolves({
         doc_one: {
           _id: 'id_one',
           lines: ['one', '\\label{aaa} two', 'three'],
@@ -134,14 +138,27 @@ describe('MetaHandler', function () {
           ],
         },
       })
-    })
 
-    it('should extract all metadata', function () {
-      const projectMeta = this.MetaHandler.extractMetaFromProjectDocs(this.docs)
-      return expect(projectMeta).to.deep.equal({
-        id_one: { labels: ['aaa'], packages: {}, packageNames: [] },
-        id_two: { labels: [], packages: {}, packageNames: [] },
-        id_three: { labels: ['bbb', 'ccc'], packages: {}, packageNames: [] },
+      const result = await this.MetaHandler.promises.getAllMetaForProject(
+        this.projectId
+      )
+
+      expect(result).to.deep.equal({
+        id_one: {
+          labels: ['aaa'],
+          packages: {},
+          packageNames: [],
+        },
+        id_two: {
+          labels: [],
+          packages: {},
+          packageNames: [],
+        },
+        id_three: {
+          labels: ['bbb', 'ccc'],
+          packages: {},
+          packageNames: [],
+        },
         id_four: {
           labels: [],
           packages: {
@@ -185,161 +202,14 @@ describe('MetaHandler', function () {
           packageNames: ['foo', 'baz', 'hello'],
         },
       })
-    })
-  })
 
-  describe('getMetaForDoc', function () {
-    beforeEach(function () {
-      this.fakeLines = [
-        '\\usepackage{abc}',
-        'one',
-        '\\label{aaa}',
-        'two',
-        // bbb should not be in the returned labels
-        'commented label % \\label{bbb}',
-        '\\label{ccc}%bar',
-        '\\label{ddd} % bar',
-      ]
-      this.fakeMeta = {
-        labels: ['aaa', 'ccc', 'ddd'],
-        packages: { abc: [] },
-        packageNames: ['abc'],
-      }
-      this.DocumentUpdaterHandler.flushDocToMongo = sinon
-        .stub()
-        .callsArgWith(2, null)
-      this.ProjectEntityHandler.getDoc = sinon
-        .stub()
-        .callsArgWith(2, null, this.fakeLines)
-      this.MetaHandler.extractMetaFromDoc = sinon.stub().returns(this.fakeMeta)
-      return (this.call = callback => {
-        return this.MetaHandler.getMetaForDoc(
-          this.projectId,
-          this.docId,
-          callback
-        )
-      })
-    })
+      this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.be.calledWith(
+        this.projectId
+      )
 
-    it('should not produce an error', function (done) {
-      return this.call((err, docMeta) => {
-        expect(err).to.equal(null)
-        return done()
-      })
-    })
-
-    it('should produce docMeta', function (done) {
-      return this.call((err, docMeta) => {
-        expect(docMeta).to.equal(this.fakeMeta)
-        return done()
-      })
-    })
-
-    it('should call flushDocToMongo', function (done) {
-      return this.call((err, docMeta) => {
-        this.DocumentUpdaterHandler.flushDocToMongo.callCount.should.equal(1)
-        this.DocumentUpdaterHandler.flushDocToMongo
-          .calledWith(this.projectId, this.docId)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should call getDoc', function (done) {
-      return this.call((err, docMeta) => {
-        this.ProjectEntityHandler.getDoc.callCount.should.equal(1)
-        this.ProjectEntityHandler.getDoc
-          .calledWith(this.projectId, this.docId)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should call extractMetaFromDoc', function (done) {
-      return this.call((err, docMeta) => {
-        this.MetaHandler.extractMetaFromDoc.callCount.should.equal(1)
-        this.MetaHandler.extractMetaFromDoc
-          .calledWith(this.fakeLines)
-          .should.equal(true)
-        return done()
-      })
-    })
-  })
-
-  describe('getAllMetaForProject', function () {
-    beforeEach(function () {
-      this.fakeDocs = {
-        doc_one: {
-          lines: ['\\usepackage[some-options,more=foo]{foo}', '\\label{aaa}'],
-        },
-      }
-
-      this.fakeMeta = {
-        labels: ['aaa'],
-        packages: {
-          foo: [
-            {
-              caption: '\\bar',
-              snippet: '\\bar',
-              meta: 'foo-cmd',
-              score: 12,
-            },
-            {
-              caption: '\\bat[]{}',
-              snippet: '\\bar[$1]{$2}',
-              meta: 'foo-cmd',
-              score: 10,
-            },
-          ],
-        },
-        packageNames: ['foo'],
-      }
-      this.DocumentUpdaterHandler.flushProjectToMongo = sinon
-        .stub()
-        .callsArgWith(1, null)
-      this.ProjectEntityHandler.getAllDocs = sinon
-        .stub()
-        .callsArgWith(1, null, this.fakeDocs)
-      this.MetaHandler.extractMetaFromProjectDocs = sinon
-        .stub()
-        .returns(this.fakeMeta)
-      return (this.call = callback => {
-        return this.MetaHandler.getAllMetaForProject(this.projectId, callback)
-      })
-    })
-
-    it('should not produce an error', function (done) {
-      return this.call((err, projectMeta) => {
-        expect(err).to.equal(null)
-        return done()
-      })
-    })
-
-    it('should produce projectMeta', function (done) {
-      return this.call((err, projectMeta) => {
-        expect(projectMeta).to.equal(this.fakeMeta)
-        return done()
-      })
-    })
-
-    it('should call getAllDocs', function (done) {
-      return this.call((err, projectMeta) => {
-        this.ProjectEntityHandler.getAllDocs.callCount.should.equal(1)
-        this.ProjectEntityHandler.getAllDocs
-          .calledWith(this.projectId)
-          .should.equal(true)
-        return done()
-      })
-    })
-
-    it('should call extractMetaFromDoc', function (done) {
-      return this.call((err, docMeta) => {
-        this.MetaHandler.extractMetaFromProjectDocs.callCount.should.equal(1)
-        this.MetaHandler.extractMetaFromProjectDocs
-          .calledWith(this.fakeDocs)
-          .should.equal(true)
-        return done()
-      })
+      this.ProjectEntityHandler.promises.getAllDocs.should.be.calledWith(
+        this.projectId
+      )
     })
   })
 })

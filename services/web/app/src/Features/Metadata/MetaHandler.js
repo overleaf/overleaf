@@ -1,142 +1,127 @@
-/* eslint-disable
-    n/handle-callback-err,
-    max-len,
-    no-cond-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let MetaHandler
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const packageMapping = require('./packageMapping')
+const { callbackify } = require('@overleaf/promise-utils')
 
-module.exports = MetaHandler = {
-  labelRegex() {
-    return /\\label{(.{0,80}?)}/g
-  },
+/** @typedef {{
+ *   labels: string[]
+ *   packages: Record<string, Record<string, any>>,
+ *   packageNames: string[],
+ * }} DocMeta
+ */
 
-  usepackageRegex() {
-    return /^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
-  },
+/**
+ * @param {string[]} lines
+ * @return {Promise<DocMeta>}
+ */
+async function extractMetaFromDoc(lines) {
+  /** @type {DocMeta} */
+  const docMeta = {
+    labels: [],
+    packages: {},
+    packageNames: [],
+  }
 
-  ReqPackageRegex() {
-    return /^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
-  },
+  const labelRe = /\\label{(.{0,80}?)}/g
+  const packageRe = /^\\usepackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
+  const reqPackageRe = /^\\RequirePackage(?:\[.{0,80}?])?{(.{0,80}?)}/g
 
-  getAllMetaForProject(projectId, callback) {
-    if (callback == null) {
-      callback = function () {}
+  for (const rawLine of lines) {
+    const line = getNonCommentedContent(rawLine)
+
+    for (const pkg of lineMatches(labelRe, line)) {
+      docMeta.labels.push(pkg)
     }
-    return DocumentUpdaterHandler.flushProjectToMongo(
-      projectId,
-      function (err) {
-        if (err != null) {
-          return callback(err)
-        }
-        return ProjectEntityHandler.getAllDocs(projectId, function (err, docs) {
-          if (err != null) {
-            return callback(err)
-          }
-          const projectMeta = MetaHandler.extractMetaFromProjectDocs(docs)
-          return callback(null, projectMeta)
-        })
-      }
-    )
-  },
 
-  getMetaForDoc(projectId, docId, callback) {
-    if (callback == null) {
-      callback = function () {}
+    for (const pkg of lineMatches(packageRe, line, ',')) {
+      docMeta.packageNames.push(pkg)
     }
-    return DocumentUpdaterHandler.flushDocToMongo(
-      projectId,
-      docId,
-      function (err) {
-        if (err != null) {
-          return callback(err)
-        }
-        return ProjectEntityHandler.getDoc(
-          projectId,
-          docId,
-          function (err, lines) {
-            if (err != null) {
-              return callback(err)
-            }
-            const docMeta = MetaHandler.extractMetaFromDoc(lines)
-            return callback(null, docMeta)
-          }
-        )
-      }
-    )
-  },
 
-  extractMetaFromDoc(lines) {
-    let pkg
-    const docMeta = { labels: [], packages: {} }
-    const packages = []
-    const labelRe = MetaHandler.labelRegex()
-    const packageRe = MetaHandler.usepackageRegex()
-    const reqPackageRe = MetaHandler.ReqPackageRegex()
-    for (const rawLine of Array.from(lines)) {
-      const line = MetaHandler._getNonCommentedContent(rawLine)
-      let labelMatch
-      let clean, messy, packageMatch
-      while ((labelMatch = labelRe.exec(line))) {
-        let label
-        if ((label = labelMatch[1])) {
-          docMeta.labels.push(label)
+    for (const pkg of lineMatches(reqPackageRe, line, ',')) {
+      docMeta.packageNames.push(pkg)
+    }
+  }
+
+  for (const packageName of docMeta.packageNames) {
+    if (packageMapping[packageName]) {
+      docMeta.packages[packageName] = packageMapping[packageName]
+    }
+  }
+
+  return docMeta
+}
+
+/**
+ *
+ * @param {RegExp} matchRe
+ * @param {string} line
+ * @param {string} [separator]
+ * @return {Generator<string>}
+ */
+function* lineMatches(matchRe, line, separator) {
+  let match
+  while ((match = matchRe.exec(line))) {
+    const matched = match[1].trim()
+
+    if (matched) {
+      if (separator) {
+        const items = matched
+          .split(',')
+          .map(item => item.trim())
+          .filter(Boolean)
+
+        for (const item of items) {
+          yield item
         }
-      }
-      while ((packageMatch = packageRe.exec(line))) {
-        if ((messy = packageMatch[1])) {
-          for (pkg of Array.from(messy.split(','))) {
-            if ((clean = pkg.trim())) {
-              packages.push(clean)
-            }
-          }
-        }
-      }
-      while ((packageMatch = reqPackageRe.exec(line))) {
-        if ((messy = packageMatch[1])) {
-          for (pkg of Array.from(messy.split(','))) {
-            if ((clean = pkg.trim())) {
-              packages.push(clean)
-            }
-          }
-        }
+      } else {
+        yield matched
       }
     }
-    for (pkg of Array.from(packages)) {
-      if (packageMapping[pkg] != null) {
-        docMeta.packages[pkg] = packageMapping[pkg]
-      }
-    }
-    docMeta.packageNames = packages
-    return docMeta
-  },
+  }
+}
 
-  extractMetaFromProjectDocs(projectDocs) {
-    const projectMeta = {}
-    for (const _path in projectDocs) {
-      const doc = projectDocs[_path]
-      projectMeta[doc._id] = MetaHandler.extractMetaFromDoc(doc.lines)
-    }
-    return projectMeta
-  },
+/**
+ * @param {Record<{ lines: string[] }, any>} projectDocs
+ * @return {Promise<{}>}
+ */
+async function extractMetaFromProjectDocs(projectDocs) {
+  const projectMeta = {}
+  for (const doc of Object.values(projectDocs)) {
+    projectMeta[doc._id] = await extractMetaFromDoc(doc.lines)
+  }
+  return projectMeta
+}
 
-  /**
-   * Trims comment content from line
-   * @param {string} rawLine
-   * @returns {string}
-   */
-  _getNonCommentedContent(rawLine) {
-    return rawLine.replace(/(^|[^\\])%.*/, '$1')
+/**
+ * Trims comment content from line
+ * @param {string} rawLine
+ * @returns {string}
+ */
+function getNonCommentedContent(rawLine) {
+  return rawLine.replace(/(^|[^\\])%.*/, '$1')
+}
+
+async function getAllMetaForProject(projectId) {
+  await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
+
+  const docs = await ProjectEntityHandler.promises.getAllDocs(projectId)
+
+  return await extractMetaFromProjectDocs(docs)
+}
+
+async function getMetaForDoc(projectId, docId) {
+  await DocumentUpdaterHandler.promises.flushDocToMongo(projectId, docId)
+
+  const { lines } = await ProjectEntityHandler.promises.getDoc(projectId, docId)
+
+  return await extractMetaFromDoc(lines)
+}
+
+module.exports = {
+  promises: {
+    getAllMetaForProject,
+    getMetaForDoc,
   },
+  getAllMetaForProject: callbackify(getAllMetaForProject),
+  getMetaForDoc: callbackify(getMetaForDoc),
 }
