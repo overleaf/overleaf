@@ -21,7 +21,10 @@ const SafePath = require('./SafePath')
 const TpdsUpdateSender = require('../ThirdPartyDataStore/TpdsUpdateSender')
 const FileWriter = require('../../infrastructure/FileWriter')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
-const { promisifyAll } = require('@overleaf/promise-utils')
+const {
+  callbackifyMultiResult,
+  callbackify,
+} = require('@overleaf/promise-utils')
 const { iterablePaths } = require('./IterablePath')
 
 const LOCK_NAMESPACE = 'sequentialProjectStructureUpdateLock'
@@ -1172,6 +1175,28 @@ const ProjectEntityUpdateHandler = {
     'folder',
   ]),
 
+  promises: {
+    addDoc,
+    addDocWithRanges,
+    addFile,
+    addFolder,
+    convertDocToFile,
+    deleteEntity,
+    deleteEntityWithPath,
+    mkdirp,
+    mkdirpWithExactCase,
+    moveEntity,
+    renameEntity,
+    resyncProjectHistory,
+    setRootDoc,
+    unsetRootDoc,
+    updateDocLines,
+    upsertDoc,
+    upsertDocWithPath,
+    upsertFile,
+    upsertFileWithPath,
+  },
+
   async _addDocAndSendToTpds(projectId, folderId, doc) {
     let result, project
     try {
@@ -1600,21 +1625,3 @@ function _listSubtree(entity, entityType, entityPath) {
 }
 
 module.exports = ProjectEntityUpdateHandler
-module.exports.promises = promisifyAll(ProjectEntityUpdateHandler, {
-  without: ['isPathValidForRootDoc'],
-  multiResult: {
-    _addDocAndSendToTpds: ['result', 'project'],
-    addDoc: ['doc', 'folderId'],
-    addDocWithRanges: ['doc', 'folderId'],
-    _uploadFile: ['fileStoreUrl', 'fileRef'],
-    _addFileAndSendToTpds: ['result', 'project'],
-    addFile: ['fileRef', 'folderId'],
-    upsertDoc: ['doc', 'isNew'],
-    upsertFile: ['fileRef', 'isNew', 'oldFileRef'],
-    upsertDocWithPath: ['doc', 'isNew', 'newFolders', 'folder'],
-    upsertFileWithPath: ['fileRef', 'isNew', 'oldFile', 'newFolders', 'folder'],
-    mkdirp: ['newFolders', 'folder'],
-    mkdirpWithExactCase: ['newFolders', 'folder'],
-    addFolder: ['folder', 'parentFolderId'],
-  },
-})
