@@ -15,6 +15,7 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
 
     let bs3FormControlProps: React.ComponentProps<typeof BS3FormControl> = {
       id: rest.id,
+      name: rest.name,
       className: rest.className,
       style: rest.style,
       type: rest.type,
