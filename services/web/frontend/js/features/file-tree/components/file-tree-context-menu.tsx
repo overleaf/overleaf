@@ -31,9 +31,15 @@ function FileTreeContextMenu() {
       open
       id="dropdown-file-tree-context-menu"
       onToggle={handleToggle}
+      dropup={
+        document.body.offsetHeight / contextMenuCoords.top < 2 &&
+        document.body.offsetHeight - contextMenuCoords.top < 250
+      }
+      className="context-menu"
+      style={contextMenuCoords}
     >
       <FakeDropDownToggle bsRole="toggle" />
-      <Dropdown.Menu className="context-menu" style={contextMenuCoords}>
+      <Dropdown.Menu>
         <FileTreeItemMenuItems />
       </Dropdown.Menu>
     </Dropdown>,
