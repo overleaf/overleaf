@@ -16,4 +16,5 @@ export type UserSettings = {
   fontSize: number
   fontFamily: FontFamily
   lineHeight: LineHeight
+  mathPreview: boolean
 }

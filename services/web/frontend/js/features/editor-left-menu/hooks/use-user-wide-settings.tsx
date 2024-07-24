@@ -19,6 +19,7 @@ export default function useUserWideSettings() {
     fontFamily,
     lineHeight,
     pdfViewer,
+    mathPreview,
   } = userSettings
 
   const setOverallTheme = useSetOverallTheme()
@@ -85,6 +86,13 @@ export default function useUserWideSettings() {
     [saveUserSettings]
   )
 
+  const setMathPreview = useCallback(
+    (mathPreview: UserSettings['mathPreview']) => {
+      saveUserSettings('mathPreview', mathPreview)
+    },
+    [saveUserSettings]
+  )
+
   return {
     autoComplete,
     setAutoComplete,
@@ -106,5 +114,7 @@ export default function useUserWideSettings() {
     setLineHeight,
     pdfViewer,
     setPdfViewer,
+    mathPreview,
+    setMathPreview,
   }
 }

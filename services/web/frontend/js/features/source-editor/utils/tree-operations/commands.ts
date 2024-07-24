@@ -10,6 +10,8 @@ export class Command extends ProjectionItem {
   readonly title: string = ''
   readonly optionalArgCount: number = 0
   readonly requiredArgCount: number = 0
+  readonly type: 'usage' | 'definition' = 'usage'
+  readonly raw: string | undefined = undefined
 }
 
 /**
@@ -62,16 +64,16 @@ export const enterNode = (
       argCountNumber--
     }
 
-    const thisCommand: Readonly<Command> = {
+    items.push({
       line: state.doc.lineAt(node.from).number,
       title: commandNameText,
       from: node.from,
       to: node.to,
       optionalArgCount: commandDefinitionHasOptionalArgument ? 1 : 0,
       requiredArgCount: argCountNumber,
-    }
-
-    items.push(thisCommand)
+      type: 'definition',
+      raw: state.sliceDoc(node.from, node.to),
+    })
   } else if (
     node.type.is('UnknownCommand') ||
     node.type.is('KnownCommand') ||
@@ -112,7 +114,7 @@ export const enterNode = (
       commandNode.getChildren('$Argument')
     const text = state.doc.sliceString(ctrlSeq.from, ctrlSeq.to)
 
-    const thisCommand = {
+    items.push({
       line: state.doc.lineAt(commandNode.from).number,
       title: text,
       from: commandNode.from,
@@ -120,7 +122,8 @@ export const enterNode = (
       optionalArgCount: optionalArguments.length,
       requiredArgCount:
         commandArgumentsIncludingOptional.length - optionalArguments.length,
-    }
-    items.push(thisCommand)
+      type: 'usage',
+      raw: undefined,
+    })
   }
 }

@@ -54,6 +54,7 @@ const defaultUserSettings = {
   autoPairDelimiters: true,
   trackChanges: true,
   syntaxValidation: false,
+  mathPreview: true,
 }
 
 export function EditorProviders({

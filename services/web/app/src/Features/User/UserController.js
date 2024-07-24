@@ -372,6 +372,9 @@ async function updateUserSettings(req, res, next) {
   if (req.body.lineHeight != null) {
     user.ace.lineHeight = req.body.lineHeight
   }
+  if (req.body.mathPreview != null) {
+    user.ace.mathPreview = req.body.mathPreview
+  }
   await user.save()
 
   const newEmail = req.body.email?.trim().toLowerCase()

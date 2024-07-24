@@ -61,6 +61,7 @@ import { debugConsole } from '@/utils/debugging'
 import { useMetadataContext } from '@/features/ide-react/context/metadata-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
+import { setMathPreview } from '@/features/source-editor/extensions/math-preview'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -96,6 +97,7 @@ function useCodeMirrorScope(view: EditorView) {
     autoPairDelimiters,
     mode,
     syntaxValidation,
+    mathPreview,
   } = userSettings
 
   const [cursorHighlights] = useScopeValue<Record<string, Highlight[]>>(
@@ -153,6 +155,7 @@ function useCodeMirrorScope(view: EditorView) {
     autoPairDelimiters,
     mode,
     syntaxValidation,
+    mathPreview,
   })
 
   const currentDocRef = useRef({
@@ -384,6 +387,11 @@ function useCodeMirrorScope(view: EditorView) {
     settingsRef.current.syntaxValidation = syntaxValidation
     view.dispatch(setSyntaxValidation(syntaxValidation))
   }, [view, syntaxValidation])
+
+  useEffect(() => {
+    settingsRef.current.mathPreview = mathPreview
+    view.dispatch(setMathPreview(mathPreview))
+  }, [view, mathPreview])
 
   const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
 

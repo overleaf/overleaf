@@ -46,6 +46,7 @@ const countCommandUsage = (context: CompletionContext) => {
   >()
 
   const commandListProjection = context.state.field(documentCommands)
+
   if (!commandListProjection.items) {
     return result
   }

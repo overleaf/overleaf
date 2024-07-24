@@ -86,6 +86,7 @@ const UserSchema = new Schema(
       syntaxValidation: { type: Boolean },
       fontFamily: { type: String },
       lineHeight: { type: String },
+      mathPreview: { type: Boolean, default: true },
     },
     features: {
       collaborators: {

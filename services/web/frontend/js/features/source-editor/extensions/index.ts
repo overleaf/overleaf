@@ -48,6 +48,7 @@ import { toolbarPanel } from './toolbar/toolbar-panel'
 import { geometryChangeEvent } from './geometry-change-event'
 import { docName } from './doc-name'
 import { fileTreeItemDrop } from './file-tree-item-drop'
+import { mathPreview } from './math-preview'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -125,6 +126,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   emptyLineFiller(),
   trackChanges(options.currentDoc, options.changeManager),
   visual(options.visual),
+  mathPreview(options.settings.mathPreview),
   toolbarPanel(),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),

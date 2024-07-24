@@ -26,6 +26,7 @@ type ProjectSettingsSetterContextValue = {
   setFontFamily: (fontFamily: UserSettings['fontFamily']) => void
   setLineHeight: (lineHeight: UserSettings['lineHeight']) => void
   setPdfViewer: (pdfViewer: UserSettings['pdfViewer']) => void
+  setMathPreview: (mathPreview: UserSettings['mathPreview']) => void
 }
 
 type ProjectSettingsContextValue = Partial<ProjectSettings> &
@@ -69,6 +70,8 @@ export const ProjectSettingsProvider: FC = ({ children }) => {
     setLineHeight,
     pdfViewer,
     setPdfViewer,
+    mathPreview,
+    setMathPreview,
   } = useUserWideSettings()
 
   useProjectWideSettingsSocketListener()
@@ -103,6 +106,8 @@ export const ProjectSettingsProvider: FC = ({ children }) => {
       setLineHeight,
       pdfViewer,
       setPdfViewer,
+      mathPreview,
+      setMathPreview,
     }),
     [
       compiler,
@@ -133,6 +138,8 @@ export const ProjectSettingsProvider: FC = ({ children }) => {
       setLineHeight,
       pdfViewer,
       setPdfViewer,
+      mathPreview,
+      setMathPreview,
     ]
   )
 

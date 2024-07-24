@@ -82,6 +82,10 @@ import {
   createSpaceCommand,
   hasSpaceSubstitution,
 } from '@/features/source-editor/extensions/visual/visual-widgets/space'
+import {
+  mathAncestorNode,
+  parseMathContainer,
+} from '../../utils/tree-operations/math'
 
 type Options = {
   previewByPath: (path: string) => PreviewPath | null
@@ -760,13 +764,7 @@ export const atomicDecorations = (options: Options) => {
           return false // no markup in input content
         } else if (nodeRef.type.is('Math')) {
           // math equations
-          let passToMathJax = true
-
-          const ancestorNode =
-            ancestorNodeOfType(state, nodeRef.from, '$MathContainer') ||
-            ancestorNodeOfType(state, nodeRef.from, 'EquationEnvironment') ||
-            // NOTE: EquationArrayEnvironment can be nested inside EquationEnvironment
-            ancestorNodeOfType(state, nodeRef.from, 'EquationArrayEnvironment')
+          const ancestorNode = mathAncestorNode(state, nodeRef.from)
 
           if (
             ancestorNode &&
@@ -774,57 +772,19 @@ export const atomicDecorations = (options: Options) => {
               ? shouldDecorateFromLineEdges(state, ancestorNode)
               : shouldDecorate(state, ancestorNode))
           ) {
-            // the content of the Math element, without braces
-            const innerContent = state.doc
-              .sliceString(nodeRef.from, nodeRef.to)
-              .trim()
+            const math = parseMathContainer(state, nodeRef, ancestorNode)
 
-            // only replace when there's content inside the braces
-            if (innerContent.length) {
-              let content = innerContent
-              let displayMode = false
-
-              if (ancestorNode.type.is('$Environment')) {
-                const environmentName = getEnvironmentName(ancestorNode, state)
-                if (environmentName) {
-                  // use the outer content of environments that MathJax supports
-                  // https://docs.mathjax.org/en/latest/input/tex/macros/index.html#environments
-                  if (environmentName === 'tikzcd') {
-                    passToMathJax = false
-                  }
-                  if (
-                    environmentName !== 'math' &&
-                    environmentName !== 'displaymath'
-                  ) {
-                    content = state.doc
-                      .sliceString(ancestorNode.from, ancestorNode.to)
-                      .trim()
-                  }
-
-                  if (environmentName !== 'math') {
-                    displayMode = true
-                  }
-                }
-              } else {
-                if (
-                  ancestorNode.type.is('BracketMath') ||
-                  Boolean(ancestorNode.getChild('DisplayMath'))
-                ) {
-                  displayMode = true
-                }
-              }
-              if (passToMathJax) {
-                decorations.push(
-                  Decoration.replace({
-                    widget: new MathWidget(
-                      content,
-                      displayMode,
-                      commandDefinitions
-                    ),
-                    block: displayMode,
-                  }).range(ancestorNode.from, ancestorNode.to)
-                )
-              }
+            if (math && math.passToMathJax) {
+              decorations.push(
+                Decoration.replace({
+                  widget: new MathWidget(
+                    math.content,
+                    math.displayMode,
+                    commandDefinitions
+                  ),
+                  block: math.displayMode,
+                }).range(ancestorNode.from, ancestorNode.to)
+              )
             }
           }
 

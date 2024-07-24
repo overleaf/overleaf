@@ -23,6 +23,7 @@ const defaultSettings: UserSettings = {
   fontSize: 12,
   fontFamily: 'monaco',
   lineHeight: 'normal',
+  mathPreview: true,
 }
 
 type UserSettingsContextValue = {

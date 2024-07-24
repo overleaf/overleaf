@@ -324,6 +324,7 @@ const _ProjectController = {
     const splitTests = [
       !anonymous && 'bib-file-tpr-prompt',
       'compile-log-events',
+      'math-preview',
       'null-test-share-modal',
       'paywall-cta',
       'pdf-caching-cached-url-lookup',
@@ -673,6 +674,7 @@ const _ProjectController = {
           fontFamily: user.ace.fontFamily || 'lucida',
           lineHeight: user.ace.lineHeight || 'normal',
           overallTheme: user.ace.overallTheme,
+          mathPreview: user.ace.mathPreview,
         },
         privilegeLevel,
         anonymous,
