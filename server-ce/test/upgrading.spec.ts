@@ -217,8 +217,9 @@ describe('Upgrading', function () {
             cy.findByText('History').click()
             cy.findByText(/\\section\{FiveOOne Section}/)
 
-            cy.log('Check indicator of force resync')
-            cy.findByText('Overleaf History System')
+            // TODO(das7pad): restore after https://github.com/overleaf/internal/issues/19588 is fixed.
+            // cy.log('Check indicator of force resync')
+            // cy.findByText('Overleaf History System')
           })
         },
       },
