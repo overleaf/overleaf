@@ -222,8 +222,8 @@ const RestoreManager = {
     try {
       return await addEntityWithName(basename)
     } catch (error) {
-      if (error instanceof Errors.InvalidNameError) {
-        // likely a duplicate name, so try with a prefix
+      if (error instanceof Errors.DuplicateNameError) {
+        // Duplicate name, so try with a prefix
         const date = moment(new Date()).format('Do MMM YY H:mm:ss')
         // Move extension to the end so the file type is preserved
         const extension = Path.extname(basename)

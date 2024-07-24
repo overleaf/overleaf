@@ -42,6 +42,13 @@ export default function ErrorMessage({ error }) {
           </DangerMessage>
         )
 
+      case 'duplicate_file_name':
+        return (
+          <DangerMessage>
+            {t('file_or_folder_name_already_exists')}
+          </DangerMessage>
+        )
+
       case 'rate-limit-hit':
         return (
           <DangerMessage>

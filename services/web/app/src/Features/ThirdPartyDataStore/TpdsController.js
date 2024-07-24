@@ -146,7 +146,10 @@ async function updateProjectContents(req, res, next) {
   try {
     await UpdateMerger.promises.mergeUpdate(null, projectId, path, req, source)
   } catch (error) {
-    if (error.constructor === Errors.InvalidNameError) {
+    if (
+      error instanceof Errors.InvalidNameError ||
+      error instanceof Errors.DuplicateNameError
+    ) {
       return res.sendStatus(422)
     } else {
       throw error

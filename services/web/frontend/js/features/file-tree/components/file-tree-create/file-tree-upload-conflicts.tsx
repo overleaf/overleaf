@@ -4,90 +4,110 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useCallback } from 'react'
 import { syncDelete } from '@/features/file-tree/util/sync-mutation'
 import { Button } from 'react-bootstrap'
+import { TFunction } from 'i18next'
 
-export function UploadConflicts({
+export type Conflict = {
+  entity: FileTreeEntity
+  type: 'file' | 'folder'
+}
+
+const getConflictText = (conflicts: Conflict[], t: TFunction) => {
+  const hasFolderConflict = conflicts.some(
+    conflict => conflict.type === 'folder'
+  )
+
+  const hasFileConflict = conflicts.some(conflict => conflict.type === 'file')
+
+  if (hasFolderConflict && hasFileConflict) {
+    return t('the_following_files_and_folders_already_exist_in_this_project')
+  }
+
+  if (hasFolderConflict) {
+    return t('the_following_folder_already_exists_in_this_project', {
+      count: conflicts.length,
+    })
+  }
+
+  return t('the_following_files_already_exist_in_this_project')
+}
+
+export function FileUploadConflicts({
   cancel,
   conflicts,
-  folderConflicts,
   handleOverwrite,
-  setError,
 }: {
   cancel: () => void
-  conflicts: FileTreeEntity[]
-  folderConflicts: FileTreeEntity[]
+  conflicts: Conflict[]
   handleOverwrite: () => void
-  setError: (error: string) => void
 }) {
   const { t } = useTranslation()
 
-  // ensure that no uploads happen while there are folder conflicts
-  if (folderConflicts.length > 0) {
-    return (
-      <FolderUploadConflicts
-        cancel={cancel}
-        folderConflicts={folderConflicts}
-        handleOverwrite={handleOverwrite}
-        setError={setError}
-      />
-    )
-  }
+  // Don't allow overwriting folders with files
+  const hasFolderConflict = conflicts.some(
+    conflict => conflict.type === 'folder'
+  )
 
   return (
     <div className="small modal-new-file--body-conflict">
       {conflicts.length > 0 && (
         <>
-          <p className="text-center mb-0">
-            {t('the_following_files_already_exist_in_this_project')}
-          </p>
+          <p className="text-center mb-0">{getConflictText(conflicts, t)}</p>
 
           <ul className="text-center list-unstyled row-spaced-small mt-1">
             {conflicts.map((conflict, index) => (
               <li key={index}>
-                <strong>{conflict.name}</strong>
+                <strong>{conflict.entity.name}</strong>
               </li>
             ))}
           </ul>
         </>
       )}
 
-      <p className="text-center row-spaced-small">
-        {t('do_you_want_to_overwrite_them')}
-      </p>
+      {!hasFolderConflict && (
+        <p className="text-center row-spaced-small">
+          {t('do_you_want_to_overwrite_them')}
+        </p>
+      )}
 
       <p className="text-center">
         <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
           {t('cancel')}
         </Button>
         &nbsp;
-        <Button bsStyle="danger" onClick={handleOverwrite}>
-          {t('overwrite')}
-        </Button>
+        {!hasFolderConflict && (
+          <Button bsStyle="danger" onClick={handleOverwrite}>
+            {t('overwrite')}
+          </Button>
+        )}
       </p>
     </div>
   )
 }
 
-function FolderUploadConflicts({
+export function FolderUploadConflicts({
   cancel,
   handleOverwrite,
-  folderConflicts,
+  conflicts,
   setError,
 }: {
   cancel: () => void
   handleOverwrite: () => void
-  folderConflicts: FileTreeEntity[]
+  conflicts: Conflict[]
   setError: (error: string) => void
 }) {
   const { t } = useTranslation()
   const { _id: projectId } = useProjectContext()
+
+  // Don't allow overwriting files with a folder
+  const hasFileConflict = conflicts.some(conflict => conflict.type === 'file')
 
   const deleteAndRetry = useCallback(async () => {
     // TODO: confirm deletion?
 
     try {
       await Promise.all(
-        folderConflicts.map(
-          entity => syncDelete(projectId, 'folder', entity._id) // TODO: might be a file!
+        conflicts.map(conflict =>
+          syncDelete(projectId, 'folder', conflict.entity._id)
         )
       )
 
@@ -95,40 +115,40 @@ function FolderUploadConflicts({
     } catch (error: any) {
       setError(error.message)
     }
-  }, [setError, folderConflicts, handleOverwrite, projectId])
+  }, [setError, conflicts, handleOverwrite, projectId])
 
   return (
     <div className="small modal-new-file--body-conflict">
-      <p className="text-center mb-0">
-        {t('the_following_folder_already_exists_in_this_project', {
-          count: folderConflicts.length,
-        })}
-      </p>
+      <p className="text-center mb-0">{getConflictText(conflicts, t)}</p>
 
       <ul className="text-center list-unstyled row-spaced-small mt-1">
-        {folderConflicts.map((entity, index) => (
+        {conflicts.map((conflict, index) => (
           <li key={index}>
-            <strong>{entity.name}</strong>
+            <strong>{conflict.entity.name}</strong>
           </li>
         ))}
       </ul>
 
-      <p className="text-center row-spaced-small">
-        {t('overwriting_the_original_folder')}
-        <br />
-        {t('do_you_want_to_overwrite_it', {
-          count: folderConflicts.length,
-        })}
-      </p>
+      {!hasFileConflict && (
+        <p className="text-center row-spaced-small">
+          {t('overwriting_the_original_folder')}
+          <br />
+          {t('do_you_want_to_overwrite_it', {
+            count: conflicts.length,
+          })}
+        </p>
+      )}
 
       <p className="text-center">
         <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
           {t('cancel')}
         </Button>
         &nbsp;
-        <Button bsStyle="danger" onClick={deleteAndRetry}>
-          {t('overwrite')}
-        </Button>
+        {!hasFileConflict && (
+          <Button bsStyle="danger" onClick={deleteAndRetry}>
+            {t('overwrite')}
+          </Button>
+        )}
       </p>
     </div>
   )

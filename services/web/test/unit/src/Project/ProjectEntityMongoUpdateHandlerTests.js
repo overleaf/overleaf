@@ -856,7 +856,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
             'doc',
             this.folder.name
           )
-        ).to.be.rejectedWith(Errors.InvalidNameError)
+        ).to.be.rejectedWith(Errors.DuplicateNameError)
       })
     })
   })
@@ -990,7 +990,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
                 file,
                 'file'
               )
-            ).to.be.rejectedWith(Errors.InvalidNameError)
+            ).to.be.rejectedWith(Errors.DuplicateNameError)
           })
         })
       })

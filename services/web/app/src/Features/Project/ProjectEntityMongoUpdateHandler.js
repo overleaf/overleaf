@@ -618,7 +618,7 @@ function _checkValidElementName(folder, name) {
     .concat(folder.folders || [])
   for (const element of elements) {
     if (element.name === name) {
-      throw new Errors.InvalidNameError('file already exists')
+      throw new Errors.DuplicateNameError('file already exists')
     }
   }
 }

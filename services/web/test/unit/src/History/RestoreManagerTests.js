@@ -180,9 +180,9 @@ describe('RestoreManager', function () {
       })
     })
 
-    describe('with an invalid name', function () {
+    describe('with a duplicate name', function () {
       beforeEach(async function () {
-        this.addEntityWithName.rejects(new Errors.InvalidNameError())
+        this.addEntityWithName.rejects(new Errors.DuplicateNameError())
         this.addEntityWithName
           .onSecondCall()
           .resolves((this.entity = 'mock-entity'))

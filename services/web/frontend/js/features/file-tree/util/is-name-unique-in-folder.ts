@@ -8,21 +8,35 @@ export function isNameUniqueInFolder(
   parentFolderId: string,
   name: string
 ): boolean {
-  return !findByNameInFolder(tree, parentFolderId, name)
+  return !(
+    findFileByNameInFolder(tree, parentFolderId, name) ||
+    findFolderByNameInFolder(tree, parentFolderId, name)
+  )
 }
 
-export function findByNameInFolder(
+export function findFileByNameInFolder(
   tree: Folder,
   parentFolderId: string,
   name: string
-): Doc | FileRef | Folder | undefined {
+): Doc | FileRef | undefined {
   if (tree._id !== parentFolderId) {
     tree = findInTree(tree, parentFolderId).entity
   }
 
   return (
     tree.docs.find(entity => entity.name === name) ||
-    tree.fileRefs.find(entity => entity.name === name) ||
-    tree.folders.find(entity => entity.name === name)
+    tree.fileRefs.find(entity => entity.name === name)
   )
+}
+
+export function findFolderByNameInFolder(
+  tree: Folder,
+  parentFolderId: string,
+  name: string
+): Folder | undefined {
+  if (tree._id !== parentFolderId) {
+    tree = findInTree(tree, parentFolderId).entity
+  }
+
+  return tree.folders.find(entity => entity.name === name)
 }

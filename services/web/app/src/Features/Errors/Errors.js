@@ -38,6 +38,8 @@ class ServiceNotConfiguredError extends BackwardCompatibleError {}
 
 class TooManyRequestsError extends BackwardCompatibleError {}
 
+class DuplicateNameError extends OError {}
+
 class InvalidNameError extends BackwardCompatibleError {}
 
 class UnsupportedFileTypeError extends BackwardCompatibleError {}
@@ -270,6 +272,7 @@ module.exports = {
   ForbiddenError,
   ServiceNotConfiguredError,
   TooManyRequestsError,
+  DuplicateNameError,
   InvalidNameError,
   UnsupportedFileTypeError,
   FileTooLargeError,

@@ -12,6 +12,7 @@ const { InvalidZipFileError } = require('./ArchiveErrors')
 const multer = require('multer')
 const { defaultsDeep } = require('lodash')
 const { expressify } = require('@overleaf/promise-utils')
+const { DuplicateNameError } = require('../Errors/Errors')
 
 const upload = multer(
   defaultsDeep(
@@ -106,6 +107,11 @@ async function uploadFile(req, res, next) {
           return res.status(422).json({
             success: false,
             error: 'invalid_filename',
+          })
+        } else if (error instanceof DuplicateNameError) {
+          return res.status(422).json({
+            success: false,
+            error: 'duplicate_file_name',
           })
         } else if (error.message === 'project_has_too_many_files') {
           return res.status(422).json({
