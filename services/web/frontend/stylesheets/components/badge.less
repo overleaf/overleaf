@@ -6,7 +6,6 @@
   height: @size;
   max-width: 100%;
   min-height: @size;
-  padding: 0 @padding;
   white-space: nowrap;
   color: @ol-blue-gray-6;
   background-color: @neutral-20;
@@ -16,6 +15,16 @@
     background-color: @neutral-30;
   }
 
+  &-content-wrapper {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding-left: @padding;
+    padding-right: @padding;
+    border-top-left-radius: inherit;
+    border-bottom-left-radius: inherit;
+  }
+
   &-prepend {
     margin-right: 2px;
   }
@@ -23,7 +32,6 @@
   &-close {
     .reset-button;
     width: @size;
-    margin-left: 4px;
     font-size: 20px;
     height: @size;
     line-height: 1;
@@ -31,7 +39,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-right: -@padding;
+    padding: 0 @padding;
     border-top-right-radius: inherit;
     border-bottom-right-radius: inherit;
     color: inherit;

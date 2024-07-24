@@ -29,10 +29,7 @@ describe('History', function () {
     cy.log(`download version ${JSON.stringify(name)}`)
     cy.findByText('Labels').click()
     cy.findByText(name)
-      .parent()
-      .parent()
-      .parent()
-      .parent()
+      .closest('[data-testid="history-version-details"]')
       .within(() => {
         cy.get('.history-version-dropdown-menu-btn').click()
         cy.findByText('Download this version').click()

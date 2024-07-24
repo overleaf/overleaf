@@ -58,3 +58,20 @@ export const TagWithCloseButton: Story = {
     )
   },
 }
+
+export const TagWithContentButtonAndCloseButton: Story = {
+  render: args => {
+    return (
+      <Tag
+        prepend={<Icon type="tag" fw />}
+        contentProps={{
+          onClick: () => alert('Content button clicked!'),
+        }}
+        closeBtnProps={{
+          onClick: () => alert('Close triggered!'),
+        }}
+        {...args}
+      />
+    )
+  },
+}

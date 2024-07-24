@@ -1,14 +1,19 @@
+$max-width: 160px;
+
 .badge {
   display: inline-flex;
   align-items: stretch;
   max-width: 100%;
   line-height: var(--line-height-01);
   padding: 0 var(--bs-badge-padding-x);
+
+  &:not(.badge-tag) {
+    max-width: $max-width;
+  }
 }
 
 .badge-prepend {
-  margin-left: calc($spacing-01 / -2);
-  margin-right: $spacing-01;
+  margin-right: var(--spacing-02);
   display: flex;
   align-items: center;
 }
@@ -20,8 +25,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 0 $spacing-02;
-  margin: 0 (-$spacing-02) 0 $spacing-02;
+  padding: 0 var(--spacing-02);
   border-top-right-radius: inherit;
   border-bottom-right-radius: inherit;
   color: inherit;
@@ -30,7 +34,10 @@
   .badge-close-icon {
     font-size: $font-size-base;
   }
+}
 
+.badge-close,
+.badge-tag-content-btn {
   &:hover {
     background-color: var(--neutral-40);
   }
@@ -45,9 +52,36 @@
 .badge-tag {
   @include body-sm;
 
+  padding: 0;
   color: $dark;
 
   &:hover {
     background-color: var(--neutral-30) !important;
   }
+}
+
+.badge-tag-content {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  max-width: $max-width;
+  padding-left: var(--bs-badge-padding-x);
+  padding-right: var(--bs-badge-padding-x);
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
+}
+
+.badge-tag-content-btn {
+  @include reset-button;
+
+  padding-left: var(--bs-badge-padding-x);
+  padding-right: var(--bs-badge-padding-x);
+}
+
+.badge-tag-circle {
+  display: block;
+  margin: var(--spacing-02);
+  width: var(--spacing-04);
+  height: var(--spacing-04);
+  border-radius: 50%;
 }

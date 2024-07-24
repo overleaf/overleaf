@@ -8,6 +8,7 @@ type TagProps = MergeAndOverride<
   {
     prepend?: React.ReactNode
     children: React.ReactNode
+    contentProps?: React.ComponentProps<'button'>
     closeBtnProps?: React.ComponentProps<'button'>
     className?: string
     bsStyle?: React.ComponentProps<typeof Label>['bsStyle'] | null
@@ -17,6 +18,7 @@ type TagProps = MergeAndOverride<
 function Tag({
   prepend,
   children,
+  contentProps,
   closeBtnProps,
   bsStyle,
   className,
@@ -26,8 +28,10 @@ function Tag({
 
   return (
     <span className={classnames('badge-tag-bs3', className)} {...rest}>
-      {prepend && <span className="badge-tag-bs3-prepend">{prepend}</span>}
-      <span className="badge-tag-bs3-content">{children}</span>
+      <span className="badge-tag-bs3-content-wrapper">
+        {prepend && <span className="badge-tag-bs3-prepend">{prepend}</span>}
+        <span className="badge-tag-bs3-content">{children}</span>
+      </span>
       {closeBtnProps && (
         <button
           type="button"

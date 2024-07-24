@@ -47,4 +47,10 @@
     border-top-width: 0;
     border-bottom-width: 0;
   }
+
+  > tbody > tr:nth-of-type(#{$table-striped-order}) {
+    &:hover > * {
+      --#{$prefix}table-hover-bg: var(--bg-light-tertiary);
+    }
+  }
 }

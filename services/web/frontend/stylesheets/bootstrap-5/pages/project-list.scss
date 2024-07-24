@@ -2,7 +2,6 @@
   display: flex;
   height: 100%;
   flex-flow: column nowrap;
-  flex-wrap: nowrap;
 
   .row:first-child {
     flex-grow: 1; /* fill vertical space so notifications are pushed to bottom */
@@ -51,8 +50,6 @@
         flex-grow: 1;
         padding: var(--spacing-08) var(--spacing-06);
         -ms-overflow-style: -ms-autohiding-scrollbar;
-        padding-top: var(--spacing-08);
-        padding-bottom: var(--spacing-08);
         color: var(--neutral-40);
 
         .small {
@@ -331,27 +328,6 @@
       }
     }
   }
-}
-
-.add-affiliation-mobile-wrapper {
-  padding: var(--spacing-07) 0;
-}
-
-.add-affiliation {
-  .progress {
-    height: var(--spacing-05);
-    margin-bottom: var(--spacing-03);
-  }
-
-  p {
-    margin-bottom: var(--spacing-03);
-  }
-
-  &.is-mobile p {
-    @include body-xs;
-
-    white-space: normal;
-  }
 
   .project-dash-table {
     width: 100%;
@@ -426,6 +402,18 @@
       font-size: $font-size-sm;
 
       @include text-truncate;
+    }
+
+    .dash-cell-tag,
+    .clone-project-tag {
+      .badge-tag {
+        margin-top: var(--spacing-06);
+        margin-bottom: var(--spacing-06);
+
+        &:first-child {
+          margin-left: initial !important;
+        }
+      }
     }
 
     @include media-breakpoint-up(sm) {
@@ -554,6 +542,15 @@
         position: relative;
         display: flex;
         flex-direction: column;
+
+        td {
+          padding-top: var(--spacing-02);
+          padding-bottom: var(--spacing-02);
+        }
+
+        td:not(.dash-cell-actions) {
+          padding-right: 55px;
+        }
       }
 
       .dash-cell-name,
@@ -660,6 +657,14 @@
   margin-bottom: var(--spacing-05);
 }
 
+.clone-project-tag {
+  display: flex;
+
+  .form-label {
+    margin-top: var(--spacing-01);
+  }
+}
+
 form.project-search {
   .form-group {
     margin-bottom: 0;
@@ -668,6 +673,27 @@ form.project-search {
 
 .project-search-clear-btn {
   @include reset-button;
+}
+
+.add-affiliation-mobile-wrapper {
+  padding: var(--spacing-07) 0;
+}
+
+.add-affiliation {
+  .progress {
+    height: var(--spacing-05);
+    margin-bottom: var(--spacing-03);
+  }
+
+  p {
+    margin-bottom: var(--spacing-03);
+  }
+
+  &.is-mobile p {
+    @include body-xs;
+
+    white-space: normal;
+  }
 }
 
 .color-picker-item {

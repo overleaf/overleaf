@@ -21,7 +21,7 @@ function Badge({ prepend, children, bsStyle, className, ...rest }: BadgeProps) {
   return (
     <span className={classNames} {...rest}>
       {prepend && <span className="badge-tag-bs3-prepend">{prepend}</span>}
-      {children}
+      <span className="badge-tag-bs3-content">{children}</span>
     </span>
   )
 }
