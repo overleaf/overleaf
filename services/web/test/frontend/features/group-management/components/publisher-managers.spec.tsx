@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import PublisherManagers from '@/features/group-management/components/publisher-managers'
 
 const JOHN_DOE = {

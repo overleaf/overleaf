@@ -1,5 +1,6 @@
 // Needed since eslint gets confused by mocha-each
 /* eslint-disable mocha/prefer-arrow-callback */
+import '../../../helpers/bootstrap-3'
 import { FC } from 'react'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'

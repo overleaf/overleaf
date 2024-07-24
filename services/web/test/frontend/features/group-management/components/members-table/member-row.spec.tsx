@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import sinon from 'sinon'
 import MemberRow from '@/features/group-management/components/members-table/member-row'
 import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'

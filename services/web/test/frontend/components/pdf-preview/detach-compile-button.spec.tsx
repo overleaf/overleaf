@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import { EditorProviders } from '../../helpers/editor-providers'
 import DetachCompileButtonWrapper from '../../../../frontend/js/features/pdf-preview/components/detach-compile-button-wrapper'
 import { mockScope } from './scope'

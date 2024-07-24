@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import ManagedUserStatus from '@/features/group-management/components/members-table/managed-user-status'
 import { User } from '../../../../../../types/group-management/user'
 

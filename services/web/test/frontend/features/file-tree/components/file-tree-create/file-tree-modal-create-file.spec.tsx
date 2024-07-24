@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import { useEffect } from 'react'
 import FileTreeModalCreateFile from '../../../../../../frontend/js/features/file-tree/components/modals/file-tree-modal-create-file'
 import { useFileTreeActionable } from '../../../../../../frontend/js/features/file-tree/contexts/file-tree-actionable'

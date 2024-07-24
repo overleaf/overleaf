@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import { EditorProviders } from '../../helpers/editor-providers'
 import PdfLogsEntries from '../../../../frontend/js/features/pdf-preview/components/pdf-logs-entries'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'

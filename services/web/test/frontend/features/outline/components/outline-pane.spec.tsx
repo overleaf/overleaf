@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import OutlinePane from '@/features/outline/components/outline-pane'
 import { EditorProviders, PROJECT_ID } from '../../../helpers/editor-providers'
 import { useState } from 'react'

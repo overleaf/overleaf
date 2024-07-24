@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import SplitMenu from '../../../../frontend/js/shared/components/split-menu'
 
 describe('SplitMenu', function () {

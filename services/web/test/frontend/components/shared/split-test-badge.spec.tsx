@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import SplitTestBadge from '../../../../frontend/js/shared/components/split-test-badge'
 import { EditorProviders } from '../../helpers/editor-providers'
 

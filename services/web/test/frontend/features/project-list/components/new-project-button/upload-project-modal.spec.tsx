@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import UploadProjectModal from '../../../../../../frontend/js/features/project-list/components/new-project-button/upload-project-modal'
 
 describe('<UploadProjectModal />', function () {

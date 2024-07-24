@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import OffboardManagedUserModal from '@/features/group-management/components/members-table/offboard-managed-user-modal'
 import sinon from 'sinon'
 

@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import CodemirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import { mockScope, rootFolderId } from '../helpers/mock-scope'

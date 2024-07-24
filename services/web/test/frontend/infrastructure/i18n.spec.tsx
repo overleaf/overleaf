@@ -1,3 +1,4 @@
+import '../helpers/bootstrap-3'
 import { Trans, useTranslation } from 'react-i18next'
 
 describe('i18n', function () {

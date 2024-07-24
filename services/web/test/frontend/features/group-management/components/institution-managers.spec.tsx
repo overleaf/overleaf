@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import InstitutionManagers from '@/features/group-management/components/institution-managers'
 
 const JOHN_DOE = {

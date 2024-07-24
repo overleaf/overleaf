@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import StartFreeTrialButton from '../../../../frontend/js/shared/components/start-free-trial-button'
 import getMeta from '@/utils/meta'
 

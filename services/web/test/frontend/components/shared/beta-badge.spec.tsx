@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import BetaBadge from '../../../../frontend/js/shared/components/beta-badge'
 
 describe('beta badge', function () {

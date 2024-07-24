@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import SwitchToEditorButton from '@/features/pdf-preview/components/switch-to-editor-button'
 

@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import FileTreeItemName from '../../../../../../frontend/js/features/file-tree/components/file-tree-item/file-tree-item-name'
 import { EditorProviders } from '../../../../helpers/editor-providers'
 import { FileTreeProvider } from '../../helpers/file-tree-provider'

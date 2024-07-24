@@ -1,3 +1,4 @@
+import '../../../../helpers/bootstrap-3'
 import type { PropsWithChildren } from 'react'
 import sinon from 'sinon'
 import DropdownButton from '@/features/group-management/components/members-table/dropdown-button'

@@ -97,7 +97,7 @@ function ReconfirmationInfo({ userEmailData }: ReconfirmationInfoProps) {
     return (
       <OLRow>
         <OLCol lg={12}>
-          {isBootstrap5 ? (
+          {isBootstrap5() ? (
             <OLNotification
               type="info"
               content={

@@ -40,7 +40,7 @@ function Email({ userEmailData }: EmailProps) {
         </div>
       )}
       {hasBadges && (
-        <div className={classnames({ small: !isBootstrap5 })}>
+        <div className={classnames({ small: !isBootstrap5() })}>
           {isPrimary && (
             <>
               <OLBadge bg="info">Primary</OLBadge>{' '}

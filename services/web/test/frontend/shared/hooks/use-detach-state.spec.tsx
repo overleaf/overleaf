@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import { FC } from 'react'
 import useDetachState from '../../../../frontend/js/shared/hooks/use-detach-state'
 import { EditorProviders } from '../../helpers/editor-providers'

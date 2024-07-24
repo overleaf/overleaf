@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import PdfSynctexControls from '../../../../frontend/js/features/pdf-preview/components/pdf-synctex-controls'
 import { cloneDeep } from 'lodash'
 import { useDetachCompileContext as useCompileContext } from '../../../../frontend/js/shared/context/detach-compile-context'

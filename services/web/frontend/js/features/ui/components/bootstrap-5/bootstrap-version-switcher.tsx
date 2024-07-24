@@ -9,7 +9,7 @@ function BootstrapVersionSwitcher({
   bs3,
   bs5,
 }: BootstrapVersionSwitcherProps): React.ReactElement {
-  return <>{isBootstrap5 ? bs5 : bs3}</>
+  return <>{isBootstrap5() ? bs5 : bs3}</>
 }
 
 export default BootstrapVersionSwitcher

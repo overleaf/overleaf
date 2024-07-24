@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import EditorLeftMenu from '../../../../frontend/js/features/editor-left-menu/components/editor-left-menu'
 import {
   AllowedImageName,

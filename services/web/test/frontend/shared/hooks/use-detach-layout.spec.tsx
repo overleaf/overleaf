@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import useDetachLayout from '../../../../frontend/js/shared/hooks/use-detach-layout'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
 import { EditorProviders } from '../../helpers/editor-providers'

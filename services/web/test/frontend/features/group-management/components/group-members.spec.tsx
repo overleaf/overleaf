@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import GroupMembers from '@/features/group-management/components/group-members'
 import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 import { User } from '../../../../../types/group-management/user'

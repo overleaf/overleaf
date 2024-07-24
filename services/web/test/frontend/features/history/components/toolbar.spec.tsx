@@ -1,3 +1,4 @@
+import '../../../helpers/bootstrap-3'
 import Toolbar from '../../../../../frontend/js/features/history/components/diff-view/toolbar/toolbar'
 import { HistoryProvider } from '../../../../../frontend/js/features/history/context/history-context'
 import { HistoryContextValue } from '../../../../../frontend/js/features/history/context/types/history-context-value'

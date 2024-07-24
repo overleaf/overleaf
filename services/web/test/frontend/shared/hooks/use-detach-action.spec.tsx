@@ -1,3 +1,4 @@
+import '../../helpers/bootstrap-3'
 import { FC } from 'react'
 import useDetachAction from '../../../../frontend/js/shared/hooks/use-detach-action'
 import { detachChannel, testDetachChannel } from '../../helpers/detach-channel'
