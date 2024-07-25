@@ -469,7 +469,7 @@
     }
 
     .plans-table-short-feature-list ul {
-      color: var(--neutral-90);
+      color: var(--neutral-70);
       font-size: var(--font-size-02);
       line-height: var(--line-height-02);
       hyphens: auto;
@@ -517,7 +517,7 @@
       // padding adjustments
       &.plans-table-th > div {
         padding-top: var(--spacing-06);
-        padding-bottom: var(--spacing-06);
+        padding-bottom: var(--spacing-04);
       }
       &.plans-table-cell-price > div {
         padding-top: 0;
@@ -923,14 +923,24 @@
     }
   }
 
-  @media (min-width: (@screen-xs-max+1)) {
-    .hidden-desktop {
-      display: none;
+  .visible-desktop,
+  .visible-tablet,
+  .visible-mobile {
+    display: none;
+  }
+  @media (min-width: (@screen-md-max+1)) {
+    .visible-desktop {
+      display: inline-block;
+    }
+  }
+  @media (min-width: (@screen-xs-max+1)) and (max-width: @screen-md-max) {
+    .visible-tablet {
+      display: inline-block;
     }
   }
   @media (max-width: @screen-xs-max) {
-    .hidden-mobile {
-      display: none;
+    .visible-mobile {
+      display: inline-block;
     }
   }
 
