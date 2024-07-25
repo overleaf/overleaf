@@ -464,18 +464,86 @@
 
     .plans-table-th-content,
     .plans-table-price,
-    .plans-table-comments-icon,
-    .plans-table-th-content-benefit {
+    .plans-table-comments-icon {
       color: var(--neutral-90);
     }
 
-    // cannot add border to td,th directly due to highlighted column border
+    .plans-table-short-feature-list ul {
+      color: var(--neutral-90);
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
+      hyphens: auto;
+      padding-left: 15px;
+      text-align: left;
+      margin-bottom: 0;
+    }
+
+    // Table BORDER and PADDING
+    // Cannot add border to td, th directly due to highlighted column border.
+    // The outer div handles the border (see exception below for highlighted column).
+    // The inner div handles the padding.
+    // The 2 layers of divs make the highlighted column border appears
+    // as a solid vertical line across the table.
+    // The highlighted column's border handling is an exception. The inner div (div > div)
+    // of the highlighted column handles the horizontal border (gray) so that it appears as
+    // behind the vertical border (green).
+    // On mobile, there is no vertical border for the highighted column
     td > div,
     th > div {
+      // border
       border-left: @table-border;
       border-top: @table-border;
       border-right: @table-border;
       border-bottom: 0;
+      // border adjustments
+      &.plans-table-cell-cta-desktop,
+      &.plans-table-cell-cta-mobile,
+      &.plans-table-cell-short-feature-list,
+      &.plans-table-cell-price,
+      &.plans-table-cell-divider {
+        border-top: 0;
+      }
+      &.plans-table-cell-divider {
+        border-bottom: 0;
+      }
+
+      // padding
+      > div {
+        padding: var(--spacing-05) var(--spacing-08);
+        @media (max-width: @screen-xs-max) {
+          padding: var(--spacing-05);
+        }
+      }
+      // padding adjustments
+      &.plans-table-th > div {
+        padding-top: var(--spacing-06);
+        padding-bottom: var(--spacing-06);
+      }
+      &.plans-table-cell-price > div {
+        padding-top: 0;
+        padding-bottom: var(--spacing-06);
+      }
+      &.plans-table-cell-short-feature-list > div {
+        padding-top: 0;
+        padding-bottom: 0;
+
+        @media (max-width: @screen-xs-max) {
+          padding-bottom: var(--spacing-06);
+        }
+      }
+      &.plans-table-cell-cta-desktop > div {
+        padding-top: var(--spacing-08);
+      }
+      &.plans-table-cell-cta-mobile > div {
+        padding-top: 0;
+        padding-bottom: var(--spacing-06);
+      }
+      &.plans-table-feature-name > div {
+        padding-left: var(--spacing-05);
+      }
+      &.plans-table-cell-divider > div {
+        padding: var(--spacing-05) var(--spacing-08);
+      }
 
       @media (max-width: @screen-xs-max) {
         border-left: unset;
@@ -483,6 +551,7 @@
       }
     }
 
+    // border adjustments for highlighted column
     // remove left border for all col after highlighted column
     .plans-table-green-highlighted ~ td > div,
     .plans-table-green-highlighted ~ th > div {
@@ -493,7 +562,6 @@
     th:has(~ .plans-table-green-highlighted) > div {
       border-right: 0;
     }
-
     // highlighted column border
     th.plans-table-green-highlighted > div,
     td.plans-table-green-highlighted > div {
@@ -504,6 +572,10 @@
       // and then apply the gray top border to the inner div, .plans-table-cell-content
       border-top: 0;
 
+      &.plans-table-th {
+        border-top: @table-border-size solid var(--green-50);
+      }
+
       .plans-table-cell-content {
         border-top: @table-border;
       }
@@ -511,87 +583,67 @@
       @media (max-width: @screen-xs-max) {
         border-left: unset;
         border-right: unset;
+        .plans-table-cell-content {
+          border-color: transparent;
+        }
       }
     }
-
-    th {
-      &:nth-child(2):not(.plans-table-green-highlighted) .plans-table-th {
-        border-top-left-radius: @plans-table-border-radius;
+    tr.plans-table-divider {
+      // highlighted divider will only show if the highlighted column is on the last visible column
+      .plans-table-last-col-highlighted > div {
+        border-right: @highlighted-border;
+      }
+    }
+    // add border for last row
+    tr:last-child {
+      td > div,
+      th > div {
+        border-bottom: @table-border;
+      }
+      td.plans-table-green-highlighted > div {
+        border-bottom: @highlighted-border;
 
         @media (max-width: @screen-xs-max) {
-          border-top-left-radius: 0;
+          // column is not highlighted on mobile, so
+          // match non-highlighted column border on mobile
+          border-top: @table-border;
+          border-bottom: @table-border;
         }
       }
     }
 
-    .plans-table-cta-desktop,
-    .plans-table-cta-mobile,
-    .plans-table-short-feature-list,
-    .plans-table-price-row {
-      td > div {
+    // remove borders
+    tr.plans-table-divider + tr {
+      td > div,
+      th > div {
         border-top: 0;
       }
-    }
-
-    th[scope='col'] > div {
-      padding: var(--spacing-06) var(--spacing-08);
-    }
-    th[scope='row'] > div {
-      padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
-        var(--spacing-05);
-    }
-    td > div > div {
-      // apply spacing to inner div to not interfere with border
-      padding: var(--spacing-05) var(--spacing-08);
-
-      @media (max-width: @screen-xs-max) {
-        padding: var(--spacing-05);
+      .plans-table-green-highlighted {
+        .plans-table-cell-content {
+          border-top: 0;
+        }
       }
     }
-    tr.plans-table-divider > td > div {
-      // td style above not applied since there is only 1 level of div within divider cells
-      padding: var(--spacing-05) var(--spacing-08);
-    }
-
-    tr.plans-table-price-row > td > div > div {
-      padding-top: 0;
-      padding-bottom: var(--spacing-06);
-    }
-    tr.plans-table-short-feature-list > td > div > div {
-      padding-top: 0;
-      padding-bottom: 0;
-
-      @media (max-width: @screen-xs-max) {
-        padding-bottom: var(--spacing-06);
+    tr.plans-table-cols-2 {
+      th:last-child {
+        div {
+          border: 0;
+        }
       }
     }
-    tr.plans-table-cta-desktop > td > div > div {
-      padding-top: var(--spacing-08);
-    }
-    tr.plans-table-cta-mobile > td > div > div {
-      padding-top: 0;
-      padding-bottom: var(--spacing-06);
-    }
 
-    // We want these `div` inside `th` and `td` to have a 100% height since
-    // white backgrounds are defined here:
-    // 1. `td > div.plans-table-cell`
-    // 2. `th > div.plans-table-th`
-    //
-    // To make both of them have 100% height of their respective `td` and `th`,
-    // we need to have the `table` has an explicit `height` rule.
-    // The value can be arbitrary, since it will be ignored by the browser
-    //
-    // See https://stackoverflow.com/a/56913789 for more details
-    height: 100%;
-
-    th[scope='row'] {
-      font-weight: 500;
-    }
+    // border radius
 
     tr {
-      height: 100%;
+      th {
+        &:nth-child(2):not(.plans-table-green-highlighted) .plans-table-th {
+          border-top-left-radius: @plans-table-border-radius;
 
+          @media (max-width: @screen-xs-max) {
+            border-top-left-radius: 0;
+          }
+        }
+      }
       // top right border radius on desktop only
       &:first-of-type {
         th:last-child > .plans-table-th {
@@ -622,26 +674,34 @@
             }
           }
         }
+      }
 
-        td > div,
-        th > div {
-          border-bottom: @table-border;
-        }
+      // top left border radius on first feature row
+      .plans-table-first-feature-header > .plans-table-feature-name {
+        border-top-left-radius: @plans-table-border-radius;
 
-        .plans-table-green-highlighted > div {
-          border-bottom: @highlighted-border;
-
-          @media (max-width: @screen-xs-max) {
-            // column is not highlighted on mobile, so
-            // match non-highlighted column border on mobile
-            border-top: @table-border;
-            border-bottom: @table-border;
-            .plans-table-cell-content {
-              border-color: transparent;
-            }
-          }
+        @media (max-width: @screen-xs-max) {
+          border-top-left-radius: 0;
         }
       }
+    }
+
+    // We want these `div` inside `th` and `td` to have a 100% height so
+    // that their borders are all the full height of their row.
+    //
+    // To make both of them have 100% height of their respective `td` and `th`,
+    // we need to have the `table` has an explicit `height` rule.
+    // The value can be arbitrary, since it will be ignored by the browser
+    //
+    // See https://stackoverflow.com/a/56913789 for more details
+    height: 100%;
+
+    th[scope='row'] {
+      font-weight: 500;
+    }
+
+    tr {
+      height: 100%;
     }
 
     th[scope='col'],
@@ -656,12 +716,6 @@
       line-height: var(--line-height-04);
       vertical-align: top;
       position: relative;
-
-      &.plans-table-green-highlighted {
-        .plans-table-th {
-          border-top: @table-border-size solid var(--green-50);
-        }
-      }
     }
 
     td {
@@ -674,25 +728,10 @@
         // keep the position here, otherwise messes up border on safari
         position: relative;
       }
-
-      .plans-table-first-feature-header {
-        .plans-table-feature-name {
-          border-top-left-radius: @plans-table-border-radius;
-
-          @media (max-width: @screen-xs-max) {
-            border-top-left-radius: 0;
-          }
-        }
-      }
     }
 
     tr.plans-table-divider {
       background-color: var(--neutral-10);
-      th > div,
-      td > div {
-        border-top: 0;
-        border-bottom: 0;
-      }
 
       // direct child selector to NOT affect the generated tooltip
       td > div {
@@ -706,11 +745,6 @@
         .plans-table-divider-learn-more-container {
           display: none;
         }
-      }
-
-      // highlighted divider will only show if the highlighted column is on the last visible column
-      .plans-table-last-col-highlighted > div {
-        border-right: @highlighted-border;
       }
 
       @media (max-width: @screen-xs-max) {
@@ -749,26 +783,6 @@
 
         .plans-table-last-col-highlighted > div {
           border-right: none;
-        }
-      }
-    }
-
-    tr.plans-table-divider + tr {
-      td > div,
-      th > div {
-        border-top: 0;
-      }
-      .plans-table-green-highlighted {
-        .plans-table-cell-content {
-          border-top: 0;
-        }
-      }
-    }
-
-    tr.plans-table-cols-2 {
-      th:last-child {
-        div {
-          border: 0;
         }
       }
     }
@@ -920,15 +934,6 @@
     }
   }
 
-  ul.plans-table-th-content-benefit {
-    font-size: var(--font-size-02);
-    line-height: var(--line-height-02);
-    hyphens: auto;
-    padding-left: 15px;
-    text-align: left;
-    margin-bottom: 0;
-  }
-
   // this class should only appear on the group table
   .plans-group-total-price {
     font-weight: 700;
@@ -965,7 +970,7 @@
     }
   }
 
-  .plans-table-feature-name {
+  .plans-table-feature-name-content {
     display: flex;
     justify-content: space-between;
     align-items: center;

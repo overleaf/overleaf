@@ -1,0 +1,48 @@
+mixin table_short_feature_list_free()
+	ul
+		li #{translate("one_collaborator")}
+
+mixin table_short_feature_list_collaborator()
+	ul
+		li !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
+		li #{translate("all_premium_features")}
+
+mixin table_short_feature_list_professional()
+	ul
+		li !{translate("unlimited_collabs_rt",{},["b"])}
+		li #{translate("all_premium_features")}
+
+mixin table_short_feature_list_group_collaborator()
+	ul
+		li #{translate("up_to")} !{translate("x_collaborators_per_project", {collaboratorsCount: '10'})}
+		li
+			+table_head_group_total_per_year('collaborator')
+
+mixin table_short_feature_list_group_professional()
+	ul
+		li #{translate("unlimited_collaborators_in_each_project")}
+		li
+			+table_head_group_total_per_year('professional')
+
+mixin table_short_feature_list_group_organization(additionalEventSegmentation)
+	- var segmentation = JSON.stringify(Object.assign({}, {button: 'group_organization-link', location: 'table-header-list', period: 'annual'}, additionalEventSegmentation))
+	ul
+		li #{translate("best_choices_companies_universities_non_profits")}
+		li #{translate("for_groups_or_site_wide")}
+		li
+			a.inline-green-link(
+				target="_blank"
+				href="/for/contact-sales"
+				event-tracking="plans-page-click"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation=segmentation
+			) #{translate("also_available_as_on_premises")}
+
+mixin table_short_feature_list_student_student(showExtraContent)
+	ul
+		li !{translate("x_collaborators_per_project", {collaboratorsCount: '6'})}
+		li #{translate("all_premium_features")}
+		if showExtraContent
+			li 
+				b !{translate("for_students_only")}

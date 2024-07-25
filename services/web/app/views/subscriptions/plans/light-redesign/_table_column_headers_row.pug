@@ -1,0 +1,34 @@
+mixin table_column_headers_row({maxColumn, tableHeadKeys, highlightedColKey, highlightedColTranslationKey})
+	tr(class=`plans-table-cols-${tableHeadKeys.length}`)
+		th
+		- for (var i = 0; i < maxColumn; i++)
+			- var tableHeadKey = tableHeadKeys[i]
+			- var highlighted = highlightedColKey === tableHeadKey
+			- var thClass = highlighted ? 'plans-table-green-highlighted' : ''
+
+			th(
+				class=thClass
+				scope="col"
+			)
+				.plans-table-th
+					if (highlighted)
+						p.plans-table-green-highlighted-text #{translate(highlightedColTranslationKey)}
+					.plans-table-th-content
+						if tableHeadKey
+							case tableHeadKey
+								when 'individual_free'
+									| #{translate("free")}
+								when 'individual_collaborator'
+									| #{translate("standard")}
+								when 'individual_professional'
+									| #{translate("professional")}
+								when 'group_collaborator'
+									| #{translate("group_standard")}
+								when 'group_professional'
+									| #{translate("group_professional")}
+								when 'group_organization'
+									| #{translate("organization")}
+								when 'student_free'
+									| #{translate("free")}
+								when 'student_student'
+									| #{translate("student")}
