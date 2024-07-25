@@ -30,6 +30,38 @@ describe('PermissionsManager', function () {
     this.PermissionsManager.registerCapability('capability4', {
       default: false,
     })
+    this.PermissionsManager.registerPolicy('openPolicy', {
+      capability1: true,
+      capability2: true,
+    })
+    this.PermissionsManager.registerPolicy('restrictivePolicy', {
+      capability1: true,
+      capability2: false,
+    })
+    this.openPolicyResponseSet = [
+      [
+        {
+          managedUsersEnabled: true,
+          groupPolicy: { openPolicy: true },
+        },
+        {
+          managedUsersEnabled: true,
+          groupPolicy: { openPolicy: true },
+        },
+      ],
+    ]
+    this.restrictivePolicyResponseSet = [
+      [
+        {
+          managedUsersEnabled: true,
+          groupPolicy: { openPolicy: true },
+        },
+        {
+          managedUsersEnabled: true,
+          groupPolicy: { restrictivePolicy: true },
+        },
+      ],
+    ]
   })
 
   describe('hasPermission', function () {
@@ -715,6 +747,38 @@ describe('PermissionsManager', function () {
         policy3: true,
         policy4: true,
       })
+    })
+  })
+
+  describe('checkUserListPermissions', function () {
+    it('should return true when all users have permissions required', async function () {
+      const userList = ['user1', 'user2', 'user3']
+      const capabilities = ['capability1', 'capability2']
+      this.hooksFire.onCall(0).resolves(this.openPolicyResponseSet)
+      this.hooksFire.onCall(1).resolves(this.openPolicyResponseSet)
+      this.hooksFire.onCall(2).resolves(this.openPolicyResponseSet)
+
+      const usersHavePermission =
+        await this.PermissionsManager.promises.checkUserListPermissions(
+          userList,
+          capabilities
+        )
+      expect(usersHavePermission).to.equal(true)
+    })
+
+    it('should return false if any user does not have permission', async function () {
+      const userList = ['user1', 'user2', 'user3']
+      const capabilities = ['capability1', 'capability2']
+      this.hooksFire.onCall(0).resolves(this.openPolicyResponseSet)
+      this.hooksFire.onCall(1).resolves(this.restrictivePolicyResponseSet)
+      this.hooksFire.onCall(2).resolves(this.openPolicyResponseSet)
+
+      const usersHavePermission =
+        await this.PermissionsManager.promises.checkUserListPermissions(
+          userList,
+          capabilities
+        )
+      expect(usersHavePermission).to.equal(false)
     })
   })
 })

@@ -422,8 +422,8 @@ async function checkUserPermissions(user, requiredCapabilities) {
  * checks if all collaborators of a given project have the specified capability, including the owner
  *
  * @async
- * @function checkCollaboratorsPermission
- * @param {string} userList - An array of all user to check permissions for
+ * @function checkUserListPermissions
+ * @param {Object[]} userList - An array of all user to check permissions for
  * @param {Array} capabilities - The list of the capabilities to check permission for.
  * @returns {Promise<boolean>} - A promise that resolves to `true` if all collaborators have the specified capability, otherwise `false`.
  */

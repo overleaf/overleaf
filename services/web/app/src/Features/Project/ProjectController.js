@@ -42,8 +42,7 @@ const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
 const TutorialHandler = require('../Tutorial/TutorialHandler')
 const UserUpdater = require('../User/UserUpdater')
-const { checkUserPermissions } =
-  require('../Authorization/PermissionsManager').promises
+const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
 
 /**
@@ -616,21 +615,34 @@ const _ProjectController = {
         !showPersonalAccessToken &&
         splitTestAssignments['personal-access-token'].variant === 'enabled' // `?personal-access-token=enabled`
 
-      // still allow users to access project if we cant get their permissions, but disable AI feature
-      let canUseAi
-      try {
-        canUseAi = await checkUserPermissions(user, ['use-ai'])
-      } catch (err) {
-        canUseAi = false
-      }
+      let showAiErrorAssistant = false
+      if (userId && Features.hasFeature('saas')) {
+        try {
+          // exit early if the user couldnt use ai anyways, since permissions checks are expensive
+          const canUseAiOnProject =
+            user.features?.aiErrorAssistant &&
+            (privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
+              privilegeLevel === PrivilegeLevels.OWNER)
 
-      const showAiErrorAssistant =
-        userId &&
-        Features.hasFeature('saas') &&
-        user.features?.aiErrorAssistant &&
-        canUseAi &&
-        (privilegeLevel === PrivilegeLevels.READ_AND_WRITE ||
-          privilegeLevel === PrivilegeLevels.OWNER)
+          if (canUseAiOnProject) {
+            // check permissions for user and project owner, to see if they allow AI on the project
+            const permissionsResults = await Modules.promises.hooks.fire(
+              'projectAllowsCapability',
+              project,
+              userId,
+              ['use-ai']
+            )
+            const aiAllowed = permissionsResults.every(
+              result => result === true
+            )
+
+            showAiErrorAssistant = aiAllowed
+          }
+        } catch (err) {
+          // still allow users to access project if we cant get their permissions, but disable AI feature
+          showAiErrorAssistant = false
+        }
+      }
 
       const template =
         detachRole === 'detached'
