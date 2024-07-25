@@ -69,7 +69,9 @@ mixin plans_table(period, config)
 			)
 				.plans-table-th
 					if (highlighted)
-						p.plans-table-green-highlighted-text #{translate(config.highlightedColumn.text[period]).toUpperCase()}
+						//-most_popular_uppercase
+						-var translationKey  = config.highlightedColumn.text[period] === 'most_popular' ? 'most_popular_uppercase' : config.highlightedColumn.text[period] === 'saving_20_percent' ? 'saving_20_percent_no_exclamation' : config.highlightedColumn.text[period] 
+						p.plans-table-green-highlighted-text #{translate(translationKey)}
 					.plans-table-th-content
 						if tableHeadKey
 							case tableHeadKey

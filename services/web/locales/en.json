@@ -1693,6 +1693,7 @@
   "save_x_percent_or_more": "Save __percent__% or more",
   "saving": "Saving",
   "saving_20_percent": "Saving 20%!",
+  "saving_20_percent_no_exclamation": "Saving 20%",
   "saving_notification_with_seconds": "Saving __docname__... (__seconds__ seconds of unsaved changes)",
   "search": "Search",
   "search_bib_files": "Search by author, title, year",
