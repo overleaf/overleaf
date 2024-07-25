@@ -315,7 +315,7 @@ mixin table_cell(feature, plan)
 				| !{translate(planValue, {}, ['strong'])}
 			else if (feature.value === 'bool')
 				if (planValue)
-					i.fa.fa-check(aria-hidden="true")
+					i.material-symbols.material-symbols-outlined.icon-green-round-background.icon-sm(aria-hidden="true") check
 					span.sr-only #{translate("feature_included")}
 				else
 					span(aria-hidden="true") -
