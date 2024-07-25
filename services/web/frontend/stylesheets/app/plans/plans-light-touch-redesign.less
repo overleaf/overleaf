@@ -11,6 +11,7 @@
 @highlighted-border: var(--border-width-base) solid var(--green-50);
 @table-border-size: 2px;
 @table-border: @table-border-size solid var(--neutral-10);
+@plans-table-sticky-header-size: 60px;
 
 .plans-page {
   p {
@@ -506,6 +507,12 @@
       &.plans-table-cell-divider {
         border-bottom: 0;
       }
+      @media (max-width: @screen-xs-max) {
+        border: 0;
+        &.plans-table-th {
+          border-top: @table-border;
+        }
+      }
 
       // padding
       > div {
@@ -522,6 +529,9 @@
       &.plans-table-cell-price > div {
         padding-top: 0;
         padding-bottom: var(--spacing-06);
+        @media (max-width: @screen-xs-max) {
+          padding-top: var(--spacing-05);
+        }
       }
       &.plans-table-cell-short-feature-list > div {
         padding-top: 0;
@@ -543,11 +553,6 @@
       }
       &.plans-table-cell-divider > div {
         padding: var(--spacing-05) var(--spacing-08);
-      }
-
-      @media (max-width: @screen-xs-max) {
-        border-left: unset;
-        border-right: unset;
       }
     }
 
@@ -581,10 +586,10 @@
       }
 
       @media (max-width: @screen-xs-max) {
-        border-left: unset;
-        border-right: unset;
+        // column is not highlighted on mobile
+        border: 0;
         .plans-table-cell-content {
-          border-color: transparent;
+          border: 0;
         }
       }
     }
@@ -606,7 +611,6 @@
         @media (max-width: @screen-xs-max) {
           // column is not highlighted on mobile, so
           // match non-highlighted column border on mobile
-          border-top: @table-border;
           border-bottom: @table-border;
         }
       }
@@ -720,7 +724,9 @@
 
     td {
       vertical-align: middle;
-      height: 100%;
+      @media (min-width: @screen-sm-min) {
+        height: 100%;
+      }
     }
 
     tr {
@@ -816,6 +822,11 @@
         justify-content: space-around;
       }
 
+      td,
+      th {
+        align-self: stretch;
+      }
+
       // The forced width below (plans-table-cols-n) is to ensure the table columns have an equal width
       // because on mobile, the first column (empty cell on first `tr` and feature name on the rest of `tr`) will be shown as its own row
       // and the rest of the `tr` will incorporate a full width of the viewport
@@ -890,14 +901,7 @@
     height: 100%;
 
     .plans-table-th-content {
-      display: flex;
-      flex-direction: column;
       height: 100%;
-
-      @media (max-width: @screen-sm-max) {
-        padding-left: @padding-xs;
-        padding-right: @padding-xs;
-      }
     }
   }
 
@@ -1051,6 +1055,12 @@
     }
   }
 
+  .plans-table-th-content {
+    @media (max-width: @screen-xs-max) {
+      height: @plans-table-sticky-header-size!important;
+      overflow: hidden;
+    }
+  }
   .plans-table-sticky-header-container {
     @media (max-width: @screen-xs-max) {
       // `height: 60%` is just an arbitrary percentage
@@ -1061,49 +1071,47 @@
       width: 100%;
       position: absolute;
     }
-  }
 
-  .plans-table-sticky-header-without-switch {
-    margin-bottom: -107px;
-    margin-top: 67px;
-  }
-
-  .plans-table-sticky-header-with-switch {
-    margin-bottom: -140px;
-    margin-top: 100px;
-  }
-
-  .plans-table-sticky-header {
-    display: none;
-
-    @media (max-width: @screen-xs-max) {
-      display: flex;
-      width: 100%;
-      top: 0;
-      left: 0;
-      z-index: @z-index-plans-page-table-header-mobile;
-      height: 42px;
-      border-bottom: @table-border;
-
-      // separate sticky class because we want to remove the class (to visually remove the sticky header)
-      // with javascript whenever the table is not visible anymore
-      &.sticky {
-        position: sticky;
-      }
+    .plans-table-sticky-header-without-switch {
+      margin-bottom: -107px;
+      margin-top: @plans-table-sticky-header-size;
     }
-  }
 
-  .plans-table-sticky-header-item {
-    background-color: @white;
-    flex: 1 1 0px;
+    .plans-table-sticky-header-with-switch {
+      margin-bottom: -140px;
+      margin-top: @plans-table-sticky-header-size + 34px;
+    }
 
-    span {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .plans-table-sticky-header {
+      display: none;
 
       @media (max-width: @screen-xs-max) {
+        display: flex;
+        width: 100%;
+        top: 0;
+        left: 0;
+        z-index: @z-index-plans-page-table-header-mobile;
+        height: @plans-table-sticky-header-size;
+        border-bottom: @table-border;
+
+        // separate sticky class because we want to remove the class (to visually remove the sticky header)
+        // with javascript whenever the table is not visible anymore
+        &.sticky {
+          position: sticky;
+        }
+      }
+    }
+
+    .plans-table-sticky-header-item {
+      background-color: @white;
+      flex: 1 1 0px;
+
+      span {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 var(--spacing-01);
         color: var(--neutral-90);
         font-size: var(--font-size-03);
         font-weight: 600;
@@ -1111,10 +1119,10 @@
         line-height: var(--line-height-02);
       }
     }
-  }
 
-  .plans-table-sticky-header-item-green-highlighted span {
-    color: var(--green-50);
+    .plans-table-sticky-header-item-green-highlighted span {
+      color: var(--green-50);
+    }
   }
 
   .plans-v2-faq {
