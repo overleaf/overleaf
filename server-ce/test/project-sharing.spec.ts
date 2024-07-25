@@ -1,7 +1,11 @@
 import { v4 as uuid } from 'uuid'
 import { isExcludedBySharding, startWith } from './helpers/config'
 import { ensureUserExists, login } from './helpers/login'
-import { createProject } from './helpers/project'
+import {
+  createProject,
+  enableLinkSharing,
+  shareProjectByEmailAndAcceptInvite,
+} from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
 
@@ -36,46 +40,12 @@ describe('Project Sharing', function () {
     ).type('New Chat Message{enter}')
 
     // Get link sharing links
-    cy.findByText('Share').click()
-    cy.findByText('Turn on link sharing').click()
-    cy.findByText('Anyone with this link can view this project')
-      .next()
-      .should('contain.text', 'http://sharelatex/')
-      .then(el => {
-        linkSharingReadOnly = el.text()
-      })
-    cy.findByText('Anyone with this link can edit this project')
-      .next()
-      .should('contain.text', 'http://sharelatex/')
-      .then(el => {
-        linkSharingReadAndWrite = el.text()
-      })
-  }
-
-  function shareProjectByEmailAndAcceptInvite(
-    email: string,
-    level: 'Read only' | 'Can edit'
-  ) {
-    login('user@example.com')
-    cy.visit('/project')
-    cy.findByText(projectName).click()
-    cy.findByText('Share').click()
-    cy.findByRole('dialog').within(() => {
-      cy.get('input').type(`${email},`)
-      cy.get('input')
-        .parents('form')
-        .within(() => cy.findByText('Can edit').parent().select(level))
-      cy.findByText('Share').click({ force: true })
-    })
-
-    login(email)
-    cy.visit('/project')
-    cy.findByText(new RegExp(projectName))
-      .parent()
-      .parent()
-      .within(() => {
-        cy.findByText('Join Project').click()
-      })
+    enableLinkSharing().then(
+      ({ linkSharingReadOnly: ro, linkSharingReadAndWrite: rw }) => {
+        linkSharingReadAndWrite = rw
+        linkSharingReadOnly = ro
+      }
+    )
   }
 
   function expectContentReadOnlyAccess() {
@@ -178,7 +148,8 @@ describe('Project Sharing', function () {
     ensureUserExists({ email })
 
     beforeWithReRunOnTestRetry(function () {
-      shareProjectByEmailAndAcceptInvite(email, 'Read only')
+      login('user@example.com')
+      shareProjectByEmailAndAcceptInvite(projectName, email, 'Read only')
     })
 
     it('should grant the collaborator read access', () => {
@@ -195,7 +166,8 @@ describe('Project Sharing', function () {
     ensureUserExists({ email })
 
     beforeWithReRunOnTestRetry(function () {
-      shareProjectByEmailAndAcceptInvite(email, 'Can edit')
+      login('user@example.com')
+      shareProjectByEmailAndAcceptInvite(projectName, email, 'Can edit')
     })
 
     it('should grant the collaborator write access', () => {
