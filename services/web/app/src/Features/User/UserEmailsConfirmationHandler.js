@@ -133,6 +133,7 @@ UserEmailsConfirmationHandler.promises = {
   sendConfirmationEmail: promisify(sendConfirmationEmail),
   confirmEmailFromToken,
   sendConfirmationCode,
+  sendReconfirmationEmail,
 }
 
 module.exports = UserEmailsConfirmationHandler
