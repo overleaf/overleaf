@@ -326,6 +326,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/user/emails/resend_confirmation',
     AuthenticationController.requireLogin(),
     RateLimiterMiddleware.rateLimit(rateLimiters.resendConfirmation),
+    Modules.middleware('resendConfirmationEmail'),
     UserEmailsController.resendConfirmation
   )
 
@@ -356,6 +357,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
       '/user/emails/delete',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(rateLimiters.deleteEmail),
+      Modules.middleware('userDeleteEmail'),
       UserEmailsController.remove
     )
     webRouter.post(

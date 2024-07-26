@@ -107,56 +107,42 @@ async function add(req, res, next) {
   res.sendStatus(204)
 }
 
-function resendConfirmation(req, res, next) {
+async function resendConfirmation(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
     return res.sendStatus(422)
   }
-  UserGetter.getUserByAnyEmail(email, { _id: 1 }, function (error, user) {
-    if (error) {
-      return next(error)
-    }
-    if (!user || user._id.toString() !== userId) {
-      return res.sendStatus(422)
-    }
-    UserEmailsConfirmationHandler.sendConfirmationEmail(
-      userId,
-      email,
-      function (error) {
-        if (error) {
-          return next(error)
-        }
-        res.sendStatus(200)
-      }
-    )
-  })
+  const user = await UserGetter.promises.getUserByAnyEmail(email, { _id: 1 })
+
+  if (!user || user._id.toString() !== userId) {
+    return res.sendStatus(422)
+  }
+
+  await UserEmailsConfirmationHandler.promises.sendConfirmationEmail(
+    userId,
+    email
+  )
+  res.sendStatus(200)
 }
 
-function sendReconfirmation(req, res, next) {
+async function sendReconfirmation(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const email = EmailHelper.parseEmail(req.body.email)
   if (!email) {
     return res.sendStatus(400)
   }
-  UserGetter.getUserByAnyEmail(email, { _id: 1 }, function (error, user) {
-    if (error) {
-      return next(error)
-    }
-    if (!user || user._id.toString() !== userId) {
-      return res.sendStatus(422)
-    }
-    UserEmailsConfirmationHandler.sendReconfirmationEmail(
-      userId,
-      email,
-      function (error) {
-        if (error) {
-          return next(error)
-        }
-        res.sendStatus(204)
-      }
-    )
-  })
+  const user = await UserGetter.promises.getUserByAnyEmail(email, { _id: 1 })
+
+  if (!user || user._id.toString() !== userId) {
+    return res.sendStatus(422)
+  }
+  await UserEmailsConfirmationHandler.promises.sendReconfirmationEmail(
+    userId,
+    email
+  )
+
+  res.sendStatus(204)
 }
 
 /**
@@ -521,6 +507,20 @@ async function showConfirm(req, res, next) {
   })
 }
 
+async function remove(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const email = EmailHelper.parseEmail(req.body.email)
+  if (!email) {
+    return res.sendStatus(422)
+  }
+  const auditLog = {
+    initiatorId: userId,
+    ipAddress: req.ip,
+  }
+  await UserUpdater.promises.removeEmailAddress(userId, email, auditLog)
+  res.sendStatus(200)
+}
+
 const UserEmailsController = {
   list(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
@@ -541,23 +541,7 @@ const UserEmailsController = {
     resendSecondaryEmailConfirmationCode
   ),
 
-  remove(req, res, next) {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    const email = EmailHelper.parseEmail(req.body.email)
-    if (!email) {
-      return res.sendStatus(422)
-    }
-    const auditLog = {
-      initiatorId: userId,
-      ipAddress: req.ip,
-    }
-    UserUpdater.removeEmailAddress(userId, email, auditLog, function (error) {
-      if (error) {
-        return next(error)
-      }
-      res.sendStatus(200)
-    })
-  },
+  remove: expressify(remove),
 
   setDefault(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
@@ -618,9 +602,9 @@ const UserEmailsController = {
     )
   },
 
-  resendConfirmation,
+  resendConfirmation: expressify(resendConfirmation),
 
-  sendReconfirmation,
+  sendReconfirmation: expressify(sendReconfirmation),
 
   addSecondaryEmailPage: expressify(addSecondaryEmailPage),
 

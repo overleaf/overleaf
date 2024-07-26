@@ -23,10 +23,10 @@ describe('UserEmailsController', function () {
     this.UserGetter = {
       getUser: sinon.stub().yields(),
       getUserFullEmails: sinon.stub(),
-      getUserByAnyEmail: sinon.stub(),
       promises: {
         ensureUniqueEmailAddress: sinon.stub().resolves(),
         getUser: sinon.stub().resolves(this.user),
+        getUserByAnyEmail: sinon.stub(),
       },
     }
     this.SessionManager = {
@@ -42,12 +42,12 @@ describe('UserEmailsController', function () {
     }
     this.UserUpdater = {
       addEmailAddress: sinon.stub(),
-      removeEmailAddress: sinon.stub(),
       setDefaultEmailAddress: sinon.stub(),
       updateV1AndSetDefaultEmailAddress: sinon.stub(),
       promises: {
         addEmailAddress: sinon.stub().resolves(),
         confirmEmail: sinon.stub().resolves(),
+        removeEmailAddress: sinon.stub(),
       },
     }
     this.EmailHelper = { parseEmail: sinon.stub() }
@@ -91,9 +91,9 @@ describe('UserEmailsController', function () {
         '../Helpers/EmailHelper': this.EmailHelper,
         './UserEmailsConfirmationHandler': (this.UserEmailsConfirmationHandler =
           {
-            sendReconfirmationEmail: sinon.stub(),
             promises: {
               sendConfirmationEmail: sinon.stub().resolves(),
+              sendReconfirmationEmail: sinon.stub(),
             },
           }),
         '../Institutions/InstitutionsAPI': this.InstitutionsAPI,
@@ -486,14 +486,14 @@ describe('UserEmailsController', function () {
         initiatorId: this.user._id,
         ipAddress: this.req.ip,
       }
-      this.UserUpdater.removeEmailAddress.callsArgWith(3, null)
+      this.UserUpdater.promises.removeEmailAddress.resolves()
 
       this.UserEmailsController.remove(this.req, {
         sendStatus: code => {
           code.should.equal(200)
           assertCalledWith(this.EmailHelper.parseEmail, this.email)
           assertCalledWith(
-            this.UserUpdater.removeEmailAddress,
+            this.UserUpdater.promises.removeEmailAddress,
             this.user._id,
             this.email,
             auditLog
@@ -509,7 +509,7 @@ describe('UserEmailsController', function () {
       this.UserEmailsController.remove(this.req, {
         sendStatus: code => {
           code.should.equal(422)
-          assertNotCalled(this.UserUpdater.removeEmailAddress)
+          assertNotCalled(this.UserUpdater.promises.removeEmailAddress)
           done()
         },
       })
@@ -703,7 +703,7 @@ describe('UserEmailsController', function () {
   describe('resendConfirmation', function () {
     beforeEach(function () {
       this.EmailHelper.parseEmail.returnsArg(0)
-      this.UserGetter.getUserByAnyEmail.yields(undefined, {
+      this.UserGetter.promises.getUserByAnyEmail.resolves({
         _id: this.user._id,
       })
       this.req = {
@@ -718,20 +718,20 @@ describe('UserEmailsController', function () {
         .yields()
     })
 
-    it('should send the email', function (done) {
+    it('should send the email', async function () {
       this.req = {
         body: {
           email: 'test@example.com',
         },
       }
-      this.UserEmailsController.sendReconfirmation(
+      await this.UserEmailsController.sendReconfirmation(
         this.req,
         this.res,
         this.next
       )
-      expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to.have
-        .been.calledOnce
-      done()
+      expect(
+        this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
+      ).to.have.been.calledOnce
     })
 
     it('should return 422 if email not valid', function (done) {
@@ -751,17 +751,17 @@ describe('UserEmailsController', function () {
 
     describe('email on another user account', function () {
       beforeEach(function () {
-        this.UserGetter.getUserByAnyEmail.yields(undefined, {
+        this.UserGetter.promises.getUserByAnyEmail.resolves({
           _id: 'another-user-id',
         })
       })
-      it('should return 422', function (done) {
+      it('should return 422', async function () {
         this.req = {
           body: {
             email: 'test@example.com',
           },
         }
-        this.UserEmailsController.resendConfirmation(
+        await this.UserEmailsController.resendConfirmation(
           this.req,
           this.res,
           this.next
@@ -769,7 +769,6 @@ describe('UserEmailsController', function () {
         expect(this.UserEmailsConfirmationHandler.sendConfirmationEmail).to.not
           .have.been.called
         expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
-        done()
       })
     })
   })
@@ -777,25 +776,25 @@ describe('UserEmailsController', function () {
   describe('sendReconfirmation', function () {
     beforeEach(function () {
       this.res.sendStatus = sinon.stub()
-      this.UserGetter.getUserByAnyEmail.yields(undefined, {
+      this.UserGetter.promises.getUserByAnyEmail.resolves({
         _id: this.user._id,
       })
       this.EmailHelper.parseEmail.returnsArg(0)
     })
-    it('should send the email', function (done) {
+    it('should send the email', async function () {
       this.req = {
         body: {
           email: 'test@example.com',
         },
       }
-      this.UserEmailsController.sendReconfirmation(
+      await this.UserEmailsController.sendReconfirmation(
         this.req,
         this.res,
         this.next
       )
-      expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to.have
-        .been.calledOnce
-      done()
+      expect(
+        this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
+      ).to.have.been.calledOnce
     })
     it('should return 400 if email not valid', function (done) {
       this.req = {
@@ -806,32 +805,33 @@ describe('UserEmailsController', function () {
         this.res,
         this.next
       )
-      expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to.not
-        .have.been.called
+      expect(
+        this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
+      ).to.not.have.been.called
       expect(this.res.sendStatus.lastCall.args[0]).to.equal(400)
       done()
     })
     describe('email on another user account', function () {
       beforeEach(function () {
-        this.UserGetter.getUserByAnyEmail.yields(undefined, {
+        this.UserGetter.promises.getUserByAnyEmail.resolves({
           _id: 'another-user-id',
         })
       })
-      it('should return 422', function (done) {
+      it('should return 422', async function () {
         this.req = {
           body: {
             email: 'test@example.com',
           },
         }
-        this.UserEmailsController.sendReconfirmation(
+        await this.UserEmailsController.sendReconfirmation(
           this.req,
           this.res,
           this.next
         )
-        expect(this.UserEmailsConfirmationHandler.sendReconfirmationEmail).to
-          .not.have.been.called
+        expect(
+          this.UserEmailsConfirmationHandler.promises.sendReconfirmationEmail
+        ).to.not.have.been.called
         expect(this.res.sendStatus.lastCall.args[0]).to.equal(422)
-        done()
       })
     })
   })
