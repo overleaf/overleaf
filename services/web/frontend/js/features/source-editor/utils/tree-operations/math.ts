@@ -3,6 +3,13 @@ import { EditorState } from '@codemirror/state'
 import { SyntaxNode, SyntaxNodeRef } from '@lezer/common'
 import { ancestorNodeOfType } from './ancestors'
 
+export type MathContainer = {
+  content: string
+  displayMode: boolean
+  passToMathJax: boolean
+  pos: number
+}
+
 export const mathAncestorNode = (state: EditorState, pos: number) =>
   ancestorNodeOfType(state, pos, '$MathContainer') ||
   ancestorNodeOfType(state, pos, 'EquationEnvironment') ||
@@ -13,7 +20,7 @@ export const parseMathContainer = (
   state: EditorState,
   nodeRef: SyntaxNodeRef,
   ancestorNode: SyntaxNode
-) => {
+): MathContainer | null => {
   // the content of the Math element, without braces
   const innerContent = state.doc.sliceString(nodeRef.from, nodeRef.to).trim()
 
@@ -24,6 +31,7 @@ export const parseMathContainer = (
   let content = innerContent
   let displayMode = false
   let passToMathJax = true
+  let pos = nodeRef.from
 
   if (ancestorNode.type.is('$Environment')) {
     const environmentName = getEnvironmentName(ancestorNode, state)
@@ -37,6 +45,7 @@ export const parseMathContainer = (
         content = state.doc
           .sliceString(ancestorNode.from, ancestorNode.to)
           .trim()
+        pos = ancestorNode.from
       }
 
       if (environmentName !== 'math') {
@@ -52,5 +61,5 @@ export const parseMathContainer = (
     }
   }
 
-  return { content, displayMode, passToMathJax }
+  return { content, displayMode, passToMathJax, pos }
 }

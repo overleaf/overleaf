@@ -14,6 +14,7 @@ import {
 import { loadMathJax } from '../../mathjax/load-mathjax'
 import { descendantsOfNodeWithType } from '../utils/tree-query'
 import {
+  MathContainer,
   mathAncestorNode,
   parseMathContainer,
 } from '../utils/tree-operations/math'
@@ -92,12 +93,13 @@ function buildTooltips(state: EditorState): readonly Tooltip[] {
 
   for (const range of state.selection.ranges) {
     if (range.empty) {
-      const pos = range.from
-      const content = buildTooltipContent(state, pos)
-      if (content) {
+      const mathContainer = getMathContainer(state, range.from)
+      const content = buildTooltipContent(state, mathContainer)
+      if (content && mathContainer) {
         const tooltip: Tooltip = {
-          pos,
+          pos: mathContainer.pos,
           above: true,
+          strictSide: true,
           arrow: false,
           create() {
             const dom = document.createElement('div')
@@ -116,18 +118,21 @@ function buildTooltips(state: EditorState): readonly Tooltip[] {
   return tooltips
 }
 
-const buildTooltipContent = (
-  state: EditorState,
-  pos: number
-): HTMLDivElement | null => {
-  // if anywhere inside Math, render the whole Math content
+const getMathContainer = (state: EditorState, pos: number) => {
+  // if anywhere inside Math, find the whole Math node
   const ancestorNode = mathAncestorNode(state, pos)
   if (!ancestorNode) return null
 
   const [node] = descendantsOfNodeWithType(ancestorNode, 'Math', 'Math')
   if (!node) return null
 
-  const math = parseMathContainer(state, node, ancestorNode)
+  return parseMathContainer(state, node, ancestorNode)
+}
+
+const buildTooltipContent = (
+  state: EditorState,
+  math: MathContainer | null
+): HTMLDivElement | null => {
   if (!math || !math.content.length) return null
 
   const element = document.createElement('div')
