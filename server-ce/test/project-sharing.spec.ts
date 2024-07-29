@@ -36,6 +36,8 @@ describe('Project Sharing', function () {
 
     // Add chat message
     cy.findByText('Chat').click()
+    // wait for lazy loading of the chat pane
+    cy.findByText('Send your first message to your collaborators')
     cy.get(
       'textarea[placeholder="Send a message to your collaborators…"]'
     ).type('New Chat Message{enter}')
