@@ -2,6 +2,7 @@ import {
   FC,
   HTMLProps,
   PropsWithChildren,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -13,6 +14,7 @@ import { EditorView } from '@codemirror/view'
 import { PastedContent } from '../../extensions/visual/pasted-content'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
+import { sendMB } from '@/infrastructure/event-tracking'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -35,6 +37,27 @@ export const PastedContentMenu: FC<{
   useEventListener('keydown', (event: KeyboardEvent) => {
     shiftRef.current = event.shiftKey
   })
+
+  // track interaction events
+  const trackedEventsRef = useRef<Record<string, boolean>>({
+    'pasted-content-button-shown': false,
+    'pasted-content-button-click': false,
+  })
+
+  const trackEventOnce = useCallback((key: string) => {
+    if (!trackedEventsRef.current[key]) {
+      trackedEventsRef.current[key] = true
+      sendMB(key)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (menuOpen) {
+      trackEventOnce('pasted-content-button-click')
+    } else {
+      trackEventOnce('pasted-content-button-shown')
+    }
+  }, [menuOpen, trackEventOnce])
 
   useEffect(() => {
     if (menuOpen) {
@@ -101,6 +124,9 @@ export const PastedContentMenu: FC<{
               <MenuItem
                 onClick={() => {
                   insertPastedContent(view, pastedContent, true)
+                  sendMB('pasted-content-menu-click', {
+                    action: 'paste-with-formatting',
+                  })
                   setMenuOpen(false)
                 }}
               >
@@ -118,6 +144,9 @@ export const PastedContentMenu: FC<{
               <MenuItem
                 onClick={() => {
                   insertPastedContent(view, pastedContent, false)
+                  sendMB('pasted-content-menu-click', {
+                    action: 'paste-without-formatting',
+                  })
                   setMenuOpen(false)
                 }}
               >
@@ -139,6 +168,9 @@ export const PastedContentMenu: FC<{
                     'https://docs.google.com/forms/d/e/1FAIpQLSc7WcHrwz9fnCkUP5hXyvkG3LkSYZiR3lVJWZ0o6uqNQYrV7Q/viewform',
                     '_blank'
                   )
+                  sendMB('pasted-content-menu-click', {
+                    action: 'give-feedback',
+                  })
                   setMenuOpen(false)
                 }}
               >
