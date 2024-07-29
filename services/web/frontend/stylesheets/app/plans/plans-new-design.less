@@ -573,6 +573,14 @@
         line-height: var(--line-height-04);
       }
 
+      .plans-card-icon-container-mobile {
+        margin-top: var(--spacing-04);
+        .plans-card-icon {
+          font-size: var(--font-size-09);
+          color: var(--neutral-90);
+        }
+      }
+
       .old-price-plans-card-mobile {
         padding: var(--spacing-04) 0 0 0;
         color: var(--neutral-40);
@@ -585,13 +593,19 @@
       .plans-card-price-container-mobile {
         display: flex;
         align-items: baseline;
-        .plans-card-price-mobile {
-          color: var(--neutral-90);
-          font-size: var(--font-size-08); // 36px
-          font-weight: 600;
-          line-height: var(--line-height-07);
-          margin-right: var(--spacing-03);
-        }
+      }
+
+      .group-plans-card-price-container-mobile {
+        display: flex;
+        align-items: center;
+      }
+
+      .plans-card-price-mobile {
+        color: var(--neutral-90);
+        font-size: var(--font-size-08); // 36px
+        font-weight: 600;
+        line-height: var(--line-height-07);
+        margin-right: var(--spacing-03);
       }
 
       .light-gray-text {
@@ -623,6 +637,10 @@
         }
       }
     }
+  }
+
+  .plans-new-group-tab-card-container {
+    margin-top: var(--spacing-09);
   }
 
   .plans-features-table-section-container-mobile {
