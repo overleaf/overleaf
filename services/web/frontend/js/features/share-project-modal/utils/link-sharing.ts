@@ -1,6 +1,6 @@
 import { formatDate } from '@/utils/dates'
 
 export const linkSharingEnforcementDate = formatDate(
-  new Date(2024, 6, 29),
+  new Date(2024, 7, 26),
   'MMMM Do'
-) // July 29th 2024
+) // August 26th 2024
