@@ -52,6 +52,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
+  'ol-allowedExperiments': string[]
   'ol-allowedImageNames': AllowedImageName[]
   'ol-anonymous': boolean
   'ol-bootstrapVersion': 3 | 5

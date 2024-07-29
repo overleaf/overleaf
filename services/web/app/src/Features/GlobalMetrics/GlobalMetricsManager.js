@@ -12,7 +12,7 @@ async function getMetric(key, defaultValue = 0) {
   if (!metric) {
     return defaultValue
   }
-  return metric
+  return metric.value
 }
 
 async function setMetric(key, value) {

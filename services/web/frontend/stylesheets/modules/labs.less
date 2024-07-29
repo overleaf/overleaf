@@ -81,3 +81,22 @@
   margin-top: 8em;
   margin-bottom: 12em;
 }
+
+.labs-experiment-widget-container.disabled-experiment {
+  grid-template-columns: 40px 3fr 1fr auto;
+
+  .disabled-explanation {
+    color: @content-secondary;
+  }
+
+  h3,
+  p {
+    color: @content-disabled;
+  }
+}
+
+.disabled-experiment {
+  .ai-error-assistant-avatar {
+    filter: grayscale(0.6);
+  }
+}
