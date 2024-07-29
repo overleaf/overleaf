@@ -11,12 +11,18 @@ services:
       host-admin:
         # The host-admin service initiates the mongo replica set
         condition: service_healthy
+      mailtrap:
+        condition: service_started
     environment:
       OVERLEAF_SITE_URL: 'http://sharelatex'
       OVERLEAF_APP_NAME: Overleaf Community Edition
       OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex?directConnection=true
       OVERLEAF_REDIS_HOST: redis
       REDIS_HOST: redis
+      OVERLEAF_EMAIL_FROM_ADDRESS: 'welcome@example.com'
+      OVERLEAF_EMAIL_SMTP_HOST: 'mailtrap'
+      OVERLEAF_EMAIL_SMTP_PORT: '25'
+      OVERLEAF_EMAIL_SMTP_IGNORE_TLS: 'true'
       ENABLED_LINKED_FILE_TYPES: 'project_file,project_output_file'
       ENABLE_CONVERSIONS: 'true'
       EMAIL_CONFIRMATION_DISABLED: 'true'
@@ -25,6 +31,11 @@ services:
       interval: 3s
       timeout: 3s
       retries: 30
+
+  mailtrap:
+    image: mailtrap
+    environment:
+      MAILTRAP_PASSWORD: 'password-for-mailtrap'
 
   mongo:
     image: mongo:5.0.17

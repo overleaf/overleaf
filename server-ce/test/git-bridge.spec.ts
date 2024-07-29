@@ -4,7 +4,7 @@ import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
   enableLinkSharing,
-  shareProjectByEmailAndAcceptInvite,
+  shareProjectByEmailAndAcceptInviteViaDash,
 } from './helpers/project'
 
 import git from 'isomorphic-git'
@@ -134,7 +134,7 @@ describe('git-bridge', function () {
       })
 
       it('should expose r/w interface to invited r/w collaborator', () => {
-        shareProjectByEmailAndAcceptInvite(
+        shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-rw@example.com',
           'Can edit'
@@ -146,7 +146,7 @@ describe('git-bridge', function () {
       })
 
       it('should expose r/o interface to invited r/o collaborator', () => {
-        shareProjectByEmailAndAcceptInvite(
+        shareProjectByEmailAndAcceptInviteViaDash(
           projectName,
           'collaborator-ro@example.com',
           'Read only'

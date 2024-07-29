@@ -12,14 +12,14 @@ export IMAGE_TAG_PRO ?= quay.io/sharelatex/sharelatex-pro:latest
 export CYPRESS_SHARD ?=
 export COMPOSE_PROJECT_NAME ?= test
 
-test-e2e-native:
+test-e2e-native: build_mailtrap
 	docker compose -f docker-compose.yml -f docker-compose.native.yml up --build --no-log-prefix sharelatex host-admin -d
 	CYPRESS_ADMIN_CLIENT_URL='http://localhost:8081' CYPRESS_GIT_BRIDGE_PUBLIC_HOST='localhost' CYPRESS_SAML_PUBLIC_HOST='localhost:8082' CYPRESS_OVERLEAF_PUBLIC_HOST='localhost:8082' npm run cypress:open
 
 test-e2e:
 	docker compose up --build --no-log-prefix --exit-code-from=e2e e2e
 
-test-e2e-open:
+test-e2e-open: build_mailtrap
 	docker compose up --build --no-log-prefix --exit-code-from=e2e-open e2e-open
 
 clean:
@@ -32,7 +32,7 @@ prefetch_default_compose:
 
 prefetch_default: prefetch_default_compose_build
 prefetch_default_compose_build:
-	docker compose build
+	docker compose build host-admin
 
 prefetch: prefetch_custom
 prefetch_custom: prefetch_custom_compose_pull
@@ -49,5 +49,12 @@ prefetch_old:
 	docker pull $(IMAGE_TAG_PRO:latest=4.2)
 	docker pull $(IMAGE_TAG_PRO:latest=5.0.1-RC1)
 	docker pull $(IMAGE_TAG_PRO:latest=5.0)
+
+# Google Cloud Build runs on a very ancient Docker version that does not support the subdir flag.
+# Use services -> mailtrap -> build -> context = https://github.com/dbck/docker-mailtrap.git#v1.5.0:build in docker-compose.yml eventually.
+prefetch_default_compose_build: build_mailtrap
+build_mailtrap:
+	git clone https://github.com/dbck/docker-mailtrap.git || true && cd docker-mailtrap && git checkout v1.5.0
+	docker build -t mailtrap docker-mailtrap/build
 
 .PHONY: test-e2e test-e2e-open

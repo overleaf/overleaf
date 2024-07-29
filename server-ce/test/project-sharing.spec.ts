@@ -4,7 +4,8 @@ import { ensureUserExists, login } from './helpers/login'
 import {
   createProject,
   enableLinkSharing,
-  shareProjectByEmailAndAcceptInvite,
+  shareProjectByEmailAndAcceptInviteViaDash,
+  shareProjectByEmailAndAcceptInviteViaEmail,
 } from './helpers/project'
 import { throttledRecompile } from './helpers/compile'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
@@ -143,13 +144,34 @@ describe('Project Sharing', function () {
       .should('contain.text', author) // might have other edits in the same group
   }
 
+  describe('via email', function () {
+    const email = 'collaborator-email@example.com'
+    ensureUserExists({ email })
+
+    beforeEach(function () {
+      login('user@example.com')
+      shareProjectByEmailAndAcceptInviteViaEmail(
+        projectName,
+        email,
+        'Read only'
+      )
+    })
+
+    it('should grant the collaborator read access', () => {
+      cy.visit('/project')
+      cy.findByText(projectName).click()
+      expectFullReadOnlyAccess()
+      expectProjectDashboardEntry()
+    })
+  })
+
   describe('read only', () => {
     const email = 'collaborator-ro@example.com'
     ensureUserExists({ email })
 
     beforeWithReRunOnTestRetry(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInvite(projectName, email, 'Read only')
+      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Read only')
     })
 
     it('should grant the collaborator read access', () => {
@@ -167,7 +189,7 @@ describe('Project Sharing', function () {
 
     beforeWithReRunOnTestRetry(function () {
       login('user@example.com')
-      shareProjectByEmailAndAcceptInvite(projectName, email, 'Can edit')
+      shareProjectByEmailAndAcceptInviteViaDash(projectName, email, 'Can edit')
     })
 
     it('should grant the collaborator write access', () => {
