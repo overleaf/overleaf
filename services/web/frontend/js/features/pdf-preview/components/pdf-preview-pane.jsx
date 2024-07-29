@@ -8,6 +8,9 @@ import { useDetachCompileContext as useCompileContext } from '../../../shared/co
 import { PdfPreviewMessages } from './pdf-preview-messages'
 import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prompt'
 import { PdfPreviewProvider } from './pdf-preview-provider'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+
+const pdfPreviewPromotions = importOverleafModules('pdfPreviewPromotions')
 
 function PdfPreviewPane() {
   const { pdfUrl, hasShortCompileTimeout } = useCompileContext()
@@ -19,6 +22,11 @@ function PdfPreviewPane() {
       <PdfPreviewProvider>
         <PdfHybridPreviewToolbar />
         <PdfPreviewMessages>
+          {pdfPreviewPromotions.map(
+            ({ import: { default: Component }, path }) => (
+              <Component key={path} />
+            )
+          )}
           {hasShortCompileTimeout && <CompileTimeWarningUpgradePrompt />}
         </PdfPreviewMessages>
         <Suspense fallback={<FullSizeLoadingSpinner delay={500} />}>
