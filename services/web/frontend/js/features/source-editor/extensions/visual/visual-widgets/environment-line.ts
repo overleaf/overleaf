@@ -39,4 +39,8 @@ export class EnvironmentLineWidget extends WidgetType {
   ignoreEvent(event: Event): boolean {
     return event.type !== 'mousedown' && event.type !== 'mouseup'
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

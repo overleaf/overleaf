@@ -74,6 +74,10 @@ export class GraphicsWidget extends WidgetType {
     this.destroyed = true
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   get estimatedHeight(): number {
     return this.height
   }

@@ -24,4 +24,8 @@ export class IndicatorWidget extends WidgetType {
   ignoreEvent(event: Event) {
     return event.type !== 'mousedown' && event.type !== 'mouseup'
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

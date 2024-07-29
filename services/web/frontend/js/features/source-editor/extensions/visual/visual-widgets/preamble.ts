@@ -84,6 +84,10 @@ export class PreambleWidget extends WidgetType {
     return this.expanded === other.expanded
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   get estimatedHeight() {
     return this.expanded ? -1 : 54
   }

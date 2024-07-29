@@ -41,6 +41,10 @@ export class BeginWidget extends WidgetType {
     return event.type !== 'mouseup'
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   buildName(name: HTMLSpanElement, view: EditorView) {
     name.textContent = this.environment
   }

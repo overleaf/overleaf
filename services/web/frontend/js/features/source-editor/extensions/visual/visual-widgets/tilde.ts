@@ -10,4 +10,8 @@ export class TildeWidget extends WidgetType {
   eq() {
     return true
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

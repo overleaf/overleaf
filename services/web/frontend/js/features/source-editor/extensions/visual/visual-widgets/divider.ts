@@ -14,4 +14,8 @@ export class DividerWidget extends WidgetType {
   updateDOM(): boolean {
     return true
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

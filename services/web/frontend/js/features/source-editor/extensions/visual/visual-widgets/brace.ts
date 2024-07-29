@@ -21,4 +21,8 @@ export class BraceWidget extends WidgetType {
   eq(widget: BraceWidget) {
     return widget.content === this.content
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

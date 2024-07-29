@@ -27,4 +27,8 @@ export class IconBraceWidget extends WidgetType {
     element.textContent = this.content ?? ''
     return true
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

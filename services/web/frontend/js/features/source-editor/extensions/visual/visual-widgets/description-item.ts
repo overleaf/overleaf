@@ -25,6 +25,10 @@ export class DescriptionItemWidget extends WidgetType {
     return event.type !== 'mousedown' && event.type !== 'mouseup'
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   setProperties(element: HTMLElement) {
     element.style.setProperty('--list-depth', String(this.listDepth))
   }

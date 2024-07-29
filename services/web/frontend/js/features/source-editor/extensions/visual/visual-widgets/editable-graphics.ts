@@ -41,6 +41,10 @@ export class EditableGraphicsWidget extends GraphicsWidget {
     return true
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   createEditButton(view: EditorView) {
     const button = document.createElement('button')
     button.setAttribute('aria-label', view.state.phrase('edit_figure'))

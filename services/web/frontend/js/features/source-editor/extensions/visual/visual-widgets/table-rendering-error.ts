@@ -40,4 +40,8 @@ export class TableRenderingErrorWidget extends WidgetType {
     }
     return element
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

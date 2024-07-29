@@ -74,4 +74,8 @@ export class FrameWidget extends WidgetType {
   ignoreEvent(event: Event) {
     return event.type !== 'mouseup'
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

@@ -33,6 +33,10 @@ export class BeginTheoremWidget extends BeginWidget {
     )
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   buildName(nameElement: HTMLSpanElement, view: EditorView) {
     nameElement.textContent = this.name
     if (this.argumentNode) {

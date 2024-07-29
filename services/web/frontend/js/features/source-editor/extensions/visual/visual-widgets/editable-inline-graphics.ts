@@ -40,6 +40,10 @@ export class EditableInlineGraphicsWidget extends EditableGraphicsWidget {
     return event.type !== 'mousedown' && event.type !== 'mouseup'
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   // We set the actual figure width on the span rather than the img element
   getFigureWidth(): string {
     return '100%'

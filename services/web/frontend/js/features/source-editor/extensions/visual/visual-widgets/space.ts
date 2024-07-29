@@ -24,6 +24,10 @@ export class SpaceWidget extends WidgetType {
   ignoreEvent(event: Event) {
     return event.type !== 'mousedown' && event.type !== 'mouseup'
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }
 
 // https://tex.stackexchange.com/a/74354

@@ -10,4 +10,8 @@ export class EndWidget extends WidgetType {
   eq(widget: EndWidget) {
     return true
   }
+
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
 }

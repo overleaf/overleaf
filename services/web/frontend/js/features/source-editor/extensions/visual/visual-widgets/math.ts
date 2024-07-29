@@ -65,6 +65,10 @@ export class MathWidget extends WidgetType {
     this.destroyed = true
   }
 
+  coordsAt(element: HTMLElement) {
+    return element.getBoundingClientRect()
+  }
+
   async renderMath(element: HTMLElement) {
     const MathJax = await loadMathJax()
 
