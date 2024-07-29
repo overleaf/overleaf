@@ -41,6 +41,15 @@ function loadModules() {
         `${moduleName}: module.viewIncludes moved into Settings.viewIncludes`
       )
     }
+    if (loadedModule.dependencies) {
+      for (const dependency of loadedModule.dependencies) {
+        if (!Settings.moduleImportSequence.includes(dependency)) {
+          throw new Error(
+            `Module '${dependency}' listed as a dependency of '${moduleName}' is missing in the moduleImportSequence. Please also verify that it is available in the current environment.`
+          )
+        }
+      }
+    }
   }
   _modulesLoaded = true
   attachHooks()
@@ -74,7 +83,7 @@ function loadViewIncludes(app) {
   _viewIncludes = Views.compileViewIncludes(app)
 }
 
-function registerMiddleware(appOrRouter, middlewareName, options) {
+function applyMiddleware(appOrRouter, middlewareName, options) {
   if (!middlewareName) {
     throw new Error(
       'middleware name must be provided to register module middleware'
@@ -173,7 +182,7 @@ module.exports = {
   loadViewIncludes,
   moduleIncludes,
   moduleIncludesAvailable,
-  registerMiddleware,
+  applyMiddleware,
   hooks: {
     attach: attachHook,
     fire: fireHook,

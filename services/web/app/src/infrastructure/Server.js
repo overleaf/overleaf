@@ -144,7 +144,7 @@ if (Settings.enabledServices.includes('web')) {
 
 app.use(metrics.http.monitor(logger))
 
-Modules.registerMiddleware(app, 'appMiddleware')
+Modules.applyMiddleware(app, 'appMiddleware')
 app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }))
 app.use(bodyParser.json({ limit: Settings.max_json_request_size }))
 app.use(methodOverride())
@@ -179,7 +179,7 @@ const sessionSecrets = [
 webRouter.use(cookieParser(sessionSecrets))
 webRouter.use(CookieMetrics.middleware)
 SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
-Modules.registerMiddleware(webRouter, 'sessionMiddleware', {
+Modules.applyMiddleware(webRouter, 'sessionMiddleware', {
   store: sessionStore,
 })
 webRouter.use(
