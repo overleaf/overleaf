@@ -56,7 +56,7 @@ function rateLimit(rateLimiter, opts = {}) {
   }
 }
 
-function loginRateLimit(req, res, next) {
+function loginRateLimitEmail(req, res, next) {
   const { email } = req.body
   if (!email) {
     return next()
@@ -83,7 +83,7 @@ function loginRateLimit(req, res, next) {
 
 const RateLimiterMiddleware = {
   rateLimit,
-  loginRateLimit,
+  loginRateLimitEmail,
 }
 
 module.exports = RateLimiterMiddleware

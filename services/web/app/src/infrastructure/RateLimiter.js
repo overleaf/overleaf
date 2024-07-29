@@ -120,11 +120,14 @@ const openProjectRateLimiter = new RateLimiter('open-project', {
 })
 
 // Keep in sync with the can-skip-captcha options.
-const overleafLoginRateLimiter = new RateLimiter('overleaf-login', {
-  points: 20,
-  subnetPoints: 200,
-  duration: 60,
-})
+const overleafLoginRateLimiter = new RateLimiter(
+  'overleaf-login',
+  Settings.rateLimit?.login?.ip || {
+    points: 20,
+    subnetPoints: 200,
+    duration: 60,
+  }
+)
 
 module.exports = {
   RateLimiter,

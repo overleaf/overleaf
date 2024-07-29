@@ -388,24 +388,6 @@ describe('AuthenticationController', function () {
       })
     })
 
-    describe('when the users rate limit', function () {
-      beforeEach(function () {
-        this.LoginRateLimiter.processLoginRequest.yields(null, false)
-      })
-
-      it('should block the request if the limit has been exceeded', function (done) {
-        this.AuthenticationController.doPassportLogin(
-          this.req,
-          this.req.body.email,
-          this.req.body.password,
-          this.cb
-        )
-        this.cb.callCount.should.equal(1)
-        this.cb.calledWith(null, null).should.equal(true)
-        done()
-      })
-    })
-
     describe('when the user is authenticated', function () {
       beforeEach(function () {
         this.cb = sinon.stub()

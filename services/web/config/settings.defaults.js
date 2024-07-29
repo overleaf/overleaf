@@ -727,6 +727,10 @@ module.exports = {
       everyone: process.env.RATE_LIMIT_AUTO_COMPILE_EVERYONE || 100,
       standard: process.env.RATE_LIMIT_AUTO_COMPILE_STANDARD || 25,
     },
+    login: {
+      ip: { points: 20, subnetPoints: 200, duration: 60 },
+      email: { points: 10, duration: 120 },
+    },
   },
 
   analytics: {

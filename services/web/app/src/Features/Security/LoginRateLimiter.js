@@ -1,14 +1,18 @@
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const { promisifyAll } = require('@overleaf/promise-utils')
+const Settings = require('@overleaf/settings')
 
-const rateLimiter = new RateLimiter('login', {
-  points: 10,
-  duration: 120,
-})
+const rateLimiterLoginEmail = new RateLimiter(
+  'login',
+  Settings.rateLimit?.login?.email || {
+    points: 10,
+    duration: 120,
+  }
+)
 
 function processLoginRequest(email, callback) {
-  rateLimiter
-    .consume(email, 1, { method: 'email' })
+  rateLimiterLoginEmail
+    .consume(email.trim().toLowerCase(), 1, { method: 'email' })
     .then(() => {
       callback(null, true)
     })
@@ -22,7 +26,7 @@ function processLoginRequest(email, callback) {
 }
 
 function recordSuccessfulLogin(email, callback) {
-  rateLimiter
+  rateLimiterLoginEmail
     .delete(email)
     .then(() => {
       callback()

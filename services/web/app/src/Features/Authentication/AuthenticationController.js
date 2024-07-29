@@ -212,91 +212,77 @@ const AuthenticationController = {
         if (info != null) {
           return done(null, false, info)
         }
-        LoginRateLimiter.processLoginRequest(email, function (err, isAllowed) {
-          if (err) {
-            return done(err)
-          }
-          if (!isAllowed) {
-            logger.debug({ email }, 'too many login requests')
-            return done(null, null, {
-              text: req.i18n.translate('to_many_login_requests_2_mins'),
-              type: 'error',
-              key: 'to-many-login-requests-2-mins',
-              status: 429,
-            })
-          }
-          const { fromKnownDevice } = AuthenticationController.getAuditInfo(req)
-          const auditLog = {
-            ipAddress: req.ip,
-            info: { method: 'Password login', fromKnownDevice },
-          }
-          AuthenticationManager.authenticate(
-            { email },
-            password,
-            auditLog,
-            {
-              enforceHIBPCheck: !fromKnownDevice,
-            },
-            function (error, user, isPasswordReused) {
-              if (error != null) {
-                if (error instanceof ParallelLoginError) {
-                  return done(null, false, { status: 429 })
-                } else if (error instanceof PasswordReusedError) {
-                  const text = `${req.i18n
-                    .translate(
-                      'password_compromised_try_again_or_use_known_device_or_reset'
-                    )
-                    .replace('<0>', '')
-                    .replace('</0>', ' (https://haveibeenpwned.com/passwords)')
-                    .replace('<1>', '')
-                    .replace(
-                      '</1>',
-                      ` (${Settings.siteUrl}/user/password/reset)`
-                    )}.`
-                  return done(null, false, {
-                    status: 400,
-                    type: 'error',
-                    key: 'password-compromised',
-                    text,
-                  })
-                }
-                return done(error)
-              }
-              if (
-                user &&
-                AuthenticationController.captchaRequiredForLogin(req, user)
-              ) {
-                done(null, false, {
-                  text: req.i18n.translate('cannot_verify_user_not_robot'),
-                  type: 'error',
-                  errorReason: 'cannot_verify_user_not_robot',
-                  status: 400,
-                })
-              } else if (user) {
-                if (
-                  isPasswordReused &&
-                  AuthenticationController.getRedirectFromSession(req) == null
-                ) {
-                  AuthenticationController.setRedirectInSession(
-                    req,
-                    '/compromised-password'
+        const { fromKnownDevice } = AuthenticationController.getAuditInfo(req)
+        const auditLog = {
+          ipAddress: req.ip,
+          info: { method: 'Password login', fromKnownDevice },
+        }
+        AuthenticationManager.authenticate(
+          { email },
+          password,
+          auditLog,
+          {
+            enforceHIBPCheck: !fromKnownDevice,
+          },
+          function (error, user, isPasswordReused) {
+            if (error != null) {
+              if (error instanceof ParallelLoginError) {
+                return done(null, false, { status: 429 })
+              } else if (error instanceof PasswordReusedError) {
+                const text = `${req.i18n
+                  .translate(
+                    'password_compromised_try_again_or_use_known_device_or_reset'
                   )
-                }
-
-                // async actions
-                done(null, user)
-              } else {
-                AuthenticationController._recordFailedLogin()
-                logger.debug({ email }, 'failed log in')
-                done(null, false, {
+                  .replace('<0>', '')
+                  .replace('</0>', ' (https://haveibeenpwned.com/passwords)')
+                  .replace('<1>', '')
+                  .replace(
+                    '</1>',
+                    ` (${Settings.siteUrl}/user/password/reset)`
+                  )}.`
+                return done(null, false, {
+                  status: 400,
                   type: 'error',
-                  key: 'invalid-password-retry-or-reset',
-                  status: 401,
+                  key: 'password-compromised',
+                  text,
                 })
               }
+              return done(error)
             }
-          )
-        })
+            if (
+              user &&
+              AuthenticationController.captchaRequiredForLogin(req, user)
+            ) {
+              done(null, false, {
+                text: req.i18n.translate('cannot_verify_user_not_robot'),
+                type: 'error',
+                errorReason: 'cannot_verify_user_not_robot',
+                status: 400,
+              })
+            } else if (user) {
+              if (
+                isPasswordReused &&
+                AuthenticationController.getRedirectFromSession(req) == null
+              ) {
+                AuthenticationController.setRedirectInSession(
+                  req,
+                  '/compromised-password'
+                )
+              }
+
+              // async actions
+              done(null, user)
+            } else {
+              AuthenticationController._recordFailedLogin()
+              logger.debug({ email }, 'failed log in')
+              done(null, false, {
+                type: 'error',
+                key: 'invalid-password-retry-or-reset',
+                status: 401,
+              })
+            }
+          }
+        )
       }
     )
   },
