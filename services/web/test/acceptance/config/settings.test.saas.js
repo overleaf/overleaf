@@ -7,12 +7,20 @@ const httpAuthPass = 'password'
 const httpAuthUsers = {}
 httpAuthUsers[httpAuthUser] = httpAuthPass
 
+const overleafHost =
+  process.env.V2_URL ||
+  `http://${process.env.HTTP_TEST_HOST || '127.0.0.1'}:23000`
+
 const overrides = {
+  appName: 'Overleaf',
+  siteUrl: overleafHost,
+
   enableSubscriptions: true,
 
   apis: {
     thirdPartyDataStore: {
       url: `http://127.0.0.1:23002`,
+      dropboxApp: 'Overleaf',
     },
     analytics: {
       url: `http://127.0.0.1:23050`,
@@ -34,6 +42,9 @@ const overrides = {
       url: `http://127.0.0.1:25000`,
       user: 'overleaf',
       pass: 'password',
+    },
+    tags: {
+      url: 'http://127.0.0.1:25000',
     },
   },
 
@@ -65,6 +76,18 @@ const overrides = {
         '2023.1-v3': 'this-is-a-weak-secret-for-tests-web-2023.1-v3',
       },
     },
+  },
+
+  overleaf: {
+    host: 'http://127.0.0.1:25000',
+    oauth: {
+      clientID: 'mock-oauth-client-id',
+      clientSecret: 'mock-oauth-client-secret',
+    },
+  },
+
+  analytics: {
+    enabled: true,
   },
 }
 
