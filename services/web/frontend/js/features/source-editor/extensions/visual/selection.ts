@@ -107,6 +107,14 @@ const mouseDownListener = EditorView.domEventHandlers({
       })
     })
   },
+  drop: (event: MouseEvent, view) => {
+    // treat a `drop` event as a `mouseup` event, which isn't fired
+    window.setTimeout(() => {
+      view.dispatch({
+        effects: mouseDownEffect.of(false),
+      })
+    })
+  },
 })
 
 const mousedownSelectionState = StateField.define<EditorSelection | undefined>({
