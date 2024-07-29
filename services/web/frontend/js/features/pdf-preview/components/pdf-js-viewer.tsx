@@ -1,4 +1,11 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  memo,
+  MouseEventHandler,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { debounce, throttle } from 'lodash'
 import PdfViewerControlsToolbar from './pdf-viewer-controls-toolbar'
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -244,16 +251,14 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         const textLayerDiv =
           textLayer.source.textLayerDiv ?? textLayer.source.textLayer.div
 
-        const pageElement = textLayerDiv.closest('.page')
+        if (!textLayerDiv.dataset.listeningForDoubleClick) {
+          textLayerDiv.dataset.listeningForDoubleClick = true
 
-        if (!pageElement.dataset.listeningForDoubleClick) {
-          pageElement.dataset.listeningForDoubleClick = true
-
-          const doubleClickListener = (event: Event) => {
+          const doubleClickListener: MouseEventHandler = event => {
             const clickPosition = pdfJsWrapper.clickPosition(
               event,
-              pageElement,
-              textLayer
+              textLayerDiv.closest('.page').querySelector('canvas'),
+              textLayer.pageNumber - 1
             )
 
             if (clickPosition) {
@@ -270,7 +275,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
             }
           }
 
-          pageElement.addEventListener('dblclick', doubleClickListener)
+          textLayerDiv.addEventListener('dblclick', doubleClickListener)
         }
       }
 
