@@ -337,90 +337,107 @@
   }
 
   .plans-license-picker-form {
-    margin-top: 25px;
+    margin-top: var(--spacing-08);
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
+    font-size: var(--font-size-03);
+    line-height: var(--line-height-03);
 
-    @media (max-width: @screen-xs-max) {
-      font-size: @font-size-small;
-      margin-top: 15px;
-      flex-direction: column;
+    .plans-license-picker-select-container {
+      span {
+        font-weight: 700;
+      }
     }
-  }
 
-  .plans-v2-license-picker-select {
-    background-color: @white;
-    border: 1px solid #cccccc;
-    width: 64px;
-    height: 30px;
-    margin: 0 @margin-sm;
-    padding-left: @padding-sm;
+    select {
+      background-color: @white;
+      border: 1px solid var(--neutral-60);
+      border-radius: var(--border-radius-base-new);
+      width: 53px;
+      height: 31px;
+      margin-left: var(--spacing-04);
+      padding: 5.5px var(--spacing-04);
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
 
-    @media (max-width: @screen-xs-max) {
-      margin: 0 15px;
+      @media (max-width: @screen-xs-max) {
+        margin: 0 15px;
+      }
     }
-  }
 
-  .plans-v2-license-picker-educational-discount {
-    display: flex;
-    align-items: center;
+    i {
+      margin-left: var(--spacing-04);
 
-    @media (max-width: @screen-xs-max) {
-      margin-top: 15px;
+      @media (max-width: @screen-xs-max) {
+        display: none;
+      }
     }
-  }
 
-  .plans-v2-license-picker-educational-discount-label {
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    font-weight: normal;
+    //- element is selected by shared JS with default variant
+    .plans-v2-license-picker-educational-discount {
+      display: flex;
+      align-items: center;
+      margin-left: var(--spacing-06);
 
-    &.disabled span {
-      color: @ol-blue-gray-2;
+      &.total-licenses-not-eligible-for-discount {
+        display: none;
+      }
+
+      @media (max-width: @screen-xs-max) {
+        margin-top: 15px;
+      }
     }
-  }
 
-  input[type='checkbox'].plans-v2-license-picker-educational-discount-checkbox {
-    margin-top: 0;
-    margin-right: @margin-sm;
+    label {
+      margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      font-weight: normal;
 
-    @media (max-width: @screen-xs-max) {
-      margin-right: 25px;
-      // scale the checkbox to around 30px width and height
-      transform: scale(2.307);
+      &.disabled span {
+        color: var(--neutral-40);
+      }
     }
-  }
 
-  i.plans-v2-license-picker-educational-discount-question-icon {
-    margin-left: @margin-xs;
+    input[type='checkbox'].plans-v2-license-picker-educational-discount-checkbox {
+      margin-top: 0;
+      margin-right: var(--spacing-04);
 
-    @media (max-width: @screen-xs-max) {
+      @media (max-width: @screen-xs-max) {
+        margin-right: 25px;
+        // scale the checkbox to around 30px width and height
+        transform: scale(2.307);
+      }
+    }
+
+    span.plans-v2-license-picker-educational-discount-learn-more-container {
       display: none;
-    }
-  }
 
-  span.plans-v2-license-picker-educational-discount-learn-more-container {
-    display: none;
+      @media (max-width: @screen-xs-max) {
+        margin-left: 5px;
+        display: inline;
+        // this white-space is important to ensure the "learn more" text won't get separated by a newline
+        white-space: nowrap;
+
+        span.plans-v2-license-picker-educational-discount-learn-more-text {
+          color: @plans-learn-more-link-color;
+        }
+
+        .tooltip {
+          // force white-space to have initial value since the `white-space: nowrap` rule
+          // on .plans-v2-license-picker-educational-discount-learn-more-container selector (the current code block) above
+          // will also affect every child inside of it, including the generated tooltip
+          white-space: initial;
+        }
+      }
+    }
 
     @media (max-width: @screen-xs-max) {
-      margin-left: 5px;
-      display: inline;
-      // this white-space is important to ensure the "learn more" text won't get separated by a newline
-      white-space: nowrap;
-
-      span.plans-v2-license-picker-educational-discount-learn-more-text {
-        color: @plans-learn-more-link-color;
-      }
-
-      .tooltip {
-        // force white-space to have initial value since the `white-space: nowrap` rule
-        // on .plans-v2-license-picker-educational-discount-learn-more-container selector (the current code block) above
-        // will also affect every child inside of it, including the generated tooltip
-        white-space: initial;
-      }
+      font-size: var(--font-size-02);
+      margin-top: var(--spacing-06);
+      flex-direction: column;
     }
   }
 
@@ -447,7 +464,11 @@
   }
 
   .plans-table-group {
-    margin-top: 26px + @plans-highlighted-text-height-desktop;
+    margin-top: 40px + @plans-highlighted-text-height-desktop;
+
+    @media (max-width: @screen-xs-max) {
+      margin-top: 40px + @plans-highlighted-text-height-mobile;
+    }
   }
 
   .plans-table {
@@ -731,6 +752,12 @@
 
     tr.plans-table-divider {
       background-color: var(--neutral-10);
+
+      .plans-table-cell-divider-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
       // direct child selector to NOT affect the generated tooltip
       td > div {
@@ -1067,7 +1094,8 @@
 
     .plans-table-sticky-header-without-switch {
       margin-bottom: -107px;
-      margin-top: @plans-table-sticky-header-size;
+      margin-top: @plans-highlighted-text-height-mobile + 40px +
+        @table-border-size;
     }
 
     .plans-table-sticky-header-with-switch {

@@ -78,6 +78,13 @@ export function updateMainGroupPlanPricing() {
     )
     .classList.toggle('disabled', notEligibleForEducationalDiscount)
 
+  formEl
+    .querySelector('.plans-v2-license-picker-educational-discount')
+    .classList.toggle(
+      'total-licenses-not-eligible-for-discount',
+      notEligibleForEducationalDiscount
+    )
+
   formEl.querySelector(
     '[data-ol-plans-v2-license-picker-educational-discount-input]'
   ).disabled = notEligibleForEducationalDiscount

@@ -133,14 +133,14 @@ mixin plans_table(period, config)
 				)
 					.plans-table-cell-divider
 						//- all cells need 2 layers of divs for handling border and padding. See .plans-table in CSS for more details
-						div
+						.plans-table-cell-divider-content
 							b.plans-table-divider-label #{translate(featuresPerSection.dividerLabel)}
 							//- will only appear on screen width >= 768px (using CSS)
-							i.fa.fa-question-circle(
+							i.material-symbols.material-symbols-outlined.icon-sm(
 								data-toggle="tooltip"
 								title=translate(featuresPerSection.dividerInfo),
 								data-placement="top"
-							)
+							) help
 							//- will only appear on screen width < 768px (using CSS)
 							span.plans-table-divider-learn-more-container
 								span (
@@ -168,11 +168,11 @@ mixin plans_table(period, config)
 							if feature.info
 								span #{translate(feature.feature)}
 								//- will only appear on screen width >= 768px (using CSS)
-								i.fa.fa-question-circle.plans-table-feature-question-icon(
+								i.material-symbols.material-symbols-outlined.icon-sm.plans-table-feature-question-icon(
 									data-toggle="tooltip"
 									title=translate(feature.info),
 									data-placement="right"
-								)
+								) help
 								//- will only appear on screen width < 768px (using CSS)
 								span.plans-table-feature-learn-more-container
 									span (
@@ -236,9 +236,9 @@ mixin table_head_group_total_per_year(groupPlan)
 
 mixin group_plans_license_picker()
 	form.plans-license-picker-form(data-ol-plans-v2-license-picker-form)
-		.plans-v2-license-picker-select-container
+		.plans-license-picker-select-container
 			span #{translate("number_of_users_with_colon")}
-			select.plans-v2-license-picker-select(
+			select(
 				name="plans-v2-license-picker-select"
 				id="plans-v2-license-picker-select"
 				autocomplete="off"
@@ -256,7 +256,7 @@ mixin group_plans_license_picker()
 				option(value="20") 20
 				option(value="50") 50
 		.plans-v2-license-picker-educational-discount
-			label.plans-v2-license-picker-educational-discount-label(data-ol-plans-v2-license-picker-educational-discount-label)
+			label(data-ol-plans-v2-license-picker-educational-discount-label)
 				input.plans-v2-license-picker-educational-discount-checkbox(
 					type="checkbox"
 					id="license-picker-educational-discount"
@@ -269,11 +269,12 @@ mixin group_plans_license_picker()
 				)
 				span #{translate("apply_educational_discount")}
 			//- will only appear on screen width >= 768px (using CSS)
-			i.fa.fa-question-circle.plans-v2-license-picker-educational-discount-question-icon(
+			i.material-symbols.material-symbols-outlined.icon-sm(
 				data-toggle="tooltip"
 				title=translate("apply_educational_discount_info"),
 				data-placement="bottom"
-			)
+			) help
+			
 			//- will only appear on screen width < 768px (using CSS)
 			span.plans-v2-license-picker-educational-discount-learn-more-container
 				span (
