@@ -840,11 +840,39 @@
     margin-top: var(--spacing-08);
     text-align: center;
 
+    &:last-child {
+      margin-bottom: var(--spacing-11);
+    }
+
+    &:not(:last-child) {
+      margin-bottom: var(--spacing-08);
+    }
+
     .plans-price-disclaimer-icons {
       display: flex;
       justify-content: center;
       gap: var(--spacing-04);
     }
+  }
+}
+
+.plans-overleaf-common-request {
+  color: var(--neutral-90);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: var(--spacing-04) var(--spacing-08);
+  text-align: center;
+  gap: var(--spacing-06);
+
+  @media (max-width: @screen-xs-max) {
+    flex-direction: column;
+    margin: 0;
+  }
+
+  a {
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
   }
 }
 
