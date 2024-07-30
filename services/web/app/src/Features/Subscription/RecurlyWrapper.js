@@ -579,7 +579,7 @@ const promises = {
   async attemptInvoiceCollection(invoiceId) {
     return await RecurlyWrapper.promises.apiRequest({
       url: `invoices/${invoiceId}/collect`,
-      method: 'put',
+      method: 'PUT',
     })
   },
 
@@ -639,7 +639,7 @@ const promises = {
     try {
       await RecurlyWrapper.promises.apiRequest({
         url: 'coupons',
-        method: 'post',
+        method: 'POST',
         body: requestBody,
       })
     } catch (error) {
@@ -677,7 +677,7 @@ const promises = {
     try {
       await RecurlyWrapper.promises.apiRequest({
         url: `coupons/${couponCode}/redeem`,
-        method: 'post',
+        method: 'POST',
         body: requestBody,
       })
     } catch (error) {
@@ -703,7 +703,7 @@ const promises = {
       await RecurlyWrapper.promises.apiRequest({
         url: `subscriptions/${subscriptionId}/postpone`,
         qs: { bulk: false, next_bill_date: nextRenewalDate },
-        method: 'put',
+        method: 'PUT',
       })
     } catch (error) {
       logger.warn(

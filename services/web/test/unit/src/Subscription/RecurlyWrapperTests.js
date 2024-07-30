@@ -378,7 +378,7 @@ describe('RecurlyWrapper', function () {
         .stub(this.RecurlyWrapper.promises, 'apiRequest')
         .callsFake(options => {
           options.url.should.equal(`coupons/${this.coupon_code}/redeem`)
-          options.method.should.equal('post')
+          options.method.should.equal('POST')
           return {}
         })
       await this.RecurlyWrapper.promises.redeemCoupon(
