@@ -78,7 +78,9 @@ describe('AuthenticationController', function () {
         '../../infrastructure/RequestContentTypeDetection': {
           acceptsJson: (this.acceptsJson = sinon.stub().returns(false)),
         },
-        './AuthenticationManager': (this.AuthenticationManager = {}),
+        './AuthenticationManager': (this.AuthenticationManager = {
+          promises: {},
+        }),
         '../User/UserUpdater': (this.UserUpdater = {
           updateUser: sinon.stub(),
         }),
@@ -86,6 +88,10 @@ describe('AuthenticationController', function () {
         '../Security/LoginRateLimiter': (this.LoginRateLimiter = {
           processLoginRequest: sinon.stub(),
           recordSuccessfulLogin: sinon.stub(),
+          promises: {
+            processLoginRequest: sinon.stub(),
+            recordSuccessfulLogin: sinon.stub(),
+          },
         }),
         '../User/UserHandler': (this.UserHandler = {
           setupLoginData: sinon.stub(),
@@ -365,74 +371,95 @@ describe('AuthenticationController', function () {
       this.cb = sinon.stub()
     })
 
-    describe('when the preDoPassportLogin hooks produce an info object', function () {
+    describe('when the authentication errors', function () {
       beforeEach(function () {
-        this.Modules.hooks.fire = sinon
-          .stub()
-          .yields(null, [null, { redir: '/somewhere' }, null])
+        this.LoginRateLimiter.promises.processLoginRequest.resolves(true)
+        this.errorsWith = (error, done) => {
+          this.AuthenticationManager.promises.authenticate = sinon
+            .stub()
+            .rejects(error)
+          this.AuthenticationController.doPassportLogin(
+            this.req,
+            this.req.body.email,
+            this.req.body.password,
+            this.cb.callsFake(() => done())
+          )
+        }
       })
-
-      it('should stop early and call done with this info object', function (done) {
-        this.AuthenticationController.doPassportLogin(
-          this.req,
-          this.req.body.email,
-          this.req.body.password,
-          this.cb
-        )
-        this.cb.callCount.should.equal(1)
-        this.cb
-          .calledWith(null, false, { redir: '/somewhere' })
-          .should.equal(true)
-        this.LoginRateLimiter.processLoginRequest.callCount.should.equal(0)
-        done()
+      describe('with "password is too long"', function () {
+        beforeEach(function (done) {
+          this.errorsWith(new Error('password is too long'), done)
+        })
+        it('should send a 429', function () {
+          this.cb.should.have.been.calledWith(undefined, false, {
+            status: 422,
+            type: 'error',
+            key: 'password-too-long',
+            text: 'password_too_long_please_reset',
+          })
+        })
+      })
+      describe('with ParallelLoginError', function () {
+        beforeEach(function (done) {
+          this.errorsWith(new AuthenticationErrors.ParallelLoginError(), done)
+        })
+        it('should send a 429', function () {
+          this.cb.should.have.been.calledWith(undefined, false, {
+            status: 429,
+          })
+        })
+      })
+      describe('with PasswordReusedError', function () {
+        beforeEach(function (done) {
+          this.errorsWith(new AuthenticationErrors.PasswordReusedError(), done)
+        })
+        it('should send a 400', function () {
+          this.cb.should.have.been.calledWith(undefined, false, {
+            status: 400,
+            type: 'error',
+            key: 'password-compromised',
+            text: 'password_compromised_try_again_or_use_known_device_or_reset.',
+          })
+        })
+      })
+      describe('with another error', function () {
+        const err = new Error('unhandled error')
+        beforeEach(function (done) {
+          this.errorsWith(err, done)
+        })
+        it('should send a 400', function () {
+          this.cb.should.have.been.calledWith(err)
+        })
       })
     })
 
     describe('when the user is authenticated', function () {
       beforeEach(function () {
         this.cb = sinon.stub()
-        this.LoginRateLimiter.processLoginRequest.yields(null, true)
-        this.AuthenticationManager.authenticate = sinon
+        this.LoginRateLimiter.promises.processLoginRequest.resolves(true)
+        this.AuthenticationManager.promises.authenticate = sinon
           .stub()
-          .yields(null, this.user)
+          .resolves({ user: this.user })
         this.req.sessionID = Math.random()
       })
 
       describe('happy path', function () {
-        beforeEach(function () {
+        beforeEach(function (done) {
           this.AuthenticationController.doPassportLogin(
             this.req,
             this.req.body.email,
             this.req.body.password,
-            this.cb
+            this.cb.callsFake(() => done())
           )
         })
         it('should attempt to authorise the user', function () {
-          this.AuthenticationManager.authenticate
+          this.AuthenticationManager.promises.authenticate
             .calledWith({ email: this.email.toLowerCase() }, this.password)
             .should.equal(true)
         })
 
         it("should establish the user's session", function () {
-          this.cb.calledWith(null, this.user).should.equal(true)
-        })
-      })
-
-      describe('when authenticate flags a parallel login', function () {
-        beforeEach(function () {
-          this.AuthenticationManager.authenticate = sinon
-            .stub()
-            .yields(new AuthenticationErrors.ParallelLoginError())
-          this.AuthenticationController.doPassportLogin(
-            this.req,
-            this.req.body.email,
-            this.req.body.password,
-            this.cb
-          )
-        })
-
-        it('should send a 429', function () {
-          this.cb.should.have.been.calledWith(null, false, { status: 429 })
+          this.cb.calledWith(undefined, this.user).should.equal(true)
         })
       })
 
@@ -442,50 +469,50 @@ describe('AuthenticationController', function () {
         })
 
         describe('with captcha disabled', function () {
-          beforeEach(function () {
+          beforeEach(function (done) {
             this.req.__authAuditInfo.captcha = 'disabled'
             this.AuthenticationController.doPassportLogin(
               this.req,
               this.req.body.email,
               this.req.body.password,
-              this.cb
+              this.cb.callsFake(() => done())
             )
           })
 
           it('should let the user log in', function () {
-            this.cb.should.have.been.calledWith(null, this.user)
+            this.cb.should.have.been.calledWith(undefined, this.user)
           })
         })
 
         describe('with a solved captcha', function () {
-          beforeEach(function () {
+          beforeEach(function (done) {
             this.req.__authAuditInfo.captcha = 'solved'
             this.AuthenticationController.doPassportLogin(
               this.req,
               this.req.body.email,
               this.req.body.password,
-              this.cb
+              this.cb.callsFake(() => done())
             )
           })
 
           it('should let the user log in', function () {
-            this.cb.should.have.been.calledWith(null, this.user)
+            this.cb.should.have.been.calledWith(undefined, this.user)
           })
         })
 
         describe('with a skipped captcha', function () {
-          beforeEach(function () {
+          beforeEach(function (done) {
             this.req.__authAuditInfo.captcha = 'skipped'
             this.AuthenticationController.doPassportLogin(
               this.req,
               this.req.body.email,
               this.req.body.password,
-              this.cb
+              this.cb.callsFake(() => done())
             )
           })
 
           it('should request a captcha', function () {
-            this.cb.should.have.been.calledWith(null, false, {
+            this.cb.should.have.been.calledWith(undefined, false, {
               text: 'cannot_verify_user_not_robot',
               type: 'error',
               errorReason: 'cannot_verify_user_not_robot',
@@ -497,12 +524,12 @@ describe('AuthenticationController', function () {
     })
 
     describe('when the user is not authenticated', function () {
-      beforeEach(function () {
-        this.LoginRateLimiter.processLoginRequest.yields(null, true)
-        this.AuthenticationManager.authenticate = sinon
+      beforeEach(function (done) {
+        this.LoginRateLimiter.promises.processLoginRequest.resolves(true)
+        this.AuthenticationManager.promises.authenticate = sinon
           .stub()
-          .yields(null, null)
-        this.cb = sinon.stub()
+          .resolves({ user: null })
+        this.cb = sinon.stub().callsFake(() => done())
         this.AuthenticationController.doPassportLogin(
           this.req,
           this.req.body.email,

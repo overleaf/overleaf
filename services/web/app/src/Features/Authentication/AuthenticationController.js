@@ -22,13 +22,10 @@ const AnalyticsRegistrationSourceHelper = require('../Analytics/AnalyticsRegistr
 const {
   acceptsJson,
 } = require('../../infrastructure/RequestContentTypeDetection')
-const {
-  ParallelLoginError,
-  PasswordReusedError,
-} = require('./AuthenticationErrors')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Modules = require('../../infrastructure/Modules')
 const { expressify, promisify } = require('@overleaf/promise-utils')
+const { handleAuthenticateErrors } = require('./AuthenticationErrors')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -198,93 +195,88 @@ const AuthenticationController = {
     )
   },
 
-  doPassportLogin(req, username, password, done) {
+  async doPassportLogin(req, username, password, done) {
+    let user, info
+    try {
+      ;({ user, info } = await AuthenticationController._doPassportLogin(
+        req,
+        username,
+        password
+      ))
+    } catch (error) {
+      return done(error)
+    }
+    return done(undefined, user, info)
+  },
+
+  /**
+   *
+   * @param req
+   * @param username
+   * @param password
+   * @returns {Promise<{ user: any, info: any}>}
+   */
+  async _doPassportLogin(req, username, password) {
     const email = username.toLowerCase()
-    Modules.hooks.fire(
-      'preDoPassportLogin',
-      req,
-      email,
-      function (err, infoList) {
-        if (err) {
-          return done(err)
-        }
-        const info = infoList.find(i => i != null)
-        if (info != null) {
-          return done(null, false, info)
-        }
-        const { fromKnownDevice } = AuthenticationController.getAuditInfo(req)
-        const auditLog = {
-          ipAddress: req.ip,
-          info: { method: 'Password login', fromKnownDevice },
-        }
-        AuthenticationManager.authenticate(
+    const { fromKnownDevice } = AuthenticationController.getAuditInfo(req)
+    const auditLog = {
+      ipAddress: req.ip,
+      info: { method: 'Password login', fromKnownDevice },
+    }
+
+    let user, isPasswordReused
+    try {
+      ;({ user, isPasswordReused } =
+        await AuthenticationManager.promises.authenticate(
           { email },
           password,
           auditLog,
           {
             enforceHIBPCheck: !fromKnownDevice,
-          },
-          function (error, user, isPasswordReused) {
-            if (error != null) {
-              if (error instanceof ParallelLoginError) {
-                return done(null, false, { status: 429 })
-              } else if (error instanceof PasswordReusedError) {
-                const text = `${req.i18n
-                  .translate(
-                    'password_compromised_try_again_or_use_known_device_or_reset'
-                  )
-                  .replace('<0>', '')
-                  .replace('</0>', ' (https://haveibeenpwned.com/passwords)')
-                  .replace('<1>', '')
-                  .replace(
-                    '</1>',
-                    ` (${Settings.siteUrl}/user/password/reset)`
-                  )}.`
-                return done(null, false, {
-                  status: 400,
-                  type: 'error',
-                  key: 'password-compromised',
-                  text,
-                })
-              }
-              return done(error)
-            }
-            if (
-              user &&
-              AuthenticationController.captchaRequiredForLogin(req, user)
-            ) {
-              done(null, false, {
-                text: req.i18n.translate('cannot_verify_user_not_robot'),
-                type: 'error',
-                errorReason: 'cannot_verify_user_not_robot',
-                status: 400,
-              })
-            } else if (user) {
-              if (
-                isPasswordReused &&
-                AuthenticationController.getRedirectFromSession(req) == null
-              ) {
-                AuthenticationController.setRedirectInSession(
-                  req,
-                  '/compromised-password'
-                )
-              }
-
-              // async actions
-              done(null, user)
-            } else {
-              AuthenticationController._recordFailedLogin()
-              logger.debug({ email }, 'failed log in')
-              done(null, false, {
-                type: 'error',
-                key: 'invalid-password-retry-or-reset',
-                status: 401,
-              })
-            }
           }
+        ))
+    } catch (error) {
+      return {
+        user: false,
+        info: handleAuthenticateErrors(error, req),
+      }
+    }
+
+    if (user && AuthenticationController.captchaRequiredForLogin(req, user)) {
+      return {
+        user: false,
+        info: {
+          text: req.i18n.translate('cannot_verify_user_not_robot'),
+          type: 'error',
+          errorReason: 'cannot_verify_user_not_robot',
+          status: 400,
+        },
+      }
+    } else if (user) {
+      if (
+        isPasswordReused &&
+        AuthenticationController.getRedirectFromSession(req) == null
+      ) {
+        AuthenticationController.setRedirectInSession(
+          req,
+          '/compromised-password'
         )
       }
-    )
+
+      // async actions
+      return { user, info: undefined }
+    } else {
+      AuthenticationController._recordFailedLogin()
+      logger.debug({ email }, 'failed log in')
+      return {
+        user: false,
+        info: {
+          type: 'error',
+          key: 'invalid-password-retry-or-reset',
+          status: 401,
+        },
+      }
+    }
   },
 
   captchaRequiredForLogin(req, user) {
