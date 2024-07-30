@@ -35,7 +35,6 @@ SandboxedModule.configure({
     '@overleaf/logger': stubs.logger,
     'timers/promises': timersPromises,
     'mongodb-legacy': require('mongodb-legacy'),
-    bson: require('bson'),
   },
   globals: { Buffer, JSON, Math, console, process },
 })
