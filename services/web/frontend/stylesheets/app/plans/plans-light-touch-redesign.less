@@ -1,7 +1,7 @@
 // m-a stands for: monthly annual
 @plans-top-switch-item-height: 34px;
 @plans-top-switch-item-border-radius: @plans-top-switch-item-height / 2;
-@plans-m-a-switch-height: 34px;
+@plans-m-a-switch-height: 20px;
 @plans-highlighted-text-height-desktop: 32px;
 @plans-highlighted-text-height-mobile: 41px;
 @plans-learn-more-link-color: hsl(206, 100%, 52%);
@@ -189,27 +189,18 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    margin-top: @margin-xl;
+    margin-top: var(--spacing-10);
 
     .underline {
       text-decoration: underline;
     }
 
     &.disabled {
-      span {
-        color: @ol-blue-gray-2;
-      }
-
-      label {
-        input + span {
-          background-color: @ol-blue-gray-2;
-          cursor: not-allowed;
-        }
-      }
+      display: none;
     }
 
     @media (max-width: @screen-xs-max) {
-      margin-top: 25px;
+      margin-top: var(--spacing-08);
 
       &[data-ol-current-view='group'] {
         display: none;
@@ -219,9 +210,9 @@
     label {
       position: relative;
       display: inline-block;
-      width: 60px;
+      width: 34px;
       height: @plans-m-a-switch-height;
-      margin: 0 @margin-lg;
+      margin: 0 var(--spacing-05);
 
       input {
         opacity: 0;
@@ -234,11 +225,11 @@
       }
 
       input:checked + span {
-        background-color: @ol-blue-gray-4;
+        background-color: var(--neutral-70);
       }
 
       input:checked + span::before {
-        transform: translateX(26px);
+        transform: translateX(14px);
       }
 
       span {
@@ -254,10 +245,10 @@
         &::before {
           position: absolute;
           content: '';
-          height: 32px;
-          width: 32px;
-          left: 1px;
-          bottom: 1px;
+          height: 16px;
+          width: 16px;
+          left: 2px;
+          bottom: 2px;
           background-color: @white;
           transition: 0.4s;
           border-radius: 50%;
@@ -273,10 +264,12 @@
       position: absolute;
       color: @white;
       width: auto;
-      border-radius: 4px;
-      right: 110%;
+      border-radius: var(--border-radius-base-new);
+      margin-right: var(--spacing-05);
+      right: 100%;
       top: 0;
       z-index: 0;
+      font-weight: 600;
 
       &.tooltip.in.left {
         .tooltip-inner {
