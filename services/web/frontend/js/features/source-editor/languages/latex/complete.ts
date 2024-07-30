@@ -269,11 +269,7 @@ const analyticsSourceBuilder = (debounceTimes: number[]) => {
       counters.forEach(debouncedCounter => {
         result[`${debouncedCounter.debounceTime}ms`] = debouncedCounter.counter
       })
-      sendMBSampled(
-        'cite-key-search',
-        { searchesForDebouncedTime: result },
-        0.01
-      )
+      sendMBSampled('cite-key-search', result, 0.05)
       timeoutId = 0
       resetCounters()
     }, CITE_ANALYTICS_REPORT_TIMEOUT)
