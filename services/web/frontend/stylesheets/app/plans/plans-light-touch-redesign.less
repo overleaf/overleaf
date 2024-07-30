@@ -531,8 +531,11 @@
       // padding
       > div {
         padding: var(--spacing-05) var(--spacing-08);
-        @media (max-width: @screen-xs-max) {
+        @media (max-width: @screen-sm-max) {
           padding: var(--spacing-05);
+        }
+        @media (max-width: @screen-xs-max) {
+          padding: var(--spacing-03);
         }
       }
       // padding adjustments
@@ -944,26 +947,24 @@
     @media (max-width: @screen-xs-max) {
       display: flex;
       flex-direction: column;
+
+      .btn {
+        .btn-xs;
+      }
     }
   }
 
   .visible-desktop,
-  .visible-tablet,
-  .visible-mobile {
+  .visible-mobile-and-tablet {
     display: none;
   }
-  @media (min-width: (@screen-md-max+1)) {
+  @media (min-width: (@screen-lg-min)) {
     .visible-desktop {
       display: inline-block;
     }
   }
-  @media (min-width: (@screen-xs-max+1)) and (max-width: @screen-md-max) {
-    .visible-tablet {
-      display: inline-block;
-    }
-  }
-  @media (max-width: @screen-xs-max) {
-    .visible-mobile {
+  @media (max-width: @screen-md-max) {
+    .visible-mobile-and-tablet {
       display: inline-block;
     }
   }
