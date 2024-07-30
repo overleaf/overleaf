@@ -7,14 +7,16 @@ export function toggleMonthlyAnnualSwitching(
   const containerEl = document.querySelector(
     '[data-ol-plans-v2-m-a-switch-container]'
   )
-  const checkbox = containerEl.querySelector('input[type="checkbox"]')
+  if (containerEl) {
+    const checkbox = containerEl.querySelector('input[type="checkbox"]')
 
-  containerEl.classList.toggle('disabled', view === 'group')
+    containerEl.classList.toggle('disabled', view === 'group')
 
-  checkbox.disabled = view === 'group'
-  checkbox.checked = currentMonthlyAnnualSwitchValue === 'monthly'
+    checkbox.disabled = view === 'group'
+    checkbox.checked = currentMonthlyAnnualSwitchValue === 'monthly'
 
-  switchMonthlyAnnual(currentMonthlyAnnualSwitchValue)
+    switchMonthlyAnnual(currentMonthlyAnnualSwitchValue)
+  }
 }
 
 export function switchMonthlyAnnual(currentMonthlyAnnualSwitchValue) {

@@ -117,14 +117,24 @@ function selectTab(viewTab) {
     el.hidden = el.getAttribute('data-ol-plans-v2-view') !== viewTab
   })
 
-  document.querySelector('[data-ol-plans-v2-m-a-tooltip]').hidden =
-    viewTab === 'group'
-  document.querySelector('[data-ol-plans-v2-license-picker-container]').hidden =
-    viewTab !== 'group'
+  const tooltipEl = document.querySelector('[data-ol-plans-v2-m-a-tooltip]')
+  if (tooltipEl) {
+    tooltipEl.hidden = viewTab === 'group'
+  }
 
-  document
-    .querySelector('[data-ol-plans-v2-m-a-switch-container]')
-    .setAttribute('data-ol-current-view', viewTab)
+  const licensePickerEl = document.querySelector(
+    '[data-ol-plans-v2-license-picker-container]'
+  )
+  if (licensePickerEl) {
+    licensePickerEl.hidden = viewTab !== 'group'
+  }
+
+  const monthlyAnnualSwitch = document.querySelector(
+    '[data-ol-plans-v2-m-a-switch-container]'
+  )
+  if (monthlyAnnualSwitch) {
+    monthlyAnnualSwitch.setAttribute('data-ol-current-view', viewTab)
+  }
 
   if (viewTab === 'group') {
     updateMainGroupPlanPricing()
@@ -208,8 +218,9 @@ function setUpGroupPlanPricingChange() {
 
 function toggleUniversityInfo(viewTab) {
   const el = document.querySelector('[data-ol-plans-university-info-container]')
-
-  el.hidden = viewTab !== 'student'
+  if (el) {
+    el.hidden = viewTab !== 'student'
+  }
 }
 
 // This is the old scheme for hashing redirection
