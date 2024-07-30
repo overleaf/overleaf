@@ -233,7 +233,7 @@ mixin table_head_group_collaborator(highlighted, eventTrackingKey, additionalEve
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("group_standard")}
 		.plans-v2-table-price-container
-			strike.plans-v2-table-price-before-discount
+			s.plans-v2-table-price-before-discount
 				+gen_localized_price_for_plan_view('collaborator', 'annual')
 			p.plans-v2-table-price
 				span(data-ol-plans-v2-group-price-per-user='collaborator') #{initialLocalizedGroupPrice.pricePerUser.collaborator}
@@ -254,7 +254,7 @@ mixin table_head_group_professional(highlighted, eventTrackingKey, additionalEve
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("group_professional")}
 		.plans-v2-table-price-container
-			strike.plans-v2-table-price-before-discount
+			s.plans-v2-table-price-before-discount
 				+gen_localized_price_for_plan_view('professional', 'annual')
 			p.plans-v2-table-price
 				span(data-ol-plans-v2-group-price-per-user='professional') #{initialLocalizedGroupPrice.pricePerUser.professional}
@@ -347,7 +347,7 @@ mixin table_head_student_university(highlighted, eventTrackingKey, additionalEve
 mixin table_head_price(plan, period)
 	div.plans-v2-table-price-container
 		if plan !== 'free' && period === 'annual'
-			strike.plans-v2-table-price-before-discount
+			s.plans-v2-table-price-before-discount
 				+gen_localized_price_for_plan_view(plan, 'monthlyTimesTwelve')
 		p.plans-v2-table-price
 			+gen_localized_price_for_plan_view(plan, period)
