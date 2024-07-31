@@ -18,6 +18,8 @@
 
 @nondiscounted-price-element-height: var(--line-height-02);
 
+@group-member-picker-height: 24px;
+
 .plans-new-design {
   padding-top: calc(var(--spacing-16) + var(--header-height));
 
@@ -134,9 +136,7 @@
 
         // tab navigation focus style
         &:focus-visible {
-          // https://stackoverflow.com/a/38571103
-          outline: auto 2px Highlight; // firefox
-          outline: auto 5px -webkit-focus-ring-color;
+          &:extend(.input-focus-style);
           background-color: white;
         }
 
@@ -411,6 +411,106 @@
 
     .plans-new-table-cta {
       margin-top: auto;
+    }
+  }
+
+  .plans-new-group-member-picker-container {
+    .plans-new-group-member-picker-text {
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
+      font-weight: 600;
+      margin-bottom: var(--spacing-02);
+    }
+
+    .plans-new-group-member-picker {
+      position: relative;
+
+      .plans-new-group-member-picker-button {
+        width: 100%;
+        background-color: white;
+        border-radius: var(--border-radius-base-new);
+        border: 1px solid var(--neutral-60);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--spacing-01) var(--spacing-03);
+        margin-bottom: var(--spacing-04);
+        height: @group-member-picker-height;
+        font-size: var(--font-size-02);
+        line-height: var(--line-height-02);
+      }
+
+      ul.plans-new-group-member-picker-list {
+        list-style-type: none;
+        margin-bottom: 0;
+        overflow: auto; // to enable box-shadow
+        box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
+        padding: var(--spacing-02);
+        position: absolute;
+        top: @group-member-picker-height;
+        background-color: white;
+        width: 100%;
+        margin-top: var(--spacing-01);
+      }
+
+      li {
+        position: relative;
+        border-radius: var(--border-radius-base-new);
+
+        &:not(:last-child) {
+          margin-bottom: var(--spacing-02);
+        }
+
+        &:hover {
+          background-color: var(--neutral-10);
+        }
+
+        input[type='radio'] {
+          position: absolute;
+          opacity: 0;
+          cursor: pointer;
+
+          &:focus + label {
+            &:extend(.input-focus-style);
+          }
+        }
+
+        input[type='radio']:checked + label {
+          background-color: var(--green-10);
+          color: var(--green-70);
+          position: relative;
+          word-wrap: break-word;
+
+          &::after {
+            content: url(../../../../public/img/material-icons/check-green-20.svg);
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+
+            @media (max-width: @screen-sm-max) {
+              right: var(--spacing-04);
+            }
+          }
+        }
+
+        label {
+          width: 100%;
+          font-size: var(--font-size-02);
+          line-height: var(--line-height-02);
+          padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
+            var(--spacing-04);
+          margin-bottom: var(--spacing-00);
+          font-weight: 400;
+          cursor: pointer;
+          border-radius: var(--border-radius-base-new);
+
+          .list-item-footer {
+            font-size: var(--font-size-01);
+            line-height: var(--line-height-01);
+          }
+        }
+      }
     }
   }
 
