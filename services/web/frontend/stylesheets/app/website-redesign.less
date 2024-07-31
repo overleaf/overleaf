@@ -1091,11 +1091,7 @@
 
     @media (max-width: @screen-xs-max) {
       width: 100%;
-      // this is currently useful for responsive-button-container that has two buttons
-      // in our current implementation, all two-buttons container will have the same value (explore plan + sign up)
-      // we want to sign up to be on the right side on big screen, and on the top on small screen
-      // if we want to apply this style for different buttons scenario, we should change this
-      flex-direction: column-reverse;
+      flex-direction: column;
     }
   }
 
