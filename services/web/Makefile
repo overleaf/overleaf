@@ -423,6 +423,10 @@ lint: lint_flag_res_send_usage
 lint_flag_res_send_usage:
 	bin/lint_flag_res_send_usage
 
+lint: lint_overleafModuleImports
+lint_overleafModuleImports:
+	node scripts/check_overleafModuleImports.js
+
 lint: typecheck_frontend
 typecheck_frontend:
 	npx -p typescript tsc --noEmit
