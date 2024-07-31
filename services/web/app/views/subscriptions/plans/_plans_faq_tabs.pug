@@ -137,5 +137,6 @@ mixin overleafGroupPlans()
 			.collapse(id="overleafGroupPlansQ4")
 				.custom-accordion-body
 					| Yes. To add more users to your subscription you’ll need to 
-					a.inline-green-link(href="/contact") contact us. 
+					button.btn-link.inline-green-link(data-ol-open-contact-form-modal="contact-us")
+						span #{translate("contact_us")}
 
