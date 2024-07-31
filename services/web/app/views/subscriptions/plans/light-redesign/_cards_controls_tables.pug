@@ -1,6 +1,6 @@
 include ./_mixins
 
-.row.plans-top-switch
+.row.plans-top-switch.text-center
 	.col-xs-12
 		ul.nav(role="tablist")
 			li.active.plans-switch-individual(
@@ -11,7 +11,11 @@ include ./_mixins
 				event-segmentation='{"button": "individual"}'
 				role="presentation"
 			)
-				button.btn.btn-default-outline(role="tab" aria-controls="panel-individual" aria-selected="true") #{translate("indvidual_plans")}
+				button.btn(
+					role="tab"
+					aria-controls="panel-individual"
+					aria-selected="true"
+				) #{translate("indvidual_plans")}
 			li.plans-switch-group(
 				data-ol-plans-v2-view-tab='group'
 				event-tracking="plans-page-toggle-plan"
@@ -20,9 +24,8 @@ include ./_mixins
 				event-segmentation='{"button": "group"}'
 				role="presentation"
 			)
-				button.btn.btn-default-outline(
+				button.btn(
 					aria-controls="panel-group"
-					href="#"
 					role="tab"
 					aria-selected="false"
 				)
@@ -36,11 +39,10 @@ include ./_mixins
 				event-segmentation='{"button": "student"}'
 				role="presentation"
 			)
-				button.btn.btn-default-outline(
+				button.btn(
 					aria-controls="panel-student"
-					href="#"
 					role="tab"
-					aria-selected="false"					
+					aria-selected="false"
 				) #{translate("student_plans")}
 
 +monthly_annual_switch("annual", "plans-page-toggle-period")

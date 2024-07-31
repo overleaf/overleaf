@@ -1,11 +1,8 @@
 // m-a stands for: monthly annual
-@plans-top-switch-item-height: 34px;
-@plans-top-switch-item-border-radius: @plans-top-switch-item-height / 2;
 @plans-m-a-switch-height: 20px;
 @plans-highlighted-text-height-desktop: 32px;
 @plans-highlighted-text-height-mobile: 41px;
 @plans-learn-more-link-color: hsl(206, 100%, 52%);
-@plans-top-switch-group-width-mobile: 46%;
 @plans-table-border-radius: var(--border-radius-medium-new);
 @plans-table-td-mobile-min-height: 34px;
 @highlighted-border: var(--border-width-base) solid var(--green-50);
@@ -72,74 +69,71 @@
   }
 
   .plans-top-switch ul {
-    display: flex;
+    background-color: var(--neutral-10);
+    display: inline-flex;
     justify-content: center;
-    margin-top: var(--spacing-09);
+    margin: var(--spacing-09) auto 0 auto;
+    border-radius: var(--border-radius-full-new);
+    padding: var(--spacing-01);
 
     li {
-      border-top: 1px solid @ol-blue-gray-3;
-      border-bottom: 1px solid @ol-blue-gray-3;
-      height: @plans-top-switch-item-height;
-
-      &.plans-switch-individual {
-        border-right: 1px solid @ol-blue-gray-3;
-        border-left: 1px solid @ol-blue-gray-3;
-        border-top-left-radius: @plans-top-switch-item-border-radius;
-        border-bottom-left-radius: @plans-top-switch-item-border-radius;
+      display: flex;
+      margin-right: var(--spacing-02);
+      &:last-child {
+        margin-right: 0;
       }
-
-      &.plans-switch-student {
-        border-right: 1px solid @ol-blue-gray-3;
-        border-left: 1px solid @ol-blue-gray-3;
-        border-top-right-radius: @plans-top-switch-item-border-radius;
-        border-bottom-right-radius: @plans-top-switch-item-border-radius;
-      }
-
       button {
-        padding: 4px 16px;
-        height: 100%;
+        background-color: var(--neutral-10);
+        color: var(--neutral-70);
+        border-radius: var(--border-radius-full-new);
+        font-size: var(--font-size-03);
+        font-weight: 600;
+        line-height: var(--line-height-03);
+        padding: 0 var(--spacing-04);
 
         // remove bootstrap default
         &.btn:active {
           box-shadow: none;
         }
 
-        // on Firefox, there will be a visible dotted border on the li element
-        // when it's `active` / `focus`
-        // `outline: none` rule intends to eliminate that border
-        &:active,
+        &:hover {
+          // same background as btn-secondary hover
+          background-color: var(--neutral-20);
+          color: var(--neutral-70);
+        }
+
         &:focus {
-          outline: none;
+          outline: 0;
+        }
+        &:focus-visible {
+          outline: 0;
+          .box-shadow-button-input();
         }
       }
 
       &.active {
-        background-color: @ol-blue-gray-4;
-
-        button.btn-default-outline {
-          color: @white;
+        button {
+          cursor: pointer;
+          background-color: var(--neutral-70);
+          border-color: var(--neutral-70);
+          color: var(--white);
         }
-      }
-
-      &:not(.active) {
-        background-color: @white;
       }
     }
 
     @media (max-width: @screen-xs-max) {
-      margin: 0 13px;
+      border-radius: var(--border-radius-base-new);
 
       li {
-        height: unset;
-
-        &.plans-switch-individual,
-        &.plans-switch-student {
-          width: (100% - @plans-top-switch-group-width-mobile) / 2;
+        button {
+          font-size: var(--font-size-01);
+          line-height: var(--line-height-01);
+          text-wrap: auto;
+          padding: var(--spacing-02) var(--spacing-04);
+          border-radius: var(--border-radius-base-new);
         }
 
         &.plans-switch-group {
-          width: @plans-top-switch-group-width-mobile;
-
           // force newline for the second span
           span:first-child::after {
             content: '';
@@ -149,23 +143,6 @@
           span:last-child {
             font-weight: 400;
           }
-        }
-
-        &.plans-switch-individual,
-        &.plans-switch-student {
-          button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-          }
-        }
-
-        button {
-          white-space: unset;
-          padding: 4px 8px;
-          font-size: 14px;
-          width: 100%;
         }
       }
     }
