@@ -15,20 +15,22 @@ mixin gen_localized_price_for_plan_view(plan, view)
 	span #{formatCurrency(settings.localizedPlanPricing[recommendedCurrency][plan][view], recommendedCurrency, language, true)}
 
 mixin currency_and_payment_methods()
-	.row.row-spaced-large.text-centered
+	.row.plans-payment-methods.text-centered
 		.col-xs-12
-			p.text-centered
-				strong #{translate("all_prices_displayed_are_in_currency", { recommendedCurrency })}
-				| &nbsp;
-				span #{translate("subject_to_additional_vat")}
-			i.fa.fa-cc-mastercard.fa-2x(aria-hidden="true") &nbsp;
-			span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Mastercard' })}
-			i.fa.fa-cc-visa.fa-2x(aria-hidden="true") &nbsp;
-			span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Visa' })}
-			i.fa.fa-cc-amex.fa-2x(aria-hidden="true") &nbsp;
-			span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Amex' })}
-			i.fa.fa-cc-paypal.fa-2x(aria-hidden="true") &nbsp;
-			span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Paypal' })}
+			p
+				| #{translate("all_prices_displayed_are_in_currency", { recommendedCurrency })}
+				| #{translate("subject_to_additional_vat")}
+
+			.plans-payment-methods-icons
+				img(src=buildImgPath('/other-brands/logo_mastercard.svg') aria-hidden="true")
+				span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Mastercard' })}
+				img(src=buildImgPath('/other-brands/logo_visa.svg') aria-hidden="true")
+				span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Visa' })}
+				img(src=buildImgPath('/other-brands/logo_amex.svg') aria-hidden="true")
+				span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Amex' })}
+				img(src=buildImgPath('/other-brands/logo_paypal.svg') aria-hidden="true")
+				span.sr-only #{translate('payment_method_accepted', { paymentMethod: 'Paypal' })}
+
 
 mixin plans_table(period, config)
 	- var maxColumn = config.maxColumn || 4
