@@ -110,6 +110,10 @@ module.exports = {
     splitChunks: {
       chunks: 'all', // allow non-async chunks to be analysed for shared modules
     },
+    // https://webpack.js.org/configuration/optimization/#optimizationruntimechunk
+    runtimeChunk: {
+      name: 'runtime',
+    },
   },
 
   // Define how file types are handled by webpack

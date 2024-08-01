@@ -93,10 +93,4 @@ module.exports = merge(base, {
     preset: 'minimal',
     colors: true,
   },
-
-  optimization: {
-    runtimeChunk: {
-      name: 'runtime',
-    },
-  },
 })
