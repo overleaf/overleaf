@@ -75,17 +75,6 @@ function setUpStatusIndicators() {
       })
     }
   )
-
-  setUpStatusIndicator(
-    document.querySelector('[data-ol-launchpad-check="ide"]'),
-    () => {
-      return fetch(getMeta('ol-ideJsPath')).then(res => {
-        if (!res.ok) {
-          throw new Error(`Http status: ${res.status}`)
-        }
-      })
-    }
-  )
 }
 
 if (getMeta('ol-adminUserExists')) {
