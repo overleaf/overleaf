@@ -1,14 +1,27 @@
 const {
   OnboardingDataCollection,
+  OnboardingDataCollectionSchema,
 } = require('../../models/OnboardingDataCollection')
 const OError = require('@overleaf/o-error')
 
-async function getOnboardingDataCollection(userId) {
+async function getOnboardingDataCollection(userId, projection = {}) {
   try {
-    return await OnboardingDataCollection.findOne({ _id: userId }).exec()
+    return await OnboardingDataCollection.findOne(
+      { _id: userId },
+      projection
+    ).exec()
   } catch (error) {
     throw OError.tag(error, 'Failed to get OnboardingDataCollection')
   }
+}
+
+async function getOnboardingDataValue(userId, key) {
+  if (!OnboardingDataCollectionSchema.paths[key]) {
+    throw new Error(`${key} is not a valid onboarding data key`)
+  }
+
+  const result = await getOnboardingDataCollection(userId, { [key]: 1 })
+  return result ? result[key] : null
 }
 
 async function upsertOnboardingDataCollection({
@@ -60,4 +73,5 @@ module.exports = {
   getOnboardingDataCollection,
   upsertOnboardingDataCollection,
   deleteOnboardingDataCollection,
+  getOnboardingDataValue,
 }

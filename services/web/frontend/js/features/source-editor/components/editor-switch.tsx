@@ -1,16 +1,26 @@
 import { ChangeEvent, FC, memo, useCallback } from 'react'
-import useScopeValue from '../../../shared/hooks/use-scope-value'
-import Tooltip from '../../../shared/components/tooltip'
+import useScopeValue from '@/shared/hooks/use-scope-value'
+import Tooltip from '@/shared/components/tooltip'
+import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
 import { useTranslation } from 'react-i18next'
+import {
+  EditorSwitchBeginnerTooltip,
+  codeEditorModePrompt,
+} from './editor-switch-beginner-tooltip'
 
 function EditorSwitch() {
   const { t } = useTranslation()
   const [visual, setVisual] = useScopeValue('editor.showVisual')
   const [docName] = useScopeValue('editor.open_doc_name')
+  const [codeEditorOpened] = useScopeValue('editor.codeEditorOpened')
 
   const richTextAvailable = isValidTeXFile(docName)
+  const { completeTutorial } = useTutorial(codeEditorModePrompt, {
+    location: 'logs',
+    name: codeEditorModePrompt,
+  })
 
   const handleChange = useCallback(
     event => {
@@ -19,6 +29,9 @@ function EditorSwitch() {
       switch (editorType) {
         case 'cm6':
           setVisual(false)
+          if (!codeEditorOpened) {
+            completeTutorial({ event: 'promo-click', action: 'complete' })
+          }
           break
 
         case 'rich-text':
@@ -28,7 +41,7 @@ function EditorSwitch() {
 
       sendMB('editor-switch-change', { editorType })
     },
-    [setVisual]
+    [codeEditorOpened, completeTutorial, setVisual]
   )
 
   return (
@@ -45,9 +58,11 @@ function EditorSwitch() {
           checked={!richTextAvailable || !visual}
           onChange={handleChange}
         />
-        <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
-          <span>{t('code_editor')}</span>
-        </label>
+        <EditorSwitchBeginnerTooltip>
+          <label htmlFor="editor-switch-cm6" className="toggle-switch-label">
+            <span>{t('code_editor')}</span>
+          </label>
+        </EditorSwitchBeginnerTooltip>
 
         <RichTextToggle
           checked={richTextAvailable && visual}

@@ -196,6 +196,7 @@ export interface Meta {
   'ol-translationMaintenance': string
   'ol-translationUnableToJoin': string
   'ol-useShareJsHash': boolean
+  'ol-usedLatex': 'never' | 'occasionally' | 'often' | undefined
   'ol-user': User
   'ol-userAffiliations': Affiliation[]
   'ol-userEmails': UserEmailData[]

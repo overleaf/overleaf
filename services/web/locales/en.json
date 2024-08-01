@@ -277,6 +277,8 @@
   "code_check_failed": "Code check failed",
   "code_check_failed_explanation": "Your code has errors that need to be fixed before the auto-compile can run",
   "code_editor": "Code Editor",
+  "code_editor_tooltip_message": "You can see the code behind your project (and make edits to it) in the Code Editor",
+  "code_editor_tooltip_title": "Want to view and edit the LaTeX code?",
   "collaborate_easily_on_your_projects": "Collaborate easily on your projects. Work on longer or more complex docs.",
   "collaborate_online_and_offline": "Collaborate online and offline, using your own workflow",
   "collaboration": "Collaboration",

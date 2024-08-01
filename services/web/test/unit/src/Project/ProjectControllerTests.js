@@ -197,6 +197,9 @@ describe('ProjectController', function () {
     this.TutorialHandler = {
       getInactiveTutorials: sinon.stub().returns([]),
     }
+    this.OnboardingDataCollectionManager = {
+      getOnboardingDataValue: sinon.stub().resolves(null),
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -245,6 +248,8 @@ describe('ProjectController', function () {
         '../Survey/SurveyHandler': this.SurveyHandler,
         './ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Tutorial/TutorialHandler': this.TutorialHandler,
+        '../OnboardingDataCollection/OnboardingDataCollectionManager':
+          this.OnboardingDataCollectionManager,
         '../User/UserUpdater': {
           promises: {
             updateUser: sinon.stub().resolves(),

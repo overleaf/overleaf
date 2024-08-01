@@ -8,6 +8,7 @@ const VALID_KEYS = [
   'writefull-oauth-promotion',
   'bib-file-tpr-prompt',
   'ai-error-assistant-consent',
+  'code-editor-mode-prompt',
 ]
 
 async function completeTutorial(req, res, next) {
