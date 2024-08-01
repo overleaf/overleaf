@@ -64,9 +64,9 @@
     "local:test": "npm run local:test:unit && npm run local:test:frontend && npm run local:test:acceptance"
   },
   "browserslist": [
+    "defaults",
     "last 1 year",
-    "ie 11",
-    "firefox esr"
+    "safari > 13"
   ],
   "dependencies": {
     "@contentful/rich-text-html-renderer": "^16.0.2",
