@@ -50,6 +50,23 @@ class V2DocVersions {
       _.assign(snapshot.v2DocVersions.data, this.data)
     }
   }
+
+  /**
+   * Move or remove a doc.
+   * Must be called after FileMap#moveFile, which validates the paths.
+   */
+  moveFile(pathname, newPathname) {
+    for (const [id, v] of Object.entries(this.data)) {
+      if (v.pathname !== pathname) continue
+
+      if (newPathname === '') {
+        delete this.data[id]
+      } else {
+        v.pathname = newPathname
+      }
+      break
+    }
+  }
 }
 
 module.exports = V2DocVersions

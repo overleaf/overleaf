@@ -133,6 +133,7 @@ class Snapshot {
    */
   moveFile(pathname, newPathname) {
     this.fileMap.moveFile(pathname, newPathname)
+    if (this.v2DocVersions) this.v2DocVersions.moveFile(pathname, newPathname)
   }
 
   /**
