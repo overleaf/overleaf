@@ -1,7 +1,7 @@
 /** @module */
 'use strict'
 
-const path = require('path')
+const path = require('path-browserify')
 
 /**
  * Regular expressions for Overleaf v2 taken from

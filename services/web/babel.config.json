@@ -33,6 +33,10 @@
     {
       "test": "../../**/*.cjs",
       "sourceType": "script"
+    },
+    {
+      "test": "../../libraries/overleaf-editor-core/**/*.js",
+      "sourceType": "script"
     }
   ]
 }
