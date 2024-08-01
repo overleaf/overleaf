@@ -340,6 +340,7 @@ const _ProjectController = {
       !anonymous && 'writefull-oauth-promotion',
       'ieee-stylesheet',
       'write-and-cite',
+      'default-visual-for-beginners',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -733,7 +734,12 @@ const _ProjectController = {
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
         linkSharingWarning: linkSharingChanges.variant === 'active',
-        usedLatex,
+        usedLatex:
+          // only use the usedLatex value if the split test is enabled
+          splitTestAssignments['default-visual-for-beginners']?.variant ===
+          'enabled'
+            ? usedLatex
+            : null,
       })
       timer.done()
     } catch (err) {
