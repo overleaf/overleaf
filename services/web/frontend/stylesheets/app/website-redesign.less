@@ -940,27 +940,27 @@
 
   .link-with-arrow {
     .dm-mono;
-    font-size: 1.125rem;
-    line-height: 1.333;
+    font-size: var(--font-size-04);
+    line-height: var(--line-height-03);
     font-weight: 500;
+    color: var(--green-50);
 
     i.material-symbols {
       vertical-align: middle;
       padding-bottom: 3px;
       font-size: 24px;
+      line-height: inherit;
+      margin-left: var(--spacing-02);
+    }
+
+    &:hover {
+      color: var(--green-60);
     }
   }
 
   .green-link {
     .link-with-arrow;
-    color: var(--emerald-green);
-
-    &:hover {
-      color: var(--green-60);
-      .right-arrow {
-        color: var(--green-60);
-      }
-    }
+    // TODO: replace .green-link uses with .link-with-arrow
   }
 
   .inline-green-link {
@@ -979,11 +979,6 @@
       outline: 2px solid var(--emerald-green);
       outline-offset: 1px;
     }
-  }
-
-  .white-link {
-    .link-with-arrow;
-    color: white;
   }
 
   .btn-blue {
