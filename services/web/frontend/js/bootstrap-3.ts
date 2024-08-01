@@ -1,4 +1,3 @@
-import 'jquery'
 import 'bootstrap'
 import './features/contact-form'
 import './features/bookmarkable-tab'
