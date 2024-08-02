@@ -5,8 +5,6 @@ module.exports = {
   addCachingToKey,
   userFileKeyMiddleware,
   userProjectKeyMiddleware,
-  publicFileKeyMiddleware,
-  publicProjectKeyMiddleware,
   bucketFileKeyMiddleware,
   templateFileKeyMiddleware,
 }
@@ -40,20 +38,9 @@ function userFileKeyMiddleware(req, res, next) {
 
 function userProjectKeyMiddleware(req, res, next) {
   const { project_id: projectId } = req.params
+  req.project_id = projectId
   req.key = `${projectId}/`
   req.bucket = settings.filestore.stores.user_files
-  next()
-}
-
-function publicFileKeyMiddleware(req, res, next) {
-  if (settings.filestore.stores.public_files == null) {
-    return res.status(501).send('public files not available')
-  }
-
-  const { project_id: projectId, public_file_id: publicFileId } = req.params
-  req.key = `${projectId}/${publicFileId}`
-  req.bucket = settings.filestore.stores.public_files
-
   next()
 }
 
@@ -79,15 +66,6 @@ function templateFileKeyMiddleware(req, res, next) {
 
   req.bucket = settings.filestore.stores.template_files
   req.version = version
-
-  next()
-}
-
-function publicProjectKeyMiddleware(req, res, next) {
-  const { project_id: projectId } = req.params
-
-  req.project_id = projectId
-  req.bucket = settings.filestore.stores.user_files
 
   next()
 }

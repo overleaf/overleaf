@@ -88,10 +88,8 @@ describe('Filestore', function () {
 
       const BUCKET_NAMES = [
         process.env.GCS_USER_FILES_BUCKET_NAME,
-        process.env.GCS_PUBLIC_FILES_BUCKET_NAME,
         process.env.GCS_TEMPLATE_FILES_BUCKET_NAME,
         `${process.env.GCS_USER_FILES_BUCKET_NAME}-deleted`,
-        `${process.env.GCS_PUBLIC_FILES_BUCKET_NAME}-deleted`,
         `${process.env.GCS_TEMPLATE_FILES_BUCKET_NAME}-deleted`,
       ]
 

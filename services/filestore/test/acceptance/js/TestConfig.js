@@ -24,7 +24,6 @@ function s3Stores() {
   return {
     user_files: process.env.AWS_S3_USER_FILES_BUCKET_NAME,
     template_files: process.env.AWS_S3_TEMPLATE_FILES_BUCKET_NAME,
-    public_files: process.env.AWS_S3_PUBLIC_FILES_BUCKET_NAME,
   }
 }
 
@@ -44,14 +43,12 @@ function gcsStores() {
   return {
     user_files: process.env.GCS_USER_FILES_BUCKET_NAME,
     template_files: process.env.GCS_TEMPLATE_FILES_BUCKET_NAME,
-    public_files: process.env.GCS_PUBLIC_FILES_BUCKET_NAME,
   }
 }
 
 function fsStores() {
   return {
     user_files: Path.resolve(__dirname, '../../../user_files'),
-    public_files: Path.resolve(__dirname, '../../../public_files'),
     template_files: Path.resolve(__dirname, '../../../template_files'),
   }
 }
@@ -59,7 +56,6 @@ function fsStores() {
 function fallbackStores(primaryConfig, fallbackConfig) {
   return {
     [primaryConfig.user_files]: fallbackConfig.user_files,
-    [primaryConfig.public_files]: fallbackConfig.public_files,
     [primaryConfig.template_files]: fallbackConfig.template_files,
   }
 }

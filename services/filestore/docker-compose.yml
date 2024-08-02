@@ -51,10 +51,8 @@ services:
       USE_PROM_METRICS: "true"
       AWS_S3_USER_FILES_BUCKET_NAME: fake_user_files
       AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake_template_files
-      AWS_S3_PUBLIC_FILES_BUCKET_NAME: fake_public_files
       GCS_USER_FILES_BUCKET_NAME: fake_userfiles
       GCS_TEMPLATE_FILES_BUCKET_NAME: fake_templatefiles
-      GCS_PUBLIC_FILES_BUCKET_NAME: fake_publicfiles
     user: node
     depends_on:
       s3:
@@ -66,7 +64,7 @@ services:
   s3:
     image: adobe/s3mock:2.4.14
     environment:
-      - initialBuckets=fake_user_files,fake_template_files,fake_public_files,bucket
+      - initialBuckets=fake_user_files,fake_template_files,bucket
     healthcheck:
       test: wget --quiet --output-document=/dev/null http://localhost:9090
       interval: 1s

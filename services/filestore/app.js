@@ -86,6 +86,12 @@ app.delete(
   fileController.deleteProject
 )
 
+app.get(
+  '/project/:project_id/size',
+  keyBuilder.userProjectKeyMiddleware,
+  fileController.directorySize
+)
+
 app.head(
   '/template/:template_id/v/:version/:format',
   keyBuilder.templateFileKeyMiddleware,
@@ -105,39 +111,6 @@ app.post(
   '/template/:template_id/v/:version/:format',
   keyBuilder.templateFileKeyMiddleware,
   fileController.insertFile
-)
-
-app.head(
-  '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKeyMiddleware,
-  fileController.getFileHead
-)
-app.get(
-  '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKeyMiddleware,
-  fileController.getFile
-)
-app.post(
-  '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKeyMiddleware,
-  fileController.insertFile
-)
-app.put(
-  '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKeyMiddleware,
-  bodyParser.json(),
-  fileController.copyFile
-)
-app.delete(
-  '/project/:project_id/public/:public_file_id',
-  keyBuilder.publicFileKeyMiddleware,
-  fileController.deleteFile
-)
-
-app.get(
-  '/project/:project_id/size',
-  keyBuilder.publicProjectKeyMiddleware,
-  fileController.directorySize
 )
 
 app.get(
