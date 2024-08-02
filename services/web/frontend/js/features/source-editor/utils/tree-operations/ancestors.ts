@@ -1,7 +1,6 @@
 import { ensureSyntaxTree, syntaxTree } from '@codemirror/language'
 import { EditorSelection, EditorState, SelectionRange } from '@codemirror/state'
 import { SyntaxNode, Tree } from '@lezer/common'
-import { isUnknownCommandWithName } from './common'
 import { ListEnvironment } from '../../lezer-latex/latex.terms.mjs'
 
 const HUNDRED_MS = 100
@@ -125,14 +124,15 @@ export const lastAncestorAtEndPosition = (
   node: SyntaxNode | null | undefined,
   to: number
 ): SyntaxNode | null => {
-  for (let ancestor = node; ancestor; ancestor = ancestor.parent) {
-    if (ancestor.parent?.to === to) {
-      continue
-    } else if (ancestor.to === to) {
-      return ancestor
-    }
+  let lastAncestor: SyntaxNode | null = null
+  for (
+    let ancestor = node;
+    ancestor && ancestor.to === to;
+    ancestor = ancestor.parent
+  ) {
+    lastAncestor = ancestor
   }
-  return null
+  return lastAncestor
 }
 
 export const descendantsOfNodeWithType = (
@@ -224,37 +224,6 @@ export const commonAncestor = (
     }
   }
   return null
-}
-
-export const withinFormattingCommand = (state: EditorState) => {
-  const tree = syntaxTree(state)
-
-  return (command: string): boolean => {
-    const isFormattedText = (range: SelectionRange): boolean => {
-      const nodeLeft = tree.resolveInner(range.from, -1)
-      const formattingCommandLeft = matchingAncestor(nodeLeft, node =>
-        isUnknownCommandWithName(node, command, state)
-      )
-      if (!formattingCommandLeft) {
-        return false
-      }
-
-      // We need to check the other end of the selection, and ensure that they
-      // share a common formatting command ancestor
-      const nodeRight = tree.resolveInner(range.to, 1)
-      const ancestor = commonAncestor(formattingCommandLeft, nodeRight)
-      if (!ancestor) {
-        return false
-      }
-
-      const formattingAncestor = matchingAncestor(ancestor, node =>
-        isUnknownCommandWithName(node, command, state)
-      )
-      return Boolean(formattingAncestor)
-    }
-
-    return state.selection.ranges.every(isFormattedText)
-  }
 }
 
 export type ListEnvironmentName = 'itemize' | 'enumerate' | 'description'

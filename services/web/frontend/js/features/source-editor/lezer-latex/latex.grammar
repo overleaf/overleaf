@@ -95,7 +95,18 @@
     MidRuleCtrlSeq,
     BottomRuleCtrlSeq,
     MultiColumnCtrlSeq,
-    ParBoxCtrlSeq
+    ParBoxCtrlSeq,
+    TextBoldCtrlSeq,
+    TextItalicCtrlSeq,
+    TextSmallCapsCtrlSeq,
+    TextTeletypeCtrlSeq,
+    TextMediumCtrlSeq,
+    TextSansSerifCtrlSeq,
+    TextSuperscriptCtrlSeq,
+    TextSubscriptCtrlSeq,
+    TextStrikeOutCtrlSeq,
+    EmphasisCtrlSeq,
+    UnderlineCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -358,6 +369,39 @@ KnownCommand<ArgumentType> {
             (optionalWhitespace? OptionalArgument)*
             ShortTextArgument
             optionalWhitespace? TextArgument
+    } |
+    TextBoldCommand {
+        TextBoldCtrlSeq TextArgument
+    } |
+    TextItalicCommand {
+        TextItalicCtrlSeq TextArgument
+    } |
+    TextSmallCapsCommand {
+        TextSmallCapsCtrlSeq TextArgument
+    } |
+    TextTeletypeCommand {
+        TextTeletypeCtrlSeq TextArgument
+    } |
+    TextMediumCommand {
+        TextMediumCtrlSeq TextArgument
+    } |
+    TextSansSerifCommand {
+        TextSansSerifCtrlSeq TextArgument
+    } |
+    TextSuperscriptCommand {
+        TextSuperscriptCtrlSeq TextArgument
+    } |
+    TextSubscriptCommand {
+        TextSubscriptCtrlSeq TextArgument
+    } |
+    StrikeOutCommand {
+        TextStrikeOutCtrlSeq ArgumentType
+    } |
+    EmphasisCommand {
+        EmphasisCtrlSeq ArgumentType
+    } |
+    UnderlineCommand {
+        UnderlineCtrlSeq ArgumentType
     }
 }
 

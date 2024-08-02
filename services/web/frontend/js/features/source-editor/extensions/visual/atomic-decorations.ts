@@ -1038,11 +1038,38 @@ export const atomicDecorations = (options: Options) => {
               )
             }
           }
+        } else if (nodeRef.type.is('$ToggleTextFormattingCommand')) {
+          // markup that can be toggled using toolbar buttons/keyboard shortcuts
+          const textArgumentNode = nodeRef.node.getChild('TextArgument')
+          const argumentText = textArgumentNode?.getChild('LongArg')
+          const shouldShowBraces =
+            !shouldDecorate(state, nodeRef) ||
+            argumentText?.from === argumentText?.to
+          decorations.push(
+            ...decorateArgumentBraces(
+              new BraceWidget(shouldShowBraces ? '{' : ''),
+              textArgumentNode,
+              nodeRef.from,
+              true,
+              new BraceWidget(shouldShowBraces ? '}' : '')
+            )
+          )
+        } else if (nodeRef.type.is('$OtherTextFormattingCommand')) {
+          // markup that can't be toggled using toolbar buttons/keyboard shortcuts
+          const textArgumentNode = nodeRef.node.getChild('TextArgument')
+          if (shouldDecorate(state, nodeRef)) {
+            decorations.push(
+              ...decorateArgumentBraces(
+                new BraceWidget(),
+                textArgumentNode,
+                nodeRef.from
+              )
+            )
+          }
         } else if (nodeRef.type.is('UnknownCommand')) {
           // a command that's not defined separately by the grammar
           const commandNode = nodeRef.node
           const commandNameNode = commandNode.getChild('$CtrlSeq')
-          const textArgumentNode = commandNode.getChild('TextArgument')
 
           if (commandNameNode) {
             const commandName = state.doc
@@ -1050,46 +1077,9 @@ export const atomicDecorations = (options: Options) => {
               .trim()
 
             if (commandName.length > 0) {
-              if (
-                // markup that can be toggled using toolbar buttons/keyboard shortcuts
-                ['\\textbf', '\\textit', '\\underline'].includes(commandName)
-              ) {
-                const argumentText = textArgumentNode?.getChild('LongArg')
-                const shouldShowBraces =
-                  !shouldDecorate(state, nodeRef) ||
-                  argumentText?.from === argumentText?.to
-                decorations.push(
-                  ...decorateArgumentBraces(
-                    new BraceWidget(shouldShowBraces ? '{' : ''),
-                    textArgumentNode,
-                    nodeRef.from,
-                    true,
-                    new BraceWidget(shouldShowBraces ? '}' : '')
-                  )
-                )
-              } else if (
-                // markup that can't be toggled using toolbar buttons/keyboard shortcuts
-                [
-                  '\\textsc',
-                  '\\texttt',
-                  '\\textmd',
-                  '\\textsf',
-                  '\\textsuperscript',
-                  '\\textsubscript',
-                  '\\sout',
-                  '\\emph',
-                ].includes(commandName)
-              ) {
-                if (shouldDecorate(state, nodeRef)) {
-                  decorations.push(
-                    ...decorateArgumentBraces(
-                      new BraceWidget(),
-                      textArgumentNode,
-                      nodeRef.from
-                    )
-                  )
-                }
-              } else if (commandName === '\\keywords') {
+              const textArgumentNode = commandNode.getChild('TextArgument')
+
+              if (commandName === '\\keywords') {
                 if (shouldDecorate(state, nodeRef)) {
                   // command name and opening brace
                   decorations.push(

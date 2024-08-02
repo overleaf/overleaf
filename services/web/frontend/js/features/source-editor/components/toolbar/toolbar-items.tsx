@@ -1,7 +1,6 @@
 import { FC, memo } from 'react'
 import { EditorState } from '@codemirror/state'
 import { useEditorContext } from '../../../../shared/context/editor-context'
-import { withinFormattingCommand } from '../../utils/tree-operations/ancestors'
 import { ToolbarButton } from './toolbar-button'
 import { redo, undo } from '@codemirror/commands'
 import * as commands from '../../extensions/toolbar/commands'
@@ -11,6 +10,7 @@ import { InsertFigureDropdown } from './insert-figure-dropdown'
 import { useTranslation } from 'react-i18next'
 import { MathDropdown } from './math-dropdown'
 import { TableInserterDropdown } from './table-inserter-dropdown'
+import { withinFormattingCommand } from '@/features/source-editor/utils/tree-operations/formatting'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 

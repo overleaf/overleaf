@@ -10,7 +10,6 @@ export {
   iterateDescendantsOf,
   previousSiblingIs,
   nextSiblingIs,
-  isUnknownCommandWithName,
 } from './tree-operations/common'
 
 export {

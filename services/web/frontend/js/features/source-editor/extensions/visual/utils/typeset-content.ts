@@ -2,59 +2,49 @@ import { EditorState } from '@codemirror/state'
 import { SyntaxNode } from '@lezer/common'
 import { COMMAND_SUBSTITUTIONS } from '../visual-widgets/character'
 
-const isUnknownCommandWithName = (
-  node: SyntaxNode,
-  command: string,
-  getText: (from: number, to: number) => string
-): boolean => {
-  const commandName = getUnknownCommandName(node, getText)
-  if (commandName === undefined) {
-    return false
-  }
-  return commandName === command
-}
-
-const getUnknownCommandName = (
-  node: SyntaxNode,
-  getText: (from: number, to: number) => string
-): string | undefined => {
-  if (!node.type.is('UnknownCommand')) {
-    return undefined
-  }
-  const commandNameNode = node.getChild('CtrlSeq')
-  if (!commandNameNode) {
-    return undefined
-  }
-  const commandName = getText(commandNameNode.from, commandNameNode.to)
-  return commandName
-}
-
-type NodeMapping = {
+type Markup = {
   elementType: keyof HTMLElementTagNameMap
   className?: string
 }
-type MarkupMapping = {
-  [command: string]: NodeMapping
-}
-const MARKUP_COMMANDS: MarkupMapping = {
-  '\\textit': {
-    elementType: 'i',
-  },
-  '\\textbf': {
-    elementType: 'b',
-  },
-  '\\emph': {
-    elementType: 'em',
-  },
-  '\\texttt': {
-    elementType: 'span',
-    className: 'ol-cm-command-texttt',
-  },
-  '\\textsc': {
-    elementType: 'span',
-    className: 'ol-cm-command-textsc',
-  },
-}
+
+const textFormattingMarkupMap = new Map<string, Markup>([
+  [
+    'TextBoldCommand', // \\textbf
+    { elementType: 'b' },
+  ],
+  [
+    'TextItalicCommand', // \\textit
+    { elementType: 'i' },
+  ],
+  [
+    'TextSmallCapsCommand', // \\textsc
+    { elementType: 'span', className: 'ol-cm-command-textsc' },
+  ],
+  [
+    'TextTeletypeCommand', // \\texttt
+    { elementType: 'span', className: 'ol-cm-command-texttt' },
+  ],
+  [
+    'TextSuperscriptCommand', // \\textsuperscript
+    { elementType: 'sup' },
+  ],
+  [
+    'TextSubscriptCommand', // \\textsubscript
+    { elementType: 'sub' },
+  ],
+  [
+    'EmphasisCommand', // \\emph
+    { elementType: 'em' },
+  ],
+  [
+    'UnderlineCommand', // \\underline
+    { elementType: 'span', className: 'ol-cm-command-underline' },
+  ],
+])
+
+const markupMap = new Map<string, Markup>([
+  ['\\and', { elementType: 'span', className: 'ol-cm-command-and' }],
+])
 
 /**
  * Does a small amount of typesetting of LaTeX content into a DOM element.
@@ -62,35 +52,44 @@ const MARKUP_COMMANDS: MarkupMapping = {
  * function if you wish to typeset math content.
  * @param node The syntax node containing the text to be typeset
  * @param element The DOM element to typeset into
- * @param state The editor state where `node` is from
+ * @param getText The editor state where `node` is from or a custom function
  */
 export function typesetNodeIntoElement(
   node: SyntaxNode,
   element: HTMLElement,
-  state: EditorState | ((from: number, to: number) => string)
+  getText: EditorState | ((from: number, to: number) => string)
 ) {
-  let getText: (from: number, to: number) => string
-  if (typeof state === 'function') {
-    getText = state
-  } else {
-    getText = state!.sliceDoc.bind(state!)
+  if (getText instanceof EditorState) {
+    getText = getText.sliceDoc.bind(getText)
   }
+
   // If we're a TextArgument node, we should skip the braces
   const argument = node.getChild('LongArg')
   if (argument) {
     node = argument
   }
+
   const ancestorStack = [element]
 
   const ancestor = () => ancestorStack[ancestorStack.length - 1]
   const popAncestor = () => ancestorStack.pop()!
-  const pushAncestor = (x: HTMLElement) => ancestorStack.push(x)
+  const pushAncestor = (element: HTMLElement) => ancestorStack.push(element)
 
   let from = node.from
+
+  const addMarkup = (markup: Markup, childNode: SyntaxNode) => {
+    const element = document.createElement(markup.elementType)
+    if (markup.className) {
+      element.classList.add(markup.className)
+    }
+    pushAncestor(element)
+    from = chooseFrom(childNode)
+  }
 
   node.cursor().iterate(
     function enter(childNodeRef) {
       const childNode = childNodeRef.node
+
       if (from < childNode.from) {
         ancestor().append(
           document.createTextNode(getText(from, childNode.from))
@@ -98,57 +97,43 @@ export function typesetNodeIntoElement(
         from = childNode.from
       }
 
-      if (childNode.type.is('UnknownCommand')) {
-        const commandNameNode = childNode.getChild('CtrlSeq')
-        if (commandNameNode) {
-          const commandName = getText(commandNameNode.from, commandNameNode.to)
-          const mapping: NodeMapping | undefined = MARKUP_COMMANDS[commandName]
-          if (mapping) {
-            const element = document.createElement(mapping.elementType)
-            if (mapping.className) {
-              element.classList.add(mapping.className)
-            }
-            pushAncestor(element)
-            const textArgument = childNode.getChild('TextArgument')
-            from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-            return
-          }
-        }
+      // commands defined in the grammar
+      const markup = textFormattingMarkupMap.get(childNode.type.name)
+      if (markup) {
+        addMarkup(markup, childNode)
+        return
       }
-      if (isUnknownCommandWithName(childNode, '\\and', getText)) {
-        const spanElement = document.createElement('span')
-        spanElement.classList.add('ol-cm-command-and')
-        pushAncestor(spanElement)
-        const textArgument = childNode.getChild('TextArgument')
-        from = textArgument?.getChild('LongArg')?.from ?? childNode.to
-      } else if (
-        isUnknownCommandWithName(childNode, '\\corref', getText) ||
-        isUnknownCommandWithName(childNode, '\\fnref', getText) ||
-        isUnknownCommandWithName(childNode, '\\thanks', getText)
-      ) {
-        // ignoring these commands
-        from = childNode.to
-        return false
-      } else if (childNode.type.is('LineBreak')) {
-        ancestor().appendChild(document.createElement('br'))
-        from = childNode.to
-      } else if (childNode.type.is('UnknownCommand')) {
-        const command = getText(childNode.from, childNode.to)
-        const symbol = COMMAND_SUBSTITUTIONS.get(command.trim())
-        if (symbol !== undefined) {
+
+      // commands not defined in the grammar
+      const commandName = unknownCommandName(childNode, getText)
+      if (commandName) {
+        const markup = markupMap.get(commandName)
+        if (markup) {
+          addMarkup(markup, childNode)
+          return
+        }
+
+        if (['\\corref', '\\fnref', '\\thanks'].includes(commandName)) {
+          // ignoring these commands
+          from = childNode.to
+          return false
+        }
+
+        const symbol = COMMAND_SUBSTITUTIONS.get(commandName)
+        if (symbol) {
           ancestor().append(document.createTextNode(symbol))
           from = childNode.to
           return false
         }
+      } else if (childNode.type.is('LineBreak')) {
+        ancestor().append(document.createElement('br'))
+        from = childNode.to
       }
     },
     function leave(childNodeRef) {
       const childNode = childNodeRef.node
-      const commandName = getUnknownCommandName(childNode, getText)
-      if (
-        (commandName && Boolean(MARKUP_COMMANDS[commandName])) ||
-        isUnknownCommandWithName(childNode, '\\and', getText)
-      ) {
+
+      if (shouldHandleLeave(childNode, getText)) {
         const typeSetElement = popAncestor()
         ancestor().appendChild(typeSetElement)
         const textArgument = childNode.getChild('TextArgument')
@@ -159,9 +144,37 @@ export function typesetNodeIntoElement(
       }
     }
   )
+
   if (from < node.to) {
     ancestor().append(document.createTextNode(getText(from, node.to)))
   }
 
   return element
+}
+
+const chooseFrom = (node: SyntaxNode) =>
+  node.getChild('TextArgument')?.getChild('LongArg')?.from ?? node.to
+
+const shouldHandleLeave = (
+  node: SyntaxNode,
+  getText: (from: number, to: number) => string
+) => {
+  if (textFormattingMarkupMap.has(node.type.name)) {
+    return true
+  }
+
+  const commandName = unknownCommandName(node, getText)
+  return commandName && markupMap.has(commandName)
+}
+
+const unknownCommandName = (
+  node: SyntaxNode,
+  getText: (from: number, to: number) => string
+): string | undefined => {
+  if (node.type.is('UnknownCommand')) {
+    const commandNameNode = node.getChild('$CtrlSeq')
+    if (commandNameNode) {
+      return getText(commandNameNode.from, commandNameNode.to).trim()
+    }
+  }
 }

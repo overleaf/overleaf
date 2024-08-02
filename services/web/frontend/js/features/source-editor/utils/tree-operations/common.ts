@@ -58,35 +58,6 @@ export const getOptionalArgumentText = (
 ): string | undefined => {
   const shortArgNode = optionalArgumentNode.getChild('ShortOptionalArg')
   if (shortArgNode) {
-    const shortArgNodeText = state.doc.sliceString(
-      shortArgNode.from,
-      shortArgNode.to
-    )
-    return shortArgNodeText
+    return state.doc.sliceString(shortArgNode.from, shortArgNode.to)
   }
-}
-
-export const resolveNodeAtPos = (
-  state: EditorState,
-  pos: number,
-  side?: -1 | 0 | 1
-) => ensureSyntaxTree(state, pos, HUNDRED_MS)?.resolveInner(pos, side) ?? null
-
-export const isUnknownCommandWithName = (
-  node: SyntaxNode,
-  command: string,
-  state: EditorState
-): boolean => {
-  if (!node.type.is('UnknownCommand')) {
-    return false
-  }
-  const commandNameNode = node.getChild('CtrlSeq')
-  if (!commandNameNode) {
-    return false
-  }
-  const commandName = state.doc.sliceString(
-    commandNameNode.from,
-    commandNameNode.to
-  )
-  return commandName === command
 }

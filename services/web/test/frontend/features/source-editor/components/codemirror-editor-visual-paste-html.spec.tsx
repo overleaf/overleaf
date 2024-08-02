@@ -327,6 +327,31 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
     cy.get('td i').should('have.length', 2)
   })
 
+  it('handles a pasted table with formatting markup', function () {
+    mountEditor()
+
+    const data =
+      '<table><tbody><tr>' +
+      '<td><b>foo</b></td>' +
+      '<td><i>bar</i></td>' +
+      '<td><b><i>baz</i></b></td>' +
+      '<td><i><b>buzz</b></i></td>' +
+      '<td><sup>up</sup></td>' +
+      '<td><sub>down</sub></td>' +
+      '</tr></tbody></table>'
+
+    const clipboardData = new DataTransfer()
+    clipboardData.setData('text/html', data)
+    cy.get('@content').trigger('paste', { clipboardData })
+
+    cy.get('@content').should('have.text', 'foobarbazbuzzupdown')
+    cy.findByText(/Sorry/).should('not.exist')
+    cy.get('td b').should('have.length', 3)
+    cy.get('td i').should('have.length', 3)
+    cy.get('td sup').should('have.length', 1)
+    cy.get('td sub').should('have.length', 1)
+  })
+
   it('handles a pasted table with a caption', function () {
     mountEditor()
 
