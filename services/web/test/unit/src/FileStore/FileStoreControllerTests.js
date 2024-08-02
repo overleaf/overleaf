@@ -93,6 +93,15 @@ describe('FileStoreController', function () {
       this.controller.getFile(this.req, this.res)
     })
 
+    it('should return a 404 when not found', function (done) {
+      this.res.callback = () => {
+        expect(this.res.statusCode).to.equal(404)
+        done()
+      }
+      this.ProjectLocator.findElement.yields(new Errors.NotFoundError())
+      this.controller.getFile(this.req, this.res)
+    })
+
     // Test behaviour around handling html files
     ;['.html', '.htm', '.xhtml'].forEach(extension => {
       describe(`with a '${extension}' file extension`, function () {

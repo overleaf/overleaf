@@ -15,18 +15,21 @@ module.exports = {
       { project_id: projectId, element_id: fileId, type: 'file' },
       function (err, file) {
         if (err) {
-          if (err.name === 'NotFoundError') {
+          if (err instanceof Errors.NotFoundError) {
             logger.warn(
               { err, projectId, fileId, queryString },
               'entity not found when downloading file'
             )
+            // res.sendStatus() sends a description of the status as body.
+            // Using res.status().end() avoids sending that fake body.
+            return res.status(404).end()
           } else {
             logger.err(
               { err, projectId, fileId, queryString },
               'error finding element for downloading file'
             )
+            return res.status(500).end()
           }
-          return res.sendStatus(500)
         }
         FileStoreHandler.getFileStream(
           projectId,
