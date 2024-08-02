@@ -2,12 +2,12 @@
  * Helper function for opening an email in Roundcube based mailtrap.
  * We need to cross an origin boundary, which complicates the use of variables.
  * Any variables need to be explicitly defined and the "runner" may only reference these and none from its scope.
- * It is not possible to use Cypress helper functions, e.g. from the testing library inside the "runner".
+ * It is not possible to use Cypress helper functions, e.g. from the testing library or other functions like "activateUser", inside the "runner".
  * REF: https://github.com/testing-library/cypress-testing-library/issues/221
  */
 export function openEmail<T>(
   subject: string | RegExp,
-  runner: (frame: Cypress.Chainable<JQuery<any>>, args?: T) => void,
+  runner: (frame: Cypress.Chainable<JQuery<any>>, args: T) => void,
   args?: T
 ) {
   const runnerS = runner.toString()

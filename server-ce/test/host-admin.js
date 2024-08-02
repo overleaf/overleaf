@@ -159,6 +159,7 @@ const allowedVars = Joi.object(
       'OVERLEAF_LDAP_LAST_NAME_ATT',
       'OVERLEAF_LDAP_UPDATE_USER_DETAILS_ON_LOGIN',
       // Old branding, used for upgrade tests
+      'SHARELATEX_SITE_URL',
       'SHARELATEX_MONGO_URL',
       'SHARELATEX_REDIS_HOST',
     ].map(name => [name, Joi.string()])

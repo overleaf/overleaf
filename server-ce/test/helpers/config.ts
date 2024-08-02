@@ -1,5 +1,5 @@
 import { reconfigure } from './hostAdminClient'
-import { resetCreatedUsersCache } from './login'
+import { resetActivateUserRateLimit, resetCreatedUsersCache } from './login'
 
 export const STARTUP_TIMEOUT =
   parseInt(Cypress.env('STARTUP_TIMEOUT'), 10) || 120_000
@@ -39,6 +39,7 @@ export function startWith({
     })
     if (resetData) {
       resetCreatedUsersCache()
+      resetActivateUserRateLimit()
       // no return here, always reconfigure when resetting data
     } else if (lastConfig === cfg) {
       return

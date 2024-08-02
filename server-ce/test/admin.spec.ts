@@ -1,10 +1,105 @@
 import { isExcludedBySharding, startWith } from './helpers/config'
-import { activateUser, ensureUserExists, login } from './helpers/login'
+import {
+  activateUser,
+  createMongoUser,
+  ensureUserExists,
+  login,
+} from './helpers/login'
 import { v4 as uuid } from 'uuid'
 import { createProject } from './helpers/project'
 import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry'
+import { openEmail } from './helpers/email'
 
 describe('admin panel', function () {
+  function registrationTests() {
+    it('via GUI and opening URL manually', () => {
+      const user = `${uuid()}@example.com`
+      cy.get('input[name="email"]').type(user + '{enter}')
+
+      cy.get('td')
+        .contains(/\/user\/activate/)
+        .then($td => {
+          const url = $td.text().trim()
+          activateUser(url)
+        })
+    })
+
+    it('via GUI and email', () => {
+      const user = `${uuid()}@example.com`
+      cy.get('input[name="email"]').type(user + '{enter}')
+
+      let url: string
+      cy.get('td')
+        .contains(/\/user\/activate/)
+        .then($td => {
+          url = $td.text().trim()
+        })
+
+      cy.then(() => {
+        openEmail(
+          'Activate your Overleaf Community Edition Account',
+          (frame, { url }) => {
+            frame.contains('Set password').then(el => {
+              expect(el.attr('href')!).to.equal(url)
+            })
+          },
+          { url }
+        )
+        // Run activateUser in the main origin instead of inside openEmail. See docs on openEmail.
+        activateUser(url)
+      })
+    })
+    it('via script and opening URL manually', () => {
+      const user = `${uuid()}@example.com`
+      let url: string
+      cy.then(async () => {
+        ;({ url } = await createMongoUser({ email: user }))
+      })
+      cy.then(() => {
+        activateUser(url)
+      })
+    })
+    it('via script and email', () => {
+      const user = `${uuid()}@example.com`
+      let url: string
+      cy.then(async () => {
+        ;({ url } = await createMongoUser({ email: user }))
+      })
+      cy.then(() => {
+        openEmail(
+          'Activate your Overleaf Community Edition Account',
+          (frame, { url }) => {
+            frame.contains('Set password').then(el => {
+              expect(el.attr('href')!).to.equal(url)
+            })
+          },
+          { url }
+        )
+        // Run activateUser in the main origin instead of inside openEmail. See docs on openEmail.
+        activateUser(url)
+      })
+    })
+  }
+
+  describe('in CE', () => {
+    if (isExcludedBySharding('CE_DEFAULT')) return
+    startWith({ pro: false, version: 'latest' })
+    const admin = 'admin@example.com'
+    const user = `user+${uuid()}@example.com`
+    ensureUserExists({ email: admin, isAdmin: true })
+    ensureUserExists({ email: user })
+
+    describe('create users', () => {
+      beforeEach(() => {
+        login(admin)
+        cy.visit('/project')
+        cy.get('nav').findByText('Admin').click()
+        cy.get('nav').findByText('Manage Users').click()
+      })
+      registrationTests()
+    })
+  })
+
   describe('in server pro', () => {
     const admin = 'admin@example.com'
     const user1 = 'user@example.com'
@@ -83,18 +178,11 @@ describe('admin panel', function () {
         cy.get('nav').findByText('Manage Users').click()
       })
 
-      it('create and login user', () => {
-        const user = `${uuid()}@example.com`
-
-        cy.get('a').contains('New User').click()
-        cy.get('input[name="email"]').type(user + '{enter}')
-
-        cy.get('td')
-          .contains(/\/user\/activate/)
-          .then($td => {
-            const url = $td.text().trim()
-            activateUser(url)
-          })
+      describe('create users', () => {
+        beforeEach(() => {
+          cy.get('a').contains('New User').click()
+        })
+        registrationTests()
       })
 
       it('user list RegExp search', () => {

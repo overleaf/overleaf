@@ -21,7 +21,7 @@ export async function createMongoUser({
     script: 'modules/server-ce-scripts/scripts/create-user.js',
     args: [`--email=${email}`, `--admin=${isAdmin}`],
   })
-  const [url] = stdout.match(/\/user\/activate\?token=\S+/)!
+  const [url] = stdout.match(/http:\/\/.+\/user\/activate\?token=\S+/)!
   const userId = new URL(url, location.origin).searchParams.get('user_id')!
   const signupDate = parseInt(userId.slice(0, 8), 16)
   if (signupDate < t0) {
@@ -70,7 +70,27 @@ export function login(username: string, password = DEFAULT_PASSWORD) {
   return startOrResumeSession
 }
 
+let activateRateLimitState = { count: 0, reset: 0 }
+export function resetActivateUserRateLimit() {
+  activateRateLimitState = { count: 0, reset: 0 }
+}
+
+function handleActivateUserRateLimit() {
+  cy.then(() => {
+    activateRateLimitState.count++
+    if (activateRateLimitState.reset < Date.now()) {
+      activateRateLimitState.reset = Date.now() + 65_000
+      activateRateLimitState.count = 1
+    } else if (activateRateLimitState.count >= 6) {
+      cy.wait(activateRateLimitState.reset - Date.now())
+      activateRateLimitState.count = 1
+    }
+  })
+}
+
 export function activateUser(url: string, password = DEFAULT_PASSWORD) {
+  handleActivateUserRateLimit()
+
   cy.session(url, () => {
     cy.visit(url)
     cy.url().then(url => {

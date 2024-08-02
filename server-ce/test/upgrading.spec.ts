@@ -145,7 +145,8 @@ describe('Upgrading', function () {
   const optionsFourDotTwo = {
     version: '4.2',
     vars: {
-      // Add database vars with old branding
+      // Add core vars with old branding
+      SHARELATEX_SITE_URL: 'http://sharelatex',
       SHARELATEX_MONGO_URL: 'mongodb://mongo/sharelatex',
       SHARELATEX_REDIS_HOST: 'redis',
     },
