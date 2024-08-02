@@ -17,7 +17,7 @@
     "adm-zip": "^0.5.12",
     "body-parser": "^1.20.2",
     "celebrate": "^15.0.3",
-    "cypress": "13.6.6",
+    "cypress": "13.13.2",
     "express": "^4.19.2",
     "isomorphic-git": "^1.25.10",
     "js-yaml": "^4.1.0",

@@ -60,7 +60,7 @@ services:
     command: ["/server-pro-start.sh"]
 
   e2e:
-    image: cypress/included:13.6.6
+    image: cypress/included:13.13.2
     stop_grace_period: 0s
     entrypoint: npm
     command: run cypress:run
@@ -78,7 +78,7 @@ services:
         condition: service_healthy
 
   e2e-open:
-    image: cypress/included:13.6.6
+    image: cypress/included:13.13.2
     stop_grace_period: 0s
     entrypoint: npm
     command: run cypress:open
