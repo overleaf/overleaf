@@ -51,11 +51,10 @@ const UserMembershipsHandler = {
     }
     const removeOperation = { $pull: {} }
     removeOperation.$pull[entityConfig.fields.write] = userId
-    EntityModels[entityConfig.modelName].updateMany(
-      {},
-      removeOperation,
-      callback
-    )
+    EntityModels[entityConfig.modelName]
+      .updateMany({}, removeOperation)
+      .then(result => callback(null, result))
+      .catch(callback)
   },
 
   getEntitiesByUser(entityConfig, userId, callback) {
@@ -64,22 +63,19 @@ const UserMembershipsHandler = {
     }
     const query = Object.assign({}, entityConfig.baseQuery)
     query[entityConfig.fields.access] = userId
-    EntityModels[entityConfig.modelName].find(
-      query,
-      function (error, entities) {
+    EntityModels[entityConfig.modelName]
+      .find(query)
+      .then(entities => {
         if (entities == null) {
           entities = []
-        }
-        if (error != null) {
-          return callback(error)
         }
         async.mapSeries(
           entities,
           (entity, cb) => entity.fetchV1Data(cb),
           callback
         )
-      }
-    )
+      })
+      .catch(callback)
   },
 }
 
