@@ -4,7 +4,7 @@ const modulePath =
   '../../../../app/src/Features/Authentication/SessionManager.js'
 const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('SessionManager', function () {
   beforeEach(function () {

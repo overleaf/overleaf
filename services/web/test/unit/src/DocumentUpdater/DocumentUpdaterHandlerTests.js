@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/DocumentUpdater/DocumentUpdaterHandler'

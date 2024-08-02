@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
@@ -72,7 +72,7 @@ describe('TpdsUpdateSender', function () {
     }
     this.TpdsUpdateSender = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '@overleaf/settings': this.settings,
         '@overleaf/fetch-utils': this.FetchUtils,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,

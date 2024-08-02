@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
 const sinon = require('sinon')
 const { Tag } = require('../helpers/models/Tag')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Tags/TagsHandler.js'

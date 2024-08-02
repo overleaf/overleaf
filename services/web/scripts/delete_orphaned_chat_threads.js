@@ -13,7 +13,7 @@ process.env.BATCH_SIZE = BATCH_SIZE
 process.env.MONGO_SOCKET_TIMEOUT =
   parseInt(process.env.MONGO_SOCKET_TIMEOUT, 10) || 600000
 
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
 const ChatApiHandler = require('../app/src/Features/Chat/ChatApiHandler')

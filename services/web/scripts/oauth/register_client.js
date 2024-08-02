@@ -1,5 +1,5 @@
 const minimist = require('minimist')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
 const {
   hashSecret,

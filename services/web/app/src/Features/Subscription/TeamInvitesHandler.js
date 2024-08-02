@@ -3,7 +3,7 @@ const crypto = require('crypto')
 
 const settings = require('@overleaf/settings')
 const Modules = require('../../infrastructure/Modules')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const { Subscription } = require('../../models/Subscription')
 const { SSOConfig } = require('../../models/SSOConfig')

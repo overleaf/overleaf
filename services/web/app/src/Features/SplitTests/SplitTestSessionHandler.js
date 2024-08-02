@@ -1,6 +1,6 @@
 const { callbackify } = require('util')
 const _ = require('lodash')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
 const SessionManager = require('../Authentication/SessionManager')

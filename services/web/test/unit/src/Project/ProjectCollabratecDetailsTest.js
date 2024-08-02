@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
@@ -19,7 +19,7 @@ describe('ProjectCollabratecDetailsHandler', function () {
       modulePath,
       {
         requires: {
-          mongodb: { ObjectId },
+          'mongodb-legacy': { ObjectId },
           '../../models/Project': { Project: this.ProjectModel },
         },
       }

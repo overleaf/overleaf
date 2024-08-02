@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const PublisherModel = require('../../../../app/src/models/Publisher').Publisher
 const { callbackifyClass } = require('@overleaf/promise-utils')
 

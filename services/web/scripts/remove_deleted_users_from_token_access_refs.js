@@ -1,6 +1,6 @@
 const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const { batchedUpdate } = require('./helpers/batchedUpdate')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const minimist = require('minimist')
 const CollaboratorsHandler = require('../app/src/Features/Collaborators/CollaboratorsHandler')
 const {

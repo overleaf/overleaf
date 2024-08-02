@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Subscription = require('./Subscription')
 const MockRecurlyApiClass = require('../mocks/MockRecurlyApi')
 const RecurlyWrapper = require('../../../../app/src/Features/Subscription/RecurlyWrapper')

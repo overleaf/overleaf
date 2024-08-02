@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const _ = require('lodash')
 const { callbackify } = require('util')
 const logger = require('@overleaf/logger')

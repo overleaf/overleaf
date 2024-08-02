@@ -7,7 +7,7 @@ const {
 } = require('../../app/src/models/DeletedSubscription')
 const minimist = require('minimist')
 const _ = require('lodash')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 let FETCH_LIMIT, COMMIT, VERBOSE
 

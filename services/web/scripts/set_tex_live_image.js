@@ -1,5 +1,5 @@
 const Settings = require('@overleaf/settings')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { Project } = require('../app/src/models/Project')
 
 async function main() {

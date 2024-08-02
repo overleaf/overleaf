@@ -1,5 +1,5 @@
 const OError = require('@overleaf/o-error')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { ObjectId: MongooseObjectId } = require('mongoose').mongo
 
 function _getObjectIdInstance(id) {

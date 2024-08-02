@@ -3,7 +3,7 @@
  */
 
 const minimist = require('minimist')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const Errors = require('../app/src/Features/Errors/Errors')

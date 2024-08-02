@@ -2,7 +2,7 @@ const User = require('./helpers/User')
 const request = require('./helpers/request')
 const { expect } = require('chai')
 const settings = require('@overleaf/settings')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('DocUpdate', function () {
   beforeEach(function (done) {

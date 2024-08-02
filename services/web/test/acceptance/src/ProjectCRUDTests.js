@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const User = require('./helpers/User').promises
 const { Project } = require('../../../app/src/models/Project')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const cheerio = require('cheerio')
 const { Subscription } = require('../../../app/src/models/Subscription')
 const Features = require('../../../app/src/infrastructure/Features')

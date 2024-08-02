@@ -1,5 +1,5 @@
 // ts-check
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const _ = require('lodash')
 const { promisify } = require('util')
 const Settings = require('@overleaf/settings')

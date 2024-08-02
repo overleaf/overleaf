@@ -2,7 +2,7 @@ const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { Project } = require('../helpers/models/Project')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
@@ -53,7 +53,7 @@ describe('CollaboratorsGetter', function () {
     }
     this.CollaboratorsGetter = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '../User/UserGetter': this.UserGetter,
         '../../models/Project': { Project },
         '../Project/ProjectGetter': this.ProjectGetter,

@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const MODULE_PATH = '../../../../app/src/Features/Project/ProjectHelper.js'
 
@@ -37,7 +37,7 @@ describe('ProjectHelper', function () {
 
     this.ProjectHelper = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '@overleaf/settings': this.Settings,
       },
     })

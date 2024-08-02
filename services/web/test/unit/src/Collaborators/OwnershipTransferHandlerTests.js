@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const PrivilegeLevels = require('../../../../app/src/Features/Authorization/PrivilegeLevels')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Collaborators/OwnershipTransferHandler'

@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/Project/ProjectGetter.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('ProjectGetter', function () {
   beforeEach(function () {

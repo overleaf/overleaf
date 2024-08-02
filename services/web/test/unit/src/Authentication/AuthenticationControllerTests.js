@@ -6,7 +6,7 @@ const SandboxedModule = require('sandboxed-module')
 const tk = require('timekeeper')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const AuthenticationErrors = require('../../../../app/src/Features/Authentication/AuthenticationErrors')
 
 describe('AuthenticationController', function () {

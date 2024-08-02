@@ -1,4 +1,4 @@
-const mongodb = require('mongodb')
+const mongodb = require('mongodb-legacy')
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
 const Mongoose = require('./Mongoose')

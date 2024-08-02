@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { Project } = require('../../models/Project')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 

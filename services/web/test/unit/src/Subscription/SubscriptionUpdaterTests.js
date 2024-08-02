@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionUpdater'
 const { assert, expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('SubscriptionUpdater', function () {
   beforeEach(function () {

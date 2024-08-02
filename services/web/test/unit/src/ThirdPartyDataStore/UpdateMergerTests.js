@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
 const { Writable } = require('stream')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const MODULE_PATH =
   '../../../../app/src/Features/ThirdPartyDataStore/UpdateMerger.js'

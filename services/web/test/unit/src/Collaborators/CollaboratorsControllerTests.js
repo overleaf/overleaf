@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
@@ -79,7 +79,7 @@ describe('CollaboratorsController', function () {
 
     this.CollaboratorsController = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         './CollaboratorsHandler': this.CollaboratorsHandler,
         './CollaboratorsGetter': this.CollaboratorsGetter,
         './OwnershipTransferHandler': this.OwnershipTransferHandler,

@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const sinon = require('sinon')
 
 const MODULE_PATH =
@@ -8,7 +8,9 @@ const MODULE_PATH =
 
 describe('FolderStructureBuilder', function () {
   beforeEach(function () {
-    this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {})
+    this.FolderStructureBuilder = SandboxedModule.require(MODULE_PATH, {
+      requires: { 'mongodb-legacy': { ObjectId } },
+    })
   })
 
   describe('buildFolderStructure', function () {

@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const EmailHandler = require('../Email/EmailHandler')
 const Errors = require('../Errors/Errors')
 const InstitutionsAPI = require('../Institutions/InstitutionsAPI')

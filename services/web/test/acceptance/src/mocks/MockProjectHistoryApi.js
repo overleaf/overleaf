@@ -1,6 +1,6 @@
 const AbstractMockApi = require('./AbstractMockApi')
 const _ = require('lodash')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const {
   plainTextResponse,
 } = require('../../../../app/src/infrastructure/Response')

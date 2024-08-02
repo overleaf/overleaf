@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const MODULE_PATH =
@@ -39,6 +39,7 @@ describe('AuthorizationMiddleware', function () {
       requires: {
         './AuthorizationManager': this.AuthorizationManager,
         '../Errors/HttpErrorHandler': this.HttpErrorHandler,
+        'mongodb-legacy': { ObjectId },
         '../Authentication/AuthenticationController':
           this.AuthenticationController,
         '../Authentication/SessionManager': this.SessionManager,

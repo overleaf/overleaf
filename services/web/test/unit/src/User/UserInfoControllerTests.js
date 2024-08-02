@@ -4,7 +4,7 @@ const modulePath = '../../../../app/src/Features/User/UserInfoController.js'
 const SandboxedModule = require('sandboxed-module')
 const MockResponse = require('../helpers/MockResponse')
 const MockRequest = require('../helpers/MockRequest')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('UserInfoController', function () {
   beforeEach(function () {
@@ -14,7 +14,7 @@ describe('UserInfoController', function () {
 
     this.UserInfoController = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         './UserGetter': this.UserGetter,
         './UserUpdater': this.UserUpdater,
         './UserDeleter': this.UserDeleter,

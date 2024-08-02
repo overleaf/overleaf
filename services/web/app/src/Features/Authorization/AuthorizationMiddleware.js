@@ -1,6 +1,6 @@
 const AuthorizationManager = require('./AuthorizationManager')
 const logger = require('@overleaf/logger')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../Errors/Errors')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const AuthenticationController = require('../Authentication/AuthenticationController')

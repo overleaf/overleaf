@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Path = require('path')
 const fs = require('fs')
 

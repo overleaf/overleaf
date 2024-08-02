@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const tk = require('timekeeper')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const SandboxedModule = require('sandboxed-module')
 const { DeletedFile } = require('../helpers/models/DeletedFile')
 const { Project } = require('../helpers/models/Project')
@@ -191,7 +191,7 @@ describe('ProjectEntityMongoUpdateHandler', function () {
 
     this.subject = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '@overleaf/settings': this.Settings,
         '../Cooldown/CooldownManager': this.CooldownManager,
         '../../models/Folder': { Folder: this.FolderModel },

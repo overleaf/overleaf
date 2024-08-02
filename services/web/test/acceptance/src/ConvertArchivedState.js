@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 const { exec } = require('child_process')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const User = require('./helpers/User').promises
 

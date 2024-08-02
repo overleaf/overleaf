@@ -4,7 +4,7 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')
 const { Project } = require('../../models/Project')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
 const { callbackifyAll } = require('@overleaf/promise-utils')
 

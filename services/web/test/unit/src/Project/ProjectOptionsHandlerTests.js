@@ -17,7 +17,7 @@ const { expect } = require('chai')
 const modulePath =
   '../../../../app/src/Features/Project/ProjectOptionsHandler.js'
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('ProjectOptionsHandler', function () {
   const projectId = '4eecaffcbffa66588e000008'

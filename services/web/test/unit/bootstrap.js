@@ -23,7 +23,7 @@ chai.config.truncateThreshold = 0
 require('sinon-mongoose')
 
 // ensure every ObjectId has the id string as a property for correct comparisons
-require('mongodb').ObjectId.cacheHexString = true
+require('mongodb-legacy').ObjectId.cacheHexString = true
 
 /*
  * Global stubs

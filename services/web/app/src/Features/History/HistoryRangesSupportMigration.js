@@ -1,7 +1,7 @@
 // @ts-check
 
 const { callbackify } = require('util')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const HistoryManager = require('../History/HistoryManager')

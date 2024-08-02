@@ -14,7 +14,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
 const assertNotCalled = sinon.assert.notCalled
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipViewModel'
 const SandboxedModule = require('sandboxed-module')
@@ -28,7 +28,7 @@ describe('UserMembershipViewModel', function () {
     this.UserGetter = { getUser: sinon.stub() }
     this.UserMembershipViewModel = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '../Helpers/Mongo': { isObjectIdInstance, normalizeQuery },
         '../User/UserGetter': this.UserGetter,
       },

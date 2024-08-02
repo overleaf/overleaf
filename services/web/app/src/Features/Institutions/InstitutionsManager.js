@@ -2,7 +2,7 @@ const {
   callbackifyAll,
   promiseMapWithLimit,
 } = require('@overleaf/promise-utils')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const { fetchJson } = require('@overleaf/fetch-utils')

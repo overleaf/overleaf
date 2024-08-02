@@ -1,6 +1,6 @@
 const UserGetter = require('./UserGetter')
 const SessionManager = require('../Authentication/SessionManager')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 function getLoggedInUsersPersonalInfo(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)

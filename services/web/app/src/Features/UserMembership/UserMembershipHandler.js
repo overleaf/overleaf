@@ -1,4 +1,4 @@
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { promisifyAll, callbackify } = require('@overleaf/promise-utils')
 const EntityModels = {
   Institution: require('../../models/Institution').Institution,

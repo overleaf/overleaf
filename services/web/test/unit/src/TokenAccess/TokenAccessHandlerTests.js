@@ -6,7 +6,7 @@ const modulePath = path.join(
   '../../../../app/src/Features/TokenAccess/TokenAccessHandler'
 )
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('TokenAccessHandler', function () {
   beforeEach(function () {
@@ -21,7 +21,7 @@ describe('TokenAccessHandler', function () {
     this.req = {}
     this.TokenAccessHandler = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '../../models/Project': { Project: (this.Project = {}) },
         '@overleaf/metrics': (this.Metrics = { inc: sinon.stub() }),
         '@overleaf/settings': (this.settings = {}),

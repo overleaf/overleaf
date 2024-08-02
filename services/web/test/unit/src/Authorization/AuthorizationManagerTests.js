@@ -6,7 +6,7 @@ const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const PrivilegeLevels = require('../../../../app/src/Features/Authorization/PrivilegeLevels')
 const PublicAccessLevels = require('../../../../app/src/Features/Authorization/PublicAccessLevels')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('AuthorizationManager', function () {
   beforeEach(function () {
@@ -48,7 +48,7 @@ describe('AuthorizationManager', function () {
 
     this.AuthorizationManager = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../Project/ProjectGetter': this.ProjectGetter,

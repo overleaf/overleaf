@@ -1,5 +1,5 @@
 const { callbackify } = require('util')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const ProjectGetter = require('../Project/ProjectGetter')

@@ -1,5 +1,5 @@
 const { Joi } = require('../../../../app/src/infrastructure/Validation')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { expect } = require('chai')
 const { ValidationError } = require('joi')
 

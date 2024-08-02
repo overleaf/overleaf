@@ -1,5 +1,5 @@
 const { Joi: CelebrateJoi, celebrate, errors } = require('celebrate')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const objectIdValidator = {
   type: 'objectId',

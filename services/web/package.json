@@ -137,7 +137,7 @@
     "minimist": "^1.2.7",
     "mmmagic": "^0.5.3",
     "moment": "^2.29.4",
-    "mongodb": "5.9.2",
+    "mongodb-legacy": "5.0.0",
     "mongoose": "^7.8.0",
     "multer": "overleaf/multer#e1df247fbf8e7590520d20ae3601eaef9f3d2e9e",
     "nocache": "^2.1.0",

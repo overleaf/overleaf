@@ -8,7 +8,7 @@ const UserUpdater = require('../../../../app/src/Features/User/UserUpdater')
 const moment = require('moment')
 const fetch = require('node-fetch')
 const { db } = require('../../../../app/src/infrastructure/mongodb')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const {
   UserAuditLogEntry,
 } = require('../../../../app/src/models/UserAuditLogEntry')

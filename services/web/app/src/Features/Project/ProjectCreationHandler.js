@@ -1,7 +1,7 @@
 const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Features = require('../../infrastructure/Features')
 const { Project } = require('../../models/Project')
 const { Folder } = require('../../models/Folder')

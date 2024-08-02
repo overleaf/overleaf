@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipHandler'
 const SandboxedModule = require('sandboxed-module')
@@ -77,7 +77,7 @@ describe('UserMembershipHandler', function () {
     }
     this.UserMembershipHandler = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         './UserMembershipErrors': {
           UserIsManagerError,
           UserNotFoundError,

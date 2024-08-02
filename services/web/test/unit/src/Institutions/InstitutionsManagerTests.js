@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const path = require('path')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/Institutions/InstitutionsManager'
@@ -136,7 +136,7 @@ describe('InstitutionsManager', function () {
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../../models/Institution': this.InstitutionModel,
         '../../models/Subscription': SubscriptionModel,
-        mongodb: this.Mongo,
+        'mongodb-legacy': this.Mongo,
         '@overleaf/settings': {
           features: { professional: { 'test-feature': true } },
         },

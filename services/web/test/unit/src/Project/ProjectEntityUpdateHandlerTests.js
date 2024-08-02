@@ -2,7 +2,7 @@ const { expect } = require('chai')
 const sinon = require('sinon')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
 const SandboxedModule = require('sandboxed-module')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Project/ProjectEntityUpdateHandler'

@@ -2,6 +2,7 @@ const Path = require('path')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const { ObjectId } = require('mongodb-legacy')
 
 const MODULE_PATH = Path.join(
   __dirname,
@@ -59,6 +60,7 @@ describe('SplitTestSessionHandler', function () {
         './SplitTestCache': this.SplitTestCache,
         './SplitTestUserGetter': this.SplitTestUserGetter,
         '@overleaf/metrics': this.Metrics,
+        'mongodb-legacy': { ObjectId },
       },
     })
   })

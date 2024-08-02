@@ -5,7 +5,7 @@
  * This is the output format of each line in the find_malformed_filetrees.js
  * script.
  */
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
 const ProjectLocator = require('../app/src/Features/Project/ProjectLocator')
 

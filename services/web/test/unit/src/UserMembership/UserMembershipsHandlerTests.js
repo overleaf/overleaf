@@ -12,7 +12,7 @@
  */
 const sinon = require('sinon')
 const assertCalledWith = sinon.assert.calledWith
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const modulePath =
   '../../../../app/src/Features/UserMembership/UserMembershipsHandler'
 const SandboxedModule = require('sandboxed-module')

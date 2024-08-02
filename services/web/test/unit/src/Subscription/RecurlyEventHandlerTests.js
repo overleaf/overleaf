@@ -1,4 +1,5 @@
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb-legacy')
 const sinon = require('sinon')
 const modulePath =
   '../../../../app/src/Features/Subscription/RecurlyEventHandler'
@@ -27,6 +28,7 @@ describe('RecurlyEventHandler', function () {
 
     this.RecurlyEventHandler = SandboxedModule.require(modulePath, {
       requires: {
+        'mongodb-legacy': { ObjectId },
         './SubscriptionEmailHandler': (this.SubscriptionEmailHandler = {
           sendTrialOnboardingEmail: sinon.stub(),
         }),

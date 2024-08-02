@@ -5,7 +5,7 @@ const modulePath = path.join(
   __dirname,
   '../../../../app/src/Features/InactiveData/InactiveProjectManager'
 )
-const { ObjectId, ReadPreference } = require('mongodb')
+const { ObjectId, ReadPreference } = require('mongodb-legacy')
 const { expect } = require('chai')
 
 describe('InactiveProjectManager', function () {
@@ -26,7 +26,7 @@ describe('InactiveProjectManager', function () {
     this.ProjectGetter = { promises: { getProject: sinon.stub() } }
     this.InactiveProjectManager = SandboxedModule.require(modulePath, {
       requires: {
-        mongodb: { ObjectId },
+        'mongodb-legacy': { ObjectId },
         '@overleaf/settings': this.settings,
         '../Docstore/DocstoreManager': this.DocstoreManager,
         '../Project/ProjectUpdateHandler': this.ProjectUpdateHandler,

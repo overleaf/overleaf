@@ -1,6 +1,6 @@
 const { expect } = require('chai')
 
-const { ObjectId: NativeObjectId } = require('mongodb')
+const { ObjectId: NativeObjectId } = require('mongodb-legacy')
 const { ObjectId: MongooseObjectId } = require('mongoose').mongo
 
 const { User: UserModel } = require('../../../app/src/models/User')

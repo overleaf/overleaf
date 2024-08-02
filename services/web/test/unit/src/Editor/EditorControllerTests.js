@@ -21,7 +21,7 @@ const modulePath = require('path').join(
 )
 const MockClient = require('../helpers/MockClient')
 const assert = require('assert')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('EditorController', function () {
   beforeEach(function () {

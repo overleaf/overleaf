@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
 

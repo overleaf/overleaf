@@ -1,6 +1,6 @@
 const OError = require('@overleaf/o-error')
 const HttpErrorHandler = require('../../Features/Errors/HttpErrorHandler')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
 const OwnershipTransferHandler = require('./OwnershipTransferHandler')

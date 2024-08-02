@@ -3,7 +3,7 @@ const SubscriptionUpdater = require('../app/src/Features/Subscription/Subscripti
 const minimist = require('minimist')
 
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const run = async () => {
   for (const id of ids) {

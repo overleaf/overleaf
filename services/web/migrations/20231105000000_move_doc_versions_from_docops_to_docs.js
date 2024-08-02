@@ -1,4 +1,4 @@
-const { ObjectId, ReadPreference } = require('mongodb')
+const { ObjectId, ReadPreference } = require('mongodb-legacy')
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || '1000', 10)
 const MIN_ID = process.env.MIN_ID

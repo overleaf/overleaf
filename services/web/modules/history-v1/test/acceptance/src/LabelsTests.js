@@ -12,7 +12,7 @@
  */
 const _ = require('lodash')
 const { expect } = require('chai')
-const { ObjectId } = require('mongodb')
+const { ObjectId } = require('mongodb-legacy')
 
 const User = require('../../../../../test/acceptance/src/helpers/User')
 const MockProjectHistoryApiClass = require('../../../../../test/acceptance/src/mocks/MockProjectHistoryApi')
