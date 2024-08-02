@@ -2,6 +2,7 @@ const mongodb = require('mongodb-legacy')
 const OError = require('@overleaf/o-error')
 const Settings = require('@overleaf/settings')
 const Mongoose = require('./Mongoose')
+const { addConnectionDrainer } = require('./GracefulShutdown')
 
 // Ensure Mongoose is using the same mongodb instance as the mongodb module,
 // otherwise we will get multiple versions of the ObjectId class. Mongoose
@@ -13,7 +14,6 @@ if (Mongoose.mongo !== mongodb) {
   )
 }
 
-const { getNativeDb } = Mongoose
 const { ObjectId, ReadPreference } = mongodb
 
 if (
@@ -39,8 +39,31 @@ async function waitForDb() {
 }
 
 const db = {}
+
+let clientPromise
+
+async function getClient() {
+  if (!clientPromise) {
+    clientPromise = mongodb.MongoClient.connect(
+      Settings.mongo.url,
+      Settings.mongo.options
+    )
+  }
+  return await clientPromise
+}
+
+addConnectionDrainer('mongodb', async () => {
+  const client = await getClient()
+  await client.close()
+})
+
+async function getInternalDb() {
+  const client = await getClient()
+  return client.db()
+}
+
 async function setupDb() {
-  const internalDb = await getNativeDb()
+  const internalDb = await getInternalDb()
 
   db.contacts = internalDb.collection('contacts')
   db.deletedFiles = internalDb.collection('deletedFiles')
@@ -101,14 +124,14 @@ async function setupDb() {
 }
 
 async function getCollectionNames() {
-  const internalDb = await getNativeDb()
+  const internalDb = await getInternalDb()
 
   const collections = await internalDb.collections()
   return collections.map(collection => collection.collectionName)
 }
 
 async function dropTestDatabase() {
-  const internalDb = await getNativeDb()
+  const internalDb = await getInternalDb()
   const dbName = internalDb.databaseName
   const env = process.env.NODE_ENV
 
@@ -125,7 +148,7 @@ async function dropTestDatabase() {
  * WARNING: Consider using a pre-populated collection from `db` to avoid typos!
  */
 async function getCollectionInternal(name) {
-  const internalDb = await getNativeDb()
+  const internalDb = await getInternalDb()
   return internalDb.collection(name)
 }
 
