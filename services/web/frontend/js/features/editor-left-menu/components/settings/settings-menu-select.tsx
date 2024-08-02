@@ -22,6 +22,7 @@ type SettingsMenuSelectProps<T extends PossibleValue = string> = {
   loading?: boolean
   onChange: (val: T) => void
   value?: T
+  disabled?: boolean
 }
 
 export default function SettingsMenuSelect<T extends PossibleValue = string>({
@@ -32,6 +33,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
   loading,
   onChange,
   value,
+  disabled = false,
 }: SettingsMenuSelectProps<T>) {
   const handleChange: ChangeEventHandler<HTMLSelectElement> = useCallback(
     event => {
@@ -60,6 +62,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
           className="form-control"
           onChange={handleChange}
           value={value?.toString()}
+          disabled={disabled}
         >
           {options.map(option => (
             <option

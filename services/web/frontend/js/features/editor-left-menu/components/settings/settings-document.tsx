@@ -35,14 +35,11 @@ export default function SettingsDocument() {
     return mappedDocs
   }, [docs, rootDocId])
 
-  if (permissionsLevel === 'readOnly') {
-    return null
-  }
-
   return (
     <SettingsMenuSelect
       onChange={setRootDocId}
       value={rootDocId ?? ''}
+      disabled={permissionsLevel === 'readOnly'}
       options={validDocsOptions}
       label={t('main_document')}
       name="rootDocId"

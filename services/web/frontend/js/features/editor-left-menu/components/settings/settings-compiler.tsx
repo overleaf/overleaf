@@ -9,14 +9,11 @@ export default function SettingsCompiler() {
   const { permissionsLevel } = useEditorContext()
   const { compiler, setCompiler } = useProjectSettingsContext()
 
-  if (permissionsLevel === 'readOnly') {
-    return null
-  }
-
   return (
     <SettingsMenuSelect<ProjectCompiler>
       onChange={setCompiler}
       value={compiler}
+      disabled={permissionsLevel === 'readOnly'}
       options={[
         {
           value: 'pdflatex',
