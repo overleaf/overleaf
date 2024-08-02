@@ -100,7 +100,7 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
               type="text"
               placeholder="Tag Name"
               name="new-tag-name"
-              value={newTagName === undefined ? tag.name ?? '' : newTagName}
+              value={newTagName === undefined ? (tag.name ?? '') : newTagName}
               required
               onChange={e => setNewTagName(e.target.value)}
             />

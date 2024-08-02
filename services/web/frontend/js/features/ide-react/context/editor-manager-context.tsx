@@ -538,7 +538,7 @@ export const EditorManagerProvider: FC = ({ children }) => {
     if (docError) {
       const { doc, document, error, meta } = docError
       let { editorContent } = docError
-      const message = typeof error === 'string' ? error : error?.message ?? ''
+      const message = typeof error === 'string' ? error : (error?.message ?? '')
 
       // Clear document error so that it's only handled once
       setDocError(null)

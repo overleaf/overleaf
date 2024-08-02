@@ -190,7 +190,7 @@ function PasswordForm() {
                   {t('use_a_different_password')}.
                 </>
               ) : (
-                getUserFacingMessage(error) ?? ''
+                (getUserFacingMessage(error) ?? '')
               )
             }
           />

@@ -158,7 +158,7 @@ const ColumnWidthModalBody = () => {
                 }
                 items={UNITS}
                 itemToKey={x => x ?? ''}
-                itemToString={x => (x === 'custom' ? t('custom') : x ?? '')}
+                itemToString={x => (x === 'custom' ? t('custom') : (x ?? ''))}
                 onSelectedItemChanged={item => setCurrentUnit(item)}
                 defaultItem={currentUnit}
               />

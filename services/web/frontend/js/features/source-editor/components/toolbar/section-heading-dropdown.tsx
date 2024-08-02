@@ -48,7 +48,7 @@ export const SectionHeadingDropdown = () => {
   )
 
   const currentLabel = currentLevel
-    ? levels.get(currentLevel.level) ?? currentLevel.level
+    ? (levels.get(currentLevel.level) ?? currentLevel.level)
     : '---'
 
   return (
