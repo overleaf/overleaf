@@ -130,11 +130,15 @@ describe('MongoTests', function () {
         expectInQueryWithNativeObjectIds(query)
       })
       it('should transform all Mongoose ObjectIds to native ObjectIds', function () {
-        const query = normalizeMultiQuery(userIds.map(MongooseObjectId))
+        const query = normalizeMultiQuery(
+          userIds.map(userId => new NativeObjectId(userId))
+        )
         expectInQueryWithNativeObjectIds(query)
       })
       it('should leave all native Objects as native ObjectIds', function () {
-        const query = normalizeMultiQuery(userIds.map(NativeObjectId))
+        const query = normalizeMultiQuery(
+          userIds.map(userId => new NativeObjectId(userId))
+        )
         expectInQueryWithNativeObjectIds(query)
       })
 
@@ -143,11 +147,15 @@ describe('MongoTests', function () {
         await expectToFindTheThreeUsers(query)
       })
       it('should find the three users from Mongoose ObjectIds', async function () {
-        const query = normalizeMultiQuery(userIds.map(MongooseObjectId))
+        const query = normalizeMultiQuery(
+          userIds.map(userId => new NativeObjectId(userId))
+        )
         await expectToFindTheThreeUsers(query)
       })
       it('should find the three users from native ObjectIds', async function () {
-        const query = normalizeMultiQuery(userIds.map(NativeObjectId))
+        const query = normalizeMultiQuery(
+          userIds.map(userId => new NativeObjectId(userId))
+        )
         await expectToFindTheThreeUsers(query)
       })
     })
