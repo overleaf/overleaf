@@ -423,16 +423,13 @@ class User {
         UserModel.findOneAndUpdate(
           filter,
           { $set: { hashedPassword, emails: this.emails } },
-          options,
-          (error, user) => {
-            if (error != null) {
-              return callback(error)
-            }
-
+          options
+        )
+          .then(user => {
             this.setExtraAttributes(user)
             callback(null, this.password)
-          }
-        )
+          })
+          .catch(callback)
       }
     )
   }
@@ -443,28 +440,34 @@ class User {
       const value = features[key]
       update[`features.${key}`] = value
     }
-    UserModel.updateOne({ _id: this.id }, update, callback)
+    UserModel.updateOne({ _id: this.id }, update)
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 
   setFeaturesOverride(featuresOverride, callback) {
     const update = { $push: { featuresOverrides: featuresOverride } }
-    UserModel.updateOne({ _id: this.id }, update, callback)
+    UserModel.updateOne({ _id: this.id }, update)
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 
   setOverleafId(overleafId, callback) {
-    UserModel.updateOne(
-      { _id: this.id },
-      { 'overleaf.id': overleafId },
-      callback
-    )
+    UserModel.updateOne({ _id: this.id }, { 'overleaf.id': overleafId })
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 
   setEmails(emails, callback) {
-    UserModel.updateOne({ _id: this.id }, { emails }, callback)
+    UserModel.updateOne({ _id: this.id }, { emails })
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 
   setSuspended(suspended, callback) {
-    UserModel.updateOne({ _id: this.id }, { suspended }, callback)
+    UserModel.updateOne({ _id: this.id }, { suspended })
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 
   logout(callback) {
@@ -1215,9 +1218,10 @@ class User {
         overleaf: {
           id: v1Id,
         },
-      },
-      callback
+      }
     )
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 
   setCollaboratorInfo(projectId, userId, info, callback) {

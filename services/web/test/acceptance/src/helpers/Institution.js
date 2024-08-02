@@ -15,23 +15,21 @@ class Institution {
   ensureExists(callback) {
     const filter = { v1Id: this.v1Id }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
-    InstitutionModel.findOneAndUpdate(
-      filter,
-      {},
-      options,
-      (error, institution) => {
+    InstitutionModel.findOneAndUpdate(filter, {}, options)
+      .then(institution => {
         this._id = institution._id
-        callback(error)
-      }
-    )
+        callback()
+      })
+      .catch(callback)
   }
 
   setManagerIds(managerIds, callback) {
     return InstitutionModel.findOneAndUpdate(
       { _id: new ObjectId(this._id) },
-      { managerIds },
-      callback
+      { managerIds }
     )
+      .then((...args) => callback(null, ...args))
+      .catch(callback)
   }
 }
 

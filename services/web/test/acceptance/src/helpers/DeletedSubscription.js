@@ -21,16 +21,13 @@ class DeletedSubscription {
   }
 
   expectRestored(callback) {
-    DeletedSubscriptionModel.findOne(
-      { 'subscription._id': this.subscription._id },
-      (error, deletedSubscription) => {
-        if (error) {
-          return callback(error)
-        }
+    DeletedSubscriptionModel.findOne({
+      'subscription._id': this.subscription._id,
+    })
+      .then(deletedSubscription => {
         expect(deletedSubscription).to.be.null
-        SubscriptionModel.findById(
-          this.subscription._id,
-          (error, subscription) => {
+        SubscriptionModel.findById(this.subscription._id)
+          .then(subscription => {
             expect(subscription).to.exist
             expect(subscription._id.toString()).to.equal(
               this.subscription._id.toString()
@@ -38,11 +35,11 @@ class DeletedSubscription {
             expect(subscription.admin_id.toString()).to.equal(
               this.subscription.admin_id.toString()
             )
-            callback(error)
-          }
-        )
-      }
-    )
+            callback()
+          })
+          .catch(callback)
+      })
+      .catch(callback)
   }
 }
 
