@@ -133,7 +133,6 @@
   "dropbox_sync_description": "__appName__ プロジェクトをDropboxと同期しましょう。__appName__ の変更が自動的にDropboxに送信されます。その逆も同じです。",
   "editing": "編集中",
   "editor_disconected_click_to_reconnect": "エディターの接続が切れました。どこかをクリックして再接続。",
-  "editor_resources": "エディターの資源",
   "email": "電子メール",
   "email_already_registered": "このメールアドレスはすでに登録されています",
   "email_link_expired": "メールのリンクの有効期限が切れています。新しいリンクをリクエストしてください。",
