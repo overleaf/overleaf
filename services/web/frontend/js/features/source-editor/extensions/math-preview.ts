@@ -1,4 +1,5 @@
 import {
+  EditorView,
   repositionTooltips,
   showTooltip,
   Tooltip,
@@ -29,7 +30,9 @@ export const mathPreview = (enabled: boolean): Extension => {
     return []
   }
 
-  return mathPreviewConf.of(enabled ? mathPreviewStateField : [])
+  return mathPreviewConf.of(
+    enabled ? [mathPreviewTheme, mathPreviewStateField] : []
+  )
 }
 
 const mathPreviewConf = new Compartment()
@@ -162,3 +165,19 @@ const buildTooltipContent = (
 
   return element
 }
+
+/**
+ * Styles for the preview tooltip
+ */
+const mathPreviewTheme = EditorView.baseTheme({
+  '&light .ol-cm-math-tooltip': {
+    boxShadow: '0px 2px 4px 0px #1e253029',
+    border: '1px solid #e7e9ee !important',
+    backgroundColor: 'white !important',
+  },
+  '&dark .ol-cm-math-tooltip': {
+    boxShadow: '0px 2px 4px 0px #1e253029',
+    border: '1px solid #2f3a4c !important',
+    backgroundColor: '#1b222c !important',
+  },
+})
