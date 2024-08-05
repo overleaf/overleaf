@@ -5,6 +5,7 @@ const modulePath = require('path').join(
   __dirname,
   '../../../app/js/CompileController'
 )
+const Errors = require('../../../app/js/Errors')
 
 function tryImageNameValidation(method, imageNameField) {
   describe('when allowedImages is set', function () {
@@ -67,6 +68,7 @@ describe('CompileController', function () {
           Timer: sinon.stub().returns({ done: sinon.stub() }),
         },
         './ProjectPersistenceManager': (this.ProjectPersistenceManager = {}),
+        './Errors': (this.Erros = Errors),
       },
     })
     this.Settings.externalUrl = 'http://www.example.com'
@@ -304,6 +306,35 @@ describe('CompileController', function () {
               outputFiles: [],
               buildId: this.buildId,
               // JSON.stringify will omit these
+              stats: undefined,
+              timings: undefined,
+            },
+          })
+          .should.equal(true)
+      })
+    })
+
+    describe('with too many compile requests error', function () {
+      beforeEach(function () {
+        const error = new Errors.TooManyCompileRequestsError(
+          'too many concurrent compile requests'
+        )
+        this.CompileManager.doCompileWithLock = sinon
+          .stub()
+          .callsArgWith(1, error, null)
+        this.CompileController.compile(this.req, this.res)
+      })
+
+      it('should return the JSON response with the error', function () {
+        this.res.status.calledWith(503).should.equal(true)
+        this.res.send
+          .calledWith({
+            compile: {
+              status: 'unavailable',
+              error: 'too many concurrent compile requests',
+              outputUrlPrefix: '/zone/b',
+              outputFiles: [],
+              buildId: undefined,
               stats: undefined,
               timings: undefined,
             },

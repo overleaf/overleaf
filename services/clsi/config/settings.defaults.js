@@ -1,4 +1,7 @@
 const Path = require('path')
+const os = require('os')
+
+const isPreEmptible = os.hostname().includes('pre-emp')
 
 module.exports = {
   compileSizeLimit: process.env.COMPILE_SIZE_LIMIT || '7mb',
@@ -69,6 +72,7 @@ module.exports = {
     parseInt(process.env.PDF_CACHING_WORKER_POOL_SIZE, 10) || 4,
   pdfCachingWorkerPoolBackLogLimit:
     parseInt(process.env.PDF_CACHING_WORKER_POOL_BACK_LOG_LIMIT, 10) || 40,
+  compileConcurrencyLimit: isPreEmptible ? 32 : 64,
 }
 
 if (process.env.ALLOWED_COMPILE_GROUPS) {
