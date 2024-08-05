@@ -317,7 +317,7 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
             if (err) {
               return callback(err)
             }
-            if (update.hash !== fileHash) {
+            if (update.hash && update.hash !== fileHash) {
               logger.warn(
                 { projectId, fileId, webHash: update.hash, fileHash },
                 'hash mismatch between web and project-history'
