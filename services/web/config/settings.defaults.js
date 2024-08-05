@@ -900,6 +900,7 @@ module.exports = {
     userNotifications: [],
     managedGroupEnrollmentInvite: [],
     ssoCertificateInfo: [],
+    v1ImportDataScreen: [],
   },
 
   moduleImportSequence: [

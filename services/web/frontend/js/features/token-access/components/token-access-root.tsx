@@ -1,23 +1,33 @@
 import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import withErrorBoundary from '@/infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '@/shared/components/generic-error-boundary-fallback'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { ElementType, useCallback, useEffect, useRef, useState } from 'react'
 import getMeta from '@/utils/meta'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { debugConsole } from '@/utils/debugging'
 import { useLocation } from '@/shared/hooks/use-location'
-import {
-  V1ImportData,
-  V1ImportDataScreen,
-} from '@/features/token-access/components/v1-import-data-screen'
 import { AccessAttemptScreen } from '@/features/token-access/components/access-attempt-screen'
 import {
   RequireAcceptData,
   RequireAcceptScreen,
 } from '@/features/token-access/components/require-accept-screen'
 import Icon from '@/shared/components/icon'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
 type Mode = 'access-attempt' | 'v1Import' | 'requireAccept'
+
+const [v1ImportDataScreenModule] = importOverleafModules(
+  'v1ImportDataScreen'
+) as {
+  import: { default: ElementType }
+}[]
+const V1ImportDataScreen = v1ImportDataScreenModule?.import.default
+
+export type V1ImportData = {
+  name?: string
+  status: string
+  projectId: string
+}
 
 function TokenAccessRoot() {
   const [mode, setMode] = useState<Mode>('access-attempt')
@@ -124,7 +134,7 @@ function TokenAccessRoot() {
         />
       )}
 
-      {mode === 'v1Import' && v1ImportData && (
+      {V1ImportDataScreen && mode === 'v1Import' && v1ImportData && (
         <V1ImportDataScreen v1ImportData={v1ImportData} />
       )}
 
