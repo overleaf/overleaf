@@ -317,6 +317,12 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
             if (err) {
               return callback(err)
             }
+            if (update.hash !== fileHash) {
+              logger.warn(
+                { projectId, fileId, webHash: update.hash, fileHash },
+                'hash mismatch between web and project-history'
+              )
+            }
             logger.debug({ fileHash }, 'created blob for file')
             callback(null, { file: fileHash })
           }

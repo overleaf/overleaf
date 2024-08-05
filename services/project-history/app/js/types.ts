@@ -75,6 +75,7 @@ export type AddFileUpdate = ProjectUpdateBase & {
   pathname: string
   file: string
   url: string
+  hash: string
   metadata?: LinkedFileData
 }
 

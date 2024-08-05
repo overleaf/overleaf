@@ -539,6 +539,7 @@ class SyncUpdateExpander {
       } else {
         update.file = entity.file
         update.url = entity.url
+        update.hash = entity._hash
         update.metadata = entity.metadata
       }
 
@@ -627,6 +628,7 @@ class SyncUpdateExpander {
         },
         file: entity.file,
         url: entity.url,
+        hash: entity._hash,
         metadata: entity.metadata,
       }
       this.expandedUpdates.push(addUpdate)

@@ -607,6 +607,7 @@ describe('SyncManager', function () {
           path: '2.png',
           file: {},
           url: 'filestore/2.png',
+          _hash: 'hash-42',
         }
         const updates = [
           resyncProjectStructureUpdate(
@@ -627,6 +628,7 @@ describe('SyncManager', function () {
             pathname: newFile.path,
             file: newFile.file,
             url: newFile.url,
+            hash: 'hash-42',
             metadata: undefined,
             meta: {
               resync: true,
@@ -647,6 +649,7 @@ describe('SyncManager', function () {
             importedAt: '2024-07-30T09:14:45.928Z',
             provider: 'references-provider',
           },
+          _hash: 'hash-42',
         }
         const updates = [
           resyncProjectStructureUpdate(
@@ -667,6 +670,7 @@ describe('SyncManager', function () {
             pathname: newFile.path,
             file: newFile.file,
             url: newFile.url,
+            hash: 'hash-42',
             metadata: {
               importedAt: '2024-07-30T09:14:45.928Z',
               provider: 'references-provider',
@@ -750,6 +754,7 @@ describe('SyncManager', function () {
             pathname: fileWichWasADoc.path,
             file: fileWichWasADoc.file,
             url: fileWichWasADoc.url,
+            hash: 'other-hash',
             metadata: undefined,
             meta: {
               resync: true,
@@ -800,6 +805,7 @@ describe('SyncManager', function () {
             pathname: fileWhichWasADoc.path,
             file: fileWhichWasADoc.file,
             url: fileWhichWasADoc.url,
+            hash: 'other-hash',
             metadata: {
               importedAt: '2024-07-30T09:14:45.928Z',
               provider: 'references-provider',
@@ -1026,6 +1032,7 @@ describe('SyncManager', function () {
             pathname: persistedFileWithNewContent.path,
             file: persistedFileWithNewContent.file,
             url: persistedFileWithNewContent.url,
+            hash: 'anotherhashvalue',
             metadata: undefined,
             meta: {
               resync: true,

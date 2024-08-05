@@ -188,6 +188,7 @@ describe('ProjectHistoryRedisManager', function () {
           pathname: 'foo.png',
           url,
           version: 42,
+          hash: '1337',
           metadata,
         },
         this.source
@@ -203,6 +204,7 @@ describe('ProjectHistoryRedisManager', function () {
           source: this.source,
         },
         version: 42,
+        hash: '1337',
         metadata,
         projectHistoryId: this.projectHistoryId,
         file: fileId,
