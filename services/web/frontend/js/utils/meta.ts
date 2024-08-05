@@ -46,8 +46,6 @@ import { PasswordStrengthOptions } from '../../../types/password-strength-option
 import { Subscription as ProjectDashboardSubscription } from '../../../types/project/dashboard/subscription'
 import { ThirdPartyIds } from '../../../types/third-party-ids'
 import { Publisher } from '../../../types/subscription/dashboard/publisher'
-import _ from 'lodash'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -247,30 +245,4 @@ export default function getMeta<T extends keyof Meta>(name: T): Meta[T] {
   }
   window.metaAttributesCache.set(name, value)
   return value
-}
-
-function convertMetaToWindowAttributes() {
-  Array.from(document.querySelectorAll('meta[name^="ol-"]'))
-    .map(element => (element as HTMLMetaElement).name)
-    // process short labels before long ones:
-    // e.g. assign 'foo' before 'foo.bar'
-    .sort()
-    .forEach(nameWithNamespace => {
-      const label = nameWithNamespace.slice('ol-'.length)
-      // @ts-ignore
-      _.set(window, label, getMeta(nameWithNamespace))
-    })
-}
-
-// Deduplicate warning, the bootstrap-3 bundle ships its own copy of this module.
-if (!window.warnedAboutWindowAttributeRemoval) {
-  window.warnedAboutWindowAttributeRemoval = true
-  // Notify any extension developers about the upcoming removal of window attributes.
-  // eslint-disable-next-line no-console
-  console.warn(
-    'overleaf.com: We are sunsetting window properties like "window.project_id". If you need access to any of these, please reach out to support@overleaf.com to discuss options.'
-  )
-}
-if (!isSplitTestEnabled('remove-window-attributes')) {
-  convertMetaToWindowAttributes()
 }

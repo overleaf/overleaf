@@ -5,7 +5,6 @@ declare global {
   // eslint-disable-next-line no-unused-vars
   interface Window {
     metaAttributesCache: Map<string, any>
-    warnedAboutWindowAttributeRemoval?: boolean
     _ide: Record<string, unknown> & {
       $scope: Record<string, unknown> & {
         pdf?: {
