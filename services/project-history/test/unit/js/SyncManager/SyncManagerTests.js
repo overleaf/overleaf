@@ -498,10 +498,12 @@ describe('SyncManager', function () {
           getContent: sinon.stub().returns(null),
           getHash: sinon.stub().returns(null),
           load: sinon.stub().resolves(this.loadedSnapshotDoc),
+          getMetadata: sinon.stub().returns({}),
         },
         '1.png': {
           isEditable: sinon.stub().returns(false),
           data: { hash: this.persistedFile._hash },
+          getMetadata: sinon.stub().returns({}),
         },
       }
       this.UpdateTranslator._convertPathname
@@ -600,7 +602,7 @@ describe('SyncManager', function () {
         expect(this.extendLock).to.have.been.called
       })
 
-      it('queues file additions for missing files', async function () {
+      it('queues file additions for missing regular files', async function () {
         const newFile = {
           path: '2.png',
           file: {},
@@ -625,6 +627,50 @@ describe('SyncManager', function () {
             pathname: newFile.path,
             file: newFile.file,
             url: newFile.url,
+            metadata: undefined,
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('queues file additions for missing linked files', async function () {
+        const newFile = {
+          path: '2.png',
+          file: {},
+          url: 'filestore/2.png',
+          metadata: {
+            importedAt: '2024-07-30T09:14:45.928Z',
+            provider: 'references-provider',
+          },
+        }
+        const updates = [
+          resyncProjectStructureUpdate(
+            [this.persistedDoc],
+            [this.persistedFile, newFile]
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: newFile.path,
+            file: newFile.file,
+            url: newFile.url,
+            metadata: {
+              importedAt: '2024-07-30T09:14:45.928Z',
+              provider: 'references-provider',
+            },
             meta: {
               resync: true,
               ts: TIMESTAMP,
@@ -704,6 +750,185 @@ describe('SyncManager', function () {
             pathname: fileWichWasADoc.path,
             file: fileWichWasADoc.file,
             url: fileWichWasADoc.url,
+            metadata: undefined,
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('removes and re-adds linked-files if their binary state differs', async function () {
+        const fileWhichWasADoc = {
+          path: this.persistedDoc.path,
+          url: 'filestore/references.txt',
+          _hash: 'other-hash',
+          metadata: {
+            importedAt: '2024-07-30T09:14:45.928Z',
+            provider: 'references-provider',
+          },
+        }
+
+        const updates = [
+          resyncProjectStructureUpdate(
+            [],
+            [fileWhichWasADoc, this.persistedFile]
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: fileWhichWasADoc.path,
+            new_pathname: '',
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+          {
+            pathname: fileWhichWasADoc.path,
+            file: fileWhichWasADoc.file,
+            url: fileWhichWasADoc.url,
+            metadata: {
+              importedAt: '2024-07-30T09:14:45.928Z',
+              provider: 'references-provider',
+            },
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('add linked file data with same hash', async function () {
+        const nowLinkedFile = {
+          path: this.persistedFile.path,
+          url: 'filestore/1.png',
+          _hash: this.persistedFile._hash,
+          metadata: {
+            importedAt: '2024-07-30T09:14:45.928Z',
+            provider: 'image-provider',
+          },
+        }
+
+        const updates = [
+          resyncProjectStructureUpdate([this.persistedDoc], [nowLinkedFile]),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: nowLinkedFile.path,
+            metadata: {
+              importedAt: '2024-07-30T09:14:45.928Z',
+              provider: 'image-provider',
+            },
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('updates linked file data when hash remains the same', async function () {
+        this.fileMap[this.persistedFile.path].getMetadata.returns({
+          importedAt: '2024-07-30T09:14:45.928Z',
+          provider: 'image-provider',
+        })
+        const updatedLinkedFile = {
+          path: this.persistedFile.path,
+          url: 'filestore/1.png',
+          _hash: this.persistedFile._hash,
+          metadata: {
+            importedAt: '2024-07-31T00:00:00.000Z',
+            provider: 'image-provider',
+          },
+        }
+
+        const updates = [
+          resyncProjectStructureUpdate(
+            [this.persistedDoc],
+            [updatedLinkedFile]
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: updatedLinkedFile.path,
+            metadata: {
+              importedAt: '2024-07-31T00:00:00.000Z',
+              provider: 'image-provider',
+            },
+            meta: {
+              resync: true,
+              ts: TIMESTAMP,
+              origin: { kind: 'history-resync' },
+            },
+          },
+        ])
+        expect(this.extendLock).to.have.been.called
+      })
+
+      it('remove linked file data', async function () {
+        this.fileMap[this.persistedFile.path].getMetadata.returns({
+          importedAt: '2024-07-30T09:14:45.928Z',
+          provider: 'image-provider',
+        })
+
+        const noLongerLinkedFile = {
+          path: this.persistedFile.path,
+          url: 'filestore/1.png',
+          _hash: this.persistedFile._hash,
+        }
+
+        const updates = [
+          resyncProjectStructureUpdate(
+            [this.persistedDoc],
+            [noLongerLinkedFile]
+          ),
+        ]
+        const expandedUpdates =
+          await this.SyncManager.promises.expandSyncUpdates(
+            this.projectId,
+            this.historyId,
+            updates,
+            this.extendLock
+          )
+
+        expect(expandedUpdates).to.deep.equal([
+          {
+            pathname: noLongerLinkedFile.path,
+            metadata: {},
             meta: {
               resync: true,
               ts: TIMESTAMP,
@@ -801,6 +1026,7 @@ describe('SyncManager', function () {
             pathname: persistedFileWithNewContent.path,
             file: persistedFileWithNewContent.file,
             url: persistedFileWithNewContent.url,
+            metadata: undefined,
             meta: {
               resync: true,
               ts: TIMESTAMP,

@@ -33,6 +33,7 @@ import { isInsert, isDelete } from './Utils.js'
  * @typedef {import('./types').TrackingDirective} TrackingDirective
  * @typedef {import('./types').TrackingType} TrackingType
  * @typedef {import('./types').Update} Update
+ * @typedef {import('./types').ProjectStructureUpdate} ProjectStructureUpdate
  */
 const MAX_RESYNC_HISTORY_RECORDS = 100 // keep this many records of previous resyncs
 const EXPIRE_RESYNC_HISTORY_INTERVAL_MS = 90 * 24 * 3600 * 1000 // 90 days
@@ -377,7 +378,7 @@ class SyncUpdateExpander {
   constructor(projectId, snapshotFiles, origin) {
     this.projectId = projectId
     this.files = snapshotFiles
-    this.expandedUpdates = []
+    this.expandedUpdates = /** @type ProjectStructureUpdate[] */ []
     this.origin = origin
   }
 
@@ -471,6 +472,7 @@ class SyncUpdateExpander {
         expectedBinaryFiles,
         persistedBinaryFiles
       )
+      this.queueSetMetadataOpsForLinkedFiles(update)
     } else if ('resyncDocContent' in update) {
       logger.debug(
         { projectId: this.projectId, update },
@@ -537,11 +539,53 @@ class SyncUpdateExpander {
       } else {
         update.file = entity.file
         update.url = entity.url
+        update.metadata = entity.metadata
       }
 
       this.expandedUpdates.push(update)
       Metrics.inc('project_history_resync_operation', 1, {
         status: 'add missing file',
+      })
+    }
+  }
+
+  queueSetMetadataOpsForLinkedFiles(update) {
+    const allEntities = update.resyncProjectStructure.docs.concat(
+      update.resyncProjectStructure.files
+    )
+    for (const file of allEntities) {
+      const pathname = UpdateTranslator._convertPathname(file.path)
+      const matchingAddFileOperation = this.expandedUpdates.some(
+        // Look for an addFile operation that already syncs the metadata.
+        u => u.pathname === pathname && u.metadata === file.metadata
+      )
+      if (matchingAddFileOperation) continue
+      const metaData = this.files[pathname].getMetadata()
+
+      let shouldUpdate = false
+      if (file.metadata) {
+        // check for in place update of linked-file
+        shouldUpdate = Object.entries(file.metadata).some(
+          ([k, v]) => metaData[k] !== v
+        )
+      } else if (metaData.provider) {
+        // overwritten by non-linked-file with same hash
+        // or overwritten by doc
+        shouldUpdate = true
+      }
+      if (!shouldUpdate) continue
+
+      this.expandedUpdates.push({
+        pathname,
+        meta: {
+          resync: true,
+          origin: this.origin,
+          ts: update.meta.ts,
+        },
+        metadata: file.metadata || {},
+      })
+      Metrics.inc('project_history_resync_operation', 1, {
+        status: 'update metadata',
       })
     }
   }
@@ -583,6 +627,7 @@ class SyncUpdateExpander {
         },
         file: entity.file,
         url: entity.url,
+        metadata: entity.metadata,
       }
       this.expandedUpdates.push(addUpdate)
       Metrics.inc('project_history_resync_operation', 1, {

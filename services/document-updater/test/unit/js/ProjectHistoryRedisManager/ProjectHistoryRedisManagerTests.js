@@ -170,6 +170,53 @@ describe('ProjectHistoryRedisManager', function () {
         .should.equal(true)
     })
 
+    it('should queue an update with file metadata', async function () {
+      const metadata = {
+        importedAt: '2024-07-30T09:14:45.928Z',
+        provider: 'references-provider',
+      }
+      const projectId = 'project-id'
+      const fileId = 'file-id'
+      const url = `http://filestore/project/${projectId}/file/${fileId}`
+      await this.ProjectHistoryRedisManager.promises.queueAddEntity(
+        projectId,
+        this.projectHistoryId,
+        'file',
+        fileId,
+        this.user_id,
+        {
+          pathname: 'foo.png',
+          url,
+          version: 42,
+          metadata,
+        },
+        this.source
+      )
+
+      const update = {
+        pathname: 'foo.png',
+        docLines: undefined,
+        url,
+        meta: {
+          user_id: this.user_id,
+          ts: new Date(),
+          source: this.source,
+        },
+        version: 42,
+        metadata,
+        projectHistoryId: this.projectHistoryId,
+        file: fileId,
+      }
+
+      expect(
+        this.ProjectHistoryRedisManager.promises.queueOps.args[0][1]
+      ).to.equal(JSON.stringify(update))
+      this.ProjectHistoryRedisManager.promises.queueOps.should.have.been.calledWithExactly(
+        projectId,
+        JSON.stringify(update)
+      )
+    })
+
     it('should forward history compatible ranges if history ranges support is enabled', async function () {
       this.rawUpdate.historyRangesSupport = true
       this.docLines = 'the quick fox jumps over the lazy dog'

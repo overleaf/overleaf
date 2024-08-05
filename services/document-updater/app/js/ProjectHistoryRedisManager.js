@@ -119,6 +119,7 @@ const ProjectHistoryRedisManager = {
         ts: new Date(),
       },
       version: projectUpdate.version,
+      metadata: projectUpdate.metadata,
       projectHistoryId,
     }
     if (ranges) {

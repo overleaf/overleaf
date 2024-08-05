@@ -94,3 +94,9 @@ export type RawEditOperation =
   | RawAddCommentOperation
   | RawDeleteCommentOperation
   | RawSetCommentStateOperation
+
+export type LinkedFileData = {
+  importedAt: string
+  provider: string
+  [other: string]: any
+}

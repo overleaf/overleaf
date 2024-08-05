@@ -53,6 +53,11 @@ describe('DocumentUpdaterHandler', function () {
             done() {}
           },
         },
+        '../FileStore/FileStoreHandler': {
+          _buildUrl: sinon.stub().callsFake((projectId, fileId) => {
+            return `http://filestore/project/${projectId}/file/${fileId}`
+          }),
+        },
       },
     })
     this.ProjectGetter.getProjectWithoutLock
@@ -1126,6 +1131,7 @@ describe('DocumentUpdaterHandler', function () {
               url: undefined,
               hash: undefined,
               ranges: undefined,
+              metadata: undefined,
             },
           ]
 
@@ -1136,20 +1142,18 @@ describe('DocumentUpdaterHandler', function () {
             this.changes,
             this.source,
             () => {
-              this.request
-                .calledWith({
-                  url: this.url,
-                  method: 'POST',
-                  json: {
-                    updates,
-                    userId: this.user_id,
-                    version: this.version,
-                    projectHistoryId: this.projectHistoryId,
-                    source: this.source,
-                  },
-                  timeout: 30 * 1000,
-                })
-                .should.equal(true)
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId,
+                  source: this.source,
+                },
+                timeout: 30 * 1000,
+              })
               done()
             }
           )
@@ -1180,6 +1184,7 @@ describe('DocumentUpdaterHandler', function () {
               historyRangesSupport: false,
               hash: '12345',
               ranges: undefined,
+              metadata: undefined,
             },
           ]
 
@@ -1190,20 +1195,18 @@ describe('DocumentUpdaterHandler', function () {
             this.changes,
             this.source,
             () => {
-              this.request
-                .calledWith({
-                  url: this.url,
-                  method: 'POST',
-                  json: {
-                    updates,
-                    userId: this.user_id,
-                    version: this.version,
-                    projectHistoryId: this.projectHistoryId,
-                    source: this.source,
-                  },
-                  timeout: 30 * 1000,
-                })
-                .should.equal(true)
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId,
+                  source: this.source,
+                },
+                timeout: 30 * 1000,
+              })
               done()
             }
           )
@@ -1236,20 +1239,18 @@ describe('DocumentUpdaterHandler', function () {
             this.changes,
             this.source,
             () => {
-              this.request
-                .calledWith({
-                  url: this.url,
-                  method: 'POST',
-                  json: {
-                    updates,
-                    userId: this.user_id,
-                    version: this.version,
-                    projectHistoryId: this.projectHistoryId,
-                    source: this.source,
-                  },
-                  timeout: 30 * 1000,
-                })
-                .should.equal(true)
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId,
+                  source: this.source,
+                },
+                timeout: 30 * 1000,
+              })
               done()
             }
           )
@@ -1294,6 +1295,7 @@ describe('DocumentUpdaterHandler', function () {
               url: undefined,
               hash: undefined,
               ranges: undefined,
+              metadata: undefined,
             },
           ]
 
@@ -1395,6 +1397,7 @@ describe('DocumentUpdaterHandler', function () {
               url: undefined,
               hash: undefined,
               ranges: this.ranges,
+              metadata: undefined,
             },
           ]
 
@@ -1405,20 +1408,18 @@ describe('DocumentUpdaterHandler', function () {
             this.changes,
             this.source,
             () => {
-              this.request
-                .calledWith({
-                  url: this.url,
-                  method: 'POST',
-                  json: {
-                    updates,
-                    userId: this.user_id,
-                    version: this.version,
-                    projectHistoryId: this.projectHistoryId,
-                    source: this.source,
-                  },
-                  timeout: 30 * 1000,
-                })
-                .should.equal(true)
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId,
+                  source: this.source,
+                },
+                timeout: 30 * 1000,
+              })
               done()
             }
           )
@@ -1442,6 +1443,7 @@ describe('DocumentUpdaterHandler', function () {
               url: undefined,
               hash: undefined,
               ranges: this.ranges,
+              metadata: undefined,
             },
           ]
 
@@ -1452,25 +1454,153 @@ describe('DocumentUpdaterHandler', function () {
             this.changes,
             this.source,
             () => {
-              this.request
-                .calledWith({
-                  url: this.url,
-                  method: 'POST',
-                  json: {
-                    updates,
-                    userId: this.user_id,
-                    version: this.version,
-                    projectHistoryId: this.projectHistoryId,
-                    source: this.source,
-                  },
-                  timeout: 30 * 1000,
-                })
-                .should.equal(true)
+              this.request.should.have.been.calledWith({
+                url: this.url,
+                method: 'POST',
+                json: {
+                  updates,
+                  userId: this.user_id,
+                  version: this.version,
+                  projectHistoryId: this.projectHistoryId,
+                  source: this.source,
+                },
+                timeout: 30 * 1000,
+              })
               done()
             }
           )
         })
       })
+    })
+  })
+
+  describe('resyncProjectHistory', function () {
+    it('should add docs', function (done) {
+      const docId1 = new ObjectId()
+      const docId2 = new ObjectId()
+      const docs = [
+        { doc: { _id: docId1 }, path: 'main.tex' },
+        { doc: { _id: docId2 }, path: 'references.bib' },
+      ]
+      const files = []
+      this.request.yields(null, { statusCode: 200 })
+      const projectId = new ObjectId()
+      const projectHistoryId = 99
+      this.handler.resyncProjectHistory(
+        projectId,
+        projectHistoryId,
+        docs,
+        files,
+        {},
+        () => {
+          this.request.should.have.been.calledWith({
+            url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+            method: 'POST',
+            json: {
+              docs: [
+                { doc: docId1, path: 'main.tex' },
+                { doc: docId2, path: 'references.bib' },
+              ],
+              files: [],
+              projectHistoryId,
+            },
+            timeout: 6 * 60 * 1000,
+          })
+          done()
+        }
+      )
+    })
+    it('should add files', function (done) {
+      const fileId1 = new ObjectId()
+      const fileId2 = new ObjectId()
+      const fileId3 = new ObjectId()
+      const fileCreated2 = new Date()
+      const fileCreated3 = new Date()
+      const otherProjectId = new ObjectId().toString()
+      const files = [
+        { file: { _id: fileId1, hash: '42' }, path: '1.png' },
+        {
+          file: {
+            _id: fileId2,
+            hash: '1337',
+            created: fileCreated2,
+            linkedFileData: {
+              provider: 'references-provider',
+            },
+          },
+          path: '1.bib',
+        },
+        {
+          file: {
+            _id: fileId3,
+            hash: '21',
+            created: fileCreated3,
+            linkedFileData: {
+              provider: 'project_output_file',
+              build_id: '1234-abc',
+              clsiServerId: 'server-1',
+              source_project_id: otherProjectId,
+              source_output_file_path: 'foo/bar.txt',
+            },
+          },
+          path: 'bar.txt',
+        },
+      ]
+      const docs = []
+      this.request.yields(null, { statusCode: 200 })
+      const projectId = new ObjectId()
+      const projectHistoryId = 99
+      this.handler.resyncProjectHistory(
+        projectId,
+        projectHistoryId,
+        docs,
+        files,
+        {},
+        () => {
+          this.request.should.have.been.calledWith({
+            url: `${this.settings.apis.documentupdater.url}/project/${projectId}/history/resync`,
+            method: 'POST',
+            json: {
+              docs: [],
+              files: [
+                {
+                  file: fileId1,
+                  _hash: '42',
+                  path: '1.png',
+                  url: `http://filestore/project/${projectId}/file/${fileId1}`,
+                  metadata: undefined,
+                },
+                {
+                  file: fileId2,
+                  _hash: '1337',
+                  path: '1.bib',
+                  url: `http://filestore/project/${projectId}/file/${fileId2}`,
+                  metadata: {
+                    importedAt: fileCreated2,
+                    provider: 'references-provider',
+                  },
+                },
+                {
+                  file: fileId3,
+                  _hash: '21',
+                  path: 'bar.txt',
+                  url: `http://filestore/project/${projectId}/file/${fileId3}`,
+                  metadata: {
+                    importedAt: fileCreated3,
+                    provider: 'project_output_file',
+                    source_project_id: otherProjectId,
+                    source_output_file_path: 'foo/bar.txt',
+                    // build_id and clsiServerId are omitted
+                  },
+                },
+              ],
+              projectHistoryId,
+            },
+            timeout: 6 * 60 * 1000,
+          })
+          done()
+        }
+      )
     })
   })
 })

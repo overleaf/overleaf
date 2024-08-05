@@ -8,6 +8,7 @@ const metrics = require('@overleaf/metrics')
 const { promisify } = require('util')
 const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const ProjectGetter = require('../Project/ProjectGetter')
+const FileStoreHandler = require('../FileStore/FileStoreHandler')
 
 function flushProjectToMongo(projectId, callback) {
   _makeRequest(
@@ -230,6 +231,18 @@ function resyncProjectHistory(
   opts,
   callback
 ) {
+  docs = docs.map(doc => ({
+    doc: doc.doc._id,
+    path: doc.path,
+  }))
+  files = files.map(file => ({
+    file: file.file._id,
+    path: file.path,
+    url: FileStoreHandler._buildUrl(projectId, file.file._id),
+    _hash: file.file.hash,
+    metadata: buildFileMetadataForHistory(file.file),
+  }))
+
   const body = { docs, files, projectHistoryId }
   if (opts.historyRangesMigration) {
     body.historyRangesMigration = opts.historyRangesMigration
@@ -470,6 +483,7 @@ function _getUpdates(
         historyRangesSupport,
         url: newEntity.url,
         hash: newEntity.file != null ? newEntity.file.hash : undefined,
+        metadata: buildFileMetadataForHistory(newEntity.file),
       })
     } else if (newEntity.path !== oldEntity.path) {
       // entity renamed
@@ -483,6 +497,25 @@ function _getUpdates(
   }
 
   return { deletes, adds, renames }
+}
+
+function buildFileMetadataForHistory(file) {
+  if (!file?.linkedFileData) return undefined
+
+  const metadata = {
+    // Files do not have a created at timestamp in the history.
+    // For cloned projects, the importedAt timestamp needs to remain untouched.
+    // Record the timestamp in the metadata blob to keep everything self-contained.
+    importedAt: file.created,
+    ...file.linkedFileData,
+  }
+  if (metadata.provider === 'project_output_file') {
+    // The build-id and clsi-server-id are only used for downloading file.
+    // Omit them from history as they are not useful in the future.
+    delete metadata.build_id
+    delete metadata.clsiServerId
+  }
+  return metadata
 }
 
 module.exports = {

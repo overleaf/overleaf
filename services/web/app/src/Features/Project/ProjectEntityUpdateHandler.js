@@ -1435,17 +1435,6 @@ const ProjectEntityUpdateHandler = {
               if (error) {
                 return callback(error)
               }
-              docs = _.map(docs, doc => ({
-                doc: doc.doc._id,
-                path: doc.path,
-              }))
-
-              files = _.map(files, file => ({
-                file: file.file._id,
-                path: file.path,
-                url: FileStoreHandler._buildUrl(projectId, file.file._id),
-                _hash: file.file.hash,
-              }))
 
               DocumentUpdaterHandler.resyncProjectHistory(
                 projectId,

@@ -17,6 +17,7 @@ import { isInsert, isRetain, isDelete, isComment } from './Utils.js'
  * @typedef {import('./types').TrackingDirective} TrackingDirective
  * @typedef {import('./types').TrackingProps} TrackingProps
  * @typedef {import('./types').SetCommentStateUpdate} SetCommentStateUpdate
+ * @typedef {import('./types').SetFileMetadataOperation} SetFileMetadataOperation
  * @typedef {import('./types').Update} Update
  * @typedef {import('./types').UpdateWithBlob} UpdateWithBlob
  */
@@ -64,6 +65,9 @@ function _convertToChange(projectId, updateWithBlob) {
     if (_isAddDocUpdate(update)) {
       op.file.rangesHash = updateWithBlob.blobHashes.ranges
     }
+    if (_isAddFileUpdate(update)) {
+      op.file.metadata = update.metadata
+    }
     operations = [op]
     projectVersion = update.version
   } else if (isTextUpdate(update)) {
@@ -87,6 +91,13 @@ function _convertToChange(projectId, updateWithBlob) {
         pathname: _convertPathname(update.pathname),
         commentId: update.commentId,
         resolved: update.resolved,
+      },
+    ]
+  } else if (isSetFileMetadataOperation(update)) {
+    operations = [
+      {
+        pathname: _convertPathname(update.pathname),
+        metadata: update.metadata,
       },
     ]
   } else if (isDeleteCommentUpdate(update)) {
@@ -213,6 +224,14 @@ export function isSetCommentStateUpdate(update) {
  */
 export function isDeleteCommentUpdate(update) {
   return 'deleteComment' in update
+}
+
+/**
+ * @param {Update} update
+ * @returns {update is SetFileMetadataOperation}
+ */
+export function isSetFileMetadataOperation(update) {
+  return 'metadata' in update
 }
 
 export function _convertPathname(pathname) {

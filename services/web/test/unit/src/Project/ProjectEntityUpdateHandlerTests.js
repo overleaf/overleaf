@@ -2012,17 +2012,15 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('a project with project-history enabled', function () {
+      const docs = [{ doc: { _id: docId, name: 'main.tex' }, path: 'main.tex' }]
+      const files = [
+        {
+          file: { _id: fileId, name: 'universe.png', hash: '123456' },
+          path: 'universe.png',
+        },
+      ]
       beforeEach(function () {
         this.ProjectGetter.getProject.yields(null, this.project)
-        const docs = [
-          { doc: { _id: docId, name: 'main.tex' }, path: 'main.tex' },
-        ]
-        const files = [
-          {
-            file: { _id: fileId, name: 'universe.png', hash: '123456' },
-            path: 'universe.png',
-          },
-        ]
         const folders = []
         this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
@@ -2051,20 +2049,6 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('tells the doc updater to sync the project', function () {
-        const docs = [
-          {
-            doc: docId,
-            path: 'main.tex',
-          },
-        ]
-        const files = [
-          {
-            file: fileId,
-            path: 'universe.png',
-            url: `www.filestore.test/${projectId}/${fileId}`,
-            _hash: '123456',
-          },
-        ]
         this.DocumentUpdaterHandler.resyncProjectHistory
           .calledWith(projectId, projectHistoryId, docs, files)
           .should.equal(true)
@@ -2157,40 +2141,24 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('tells the doc updater to resync the project', function () {
-        const docs = [
-          { doc: 'doc1', path: 'main.tex' },
-          { doc: 'doc2', path: 'a/b/c/duplicate.tex' },
-          { doc: 'doc3', path: 'a/b/c/duplicate.tex (1)' },
-          { doc: 'doc4', path: 'another dupe (22)' },
-          { doc: 'doc5', path: 'a/b/c/duplicate.tex (2)' },
-        ]
-        const urlPrefix = `www.filestore.test/${projectId}`
-        const files = [
-          {
-            file: 'file1',
-            path: 'image.jpg',
-            url: `${urlPrefix}/file1`,
-            _hash: 'hash1',
-          },
-          {
-            file: 'file2',
-            path: 'duplicate.jpg',
-            url: `${urlPrefix}/file2`,
-            _hash: 'hash2',
-          },
-          {
-            file: 'file3',
-            path: 'duplicate.jpg (1)',
-            url: `${urlPrefix}/file3`,
-            _hash: 'hash3',
-          },
-          {
-            file: 'file4',
-            path: 'another dupe (23)',
-            url: `${urlPrefix}/file4`,
-            _hash: 'hash4',
-          },
-        ]
+        const docs = this.docs.map(d => {
+          if (d.doc._id === 'doc3') {
+            return Object.assign({}, d, { path: 'a/b/c/duplicate.tex (1)' })
+          }
+          if (d.doc._id === 'doc5') {
+            return Object.assign({}, d, { path: 'a/b/c/duplicate.tex (2)' })
+          }
+          return d
+        })
+        const files = this.files.map(f => {
+          if (f.file._id === 'file3') {
+            return Object.assign({}, f, { path: 'duplicate.jpg (1)' })
+          }
+          if (f.file._id === 'file4') {
+            return Object.assign({}, f, { path: 'another dupe (23)' })
+          }
+          return f
+        })
         expect(
           this.DocumentUpdaterHandler.resyncProjectHistory
         ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
@@ -2262,25 +2230,24 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('tells the doc updater to resync the project', function () {
-        const docs = [
-          { doc: 'doc1', path: 'a/b/c/_d_e_f_test.tex' },
-          { doc: 'doc2', path: 'a/untitled' },
-        ]
-        const urlPrefix = `www.filestore.test/${projectId}`
-        const files = [
-          {
-            file: 'file1',
-            path: 'A_.png',
-            url: `${urlPrefix}/file1`,
-            _hash: 'hash1',
-          },
-          {
-            file: 'file2',
-            path: 'A_.png (1)',
-            url: `${urlPrefix}/file2`,
-            _hash: 'hash2',
-          },
-        ]
+        const docs = this.docs.map(d => {
+          if (d.doc._id === 'doc1') {
+            return Object.assign({}, d, { path: 'a/b/c/_d_e_f_test.tex' })
+          }
+          if (d.doc._id === 'doc2') {
+            return Object.assign({}, d, { path: 'a/untitled' })
+          }
+          return d
+        })
+        const files = this.files.map(f => {
+          if (f.file._id === 'file1') {
+            return Object.assign({}, f, { path: 'A_.png' })
+          }
+          if (f.file._id === 'file2') {
+            return Object.assign({}, f, { path: 'A_.png (1)' })
+          }
+          return f
+        })
         expect(
           this.DocumentUpdaterHandler.resyncProjectHistory
         ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
@@ -2288,29 +2255,29 @@ describe('ProjectEntityUpdateHandler', function () {
     })
 
     describe('a project with a bad folder name', function () {
+      const folders = [
+        {
+          folder: { _id: 'folder1', name: 'good' },
+          path: 'good',
+        },
+        {
+          folder: { _id: 'folder2', name: 'bad*' },
+          path: 'bad*',
+        },
+      ]
+      const docs = [
+        {
+          doc: { _id: 'doc1', name: 'doc1.tex' },
+          path: 'good/doc1.tex',
+        },
+        {
+          doc: { _id: 'doc2', name: 'duplicate.tex' },
+          path: 'bad*/doc2.tex',
+        },
+      ]
+      const files = []
       beforeEach(function (done) {
         this.ProjectGetter.getProject.yields(null, this.project)
-        const folders = [
-          {
-            folder: { _id: 'folder1', name: 'good' },
-            path: 'good',
-          },
-          {
-            folder: { _id: 'folder2', name: 'bad*' },
-            path: 'bad*',
-          },
-        ]
-        const docs = [
-          {
-            doc: { _id: 'doc1', name: 'doc1.tex' },
-            path: 'good/doc1.tex',
-          },
-          {
-            doc: { _id: 'doc2', name: 'duplicate.tex' },
-            path: 'bad*/doc2.tex',
-          },
-        ]
-        const files = []
         this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
@@ -2335,37 +2302,38 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('tells the doc updater to resync the project', function () {
-        const docs = [
-          { doc: 'doc1', path: 'good/doc1.tex' },
-          { doc: 'doc2', path: 'bad_/doc2.tex' },
-        ]
-        const files = []
+        const fixedDocs = docs.map(d => {
+          if (d.doc._id === 'doc2') {
+            return Object.assign({}, d, { path: 'bad_/doc2.tex' })
+          }
+          return d
+        })
         expect(
           this.DocumentUpdaterHandler.resyncProjectHistory
-        ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
+        ).to.have.been.calledWith(projectId, projectHistoryId, fixedDocs, files)
       })
     })
 
     describe('a project with duplicate names between a folder and a doc', function () {
+      const folders = [
+        {
+          folder: { _id: 'folder1', name: 'chapters' },
+          path: 'chapters',
+        },
+      ]
+      const docs = [
+        {
+          doc: { _id: 'doc1', name: 'chapters' },
+          path: 'chapters',
+        },
+        {
+          doc: { _id: 'doc2', name: 'chapter1.tex' },
+          path: 'chapters/chapter1.tex',
+        },
+      ]
+      const files = []
       beforeEach(function (done) {
         this.ProjectGetter.getProject.yields(null, this.project)
-        const folders = [
-          {
-            folder: { _id: 'folder1', name: 'chapters' },
-            path: 'chapters',
-          },
-        ]
-        const docs = [
-          {
-            doc: { _id: 'doc1', name: 'chapters' },
-            path: 'chapters',
-          },
-          {
-            doc: { _id: 'doc2', name: 'chapter1.tex' },
-            path: 'chapters/chapter1.tex',
-          },
-        ]
-        const files = []
         this.ProjectEntityHandler.getAllEntitiesFromProject.returns({
           docs,
           files,
@@ -2390,14 +2358,15 @@ describe('ProjectEntityUpdateHandler', function () {
       })
 
       it('tells the doc updater to resync the project', function () {
-        const docs = [
-          { doc: 'doc1', path: 'chapters (1)' },
-          { doc: 'doc2', path: 'chapters/chapter1.tex' },
-        ]
-        const files = []
+        const fixedDocs = docs.map(d => {
+          if (d.doc._id === 'doc1') {
+            return Object.assign({}, d, { path: 'chapters (1)' })
+          }
+          return d
+        })
         expect(
           this.DocumentUpdaterHandler.resyncProjectHistory
-        ).to.have.been.calledWith(projectId, projectHistoryId, docs, files)
+        ).to.have.been.calledWith(projectId, projectHistoryId, fixedDocs, files)
       })
     })
 
