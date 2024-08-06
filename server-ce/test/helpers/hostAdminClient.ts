@@ -35,7 +35,18 @@ async function fetchJSON<T = { stdout: string; stderr: string }>(
   if (init?.body) {
     init.headers = { 'Content-Type': 'application/json' }
   }
-  const res = await fetch(input, init)
+  let res
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      res = await fetch(input, init)
+      break
+    } catch {
+      await sleep(3_000)
+    }
+  }
+  if (!res) {
+    res = await fetch(input, init)
+  }
   const { error, stdout, stderr, ...rest } = await res.json()
   if (error) {
     console.error(input, init, 'failed:', error)
@@ -72,4 +83,10 @@ export async function getRedisKeys() {
     method: 'GET',
   })
   return stdout.split('\n')
+}
+
+async function sleep(ms: number) {
+  return new Promise(resolve => {
+    setTimeout(resolve, ms)
+  })
 }
