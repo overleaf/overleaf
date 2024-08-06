@@ -429,11 +429,11 @@ lint_overleafModuleImports:
 
 lint: typecheck_frontend
 typecheck_frontend:
-	npx -p typescript tsc --noEmit
+	npm run --silent type-check
 
 lint: typecheck_backend
 typecheck_backend:
-	npx -p typescript tsc -p tsconfig.backend.json --noEmit
+	npm run --silent type-check:backend
 
 lint_in_docker:
 	$(RUN_LINT_FORMAT) make lint -j2 --output-sync

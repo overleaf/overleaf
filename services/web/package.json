@@ -29,6 +29,7 @@
     "lint:styles": "stylelint '**/*.scss'",
     "lint:styles:fix": "stylelint '**/*.scss' --fix",
     "type-check": "tsc --noEmit",
+    "type-check:backend": "tsc -p tsconfig.backend.json --noEmit",
     "extract-translations": "i18next-scanner",
     "migrations": "MONGO_SOCKET_TIMEOUT=0 east",
     "convert-themes": "node frontend/js/features/source-editor/themes/scripts/convert.js",

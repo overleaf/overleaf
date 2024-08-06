@@ -148,7 +148,6 @@ class Reporter {
 export default class EditorWatchdogManager {
   lastAck: number | null = null
   reporter: Reporter
-  // eslint-disable-next-line no-use-before-define
   parent?: EditorWatchdogManager
   scope: Scope
   timeout: number

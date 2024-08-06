@@ -1,10 +1,10 @@
 export type Nullable<T> = T | null
 
-// eslint-disable-next-line no-use-before-define, @typescript-eslint/no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DeepReadonlyArray<T> extends ReadonlyArray<DeepReadonly<T>> {}
 
 type DeepReadonlyObject<T> = {
-  readonly [P in keyof T]: DeepReadonly<T[P]> // eslint-disable-line no-use-before-define
+  readonly [P in keyof T]: DeepReadonly<T[P]>
 }
 
 export type DeepReadonly<T> = T extends (infer R)[]
