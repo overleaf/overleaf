@@ -100,11 +100,11 @@ function LinkingSection() {
 
   return (
     <>
-      <h3>{t('integrations')}</h3>
+      <h3 id="integrations">{t('integrations')}</h3>
       <p className="small">{t('linked_accounts_explained')}</p>
       {haslangFeedbackLinkingWidgets ? (
         <>
-          <h3 id="project-sync" className="text-capitalize">
+          <h3 id="language-feedback" className="text-capitalize">
             {t('language_feedback')}
           </h3>
           <div className="settings-widgets-container">
