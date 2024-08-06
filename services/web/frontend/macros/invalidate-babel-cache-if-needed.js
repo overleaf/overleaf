@@ -16,8 +16,15 @@ module.exports = function invalidateBabelCacheIfNeeded() {
     console.warn(
       'Detected change in overleafModuleImports, purging babel cache!'
     )
-    fs.rmSync(cachePath, { recursive: true, force: true, maxRetries: 5 })
-    fs.mkdirSync(cachePath)
+    // Gracefully handle cache mount in Server Pro build, only purge nested folders and keep .cache/ folder.
+    fs.mkdirSync(cachePath, { recursive: true })
+    for (const name of fs.readdirSync(cachePath)) {
+      fs.rmSync(Path.join(cachePath, name), {
+        recursive: true,
+        force: true,
+        maxRetries: 5,
+      })
+    }
     fs.writeFileSync(statePath, newState)
   }
 }

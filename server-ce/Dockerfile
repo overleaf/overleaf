@@ -19,13 +19,14 @@ ADD services/ /overleaf/services/
 # -----------------------
 ADD patches/ /overleaf/patches
 
-# Install npm dependencies
+# Install npm dependencies and build webpack assets
 # ------------------------
-RUN node genScript install | bash
-
-# Compile
-# --------------------
-RUN node genScript compile | bash
+RUN --mount=type=cache,target=/root/.cache \
+    --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/overleaf/services/web/node_modules/.cache,id=server-ce-webpack-cache \
+    --mount=type=tmpfs,target=/tmp true \
+&&  node genScript install | bash \
+&&  node genScript compile | bash
 
 # Copy runit service startup scripts to its location
 # --------------------------------------------------

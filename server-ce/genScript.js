@@ -19,8 +19,6 @@ switch (process.argv.pop()) {
           console.log('npm install --include=dev')
           // run webpack
           console.log('npm run webpack:production')
-          // drop webpack/babel cache
-          console.log('rm -rf node_modules/.cache')
           // uninstall webpack and frontend dependencies
           console.log('npm install --omit=dev')
           // precompile pug
@@ -37,8 +35,3 @@ switch (process.argv.pop()) {
     console.log('exit 101')
     process.exit(101)
 }
-
-console.log('set +x')
-console.log(
-  'rm -rf /root/.cache /root/.npm $(find /tmp/ -mindepth 1 -maxdepth 1)'
-)
