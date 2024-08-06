@@ -30,6 +30,7 @@ import {
 import { snippet } from './completions/data/environments'
 import { syntaxTree } from '@codemirror/language'
 import { sendMBSampled } from '@/infrastructure/event-tracking'
+import getMeta from '@/utils/meta'
 
 function blankCompletions(): Completions {
   return {
@@ -242,6 +243,7 @@ const debouncedCounter = (
 const CITE_ANALYTICS_REPORT_TIMEOUT = 4000
 
 const analyticsSourceBuilder = (debounceTimes: number[]) => {
+  const user = getMeta('ol-user')
   let timeoutId = 0
   const counters = debounceTimes.map(debounceTime => {
     if (debounceTime >= CITE_ANALYTICS_REPORT_TIMEOUT) {
@@ -265,7 +267,12 @@ const analyticsSourceBuilder = (debounceTimes: number[]) => {
       clearTimeout(timeoutId)
     }
     timeoutId = window.setTimeout(() => {
-      const result: Record<string, number> = {}
+      const result: Record<string, number | boolean | undefined> = {
+        mendeley: Boolean(
+          user?.features?.mendeley && user?.refProviders?.mendeley
+        ),
+        zotero: Boolean(user?.features?.zotero && user?.refProviders?.zotero),
+      }
       counters.forEach(debouncedCounter => {
         result[`${debouncedCounter.debounceTime}ms`] = debouncedCounter.counter
       })
