@@ -994,7 +994,7 @@ describe('ProjectController', function () {
       it('should not show for a user who is a member of a group subscription', function (done) {
         this.LimitationsManager.promises.userIsMemberOfGroupSubscription = sinon
           .stub()
-          .resolves(true)
+          .resolves({ isMember: true })
         this.res.render = (pageName, opts) => {
           expect(opts.showUpgradePrompt).to.equal(false)
           done()

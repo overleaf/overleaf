@@ -415,9 +415,12 @@ const _ProjectController = {
           collaberator_refs: 1, // used for link sharing analytics
         }),
         userIsMemberOfGroupSubscription: sessionUser
-          ? LimitationsManager.promises.userIsMemberOfGroupSubscription(
-              sessionUser
-            )
+          ? (async () =>
+              (
+                await LimitationsManager.promises.userIsMemberOfGroupSubscription(
+                  sessionUser
+                )
+              ).isMember)()
           : false,
         _flushToTpds:
           TpdsProjectFlusher.promises.flushProjectToTpdsIfNeeded(projectId),
