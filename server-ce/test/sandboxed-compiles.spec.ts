@@ -63,9 +63,8 @@ describe('SandboxedCompiles', function () {
   function checkSyncTeX() {
     describe('SyncTeX', () => {
       let projectName: string
-      beforeWithReRunOnTestRetry(function () {
+      beforeEach(function () {
         projectName = `Project ${uuid()}`
-        login('user@example.com')
         cy.visit('/project')
         createProject(projectName)
         const recompile = throttledRecompile()
@@ -76,12 +75,13 @@ describe('SandboxedCompiles', function () {
             `\n\\pagebreak\n\\section{{}Section A}\n\\pagebreak\n\\section{{}Section B}\n\\pagebreak`
           )
         recompile()
+        cy.log('wait for pdf-rendering')
+        cy.get('.pdf-viewer').within(() => {
+          cy.findByText(projectName)
+        })
       })
 
       it('should sync to code', () => {
-        cy.visit('/project')
-        cy.findByText(projectName).click()
-
         cy.log('navigate to \\maketitle using double click in PDF')
         cy.get('.pdf-viewer').within(() => {
           cy.findByText(projectName).dblclick()
@@ -112,26 +112,13 @@ describe('SandboxedCompiles', function () {
         cy.get('.cm-activeLine').should('have.text', '\\section{Section B}')
       })
 
-      // Waiting for a fix of https://github.com/overleaf/internal/issues/18603
-      it.skip('should sync to pdf', () => {
-        cy.visit('/project')
-        cy.findByText(projectName).click()
-
-        cy.log('wait for compile')
-        cy.get('.pdf-viewer').within(() => {
-          cy.findByText(projectName)
-        })
-
+      it('should sync to pdf', () => {
         cy.log('zoom in')
-        for (let i = 0; i < 8; i++) {
-          cy.get('[aria-label="Zoom in"]').click({ force: true })
-        }
+        cy.findByText('45%').click()
+        cy.findByText('400%').click()
         cy.log('scroll to top')
         cy.get('.pdfjs-viewer-inner').scrollTo('top')
-        waitUntilScrollingFinished('.pdfjs-viewer-inner', -1)
-        cy.get('.pdfjs-viewer-inner')
-          .should('have.prop', 'scrollTop')
-          .as('start')
+        waitUntilScrollingFinished('.pdfjs-viewer-inner', -1).as('start')
 
         cy.log('navigate to title')
         cy.findByText('\\maketitle').parent().click()

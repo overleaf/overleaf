@@ -341,7 +341,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
               timers.push(
                 window.setTimeout(() => {
                   element.style.opacity = '0'
-                }, 1000)
+                }, 1100)
               )
             }
           }
@@ -367,11 +367,16 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
       if (firstElement) {
         // scroll to the first highlighted element
-        firstElement.scrollIntoView({
-          block: 'center',
-          inline: 'start',
-          behavior: 'smooth',
-        })
+        // Briefly delay the scrolling after adding the element to the DOM.
+        timers.push(
+          window.setTimeout(() => {
+            firstElement.scrollIntoView({
+              block: 'center',
+              inline: 'start',
+              behavior: 'smooth',
+            })
+          }, 100)
+        )
       }
 
       return () => {

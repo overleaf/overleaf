@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "cypress:open": "cypress open",
-    "cypress:run": "cypress run",
+    "cypress:run": "cypress run --browser chrome",
     "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx,json}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx,json}'"
   },
