@@ -108,6 +108,7 @@ describe('TokenAccessController', function () {
 
     this.AnalyticsManager = {
       recordEventForSession: sinon.stub(),
+      recordEventForUserInBackground: sinon.stub(),
     }
 
     this.UserGetter = {
@@ -250,6 +251,15 @@ describe('TokenAccessController', function () {
             this.req.ip,
             { privileges: 'readAndWrite' }
           )
+        })
+
+        it('records a project-joined event for the user', function () {
+          expect(
+            this.AnalyticsManager.recordEventForUserInBackground
+          ).to.have.been.calledWith(this.user._id, 'project-joined', {
+            mode: 'read-write',
+            projectId: this.project._id.toString(),
+          })
         })
 
         it('emits a project membership changed event', function () {

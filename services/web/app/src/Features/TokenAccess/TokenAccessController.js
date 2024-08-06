@@ -340,6 +340,14 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
         req.ip,
         { privileges: 'readAndWrite' }
       )
+      AnalyticsManager.recordEventForUserInBackground(
+        userId,
+        'project-joined',
+        {
+          mode: 'read-write',
+          projectId: project._id.toString(),
+        }
+      )
       // Currently does not enforce the collaborator limit (warning phase)
       await CollaboratorsHandler.promises.addUserIdToProject(
         project._id,
