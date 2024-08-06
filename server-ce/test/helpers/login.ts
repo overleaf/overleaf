@@ -56,18 +56,26 @@ export function ensureUserExists({
 }
 
 export function login(username: string, password = DEFAULT_PASSWORD) {
-  const id = [username, password, new Date()]
-  function startOrResumeSession() {
-    cy.session(id, () => {
+  cy.session(
+    [username, password],
+    () => {
       cy.visit('/login')
       cy.get('input[name="email"]').type(username)
       cy.get('input[name="password"]').type(password)
       cy.findByRole('button', { name: 'Login' }).click()
       cy.url().should('contain', '/project')
-    })
-  }
-  startOrResumeSession()
-  return startOrResumeSession
+    },
+    {
+      cacheAcrossSpecs: true,
+      async validate() {
+        cy.request({ url: '/project', followRedirect: false }).then(
+          response => {
+            expect(response.status).to.equal(200)
+          }
+        )
+      },
+    }
+  )
 }
 
 let activateRateLimitState = { count: 0, reset: 0 }

@@ -11,6 +11,9 @@ describe('Accounts', function () {
     cy.visit('/project')
     cy.findByText('Account').click()
     cy.findByText('Log Out').click()
+    cy.url().should('include', '/login')
+    cy.visit('/project')
+    cy.url().should('include', '/login')
   })
 
   it('should render the email on the user activate screen', () => {

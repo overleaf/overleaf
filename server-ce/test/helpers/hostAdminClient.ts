@@ -15,7 +15,7 @@ export async function reconfigure({
   vars = {},
   withDataDir = false,
   resetData = false,
-}) {
+}): Promise<{ previousConfigServer: string }> {
   return await fetchJSON(`${hostAdminUrl}/reconfigure`, {
     method: 'POST',
     body: JSON.stringify({
@@ -28,15 +28,15 @@ export async function reconfigure({
   })
 }
 
-async function fetchJSON(
+async function fetchJSON<T = { stdout: string; stderr: string }>(
   input: RequestInfo,
   init?: RequestInit
-): Promise<{ stdout: string; stderr: string }> {
+): Promise<T> {
   if (init?.body) {
     init.headers = { 'Content-Type': 'application/json' }
   }
   const res = await fetch(input, init)
-  const { error, stdout, stderr } = await res.json()
+  const { error, stdout, stderr, ...rest } = await res.json()
   if (error) {
     console.error(input, init, 'failed:', error)
     if (stdout) console.log(stdout)
@@ -45,7 +45,7 @@ async function fetchJSON(
     Object.assign(err, error)
     throw err
   }
-  return { stdout, stderr }
+  return { stdout, stderr, ...rest }
 }
 
 export async function runScript({

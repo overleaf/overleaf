@@ -66,11 +66,9 @@ describe('editor', () => {
 
   describe('collaboration', () => {
     let projectId: string
-    let resumeUserSession: () => void
-    let resumeCollaboratorSession: () => void
 
     beforeEach(() => {
-      resumeUserSession = login('user@example.com')
+      login('user@example.com')
       cy.visit(`/project`)
       createProject('test-editor', { type: 'Example Project' }).then(
         (id: string) => {
@@ -86,7 +84,7 @@ describe('editor', () => {
             .should('contain.text', 'http://') // wait for the link to appear
             .then(el => {
               const linkSharingReadAndWrite = el.text()
-              resumeCollaboratorSession = login('collaborator@example.com')
+              login('collaborator@example.com')
               cy.visit(linkSharingReadAndWrite)
               cy.get('button').contains('Join Project').click()
               cy.log(
@@ -95,7 +93,7 @@ describe('editor', () => {
               cy.visit('/project')
             })
 
-          resumeUserSession()
+          login('user@example.com')
           cy.visit(`/project/${projectId}`)
         }
       )
@@ -112,7 +110,7 @@ describe('editor', () => {
         .within(() => cy.get('.input-switch').click())
       cy.wait('@enableTrackChanges')
 
-      resumeCollaboratorSession()
+      login('collaborator@example.com')
       cy.visit(`/project/${projectId}`)
 
       cy.log('make changes in main file')
@@ -127,7 +125,7 @@ describe('editor', () => {
       cy.log('recompile to force flush')
       cy.findByText('Recompile').click()
 
-      resumeUserSession()
+      login('user@example.com')
       cy.visit(`/project/${projectId}`)
 
       cy.log('reject changes')
@@ -151,7 +149,7 @@ describe('editor', () => {
         .within(() => cy.get('.input-switch').click())
       cy.wait('@enableTrackChanges')
 
-      resumeCollaboratorSession()
+      login('collaborator@example.com')
       cy.visit(`/project/${projectId}`)
 
       cy.log('enable visual editor and make changes in main file')
@@ -168,7 +166,7 @@ describe('editor', () => {
       cy.log('recompile to force flush')
       cy.findByText('Recompile').click()
 
-      resumeUserSession()
+      login('user@example.com')
       cy.visit(`/project/${projectId}`)
 
       cy.log('reject changes')

@@ -134,9 +134,8 @@ describe('admin panel', function () {
     })
 
     describe('manage site', () => {
-      let resumeAdminSession: () => void
       beforeEach(() => {
-        resumeAdminSession = login(admin)
+        login(admin)
         cy.visit('/project')
         cy.get('nav').findByText('Admin').click()
         cy.get('nav').findByText('Manage Site').click()
@@ -151,12 +150,12 @@ describe('admin panel', function () {
         cy.get('button').contains('Post Message').click()
         cy.findByText(message)
 
-        const resumeUser1Session = login(user1)
+        login(user1)
         cy.visit('/project')
         cy.findByText(message)
 
         cy.log('clear system messages')
-        resumeAdminSession()
+        login(admin)
         cy.visit('/project')
         cy.get('nav').findByText('Admin').click()
         cy.get('nav').findByText('Manage Site').click()
@@ -164,7 +163,7 @@ describe('admin panel', function () {
         cy.get('button').contains('Clear all messages').click()
 
         cy.log('verify system messages are no longer displayed')
-        resumeUser1Session()
+        login(user1)
         cy.visit('/project')
         cy.findByText(message).should('not.exist')
       })
@@ -260,7 +259,7 @@ describe('admin panel', function () {
     })
 
     it('restore deleted projects', () => {
-      const resumeUserSession = login(user1)
+      login(user1)
       cy.visit('/project')
 
       cy.log('select project to delete')
@@ -299,7 +298,7 @@ describe('admin panel', function () {
       cy.url().should('contain', `/admin/project/${projectToDeleteId}`)
 
       cy.log('login as the user and verify the project is restored')
-      resumeUserSession()
+      login(user1)
       cy.visit('/project')
       cy.get('.project-list-sidebar-react').within(() => {
         cy.findByText('Trashed Projects').click()

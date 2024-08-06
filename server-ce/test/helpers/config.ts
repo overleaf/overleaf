@@ -19,7 +19,7 @@ export function isExcludedBySharding(
   return SHARD && shard !== SHARD
 }
 
-let lastConfig: string
+let previousConfigFrontend: string
 
 export function startWith({
   pro = false,
@@ -36,18 +36,28 @@ export function startWith({
       version,
       vars,
       withDataDir,
+      resetData,
     })
     if (resetData) {
       resetCreatedUsersCache()
       resetActivateUserRateLimit()
       // no return here, always reconfigure when resetting data
-    } else if (lastConfig === cfg) {
+    } else if (previousConfigFrontend === cfg) {
       return
     }
 
     this.timeout(STARTUP_TIMEOUT)
-    await reconfigure({ pro, version, vars, withDataDir, resetData })
-    lastConfig = cfg
+    const { previousConfigServer } = await reconfigure({
+      pro,
+      version,
+      vars,
+      withDataDir,
+      resetData,
+    })
+    if (previousConfigServer !== cfg) {
+      await Cypress.session.clearAllSavedSessions()
+    }
+    previousConfigFrontend = cfg
   })
 }
 

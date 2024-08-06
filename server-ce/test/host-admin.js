@@ -29,6 +29,7 @@ const IMAGES = {
   PRO: process.env.IMAGE_TAG_PRO.replace(/:.+/, ''),
 }
 
+let previousConfig = ''
 let mongoIsInitialized = false
 
 function readDockerComposeOverride() {
@@ -295,6 +296,7 @@ function maybeResetData(resetData, callback) {
         return callback(error)
       }
 
+      previousConfig = ''
       mongoIsInitialized = false
       runDockerCompose(
         'down',
@@ -336,7 +338,9 @@ app.post(
           'up',
           ['--detach', '--wait', 'sharelatex'],
           (error, stdout, stderr) => {
-            res.json({ error, stdout, stderr })
+            const previousConfigServer = previousConfig
+            previousConfig = JSON.stringify(req.body)
+            res.json({ error, stdout, stderr, previousConfigServer })
           }
         )
       })
