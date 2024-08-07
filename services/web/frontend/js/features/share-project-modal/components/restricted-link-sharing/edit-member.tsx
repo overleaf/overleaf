@@ -150,7 +150,9 @@ export default function EditMember({
           <SelectPrivilege
             value={privileges}
             handleChange={value => {
-              value && handlePrivilegeChange(value.key)
+              if (value) {
+                handlePrivilegeChange(value.key)
+              }
             }}
             canAddCollaborators={canAddCollaborators}
           />

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import showDowngradeOption from '../../../../../frontend/js/features/subscription/util/show-downgrade-option'
-const dateformat = require('dateformat')
+import dateformat from 'dateformat'
 
 describe('showDowngradeOption', function () {
   const today = new Date()

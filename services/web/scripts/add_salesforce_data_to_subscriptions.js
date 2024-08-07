@@ -134,7 +134,9 @@ async function processRows(rows) {
           update,
           { upsert: false }
         )
-        result.matchedCount && stats.db.matched++
+        if (result.matchedCount) {
+          stats.db.matched++
+        }
         if (result.modifiedCount) {
           stats.db.updated++
           if (verbose) {

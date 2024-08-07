@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import isInFreeTrial from '../../../../../frontend/js/features/subscription/util/is-in-free-trial'
-const dateformat = require('dateformat')
+import dateformat from 'dateformat'
 
 describe('isInFreeTrial', function () {
   it('returns false when no date sent', function () {

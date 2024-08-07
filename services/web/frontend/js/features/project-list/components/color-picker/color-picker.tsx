@@ -75,7 +75,11 @@ function MoreButton() {
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
-      showCustomPicker ? closeCustomPicker() : openCustomPicker()
+      if (showCustomPicker) {
+        closeCustomPicker()
+      } else {
+        openCustomPicker()
+      }
     }
   }
 

@@ -3,8 +3,8 @@ import {
   GroupSubscription,
   RecurlySubscription,
 } from '../../../../../types/subscription/dashboard/subscription'
+import dateformat from 'dateformat'
 
-const dateformat = require('dateformat')
 const today = new Date()
 const oneYearFromToday = new Date().setFullYear(today.getFullYear() + 1)
 const nextPaymentDueAt = dateformat(oneYearFromToday, 'dS mmmm yyyy')

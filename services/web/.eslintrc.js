@@ -85,6 +85,8 @@ module.exports = {
         // we don't enforce this at the top-level - just in tests to manage `this` scope
         // based on mocha's context mechanism
         'mocha/prefer-arrow-callback': 'error',
+
+        '@typescript-eslint/no-unused-expressions': 'off',
       },
     },
     {
@@ -133,13 +135,20 @@ module.exports = {
             message:
               "Don't map ObjectId directly. Use `id => new ObjectId(id)` instead",
           },
+          // Catch incorrect usage of `await db.collection.find()`
+          {
+            selector:
+              "AwaitExpression > CallExpression > MemberExpression[property.name='find'][object.object.name='db']",
+            message:
+              'Mongo find returns a cursor not a promise, use `for await (const result of cursor)` or `.toArray()` instead.',
+          },
         ],
         '@typescript-eslint/no-floating-promises': 'error',
       },
     },
     {
-      // Backend tests and scripts specific rules
-      files: ['**/test/**/*.*', '**/scripts/*.*'],
+      // Backend scripts specific rules
+      files: ['**/scripts/**/*.js'],
       rules: {
         'no-restricted-syntax': [
           'error',
@@ -274,38 +283,6 @@ module.exports = {
         ],
         'no-restricted-syntax': [
           'error',
-          // Begin: Make sure angular can withstand minification
-          {
-            selector:
-              "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > :function[params.length > 0]",
-            message:
-              "Wrap the function in an array with the parameter names, to withstand minifcation. E.g. App.controller('MyController', ['param1', function(param1) {}]",
-          },
-          {
-            selector:
-              "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression > ArrowFunctionExpression",
-            message:
-              'Use standard function syntax instead of arrow function syntax in angular components. E.g. function(param1) {}',
-          },
-          {
-            selector:
-              "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrowFunctionExpression",
-            message:
-              'Use standard function syntax instead of arrow function syntax in angular components. E.g. function(param1) {}',
-          },
-          {
-            selector:
-              "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression > :not(:function, Identifier):last-child",
-            message:
-              "Last element of the array must be a function. E.g ['param1', function(param1) {}]",
-          },
-          {
-            selector:
-              "CallExpression[callee.object.name='App'][callee.property.name=/run|directive|config|controller/] > ArrayExpression[elements.length=0]",
-            message:
-              "Array must not be empty. Add parameters and a function. E.g ['param1', function(param1) {}]",
-          },
-          // End: Make sure angular can withstand minification
           // prohibit direct calls to methods of window.localStorage
           {
             selector:
@@ -390,6 +367,13 @@ module.exports = {
       files: ['**/*.ts'],
       rules: {
         'no-undef': 'off',
+      },
+    },
+    // JavaScript-specific rules
+    {
+      files: ['**/*.js'],
+      rules: {
+        '@typescript-eslint/no-require-imports': 'off',
       },
     },
     {

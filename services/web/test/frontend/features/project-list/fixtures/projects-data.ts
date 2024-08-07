@@ -3,8 +3,7 @@ import {
   isDeletableProject,
   isLeavableProject,
 } from '../../../../../frontend/js/features/project-list/util/project'
-
-const moment = require('moment')
+import moment from 'moment'
 
 export const owner = {
   id: '624333f147cfd8002622a1d3',
@@ -38,7 +37,7 @@ const users = {
 export const copyableProject = <Project>{
   id: '62f17f594641b405ca2b3264',
   name: 'Starfleet Report (owner)',
-  lastUpdated: moment().subtract(1, 'day').toDate(),
+  lastUpdated: moment().subtract(1, 'day').toISOString(),
   lastUpdatedBy: users.picard,
   accessLevel: 'owner',
   source: 'owner',
@@ -50,7 +49,7 @@ export const copyableProject = <Project>{
 export const archiveableProject = <Project>{
   id: '62d6d3721357e20a682110d5',
   name: "Captain's logs (Invite & Read Only)",
-  lastUpdated: moment().subtract(1, 'week').toDate(),
+  lastUpdated: moment().subtract(1, 'week').toISOString(),
   lastUpdatedBy: users.picard,
   accessLevel: 'readOnly',
   source: 'invite',
@@ -62,7 +61,7 @@ export const archiveableProject = <Project>{
 export const trashedProject = <Project>{
   id: '42f17f594641b405ca2b3265',
   name: 'Starfleet Report draft (owner & trashed)',
-  lastUpdated: moment().subtract(2, 'year').toDate(),
+  lastUpdated: moment().subtract(2, 'year').toISOString(),
   lastUpdatedBy: users.picard,
   accessLevel: 'owner',
   source: 'owner',
@@ -74,7 +73,7 @@ export const trashedProject = <Project>{
 export const archivedProject = <Project>{
   id: '52f17f594641b405ca2b3266',
   name: 'Starfleet Report old (owner & archive)',
-  lastUpdated: moment().subtract(1, 'year').toDate(),
+  lastUpdated: moment().subtract(1, 'year').toISOString(),
   lastUpdatedBy: users.picard,
   accessLevel: 'owner',
   source: 'owner',
@@ -86,7 +85,7 @@ export const archivedProject = <Project>{
 export const trashedAndNotOwnedProject = <Project>{
   id: '63d6d3721357e20a682110d5',
   name: "Captain's logs very old (Trashed & Read Only & Not Owned)",
-  lastUpdated: moment().subtract(11, 'year').toDate(),
+  lastUpdated: moment().subtract(11, 'year').toISOString(),
   lastUpdatedBy: users.picard,
   accessLevel: 'readOnly',
   source: 'invite',
@@ -105,7 +104,7 @@ export const projectsData: Array<Project> = [
   {
     id: '62b5cdf85212090c2244161c',
     name: 'Enterprise Security Analysis | Deflector Shields, Sensors, Tractor Beams, and Cloaking Devices (Invite & Edit)',
-    lastUpdated: moment().subtract(1, 'month').toDate(),
+    lastUpdated: moment().subtract(1, 'month').toISOString(),
     lastUpdatedBy: users.worf,
     accessLevel: 'readWrite',
     source: 'invite',
@@ -116,7 +115,7 @@ export const projectsData: Array<Project> = [
   {
     id: '624380431c2e40006c59b922',
     name: 'VISOR Sensors (Link Sharing & Edit)',
-    lastUpdated: moment().subtract(2, 'months').toDate(),
+    lastUpdated: moment().subtract(2, 'months').toISOString(),
     lastUpdatedBy: users.laforge,
     accessLevel: 'readAndWrite',
     source: 'token',
@@ -127,7 +126,7 @@ export const projectsData: Array<Project> = [
   {
     id: '62f51b31f6f4c60027e8935f',
     name: 'United Federation of Planets (Link Sharing & View Only)',
-    lastUpdated: moment().subtract(2, 'year').toDate(),
+    lastUpdated: moment().subtract(2, 'year').toISOString(),
     lastUpdatedBy: null,
     accessLevel: 'readOnly',
     source: 'token',
