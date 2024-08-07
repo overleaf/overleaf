@@ -156,16 +156,16 @@
 
 .form-control,
 .form-select {
-  &:focus-visible {
+  &:focus,
+  &:invalid:focus,
+  &.is-invalid:focus,
+  &:focus-visible,
+  &:invalid:focus-visible,
+  &.is-invalid:focus-visible {
     color: $input-focus-color;
     background-color: $input-focus-bg;
     outline: 0;
     border-color: $input-focus-border-color;
     box-shadow: $input-focus-box-shadow;
-  }
-
-  &.is-invalid:focus-visible {
-    border-color: $form-feedback-invalid-color;
-    box-shadow: 0 0 0 2px var(--red-30);
   }
 }
