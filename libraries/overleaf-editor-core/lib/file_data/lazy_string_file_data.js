@@ -14,6 +14,8 @@ const EditOperationBuilder = require('../operation/edit_operation_builder')
  *  @typedef {import('../types').BlobStore} BlobStore
  *  @typedef {import('../types').ReadonlyBlobStore} ReadonlyBlobStore
  *  @typedef {import('../types').RangesBlob} RangesBlob
+ *  @typedef {import('../types').RawFileData} RawFileData
+ *  @typedef {import('../types').RawLazyStringFileData} RawLazyStringFileData
  */
 
 class LazyStringFileData extends FileData {
@@ -39,6 +41,10 @@ class LazyStringFileData extends FileData {
     this.operations = operations || []
   }
 
+  /**
+   * @param {RawLazyStringFileData} raw
+   * @returns {LazyStringFileData}
+   */
   static fromRaw(raw) {
     return new LazyStringFileData(
       raw.hash,
@@ -48,9 +54,16 @@ class LazyStringFileData extends FileData {
     )
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   * @returns {RawLazyStringFileData}
+   */
   toRaw() {
-    const raw = { hash: this.hash, stringLength: this.stringLength }
+    /** @type RawLazyStringFileData */
+    const raw = {
+      hash: this.hash,
+      stringLength: this.stringLength,
+    }
     if (this.rangesHash) {
       raw.rangesHash = this.rangesHash
     }
@@ -135,18 +148,26 @@ class LazyStringFileData extends FileData {
 
   /** @inheritdoc */
   async toHollow() {
+    // TODO(das7pad): inline 2nd path of FileData.createLazyFromBlobs?
+    // @ts-ignore
     return FileData.createHollow(null, this.stringLength)
   }
 
-  /** @inheritdoc */
+  /** @inheritdoc
+   * @param {EditOperation} operation
+   */
   edit(operation) {
     this.stringLength = operation.applyToLength(this.stringLength)
     this.operations.push(operation)
   }
 
-  /** @inheritdoc */
+  /** @inheritdoc
+   * @param {BlobStore} blobStore
+   * @return {Promise<RawFileData>}
+   */
   async store(blobStore) {
     if (this.operations.length === 0) {
+      /** @type RawFileData */
       const raw = { hash: this.hash }
       if (this.rangesHash) {
         raw.rangesHash = this.rangesHash
@@ -155,6 +176,7 @@ class LazyStringFileData extends FileData {
     }
     const eager = await this.toEager(blobStore)
     this.operations.length = 0
+    /** @type RawFileData */
     return await eager.store(blobStore)
   }
 }

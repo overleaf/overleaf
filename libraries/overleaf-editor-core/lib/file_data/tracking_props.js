@@ -1,6 +1,7 @@
 // @ts-check
 /**
  * @typedef {import("../types").TrackingPropsRawData} TrackingPropsRawData
+ * @typedef {import("../types").TrackingDirective} TrackingDirective
  */
 
 class TrackingProps {
@@ -48,6 +49,10 @@ class TrackingProps {
     }
   }
 
+  /**
+   * @param {TrackingDirective} [other]
+   * @returns {boolean}
+   */
   equals(other) {
     if (!(other instanceof TrackingProps)) {
       return false

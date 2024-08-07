@@ -1,6 +1,10 @@
 // @ts-check
 'use strict'
-/** @typedef {import('./edit_operation')} EditOperation */
+/**
+ * @typedef {import('./edit_operation')} EditOperation
+ * @typedef {import('../types').RawEditFileOperation} RawEditFileOperation
+ * @typedef {import("../snapshot")} Snapshot
+ */
 
 const Operation = require('./')
 const EditOperationBuilder = require('./edit_operation_builder')
@@ -32,7 +36,7 @@ class EditFileOperation extends Operation {
   /**
    * Deserialize an EditFileOperation.
    *
-   * @param {Object} raw
+   * @param {RawEditFileOperation} raw
    * @return {EditFileOperation}
    */
   static fromRaw(raw) {
@@ -52,13 +56,18 @@ class EditFileOperation extends Operation {
 
   /**
    * @inheritdoc
+   * @param {Snapshot} snapshot
    */
   applyTo(snapshot) {
+    // TODO(das7pad): can we teach typescript our polymorphism?
+    // @ts-ignore
     snapshot.editFile(this.pathname, this.operation)
   }
 
   /**
    * @inheritdoc
+   * @param {Operation} other
+   * @return {boolean}
    */
   canBeComposedWithForUndo(other) {
     return (
@@ -69,6 +78,8 @@ class EditFileOperation extends Operation {
 
   /**
    * @inheritdoc
+   * @param {Operation} other
+   * @return {other is EditFileOperation}
    */
   canBeComposedWith(other) {
     // Ensure that other operation is an edit file operation
@@ -81,6 +92,7 @@ class EditFileOperation extends Operation {
 
   /**
    * @inheritdoc
+   * @param {EditFileOperation} other
    */
   compose(other) {
     return new EditFileOperation(

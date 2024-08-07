@@ -13,6 +13,8 @@ const StringFileData = require('./file_data/string_file_data')
  * @typedef {import("./blob")} Blob
  * @typedef {import("./types").BlobStore} BlobStore
  * @typedef {import("./types").ReadonlyBlobStore} ReadonlyBlobStore
+ * @typedef {import("./types").RawFileData} RawFileData
+ * @typedef {import("./types").RawFile} RawFile
  * @typedef {import("./types").StringFileRawData} StringFileRawData
  * @typedef {import("./types").CommentRawData} CommentRawData
  * @typedef {import("./file_data/comment_list")} CommentList
@@ -62,9 +64,14 @@ class File {
     assert.instance(data, FileData, 'File: bad data')
 
     this.data = data
+    this.metadata = {}
     this.setMetadata(metadata || {})
   }
 
+  /**
+   * @param {RawFile} raw
+   * @return {File|null}
+   */
   static fromRaw(raw) {
     if (!raw) return null
     return new File(FileData.fromRaw(raw), raw.metadata)
@@ -90,8 +97,8 @@ class File {
   }
 
   /**
-   * @param  {number} [byteLength]
-   * @param  {number} [stringLength]
+   * @param  {number} byteLength
+   * @param  {number?} stringLength
    * @param  {Object} [metadata]
    * @return {File}
    */
@@ -109,7 +116,11 @@ class File {
     return new File(FileData.createLazyFromBlobs(blob, rangesBlob), metadata)
   }
 
+  /**
+   * @returns {RawFile}
+   */
   toRaw() {
+    /** @type RawFile */
     const rawFileData = this.data.toRaw()
     storeRawMetadata(this.metadata, rawFileData)
     return rawFileData
@@ -249,15 +260,20 @@ class File {
    * the hash.
    *
    * @param {BlobStore} blobStore
-   * @return {Promise<Object>} a raw HashFile
+   * @return {Promise<RawFile>} a raw HashFile
    */
   async store(blobStore) {
+    /** @type RawFile */
     const raw = await this.data.store(blobStore)
     storeRawMetadata(this.metadata, raw)
     return raw
   }
 }
 
+/**
+ * @param {Object} metadata
+ * @param {RawFile} raw
+ */
 function storeRawMetadata(metadata, raw) {
   if (!_.isEmpty(metadata)) {
     raw.metadata = _.cloneDeep(metadata)

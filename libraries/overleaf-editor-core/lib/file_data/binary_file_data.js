@@ -5,6 +5,10 @@ const assert = require('check-types').assert
 const Blob = require('../blob')
 const FileData = require('./')
 
+/**
+ * @typedef {import('../types').RawBinaryFileData} RawBinaryFileData
+ */
+
 class BinaryFileData extends FileData {
   /**
    * @param {string} hash
@@ -21,11 +25,18 @@ class BinaryFileData extends FileData {
     this.byteLength = byteLength
   }
 
+  /**
+   * @param {RawBinaryFileData} raw
+   * @returns {BinaryFileData}
+   */
   static fromRaw(raw) {
     return new BinaryFileData(raw.hash, raw.byteLength)
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   * @returns {RawBinaryFileData}
+   */
   toRaw() {
     return { hash: this.hash, byteLength: this.byteLength }
   }
@@ -60,7 +71,9 @@ class BinaryFileData extends FileData {
     return FileData.createHollow(this.byteLength, null)
   }
 
-  /** @inheritdoc */
+  /** @inheritdoc
+   * @return {Promise<RawFileData>}
+   */
   async store() {
     return { hash: this.hash }
   }

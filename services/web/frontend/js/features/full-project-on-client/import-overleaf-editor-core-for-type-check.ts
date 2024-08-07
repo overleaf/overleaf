@@ -1,0 +1,1 @@
+import 'overleaf-editor-core'

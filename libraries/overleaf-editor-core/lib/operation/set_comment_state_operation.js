@@ -48,7 +48,7 @@ class SetCommentStateOperation extends EditOperation {
   }
 
   /**
-   *
+   * @param {StringFileData} previousState
    * @returns {SetCommentStateOperation | EditNoOperation}
    */
   invert(previousState) {
@@ -77,7 +77,7 @@ class SetCommentStateOperation extends EditOperation {
   /**
    * @inheritdoc
    * @param {EditOperation} other
-   * @returns {EditOperation}
+   * @returns {SetCommentStateOperation | core.DeleteCommentOperation}
    */
   compose(other) {
     if (

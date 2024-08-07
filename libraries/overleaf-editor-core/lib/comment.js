@@ -149,6 +149,7 @@ class Comment {
    * @returns {CommentRawData}
    */
   toRaw() {
+    /** @type CommentRawData */
     const raw = {
       id: this.id,
       ranges: this.ranges.map(range => range.toRaw()),

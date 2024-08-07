@@ -9,9 +9,18 @@ const pMap = require('p-map')
 const File = require('./file')
 const safePathname = require('./safe_pathname')
 
+/**
+ * @typedef {import('./types').RawFile} RawFile
+ * @typedef {import('./types').RawFileMap} RawFileMap
+ * @typedef {Record<String, File | null>} FileMapData
+ */
+
 class PathnameError extends OError {}
 
 class NonUniquePathnameError extends PathnameError {
+  /**
+   * @param {string[]} pathnames
+   */
   constructor(pathnames) {
     super('pathnames are not unique: ' + pathnames, { pathnames })
     this.pathnames = pathnames
@@ -19,6 +28,9 @@ class NonUniquePathnameError extends PathnameError {
 }
 
 class BadPathnameError extends PathnameError {
+  /**
+   * @param {string} pathname
+   */
   constructor(pathname) {
     super(pathname + ' is not a valid pathname', { pathname })
     this.pathname = pathname
@@ -26,6 +38,9 @@ class BadPathnameError extends PathnameError {
 }
 
 class PathnameConflictError extends PathnameError {
+  /**
+   * @param {string} pathname
+   */
   constructor(pathname) {
     super(`pathname '${pathname}' conflicts with another file`, { pathname })
     this.pathname = pathname
@@ -33,6 +48,9 @@ class PathnameConflictError extends PathnameError {
 }
 
 class FileNotFoundError extends PathnameError {
+  /**
+   * @param {string} pathname
+   */
   constructor(pathname) {
     super(`file ${pathname} does not exist`, { pathname })
     this.pathname = pathname
@@ -70,13 +88,17 @@ class FileMap {
   constructor(files) {
     // create bare object for use as Map
     // http://ryanmorr.com/true-hash-maps-in-javascript/
-    /** @type {Record<String, File | null>} */
+    /** @type FileMapData */
     this.files = Object.create(null)
     _.assign(this.files, files)
     checkPathnamesAreUnique(this.files)
     checkPathnamesDoNotConflict(this)
   }
 
+  /**
+   * @param {RawFileMap} raw
+   * @returns {FileMap}
+   */
   static fromRaw(raw) {
     assert.object(raw, 'bad raw files')
     return new FileMap(_.mapValues(raw, File.fromRaw))
@@ -85,12 +107,18 @@ class FileMap {
   /**
    * Convert to raw object for serialization.
    *
-   * @return {Object}
+   * @return {RawFileMap}
    */
   toRaw() {
+    /**
+     * @param {File} file
+     * @return {RawFile}
+     */
     function fileToRaw(file) {
       return file.toRaw()
     }
+    // TODO(das7pad): refine types to enforce no nulls in FileMapData
+    // @ts-ignore
     return _.mapValues(this.files, fileToRaw)
   }
 
@@ -103,6 +131,8 @@ class FileMap {
   addFile(pathname, file) {
     checkPathname(pathname)
     assert.object(file, 'bad file')
+    // TODO(das7pad): make ignoredPathname argument fully optional
+    // @ts-ignore
     checkNewPathnameDoesNotConflict(this, pathname)
     addFile(this.files, pathname, file)
   }
@@ -163,7 +193,7 @@ class FileMap {
    */
   getFile(pathname) {
     const key = findPathnameKey(this.files, pathname)
-    return key && this.files[key]
+    if (key) return this.files[key]
   }
 
   /**
@@ -177,7 +207,7 @@ class FileMap {
    * and MoveFile overwrite existing files.)
    *
    * @param {string} pathname
-   * @param {string} [ignoredPathname] pretend this pathname does not exist
+   * @param {string?} ignoredPathname pretend this pathname does not exist
    */
   wouldConflict(pathname, ignoredPathname) {
     checkPathname(pathname)
@@ -224,7 +254,7 @@ class FileMap {
   /**
    * Map the files in this map to new values.
    * @template T
-   * @param {(file: File | null) => T} iteratee
+   * @param {(file: File | null, path: string) => T} iteratee
    * @return {Record<String, T>}
    */
   map(iteratee) {
@@ -234,9 +264,10 @@ class FileMap {
   /**
    * Map the files in this map to new values asynchronously, with an optional
    * limit on concurrency.
-   * @param {function} iteratee like for _.mapValues
+   * @template T
+   * @param {(file: File | null | undefined, path: string, pathnames: string[]) => T} iteratee
    * @param {number} [concurrency]
-   * @return {Promise<Object>}
+   * @return {Promise<Record<String, T>>}
    */
   async mapAsync(iteratee, concurrency) {
     assert.maybe.number(concurrency, 'bad concurrency')
@@ -253,32 +284,55 @@ class FileMap {
   }
 }
 
+/**
+ * @param {string} pathname0
+ * @param {string?} pathname1
+ * @returns {boolean}
+ */
 function pathnamesEqual(pathname0, pathname1) {
   return pathname0 === pathname1
 }
 
+/**
+ * @param {FileMapData} files
+ * @returns {boolean}
+ */
 function pathnamesAreUnique(files) {
   const keys = _.keys(files)
   return _.uniqWith(keys, pathnamesEqual).length === keys.length
 }
 
+/**
+ * @param {FileMapData} files
+ */
 function checkPathnamesAreUnique(files) {
   if (pathnamesAreUnique(files)) return
   throw new FileMap.NonUniquePathnameError(_.keys(files))
 }
 
+/**
+ * @param {string} pathname
+ */
 function checkPathname(pathname) {
   assert.nonEmptyString(pathname, 'bad pathname')
   if (safePathname.isClean(pathname)) return
   throw new FileMap.BadPathnameError(pathname)
 }
 
+/**
+ * @param {FileMap} fileMap
+ * @param {string} pathname
+ * @param {string?} ignoredPathname
+ */
 function checkNewPathnameDoesNotConflict(fileMap, pathname, ignoredPathname) {
   if (fileMap.wouldConflict(pathname, ignoredPathname)) {
     throw new FileMap.PathnameConflictError(pathname)
   }
 }
 
+/**
+ * @param {FileMap} fileMap
+ */
 function checkPathnamesDoNotConflict(fileMap) {
   const pathnames = fileMap.getPathnames()
   // check pathnames for validity first
@@ -299,18 +353,29 @@ function checkPathnamesDoNotConflict(fileMap) {
   }
 }
 
-//
-// This function is somewhat vestigial: it was used when this map used
-// case-insensitive pathname comparison. We could probably simplify some of the
-// logic in the callers, but in the hope that we will one day return to
-// case-insensitive semantics, we've just left things as-is for now.
-//
+/**
+ * This function is somewhat vestigial: it was used when this map used
+ * case-insensitive pathname comparison. We could probably simplify some of the
+ * logic in the callers, but in the hope that we will one day return to
+ * case-insensitive semantics, we've just left things as-is for now.
+ *
+ * TODO(das7pad): In a followup, inline this function and make types stricter.
+ *
+ * @param {FileMapData} files
+ * @param {string} pathname
+ * @returns {string | undefined}
+ */
 function findPathnameKey(files, pathname) {
   // we can check for the key without worrying about properties
   // in the prototype because we are now using a bare object/
   if (pathname in files) return pathname
 }
 
+/**
+ * @param {FileMapData} files
+ * @param {string} pathname
+ * @param {File?} file
+ */
 function addFile(files, pathname, file) {
   const key = findPathnameKey(files, pathname)
   if (key) delete files[key]

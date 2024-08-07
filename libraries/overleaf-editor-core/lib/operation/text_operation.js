@@ -35,6 +35,7 @@ const TrackingProps = require('../file_data/tracking_props')
  * @typedef {import('../operation/scan_op').ScanOp} ScanOp
  * @typedef {import('../file_data/tracked_change_list')} TrackedChangeList
  * @typedef {import('../types').TrackingDirective} TrackingDirective
+ * @typedef {{tracking?: TrackingProps, commentIds?: string[]}} InsertOptions
  */
 
 /**
@@ -69,6 +70,10 @@ class TextOperation extends EditOperation {
     this.targetLength = 0
   }
 
+  /**
+   * @param {TextOperation} other
+   * @return {boolean}
+   */
   equals(other) {
     if (this.baseLength !== other.baseLength) {
       return false
@@ -129,7 +134,7 @@ class TextOperation extends EditOperation {
   /**
    * Insert a string at the current position.
    * @param {string | {i: string}} insertValue
-   * @param {{tracking?: TrackingProps, commentIds?: string[]}} opts
+   * @param {InsertOptions} opts
    * @returns {TextOperation}
    */
   insert(insertValue, opts = {}) {
@@ -328,6 +333,8 @@ class TextOperation extends EditOperation {
 
   /**
    * @inheritdoc
+   * @param {number} length of the original string; non-negative
+   * @return {number} length of the new string; non-negative
    */
   applyToLength(length) {
     const operation = this
@@ -573,6 +580,7 @@ class TextOperation extends EditOperation {
           op1 = ops1[i1++]
         }
       } else if (op1 instanceof InsertOp && op2 instanceof RetainOp) {
+        /** @type InsertOptions */
         const opts = {
           commentIds: op1.commentIds,
         }
@@ -807,6 +815,10 @@ function getSimpleOp(operation) {
   return null
 }
 
+/**
+ * @param {TextOperation} operation
+ * @return {number}
+ */
 function getStartIndex(operation) {
   if (operation.ops[0] instanceof RetainOp) {
     return operation.ops[0].length
@@ -843,7 +855,10 @@ function calculateTrackingCommentSegments(
   const breaks = new Set()
   const opStart = cursor
   const opEnd = cursor + length
-  // Utility function to limit breaks to the boundary set by the operation range
+  /**
+   * Utility function to limit breaks to the boundary set by the operation range
+   * @param {number} rangeBoundary
+   */
   function addBreak(rangeBoundary) {
     if (rangeBoundary < opStart || rangeBoundary > opEnd) {
       return

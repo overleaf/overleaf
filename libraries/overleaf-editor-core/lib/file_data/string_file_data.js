@@ -9,6 +9,7 @@ const TrackedChangeList = require('./tracked_change_list')
 
 /**
  * @typedef {import("../types").StringFileRawData} StringFileRawData
+ * @typedef {import("../types").RawFileData} RawFileData
  * @typedef {import("../operation/edit_operation")} EditOperation
  * @typedef {import("../types").BlobStore} BlobStore
  * @typedef {import("../types").CommentRawData} CommentRawData
@@ -47,6 +48,7 @@ class StringFileData extends FileData {
    * @returns {StringFileRawData}
    */
   toRaw() {
+    /** @type StringFileRawData */
     const raw = { content: this.content }
 
     if (this.comments.length) {
@@ -133,6 +135,7 @@ class StringFileData extends FileData {
   /**
    * @inheritdoc
    * @param {BlobStore} blobStore
+   * @return {Promise<RawFileData>}
    */
   async store(blobStore) {
     const blob = await blobStore.putString(this.content)
@@ -143,8 +146,12 @@ class StringFileData extends FileData {
         trackedChanges: this.trackedChanges.toRaw(),
       }
       const rangesBlob = await blobStore.putObject(ranges)
+      // TODO(das7pad): Provide interface that guarantees hash exists?
+      // @ts-ignore
       return { hash: blob.getHash(), rangesHash: rangesBlob.getHash() }
     }
+    // TODO(das7pad): Provide interface that guarantees hash exists?
+    // @ts-ignore
     return { hash: blob.getHash() }
   }
 }

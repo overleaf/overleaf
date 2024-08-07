@@ -1,6 +1,11 @@
+// @ts-check
 'use strict'
 
 const assert = require('check-types').assert
+
+/**
+ * @typedef {import('./types').RawLabel} RawLabel
+ */
 
 /**
  * @classdesc
@@ -13,6 +18,9 @@ class Label {
   /**
    * @constructor
    * @param {string} text
+   * @param {number?} authorId
+   * @param {Date} timestamp
+   * @param {number} version
    */
   constructor(text, authorId, timestamp, version) {
     assert.string(text, 'bad text')
@@ -29,7 +37,7 @@ class Label {
   /**
    * Create a Label from its raw form.
    *
-   * @param {Object} raw
+   * @param {RawLabel} raw
    * @return {Label}
    */
   static fromRaw(raw) {
@@ -44,7 +52,7 @@ class Label {
   /**
    * Convert the Label to raw form for transmission.
    *
-   * @return {Object}
+   * @return {RawLabel}
    */
   toRaw() {
     return {
@@ -81,7 +89,7 @@ class Label {
   }
 
   /**
-   * @return {number | undefined}
+   * @return {number}
    */
   getVersion() {
     return this.version

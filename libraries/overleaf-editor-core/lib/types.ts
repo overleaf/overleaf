@@ -17,19 +17,19 @@ export type RangesBlob = {
   trackedChanges: TrackedChangeRawData[]
 }
 
-type Range = {
+export type RawRange = {
   pos: number
   length: number
 }
 
 export type CommentRawData = {
   id: string
-  ranges: Range[]
+  ranges: RawRange[]
   resolved?: boolean
 }
 
 export type TrackedChangeRawData = {
-  range: Range
+  range: RawRange
   tracking: TrackingPropsRawData
 }
 
@@ -50,6 +50,35 @@ export type StringFileRawData = {
   comments?: CommentRawData[]
   trackedChanges?: TrackedChangeRawData[]
 }
+
+export type RawSnapshot = {
+  files: RawFileMap
+  projectVersion?: string
+  v2DocVersions?: RawV2DocVersions | null
+}
+
+export type RawFileMap = Record<string, RawFile>
+
+export type RawFile = { metadata?: Object } & RawFileData
+
+export type RawFileData =
+  | RawBinaryFileData
+  | RawHashFileData
+  | RawHollowBinaryFileData
+  | RawHollowStringFileData
+  | RawLazyStringFileData
+  | StringFileRawData
+
+export type RawHashFileData = { hash: string; rangesHash?: string }
+export type RawBinaryFileData = { hash: string; byteLength: number }
+export type RawLazyStringFileData = {
+  hash: string
+  stringLength: number
+  rangesHash?: string
+  operations?: RawEditOperation[]
+}
+export type RawHollowBinaryFileData = { byteLength: number }
+export type RawHollowStringFileData = { stringLength: number }
 
 export type RawV2DocVersions = Record<string, { pathname: string; v: number }>
 
@@ -78,7 +107,7 @@ export type RawTextOperation = {
 
 export type RawAddCommentOperation = {
   commentId: string
-  ranges: Range[]
+  ranges: RawRange[]
   resolved?: boolean
 }
 
@@ -89,14 +118,28 @@ export type RawSetCommentStateOperation = {
   resolved: boolean
 }
 
+export type RawEditNoOperation = {
+  noOp: true
+}
+
+export type RawEditFileOperation = RawEditOperation & { pathname: string }
+
 export type RawEditOperation =
   | RawTextOperation
   | RawAddCommentOperation
   | RawDeleteCommentOperation
   | RawSetCommentStateOperation
+  | RawEditNoOperation
 
 export type LinkedFileData = {
   importedAt: string
   provider: string
   [other: string]: any
+}
+
+export type RawLabel = {
+  text: string
+  authorId: number | null
+  timestamp: string
+  version: number
 }

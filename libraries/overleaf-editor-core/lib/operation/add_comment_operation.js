@@ -44,6 +44,7 @@ class AddCommentOperation extends EditOperation {
    * @returns {RawAddCommentOperation}
    */
   toJSON() {
+    /** @type RawAddCommentOperation */
     const raw = {
       commentId: this.commentId,
       ranges: this.ranges.map(range => range.toRaw()),

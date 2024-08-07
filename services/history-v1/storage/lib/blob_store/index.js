@@ -296,7 +296,7 @@ class BlobStore {
    * Read a blob metadata record by hexadecimal hash.
    *
    * @param {string} hash hexadecimal SHA-1 hash
-   * @return {Promise.<core.Blob?>}
+   * @return {Promise<core.Blob | null>}
    */
   async getBlob(hash) {
     assert.blobHash(hash, 'bad hash')

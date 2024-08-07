@@ -8,6 +8,10 @@ const assert = require('check-types').assert
 
 const FileData = require('./')
 
+/**
+ * @typedef {import('../types').RawHollowStringFileData} RawHollowStringFileData
+ */
+
 class HollowStringFileData extends FileData {
   /**
    * @param {number} stringLength
@@ -24,11 +28,18 @@ class HollowStringFileData extends FileData {
     this.stringLength = stringLength
   }
 
+  /**
+   * @param {RawHollowStringFileData} raw
+   * @returns {HollowStringFileData}
+   */
   static fromRaw(raw) {
     return new HollowStringFileData(raw.stringLength)
   }
 
-  /** @inheritdoc */
+  /**
+   * @inheritdoc
+   * @returns {RawHollowStringFileData}
+   */
   toRaw() {
     return { stringLength: this.stringLength }
   }

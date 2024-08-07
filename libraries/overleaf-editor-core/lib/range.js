@@ -2,6 +2,10 @@
 
 const OError = require('@overleaf/o-error')
 
+/**
+ * @typedef {import('./types').RawRange} RawRange
+ */
+
 class Range {
   /**
    * @param {number} pos
@@ -17,10 +21,16 @@ class Range {
     this.length = length
   }
 
+  /**
+   * @return {number}
+   */
   get start() {
     return this.pos
   }
 
+  /**
+   * @return {number}
+   */
   get end() {
     return this.pos + this.length
   }
@@ -193,6 +203,10 @@ class Range {
     }
   }
 
+  /**
+   * @param {RawRange} raw
+   * @return {Range}
+   */
   static fromRaw(raw) {
     return new Range(raw.pos, raw.length)
   }

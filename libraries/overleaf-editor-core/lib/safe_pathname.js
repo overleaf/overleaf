@@ -1,4 +1,4 @@
-/** @module */
+// @ts-check
 'use strict'
 
 const path = require('path-browserify')
@@ -39,6 +39,7 @@ const MAX_PATH = 1024
 /**
  * Replace invalid characters and filename patterns in a filename with
  * underscores.
+ * @param {string} filename
  */
 function cleanPart(filename) {
   filename = filename.replace(BAD_CHAR_RX, '_')
