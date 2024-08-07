@@ -29,8 +29,6 @@ import {
 } from './completions/apply'
 import { snippet } from './completions/data/environments'
 import { syntaxTree } from '@codemirror/language'
-import { sendMBSampled } from '@/infrastructure/event-tracking'
-import getMeta from '@/utils/meta'
 
 function blankCompletions(): Completions {
   return {
@@ -208,92 +206,6 @@ export const bibKeyArgumentCompletionSource: CompletionSource =
     }
   )
 
-const debouncedCounter = (
-  debounceTime: number
-): {
-  debounceTime: number
-  counter: number
-  increment: () => void
-  reset: () => void
-} => {
-  let timeoutId = 0
-  let _counter = 0
-  return {
-    debounceTime,
-    get counter() {
-      return _counter
-    },
-    increment() {
-      if (timeoutId !== 0) {
-        clearTimeout(timeoutId)
-      }
-      timeoutId = window.setTimeout(() => {
-        _counter += 1
-        timeoutId = 0
-      }, debounceTime)
-    },
-    reset() {
-      clearTimeout(timeoutId)
-      _counter = 0
-      timeoutId = 0
-    },
-  }
-}
-
-const CITE_ANALYTICS_REPORT_TIMEOUT = 4000
-
-const analyticsSourceBuilder = (debounceTimes: number[]) => {
-  const user = getMeta('ol-user')
-  let timeoutId = 0
-  const counters = debounceTimes.map(debounceTime => {
-    if (debounceTime >= CITE_ANALYTICS_REPORT_TIMEOUT) {
-      throw new Error(
-        `Debounce time ${debounceTime} is greater than the report timeout ${CITE_ANALYTICS_REPORT_TIMEOUT}`
-      )
-    }
-    return debouncedCounter(debounceTime)
-  })
-
-  const incrementCounters = () => {
-    counters.forEach(counter => counter.increment())
-  }
-
-  const resetCounters = () => {
-    counters.forEach(counter => counter.reset())
-  }
-
-  const delayedReport = () => {
-    if (timeoutId !== 0) {
-      clearTimeout(timeoutId)
-    }
-    timeoutId = window.setTimeout(() => {
-      const result: Record<string, number | boolean | undefined> = {
-        mendeley: Boolean(
-          user?.features?.mendeley && user?.refProviders?.mendeley
-        ),
-        zotero: Boolean(user?.features?.zotero && user?.refProviders?.zotero),
-      }
-      counters.forEach(debouncedCounter => {
-        result[`${debouncedCounter.debounceTime}ms`] = debouncedCounter.counter
-      })
-      sendMBSampled('cite-key-search', result, 0.05)
-      timeoutId = 0
-      resetCounters()
-    }, CITE_ANALYTICS_REPORT_TIMEOUT)
-  }
-
-  return () => {
-    incrementCounters()
-    delayedReport()
-    return null
-  }
-}
-
-const citeKeyAnalyticsSource = makeMultipleArgumentCompletionSource(
-  ['BibKeyArgument'],
-  analyticsSourceBuilder([0, 100, 250, 500])
-)
-
 export const refArgumentCompletionSource: CompletionSource =
   makeMultipleArgumentCompletionSource(
     ['RefArgument'],
@@ -447,7 +359,6 @@ export const argumentCompletionSources: CompletionSource[] = [
   documentClassArgumentCompletionSource,
   bibliographyArgumentCompletionSource,
   bibliographyStyleArgumentCompletionSource,
-  citeKeyAnalyticsSource,
 ]
 
 const commandCompletionSource = (context: CompletionContext) => {
