@@ -7,6 +7,8 @@ import { dirname, findEntityByPath } from '@/features/file-tree/util/path'
 // Warnings that may disappear after a second LaTeX pass
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
 
+const MAX_LOG_SIZE = 1024 * 1024 // 1MB
+
 export function handleOutputFiles(outputFiles, projectId, data) {
   const outputFile = outputFiles.get('output.pdf')
   if (!outputFile) return null
@@ -75,12 +77,31 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
   if (logFile) {
     try {
-      const response = await fetch(buildURL(logFile, data.pdfDownloadDomain), {
-        signal,
+      const logFileAbortController = new AbortController()
+
+      // abort fetching the log file if the main signal is aborted
+      signal.addEventListener('abort', () => {
+        logFileAbortController.abort()
       })
 
-      result.log = await response.text()
+      const response = await fetch(buildURL(logFile, data.pdfDownloadDomain), {
+        signal: logFileAbortController.signal,
+      })
 
+      result.log = ''
+
+      const reader = response.body.pipeThrough(new TextDecoderStream())
+      for await (const chunk of reader) {
+        result.log += chunk
+        if (result.log.length > MAX_LOG_SIZE) {
+          logFileAbortController.abort()
+        }
+      }
+    } catch (e) {
+      debugConsole.warn(e) // ignore failure to fetch the log file, but log a warning
+    }
+
+    try {
       let { errors, warnings, typesetting } = HumanReadableLogs.parse(
         result.log,
         {
@@ -95,7 +116,7 @@ export const handleLogFiles = async (outputFiles, data, signal) => {
 
       accumulateResults({ errors, warnings, typesetting })
     } catch (e) {
-      debugConsole.warn(e) // ignore failure to fetch/parse the log file, but log a warning
+      debugConsole.warn(e) // ignore failure to parse the log file, but log a warning
     }
   }
 
