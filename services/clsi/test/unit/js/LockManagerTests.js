@@ -75,24 +75,9 @@ describe('LockManager', function () {
   })
 
   describe('concurrency limit', function () {
-    it('dry run', function () {
-      for (let i = 0; i <= this.Settings.compileConcurrencyLimit; i++) {
-        this.LockManager.acquire('test_key' + i)
-      }
-      this.Metrics.inc
-        .calledWith('exceeded-compilier-concurrency-limit')
-        .should.equal(false)
-      this.LockManager.acquire(
-        'test_key_' + (this.Settings.compileConcurrencyLimit + 1)
-      )
-      this.Metrics.inc
-        .calledWith('exceeded-compilier-concurrency-limit')
-        .should.equal(true)
-    })
-
     it('exceeding the limit', function () {
       for (let i = 0; i <= this.Settings.compileConcurrencyLimit; i++) {
-        this.LockManager.acquire('test_key' + i, false)
+        this.LockManager.acquire('test_key' + i)
       }
       this.Metrics.inc
         .calledWith('exceeded-compilier-concurrency-limit')
@@ -111,7 +96,7 @@ describe('LockManager', function () {
 
     it('within the limit', function () {
       for (let i = 0; i <= this.Settings.compileConcurrencyLimit - 1; i++) {
-        this.LockManager.acquire('test_key' + i, false)
+        this.LockManager.acquire('test_key' + i)
       }
       this.Metrics.inc
         .calledWith('exceeded-compilier-concurrency-limit')

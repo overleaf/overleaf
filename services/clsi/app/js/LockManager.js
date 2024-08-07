@@ -10,7 +10,7 @@ const LOCK_TIMEOUT_MS = RequestParser.MAX_TIMEOUT * 1000 + 120000
 
 const LOCKS = new Map()
 
-function acquire(key, concurrencyLimitDryRun = true) {
+function acquire(key) {
   const currentLock = LOCKS.get(key)
   if (currentLock != null) {
     if (currentLock.isExpired()) {
@@ -21,14 +21,14 @@ function acquire(key, concurrencyLimitDryRun = true) {
     }
   }
 
-  checkConcurrencyLimit(concurrencyLimitDryRun)
+  checkConcurrencyLimit()
 
   const lock = new Lock(key)
   LOCKS.set(key, lock)
   return lock
 }
 
-function checkConcurrencyLimit(dryRun) {
+function checkConcurrencyLimit() {
   Metrics.gauge('concurrent_compile_requests', LOCKS.size)
 
   if (LOCKS.size <= Settings.compileConcurrencyLimit) {
@@ -37,11 +37,9 @@ function checkConcurrencyLimit(dryRun) {
 
   Metrics.inc('exceeded-compilier-concurrency-limit')
 
-  if (!dryRun) {
-    throw new Errors.TooManyCompileRequestsError(
-      'too many concurrent compile requests'
-    )
-  }
+  throw new Errors.TooManyCompileRequestsError(
+    'too many concurrent compile requests'
+  )
 }
 
 class Lock {
