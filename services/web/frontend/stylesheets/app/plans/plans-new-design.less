@@ -1,4 +1,5 @@
 @z-index-plans-new-tabs: 1;
+@z-index-group-member-picker-list: 1;
 @z-index-plans-new-tabs-content: 0;
 
 @highlighted-heading-line-height: (@line-height-03 / 1rem) * 16px; // convert to px
@@ -451,6 +452,7 @@
         background-color: white;
         width: 100%;
         margin-top: var(--spacing-01);
+        z-index: @z-index-group-member-picker-list;
       }
 
       li {
@@ -730,9 +732,18 @@
           }
         }
 
+        .group-members-picker-container-mobile {
+          margin-top: var(--spacing-08);
+        }
+
         .plans-card-cta-buy-now-mobile {
           width: 100%;
           margin-top: var(--spacing-08);
+          line-height: var(--line-height-03);
+        }
+        .group-plans-card-cta-buy-now-mobile {
+          width: 100%;
+          margin-top: var(--spacing-04);
           line-height: var(--line-height-03);
         }
       }
