@@ -3,6 +3,7 @@ import BibLogParser from '../../../ide/log-parser/bib-log-parser'
 import { enablePdfCaching } from './pdf-caching-flags'
 import { debugConsole } from '@/utils/debugging'
 import { dirname, findEntityByPath } from '@/features/file-tree/util/path'
+import '@/utils/readable-stream-async-iterator-polyfill'
 
 // Warnings that may disappear after a second LaTeX pass
 const TRANSIENT_WARNING_REGEX = /^(Reference|Citation).+undefined on input line/
