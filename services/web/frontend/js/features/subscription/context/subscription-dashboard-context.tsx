@@ -74,6 +74,7 @@ type SubscriptionDashboardContextValue = {
   setShowCancellation: React.Dispatch<React.SetStateAction<boolean>>
   leavingGroupId?: string
   setLeavingGroupId: React.Dispatch<React.SetStateAction<string | undefined>>
+  userCanExtendTrial: boolean
 }
 
 export const SubscriptionDashboardContext = createContext<
@@ -115,6 +116,7 @@ export function SubscriptionDashboardProvider({
   const plansWithoutDisplayPrice = getMeta('ol-plans')
   const institutionMemberships = getMeta('ol-currentInstitutionsWithLicence')
   const personalSubscription = getMeta('ol-subscription')
+  const userCanExtendTrial = getMeta('ol-userCanExtendTrial')
   const managedGroupSubscriptions = getMeta('ol-managedGroupSubscriptions')
   const memberGroupSubscriptions = getMeta('ol-memberGroupSubscriptions')
   const [managedInstitutions, setManagedInstitutions] = useState(
@@ -294,6 +296,7 @@ export function SubscriptionDashboardProvider({
       setShowCancellation,
       leavingGroupId,
       setLeavingGroupId,
+      userCanExtendTrial,
     }),
     [
       groupPlanToChangeToCode,
@@ -329,6 +332,7 @@ export function SubscriptionDashboardProvider({
       setShowCancellation,
       leavingGroupId,
       setLeavingGroupId,
+      userCanExtendTrial,
     ]
   )
 

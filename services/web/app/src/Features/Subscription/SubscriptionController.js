@@ -218,6 +218,10 @@ async function userSubscriptionPage(req, res) {
   } = results
   const hasSubscription =
     await LimitationsManager.promises.userHasV1OrV2Subscription(user)
+
+  const userCanExtendTrial = (
+    await Modules.promises.hooks.fire('userCanExtendTrial', user)
+  )?.[0]
   const fromPlansPage = req.query.hasSubscription
   const plansData =
     SubscriptionViewModelBuilder.buildPlansListForSubscriptionDash(
@@ -270,6 +274,7 @@ async function userSubscriptionPage(req, res) {
     hasSubscription,
     fromPlansPage,
     personalSubscription,
+    userCanExtendTrial,
     memberGroupSubscriptions,
     managedGroupSubscriptions,
     managedInstitutions,
@@ -565,6 +570,14 @@ async function extendTrial(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const { subscription } =
     await LimitationsManager.promises.userHasV2Subscription(user)
+
+  const allowed = (
+    await Modules.promises.hooks.fire('userCanExtendTrial', user)
+  )?.[0]
+  if (!allowed) {
+    logger.warn({ userId: user._id }, 'user can not extend trial')
+    return res.sendStatus(403)
+  }
 
   try {
     await SubscriptionHandler.promises.extendTrial(subscription, 14)

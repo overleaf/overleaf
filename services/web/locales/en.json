@@ -2346,6 +2346,7 @@
   "you_are_on_x_plan_as_a_confirmed_member_of_institution_y": "You are on our <0>__planName__</0> plan as a <1>confirmed member</1> of <1>__institutionName__</1>",
   "you_are_on_x_plan_as_member_of_group_subscription_y_administered_by_z": "You are on our <0>__planName__</0> plan as a <1>member</1> of the group subscription <1>__groupName__</1> administered by <1>__adminEmail__</1>",
   "you_can_also_choose_to_view_anonymously_or_leave_the_project": "You can also choose to <0>view anonymously</0> (you will lose edit access) or <1>leave the project</1>.",
+  "you_can_buy_this_plan_but_not_as_a_trial": "You can buy this plan but not as a trial, as you’ve completed a trial recently.",
   "you_can_now_enable_sso": "You can now enable SSO on your Group settings page.",
   "you_can_now_log_in_sso": "You can now log in through your institution and if eligible you will receive <0>__appName__ Professional features</0>.",
   "you_can_only_add_n_people_to_edit_a_project": "You can only add __count__ person to edit a project with you on your current plan. Upgrade to add more.",

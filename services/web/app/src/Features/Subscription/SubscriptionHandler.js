@@ -8,6 +8,7 @@ const EmailHandler = require('../Email/EmailHandler')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const { callbackify } = require('@overleaf/promise-utils')
+const UserUpdater = require('../User/UserUpdater')
 
 async function validateNoSubscriptionInRecurly(userId) {
   let subscriptions =
@@ -41,6 +42,14 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
     subscriptionDetails,
     recurlyTokenIds
   )
+
+  if (recurlySubscription.trial_started_at) {
+    const trialStartedAt = new Date(recurlySubscription.trial_started_at)
+    await UserUpdater.promises.updateUser(
+      { _id: user._id, lastTrial: { $not: { $gt: trialStartedAt } } },
+      { $set: { lastTrial: trialStartedAt } }
+    )
+  }
 
   await SubscriptionUpdater.promises.syncSubscription(
     recurlySubscription,

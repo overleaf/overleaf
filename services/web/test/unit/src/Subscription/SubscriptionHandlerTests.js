@@ -130,6 +130,12 @@ describe('SubscriptionHandler', function () {
       shouldPlanChangeAtTermEnd: sinon.stub(),
     }
 
+    this.UserUpdater = {
+      promises: {
+        updateUser: sinon.stub().resolves(),
+      },
+    }
+
     this.SubscriptionHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         './RecurlyWrapper': this.RecurlyWrapper,
@@ -144,6 +150,7 @@ describe('SubscriptionHandler', function () {
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         './PlansLocator': this.PlansLocator,
         './SubscriptionHelper': this.SubscriptionHelper,
+        '../User/UserUpdater': this.UserUpdater,
       },
     })
   })
@@ -182,6 +189,40 @@ describe('SubscriptionHandler', function () {
         this.SubscriptionUpdater.promises.syncSubscription.args[0][1].should.deep.equal(
           this.user._id
         )
+      })
+
+      it('should not set last trial date if not a trial/the trial_started_at is not set', function () {
+        this.UserUpdater.promises.updateUser.should.not.have.been.called
+      })
+    })
+
+    describe('when the subscription is a trial and has a trial_started_at date', function () {
+      beforeEach(async function () {
+        this.activeRecurlySubscription.trial_started_at =
+          '2024-01-01T09:58:35.531+00:00'
+        await this.SubscriptionHandler.promises.createSubscription(
+          this.user,
+          this.subscriptionDetails,
+          this.recurlyTokenIds
+        )
+      })
+      it('should set the users lastTrial date', function () {
+        this.UserUpdater.promises.updateUser.should.have.been.calledOnce
+        expect(this.UserUpdater.promises.updateUser.args[0][0]).to.deep.equal({
+          _id: this.user_id,
+          lastTrial: {
+            $not: {
+              $gt: new Date(this.activeRecurlySubscription.trial_started_at),
+            },
+          },
+        })
+        expect(this.UserUpdater.promises.updateUser.args[0][1]).to.deep.equal({
+          $set: {
+            lastTrial: new Date(
+              this.activeRecurlySubscription.trial_started_at
+            ),
+          },
+        })
       })
     })
 

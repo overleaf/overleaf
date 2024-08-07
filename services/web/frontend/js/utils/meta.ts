@@ -197,6 +197,8 @@ export interface Meta {
   'ol-usedLatex': 'never' | 'occasionally' | 'often' | undefined
   'ol-user': User
   'ol-userAffiliations': Affiliation[]
+  'ol-userCanExtendTrial': boolean
+  'ol-userCanNotStartRequestedTrial': boolean
   'ol-userEmails': UserEmailData[]
   'ol-userSettings': UserSettings
   'ol-user_id': string | undefined

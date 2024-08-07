@@ -318,10 +318,14 @@ describe('<ActiveSubscription />', function () {
     })
 
     describe('extend trial', function () {
+      const canExtend = {
+        name: 'ol-userCanExtendTrial',
+        value: 'true',
+      }
       const cancelButtonText = 'No thanks, I still want to cancel'
       const extendTrialButtonText = 'I’ll take it!'
       it('shows alternate cancel subscription button text for cancel button and option to extend trial', function () {
-        renderActiveSubscription(trialCollaboratorSubscription)
+        renderActiveSubscription(trialCollaboratorSubscription, [canExtend])
         showConfirmCancelUI()
         screen.getByText('Have another', { exact: false })
         screen.getByText('14 days', { exact: false })
@@ -335,7 +339,7 @@ describe('<ActiveSubscription />', function () {
       })
 
       it('disables both buttons and updates text for when trial button clicked', function () {
-        renderActiveSubscription(trialCollaboratorSubscription)
+        renderActiveSubscription(trialCollaboratorSubscription, [canExtend])
         showConfirmCancelUI()
         const extendTrialButton = screen.getByRole('button', {
           name: extendTrialButtonText,
@@ -355,7 +359,7 @@ describe('<ActiveSubscription />', function () {
       })
 
       it('disables both buttons and updates text for when cancel button clicked', function () {
-        renderActiveSubscription(trialCollaboratorSubscription)
+        renderActiveSubscription(trialCollaboratorSubscription, [canExtend])
         showConfirmCancelUI()
         const cancelButtton = screen.getByRole('button', {
           name: cancelButtonText,
@@ -374,22 +378,8 @@ describe('<ActiveSubscription />', function () {
         })
       })
 
-      it('does not show option to extend trial when not a collaborator trial', function () {
-        const trialPlan = cloneDeep(trialCollaboratorSubscription)
-        trialPlan.plan.planCode = 'anotherplan'
-        renderActiveSubscription(trialPlan)
-        showConfirmCancelUI()
-        expect(
-          screen.queryByRole('button', {
-            name: extendTrialButtonText,
-          })
-        ).to.be.null
-      })
-
-      it('does not show option to extend trial when a collaborator trial but does not expire in 7 days', function () {
-        const trialPlan = cloneDeep(trialCollaboratorSubscription)
-        trialPlan.recurly.trial_ends_at = null
-        renderActiveSubscription(trialPlan)
+      it('does not show option to extend trial when user is not eligible', function () {
+        renderActiveSubscription(trialCollaboratorSubscription)
         showConfirmCancelUI()
         expect(
           screen.queryByRole('button', {
@@ -403,7 +393,7 @@ describe('<ActiveSubscription />', function () {
           status: 200,
         }
         fetchMock.put(extendTrialUrl, endPointResponse)
-        renderActiveSubscription(trialCollaboratorSubscription)
+        renderActiveSubscription(trialCollaboratorSubscription, [canExtend])
         showConfirmCancelUI()
         const extendTrialButton = screen.getByRole('button', {
           name: extendTrialButtonText,

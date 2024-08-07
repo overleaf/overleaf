@@ -65,4 +65,5 @@ export type PaymentContextValue = {
   addCoupon: (coupon: PricingFormState['coupon']) => void
   changeCurrency: (newCurrency: CurrencyCode) => void
   updateCountry: (country: PricingFormState['country']) => void
+  userCanNotStartRequestedTrial: boolean
 }

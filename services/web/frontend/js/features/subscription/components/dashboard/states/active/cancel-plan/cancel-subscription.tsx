@@ -8,7 +8,6 @@ import {
   cancelSubscriptionUrl,
   redirectAfterCancelSubscriptionUrl,
 } from '../../../../../data/subscription-url'
-import canExtendTrial from '../../../../../util/can-extend-trial'
 import showDowngradeOption from '../../../../../util/show-downgrade-option'
 import ActionButtonText from '../../../action-button-text'
 import GenericErrorAlert from '../../../generic-error-alert'
@@ -144,7 +143,8 @@ function NotCancelOption({
 export function CancelSubscription() {
   const { t } = useTranslation()
   const location = useLocation()
-  const { personalSubscription, plans } = useSubscriptionDashboardContext()
+  const { personalSubscription, plans, userCanExtendTrial } =
+    useSubscriptionDashboardContext()
   const {
     isLoading: isLoadingCancel,
     isError: isErrorCancel,
@@ -186,11 +186,7 @@ export function CancelSubscription() {
     }
   }
 
-  const showExtendFreeTrial = canExtendTrial(
-    personalSubscription.plan.planCode,
-    personalSubscription.plan.groupPlan,
-    personalSubscription.recurly.trial_ends_at
-  )
+  const showExtendFreeTrial = userCanExtendTrial
 
   let confirmCancelButtonText = t('cancel_my_account')
   let confirmCancelButtonClass = 'btn-primary'
