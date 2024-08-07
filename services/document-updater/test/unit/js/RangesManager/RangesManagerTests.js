@@ -970,7 +970,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 24,
             pathname: '',
-            ts: ranges.changes[1].metadata.ts,
+            ts: ranges.changes[2].metadata.ts,
           },
           op: [
             {
@@ -988,7 +988,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 24,
             pathname: '',
-            ts: ranges.changes[2].metadata.ts,
+            ts: ranges.changes[3].metadata.ts,
           },
           op: [
             {
@@ -1006,13 +1006,15 @@ describe('RangesManager', function () {
 function makeRanges(ops) {
   let id = 1
   const changes = []
+  let ts = Date.now()
   for (const op of ops) {
     changes.push({
       id: id.toString(),
       op,
-      metadata: { user_id: TEST_USER_ID, ts: new Date() },
+      metadata: { user_id: TEST_USER_ID, ts: new Date(ts) },
     })
     id += 1
+    ts += 1000 // use a unique timestamp for each change
   }
   return changes
 }
