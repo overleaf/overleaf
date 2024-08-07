@@ -112,7 +112,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   theme(options.theme),
   realtime(options.currentDoc, options.handleError),
   cursorPosition(options.currentDoc),
-  scrollPosition(options.currentDoc),
+  scrollPosition(options.currentDoc, options.visual),
   cursorHighlights(),
   autoPair(options.settings),
   editable(),

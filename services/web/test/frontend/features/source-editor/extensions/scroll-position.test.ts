@@ -66,7 +66,7 @@ describe('CodeMirror scroll position extension', function () {
     const view = new EditorView({
       state: EditorState.create({
         doc,
-        extensions: [scrollPosition({ currentDoc })],
+        extensions: [scrollPosition({ currentDoc }, { visual: false })],
       }),
     })
 
@@ -102,7 +102,7 @@ describe('CodeMirror scroll position extension', function () {
     const view = new EditorView({
       state: EditorState.create({
         doc,
-        extensions: [scrollPosition({ currentDoc })],
+        extensions: [scrollPosition({ currentDoc }, { visual: false })],
       }),
     })
     view.dispatch(restoreScrollPosition())

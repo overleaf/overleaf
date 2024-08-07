@@ -85,23 +85,6 @@ export const sourceOnly = (visual: boolean, extension: Extension) => {
       }
       return null
     }),
-
-    // restore the scroll position when switching to source mode
-    EditorView.updateListener.of(update => {
-      for (const tr of update.transactions) {
-        for (const effect of tr.effects) {
-          if (effect.is(toggleVisualEffect)) {
-            if (!effect.value) {
-              // switching to the source editor
-              window.setTimeout(() => {
-                update.view.dispatch(restoreScrollPosition())
-                update.view.focus()
-              })
-            }
-          }
-        }
-      }
-    }),
   ]
 }
 

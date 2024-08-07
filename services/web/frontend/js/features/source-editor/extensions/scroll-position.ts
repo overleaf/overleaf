@@ -7,7 +7,7 @@ import {
   Text,
   TransactionSpec,
 } from '@codemirror/state'
-import { toggleVisualEffect } from './visual/visual'
+import { sourceOnly, toggleVisualEffect } from './visual/visual'
 import { debugConsole } from '@/utils/debugging'
 
 const buildStorageKey = (docId: string) => `doc.position.${docId}`
@@ -23,11 +23,14 @@ type LineInfo = {
  *    or the window is closed, or when switching between Source and Rich Text, and
  * b) dispatches the scroll position (middle visible line) when it changes, for use in the outline.
  */
-export const scrollPosition = ({
-  currentDoc: { doc_id: docId },
-}: {
-  currentDoc: { doc_id: string }
-}) => {
+export const scrollPosition = (
+  {
+    currentDoc: { doc_id: docId },
+  }: {
+    currentDoc: { doc_id: string }
+  },
+  { visual }: { visual: boolean }
+) => {
   // store lineInfo for use on unload, when the DOM has already been unmounted
   let lineInfo: LineInfo
 
@@ -89,6 +92,26 @@ export const scrollPosition = ({
           scroll: scrollHandler,
         },
       }
+    ),
+
+    // restore the scroll position when switching to source mode
+    sourceOnly(
+      visual,
+      EditorView.updateListener.of(update => {
+        for (const tr of update.transactions) {
+          for (const effect of tr.effects) {
+            if (effect.is(toggleVisualEffect)) {
+              if (!effect.value) {
+                // switching to the source editor
+                window.setTimeout(() => {
+                  update.view.dispatch(restoreScrollPosition())
+                  update.view.focus()
+                })
+              }
+            }
+          }
+        }
+      })
     ),
   ]
 }
