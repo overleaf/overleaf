@@ -17,13 +17,13 @@ describe('HistoryStoreManager', function () {
           host: 'http://example.com',
           user: 'overleaf',
           pass: 'password',
+          requestTimeout: 123,
         },
       },
       apis: {
         filestore: {
           url: 'http://filestore.overleaf.production',
         },
-        history_v1: { requestTimeout: 123 },
       },
     }
     this.latestChunkRequestArgs = sinon.match({

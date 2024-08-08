@@ -23,9 +23,6 @@ module.exports = {
     filestore: {
       url: `http://${process.env.FILESTORE_HOST || '127.0.0.1'}:3009`,
     },
-    history_v1: {
-      requestTimeout: parseInt(process.env.V1_REQUEST_TIMEOUT || '300000', 10),
-    },
     web: {
       url: `http://${
         process.env.WEB_API_HOST || process.env.WEB_HOST || '127.0.0.1'
@@ -90,6 +87,7 @@ module.exports = {
         retries_max: 30,
         interval: 2,
       },
+      requestTimeout: parseInt(process.env.V1_REQUEST_TIMEOUT || '300000', 10),
     },
   },
 

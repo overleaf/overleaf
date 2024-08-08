@@ -18,7 +18,7 @@ import * as LocalFileWriter from './LocalFileWriter.js'
 import * as HashManager from './HashManager.js'
 import * as HistoryBlobTranslator from './HistoryBlobTranslator.js'
 
-const HTTP_REQUEST_TIMEOUT = Settings.apis.history_v1.requestTimeout
+const HTTP_REQUEST_TIMEOUT = Settings.overleaf.history.requestTimeout
 
 /**
  * Container for functions that need to be mocked in tests
