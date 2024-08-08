@@ -1236,6 +1236,7 @@
   "need_anything_contact_us_at": "If there is anything you ever need please feel free to contact us directly at",
   "need_contact_group_admin_to_make_changes": "You’ll need to contact your group admin if you want to make certain changes to your account. <0>Read more about managed users.</0>",
   "need_make_changes": "You need to make some changes",
+  "need_more_than_50_users": "Need more than 50 users?",
   "need_more_than_to_licenses_get_in_touch": "Need more than 50 licenses? Please get in touch",
   "need_more_than_x_licenses": "Need more than __x__ licenses?",
   "need_to_add_new_primary_before_remove": "You’ll need to add a new primary email address before you can remove this one.",

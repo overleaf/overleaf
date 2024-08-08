@@ -974,10 +974,8 @@
       color: var(--green-60);
     }
 
-    // for accessibility with keyboard navigation
     &:focus {
-      outline: 2px solid var(--green-50);
-      outline-offset: 1px;
+      &:extend(.input-focus-style);
     }
   }
 
