@@ -4,7 +4,7 @@ class UnprocessableError extends OError {}
 
 class ApplyError extends UnprocessableError {
   constructor(message, operation, operand) {
-    super(message, { operation, operand })
+    super(message)
     this.operation = operation
     this.operand = operand
   }
@@ -12,7 +12,7 @@ class ApplyError extends UnprocessableError {
 
 class InvalidInsertionError extends UnprocessableError {
   constructor(str, operation) {
-    super('inserted text contains non BMP characters', { str, operation })
+    super('inserted text contains non BMP characters')
     this.str = str
     this.operation = operation
   }
@@ -20,10 +20,7 @@ class InvalidInsertionError extends UnprocessableError {
 
 class TooLongError extends UnprocessableError {
   constructor(operation, resultLength) {
-    super(`resulting string would be too long: ${resultLength}`, {
-      operation,
-      resultLength,
-    })
+    super('resulting string would be too long', { resultLength })
     this.operation = operation
     this.resultLength = resultLength
   }
