@@ -86,16 +86,6 @@ describe('CollaboratorsInviteHandler', function () {
       privileges: this.privileges,
       createdAt: new Date(),
     }
-    this.newFakeInvite = {
-      _id: new ObjectId(),
-      email: this.email,
-      token: 'new-token',
-      tokenHmac: 'new-hmac-token',
-      sendingUserId: this.sendingUserId,
-      projectId: this.projectId,
-      privileges: this.privileges,
-      createdAt: new Date(),
-    }
   })
 
   describe('getInviteCount', function () {
@@ -243,13 +233,7 @@ describe('CollaboratorsInviteHandler', function () {
         expect(invite).to.not.equal(null)
         expect(invite).to.not.equal(undefined)
         expect(invite).to.be.instanceof(Object)
-        expect(invite).to.have.all.keys([
-          '_id',
-          'email',
-          'sendingUserId',
-          'projectId',
-          'privileges',
-        ])
+        expect(invite).to.have.all.keys(['_id', 'email', 'privileges'])
       })
 
       it('should have generated a random token', async function () {
@@ -413,12 +397,17 @@ describe('CollaboratorsInviteHandler', function () {
 
   describe('generateNewInvite', function () {
     beforeEach(function () {
+      this.fakeInviteToProjectObject = {
+        _id: new ObjectId(),
+        email: this.email,
+        privileges: this.privileges,
+      }
       this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
         .stub()
         .resolves(this.fakeInvite)
       this.CollaboratorsInviteHandler.promises.inviteToProject = sinon
         .stub()
-        .resolves(this.newFakeInvite)
+        .resolves(this.fakeInviteToProjectObject)
       this.call = async () => {
         return await this.CollaboratorsInviteHandler.promises.generateNewInvite(
           this.projectId,
@@ -456,7 +445,7 @@ describe('CollaboratorsInviteHandler', function () {
 
       it('should return the invite', async function () {
         const invite = await this.call()
-        expect(invite).to.deep.equal(this.newFakeInvite)
+        expect(invite).to.deep.equal(this.fakeInviteToProjectObject)
       })
     })
 

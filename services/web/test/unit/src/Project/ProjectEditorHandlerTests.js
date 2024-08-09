@@ -218,7 +218,9 @@ describe('ProjectEditorHandler', function () {
       it('should include invites', function () {
         expect(this.result.invites).to.exist
         this.result.invites.should.deep.equal(
-          this.invites.map(invite => _.omit(invite, 'token'))
+          this.invites.map(invite =>
+            _.pick(invite, ['_id', 'email', 'privileges'])
+          )
         )
       })
 

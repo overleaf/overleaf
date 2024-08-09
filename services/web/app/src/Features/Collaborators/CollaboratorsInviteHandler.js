@@ -14,7 +14,7 @@ const CollaboratorsInviteHandler = {
   async getAllInvites(projectId) {
     logger.debug({ projectId }, 'fetching invites for project')
     const invites = await ProjectInvite.find({ projectId })
-      .select('_id email sendingUserId projectId privileges createdAt expires')
+      .select('_id email privileges')
       .exec()
     logger.debug(
       { projectId, count: invites.length },
@@ -102,15 +102,7 @@ const CollaboratorsInviteHandler = {
       privileges,
     })
     invite = await invite.save()
-    invite = _.pick(invite.toObject(), [
-      'email',
-      'sendingUserId',
-      'projectId',
-      'privileges',
-      '_id',
-      'createdAt',
-      'expires',
-    ])
+    invite = invite.toObject()
 
     // Send email and notification in background
     CollaboratorsInviteHandler._sendMessages(projectId, sendingUser, {
@@ -120,7 +112,7 @@ const CollaboratorsInviteHandler = {
       logger.err({ err, projectId, email }, 'error sending messages for invite')
     })
 
-    return invite
+    return _.pick(invite, ['_id', 'email', 'privileges'])
   },
 
   async revokeInvite(projectId, inviteId) {

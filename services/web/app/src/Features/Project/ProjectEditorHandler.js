@@ -141,16 +141,6 @@ module.exports = ProjectEditorHandler = {
     if (invites == null) {
       return []
     }
-    return invites.map(invite =>
-      _.pick(invite, [
-        '_id',
-        'createdAt',
-        'email',
-        'expires',
-        'privileges',
-        'projectId',
-        'sendingUserId',
-      ])
-    )
+    return invites.map(invite => _.pick(invite, ['_id', 'email', 'privileges']))
   },
 }

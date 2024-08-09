@@ -5,6 +5,7 @@ const MockRequest = require('../helpers/MockRequest')
 const MockResponse = require('../helpers/MockResponse')
 const { ObjectId } = require('mongodb')
 const Errors = require('../../../../app/src/Features/Errors/Errors')
+const _ = require('lodash')
 
 const MODULE_PATH =
   '../../../../app/src/Features/Collaborators/CollaboratorsInviteController.js'
@@ -34,6 +35,7 @@ describe('CollaboratorsInviteController', function () {
       privileges: this.privileges,
       createdAt: new Date(),
     }
+    this.inviteReducedData = _.pick(this.invite, ['_id', 'email', 'privileges'])
     this.project = {
       _id: this.projectId,
       owner_ref: this.projectOwner._id,
@@ -82,7 +84,7 @@ describe('CollaboratorsInviteController', function () {
     this.CollaboratorsInviteHandler = {
       promises: {
         getAllInvites: sinon.stub(),
-        inviteToProject: sinon.stub().resolves(this.invite),
+        inviteToProject: sinon.stub().resolves(this.inviteReducedData),
         getInviteByToken: sinon.stub().resolves(this.invite),
         generateNewInvite: sinon.stub().resolves(this.invite),
         revokeInvite: sinon.stub().resolves(this.invite),
@@ -237,7 +239,7 @@ describe('CollaboratorsInviteController', function () {
         it('should produce json response', function () {
           this.res.json.callCount.should.equal(1)
           expect(this.res.json.firstCall.args[0]).to.deep.equal({
-            invite: this.invite,
+            invite: this.inviteReducedData,
           })
         })
 
@@ -362,7 +364,7 @@ describe('CollaboratorsInviteController', function () {
           it('should produce json response', function () {
             this.res.json.callCount.should.equal(1)
             expect(this.res.json.firstCall.args[0]).to.deep.equal({
-              invite: this.invite,
+              invite: this.inviteReducedData,
             })
           })
 
@@ -436,7 +438,7 @@ describe('CollaboratorsInviteController', function () {
       it('should produce json response', function () {
         this.res.json.callCount.should.equal(1)
         expect(this.res.json.firstCall.args[0]).to.deep.equal({
-          invite: this.invite,
+          invite: this.inviteReducedData,
         })
       })
 
