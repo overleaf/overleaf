@@ -326,7 +326,7 @@ mixin table_cell(feature, plan)
 
 //- table header and control mixins
 
-mixin plans_v2_table_sticky_header(withSwitch, config)
+mixin plans_table_sticky_header(withSwitch, config)
 	- var tableHeadKeys = Object.keys(config.tableHead)
 	.row.plans-table-sticky-header.sticky(
 		data-ol-plans-v2-table-sticky-header
@@ -358,17 +358,17 @@ mixin table_sticky_header_all(plansConfig)
 	.row.plans-table-sticky-header-container(
 		data-ol-plans-v2-view='individual'
 	)
-		+plans_v2_table_sticky_header(true, plansConfig.individual)
+		+plans_table_sticky_header(true, plansConfig.individual)
 	.row.plans-table-sticky-header-container(
 		hidden
 		data-ol-plans-v2-view='group'
 	)
-		+plans_v2_table_sticky_header(false, plansConfig.group)
+		+plans_table_sticky_header(false, plansConfig.group)
 	.row.plans-table-sticky-header-container(
 		hidden
 		data-ol-plans-v2-view='student'
 	)
-		+plans_v2_table_sticky_header(true, plansConfig.student)
+		+plans_table_sticky_header(true, plansConfig.student)
 
 mixin monthly_annual_switch(initialState, eventTracking, eventSegmentation)
 	- var monthlyAnnualToggleChecked = initialState === 'monthly'

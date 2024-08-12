@@ -834,6 +834,13 @@
       // The forced width below (plans-table-cols-n) is to ensure the table columns have an equal width
       // because on mobile, the first column (empty cell on first `tr` and feature name on the rest of `tr`) will be shown as its own row
       // and the rest of the `tr` will incorporate a full width of the viewport
+      tr.plans-table-cols-4:not(.plans-table-divider) {
+        td,
+        th:not(:first-of-type) {
+          width: 25%;
+        }
+      }
+
       tr.plans-table-cols-3:not(.plans-table-divider) {
         td,
         th:not(:first-of-type) {
@@ -1200,6 +1207,26 @@
       gap: var(--spacing-04);
       justify-content: center;
       margin-top: var(--spacing-05);
+    }
+  }
+}
+
+.plans-page-interstitial {
+  padding-bottom: var(--spacing-09);
+  h1 {
+    margin-bottom: var(--spacing-13);
+  }
+  .monthly-annual-switch {
+    margin-top: 0;
+  }
+
+  .plans-table-btn-buy-container-mobile {
+    @media (max-width: @screen-xs-max) {
+      .btn {
+        // interstitial page is a 4 column layout and CTA text cannot fit without adjustments
+        font-size: 11px;
+        text-wrap: auto;
+      }
     }
   }
 }
