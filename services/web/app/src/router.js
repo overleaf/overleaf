@@ -56,7 +56,6 @@ const TokenAccessRouter = require('./Features/TokenAccess/TokenAccessRouter')
 const Features = require('./infrastructure/Features')
 const LinkedFilesRouter = require('./Features/LinkedFiles/LinkedFilesRouter')
 const TemplatesRouter = require('./Features/Templates/TemplatesRouter')
-const InstitutionsController = require('./Features/Institutions/InstitutionsController')
 const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRouter')
 const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
 const AnalyticsRegistrationSourceMiddleware = require('./Features/Analytics/AnalyticsRegistrationSourceMiddleware')
@@ -1150,34 +1149,6 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
     '/beta/opt-out',
     AuthenticationController.requireLogin(),
     BetaProgramController.optOut
-  )
-
-  // New "api" endpoints. Started as a way for v1 to call over to v2 (for
-  // long-term features, as opposed to the nominally temporary ones in the
-  // overleaf-integration module), but may expand beyond that role.
-  publicApiRouter.post(
-    '/api/clsi/compile/:submission_id',
-    AuthenticationController.requirePrivateApiAuth(),
-    CompileController.compileSubmission
-  )
-  publicApiRouter.get(
-    /^\/api\/clsi\/compile\/([^/]*)\/build\/([0-9a-f-]+)\/output\/(.*)$/,
-    function (req, res, next) {
-      const params = {
-        submission_id: req.params[0],
-        build_id: req.params[1],
-        file: req.params[2],
-      }
-      req.params = params
-      next()
-    },
-    AuthenticationController.requirePrivateApiAuth(),
-    CompileController.getFileFromClsiWithoutUser
-  )
-  publicApiRouter.post(
-    '/api/institutions/confirm_university_domain',
-    AuthenticationController.requirePrivateApiAuth(),
-    InstitutionsController.confirmDomain
   )
 
   webRouter.get('/chrome', function (req, res, next) {
