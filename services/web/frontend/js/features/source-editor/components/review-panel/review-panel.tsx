@@ -1,70 +1,17 @@
 import ReactDOM from 'react-dom'
-import EditorWidgets from './editor-widgets/editor-widgets'
-import CurrentFileContainer from './current-file-container'
-import OverviewContainer from './overview-container'
 import { useCodeMirrorViewContext } from '../codemirror-editor'
-import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
-import { isCurrentFileView } from '../../utils/sub-view'
-import { useLayoutContext } from '@/shared/context/layout-context'
-import classnames from 'classnames'
-import { lazy, memo } from 'react'
-import { SubView } from '../../../../../../types/review-panel/review-panel'
-
-type ReviewPanelViewProps = {
-  parentDomNode: Element
-}
-
-function ReviewPanelView({ parentDomNode }: ReviewPanelViewProps) {
-  return ReactDOM.createPortal(<ReviewPanelContainer />, parentDomNode)
-}
-
-const ReviewPanelContainer = memo(() => {
-  const { subView, loadingThreads, layoutToLeft } = useReviewPanelValueContext()
-  const { reviewPanelOpen, miniReviewPanelVisible } = useLayoutContext()
-
-  const className = classnames('review-panel-wrapper', {
-    'rp-state-current-file': subView === 'cur_file',
-    'rp-state-current-file-expanded': subView === 'cur_file' && reviewPanelOpen,
-    'rp-state-current-file-mini': subView === 'cur_file' && !reviewPanelOpen,
-    'rp-state-overview': subView === 'overview',
-    'rp-size-mini': miniReviewPanelVisible,
-    'rp-size-expanded': reviewPanelOpen,
-    'rp-layout-left': layoutToLeft,
-    'rp-loading-threads': loadingThreads,
-  })
-
-  return (
-    <div className={className}>
-      <ReviewPanelContent subView={subView} />
-    </div>
-  )
-})
-ReviewPanelContainer.displayName = 'ReviewPanelContainer'
-
-const ReviewPanelContent = memo<{ subView: SubView }>(({ subView }) => (
-  <>
-    <EditorWidgets />
-    {isCurrentFileView(subView) ? (
-      <CurrentFileContainer />
-    ) : (
-      <OverviewContainer />
-    )}
-  </>
-))
-ReviewPanelContent.displayName = 'ReviewPanelContent'
-
-const ReviewPanelProvider = lazy(
-  () =>
-    import('@/features/ide-react/context/review-panel/review-panel-provider')
-)
+import { ReviewPanelProvider } from '../../context/review-panel/review-panel-context'
+import { memo } from 'react'
+import ReviewPanelContent from '@/features/source-editor/components/review-panel/review-panel-content'
 
 function ReviewPanel() {
   const view = useCodeMirrorViewContext()
 
-  return (
+  return ReactDOM.createPortal(
     <ReviewPanelProvider>
-      <ReviewPanelView parentDomNode={view.scrollDOM} />
-    </ReviewPanelProvider>
+      <ReviewPanelContent />
+    </ReviewPanelProvider>,
+    view.scrollDOM
   )
 }
 

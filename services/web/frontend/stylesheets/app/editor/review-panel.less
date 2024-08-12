@@ -1134,44 +1134,40 @@ button when (@is-overleaf-light = true) {
   }
 }
 
-.rp-empty-state {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+.review-panel-indicator {
+  display: none;
+}
 
-  .rp-empty-state-inner {
-    position: sticky;
-    top: 50%;
-    transform: translateY(-50%);
+.review-panel-mini {
+  width: 22px !important;
+  overflow: visible !important;
 
-    width: 100%;
-    padding-left: 16px;
-    padding-right: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-
-    p {
-      margin-bottom: 0;
-      text-align: center;
-    }
+  .rp-entry {
+    height: 12px;
   }
 
-  .rp-empty-state-comment-icon {
-    width: 80px;
-    height: 80px;
-    background-color: white;
-    border-radius: 100%;
+  .rp-entry-indicator {
+    position: absolute;
+    left: -6px;
+    right: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
+    width: 20px;
+    height: 20px;
+  }
 
-    .material-symbols {
-      font-size: 32px;
+  .rp-entry-content {
+    display: none;
+    background: white;
+    border: 1px solid @rp-border-grey;
+    width: 200px;
+  }
+
+  .rp-entry:hover {
+    .rp-entry-content {
+      display: initial;
+      position: absolute;
+      left: -206px;
+      top: 0;
     }
   }
 }

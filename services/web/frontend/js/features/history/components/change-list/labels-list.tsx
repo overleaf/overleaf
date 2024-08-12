@@ -33,7 +33,7 @@ function LabelsList() {
             key={version}
             labels={labels}
             version={version}
-            currentUserId={currentUserId}
+            currentUserId={currentUserId!}
             projectId={projectId}
             selectionState={selectionState}
             selectable={selectionState !== 'selected'}

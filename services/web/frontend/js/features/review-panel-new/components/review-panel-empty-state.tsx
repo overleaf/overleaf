@@ -1,13 +1,13 @@
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
 
-function EmptyState() {
+function ReviewPanelEmptyState() {
   const { t } = useTranslation()
 
   return (
-    <div className="rp-empty-state">
-      <div className="rp-empty-state-inner">
-        <div className="rp-empty-state-comment-icon">
+    <div className="review-panel-empty-state">
+      <div className="review-panel-empty-state-inner">
+        <div className="review-panel-empty-state-comment-icon">
           <MaterialIcon type="question_answer" />
         </div>
         <p>
@@ -19,4 +19,4 @@ function EmptyState() {
   )
 }
 
-export default EmptyState
+export default ReviewPanelEmptyState

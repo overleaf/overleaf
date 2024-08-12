@@ -282,7 +282,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
           const tempUsers = {} as ReviewPanel.Value<'users'>
           // Always include ourself, since if we submit an op, we might need to display info
           // about it locally before it has been flushed through the server
-          if (user) {
+          if (user?.id) {
             tempUsers[user.id] = formatUser(user)
           }
 
@@ -724,7 +724,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   )
 
   const applyTrackChangesStateToClient = useCallback(
-    (state: boolean | ReviewPanel.Value<'trackChangesState'>) => {
+    (state: boolean | Record<UserId | '__guests__', boolean>) => {
       if (typeof state === 'boolean') {
         setEveryoneTCState(state)
         setGuestsTCState(state)
@@ -1189,8 +1189,8 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   // listen for events from the CodeMirror 6 track changes extension
   useEffect(() => {
     const toggleTrackChangesFromKbdShortcut = () => {
-      if (trackChangesVisible && trackChanges) {
-        const userId: UserId = user.id
+      const userId = user.id
+      if (trackChangesVisible && trackChanges && userId) {
         const state = trackChangesState[userId]
         if (state) {
           toggleTrackChangesForUser(!state.value, userId)

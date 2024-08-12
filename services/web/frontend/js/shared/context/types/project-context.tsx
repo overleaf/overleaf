@@ -1,11 +1,12 @@
 import { UserId } from '../../../../../types/user'
 import { PublicAccessLevel } from '../../../../../types/public-access-level'
-import type * as ReviewPanel from '@/features/source-editor/context/review-panel/types/review-panel-state'
 
 export type ProjectContextMember = {
   _id: UserId
   privileges: 'readOnly' | 'readAndWrite'
   email: string
+  first_name: string
+  last_name: string
 }
 
 export type ProjectContextValue = {
@@ -32,13 +33,17 @@ export type ProjectContextValue = {
   owner: {
     _id: UserId
     email: string
+    first_name: string
+    last_name: string
+    privileges: string
+    signUpDate: string
   }
   tags: {
     _id: string
     name: string
     color?: string
   }[]
-  trackChangesState: ReviewPanel.Value<'trackChangesState'>
+  trackChangesState: boolean | Record<UserId | '__guests__', boolean>
 }
 
 export type ProjectContextUpdateValue = Partial<ProjectContextValue>

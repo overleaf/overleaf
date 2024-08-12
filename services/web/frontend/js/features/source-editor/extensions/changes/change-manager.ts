@@ -20,6 +20,7 @@ import { ThreadId } from '../../../../../../types/review-panel/review-panel'
 import { isDeleteOperation, isInsertOperation } from '@/utils/operations'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { updateHasEffect } from '@/features/source-editor/utils/effects'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 // With less than this number of entries, don't bother culling to avoid
 // little UI jumps when scrolling.
@@ -85,7 +86,11 @@ export type UpdateType =
 export const createChangeManager = (
   view: EditorView,
   currentDoc: DocumentContainer
-): ChangeManager => {
+): ChangeManager | undefined => {
+  if (isSplitTestEnabled('review-panel-redesign')) {
+    return undefined
+  }
+
   /**
    * Calculate the screen coordinates of each entry (change or comment),
    * for use in the review panel.
@@ -261,11 +266,7 @@ export const createChangeManager = (
         const text = view.state.doc.sliceString(from, to)
 
         if (text !== content) {
-          throw new Error(
-            `Op to be removed (${JSON.stringify(
-              change.op
-            )}) does not match editor text '${text}'`
-          )
+          throw new Error(`Op to be removed does not match editor text`)
         }
 
         return { from, to, insert: '' }

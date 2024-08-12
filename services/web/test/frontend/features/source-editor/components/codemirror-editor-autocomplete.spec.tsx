@@ -5,7 +5,6 @@ import { mockScope } from '../helpers/mock-scope'
 import { EditorProviders } from '../../../helpers/editor-providers'
 import CodeMirrorEditor from '../../../../../frontend/js/features/source-editor/components/codemirror-editor'
 import { activeEditorLine } from '../helpers/active-editor-line'
-import { User, UserId } from '../../../../../types/user'
 import { TestContainer } from '../helpers/test-container'
 import { FC } from 'react'
 import { MetadataContext } from '@/features/ide-react/context/metadata-context'
@@ -759,9 +758,9 @@ describe('autocomplete', { scrollBehavior: false }, function () {
 
     window.metaAttributesCache.set('ol-showSymbolPalette', true)
     const user = {
-      id: '123abd' as UserId,
+      id: '123abd',
       email: 'testuser@example.com',
-    } as User
+    }
     cy.mount(
       <TestContainer>
         <EditorProviders user={user} scope={scope}>

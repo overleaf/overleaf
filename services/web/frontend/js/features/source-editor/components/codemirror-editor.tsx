@@ -18,8 +18,9 @@ import { dispatchTimer } from '../../../infrastructure/cm6-performance'
 
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { FigureModal } from './figure-modal/figure-modal'
-import ReviewPanel from './review-panel/review-panel'
 import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
+import { ReviewPanelProviders } from '@/features/review-panel-new/context/review-panel-providers'
+import { ReviewPanelMigration } from '@/features/source-editor/components/review-panel/review-panel-migration'
 
 const sourceEditorComponents = importOverleafModules(
   'sourceEditorComponents'
@@ -61,24 +62,26 @@ function CodeMirrorEditor() {
   return (
     <CodeMirrorStateContext.Provider value={state}>
       <CodeMirrorViewContextProvider value={viewRef.current}>
-        <CodemirrorOutline />
-        <CodeMirrorView />
-        <FigureModal />
-        <CodeMirrorSearch />
-        <CodeMirrorToolbar />
-        {sourceEditorToolbarComponents.map(
-          ({ import: { default: Component }, path }) => (
-            <Component key={path} />
-          )
-        )}
-        <CodeMirrorCommandTooltip />
+        <ReviewPanelProviders>
+          <CodemirrorOutline />
+          <CodeMirrorView />
+          <FigureModal />
+          <CodeMirrorSearch />
+          <CodeMirrorToolbar />
+          {sourceEditorToolbarComponents.map(
+            ({ import: { default: Component }, path }) => (
+              <Component key={path} />
+            )
+          )}
+          <CodeMirrorCommandTooltip />
 
-        {shouldShowReviewPanel && <ReviewPanel />}
-        {sourceEditorComponents.map(
-          ({ import: { default: Component }, path }) => (
-            <Component key={path} />
-          )
-        )}
+          {shouldShowReviewPanel && <ReviewPanelMigration />}
+          {sourceEditorComponents.map(
+            ({ import: { default: Component }, path }) => (
+              <Component key={path} />
+            )
+          )}
+        </ReviewPanelProviders>
       </CodeMirrorViewContextProvider>
     </CodeMirrorStateContext.Provider>
   )

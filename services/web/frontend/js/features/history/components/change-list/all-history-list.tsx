@@ -225,7 +225,7 @@ function AllHistoryList() {
               showDivider={showDivider}
               setSelection={setSelection}
               selectionState={selectionState}
-              currentUserId={currentUserId}
+              currentUserId={currentUserId!}
               selectable={selectable}
               projectId={projectId}
               setActiveDropdownItem={setActiveDropdownItem}

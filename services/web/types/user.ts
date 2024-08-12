@@ -26,7 +26,7 @@ export type Features = {
 }
 
 export type User = {
-  id: UserId
+  id: UserId | null
   isAdmin?: boolean
   email: string
   allowedFreeTrial?: boolean
