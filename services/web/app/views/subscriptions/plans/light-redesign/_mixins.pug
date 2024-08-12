@@ -125,7 +125,7 @@ mixin plans_table(period, config)
 					.plans-table-btn-buy-container-desktop
 						+plans_cta(tableHeadKey, highlighted, eventTrackingKey, additionalEventSegmentation, period)
 
-	for featuresPerSection in config.features
+	for featuresPerSection, featuresSectionIndex in config.features
 		- var dividerColspan = Object.values(config.tableHead).length + 1
 		if featuresPerSection.divider
 			tr.plans-table-divider
@@ -163,7 +163,7 @@ mixin plans_table(period, config)
 					event-tracking-ga="subscription-funnel"
 					event-tracking-label=`${feature.feature}`
 					scope="row"
-					class=`${featureIndex === 0 ? 'plans-table-first-feature-header' : ''}`
+					class=`${featuresSectionIndex === 0 && featureIndex === 0 ? 'plans-table-first-feature-header' : ''}`
 				)
 					.plans-table-feature-name
 						.plans-table-feature-name-content
