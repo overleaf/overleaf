@@ -267,7 +267,9 @@ function WelcomeMessageCreateNewProjectDropdown({
             {(portalTemplates?.length ?? 0) > 0 ? (
               <>
                 <DropdownDivider />
-                <DropdownHeader>{t('institution_templates')}</DropdownHeader>
+                <DropdownHeader aria-hidden="true">
+                  {t('institution_templates')}
+                </DropdownHeader>
                 {portalTemplates?.map((portalTemplate, index) => (
                   <DropdownItem
                     key={`portal-template-${index}`}

@@ -74,6 +74,10 @@
     }
   }
 
+  .new-project-button.dropdown-toggle::after {
+    display: none;
+  }
+
   .project-list-welcome-wrapper {
     width: 100%;
     padding-bottom: var(--spacing-08);
@@ -197,6 +201,13 @@
         padding: var(--spacing-03) var(--spacing-06);
         cursor: auto;
       }
+    }
+
+    .dropdown-header {
+      @include body-sm;
+
+      padding: var(--spacing-05) var(--spacing-06);
+      text-transform: uppercase;
     }
 
     > li.active {
@@ -598,6 +609,8 @@
       @extend .btn;
       @extend .btn-lg;
       @extend .btn-primary;
+
+      margin-bottom: var(--spacing-07);
     }
   }
 }

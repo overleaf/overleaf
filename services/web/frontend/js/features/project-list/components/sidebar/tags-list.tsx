@@ -36,8 +36,12 @@ export default function TagsList() {
 
   return (
     <>
-      <li role="separator" className="separator">
-        <h2>{t('organize_projects')}</h2>
+      <li
+        className="dropdown-header"
+        aria-hidden="true"
+        data-testid="organize-projects"
+      >
+        {t('organize_projects')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>

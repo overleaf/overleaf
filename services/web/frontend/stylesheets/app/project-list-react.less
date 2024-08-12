@@ -212,6 +212,18 @@
   ul.project-list-filters {
     margin: @margin-sm @folders-menu-margin;
 
+    .dropdown-header {
+      margin-top: @folders-title-margin-top;
+      margin-bottom: @folders-title-margin-bottom;
+      font-size: @folders-title-font-size;
+      color: @folders-title-color;
+      text-transform: @folders-title-text-transform;
+      padding: 12.5px 16px;
+      font-weight: @folders-title-font-weight;
+      font-family: @font-family-sans-serif;
+      text-transform: uppercase;
+    }
+
     .subdued {
       color: @gray-light;
     }
@@ -263,17 +275,6 @@
       }
     }
 
-    h2 {
-      margin-top: @folders-title-margin-top;
-      margin-bottom: @folders-title-margin-bottom;
-      font-size: @folders-title-font-size;
-      color: @folders-title-color;
-      text-transform: @folders-title-text-transform;
-      padding: @folders-title-padding;
-      font-weight: @folders-title-font-weight;
-      font-family: @font-family-sans-serif;
-    }
-
     > li.tag {
       &.active {
         .tag-menu > button {
@@ -317,6 +318,11 @@
         display: @folders-tag-display;
         align-items: center;
         word-wrap: anywhere;
+
+        .tag-list-icon {
+          vertical-align: sub;
+          font-weight: bold;
+        }
 
         span.name {
           padding-left: 0.5em;
@@ -724,12 +730,6 @@
       // Avoid line breaks for labels in menu items.
       // There is enough space for these on mobile devices (checked DE and EN translations).
       white-space: nowrap;
-    }
-
-    .dropdown-header {
-      padding: 14px 20px;
-      font-size: 13px;
-      text-transform: uppercase;
     }
   }
 

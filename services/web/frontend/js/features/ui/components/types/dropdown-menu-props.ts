@@ -36,6 +36,7 @@ export type DropdownItemProps = PropsWithChildren<{
 
 export type DropdownToggleProps = PropsWithChildren<{
   bsPrefix?: string
+  className?: string
   disabled?: boolean
   split?: boolean
   id?: string // necessary for assistive technologies
