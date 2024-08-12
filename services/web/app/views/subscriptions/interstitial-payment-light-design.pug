@@ -21,13 +21,13 @@ block content
 		.plans-page.plans-page-interstitial
 			.container
 				if showInrGeoBanner
-					div.notification.notification-type-success.text-center
+					.mb-5.notification.notification-type-success.text-center
 						div.notification-content !{translate("inr_discount_offer_plans_page_banner", {flag: '🇮🇳'})}
 				if showBrlGeoBanner
-					div.notification.notification-type-success.text-center
+					.mb-5.notification.notification-type-success.text-center
 						div.notification-content !{translate("brl_discount_offer_plans_page_banner", {flag: '🇧🇷'})}
 				if showLATAMBanner
-					div.notification.notification-type-success.text-center
+					.mb-5.notification.notification-type-success.text-center
 						div.notification-content !{translate("latam_discount_offer_plans_page_banner", {flag: latamCountryBannerDetails.latamCountryFlag, country: latamCountryBannerDetails.country, currency: latamCountryBannerDetails.currency, discount: latamCountryBannerDetails.discount })}
 
 				.row
