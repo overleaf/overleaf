@@ -80,65 +80,6 @@
   }
 }
 
-.plans-page {
-  p {
-    color: var(--neutral-70);
-    margin-bottom: @line-height-computed;
-  }
-
-  .plans-header {
-    h1,
-    h2 {
-      color: var(--neutral-70);
-    }
-  }
-
-  .circle {
-    font-size: 1.5rem;
-    font-weight: 700;
-    padding: 46px 18px;
-    margin: 0 auto @line-height-computed;
-    text-shadow: 0 -1px 1px darken(@link-color, 10%);
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: @green-70;
-    color: white;
-    white-space: nowrap;
-    line-height: 1;
-
-    .small {
-      color: rgba(255, 255, 255, 0.85);
-      font-size: @font-size-base * 0.8;
-    }
-  }
-
-  .circle-lg {
-    height: 180px;
-    padding: 70px 8px;
-    width: 180px;
-  }
-
-  .circle-subtext {
-    font-size: 1rem;
-  }
-
-  .circle-img {
-    float: right;
-
-    @media (max-width: @screen-sm-max) {
-      float: left;
-      margin: 0 15px;
-    }
-  }
-
-  @media (max-width: @screen-xs-max) {
-    [data-ol-current-view='group'] [data-ol-plans-v2-m-a-switch-container] {
-      display: none;
-    }
-  }
-}
-
 .plans-v2-top-switch ul.plans-v2-nav {
   display: flex;
   justify-content: center;
