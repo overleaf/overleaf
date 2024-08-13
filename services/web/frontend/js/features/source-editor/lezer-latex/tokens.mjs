@@ -697,6 +697,7 @@ const verbatimEnvNames = new Set([
   'minted',
   'Verbatim',
   'lstlisting',
+  'tcblisting',
   'codeexample',
   'comment',
 ])

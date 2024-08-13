@@ -1820,7 +1820,9 @@ const EnvHandler = function (TokeniseResult, ErrorReporter) {
     // flag any verbatim environments for special handling
     if (
       name &&
-      name.match(/^(verbatim|boxedverbatim|lstlisting|minted|Verbatim)$/)
+      name.match(
+        /^(verbatim|boxedverbatim|lstlisting|minted|Verbatim|tcblisting)$/
+      )
     ) {
       delimiter.verbatim = true
     }
