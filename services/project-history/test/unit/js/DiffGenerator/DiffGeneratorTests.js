@@ -1,16 +1,3 @@
-/* eslint-disable
-    no-return-assign,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { strict as esmock } from 'esmock'
@@ -23,11 +10,11 @@ describe('DiffGenerator', function () {
     this.ts = Date.now()
     this.user_id = 'mock-user-id'
     this.user_id_2 = 'mock-user-id-2'
-    return (this.meta = {
+    this.meta = {
       start_ts: this.ts,
       end_ts: this.ts,
       user_id: this.user_id,
-    })
+    }
   })
 
   describe('buildDiff', function () {
@@ -43,18 +30,15 @@ describe('DiffGenerator', function () {
         .stub()
         .returns(this.diff)
       this.DiffGenerator._mocks.compressDiff = sinon.stub().returns(this.diff)
-      return (this.result = this.DiffGenerator.buildDiff(
-        this.content,
-        this.updates
-      ))
+      this.result = this.DiffGenerator.buildDiff(this.content, this.updates)
     })
 
     it('should return the diff', function () {
-      return this.result.should.deep.equal(this.diff)
+      this.result.should.deep.equal(this.diff)
     })
 
     it('should build the content into an initial diff', function () {
-      return this.DiffGenerator._mocks.applyUpdateToDiff
+      this.DiffGenerator._mocks.applyUpdateToDiff
         .calledWith(
           [
             {
@@ -67,106 +51,127 @@ describe('DiffGenerator', function () {
     })
 
     it('should apply each update', function () {
-      return Array.from(this.updates).map(update =>
+      this.updates.map(update =>
         this.DiffGenerator._mocks.applyUpdateToDiff
           .calledWith(sinon.match.any, update)
           .should.equal(true)
       )
     })
 
-    return it('should compress the diff', function () {
-      return this.DiffGenerator._mocks.compressDiff
+    it('should compress the diff', function () {
+      this.DiffGenerator._mocks.compressDiff
         .calledWith(this.diff)
         .should.equal(true)
     })
   })
 
   describe('compressDiff', function () {
-    describe('with adjacent inserts with the same user_id', function () {
-      return it('should create one update with combined meta data and min/max timestamps', function () {
+    describe('with adjacent inserts with the same user id', function () {
+      it('should create one update with combined meta data and min/max timestamps', function () {
         const diff = this.DiffGenerator.compressDiff([
           {
             i: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
+            meta: { start_ts: 10, end_ts: 20, users: [this.user_id] },
           },
           {
             i: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id } },
+            meta: { start_ts: 5, end_ts: 15, users: [this.user_id] },
           },
         ])
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           {
             i: 'foobar',
-            meta: { start_ts: 5, end_ts: 20, user: { id: this.user_id } },
+            meta: { start_ts: 5, end_ts: 20, users: [this.user_id] },
           },
         ])
       })
     })
 
-    describe('with adjacent inserts with different user_ids', function () {
-      return it('should leave the inserts unchanged', function () {
+    describe('with adjacent inserts with different user ids', function () {
+      it('should leave the inserts unchanged', function () {
         const input = [
           {
             i: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
+            meta: { start_ts: 10, end_ts: 20, users: [this.user_id] },
           },
           {
             i: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id_2 } },
+            meta: { start_ts: 5, end_ts: 15, users: [this.user_id_2] },
           },
         ]
         const output = this.DiffGenerator.compressDiff(input)
-        return expect(output).to.deep.equal(input)
+        expect(output).to.deep.equal(input)
       })
     })
 
-    describe('with adjacent deletes with the same user_id', function () {
-      return it('should create one update with combined meta data and min/max timestamps', function () {
+    describe('with adjacent deletes with the same user id', function () {
+      it('should create one update with combined meta data and min/max timestamps', function () {
         const diff = this.DiffGenerator.compressDiff([
           {
             d: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
+            meta: { start_ts: 10, end_ts: 20, users: [this.user_id] },
           },
           {
             d: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id } },
+            meta: { start_ts: 5, end_ts: 15, users: [this.user_id] },
           },
         ])
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           {
             d: 'foobar',
-            meta: { start_ts: 5, end_ts: 20, user: { id: this.user_id } },
+            meta: { start_ts: 5, end_ts: 20, users: [this.user_id] },
           },
         ])
       })
     })
 
-    return describe('with adjacent deletes with different user_ids', function () {
-      return it('should leave the deletes unchanged', function () {
+    describe('with adjacent deletes with different user ids', function () {
+      it('should leave the deletes unchanged', function () {
         const input = [
           {
             d: 'foo',
-            meta: { start_ts: 10, end_ts: 20, user: { id: this.user_id } },
+            meta: { start_ts: 10, end_ts: 20, users: [this.user_id] },
           },
           {
             d: 'bar',
-            meta: { start_ts: 5, end_ts: 15, user: { id: this.user_id_2 } },
+            meta: { start_ts: 5, end_ts: 15, users: [this.user_id_2] },
           },
         ]
         const output = this.DiffGenerator.compressDiff(input)
-        return expect(output).to.deep.equal(input)
+        expect(output).to.deep.equal(input)
+      })
+    })
+
+    describe('with history resync updates', function () {
+      it('should keep only inserts and mark them as unchanged text', function () {
+        const input = [
+          { u: 'untracked text' },
+          {
+            i: 'inserted anonymously',
+            meta: { origin: { kind: 'history-resync' } },
+          },
+          {
+            d: 'deleted anonymously',
+            meta: { origin: { kind: 'history-resync' } },
+          },
+        ]
+        const output = this.DiffGenerator.compressDiff(input)
+        expect(output).to.deep.equal([
+          { u: 'untracked text' },
+          { u: 'inserted anonymously' },
+        ])
       })
     })
   })
 
-  return describe('applyUpdateToDiff', function () {
+  describe('applyUpdateToDiff', function () {
     describe('an insert', function () {
       it('should insert into the middle of (u)nchanged text', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff([{ u: 'foobar' }], {
           op: [{ p: 3, i: 'baz' }],
           meta: this.meta,
         })
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           { u: 'foo' },
           { i: 'baz', meta: this.meta },
           { u: 'bar' },
@@ -178,7 +183,7 @@ describe('DiffGenerator', function () {
           op: [{ p: 0, i: 'baz' }],
           meta: this.meta,
         })
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           { i: 'baz', meta: this.meta },
           { u: 'foobar' },
         ])
@@ -189,7 +194,7 @@ describe('DiffGenerator', function () {
           op: [{ p: 6, i: 'baz' }],
           meta: this.meta,
         })
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           { u: 'foobar' },
           { i: 'baz', meta: this.meta },
         ])
@@ -200,19 +205,19 @@ describe('DiffGenerator', function () {
           [{ i: 'foobar', meta: this.meta }],
           { op: [{ p: 3, i: 'baz' }], meta: this.meta }
         )
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           { i: 'foo', meta: this.meta },
           { i: 'baz', meta: this.meta },
           { i: 'bar', meta: this.meta },
         ])
       })
 
-      return it('should not count deletes in the running length total', function () {
+      it('should not count deletes in the running length total', function () {
         const diff = this.DiffGenerator.applyUpdateToDiff(
           [{ d: 'deleted', meta: this.meta }, { u: 'foobar' }],
           { op: [{ p: 3, i: 'baz' }], meta: this.meta }
         )
-        return expect(diff).to.deep.equal([
+        expect(diff).to.deep.equal([
           { d: 'deleted', meta: this.meta },
           { u: 'foo' },
           { i: 'baz', meta: this.meta },
@@ -221,14 +226,14 @@ describe('DiffGenerator', function () {
       })
     })
 
-    return describe('a delete', function () {
+    describe('a delete', function () {
       describe('deleting unchanged text', function () {
         it('should delete from the middle of (u)nchanged text', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foobazbar' }],
             { op: [{ p: 3, d: 'baz' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { u: 'foo' },
             { d: 'baz', meta: this.meta },
             { u: 'bar' },
@@ -240,7 +245,7 @@ describe('DiffGenerator', function () {
             [{ u: 'foobazbar' }],
             { op: [{ p: 0, d: 'foo' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { d: 'foo', meta: this.meta },
             { u: 'bazbar' },
           ])
@@ -251,18 +256,18 @@ describe('DiffGenerator', function () {
             [{ u: 'foobazbar' }],
             { op: [{ p: 6, d: 'bar' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { u: 'foobaz' },
             { d: 'bar', meta: this.meta },
           ])
         })
 
-        return it('should delete across multiple (u)changed text parts', function () {
+        it('should delete across multiple (u)changed text parts', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { u: 'baz' }, { u: 'bar' }],
             { op: [{ p: 2, d: 'obazb' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { u: 'fo' },
             { d: 'o', meta: this.meta },
             { d: 'baz', meta: this.meta },
@@ -278,7 +283,7 @@ describe('DiffGenerator', function () {
             [{ i: 'foobazbar', meta: this.meta }],
             { op: [{ p: 3, d: 'baz' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { i: 'foo', meta: this.meta },
             { i: 'bar', meta: this.meta },
           ])
@@ -289,7 +294,7 @@ describe('DiffGenerator', function () {
             [{ i: 'foobazbar', meta: this.meta }],
             { op: [{ p: 0, d: 'foo' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([{ i: 'bazbar', meta: this.meta }])
+          expect(diff).to.deep.equal([{ i: 'bazbar', meta: this.meta }])
         })
 
         it('should delete from the end of (u)nchanged text', function () {
@@ -297,15 +302,15 @@ describe('DiffGenerator', function () {
             [{ i: 'foobazbar', meta: this.meta }],
             { op: [{ p: 6, d: 'bar' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([{ i: 'foobaz', meta: this.meta }])
+          expect(diff).to.deep.equal([{ i: 'foobaz', meta: this.meta }])
         })
 
-        return it('should delete across multiple (u)changed and (i)nserted text parts', function () {
+        it('should delete across multiple (u)changed and (i)nserted text parts', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { i: 'baz', meta: this.meta }, { u: 'bar' }],
             { op: [{ p: 2, d: 'obazb' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { u: 'fo' },
             { d: 'o', meta: this.meta },
             { d: 'b', meta: this.meta },
@@ -315,12 +320,12 @@ describe('DiffGenerator', function () {
       })
 
       describe('deleting over existing deletes', function () {
-        return it('should delete across multiple (u)changed and (d)deleted text parts', function () {
+        it('should delete across multiple (u)changed and (d)deleted text parts', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { d: 'baz', meta: this.meta }, { u: 'bar' }],
             { op: [{ p: 2, d: 'ob' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { u: 'fo' },
             { d: 'o', meta: this.meta },
             { d: 'baz', meta: this.meta },
@@ -332,7 +337,7 @@ describe('DiffGenerator', function () {
 
       describe("deleting when the text doesn't match", function () {
         it('should throw an error when deleting from the middle of (u)nchanged text', function () {
-          return expect(() =>
+          expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 3, d: 'xxx' }],
               meta: this.meta,
@@ -341,7 +346,7 @@ describe('DiffGenerator', function () {
         })
 
         it('should throw an error when deleting from the start of (u)nchanged text', function () {
-          return expect(() =>
+          expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 0, d: 'xxx' }],
               meta: this.meta,
@@ -349,8 +354,8 @@ describe('DiffGenerator', function () {
           ).to.throw(this.DiffGenerator.ConsistencyError)
         })
 
-        return it('should throw an error when deleting from the end of (u)nchanged text', function () {
-          return expect(() =>
+        it('should throw an error when deleting from the end of (u)nchanged text', function () {
+          expect(() =>
             this.DiffGenerator.applyUpdateToDiff([{ u: 'foobazbar' }], {
               op: [{ p: 6, d: 'xxx' }],
               meta: this.meta,
@@ -360,12 +365,12 @@ describe('DiffGenerator', function () {
       })
 
       describe('when the last update in the existing diff is a delete', function () {
-        return it('should insert the new update before the delete', function () {
+        it('should insert the new update before the delete', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ u: 'foo' }, { d: 'bar', meta: this.meta }],
             { op: [{ p: 3, i: 'baz' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { u: 'foo' },
             { i: 'baz', meta: this.meta },
             { d: 'bar', meta: this.meta },
@@ -373,13 +378,13 @@ describe('DiffGenerator', function () {
         })
       })
 
-      return describe('when the only update in the existing diff is a delete', function () {
-        return it('should insert the new update after the delete', function () {
+      describe('when the only update in the existing diff is a delete', function () {
+        it('should insert the new update after the delete', function () {
           const diff = this.DiffGenerator.applyUpdateToDiff(
             [{ d: 'bar', meta: this.meta }],
             { op: [{ p: 0, i: 'baz' }], meta: this.meta }
           )
-          return expect(diff).to.deep.equal([
+          expect(diff).to.deep.equal([
             { d: 'bar', meta: this.meta },
             { i: 'baz', meta: this.meta },
           ])

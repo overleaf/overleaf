@@ -20,6 +20,7 @@ import CompareItems from './dropdown/menu-item/compare-items'
 import CompareVersionDropdown from './dropdown/compare-version-dropdown'
 import { CompareVersionDropdownContentAllHistory } from './dropdown/compare-version-dropdown-content'
 import FileRestoreChange from './file-restore-change'
+import HistoryResyncChange from './history-resync-change'
 
 type HistoryVersionProps = {
   update: LoadedUpdate
@@ -167,18 +168,24 @@ function HistoryVersion({
             ))}
             {update.meta.origin?.kind === 'file-restore' ? (
               <FileRestoreChange origin={update.meta.origin} />
+            ) : update.meta.origin?.kind === 'history-resync' ? (
+              <HistoryResyncChange />
             ) : (
               <Changes
                 pathnames={update.pathnames}
                 projectOps={update.project_ops}
               />
             )}
-            <MetadataUsersList
-              users={update.meta.users}
-              origin={update.meta.origin}
-              currentUserId={currentUserId}
-            />
-            <Origin origin={update.meta.origin} />
+            {update.meta.origin?.kind !== 'history-resync' ? (
+              <>
+                <MetadataUsersList
+                  users={update.meta.users}
+                  origin={update.meta.origin}
+                  currentUserId={currentUserId}
+                />
+                <Origin origin={update.meta.origin} />
+              </>
+            ) : null}
           </div>
         </HistoryVersionDetails>
       </div>

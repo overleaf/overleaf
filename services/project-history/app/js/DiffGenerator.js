@@ -1,18 +1,4 @@
-/* eslint-disable
-    no-proto,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS101: Remove unnecessary use of Array.from
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-
-import logger from '@overleaf/logger'
+import _ from 'lodash'
 import OError from '@overleaf/o-error'
 
 export class ConsistencyError extends OError {}
@@ -26,7 +12,7 @@ export const _mocks = {}
 
 export function buildDiff(initialContent, updates) {
   let diff = [{ u: initialContent }]
-  for (const update of Array.from(updates)) {
+  for (const update of updates) {
     diff = applyUpdateToDiff(diff, update)
   }
   diff = compressDiff(diff)
@@ -35,38 +21,54 @@ export function buildDiff(initialContent, updates) {
 
 _mocks.compressDiff = diff => {
   const newDiff = []
-  for (const part of Array.from(diff)) {
-    const lastPart = newDiff[newDiff.length - 1]
-    if (
-      lastPart != null &&
-      (lastPart.meta != null ? lastPart.meta.user : undefined) != null &&
-      (part.meta != null ? part.meta.user : undefined) != null
-    ) {
-      if (
-        lastPart.i != null &&
-        part.i != null &&
-        lastPart.meta.user.id === part.meta.user.id
-      ) {
-        lastPart.i += part.i
-        lastPart.meta.start_ts = Math.min(
-          lastPart.meta.start_ts,
-          part.meta.start_ts
-        )
-        lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
-      } else if (
-        lastPart.d != null &&
-        part.d != null &&
-        lastPart.meta.user.id === part.meta.user.id
-      ) {
-        lastPart.d += part.d
-        lastPart.meta.start_ts = Math.min(
-          lastPart.meta.start_ts,
-          part.meta.start_ts
-        )
-        lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
-      } else {
+  for (const part of diff) {
+    const users = part.meta?.users ?? []
+
+    if (part.meta?.origin?.kind === 'history-resync') {
+      // Skip history resync updates. Inserts are converted to unchanged text
+      // and deletes are skipped, so that they effectively don't appear in the
+      // diff.
+      if (part.u != null) {
         newDiff.push(part)
+      } else if (part.i != null) {
+        newDiff.push({ u: part.i })
       }
+      continue
+    }
+
+    if (newDiff.length === 0) {
+      // If we haven't seen other parts yet, we have nothing to merge.
+      newDiff.push(part)
+      continue
+    }
+
+    const lastPart = newDiff[newDiff.length - 1]
+    const lastUsers = lastPart.meta?.users ?? []
+    const usersNotInBothParts = _.xor(users, lastUsers)
+
+    if (usersNotInBothParts.length > 0) {
+      // If the set of users in the last part and this part are not the same, we
+      // can't merge.
+      newDiff.push(part)
+      continue
+    }
+
+    if (lastPart.i != null && part.i != null) {
+      // Merge two inserts
+      lastPart.i += part.i
+      lastPart.meta.start_ts = Math.min(
+        lastPart.meta.start_ts,
+        part.meta.start_ts
+      )
+      lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
+    } else if (lastPart.d != null && part.d != null) {
+      // Merge two deletes
+      lastPart.d += part.d
+      lastPart.meta.start_ts = Math.min(
+        lastPart.meta.start_ts,
+        part.meta.start_ts
+      )
+      lastPart.meta.end_ts = Math.max(lastPart.meta.end_ts, part.meta.end_ts)
     } else {
       newDiff.push(part)
     }
@@ -80,7 +82,6 @@ export function compressDiff(...args) {
 
 export function applyOpToDiff(diff, op, meta) {
   let consumedDiff
-  const position = 0
 
   let remainingDiff = diff.slice()
   ;({ consumedDiff, remainingDiff } = _consumeToOffset(remainingDiff, op.p))
@@ -97,16 +98,16 @@ export function applyOpToDiff(diff, op, meta) {
       op,
       meta
     ))
-    newDiff.push(...Array.from(consumedDiff || []))
+    newDiff.push(...(consumedDiff || []))
   }
 
-  newDiff.push(...Array.from(remainingDiff || []))
+  newDiff.push(...(remainingDiff || []))
 
   return newDiff
 }
 
 _mocks.applyUpdateToDiff = (diff, update) => {
-  for (const op of Array.from(update.op)) {
+  for (const op of update.op) {
     if (op.broken !== true) {
       diff = applyOpToDiff(diff, op, update.meta)
     }

@@ -189,10 +189,10 @@ function _summarizeUpdates(updates, labels, existingSummarizedUpdates, toV) {
       toV = update.v + 1
     }
 
-    // Skip empty and history-resync updates (only record their version).
-    // Empty updates are updates that only contain comment operations. We don't have a UI for
+    // Skip empty updates (only record their version). Empty updates are
+    // updates that only contain comment operations. We don't have a UI for
     // these yet.
-    if (isUpdateEmpty(update) || isHistoryResyncUpdate(update)) {
+    if (isUpdateEmpty(update)) {
       continue
     }
 
@@ -282,8 +282,11 @@ function _shouldMergeUpdate(update, summarizedUpdate, labels) {
   const updateHasFileOps = update.project_ops.length > 0
   const summarizedUpdateHasTextOps = summarizedUpdate.pathnames.size > 0
   const summarizedUpdateHasFileOps = summarizedUpdate.project_ops.length > 0
+  const isHistoryResync =
+    update.meta.origin &&
+    ['history-resync', 'history-migration'].includes(update.meta.origin.kind)
   if (
-    !isHistoryResyncUpdate(update) &&
+    !isHistoryResync &&
     ((updateHasTextOps && summarizedUpdateHasFileOps) ||
       (updateHasFileOps && summarizedUpdateHasTextOps))
   ) {
@@ -342,11 +345,4 @@ function _mergeUpdate(update, summarizedUpdate) {
 
 function isUpdateEmpty(update) {
   return update.project_ops.length === 0 && update.pathnames.length === 0
-}
-
-function isHistoryResyncUpdate(update) {
-  return (
-    update.meta.origin?.kind === 'history-resync' ||
-    update.meta.origin?.kind === 'history-migration'
-  )
 }

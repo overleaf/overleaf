@@ -595,12 +595,12 @@ describe('SummarizedUpdatesManager', function () {
             makeUpdate({
               startTs: 20,
               v: 3,
-              origin: { kind: 'origin-a' },
+              origin: { kind: 'history-resync' },
             }),
             makeUpdate({
               startTs: 30,
               v: 4,
-              origin: { kind: 'origin-a' },
+              origin: { kind: 'history-resync' },
             }),
             makeUpdate({ startTs: 40, v: 5 }),
             makeUpdate({ startTs: 50, v: 6 }),
@@ -617,7 +617,7 @@ describe('SummarizedUpdatesManager', function () {
               endTs: 40,
               fromV: 3,
               toV: 5,
-              origin: { kind: 'origin-a' },
+              origin: { kind: 'history-resync' },
             }),
             makeSummary({ startTs: 0, endTs: 20, fromV: 1, toV: 3 }),
           ]
@@ -687,7 +687,13 @@ describe('SummarizedUpdatesManager', function () {
       describe('history resync updates', function () {
         setupChunks([
           [
-            makeUpdate({ startTs: 0, v: 1 }),
+            makeUpdate({
+              startTs: 0,
+              v: 1,
+              origin: { kind: 'history-resync' },
+              projectOps: [{ add: { pathname: 'file1.tex' } }],
+              pathnames: [],
+            }),
             makeUpdate({
               startTs: 20,
               v: 2,
@@ -703,13 +709,47 @@ describe('SummarizedUpdatesManager', function () {
               v: 3,
               origin: { kind: 'history-resync' },
               projectOps: [{ add: { pathname: 'file4.tex' } }],
+              pathnames: [],
             }),
-            makeUpdate({ startTs: 60, v: 4 }),
-            makeUpdate({ startTs: 80, v: 5 }),
+            makeUpdate({
+              startTs: 60,
+              v: 4,
+              origin: { kind: 'history-resync' },
+              projectOps: [],
+              pathnames: ['file1.tex', 'file2.tex', 'file5.tex'],
+            }),
+            makeUpdate({
+              startTs: 80,
+              v: 5,
+              origin: { kind: 'history-resync' },
+              projectOps: [],
+              pathnames: ['file4.tex'],
+            }),
+            makeUpdate({ startTs: 100, v: 6, pathnames: ['file1.tex'] }),
           ],
         ])
-        expectSummaries('should skip history-resync updates', {}, [
-          makeSummary({ startTs: 0, endTs: 90, fromV: 1, toV: 6 }),
+        expectSummaries('should merge creates and edits', {}, [
+          makeSummary({
+            startTs: 100,
+            endTs: 110,
+            fromV: 6,
+            toV: 7,
+            pathnames: ['file1.tex'],
+          }),
+          makeSummary({
+            startTs: 0,
+            endTs: 90,
+            fromV: 1,
+            toV: 6,
+            origin: { kind: 'history-resync' },
+            pathnames: ['file5.tex'],
+            projectOps: [
+              { add: { pathname: 'file4.tex' }, atV: 3 },
+              { add: { pathname: 'file2.tex' }, atV: 2 },
+              { add: { pathname: 'file3.tex' }, atV: 2 },
+              { add: { pathname: 'file1.tex' }, atV: 1 },
+            ],
+          }),
         ])
       })
     })
