@@ -368,22 +368,28 @@
 @screen-sm-min: @screen-sm;
 @screen-tablet: @screen-sm-min;
 
-// Medium screen / desktop
+// Medium screen / small desktop
 // Note: Deprecated @screen-md and @screen-desktop as of v3.0.1
 @screen-md: 992px;
 @screen-md-min: @screen-md;
 @screen-desktop: @screen-md-min;
 
-// Large screen / wide desktop
+// Large screen / desktop
 // Note: Deprecated @screen-lg and @screen-lg-desktop as of v3.0.1
 @screen-lg: 1200px;
 @screen-lg-min: @screen-lg;
 @screen-lg-desktop: @screen-lg-min;
 
+// Extra large screen / wide desktop
+@screen-xl: 1400px;
+@screen-xl-min: @screen-xl;
+@screen-xl-desktop: @screen-xl-min;
+
 // So media queries don't overlap when required, provide a maximum
 @screen-xs-max: (@screen-sm-min - 1);
 @screen-sm-max: (@screen-md-min - 1);
 @screen-md-max: (@screen-lg-min - 1);
+@screen-lg-max: (@screen-xl-min - 1);
 
 //== Grid system
 //
@@ -393,6 +399,7 @@
 @grid-columns: 12;
 //** Padding between columns. Gets divided in half for the left and right.
 @grid-gutter-width: 30px;
+@grid-gutter-width-new: 32px; // for website-redesign because the usage of 16px padding
 // Navbar collapse
 //** Point at which the navbar becomes uncollapsed.
 @grid-float-breakpoint: @screen-md-min;
@@ -408,15 +415,20 @@
 //** For `@screen-sm-min` and up.
 @container-sm: @container-tablet;
 
-// Medium screen / desktop
+// Medium screen / small desktop
 @container-desktop: ((940px + @grid-gutter-width));
 //** For `@screen-md-min` and up.
 @container-md: @container-desktop;
 
-// Large screen / wide desktop
+// Large screen / desktop
 @container-large-desktop: ((1140px + @grid-gutter-width));
 //** For `@screen-lg-min` and up.
 @container-lg: @container-large-desktop;
+
+// Extra large screen / wide desktop
+@container-wide-desktop: ((1248px + @grid-gutter-width-new)); // 1280px
+//** For `@screen-xl-min` and up.
+@container-xl: @container-wide-desktop;
 
 //== Navbar
 //

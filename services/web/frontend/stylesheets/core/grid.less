@@ -74,3 +74,45 @@
 @media (min-width: @screen-lg-min) {
   .make-grid(lg);
 }
+
+.website-redesign {
+  // whitelist for the pages to use the new grid
+  // TODO: remove this whitelist once all pages are using the new grid
+  .plans-new-design,
+  .plans-page {
+    // Container widths
+    //
+    // Set the container width, and override it for fixed navbars in media queries.
+
+    .container {
+      .container-fixed(@grid-gutter-width-new);
+
+      @media (min-width: @screen-sm-min) {
+        width: @container-sm;
+      }
+      @media (min-width: @screen-md-min) {
+        width: @container-md;
+      }
+      @media (min-width: @screen-lg-min) {
+        width: @container-lg;
+      }
+      @media (min-width: @screen-xl-min) {
+        width: @container-xl;
+      }
+    }
+
+    // Row
+    //
+    // Rows contain and clear the floats of your columns.
+
+    .row {
+      .make-row(@grid-gutter-width-new);
+    }
+
+    // Columns
+    //
+    // Common styles for small and large grid columns
+
+    .make-grid-columns(@grid-gutter-width-new);
+  }
+}
