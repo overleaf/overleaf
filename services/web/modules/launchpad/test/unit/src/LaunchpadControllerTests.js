@@ -696,7 +696,6 @@ describe('LaunchpadController', function () {
     describe('when overleaf', function () {
       beforeEach(function () {
         this.Settings.overleaf = { one: 1 }
-        this.Settings.createV1AccountOnLogin = true
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'

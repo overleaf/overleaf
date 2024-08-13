@@ -133,6 +133,14 @@ describe('UserController', function () {
       promises: { expireAllTokensForUser: sinon.stub().resolves() },
     }
 
+    this.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves(),
+        },
+      },
+    }
+
     this.UserController = SandboxedModule.require(modulePath, {
       requires: {
         '../Helpers/UrlHelper': this.UrlHelper,
@@ -156,6 +164,7 @@ describe('UserController', function () {
         '../Security/OneTimeTokenHandler': this.OneTimeTokenHandler,
         '../../infrastructure/RequestContentTypeDetection':
           this.RequestContentTypeDetection,
+        '../../infrastructure/Modules': this.Modules,
       },
     })
 
@@ -209,6 +218,17 @@ describe('UserController', function () {
         this.UserDeleter.promises.deleteUser.should.have.been.calledOnce
         this.UserDeleter.promises.deleteUser.should.have.been.calledWith(
           this.user._id
+        )
+        done()
+      }
+      this.UserController.tryDeleteUser(this.req, this.res, this.next)
+    })
+
+    it('should call hook to try to delete v1 account', function (done) {
+      this.res.sendStatus = code => {
+        expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+          'tryDeleteV1Account',
+          this.user
         )
         done()
       }
@@ -873,6 +893,7 @@ describe('UserController', function () {
           }
           this.EmailHandler.promises.sendEmail.rejects(anError)
         })
+
         it('should not return error but should log it', function (done) {
           this.res.json.callsFake(result => {
             expect(result.message.type).to.equal('success')
@@ -901,16 +922,19 @@ describe('UserController', function () {
           this.next
         )
       })
+
       it('should not run affiliation check', function () {
         expect(this.UserGetter.promises.getUser).to.not.have.been.called
         expect(this.UserUpdater.promises.confirmEmail).to.not.have.been.called
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
           .been.called
       })
+
       it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
+
     describe('without ensureAffiliation query parameter', function () {
       beforeEach(async function () {
         this.Features.hasFeature.withArgs('affiliations').returns(true)
@@ -920,16 +944,19 @@ describe('UserController', function () {
           this.next
         )
       })
+
       it('should not run middleware', function () {
         expect(this.UserGetter.promises.getUser).to.not.have.been.called
         expect(this.UserUpdater.promises.confirmEmail).to.not.have.been.called
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
           .been.called
       })
+
       it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
+
     describe('no flagged email', function () {
       beforeEach(async function () {
         const email = 'unit-test@overleaf.com'
@@ -947,19 +974,23 @@ describe('UserController', function () {
           this.next
         )
       })
+
       it('should get the user', function () {
         expect(this.UserGetter.promises.getUser).to.have.been.calledWith(
           this.user._id
         )
       })
+
       it('should not try to add affiliation or update user', function () {
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.not.have
           .been.called
       })
+
       it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
+
     describe('flagged non-SSO email', function () {
       let emailFlagged
       beforeEach(async function () {
@@ -980,11 +1011,13 @@ describe('UserController', function () {
           this.next
         )
       })
+
       it('should check the user has permission', function () {
         expect(this.req.assertPermission).to.have.been.calledWith(
           'add-affiliation'
         )
       })
+
       it('should unflag the emails but not confirm', function () {
         expect(
           this.UserUpdater.promises.addAffiliationForNewUser
@@ -993,10 +1026,12 @@ describe('UserController', function () {
           this.UserUpdater.promises.confirmEmail
         ).to.not.have.been.calledWith(this.user._id, emailFlagged)
       })
+
       it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
+
     describe('flagged SSO email', function () {
       let emailFlagged
       beforeEach(async function () {
@@ -1018,11 +1053,13 @@ describe('UserController', function () {
           this.next
         )
       })
+
       it('should check the user has permission', function () {
         expect(this.req.assertPermission).to.have.been.calledWith(
           'add-affiliation'
         )
       })
+
       it('should add affiliation to v1, unflag and confirm on v2', function () {
         expect(this.UserUpdater.promises.addAffiliationForNewUser).to.have.not
           .been.called
@@ -1031,10 +1068,12 @@ describe('UserController', function () {
           emailFlagged
         )
       })
+
       it('should not return an error', function () {
         expect(this.next).to.be.calledWith()
       })
     })
+
     describe('when v1 returns an error', function () {
       let emailFlagged
       beforeEach(async function () {
@@ -1056,11 +1095,13 @@ describe('UserController', function () {
           this.next
         )
       })
+
       it('should check the user has permission', function () {
         expect(this.req.assertPermission).to.have.been.calledWith(
           'add-affiliation'
         )
       })
+
       it('should return the error', function () {
         expect(this.next).to.be.calledWith(sinon.match.instanceOf(Error))
       })
