@@ -3,6 +3,8 @@ const User = require('./helpers/User').promises
 const { Project } = require('../../../app/src/models/Project')
 const { ObjectId } = require('mongodb')
 const cheerio = require('cheerio')
+const { Subscription } = require('../../../app/src/models/Subscription')
+const Features = require('../../../app/src/infrastructure/Features')
 
 describe('Project CRUD', function () {
   beforeEach(async function () {
@@ -12,6 +14,15 @@ describe('Project CRUD', function () {
   })
 
   describe('project page', function () {
+    const loadProject = async function (user, projectId) {
+      const { response, body } = await user.doRequest(
+        'GET',
+        `/project/${projectId}`
+      )
+      expect(response.statusCode).to.equal(200)
+      return body
+    }
+
     it('should cast refProviders to booleans', async function () {
       await this.user.mongoUpdate({
         $set: {
@@ -21,16 +32,34 @@ describe('Project CRUD', function () {
           },
         },
       })
-      const { response, body } = await this.user.doRequest(
-        'GET',
-        `/project/${this.projectId}`
-      )
-      expect(response.statusCode).to.equal(200)
+      const body = await loadProject(this.user, this.projectId)
       const dom = cheerio.load(body)
       const metaOlUser = dom('meta[name="ol-user"]')[0]
       const userData = JSON.parse(metaOlUser.attribs.content)
       expect(userData.refProviders.mendeley).to.equal(true)
       expect(userData.refProviders.zotero).to.equal(true)
+    })
+
+    it('should show UpgradePrompt for user without a subscription', async function () {
+      const body = await loadProject(this.user, this.projectId)
+      expect(body).to.include(
+        Features.hasFeature('saas')
+          ? // `content` means true in this context
+            '<meta name="ol-showUpgradePrompt" data-type="boolean" content>'
+          : '<meta name="ol-showUpgradePrompt" data-type="boolean">'
+      )
+    })
+
+    it('should not show UpgradePrompt for user with a subscription', async function () {
+      await Subscription.create({
+        admin_id: this.user._id,
+        manager_ids: [this.user._id],
+      })
+      const body = await loadProject(this.user, this.projectId)
+      // having no `content` means false in this context
+      expect(body).to.include(
+        '<meta name="ol-showUpgradePrompt" data-type="boolean">'
+      )
     })
   })
 
