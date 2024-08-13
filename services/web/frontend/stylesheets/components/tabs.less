@@ -47,30 +47,51 @@
   .nav-tabs-container {
     overflow-x: auto;
     margin-bottom: var(--spacing-11);
-
+    text-align: center;
     .nav-tabs {
-      border: 0 !important;
+      display: inline-flex;
+      border-bottom: var(--border-width-base) solid var(--neutral-20);
       margin: 0 auto;
       padding: 0;
       text-align: center;
       min-width: max-content; // This is for horizontal scrolling
+      border-top: 2px solid transparent; // so that top focus border is visible
 
       li {
         display: inline-block;
         float: none;
-        margin-bottom: 0; //override navs.less
+        margin-bottom: calc(var(--border-width-base) * -1);
+        margin-right: var(--spacing-04);
+
+        &:last-child {
+          margin-right: 0;
+        }
 
         a {
           border: 0;
-          color: @neutral-70;
-          border-bottom: 3px solid @neutral-20 !important;
+          border-radius: 0;
+          color: var(--neutral-70);
           margin-right: unset;
           padding: var(--spacing-04);
+          line-height: var(--line-height-03);
 
           &:focus,
           &:hover {
-            background-color: transparent !important;
             border: 0;
+          }
+
+          &:focus,
+          &:focus-visible {
+            background-color: unset;
+            outline: 0;
+          }
+
+          &:hover {
+            background-color: var(--neutral-10);
+          }
+
+          &:focus-visible {
+            .box-shadow-button-input();
           }
         }
       }

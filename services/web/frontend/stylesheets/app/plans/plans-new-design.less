@@ -128,7 +128,7 @@
 
         &:focus {
           background-color: unset;
-          border: 1px solid var(--green-50);
+          outline: 0;
         }
 
         &:hover {
@@ -137,8 +137,8 @@
 
         // tab navigation focus style
         &:focus-visible {
-          &:extend(.input-focus-style);
-          background-color: white;
+          .box-shadow-button-input();
+          outline: 0;
         }
 
         @media (max-width: @screen-xs-max) {
