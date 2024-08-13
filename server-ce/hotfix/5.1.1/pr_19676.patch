@@ -1,0 +1,26 @@
+diff --git a/services/web/app/src/Features/Email/EmailBuilder.js b/services/web/app/src/Features/Email/EmailBuilder.js
+index 46d014a8e14..d839d67f634 100644
+--- a/services/web/app/src/Features/Email/EmailBuilder.js
++++ b/services/web/app/src/Features/Email/EmailBuilder.js
+@@ -234,7 +234,7 @@ templates.confirmEmail = ctaTemplate({
+   },
+   secondaryMessage() {
+     return [
+-      'If you did not request this, please let us know at <a href="mailto:support@overleaf.com">support@overleaf.com</a>.',
++      `If you did not request this, please let us know at <a href="mailto:${settings.adminEmail}">${settings.adminEmail}</a>.`,
+       `If you have any questions or trouble confirming your email address, please get in touch with our support team at ${settings.adminEmail}.`,
+     ]
+   },
+diff --git a/services/web/app/src/Features/User/UserRegistrationHandler.js b/services/web/app/src/Features/User/UserRegistrationHandler.js
+index 2802fdc81c5..02c52f73fd2 100644
+--- a/services/web/app/src/Features/User/UserRegistrationHandler.js
++++ b/services/web/app/src/Features/User/UserRegistrationHandler.js
+@@ -113,7 +113,7 @@ const UserRegistrationHandler = {
+
+     const setNewPasswordUrl = `${settings.siteUrl}/user/activate?token=${token}&user_id=${user._id}`
+
+-    EmailHandler.promises
++    await EmailHandler.promises
+       .sendEmail('registered', {
+         to: user.email,
+         setNewPasswordUrl,

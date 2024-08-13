@@ -1,0 +1,46 @@
+diff --git a/services/web/app/src/Features/HealthCheck/HealthCheckController.js b/services/web/app/src/Features/HealthCheck/HealthCheckController.js
+index 278f04bb767..ff074cfa816 100644
+--- a/services/web/app/src/Features/HealthCheck/HealthCheckController.js
++++ b/services/web/app/src/Features/HealthCheck/HealthCheckController.js
+@@ -45,6 +45,10 @@ module.exports = {
+         logger.err({ err }, 'failed api redis health check')
+         return res.sendStatus(500)
+       }
++      if (!settings.smokeTest.userId) {
++        logger.err({}, 'smokeTest.userId is undefined in health check')
++        return res.sendStatus(404)
++      }
+       UserGetter.getUserEmail(settings.smokeTest.userId, (err, email) => {
+         if (err) {
+           logger.err({ err }, 'failed api mongo health check')
+diff --git a/services/web/app/src/infrastructure/ExpressLocals.js b/services/web/app/src/infrastructure/ExpressLocals.js
+index 5f14977d3a3..2e9ed4f1ebb 100644
+--- a/services/web/app/src/infrastructure/ExpressLocals.js
++++ b/services/web/app/src/infrastructure/ExpressLocals.js
+@@ -11,6 +11,7 @@ const Features = require('./Features')
+ const SessionManager = require('../Features/Authentication/SessionManager')
+ const PackageVersions = require('./PackageVersions')
+ const Modules = require('./Modules')
++const Errors = require('../Features/Errors/Errors')
+ const {
+   canRedirectToAdminDomain,
+   hasAdminAccess,
+@@ -236,10 +237,14 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
+
+     // Don't include the query string parameters, otherwise Google
+     // treats ?nocdn=true as the canonical version
+-    const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
+-    res.locals.currentUrl = parsedOriginalUrl.pathname
+-    res.locals.currentUrlWithQueryParams =
+-      parsedOriginalUrl.pathname + parsedOriginalUrl.search
++    try {
++      const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
++      res.locals.currentUrl = parsedOriginalUrl.pathname
++      res.locals.currentUrlWithQueryParams =
++        parsedOriginalUrl.pathname + parsedOriginalUrl.search
++    } catch (err) {
++      return next(new Errors.InvalidError())
++    }
+     res.locals.capitalize = function (string) {
+       if (string.length === 0) {
+         return ''

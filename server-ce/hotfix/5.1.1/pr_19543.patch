@@ -1,0 +1,30 @@
+diff --git a/services/web/locales/en.json b/services/web/locales/en.json
+index a953a01a1d7..13e20b37279 100644
+--- a/services/web/locales/en.json
++++ b/services/web/locales/en.json
+@@ -519,7 +519,6 @@
+   "editor_disconected_click_to_reconnect": "Editor disconnected, click anywhere to reconnect.",
+   "editor_limit_exceeded_in_this_project": "Too many editors in this project",
+   "editor_only_hide_pdf": "Editor only <0>(hide PDF)</0>",
+-  "editor_resources": "Editor Resources",
+   "editor_theme": "Editor theme",
+   "educational_discount_applied": "40% educational discount applied!",
+   "educational_discount_available_for_groups_of_ten_or_more": "The educational discount is available for groups of 10 or more",
+diff --git a/services/web/modules/launchpad/app/views/launchpad.pug b/services/web/modules/launchpad/app/views/launchpad.pug
+index c478fe7b649..28d3ff8fc83 100644
+--- a/services/web/modules/launchpad/app/views/launchpad.pug
++++ b/services/web/modules/launchpad/app/views/launchpad.pug
+@@ -166,13 +166,6 @@ block content
+
+ 											h2 #{translate('status_checks')}
+
+-											<!-- ide js -->
+-											.row.row-spaced-small
+-												.col-sm-5
+-													| #{translate('editor_resources')}
+-												.col-sm-7
+-													+launchpad-check('ide')
+-
+ 											<!-- websocket -->
+ 											.row.row-spaced-small
+ 												.col-sm-5

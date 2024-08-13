@@ -1,0 +1,59 @@
+diff --git a/services/web/app/src/infrastructure/CSP.js b/services/web/app/src/infrastructure/CSP.js
+index 28f4f380d3d..abc11c59a48 100644
+--- a/services/web/app/src/infrastructure/CSP.js
++++ b/services/web/app/src/infrastructure/CSP.js
+@@ -6,6 +6,7 @@ module.exports = function ({
+   reportPercentage,
+   reportOnly = false,
+   exclude = [],
++  viewDirectives = {},
+ }) {
+   const header = reportOnly
+     ? 'Content-Security-Policy-Report-Only'
+@@ -33,7 +34,12 @@ module.exports = function ({
+
+         res.locals.scriptNonce = scriptNonce
+
+-        const policy = buildViewPolicy(scriptNonce, reportPercentage, reportUri)
++        const policy = buildViewPolicy(
++          scriptNonce,
++          reportPercentage,
++          reportUri,
++          viewDirectives[view]
++        )
+
+         // Note: https://csp-evaluator.withgoogle.com/ is useful for checking the policy
+
+@@ -68,11 +74,17 @@ const buildDefaultPolicy = (reportUri, styleSrc) => {
+   return directives.join('; ')
+ }
+
+-const buildViewPolicy = (scriptNonce, reportPercentage, reportUri) => {
++const buildViewPolicy = (
++  scriptNonce,
++  reportPercentage,
++  reportUri,
++  viewDirectives
++) => {
+   const directives = [
+     `script-src 'nonce-${scriptNonce}' 'unsafe-inline' 'strict-dynamic' https: 'report-sample'`, // only allow scripts from certain sources
+     `object-src 'none'`, // forbid loading an "object" element
+     `base-uri 'none'`, // forbid setting a "base" element
++    ...(viewDirectives ?? []),
+   ]
+
+   if (reportUri) {
+diff --git a/services/web/config/settings.defaults.js b/services/web/config/settings.defaults.js
+index cad13ab8156..ab738babdcd 100644
+--- a/services/web/config/settings.defaults.js
++++ b/services/web/config/settings.defaults.js
+@@ -911,6 +911,9 @@ module.exports = {
+     reportPercentage: parseFloat(process.env.CSP_REPORT_PERCENTAGE) || 0,
+     reportUri: process.env.CSP_REPORT_URI,
+     exclude: [],
++    viewDirectives: {
++      'app/views/project/ide-react': [`img-src 'self' data: blob:`],
++    },
+   },
+
+   unsupportedBrowsers: {

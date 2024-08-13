@@ -1,0 +1,19 @@
+--- overleaf.conf
++++ overleaf.conf
+@@ -67,6 +67,16 @@ server {
+ 		proxy_http_version 1.1;
+   }
+
++  # block external access to metrics
++  location ~* ^/metrics/?$ {
++    return 404 'Not found';
++  }
++
++  # block external access to all health checks /health_check, /health_check/full, etc
++  location ~* ^/health_check {
++    return 404 'Not found';
++  }
++
+   # Load any extra configuration for this vhost
+   include /etc/nginx/vhost-extras/overleaf/*.conf;
+ }
