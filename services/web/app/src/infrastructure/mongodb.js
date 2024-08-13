@@ -8,7 +8,7 @@ const { addConnectionDrainer } = require('./GracefulShutdown')
 // otherwise we will get multiple versions of the ObjectId class. Mongoose
 // patches ObjectId, so loading multiple versions of the mongodb module can
 // cause problems with ObjectId comparisons.
-if (Mongoose.mongo !== mongodb) {
+if (Mongoose.mongo.ObjectId !== mongodb.ObjectId) {
   throw new OError(
     'FATAL ERROR: Mongoose is using a different mongodb instance'
   )
