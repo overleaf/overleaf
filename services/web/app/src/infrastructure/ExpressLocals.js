@@ -11,6 +11,7 @@ const Features = require('./Features')
 const SessionManager = require('../Features/Authentication/SessionManager')
 const PackageVersions = require('./PackageVersions')
 const Modules = require('./Modules')
+const Errors = require('../Features/Errors/Errors')
 const {
   canRedirectToAdminDomain,
   hasAdminAccess,
@@ -228,10 +229,14 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
-    const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
-    res.locals.currentUrl = parsedOriginalUrl.pathname
-    res.locals.currentUrlWithQueryParams =
-      parsedOriginalUrl.pathname + parsedOriginalUrl.search
+    try {
+      const parsedOriginalUrl = new URL(req.originalUrl, Settings.siteUrl)
+      res.locals.currentUrl = parsedOriginalUrl.pathname
+      res.locals.currentUrlWithQueryParams =
+        parsedOriginalUrl.pathname + parsedOriginalUrl.search
+    } catch (err) {
+      return next(new Errors.InvalidError())
+    }
     res.locals.capitalize = function (string) {
       if (string.length === 0) {
         return ''

@@ -45,6 +45,10 @@ module.exports = {
         logger.err({ err }, 'failed api redis health check')
         return res.sendStatus(500)
       }
+      if (!settings.smokeTest.userId) {
+        logger.err({}, 'smokeTest.userId is undefined in health check')
+        return res.sendStatus(404)
+      }
       UserGetter.getUserEmail(settings.smokeTest.userId, (err, email) => {
         if (err) {
           logger.err({ err }, 'failed api mongo health check')
