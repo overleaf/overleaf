@@ -67,7 +67,7 @@ export const Info: Story = {
             size="lg"
             {...args}
           />
-          <FormText isInfo>Info</FormText>
+          <FormText type="info">Info</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
@@ -78,7 +78,7 @@ export const Info: Story = {
             defaultValue="Regular input"
             {...args}
           />
-          <FormText isInfo>Info</FormText>
+          <FormText type="info">Info</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
@@ -90,7 +90,7 @@ export const Info: Story = {
             size="sm"
             {...args}
           />
-          <FormText isInfo>Info</FormText>
+          <FormText type="info">Info</FormText>
         </FormGroup>
       </>
     )
@@ -111,7 +111,7 @@ export const Error: Story = {
             isInvalid
             {...args}
           />
-          <FormText isError>Error</FormText>
+          <FormText type="error">Error</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
@@ -123,7 +123,7 @@ export const Error: Story = {
             isInvalid
             {...args}
           />
-          <FormText isError>Error</FormText>
+          <FormText type="error">Error</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
@@ -136,7 +136,7 @@ export const Error: Story = {
             isInvalid
             {...args}
           />
-          <FormText isError>Error</FormText>
+          <FormText type="error">Error</FormText>
         </FormGroup>
       </>
     )
@@ -156,7 +156,7 @@ export const Warning: Story = {
             size="lg"
             {...args}
           />
-          <FormText isWarning>Warning</FormText>
+          <FormText type="warning">Warning</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
@@ -167,7 +167,7 @@ export const Warning: Story = {
             defaultValue="Regular input"
             {...args}
           />
-          <FormText isWarning>Warning</FormText>
+          <FormText type="warning">Warning</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
@@ -179,7 +179,7 @@ export const Warning: Story = {
             size="sm"
             {...args}
           />
-          <FormText isWarning>Warning</FormText>
+          <FormText type="warning">Warning</FormText>
         </FormGroup>
       </>
     )
@@ -199,7 +199,7 @@ export const Success: Story = {
             size="lg"
             {...args}
           />
-          <FormText isSuccess>Success</FormText>
+          <FormText type="success">Success</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-2">
@@ -210,7 +210,7 @@ export const Success: Story = {
             defaultValue="Regular input"
             {...args}
           />
-          <FormText isSuccess>Success</FormText>
+          <FormText type="success">Success</FormText>
         </FormGroup>
         <hr />
         <FormGroup controlId="id-3">
@@ -222,7 +222,7 @@ export const Success: Story = {
             size="sm"
             {...args}
           />
-          <FormText isSuccess>Success</FormText>
+          <FormText type="success">Success</FormText>
         </FormGroup>
       </>
     )

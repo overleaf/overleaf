@@ -1,25 +1,29 @@
-import { forwardRef } from 'react'
+import { forwardRef, ComponentProps } from 'react'
 import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
-import BS3FormControl from '@/features/ui/components/bootstrap-3/form/form-control'
 import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
+import BS3FormControl from '@/features/ui/components/bootstrap-3/form/form-control'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type OLFormControlProps = React.ComponentProps<typeof FormControl> & {
+type OLFormControlProps = ComponentProps<typeof FormControl> & {
   bs3Props?: Record<string, unknown>
   'data-ol-dirty'?: unknown
 }
+
+type BS3FormControlProps = ComponentProps<typeof BS3FormControl>
 
 const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
   (props, ref) => {
     const { bs3Props, ...rest } = props
 
-    let bs3FormControlProps: React.ComponentProps<typeof BS3FormControl> = {
+    let bs3FormControlProps: BS3FormControlProps = {
+      componentClass: rest.as,
       id: rest.id,
       name: rest.name,
       className: rest.className,
       style: rest.style,
       type: rest.type,
       value: rest.value,
+      defaultValue: rest.defaultValue,
       required: rest.required,
       disabled: rest.disabled,
       placeholder: rest.placeholder,
@@ -28,10 +32,10 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       autoFocus: rest.autoFocus,
       minLength: rest.minLength,
       maxLength: rest.maxLength,
-      onChange: rest.onChange as (e: React.ChangeEvent<unknown>) => void,
-      onKeyDown: rest.onKeyDown as (e: React.KeyboardEvent<unknown>) => void,
-      onFocus: rest.onFocus as (e: React.FocusEvent<unknown>) => void,
-      onInvalid: rest.onInvalid as (e: React.InvalidEvent<unknown>) => void,
+      onChange: rest.onChange as BS3FormControlProps['onChange'],
+      onKeyDown: rest.onKeyDown as BS3FormControlProps['onKeyDown'],
+      onFocus: rest.onFocus as BS3FormControlProps['onFocus'],
+      onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
       inputRef: (inputElement: HTMLInputElement) => {
         if (typeof ref === 'function') {
           ref(inputElement)

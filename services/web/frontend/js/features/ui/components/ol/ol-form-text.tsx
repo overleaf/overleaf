@@ -1,11 +1,12 @@
 import FormText, {
-  getFormTextColor,
+  FormTextProps,
+  getFormTextClass,
 } from '@/features/ui/components/bootstrap-5/form/form-text'
 import PolymorphicComponent from '@/shared/components/polymorphic-component'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import classnames from 'classnames'
 
-type OLFormTextProps = React.ComponentProps<typeof FormText> & {
+type OLFormTextProps = FormTextProps & {
   bs3Props?: Record<string, unknown>
 }
 
@@ -14,15 +15,7 @@ function OLFormText(props: OLFormTextProps) {
 
   const bs3HelpBlockProps = {
     children: rest.children,
-    className: classnames(
-      'small',
-      rest.className,
-      getFormTextColor({
-        isError: rest.isError,
-        isSuccess: rest.isSuccess,
-        isWarning: rest.isWarning,
-      })
-    ),
+    className: classnames('small', rest.className, getFormTextClass(rest.type)),
     as: 'span',
     ...bs3Props,
   } as const satisfies React.ComponentProps<typeof PolymorphicComponent>

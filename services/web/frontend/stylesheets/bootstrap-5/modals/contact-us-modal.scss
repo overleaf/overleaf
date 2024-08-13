@@ -1,0 +1,82 @@
+.contact-us-modal-textarea {
+  height: 120px;
+}
+
+.modal-form-messages .notification {
+  margin-bottom: var(--spacing-05);
+}
+
+.contact-suggestions {
+  @include body-sm;
+
+  margin: 0 calc(-1 * var(--bs-modal-padding)) var(--spacing-05);
+  padding: var(--spacing-05) 0;
+  color: var(--content-secondary);
+  background-color: var(--bg-light-secondary);
+  border-top: solid 1px var(--border-primary-dark);
+  border-bottom: solid 1px var(--border-primary-dark);
+}
+
+.contact-suggestion-label {
+  margin-bottom: var(--spacing-05);
+  padding: 0 var(--spacing-07);
+}
+
+.contact-suggestion-list {
+  padding-left: 0;
+  list-style: none;
+  background-color: var(--white);
+  border-top: solid 1px var(--border-primary-dark);
+  border-bottom: solid 1px var(--border-primary-dark);
+  margin: 0;
+
+  li:last-child .contact-suggestion-list-item {
+    border-bottom: none;
+  }
+}
+
+.contact-suggestion-list-item {
+  display: flex;
+  justify-content: space-between;
+  color: var(--content-secondary);
+  padding: var(--spacing-05) var(--spacing-07);
+  border-bottom: solid 1px var(--border-divider);
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    background-color: var(--bg-light-secondary);
+
+    span {
+      text-decoration: underline;
+    }
+
+    .fa {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  .fa {
+    color: var(--neutral-30);
+  }
+}
+
+.contact-suggestions-dropdown {
+  width: calc(100% - 2 * var(--bs-modal-padding));
+
+  .dropdown-header {
+    @include body-sm;
+
+    padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
+  }
+
+  .dropdown-item {
+    white-space: normal;
+  }
+
+  .form-group + & {
+    margin-top: $spacing-02 - $form-group-margin-bottom;
+  }
+}

@@ -91,9 +91,13 @@ export function DropdownToggle({ ...props }: DropdownToggleProps) {
   return <BS5DropdownToggle {...props} />
 }
 
-export function DropdownMenu({ as = 'ul', ...props }: DropdownMenuProps) {
-  return <BS5DropdownMenu as={as} role="menu" {...props} />
-}
+export const DropdownMenu = forwardRef<
+  typeof BS5DropdownMenu,
+  DropdownMenuProps
+>(({ as = 'ul', ...props }, ref) => {
+  return <BS5DropdownMenu as={as} role="menu" {...props} ref={ref} />
+})
+DropdownMenu.displayName = 'DropdownMenu'
 
 export function DropdownDivider({ as = 'li' }: DropdownDividerProps) {
   return <BS5DropdownDivider as={as} />

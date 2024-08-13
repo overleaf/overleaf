@@ -24,10 +24,12 @@ export function formatWikiHit(hit) {
   const pagePath = hit.kb ? 'how-to' : 'latex'
 
   let pageAnchor = ''
-  let pageName = hit._highlightResult.pageName.value
-  if (hit.sectionName) {
-    pageAnchor = `#${hit.sectionName.replace(/\s/g, '_')}`
-    pageName += ' - ' + hit.sectionName
+  const rawPageName = hit._highlightResult.pageName.value
+  const sectionName = hit.sectionName
+  let pageName = rawPageName
+  if (sectionName) {
+    pageAnchor = `#${sectionName.replace(/\s/g, '_')}`
+    pageName += ' - ' + sectionName
   }
 
   const body = hit._highlightResult.content.value
@@ -37,5 +39,5 @@ export function formatWikiHit(hit) {
     .join('\n...\n')
 
   const url = `/learn/${pagePath}/${pageSlug}${pageAnchor}`
-  return { url, pageName, content }
+  return { url, pageName, rawPageName, sectionName, content }
 }

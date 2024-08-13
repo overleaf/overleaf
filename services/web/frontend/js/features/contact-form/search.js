@@ -48,7 +48,7 @@ export function setupSearch(formEl) {
         const iconEl = document.createElement('i')
         iconEl.className = 'fa fa-angle-right'
         iconEl.setAttribute('aria-hidden', 'true')
-        linkEl.append(contentEl)
+        linkEl.append(iconEl)
 
         resultsEl.append(liEl)
       }

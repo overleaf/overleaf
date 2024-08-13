@@ -357,6 +357,15 @@ input[type='checkbox'],
   margin-top: 5px;
   margin-bottom: 10px;
   color: lighten(@text-color, 25%); // lighten the text some for contrast
+
+  // Hide help blocks used as validation messages by default
+  &.invalid-only {
+    display: none;
+
+    .has-error & {
+      display: block;
+    }
+  }
 }
 
 // Inline forms

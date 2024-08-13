@@ -102,7 +102,7 @@ export function OLModalBody({ children, ...props }: OLModalBodyProps) {
 
   const bs3ModalProps: BS3ModalBodyProps = {
     componentClass: bs5Props.as,
-    bsClass: bs5Props.className,
+    className: bs5Props.className,
   }
 
   return (
@@ -118,7 +118,7 @@ export function OLModalFooter({ children, ...props }: OLModalFooterProps) {
 
   const bs3ModalProps: BS3ModalFooterProps = {
     componentClass: bs5Props.as,
-    bsClass: bs5Props.className,
+    className: bs5Props.className,
   }
 
   return (

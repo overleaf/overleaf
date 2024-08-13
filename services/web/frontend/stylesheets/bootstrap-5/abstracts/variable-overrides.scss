@@ -120,6 +120,7 @@ $form-check-input-disabled-opacity: 1;
 // form-feedback-variables
 $form-feedback-invalid-color: $bg-danger-01;
 $form-feedback-icon-invalid: null;
+$form-feedback-margin-top: 0; // Our feedback component wraps Form.Text, which takes care of top margin
 
 // form-validation-colors
 $form-invalid-color: $form-feedback-invalid-color;

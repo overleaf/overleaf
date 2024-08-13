@@ -1455,6 +1455,8 @@
   "please_enter_email": "Please enter your email address",
   "please_get_in_touch": "Please get in touch",
   "please_link_before_making_primary": "Please confirm your email by linking to your institutional account before making it the primary email.",
+  "please_provide_a_message": "Please provide a message",
+  "please_provide_a_subject": "Please provide a subject",
   "please_reconfirm_institutional_email": "Please take a moment to confirm your institutional email address or <0>remove it</0> from your account.",
   "please_reconfirm_your_affiliation_before_making_this_primary": "Please confirm your affiliation before making this the primary.",
   "please_refresh": "Please refresh the page to continue.",

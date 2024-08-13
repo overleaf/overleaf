@@ -118,18 +118,20 @@ function AccountInfoSection() {
           </OLFormGroup>
         ) : null}
         {canUpdateEmail || canUpdateNames ? (
-          <OLButton
-            type="submit"
-            variant="primary"
-            form="account-info-form"
-            disabled={!isFormValid}
-            isLoading={isLoading}
-            bs3Props={{
-              loading: isLoading ? `${t('saving')}…` : t('update'),
-            }}
-          >
-            {t('update')}
-          </OLButton>
+          <OLFormGroup>
+            <OLButton
+              type="submit"
+              variant="primary"
+              form="account-info-form"
+              disabled={!isFormValid}
+              isLoading={isLoading}
+              bs3Props={{
+                loading: isLoading ? `${t('saving')}…` : t('update'),
+              }}
+            >
+              {t('update')}
+            </OLButton>
+          </OLFormGroup>
         ) : null}
       </form>
     </>
@@ -188,7 +190,9 @@ function ReadOrWriteFormGroup({
         onChange={handleChangeAndValidity}
         onInvalid={handleInvalid}
       />
-      {validationMessage && <FormText isError>{validationMessage}</FormText>}
+      {validationMessage && (
+        <FormText type="error">{validationMessage}</FormText>
+      )}
     </OLFormGroup>
   )
 }

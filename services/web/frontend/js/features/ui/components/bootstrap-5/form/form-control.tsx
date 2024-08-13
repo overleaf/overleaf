@@ -36,7 +36,7 @@ const FormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       )
     }
 
-    return <Form.Control className={className} {...props} />
+    return <Form.Control ref={ref} className={className} {...props} />
   }
 )
 FormControl.displayName = 'FormControl'

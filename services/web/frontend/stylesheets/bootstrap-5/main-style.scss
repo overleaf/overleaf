@@ -32,3 +32,9 @@ $is-overleaf-light: false;
 
 // Page layout that isn't related to a particular component or page
 @import 'base/layout';
+
+// Modals
+@import 'modals/all';
+
+// Pages custom style
+@import 'pages/all';
