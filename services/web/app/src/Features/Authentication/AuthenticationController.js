@@ -26,6 +26,7 @@ const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const Modules = require('../../infrastructure/Modules')
 const { expressify, promisify } = require('@overleaf/promise-utils')
 const { handleAuthenticateErrors } = require('./AuthenticationErrors')
+const EmailHelper = require('../Helpers/EmailHelper')
 
 function send401WithChallenge(res) {
   res.setHeader('WWW-Authenticate', 'OverleafLogin')
@@ -103,7 +104,7 @@ const AuthenticationController = {
     passport.authenticate(
       'local',
       { keepSessionInfo: true },
-      function (err, user, info) {
+      async function (err, user, info) {
         if (err) {
           return next(err)
         }
@@ -112,7 +113,18 @@ const AuthenticationController = {
           AuthenticationController.setAuditInfo(req, {
             method: 'Password login',
           })
-          return AuthenticationController.finishLogin(user, req, res, next)
+
+          try {
+            // We could investigate whether this can be done together with 'preFinishLogin' instead of being its own hook
+            await Modules.promises.hooks.fire(
+              'saasLogin',
+              { email: user.email },
+              req
+            )
+            await AuthenticationController.promises.finishLogin(user, req, res)
+          } catch (err) {
+            return next(err)
+          }
         } else {
           if (info.redir != null) {
             return res.json({ redir: info.redir })
@@ -217,7 +229,20 @@ const AuthenticationController = {
    * @returns {Promise<{ user: any, info: any}>}
    */
   async _doPassportLogin(req, username, password) {
-    const email = username.toLowerCase()
+    const email = EmailHelper.parseEmail(username)
+    if (!email) {
+      Metrics.inc('login_failure_reason', 1, { status: 'invalid_email' })
+      return {
+        user: null,
+        info: {
+          status: 400,
+          type: 'error',
+          text: req.i18n.translate('email_address_is_invalid'),
+        },
+      }
+    }
+    AuthenticationController.setAuditInfo(req, { method: 'Password login' })
+
     const { fromKnownDevice } = AuthenticationController.getAuditInfo(req)
     const auditLog = {
       ipAddress: req.ip,
@@ -243,6 +268,7 @@ const AuthenticationController = {
     }
 
     if (user && AuthenticationController.captchaRequiredForLogin(req, user)) {
+      Metrics.inc('login_failure_reason', 1, { status: 'captcha_missing' })
       return {
         user: false,
         info: {
@@ -266,6 +292,7 @@ const AuthenticationController = {
       // async actions
       return { user, info: undefined }
     } else {
+      Metrics.inc('login_failure_reason', 1, { status: 'password_invalid' })
       AuthenticationController._recordFailedLogin()
       logger.debug({ email }, 'failed log in')
       return {

@@ -280,7 +280,7 @@ describe('AuthenticationController', function () {
       this.req.session.destroy = sinon.stub().yields(null)
       this.req.session.save = sinon.stub().yields(null)
       this.req.sessionStore = { generate: sinon.stub() }
-      this.AuthenticationController.finishLogin = sinon.stub()
+      this.AuthenticationController.promises.finishLogin = sinon.stub()
       this.passport.authenticate.yields(null, this.user, this.info)
       this.err = new Error('woops')
     })
@@ -315,16 +315,21 @@ describe('AuthenticationController', function () {
         delete this.req.session.postLoginRedirect
       })
 
-      it('should call finishLogin', function () {
+      it('should call finishLogin', function (done) {
+        this.AuthenticationController.promises.finishLogin.callsFake(() => {
+          this.AuthenticationController.promises.finishLogin.callCount.should.equal(
+            1
+          )
+          this.AuthenticationController.promises.finishLogin
+            .calledWith(this.user, this.req, this.res)
+            .should.equal(true)
+          done()
+        })
         this.AuthenticationController.passportLogin(
           this.req,
           this.res,
           this.next
         )
-        this.AuthenticationController.finishLogin.callCount.should.equal(1)
-        this.AuthenticationController.finishLogin
-          .calledWith(this.user)
-          .should.equal(true)
       })
     })
 
@@ -340,7 +345,9 @@ describe('AuthenticationController', function () {
           this.res,
           this.next
         )
-        this.AuthenticationController.finishLogin.callCount.should.equal(0)
+        this.AuthenticationController.promises.finishLogin.callCount.should.equal(
+          0
+        )
       })
 
       it('should not send a json response with redirect', function () {
