@@ -65,7 +65,8 @@ function monitor(mongoClient) {
     const servers = mongoClient.topology?.s?.servers
     if (servers != null) {
       for (const [address, server] of servers) {
-        const pool = server.s?.pool
+        // The server object is different between v4 and v5 (c.f. https://github.com/mongodb/node-mongodb-native/pull/3645)
+        const pool = server.s?.pool || server.pool
         if (pool == null) {
           continue
         }
