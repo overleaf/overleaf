@@ -6,6 +6,8 @@ const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const PlansLocator = require('./app/src/Features/Subscription/PlansLocator')
 const SiteAdminHandler = require('./app/src/infrastructure/SiteAdminHandler')
+const Modules = require('./app/src/infrastructure/Modules')
+
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
 logger.logger.serializers.user =
   require('./app/src/infrastructure/LoggerSerializers').user
@@ -60,7 +62,7 @@ if (!module.parent) {
   PlansLocator.ensurePlansAreSetupCorrectly()
 
   Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
-    .then(() => {
+    .then(async () => {
       Server.server.listen(port, host, function () {
         logger.debug(`web starting up, listening on ${host}:${port}`)
         logger.debug(
@@ -69,9 +71,8 @@ if (!module.parent) {
         // wait until the process is ready before monitoring the event loop
         metrics.event_loop.monitor(logger)
       })
-      if (process.env.QUEUE_PROCESSING_ENABLED === 'true') {
-        QueueWorkers.start()
-      }
+      QueueWorkers.start()
+      await Modules.start()
     })
     .catch(err => {
       logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')

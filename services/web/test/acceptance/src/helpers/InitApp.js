@@ -12,6 +12,7 @@ const { app } = require('../../../../app/src/infrastructure/Server')
 const { injectRouteAfter } = require('./injectRoute')
 const SplitTestHandler = require('../../../../app/src/Features/SplitTests/SplitTestHandler')
 const SplitTestSessionHandler = require('../../../../app/src/Features/SplitTests/SplitTestSessionHandler')
+const Modules = require('../../../../app/src/infrastructure/Modules')
 
 logger.logger.level('error')
 
@@ -104,8 +105,9 @@ before('start main app', function (done) {
   server = App.listen(23000, '127.0.0.1', done)
 })
 
-before('start queue workers', function () {
+before('start queue workers', async function () {
   QueueWorkers.start()
+  await Modules.start()
 })
 
 after('stop main app', async function () {

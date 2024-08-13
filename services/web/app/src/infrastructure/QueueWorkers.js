@@ -3,7 +3,6 @@ const Queues = require('./Queues')
 const UserOnboardingEmailManager = require('../Features/User/UserOnboardingEmailManager')
 const UserPostRegistrationAnalyticsManager = require('../Features/User/UserPostRegistrationAnalyticsManager')
 const FeaturesUpdater = require('../Features/Subscription/FeaturesUpdater')
-const InstitutionsManager = require('../Features/Institutions/InstitutionsManager')
 const {
   addOptionalCleanupHandlerBeforeStoppingTraffic,
   addRequiredCleanupHandlerBeforeDrainingConnections,
@@ -13,13 +12,30 @@ const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const Modules = require('./Modules')
 
+/**
+ * @typedef {{
+ *   data: {queueName: string,name?: string,data?: any},
+ * }} BullJob
+ */
+
+/**
+ * @param {string} queueName
+ * @param {(job: BullJob) => Promise<void>} handler
+ */
+function registerQueue(queueName, handler) {
+  if (process.env.QUEUE_PROCESSING_ENABLED === 'true') {
+    const queue = Queues.getQueue(queueName)
+    queue.process(handler)
+    registerCleanup(queue)
+  }
+}
+
 function start() {
   if (!Features.hasFeature('saas')) {
     return
   }
 
-  const scheduledJobsQueue = Queues.getQueue('scheduled-jobs')
-  scheduledJobsQueue.process(async job => {
+  registerQueue('scheduled-jobs', async job => {
     const { queueName, name, data, options } = job.data
     const queue = Queues.getQueue(queueName)
     if (name) {
@@ -28,33 +44,23 @@ function start() {
       await queue.add(data || {}, options || {})
     }
   })
-  registerCleanup(scheduledJobsQueue)
 
-  const onboardingEmailsQueue = Queues.getQueue('emails-onboarding')
-  onboardingEmailsQueue.process(async job => {
+  registerQueue('emails-onboarding', async job => {
     const { userId } = job.data
     await UserOnboardingEmailManager.sendOnboardingEmail(userId)
   })
-  registerCleanup(onboardingEmailsQueue)
 
-  const postRegistrationAnalyticsQueue = Queues.getQueue(
-    'post-registration-analytics'
-  )
-  postRegistrationAnalyticsQueue.process(async job => {
+  registerQueue('post-registration-analytics', async job => {
     const { userId } = job.data
     await UserPostRegistrationAnalyticsManager.postRegistrationAnalytics(userId)
   })
-  registerCleanup(postRegistrationAnalyticsQueue)
 
-  const refreshFeaturesQueue = Queues.getQueue('refresh-features')
-  refreshFeaturesQueue.process(async job => {
+  registerQueue('refresh-features', async job => {
     const { userId, reason } = job.data
     await FeaturesUpdater.promises.refreshFeatures(userId, reason)
   })
-  registerCleanup(refreshFeaturesQueue)
 
-  const deferredEmailsQueue = Queues.getQueue('deferred-emails')
-  deferredEmailsQueue.process(async job => {
+  registerQueue('deferred-emails', async job => {
     const { emailType, opts } = job.data
     try {
       await EmailHandler.promises.sendEmail(emailType, opts)
@@ -64,25 +70,8 @@ function start() {
       throw error
     }
   })
-  registerCleanup(deferredEmailsQueue)
 
-  const confirmInstitutionDomainQueue = Queues.getQueue(
-    'confirm-institution-domain'
-  )
-  confirmInstitutionDomainQueue.process(async job => {
-    const { hostname } = job.data
-    try {
-      await InstitutionsManager.promises.affiliateUsers(hostname)
-    } catch (e) {
-      const error = OError.tag(e, 'failed to confirm university domain')
-      logger.warn(error)
-      throw error
-    }
-  })
-  registerCleanup(confirmInstitutionDomainQueue)
-
-  const groupSSOReminderQueue = Queues.getQueue('group-sso-reminder')
-  groupSSOReminderQueue.process(async job => {
+  registerQueue('group-sso-reminder', async job => {
     const { userId, subscriptionId } = job.data
     try {
       await Modules.promises.hooks.fire(
@@ -99,7 +88,6 @@ function start() {
       throw error
     }
   })
-  registerCleanup(groupSSOReminderQueue)
 }
 
 function registerCleanup(queue) {
@@ -119,4 +107,4 @@ function registerCleanup(queue) {
   // Disconnect from redis is scheduled in queue setup.
 }
 
-module.exports = { start }
+module.exports = { start, registerQueue }

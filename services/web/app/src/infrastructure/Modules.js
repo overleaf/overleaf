@@ -79,6 +79,12 @@ function applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter) {
   }
 }
 
+async function start() {
+  for (const module of modules()) {
+    await module.start?.()
+  }
+}
+
 function loadViewIncludes(app) {
   _viewIncludes = Views.compileViewIncludes(app)
 }
@@ -183,6 +189,7 @@ module.exports = {
   moduleIncludes,
   moduleIncludesAvailable,
   applyMiddleware,
+  start,
   hooks: {
     attach: attachHook,
     fire: fireHook,
