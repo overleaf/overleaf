@@ -125,7 +125,10 @@ module.exports = {
         test: /\.([jt]sx?|[cm]js)$/,
         // Only compile application files and specific dependencies
         // (other npm and vendored dependencies must be in ES5 already)
-        exclude: [/node_modules\/(?!(react-dnd|chart\.js|@uppy)\/)/, vendorDir],
+        exclude: [
+          /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist401)\/)/,
+          vendorDir,
+        ],
         use: [
           {
             loader: 'babel-loader',
