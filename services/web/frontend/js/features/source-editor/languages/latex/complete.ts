@@ -114,7 +114,9 @@ export type CompletionBuilderOptions = {
 
 export const makeArgumentCompletionSource = (
   ifInSpec: string[],
-  builder: (builderOptions: CompletionBuilderOptions) => CompletionResult | null
+  builder: (
+    builderOptions: CompletionBuilderOptions
+  ) => CompletionResult | null | Promise<CompletionResult | null>
 ): CompletionSource => {
   const completionSource: CompletionSource = (context: CompletionContext) => {
     const completionMatches = getCompletionMatches(context)
