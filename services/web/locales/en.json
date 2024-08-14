@@ -133,6 +133,7 @@
   "app_on_x": "__appName__ on __social__",
   "apply_educational_discount": "Apply educational discount",
   "apply_educational_discount_info": "Overleaf offers a 40% educational discount for groups of 10 or more. Applies to students or faculty using Overleaf for teaching.",
+  "apply_educational_discount_info_new": "40% discount for groups of 10 or more using __appName__ for teaching",
   "apply_suggestion": "Apply suggestion",
   "april": "April",
   "archive": "Archive",

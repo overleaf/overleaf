@@ -418,7 +418,7 @@
     }
   }
 
-  .plans-new-group-member-picker-container {
+  .plans-new-group-member-picker {
     .plans-new-group-member-picker-text {
       font-size: var(--font-size-02);
       line-height: var(--line-height-02);
@@ -426,7 +426,7 @@
       margin-bottom: var(--spacing-02);
     }
 
-    .plans-new-group-member-picker {
+    .plans-new-group-member-picker-form {
       position: relative;
 
       .plans-new-group-member-picker-button {
@@ -486,14 +486,15 @@
 
       li {
         position: relative;
-        border-radius: var(--border-radius-base-new);
 
         &:not(:last-child) {
           margin-bottom: var(--spacing-02);
         }
 
         &:not(.plans-new-group-member-picker-footer):hover {
-          background-color: var(--neutral-10);
+          input[type='radio']:not(:checked) + p {
+            background-color: var(--neutral-10);
+          }
         }
 
         input[type='radio'] {
@@ -501,12 +502,19 @@
           opacity: 0;
           cursor: pointer;
 
-          &:focus + label {
+          &:focus + p {
             &:extend(.input-focus-style);
+          }
+
+          + p {
+            padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
+              var(--spacing-04);
+            margin-bottom: 0;
+            border-radius: var(--border-radius-base-new);
           }
         }
 
-        input[type='radio']:checked + label {
+        input[type='radio']:checked + p {
           background-color: var(--green-10);
           color: var(--green-70);
           position: relative;
@@ -529,14 +537,45 @@
           width: 100%;
           font-size: var(--font-size-02);
           line-height: var(--line-height-02);
-          padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
-            var(--spacing-04);
           margin-bottom: var(--spacing-00);
           font-weight: 400;
           cursor: pointer;
           border-radius: var(--border-radius-base-new);
 
           .list-item-footer {
+            font-size: var(--font-size-01);
+            line-height: var(--line-height-01);
+          }
+        }
+      }
+
+      .plans-new-edu-discount {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--spacing-04);
+        margin-bottom: var(--spacing-06);
+        font-weight: 400;
+
+        input[type='checkbox'] {
+          margin: var(--spacing-02);
+          accent-color: var(--green-50);
+
+          &:focus-visible {
+            .box-shadow-button-input();
+          }
+        }
+
+        .plans-new-edu-discount-content {
+          display: flex;
+          flex-direction: column;
+
+          span {
+            line-height: var(--line-height-03);
+            color: var(--neutral-90);
+          }
+
+          small {
+            color: var(--neutral-70);
             font-size: var(--font-size-01);
             line-height: var(--line-height-01);
           }
@@ -771,11 +810,6 @@
         .plans-card-cta-buy-now-mobile {
           width: 100%;
           margin-top: var(--spacing-08);
-          line-height: var(--line-height-03);
-        }
-        .group-plans-card-cta-buy-now-mobile {
-          width: 100%;
-          margin-top: var(--spacing-04);
           line-height: var(--line-height-03);
         }
       }
