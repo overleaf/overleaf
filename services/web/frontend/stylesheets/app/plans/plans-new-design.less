@@ -15,6 +15,7 @@
 @group-member-picker-height: 24px;
 
 @table-4-column-width: 25%;
+@table-5-column-width: 20%;
 
 .plans-new-design {
   padding-top: calc(var(--spacing-16) + var(--header-height));
@@ -1074,10 +1075,18 @@
 
 .plans-new-design.plans-interstitial-new-design {
   padding-top: calc(var(--spacing-13) + var(--header-height));
+  padding-bottom: var(--spacing-09);
 
   .plans-interstitial-new-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  .plans-new-table {
+    th,
+    td {
+      width: @table-5-column-width;
+    }
   }
 }
