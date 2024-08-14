@@ -21,6 +21,8 @@
 
 @group-member-picker-height: 24px;
 
+@table-4-column-width: 25%;
+
 .plans-new-design {
   padding-top: calc(var(--spacing-16) + var(--header-height));
 
@@ -292,120 +294,81 @@
   .plans-new-table {
     width: 100%;
 
-    // overrides
-    th {
-      font-weight: normal;
-    }
-
-    // the following rules are used to make every .plans-new-table-header-content
-    // occupy the whole height dynamically
-    height: fit-content;
-    thead tr {
-      height: 100%;
-
-      .plans-new-table-header-content {
-        height: 100%;
-      }
-    }
-  }
-
-  @table-4-column-width: 25%;
-
-  // TODO: review the usage of this class
-  // and check whether we can move the rule directly in the .plans-new-table
-  .plans-new-table-4-column {
     th,
     td {
       width: @table-4-column-width;
     }
   }
 
-  .plans-new-table-4-column.plans-new-table-student {
+  .plans-new-table-student {
     margin-left: @table-4-column-width / 2;
   }
 
   .plans-new-table-group {
     margin-top: @spacing-11 + @highlighted-heading-height;
-
-    .plans-new-table-header-grid-container {
-      min-height: 85px;
-    }
-
-    // css specificity issue
-    thead tr th .plans-new-table-header-title {
-      @media (max-width: @screen-md-max) {
-        font-size: var(--font-size-03);
-      }
-    }
   }
 
-  .plans-new-table-header {
+  thead th {
     position: relative;
-    padding: @spacing-06 @spacing-08;
+    padding: var(--spacing-06) var(--spacing-08) var(--spacing-04)
+      var(--spacing-08);
+    font-size: var(--font-size-05);
+    font-weight: 600;
+    line-height: var(--line-height-04);
+    color: var(--neutral-90);
+    text-align: center;
 
     @media (max-width: @screen-md-max) {
-      padding: var(--spacing-05);
+      padding: var(--spacing-05) var(--spacing-05) 0 var(--spacing-05);
     }
   }
 
-  .plans-new-table-header-content {
+  .plans-new-table-subheader {
+    vertical-align: top;
+    padding: 0 var(--spacing-08);
+    @media (max-width: @screen-md-max) {
+      padding: 0 var(--spacing-05);
+    }
+
+    &.plans-new-table-icon-cta-cell {
+      vertical-align: bottom;
+    }
+  }
+
+  .plans-new-table-cta-row {
+    td {
+      padding-bottom: var(--spacing-06);
+      @media (max-width: @screen-md-max) {
+        padding-bottom: var(--spacing-05);
+      }
+    }
+
+    .btn-block + .btn-block {
+      margin-top: var(--spacing-04);
+    }
+  }
+
+  .plans-new-table-header-grid-container {
     display: flex;
     flex-direction: column;
-    position: relative;
+    align-items: center;
 
-    .plans-new-table-header-title {
-      font-size: var(--font-size-05);
+    s,
+    .match-original-price-height {
+      font-size: var(--font-size-02);
+      line-height: @nondiscounted-price-element-height;
+      color: var(--neutral-60);
       font-weight: 600;
-      line-height: var(--line-height-04);
-      margin-bottom: var(--spacing-04);
+    }
+
+    .plans-new-table-header-price {
+      font-size: var(--font-size-08);
+      font-weight: 600;
+      line-height: var(--line-height-07);
       color: var(--neutral-90);
-      text-align: center;
     }
 
-    .plans-new-table-header-grid-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      s {
-        font-size: var(--font-size-02);
-        line-height: @nondiscounted-price-element-height;
-        color: var(--neutral-60);
-        font-weight: 600;
-      }
-
-      .plans-new-table-header-price {
-        font-size: var(--font-size-08);
-        font-weight: 600;
-        line-height: var(--line-height-07);
-        color: var(--neutral-90);
-
-        // will affect the element if header does not have nondiscounted price
-        &:first-child {
-          margin-top: @nondiscounted-price-element-height;
-        }
-      }
-
-      .plans-new-table-header-price-unit {
-        font-size: var(--font-size-02);
-        line-height: var(--line-height-02);
-      }
-
-      .plans-new-table-header-price-unit-total {
-        font-size: var(--font-size-01);
-        line-height: var(--line-height-01);
-      }
-
-      .plans-new-table-header-icon {
-        font-size: 56px;
-        color: var(--neutral-90);
-        margin-top: @nondiscounted-price-element-height;
-      }
-    }
-
-    .plans-new-table-header-desc {
-      margin-top: var(--spacing-05);
-      margin-bottom: var(--spacing-08);
+    .plans-new-table-header-price-unit {
       font-size: var(--font-size-02);
       line-height: var(--line-height-02);
     }
@@ -416,6 +379,23 @@
         margin-top: var(--spacing-04);
       }
     }
+
+    .plans-new-table-header-icon {
+      font-size: 56px;
+      color: var(--neutral-90);
+    }
+  }
+
+  .plans-new-table-header-price-unit-total {
+    font-size: var(--font-size-01);
+    line-height: var(--line-height-01);
+  }
+
+  .plans-new-table-header-desc {
+    margin-top: var(--spacing-05);
+    margin-bottom: var(--spacing-08);
+    font-size: var(--font-size-02);
+    line-height: var(--line-height-02);
   }
 
   .plans-new-group-member-picker {
@@ -623,6 +603,7 @@
   }
 
   .plans-new-table-feature-th {
+    font-weight: normal;
     padding: var(--spacing-05) var(--spacing-08) var(--spacing-05)
       var(--spacing-05);
 
@@ -678,6 +659,7 @@
     line-height: @highlighted-heading-line-height;
     background-color: var(--green-50);
     color: var(--white);
+    font-size: var(--font-size-03);
   }
 
   .plans-new-table-highlighted-cell {
