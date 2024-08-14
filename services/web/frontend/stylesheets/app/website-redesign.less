@@ -958,6 +958,15 @@
     }
   }
 
+  .link-monospace {
+    .dm-mono;
+    font-weight: 500;
+    color: var(--green-50);
+    &:hover {
+      color: var(--green-60);
+    }
+  }
+
   .green-link {
     .link-with-arrow;
     // TODO: replace .green-link uses with .link-with-arrow
@@ -996,6 +1005,33 @@
 
       &:hover {
         background: var(--green-60);
+      }
+    }
+  }
+
+  a {
+    &:focus,
+    &:focus-visible {
+      outline: 0;
+    }
+
+    &:focus-visible {
+      .box-shadow-button-input();
+    }
+
+    i {
+      vertical-align: middle;
+      margin-left: var(--spacing-02);
+      padding-bottom: 3px;
+    }
+
+    &.link-lg {
+      font-size: var(--font-size-04);
+      line-height: var(--line-height-03);
+
+      i {
+        font-size: 24px;
+        line-height: inherit;
       }
     }
   }
