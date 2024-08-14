@@ -768,7 +768,9 @@ module.exports = {
   recurlyNotificationParser,
   refreshUserFeatures: expressify(refreshUserFeatures),
   redirectToHostedPage: expressify(redirectToHostedPage),
+  plansBanners: _plansBanners,
   promises: {
     getRecommendedCurrency: _getRecommendedCurrency,
+    getLatamCountryBannerDetails,
   },
 }
