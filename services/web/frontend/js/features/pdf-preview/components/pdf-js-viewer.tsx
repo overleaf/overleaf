@@ -439,7 +439,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
   const handleKeyDown = useCallback(
     event => {
-      if (!initialised) {
+      if (!initialised || !pdfJsWrapper) {
         return
       }
       if (event.metaKey || event.ctrlKey) {
@@ -448,26 +448,30 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
           case '=':
             event.preventDefault()
             setZoom('zoom-in')
+            pdfJsWrapper.container.focus()
             break
 
           case '-':
             event.preventDefault()
             setZoom('zoom-out')
+            pdfJsWrapper.container.focus()
             break
 
           case '0':
             event.preventDefault()
             setZoom('page-width')
+            pdfJsWrapper.container.focus()
             break
 
           case '9':
             event.preventDefault()
             setZoom('page-height')
+            pdfJsWrapper.container.focus()
             break
         }
       }
     },
-    [initialised, setZoom]
+    [initialised, setZoom, pdfJsWrapper]
   )
 
   useMouseWheelZoom(pdfJsWrapper, setScale)
@@ -494,12 +498,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
-      <div
-        className="pdfjs-viewer-inner"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        role="tabpanel"
-      >
+      <div className="pdfjs-viewer-inner" tabIndex={0} role="tabpanel">
         <div className="pdfViewer" />
       </div>
       {toolbarInfoLoaded && (
