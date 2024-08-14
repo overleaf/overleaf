@@ -8,14 +8,7 @@
   @highlighted-heading-line-height + (2 * @highlighted-heading-padding-vertical)
 );
 
-@switcher-container-width: 270px;
-@switcher-container-height: 44px;
-@switcher-container-border-radius: @switcher-container-height / 2;
-@switcher-container-padding: 6px;
 @switcher-container-margin-bottom: @highlighted-heading-height + @spacing-10;
-@switcher-padding-vertical: 2px;
-@switcher-height: @switcher-container-height - 2 * @switcher-container-padding;
-@switcher-border-radius: @switcher-height / 2;
 
 @nondiscounted-price-element-height: var(--line-height-02);
 
@@ -211,21 +204,19 @@
     display: flex;
     justify-content: center;
     background-color: var(--neutral-10);
-    width: @switcher-container-width;
-    height: @switcher-container-height;
-    border-radius: @switcher-container-border-radius;
-    padding: @switcher-container-padding;
-    margin-top: @spacing-09;
+    border-radius: var(--border-radius-full-new);
+    padding: var(--spacing-03);
+    margin-top: var(--spacing-09);
     margin-bottom: @switcher-container-margin-bottom;
+    gap: var(--spacing-04);
 
     .plans-new-period-switcher {
       font-size: var(--font-size-05);
       font-weight: 600;
       line-height: var(--line-height-04);
       text-align: center;
-      padding: 2px 8px;
-      height: @switcher-height;
-      border-radius: @switcher-border-radius;
+      padding: var(--spacing-01) var(--spacing-04);
+      border-radius: var(--border-radius-full-new);
       display: flex;
       align-items: center;
       border: unset;
@@ -244,6 +235,15 @@
           background-color: #eaf6ef;
           color: var(--green-50);
         }
+      }
+
+      &:focus,
+      &:focus-visible {
+        outline: 0;
+      }
+
+      &:focus-visible {
+        .box-shadow-button-input();
       }
 
       .plans-new-discount-badge {
