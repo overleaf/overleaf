@@ -113,14 +113,18 @@ export class LineTracker {
                */
 
               const changes = new Array(insertedText.lines).fill(true)
-              const index = startLine - 1 + lineShift
+              try {
+                this._lines.splice(startLine - 1 + lineShift, 1, ...changes)
+                lineShift += changes.length - 1
+              } catch (error) {
+                if (error instanceof RangeError) {
+                  throw new OError(error.message).withInfo({
+                    changesSize: changes.length,
+                  })
+                }
 
-              this._lines = [
-                ...this._lines.slice(0, index),
-                ...changes,
-                ...this._lines.slice(index + 1),
-              ]
-              lineShift += changes.length - 1
+                throw error
+              }
             }
           }
         )
