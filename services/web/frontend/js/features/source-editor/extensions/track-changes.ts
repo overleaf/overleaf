@@ -161,7 +161,23 @@ export const trackChanges = (
             },
           }
         })
-      : [],
+      : ViewPlugin.define(view => {
+          let timer: number
+
+          return {
+            update(update) {
+              if (update.viewportChanged) {
+                if (timer) {
+                  window.clearTimeout(timer)
+                }
+
+                timer = window.setTimeout(() => {
+                  dispatchEvent(new Event('editor:viewport-changed'))
+                }, 25)
+              }
+            },
+          }
+        }),
 
     // draw change decorations
     ViewPlugin.define<

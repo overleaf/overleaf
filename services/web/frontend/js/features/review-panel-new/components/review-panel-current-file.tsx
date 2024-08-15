@@ -29,6 +29,7 @@ import { positionItems } from '../utils/position-items'
 import { canAggregate } from '../utils/can-aggregate'
 import { isInViewport } from '../utils/is-in-viewport'
 import ReviewPanelEmptyState from './review-panel-empty-state'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 type Positions = Map<string, number>
 type Aggregates = Map<string, Change<DeleteOperation>>
@@ -97,7 +98,7 @@ const ReviewPanelCurrentFile: FC = () => {
     return () => {
       window.clearTimeout(timer)
     }
-  }, [state, updatePositions, view.viewport.from, view.viewport.to])
+  }, [state, updatePositions])
 
   useEffect(() => {
     const element = containerRef.current
@@ -111,7 +112,7 @@ const ReviewPanelCurrentFile: FC = () => {
     }
   }, [view, updatePositions])
 
-  useEffect(() => {
+  const buildEntries = useCallback(() => {
     if (ranges) {
       view.requestMeasure({
         key: 'review-panel-position',
@@ -175,7 +176,13 @@ const ReviewPanelCurrentFile: FC = () => {
         },
       })
     }
-  }, [view, threads, ranges, screenPosition, containerRef])
+  }, [screenPosition, threads, view, ranges])
+
+  useEffect(() => {
+    buildEntries()
+  }, [buildEntries])
+
+  useEventListener('editor:viewport-changed', buildEntries)
 
   if (!rangesWithPositions) {
     return null
