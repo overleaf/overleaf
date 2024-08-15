@@ -7,12 +7,13 @@ import getMeta from '../../../utils/meta'
 // plan: 'collaborator' or 'professional'
 // the rest of available arguments can be seen in the groupPlans value
 /**
- * @param {'collaborator' | 'professional'} plan
- * @param {string} licenseSize
- * @param {CurrencyCode} currency
- * @param {'enterprise' | 'educational'} usage
- * @param {string?} locale
- * @param {(amount: number, currency: CurrencyCode, locale: string, includeSymbol: boolean) => string} formatCurrency
+ * @param {Object} opts
+ * @param {'collaborator' | 'professional'} opts.plan
+ * @param {string} opts.licenseSize
+ * @param {CurrencyCode} opts.currency
+ * @param {'enterprise' | 'educational'} opts.usage
+ * @param {string} [opts.locale]
+ * @param {(amount: number, currency: CurrencyCode, locale: string, includeSymbol: boolean) => string} opts.formatCurrency
  * @returns {{localizedPrice: string, localizedPerUserPrice: string}}
  */
 export function createLocalizedGroupPlanPrice({
