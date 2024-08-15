@@ -16,10 +16,7 @@ import {
   DeleteOperation,
   EditOperation,
 } from '../../../../../types/change'
-import {
-  editorOverflowPadding,
-  editorVerticalTopPadding,
-} from '@/features/source-editor/extensions/vertical-overflow'
+import { editorVerticalTopPadding } from '@/features/source-editor/extensions/vertical-overflow'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
@@ -77,50 +74,25 @@ const ReviewPanelCurrentFile: FC = () => {
   )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const ignoreNextUpdateRef = useRef(false)
   const previousFocusedItem = useRef(0)
 
   const updatePositions = useCallback(() => {
-    if (ignoreNextUpdateRef.current) {
-      ignoreNextUpdateRef.current = false
-      return
-    }
-
     if (containerRef.current) {
       const extents = positionItems(
         containerRef.current,
-        view.scrollDOM as HTMLDivElement,
         previousFocusedItem.current
       )
 
       if (extents) {
         previousFocusedItem.current = extents.focusedItemIndex
-
-        window.setTimeout(() => {
-          const top = extents.min < 0 ? -extents.min : 0
-          const bottom =
-            extents.max > contentRect.bottom
-              ? extents.max - contentRect.bottom
-              : 0
-
-          const currentPadding = editorOverflowPadding(view)
-
-          if (
-            currentPadding?.top !== top ||
-            currentPadding?.bottom !== bottom
-          ) {
-            // ignoreNextUpdateRef.current = true
-            // view.dispatch(setVerticalOverflow({ top, bottom }))
-          }
-        })
       }
     }
-  }, [contentRect.bottom, view])
+  }, [])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       updatePositions()
-    }, 100)
+    }, 50)
 
     return () => {
       window.clearTimeout(timer)

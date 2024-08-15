@@ -6,11 +6,10 @@ import {
   useThreadsActionsContext,
   useThreadsContext,
 } from '../context/threads-context'
-import { useCodeMirrorStateContext } from '@/features/source-editor/components/codemirror-editor'
 import classnames from 'classnames'
-import { isFocused } from '../utils/is-focused'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import MaterialIcon from '@/shared/components/material-icon'
+import { ReviewPanelEntry } from './review-panel-entry'
 
 export const ReviewPanelComment = memo<{
   comment: Change<CommentOperation>
@@ -22,7 +21,6 @@ export const ReviewPanelComment = memo<{
   const [content, setContent] = useState('')
   const threads = useThreadsContext()
   const { resolveThread, addMessage } = useThreadsActionsContext()
-  const state = useCodeMirrorStateContext()
 
   const handleSubmitReply = useCallback(() => {
     setSubmitting(true)
@@ -52,25 +50,14 @@ export const ReviewPanelComment = memo<{
     return null
   }
 
-  const focused = isFocused(comment.op, state.selection.main)
-
   return (
-    <div
-      className={classnames(
-        'review-panel-entry',
-        'review-panel-entry-comment',
-        {
-          'review-panel-entry-loaded': !!threads?.[comment.op.t],
-          'review-panel-entry-focused': focused,
-        }
-      )}
-      data-top={top}
-      data-pos={comment.op.p}
-      style={{
-        position: top === undefined ? 'relative' : 'absolute',
-        visibility: top === undefined ? 'visible' : 'hidden',
-        transition: 'top .3s, left .1s, right .1s',
-      }}
+    <ReviewPanelEntry
+      className={classnames('review-panel-entry-comment', {
+        'review-panel-entry-loaded': !!threads?.[comment.op.t],
+      })}
+      top={top}
+      op={comment.op}
+      position={comment.op.p}
     >
       <div className="review-panel-entry-indicator">
         <MaterialIcon type="edit" className="review-panel-entry-icon" />
@@ -109,7 +96,7 @@ export const ReviewPanelComment = memo<{
 
         {error && <div>{error.message}</div>}
       </div>
-    </div>
+    </ReviewPanelEntry>
   )
 })
 ReviewPanelComment.displayName = 'ReviewPanelComment'

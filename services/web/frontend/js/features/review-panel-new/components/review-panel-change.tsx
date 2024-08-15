@@ -7,22 +7,20 @@ import {
 } from '../../../../../types/change'
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
-import { useCodeMirrorStateContext } from '@/features/source-editor/components/codemirror-editor'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
-import { isFocused } from '../utils/is-focused'
 import { Button } from 'react-bootstrap'
 import Tooltip from '@/shared/components/tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 import { useChangesUsersContext } from '../context/changes-users-context'
 import { ReviewPanelChangeUser } from './review-panel-change-user'
+import { ReviewPanelEntry } from './review-panel-entry'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
   aggregate?: Change<DeleteOperation>
   top?: number
 }>(({ change, aggregate, top }) => {
-  const state = useCodeMirrorStateContext()
   const { t } = useTranslation()
   const { acceptChanges, rejectChanges } = useRangesActionsContext()
   const permissions = usePermissionsContext()
@@ -33,23 +31,16 @@ export const ReviewPanelChange = memo<{
     return null
   }
 
-  const focused = isFocused(change.op, state.selection.main)
-
   return (
-    <div
-      className={classnames('review-panel-entry', 'review-panel-entry-change', {
-        'review-panel-entry-focused': focused,
+    <ReviewPanelEntry
+      className={classnames('review-panel-entry-change', {
         'review-panel-entry-insert': 'i' in change.op,
         'review-panel-entry-delete': 'd' in change.op,
         // TODO: aggregate
       })}
-      data-top={top}
-      data-pos={change.op.p}
-      style={{
-        position: top === undefined ? 'relative' : 'absolute',
-        visibility: top === undefined ? 'visible' : 'hidden',
-        transition: 'top .3s, left .1s, right .1s',
-      }}
+      top={top}
+      op={change.op}
+      position={change.op.p}
     >
       <div className="review-panel-entry-indicator">
         <MaterialIcon type="edit" className="review-panel-entry-icon" />
@@ -166,7 +157,7 @@ export const ReviewPanelChange = memo<{
           )}
         </div>
       </div>
-    </div>
+    </ReviewPanelEntry>
   )
 })
 ReviewPanelChange.displayName = 'ReviewPanelChange'
