@@ -545,6 +545,18 @@
         margin-bottom: var(--spacing-06);
         font-weight: 400;
 
+        @media (max-width: @screen-xs-max) {
+          &.invisible-desktop {
+            display: none;
+          }
+        }
+
+        @media (min-width: @screen-sm-min) {
+          &.invisible-desktop {
+            visibility: hidden;
+          }
+        }
+
         input[type='checkbox'] {
           margin: var(--spacing-02);
           accent-color: var(--green-50);
