@@ -297,6 +297,12 @@ webRouter.use(function addNoCacheHeader(req, res, next) {
     return next()
   }
 
+  const isWikiContent = /^\/learn(-scripts)?(\/|$)/i.test(req.path)
+  if (isWikiContent) {
+    // don't set no-cache headers on wiki content, as it's immutable and can be cached (publicly)
+    return next()
+  }
+
   const isLoggedIn = SessionManager.isUserLoggedIn(req.session)
   if (isLoggedIn) {
     // always set no-cache headers for authenticated users (apart from project files, above)
