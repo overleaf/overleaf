@@ -16,8 +16,10 @@ async function main() {
 
   console.log('## Syncing group subscription memberships...')
 
-  const subscriptionsCount = await Subscription.count({ groupPlan: true })
-  const deletedSubscriptionsCount = await DeletedSubscription.count({
+  const subscriptionsCount = await Subscription.countDocuments({
+    groupPlan: true,
+  })
+  const deletedSubscriptionsCount = await DeletedSubscription.countDocuments({
     'subscription.groupPlan': true,
   })
 

@@ -8,7 +8,7 @@ async function getAllTags(userId) {
 }
 
 async function countTagsForProject(userId, projectId) {
-  return Tag.count({ user_id: userId, project_ids: projectId })
+  return Tag.countDocuments({ user_id: userId, project_ids: projectId })
 }
 
 async function getTagsForProject(userId, projectId) {
