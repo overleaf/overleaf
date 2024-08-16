@@ -40,30 +40,17 @@ async function waitForDb() {
 
 const db = {}
 
-let clientPromise
-
-async function getClient() {
-  if (!clientPromise) {
-    clientPromise = mongodb.MongoClient.connect(
-      Settings.mongo.url,
-      Settings.mongo.options
-    )
-  }
-  return await clientPromise
-}
+const mongoClient = new mongodb.MongoClient(
+  Settings.mongo.url,
+  Settings.mongo.options
+)
 
 addConnectionDrainer('mongodb', async () => {
-  const client = await getClient()
-  await client.close()
+  await mongoClient.close()
 })
 
-async function getInternalDb() {
-  const client = await getClient()
-  return client.db()
-}
-
 async function setupDb() {
-  const internalDb = await getInternalDb()
+  const internalDb = mongoClient.db()
 
   db.contacts = internalDb.collection('contacts')
   db.deletedFiles = internalDb.collection('deletedFiles')
@@ -121,17 +108,19 @@ async function setupDb() {
   db.onboardingDataCollection = internalDb.collection(
     'onboardingDataCollection'
   )
+
+  await mongoClient.connect()
 }
 
 async function getCollectionNames() {
-  const internalDb = await getInternalDb()
+  const internalDb = mongoClient.db()
 
   const collections = await internalDb.collections()
   return collections.map(collection => collection.collectionName)
 }
 
 async function dropTestDatabase() {
-  const internalDb = await getInternalDb()
+  const internalDb = mongoClient.db()
   const dbName = internalDb.databaseName
   const env = process.env.NODE_ENV
 
@@ -148,7 +137,7 @@ async function dropTestDatabase() {
  * WARNING: Consider using a pre-populated collection from `db` to avoid typos!
  */
 async function getCollectionInternal(name) {
-  const internalDb = await getInternalDb()
+  const internalDb = mongoClient.db()
   return internalDb.collection(name)
 }
 
