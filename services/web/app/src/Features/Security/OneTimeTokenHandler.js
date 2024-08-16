@@ -7,7 +7,7 @@ const { callbackify } = require('util')
 const ONE_HOUR_IN_S = 60 * 60
 
 async function peekValueFromToken(use, token) {
-  const result = await db.tokens.findOneAndUpdate(
+  const tokenDoc = await db.tokens.findOneAndUpdate(
     {
       use,
       token,
@@ -22,8 +22,6 @@ async function peekValueFromToken(use, token) {
       returnDocument: 'after',
     }
   )
-
-  const tokenDoc = result.value
   if (!tokenDoc) {
     throw new Errors.NotFoundError('no token found')
   }
@@ -82,11 +80,10 @@ const OneTimeTokenHandler = {
           usedAt: now,
         },
       },
-      function (error, result) {
+      function (error, token) {
         if (error) {
           return callback(error)
         }
-        const token = result.value
         if (!token) {
           return callback(new Errors.NotFoundError('no token found'))
         }

@@ -97,7 +97,7 @@ describe('OneTimeTokenHandler', function () {
       beforeEach(async function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
-          .resolves({ value: { data, peekCount: 1 } })
+          .resolves({ data, peekCount: 1 })
         result = await this.OneTimeTokenHandler.promises.peekValueFromToken(
           'password',
           'mock-token'
@@ -128,7 +128,7 @@ describe('OneTimeTokenHandler', function () {
 
     describe('when a valid token is not found', function () {
       beforeEach(function () {
-        this.db.tokens.findOneAndUpdate = sinon.stub().resolves({ value: null })
+        this.db.tokens.findOneAndUpdate = sinon.stub().resolves(null)
       })
 
       it('should return a NotFoundError', async function () {
@@ -175,7 +175,7 @@ describe('OneTimeTokenHandler', function () {
       beforeEach(function () {
         this.db.tokens.findOneAndUpdate = sinon
           .stub()
-          .yields(null, { value: { data: 'mock-data' } })
+          .yields(null, { data: 'mock-data' })
         this.OneTimeTokenHandler.getValueFromTokenAndExpire(
           'password',
           'mock-token',
@@ -207,9 +207,7 @@ describe('OneTimeTokenHandler', function () {
 
     describe('when a valid token is not found', function () {
       beforeEach(function () {
-        this.db.tokens.findOneAndUpdate = sinon
-          .stub()
-          .yields(null, { value: null })
+        this.db.tokens.findOneAndUpdate = sinon.stub().yields(null, null)
         this.OneTimeTokenHandler.getValueFromTokenAndExpire(
           'password',
           'mock-token',
