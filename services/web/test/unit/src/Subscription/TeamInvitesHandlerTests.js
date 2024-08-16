@@ -260,7 +260,7 @@ describe('TeamInvitesHandler', function () {
     })
 
     it('sends an SSO invite if SSO is enabled and inviting self', function (done) {
-      this.subscription.ssoConfig = new ObjectId('abc123abc123')
+      this.subscription.ssoConfig = new ObjectId('abc123abc123abc123abc123')
       this.SSOConfig.findById
         .withArgs(this.subscription.ssoConfig)
         .resolves({ enabled: true })
@@ -282,7 +282,7 @@ describe('TeamInvitesHandler', function () {
     })
 
     it('does not send an SSO invite if SSO is disabled and inviting self', function (done) {
-      this.subscription.ssoConfig = new ObjectId('abc123abc123')
+      this.subscription.ssoConfig = new ObjectId('abc123abc123abc123abc123')
       this.SSOConfig.findById
         .withArgs(this.subscription.ssoConfig)
         .resolves({ enabled: false })

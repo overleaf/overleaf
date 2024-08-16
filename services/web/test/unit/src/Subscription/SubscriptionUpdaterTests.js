@@ -307,7 +307,7 @@ describe('SubscriptionUpdater', function () {
 
     it('should not remove the subscription when expired if it has Group SSO enabled', async function () {
       this.Features.hasFeature.withArgs('saas').returns(true)
-      this.subscription.ssoConfig = new ObjectId('abc123abc123')
+      this.subscription.ssoConfig = new ObjectId('abc123abc123abc123abc123')
 
       this.recurlySubscription.state = 'expired'
       await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(

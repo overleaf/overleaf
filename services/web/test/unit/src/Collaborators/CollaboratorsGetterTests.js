@@ -13,7 +13,7 @@ const MODULE_PATH = Path.join(
 
 describe('CollaboratorsGetter', function () {
   beforeEach(function () {
-    this.userId = 'mock-user-id'
+    this.userId = 'efb93a186e9a06f15fea5abd'
     this.ownerRef = new ObjectId()
     this.readOnlyRef1 = new ObjectId()
     this.readOnlyRef2 = new ObjectId()
