@@ -821,6 +821,7 @@
   "history_label_project_current_state": "当前状态",
   "history_label_this_version": "标记此版本",
   "history_new_label_name": "新标记名称",
+  "history_resync": "重新同步历史记录",
   "history_view_a11y_description": "显示所有项目历史记录或仅显示带标签的版本。",
   "history_view_all": "所有历史",
   "history_view_labels": "标记",
