@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Dropdown } from 'react-bootstrap'
 import { useEditorContext } from '../../../shared/context/editor-context'
@@ -9,12 +9,33 @@ import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
 function FileTreeContextMenu() {
   const { permissionsLevel } = useEditorContext()
   const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
+  const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
 
-  if (permissionsLevel === 'readOnly' || !contextMenuCoords) return null
+  useEffect(() => {
+    if (contextMenuCoords) {
+      toggleButtonRef.current = document.querySelector(
+        '.entity-menu-toggle'
+      ) as HTMLButtonElement | null
+      focusContextMenu()
+    }
+  }, [contextMenuCoords])
+
+  if (!contextMenuCoords || permissionsLevel === 'readOnly') return null
+
+  // A11y - Move the focus to the context menu when it opens
+  function focusContextMenu() {
+    const contextMenu = document.querySelector(
+      '[aria-labelledby="dropdown-file-tree-context-menu"]'
+    ) as HTMLElement | null
+    contextMenu?.focus()
+  }
 
   function close() {
-    // reset context menu
     setContextMenuCoords(null)
+    if (toggleButtonRef.current) {
+      // A11y - Move the focus back to the toggle button when the context menu closes by pressing the Esc key
+      toggleButtonRef.current.focus()
+    }
   }
 
   function handleToggle(wantOpen: boolean) {
@@ -23,6 +44,14 @@ function FileTreeContextMenu() {
 
   function handleClick() {
     handleToggle(false)
+  }
+
+  // A11y - Close the context menu when the user presses the Tab key
+  // Focus should move to the next element in the filetree
+  function handleKeyDown(event: React.KeyboardEvent<Dropdown>) {
+    if (event.key === 'Tab') {
+      close()
+    }
   }
 
   return ReactDOM.createPortal(
@@ -37,9 +66,10 @@ function FileTreeContextMenu() {
       }
       className="context-menu"
       style={contextMenuCoords}
+      onKeyDown={handleKeyDown}
     >
       <FakeDropDownToggle bsRole="toggle" />
-      <Dropdown.Menu>
+      <Dropdown.Menu tabIndex={-1}>
         <FileTreeItemMenuItems />
       </Dropdown.Menu>
     </Dropdown>,

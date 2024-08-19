@@ -56,7 +56,7 @@ function FileTreeItemMenuItems() {
       ) : null}
       {canCreate ? (
         <>
-          <MenuItem divider />
+          <li role="none" className="divider" />
           <MenuItem onClick={createWithAnalytics}>{t('new_file')}</MenuItem>
           <MenuItem onClick={startCreatingFolder}>{t('new_folder')}</MenuItem>
           <MenuItem onClick={uploadWithAnalytics}>{t('upload')}</MenuItem>
