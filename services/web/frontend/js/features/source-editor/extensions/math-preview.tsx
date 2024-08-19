@@ -22,6 +22,9 @@ import {
 import { documentCommands } from '../languages/latex/document-commands'
 import { debugConsole } from '@/utils/debugging'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import ReactDOM from 'react-dom'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
+import SplitTestBadge from '@/shared/components/split-test-badge'
 
 const REPOSITION_EVENT = 'editor:repositionMathTooltips'
 
@@ -107,6 +110,8 @@ function buildTooltips(state: EditorState): readonly Tooltip[] {
           create() {
             const dom = document.createElement('div')
             dom.append(content)
+            const badge = renderSplitTestBadge()
+            dom.append(badge)
             dom.className = 'ol-cm-math-tooltip'
 
             return { dom, overlap: true, offset: { x: 0, y: 8 } }
@@ -163,6 +168,20 @@ const buildTooltipContent = (
       debugConsole.error(error)
     })
 
+  return element
+}
+
+const renderSplitTestBadge = () => {
+  const element = document.createElement('span')
+  ReactDOM.render(
+    <SplitTestProvider>
+      <SplitTestBadge
+        displayOnVariants={['enabled']}
+        splitTestName="math-preview"
+      />
+    </SplitTestProvider>,
+    element
+  )
   return element
 }
 
