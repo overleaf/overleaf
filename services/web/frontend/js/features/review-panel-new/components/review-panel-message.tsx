@@ -21,7 +21,15 @@ export const ReviewPanelMessage: FC<{
   hasReplies: boolean
   isReply: boolean
   onResolve: () => void
-}> = ({ message, threadId, isReply, hasReplies, onResolve }) => {
+  isThreadResolved: boolean
+}> = ({
+  message,
+  threadId,
+  isReply,
+  hasReplies,
+  onResolve,
+  isThreadResolved,
+}) => {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -93,7 +101,7 @@ export const ReviewPanelMessage: FC<{
         </div>
 
         <div className="review-panel-entry-actions">
-          {!isReply && (
+          {!isReply && !isThreadResolved && (
             <Tooltip
               id="resolve-thread"
               overlayProps={{ placement: 'bottom' }}
@@ -109,10 +117,12 @@ export const ReviewPanelMessage: FC<{
             </Tooltip>
           )}
 
-          <ReviewPanelCommentOptions
-            onEdit={handleEditOption}
-            onDelete={showDeleteModal}
-          />
+          {!isThreadResolved && (
+            <ReviewPanelCommentOptions
+              onEdit={handleEditOption}
+              onDelete={showDeleteModal}
+            />
+          )}
         </div>
       </div>
       <ExpandableContent className="review-panel-comment-body">

@@ -186,6 +186,107 @@
       }
     }
   }
+
+  &.review-panel-resolved-comments {
+    width: 280px;
+
+    .popover-content {
+      background-color: @neutral-10;
+      overflow-y: auto;
+      max-height: calc(100vh - 180px);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 6px;
+    }
+  }
+
+  .review-panel-resolved-comments-loading {
+    text-align: center;
+  }
+
+  .review-panel-resolved-comments-empty {
+    text-align: center;
+  }
+
+  .review-panel-resolved-comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .review-panel-resolved-comments-label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+
+  .review-panel-resolved-comments-count {
+    background-color: @neutral-20;
+    border-radius: @border-radius-base-new;
+    padding: 2px;
+  }
+
+  .review-panel-resolved-comment {
+    background-color: white;
+    border-radius: @border-radius-base-new;
+    padding: @spacing-04;
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-04;
+  }
+
+  .review-panel-resolved-comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: @content-secondary;
+    font-size: 12px;
+  }
+
+  .review-panel-resolved-comment-filename {
+    color: @content-primary;
+  }
+
+  .review-panel-resolved-comment-buttons {
+    display: flex;
+    align-items: center;
+    gap: @spacing-03;
+
+    .btn {
+      background-color: transparent;
+      color: @content-primary;
+      padding: @spacing-01;
+      height: 24px;
+      width: 24px;
+
+      &:hover,
+      &:focus {
+        background-color: @neutral-20;
+      }
+    }
+
+    .material-symbols {
+      font-size: 20px;
+    }
+  }
+
+  .review-panel-resolved-comment-quoted-text {
+    background-color: @neutral-20;
+    border-radius: @border-radius-base-new;
+    padding: 4px 8px;
+  }
+
+  .review-panel-resolved-comment-quoted-text-label {
+    color: @content-secondary;
+    font-size: 12px;
+  }
+
+  .review-panel-resolved-comment-quoted-text-quote {
+    overflow-wrap: anywhere;
+    font-size: 14px;
+  }
+
   .review-panel-comment-wrapper {
     display: flex;
     gap: @spacing-04;
@@ -201,6 +302,7 @@
     color: @content-primary;
     overflow-wrap: anywhere;
   }
+
   .review-panel-content-expandable  {
     display: -webkit-box;
     text-overflow: ellipsis;

@@ -1,5 +1,5 @@
 import { FC, memo, useState } from 'react'
-import { ReviewPanelResolvedThreads } from './review-panel-resolved-threads'
+import { ReviewPanelResolvedThreadsButton } from './review-panel-resolved-threads-button'
 import { ReviewPanelTrackChangesMenu } from './review-panel-track-changes-menu'
 import ReviewPanelTrackChangesMenuButton from './review-panel-track-changes-menu-button'
 import { Button } from 'react-bootstrap'
@@ -28,7 +28,7 @@ const ReviewPanelHeader: FC<{
         </Button>
       </div>
       <div className="review-panel-tools">
-        <ReviewPanelResolvedThreads />
+        <ReviewPanelResolvedThreadsButton />
         <ReviewPanelTrackChangesMenuButton
           menuExpanded={trackChangesMenuExpanded}
           setMenuExpanded={setTrackChangesMenuExpanded}
