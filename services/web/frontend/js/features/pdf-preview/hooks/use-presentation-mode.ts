@@ -74,17 +74,43 @@ export default function usePresentationMode(
     [nextPage, previousPage]
   )
 
+  const isMouseWheelScrollingRef = useRef(false)
+
+  const mouseWheelListener = useCallback(
+    (event: WheelEvent) => {
+      if (
+        !isMouseWheelScrollingRef.current &&
+        !event.ctrlKey // Avoid trackpad pinching
+      ) {
+        isMouseWheelScrollingRef.current = true
+
+        if (event.deltaY > 0) {
+          nextPage()
+        } else {
+          previousPage()
+        }
+
+        setTimeout(() => {
+          isMouseWheelScrollingRef.current = false
+        }, 200)
+      }
+    },
+    [nextPage, previousPage]
+  )
+
   useEffect(() => {
     if (presentationMode) {
       window.addEventListener('keydown', arrowKeyListener)
       window.addEventListener('click', clickListener)
+      window.addEventListener('wheel', mouseWheelListener)
 
       return () => {
         window.removeEventListener('keydown', arrowKeyListener)
         window.removeEventListener('click', clickListener)
+        window.removeEventListener('wheel', mouseWheelListener)
       }
     }
-  }, [presentationMode, arrowKeyListener, clickListener])
+  }, [presentationMode, arrowKeyListener, clickListener, mouseWheelListener])
 
   const requestPresentationMode = useCallback(() => {
     sendMB('pdf-viewer-enter-presentation-mode')
