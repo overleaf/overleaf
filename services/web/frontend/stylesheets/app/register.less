@@ -8,10 +8,6 @@
   padding: 8px 0;
 }
 
-.login-register-header-focus {
-  padding-top: @line-height-computed;
-}
-
 .website-redesign {
   .login-register-header-focus {
     padding-top: unset;
@@ -23,18 +19,13 @@
   margin-bottom: 0;
 }
 
-.login-register-form-focus {
-  padding: @line-height-computed;
-  padding-bottom: 0;
-  border-bottom: solid 1px @hr-border;
-  &:last-child {
-    border-bottom-width: 0;
-  }
-}
-
 .website-redesign {
   .login-register-form-focus {
     padding: @line-height-computed 0 0 0;
     border-bottom: unset;
+    border-bottom: solid 1px @hr-border;
+    &:last-child {
+      border-bottom-width: 0;
+    }
   }
 }

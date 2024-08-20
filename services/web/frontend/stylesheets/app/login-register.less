@@ -37,9 +37,6 @@
     border-bottom-width: 0;
   }
 }
-.login-register-other-links {
-  padding: @line-height-computed;
-}
 
 .login-register-text,
 .login-register-hr-text-container {
@@ -89,20 +86,8 @@
   }
 }
 
-.login-btn-icon-ieee {
-  background-image: url(../../../public/img/other-brands/logo_ieee.svg);
-}
-.login-btn-icon-google {
-  background-image: url(../../../public/img/other-brands/logo_google.svg);
-}
 .login-btn-icon-twitter {
   background-image: url(../../../public/img/other-brands/logo_twitter.svg);
-}
-.login-btn-icon-orcid {
-  background-image: url(../../../public/img/other-brands/logo_orcid.svg);
-}
-.login-btn-icon-institution {
-  background-image: url(../../../public/img/other-brands/logo_institution.svg);
 }
 
 .registration-message-heading {
@@ -120,22 +105,6 @@
 .website-redesign {
   .login-register-container {
     max-width: 320px;
-  }
-
-  .login-overleaf-logo-container {
-    padding: 15px;
-    width: 65px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    .login-overleaf-logo {
-      width: 35px;
-    }
-
-    @media (max-width: @screen-xs-max) {
-      margin-top: @margin-lg;
-    }
   }
 
   .login-register-text {
@@ -220,6 +189,7 @@
   .form-group-password {
     display: flex;
     position: relative;
+    flex-direction: column;
 
     .form-group-password-input {
       input.form-control {
@@ -260,12 +230,6 @@
       display: flex;
       background-color: #f2f4f7;
       min-height: 100vh;
-    }
-
-    // TODO: One of these two classes should be removed when test is tearing down.
-    .register-content-container-light {
-      .register-content-container;
-      background-color: @white;
     }
 
     .register-form {
@@ -353,32 +317,6 @@
       &:focus {
         outline: 2px solid var(--green-50);
         outline-offset: 1px;
-      }
-    }
-  }
-
-  // TODO: This is Temporary class for split test to center align the text, we can remove this during the tear down of the test based on the winner variant.
-  .light-variant {
-    .tos-agreement-notice {
-      text-align: center;
-      font-size: 12px;
-
-      a {
-        color: var(--green-50);
-        text-decoration: underline;
-        // text-decoration-;skip-ink is for letter with descender (like 'g' and 'y')
-        // this will force underline to not skip the descender
-        text-decoration-skip-ink: none;
-
-        &:hover {
-          color: var(--green-60);
-        }
-
-        // for accessibility with keyboard navigation
-        &:focus {
-          outline: 2px solid var(--green-50);
-          outline-offset: 1px;
-        }
       }
     }
   }
