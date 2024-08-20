@@ -35,6 +35,9 @@ describe('RestoreManager', function () {
         '../Editor/EditorRealTimeController': (this.EditorRealTimeController =
           {}),
         '../Project/ProjectGetter': (this.ProjectGetter = { promises: {} }),
+        '../Project/ProjectEntityHandler': (this.ProjectEntityHandler = {
+          promises: {},
+        }),
       },
     })
     this.user_id = 'mock-user-id'
@@ -485,6 +488,138 @@ describe('RestoreManager', function () {
         )
 
         expect(revertRes).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
+      })
+    })
+  })
+
+  describe('revertProject', function () {
+    beforeEach(function () {
+      this.ProjectGetter.promises.getProject = sinon.stub()
+      this.ProjectGetter.promises.getProject
+        .withArgs(this.project_id)
+        .resolves({ overleaf: { history: { rangesSupportEnabled: true } } })
+      this.RestoreManager.promises.revertFile = sinon.stub().resolves()
+      this.RestoreManager.promises._getProjectPathsAtVersion = sinon
+        .stub()
+        .resolves([])
+      this.ProjectEntityHandler.promises.getAllEntities = sinon
+        .stub()
+        .resolves({ docs: [], files: [] })
+      this.EditorController.promises.deleteEntityWithPath = sinon
+        .stub()
+        .resolves()
+      this.RestoreManager.promises._getUpdatesFromHistory = sinon
+        .stub()
+        .resolves([
+          { toV: this.version, meta: { end_ts: (this.end_ts = Date.now()) } },
+        ])
+    })
+
+    describe('reverting a project without ranges support', function () {
+      beforeEach(function () {
+        this.ProjectGetter.promises.getProject = sinon.stub().resolves({
+          overleaf: { history: { rangesSupportEnabled: false } },
+        })
+      })
+
+      it('should throw an error', async function () {
+        await expect(
+          this.RestoreManager.promises.revertProject(
+            this.user_id,
+            this.project_id,
+            this.version
+          )
+        ).to.eventually.be.rejectedWith('project does not have ranges support')
+      })
+    })
+
+    describe('for a project with overlap in current files and old files', function () {
+      beforeEach(async function () {
+        this.ProjectEntityHandler.promises.getAllEntities = sinon
+          .stub()
+          .resolves({
+            docs: [{ path: '/main.tex' }, { path: '/new-file.tex' }],
+            files: [{ path: '/figures/image.png' }],
+          })
+        this.RestoreManager.promises._getProjectPathsAtVersion = sinon
+          .stub()
+          .resolves(['main.tex', 'figures/image.png', 'since-deleted.tex'])
+
+        await this.RestoreManager.promises.revertProject(
+          this.user_id,
+          this.project_id,
+          this.version
+        )
+        this.origin = {
+          kind: 'project-restore',
+          version: this.version,
+          timestamp: new Date(this.end_ts).toISOString(),
+        }
+      })
+
+      it('should delete the old files', function () {
+        expect(
+          this.EditorController.promises.deleteEntityWithPath
+        ).to.have.been.calledWith(
+          this.project_id,
+          'new-file.tex',
+          this.origin,
+          this.user_id
+        )
+      })
+
+      it('should not delete the current files', function () {
+        expect(
+          this.EditorController.promises.deleteEntityWithPath
+        ).to.not.have.been.calledWith(
+          this.project_id,
+          'main.tex',
+          this.origin,
+          this.user_id
+        )
+
+        expect(
+          this.EditorController.promises.deleteEntityWithPath
+        ).to.not.have.been.calledWith(
+          this.project_id,
+          'figures/image.png',
+          this.origin,
+          this.user_id
+        )
+      })
+
+      it('should revert the old files', function () {
+        expect(this.RestoreManager.promises.revertFile).to.have.been.calledWith(
+          this.user_id,
+          this.project_id,
+          this.version,
+          'main.tex'
+        )
+
+        expect(this.RestoreManager.promises.revertFile).to.have.been.calledWith(
+          this.user_id,
+          this.project_id,
+          this.version,
+          'figures/image.png'
+        )
+
+        expect(this.RestoreManager.promises.revertFile).to.have.been.calledWith(
+          this.user_id,
+          this.project_id,
+          this.version,
+          'since-deleted.tex'
+        )
+      })
+
+      it('should not revert the current files', function () {
+        expect(
+          this.RestoreManager.promises.revertFile
+        ).to.not.have.been.calledWith(
+          this.user_id,
+          this.project_id,
+          this.version,
+          'new-file.tex'
+        )
       })
     })
   })

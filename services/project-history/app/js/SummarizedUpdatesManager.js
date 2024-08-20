@@ -261,6 +261,12 @@ function _shouldMergeUpdate(update, summarizedUpdate, labels) {
       ) {
         return false
       }
+      if (
+        update.meta.origin.kind === 'project-restore' &&
+        update.meta.origin.timestamp !== summarizedUpdate.meta.origin.timestamp
+      ) {
+        return false
+      }
     } else {
       return false
     }

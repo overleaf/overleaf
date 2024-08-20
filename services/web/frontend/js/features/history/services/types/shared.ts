@@ -29,4 +29,9 @@ export interface Meta {
         timestamp: number
         version: number
       }
+    | {
+        kind: 'project-restore'
+        timestamp: number
+        version: number
+      }
 }

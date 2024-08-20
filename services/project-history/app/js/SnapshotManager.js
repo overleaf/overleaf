@@ -237,6 +237,13 @@ async function getProjectSnapshot(projectId, version) {
   }
 }
 
+async function getPathsAtVersion(projectId, version) {
+  const snapshot = await _getSnapshotAtVersion(projectId, version)
+  return {
+    paths: snapshot.getFilePathnames(),
+  }
+}
+
 /**
  *
  * @param {string} projectId
@@ -295,12 +302,14 @@ const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
 const getProjectSnapshotCb = callbackify(getProjectSnapshot)
 const getLatestSnapshotCb = callbackify(getLatestSnapshot)
 const getRangesSnapshotCb = callbackify(getRangesSnapshot)
+const getPathsAtVersionCb = callbackify(getPathsAtVersion)
 
 export {
   getFileSnapshotStreamCb as getFileSnapshotStream,
   getProjectSnapshotCb as getProjectSnapshot,
   getLatestSnapshotCb as getLatestSnapshot,
   getRangesSnapshotCb as getRangesSnapshot,
+  getPathsAtVersionCb as getPathsAtVersion,
 }
 
 export const promises = {
@@ -308,4 +317,5 @@ export const promises = {
   getProjectSnapshot,
   getLatestSnapshot,
   getRangesSnapshot,
+  getPathsAtVersion,
 }

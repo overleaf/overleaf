@@ -21,6 +21,7 @@ import CompareVersionDropdown from './dropdown/compare-version-dropdown'
 import { CompareVersionDropdownContentAllHistory } from './dropdown/compare-version-dropdown-content'
 import FileRestoreChange from './file-restore-change'
 import HistoryResyncChange from './history-resync-change'
+import ProjectRestoreChange from './project-restore-change'
 
 type HistoryVersionProps = {
   update: LoadedUpdate
@@ -113,6 +114,7 @@ function HistoryVersion({
               {dropdownActive ? (
                 <HistoryDropdownContent
                   version={update.toV}
+                  endTimestamp={update.meta.end_ts}
                   projectId={projectId}
                   closeDropdownForItem={closeDropdownForItem}
                 />
@@ -166,16 +168,7 @@ function HistoryVersion({
                 label={label}
               />
             ))}
-            {update.meta.origin?.kind === 'file-restore' ? (
-              <FileRestoreChange origin={update.meta.origin} />
-            ) : update.meta.origin?.kind === 'history-resync' ? (
-              <HistoryResyncChange />
-            ) : (
-              <Changes
-                pathnames={update.pathnames}
-                projectOps={update.project_ops}
-              />
-            )}
+            <ChangeEntry update={update} />
             {update.meta.origin?.kind !== 'history-resync' ? (
               <>
                 <MetadataUsersList
@@ -191,6 +184,21 @@ function HistoryVersion({
       </div>
     </>
   )
+}
+
+function ChangeEntry({ update }: { update: LoadedUpdate }) {
+  switch (update.meta.origin?.kind) {
+    case 'file-restore':
+      return <FileRestoreChange origin={update.meta.origin} />
+    case 'history-resync':
+      return <HistoryResyncChange />
+    case 'project-restore':
+      return <ProjectRestoreChange origin={update.meta.origin} />
+    default:
+      return (
+        <Changes pathnames={update.pathnames} projectOps={update.project_ops} />
+      )
+  }
 }
 
 export default memo(HistoryVersion)

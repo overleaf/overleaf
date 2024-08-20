@@ -118,6 +118,7 @@ module.exports = HistoryController = {
       projectId,
       version,
       pathname,
+      {},
       function (err, entity) {
         if (err) {
           return next(err)
@@ -128,6 +129,18 @@ module.exports = HistoryController = {
         })
       }
     )
+  },
+
+  revertProject(req, res, next) {
+    const { project_id: projectId } = req.params
+    const { version } = req.body
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    RestoreManager.revertProject(userId, projectId, version, function (err) {
+      if (err) {
+        return next(err)
+      }
+      res.sendStatus(200)
+    })
   },
 
   getLabels(req, res, next) {

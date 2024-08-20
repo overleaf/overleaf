@@ -335,6 +335,7 @@ const _ProjectController = {
       'pdfjs-40',
       'personal-access-token',
       'revert-file',
+      'revert-project',
       'review-panel-redesign',
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',

@@ -998,4 +998,50 @@ Four five six\
       })
     })
   })
+
+  describe('getPathsAtVersion', function () {
+    beforeEach(function () {
+      this.WebApiManager.promises.getHistoryId.resolves(this.historyId)
+      this.HistoryStoreManager.promises.getChunkAtVersion.resolves({
+        chunk: (this.chunk = {
+          history: {
+            snapshot: {
+              files: {
+                'main.tex': {
+                  hash: (this.fileHash =
+                    '5d2781d78fa5a97b7bafa849fe933dfc9dc93eba'),
+                  rangesHash: (this.rangesHash =
+                    '73061952d41ce54825e2fc1c36b4cf736d5fb62f'),
+                  stringLength: 41,
+                },
+                'other.tex': {
+                  hash: (this.fileHash =
+                    'f572d396fae9206628714fb2ce00f72e94f2258f'),
+                  stringLength: 6,
+                },
+              },
+            },
+            changes: [],
+          },
+          startVersion: 4,
+          authors: [
+            {
+              id: 31,
+              email: 'author@example.com',
+              name: 'Author',
+            },
+          ],
+        }),
+      })
+    })
+
+    it('should return an array of paths', async function () {
+      const result = await this.SnapshotManager.promises.getPathsAtVersion(
+        this.projectId,
+        4
+      )
+      expect(result.paths).to.have.length(2)
+      expect(result.paths).to.include.members(['main.tex', 'other.tex'])
+    })
+  })
 })

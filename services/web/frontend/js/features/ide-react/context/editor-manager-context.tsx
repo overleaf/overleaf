@@ -286,7 +286,10 @@ export const EditorManagerProvider: FC = ({ children }) => {
         ) {
           return
         }
-        if (update.meta.origin?.kind === 'file-restore') {
+        if (
+          update.meta.origin?.kind === 'file-restore' ||
+          update.meta.origin?.kind === 'project-restore'
+        ) {
           return
         }
         showGenericMessageModal(

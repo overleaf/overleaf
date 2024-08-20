@@ -230,6 +230,16 @@ export function getProjectSnapshot(req, res, next) {
   )
 }
 
+export function getPathsAtVersion(req, res, next) {
+  const { project_id: projectId, version } = req.params
+  SnapshotManager.getPathsAtVersion(projectId, version, (error, result) => {
+    if (error != null) {
+      return next(error)
+    }
+    res.json(result)
+  })
+}
+
 export function healthCheck(req, res) {
   HealthChecker.check(err => {
     if (err != null) {

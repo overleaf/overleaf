@@ -91,6 +91,7 @@ function LabelListItem({
             version={version}
             projectId={projectId}
             closeDropdownForItem={closeDropdownForItem}
+            endTimestamp={toVTimestamp * 1000}
           />
         ) : null}
       </HistoryDropdown>

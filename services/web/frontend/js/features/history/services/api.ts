@@ -107,3 +107,9 @@ export function restoreFileToVersion(
     },
   })
 }
+
+export function restoreProjectToVersion(projectId: string, version: number) {
+  return postJSON(`/project/${projectId}/revert-project`, {
+    body: { version },
+  })
+}

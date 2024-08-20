@@ -156,6 +156,11 @@ export function initialize(app) {
     HttpController.getProjectSnapshot
   )
 
+  app.get(
+    '/project/:project_id/paths/version/:version',
+    HttpController.getPathsAtVersion
+  )
+
   app.post(
     '/project/:project_id/force',
     validate({
