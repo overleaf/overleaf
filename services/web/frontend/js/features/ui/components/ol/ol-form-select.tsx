@@ -14,6 +14,7 @@ function OLFormSelect(props: OLFormSelectProps) {
   const { bs3Props, ...bs5Props } = props
 
   const bs3FormSelectProps: BS3FormControlProps = {
+    children: bs5Props.children,
     bsSize: bs5Props.size,
     name: bs5Props.name,
     value: bs5Props.value,
