@@ -152,6 +152,7 @@ export default class PDFJSWrapper {
       if (
         currentScaleValue === 'auto' ||
         currentScaleValue === 'page-fit' ||
+        currentScaleValue === 'page-height' ||
         currentScaleValue === 'page-width'
       ) {
         this.viewer.currentScaleValue = currentScaleValue
