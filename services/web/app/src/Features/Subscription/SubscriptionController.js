@@ -80,29 +80,13 @@ async function plansPage(req, res) {
 
   const plans = SubscriptionViewModelBuilder.buildPlansList()
 
-  const {
-    currency,
-    recommendedCurrency,
-    countryCode,
-    geoPricingLATAMTestVariant,
-  } = await _getRecommendedCurrency(req, res)
+  const { currency, countryCode, geoPricingLATAMTestVariant } =
+    await _getRecommendedCurrency(req, res)
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
   const groupPlanModalDefaults = _getGroupPlanModalDefaults(req, currency)
 
   const currentView = 'annual'
-
-  const plansPageViewSegmentation = {
-    currency: recommendedCurrency,
-    countryCode,
-    'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
-  }
-
-  AnalyticsManager.recordEventForSession(
-    req.session,
-    'plans-page-view',
-    plansPageViewSegmentation
-  )
 
   const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } = _plansBanners(
     {
@@ -145,6 +129,8 @@ async function plansPage(req, res) {
     showBrlGeoBanner,
     showLATAMBanner,
     latamCountryBannerDetails,
+    countryCode,
+    websiteRedesignPlansVariant: 'default',
   })
 }
 
@@ -156,12 +142,8 @@ async function plansPageLightDesign(req, res) {
   if (!splitTestActive && req.query.preview !== 'true') {
     return res.redirect(302, '/user/subscription/plans')
   }
-  const {
-    currency,
-    countryCode,
-    geoPricingLATAMTestVariant,
-    recommendedCurrency,
-  } = await _getRecommendedCurrency(req, res)
+  const { currency, countryCode, geoPricingLATAMTestVariant } =
+    await _getRecommendedCurrency(req, res)
 
   const language = req.i18n.language || 'en'
   const currentView = 'annual'
@@ -187,18 +169,6 @@ async function plansPageLightDesign(req, res) {
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
 
-  const plansPageViewSegmentation = {
-    currency: recommendedCurrency,
-    countryCode,
-    'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
-  }
-
-  AnalyticsManager.recordEventForSession(
-    req.session,
-    'plans-page-view',
-    plansPageViewSegmentation
-  )
-
   res.render('subscriptions/plans-light-design', {
     title: 'plans_and_pricing',
     currentView,
@@ -223,6 +193,8 @@ async function plansPageLightDesign(req, res) {
     showInrGeoBanner,
     showBrlGeoBanner,
     latamCountryBannerDetails,
+    countryCode,
+    websiteRedesignPlansVariant: 'light-design',
   })
 }
 
@@ -370,17 +342,6 @@ async function interstitialPaymentPage(req, res) {
   if (hasSubscription) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
-    const paywallPlansPageViewSegmentation = {
-      currency: recommendedCurrency,
-      countryCode,
-      'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
-    }
-    AnalyticsManager.recordEventForSession(
-      req.session,
-      'paywall-plans-page-view',
-      paywallPlansPageViewSegmentation
-    )
-
     const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
       _plansBanners({
         geoPricingLATAMTestVariant,
@@ -411,6 +372,7 @@ async function interstitialPaymentPage(req, res) {
       showLATAMBanner,
       latamCountryBannerDetails,
       skipLinkTarget: req.session?.postCheckoutRedirect || '/project',
+      websiteRedesignPlansVariant: websiteRedesignPlansAssignment.variant,
     })
   }
 }

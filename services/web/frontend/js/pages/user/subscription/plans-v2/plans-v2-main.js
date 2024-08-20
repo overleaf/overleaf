@@ -18,6 +18,7 @@ import {
   handleForStudentsLinkInFooter,
   setHashFromViewTab,
 } from './plans-v2-hash'
+import { sendPlansViewEvent } from './plans-v2-tracking'
 import getMeta from '../../../../utils/meta'
 
 const currentCurrencyCode = getMeta('ol-recommendedCurrency')
@@ -330,3 +331,5 @@ window.addEventListener('hashchange', () => {
     }
   }
 })
+
+sendPlansViewEvent()
