@@ -184,7 +184,7 @@
     "@babel/preset-react": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
     "@babel/register": "^7.24.6",
-    "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#v6.12.0-overleaf-2",
+    "@codemirror/autocomplete": "github:overleaf/codemirror-autocomplete#v6.18.0-overleaf-1",
     "@codemirror/commands": "^6.4.0",
     "@codemirror/lang-markdown": "^6.2.4",
     "@codemirror/language": "^6.10.0",
