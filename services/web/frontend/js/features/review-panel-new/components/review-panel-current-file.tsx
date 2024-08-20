@@ -100,17 +100,29 @@ const ReviewPanelCurrentFile: FC = () => {
     }
   }, [state, updatePositions])
 
+  const handleContainer = useCallback(
+    (element: HTMLDivElement | null) => {
+      containerRef.current = element
+      if (containerRef.current) {
+        containerRef.current.addEventListener(
+          'review-panel:position',
+          updatePositions
+        )
+      }
+    },
+    [updatePositions]
+  )
+
   useEffect(() => {
-    const element = containerRef.current
-    if (element) {
-      element.addEventListener('review-panel:position', updatePositions)
-      // view.scrollDOM.addEventListener('scroll', positionListener)
-      return () => {
-        element.removeEventListener('review-panel:position', updatePositions)
-        // view.scrollDOM.removeEventListener('scroll', positionListener)
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener(
+          'review-panel:position',
+          updatePositions
+        )
       }
     }
-  }, [view, updatePositions])
+  }, [updatePositions])
 
   const buildEntries = useCallback(() => {
     if (ranges) {
@@ -194,7 +206,7 @@ const ReviewPanelCurrentFile: FC = () => {
     rangesWithPositions.comments.length === 0
 
   return (
-    <div ref={containerRef}>
+    <div ref={handleContainer}>
       {selectionCoords && (
         <div
           className="review-panel-entry"
