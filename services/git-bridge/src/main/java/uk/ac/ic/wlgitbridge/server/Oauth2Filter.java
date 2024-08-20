@@ -46,10 +46,15 @@ public class Oauth2Filter implements Filter {
    *
    * So, for projects that need auth, we return 401. Git will swallow this
    * and prompt the user for user/pass, and then make a brand new request.
+   *
    * @param servletRequest
+   *
    * @param servletResponse
+   *
    * @param filterChain
+   *
    * @throws IOException
+   *
    * @throws ServletException
    */
   @Override
@@ -125,6 +130,15 @@ public class Oauth2Filter implements Filter {
           handleRateLimit(projectId, username, request, response);
         } else if (statusCode == 400 || statusCode == 401) {
           handleNeedAuthorization(projectId, username, request, response);
+        } else if (statusCode == 410) {
+          // 410 is returned from `web` though endpoint "/oauth/token" is not deprecated.
+          // Ideally, we should return 400 with proper error info in the response body.
+          // However, on the git-bridge side, `google-oauth-client` is used to request
+          // tokens, and there is no easy way to get response body as everything is
+          // encapsulated by the library.
+          // Hence we use http error code 410 to indicate password auth is deprecated for
+          // a user.
+          handlePasswordAuthenticationDeprecation(projectId, request, response);
         } else {
           handleUnknownOauthServerError(projectId, statusCode, request, response);
         }
@@ -271,6 +285,17 @@ public class Oauth2Filter implements Filter {
     sendResponse(response, 500, Arrays.asList("Unexpected server error. Please try again later."));
   }
 
+  private void handlePasswordAuthenticationDeprecation(
+      String projectId, HttpServletRequest request, HttpServletResponse response)
+      throws IOException {
+    Log.info("[{}] Password authentication deprecated, ip={}", projectId, getClientIp(request));
+    sendResponse(
+        response,
+        403,
+        Arrays.asList(
+            "Overleaf now only supports Git authentication tokens to access git. See: https://www.overleaf.com/learn/how-to/Git_integration_authentication_tokens"));
+  }
+
   /*
    * Gets the remote IP from the request.
    */
@@ -319,7 +344,8 @@ public class Oauth2Filter implements Filter {
   }
 
   /*
-   * Perform a password grant flow with the OAuth server and return an access token.
+   * Perform a password grant flow with the OAuth server and return an access
+   * token.
    *
    * The access token is null if the password grant flow was unsuccessful.
    */
