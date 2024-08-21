@@ -29,14 +29,6 @@ import {
   DocumentContainer,
   RangesTrackerWithResolvedThreadIds,
 } from '@/features/ide-react/editor/document-container'
-import { Ranges } from '@/features/review-panel-new/context/ranges-context'
-import { Threads } from '@/features/review-panel-new/context/threads-context'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-
-type RangesData = {
-  ranges: Ranges
-  threads: Threads
-}
 
 const clearChangesEffect = StateEffect.define()
 const buildChangesEffect = StateEffect.define()
@@ -54,9 +46,7 @@ const restoreDetachedCommentsEffect = StateEffect.define<RangeSet<any>>({
 
 type Options = {
   currentDoc: DocumentContainer
-  loadingThreads?: boolean
-  ranges?: Ranges
-  threads?: Threads
+  loadingThreads: boolean
 }
 
 /**
@@ -64,8 +54,8 @@ type Options = {
  * and produces decorations for tracked changes and comments.
  */
 export const trackChanges = (
-  { currentDoc, loadingThreads, ranges, threads }: Options,
-  changeManager?: ChangeManager
+  { currentDoc, loadingThreads }: Options,
+  changeManager: ChangeManager
 ) => {
   // A state field that stored any comments found within the ranges of a "cut" transaction,
   // to be restored when pasting matching text.
@@ -130,36 +120,18 @@ export const trackChanges = (
     cutCommentsState,
 
     // initialize/destroy the change manager, and handle any updates
-    changeManager
-      ? ViewPlugin.define(() => {
-          changeManager.initialize()
+    ViewPlugin.define(() => {
+      changeManager.initialize()
 
-          return {
-            update: update => {
-              changeManager.handleUpdate(update)
-            },
-            destroy: () => {
-              changeManager.destroy()
-            },
-          }
-        })
-      : ViewPlugin.define(view => {
-          let timer: number
-
-          return {
-            update(update) {
-              if (update.viewportChanged) {
-                if (timer) {
-                  window.clearTimeout(timer)
-                }
-
-                timer = window.setTimeout(() => {
-                  dispatchEvent(new Event('editor:viewport-changed'))
-                }, 25)
-              }
-            },
-          }
-        }),
+      return {
+        update: update => {
+          changeManager.handleUpdate(update)
+        },
+        destroy: () => {
+          changeManager.destroy()
+        },
+      }
+    }),
 
     // draw change decorations
     ViewPlugin.define<
@@ -168,20 +140,10 @@ export const trackChanges = (
       }
     >(
       () => {
-        let decorations = Decoration.none
-        if (isSplitTestEnabled('review-panel-redesign')) {
-          if (ranges && threads) {
-            decorations = buildChangeDecorations(currentDoc, {
-              ranges,
-              threads,
-            })
-          }
-        } else if (!loadingThreads) {
-          decorations = buildChangeDecorations(currentDoc)
-        }
-
         return {
-          decorations,
+          decorations: loadingThreads
+            ? Decoration.none
+            : buildChangeDecorations(currentDoc),
           update(update) {
             for (const transaction of update.transactions) {
               this.decorations = this.decorations.map(transaction.changes)
@@ -219,23 +181,18 @@ export const buildChangeMarkers = () => {
   }
 }
 
-const buildChangeDecorations = (
-  currentDoc: DocumentContainer,
-  data?: RangesData
-) => {
-  const ranges = data ? data.ranges : currentDoc.ranges
-
-  if (!ranges) {
+const buildChangeDecorations = (currentDoc: DocumentContainer) => {
+  if (!currentDoc.ranges) {
     return Decoration.none
   }
 
-  const changes = [...ranges.changes, ...ranges.comments]
+  const changes = [...currentDoc.ranges.changes, ...currentDoc.ranges.comments]
 
   const decorations = []
 
   for (const change of changes) {
     try {
-      decorations.push(...createChangeRange(change, currentDoc, data))
+      decorations.push(...createChangeRange(change, currentDoc))
     } catch (error) {
       // ignore invalid changes
       debugConsole.debug('invalid change position', error)
@@ -294,11 +251,7 @@ class ChangeCalloutWidget extends WidgetType {
   }
 }
 
-const createChangeRange = (
-  change: Change,
-  currentDoc: DocumentContainer,
-  data?: RangesData
-) => {
+const createChangeRange = (change: Change, currentDoc: DocumentContainer) => {
   const { id, metadata, op } = change
 
   const from = op.p
@@ -334,20 +287,6 @@ const createChangeRange = (
       .resolvedThreadIds![op.t]
   ) {
     return []
-  }
-
-  if (_isCommentOperation) {
-    if (data) {
-      const thread = data.threads[op.t]
-      if (!thread || thread.resolved) {
-        return []
-      }
-    } else if (
-      (currentDoc.ranges as RangesTrackerWithResolvedThreadIds)
-        .resolvedThreadIds![op.t]
-    ) {
-      return []
-    }
   }
 
   const opType = _isCommentOperation ? 'c' : 'i'
