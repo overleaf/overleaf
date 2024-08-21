@@ -81,7 +81,7 @@ type Options = {
  * A custom extension that initialises the change manager, passes any updates to it,
  * and produces decorations for tracked changes and comments.
  */
-export const trackChanges = (
+export const ranges = (
   { currentDoc, loadingThreads, ranges, threads }: Options,
   changeManager?: ChangeManager
 ) => {

@@ -63,7 +63,7 @@ import { useUserContext } from '@/shared/context/user-context'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
 import { setMathPreview } from '@/features/source-editor/extensions/math-preview'
 import { useRangesContext } from '@/features/review-panel-new/context/ranges-context'
-import { updateRanges } from '@/features/source-editor/extensions/track-changes'
+import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel-new/context/threads-context'
 
 function useCodeMirrorScope(view: EditorView) {
