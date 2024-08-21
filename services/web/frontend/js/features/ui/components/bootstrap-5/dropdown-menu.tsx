@@ -99,8 +99,8 @@ export const DropdownMenu = forwardRef<
 })
 DropdownMenu.displayName = 'DropdownMenu'
 
-export function DropdownDivider({ as = 'li' }: DropdownDividerProps) {
-  return <BS5DropdownDivider as={as} />
+export function DropdownDivider({ as = 'li', ...props }: DropdownDividerProps) {
+  return <BS5DropdownDivider as={as} {...props} />
 }
 
 export function DropdownHeader({ as = 'li', ...props }: DropdownHeaderProps) {

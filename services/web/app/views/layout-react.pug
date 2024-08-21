@@ -1,0 +1,61 @@
+//- This is used for pages that are migrated to Bootstrap 5 but don't use Bootstrap's own JS, instead using
+//- react-bootstrap for all Bootstrap components
+extends ./layout-base
+
+include ./_mixins/formMessages
+include ./_mixins/bootstrap_js
+
+block entrypointVar
+	- entrypoint = 'marketing'
+		
+block append meta
+	if bootstrapVersion === 5
+		- const canDisplayAdminMenu = hasAdminAccess()
+		- const canDisplayAdminRedirect = canRedirectToAdminDomain()
+		- const sessionUser = getSessionUser()
+		- const staffAccess = sessionUser?.staffAccess
+		- const canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || staffAccess?.splitTestMetrics || staffAccess?.splitTestManagement)
+		- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
+		- const enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+
+		meta(name="ol-navbar" data-type="json" content={
+			customLogo: settings.nav.custom_logo,
+			title: nav.title,
+			canDisplayAdminMenu,
+			canDisplayAdminRedirect,
+			canDisplaySplitTestMenu,
+			canDisplaySurveyMenu,
+			enableUpgradeButton,
+			suppressNavbarRight: !!suppressNavbarRight,
+			suppressNavContentLinks: !!suppressNavContentLinks,
+			showSubscriptionLink: nav.showSubscriptionLink,
+			sessionUser: sessionUser ? { email: sessionUser.email} : undefined,
+			adminUrl: settings.adminUrl,
+			items: cloneAndTranslateText(nav.header_extras)
+		})
+
+block body
+	if (typeof suppressNavbar === "undefined")
+		if bootstrapVersion === 5
+			include layout/navbar-marketing-react-bootstrap-5
+		else
+			include layout/navbar-marketing
+
+	block content
+
+	if (typeof suppressFooter === "undefined")
+		if showThinFooter
+			include layout/footer-marketing
+		else
+			include layout/fat-footer
+
+	if (typeof suppressCookieBanner === "undefined")
+		include _cookie_banner
+
+	if bootstrapVersion === 3
+		!= moduleIncludes("contactModal-marketing", locals)
+		
+block prepend foot-scripts
+	//- Only include Bootstrap JS if using Bootstrap 3 
+	if bootstrapVersion === 3
+		+bootstrap-js(3)

@@ -55,6 +55,7 @@ export type DropdownMenuProps = PropsWithChildren<{
 
 export type DropdownDividerProps = PropsWithChildren<{
   as?: ElementType
+  className?: string
 }>
 
 export type DropdownHeaderProps = PropsWithChildren<{

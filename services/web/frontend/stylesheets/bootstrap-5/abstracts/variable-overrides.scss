@@ -204,6 +204,9 @@ $navbar-toggler-padding-x: var(--spacing-05);
 $navbar-toggler-padding-y: var(--spacing-02);
 $navbar-toggler-border-radius: var(--border-radius-base);
 
+// Nav links
+$navbar-nav-link-padding-x: var(--navbar-btn-padding-h);
+
 // Spacing scale used by Bootstrap utilities
 $spacer: $spacing-06;
 $spacers: (

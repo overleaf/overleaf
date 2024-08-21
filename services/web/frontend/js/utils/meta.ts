@@ -46,6 +46,7 @@ import { PasswordStrengthOptions } from '../../../types/password-strength-option
 import { Subscription as ProjectDashboardSubscription } from '../../../types/project/dashboard/subscription'
 import { ThirdPartyIds } from '../../../types/third-party-ids'
 import { Publisher } from '../../../types/subscription/dashboard/publisher'
+import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
 
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
@@ -135,6 +136,7 @@ export interface Meta {
   'ol-memberGroupSubscriptions': MemberGroupSubscription[]
   'ol-memberOfSSOEnabledGroups': GroupSSOLinkingStatus[]
   'ol-members': MinimalUser[]
+  'ol-navbar': DefaultNavbarMetadata
   'ol-no-single-dollar': boolean
   'ol-notifications': NotificationType[]
   'ol-notificationsInstitution': InstitutionType[]

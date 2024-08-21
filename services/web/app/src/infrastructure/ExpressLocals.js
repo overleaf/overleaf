@@ -227,6 +227,26 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(function (req, res, next) {
     res.locals.translate = req.i18n.translate
 
+    const addTranslatedTextDeep = obj => {
+      if (_.isObject(obj)) {
+        if (_.has(obj, 'text')) {
+          obj.translatedText = req.i18n.translate(obj.text)
+        }
+        _.forOwn(obj, value => {
+          addTranslatedTextDeep(value)
+        })
+      }
+    }
+
+    // This function is used to add translations from the server for main
+    // navigation items because it's tricky to get them in the front end
+    // otherwise.
+    res.locals.cloneAndTranslateText = obj => {
+      const clone = _.cloneDeep(obj)
+      addTranslatedTextDeep(clone)
+      return clone
+    }
+
     // Don't include the query string parameters, otherwise Google
     // treats ?nocdn=true as the canonical version
     try {
