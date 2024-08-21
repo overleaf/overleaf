@@ -59,8 +59,6 @@ describe('SubscriptionController', function () {
       },
     }
 
-    this.PlansLocator = { findLocalPlanInSettings: sinon.stub() }
-
     this.LimitationsManager = {
       hasPaidSubscription: sinon.stub(),
       userHasV1OrV2Subscription: sinon.stub(),
@@ -148,7 +146,6 @@ describe('SubscriptionController', function () {
         '../Authentication/SessionManager': this.SessionManager,
         './SubscriptionHandler': this.SubscriptionHandler,
         './SubscriptionHelper': this.SubscriptionHelper,
-        './PlansLocator': this.PlansLocator,
         './SubscriptionViewModelBuilder': this.SubscriptionViewModelBuilder,
         './LimitationsManager': this.LimitationsManager,
         '../../infrastructure/GeoIpLookup': this.GeoIpLookup,
@@ -176,6 +173,9 @@ describe('SubscriptionController', function () {
           setUserPropertyForUser: sinon.stub(),
         }),
         '../../infrastructure/Features': this.Features,
+        '../../util/currency': (this.currency = {
+          formatCurrencyLocalized: sinon.stub(),
+        }),
       },
     })
 
@@ -402,6 +402,30 @@ describe('SubscriptionController', function () {
         })
       })
     })
+
+    describe('localCcyAssignment', function () {
+      it('uses formatCurrencyLocalized when variant is enabled', function (done) {
+        this.SplitTestV2Hander.promises.getAssignment.resolves({
+          variant: 'enabled',
+        })
+        this.res.render = (page, opts) => {
+          expect(opts.formatCurrency).to.equal(
+            this.currency.formatCurrencyLocalized
+          )
+          done()
+        }
+        this.SubscriptionController.plansPage(this.req, this.res)
+      })
+      it('uses formatCurrencyDefault when variant is default', function (done) {
+        this.res.render = (page, opts) => {
+          expect(opts.formatCurrency).to.equal(
+            this.SubscriptionHelper.formatCurrencyDefault
+          )
+          done()
+        }
+        this.SubscriptionController.plansPage(this.req, this.res)
+      })
+    })
   })
 
   describe('plansPage light touch redesign', function () {
@@ -619,6 +643,30 @@ describe('SubscriptionController', function () {
         })
       })
     })
+
+    describe('localCcyAssignment', function () {
+      it('uses formatCurrencyLocalized when variant is enabled', function (done) {
+        this.SplitTestV2Hander.promises.getAssignment.resolves({
+          variant: 'enabled',
+        })
+        this.res.render = (page, opts) => {
+          expect(opts.formatCurrency).to.equal(
+            this.currency.formatCurrencyLocalized
+          )
+          done()
+        }
+        this.SubscriptionController.plansPageLightDesign(this.req, this.res)
+      })
+      it('uses formatCurrencyDefault when variant is default', function (done) {
+        this.res.render = (page, opts) => {
+          expect(opts.formatCurrency).to.equal(
+            this.SubscriptionHelper.formatCurrencyDefault
+          )
+          done()
+        }
+        this.SubscriptionController.plansPageLightDesign(this.req, this.res)
+      })
+    })
   })
 
   describe('interstitialPaymentPage', function () {
@@ -641,7 +689,6 @@ describe('SubscriptionController', function () {
 
     describe('with a user with subscription', function () {
       it('should redirect to the subscription dashboard', function (done) {
-        this.PlansLocator.findLocalPlanInSettings.returns({})
         this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
           true
         )
