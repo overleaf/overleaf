@@ -14,6 +14,18 @@ mixin quoteLargeTextCentered(quote, person, position, affiliation, link, picture
 			if link
 				.quote-link !{link}
 
+mixin quoteLeftGreenBorder({quote, person, position, affiliation, link})
+	blockquote.quote-left-green-border
+		.quote !{quote}
+		footer
+			| #{person}
+			| #{position || affiliation ? ',' : ''}
+			| #{position}
+			| #{position && affiliation ? ' at ' : ''}
+			| #{affiliation}
+			if link
+				.quote-link !{link}
+
 mixin collinsQuote1
 	.card.card-dark-green-bg
 		-var quote = 'Overleaf is indispensable for us. We use it in our research, thesis writing, project proposals, and manuscripts for publication. When it comes to writing, it’s our main tool.'

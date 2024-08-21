@@ -59,3 +59,39 @@ blockquote.quote-large-text-centered {
     }
   }
 }
+
+blockquote.quote-left-green-border {
+  border-left: 2px solid var(--green-60) !important;
+  text-align: left;
+  font-size: var(--font-size-07) !important;
+  line-height: var(--line-height-06) !important;
+  color: var(--neutral-90);
+  padding: var(--spacing-04) 0 var(--spacing-04) var(--spacing-06) !important;
+
+  // customize open/close quote placement.
+  // Otherwise, close is after footer and before is above quote
+  &:before,
+  &:after {
+    content: none;
+  }
+  .quote {
+    &:before {
+      content: open-quote;
+    }
+    &:after {
+      content: close-quote;
+    }
+  }
+
+  footer {
+    .heading-xs();
+    color: var(--neutral-70);
+    font-weight: 400;
+    margin: var(--spacing-09) 0 0 0;
+    padding: 0;
+  }
+
+  .quote-link {
+    margin-top: var(--spacing-05);
+  }
+}
