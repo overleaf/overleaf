@@ -142,37 +142,6 @@ class ChangeDeletedWidget extends WidgetType {
   }
 }
 
-class ChangeCalloutWidget extends WidgetType {
-  constructor(
-    public change: Change,
-    public opType: string
-  ) {
-    super()
-  }
-
-  toDOM() {
-    const widget = document.createElement('span')
-    widget.className = 'ol-cm-change-callout'
-    widget.classList.add(`ol-cm-change-callout-${this.opType}`)
-
-    const inner = document.createElement('span')
-    inner.classList.add('ol-cm-change-callout-inner')
-    widget.appendChild(inner)
-
-    return widget
-  }
-
-  eq(widget: ChangeCalloutWidget) {
-    return widget.opType === this.opType
-  }
-
-  updateDOM(element: HTMLElement) {
-    element.className = 'ol-cm-change-callout'
-    element.classList.add(`ol-cm-change-callout-${this.opType}`)
-    return true
-  }
-}
-
 const createChangeRange = (change: Change, data: RangesData) => {
   const { id, metadata, op } = change
 
@@ -190,15 +159,7 @@ const createChangeRange = (change: Change, data: RangesData) => {
       metadata,
     })
 
-    const calloutWidget = Decoration.widget({
-      widget: new ChangeCalloutWidget(change, opType),
-      side: 1,
-      opType,
-      id,
-      metadata,
-    })
-
-    return [calloutWidget.range(from, from), changeWidget.range(from, from)]
+    return [changeWidget.range(from, from)]
   }
 
   const _isCommentOperation = isCommentOperation(op)
@@ -227,14 +188,7 @@ const createChangeRange = (change: Change, data: RangesData) => {
     metadata,
   })
 
-  const calloutWidget = Decoration.widget({
-    widget: new ChangeCalloutWidget(change, opType),
-    opType,
-    id,
-    metadata,
-  })
-
-  return [calloutWidget.range(from, from), changeMark.range(from, to)]
+  return [changeMark.range(from, to)]
 }
 
 /**
@@ -339,9 +293,6 @@ export const rejectChanges = (
 }
 
 const trackChangesTheme = EditorView.baseTheme({
-  '.cm-line': {
-    overflowX: 'hidden', // needed so the callout elements don't overflow (requires line wrapping to be on)
-  },
   '&light .ol-cm-change-i': {
     backgroundColor: '#2c8e304d',
   },
@@ -360,33 +311,5 @@ const trackChangesTheme = EditorView.baseTheme({
   '.ol-cm-change-d': {
     borderLeft: '2px dotted #c5060b',
     marginLeft: '-1px',
-  },
-  '.ol-cm-change-callout': {
-    position: 'relative',
-    pointerEvents: 'none',
-    padding: 'var(--half-leading, 0) 0',
-  },
-  '.ol-cm-change-callout-inner': {
-    display: 'inline-block',
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    width: '100vw',
-    borderBottom: '1px dashed black',
-  },
-  // disable callout line in Firefox
-  '@supports (-moz-appearance:none)': {
-    '.ol-cm-change-callout-inner': {
-      display: 'none',
-    },
-  },
-  '.ol-cm-change-callout-i .ol-cm-change-callout-inner': {
-    borderColor: '#2c8e30',
-  },
-  '.ol-cm-change-callout-c .ol-cm-change-callout-inner': {
-    borderColor: '#f3b111',
-  },
-  '.ol-cm-change-callout-d .ol-cm-change-callout-inner': {
-    borderColor: '#c5060b',
   },
 })
