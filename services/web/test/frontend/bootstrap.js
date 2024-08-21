@@ -92,3 +92,6 @@ addHook(() => '', { exts: ['.css'], ignoreNodeModules: false })
 globalThis.HTMLElement.prototype.scrollIntoView = () => {}
 
 globalThis.DOMParser = window.DOMParser
+
+// Polyfill for IndexedDB
+require('fake-indexeddb/auto')

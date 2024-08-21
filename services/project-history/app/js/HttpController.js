@@ -17,6 +17,8 @@ import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
 import { pipeline } from 'stream'
 
+const ONE_DAY_IN_SECONDS = 24 * 60 * 60
+
 export function getProjectBlob(req, res, next) {
   const projectId = req.params.project_id
   const blobHash = req.params.hash
@@ -27,6 +29,7 @@ export function getProjectBlob(req, res, next) {
       if (err != null) {
         return next(OError.tag(err))
       }
+      res.setHeader('Cache-Control', `private, max-age=${ONE_DAY_IN_SECONDS}`)
       pipeline(stream, res, err => {
         if (err) next(err)
         // res.end() is already called via 'end' event by pipeline.
@@ -214,6 +217,42 @@ export function getRangesSnapshot(req, res, next) {
       res.json(ranges)
     }
   )
+}
+
+export function getLatestSnapshot(req, res, next) {
+  const { project_id: projectId } = req.params
+  WebApiManager.getHistoryId(projectId, (error, historyId) => {
+    if (error) return next(OError.tag(error))
+    SnapshotManager.getLatestSnapshot(
+      projectId,
+      historyId,
+      (error, { snapshot, version }) => {
+        if (error != null) {
+          return next(error)
+        }
+        res.json({ snapshot: snapshot.toRaw(), version })
+      }
+    )
+  })
+}
+
+export function getChangesSince(req, res, next) {
+  const { project_id: projectId } = req.params
+  const { since } = req.query
+  WebApiManager.getHistoryId(projectId, (error, historyId) => {
+    if (error) return next(OError.tag(error))
+    SnapshotManager.getChangesSince(
+      projectId,
+      historyId,
+      since,
+      (error, changes) => {
+        if (error != null) {
+          return next(error)
+        }
+        res.json(changes.map(c => c.toRaw()))
+      }
+    )
+  })
 }
 
 export function getProjectSnapshot(req, res, next) {

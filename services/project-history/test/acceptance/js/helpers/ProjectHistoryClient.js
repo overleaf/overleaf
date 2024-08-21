@@ -108,6 +108,41 @@ export function getFileTreeDiff(projectId, from, to, callback) {
   )
 }
 
+export function getChangesSince(projectId, since, options, callback) {
+  request.get(
+    {
+      url: `http://127.0.0.1:3054/project/${projectId}/changes`,
+      qs: {
+        since,
+      },
+      json: true,
+    },
+    (error, res, body) => {
+      if (error) return callback(error)
+      if (!options.allowErrors) {
+        expect(res.statusCode).to.equal(200)
+      }
+      callback(null, body, res.statusCode)
+    }
+  )
+}
+
+export function getLatestSnapshot(projectId, callback) {
+  request.get(
+    {
+      url: `http://127.0.0.1:3054/project/${projectId}/snapshot`,
+      json: true,
+    },
+    (error, res, body) => {
+      if (error) {
+        return callback(error)
+      }
+      expect(res.statusCode).to.equal(200)
+      callback(null, body)
+    }
+  )
+}
+
 export function getSnapshot(projectId, pathname, version, options, callback) {
   if (typeof options === 'function') {
     callback = options

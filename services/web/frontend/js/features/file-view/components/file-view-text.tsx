@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { debugConsole } from '@/utils/debugging'
 import useAbortController from '../../../shared/hooks/use-abort-controller'
+import { BinaryFile } from '@/features/file-view/types/binary-file'
+import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
@@ -10,11 +12,12 @@ export default function FileViewText({
   onLoad,
   onError,
 }: {
-  file: { id: string }
+  file: BinaryFile
   onLoad: () => void
   onError: () => void
 }) {
   const { _id: projectId } = useProjectContext()
+  const { fileTreeFromHistory } = useSnapshotContext()
 
   const [textPreview, setTextPreview] = useState('')
   const [shouldShowDots, setShouldShowDots] = useState(false)
@@ -27,7 +30,9 @@ export default function FileViewText({
     if (inFlight) {
       return
     }
-    let path = `/project/${projectId}/file/${file.id}`
+    let path = fileTreeFromHistory
+      ? `/project/${projectId}/blob/${file.hash}`
+      : `/project/${projectId}/file/${file.id}`
     const fetchContentLengthTimeout = setTimeout(
       () => fetchContentLengthController.abort(),
       10000
@@ -77,8 +82,10 @@ export default function FileViewText({
         clearTimeout(fetchDataTimeout)
       })
   }, [
+    fileTreeFromHistory,
     projectId,
     file.id,
+    file.hash,
     onError,
     onLoad,
     inFlight,

@@ -34,6 +34,7 @@ import { ModalsContextProvider } from '@/features/ide-react/context/modals-conte
 import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-context'
 import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
+import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -159,6 +160,7 @@ export function EditorProviders({
     DetachProvider,
     EditorProvider,
     EditorManagerProvider,
+    SnapshotProvider,
     FileTreeDataProvider,
     FileTreeOpenProvider,
     FileTreePathProvider,
@@ -187,39 +189,41 @@ export function EditorProviders({
             <Providers.UserProvider>
               <Providers.UserSettingsProvider>
                 <Providers.ProjectProvider>
-                  <Providers.FileTreeDataProvider>
-                    <Providers.FileTreePathProvider>
-                      <Providers.ReferencesProvider>
-                        <Providers.DetachProvider>
-                          <Providers.EditorProvider>
-                            <Providers.PermissionsProvider>
-                              <Providers.ProjectSettingsProvider>
-                                <Providers.LayoutProvider>
-                                  <Providers.EditorManagerProvider>
-                                    <Providers.LocalCompileProvider>
-                                      <Providers.DetachCompileProvider>
-                                        <Providers.ChatProvider>
-                                          <Providers.FileTreeOpenProvider>
-                                            <Providers.OnlineUsersProvider>
-                                              <Providers.MetadataProvider>
-                                                <Providers.OutlineProvider>
-                                                  {children}
-                                                </Providers.OutlineProvider>
-                                              </Providers.MetadataProvider>
-                                            </Providers.OnlineUsersProvider>
-                                          </Providers.FileTreeOpenProvider>
-                                        </Providers.ChatProvider>
-                                      </Providers.DetachCompileProvider>
-                                    </Providers.LocalCompileProvider>
-                                  </Providers.EditorManagerProvider>
-                                </Providers.LayoutProvider>
-                              </Providers.ProjectSettingsProvider>
-                            </Providers.PermissionsProvider>
-                          </Providers.EditorProvider>
-                        </Providers.DetachProvider>
-                      </Providers.ReferencesProvider>
-                    </Providers.FileTreePathProvider>
-                  </Providers.FileTreeDataProvider>
+                  <Providers.SnapshotProvider>
+                    <Providers.FileTreeDataProvider>
+                      <Providers.FileTreePathProvider>
+                        <Providers.ReferencesProvider>
+                          <Providers.DetachProvider>
+                            <Providers.EditorProvider>
+                              <Providers.PermissionsProvider>
+                                <Providers.ProjectSettingsProvider>
+                                  <Providers.LayoutProvider>
+                                    <Providers.EditorManagerProvider>
+                                      <Providers.LocalCompileProvider>
+                                        <Providers.DetachCompileProvider>
+                                          <Providers.ChatProvider>
+                                            <Providers.FileTreeOpenProvider>
+                                              <Providers.OnlineUsersProvider>
+                                                <Providers.MetadataProvider>
+                                                  <Providers.OutlineProvider>
+                                                    {children}
+                                                  </Providers.OutlineProvider>
+                                                </Providers.MetadataProvider>
+                                              </Providers.OnlineUsersProvider>
+                                            </Providers.FileTreeOpenProvider>
+                                          </Providers.ChatProvider>
+                                        </Providers.DetachCompileProvider>
+                                      </Providers.LocalCompileProvider>
+                                    </Providers.EditorManagerProvider>
+                                  </Providers.LayoutProvider>
+                                </Providers.ProjectSettingsProvider>
+                              </Providers.PermissionsProvider>
+                            </Providers.EditorProvider>
+                          </Providers.DetachProvider>
+                        </Providers.ReferencesProvider>
+                      </Providers.FileTreePathProvider>
+                    </Providers.FileTreeDataProvider>
+                  </Providers.SnapshotProvider>
                 </Providers.ProjectProvider>
               </Providers.UserSettingsProvider>
             </Providers.UserProvider>

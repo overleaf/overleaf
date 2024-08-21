@@ -84,6 +84,7 @@ describe('HttpController', function () {
       json: sinon.stub(),
       send: sinon.stub(),
       sendStatus: sinon.stub(),
+      setHeader: sinon.stub(),
     }
   })
 
@@ -104,6 +105,13 @@ describe('HttpController', function () {
         .calledWith(this.projectId, this.blobHash)
         .should.equal(true)
       this.pipeline.should.have.been.calledWith(this.stream, this.res)
+    })
+
+    it('should set caching header', function () {
+      this.res.setHeader.should.have.been.calledWith(
+        'Cache-Control',
+        'private, max-age=86400'
+      )
     })
   })
 

@@ -42,6 +42,7 @@ import { EditorManagerProvider } from '@/features/ide-react/context/editor-manag
 import { FileTreeOpenProvider } from '@/features/ide-react/context/file-tree-open-context'
 import { MetadataProvider } from '@/features/ide-react/context/metadata-context'
 import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-context'
+import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
 
 const scopeWatchers: [string, (value: any) => void][] = []
 
@@ -73,7 +74,7 @@ const initialize = () => {
           { _id: 'test-file-id', name: 'testfile.tex' },
           { _id: 'test-bib-file-id', name: 'testsources.bib' },
         ],
-        fileRefs: [{ _id: 'test-image-id', name: 'frog.jpg' }],
+        fileRefs: [{ _id: 'test-image-id', name: 'frog.jpg', hash: '42' }],
         folders: [],
       },
     ],
@@ -179,6 +180,7 @@ export const ScopeDecorator = (
     DetachProvider,
     EditorProvider,
     EditorManagerProvider,
+    SnapshotProvider,
     FileTreeDataProvider,
     FileTreeOpenProvider,
     FileTreePathProvider,
@@ -207,39 +209,41 @@ export const ScopeDecorator = (
             <Providers.UserProvider>
               <Providers.UserSettingsProvider>
                 <Providers.ProjectProvider>
-                  <Providers.FileTreeDataProvider>
-                    <Providers.FileTreePathProvider>
-                      <Providers.ReferencesProvider>
-                        <Providers.DetachProvider>
-                          <Providers.EditorProvider>
-                            <Providers.PermissionsProvider>
-                              <Providers.ProjectSettingsProvider>
-                                <Providers.LayoutProvider>
-                                  <Providers.EditorManagerProvider>
-                                    <Providers.LocalCompileProvider>
-                                      <Providers.DetachCompileProvider>
-                                        <Providers.ChatProvider>
-                                          <Providers.FileTreeOpenProvider>
-                                            <Providers.OnlineUsersProvider>
-                                              <Providers.MetadataProvider>
-                                                <Providers.OutlineProvider>
-                                                  <Story />
-                                                </Providers.OutlineProvider>
-                                              </Providers.MetadataProvider>
-                                            </Providers.OnlineUsersProvider>
-                                          </Providers.FileTreeOpenProvider>
-                                        </Providers.ChatProvider>
-                                      </Providers.DetachCompileProvider>
-                                    </Providers.LocalCompileProvider>
-                                  </Providers.EditorManagerProvider>
-                                </Providers.LayoutProvider>
-                              </Providers.ProjectSettingsProvider>
-                            </Providers.PermissionsProvider>
-                          </Providers.EditorProvider>
-                        </Providers.DetachProvider>
-                      </Providers.ReferencesProvider>
-                    </Providers.FileTreePathProvider>
-                  </Providers.FileTreeDataProvider>
+                  <Providers.SnapshotProvider>
+                    <Providers.FileTreeDataProvider>
+                      <Providers.FileTreePathProvider>
+                        <Providers.ReferencesProvider>
+                          <Providers.DetachProvider>
+                            <Providers.EditorProvider>
+                              <Providers.PermissionsProvider>
+                                <Providers.ProjectSettingsProvider>
+                                  <Providers.LayoutProvider>
+                                    <Providers.EditorManagerProvider>
+                                      <Providers.LocalCompileProvider>
+                                        <Providers.DetachCompileProvider>
+                                          <Providers.ChatProvider>
+                                            <Providers.FileTreeOpenProvider>
+                                              <Providers.OnlineUsersProvider>
+                                                <Providers.MetadataProvider>
+                                                  <Providers.OutlineProvider>
+                                                    <Story />
+                                                  </Providers.OutlineProvider>
+                                                </Providers.MetadataProvider>
+                                              </Providers.OnlineUsersProvider>
+                                            </Providers.FileTreeOpenProvider>
+                                          </Providers.ChatProvider>
+                                        </Providers.DetachCompileProvider>
+                                      </Providers.LocalCompileProvider>
+                                    </Providers.EditorManagerProvider>
+                                  </Providers.LayoutProvider>
+                                </Providers.ProjectSettingsProvider>
+                              </Providers.PermissionsProvider>
+                            </Providers.EditorProvider>
+                          </Providers.DetachProvider>
+                        </Providers.ReferencesProvider>
+                      </Providers.FileTreePathProvider>
+                    </Providers.FileTreeDataProvider>
+                  </Providers.SnapshotProvider>
                 </Providers.ProjectProvider>
               </Providers.UserSettingsProvider>
             </Providers.UserProvider>

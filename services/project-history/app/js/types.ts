@@ -1,5 +1,5 @@
 import { HistoryRanges } from '../../../document-updater/app/js/types'
-import { LinkedFileData } from 'overleaf-editor-core/lib/types'
+import { LinkedFileData, RawOrigin } from 'overleaf-editor-core/lib/types'
 
 export type Update =
   | TextUpdate
@@ -159,10 +159,6 @@ export type UpdateWithBlob<T extends Update = Update> = {
         ranges?: string
       }
     : never
-}
-
-export type RawOrigin = {
-  kind: string
 }
 
 export type TrackingProps = {

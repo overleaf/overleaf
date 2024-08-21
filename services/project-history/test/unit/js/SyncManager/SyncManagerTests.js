@@ -114,7 +114,7 @@ describe('SyncManager', function () {
 
     this.SnapshotManager = {
       promises: {
-        getLatestSnapshot: sinon.stub(),
+        getLatestSnapshotFiles: sinon.stub(),
       },
     }
 
@@ -517,7 +517,9 @@ describe('SyncManager', function () {
         .returns('another.tex')
       this.UpdateTranslator._convertPathname.withArgs('1.png').returns('1.png')
       this.UpdateTranslator._convertPathname.withArgs('2.png').returns('2.png')
-      this.SnapshotManager.promises.getLatestSnapshot.resolves(this.fileMap)
+      this.SnapshotManager.promises.getLatestSnapshotFiles.resolves(
+        this.fileMap
+      )
     })
 
     it('returns updates if no sync updates are queued', async function () {
@@ -530,8 +532,8 @@ describe('SyncManager', function () {
       )
 
       expect(expandedUpdates).to.equal(updates)
-      expect(this.SnapshotManager.promises.getLatestSnapshot).to.not.have.been
-        .called
+      expect(this.SnapshotManager.promises.getLatestSnapshotFiles).to.not.have
+        .been.called
       expect(this.extendLock).to.not.have.been.called
     })
 

@@ -127,6 +127,7 @@ module.exports = ProjectEditorHandler = {
       name: file.name,
       linkedFileData: file.linkedFileData,
       created: file.created,
+      hash: file.hash,
     }
   },
 

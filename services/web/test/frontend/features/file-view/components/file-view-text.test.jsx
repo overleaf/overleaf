@@ -6,6 +6,8 @@ import FileViewText from '../../../../../frontend/js/features/file-view/componen
 
 describe('<FileViewText/>', function () {
   const file = {
+    id: '123',
+    hash: '1234',
     name: 'example.tex',
     linkedFileData: {
       v1_source_doc_id: 'v1-source-id',

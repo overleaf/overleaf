@@ -5,6 +5,9 @@ const settings = require('@overleaf/settings')
 // backward-compatible (can be instantiated with string as argument instead
 // of object)
 class BackwardCompatibleError extends OError {
+  /**
+   * @param {string | { message: string, info?: Object }} messageOrOptions
+   */
   constructor(messageOrOptions) {
     if (typeof messageOrOptions === 'string') {
       super(messageOrOptions)

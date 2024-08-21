@@ -203,7 +203,7 @@ async function expandSyncUpdates(
   const syncState = await _getResyncState(projectId)
 
   // compute the current snapshot from the most recent chunk
-  const snapshotFiles = await SnapshotManager.promises.getLatestSnapshot(
+  const snapshotFiles = await SnapshotManager.promises.getLatestSnapshotFiles(
     projectId,
     projectHistoryId
   )

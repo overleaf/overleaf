@@ -10,6 +10,7 @@ export function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
     selected: true,
     linkedFileData: fileRef.linkedFileData,
     created: fileRef.created ? new Date(fileRef.created) : new Date(),
+    hash: fileRef.hash,
   }
 }
 

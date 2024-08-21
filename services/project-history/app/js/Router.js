@@ -21,6 +21,8 @@ export function initialize(app) {
 
   app.delete('/project/:project_id', HttpController.deleteProject)
 
+  app.get('/project/:project_id/snapshot', HttpController.getLatestSnapshot)
+
   app.get(
     '/project/:project_id/diff',
     validate({
@@ -53,6 +55,16 @@ export function initialize(app) {
       },
     }),
     HttpController.getUpdates
+  )
+
+  app.get(
+    '/project/:project_id/changes',
+    validate({
+      query: {
+        since: Joi.number().integer(),
+      },
+    }),
+    HttpController.getChangesSince
   )
 
   app.get('/project/:project_id/version', HttpController.latestVersion)

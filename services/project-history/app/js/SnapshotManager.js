@@ -263,6 +263,15 @@ async function _getSnapshotAtVersion(projectId, version) {
   return snapshot
 }
 
+async function getLatestSnapshotFiles(projectId, historyId) {
+  const { snapshot } = await getLatestSnapshot(projectId, historyId)
+  const snapshotFiles = await snapshot.loadFiles(
+    'lazy',
+    HistoryStoreManager.getBlobStore(historyId)
+  )
+  return snapshotFiles
+}
+
 async function getLatestSnapshot(projectId, historyId) {
   const data = await HistoryStoreManager.promises.getMostRecentChunk(
     projectId,
@@ -277,11 +286,48 @@ async function getLatestSnapshot(projectId, historyId) {
   const snapshot = chunk.getSnapshot()
   const changes = chunk.getChanges()
   snapshot.applyAll(changes)
-  const snapshotFiles = await snapshot.loadFiles(
-    'lazy',
-    HistoryStoreManager.getBlobStore(historyId)
-  )
-  return snapshotFiles
+  return {
+    snapshot,
+    version: chunk.getEndVersion(),
+  }
+}
+
+async function getChangesSince(projectId, historyId, sinceVersion) {
+  const allChanges = []
+  let nextVersion
+  while (true) {
+    let data
+    if (nextVersion) {
+      data = await HistoryStoreManager.promises.getChunkAtVersion(
+        projectId,
+        historyId,
+        nextVersion
+      )
+    } else {
+      data = await HistoryStoreManager.promises.getMostRecentChunk(
+        projectId,
+        historyId
+      )
+    }
+    if (data == null || data.chunk == null) {
+      throw new OError('undefined chunk')
+    }
+    const chunk = Core.Chunk.fromRaw(data.chunk)
+    if (sinceVersion > chunk.getEndVersion()) {
+      throw new OError('requested version past the end')
+    }
+    const changes = chunk.getChanges()
+    if (chunk.getStartVersion() > sinceVersion) {
+      allChanges.unshift(...changes)
+      nextVersion = chunk.getStartVersion()
+    } else {
+      allChanges.unshift(
+        ...changes.slice(sinceVersion - chunk.getStartVersion())
+      )
+      break
+    }
+  }
+  return allChanges
 }
 
 async function _loadFilesLimit(snapshot, kind, blobStore) {
@@ -298,24 +344,30 @@ async function _loadFilesLimit(snapshot, kind, blobStore) {
 
 // EXPORTS
 
+const getChangesSinceCb = callbackify(getChangesSince)
 const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
 const getProjectSnapshotCb = callbackify(getProjectSnapshot)
 const getLatestSnapshotCb = callbackify(getLatestSnapshot)
+const getLatestSnapshotFilesCb = callbackify(getLatestSnapshotFiles)
 const getRangesSnapshotCb = callbackify(getRangesSnapshot)
 const getPathsAtVersionCb = callbackify(getPathsAtVersion)
 
 export {
+  getChangesSinceCb as getChangesSince,
   getFileSnapshotStreamCb as getFileSnapshotStream,
   getProjectSnapshotCb as getProjectSnapshot,
   getLatestSnapshotCb as getLatestSnapshot,
+  getLatestSnapshotFilesCb as getLatestSnapshotFiles,
   getRangesSnapshotCb as getRangesSnapshot,
   getPathsAtVersionCb as getPathsAtVersion,
 }
 
 export const promises = {
+  getChangesSince,
   getFileSnapshotStream,
   getProjectSnapshot,
   getLatestSnapshot,
+  getLatestSnapshotFiles,
   getRangesSnapshot,
   getPathsAtVersion,
 }

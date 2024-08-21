@@ -6,6 +6,7 @@ import {
   useMemo,
   useState,
   FC,
+  useEffect,
 } from 'react'
 import useScopeValue from '../hooks/use-scope-value'
 import {
@@ -22,6 +23,14 @@ import { Folder } from '../../../../types/folder'
 import { Project } from '../../../../types/project'
 import { MainDocument } from '../../../../types/project-settings'
 import { FindResult } from '@/features/file-tree/util/path'
+import {
+  StubSnapshotUtils,
+  useSnapshotContext,
+} from '@/features/ide-react/context/snapshot-context'
+import importOverleafModules from '../../../macros/import-overleaf-module.macro'
+const { buildFileTree, createFolder } =
+  (importOverleafModules('snapshotUtils')[0]
+    ?.import as typeof StubSnapshotUtils) || StubSnapshotUtils
 
 const FileTreeDataContext = createContext<
   | {
@@ -170,8 +179,29 @@ export const FileTreeDataProvider: FC = ({ children }) => {
   const [project] = useScopeValue<Project>('project')
   const [openDocId] = useScopeValue('editor.open_doc_id')
   const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
+  const { fileTreeFromHistory, snapshot, snapshotVersion } =
+    useSnapshotContext()
 
-  const { rootFolder } = project || {}
+  const [rootFolder, setRootFolder] = useState(project?.rootFolder)
+
+  useEffect(() => {
+    if (fileTreeFromHistory) return
+    setRootFolder(project?.rootFolder)
+  }, [project, fileTreeFromHistory])
+
+  useEffect(() => {
+    if (!fileTreeFromHistory) return
+    if (!rootFolder || rootFolder?.[0]?._id) {
+      // Init or replace mongo rootFolder with stub while we load the snapshot.
+      // In the future, project:joined should only fire once the snapshot is ready.
+      setRootFolder([createFolder('', '')])
+    }
+  }, [fileTreeFromHistory, rootFolder])
+
+  useEffect(() => {
+    if (!fileTreeFromHistory || !snapshot) return
+    setRootFolder([buildFileTree(snapshot)])
+  }, [fileTreeFromHistory, snapshot, snapshotVersion])
 
   const [{ fileTreeData, fileCount }, dispatch] = useReducer(
     fileTreeMutableReducer,

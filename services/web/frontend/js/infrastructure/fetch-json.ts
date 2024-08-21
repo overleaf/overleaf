@@ -244,3 +244,10 @@ export function getUserFacingMessage(error: Error | null) {
 
   return error.message
 }
+
+export function isRateLimited(error?: Error | FetchError | any) {
+  if (error && error instanceof FetchError) {
+    return error.response?.status === 429
+  }
+  return false
+}

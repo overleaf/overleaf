@@ -3,4 +3,5 @@ export type FileRef = {
   name: string
   created?: string
   linkedFileData?: any
+  hash: string
 }

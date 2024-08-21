@@ -479,7 +479,7 @@ Four five six\
     })
   })
 
-  describe('getLatestSnapshot', function () {
+  describe('getLatestSnapshotFiles', function () {
     describe('for a project', function () {
       beforeEach(async function () {
         this.HistoryStoreManager.promises.getMostRecentChunk.resolves({
@@ -543,7 +543,7 @@ Four five six\
           )),
           getObject: sinon.stub().rejects(),
         })
-        this.data = await this.SnapshotManager.promises.getLatestSnapshot(
+        this.data = await this.SnapshotManager.promises.getLatestSnapshotFiles(
           this.projectId,
           this.historyId
         )
@@ -571,7 +571,7 @@ Four five six\
       beforeEach(async function () {
         this.HistoryStoreManager.promises.getMostRecentChunk.resolves(null)
         expect(
-          this.SnapshotManager.promises.getLatestSnapshot(
+          this.SnapshotManager.promises.getLatestSnapshotFiles(
             this.projectId,
             this.historyId
           )

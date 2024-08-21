@@ -15,9 +15,19 @@ import ShareProjectButton from './share-project-button'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import BackToEditorButton from './back-to-editor-button'
 import getMeta from '@/utils/meta'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
+
+const offlineModeToolbarButtons = importOverleafModules(
+  'offlineModeToolbarButtons'
+)
+// double opt-in
+const enableROMirrorOnClient =
+  isSplitTestEnabled('ro-mirror-on-client') &&
+  new URLSearchParams(window.location.search).get('ro-mirror-on-client') ===
+    'enabled'
 
 const ToolbarHeader = React.memo(function ToolbarHeader({
   cobranding,
@@ -55,6 +65,12 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
           <CobrandingLogo {...cobranding} />
         )}
         <BackToProjectsButton />
+        {enableROMirrorOnClient &&
+          offlineModeToolbarButtons.map(
+            ({ path, import: { default: OfflineModeToolbarButton } }) => {
+              return <OfflineModeToolbarButton key={path} />
+            }
+          )}
       </div>
       {getMeta('ol-showUpgradePrompt') && <UpgradePrompt />}
       <ProjectNameEditableLabel

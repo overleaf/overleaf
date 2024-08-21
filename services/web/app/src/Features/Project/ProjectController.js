@@ -337,6 +337,7 @@ const _ProjectController = {
       'revert-file',
       'revert-project',
       'review-panel-redesign',
+      !anonymous && 'ro-mirror-on-client',
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
       'ieee-stylesheet',

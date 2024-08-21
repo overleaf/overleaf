@@ -44,12 +44,7 @@ export default function FileView({ file }) {
     <>
       <FileViewHeader file={file} />
       {isImageFile && (
-        <FileViewImage
-          fileName={file.name}
-          fileId={file.id}
-          onLoad={handleLoad}
-          onError={handleError}
-        />
+        <FileViewImage file={file} onLoad={handleLoad} onError={handleError} />
       )}
       {isEditableTextFile && (
         <FileViewText file={file} onLoad={handleLoad} onError={handleError} />
@@ -91,5 +86,6 @@ FileView.propTypes = {
   file: PropTypes.shape({
     id: PropTypes.string,
     name: PropTypes.string,
+    hash: PropTypes.string,
   }).isRequired,
 }

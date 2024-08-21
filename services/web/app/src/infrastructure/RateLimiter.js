@@ -11,6 +11,8 @@ const rclient = RedisWrapper.client('ratelimiter')
  * Wrapper over the RateLimiterRedis class
  */
 class RateLimiter {
+  #opts
+
   /**
    * Create a rate limiter.
    *
@@ -31,6 +33,7 @@ class RateLimiter {
    */
   constructor(name, opts = {}) {
     this.name = name
+    this.#opts = Object.assign({}, opts)
     this._rateLimiter = new RateLimiterFlexible.RateLimiterRedis({
       ...opts,
       keyPrefix: `rate-limit:${name}`,
@@ -44,6 +47,11 @@ class RateLimiter {
         storeClient: rclient,
       })
     }
+  }
+
+  // Readonly access to the options, useful for aligning rate-limits.
+  getOptions() {
+    return Object.assign({}, this.#opts)
   }
 
   async consume(key, points = 1, options = { method: 'unknown' }) {

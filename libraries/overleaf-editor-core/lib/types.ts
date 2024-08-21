@@ -51,6 +51,25 @@ export type StringFileRawData = {
   trackedChanges?: TrackedChangeRawData[]
 }
 
+export type RawOrigin = {
+  kind: string
+}
+
+export type RawChange = {
+  operations: RawOperation[]
+  timestamp: string
+  authors?: (number | null)[]
+  v2Authors: string[]
+  origin: RawOrigin
+  projectVersion: string
+  v2DocVersions: RawV2DocVersions
+}
+
+export type RawOperation =
+  | RawEditFileOperation
+  // TODO(das7pad): add types for all the other operations
+  | object
+
 export type RawSnapshot = {
   files: RawFileMap
   projectVersion?: string

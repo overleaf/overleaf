@@ -16,6 +16,7 @@ describe('<FileViewRefreshError />', function () {
       name: 'frog.jpg',
       type: 'file',
       selected: true,
+      hash: '42',
     }
 
     render(

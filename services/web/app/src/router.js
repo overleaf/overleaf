@@ -125,6 +125,20 @@ const rateLimiters = {
     points: 30,
     duration: 60 * 60,
   }),
+  flushHistory: new RateLimiter('flush-project-history', {
+    // Allow flushing once every 30s-1s (allow for network jitter).
+    points: 1,
+    duration: 30 - 1,
+  }),
+  getProjectBlob: new RateLimiter('get-project-blob', {
+    // Download project in full once per hour
+    points: Settings.maxEntitiesPerProject,
+    duration: 60 * 60,
+  }),
+  getHistorySnapshot: new RateLimiter(
+    'get-history-snapshot',
+    openProjectRateLimiter.getOptions()
+  ),
   endorseEmail: new RateLimiter('endorse-email', {
     points: 30,
     duration: 60,

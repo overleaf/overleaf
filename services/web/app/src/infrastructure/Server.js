@@ -296,6 +296,13 @@ webRouter.use(function addNoCacheHeader(req, res, next) {
     // don't set no-cache headers on a project file, as it's immutable and can be cached (privately)
     return next()
   }
+  const isProjectBlob = /^\/project\/[a-f0-9]{24}\/blob\/[a-f0-9]{40}$/.test(
+    req.path
+  )
+  if (isProjectBlob) {
+    // don't set no-cache headers on a project blobs, as they are immutable and can be cached (privately)
+    return next()
+  }
 
   const isWikiContent = /^\/learn(-scripts)?(\/|$)/i.test(req.path)
   if (isWikiContent) {

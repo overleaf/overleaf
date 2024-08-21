@@ -12,6 +12,7 @@ import { LinkedFileIcon } from './file-view-icons'
 import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
 import FileViewRefreshButton from './file-view-refresh-button'
 import FileViewRefreshError from './file-view-refresh-error'
+import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
 
 const tprFileViewInfo = importOverleafModules('tprFileViewInfo') as {
   import: { TPRFileViewInfo: ElementType }
@@ -49,6 +50,7 @@ type FileViewHeaderProps = {
 export default function FileViewHeader({ file }: FileViewHeaderProps) {
   const { _id: projectId } = useProjectContext()
   const { permissionsLevel } = useEditorContext()
+  const { fileTreeFromHistory } = useSnapshotContext()
   const { t } = useTranslation()
 
   const [refreshError, setRefreshError] = useState<Nullable<string>>(null)
@@ -88,8 +90,12 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
       )}
       &nbsp;
       <a
-        download
-        href={`/project/${projectId}/file/${file.id}`}
+        download={file.name}
+        href={
+          fileTreeFromHistory
+            ? `/project/${projectId}/blob/${file.hash}`
+            : `/project/${projectId}/file/${file.id}`
+        }
         className="btn btn-secondary-info btn-secondary"
       >
         <Icon type="download" fw />

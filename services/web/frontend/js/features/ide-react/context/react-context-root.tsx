@@ -22,6 +22,7 @@ import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 import { FileTreeOpenProvider } from '@/features/ide-react/context/file-tree-open-context'
 import { OutlineProvider } from '@/features/ide-react/context/outline-context'
+import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
 
 export const ReactContextRoot: FC = ({ children }) => {
   return (
@@ -32,39 +33,41 @@ export const ReactContextRoot: FC = ({ children }) => {
             <UserProvider>
               <UserSettingsProvider>
                 <ProjectProvider>
-                  <FileTreeDataProvider>
-                    <FileTreePathProvider>
-                      <ReferencesProvider>
-                        <DetachProvider>
-                          <EditorProvider>
-                            <PermissionsProvider>
-                              <ProjectSettingsProvider>
-                                <LayoutProvider>
-                                  <EditorManagerProvider>
-                                    <LocalCompileProvider>
-                                      <DetachCompileProvider>
-                                        <ChatProvider>
-                                          <FileTreeOpenProvider>
-                                            <OnlineUsersProvider>
-                                              <MetadataProvider>
-                                                <OutlineProvider>
-                                                  {children}
-                                                </OutlineProvider>
-                                              </MetadataProvider>
-                                            </OnlineUsersProvider>
-                                          </FileTreeOpenProvider>
-                                        </ChatProvider>
-                                      </DetachCompileProvider>
-                                    </LocalCompileProvider>
-                                  </EditorManagerProvider>
-                                </LayoutProvider>
-                              </ProjectSettingsProvider>
-                            </PermissionsProvider>
-                          </EditorProvider>
-                        </DetachProvider>
-                      </ReferencesProvider>
-                    </FileTreePathProvider>
-                  </FileTreeDataProvider>
+                  <SnapshotProvider>
+                    <FileTreeDataProvider>
+                      <FileTreePathProvider>
+                        <ReferencesProvider>
+                          <DetachProvider>
+                            <EditorProvider>
+                              <PermissionsProvider>
+                                <ProjectSettingsProvider>
+                                  <LayoutProvider>
+                                    <EditorManagerProvider>
+                                      <LocalCompileProvider>
+                                        <DetachCompileProvider>
+                                          <ChatProvider>
+                                            <FileTreeOpenProvider>
+                                              <OnlineUsersProvider>
+                                                <MetadataProvider>
+                                                  <OutlineProvider>
+                                                    {children}
+                                                  </OutlineProvider>
+                                                </MetadataProvider>
+                                              </OnlineUsersProvider>
+                                            </FileTreeOpenProvider>
+                                          </ChatProvider>
+                                        </DetachCompileProvider>
+                                      </LocalCompileProvider>
+                                    </EditorManagerProvider>
+                                  </LayoutProvider>
+                                </ProjectSettingsProvider>
+                              </PermissionsProvider>
+                            </EditorProvider>
+                          </DetachProvider>
+                        </ReferencesProvider>
+                      </FileTreePathProvider>
+                    </FileTreeDataProvider>
+                  </SnapshotProvider>
                 </ProjectProvider>
               </UserSettingsProvider>
             </UserProvider>

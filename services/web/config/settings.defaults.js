@@ -901,6 +901,8 @@ module.exports = {
     managedGroupEnrollmentInvite: [],
     ssoCertificateInfo: [],
     v1ImportDataScreen: [],
+    snapshotUtils: [],
+    offlineModeToolbarButtons: [],
   },
 
   moduleImportSequence: [

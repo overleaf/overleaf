@@ -26,6 +26,7 @@ export type BinaryFile<T extends keyof LinkedFileData = keyof LinkedFileData> =
     type: string
     selected: boolean
     linkedFileData?: LinkedFileData[T]
+    hash: string
   }
 
 export type LinkedFile<T extends keyof LinkedFileData> = Required<BinaryFile<T>>

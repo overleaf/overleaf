@@ -44,6 +44,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
               {
                 _id: 'test-file-in-folder',
                 name: 'example.png',
+                hash: '42',
               },
             ],
             folders: [],
@@ -53,10 +54,12 @@ describe('autocomplete', { scrollBehavior: false }, function () {
           {
             _id: 'test-image-file',
             name: 'frog.jpg',
+            hash: '21',
           },
           {
             _id: 'uppercase-extension-image-file',
             name: 'frog.JPG',
+            hash: '22',
           },
         ],
       },
@@ -194,6 +197,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
               {
                 _id: 'test-file-in-folder',
                 name: 'example.png',
+                hash: '42',
               },
             ],
             folders: [],
@@ -203,6 +207,7 @@ describe('autocomplete', { scrollBehavior: false }, function () {
           {
             _id: 'test-image-file',
             name: 'frog.jpg',
+            hash: '43',
           },
         ],
       },
