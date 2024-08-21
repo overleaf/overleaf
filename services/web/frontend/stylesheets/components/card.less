@@ -139,4 +139,63 @@
       width: 100%;
     }
   }
+
+  &.card-pattern {
+    border-radius: var(--border-radius-medium-new);
+    color: var(--white);
+    padding: var(--spacing-13);
+    text-align: center;
+    background-size: cover;
+    background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.4) 0%,
+        var(--dark-jungle-green) 25%,
+        var(--dark-jungle-green) 75%,
+        rgba(0, 0, 0, 0.4) 100%
+      ),
+      url('../../../public/img/website-redesign/overleaf-pattern-purple.png');
+
+    h2 {
+      .heading-lg();
+    }
+    p {
+      .body-lg();
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    p {
+      color: var(--white);
+    }
+  }
+
+  &.card-pattern-left-only {
+    border-radius: var(--border-radius-medium-new);
+    color: var(--white);
+    padding: var(--spacing-13);
+    background-size: cover;
+    background-image: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.4) 0%,
+        var(--dark-jungle-green) 20%,
+        var(--dark-jungle-green) 100%
+      ),
+      url('../../../public/img/website-redesign/overleaf-pattern-purple.png');
+    h2 {
+      .heading-lg();
+    }
+    p {
+      .body-lg();
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    p {
+      color: var(--white);
+    }
+  }
 }
