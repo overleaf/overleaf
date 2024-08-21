@@ -18,8 +18,8 @@ mixin currency_and_payment_methods()
 	.row.plans-payment-methods.text-centered
 		.col-xs-12
 			p
-				| #{translate("all_prices_displayed_are_in_currency", { recommendedCurrency })}
-				| #{translate("subject_to_additional_vat")}
+				b #{translate("all_prices_displayed_are_in_currency", { recommendedCurrency })}
+				| &nbsp;#{translate("subject_to_additional_vat")}
 
 			.plans-payment-methods-icons
 				img(src=buildImgPath('/other-brands/logo_mastercard.svg') aria-hidden="true")
