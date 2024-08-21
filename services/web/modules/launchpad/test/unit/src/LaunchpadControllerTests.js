@@ -365,7 +365,9 @@ describe('LaunchpadController', function () {
             {
               $set: {
                 isAdmin: true,
-                emails: [{ email: this.user.email }],
+                emails: [
+                  { email: this.user.email, reversedHostname: 'moc.elpmaxe' },
+                ],
               },
             }
           )
@@ -749,7 +751,9 @@ describe('LaunchpadController', function () {
             {
               $set: {
                 isAdmin: true,
-                emails: [{ email: this.user.email }],
+                emails: [
+                  { email: this.user.email, reversedHostname: 'moc.elpmaxe' },
+                ],
               },
             }
           )
@@ -823,8 +827,12 @@ describe('LaunchpadController', function () {
           .calledWith(
             { _id: this.user._id },
             {
-              $set: { isAdmin: true },
-              emails: [{ email: this.user.email }],
+              $set: {
+                isAdmin: true,
+                emails: [
+                  { email: this.user.email, reversedHostname: 'moc.elpmaxe' },
+                ],
+              },
             }
           )
           .should.equal(true)

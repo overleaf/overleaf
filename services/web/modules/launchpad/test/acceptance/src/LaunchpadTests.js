@@ -76,5 +76,8 @@ describe('Launchpad', function () {
     // Check we are actually admin
     expect(await adminUser.isLoggedIn()).to.equal(true)
     expect(adminUser.user.isAdmin).to.equal(true)
+
+    // Check reversedHostName is stored
+    expect(adminUser.user.emails[0].reversedHostname).to.equal('moc.elpmaxe')
   })
 })

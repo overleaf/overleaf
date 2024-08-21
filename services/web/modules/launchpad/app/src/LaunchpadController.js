@@ -137,11 +137,15 @@ const _LaunchpadController = {
       }
 
       try {
+        const reversedHostname = user.email
+          .split('@')[1]
+          .split('')
+          .reverse()
+          .join('')
         await User.updateOne(
           { _id: user._id },
           {
-            $set: { isAdmin: true },
-            emails: [{ email }],
+            $set: { isAdmin: true, emails: [{ email, reversedHostname }] },
           }
         ).exec()
       } catch (err) {
@@ -206,12 +210,17 @@ const _LaunchpadController = {
     logger.debug({ userId: user._id }, 'making user an admin')
 
     try {
+      const reversedHostname = user.email
+        .split('@')[1]
+        .split('')
+        .reverse()
+        .join('')
       await User.updateOne(
         { _id: user._id },
         {
           $set: {
             isAdmin: true,
-            emails: [{ email }],
+            emails: [{ email, reversedHostname }],
           },
         }
       ).exec()
