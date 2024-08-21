@@ -308,7 +308,7 @@ const groupPlans = [
   {
     divider: true,
     dividerLabel: 'group_members_and_collaborators_get_access_to',
-    dividerInfo: 'group_members_and_collaborators_get_access_to_info',
+    dividerInfo: 'group_members_and_their_collaborators_get_access_to_info',
     items: [
       {
         feature: 'compile_timeout_short',

@@ -816,7 +816,7 @@
   "group_libraries": "Group Libraries",
   "group_managed_by_group_administrator": "User accounts in this group are managed by the group administrator.",
   "group_members_and_collaborators_get_access_to": "Group members and their project collaborators get access to",
-  "group_members_and_collaborators_get_access_to_info": "These features are available to group members and their collaborators (other Overleaf users invited to projects owned a group member).",
+  "group_members_and_their_collaborators_get_access_to_info": "These features are available to group members and their collaborators (other Overleaf users invited to projects owned by a group member).",
   "group_members_get_access_to": "Group members get access to",
   "group_members_get_access_to_info": "These features are available only to group members (subscribers).",
   "group_plan_admins_can_easily_add_and_remove_users_from_a_group": "Group plan admins can easily add and remove users from a group. For site-wide plans, users are automatically upgraded when they register or add their email address to Overleaf (domain-based enrollment or SSO).",
