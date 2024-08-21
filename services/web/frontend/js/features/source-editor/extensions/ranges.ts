@@ -12,21 +12,16 @@ import {
   DeleteOperation,
   EditOperation,
 } from '../../../../../types/change'
-import { ChangeManager } from './changes/change-manager'
 import { debugConsole } from '@/utils/debugging'
 import {
   isCommentOperation,
   isDeleteOperation,
   isInsertOperation,
 } from '@/utils/operations'
-import {
-  DocumentContainer,
-  RangesTrackerWithResolvedThreadIds,
-} from '@/features/ide-react/editor/document-container'
+import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { trackChangesAnnotation } from '@/features/source-editor/extensions/realtime'
 import { Ranges } from '@/features/review-panel-new/context/ranges-context'
 import { Threads } from '@/features/review-panel-new/context/threads-context'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 type RangesData = {
   ranges: Ranges
@@ -41,9 +36,6 @@ export const updateRanges = (data: RangesData): TransactionSpec => {
   }
 }
 
-const clearChangesEffect = StateEffect.define()
-const buildChangesEffect = StateEffect.define()
-
 type Options = {
   currentDoc: DocumentContainer
   loadingThreads?: boolean
@@ -55,42 +47,26 @@ type Options = {
  * A custom extension that initialises the change manager, passes any updates to it,
  * and produces decorations for tracked changes and comments.
  */
-export const ranges = (
-  { currentDoc, loadingThreads, ranges, threads }: Options,
-  changeManager?: ChangeManager
-) => {
+export const ranges = ({ ranges, threads }: Options) => {
   return [
-    // initialize/destroy the change manager, and handle any updates
-    changeManager
-      ? ViewPlugin.define(() => {
-          changeManager.initialize()
+    // handle viewportChanged updates
+    ViewPlugin.define(view => {
+      let timer: number
 
-          return {
-            update: update => {
-              changeManager.handleUpdate(update)
-            },
-            destroy: () => {
-              changeManager.destroy()
-            },
+      return {
+        update(update) {
+          if (update.viewportChanged) {
+            if (timer) {
+              window.clearTimeout(timer)
+            }
+
+            timer = window.setTimeout(() => {
+              dispatchEvent(new Event('editor:viewport-changed'))
+            }, 25)
           }
-        })
-      : ViewPlugin.define(view => {
-          let timer: number
-
-          return {
-            update(update) {
-              if (update.viewportChanged) {
-                if (timer) {
-                  window.clearTimeout(timer)
-                }
-
-                timer = window.setTimeout(() => {
-                  dispatchEvent(new Event('editor:viewport-changed'))
-                }, 25)
-              }
-            },
-          }
-        }),
+        },
+      }
+    }),
 
     // draw change decorations
     ViewPlugin.define<
@@ -99,34 +75,18 @@ export const ranges = (
       }
     >(
       () => {
-        let decorations = Decoration.none
-        if (isSplitTestEnabled('review-panel-redesign')) {
-          if (ranges && threads) {
-            decorations = buildChangeDecorations(currentDoc, {
-              ranges,
-              threads,
-            })
-          }
-        } else if (!loadingThreads) {
-          decorations = buildChangeDecorations(currentDoc)
-        }
-
         return {
-          decorations,
+          decorations:
+            ranges && threads
+              ? buildChangeDecorations({ ranges, threads })
+              : Decoration.none,
           update(update) {
             for (const transaction of update.transactions) {
               this.decorations = this.decorations.map(transaction.changes)
 
               for (const effect of transaction.effects) {
-                if (effect.is(clearChangesEffect)) {
-                  this.decorations = Decoration.none
-                } else if (effect.is(buildChangesEffect)) {
-                  this.decorations = buildChangeDecorations(currentDoc)
-                } else if (effect.is(updateRangesEffect)) {
-                  this.decorations = buildChangeDecorations(
-                    currentDoc,
-                    effect.value
-                  )
+                if (effect.is(updateRangesEffect)) {
+                  this.decorations = buildChangeDecorations(effect.value)
                 }
               }
             }
@@ -143,35 +103,18 @@ export const ranges = (
   ]
 }
 
-export const clearChangeMarkers = () => {
-  return {
-    effects: clearChangesEffect.of(null),
-  }
-}
-
-export const buildChangeMarkers = () => {
-  return {
-    effects: buildChangesEffect.of(null),
-  }
-}
-
-const buildChangeDecorations = (
-  currentDoc: DocumentContainer,
-  data?: RangesData
-) => {
-  const ranges = data ? data.ranges : currentDoc.ranges
-
-  if (!ranges) {
+const buildChangeDecorations = (data: RangesData) => {
+  if (!data.ranges) {
     return Decoration.none
   }
 
-  const changes = [...ranges.changes, ...ranges.comments]
+  const changes = [...data.ranges.changes, ...data.ranges.comments]
 
   const decorations = []
 
   for (const change of changes) {
     try {
-      decorations.push(...createChangeRange(change, currentDoc, data))
+      decorations.push(...createChangeRange(change, data))
     } catch (error) {
       // ignore invalid changes
       debugConsole.debug('invalid change position', error)
@@ -230,11 +173,7 @@ class ChangeCalloutWidget extends WidgetType {
   }
 }
 
-const createChangeRange = (
-  change: Change,
-  currentDoc: DocumentContainer,
-  data?: RangesData
-) => {
+const createChangeRange = (change: Change, data: RangesData) => {
   const { id, metadata, op } = change
 
   const from = op.p
@@ -264,24 +203,9 @@ const createChangeRange = (
 
   const _isCommentOperation = isCommentOperation(op)
 
-  if (
-    _isCommentOperation &&
-    (currentDoc.ranges as RangesTrackerWithResolvedThreadIds)
-      .resolvedThreadIds![op.t]
-  ) {
-    return []
-  }
-
   if (_isCommentOperation) {
-    if (data) {
-      const thread = data.threads[op.t]
-      if (!thread || thread.resolved) {
-        return []
-      }
-    } else if (
-      (currentDoc.ranges as RangesTrackerWithResolvedThreadIds)
-        .resolvedThreadIds![op.t]
-    ) {
+    const thread = data.threads[op.t]
+    if (!thread || thread.resolved) {
       return []
     }
   }

@@ -128,7 +128,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // so the decorations are added in the correct order.
   emptyLineFiller(),
   isSplitTestEnabled('review-panel-redesign')
-    ? ranges(options.currentDoc, options.changeManager)
+    ? ranges(options.currentDoc)
     : trackChanges(options.currentDoc, options.changeManager),
   trackDetachedComments(options.currentDoc),
   visual(options.visual),
