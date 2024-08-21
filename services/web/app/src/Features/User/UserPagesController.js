@@ -115,14 +115,15 @@ async function settingsPage(req, res) {
 
   let memberOfSSOEnabledGroups = []
   try {
-    memberOfSSOEnabledGroups = (
-      await Modules.promises.hooks.fire(
-        'getUserGroupsSSOEnrollmentStatus',
-        user._id,
-        { teamName: 1 },
-        ['email']
-      )
-    )?.[0]
+    memberOfSSOEnabledGroups =
+      (
+        await Modules.promises.hooks.fire(
+          'getUserGroupsSSOEnrollmentStatus',
+          user._id,
+          { teamName: 1 },
+          ['email']
+        )
+      )?.[0] || []
     memberOfSSOEnabledGroups = memberOfSSOEnabledGroups.map(group => {
       return {
         groupId: group._id.toString(),
