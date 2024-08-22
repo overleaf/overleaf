@@ -69,8 +69,6 @@ const Features = {
       case 'affiliations':
       case 'analytics':
         return Boolean(_.get(Settings, ['apis', 'v1', 'url']))
-      case 'overleaf-integration':
-        return Boolean(Settings.overleaf)
       case 'references':
         return Boolean(_.get(Settings, ['apis', 'references', 'url']))
       case 'saml':

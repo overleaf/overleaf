@@ -28,7 +28,7 @@ make test
 
 To run both unit and acceptance tests for a module run:
 ```
-make test_module MODULE=overleaf-integration
+make test_module MODULE=saas-authentication
 ```
 
 ### Unit Tests
@@ -51,12 +51,12 @@ make test_unit MOCHA_GREP='AuthorizationManager'
 
 To run only the unit tests for a single module do:
 ```
-make test_unit_module MODULE=overleaf-integration
+make test_unit_module MODULE=saas-authentication
 ```
 
 Module tests can also use a MOCHA_GREP argument:
 ```
-make test_unit_module MODULE=overleaf-integration MOCHA_GREP=SSO
+make test_unit_module MODULE=saas-authentication MOCHA_GREP=SSO
 ```
 
 ### Acceptance Tests
@@ -87,12 +87,12 @@ make test_acceptance_run MOCHA_GREP='AuthorizationManager'
 
 To run only the acceptance tests for a single module do:
 ```
-make test_acceptance_module MODULE=overleaf-integration
+make test_acceptance_module MODULE=saas-authentication
 ```
 
 Module tests can also use a MOCHA_GREP argument:
 ```
-make test_acceptance_module MODULE=overleaf-integration MOCHA_GREP=SSO
+make test_acceptance_module MODULE=saas-authentication MOCHA_GREP=SSO
 ```
 
 Routes

@@ -3,7 +3,7 @@ process.env.MONGO_CONNECTION_STRING =
   process.env.READ_ONLY_MONGO_CONNECTION_STRING
 
 const { waitForDb } = require('../app/src/infrastructure/mongodb')
-const SAMLUserIdMigrationHandler = require('../modules/overleaf-integration/app/src/SAML/SAMLUserIdMigrationHandler')
+const SAMLUserIdMigrationHandler = require('../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler')
 
 const institutionId = parseInt(process.argv[2])
 if (isNaN(institutionId)) throw new Error('No institution id')

@@ -362,7 +362,7 @@ describe('ProjectListController', function () {
         this.institutionName = 'Overleaf'
         this.Features.hasFeature.withArgs('saml').returns(true)
         this.Features.hasFeature.withArgs('affiliations').returns(true)
-        this.Features.hasFeature.withArgs('overleaf-integration').returns(true)
+        this.Features.hasFeature.withArgs('saas').returns(true)
         done()
       })
       it('should show institution SSO available notification for confirmed domains', function () {

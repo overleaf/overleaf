@@ -68,7 +68,7 @@ const TokenGenerator = {
       function (cb) {
         const token = TokenGenerator.readOnlyToken()
 
-        if (!Features.hasFeature('overleaf-integration')) {
+        if (!Features.hasFeature('saas')) {
           return cb(null, token)
         }
 
