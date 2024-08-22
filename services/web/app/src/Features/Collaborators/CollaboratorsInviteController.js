@@ -4,6 +4,7 @@ const LimitationsManager = require('../Subscription/LimitationsManager')
 const UserGetter = require('../User/UserGetter')
 const CollaboratorsGetter = require('./CollaboratorsGetter')
 const CollaboratorsInviteHandler = require('./CollaboratorsInviteHandler')
+const CollaboratorsInviteGetter = require('./CollaboratorsInviteGetter')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const EmailHelper = require('../Helpers/EmailHelper')
@@ -38,7 +39,7 @@ const CollaboratorsInviteController = {
     const projectId = req.params.Project_id
     logger.debug({ projectId }, 'getting all active invites for project')
     const invites =
-      await CollaboratorsInviteHandler.promises.getAllInvites(projectId)
+      await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
     res.json({ invites })
   },
 
@@ -291,7 +292,7 @@ const CollaboratorsInviteController = {
     }
 
     // get the invite
-    const invite = await CollaboratorsInviteHandler.promises.getInviteByToken(
+    const invite = await CollaboratorsInviteGetter.promises.getInviteByToken(
       projectId,
       token
     )
@@ -351,7 +352,7 @@ const CollaboratorsInviteController = {
       'got request to accept invite'
     )
 
-    const invite = await CollaboratorsInviteHandler.promises.getInviteByToken(
+    const invite = await CollaboratorsInviteGetter.promises.getInviteByToken(
       projectId,
       token
     )

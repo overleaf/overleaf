@@ -8,36 +8,12 @@ const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const LimitationsManager = require('../Subscription/LimitationsManager')
+const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const _ = require('lodash')
 
 const CollaboratorsInviteHandler = {
-  async getAllInvites(projectId) {
-    logger.debug({ projectId }, 'fetching invites for project')
-    const invites = await ProjectInvite.find({ projectId })
-      .select('_id email privileges')
-      .exec()
-    logger.debug(
-      { projectId, count: invites.length },
-      'found invites for project'
-    )
-    return invites
-  },
-
-  async getInviteCount(projectId) {
-    logger.debug({ projectId }, 'counting invites for project')
-    const count = await ProjectInvite.countDocuments({ projectId }).exec()
-    return count
-  },
-
-  async getEditInviteCount(projectId) {
-    logger.debug({ projectId }, 'counting edit invites for project')
-    const count = await ProjectInvite.countDocuments({
-      projectId,
-      privileges: { $ne: PrivilegeLevels.READ_ONLY },
-    }).exec()
-    return count
-  },
-
   async _trySendInviteNotification(projectId, sendingUser, invite) {
     const { email } = invite
     const existingUser = await UserGetter.promises.getUserByAnyEmail(email, {
@@ -152,27 +128,43 @@ const CollaboratorsInviteHandler = {
     )
   },
 
-  async getInviteByToken(projectId, tokenString) {
-    logger.debug({ projectId }, 'fetching invite by token')
-    const invite = await ProjectInvite.findOne({
-      projectId,
-      tokenHmac: CollaboratorsInviteHelper.hashInviteToken(tokenString),
-    }).exec()
-
-    if (invite == null) {
-      logger.err({ projectId }, 'no invite found')
-      return null
+  async acceptInvite(invite, projectId, user) {
+    const project = await ProjectGetter.promises.getProject(projectId, {
+      owner_ref: 1,
+    })
+    const linkSharingEnforcement =
+      await SplitTestHandler.promises.getAssignmentForUser(
+        project.owner_ref,
+        'link-sharing-enforcement'
+      )
+    const pendingEditor =
+      invite.privileges === PrivilegeLevels.READ_AND_WRITE &&
+      linkSharingEnforcement?.variant === 'active' &&
+      !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+        project._id
+      ))
+    if (pendingEditor) {
+      logger.debug(
+        { projectId, userId: user._id },
+        'no collaborator slots available, user added as read only (pending editor)'
+      )
+      await ProjectAuditLogHandler.promises.addEntry(
+        projectId,
+        'editor-moved-to-pending', // controller already logged accept-invite
+        null,
+        null,
+        {
+          userId: user._id.toString(),
+        }
+      )
     }
 
-    return invite
-  },
-
-  async acceptInvite(invite, projectId, user) {
     await CollaboratorsHandler.promises.addUserIdToProject(
       projectId,
       invite.sendingUserId,
       user._id,
-      invite.privileges
+      pendingEditor ? PrivilegeLevels.READ_ONLY : invite.privileges,
+      { pendingEditor }
     )
 
     // Remove invite
@@ -192,12 +184,9 @@ const CollaboratorsInviteHandler = {
 
 module.exports = {
   promises: CollaboratorsInviteHandler,
-  getAllInvites: callbackify(CollaboratorsInviteHandler.getAllInvites),
-  getInviteCount: callbackify(CollaboratorsInviteHandler.getInviteCount),
   inviteToProject: callbackify(CollaboratorsInviteHandler.inviteToProject),
   revokeInvite: callbackify(CollaboratorsInviteHandler.revokeInvite),
   generateNewInvite: callbackify(CollaboratorsInviteHandler.generateNewInvite),
-  getInviteByToken: callbackify(CollaboratorsInviteHandler.getInviteByToken),
   acceptInvite: callbackify(CollaboratorsInviteHandler.acceptInvite),
   _trySendInviteNotification: callbackify(
     CollaboratorsInviteHandler._trySendInviteNotification

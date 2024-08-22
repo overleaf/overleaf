@@ -1,6 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const assert = require('assert')
 const sinon = require('sinon')
+const { expect } = require('chai')
 const modulePath = require('path').join(
   __dirname,
   '../../../../app/src/Features/Subscription/LimitationsManager'
@@ -60,7 +61,7 @@ describe('LimitationsManager', function () {
       },
     }
 
-    this.CollaboratorsInviteHandler = {
+    this.CollaboratorsInviteGetter = {
       promises: {
         getInviteCount: sinon.stub().resolves(),
         getEditInviteCount: sinon.stub().resolves(),
@@ -74,8 +75,8 @@ describe('LimitationsManager', function () {
         './SubscriptionLocator': this.SubscriptionLocator,
         '@overleaf/settings': (this.Settings = {}),
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
-        '../Collaborators/CollaboratorsInviteHandler':
-          this.CollaboratorsInviteHandler,
+        '../Collaborators/CollaboratorsInviteGetter':
+          this.CollaboratorsInviteGetter,
         './V1SubscriptionManager': this.V1SubscriptionManager,
       },
     })
@@ -157,6 +158,76 @@ describe('LimitationsManager', function () {
     })
   })
 
+  describe('canAcceptEditCollaboratorInvite', function () {
+    describe('when the project has fewer collaborators than allowed', function () {
+      beforeEach(function () {
+        this.current_number = 1
+        this.user.features.collaborators = 2
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+      })
+
+      it('should return true', async function () {
+        const result =
+          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            this.projectId
+          )
+        expect(result).to.be.true
+      })
+    })
+
+    describe('when accepting the invite would exceed the collaborator limit', function () {
+      beforeEach(function () {
+        this.current_number = 2
+        this.user.features.collaborators = 2
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+      })
+
+      it('should return false', async function () {
+        const result =
+          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            this.projectId
+          )
+        expect(result).to.be.false
+      })
+    })
+
+    describe('when the project has more collaborators than allowed', function () {
+      beforeEach(function () {
+        this.current_number = 3
+        this.user.features.collaborators = 2
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+      })
+
+      it('should return false', async function () {
+        const result =
+          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            this.projectId
+          )
+        expect(result).to.be.false
+      })
+    })
+
+    describe('when the project has infinite collaborators', function () {
+      beforeEach(function () {
+        this.current_number = 100
+        this.user.features.collaborators = -1
+        this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
+          sinon.stub().resolves(this.current_number)
+      })
+
+      it('should return true', async function () {
+        const result =
+          await this.LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+            this.projectId
+          )
+        expect(result).to.be.true
+      })
+    })
+  })
+
   describe('canAddXCollaborators', function () {
     describe('when the project has fewer collaborators than allowed', function () {
       beforeEach(function (done) {
@@ -166,7 +237,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -190,7 +261,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -214,7 +285,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -238,7 +309,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -262,7 +333,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -286,7 +357,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -310,7 +381,7 @@ describe('LimitationsManager', function () {
         this.CollaboratorsGetter.promises.getInvitedCollaboratorCount = sinon
           .stub()
           .resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -334,7 +405,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 0
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -357,7 +428,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 1
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -380,7 +451,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 0
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -403,7 +474,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 0
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -426,7 +497,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 0
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -449,7 +520,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 2
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())
@@ -472,7 +543,7 @@ describe('LimitationsManager', function () {
         this.invite_count = 1
         this.CollaboratorsGetter.promises.getInvitedEditCollaboratorCount =
           sinon.stub().resolves(this.current_number)
-        this.CollaboratorsInviteHandler.promises.getEditInviteCount = sinon
+        this.CollaboratorsInviteGetter.promises.getEditInviteCount = sinon
           .stub()
           .resolves(this.invite_count)
         this.callback = sinon.stub().callsFake(() => done())

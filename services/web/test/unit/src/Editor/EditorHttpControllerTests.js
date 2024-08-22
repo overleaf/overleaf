@@ -67,7 +67,7 @@ describe('EditorHttpController', function () {
         userIsTokenMember: sinon.stub().resolves(false),
       },
     }
-    this.CollaboratorsInviteHandler = {
+    this.CollaboratorsInviteGetter = {
       promises: {
         getAllInvites: sinon.stub().resolves([
           {
@@ -147,8 +147,8 @@ describe('EditorHttpController', function () {
         '@overleaf/metrics': this.Metrics,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
-        '../Collaborators/CollaboratorsInviteHandler':
-          this.CollaboratorsInviteHandler,
+        '../Collaborators/CollaboratorsInviteGetter':
+          this.CollaboratorsInviteGetter,
         '../TokenAccess/TokenAccessHandler': this.TokenAccessHandler,
         '../Authentication/SessionManager': this.SessionManager,
         '../../infrastructure/FileWriter': this.FileWriter,

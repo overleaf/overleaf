@@ -4,7 +4,7 @@ const UserGetter = require('../User/UserGetter')
 const SubscriptionLocator = require('./SubscriptionLocator')
 const Settings = require('@overleaf/settings')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const CollaboratorsInvitesHandler = require('../Collaborators/CollaboratorsInviteHandler')
+const CollaboratorsInvitesGetter = require('../Collaborators/CollaboratorsInviteGetter')
 const V1SubscriptionManager = require('./V1SubscriptionManager')
 const { V1ConnectionError } = require('../Errors/Errors')
 const {
@@ -28,6 +28,18 @@ async function allowedNumberOfCollaboratorsForUser(userId) {
   }
 }
 
+async function canAcceptEditCollaboratorInvite(projectId) {
+  const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
+  if (allowedNumber < 0) {
+    return true // -1 means unlimited
+  }
+  const currentEditors =
+    await CollaboratorsGetter.promises.getInvitedEditCollaboratorCount(
+      projectId
+    )
+  return currentEditors + 1 <= allowedNumber
+}
+
 async function canAddXCollaborators(projectId, numberOfNewCollaborators) {
   const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
   if (allowedNumber < 0) {
@@ -36,7 +48,7 @@ async function canAddXCollaborators(projectId, numberOfNewCollaborators) {
   const currentNumber =
     await CollaboratorsGetter.promises.getInvitedCollaboratorCount(projectId)
   const inviteCount =
-    await CollaboratorsInvitesHandler.promises.getInviteCount(projectId)
+    await CollaboratorsInvitesGetter.promises.getInviteCount(projectId)
   return currentNumber + inviteCount + numberOfNewCollaborators <= allowedNumber
 }
 
@@ -53,7 +65,7 @@ async function canAddXEditCollaborators(
       projectId
     )
   const editInviteCount =
-    await CollaboratorsInvitesHandler.promises.getEditInviteCount(projectId)
+    await CollaboratorsInvitesGetter.promises.getEditInviteCount(projectId)
   return (
     currentEditors + editInviteCount + numberOfNewEditCollaborators <=
     allowedNumber
@@ -179,6 +191,7 @@ const LimitationsManager = {
   promises: {
     allowedNumberOfCollaboratorsInProject,
     allowedNumberOfCollaboratorsForUser,
+    canAcceptEditCollaboratorInvite,
     canAddXCollaborators,
     canAddXEditCollaborators,
     hasPaidSubscription,

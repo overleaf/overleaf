@@ -246,6 +246,32 @@ describe('CollaboratorsHandler', function () {
           this.userId
         )
       })
+
+      describe('and with pendingEditor flag', function () {
+        it('should add them to the pending editor refs', async function () {
+          this.ProjectMock.expects('updateOne')
+            .withArgs(
+              {
+                _id: this.project._id,
+              },
+              {
+                $addToSet: {
+                  readOnly_refs: this.userId,
+                  pendingEditor_refs: this.userId,
+                },
+              }
+            )
+            .chain('exec')
+            .resolves()
+          await this.CollaboratorsHandler.promises.addUserIdToProject(
+            this.project._id,
+            this.addingUserId,
+            this.userId,
+            'readOnly',
+            { pendingEditor: true }
+          )
+        })
+      })
     })
 
     describe('as readAndWrite', function () {

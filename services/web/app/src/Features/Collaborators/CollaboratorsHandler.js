@@ -101,7 +101,8 @@ async function addUserIdToProject(
   projectId,
   addingUserId,
   userId,
-  privilegeLevel
+  privilegeLevel,
+  { pendingEditor } = {}
 ) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
@@ -124,7 +125,13 @@ async function addUserIdToProject(
     )
   } else if (privilegeLevel === PrivilegeLevels.READ_ONLY) {
     level = { readOnly_refs: userId }
-    logger.debug({ privileges: 'readOnly', userId, projectId }, 'adding user')
+    if (pendingEditor) {
+      level.pendingEditor_refs = userId
+    }
+    logger.debug(
+      { privileges: 'readOnly', userId, projectId, pendingEditor },
+      'adding user'
+    )
   } else {
     throw new Error(`unknown privilegeLevel: ${privilegeLevel}`)
   }

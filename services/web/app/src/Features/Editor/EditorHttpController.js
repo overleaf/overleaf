@@ -5,7 +5,7 @@ const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectEditorHandler = require('../Project/ProjectEditorHandler')
 const Metrics = require('@overleaf/metrics')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
-const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInviteHandler')
+const CollaboratorsInviteGetter = require('../Collaborators/CollaboratorsInviteGetter')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const SessionManager = require('../Authentication/SessionManager')
@@ -128,7 +128,7 @@ async function _buildJoinProjectView(req, projectId, userId) {
     return { project: null, privilegeLevel: null, isRestrictedUser: false }
   }
   const invites =
-    await CollaboratorsInviteHandler.promises.getAllInvites(projectId)
+    await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
   const isTokenMember = await CollaboratorsHandler.promises.userIsTokenMember(
     userId,
     projectId
