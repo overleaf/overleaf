@@ -163,6 +163,7 @@ export interface Meta {
   'ol-reconfirmedViaSAML': string
   'ol-recurlyApiKey': string
   'ol-recurlySubdomain': string
+  'ol-ro-mirror-on-client-no-local-storage': boolean
   'ol-samlError': SAMLError | undefined
   'ol-settingsGroupSSO': { enabled: boolean } | undefined
   'ol-settingsPlans': Plan[]

@@ -727,6 +727,8 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
+        roMirrorOnClientNoLocalStorage:
+          Settings.adminOnlyLogin || project.name.startsWith('Debug: '),
         languages: Settings.languages,
         learnedWords,
         editorThemes: THEME_LIST,
