@@ -1,9 +1,9 @@
 import { ComponentProps } from 'react'
 import useFetchMock from './hooks/use-fetch-mock'
 import ContactUsModal from '../../modules/support/frontend/js/components/contact-us-modal'
+import fixedHelpSuggestionSearch from '../../modules/support/test/frontend/util/fixed-help-suggestion-search'
 import { ScopeDecorator } from './decorators/scope'
 import { StoryObj } from '@storybook/react'
-import { FixedHelpSuggestionSearchProvider } from '../../modules/support/test/frontend/helpers/contact-us-modal-base-tests'
 
 type Story = StoryObj<typeof ContactUsModal>
 type ContactUsModalProps = ComponentProps<typeof ContactUsModal>
@@ -41,9 +41,10 @@ function GenericContactUsModal(args: ContactUsModalProps) {
   })
 
   return (
-    <FixedHelpSuggestionSearchProvider>
-      <ContactUsModal {...args} />
-    </FixedHelpSuggestionSearchProvider>
+    <ContactUsModal
+      helpSuggestionSearch={fixedHelpSuggestionSearch}
+      {...args}
+    />
   )
 }
 
@@ -61,9 +62,10 @@ const ContactUsModalWithRequestError = (args: ContactUsModalProps) => {
   })
 
   return (
-    <FixedHelpSuggestionSearchProvider>
-      <ContactUsModal {...args} />
-    </FixedHelpSuggestionSearchProvider>
+    <ContactUsModal
+      helpSuggestionSearch={fixedHelpSuggestionSearch}
+      {...args}
+    />
   )
 }
 

@@ -1,6 +1,5 @@
 import importOverleafModules from '../../../macros/import-overleaf-module.macro'
 import { JSXElementConstructor, useCallback, useState } from 'react'
-import { HelpSuggestionSearchProvider } from '../../../../modules/support/frontend/js/context/help-suggestion-search-context'
 
 const [contactUsModalModules] = importOverleafModules('contactUsModal')
 const ContactUsModal: JSXElementConstructor<{
@@ -23,13 +22,11 @@ export const useContactUsModal = (options = { autofillProjectUrl: true }) => {
   }, [])
 
   const modal = ContactUsModal && (
-    <HelpSuggestionSearchProvider>
-      <ContactUsModal
-        show={show}
-        handleHide={hideModal}
-        autofillProjectUrl={options.autofillProjectUrl}
-      />
-    </HelpSuggestionSearchProvider>
+    <ContactUsModal
+      show={show}
+      handleHide={hideModal}
+      autofillProjectUrl={options.autofillProjectUrl}
+    />
   )
 
   return { modal, hideModal, showModal }
