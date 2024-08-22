@@ -592,6 +592,36 @@ describe('CollaboratorsHandler', function () {
       )
     })
 
+    it('sets a collaborator to read-only as a pendingEditor', async function () {
+      this.ProjectMock.expects('updateOne')
+        .withArgs(
+          {
+            _id: this.projectId,
+            $or: [
+              { collaberator_refs: this.userId },
+              { readOnly_refs: this.userId },
+            ],
+          },
+          {
+            $addToSet: {
+              readOnly_refs: this.userId,
+              pendingEditor_refs: this.userId,
+            },
+            $pull: {
+              collaberator_refs: this.userId,
+            },
+          }
+        )
+        .chain('exec')
+        .resolves({ matchedCount: 1 })
+      await this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+        this.projectId,
+        this.userId,
+        'readOnly',
+        { pendingEditor: true }
+      )
+    })
+
     it('throws a NotFoundError if the project or collaborator does not exist', async function () {
       this.ProjectMock.expects('updateOne')
         .chain('exec')

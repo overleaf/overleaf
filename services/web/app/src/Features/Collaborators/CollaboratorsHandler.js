@@ -230,7 +230,8 @@ async function transferProjects(fromUserId, toUserId) {
 async function setCollaboratorPrivilegeLevel(
   projectId,
   userId,
-  privilegeLevel
+  privilegeLevel,
+  { pendingEditor } = {}
 ) {
   // Make sure we're only updating the project if the user is already a
   // collaborator
@@ -249,8 +250,13 @@ async function setCollaboratorPrivilegeLevel(
     }
     case PrivilegeLevels.READ_ONLY: {
       update = {
-        $pull: { collaberator_refs: userId, pendingEditor_refs: userId },
+        $pull: { collaberator_refs: userId },
         $addToSet: { readOnly_refs: userId },
+      }
+      if (pendingEditor) {
+        update.$addToSet.pendingEditor_refs = userId
+      } else {
+        update.$pull.pendingEditor_refs = userId
       }
       break
     }

@@ -22,6 +22,7 @@ const {
 const { getSafeAdminDomainRedirect } = require('../Helpers/UrlHelper')
 const UserGetter = require('../User/UserGetter')
 const Settings = require('@overleaf/settings')
+const LimitationsManager = require('../Subscription/LimitationsManager')
 
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
@@ -333,27 +334,43 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
         })
       }
 
+      const linkSharingEnforcement =
+        await SplitTestHandler.promises.getAssignmentForUser(
+          project.owner_ref,
+          'link-sharing-enforcement'
+        )
+      const pendingEditor =
+        linkSharingEnforcement?.variant === 'active' &&
+        !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+          project._id
+        ))
       await ProjectAuditLogHandler.promises.addEntry(
         project._id,
         'accept-via-link-sharing',
         userId,
         req.ip,
-        { privileges: 'readAndWrite' }
+        {
+          privileges: pendingEditor ? 'readOnly' : 'readAndWrite',
+          ...(pendingEditor && { pendingEditor: true }),
+        }
       )
       AnalyticsManager.recordEventForUserInBackground(
         userId,
         'project-joined',
         {
-          mode: 'read-write',
+          mode: pendingEditor ? 'read-only' : 'read-write',
           projectId: project._id.toString(),
+          ...(pendingEditor && { pendingEditor: true }),
         }
       )
-      // Currently does not enforce the collaborator limit (warning phase)
       await CollaboratorsHandler.promises.addUserIdToProject(
         project._id,
         undefined,
         userId,
-        PrivilegeLevels.READ_AND_WRITE
+        pendingEditor
+          ? PrivilegeLevels.READ_ONLY
+          : PrivilegeLevels.READ_AND_WRITE,
+        { pendingEditor }
       )
       // Does not remove any pending invite or the invite notification
       // Should be a noop if the user is already a member,
@@ -536,20 +553,36 @@ async function sharingUpdatesConsent(req, res, next) {
 async function moveReadWriteToCollaborators(req, res, next) {
   const { Project_id: projectId } = req.params
   const userId = SessionManager.getLoggedInUserId(req.session)
+  const project = await ProjectGetter.promises.getProject(projectId, {
+    owner_ref: 1,
+  })
   const isInvitedMember =
     await CollaboratorsGetter.promises.isUserInvitedMemberOfProject(
       userId,
       projectId
     )
+  const linkSharingEnforcement =
+    await SplitTestHandler.promises.getAssignmentForUser(
+      project.owner_ref,
+      'link-sharing-enforcement'
+    )
+  const pendingEditor =
+    linkSharingEnforcement?.variant === 'active' &&
+    !(await LimitationsManager.promises.canAcceptEditCollaboratorInvite(
+      project._id
+    ))
   await ProjectAuditLogHandler.promises.addEntry(
     projectId,
     'accept-via-link-sharing',
     userId,
     req.ip,
     {
-      privileges: 'readAndWrite',
+      privileges: pendingEditor
+        ? PrivilegeLevels.READ_ONLY
+        : PrivilegeLevels.READ_AND_WRITE,
       tokenMember: true,
       invitedMember: isInvitedMember,
+      ...(pendingEditor && { pendingEditor: true }),
     }
   )
   if (isInvitedMember) {
@@ -561,7 +594,10 @@ async function moveReadWriteToCollaborators(req, res, next) {
     await CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
       projectId,
       userId,
-      PrivilegeLevels.READ_AND_WRITE
+      pendingEditor
+        ? PrivilegeLevels.READ_ONLY
+        : PrivilegeLevels.READ_AND_WRITE,
+      { pendingEditor }
     )
   } else {
     // Normal case, not invited, joining via link sharing
@@ -573,7 +609,10 @@ async function moveReadWriteToCollaborators(req, res, next) {
       projectId,
       undefined,
       userId,
-      PrivilegeLevels.READ_AND_WRITE
+      pendingEditor
+        ? PrivilegeLevels.READ_ONLY
+        : PrivilegeLevels.READ_AND_WRITE,
+      { pendingEditor }
     )
   }
   EditorRealTimeController.emitToRoom(projectId, 'project:membership:changed', {
