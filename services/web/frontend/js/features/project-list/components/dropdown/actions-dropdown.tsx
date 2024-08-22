@@ -318,7 +318,7 @@ function BS5ActionsDropdown({ project }: ActionDropdownProps) {
                 as="button"
                 tabIndex={-1}
                 onClick={downloadProject}
-                leadingIcon="cloud_download"
+                leadingIcon="download"
               >
                 {text}
               </DropdownItem>

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { untrashProject } from '../../../../util/api'
@@ -18,13 +18,9 @@ function UntrashProjectsButton() {
   }
 
   return (
-    <Button
-      bsStyle={null}
-      className="btn-secondary"
-      onClick={handleUntrashProjects}
-    >
+    <OLButton variant="secondary" onClick={handleUntrashProjects}>
       {t('untrash')}
-    </Button>
+    </OLButton>
   )
 }
 

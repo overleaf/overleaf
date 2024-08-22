@@ -16,76 +16,88 @@ import type {
   DropdownHeaderProps,
 } from '@/features/ui/components/types/dropdown-menu-props'
 import MaterialIcon from '@/shared/components/material-icon'
+import { fixedForwardRef } from '@/utils/react'
 
 export function Dropdown({ ...props }: DropdownProps) {
   return <BS5Dropdown {...props} />
 }
 
-export const DropdownItem = forwardRef<
-  typeof BS5DropdownItem,
-  DropdownItemProps
->(
-  (
-    { active, children, description, leadingIcon, trailingIcon, ...props },
-    ref
-  ) => {
-    let leadingIconComponent = null
-    if (leadingIcon) {
-      if (typeof leadingIcon === 'string') {
-        leadingIconComponent = (
-          <MaterialIcon
-            className="dropdown-item-leading-icon"
-            type={leadingIcon}
-          />
-        )
-      } else {
-        leadingIconComponent = (
-          <span className="dropdown-item-leading-icon" aria-hidden="true">
-            {leadingIcon}
-          </span>
-        )
-      }
+function DropdownItem(
+  {
+    active,
+    children,
+    description,
+    leadingIcon,
+    trailingIcon,
+    ...props
+  }: DropdownItemProps,
+  ref: React.ForwardedRef<typeof BS5DropdownItem>
+) {
+  let leadingIconComponent = null
+  if (leadingIcon) {
+    if (typeof leadingIcon === 'string') {
+      leadingIconComponent = (
+        <MaterialIcon
+          className="dropdown-item-leading-icon"
+          type={leadingIcon}
+        />
+      )
+    } else {
+      leadingIconComponent = (
+        <span className="dropdown-item-leading-icon" aria-hidden="true">
+          {leadingIcon}
+        </span>
+      )
     }
-
-    let trailingIconComponent = null
-    if (trailingIcon) {
-      if (typeof trailingIcon === 'string') {
-        const trailingIconType = active ? 'check' : trailingIcon
-
-        trailingIconComponent = (
-          <MaterialIcon
-            className="dropdown-item-trailing-icon"
-            type={trailingIconType}
-          />
-        )
-      } else {
-        trailingIconComponent = (
-          <span className="dropdown-item-leading-icon" aria-hidden="true">
-            {trailingIcon}
-          </span>
-        )
-      }
-    }
-
-    return (
-      <BS5DropdownItem
-        active={active}
-        className={description ? 'dropdown-item-description-container' : ''}
-        role="menuitem"
-        {...props}
-        ref={ref}
-      >
-        {leadingIconComponent}
-        {children}
-        {trailingIconComponent}
-        {description && (
-          <span className="dropdown-item-description">{description}</span>
-        )}
-      </BS5DropdownItem>
-    )
   }
-)
-DropdownItem.displayName = 'DropdownItem'
+
+  let trailingIconComponent = null
+  if (trailingIcon) {
+    if (typeof trailingIcon === 'string') {
+      const trailingIconType = active ? 'check' : trailingIcon
+
+      trailingIconComponent = (
+        <MaterialIcon
+          className="dropdown-item-trailing-icon"
+          type={trailingIconType}
+        />
+      )
+    } else {
+      trailingIconComponent = (
+        <span className="dropdown-item-trailing-icon" aria-hidden="true">
+          {trailingIcon}
+        </span>
+      )
+    }
+  }
+
+  return (
+    <BS5DropdownItem
+      active={active}
+      className={description ? 'dropdown-item-description-container' : ''}
+      role="menuitem"
+      {...props}
+      ref={ref}
+    >
+      {leadingIconComponent}
+      {children}
+      {trailingIconComponent}
+      {description && (
+        <span className="dropdown-item-description">{description}</span>
+      )}
+    </BS5DropdownItem>
+  )
+}
+
+function EmptyLeadingIcon() {
+  return <span className="dropdown-item-leading-icon-empty" />
+}
+
+const ForwardReferredDropdownItem = fixedForwardRef(DropdownItem, {
+  EmptyLeadingIcon,
+})
+
+export { ForwardReferredDropdownItem as DropdownItem }
 
 export function DropdownToggle({ ...props }: DropdownToggleProps) {
   return <BS5DropdownToggle {...props} />

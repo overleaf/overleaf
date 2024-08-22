@@ -2,6 +2,7 @@ import {
   DropdownMenu,
   DropdownItem,
   DropdownDivider,
+  DropdownHeader,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import type { Meta } from '@storybook/react'
 
@@ -51,6 +52,35 @@ export const Active = (args: Args) => {
       <DropdownDivider />
       <li>
         <DropdownItem eventKey="3" disabled={args.disabled} href="#/action-3">
+          Example
+        </DropdownItem>
+      </li>
+    </DropdownMenu>
+  )
+}
+
+export const MultipleSelection = (args: Args) => {
+  console.log('DropdownItem.EmptyLeadingIcon', DropdownItem.EmptyLeadingIcon)
+
+  return (
+    <DropdownMenu show>
+      <DropdownHeader>Header</DropdownHeader>
+      <li>
+        <DropdownItem
+          eventKey="1"
+          href="#/action-1"
+          leadingIcon={<DropdownItem.EmptyLeadingIcon />}
+        >
+          Example
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem eventKey="2" href="#/action-2" leadingIcon="check">
+          Example
+        </DropdownItem>
+      </li>
+      <li>
+        <DropdownItem eventKey="3" href="#/action-3" leadingIcon="check">
           Example
         </DropdownItem>
       </li>

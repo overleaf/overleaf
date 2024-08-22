@@ -1,8 +1,12 @@
 import { useTranslation, Trans } from 'react-i18next'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 import { FreePlanSubscription } from '../../../../../../types/project/dashboard/subscription'
-import Tooltip from '../../../../shared/components/tooltip'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 type FreePlanProps = Pick<FreePlanSubscription, 'featuresPageURL'>
 
@@ -23,24 +27,49 @@ function FreePlan({ featuresPageURL }: FreePlanProps) {
 
   return (
     <>
-      <span className="current-plan-label visible-xs">{currentPlanLabel}</span>
-      <Tooltip
+      <span
+        className={classnames(
+          'current-plan-label',
+          bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
+        )}
+      >
+        {currentPlanLabel}
+      </span>
+      <OLTooltip
         description={t('free_plan_tooltip')}
         id="free-plan"
         overlayProps={{ placement: 'bottom' }}
       >
-        <a href={featuresPageURL} className="current-plan-label hidden-xs">
-          {currentPlanLabel} <span className="info-badge" />
+        <a
+          href={featuresPageURL}
+          className={classnames(
+            'current-plan-label',
+            bsVersion({ bs5: 'd-none d-md-inline-block', bs3: 'hidden-xs' })
+          )}
+        >
+          {currentPlanLabel}&nbsp;
+          <BootstrapVersionSwitcher
+            bs3={<span className="info-badge" />}
+            bs5={
+              <MaterialIcon type="info" className="current-plan-label-icon" />
+            }
+          />
         </a>
-      </Tooltip>{' '}
-      <Button
-        bsStyle="primary"
-        className="hidden-xs"
-        href="/user/subscription/plans"
-        onClick={handleClick}
+      </OLTooltip>{' '}
+      <span
+        className={bsVersion({
+          bs5: 'd-none d-md-inline-block',
+          bs3: 'hidden-xs',
+        })}
       >
-        {t('upgrade')}
-      </Button>
+        <OLButton
+          variant="primary"
+          href="/user/subscription/plans"
+          onClick={handleClick}
+        >
+          {t('upgrade')}
+        </OLButton>
+      </span>
     </>
   )
 }

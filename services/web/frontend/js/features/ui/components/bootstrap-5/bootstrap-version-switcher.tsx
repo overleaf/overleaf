@@ -1,8 +1,8 @@
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 
 type BootstrapVersionSwitcherProps = {
-  bs3: React.ReactNode
-  bs5: React.ReactNode
+  bs3?: React.ReactNode
+  bs5?: React.ReactNode
 }
 
 function BootstrapVersionSwitcher({

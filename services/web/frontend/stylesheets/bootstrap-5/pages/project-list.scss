@@ -164,6 +164,65 @@
     padding: var(--spacing-08) var(--spacing-06);
   }
 
+  .project-list-header-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-05);
+    min-height: 36px;
+  }
+
+  .project-list-title {
+    min-width: 0;
+    color: $content-secondary;
+
+    @include heading-sm;
+
+    font-weight: bold;
+  }
+
+  .project-tools {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  @include media-breakpoint-down(md) {
+    .project-tools {
+      float: left;
+      margin-left: initial;
+    }
+  }
+
+  .projects-toolbar {
+    display: flex;
+    align-items: center;
+
+    .dropdown,
+    .dropdown-toggle {
+      max-width: 100%;
+    }
+
+    .dropdown {
+      min-width: 0;
+    }
+  }
+
+  .projects-sort-dropdown {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .project-menu-item-edit-btn {
+    position: absolute;
+    top: 0;
+    right: var(--spacing-09);
+    width: initial;
+    background-color: transparent;
+  }
+
+  .project-menu-item-tag-name {
+    padding-right: var(--spacing-13);
+  }
+
   ul.project-list-filters {
     margin: var(--spacing-05) calc(-1 * var(--spacing-06));
 
@@ -609,6 +668,18 @@
   }
 }
 
+.current-plan {
+  a.current-plan-label {
+    text-decoration: none;
+    color: $content-secondary;
+  }
+
+  .current-plan-label-icon {
+    vertical-align: text-bottom;
+    color: var(--bg-info-01);
+  }
+}
+
 /* stylelint-disable selector-class-pattern */
 .project-list-upload-project-modal-uppy-dashboard .uppy-Root {
   .uppy-Dashboard-AddFiles-title {
@@ -747,7 +818,7 @@ form.project-search {
       margin: 3px; // it's centered, no matching spacing variable
       font-weight: bold;
 
-      @include media-breakpoint-down(sm) {
+      @include media-breakpoint-down(md) {
         margin: 5px; // it's centered, no matching spacing variable
       }
     }
@@ -757,7 +828,7 @@ form.project-search {
       margin: 3px;
       font-weight: bold;
 
-      @include media-breakpoint-down(sm) {
+      @include media-breakpoint-down(md) {
         margin: 5px;
       }
     }
@@ -769,7 +840,7 @@ form.project-search {
     font-weight: bold;
   }
 
-  @include media-breakpoint-down(sm) {
+  @include media-breakpoint-down(md) {
     height: 32px;
     width: 32px;
     margin: var(--spacing-08);

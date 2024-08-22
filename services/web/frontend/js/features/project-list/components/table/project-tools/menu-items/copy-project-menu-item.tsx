@@ -1,6 +1,6 @@
 import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MenuItem } from 'react-bootstrap'
+import OlDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import CloneProjectModal from '../../../../../clone-project-modal/components/clone-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
@@ -64,6 +64,9 @@ function CopyProjectMenuItem() {
 
   return (
     <>
+      <OlDropdownMenuItem onClick={handleOpenModal} as="button" tabIndex={-1}>
+        {t('make_a_copy')}
+      </OlDropdownMenuItem>
       <CloneProjectModal
         show={showModal}
         handleHide={handleCloseModal}
@@ -72,7 +75,6 @@ function CopyProjectMenuItem() {
         projectName={selectedProjects[0].name}
         projectTags={projectTags}
       />
-      <MenuItem onClick={handleOpenModal}>{t('make_a_copy')}</MenuItem>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import type { MouseEventHandler, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 
 export type ButtonProps = {
   children?: ReactNode
@@ -11,7 +11,11 @@ export type ButtonProps = {
   rel?: string
   isLoading?: boolean
   loadingLabel?: string
-  onClick?: MouseEventHandler<HTMLButtonElement>
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
+  onMouseOver?: React.MouseEventHandler<HTMLButtonElement>
+  onMouseOut?: React.MouseEventHandler<HTMLButtonElement>
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>
   size?: 'small' | 'default' | 'large'
   trailingIcon?: string
   type?: 'button' | 'reset' | 'submit'

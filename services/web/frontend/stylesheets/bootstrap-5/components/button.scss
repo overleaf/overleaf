@@ -221,3 +221,19 @@ a.btn:visited {
 .copy-button {
   text-decoration: none;
 }
+
+.btn-reset {
+  @include reset-button;
+}
+
+.btn-transparent {
+  background: none !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  font-weight: 400;
+
+  &:hover {
+    background: none !important;
+    color: inherit !important;
+  }
+}

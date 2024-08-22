@@ -191,7 +191,11 @@ function ProjectListPageContent() {
                   bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
                 )}
               >
-                <div role="toolbar" className="projects-toolbar">
+                <div
+                  role="toolbar"
+                  className="projects-toolbar"
+                  aria-label={t('projects')}
+                >
                   <ProjectsDropdown />
                   <SortByDropdown />
                 </div>

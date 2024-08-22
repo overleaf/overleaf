@@ -11,7 +11,7 @@ import OLModal, {
   OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import OLNotification from '@/features/ui/components/ol/ol-notification'
+import Notification from '@/shared/components/notification'
 
 type DeleteTagModalProps = {
   id: string
@@ -56,7 +56,7 @@ export default function DeleteTagModal({
           <li>{tag.name}</li>
         </ul>
         {isError && (
-          <OLNotification
+          <Notification
             type="error"
             content={t('generic_something_went_wrong')}
           />

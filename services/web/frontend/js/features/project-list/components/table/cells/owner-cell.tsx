@@ -3,6 +3,8 @@ import Icon from '../../../../../shared/components/icon'
 import { getOwnerName } from '../../../util/project'
 import { Project } from '../../../../../../../types/project/dashboard/api'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type LinkSharingIconProps = {
   prependSpace: boolean
@@ -26,10 +28,21 @@ function LinkSharingIcon({
       {/* OverlayTrigger won't fire unless icon is wrapped in a span */}
       <span className={className}>
         {prependSpace ? ' ' : ''}
-        <Icon
-          type="link"
-          className="small"
-          accessibilityLabel={t('link_sharing')}
+        <BootstrapVersionSwitcher
+          bs3={
+            <Icon
+              type="link"
+              className="small"
+              accessibilityLabel={t('link_sharing')}
+            />
+          }
+          bs5={
+            <MaterialIcon
+              type="link"
+              className="align-text-bottom"
+              accessibilityLabel={t('link_sharing')}
+            />
+          }
         />
       </span>
     </OLTooltip>
@@ -48,14 +61,8 @@ export default function OwnerCell({ project }: OwnerCellProps) {
   return (
     <>
       {ownerName === 'You' ? t('you') : ownerName}
-      {project.source === 'token' ? (
-        <LinkSharingIcon
-          className="hidden-xs"
-          project={project}
-          prependSpace={!!project.owner}
-        />
-      ) : (
-        ''
+      {project.source === 'token' && (
+        <LinkSharingIcon project={project} prependSpace={!!project.owner} />
       )}
     </>
   )

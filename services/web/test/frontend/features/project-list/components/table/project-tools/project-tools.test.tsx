@@ -17,7 +17,7 @@ describe('<ProjectTools />', function () {
     screen.getByLabelText('Download')
     screen.getByLabelText('Archive')
     screen.getByLabelText('Trash')
-    screen.getByTitle('Tags')
+    screen.getByLabelText('Tags')
     screen.getByRole('button', { name: 'Create new tag' })
   })
 })

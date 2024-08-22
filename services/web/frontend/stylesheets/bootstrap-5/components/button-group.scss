@@ -1,0 +1,15 @@
+.btn-group {
+  > .btn {
+    &:first-child {
+      padding-left: var(--spacing-05);
+    }
+
+    &:last-child {
+      padding-right: var(--spacing-05);
+    }
+  }
+}
+
+.btn-toolbar {
+  gap: var(--spacing-03);
+}

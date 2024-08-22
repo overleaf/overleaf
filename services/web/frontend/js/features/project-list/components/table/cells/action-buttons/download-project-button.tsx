@@ -54,7 +54,7 @@ const DownloadProjectButtonTooltip = memo(
                 className="action-btn"
                 icon={
                   bsVersion({
-                    bs5: 'cloud_download',
+                    bs5: 'download',
                     bs3: 'cloud-download',
                   }) as string
                 }

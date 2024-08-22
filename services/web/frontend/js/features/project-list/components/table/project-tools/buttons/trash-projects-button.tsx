@@ -1,12 +1,13 @@
 import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../../../shared/components/icon'
-import Tooltip from '../../../../../../shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
 import TrashProjectModal from '../../../modals/trash-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function TrashProjectsButton() {
   const { selectedProjects, toggleSelectedProject, updateProjectViewData } =
@@ -40,19 +41,23 @@ function TrashProjectsButton() {
 
   return (
     <>
-      <Tooltip
+      <OLTooltip
         id="tooltip-trash-projects"
         description={text}
         overlayProps={{ placement: 'bottom', trigger: ['hover', 'focus'] }}
       >
-        <button
-          className="btn btn-secondary"
-          aria-label={text}
+        <OLIconButton
           onClick={handleOpenModal}
-        >
-          <Icon type="trash" />
-        </button>
-      </Tooltip>
+          variant="secondary"
+          accessibilityLabel={text}
+          icon={
+            bsVersion({
+              bs5: 'delete',
+              bs3: 'trash',
+            }) as string
+          }
+        />
+      </OLTooltip>
       <TrashProjectModal
         projects={selectedProjects}
         actionHandler={handleTrashProject}

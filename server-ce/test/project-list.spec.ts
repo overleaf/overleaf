@@ -41,7 +41,7 @@ describe('Project List', () => {
       cy.visit('/project')
 
       findProjectRow(projectName).within(() =>
-        cy.contains(`Download .zip file`).click()
+        cy.findByRole('button', { name: 'Download .zip file' }).click()
       )
 
       cy.task('readFileInZip', {
@@ -55,7 +55,7 @@ describe('Project List', () => {
       cy.visit('/project')
 
       findProjectRow(projectName).within(() =>
-        cy.contains(`Download PDF`).click()
+        cy.findByRole('button', { name: 'Download PDF' }).click()
       )
 
       const pdfName = projectName.replaceAll('-', '_')

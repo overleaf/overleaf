@@ -16,6 +16,7 @@ export type DropdownProps = {
   onSelect?: (eventKey: any, event: object) => any
   onToggle?: (show: boolean) => void
   show?: boolean
+  autoClose?: boolean | 'inside' | 'outside'
 }
 
 export type DropdownItemProps = PropsWithChildren<{
@@ -43,6 +44,7 @@ export type DropdownToggleProps = PropsWithChildren<{
   id?: string // necessary for assistive technologies
   variant?: SplitButtonVariants
   as?: ElementType
+  size?: 'sm' | 'lg'
 }>
 
 export type DropdownMenuProps = PropsWithChildren<{
@@ -60,4 +62,5 @@ export type DropdownDividerProps = PropsWithChildren<{
 
 export type DropdownHeaderProps = PropsWithChildren<{
   as?: ElementType
+  className?: string
 }>

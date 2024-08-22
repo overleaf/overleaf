@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import DeleteLeaveProjectModal from '../../../modals/delete-leave-project-modal'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
@@ -41,9 +41,9 @@ function DeleteLeaveProjectsButton() {
   return (
     <>
       {hasDeletableProjectsSelected && hasLeavableProjectsSelected && (
-        <Button bsStyle={null} className="btn-danger" onClick={handleOpenModal}>
+        <OLButton variant="danger" onClick={handleOpenModal}>
           {t('delete_and_leave')}
-        </Button>
+        </OLButton>
       )}
       <DeleteLeaveProjectModal
         projects={selectedProjects}

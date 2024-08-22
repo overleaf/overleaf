@@ -16,6 +16,7 @@ function ProjectListTitle({
 }) {
   const { t } = useTranslation()
   let message = t('projects')
+
   if (selectedTag) {
     message = `${selectedTag.name}`
   } else if (selectedTagId === UNCATEGORIZED_KEY) {
@@ -39,10 +40,9 @@ function ProjectListTitle({
         break
     }
   }
+
   return (
-    <div className={classnames('project-list-title', className)}>
-      <span>{message}</span>
-    </div>
+    <div className={classnames('project-list-title', className)}>{message}</div>
   )
 }
 

@@ -1,8 +1,8 @@
 import { memo, useCallback, useState } from 'react'
-import { MenuItem } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
+import OlDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import RenameProjectModal from '../../../modals/rename-project-modal'
 
 function RenameProjectMenuItem() {
@@ -34,7 +34,9 @@ function RenameProjectMenuItem() {
 
   return (
     <>
-      <MenuItem onClick={handleOpenModal}>{t('rename')}</MenuItem>
+      <OlDropdownMenuItem onClick={handleOpenModal} as="button" tabIndex={-1}>
+        {t('rename')}
+      </OlDropdownMenuItem>
       <RenameProjectModal
         handleCloseModal={handleCloseModal}
         showModal={showModal}

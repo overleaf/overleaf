@@ -1,6 +1,6 @@
 export function callFnsInSequence<
-  Args,
-  Fn extends ((...args: Args[]) => void) | void,
+  Args extends Array<any>,
+  Fn extends ((...args: Args) => void) | void,
 >(...fns: Fn[]) {
-  return (...args: Args[]) => fns.forEach(fn => fn?.(...args))
+  return (...args: Args) => fns.forEach(fn => fn?.(...args))
 }

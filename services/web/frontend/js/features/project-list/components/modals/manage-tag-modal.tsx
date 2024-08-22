@@ -1,7 +1,5 @@
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, ControlLabel, Form, FormGroup, Modal } from 'react-bootstrap'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import useAsync from '../../../../shared/hooks/use-async'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import useSelectColor from '../../hooks/use-select-color'
@@ -10,6 +8,19 @@ import { Tag } from '../../../../../../app/src/Features/Tags/types'
 import { getTagColor } from '../../util/tag'
 import { ColorPicker } from '../color-picker/color-picker'
 import { debugConsole } from '@/utils/debugging'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import Notification from '@/shared/components/notification'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type ManageTagModalProps = {
   id: string
@@ -78,14 +89,14 @@ export function ManageTagModal({
   }
 
   return (
-    <AccessibleModal show animation onHide={onClose} id={id} backdrop="static">
-      <Modal.Header closeButton>
-        <Modal.Title>{t('edit_tag')}</Modal.Title>
-      </Modal.Header>
+    <OLModal show animation onHide={onClose} id={id} backdrop="static">
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('edit_tag')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
-        <Form name="editTagRenameForm" onSubmit={handleSubmit}>
-          <FormGroup>
+      <OLModalBody>
+        <OLForm onSubmit={handleSubmit}>
+          <OLFormGroup>
             <input
               ref={autoFocusedRef}
               className="form-control"
@@ -96,61 +107,60 @@ export function ManageTagModal({
               required
               onChange={e => setNewTagName(e.target.value)}
             />
-          </FormGroup>
-          <FormGroup aria-hidden="true">
-            <ControlLabel>{t('tag_color')}</ControlLabel>:<br />
+          </OLFormGroup>
+          <OLFormGroup aria-hidden="true">
+            <OLFormLabel>{t('tag_color')}</OLFormLabel>:<br />
             <ColorPicker disableCustomColor />
-          </FormGroup>
-        </Form>
-      </Modal.Body>
-
-      <Modal.Footer>
-        <div className="clearfix">
-          <div className="modal-footer-left">
-            <Button
-              onClick={() => runDeleteTag(tag._id)}
-              bsStyle="danger"
-              disabled={isDeleteLoading || isUpdateLoading}
-            >
-              {isDeleteLoading ? (
-                <>{t('deleting')} &hellip;</>
-              ) : (
-                t('delete_tag')
-              )}
-            </Button>
-          </div>
-          <Button
-            onClick={onClose}
-            disabled={isDeleteLoading || isUpdateLoading}
-          >
-            {t('save_or_cancel-cancel')}
-          </Button>
-          <Button
-            onClick={() => runUpdateTag(tag._id)}
-            bsStyle={null}
-            className="btn-secondary"
-            disabled={Boolean(
-              isUpdateLoading ||
-                isDeleteLoading ||
-                !newTagName?.length ||
-                (newTagName === tag?.name && selectedColor === getTagColor(tag))
-            )}
-          >
-            {isUpdateLoading ? (
-              <>{t('saving')} &hellip;</>
-            ) : (
-              t('save_or_cancel-save')
-            )}
-          </Button>
-        </div>
+          </OLFormGroup>
+        </OLForm>
         {(isDeleteError || isRenameError) && (
-          <div className="modal-footer-left mt-2">
-            <span className="text-danger error">
-              {t('generic_something_went_wrong')}
-            </span>
-          </div>
+          <Notification
+            type="error"
+            content={t('generic_something_went_wrong')}
+          />
         )}
-      </Modal.Footer>
-    </AccessibleModal>
+      </OLModalBody>
+
+      <OLModalFooter>
+        <OLButton
+          variant="danger"
+          onClick={() => runDeleteTag(tag._id)}
+          className={bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })}
+          disabled={isDeleteLoading || isUpdateLoading}
+          isLoading={isDeleteLoading}
+          bs3Props={{
+            loading: isDeleteLoading ? `${t('deleting')}…` : t('delete_tag'),
+          }}
+        >
+          {t('delete_tag')}
+        </OLButton>
+        <OLButton
+          variant="secondary"
+          onClick={onClose}
+          disabled={isDeleteLoading || isUpdateLoading}
+        >
+          {t('save_or_cancel-cancel')}
+        </OLButton>
+        <OLButton
+          variant="primary"
+          onClick={() => runUpdateTag(tag._id)}
+          disabled={Boolean(
+            isUpdateLoading ||
+              isDeleteLoading ||
+              !newTagName?.length ||
+              (newTagName === tag?.name && selectedColor === getTagColor(tag))
+          )}
+          isLoading={isUpdateLoading}
+          bs3Props={{
+            loading: isUpdateLoading
+              ? `${t('saving')}…`
+              : t('save_or_cancel-save'),
+          }}
+        >
+          {t('save_or_cancel-save')}
+        </OLButton>
+        <BootstrapVersionSwitcher bs3={<div className="clearfix" />} />
+      </OLModalFooter>
+    </OLModal>
   )
 }
