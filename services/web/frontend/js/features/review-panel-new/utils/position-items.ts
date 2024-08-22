@@ -15,34 +15,44 @@ export const positionItems = debounce(
       return
     }
 
-    let focusedItemIndex = items.findIndex(item =>
-      item.classList.contains('review-panel-entry-focused')
+    let activeItemIndex = items.findIndex(item =>
+      item.classList.contains('review-panel-entry-action')
     )
-    if (focusedItemIndex === -1) {
+
+    if (activeItemIndex === -1) {
+      // if there is no action available
+      // check if there is a focused entry
+      activeItemIndex = items.findIndex(item =>
+        item.classList.contains('review-panel-entry-focused')
+      )
+    }
+
+    if (activeItemIndex === -1) {
       // if entry was not focused manually
       // check if there is an entry in selection and use that as the focused item
-      focusedItemIndex = items.findIndex(item =>
+      activeItemIndex = items.findIndex(item =>
         item.classList.contains('review-panel-entry-highlighted')
       )
     }
-    if (focusedItemIndex === -1) {
-      focusedItemIndex = previousFocusedItemIndex
+
+    if (activeItemIndex === -1) {
+      activeItemIndex = previousFocusedItemIndex
     }
 
-    const focusedItem = items[focusedItemIndex]
-    if (!focusedItem) {
+    const activeItem = items[activeItemIndex]
+    if (!activeItem) {
       return
     }
 
-    const focusedItemTop = getTopPosition(focusedItem, focusedItemIndex === 0)
+    const activeItemTop = getTopPosition(activeItem, activeItemIndex === 0)
 
-    focusedItem.style.top = `${focusedItemTop}px`
-    focusedItem.style.visibility = 'visible'
-    const focusedItemRect = focusedItem.getBoundingClientRect()
+    activeItem.style.top = `${activeItemTop}px`
+    activeItem.style.visibility = 'visible'
+    const focusedItemRect = activeItem.getBoundingClientRect()
 
-    // above the focused item
-    let topLimit = focusedItemTop
-    for (let i = focusedItemIndex - 1; i >= 0; i--) {
+    // above the active item
+    let topLimit = activeItemTop
+    for (let i = activeItemIndex - 1; i >= 0; i--) {
       const item = items[i]
       const rect = item.getBoundingClientRect()
       let top = getTopPosition(item, i === 0)
@@ -55,9 +65,9 @@ export const positionItems = debounce(
       topLimit = top
     }
 
-    // below the focused item
-    let bottomLimit = focusedItemTop + focusedItemRect.height
-    for (let i = focusedItemIndex + 1; i < items.length; i++) {
+    // below the active item
+    let bottomLimit = activeItemTop + focusedItemRect.height
+    for (let i = activeItemIndex + 1; i < items.length; i++) {
       const item = items[i]
       const rect = item.getBoundingClientRect()
       let top = getTopPosition(item, false)
@@ -70,7 +80,7 @@ export const positionItems = debounce(
     }
 
     return {
-      focusedItemIndex,
+      activeItemIndex,
       min: topLimit,
       max: bottomLimit,
     }

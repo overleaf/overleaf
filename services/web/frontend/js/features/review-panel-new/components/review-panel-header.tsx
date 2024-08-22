@@ -6,16 +6,13 @@ import { Button } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useLayoutContext } from '@/shared/context/layout-context'
 
-const ReviewPanelHeader: FC<{
-  top: number
-  width: number
-}> = ({ top, width }) => {
+const ReviewPanelHeader: FC = () => {
   const [trackChangesMenuExpanded, setTrackChangesMenuExpanded] =
     useState(false)
   const { setReviewPanelOpen } = useLayoutContext()
 
   return (
-    <div className="review-panel-header" style={{ top, width }}>
+    <div className="review-panel-header">
       <div className="review-panel-heading">
         <div className="review-panel-label">Review</div>
         <Button

@@ -16,7 +16,6 @@ import {
   DeleteOperation,
   EditOperation,
 } from '../../../../../types/change'
-import { editorVerticalTopPadding } from '@/features/source-editor/extensions/vertical-overflow'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
@@ -27,18 +26,14 @@ import { isDeleteChange, isInsertChange } from '@/utils/operations'
 import Icon from '@/shared/components/icon'
 import { positionItems } from '../utils/position-items'
 import { canAggregate } from '../utils/can-aggregate'
-import { isInViewport } from '../utils/is-in-viewport'
 import ReviewPanelEmptyState from './review-panel-empty-state'
 import useEventListener from '@/shared/hooks/use-event-listener'
+import { hasActiveRange } from '@/features/review-panel-new/utils/has-active-range'
 
-type Positions = Map<string, number>
-type Aggregates = Map<string, Change<DeleteOperation>>
-
-type RangesWithPositions = {
+type AggregatedRanges = {
   changes: Change<EditOperation>[]
   comments: Change<CommentOperation>[]
-  positions: Positions
-  aggregates: Aggregates
+  aggregates: Map<string, Change<DeleteOperation>>
 }
 
 const ReviewPanelCurrentFile: FC = () => {
@@ -47,24 +42,7 @@ const ReviewPanelCurrentFile: FC = () => {
   const threads = useThreadsContext()
   const state = useCodeMirrorStateContext()
 
-  const [rangesWithPositions, setRangesWithPositions] =
-    useState<RangesWithPositions>()
-
-  const contentRect = view.contentDOM.getBoundingClientRect()
-
-  const editorPaddingTop = editorVerticalTopPadding(view)
-  const topDiff = contentRect.top - editorPaddingTop
-  const docLength = state.doc.length
-
-  const screenPosition = useCallback(
-    (change: Change): number | undefined => {
-      const pos = Math.min(change.op.p, docLength)
-      const coords = view.coordsAtPos(pos)
-
-      return coords ? Math.round(coords.top - topDiff) : undefined
-    },
-    [docLength, topDiff, view]
-  )
+  const [aggregatedRanges, setAggregatedRanges] = useState<AggregatedRanges>()
 
   const selectionCoords = useMemo(
     () =>
@@ -85,7 +63,7 @@ const ReviewPanelCurrentFile: FC = () => {
       )
 
       if (extents) {
-        previousFocusedItem.current = extents.focusedItemIndex
+        previousFocusedItem.current = extents.activeItemIndex
       }
     }
   }, [])
@@ -124,62 +102,84 @@ const ReviewPanelCurrentFile: FC = () => {
     }
   }, [updatePositions])
 
-  const buildEntries = useCallback(() => {
+  const buildAggregatedRanges = useCallback(() => {
     if (ranges) {
+      const output: AggregatedRanges = {
+        aggregates: new Map(),
+        changes: [],
+        comments: [],
+      }
+
+      let precedingChange: Change<EditOperation> | null = null
+
+      for (const change of ranges.changes) {
+        if (
+          precedingChange &&
+          isInsertChange(precedingChange) &&
+          isDeleteChange(change) &&
+          canAggregate(change, precedingChange)
+        ) {
+          output.aggregates.set(precedingChange.id, change)
+        } else {
+          output.changes.push(change)
+        }
+
+        precedingChange = change
+      }
+
+      if (threads) {
+        for (const comment of ranges.comments) {
+          if (!threads[comment.op.t]?.resolved) {
+            output.comments.push(comment)
+          }
+        }
+      }
+
+      setAggregatedRanges(output)
+    }
+  }, [threads, ranges])
+
+  useEffect(() => {
+    buildAggregatedRanges()
+  }, [buildAggregatedRanges])
+
+  useEventListener('editor:viewport-changed', buildAggregatedRanges)
+
+  const [positions, setPositions] = useState<Map<string, number>>(new Map())
+
+  const positionsRef = useRef<Map<string, number>>(new Map())
+
+  useEffect(() => {
+    if (aggregatedRanges) {
       view.requestMeasure({
         key: 'review-panel-position',
-        read(view): RangesWithPositions {
-          const isVisible = isInViewport(view)
+        read(view) {
+          const contentRect = view.contentDOM.getBoundingClientRect()
+          const docLength = view.state.doc.length
 
-          const output: RangesWithPositions = {
-            positions: new Map(),
-            aggregates: new Map(),
-            changes: [],
-            comments: [],
+          const screenPosition = (change: Change): number | undefined => {
+            const pos = Math.min(change.op.p, docLength) // TODO: needed?
+            const coords = view.coordsAtPos(pos)
+
+            return coords ? Math.round(coords.top - contentRect.top) : undefined
           }
 
-          let precedingChange: Change<EditOperation> | null = null
-
-          for (const change of ranges.changes) {
-            if (isVisible(change)) {
-              if (
-                precedingChange &&
-                isInsertChange(precedingChange) &&
-                isDeleteChange(change) &&
-                canAggregate(change, precedingChange)
-              ) {
-                output.aggregates.set(precedingChange.id, change)
-              } else {
-                output.changes.push(change)
-
-                const position = screenPosition(change)
-                if (position) {
-                  output.positions.set(change.id, position)
-                }
-              }
-            }
-
-            precedingChange = change
-          }
-
-          if (threads) {
-            for (const comment of ranges.comments) {
-              if (isVisible(comment)) {
-                output.comments.push(comment)
-                if (!threads[comment.op.t]?.resolved) {
-                  const position = screenPosition(comment)
-                  if (position) {
-                    output.positions.set(comment.id, position)
-                  }
-                }
-              }
+          for (const change of aggregatedRanges.changes) {
+            const position = screenPosition(change)
+            if (position) {
+              positionsRef.current.set(change.id, position)
             }
           }
 
-          return output
+          for (const comment of aggregatedRanges.comments) {
+            const position = screenPosition(comment)
+            if (position) {
+              positionsRef.current.set(comment.id, position)
+            }
+          }
         },
-        write(positionedRanges) {
-          setRangesWithPositions(positionedRanges)
+        write() {
+          setPositions(positionsRef.current)
           window.setTimeout(() => {
             containerRef.current?.dispatchEvent(
               new Event('review-panel:position')
@@ -188,28 +188,22 @@ const ReviewPanelCurrentFile: FC = () => {
         },
       })
     }
-  }, [screenPosition, threads, view, ranges])
+  }, [view, aggregatedRanges])
 
-  useEffect(() => {
-    buildEntries()
-  }, [buildEntries])
+  const showEmptyState = useMemo(
+    () => hasActiveRange(ranges, threads) === false,
+    [ranges, threads]
+  )
 
-  useEventListener('editor:viewport-changed', buildEntries)
-
-  if (!rangesWithPositions) {
+  if (!aggregatedRanges) {
     return null
   }
-
-  const showEmptyState =
-    threads &&
-    rangesWithPositions.changes.length === 0 &&
-    rangesWithPositions.comments.length === 0
 
   return (
     <div ref={handleContainer}>
       {selectionCoords && (
         <div
-          className="review-panel-entry"
+          className="review-panel-entry review-panel-entry-action"
           style={{ position: 'absolute' }}
           data-top={selectionCoords.top + view.scrollDOM.scrollTop - 70}
           data-pos={state.selection.main.head}
@@ -225,22 +219,28 @@ const ReviewPanelCurrentFile: FC = () => {
 
       {showEmptyState && <ReviewPanelEmptyState />}
 
-      {rangesWithPositions.changes.map(change => (
-        <ReviewPanelChange
-          key={change.id}
-          change={change}
-          top={rangesWithPositions.positions.get(change.id)}
-          aggregate={rangesWithPositions.aggregates.get(change.id)}
-        />
-      ))}
+      {aggregatedRanges.changes.map(
+        change =>
+          positions.has(change.id) && (
+            <ReviewPanelChange
+              key={change.id}
+              change={change}
+              top={positions.get(change.id)}
+              aggregate={aggregatedRanges.aggregates.get(change.id)}
+            />
+          )
+      )}
 
-      {rangesWithPositions.comments.map(comment => (
-        <ReviewPanelComment
-          key={comment.id}
-          comment={comment}
-          top={rangesWithPositions.positions.get(comment.id)}
-        />
-      ))}
+      {aggregatedRanges.comments.map(
+        comment =>
+          positions.has(comment.id) && (
+            <ReviewPanelComment
+              key={comment.id}
+              comment={comment}
+              top={positions.get(comment.id)}
+            />
+          )
+      )}
     </div>
   )
 }

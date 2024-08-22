@@ -4,7 +4,6 @@ import {
   useCodeMirrorViewContext,
 } from '@/features/source-editor/components/codemirror-editor'
 import { EditorSelection } from '@codemirror/state'
-import { PANEL_WIDTH } from './review-panel'
 import { useTranslation } from 'react-i18next'
 import { useThreadsActionsContext } from '../context/threads-context'
 
@@ -49,7 +48,7 @@ export const ReviewPanelAddComment: FC = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      style={{ display: 'flex', flexDirection: 'column', width: PANEL_WIDTH }}
+      className="review-panel-add-comment-form"
       ref={handleElement}
     >
       {/* eslint-disable-next-line jsx-a11y/no-autofocus */}
