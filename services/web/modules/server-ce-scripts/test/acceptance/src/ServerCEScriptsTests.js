@@ -1,9 +1,9 @@
-const Settings = require('@overleaf/settings')
 const { execSync } = require('child_process')
+const fs = require('fs')
+const Settings = require('@overleaf/settings')
 const { expect } = require('chai')
 const { db } = require('../../../../../app/src/infrastructure/mongodb')
 const User = require('../../../../../test/acceptance/src/helpers/User').promises
-const fs = require('fs')
 
 /**
  * @param {string} cmd
@@ -18,6 +18,21 @@ function run(cmd) {
   return execSync(cmd, {
     stdio: ['ignore', 'pipe', 'pipe'],
   }).toString()
+}
+
+function runAndExpectError(cmd, errorMessages) {
+  try {
+    run(cmd)
+  } catch (error) {
+    expect(error.status).to.equal(1)
+    if (errorMessages) {
+      errorMessages.forEach(errorMessage =>
+        expect(error.stderr.toString()).to.include(errorMessage)
+      )
+    }
+    return
+  }
+  expect.fail('command should have failed')
 }
 
 async function getUser(email) {
@@ -494,6 +509,173 @@ describe('ServerCEScripts', function () {
             compileTimeout: 360,
           }),
         ])
+      })
+    })
+  })
+
+  describe('check-texlive-images', function () {
+    const TEST_TL_IMAGE = 'sharelatex/texlive:2023'
+    const TEST_TL_IMAGE_LIST =
+      'sharelatex/texlive:2021,sharelatex/texlive:2022,sharelatex/texlive:2023'
+
+    let output
+
+    function buildCheckTexLiveCmd({
+      SANDBOXED_COMPILES,
+      TEX_LIVE_DOCKER_IMAGE,
+      ALL_TEX_LIVE_DOCKER_IMAGES,
+    }) {
+      let cmd = `SANDBOXED_COMPILES=${SANDBOXED_COMPILES ? 'true' : 'false'}`
+      if (TEX_LIVE_DOCKER_IMAGE) {
+        cmd += ` TEX_LIVE_DOCKER_IMAGE='${TEX_LIVE_DOCKER_IMAGE}'`
+      }
+      if (ALL_TEX_LIVE_DOCKER_IMAGES) {
+        cmd += ` ALL_TEX_LIVE_DOCKER_IMAGES='${ALL_TEX_LIVE_DOCKER_IMAGES}'`
+      }
+      return (
+        cmd + ' node modules/server-ce-scripts/scripts/check-texlive-images'
+      )
+    }
+
+    beforeEach(async function () {
+      const user = new User()
+      await user.ensureUserExists()
+      await user.login()
+      await user.createProject('test-project')
+    })
+
+    describe('when sandboxed compiles are disabled', function () {
+      beforeEach('run script', function () {
+        output = run(buildCheckTexLiveCmd({ SANDBOXED_COMPILES: false }))
+      })
+
+      it('should skip checks', function () {
+        expect(output).to.include(
+          'Sandboxed compiles disabled, skipping TexLive checks'
+        )
+      })
+    })
+
+    describe('when texlive configuration is incorrect', function () {
+      it('should fail when TEX_LIVE_DOCKER_IMAGE is not set', function () {
+        runAndExpectError(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            ALL_TEX_LIVE_DOCKER_IMAGES: TEST_TL_IMAGE_LIST,
+          }),
+          [
+            'Sandboxed compiles require TEX_LIVE_DOCKER_IMAGE and ALL_TEX_LIVE_DOCKER_IMAGES being set',
+          ]
+        )
+      })
+
+      it('should fail when ALL_TEX_LIVE_DOCKER_IMAGES is not set', function () {
+        runAndExpectError(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: TEST_TL_IMAGE,
+          }),
+          [
+            'Sandboxed compiles require TEX_LIVE_DOCKER_IMAGE and ALL_TEX_LIVE_DOCKER_IMAGES being set',
+          ]
+        )
+      })
+
+      it('should fail when TEX_LIVE_DOCKER_IMAGE is not defined in ALL_TEX_LIVE_DOCKER_IMAGES', function () {
+        runAndExpectError(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: 'tl-1',
+            ALL_TEX_LIVE_DOCKER_IMAGES: 'tl-2,tl-3',
+          }),
+          [
+            'TEX_LIVE_DOCKER_IMAGE must be included in ALL_TEX_LIVE_DOCKER_IMAGES',
+          ]
+        )
+      })
+    })
+
+    describe(`when projects don't have 'imageName' set`, function () {
+      beforeEach(async function () {
+        await db.projects.updateMany({}, { $unset: { imageName: 1 } })
+      })
+
+      it('should fail and suggest running backfilling scripts', function () {
+        runAndExpectError(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: TEST_TL_IMAGE,
+            ALL_TEX_LIVE_DOCKER_IMAGES: TEST_TL_IMAGE_LIST,
+          }),
+          [
+            `'project.imageName' is not set for some projects`,
+            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.js' to initialise TexLive image in existing projects`,
+          ]
+        )
+      })
+    })
+
+    describe(`when projects have a null 'imageName'`, function () {
+      beforeEach(async function () {
+        await db.projects.updateMany({}, { $set: { imageName: null } })
+      })
+
+      it('should fail and suggest running backfilling scripts', function () {
+        runAndExpectError(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: TEST_TL_IMAGE,
+            ALL_TEX_LIVE_DOCKER_IMAGES: TEST_TL_IMAGE_LIST,
+          }),
+          [
+            `'project.imageName' is not set for some projects`,
+            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/backfill_project_image_name.js' to initialise TexLive image in existing projects`,
+          ]
+        )
+      })
+    })
+
+    describe('when TexLive ALL_TEX_LIVE_DOCKER_IMAGES are upgraded and used images are no longer available', function () {
+      it('should suggest running a fixing script', async function () {
+        await db.projects.updateMany({}, { $set: { imageName: TEST_TL_IMAGE } })
+        runAndExpectError(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: 'tl-1',
+            ALL_TEX_LIVE_DOCKER_IMAGES: 'tl-1,tl-2',
+          }),
+          [
+            `Set SKIP_TEX_LIVE_CHECK=true in config/variables.env, restart the instance and run 'bin/run-script scripts/update_project_image_name.js <dangling_image> <new_image>' to update projects to a new image`,
+          ]
+        )
+      })
+    })
+
+    describe('success scenarios', function () {
+      beforeEach(async function () {
+        await db.projects.updateMany({}, { $set: { imageName: TEST_TL_IMAGE } })
+      })
+
+      it('should succeed when there are no changes to the TexLive images', function () {
+        const output = run(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: TEST_TL_IMAGE,
+            ALL_TEX_LIVE_DOCKER_IMAGES: TEST_TL_IMAGE_LIST,
+          })
+        )
+        expect(output).to.include('Done.')
+      })
+
+      it('should succeed when there are valid changes to the TexLive images', function () {
+        const output = run(
+          buildCheckTexLiveCmd({
+            SANDBOXED_COMPILES: true,
+            TEX_LIVE_DOCKER_IMAGE: 'new-image',
+            ALL_TEX_LIVE_DOCKER_IMAGES: TEST_TL_IMAGE_LIST + ',new-image',
+          })
+        )
+        expect(output).to.include('Done.')
       })
     })
   })
