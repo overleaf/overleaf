@@ -40,6 +40,7 @@ module.exports = {
     getMemberIdPrivilegeLevel,
     getInvitedCollaboratorCount,
     getInvitedEditCollaboratorCount,
+    getInvitedPendingEditorCount,
     getProjectsUserIsMemberOf,
     dangerouslyGetAllProjectsUserIsMemberOf,
     isUserInvitedMemberOfProject,
@@ -59,6 +60,7 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     tokenAccessReadOnly_refs: 1,
     tokenAccessReadAndWrite_refs: 1,
     publicAccesLevel: 1,
+    pendingEditor_refs: 1,
   })
   if (!project) {
     throw new Errors.NotFoundError(`no project found with id ${projectId}`)
@@ -69,7 +71,8 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     project.readOnly_refs,
     project.tokenAccessReadAndWrite_refs,
     project.tokenAccessReadOnly_refs,
-    project.publicAccesLevel
+    project.publicAccesLevel,
+    project.pendingEditor_refs
   )
   return memberIds
 }
@@ -133,6 +136,17 @@ async function getInvitedEditCollaboratorCount(projectId) {
     m =>
       m.source === Sources.INVITE &&
       m.privilegeLevel === PrivilegeLevels.READ_AND_WRITE
+  ).length
+}
+
+async function getInvitedPendingEditorCount(projectId) {
+  // Only counts invited members that are readonly pending editors
+  const members = await getMemberIdsWithPrivilegeLevels(projectId)
+  return members.filter(
+    m =>
+      m.source === Sources.INVITE &&
+      m.privilegeLevel === PrivilegeLevels.READ_ONLY &&
+      m.pendingEditor === true
   ).length
 }
 
@@ -309,7 +323,8 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
   readOnlyIds,
   tokenAccessIds,
   tokenAccessReadOnlyIds,
-  publicAccessLevel
+  publicAccessLevel,
+  pendingEditorIds
 ) {
   const members = []
   members.push({
@@ -329,6 +344,9 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
       id: memberId.toString(),
       privilegeLevel: PrivilegeLevels.READ_ONLY,
       source: Sources.INVITE,
+      ...(pendingEditorIds?.some(pe => memberId.equals(pe)) && {
+        pendingEditor: true,
+      }),
     })
   }
   if (publicAccessLevel === PublicAccessLevels.TOKEN_BASED) {
@@ -364,7 +382,11 @@ async function _loadMembers(members) {
           signUpDate: 1,
         })
         if (user != null) {
-          return { user, privilegeLevel: member.privilegeLevel }
+          return {
+            user,
+            privilegeLevel: member.privilegeLevel,
+            ...(member.pendingEditor && { pendingEditor: true }),
+          }
         } else {
           return null
         }

@@ -83,11 +83,9 @@ module.exports = ProjectEditorHandler = {
     for (const member of members || []) {
       if (member.privilegeLevel === 'owner') {
         ownerFeatures = member.user.features
-        owner = this.buildUserModelView(member.user, 'owner')
+        owner = this.buildUserModelView(member)
       } else {
-        filteredMembers.push(
-          this.buildUserModelView(member.user, member.privilegeLevel)
-        )
+        filteredMembers.push(this.buildUserModelView(member))
       }
     }
     return {
@@ -97,14 +95,16 @@ module.exports = ProjectEditorHandler = {
     }
   },
 
-  buildUserModelView(user, privileges) {
+  buildUserModelView(member) {
+    const user = member.user
     return {
       _id: user._id,
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      privileges,
+      privileges: member.privilegeLevel,
       signUpDate: user.signUpDate,
+      pendingEditor: member.pendingEditor,
     }
   },
 

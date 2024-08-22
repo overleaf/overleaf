@@ -17,6 +17,7 @@ describe('CollaboratorsGetter', function () {
     this.ownerRef = new ObjectId()
     this.readOnlyRef1 = new ObjectId()
     this.readOnlyRef2 = new ObjectId()
+    this.pendingEditorRef = new ObjectId()
     this.readWriteRef1 = new ObjectId()
     this.readWriteRef2 = new ObjectId()
     this.readOnlyTokenRef = new ObjectId()
@@ -25,7 +26,12 @@ describe('CollaboratorsGetter', function () {
     this.project = {
       _id: new ObjectId(),
       owner_ref: [this.ownerRef],
-      readOnly_refs: [this.readOnlyRef1, this.readOnlyRef2],
+      readOnly_refs: [
+        this.readOnlyRef1,
+        this.readOnlyRef2,
+        this.pendingEditorRef,
+      ],
+      pendingEditor_refs: [this.pendingEditorRef],
       collaberator_refs: [this.readWriteRef1, this.readWriteRef2],
       tokenAccessReadAndWrite_refs: [this.readWriteTokenRef],
       tokenAccessReadOnly_refs: [this.readOnlyTokenRef],
@@ -100,6 +106,12 @@ describe('CollaboratorsGetter', function () {
             source: 'invite',
           },
           {
+            id: this.pendingEditorRef.toString(),
+            privilegeLevel: 'readOnly',
+            source: 'invite',
+            pendingEditor: true,
+          },
+          {
             id: this.readOnlyTokenRef.toString(),
             privilegeLevel: 'readOnly',
             source: 'token',
@@ -139,6 +151,7 @@ describe('CollaboratorsGetter', function () {
         this.readOnlyRef2.toString(),
         this.readWriteRef1.toString(),
         this.readWriteRef2.toString(),
+        this.pendingEditorRef.toString(),
         this.readWriteTokenRef.toString(),
         this.readOnlyTokenRef.toString(),
       ])
@@ -157,6 +170,7 @@ describe('CollaboratorsGetter', function () {
         this.readOnlyRef2.toString(),
         this.readWriteRef1.toString(),
         this.readWriteRef2.toString(),
+        this.pendingEditorRef.toString(),
       ])
     })
   })
@@ -482,6 +496,16 @@ describe('CollaboratorsGetter', function () {
           this.project._id
         )
       expect(count).to.equal(2)
+    })
+  })
+
+  describe('getInvitedPendingEditorCount', function () {
+    it('should return the count of pending editors', async function () {
+      const count =
+        await this.CollaboratorsGetter.promises.getInvitedPendingEditorCount(
+          this.project._id
+        )
+      expect(count).to.equal(1)
     })
   })
 })

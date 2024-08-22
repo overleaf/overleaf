@@ -7,6 +7,7 @@ export type ProjectContextMember = {
   email: string
   first_name: string
   last_name: string
+  pendingEditor?: boolean
 }
 
 export type ProjectContextValue = {

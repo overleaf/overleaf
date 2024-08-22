@@ -44,6 +44,7 @@ export const EditorContext = createContext<
       insertSymbol?: (symbol: string) => void
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
+      isPendingEditor: boolean
       permissionsLevel: 'readOnly' | 'readAndWrite' | 'owner'
       deactivateTutorial: (tutorial: string) => void
       inactiveTutorials: string[]
@@ -62,7 +63,7 @@ export const EditorProvider: FC = ({ children }) => {
   const { role } = useDetachContext()
   const { showGenericMessageModal } = useModalsContext()
 
-  const { owner, features, _id: projectId } = useProjectContext()
+  const { owner, features, _id: projectId, members } = useProjectContext()
 
   const cobranding = useMemo(() => {
     const brandVariation = getMeta('ol-brandVariation')
@@ -97,6 +98,17 @@ export const EditorProvider: FC = ({ children }) => {
     useState<writefullAdButtons>('')
 
   const [currentPopup, setCurrentPopup] = useState<string | null>(null)
+
+  const isPendingEditor = useMemo(
+    () =>
+      members?.some(
+        member =>
+          member._id === userId &&
+          member.pendingEditor &&
+          member.privileges === 'readAndWrite'
+      ),
+    [members, userId]
+  )
 
   const deactivateTutorial = useCallback(
     tutorialKey => {
@@ -174,6 +186,7 @@ export const EditorProvider: FC = ({ children }) => {
       setPermissionsLevel,
       isProjectOwner: owner?._id === userId,
       isRestrictedTokenMember: getMeta('ol-isRestrictedTokenMember'),
+      isPendingEditor,
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,
@@ -194,6 +207,7 @@ export const EditorProvider: FC = ({ children }) => {
       renameProject,
       permissionsLevel,
       setPermissionsLevel,
+      isPendingEditor,
       showSymbolPalette,
       toggleSymbolPalette,
       insertSymbol,

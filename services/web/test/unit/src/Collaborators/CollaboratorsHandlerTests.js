@@ -106,6 +106,7 @@ describe('CollaboratorsHandler', function () {
               $pull: {
                 collaberator_refs: this.userId,
                 readOnly_refs: this.userId,
+                pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 archived: this.userId,
@@ -148,6 +149,7 @@ describe('CollaboratorsHandler', function () {
               $pull: {
                 collaberator_refs: this.userId,
                 readOnly_refs: this.userId,
+                pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 trashed: this.userId,
@@ -182,6 +184,7 @@ describe('CollaboratorsHandler', function () {
               $pull: {
                 collaberator_refs: this.userId,
                 readOnly_refs: this.userId,
+                pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 archived: this.userId,
@@ -377,6 +380,7 @@ describe('CollaboratorsHandler', function () {
               $pull: {
                 collaberator_refs: this.userId,
                 readOnly_refs: this.userId,
+                pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
                 tokenAccessReadAndWrite_refs: this.userId,
                 archived: this.userId,
@@ -457,6 +461,24 @@ describe('CollaboratorsHandler', function () {
         )
         .chain('exec')
         .resolves()
+      this.ProjectMock.expects('updateMany')
+        .withArgs(
+          { pendingEditor_refs: this.fromUserId },
+          {
+            $addToSet: { pendingEditor_refs: this.toUserId },
+          }
+        )
+        .chain('exec')
+        .resolves()
+      this.ProjectMock.expects('updateMany')
+        .withArgs(
+          { pendingEditor_refs: this.fromUserId },
+          {
+            $pull: { pendingEditor_refs: this.fromUserId },
+          }
+        )
+        .chain('exec')
+        .resolves()
     })
 
     describe('successfully', function () {
@@ -501,7 +523,10 @@ describe('CollaboratorsHandler', function () {
             ],
           },
           {
-            $pull: { collaberator_refs: this.userId },
+            $pull: {
+              collaberator_refs: this.userId,
+              pendingEditor_refs: this.userId,
+            },
             $addToSet: { readOnly_refs: this.userId },
           }
         )
@@ -526,7 +551,10 @@ describe('CollaboratorsHandler', function () {
           },
           {
             $addToSet: { collaberator_refs: this.userId },
-            $pull: { readOnly_refs: this.userId },
+            $pull: {
+              readOnly_refs: this.userId,
+              pendingEditor_refs: this.userId,
+            },
           }
         )
         .chain('exec')

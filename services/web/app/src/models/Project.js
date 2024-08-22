@@ -39,6 +39,7 @@ const ProjectSchema = new Schema(
     owner_ref: { type: ObjectId, ref: 'User' },
     collaberator_refs: [{ type: ObjectId, ref: 'User' }],
     readOnly_refs: [{ type: ObjectId, ref: 'User' }],
+    pendingEditor_refs: [{ type: ObjectId, ref: 'User' }],
     rootDoc_id: { type: ObjectId },
     rootFolder: [FolderSchema],
     version: { type: Number }, // incremented for every change in the project structure (folders and filenames)

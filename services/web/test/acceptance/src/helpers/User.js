@@ -946,6 +946,10 @@ class User {
       updateOp = { $addToSet: { collaberator_refs: user._id } }
     } else if (privileges === 'readOnly') {
       updateOp = { $addToSet: { readOnly_refs: user._id } }
+    } else if (privileges === 'pendingEditor') {
+      updateOp = {
+        $addToSet: { readOnly_refs: user._id, pendingEditor_refs: user._id },
+      }
     }
     db.projects.updateOne({ _id: new ObjectId(projectId) }, updateOp, callback)
   }

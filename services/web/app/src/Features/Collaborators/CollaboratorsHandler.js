@@ -49,6 +49,7 @@ async function removeUserFromProject(projectId, userId) {
           $pull: {
             collaberator_refs: userId,
             readOnly_refs: userId,
+            pendingEditor_refs: userId,
             tokenAccessReadOnly_refs: userId,
             tokenAccessReadAndWrite_refs: userId,
             trashed: userId,
@@ -62,6 +63,7 @@ async function removeUserFromProject(projectId, userId) {
           $pull: {
             collaberator_refs: userId,
             readOnly_refs: userId,
+            pendingEditor_refs: userId,
             tokenAccessReadOnly_refs: userId,
             tokenAccessReadAndWrite_refs: userId,
             archived: userId,
@@ -196,6 +198,19 @@ async function transferProjects(fromUserId, toUserId) {
     }
   ).exec()
 
+  await Project.updateMany(
+    { pendingEditor_refs: fromUserId },
+    {
+      $addToSet: { pendingEditor_refs: toUserId },
+    }
+  ).exec()
+  await Project.updateMany(
+    { pendingEditor_refs: fromUserId },
+    {
+      $pull: { pendingEditor_refs: fromUserId },
+    }
+  ).exec()
+
   // Flush in background, no need to block on this
   _flushProjects(projectIds).catch(err => {
     logger.err(
@@ -220,14 +235,14 @@ async function setCollaboratorPrivilegeLevel(
   switch (privilegeLevel) {
     case PrivilegeLevels.READ_AND_WRITE: {
       update = {
-        $pull: { readOnly_refs: userId },
+        $pull: { readOnly_refs: userId, pendingEditor_refs: userId },
         $addToSet: { collaberator_refs: userId },
       }
       break
     }
     case PrivilegeLevels.READ_ONLY: {
       update = {
-        $pull: { collaberator_refs: userId },
+        $pull: { collaberator_refs: userId, pendingEditor_refs: userId },
         $addToSet: { readOnly_refs: userId },
       }
       break

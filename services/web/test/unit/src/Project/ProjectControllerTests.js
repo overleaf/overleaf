@@ -131,6 +131,11 @@ describe('ProjectController', function () {
         isUserInvitedReadWriteMemberOfProject: sinon.stub().resolves(true),
       },
     }
+    this.CollaboratorsHandler = {
+      promises: {
+        setCollaboratorPrivilegeLevel: sinon.stub().resolves(),
+      },
+    }
     this.ProjectEntityHandler = {}
     this.UserGetter = {
       getUserFullEmails: sinon.stub().yields(null, []),
@@ -200,12 +205,16 @@ describe('ProjectController', function () {
     this.OnboardingDataCollectionManager = {
       getOnboardingDataValue: sinon.stub().resolves(null),
     }
+    this.Modules = {
+      promises: { hooks: { fire: sinon.stub().resolves() } },
+    }
 
     this.ProjectController = SandboxedModule.require(MODULE_PATH, {
       requires: {
         'mongodb-legacy': { ObjectId },
         '@overleaf/settings': this.settings,
         '@overleaf/metrics': this.Metrics,
+        '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../SplitTests/SplitTestSessionHandler': this.SplitTestSessionHandler,
         './ProjectDeleter': this.ProjectDeleter,
@@ -255,6 +264,7 @@ describe('ProjectController', function () {
             updateUser: sinon.stub().resolves(),
           },
         },
+        '../../infrastructure/Modules': this.Modules,
       },
     })
 
@@ -1015,9 +1025,13 @@ describe('ProjectController', function () {
 
     describe('link sharing changes active', function () {
       beforeEach(function () {
-        this.SplitTestHandler.promises.getAssignmentForUser.resolves({
-          variant: 'active',
-        })
+        this.SplitTestHandler.promises.getAssignmentForUser.callsFake(
+          async (userId, test) => {
+            if (test === 'link-sharing-warning') {
+              return { variant: 'active' }
+            }
+          }
+        )
       })
 
       describe('when user is a read write token member (and not already a named editor)', function () {
@@ -1053,6 +1067,57 @@ describe('ProjectController', function () {
 
         it('should not redirect to the sharing-updates page, and should load the editor', function (done) {
           this.res.render = (pageName, opts) => {
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      })
+    })
+
+    describe('link sharing enforcement', function () {
+      describe('when not active (default)', function () {
+        beforeEach(function () {
+          this.SplitTestHandler.promises.getAssignmentForUser.callsFake(
+            async (userId, test) => {
+              if (test === 'link-sharing-warning') {
+                return { variant: 'active' }
+              } else if (test === 'link-sharing-enforcement') {
+                return { variant: 'default' }
+              }
+            }
+          )
+        })
+
+        it('should not call the collaborator limit enforcement check', function (done) {
+          this.res.render = (pageName, opts) => {
+            this.Modules.promises.hooks.fire.should.not.have.been.calledWith(
+              'enforceCollaboratorLimit'
+            )
+            done()
+          }
+          this.ProjectController.loadEditor(this.req, this.res)
+        })
+      })
+
+      describe('when active', function () {
+        beforeEach(function () {
+          this.SplitTestHandler.promises.getAssignmentForUser.callsFake(
+            async (userId, test) => {
+              if (test === 'link-sharing-warning') {
+                return { variant: 'active' }
+              } else if (test === 'link-sharing-enforcement') {
+                return { variant: 'active' }
+              }
+            }
+          )
+        })
+
+        it('should call the collaborator limit enforcement check', function (done) {
+          this.res.render = (pageName, opts) => {
+            this.Modules.promises.hooks.fire.should.have.been.calledWith(
+              'enforceCollaboratorLimit',
+              this.project_id
+            )
             done()
           }
           this.ProjectController.loadEditor(this.req, this.res)

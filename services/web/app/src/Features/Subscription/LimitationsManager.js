@@ -30,14 +30,14 @@ async function allowedNumberOfCollaboratorsForUser(userId) {
 
 async function canAddXCollaborators(projectId, numberOfNewCollaborators) {
   const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
+  if (allowedNumber < 0) {
+    return true // -1 means unlimited
+  }
   const currentNumber =
     await CollaboratorsGetter.promises.getInvitedCollaboratorCount(projectId)
   const inviteCount =
     await CollaboratorsInvitesHandler.promises.getInviteCount(projectId)
-  return (
-    currentNumber + inviteCount + numberOfNewCollaborators <= allowedNumber ||
-    allowedNumber < 0 // -1 means unlimited
-  )
+  return currentNumber + inviteCount + numberOfNewCollaborators <= allowedNumber
 }
 
 async function canAddXEditCollaborators(
@@ -45,6 +45,9 @@ async function canAddXEditCollaborators(
   numberOfNewEditCollaborators
 ) {
   const allowedNumber = await allowedNumberOfCollaboratorsInProject(projectId)
+  if (allowedNumber < 0) {
+    return true // -1 means unlimited
+  }
   const currentEditors =
     await CollaboratorsGetter.promises.getInvitedEditCollaboratorCount(
       projectId
@@ -53,7 +56,7 @@ async function canAddXEditCollaborators(
     await CollaboratorsInvitesHandler.promises.getEditInviteCount(projectId)
   return (
     currentEditors + editInviteCount + numberOfNewEditCollaborators <=
-      allowedNumber || allowedNumber < 0 // -1 means unlimited
+    allowedNumber
   )
 }
 
