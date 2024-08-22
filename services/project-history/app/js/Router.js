@@ -183,7 +183,7 @@ export function initialize(app) {
     HttpController.forceDebugProject
   )
 
-  app.get('/project/:project_id/blob/:hash', HttpController.getProjectBlob)
+  app.get('/project/:history_id/blob/:hash', HttpController.getProjectBlob)
 
   app.get('/status/failures', HttpController.getFailures)
 

@@ -20,10 +20,10 @@ import { pipeline } from 'stream'
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
 export function getProjectBlob(req, res, next) {
-  const projectId = req.params.project_id
+  const historyId = req.params.history_id
   const blobHash = req.params.hash
   HistoryStoreManager.getProjectBlobStream(
-    projectId,
+    historyId,
     blobHash,
     (err, stream) => {
       if (err != null) {

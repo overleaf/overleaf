@@ -38,6 +38,30 @@ module.exports = HistoryController = {
     })
   },
 
+  getBlob(req, res, next) {
+    const { project_id: projectId, blob } = req.params
+
+    ProjectGetter.getProject(
+      projectId,
+      { 'overleaf.history.id': true },
+      (err, project) => {
+        if (err) return next(err)
+
+        const url = new URL(settings.apis.project_history.url)
+        url.pathname = `/project/${project.overleaf.history.id}/blob/${blob}`
+
+        pipeline(request(url.href), res, err => {
+          // If the downstream request is cancelled, we get an
+          // ERR_STREAM_PREMATURE_CLOSE.
+          if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
+            logger.warn({ url, err }, 'history API error')
+            next(err)
+          }
+        })
+      }
+    )
+  },
+
   proxyToHistoryApiAndInjectUserDetails(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const url = settings.apis.project_history.url + req.url
