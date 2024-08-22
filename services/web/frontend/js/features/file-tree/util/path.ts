@@ -106,7 +106,8 @@ export function findEntityByPath(
 export function previewByPath(
   folder: Folder,
   projectId: string,
-  path: string
+  path: string,
+  fileTreeFromHistory: boolean
 ): PreviewPath | null {
   for (const suffix of [
     '',
@@ -121,10 +122,12 @@ export function previewByPath(
   ]) {
     const result = findEntityByPath(folder, path + suffix)
 
-    if (result) {
-      const { name, _id: id } = result.entity
+    if (result?.type === 'fileRef') {
+      const { name, _id: id, hash } = result.entity
       return {
-        url: `/project/${projectId}/file/${id}`,
+        url: fileTreeFromHistory
+          ? `/project/${projectId}/blob/${hash}`
+          : `/project/${projectId}/file/${id}`,
         extension: name.slice(name.lastIndexOf('.') + 1),
       }
     }

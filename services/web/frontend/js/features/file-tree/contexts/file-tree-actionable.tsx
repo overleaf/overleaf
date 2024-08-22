@@ -22,7 +22,6 @@ import { isNameUniqueInFolder } from '../util/is-name-unique-in-folder'
 import { isBlockedFilename, isCleanFilename } from '../util/safe-path'
 
 import { useProjectContext } from '../../../shared/context/project-context'
-import { useEditorContext } from '../../../shared/context/editor-context'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from './file-tree-selectable'
 
@@ -34,6 +33,7 @@ import {
 } from '../errors'
 import { Folder } from '../../../../../types/folder'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
+import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -219,11 +219,12 @@ function fileTreeActionableReducer(state: State, action: Action) {
 
 export const FileTreeActionableProvider: FC = ({ children }) => {
   const { _id: projectId } = useProjectContext()
-  const { permissionsLevel } = useEditorContext()
+  const { fileTreeReadOnly } = useFileTreeData()
   const { indexAllReferences } = useReferencesContext()
+  const { fileTreeFromHistory } = useSnapshotContext()
 
   const [state, dispatch] = useReducer(
-    permissionsLevel === 'readOnly'
+    fileTreeReadOnly
       ? fileTreeActionableReadOnlyReducer
       : fileTreeActionableReducer,
     defaultState
@@ -493,6 +494,9 @@ export const FileTreeActionableProvider: FC = ({ children }) => {
       const selectedEntity = findInTree(fileTreeData, selectedEntityId)
 
       if (selectedEntity?.type === 'fileRef') {
+        if (fileTreeFromHistory) {
+          return `/project/${projectId}/blob/${selectedEntity.entity.hash}`
+        }
         return `/project/${projectId}/file/${selectedEntityId}`
       }
 
@@ -500,7 +504,7 @@ export const FileTreeActionableProvider: FC = ({ children }) => {
         return `/project/${projectId}/doc/${selectedEntityId}/download`
       }
     }
-  }, [fileTreeData, projectId, selectedEntityIds])
+  }, [fileTreeData, projectId, selectedEntityIds, fileTreeFromHistory])
 
   // TODO: wrap in useMemo
   const value = {

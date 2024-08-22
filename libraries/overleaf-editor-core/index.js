@@ -42,6 +42,7 @@ const TrackedChangeList = require('./lib/file_data/tracked_change_list')
 const TrackingProps = require('./lib/file_data/tracking_props')
 const Range = require('./lib/range')
 const CommentList = require('./lib/file_data/comment_list')
+const LazyStringFileData = require('./lib/file_data/lazy_string_file_data')
 
 exports.AddCommentOperation = AddCommentOperation
 exports.Author = Author
@@ -56,6 +57,7 @@ exports.Comment = Comment
 exports.DeleteCommentOperation = DeleteCommentOperation
 exports.File = File
 exports.FileMap = FileMap
+exports.LazyStringFileData = LazyStringFileData
 exports.History = History
 exports.Label = Label
 exports.AddFileOperation = AddFileOperation

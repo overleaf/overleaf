@@ -5,13 +5,13 @@ import { Button } from 'react-bootstrap'
 import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 
-import { useEditorContext } from '../../../shared/context/editor-context'
 import { useFileTreeActionable } from '../contexts/file-tree-actionable'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 
 function FileTreeToolbar() {
-  const { permissionsLevel } = useEditorContext()
+  const { fileTreeReadOnly } = useFileTreeData()
 
-  if (permissionsLevel === 'readOnly') return null
+  if (fileTreeReadOnly) return null
 
   return (
     <div className="toolbar toolbar-filetree">

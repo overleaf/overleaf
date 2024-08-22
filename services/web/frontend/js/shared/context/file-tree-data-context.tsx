@@ -38,6 +38,7 @@ const FileTreeDataContext = createContext<
       // by the file tree
       fileTreeData: Folder
       fileCount: { value: number; status: string; limit: number } | number
+      fileTreeReadOnly: boolean
       hasFolders: boolean
       selectedEntities: FindResult[]
       setSelectedEntities: (selectedEntities: FindResult[]) => void
@@ -179,8 +180,11 @@ export const FileTreeDataProvider: FC = ({ children }) => {
   const [project] = useScopeValue<Project>('project')
   const [openDocId] = useScopeValue('editor.open_doc_id')
   const [, setOpenDocName] = useScopeValueSetterOnly('editor.open_doc_name')
+  const [permissionsLevel] = useScopeValue('permissionsLevel')
   const { fileTreeFromHistory, snapshot, snapshotVersion } =
     useSnapshotContext()
+  const fileTreeReadOnly =
+    permissionsLevel === 'readOnly' || fileTreeFromHistory
 
   const [rootFolder, setRootFolder] = useState(project?.rootFolder)
 
@@ -288,6 +292,7 @@ export const FileTreeDataProvider: FC = ({ children }) => {
       dispatchRename,
       fileCount,
       fileTreeData,
+      fileTreeReadOnly,
       hasFolders: fileTreeData?.folders.length > 0,
       selectedEntities,
       setSelectedEntities,
@@ -302,6 +307,7 @@ export const FileTreeDataProvider: FC = ({ children }) => {
     dispatchRename,
     fileCount,
     fileTreeData,
+    fileTreeReadOnly,
     selectedEntities,
     setSelectedEntities,
     docs,

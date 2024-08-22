@@ -13,7 +13,6 @@ import _ from 'lodash'
 import { findInTree } from '../util/find-in-tree'
 import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useProjectContext } from '../../../shared/context/project-context'
-import { useEditorContext } from '../../../shared/context/editor-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import usePersistedState from '../../../shared/hooks/use-persisted-state'
 import usePreviousValue from '../../../shared/hooks/use-previous-value'
@@ -123,19 +122,19 @@ export const FileTreeSelectableProvider: FC<{
   onSelect: (value: FindResult[]) => void
 }> = ({ onSelect, children }) => {
   const { _id: projectId, rootDocId } = useProjectContext()
-  const { permissionsLevel } = useEditorContext()
 
   const [initialSelectedEntityId] = usePersistedState(
     `doc.open_id.${projectId}`,
     rootDocId
   )
 
-  const { fileTreeData, setSelectedEntities } = useFileTreeData()
+  const { fileTreeData, setSelectedEntities, fileTreeReadOnly } =
+    useFileTreeData()
 
   const [isRootFolderSelected, setIsRootFolderSelected] = useState(false)
 
   const [selectedEntityIds, dispatch] = useReducer(
-    permissionsLevel === 'readOnly'
+    fileTreeReadOnly
       ? fileTreeSelectableReadOnlyReducer
       : fileTreeSelectableReadWriteReducer,
     null,

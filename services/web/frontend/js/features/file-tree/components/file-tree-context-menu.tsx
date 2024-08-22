@@ -1,13 +1,13 @@
 import React, { useEffect, useRef } from 'react'
 import ReactDOM from 'react-dom'
 import { Dropdown } from 'react-bootstrap'
-import { useEditorContext } from '../../../shared/context/editor-context'
+import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeMainContext } from '../contexts/file-tree-main'
 
 import FileTreeItemMenuItems from './file-tree-item/file-tree-item-menu-items'
 
 function FileTreeContextMenu() {
-  const { permissionsLevel } = useEditorContext()
+  const { fileTreeReadOnly } = useFileTreeData()
   const { contextMenuCoords, setContextMenuCoords } = useFileTreeMainContext()
   const toggleButtonRef = useRef<HTMLButtonElement | null>(null)
 
@@ -20,7 +20,7 @@ function FileTreeContextMenu() {
     }
   }, [contextMenuCoords])
 
-  if (!contextMenuCoords || permissionsLevel === 'readOnly') return null
+  if (!contextMenuCoords || fileTreeReadOnly) return null
 
   // A11y - Move the focus to the context menu when it opens
   function focusContextMenu() {

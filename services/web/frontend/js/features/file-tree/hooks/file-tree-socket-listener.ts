@@ -5,6 +5,7 @@ import { useFileTreeData } from '../../../shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
 import { findInTree, findInTreeOrThrow } from '../util/find-in-tree'
 import { useIdeContext } from '@/shared/context/ide-context'
+import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
 
 export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
   const user = useUserContext()
@@ -20,6 +21,7 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
   const { selectedEntityIds, selectedEntityParentIds, select, unselect } =
     useFileTreeSelectable()
   const { socket } = useIdeContext()
+  const { fileTreeFromHistory } = useSnapshotContext()
 
   const selectEntityIfCreatedByUser = useCallback(
     // hack to automatically re-open refreshed linked files
@@ -38,6 +40,7 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
   )
 
   useEffect(() => {
+    if (fileTreeFromHistory) return
     function handleDispatchRename(entityId: string, name: string) {
       dispatchRename(entityId, name)
     }
@@ -46,9 +49,10 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
       if (socket)
         socket.removeListener('reciveEntityRename', handleDispatchRename)
     }
-  }, [socket, dispatchRename])
+  }, [socket, dispatchRename, fileTreeFromHistory])
 
   useEffect(() => {
+    if (fileTreeFromHistory) return
     function handleDispatchDelete(entityId: string) {
       const entity = findInTree(fileTreeData, entityId)
       unselect(entityId)
@@ -82,9 +86,11 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
     selectedEntityIds,
     selectedEntityParentIds,
     onDelete,
+    fileTreeFromHistory,
   ])
 
   useEffect(() => {
+    if (fileTreeFromHistory) return
     function handleDispatchMove(entityId: string, toFolderId: string) {
       dispatchMove(entityId, toFolderId)
     }
@@ -92,9 +98,10 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
     return () => {
       if (socket) socket.removeListener('reciveEntityMove', handleDispatchMove)
     }
-  }, [socket, dispatchMove])
+  }, [socket, dispatchMove, fileTreeFromHistory])
 
   useEffect(() => {
+    if (fileTreeFromHistory) return
     function handleDispatchCreateFolder(parentFolderId: string, folder: any) {
       dispatchCreateFolder(parentFolderId, folder)
     }
@@ -103,9 +110,10 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
       if (socket)
         socket.removeListener('reciveNewFolder', handleDispatchCreateFolder)
     }
-  }, [socket, dispatchCreateFolder])
+  }, [socket, dispatchCreateFolder, fileTreeFromHistory])
 
   useEffect(() => {
+    if (fileTreeFromHistory) return
     function handleDispatchCreateDoc(
       parentFolderId: string,
       doc: any,
@@ -117,9 +125,10 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
     return () => {
       if (socket) socket.removeListener('reciveNewDoc', handleDispatchCreateDoc)
     }
-  }, [socket, dispatchCreateDoc])
+  }, [socket, dispatchCreateDoc, fileTreeFromHistory])
 
   useEffect(() => {
+    if (fileTreeFromHistory) return
     function handleDispatchCreateFile(
       parentFolderId: string,
       file: any,
@@ -137,5 +146,10 @@ export function useFileTreeSocketListener(onDelete: (entity: any) => void) {
       if (socket)
         socket.removeListener('reciveNewFile', handleDispatchCreateFile)
     }
-  }, [socket, dispatchCreateFile, selectEntityIfCreatedByUser])
+  }, [
+    socket,
+    dispatchCreateFile,
+    selectEntityIfCreatedByUser,
+    fileTreeFromHistory,
+  ])
 }

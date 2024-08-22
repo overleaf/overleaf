@@ -14,7 +14,6 @@ import {
 import { useFileTreeActionable } from './file-tree-actionable'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { useFileTreeSelectable } from '../contexts/file-tree-selectable'
-import { useEditorContext } from '@/shared/context/editor-context'
 import { isAcceptableFile } from '@/features/file-tree/util/is-acceptable-file'
 
 const DRAGGABLE_TYPE = 'ENTITY'
@@ -48,8 +47,7 @@ type DropResult = {
 export function useDraggable(draggedEntityId: string) {
   const { t } = useTranslation()
 
-  const { permissionsLevel } = useEditorContext()
-  const { fileTreeData } = useFileTreeData()
+  const { fileTreeData, fileTreeReadOnly } = useFileTreeData()
   const { selectedEntityIds, isRootFolderSelected } = useFileTreeSelectable()
   const { finishMoving } = useFileTreeActionable()
 
@@ -73,7 +71,7 @@ export function useDraggable(draggedEntityId: string) {
       }
     },
     canDrag() {
-      return permissionsLevel !== 'readOnly' && isDraggable
+      return !fileTreeReadOnly && isDraggable
     },
     end(item: DragObject, monitor: DragSourceMonitor<DragObject, DropResult>) {
       if (monitor.didDrop()) {

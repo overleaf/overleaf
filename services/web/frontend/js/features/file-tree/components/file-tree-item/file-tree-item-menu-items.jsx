@@ -47,7 +47,11 @@ function FileTreeItemMenuItems() {
         <MenuItem onClick={startRenaming}>{t('rename')}</MenuItem>
       ) : null}
       {downloadPath ? (
-        <MenuItem href={downloadPath} onClick={downloadWithAnalytics} download>
+        <MenuItem
+          href={downloadPath}
+          onClick={downloadWithAnalytics}
+          download={selectedFileName}
+        >
           {t('download')}
         </MenuItem>
       ) : null}
