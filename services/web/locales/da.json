@@ -1156,8 +1156,6 @@
   "register_error": "Registreringsfejl",
   "register_intercept_sso": "Du kan forbinde din __authProviderName__-konto fra din Kontoindstillingsside, efter du har logget ind.",
   "register_to_edit_template": "Register for at redigere i __templateName__ skabelonen",
-  "register_using_email": "Registrér dig med din e-mailaddresse",
-  "register_using_service": "Registrér med __service__",
   "register_with_another_email": "<a href=\"__link__\">Bliv registreret hos __appName__</a> med en anden e-mailadresse.",
   "registered": "Registreret",
   "registering": "Registrerer",

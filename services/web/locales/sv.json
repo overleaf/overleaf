@@ -723,8 +723,6 @@
   "register_error": "Registreringsfel",
   "register_intercept_sso": "Du kan länka ditt __authProviderName__-konto från sidan Kontoinställningar efter att du loggat in.",
   "register_to_edit_template": "Vänligen registrera dig för att redigera __templateName__ mallen",
-  "register_using_email": "Registrera med din e-post",
-  "register_using_service": "Registrera via __service__",
   "registered": "Registrerad",
   "registering": "Registrerar",
   "registration_error": "Registreringsfel",

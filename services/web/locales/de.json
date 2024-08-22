@@ -1112,8 +1112,6 @@
   "register_error": "Registrierungsfehler",
   "register_intercept_sso": "Du kannst dein __authProviderName__-Konto nach der Anmeldung auf der Seite Kontoeinstellungen verknüpfen.",
   "register_to_edit_template": "Bitte registriere dich um die __templateName__ Vorlage zu bearbeiten",
-  "register_using_email": "Mit deiner E-Mail-Adresse registrieren",
-  "register_using_service": "Registrieren mit __service__",
   "register_with_another_email": "<a href=\"__link__\">Registriere Dich bei __appName__</a> mit einer anderen E-Mail-Adresse.",
   "registered": "Registriert",
   "registering": "Registrieren",

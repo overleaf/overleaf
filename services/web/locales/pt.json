@@ -505,8 +505,6 @@
   "regards": "Saudações",
   "register": "Registrar",
   "register_to_edit_template": "Por favor, registre-se para editar o modelo __templateName__",
-  "register_using_email": "Registre-se usando seu email",
-  "register_using_service": "Registre-se usando __service__",
   "registered": "Registrado",
   "registering": "Registrando",
   "registration_error": "Erro de Registro",
