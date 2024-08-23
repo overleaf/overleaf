@@ -333,7 +333,6 @@ const _ProjectController = {
       'pdf-caching-prefetching',
       'pdf-presentation-mode',
       'pdfjs-40',
-      'personal-access-token',
       'revert-file',
       'revert-project',
       'review-panel-redesign',
@@ -343,6 +342,7 @@ const _ProjectController = {
       'ieee-stylesheet',
       'write-and-cite',
       'default-visual-for-beginners',
+      'password-authentication-removal',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -635,16 +635,6 @@ const _ProjectController = {
         !userIsMemberOfGroupSubscription &&
         !userHasInstitutionLicence
 
-      const showPersonalAccessToken =
-        userId &&
-        (!Features.hasFeature('saas') ||
-          req.query?.personal_access_token === 'true')
-
-      const optionalPersonalAccessToken =
-        userId &&
-        !showPersonalAccessToken &&
-        splitTestAssignments['personal-access-token'].variant === 'enabled' // `?personal-access-token=enabled`
-
       let showAiErrorAssistant = false
       if (userId && Features.hasFeature('saas')) {
         try {
@@ -751,8 +741,6 @@ const _ProjectController = {
         showUpgradePrompt,
         fixedSizeDocument: true,
         useOpenTelemetry: Settings.useOpenTelemetryClient,
-        showPersonalAccessToken,
-        optionalPersonalAccessToken,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
         linkSharingWarning: linkSharingChanges.variant === 'active',
@@ -762,6 +750,7 @@ const _ProjectController = {
           'enabled'
             ? usedLatex
             : null,
+        isSaas: Features.hasFeature('saas'),
       })
       timer.done()
     } catch (err) {

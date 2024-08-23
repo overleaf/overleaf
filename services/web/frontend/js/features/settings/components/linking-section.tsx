@@ -44,13 +44,9 @@ function LinkingSection() {
   const renderSyncSection =
     getMeta('ol-isSaas') || getMeta('ol-gitBridgeEnabled')
 
-  const showPersonalAccessTokenComponents =
-    getMeta('ol-showPersonalAccessToken') ||
-    getMeta('ol-optionalPersonalAccessToken')
-
-  const allIntegrationLinkingWidgets = showPersonalAccessTokenComponents
-    ? integrationLinkingWidgets.concat(oauth2ServerComponents)
-    : integrationLinkingWidgets
+  const allIntegrationLinkingWidgets = integrationLinkingWidgets.concat(
+    oauth2ServerComponents
+  )
 
   // currently the only thing that is in the langFeedback section is writefull,
   // which is behind a split test. we should hide this section if the user is not in the split test

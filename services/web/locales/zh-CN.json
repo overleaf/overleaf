@@ -718,7 +718,6 @@
   "git_bridge_modal_git_authentication_tokens": "Git 身份验证令牌",
   "git_bridge_modal_read_only": "<strong>您对此项目具有只读访问权限</strong>这意味着您可以从__appName__中提取，但不能将您所做的任何更改推送回该项目。",
   "git_bridge_modal_see_once": "您只能看到此令牌一次。要删除或生成新帐户，请访问“帐户设置”。有关详细说明和故障排除，请阅读我们的<0>帮助页面</0>。",
-  "git_bridge_modal_tokens_description": "要用 git 克隆您的项目，您需要下面的链接和 git 身份验证令牌。",
   "git_bridge_modal_use_previous_token": "如果系统提示您输入密码，您可以使用以前生成的Git身份验证令牌。或者，您可以在“帐户设置”中生成一个新帐户。有关更多支持，请阅读我们的<0>帮助页面</0>。",
   "git_bridge_modal_you_can_also_git_clone": "您也可以使用下面的链接和git身份验证令牌来git克隆您的项目。",
   "git_gitHub_dropbox_mendeley_and_zotero_integrations": "Git、GitHub、Dropbox、Mendeley 和 Zotero 集成",

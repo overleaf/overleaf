@@ -75,5 +75,4 @@ export function setPersonalAccessTokensMeta() {
   }
 
   window.metaAttributesCache.set('ol-personalAccessTokens', tokens)
-  window.metaAttributesCache.set('ol-showPersonalAccessToken', true)
 }

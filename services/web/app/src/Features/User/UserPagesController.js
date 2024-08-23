@@ -71,20 +71,6 @@ async function settingsPage(req, res) {
     )
   }
 
-  const showPersonalAccessToken =
-    !Features.hasFeature('saas') || req.query?.personal_access_token === 'true'
-
-  // if not already enabled, use a split test to determine whether to offer personal access tokens
-  let optionalPersonalAccessToken = false
-  if (!showPersonalAccessToken) {
-    const { variant } = await SplitTestHandler.promises.getAssignment(
-      req,
-      res,
-      'personal-access-token'
-    )
-    optionalPersonalAccessToken = variant === 'enabled' // `?personal-access-token=enabled`
-  }
-
   // getAssignment sets res.locals, which will pass to the splitTest context
   await SplitTestHandler.promises.getAssignment(
     req,
@@ -93,16 +79,14 @@ async function settingsPage(req, res) {
   )
 
   let personalAccessTokens
-  if (showPersonalAccessToken || optionalPersonalAccessToken) {
-    try {
-      // require this here because module may not be included in some versions
-      const PersonalAccessTokenManager = require('../../../../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager')
-      personalAccessTokens = await PersonalAccessTokenManager.listTokens(
-        user._id
-      )
-    } catch (error) {
-      logger.error(OError.tag(error))
-    }
+  try {
+    const results = await Modules.promises.hooks.fire(
+      'listPersonalAccessTokens',
+      user._id
+    )
+    personalAccessTokens = results?.[0] ?? []
+  } catch (error) {
+    logger.error(OError.tag(error))
   }
 
   let currentManagedUserAdminEmail
@@ -189,8 +173,6 @@ async function settingsPage(req, res) {
     ssoErrorMessage,
     thirdPartyIds: UserPagesController._restructureThirdPartyIds(user),
     projectSyncSuccessMessage,
-    showPersonalAccessToken,
-    optionalPersonalAccessToken,
     personalAccessTokens,
     emailAddressLimit: Settings.emailAddressLimit,
     isManagedAccount: !!req.managedBy,

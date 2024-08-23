@@ -528,7 +528,6 @@
   "git_bridge_modal_description": "Du kan git clone dit projekt med linket herunder.",
   "git_bridge_modal_enter_authentication_token": "Når du bliver spurgt om en kode, indtast da din nye autentificeringsnøgle:",
   "git_bridge_modal_see_once": "Du kan kun se denne autentificeringsnøgle én gang. For at slette den eller generere en ny, gå til dine brugerindstilinger. For detalerede instruktioner og fejlsøgning, læs vores <0>hjælpeside</0>.",
-  "git_bridge_modal_tokens_description": "For at git clone dit projekt har du brug for linket herunder og en git autentificeringsnøgle.",
   "git_bridge_modal_use_previous_token": "Hvis du bliver spurgt om en kode kan du bruge en tidligere genereret autentificeringsnøgle. Du kan også generere en ny i dine kontoindstillinger. For mere hjælp, læs vores <0>hjælpeside</0>.",
   "git_integration": "Git-integration",
   "git_integration_info": "Med Git-integration kan du klone dine Overleaf projekter med Git. For komplette instruktioner til hvordan du gør det, læs vores <0>hjælpeside</0>.",
