@@ -37,6 +37,26 @@ export default function ShareModalBody() {
     )
   }, [members, invites, features, isProjectOwner])
 
+  // determine if some but not all pending editors' permissions have been resolved,
+  // for moving between warning and info notification states etc.
+  const somePendingEditorsResolved = useMemo(() => {
+    return (
+      members.some(member => member.privileges === 'readAndWrite') &&
+      members.some(member => member.pendingEditor)
+    )
+  }, [members])
+
+  const haveAnyEditorsBeenDowngraded = useMemo(() => {
+    if (!isProjectOwner || !features) {
+      return false
+    }
+
+    if (features.collaborators === -1) {
+      return false
+    }
+    return members.some(member => member.pendingEditor)
+  }, [features, isProjectOwner, members])
+
   const hasExceededCollaboratorLimit = useMemo(() => {
     if (!isProjectOwner || !features) {
       return false
@@ -58,6 +78,8 @@ export default function ShareModalBody() {
         <SendInvites
           canAddCollaborators={canAddCollaborators}
           hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
+          haveAnyEditorsBeenDowngraded={haveAnyEditorsBeenDowngraded}
+          somePendingEditorsResolved={somePendingEditorsResolved}
         />
       ) : (
         <SendInvitesNotice />
@@ -72,6 +94,7 @@ export default function ShareModalBody() {
             key={member._id}
             member={member}
             hasExceededCollaboratorLimit={hasExceededCollaboratorLimit}
+            hasBeenDowngraded={member.pendingEditor ?? false}
             canAddCollaborators={canAddCollaborators}
           />
         ) : (

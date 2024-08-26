@@ -6,13 +6,13 @@ import Icon from '@/shared/components/icon'
 export default function ViewMember({ member }) {
   return (
     <Row className="project-member">
-      <Col xs={9}>
+      <Col xs={8}>
         <div className="project-member-email-icon">
           <Icon type="user" fw />
           <div className="email-warning">{member.email}</div>
         </div>
       </Col>
-      <Col xs={3} className="text-left">
+      <Col xs={4} className="text-right">
         <MemberPrivileges privileges={member.privileges} />
       </Col>
     </Row>

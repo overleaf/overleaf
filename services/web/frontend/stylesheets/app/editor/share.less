@@ -191,4 +191,28 @@
   .invite-warning {
     margin-bottom: @line-height-computed / 2;
   }
+
+  .project-member-select {
+    padding: 0;
+    .fa-warning {
+      color: @brand-warning;
+    }
+  }
+
+  .project-member.form-group,
+  .project-member.row {
+    margin: 0 -30px;
+  }
+  .project-member .select-wrapper {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+
+    .select-trigger {
+      gap: @spacing-02;
+    }
+  }
+  .project-member.row {
+    padding-right: 1.28571429em;
+  }
 }

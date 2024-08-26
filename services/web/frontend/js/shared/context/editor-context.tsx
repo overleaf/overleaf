@@ -101,12 +101,7 @@ export const EditorProvider: FC = ({ children }) => {
 
   const isPendingEditor = useMemo(
     () =>
-      members?.some(
-        member =>
-          member._id === userId &&
-          member.pendingEditor &&
-          member.privileges === 'readAndWrite'
-      ),
+      members?.some(member => member._id === userId && member.pendingEditor),
     [members, userId]
   )
 

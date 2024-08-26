@@ -68,7 +68,7 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
 
   // split test: link-sharing-warning
   // show the new share modal if project owner
-  // is over collaborator limit (once every 24 hours)
+  // is over collaborator limit or has pending editors (once every 24 hours)
   useEffect(() => {
     const hasExceededCollaboratorLimit = () => {
       if (!isProjectOwner || !project.features) {
@@ -80,7 +80,8 @@ const ShareProjectModal = React.memo(function ShareProjectModal({
       }
       return (
         project.members.filter(member => member.privileges === 'readAndWrite')
-          .length > (project.features.collaborators ?? 1)
+          .length > (project.features.collaborators ?? 1) ||
+        project.members.some(member => member.pendingEditor)
       )
     }
 

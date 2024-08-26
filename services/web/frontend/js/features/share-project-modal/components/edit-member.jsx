@@ -54,7 +54,7 @@ export default function EditMember({ member }) {
 
   return (
     <Form horizontal id="share-project-form" onSubmit={handleSubmit}>
-      <FormGroup className="project-member">
+      <FormGroup className="project-member row">
         <Col xs={7}>
           <FormControl.Static>{member.email}</FormControl.Static>
         </Col>

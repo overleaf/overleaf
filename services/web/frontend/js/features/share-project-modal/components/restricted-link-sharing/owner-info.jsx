@@ -9,13 +9,13 @@ export default function OwnerInfo() {
 
   return (
     <Row className="project-member">
-      <Col xs={9}>
+      <Col xs={8}>
         <div className="project-member-email-icon">
           <Icon type="user" fw />
           <div className="email-warning">{owner?.email}</div>
         </div>
       </Col>
-      <Col xs={3} className="text-left">
+      <Col xs={4} className="text-right">
         {t('owner')}
       </Col>
     </Row>
