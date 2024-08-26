@@ -443,12 +443,6 @@ async function projectListPage(req, res, next) {
     'bootstrap-5-project-dashboard'
   )
 
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'ai-fake-door-offering-test'
-  )
-
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,
