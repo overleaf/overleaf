@@ -3,15 +3,22 @@ const Path = require('path')
 const _ = require('lodash')
 const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
+const Errors = require('../app/js/Errors')
 const LockManager = require('../app/js/LockManager')
 const PersistenceManager = require('../app/js/PersistenceManager')
 const ProjectFlusher = require('../app/js/ProjectFlusher')
 const ProjectManager = require('../app/js/ProjectManager')
 const RedisManager = require('../app/js/RedisManager')
 const Settings = require('@overleaf/settings')
+const request = require('requestretry').defaults({
+  maxAttempts: 2,
+  retryDelay: 10,
+})
 
 const AUTO_FIX_VERSION_MISMATCH =
   process.env.AUTO_FIX_VERSION_MISMATCH === 'true'
+const AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA =
+  process.env.AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA === 'true'
 const SCRIPT_LOG_LEVEL = process.env.SCRIPT_LOG_LEVEL || 'warn'
 const FLUSH_IN_SYNC_PROJECTS = process.env.FLUSH_IN_SYNC_PROJECTS === 'true'
 const FOLDER =
@@ -32,6 +39,7 @@ const COMPARE_AND_SET =
  * @property {Array<string>} lines
  * @property {string} pathname
  * @property {Object} ranges
+ * @property {boolean} [partiallyDeleted]
  */
 
 class TryAgainError extends Error {}
@@ -66,6 +74,101 @@ async function updateDocVersionInRedis(docId, redisDoc, mongoDoc) {
   }
 }
 
+async function fixPartiallyDeletedDocMetadata(projectId, docId, pathname) {
+  await new Promise((resolve, reject) => {
+    request(
+      {
+        method: 'PATCH',
+        url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016/project/${projectId}/doc/${docId}`,
+        timeout: 60 * 1000,
+        json: {
+          name: Path.basename(pathname),
+          deleted: true,
+          deletedAt: new Date(),
+        },
+      },
+      (err, res, body) => {
+        if (err) return reject(err)
+        const { statusCode } = res
+        if (statusCode !== 204) {
+          return reject(
+            new OError('patch request to docstore failed', {
+              statusCode,
+              body,
+            })
+          )
+        }
+        resolve()
+      }
+    )
+  })
+}
+
+async function getDocFromMongo(projectId, docId) {
+  try {
+    return await PersistenceManager.promises.getDoc(projectId, docId)
+  } catch (err) {
+    if (!(err instanceof Errors.NotFoundError)) {
+      throw err
+    }
+  }
+  const docstoreDoc = await new Promise((resolve, reject) => {
+    request(
+      {
+        url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016/project/${projectId}/doc/${docId}/peek`,
+        timeout: 60 * 1000,
+        json: true,
+      },
+      (err, res, body) => {
+        if (err) return reject(err)
+        const { statusCode } = res
+        if (statusCode !== 200) {
+          return reject(
+            new OError('fallback request to docstore failed', {
+              statusCode,
+              body,
+            })
+          )
+        }
+        resolve(body)
+      }
+    )
+  })
+  const deletedDocName = await new Promise((resolve, reject) => {
+    request(
+      {
+        url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016/project/${projectId}/doc-deleted`,
+        timeout: 60 * 1000,
+        json: true,
+      },
+      (err, res, body) => {
+        if (err) return reject(err)
+        const { statusCode } = res
+        if (statusCode !== 200) {
+          return reject(
+            new OError('list deleted docs request to docstore failed', {
+              statusCode,
+              body,
+            })
+          )
+        }
+        resolve(body.find(doc => doc._id === docId)?.name)
+      }
+    )
+  })
+  if (docstoreDoc.deleted && deletedDocName) {
+    return {
+      ...docstoreDoc,
+      pathname: deletedDocName,
+    }
+  }
+  return {
+    ...docstoreDoc,
+    pathname: `/partially-deleted-doc-with-unknown-name-and-id-${docId}.txt`,
+    partiallyDeleted: true,
+  }
+}
+
 /**
  * @param {string} projectId
  * @param {string} docId
@@ -76,10 +179,20 @@ async function processDoc(projectId, docId) {
     projectId,
     docId
   )
-  const mongoDoc = /** @type Doc */ await PersistenceManager.promises.getDoc(
-    projectId,
-    docId
-  )
+  const mongoDoc = /** @type Doc */ await getDocFromMongo(projectId, docId)
+
+  if (mongoDoc.partiallyDeleted) {
+    if (AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA) {
+      console.log(
+        `Found partially deleted doc ${docId} in project ${projectId}: fixing metadata`
+      )
+      await fixPartiallyDeletedDocMetadata(projectId, docId, redisDoc.pathname)
+    } else {
+      console.log(
+        `Found partially deleted doc ${docId} in project ${projectId}: use AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA=true to fix metadata`
+      )
+    }
+  }
 
   if (mongoDoc.version < redisDoc.version) {
     // mongo is behind, we can flush to mongo when all docs are processed.
@@ -121,6 +234,9 @@ async function processDoc(projectId, docId) {
   if (!WRITE_CONTENT) return true
 
   console.log(`pathname: ${mongoDoc.pathname}`)
+  if (mongoDoc.pathname !== redisDoc.pathname) {
+    console.log(`pathname redis: ${redisDoc.pathname}`)
+  }
   console.log(`mongo version: ${mongoDoc.version}`)
   console.log(`redis version: ${redisDoc.version}`)
 

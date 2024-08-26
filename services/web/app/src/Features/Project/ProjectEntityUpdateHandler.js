@@ -774,6 +774,10 @@ const deleteEntity = wrapWithLock(
       throw new Error('No entityType set')
     }
     entityType = entityType.toLowerCase()
+
+    // Flush the entire project to avoid leaving partially deleted docs in redis.
+    await DocumentUpdaterHandler.promises.flushProjectToMongo(projectId)
+
     const { entity, path, projectBeforeDeletion, newProject } =
       await ProjectEntityMongoUpdateHandler.promises.deleteEntity(
         projectId,

@@ -7,6 +7,8 @@ const { expect } = require('chai')
 const Settings = require('@overleaf/settings')
 const fs = require('fs')
 const Path = require('path')
+const MockDocstoreApi = require('./helpers/MockDocstoreApi')
+const sinon = require('sinon')
 
 const rclient = require('@overleaf/redis-wrapper').createClient(
   Settings.redis.documentupdater
@@ -18,6 +20,14 @@ describe('CheckRedisMongoSyncState', function () {
   })
   beforeEach(async function () {
     await rclient.flushall()
+  })
+
+  let peekDocumentInDocstore
+  beforeEach(function () {
+    peekDocumentInDocstore = sinon.spy(MockDocstoreApi, 'peekDocument')
+  })
+  afterEach(function () {
+    peekDocumentInDocstore.restore()
   })
 
   async function runScript(options) {
@@ -67,6 +77,8 @@ describe('CheckRedisMongoSyncState', function () {
       expect(result.stdout).to.include(
         'Found 0 projects with 0 out of sync docs'
       )
+
+      expect(peekDocumentInDocstore).to.not.have.been.called
     })
 
     describe('with out of sync lines', function () {
@@ -261,6 +273,99 @@ describe('CheckRedisMongoSyncState', function () {
       })
       expect(result.code).to.equal(0)
       expect(result.stdout).to.include('Processed 20 projects')
+    })
+  })
+
+  describe('with partially deleted doc', function () {
+    let projectId, docId
+    beforeEach(function (done) {
+      projectId = DocUpdaterClient.randomId()
+      docId = DocUpdaterClient.randomId()
+      MockWebApi.insertDoc(projectId, docId, {
+        lines: ['mongo', 'lines'],
+        version: 1,
+      })
+      MockDocstoreApi.insertDoc(projectId, docId, {
+        lines: ['mongo', 'lines'],
+        version: 1,
+      })
+      DocUpdaterClient.getDoc(projectId, docId, err => {
+        MockWebApi.clearDocs()
+        done(err)
+      })
+    })
+    describe('with only the file-tree entry deleted', function () {
+      it('should flag the partial deletion', async function () {
+        const result = await runScript({})
+        expect(result.code).to.equal(0)
+        expect(result.stdout).to.include('Processed 1 projects')
+        expect(result.stdout).to.include(
+          `Found partially deleted doc ${docId} in project ${projectId}: use AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA=true to fix metadata`
+        )
+        expect(result.stdout).to.include(
+          'Found 0 projects with 0 out of sync docs'
+        )
+        expect(MockDocstoreApi.getDoc(projectId, docId)).to.not.include({
+          deleted: true,
+          name: 'c.tex',
+        })
+        expect(peekDocumentInDocstore).to.have.been.called
+      })
+      it('should autofix the partial deletion', async function () {
+        const result = await runScript({
+          AUTO_FIX_PARTIALLY_DELETED_DOC_METADATA: 'true',
+        })
+        expect(result.code).to.equal(0)
+        expect(result.stdout).to.include('Processed 1 projects')
+        expect(result.stdout).to.include(
+          `Found partially deleted doc ${docId} in project ${projectId}: fixing metadata`
+        )
+        expect(result.stdout).to.include(
+          'Found 0 projects with 0 out of sync docs'
+        )
+
+        expect(MockDocstoreApi.getDoc(projectId, docId)).to.include({
+          deleted: true,
+          name: 'c.tex',
+        })
+
+        const result2 = await runScript({})
+        expect(result2.code).to.equal(0)
+        expect(result2.stdout).to.include('Processed 1 projects')
+        expect(result2.stdout).to.not.include(
+          `Found partially deleted doc ${docId} in project ${projectId}`
+        )
+        expect(result2.stdout).to.include(
+          'Found 0 projects with 0 out of sync docs'
+        )
+      })
+    })
+    describe('with docstore metadata updated', function () {
+      beforeEach(function (done) {
+        MockDocstoreApi.patchDocument(
+          projectId,
+          docId,
+          {
+            deleted: true,
+            deletedAt: new Date(),
+            name: 'c.tex',
+          },
+          done
+        )
+      })
+
+      it('should work when in sync', async function () {
+        const result = await runScript({})
+        expect(result.code).to.equal(0)
+        expect(result.stdout).to.include('Processed 1 projects')
+        expect(result.stdout).to.not.include(
+          `Found partially deleted doc ${docId} in project ${projectId}`
+        )
+        expect(result.stdout).to.include(
+          'Found 0 projects with 0 out of sync docs'
+        )
+        expect(peekDocumentInDocstore).to.have.been.called
+      })
     })
   })
 })

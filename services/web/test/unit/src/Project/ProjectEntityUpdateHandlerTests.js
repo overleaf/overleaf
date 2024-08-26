@@ -1731,6 +1731,12 @@ describe('ProjectEntityUpdateHandler', function () {
       )
     })
 
+    it('flushes the project to mongo', function () {
+      this.DocumentUpdaterHandler.promises.flushProjectToMongo.should.have.been.calledWith(
+        projectId
+      )
+    })
+
     it('deletes the entity in mongo', function () {
       this.ProjectEntityMongoUpdateHandler.promises.deleteEntity
         .calledWith(projectId, docId, 'doc')
