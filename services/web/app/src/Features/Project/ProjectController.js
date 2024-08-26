@@ -589,6 +589,7 @@ const _ProjectController = {
           projectId: project._id,
           // temporary link sharing segmentation:
           linkSharingWarning: linkSharingChanges?.variant,
+          linkSharingEnforcement: linkSharingEnforcement?.variant,
           namedEditors,
           pendingEditors,
           tokenEditors: project.tokenAccessReadAndWrite_refs?.length || 0,
@@ -743,7 +744,8 @@ const _ProjectController = {
         useOpenTelemetry: Settings.useOpenTelemetryClient,
         hasTrackChangesFeature: Features.hasFeature('track-changes'),
         projectTags,
-        linkSharingWarning: linkSharingChanges.variant === 'active',
+        linkSharingWarning: linkSharingChanges?.variant === 'active',
+        linkSharingEnforcement: linkSharingEnforcement?.variant === 'active',
         usedLatex:
           // only use the usedLatex value if the split test is enabled
           splitTestAssignments['default-visual-for-beginners']?.variant ===
