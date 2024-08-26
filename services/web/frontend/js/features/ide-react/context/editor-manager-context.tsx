@@ -548,10 +548,14 @@ export const EditorManagerProvider: FC = ({ children }) => {
 
       if (message.includes('maxDocLength')) {
         openDoc(doc, { forceReopen: true })
-        showGenericMessageModal(
-          t('document_too_long'),
-          t('document_too_long_detail')
-        )
+        const hasTrackedDeletes =
+          document.ranges != null &&
+          document.ranges.changes.some(change => 'd' in change.op)
+        const explanation = hasTrackedDeletes
+          ? `${t('document_too_long_detail')} ${t('document_too_long_tracked_deletes')}`
+          : t('document_too_long_detail')
+
+        showGenericMessageModal(t('document_too_long'), explanation)
         setDocTooLongErrorShown(true)
       } else if (/too many comments or tracked changes/.test(message)) {
         showGenericMessageModal(

@@ -1,6 +1,7 @@
 import { Prec, Transaction, Annotation, ChangeSpec } from '@codemirror/state'
 import { EditorView, ViewPlugin } from '@codemirror/view'
 import { EventEmitter } from 'events'
+import RangesTracker from '@overleaf/ranges-tracker'
 import { ShareDoc } from '../../../../../types/share-doc'
 import { debugConsole } from '@/utils/debugging'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
@@ -45,7 +46,7 @@ export const realtime = (
     return {
       update(update) {
         if (update.docChanged) {
-          editor.handleUpdateFromCM(update.transactions)
+          editor.handleUpdateFromCM(update.transactions, currentDoc.ranges)
         }
       },
       destroy() {
@@ -166,8 +167,13 @@ export class EditorFacade extends EventEmitter {
 
   // Process an update from CodeMirror, applying changes to the
   // ShareJs doc if appropriate
-  handleUpdateFromCM(transactions: readonly Transaction[]) {
+  handleUpdateFromCM(
+    transactions: readonly Transaction[],
+    ranges?: RangesTracker
+  ) {
     const shareDoc = this.shareDoc
+    const trackedDeletesLength =
+      ranges != null ? ranges.getTrackedDeletesLength() : 0
 
     if (!shareDoc) {
       throw new Error('Trying to process updates with no shareDoc')
@@ -181,10 +187,15 @@ export class EditorFacade extends EventEmitter {
           return
         }
 
-        if (
-          this.maxDocLength &&
-          transaction.changes.desc.newLength >= this.maxDocLength
-        ) {
+        // This is an approximation. Some deletes could have generated new
+        // tracked deletes since we measured trackedDeletesLength at the top of
+        // the function. Unfortunately, the ranges tracker is only updated
+        // after all transactions are processed, so it's not easy to get an
+        // exact number.
+        const fullDocLength =
+          transaction.changes.desc.newLength + trackedDeletesLength
+
+        if (this.maxDocLength && fullDocLength >= this.maxDocLength) {
           shareDoc.emit(
             'error',
             new Error('document length is greater than maxDocLength')

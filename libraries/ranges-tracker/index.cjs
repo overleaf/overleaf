@@ -768,6 +768,16 @@ class RangesTracker {
     return this._dirtyState
   }
 
+  getTrackedDeletesLength() {
+    let length = 0
+    for (const change of this.changes) {
+      if (change.op.d != null) {
+        length += change.op.d.length
+      }
+    }
+    return length
+  }
+
   _markAsDirty(object, type, action) {
     this._dirtyState[type][action][object.id] = object
   }

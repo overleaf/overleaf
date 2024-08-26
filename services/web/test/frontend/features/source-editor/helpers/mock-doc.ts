@@ -78,6 +78,7 @@ export const mockDoc = (content = defaultContent) => {
       comments: [],
       getIdSeed: () => '123',
       setIdSeed: () => {},
+      getTrackedDeletesLength: () => 0,
     },
     setTrackChangesIdSeeds: () => {},
     getTrackingChanges: () => true,
