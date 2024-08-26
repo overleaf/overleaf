@@ -143,7 +143,10 @@ module.exports = {
               'Mongo find returns a cursor not a promise, use `for await (const result of cursor)` or `.toArray()` instead.',
           },
         ],
-        '@typescript-eslint/no-floating-promises': 'error',
+        '@typescript-eslint/no-floating-promises': [
+          'error',
+          { checkThenables: true },
+        ],
       },
     },
     {
