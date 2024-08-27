@@ -6,7 +6,7 @@ import EditorNavigationToolbarRoot from '@/features/editor-navigation-toolbar/co
 import NewShareProjectModal from '@/features/share-project-modal/components/restricted-link-sharing/share-project-modal'
 import ShareProjectModal from '@/features/share-project-modal/components/share-project-modal'
 import EditorOverLimitModal from '@/features/share-project-modal/components/restricted-link-sharing/editor-over-limit-modal'
-
+import ViewOnlyAccessModal from '@/features/share-project-modal/components/restricted-link-sharing/view-only-access-modal'
 import getMeta from '@/utils/meta'
 
 function EditorNavigationToolbar() {
@@ -35,6 +35,7 @@ function EditorNavigationToolbar() {
       {showNewShareModal ? (
         <>
           <EditorOverLimitModal />
+          <ViewOnlyAccessModal />
           <NewShareProjectModal
             show={showShareModal}
             handleOpen={handleOpenShareModal}
