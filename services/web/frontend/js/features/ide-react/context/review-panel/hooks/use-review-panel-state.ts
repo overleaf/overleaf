@@ -64,7 +64,6 @@ import {
   EditOperation,
 } from '../../../../../../../types/change'
 import { RangesTrackerWithResolvedThreadIds } from '@/features/ide-react/editor/document-container'
-import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 import getMeta from '@/utils/meta'
 import { useEditorContext } from '@/shared/context/editor-context'
 
@@ -152,7 +151,6 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
   const permissions = usePermissionsContext()
   const { showGenericMessageModal } = useModalsContext()
   const addCommentEmitter = useScopeEventEmitter('comment:start_adding')
-  const hasViewerPermissions = useViewerPermissions()
 
   const layoutToLeft = useLayoutToLeft('.ide-react-editor-panel')
   const [subView, setSubView] =
@@ -420,7 +418,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
         }
 
         if (!users[change.metadata.user_id]) {
-          if (!(isRestrictedTokenMember || hasViewerPermissions)) {
+          if (!isRestrictedTokenMember) {
             refreshChangeUsers(change.metadata.user_id)
           }
         }
@@ -428,10 +426,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
 
       let localResolvedThreadIds = resolvedThreadIds
 
-      if (
-        !(isRestrictedTokenMember || hasViewerPermissions) &&
-        rangesTracker.comments.length > 0
-      ) {
+      if (!isRestrictedTokenMember && rangesTracker.comments.length > 0) {
         const threadsLoadResult = await ensureThreadsAreLoaded()
         if (threadsLoadResult?.resolvedThreadIds) {
           localResolvedThreadIds = threadsLoadResult.resolvedThreadIds
@@ -494,7 +489,6 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
       ensureThreadsAreLoaded,
       loadingThreads,
       setLoadingThreads,
-      hasViewerPermissions,
       isRestrictedTokenMember,
     ]
   )
