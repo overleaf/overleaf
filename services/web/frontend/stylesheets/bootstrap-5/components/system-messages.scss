@@ -1,0 +1,25 @@
+@use 'sass:color';
+
+.system-messages {
+  @include list-unstyled;
+
+  margin: 0;
+
+  .system-message {
+    padding: var(--spacing-03) var(--spacing-05);
+    background-color: var(--bg-info-01);
+    color: var(--content-primary-dark);
+    border-bottom: solid 1px color.adjust($blue-50, $lightness: 10%);
+
+    a {
+      color: var(--content-primary-dark);
+      text-decoration: underline;
+    }
+  }
+}
+
+.system-message .close {
+  @include reset-button;
+
+  color: var(--content-primary-dark);
+}

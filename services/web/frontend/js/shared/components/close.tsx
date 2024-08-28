@@ -1,4 +1,6 @@
 import { useTranslation } from 'react-i18next'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type CloseProps = {
   onDismiss: React.MouseEventHandler<HTMLButtonElement>
@@ -14,7 +16,16 @@ function Close({ onDismiss, variant = 'light' }: CloseProps) {
       className={`close pull-right ${variant}`}
       onClick={onDismiss}
     >
-      <span aria-hidden="true">&times;</span>
+      <BootstrapVersionSwitcher
+        bs3={<span aria-hidden="true">&times;</span>}
+        bs5={
+          <MaterialIcon
+            type="close"
+            className="align-text-bottom"
+            accessibilityLabel={t('close')}
+          />
+        }
+      />
       <span className="sr-only">{t('close')}</span>
     </button>
   )
