@@ -80,12 +80,11 @@ services:
             ## Server Pro ##
             ################
 
-            # SANDBOXED_COMPILES: 'true'
-
-            # SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
-            # SANDBOXED_COMPILES_HOST_DIR: '/var/sharelatex_data/data/compiles'
-
-            # DOCKER_RUNNER: 'false'
+            ## Sandboxed Compiles: https://github.com/overleaf/overleaf/wiki/Server-Pro:-Sandboxed-Compiles
+            SANDBOXED_COMPILES: 'true'
+            SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
+            ### Bind-mount source for /var/lib/overleaf/data/compiles inside the container.
+            SANDBOXED_COMPILES_HOST_DIR: '/home/user/sharelatex_data/data/compiles'
 
             ## Works with test LDAP server shown at bottom of docker compose
             # OVERLEAF_LDAP_URL: 'ldap://ldap:389'
