@@ -4,6 +4,8 @@ include ../_mixins/eyebrow
 
 block vars
 	- entrypoint = 'pages/user/subscription/plans-v2/plans-v2-main'
+	- var suppressRelAlternateLinks = true
+	- metadata.canonicalURL = (settings.siteUrl ? settings.siteUrl : '') + '/user/subscription/plans'
 
 block append meta
 	meta(name="ol-recommendedCurrency" content=recommendedCurrency)
