@@ -15,7 +15,7 @@ type SplitButtonItemProps = Pick<
 
 export type SplitButtonVariants = Extract<
   ButtonProps['variant'],
-  'primary' | 'secondary' | 'danger'
+  'primary' | 'secondary' | 'danger' | 'link'
 >
 
 export type SplitButtonProps = PropsWithChildren<{

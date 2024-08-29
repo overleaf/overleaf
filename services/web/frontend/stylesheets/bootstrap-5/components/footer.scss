@@ -139,6 +139,12 @@ footer.site-footer {
 
     #language-picker-toggle {
       color: var(--content-secondary-dark);
+      cursor: pointer;
+      text-decoration: none;
+
+      &::after {
+        display: none;
+      }
     }
 
     .fat-footer-base-meta a:not(.dropdown-toggle) {

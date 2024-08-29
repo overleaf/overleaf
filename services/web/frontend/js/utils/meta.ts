@@ -47,7 +47,7 @@ import { Subscription as ProjectDashboardSubscription } from '../../../types/pro
 import { ThirdPartyIds } from '../../../types/third-party-ids'
 import { Publisher } from '../../../types/subscription/dashboard/publisher'
 import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
-
+import { FatFooterMetadata } from '@/features/ui/components/types/fat-footer-metadata'
 export interface Meta {
   'ol-ExposedSettings': ExposedSettings
   'ol-allInReconfirmNotificationPeriods': UserEmailData[]
@@ -83,6 +83,7 @@ export interface Meta {
   'ol-error': { name: string } | undefined
   'ol-expired': boolean
   'ol-features': Features
+  'ol-footer': FatFooterMetadata
   'ol-fromPlansPage': boolean
   'ol-gitBridgeEnabled': boolean
   'ol-gitBridgePublicBaseUrl': string

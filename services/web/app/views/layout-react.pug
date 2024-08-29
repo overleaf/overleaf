@@ -33,6 +33,10 @@ block append meta
 			adminUrl: settings.adminUrl,
 			items: cloneAndTranslateText(nav.header_extras)
 		})
+		meta(name="ol-footer" data-type="json" content={
+			subdomainLang: settings.i18n.subdomainLang,
+			translatedLanguages: settings.translatedLanguages
+		})
 
 block body
 	if (typeof suppressNavbar === "undefined")
@@ -47,7 +51,10 @@ block body
 		if showThinFooter
 			include layout/footer-marketing
 		else
-			include layout/fat-footer
+			if bootstrapVersion === 5
+				include layout/fat-footer-react-bootstrap-5
+			else
+				include layout/fat-footer
 
 	if (typeof suppressCookieBanner === "undefined")
 		include _cookie_banner
