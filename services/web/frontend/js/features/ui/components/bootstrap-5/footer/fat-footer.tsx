@@ -62,6 +62,7 @@ function FatFooter(props: FatFooterMetadata) {
           href: '/user/subscription/plans?itm_referrer=footer-for-students#student-annual',
           label: t('for_students'),
         },
+        { href: '/for/government', label: t('for_government') },
       ],
     },
     {
