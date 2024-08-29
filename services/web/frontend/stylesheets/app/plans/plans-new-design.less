@@ -1029,6 +1029,25 @@
       gap: var(--spacing-04);
     }
   }
+
+  .only-show-for-specific-plan-type {
+    display: none;
+  }
+  &[data-ol-current-plan-type='group'] {
+    .show-for-plan-type-group {
+      display: block;
+    }
+  }
+  &[data-ol-current-plan-type='individual'] {
+    .show-for-plan-type-individual {
+      display: block;
+    }
+  }
+  &[data-ol-current-plan-type='student'] {
+    .show-for-plan-type-student {
+      display: block;
+    }
+  }
 }
 
 .plans-overleaf-common-request {
