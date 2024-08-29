@@ -1048,6 +1048,20 @@
       display: block;
     }
   }
+
+  .only-show-for-specific-plan-period {
+    display: none;
+  }
+  &[data-ol-current-plan-period='annual'] {
+    .show-for-plan-period-annual {
+      display: block;
+    }
+  }
+  &[data-ol-current-plan-period='monthly'] {
+    .show-for-plan-period-monthly {
+      display: block;
+    }
+  }
 }
 
 .plans-overleaf-common-request {
