@@ -62,7 +62,7 @@ const ChatPane = React.memo(function ChatPane() {
     throw error
   }
 
-  if (!user?.id) {
+  if (!user) {
     return null
   }
   if (!chatOpenedOnce) {

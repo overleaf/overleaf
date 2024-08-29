@@ -61,7 +61,7 @@ MessageList.propTypes = {
     })
   ).isRequired,
   resetUnreadMessages: PropTypes.func.isRequired,
-  userId: PropTypes.string.isRequired,
+  userId: PropTypes.string,
 }
 
 export default MessageList

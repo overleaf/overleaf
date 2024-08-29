@@ -52,7 +52,7 @@ Message.propTypes = {
       first_name: PropTypes.string,
     }),
   }),
-  userId: PropTypes.string.isRequired,
+  userId: PropTypes.string,
 }
 
 export default Message

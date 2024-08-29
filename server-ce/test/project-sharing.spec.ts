@@ -296,8 +296,7 @@ describe('Project Sharing', function () {
           expectRestrictedReadOnlyAccess()
         })
 
-        // eslint-disable-next-line mocha/no-skipped-tests
-        it.skip('should grant write access with write link', () => {
+        it('should grant write access with write link', () => {
           cy.visit(linkSharingReadAndWrite)
           expectReadAndWriteAccess()
           expectEditAuthoredAs('Anonymous')
