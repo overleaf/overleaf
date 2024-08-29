@@ -22,7 +22,7 @@ describe('Add secondary email address confirmation code email', function () {
       this.skip()
     }
 
-    spy = sinon.spy(logger, 'debug')
+    spy = sinon.spy(logger, 'info')
     user = new User()
     await user.register()
     await user.login()
