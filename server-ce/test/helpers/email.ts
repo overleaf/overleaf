@@ -12,16 +12,19 @@ export function openEmail<T>(
 ) {
   const runnerS = runner.toString()
   cy.origin(
-    'http://mailtrap',
+    Cypress.env('MAILTRAP_URL') || 'http://mailtrap',
     { args: { args, runnerS, subject } },
     ({ args, runnerS, subject }) => {
       cy.visit('/')
       cy.get('input[name="_user"]').type('mailtrap')
       cy.get('input[name="_pass"]').type('password-for-mailtrap')
       cy.get('button[type="submit"]').click()
-      cy.log('mailtrap login is flaky in cypress, submit again')
-      cy.get('input[name="_pass"]').type('password-for-mailtrap')
-      cy.get('button[type="submit"]').click()
+      cy.url().then(url => {
+        if (!url.includes('?_task=login')) return
+        cy.log('mailtrap login is flaky in cypress, submit again')
+        cy.get('input[name="_pass"]').type('password-for-mailtrap')
+        cy.get('button[type="submit"]').click()
+      })
       // Use force as the subject is partially hidden
       cy.contains(subject).click({ force: true })
       cy.log('wait for iframe loading')

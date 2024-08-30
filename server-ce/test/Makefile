@@ -14,7 +14,10 @@ export COMPOSE_PROJECT_NAME ?= test
 
 test-e2e-native:
 	docker compose -f docker-compose.yml -f docker-compose.native.yml up --no-log-prefix sharelatex host-admin -d
-	CYPRESS_ADMIN_CLIENT_URL='http://localhost:8081' CYPRESS_GIT_BRIDGE_PUBLIC_HOST='localhost' CYPRESS_SAML_PUBLIC_HOST='localhost:8082' CYPRESS_OVERLEAF_PUBLIC_HOST='localhost:8082' npm run cypress:open
+	CYPRESS_HOST_ADMIN_URL='http://localhost:8081' \
+	CYPRESS_SAML_URL='http://localhost:8082' \
+	CYPRESS_MAILTRAP_URL='http://localhost:8083' \
+		npm run cypress:open
 
 test-e2e:
 	docker compose up --no-log-prefix --exit-code-from=e2e e2e

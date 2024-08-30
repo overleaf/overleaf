@@ -19,3 +19,7 @@ services:
     environment:
       SAML_BASE_URL_PATH: 'http://localhost:8082/simplesaml/'
       SAML_TEST_SP_LOCATION: 'http://localhost/saml/callback'
+
+  mailtrap:
+    ports:
+      - 127.0.0.1:8083:80

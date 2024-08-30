@@ -3,15 +3,14 @@ import { createProject } from './helpers/project'
 
 describe('SAML', () => {
   if (isExcludedBySharding('PRO_CUSTOM_1')) return
-  const overleafPublicHost = Cypress.env('OVERLEAF_PUBLIC_HOST') || 'sharelatex'
-  const samlPublicHost = Cypress.env('SAML_PUBLIC_HOST') || 'saml'
+  const samlURL = Cypress.env('SAML_URL') || 'http://saml'
 
   startWith({
     pro: true,
     vars: {
       EXTERNAL_AUTH: 'saml',
-      OVERLEAF_SAML_ENTRYPOINT: `http://${samlPublicHost}/simplesaml/saml2/idp/SSOService.php`,
-      OVERLEAF_SAML_CALLBACK_URL: `http://${overleafPublicHost}/saml/callback`,
+      OVERLEAF_SAML_ENTRYPOINT: `${samlURL}/simplesaml/saml2/idp/SSOService.php`,
+      OVERLEAF_SAML_CALLBACK_URL: `${Cypress.config().baseUrl}/saml/callback`,
       OVERLEAF_SAML_ISSUER: 'sharelatex-test-saml',
       OVERLEAF_SAML_IDENTITY_SERVICE_NAME: 'SAML Test Server',
       OVERLEAF_SAML_EMAIL_FIELD: 'email',
@@ -27,7 +26,7 @@ describe('SAML', () => {
     cy.visit('/')
     cy.findByText('Log in with SAML Test Server').click()
 
-    cy.origin(`http://${samlPublicHost}`, () => {
+    cy.origin(samlURL, () => {
       cy.get('input[name="username"]').type('sally')
       cy.get('input[name="password"]').type('sally123')
       cy.get('button[type="submit"]').click()

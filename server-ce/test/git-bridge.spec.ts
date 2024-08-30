@@ -20,8 +20,7 @@ describe('git-bridge', function () {
     V1_HISTORY_URL: 'http://sharelatex:3100/api',
   }
 
-  const gitBridgePublicHost =
-    Cypress.env('GIT_BRIDGE_PUBLIC_HOST') || 'sharelatex'
+  const gitBridgePublicHost = new URL(Cypress.config().baseUrl!).host
 
   describe('enabled in Server Pro', function () {
     if (isExcludedBySharding('PRO_CUSTOM_1')) return

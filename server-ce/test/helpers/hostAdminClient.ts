@@ -1,7 +1,7 @@
-const hostAdminUrl = Cypress.env('ADMIN_CLIENT_URL') || 'http://host-admin'
+const hostAdminURL = Cypress.env('HOST_ADMIN_URL') || 'http://host-admin'
 
 export async function dockerCompose(cmd: string, ...args: string[]) {
-  return await fetchJSON(`${hostAdminUrl}/docker/compose/${cmd}`, {
+  return await fetchJSON(`${hostAdminURL}/docker/compose/${cmd}`, {
     method: 'POST',
     body: JSON.stringify({
       args,
@@ -16,7 +16,7 @@ export async function reconfigure({
   withDataDir = false,
   resetData = false,
 }): Promise<{ previousConfigServer: string }> {
-  return await fetchJSON(`${hostAdminUrl}/reconfigure`, {
+  return await fetchJSON(`${hostAdminURL}/reconfigure`, {
     method: 'POST',
     body: JSON.stringify({
       pro,
@@ -68,7 +68,7 @@ export async function runScript({
   script: string
   args?: string[]
 }) {
-  return await fetchJSON(`${hostAdminUrl}/run/script`, {
+  return await fetchJSON(`${hostAdminURL}/run/script`, {
     method: 'POST',
     body: JSON.stringify({
       cwd,
@@ -79,7 +79,7 @@ export async function runScript({
 }
 
 export async function getRedisKeys() {
-  const { stdout } = await fetchJSON(`${hostAdminUrl}/redis/keys`, {
+  const { stdout } = await fetchJSON(`${hostAdminURL}/redis/keys`, {
     method: 'GET',
   })
   return stdout.split('\n')
