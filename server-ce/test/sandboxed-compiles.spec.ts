@@ -9,8 +9,6 @@ import { beforeWithReRunOnTestRetry } from './helpers/beforeWithReRunOnTestRetry
 const LABEL_TEX_LIVE_VERSION = 'TeX Live version'
 
 describe('SandboxedCompiles', function () {
-  ensureUserExists({ email: 'user@example.com' })
-
   const enabledVars = {
     DOCKER_RUNNER: 'true',
     SANDBOXED_COMPILES: 'true',
@@ -23,7 +21,9 @@ describe('SandboxedCompiles', function () {
     startWith({
       pro: true,
       vars: enabledVars,
+      resetData: true,
     })
+    ensureUserExists({ email: 'user@example.com' })
     beforeEach(function () {
       login('user@example.com')
     })
@@ -181,10 +181,6 @@ describe('SandboxedCompiles', function () {
   }
 
   function checkUsesDefaultCompiler() {
-    beforeEach(function () {
-      login('user@example.com')
-    })
-
     it('should not offer TexLive images and use default compiler', () => {
       cy.visit('/project')
       createProject('sandboxed')
@@ -205,6 +201,10 @@ describe('SandboxedCompiles', function () {
   describe('disabled in Server Pro', () => {
     if (isExcludedBySharding('PRO_DEFAULT_2')) return
     startWith({ pro: true })
+    ensureUserExists({ email: 'user@example.com' })
+    beforeEach(function () {
+      login('user@example.com')
+    })
 
     checkUsesDefaultCompiler()
     checkSyncTeX()
@@ -213,7 +213,11 @@ describe('SandboxedCompiles', function () {
 
   describe.skip('unavailable in CE', () => {
     if (isExcludedBySharding('CE_CUSTOM_1')) return
-    startWith({ pro: false, vars: enabledVars })
+    startWith({ pro: false, vars: enabledVars, resetData: true })
+    ensureUserExists({ email: 'user@example.com' })
+    beforeEach(function () {
+      login('user@example.com')
+    })
 
     checkUsesDefaultCompiler()
     checkSyncTeX()
