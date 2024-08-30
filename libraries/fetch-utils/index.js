@@ -21,7 +21,7 @@ async function fetchJson(url, opts = {}) {
 async function fetchJsonWithResponse(url, opts = {}) {
   const { fetchOpts } = parseOpts(opts)
   fetchOpts.headers = fetchOpts.headers ?? {}
-  fetchOpts.headers.Accept = 'application/json'
+  fetchOpts.headers.Accept = fetchOpts.headers.Accept ?? 'application/json'
 
   const response = await performRequest(url, fetchOpts)
   if (!response.ok) {
