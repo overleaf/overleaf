@@ -86,9 +86,7 @@ function UserNotifications() {
           }}
         />
         {moduleNotifications.map(({ import: { default: Component }, path }) => (
-          <li key={path}>
-            <Component />
-          </li>
+          <Component key={path} />
         ))}
       </ul>
     </div>
