@@ -3,8 +3,8 @@
   "description": "e2e tests for Overleaf Community Edition",
   "private": true,
   "scripts": {
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run --browser chrome",
+    "cypress:open": "cypress open --e2e --browser chrome",
+    "cypress:run": "cypress run --e2e --browser chrome",
     "format": "prettier --list-different $PWD/'**/*.{js,mjs,ts,tsx,json}'",
     "format:fix": "prettier --write $PWD/'**/*.{js,mjs,ts,tsx,json}'"
   },

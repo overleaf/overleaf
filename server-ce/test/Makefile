@@ -6,21 +6,21 @@ all: test-e2e
 # Notable the container labels com.docker.compose.project.working_dir and com.docker.compose.project.config_files need to match when creating containers from the docker host (how you started things) and from host-admin (how tests reconfigure the instance).
 export PWD = $(shell pwd)
 
-export TEX_LIVE_DOCKER_IMAGE ?= quay.io/sharelatex/texlive-full:2023.1
-export ALL_TEX_LIVE_DOCKER_IMAGES ?= quay.io/sharelatex/texlive-full:2023.1,quay.io/sharelatex/texlive-full:2022.1
+export TEX_LIVE_DOCKER_IMAGE ?= gcr.io/overleaf-ops/texlive-full:2023.1
+export ALL_TEX_LIVE_DOCKER_IMAGES ?= gcr.io/overleaf-ops/texlive-full:2023.1,gcr.io/overleaf-ops/texlive-full:2022.1
 export IMAGE_TAG_PRO ?= quay.io/sharelatex/sharelatex-pro:latest
 export CYPRESS_SHARD ?=
 export COMPOSE_PROJECT_NAME ?= test
 
-test-e2e-native: build_mailtrap
-	docker compose -f docker-compose.yml -f docker-compose.native.yml up --build --no-log-prefix sharelatex host-admin -d
+test-e2e-native:
+	docker compose -f docker-compose.yml -f docker-compose.native.yml up --no-log-prefix sharelatex host-admin -d
 	CYPRESS_ADMIN_CLIENT_URL='http://localhost:8081' CYPRESS_GIT_BRIDGE_PUBLIC_HOST='localhost' CYPRESS_SAML_PUBLIC_HOST='localhost:8082' CYPRESS_OVERLEAF_PUBLIC_HOST='localhost:8082' npm run cypress:open
 
 test-e2e:
-	docker compose up --build --no-log-prefix --exit-code-from=e2e e2e
+	docker compose up --no-log-prefix --exit-code-from=e2e e2e
 
-test-e2e-open: build_mailtrap
-	docker compose up --build --no-log-prefix --exit-code-from=e2e-open e2e-open
+test-e2e-open:
+	docker compose up --no-log-prefix --exit-code-from=e2e-open e2e-open
 
 clean:
 	docker compose down --volumes --timeout 0
@@ -42,7 +42,7 @@ prefetch_custom_compose_pull:
 prefetch_custom: prefetch_custom_texlive
 prefetch_custom_texlive:
 	echo -n "$$ALL_TEX_LIVE_DOCKER_IMAGES" | xargs -d, -I% \
-	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/}; docker pull $$tag; docker tag $$tag $$re_tag'
+	sh -exc 'tag=%; re_tag=quay.io/sharelatex/$${tag#*/*/}; docker pull $$tag; docker tag $$tag $$re_tag'
 
 prefetch_custom: prefetch_old
 prefetch_old:
