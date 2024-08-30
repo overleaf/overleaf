@@ -8,6 +8,8 @@ import NavItemFromData from '@/features/ui/components/bootstrap-5/navbar/nav-ite
 import LoggedInItems from '@/features/ui/components/bootstrap-5/navbar/logged-in-items'
 import HeaderLogoOrTitle from '@/features/ui/components/bootstrap-5/navbar/header-logo-or-title'
 import MaterialIcon from '@/shared/components/material-icon'
+import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
+import { UserProvider } from '@/shared/context/user-context'
 
 function LoggedOutItems() {
   return <span>Logged out</span>
@@ -31,6 +33,13 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
   } = props
   const { t } = useTranslation()
   const { isReady } = useWaitForI18n()
+
+  // The Contact Us modal is rendered at this level rather than inside the nav
+  // bar because otherwise the help wiki search results dropdown doesn't show up
+  const { modal: contactUsModal, showModal: showContactUsModal } =
+    useContactUsModal({
+      autofillProjectUrl: false,
+    })
 
   if (!isReady) {
     return null
@@ -95,7 +104,11 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                       (item.only_content_pages && !suppressNavContentLinks)
 
                     return showNavItem ? (
-                      <NavItemFromData item={item} key={index} />
+                      <NavItemFromData
+                        item={item}
+                        key={index}
+                        showContactUsModal={showContactUsModal}
+                      />
                     ) : null
                   })}
                   {sessionUser ? (
@@ -112,6 +125,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
           )}
         </Container>
       </Navbar>
+      <UserProvider>{contactUsModal}</UserProvider>
     </>
   )
 }

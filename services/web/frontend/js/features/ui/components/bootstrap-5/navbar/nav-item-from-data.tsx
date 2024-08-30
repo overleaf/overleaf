@@ -8,9 +8,20 @@ import NavItem from '@/features/ui/components/bootstrap-5/navbar/nav-item'
 import { sendMB } from '@/infrastructure/event-tracking'
 import NavLinkItem from '@/features/ui/components/bootstrap-5/navbar/nav-link-item'
 
-export default function NavItemFromData({ item }: { item: NavbarItemData }) {
+export default function NavItemFromData({
+  item,
+  showContactUsModal,
+}: {
+  item: NavbarItemData
+  showContactUsModal: (event?: Event) => void
+}) {
   if (isDropdownItem(item)) {
-    return <NavDropdownFromData item={item} />
+    return (
+      <NavDropdownFromData
+        item={item}
+        showContactUsModal={showContactUsModal}
+      />
+    )
   } else if (isLinkItem(item)) {
     return (
       <NavLinkItem

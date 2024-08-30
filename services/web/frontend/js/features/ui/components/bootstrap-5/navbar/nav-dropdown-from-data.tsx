@@ -9,8 +9,10 @@ import ContactUsItem from '@/features/ui/components/bootstrap-5/navbar/contact-u
 
 export default function NavDropdownFromData({
   item,
+  showContactUsModal,
 }: {
   item: NavbarDropdownItemData
+  showContactUsModal: (event?: Event) => void
 }) {
   return (
     <NavDropdownMenu title={item.translatedText} className={item.class}>
@@ -18,7 +20,7 @@ export default function NavDropdownFromData({
         if ('divider' in child) {
           return <NavDropdownDivider key={index} />
         } else if ('isContactUs' in child) {
-          return <ContactUsItem key={index} />
+          return <ContactUsItem key={index} showModal={showContactUsModal} />
         } else if (isDropdownLinkItem(child)) {
           return (
             <NavDropdownLinkItem

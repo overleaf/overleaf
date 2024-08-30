@@ -18,6 +18,7 @@ function OLFormSelect(props: OLFormSelectProps) {
     bsSize: bs5Props.size,
     name: bs5Props.name,
     value: bs5Props.value,
+    defaultValue: bs5Props.defaultValue,
     disabled: bs5Props.disabled,
     onChange: bs5Props.onChange as BS3FormControlProps['onChange'],
     required: bs5Props.required,
