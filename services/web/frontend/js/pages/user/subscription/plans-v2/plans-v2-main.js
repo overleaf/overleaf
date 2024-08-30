@@ -56,7 +56,6 @@ function setUpSubscriptionTracking(linkEl) {
       'billing-period': period,
     }
 
-    eventTracking.sendMB('plans-page-start-trial') // deprecated by plans-page-click
     eventTracking.sendMB(eventTrackingKey, eventTrackingSegmentation)
   })
 }

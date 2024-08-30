@@ -10,10 +10,13 @@ function setupEventTracking(el) {
   const trigger = el.getAttribute('event-tracking-trigger')
   const sendOnce = el.getAttribute('event-tracking-send-once')
   const element = el.getAttribute('event-tracking-element')
-  const segmentation = JSON.parse(el.getAttribute('event-segmentation') || '{}')
-  segmentation.page = window.location.pathname
 
   function submit() {
+    const segmentation = JSON.parse(
+      el.getAttribute('event-segmentation') || '{}'
+    )
+    segmentation.page = window.location.pathname
+
     if (element === 'checkbox') {
       segmentation.checkbox = el.checked ? 'checked' : 'unchecked'
     } else if (element === 'select') {
