@@ -17,6 +17,7 @@ export type DropdownProps = {
   onToggle?: (show: boolean) => void
   show?: boolean
   autoClose?: boolean | 'inside' | 'outside'
+  drop?: 'up' | 'up-centered' | 'start' | 'end' | 'down' | 'down-centered'
 }
 
 export type DropdownItemProps = PropsWithChildren<{

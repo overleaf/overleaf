@@ -1,4 +1,5 @@
 export interface SubdomainDetails {
+  hide?: boolean
   lngCode: string
   url: string
 }

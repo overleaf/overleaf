@@ -18,7 +18,7 @@ function LanguagePicker() {
   const currentUrlWithQueryParams = window.location.pathname
 
   return (
-    <Dropdown>
+    <Dropdown drop="up">
       <DropdownToggle
         id="language-picker-toggle"
         aria-label={t('select_a_language')}
@@ -37,7 +37,12 @@ function LanguagePicker() {
       <DropdownMenu className="sm" aria-labelledby="language-picker-toggle">
         {subdomainLang &&
           Object.entries(subdomainLang).map(([subdomain, subdomainDetails]) => {
-            if (!subdomainDetails || !subdomainDetails.lngCode) return null
+            if (
+              !subdomainDetails ||
+              !subdomainDetails.lngCode ||
+              subdomainDetails.hide
+            )
+              return null
             const isActive = subdomainDetails.lngCode === currentLangCode
             return (
               <li role="none" key={subdomain}>
