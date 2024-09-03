@@ -1,0 +1,38 @@
+//- to be kept in sync with frontend/js/shared/components/notification.tsx
+
+mixin notificationIcon(type)
+	if type === 'info'
+		span.material-symbols(aria-hidden="true") info
+	else if type === 'success'
+		span.material-symbols(aria-hidden="true") check_circle
+
+
+mixin notification(options)
+	- var {ariaLive, id, type, title, content, disclaimer, className} = options
+	- var classNames = `notification notification-type-${type} ${className ? className : ''} ${isActionBelowContent ? 'notification-cta-below-content' : ''}`
+
+	div(
+		aria-live=ariaLive,
+		role="alert",
+		id=id,
+		class=classNames
+	)
+		.notification-icon
+			+notificationIcon(type)
+		.notification-content-and-cta
+			.notification-content
+				if title
+					p
+						b #{title}
+				| #{content}
+			//- TODO: handle action
+			//- if action
+			//- 	.notification-cta
+			if disclaimer
+				.notification-disclaimer #{disclaimer}
+		//- TODO: handle dismissible notifications
+		//- TODO: handle onDismiss
+		//- if isDismissible
+		//- 	.notification-close-btn
+		//- 		button(aria-label=translate('close'))
+		//- 			span.material-symbols(aria-hidden="true") close

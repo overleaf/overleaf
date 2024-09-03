@@ -1,3 +1,5 @@
+include ../../../_mixins/notification
+
 div.modal.fade.group-customize-subscription-modal.website-redesign-modal(tabindex="-1" role="dialog" data-ol-group-plan-modal)
 	.modal-dialog(role="document")
 		.modal-content
@@ -92,13 +94,13 @@ div.modal.fade.group-customize-subscription-modal.website-redesign-modal(tabinde
 									span #{translate('educational_discount_disclaimer')}
 
 					.row
-						.col-md-12.text-center
+						.col-md-12
 							.educational-discount-section
 								div(hidden=(groupPlanModalDefaults.usage !== 'educational') data-ol-group-plan-educational-discount)
 									.applied(hidden=true data-ol-group-plan-educational-discount-applied)
-										| #{translate('educational_discount_applied')}
+										+notification({ariaLive: 'polite', content: translate('educational_discount_applied'), type: 'success', ariaLive: 'polite'})
 									.ineligible(hidden=true data-ol-group-plan-educational-discount-ineligible)
-										| #{translate('educational_discount_available_for_groups_of_ten_or_more')}
+										+notification({ariaLive: 'polite', content: translate('educational_discount_available_for_groups_of_ten_or_more'), type: 'info', ariaLive: 'polite'})
 			.modal-footer
 				.text-center
 					button.btn.btn-primary.btn-lg(

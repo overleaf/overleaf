@@ -1,3 +1,5 @@
+// to be kept in sync with app/views/_mixins/notification.pug
+
 import classNames from 'classnames'
 import React, { ReactElement, useState } from 'react'
 import { useTranslation } from 'react-i18next'
