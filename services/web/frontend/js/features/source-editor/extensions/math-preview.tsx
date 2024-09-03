@@ -145,7 +145,6 @@ const buildTooltipContent = (
 
   const element = document.createElement('div')
   element.style.opacity = '0'
-  element.style.transition = 'opacity .01s ease-in'
   element.textContent = math.content
 
   let definitions = ''
