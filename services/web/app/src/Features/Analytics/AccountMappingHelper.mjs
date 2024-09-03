@@ -28,8 +28,30 @@ export function extractAccountMappingsFromSubscription(
   }
   return accountMappings
 }
+
+export function generateV1Mapping(v1Id, salesforceId, createdAt) {
+  return {
+    source: 'salesforce',
+    sourceEntity: 'account',
+    sourceEntityId: salesforceId,
+    target: 'v1',
+    targetEntity: 'university',
+    targetEntityId: v1Id,
+    createdAt,
+  }
 }
 
+function generateSubscriptionToV1Mapping(subscriptionId, v1Id) {
+  return {
+    source: 'v1',
+    sourceEntity: 'university',
+    sourceEntityId: v1Id,
+    target: 'v2',
+    targetEntity: 'subscription',
+    targetEntityId: subscriptionId,
+    createdAt: new Date().toISOString(),
+  }
+}
 
 function generateSubscriptionToSalesforceMapping(subscriptionId, salesforceId) {
   return {
@@ -45,4 +67,5 @@ function generateSubscriptionToSalesforceMapping(subscriptionId, salesforceId) {
 
 export default {
   extractAccountMappingsFromSubscription,
+  generateV1Mapping,
 }
