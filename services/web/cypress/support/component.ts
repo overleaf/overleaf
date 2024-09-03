@@ -4,6 +4,7 @@ import '../../frontend/js/i18n'
 import './shared/commands'
 import './shared/exceptions'
 import './ct/commands'
+import './ct/codemirror'
 
 beforeEach(function () {
   resetMeta()

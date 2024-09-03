@@ -42,6 +42,9 @@ function CodeMirrorEditor() {
   if (viewRef.current === null) {
     const timer = dispatchTimer()
 
+    // @ts-ignore (disable EditContext-based editing until stable)
+    EditorView.EDIT_CONTEXT = false
+
     const view = new EditorView({
       state,
       dispatchTransactions: trs => {
