@@ -1,0 +1,53 @@
+#ide-root {
+  height: 100vh; /* for backwards compatibility */
+  height: 100dvh; /* needed for mobile devices */
+
+  .global-alerts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chat {
+    position: relative;
+    height: 100%;
+  }
+
+  .review-panel-wrapper {
+    &.rp-state-overview {
+      position: sticky;
+      top: 0;
+      height: 100%;
+    }
+  }
+}
+
+.ide-react-editor-sidebar {
+  @include file-tree-bg;
+
+  height: 100%;
+  color: var(--content-secondary-dark);
+}
+
+.ide-react-body {
+  flex-grow: 1;
+  background-color: var(--bg-light-secondary);
+  overflow-y: hidden;
+  z-index: 0;
+}
+
+.ide-react-main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .toolbar.toolbar-header {
+    position: static;
+    flex-grow: 0;
+    color: var(--neutral-20);
+  }
+}

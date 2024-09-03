@@ -1,6 +1,6 @@
 import { memo, type Dispatch, type SetStateAction } from 'react'
-import Icon from '@/shared/components/icon'
 import { useTranslation } from 'react-i18next'
+import MaterialIcon from '@/shared/components/material-icon'
 
 export const OutlineItemToggleButton = memo<{
   expanded: boolean
@@ -14,8 +14,8 @@ export const OutlineItemToggleButton = memo<{
       onClick={() => setExpanded(value => !value)}
       aria-label={expanded ? t('collapse') : t('expand')}
     >
-      <Icon
-        type={expanded ? 'angle-down' : 'angle-right'}
+      <MaterialIcon
+        type={expanded ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}
         className="outline-caret-icon"
       />
     </button>

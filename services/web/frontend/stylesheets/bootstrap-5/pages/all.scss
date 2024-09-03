@@ -1,4 +1,8 @@
 @import 'account-settings';
 @import 'project-list';
 @import 'sidebar-v2-dash-pane';
-@import 'editor';
+@import 'editor/ide';
+@import 'editor/loading-screen';
+@import 'editor/outline';
+@import 'editor/file-tree';
+@import 'editor/toolbar';

@@ -1,5 +1,5 @@
-import Icon from '@/shared/components/icon'
-import Tooltip from '@/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import MaterialIcon from '@/shared/components/material-icon'
 import React, { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -19,24 +19,24 @@ export const OutlineToggleButton = memo<{
       onClick={toggleExpanded}
       aria-label={expanded ? t('hide_outline') : t('show_outline')}
     >
-      <Icon
-        type={isOpen ? 'angle-down' : 'angle-right'}
+      <MaterialIcon
+        type={isOpen ? 'keyboard_arrow_down' : 'keyboard_arrow_right'}
         className="outline-caret-icon"
       />
       <h4 className="outline-header-name">{t('file_outline')}</h4>
       {isPartial && (
-        <Tooltip
+        <OLTooltip
           id="partial-outline"
           description={t('partial_outline_warning')}
           overlayProps={{ placement: 'top' }}
         >
-          <span role="status">
-            <Icon
-              type="exclamation-triangle"
-              aria-label={t('partial_outline_warning')}
+          <span role="status" style={{ display: 'flex' }}>
+            <MaterialIcon
+              type="warning"
+              accessibilityLabel={t('partial_outline_warning')}
             />
           </span>
-        </Tooltip>
+        </OLTooltip>
       )}
     </button>
   )

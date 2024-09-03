@@ -1,0 +1,9 @@
+.ide-react-file-tree-panel {
+  display: flex;
+  flex-direction: column;
+
+  // Prevent the file tree expanding beyond the boundary of the panel
+  .file-tree {
+    width: 100%;
+  }
+}

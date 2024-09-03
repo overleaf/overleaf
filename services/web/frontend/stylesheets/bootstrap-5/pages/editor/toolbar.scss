@@ -1,0 +1,8 @@
+$toolbar-height: 40px;
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  height: $toolbar-height;
+  border-bottom: 1px solid var(--border-divider-dark);
+}
