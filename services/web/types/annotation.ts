@@ -7,4 +7,5 @@ export type Annotation = {
   id: string
   entryIndex: number
   firstOnLine: boolean
+  command?: string
 }

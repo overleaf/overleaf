@@ -2,17 +2,19 @@ import { EditorView, ViewUpdate } from '@codemirror/view'
 import { Diagnostic, linter, lintGutter } from '@codemirror/lint'
 import {
   Compartment,
+  EditorState,
   Extension,
+  Line,
   RangeSet,
   RangeValue,
   StateEffect,
   StateField,
-  Text,
 } from '@codemirror/state'
 import { Annotation } from '../../../../../types/annotation'
 import { debugConsole } from '@/utils/debugging'
 import { sendMB } from '@/infrastructure/event-tracking'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { syntaxTree } from '@codemirror/language'
 
 interface CompileLogDiagnostic extends Diagnostic {
   compile?: true
@@ -142,14 +144,17 @@ export const compileDiagnosticsState = StateField.define<
   },
 })
 
-export const setAnnotations = (doc: Text, annotations: Annotation[]) => {
+export const setAnnotations = (
+  state: EditorState,
+  annotations: Annotation[]
+) => {
   const diagnostics: CompileLogDiagnostic[] = []
 
   for (const annotation of annotations) {
     // ignore "whole document" (row: -1) annotations
     if (annotation.row !== -1) {
       try {
-        diagnostics.push(convertAnnotationToDiagnostic(doc, annotation))
+        diagnostics.push(...convertAnnotationToDiagnostic(state, annotation))
       } catch (error) {
         // ignore invalid annotations
         debugConsole.debug('invalid annotation position', error)
@@ -171,19 +176,60 @@ export const showCompileLogDiagnostics = (show: boolean) => {
   }
 }
 
-const convertAnnotationToDiagnostic = (
-  doc: Text,
+const commandRanges = (state: EditorState, line: Line, command: string) => {
+  const ranges: { from: number; to: number }[] = []
+
+  syntaxTree(state).iterate({
+    enter(nodeRef) {
+      if (nodeRef.type.is('CtrlSeq')) {
+        const { from, to } = nodeRef
+        if (command === state.sliceDoc(from, to)) {
+          ranges.push({ from, to })
+        }
+      }
+    },
+    from: line.from,
+    to: line.to,
+  })
+
+  return ranges.slice(0, 1) // NOTE: only highlighting the first match on a line, to avoid duplicate messages
+}
+
+const chooseHighlightRanges = (
+  state: EditorState,
+  line: Line,
   annotation: Annotation
-): CompileLogDiagnostic => {
+) => {
+  const ranges: { from: number; to: number }[] = []
+
+  if (annotation.command) {
+    ranges.push(...commandRanges(state, line, annotation.command))
+  }
+
+  // default to highlighting the whole line
+  if (ranges.length === 0) {
+    ranges.push(line)
+  }
+
+  return ranges
+}
+
+const convertAnnotationToDiagnostic = (
+  state: EditorState,
+  annotation: Annotation
+): CompileLogDiagnostic[] => {
   if (annotation.row < 0) {
     throw new Error(`Invalid annotation row ${annotation.row}`)
   }
 
-  const line = doc.line(annotation.row + 1)
+  // NOTE: highlight whole line by default, as synctex doesn't output column number
+  const line = state.doc.line(annotation.row + 1)
 
-  return {
-    from: line.from,
-    to: line.to, // NOTE: highlight whole line as synctex doesn't output column number
+  const highlightRanges = chooseHighlightRanges(state, line, annotation)
+
+  return highlightRanges.map(location => ({
+    from: location.from,
+    to: location.to,
     severity: annotation.type,
     message: annotation.text,
     ruleId: annotation.ruleId,
@@ -192,7 +238,7 @@ const convertAnnotationToDiagnostic = (
     entryIndex: annotation.entryIndex,
     source: annotation.source,
     firstOnLine: annotation.firstOnLine,
-  }
+  }))
 }
 
 export const renderMessage = (diagnostic: RenderedDiagnostic) => {

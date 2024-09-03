@@ -183,6 +183,7 @@ export function buildLogEntryAnnotations(entries, fileTreeData, rootDocId) {
           text: entry.message,
           source: 'compile', // NOTE: this is used in Ace for filtering the annotations
           ruleId: entry.ruleId,
+          command: entry.command,
         }
 
         // set firstOnLine for the first non-typesetting annotation on a line

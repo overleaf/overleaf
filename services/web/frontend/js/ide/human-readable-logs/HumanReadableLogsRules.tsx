@@ -16,6 +16,7 @@ interface Rule {
     details?: [string]
   ) => string | [string, JSX.Element]
   package?: string
+  highlightCommand?: (contentDetails: string[]) => string | undefined
 }
 
 const rules: Rule[] = [
@@ -77,6 +78,9 @@ const rules: Rule[] = [
         ]
       }
       return currentTitle
+    },
+    highlightCommand(contentDetails) {
+      return contentDetails[0]
     },
   },
   {

@@ -51,6 +51,10 @@ export default {
           }
         }
 
+        if (entry.contentDetails && ruleDetails.highlightCommand) {
+          entry.command = ruleDetails.highlightCommand(entry.contentDetails)
+        }
+
         // suppress any entries that are known to cascade from previous error types
         if (ruleDetails.cascadesFrom) {
           for (const type of ruleDetails.cascadesFrom) {
