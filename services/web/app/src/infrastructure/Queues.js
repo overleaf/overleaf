@@ -17,6 +17,9 @@ const QUEUES_JOB_OPTIONS = {
   'analytics-editing-sessions': {
     removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
   },
+  'analytics-account-mapping': {
+    removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
+  },
   'analytics-user-properties': {
     removeOnFail: MAX_FAILED_JOBS_RETAINED_ANALYTICS,
   },
@@ -38,6 +41,7 @@ const QUEUES_JOB_OPTIONS = {
     removeOnFail: MAX_FAILED_JOBS_RETAINED,
     attempts: 3,
   },
+
   'group-sso-reminder': {
     removeOnFail: MAX_FAILED_JOBS_RETAINED,
     attempts: 3,
@@ -54,6 +58,7 @@ const QUEUE_OPTIONS = {
 }
 
 const ANALYTICS_QUEUES = [
+  'analytics-account-mapping',
   'analytics-events',
   'analytics-editing-sessions',
   'analytics-user-properties',

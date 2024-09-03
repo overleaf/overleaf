@@ -15,6 +15,9 @@ const analyticsEditingSessionsQueue = Queues.getQueue(
 const analyticsUserPropertiesQueue = Queues.getQueue(
   'analytics-user-properties'
 )
+const analyticsAccountMappingQueue = Queues.getQueue(
+  'analytics-account-mapping'
+)
 
 const ONE_MINUTE_MS = 60 * 1000
 
@@ -141,6 +144,55 @@ function setUserPropertyForSessionInBackground(session, property, value) {
       'failed to set user property for session'
     )
   })
+}
+
+/**
+ * Register mapping between two accounts.
+ *
+ * @param {object} payload - The event payload to send to Analytics
+ * @param {string} payload.source - The type of account linked from
+ * @param {string} payload.sourceId - The ID of the account linked from
+ * @param {string} payload.target - The type of account linked to
+ * @param {string} payload.targetId - The ID of the account linked to
+ * @param {Date} payload.createdAt - The date the mapping was created
+ * @property
+ */
+function registerAccountMapping({
+  source,
+  sourceEntity,
+  sourceEntityId,
+  target,
+  targetEntity,
+  targetEntityId,
+  createdAt,
+}) {
+  Metrics.analyticsQueue.inc({
+    status: 'adding',
+    event_type: 'account-mapping',
+  })
+
+  analyticsAccountMappingQueue
+    .add('account-mapping', {
+      source,
+      sourceEntity,
+      sourceEntityId,
+      target,
+      targetEntity,
+      targetEntityId,
+      createdAt: createdAt ?? new Date(),
+    })
+    .then(() => {
+      Metrics.analyticsQueue.inc({
+        status: 'added',
+        event_type: 'account-mapping',
+      })
+    })
+    .catch(() => {
+      Metrics.analyticsQueue.inc({
+        status: 'error',
+        event_type: 'account-mapping',
+      })
+    })
 }
 
 function updateEditingSession(userId, projectId, countryCode, segmentation) {
@@ -349,5 +401,6 @@ module.exports = {
   setUserPropertyForAnalyticsId,
   updateEditingSession,
   getIdsFromSession,
+  registerAccountMapping,
   analyticsIdMiddleware: expressify(analyticsIdMiddleware),
 }

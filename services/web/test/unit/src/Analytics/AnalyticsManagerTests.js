@@ -34,6 +34,10 @@ describe('AnalyticsManager', function () {
       add: sinon.stub().resolves(),
       process: sinon.stub().resolves(),
     }
+    this.analyticsAccountMappingQueue = {
+      add: sinon.stub().resolves(),
+      process: sinon.stub().resolves(),
+    }
     const self = this
     this.Queues = {
       getQueue: queueName => {
@@ -46,6 +50,8 @@ describe('AnalyticsManager', function () {
             return self.onboardingEmailsQueue
           case 'analytics-user-properties':
             return self.analyticsUserPropertiesQueue
+          case 'analytics-account-mapping':
+            return self.analyticsAccountMappingQueue
           default:
             throw new Error('Unexpected queue name')
         }
@@ -278,6 +284,24 @@ describe('AnalyticsManager', function () {
         isLoggedIn: true,
       })
     })
+
+    it('account mapping', async function () {
+      const message = {
+        source: 'salesforce',
+        sourceEntity: 'account',
+        sourceEntityId: 'abc123abc123abc123',
+        target: 'v1',
+        targetEntity: 'university',
+        targetEntityId: 1,
+        createdAt: '2021-01-01T00:00:00Z',
+      }
+      await this.AnalyticsManager.registerAccountMapping(message)
+      sinon.assert.calledWithMatch(
+        this.analyticsAccountMappingQueue.add,
+        'account-mapping',
+        message
+      )
+    })
   })
 
   describe('AnalyticsIdMiddleware', function () {
@@ -299,6 +323,8 @@ describe('AnalyticsManager', function () {
                   return self.onboardingEmailsQueue
                 case 'analytics-user-properties':
                   return self.analyticsUserPropertiesQueue
+                case 'analytics-account-mapping':
+                  return self.analyticsAccountMappingQueue
                 default:
                   throw new Error('Unexpected queue name')
               }
