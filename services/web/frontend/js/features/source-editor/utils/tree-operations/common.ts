@@ -61,3 +61,20 @@ export const getOptionalArgumentText = (
     return state.doc.sliceString(shortArgNode.from, shortArgNode.to)
   }
 }
+
+export const nodeHasError = (node: SyntaxNode): boolean => {
+  let hasError = false
+
+  node.cursor().iterate(({ type }) => {
+    if (hasError) return false
+
+    if (type.isError) {
+      hasError = true
+      return false
+    }
+
+    return true
+  })
+
+  return hasError
+}

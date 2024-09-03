@@ -25,6 +25,7 @@ import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import ReactDOM from 'react-dom'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import SplitTestBadge from '@/shared/components/split-test-badge'
+import { nodeHasError } from '../utils/tree-operations/common'
 
 const REPOSITION_EVENT = 'editor:repositionMathTooltips'
 
@@ -133,6 +134,8 @@ const getMathContainer = (state: EditorState, pos: number) => {
 
   const [node] = descendantsOfNodeWithType(ancestorNode, 'Math', 'Math')
   if (!node) return null
+
+  if (nodeHasError(ancestorNode)) return null
 
   return parseMathContainer(state, node, ancestorNode)
 }
