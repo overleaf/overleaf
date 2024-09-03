@@ -82,6 +82,10 @@ RUN chmod +x /overleaf/bin/flush-history-queues
 ADD server-ce/bin/force-history-resyncs /overleaf/bin/force-history-resyncs
 RUN chmod +x /overleaf/bin/force-history-resyncs
 
+# Copy Latexmkrc
+# -----------------------
+COPY server-ce/config/latexmkrc /usr/local/share/latexmk/LatexMk
+
 # File that controls open|closed status of the site
 # -------------------------------------------------
 ENV SITE_MAINTENANCE_FILE "/etc/overleaf/site_status"

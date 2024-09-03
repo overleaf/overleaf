@@ -1,0 +1,3 @@
+# equivalent to -gt option. Used to prevent latexmk from skipping recompilation
+# of output.log and output.pdf
+$go_mode = 3;
