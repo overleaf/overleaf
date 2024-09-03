@@ -78,12 +78,9 @@ function TagsList({ onTagClick, onEditClick }: TagsListProps) {
                       style={{ verticalAlign: 'sub' }}
                     />
                   </span>
-                  <span>
-                    {tag.name}{' '}
-                    <span className="subdued">
-                      {' '}
-                      ({tag.project_ids?.length})
-                    </span>
+                  <span className="tag-name-and-size">
+                    <span className="tag-name">{tag.name}</span>
+                    <span className="subdued">({tag.project_ids?.length})</span>
                   </span>
                 </span>
               </MenuItemButton>

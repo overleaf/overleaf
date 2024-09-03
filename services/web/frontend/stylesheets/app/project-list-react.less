@@ -714,6 +714,7 @@
 
     & + .projects-dropdown-menu {
       min-width: 226px;
+      max-width: 92vw;
     }
   }
 
@@ -814,6 +815,7 @@
 .menu-item-button {
   position: relative;
   width: 100%;
+  overflow: hidden;
   border: none;
   box-shadow: none;
   background: inherit;
@@ -822,6 +824,18 @@
 
   .menu-item-button-text {
     padding-left: 14px;
+    overflow: hidden;
+
+    .tag-name-and-size {
+      overflow: hidden;
+      display: flex;
+      gap: 1ex;
+    }
+
+    .tag-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   .menu-item-button-icon {
