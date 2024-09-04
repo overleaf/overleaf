@@ -343,7 +343,7 @@
     "react-linkify": "^1.0.0-alpha",
     "react-overlays": "^0.9.3",
     "react-refresh": "^0.14.0",
-    "react-resizable-panels": "^1.0.3",
+    "react-resizable-panels": "^2.1.1",
     "resolve-url-loader": "^5.0.0",
     "samlp": "^7.0.2",
     "sandboxed-module": "overleaf/node-sandboxed-module#cafa2d60f17ce75cc023e6f296eb8de79d92d35d",
