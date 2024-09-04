@@ -4,6 +4,7 @@ import type { ButtonProps } from '@/features/ui/components/types/button-props'
 import type { ButtonProps as BS3ButtonPropsBase } from 'react-bootstrap'
 import Button from '../bootstrap-5/button'
 import classnames from 'classnames'
+import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 
 export type BS3ButtonSize = 'xsmall' | 'sm' | 'medium' | 'lg'
 
@@ -45,10 +46,13 @@ export const mapBsButtonSizes = (
 export default function OLButton(props: OLButtonProps) {
   const { bs3Props, ...rest } = props
 
+  // Get all `aria-*` and `data-*` attributes
+  const extraProps = getAriaAndDataProps(rest)
+
   return (
     <BootstrapVersionSwitcher
       bs3={
-        <BS3Button {...bs3ButtonProps(rest)} {...bs3Props}>
+        <BS3Button {...bs3ButtonProps(rest)} {...bs3Props} {...extraProps}>
           {bs3Props?.loading || rest.children}
         </BS3Button>
       }
