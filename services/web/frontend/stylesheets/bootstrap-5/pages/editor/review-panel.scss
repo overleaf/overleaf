@@ -1,0 +1,16 @@
+:root {
+  --review-icon: url('../../../../../public/img/ol-icons/review-icon-dark-theme.svg');
+}
+
+.review-icon {
+  display: inline-block;
+  background-image: var(--review-icon);
+  background-repeat: no-repeat;
+  background-position: top;
+  background-size: 30px;
+  width: 30px;
+
+  &::before {
+    content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
+  }
+}

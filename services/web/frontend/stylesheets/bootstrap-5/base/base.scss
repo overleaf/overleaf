@@ -2,3 +2,40 @@
   visibility: hidden;
   height: 0 !important; // Prevent layout shift
 }
+
+@keyframes bounce {
+  0%,
+  10%,
+  26%,
+  40% {
+    transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    transform: translate3d(0, 0, 0);
+  }
+
+  20%,
+  21% {
+    transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -10px, 0);
+  }
+
+  35% {
+    transition-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+    transform: translate3d(0, -5px, 0);
+  }
+
+  45% {
+    transform: translate3d(0, -2px, 0);
+  }
+
+  50% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.bounce {
+  animation-duration: 2s;
+  animation-fill-mode: both;
+  animation-iteration-count: infinite;
+  animation-name: bounce;
+  transform-origin: center bottom;
+}

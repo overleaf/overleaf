@@ -1,8 +1,227 @@
-$toolbar-height: 40px;
+:root {
+  --toolbar-border-color: var(--neutral-80);
+  --toolbar-header-bg-color: var(--neutral-90);
+  --toolbar-header-btn-border-color: var(--neutral-80);
+  --toolbar-btn-color: var(--white);
+  --toolbar-btn-hover-bg-color: var(--neutral-80);
+  --project-name-color: var(--neutral-40);
+  --project-rename-link-color: var(--neutral-40);
+  --project-rename-link-color-hover: var(--neutral-20);
+  --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o-white.svg)
+    center / contain no-repeat;
+}
 
 .toolbar {
+  --toolbar-height: 40px;
+
   display: flex;
-  align-items: center;
-  height: $toolbar-height;
-  border-bottom: 1px solid var(--border-divider-dark);
+  align-items: stretch;
+  height: var(--toolbar-height);
+  min-height: var(--toolbar-height);
+  border-bottom: 1px solid var(--toolbar-border-color);
+
+  button {
+    position: relative;
+
+    .badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      pointer-events: none; // Labels were capturing button/anchor clicks.
+
+      .badge-content {
+        padding: 0;
+      }
+    }
+  }
+
+  .toolbar-right,
+  .toolbar-left {
+    button {
+      background: transparent;
+      box-shadow: none;
+    }
+  }
+
+  .toolbar-right .back-to-editor-btn {
+    margin-right: var(--spacing-09);
+  }
+
+  a.btn-full-height,
+  button.btn-full-height {
+    border: none;
+    border-radius: 0;
+    border-right: 1px solid var(--toolbar-header-btn-border-color) !important;
+    color: var(--toolbar-btn-color);
+    padding: var(--spacing-02) var(--spacing-05) var(--spacing-03);
+    font-size: var(--font-size-05);
+    max-height: 39px;
+
+    &:hover {
+      text-shadow: none;
+      background-color: var(--toolbar-btn-hover-bg-color);
+      color: var(--toolbar-btn-color);
+    }
+
+    &.active,
+    &:active {
+      color: var(--white);
+      background-color: $bg-accent-01;
+      box-shadow: none;
+    }
+
+    .badge {
+      top: var(--spacing-01);
+      right: var(--spacing-02);
+    }
+
+    &.header-cobranding-logo-container {
+      height: calc(var(--toolbar-height) - 1px);
+      padding: var(--spacing-04) var(--spacing-05);
+    }
+
+    .spinner-border {
+      vertical-align: middle;
+      font-size: var(--font-size-02);
+    }
+
+    &.dropdown-toggle {
+      line-height: 1;
+
+      &::after {
+        vertical-align: middle;
+        font-size: var(--font-size-02);
+      }
+    }
+  }
+
+  .btn-full-height-no-border {
+    border-right: 0;
+    border-left: 0;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: stretch;
+    float: left;
+    text-align: center;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: stretch;
+    flex-grow: 1;
+    justify-content: flex-end;
+
+    .btn-full-height {
+      border-right: 0;
+      border-left: 1px solid var(--toolbar-header-btn-border-color);
+    }
+  }
+
+  .toolbar-center {
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    // At small screen sizes, center relative to the left menu and right buttons
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  &.toolbar-header {
+    background-color: var(--toolbar-header-bg-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+  }
+
+  .toolbar-item {
+    display: flex;
+  }
+}
+
+.header-cobranding-logo {
+  display: block;
+  width: auto;
+  max-height: 100%;
+}
+
+.toolbar-label {
+  display: none;
+  margin: 0 var(--spacing-02);
+  font-size: var(--font-size-02);
+  font-weight: 600;
+  vertical-align: middle;
+  text-align: left;
+
+  @include media-breakpoint-up(lg) {
+    display: inline-block;
+  }
+
+  &.toolbar-label-multiline {
+    line-height: 1.1;
+  }
+}
+
+.toolbar-header-upgrade-prompt {
+  margin-left: var(--spacing-05);
+
+  @include media-breakpoint-down(lg) {
+    display: none !important;
+  }
+}
+
+.editor-menu-icon {
+  &.material-symbols {
+    width: 1em;
+    text-indent: -9999px;
+    background: var(--editor-header-logo-background);
+  }
+}
+
+.project-name {
+  .name {
+    display: inline-block;
+
+    @include text-truncate;
+
+    padding: var(--spacing-03);
+    vertical-align: top;
+    color: var(--project-name-color);
+    font-weight: 700;
+  }
+
+  input {
+    height: 30px;
+    margin-top: var(--spacing-02);
+    padding: var(--spacing-03);
+    max-width: 500px;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  a.rename {
+    visibility: hidden;
+    display: inline-block;
+    color: var(--project-rename-link-color);
+    padding: var(--spacing-03);
+    border-radius: var(--border-radius-base);
+    cursor: pointer;
+
+    &:hover {
+      text-shadow: 0 1px 0 rgb(0 0 0 / 25%);
+      color: var(--project-rename-link-color-hover);
+      text-decoration: none;
+    }
+  }
+
+  &:hover {
+    a.rename {
+      visibility: visible;
+    }
+  }
 }

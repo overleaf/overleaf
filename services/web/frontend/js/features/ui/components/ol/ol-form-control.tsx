@@ -35,6 +35,7 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       onChange: rest.onChange as BS3FormControlProps['onChange'],
       onKeyDown: rest.onKeyDown as BS3FormControlProps['onKeyDown'],
       onFocus: rest.onFocus as BS3FormControlProps['onFocus'],
+      onBlur: rest.onBlur as BS3FormControlProps['onBlur'],
       onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
       inputRef: (inputElement: HTMLInputElement) => {
         if (typeof ref === 'function') {

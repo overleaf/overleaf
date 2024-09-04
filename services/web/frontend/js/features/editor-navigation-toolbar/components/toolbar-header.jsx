@@ -16,6 +16,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import BackToEditorButton from './back-to-editor-button'
 import getMeta from '@/utils/meta'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 const [publishModalModules] = importOverleafModules('publishModal')
 const PublishButton = publishModalModules?.import.default
@@ -55,7 +56,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 
   return (
     <header
-      className="toolbar toolbar-header toolbar-with-labels"
+      className="toolbar toolbar-header"
       role="navigation"
       aria-label={t('project_layout_sharing_submission')}
     >
@@ -72,7 +73,16 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
             }
           )}
       </div>
-      {getMeta('ol-showUpgradePrompt') && <UpgradePrompt />}
+      {getMeta('ol-showUpgradePrompt') && (
+        <BootstrapVersionSwitcher
+          bs3={<UpgradePrompt />}
+          bs5={
+            <div className="d-flex align-items-center">
+              <UpgradePrompt />
+            </div>
+          }
+        />
+      )}
       <ProjectNameEditableLabel
         className="toolbar-center"
         projectName={projectName}
@@ -84,7 +94,14 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
         <OnlineUsersWidget onlineUsers={onlineUsers} goToUser={goToUser} />
 
         {historyIsOpen ? (
-          <BackToEditorButton onClick={toggleHistoryOpen} />
+          <BootstrapVersionSwitcher
+            bs3={<BackToEditorButton onClick={toggleHistoryOpen} />}
+            bs5={
+              <div className="d-flex align-items-center">
+                <BackToEditorButton onClick={toggleHistoryOpen} />
+              </div>
+            }
+          />
         ) : (
           <>
             {trackChangesVisible && (

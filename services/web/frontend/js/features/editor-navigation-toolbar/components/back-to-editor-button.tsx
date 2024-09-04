@@ -1,20 +1,20 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function BackToEditorButton({ onClick }: { onClick: () => void }) {
   const { t } = useTranslation()
 
   return (
-    <Button
-      bsSize="sm"
-      bsStyle={null}
+    <OLButton
+      variant="secondary"
+      size="small"
       onClick={onClick}
       className="back-to-editor-btn"
     >
       <MaterialIcon type="arrow_back" className="toolbar-btn-secondary-icon" />
-      <p className="toolbar-label">{t('back_to_editor')}</p>
-    </Button>
+      <span className="toolbar-label">{t('back_to_editor')}</span>
+    </OLButton>
   )
 }
 

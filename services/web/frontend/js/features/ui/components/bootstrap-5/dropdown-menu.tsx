@@ -99,7 +99,7 @@ const ForwardReferredDropdownItem = fixedForwardRef(DropdownItem, {
 
 export { ForwardReferredDropdownItem as DropdownItem }
 
-export function DropdownToggle({ ...props }: DropdownToggleProps) {
+export function DropdownToggle(props: DropdownToggleProps) {
   return <BS5DropdownToggle {...props} />
 }
 

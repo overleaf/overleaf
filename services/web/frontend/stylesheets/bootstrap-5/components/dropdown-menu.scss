@@ -17,6 +17,10 @@
   &.sm {
     min-width: 160px;
   }
+
+  .subdued {
+    color: var(--content-disabled);
+  }
 }
 
 .dropdown-item {

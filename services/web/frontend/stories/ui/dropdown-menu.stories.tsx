@@ -60,8 +60,6 @@ export const Active = (args: Args) => {
 }
 
 export const MultipleSelection = (args: Args) => {
-  console.log('DropdownItem.EmptyLeadingIcon', DropdownItem.EmptyLeadingIcon)
-
   return (
     <DropdownMenu show>
       <DropdownHeader>Header</DropdownHeader>
