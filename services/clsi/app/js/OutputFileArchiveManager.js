@@ -36,7 +36,17 @@ module.exports = {
     const archive = archiver('zip')
 
     archive.on('error', err => {
-      logger.warn({ err }, 'error emitted when creating output files archive')
+      logger.warn(
+        { err, projectId, userId, build },
+        'error emitted when creating output files archive'
+      )
+    })
+
+    archive.on('warning', err => {
+      logger.warn(
+        { err, projectId, userId, build },
+        'warning emitted when creating output files archive'
+      )
     })
 
     const missingFiles = []
