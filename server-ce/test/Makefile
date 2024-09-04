@@ -8,7 +8,7 @@ export PWD = $(shell pwd)
 
 export TEX_LIVE_DOCKER_IMAGE ?= gcr.io/overleaf-ops/texlive-full:2023.1
 export ALL_TEX_LIVE_DOCKER_IMAGES ?= gcr.io/overleaf-ops/texlive-full:2023.1,gcr.io/overleaf-ops/texlive-full:2022.1
-export IMAGE_TAG_PRO ?= quay.io/sharelatex/sharelatex-pro:latest
+export IMAGE_TAG_PRO ?= us-east1-docker.pkg.dev/overleaf-ops/ol-docker/pro:latest
 export CYPRESS_SHARD ?=
 export COMPOSE_PROJECT_NAME ?= test
 
