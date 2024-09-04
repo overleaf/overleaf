@@ -3,7 +3,6 @@ const OutputCacheManager = require('./OutputCacheManager')
 const OutputFileFinder = require('./OutputFileFinder')
 const Settings = require('@overleaf/settings')
 const { open } = require('node:fs/promises')
-const path = require('path')
 const { NotFoundError } = require('./Errors')
 const logger = require('@overleaf/logger')
 
@@ -25,7 +24,14 @@ module.exports = {
   async archiveFilesForBuild(projectId, userId, build) {
     logger.debug({ projectId, userId, build }, 'Will create zip file')
 
-    const outputFiles = await this._getAllOutputFiles(projectId, userId, build)
+    const contentDir = getContentDir(projectId, userId)
+
+    const outputFiles = await this._getAllOutputFiles(
+      contentDir,
+      projectId,
+      userId,
+      build
+    )
 
     const archive = archiver('zip')
 
@@ -35,23 +41,22 @@ module.exports = {
 
     const missingFiles = []
 
-    for (const file of outputFiles) {
+    for (const { path } of outputFiles) {
       let fileHandle
-
       try {
-        fileHandle = await open(file, 'r')
+        fileHandle = await open(
+          `${contentDir}${OutputCacheManager.path(build, path)}`
+        )
       } catch (error) {
         logger.warn(
-          { file, error },
+          { path, error, projectId, userId, build },
           'error opening file to add to output files archive'
         )
-        missingFiles.push(file)
+        missingFiles.push(path)
         continue
       }
       const fileStream = fileHandle.createReadStream()
-      archive.append(fileStream, {
-        name: path.basename(file),
-      })
+      archive.append(fileStream, { name: path })
     }
 
     if (missingFiles.length > 0) {
@@ -65,23 +70,17 @@ module.exports = {
     return archive
   },
 
-  async _getAllOutputFiles(projectId, userId, build) {
-    const contentDir = getContentDir(projectId, userId)
-
+  async _getAllOutputFiles(contentDir, projectId, userId, build) {
     try {
       const { outputFiles } = await OutputFileFinder.promises.findOutputFiles(
         [],
         `${contentDir}${OutputCacheManager.path(build, '.')}`
       )
 
-      return outputFiles
-        .filter(
-          // Ignore the pdf and also ignore the files ignored by the frontend.
-          ({ path }) => path !== 'output.pdf' && !ignoreFiles.includes(path)
-        )
-        .map(
-          ({ path }) => `${contentDir}${OutputCacheManager.path(build, path)}`
-        )
+      return outputFiles.filter(
+        // Ignore the pdf and also ignore the files ignored by the frontend.
+        ({ path }) => path !== 'output.pdf' && !ignoreFiles.includes(path)
+      )
     } catch (error) {
       if (
         error.code === 'ENOENT' ||
