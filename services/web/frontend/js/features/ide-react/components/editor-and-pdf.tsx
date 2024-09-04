@@ -45,9 +45,9 @@ export const EditorAndPdf: FC = () => {
         hidden: view === 'history',
       })}
     >
-      {/* ide */}
+      {/* main */}
       <Panel
-        id="panel-ide"
+        id="panel-main"
         order={1}
         defaultSize={50}
         minSize={5}
