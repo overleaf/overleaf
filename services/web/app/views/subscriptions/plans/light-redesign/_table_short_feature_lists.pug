@@ -25,7 +25,8 @@ mixin table_short_feature_list_group_professional()
 			+table_head_group_total_per_year('professional')
 
 mixin table_short_feature_list_group_organization(additionalEventSegmentation)
-	- var segmentation = JSON.stringify(Object.assign({}, {button: 'group_organization-link', location: 'table-header-list', period: 'annual'}, additionalEventSegmentation))
+	- additionalEventSegmentation = additionalEventSegmentation || {}
+	- var segmentation = { ...additionalEventSegmentation, button: 'group_organization-link', location: 'table-header-list', period: 'annual', currency: recommendedCurrency}
 	ul
 		li #{translate("best_choices_companies_universities_non_profits")}
 		li #{translate("for_groups_or_site_wide")}

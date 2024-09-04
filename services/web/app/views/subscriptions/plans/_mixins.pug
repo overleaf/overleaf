@@ -282,7 +282,9 @@ mixin table_head_group_total_per_year(groupPlan)
 		) !{translate("total_per_year_for_x_users", {licenseSize})}
 
 mixin table_head_group_organization(highlighted, eventTrackingKey, additionalEventSegmentation)
-	- var segmentation = JSON.stringify(Object.assign({}, {button: 'group_organization-link', location: 'table-header-list', period: 'annual'}, additionalEventSegmentation))
+	- additionalEventSegmentation = additionalEventSegmentation || {}
+	- var segmentation = { ...additionalEventSegmentation, button: 'group_organization-link', location: 'table-header-list', period: 'annual', currency: recommendedCurrency }
+
 	.plans-v2-table-th-content
 		p.plans-v2-table-th-content-title #{translate("organization")}
 		.plans-v2-table-comments-icon
@@ -537,7 +539,8 @@ mixin btn_buy_student_university(highlighted, eventTrackingKey, additionalEventS
 
 mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 	- var buttonSegmentation = plan + '-link'
-	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header'}, additionalEventSegmentation))
+	- additionalEventSegmentation = additionalEventSegmentation || {}
+	- var segmentation = { ...additionalEventSegmentation, button: buttonSegmentation, location: 'table-header', currency: recommendedCurrency }
 	small.plans-v2-table-th-content-additional-link
 		| #{translate("or")} 
 		a(
@@ -551,7 +554,8 @@ mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 
 mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, period)
 	- var buttonSegmentation = plan + '-link'
-	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header', period}, additionalEventSegmentation))
+	- additionalEventSegmentation = additionalEventSegmentation || {}
+	- var segmentation = { ...additionalEventSegmentation, button: buttonSegmentation, location: 'table-header', currency: recommendedCurrency }
 	- var itmCampaign = itm_campaign ? { itm_campaign } : {itm_campaign: 'plans'}
 	- var itmReferrer = itm_referrer ? { itm_referrer } : {}
 	- var qs = new URLSearchParams({planCode: plan, currency: recommendedCurrency, itm_content: 'card', ...itmCampaign, ...itmReferrer})

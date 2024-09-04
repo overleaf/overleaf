@@ -95,7 +95,8 @@ mixin btn_buy_student_student(highlighted, eventTrackingKey, additionalEventSegm
 
 mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 	- var buttonSegmentation = plan + '-link'
-	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header'}, additionalEventSegmentation))
+	- additionalEventSegmentation = additionalEventSegmentation || {}
+	- var segmentation = { ...additionalEventSegmentation, button: buttonSegmentation, location: 'table-header' }
 
 	a.btn.btn-bg-ghost(
 		href="/for/contact-sales"
@@ -108,7 +109,8 @@ mixin additional_link_group(eventTrackingKey, additionalEventSegmentation, plan)
 
 mixin additional_link_buy(eventTrackingKey, additionalEventSegmentation, plan, period)
 	- var buttonSegmentation = plan + '-link'
-	- var segmentation = JSON.stringify(Object.assign({}, {button: buttonSegmentation, location: 'table-header', period}, additionalEventSegmentation))
+	- additionalEventSegmentation = additionalEventSegmentation || {}
+	- var segmentation = { ...additionalEventSegmentation, button: buttonSegmentation, location: 'table-header', period }
 	- var itmCampaign = itm_campaign ? { itm_campaign } : {itm_campaign: 'plans'}
 	- var itmReferrer = itm_referrer ? { itm_referrer } : {}
 	- var qs = new URLSearchParams({planCode: plan, currency: recommendedCurrency, itm_content: 'card', ...itmCampaign, ...itmReferrer})

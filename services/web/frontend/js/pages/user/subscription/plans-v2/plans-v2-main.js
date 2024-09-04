@@ -54,6 +54,7 @@ function setUpSubscriptionTracking(linkEl) {
       button: plan,
       location,
       'billing-period': period,
+      currency: currentCurrencyCode,
     }
 
     eventTracking.sendMB(eventTrackingKey, eventTrackingSegmentation)
