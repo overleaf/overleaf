@@ -214,6 +214,7 @@ describe('admin panel', function () {
         cy.get('[role="tab"]').each((el, index) => {
           cy.wrap(el).findByText(tabs[index]).click()
         })
+        cy.get('[role="tab"]').should('have.length', tabs.length)
       })
 
       describe('user info tab', () => {
@@ -255,6 +256,21 @@ describe('admin panel', function () {
         cy.findByText(user2).click()
         cy.get('[role="tab"]').contains('Projects').click()
         cy.get(`a[href="/admin/project/${testProjectId}"]`)
+      })
+    })
+
+    describe('project page', () => {
+      beforeEach(() => {
+        login(admin)
+        cy.visit(`/admin/project/${testProjectId}`)
+      })
+
+      it('displays expected tabs', () => {
+        const tabs = ['Project Info', 'Deleted Docs', 'Audit Log']
+        cy.get('[role="tab"]').each((el, index) => {
+          cy.wrap(el).findByText(tabs[index]).click()
+        })
+        cy.get('[role="tab"]').should('have.length', tabs.length)
       })
     })
 
