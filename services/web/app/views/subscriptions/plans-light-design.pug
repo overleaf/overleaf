@@ -40,8 +40,6 @@ block content
 					
 				+currency_and_payment_methods()
 
-				include ./plans/_university_info
-
 				//- TODO: changing .plans-page-quote-row-hidden causes flickering on page load
 				.plans-page-quote-row(data-ol-show-for-plan-type="individual")
 					+collinsQuote1()
@@ -51,6 +49,8 @@ block content
 
 				.plans-page-quote-row.plans-page-quote-row-hidden(data-ol-show-for-plan-type="student")
 					+collinsQuote2()
+				
+				include ./plans/_university_info_light_design
 
 				include ./plans/_faq_new
 

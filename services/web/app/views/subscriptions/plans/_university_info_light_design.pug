@@ -1,0 +1,17 @@
+.row.row-spaced-large(
+	data-ol-plans-university-info-container
+	hidden
+)
+	.col-xs-12
+		.card.plans-v2-university-info-light
+			div
+				h3.plans-v2-university-info-header-light #{translate('would_you_like_to_see_a_university_subscription')}
+				p.plans-v2-university-info-text-light #{translate('student_and_faculty_support_make_difference')}
+			a.btn.btn-secondary.plans-v2-btn-header-light(
+				target="_blank"
+				href="/for/support-an-overleaf-university-subscription"
+				event-tracking="plans-page-click"
+				event-tracking-mb="true"
+				event-tracking-trigger="click"
+				event-segmentation='{"button": "university-support"}'
+			) #{translate('show_your_support')}
