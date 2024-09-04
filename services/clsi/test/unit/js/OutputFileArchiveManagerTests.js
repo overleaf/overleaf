@@ -31,7 +31,7 @@ describe('OutputFileArchiveManager', function () {
 
     this.archive = {
       append: sinon.stub(),
-      finalize: sinon.stub(),
+      finalize: sinon.stub().resolves(),
       on: sinon.stub(),
     }
 

@@ -65,7 +65,12 @@ module.exports = {
       })
     }
 
-    await archive.finalize()
+    archive.finalize().catch(error => {
+      logger.error(
+        { error, projectId, userId, build },
+        'error finalizing output files archive'
+      )
+    })
 
     return archive
   },
