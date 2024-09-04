@@ -22,6 +22,11 @@
     "prettier": "3.3.3",
     "typescript": "^5.5.4"
   },
+  "overrides": {
+    "google-gax": {
+      "protobufjs": "^7.2.5"
+    }
+  },
   "scripts": {
     "format": "prettier --list-different $PWD/'**/*.js'",
     "format:fix": "prettier --write $PWD/'**/*.js'",

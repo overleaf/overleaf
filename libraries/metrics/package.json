@@ -6,11 +6,6 @@
     "type": "git",
     "url": "https://github.com/overleaf/metrics-module.git"
   },
-  "overrides": {
-    "google-gax": {
-      "protobufjs": "^7.2.5"
-    }
-  },
   "main": "index.js",
   "dependencies": {
     "@google-cloud/opentelemetry-cloud-trace-exporter": "^2.1.0",
