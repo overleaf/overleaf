@@ -223,6 +223,10 @@
     margin-bottom: @switcher-container-margin-bottom;
     gap: var(--spacing-04);
 
+    @media (max-width: @screen-xs-max) {
+      margin-bottom: var(--spacing-09);
+    }
+
     .plans-new-period-switcher {
       font-size: var(--font-size-05);
       font-weight: 600;
