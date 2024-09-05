@@ -71,6 +71,7 @@ export const MainLayout: FC = () => {
             onDoubleClick={toggleSidebar}
             resizable={sidebarIsOpen}
             onDragging={setSidebarResizing}
+            hitAreaMargins={{ coarse: 0, fine: 0 }}
           >
             <HorizontalToggler
               id="panel-sidebar"
@@ -93,6 +94,7 @@ export const MainLayout: FC = () => {
                 onDoubleClick={toggleChat}
                 resizable={chatIsOpen}
                 onDragging={setChatResizing}
+                hitAreaMargins={{ coarse: 0, fine: 0 }}
               />
 
               {/* chat */}

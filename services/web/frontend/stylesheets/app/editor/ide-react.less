@@ -59,6 +59,8 @@
   .custom-toggler {
     padding: 0;
     border-width: 0;
+    // Override react-resizable-panels which sets a global * { cursor: ew-resize }
+    cursor: pointer !important;
   }
 
   &.horizontal-resize-handle-enabled {
@@ -91,6 +93,8 @@
     margin: 0;
     // Ensure that SyncTex controls appear in front of PDF viewer controls and logs pane
     z-index: 12;
+    // Override react-resizable-panels which sets a global * { cursor: ew-resize }
+    cursor: pointer !important;
   }
 }
 
