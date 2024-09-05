@@ -22,6 +22,7 @@ const Modules = require('../../infrastructure/Modules')
 const async = require('async')
 const { formatCurrencyLocalized } = require('../../util/currency')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
+const { URLSearchParams } = require('url')
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -69,11 +70,21 @@ async function plansPage(req, res) {
       res,
       'website-redesign-plans'
     )
+  if (websiteRedesignPlansAssignment.variant !== 'default') {
+    const queryParamString = new URLSearchParams(req.query)?.toString()
+    const queryParamForRedirect = queryParamString ? '?' + queryParamString : ''
 
-  if (websiteRedesignPlansAssignment.variant === 'new-design') {
-    return res.redirect(302, '/user/subscription/plans-2')
-  } else if (websiteRedesignPlansAssignment.variant === 'light-design') {
-    return res.redirect(302, '/user/subscription/plans-3')
+    if (websiteRedesignPlansAssignment.variant === 'new-design') {
+      return res.redirect(
+        302,
+        '/user/subscription/plans-2' + queryParamForRedirect
+      )
+    } else if (websiteRedesignPlansAssignment.variant === 'light-design') {
+      return res.redirect(
+        302,
+        '/user/subscription/plans-3' + queryParamForRedirect
+      )
+    }
   }
 
   const language = req.i18n.language || 'en'
