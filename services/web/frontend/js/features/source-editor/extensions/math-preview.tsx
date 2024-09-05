@@ -45,19 +45,19 @@ export const setMathPreview = (enabled: boolean): TransactionSpec => ({
   effects: mathPreviewConf.reconfigure(enabled ? mathPreviewStateField : []),
 })
 
-const mathPreviewStateField = StateField.define<readonly Tooltip[]>({
-  create: buildTooltips,
+const mathPreviewStateField = StateField.define<Tooltip | null>({
+  create: buildTooltip,
 
   update(tooltips, tr) {
     if (tr.docChanged || tr.selection) {
-      tooltips = buildTooltips(tr.state)
+      tooltips = buildTooltip(tr.state)
     }
 
     return tooltips
   },
 
   provide: field => [
-    showTooltip.computeN([field], state => state.field(field)),
+    showTooltip.compute([field], state => state.field(field)),
 
     ViewPlugin.define(view => {
       const listener = () => repositionTooltips(view)
@@ -95,36 +95,35 @@ const renderMath = async (
   element.append(math)
 }
 
-function buildTooltips(state: EditorState): readonly Tooltip[] {
-  const tooltips: Tooltip[] = []
+function buildTooltip(state: EditorState): Tooltip | null {
+  const range = state.selection.main
 
-  for (const range of state.selection.ranges) {
-    if (range.empty) {
-      const mathContainer = getMathContainer(state, range.from)
-      const content = buildTooltipContent(state, mathContainer)
-      if (content && mathContainer) {
-        const tooltip: Tooltip = {
-          pos: mathContainer.pos,
-          above: true,
-          strictSide: true,
-          arrow: false,
-          create() {
-            const dom = document.createElement('div')
-            dom.append(content)
-            const badge = renderSplitTestBadge()
-            dom.append(badge)
-            dom.className = 'ol-cm-math-tooltip'
-
-            return { dom, overlap: true, offset: { x: 0, y: 8 } }
-          },
-        }
-
-        tooltips.push(tooltip)
-      }
-    }
+  if (!range.empty) {
+    return null
   }
 
-  return tooltips
+  const mathContainer = getMathContainer(state, range.from)
+  const content = buildTooltipContent(state, mathContainer)
+
+  if (!content || !mathContainer) {
+    return null
+  }
+
+  return {
+    pos: mathContainer.pos,
+    above: true,
+    strictSide: true,
+    arrow: false,
+    create() {
+      const dom = document.createElement('div')
+      dom.append(content)
+      const badge = renderSplitTestBadge()
+      dom.append(badge)
+      dom.className = 'ol-cm-math-tooltip'
+
+      return { dom, overlap: true, offset: { x: 0, y: 8 } }
+    },
+  }
 }
 
 const getMathContainer = (state: EditorState, pos: number) => {
