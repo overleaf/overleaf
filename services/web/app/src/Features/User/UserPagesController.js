@@ -71,13 +71,6 @@ async function settingsPage(req, res) {
     )
   }
 
-  // getAssignment sets res.locals, which will pass to the splitTest context
-  await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'writefull-oauth-promotion'
-  )
-
   let personalAccessTokens
   try {
     const results = await Modules.promises.hooks.fire(

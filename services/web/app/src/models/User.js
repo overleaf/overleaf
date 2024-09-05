@@ -180,7 +180,7 @@ const UserSchema = new Schema(
       zotero: Schema.Types.Mixed,
     },
     writefull: {
-      enabled: { type: Boolean, default: false },
+      enabled: { type: Boolean, default: null },
     },
     alphaProgram: { type: Boolean, default: false }, // experimental features
     betaProgram: { type: Boolean, default: false },
