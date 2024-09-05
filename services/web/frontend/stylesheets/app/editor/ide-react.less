@@ -93,8 +93,11 @@
     margin: 0;
     // Ensure that SyncTex controls appear in front of PDF viewer controls and logs pane
     z-index: 12;
-    // Override react-resizable-panels which sets a global * { cursor: ew-resize }
-    cursor: pointer !important;
+
+    & .synctex-control .synctex-control-icon {
+      // Override react-resizable-panels which sets a global * { cursor: ew-resize }
+      cursor: pointer !important;
+    }
   }
 }
 
