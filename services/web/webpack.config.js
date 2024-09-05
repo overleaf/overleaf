@@ -126,7 +126,7 @@ module.exports = {
         // Only compile application files and specific dependencies
         // (other npm and vendored dependencies must be in ES5 already)
         exclude: [
-          /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist401)\/)/,
+          /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist401|react-resizable-panels)\/)/,
           vendorDir,
         ],
         use: [
