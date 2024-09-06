@@ -150,6 +150,10 @@ async function plansPageLightDesign(req, res) {
     'website-redesign-plans'
   )
 
+  const metadata = {
+    robotsNoindexNofollow: true,
+  }
+
   if (!splitTestActive && req.query.preview !== 'true') {
     return res.redirect(302, '/user/subscription/plans')
   }
@@ -182,6 +186,7 @@ async function plansPageLightDesign(req, res) {
 
   res.render('subscriptions/plans-light-design', {
     title: 'plans_and_pricing',
+    metadata,
     currentView,
     plans,
     itm_content: req.query?.itm_content,
