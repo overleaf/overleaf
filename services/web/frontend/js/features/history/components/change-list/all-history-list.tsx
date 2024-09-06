@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import HistoryVersion from './history-version'
 import LoadingSpinner from '../../../../shared/components/loading-spinner'
 import { OwnerPaywallPrompt } from './owner-paywall-prompt'
@@ -12,9 +12,8 @@ import { Overlay, Popover } from 'react-bootstrap'
 import Close from '@/shared/components/close'
 import { Trans, useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
-import useAsync from '@/shared/hooks/use-async'
-import { completeHistoryTutorial } from '../../services/api'
-import { debugConsole } from '@/utils/debugging'
+import useTutorial from '@/shared/hooks/promotions/use-tutorial'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 function AllHistoryList() {
   const { id: currentUserId } = useUserContext()
@@ -92,23 +91,29 @@ function AllHistoryList() {
     }
   }, [updatesLoadingState])
 
-  const { inactiveTutorials, deactivateTutorial } = useEditorContext()
-
-  const [showPopover, setShowPopover] = useState(() => {
-    // only show tutorial popover if they haven't dismissed ("completed") it yet
-    return !inactiveTutorials.includes('react-history-buttons-tutorial')
+  const { inactiveTutorials } = useEditorContext()
+  const {
+    showPopup: showHistoryTutorial,
+    tryShowingPopup: tryShowingHistoryTutorial,
+    hideUntilReload: hideHistoryTutorialUntilReload,
+    completeTutorial: completeHistoryTutorial,
+  } = useTutorial('react-history-buttons-tutorial', {
+    name: 'react-history-buttons-tutorial',
   })
 
-  const completeTutorial = useCallback(() => {
-    setShowPopover(false)
-    deactivateTutorial('react-history-buttons-tutorial')
-  }, [deactivateTutorial])
+  const {
+    showPopup: showRestorePromo,
+    tryShowingPopup: tryShowingRestorePromo,
+    hideUntilReload: hideRestorePromoUntilReload,
+    completeTutorial: completeRestorePromo,
+  } = useTutorial('history-restore-promo', {
+    name: 'history-restore-promo',
+  })
+  const inFileRestoreSplitTest = useFeatureFlag('revert-file')
+  const inProjectRestoreSplitTest = useFeatureFlag('revert-project')
 
-  const { runAsync } = useAsync()
-
-  const { t } = useTranslation()
-
-  // wait for the layout to settle before showing popover, to avoid a flash/ instant move
+  const hasVisibleUpdates = visibleUpdates.length > 0
+  const isMoreThanOneVersion = visibleUpdates.length > 1
   const [layoutSettled, setLayoutSettled] = useState(false)
 
   // When there is a paywall and only two version's to compare,
@@ -117,30 +122,60 @@ function AllHistoryList() {
   const isPaywallAndNonComparable =
     visibleUpdates.length === 2 && updatesInfo.freeHistoryLimitHit
 
-  const isMoreThanOneVersion = visibleUpdates.length > 1
+  useEffect(() => {
+    const hasCompletedHistoryTutorial = inactiveTutorials.includes(
+      'react-history-buttons-tutorial'
+    )
+    const hasCompletedRestorePromotion = inactiveTutorials.includes(
+      'history-restore-promo'
+    )
+
+    // wait for the layout to settle before showing popover, to avoid a flash/ instant move
+    if (!layoutSettled) {
+      return
+    }
+    if (
+      !hasCompletedHistoryTutorial &&
+      isMoreThanOneVersion &&
+      !isPaywallAndNonComparable
+    ) {
+      tryShowingHistoryTutorial()
+    } else if (
+      !hasCompletedRestorePromotion &&
+      inFileRestoreSplitTest &&
+      inProjectRestoreSplitTest &&
+      hasVisibleUpdates
+    ) {
+      tryShowingRestorePromo()
+    }
+  }, [
+    hasVisibleUpdates,
+    inFileRestoreSplitTest,
+    inProjectRestoreSplitTest,
+    tryShowingRestorePromo,
+    inactiveTutorials,
+    isMoreThanOneVersion,
+    isPaywallAndNonComparable,
+    layoutSettled,
+    tryShowingHistoryTutorial,
+  ])
+
+  const { t } = useTranslation()
+
   let popover = null
 
   // hiding is different from dismissing, as we wont save a full dismissal to the user
   // meaning the tutorial will show on page reload/ re-navigation
   const hidePopover = () => {
-    completeTutorial()
+    hideHistoryTutorialUntilReload()
+    hideRestorePromoUntilReload()
   }
 
-  if (
-    isMoreThanOneVersion &&
-    showPopover &&
-    !isPaywallAndNonComparable &&
-    layoutSettled
-  ) {
-    const dismissModal = () => {
-      completeTutorial()
-      runAsync(completeHistoryTutorial()).catch(debugConsole.error)
-    }
-
+  if (showHistoryTutorial) {
     popover = (
       <Overlay
         placement="left"
-        show={showPopover}
+        show={showHistoryTutorial}
         rootClose
         onHide={hidePopover}
         // using scrollerRef to position the popover in the middle of the viewport
@@ -153,7 +188,15 @@ function AllHistoryList() {
           title={
             <span>
               {t('react_history_tutorial_title')}{' '}
-              <Close variant="dark" onDismiss={() => dismissModal()} />
+              <Close
+                variant="dark"
+                onDismiss={() =>
+                  completeHistoryTutorial({
+                    event: 'promo-click',
+                    action: 'complete',
+                  })
+                }
+              />
             </span>
           }
           className="dark-themed history-popover"
@@ -167,6 +210,49 @@ function AllHistoryList() {
                 className="history-dropdown-icon-inverted"
               />,
               <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
+            ]}
+          />
+        </Popover>
+      </Overlay>
+    )
+  } else if (showRestorePromo) {
+    popover = (
+      <Overlay
+        placement="left"
+        show={showRestorePromo}
+        rootClose
+        onHide={hidePopover}
+        // using scrollerRef to position the popover in the middle of the viewport
+        target={scrollerRef.current ?? undefined}
+        shouldUpdatePosition
+      >
+        <Popover
+          id="popover-toolbar-overflow"
+          arrowOffsetTop={10}
+          title={
+            <span>
+              {t('history_restore_promo_title')}
+              <Close
+                variant="dark"
+                onDismiss={() =>
+                  completeRestorePromo({
+                    event: 'promo-click',
+                    action: 'complete',
+                  })
+                }
+              />
+            </span>
+          }
+          className="dark-themed history-popover"
+        >
+          <Trans
+            i18nKey="history_restore_promo_content"
+            components={[
+              // eslint-disable-next-line react/jsx-key
+              <MaterialIcon
+                type="more_vert"
+                className="history-restore-promo-icon"
+              />,
             ]}
           />
         </Popover>

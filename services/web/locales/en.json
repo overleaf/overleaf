@@ -870,6 +870,8 @@
   "history_label_project_current_state": "Current state",
   "history_label_this_version": "Label this version",
   "history_new_label_name": "New label name",
+  "history_restore_promo_content": "Now you can restore a single file or your whole project to a previous version, including comments and tracked changes. Click Restore this version to restore the selected file or use the <0></0> menu in the history entry to restore the full project.",
+  "history_restore_promo_title": "Need to turn back time?",
   "history_resync": "History resync",
   "history_view_a11y_description": "Show all of the project history or only labelled versions.",
   "history_view_all": "All history",

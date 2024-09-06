@@ -81,6 +81,11 @@ export const useTutorial = (
     [setCurrentPopup, setShowPopup, tutorialKey, eventData]
   )
 
+  const hideUntilReload = useCallback(() => {
+    clearPopup()
+    deactivateTutorial(tutorialKey)
+  }, [clearPopup, deactivateTutorial, tutorialKey])
+
   return {
     completeTutorial,
     dismissTutorial,
@@ -89,6 +94,7 @@ export const useTutorial = (
     clearPopup,
     clearAndShow,
     showPopup,
+    hideUntilReload,
   }
 }
 
