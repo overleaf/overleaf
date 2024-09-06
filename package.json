@@ -25,6 +25,10 @@
   "overrides": {
     "google-gax": {
       "protobufjs": "^7.2.5"
+    },
+    "swagger-tools": {
+      "multer": "1.4.5-lts.1",
+      "qs": "6.13.0"
     }
   },
   "scripts": {
