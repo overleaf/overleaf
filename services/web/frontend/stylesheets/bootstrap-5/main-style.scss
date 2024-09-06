@@ -8,8 +8,6 @@
 @import '../../fonts/material-symbols';
 @import '../../fonts/font-awesome';
 
-$is-overleaf-light: false;
-
 // Vendor CSS
 // TODO Bootstrap 5: Check whether this works with Bootstrap 5, and whether we can replace it
 @import '../vendor/select/select';
@@ -32,9 +30,3 @@ $is-overleaf-light: false;
 
 // Page layout that isn't related to a particular component or page
 @import 'base/layout';
-
-// Modals
-@import 'modals/all';
-
-// Pages custom style
-@import 'pages/all';

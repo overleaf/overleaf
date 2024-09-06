@@ -8,12 +8,7 @@ import OLBadge from '@/features/ui/components/ol/ol-badge'
 
 function ChatToggleButton({ chatIsOpen, unreadMessageCount, onClick }) {
   const { t } = useTranslation()
-  const classes = classNames(
-    'btn',
-    'btn-full-height',
-    'btn-full-height-no-border',
-    { active: chatIsOpen }
-  )
+  const classes = classNames('btn', 'btn-full-height', { active: chatIsOpen })
 
   const hasUnreadMessages = unreadMessageCount > 0
 

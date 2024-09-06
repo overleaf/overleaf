@@ -86,3 +86,13 @@
 @mixin file-tree-bg {
   background-color: var(--bg-dark-tertiary);
 }
+
+@mixin theme($name) {
+  @if index($themes, $name) {
+    [data-theme='#{$name}'] {
+      @content;
+    }
+  } @else {
+    @error 'Theme "#{$name}" is not supported. Supported themes are: #{$themes}.';
+  }
+}

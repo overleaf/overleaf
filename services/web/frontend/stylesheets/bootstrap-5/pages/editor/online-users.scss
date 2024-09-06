@@ -2,6 +2,10 @@
   --toolbar-btn-color: var(--white);
 }
 
+@include theme('light') {
+  --toolbar-btn-color: var(--neutral-70);
+}
+
 .online-users {
   display: flex;
   align-items: center;

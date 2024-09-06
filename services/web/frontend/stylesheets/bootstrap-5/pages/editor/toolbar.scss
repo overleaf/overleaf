@@ -11,6 +11,19 @@
     center / contain no-repeat;
 }
 
+@include theme('light') {
+  --toolbar-border-color: var(--neutral-20);
+  --toolbar-header-bg-color: var(--white);
+  --toolbar-header-btn-border-color: var(--neutral-20);
+  --toolbar-btn-color: var(--neutral-70);
+  --toolbar-btn-hover-bg-color: var(--neutral-10);
+  --project-name-color: var(--neutral-70);
+  --project-rename-link-color: var(--neutral-70);
+  --project-rename-link-color-hover: var(--neutral-70);
+  --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o.svg)
+    center / contain no-repeat;
+}
+
 .toolbar {
   --toolbar-height: 40px;
 
@@ -37,7 +50,7 @@
 
   .toolbar-right,
   .toolbar-left {
-    button {
+    button:not(.back-to-editor-btn) {
       background: transparent;
       box-shadow: none;
     }
@@ -51,7 +64,7 @@
   button.btn-full-height {
     border: none;
     border-radius: 0;
-    border-right: 1px solid var(--toolbar-header-btn-border-color) !important;
+    border-right: 1px solid var(--toolbar-header-btn-border-color);
     color: var(--toolbar-btn-color);
     padding: var(--spacing-02) var(--spacing-05) var(--spacing-03);
     font-size: var(--font-size-05);
@@ -95,11 +108,6 @@
     }
   }
 
-  .btn-full-height-no-border {
-    border-right: 0;
-    border-left: 0;
-  }
-
   .toolbar-left {
     display: flex;
     align-items: stretch;
@@ -113,7 +121,8 @@
     flex-grow: 1;
     justify-content: flex-end;
 
-    .btn-full-height {
+    a.btn-full-height,
+    button.btn-full-height {
       border-right: 0;
       border-left: 1px solid var(--toolbar-header-btn-border-color);
     }

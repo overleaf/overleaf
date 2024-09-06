@@ -2,6 +2,19 @@
   --review-icon: url('../../../../../public/img/ol-icons/review-icon-dark-theme.svg');
 }
 
+@include theme('light') {
+  --review-icon: url('../../../../../public/img/ol-icons/review-icon-light-theme.svg');
+
+  button {
+    &.active,
+    &:active {
+      .review-icon {
+        --review-icon: url('../../../../../public/img/ol-icons/review-icon-dark-theme.svg');
+      }
+    }
+  }
+}
+
 .review-icon {
   display: inline-block;
   background-image: var(--review-icon);

@@ -210,9 +210,10 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     ) {
       // Pick which main stylesheet to use based on Bootstrap version
       const bootstrap5Modifier = bootstrapVersion === 5 ? '-bootstrap-5' : ''
+      const computedThemeModifier = bootstrapVersion === 5 ? '' : themeModifier
 
       return res.locals.buildStylesheetPath(
-        `main-${themeModifier}style${bootstrap5Modifier}.css`
+        `main-${computedThemeModifier}style${bootstrap5Modifier}.css`
       )
     }
 
