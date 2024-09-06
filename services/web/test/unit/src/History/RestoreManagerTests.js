@@ -231,6 +231,9 @@ describe('RestoreManager', function () {
       this.RestoreManager.promises._getRangesFromHistory = sinon
         .stub()
         .rejects()
+      this.RestoreManager.promises._getMetadataFromHistory = sinon
+        .stub()
+        .resolves({ metadata: undefined })
     })
 
     describe('reverting a project without ranges support', function () {
@@ -252,7 +255,7 @@ describe('RestoreManager', function () {
       })
     })
 
-    describe('reverting a document', function () {
+    describe('reverting a document with ranges', function () {
       beforeEach(function () {
         this.pathname = 'foo.tex'
         this.comments = [
@@ -315,7 +318,9 @@ describe('RestoreManager', function () {
           })
         this.RestoreManager.promises._getUpdatesFromHistory = sinon
           .stub()
-          .resolves([{ toV: this.version, meta: { end_ts: Date.now() } }])
+          .resolves([
+            { toV: this.version, meta: { end_ts: (this.endTs = new Date()) } },
+          ])
         this.EditorController.promises.addDocWithRanges = sinon
           .stub()
           .resolves((this.addedFile = { _id: 'mock-doc', type: 'doc' }))
@@ -370,6 +375,39 @@ describe('RestoreManager', function () {
         beforeEach(async function () {
           this.ProjectLocator.promises.findElementByPath = sinon
             .stub()
+            .resolves({ type: 'file', element: { _id: 'mock-file-id' } })
+          this.EditorController.promises.deleteEntity = sinon.stub().resolves()
+
+          this.data = await this.RestoreManager.promises.revertFile(
+            this.user_id,
+            this.project_id,
+            this.version,
+            this.pathname
+          )
+        })
+
+        it('should delete the existing file', async function () {
+          expect(
+            this.EditorController.promises.deleteEntity
+          ).to.have.been.calledWith(
+            this.project_id,
+            'mock-file-id',
+            'file',
+            {
+              kind: 'file-restore',
+              path: this.pathname,
+              version: this.version,
+              timestamp: new Date(this.endTs).toISOString(),
+            },
+            this.user_id
+          )
+        })
+      })
+
+      describe('with an existing document in the current project', function () {
+        beforeEach(async function () {
+          this.ProjectLocator.promises.findElementByPath = sinon
+            .stub()
             .resolves({ type: 'doc', element: { _id: 'mock-file-id' } })
           this.EditorController.promises.deleteEntity = sinon.stub().resolves()
 
@@ -392,7 +430,7 @@ describe('RestoreManager', function () {
               kind: 'file-restore',
               path: this.pathname,
               version: this.version,
-              timestamp: new Date().toISOString(),
+              timestamp: new Date(this.endTs).toISOString(),
             },
             this.user_id
           )
@@ -427,7 +465,7 @@ describe('RestoreManager', function () {
               kind: 'file-restore',
               path: this.pathname,
               version: this.version,
-              timestamp: new Date().toISOString(),
+              timestamp: new Date(this.endTs).toISOString(),
             }
           )
         })
@@ -448,6 +486,130 @@ describe('RestoreManager', function () {
       })
     })
 
+    describe('reverting a document with metadata', function () {
+      beforeEach(async function () {
+        this.pathname = 'foo.tex'
+        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
+        this.EditorController.promises.addDocWithRanges = sinon.stub()
+        this.FileSystemImportManager.promises.importFile = sinon
+          .stub()
+          .resolves({ type: 'doc', lines: ['foo', 'bar', 'baz'] })
+        this.RestoreManager.promises._getUpdatesFromHistory = sinon
+          .stub()
+          .resolves([
+            { toV: this.version, meta: { end_ts: (this.endTs = new Date()) } },
+          ])
+
+        this.EditorController.promises.upsertFile = sinon
+          .stub()
+          .resolves({ _id: 'mock-file-id', type: 'file' })
+        this.RestoreManager.promises._getMetadataFromHistory = sinon
+          .stub()
+          .resolves({ metadata: { foo: 'bar' } })
+        this.result = await this.RestoreManager.promises.revertFile(
+          this.user_id,
+          this.project_id,
+          this.version,
+          this.pathname
+        )
+      })
+
+      it('should revert it as a file', function () {
+        expect(this.result).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
+      })
+
+      it('should upload to the project as a file', function () {
+        expect(
+          this.EditorController.promises.upsertFile
+        ).to.have.been.calledWith(
+          this.project_id,
+          'mock-folder-id',
+          'foo.tex',
+          this.fsPath,
+          { foo: 'bar' },
+          {
+            kind: 'file-restore',
+            path: this.pathname,
+            version: this.version,
+            timestamp: new Date(this.endTs).toISOString(),
+          },
+          this.user_id
+        )
+      })
+
+      it('should not look up ranges', function () {
+        expect(this.RestoreManager.promises._getRangesFromHistory).to.not.have
+          .been.called
+      })
+
+      it('should not try to add a file', function () {
+        expect(this.EditorController.promises.addDocWithRanges).to.not.have.been
+          .called
+      })
+    })
+
+    describe('reverting a file with metadata', function () {
+      beforeEach(async function () {
+        this.pathname = 'foo.png'
+        this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
+        this.EditorController.promises.addDocWithRanges = sinon.stub()
+        this.FileSystemImportManager.promises.importFile = sinon
+          .stub()
+          .resolves({ type: 'file' })
+        this.RestoreManager.promises._getUpdatesFromHistory = sinon
+          .stub()
+          .resolves([
+            { toV: this.version, meta: { end_ts: (this.endTs = new Date()) } },
+          ])
+
+        this.EditorController.promises.upsertFile = sinon
+          .stub()
+          .resolves({ _id: 'mock-file-id', type: 'file' })
+        this.RestoreManager.promises._getMetadataFromHistory = sinon
+          .stub()
+          .resolves({ metadata: { foo: 'bar' } })
+        this.result = await this.RestoreManager.promises.revertFile(
+          this.user_id,
+          this.project_id,
+          this.version,
+          this.pathname
+        )
+      })
+
+      it('should revert it as a file', function () {
+        expect(this.result).to.deep.equal({ _id: 'mock-file-id', type: 'file' })
+      })
+
+      it('should upload to the project as a file', function () {
+        expect(
+          this.EditorController.promises.upsertFile
+        ).to.have.been.calledWith(
+          this.project_id,
+          'mock-folder-id',
+          'foo.png',
+          this.fsPath,
+          { foo: 'bar' },
+          {
+            kind: 'file-restore',
+            path: this.pathname,
+            version: this.version,
+            timestamp: new Date(this.endTs).toISOString(),
+          },
+          this.user_id
+        )
+      })
+
+      it('should not look up ranges', function () {
+        expect(this.RestoreManager.promises._getRangesFromHistory).to.not.have
+          .been.called
+      })
+
+      it('should not try to add a file', function () {
+        expect(this.EditorController.promises.addDocWithRanges).to.not.have.been
+          .called
+      })
+    })
+
     describe('when reverting a binary file', function () {
       beforeEach(async function () {
         this.pathname = 'foo.png'
@@ -457,6 +619,7 @@ describe('RestoreManager', function () {
         this.EditorController.promises.upsertFile = sinon
           .stub()
           .resolves({ _id: 'mock-file-id', type: 'file' })
+        this.EditorController.promises.deleteEntity = sinon.stub().resolves()
         this.RestoreManager.promises._getUpdatesFromHistory = sinon
           .stub()
           .resolves([{ toV: this.version, meta: { end_ts: Date.now() } }])
@@ -465,7 +628,7 @@ describe('RestoreManager', function () {
       it('should return the created entity if file exists', async function () {
         this.ProjectLocator.promises.findElementByPath = sinon
           .stub()
-          .resolves({ type: 'file' })
+          .resolves({ type: 'file', element: { _id: 'existing-file-id' } })
 
         const revertRes = await this.RestoreManager.promises.revertFile(
           this.user_id,

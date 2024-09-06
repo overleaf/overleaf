@@ -97,24 +97,11 @@ const RestoreManager = {
       fsPath,
       pathname
     )
-    if (importInfo.type === 'file') {
-      const newFile = await EditorController.promises.upsertFile(
-        projectId,
-        parentFolderId,
-        basename,
-        fsPath,
-        file?.element?.linkedFileData,
-        origin,
-        userId
-      )
-
-      return {
-        _id: newFile._id,
-        type: importInfo.type,
-      }
-    }
 
     if (file) {
+      if (file.type !== 'doc' && file.type !== 'file') {
+        throw new OError('unexpected file type', { type: file.type })
+      }
       logger.debug(
         { projectId, fileId: file.element._id, type: importInfo.type },
         'deleting entity before reverting it'
@@ -122,10 +109,35 @@ const RestoreManager = {
       await EditorController.promises.deleteEntity(
         projectId,
         file.element._id,
-        importInfo.type,
+        file.type,
         origin,
         userId
       )
+    }
+
+    const { metadata } = await RestoreManager._getMetadataFromHistory(
+      projectId,
+      version,
+      pathname
+    )
+
+    logger.debug({ metadata }, 'metadata from history')
+
+    if (importInfo.type === 'file' || metadata) {
+      const newFile = await EditorController.promises.upsertFile(
+        projectId,
+        parentFolderId,
+        basename,
+        fsPath,
+        metadata,
+        origin,
+        userId
+      )
+
+      return {
+        _id: newFile._id,
+        type: 'file',
+      }
     }
 
     const ranges = await RestoreManager._getRangesFromHistory(
@@ -306,6 +318,13 @@ const RestoreManager = {
     const url = `${
       Settings.apis.project_history.url
     }/project/${projectId}/ranges/version/${version}/${encodeURIComponent(pathname)}`
+    return await fetchJson(url)
+  },
+
+  async _getMetadataFromHistory(projectId, version, pathname) {
+    const url = `${
+      Settings.apis.project_history.url
+    }/project/${projectId}/metadata/version/${version}/${encodeURIComponent(pathname)}`
     return await fetchJson(url)
   },
 

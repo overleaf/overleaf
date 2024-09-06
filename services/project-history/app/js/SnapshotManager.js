@@ -7,6 +7,7 @@ import OError from '@overleaf/o-error'
 import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as WebApiManager from './WebApiManager.js'
 import * as Errors from './Errors.js'
+import _ from 'lodash'
 
 /**
  * @typedef {import('stream').Readable} ReadableStream
@@ -209,6 +210,30 @@ async function getRangesSnapshot(projectId, version, pathname) {
   }
 }
 
+/**
+ * Gets the file metadata at a specific version.
+ *
+ * @param {string} projectId
+ * @param {number} version
+ * @param {string} pathname
+ * @returns {Promise<{metadata: any}>}
+ */
+async function getFileMetadataSnapshot(projectId, version, pathname) {
+  const snapshot = await _getSnapshotAtVersion(projectId, version)
+  const file = snapshot.getFile(pathname)
+  if (!file) {
+    throw new Errors.NotFoundError(`${pathname} not found`, {
+      projectId,
+      version,
+      pathname,
+    })
+  }
+  const rawMetadata = file.getMetadata()
+  const metadata = _.isEmpty(rawMetadata) ? undefined : rawMetadata
+
+  return { metadata }
+}
+
 // Returns project snapshot containing the document content for files with
 // text operations in the relevant chunk, and hashes for unmodified/binary
 // files. Used by git bridge to get the state of the project.
@@ -350,12 +375,14 @@ const getProjectSnapshotCb = callbackify(getProjectSnapshot)
 const getLatestSnapshotCb = callbackify(getLatestSnapshot)
 const getLatestSnapshotFilesCb = callbackify(getLatestSnapshotFiles)
 const getRangesSnapshotCb = callbackify(getRangesSnapshot)
+const getFileMetadataSnapshotCb = callbackify(getFileMetadataSnapshot)
 const getPathsAtVersionCb = callbackify(getPathsAtVersion)
 
 export {
   getChangesSinceCb as getChangesSince,
   getFileSnapshotStreamCb as getFileSnapshotStream,
   getProjectSnapshotCb as getProjectSnapshot,
+  getFileMetadataSnapshotCb as getFileMetadataSnapshot,
   getLatestSnapshotCb as getLatestSnapshot,
   getLatestSnapshotFilesCb as getLatestSnapshotFiles,
   getRangesSnapshotCb as getRangesSnapshot,
@@ -370,4 +397,5 @@ export const promises = {
   getLatestSnapshotFiles,
   getRangesSnapshot,
   getPathsAtVersion,
+  getFileMetadataSnapshot,
 }

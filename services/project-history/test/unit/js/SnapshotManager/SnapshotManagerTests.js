@@ -999,6 +999,78 @@ Four five six\
     })
   })
 
+  describe('getFileMetadataSnapshot', function () {
+    beforeEach(function () {
+      this.WebApiManager.promises.getHistoryId.resolves(this.historyId)
+      this.HistoryStoreManager.promises.getChunkAtVersion.resolves({
+        chunk: (this.chunk = {
+          history: {
+            snapshot: {
+              files: {
+                'main.tex': {
+                  hash: '5d2781d78fa5a97b7bafa849fe933dfc9dc93eba',
+                  metadata: {
+                    importer_id: 'test-user-id',
+                    imported_at: '2024-01-01T00:00:00.000Z',
+                  },
+                  stringLength: 41,
+                },
+                'other.tex': {
+                  hash: '5d2781d78fa5a97b7bafa849fe933dfc9dc93eba',
+                  stringLength: 41,
+                },
+              },
+            },
+            changes: [],
+          },
+          startVersion: 1,
+          authors: [
+            {
+              id: 31,
+              email: 'author@example.com',
+              name: 'Author',
+            },
+          ],
+        }),
+      })
+    })
+
+    it('should return the metadata for the file', async function () {
+      const result =
+        await this.SnapshotManager.promises.getFileMetadataSnapshot(
+          this.projectId,
+          1,
+          'main.tex'
+        )
+      expect(result).to.deep.equal({
+        metadata: {
+          importer_id: 'test-user-id',
+          imported_at: '2024-01-01T00:00:00.000Z',
+        },
+      })
+    })
+
+    it('should return undefined when file does not have metadata', async function () {
+      const result =
+        await this.SnapshotManager.promises.getFileMetadataSnapshot(
+          this.projectId,
+          1,
+          'other.tex'
+        )
+      expect(result).to.deep.equal({ metadata: undefined })
+    })
+
+    it('throw an error when file does not exist', async function () {
+      await expect(
+        this.SnapshotManager.promises.getFileMetadataSnapshot(
+          this.projectId,
+          1,
+          'does-not-exist.tex'
+        )
+      ).to.be.rejectedWith(Error)
+    })
+  })
+
   describe('getPathsAtVersion', function () {
     beforeEach(function () {
       this.WebApiManager.promises.getHistoryId.resolves(this.historyId)

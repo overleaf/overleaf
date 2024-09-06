@@ -164,6 +164,11 @@ export function initialize(app) {
   )
 
   app.get(
+    '/project/:project_id/metadata/version/:version/:pathname',
+    HttpController.getFileMetadataSnapshot
+  )
+
+  app.get(
     '/project/:project_id/version/:version',
     HttpController.getProjectSnapshot
   )

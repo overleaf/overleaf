@@ -219,6 +219,21 @@ export function getRangesSnapshot(req, res, next) {
   )
 }
 
+export function getFileMetadataSnapshot(req, res, next) {
+  const { project_id: projectId, version, pathname } = req.params
+  SnapshotManager.getFileMetadataSnapshot(
+    projectId,
+    version,
+    pathname,
+    (err, data) => {
+      if (err) {
+        return next(OError.tag(err))
+      }
+      res.json(data)
+    }
+  )
+}
+
 export function getLatestSnapshot(req, res, next) {
   const { project_id: projectId } = req.params
   WebApiManager.getHistoryId(projectId, (error, historyId) => {
