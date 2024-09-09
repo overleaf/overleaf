@@ -26,6 +26,10 @@
     flex-direction: column;
   }
 
+  .user-notifications ul {
+    margin-bottom: 0;
+  }
+
   .project-list-wrapper {
     display: flex;
     align-items: stretch;
