@@ -3,8 +3,10 @@
   "include": [
     "app.js",
     "app/js/**/*",
+    "benchmarks/**/*",
     "config/**/*",
     "scripts/**/*",
-    "test/**/*"
+    "test/**/*",
+    "types"
   ]
 }

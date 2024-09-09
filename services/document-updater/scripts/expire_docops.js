@@ -4,7 +4,7 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 )
 let keys = Settings.redis.documentupdater.key_schema
 const async = require('async')
-const RedisManager = require('./app/js/RedisManager')
+const RedisManager = require('../app/js/RedisManager')
 
 const getKeysFromNode = function (node, pattern, callback) {
   let cursor = 0 // redis iterator

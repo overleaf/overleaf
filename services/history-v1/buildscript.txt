@@ -7,3 +7,4 @@ history-v1
 --node-version=18.20.2
 --public-repo=False
 --script-version=4.5.0
+--tsconfig-extra-includes=api/**/*,migrations/**/*,storage/**/*

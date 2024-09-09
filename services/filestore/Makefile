@@ -50,12 +50,6 @@ lint:
 lint_fix:
 	$(RUN_LINTING) lint:fix
 
-lint_styles:
-	$(RUN_LINTING) lint:styles
-
-lint_styles_fix:
-	$(RUN_LINTING) lint:styles:fix
-
 typecheck:
 	$(RUN_LINTING) types:check
 

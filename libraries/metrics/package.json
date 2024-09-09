@@ -29,13 +29,13 @@
     "typescript": "^5.0.4"
   },
   "scripts": {
-    "lint": "eslint --ext .js --ext .cjs --max-warnings 0 --format unix .",
-    "lint:fix": "eslint --fix --ext .js --ext .cjs .",
+    "lint": "eslint --ext .js --ext .cjs --ext .ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs --ext .ts .",
     "test:unit": "mocha --exit test/**/*.{js,cjs}",
     "test:acceptance": "mocha --reporter spec --recursive --exit --grep=$MOCHA_GREP test/acceptance",
     "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
-    "format": "prettier --list-different $PWD/'**/*.{js,cjs}'",
-    "format:fix": "prettier --write $PWD/'**/*.{js,cjs}'",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",
     "test:ci": "npm run test:unit",
     "types:check": "tsc --noEmit"
   },
