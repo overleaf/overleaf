@@ -99,11 +99,9 @@ export class SpellChecker {
         unknownWords,
         misspellings
       )
-      window.setTimeout(() => {
-        view.dispatch({
-          effects: compileEffects(result),
-        })
-      }, 0)
+      view.dispatch({
+        effects: compileEffects(result),
+      })
     }
     if (unknownWords.length === 0) {
       processResult([])
