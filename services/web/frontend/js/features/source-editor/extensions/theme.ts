@@ -125,6 +125,10 @@ const baseTheme = EditorView.baseTheme({
   '.cm-lineNumbers': {
     fontFamily: 'var(--source-font-family)',
   },
+  // double the specificity to override the underline squiggle
+  '.cm-lintRange.cm-lintRange': {
+    backgroundImage: 'none',
+  },
   // use a background color for lint error ranges
   '.cm-lintRange-error': {
     padding: 'var(--half-leading, 0) 0',
