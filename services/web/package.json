@@ -365,7 +365,6 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
     "webpack-merge": "^5.10.0",
-    "worker-loader": "^3.0.8",
     "yup": "^0.32.11"
   },
   "overrides": {
