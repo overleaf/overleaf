@@ -19,7 +19,7 @@ describe('<DictionaryModalContent />', function () {
   })
 
   it('list words', function () {
-    cy.then(win => {
+    cy.then(() => {
       learnedWords.global = new Set(['foo', 'bar'])
     })
 
@@ -34,7 +34,7 @@ describe('<DictionaryModalContent />', function () {
   })
 
   it('shows message when empty', function () {
-    cy.then(win => {
+    cy.then(() => {
       learnedWords.global = new Set([])
     })
 
@@ -50,7 +50,7 @@ describe('<DictionaryModalContent />', function () {
   it('removes words', function () {
     cy.intercept('/spelling/unlearn', { statusCode: 200 })
 
-    cy.then(win => {
+    cy.then(() => {
       learnedWords.global = new Set(['Foo', 'bar'])
     })
 
@@ -76,7 +76,7 @@ describe('<DictionaryModalContent />', function () {
   it('handles errors', function () {
     cy.intercept('/spelling/unlearn', { statusCode: 500 }).as('unlearn')
 
-    cy.then(win => {
+    cy.then(() => {
       learnedWords.global = new Set(['foo'])
     })
 

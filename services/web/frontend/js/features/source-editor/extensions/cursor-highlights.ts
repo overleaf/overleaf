@@ -187,7 +187,7 @@ class CursorMarker extends RectangleMarker {
 const cursorHighlightsLayer = layer({
   above: true,
   class: 'ol-cm-cursorHighlightsLayer',
-  update: (update, layer) => {
+  update: update => {
     return (
       update.docChanged ||
       update.selectionSet ||

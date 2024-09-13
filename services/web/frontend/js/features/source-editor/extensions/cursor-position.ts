@@ -42,7 +42,7 @@ export const cursorPosition = ({
     // Asynchronously dispatch cursor position when the selection changes and
     // provide a little debouncing. Using requestAnimationFrame postpones it
     // until the next CM6 DOM update.
-    ViewPlugin.define(view => {
+    ViewPlugin.define(() => {
       let animationFrameRequest: number | null = null
 
       return {

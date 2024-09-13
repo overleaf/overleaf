@@ -334,10 +334,7 @@ class HistoryOTAdapter {
     }
   }
 
-  handleUpdateFromCM(
-    transactions: readonly Transaction[],
-    ranges?: RangesTracker
-  ) {
+  handleUpdateFromCM(transactions: readonly Transaction[]) {
     for (const transaction of transactions) {
       if (
         this.maxDocLength &&

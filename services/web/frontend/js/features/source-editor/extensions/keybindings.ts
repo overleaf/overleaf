@@ -34,17 +34,14 @@ const customiseVimOnce = (_Vim: typeof Vim, _CodeMirror: typeof CodeMirror) => {
   // Allow copy via Ctrl-C in insert mode
   _Vim.unmap('<C-c>', 'insert')
 
-  _Vim.defineAction(
-    'insertModeCtrlC',
-    (cm: CodeMirror, actionArgs: object, state: any) => {
-      if (hasNonEmptySelection(cm)) {
-        navigator.clipboard.writeText(cm.getSelection())
-        cm.setSelection(cm.getCursor(), cm.getCursor())
-      } else {
-        _Vim.exitInsertMode(cm)
-      }
+  _Vim.defineAction('insertModeCtrlC', (cm: CodeMirror) => {
+    if (hasNonEmptySelection(cm)) {
+      navigator.clipboard.writeText(cm.getSelection())
+      cm.setSelection(cm.getCursor(), cm.getCursor())
+    } else {
+      _Vim.exitInsertMode(cm)
     }
-  )
+  })
 
   // Overwrite the moveByCharacters command with a decoration-aware version
   _Vim.defineMotion(

@@ -71,7 +71,7 @@ const cursorLayer = layer({
       updateHasMouseDownEffect(update)
     )
   },
-  mount(dom, view) {
+  mount(dom) {
     dom.style.animationDuration = '1200ms'
   },
   class: 'cm-cursorLayer',
@@ -90,7 +90,7 @@ const selectionLayer = layer({
     }
     return markers
   },
-  update(update, dom) {
+  update(update) {
     return (
       update.docChanged ||
       update.selectionSet ||

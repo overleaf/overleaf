@@ -60,7 +60,7 @@ export const Active = (args: Args) => {
   )
 }
 
-export const MultipleSelection = (args: Args) => {
+export const MultipleSelection = () => {
   return (
     <DropdownMenu show>
       <DropdownHeader>Header</DropdownHeader>
@@ -191,7 +191,7 @@ export const LeadingIcon = (args: Args) => {
   )
 }
 
-export const TrailingIcon = (args: Args) => {
+export const TrailingIcon = () => {
   return (
     <DropdownMenu show>
       <OLDropdownMenuItem eventKey="1" href="#/action-1" trailingIcon="check">

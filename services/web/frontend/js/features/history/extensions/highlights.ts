@@ -238,7 +238,7 @@ class EmptyLineAdditionMarkerWidget extends WidgetType {
     super()
   }
 
-  toDOM(view: EditorView): HTMLElement {
+  toDOM(): HTMLElement {
     const element = document.createElement('span')
     element.classList.add(
       'ol-cm-empty-line-addition-marker',
@@ -255,7 +255,7 @@ class EmptyLineDeletionMarkerWidget extends WidgetType {
     super()
   }
 
-  toDOM(view: EditorView): HTMLElement {
+  toDOM(): HTMLElement {
     const element = document.createElement('span')
     element.classList.add(
       'ol-cm-empty-line-deletion-marker',
@@ -297,7 +297,7 @@ class ChangeGutterMarker extends GutterMarker {
     super()
   }
 
-  toDOM(view: EditorView) {
+  toDOM() {
     const el = document.createElement('div')
     el.className = 'ol-cm-changed-line-gutter'
     el.style.setProperty('--hue', this.hue.toString())

@@ -1,7 +1,7 @@
 import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 
-export const useReviewPanelStyles = (mini: boolean) => {
+export const useReviewPanelStyles = () => {
   const view = useCodeMirrorViewContext()
 
   const [styles, setStyles] = useState<CSSProperties>({

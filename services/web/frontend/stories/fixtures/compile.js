@@ -100,7 +100,7 @@ export const mockClearCache = fetchMock =>
   })
 
 export const mockBuildFile = fetchMock =>
-  fetchMock.get('express:/build/:file', (url, options, request) => {
+  fetchMock.get('express:/build/:file', url => {
     const { pathname } = new URL(url, 'https://example.com')
 
     switch (pathname) {
@@ -190,7 +190,7 @@ export const mockEventTracking = fetchMock =>
   fetchMock.get('express:/event/:event', 204)
 
 export const mockValidPdf = fetchMock =>
-  fetchMock.get('express:/build/output.pdf', (url, options, request) => {
+  fetchMock.get('express:/build/output.pdf', () => {
     return new Promise(resolve => {
       const xhr = new XMLHttpRequest()
       xhr.addEventListener('load', () => {

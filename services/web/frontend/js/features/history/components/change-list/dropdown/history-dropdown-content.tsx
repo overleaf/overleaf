@@ -28,11 +28,7 @@ function HistoryDropdownContent({
   return (
     <>
       {permissions.labelVersion && (
-        <AddLabel
-          projectId={projectId}
-          version={version}
-          closeDropdown={closeDropdown}
-        />
+        <AddLabel version={version} closeDropdown={closeDropdown} />
       )}
       <Download
         projectId={projectId}

@@ -13,7 +13,7 @@ const testInstitutionData = [
 
 describe('<AddEmailInput/>', function () {
   const defaultProps = {
-    onChange: (value: string) => {},
+    onChange: () => {},
     handleAddNewEmail: () => {},
   }
 

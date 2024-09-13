@@ -4,18 +4,12 @@ import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-ite
 import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
 import AddLabelModal from '../../add-label-modal'
 
-type DownloadProps = {
-  projectId: string
+type AddLabelProps = {
   version: number
   closeDropdown: () => void
 }
 
-function AddLabel({
-  version,
-  projectId,
-  closeDropdown,
-  ...props
-}: DownloadProps) {
+function AddLabel({ version, closeDropdown, ...props }: AddLabelProps) {
   const { t } = useTranslation()
   const [showModal, setShowModal] = useState(false)
 

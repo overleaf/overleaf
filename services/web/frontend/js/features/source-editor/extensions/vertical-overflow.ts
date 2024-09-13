@@ -188,7 +188,7 @@ class TopPaddingWidget extends WidgetType {
     this.height = height
   }
 
-  toDOM(view: EditorView): HTMLElement {
+  toDOM(): HTMLElement {
     const element = document.createElement('div')
     element.style.height = this.height + 'px'
     return element

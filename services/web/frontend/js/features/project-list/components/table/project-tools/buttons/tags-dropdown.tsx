@@ -91,7 +91,7 @@ function TagsDropdown() {
           data-testid="project-tools-more-dropdown-menu"
         >
           <DropdownHeader>{t('add_to_tag')}</DropdownHeader>
-          {sortBy(tags, tag => tag.name?.toLowerCase()).map((tag, index) => (
+          {sortBy(tags, tag => tag.name?.toLowerCase()).map(tag => (
             <li role="none" key={tag._id}>
               <DropdownItem
                 onClick={e =>

@@ -127,7 +127,7 @@ export default {
     displayOnVariants: ['active'],
   },
   decorators: [
-    (Story, context) => (
+    Story => (
       <SplitTestContext.Provider value={splitTestContextValue}>
         <Story />
       </SplitTestContext.Provider>

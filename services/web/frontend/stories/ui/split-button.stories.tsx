@@ -11,9 +11,7 @@ import {
 import Button from '@/features/ui/components/bootstrap-5/button'
 import { ButtonGroup } from 'react-bootstrap'
 
-type Args = React.ComponentProps<typeof Dropdown>
-
-export const Sizes = (args: Args) => {
+export const Sizes = () => {
   const { t } = useTranslation()
   const sizes = {
     Large: 'lg',

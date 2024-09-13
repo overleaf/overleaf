@@ -9,13 +9,13 @@ import {
 import browser from './browser'
 
 class EmptyLineWidget extends WidgetType {
-  toDOM(view: EditorView): HTMLElement {
+  toDOM(): HTMLElement {
     const element = document.createElement('span')
     element.className = 'ol-cm-filler'
     return element
   }
 
-  eq(widget: EmptyLineWidget) {
+  eq() {
     return true
   }
 }

@@ -72,7 +72,7 @@ const initialize = () => {
         }
       }, 0)
     },
-    $on: (eventName: string, callback: () => void) => {
+    $on: () => {
       //
     },
     $broadcast: () => {},

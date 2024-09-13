@@ -20,7 +20,7 @@ function ChangeToPlanButton({ planCode }: { planCode: string }) {
   )
 }
 
-function KeepCurrentPlanButton({ plan }: { plan: Plan }) {
+function KeepCurrentPlanButton() {
   const { t } = useTranslation()
   const { handleOpenModal } = useSubscriptionDashboardContext()
 
@@ -43,7 +43,7 @@ function ChangePlanButton({ plan }: { plan: Plan }) {
     plan.planCode === personalSubscription.planCode.split('_')[0]
 
   if (isCurrentPlanForUser && personalSubscription.pendingPlan) {
-    return <KeepCurrentPlanButton plan={plan} />
+    return <KeepCurrentPlanButton />
   } else if (isCurrentPlanForUser && !personalSubscription.pendingPlan) {
     return (
       <b>

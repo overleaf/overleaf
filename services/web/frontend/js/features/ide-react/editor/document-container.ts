@@ -599,7 +599,7 @@ export class DocumentContainer extends EventEmitter {
     this.doc.on('remoteop', (...ops: AnyOperation[]) => {
       return this.trigger('remoteop', ...ops)
     })
-    this.doc.on('op:sent', (op: AnyOperation) => {
+    this.doc.on('op:sent', () => {
       return this.trigger('op:sent')
     })
     this.doc.on('op:acknowledged', (op: AnyOperation) => {
@@ -609,7 +609,7 @@ export class DocumentContainer extends EventEmitter {
       })
       return this.trigger('op:acknowledged')
     })
-    this.doc.on('op:timeout', (op: AnyOperation) => {
+    this.doc.on('op:timeout', () => {
       this.trigger('op:timeout')
       return this.onError(new Error('op timed out'))
     })

@@ -68,7 +68,7 @@ export const rangesDataField = StateField.define<RangesData | null>({
 export const ranges = () => [
   rangesDataField,
   // handle viewportChanged updates
-  ViewPlugin.define(view => {
+  ViewPlugin.define(() => {
     let timer: number
 
     return {
