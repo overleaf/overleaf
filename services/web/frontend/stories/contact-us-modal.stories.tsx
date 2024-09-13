@@ -69,7 +69,7 @@ const ContactUsModalWithAcknowledgement = (
 }
 
 export const WithAcknowledgement = (args: ContactUsModalProps) => {
-  const { show, handleHide, ...rest } = args
+  const { show: _show, handleHide: _handleHide, ...rest } = args
   return <ContactUsModalWithAcknowledgement {...rest} />
 }
 

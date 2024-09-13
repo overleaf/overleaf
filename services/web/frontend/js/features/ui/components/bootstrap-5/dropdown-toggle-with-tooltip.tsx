@@ -29,7 +29,7 @@ const DropdownToggleWithTooltip = forwardRef<
       toolTipDescription,
       overlayTriggerProps,
       tooltipProps,
-      id,
+      id: _id,
       ...toggleProps
     },
     ref

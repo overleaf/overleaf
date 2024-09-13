@@ -89,7 +89,7 @@ export const ThreadsProvider: FC<React.PropsWithChildren> = ({ children }) => {
       ) => {
         setData(value => {
           if (value) {
-            const { submitting, ...thread } = value[threadId] ?? {
+            const { submitting: _1, ...thread } = value[threadId] ?? {
               messages: [],
             }
 
