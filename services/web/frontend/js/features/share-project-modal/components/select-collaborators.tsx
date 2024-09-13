@@ -116,7 +116,7 @@ export default function SelectCollaborators({
     items: filteredOptions,
     itemToString: item => (item && item.name) || '',
     stateReducer,
-    onStateChange: ({ inputValue, type, selectedItem }) => {
+    onStateChange: ({ type, selectedItem }) => {
       switch (type) {
         // add a selected item on Enter (keypress), click or blur
         case useCombobox.stateChangeTypes.InputKeyDownEnter:

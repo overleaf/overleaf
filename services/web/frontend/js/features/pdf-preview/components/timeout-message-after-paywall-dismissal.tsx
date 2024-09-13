@@ -1,40 +1,20 @@
 import getMeta from '@/utils/meta'
 import { Trans, useTranslation } from 'react-i18next'
-import { memo, useCallback, useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { useDetachCompileContext } from '@/shared/context/detach-compile-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import MaterialIcon from '@/shared/components/material-icon'
-import { useStopOnFirstError } from '@/shared/hooks/use-stop-on-first-error'
 import * as eventTracking from '@/infrastructure/event-tracking'
 import PdfLogEntry from './pdf-log-entry'
 
 function TimeoutMessageAfterPaywallDismissal() {
-  const {
-    startCompile,
-    lastCompileOptions,
-    setAnimateCompileDropdownArrow,
-    isProjectOwner,
-  } = useDetachCompileContext()
-
-  const { enableStopOnFirstError } = useStopOnFirstError({
-    eventSource: 'timeout-new',
-  })
-
-  const handleEnableStopOnFirstErrorClick = useCallback(() => {
-    enableStopOnFirstError()
-    startCompile({ stopOnFirstError: true })
-    setAnimateCompileDropdownArrow(true)
-  }, [enableStopOnFirstError, startCompile, setAnimateCompileDropdownArrow])
+  const { lastCompileOptions, isProjectOwner } = useDetachCompileContext()
 
   return (
     <div className="website-redesign timeout-upgrade-paywall-prompt">
       <CompileTimeout isProjectOwner={isProjectOwner} />
       {getMeta('ol-ExposedSettings').enableSubscriptions && (
-        <PreventTimeoutHelpMessage
-          handleEnableStopOnFirstErrorClick={handleEnableStopOnFirstErrorClick}
-          lastCompileOptions={lastCompileOptions}
-          isProjectOwner={isProjectOwner}
-        />
+        <PreventTimeoutHelpMessage lastCompileOptions={lastCompileOptions} />
       )}
     </div>
   )
@@ -124,14 +104,10 @@ const CompileTimeout = memo(function CompileTimeout({
 
 type PreventTimeoutHelpMessageProps = {
   lastCompileOptions: any
-  handleEnableStopOnFirstErrorClick: () => void
-  isProjectOwner: boolean
 }
 
 const PreventTimeoutHelpMessage = memo(function PreventTimeoutHelpMessage({
   lastCompileOptions,
-  handleEnableStopOnFirstErrorClick,
-  isProjectOwner,
 }: PreventTimeoutHelpMessageProps) {
   const { t } = useTranslation()
 

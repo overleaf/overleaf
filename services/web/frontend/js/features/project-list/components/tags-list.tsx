@@ -12,10 +12,9 @@ import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu
 
 type TagsListProps = {
   onTagClick?: () => void
-  onEditClick?: () => void
 }
 
-function TagsList({ onTagClick, onEditClick }: TagsListProps) {
+function TagsList({ onTagClick }: TagsListProps) {
   const { t } = useTranslation()
   const { tags, untaggedProjectsCount, selectedTagId, selectTag } =
     useProjectListContext()

@@ -291,7 +291,6 @@ type MenuItemButtonProps = {
 function MenuItemButton({
   children,
   onClick,
-  className,
   isLoading,
   variant,
   'data-testid': dataTestId,

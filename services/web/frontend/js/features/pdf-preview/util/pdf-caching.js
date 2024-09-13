@@ -247,7 +247,6 @@ function usageAboveThreshold(chunk) {
 function cutRequestAmplification({
   potentialChunks,
   usageScore,
-  cachedUrls,
   metrics,
   start,
   end,

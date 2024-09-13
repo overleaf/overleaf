@@ -115,7 +115,7 @@ function LinkingSection() {
           ) : null}
           <div className="settings-widgets-container">
             {allIntegrationLinkingWidgets.map(
-              ({ import: importObject, path }, widgetIndex) => (
+              ({ import: importObject }, widgetIndex) => (
                 <ModuleLinkingWidget
                   key={Object.keys(importObject)[0]}
                   ModuleComponent={Object.values(importObject)[0]}
@@ -133,7 +133,7 @@ function LinkingSection() {
           <h3 id="references">{t('reference_managers')}</h3>
           <div className="settings-widgets-container">
             {referenceLinkingWidgets.map(
-              ({ import: importObject, path }, widgetIndex) => (
+              ({ import: importObject }, widgetIndex) => (
                 <ModuleLinkingWidget
                   key={Object.keys(importObject)[0]}
                   ModuleComponent={Object.values(importObject)[0]}

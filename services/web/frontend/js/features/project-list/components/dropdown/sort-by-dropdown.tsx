@@ -12,7 +12,7 @@ import {
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 
-function Item({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
+function Item({ onClick, text, iconType }: SortBtnProps) {
   return (
     <DropdownItem
       as="button"
