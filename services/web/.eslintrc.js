@@ -383,6 +383,18 @@ module.exports = {
               'Modify location via customLocalStorage instead of calling window.localStorage methods directly',
           },
         ],
+        'no-unused-vars': 'off',
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            args: 'after-used',
+            argsIgnorePattern: '^_',
+            ignoreRestSiblings: false,
+            caughtErrors: 'none',
+            vars: 'all',
+            varsIgnorePattern: '^_',
+          },
+        ],
       },
     },
     {
