@@ -24,10 +24,14 @@ export const StubSnapshotUtils = {
       throw new Error('not implemented')
     }
   },
+  // unused vars kept to document the interface
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buildFileTree(snapshot: Snapshot): Folder {
     throw new Error('not implemented')
   },
-  createFolder(_id: string, name: string): Folder {
+  // unused vars kept to document the interface
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  createFolder(id: string, name: string): Folder {
     throw new Error('not implemented')
   },
 }

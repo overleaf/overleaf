@@ -4,6 +4,8 @@ import { debugConsole } from '@/utils/debugging'
 import EventEmitter from '@/utils/EventEmitter'
 
 class SocketShimBase {
+  // unused vars kept to document the interface
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   static connect(url, options) {
     return new SocketShimBase()
   }
@@ -46,11 +48,15 @@ class SocketShimNoop extends SocketShimBase {
       },
 
       connect() {},
+      // unused vars kept to document the interface
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       disconnect(reason) {},
     }
   }
 
   connect() {}
+  // unused vars kept to document the interface
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   disconnect(reason) {}
   emit() {}
   on() {}
@@ -295,6 +301,8 @@ export class SocketIOMock extends SocketShimBase {
       },
 
       connect() {},
+      // unused vars kept to document the interface
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       disconnect(reason) {},
     }
   }

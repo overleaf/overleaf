@@ -2087,7 +2087,10 @@ if (typeof onmessage !== 'undefined') {
 }
 // export dummy class for testing
 export default class LintWorker {
+  // unused vars kept to document the interface
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   postMessage(message) {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addEventListener(eventName, listener) {}
   Parse(text) {
     return Parse(text)

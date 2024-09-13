@@ -65,8 +65,12 @@ globalThis.BroadcastChannel =
   global.BroadcastChannel =
   window.BroadcastChannel =
     class BroadcastChannel {
+      // Unused arguments left to document the signature of the stubbed function.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       addEventListener(type, listener) {}
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       removeEventListener(type, listener) {}
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       postMessage(message) {}
     }
 

@@ -106,6 +106,7 @@ export const mockDoc = (
       removeCommentId: () => {},
       ...rangesOptions,
     },
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     submitOp: (op: any) => {},
     setTrackChangesIdSeeds: () => {},
     getTrackingChanges: () => true,
