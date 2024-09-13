@@ -46,7 +46,7 @@ export const TableDropdown = memo(function TableDropdown() {
           </DropdownHeader>
           <OLListGroupItem
             aria-label={t('toolbar_generate_table')}
-            onClick={event => {
+            onClick={() => {
               writefullInstance?.openTableGenerator()
             }}
           >

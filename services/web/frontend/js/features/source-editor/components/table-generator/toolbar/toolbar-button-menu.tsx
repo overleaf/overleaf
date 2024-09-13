@@ -36,7 +36,7 @@ export const ToolbarButtonMenu: FC<
         event.preventDefault()
         event.stopPropagation()
       }}
-      onClick={event => {
+      onClick={() => {
         onToggle(!open)
       }}
       disabled={disabled}

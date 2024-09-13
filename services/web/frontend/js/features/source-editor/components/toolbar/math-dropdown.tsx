@@ -34,7 +34,7 @@ export const MathDropdown = memo(function MathDropdown() {
           </DropdownHeader>
           <OLListGroupItem
             aria-label={t('toolbar_generate_math')}
-            onClick={event => {
+            onClick={() => {
               writefullInstance?.openEquationGenerator()
             }}
           >
