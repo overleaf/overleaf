@@ -15,9 +15,9 @@ const FileViewPdf: FC<{
   const handleContainer = useCallback(
     async (element: HTMLDivElement | null) => {
       if (element) {
-        const { PDFJS } = await import(
-          '../../pdf-preview/util/pdf-js-versions'
-        ).then(m => m.default as any)
+        const { loadPdfDocumentFromUrl } = await import(
+          '@/features/pdf-preview/util/pdf-js'
+        )
 
         // bail out if loading PDF.js took too long
         if (!mountedRef.current) {
@@ -33,10 +33,7 @@ const FileViewPdf: FC<{
           return
         }
 
-        const pdf = await PDFJS.getDocument({
-          url: preview.url,
-          isEvalSupported: false,
-        }).promise
+        const pdf = await loadPdfDocumentFromUrl(preview.url).promise
 
         // bail out if loading the PDF took too long
         if (!mountedRef.current) {
@@ -61,7 +58,7 @@ const FileViewPdf: FC<{
 
           element.append(canvas)
           page.render({
-            canvasContext: canvas.getContext('2d'),
+            canvasContext: canvas.getContext('2d')!,
             viewport,
           })
         }

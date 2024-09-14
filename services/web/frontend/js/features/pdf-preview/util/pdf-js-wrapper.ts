@@ -1,81 +1,70 @@
-import { captureException } from '../../../infrastructure/error-reporter'
+import { captureException } from '@/infrastructure/error-reporter'
 import { generatePdfCachingTransportFactory } from './pdf-caching-transport'
 import { debugConsole } from '@/utils/debugging'
-
-const params = new URLSearchParams(window.location.search)
-const disableFontFace = params.get('disable-font-face') === 'true'
-const disableStream = process.env.NODE_ENV !== 'test'
+import { PDFJS, loadPdfDocumentFromUrl, imageResourcesPath } from './pdf-js'
+import {
+  PDFViewer,
+  EventBus,
+  PDFLinkService,
+  LinkTarget,
+} from 'pdfjs-dist/legacy/web/pdf_viewer.mjs'
+import 'pdfjs-dist/legacy/web/pdf_viewer.css'
 
 const DEFAULT_RANGE_CHUNK_SIZE = 128 * 1024 // 128K chunks
 
 export default class PDFJSWrapper {
-  constructor(container) {
-    this.container = container
-  }
+  private loadDocumentTask: PDFJS.PDFDocumentLoadingTask | undefined
 
-  async init() {
-    const {
-      PDFJS,
-      PDFJSViewer,
-      cMapUrl,
-      imageResourcesPath,
-      standardFontDataUrl,
-    } = await import('./pdf-js-versions').then(m => {
-      return m.default
-    })
+  public readonly viewer: PDFViewer
+  public readonly eventBus: EventBus
+  private readonly linkService: PDFLinkService
 
-    this.PDFJS = PDFJS
-    this.genPdfCachingTransport = generatePdfCachingTransportFactory(PDFJS)
-    this.PDFJSViewer = PDFJSViewer
-    this.cMapUrl = cMapUrl
-    this.standardFontDataUrl = standardFontDataUrl
-    this.imageResourcesPath = imageResourcesPath
-
+  // eslint-disable-next-line no-useless-constructor
+  constructor(public container: HTMLDivElement) {
     // create the event bus
-    const eventBus = new PDFJSViewer.EventBus()
+    this.eventBus = new EventBus()
 
     // create the link service
-    const linkService = new PDFJSViewer.PDFLinkService({
-      eventBus,
-      externalLinkTarget: 2,
+    this.linkService = new PDFLinkService({
+      eventBus: this.eventBus,
+      externalLinkTarget: LinkTarget.BLANK,
       externalLinkRel: 'noopener',
     })
 
-    // create the localization
-    // const l10n = new PDFJSViewer.GenericL10n('en-GB') // TODO: locale mapping?
-
     // create the viewer
-    const viewer = new PDFJSViewer.PDFViewer({
+    this.viewer = new PDFViewer({
       container: this.container,
-      eventBus,
+      eventBus: this.eventBus,
       imageResourcesPath,
-      linkService,
-      // l10n, // commented out since it currently breaks `aria-label` rendering in pdf pages
-      enableScripting: false, // default is false, but set explicitly to be sure
-      enableXfa: false, // default is false (2021-10-12), but set explicitly to be sure
-      renderInteractiveForms: false,
+      linkService: this.linkService,
       maxCanvasPixels: 8192 * 8192, // default is 4096 * 4096, increased for better resolution at high zoom levels
-      annotationMode: PDFJS.AnnotationMode?.ENABLE, // enable annotations but not forms
-      annotationEditorMode: PDFJS.AnnotationEditorType?.DISABLE, // disable annotation editing
+      annotationMode: PDFJS.AnnotationMode.ENABLE, // enable annotations but not forms
+      annotationEditorMode: PDFJS.AnnotationEditorType.DISABLE, // disable annotation editing
     })
 
-    linkService.setViewer(viewer)
-
-    this.eventBus = eventBus
-    this.linkService = linkService
-    this.viewer = viewer
+    this.linkService.setViewer(this.viewer)
   }
 
   // load a document from a URL
-  loadDocument({ url, pdfFile, abortController, handleFetchError }) {
+  loadDocument({
+    url,
+    pdfFile,
+    abortController,
+    handleFetchError,
+  }: {
+    url: string
+    pdfFile: Record<string, any>
+    abortController: AbortController
+    handleFetchError: (error: Error) => void
+  }) {
     // cancel any previous loading task
     if (this.loadDocumentTask) {
-      this.loadDocumentTask.destroy()
+      this.loadDocumentTask.destroy().catch(debugConsole.error)
       this.loadDocumentTask = undefined
     }
 
-    return new Promise((resolve, reject) => {
-      const rangeTransport = this.genPdfCachingTransport({
+    return new Promise<PDFJS.PDFDocumentProxy>((resolve, reject) => {
+      const rangeTransport = generatePdfCachingTransportFactory()({
         url,
         pdfFile,
         abortController,
@@ -87,35 +76,25 @@ export default class PDFJSWrapper {
         //  custom range transport. Restore it by bumping the chunk size.
         rangeChunkSize = pdfFile.size
       }
-      this.loadDocumentTask = this.PDFJS.getDocument({
-        url,
-        cMapUrl: this.cMapUrl,
-        cMapPacked: true,
-        standardFontDataUrl: this.standardFontDataUrl,
-        disableFontFace,
+      this.loadDocumentTask = loadPdfDocumentFromUrl(url, {
         rangeChunkSize,
-        disableAutoFetch: true,
-        disableStream,
-        isEvalSupported: false,
-        textLayerMode: 2, // PDFJSViewer.TextLayerMode.ENABLE,
         range: rangeTransport,
       })
 
       this.loadDocumentTask.promise
         .then(doc => {
-          if (!this.loadDocumentTask) {
+          if (!this.loadDocumentTask || !this.viewer) {
             return // ignoring the response since loading task has been aborted
           }
 
           const previousDoc = this.viewer.pdfDocument
-
           this.viewer.setDocument(doc)
           this.linkService.setDocument(doc)
           resolve(doc)
 
           if (previousDoc) {
             previousDoc.cleanup().catch(debugConsole.error)
-            previousDoc.destroy()
+            previousDoc.destroy().catch(debugConsole.error)
           }
         })
         .catch(error => {
@@ -163,7 +142,7 @@ export default class PDFJSWrapper {
   }
 
   // get the page and offset of a click event
-  clickPosition(event, canvas, page) {
+  clickPosition(event: MouseEvent, canvas: HTMLCanvasElement, page: number) {
     if (!canvas) {
       return
     }
@@ -205,7 +184,7 @@ export default class PDFJSWrapper {
     }
   }
 
-  scrollToPosition(position, scale = null) {
+  scrollToPosition(position: Record<string, any>, scale = null) {
     const destArray = [
       null,
       {
@@ -239,13 +218,9 @@ export default class PDFJSWrapper {
     this.loadDocumentTask = undefined
   }
 
-  destroy() {
-    if (this.loadDocumentTask) {
-      this.loadDocumentTask.destroy()
-      this.loadDocumentTask = undefined
-    }
-    if (this.viewer) {
-      this.viewer.destroy()
-    }
+  async destroy() {
+    await this.loadDocumentTask?.destroy().catch(debugConsole.error)
+    this.loadDocumentTask = undefined
+    await this.viewer.pdfDocument?.destroy().catch(debugConsole.error)
   }
 }

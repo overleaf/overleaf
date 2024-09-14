@@ -1,11 +1,4 @@
-import {
-  memo,
-  MouseEventHandler,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { debounce, throttle } from 'lodash'
 import PdfViewerControlsToolbar from './pdf-viewer-controls-toolbar'
 import { useProjectContext } from '../../../shared/context/project-context'
@@ -22,6 +15,7 @@ import { debugConsole } from '@/utils/debugging'
 import { usePdfPreviewContext } from '@/features/pdf-preview/components/pdf-preview-provider'
 import usePresentationMode from '../hooks/use-presentation-mode'
 import useMouseWheelZoom from '../hooks/use-mouse-wheel-zoom'
+import { PDFJS } from '../util/pdf-js'
 
 type PdfJsViewerProps = {
   url: string
@@ -70,20 +64,18 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   const handleContainer = useCallback(
     parent => {
       if (parent) {
-        const wrapper = new PDFJSWrapper(parent.firstChild)
-        wrapper
-          .init()
-          .then(() => {
-            setPdfJsWrapper(wrapper)
-          })
-          .catch(error => {
-            setLoadingError(true)
-            captureException(error)
-          })
+        let wrapper: PDFJSWrapper | undefined
+        try {
+          wrapper = new PDFJSWrapper(parent.firstChild)
+          setPdfJsWrapper(wrapper)
+        } catch (error) {
+          setLoadingError(true)
+          captureException(error)
+        }
 
         return () => {
           setPdfJsWrapper(null)
-          wrapper.destroy()
+          wrapper?.destroy().catch(debugConsole.error)
         }
       }
     },
@@ -180,7 +172,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       const handleFetchError = (err: Error) => {
         if (abortController.signal.aborted) return
         // The error is already logged at the call-site with additional context.
-        if (err instanceof pdfJsWrapper.PDFJS.MissingPDFException) {
+        if (err instanceof PDFJS.MissingPDFException) {
           setError('rendering-error-expected')
         } else {
           setError('rendering-error')
@@ -254,7 +246,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         if (!textLayerDiv.dataset.listeningForDoubleClick) {
           textLayerDiv.dataset.listeningForDoubleClick = true
 
-          const doubleClickListener: MouseEventHandler = event => {
+          const doubleClickListener = (event: MouseEvent) => {
             const clickPosition = pdfJsWrapper.clickPosition(
               event,
               textLayerDiv.closest('.page').querySelector('canvas'),
@@ -355,7 +347,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
 
       for (const highlight of highlights) {
         try {
-          const element = buildHighlightElement(highlight, pdfJsWrapper)
+          const element = buildHighlightElement(highlight, pdfJsWrapper.viewer)
           elements.push(element)
           intersectionObserver.observe(element)
         } catch (error) {

@@ -1,4 +1,4 @@
-import { memo, Suspense } from 'react'
+import { ElementType, memo, Suspense } from 'react'
 import classNames from 'classnames'
 import PdfLogsViewer from './pdf-logs-viewer'
 import PdfViewer from './pdf-viewer'
@@ -10,7 +10,10 @@ import CompileTimeWarningUpgradePrompt from './compile-time-warning-upgrade-prom
 import { PdfPreviewProvider } from './pdf-preview-provider'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 
-const pdfPreviewPromotions = importOverleafModules('pdfPreviewPromotions')
+const pdfPreviewPromotions = importOverleafModules('pdfPreviewPromotions') as {
+  import: { default: ElementType }
+  path: string
+}[]
 
 function PdfPreviewPane() {
   const { pdfUrl, hasShortCompileTimeout } = useCompileContext()

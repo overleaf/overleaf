@@ -1,6 +1,6 @@
 import OError from '@overleaf/o-error'
 import { fallbackRequest, fetchRange } from './pdf-caching'
-import { captureException } from '../../../infrastructure/error-reporter'
+import { captureException } from '@/infrastructure/error-reporter'
 import { getPdfCachingMetrics } from './metrics'
 import {
   cachedUrlLookupEnabled,
@@ -9,16 +9,17 @@ import {
   prefetchLargeEnabled,
   trackPdfDownloadEnabled,
 } from './pdf-caching-flags'
-import { isNetworkError } from '../../../utils/isNetworkError'
+import { isNetworkError } from '@/utils/isNetworkError'
 import { debugConsole } from '@/utils/debugging'
+import { PDFJS } from './pdf-js'
 
 // 30 seconds: The shutdown grace period of a clsi pre-emp instance.
 const STALE_OUTPUT_REQUEST_THRESHOLD_MS = 30 * 1000
 
-export function generatePdfCachingTransportFactory(PDFJS) {
+export function generatePdfCachingTransportFactory() {
   // NOTE: The custom transport can be used for tracking download volume.
   if (!enablePdfCaching && !trackPdfDownloadEnabled) {
-    return () => null
+    return () => undefined
   }
   const usageScore = new Map()
   const cachedUrls = new Map()
@@ -180,7 +181,7 @@ export function generatePdfCachingTransportFactory(PDFJS) {
     if (metrics.failedOnce) {
       // Disable pdf caching once any fetch request failed.
       // Be trigger-happy here until we reached a stable state of the feature.
-      return null
+      return undefined
     }
     // Latency is collected per preview cycle.
     metrics.latencyComputeMax = 0

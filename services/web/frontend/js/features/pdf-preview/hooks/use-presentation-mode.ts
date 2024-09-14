@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import PDFJSWrapper from '../util/pdf-js-wrapper'
 import { sendMB } from '@/infrastructure/event-tracking'
+import { debugConsole } from '@/utils/debugging'
 
 type StoredPDFState = {
   scrollMode?: number
@@ -116,7 +117,9 @@ export default function usePresentationMode(
     sendMB('pdf-viewer-enter-presentation-mode')
 
     if (pdfJsWrapper) {
-      pdfJsWrapper.container.parentNode.requestFullscreen()
+      pdfJsWrapper.container.parentElement
+        ?.requestFullscreen()
+        .catch(debugConsole.error)
     }
   }, [pdfJsWrapper])
 
@@ -136,8 +139,8 @@ export default function usePresentationMode(
 
   const handleExitFullscreen = useCallback(() => {
     if (pdfJsWrapper) {
-      pdfJsWrapper.viewer.scrollMode = storedState.current.scrollMode
-      pdfJsWrapper.viewer.spreadMode = storedState.current.spreadMode
+      pdfJsWrapper.viewer.scrollMode = storedState.current.scrollMode!
+      pdfJsWrapper.viewer.spreadMode = storedState.current.spreadMode!
 
       if (storedState.current.currentScaleValue !== undefined) {
         setScale(storedState.current.currentScaleValue)
