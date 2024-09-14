@@ -66,9 +66,8 @@ function getModuleDirectory(moduleName) {
 }
 
 const mathjaxDir = getModuleDirectory('mathjax')
+const pdfjsDir = getModuleDirectory('pdfjs-dist')
 const dictionariesDir = getModuleDirectory('@overleaf/dictionaries')
-
-const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist401']
 
 const vendorDir = path.join(__dirname, 'frontend/js/vendor')
 
@@ -131,7 +130,7 @@ module.exports = {
         // Only compile application files and specific dependencies
         // (other npm and vendored dependencies must be in ES5 already)
         exclude: [
-          /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist401|react-resizable-panels)\/)/,
+          /node_modules\/(?!(react-dnd|chart\.js|@uppy|pdfjs-dist|react-resizable-panels)\/)/,
           vendorDir,
         ],
         use: [
@@ -326,9 +325,9 @@ module.exports = {
       jQuery: 'jquery',
     }),
 
-    // Copy the required files for loading MathJax from MathJax NPM package
     new CopyPlugin({
       patterns: [
+        // Copy the required files for loading MathJax from MathJax NPM package
         // https://www.npmjs.com/package/mathjax#user-content-hosting-your-own-copy-of-the-mathjax-components
         {
           from: 'es5/tex-svg-full.js',
@@ -372,26 +371,23 @@ module.exports = {
           toType: 'dir',
           context: `${dictionariesDir}/dictionaries`,
         },
-        ...pdfjsVersions.flatMap(version => {
-          const dir = getModuleDirectory(version)
-
-          // Copy CMap files (used to provide support for non-Latin characters)
-          // and static images from pdfjs-dist package to build output.
-
-          return [
-            { from: `cmaps`, to: `js/${version}/cmaps`, context: dir },
-            {
-              from: `standard_fonts`,
-              to: `fonts/${version}`,
-              context: dir,
-            },
-            {
-              from: `legacy/web/images`,
-              to: `images/${version}`,
-              context: dir,
-            },
-          ]
-        }),
+        // Copy CMap files (used to provide support for non-Latin characters),
+        // fonts and images from pdfjs-dist package to build output.
+        {
+          from: 'cmaps',
+          to: 'js/pdfjs-dist/cmaps',
+          context: pdfjsDir,
+        },
+        {
+          from: 'standard_fonts',
+          to: 'fonts/pdfjs-dist',
+          context: pdfjsDir,
+        },
+        {
+          from: 'legacy/web/images',
+          to: 'images/pdfjs-dist',
+          context: pdfjsDir,
+        },
       ],
     }),
   ],

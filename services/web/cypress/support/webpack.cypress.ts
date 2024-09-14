@@ -41,8 +41,7 @@ const buildConfig = () => {
   )
 
   // add entrypoints under '/' for pdfjs workers
-  addWorker('pdfjs-dist213', 'pdfjs-dist213/legacy/build/pdf.worker.js')
-  addWorker('pdfjs-dist401', 'pdfjs-dist401/legacy/build/pdf.worker.mjs')
+  addWorker('pdfjs-dist', 'pdfjs-dist/legacy/build/pdf.worker.mjs')
 
   return webpackConfig
 }
