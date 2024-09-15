@@ -6,7 +6,7 @@
       {
         "useBuiltIns": "usage",
         // This version must be aligned with the `core-js` version in `package.json`
-        "corejs": { "version": "3.30" },
+        "corejs": { "version": "3.38" },
         "exclude": [
           // Exclude Array.prototype.push polyfill, as it's not needed and affects performance in Chrome
           "es.array.push",
