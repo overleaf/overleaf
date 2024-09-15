@@ -1,17 +1,12 @@
-import 'core-js/stable/global-this' // polyfill for globalThis (used by pdf.js)
-import 'core-js/stable/promise/all-settled' // polyfill for Promise.allSettled (used by pdf.js)
-import 'core-js/stable/structured-clone' // polyfill for global.StructuredClone (used by pdf.js)
-import 'core-js/stable/array/at' // polyfill for Array.prototype.at (used by pdf.js)
-
 import { createWorker } from '@/utils/worker'
-import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.mjs'
+import * as PDFJS from 'pdfjs-dist'
 import type { DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
 
 export { PDFJS }
 
 createWorker(() => {
   PDFJS.GlobalWorkerOptions.workerPort = new Worker(
-    new URL('pdfjs-dist/legacy/build/pdf.worker.mjs', import.meta.url) // NOTE: .mjs extension
+    new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url) // NOTE: .mjs extension
   )
 })
 

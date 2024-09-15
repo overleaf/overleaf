@@ -7,8 +7,8 @@ import {
   EventBus,
   PDFLinkService,
   LinkTarget,
-} from 'pdfjs-dist/legacy/web/pdf_viewer.mjs'
-import 'pdfjs-dist/legacy/web/pdf_viewer.css'
+} from 'pdfjs-dist/web/pdf_viewer.mjs'
+import 'pdfjs-dist/web/pdf_viewer.css'
 
 const DEFAULT_RANGE_CHUNK_SIZE = 128 * 1024 // 128K chunks
 
