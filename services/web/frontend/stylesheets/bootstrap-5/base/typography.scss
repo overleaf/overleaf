@@ -1,4 +1,10 @@
-// Headings
+// Typography
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility; /* stylelint-disable-line value-keyword-case */
+  -moz-osx-font-smoothing: grayscale;
+}
 
 // Headings
 h1,
