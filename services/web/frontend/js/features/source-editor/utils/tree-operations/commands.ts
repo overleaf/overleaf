@@ -1,6 +1,6 @@
 import { EditorState } from '@codemirror/state'
 import { SyntaxNode, SyntaxNodeRef } from '@lezer/common'
-import { getOptionalArgumentText } from './common'
+import { childOfNodeWithType, getOptionalArgumentText } from './common'
 import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
 
 /**
@@ -8,15 +8,34 @@ import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
  */
 export class Command extends ProjectionItem {
   readonly title: string = ''
-  readonly optionalArgCount: number = 0
-  readonly requiredArgCount: number = 0
+  readonly optionalArgCount: number | undefined = 0
+  readonly requiredArgCount: number | undefined = 0
   readonly type: 'usage' | 'definition' = 'usage'
   readonly raw: string | undefined = undefined
+  readonly ignoreInAutocomplete?: boolean = false
+}
+
+const getCommandName = (
+  node: SyntaxNode,
+  state: EditorState,
+  childTypes: string[]
+): string | null => {
+  const child = childOfNodeWithType(node, ...childTypes)
+
+  if (child) {
+    const commandName = state.doc.sliceString(child.from, child.to)
+    if (commandName.length > 0) {
+      return commandName
+    }
+  }
+
+  return null
 }
 
 /**
  * Extracts Command instances from the syntax tree.
- * `\newcommand` and `\renewcommand` are treated specially
+ * `\newcommand`, `\renewcommand`, `\newenvironment`, `\renewenvironment`
+ * and `\def` are treated specially.
  */
 export const enterNode = (
   state: EditorState,
@@ -29,19 +48,13 @@ export const enterNode = (
       // This should already be in `items`
       return
     }
-    let commandName = node.node.getChild('LiteralArgContent')
-    if (!commandName) {
-      commandName = node.node.getChild('Csname')
-    }
-    if (!commandName) {
-      return
-    }
-    const commandNameText = state.doc.sliceString(
-      commandName.from,
-      commandName.to
-    )
 
-    if (commandNameText.length < 1) {
+    const commandName = getCommandName(node.node, state, [
+      'LiteralArgContent',
+      'Csname',
+    ])
+
+    if (commandName === null) {
       return
     }
 
@@ -66,11 +79,60 @@ export const enterNode = (
 
     items.push({
       line: state.doc.lineAt(node.from).number,
-      title: commandNameText,
+      title: commandName,
       from: node.from,
       to: node.to,
       optionalArgCount: commandDefinitionHasOptionalArgument ? 1 : 0,
       requiredArgCount: argCountNumber,
+      type: 'definition',
+      raw: state.sliceDoc(node.from, node.to),
+    })
+  } else if (node.type.is('Def')) {
+    if (!nodeIntersectsChange(node.node)) {
+      // This should already be in `items`
+      return
+    }
+
+    const commandName = getCommandName(node.node, state, ['Csname', 'CtrlSym'])
+
+    if (commandName === null) {
+      return
+    }
+
+    const requiredArgCount = node.node.getChildren('MacroParameter').length
+    const optionalArgCount = node.node.getChildren(
+      'OptionalMacroParameter'
+    ).length
+
+    items.push({
+      line: state.doc.lineAt(node.from).number,
+      title: commandName,
+      from: node.from,
+      to: node.to,
+      optionalArgCount,
+      requiredArgCount,
+      type: 'definition',
+      raw: state.sliceDoc(node.from, node.to),
+    })
+  } else if (node.type.is('Let')) {
+    if (!nodeIntersectsChange(node.node)) {
+      // This should already be in `items`
+      return
+    }
+
+    const commandName = getCommandName(node.node, state, ['Csname'])
+
+    if (commandName === null) {
+      return
+    }
+    items.push({
+      line: state.doc.lineAt(node.from).number,
+      title: commandName,
+      from: node.from,
+      to: node.to,
+      ignoreInAutocomplete: true, // Ignoring since we don't know the argument counts
+      optionalArgCount: undefined,
+      requiredArgCount: undefined,
       type: 'definition',
       raw: state.sliceDoc(node.from, node.to),
     })
@@ -80,6 +142,11 @@ export const enterNode = (
     node.type.is('MathUnknownCommand') ||
     node.type.is('DefinitionFragmentUnknownCommand')
   ) {
+    if (!nodeIntersectsChange(node.node)) {
+      // This should already be in `items`
+      return
+    }
+
     let commandNode: SyntaxNode | null = node.node
     if (node.type.is('KnownCommand')) {
       // KnownCommands are defined as
@@ -96,10 +163,7 @@ export const enterNode = (
     if (!commandNode) {
       return
     }
-    if (!nodeIntersectsChange(node.node)) {
-      // This should already be in `items`
-      return
-    }
+
     const ctrlSeq = commandNode.getChild('$CtrlSeq')
     if (!ctrlSeq) {
       return

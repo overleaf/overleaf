@@ -22,7 +22,10 @@ export function customCommandCompletions(
   const items = countCommandUsage(context)
 
   for (const item of items.values()) {
-    if (!existingCommands.has(commandNameFromLabel(item.label))) {
+    if (
+      !existingCommands.has(commandNameFromLabel(item.label)) &&
+      !item.ignoreInAutoComplete
+    ) {
       output.push({
         type: 'cmd',
         label: item.label,
@@ -42,7 +45,12 @@ const countCommandUsage = (context: CompletionContext) => {
 
   const result = new Map<
     string,
-    { label: string; snippet: string; count: number }
+    {
+      label: string
+      snippet: string
+      count: number
+      ignoreInAutoComplete?: boolean
+    }
   >()
 
   const commandListProjection = context.state.field(documentCommands)
@@ -58,7 +66,12 @@ const countCommandUsage = (context: CompletionContext) => {
     const label = buildLabel(command)
     const snippet = buildSnippet(command)
 
-    const item = result.get(label) || { label, snippet, count: 0 }
+    const item = result.get(label) || {
+      label,
+      snippet,
+      count: 0,
+      ignoreInAutoComplete: command.ignoreInAutocomplete,
+    }
     item.count++
     result.set(label, item)
   }
@@ -69,15 +82,15 @@ const countCommandUsage = (context: CompletionContext) => {
 const buildLabel = (command: Command): string => {
   return [
     `${command.title}`,
-    '[]'.repeat(command.optionalArgCount),
-    '{}'.repeat(command.requiredArgCount),
+    '[]'.repeat(command.optionalArgCount ?? 0),
+    '{}'.repeat(command.requiredArgCount ?? 0),
   ].join('')
 }
 
 const buildSnippet = (command: Command): string => {
   return [
     `${command.title}`,
-    '[#{}]'.repeat(command.optionalArgCount),
-    '{#{}}'.repeat(command.requiredArgCount),
+    '[#{}]'.repeat(command.optionalArgCount ?? 0),
+    '{#{}}'.repeat(command.requiredArgCount ?? 0),
   ].join('')
 }

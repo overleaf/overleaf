@@ -15,7 +15,7 @@ import { documentCommands } from './document-commands'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import { documentOutline } from './document-outline'
 import { LaTeXLanguage } from './latex-language'
-import { documentEnvironmentNames } from './document-environment-names'
+import { documentEnvironments } from './document-environments'
 import {
   figureModal,
   figureModalPasteHandler,
@@ -36,7 +36,7 @@ export const latex = () => {
     shortcuts(),
     documentOutline,
     documentCommands,
-    documentEnvironmentNames,
+    documentEnvironments,
     latexIndentService(),
     linting(),
     metadata(),

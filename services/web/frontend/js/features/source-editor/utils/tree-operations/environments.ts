@@ -7,14 +7,16 @@ import { FigureData } from '../../extensions/figure-modal'
 
 const HUNDRED_MS = 100
 
-export class EnvironmentName extends ProjectionItem {
+export class Environment extends ProjectionItem {
   readonly title: string = ''
+  readonly type: 'usage' | 'definition' = 'usage'
+  readonly raw: string = ''
 }
 
 export const enterNode = (
   state: EditorState,
   node: SyntaxNodeRef,
-  items: EnvironmentName[],
+  items: Environment[],
   nodeIntersectsChange: NodeIntersectsChangeFn
 ): any => {
   if (node.type.is('EnvNameGroup')) {
@@ -38,11 +40,13 @@ export const enterNode = (
       return false
     }
 
-    const thisEnvironmentName = {
+    const thisEnvironmentName: Environment = {
       title: envNameText,
       from: envNameNode.from,
       to: envNameNode.to,
       line: state.doc.lineAt(envNameNode.from).number,
+      type: 'usage',
+      raw: state.sliceDoc(node.from, node.to),
     }
 
     items.push(thisEnvironmentName)
@@ -65,11 +69,13 @@ export const enterNode = (
       return
     }
 
-    const thisEnvironmentName = {
+    const thisEnvironmentName: Environment = {
       title: envNameText,
       from: envNameNode.from,
       to: envNameNode.to,
       line: state.doc.lineAt(envNameNode.from).number,
+      type: 'definition',
+      raw: state.sliceDoc(node.from, node.to),
     }
 
     items.push(thisEnvironmentName)

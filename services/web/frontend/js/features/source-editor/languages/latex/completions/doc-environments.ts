@@ -1,8 +1,8 @@
 import { customBeginCompletion } from './environments'
 import { CompletionContext } from '@codemirror/autocomplete'
-import { documentEnvironmentNames } from '../document-environment-names'
+import { documentEnvironments } from '../document-environments'
 import { ProjectionResult } from '../../../utils/tree-operations/projection'
-import { EnvironmentName } from '../../../utils/tree-operations/environments'
+import { Environment } from '../../../utils/tree-operations/environments'
 
 /**
  * Environments from the current doc
@@ -25,8 +25,8 @@ export function customEnvironmentCompletions(context: CompletionContext) {
 export const findEnvironmentsInDoc = (context: CompletionContext) => {
   const result = new Set<string>()
 
-  const environmentNamesProjection: ProjectionResult<EnvironmentName> =
-    context.state.field(documentEnvironmentNames)
+  const environmentNamesProjection: ProjectionResult<Environment> =
+    context.state.field(documentEnvironments)
   if (!environmentNamesProjection || !environmentNamesProjection.items) {
     return result
   }

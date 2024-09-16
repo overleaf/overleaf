@@ -78,3 +78,27 @@ export const nodeHasError = (node: SyntaxNode): boolean => {
 
   return hasError
 }
+
+export const childOfNodeWithType = (
+  node: SyntaxNode,
+  ...types: (string | number)[]
+): SyntaxNode | null => {
+  let childOfType: SyntaxNode | null = null
+
+  node.cursor().iterate(child => {
+    if (childOfType !== null) {
+      return false
+    }
+
+    for (const type of types) {
+      if (child.type.is(type)) {
+        childOfType = child.node
+        return false
+      }
+    }
+
+    return true
+  })
+
+  return childOfType
+}

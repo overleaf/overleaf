@@ -26,6 +26,7 @@ import ReactDOM from 'react-dom'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import SplitTestBadge from '@/shared/components/split-test-badge'
 import { nodeHasError } from '../utils/tree-operations/common'
+import { documentEnvironments } from '../languages/latex/document-environments'
 
 const REPOSITION_EVENT = 'editor:repositionMathTooltips'
 
@@ -150,8 +151,17 @@ const buildTooltipContent = (
   element.textContent = math.content
 
   let definitions = ''
-  const commandState = state.field(documentCommands, false)
 
+  const environmentState = state.field(documentEnvironments, false)
+  if (environmentState?.items) {
+    for (const environment of environmentState.items) {
+      if (environment.type === 'definition') {
+        definitions += `${environment.raw}\n`
+      }
+    }
+  }
+
+  const commandState = state.field(documentCommands, false)
   if (commandState?.items) {
     for (const command of commandState.items) {
       if (command.type === 'definition' && command.raw) {
