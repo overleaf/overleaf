@@ -23,6 +23,7 @@ const userData1: UserEmailData & { affiliation: Affiliation } = {
     department: null,
     institution: {
       commonsAccount: false,
+      writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
       isUniversity: false,
@@ -53,6 +54,7 @@ const userData2: UserEmailData & { affiliation: Affiliation } = {
     department: 'Art History',
     institution: {
       commonsAccount: false,
+      writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
       isUniversity: false,
