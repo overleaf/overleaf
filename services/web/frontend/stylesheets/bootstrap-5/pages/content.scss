@@ -1,0 +1,132 @@
+/*
+  Styling for content pages
+  Including: about, home, blog, /for/__, legal, contact, portals, wiki, gallery, plans, and interstitial payment page
+*/
+
+// TODO: consolidate cms.scss and content.scss
+
+.content-page {
+  word-break: break-word;
+
+  /*
+      Links and Buttons
+    */
+
+  // TODO: remove an use link style in more generic selector,
+  // which is likely .website-redesign to start
+  // a {
+  //   color: @link-color-alt;
+  //   &:hover {
+  //     color: @link-hover-color-alt;
+  //   }
+  // }
+
+  // TODO: confirm if needed
+  // correct color property set on <a> above:
+  // .reset-btns;
+  // .alert {
+  //   .alert;
+  // }
+  // .alert-info {
+  //   .btn-info {
+  //     .btn-alert-info;
+  //   }
+  // }
+
+  hr {
+    border-color: var(--neutral-30);
+  }
+
+  /*
+      section
+    */
+  section {
+    padding: var(--spacing-08) var(--spacing-05);
+
+    // TODO: confirm if we will still support this and if so what colors to use
+    // &.color-block {
+    //   &.green-dark {
+    //     background-color: @ol-dark-green;
+    //   }
+    //   &.green {
+    //     background-color: @ol-green;
+
+    //     .no-card * {
+    //       .btn-primary,
+    //       .btn-success {
+    //         // only correct button colors when green on green
+    //         .btn-primary-on-primary-bg;
+    //       }
+    //     }
+    //   }
+    //   &.blue-gray-dark {
+    //     background-color: @ol-blue-gray-5;
+    //   }
+    //   &.blue-gray-light {
+    //     background-color: @ol-blue-gray-1;
+    //   }
+
+    //   &.green,
+    //   &.green-dark,
+    //   &.blue-gray-dark {
+    //     .no-card * {
+    //       &:not(.btn) {
+    //         color: @white;
+    //       }
+    //       a {
+    //         text-decoration: underline;
+    //       }
+    //       .btn {
+    //         text-decoration: none;
+    //       }
+
+    //       .form-control {
+    //         color: @input-color;
+    //       }
+    //     }
+    //   }
+    // }
+
+    .section-row {
+      // TODO: check max-widths with UX team for new design
+      // used to have different sizes for different breakpoints but probably not needed
+      max-width: 1344px;
+    }
+  }
+
+  .content-container > section:first-child {
+    /* header */
+    padding-bottom: 0;
+    padding-top: 0;
+  }
+
+  section.no-top-padding {
+    /* opt out of padding via the CMS */
+    padding-top: 0;
+  }
+
+  // TODO: only used on about page. Confirm with UX changes needed
+  // .container-small {
+  //   section .section-row {
+  //     /* match col-sm-8 */
+  //     /* @grid-gutter-width  is used for margins */
+  //     max-width: (@screen-sm * (8/12)) - @grid-gutter-width;
+  //     @media (min-width: @screen-md-min) {
+  //       max-width: (@screen-md * (8/12)) - @grid-gutter-width;
+  //     }
+  //     @media (min-width: @screen-lg-min) {
+  //       max-width: (@screen-lg * (8/12)) - @grid-gutter-width;
+  //     }
+  //   }
+  // }
+
+  /*
+      lists
+    */
+
+  .list-without-style {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
