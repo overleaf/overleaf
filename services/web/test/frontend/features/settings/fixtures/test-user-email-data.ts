@@ -24,7 +24,6 @@ export const professionalUserData: UserEmailData & {
     department: 'Art History',
     institution: {
       commonsAccount: false,
-      writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
       isUniversity: false,
@@ -57,7 +56,6 @@ export const unconfirmedCommonsUserData: UserEmailData & {
     department: 'Art History',
     institution: {
       commonsAccount: true,
-      writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
       isUniversity: false,
@@ -87,7 +85,6 @@ export const ssoUserData: UserEmailData = {
     department: 'Art History',
     institution: {
       commonsAccount: true,
-      writefullCommonsAccount: false,
       confirmed: true,
       id: 2,
       isUniversity: true,

@@ -23,7 +23,6 @@ const userEmailData: UserEmailData & { affiliation: Affiliation } = {
     department: 'Art History',
     institution: {
       commonsAccount: false,
-      writefullCommonsAccount: false,
       confirmed: true,
       id: 1,
       isUniversity: true,
