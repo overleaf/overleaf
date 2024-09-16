@@ -15,11 +15,12 @@ import { CodeMirrorToolbar } from './codemirror-toolbar'
 import { CodemirrorOutline } from './codemirror-outline'
 import { CodeMirrorCommandTooltip } from './codemirror-command-tooltip'
 import { dispatchTimer } from '../../../infrastructure/cm6-performance'
-
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { FigureModal } from './figure-modal/figure-modal'
 import { ReviewPanelProviders } from '@/features/review-panel-new/context/review-panel-providers'
 import { ReviewPanelMigration } from '@/features/source-editor/components/review-panel/review-panel-migration'
+import AddCommentTooltip from '@/features/review-panel-new/components/add-comment-tooltip'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const sourceEditorComponents = importOverleafModules(
   'sourceEditorComponents'
@@ -36,6 +37,8 @@ function CodeMirrorEditor() {
   })
 
   const isMounted = useIsMounted()
+
+  const newReviewPanel = useFeatureFlag('review-panel-redesign')
 
   // create the view using the initial state and intercept transactions
   const viewRef = useRef<EditorView | null>(null)
@@ -75,7 +78,9 @@ function CodeMirrorEditor() {
           )}
           <CodeMirrorCommandTooltip />
 
+          {newReviewPanel && <AddCommentTooltip />}
           <ReviewPanelMigration />
+
           {sourceEditorComponents.map(
             ({ import: { default: Component }, path }) => (
               <Component key={path} />

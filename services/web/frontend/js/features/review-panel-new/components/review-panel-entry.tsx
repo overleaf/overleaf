@@ -14,7 +14,8 @@ export const ReviewPanelEntry: FC<{
   op: AnyOperation
   top?: number
   className?: string
-}> = ({ children, position, top, op, className }) => {
+  selectLineOnFocus?: boolean
+}> = ({ children, position, top, op, className, selectLineOnFocus }) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
   const [focused, setFocused] = useState(false)
@@ -25,13 +26,15 @@ export const ReviewPanelEntry: FC<{
     setTimeout(() => {
       // without setTimeout, error "EditorView.update are not allowed while an update is in progress" can occur
       // this can be avoided by using onClick rather than onFocus but it will then not pick up <Tab> or <Shift+Tab> events for focusing entries
-      view.dispatch({
-        selection: EditorSelection.cursor(position),
-        effects: EditorView.scrollIntoView(position, { y: 'center' }),
-      })
+      if (selectLineOnFocus) {
+        view.dispatch({
+          selection: EditorSelection.cursor(position),
+          effects: EditorView.scrollIntoView(position, { y: 'center' }),
+        })
+      }
     }, 0)
     setFocused(true)
-  }, [view, position])
+  }, [view, position, selectLineOnFocus])
 
   return (
     <div

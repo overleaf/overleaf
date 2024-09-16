@@ -3,9 +3,9 @@ import {
   memo,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
+  useMemo,
 } from 'react'
 import { ReviewPanelAddComment } from './review-panel-add-comment'
 import { ReviewPanelChange } from './review-panel-change'
@@ -23,12 +23,12 @@ import {
 import { useRangesContext } from '../context/ranges-context'
 import { useThreadsContext } from '../context/threads-context'
 import { isDeleteChange, isInsertChange } from '@/utils/operations'
-import Icon from '@/shared/components/icon'
 import { positionItems } from '../utils/position-items'
 import { canAggregate } from '../utils/can-aggregate'
 import ReviewPanelEmptyState from './review-panel-empty-state'
 import useEventListener from '@/shared/hooks/use-event-listener'
 import { hasActiveRange } from '@/features/review-panel-new/utils/has-active-range'
+import { addCommentStateField } from '@/features/source-editor/extensions/add-comment'
 
 type AggregatedRanges = {
   changes: Change<EditOperation>[]
@@ -43,14 +43,6 @@ const ReviewPanelCurrentFile: FC = () => {
   const state = useCodeMirrorStateContext()
 
   const [aggregatedRanges, setAggregatedRanges] = useState<AggregatedRanges>()
-
-  const selectionCoords = useMemo(
-    () =>
-      state.selection.main.empty
-        ? null
-        : view.coordsAtPos(state.selection.main.head),
-    [view, state]
-  )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const previousFocusedItem = useRef(0)
@@ -149,6 +141,8 @@ const ReviewPanelCurrentFile: FC = () => {
 
   const positionsRef = useRef<Map<string, number>>(new Map())
 
+  const addCommentRanges = state.field(addCommentStateField).ranges
+
   useEffect(() => {
     if (aggregatedRanges) {
       view.requestMeasure({
@@ -157,29 +151,45 @@ const ReviewPanelCurrentFile: FC = () => {
           const contentRect = view.contentDOM.getBoundingClientRect()
           const docLength = view.state.doc.length
 
-          const screenPosition = (change: Change): number | undefined => {
-            const pos = Math.min(change.op.p, docLength) // TODO: needed?
+          const screenPosition = (position: number): number | undefined => {
+            const pos = Math.min(position, docLength) // TODO: needed?
             const coords = view.coordsAtPos(pos)
 
             return coords ? Math.round(coords.top - contentRect.top) : undefined
           }
 
           for (const change of aggregatedRanges.changes) {
-            const position = screenPosition(change)
+            const position = screenPosition(change.op.p)
             if (position) {
               positionsRef.current.set(change.id, position)
             }
           }
 
           for (const comment of aggregatedRanges.comments) {
-            const position = screenPosition(comment)
+            const position = screenPosition(comment.op.p)
             if (position) {
               positionsRef.current.set(comment.id, position)
             }
           }
+
+          const cursor = addCommentRanges.iter()
+
+          while (cursor.value) {
+            const { from } = cursor
+            const position = screenPosition(from)
+
+            if (position) {
+              positionsRef.current.set(
+                `new-comment-${cursor.value.spec.id}`,
+                position
+              )
+            }
+
+            cursor.next()
+          }
         },
         write() {
-          setPositions(positionsRef.current)
+          setPositions(new Map(positionsRef.current))
           window.setTimeout(() => {
             containerRef.current?.dispatchEvent(
               new Event('review-panel:position')
@@ -188,12 +198,39 @@ const ReviewPanelCurrentFile: FC = () => {
         },
       })
     }
-  }, [view, aggregatedRanges])
+  }, [view, aggregatedRanges, addCommentRanges])
 
   const showEmptyState = useMemo(
     () => hasActiveRange(ranges, threads) === false,
     [ranges, threads]
   )
+
+  const addCommentEntries = useMemo(() => {
+    const cursor = addCommentRanges.iter()
+
+    const entries = []
+
+    while (cursor.value) {
+      const id = `new-comment-${cursor.value.spec.id}`
+      if (!positions.has(id)) {
+        cursor.next()
+        continue
+      }
+
+      const { from, to } = cursor
+
+      entries.push({
+        id,
+        from,
+        to,
+        value: cursor.value,
+        top: positions.get(id),
+      })
+
+      cursor.next()
+    }
+    return entries
+  }, [addCommentRanges, positions])
 
   if (!aggregatedRanges) {
     return null
@@ -201,21 +238,18 @@ const ReviewPanelCurrentFile: FC = () => {
 
   return (
     <div ref={handleContainer}>
-      {selectionCoords && (
-        <div
-          className="review-panel-entry review-panel-entry-action"
-          style={{ position: 'absolute' }}
-          data-top={selectionCoords.top + view.scrollDOM.scrollTop - 70}
-          data-pos={state.selection.main.head}
-        >
-          <div className="review-panel-entry-indicator">
-            <Icon type="pencil" fw />
-          </div>
-          <div className="review-panel-entry-content">
-            <ReviewPanelAddComment />
-          </div>
-        </div>
-      )}
+      {addCommentEntries.map(entry => {
+        const { id, from, to, value, top } = entry
+        return (
+          <ReviewPanelAddComment
+            key={id}
+            from={from}
+            to={to}
+            value={value}
+            top={top}
+          />
+        )
+      })}
 
       {showEmptyState && <ReviewPanelEmptyState />}
 

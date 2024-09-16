@@ -349,12 +349,6 @@
     max-height: 400px;
   }
 
-  .review-panel-add-comment-form {
-    display: flex;
-    flex-direction: column;
-    width: var(--review-panel-width);
-  }
-
   .review-panel-empty-state {
     position: absolute;
     top: 0;
@@ -453,6 +447,33 @@
     display: flex;
   }
 
+  .review-panel-add-comment-textarea {
+    padding: 2px 6px;
+    resize: vertical;
+    min-height: 44px;
+  }
+
+  .review-panel-add-comment {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .review-panel-add-comment-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .review-panel-add-comment-cancel-button {
+    background-color: transparent;
+
+    &:hover,
+    &:focus {
+      background-color: @neutral-20;
+      color: @content-primary;
+    }
+  }
+
   &.review-panel-subview-overview {
     &.review-panel-container {
       overflow-y: hidden;
@@ -509,4 +530,13 @@
       display: none;
     }
   }
+}
+
+.review-panel-add-comment-tooltip {
+  height: 24px;
+  border-radius: 12px;
+  padding: 2px 12px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }

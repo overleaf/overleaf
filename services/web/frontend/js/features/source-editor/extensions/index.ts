@@ -52,6 +52,7 @@ import { mathPreview } from './math-preview'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { ranges } from './ranges'
 import { trackDetachedComments } from './track-detached-comments'
+import { addComment } from './add-comment'
 
 const moduleExtensions: Array<() => Extension> = importOverleafModules(
   'sourceEditorExtensions'
@@ -133,6 +134,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   trackDetachedComments(options.currentDoc),
   visual(options.visual),
   mathPreview(options.settings.mathPreview),
+  addComment(),
   toolbarPanel(),
   verticalOverflow(),
   highlightActiveLine(options.visual.visual),

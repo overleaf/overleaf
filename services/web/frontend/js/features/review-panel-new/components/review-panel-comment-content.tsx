@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react'
+import { Dispatch, memo, SetStateAction, useCallback, useState } from 'react'
 import { Change, CommentOperation } from '../../../../../types/change'
 import { ReviewPanelMessage } from './review-panel-message'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +9,7 @@ import {
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import ReviewPanelResolvedMessage from './review-panel-resolved-message'
 import { ReviewPanelResolvedCommentThread } from '../../../../../types/review-panel/comment-thread'
+import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>
@@ -17,32 +18,28 @@ export const ReviewPanelCommentContent = memo<{
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<Error>()
-  const [content, setContent] = useState('')
   const threads = useThreadsContext()
   const { resolveThread, addMessage } = useThreadsActionsContext()
 
-  const handleSubmitReply = useCallback(() => {
-    setSubmitting(true)
-    addMessage(comment.op.t, content)
-      .then(() => {
-        setContent('')
-      })
-      .catch(error => {
-        setError(error)
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
-  }, [addMessage, comment.op.t, content])
+  const handleSubmitReply = useCallback(
+    (content: string, setContent: Dispatch<SetStateAction<string>>) => {
+      setSubmitting(true)
+      addMessage(comment.op.t, content)
+        .then(() => {
+          setContent('')
+        })
+        .catch(error => {
+          setError(error)
+        })
+        .finally(() => {
+          setSubmitting(false)
+        })
+    },
+    [addMessage, comment.op.t]
+  )
 
-  const handleCommentReplyKeyPress = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
-    if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
-      e.preventDefault()
-      handleSubmitReply()
-    }
-  }
+  const { handleChange, handleKeyPress, content } =
+    useSubmittableTextInput(handleSubmitReply)
 
   const thread = threads?.[comment.op.t]
   if (!thread) {
@@ -82,8 +79,8 @@ export const ReviewPanelCommentContent = memo<{
         <AutoExpandingTextArea
           name="content"
           className="review-panel-comment-input"
-          onChange={e => setContent(e.target.value)}
-          onKeyDown={handleCommentReplyKeyPress}
+          onChange={handleChange}
+          onKeyDown={handleKeyPress}
           placeholder={t('reply')}
           value={content}
           disabled={submitting}
