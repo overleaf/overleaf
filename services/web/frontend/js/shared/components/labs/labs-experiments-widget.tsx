@@ -111,11 +111,7 @@ function ActionButton({
 
   if (optedIn) {
     return (
-      <Button
-        bsStyle="secondary"
-        onClick={handleDisable}
-        className="btn btn-secondary"
-      >
+      <Button bsStyle={null} className="btn-secondary" onClick={handleDisable}>
         {t('turn_off')}
       </Button>
     )
