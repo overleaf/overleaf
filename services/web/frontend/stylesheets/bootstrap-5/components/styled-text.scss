@@ -1,0 +1,48 @@
+.text-with-bg {
+  @extend .dm-mono;
+
+  padding: 0 10px;
+  border-radius: 10px;
+  margin-top: 5px;
+
+  // will make all spans content inline while avoiding overflowing the viewport in mobile
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/display#flow-root
+  // https://css-tricks.com/display-flow-root/
+  display: inline flow-root;
+
+  &.tangerine-bg {
+    background-color: var(--vivid-tangerine);
+  }
+
+  &.purple-bg {
+    background-color: var(--ceil);
+  }
+
+  &.yellow-bg {
+    background-color: var(--caramel);
+  }
+
+  &.green-bg {
+    background-color: var(--green-30);
+  }
+}
+
+.mono-text {
+  @extend .dm-mono;
+  @include body-lg;
+
+  color: var(--green-60);
+  font-weight: 500;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  > span.mono-text {
+    display: block;
+    margin-bottom: var(--spacing-04);
+  }
+}

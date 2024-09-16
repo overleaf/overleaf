@@ -18,3 +18,14 @@ a {
     color: var(--link-visited-color);
   }
 }
+
+.link-monospace {
+  @extend .dm-mono;
+
+  font-weight: 500;
+  color: var(--green-50);
+
+  &:hover {
+    color: var(--green-60);
+  }
+}

@@ -41,6 +41,8 @@
       section
     */
   section {
+    // TODO: static pages look to use --spacing-16 (96px) for total vertical padding
+    // should that be the default going forward?
     padding: var(--spacing-08) var(--spacing-05);
 
     // TODO: confirm if we will still support this and if so what colors to use

@@ -96,3 +96,7 @@
     @error 'Theme "#{$name}" is not supported. Supported themes are: #{$themes}.';
   }
 }
+
+@mixin focus-style() {
+  box-shadow: 0 0 0 2px var(--blue-30);
+}

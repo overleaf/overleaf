@@ -1,0 +1,36 @@
+// TODO: .website-redesign to be removed once fully rolled out
+
+.website-redesign {
+  // hero section of features, enterprises, and universities will have an image that will overflow the page
+  overflow-x: hidden;
+
+  a {
+    text-decoration: none;
+
+    &:focus,
+    &:focus-visible {
+      outline: 0;
+    }
+
+    &:focus-visible {
+      @include focus-style;
+    }
+
+    // TODO: remove visited?
+
+    i {
+      vertical-align: middle;
+      margin-left: var(--spacing-02);
+    }
+
+    &.link-lg {
+      font-size: var(--font-size-04);
+      line-height: var(--line-height-03);
+
+      i {
+        font-size: 24px;
+        line-height: inherit;
+      }
+    }
+  }
+}

@@ -55,6 +55,11 @@ $yellow-50: #8f5514;
 $yellow-60: #7a4304;
 $yellow-70: #633a0b;
 
+/* Website redesign */
+$vivid-tangerine: #f1a695;
+$ceil: #9597c9;
+$caramel: #f9d38f;
+
 /* ====== Semantic Sass color variables ====== */
 $bg-light-primary: $white;
 $bg-light-secondary: $neutral-10;
@@ -164,6 +169,11 @@ $link-ui-visited-dark: $blue-40;
   --yellow-50: #{$yellow-50};
   --yellow-60: #{$yellow-60};
   --yellow-70: #{$yellow-70};
+
+  /* Website redesign */
+  --vivid-tangerine: #{$vivid-tangerine};
+  --ceil: #{$ceil};
+  --caramel: #{$caramel};
 
   /* ====== Semantic CSS color variables ====== */
   --bg-light-primary: var(--white);

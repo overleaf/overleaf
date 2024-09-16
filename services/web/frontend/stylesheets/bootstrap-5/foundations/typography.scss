@@ -99,3 +99,14 @@
   font-size: var(--font-size-01);
   line-height: var(--line-height-01);
 }
+
+.dm-mono {
+  font-family: 'DM Mono', monospace;
+
+  // We're using the "ss05" (stylistic set 5) version of the DM Mono, by setting the `font-feature-settings` rule
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/font-feature-settings
+  // We use the ss05 specifically to remove the "squiggle" below the f letter.
+  // You can try removing the `font-feature-settings` rule and check what happens to the letter "f",
+  // as it's quite hard to describe it with sentences alone
+  font-feature-settings: 'ss05';
+}
