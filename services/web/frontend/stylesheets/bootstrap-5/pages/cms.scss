@@ -1,0 +1,599 @@
+/*
+  CMS Generated Pages:
+  /about/*, /contact, /legal, /blog/*, /for/*, /events/*
+*/
+.cms-page {
+  &.website-redesign {
+    h1 {
+      font-size: 2rem; // 32px
+      line-height: 1.333;
+    }
+
+    h2 {
+      font-size: 1.5rem; // 24px
+    }
+
+    .sales-contact-form-left-column {
+      .sales-contact-form-heading-title {
+        font-size: 2.25rem;
+        font-family: var(-font-family-san-serif);
+        font-style: normal;
+        font-weight: 600;
+        line-height: 1.333;
+        padding-top: 8px;
+        padding-right: 50px;
+      }
+
+      @include media-breakpoint-up(sm) {
+        .names-container {
+          display: flex;
+          gap: 21px;
+        }
+      }
+
+      .checkbox-label {
+        font-size: 16px;
+        font-weight: 400;
+      }
+    }
+
+    /* Buttons */
+    // correct color property set on <a> above:
+    // TODO: check if reset needed
+    //   .reset-btns;
+    //   .alert {
+    //     .alert;
+    //   }
+    //   .alert-info {
+    //     .btn-info {
+    //       .btn-alert-info;
+    //     }
+    //   }
+
+    .p-no-text-nodes:has(.btn) {
+      margin-top: var(--spacing-09);
+
+      @include media-breakpoint-down(md) {
+        .btn {
+          width: 100%;
+          margin-left: 0;
+          margin-top: var(--spacing-05);
+        }
+
+        .btn:first-child {
+          margin-top: 0;
+        }
+      }
+    }
+
+    .btn + .btn {
+      margin-left: var(--spacing-06);
+    }
+
+    .optional-text {
+      font-size: 14px;
+    }
+  }
+
+  .section-row {
+    margin: 0 auto;
+
+    // TODO: check max-widths with UX team for new design
+    // used to have different sizes for different breakpoints but probably not needed
+    max-width: 1344px;
+  }
+
+  padding-bottom: 0;
+
+  img {
+    height: auto;
+    max-width: 100%;
+  }
+
+  /*
+      Tabs
+    */
+  .tab-content {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+  }
+
+  /*
+      When on preview mode
+    */
+  .cms-preview {
+    background-color: var(--blue-60);
+    color: white;
+    font-weight: bold;
+    height: 30px;
+    left: 0;
+    line-height: 30px;
+    opacity: 0.8;
+    position: fixed;
+    text-align: center;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+
+    &::after {
+      content: 'Preview';
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+  }
+
+  .tab-pane {
+    .row:first-child {
+      margin-top: 0;
+    }
+  }
+
+  /*
+      Tables
+    */
+  .table-styled {
+    overflow: hidden;
+    overflow-x: auto;
+
+    table {
+      background: white;
+      max-width: none;
+
+      th,
+      td {
+        border: 1px solid var(--neutral-30);
+        padding: var(--spacing-05);
+        text-align: center;
+        word-break: normal;
+      }
+    }
+  }
+
+  .table-styled,
+  .features-table {
+    .fa-check-square,
+    .fa-check {
+      color: var(--green-50);
+    }
+  }
+
+  .features-table {
+    max-width: none;
+
+    th,
+    td {
+      border: 1px solid var(--neutral-30);
+      hyphens: auto;
+      padding: var(--spacing-05);
+      text-align: center;
+      width: 20%;
+    }
+
+    .btn {
+      max-width: 100%;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    &.left-align-first-col {
+      td,
+      th {
+        text-align: left;
+      }
+
+      td + td,
+      th + th {
+        text-align: center;
+      }
+    }
+
+    .hidden-row-above-xs {
+      display: none;
+    }
+
+    @include media-breakpoint-down(md) {
+      tbody,
+      thead {
+        display: block;
+      }
+
+      tr {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-around;
+      }
+
+      td,
+      th {
+        display: block;
+        width: 25%;
+      }
+
+      tr:first-child {
+        th {
+          width: 50%;
+        }
+
+        th:first-child {
+          width: 100%;
+        }
+      }
+
+      td:first-child {
+        text-align: center;
+        width: 100%;
+      }
+
+      .hidden-row-xs {
+        display: none;
+      }
+
+      .hidden-row-above-xs {
+        display: flex;
+      }
+
+      .table-header {
+        text-align: center;
+      }
+    }
+  }
+
+  /*
+      universities page
+    */
+  #universities-container {
+    padding: var(--spacing-07);
+    width: 100%;
+
+    .row {
+      border-bottom: 1px solid var(--neutral-10);
+
+      div {
+        padding: var(--spacing-07);
+        vertical-align: middle;
+      }
+    }
+
+    .row:first-child {
+      // parent container contains padding
+
+      div {
+        padding-top: 0;
+      }
+    }
+
+    .row:last-child {
+      border: 0;
+
+      // parent container contains padding
+      div {
+        border: 0;
+        padding-bottom: 0;
+      }
+    }
+
+    p {
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    // Logos
+    .uni-logo {
+      margin: 0 auto;
+      max-height: 55px;
+      min-width: 55px;
+    }
+
+    .university-claim-btn {
+      text-align: center;
+    }
+
+    @include media-breakpoint-up(sm) {
+      display: table;
+      table-layout: fixed;
+
+      .row {
+        display: table-row;
+
+        div {
+          border-bottom: 1px solid var(--neutral-10);
+          display: table-cell;
+          float: none;
+        }
+      }
+    }
+  }
+
+  /*
+      videos
+    */
+  video {
+    height: auto;
+    max-width: 100%;
+  }
+}
+
+.icon-with-content {
+  display: flex;
+
+  h2,
+  h3,
+  h4 {
+    margin-top: 15px;
+  }
+
+  .icon-container {
+    background-color: var(--green-10);
+    padding: 7.5px;
+    height: 56px;
+    width: 56px;
+    border-radius: 50%;
+    margin-right: 24px;
+
+    .icon-inner-container {
+      align-items: center;
+      border: var(--green-30) 3.5px solid;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      height: 42px;
+      width: 42px;
+    }
+
+    i {
+      color: var(--green-50);
+      font-size: 21px;
+    }
+  }
+}
+
+.svg-arrow-icon {
+  position: relative;
+  left: 4px;
+  bottom: 1px;
+}
+
+// `Layout | Grid` display options
+.row-equal-column-heights {
+  @include media-breakpoint-down(md) {
+    div[class*='col-'] {
+      .card,
+      .no-card {
+        height: 100%;
+      }
+    }
+  }
+}
+
+.vertically-center-col {
+  // remove margin to better vertically align
+  // some elements need to be nested within a container, and others are directly within .no-card/.card
+  .card:first-child,
+  .no-card:first-child {
+    .cms-element-container {
+      > *:first-child {
+        margin-top: 0;
+      }
+    }
+
+    > *:first-child:not(.cms-element-container) {
+      margin-top: 0;
+    }
+  }
+
+  .card:last-child,
+  .no-card:last-child {
+    .cms-element-container {
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    > *:last-child:not(.cms-element-container) {
+      margin-bottom: 0;
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    display: flex;
+
+    div[class*='col-'] {
+      align-self: center;
+    }
+  }
+}
+
+.reverse-col-order-mobile {
+  @include media-breakpoint-down(md) {
+    flex-direction: column-reverse;
+  }
+}
+
+.row-within-card {
+  .no-card {
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.contact-form-error-container {
+  padding-bottom: var(--spacing-08);
+}
+
+.row-top-padding-sm {
+  padding-top: var(--spacing-05);
+}
+
+.row-top-padding-md {
+  padding-top: var(--spacing-07);
+}
+
+.row-top-padding-lg {
+  padding-top: var(--spacing-09);
+}
+
+.row-top-padding-xl {
+  padding-top: var(--spacing-10);
+}
+
+.row-top-padding-xxl {
+  padding-top: var(--spacing-11);
+}
+
+.row-bottom-padding-sm {
+  padding-bottom: var(--spacing-05);
+}
+
+.row-bottom-padding-md {
+  padding-bottom: var(--spacing-07);
+}
+
+.row-bottom-padding-lg {
+  padding-bottom: var(--spacing-09);
+}
+
+.row-bottom-padding-xl {
+  padding-bottom: var(--spacing-10);
+}
+
+.row-bottom-padding-xxl {
+  padding-bottom: var(--spacing-11);
+}
+
+@include media-breakpoint-up(md) {
+  .desktop-left-margin-sm {
+    margin-left: var(--spacing-05);
+  }
+
+  .desktop-left-margin-md {
+    margin-left: var(--spacing-07);
+  }
+
+  .desktop-left-margin-lg {
+    margin-left: var(--spacing-09);
+  }
+
+  .desktop-left-margin-xl {
+    margin-left: var(--spacing-10);
+  }
+
+  .desktop-left-margin-xxl {
+    margin-left: var(--spacing-11);
+  }
+
+  .desktop-right-margin-sm {
+    margin-right: var(--spacing-05);
+  }
+
+  .desktop-right-margin-md {
+    margin-right: var(--spacing-07);
+  }
+
+  .desktop-right-margin-lg {
+    margin-right: var(--spacing-09);
+  }
+
+  .desktop-right-margin-xl {
+    margin-right: var(--spacing-10);
+  }
+
+  .desktop-right-margin-xxl {
+    margin-right: var(--spacing-11);
+  }
+}
+
+.top-margin-sm {
+  margin-top: var(--spacing-05);
+}
+
+.top-margin-md {
+  margin-top: var(--spacing-07);
+}
+
+.top-margin-lg {
+  margin-top: var(--spacing-09);
+}
+
+.top-margin-xl {
+  margin-top: var(--spacing-10);
+}
+
+.top-margin-xxl {
+  margin-top: var(--spacing-11);
+}
+
+@include media-breakpoint-down(md) {
+  .mobile-bottom-margin-sm {
+    margin-bottom: var(--spacing-05);
+  }
+
+  .mobile-bottom-margin-md {
+    margin-bottom: var(--spacing-07);
+  }
+
+  .mobile-bottom-margin-lg {
+    margin-bottom: var(--spacing-09);
+  }
+
+  .mobile-bottom-margin-xl {
+    margin-bottom: var(--spacing-10);
+  }
+
+  .mobile-bottom-margin-xxl {
+    margin-bottom: var(--spacing-11);
+  }
+}
+
+// TODO: static newly designed pages used 992px for breakpoint
+// need to confirm whether or not CMS should as well
+// CMS currently uses 767px for breakpoint
+@include media-breakpoint-down(sm) {
+  .col-xs-padding-sm {
+    .col-xs-12:not(:first-child) {
+      padding-top: var(--spacing-05);
+    }
+  }
+
+  .col-xs-padding-md {
+    .col-xs-12:not(:first-child) {
+      padding-top: var(--spacing-07);
+    }
+  }
+
+  .col-xs-padding-lg {
+    .col-xs-12:not(:first-child) {
+      padding-top: var(--spacing-09);
+    }
+  }
+
+  .col-xs-padding-xl {
+    .col-xs-12:not(:first-child) {
+      padding-top: var(--spacing-10);
+    }
+  }
+
+  .col-xs-padding-xxl {
+    .col-xs-12:not(:first-child) {
+      padding-top: var(--spacing-11);
+    }
+  }
+}
+
+.bottom-align-last-entry {
+  display: flex;
+  flex-direction: column;
+
+  * {
+    &:last-child {
+      flex: 1;
+      align-content: end;
+    }
+  }
+}
