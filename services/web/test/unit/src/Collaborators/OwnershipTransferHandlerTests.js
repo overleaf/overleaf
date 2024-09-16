@@ -15,11 +15,16 @@ describe('OwnershipTransferHandler', function () {
       _id: new ObjectId(),
       email: 'collaborator@example.com',
     }
+    this.readOnlyCollaborator = {
+      _id: new ObjectId(),
+      email: 'readonly@example.com',
+    }
     this.project = {
       _id: new ObjectId(),
       name: 'project',
       owner_ref: this.user._id,
       collaberator_refs: [this.collaborator._id],
+      readOnly_refs: [this.readOnlyCollaborator._id],
     }
     this.ProjectGetter = {
       promises: {
@@ -89,6 +94,9 @@ describe('OwnershipTransferHandler', function () {
       this.UserGetter.promises.getUser
         .withArgs(this.collaborator._id)
         .resolves(this.collaborator)
+      this.UserGetter.promises.getUser
+        .withArgs(this.readOnlyCollaborator._id)
+        .resolves(this.readOnlyCollaborator)
     })
 
     it("should return a not found error if the project can't be found", async function () {
@@ -130,6 +138,32 @@ describe('OwnershipTransferHandler', function () {
       expect(this.ProjectModel.updateOne).to.have.been.calledWith(
         { _id: this.project._id },
         sinon.match({ $set: { owner_ref: this.collaborator._id } })
+      )
+    })
+
+    it('should transfer ownership of the project to a read-only collaborator', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.readOnlyCollaborator._id
+      )
+      expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+        { _id: this.project._id },
+        sinon.match({ $set: { owner_ref: this.readOnlyCollaborator._id } })
+      )
+    })
+
+    it('gives old owner read-only permissions if new owner was previously a viewer', async function () {
+      await this.handler.promises.transferOwnership(
+        this.project._id,
+        this.readOnlyCollaborator._id
+      )
+      expect(
+        this.CollaboratorsHandler.promises.addUserIdToProject
+      ).to.have.been.calledWith(
+        this.project._id,
+        this.readOnlyCollaborator._id,
+        this.user._id,
+        PrivilegeLevels.READ_ONLY
       )
     })
 
@@ -248,6 +282,7 @@ describe('OwnershipTransferHandler', function () {
 
     it('should decline to transfer ownership to a non-collaborator', async function () {
       this.project.collaberator_refs = []
+      this.project.readOnly_refs = []
       await expect(
         this.handler.promises.transferOwnership(
           this.project._id,

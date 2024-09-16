@@ -52,7 +52,18 @@ async function transferOwnership(projectId, newOwnerId, options = {}) {
     '', // IP address
     { previousOwnerId, newOwnerId }
   )
-  await _transferOwnership(projectId, previousOwnerId, newOwnerId)
+
+  // Determine which permissions to give old owner based on
+  // new owner's existing permissions
+  const newPermissions =
+    _getUserPermissions(newOwner, project) || PrivilegeLevels.READ_ONLY
+
+  await _transferOwnership(
+    projectId,
+    previousOwnerId,
+    newOwnerId,
+    newPermissions
+  )
 
   // Flush project to TPDS
   await TpdsProjectFlusher.promises.flushProjectToTpds(projectId)
@@ -68,6 +79,7 @@ async function _getProject(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     owner_ref: 1,
     collaberator_refs: 1,
+    readOnly_refs: 1,
     name: 1,
   })
   if (project == null) {
@@ -84,12 +96,28 @@ async function _getUser(userId) {
   return user
 }
 
-function _userIsCollaborator(user, project) {
+function _getUserPermissions(user, project) {
   const collaboratorIds = project.collaberator_refs || []
-  return collaboratorIds.some(collaboratorId => collaboratorId.equals(user._id))
+  const readOnlyIds = project.readOnly_refs || []
+  if (collaboratorIds.some(collaboratorId => collaboratorId.equals(user._id))) {
+    return PrivilegeLevels.READ_AND_WRITE
+  } else if (
+    readOnlyIds.some(collaboratorId => collaboratorId.equals(user._id))
+  ) {
+    return PrivilegeLevels.READ_ONLY
+  }
 }
 
-async function _transferOwnership(projectId, previousOwnerId, newOwnerId) {
+function _userIsCollaborator(user, project) {
+  return Boolean(_getUserPermissions(user, project))
+}
+
+async function _transferOwnership(
+  projectId,
+  previousOwnerId,
+  newOwnerId,
+  newPermissions
+) {
   await CollaboratorsHandler.promises.removeUserFromProject(
     projectId,
     newOwnerId
@@ -102,7 +130,7 @@ async function _transferOwnership(projectId, previousOwnerId, newOwnerId) {
     projectId,
     newOwnerId,
     previousOwnerId,
-    PrivilegeLevels.READ_AND_WRITE
+    newPermissions
   )
 }
 
