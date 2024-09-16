@@ -8,6 +8,7 @@ html(
 	- metadata = metadata || {}
 	- let bootstrap5PageStatus = 'disabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
 	- let bootstrap5PageSplitTest = ''
+	- let isWebsiteRedesign = false
 
 	block entrypointVar
 
@@ -73,7 +74,10 @@ html(
 
 		block head-scripts
 
-	body(class=(showThinFooter ? 'thin-footer' : undefined), data-theme="default")
+	body(class={
+		'thin-footer': showThinFooter,
+		'website-redesign': isWebsiteRedesign === true
+	}, data-theme="default")
 		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
 			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render=" + settings.recaptcha.siteKeyV3, defer=deferScripts)
 

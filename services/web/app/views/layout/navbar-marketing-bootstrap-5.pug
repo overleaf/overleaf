@@ -1,6 +1,8 @@
 include ../_mixins/navbar
 
-nav.navbar.navbar-default.navbar-main.navbar-expand-lg
+nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
+	'website-redesign-navbar': isWebsiteRedesign
+})
 	.container-fluid.navbar-container
 		.navbar-header
 			if settings.nav.custom_logo

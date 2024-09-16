@@ -1,0 +1,30 @@
+extends ./layout-base
+
+include ./_mixins/formMessages
+include ./_mixins/bootstrap_js
+
+block entrypointVar
+	- entrypoint = 'marketing'
+	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
+	- bootstrap5Override = true
+	- isWebsiteRedesign = true
+
+block body
+	if (typeof(suppressNavbar) == "undefined")
+		include layout/navbar-marketing-bootstrap-5
+
+	block content
+
+	if (typeof(suppressFooter) == "undefined")
+		if showThinFooter
+			include layout/footer-marketing
+		else
+			include layout/fat-footer-website-redesign
+
+	if (typeof(suppressCookieBanner) == 'undefined')
+		include _cookie_banner
+
+	!= moduleIncludes("contactModal-marketing-bootstrap-5", locals)
+
+block prepend foot-scripts
+	+bootstrap-js(5)
