@@ -7,16 +7,15 @@ const TextOperation = ot.TextOperation
 
 describe('HollowStringFileData', function () {
   it('validates string length when edited', function () {
-    const maxLength = TextOperation.MAX_STRING_LENGTH
-    const fileData = new HollowStringFileData(maxLength)
-    expect(fileData.getStringLength()).to.equal(maxLength)
+    const length = 200
+    const fileData = new HollowStringFileData(length)
 
     expect(() => {
-      fileData.edit(new TextOperation().retain(maxLength).insert('x'))
-    }).to.throw(TextOperation.TooLongError)
-    expect(fileData.getStringLength()).to.equal(maxLength)
+      fileData.edit(new TextOperation().retain(length + 10).insert('x'))
+    }).to.throw(TextOperation.ApplyError)
+    expect(fileData.getStringLength()).to.equal(length)
 
-    fileData.edit(new TextOperation().retain(maxLength - 1).remove(1))
-    expect(fileData.getStringLength()).to.equal(maxLength - 1)
+    fileData.edit(new TextOperation().retain(length).insert('x'))
+    expect(fileData.getStringLength()).to.equal(length + 1)
   })
 })

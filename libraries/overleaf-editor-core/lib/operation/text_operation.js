@@ -46,9 +46,18 @@ class TextOperation extends EditOperation {
   /**
    * Length of the longest file that we'll attempt to edit, in characters.
    *
-   * @type {number}
+   * This number used to be 2M characters, but it didn't include tracked
+   * deletes. Now that it includes tracked deletes, we raise the limit to the
+   * Mongo document size limit. It would have been impossible to store more
+   * tracked deletes in a single document.
    */
-  static MAX_STRING_LENGTH = 2 * Math.pow(1024, 2)
+  static MAX_STRING_LENGTH = 16 * Math.pow(1024, 2)
+
+  /**
+   * Max editable file length, excluding tracked deletes.
+   */
+  static MAX_STRING_LENGTH_EXCLUDING_TRACKED_DELETES = 2 * Math.pow(1024, 2)
+
   static UnprocessableError = UnprocessableError
   static ApplyError = ApplyError
   static InvalidInsertionError = InvalidInsertionError
@@ -325,7 +334,28 @@ class TextOperation extends EditOperation {
     }
 
     if (result.length > TextOperation.MAX_STRING_LENGTH) {
+      // We're over the hard limit, with or without tracked deletes
       throw new TextOperation.TooLongError(operation, result.length)
+    }
+
+    if (
+      result.length > TextOperation.MAX_STRING_LENGTH_EXCLUDING_TRACKED_DELETES
+    ) {
+      // We might be over the limit, but we need to check how much of the
+      // length is tracked deletes.
+      let trackedDeletesLength = 0
+      for (const change of file.trackedChanges) {
+        if (change.tracking.type === 'delete') {
+          trackedDeletesLength += change.range.length
+        }
+      }
+
+      if (
+        result.length - trackedDeletesLength >
+        TextOperation.MAX_STRING_LENGTH_EXCLUDING_TRACKED_DELETES
+      ) {
+        throw new TextOperation.TooLongError(operation, result.length)
+      }
     }
 
     file.content = result

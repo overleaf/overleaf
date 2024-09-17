@@ -3,8 +3,6 @@
 const assert = require('check-types').assert
 const OError = require('@overleaf/o-error')
 
-const TextOperation = require('./operation/text_operation')
-
 class NotFoundError extends OError {
   constructor(hash) {
     super(`blob ${hash} not found`, { hash })
@@ -26,17 +24,14 @@ class Blob {
    * in to determine that; so it is useful to have an upper bound on the byte
    * length of a file that might be editable.
    *
-   * The reason for the factor of 3 is as follows. We cannot currently edit files
-   * that contain characters outside of the basic multilingual plane, so we're
-   * limited to characters that can be represented in a single, two-byte UCS-2
-   * code unit. Encoding the largest such value, 0xFFFF (which is not actually
-   * a valid character), takes three bytes in UTF-8: 0xEF 0xBF 0xBF. A file
-   * composed entirely of three-byte UTF-8 codepoints is the worst case; in
-   * practice, this is a very conservative upper bound.
-   *
-   * @type {number}
+   * This used to be 3 times the max editable file length to account for 3-byte
+   * UTF-8 codepoints. However, editable file blobs now include tracked deletes
+   * and the system used to allow unlimited tracked deletes on a single file.
+   * A practical limit is the 16 MB Mongo size limit. It wouldn't have been
+   * possible to store more than 16 MB of tracked deletes. We therefore fall
+   * back to this limit.
    */
-  static MAX_EDITABLE_BYTE_LENGTH_BOUND = 3 * TextOperation.MAX_STRING_LENGTH
+  static MAX_EDITABLE_BYTE_LENGTH_BOUND = 16 * 1024 * 1024
 
   static NotFoundError = NotFoundError
 

@@ -178,7 +178,7 @@ describe('LazyStringFileData', function () {
     expect(fileData.getStringLength()).to.equal(0)
     expect(fileData.getOperations()).to.have.length(0)
 
-    const longString = _.repeat('a', TextOperation.MAX_STRING_LENGTH)
+    const longString = _.repeat('a', 1000)
     fileData.edit(new TextOperation().insert(longString))
     expect(fileData.getHash()).not.to.exist
     expect(fileData.getByteLength()).to.equal(longString.length) // approximate
@@ -186,8 +186,10 @@ describe('LazyStringFileData', function () {
     expect(fileData.getOperations()).to.have.length(1)
 
     expect(() => {
-      fileData.edit(new TextOperation().retain(longString.length).insert('x'))
-    }).to.throw(TextOperation.TooLongError)
+      fileData.edit(
+        new TextOperation().retain(longString.length - 123).insert('x')
+      )
+    }).to.throw(TextOperation.ApplyError)
     expect(fileData.getHash()).not.to.exist
     expect(fileData.getByteLength()).to.equal(longString.length) // approximate
     expect(fileData.getStringLength()).to.equal(longString.length)

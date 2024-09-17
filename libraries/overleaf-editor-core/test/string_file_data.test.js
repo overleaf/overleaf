@@ -5,7 +5,10 @@ const { expect } = require('chai')
 const _ = require('lodash')
 
 const ot = require('..')
+const Range = require('../lib/range')
 const StringFileData = require('../lib/file_data/string_file_data')
+const TrackedChange = require('../lib/file_data/tracked_change')
+const TrackingProps = require('../lib/file_data/tracking_props')
 const TextOperation = ot.TextOperation
 
 describe('StringFileData', function () {
@@ -20,7 +23,10 @@ describe('StringFileData', function () {
   })
 
   it('validates string length when edited', function () {
-    const longString = _.repeat('a', TextOperation.MAX_STRING_LENGTH)
+    const longString = _.repeat(
+      'a',
+      TextOperation.MAX_STRING_LENGTH_EXCLUDING_TRACKED_DELETES
+    )
     const fileData = new StringFileData(longString)
     expect(fileData.getByteLength()).to.equal(longString.length)
     expect(fileData.getStringLength()).to.equal(longString.length)
@@ -34,6 +40,38 @@ describe('StringFileData', function () {
     fileData.edit(new TextOperation().retain(longString.length - 1).remove(1))
     expect(fileData.getByteLength()).to.equal(longString.length - 1)
     expect(fileData.getStringLength()).to.equal(longString.length - 1)
+  })
+
+  it('ignores tracked deletes when checking the max string length', function () {
+    const longString = _.repeat(
+      'a',
+      TextOperation.MAX_STRING_LENGTH_EXCLUDING_TRACKED_DELETES
+    )
+    const fileData = new StringFileData(longString)
+    fileData.trackedChanges.add(
+      new TrackedChange(
+        new Range(123, 100),
+        new TrackingProps('delete', 'some-user', new Date())
+      )
+    )
+    fileData.trackedChanges.add(
+      new TrackedChange(
+        new Range(456, 50),
+        new TrackingProps('insert', 'some-user', new Date())
+      )
+    )
+
+    // Add text the same length as the tracked delete
+    fileData.edit(
+      new TextOperation().retain(longString.length).insert('x'.repeat(100))
+    )
+
+    // Add more text
+    expect(() => {
+      fileData.edit(
+        new TextOperation().retain(longString.length + 100).insert('x')
+      )
+    }).to.throw(TextOperation.TooLongError)
   })
 
   it('getComments() should return an empty array', function () {
