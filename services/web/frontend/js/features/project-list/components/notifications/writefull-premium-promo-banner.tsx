@@ -4,6 +4,7 @@ import { sendMB } from '@/infrastructure/event-tracking'
 import customLocalStorage from '@/infrastructure/local-storage'
 import WritefullLogo from '@/shared/svgs/writefull-logo'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import getMeta from '@/utils/meta'
 
 const eventSegmentation = {
   location: 'dashboard-banner',
@@ -20,6 +21,11 @@ function WritefullPremiumPromoBanner({
   setShow: (value: boolean) => void
   onDismiss: () => void
 }) {
+  // dont show the add to WF commons users since their license already includes it
+  const userAffiliations = getMeta('ol-userAffiliations') || []
+  const hasWritefullCommons = userAffiliations.some(
+    affil => affil.institution?.writefullCommonsAccount
+  )
   const handleClose = useCallback(() => {
     customLocalStorage.setItem('has_dismissed_writefull_promo_banner', true)
     setShow(false)
@@ -27,7 +33,7 @@ function WritefullPremiumPromoBanner({
     onDismiss()
   }, [setShow, onDismiss])
 
-  if (!show) {
+  if (!show || hasWritefullCommons) {
     return null
   }
 
