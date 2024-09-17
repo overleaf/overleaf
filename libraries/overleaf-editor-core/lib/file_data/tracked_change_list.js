@@ -42,17 +42,6 @@ class TrackedChangeList {
   }
 
   /**
-   * Iterate over tracked changes
-   *
-   * @returns {Iterator<TrackedChange>}
-   */
-  *[Symbol.iterator]() {
-    for (const change of this._trackedChanges) {
-      yield change
-    }
-  }
-
-  /**
    * @returns {readonly TrackedChange[]}
    */
   asSorted() {
