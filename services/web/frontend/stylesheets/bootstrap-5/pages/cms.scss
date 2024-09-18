@@ -3,84 +3,79 @@
   /about/*, /contact, /legal, /blog/*, /for/*, /events/*
 */
 .cms-page {
-  &.website-redesign {
-    h1 {
-      font-size: 2rem; // 32px
+  h1 {
+    font-size: 2rem; // 32px
+    line-height: 1.333;
+  }
+
+  h2 {
+    font-size: 1.5rem; // 24px
+  }
+
+  .sales-contact-form-left-column {
+    .sales-contact-form-heading-title {
+      font-size: 2.25rem;
+      font-family: var(-font-family-san-serif);
+      font-style: normal;
+      font-weight: 600;
       line-height: 1.333;
+      padding-top: 8px;
+      padding-right: 50px;
     }
 
-    h2 {
-      font-size: 1.5rem; // 24px
-    }
-
-    .sales-contact-form-left-column {
-      .sales-contact-form-heading-title {
-        font-size: 2.25rem;
-        font-family: var(-font-family-san-serif);
-        font-style: normal;
-        font-weight: 600;
-        line-height: 1.333;
-        padding-top: 8px;
-        padding-right: 50px;
-      }
-
-      @include media-breakpoint-up(sm) {
-        .names-container {
-          display: flex;
-          gap: 21px;
-        }
-      }
-
-      .checkbox-label {
-        font-size: 16px;
-        font-weight: 400;
+    @include media-breakpoint-up(sm) {
+      .names-container {
+        display: flex;
+        gap: 21px;
       }
     }
 
-    /* Buttons */
-    // correct color property set on <a> above:
-    // TODO: check if reset needed
-    //   .reset-btns;
-    //   .alert {
-    //     .alert;
-    //   }
-    //   .alert-info {
-    //     .btn-info {
-    //       .btn-alert-info;
-    //     }
-    //   }
+    .checkbox-label {
+      font-size: 16px;
+      font-weight: 400;
+    }
+  }
 
-    .p-no-text-nodes:has(.btn) {
-      margin-top: var(--spacing-09);
+  /* Buttons */
+  // correct color property set on <a> above:
+  // TODO: check if reset needed
+  //   .reset-btns;
+  //   .alert {
+  //     .alert;
+  //   }
+  //   .alert-info {
+  //     .btn-info {
+  //       .btn-alert-info;
+  //     }
+  //   }
 
-      @include media-breakpoint-down(md) {
-        .btn {
-          width: 100%;
-          margin-left: 0;
-          margin-top: var(--spacing-05);
-        }
+  .p-no-text-nodes:has(.btn) {
+    margin-top: var(--spacing-09);
 
-        .btn:first-child {
-          margin-top: 0;
-        }
+    @include media-breakpoint-down(md) {
+      .btn {
+        width: 100%;
+        margin-left: 0;
+        margin-top: var(--spacing-05);
+      }
+
+      .btn:first-child {
+        margin-top: 0;
       }
     }
+  }
 
-    .btn + .btn {
-      margin-left: var(--spacing-06);
-    }
+  .btn + .btn {
+    margin-left: var(--spacing-06);
+  }
 
-    .optional-text {
-      font-size: 14px;
-    }
+  .optional-text {
+    font-size: 14px;
   }
 
   .section-row {
     margin: 0 auto;
-
-    // TODO: check max-widths with UX team for new design
-    // used to have different sizes for different breakpoints but probably not needed
-    max-width: 1344px;
+    max-width: 1440px;
   }
 
   padding-bottom: 0;

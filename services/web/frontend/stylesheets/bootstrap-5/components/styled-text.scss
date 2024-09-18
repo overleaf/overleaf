@@ -1,9 +1,9 @@
 .text-with-bg {
   @extend .dm-mono;
 
-  padding: 0 10px;
-  border-radius: 10px;
-  margin-top: 5px;
+  padding: 0 var(--spacing-04);
+  border-radius: var(--border-radius-medium);
+  margin-top: var(--spacing-02);
 
   // will make all spans content inline while avoiding overflowing the viewport in mobile
   // https://developer.mozilla.org/en-US/docs/Web/CSS/display#flow-root
