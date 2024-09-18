@@ -4,6 +4,7 @@ import fetchMock from 'fetch-mock'
 import { renderWithEditorContext } from '../../../helpers/render-with-context'
 import FileViewHeader from '../../../../../frontend/js/features/file-view/components/file-view-header'
 import { USER_ID } from '../../../helpers/editor-providers'
+import { fileViewFile } from '@/features/ide-react/util/file-view'
 
 describe('<FileViewHeader/>', function () {
   const urlFile = {
@@ -79,6 +80,29 @@ describe('<FileViewHeader/>', function () {
       renderWithEditorContext(<FileViewHeader file={urlFile} />)
 
       screen.getByText('Download', { exact: false })
+    })
+  })
+
+  it('should use importedAt as timestamp when present in the linked file data', function () {
+    const fileFromServer = {
+      name: 'example.tex',
+      linkedFileData: {
+        v1_source_doc_id: 'v1-source-id',
+        source_project_id: 'source-project-id',
+        source_entity_path: '/source-entity-path.ext',
+        provider: 'project_file',
+        importer_id: USER_ID,
+        importedAt: new Date(2024, 9, 16, 1, 30).getTime(),
+      },
+      created: new Date(2021, 1, 17, 3, 24).toISOString(),
+    }
+    // FIXME: This should be tested through the <EditorAndPdf /> component instead
+    const fileShown = fileViewFile(fileFromServer)
+    renderWithEditorContext(<FileViewHeader file={fileShown} />)
+    screen.getByText('Imported from', { exact: false })
+    screen.getByText('Another project', { exact: false })
+    screen.getByText('/source-entity-path.ext, at 1:30 am Wed, 16th Oct 24', {
+      exact: false,
     })
   })
 })

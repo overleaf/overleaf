@@ -2,6 +2,7 @@ import { FileRef } from '../../../../../types/file-ref'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 
 export function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
+  const timestamp = fileRef.linkedFileData?.importedAt ?? fileRef.created
   return {
     _id: fileRef._id,
     name: fileRef.name,
@@ -9,7 +10,7 @@ export function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
     type: 'file',
     selected: true,
     linkedFileData: fileRef.linkedFileData,
-    created: fileRef.created ? new Date(fileRef.created) : new Date(),
+    created: timestamp ? new Date(timestamp) : new Date(),
     hash: fileRef.hash,
   }
 }
@@ -22,8 +23,9 @@ export function convertFileRefToBinaryFile(fileRef: FileRef): BinaryFile {
 // `FileViewHeader` pass in a string for `created`, so that's what this function
 // does too.
 export function fileViewFile(fileRef: FileRef) {
+  const converted = convertFileRefToBinaryFile(fileRef)
   return {
-    ...convertFileRefToBinaryFile(fileRef),
-    created: fileRef.created,
+    ...converted,
+    created: converted.created.toISOString(),
   }
 }
