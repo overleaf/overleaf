@@ -110,6 +110,7 @@ function _sanitizeData(data) {
     source_output_file_path: data.source_output_file_path,
     build_id: data.build_id,
     clsiServerId: data.clsiServerId,
+    importedAt: data.importedAt,
   }
 }
 

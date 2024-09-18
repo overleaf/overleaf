@@ -82,6 +82,7 @@ module.exports = LinkedFilesController = {
     }
 
     data.provider = provider
+    data.importedAt = new Date().toISOString()
 
     return Agent.createLinkedFile(
       projectId,
@@ -135,6 +136,8 @@ module.exports = LinkedFilesController = {
         if (Agent == null) {
           return res.sendStatus(400)
         }
+
+        linkedFileData.importedAt = new Date().toISOString()
 
         Agent.refreshLinkedFile(
           projectId,

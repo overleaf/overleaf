@@ -215,7 +215,8 @@ module.exports = ProjectFileAgent = {
       'provider',
       'source_project_id',
       'v1_source_doc_id',
-      'source_entity_path'
+      'source_entity_path',
+      'importedAt'
     )
   },
 

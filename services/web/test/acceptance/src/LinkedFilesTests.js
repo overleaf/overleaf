@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const _ = require('lodash')
 const fs = require('fs')
+const timekeeper = require('timekeeper')
 
 const Settings = require('@overleaf/settings')
 const User = require('./helpers/User').promises
@@ -23,6 +24,14 @@ LinkedUrlProxy.get('/', (req, res, next) => {
 })
 
 describe('LinkedFiles', function () {
+  before(function () {
+    timekeeper.freeze(new Date())
+  })
+
+  after(function () {
+    timekeeper.reset()
+  })
+
   let projectOne, projectOneId, projectOneRootFolderId
   let projectTwo, projectTwoId, projectTwoRootFolderId
   const sourceDocName = 'test.txt'
@@ -129,6 +138,7 @@ describe('LinkedFiles', function () {
         provider: 'project_file',
         source_project_id: projectTwoId,
         source_entity_path: `/${sourceDocName}`,
+        importedAt: new Date().toISOString(),
       })
       expect(firstFile.name).to.equal('test-link.txt')
 
@@ -264,6 +274,7 @@ describe('LinkedFiles', function () {
       expect(file.linkedFileData).to.deep.equal({
         provider: 'url',
         url: 'http://example.com/foo',
+        importedAt: new Date().toISOString(),
       })
       ;({ response, body } = await owner.doRequest(
         'get',
@@ -303,6 +314,7 @@ describe('LinkedFiles', function () {
       expect(file.linkedFileData).to.deep.equal({
         provider: 'url',
         url: 'http://example.com/bar',
+        importedAt: new Date().toISOString(),
       })
       ;({ response, body } = await owner.doRequest(
         'get',
@@ -405,6 +417,7 @@ describe('LinkedFiles', function () {
       expect(file.linkedFileData).to.deep.equal({
         provider: 'url',
         url: 'http://example.com/foo',
+        importedAt: new Date().toISOString(),
       })
       ;({ response, body } = await owner.doRequest(
         'get',
@@ -460,6 +473,7 @@ describe('LinkedFiles', function () {
         source_project_id: projectTwoId,
         source_output_file_path: 'project.pdf',
         build_id: '1234-abcd',
+        importedAt: new Date().toISOString(),
       })
       expect(firstFile.name).to.equal('test.pdf')
 

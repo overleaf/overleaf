@@ -63,6 +63,7 @@ function _sanitizeData(data) {
   return {
     provider: data.provider,
     url: UrlHelper.prependHttpIfNeeded(data.url),
+    importedAt: data.importedAt,
   }
 }
 
