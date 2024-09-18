@@ -4,4 +4,150 @@
   --bs-card-border-radius: var(--border-radius-base);
   --bs-card-spacer-x: var(--spacing-08);
   --bs-card-spacer-y: var(--spacing-08);
+
+  .card-body {
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &.card-dark-green-bg {
+    background: var(--dark-jungle-green);
+    border-radius: var(--border-radius-large);
+    color: var(--green-10);
+
+    .card-body {
+      padding: var(--spacing-09);
+    }
+
+    a:not(.btn) {
+      color: var(--green-30);
+
+      &:hover {
+        color: var(--green-30);
+      }
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    p {
+      color: var(--green-10);
+    }
+  }
+
+  &.card-purple-top-border {
+    background-color: white;
+    border-radius: var(--border-radius-medium);
+    box-shadow:
+      0 2px 4px 0 #1e253014,
+      0 4px 12px 0 #1e25301f;
+    border-top: 8px solid var(--sapphire-blue);
+
+    .card-body {
+      padding: var(--spacing-09) var(--spacing-10);
+    }
+  }
+
+  &.card-premium-border {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    p {
+      color: var(--blue-60);
+    }
+
+    border-radius: var(--spacing-04);
+    border: 2px solid transparent;
+    background:
+      linear-gradient(white, white) padding-box,
+      linear-gradient(to right, var(--blue-40), #254c84, var(--blue-70))
+        border-box;
+
+    .card-body {
+      padding: var(--spacing-10);
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  &.card-pattern {
+    border-radius: var(--border-radius-medium);
+    color: var(--white);
+    text-align: center;
+    background-size: cover;
+    background-image: linear-gradient(
+        to right,
+        rgba(0 0 0 / 40%) 0%,
+        var(--dark-jungle-green) 25%,
+        var(--dark-jungle-green) 75%,
+        rgba(0 0 0 / 40%) 100%
+      ),
+      url('../../../../public/img/website-redesign/overleaf-pattern-purple.png');
+
+    h2 {
+      @include heading-lg;
+    }
+
+    p {
+      @include body-lg;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    p {
+      color: var(--white);
+    }
+
+    .card-body {
+      padding: var(--spacing-13);
+    }
+  }
+
+  &.card-pattern-left-only {
+    border-radius: var(--border-radius-medium);
+    color: var(--white);
+    background-size: cover;
+    background-image: linear-gradient(
+        to right,
+        rgba(0 0 0 / 40%) 0%,
+        var(--dark-jungle-green) 20%,
+        var(--dark-jungle-green) 100%
+      ),
+      url('../../../../public/img/website-redesign/overleaf-pattern-purple.png');
+
+    h2 {
+      @include heading-lg;
+    }
+
+    p {
+      @include body-lg;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    p {
+      color: var(--white);
+    }
+
+    .card-body {
+      padding: var(--spacing-13);
+    }
+  }
 }
