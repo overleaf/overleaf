@@ -78,6 +78,15 @@
     max-width: 1440px;
   }
 
+  // TODO: update if mobile breakpoint changes
+  @include media-breakpoint-down(md) {
+    div[class*='col-'] {
+      &:not(:first-child) {
+        padding-top: var(--spacing-13);
+      }
+    }
+  }
+
   padding-bottom: 0;
 
   img {
@@ -522,63 +531,6 @@
 
 .top-margin-xxl {
   margin-top: var(--spacing-11);
-}
-
-@include media-breakpoint-down(md) {
-  .mobile-bottom-margin-sm {
-    margin-bottom: var(--spacing-05);
-  }
-
-  .mobile-bottom-margin-md {
-    margin-bottom: var(--spacing-07);
-  }
-
-  .mobile-bottom-margin-lg {
-    margin-bottom: var(--spacing-09);
-  }
-
-  .mobile-bottom-margin-xl {
-    margin-bottom: var(--spacing-10);
-  }
-
-  .mobile-bottom-margin-xxl {
-    margin-bottom: var(--spacing-11);
-  }
-}
-
-// TODO: static newly designed pages used 992px for breakpoint
-// need to confirm whether or not CMS should as well
-// CMS currently uses 767px for breakpoint
-@include media-breakpoint-down(sm) {
-  .col-xs-padding-sm {
-    .col-xs-12:not(:first-child) {
-      padding-top: var(--spacing-05);
-    }
-  }
-
-  .col-xs-padding-md {
-    .col-xs-12:not(:first-child) {
-      padding-top: var(--spacing-07);
-    }
-  }
-
-  .col-xs-padding-lg {
-    .col-xs-12:not(:first-child) {
-      padding-top: var(--spacing-09);
-    }
-  }
-
-  .col-xs-padding-xl {
-    .col-xs-12:not(:first-child) {
-      padding-top: var(--spacing-10);
-    }
-  }
-
-  .col-xs-padding-xxl {
-    .col-xs-12:not(:first-child) {
-      padding-top: var(--spacing-11);
-    }
-  }
 }
 
 .bottom-align-last-entry {
