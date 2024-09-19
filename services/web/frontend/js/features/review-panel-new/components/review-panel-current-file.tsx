@@ -45,20 +45,26 @@ const ReviewPanelCurrentFile: FC = () => {
   const [aggregatedRanges, setAggregatedRanges] = useState<AggregatedRanges>()
 
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const previousFocusedItem = useRef(0)
+  const previousFocusedItem = useRef(new Map<string, number>())
 
   const updatePositions = useCallback(() => {
-    if (containerRef.current) {
-      const extents = positionItems(
+    const docId = ranges?.docId
+
+    if (containerRef.current && docId) {
+      const positioningRes = positionItems(
         containerRef.current,
-        previousFocusedItem.current
+        previousFocusedItem.current.get(docId) || 0,
+        docId
       )
 
-      if (extents) {
-        previousFocusedItem.current = extents.activeItemIndex
+      if (positioningRes) {
+        previousFocusedItem.current.set(
+          positioningRes.docId,
+          positioningRes.activeItemIndex
+        )
       }
     }
-  }, [])
+  }, [ranges?.docId])
 
   useEffect(() => {
     const timer = window.setTimeout(() => {

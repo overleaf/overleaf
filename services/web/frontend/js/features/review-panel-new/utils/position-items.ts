@@ -4,7 +4,11 @@ const COLLAPSED_HEADER_HEIGHT = 75
 const OFFSET_FOR_ENTRIES_ABOVE = 70
 
 export const positionItems = debounce(
-  (element: HTMLDivElement, previousFocusedItemIndex: number) => {
+  (
+    element: HTMLDivElement,
+    previousFocusedItemIndex: number,
+    docId: string
+  ) => {
     const items = Array.from(
       element.querySelectorAll<HTMLDivElement>('.review-panel-entry')
     )
@@ -80,9 +84,8 @@ export const positionItems = debounce(
     }
 
     return {
+      docId,
       activeItemIndex,
-      min: topLimit,
-      max: bottomLimit,
     }
   },
   100,
