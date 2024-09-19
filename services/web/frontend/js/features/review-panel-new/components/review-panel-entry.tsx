@@ -16,7 +16,7 @@ export const ReviewPanelEntry: FC<{
   top?: number
   className?: string
   selectLineOnFocus?: boolean
-}> = ({ children, position, top, op, className, selectLineOnFocus }) => {
+}> = ({ children, position, top, op, className, selectLineOnFocus = true }) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
   const [focused, setFocused] = useState(false)
