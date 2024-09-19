@@ -19,7 +19,11 @@ export const useScope = (scope: Record<string, unknown>) => {
         } catch {
           // allowed not to exist
         }
-        window.overleaf.unstable.store.set(path, merge(existingValue, value))
+        if (typeof existingValue === 'object' && typeof value === 'object') {
+          window.overleaf.unstable.store.set(path, merge(existingValue, value))
+        } else {
+          window.overleaf.unstable.store.set(path, value)
+        }
       }
     }
   }, [])
