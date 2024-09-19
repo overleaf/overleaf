@@ -13,7 +13,7 @@ export const ReviewPanelComment = memo<{
   const threads = useThreadsContext()
 
   const thread = threads?.[comment.op.t]
-  if (!thread || thread.resolved) {
+  if (!thread || thread.resolved || thread.messages.length === 0) {
     return null
   }
 
