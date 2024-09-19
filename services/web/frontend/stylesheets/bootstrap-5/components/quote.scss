@@ -1,0 +1,110 @@
+blockquote {
+  p {
+    display: inline;
+  }
+}
+
+blockquote.quote-large-text-centered {
+  text-align: center;
+  font-size: var(--font-size-07);
+  font-weight: 600;
+  line-height: var(--line-height-06);
+
+  // customize open/close quote placement.
+  // Otherwise, close is after footer and before is above quote
+  &::before,
+  &::after {
+    content: none;
+  }
+
+  .quote {
+    margin-bottom: var(--spacing-08);
+
+    &::before {
+      content: open-quote;
+    }
+
+    &::after {
+      content: close-quote;
+    }
+  }
+
+  .quote-img {
+    img {
+      border-radius: 50%;
+      height: 64px;
+      max-width: 64px;
+    }
+  }
+
+  footer {
+    color: inherit;
+    font-size: var(--font-size-03);
+    font-weight: 400;
+    line-height: var(--line-height-03);
+    padding: var(--spacing-04) 0 0 0;
+
+    &::before {
+      content: none;
+    }
+
+    .quote-link {
+      text-align: center;
+      margin-top: var(--spacing-05);
+    }
+  }
+
+  @include media-breakpoint-down(lg) {
+    font-size: var(--font-size-04);
+    line-height: var(--line-height-04);
+
+    footer {
+      font-size: var(--font-size-02);
+      line-height: var(--line-height-02);
+    }
+  }
+}
+
+blockquote.quote-left-green-border {
+  border-left: 2px solid var(--green-60);
+  text-align: left;
+  font-size: var(--font-size-07);
+  font-weight: 600;
+  line-height: var(--line-height-06);
+  color: var(--neutral-90);
+  padding: var(--spacing-04) 0 var(--spacing-04) var(--spacing-06);
+
+  // customize open/close quote placement.
+  // Otherwise, close is after footer and before is above quote
+  &::before,
+  &::after {
+    content: none;
+  }
+
+  .quote {
+    &::before {
+      content: open-quote;
+    }
+
+    &::after {
+      content: close-quote;
+    }
+  }
+
+  footer {
+    @include heading-xs;
+
+    color: var(--neutral-70);
+    font-weight: 400;
+    margin: var(--spacing-09) 0 0 0;
+    padding: 0;
+
+    &::before {
+      content: '\2014 \00A0';
+    }
+  }
+
+  .quote-link {
+    margin-top: var(--spacing-05);
+  }
+}
