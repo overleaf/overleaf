@@ -7,12 +7,21 @@ import {
   ViewPlugin,
   WidgetType,
 } from '@codemirror/view'
-import { Change, DeleteOperation } from '../../../../../types/change'
+import {
+  AnyOperation,
+  Change,
+  DeleteOperation,
+} from '../../../../../types/change'
 import { debugConsole } from '@/utils/debugging'
-import { isCommentOperation, isDeleteOperation } from '@/utils/operations'
+import {
+  isCommentOperation,
+  isDeleteOperation,
+  isInsertOperation,
+} from '@/utils/operations'
 import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { Ranges } from '@/features/review-panel-new/context/ranges-context'
 import { Threads } from '@/features/review-panel-new/context/threads-context'
+import { isSelectionWithinOp } from '@/features/review-panel-new/utils/is-selection-within-op'
 
 type RangesData = {
   ranges: Ranges
@@ -20,10 +29,17 @@ type RangesData = {
 }
 
 const updateRangesEffect = StateEffect.define<RangesData>()
+const highlightRangesEffect = StateEffect.define<AnyOperation | undefined>()
 
 export const updateRanges = (data: RangesData): TransactionSpec => {
   return {
     effects: updateRangesEffect.of(data),
+  }
+}
+
+export const highlightRanges = (op?: AnyOperation): TransactionSpec => {
+  return {
+    effects: highlightRangesEffect.of(op),
   }
 }
 
@@ -89,6 +105,68 @@ export const ranges = ({ ranges, threads }: Options) => {
       }
     ),
 
+    // draw highlight decorations
+    ViewPlugin.define<
+      PluginValue & {
+        decorations: DecorationSet
+      }
+    >(
+      () => {
+        return {
+          decorations: Decoration.none,
+          update(update) {
+            for (const transaction of update.transactions) {
+              this.decorations = this.decorations.map(transaction.changes)
+
+              for (const effect of transaction.effects) {
+                if (effect.is(highlightRangesEffect)) {
+                  this.decorations = buildHighlightDecorations(
+                    'ol-cm-change-highlight',
+                    effect.value
+                  )
+                }
+              }
+            }
+          },
+        }
+      },
+      {
+        decorations: value => value.decorations,
+      }
+    ),
+
+    // draw focus decorations
+    ViewPlugin.define<
+      PluginValue & {
+        decorations: DecorationSet
+      }
+    >(
+      () => {
+        return {
+          decorations: Decoration.none,
+          update(update) {
+            this.decorations = Decoration.none
+
+            if (!ranges) {
+              return
+            }
+
+            for (const range of [...ranges.changes, ...ranges.comments]) {
+              if (isSelectionWithinOp(range.op, update.state.selection.main)) {
+                this.decorations = buildHighlightDecorations(
+                  'ol-cm-change-focus',
+                  range.op
+                )
+              }
+            }
+          },
+        }
+      },
+      {
+        decorations: value => value.decorations,
+      }
+    ),
+
     // styles for change decorations
     trackChangesTheme,
   ]
@@ -113,6 +191,29 @@ const buildChangeDecorations = (data: RangesData) => {
   }
 
   return Decoration.set(decorations, true)
+}
+
+const buildHighlightDecorations = (className: string, op?: AnyOperation) => {
+  if (!op) {
+    return Decoration.none
+  }
+
+  if (isDeleteOperation(op)) {
+    // nothing to highlight for deletions (for now)
+    // TODO: add highlight when delete indicator is done
+    return Decoration.none
+  }
+
+  const opFrom = op.p
+  const opLength = isInsertOperation(op) ? op.i.length : op.c.length
+  const opType = isInsertOperation(op) ? 'i' : 'c'
+
+  return Decoration.set(
+    Decoration.mark({
+      class: `${className} ${className}-${opType}`,
+    }).range(opFrom, opFrom + opLength),
+    true
+  )
 }
 
 class ChangeDeletedWidget extends WidgetType {
@@ -201,5 +302,29 @@ const trackChangesTheme = EditorView.baseTheme({
   '.ol-cm-change-d': {
     borderLeft: '2px dotted #c5060b',
     marginLeft: '-1px',
+  },
+  '&light .ol-cm-change-highlight-i': {
+    backgroundColor: '#b8dbc899',
+  },
+  '&dark .ol-cm-change-highlight-i': {
+    backgroundColor: '#b8dbc899',
+  },
+  '&light .ol-cm-change-highlight-c': {
+    backgroundColor: '#fcc4837d',
+  },
+  '&dark .ol-cm-change-highlight-c': {
+    backgroundColor: '#fcc4837d',
+  },
+  '&light .ol-cm-change-focus-i': {
+    backgroundColor: '#B8DBC8',
+  },
+  '&dark .ol-cm-change-focus-i': {
+    backgroundColor: '#B8DBC8',
+  },
+  '&light .ol-cm-change-focus-c': {
+    backgroundColor: '#FCC483',
+  },
+  '&dark .ol-cm-change-focus-c': {
+    backgroundColor: '#FCC483',
   },
 })
