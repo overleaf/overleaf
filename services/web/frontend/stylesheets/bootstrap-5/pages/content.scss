@@ -6,6 +6,10 @@
 // TODO: consolidate cms.scss and content.scss
 
 .content-page {
+  &.content {
+    padding-top: $header-height; // remove extra padding added by .content. Keep .content selector to increase specificity
+  }
+
   word-break: break-word;
 
   /*
@@ -93,9 +97,7 @@
   }
 
   .content-container > section:first-child {
-    /* header */
-    padding-bottom: 0;
-    padding-top: 0;
+    padding-top: var(--spacing-15);
   }
 
   section.no-top-padding {
