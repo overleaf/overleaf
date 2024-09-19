@@ -237,45 +237,47 @@ const ReviewPanelCurrentFile: FC = () => {
   }
 
   return (
-    <div ref={handleContainer}>
-      {addCommentEntries.map(entry => {
-        const { id, from, to, value, top } = entry
-        return (
-          <ReviewPanelAddComment
-            key={id}
-            from={from}
-            to={to}
-            value={value}
-            top={top}
-          />
-        )
-      })}
-
+    <>
       {showEmptyState && <ReviewPanelEmptyState />}
 
-      {aggregatedRanges.changes.map(
-        change =>
-          positions.has(change.id) && (
-            <ReviewPanelChange
-              key={change.id}
-              change={change}
-              top={positions.get(change.id)}
-              aggregate={aggregatedRanges.aggregates.get(change.id)}
+      <div ref={handleContainer}>
+        {addCommentEntries.map(entry => {
+          const { id, from, to, value, top } = entry
+          return (
+            <ReviewPanelAddComment
+              key={id}
+              from={from}
+              to={to}
+              value={value}
+              top={top}
             />
           )
-      )}
+        })}
 
-      {aggregatedRanges.comments.map(
-        comment =>
-          positions.has(comment.id) && (
-            <ReviewPanelComment
-              key={comment.id}
-              comment={comment}
-              top={positions.get(comment.id)}
-            />
-          )
-      )}
-    </div>
+        {aggregatedRanges.changes.map(
+          change =>
+            positions.has(change.id) && (
+              <ReviewPanelChange
+                key={change.id}
+                change={change}
+                top={positions.get(change.id)}
+                aggregate={aggregatedRanges.aggregates.get(change.id)}
+              />
+            )
+        )}
+
+        {aggregatedRanges.comments.map(
+          comment =>
+            positions.has(comment.id) && (
+              <ReviewPanelComment
+                key={comment.id}
+                comment={comment}
+                top={positions.get(comment.id)}
+              />
+            )
+        )}
+      </div>
+    </>
   )
 }
 
