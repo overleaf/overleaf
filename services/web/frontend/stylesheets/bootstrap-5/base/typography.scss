@@ -73,3 +73,19 @@ samp {
 .list-style-check-green {
   list-style-image: url('../../../../public/img/fa-check-green.svg');
 }
+
+.text-center {
+  text-align: center;
+}
+
+@include media-breakpoint-up(lg) {
+  .text-center-only-desktop {
+    text-align: center;
+  }
+}
+
+@include media-breakpoint-down(lg) {
+  .text-center-only-mobile {
+    text-align: center;
+  }
+}
