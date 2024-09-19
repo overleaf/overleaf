@@ -78,15 +78,6 @@
     max-width: 1440px;
   }
 
-  // TODO: update if mobile breakpoint changes
-  @include media-breakpoint-down(md) {
-    div[class*='col-'] {
-      &:not(:first-child) {
-        padding-top: var(--spacing-13);
-      }
-    }
-  }
-
   padding-bottom: 0;
 
   img {
@@ -359,18 +350,6 @@
   bottom: 1px;
 }
 
-// `Layout | Grid` display options
-.row-equal-column-heights {
-  @include media-breakpoint-down(md) {
-    div[class*='col-'] {
-      .card,
-      .no-card {
-        height: 100%;
-      }
-    }
-  }
-}
-
 .vertically-center-col {
   // remove margin to better vertically align
   // some elements need to be nested within a container, and others are directly within .no-card/.card
@@ -398,20 +377,6 @@
     > *:last-child:not(.cms-element-container) {
       margin-bottom: 0;
     }
-  }
-
-  @include media-breakpoint-up(md) {
-    display: flex;
-
-    div[class*='col-'] {
-      align-self: center;
-    }
-  }
-}
-
-.reverse-col-order-mobile {
-  @include media-breakpoint-down(md) {
-    flex-direction: column-reverse;
   }
 }
 
@@ -471,7 +436,41 @@
   padding-bottom: var(--spacing-11);
 }
 
-@include media-breakpoint-up(md) {
+// Desktop layout options depdendent on mobile breakpoint
+@include media-breakpoint-up(lg) {
+  .row-equal-column-heights {
+    div[class*='col-'] {
+      .card,
+      .no-card {
+        height: 100%;
+      }
+    }
+  }
+
+  .vertically-center-col {
+    div[class*='col-'] {
+      align-self: center;
+    }
+  }
+}
+
+// Mobile layout options depdendent on mobile breakpoint
+@include media-breakpoint-down(lg) {
+  .cms-page {
+    div[class*='col-'] {
+      &:not(:first-child) {
+        padding-top: var(--spacing-13);
+      }
+    }
+
+    .reverse-col-order-mobile {
+      flex-direction: column-reverse;
+    }
+  }
+}
+
+// TODO: will be deprecated and gap option used instead
+@include media-breakpoint-up(lg) {
   .desktop-left-margin-sm {
     margin-left: var(--spacing-05);
   }
