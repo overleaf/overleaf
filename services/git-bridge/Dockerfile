@@ -1,6 +1,6 @@
 # Dockerfile for git-bridge
 
-FROM maven:3-amazoncorretto-21-debian as base
+FROM maven:3-amazoncorretto-21-debian AS base
 
 RUN apt-get update && apt-get install -y make git sqlite3 \
  && rm -rf /var/lib/apt/lists
@@ -10,7 +10,7 @@ RUN chmod +x /opt/envsubst
 
 RUN useradd --create-home node
 
-FROM base as builder
+FROM base AS builder
 
 COPY . /app
 

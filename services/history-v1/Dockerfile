@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:18.20.2 as base
+FROM node:18.20.2 AS base
 
 WORKDIR /overleaf/services/history-v1
 
@@ -13,7 +13,7 @@ RUN mkdir /home/node/.config && chown node:node /home/node/.config
 # fs persistor needs a writable folder as a target for the mounted volume
 RUN mkdir /buckets && chown node:node /buckets
 
-FROM base as app
+FROM base AS app
 
 COPY package.json package-lock.json /overleaf/
 COPY services/history-v1/package.json /overleaf/services/history-v1/
