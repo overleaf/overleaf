@@ -10,16 +10,13 @@ const HashFileData = require('./file_data/hash_file_data')
 const StringFileData = require('./file_data/string_file_data')
 
 /**
- * @typedef {import("./blob")} Blob
- * @typedef {import("./types").BlobStore} BlobStore
- * @typedef {import("./types").ReadonlyBlobStore} ReadonlyBlobStore
- * @typedef {import("./types").RawFileData} RawFileData
- * @typedef {import("./types").RawFile} RawFile
- * @typedef {import("./types").StringFileRawData} StringFileRawData
- * @typedef {import("./types").CommentRawData} CommentRawData
- * @typedef {import("./file_data/comment_list")} CommentList
- * @typedef {import("./operation/text_operation")} TextOperation
- * @typedef {import("./file_data/tracked_change_list")} TrackedChangeList
+ * @import Blob from "./blob"
+ * @import { BlobStore, ReadonlyBlobStore, RawFileData, RawFile } from "./types"
+ * @import { StringFileRawData, CommentRawData } from "./types"
+ * @import CommentList from "./file_data/comment_list"
+ * @import TextOperation from "./operation/text_operation"
+ * @import TrackedChangeList from "./file_data/tracked_change_list"
+ *
  * @typedef {{filterTrackedDeletes?: boolean}} FileGetContentOptions
  */
 

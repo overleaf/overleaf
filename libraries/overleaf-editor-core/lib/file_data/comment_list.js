@@ -2,8 +2,8 @@
 const Comment = require('../comment')
 
 /**
- * @typedef {import("../types").CommentRawData} CommentRawData
- * @typedef {import("../range")} Range
+ * @import { CommentRawData } from "../types"
+ * @import Range from "../range"
  */
 
 class CommentList {

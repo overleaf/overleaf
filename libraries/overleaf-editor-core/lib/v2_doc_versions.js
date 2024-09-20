@@ -4,9 +4,9 @@
 const _ = require('lodash')
 
 /**
- * @typedef {import("./file")} File
- * @typedef {import("./snapshot")} Snapshot
- * @typedef {import("./types").RawV2DocVersions} RawV2DocVersions
+ * @import File from "./file"
+ * @import Snapshot from "./snapshot"
+ * @import { RawV2DocVersions } from "./types"
  */
 
 class V2DocVersions {

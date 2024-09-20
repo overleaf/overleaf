@@ -10,9 +10,8 @@ import * as Errors from './Errors.js'
 import _ from 'lodash'
 
 /**
- * @typedef {import('stream').Readable} ReadableStream
- * @typedef {import('overleaf-editor-core').Snapshot} Snapshot
- * @typedef {import('./types').RangesSnapshot} RangesSnapshot
+ * @import { Snapshot } from 'overleaf-editor-core'
+ * @import { RangesSnapshot } from './types'
  */
 
 StringStream.prototype._read = function () {}

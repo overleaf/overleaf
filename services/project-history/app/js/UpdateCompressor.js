@@ -4,10 +4,7 @@ import OError from '@overleaf/o-error'
 import DMP from 'diff-match-patch'
 
 /**
- * @typedef {import('./types').DeleteOp} DeleteOp
- * @typedef {import('./types').InsertOp} InsertOp
- * @typedef {import('./types').Op} Op
- * @typedef {import('./types').Update} Update
+ * @import { DeleteOp, InsertOp, Op, Update } from './types'
  */
 
 const MAX_TIME_BETWEEN_UPDATES = 60 * 1000 // one minute

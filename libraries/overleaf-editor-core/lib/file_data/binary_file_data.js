@@ -6,7 +6,7 @@ const Blob = require('../blob')
 const FileData = require('./')
 
 /**
- * @typedef {import('../types').RawBinaryFileData} RawBinaryFileData
+ * @import { RawBinaryFileData } from '../types'
  */
 
 class BinaryFileData extends FileData {

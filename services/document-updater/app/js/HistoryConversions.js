@@ -4,12 +4,8 @@ const _ = require('lodash')
 const { isDelete } = require('./Utils')
 
 /**
- * @typedef {import('./types').Comment} Comment
- * @typedef {import('./types').HistoryComment} HistoryComment
- * @typedef {import('./types').HistoryRanges} HistoryRanges
- * @typedef {import('./types').HistoryTrackedChange} HistoryTrackedChange
- * @typedef {import('./types').Ranges} Ranges
- * @typedef {import('./types').TrackedChange} TrackedChange
+ * @import { Comment, HistoryComment, HistoryRanges, HistoryTrackedChange } from './types'
+ * @import { Ranges, TrackedChange } from './types'
  */
 
 /**

@@ -9,12 +9,9 @@ const ClearTrackingProps = require('../file_data/clear_tracking_props')
 const TrackingProps = require('../file_data/tracking_props')
 
 /**
+ * @import { RawScanOp, RawInsertOp, RawRetainOp, RawRemoveOp, TrackingDirective } from '../types'
+ *
  * @typedef {{ length: number, inputCursor: number, readonly inputLength: number}} LengthApplyContext
- * @typedef {import('../types').RawScanOp} RawScanOp
- * @typedef {import('../types').RawInsertOp} RawInsertOp
- * @typedef {import('../types').RawRetainOp} RawRetainOp
- * @typedef {import('../types').RawRemoveOp} RawRemoveOp
- * @typedef {import('../types').TrackingDirective} TrackingDirective
  */
 
 class ScanOp {

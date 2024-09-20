@@ -7,7 +7,7 @@ const Change = require('./change')
 const Operation = require('./operation')
 
 /**
- * @typedef {import("./author")} Author
+ * @import Author from "./author"
  */
 
 /**

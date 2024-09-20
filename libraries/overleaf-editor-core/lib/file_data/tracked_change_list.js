@@ -4,8 +4,7 @@ const TrackedChange = require('./tracked_change')
 const TrackingProps = require('../file_data/tracking_props')
 
 /**
- * @typedef {import("../types").TrackingDirective} TrackingDirective
- * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
+ * @import { TrackingDirective, TrackedChangeRawData } from "../types"
  */
 
 class TrackedChangeList {

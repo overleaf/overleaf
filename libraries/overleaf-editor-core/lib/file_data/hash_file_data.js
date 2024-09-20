@@ -6,11 +6,10 @@ const assert = require('check-types').assert
 const Blob = require('../blob')
 const FileData = require('./')
 /**
- * @typedef {import('./string_file_data')} StringFileData
- * @typedef {import('./lazy_string_file_data')} LazyStringFileData
- * @typedef {import('./hollow_string_file_data')} HollowStringFileData
- * @typedef {import('../types').BlobStore} BlobStore
- * @typedef {import('../types').RawHashFileData} RawHashFileData
+ * @import StringFileData from './string_file_data'
+ * @import LazyStringFileData from './lazy_string_file_data'
+ * @import HollowStringFileData from './hollow_string_file_data'
+ * @import { BlobStore, RawHashFileData } from '../types'
  */
 
 class HashFileData extends FileData {

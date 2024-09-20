@@ -2,11 +2,7 @@
 const _ = require('lodash')
 
 /**
- * @typedef {import('./types').CommentOp} CommentOp
- * @typedef {import('./types').DeleteOp} DeleteOp
- * @typedef {import('./types').InsertOp} InsertOp
- * @typedef {import('./types').Op} Op
- * @typedef {import('./types').TrackedChange} TrackedChange
+ * @import { CommentOp, DeleteOp, InsertOp, Op, TrackedChange } from './types'
  */
 
 /**

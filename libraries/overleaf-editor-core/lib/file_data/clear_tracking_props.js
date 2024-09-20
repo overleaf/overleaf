@@ -1,7 +1,7 @@
 // @ts-check
 
 /**
- * @typedef {import('../types').ClearTrackingPropsRawData} ClearTrackingPropsRawData
+ * @import { ClearTrackingPropsRawData } from '../types'
  */
 
 class ClearTrackingProps {

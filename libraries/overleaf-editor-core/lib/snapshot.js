@@ -10,12 +10,10 @@ const V2DocVersions = require('./v2_doc_versions')
 const FILE_LOAD_CONCURRENCY = 50
 
 /**
- * @typedef {import("./types").BlobStore} BlobStore
- * @typedef {import("./types").RawSnapshot} RawSnapshot
- * @typedef {import("./types").ReadonlyBlobStore} ReadonlyBlobStore
- * @typedef {import("./change")} Change
- * @typedef {import("./operation/text_operation")} TextOperation
- * @typedef {import("./file")} File
+ * @import { BlobStore, RawSnapshot, ReadonlyBlobStore } from "./types"
+ * @import Change from "./change"
+ * @import TextOperation from "./operation/text_operation"
+ * @import File from "./file"
  */
 
 class EditMissingFileError extends OError {}

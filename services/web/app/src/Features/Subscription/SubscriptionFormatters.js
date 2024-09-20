@@ -1,6 +1,10 @@
 const dateformat = require('dateformat')
 const { formatCurrencyLocalized } = require('../../util/currency')
 
+/**
+ * @import { CurrencyCode } from '@/shared/utils/currency'
+ */
+
 const currencySymbols = {
   EUR: '€',
   USD: '$',
@@ -47,10 +51,6 @@ function formatPriceDefault(priceInCents, currency) {
   const symbol = currencySymbols[currency]
   return `${symbol}${dollars}.${cents}`
 }
-
-/**
- * @typedef {import('@/shared/utils/currency').CurrencyCode} CurrencyCode
- */
 
 /**
  * @param {number} priceInCents - price in the smallest currency unit (e.g. dollar cents, CLP units, ...)

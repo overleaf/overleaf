@@ -30,11 +30,11 @@ const ClearTrackingProps = require('../file_data/clear_tracking_props')
 const TrackingProps = require('../file_data/tracking_props')
 
 /**
- * @typedef {import('../file_data/string_file_data')} StringFileData
- * @typedef {import('../types').RawTextOperation} RawTextOperation
- * @typedef {import('../operation/scan_op').ScanOp} ScanOp
- * @typedef {import('../file_data/tracked_change_list')} TrackedChangeList
- * @typedef {import('../types').TrackingDirective} TrackingDirective
+ * @import StringFileData from '../file_data/string_file_data'
+ * @import { RawTextOperation, TrackingDirective } from '../types'
+ * @import { ScanOp } from '../operation/scan_op'
+ * @import TrackedChangeList from '../file_data/tracked_change_list'
+ *
  * @typedef {{tracking?: TrackingProps, commentIds?: string[]}} InsertOptions
  */
 

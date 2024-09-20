@@ -3,8 +3,8 @@
 const Settings = require('@overleaf/settings')
 
 /**
- * @typedef {import('./types').HttpPermissionsPolicy} HttpPermissionsPolicy
- * */
+ * @import { HttpPermissionsPolicy } from './types'
+ */
 
 class HttpPermissionsPolicyMiddleware {
   /**

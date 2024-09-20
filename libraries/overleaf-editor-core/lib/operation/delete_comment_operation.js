@@ -4,9 +4,9 @@ const EditNoOperation = require('./edit_no_operation')
 const EditOperation = require('./edit_operation')
 
 /**
- * @typedef {import('./add_comment_operation')} AddCommentOperation
- * @typedef {import('../types').RawDeleteCommentOperation} RawDeleteCommentOperation
- * @typedef {import('../file_data/string_file_data')} StringFileData
+ * @import AddCommentOperation from './add_comment_operation'
+ * @import StringFileData from '../file_data/string_file_data'
+ * @import { RawDeleteCommentOperation } from '../types'
  */
 
 /**

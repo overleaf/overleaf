@@ -27,15 +27,11 @@ const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SplitTestSessionHandler = require('../SplitTests/SplitTestSessionHandler')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 
-/** @typedef {import("./types").GetProjectsRequest} GetProjectsRequest */
-/** @typedef {import("./types").GetProjectsResponse} GetProjectsResponse */
-/** @typedef {import("../../../../types/project/dashboard/api").ProjectApi} ProjectApi */
-/** @typedef {import("../../../../types/project/dashboard/api").Filters} Filters */
-/** @typedef {import("../../../../types/project/dashboard/api").Page} Page */
-/** @typedef {import("../../../../types/project/dashboard/api").Sort} Sort */
-/** @typedef {import("./types").AllUsersProjects} AllUsersProjects */
-/** @typedef {import("./types").MongoProject} MongoProject */
-/** @typedef {import("../Tags/types").Tag} Tag */
+/**
+ * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject } from "./types"
+ * @import { ProjectApi, Filters, Page, Sort } from "../../../../types/project/dashboard/api"
+ * @import { Tag } from "../Tags/types"
+ */
 
 const _ssoAvailable = (affiliation, session, linkedInstitutionIds) => {
   if (!affiliation.institution) return false

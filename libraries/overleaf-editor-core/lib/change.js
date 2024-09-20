@@ -12,8 +12,8 @@ const FileMap = require('./file_map')
 const V2DocVersions = require('./v2_doc_versions')
 
 /**
- * @typedef {import("./author")} Author
- * @typedef {import("./types").BlobStore} BlobStore
+ * @import Author from "./author"
+ * @import { BlobStore } from "./types"
  */
 
 /**

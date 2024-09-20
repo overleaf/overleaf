@@ -8,13 +8,9 @@ const CommentList = require('./comment_list')
 const TrackedChangeList = require('./tracked_change_list')
 
 /**
- * @typedef {import("../types").StringFileRawData} StringFileRawData
- * @typedef {import("../types").RawFileData} RawFileData
- * @typedef {import("../operation/edit_operation")} EditOperation
- * @typedef {import("../types").BlobStore} BlobStore
- * @typedef {import("../types").CommentRawData} CommentRawData
- * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
- * @typedef {import('../types').RangesBlob} RangesBlob
+ * @import { StringFileRawData, RawFileData, BlobStore, CommentRawData } from "../types"
+ * @import { TrackedChangeRawData, RangesBlob } from "../types"
+ * @import EditOperation from "../operation/edit_operation"
  */
 
 class StringFileData extends FileData {

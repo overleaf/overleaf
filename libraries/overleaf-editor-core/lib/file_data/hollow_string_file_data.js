@@ -1,15 +1,13 @@
 // @ts-check
 'use strict'
 
-/**
- * @typedef {import('../operation/edit_operation')} EditOperation
- */
 const assert = require('check-types').assert
 
 const FileData = require('./')
 
 /**
- * @typedef {import('../types').RawHollowStringFileData} RawHollowStringFileData
+ * @import { RawHollowStringFileData } from '../types'
+ * @import EditOperation from '../operation/edit_operation'
  */
 
 class HollowStringFileData extends FileData {

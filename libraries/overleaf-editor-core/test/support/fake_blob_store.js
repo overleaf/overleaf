@@ -1,5 +1,5 @@
 /**
- * @typedef {import("../..").Blob } Blob
+ * @import { Blob } from "../.."
  */
 
 /**

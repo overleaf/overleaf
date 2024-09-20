@@ -6,9 +6,9 @@ const OError = require('@overleaf/o-error')
 const History = require('./history')
 
 /**
- * @typedef {import("./types").BlobStore} BlobStore
- * @typedef {import("./change")} Change
- * @typedef {import("./snapshot")} Snapshot
+ * @import { BlobStore } from "./types"
+ * @import Change from "./change"
+ * @import Snapshot from "./snapshot"
  */
 class ConflictingEndVersion extends OError {
   constructor(clientEndVersion, latestEndVersion) {

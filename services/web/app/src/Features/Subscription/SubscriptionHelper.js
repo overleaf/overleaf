@@ -9,7 +9,7 @@ function shouldPlanChangeAtTermEnd(oldPlan, newPlan) {
 }
 
 /**
- * @typedef {import('../../../../frontend/js/shared/utils/currency').CurrencyCode} CurrencyCode
+ * @import { CurrencyCode } from '../../../../frontend/js/shared/utils/currency'
  */
 
 /**

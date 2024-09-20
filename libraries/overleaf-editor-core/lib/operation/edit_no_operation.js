@@ -1,7 +1,7 @@
 const EditOperation = require('./edit_operation')
 
 /**
- * @typedef {import('../types').RawEditNoOperation} RawEditNoOperation
+ * @import { RawEditNoOperation } from '../types'
  */
 
 class EditNoOperation extends EditOperation {

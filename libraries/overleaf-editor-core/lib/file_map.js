@@ -10,8 +10,8 @@ const File = require('./file')
 const safePathname = require('./safe_pathname')
 
 /**
- * @typedef {import('./types').RawFile} RawFile
- * @typedef {import('./types').RawFileMap} RawFileMap
+ * @import { RawFile, RawFileMap } from './types'
+ *
  * @typedef {Record<String, File | null>} FileMapData
  */
 

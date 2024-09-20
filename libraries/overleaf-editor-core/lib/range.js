@@ -3,7 +3,7 @@
 const OError = require('@overleaf/o-error')
 
 /**
- * @typedef {import('./types').RawRange} RawRange
+ * @import { RawRange } from './types'
  */
 
 class Range {

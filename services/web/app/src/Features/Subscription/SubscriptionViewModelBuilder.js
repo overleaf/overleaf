@@ -20,7 +20,9 @@ const {
 } = require('../Errors/Errors')
 const FeaturesHelper = require('./FeaturesHelper')
 
-/** @typedef {import("../../../../types/project/dashboard/subscription").Subscription} Subscription */
+/**
+ * @import { Subscription } from "../../../../types/project/dashboard/subscription"
+ */
 
 function buildHostedLink(type) {
   return `/user/subscription/recurly/${type}`

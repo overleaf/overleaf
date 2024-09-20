@@ -3,7 +3,7 @@ const TrackedChangeList = require('../lib/file_data/tracked_change_list')
 const TrackingProps = require('../lib/file_data/tracking_props')
 const ClearTrackingProps = require('../lib/file_data/clear_tracking_props')
 const { expect } = require('chai')
-/** @typedef {import('../lib/types').TrackedChangeRawData} TrackedChangeRawData */
+/** @import { TrackedChangeRawData } from '../lib/types' */
 
 describe('TrackedChangeList', function () {
   describe('applyInsert', function () {

@@ -11,11 +11,7 @@ const EditOperation = require('../operation/edit_operation')
 const EditOperationBuilder = require('../operation/edit_operation_builder')
 
 /**
- *  @typedef {import('../types').BlobStore} BlobStore
- *  @typedef {import('../types').ReadonlyBlobStore} ReadonlyBlobStore
- *  @typedef {import('../types').RangesBlob} RangesBlob
- *  @typedef {import('../types').RawFileData} RawFileData
- *  @typedef {import('../types').RawLazyStringFileData} RawLazyStringFileData
+ *  @import { BlobStore, ReadonlyBlobStore, RangesBlob, RawFileData, RawLazyStringFileData } from '../types'
  */
 
 class LazyStringFileData extends FileData {

@@ -5,7 +5,7 @@ const assert = require('check-types').assert
 const FileData = require('./')
 
 /**
- * @typedef {import('../types').RawHollowBinaryFileData} RawHollowBinaryFileData
+ * @import { RawHollowBinaryFileData } from '../types'
  */
 
 class HollowBinaryFileData extends FileData {

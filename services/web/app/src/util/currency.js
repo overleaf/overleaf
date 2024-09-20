@@ -3,7 +3,7 @@
  */
 
 /**
- * @typedef {import('@/shared/utils/currency').CurrencyCode} CurrencyCode
+ * @import { CurrencyCode } from '@/shared/utils/currency'
  */
 
 /**

@@ -4,7 +4,7 @@
 const assert = require('check-types').assert
 
 /**
- * @typedef {import('./types').RawLabel} RawLabel
+ * @import { RawLabel } from './types'
  */
 
 /**

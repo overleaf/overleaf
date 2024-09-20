@@ -1,4 +1,4 @@
-/** @typedef {import("../../types/web-module").WebModule} WebModule */
+/** @import { WebModule } from "../../types/web-module" */
 
 /** @type {WebModule} */
 const ServerCeScriptsModule = {}

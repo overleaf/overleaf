@@ -1,11 +1,7 @@
 // @ts-check
 
 /**
- * @typedef {import('./types').CommentOp} CommentOp
- * @typedef {import('./types').DeleteOp} DeleteOp
- * @typedef {import('./types').InsertOp} InsertOp
- * @typedef {import('./types').Op} Op
- * @typedef {import('./types').RetainOp} RetainOp
+ * @import { CommentOp, DeleteOp, InsertOp, Op, RetainOp } from './types'
  */
 
 /**

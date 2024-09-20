@@ -1,7 +1,6 @@
 // @ts-check
 /**
- * @typedef {import("../types").TrackingPropsRawData} TrackingPropsRawData
- * @typedef {import("../types").TrackingDirective} TrackingDirective
+ * @import { TrackingPropsRawData, TrackingDirective } from "../types"
  */
 
 class TrackingProps {

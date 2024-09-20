@@ -9,7 +9,7 @@ const { expressify } = require('@overleaf/promise-utils')
 const Modules = require('../../infrastructure/Modules')
 
 /**
- * @typedef {import("../../../../types/subscription/dashboard/subscription").Subscription} Subscription
+ * @import { Subscription } from "../../../../types/subscription/dashboard/subscription"
  */
 
 /**

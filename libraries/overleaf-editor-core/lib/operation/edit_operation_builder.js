@@ -1,12 +1,11 @@
 // @ts-check
+
 /**
- * @typedef {import('./edit_operation')} EditOperation
- * @typedef {import('../types').RawTextOperation} RawTextOperation
- * @typedef {import('../types').RawAddCommentOperation} RawAddCommentOperation
- * @typedef {import('../types').RawDeleteCommentOperation} RawDeleteCommentOperation
- * @typedef {import('../types').RawSetCommentStateOperation} RawSetCommentStateOperation
- * @typedef {import('../types').RawEditOperation} RawEditOperation
+ * @import EditOperation from './edit_operation'
+ * @import { RawTextOperation, RawAddCommentOperation, RawEditOperation } from '../types'
+ * @import { RawDeleteCommentOperation, RawSetCommentStateOperation } from '../types'
  */
+
 const DeleteCommentOperation = require('./delete_comment_operation')
 const AddCommentOperation = require('./add_comment_operation')
 const TextOperation = require('./text_operation')

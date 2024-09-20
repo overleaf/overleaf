@@ -22,7 +22,7 @@ const postgresBackend = require('./postgres')
 const mongoBackend = require('./mongo')
 const logger = require('@overleaf/logger')
 
-/** @typedef {import('stream').Readable} Readable */
+/** @import { Readable } from 'stream' */
 
 const GLOBAL_BLOBS = new Map()
 

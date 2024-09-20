@@ -12,10 +12,9 @@ import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 
 /**
- * @typedef {import('./types').AddDocUpdate} AddDocUpdate
- * @typedef {import('overleaf-editor-core/lib/types').CommentRawData} CommentRawData
- * @typedef {import('overleaf-editor-core/lib/types').TrackedChangeRawData} TrackedChangeRawData
- * */
+ * @import { AddDocUpdate } from './types'
+ * @import { CommentRawData, TrackedChangeRawData } from 'overleaf-editor-core/lib/types'
+ */
 
 /**
  *

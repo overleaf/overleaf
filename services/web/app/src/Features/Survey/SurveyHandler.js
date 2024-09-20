@@ -5,7 +5,7 @@ const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const { callbackify } = require('@overleaf/promise-utils')
 
 /**
- * @typedef {import('../../../../types/project/dashboard/survey').Survey} Survey
+ * @import { Survey } from '../../../../types/project/dashboard/survey'
  */
 
 /**

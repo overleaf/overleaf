@@ -13,8 +13,8 @@ let EditFileOperation = null
 let SetFileMetadataOperation = null
 
 /**
- * @typedef {import("../types").BlobStore} BlobStore
- * @typedef {import("../snapshot")} Snapshot
+ * @import { BlobStore } from "../types"
+ * @import Snapshot from "../snapshot"
  */
 
 /**

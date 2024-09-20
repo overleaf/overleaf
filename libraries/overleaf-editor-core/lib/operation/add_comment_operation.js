@@ -5,10 +5,9 @@ const Range = require('../range')
 const EditOperation = require('./edit_operation')
 
 /**
- * @typedef {import('./delete_comment_operation')} DeleteCommentOperation
- * @typedef {import('../types').CommentRawData} CommentRawData
- * @typedef {import('../types').RawAddCommentOperation} RawAddCommentOperation
- * @typedef {import('../file_data/string_file_data')} StringFileData
+ * @import DeleteCommentOperation from './delete_comment_operation'
+ * @import { CommentRawData, RawAddCommentOperation } from '../types'
+ * @import StringFileData from '../file_data/string_file_data'
  */
 
 /**

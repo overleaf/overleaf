@@ -7,7 +7,7 @@ const Change = require('./change')
 const Snapshot = require('./snapshot')
 
 /**
- * @typedef {import("./types").BlobStore} BlobStore
+ * @import { BlobStore } from "./types"
  */
 
 class History {

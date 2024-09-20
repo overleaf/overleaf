@@ -14,8 +14,7 @@ import {
 } from 'overleaf-editor-core'
 
 /**
- * @typedef {import('overleaf-editor-core/lib/types').RawEditOperation} RawEditOperation
- * @typedef {import('overleaf-editor-core/lib/types').TrackedChangeRawData} TrackedChangeRawData
+ * @import { RawEditOperation, TrackedChangeRawData } from 'overleaf-editor-core/lib/types'
  */
 
 export function convertToSummarizedUpdates(chunk, callback) {

@@ -1,7 +1,7 @@
 import getMeta from '../../../utils/meta'
 
 /**
- * @typedef {import('@/shared/utils/currency').CurrencyCode} CurrencyCode
+ * @import { CurrencyCode } from '@/shared/utils/currency'
  */
 
 // plan: 'collaborator' or 'professional'

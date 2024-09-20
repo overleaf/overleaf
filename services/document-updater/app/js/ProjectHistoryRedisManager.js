@@ -14,7 +14,7 @@ const HistoryConversions = require('./HistoryConversions')
 const OError = require('@overleaf/o-error')
 
 /**
- * @typedef {import('./types').Ranges} Ranges
+ * @import { Ranges } from './types'
  */
 
 const ProjectHistoryRedisManager = {

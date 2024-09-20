@@ -17,7 +17,7 @@ const SplitTestSessionHandler = require('./SplitTestSessionHandler')
 const SplitTestUserGetter = require('./SplitTestUserGetter')
 
 /**
- * @typedef {import("./types").Assignment} Assignment
+ * @import { Assignment } from "./types"
  */
 
 const DEFAULT_VARIANT = 'default'

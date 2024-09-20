@@ -7,13 +7,10 @@ const assert = require('check-types').assert
 const Blob = require('../blob')
 
 /**
- * @typedef {import("../types").BlobStore} BlobStore
- * @typedef {import("../types").ReadonlyBlobStore} ReadonlyBlobStore
- * @typedef {import("../types").RawFileData} RawFileData
- * @typedef {import("../operation/edit_operation")} EditOperation
- * @typedef {import("../file_data/comment_list")} CommentList
- * @typedef {import("../types").CommentRawData} CommentRawData
- * @typedef {import("../file_data/tracked_change_list")} TrackedChangeList
+ * @import { BlobStore, ReadonlyBlobStore, RawFileData, CommentRawData } from "../types"
+ * @import EditOperation from "../operation/edit_operation"
+ * @import CommentList from "../file_data/comment_list"
+ * @import TrackedChangeList from "../file_data/tracked_change_list"
  */
 
 /**

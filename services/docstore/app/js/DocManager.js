@@ -9,8 +9,8 @@ const { callbackifyAll } = require('@overleaf/promise-utils')
 const { setTimeout } = require('timers/promises')
 
 /**
- * @typedef {import('mongodb').Document} Document
- * @typedef {import('mongodb').WithId} WithId
+ * @import { Document } from 'mongodb'
+ * @import { WithId } from 'mongodb'
  */
 
 const DocManager = {

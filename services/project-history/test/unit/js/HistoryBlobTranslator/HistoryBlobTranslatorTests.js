@@ -1,7 +1,9 @@
 import { expect } from 'chai'
 import { createRangeBlobDataFromUpdate } from '../../../../app/js/HistoryBlobTranslator.js'
 
-/** @typedef {import("../../../../app/js/types").AddDocUpdate} AddDocUpdate */
+/**
+ * @import { AddDocUpdate } from "../../../../app/js/types"
+ */
 
 /**
  *

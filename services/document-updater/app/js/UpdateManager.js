@@ -17,12 +17,7 @@ const Profiler = require('./Profiler')
 const { isInsert, isDelete, getDocLength } = require('./Utils')
 
 /**
- * @typedef {import("./types").DeleteOp} DeleteOp
- * @typedef {import("./types").HistoryUpdate } HistoryUpdate
- * @typedef {import("./types").InsertOp} InsertOp
- * @typedef {import("./types").Op} Op
- * @typedef {import("./types").Ranges} Ranges
- * @typedef {import("./types").Update} Update
+ * @import { DeleteOp, InsertOp, Op, Ranges, Update, HistoryUpdate } from "./types"
  */
 
 const UpdateManager = {

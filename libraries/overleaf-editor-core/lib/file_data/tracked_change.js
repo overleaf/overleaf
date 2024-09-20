@@ -3,7 +3,7 @@ const Range = require('../range')
 const TrackingProps = require('./tracking_props')
 
 /**
- * @typedef {import("../types").TrackedChangeRawData} TrackedChangeRawData
+ * @import { TrackedChangeRawData } from "../types"
  */
 
 class TrackedChange {

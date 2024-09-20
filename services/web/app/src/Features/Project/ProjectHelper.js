@@ -5,7 +5,7 @@ const { promisify } = require('util')
 const Settings = require('@overleaf/settings')
 
 /**
- * @typedef {import("./types").MongoProject} MongoProject
+ * @import { MongoProject } from "./types"
  */
 
 const ENGINE_TO_COMPILER_MAP = {

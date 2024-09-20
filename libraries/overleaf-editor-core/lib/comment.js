@@ -3,8 +3,8 @@ const { RetainOp, InsertOp, RemoveOp } = require('./operation/scan_op')
 const Range = require('./range')
 
 /**
- * @typedef {import("./types").CommentRawData} CommentRawData
- * @typedef {import("./operation/text_operation")} TextOperation
+ * @import { CommentRawData } from "./types"
+ * @import TextOperation from "./operation/text_operation"
  */
 
 class Comment {

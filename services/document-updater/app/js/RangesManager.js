@@ -8,21 +8,9 @@ const _ = require('lodash')
 const { isInsert, isDelete, isComment, getDocLength } = require('./Utils')
 
 /**
- * @typedef {import('./types').Comment} Comment
- * @typedef {import('./types').CommentOp} CommentOp
- * @typedef {import('./types').DeleteOp} DeleteOp
- * @typedef {import('./types').HistoryCommentOp} HistoryCommentOp
- * @typedef {import('./types').HistoryDeleteOp} HistoryDeleteOp
- * @typedef {import('./types').HistoryDeleteTrackedChange} HistoryDeleteTrackedChange
- * @typedef {import('./types').HistoryInsertOp} HistoryInsertOp
- * @typedef {import('./types').HistoryRetainOp} HistoryRetainOp
- * @typedef {import('./types').HistoryOp} HistoryOp
- * @typedef {import('./types').HistoryUpdate} HistoryUpdate
- * @typedef {import('./types').InsertOp} InsertOp
- * @typedef {import('./types').Op} Op
- * @typedef {import('./types').Ranges} Ranges
- * @typedef {import('./types').TrackedChange} TrackedChange
- * @typedef {import('./types').Update} Update
+ * @import { Comment, CommentOp, InsertOp, DeleteOp, HistoryOp, Op } from './types'
+ * @import { HistoryCommentOp, HistoryDeleteOp, HistoryInsertOp, HistoryRetainOp } from './types'
+ * @import { HistoryDeleteTrackedChange, HistoryUpdate, Ranges, TrackedChange, Update } from './types'
  */
 
 const RANGE_DELTA_BUCKETS = [0, 1, 2, 3, 4, 5, 10, 20, 50]

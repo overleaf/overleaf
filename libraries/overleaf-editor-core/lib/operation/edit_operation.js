@@ -1,7 +1,7 @@
 // @ts-check
 /**
- * @typedef {import('../file_data')} FileData
- * @typedef {import('../types').RawEditOperation} RawEditOperation
+ * @import FileData from '../file_data'
+ * @import { RawEditOperation } from '../types'
  */
 
 class EditOperation {

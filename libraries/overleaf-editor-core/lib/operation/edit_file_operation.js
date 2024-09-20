@@ -1,9 +1,9 @@
 // @ts-check
 'use strict'
 /**
- * @typedef {import('./edit_operation')} EditOperation
- * @typedef {import('../types').RawEditFileOperation} RawEditFileOperation
- * @typedef {import("../snapshot")} Snapshot
+ * @import EditOperation from './edit_operation'
+ * @import { RawEditFileOperation } from '../types'
+ * @import Snapshot from "../snapshot"
  */
 
 const Operation = require('./')

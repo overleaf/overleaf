@@ -22,18 +22,10 @@ import * as HashManager from './HashManager.js'
 import { isInsert, isDelete } from './Utils.js'
 
 /**
- * @typedef {import('overleaf-editor-core').Comment} HistoryComment
- * @typedef {import('overleaf-editor-core').TrackedChange} HistoryTrackedChange
- * @typedef {import('./types').Comment} Comment
- * @typedef {import('./types').Entity} Entity
- * @typedef {import('./types').ResyncDocContentUpdate} ResyncDocContentUpdate
- * @typedef {import('./types').RetainOp} RetainOp
- * @typedef {import('./types').TrackedChange} TrackedChange
- * @typedef {import('./types').TrackedChangeTransition} TrackedChangeTransition
- * @typedef {import('./types').TrackingDirective} TrackingDirective
- * @typedef {import('./types').TrackingType} TrackingType
- * @typedef {import('./types').Update} Update
- * @typedef {import('./types').ProjectStructureUpdate} ProjectStructureUpdate
+ * @import { Comment as HistoryComment, TrackedChange as HistoryTrackedChange } from 'overleaf-editor-core'
+ * @import { Comment, Entity, ResyncDocContentUpdate, RetainOp, TrackedChange } from './types'
+ * @import { TrackedChangeTransition, TrackingDirective, TrackingType, Update } from './types'
+ * @import { ProjectStructureUpdate } from './types'
  */
 const MAX_RESYNC_HISTORY_RECORDS = 100 // keep this many records of previous resyncs
 const EXPIRE_RESYNC_HISTORY_INTERVAL_MS = 90 * 24 * 3600 * 1000 // 90 days

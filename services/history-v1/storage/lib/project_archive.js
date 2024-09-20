@@ -1,7 +1,10 @@
 // @ts-check
 'use strict'
 
-/** @typedef {import('overleaf-editor-core').Snapshot} Snapshot */
+/**
+ * @import { Snapshot } from 'overleaf-editor-core'
+ * @import { BlobStore } from '../../storage/lib/blob_store/index'
+ */
 
 const Archive = require('archiver')
 const BPromise = require('bluebird')
@@ -14,10 +17,6 @@ const Snapshot = core.Snapshot
 const OError = require('@overleaf/o-error')
 
 const assert = require('./assert')
-
-/**
- * @typedef {import('../../storage/lib/blob_store/index').BlobStore} BlobStore
- */
 
 // The maximum safe concurrency appears to be 1.
 // https://github.com/overleaf/issues/issues/1909

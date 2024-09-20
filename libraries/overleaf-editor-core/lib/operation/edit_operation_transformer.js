@@ -3,7 +3,10 @@ const core = require('../..')
 const Comment = require('../comment')
 const EditNoOperation = require('./edit_no_operation')
 const TextOperation = require('./text_operation')
-/** @typedef {import('./edit_operation')} EditOperation */
+
+/**
+ * @import EditOperation from './edit_operation'
+ */
 
 class EditOperationTransformer {
   /**

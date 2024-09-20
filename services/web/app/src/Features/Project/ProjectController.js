@@ -47,9 +47,7 @@ const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
 
 /**
- * @typedef {import("./types").GetProjectsRequest} GetProjectsRequest
- * @typedef {import("./types").GetProjectsResponse} GetProjectsResponse
- * @typedef {import("./types").Project} Project
+ * @import { GetProjectsRequest, GetProjectsResponse, Project } from "./types"
  */
 
 const _ProjectController = {
