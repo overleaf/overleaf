@@ -47,9 +47,9 @@ module.exports = class GcsPersistor extends AbstractPersistor {
 
   async sendStream(bucketName, key, readStream, opts = {}) {
     try {
-      // egress from us to gcs
       const observeOptions = {
-        metric: 'gcs.egress',
+        metric: 'gcs.egress', // egress from us to GCS
+        bucket: bucketName,
       }
 
       let sourceMd5 = opts.sourceMd5
@@ -104,6 +104,10 @@ module.exports = class GcsPersistor extends AbstractPersistor {
   }
 
   async getObjectStream(bucketName, key, opts = {}) {
+    const observer = new PersistorHelper.ObserverStream({
+      metric: 'gcs.ingress', // ingress to us from GCS
+      bucket: bucketName,
+    })
     const stream = this.storage
       .bucket(bucketName)
       .file(key)
@@ -133,12 +137,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         ReadError
       )
     }
-
-    // ingress to us from gcs
-    const observer = new PersistorHelper.ObserverStream({
-      metric: 'gcs.ingress',
-    })
-
+    // Return a PassThrough stream with a minimal interface. It will buffer until the caller starts reading. It will emit errors from the source stream (Stream.pipeline passes errors along).
     const pass = new PassThrough()
     pipeline(stream, observer, pass).catch(() => {})
     return pass

@@ -5,31 +5,82 @@ const Logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
 const { WriteError, NotFoundError } = require('./Errors')
 
+const _128KiB = 128 * 1024
+const TIMING_BUCKETS = [
+  0, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000,
+]
+const SIZE_BUCKETS = [
+  0,
+  1_000,
+  10_000,
+  100_000,
+  _128KiB,
+  1_000_000,
+  10_000_000,
+  50_000_000,
+  100_000_000,
+]
+
 /**
  * Observes data that passes through and optionally computes hash for content.
  */
 class ObserverStream extends Stream.Transform {
   /**
    * @param {string} metric prefix for metrics
+   * @param {string} bucket name of source/target bucket
    * @param {string} hash optional hash algorithm, e.g. 'md5'
    */
-  constructor({ metric, hash = '' }) {
+  constructor({ metric, bucket, hash = '' }) {
     super({ autoDestroy: true })
 
     this.bytes = 0
+    this.start = performance.now()
 
     if (hash) {
       this.hash = Crypto.createHash(hash)
     }
 
-    const onEnd = () => {
-      Metrics.count(metric, this.bytes)
+    const onEnd = status => {
+      const size = this.bytes < _128KiB ? 'lt-128KiB' : 'gte-128KiB'
+      const labels = { size, bucket, status }
+      // Keep this counter metric to allow rendering long-term charts.
+      Metrics.count(metric, this.bytes, 1, labels)
+      Metrics.inc(`${metric}.hit`, 1, labels)
+
+      if (status === 'error') return
+      // The below metrics are only relevant for successfully fetched objects.
+
+      Metrics.histogram(`${metric}.size`, this.bytes, SIZE_BUCKETS, {
+        status,
+        bucket,
+      })
+      if (this.firstByteAfterMs) {
+        Metrics.histogram(
+          `${metric}.latency.first-byte`,
+          this.firstByteAfterMs,
+          TIMING_BUCKETS,
+          labels
+        )
+      }
+      Metrics.histogram(
+        `${metric}.latency`,
+        this.#getMsSinceStart(),
+        TIMING_BUCKETS,
+        labels
+      )
     }
-    this.once('error', onEnd)
-    this.once('end', onEnd)
+    this.once('error', () => onEnd('error'))
+    this.once('end', () => onEnd('success'))
+  }
+
+  #getMsSinceStart() {
+    return performance.now() - this.start
   }
 
   _transform(chunk, encoding, done) {
+    if (this.bytes === 0) {
+      this.firstByteAfterMs = this.#getMsSinceStart()
+    }
     if (this.hash) {
       this.hash.update(chunk)
     }
