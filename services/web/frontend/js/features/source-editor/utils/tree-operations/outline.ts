@@ -4,6 +4,7 @@ import { NodeIntersectsChangeFn, ProjectionItem } from './projection'
 import * as tokens from '../../lezer-latex/latex.terms.mjs'
 import { getEnvironmentArguments, getEnvironmentName } from './environments'
 import { PartialFlatOutline } from '@/features/ide-react/context/outline-context'
+import { texOrPdfString } from './commands'
 
 export type Outline = {
   line: number
@@ -89,18 +90,10 @@ const getEntryText = (state: EditorState, node: SyntaxNodeRef): string => {
     }
 
     // Handle the texorpdfstring command
-    if (
-      token.type.name === 'Command' &&
-      token.node.firstChild?.firstChild != null
-    ) {
-      let command = token.node.firstChild.firstChild
-      let commandName = state.doc.sliceString(command.from + 1, command.to)
-      let textArguments = token.node.firstChild.getChildren('TextArgument')
-      if (commandName == 'texorpdfstring' && textArguments.length >= 2) {
-        let pdfstring = textArguments[1]
-        titleParts.push(
-          state.doc.sliceString(pdfstring.from + 1, pdfstring.to - 1)
-        )
+    if (token.type.is('UnknownCommand')) {
+      const pdfString = texOrPdfString(state, token.node, 'pdf')
+      if (pdfString) {
+        titleParts.push(pdfString)
         return false
       }
     }

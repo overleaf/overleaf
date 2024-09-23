@@ -191,3 +191,21 @@ export const enterNode = (
     })
   }
 }
+
+const texOrPdfArgument = { tex: 0, pdf: 1 }
+
+export const texOrPdfString = (
+  state: EditorState,
+  node: SyntaxNode,
+  version: keyof typeof texOrPdfArgument
+) => {
+  const commandName = getCommandName(node.node, state, ['CtrlSeq'])
+  if (commandName === '\\texorpdfstring') {
+    const argumentNode = node
+      .getChildren('TextArgument')
+      [texOrPdfArgument[version]]?.getChild('LongArg')
+    if (argumentNode) {
+      return state.doc.sliceString(argumentNode.from, argumentNode.to)
+    }
+  }
+}
