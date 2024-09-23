@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { FetchError, AbortError } = require('node-fetch')
+const { FetchError } = require('node-fetch')
 const { Readable } = require('stream')
 const { once } = require('events')
 const { TestServer } = require('./helpers/TestServer')
@@ -14,6 +14,8 @@ const {
   CustomHttpAgent,
   CustomHttpsAgent,
 } = require('../..')
+
+const abortErrorMessage = 'The user aborted a request'
 
 const HTTP_PORT = 30001
 const HTTPS_PORT = 30002
@@ -105,7 +107,7 @@ describe('fetch-utils', function () {
     it('supports abort signals', async function () {
       await expect(
         fetchJson(this.url('/hang'), { signal: AbortSignal.timeout(10) })
-      ).to.be.rejectedWith(AbortError)
+      ).to.be.rejectedWith(abortErrorMessage)
       await expectRequestAborted(this.server.lastReq)
     })
 
@@ -146,7 +148,7 @@ describe('fetch-utils', function () {
         body: stream,
       })
       stream.destroy()
-      await expect(promise).to.be.rejectedWith(AbortError)
+      await expect(promise).to.be.rejectedWith(abortErrorMessage)
       await wait(80)
       expect(this.server.lastReq).to.be.undefined
     })
@@ -160,7 +162,7 @@ describe('fetch-utils', function () {
       })
       await once(this.server.events, 'request-received')
       stream.destroy()
-      await expect(promise).to.be.rejectedWith(AbortError)
+      await expect(promise).to.be.rejectedWith(abortErrorMessage)
       await expectRequestAborted(this.server.lastReq)
     })
 
@@ -174,7 +176,7 @@ describe('fetch-utils', function () {
     it('supports abort signals', async function () {
       await expect(
         fetchStream(this.url('/hang'), { signal: AbortSignal.timeout(10) })
-      ).to.be.rejectedWith(AbortError)
+      ).to.be.rejectedWith(abortErrorMessage)
       await expectRequestAborted(this.server.lastReq)
     })
 
@@ -186,7 +188,7 @@ describe('fetch-utils', function () {
           body: stream,
           signal: AbortSignal.timeout(10),
         })
-      ).to.be.rejectedWith(AbortError)
+      ).to.be.rejectedWith(abortErrorMessage)
       expect(stream.destroyed).to.be.true
     })
   })
@@ -204,7 +206,7 @@ describe('fetch-utils', function () {
         body: stream,
       })
       stream.destroy()
-      await expect(promise).to.be.rejectedWith(AbortError)
+      await expect(promise).to.be.rejectedWith(abortErrorMessage)
       expect(this.server.lastReq).to.be.undefined
     })
 
@@ -217,7 +219,7 @@ describe('fetch-utils', function () {
       })
       await once(this.server.events, 'request-received')
       stream.destroy()
-      await expect(promise).to.be.rejectedWith(AbortError)
+      await expect(promise).to.be.rejectedWith(abortErrorMessage)
       await wait(80)
       await expectRequestAborted(this.server.lastReq)
     })
@@ -237,7 +239,7 @@ describe('fetch-utils', function () {
     it('supports abort signals', async function () {
       await expect(
         fetchNothing(this.url('/hang'), { signal: AbortSignal.timeout(10) })
-      ).to.be.rejectedWith(AbortError)
+      ).to.be.rejectedWith(abortErrorMessage)
       await expectRequestAborted(this.server.lastReq)
     })
 
@@ -249,7 +251,7 @@ describe('fetch-utils', function () {
           body: stream,
           signal: AbortSignal.timeout(10),
         })
-      ).to.be.rejectedWith(AbortError)
+      ).to.be.rejectedWith(abortErrorMessage)
       expect(stream.destroyed).to.be.true
     })
   })
