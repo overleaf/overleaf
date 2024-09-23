@@ -88,28 +88,28 @@ COPY server-ce/config/latexmkrc /usr/local/share/latexmk/LatexMk
 
 # File that controls open|closed status of the site
 # -------------------------------------------------
-ENV SITE_MAINTENANCE_FILE "/etc/overleaf/site_status"
+ENV SITE_MAINTENANCE_FILE="/etc/overleaf/site_status"
 RUN touch $SITE_MAINTENANCE_FILE
 
 # Set Environment Variables
 # --------------------------------
-ENV OVERLEAF_CONFIG /etc/overleaf/settings.js
+ENV OVERLEAF_CONFIG=/etc/overleaf/settings.js
 
-ENV WEB_API_USER "overleaf"
-ENV ADMIN_PRIVILEGE_AVAILABLE "true"
+ENV WEB_API_USER="overleaf"
+ENV ADMIN_PRIVILEGE_AVAILABLE="true"
 
-ENV OVERLEAF_APP_NAME "Overleaf Community Edition"
+ENV OVERLEAF_APP_NAME="Overleaf Community Edition"
 
-ENV OPTIMISE_PDF "true"
+ENV OPTIMISE_PDF="true"
 
 # Phusion Image timeouts before sending SIGKILL to processes
 # ----------------------------------------------------------
-ENV KILL_PROCESS_TIMEOUT 55
-ENV KILL_ALL_PROCESSES_TIMEOUT 55
-ENV GRACEFUL_SHUTDOWN_DELAY_SECONDS 1
+ENV KILL_PROCESS_TIMEOUT=55
+ENV KILL_ALL_PROCESSES_TIMEOUT=55
+ENV GRACEFUL_SHUTDOWN_DELAY_SECONDS=1
 
-ENV NODE_ENV "production"
-ENV LOG_LEVEL "info"
+ENV NODE_ENV="production"
+ENV LOG_LEVEL="info"
 
 
 EXPOSE 80
