@@ -6,10 +6,11 @@ const OError = require('@overleaf/o-error')
 const History = require('./history')
 
 /**
- * @import { BlobStore } from "./types"
+ * @import { BlobStore, RawChunk } from "./types"
  * @import Change from "./change"
  * @import Snapshot from "./snapshot"
  */
+
 class ConflictingEndVersion extends OError {
   constructor(clientEndVersion, latestEndVersion) {
     const message =
@@ -84,6 +85,10 @@ class Chunk {
     this.startVersion = startVersion
   }
 
+  /**
+   * @param {RawChunk} raw
+   * @return {Chunk}
+   */
   static fromRaw(raw) {
     return new Chunk(History.fromRaw(raw.history), raw.startVersion)
   }

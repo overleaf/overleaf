@@ -354,6 +354,39 @@ async function getChangesSince(projectId, historyId, sinceVersion) {
   return allChanges
 }
 
+async function getChangesInChunkSince(projectId, historyId, sinceVersion) {
+  const latestChunk = Core.Chunk.fromRaw(
+    (
+      await HistoryStoreManager.promises.getMostRecentChunk(
+        projectId,
+        historyId
+      )
+    ).chunk
+  )
+  if (sinceVersion > latestChunk.getEndVersion()) {
+    throw new Errors.BadRequestError(
+      'requested version past the end of the history'
+    )
+  }
+  const latestStartVersion = latestChunk.getStartVersion()
+  let chunk = latestChunk
+  if (sinceVersion < latestStartVersion) {
+    chunk = Core.Chunk.fromRaw(
+      (
+        await HistoryStoreManager.promises.getChunkAtVersion(
+          projectId,
+          historyId,
+          sinceVersion
+        )
+      ).chunk
+    )
+  }
+  const changes = chunk
+    .getChanges()
+    .slice(sinceVersion - chunk.getStartVersion())
+  return { latestStartVersion, changes }
+}
+
 async function _loadFilesLimit(snapshot, kind, blobStore) {
   await snapshot.fileMap.mapAsync(async file => {
     // only load changed files or files with tracked changes, others can be
@@ -369,6 +402,7 @@ async function _loadFilesLimit(snapshot, kind, blobStore) {
 // EXPORTS
 
 const getChangesSinceCb = callbackify(getChangesSince)
+const getChangesInChunkSinceCb = callbackify(getChangesInChunkSince)
 const getFileSnapshotStreamCb = callbackify(getFileSnapshotStream)
 const getProjectSnapshotCb = callbackify(getProjectSnapshot)
 const getLatestSnapshotCb = callbackify(getLatestSnapshot)
@@ -379,6 +413,7 @@ const getPathsAtVersionCb = callbackify(getPathsAtVersion)
 
 export {
   getChangesSinceCb as getChangesSince,
+  getChangesInChunkSinceCb as getChangesInChunkSince,
   getFileSnapshotStreamCb as getFileSnapshotStream,
   getProjectSnapshotCb as getProjectSnapshot,
   getFileMetadataSnapshotCb as getFileMetadataSnapshot,
@@ -390,6 +425,7 @@ export {
 
 export const promises = {
   getChangesSince,
+  getChangesInChunkSince,
   getFileSnapshotStream,
   getProjectSnapshot,
   getLatestSnapshot,

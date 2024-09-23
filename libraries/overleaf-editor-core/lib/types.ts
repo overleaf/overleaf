@@ -76,6 +76,16 @@ export type RawSnapshot = {
   v2DocVersions?: RawV2DocVersions | null
 }
 
+export type RawHistory = {
+  snapshot: RawSnapshot
+  changes: RawChange[]
+}
+
+export type RawChunk = {
+  history: RawHistory
+  startVersion: number
+}
+
 export type RawFileMap = Record<string, RawFile>
 
 export type RawFile = { metadata?: Object } & RawFileData
