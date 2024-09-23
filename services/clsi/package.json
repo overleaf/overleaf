@@ -42,7 +42,7 @@
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",
     "mock-fs": "^5.1.2",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.7.0",
     "sandboxed-module": "^2.0.4",
     "sinon": "~9.0.1",
     "sinon-chai": "^3.7.0",
