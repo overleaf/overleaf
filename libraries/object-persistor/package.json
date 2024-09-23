@@ -19,11 +19,10 @@
   },
   "author": "Overleaf (https://www.overleaf.com/)",
   "license": "AGPL-3.0",
-  "peerDependencies": {
-    "@overleaf/logger": "*"
-  },
   "dependencies": {
     "@google-cloud/storage": "^6.10.1",
+    "@overleaf/logger": "*",
+    "@overleaf/metrics": "*",
     "@overleaf/o-error": "*",
     "aws-sdk": "^2.718.0",
     "fast-crc32c": "overleaf/node-fast-crc32c#aae6b2a4c7a7a159395df9cc6c38dfde702d6f51",
@@ -32,7 +31,6 @@
     "tiny-async-pool": "^1.1.0"
   },
   "devDependencies": {
-    "@overleaf/logger": "*",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",

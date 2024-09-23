@@ -50,7 +50,6 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       // egress from us to gcs
       const observeOptions = {
         metric: 'gcs.egress',
-        Metrics: this.settings.Metrics,
       }
 
       let sourceMd5 = opts.sourceMd5
@@ -138,7 +137,6 @@ module.exports = class GcsPersistor extends AbstractPersistor {
     // ingress to us from gcs
     const observer = new PersistorHelper.ObserverStream({
       metric: 'gcs.ingress',
-      Metrics: this.settings.Metrics,
     })
 
     const pass = new PassThrough()

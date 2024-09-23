@@ -41,9 +41,6 @@ describe('GcsPersistorTests', function () {
   beforeEach(function () {
     Settings = {
       directoryKeyRegex: /^[0-9a-fA-F]{24}\/[0-9a-fA-F]{24}/,
-      Metrics: {
-        count: sinon.stub(),
-      },
     }
 
     files = [

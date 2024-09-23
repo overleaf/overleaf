@@ -7,6 +7,7 @@ if (https.globalAgent.maxSockets < 300) {
   https.globalAgent.maxSockets = 300
 }
 
+const Metrics = require('@overleaf/metrics')
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
 
@@ -32,7 +33,6 @@ module.exports = class S3Persistor extends AbstractPersistor {
       // egress from us to S3
       const observeOptions = {
         metric: 's3.egress',
-        Metrics: this.settings.Metrics,
       }
 
       const observer = new PersistorHelper.ObserverStream(observeOptions)
@@ -120,7 +120,6 @@ module.exports = class S3Persistor extends AbstractPersistor {
     // ingress from S3 to us
     const observer = new PersistorHelper.ObserverStream({
       metric: 's3.ingress',
-      Metrics: this.settings.Metrics,
     })
 
     const pass = new PassThrough()
@@ -228,9 +227,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
         return md5
       }
       // etag is not in md5 format
-      if (this.settings.Metrics) {
-        this.settings.Metrics.inc('s3.md5Download')
-      }
+      Metrics.inc('s3.md5Download')
       return await PersistorHelper.calculateStreamMd5(
         await this.getObjectStream(bucketName, key)
       )

@@ -2,31 +2,31 @@ const Crypto = require('crypto')
 const Stream = require('stream')
 const { pipeline } = require('stream/promises')
 const Logger = require('@overleaf/logger')
+const Metrics = require('@overleaf/metrics')
 const { WriteError, NotFoundError } = require('./Errors')
 
-// Observes data that passes through and computes some metadata for it
-// - specifically, it computes the number of bytes transferred, and optionally
-//   computes a cryptographic hash based on the 'hash' option. e.g., pass
-//   { hash: 'md5' } to compute the md5 hash of the stream
-// - if 'metric' is supplied as an option, this metric will be incremented by
-//   the number of bytes transferred
+/**
+ * Observes data that passes through and optionally computes hash for content.
+ */
 class ObserverStream extends Stream.Transform {
-  constructor(options) {
-    super({ autoDestroy: true, ...options })
+  /**
+   * @param {string} metric prefix for metrics
+   * @param {string} hash optional hash algorithm, e.g. 'md5'
+   */
+  constructor({ metric, hash = '' }) {
+    super({ autoDestroy: true })
 
     this.bytes = 0
 
-    if (options.hash) {
-      this.hash = Crypto.createHash(options.hash)
+    if (hash) {
+      this.hash = Crypto.createHash(hash)
     }
 
-    if (options.metric && options.Metrics) {
-      const onEnd = () => {
-        options.Metrics.count(options.metric, this.bytes)
-      }
-      this.once('error', onEnd)
-      this.once('end', onEnd)
+    const onEnd = () => {
+      Metrics.count(metric, this.bytes)
     }
+    this.once('error', onEnd)
+    this.once('end', onEnd)
   }
 
   _transform(chunk, encoding, done) {

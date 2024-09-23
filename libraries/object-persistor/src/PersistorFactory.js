@@ -9,19 +9,14 @@ function getPersistor(backend, settings) {
   switch (backend) {
     case 'aws-sdk':
     case 's3':
-      return new S3Persistor(
-        Object.assign({}, settings.s3, { Metrics: settings.Metrics })
-      )
+      return new S3Persistor(settings.s3)
     case 'fs':
       return new FSPersistor({
         useSubdirectories: settings.useSubdirectories,
         paths: settings.paths,
-        Metrics: settings.Metrics,
       })
     case 'gcs':
-      return new GcsPersistor(
-        Object.assign({}, settings.gcs, { Metrics: settings.Metrics })
-      )
+      return new GcsPersistor(settings.gcs)
     default:
       throw new SettingsError('unknown backend', { backend })
   }
@@ -44,11 +39,7 @@ module.exports = function create(settings) {
   if (settings.fallback && settings.fallback.backend) {
     const primary = persistor
     const fallback = getPersistor(settings.fallback.backend, settings)
-    persistor = new MigrationPersistor(
-      primary,
-      fallback,
-      Object.assign({}, settings.fallback, { Metrics: settings.Metrics })
-    )
+    persistor = new MigrationPersistor(primary, fallback, settings.fallback)
   }
 
   return persistor

@@ -5,6 +5,7 @@ const globCallbacks = require('glob')
 const Path = require('path')
 const { pipeline } = require('stream/promises')
 const { promisify } = require('util')
+const Metrics = require('@overleaf/metrics')
 
 const AbstractPersistor = require('./AbstractPersistor')
 const { ReadError, WriteError } = require('./Errors')
@@ -16,7 +17,6 @@ module.exports = class FSPersistor extends AbstractPersistor {
   constructor(settings = {}) {
     super()
     this.useSubdirectories = Boolean(settings.useSubdirectories)
-    this.metrics = settings.Metrics
   }
 
   async sendFile(location, target, source) {
@@ -231,17 +231,12 @@ module.exports = class FSPersistor extends AbstractPersistor {
       transforms.push(md5Observer.transform)
     }
 
-    let timer
-    if (this.metrics) {
-      timer = new this.metrics.Timer('writingFile')
-    }
+    const timer = new Metrics.Timer('writingFile')
 
     try {
       const writeStream = fs.createWriteStream(tempFilePath)
       await pipeline(stream, ...transforms, writeStream)
-      if (timer) {
-        timer.done()
-      }
+      timer.done()
     } catch (err) {
       await this._cleanupTempFile(tempFilePath)
       throw new WriteError(
