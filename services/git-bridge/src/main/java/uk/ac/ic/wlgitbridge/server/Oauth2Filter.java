@@ -121,30 +121,9 @@ public class Oauth2Filter implements Filter {
       }
       cred.setAccessToken(password);
     } else if (this.isUserPasswordEnabled) {
-      String accessToken = null;
-      try {
-        accessToken = doPasswordGrantFlow(username, password, getClientIp(request));
-      } catch (TokenResponseException e) {
-        int statusCode = e.getStatusCode();
-        if (statusCode == 429) {
-          handleRateLimit(projectId, username, request, response);
-        } else if (statusCode == 400 || statusCode == 401) {
-          handleNeedAuthorization(projectId, username, request, response);
-        } else if (statusCode == 410) {
-          // 410 is returned from `web` though endpoint "/oauth/token" is not deprecated.
-          // Ideally, we should return 400 with proper error info in the response body.
-          // However, on the git-bridge side, `google-oauth-client` is used to request
-          // tokens, and there is no easy way to get response body as everything is
-          // encapsulated by the library.
-          // Hence we use http error code 410 to indicate password auth is deprecated for
-          // a user.
-          handlePasswordAuthenticationDeprecation(projectId, request, response);
-        } else {
-          handleUnknownOauthServerError(projectId, statusCode, request, response);
-        }
-        return;
-      }
-      cred.setAccessToken(accessToken);
+      // password auth has been deprecated for git-bridge
+      handlePasswordAuthenticationDeprecation(projectId, request, response);
+      return;
     } else {
       handleNeedAuthorization(projectId, username, request, response);
       return;
@@ -341,26 +320,5 @@ public class Oauth2Filter implements Filter {
     String username = split[0];
     String password = split[1];
     return new BasicAuthCredentials(username, password);
-  }
-
-  /*
-   * Perform a password grant flow with the OAuth server and return an access
-   * token.
-   *
-   * The access token is null if the password grant flow was unsuccessful.
-   */
-  private String doPasswordGrantFlow(String username, String password, String clientIp)
-      throws IOException {
-    return new PasswordTokenRequest(
-            Instance.httpTransport,
-            Instance.jsonFactory,
-            new GenericUrl(oauth2.getOauth2Server() + "/oauth/token?client_ip=" + clientIp),
-            username,
-            password)
-        .setClientAuthentication(
-            new ClientParametersAuthentication(
-                oauth2.getOauth2ClientID(), oauth2.getOauth2ClientSecret()))
-        .execute()
-        .getAccessToken();
   }
 }
