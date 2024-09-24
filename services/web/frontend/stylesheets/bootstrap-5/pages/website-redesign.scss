@@ -27,6 +27,10 @@
 }
 
 .website-redesign {
+  --link-color: var(--link-web);
+  --link-hover-color: var(--link-web-hover);
+  --link-visited-color: var(--link-web-visited);
+
   // hero section of features, enterprises, and universities will have an image that will overflow the page
 
   --bs-body-color: var(--neutral-70);
@@ -34,7 +38,9 @@
   overflow-x: hidden;
 
   a {
-    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
 
     &:focus,
     &:focus-visible {
@@ -44,8 +50,6 @@
     &:focus-visible {
       @include box-shadow-button-input;
     }
-
-    // TODO: remove visited?
 
     i {
       vertical-align: middle;
@@ -60,6 +64,19 @@
         font-size: 24px;
         line-height: inherit;
       }
+    }
+
+    // Specific overrides for link styles
+    &.link-monospace {
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    &.btn:hover {
+      text-decoration: none;
     }
   }
 
