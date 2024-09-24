@@ -13,7 +13,7 @@
     }
 
     &:focus-visible {
-      @include focus-style;
+      @include box-shadow-button-input;
     }
 
     // TODO: remove visited?

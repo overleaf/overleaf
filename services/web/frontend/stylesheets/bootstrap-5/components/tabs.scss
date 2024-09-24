@@ -1,0 +1,83 @@
+.ol-tabs {
+  --border-width-base: 3px;
+
+  .nav-tabs-container {
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+
+    @include media-breakpoint-down(md) {
+      display: block;
+    }
+
+    .nav-tabs {
+      display: inline-flex;
+      gap: var(--spacing-04);
+      margin: 0 auto;
+      padding: 0;
+      border-bottom: var(--border-width-base) solid var(--neutral-20);
+      text-align: center;
+      border-top: 2px solid transparent; // so that top focus border is visible
+      min-width: max-content; // This is for horizontal scrolling
+
+      li {
+        display: inline-block;
+        float: none;
+        margin-bottom: calc(var(--border-width-base) * -0.6);
+
+        &:last-child {
+          margin-right: 0;
+        }
+
+        a {
+          border: 0;
+          border-radius: 0;
+          color: var(--neutral-70);
+          margin-right: unset;
+          padding: var(--spacing-04);
+          line-height: var(--line-height-03);
+
+          &:focus,
+          &:hover {
+            border: 0;
+          }
+
+          &:focus,
+          &:focus-visible {
+            background-color: unset;
+            outline: 0;
+          }
+
+          &:hover {
+            background-color: var(--neutral-10);
+          }
+
+          &:focus-visible {
+            @include box-shadow-button-input;
+          }
+        }
+      }
+
+      li > a.active {
+        background-color: transparent !important;
+        border: 0 !important;
+        border-bottom: 3px solid var(--green-50) !important;
+        color: var(--neutral-90) !important;
+
+        &:hover {
+          border-bottom: 3px solid var(--green-50) !important;
+        }
+      }
+    }
+  }
+
+  .tab-content {
+    margin-top: var(--spacing-11);
+  }
+}
+
+// Scroll the page up a bit to allow tab links to be shown when navigating to
+// a bookmarked tab hash
+[data-ol-bookmarkable-tabset] .tab-pane {
+  scroll-margin-top: 120px;
+}
