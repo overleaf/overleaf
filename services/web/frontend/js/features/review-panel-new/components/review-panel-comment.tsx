@@ -27,7 +27,7 @@ export const ReviewPanelComment = memo<{
       position={comment.op.p}
     >
       <div className="review-panel-entry-indicator">
-        <MaterialIcon type="edit" className="review-panel-entry-icon" />
+        <MaterialIcon type="comment" className="review-panel-entry-icon" />
       </div>
       <ReviewPanelCommentContent comment={comment} isResolved={false} />
     </ReviewPanelEntry>
