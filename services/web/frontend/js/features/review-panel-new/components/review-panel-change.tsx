@@ -20,7 +20,8 @@ export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
   aggregate?: Change<DeleteOperation>
   top?: number
-}>(({ change, aggregate, top }) => {
+  editable?: boolean
+}>(({ change, aggregate, top, editable = true }) => {
   const { t } = useTranslation()
   const { acceptChanges, rejectChanges } = useRangesActionsContext()
   const permissions = usePermissionsContext()
@@ -56,7 +57,7 @@ export const ReviewPanelChange = memo<{
               {formatTimeBasedOnYear(change.metadata?.ts)}
             </div>
           </div>
-          {permissions.write && (
+          {editable && permissions.write && (
             <div className="review-panel-entry-actions">
               <Tooltip
                 id="accept-change"

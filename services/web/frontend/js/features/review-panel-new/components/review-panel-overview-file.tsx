@@ -81,6 +81,7 @@ export const ReviewPanelOverviewFile: FC<{
               key={change.id}
               change={change}
               aggregate={aggregates.get(change.id)}
+              editable={false}
             />
           ))}
 
