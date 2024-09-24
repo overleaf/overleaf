@@ -3,15 +3,6 @@
   /about/*, /contact, /legal, /blog/*, /for/*, /events/*
 */
 .cms-page {
-  h1 {
-    font-size: 2rem; // 32px
-    line-height: 1.333;
-  }
-
-  h2 {
-    font-size: 1.5rem; // 24px
-  }
-
   .sales-contact-form-left-column {
     .sales-contact-form-heading-title {
       font-size: 2.25rem;
@@ -307,6 +298,25 @@
   video {
     height: auto;
     max-width: 100%;
+  }
+
+  /*
+    cards
+  */
+  .card-body {
+    // card-body all have div before the actual content
+    // due to option to override font size
+    > :first-child {
+      > :first-child {
+        margin-top: 0;
+      }
+    }
+
+    > :last-child {
+      > :last-child {
+        margin-bottom: 0;
+      }
+    }
   }
 }
 

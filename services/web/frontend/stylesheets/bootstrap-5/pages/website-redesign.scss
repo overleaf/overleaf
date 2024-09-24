@@ -1,7 +1,36 @@
 // TODO: .website-redesign to be removed once fully rolled out
 
+@mixin reset-font-size($size) {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    @if $size == 'heading-2xl' {
+      @include heading-2xl;
+    } @else if $size == 'heading-xl' {
+      @include heading-xl;
+    } @else if $size == 'heading-lg' {
+      @include heading-lg;
+    } @else if $size == 'heading-md' {
+      @include heading-md;
+    } @else if $size == 'heading-sm' {
+      @include heading-sm;
+    } @else if $size == 'heading-xs' {
+      @include heading-xs;
+    } @else if $size == 'base' {
+      @include body-base;
+    }
+  }
+}
+
 .website-redesign {
   // hero section of features, enterprises, and universities will have an image that will overflow the page
+
+  --bs-body-color: var(--neutral-70);
+
   overflow-x: hidden;
 
   a {
@@ -31,6 +60,130 @@
         font-size: 24px;
         line-height: inherit;
       }
+    }
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+  }
+
+  h1,
+  .h1 {
+    @include heading-2xl;
+  }
+
+  .font-size-h1 {
+    @include reset-font-size('heading-2xl');
+  }
+
+  h2,
+  .h2 {
+    @include heading-xl;
+  }
+
+  .font-size-h2 {
+    @include reset-font-size('heading-xl');
+  }
+
+  h3,
+  .h3 {
+    @include heading-lg;
+  }
+
+  .font-size-h3 {
+    @include reset-font-size('heading-lg');
+  }
+
+  h4,
+  .h4 {
+    @include heading-md;
+  }
+
+  .font-size-h4 {
+    @include reset-font-size('heading-md');
+  }
+
+  h5,
+  .h5 {
+    @include heading-sm;
+  }
+
+  .font-size-h5 {
+    @include reset-font-size('heading-sm');
+  }
+
+  h6,
+  .h6 {
+    @include heading-xs;
+  }
+
+  .font-size-h6 {
+    @include reset-font-size('heading-xs');
+  }
+
+  .font-size-base {
+    @include reset-font-size('base');
+  }
+
+  // smaller fonts for mobile
+  @include media-breakpoint-down(lg) {
+    h1,
+    .h1 {
+      @include heading-xl;
+    }
+
+    .font-size-h1 {
+      @include reset-font-size('heading-xl');
+    }
+
+    h2,
+    .h2 {
+      @include heading-lg;
+    }
+
+    .font-size-h2 {
+      @include reset-font-size('heading-lg');
+    }
+
+    h3,
+    .h3 {
+      @include heading-md;
+    }
+
+    .font-size-h3 {
+      @include reset-font-size('heading-md');
+    }
+
+    h4,
+    .h4 {
+      @include heading-sm;
+    }
+
+    .font-size-h4 {
+      @include reset-font-size('heading-sm');
+    }
+
+    h5,
+    .h5 {
+      @include heading-xs;
+    }
+
+    .font-size-h5 {
+      @include reset-font-size('heading-xs');
+    }
+
+    h6,
+    .h6 {
+      @include body-base;
+    }
+
+    .font-size-h6 {
+      @include reset-font-size('base');
     }
   }
 
