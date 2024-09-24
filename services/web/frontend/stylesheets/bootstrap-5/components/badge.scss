@@ -85,3 +85,11 @@ $max-width: 160px;
   height: var(--spacing-04);
   border-radius: 50%;
 }
+
+.badge-premium {
+  background-color: var(--neutral-20);
+  color: var(--neutral-90);
+  vertical-align: middle;
+  margin-left: 5px;
+  font-weight: var(--badge-font-weight);
+}

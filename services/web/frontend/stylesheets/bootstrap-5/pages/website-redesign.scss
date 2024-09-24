@@ -40,4 +40,8 @@
     --bs-card-spacer-y: var(--spacing-08);
     --bs-card-spacer-x: var(--spacing-08);
   }
+
+  .badge-premium {
+    --badge-font-weight: 600;
+  }
 }
