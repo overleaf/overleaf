@@ -438,12 +438,38 @@
 
   .review-panel-footer {
     position: fixed;
-    top: calc(var(--review-panel-bottom) - 66px);
+    height: 60px;
+    top: calc(var(--review-panel-bottom) - 100px);
     width: var(--review-panel-width);
     z-index: 2;
-    background: @rp-bg-dim-blue;
+    background-color: white;
     border-top: 1px solid #d9d9d9;
     display: flex;
+
+    .review-panel-tab {
+      flex: 0 0 50%;
+      padding: 6px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border: 0;
+      border-top: solid 3px transparent;
+      background: none;
+      color: @content-secondary;
+      font-size: @font-size-02;
+
+      &:hover,
+      &:focus {
+        text-decoration: none;
+        color: @content-primary;
+      }
+
+      &-active {
+        color: @content-primary;
+        border-top: solid 3px @green-50;
+      }
+    }
   }
 
   .review-panel-add-comment-textarea {
