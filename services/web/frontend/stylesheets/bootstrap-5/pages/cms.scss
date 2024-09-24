@@ -27,19 +27,6 @@
     }
   }
 
-  /* Buttons */
-  // correct color property set on <a> above:
-  // TODO: check if reset needed
-  //   .reset-btns;
-  //   .alert {
-  //     .alert;
-  //   }
-  //   .alert-info {
-  //     .btn-info {
-  //       .btn-alert-info;
-  //     }
-  //   }
-
   .p-no-text-nodes:has(.btn) {
     margin-top: var(--spacing-09);
 
