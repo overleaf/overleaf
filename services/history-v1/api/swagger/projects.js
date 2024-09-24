@@ -309,6 +309,44 @@ exports.paths = {
       },
     },
   },
+  '/projects/{project_id}/versions/{version}/content': {
+    get: {
+      'x-swagger-router-controller': 'projects',
+      operationId: 'getContentAtVersion',
+      tags: ['Project'],
+      description: 'Get full content at the given version',
+      parameters: [
+        {
+          name: 'project_id',
+          in: 'path',
+          description: 'project id',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'version',
+          in: 'path',
+          description: 'numeric version',
+          required: true,
+          type: 'number',
+        },
+      ],
+      responses: {
+        200: {
+          description: 'Success',
+          schema: {
+            $ref: '#/definitions/Snapshot',
+          },
+        },
+        404: {
+          description: 'Not Found',
+          schema: {
+            $ref: '#/definitions/Error',
+          },
+        },
+      },
+    },
+  },
   '/projects/{project_id}/timestamp/{timestamp}/history': {
     get: {
       'x-swagger-router-controller': 'projects',

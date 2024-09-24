@@ -50,6 +50,15 @@ async function getLatestContent(req, res, next) {
   res.json(snapshot.toRaw())
 }
 
+async function getContentAtVersion(req, res, next) {
+  const projectId = req.swagger.params.project_id.value
+  const version = req.swagger.params.version.value
+  const blobStore = new BlobStore(projectId)
+  const snapshot = await getSnapshotAtVersion(projectId, version)
+  await snapshot.loadFiles('eager', blobStore)
+  res.json(snapshot.toRaw())
+}
+
 async function getLatestHashedContent(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const blobStore = new HashCheckBlobStore(new BlobStore(projectId))
@@ -227,6 +236,7 @@ async function getSnapshotAtVersion(projectId, version) {
 module.exports = {
   initializeProject: expressify(initializeProject),
   getLatestContent: expressify(getLatestContent),
+  getContentAtVersion: expressify(getContentAtVersion),
   getLatestHashedContent: expressify(getLatestHashedContent),
   getLatestPersistedHistory: expressify(getLatestHistory),
   getLatestHistory: expressify(getLatestHistory),
