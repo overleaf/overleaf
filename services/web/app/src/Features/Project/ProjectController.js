@@ -340,7 +340,6 @@ const _ProjectController = {
       'ieee-stylesheet',
       'write-and-cite',
       'default-visual-for-beginners',
-      'password-authentication-removal',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
