@@ -475,6 +475,17 @@
 
     .reverse-col-order-mobile {
       flex-direction: column-reverse;
+
+      // 1st column is displayed as 2nd column on mobile when reversed
+      div[class*='col-'] {
+        &:not(:last-child) {
+          padding-top: var(--spacing-13);
+        }
+
+        &:last-child {
+          padding-top: 0; // unset padding from default rows above
+        }
+      }
     }
   }
 }
