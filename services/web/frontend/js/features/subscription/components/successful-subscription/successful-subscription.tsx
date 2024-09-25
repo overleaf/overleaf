@@ -1,9 +1,12 @@
 import { useTranslation, Trans } from 'react-i18next'
-import { Col, Row } from 'react-bootstrap'
 import { PriceExceptions } from '../shared/price-exceptions'
 import PremiumFeaturesLink from '../dashboard/premium-features-link'
 import getMeta from '../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLCard from '@/features/ui/components/ol/ol-card'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
@@ -16,37 +19,43 @@ function SuccessfulSubscription() {
 
   return (
     <div className="container">
-      <Row>
-        <Col md={8} mdOffset={2}>
-          <div className="card">
+      <OLRow>
+        <OLCol lg={{ span: 8, offset: 2 }}>
+          <OLCard>
             <div className="page-header">
               <h2>{t('thanks_for_subscribing')}</h2>
             </div>
-            <div role="alert" className="alert alert-success">
-              {subscription.recurly.trial_ends_at && (
+            <OLNotification
+              type="success"
+              content={
                 <>
+                  {subscription.recurly.trial_ends_at && (
+                    <>
+                      <p>
+                        <Trans
+                          i18nKey="next_payment_of_x_collectected_on_y"
+                          values={{
+                            paymentAmmount: subscription.recurly.displayPrice,
+                            collectionDate:
+                              subscription.recurly.nextPaymentDueAt,
+                          }}
+                          shouldUnescape
+                          tOptions={{ interpolation: { escapeValue: true } }}
+                          components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
+                        />
+                      </p>
+                      <PriceExceptions subscription={subscription} />
+                    </>
+                  )}
                   <p>
-                    <Trans
-                      i18nKey="next_payment_of_x_collectected_on_y"
-                      values={{
-                        paymentAmmount: subscription.recurly.displayPrice,
-                        collectionDate: subscription.recurly.nextPaymentDueAt,
-                      }}
-                      shouldUnescape
-                      tOptions={{ interpolation: { escapeValue: true } }}
-                      components={[<strong />, <strong />]} // eslint-disable-line react/jsx-key
-                    />
+                    {t('to_modify_your_subscription_go_to')}&nbsp;
+                    <a href="/user/subscription" rel="noopener noreferrer">
+                      {t('manage_subscription')}.
+                    </a>
                   </p>
-                  <PriceExceptions subscription={subscription} />
                 </>
-              )}
-              <p>
-                {t('to_modify_your_subscription_go_to')}&nbsp;
-                <a href="/user/subscription" rel="noopener noreferrer">
-                  {t('manage_subscription')}.
-                </a>
-              </p>
-            </div>
+              }
+            />
             {subscription.groupPlan && (
               <p>
                 <a
@@ -97,9 +106,9 @@ function SuccessfulSubscription() {
                 &lt; {t('back_to_your_projects')}
               </a>
             </p>
-          </div>
-        </Col>
-      </Row>
+          </OLCard>
+        </OLCol>
+      </OLRow>
     </div>
   )
 }

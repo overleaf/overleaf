@@ -422,6 +422,12 @@ async function successfulSubscription(req, res) {
   if (!personalSubscription) {
     res.redirect('/user/subscription/plans')
   } else {
+    await SplitTestHandler.promises.getAssignment(
+      req,
+      res,
+      'bootstrap-5-subscription'
+    )
+
     res.render('subscriptions/successful-subscription-react', {
       title: 'thank_you',
       personalSubscription,

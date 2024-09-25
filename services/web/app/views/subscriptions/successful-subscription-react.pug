@@ -1,5 +1,9 @@
 extends ../layout-marketing
 
+block vars
+	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
+	- bootstrap5PageSplitTest = 'bootstrap-5-subscription'
+
 block entrypointVar
 	- entrypoint = 'pages/user/subscription/successful-subscription'
 
