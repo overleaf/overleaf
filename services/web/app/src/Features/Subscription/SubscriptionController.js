@@ -232,6 +232,14 @@ async function userSubscriptionPage(req, res) {
     'local-ccy-format-v2'
   )
 
+  // Populates splitTestVariants with a value for the split test name and allows
+  // Pug to read it
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'bootstrap-5-subscription'
+  )
+
   const results =
     await SubscriptionViewModelBuilder.promises.buildUsersSubscriptionViewModel(
       user,
