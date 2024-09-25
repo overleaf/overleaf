@@ -53,7 +53,11 @@ export const pasteHtml = [
           // fall back to creating a figure when there's an image on the clipoard,
           // unless the HTML indicates that it came from an Office application
           // (which also puts an image on the clipboard)
-          if (clipboardData.files.length > 0 && !hasProgId(documentElement)) {
+          if (
+            clipboardData.files.length > 0 &&
+            !hasProgId(documentElement) &&
+            !isOnlyTable(documentElement)
+          ) {
             return false
           }
 
@@ -133,6 +137,17 @@ const hasProgId = (documentElement: HTMLElement) => {
     'meta[name="ProgId"]'
   )
   return meta && meta.content.trim().length > 0
+}
+
+// detect a table (probably pasted from desktop Excel)
+const isOnlyTable = (documentElement: HTMLElement) => {
+  const body = documentElement.querySelector<HTMLBodyElement>('body')
+
+  return (
+    body &&
+    body.childElementCount === 1 &&
+    body.firstElementChild!.nodeName === 'TABLE'
+  )
 }
 
 const htmlToLaTeX = (bodyElement: HTMLElement) => {
