@@ -1,7 +1,7 @@
 spelling
 --data-dirs=cache
 --dependencies=
---docker-repos=gcr.io/overleaf-ops,us-east1-docker.pkg.dev/overleaf-ops/ol-docker
+--docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=
 --env-pass-through=
 --esmock-loader=True

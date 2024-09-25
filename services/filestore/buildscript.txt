@@ -1,7 +1,7 @@
 filestore
 --data-dirs=uploads,user_files,template_files
 --dependencies=s3,gcs
---docker-repos=gcr.io/overleaf-ops,us-east1-docker.pkg.dev/overleaf-ops/ol-docker
+--docker-repos=us-east1-docker.pkg.dev/overleaf-ops/ol-docker
 --env-add=ENABLE_CONVERSIONS="true",USE_PROM_METRICS="true",AWS_S3_USER_FILES_BUCKET_NAME=fake_user_files,AWS_S3_TEMPLATE_FILES_BUCKET_NAME=fake_template_files,GCS_USER_FILES_BUCKET_NAME=fake_userfiles,GCS_TEMPLATE_FILES_BUCKET_NAME=fake_templatefiles
 --env-pass-through=
 --esmock-loader=False
@@ -9,3 +9,4 @@ filestore
 --public-repo=True
 --script-version=4.5.0
 --test-acceptance-shards=SHARD_01_,SHARD_02_,SHARD_03_
+--use-large-ci-runner=True
