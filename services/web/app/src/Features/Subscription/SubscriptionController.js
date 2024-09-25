@@ -458,7 +458,12 @@ function cancelSubscription(req, res, next) {
  * @param {import('express').NextFunction} next
  * @returns {Promise<void>}
  */
-function canceledSubscription(req, res, next) {
+async function canceledSubscription(req, res, next) {
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'bootstrap-5-subscription'
+  )
   return res.render('subscriptions/canceled-subscription-react', {
     title: 'subscription_canceled',
   })
@@ -753,7 +758,7 @@ module.exports = {
   interstitialPaymentPage: expressify(interstitialPaymentPage),
   successfulSubscription: expressify(successfulSubscription),
   cancelSubscription,
-  canceledSubscription,
+  canceledSubscription: expressify(canceledSubscription),
   cancelV1Subscription,
   updateSubscription,
   cancelPendingSubscriptionChange,

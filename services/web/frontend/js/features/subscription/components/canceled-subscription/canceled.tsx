@@ -1,25 +1,31 @@
 import { useTranslation } from 'react-i18next'
-import { Col, Row, Alert } from 'react-bootstrap'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLCard from '@/features/ui/components/ol/ol-card'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function Canceled() {
   const { t } = useTranslation()
 
   return (
     <div className="container">
-      <Row>
-        <Col md={8} mdOffset={2}>
-          <div className="card">
+      <OLRow>
+        <OLCol lg={{ span: 8, offset: 2 }}>
+          <OLCard>
             <div className="page-header">
               <h2>{t('subscription_canceled')}</h2>
             </div>
-            <Alert bsStyle="info">
-              <p>
-                {t('to_modify_your_subscription_go_to')}&nbsp;
-                <a href="/user/subscription" rel="noopener noreferrer">
-                  {t('manage_subscription')}.
-                </a>
-              </p>
-            </Alert>
+            <OLNotification
+              type="info"
+              content={
+                <p>
+                  {t('to_modify_your_subscription_go_to')}&nbsp;
+                  <a href="/user/subscription" rel="noopener noreferrer">
+                    {t('manage_subscription')}.
+                  </a>
+                </p>
+              }
+            />
             <p>
               <a
                 className="btn btn-primary"
@@ -29,9 +35,9 @@ function Canceled() {
                 &lt; {t('back_to_your_projects')}
               </a>
             </p>
-          </div>
-        </Col>
-      </Row>
+          </OLCard>
+        </OLCol>
+      </OLRow>
     </div>
   )
 }
