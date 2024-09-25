@@ -1,5 +1,6 @@
 const Queue = require('bull')
 const Settings = require('@overleaf/settings')
+const Features = require('../infrastructure/Features')
 const { addConnectionDrainer } = require('./GracefulShutdown')
 
 // Bull will keep a fixed number of the most recently completed jobs. This is
@@ -62,6 +63,14 @@ const ANALYTICS_QUEUES = [
 const queues = {}
 
 function getQueue(queueName) {
+  if (!Features.hasFeature('saas')) {
+    // Disable bull queue handling for Server Pro/CE by providing a stub interface.
+    return {
+      async add() {},
+      process() {},
+    }
+  }
+
   if (!queues[queueName]) {
     const redisOptions = ANALYTICS_QUEUES.includes(queueName)
       ? Settings.redis.analyticsQueues

@@ -98,6 +98,11 @@ describe('FeaturesUpdater', function () {
     this.Modules = {
       promises: { hooks: { fire: sinon.stub().resolves() } },
     }
+    this.Queues = {
+      getQueue: sinon.stub().returns({
+        add: sinon.stub().resolves(),
+      }),
+    }
 
     this.FeaturesUpdater = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -110,6 +115,7 @@ describe('FeaturesUpdater', function () {
         '../User/UserGetter': this.UserGetter,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../../infrastructure/Modules': this.Modules,
+        '../../infrastructure/Queues': this.Queues,
       },
     })
   })
