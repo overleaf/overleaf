@@ -80,7 +80,7 @@
     // }
 
     .section-row {
-      max-width: 1440px;
+      @extend .container;
     }
   }
 
