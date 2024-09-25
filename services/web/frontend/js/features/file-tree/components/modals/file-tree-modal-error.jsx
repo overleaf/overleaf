@@ -1,4 +1,3 @@
-import { Button, Modal } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
@@ -9,6 +8,13 @@ import {
   DuplicateFilenameError,
   DuplicateFilenameMoveError,
 } from '../../errors'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function FileTreeModalError() {
   const { t } = useTranslation()
@@ -60,23 +66,23 @@ function FileTreeModalError() {
   }
 
   return (
-    <Modal show onHide={handleHide}>
-      <Modal.Header>
-        <Modal.Title>{errorTitle()}</Modal.Title>
-      </Modal.Header>
+    <OLModal show onHide={handleHide}>
+      <OLModalHeader>
+        <OLModalTitle>{errorTitle()}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <div role="alert" aria-label={errorMessage()}>
           {errorMessage()}
         </div>
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <Button onClick={handleHide} bsStyle="primary">
+      <OLModalFooter>
+        <OLButton onClick={handleHide} variant="primary">
           {t('ok')}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

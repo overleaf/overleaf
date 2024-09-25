@@ -1,7 +1,4 @@
-import ControlLabel from 'react-bootstrap/lib/ControlLabel'
-import { Alert, FormControl } from 'react-bootstrap'
-import FormGroup from 'react-bootstrap/lib/FormGroup'
-import { useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFileTreeCreateName } from '../../contexts/file-tree-create-name'
 import PropTypes from 'prop-types'
@@ -10,6 +7,10 @@ import {
   DuplicateFilenameError,
   InvalidFilenameError,
 } from '../../errors'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 /**
  * A form component that renders a text input with label,
@@ -29,42 +30,46 @@ export default function FileTreeCreateNameInput({
   const { name, setName, touchedName, validName } = useFileTreeCreateName()
 
   // focus the first part of the filename if needed
-  const inputRef = useCallback(
-    element => {
-      if (element && focusName) {
-        window.requestAnimationFrame(() => {
-          element.focus()
-          element.setSelectionRange(0, element.value.lastIndexOf('.'))
-        })
-      }
-    },
-    [focusName]
-  )
+  const inputRef = useRef(null)
+
+  useEffect(() => {
+    if (inputRef.current && focusName) {
+      window.requestAnimationFrame(() => {
+        if (inputRef.current) {
+          inputRef.current.focus()
+          inputRef.current.setSelectionRange(
+            0,
+            inputRef.current.value.lastIndexOf('.')
+          )
+        }
+      })
+    }
+  }, [focusName])
 
   return (
-    <FormGroup controlId="new-doc-name" className={classes.formGroup}>
-      <ControlLabel>{label || t('file_name')}</ControlLabel>
+    <OLFormGroup controlId="new-doc-name" className={classes.formGroup}>
+      <OLFormLabel>{label || t('file_name')}</OLFormLabel>
 
-      <FormControl
+      <OLFormControl
         type="text"
         placeholder={placeholder || t('file_name')}
         required
         value={name}
         onChange={event => setName(event.target.value)}
-        inputRef={inputRef}
+        ref={inputRef}
         disabled={inFlight}
       />
 
-      <FormControl.Feedback />
-
       {touchedName && !validName && (
-        <Alert bsStyle="danger" className="row-spaced-small">
-          {t('files_cannot_include_invalid_characters')}
-        </Alert>
+        <OLNotification
+          type="error"
+          className="row-spaced-small"
+          content={t('files_cannot_include_invalid_characters')}
+        />
       )}
 
       {error && <ErrorMessage error={error} />}
-    </FormGroup>
+    </OLFormGroup>
   )
 }
 
@@ -89,23 +94,29 @@ function ErrorMessage({ error }) {
   switch (error.constructor) {
     case DuplicateFilenameError:
       return (
-        <Alert bsStyle="danger" className="row-spaced-small">
-          {t('file_already_exists')}
-        </Alert>
+        <OLNotification
+          type="error"
+          className="row-spaced-small"
+          content={t('file_already_exists')}
+        />
       )
 
     case InvalidFilenameError:
       return (
-        <Alert bsStyle="danger" className="row-spaced-small">
-          {t('files_cannot_include_invalid_characters')}
-        </Alert>
+        <OLNotification
+          type="error"
+          className="row-spaced-small"
+          content={t('files_cannot_include_invalid_characters')}
+        />
       )
 
     case BlockedFilenameError:
       return (
-        <Alert bsStyle="danger" className="row-spaced-small">
-          {t('blocked_filename')}
-        </Alert>
+        <OLNotification
+          type="error"
+          className="row-spaced-small"
+          content={t('blocked_filename')}
+        />
       )
 
     default:

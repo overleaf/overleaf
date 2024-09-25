@@ -1,8 +1,8 @@
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 import PropTypes from 'prop-types'
-import { Alert } from 'react-bootstrap'
 
 export default function DangerMessage({ children }) {
-  return <Alert bsStyle="danger">{children}</Alert>
+  return <OLNotification type="error" content={children} />
 }
 DangerMessage.propTypes = {
   children: PropTypes.any.isRequired,

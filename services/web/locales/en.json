@@ -1375,6 +1375,7 @@
   "only_group_admin_or_managers_can_delete_your_account_5": "For more information, see the \"Managed Accounts\" section in our terms of use, which you agree to by clicking Accept invitation",
   "only_importer_can_refresh": "Only the person who originally imported this __provider__ file can refresh it.",
   "open_a_file_on_the_left": "Open a file on the left",
+  "open_action_menu": "Open __name__ action menu",
   "open_advanced_reference_search": "Open advanced reference search",
   "open_as_template": "Open as Template",
   "open_file": "Edit file",

@@ -74,19 +74,6 @@
   background-color: var(--bg-dark-secondary);
 }
 
-// Filetree
-@mixin file-tree-item-color {
-  color: var(--content-primary-dark);
-}
-
-@mixin file-tree-item-hover-bg {
-  background-color: var(--bg-dark-secondary);
-}
-
-@mixin file-tree-bg {
-  background-color: var(--bg-dark-tertiary);
-}
-
 @mixin theme($name) {
   @if index($themes, $name) {
     [data-theme='#{$name}'] {

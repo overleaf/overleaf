@@ -1,9 +1,14 @@
-import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 
-import AccessibleModal from '../../../../shared/components/accessible-modal'
-
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function FileTreeModalDelete() {
   const { t } = useTranslation()
@@ -28,12 +33,12 @@ function FileTreeModalDelete() {
   }
 
   return (
-    <AccessibleModal show onHide={handleHide}>
-      <Modal.Header>
-        <Modal.Title>{t('delete')}</Modal.Title>
-      </Modal.Header>
+    <OLModal show onHide={handleHide}>
+      <OLModalHeader>
+        <OLModalTitle>{t('delete')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <p>{t('sure_you_want_to_delete')}</p>
         <ul>
           {actionedEntities.map(entity => (
@@ -41,33 +46,33 @@ function FileTreeModalDelete() {
           ))}
         </ul>
         {error && (
-          <div className="alert alert-danger file-tree-modal-alert">
-            {t('generic_something_went_wrong')}
-          </div>
+          <OLNotification
+            type="error"
+            content={t('generic_something_went_wrong')}
+          />
         )}
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
+      <OLModalFooter>
         {inFlight ? (
-          <Button bsStyle="danger" disabled>
-            {t('deleting')}…
-          </Button>
+          <OLButton
+            variant="danger"
+            disabled
+            isLoading
+            bs3Props={{ loading: `${t('deleting')}…` }}
+          />
         ) : (
           <>
-            <Button
-              bsStyle={null}
-              className="btn-secondary"
-              onClick={handleHide}
-            >
+            <OLButton className="secondary" onClick={handleHide}>
               {t('cancel')}
-            </Button>
-            <Button bsStyle="danger" onClick={handleDelete}>
+            </OLButton>
+            <OLButton variant="danger" onClick={handleDelete}>
               {t('delete')}
-            </Button>
+            </OLButton>
           </>
         )}
-      </Modal.Footer>
-    </AccessibleModal>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

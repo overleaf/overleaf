@@ -51,8 +51,7 @@
 }
 
 .outline-header-expand-collapse-btn {
-  @include file-tree-item-color;
-
+  color: var(--file-tree-item-color);
   display: flex;
   align-items: center;
   background-color: transparent;
@@ -81,8 +80,8 @@
 
 .outline-header-name {
   @include body-sm;
-  @include file-tree-item-color;
 
+  color: var(--file-tree-item-color);
   display: inline-block;
   font-weight: 700;
   margin: 0;
@@ -93,15 +92,13 @@
 }
 
 .outline-body {
-  @include file-tree-bg;
-
+  background-color: var(--file-tree-bg);
   overflow-y: auto;
   padding-right: var(--spacing-03);
 }
 
 .outline-body-no-elements {
-  @include file-tree-item-color;
-
+  color: var(--file-tree-item-color);
   text-align: center;
   padding: var(--spacing-08) var(--spacing-08) var(--spacing-11)
     var(--spacing-08);
@@ -109,15 +106,13 @@
 }
 
 .outline-body-link {
-  @include file-tree-item-color;
-
+  color: var(--file-tree-item-color);
   display: block;
   text-decoration: underline;
 
   &:hover,
   &:focus {
-    @include file-tree-item-color;
-
+    color: var(--file-tree-item-color);
     text-decoration: underline;
   }
 }
@@ -157,8 +152,7 @@
 }
 
 .outline-item-expand-collapse-btn {
-  @include file-tree-bg;
-
+  background-color: var(--file-tree-bg);
   display: inline;
   border: 0;
   padding: 0;
@@ -176,14 +170,14 @@
   }
 
   &:hover {
-    @include file-tree-item-hover-bg;
+    background-color: var(--file-tree-item-hover-bg);
   }
 }
 
 .outline-item-link {
-  @include file-tree-item-color;
   @include text-truncate;
 
+  color: var(--file-tree-item-color);
   display: inline;
   background-color: transparent;
   border: 0;
@@ -196,8 +190,7 @@
 
   &:hover,
   &:focus {
-    @include file-tree-item-hover-bg;
-
+    background-color: var(--file-tree-item-hover-bg);
     outline: 0;
   }
 }

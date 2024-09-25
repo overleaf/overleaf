@@ -1,10 +1,14 @@
-import { Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import FileTreeCreateFormProvider from '../../contexts/file-tree-create-form'
 import FileTreeModalCreateFileBody from '../file-tree-create/file-tree-modal-create-file-body'
 import FileTreeModalCreateFileFooter from '../file-tree-create/file-tree-modal-create-file-footer'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 
 export default function FileTreeModalCreateFile() {
   const { t } = useTranslation()
@@ -17,19 +21,19 @@ export default function FileTreeModalCreateFile() {
 
   return (
     <FileTreeCreateFormProvider>
-      <AccessibleModal bsSize="large" onHide={cancel} show>
-        <Modal.Header closeButton>
-          <Modal.Title>{t('add_files')}</Modal.Title>
-        </Modal.Header>
+      <OLModal size="lg" onHide={cancel} show>
+        <OLModalHeader closeButton>
+          <OLModalTitle>{t('add_files')}</OLModalTitle>
+        </OLModalHeader>
 
-        <Modal.Body className="modal-new-file">
+        <OLModalBody className="modal-new-file">
           <FileTreeModalCreateFileBody />
-        </Modal.Body>
+        </OLModalBody>
 
-        <Modal.Footer>
+        <OLModalFooter>
           <FileTreeModalCreateFileFooter />
-        </Modal.Footer>
-      </AccessibleModal>
+        </OLModalFooter>
+      </OLModal>
     </FileTreeCreateFormProvider>
   )
 }

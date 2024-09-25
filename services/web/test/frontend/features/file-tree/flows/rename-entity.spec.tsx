@@ -157,7 +157,7 @@ describe('FileTree Rename Entity Flow', function () {
 
   function renameItem(from: string, to: string) {
     cy.findByRole('treeitem', { name: from }).click()
-    cy.findByRole('button', { name: 'Menu' }).click()
+    cy.findByRole('button', { name: `Open ${from} action menu` }).click()
     cy.findByRole('menuitem', { name: 'Rename' }).click()
     cy.findByRole('textbox').clear()
     cy.findByRole('textbox').type(to + '{enter}')

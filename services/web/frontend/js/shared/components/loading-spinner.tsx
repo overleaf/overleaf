@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import Icon from './icon'
 import { useEffect, useState } from 'react'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { Spinner } from 'react-bootstrap-5'
 
 function LoadingSpinner({
   delay = 0,
@@ -28,11 +30,27 @@ function LoadingSpinner({
   }
 
   return (
-    <div className="loading">
-      <Icon type="refresh" fw spin />
-      &nbsp;
-      {loadingText || t('loading')}…
-    </div>
+    <BootstrapVersionSwitcher
+      bs3={
+        <div className="loading">
+          <Icon type="refresh" fw spin />
+          &nbsp;
+          {loadingText || t('loading')}…
+        </div>
+      }
+      bs5={
+        <div className="text-center mt-4">
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            role="status"
+            className="align-bottom"
+          />
+          &nbsp;
+          {loadingText || t('loading')}…
+        </div>
+      }
+    />
   )
 }
 

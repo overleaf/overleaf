@@ -90,7 +90,7 @@ function FileTreeItemInner({
           isSelected={isSelected}
           setIsDraggable={setIsDraggable}
         />
-        {hasMenu ? <FileTreeItemMenu id={id} /> : null}
+        {hasMenu ? <FileTreeItemMenu id={id} name={name} /> : null}
       </div>
     </div>
   )

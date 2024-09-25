@@ -18,6 +18,8 @@ export type DropdownProps = {
   show?: boolean
   autoClose?: boolean | 'inside' | 'outside'
   drop?: 'up' | 'up-centered' | 'start' | 'end' | 'down' | 'down-centered'
+  focusFirstItemOnShow?: false | true | 'keyboard'
+  onKeyDown?: (event: React.KeyboardEvent) => void
 }
 
 export type DropdownItemProps = PropsWithChildren<{
@@ -54,6 +56,7 @@ export type DropdownMenuProps = PropsWithChildren<{
   show?: boolean
   className?: string
   flip?: boolean
+  id?: string
 }>
 
 export type DropdownDividerProps = PropsWithChildren<{

@@ -1,4 +1,3 @@
-import { ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FileTreeCreateNameInput from '../file-tree-create-name-input'
@@ -7,6 +6,9 @@ import { useFileTreeCreateName } from '../../../contexts/file-tree-create-name'
 import { useFileTreeCreateForm } from '../../../contexts/file-tree-create-form'
 import ErrorMessage from '../error-message'
 import * as eventTracking from '../../../../../infrastructure/event-tracking'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 
 export default function FileTreeImportFromUrl() {
   const { t } = useTranslation()
@@ -54,17 +56,16 @@ export default function FileTreeImportFromUrl() {
       noValidate
       onSubmit={handleSubmit}
     >
-      <FormGroup controlId="import-from-url">
-        <ControlLabel>{t('url_to_fetch_the_file_from')}</ControlLabel>
-
-        <FormControl
+      <OLFormGroup controlId="import-from-url">
+        <OLFormLabel>{t('url_to_fetch_the_file_from')}</OLFormLabel>
+        <OLFormControl
           type="url"
           placeholder="https://example.com/my-file.png"
           required
           value={url}
           onChange={handleChange}
         />
-      </FormGroup>
+      </OLFormGroup>
 
       <FileTreeCreateNameInput
         label={t('file_name_in_this_project')}

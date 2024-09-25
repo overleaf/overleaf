@@ -27,8 +27,7 @@
 }
 
 .ide-react-editor-sidebar {
-  @include file-tree-bg;
-
+  background-color: var(--file-tree-bg);
   height: 100%;
   color: var(--content-secondary-dark);
 }
@@ -49,5 +48,143 @@
     position: static;
     flex-grow: 0;
     color: var(--neutral-20);
+  }
+}
+
+.ide-react-symbol-palette {
+  height: 100%;
+  background-color: var(--bg-dark-tertiary);
+  color: var(--neutral-20);
+}
+
+.ide-react-file-tree-panel {
+  display: flex;
+  flex-direction: column;
+
+  // Prevent the file tree expanding beyond the boundary of the panel
+  .file-tree {
+    width: 100%;
+  }
+}
+
+.ide-react-editor-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+// Ensure an element with class "full-size", such as the binary file view, stays within the bounds of the panel
+.ide-react-panel {
+  position: relative;
+  container-type: size;
+}
+
+.ide-panel-group-resizing {
+  background-color: white;
+
+  // Hide panel contents while resizing
+  .ide-react-editor-content,
+  .pdf {
+    display: none !important;
+  }
+}
+
+.horizontal-resize-handle {
+  width: 7px !important;
+  height: 100%;
+
+  // Enable ::before and ::after pseudo-elements to position themselves correctly
+  position: relative;
+  background-color: var(--bg-dark-secondary);
+
+  .custom-toggler {
+    padding: 0;
+    border-width: 0;
+  }
+
+  &.horizontal-resize-handle-enabled {
+    &::before,
+    &::after {
+      // This SVG has the colour hard-coded to the current value of @ol-blue-gray-2, so if we changed @ol-blue-gray-2,
+      // we'd have to change this SVG too
+      content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='18' viewBox='0 0 7 18'%3E%3Cpath d='M2 0h3v3H2zM2 5h3v3H2zM2 10h3v3H2zM2 15h3v3H2z' style='fill:%239da7b7'/%3E%3C/svg%3E");
+      display: block;
+      position: absolute;
+      text-align: center;
+      left: 0;
+      width: 7px;
+      height: 18px;
+    }
+
+    &::before {
+      top: 25%;
+    }
+
+    &::after {
+      top: 75%;
+    }
+  }
+
+  &:not(.horizontal-resize-handle-enabled) {
+    cursor: default;
+  }
+
+  .synctex-controls {
+    left: -8px;
+    margin: 0;
+
+    // Ensure that SyncTex controls appear in front of PDF viewer controls and logs pane
+    z-index: 12;
+  }
+}
+
+.vertical-resize-handle {
+  height: 6px;
+  background-color: var(--bg-dark-secondary);
+
+  &.vertical-resize-handle-enabled {
+    &:hover {
+      background-color: var(--bg-dark-primary);
+    }
+  }
+
+  &:not(.vertical-resize-handle-enabled) {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &::after {
+    // This SVG has the colour hard-coded to the current value of @ol-blue-gray-2, so if we changed @ol-blue-gray-2,
+    // we'd have to change this SVG too
+    content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='6' viewBox='0 0 18 6'%3E%3Cpath d='M0 1.5h3v3H0zM5 1.5h3v3H5zM10 1.5h3v3h-3zM15 1.5h3v3h-3z' style='fill:%239da7b7'/%3E%3C/svg%3E");
+    display: block;
+    text-align: center;
+    line-height: 0;
+  }
+}
+
+.vertical-resizable-resizer {
+  background-color: var(--bg-dark-secondary);
+
+  &:hover {
+    background-color: var(--bg-dark-primary);
+  }
+
+  &::after {
+    @include heading-sm;
+
+    content: '\00b7\00b7\00b7\00b7';
+    display: block;
+    color: var(--content-disabled);
+    text-align: center;
+    pointer-events: none;
+  }
+}
+
+.vertical-resizable-resizer-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+
+  &::after {
+    opacity: 0.5;
   }
 }

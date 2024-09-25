@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { Alert, Button } from 'react-bootstrap'
 import { useFileTreeCreateForm } from '../../contexts/file-tree-create-form'
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
 import { useFileTreeData } from '../../../../shared/context/file-tree-data-context'
 import PropTypes from 'prop-types'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 export default function FileTreeModalCreateFileFooter() {
   const { valid } = useFileTreeCreateForm()
@@ -40,31 +41,35 @@ export function FileTreeModalCreateFileFooterContent({
       )}
 
       {fileCount.status === 'error' && (
-        <Alert bsStyle="warning" className="at-file-limit">
+        <OLNotification
+          type="error"
+          className="at-file-limit"
+          content={t('project_has_too_many_files')}
+        >
           {/* TODO: add parameter for fileCount.limit */}
-          {t('project_has_too_many_files')}
-        </Alert>
+        </OLNotification>
       )}
 
-      <Button
-        bsStyle={null}
-        className="btn-secondary"
+      <OLButton
+        variant="secondary"
         type="button"
         disabled={inFlight}
         onClick={cancel}
       >
         {t('cancel')}
-      </Button>
+      </OLButton>
 
       {newFileCreateMode !== 'upload' && (
-        <Button
-          bsStyle="primary"
+        <OLButton
+          variant="primary"
           type="submit"
           form="create-file"
           disabled={inFlight || !valid}
+          isLoading={inFlight}
+          bs3Props={{ loading: inFlight ? `${t('creating')}…` : t('create') }}
         >
-          <span>{inFlight ? `${t('creating')}…` : t('create')}</span>
-        </Button>
+          {t('create')}
+        </OLButton>
       )}
     </>
   )

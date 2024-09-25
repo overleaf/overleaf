@@ -1,3 +1,19 @@
+:root {
+  --file-tree-item-hover-bg: var(--bg-dark-secondary);
+  --file-tree-item-selected-bg: var(--bg-accent-01);
+  --file-tree-item-color: var(--content-primary-dark);
+  --file-tree-bg: var(--bg-dark-tertiary);
+  --file-tree-item-selected-color: var(--content-primary-dark);
+  --file-tree-line-height: 2.05;
+}
+
+@include theme('light') {
+  --file-tree-item-hover-bg: var(--bg-light-tertiary);
+  --file-tree-item-color: var(--content-secondary);
+  --file-tree-bg: var(--bg-light-primary);
+  --file-tree-item-selected-color: var(--bg-light-primary);
+}
+
 .ide-react-file-tree-panel {
   display: flex;
   flex-direction: column;
@@ -5,5 +21,592 @@
   // Prevent the file tree expanding beyond the boundary of the panel
   .file-tree {
     width: 100%;
+  }
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 100;
+}
+
+.editor-sidebar {
+  background-color: var(--file-tree-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin fake-full-width-bg($bg-color) {
+  &::before {
+    content: '\00a0';
+    position: absolute;
+    width: 9999px;
+    left: -9999px;
+    background-color: $bg-color;
+  }
+}
+
+.file-tree {
+  display: flex !important; // To work around jQuery layout's inline styles
+  flex-direction: column;
+  height: 100%;
+
+  .toolbar.toolbar-filetree {
+    @include toolbar-sm-height;
+    @include toolbar-alt-bg;
+
+    padding: 0 var(--spacing-03);
+    flex-shrink: 0;
+  }
+
+  > file-tree-root,
+  .file-tree-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+    width: inherit;
+    height: inherit;
+
+    &.no-toolbar {
+      top: 0;
+    }
+  }
+
+  // TODO; Consolidate with "Project files" in Overleaf
+  h3 {
+    font-size: 1rem;
+    border-bottom: 1px solid var(--border-primary);
+    padding-bottom: var(--spacing-02);
+    margin: var(--spacing-05);
+  }
+
+  &-history {
+    .entity-name {
+      padding-left: var(--spacing-03);
+
+      &.deleted {
+        text-decoration: line-through;
+      }
+    }
+
+    .loading {
+      padding-left: var(--spacing-03);
+      color: var(--content-primary-dark);
+
+      .material-symbols {
+        color: var(--content-primary-dark);
+      }
+    }
+  }
+
+  ul.file-tree-list {
+    margin: 0;
+    overflow: hidden auto;
+    height: 100%;
+    flex-grow: 1;
+    position: relative;
+
+    .entity > ul,
+    ul[role='tree'] {
+      margin-left: var(--spacing-08);
+    }
+
+    &::after {
+      content: '';
+      display: block;
+      min-height: var(--spacing-08);
+    }
+
+    li {
+      line-height: var(--file-tree-line-height);
+      position: relative;
+
+      &:focus {
+        outline: none;
+      }
+
+      .entity {
+        user-select: none;
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      .entity > .entity-name > button {
+        background-color: transparent;
+        border: 0;
+        padding: 0;
+
+        &:focus {
+          outline: none;
+        }
+
+        &.item-name-button {
+          color: inherit;
+          width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          text-align: left;
+          padding-right: var(--spacing-09);
+          white-space: pre;
+        }
+      }
+
+      .entity-name {
+        color: var(--file-tree-item-color);
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &.entity-name-react {
+          text-overflow: clip;
+        }
+
+        &:focus {
+          outline: none;
+        }
+
+        background-color: transparent;
+
+        @include fake-full-width-bg(transparent);
+
+        &:hover {
+          background-color: var(--file-tree-item-hover-bg);
+
+          // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+          // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
+          // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
+          // the empty space.
+          @include fake-full-width-bg(var(--file-tree-item-hover-bg));
+        }
+
+        input {
+          line-height: 1.6;
+        }
+
+        .entity-menu-toggle > .material-symbols {
+          color: var(--content-primary-dark);
+          vertical-align: middle;
+        }
+      }
+
+      .material-symbols {
+        color: var(--content-disabled);
+
+        &.file-tree-icon {
+          margin-right: var(--spacing-02);
+          margin-left: var(--spacing-04);
+          vertical-align: sub;
+
+          &.linked-file-icon {
+            position: relative;
+            left: -2px;
+
+            + .linked-file-highlight {
+              color: inherit;
+              position: relative;
+              top: 4px;
+              width: 0;
+              left: -5px;
+              font-size: 12px;
+            }
+          }
+        }
+
+        &.file-tree-folder-icon {
+          margin-right: var(--spacing-02);
+          vertical-align: sub;
+        }
+
+        &.file-tree-expand-icon {
+          margin-left: var(--spacing-04);
+          vertical-align: sub;
+        }
+      }
+
+      .material-symbols.folder-open,
+      .material-symbols.fa-folder {
+        color: var(--content-disabled);
+      }
+
+      .material-symbols.toggle {
+        width: 24px;
+        padding: var(--spacing-03);
+        font-size: var(--font-size-03);
+        color: var(--content-disabled);
+      }
+
+      .file-tree-dropdown-toggle {
+        display: flex;
+        align-items: center;
+        color: var(--content-primary-dark);
+        line-height: 1.6;
+        font-size: var(--font-size-05);
+        padding: 0 var(--font-size-02) 0 var(--font-size-04);
+
+        &:hover,
+        &:focus {
+          text-decoration: none;
+        }
+
+        &::before {
+          content: '\00B7\00B7\00B7';
+          transform: rotate(90deg);
+          letter-spacing: 0.5px;
+        }
+      }
+
+      &.multi-selected {
+        > .entity {
+          > .entity-name {
+            > div > .material-symbols,
+            > button > .material-symbols,
+            > .material-symbols,
+            .entity-menu-toggle .material-symbols {
+              color: var(--content-primary-dark);
+            }
+
+            > .material-symbols.linked-file-highlight {
+              color: var(--bg-info-01);
+            }
+
+            @include fake-full-width-bg(var(--bg-info-01));
+
+            color: var(--content-primary-dark);
+            font-weight: bold;
+            background-color: var(--bg-info-01);
+
+            &:hover {
+              background-color: var(--bg-info-02);
+
+              @include fake-full-width-bg(var(--bg-info-02));
+            }
+          }
+        }
+      }
+
+      .menu-button {
+        position: absolute;
+        right: 0;
+        top: 3px;
+      }
+
+      .rename-input {
+        display: block;
+        position: absolute;
+        top: 1px;
+        left: 32px;
+        right: 32px;
+        color: var(--content-primary);
+
+        input {
+          width: 100%;
+        }
+      }
+
+      > .entity > .entity-name {
+        .entity-menu-toggle {
+          display: none;
+        }
+      }
+
+      .entity-limit-hit {
+        line-height: var(--file-tree-line-height);
+        color: var(--file-tree-item-color);
+        margin-left: var(--spacing-05);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .entity-limit-hit-message {
+        font-style: italic;
+      }
+
+      .material-symbols .entity-limit-hit-tooltip-trigger {
+        margin-left: var(spacing-03);
+        cursor: pointer;
+      }
+    }
+  }
+
+  &:not(.multi-selected) {
+    ul.file-tree-list li.selected {
+      > .entity {
+        > .entity-name {
+          background-color: var(--file-tree-item-selected-bg);
+          color: var(--file-tree-item-selected-color);
+
+          > div > .material-symbols,
+          > button > .material-symbols,
+          > .material-symbols,
+          .entity-menu-toggle .material-symbols {
+            color: var(--file-tree-item-selected-color);
+          }
+
+          > .material-symbols.linked-file-highlight {
+            color: var(--bg-info-01);
+          }
+
+          @include fake-full-width-bg(var(--file-tree-item-selected-bg));
+
+          font-weight: bold;
+          padding-right: var(--spacing-09);
+
+          .entity-menu-toggle {
+            display: inline-block;
+            background-color: transparent;
+            box-shadow: none;
+            border: 0;
+            padding-right: var(--spacing-02);
+            padding-left: var(--spacing-02);
+          }
+        }
+      }
+    }
+  }
+
+  // while dragging, the previously selected item gets no highlight
+  ul.file-tree-list.file-tree-dragging li.selected .entity .entity-name {
+    @include fake-full-width-bg(transparent);
+
+    font-weight: normal;
+    background-color: transparent;
+    color: var(--file-tree-item-color);
+
+    .material-symbols {
+      color: var(--content-disabled) !important;
+    }
+  }
+
+  // the items being dragged get the full "hover" colour
+  ul.file-tree-list.file-tree-dragging
+    li
+    .entity.file-tree-entity-dragging
+    .entity-name {
+    background-color: fade(var(--file-tree-item-hover-bg), 90%);
+
+    @include fake-full-width-bg(fade(var(--file-tree-item-hover-bg), 90%));
+
+    color: var(--file-tree-item-color);
+
+    .material-symbols {
+      color: var(--content-disabled) !important;
+    }
+  }
+
+  // the drop target gets the "selected" colour
+  ul.file-tree-list.file-tree-dragging
+    li.dnd-droppable-hover
+    .entity
+    .entity-name {
+    background-color: var(--file-tree-item-selected-bg);
+
+    @include fake-full-width-bg(var(--file-tree-item-selected-bg));
+
+    color: var(--file-tree-item-selected-color);
+
+    .material-symbols {
+      color: var(--file-tree-item-selected-color) !important;
+    }
+  }
+
+  .dnd-draggable-preview-layer {
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    &.dnd-droppable-hover {
+      border: 3px solid var(--file-tree-item-selected-bg);
+    }
+  }
+
+  .dnd-draggable-preview-item {
+    color: var(--file-tree-item-selected-color);
+    background-color: fade(var(--file-tree-item-selected-bg), 60%);
+    width: 75%;
+    padding-left: var(--spacing-08);
+    line-height: 2.05;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .disconnected-overlay {
+    background-color: var(--file-tree-bg);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    opacity: 0.5;
+    cursor: wait;
+  }
+}
+
+.modal-new-file {
+  padding: 0;
+
+  table {
+    width: 100%;
+    table-layout: fixed;
+
+    td {
+      vertical-align: top;
+    }
+  }
+
+  .toggle-file-type-button {
+    font-size: 80%;
+    margin-top: calc(var(--spacing-05) * -1);
+
+    .btn {
+      display: inline-block;
+      padding: 0;
+      vertical-align: baseline;
+      font-size: inherit;
+    }
+
+    .btn:focus-within {
+      outline: none;
+      text-decoration: none;
+    }
+  }
+}
+
+.modal-new-file-list {
+  background-color: var(--bg-light-secondary);
+  width: 220px;
+
+  ul {
+    li {
+      /* old modal (a) */
+      a {
+        color: var(--content-secondary);
+        padding: var(--spacing-03);
+        display: block;
+        text-decoration: none;
+      }
+
+      /* new modal (button) */
+      .btn {
+        color: var(--content-secondary);
+        padding: var(--spacing-03);
+      }
+
+      .btn:hover {
+        text-decoration: none;
+      }
+
+      .btn:focus {
+        outline: none;
+        text-decoration: none;
+        background-color: white;
+      }
+    }
+
+    li.active {
+      background-color: white;
+
+      /* old modal (a) */
+      a {
+        color: var(--link-ui);
+      }
+
+      /* new modal (button) */
+      .btn {
+        color: var(--link-ui);
+        text-decoration: none;
+      }
+    }
+
+    li:hover {
+      background-color: white;
+    }
+  }
+}
+
+.file-tree-error {
+  text-align: center;
+  color: var(--content-secondary-dark);
+  padding: 20px;
+}
+
+.file-tree-modal-alert {
+  margin-top: var(--spacing-06);
+}
+
+.btn.modal-new-file-mode {
+  justify-content: left;
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+}
+
+.modal-new-file-body {
+  padding: 20px;
+  padding-top: var(--spacing-03);
+}
+
+.modal-new-file-body-upload {
+  padding-top: 20px;
+}
+
+.modal-new-file-body-conflict {
+  background-color: var(--bg-danger-03);
+  border: 1px dashed var(--border-danger);
+  min-height: 400px;
+  border-radius: 3px;
+  color: var(--content-primary);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--spacing-05);
+}
+
+.modal-footer {
+  .approaching-file-limit {
+    font-weight: bold;
+  }
+
+  .at-file-limit {
+    text-align: left;
+  }
+}
+
+/* stylelint-disable selector-class-pattern */
+.modal-new-file-body-upload .uppy-Root {
+  font-family: inherit;
+}
+
+.modal-new-file-body-upload .uppy-Dashboard {
+  .uppy-Dashboard-inner {
+    border: none;
+  }
+
+  .uppy-Dashboard-dropFilesHereHint {
+    inset: 0;
+  }
+
+  .uppy-Dashboard-AddFiles {
+    margin: 0;
+    border: 1px dashed var(--border-primary);
+    height: 100%;
+
+    .uppy-Dashboard-AddFiles-title {
+      font-size: inherit;
+    }
+  }
+
+  .uppy-Dashboard-AddFiles-title {
+    width: 26em; // sized to create a wrap between the sentences
+    max-width: 100%;
   }
 }

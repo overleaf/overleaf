@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import iconTypeFromName from '../util/icon-type-from-name'
 import classnames from 'classnames'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 function FileTreeDoc({ name, id, isFile, isLinkedFile }) {
   const type = isFile ? 'file' : 'doc'
@@ -46,25 +48,45 @@ FileTreeDoc.propTypes = {
 export const FileTreeIcon = ({ isLinkedFile, name }) => {
   const { t } = useTranslation()
 
-  const className = classnames('spaced', 'file-tree-icon', {
+  const className = classnames('file-tree-icon', {
     'linked-file-icon': isLinkedFile,
   })
 
   return (
     <>
       &nbsp;
-      <Icon type={iconTypeFromName(name)} fw className={className} />
-      {isLinkedFile && (
-        <Icon
-          type="external-link-square"
-          modifier="rotate-180"
-          className="linked-file-highlight"
-          accessibilityLabel={t('linked_file')}
-        />
-      )}
+      <BootstrapVersionSwitcher
+        bs3={
+          <>
+            <Icon type={iconTypeFromName(name)} fw className={className} />
+            {isLinkedFile && (
+              <Icon
+                type="external-link-square"
+                modifier="rotate-180"
+                className="linked-file-highlight"
+                accessibilityLabel={t('linked_file')}
+              />
+            )}
+          </>
+        }
+        bs5={
+          <>
+            <MaterialIcon type={iconTypeFromName(name)} className={className} />
+            {isLinkedFile && (
+              <MaterialIcon
+                type="open_in_new"
+                modifier="rotate-180"
+                className="linked-file-highlight"
+                accessibilityLabel={t('linked_file')}
+              />
+            )}
+          </>
+        }
+      />
     </>
   )
 }
+
 FileTreeIcon.propTypes = {
   name: PropTypes.string.isRequired,
   isLinkedFile: PropTypes.bool,

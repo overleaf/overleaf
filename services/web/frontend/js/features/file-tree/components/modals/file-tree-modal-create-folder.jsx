@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
-
-import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
-
-import AccessibleModal from '../../../../shared/components/accessible-modal'
-
 import { useFileTreeActionable } from '../../contexts/file-tree-actionable'
-
 import { DuplicateFilenameError } from '../../errors'
-
 import { isCleanFilename } from '../../util/safe-path'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function FileTreeModalCreateFolder() {
   const { t } = useTranslation()
@@ -48,12 +48,12 @@ function FileTreeModalCreateFolder() {
   }
 
   return (
-    <AccessibleModal show onHide={handleHide}>
-      <Modal.Header>
-        <Modal.Title>{t('new_folder')}</Modal.Title>
-      </Modal.Header>
+    <OLModal show onHide={handleHide}>
+      <OLModalHeader>
+        <OLModalTitle>{t('new_folder')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <InputName
           name={name}
           setName={setName}
@@ -79,33 +79,32 @@ function FileTreeModalCreateFolder() {
             {errorMessage()}
           </div>
         ) : null}
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
+      <OLModalFooter>
         {inFlight ? (
-          <Button bsStyle="primary" disabled>
-            {t('creating')}…
-          </Button>
+          <OLButton
+            variant="primary"
+            disabled
+            isLoading={inFlight}
+            bs3Props={{ loading: `${t('creating')}…` }}
+          />
         ) : (
           <>
-            <Button
-              bsStyle={null}
-              className="btn-secondary"
-              onClick={handleHide}
-            >
+            <OLButton variant="secondary" onClick={handleHide}>
               {t('cancel')}
-            </Button>
-            <Button
-              bsStyle="primary"
+            </OLButton>
+            <OLButton
+              variant="primary"
               onClick={handleCreateFolder}
               disabled={!validName}
             >
               {t('create')}
-            </Button>
+            </OLButton>
           </>
         )}
-      </Modal.Footer>
-    </AccessibleModal>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

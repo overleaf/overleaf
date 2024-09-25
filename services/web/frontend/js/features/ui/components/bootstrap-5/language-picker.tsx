@@ -34,7 +34,10 @@ function LanguagePicker() {
         {translatedLanguages?.[currentLangCode]}
       </DropdownToggle>
 
-      <DropdownMenu className="sm" aria-labelledby="language-picker-toggle">
+      <DropdownMenu
+        className="dropdown-menu-sm-width"
+        aria-labelledby="language-picker-toggle"
+      >
         {subdomainLang &&
           Object.entries(subdomainLang).map(([subdomain, subdomainDetails]) => {
             if (

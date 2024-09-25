@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useCallback } from 'react'
 import { syncDelete } from '@/features/file-tree/util/sync-mutation'
-import { Button } from 'react-bootstrap'
 import { TFunction } from 'i18next'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export type Conflict = {
   entity: FileTreeEntity
@@ -48,7 +48,7 @@ export function FileUploadConflicts({
   )
 
   return (
-    <div className="small modal-new-file--body-conflict">
+    <div className="small modal-new-file-body-conflict">
       {conflicts.length > 0 && (
         <>
           <p className="text-center mb-0">{getConflictText(conflicts, t)}</p>
@@ -70,14 +70,14 @@ export function FileUploadConflicts({
       )}
 
       <p className="text-center">
-        <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
+        <OLButton variant="secondary" onClick={cancel}>
           {t('cancel')}
-        </Button>
+        </OLButton>
         &nbsp;
         {!hasFolderConflict && (
-          <Button bsStyle="danger" onClick={handleOverwrite}>
+          <OLButton variant="danger" onClick={handleOverwrite}>
             {t('overwrite')}
-          </Button>
+          </OLButton>
         )}
       </p>
     </div>
@@ -118,7 +118,7 @@ export function FolderUploadConflicts({
   }, [setError, conflicts, handleOverwrite, projectId])
 
   return (
-    <div className="small modal-new-file--body-conflict">
+    <div className="small modal-new-file-body-conflict">
       <p className="text-center mb-0">{getConflictText(conflicts, t)}</p>
 
       <ul className="text-center list-unstyled row-spaced-small mt-1">
@@ -140,14 +140,14 @@ export function FolderUploadConflicts({
       )}
 
       <p className="text-center">
-        <Button bsStyle={null} className="btn-secondary" onClick={cancel}>
+        <OLButton variant="secondary" onClick={cancel}>
           {t('cancel')}
-        </Button>
+        </OLButton>
         &nbsp;
         {!hasFileConflict && (
-          <Button bsStyle="danger" onClick={deleteAndRetry}>
+          <OLButton variant="danger" onClick={deleteAndRetry}>
             {t('overwrite')}
-          </Button>
+          </OLButton>
         )}
       </p>
     </div>

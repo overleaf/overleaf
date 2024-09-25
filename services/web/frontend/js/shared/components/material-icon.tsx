@@ -5,15 +5,17 @@ import { bsVersion } from '@/features/utils/bootstrap-5'
 type IconProps = React.ComponentProps<'i'> & {
   type: string
   accessibilityLabel?: string
+  modifier?: string
 }
 
 function MaterialIcon({
   type,
   className,
   accessibilityLabel,
+  modifier,
   ...rest
 }: IconProps) {
-  const iconClassName = classNames('material-symbols', className)
+  const iconClassName = classNames('material-symbols', className, modifier)
 
   return (
     <>

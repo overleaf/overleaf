@@ -82,7 +82,7 @@ export default function TagsList() {
                   <DropdownToggle id={`${tag._id}-dropdown-toggle`}>
                     <span className="caret" />
                   </DropdownToggle>
-                  <DropdownMenu className="sm">
+                  <DropdownMenu className="dropdown-menu-sm-width">
                     <DropdownItem
                       as="li"
                       className="tag-action"

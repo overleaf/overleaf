@@ -1,6 +1,6 @@
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from '../../../shared/hooks/use-location'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function FileTreeError() {
   const { t } = useTranslation()
@@ -10,9 +10,9 @@ function FileTreeError() {
     <div className="file-tree-error">
       <p>{t('generic_something_went_wrong')}</p>
       <p>{t('please_refresh')}</p>
-      <Button bsStyle="primary" onClick={handleClick}>
+      <OLButton variant="primary" onClick={handleClick}>
         {t('refresh')}
-      </Button>
+      </OLButton>
     </div>
   )
 }

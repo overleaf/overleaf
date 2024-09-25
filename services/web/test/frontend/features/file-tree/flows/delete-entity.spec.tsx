@@ -47,7 +47,7 @@ describe('FileTree Delete Entity Flow', function () {
       )
 
       cy.findByRole('treeitem', { name: 'main.tex' }).click()
-      cy.findByRole('button', { name: 'Menu' }).click()
+      cy.findByRole('button', { name: 'Open main.tex action menu' }).click()
       cy.findByRole('menuitem', { name: 'Delete' }).click()
     })
 
@@ -195,7 +195,7 @@ describe('FileTree Delete Entity Flow', function () {
       // as a proxy to check that the child entity has been unselect we start
       // a delete and ensure the modal is displayed (the cancel button can be
       // selected) This is needed to make sure the test fail.
-      cy.findByRole('button', { name: 'Menu' }).click()
+      cy.findByRole('button', { name: 'Open main.tex action menu' }).click()
       cy.findByRole('menuitem', { name: 'Delete' }).click()
       cy.findByRole('button', { name: 'Cancel' })
     })

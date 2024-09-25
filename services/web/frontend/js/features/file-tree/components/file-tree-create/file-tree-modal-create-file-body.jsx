@@ -11,6 +11,7 @@ import importOverleafModules from '../../../../../macros/import-overleaf-module.
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 const createFileModeModules = importOverleafModules('createFileModes')
 
@@ -35,11 +36,11 @@ export default function FileTreeModalCreateFileBody() {
     <table>
       <tbody>
         <tr>
-          <td className="modal-new-file--list">
+          <td className="modal-new-file-list">
             <ul className="list-unstyled">
               <FileTreeModalCreateFileMode
                 mode="doc"
-                icon="file"
+                icon={bsVersion({ bs5: 'description', bs3: 'file' })}
                 label={t('new_file')}
               />
 
@@ -53,7 +54,7 @@ export default function FileTreeModalCreateFileBody() {
                 hasLinkedProjectOutputFileFeature) && (
                 <FileTreeModalCreateFileMode
                   mode="project"
-                  icon="folder-open"
+                  icon={bsVersion({ bs5: 'folder_open', bs3: 'folder-open' })}
                   label={t('from_another_project')}
                 />
               )}
@@ -75,7 +76,7 @@ export default function FileTreeModalCreateFileBody() {
           </td>
 
           <td
-            className={`modal-new-file--body modal-new-file--body-${newFileCreateMode}`}
+            className={`modal-new-file-body modal-new-file-body-${newFileCreateMode}`}
           >
             {newFileCreateMode === 'doc' && (
               <FileTreeCreateNameProvider initialName="name.tex">
