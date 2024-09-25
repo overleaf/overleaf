@@ -542,13 +542,29 @@
 }
 
 .bottom-align-last-entry {
-  display: flex;
-  flex-direction: column;
+  &.no-card {
+    display: flex;
+    flex-direction: column;
 
-  * {
-    &:last-child {
-      flex: 1;
-      align-content: end;
+    * {
+      &:last-child {
+        flex: 1;
+        align-content: end;
+      }
+    }
+  }
+
+  &.card {
+    .card-body {
+      display: flex;
+      flex-direction: column;
+
+      * {
+        &:last-child {
+          flex: 1;
+          align-content: end;
+        }
+      }
     }
   }
 }
