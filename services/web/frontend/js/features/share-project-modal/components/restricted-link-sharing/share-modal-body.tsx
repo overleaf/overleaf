@@ -72,6 +72,16 @@ export default function ShareModalBody() {
     )
   }, [features, isProjectOwner, members])
 
+  const sortedMembers = useMemo(() => {
+    return [
+      ...members.filter(member => member.privileges === 'readAndWrite'),
+      ...members.filter(member => member.pendingEditor),
+      ...members.filter(
+        member => !member.pendingEditor && member.privileges !== 'readAndWrite'
+      ),
+    ]
+  }, [members])
+
   return (
     <>
       {isProjectOwner ? (
@@ -88,7 +98,7 @@ export default function ShareModalBody() {
 
       <OwnerInfo />
 
-      {members.map(member =>
+      {sortedMembers.map(member =>
         isProjectOwner ? (
           <EditMember
             key={member._id}
