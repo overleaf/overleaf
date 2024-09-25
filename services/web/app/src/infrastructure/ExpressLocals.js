@@ -23,29 +23,31 @@ const {
 const IEEE_BRAND_ID = Settings.ieeeBrandId
 
 let webpackManifest
-switch (process.env.NODE_ENV) {
-  case 'production':
-    // Only load webpack manifest file in production.
-    webpackManifest = require('../../../public/manifest.json')
-    break
-  case 'development': {
-    // In dev, fetch the manifest from the webpack container.
-    loadManifestFromWebpackDevServer()
-    const intervalHandle = setInterval(
-      loadManifestFromWebpackDevServer,
-      10 * 1000
-    )
-    addOptionalCleanupHandlerAfterDrainingConnections(
-      'refresh webpack manifest',
-      () => {
-        clearInterval(intervalHandle)
-      }
-    )
-    break
+function loadManifest() {
+  switch (process.env.NODE_ENV) {
+    case 'production':
+      // Only load webpack manifest file in production.
+      webpackManifest = require('../../../public/manifest.json')
+      break
+    case 'development': {
+      // In dev, fetch the manifest from the webpack container.
+      loadManifestFromWebpackDevServer()
+      const intervalHandle = setInterval(
+        loadManifestFromWebpackDevServer,
+        10 * 1000
+      )
+      addOptionalCleanupHandlerAfterDrainingConnections(
+        'refresh webpack manifest',
+        () => {
+          clearInterval(intervalHandle)
+        }
+      )
+      break
+    }
+    default:
+      // In ci, all entries are undefined.
+      webpackManifest = {}
   }
-  default:
-    // In ci, all entries are undefined.
-    webpackManifest = {}
 }
 function loadManifestFromWebpackDevServer(done = function () {}) {
   fetchJson(new URL(`/manifest.json`, Settings.apis.webpack.url), {
@@ -72,6 +74,7 @@ function getWebpackAssets(entrypoint, section) {
 }
 
 module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
+  loadManifest()
   if (process.env.NODE_ENV === 'development') {
     // In the dev-env, delay requests until we fetched the manifest once.
     webRouter.use(function (req, res, next) {

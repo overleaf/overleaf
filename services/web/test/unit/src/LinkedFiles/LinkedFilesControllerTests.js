@@ -61,7 +61,7 @@ describe('LinkedFilesController', function () {
         '@overleaf/settings': this.settings,
       },
     })
-    this.LinkedFilesController._getAgent = sinon.stub().returns(this.Agent)
+    this.LinkedFilesController._getAgent = sinon.stub().resolves(this.Agent)
   })
 
   describe('createLinkedFile', function () {

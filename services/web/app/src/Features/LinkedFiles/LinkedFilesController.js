@@ -42,13 +42,16 @@ const { plainTextResponse } = require('../../infrastructure/Response')
 const ReferencesHandler = require('../References/ReferencesHandler')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const { expressify } = require('@overleaf/promise-utils')
+const ProjectOutputFileAgent = require('./ProjectOutputFileAgent')
+const ProjectFileAgent = require('./ProjectFileAgent')
+const UrlAgent = require('./UrlAgent')
 
 async function createLinkedFile(req, res, next) {
   const { project_id: projectId } = req.params
   const { name, provider, data, parent_folder_id: parentFolderId } = req.body
   const userId = SessionManager.getLoggedInUserId(req.session)
 
-  const Agent = LinkedFilesController._getAgent(provider)
+  const Agent = await LinkedFilesController._getAgent(provider)
   if (Agent == null) {
     return res.sendStatus(400)
   }
@@ -102,7 +105,7 @@ async function refreshLinkedFile(req, res, next) {
 
   const { provider } = linkedFileData
   const parentFolderId = parentFolder._id
-  const Agent = LinkedFilesController._getAgent(provider)
+  const Agent = await LinkedFilesController._getAgent(provider)
   if (Agent == null) {
     return res.sendStatus(400)
   }
@@ -144,16 +147,23 @@ async function refreshLinkedFile(req, res, next) {
 }
 
 module.exports = LinkedFilesController = {
-  Agents: _.extend(
-    {
-      url: require('./UrlAgent'),
-      project_file: require('./ProjectFileAgent'),
-      project_output_file: require('./ProjectOutputFileAgent'),
-    },
-    Modules.linkedFileAgentsIncludes()
-  ),
+  Agents: null,
 
-  _getAgent(provider) {
+  async _cacheAgents() {
+    if (!LinkedFilesController.Agents) {
+      LinkedFilesController.Agents = _.extend(
+        {
+          url: UrlAgent,
+          project_file: ProjectFileAgent,
+          project_output_file: ProjectOutputFileAgent,
+        },
+        await Modules.linkedFileAgentsIncludes()
+      )
+    }
+  },
+
+  async _getAgent(provider) {
+    await LinkedFilesController._cacheAgents()
     if (
       !Object.prototype.hasOwnProperty.call(
         LinkedFilesController.Agents,

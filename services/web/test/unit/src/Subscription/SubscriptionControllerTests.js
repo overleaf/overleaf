@@ -172,6 +172,9 @@ describe('SubscriptionController', function () {
           recordEventForSession: sinon.stub(),
           setUserPropertyForUser: sinon.stub(),
         }),
+        '../../infrastructure/Modules': {
+          promises: { hooks: { fire: sinon.stub().resolves() } },
+        },
         '../../infrastructure/Features': this.Features,
         '../../util/currency': (this.currency = {
           formatCurrencyLocalized: sinon.stub(),

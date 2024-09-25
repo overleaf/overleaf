@@ -140,6 +140,9 @@ describe('ProjectDeleter', function () {
     }
     this.ProjectDeleter = SandboxedModule.require(modulePath, {
       requires: {
+        '../../infrastructure/Modules': {
+          promises: { hooks: { fire: sinon.stub().resolves() } },
+        },
         '../../infrastructure/Features': this.Features,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../../models/Project': { Project },
