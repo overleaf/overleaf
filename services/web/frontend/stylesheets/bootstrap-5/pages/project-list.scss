@@ -371,16 +371,16 @@
         border-radius: var(--border-radius-base);
         background-color: transparent;
         color: var(--white);
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 16px;
         height: 16px;
         position: relative;
         padding: var(--spacing-01) var(--spacing-03);
 
         &::after {
-          position: absolute;
-          top: 4px;
-          left: -2px;
+          margin: 0;
         }
       }
 
