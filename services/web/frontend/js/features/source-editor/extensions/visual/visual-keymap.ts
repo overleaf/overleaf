@@ -110,7 +110,7 @@ export const visualKeymap = Prec.highest(
 
               return {
                 changes: { from, insert },
-                range: EditorSelection.cursor(pos),
+                range: EditorSelection.cursor(pos, -1),
               }
             }
 

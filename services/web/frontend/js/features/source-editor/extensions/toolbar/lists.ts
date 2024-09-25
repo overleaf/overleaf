@@ -69,7 +69,7 @@ const wrapRangeInList = (
   ]
 
   // map through the prefix
-  range = EditorSelection.cursor(range.to).map(state.changes(changes), 1)
+  range = EditorSelection.cursor(range.to, -1).map(state.changes(changes), 1)
 
   changes.push({
     from: toLine.to,
