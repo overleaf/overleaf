@@ -232,7 +232,6 @@
   "get_discounted_plan": "Obtenha um plano com desconto",
   "get_in_touch": "Entre em contato",
   "git": "Git",
-  "git_bridge_modal_description": "Você pode usar git clone no seu projeto usando o link abaixo.",
   "github_commit_message_placeholder": "Mensagem de commit para as alterações feitas no __appName__...",
   "github_credentials_expired": "Suas credenciais de autorização do GitHub expiraram",
   "github_integration_lowercase": "Integração com GitHub",

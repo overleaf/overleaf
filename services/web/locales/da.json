@@ -525,7 +525,6 @@
   "git_authentication_token_create_modal_info_1": "Dette er din Git autentificeringsnøgle. Du skal indtaste den når du bliver spurgt om et kodeord.",
   "git_authentication_token_create_modal_info_2": "<0>Du kan kun se denne autentificeringsnøgle én gang så kopier den venligst og opbevar den sikkert.</0> For flere instruktioner omkring brugen af autentificeringsnøgler, besøg vores <1>hjælpeside</1>.",
   "git_bridge_modal_click_generate": "Klik <strong>“Generér nøgle”</strong> for at generere din autentificeringsnøgle. Du kan også gøre det senere i dine kontoindstillinger.",
-  "git_bridge_modal_description": "Du kan git clone dit projekt med linket herunder.",
   "git_bridge_modal_enter_authentication_token": "Når du bliver spurgt om en kode, indtast da din nye autentificeringsnøgle:",
   "git_bridge_modal_see_once": "Du kan kun se denne autentificeringsnøgle én gang. For at slette den eller generere en ny, gå til dine brugerindstilinger. For detalerede instruktioner og fejlsøgning, læs vores <0>hjælpeside</0>.",
   "git_bridge_modal_use_previous_token": "Hvis du bliver spurgt om en kode kan du bruge en tidligere genereret autentificeringsnøgle. Du kan også generere en ny i dine kontoindstillinger. For mere hjælp, læs vores <0>hjælpeside</0>.",
