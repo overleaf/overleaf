@@ -50,14 +50,6 @@
   flex-direction: column;
   height: 100%;
 
-  .toolbar.toolbar-filetree {
-    @include toolbar-sm-height;
-    @include toolbar-alt-bg;
-
-    padding: 0 var(--spacing-03);
-    flex-shrink: 0;
-  }
-
   > file-tree-root,
   .file-tree-inner {
     position: relative;

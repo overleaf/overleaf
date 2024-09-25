@@ -11,7 +11,7 @@ import UntrashProjectsButton from './buttons/untrash-projects-button'
 import DeleteLeaveProjectsButton from './buttons/delete-leave-projects-button'
 import LeaveProjectsButton from './buttons/leave-projects-button'
 import DeleteProjectsButton from './buttons/delete-projects-button'
-import OlButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
+import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
 import OlButtonGroup from '@/features/ui/components/ol/ol-button-group'
 
 function ProjectTools() {
@@ -19,7 +19,7 @@ function ProjectTools() {
   const { filter, selectedProjects } = useProjectListContext()
 
   return (
-    <OlButtonToolbar aria-label={t('toolbar_selected_projects')}>
+    <OLButtonToolbar aria-label={t('toolbar_selected_projects')}>
       <OlButtonGroup
         aria-label={t('toolbar_selected_projects_management_actions')}
       >
@@ -48,7 +48,7 @@ function ProjectTools() {
       {selectedProjects.length === 1 &&
         filter !== 'archived' &&
         filter !== 'trashed' && <ProjectToolsMoreDropdownButton />}
-    </OlButtonToolbar>
+    </OLButtonToolbar>
   )
 }
 

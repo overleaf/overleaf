@@ -1541,6 +1541,7 @@
   "project": "project",
   "project_approaching_file_limit": "This project is approaching the file limit",
   "project_figure_modal": "Project",
+  "project_files": "Project files",
   "project_flagged_too_many_compiles": "This project has been flagged for compiling too often. The limit will be lifted shortly.",
   "project_has_too_many_files": "This project has reached the 2000 file limit",
   "project_last_published_at": "Your project was last published at",

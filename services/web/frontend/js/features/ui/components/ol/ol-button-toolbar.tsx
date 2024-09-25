@@ -10,7 +10,7 @@ type OLButtonToolbarProps = ButtonToolbarProps & {
   bs3Props?: Record<string, unknown>
 }
 
-function OlButtonToolbar(props: OLButtonToolbarProps) {
+function OLButtonToolbar(props: OLButtonToolbarProps) {
   const { bs3Props, ...rest } = props
 
   const bs3ButtonToolbarProps: BS3ButtonToolbarProps = {
@@ -28,4 +28,4 @@ function OlButtonToolbar(props: OLButtonToolbarProps) {
   )
 }
 
-export default OlButtonToolbar
+export default OLButtonToolbar

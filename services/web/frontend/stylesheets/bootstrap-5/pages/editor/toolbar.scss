@@ -4,7 +4,9 @@
   --toolbar-header-btn-border-color: var(--neutral-80);
   --toolbar-btn-color: var(--white);
   --toolbar-btn-hover-bg-color: var(--neutral-80);
+  --toolbar-btn-hover-color: var(--white);
   --project-name-color: var(--neutral-40);
+  --toolbar-filetree-bg-color: var(--neutral-80);
   --project-rename-link-color: var(--neutral-40);
   --project-rename-link-color-hover: var(--neutral-20);
   --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o-white.svg)
@@ -17,7 +19,9 @@
   --toolbar-header-btn-border-color: var(--neutral-20);
   --toolbar-btn-color: var(--neutral-70);
   --toolbar-btn-hover-bg-color: var(--neutral-10);
+  --toolbar-btn-hover-color: var(--neutral-70);
   --project-name-color: var(--neutral-70);
+  --toolbar-filetree-bg-color: var(--white);
   --project-rename-link-color: var(--neutral-70);
   --project-rename-link-color-hover: var(--neutral-70);
   --editor-header-logo-background: url(../../../../../public/img/ol-brand/overleaf-o.svg)
@@ -25,10 +29,8 @@
 }
 
 .toolbar {
-  --toolbar-height: 40px;
-
   display: flex;
-  align-items: stretch;
+  align-items: center;
   height: var(--toolbar-height);
   min-height: var(--toolbar-height);
   border-bottom: 1px solid var(--toolbar-border-color);
@@ -58,6 +60,59 @@
 
   .toolbar-right .back-to-editor-btn {
     margin-right: var(--spacing-09);
+    display: flex;
+    align-items: center;
+
+    .toolbar-label {
+      margin-bottom: 0;
+    }
+  }
+
+  > a:focus,
+  button:focus {
+    outline: none;
+  }
+
+  > a:not(.btn),
+  > button,
+  .toolbar-left > a:not(.btn),
+  .toolbar-left > button,
+  .toolbar-right > a:not(.btn),
+  .toolbar-right > button:not(.back-to-editor-btn) {
+    display: inline-block;
+    color: var(--toolbar-btn-color);
+    background-color: transparent;
+    padding: var(--spacing-01);
+    line-height: 1;
+    height: 24px;
+    border-radius: var(--border-radius-base);
+
+    &.toolbar-header-back-projects {
+      padding: var(--spacing-02) var(--spacing-04) var(--spacing-02);
+      margin-bottom: var(--spacing-01);
+    }
+
+    &:hover {
+      text-shadow: none;
+      color: var(--toolbar-btn-hover-color);
+      background-color: transparent;
+      text-decoration: none;
+    }
+
+    &.active,
+    &:active {
+      .label {
+        display: none;
+      }
+
+      color: white;
+      background-color: var(--bg-info-01);
+      box-shadow: none;
+
+      &:hover {
+        color: white;
+      }
+    }
   }
 
   a.btn-full-height,
@@ -140,6 +195,9 @@
   }
 
   &.toolbar-header {
+    --toolbar-height: 40px;
+
+    align-items: stretch;
     background-color: var(--toolbar-header-bg-color);
     position: absolute;
     top: 0;
@@ -182,6 +240,14 @@
   @include media-breakpoint-down(lg) {
     display: none !important;
   }
+}
+
+.toolbar-filetree {
+  @include toolbar-sm-height;
+
+  background-color: var(--toolbar-filetree-bg-color);
+  padding: 0 var(--spacing-03);
+  flex-shrink: 0;
 }
 
 .editor-menu-icon {
