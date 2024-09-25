@@ -98,6 +98,16 @@
         }
       }
 
+      .welcome-message-card-item {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+
+        @media (min-width: @screen-md-min) {
+          flex: 0 1 310px;
+        }
+      }
+
       .welcome-message-card {
         border: 1px solid @neutral-20;
         border-radius: 16px;
@@ -115,6 +125,7 @@
         @media (min-width: @screen-md-min) {
           margin: 0 15px;
           height: 240px;
+          width: auto;
         }
 
         &:hover {
@@ -122,6 +133,8 @@
         }
 
         .welcome-message-card-img {
+          max-width: 100%;
+
           @media (min-width: @screen-md-min) {
             margin-bottom: 20px;
           }
@@ -159,7 +172,7 @@
           }
 
           > a {
-            color: @ol-blue-gray-3;
+            color: @gray-dark;
             display: block;
 
             &:hover {
@@ -179,7 +192,7 @@
         &,
         &:hover {
           text-decoration: none;
-          color: @ol-blue-gray-3;
+          color: @gray-dark;
         }
       }
     }

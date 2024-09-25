@@ -126,85 +126,91 @@ function WelcomeMessageCreateNewProjectDropdown({
   return (
     <BootstrapVersionSwitcher
       bs3={
-        <div
-          role="button"
-          tabIndex={0}
-          className="card welcome-message-card"
-          onClick={handleClick}
-          onKeyDown={handleKeyDown}
-        >
-          <p>{t('create_a_new_project')}</p>
-          <img
-            className="welcome-message-card-img"
-            src="/img/welcome-page/create-a-new-project.svg"
-            aria-hidden="true"
-            alt=""
-          />
-          {showDropdown && (
-            <div className="card create-new-project-dropdown">
-              <button
-                onClick={e =>
-                  handleDropdownItemClick(e, 'blank_project', 'blank-project')
-                }
-              >
-                {t('blank_project')}
-              </button>
-              <button
-                onClick={e =>
-                  handleDropdownItemClick(
-                    e,
-                    'example_project',
-                    'example-project'
-                  )
-                }
-              >
-                {t('example_project')}
-              </button>
-              <button
-                onClick={e =>
-                  handleDropdownItemClick(e, 'upload_project', 'upload-project')
-                }
-              >
-                {t('upload_project')}
-              </button>
-              {isOverleaf && (
+        <div className="welcome-message-card-item">
+          <div
+            role="button"
+            tabIndex={0}
+            className="card welcome-message-card"
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+          >
+            <p>{t('create_a_new_project')}</p>
+            <img
+              className="welcome-message-card-img"
+              src="/img/welcome-page/create-a-new-project.svg"
+              aria-hidden="true"
+              alt=""
+            />
+            {showDropdown && (
+              <div className="card create-new-project-dropdown">
+                <button
+                  onClick={e =>
+                    handleDropdownItemClick(e, 'blank_project', 'blank-project')
+                  }
+                >
+                  {t('blank_project')}
+                </button>
                 <button
                   onClick={e =>
                     handleDropdownItemClick(
                       e,
-                      'import_from_github',
-                      'import-from-github'
+                      'example_project',
+                      'example-project'
                     )
                   }
                 >
-                  {t('import_from_github')}
+                  {t('example_project')}
                 </button>
-              )}
-              {portalTemplates.length > 0 ? (
-                <>
-                  <hr />
-                  <div className="dropdown-header">
-                    {t('institution_templates')}
-                  </div>
-                  {portalTemplates?.map((portalTemplate, index) => (
-                    <a
-                      key={`portal-template-${index}`}
-                      href={`${portalTemplate.url}#templates`}
-                      onClick={e =>
-                        handlePortalTemplateClick(e, portalTemplate.name)
-                      }
-                    >
-                      {portalTemplate.name}
-                    </a>
-                  ))}
-                </>
-              ) : null}
-            </div>
-          )}
+                <button
+                  onClick={e =>
+                    handleDropdownItemClick(
+                      e,
+                      'upload_project',
+                      'upload-project'
+                    )
+                  }
+                >
+                  {t('upload_project')}
+                </button>
+                {isOverleaf && (
+                  <button
+                    onClick={e =>
+                      handleDropdownItemClick(
+                        e,
+                        'import_from_github',
+                        'import-from-github'
+                      )
+                    }
+                  >
+                    {t('import_from_github')}
+                  </button>
+                )}
+                {portalTemplates.length > 0 ? (
+                  <>
+                    <hr />
+                    <div className="dropdown-header">
+                      {t('institution_templates')}
+                    </div>
+                    {portalTemplates?.map((portalTemplate, index) => (
+                      <a
+                        key={`portal-template-${index}`}
+                        href={`${portalTemplate.url}#templates`}
+                        onClick={e =>
+                          handlePortalTemplateClick(e, portalTemplate.name)
+                        }
+                      >
+                        {portalTemplate.name}
+                      </a>
+                    ))}
+                  </>
+                ) : null}
+              </div>
+            )}
+          </div>
         </div>
       }
       bs5={
-        <Dropdown>
+        <Dropdown className="welcome-message-card-item">
           <DropdownToggle
             as={CustomDropdownToggle}
             id="create-new-project-dropdown-toggle-btn"

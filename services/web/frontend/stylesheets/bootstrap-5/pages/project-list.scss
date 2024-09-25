@@ -115,7 +115,6 @@
         justify-content: space-between;
         padding: var(--spacing-08) var(--spacing-06);
         margin: var(--spacing-05) 0;
-        width: 280px;
         height: 200px;
         position: relative;
         cursor: pointer;
@@ -130,9 +129,23 @@
         }
 
         .welcome-message-card-img {
+          max-width: 100%;
+
           @include media-breakpoint-up(lg) {
             margin-bottom: var(--spacing-07);
           }
+        }
+      }
+
+      .welcome-message-card-item {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        width: 280px;
+
+        @include media-breakpoint-up(lg) {
+          flex: 0 1 312px;
+          width: auto;
         }
       }
 
@@ -156,7 +169,7 @@
         &,
         &:hover {
           text-decoration: none;
-          color: $neutral-60;
+          color: var(--bs-body-color);
         }
       }
     }
