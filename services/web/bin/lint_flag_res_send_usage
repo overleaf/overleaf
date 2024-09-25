@@ -6,7 +6,7 @@ POTENTIAL_SEND_USAGE=$(\
   grep \
     --files-with-matches \
     --recursive \
-      app.js \
+      app.mjs \
       app/ \
       modules/*/app \
       test/acceptance/ \

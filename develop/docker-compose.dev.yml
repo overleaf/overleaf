@@ -120,7 +120,7 @@ services:
       - "127.0.0.1:9229:9229"
     volumes:
       - ../services/web/app:/overleaf/services/web/app
-      - ../services/web/app.js:/overleaf/services/web/app.js
+      - ../services/web/app.mjs:/overleaf/services/web/app.mjs
       - ../services/web/config:/overleaf/services/web/config
       - ../services/web/locales:/overleaf/services/web/locales
       - ../services/web/modules:/overleaf/services/web/modules

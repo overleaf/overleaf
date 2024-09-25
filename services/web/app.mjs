@@ -1,43 +1,40 @@
 // Metrics must be initialized before importing anything else
-require('@overleaf/metrics/initialize')
+import '@overleaf/metrics/initialize.js'
 
-const metrics = require('@overleaf/metrics')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const PlansLocator = require('./app/src/Features/Subscription/PlansLocator')
-const SiteAdminHandler = require('./app/src/infrastructure/SiteAdminHandler')
-const Modules = require('./app/src/infrastructure/Modules')
+import Modules from './app/src/infrastructure/Modules.js'
+import metrics from '@overleaf/metrics'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import PlansLocator from './app/src/Features/Subscription/PlansLocator.js'
+import SiteAdminHandler from './app/src/infrastructure/SiteAdminHandler.js'
+
+import http from 'node:http'
+import https from 'node:https'
+
+import * as Serializers from './app/src/infrastructure/LoggerSerializers.js'
+
+import Server from './app/src/infrastructure/Server.js'
+import QueueWorkers from './app/src/infrastructure/QueueWorkers.js'
+import mongodb from './app/src/infrastructure/mongodb.js'
+import mongoose from './app/src/infrastructure/Mongoose.js'
+import { triggerGracefulShutdown } from './app/src/infrastructure/GracefulShutdown.js'
+import FileWriter from './app/src/infrastructure/FileWriter.js'
+import { fileURLToPath } from 'url'
 
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
-logger.logger.serializers.user =
-  require('./app/src/infrastructure/LoggerSerializers').user
-logger.logger.serializers.docs =
-  require('./app/src/infrastructure/LoggerSerializers').docs
-logger.logger.serializers.files =
-  require('./app/src/infrastructure/LoggerSerializers').files
-logger.logger.serializers.project =
-  require('./app/src/infrastructure/LoggerSerializers').project
+logger.logger.serializers.user = Serializers.user
+logger.logger.serializers.docs = Serializers.docs
+logger.logger.serializers.files = Serializers.files
+logger.logger.serializers.project = Serializers.project
 if (Settings.sentry?.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
-
-const http = require('http')
-const https = require('https')
 http.globalAgent.maxSockets = Settings.limits.httpGlobalAgentMaxSockets
 https.globalAgent.maxSockets = Settings.limits.httpsGlobalAgentMaxSockets
 
 metrics.memory.monitor(logger)
 metrics.leaked_sockets.monitor(logger)
 metrics.open_sockets.monitor()
-
-const Server = require('./app/src/infrastructure/Server')
-const QueueWorkers = require('./app/src/infrastructure/QueueWorkers')
-const mongodb = require('./app/src/infrastructure/mongodb')
-const mongoose = require('./app/src/infrastructure/Mongoose')
-const {
-  triggerGracefulShutdown,
-} = require('./app/src/infrastructure/GracefulShutdown')
-const FileWriter = require('./app/src/infrastructure/FileWriter')
 
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
@@ -51,9 +48,8 @@ FileWriter.ensureDumpFolderExists()
 
 const port = Settings.port || Settings.internal.web.port || 3000
 const host = Settings.internal.web.host || '127.0.0.1'
-if (!module.parent) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // Called directly
-
   // We want to make sure that we provided a password through the environment.
   if (!process.env.WEB_API_USER || !process.env.WEB_API_PASSWORD) {
     throw new Error('No API user and password provided')
@@ -65,9 +61,7 @@ if (!module.parent) {
     .then(async () => {
       Server.server.listen(port, host, function () {
         logger.debug(`web starting up, listening on ${host}:${port}`)
-        logger.debug(
-          `${require('http').globalAgent.maxSockets} sockets enabled`
-        )
+        logger.debug(`${http.globalAgent.maxSockets} sockets enabled`)
         // wait until the process is ready before monitoring the event loop
         metrics.event_loop.monitor(logger)
       })
@@ -93,4 +87,4 @@ process.on('SIGTERM', function (signal) {
   triggerGracefulShutdown(Server.server, signal)
 })
 
-module.exports = Server.server
+export default Server.server

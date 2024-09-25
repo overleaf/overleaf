@@ -11,4 +11,4 @@ export LISTEN_ADDRESS=127.0.0.1
 export ENABLED_SERVICES="web"
 export WEB_PORT="4000"
 
-exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/web/app.js >> /var/log/overleaf/web.log 2>&1
+exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/web/app.mjs >> /var/log/overleaf/web.log 2>&1

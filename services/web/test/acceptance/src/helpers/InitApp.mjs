@@ -1,18 +1,18 @@
-const App = require('../../../../app')
-const QueueWorkers = require('../../../../app/src/infrastructure/QueueWorkers')
-const MongoHelper = require('./MongoHelper')
-const RedisHelper = require('./RedisHelper')
-const logger = require('@overleaf/logger')
-const Settings = require('@overleaf/settings')
-const MockReCAPTCHAApi = require('../mocks/MockReCaptchaApi')
-const {
-  gracefulShutdown,
-} = require('../../../../app/src/infrastructure/GracefulShutdown')
-const { app } = require('../../../../app/src/infrastructure/Server')
-const { injectRouteAfter } = require('./injectRoute')
-const SplitTestHandler = require('../../../../app/src/Features/SplitTests/SplitTestHandler')
-const SplitTestSessionHandler = require('../../../../app/src/Features/SplitTests/SplitTestSessionHandler')
-const Modules = require('../../../../app/src/infrastructure/Modules')
+import App from '../../../../app.mjs'
+import QueueWorkers from '../../../../app/src/infrastructure/QueueWorkers.js'
+import MongoHelper from './MongoHelper.js'
+import RedisHelper from './RedisHelper.js'
+import logger from '@overleaf/logger'
+import Settings from '@overleaf/settings'
+import MockReCAPTCHAApi from '../mocks/MockReCaptchaApi.js'
+import { gracefulShutdown } from '../../../../app/src/infrastructure/GracefulShutdown.js'
+import Server from '../../../../app/src/infrastructure/Server.mjs'
+import { injectRouteAfter } from './injectRoute.js'
+import SplitTestHandler from '../../../../app/src/Features/SplitTests/SplitTestHandler.js'
+import SplitTestSessionHandler from '../../../../app/src/Features/SplitTests/SplitTestSessionHandler.js'
+import Modules from '../../../../app/src/infrastructure/Modules.js'
+
+const app = Server.app
 
 logger.logger.level('error')
 

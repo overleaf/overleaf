@@ -11,4 +11,4 @@ export LISTEN_ADDRESS=0.0.0.0
 export ENABLED_SERVICES="api"
 export METRICS_APP_NAME="web-api"
 
-exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/web/app.js >> /var/log/overleaf/web-api.log 2>&1
+exec /sbin/setuser www-data /usr/bin/node $NODE_PARAMS /overleaf/services/web/app.mjs >> /var/log/overleaf/web-api.log 2>&1
