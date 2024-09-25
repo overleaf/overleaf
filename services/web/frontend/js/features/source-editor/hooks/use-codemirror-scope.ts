@@ -223,10 +223,16 @@ function useCodeMirrorScope(view: EditorView) {
     view.dispatch(setSpelling(spellingRef.current))
   }, [view, spellCheckLanguage])
 
-  // listen to doc:after-opened, and focus the editor
+  // listen to doc:after-opened, and focus the editor if it's not a new doc
   useEffect(() => {
-    const listener = () => {
-      scheduleFocus(view)
+    const listener: EventListener = event => {
+      const { isNewDoc } = (event as CustomEvent<{ isNewDoc: boolean }>).detail
+
+      if (!isNewDoc) {
+        window.setTimeout(() => {
+          view.focus()
+        }, 0)
+      }
     }
     window.addEventListener('doc:after-opened', listener)
     return () => window.removeEventListener('doc:after-opened', listener)
@@ -554,9 +560,3 @@ function useCodeMirrorScope(view: EditorView) {
 }
 
 export default useCodeMirrorScope
-
-const scheduleFocus = (view: EditorView) => {
-  window.setTimeout(() => {
-    view.focus()
-  }, 0)
-}

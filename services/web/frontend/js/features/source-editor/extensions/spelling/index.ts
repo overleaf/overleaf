@@ -82,7 +82,7 @@ const spellCheckField = StateField.define<SpellChecker | null>({
       EditorView.domEventHandlers({
         focus: (event, view) => {
           if (view.state.facet(EditorView.editable)) {
-            view.state.field(field)?.spellCheckAsap(view)
+            view.state.field(field)?.scheduleSpellCheck(view)
           }
         },
       }),
