@@ -1,76 +1,77 @@
-const AdminController = require('./Features/ServerAdmin/AdminController')
-const ErrorController = require('./Features/Errors/ErrorController')
-const ProjectController = require('./Features/Project/ProjectController')
-const ProjectApiController = require('./Features/Project/ProjectApiController')
-const ProjectListController = require('./Features/Project/ProjectListController')
-const SpellingController = require('./Features/Spelling/SpellingController')
-const EditorRouter = require('./Features/Editor/EditorRouter')
-const Settings = require('@overleaf/settings')
-const TpdsController = require('./Features/ThirdPartyDataStore/TpdsController')
-const SubscriptionRouter = require('./Features/Subscription/SubscriptionRouter')
-const UploadsRouter = require('./Features/Uploads/UploadsRouter')
-const metrics = require('@overleaf/metrics')
-const ReferalController = require('./Features/Referal/ReferalController')
-const AuthenticationController = require('./Features/Authentication/AuthenticationController')
-const PermissionsController = require('./Features/Authorization/PermissionsController')
-const SessionManager = require('./Features/Authentication/SessionManager')
-const TagsController = require('./Features/Tags/TagsController')
-const NotificationsController = require('./Features/Notifications/NotificationsController')
-const CollaboratorsRouter = require('./Features/Collaborators/CollaboratorsRouter')
-const UserInfoController = require('./Features/User/UserInfoController')
-const UserController = require('./Features/User/UserController')
-const UserEmailsController = require('./Features/User/UserEmailsController')
-const UserPagesController = require('./Features/User/UserPagesController')
-const TutorialController = require('./Features/Tutorial/TutorialController')
-const DocumentController = require('./Features/Documents/DocumentController')
-const CompileManager = require('./Features/Compile/CompileManager')
-const CompileController = require('./Features/Compile/CompileController')
-const ClsiCookieManager = require('./Features/Compile/ClsiCookieManager')(
-  Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
-)
-const HealthCheckController = require('./Features/HealthCheck/HealthCheckController')
-const ProjectDownloadsController = require('./Features/Downloads/ProjectDownloadsController')
-const FileStoreController = require('./Features/FileStore/FileStoreController')
-const DocumentUpdaterController = require('./Features/DocumentUpdater/DocumentUpdaterController')
-const HistoryController = require('./Features/History/HistoryController')
-const ExportsController = require('./Features/Exports/ExportsController')
-const PasswordResetRouter = require('./Features/PasswordReset/PasswordResetRouter')
-const StaticPagesRouter = require('./Features/StaticPages/StaticPagesRouter')
-const ChatController = require('./Features/Chat/ChatController')
-const Modules = require('./infrastructure/Modules')
-const {
+import AdminController from './Features/ServerAdmin/AdminController.js'
+import ErrorController from './Features/Errors/ErrorController.js'
+import Features from './infrastructure/Features.js'
+import ProjectController from './Features/Project/ProjectController.js'
+import ProjectApiController from './Features/Project/ProjectApiController.js'
+import ProjectListController from './Features/Project/ProjectListController.js'
+import SpellingController from './Features/Spelling/SpellingController.js'
+import EditorRouter from './Features/Editor/EditorRouter.js'
+import Settings from '@overleaf/settings'
+import TpdsController from './Features/ThirdPartyDataStore/TpdsController.js'
+import SubscriptionRouter from './Features/Subscription/SubscriptionRouter.js'
+import UploadsRouter from './Features/Uploads/UploadsRouter.js'
+import metrics from '@overleaf/metrics'
+import ReferalController from './Features/Referal/ReferalController.js'
+import AuthenticationController from './Features/Authentication/AuthenticationController.js'
+import PermissionsController from './Features/Authorization/PermissionsController.js'
+import SessionManager from './Features/Authentication/SessionManager.js'
+import TagsController from './Features/Tags/TagsController.js'
+import NotificationsController from './Features/Notifications/NotificationsController.js'
+import CollaboratorsRouter from './Features/Collaborators/CollaboratorsRouter.js'
+import UserInfoController from './Features/User/UserInfoController.js'
+import UserController from './Features/User/UserController.js'
+import UserEmailsController from './Features/User/UserEmailsController.js'
+import UserPagesController from './Features/User/UserPagesController.js'
+import TutorialController from './Features/Tutorial/TutorialController.js'
+import DocumentController from './Features/Documents/DocumentController.js'
+import CompileManager from './Features/Compile/CompileManager.js'
+import CompileController from './Features/Compile/CompileController.js'
+import ClsiCookieManagerFactory from './Features/Compile/ClsiCookieManager.js'
+import HealthCheckController from './Features/HealthCheck/HealthCheckController.js'
+import ProjectDownloadsController from './Features/Downloads/ProjectDownloadsController.js'
+import FileStoreController from './Features/FileStore/FileStoreController.js'
+import DocumentUpdaterController from './Features/DocumentUpdater/DocumentUpdaterController.js'
+import HistoryController from './Features/History/HistoryController.js'
+import ExportsController from './Features/Exports/ExportsController.js'
+import PasswordResetRouter from './Features/PasswordReset/PasswordResetRouter.js'
+import StaticPagesRouter from './Features/StaticPages/StaticPagesRouter.js'
+import ChatController from './Features/Chat/ChatController.js'
+import Modules from './infrastructure/Modules.js'
+import {
   RateLimiter,
   openProjectRateLimiter,
   overleafLoginRateLimiter,
-} = require('./infrastructure/RateLimiter')
-const RateLimiterMiddleware = require('./Features/Security/RateLimiterMiddleware')
-const InactiveProjectController = require('./Features/InactiveData/InactiveProjectController')
-const ContactRouter = require('./Features/Contacts/ContactRouter')
-const ReferencesController = require('./Features/References/ReferencesController')
-const AuthorizationMiddleware = require('./Features/Authorization/AuthorizationMiddleware')
-const BetaProgramController = require('./Features/BetaProgram/BetaProgramController')
-const AnalyticsRouter = require('./Features/Analytics/AnalyticsRouter')
-const MetaController = require('./Features/Metadata/MetaController')
-const TokenAccessController = require('./Features/TokenAccess/TokenAccessController')
-const TokenAccessRouter = require('./Features/TokenAccess/TokenAccessRouter')
-const Features = require('./infrastructure/Features')
-const LinkedFilesRouter = require('./Features/LinkedFiles/LinkedFilesRouter')
-const TemplatesRouter = require('./Features/Templates/TemplatesRouter')
-const UserMembershipRouter = require('./Features/UserMembership/UserMembershipRouter')
-const SystemMessageController = require('./Features/SystemMessages/SystemMessageController')
-const AnalyticsRegistrationSourceMiddleware = require('./Features/Analytics/AnalyticsRegistrationSourceMiddleware')
-const AnalyticsUTMTrackingMiddleware = require('./Features/Analytics/AnalyticsUTMTrackingMiddleware')
-const CaptchaMiddleware = require('./Features/Captcha/CaptchaMiddleware')
-const { Joi, validate } = require('./infrastructure/Validation')
-const {
+} from './infrastructure/RateLimiter.js'
+import RateLimiterMiddleware from './Features/Security/RateLimiterMiddleware.js'
+import InactiveProjectController from './Features/InactiveData/InactiveProjectController.js'
+import ContactRouter from './Features/Contacts/ContactRouter.js'
+import ReferencesController from './Features/References/ReferencesController.js'
+import AuthorizationMiddleware from './Features/Authorization/AuthorizationMiddleware.js'
+import BetaProgramController from './Features/BetaProgram/BetaProgramController.js'
+import AnalyticsRouter from './Features/Analytics/AnalyticsRouter.js'
+import MetaController from './Features/Metadata/MetaController.js'
+import TokenAccessController from './Features/TokenAccess/TokenAccessController.js'
+import TokenAccessRouter from './Features/TokenAccess/TokenAccessRouter.js'
+import LinkedFilesRouter from './Features/LinkedFiles/LinkedFilesRouter.js'
+import TemplatesRouter from './Features/Templates/TemplatesRouter.js'
+import UserMembershipRouter from './Features/UserMembership/UserMembershipRouter.js'
+import SystemMessageController from './Features/SystemMessages/SystemMessageController.js'
+import AnalyticsRegistrationSourceMiddleware from './Features/Analytics/AnalyticsRegistrationSourceMiddleware.js'
+import AnalyticsUTMTrackingMiddleware from './Features/Analytics/AnalyticsUTMTrackingMiddleware.js'
+import CaptchaMiddleware from './Features/Captcha/CaptchaMiddleware.js'
+import { Joi, validate } from './infrastructure/Validation.js'
+import {
   renderUnsupportedBrowserPage,
   unsupportedBrowserMiddleware,
-} = require('./infrastructure/UnsupportedBrowserMiddleware')
+} from './infrastructure/UnsupportedBrowserMiddleware.js'
 
-const logger = require('@overleaf/logger')
-const _ = require('lodash')
-const { plainTextResponse } = require('./infrastructure/Response')
-const PublicAccessLevels = require('./Features/Authorization/PublicAccessLevels')
+import logger from '@overleaf/logger'
+import _ from 'lodash'
+import { plainTextResponse } from './infrastructure/Response.js'
+import PublicAccessLevels from './Features/Authorization/PublicAccessLevels.js'
+const ClsiCookieManager = ClsiCookieManagerFactory(
+  Settings.apis.clsi != null ? Settings.apis.clsi.backendGroupName : undefined
+)
 
 const rateLimiters = {
   addEmail: new RateLimiter('add-email', {
@@ -212,7 +213,7 @@ const rateLimiters = {
   }),
 }
 
-function initialize(webRouter, privateApiRouter, publicApiRouter) {
+async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.use(unsupportedBrowserMiddleware)
 
   if (!Settings.allowPublicAccess) {
@@ -291,7 +292,7 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   UserMembershipRouter.apply(webRouter)
   TokenAccessRouter.apply(webRouter)
 
-  Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
+  await Modules.applyRouter(webRouter, privateApiRouter, publicApiRouter)
 
   if (Settings.enableSubscriptions) {
     webRouter.get(
@@ -1377,4 +1378,4 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.get('*', ErrorController.notFound)
 }
 
-module.exports = { initialize, rateLimiters }
+export default { initialize, rateLimiters }

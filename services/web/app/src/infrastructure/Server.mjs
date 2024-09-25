@@ -1,49 +1,46 @@
-const Path = require('path')
-const express = require('express')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
-const metrics = require('@overleaf/metrics')
-const Validation = require('./Validation')
-const csp = require('./CSP')
-const Router = require('../router')
-const helmet = require('helmet')
-const UserSessionsRedis = require('../Features/User/UserSessionsRedis')
-const Csrf = require('./Csrf')
-const HttpPermissionsPolicyMiddleware = require('./HttpPermissionsPolicy')
+import express from 'express'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
+import metrics from '@overleaf/metrics'
+import Validation from './Validation.js'
+import csp from './CSP.js'
+import Router from '../router.mjs'
+import helmet from 'helmet'
+import UserSessionsRedis from '../Features/User/UserSessionsRedis.js'
+import Csrf from './Csrf.js'
+import HttpPermissionsPolicyMiddleware from './HttpPermissionsPolicy.js'
+import SessionAutostartMiddleware from './SessionAutostartMiddleware.js'
+import AnalyticsManager from '../Features/Analytics/AnalyticsManager.js'
+import session from 'express-session'
+import CookieMetrics from './CookieMetrics.js'
+import CustomSessionStore from './CustomSessionStore.js'
+import bodyParser from './BodyParserWrapper.js'
+import methodOverride from 'method-override'
+import cookieParser from 'cookie-parser'
+import bearerTokenMiddleware from 'express-bearer-token'
+import passport from 'passport'
+import { Strategy as LocalStrategy } from 'passport-local'
+import ReferalConnect from '../Features/Referal/ReferalConnect.js'
+import RedirectManager from './RedirectManager.js'
+import translations from './Translations.js'
+import Views from './Views.js'
+import Features from './Features.js'
+import ErrorController from '../Features/Errors/ErrorController.js'
+import HttpErrorHandler from '../Features/Errors/HttpErrorHandler.js'
+import UserSessionsManager from '../Features/User/UserSessionsManager.js'
+import AuthenticationController from '../Features/Authentication/AuthenticationController.js'
+import SessionManager from '../Features/Authentication/SessionManager.js'
+import { hasAdminAccess } from '../Features/Helpers/AdminAuthorizationHelper.js'
+import Modules from './Modules.js'
+import expressLocals from './ExpressLocals.js'
+import noCache from 'nocache'
+import os from 'os'
+import http from 'http'
+import { fileURLToPath } from 'url'
 
 const sessionsRedisClient = UserSessionsRedis.client()
 
-const SessionAutostartMiddleware = require('./SessionAutostartMiddleware')
-const AnalyticsManager = require('../Features/Analytics/AnalyticsManager')
-const session = require('express-session')
-const CookieMetrics = require('./CookieMetrics')
-const CustomSessionStore = require('./CustomSessionStore')
-const bodyParser = require('./BodyParserWrapper')
-const methodOverride = require('method-override')
-const cookieParser = require('cookie-parser')
-const bearerTokenMiddleware = require('express-bearer-token')
-
-const passport = require('passport')
-const LocalStrategy = require('passport-local').Strategy
-
 const oneDayInMilliseconds = 86400000
-const ReferalConnect = require('../Features/Referal/ReferalConnect')
-const RedirectManager = require('./RedirectManager')
-const translations = require('./Translations')
-const Views = require('./Views')
-const Features = require('./Features')
-
-const ErrorController = require('../Features/Errors/ErrorController')
-const HttpErrorHandler = require('../Features/Errors/HttpErrorHandler')
-const UserSessionsManager = require('../Features/User/UserSessionsManager')
-const AuthenticationController = require('../Features/Authentication/AuthenticationController')
-const SessionManager = require('../Features/Authentication/SessionManager')
-const {
-  hasAdminAccess,
-} = require('../Features/Helpers/AdminAuthorizationHelper')
-
-const Modules = require('./Modules')
-const expressLocals = require('./ExpressLocals')
 
 const STATIC_CACHE_AGE = Settings.cacheStaticAssets
   ? oneDayInMilliseconds * 365
@@ -67,7 +64,7 @@ if (Settings.behindProxy) {
    * X-Original-Forwarded-For. Express expects all proxy IPs to be in a comma
    * separated list in X-Forwarded-For.
    */
-  app.use(function getForwardedForHeader(req, res, next) {
+  app.use((req, res, next) => {
     if (
       req.headers['x-original-forwarded-for'] &&
       req.headers['x-forwarded-for']
@@ -92,7 +89,7 @@ const ORIGINAL_REQ_IP = Object.getOwnPropertyDescriptor(
 Object.defineProperty(app.request, 'ip', {
   configurable: true,
   enumerable: true,
-  get: function ipWithCache() {
+  get() {
     const ip = ORIGINAL_REQ_IP.call(this)
     // Shadow the prototype level getter with a property on the instance.
     // Any future access on `req.ip` will get served by the instance property.
@@ -100,7 +97,8 @@ Object.defineProperty(app.request, 'ip', {
     return ip
   },
 })
-app.use(function ignoreAbortedConnections(req, res, next) {
+
+app.use((req, res, next) => {
   if (req.destroyed) {
     // Request has been aborted already.
     return
@@ -114,20 +112,21 @@ app.use(function ignoreAbortedConnections(req, res, next) {
 })
 
 if (Settings.exposeHostname) {
-  const HOSTNAME = require('os').hostname()
-  app.use(function exposeHostname(req, res, next) {
+  const HOSTNAME = os.hostname()
+  app.use((req, res, next) => {
     res.setHeader('X-Served-By', HOSTNAME)
     next()
   })
 }
 
 webRouter.use(
-  express.static(Path.join(__dirname, '/../../../public'), {
+  express.static(fileURLToPath(new URL('../../../public', import.meta.url)), {
     maxAge: STATIC_CACHE_AGE,
     setHeaders: csp.removeCSPHeaders,
   })
 )
-app.set('views', Path.join(__dirname, '/../../views'))
+
+app.set('views', fileURLToPath(new URL('../../views', import.meta.url)))
 app.set('view engine', 'pug')
 
 if (Settings.enabledServices.includes('web')) {
@@ -144,7 +143,7 @@ if (Settings.enabledServices.includes('web')) {
 
 app.use(metrics.http.monitor(logger))
 
-Modules.applyMiddleware(app, 'appMiddleware')
+await Modules.applyMiddleware(app, 'appMiddleware')
 app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }))
 app.use(bodyParser.json({ limit: Settings.max_json_request_size }))
 app.use(methodOverride())
@@ -160,7 +159,6 @@ if (Settings.useHttpPermissionsPolicy) {
     Settings.httpPermissions
   )
   logger.debug('adding permissions policy config', Settings.httpPermissions)
-
   webRouter.use(httpPermissionsPolicy.middleware)
 }
 
@@ -179,7 +177,7 @@ const sessionSecrets = [
 webRouter.use(cookieParser(sessionSecrets))
 webRouter.use(CookieMetrics.middleware)
 SessionAutostartMiddleware.applyInitialMiddleware(webRouter)
-Modules.applyMiddleware(webRouter, 'sessionMiddleware', {
+await Modules.applyMiddleware(webRouter, 'sessionMiddleware', {
   store: sessionStore,
 })
 webRouter.use(
@@ -199,6 +197,7 @@ webRouter.use(
     rolling: Settings.cookieRollingSession === true,
   })
 )
+
 if (Features.hasFeature('saas')) {
   webRouter.use(AnalyticsManager.analyticsIdMiddleware)
 }
@@ -220,13 +219,13 @@ passport.use(
 passport.serializeUser(AuthenticationController.serializeUser)
 passport.deserializeUser(AuthenticationController.deserializeUser)
 
-Modules.hooks.fire('passportSetup', passport, function (err) {
+Modules.hooks.fire('passportSetup', passport, err => {
   if (err != null) {
     logger.err({ err }, 'error setting up passport in modules')
   }
 })
 
-Modules.applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter)
+await Modules.applyNonCsrfRouter(webRouter, privateApiRouter, publicApiRouter)
 
 webRouter.csrf = new Csrf()
 webRouter.use(webRouter.csrf.middleware)
@@ -235,7 +234,7 @@ webRouter.use(translations.setLangBasedOnDomainMiddleware)
 
 if (Settings.cookieRollingSession) {
   // Measure expiry from last request, not last login
-  webRouter.use(function touchSession(req, res, next) {
+  webRouter.use((req, res, next) => {
     if (!req.session.noSessionCallback) {
       req.session.touch()
       if (SessionManager.isUserLoggedIn(req.session)) {
@@ -255,7 +254,6 @@ if (Settings.cookieRollingSession) {
 
 webRouter.use(ReferalConnect.use)
 expressLocals(webRouter, privateApiRouter, publicApiRouter)
-
 webRouter.use(SessionAutostartMiddleware.invokeCallbackMiddleware)
 
 webRouter.use(function checkIfSiteClosed(req, res, next) {
@@ -281,8 +279,8 @@ webRouter.use(function checkIfEditorClosed(req, res, next) {
 webRouter.use(AuthenticationController.validateAdmin)
 
 // add security headers using Helmet
-const noCacheMiddleware = require('nocache')()
-webRouter.use(function addNoCacheHeader(req, res, next) {
+const noCacheMiddleware = noCache()
+webRouter.use((req, res, next) => {
   const isProjectPage = /^\/project\/[a-f0-9]{24}$/.test(req.path)
   if (isProjectPage) {
     // always set no-cache headers on a project page, as it could be an anonymous token viewer
@@ -319,6 +317,7 @@ webRouter.use(function addNoCacheHeader(req, res, next) {
   // allow other responses (anonymous users, except for project pages) to be cached
   return next()
 })
+
 webRouter.use(
   helmet({
     // note that more headers are added by default
@@ -346,22 +345,21 @@ if (Settings.csp && Settings.csp.enabled) {
 }
 
 logger.debug('creating HTTP server'.yellow)
-const server = require('http').createServer(app)
+const server = http.createServer(app)
 
 // provide settings for separate web and api processes
 if (Settings.enabledServices.includes('api')) {
-  logger.debug('providing api router')
+  logger.debug({}, 'providing api router')
   app.use(privateApiRouter)
   app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)
 }
 
 if (Settings.enabledServices.includes('web')) {
-  logger.debug('providing web router')
+  logger.debug({}, 'providing web router')
   app.use(publicApiRouter) // public API goes with web router for public access
   app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleApiError)
-
   app.use(webRouter)
   app.use(Validation.errorMiddleware)
   app.use(ErrorController.handleError)
@@ -370,9 +368,6 @@ if (Settings.enabledServices.includes('web')) {
 metrics.injectMetricsRoute(webRouter)
 metrics.injectMetricsRoute(privateApiRouter)
 
-Router.initialize(webRouter, privateApiRouter, publicApiRouter)
+await Router.initialize(webRouter, privateApiRouter, publicApiRouter)
 
-module.exports = {
-  app,
-  server,
-}
+export default { app, server }

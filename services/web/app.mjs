@@ -13,7 +13,7 @@ import https from 'node:https'
 
 import * as Serializers from './app/src/infrastructure/LoggerSerializers.js'
 
-import Server from './app/src/infrastructure/Server.js'
+import Server from './app/src/infrastructure/Server.mjs'
 import QueueWorkers from './app/src/infrastructure/QueueWorkers.js'
 import mongodb from './app/src/infrastructure/mongodb.js'
 import mongoose from './app/src/infrastructure/Mongoose.js'
