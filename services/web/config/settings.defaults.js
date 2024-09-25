@@ -903,6 +903,7 @@ module.exports = {
     v1ImportDataScreen: [],
     snapshotUtils: [],
     offlineModeToolbarButtons: [],
+    settingsEntries: [],
   },
 
   moduleImportSequence: [

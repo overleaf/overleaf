@@ -18,6 +18,13 @@ import SettingsSpellCheckLanguage from './settings/settings-spell-check-language
 import SettingsSyntaxValidation from './settings/settings-syntax-validation'
 import SettingsMathPreview from './settings/settings-math-preview'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import { ElementType } from 'react'
+
+const moduleSettings: Array<{
+  import: { default: ElementType }
+  path: string
+}> = importOverleafModules('settingsEntries')
 
 export default function SettingsMenu() {
   const { t } = useTranslation()
@@ -37,6 +44,9 @@ export default function SettingsMenu() {
         <SettingsDocument />
         <SettingsSpellCheckLanguage />
         <SettingsDictionary />
+        {moduleSettings.map(({ import: { default: Component }, path }) => (
+          <Component key={path} />
+        ))}
         <SettingsAutoComplete />
         <SettingsAutoCloseBrackets />
         <SettingsSyntaxValidation />
