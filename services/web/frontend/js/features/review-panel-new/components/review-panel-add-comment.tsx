@@ -15,11 +15,12 @@ import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import { Decoration } from '@codemirror/view'
 
 export const ReviewPanelAddComment: FC<{
+  docId: string
   from: number
   to: number
   value: Decoration
   top: number | undefined
-}> = ({ from, to, value, top }) => {
+}> = ({ from, to, value, top, docId }) => {
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
@@ -113,6 +114,7 @@ export const ReviewPanelAddComment: FC<{
 
   return (
     <ReviewPanelEntry
+      docId={docId}
       top={top}
       position={from}
       op={{

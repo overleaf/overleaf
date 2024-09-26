@@ -5,44 +5,56 @@ import {
   useCodeMirrorViewContext,
 } from '@/features/source-editor/components/codemirror-editor'
 import { isSelectionWithinOp } from '../utils/is-selection-within-op'
-import { EditorSelection } from '@codemirror/state'
-import { EditorView } from '@codemirror/view'
 import classNames from 'classnames'
 import { highlightRanges } from '@/features/source-editor/extensions/ranges'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 export const ReviewPanelEntry: FC<{
   position: number
   op: AnyOperation
+  docId: string
   top?: number
   className?: string
   selectLineOnFocus?: boolean
-}> = ({ children, position, top, op, className, selectLineOnFocus = true }) => {
+  hoverRanges?: boolean
+}> = ({
+  children,
+  position,
+  top,
+  op,
+  className,
+  selectLineOnFocus = true,
+  docId,
+  hoverRanges = true,
+}) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
+  const { openDocId } = useEditorManagerContext()
   const [focused, setFocused] = useState(false)
 
   const highlighted = isSelectionWithinOp(op, state.selection.main)
 
   const focusHandler = useCallback(() => {
-    setTimeout(() => {
-      // without setTimeout, error "EditorView.update are not allowed while an update is in progress" can occur
-      // this can be avoided by using onClick rather than onFocus but it will then not pick up <Tab> or <Shift+Tab> events for focusing entries
-      if (selectLineOnFocus) {
-        view.dispatch({
-          selection: EditorSelection.cursor(position),
-          effects: EditorView.scrollIntoView(position, { y: 'center' }),
-        })
-      }
-    }, 0)
+    if (selectLineOnFocus) {
+      openDocId(docId, { gotoOffset: position, keepCurrentView: true })
+    }
     setFocused(true)
-  }, [view, position, selectLineOnFocus])
+  }, [selectLineOnFocus, docId, openDocId, position])
 
   return (
     <div
       onFocus={focusHandler}
       onBlur={() => setFocused(false)}
-      onMouseEnter={() => view.dispatch(highlightRanges(op))}
-      onMouseLeave={() => view.dispatch(highlightRanges())}
+      onMouseEnter={() => {
+        if (hoverRanges) {
+          view.dispatch(highlightRanges(op))
+        }
+      }}
+      onMouseLeave={() => {
+        if (hoverRanges) {
+          view.dispatch(highlightRanges())
+        }
+      }}
       role="button"
       tabIndex={position + 1}
       className={classNames(

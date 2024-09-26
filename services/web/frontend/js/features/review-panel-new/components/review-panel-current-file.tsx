@@ -251,6 +251,7 @@ const ReviewPanelCurrentFile: FC = () => {
           const { id, from, to, value, top } = entry
           return (
             <ReviewPanelAddComment
+              docId={ranges!.docId}
               key={id}
               from={from}
               to={to}
@@ -264,6 +265,7 @@ const ReviewPanelCurrentFile: FC = () => {
           change =>
             positions.has(change.id) && (
               <ReviewPanelChange
+                docId={ranges!.docId}
                 key={change.id}
                 change={change}
                 top={positions.get(change.id)}
@@ -276,6 +278,7 @@ const ReviewPanelCurrentFile: FC = () => {
           comment =>
             positions.has(comment.id) && (
               <ReviewPanelComment
+                docId={ranges!.docId}
                 key={comment.id}
                 comment={comment}
                 top={positions.get(comment.id)}

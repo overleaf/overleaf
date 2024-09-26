@@ -82,11 +82,18 @@ export const ReviewPanelOverviewFile: FC<{
               change={change}
               aggregate={aggregates.get(change.id)}
               editable={false}
+              docId={doc.doc.id}
+              hoverRanges={false}
             />
           ))}
 
           {unresolvedComments.map(comment => (
-            <ReviewPanelComment key={comment.id} comment={comment} />
+            <ReviewPanelComment
+              key={comment.id}
+              comment={comment}
+              docId={doc.doc.id}
+              hoverRanges={false}
+            />
           ))}
         </div>
       )}

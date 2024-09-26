@@ -21,7 +21,9 @@ export const ReviewPanelChange = memo<{
   aggregate?: Change<DeleteOperation>
   top?: number
   editable?: boolean
-}>(({ change, aggregate, top, editable = true }) => {
+  docId: string
+  hoverRanges?: boolean
+}>(({ change, aggregate, top, docId, hoverRanges, editable = true }) => {
   const { t } = useTranslation()
   const { acceptChanges, rejectChanges } = useRangesActionsContext()
   const permissions = usePermissionsContext()
@@ -42,6 +44,8 @@ export const ReviewPanelChange = memo<{
       top={top}
       op={change.op}
       position={change.op.p}
+      docId={docId}
+      hoverRanges={hoverRanges}
     >
       <div className="review-panel-entry-indicator">
         <MaterialIcon type="edit" className="review-panel-entry-icon" />

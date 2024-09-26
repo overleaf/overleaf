@@ -8,8 +8,10 @@ import { ReviewPanelCommentContent } from './review-panel-comment-content'
 
 export const ReviewPanelComment = memo<{
   comment: Change<CommentOperation>
+  docId: string
   top?: number
-}>(({ comment, top }) => {
+  hoverRanges?: boolean
+}>(({ comment, top, docId, hoverRanges }) => {
   const threads = useThreadsContext()
 
   const thread = threads?.[comment.op.t]
@@ -22,9 +24,11 @@ export const ReviewPanelComment = memo<{
       className={classnames('review-panel-entry-comment', {
         'review-panel-entry-loaded': !!threads?.[comment.op.t],
       })}
+      docId={docId}
       top={top}
       op={comment.op}
       position={comment.op.p}
+      hoverRanges={hoverRanges}
     >
       <div className="review-panel-entry-indicator">
         <MaterialIcon type="comment" className="review-panel-entry-icon" />
