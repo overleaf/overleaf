@@ -6,7 +6,6 @@ import {
   Tooltip,
 } from '@codemirror/view'
 import {
-  EditorState,
   Extension,
   StateField,
   StateEffect,
@@ -15,6 +14,7 @@ import {
 } from '@codemirror/state'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { v4 as uuid } from 'uuid'
+import { textSelected, textSelectedEffect } from './text-selected'
 
 export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
 
@@ -36,7 +36,7 @@ export const addComment = (): Extension => {
     return []
   }
 
-  return [addCommentTheme, addCommentStateField]
+  return [addCommentTheme, addCommentStateField, textSelected]
 }
 
 export const addCommentStateField = StateField.define<{
@@ -69,10 +69,14 @@ export const addCommentStateField = StateField.define<{
           add: [rangeToAdd],
         })
       }
-    }
 
-    if (tr.docChanged || tr.selection) {
-      tooltip = buildTooltip(tr.state)
+      if (effect.is(textSelectedEffect)) {
+        tooltip = buildTooltip(effect.value)
+      }
+
+      if (tooltip && tr.state.selection.main.empty) {
+        tooltip = null
+      }
     }
 
     return { tooltip, ranges }
@@ -84,8 +88,7 @@ export const addCommentStateField = StateField.define<{
   ],
 })
 
-function buildTooltip(state: EditorState): Tooltip | null {
-  const range = state.selection.main
+function buildTooltip(range: SelectionRange): Tooltip | null {
   if (range.empty) {
     return null
   }
