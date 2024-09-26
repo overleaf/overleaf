@@ -88,6 +88,23 @@ const getEntryText = (state: EditorState, node: SyntaxNodeRef): string => {
       return false
     }
 
+    // Handle the texorpdfstring command
+    if (
+      token.type.name === 'Command' &&
+      token.node.firstChild?.firstChild != null
+    ) {
+      let command = token.node.firstChild.firstChild
+      let commandName = state.doc.sliceString(command.from + 1, command.to)
+      let textArguments = token.node.firstChild.getChildren('TextArgument')
+      if (commandName == 'texorpdfstring' && textArguments.length >= 2) {
+        let pdfstring = textArguments[1]
+        titleParts.push(
+          state.doc.sliceString(pdfstring.from + 1, pdfstring.to - 1)
+        )
+        return false
+      }
+    }
+
     // Only add text from leaf nodes
     if (token.node.firstChild) {
       return true

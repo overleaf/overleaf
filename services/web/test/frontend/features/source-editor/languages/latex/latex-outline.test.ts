@@ -449,6 +449,29 @@ describe('CodeMirror LaTeX-FileOutline', function () {
     })
   })
 
+  describe('for labels using texorpdfstring', function () {
+    let view: EditorView, content: string[]
+    beforeEach(function () {
+      content = [
+        '\\section{The \\texorpdfstring{function $f(x) = x^2$}{function f(x) = x^2}: Properties of \\texorpdfstring{$x$}{x}.}',
+      ]
+      view = makeView(content)
+    })
+
+    it('should use the text argument as title', function () {
+      const outline = getOutline(view)
+      expect(outline).to.deep.equal([
+        {
+          from: 0,
+          to: 113,
+          title: 'The function f(x) = x^2: Properties of x.',
+          line: 1,
+          level: SECTION_LEVEL,
+        },
+      ])
+    })
+  })
+
   describe('for ill-formed \\def command', function () {
     let view: EditorView, content: string[]
     beforeEach(function () {
