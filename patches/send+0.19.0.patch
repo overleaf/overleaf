@@ -1,8 +1,8 @@
-diff --git a/node_modules/express/node_modules/send/index.js b/node_modules/express/node_modules/send/index.js
-index 89afd7e..de56daf 100644
---- a/node_modules/express/node_modules/send/index.js
-+++ b/node_modules/express/node_modules/send/index.js
-@@ -789,29 +789,29 @@ SendStream.prototype.stream = function stream (path, options) {
+diff --git a/node_modules/send/index.js b/node_modules/send/index.js
+index 768f8ca..a882f4d 100644
+--- a/node_modules/send/index.js
++++ b/node_modules/send/index.js
+@@ -788,29 +788,29 @@ SendStream.prototype.stream = function stream (path, options) {
    // pipe
    var stream = fs.createReadStream(path, options)
    this.emit('stream', stream)
