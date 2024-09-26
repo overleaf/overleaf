@@ -1,4 +1,4 @@
-import { FC, memo, useState } from 'react'
+import { FC, memo, useMemo, useState } from 'react'
 import ReviewPanelTabs from './review-panel-tabs'
 import ReviewPanelHeader from './review-panel-header'
 import ReviewPanelCurrentFile from './review-panel-current-file'
@@ -9,13 +9,17 @@ import { useReviewPanelStyles } from '@/features/review-panel-new/hooks/use-revi
 export type SubView = 'cur_file' | 'overview'
 
 const ReviewPanel: FC<{ mini?: boolean }> = ({ mini = false }) => {
-  const [subView, setSubView] = useState<SubView>('cur_file')
+  const [choosenSubView, setSubView] = useState<SubView>('cur_file')
+  const activeSubView = useMemo(
+    () => (mini ? 'cur_file' : choosenSubView),
+    [choosenSubView, mini]
+  )
 
   const style = useReviewPanelStyles(mini)
 
   const className = classnames('review-panel-new', 'review-panel-container', {
     'review-panel-mini': mini,
-    'review-panel-subview-overview': subView === 'overview',
+    'review-panel-subview-overview': activeSubView === 'overview',
   })
 
   return (
@@ -23,11 +27,11 @@ const ReviewPanel: FC<{ mini?: boolean }> = ({ mini = false }) => {
       <div className="review-panel-inner">
         {!mini && <ReviewPanelHeader />}
 
-        {subView === 'cur_file' && <ReviewPanelCurrentFile />}
-        {subView === 'overview' && <ReviewPanelOverview />}
+        {activeSubView === 'cur_file' && <ReviewPanelCurrentFile />}
+        {activeSubView === 'overview' && <ReviewPanelOverview />}
 
         <div className="review-panel-footer">
-          <ReviewPanelTabs subView={subView} setSubView={setSubView} />
+          <ReviewPanelTabs subView={activeSubView} setSubView={setSubView} />
         </div>
       </div>
     </div>
