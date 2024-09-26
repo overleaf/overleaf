@@ -531,7 +531,6 @@
   "git_authentication_token_create_modal_info_1": "Ceci est votre jeton d’authentification Git. Vous devrez l’entrer lorsqu’un mot de passe vous sera demandé.",
   "git_authentication_token_create_modal_info_2": "<0>Vous ne verrez ce jeton d’authentification qu’une seule fois, veuillez le copier et le garder en sécurité</0>. Pour des instructions complètes sur l’utilisation des jetons, consultez notre <1>page d’aide</1>.",
   "git_bridge_modal_click_generate": "Cliquez sur Générer un jeton pour générez votre jeton d’authentification maintenant. Vous pouvez aussi faire cela plus tard dans vos Paramètres de Compte.",
-  "git_bridge_modal_description": "Vous pouvez effectuer un <code>git</code> <code>clone</code> de votre projet en utilisant le lien ci-dessous.",
   "git_bridge_modal_enter_authentication_token": "Lorsqu’un mot de passe vous sera demandé, entrez votre nouveau jeton d’authentification :",
   "git_integration_lowercase": "Intégration avec Git",
   "github_commit_message_placeholder": "Message de commit pour les changements effectués dans __appName__…",

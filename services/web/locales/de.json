@@ -530,7 +530,6 @@
   "git_authentication_token_create_modal_info_1": "Das ist dein Git Anmeldungs-Token. Verwende ihn wenn Du nach einem Passwort gefragt wirst.",
   "git_authentication_token_create_modal_info_2": "<0>Du bekommst diesen Anmelde-Token nur einmal angezeigt, bitte kopiere ihn und bewahre ihn sicher auf.</0> Für weitere Anweisungen zur Verwendung von Anmelde-Tokens, besuche unsere <1>Hilfe-Seite</1>.",
   "git_bridge_modal_click_generate": "Klicke jetzt auf <strong>Token generieren</strong> um deinen ersten Anmeldungs-Token zu erstellen. Oder erstelle ihn später in deinen Kontoeinstellungen.",
-  "git_bridge_modal_description": "Du kannst git clone für dein Projekt über den unten angezeigten Link ausführen.",
   "git_bridge_modal_enter_authentication_token": "Wenn Du nach einem Passwort gefragt wirst, gib deinen neuen Anmeldungs-Token ein:",
   "git_bridge_modal_see_once": "Du siehst diesen Token nur einmal. Um ihn zu löschen oder einen weiteren zu generieren, besuche die Kontoeinstellungen. Für detaillierte Anweisungen und Problembehebung, besuche unsere <0>Hilfe-Seite</0>.",
   "git_bridge_modal_use_previous_token": "Wenn Du nach einem Passwort gefragt wirst, kannst Du einen zuvor generierten Git-Anmeldungs-Token verwenden. Oder Du kannst einen Neuen in den Kontoeinstellungen generieren. Für mehr Hilfe, besuche unsere <0>Hilfe-Seite</0>.",
