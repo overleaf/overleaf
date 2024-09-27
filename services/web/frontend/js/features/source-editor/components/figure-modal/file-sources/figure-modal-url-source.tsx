@@ -6,7 +6,7 @@ import { File } from '../../../utils/file'
 import { useCurrentProjectFolders } from '../../../hooks/use-current-project-folders'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { EditorView } from '@codemirror/view'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 

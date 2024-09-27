@@ -21,7 +21,7 @@ import { useProjectContext } from '../../../../../shared/context/project-context
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import getMeta from '@/utils/meta'
 
 function suggestName(path: string) {

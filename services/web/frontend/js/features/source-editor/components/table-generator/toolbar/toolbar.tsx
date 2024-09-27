@@ -18,7 +18,7 @@ import {
   setBorders,
   unmergeCells,
 } from './commands'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { useTableContext } from '../contexts/table-context'
 import { useTabularContext } from '../contexts/tabular-context'
 import { useTranslation } from 'react-i18next'

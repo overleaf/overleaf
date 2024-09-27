@@ -2,7 +2,7 @@ import { memo, useEffect } from 'react'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from './codemirror-editor'
+} from './codemirror-context'
 import {
   closeCommandTooltip,
   commandTooltipState,

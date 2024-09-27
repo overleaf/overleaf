@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect } from 'react'
-import { useCodeMirrorViewContext } from './codemirror-editor'
+import { useCodeMirrorViewContext } from './codemirror-context'
 import useCodeMirrorScope from '../hooks/use-codemirror-scope'
 import useScopeValueSetterOnly from '@/shared/hooks/use-scope-value-setter-only'
 

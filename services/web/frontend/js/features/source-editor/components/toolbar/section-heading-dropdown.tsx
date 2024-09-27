@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from '../codemirror-editor'
+} from '../codemirror-context'
 import {
   findCurrentSectionHeadingLevel,
   setSectionHeadingLevel,

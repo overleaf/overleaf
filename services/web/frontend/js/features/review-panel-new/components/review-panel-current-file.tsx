@@ -19,7 +19,7 @@ import {
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from '@/features/source-editor/components/codemirror-editor'
+} from '@/features/source-editor/components/codemirror-context'
 import { useRangesContext } from '../context/ranges-context'
 import { useThreadsContext } from '../context/threads-context'
 import { isDeleteChange, isInsertChange } from '@/utils/operations'

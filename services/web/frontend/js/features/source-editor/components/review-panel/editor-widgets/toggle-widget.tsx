@@ -1,6 +1,6 @@
 import { Trans } from 'react-i18next'
 import { useReviewPanelUpdaterFnsContext } from '../../../context/review-panel/review-panel-context'
-import { useCodeMirrorStateContext } from '../../codemirror-editor'
+import { useCodeMirrorStateContext } from '../../codemirror-context'
 import { EditorView } from '@codemirror/view'
 import classnames from 'classnames'
 import { memo } from 'react'

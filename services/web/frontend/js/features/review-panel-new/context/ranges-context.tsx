@@ -15,7 +15,7 @@ import {
 } from '../../../../../types/change'
 import RangesTracker from '@overleaf/ranges-tracker'
 import { rejectChanges } from '@/features/source-editor/extensions/changes/reject-changes'
-import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-editor'
+import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 
 export type Ranges = {
   docId: string

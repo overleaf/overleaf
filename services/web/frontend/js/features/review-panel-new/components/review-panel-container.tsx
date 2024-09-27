@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom'
-import { useCodeMirrorViewContext } from '../../source-editor/components/codemirror-editor'
+import { useCodeMirrorViewContext } from '../../source-editor/components/codemirror-context'
 import { memo } from 'react'
 import ReviewPanel from './review-panel'
 import { useLayoutContext } from '@/shared/context/layout-context'

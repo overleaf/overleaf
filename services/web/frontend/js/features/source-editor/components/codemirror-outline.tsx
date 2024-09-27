@@ -1,4 +1,4 @@
-import { useCodeMirrorStateContext } from './codemirror-editor'
+import { useCodeMirrorStateContext } from './codemirror-context'
 import React, { useEffect } from 'react'
 import { documentOutline } from '../languages/latex/document-outline'
 import { ProjectionStatus } from '../utils/tree-operations/projection'

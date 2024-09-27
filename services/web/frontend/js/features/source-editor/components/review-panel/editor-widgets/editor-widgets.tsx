@@ -9,7 +9,7 @@ import {
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
 import { useEditorContext } from '@/shared/context/editor-context'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import Modal, { useBulkActionsModal } from '../entries/bulk-actions-entry/modal'
 import getMeta from '../../../../../utils/meta'
 import useScopeEventListener from '@/shared/hooks/use-scope-event-listener'

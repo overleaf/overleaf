@@ -3,7 +3,7 @@ import { ToolbarButtonMenu } from './button-menu'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 import {
   wrapInDisplayMath,
   wrapInInlineMath,

@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react'
 import { EditorView } from '@codemirror/view'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 import { Button } from 'react-bootstrap'
 import classnames from 'classnames'
 import Tooltip from '../../../../shared/components/tooltip'

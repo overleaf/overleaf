@@ -5,7 +5,7 @@ import useDropdown from '../../../../shared/hooks/use-dropdown'
 import Tooltip from '../../../../shared/components/tooltip'
 import { EditorView } from '@codemirror/view'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 import MaterialIcon from '../../../../shared/components/material-icon'
 
 export const ToolbarButtonMenu: FC<{

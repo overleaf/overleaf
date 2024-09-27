@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useCodeMirrorViewContext } from '../components/codemirror-editor'
+import { useCodeMirrorViewContext } from '../components/codemirror-context'
 import { EditorView } from '@codemirror/view'
 import useEventListener from '../../../shared/hooks/use-event-listener'
 

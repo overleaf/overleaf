@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from './codemirror-editor'
+} from './codemirror-context'
 import { searchPanelOpen } from '@codemirror/search'
 import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
 import { ToolbarButton } from './toolbar/toolbar-button'

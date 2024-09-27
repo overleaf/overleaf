@@ -3,7 +3,7 @@ import classNames from 'classnames'
 import { memo, useCallback } from 'react'
 import Tooltip from '../../../../../shared/components/tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { emitTableGeneratorEvent } from '../analytics'
 
 export const ToolbarButton = memo<{

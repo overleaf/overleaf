@@ -2,7 +2,7 @@ import { FC, LegacyRef, useRef } from 'react'
 import { Button, Overlay, Popover } from 'react-bootstrap'
 import classnames from 'classnames'
 import Icon from '../../../../shared/components/icon'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 
 export const ToolbarOverflow: FC<{
   overflowed: boolean

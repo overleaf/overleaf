@@ -1,6 +1,6 @@
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useCodeMirrorStateContext } from '../codemirror-editor'
+import { useCodeMirrorStateContext } from '../codemirror-context'
 import { Button } from 'react-bootstrap'
 import { resolveCommandNode } from '../../extensions/command-tooltip'
 import {

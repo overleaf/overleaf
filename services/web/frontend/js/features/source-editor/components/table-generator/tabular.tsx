@@ -17,9 +17,9 @@ import { ErrorBoundary } from 'react-error-boundary'
 import { Alert, Button } from 'react-bootstrap'
 import { EditorSelection } from '@codemirror/state'
 import {
-  CodeMirrorViewContextProvider,
+  CodeMirrorViewContext,
   useCodeMirrorViewContext,
-} from '../codemirror-editor'
+} from '../codemirror-context'
 import { TableProvider } from './contexts/table-context'
 import { TabularProvider, useTabularContext } from './contexts/tabular-context'
 import Icon from '../../../../shared/components/icon'
@@ -244,7 +244,7 @@ export const Tabular: FC<{
       )}
     >
       <SplitTestProvider>
-        <CodeMirrorViewContextProvider value={view}>
+        <CodeMirrorViewContext.Provider value={view}>
           <TabularProvider>
             <TableProvider
               tabularNode={tabularNode}
@@ -262,7 +262,7 @@ export const Tabular: FC<{
             </TableProvider>
             <TableGeneratorHelpModal />
           </TabularProvider>
-        </CodeMirrorViewContextProvider>
+        </CodeMirrorViewContext.Provider>
       </SplitTestProvider>
     </ErrorBoundary>
   )

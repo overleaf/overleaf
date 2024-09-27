@@ -8,7 +8,7 @@ import {
 } from './figure-modal-context'
 import { FigureModalFooter } from './figure-modal-footer'
 import { lazy, memo, Suspense, useCallback, useEffect } from 'react'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 import { ChangeSpec } from '@codemirror/state'
 import { snippet } from '@codemirror/autocomplete'
 import {

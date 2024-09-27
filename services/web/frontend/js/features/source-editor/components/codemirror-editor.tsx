@@ -1,11 +1,4 @@
-import {
-  createContext,
-  ElementType,
-  memo,
-  useContext,
-  useRef,
-  useState,
-} from 'react'
+import { ElementType, memo, useRef, useState } from 'react'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { EditorView } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
@@ -21,6 +14,13 @@ import { ReviewPanelProviders } from '@/features/review-panel-new/context/review
 import { ReviewPanelMigration } from '@/features/source-editor/components/review-panel/review-panel-migration'
 import AddCommentTooltip from '@/features/review-panel-new/components/add-comment-tooltip'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import {
+  CodeMirrorStateContext,
+  CodeMirrorViewContext,
+} from './codemirror-context'
+
+// TODO: remove this when definitely no longer used
+export * from './codemirror-context'
 
 const sourceEditorComponents = importOverleafModules(
   'sourceEditorComponents'
@@ -64,7 +64,7 @@ function CodeMirrorEditor() {
 
   return (
     <CodeMirrorStateContext.Provider value={state}>
-      <CodeMirrorViewContextProvider value={viewRef.current}>
+      <CodeMirrorViewContext.Provider value={viewRef.current}>
         <ReviewPanelProviders>
           <CodemirrorOutline />
           <CodeMirrorView />
@@ -87,39 +87,9 @@ function CodeMirrorEditor() {
             )
           )}
         </ReviewPanelProviders>
-      </CodeMirrorViewContextProvider>
+      </CodeMirrorViewContext.Provider>
     </CodeMirrorStateContext.Provider>
   )
 }
 
 export default memo(CodeMirrorEditor)
-
-const CodeMirrorStateContext = createContext<EditorState | undefined>(undefined)
-
-export const useCodeMirrorStateContext = (): EditorState => {
-  const context = useContext(CodeMirrorStateContext)
-
-  if (!context) {
-    throw new Error(
-      'useCodeMirrorStateContext is only available inside CodeMirrorEditor'
-    )
-  }
-
-  return context
-}
-
-const CodeMirrorViewContext = createContext<EditorView | undefined>(undefined)
-
-export const CodeMirrorViewContextProvider = CodeMirrorViewContext.Provider
-
-export const useCodeMirrorViewContext = (): EditorView => {
-  const context = useContext(CodeMirrorViewContext)
-
-  if (!context) {
-    throw new Error(
-      'useCodeMirrorViewContext is only available inside CodeMirrorViewContextProvider'
-    )
-  }
-
-  return context
-}

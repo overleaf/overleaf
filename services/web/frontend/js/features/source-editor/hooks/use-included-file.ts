@@ -1,4 +1,4 @@
-import { useCodeMirrorStateContext } from '@/features/source-editor/components/codemirror-editor'
+import { useCodeMirrorStateContext } from '@/features/source-editor/components/codemirror-context'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useCallback } from 'react'

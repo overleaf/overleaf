@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
 import CodeMirrorSearchForm from './codemirror-search-form'
-import { useCodeMirrorViewContext } from './codemirror-editor'
+import { useCodeMirrorViewContext } from './codemirror-context'
 import { getPanel } from '@codemirror/view'
 import { createSearchPanel } from '@codemirror/search'
 

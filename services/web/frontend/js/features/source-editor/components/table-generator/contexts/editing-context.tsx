@@ -1,5 +1,5 @@
 import { FC, createContext, useCallback, useContext, useState } from 'react'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { useTableContext } from './table-context'
 import { TableSelection } from './selection-context'
 import { debugConsole } from '@/utils/debugging'

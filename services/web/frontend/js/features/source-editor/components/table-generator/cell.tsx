@@ -11,7 +11,7 @@ import { typesetNodeIntoElement } from '../../extensions/visual/utils/typeset-co
 import { parser } from '../../lezer-latex/latex.mjs'
 import { useTableContext } from './contexts/table-context'
 import { CellInput, CellInputRef } from './cell-input'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 
 export const Cell: FC<{
   cellData: CellData

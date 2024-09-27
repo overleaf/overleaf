@@ -5,7 +5,7 @@ import MaterialIcon from '../../../../../shared/components/material-icon'
 import Tooltip from '../../../../../shared/components/tooltip'
 import { useTabularContext } from '../contexts/tabular-context'
 import { emitTableGeneratorEvent } from '../analytics'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import classNames from 'classnames'
 
 export const ToolbarDropdown: FC<{

@@ -15,7 +15,7 @@ import {
 } from './contexts/selection-context'
 import { useEditingContext } from './contexts/editing-context'
 import { useTableContext } from './contexts/table-context'
-import { useCodeMirrorViewContext } from '../codemirror-editor'
+import { useCodeMirrorViewContext } from '../codemirror-context'
 import { undo, redo } from '@codemirror/commands'
 import { ChangeSpec } from '@codemirror/state'
 import { startCompileKeypress } from '@/features/pdf-preview/hooks/use-compile-triggers'

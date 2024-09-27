@@ -1,7 +1,7 @@
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from './codemirror-editor'
+} from './codemirror-context'
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { runScopeHandlers } from '@codemirror/view'
 import {

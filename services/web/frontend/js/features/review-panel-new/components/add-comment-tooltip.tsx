@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from '@/features/source-editor/components/codemirror-editor'
+} from '@/features/source-editor/components/codemirror-context'
 import {
   addCommentStateField,
   buildAddNewCommentRangeEffect,

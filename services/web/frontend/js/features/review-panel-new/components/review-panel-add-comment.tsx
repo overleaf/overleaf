@@ -2,7 +2,7 @@ import { FC, FormEventHandler, useCallback, useState, useRef } from 'react'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from '@/features/source-editor/components/codemirror-editor'
+} from '@/features/source-editor/components/codemirror-context'
 import { EditorSelection } from '@codemirror/state'
 import { useTranslation } from 'react-i18next'
 import { useThreadsActionsContext } from '../context/threads-context'

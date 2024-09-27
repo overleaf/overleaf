@@ -14,7 +14,7 @@ import classNames from 'classnames'
 import { Button } from 'react-bootstrap'
 import { FileRelocator } from '../file-relocator'
 import { useTranslation } from 'react-i18next'
-import { useCodeMirrorViewContext } from '../../codemirror-editor'
+import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 import getMeta from '@/utils/meta'
 

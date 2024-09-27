@@ -3,7 +3,7 @@ import { AnyOperation } from '../../../../../types/change'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from '@/features/source-editor/components/codemirror-editor'
+} from '@/features/source-editor/components/codemirror-context'
 import { isSelectionWithinOp } from '../utils/is-selection-within-op'
 import classNames from 'classnames'
 import { highlightRanges } from '@/features/source-editor/extensions/ranges'

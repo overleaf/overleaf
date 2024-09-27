@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
-} from '../codemirror-editor'
+} from '../codemirror-context'
 import {
   closeCommandTooltip,
   resolveCommandNode,
