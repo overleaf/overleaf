@@ -505,7 +505,7 @@
   "request_password_reset": "Pedir restablecimiento de contraseña",
   "request_sent_thank_you": "Solicitud enviada, gracias.",
   "required": "obligatorio",
-  "resend_link_sso": "Volver a enviar invitación de SSO",
+  "resend_link_sso": "Re-enviar invitación de SSO",
   "reset_password": "Restablecer contraseña",
   "reset_your_password": "Restablecer tu contraseña",
   "restore": "Restablecer",
