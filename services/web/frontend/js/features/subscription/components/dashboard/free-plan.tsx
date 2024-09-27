@@ -1,4 +1,5 @@
 import { useTranslation, Trans } from 'react-i18next'
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 function FreePlan() {
   const { t } = useTranslation()
@@ -23,9 +24,17 @@ function FreePlan() {
         <li>{t('github_integration_lowercase')}</li>
         <li>{t('priority_support')}</li>
       </ul>
-      <a className="btn btn-primary" href="/user/subscription/plans">
+      <a className="btn btn-primary me-1" href="/user/subscription/plans">
         {t('upgrade_now')}
       </a>
+      {isSplitTestEnabled('ai-add-on') && (
+        <a
+          className="btn btn-secondary"
+          href="/user/subscription/new?planCode=assist"
+        >
+          {t('buy_overleaf_assist')}
+        </a>
+      )}
     </>
   )
 }

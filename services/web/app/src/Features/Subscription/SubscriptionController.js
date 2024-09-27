@@ -231,6 +231,7 @@ async function userSubscriptionPage(req, res) {
     res,
     'local-ccy-format-v2'
   )
+  await SplitTestHandler.promises.getAssignment(req, res, 'ai-add-on')
 
   // Populates splitTestVariants with a value for the split test name and allows
   // Pug to read it
