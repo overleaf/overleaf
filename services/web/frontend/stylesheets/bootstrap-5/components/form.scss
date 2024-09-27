@@ -169,3 +169,14 @@
     box-shadow: $input-focus-box-shadow;
   }
 }
+
+.website-redesign {
+  label {
+    color: $form-text-color;
+    display: inline-block;
+    margin-bottom: var(--spacing-02);
+    font-weight: bold;
+
+    @include body-sm;
+  }
+}
