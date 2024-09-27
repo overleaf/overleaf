@@ -1,3 +1,21 @@
 .img-rounded {
   border-radius: var(--border-radius-large);
 }
+
+.images-border-radius-base {
+  img {
+    border-radius: var(--border-radius-base);
+  }
+}
+
+.images-border-radius-medium {
+  img {
+    border-radius: var(--border-radius-medium);
+  }
+}
+
+.images-border-radius-large {
+  img {
+    border-radius: var(--border-radius-large);
+  }
+}
