@@ -145,6 +145,10 @@ footer.site-footer {
       &::after {
         display: none;
       }
+
+      &:hover {
+        text-decoration: underline;
+      }
     }
 
     .fat-footer-base-meta a:not(.dropdown-toggle) {
@@ -365,6 +369,10 @@ footer.site-footer {
 
     .fat-footer-base {
       color: var(--content-primary);
+
+      #language-picker-toggle {
+        color: inherit;
+      }
     }
   }
 
