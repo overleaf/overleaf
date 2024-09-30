@@ -43,7 +43,7 @@
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
     "mocha": "^10.2.0",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.7.0",
     "sinon": "^9.0.2",
     "swagger-client": "^3.10.0",
     "typescript": "^5.0.4",

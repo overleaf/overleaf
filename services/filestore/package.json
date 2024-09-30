@@ -30,7 +30,7 @@
     "express": "^4.21.0",
     "glob": "^7.1.6",
     "lodash.once": "^4.1.1",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.7.0",
     "range-parser": "^1.2.1",
     "tiny-async-pool": "^1.1.0"
   },

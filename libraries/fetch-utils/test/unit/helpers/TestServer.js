@@ -12,6 +12,7 @@ class TestServer {
 
     this.app.use(bodyParser.json())
     this.app.use((req, res, next) => {
+      this.events.emit('request-received')
       this.lastReq = req
       next()
     })
@@ -40,7 +41,6 @@ class TestServer {
     })
 
     this.app.post('/sink', (req, res) => {
-      this.events.emit('request-received')
       req.on('data', () => {})
       req.on('end', () => {
         res.status(204).end()

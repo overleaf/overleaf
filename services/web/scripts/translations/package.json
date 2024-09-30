@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@brainly/onesky-utils": "https://github.com/overleaf/nodejs-onesky-utils/archive/main.tar.gz",
-    "node-fetch": "^2.6.7",
+    "node-fetch": "^2.7.0",
     "sanitize-html": "^2.12.1",
     "yargs": "^17.7.2"
   }
