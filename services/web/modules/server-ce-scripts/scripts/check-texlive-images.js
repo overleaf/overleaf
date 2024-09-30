@@ -21,6 +21,13 @@ async function readImagesInUse() {
   return images
 }
 
+function checkIsServerPro() {
+  if (process.env.OVERLEAF_IS_SERVER_PRO !== 'true') {
+    console.log('Running Overleaf Community Edition, skipping TexLive checks')
+    process.exit(0)
+  }
+}
+
 function checkSandboxedCompilesAreEnabled() {
   if (process.env.SANDBOXED_COMPILES !== 'true') {
     console.log('Sandboxed compiles disabled, skipping TexLive checks')
@@ -46,6 +53,7 @@ async function main() {
     process.exit(0)
   }
 
+  checkIsServerPro()
   checkSandboxedCompilesAreEnabled()
   checkTexLiveEnvVariablesAreProvided()
 

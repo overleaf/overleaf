@@ -524,6 +524,7 @@ describe('ServerCEScripts', function () {
       SANDBOXED_COMPILES,
       TEX_LIVE_DOCKER_IMAGE,
       ALL_TEX_LIVE_DOCKER_IMAGES,
+      OVERLEAF_IS_SERVER_PRO = true,
     }) {
       let cmd = `SANDBOXED_COMPILES=${SANDBOXED_COMPILES ? 'true' : 'false'}`
       if (TEX_LIVE_DOCKER_IMAGE) {
@@ -531,6 +532,9 @@ describe('ServerCEScripts', function () {
       }
       if (ALL_TEX_LIVE_DOCKER_IMAGES) {
         cmd += ` ALL_TEX_LIVE_DOCKER_IMAGES='${ALL_TEX_LIVE_DOCKER_IMAGES}'`
+      }
+      if (OVERLEAF_IS_SERVER_PRO === true) {
+        cmd += ` OVERLEAF_IS_SERVER_PRO=${OVERLEAF_IS_SERVER_PRO}`
       }
       return (
         cmd + ' node modules/server-ce-scripts/scripts/check-texlive-images'
@@ -542,6 +546,18 @@ describe('ServerCEScripts', function () {
       await user.ensureUserExists()
       await user.login()
       await user.createProject('test-project')
+    })
+
+    describe('when running in CE', function () {
+      beforeEach('run script', function () {
+        output = run(buildCheckTexLiveCmd({ OVERLEAF_IS_SERVER_PRO: false }))
+      })
+
+      it('should skip checks', function () {
+        expect(output).to.include(
+          'Running Overleaf Community Edition, skipping TexLive checks'
+        )
+      })
     })
 
     describe('when sandboxed compiles are disabled', function () {
