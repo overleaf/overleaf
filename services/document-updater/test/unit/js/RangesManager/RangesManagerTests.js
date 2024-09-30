@@ -757,6 +757,7 @@ describe('RangesManager', function () {
 
   describe('getHistoryUpdatesForAcceptedChanges', function () {
     beforeEach(function () {
+      this.clock = sinon.useFakeTimers()
       this.RangesManager = SandboxedModule.require(MODULE_PATH, {
         requires: {
           '@overleaf/ranges-tracker': (this.RangesTracker =
@@ -764,6 +765,10 @@ describe('RangesManager', function () {
           '@overleaf/metrics': {},
         },
       })
+    })
+
+    afterEach(function () {
+      this.clock.restore()
     })
 
     it('should create history updates for accepted track inserts', function () {
@@ -776,6 +781,8 @@ describe('RangesManager', function () {
         ]),
       }
       const lines = ['loremone two thipsumree four five']
+
+      const now = Date.now()
 
       const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
         docId: this.doc_id,
@@ -793,7 +800,7 @@ describe('RangesManager', function () {
             user_id: TEST_USER_ID,
             doc_length: 33,
             pathname: '',
-            ts: ranges.changes[0].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -809,7 +816,7 @@ describe('RangesManager', function () {
             user_id: TEST_USER_ID,
             doc_length: 33,
             pathname: '',
-            ts: ranges.changes[1].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -833,6 +840,8 @@ describe('RangesManager', function () {
       }
       const lines = ['one   four five']
 
+      const now = Date.now()
+
       const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
         docId: this.doc_id,
         acceptedChangeIds: ranges.changes.map(change => change.id),
@@ -850,7 +859,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 23,
             pathname: '',
-            ts: ranges.changes[0].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -866,7 +875,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 20,
             pathname: '',
-            ts: ranges.changes[1].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -889,6 +898,8 @@ describe('RangesManager', function () {
       }
       const lines = ['one   four five']
 
+      const now = Date.now()
+
       const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
         docId: this.doc_id,
         acceptedChangeIds: [ranges.changes[1].id],
@@ -906,7 +917,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 23,
             pathname: '',
-            ts: ranges.changes[1].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -932,6 +943,8 @@ describe('RangesManager', function () {
       }
       const lines = ['one   xxx four ']
 
+      const now = Date.now()
+
       const result = this.RangesManager.getHistoryUpdatesForAcceptedChanges({
         docId: this.doc_id,
         acceptedChangeIds: [
@@ -954,7 +967,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 27,
             pathname: '',
-            ts: ranges.changes[0].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -970,7 +983,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 24,
             pathname: '',
-            ts: ranges.changes[2].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -988,7 +1001,7 @@ describe('RangesManager', function () {
             doc_length: 15,
             history_doc_length: 24,
             pathname: '',
-            ts: ranges.changes[3].metadata.ts,
+            ts: now,
           },
           op: [
             {
@@ -1011,7 +1024,7 @@ function makeRanges(ops) {
     changes.push({
       id: id.toString(),
       op,
-      metadata: { user_id: TEST_USER_ID, ts: new Date(ts) },
+      metadata: { user_id: TEST_USER_ID, ts: new Date(ts).toISOString() },
     })
     id += 1
     ts += 1000 // use a unique timestamp for each change

@@ -230,6 +230,7 @@ const RangesManager = {
         op: [op],
         meta: {
           ...change.metadata,
+          ts: Date.now(),
           doc_length: docLength,
           pathname,
         },
