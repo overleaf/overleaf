@@ -26,16 +26,18 @@
 }
 
 .btn-group {
-  .btn.active {
-    background-color: @neutral-20;
-  }
+  label {
+    &.btn.active {
+      background-color: @neutral-20;
+    }
 
-  .btn[disabled] {
-    cursor: not-allowed;
-    background-color: @neutral-20;
-    border-color: @neutral-20;
-    opacity: 1;
-    color: @neutral-90;
+    &.btn[disabled] {
+      cursor: not-allowed;
+      background-color: @neutral-20;
+      border-color: @neutral-20;
+      opacity: 1;
+      color: @neutral-90;
+    }
   }
 }
 
