@@ -7,6 +7,7 @@ import useAsync from '@/shared/hooks/use-async'
 import classNames from 'classnames'
 import { debugConsole } from '@/utils/debugging'
 import Notification from '@/shared/components/notification'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function JoinGroup({
   setView,
@@ -58,13 +59,13 @@ export default function JoinGroup({
               {t('not_now')}
             </a>
             &nbsp;&nbsp;
-            <button
-              className="btn btn-primary"
+            <OLButton
+              variant="primary"
               onClick={() => joinTeam()}
               disabled={isJoining}
             >
               {t('accept_invitation')}
-            </button>
+            </OLButton>
           </p>
         )}
       </div>

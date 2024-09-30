@@ -69,6 +69,13 @@ async function viewInvite(req, res, next) {
 
   const { invite, subscription } =
     await TeamInvitesHandler.promises.getInvite(token)
+
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'bootstrap-5-subscription'
+  )
+
   if (!invite) {
     return ErrorController.notFound(req, res)
   }

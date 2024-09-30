@@ -1,24 +1,31 @@
 extends ../../layout-marketing
 
+block vars
+	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
+	- bootstrap5PageSplitTest = 'bootstrap-5-subscription'
+
 block content
+	- var colClass = bootstrapVersion === 5 ? 'col-lg-8 m-auto' : 'col-md-8 col-md-offset-2'
+
 	main.content.content-alt.team-invite#main-content
 		.container
 			.row
-				.col-md-8.col-md-offset-2.text-center
-					.card
-						.page-header
-							h1.text-centered !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
+				div(class=colClass)
+					.card.text-center
+						.card-body
+							.page-header
+								// TODO: Remove `team-invite-name` once we fully migrated to Bootstrap 5
+								h1.text-centered !{translate("invited_to_group", {inviterName: inviterName, appName: appName }, [{name: 'span', attrs: {class: 'team-invite-name'}}])}
 
-						if (accountExists)
-							div
-								p #{translate("invited_to_group_login_benefits", {appName: appName})}
-								p #{translate("invited_to_group_login", {emailAddress: emailAddress})}
-								p
-									a.btn.btn.btn-primary(href=`/login?redir=/subscription/invites/${inviteToken}`) #{translate("login_to_accept_invitation")}
-						else
-							div
-								p #{translate("invited_to_group_register_benefits", {appName: appName})}
-								p #{translate("invited_to_group_register", {inviterName: inviterName})}
-								p
-									a.btn.btn.btn-primary(href=`/register?redir=/subscription/invites/${inviteToken}`) #{translate("register_to_accept_invitation")}
-
+							if (accountExists)
+								div
+									p #{translate("invited_to_group_login_benefits", {appName: appName})}
+									p #{translate("invited_to_group_login", {emailAddress: emailAddress})}
+									p
+										a.btn.btn-primary(href=`/login?redir=/subscription/invites/${inviteToken}`) #{translate("login_to_accept_invitation")}
+							else
+								div
+									p #{translate("invited_to_group_register_benefits", {appName: appName})}
+									p #{translate("invited_to_group_register", {inviterName: inviterName})}
+									p
+										a.btn.btn-primary(href=`/register?redir=/subscription/invites/${inviteToken}`) #{translate("register_to_accept_invitation")}

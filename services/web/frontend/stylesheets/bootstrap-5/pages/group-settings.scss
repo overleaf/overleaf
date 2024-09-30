@@ -1,0 +1,32 @@
+.enrollment-invite {
+  .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--font-size-05);
+    font-weight: bold;
+  }
+
+  .inner-card {
+    background-color: var(--neutral-10);
+    padding: var(--spacing-06);
+
+    &.warning {
+      background-color: var(--yellow-10);
+    }
+  }
+
+  .list-row {
+    border: 0;
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-05);
+
+    .icon {
+      margin-top: var(--spacing-01);
+    }
+  }
+
+  .icon.error {
+    color: var(--yellow-50);
+  }
+}

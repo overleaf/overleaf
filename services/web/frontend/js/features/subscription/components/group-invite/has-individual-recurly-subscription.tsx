@@ -6,6 +6,7 @@ import getMeta from '@/utils/meta'
 import { Dispatch, SetStateAction, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InviteViewTypes } from './group-invite'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function HasIndividualRecurlySubscription({
   setView,
@@ -46,23 +47,21 @@ export default function HasIndividualRecurlySubscription({
       <div className="text-center">
         <p>{t('cancel_personal_subscription_first')}</p>
         <p>
-          <button
-            className="btn btn-secondary"
+          <OLButton
+            variant="secondary"
             disabled={isCancelling}
             onClick={() => setView('invite')}
           >
             {t('not_now')}
-          </button>
+          </OLButton>
           &nbsp;&nbsp;
-          <button
-            className="btn btn-primary"
+          <OLButton
+            variant="primary"
             disabled={isCancelling}
-            onClick={() => {
-              cancelPersonalSubscription()
-            }}
+            onClick={() => cancelPersonalSubscription()}
           >
             {t('cancel_your_subscription')}
-          </button>
+          </OLButton>
         </p>
       </div>
     </>
