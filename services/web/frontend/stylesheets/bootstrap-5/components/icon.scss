@@ -1,0 +1,20 @@
+.icon-double-green-round-background {
+  border-radius: 50%;
+  background: var(--green-30);
+  color: var(--dark-jungle-green);
+  display: inline-flex;
+  border: var(--spacing-04) solid var(--green-10);
+  padding: var(--spacing-04);
+
+  i {
+    font-size: 24px;
+  }
+}
+
+.icon-large-purple-text {
+  color: var(--sapphire-blue);
+
+  i {
+    font-size: 50px;
+  }
+}
