@@ -204,6 +204,18 @@
     }
   }
 
+  .font-size-display-xs {
+    @include display-xs;
+  }
+
+  .text-purple-bright {
+    color: var(--purple-bright);
+  }
+
+  .text-green-bright {
+    color: var(--green-bright);
+  }
+
   .card {
     --bs-card-bg: var(--neutral-10);
     --bs-card-border-radius: var(--border-radius-large);

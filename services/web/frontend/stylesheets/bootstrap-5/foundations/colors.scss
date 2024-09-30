@@ -61,6 +61,8 @@ $ceil: #9597c9;
 $caramel: #f9d38f;
 $dark-jungle-green: #0f271a;
 $sapphire-blue: #4354a3;
+$purple-bright: #939aff;
+$green-bright: #13c965;
 
 /* ====== Semantic Sass color variables ====== */
 $bg-light-primary: $white;
@@ -178,6 +180,8 @@ $link-ui-visited-dark: $blue-40;
   --caramel: #{$caramel};
   --dark-jungle-green: #{$dark-jungle-green};
   --sapphire-blue: #{$sapphire-blue};
+  --green-bright: #{$green-bright};
+  --purple-bright: #{$purple-bright};
 
   /* ====== Semantic CSS color variables ====== */
   --bg-light-primary: var(--white);
