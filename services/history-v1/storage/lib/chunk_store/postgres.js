@@ -200,7 +200,7 @@ async function deleteProjectChunks(projectId) {
   projectId = parseInt(projectId, 10)
   assert.integer(projectId, 'bad projectId')
 
-  knex.transaction(async tx => {
+  await knex.transaction(async tx => {
     await _deleteChunks(knex, { doc_id: projectId })
   })
 }
