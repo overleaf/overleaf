@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
-import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import { useLocation } from '@/shared/hooks/use-location'
 import GroupInvitesItem from './group-invites-item'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
 
 function GroupInvites() {
   const { t } = useTranslation()
@@ -18,11 +19,11 @@ function GroupInvites() {
 
   return (
     <div className="container">
-      <Row>
-        <Col md={8} mdOffset={2}>
+      <OLRow>
+        <OLCol lg={{ span: 8, offset: 2 }}>
           <h1>{t('group_invitations')}</h1>
-        </Col>
-      </Row>
+        </OLCol>
+      </OLRow>
       {teamInvites.map(teamInvite => (
         <GroupInvitesItem teamInvite={teamInvite} key={teamInvite._id} />
       ))}
