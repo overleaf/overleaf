@@ -50,6 +50,7 @@
 
           &:hover {
             background-color: var(--neutral-10);
+            text-decoration: none;
           }
 
           &:focus-visible {
@@ -63,10 +64,6 @@
         border: 0 !important;
         border-bottom: 3px solid var(--green-50) !important;
         color: var(--neutral-90) !important;
-
-        &:hover {
-          border-bottom: 3px solid var(--green-50) !important;
-        }
       }
     }
   }
