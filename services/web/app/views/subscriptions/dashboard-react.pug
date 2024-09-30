@@ -23,6 +23,7 @@ block append meta
 	meta(name="ol-fromPlansPage" data-type="boolean" content=fromPlansPage)
 	meta(name="ol-plans", data-type="json" content=plans)
 	meta(name="ol-groupSettingsEnabledFor", data-type="json" content=groupSettingsEnabledFor)
+	meta(name="ol-user" data-type="json" content=user)
 	if (personalSubscription && personalSubscription.recurly)
 		meta(name="ol-recurlyApiKey" content=settings.apis.recurly.publicKey)
 		meta(name="ol-recommendedCurrency" content=personalSubscription.recurly.currency)

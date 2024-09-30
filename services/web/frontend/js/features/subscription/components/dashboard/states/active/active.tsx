@@ -14,6 +14,7 @@ import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
 import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan-modal'
 import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
 import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export function ActiveSubscription({
   subscription,
@@ -62,12 +63,13 @@ export function ActiveSubscription({
           subscription.recurly.account.has_past_due_invoice._ !== 'true' && (
             <>
               {' '}
-              <button
+              <OLButton
+                variant="link"
                 className="btn-inline-link"
                 onClick={() => setModalIdShown('change-plan')}
               >
                 {t('change_plan')}
-              </button>
+              </OLButton>
             </>
           )}
       </p>
@@ -103,7 +105,7 @@ export function ActiveSubscription({
         />
       </p>
       <PriceExceptions subscription={subscription} />
-      <p>
+      <p className="d-inline-flex flex-wrap gap-1">
         <a
           href={subscription.recurly.billingDetailsLink}
           target="_blank"
@@ -121,7 +123,10 @@ export function ActiveSubscription({
           {t('view_your_invoices')}
         </a>
         {!recurlyLoadError && (
-          <CancelSubscriptionButton className="btn btn-danger-ghost ms-1" />
+          <>
+            {' '}
+            <CancelSubscriptionButton />
+          </>
         )}
       </p>
 

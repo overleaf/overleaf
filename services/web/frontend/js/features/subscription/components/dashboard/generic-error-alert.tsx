@@ -1,5 +1,5 @@
-import classNames from 'classnames'
 import { useTranslation } from 'react-i18next'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 export default function GenericErrorAlert({
   className,
@@ -7,12 +7,18 @@ export default function GenericErrorAlert({
   className?: string
 }) {
   const { t } = useTranslation()
-  const alertClassName = classNames('alert', 'alert-danger', className)
 
   return (
-    <div className={alertClassName} aria-live="polite">
-      {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
-      {t('generic_if_problem_continues_contact_us')}.
-    </div>
+    <OLNotification
+      className={className}
+      aria-live="polite"
+      type="error"
+      content={
+        <>
+          {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+          {t('generic_if_problem_continues_contact_us')}.
+        </>
+      }
+    />
   )
 }

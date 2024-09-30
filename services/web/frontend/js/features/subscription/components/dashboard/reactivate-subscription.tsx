@@ -5,6 +5,7 @@ import useAsync from '../../../../shared/hooks/use-async'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import getMeta from '../../../../utils/meta'
 import { debugConsole } from '@/utils/debugging'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function ReactivateSubscription() {
   const { t } = useTranslation()
@@ -25,14 +26,14 @@ function ReactivateSubscription() {
   }
 
   return (
-    <button
-      type="button"
-      className="btn btn-primary"
+    <OLButton
+      variant="primary"
       disabled={isLoading || isSuccess}
       onClick={handleReactivate}
+      isLoading={isLoading}
     >
       {t('reactivate_subscription')}
-    </button>
+    </OLButton>
   )
 }
 

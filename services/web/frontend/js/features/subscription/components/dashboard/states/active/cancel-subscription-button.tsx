@@ -1,10 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
-export function CancelSubscriptionButton(
-  props: React.ComponentProps<'button'>
-) {
+export function CancelSubscriptionButton() {
   const { t } = useTranslation()
   const { recurlyLoadError, setShowCancellation } =
     useSubscriptionDashboardContext()
@@ -17,8 +16,8 @@ export function CancelSubscriptionButton(
   if (recurlyLoadError) return null
 
   return (
-    <button onClick={handleCancelSubscriptionClick} {...props}>
+    <OLButton variant="danger-ghost" onClick={handleCancelSubscriptionClick}>
       {t('cancel_your_subscription')}
-    </button>
+    </OLButton>
   )
 }

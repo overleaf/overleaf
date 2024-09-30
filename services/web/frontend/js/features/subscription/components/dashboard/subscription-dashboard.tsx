@@ -10,6 +10,10 @@ import ManagedInstitutions from './managed-institutions'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import getMeta from '../../../../utils/meta'
 import PremiumFeaturesLink from './premium-features-link'
+import OLCard from '@/features/ui/components/ol/ol-card'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function SubscriptionDashboard() {
   const { t } = useTranslation()
@@ -23,30 +27,35 @@ function SubscriptionDashboard() {
 
   return (
     <div className="container">
-      <div className="row">
-        <div className="col-md-8 col-md-offset-2">
+      <OLRow>
+        <OLCol lg={{ span: 8, offset: 2 }}>
           {fromPlansPage && (
-            <div className="alert alert-warning" aria-live="polite">
-              {t('you_already_have_a_subscription')}
-            </div>
+            <OLNotification
+              className="mb-4"
+              aria-live="polite"
+              content={t('you_already_have_a_subscription')}
+              type="warning"
+            />
           )}
-          <div className="card">
+          <OLCard>
             <div className="page-header">
               <h1>{t('your_subscription')}</h1>
             </div>
 
-            <PersonalSubscription />
-            <ManagedGroupSubscriptions />
-            <ManagedInstitutions />
-            <ManagedPublishers />
-            <GroupSubscriptionMemberships />
-            <InstitutionMemberships />
-            {hasValidActiveSubscription && <PremiumFeaturesLink />}
-            {!hasDisplayedSubscription &&
-              (hasSubscription ? <ContactSupport /> : <FreePlan />)}
-          </div>
-        </div>
-      </div>
+            <div>
+              <PersonalSubscription />
+              <ManagedGroupSubscriptions />
+              <ManagedInstitutions />
+              <ManagedPublishers />
+              <GroupSubscriptionMemberships />
+              <InstitutionMemberships />
+              {hasValidActiveSubscription && <PremiumFeaturesLink />}
+              {!hasDisplayedSubscription &&
+                (hasSubscription ? <ContactSupport /> : <FreePlan />)}
+            </div>
+          </OLCard>
+        </OLCol>
+      </OLRow>
     </div>
   )
 }

@@ -50,6 +50,8 @@ export default function OLModal({ children, ...props }: OLModalProps) {
     backdrop: bs5Props.backdrop,
     animation: bs5Props.animation,
     id: bs5Props.id,
+    className: bs5Props.className,
+    backdropClassName: bs5Props.backdropClassName,
     ...bs3Props,
   }
 

@@ -6,6 +6,7 @@ import { ManagedInstitution as Institution } from '../../../../../../types/subsc
 import { RowLink } from './row-link'
 import { debugConsole } from '@/utils/debugging'
 import getMeta from '@/utils/meta'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type ManagedInstitutionProps = {
   institution: Institution
@@ -53,33 +54,35 @@ export default function ManagedInstitution({
           tOptions={{ interpolation: { escapeValue: true } }}
         />
       </p>
-      <RowLink
-        href={`/metrics/institutions/${institution.v1Id}`}
-        heading={t('view_metrics')}
-        subtext={t('view_metrics_commons_subtext')}
-        icon="insights"
-      />
-      <RowLink
-        href={`/institutions/${institution.v1Id}/hub`}
-        heading={t('view_hub')}
-        subtext={t('view_hub_subtext')}
-        icon="account_circle"
-      />
-      <RowLink
-        href={`/manage/institutions/${institution.v1Id}/managers`}
-        heading={t('manage_institution_managers')}
-        subtext={t('manage_managers_subtext')}
-        icon="manage_accounts"
-      />
+      <ul className="list-group p-0">
+        <RowLink
+          href={`/metrics/institutions/${institution.v1Id}`}
+          heading={t('view_metrics')}
+          subtext={t('view_metrics_commons_subtext')}
+          icon="insights"
+        />
+        <RowLink
+          href={`/institutions/${institution.v1Id}/hub`}
+          heading={t('view_hub')}
+          subtext={t('view_hub_subtext')}
+          icon="account_circle"
+        />
+        <RowLink
+          href={`/manage/institutions/${institution.v1Id}/managers`}
+          heading={t('manage_institution_managers')}
+          subtext={t('manage_managers_subtext')}
+          icon="manage_accounts"
+        />
+      </ul>
       <div>
         <p>
           <span>Monthly metrics emails: </span>
           {subscriptionChanging ? (
             <i className="fa fa-spin fa-refresh" />
           ) : (
-            <button
+            <OLButton
+              variant="link"
               className="btn-inline-link"
-              style={{ border: 0 }}
               onClick={e =>
                 changeInstitutionalEmailSubscription(e, institution.v1Id)
               }
@@ -89,7 +92,7 @@ export default function ManagedInstitution({
               )
                 ? t('subscribe')
                 : t('unsubscribe')}
-            </button>
+            </OLButton>
           )}
         </p>
       </div>

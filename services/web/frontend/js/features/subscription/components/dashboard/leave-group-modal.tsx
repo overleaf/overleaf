@@ -1,11 +1,16 @@
 import { useCallback, useState } from 'react'
-import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { deleteJSON } from '../../../../infrastructure/fetch-json'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import { useLocation } from '../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export const LEAVE_GROUP_MODAL_ID = 'leave-group'
 
@@ -37,38 +42,43 @@ export default function LeaveGroupModal() {
   }
 
   return (
-    <AccessibleModal
+    <OLModal
       id={LEAVE_GROUP_MODAL_ID}
       show
       animation
       onHide={handleCloseModal}
       backdrop="static"
     >
-      <Modal.Header>
-        <Modal.Title>{t('leave_group')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader>
+        <OLModalTitle>{t('leave_group')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <p>{t('sure_you_want_to_leave_group')}</p>
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
+      <OLModalFooter>
+        <OLButton
+          variant="secondary"
           onClick={handleCloseModal}
           disabled={inflight}
         >
           {t('cancel')}
-        </Button>
-        <Button
-          bsStyle="danger"
+        </OLButton>
+        <OLButton
+          variant="danger"
           onClick={handleConfirmLeaveGroup}
           disabled={inflight}
+          isLoading={inflight}
+          bs3Props={{
+            loading: inflight
+              ? t('processing_uppercase') + '…'
+              : t('leave_now'),
+          }}
         >
-          {inflight ? t('processing_uppercase') + '…' : t('leave_now')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+          {t('processing_uppercase')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

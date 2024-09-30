@@ -1,9 +1,11 @@
 import { useTranslation, Trans } from 'react-i18next'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
-import { FormGroup, Alert } from 'react-bootstrap'
 import getMeta from '../../../../utils/meta'
 import useAsync from '../../../../shared/hooks/use-async'
 import { postJSON } from '../../../../infrastructure/fetch-json'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 
 function PersonalSubscriptionRecurlySyncEmail() {
   const { t } = useTranslation()
@@ -25,9 +27,12 @@ function PersonalSubscriptionRecurlySyncEmail() {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <FormGroup>
+        <OLFormGroup>
           {isSuccess ? (
-            <Alert bsStyle="success">{t('recurly_email_updated')}</Alert>
+            <OLNotification
+              type="success"
+              content={t('recurly_email_updated')}
+            />
           ) : (
             <>
               <p>
@@ -40,17 +45,21 @@ function PersonalSubscriptionRecurlySyncEmail() {
                 />
               </p>
               <div>
-                <button
-                  className="btn btn-primary"
+                <OLButton
+                  variant="primary"
                   type="submit"
                   disabled={isLoading}
+                  isLoading={isLoading}
+                  bs3Props={{
+                    loading: isLoading ? t('updating') + '…' : t('update'),
+                  }}
                 >
-                  {isLoading ? <>{t('updating')}…</> : t('update')}
-                </button>
+                  {t('update')}
+                </OLButton>
               </div>
             </>
           )}
-        </FormGroup>
+        </OLFormGroup>
       </form>
       <hr />
     </>

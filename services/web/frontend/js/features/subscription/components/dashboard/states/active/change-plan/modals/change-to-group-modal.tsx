@@ -1,16 +1,29 @@
 import { useEffect, useState } from 'react'
-import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import { Subscription } from '../../../../../../../../../../types/subscription/dashboard/subscription'
 import { PriceForDisplayData } from '../../../../../../../../../../types/subscription/plan'
 import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
-import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
 import getMeta from '../../../../../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import GenericErrorAlert from '../../../../generic-error-alert'
 import { subscriptionUpdateUrl } from '../../../../../../data/subscription-url'
 import { getRecurlyGroupPlanCode } from '../../../../../../util/recurly-group-plan-code'
 import { useLocation } from '../../../../../../../../shared/hooks/use-location'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
+import { UserProvider } from '@/shared/context/user-context'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 const educationalPercentDiscount = 40
 const groupSizeForEducationalDiscount = 10
@@ -88,7 +101,7 @@ function GroupPrice({
             })}
       </span>
 
-      <br />
+      <BootstrapVersionSwitcher bs3={<br />} />
 
       <span className="circle-subtext">
         <span aria-hidden>
@@ -124,6 +137,8 @@ export function ChangeToGroupModal() {
     setGroupPlanToChangeToSize,
     setGroupPlanToChangeToUsage,
   } = useSubscriptionDashboardContext()
+  const { modal: contactModal, showModal: showContactModal } =
+    useContactUsModal({ autofillProjectUrl: false })
   const groupPlans = getMeta('ol-groupPlans')
   const personalSubscription = getMeta('ol-subscription') as Subscription
   const [error, setError] = useState(false)
@@ -157,11 +172,6 @@ export function ChangeToGroupModal() {
     }
   }, [personalSubscription, setGroupPlanToChangeToCode])
 
-  function handleGetInTouchButton() {
-    handleCloseModal()
-    $('[data-ol-contact-form-modal="contact-us"]').modal()
-  }
-
   if (
     modalIdShown !== modalId ||
     !groupPlans ||
@@ -172,197 +182,199 @@ export function ChangeToGroupModal() {
     return null
 
   return (
-    <AccessibleModal
-      id={modalId}
-      show
-      animation
-      onHide={handleCloseModal}
-      backdrop="static"
-    >
-      <Modal.Header>
-        <button className="close" onClick={handleCloseModal}>
-          <span aria-hidden="true">×</span>
-          <span className="sr-only">{t('close')}</span>
-        </button>
-        <div className="modal-title">
-          <h2>{t('customize_your_group_subscription')}</h2>
-          <h3>
-            {t('save_x_percent_or_more', {
-              percent: '30',
-            })}
-          </h3>
-        </div>
-      </Modal.Header>
+    <>
+      <UserProvider>{contactModal}</UserProvider>
+      <OLModal
+        id={modalId}
+        show
+        animation
+        onHide={handleCloseModal}
+        backdrop="static"
+      >
+        <OLModalHeader closeButton>
+          <OLModalTitle className="lh-sm">
+            {t('customize_your_group_subscription')}
+            <br />
+            <span className="h5">
+              {t('save_x_percent_or_more', {
+                percent: '30',
+              })}
+            </span>
+          </OLModalTitle>
+        </OLModalHeader>
 
-      <Modal.Body>
-        <div className="container-fluid plans group-subscription-modal">
-          {groupPlanToChangeToPriceError && <GenericErrorAlert />}
-          <div className="row">
-            <div className="col-md-6 text-center">
-              <div className="circle circle-lg">
-                <GroupPrice
-                  groupPlanToChangeToPrice={groupPlanToChangeToPrice}
-                  queryingGroupPlanToChangeToPrice={
-                    queryingGroupPlanToChangeToPrice
-                  }
-                />
+        <OLModalBody>
+          <div className="container-fluid plans group-subscription-modal">
+            {groupPlanToChangeToPriceError && <GenericErrorAlert />}
+            <div className="row">
+              <div className="col-md-6 text-center">
+                <div className="circle circle-lg mb-4 mx-auto">
+                  <GroupPrice
+                    groupPlanToChangeToPrice={groupPlanToChangeToPrice}
+                    queryingGroupPlanToChangeToPrice={
+                      queryingGroupPlanToChangeToPrice
+                    }
+                  />
+                </div>
+                <p>{t('each_user_will_have_access_to')}:</p>
+                <ul className="list-unstyled">
+                  <li className="mb-3">
+                    <strong>
+                      <GroupPlanCollaboratorCount
+                        planCode={groupPlanToChangeToCode}
+                      />
+                    </strong>
+                  </li>
+                  <li>
+                    <strong>{t('all_premium_features')}</strong>
+                  </li>
+                  <li>{t('sync_dropbox_github')}</li>
+                  <li>{t('full_doc_history')}</li>
+                  <li>{t('track_changes')}</li>
+                  <li>
+                    <span aria-hidden>+ {t('more').toLowerCase()}</span>
+                    <span className="sr-only">{t('plus_more')}</span>
+                  </li>
+                </ul>
               </div>
-              <p>{t('each_user_will_have_access_to')}:</p>
-              <ul className="list-unstyled">
-                <li className="list-item-with-margin-bottom">
-                  <strong>
-                    <GroupPlanCollaboratorCount
-                      planCode={groupPlanToChangeToCode}
-                    />
-                  </strong>
-                </li>
-                <li>
-                  <strong>{t('all_premium_features')}</strong>
-                </li>
-                <li>{t('sync_dropbox_github')}</li>
-                <li>{t('full_doc_history')}</li>
-                <li>{t('track_changes')}</li>
-                <li>
-                  <span aria-hidden>+ {t('more').toLowerCase()}</span>
-                  <span className="sr-only">{t('plus_more')}</span>
-                </li>
-              </ul>
-            </div>
 
-            <div className="col-md-6">
-              <form className="form">
-                <fieldset className="form-group">
-                  <legend className="legend-as-label">{t('plan')}</legend>
-                  {groupPlans.plans.map(option => (
-                    <label
-                      htmlFor={`plan-option-${option.code}`}
-                      key={option.code}
-                      className="group-plan-option"
-                    >
-                      <input
+              <div className="col-md-6">
+                <form className="form">
+                  <fieldset className="form-group">
+                    <legend className="legend-as-label">{t('plan')}</legend>
+                    {groupPlans.plans.map(option => (
+                      <OLFormCheckbox
+                        key={option.code}
                         type="radio"
                         name="plan-code"
                         value={option.code}
                         id={`plan-option-${option.code}`}
-                        onChange={e =>
-                          setGroupPlanToChangeToCode(e.target.value)
-                        }
+                        onChange={() => setGroupPlanToChangeToCode(option.code)}
                         checked={option.code === groupPlanToChangeToCode}
+                        label={option.display}
                       />
-                      <span>{option.display}</span>
-                    </label>
-                  ))}
-                </fieldset>
-
-                <div className="form-group">
-                  <label htmlFor="size">{t('number_of_users')}</label>
-                  <select
-                    name="size"
-                    id="size"
-                    className="form-control"
-                    value={groupPlanToChangeToSize}
-                    onChange={e => setGroupPlanToChangeToSize(e.target.value)}
-                  >
-                    {groupPlans.sizes.map(size => (
-                      <option key={`size-option-${size}`}>{size}</option>
                     ))}
-                  </select>
-                </div>
+                  </fieldset>
 
-                <div className="form-group">
-                  <strong>
-                    {t('percent_discount_for_groups', {
-                      percent: educationalPercentDiscount,
-                      size: groupSizeForEducationalDiscount,
-                    })}
-                  </strong>
-                </div>
+                  <OLFormGroup controlId="size">
+                    <OLFormLabel>{t('number_of_users')}</OLFormLabel>
+                    <OLFormSelect
+                      name="size"
+                      value={groupPlanToChangeToSize}
+                      onChange={e => setGroupPlanToChangeToSize(e.target.value)}
+                    >
+                      {groupPlans.sizes.map(size => (
+                        <option key={`size-option-${size}`}>{size}</option>
+                      ))}
+                    </OLFormSelect>
+                  </OLFormGroup>
 
-                <div className="form-group group-plan-option">
-                  <label htmlFor="usage">
-                    <input
-                      id="usage"
-                      type="checkbox"
-                      autoComplete="off"
-                      checked={groupPlanToChangeToUsage === 'educational'}
-                      onChange={e => {
-                        if (e.target.checked) {
-                          setGroupPlanToChangeToUsage('educational')
-                        } else {
-                          setGroupPlanToChangeToUsage('enterprise')
-                        }
-                      }}
-                    />
-                    <span>{t('license_for_educational_purposes')}</span>
-                  </label>
-                </div>
-              </form>
-            </div>
-          </div>
-          <div className="row">
-            <div className="col-md-12 text-center">
-              <div className="educational-discount-badge">
-                {groupPlanToChangeToUsage === 'educational' && (
-                  <EducationDiscountAppliedOrNot
-                    groupSize={groupPlanToChangeToSize}
+                  <OLFormGroup>
+                    <strong>
+                      {t('percent_discount_for_groups', {
+                        percent: educationalPercentDiscount,
+                        size: groupSizeForEducationalDiscount,
+                      })}
+                    </strong>
+                  </OLFormGroup>
+
+                  <OLFormCheckbox
+                    id="usage"
+                    type="checkbox"
+                    autoComplete="off"
+                    checked={groupPlanToChangeToUsage === 'educational'}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setGroupPlanToChangeToUsage('educational')
+                      } else {
+                        setGroupPlanToChangeToUsage('enterprise')
+                      }
+                    }}
+                    label={t('license_for_educational_purposes')}
                   />
-                )}
+                </form>
               </div>
             </div>
-          </div>
-        </div>
-      </Modal.Body>
-
-      <Modal.Footer>
-        <div className="text-center">
-          {groupPlanToChangeToPrice?.includesTax && (
-            <p>
-              <Trans
-                i18nKey="total_with_subtotal_and_tax"
-                values={{
-                  total: groupPlanToChangeToPrice.totalForDisplay,
-                  subtotal: groupPlanToChangeToPrice.subtotal,
-                  tax: groupPlanToChangeToPrice.tax,
-                }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
-                components={[
-                  /* eslint-disable-next-line react/jsx-key */
-                  <strong />,
-                ]}
-              />
-            </p>
-          )}
-          <p>
-            <strong>{t('new_subscription_will_be_billed_immediately')}</strong>
-          </p>
-          <hr className="thin" />
-          {error && (
-            <div className="alert alert-danger" aria-live="polite">
-              {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
-              {t('generic_if_problem_continues_contact_us')}.
+            <div className="educational-discount-badge pt-4 text-center">
+              {groupPlanToChangeToUsage === 'educational' && (
+                <EducationDiscountAppliedOrNot
+                  groupSize={groupPlanToChangeToSize}
+                />
+              )}
             </div>
-          )}
-          <button
-            className="btn btn-primary btn-lg"
-            disabled={
-              queryingGroupPlanToChangeToPrice ||
-              !groupPlanToChangeToPrice ||
-              inflight
-            }
-            onClick={upgrade}
-          >
-            {!inflight ? t('upgrade_now') : t('processing_uppercase') + '…'}
-          </button>
-          <hr className="thin" />
-          <button className="btn-inline-link" onClick={handleGetInTouchButton}>
-            {t('need_more_than_x_licenses', {
-              x: 50,
-            })}{' '}
-            {t('please_get_in_touch')}
-          </button>
-        </div>
-      </Modal.Footer>
-    </AccessibleModal>
+          </div>
+        </OLModalBody>
+
+        <OLModalFooter>
+          <div className="text-center">
+            {groupPlanToChangeToPrice?.includesTax && (
+              <p>
+                <Trans
+                  i18nKey="total_with_subtotal_and_tax"
+                  values={{
+                    total: groupPlanToChangeToPrice.totalForDisplay,
+                    subtotal: groupPlanToChangeToPrice.subtotal,
+                    tax: groupPlanToChangeToPrice.tax,
+                  }}
+                  shouldUnescape
+                  tOptions={{ interpolation: { escapeValue: true } }}
+                  components={[
+                    /* eslint-disable-next-line react/jsx-key */
+                    <strong />,
+                  ]}
+                />
+              </p>
+            )}
+            <p>
+              <strong>
+                {t('new_subscription_will_be_billed_immediately')}
+              </strong>
+            </p>
+            <hr className="thin my-3" />
+            {error && (
+              <OLNotification
+                type="error"
+                aria-live="polite"
+                content={
+                  <>
+                    {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+                    {t('generic_if_problem_continues_contact_us')}.
+                  </>
+                }
+              />
+            )}
+            <OLButton
+              variant="primary"
+              size="large"
+              disabled={
+                queryingGroupPlanToChangeToPrice ||
+                !groupPlanToChangeToPrice ||
+                inflight
+              }
+              onClick={upgrade}
+              isLoading={inflight}
+              bs3Props={{
+                loading: inflight
+                  ? t('processing_uppercase') + '…'
+                  : t('upgrade_now'),
+              }}
+            >
+              {t('upgrade_now')}
+            </OLButton>
+            <hr className="thin my-3" />
+            <OLButton
+              variant="link"
+              className="btn-inline-link"
+              onClick={showContactModal}
+            >
+              {t('need_more_than_x_licenses', {
+                x: 50,
+              })}{' '}
+              {t('please_get_in_touch')}
+            </OLButton>
+          </div>
+        </OLModalFooter>
+      </OLModal>
+    </>
   )
 }

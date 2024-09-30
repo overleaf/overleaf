@@ -30,6 +30,7 @@ export function renderWithSubscriptionDashContext(
   options?.metaTags?.forEach(tag =>
     window.metaAttributesCache.set(tag.name, tag.value)
   )
+  window.metaAttributesCache.set('ol-user', {})
 
   if (!options?.recurlyNotLoaded) {
     // @ts-ignore

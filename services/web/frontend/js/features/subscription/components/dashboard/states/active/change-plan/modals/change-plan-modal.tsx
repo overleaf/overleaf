@@ -1,11 +1,14 @@
-import { Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { SubscriptionDashModalIds } from '../../../../../../../../../../types/subscription/dashboard/modal-ids'
-import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
 import LoadingSpinner from '../../../../../../../../shared/components/loading-spinner'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { ChangeToGroupPlan } from '../change-to-group-plan'
 import { IndividualPlansTable } from '../individual-plans-table'
+import OLModal, {
+  OLModalBody,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 
 function ChangePlanOptions() {
   const { plans, queryingIndividualPlansData, recurlyLoadError } =
@@ -22,7 +25,7 @@ function ChangePlanOptions() {
   } else {
     return (
       <>
-        <div className="table-outlined-container">
+        <div className="border rounded px-2 pt-1 table-outlined-container">
           <IndividualPlansTable plans={plans} />
         </div>
         <ChangeToGroupPlan />
@@ -39,14 +42,14 @@ export function ChangePlanModal() {
   if (modalIdShown !== modalId) return null
 
   return (
-    <AccessibleModal id={modalId} show animation onHide={handleCloseModal}>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('change_plan')}</Modal.Title>
-      </Modal.Header>
+    <OLModal id={modalId} show animation onHide={handleCloseModal} size="lg">
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('change_plan')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <ChangePlanOptions />
-      </Modal.Body>
-    </AccessibleModal>
+      </OLModalBody>
+    </OLModal>
   )
 }

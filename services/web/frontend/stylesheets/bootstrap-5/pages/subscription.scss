@@ -1,0 +1,140 @@
+/**
+ *  MAIN CONTENT
+ */
+
+#subscription-dashboard-root {
+  .hover-highlight {
+    &:hover,
+    &:focus {
+      background-color: var(--neutral-10);
+    }
+  }
+
+  li.row-link {
+    display: flex;
+    border: 0;
+    padding: 0;
+
+    a {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-02) 0;
+      text-decoration: none;
+      color: var(--neutral-90);
+      width: 100%;
+
+      &:hover {
+        background-color: var(--neutral-10);
+      }
+    }
+  }
+}
+
+/**
+ *  MODALS
+ */
+
+.group-subscription-modal {
+  .circle {
+    font-size: var(--font-size-06);
+    border-radius: 50%;
+    background-color: var(--green-70);
+    color: white;
+    white-space: nowrap;
+    height: 180px;
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-02);
+    font-weight: bold;
+
+    .small {
+      opacity: 0.85;
+    }
+
+    .circle-subtext {
+      font-size: var(--font-size-03);
+    }
+  }
+
+  .legend-as-label {
+    font-size: var(--font-size-02);
+    font-weight: 600;
+    color: var(--content-secondary);
+    margin-bottom: 0;
+  }
+
+  .educational-discount-badge {
+    height: 50px;
+
+    p {
+      display: inline-block;
+      font-weight: bold;
+      padding-left: var(--spacing-02);
+      padding-right: var(--spacing-02);
+    }
+
+    .applied {
+      background-color: rgba($green-70, 0.1);
+      color: var(--green-70);
+    }
+
+    .ineligible {
+      background-color: var(--neutral-10);
+    }
+  }
+}
+
+#change-plan {
+  table {
+    @include media-breakpoint-up(lg) {
+      th:last-child,
+      td:last-child {
+        width: 1%; // will expand to fit the content
+      }
+    }
+
+    @include media-breakpoint-down(lg) {
+      display: block;
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      td,
+      tr {
+        display: inline-block;
+        padding-top: 0;
+        padding-bottom: 0;
+        text-align: center;
+        width: 100%;
+      }
+
+      td:first-child {
+        padding-top: var(--spacing-07);
+      }
+
+      td:last-child {
+        padding-top: var(--spacing-03);
+        padding-bottom: var(--spacing-07);
+      }
+
+      tr {
+        border-bottom: 1px solid var(--bs-border-color);
+
+        td,
+        th {
+          border: 0 !important;
+        }
+      }
+
+      tr:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
+}

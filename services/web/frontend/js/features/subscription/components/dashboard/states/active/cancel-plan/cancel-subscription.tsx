@@ -9,41 +9,40 @@ import {
   redirectAfterCancelSubscriptionUrl,
 } from '../../../../../data/subscription-url'
 import showDowngradeOption from '../../../../../util/show-downgrade-option'
-import ActionButtonText from '../../../action-button-text'
 import GenericErrorAlert from '../../../generic-error-alert'
 import DowngradePlanButton from './downgrade-plan-button'
 import ExtendTrialButton from './extend-trial-button'
 import { useLocation } from '../../../../../../../shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 const planCodeToDowngradeTo = 'paid-personal'
 
 function ConfirmCancelSubscriptionButton({
-  buttonClass,
-  buttonText,
-  handleCancelSubscription,
-  isLoadingCancel,
-  isSuccessCancel,
-  isButtonDisabled,
+  showNoThanks,
+  onClick,
+  disabled,
+  isLoading,
 }: {
-  buttonClass: string
-  buttonText: string
-  handleCancelSubscription: () => void
-  isLoadingCancel: boolean
-  isSuccessCancel: boolean
-  isButtonDisabled: boolean
+  showNoThanks: boolean
+  onClick: () => void
+  disabled: boolean
+  isLoading: boolean
 }) {
+  const { t } = useTranslation()
+  const text = showNoThanks ? t('no_thanks_cancel_now') : t('cancel_my_account')
   return (
-    <button
-      className={`btn ${buttonClass}`}
-      onClick={handleCancelSubscription}
-      disabled={isButtonDisabled}
+    <OLButton
+      isLoading={isLoading}
+      disabled={disabled}
+      onClick={onClick}
+      className={showNoThanks ? 'btn-inline-link' : undefined}
+      bs3Props={{
+        loading: isLoading ? t('processing_uppercase') + '…' : text,
+      }}
     >
-      <ActionButtonText
-        inflight={isSuccessCancel || isLoadingCancel}
-        buttonText={buttonText}
-      />
-    </button>
+      {text}
+    </OLButton>
   )
 }
 
@@ -85,8 +84,7 @@ function NotCancelOption({
         <p>
           <ExtendTrialButton
             isButtonDisabled={isButtonDisabled}
-            isLoadingSecondaryAction={isLoadingSecondaryAction}
-            isSuccessSecondaryAction={isSuccessSecondaryAction}
+            isLoading={isLoadingSecondaryAction || isSuccessSecondaryAction}
             runAsyncSecondaryAction={runAsyncSecondaryAction}
           />
         </p>
@@ -114,8 +112,7 @@ function NotCancelOption({
         <p>
           <DowngradePlanButton
             isButtonDisabled={isButtonDisabled}
-            isLoadingSecondaryAction={isLoadingSecondaryAction}
-            isSuccessSecondaryAction={isSuccessSecondaryAction}
+            isLoading={isLoadingSecondaryAction || isSuccessSecondaryAction}
             planToDowngradeTo={planToDowngradeTo}
             runAsyncSecondaryAction={runAsyncSecondaryAction}
           />
@@ -130,12 +127,9 @@ function NotCancelOption({
 
   return (
     <p>
-      <button
-        className="btn btn-secondary-info btn-secondary"
-        onClick={handleKeepPlan}
-      >
+      <OLButton variant="secondary" onClick={handleKeepPlan}>
         {t('i_want_to_stay')}
-      </button>
+      </OLButton>
     </p>
   )
 }
@@ -188,13 +182,6 @@ export function CancelSubscription() {
 
   const showExtendFreeTrial = userCanExtendTrial
 
-  let confirmCancelButtonText = t('cancel_my_account')
-  let confirmCancelButtonClass = 'btn-primary'
-  if (showExtendFreeTrial || showDowngrade) {
-    confirmCancelButtonText = t('no_thanks_cancel_now')
-    confirmCancelButtonClass = 'btn-inline-link'
-  }
-
   return (
     <div className="text-center">
       <p>
@@ -214,12 +201,10 @@ export function CancelSubscription() {
       />
 
       <ConfirmCancelSubscriptionButton
-        buttonClass={confirmCancelButtonClass}
-        buttonText={confirmCancelButtonText}
-        isButtonDisabled={isButtonDisabled}
-        handleCancelSubscription={handleCancelSubscription}
-        isSuccessCancel={isSuccessCancel}
-        isLoadingCancel={isLoadingCancel}
+        showNoThanks={showExtendFreeTrial || showDowngrade}
+        onClick={handleCancelSubscription}
+        disabled={isButtonDisabled}
+        isLoading={isSuccessCancel || isLoadingCancel}
       />
     </div>
   )

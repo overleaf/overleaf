@@ -1,5 +1,10 @@
 import importOverleafModules from '../../../macros/import-overleaf-module.macro'
-import { JSXElementConstructor, useCallback, useState } from 'react'
+import {
+  JSXElementConstructor,
+  useCallback,
+  useState,
+  type UIEvent,
+} from 'react'
 
 const [contactUsModalModules] = importOverleafModules('contactUsModal')
 const ContactUsModal: JSXElementConstructor<{
@@ -16,7 +21,7 @@ export const useContactUsModal = (options = { autofillProjectUrl: true }) => {
     setShow(false)
   }, [])
 
-  const showModal = useCallback((event?: Event) => {
+  const showModal = useCallback((event?: Event | UIEvent) => {
     event?.preventDefault()
     setShow(true)
   }, [])

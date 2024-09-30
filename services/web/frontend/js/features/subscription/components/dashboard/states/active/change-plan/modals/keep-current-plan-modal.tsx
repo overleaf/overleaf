@@ -1,12 +1,18 @@
 import { useState } from 'react'
-import { Modal } from 'react-bootstrap'
 import { useTranslation, Trans } from 'react-i18next'
 import { SubscriptionDashModalIds } from '../../../../../../../../../../types/subscription/dashboard/modal-ids'
 import { postJSON } from '../../../../../../../../infrastructure/fetch-json'
-import AccessibleModal from '../../../../../../../../shared/components/accessible-modal'
 import { useSubscriptionDashboardContext } from '../../../../../../context/subscription-dashboard-context'
 import { cancelPendingSubscriptionChangeUrl } from '../../../../../../data/subscription-url'
 import { useLocation } from '../../../../../../../../shared/hooks/use-location'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 export function KeepCurrentPlanModal() {
   const modalId: SubscriptionDashModalIds = 'keep-current-plan'
@@ -33,23 +39,29 @@ export function KeepCurrentPlanModal() {
   if (modalIdShown !== modalId || !personalSubscription) return null
 
   return (
-    <AccessibleModal
+    <OLModal
       id={modalId}
       show
       animation
       onHide={handleCloseModal}
       backdrop="static"
     >
-      <Modal.Header>
-        <Modal.Title>{t('change_plan')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader>
+        <OLModalTitle>{t('change_plan')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         {error && (
-          <div className="alert alert-danger" aria-live="polite">
-            {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
-            {t('generic_if_problem_continues_contact_us')}.
-          </div>
+          <OLNotification
+            type="error"
+            aria-live="polite"
+            content={
+              <>
+                {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+                {t('generic_if_problem_continues_contact_us')}.
+              </>
+            }
+          />
         )}
         <p>
           <Trans
@@ -65,26 +77,30 @@ export function KeepCurrentPlanModal() {
             ]}
           />
         </p>
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <button
+      <OLModalFooter>
+        <OLButton
+          variant="secondary"
           disabled={inflight}
-          className="btn btn-secondary"
           onClick={handleCloseModal}
         >
           {t('cancel')}
-        </button>
-        <button
+        </OLButton>
+        <OLButton
+          variant="primary"
           disabled={inflight}
-          className="btn btn-primary"
+          isLoading={inflight}
           onClick={confirmCancelPendingPlanChange}
+          bs3Props={{
+            loading: inflight
+              ? t('processing_uppercase') + '…'
+              : t('revert_pending_plan_change'),
+          }}
         >
-          {!inflight
-            ? t('revert_pending_plan_change')
-            : t('processing_uppercase') + '…'}
-        </button>
-      </Modal.Footer>
-    </AccessibleModal>
+          {t('revert_pending_plan_change')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

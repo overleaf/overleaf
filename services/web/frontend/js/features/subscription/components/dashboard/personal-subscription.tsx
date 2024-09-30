@@ -5,6 +5,7 @@ import { CanceledSubscription } from './states/canceled'
 import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import PersonalSubscriptionRecurlySyncEmail from './personal-subscription-recurly-sync-email'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function PastDueSubscriptionAlert({
   subscription,
@@ -13,18 +14,21 @@ function PastDueSubscriptionAlert({
 }) {
   const { t } = useTranslation()
   return (
-    <>
-      <div className="alert alert-danger" role="alert">
-        {t('account_has_past_due_invoice_change_plan_warning')}{' '}
-        <a
-          href={subscription.recurly.accountManagementLink}
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          {t('view_your_invoices')}
-        </a>
-      </div>
-    </>
+    <OLNotification
+      type="error"
+      content={
+        <>
+          {t('account_has_past_due_invoice_change_plan_warning')}{' '}
+          <a
+            href={subscription.recurly.accountManagementLink}
+            target="_blank"
+            rel="noreferrer noopener"
+          >
+            {t('view_your_invoices')}
+          </a>
+        </>
+      }
+    />
   )
 }
 
@@ -75,9 +79,10 @@ function PersonalSubscription() {
         subscription={personalSubscription as RecurlySubscription}
       />
       {recurlyLoadError && (
-        <div className="alert alert-warning" role="alert">
-          <strong>{t('payment_provider_unreachable_error')}</strong>
-        </div>
+        <OLNotification
+          type="warning"
+          content={<strong>{t('payment_provider_unreachable_error')}</strong>}
+        />
       )}
       <hr />
       <PersonalSubscriptionRecurlySyncEmail />

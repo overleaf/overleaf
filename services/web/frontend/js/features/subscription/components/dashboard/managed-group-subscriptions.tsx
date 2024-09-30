@@ -100,27 +100,29 @@ export default function ManagedGroupSubscriptions() {
             <p>
               <ManagedGroupAdministrator subscription={subscription} />
             </p>
-            <RowLink
-              href={`/manage/groups/${subscription._id}/members`}
-              heading={t('manage_members')}
-              subtext={t('manage_group_members_subtext')}
-              icon="groups"
-            />
-            <RowLink
-              href={`/manage/groups/${subscription._id}/managers`}
-              heading={t('manage_group_managers')}
-              subtext={t('manage_managers_subtext')}
-              icon="manage_accounts"
-            />
-            {groupSettingsEnabledFor?.includes(subscription._id) && (
-              <GroupSettingsButton subscription={subscription} />
-            )}
-            <RowLink
-              href={`/metrics/groups/${subscription._id}`}
-              heading={t('view_metrics')}
-              subtext={t('view_metrics_group_subtext')}
-              icon="insights"
-            />
+            <ul className="list-group p-0">
+              <RowLink
+                href={`/manage/groups/${subscription._id}/members`}
+                heading={t('manage_members')}
+                subtext={t('manage_group_members_subtext')}
+                icon="groups"
+              />
+              <RowLink
+                href={`/manage/groups/${subscription._id}/managers`}
+                heading={t('manage_group_managers')}
+                subtext={t('manage_managers_subtext')}
+                icon="manage_accounts"
+              />
+              {groupSettingsEnabledFor?.includes(subscription._id) && (
+                <GroupSettingsButton subscription={subscription} />
+              )}
+              <RowLink
+                href={`/metrics/groups/${subscription._id}`}
+                heading={t('view_metrics')}
+                subtext={t('view_metrics_group_subtext')}
+                icon="insights"
+              />
+            </ul>
             <hr />
           </div>
         )
