@@ -583,7 +583,7 @@
   "something_went_wrong_rendering_pdf": "Algo ha fallado al renderizar este PDF.",
   "somthing_went_wrong_compiling": "Disculpa, algo anduvo mal y tu proyecto no se pudo compilar. Por favor, intenta de nuevo en unos minutos más.",
   "source": "Fuente",
-  "spell_check": "Revisión de ortografía",
+  "spell_check": "Revisión ortográfica",
   "sso": "SSO",
   "sso_active": "SSO activo",
   "sso_config_prop_help_certificate": "Certificado codificado en Base64 sin espacios en blanco",
