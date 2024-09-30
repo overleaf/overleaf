@@ -79,7 +79,7 @@
 }
 
 .ide-panel-group-resizing {
-  background-color: white;
+  background-color: var(--white);
 
   // Hide panel contents while resizing
   .ide-react-editor-content,
@@ -187,4 +187,9 @@
   &::after {
     opacity: 0.5;
   }
+}
+
+.full-size {
+  position: absolute;
+  inset: 0;
 }

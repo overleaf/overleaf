@@ -84,7 +84,7 @@
 }
 
 .form-label {
-  &:has(+ .form-control[disabled]) {
+  &:has(+ .form-control[disabled], + .form-control-wrapper-disabled) {
     color: var(--content-disabled);
   }
 }

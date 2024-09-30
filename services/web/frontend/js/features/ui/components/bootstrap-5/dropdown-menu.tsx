@@ -17,6 +17,7 @@ import type {
 } from '@/features/ui/components/types/dropdown-menu-props'
 import MaterialIcon from '@/shared/components/material-icon'
 import { fixedForwardRef } from '@/utils/react'
+import classnames from 'classnames'
 
 export function Dropdown({ ...props }: DropdownProps) {
   return <BS5Dropdown {...props} />
@@ -26,6 +27,7 @@ function DropdownItem(
   {
     active,
     children,
+    className,
     description,
     leadingIcon,
     trailingIcon,
@@ -74,7 +76,9 @@ function DropdownItem(
   return (
     <BS5DropdownItem
       active={active}
-      className={description ? 'dropdown-item-description-container' : ''}
+      className={classnames(className, {
+        'dropdown-item-description-container': description,
+      })}
       role="menuitem"
       {...props}
       ref={ref}

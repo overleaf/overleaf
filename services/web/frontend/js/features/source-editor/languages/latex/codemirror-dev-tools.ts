@@ -27,7 +27,7 @@ const devToolsButton = ViewPlugin.define(view => {
 
   const addButton = () => {
     const button = document.createElement('button')
-    button.classList.add('btn', 'formatting-btn', 'formatting-btn--icon')
+    button.classList.add('btn', 'formatting-btn', 'formatting-btn-icon')
     button.id = 'cm6-dev-tools-button'
     button.textContent = '🦧'
     button.style.border = 'none'

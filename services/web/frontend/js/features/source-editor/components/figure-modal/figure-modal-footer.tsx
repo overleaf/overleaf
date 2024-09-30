@@ -1,4 +1,3 @@
-import { Button } from 'react-bootstrap'
 import {
   FigureModalSource,
   useFigureModalContext,
@@ -7,6 +6,11 @@ import Icon from '../../../../shared/components/icon'
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import { sendMB } from '../../../../infrastructure/event-tracking'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 export const FigureModalFooter: FC<{
   onInsert: () => void
@@ -14,23 +18,16 @@ export const FigureModalFooter: FC<{
   onDelete: () => void
 }> = ({ onInsert, onCancel, onDelete }) => {
   const { t } = useTranslation()
+
   return (
-    <div className="figure-modal-footer">
-      <div className="figure-modal-help-buttons">
-        <HelpToggle />
-      </div>
-      <div className="figure-modal-actions">
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          type="button"
-          onClick={onCancel}
-        >
-          {t('cancel')}
-        </Button>
-        <FigureModalAction onInsert={onInsert} onDelete={onDelete} />
-      </div>
-    </div>
+    <>
+      <HelpToggle />
+      <OLButton variant="secondary" onClick={onCancel}>
+        {t('cancel')}
+      </OLButton>
+      <FigureModalAction onInsert={onInsert} onDelete={onDelete} />
+      <BootstrapVersionSwitcher bs3={<div className="clearfix" />} />
+    </>
   )
 }
 
@@ -39,25 +36,48 @@ const HelpToggle = () => {
   const { helpShown, dispatch } = useFigureModalContext()
   if (helpShown) {
     return (
-      <Button
-        bsStyle={null}
-        className="btn-link figure-modal-help-link"
+      <OLButton
+        variant="link"
+        className={classnames(
+          'figure-modal-help-link',
+          bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })
+        )}
         onClick={() => dispatch({ helpShown: false })}
       >
-        <Icon type="arrow-left" fw />
-        &nbsp;{t('back')}
-      </Button>
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="arrow-left" fw />}
+          bs5={
+            <span>
+              <MaterialIcon
+                type="arrow_left_alt"
+                className="align-text-bottom"
+              />
+            </span>
+          }
+        />{' '}
+        {t('back')}
+      </OLButton>
     )
   }
   return (
-    <Button
-      bsStyle={null}
-      className="btn-link figure-modal-help-link"
+    <OLButton
+      variant="link"
+      className={classnames(
+        'figure-modal-help-link',
+        bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })
+      )}
       onClick={() => dispatch({ helpShown: true })}
     >
-      <Icon type="question-circle" fw />
-      &nbsp;{t('help')}
-    </Button>
+      <BootstrapVersionSwitcher
+        bs3={<Icon type="question-circle" fw />}
+        bs5={
+          <span>
+            <MaterialIcon type="help" className="align-text-bottom" />
+          </span>
+        }
+      />{' '}
+      {t('help')}
+    </OLButton>
   )
 }
 
@@ -75,38 +95,29 @@ const FigureModalAction: FC<{
 
   if (sourcePickerShown) {
     return (
-      <Button
-        bsStyle={null}
-        className="btn-danger"
-        type="button"
-        onClick={onDelete}
-      >
+      <OLButton variant="danger" onClick={onDelete}>
         {t('delete_figure')}
-      </Button>
+      </OLButton>
     )
   }
 
   if (source === FigureModalSource.EDIT_FIGURE) {
     return (
-      <Button
-        bsStyle={null}
-        className="btn-success"
-        type="button"
+      <OLButton
+        variant="primary"
         onClick={() => {
           onInsert()
           sendMB('figure-modal-edit')
         }}
       >
         {t('done')}
-      </Button>
+      </OLButton>
     )
   }
 
   return (
-    <Button
-      bsStyle={null}
-      className="btn-success"
-      type="button"
+    <OLButton
+      variant="primary"
       disabled={getPath === undefined}
       onClick={() => {
         onInsert()
@@ -114,6 +125,6 @@ const FigureModalAction: FC<{
       }}
     >
       {t('insert_figure')}
-    </Button>
+    </OLButton>
   )
 }

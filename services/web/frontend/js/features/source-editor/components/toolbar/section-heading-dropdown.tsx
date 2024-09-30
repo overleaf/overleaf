@@ -8,7 +8,8 @@ import {
   setSectionHeadingLevel,
 } from '../../extensions/toolbar/sections'
 import { useCallback, useMemo, useRef } from 'react'
-import { Overlay, Popover } from 'react-bootstrap'
+import OLOverlay from '@/features/ui/components/ol/ol-overlay'
+import OLPopover from '@/features/ui/components/ol/ol-popover'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
@@ -69,17 +70,27 @@ export const SectionHeadingDropdown = () => {
       </button>
 
       {overflowOpen && (
-        <Overlay
+        <OLOverlay
           show
           onHide={() => setOverflowOpen(false)}
-          animation={false}
+          transition={false}
           container={view.dom}
           containerPadding={0}
           placement="bottom"
           rootClose
-          target={toggleButtonRef.current ?? undefined}
+          target={toggleButtonRef.current}
+          popperConfig={{
+            modifiers: [
+              {
+                name: 'offset',
+                options: {
+                  offset: [0, 1],
+                },
+              },
+            ],
+          }}
         >
-          <Popover
+          <OLPopover
             id="popover-toolbar-section-heading"
             className="ol-cm-toolbar-menu-popover"
           >
@@ -113,8 +124,8 @@ export const SectionHeadingDropdown = () => {
                 </button>
               ))}
             </div>
-          </Popover>
-        </Overlay>
+          </OLPopover>
+        </OLOverlay>
       )}
     </>
   )

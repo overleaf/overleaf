@@ -20,6 +20,8 @@ function OLFormCheckbox(props: OLFormCheckboxProps) {
     inline: rest.inline,
     title: rest.title,
     autoComplete: rest.autoComplete,
+    defaultChecked: rest.defaultChecked,
+    className: rest.className,
     onChange: rest.onChange as (e: React.ChangeEvent<unknown>) => void,
     inputRef: node => {
       if (inputRef) {

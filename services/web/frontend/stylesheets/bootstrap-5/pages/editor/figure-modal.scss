@@ -2,32 +2,12 @@
 .figure-modal-help-link:hover,
 .figure-modal-help-link:focus,
 .figure-modal-help-link:active {
-  color: @neutral-90;
+  color: var(--neutral-90) !important;
   text-decoration: none;
 }
 
 .figure-modal-help-link {
   padding-left: 0;
-}
-
-.figure-modal-checkbox-input {
-  label {
-    display: inline-block;
-    font-weight: normal;
-    line-height: 100%;
-
-    .figure-modal-label-content {
-      display: block;
-      overflow: hidden;
-    }
-  }
-
-  input[type='checkbox'] {
-    margin-right: 12px;
-    margin-top: 2px;
-    vertical-align: top;
-    accent-color: @ol-green;
-  }
 }
 
 .figure-modal-switcher-input {
@@ -41,25 +21,25 @@
 .file-container {
   width: 100%;
   height: 120px;
-  padding: 22px 24px;
+  padding: var(--spacing-07) var(--spacing-08);
   border: 1px dashed #eaeaea;
   background-color: #fafafa;
   justify-content: space-between;
-  border-radius: 8px;
+  border-radius: var(--border-radius-medium);
 }
 
 .file-container-file {
   display: flex;
   align-items: center;
-  border: 1px solid @neutral-20;
-  border-radius: 8px;
+  border: 1px solid var(--neutral-20);
+  border-radius: var(--border-radius-medium);
   background-color: white;
   height: 100%;
-  padding: 16px 18px;
+  padding: var(--spacing-06) var(--spacing-07);
 }
 
 .file-info {
-  margin-left: 18px;
+  margin-left: var(--spacing-07);
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -68,14 +48,6 @@
 
 .file-name {
   font-weight: bold;
-}
-
-.file-icon {
-  font-size: 20px;
-}
-
-.file-action {
-  cursor: pointer;
 }
 
 .figure-modal-source-button-grid {
@@ -94,12 +66,12 @@
   display: flex;
   flex: 1 1 0;
   align-items: center;
-  box-shadow: 0px 2px 4px 0px #1e253029;
+  box-shadow: 0 2px 4px 0 #1e253029;
   line-height: 44px;
-  background-color: white;
-  border-radius: 4px;
+  background-color: var(--white);
+  border-radius: var(--border-radius-base);
   border: none;
-  padding: 0 8px;
+  padding: 0 var(--spacing-04);
 
   &-title {
     flex: 1 1 auto;
@@ -108,13 +80,10 @@
 }
 
 .figure-modal-source-button-icon {
-  margin-right: 6px;
+  margin-right: var(--spacing-03);
 }
 
+/* stylelint-disable selector-class-pattern */
 .figure-modal-upload .uppy-Dashboard-AddFiles-list {
   display: none;
-}
-
-.select-from-files-btn {
-  vertical-align: baseline;
 }

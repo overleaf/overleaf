@@ -1,6 +1,6 @@
 import { ChangeEvent, FC, memo, useCallback } from 'react'
 import useScopeValue from '@/shared/hooks/use-scope-value'
-import Tooltip from '@/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import useTutorial from '@/shared/hooks/promotions/use-tutorial'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import isValidTeXFile from '../../../main/is-valid-tex-file'
@@ -45,7 +45,10 @@ function EditorSwitch() {
   )
 
   return (
-    <div className="editor-toggle-switch">
+    <div
+      className="editor-toggle-switch"
+      aria-label={t('toolbar_code_visual_editor_switch')}
+    >
       <fieldset className="toggle-switch">
         <legend className="sr-only">Editor mode.</legend>
 
@@ -101,14 +104,14 @@ const RichTextToggle: FC<{
 
   if (disabled) {
     return (
-      <Tooltip
+      <OLTooltip
         description={t('visual_editor_is_only_available_for_tex_files')}
         id="rich-text-toggle-tooltip"
         overlayProps={{ placement: 'bottom' }}
         tooltipProps={{ className: 'tooltip-wide' }}
       >
         {toggle}
-      </Tooltip>
+      </OLTooltip>
     )
   }
 

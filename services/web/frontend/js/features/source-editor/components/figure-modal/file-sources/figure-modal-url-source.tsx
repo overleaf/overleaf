@@ -9,6 +9,9 @@ import { useTranslation } from 'react-i18next'
 import { useCodeMirrorViewContext } from '../../codemirror-context'
 import { EditorView } from '@codemirror/view'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 
 function generateLinkedFileFetcher(
   projectId: string,
@@ -72,30 +75,25 @@ export const FigureModalUrlSource: FC = () => {
 
   return (
     <>
-      <label
-        htmlFor="figure-modal-url-url"
-        className="figure-modal-input-label"
-      >
-        {t('image_url')}
-      </label>
-      <input
-        id="figure-modal-url-url"
-        type="text"
-        className="form-control figure-modal-input-field"
-        placeholder={t('enter_image_url')}
-        value={url}
-        onChange={e => {
-          setUrl(e.target.value)
-          let newName = name
-          if (!nameDirty) {
-            // TODO: Improve this
-            const parts = e.target.value.split('/')
-            newName = parts[parts.length - 1] ?? ''
-            setName(newName)
-          }
-          ensureButtonActivation(e.target.value, newName, folder)
-        }}
-      />
+      <OLFormGroup controlId="figure-modal-url-url">
+        <OLFormLabel>{t('image_url')}</OLFormLabel>
+        <OLFormControl
+          type="text"
+          placeholder={t('enter_image_url')}
+          value={url}
+          onChange={e => {
+            setUrl(e.target.value)
+            let newName = name
+            if (!nameDirty) {
+              // TODO: Improve this
+              const parts = e.target.value.split('/')
+              newName = parts[parts.length - 1] ?? ''
+              setName(newName)
+            }
+            ensureButtonActivation(e.target.value, newName, folder)
+          }}
+        />
+      </OLFormGroup>
       <FileRelocator
         folder={folder}
         name={name}

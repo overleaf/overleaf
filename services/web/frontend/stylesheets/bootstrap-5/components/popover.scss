@@ -1,0 +1,15 @@
+.popover {
+  @include shadow-md;
+
+  line-height: var(--line-height-02);
+}
+
+.popover-header {
+  padding-bottom: 0;
+  margin-bottom: var(--spacing-02);
+  font-weight: 600;
+
+  & + .popover-body {
+    padding-top: 0;
+  }
+}

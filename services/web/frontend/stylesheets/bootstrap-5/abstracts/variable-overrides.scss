@@ -175,6 +175,24 @@ $tooltip-border-radius: $border-radius-base;
 $tooltip-padding-y: $spacing-04;
 $tooltip-padding-x: $spacing-06;
 
+// Popovers
+$popover-font-size: var(--font-size-02);
+$popover-bg: var(--bg-dark-primary);
+$popover-max-width: 320px;
+$popover-border-width: 0px; /* stylelint-disable-line length-zero-no-unit */
+$popover-border-radius: var(--border-radius-base);
+$popover-header-font-size: var(--font-size-02);
+$popover-header-bg: var(--bg-dark-primary);
+$popover-header-color: var(--content-primary-dark);
+$popover-header-padding-y: var(--spacing-04);
+$popover-header-padding-x: var(--spacing-06);
+$popover-body-color: var(--content-primary-dark);
+$popover-body-padding-y: var(--spacing-04);
+$popover-body-padding-x: var(--spacing-06);
+$popover-arrow-width: var(--spacing-04);
+$popover-arrow-height: var(--spacing-02);
+$popover-arrow-color: var(--bg-dark-primary);
+
 // Links. Ideally we'd point these to CSS variables but Bootstrap performs
 // calculations on link color during compilation.
 $link-color: $link-ui;
@@ -228,3 +246,13 @@ $dropdown-padding-y: var(--spacing-02);
 $dropdown-item-padding-x: var(--spacing-04);
 $dropdown-item-padding-y: var(--spacing-05);
 $dropdown-header-color: var(--content-secondary);
+
+// List group
+$list-group-color: var(--content-secondary);
+$list-group-border-width: 0;
+$list-group-border-radius: (--border-radius-base);
+$list-group-item-padding-y: var(--spacing-04);
+$list-group-item-padding-x: var(--spacing-05);
+$list-group-hover-bg: var(--bg-light-secondary);
+$list-group-disabled-color: var(--content-disabled);
+$list-group-disabled-bg: var(--bg-light-primary);

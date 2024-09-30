@@ -2,9 +2,10 @@ import { FC, memo, useCallback, useRef, useState } from 'react'
 import * as commands from '../../extensions/toolbar/commands'
 import { useTranslation } from 'react-i18next'
 import useDropdown from '../../../../shared/hooks/use-dropdown'
-import { Button, Overlay, Popover } from 'react-bootstrap'
 import { useCodeMirrorViewContext } from '../codemirror-context'
-import Tooltip from '../../../../shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLOverlay from '@/features/ui/components/ol/ol-overlay'
+import OLPopover from '@/features/ui/components/ol/ol-popover'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import classNames from 'classnames'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
@@ -27,17 +28,16 @@ export const TableInserterDropdown = memo(() => {
 
   return (
     <>
-      <Tooltip
+      <OLTooltip
         hidden={open}
         id="toolbar-table"
         description={<div>{t('toolbar_insert_table')}</div>}
         overlayProps={{ placement: 'bottom' }}
       >
-        <Button
+        <button
           type="button"
-          className="ol-cm-toolbar-button"
+          className="ol-cm-toolbar-button btn"
           aria-label={t('toolbar_insert_table')}
-          bsStyle={null}
           onMouseDown={event => {
             event.preventDefault()
             event.stopPropagation()
@@ -48,19 +48,19 @@ export const TableInserterDropdown = memo(() => {
           ref={target}
         >
           <MaterialIcon type="table_chart" />
-        </Button>
-      </Tooltip>
-      <Overlay
+        </button>
+      </OLTooltip>
+      <OLOverlay
         show={open}
         target={target.current}
         placement="bottom"
         container={view.dom}
         containerPadding={0}
-        animation
+        transition
         rootClose
         onHide={() => onToggle(false)}
       >
-        <Popover
+        <OLPopover
           id="toolbar-table-menu"
           ref={ref}
           className="ol-cm-toolbar-button-menu-popover ol-cm-toolbar-button-menu-popover-unstyled"
@@ -68,8 +68,8 @@ export const TableInserterDropdown = memo(() => {
           <div className="ol-cm-toolbar-table-grid-popover">
             <SizeGrid sizeX={10} sizeY={10} onSizeSelected={onSizeSelected} />
           </div>
-        </Popover>
-      </Overlay>
+        </OLPopover>
+      </OLOverlay>
     </>
   )
 })

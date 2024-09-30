@@ -1,4 +1,3 @@
-import { ListGroupItem } from 'react-bootstrap'
 import { ToolbarButtonMenu } from './button-menu'
 import { emitToolbarEvent } from '../../extensions/toolbar/utils/analytics'
 import MaterialIcon from '../../../../shared/components/material-icon'
@@ -9,6 +8,7 @@ import {
   wrapInInlineMath,
 } from '../../extensions/toolbar/commands'
 import { memo } from 'react'
+import OLListGroupItem from '@/features/ui/components/ol/ol-list-group-item'
 
 export const MathDropdown = memo(function MathDropdown() {
   const { t } = useTranslation()
@@ -18,10 +18,9 @@ export const MathDropdown = memo(function MathDropdown() {
     <ToolbarButtonMenu
       id="toolbar-math"
       label={t('toolbar_insert_math')}
-      icon="calculate"
-      materialIcon
+      icon={<MaterialIcon type="calculate" />}
     >
-      <ListGroupItem
+      <OLListGroupItem
         aria-label={t('toolbar_insert_inline_math')}
         onClick={event => {
           emitToolbarEvent(view, 'toolbar-inline-math')
@@ -32,8 +31,8 @@ export const MathDropdown = memo(function MathDropdown() {
       >
         <MaterialIcon type="123" />
         <span>{t('toolbar_insert_inline_math')}</span>
-      </ListGroupItem>
-      <ListGroupItem
+      </OLListGroupItem>
+      <OLListGroupItem
         aria-label={t('toolbar_insert_display_math')}
         onClick={event => {
           emitToolbarEvent(view, 'toolbar-display-math')
@@ -44,7 +43,7 @@ export const MathDropdown = memo(function MathDropdown() {
       >
         <MaterialIcon type="view_day" />
         <span>{t('toolbar_insert_display_math')}</span>
-      </ListGroupItem>
+      </OLListGroupItem>
     </ToolbarButtonMenu>
   )
 })

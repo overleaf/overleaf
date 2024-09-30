@@ -5,7 +5,7 @@ import {
   useCodeMirrorViewContext,
 } from './codemirror-context'
 import { searchPanelOpen } from '@codemirror/search'
-import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
+import { useResizeObserver } from '@/shared/hooks/use-resize-observer'
 import { ToolbarButton } from './toolbar/toolbar-button'
 import { ToolbarItems } from './toolbar/toolbar-items'
 import * as commands from '../extensions/toolbar/commands'
@@ -21,6 +21,8 @@ import { isVisual } from '../extensions/visual/visual'
 import { language } from '@codemirror/language'
 import { minimumListDepthForSelection } from '../utils/tree-operations/ancestors'
 import { debugConsole } from '@/utils/debugging'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import { useTranslation } from 'react-i18next'
 
 export const CodeMirrorToolbar = () => {
   const view = useCodeMirrorViewContext()
@@ -34,6 +36,7 @@ export const CodeMirrorToolbar = () => {
 }
 
 const Toolbar = memo(function Toolbar() {
+  const { t } = useTranslation()
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
 
@@ -140,7 +143,12 @@ const Toolbar = memo(function Toolbar() {
   const showActions = !state.readOnly && !insideTable
 
   return (
-    <div className="ol-cm-toolbar toolbar-editor" ref={elementRef}>
+    <div
+      role="toolbar"
+      aria-label={t('toolbar_editor')}
+      className="ol-cm-toolbar toolbar-editor"
+      ref={elementRef}
+    >
       <EditorSwitch />
       {showActions && (
         <ToolbarItems
@@ -179,19 +187,22 @@ const Toolbar = memo(function Toolbar() {
           label="Toggle Search"
           command={commands.toggleSearch}
           active={searchPanelOpen(state)}
-          icon="search"
+          icon={bsVersion({ bs5: 'search', bs3: 'search' }) as string}
         />
 
         <SwitchToPDFButton />
         <DetacherSynctexControl />
         <DetachCompileButtonWrapper />
       </div>
-      <div className="ol-cm-toolbar-button-group hidden">
+      <div
+        className="ol-cm-toolbar-button-group hidden"
+        aria-label={t('toolbar_visibility')}
+      >
         <ToolbarButton
           id="toolbar-expand-less"
           label="Hide Toolbar"
           command={toggleToolbar}
-          icon="caret-up"
+          icon={bsVersion({ bs5: 'arrow_drop_up', bs3: 'caret-up' }) as string}
           hidden // enable this once there's a way to show the toolbar again
         />
       </div>

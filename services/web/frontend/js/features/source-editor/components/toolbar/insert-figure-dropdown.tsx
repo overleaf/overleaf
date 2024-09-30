@@ -1,6 +1,8 @@
-import { ListGroupItem } from 'react-bootstrap'
 import { ToolbarButtonMenu } from './button-menu'
-import Icon from '../../../../shared/components/icon'
+import Icon from '@/shared/components/icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
+import OLListGroupItem from '@/features/ui/components/ol/ol-list-group-item'
 import { memo, useCallback } from 'react'
 import { FigureModalSource } from '../figure-modal/figure-modal-context'
 import { useTranslation } from 'react-i18next'
@@ -32,44 +34,61 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
     <ToolbarButtonMenu
       id="toolbar-figure"
       label={t('toolbar_insert_figure')}
-      icon="picture-o"
+      icon={
+        <BootstrapVersionSwitcher
+          bs3={<Icon fw type="picture-o" />}
+          bs5={<MaterialIcon type="imagesmode" />}
+        />
+      }
       altCommand={insertFigure}
     >
-      <ListGroupItem
+      <OLListGroupItem
         onClick={() =>
           openFigureModal(FigureModalSource.FILE_UPLOAD, 'file-upload')
         }
       >
-        <Icon type="upload" fw />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="upload" fw />}
+          bs5={<MaterialIcon type="upload" />}
+        />
         {t('upload_from_computer')}
-      </ListGroupItem>
-      <ListGroupItem
+      </OLListGroupItem>
+      <OLListGroupItem
         onClick={() =>
           openFigureModal(FigureModalSource.FILE_TREE, 'current-project')
         }
       >
-        <Icon type="archive" fw />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="archive" fw />}
+          bs5={<MaterialIcon type="inbox" />}
+        />
         {t('from_project_files')}
-      </ListGroupItem>
+      </OLListGroupItem>
       {(hasLinkedProjectFileFeature || hasLinkedProjectOutputFileFeature) && (
-        <ListGroupItem
+        <OLListGroupItem
           onClick={() =>
             openFigureModal(FigureModalSource.OTHER_PROJECT, 'other-project')
           }
         >
-          <Icon type="folder-open" fw />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="folder-open" fw />}
+            bs5={<MaterialIcon type="folder_open" />}
+          />
           {t('from_another_project')}
-        </ListGroupItem>
+        </OLListGroupItem>
       )}
       {hasLinkUrlFeature && (
-        <ListGroupItem
+        <OLListGroupItem
           onClick={() =>
             openFigureModal(FigureModalSource.FROM_URL, 'from-url')
           }
         >
-          <Icon type="globe" fw />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="globe" fw />}
+            bs5={<MaterialIcon type="public" />}
+          />
           {t('from_url')}
-        </ListGroupItem>
+        </OLListGroupItem>
       )}
     </ToolbarButtonMenu>
   )

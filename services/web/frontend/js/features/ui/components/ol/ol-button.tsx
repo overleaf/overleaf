@@ -13,6 +13,7 @@ export type OLButtonProps = ButtonProps & {
     loading?: React.ReactNode
     bsSize?: BS3ButtonSize
     block?: boolean
+    className?: string
   }
 }
 
@@ -43,8 +44,8 @@ export const mapBsButtonSizes = (
 ): 'sm' | 'lg' | undefined =>
   size === 'small' ? 'sm' : size === 'large' ? 'lg' : undefined
 
-export default function OLButton(props: OLButtonProps) {
-  const { bs3Props, ...rest } = props
+export default function OLButton({ bs3Props = {}, ...rest }: OLButtonProps) {
+  const { className: _, ...restBs3Props } = bs3Props
 
   // Get all `aria-*` and `data-*` attributes
   const extraProps = getAriaAndDataProps(rest)
@@ -52,7 +53,15 @@ export default function OLButton(props: OLButtonProps) {
   return (
     <BootstrapVersionSwitcher
       bs3={
-        <BS3Button {...bs3ButtonProps(rest)} {...bs3Props} {...extraProps}>
+        <BS3Button
+          {...bs3ButtonProps({
+            ...rest,
+            // Override the `className` with bs3 specific className (if provided)
+            className: bs3Props?.className ?? rest.className,
+          })}
+          {...restBs3Props}
+          {...extraProps}
+        >
           {bs3Props?.loading || rest.children}
         </BS3Button>
       }

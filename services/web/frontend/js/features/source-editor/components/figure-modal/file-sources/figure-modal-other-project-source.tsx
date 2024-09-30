@@ -13,7 +13,6 @@ import {
   OutputEntity,
   useProjectOutputFiles,
 } from '../../../../file-tree/hooks/use-project-output-files'
-import { Button } from 'react-bootstrap'
 import { useCurrentProjectFolders } from '../../../hooks/use-current-project-folders'
 import { File, isImageEntity } from '../../../utils/file'
 import { postJSON } from '../../../../../infrastructure/fetch-json'
@@ -23,6 +22,8 @@ import { useTranslation } from 'react-i18next'
 import { waitForFileTreeUpdate } from '../../../extensions/figure-modal'
 import { useCodeMirrorViewContext } from '../../codemirror-context'
 import getMeta from '@/utils/meta'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 
 function suggestName(path: string) {
   const parts = path.split('/')
@@ -132,54 +133,55 @@ export const FigureModalOtherProjectSource: FC = () => {
 
   return (
     <>
-      <Select
-        items={projects ?? []}
-        itemToString={project => (project ? project.name : '')}
-        itemToKey={item => item._id}
-        defaultText={t('select_a_project_figure_modal')}
-        label={t('project_figure_modal')}
-        disabled={projectsLoading}
-        onSelectedItemChanged={item => {
-          const suggestion = nameDirty ? name : ''
-          setName(suggestion)
-          setSelectedProject(item ?? null)
-          setFile(null)
-          updateDispatch({
-            newSelectedProject: item ?? null,
-            newFile: null,
-            newName: suggestion,
-          })
-        }}
-      />
-      <FileSelector
-        projectId={selectedProject?._id}
-        onSelectedItemChange={item => {
-          const suggestion = nameDirty ? name : suggestName(item?.path ?? '')
-          setName(suggestion)
-          setFile(item ?? null)
-          updateDispatch({
-            newFile: item ?? null,
-            newName: suggestion,
-          })
-        }}
-      />
-      {hasLinkedProjectFileFeature && hasLinkedProjectOutputFileFeature && (
-        <div>
-          or{' '}
-          <Button
-            className="p-0"
-            bsStyle="link"
-            type="button"
-            onClick={() => setUsingOutputFiles(value => !value)}
-          >
-            <span>
+      <OLFormGroup>
+        <Select
+          items={projects ?? []}
+          itemToString={project => (project ? project.name : '')}
+          itemToKey={item => item._id}
+          defaultText={t('select_a_project_figure_modal')}
+          label={t('project_figure_modal')}
+          disabled={projectsLoading}
+          onSelectedItemChanged={item => {
+            const suggestion = nameDirty ? name : ''
+            setName(suggestion)
+            setSelectedProject(item ?? null)
+            setFile(null)
+            updateDispatch({
+              newSelectedProject: item ?? null,
+              newFile: null,
+              newName: suggestion,
+            })
+          }}
+        />
+      </OLFormGroup>
+      <OLFormGroup>
+        <FileSelector
+          projectId={selectedProject?._id}
+          onSelectedItemChange={item => {
+            const suggestion = nameDirty ? name : suggestName(item?.path ?? '')
+            setName(suggestion)
+            setFile(item ?? null)
+            updateDispatch({
+              newFile: item ?? null,
+              newName: suggestion,
+            })
+          }}
+        />
+        {hasLinkedProjectFileFeature && hasLinkedProjectOutputFileFeature && (
+          <div>
+            or{' '}
+            <OLButton
+              variant="link"
+              onClick={() => setUsingOutputFiles(value => !value)}
+              className="p-0 select-from-files-btn"
+            >
               {usingOutputFiles
                 ? t('select_from_project_files')
                 : t('select_from_output_files')}
-            </span>
-          </Button>
-        </div>
-      )}
+            </OLButton>
+          </div>
+        )}
+      </OLFormGroup>
       <FileRelocator
         folder={folder}
         name={name}

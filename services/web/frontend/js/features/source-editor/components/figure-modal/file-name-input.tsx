@@ -1,19 +1,16 @@
-import {
-  DetailedHTMLProps,
-  InputHTMLAttributes,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { File, FileOrDirectory } from '../../utils/file'
-import { Alert } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { useCurrentProjectFolders } from '@/features/source-editor/hooks/use-current-project-folders'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type FileNameInputProps = Omit<
-  DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
+  React.ComponentProps<typeof OLFormControl>,
   'onFocus'
-> & { targetFolder: File | null }
+> & { targetFolder: File | null; label: string }
 
 function findFile(
   folder: { id: string; name: string },
@@ -52,6 +49,8 @@ function hasOverlap(
 }
 
 export const FileNameInput = ({
+  id,
+  label,
   targetFolder,
   ...props
 }: FileNameInputProps) => {
@@ -82,12 +81,19 @@ export const FileNameInput = ({
   }, [])
   return (
     <>
-      <input {...props} type="text" onFocus={onFocus} />
-      {overlap && (
-        <Alert bsStyle="warning" className="mt-1 mb-0">
-          {t('a_file_with_that_name_already_exists_and_will_be_overriden')}
-        </Alert>
-      )}
+      <OLFormGroup controlId={id}>
+        <OLFormLabel>{label}</OLFormLabel>
+        <OLFormControl onFocus={onFocus} {...props} />
+        {overlap && (
+          <OLNotification
+            type="warning"
+            content={t(
+              'a_file_with_that_name_already_exists_and_will_be_overriden'
+            )}
+            className="mt-1 mb-0"
+          />
+        )}
+      </OLFormGroup>
     </>
   )
 }

@@ -1,0 +1,11 @@
+.select-wrapper {
+  position: relative;
+}
+
+.select-trigger {
+  cursor: default;
+}
+
+.select-highlighted {
+  background-color: var(--bg-light-secondary);
+}
