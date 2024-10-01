@@ -80,8 +80,13 @@ if (!module.parent) {
     })
 }
 
-// monitor site maintenance file
-SiteAdminHandler.initialise()
+// initialise site admin tasks
+Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
+  .then(() => SiteAdminHandler.initialise())
+  .catch(err => {
+    logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')
+    process.exit(1)
+  })
 
 // handle SIGTERM for graceful shutdown in kubernetes
 process.on('SIGTERM', function (signal) {

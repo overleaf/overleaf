@@ -94,7 +94,7 @@ describe('AuthenticationController', function () {
           },
         }),
         '../User/UserHandler': (this.UserHandler = {
-          setupLoginData: sinon.stub(),
+          populateTeamInvites: sinon.stub(),
         }),
         '../Analytics/AnalyticsManager': (this.AnalyticsManager = {
           recordEventForUserInBackground: sinon.stub(),
@@ -556,7 +556,7 @@ describe('AuthenticationController', function () {
       })
 
       it('should not setup the user data in the background', function () {
-        this.UserHandler.setupLoginData.called.should.equal(false)
+        this.UserHandler.populateTeamInvites.called.should.equal(false)
       })
 
       it('should record a failed login', function () {
@@ -1134,7 +1134,7 @@ describe('AuthenticationController', function () {
       this.AuthenticationController._clearRedirectFromSession = sinon.stub()
       this.AuthenticationController._redirectToReconfirmPage = sinon.stub()
       this.UserSessionsManager.trackSession = sinon.stub()
-      this.UserHandler.setupLoginData = sinon.stub()
+      this.UserHandler.populateTeamInvites = sinon.stub()
       this.LoginRateLimiter.recordSuccessfulLogin = sinon.stub()
       this.AuthenticationController._recordSuccessfulLogin = sinon.stub()
       this.AnalyticsManager.recordEvent = sinon.stub()
@@ -1461,7 +1461,9 @@ describe('AuthenticationController', function () {
       })
 
       it('should setup the user data in the background', function () {
-        this.UserHandler.setupLoginData.calledWith(this.user).should.equal(true)
+        this.UserHandler.populateTeamInvites
+          .calledWith(this.user)
+          .should.equal(true)
       })
 
       it('should set res.session.justLoggedIn', function () {

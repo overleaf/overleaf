@@ -3,7 +3,11 @@ const settings = require('@overleaf/settings')
 const fs = require('fs')
 const {
   addOptionalCleanupHandlerAfterDrainingConnections,
+  addRequiredCleanupHandlerBeforeDrainingConnections,
 } = require('./GracefulShutdown')
+const Features = require('./Features')
+const UserHandler = require('../Features/User/UserHandler')
+const metrics = require('@overleaf/metrics')
 
 // Monitor a site maintenance file (e.g. /etc/site_status) periodically and
 // close the site if the file contents contain the string "closed".
@@ -42,6 +46,16 @@ function checkSiteMaintenanceFileSync() {
   updateSiteMaintenanceStatus(content)
 }
 
+const SERVER_PRO_ACTIVE_USERS_METRIC_INTERVAL =
+  settings.activeUserMetricInterval || 1000 * 60 * 60
+
+function publishActiveUsersMetric() {
+  UserHandler.promises
+    .countActiveUsers()
+    .then(activeUserCount => metrics.gauge('num_active_users', activeUserCount))
+    .catch(error => logger.error({ error }, 'error counting active users'))
+}
+
 module.exports = {
   initialise() {
     if (settings.enabledServices.includes('web') && statusFile) {
@@ -56,6 +70,19 @@ module.exports = {
       ) // continue checking periodically
       addOptionalCleanupHandlerAfterDrainingConnections(
         'poll site maintenance file',
+        () => {
+          clearInterval(intervalHandle)
+        }
+      )
+    }
+    if (!Features.hasFeature('saas')) {
+      publishActiveUsersMetric()
+      const intervalHandle = setInterval(
+        publishActiveUsersMetric,
+        SERVER_PRO_ACTIVE_USERS_METRIC_INTERVAL
+      )
+      addRequiredCleanupHandlerBeforeDrainingConnections(
+        'publish server pro usage metrics',
         () => {
           clearInterval(intervalHandle)
         }

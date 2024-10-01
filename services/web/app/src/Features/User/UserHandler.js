@@ -1,17 +1,33 @@
-const { promisifyAll } = require('@overleaf/promise-utils')
+const { callbackify, promisify } = require('@overleaf/promise-utils')
 const TeamInvitesHandler = require('../Subscription/TeamInvitesHandler')
+const {
+  db,
+  READ_PREFERENCE_SECONDARY,
+} = require('../../infrastructure/mongodb')
 
-const UserHandler = {
-  populateTeamInvites(user, callback) {
-    TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
-      user.email,
-      callback
-    )
-  },
-
-  setupLoginData(user, callback) {
-    this.populateTeamInvites(user, callback)
-  },
+function populateTeamInvites(user, callback) {
+  TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail(
+    user.email,
+    callback
+  )
 }
-module.exports = UserHandler
-module.exports.promises = promisifyAll(UserHandler)
+
+async function countActiveUsers() {
+  const oneYearAgo = new Date()
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+  return await db.users
+    .find(
+      { lastActive: { $gte: oneYearAgo } },
+      { readPreference: READ_PREFERENCE_SECONDARY }
+    )
+    .count()
+}
+
+module.exports = {
+  populateTeamInvites,
+  countActiveUsers: callbackify(countActiveUsers),
+}
+module.exports.promises = {
+  populateTeamInvites: promisify(populateTeamInvites),
+  countActiveUsers,
+}

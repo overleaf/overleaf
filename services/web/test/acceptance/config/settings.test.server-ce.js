@@ -4,6 +4,7 @@ const base = require('./settings.test.defaults')
 
 module.exports = base.mergeWith({
   defaultFeatures: ServerCEDefaults.defaultFeatures,
+  activeUserMetricInterval: 100,
 })
 
 module.exports.mergeWith = function (overrides) {

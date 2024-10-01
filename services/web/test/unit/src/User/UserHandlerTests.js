@@ -1,4 +1,5 @@
 const sinon = require('sinon')
+const { expect } = require('chai')
 const modulePath = '../../../../app/src/Features/User/UserHandler.js'
 const SandboxedModule = require('sandboxed-module')
 
@@ -14,9 +15,18 @@ describe('UserHandler', function () {
       createTeamInvitesForLegacyInvitedEmail: sinon.stub().yields(),
     }
 
+    this.db = {
+      users: {
+        find: sinon.stub().returns({
+          count: sinon.stub().resolves(2),
+        }),
+      },
+    }
+
     this.UserHandler = SandboxedModule.require(modulePath, {
       requires: {
         '../Subscription/TeamInvitesHandler': this.TeamInvitesHandler,
+        '../../infrastructure/mongodb': { db: this.db },
       },
     })
   })
@@ -30,6 +40,12 @@ describe('UserHandler', function () {
       this.TeamInvitesHandler.createTeamInvitesForLegacyInvitedEmail
         .calledWith(this.user.email)
         .should.eq(true)
+    })
+  })
+
+  describe('countActiveUsers', function () {
+    it('return user count from DB lookup', async function () {
+      expect(await this.UserHandler.promises.countActiveUsers()).to.equal(2)
     })
   })
 })
