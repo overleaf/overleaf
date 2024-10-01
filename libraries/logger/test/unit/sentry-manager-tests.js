@@ -138,7 +138,11 @@ describe('SentryManager', function () {
           },
         })
       )
-      expect(this.Sentry.captureException.args[0][0]).to.deep.equal(expectedErr)
+      // Chai is very picky with comparing Error instances. Go the long way of comparing all the fields manually.
+      const gotErr = this.Sentry.captureException.args[0][0]
+      for (const [key, wanted] of Object.entries(expectedErr)) {
+        expect(gotErr).to.have.property(key, wanted)
+      }
     })
     it('should sanitize request', function () {
       const req = {

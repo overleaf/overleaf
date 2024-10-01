@@ -81,9 +81,13 @@ class SentryManager {
       extra.info = error.info
       delete error.info
 
+      // Sentry wants to receive an Error instance.
+      const errInstance = new Error(error.message)
+      Object.assign(errInstance, error)
+
       try {
         // send the error to sentry
-        this.Sentry.captureException(error, { tags, extra, level })
+        this.Sentry.captureException(errInstance, { tags, extra, level })
 
         // put a flag on the errors to avoid reporting them multiple times
         for (const key in attributes) {
