@@ -363,6 +363,14 @@ describe('UserSessionsManager', function () {
       })
     })
 
+    it('should yield the number of purged sessions', function (done) {
+      return this.call((err, n) => {
+        expect(err).to.not.exist
+        expect(n).to.equal(this.sessionKeys.length)
+        return done()
+      })
+    })
+
     it('should call the appropriate redis methods', function (done) {
       return this.call(err => {
         this.rclient.smembers.callCount.should.equal(1)
@@ -465,9 +473,11 @@ describe('UserSessionsManager', function () {
         })
       })
 
-      it('should not produce an error', function (done) {
+      it('should produce an error', function (done) {
         return this.call(err => {
-          expect(err).to.not.exist
+          expect(err).to.match(
+            /bug: user not passed to removeSessionsFromRedis/
+          )
           return done()
         })
       })

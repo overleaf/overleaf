@@ -133,7 +133,9 @@ const UserSessionsManager = {
    */
   removeSessionsFromRedis(user, retainSessionID, callback) {
     if (!user) {
-      return callback(null)
+      return callback(
+        new Error('bug: user not passed to removeSessionsFromRedis')
+      )
     }
     const sessionSetKey = UserSessionsRedis.sessionSetKey(user)
     rclient.smembers(sessionSetKey, function (err, sessionKeys) {
@@ -155,7 +157,7 @@ const UserSessionsManager = {
           { userId: user._id },
           'no sessions in UserSessions set to delete, returning'
         )
-        return callback(null)
+        return callback(null, 0)
       }
       logger.debug(
         { userId: user._id, count: keysToDelete.length },
@@ -180,7 +182,7 @@ const UserSessionsManager = {
             })
             return callback(err)
           }
-          callback(null)
+          callback(null, keysToDelete.length)
         })
       })
     })
