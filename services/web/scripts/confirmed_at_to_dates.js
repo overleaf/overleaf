@@ -40,7 +40,7 @@ async function updateStringDates() {
   console.log(`Updated ${count} confirmedAt strings to dates!`)
 }
 
-if (require.main === module) {
+if (!module.parent) {
   updateStringDates()
     .then(() => {
       process.exit(0)

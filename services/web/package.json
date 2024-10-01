@@ -31,7 +31,7 @@
     "type-check": "tsc --noEmit",
     "type-check:backend": "tsc -p tsconfig.backend.json --noEmit",
     "extract-translations": "i18next-scanner",
-    "migrations": "MONGO_SOCKET_TIMEOUT=0 east --es-modules",
+    "migrations": "MONGO_SOCKET_TIMEOUT=0 east",
     "convert-themes": "node frontend/js/features/source-editor/themes/scripts/convert.js",
     "cypress:open-ct": "OVERLEAF_CONFIG=$PWD/config/settings.webpack.js cypress open --component",
     "cypress:run-ct": "OVERLEAF_CONFIG=$PWD/config/settings.webpack.js cypress run --component --browser chrome",
