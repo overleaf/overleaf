@@ -1,4 +1,4 @@
-const OError = require('@overleaf/o-error')
+const Serializers = require('./serializers')
 const RATE_LIMIT_MAX_ERRORS = 5
 const RATE_LIMIT_INTERVAL_MS = 60000
 
@@ -42,7 +42,7 @@ class SentryManager {
     }
 
     // extract any error object
-    let error = attributes.err || attributes.error
+    let error = Serializers.err(attributes.err || attributes.error)
 
     // avoid reporting errors twice
     for (const key in attributes) {
@@ -67,45 +67,21 @@ class SentryManager {
       const tags = {}
       const extra = {}
       for (const key in attributes) {
-        const value = attributes[key]
+        let value = attributes[key]
+        if (Serializers[key]) {
+          value = Serializers[key](value)
+        }
         if (key.match(/_id/) && typeof value === 'string') {
           tags[key] = value
         }
         extra[key] = value
       }
 
-      // capture req object if available
-      const { req } = attributes
-      if (req != null) {
-        extra.req = {
-          method: req.method,
-          url: req.originalUrl,
-          query: req.query,
-          headers: req.headers,
-          ip: req.ip,
-        }
-      }
-
-      // recreate error objects that have been converted to a normal object
-      if (!(error instanceof Error) && typeof error === 'object') {
-        const newError = new Error(error.message)
-        for (const key of Object.keys(error || {})) {
-          const value = error[key]
-          newError[key] = value
-        }
-        error = newError
-      }
-
       // OError integration
-      extra.info = OError.getFullInfo(error)
+      extra.info = error.info
+      delete error.info
 
-      // filter paths from the message to avoid duplicate errors in sentry
-      // (e.g. errors from `fs` methods which have a path attribute)
       try {
-        if (error.path) {
-          error.message = error.message.replace(` '${error.path}'`, '')
-        }
-
         // send the error to sentry
         this.Sentry.captureException(error, { tags, extra, level })
 

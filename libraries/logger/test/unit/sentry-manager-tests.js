@@ -104,6 +104,116 @@ describe('SentryManager', function () {
       )
     })
 
+    it('should sanitize error', function () {
+      const err = {
+        name: 'CustomError',
+        message: 'hello',
+        _oErrorTags: [{ stack: 'here:1', info: { one: 1 } }],
+        stack: 'here:0',
+        info: { key: 'value' },
+        code: 42,
+        signal: 9,
+        path: '/foo',
+      }
+      this.sentryManager.captureException({ err }, 'message', 'error')
+      const expectedErr = {
+        name: 'CustomError',
+        message: 'hello',
+        stack: 'here:0\nhere:1',
+        code: 42,
+        signal: 9,
+        path: '/foo',
+      }
+      expect(this.Sentry.captureException).to.have.been.calledWith(
+        sinon.match(expectedErr),
+        sinon.match({
+          tags: sinon.match.any,
+          level: sinon.match.any,
+          extra: {
+            description: 'message',
+            info: sinon.match({
+              one: 1,
+              key: 'value',
+            }),
+          },
+        })
+      )
+      expect(this.Sentry.captureException.args[0][0]).to.deep.equal(expectedErr)
+    })
+    it('should sanitize request', function () {
+      const req = {
+        ip: '1.2.3.4',
+        method: 'GET',
+        url: '/foo',
+        headers: {
+          referer: 'abc',
+          'content-length': 1337,
+          'user-agent': 'curl',
+          authorization: '42',
+        },
+      }
+      this.sentryManager.captureException({ req }, 'message', 'error')
+      const expectedReq = {
+        remoteAddress: '1.2.3.4',
+        method: 'GET',
+        url: '/foo',
+        headers: {
+          referer: 'abc',
+          'content-length': 1337,
+          'user-agent': 'curl',
+        },
+      }
+      expect(this.Sentry.captureException).to.have.been.calledWith(
+        sinon.match({
+          message: 'message',
+        }),
+        sinon.match({
+          tags: sinon.match.any,
+          level: sinon.match.any,
+          extra: {
+            info: sinon.match.any,
+            req: expectedReq,
+          },
+        })
+      )
+      expect(this.Sentry.captureException.args[0][1].extra.req).to.deep.equal(
+        expectedReq
+      )
+    })
+    it('should sanitize response', function () {
+      const res = {
+        statusCode: 417,
+        body: Buffer.from('foo'),
+        getHeader(key) {
+          expect(key).to.be.oneOf(['content-length'])
+          if (key === 'content-length') return 1337
+        },
+      }
+      this.sentryManager.captureException({ res }, 'message', 'error')
+      const expectedRes = {
+        statusCode: 417,
+        headers: {
+          'content-length': 1337,
+        },
+      }
+      expect(this.Sentry.captureException).to.have.been.calledWith(
+        sinon.match({
+          message: 'message',
+        }),
+        sinon.match({
+          tags: sinon.match.any,
+          level: sinon.match.any,
+          extra: {
+            info: sinon.match.any,
+            res: expectedRes,
+          },
+        })
+      )
+      expect(this.Sentry.captureException.args[0][1].extra.res).to.deep.equal(
+        expectedRes
+      )
+    })
+
     describe('reportedToSentry', function () {
       it('should mark the error as reported to sentry', function () {
         const err = new Error()

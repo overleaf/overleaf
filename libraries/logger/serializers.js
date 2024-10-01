@@ -4,13 +4,20 @@ function errSerializer(err) {
   if (!err) {
     return err
   }
+  let message = err.message
+  if (err.path) {
+    // filter paths from the message to avoid duplicate errors with different path in message
+    // (e.g. errors from `fs` methods which have a path attribute)
+    message = message.replace(` '${err.path}'`, '')
+  }
   return {
-    message: err.message,
+    message,
     name: err.name,
     stack: OError.getFullStack(err),
     info: OError.getFullInfo(err),
     code: err.code,
     signal: err.signal,
+    path: err.path,
   }
 }
 
