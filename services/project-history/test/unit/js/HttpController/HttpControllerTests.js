@@ -412,13 +412,13 @@ describe('HttpController', function () {
       this.req = {
         params: {
           project_id: this.projectId,
-          user_id: this.userId,
         },
         body: {
           version: (this.version = 'label-1'),
           comment: (this.comment = 'a comment'),
           created_at: (this.created_at = Date.now().toString()),
           validate_exists: true,
+          user_id: this.userId,
         },
       }
       this.label = { _id: new ObjectId() }

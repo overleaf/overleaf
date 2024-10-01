@@ -196,8 +196,8 @@ module.exports = HistoryController = {
     HistoryController._makeRequest(
       {
         method: 'POST',
-        url: `${settings.apis.project_history.url}/project/${projectId}/user/${userId}/labels`,
-        json: { comment, version },
+        url: `${settings.apis.project_history.url}/project/${projectId}/labels`,
+        json: { comment, version, user_id: userId },
       },
       function (err, label) {
         if (err) {
@@ -215,7 +215,9 @@ module.exports = HistoryController = {
 
   _enrichLabel(label, callback) {
     if (!label.user_id) {
-      return callback(null, label)
+      const newLabel = Object.assign({}, label)
+      newLabel.user_display_name = HistoryController._displayNameForUser(null)
+      return callback(null, newLabel)
     }
     UserGetter.getUser(
       label.user_id,
@@ -237,7 +239,8 @@ module.exports = HistoryController = {
     }
     const uniqueUsers = new Set(labels.map(label => label.user_id))
 
-    // For backwards compatibility expect missing user_id fields
+    // For backwards compatibility, and for anonymously created labels in SP
+    // expect missing user_id fields
     uniqueUsers.delete(undefined)
 
     if (!uniqueUsers.size) {
@@ -255,7 +258,6 @@ module.exports = HistoryController = {
 
         labels.forEach(label => {
           const user = users.get(label.user_id)
-          if (!user) return
           label.user_display_name = HistoryController._displayNameForUser(user)
         })
         callback(null, labels)

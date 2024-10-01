@@ -103,7 +103,7 @@ class MockProjectHistoryApi extends AbstractMockApi {
       }
     })
 
-    this.app.post('/project/:projectId/user/:user_id/labels', (req, res) => {
+    this.app.post('/project/:projectId/labels', (req, res) => {
       const { projectId } = req.params
       const { comment, version } = req.body
       const labelId = new ObjectId().toString()

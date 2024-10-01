@@ -259,8 +259,8 @@ export function createLabel(
 ) {
   request.post(
     {
-      url: `http://127.0.0.1:3054/project/${projectId}/user/${userId}/labels`,
-      json: { comment, version, created_at: createdAt },
+      url: `http://127.0.0.1:3054/project/${projectId}/labels`,
+      json: { comment, version, created_at: createdAt, user_id: userId },
     },
     (error, res, body) => {
       if (error) {

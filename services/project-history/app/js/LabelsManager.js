@@ -53,8 +53,10 @@ export function createLabel(
         project_id: new ObjectId(projectId),
         comment,
         version,
-        user_id: new ObjectId(userId),
         created_at: createdAt,
+      }
+      if (userId) {
+        label.user_id = userId
       }
       db.projectHistoryLabels.insertOne(label, function (error, confirmation) {
         if (error) {
@@ -125,7 +127,13 @@ function _toObjectId(...args1) {
   const args = args1.slice(0, adjustedLength - 1)
   const callback = args1[adjustedLength - 1]
   try {
-    const ids = args.map(id => new ObjectId(id))
+    const ids = args.map(id => {
+      if (id) {
+        return new ObjectId(id)
+      } else {
+        return undefined
+      }
+    })
     callback(null, ...ids)
   } catch (error) {
     callback(error)

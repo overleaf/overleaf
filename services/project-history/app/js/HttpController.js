@@ -455,13 +455,19 @@ export function getLabels(req, res, next) {
 }
 
 export function createLabel(req, res, next) {
-  const { project_id: projectId, user_id: userId } = req.params
+  const { project_id: projectId, user_id: userIdParam } = req.params
   const {
     version,
     comment,
+    user_id: userIdBody,
     created_at: createdAt,
     validate_exists: validateExists,
   } = req.body
+
+  // Temporarily looking up both params and body while rolling out changes
+  // in the router path - https://github.com/overleaf/internal/pull/20200
+  const userId = userIdParam || userIdBody
+
   HistoryApiManager.shouldUseProjectHistory(
     projectId,
     (error, shouldUseProjectHistory) => {
