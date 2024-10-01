@@ -348,10 +348,15 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
       // SMTP Creds
       host: process.env.OVERLEAF_EMAIL_SMTP_HOST,
       port: process.env.OVERLEAF_EMAIL_SMTP_PORT,
-      secure: parse(process.env.OVERLEAF_EMAIL_SMTP_SECURE),
-      ignoreTLS: parse(process.env.OVERLEAF_EMAIL_SMTP_IGNORE_TLS),
+      secure: parse(process.env.OVERLEAF_EMAIL_SMTP_SECURE || 'true'),
+      ignoreTLS: parse(process.env.OVERLEAF_EMAIL_SMTP_IGNORE_TLS || 'false'),
+      tls: {
+        rejectUnauthorized: parse(
+          process.env.OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH || 'true'
+        )
+      },
       name: process.env.OVERLEAF_EMAIL_SMTP_NAME,
-      logger: process.env.OVERLEAF_EMAIL_SMTP_LOGGER === 'true',
+      logger: parse(process.env.OVERLEAF_EMAIL_SMTP_LOGGER || 'false'),
     },
 
     textEncoding: process.env.OVERLEAF_EMAIL_TEXT_ENCODING,
@@ -371,14 +376,6 @@ if (process.env.OVERLEAF_EMAIL_FROM_ADDRESS != null) {
     settings.email.parameters.auth = {
       user: process.env.OVERLEAF_EMAIL_SMTP_USER,
       pass: process.env.OVERLEAF_EMAIL_SMTP_PASS,
-    }
-  }
-
-  if (process.env.OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH != null) {
-    settings.email.parameters.tls = {
-      rejectUnauthorized: parse(
-        process.env.OVERLEAF_EMAIL_SMTP_TLS_REJECT_UNAUTH
-      ),
     }
   }
 }
