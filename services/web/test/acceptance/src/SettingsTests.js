@@ -48,4 +48,13 @@ describe('SettingsPage', function () {
       })
     })
   })
+
+  it('prevents first name from being updated to a string longer than 255 characters', function (done) {
+    const newFirstName = 'a'.repeat(256)
+    return this.user.updateSettings({ first_name: newFirstName }, error => {
+      expect(error).to.exist
+      expect(error.message).to.contain('update settings failed: status=400')
+      return done()
+    })
+  })
 })

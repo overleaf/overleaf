@@ -313,6 +313,12 @@ function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.post(
     '/user/settings',
     AuthenticationController.requireLogin(),
+    validate({
+      body: Joi.object({
+        first_name: Joi.string().allow(null, '').max(255),
+        last_name: Joi.string().allow(null, '').max(255),
+      }).unknown(),
+    }),
     UserController.updateUserSettings
   )
   webRouter.post(

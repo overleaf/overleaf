@@ -6,6 +6,7 @@ const { ObjectId } = Schema
 
 // See https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/574698#574698
 const MAX_EMAIL_LENGTH = 254
+const MAX_NAME_LENGTH = 255
 
 const UserSchema = new Schema(
   {
@@ -26,8 +27,16 @@ const UserSchema = new Schema(
         reconfirmedAt: { type: Date },
       },
     ],
-    first_name: { type: String, default: '' },
-    last_name: { type: String, default: '' },
+    first_name: {
+      type: String,
+      default: '',
+      maxlength: MAX_NAME_LENGTH,
+    },
+    last_name: {
+      type: String,
+      default: '',
+      maxlength: MAX_NAME_LENGTH,
+    },
     role: { type: String, default: '' },
     institution: { type: String, default: '' },
     hashedPassword: String,

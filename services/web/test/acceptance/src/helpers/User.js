@@ -1142,7 +1142,7 @@ class User {
           if (response.statusCode !== 200) {
             return callback(
               new Error(
-                `login failed: status=${
+                `update settings failed: status=${
                   response.statusCode
                 } body=${JSON.stringify(body)}`
               )
