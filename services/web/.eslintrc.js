@@ -45,10 +45,10 @@ module.exports = {
     {
       // Node
       files: [
-        '**/app/src/**/*.js',
-        'app.js',
+        '**/app/src/**/*.{js,mjs}',
+        'app.{js,mjs}',
         'i18next-scanner.config.js',
-        'scripts/**/*.js',
+        'scripts/**/*.{js,mjs}',
         'webpack.config*.js',
       ],
       env: {
@@ -90,8 +90,23 @@ module.exports = {
       },
     },
     {
+      // ES specific rules
+      files: ['**/app/src/**/*.mjs'],
+      rules: {
+        'import/no-unresolved': 'error',
+        'import/extensions': [
+          'error',
+          'ignorePackages',
+          {
+            js: 'always',
+            mjs: 'always',
+          },
+        ],
+      },
+    },
+    {
       // Backend specific rules
-      files: ['**/app/src/**/*.js', 'app.js'],
+      files: ['**/app/src/**/*.{js,mjs}', 'app.{js,mjs}'],
       parserOptions: {
         tsconfigRootDir: __dirname,
         project: './tsconfig.backend.json',
@@ -409,8 +424,8 @@ module.exports = {
         // Backend: Use @overleaf/logger
         //          Docs: https://manual.dev-overleaf.com/development/code/logging/#structured-logging
         '**/app/**/*.{js,cjs,mjs}',
-        'app.js',
-        'modules/*/*.js',
+        'app.{js,mjs}',
+        'modules/*/*.{js,mjs}',
         // Frontend: Prefer debugConsole over bare console
         //           Docs: https://manual.dev-overleaf.com/development/code/logging/#frontend
         '**/frontend/**/*.{js,jsx,ts,tsx}',
