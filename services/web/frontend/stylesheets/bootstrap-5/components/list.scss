@@ -11,6 +11,14 @@
     background-size: $icon-size $icon-size;
     margin-bottom: var(--spacing-05);
     padding-left: calc(var(--spacing-05) + $icon-size);
+
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-bottom: var(--spacing-04);
+    }
   }
 }
 
