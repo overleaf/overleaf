@@ -27,6 +27,8 @@ export const IdeProvider: FC<{
    *   - `project.spellcheckLanguage`
    *   - `editor.open_doc_name`,
    *   - `editor.open_doc_id`,
+   *   - `settings.theme`
+   *   - `settings.keybindings`
    */
   useEffect(() => {
     window.overleaf = {

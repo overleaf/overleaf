@@ -1,9 +1,11 @@
-import { Keybindings, PdfViewer } from './project-settings'
 import {
   FontFamily,
   LineHeight,
   OverallTheme,
 } from '@/features/source-editor/extensions/theme'
+
+export type Keybindings = 'none' | 'default' | 'vim' | 'emacs'
+export type PdfViewer = 'pdfjs' | 'native'
 
 export type UserSettings = {
   pdfViewer: PdfViewer

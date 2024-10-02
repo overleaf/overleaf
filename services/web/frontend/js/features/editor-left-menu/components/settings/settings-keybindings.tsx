@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { Keybindings } from '../../../../../../types/project-settings'
+import type { Keybindings } from '../../../../../../types/user-settings'
 import { useProjectSettingsContext } from '../../context/project-settings-context'
 import SettingsMenuSelect from './settings-menu-select'
 

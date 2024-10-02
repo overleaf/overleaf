@@ -9,8 +9,9 @@ import {
   useEffect,
 } from 'react'
 
-import { UserSettings } from '../../../../types/user-settings'
+import { UserSettings, Keybindings } from '../../../../types/user-settings'
 import getMeta from '@/utils/meta'
+import useScopeValue from '@/shared/hooks/use-scope-value'
 
 const defaultSettings: UserSettings = {
   pdfViewer: 'pdfjs',
@@ -33,14 +34,28 @@ type UserSettingsContextValue = {
   >
 }
 
+type ScopeSettings = {
+  overallTheme: 'light' | 'dark'
+  keybindings: Keybindings
+}
+
 export const UserSettingsContext = createContext<
   UserSettingsContextValue | undefined
 >(undefined)
 
 export const UserSettingsProvider: FC = ({ children }) => {
-  const [userSettings, setUserSettings] = useState<
-    UserSettingsContextValue['userSettings']
-  >(() => getMeta('ol-userSettings') || defaultSettings)
+  const [userSettings, setUserSettings] = useState<UserSettings>(
+    () => getMeta('ol-userSettings') || defaultSettings
+  )
+
+  // update the global scope 'settings' value, for extensions
+  const [, setScopeSettings] = useScopeValue<ScopeSettings>('settings')
+  useEffect(() => {
+    setScopeSettings({
+      overallTheme: userSettings.overallTheme === 'light-' ? 'light' : 'dark',
+      keybindings: userSettings.mode === 'none' ? 'default' : userSettings.mode,
+    })
+  }, [setScopeSettings, userSettings])
 
   const value = useMemo<UserSettingsContextValue>(
     () => ({
@@ -49,13 +64,6 @@ export const UserSettingsProvider: FC = ({ children }) => {
     }),
     [userSettings, setUserSettings]
   )
-
-  // Fire an event to inform non-React code of settings changes
-  useEffect(() => {
-    window.dispatchEvent(
-      new CustomEvent('settings:change', { detail: userSettings })
-    )
-  }, [userSettings])
 
   return (
     <UserSettingsContext.Provider value={value}>

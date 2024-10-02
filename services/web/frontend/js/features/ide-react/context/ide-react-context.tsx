@@ -44,6 +44,7 @@ export const IdeReactContext = createContext<IdeReactContextValue | undefined>(
 )
 
 function populateIdeReactScope(store: ReactScopeValueStore) {
+  store.set('settings', {})
   store.set('sync_tex_error', false)
 }
 

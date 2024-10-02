@@ -17,15 +17,11 @@ export type MainDocument = {
 
 export type ProjectCompiler = 'pdflatex' | 'latex' | 'xelatex' | 'lualatex'
 
-export type Keybindings = 'default' | 'vim' | 'emacs'
-
 export type OverallThemeMeta = {
   name: string
   path: string
   val: OverallTheme
 }
-
-export type PdfViewer = 'pdfjs' | 'native'
 
 export type SpellCheckLanguage = {
   name: string

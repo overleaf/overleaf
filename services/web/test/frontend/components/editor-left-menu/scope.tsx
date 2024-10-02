@@ -1,4 +1,5 @@
-import { MainDocument, PdfViewer } from '../../../../types/project-settings'
+import { MainDocument } from '../../../../types/project-settings'
+import { PdfViewer } from '../../../../types/user-settings'
 
 type Scope = {
   settings?: {
