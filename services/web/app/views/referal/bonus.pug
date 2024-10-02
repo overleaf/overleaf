@@ -9,7 +9,10 @@ block content
 						.container-fluid
 							.row
 								.col-md-10.col-md-offset-1
-									p.thanks The Overleaf Bonus Program has been discontinued.
+									if (refered_user_count > 0)
+										p.thanks The Overleaf Bonus Program has been discontinued, but you'll continue to have access to the features you already earned.
+									else
+										p.thanks The Overleaf Bonus Program has been discontinued.
 									p.thanks Please <a href="/contact">contact us</a> if you have any questions.
 									
 							if (refered_user_count > 0)
