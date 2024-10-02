@@ -16,6 +16,9 @@ module.exports = function ({
   return function (req, res, next) {
     // set the default policy
     res.set(header, defaultPolicy)
+    if (reportUri) {
+      res.set('Reporting-Endpoints', `csp-endpoint="${reportUri}"`)
+    }
 
     const originalRender = res.render
 
@@ -25,6 +28,7 @@ module.exports = function ({
       if (exclude.includes(view)) {
         // remove the default policy
         res.removeHeader(header)
+        res.removeHeader('Reporting-Endpoints')
       } else {
         // set the view policy
         res.locals.cspEnabled = true
@@ -58,7 +62,7 @@ const buildDefaultPolicy = (reportUri, styleSrc) => {
 
   if (reportUri) {
     directives.push(`report-uri ${reportUri}`)
-    // NOTE: implement report-to once it's more widely supported
+    directives.push(`report-to csp-endpoint`)
   }
 
   if (styleSrc) {
@@ -81,7 +85,7 @@ const buildViewPolicy = (scriptNonce, reportPercentage, reportUri) => {
 
     if (belowReportCutoff) {
       directives.push(`report-uri ${reportUri}`)
-      // NOTE: implement report-to once it's more widely supported
+      directives.push(`report-to csp-endpoint`)
     }
   }
 
