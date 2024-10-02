@@ -22,15 +22,21 @@ async function modules() {
 }
 
 async function loadModulesImpl() {
-  const settingsCheckModule = Path.join(
+  const settingsCheckModuleCjs = Path.join(
     MODULE_BASE_PATH,
     'settings-check',
     'index.js'
   )
-  if (fs.existsSync(settingsCheckModule)) {
-    await import(settingsCheckModule)
+  const settingsCheckModuleEsm = Path.join(
+    MODULE_BASE_PATH,
+    'settings-check',
+    'index.mjs'
+  )
+  if (fs.existsSync(settingsCheckModuleCjs)) {
+    await import(settingsCheckModuleCjs)
+  } else if (fs.existsSync(settingsCheckModuleEsm)) {
+    await import(settingsCheckModuleEsm)
   }
-
   for (const moduleName of Settings.moduleImportSequence || []) {
     let path
     if (fs.existsSync(Path.join(MODULE_BASE_PATH, moduleName, 'index.mjs'))) {
