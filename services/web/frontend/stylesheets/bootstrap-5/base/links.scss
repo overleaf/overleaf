@@ -29,3 +29,21 @@ a {
     color: var(--green-60);
   }
 }
+
+.link-black-full-width {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  color: var(--neutral-90);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:visited {
+    color: var(--neutral-90);
+  }
+
+  &:hover {
+    color: var(--neutral-90);
+    text-decoration: underline;
+  }
+}
