@@ -7,6 +7,8 @@ import {
   useMemo,
   useRef,
   useState,
+  Dispatch,
+  SetStateAction,
 } from 'react'
 import useScopeValue from '../hooks/use-scope-value'
 import useScopeValueSetterOnly from '../hooks/use-scope-value-setter-only'
@@ -37,6 +39,10 @@ import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-
 import { useUserSettingsContext } from '@/shared/context/user-settings-context'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import {
+  PdfScrollPosition,
+  usePdfScrollPosition,
+} from '@/shared/hooks/use-pdf-scroll-position'
 
 type PdfFile = Record<string, any>
 
@@ -61,14 +67,14 @@ export type CompileContext = {
   pdfFile?: PdfFile
   pdfUrl?: string
   pdfViewer?: string
-  position?: Record<string, any>
+  position?: PdfScrollPosition
   rawLog?: string
   setAutoCompile: (value: boolean) => void
   setDraft: (value: any) => void
   setError: (value: any) => void
   setHasLintingError: (value: any) => void // only for storybook
   setHighlights: (value: any) => void
-  setPosition: (value: any) => void
+  setPosition: Dispatch<SetStateAction<PdfScrollPosition>>
   setShowCompileTimeWarning: (value: any) => void
   setShowLogs: (value: boolean) => void
   toggleLogs: () => void
@@ -171,7 +177,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // the rootDocId used in the most recent compile request, which may not be the
   // same as the project rootDocId. This is used to calculate correct paths when
   // parsing the compile logs
-  const lastCompileRootDocId = data?.rootDocId
+  const lastCompileRootDocId = data ? (data.rootDocId ?? rootDocId) : null
 
   // callback to be invoked for PdfJsMetrics
   const [firstRenderDone, setFirstRenderDone] = useState(() => () => {})
@@ -216,8 +222,7 @@ export const LocalCompileProvider: FC = ({ children }) => {
   // areas to highlight on the PDF, from synctex
   const [highlights, setHighlights] = useState()
 
-  // scroll position of the PDF
-  const [position, setPosition] = usePersistedState(`pdf.position.${projectId}`)
+  const [position, setPosition] = usePdfScrollPosition(lastCompileRootDocId)
 
   // whether autocompile is switched on
   const [autoCompile, setAutoCompile] = usePersistedState(
