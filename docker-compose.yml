@@ -13,9 +13,6 @@ services:
                 condition: service_started
         ports:
             - 80:80
-        links:
-            - mongo
-            - redis
         stop_grace_period: 60s
         volumes:
             - ~/sharelatex_data:/var/lib/overleaf
@@ -107,10 +104,16 @@ services:
         restart: always
         image: mongo:5.0
         container_name: mongo
-        expose:
-            - 27017
+        command: '--replSet overleaf'
         volumes:
             - ~/mongo_data:/data/db
+            - ./mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+        environment:
+          MONGO_INITDB_DATABASE: sharelatex
+        extra_hosts:
+          # Required when using the automatic database setup for initializing the replica set.
+          # This override is not needed when running the setup after starting up mongo.
+          - mongo:127.0.0.1
         healthcheck:
             test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
             interval: 10s
@@ -121,8 +124,6 @@ services:
         restart: always
         image: redis:6.2
         container_name: redis
-        expose:
-            - 6379
         volumes:
             - ~/redis_data:/data
 
@@ -130,8 +131,6 @@ services:
     #    restart: always
     #    image: rroemhild/test-openldap
     #    container_name: ldap
-    #    expose:
-    #        - 389
 
     # See https://github.com/jwilder/nginx-proxy for documentation on how to configure the nginx-proxy container,
     # and https://github.com/overleaf/overleaf/wiki/HTTPS-reverse-proxy-using-Nginx for an example of some recommended
@@ -142,7 +141,7 @@ services:
     #     image: jwilder/nginx-proxy
     #     container_name: nginx-proxy
     #     ports:
-    #       #- "80:80"
+    #       - "80:80"
     #       - "443:443"
     #     volumes:
     #       - /var/run/docker.sock:/tmp/docker.sock:ro
