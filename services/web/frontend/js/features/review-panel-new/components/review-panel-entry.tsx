@@ -6,7 +6,10 @@ import {
 } from '@/features/source-editor/components/codemirror-context'
 import { isSelectionWithinOp } from '../utils/is-selection-within-op'
 import classNames from 'classnames'
-import { highlightRanges } from '@/features/source-editor/extensions/ranges'
+import {
+  clearHighlightRanges,
+  highlightRanges,
+} from '@/features/source-editor/extensions/ranges'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 
 export const ReviewPanelEntry: FC<{
@@ -52,7 +55,7 @@ export const ReviewPanelEntry: FC<{
       }}
       onMouseLeave={() => {
         if (hoverRanges) {
-          view.dispatch(highlightRanges())
+          view.dispatch(clearHighlightRanges(op))
         }
       }}
       role="button"

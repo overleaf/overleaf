@@ -28,17 +28,22 @@ type RangesData = {
 }
 
 const updateRangesEffect = StateEffect.define<RangesData>()
-const highlightRangesEffect = StateEffect.define<AnyOperation | undefined>()
+const highlightRangesEffect = StateEffect.define<AnyOperation>()
+const clearHighlightRangesEffect = StateEffect.define<AnyOperation>()
 
 export const updateRanges = (data: RangesData): TransactionSpec => {
   return {
     effects: updateRangesEffect.of(data),
   }
 }
-
-export const highlightRanges = (op?: AnyOperation): TransactionSpec => {
+export const highlightRanges = (op: AnyOperation): TransactionSpec => {
   return {
     effects: highlightRangesEffect.of(op),
+  }
+}
+export const clearHighlightRanges = (op: AnyOperation): TransactionSpec => {
+  return {
+    effects: clearHighlightRangesEffect.of(op),
   }
 }
 
@@ -97,7 +102,44 @@ export const ranges = () => [
             for (const effect of transaction.effects) {
               if (effect.is(updateRangesEffect)) {
                 this.decorations = buildChangeDecorations(effect.value)
+              } else if (
+                effect.is(highlightRangesEffect) &&
+                isDeleteOperation(effect.value)
+              ) {
+                this.decorations = updateDeleteWidgetHighlight(
+                  this.decorations,
+                  widget =>
+                    widget.change.op.p === effect.value.p &&
+                    widget.highlightType !== 'focus',
+                  'highlight'
+                )
+              } else if (
+                effect.is(clearHighlightRangesEffect) &&
+                isDeleteOperation(effect.value)
+              ) {
+                this.decorations = updateDeleteWidgetHighlight(
+                  this.decorations,
+                  widget =>
+                    widget.change.op.p === effect.value.p &&
+                    widget.highlightType !== 'focus',
+                  null
+                )
               }
+            }
+
+            if (transaction.selection) {
+              this.decorations = updateDeleteWidgetHighlight(
+                this.decorations,
+                ({ change }) =>
+                  isSelectionWithinOp(change.op, update.state.selection.main),
+                'focus'
+              )
+              this.decorations = updateDeleteWidgetHighlight(
+                this.decorations,
+                ({ change }) =>
+                  !isSelectionWithinOp(change.op, update.state.selection.main),
+                null
+              )
             }
           }
         },
@@ -127,6 +169,8 @@ export const ranges = () => [
                   'ol-cm-change-highlight',
                   effect.value
                 )
+              } else if (effect.is(clearHighlightRangesEffect)) {
+                this.decorations = Decoration.none
               }
             }
           }
@@ -214,20 +258,50 @@ const buildChangeDecorations = (data: RangesData) => {
   return Decoration.set(decorations, true)
 }
 
-const buildHighlightDecorations = (className: string, op?: AnyOperation) => {
-  if (!op) {
-    return Decoration.none
+const updateDeleteWidgetHighlight = (
+  decorations: DecorationSet,
+  predicate: (widget: ChangeDeletedWidget) => boolean,
+  highlightType?: 'focus' | 'highlight' | null
+) => {
+  const widgetsToReplace: ChangeDeletedWidget[] = []
+  const cursor = decorations.iter()
+  while (cursor.value) {
+    const widget = cursor.value.spec?.widget
+    if (widget instanceof ChangeDeletedWidget && predicate(widget)) {
+      widgetsToReplace.push(cursor.value.spec.widget)
+    }
+    cursor.next()
   }
 
+  return decorations.update({
+    filter: (from, to, decoration) => {
+      return !widgetsToReplace.includes(decoration.spec?.widget)
+    },
+    add: widgetsToReplace.map(({ change }) =>
+      Decoration.widget({
+        widget: new ChangeDeletedWidget(change, highlightType),
+        side: 1,
+        opType: 'd',
+        id: change.id,
+        metadata: change.metadata,
+      }).range(change.op.p, change.op.p)
+    ),
+  })
+}
+
+const buildHighlightDecorations = (className: string, op: AnyOperation) => {
   if (isDeleteOperation(op)) {
-    // nothing to highlight for deletions (for now)
-    // TODO: add highlight when delete indicator is done
+    // delete indicators are handled in change decorations
     return Decoration.none
   }
 
   const opFrom = op.p
   const opLength = isInsertOperation(op) ? op.i.length : op.c.length
   const opType = isInsertOperation(op) ? 'i' : 'c'
+
+  if (opLength === 0) {
+    return Decoration.none
+  }
 
   return Decoration.set(
     Decoration.mark({
@@ -238,7 +312,10 @@ const buildHighlightDecorations = (className: string, op?: AnyOperation) => {
 }
 
 class ChangeDeletedWidget extends WidgetType {
-  constructor(public change: Change<DeleteOperation>) {
+  constructor(
+    public change: Change<DeleteOperation>,
+    public highlightType: 'highlight' | 'focus' | null = null
+  ) {
     super()
   }
 
@@ -246,12 +323,15 @@ class ChangeDeletedWidget extends WidgetType {
     const widget = document.createElement('span')
     widget.classList.add('ol-cm-change')
     widget.classList.add('ol-cm-change-d')
-
+    widget.textContent = '[ — ]'
+    if (this.highlightType) {
+      widget.classList.add(`ol-cm-change-d-${this.highlightType}`)
+    }
     return widget
   }
 
-  eq() {
-    return true
+  eq(old: ChangeDeletedWidget) {
+    return old.highlightType === this.highlightType
   }
 }
 
@@ -259,7 +339,6 @@ const createChangeRange = (change: Change, data: RangesData) => {
   const { id, metadata, op } = change
 
   const from = op.p
-  // TODO: find valid positions?
 
   if (isDeleteOperation(op)) {
     const opType = 'd'
@@ -326,9 +405,26 @@ const trackChangesTheme = EditorView.baseTheme({
   '.ol-cm-change-focus': {
     padding: 'var(--half-leading, 0) 0',
   },
-  '.ol-cm-change-d': {
-    borderLeft: '2px dotted #c5060b',
-    marginLeft: '-1px',
+  // TODO: fix dark mode colors
+  '&light .ol-cm-change-d': {
+    color: '#c5060b',
+    backgroundColor: '#f5beba57',
+  },
+  '&dark .ol-cm-change-d': {
+    color: '#c5060b',
+    backgroundColor: '#f5beba57',
+  },
+  '&light .ol-cm-change-d-highlight': {
+    backgroundColor: '#f5bebaa4',
+  },
+  '&dark .ol-cm-change-d-highlight': {
+    backgroundColor: '#f5bebaa4',
+  },
+  '&light .ol-cm-change-d-focus': {
+    backgroundColor: '#F5BEBA',
+  },
+  '&dark .ol-cm-change-d-focus': {
+    backgroundColor: '#F5BEBA',
   },
   '&light .ol-cm-change-highlight-i': {
     backgroundColor: '#b8dbc899',
