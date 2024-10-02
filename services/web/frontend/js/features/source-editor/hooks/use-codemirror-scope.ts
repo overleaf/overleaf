@@ -111,6 +111,7 @@ function useCodeMirrorScope(view: EditorView) {
   const [spellCheckLanguage] = useScopeValue<string>(
     'project.spellCheckLanguage'
   )
+  const [projectFeatures] = useScopeValue<boolean>('project.features')
 
   const hunspellManager = useHunspell(spellCheckLanguage)
 
@@ -228,6 +229,8 @@ function useCodeMirrorScope(view: EditorView) {
     view.dispatch(setSpellCheckLanguage(spellingRef.current))
   }, [view, spellCheckLanguage, hunspellManager])
 
+  const projectFeaturesRef = useRef(projectFeatures)
+
   // listen to doc:after-opened, and focus the editor if it's not a new doc
   useEffect(() => {
     const listener: EventListener = event => {
@@ -326,6 +329,7 @@ function useCodeMirrorScope(view: EditorView) {
           phrases: phrasesRef.current,
           spelling: spellingRef.current,
           visual: visualRef.current,
+          projectFeatures: projectFeaturesRef.current,
           changeManager: createChangeManager(view, currentDoc),
           handleError,
           handleException,

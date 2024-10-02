@@ -54,9 +54,10 @@ import { ranges } from './ranges'
 import { trackDetachedComments } from './track-detached-comments'
 import { addComment } from './add-comment'
 
-const moduleExtensions: Array<() => Extension> = importOverleafModules(
-  'sourceEditorExtensions'
-).map((item: { import: { extension: Extension } }) => item.import.extension)
+const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
+  importOverleafModules('sourceEditorExtensions').map(
+    (item: { import: { extension: Extension } }) => item.import.extension
+  )
 
 export const createExtensions = (options: Record<string, any>): Extension[] => [
   lineNumbers(),
@@ -145,7 +146,7 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // Send exceptions to Sentry
   EditorView.exceptionSink.of(options.handleException),
   // CodeMirror extensions provided by modules
-  moduleExtensions.map(extension => extension()),
+  moduleExtensions.map(extension => extension(options)),
   thirdPartyExtensions(),
   effectListeners(),
   geometryChangeEvent(),

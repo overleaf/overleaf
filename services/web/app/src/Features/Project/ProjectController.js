@@ -339,6 +339,7 @@ const _ProjectController = {
       !anonymous && 'writefull-oauth-promotion',
       'ieee-stylesheet',
       'write-and-cite',
+      'write-and-cite-ars',
       'default-visual-for-beginners',
       'spell-check-client',
     ].filter(Boolean)
