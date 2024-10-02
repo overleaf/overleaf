@@ -76,6 +76,7 @@
     "@node-oauth/oauth2-server": "^5.1.0",
     "@node-saml/passport-saml": "^4.0.4",
     "@overleaf/access-token-encryptor": "*",
+    "@overleaf/dictionaries": "https://github.com/overleaf/dictionaries/archive/refs/tags/v0.0.2.tar.gz",
     "@overleaf/fetch-utils": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",

@@ -1,6 +1,6 @@
 import getMeta from '../../utils/meta'
 
-const IGNORED_MISSPELLINGS = [
+export const globalLearnedWords = new Set([
   'Overleaf',
   'overleaf',
   'ShareLaTeX',
@@ -21,15 +21,15 @@ const IGNORED_MISSPELLINGS = [
   'lockdown',
   'Coronavirus',
   'coronavirus',
-]
+])
 
 export class IgnoredWords {
   public learnedWords!: Set<string>
-  private ignoredMisspellings: Set<string>
+  private readonly ignoredMisspellings: Set<string>
 
   constructor() {
     this.reset()
-    this.ignoredMisspellings = new Set(IGNORED_MISSPELLINGS)
+    this.ignoredMisspellings = globalLearnedWords
     window.addEventListener('learnedWords:doreset', () => this.reset()) // for tests
   }
 

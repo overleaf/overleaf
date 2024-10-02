@@ -30,4 +30,6 @@ export type PdfViewer = 'pdfjs' | 'native'
 export type SpellCheckLanguage = {
   name: string
   code: string
+  dic?: string
+  server?: false
 }

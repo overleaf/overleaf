@@ -340,6 +340,7 @@ const _ProjectController = {
       'ieee-stylesheet',
       'write-and-cite',
       'default-visual-for-beginners',
+      'spell-check-client',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

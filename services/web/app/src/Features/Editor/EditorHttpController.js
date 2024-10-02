@@ -79,6 +79,7 @@ async function joinProject(req, res, next) {
   // disable spellchecking for currently unsupported spell check languages
   // preserve the value in the db so they can use it again once we add back
   // support.
+  // TODO: allow these if in client-side spell check split test
   if (
     unsupportedSpellcheckLanguages.indexOf(project.spellCheckLanguage) !== -1
   ) {

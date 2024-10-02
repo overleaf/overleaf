@@ -20,6 +20,12 @@ export const addIgnoredWord = StateEffect.define<{
   text: string
 }>()
 
+export const removeIgnoredWord = StateEffect.define<{
+  text: string
+}>()
+
 export const updateAfterAddingIgnoredWord = StateEffect.define<string>()
+
+export const updateAfterRemovingIgnoredWord = StateEffect.define<string>()
 
 export const resetSpellChecker = StateEffect.define()

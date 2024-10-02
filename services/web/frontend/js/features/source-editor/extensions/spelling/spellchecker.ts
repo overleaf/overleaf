@@ -13,6 +13,7 @@ import {
 } from '../../utils/tree-query'
 import { waitForParser } from '../wait-for-parser'
 import { debugConsole } from '@/utils/debugging'
+import type { HunspellManager } from '../../hunspell/HunspellManager'
 
 /*
  * Spellchecker, handles updates, schedules spelling checks
@@ -26,13 +27,17 @@ export class SpellChecker {
   private trackedChanges: ChangeSet
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(private readonly language: string) {
-    this.language = language
+  constructor(
+    private readonly language: string,
+    private hunspellManager?: HunspellManager
+  ) {
+    debugConsole.log('SpellChecker', language, hunspellManager)
     this.trackedChanges = ChangeSet.empty(0)
   }
 
   destroy() {
     this._clearPendingSpellCheck()
+    // this.hunspellManager?.destroy()
   }
 
   _abortRequest() {
@@ -86,7 +91,7 @@ export class SpellChecker {
       wordsToCheck
     )
     const processResult = (
-      misspellings: { index: number; suggestions: string[] }[]
+      misspellings: { index: number; suggestions?: string[] }[]
     ) => {
       this.trackedChanges = ChangeSet.empty(0)
 
@@ -108,16 +113,77 @@ export class SpellChecker {
     } else {
       this._abortRequest()
       this.abortController = new AbortController()
-      spellCheckRequest(this.language, unknownWords, this.abortController)
-        .then(result => {
-          this.abortController = null
-          processResult(result.misspellings)
-        })
-        .catch(error => {
-          this.abortController = null
-          debugConsole.error(error)
-        })
+      if (this.hunspellManager) {
+        const signal = this.abortController.signal
+        this.hunspellManager.send(
+          {
+            type: 'spell',
+            words: unknownWords.map(word => word.text),
+          },
+          (result: any) => {
+            if (!signal.aborted) {
+              if (result.error) {
+                debugConsole.error(result.error)
+              } else {
+                processResult(result.misspellings)
+              }
+            }
+          }
+        )
+      } else {
+        spellCheckRequest(this.language, unknownWords, this.abortController)
+          .then(result => {
+            this.abortController = null
+            return processResult(result.misspellings)
+          })
+          .catch(error => {
+            this.abortController = null
+            debugConsole.error(error)
+          })
+      }
     }
+  }
+
+  suggest(word: string) {
+    return new Promise<{ suggestions: string[] }>((resolve, reject) => {
+      if (this.hunspellManager) {
+        this.hunspellManager.send({ type: 'suggest', word }, result => {
+          if ((result as { error: true }).error) {
+            reject(new Error())
+          } else {
+            resolve(result as { suggestions: string[] })
+          }
+        })
+      }
+    })
+  }
+
+  addWord(word: string) {
+    return new Promise<void>((resolve, reject) => {
+      if (this.hunspellManager) {
+        this.hunspellManager.send({ type: 'add_word', word }, result => {
+          if ((result as { error: true }).error) {
+            reject(new Error())
+          } else {
+            resolve()
+          }
+        })
+      }
+    })
+  }
+
+  removeWord(word: string) {
+    return new Promise<void>((resolve, reject) => {
+      if (this.hunspellManager) {
+        this.hunspellManager.send({ type: 'remove_word', word }, result => {
+          if ((result as { error: true }).error) {
+            reject(new Error())
+          } else {
+            resolve()
+          }
+        })
+      }
+    })
   }
 
   _spellCheckWhenParserReady(view: EditorView) {
@@ -163,7 +229,7 @@ export class SpellChecker {
     const { from, to } = view.viewport
     const changedLineNumbers = new Set<number>()
     if (this.trackedChanges.length > 0) {
-      this.trackedChanges.iterChangedRanges((fromA, toA, fromB, toB) => {
+      this.trackedChanges.iterChangedRanges((_fromA, _toA, fromB, toB) => {
         if (fromB <= to && toB >= from) {
           const fromLine = view.state.doc.lineAt(fromB).number
           const toLine = view.state.doc.lineAt(toB).number
@@ -180,7 +246,9 @@ export class SpellChecker {
       }
     }
 
-    const ignoredWords = view.state.field(ignoredWordsField)
+    const ignoredWords = this.hunspellManager
+      ? null
+      : view.state.field(ignoredWordsField)
     for (const i of changedLineNumbers) {
       const line = view.state.doc.line(i)
       wordsToCheck.push(
@@ -228,7 +296,7 @@ export class Word {
 export const buildSpellCheckResult = (
   knownMisspelledWords: Word[],
   unknownWords: Word[],
-  misspellings: { index: number; suggestions: string[] }[]
+  misspellings: { index: number; suggestions?: string[] }[]
 ) => {
   const cacheAdditions: [Word, string[] | boolean][] = []
 
@@ -277,7 +345,7 @@ export const compileEffects = (results: {
 export const getWordsFromLine = (
   view: EditorView,
   line: Line,
-  ignoredWords: IgnoredWords,
+  ignoredWords: IgnoredWords | null,
   lang: string
 ): Word[] => {
   const normalTextSpans: Array<NormalTextSpan> = getNormalTextSpansFromLine(
@@ -287,14 +355,8 @@ export const getWordsFromLine = (
   const words: Word[] = []
   for (const span of normalTextSpans) {
     for (const match of span.text.matchAll(WORD_REGEX)) {
-      let word = match[0]
-      if (word.startsWith("'")) {
-        word = word.slice(1)
-      }
-      if (word.endsWith("'")) {
-        word = word.slice(0, -1)
-      }
-      if (!ignoredWords.has(word)) {
+      const word = match[0].replace(/^'+/, '').replace(/'+$/, '')
+      if (!ignoredWords?.has(word)) {
         const from = span.from + match.index
         words.push(
           new Word({

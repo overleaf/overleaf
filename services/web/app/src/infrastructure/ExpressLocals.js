@@ -174,6 +174,7 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
 
     res.locals.mathJaxPath = `/js/libs/mathjax-${PackageVersions.version.mathjax}/es5/tex-svg-full.js`
+    res.locals.dictionariesRoot = `/js/dictionaries/${PackageVersions.version.dictionaries}/`
 
     res.locals.lib = PackageVersions.lib
 

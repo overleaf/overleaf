@@ -2,10 +2,9 @@ import { StateField, StateEffect } from '@codemirror/state'
 import { EditorView, Decoration, DecorationSet } from '@codemirror/view'
 import { updateAfterAddingIgnoredWord } from './ignored-words'
 import { Word } from './spellchecker'
+import { setSpellCheckLanguageEffect } from '@/features/source-editor/extensions/spelling/index'
 
 export const addMisspelledWords = StateEffect.define<Word[]>()
-
-export const resetMisspelledWords = StateEffect.define()
 
 const createMark = (word: Word) => {
   return Decoration.mark({
@@ -39,14 +38,17 @@ export const misspelledWordsField = StateField.define<DecorationSet>({
       if (effect.is(addMisspelledWords)) {
         // Merge the new misspelled words into the existing set of marks
         marks = marks.update({
-          add: effect.value.map(word => createMark(word)),
+          add: effect.value.map(word => createMark(word)), // TODO: make sure these positions are still accurate
           sort: true,
         })
       } else if (effect.is(updateAfterAddingIgnoredWord)) {
-        // Remove a misspelled word, all instances that match text
-        const word = effect.value
-        marks = removeAllMarksMatchingWordText(marks, word)
-      } else if (effect.is(resetMisspelledWords)) {
+        // Remove existing marks matching the text of a supplied word
+        marks = marks.update({
+          filter(_from, _to, mark) {
+            return mark.spec.word.text !== effect.value
+          },
+        })
+      } else if (effect.is(setSpellCheckLanguageEffect)) {
         marks = Decoration.none
       }
     }
@@ -56,14 +58,3 @@ export const misspelledWordsField = StateField.define<DecorationSet>({
     return EditorView.decorations.from(field)
   },
 })
-
-/*
- * Remove existing marks matching the text of a supplied word
- */
-const removeAllMarksMatchingWordText = (marks: DecorationSet, word: string) => {
-  return marks.update({
-    filter: (from, to, mark) => {
-      return mark.spec.word.text !== word
-    },
-  })
-}

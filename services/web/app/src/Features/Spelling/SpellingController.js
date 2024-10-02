@@ -7,7 +7,7 @@ const LearnedWordsManager = require('./LearnedWordsManager')
 const TEN_SECONDS = 1000 * 10
 
 const languageCodeIsSupported = code =>
-  Settings.languages.some(lang => lang.code === code)
+  Settings.languages.some(lang => lang.code === code && lang.server !== false)
 
 module.exports = {
   learn(req, res, next) {

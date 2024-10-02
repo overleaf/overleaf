@@ -54,6 +54,7 @@ export interface Meta {
   'ol-allowedExperiments': string[]
   'ol-allowedImageNames': AllowedImageName[]
   'ol-anonymous': boolean
+  'ol-baseAssetPath': string
   'ol-bootstrapVersion': 3 | 5
   'ol-brandVariation': Record<string, any>
 
@@ -76,6 +77,7 @@ export interface Meta {
   'ol-currentUrl': string
   'ol-debugPdfDetach': boolean
   'ol-detachRole': 'detached' | 'detacher' | ''
+  'ol-dictionariesRoot': 'string'
   'ol-dropbox': { error: boolean; registered: boolean }
   'ol-editorThemes': string[]
   'ol-email': string

@@ -66,6 +66,7 @@ function getModuleDirectory(moduleName) {
 }
 
 const mathjaxDir = getModuleDirectory('mathjax')
+const dictionariesDir = getModuleDirectory('@overleaf/dictionaries')
 
 const pdfjsVersions = ['pdfjs-dist213', 'pdfjs-dist401']
 
@@ -75,6 +76,14 @@ const MATHJAX_VERSION = require('mathjax/package.json').version
 if (MATHJAX_VERSION !== PackageVersions.version.mathjax) {
   throw new Error(
     '"mathjax" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
+  )
+}
+
+const DICTIONARIES_VERSION =
+  require('@overleaf/dictionaries/package.json').version
+if (DICTIONARIES_VERSION !== PackageVersions.version.dictionaries) {
+  throw new Error(
+    '"@overleaf/dictionaries" version de-synced, update services/web/app/src/infrastructure/PackageVersions.js'
   )
 }
 
@@ -140,6 +149,13 @@ module.exports = {
           },
         ],
         type: 'javascript/auto',
+      },
+      {
+        test: /\.wasm$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'js/[name]-[contenthash][ext]',
+        },
       },
       {
         // Pass Less files through less-loader/css-loader/mini-css-extract-
@@ -275,6 +291,10 @@ module.exports = {
     },
   },
 
+  experiments: {
+    asyncWebAssembly: true,
+  },
+
   plugins: [
     new LezerGrammarCompilerPlugin(),
 
@@ -345,6 +365,12 @@ module.exports = {
           to: `js/libs/mathjax-${PackageVersions.version.mathjax}`,
           toType: 'dir',
           context: mathjaxDir,
+        },
+        {
+          from: '*',
+          to: `js/dictionaries/${PackageVersions.version.dictionaries}`,
+          toType: 'dir',
+          context: `${dictionariesDir}/dictionaries`,
         },
         ...pdfjsVersions.flatMap(version => {
           const dir = getModuleDirectory(version)

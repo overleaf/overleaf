@@ -37,7 +37,7 @@ import {
   addLearnedWord,
   removeLearnedWord,
   resetLearnedWords,
-  setSpelling,
+  setSpellCheckLanguage,
 } from '../extensions/spelling'
 import {
   createChangeManager,
@@ -65,6 +65,7 @@ import { setMathPreview } from '@/features/source-editor/extensions/math-preview
 import { useRangesContext } from '@/features/review-panel-new/context/ranges-context'
 import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel-new/context/threads-context'
+import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
@@ -110,6 +111,8 @@ function useCodeMirrorScope(view: EditorView) {
   const [spellCheckLanguage] = useScopeValue<string>(
     'project.spellCheckLanguage'
   )
+
+  const hunspellManager = useHunspell(spellCheckLanguage)
 
   const [visual] = useScopeValue<boolean>('editor.showVisual')
 
@@ -214,14 +217,16 @@ function useCodeMirrorScope(view: EditorView) {
 
   const spellingRef = useRef({
     spellCheckLanguage,
+    hunspellManager,
   })
 
   useEffect(() => {
     spellingRef.current = {
       spellCheckLanguage,
+      hunspellManager,
     }
-    view.dispatch(setSpelling(spellingRef.current))
-  }, [view, spellCheckLanguage])
+    view.dispatch(setSpellCheckLanguage(spellingRef.current))
+  }, [view, spellCheckLanguage, hunspellManager])
 
   // listen to doc:after-opened, and focus the editor if it's not a new doc
   useEffect(() => {
