@@ -1,13 +1,13 @@
 // Cards
 @mixin shadow-sm {
-  box-shadow: 0 2px 8px rgb(30 37 48 / 8%);
+  box-shadow: 0 2px 4px 0 rgb(30 37 48 / 16%);
 }
 
 // Tooltips, Callouts, Dropdowns, etc.
 @mixin shadow-md {
   box-shadow:
-    0 4px 24px rgb(30 37 48 / 12%),
-    0 1px 4px rgb(30 37 48 / 8%);
+    0 4px 12px 0 rgb(30 37 48 / 12%),
+    0 2px 4px rgb(30 37 48 / 8%);
 }
 
 // Modals, drawers
