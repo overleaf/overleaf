@@ -1,4 +1,4 @@
-import { StateEffect, TransactionSpec } from '@codemirror/state'
+import { StateEffect, StateField, TransactionSpec } from '@codemirror/state'
 import {
   Decoration,
   type DecorationSet,
@@ -18,7 +18,6 @@ import {
   isDeleteOperation,
   isInsertOperation,
 } from '@/utils/operations'
-import { DocumentContainer } from '@/features/ide-react/editor/document-container'
 import { Ranges } from '@/features/review-panel-new/context/ranges-context'
 import { Threads } from '@/features/review-panel-new/context/threads-context'
 import { isSelectionWithinOp } from '@/features/review-panel-new/utils/is-selection-within-op'
@@ -43,134 +42,156 @@ export const highlightRanges = (op?: AnyOperation): TransactionSpec => {
   }
 }
 
-type Options = {
-  currentDoc: DocumentContainer
-  loadingThreads?: boolean
-  ranges?: Ranges
-  threads?: Threads
-}
+export const rangesDataField = StateField.define<RangesData | null>({
+  create() {
+    return null
+  },
+  update(rangesData, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(updateRangesEffect)) {
+        return effect.value
+      }
+    }
+    return rangesData
+  },
+})
 
 /**
  * A custom extension that initialises the change manager, passes any updates to it,
  * and produces decorations for tracked changes and comments.
  */
-export const ranges = ({ ranges, threads }: Options) => {
-  return [
-    // handle viewportChanged updates
-    ViewPlugin.define(view => {
-      let timer: number
+export const ranges = () => [
+  rangesDataField,
+  // handle viewportChanged updates
+  ViewPlugin.define(view => {
+    let timer: number
 
+    return {
+      update(update) {
+        if (update.viewportChanged) {
+          if (timer) {
+            window.clearTimeout(timer)
+          }
+
+          timer = window.setTimeout(() => {
+            dispatchEvent(new Event('editor:viewport-changed'))
+          }, 25)
+        }
+      },
+    }
+  }),
+
+  // draw change decorations
+  ViewPlugin.define<
+    PluginValue & {
+      decorations: DecorationSet
+    }
+  >(
+    () => {
       return {
+        decorations: Decoration.none,
         update(update) {
-          if (update.viewportChanged) {
-            if (timer) {
-              window.clearTimeout(timer)
-            }
+          for (const transaction of update.transactions) {
+            this.decorations = this.decorations.map(transaction.changes)
 
-            timer = window.setTimeout(() => {
-              dispatchEvent(new Event('editor:viewport-changed'))
-            }, 25)
+            for (const effect of transaction.effects) {
+              if (effect.is(updateRangesEffect)) {
+                this.decorations = buildChangeDecorations(effect.value)
+              }
+            }
           }
         },
       }
-    }),
+    },
+    {
+      decorations: value => value.decorations,
+    }
+  ),
 
-    // draw change decorations
-    ViewPlugin.define<
-      PluginValue & {
-        decorations: DecorationSet
-      }
-    >(
-      () => {
-        return {
-          decorations:
-            ranges && threads
-              ? buildChangeDecorations({ ranges, threads })
-              : Decoration.none,
-          update(update) {
-            for (const transaction of update.transactions) {
-              this.decorations = this.decorations.map(transaction.changes)
+  // draw highlight decorations
+  ViewPlugin.define<
+    PluginValue & {
+      decorations: DecorationSet
+    }
+  >(
+    () => {
+      return {
+        decorations: Decoration.none,
+        update(update) {
+          for (const transaction of update.transactions) {
+            this.decorations = this.decorations.map(transaction.changes)
 
-              for (const effect of transaction.effects) {
-                if (effect.is(updateRangesEffect)) {
-                  this.decorations = buildChangeDecorations(effect.value)
-                }
-              }
-            }
-          },
-        }
-      },
-      {
-        decorations: value => value.decorations,
-      }
-    ),
-
-    // draw highlight decorations
-    ViewPlugin.define<
-      PluginValue & {
-        decorations: DecorationSet
-      }
-    >(
-      () => {
-        return {
-          decorations: Decoration.none,
-          update(update) {
-            for (const transaction of update.transactions) {
-              this.decorations = this.decorations.map(transaction.changes)
-
-              for (const effect of transaction.effects) {
-                if (effect.is(highlightRangesEffect)) {
-                  this.decorations = buildHighlightDecorations(
-                    'ol-cm-change-highlight',
-                    effect.value
-                  )
-                }
-              }
-            }
-          },
-        }
-      },
-      {
-        decorations: value => value.decorations,
-      }
-    ),
-
-    // draw focus decorations
-    ViewPlugin.define<
-      PluginValue & {
-        decorations: DecorationSet
-      }
-    >(
-      () => {
-        return {
-          decorations: Decoration.none,
-          update(update) {
-            this.decorations = Decoration.none
-
-            if (!ranges) {
-              return
-            }
-
-            for (const range of [...ranges.changes, ...ranges.comments]) {
-              if (isSelectionWithinOp(range.op, update.state.selection.main)) {
+            for (const effect of transaction.effects) {
+              if (effect.is(highlightRangesEffect)) {
                 this.decorations = buildHighlightDecorations(
-                  'ol-cm-change-focus',
-                  range.op
+                  'ol-cm-change-highlight',
+                  effect.value
                 )
               }
             }
-          },
-        }
-      },
-      {
-        decorations: value => value.decorations,
+          }
+        },
       }
-    ),
+    },
+    {
+      decorations: value => value.decorations,
+    }
+  ),
 
-    // styles for change decorations
-    trackChangesTheme,
-  ]
-}
+  // draw focus decorations
+  ViewPlugin.define<
+    PluginValue & {
+      decorations: DecorationSet
+    }
+  >(
+    view => {
+      return {
+        decorations: Decoration.none,
+        update(update) {
+          if (
+            !update.transactions.some(
+              tr =>
+                tr.selection ||
+                tr.effects.some(effect => effect.is(updateRangesEffect))
+            )
+          ) {
+            return
+          }
+
+          this.decorations = Decoration.none
+          const rangesData = view.state.field(rangesDataField)
+
+          if (!rangesData?.ranges) {
+            return
+          }
+          const { changes, comments } = rangesData.ranges
+          const unresolvedComments = rangesData.threads
+            ? comments.filter(
+                comment =>
+                  comment.op.t && !rangesData.threads[comment.op.t].resolved
+              )
+            : []
+
+          for (const range of [...changes, ...unresolvedComments]) {
+            if (isSelectionWithinOp(range.op, update.state.selection.main)) {
+              this.decorations = buildHighlightDecorations(
+                'ol-cm-change-focus',
+                range.op
+              )
+              break
+            }
+          }
+        },
+      }
+    },
+    {
+      decorations: value => value.decorations,
+    }
+  ),
+
+  // styles for change decorations
+  trackChangesTheme,
+]
 
 const buildChangeDecorations = (data: RangesData) => {
   if (!data.ranges) {

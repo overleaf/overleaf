@@ -172,8 +172,6 @@ function useCodeMirrorScope(view: EditorView) {
     currentDoc,
     trackChanges,
     loadingThreads,
-    threads,
-    ranges,
   })
 
   useEffect(() => {
@@ -183,8 +181,6 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, currentDoc])
 
   useEffect(() => {
-    currentDocRef.current.ranges = ranges
-    currentDocRef.current.threads = threads
     if (ranges && threads) {
       window.setTimeout(() => {
         view.dispatch(updateRanges({ ranges, threads }))
