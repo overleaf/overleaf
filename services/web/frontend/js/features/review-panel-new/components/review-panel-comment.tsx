@@ -11,7 +11,10 @@ export const ReviewPanelComment = memo<{
   docId: string
   top?: number
   hoverRanges?: boolean
-}>(({ comment, top, docId, hoverRanges }) => {
+  onEnter?: () => void
+  onLeave?: () => void
+  hovered?: boolean
+}>(({ comment, top, hovered, onEnter, onLeave, docId, hoverRanges }) => {
   const threads = useThreadsContext()
 
   const thread = threads?.[comment.op.t]
@@ -23,6 +26,7 @@ export const ReviewPanelComment = memo<{
     <ReviewPanelEntry
       className={classnames('review-panel-entry-comment', {
         'review-panel-entry-loaded': !!threads?.[comment.op.t],
+        'review-panel-entry-hover': hovered,
       })}
       docId={docId}
       top={top}
@@ -30,10 +34,19 @@ export const ReviewPanelComment = memo<{
       position={comment.op.p}
       hoverRanges={hoverRanges}
     >
-      <div className="review-panel-entry-indicator">
+      <div
+        className="review-panel-entry-indicator"
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+      >
         <MaterialIcon type="comment" className="review-panel-entry-icon" />
       </div>
-      <ReviewPanelCommentContent comment={comment} isResolved={false} />
+      <ReviewPanelCommentContent
+        comment={comment}
+        isResolved={false}
+        onLeave={onLeave}
+        onEnter={onEnter}
+      />
     </ReviewPanelEntry>
   )
 })

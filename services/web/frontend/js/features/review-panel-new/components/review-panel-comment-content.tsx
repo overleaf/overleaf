@@ -14,7 +14,9 @@ import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>
   isResolved: boolean
-}>(({ comment, isResolved }) => {
+  onLeave?: () => void
+  onEnter?: () => void
+}>(({ comment, isResolved, onLeave, onEnter }) => {
   const { t } = useTranslation()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<Error>()
@@ -47,7 +49,11 @@ export const ReviewPanelCommentContent = memo<{
   }
 
   return (
-    <div className="review-panel-entry-content">
+    <div
+      className="review-panel-entry-content"
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+    >
       {thread.messages.map((message, i) => {
         const isReply = i !== 0
 

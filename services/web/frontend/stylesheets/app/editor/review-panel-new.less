@@ -554,15 +554,14 @@
       margin-left: 0;
       background-color: transparent;
       border: none;
+      width: 100%;
     }
 
     .review-panel-entry-indicator {
       position: absolute;
       left: 0;
-      top: 7px;
+      top: 0;
       display: flex;
-      width: 16px;
-      height: 16px;
       color: @content-secondary;
       cursor: pointer;
     }
@@ -576,7 +575,7 @@
       padding: @spacing-02;
     }
 
-    .review-panel-entry:hover {
+    .review-panel-entry-hover {
       .review-panel-entry-content {
         display: initial;
         position: absolute;
@@ -598,4 +597,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
+}
+.review-panel-tooltip {
+  pointer-events: none; // this is to prevent mouseLeave event from firing when hovering over the tooltip
 }

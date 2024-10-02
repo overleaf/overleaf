@@ -43,6 +43,20 @@ const ReviewPanelCurrentFile: FC = () => {
   const ranges = useRangesContext()
   const threads = useThreadsContext()
   const state = useCodeMirrorStateContext()
+  const [hoveredEntry, setHoveredEntry] = useState<string | null>(null)
+
+  const hoverTimeout = useRef<number>(0)
+  const handleEntryEnter = useCallback((id: string) => {
+    clearTimeout(hoverTimeout.current)
+    setHoveredEntry(id)
+  }, [])
+
+  const handleEntryLeave = useCallback((id: string) => {
+    clearTimeout(hoverTimeout.current)
+    hoverTimeout.current = window.setTimeout(() => {
+      setHoveredEntry(null)
+    }, 100)
+  }, [])
 
   const [aggregatedRanges, setAggregatedRanges] = useState<AggregatedRanges>()
 
@@ -298,6 +312,9 @@ const ReviewPanelCurrentFile: FC = () => {
                 change={change}
                 top={positions.get(change.id)}
                 aggregate={aggregatedRanges.aggregates.get(change.id)}
+                hovered={hoveredEntry === change.id}
+                onEnter={() => handleEntryEnter(change.id)}
+                onLeave={() => handleEntryLeave(change.id)}
               />
             )
         )}
@@ -310,6 +327,9 @@ const ReviewPanelCurrentFile: FC = () => {
                 key={comment.id}
                 comment={comment}
                 top={positions.get(comment.id)}
+                hovered={hoveredEntry === comment.id}
+                onEnter={() => handleEntryEnter(comment.id)}
+                onLeave={() => handleEntryLeave(comment.id)}
               />
             )
         )}

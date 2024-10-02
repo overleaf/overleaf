@@ -106,6 +106,7 @@ export const ReviewPanelMessage: FC<{
               id="resolve-thread"
               overlayProps={{ placement: 'bottom' }}
               description={t('resolve_comment')}
+              tooltipProps={{ className: 'review-panel-tooltip' }}
             >
               <Button onClick={onResolve} bsStyle={null}>
                 <MaterialIcon
