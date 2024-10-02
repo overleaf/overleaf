@@ -23,6 +23,9 @@
     "typescript": "^5.5.4"
   },
   "overrides": {
+    "fetch-mock": {
+      "path-to-regexp": "3.3.0"
+    },
     "google-gax": {
       "protobufjs": "^7.2.5"
     },
