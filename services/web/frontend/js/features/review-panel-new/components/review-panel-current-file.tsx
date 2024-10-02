@@ -31,6 +31,7 @@ import { hasActiveRange } from '@/features/review-panel-new/utils/has-active-ran
 import { addCommentStateField } from '@/features/source-editor/extensions/add-comment'
 import ReviewPanelMoreCommentsButton from './review-panel-more-comments-button'
 import useMoreCommments from '../hooks/use-more-comments'
+import { Decoration } from '@codemirror/view'
 
 type AggregatedRanges = {
   changes: Change<EditOperation>[]
@@ -216,7 +217,7 @@ const ReviewPanelCurrentFile: FC = () => {
   } = useMoreCommments(
     aggregatedRanges?.changes ?? [],
     aggregatedRanges?.comments ?? [],
-    addCommentRanges
+    addCommentRanges ?? Decoration.none
   )
 
   const updatePositions = useCallback(() => {
