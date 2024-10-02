@@ -390,6 +390,37 @@
   }
 }
 
+.sidebar-blog {
+  .card-body {
+    padding: var(--spacing-06) !important;
+
+    h2 {
+      @extend .h5;
+
+      padding: var(--spacing-04) var(--spacing-05);
+      margin-bottom: unset;
+    }
+
+    .tags-list {
+      padding: 0 var(--spacing-05);
+      margin-bottom: 0 !important;
+
+      a {
+        text-decoration: none;
+      }
+    }
+
+    .sidebar-register-container {
+      margin-top: var(--spacing-05);
+
+      a {
+        margin-top: var(--spacing-02);
+        margin-left: var(--spacing-05);
+      }
+    }
+  }
+}
+
 .contact-form-error-container {
   padding-bottom: var(--spacing-08);
 }
