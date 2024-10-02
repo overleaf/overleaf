@@ -299,6 +299,12 @@ const trackChangesTheme = EditorView.baseTheme({
   '.ol-cm-change': {
     padding: 'var(--half-leading, 0) 0',
   },
+  '.ol-cm-change-highlight': {
+    padding: 'var(--half-leading, 0) 0',
+  },
+  '.ol-cm-change-focus': {
+    padding: 'var(--half-leading, 0) 0',
+  },
   '.ol-cm-change-d': {
     borderLeft: '2px dotted #c5060b',
     marginLeft: '-1px',
