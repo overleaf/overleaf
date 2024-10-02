@@ -253,9 +253,10 @@ app.post(
 function maybeResetData(resetData, callback) {
   if (!resetData) return callback()
 
+  previousConfig = ''
   runDockerCompose(
-    'stop',
-    ['--timeout=0', 'sharelatex'],
+    'down',
+    ['--timeout=0', '--volumes', 'mongo', 'redis', 'sharelatex'],
     (error, stdout, stderr) => {
       if (error) return callback(error, stdout, stderr)
 
@@ -264,13 +265,7 @@ function maybeResetData(resetData, callback) {
       } catch (error) {
         return callback(error)
       }
-
-      previousConfig = ''
-      runDockerCompose(
-        'down',
-        ['--timeout=0', '--volumes', 'mongo', 'redis'],
-        callback
-      )
+      callback()
     }
   )
 }
@@ -294,6 +289,12 @@ app.post(
     maybeResetData(resetData, (error, stdout, stderr) => {
       if (error) return res.json({ error, stdout, stderr })
 
+      const previousConfigServer = previousConfig
+      const newConfig = JSON.stringify(req.body)
+      if (previousConfig === newConfig) {
+        return res.json({ previousConfigServer })
+      }
+
       try {
         setVarsDockerCompose({ pro, version, vars, withDataDir })
       } catch (error) {
@@ -305,8 +306,7 @@ app.post(
         'up',
         ['--detach', '--wait', 'sharelatex'],
         (error, stdout, stderr) => {
-          const previousConfigServer = previousConfig
-          previousConfig = JSON.stringify(req.body)
+          previousConfig = newConfig
           res.json({ error, stdout, stderr, previousConfigServer })
         }
       )
