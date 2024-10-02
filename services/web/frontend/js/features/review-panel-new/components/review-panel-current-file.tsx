@@ -147,7 +147,7 @@ const ReviewPanelCurrentFile: FC = () => {
 
   const positionsRef = useRef<Map<string, number>>(new Map())
 
-  const addCommentRanges = state.field(addCommentStateField).ranges
+  const addCommentRanges = state.field(addCommentStateField, false)?.ranges
 
   useEffect(() => {
     if (aggregatedRanges) {
@@ -176,6 +176,10 @@ const ReviewPanelCurrentFile: FC = () => {
             if (position) {
               positionsRef.current.set(comment.id, position)
             }
+          }
+
+          if (!addCommentRanges) {
+            return
           }
 
           const cursor = addCommentRanges.iter()
@@ -212,6 +216,10 @@ const ReviewPanelCurrentFile: FC = () => {
   )
 
   const addCommentEntries = useMemo(() => {
+    if (!addCommentRanges) {
+      return []
+    }
+
     const cursor = addCommentRanges.iter()
 
     const entries = []
