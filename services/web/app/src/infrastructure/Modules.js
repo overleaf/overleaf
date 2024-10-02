@@ -68,7 +68,7 @@ const loadModules = _.memoize(loadModulesImpl)
 async function applyRouter(webRouter, privateApiRouter, publicApiRouter) {
   for (const module of await modules()) {
     if (module.router && module.router.apply) {
-      module.router.apply(webRouter, privateApiRouter, publicApiRouter)
+      await module.router.apply(webRouter, privateApiRouter, publicApiRouter)
     }
   }
 }
