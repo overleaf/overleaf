@@ -24,6 +24,7 @@ const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandle
 const _ = require('lodash')
 const Async = require('async')
 const Errors = require('../Errors/Errors')
+const { promisify } = require('@overleaf/promise-utils')
 
 if (!Features.hasFeature('references')) {
   logger.debug('references search not enabled')
@@ -194,6 +195,10 @@ module.exports = ReferencesHandler = {
       )
     })
   },
+}
+
+ReferencesHandler.promises = {
+  indexAll: promisify(ReferencesHandler.indexAll),
 }
 
 function __guard__(value, transform) {

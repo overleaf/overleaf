@@ -17,15 +17,19 @@ describe('LinkedFilesController', function () {
   beforeEach(function () {
     this.userId = 'user-id'
     this.Agent = {
-      createLinkedFile: sinon.stub().yields(),
-      refreshLinkedFile: sinon.stub().yields(),
+      promises: {
+        createLinkedFile: sinon.stub().resolves(),
+        refreshLinkedFile: sinon.stub().resolves(),
+      },
     }
     this.projectId = 'projectId'
     this.provider = 'provider'
     this.name = 'linked-file-name'
     this.data = { customAgentData: 'foo' }
     this.LinkedFilesHandler = {
-      getFileById: sinon.stub(),
+      promises: {
+        getFileById: sinon.stub(),
+      },
     }
     this.AnalyticsManager = {}
     this.SessionManager = {
@@ -77,7 +81,7 @@ describe('LinkedFilesController', function () {
       this.next = sinon.stub().callsFake(() => done('unexpected error'))
       this.res = {
         json: () => {
-          expect(this.Agent.createLinkedFile).to.have.been.calledWith(
+          expect(this.Agent.promises.createLinkedFile).to.have.been.calledWith(
             this.projectId,
             { ...this.data, importedAt: this.fakeTime.toISOString() },
             this.name,
@@ -100,10 +104,14 @@ describe('LinkedFilesController', function () {
           importedAt: new Date(2020, 1, 1).toISOString(),
         },
       }
-      this.LinkedFilesHandler.getFileById
+      this.LinkedFilesHandler.promises.getFileById
         .withArgs(this.projectId, 'file-id')
-        .yields(null, this.file, 'fake-path', {
-          _id: 'parent-folder-id',
+        .resolves({
+          file: this.file,
+          path: 'fake-path',
+          parentFolder: {
+            _id: 'parent-folder-id',
+          },
         })
       this.req = {
         params: { project_id: this.projectId, file_id: 'file-id' },
@@ -116,7 +124,7 @@ describe('LinkedFilesController', function () {
       this.next = sinon.stub().callsFake(() => done('unexpected error'))
       this.res = {
         json: () => {
-          expect(this.Agent.refreshLinkedFile).to.have.been.calledWith(
+          expect(this.Agent.promises.refreshLinkedFile).to.have.been.calledWith(
             this.projectId,
             {
               ...this.data,

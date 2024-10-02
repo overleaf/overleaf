@@ -1,7 +1,6 @@
 /* eslint-disable
     n/handle-callback-err,
     max-len,
-    no-unused-vars,
 */
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
@@ -14,21 +13,18 @@
 let ProjectFileAgent
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const ProjectLocator = require('../Project/ProjectLocator')
-const ProjectGetter = require('../Project/ProjectGetter')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 const _ = require('lodash')
-const Settings = require('@overleaf/settings')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
 const {
   BadDataError,
   AccessDeniedError,
   BadEntityTypeError,
   SourceFileNotFoundError,
-  ProjectNotFoundError,
-  V1ProjectNotFoundError,
 } = require('./LinkedFilesErrors')
+const { promisify } = require('@overleaf/promise-utils')
 
 module.exports = ProjectFileAgent = {
   createLinkedFile(
@@ -39,10 +35,10 @@ module.exports = ProjectFileAgent = {
     userId,
     callback
   ) {
-    if (!this._canCreate(linkedFileData)) {
+    if (!ProjectFileAgent._canCreate(linkedFileData)) {
       return callback(new AccessDeniedError())
     }
-    return this._go(
+    return ProjectFileAgent._go(
       projectId,
       linkedFileData,
       name,
@@ -60,7 +56,7 @@ module.exports = ProjectFileAgent = {
     userId,
     callback
   ) {
-    return this._go(
+    return ProjectFileAgent._go(
       projectId,
       linkedFileData,
       name,
@@ -74,7 +70,7 @@ module.exports = ProjectFileAgent = {
     if (callback == null) {
       callback = function () {}
     }
-    return this._checkAuth(
+    return ProjectFileAgent._checkAuth(
       projectId,
       linkedFileData,
       userId,
@@ -85,7 +81,7 @@ module.exports = ProjectFileAgent = {
         if (!allowed) {
           return callback(new AccessDeniedError())
         }
-        if (!this._validate(linkedFileData)) {
+        if (!ProjectFileAgent._validate(linkedFileData)) {
           return callback(new BadDataError())
         }
         return callback(null, linkedFileData)
@@ -94,8 +90,8 @@ module.exports = ProjectFileAgent = {
   },
 
   _go(projectId, linkedFileData, name, parentFolderId, userId, callback) {
-    linkedFileData = this._sanitizeData(linkedFileData)
-    return this._prepare(
+    linkedFileData = ProjectFileAgent._sanitizeData(linkedFileData)
+    return ProjectFileAgent._prepare(
       projectId,
       linkedFileData,
       userId,
@@ -103,10 +99,10 @@ module.exports = ProjectFileAgent = {
         if (err != null) {
           return callback(err)
         }
-        if (!this._validate(linkedFileData)) {
+        if (!ProjectFileAgent._validate(linkedFileData)) {
           return callback(new BadDataError())
         }
-        return this._getEntity(
+        return ProjectFileAgent._getEntity(
           linkedFileData,
           userId,
           (err, sourceProject, entity, type) => {
@@ -177,36 +173,39 @@ module.exports = ProjectFileAgent = {
     }
     callback = _.once(callback)
     const { source_entity_path: sourceEntityPath } = linkedFileData
-    return this._getSourceProject(linkedFileData, function (err, project) {
-      if (err != null) {
-        return callback(err)
-      }
-      const sourceProjectId = project._id
-      return DocumentUpdaterHandler.flushProjectToMongo(
-        sourceProjectId,
-        function (err) {
-          if (err != null) {
-            return callback(err)
-          }
-          return ProjectLocator.findElementByPath(
-            {
-              project_id: sourceProjectId,
-              path: sourceEntityPath,
-              exactCaseMatch: true,
-            },
-            function (err, entity, type) {
-              if (err != null) {
-                if (/^not found.*/.test(err.message)) {
-                  err = new SourceFileNotFoundError()
-                }
-                return callback(err)
-              }
-              return callback(null, project, entity, type)
-            }
-          )
+    return ProjectFileAgent._getSourceProject(
+      linkedFileData,
+      function (err, project) {
+        if (err != null) {
+          return callback(err)
         }
-      )
-    })
+        const sourceProjectId = project._id
+        return DocumentUpdaterHandler.flushProjectToMongo(
+          sourceProjectId,
+          function (err) {
+            if (err != null) {
+              return callback(err)
+            }
+            return ProjectLocator.findElementByPath(
+              {
+                project_id: sourceProjectId,
+                path: sourceEntityPath,
+                exactCaseMatch: true,
+              },
+              function (err, entity, type) {
+                if (err != null) {
+                  if (/^not found.*/.test(err.message)) {
+                    err = new SourceFileNotFoundError()
+                  }
+                  return callback(err)
+                }
+                return callback(null, project, entity, type)
+              }
+            )
+          }
+        )
+      }
+    )
   },
 
   _sanitizeData(data) {
@@ -242,7 +241,7 @@ module.exports = ProjectFileAgent = {
     if (!ProjectFileAgent._validate(data)) {
       return callback(new BadDataError())
     }
-    return this._getSourceProject(data, function (err, project) {
+    return ProjectFileAgent._getSourceProject(data, function (err, project) {
       if (err != null) {
         return callback(err)
       }
@@ -259,4 +258,9 @@ module.exports = ProjectFileAgent = {
       )
     })
   },
+}
+
+ProjectFileAgent.promises = {
+  createLinkedFile: promisify(ProjectFileAgent.createLinkedFile),
+  refreshLinkedFile: promisify(ProjectFileAgent.refreshLinkedFile),
 }

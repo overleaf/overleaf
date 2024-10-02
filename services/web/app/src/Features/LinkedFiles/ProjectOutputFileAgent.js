@@ -10,6 +10,7 @@ const {
 } = require('./LinkedFilesErrors')
 const { OutputFileFetchFailedError } = require('../Errors/Errors')
 const LinkedFilesHandler = require('./LinkedFilesHandler')
+const { promisify } = require('@overleaf/promise-utils')
 
 function _prepare(projectId, linkedFileData, userId, callback) {
   _checkAuth(projectId, linkedFileData, userId, (err, allowed) => {
@@ -225,4 +226,11 @@ function _compileAndGetFileStream(linkedFileData, userId, callback) {
   })
 }
 
-module.exports = { createLinkedFile, refreshLinkedFile }
+module.exports = {
+  createLinkedFile,
+  refreshLinkedFile,
+  promises: {
+    createLinkedFile: promisify(createLinkedFile),
+    refreshLinkedFile: promisify(refreshLinkedFile),
+  },
+}
