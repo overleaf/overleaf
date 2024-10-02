@@ -1,4 +1,6 @@
 .review-panel-new {
+  @review-panel-header-height: 69px;
+
   &.review-panel-container {
     height: 100%;
     flex-shrink: 0;
@@ -125,6 +127,7 @@
     position: fixed;
     top: var(--review-panel-top);
     width: var(--review-panel-width);
+    height: @review-panel-header-height;
     z-index: 2;
     display: flex;
     flex-direction: column;
@@ -396,7 +399,7 @@
   .review-panel-overview {
     padding: 4px;
     position: absolute;
-    top: 69px;
+    top: @review-panel-header-height;
     bottom: 59px;
     width: 100%;
     overflow: auto;
@@ -499,6 +502,31 @@
       background-color: @neutral-20;
       color: @content-primary;
     }
+  }
+
+  .review-panel-more-comments-button-container {
+    position: fixed;
+    width: var(--review-panel-width);
+    display: flex;
+    justify-content: center;
+    z-index: 3;
+
+    &.downwards {
+      // TODO: fix this to not use a magic number when we have updated the footer ui
+      top: calc(100% - 102px);
+    }
+
+    &.upwards {
+      top: calc(var(--review-panel-top) + @review-panel-header-height + 16px);
+    }
+  }
+
+  .review-panel-more-comments-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2px 8px;
+    height: 24px;
   }
 
   &.review-panel-subview-overview {
