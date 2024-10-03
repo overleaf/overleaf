@@ -668,8 +668,6 @@ describe('RangesManager', function () {
       beforeEach(function () {
         this.change_ids = [this.ranges.changes[1].id]
         this.result = this.RangesManager.acceptChanges(
-          this.project_id,
-          this.doc_id,
           this.change_ids,
           this.ranges
         )
@@ -716,8 +714,6 @@ describe('RangesManager', function () {
           this.ranges.changes[4].id,
         ]
         this.result = this.RangesManager.acceptChanges(
-          this.project_id,
-          this.doc_id,
           this.change_ids,
           this.ranges
         )
