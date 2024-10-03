@@ -70,6 +70,10 @@
     margin-left: var(--spacing-06);
   }
 
+  .card + .card {
+    margin-top: var(--spacing-09);
+  }
+
   .optional-text {
     font-size: 14px;
   }
@@ -329,6 +333,29 @@
       }
     }
   }
+
+  .card,
+  .no-card {
+    &.top-margin-sm {
+      margin-top: var(--spacing-05);
+    }
+
+    &.top-margin-md {
+      margin-top: var(--spacing-07);
+    }
+
+    &.top-margin-lg {
+      margin-top: var(--spacing-09);
+    }
+
+    &.top-margin-xl {
+      margin-top: var(--spacing-10);
+    }
+
+    &.top-margin-xxl {
+      margin-top: var(--spacing-11);
+    }
+  }
 }
 
 .icon-with-content {
@@ -576,26 +603,6 @@
       }
     }
   }
-}
-
-.top-margin-sm {
-  margin-top: var(--spacing-05);
-}
-
-.top-margin-md {
-  margin-top: var(--spacing-07);
-}
-
-.top-margin-lg {
-  margin-top: var(--spacing-09);
-}
-
-.top-margin-xl {
-  margin-top: var(--spacing-10);
-}
-
-.top-margin-xxl {
-  margin-top: var(--spacing-11);
 }
 
 .bottom-align-last-entry {
