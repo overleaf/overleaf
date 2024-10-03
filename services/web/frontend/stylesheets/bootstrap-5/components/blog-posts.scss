@@ -2,6 +2,18 @@
   v2
   Blog Pages
 */
+.blog-container {
+  .blog-list-container-title {
+    small {
+      @include body-lg;
+
+      display: block;
+      margin-top: var(--spacing-06);
+      font-weight: 400;
+    }
+  }
+}
+
 .blog {
   img {
     max-width: 100%;
@@ -13,7 +25,6 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-09);
 
     .card-header {
       margin-bottom: var(--margin-sm);
@@ -22,6 +33,21 @@
 
     p {
       margin-top: 12.5px;
+    }
+
+    > li {
+      .blog-date {
+        margin-top: var(--spacing-07);
+      }
+
+      &:not(:last-child) {
+        padding-bottom: var(--spacing-09);
+        border-bottom: 1px solid var(--neutral-20);
+      }
+
+      &:not(:first-child) {
+        padding-top: var(--spacing-09);
+      }
     }
   }
 
@@ -40,12 +66,39 @@
       margin-bottom: var(--spacing-04);
     }
 
+    .blog-post-title-link {
+      margin-top: var(--spacing-04);
+      margin-bottom: var(--spacing-06);
+
+      a {
+        text-decoration: none;
+        color: var(--neutral-90);
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
     .blog-date {
       display: block;
-      margin-bottom: var(--spacing-08);
     }
 
     .blog-content {
+      margin-top: var(--spacing-08);
+
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .blog-content-preview {
+      margin-bottom: var(--spacing-06);
+
+      > *:first-child {
+        margin-top: 0;
+      }
+
       > *:last-child {
         margin-bottom: 0;
       }
@@ -53,6 +106,21 @@
 
     .blog-footer-tags {
       margin-top: var(--spacing-12);
+    }
+
+    .blog-read-more {
+      margin-bottom: var(--spacing-07);
+
+      a {
+        @extend .dm-mono;
+
+        text-decoration: none;
+        font-weight: 500;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
 
@@ -65,6 +133,10 @@
       display: flex;
       gap: var(--spacing-05);
       flex-wrap: wrap;
+    }
+
+    .badge-tag {
+      padding: 0 var(--bs-badge-padding-x);
     }
 
     li {
