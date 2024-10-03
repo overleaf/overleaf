@@ -691,6 +691,8 @@ describe('DocumentManager', function () {
 
       it('should apply the accept change to the ranges', function () {
         this.RangesManager.acceptChanges.should.have.been.calledWith(
+          this.project_id,
+          this.doc_id,
           [this.change_id],
           this.ranges
         )
@@ -722,7 +724,12 @@ describe('DocumentManager', function () {
 
       it('should apply the accept change to the ranges', function () {
         this.RangesManager.acceptChanges
-          .calledWith(this.change_ids, this.ranges)
+          .calledWith(
+            this.project_id,
+            this.doc_id,
+            this.change_ids,
+            this.ranges
+          )
           .should.equal(true)
       })
     })
