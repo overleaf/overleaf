@@ -25,18 +25,50 @@
     }
   }
 
+  .blog-post-container {
+    @include media-breakpoint-up(lg) {
+      padding-right: 0;
+    }
+  }
+
+  .blog-post {
+    @include media-breakpoint-up(lg) {
+      margin-right: var(--spacing-09);
+    }
+
+    .blog-title {
+      margin-bottom: var(--spacing-04);
+    }
+
+    .blog-date {
+      display: block;
+      margin-bottom: var(--spacing-08);
+    }
+
+    .blog-content {
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .blog-footer-tags {
+      margin-top: var(--spacing-12);
+    }
+  }
+
   .tags {
     margin-top: var(--margin-md);
 
     .tags-list {
       list-style: none;
       padding: 0;
+      display: flex;
+      gap: var(--spacing-05);
+      flex-wrap: wrap;
     }
 
     li {
-      display: inline-block;
-      margin: 0;
-      padding: 0 var(--spacing-04) var(--spacing-04) 0;
+      display: inline-flex;
     }
 
     a {

@@ -1,0 +1,20 @@
+.previous-page-link {
+  @include body-sm;
+
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--neutral-90);
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:visited {
+    color: var(--neutral-90);
+  }
+
+  i {
+    margin-right: var(--spacing-02);
+    padding-bottom: 3px;
+  }
+}
