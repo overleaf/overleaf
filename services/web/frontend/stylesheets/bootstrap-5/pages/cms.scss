@@ -399,6 +399,10 @@
 }
 
 .vertically-center-col {
+  div[class*='col-'] {
+    align-self: center;
+  }
+
   // remove margin to better vertically align
   // some elements need to be nested within a container, and others are directly within .no-card/.card
   .card:first-child,
@@ -522,12 +526,6 @@
     }
   }
 
-  .vertically-center-col {
-    div[class*='col-'] {
-      align-self: center;
-    }
-  }
-
   .section-row {
     &.section-row-max-800 {
       max-width: 800px !important;
@@ -582,25 +580,12 @@
 // Mobile layout options depdendent on mobile breakpoint
 @include media-breakpoint-down(lg) {
   .cms-page {
-    div[class*='col-'] {
-      &:not(:first-child) {
-        padding-top: var(--spacing-13);
-      }
+    div.row {
+      row-gap: var(--spacing-13);
     }
 
     .reverse-col-order-mobile {
       flex-direction: column-reverse;
-
-      // 1st column is displayed as 2nd column on mobile when reversed
-      div[class*='col-'] {
-        &:not(:last-child) {
-          padding-top: var(--spacing-13);
-        }
-
-        &:last-child {
-          padding-top: 0; // unset padding from default rows above
-        }
-      }
     }
   }
 }
