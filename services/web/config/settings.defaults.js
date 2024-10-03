@@ -977,6 +977,9 @@ module.exports = {
     reportPercentage: parseFloat(process.env.CSP_REPORT_PERCENTAGE) || 0,
     reportUri: process.env.CSP_REPORT_URI,
     exclude: [],
+    viewDirectives: {
+      'app/views/project/ide-react': [`img-src 'self' data: blob:`],
+    },
   },
 
   unsupportedBrowsers: {

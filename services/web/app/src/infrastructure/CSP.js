@@ -6,6 +6,7 @@ module.exports = function ({
   reportPercentage,
   reportOnly = false,
   exclude = [],
+  viewDirectives = {},
 }) {
   const header = reportOnly
     ? 'Content-Security-Policy-Report-Only'
@@ -37,7 +38,12 @@ module.exports = function ({
 
         res.locals.scriptNonce = scriptNonce
 
-        const policy = buildViewPolicy(scriptNonce, reportPercentage, reportUri)
+        const policy = buildViewPolicy(
+          scriptNonce,
+          reportPercentage,
+          reportUri,
+          viewDirectives[view]
+        )
 
         // Note: https://csp-evaluator.withgoogle.com/ is useful for checking the policy
 
@@ -72,11 +78,17 @@ const buildDefaultPolicy = (reportUri, styleSrc) => {
   return directives.join('; ')
 }
 
-const buildViewPolicy = (scriptNonce, reportPercentage, reportUri) => {
+const buildViewPolicy = (
+  scriptNonce,
+  reportPercentage,
+  reportUri,
+  viewDirectives
+) => {
   const directives = [
     `script-src 'nonce-${scriptNonce}' 'unsafe-inline' 'strict-dynamic' https: 'report-sample'`, // only allow scripts from certain sources
     `object-src 'none'`, // forbid loading an "object" element
     `base-uri 'none'`, // forbid setting a "base" element
+    ...(viewDirectives ?? []),
   ]
 
   if (reportUri) {
