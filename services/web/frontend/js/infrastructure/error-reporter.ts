@@ -64,7 +64,8 @@ function sentryReporter() {
 
             // Do not send events related to third party code (extensions)
             if (
-              event.extra?.arguments?.[0]?.type === 'UNSTABLE_editor:extensions'
+              (event.extra?.arguments as { type: string }[] | undefined)?.[0]
+                ?.type === 'UNSTABLE_editor:extensions'
             ) {
               return null // Block the event from sending
             }
@@ -100,7 +101,7 @@ function nullReporter() {
   })
 }
 
-export function captureException(err, options) {
+export function captureException(err: Error, options?: Record<string, any>) {
   options = options || {}
   const extra = Object.assign(OError.getFullInfo(err), options.extra || {})
   const fullStack = OError.getFullStack(err)
@@ -114,8 +115,4 @@ export function captureException(err, options) {
       extra,
     })
   )
-}
-
-export function captureMessage(...args) {
-  reporterPromise.then(reporter => reporter.captureMessage(...args))
 }

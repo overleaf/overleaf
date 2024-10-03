@@ -10,7 +10,9 @@ if [[ "$BRANCH_NAME" == "master" || "$BRANCH_NAME" == "main" ]]; then
   SENTRY_RELEASE=${COMMIT_SHA}
   sentry-cli releases new "$SENTRY_RELEASE"
   sentry-cli releases set-commits --auto "$SENTRY_RELEASE"
-  sentry-cli releases files "$SENTRY_RELEASE" upload-sourcemaps --no-rewrite --url-prefix ~ .
+  sentry-cli files upload --release="$SENTRY_RELEASE" .
+  sentry-cli sourcemaps inject .
+  sentry-cli sourcemaps upload --no-rewrite --url-prefix ~ .
   sentry-cli releases finalize "$SENTRY_RELEASE"
 
   rm -rf sentry_upload

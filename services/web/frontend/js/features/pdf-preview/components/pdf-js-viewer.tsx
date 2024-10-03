@@ -68,7 +68,7 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         try {
           wrapper = new PDFJSWrapper(parent.firstChild)
           setPdfJsWrapper(wrapper)
-        } catch (error) {
+        } catch (error: any) {
           setLoadingError(true)
           captureException(error)
         }
