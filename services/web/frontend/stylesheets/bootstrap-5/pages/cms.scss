@@ -501,36 +501,54 @@
     }
   }
 
-  .section-row-gap-spacing-16 {
-    @include section-row-custom-gap(calc(var(--spacing-16) / 2));
-  }
+  .section-row {
+    &.section-row-max-800 {
+      max-width: 800px !important;
+    }
 
-  .section-row-gap-spacing-15 {
-    @include section-row-custom-gap(calc(var(--spacing-15) / 2));
-  }
+    &.section-row-max-900 {
+      max-width: 900px !important;
+    }
 
-  .section-row-gap-spacing-14 {
-    @include section-row-custom-gap(calc(var(--spacing-14) / 2));
-  }
+    &.section-row-max-1000 {
+      max-width: 1000px !important;
+    }
 
-  .section-row-gap-spacing-13 {
-    @include section-row-custom-gap(calc(var(--spacing-13) / 2));
-  }
+    &.section-row-max-unset {
+      max-width: unset !important;
+    }
 
-  .section-row-gap-spacing-12 {
-    @include section-row-custom-gap(calc(var(--spacing-12) / 2));
-  }
+    &.section-row-gap-spacing-16 {
+      @include section-row-custom-gap(calc(var(--spacing-16) / 2));
+    }
 
-  .section-row-gap-spacing-11 {
-    @include section-row-custom-gap(calc(var(--spacing-11) / 2));
-  }
+    &.section-row-gap-spacing-15 {
+      @include section-row-custom-gap(calc(var(--spacing-15) / 2));
+    }
 
-  .section-row-gap-spacing-10 {
-    @include section-row-custom-gap(calc(var(--spacing-10) / 2));
-  }
+    &.section-row-gap-spacing-14 {
+      @include section-row-custom-gap(calc(var(--spacing-14) / 2));
+    }
 
-  .section-row-gap-spacing-09 {
-    @include section-row-custom-gap(calc(var(--spacing-09) / 2));
+    &.section-row-gap-spacing-13 {
+      @include section-row-custom-gap(calc(var(--spacing-13) / 2));
+    }
+
+    &.section-row-gap-spacing-12 {
+      @include section-row-custom-gap(calc(var(--spacing-12) / 2));
+    }
+
+    &.section-row-gap-spacing-11 {
+      @include section-row-custom-gap(calc(var(--spacing-11) / 2));
+    }
+
+    &.section-row-gap-spacing-10 {
+      @include section-row-custom-gap(calc(var(--spacing-10) / 2));
+    }
+
+    &.section-row-gap-spacing-09 {
+      @include section-row-custom-gap(calc(var(--spacing-09) / 2));
+    }
   }
 }
 
