@@ -138,6 +138,17 @@ describe('ProjectListController', function () {
         }),
       },
     }
+    this.TutorialHandler = {
+      getInactiveTutorials: sinon.stub().returns([]),
+    }
+
+    this.Modules = {
+      promises: {
+        hooks: {
+          fire: sinon.stub().resolves([]),
+        },
+      },
+    }
 
     this.ProjectListController = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -158,17 +169,14 @@ describe('ProjectListController', function () {
         '../User/UserGetter': this.UserGetter,
         '../Subscription/SubscriptionViewModelBuilder':
           this.SubscriptionViewModelBuilder,
-        '../../infrastructure/Modules': {
-          promises: {
-            hooks: { fire: sinon.stub().resolves([]) },
-          },
-        },
+        '../../infrastructure/Modules': this.Modules,
         '../Survey/SurveyHandler': this.SurveyHandler,
         '../User/UserPrimaryEmailCheckHandler':
           this.UserPrimaryEmailCheckHandler,
         '../Notifications/NotificationsBuilder': this.NotificationBuilder,
         '../Subscription/SubscriptionLocator': this.SubscriptionLocator,
         '../../infrastructure/GeoIpLookup': this.GeoIpLookup,
+        '../Tutorial/TutorialHandler': this.TutorialHandler,
       },
     })
 
@@ -592,6 +600,101 @@ describe('ProjectListController', function () {
           })
         }
         this.ProjectListController.projectListPage(this.req, this.res)
+      })
+    })
+
+    describe('enterprise banner', function () {
+      beforeEach(function (done) {
+        this.Features.hasFeature.withArgs('saas').returns(true)
+        this.LimitationsManager.promises.userIsMemberOfGroupSubscription.resolves(
+          { isMember: false }
+        )
+        this.UserGetter.promises.getUserFullEmails.resolves([
+          {
+            email: 'test@test-domain.com',
+          },
+        ])
+
+        done()
+      })
+
+      describe('normal enterprise banner', function () {
+        it('shows banner', function () {
+          this.res.render = (pageName, opts) => {
+            expect(opts.showGroupsAndEnterpriseBanner).to.be.true
+          }
+          this.ProjectListController.projectListPage(this.req, this.res)
+        })
+
+        it('does not show banner if user is part of any affiliation', function () {
+          this.UserGetter.promises.getUserFullEmails.resolves([
+            {
+              email: 'test@overleaf.com',
+              affiliation: {
+                licence: 'pro_plus',
+                institution: {
+                  id: 1,
+                  confirmed: true,
+                  name: 'Overleaf',
+                  ssoBeta: false,
+                  ssoEnabled: true,
+                },
+              },
+            },
+          ])
+
+          this.res.render = (pageName, opts) => {
+            expect(opts.showGroupsAndEnterpriseBanner).to.be.false
+          }
+          this.ProjectListController.projectListPage(this.req, this.res)
+        })
+
+        it('does not show banner if user is part of any group subscription', function () {
+          this.LimitationsManager.promises.userIsMemberOfGroupSubscription.resolves(
+            { isMember: true }
+          )
+
+          this.res.render = (pageName, opts) => {
+            expect(opts.showGroupsAndEnterpriseBanner).to.be.false
+          }
+          this.ProjectListController.projectListPage(this.req, this.res)
+        })
+
+        it('have a banner variant of "FOMO" or "on-premise"', function () {
+          this.res.render = (pageName, opts) => {
+            expect(opts.groupsAndEnterpriseBannerVariant).to.be.oneOf([
+              'FOMO',
+              'on-premise',
+            ])
+          }
+          this.ProjectListController.projectListPage(this.req, this.res)
+        })
+      })
+
+      describe('US government enterprise banner', function () {
+        it('does not show enterprise banner if US government enterprise banner is shown', function () {
+          const emails = [
+            {
+              email: 'test@test.mil',
+              confirmedAt: new Date('2024-01-01'),
+            },
+          ]
+
+          this.UserGetter.promises.getUserFullEmails.resolves(emails)
+          this.Modules.promises.hooks.fire
+            .withArgs('getUSGovBanner', emails, false, false)
+            .resolves([
+              {
+                showUSGovBanner: true,
+                usGovBannerVariant: 'variant',
+              },
+            ])
+          this.res.render = (pageName, opts) => {
+            expect(opts.showGroupsAndEnterpriseBanner).to.be.false
+            expect(opts.showUSGovBanner).to.be.true
+          }
+          this.ProjectListController.projectListPage(this.req, this.res)
+        })
       })
     })
   })

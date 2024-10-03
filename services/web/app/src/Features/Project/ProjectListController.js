@@ -26,6 +26,7 @@ const GeoIpLookup = require('../../infrastructure/GeoIpLookup')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SplitTestSessionHandler = require('../SplitTests/SplitTestSessionHandler')
 const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
+const TutorialHandler = require('../Tutorial/TutorialHandler')
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, AllUsersProjects, MongoProject } from "./types"
@@ -114,7 +115,7 @@ async function projectListPage(req, res, next) {
   const user = await User.findById(
     userId,
     `email emails features alphaProgram betaProgram lastPrimaryEmailCheck labsProgram signUpDate${
-      isSaas ? ' enrollment writefull' : ''
+      isSaas ? ' enrollment writefull completedTutorials' : ''
     }`
   )
 
@@ -351,8 +352,26 @@ async function projectListPage(req, res, next) {
     affiliation => affiliation.licence && affiliation.licence !== 'free'
   )
 
+  const inactiveTutorials = TutorialHandler.getInactiveTutorials(user)
+
+  const usGovBannerHooksResponse = await Modules.promises.hooks.fire(
+    'getUSGovBanner',
+    userEmails,
+    hasPaidAffiliation,
+    inactiveTutorials.includes('us-gov-banner')
+  )
+
+  const usGovBanner = (usGovBannerHooksResponse &&
+    usGovBannerHooksResponse[0]) || {
+    showUSGovBanner: false,
+    usGovBannerVariant: null,
+  }
+
+  const { showUSGovBanner, usGovBannerVariant } = usGovBanner
+
   const showGroupsAndEnterpriseBanner =
     Features.hasFeature('saas') &&
+    !showUSGovBanner &&
     !userIsMemberOfGroupSubscription &&
     !hasPaidAffiliation
 
@@ -455,6 +474,8 @@ async function projectListPage(req, res, next) {
     prefetchedProjectsBlob,
     showGroupsAndEnterpriseBanner,
     groupsAndEnterpriseBannerVariant,
+    showUSGovBanner,
+    usGovBannerVariant,
     showWritefullPromoBanner,
     showLATAMBanner,
     recommendedCurrency,

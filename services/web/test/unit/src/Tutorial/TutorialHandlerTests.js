@@ -9,6 +9,10 @@ describe('TutorialHandler', function () {
   beforeEach(function () {
     this.clock = sinon.useFakeTimers()
 
+    const THIRTY_DAYS_AGO = Date.now() - 30 * 24 * 60 * 60 * 1000
+    const TOMORROW = Date.now() + 24 * 60 * 60 * 1000
+    const YESTERDAY = Date.now() - 24 * 60 * 60 * 1000
+
     this.user = {
       _id: new ObjectId(),
       completedTutorials: {
@@ -23,7 +27,17 @@ describe('TutorialHandler', function () {
         },
         'postponed-long-ago': {
           state: 'postponed',
-          updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(THIRTY_DAYS_AGO),
+        },
+        'postponed-until-tomorrow': {
+          state: 'postponed',
+          updatedAt: new Date(THIRTY_DAYS_AGO),
+          postponedUntil: new Date(TOMORROW),
+        },
+        'postponed-until-yesterday': {
+          state: 'postponed',
+          updatedAt: new Date(THIRTY_DAYS_AGO),
+          postponedUntil: new Date(YESTERDAY),
         },
       },
     }
@@ -54,7 +68,20 @@ describe('TutorialHandler', function () {
         'legacy-format',
         'completed',
         'postponed-recently',
+        'postponed-until-tomorrow',
       ])
+
+      expect(hiddenTutorials).to.have.lengthOf(4)
+
+      const shownTutorials = Object.keys(this.user.completedTutorials).filter(
+        key => !hiddenTutorials.includes(key)
+      )
+
+      expect(shownTutorials).to.have.members([
+        'postponed-long-ago',
+        'postponed-until-yesterday',
+      ])
+      expect(shownTutorials).to.have.lengthOf(2)
     })
   })
 })

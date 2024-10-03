@@ -17,6 +17,8 @@ const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
 )
 
+const [usGovBannerModule] = importOverleafModules('usGovBanner')
+
 const moduleNotifications = importOverleafModules('userNotifications') as {
   import: { default: ElementType }
   path: string
@@ -26,6 +28,9 @@ const EnrollmentNotification: JSXElementConstructor<{
   groupId: string
   groupName: string
 }> = enrollmentNotificationModule?.import.default
+
+const USGovBanner: JSXElementConstructor<Record<string, never>> =
+  usGovBannerModule?.import.default
 
 function UserNotifications() {
   const groupSubscriptionsPendingEnrollment =
@@ -75,6 +80,7 @@ function UserNotifications() {
         <ReconfirmationInfo />
         <GeoBanners />
         {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
+        <USGovBanner />
 
         <AccessibilitySurveyBanner />
 

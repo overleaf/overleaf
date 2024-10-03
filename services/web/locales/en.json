@@ -2300,6 +2300,8 @@
   "upload_project": "Upload Project",
   "upload_zipped_project": "Upload Zipped Project",
   "url_to_fetch_the_file_from": "URL to fetch the file from",
+  "us_gov_banner_government_purchasing": "<0>Get __appName__ for US federal government. </0>Move faster through procurement with our tailored purchasing options. Talk to our government team.",
+  "us_gov_banner_small_business_reseller": "<0>Easy procurement for US federal government. </0>We partner with small business resellers to help you buy Overleaf organizational plans. Talk to our government team.",
   "usage_metrics": "Usage metrics",
   "usage_metrics_info": "Metrics that show how many users are accessing the licence, how many projects are being created and worked on, and how much collaboration is happening in Overleaf.",
   "use_a_different_password": "Please use a different password",

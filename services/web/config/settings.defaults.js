@@ -959,6 +959,7 @@ module.exports = {
     ssoCertificateInfo: [],
     v1ImportDataScreen: [],
     snapshotUtils: [],
+    usGovBanner: [],
     offlineModeToolbarButtons: [],
     settingsEntries: [],
   },

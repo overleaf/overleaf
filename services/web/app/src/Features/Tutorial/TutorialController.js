@@ -10,6 +10,7 @@ const VALID_KEYS = [
   'ai-error-assistant-consent',
   'code-editor-mode-prompt',
   'history-restore-promo',
+  'us-gov-banner',
 ]
 
 async function completeTutorial(req, res, next) {
@@ -27,12 +28,21 @@ async function completeTutorial(req, res, next) {
 async function postponeTutorial(req, res, next) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const tutorialKey = req.params.tutorialKey
+  let postponedUntil
+  if (req.body.postponedUntil) {
+    postponedUntil = new Date(req.body.postponedUntil)
+  }
 
   if (!VALID_KEYS.includes(tutorialKey)) {
     return res.sendStatus(404)
   }
 
-  await TutorialHandler.setTutorialState(userId, tutorialKey, 'postponed')
+  await TutorialHandler.setTutorialState(
+    userId,
+    tutorialKey,
+    'postponed',
+    postponedUntil
+  )
   res.sendStatus(204)
 }
 

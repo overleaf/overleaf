@@ -20,6 +20,7 @@ import {
   Institution as InstitutionType,
   Notification as NotificationType,
   PendingGroupSubscriptionEnrollment,
+  USGovBannerVariant,
 } from '../../../types/project/dashboard/notification'
 import { Survey } from '../../../types/project/dashboard/survey'
 import { GetProjectsResponseBody } from '../../../types/project/dashboard/api'
@@ -180,6 +181,7 @@ export interface Meta {
   'ol-showSupport': boolean
   'ol-showSymbolPalette': boolean
   'ol-showTemplatesServerPro': boolean
+  'ol-showUSGovBanner': boolean
   'ol-showUpgradePrompt': boolean
   'ol-skipUrl': string
   'ol-splitTestInfo': { [name: string]: SplitTestInfo }
@@ -198,6 +200,7 @@ export interface Meta {
   'ol-translationLoadErrorMessage': string
   'ol-translationMaintenance': string
   'ol-translationUnableToJoin': string
+  'ol-usGovBannerVariant': USGovBannerVariant
   'ol-useShareJsHash': boolean
   'ol-usedLatex': 'never' | 'occasionally' | 'often' | undefined
   'ol-user': User

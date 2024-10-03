@@ -105,3 +105,9 @@ export type PendingGroupSubscriptionEnrollment = {
 export const GroupsAndEnterpriseBannerVariants = ['on-premise', 'FOMO'] as const
 export type GroupsAndEnterpriseBannerVariant =
   (typeof GroupsAndEnterpriseBannerVariants)[number]
+
+export const USGovBannerVariants = [
+  'government-purchasing',
+  'small-business-reseller',
+] as const
+export type USGovBannerVariant = (typeof USGovBannerVariants)[number]
