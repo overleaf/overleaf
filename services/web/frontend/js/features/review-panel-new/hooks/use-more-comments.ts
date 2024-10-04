@@ -8,6 +8,7 @@ import {
 import { DecorationSet, EditorView } from '@codemirror/view'
 import { EditorSelection } from '@codemirror/state'
 import _ from 'lodash'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 const useMoreCommments = (
   changes: Change<EditOperation>[],
@@ -19,6 +20,7 @@ const useMoreCommments = (
   onMoreCommentsBelowClick: null | (() => void)
 } => {
   const view = useCodeMirrorViewContext()
+  const { reviewPanelOpen } = useLayoutContext()
 
   const [positionAbove, setPositionAbove] = useState<number | null>(null)
   const [positionBelow, setPositionBelow] = useState<number | null>(null)
@@ -32,7 +34,7 @@ const useMoreCommments = (
             read(view) {
               const container = view.scrollDOM
 
-              if (!container) {
+              if (!container || !reviewPanelOpen) {
                 return { positionAbove: null, positionBelow: null }
               }
 
@@ -99,7 +101,7 @@ const useMoreCommments = (
           }),
         200
       ),
-    [changes, comments, newComments, view]
+    [changes, comments, newComments, view, reviewPanelOpen]
   )
 
   useEffect(() => {
