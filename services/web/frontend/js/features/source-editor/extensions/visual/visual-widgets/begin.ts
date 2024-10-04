@@ -45,6 +45,7 @@ export class BeginWidget extends WidgetType {
     return element.getBoundingClientRect()
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   buildName(name: HTMLSpanElement, view: EditorView) {
     name.textContent = this.environment
   }
