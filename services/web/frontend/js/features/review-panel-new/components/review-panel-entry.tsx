@@ -11,6 +11,7 @@ import {
   highlightRanges,
 } from '@/features/source-editor/extensions/ranges'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 export const ReviewPanelEntry: FC<{
   position: number
@@ -34,8 +35,13 @@ export const ReviewPanelEntry: FC<{
   const view = useCodeMirrorViewContext()
   const { openDocId } = useEditorManagerContext()
   const [focused, setFocused] = useState(false)
+  const { setReviewPanelOpen } = useLayoutContext()
 
   const highlighted = isSelectionWithinOp(op, state.selection.main)
+
+  const openReviewPanel = useCallback(() => {
+    setReviewPanelOpen(true)
+  }, [setReviewPanelOpen])
 
   const focusHandler = useCallback(() => {
     if (selectLineOnFocus) {
@@ -55,6 +61,7 @@ export const ReviewPanelEntry: FC<{
 
   return (
     <div
+      onMouseDown={openReviewPanel} // Using onMouseDown rather than onClick to guarantee that it fires before onFocus
       onFocus={focusHandler}
       onBlur={() => setFocused(false)}
       onMouseEnter={() => {
