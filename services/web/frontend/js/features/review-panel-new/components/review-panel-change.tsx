@@ -138,12 +138,12 @@ export const ReviewPanelChange = memo<{
               <>
                 {aggregate ? (
                   <MaterialIcon
-                    className="review-panel-entry-icon review-panel-entry-icon-changed"
+                    className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-changed"
                     type="edit"
                   />
                 ) : (
                   <MaterialIcon
-                    className="review-panel-entry-icon review-panel-entry-icon-accept"
+                    className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-accept"
                     type="add_circle"
                   />
                 )}
@@ -173,7 +173,7 @@ export const ReviewPanelChange = memo<{
             {'d' in change.op && (
               <>
                 <MaterialIcon
-                  className="review-panel-entry-icon review-panel-entry-icon-reject"
+                  className="review-panel-entry-icon review-panel-entry-change-icon review-panel-entry-icon-reject"
                   type="delete"
                 />
 

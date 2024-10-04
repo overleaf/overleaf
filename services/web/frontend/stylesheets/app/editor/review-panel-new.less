@@ -88,9 +88,10 @@
 
   .review-panel-change-body {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     color: @content-secondary;
     gap: @spacing-02;
+    overflow-wrap: anywhere;
   }
 
   .review-panel-content-highlight {
@@ -106,6 +107,10 @@
     border-radius: @border-radius-base-new;
     padding: @spacing-02;
     font-size: 16px;
+  }
+
+  .review-panel-entry-change-icon {
+    margin-top: -2px;
   }
 
   .review-panel-entry-icon-accept {
