@@ -212,7 +212,9 @@ export const ranges = () => [
           const unresolvedComments = rangesData.threads
             ? comments.filter(
                 comment =>
-                  comment.op.t && !rangesData.threads[comment.op.t].resolved
+                  comment.op.t &&
+                  rangesData.threads[comment.op.t] &&
+                  !rangesData.threads[comment.op.t].resolved
               )
             : []
 
