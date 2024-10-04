@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plan } from '../../../../../../../../../types/subscription/plan'
 import Icon from '../../../../../../../shared/components/icon'
@@ -95,7 +96,16 @@ export function IndividualPlansTable({ plans }: { plans: Array<Plan> }) {
   const { t } = useTranslation()
   const { recurlyLoadError } = useSubscriptionDashboardContext()
 
-  if (!plans || recurlyLoadError) return null
+  const filteredPlans = useMemo(
+    () =>
+      plans?.filter(
+        plan =>
+          !['paid-personal', 'paid-personal-annual'].includes(plan.planCode)
+      ),
+    [plans]
+  )
+
+  if (!filteredPlans || recurlyLoadError) return null
 
   return (
     <table className="table align-middle table-vertically-centered-cells m-0">
@@ -107,7 +117,7 @@ export function IndividualPlansTable({ plans }: { plans: Array<Plan> }) {
         </tr>
       </thead>
       <tbody>
-        <PlansRows plans={plans} />
+        <PlansRows plans={filteredPlans} />
       </tbody>
     </table>
   )
