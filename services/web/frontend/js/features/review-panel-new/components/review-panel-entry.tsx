@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from 'react'
+import { FC, useCallback, useEffect, useState } from 'react'
 import { AnyOperation } from '../../../../../types/change'
 import {
   useCodeMirrorStateContext,
@@ -43,6 +43,15 @@ export const ReviewPanelEntry: FC<{
     }
     setFocused(true)
   }, [selectLineOnFocus, docId, openDocId, position])
+
+  // Clear op highlight on dismount
+  useEffect(() => {
+    return () => {
+      if (hoverRanges) {
+        view.dispatch(clearHighlightRanges(op))
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div
