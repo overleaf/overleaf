@@ -265,12 +265,18 @@ const searchFormTheme = EditorView.theme({
       'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px rgb(102 175 233 / 60%)',
     '--ol-cm-search-form-error-shadow':
       'inset 0 1px 1px rgb(0 0 0 / 8%), 0 0 8px var(--input-shadow-danger-color)',
+    containerType: 'inline-size',
   },
   '.ol-cm-search-controls': {
     display: 'grid',
     gridTemplateColumns: 'auto auto',
     gridTemplateRows: 'auto auto',
     gap: '10px',
+  },
+  '@container (max-width: 450px)': {
+    '.ol-cm-search-controls': {
+      gridTemplateColumns: 'auto',
+    },
   },
   '.ol-cm-search-form-row': {
     display: 'flex',
