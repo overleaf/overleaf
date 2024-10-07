@@ -179,4 +179,8 @@
 
     @include body-sm;
   }
+
+  .checkbox-label {
+    margin-left: var(--spacing-04);
+  }
 }
