@@ -80,7 +80,7 @@ function UserNotifications() {
         <ReconfirmationInfo />
         <GeoBanners />
         {!showWritefull && !dismissedWritefull && <GroupsAndEnterpriseBanner />}
-        <USGovBanner />
+        {USGovBanner && <USGovBanner />}
 
         <AccessibilitySurveyBanner />
 
