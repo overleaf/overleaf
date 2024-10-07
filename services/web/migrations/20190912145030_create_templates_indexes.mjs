@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 
 import Helpers from './lib/helpers.mjs'
+import mongodb from '../app/src/infrastructure/mongodb.js'
+const { getCollectionInternal } = mongodb
 
 const tags = ['server-pro', 'saas']
 
@@ -26,17 +28,21 @@ const indexes = [
   },
 ]
 
-const migrate = async client => {
-  const { db } = client
+async function getCollection() {
+  // NOTE: This is a stale collection, it will get dropped in a later migration.
+  return await getCollectionInternal('templates')
+}
 
-  await Helpers.addIndexesToCollection(db.templates, indexes)
+const migrate = async client => {
+  const collection = await getCollection()
+  await Helpers.addIndexesToCollection(collection, indexes)
 }
 
 const rollback = async client => {
-  const { db } = client
+  const collection = await getCollection()
 
   try {
-    await Helpers.dropIndexesFromCollection(db.templates, indexes)
+    await Helpers.dropIndexesFromCollection(collection, indexes)
   } catch (err) {
     console.error('Something went wrong rolling back the migrations', err)
   }

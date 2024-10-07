@@ -100,11 +100,9 @@ async function setupDb() {
   db.systemmessages = internalDb.collection('systemmessages')
   db.tags = internalDb.collection('tags')
   db.teamInvites = internalDb.collection('teamInvites')
-  db.templates = internalDb.collection('templates')
   db.tokens = internalDb.collection('tokens')
   db.userAuditLogEntries = internalDb.collection('userAuditLogEntries')
   db.users = internalDb.collection('users')
-  db.userstubs = internalDb.collection('userstubs')
   db.onboardingDataCollection = internalDb.collection(
     'onboardingDataCollection'
   )
