@@ -7,10 +7,15 @@
 
   &:hover {
     text-decoration: underline;
+    color: var(--green-60);
   }
 
   &:visited {
     color: var(--neutral-90);
+
+    &:hover {
+      color: var(--green-60);
+    }
   }
 
   i {
