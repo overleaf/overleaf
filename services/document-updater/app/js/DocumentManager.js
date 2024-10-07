@@ -264,7 +264,12 @@ const DocumentManager = {
       throw new Errors.NotFoundError(`document not found: ${docId}`)
     }
 
-    const newRanges = RangesManager.acceptChanges(changeIds, ranges)
+    const newRanges = RangesManager.acceptChanges(
+      projectId,
+      docId,
+      changeIds,
+      ranges
+    )
 
     await RedisManager.promises.updateDocument(
       projectId,
