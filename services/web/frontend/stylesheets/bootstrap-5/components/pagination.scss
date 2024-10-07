@@ -1,0 +1,57 @@
+// Pagination (multiple pages)
+// --------------------------------------------------
+.pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: var(--spacing-08) 0;
+
+  > li {
+    display: inline-block;
+
+    > a,
+    > span {
+      position: relative;
+      float: left; // Collapse white-space
+      padding: var(--spacing-04) var(--spacing-06);
+      line-height: var(--line-height-base);
+      text-decoration: none;
+      color: var(--neutral-90);
+      background-color: #fff;
+      border: 1px solid var(--neutral-30);
+      margin-left: -1px;
+      font-weight: 600;
+
+      &:hover,
+      &:focus {
+        color: var(--neutral-90);
+        background-color: var(--neutral-10);
+        border-color: var(--neutral-30);
+        text-decoration: none;
+      }
+    }
+
+    &:first-child {
+      > a,
+      > span {
+        margin-left: 0;
+      }
+    }
+  }
+
+  > .active > a,
+  > .active > span {
+    &,
+    &:hover,
+    &:focus {
+      z-index: 2;
+      color: var(--green-70);
+      background-color: var(--green-10);
+      border-color: var(--neutral-30);
+      cursor: default;
+    }
+  }
+
+  .ellipses {
+    pointer-events: none;
+  }
+}
