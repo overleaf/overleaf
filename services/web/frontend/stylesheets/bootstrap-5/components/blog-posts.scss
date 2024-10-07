@@ -67,6 +67,8 @@
     }
 
     .blog-post-title-link {
+      @include heading-lg;
+
       margin-top: var(--spacing-04);
       margin-bottom: var(--spacing-06);
 
