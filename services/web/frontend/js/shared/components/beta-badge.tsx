@@ -18,19 +18,7 @@ const BetaBadge: FC<{
   url?: string
   phase?: string
 }> = ({ tooltip, url = '/beta/participate', phase = 'beta' }) => {
-  let badgeClass: 'info-badge' | 'alpha-badge' | 'beta-badge'
-  switch (phase) {
-    case 'release':
-      badgeClass = 'info-badge'
-      break
-    case 'alpha':
-      badgeClass = 'alpha-badge'
-      break
-    case 'beta':
-    default:
-      badgeClass = 'beta-badge'
-  }
-
+  const badgeClass = chooseBadgeClass(phase)
   return (
     <OLTooltip
       id={tooltip.id}
@@ -55,6 +43,18 @@ const BetaBadge: FC<{
       </a>
     </OLTooltip>
   )
+}
+
+export const chooseBadgeClass = (phase?: string) => {
+  switch (phase) {
+    case 'release':
+      return 'info-badge'
+    case 'alpha':
+      return 'alpha-badge'
+    case 'beta':
+    default:
+      return 'beta-badge'
+  }
 }
 
 export default BetaBadge

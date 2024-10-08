@@ -8,18 +8,13 @@ import {
 } from 'react'
 import { SpellChecker, Word } from './spellchecker'
 import { useTranslation } from 'react-i18next'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import getMeta from '@/utils/meta'
 import classnames from 'classnames'
-import { SpellCheckLanguage } from '../../../../../../types/project-settings'
-import Icon from '@/shared/components/icon'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
+import SpellingSuggestionsFeedback from './spelling-suggestions-feedback'
 
 const ITEMS_TO_SHOW = 8
-
-// TODO: messaging below the spelling suggestions
-const SHOW_FOOTER = false
 
 // (index % length) that works for negative index
 const wrapArrayIndex = (index: number, length: number) =>
@@ -76,6 +71,8 @@ export const SpellingSuggestions: FC<{
     }
   }, [spellCheckLanguage])
 
+  const spellCheckClientEnabled = useFeatureFlag('spell-check-client')
+
   return (
     <ul
       className={classnames('dropdown-menu', 'dropdown-menu-unpositioned', {
@@ -125,37 +122,15 @@ export const SpellingSuggestions: FC<{
           handleLearnWord()
         }}
       />
-      {SHOW_FOOTER && language && (
+      {spellCheckClientEnabled && language?.dic && (
         <>
           <li className="divider" />
           <li>
-            <Footer language={language} />
+            <SpellingSuggestionsFeedback />
           </li>
         </>
       )}
     </ul>
-  )
-}
-
-const Footer: FC<{ language: SpellCheckLanguage }> = ({ language }) => {
-  const spellCheckClientEnabled = useFeatureFlag('spell-check-client')
-
-  if (!spellCheckClientEnabled) {
-    return null
-  }
-
-  return language.dic ? (
-    <div>
-      <SplitTestBadge
-        splitTestName="spell-check-client"
-        displayOnVariants={['enabled']}
-      />{' '}
-      <small>{language?.name}</small>
-    </div>
-  ) : (
-    <div>
-      <Icon type="warning" fw /> <small>{language?.name}</small>
-    </div>
   )
 }
 

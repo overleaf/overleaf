@@ -1,13 +1,11 @@
 import { createContext, FC, useContext, useMemo } from 'react'
 import getMeta from '../../utils/meta'
-
-type SplitTestVariants = Record<string, any>
-type SplitTestInfo = Record<string, any>
+import { SplitTestInfo } from '../../../../types/split-test'
 
 export const SplitTestContext = createContext<
   | {
-      splitTestVariants: SplitTestVariants
-      splitTestInfo: SplitTestInfo
+      splitTestVariants: Record<string, string>
+      splitTestInfo: Record<string, SplitTestInfo>
     }
   | undefined
 >(undefined)
@@ -43,4 +41,16 @@ export function useSplitTestContext() {
 export function useFeatureFlag(name: string) {
   const { splitTestVariants } = useSplitTestContext()
   return splitTestVariants[name] === 'enabled'
+}
+
+export function useSplitTest(name: string): {
+  variant: string | undefined
+  info: SplitTestInfo | undefined
+} {
+  const { splitTestVariants, splitTestInfo } = useSplitTestContext()
+
+  return {
+    variant: splitTestVariants[name],
+    info: splitTestInfo[name],
+  }
 }

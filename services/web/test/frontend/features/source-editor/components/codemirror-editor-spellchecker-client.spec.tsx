@@ -43,7 +43,11 @@ forEach(Object.keys(suggestions)).describe(
         win.metaAttributesCache.set('ol-splitTestVariants', {
           'spell-check-client': 'enabled',
         })
-        win.metaAttributesCache.set('ol-splitTestInfo', {})
+        win.metaAttributesCache.set('ol-splitTestInfo', {
+          'spell-check-client': {
+            phase: 'release',
+          },
+        })
         win.metaAttributesCache.set('ol-learnedWords', ['baz'])
         win.metaAttributesCache.set(
           'ol-dictionariesRoot',

@@ -8,4 +8,8 @@ export type SplitTestInfo = {
     rolloutPercent: number
   }[]
   hasOverride?: boolean
+  badgeInfo?: {
+    url?: string
+    tooltipText?: string
+  }
 }
