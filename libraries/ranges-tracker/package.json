@@ -19,6 +19,7 @@
     "types:check": "tsc --noEmit"
   },
   "devDependencies": {
+    "chai": "^4.3.6",
     "mocha": "^10.2.0",
     "typescript": "^5.0.4"
   }

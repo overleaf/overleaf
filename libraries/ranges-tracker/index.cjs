@@ -139,22 +139,9 @@ class RangesTracker {
     return change
   }
 
-  getChanges(changeIds) {
-    const changesResponse = []
-    const idsMap = {}
-
-    for (const changeId of changeIds) {
-      idsMap[changeId] = true
-    }
-
-    for (const change of this.changes) {
-      if (idsMap[change.id]) {
-        delete idsMap[change.id]
-        changesResponse.push(change)
-      }
-    }
-
-    return changesResponse
+  getChanges(ids) {
+    const idSet = new Set(ids)
+    return this.changes.filter(change => idSet.has(change.id))
   }
 
   removeChangeId(changeId) {
@@ -165,20 +152,15 @@ class RangesTracker {
     this._removeChange(change)
   }
 
-  removeChangeIds(changeToRemoveIds) {
-    if (changeToRemoveIds == null || changeToRemoveIds.length === 0) {
+  removeChangeIds(ids) {
+    if (ids == null || ids.length === 0) {
       return
     }
-    const removeChangeId = {}
-    for (const changeId of changeToRemoveIds) {
-      removeChangeId[changeId] = true
-    }
 
+    const idSet = new Set(ids)
     const remainingChanges = []
-
     for (const change of this.changes) {
-      if (removeChangeId[change.id]) {
-        delete removeChangeId[change.id]
+      if (idSet.has(change.id)) {
         this._markAsDirty(change, 'change', 'removed')
       } else {
         remainingChanges.push(change)
