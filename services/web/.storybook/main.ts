@@ -85,6 +85,16 @@ const config: StorybookConfig = {
           '@': path.join(rootDir, 'frontend/js/'),
         },
       },
+      module: {
+        ...storybookConfig.module,
+        rules: (storybookConfig.module?.rules ?? []).concat({
+          test: /\.wasm$/,
+          type: 'asset/resource',
+          generator: {
+            filename: 'js/[name]-[contenthash][ext]',
+          },
+        }),
+      },
     }
   },
 }
