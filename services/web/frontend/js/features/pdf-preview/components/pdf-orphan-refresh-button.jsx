@@ -1,8 +1,8 @@
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { memo, useCallback } from 'react'
-import { buildUrlWithDetachRole } from '../../../shared/utils/url-helper'
-import { useLocation } from '../../../shared/hooks/use-location'
+import { buildUrlWithDetachRole } from '@/shared/utils/url-helper'
+import { useLocation } from '@/shared/hooks/use-location'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 function PdfOrphanRefreshButton() {
   const { t } = useTranslation()
@@ -13,14 +13,9 @@ function PdfOrphanRefreshButton() {
   }, [location])
 
   return (
-    <Button
-      onClick={redirect}
-      className="btn-orphan"
-      bsStyle="primary"
-      bsSize="small"
-    >
+    <OLButton variant="primary" size="sm" onClick={redirect}>
       {t('redirect_to_editor')}
-    </Button>
+    </OLButton>
   )
 }
 

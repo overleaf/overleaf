@@ -1,7 +1,7 @@
 import { memo, useState, useEffect, useRef } from 'react'
-import { ButtonToolbar } from 'react-bootstrap'
+import OlButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
 import { useTranslation } from 'react-i18next'
-import { useLayoutContext } from '../../../shared/context/layout-context'
+import { useLayoutContext } from '@/shared/context/layout-context'
 import PdfCompileButton from './pdf-compile-button'
 import SwitchToEditorButton from './switch-to-editor-button'
 import PdfHybridLogsButton from './pdf-hybrid-logs-button'
@@ -10,6 +10,8 @@ import PdfHybridCodeCheckButton from './pdf-hybrid-code-check-button'
 import PdfOrphanRefreshButton from './pdf-orphan-refresh-button'
 import { DetachedSynctexControl } from './detach-synctex-control'
 import Icon from '../../../shared/components/icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { Spinner } from 'react-bootstrap-5'
 
 const ORPHAN_UI_TIMEOUT_MS = 5000
 
@@ -47,9 +49,9 @@ function PdfPreviewHybridToolbar() {
   }
 
   return (
-    <ButtonToolbar className="toolbar toolbar-pdf toolbar-pdf-hybrid">
+    <OlButtonToolbar className="toolbar toolbar-pdf toolbar-pdf-hybrid">
       {ToolbarInner}
-    </ButtonToolbar>
+    </OlButtonToolbar>
   )
 }
 
@@ -88,7 +90,18 @@ function PdfPreviewHybridToolbarConnectingInner() {
   return (
     <>
       <div className="toolbar-pdf-orphan">
-        <Icon type="refresh" fw spin />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="refresh" fw spin />}
+          bs5={
+            <Spinner
+              animation="border"
+              aria-hidden="true"
+              size="sm"
+              role="status"
+            />
+          }
+        />
+        &nbsp;
         {t('tab_connecting')}…
       </div>
     </>

@@ -33,7 +33,7 @@ export default function AddCollaboratorsUpgrade() {
           <div className="upgrade-actions">
             {user.allowedFreeTrial ? (
               <StartFreeTrialButton
-                buttonProps={{ variant: 'secondary', size: 'small' }}
+                buttonProps={{ variant: 'secondary', size: 'sm' }}
                 source="project-sharing"
                 variant="exceeds"
               >

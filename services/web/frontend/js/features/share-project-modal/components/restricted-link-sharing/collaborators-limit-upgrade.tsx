@@ -37,7 +37,7 @@ export default function CollaboratorsLimitUpgrade() {
           action={
             user.allowedFreeTrial ? (
               <StartFreeTrialButton
-                buttonProps={{ variant: 'premium', size: 'default' }}
+                buttonProps={{ variant: 'premium' }}
                 source="project-sharing"
                 variant="limit"
               >
@@ -71,7 +71,7 @@ export default function CollaboratorsLimitUpgrade() {
           action={
             user.allowedFreeTrial ? (
               <StartFreeTrialButton
-                buttonProps={{ variant: 'secondary', size: 'small' }}
+                buttonProps={{ variant: 'secondary', size: 'sm' }}
                 source="project-sharing"
                 variant="limit"
               >

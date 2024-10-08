@@ -53,7 +53,7 @@ const TextButton: FC<{
   return (
     <OLButton
       onClick={handleClick}
-      size="small"
+      size="sm"
       variant="secondary"
       className="copy-button"
       bs3Props={{ bsSize: 'xsmall' }}

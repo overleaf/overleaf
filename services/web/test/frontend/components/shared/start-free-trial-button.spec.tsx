@@ -44,7 +44,7 @@ describe('start free trial button', function () {
         source="cypress-test"
         buttonProps={{
           variant: 'danger',
-          size: 'large',
+          size: 'lg',
         }}
       />
     )

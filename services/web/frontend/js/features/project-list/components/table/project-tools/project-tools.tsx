@@ -12,7 +12,7 @@ import DeleteLeaveProjectsButton from './buttons/delete-leave-projects-button'
 import LeaveProjectsButton from './buttons/leave-projects-button'
 import DeleteProjectsButton from './buttons/delete-projects-button'
 import OLButtonToolbar from '@/features/ui/components/ol/ol-button-toolbar'
-import OlButtonGroup from '@/features/ui/components/ol/ol-button-group'
+import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
 
 function ProjectTools() {
   const { t } = useTranslation()
@@ -20,27 +20,27 @@ function ProjectTools() {
 
   return (
     <OLButtonToolbar aria-label={t('toolbar_selected_projects')}>
-      <OlButtonGroup
+      <OLButtonGroup
         aria-label={t('toolbar_selected_projects_management_actions')}
       >
         <DownloadProjectsButton />
         {filter !== 'archived' && <ArchiveProjectsButton />}
         {filter !== 'trashed' && <TrashProjectsButton />}
-      </OlButtonGroup>
+      </OLButtonGroup>
 
       {(filter === 'trashed' || filter === 'archived') && (
-        <OlButtonGroup aria-label={t('toolbar_selected_projects_restore')}>
+        <OLButtonGroup aria-label={t('toolbar_selected_projects_restore')}>
           {filter === 'trashed' && <UntrashProjectsButton />}
           {filter === 'archived' && <UnarchiveProjectsButton />}
-        </OlButtonGroup>
+        </OLButtonGroup>
       )}
 
       {filter === 'trashed' && (
-        <OlButtonGroup aria-label={t('toolbar_selected_projects_remove')}>
+        <OLButtonGroup aria-label={t('toolbar_selected_projects_remove')}>
           <LeaveProjectsButton />
           <DeleteProjectsButton />
           <DeleteLeaveProjectsButton />
-        </OlButtonGroup>
+        </OLButtonGroup>
       )}
 
       {!['archived', 'trashed'].includes(filter) && <TagsDropdown />}

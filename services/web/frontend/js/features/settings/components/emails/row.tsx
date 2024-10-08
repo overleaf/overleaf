@@ -152,7 +152,7 @@ function SSOAffiliationInfo({ userEmailData }: SSOAffiliationInfoProps) {
                 className="btn-link-accounts"
                 disabled={linkAccountsButtonDisabled}
                 onClick={handleLinkAccountsButtonClick}
-                size="small"
+                size="sm"
               >
                 {t('link_accounts')}
               </OLButton>

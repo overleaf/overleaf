@@ -8,7 +8,7 @@ function PrimaryButton({
 }: OLButtonProps) {
   return (
     <OLButton
-      size="small"
+      size="sm"
       disabled={disabled && !isLoading}
       isLoading={isLoading}
       onClick={onClick}

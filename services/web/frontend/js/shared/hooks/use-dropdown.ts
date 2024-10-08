@@ -25,7 +25,7 @@ export default function useDropdown(defaultOpen = false) {
 
   // handle dropdown toggle
   const handleToggle = useCallback(value => {
-    setOpen(value)
+    setOpen(Boolean(value))
   }, [])
 
   // close the dropdown on click outside the dropdown

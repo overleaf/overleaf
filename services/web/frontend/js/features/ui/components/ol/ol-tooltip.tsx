@@ -9,10 +9,13 @@ type OLTooltipProps = React.ComponentProps<typeof Tooltip> & {
 function OLTooltip(props: OLTooltipProps) {
   const { bs3Props, ...bs5Props } = props
 
-  const bs3TooltipProps: React.ComponentProps<typeof BS3Tooltip> = {
+  type BS3TooltipProps = React.ComponentProps<typeof BS3Tooltip>
+
+  const bs3TooltipProps: BS3TooltipProps = {
     children: bs5Props.children,
     id: bs5Props.id,
     description: bs5Props.description,
+    tooltipProps: bs5Props.tooltipProps as BS3TooltipProps,
     overlayProps: {
       placement: bs5Props.overlayProps?.placement,
     },

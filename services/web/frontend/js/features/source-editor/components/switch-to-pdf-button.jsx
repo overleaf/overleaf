@@ -25,7 +25,7 @@ function SwitchToPDFButton() {
   return (
     <OLButton
       variant="secondary"
-      size="small"
+      size="sm"
       onClick={handleClick}
       bs3Props={{
         bsSize: 'xsmall',

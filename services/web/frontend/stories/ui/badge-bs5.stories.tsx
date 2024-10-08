@@ -27,11 +27,6 @@ const meta: Meta<typeof Badge> = {
         disable: true,
       },
     },
-    closeBtnProps: {
-      table: {
-        disable: true,
-      },
-    },
   },
 }
 export default meta

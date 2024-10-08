@@ -1,7 +1,7 @@
-import { ButtonGroup } from 'react-bootstrap'
 import PDFToolbarButton from './pdf-toolbar-button'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
+import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
 
 type PdfPageNumberControlProps = {
   setPage: (page: number) => void
@@ -38,7 +38,7 @@ function PdfPageNumberControl({
 
   return (
     <>
-      <ButtonGroup className="pdfjs-toolbar-buttons ">
+      <OLButtonGroup className="pdfjs-toolbar-buttons">
         <PDFToolbarButton
           tooltipId="pdf-controls-previous-page-tooltip"
           icon="keyboard_arrow_up"
@@ -53,7 +53,7 @@ function PdfPageNumberControl({
           disabled={page === totalPages}
           onClick={() => setPage(page + 1)}
         />
-      </ButtonGroup>
+      </OLButtonGroup>
       <div className="pdfjs-page-number-input">
         <form onSubmit={handleSubmit}>
           <input

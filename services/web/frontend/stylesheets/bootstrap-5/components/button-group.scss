@@ -1,10 +1,10 @@
 .btn-group {
   > .btn {
-    &:first-child {
+    &:first-of-type {
       padding-left: var(--spacing-05);
     }
 
-    &:last-child {
+    &:last-of-type {
       padding-right: var(--spacing-05);
     }
   }

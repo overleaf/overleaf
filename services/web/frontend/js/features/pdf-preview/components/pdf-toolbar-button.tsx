@@ -1,6 +1,6 @@
-import Button from 'react-bootstrap/lib/Button'
 import MaterialIcon from '@/shared/components/material-icon'
-import Tooltip from '@/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type PDFToolbarButtonProps = {
   tooltipId: string
@@ -20,7 +20,7 @@ export default function PDFToolbarButton({
   shortcut,
 }: PDFToolbarButtonProps) {
   return (
-    <Tooltip
+    <OLTooltip
       id={tooltipId}
       description={
         <>
@@ -30,16 +30,15 @@ export default function PDFToolbarButton({
       }
       overlayProps={{ placement: 'bottom' }}
     >
-      <Button
-        aria-label={label}
-        bsSize="large"
-        bsStyle={null}
+      <OLButton
+        variant="ghost"
         className="pdf-toolbar-btn pdfjs-toolbar-button"
         disabled={disabled}
         onClick={onClick}
+        aria-label={label}
       >
         <MaterialIcon type={icon} />
-      </Button>
-    </Tooltip>
+      </OLButton>
+    </OLTooltip>
   )
 }

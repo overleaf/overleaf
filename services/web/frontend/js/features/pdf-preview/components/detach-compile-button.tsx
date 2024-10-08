@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
-import { Button } from 'react-bootstrap'
-import classNames from 'classnames'
+import classnames from 'classnames'
 import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext } from '../../../shared/context/detach-compile-context'
-import Tooltip from '../../../shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -21,28 +23,49 @@ function DetachCompileButton() {
   )
 
   return (
-    <div className="detach-compile-button-container">
-      <Tooltip
+    <div
+      className={classnames(
+        'detach-compile-button-container',
+        bsVersion({ bs5: 'ms-1' })
+      )}
+    >
+      <OLTooltip
         id="detach-compile"
         description={tooltipElement}
         tooltipProps={{ className: 'keyboard-tooltip' }}
-        overlayProps={{ delayShow: 500 }}
+        overlayProps={{ delay: { show: 500, hide: 0 } }}
       >
-        <Button
-          bsStyle="primary"
+        <OLButton
+          variant="primary"
           onClick={() => startCompile()}
           disabled={compiling}
-          className={classNames('detach-compile-button', {
+          className={classnames('detach-compile-button', {
             'btn-striped-animated': hasChanges,
             'detach-compile-button-disabled': compiling,
           })}
+          size="sm"
+          isLoading={compiling}
+          bs3Props={{
+            loading: (
+              <>
+                <Icon type="refresh" spin={compiling} />
+                <span className="detach-compile-button-label">
+                  {compileButtonLabel}
+                </span>
+              </>
+            ),
+          }}
         >
-          <Icon type="refresh" spin={compiling} />
-          <span className="detach-compile-button-label">
-            {compileButtonLabel}
-          </span>
-        </Button>
-      </Tooltip>
+          <BootstrapVersionSwitcher
+            bs3={
+              <span className="detach-compile-button-label">
+                {compileButtonLabel}
+              </span>
+            }
+            bs5={compileButtonLabel}
+          />
+        </OLButton>
+      </OLTooltip>
     </div>
   )
 }

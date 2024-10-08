@@ -56,7 +56,7 @@ function SsoLinkingInfo({ domainInfo, email }: SSOLinkingInfoProps) {
       <OLButton
         variant="primary"
         className="btn-link-accounts"
-        size="small"
+        size="sm"
         disabled={linkAccountsButtonDisabled}
         onClick={handleLinkAccountsButtonClick}
       >

@@ -1,5 +1,10 @@
 import type { ElementType, ReactNode, PropsWithChildren } from 'react'
-import type { SplitButtonVariants } from './split-button-props'
+import type { ButtonProps } from '@/features/ui/components/types/button-props'
+
+type SplitButtonVariants = Extract<
+  ButtonProps['variant'],
+  'primary' | 'secondary' | 'danger' | 'link'
+>
 
 export type DropdownProps = {
   align?:
@@ -47,7 +52,7 @@ export type DropdownToggleProps = PropsWithChildren<{
   id?: string // necessary for assistive technologies
   variant?: SplitButtonVariants
   as?: ElementType
-  size?: 'sm' | 'lg'
+  size?: 'sm' | 'lg' | undefined
 }>
 
 export type DropdownMenuProps = PropsWithChildren<{

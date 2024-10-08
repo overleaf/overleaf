@@ -15,7 +15,7 @@ function UpgradePrompt() {
   return (
     <OLButton
       variant="primary"
-      size="small"
+      size="sm"
       className={classnames(
         'toolbar-header-upgrade-prompt',
         bsVersion({ bs3: 'btn-xs' })

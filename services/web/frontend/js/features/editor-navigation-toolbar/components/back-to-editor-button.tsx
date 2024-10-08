@@ -8,7 +8,7 @@ function BackToEditorButton({ onClick }: { onClick: () => void }) {
   return (
     <OLButton
       variant="secondary"
-      size="small"
+      size="sm"
       onClick={onClick}
       className="back-to-editor-btn"
     >

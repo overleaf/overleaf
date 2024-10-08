@@ -67,11 +67,11 @@
 
 // Toolbar
 @mixin toolbar-sm-height {
-  height: 32px;
+  height: var(--toolbar-small-height);
 }
 
 @mixin toolbar-alt-bg() {
-  background-color: var(--bg-dark-secondary);
+  background-color: var(--toolbar-alt-bg-color);
 }
 
 @mixin theme($name) {
@@ -86,4 +86,21 @@
 
 @mixin box-shadow-button-input {
   box-shadow: 0 0 0 2px var(--blue-30);
+}
+
+@mixin animation($animation) {
+  animation: $animation;
+}
+
+@mixin striped($color: rgba(255, 255, 255, 0.15), $angle: 45deg) {
+  background-image: linear-gradient(
+    $angle,
+    $color 25%,
+    transparent 25%,
+    transparent 50%,
+    $color 50%,
+    $color 75%,
+    transparent 75%,
+    transparent
+  );
 }

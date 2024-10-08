@@ -23,7 +23,7 @@ function DeleteButton({ disabled, isLoading, onClick }: DeleteButtonProps) {
       variant="danger"
       disabled={disabled}
       isLoading={isLoading}
-      size="small"
+      size="sm"
       onClick={onClick}
       accessibilityLabel={t('remove') || ''}
       icon={

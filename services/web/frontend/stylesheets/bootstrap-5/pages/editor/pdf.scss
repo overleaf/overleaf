@@ -1,0 +1,357 @@
+:root {
+  --pdf-bg: var(--neutral-10);
+  --pdf-toolbar-btn-hover-color: rgb(125 125 125 / 20%);
+}
+
+@include theme('light') {
+  --pdf-toolbar-btn-hover-color: var(--neutral-10);
+}
+
+.pdf .toolbar.toolbar-pdf {
+  @include toolbar-sm-height;
+  @include toolbar-alt-bg;
+
+  padding-right: var(--spacing-03);
+  margin-left: 0;
+
+  .btn.disabled,
+  .btn[disabled] {
+    pointer-events: auto;
+    cursor: not-allowed;
+    opacity: 1;
+  }
+}
+
+.toolbar-pdf-left {
+  gap: var(--spacing-02);
+
+  .dropdown > .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &[disabled],
+    &[disabled]:active {
+      background-color: var(--bs-btn-bg);
+      color: var(--bs-btn-color);
+      opacity: 1;
+      pointer-events: auto;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.toolbar-pdf-orphan,
+.toolbar-pdf-left,
+.toolbar-pdf-right,
+.toolbar-pdf-controls {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+}
+
+.toolbar-pdf-orphan,
+.toolbar-pdf-controls {
+  flex: 1 1 100%;
+}
+
+.toolbar-pdf-controls {
+  margin-right: var(--spacing-02);
+  justify-content: flex-end;
+}
+
+.toolbar-pdf-right {
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.toolbar-pdf-orphan {
+  justify-content: center;
+  color: var(--toolbar-btn-color);
+
+  .btn {
+    margin-left: var(--spacing-03);
+  }
+}
+
+.btn.pdf-toolbar-btn {
+  display: inline-block;
+  color: var(--toolbar-btn-color);
+  background-color: transparent;
+  padding: 0 var(--spacing-01);
+  line-height: 1;
+  height: 24px;
+  border-radius: var(--border-radius-base);
+  text-decoration: none;
+
+  &:hover,
+  &:active,
+  &:focus {
+    color: var(--toolbar-btn-color);
+  }
+
+  &:hover {
+    &:not(:disabled) {
+      background-color: var(--pdf-toolbar-btn-hover-color);
+    }
+  }
+
+  &:active {
+    background-color: transparent;
+  }
+
+  .button-content {
+    align-self: center;
+  }
+
+  .badge {
+    font-size: 60%;
+  }
+
+  &.log-btn {
+    border: none;
+
+    &.active {
+      color: var(--white);
+      background-color: var(--link-color);
+      box-shadow: none;
+      opacity: 0.65;
+
+      &:hover {
+        &:not(:disabled) {
+          background-color: transparent;
+          color: var(--toolbar-btn-color);
+        }
+      }
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.pdf {
+  background-color: var(--pdf-bg);
+}
+
+.pdf-viewer,
+.pdf-logs,
+.pdf-errors,
+.pdf-uncompiled {
+  @extend .full-size;
+
+  top: var(--toolbar-small-height);
+}
+
+.pdf-viewer {
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .pdfjs-viewer {
+    @extend .full-size;
+
+    background-color: transparent;
+    overflow: scroll;
+
+    /* stylelint-disable-next-line selector-class-pattern */
+    .canvasWrapper > canvas,
+    div.pdf-canvas {
+      background: white;
+      box-shadow: 0 0 10px rgb(0 0 0 / 50%);
+    }
+
+    div.pdf-canvas.pdfng-empty {
+      background-color: var(--white);
+    }
+
+    div.pdf-canvas.pdfng-loading {
+      background-color: var(--white);
+    }
+
+    .page-container {
+      margin: var(--spacing-05) auto;
+      padding: 0 var(--spacing-05);
+      box-sizing: content-box;
+      user-select: none;
+    }
+
+    .page {
+      box-sizing: content-box;
+      margin: var(--spacing-05) auto;
+      box-shadow: 0 0 8px #bbb;
+      border: none;
+    }
+
+    .pdfjs-viewer-inner {
+      position: absolute;
+      overflow-y: scroll;
+      width: 100%;
+      height: 100%;
+      -webkit-font-smoothing: initial;
+      -moz-osx-font-smoothing: initial;
+
+      /* fix review-panel overflow issue, see: https://github.com/overleaf/internal/issues/6781#issuecomment-1112708638 */
+      /* stylelint-disable-next-line selector-class-pattern */
+      .pdfViewer {
+        min-height: 100%;
+      }
+    }
+
+    &:focus-within {
+      outline: none;
+    }
+
+    /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
+    /* stylelint-disable-next-line selector-class-pattern */
+    .textLayer br::selection {
+      background: transparent;
+    }
+  }
+
+  .progress-thin {
+    position: absolute;
+    top: -2px;
+    height: 3px;
+    left: 0;
+    right: 0;
+
+    .progress-bar {
+      height: 100%;
+      background-color: var(--link-color);
+    }
+  }
+}
+
+.pdfjs-viewer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.pdfjs-zoom-controls {
+  display: inline-flex;
+  border-left: 1px solid rgb(125 125 125 / 30%);
+}
+
+.pdfjs-toolbar-buttons {
+  display: flex;
+  gap: var(--spacing-04);
+  margin-left: var(--spacing-04);
+  margin-right: var(--spacing-04);
+}
+
+.pdfjs-toolbar-button {
+  padding: var(--spacing-01) !important;
+  display: flex;
+  align-items: center;
+}
+
+.pdfjs-zoom-dropdown-button {
+  width: 60px;
+  text-align: right;
+  font-weight: normal;
+}
+
+.pdfjs-zoom-dropdown-mac-shortcut-char {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+}
+
+.pdfjs-custom-zoom-menu-item {
+  display: block;
+  pointer-events: initial !important;
+
+  &:hover {
+    background-color: initial !important;
+    color: initial !important;
+    cursor: initial !important;
+  }
+}
+
+.pdfjs-page-number-input {
+  color: var(--toolbar-btn-color);
+  font-size: var(--font-size-02);
+  padding-right: var(--spacing-04);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-02);
+
+  input {
+    color: initial;
+    border: 1px solid var(--neutral-60);
+    width: 32px;
+    height: 24px;
+    border-radius: var(--border-radius-base);
+    text-align: center;
+  }
+}
+
+.pdfjs-viewer-controls-small {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-04);
+}
+
+.pdfjs-toolbar-popover-button {
+  padding: var(--spacing-01) !important;
+}
+
+.pdfjs-toolbar-popover {
+  background-color: var(--editor-toolbar-bg);
+  border-radius: var(--border-radius-base);
+
+  .popover-arrow {
+    display: none;
+  }
+
+  button {
+    background-color: transparent;
+    color: var(--toolbar-btn-color);
+  }
+
+  .popover-body {
+    display: flex;
+    align-items: center;
+    padding: var(--spacing-04) 0;
+  }
+}
+
+// The new viewer UI has overflow on the inner element,
+// so disable the overflow on the outer element
+.pdf-viewer .pdfjs-viewer.pdfjs-viewer-outer {
+  overflow: hidden;
+}
+
+:fullscreen {
+  .pdfjs-viewer-inner {
+    overflow-y: hidden !important;
+  }
+}
+
+.synctex-control {
+  > .synctex-control-icon {
+    display: inline-block;
+    font:
+      normal normal normal 14px/1 FontAwesome,
+      sans-serif;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  > .synctex-spin-icon {
+    margin-top: var(--spacing-01);
+  }
+}
+
+.keyboard-tooltip {
+  .tooltip-inner {
+    max-width: none;
+  }
+}

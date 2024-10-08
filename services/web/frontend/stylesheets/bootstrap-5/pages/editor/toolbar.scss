@@ -7,6 +7,8 @@
   --toolbar-btn-hover-color: var(--white);
   --toolbar-btn-active-color: var(--white);
   --toolbar-btn-active-bg-color: var(--green-50);
+  --toolbar-small-height: 32px;
+  --toolbar-alt-bg-color: var(--neutral-80);
   --formatting-btn-color: var(--white);
   --formatting-btn-bg: var(--neutral-80);
   --formatting-btn-border: var(--neutral-70);
@@ -27,6 +29,7 @@
   --toolbar-btn-hover-bg-color: var(--neutral-10);
   --toolbar-btn-hover-color: var(--neutral-70);
   --toolbar-btn-active-bg-color: var(--green-50);
+  --toolbar-alt-bg-color: var(--white);
   --formatting-btn-color: var(--neutral-70);
   --formatting-btn-bg: transparent;
   --formatting-btn-border: var(--neutral-20);
@@ -43,7 +46,6 @@
   display: flex;
   align-items: center;
   height: var(--toolbar-height);
-  min-height: var(--toolbar-height);
   border-bottom: 1px solid var(--toolbar-border-color);
 
   button {

@@ -17,7 +17,7 @@ export const ButtonStyle = args => {
       {...args}
       buttonProps={{
         variant: 'danger',
-        size: 'large',
+        size: 'lg',
       }}
     />
   )

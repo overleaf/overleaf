@@ -1,6 +1,6 @@
-import { ButtonGroup } from 'react-bootstrap'
 import PDFToolbarButton from './pdf-toolbar-button'
 import { useTranslation } from 'react-i18next'
+import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -15,7 +15,7 @@ function PdfZoomButtons({ setZoom }: PdfZoomButtonsProps) {
   const zoomOutShortcut = isMac ? '⌘-' : 'Ctrl+-'
 
   return (
-    <ButtonGroup className="pdfjs-toolbar-buttons">
+    <OLButtonGroup className="pdfjs-toolbar-buttons">
       <PDFToolbarButton
         tooltipId="pdf-controls-zoom-out-tooltip"
         label={t('zoom_out')}
@@ -30,7 +30,7 @@ function PdfZoomButtons({ setZoom }: PdfZoomButtonsProps) {
         onClick={() => setZoom('zoom-in')}
         shortcut={zoomInShortcut}
       />
-    </ButtonGroup>
+    </OLButtonGroup>
   )
 }
 

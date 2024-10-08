@@ -10,7 +10,7 @@ type OLButtonGroupProps = ButtonGroupProps & {
   bs3Props?: Record<string, unknown>
 }
 
-function OlButtonGroup({ bs3Props, as, ...rest }: OLButtonGroupProps) {
+function OLButtonGroup({ bs3Props, as, ...rest }: OLButtonGroupProps) {
   const bs3ButtonGroupProps: BS3ButtonGroupProps = {
     children: rest.children,
     className: rest.className,
@@ -27,4 +27,4 @@ function OlButtonGroup({ bs3Props, as, ...rest }: OLButtonGroupProps) {
   )
 }
 
-export default OlButtonGroup
+export default OLButtonGroup

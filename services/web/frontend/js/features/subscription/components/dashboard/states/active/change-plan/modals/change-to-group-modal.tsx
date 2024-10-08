@@ -345,7 +345,7 @@ export function ChangeToGroupModal() {
             )}
             <OLButton
               variant="primary"
-              size="large"
+              size="lg"
               disabled={
                 queryingGroupPlanToChangeToPrice ||
                 !groupPlanToChangeToPrice ||

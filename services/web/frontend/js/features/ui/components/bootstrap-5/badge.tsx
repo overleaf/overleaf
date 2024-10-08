@@ -1,14 +1,14 @@
-import { Badge as BSBadge } from 'react-bootstrap-5'
+import { Badge as BSBadge, BadgeProps as BSBadgeProps } from 'react-bootstrap-5'
 import { MergeAndOverride } from '../../../../../../types/utils'
 
 type BadgeProps = MergeAndOverride<
-  React.ComponentProps<typeof BSBadge>,
+  BSBadgeProps,
   {
     prepend?: React.ReactNode
   }
 >
 
-function Badge({ prepend, children, closeBtnProps, ...rest }: BadgeProps) {
+function Badge({ prepend, children, ...rest }: BadgeProps) {
   return (
     <BSBadge {...rest}>
       {prepend && <span className="badge-prepend">{prepend}</span>}

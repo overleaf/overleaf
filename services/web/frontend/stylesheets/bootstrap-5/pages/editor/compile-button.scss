@@ -1,0 +1,31 @@
+$stripe-width: 20px;
+
+@keyframes pdf-toolbar-stripes {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: $stripe-width 0;
+  }
+}
+
+.btn-striped-animated {
+  @include striped;
+
+  background-size: $stripe-width $stripe-width;
+  background-origin: content-box;
+
+  @include animation(pdf-toolbar-stripes 2s linear infinite);
+}
+
+.detach-compile-button {
+  &[disabled],
+  &[disabled]:active {
+    background-color: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+    opacity: 1;
+    pointer-events: auto;
+    cursor: not-allowed;
+  }
+}

@@ -7,8 +7,6 @@ import { getJSON } from '../../../infrastructure/fetch-json'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useLayoutContext } from '../../../shared/context/layout-context'
 import useScopeValue from '../../../shared/hooks/use-scope-value'
-import { Button } from 'react-bootstrap'
-import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import useIsMounted from '../../../shared/hooks/use-is-mounted'
@@ -21,6 +19,12 @@ import useScopeEventListener from '../../../shared/hooks/use-scope-event-listene
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import { debugConsole } from '@/utils/debugging'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
+import { Spinner } from 'react-bootstrap-5'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function GoToCodeButton({
   position,
@@ -30,15 +34,32 @@ function GoToCodeButton({
 }) {
   const { t } = useTranslation()
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
-  const buttonClasses = classNames('synctex-control', 'btn-secondary', {
+  const buttonClasses = classNames('synctex-control', {
     'detach-synctex-control': !!isDetachLayout,
   })
 
   let buttonIcon = null
   if (syncToCodeInFlight) {
-    buttonIcon = <Icon type="refresh" spin className="synctex-spin-icon" />
+    buttonIcon = (
+      <BootstrapVersionSwitcher
+        bs3={<Icon type="refresh" spin className="synctex-spin-icon" />}
+        bs5={
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            size="sm"
+            role="status"
+          />
+        }
+      />
+    )
   } else if (!isDetachLayout) {
-    buttonIcon = <Icon type="arrow-left" className="synctex-control-icon" />
+    buttonIcon = (
+      <BootstrapVersionSwitcher
+        bs3={<Icon type="arrow-left" className="synctex-control-icon" />}
+        bs5={<MaterialIcon type="arrow_left_alt" />}
+      />
+    )
   }
 
   const syncToCodeWithButton = () => {
@@ -50,23 +71,26 @@ function GoToCodeButton({
   }
 
   return (
-    <Tooltip
+    <OLTooltip
       id="sync-to-code"
       description={t('go_to_pdf_location_in_code')}
       overlayProps={{ placement: tooltipPlacement }}
     >
-      <Button
-        bsStyle={null}
-        bsSize="xs"
+      <OLButton
+        variant="secondary"
+        size="sm"
         onClick={syncToCodeWithButton}
         disabled={syncToCodeInFlight}
         className={buttonClasses}
         aria-label={t('go_to_pdf_location_in_code')}
+        bs3Props={{
+          bsSize: 'xs',
+        }}
       >
         {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_code')}</span> : ''}
-      </Button>
-    </Tooltip>
+      </OLButton>
+    </OLTooltip>
   )
 }
 
@@ -81,8 +105,7 @@ function GoToPdfButton({
   const tooltipPlacement = isDetachLayout ? 'bottom' : 'right'
   const buttonClasses = classNames(
     'synctex-control',
-    'btn-secondary',
-    'toolbar-btn-secondary',
+    bsVersion({ bs3: 'toolbar-btn-secondary' }),
     {
       'detach-synctex-control': !!isDetachLayout,
     }
@@ -90,29 +113,49 @@ function GoToPdfButton({
 
   let buttonIcon = null
   if (syncToPdfInFlight) {
-    buttonIcon = <Icon type="refresh" spin className="synctex-spin-icon" />
+    buttonIcon = (
+      <BootstrapVersionSwitcher
+        bs3={<Icon type="refresh" spin className="synctex-spin-icon" />}
+        bs5={
+          <Spinner
+            animation="border"
+            aria-hidden="true"
+            size="sm"
+            role="status"
+          />
+        }
+      />
+    )
   } else if (!isDetachLayout) {
-    buttonIcon = <Icon type="arrow-right" className="synctex-control-icon" />
+    buttonIcon = (
+      <BootstrapVersionSwitcher
+        bs3={<Icon type="arrow-right" className="synctex-control-icon" />}
+        bs5={<MaterialIcon type="arrow_right_alt" />}
+      />
+    )
   }
 
   return (
-    <Tooltip
+    <OLTooltip
       id="sync-to-pdf"
       description={t('go_to_code_location_in_pdf')}
       overlayProps={{ placement: tooltipPlacement }}
     >
-      <Button
-        bsStyle={null}
-        bsSize="xs"
+      <OLButton
+        variant="secondary"
+        size="sm"
         onClick={() => syncToPdf(cursorPosition)}
         disabled={syncToPdfInFlight || !cursorPosition || !hasSingleSelectedDoc}
         className={buttonClasses}
         aria-label={t('go_to_code_location_in_pdf')}
+        bs3Props={{
+          bsSize: 'xs',
+        }}
       >
         {buttonIcon}
         {isDetachLayout ? <span>&nbsp;{t('show_in_pdf')}</span> : ''}
-      </Button>
-    </Tooltip>
+      </OLButton>
+    </OLTooltip>
   )
 }
 
