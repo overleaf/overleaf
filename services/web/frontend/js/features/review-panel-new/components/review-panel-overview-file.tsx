@@ -48,7 +48,7 @@ export const ReviewPanelOverviewFile: FC<{
   const unresolvedComments = useMemo(() => {
     return ranges.comments.filter(comment => {
       const thread = threads?.[comment.op.t]
-      return thread && !thread.resolved
+      return thread && thread.messages.length > 0 && !thread.resolved
     })
   }, [ranges.comments, threads])
 
