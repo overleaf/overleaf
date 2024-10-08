@@ -7,20 +7,40 @@ import {
   Completion,
 } from '@codemirror/autocomplete'
 import { EditorView, keymap } from '@codemirror/view'
-import { Compartment, Prec, TransactionSpec } from '@codemirror/state'
+import {
+  Compartment,
+  Extension,
+  Prec,
+  TransactionSpec,
+} from '@codemirror/state'
+import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+
+const moduleExtensions: Array<(options: Record<string, any>) => Extension> =
+  importOverleafModules('autoCompleteExtensions').map(
+    (item: { import: { extension: Extension } }) => item.import.extension
+  )
 
 const autoCompleteConf = new Compartment()
 
-export const autoComplete = ({ autoComplete }: { autoComplete: boolean }) =>
-  autoCompleteConf.of(createAutoComplete(autoComplete))
+type AutoCompleteOptions = {
+  enabled: boolean
+} & Record<string, any>
 
-export const setAutoComplete = (autoComplete: boolean): TransactionSpec => {
+export const autoComplete = ({ enabled, ...rest }: AutoCompleteOptions) =>
+  autoCompleteConf.of(createAutoComplete({ enabled, ...rest }))
+
+export const setAutoComplete = ({
+  enabled,
+  ...rest
+}: AutoCompleteOptions): TransactionSpec => {
   return {
-    effects: autoCompleteConf.reconfigure(createAutoComplete(autoComplete)),
+    effects: autoCompleteConf.reconfigure(
+      createAutoComplete({ enabled, ...rest })
+    ),
   }
 }
 
-const createAutoComplete = (enabled: boolean) => {
+const createAutoComplete = ({ enabled, ...rest }: AutoCompleteOptions) => {
   if (!enabled) {
     return []
   }
@@ -79,6 +99,7 @@ const createAutoComplete = (enabled: boolean) => {
         ])
       ),
     ],
+    moduleExtensions.map(extension => extension({ ...rest })),
   ]
 }
 

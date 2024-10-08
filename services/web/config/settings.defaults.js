@@ -962,6 +962,7 @@ module.exports = {
     usGovBanner: [],
     offlineModeToolbarButtons: [],
     settingsEntries: [],
+    autoCompleteExtensions: [],
   },
 
   moduleImportSequence: [

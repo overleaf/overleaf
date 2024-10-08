@@ -102,7 +102,10 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
 
   // NOTE: `autoComplete` needs to be before `keybindings` so that arrow key handling
   // in the autocomplete pop-up takes precedence over Vim/Emacs key bindings
-  autoComplete(options.settings),
+  autoComplete({
+    enabled: options.settings.autoComplete,
+    projectFeatures: options.projectFeatures,
+  }),
 
   // NOTE: `keybindings` needs to be before `language` so that Vim/Emacs bindings take
   // precedence over language-specific keyboard shortcuts

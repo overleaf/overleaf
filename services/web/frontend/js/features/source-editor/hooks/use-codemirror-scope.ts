@@ -111,7 +111,10 @@ function useCodeMirrorScope(view: EditorView) {
   const [spellCheckLanguage] = useScopeValue<string>(
     'project.spellCheckLanguage'
   )
-  const [projectFeatures] = useScopeValue<boolean>('project.features')
+  const [projectFeatures] =
+    useScopeValue<Record<string, boolean | string | number | undefined>>(
+      'project.features'
+    )
 
   const hunspellManager = useHunspell(spellCheckLanguage)
 
@@ -408,7 +411,12 @@ function useCodeMirrorScope(view: EditorView) {
 
   useEffect(() => {
     settingsRef.current.autoComplete = autoComplete
-    view.dispatch(setAutoComplete(autoComplete))
+    view.dispatch(
+      setAutoComplete({
+        enabled: autoComplete,
+        projectFeatures: projectFeaturesRef.current,
+      })
+    )
   }, [view, autoComplete])
 
   useEffect(() => {
