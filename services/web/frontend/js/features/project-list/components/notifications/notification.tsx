@@ -3,7 +3,7 @@ import NewNotification from '@/shared/components/notification'
 
 type NotificationProps = Pick<
   React.ComponentProps<typeof NewNotification>,
-  'type' | 'action' | 'content' | 'onDismiss' | 'className'
+  'type' | 'action' | 'content' | 'onDismiss' | 'className' | 'title'
 >
 
 function Notification({ className, ...props }: NotificationProps) {

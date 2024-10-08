@@ -198,12 +198,13 @@ function ipMatcherAffiliation(userId) {
 function tpdsFileLimit(userId) {
   return {
     key: `tpdsFileLimit-${userId}`,
-    create(projectName, callback) {
+    create(projectName, projectId, callback) {
       if (callback == null) {
         callback = function () {}
       }
       const messageOpts = {
         projectName,
+        projectId,
       }
       NotificationsHandler.createNotification(
         userId,

@@ -42,6 +42,7 @@ export interface NotificationTPDSFileLimit extends NotificationBase {
   templateKey: Extract<TemplateKey, 'notification_tpds_file_limit'>
   messageOpts: {
     projectName: string
+    projectId?: string
   }
 }
 

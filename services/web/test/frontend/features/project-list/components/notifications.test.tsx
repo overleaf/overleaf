@@ -295,14 +295,12 @@ describe('<UserNotifications />', function () {
 
       screen.getByRole('alert')
       screen.getByText(/file limit/i)
-      screen.getByText(
-        /please decrease the size of your project to prevent further errors/i
-      )
+      screen.getByText(/You can't add more files to the project or sync it/i)
 
       const accountSettings = screen.getByRole('link', {
-        name: /account settings/i,
+        name: /Open project/i,
       })
-      expect(accountSettings.getAttribute('href')).to.equal('/user/settings')
+      expect(accountSettings.getAttribute('href')).to.equal('/project/123')
       const closeBtn = screen.getByRole('button', { name: /close/i })
       fireEvent.click(closeBtn)
 

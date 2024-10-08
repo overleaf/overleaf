@@ -62,7 +62,7 @@ async function mergeUpdate(req, res) {
         { err, userId, filePath },
         'tpds trying to append to project over file limit'
       )
-      NotificationsBuilder.tpdsFileLimit(userId).create(projectName)
+      NotificationsBuilder.tpdsFileLimit(userId).create(projectName, projectId)
       return res.sendStatus(400)
     } else {
       throw err
