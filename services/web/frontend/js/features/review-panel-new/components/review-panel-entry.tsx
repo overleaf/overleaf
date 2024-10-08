@@ -43,12 +43,25 @@ export const ReviewPanelEntry: FC<{
     setReviewPanelOpen(true)
   }, [setReviewPanelOpen])
 
-  const focusHandler = useCallback(() => {
-    if (selectLineOnFocus) {
-      openDocId(docId, { gotoOffset: position, keepCurrentView: true })
-    }
-    setFocused(true)
-  }, [selectLineOnFocus, docId, openDocId, position])
+  const focusHandler = useCallback(
+    event => {
+      if (
+        event.target instanceof HTMLButtonElement ||
+        event.target instanceof HTMLLinkElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
+        // Don't focus if the click was on a button/link/textarea as we don't want
+        // affect the behaviour of the button/link/textarea
+        return
+      }
+
+      if (selectLineOnFocus) {
+        openDocId(docId, { gotoOffset: position, keepCurrentView: true })
+      }
+      setFocused(true)
+    },
+    [selectLineOnFocus, docId, openDocId, position]
+  )
 
   // Clear op highlight on dismount
   useEffect(() => {
