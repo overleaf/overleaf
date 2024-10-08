@@ -140,11 +140,16 @@
     border-bottom: 1px solid @rp-border-grey;
     background-color: white;
     text-align: center;
+    z-index: 4;
   }
 
   // TODO: Update this when we move the track changes menu to the new design
   .rp-tc-state {
     background-color: white;
+    max-height: calc(
+      100vh - var(--review-panel-top) - @review-panel-header-height
+    );
+    overflow-y: auto;
   }
 
   .review-panel-tools {
