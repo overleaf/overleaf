@@ -1,4 +1,5 @@
 import Hunspell from './wasm/hunspell'
+import hunspellWasmPath from './wasm/hunspell.wasm'
 
 type SpellChecker = {
   spell(words: string[]): { index: number }[]
@@ -11,13 +12,23 @@ type SpellChecker = {
 const createSpellChecker = async ({
   lang,
   learnedWords,
+  baseAssetPath,
   dictionariesRoot,
 }: {
   lang: string
   learnedWords: string[]
+  baseAssetPath: string
   dictionariesRoot: string
 }) => {
-  const hunspell = await Hunspell()
+  const fileLocations: Record<string, string> = {
+    'hunspell.wasm': new URL(hunspellWasmPath, baseAssetPath).toString(),
+  }
+
+  const hunspell = await Hunspell({
+    locateFile(file: string) {
+      return fileLocations[file]
+    },
+  })
 
   const {
     cwrap,
@@ -51,11 +62,13 @@ const createSpellChecker = async ({
 
   FS.mkdir('/dictionaries')
 
+  const dictionariesRootURL = new URL(dictionariesRoot, baseAssetPath)
+
   const [dic, aff] = await Promise.all([
-    fetch(new URL(`./${lang}.dic`, dictionariesRoot)).then(response =>
+    fetch(new URL(`./${lang}.dic`, dictionariesRootURL)).then(response =>
       response.blob()
     ),
-    fetch(new URL(`./${lang}.aff`, dictionariesRoot)).then(response =>
+    fetch(new URL(`./${lang}.aff`, dictionariesRootURL)).then(response =>
       response.blob()
     ),
   ])

@@ -30,6 +30,7 @@ type Message =
     }
 
 export class HunspellManager {
+  baseAssetPath: string
   dictionariesRoot: string
   hunspellWorker!: Worker
   abortController: AbortController | undefined
@@ -42,15 +43,12 @@ export class HunspellManager {
     private readonly language: string,
     private readonly learnedWords: string[]
   ) {
-    const baseAssetPath = new URL(
+    this.baseAssetPath = new URL(
       getMeta('ol-baseAssetPath'),
       window.location.href
-    )
-
-    this.dictionariesRoot = new URL(
-      getMeta('ol-dictionariesRoot'),
-      baseAssetPath
     ).toString()
+
+    this.dictionariesRoot = getMeta('ol-dictionariesRoot')
 
     createWorker(() => {
       this.hunspellWorker = new Worker(
@@ -97,6 +95,7 @@ export class HunspellManager {
         type: 'init',
         lang: this.language,
         learnedWords: this.learnedWords, // TODO: add words
+        baseAssetPath: this.baseAssetPath,
         dictionariesRoot: this.dictionariesRoot,
       })
       for (const message of this.pendingMessages) {
