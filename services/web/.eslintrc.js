@@ -91,8 +91,13 @@ module.exports = {
     },
     {
       // ES specific rules
-      files: ['**/app/src/**/*.mjs'],
+      files: ['**/app/src/**/*.mjs', 'modules/*/index.mjs', 'app.mjs'],
+      parserOptions: {
+        sourceType: 'module',
+      },
+      plugins: ['unicorn'],
       rules: {
+        'unicorn/prefer-module': 'error',
         'import/no-unresolved': 'error',
         'import/extensions': [
           'error',
