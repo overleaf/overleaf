@@ -72,6 +72,51 @@ describe('ChunkTranslator', function () {
                 timestamp: this.date.toISOString(),
                 authors: [this.author1.id],
               },
+              {
+                origin: {
+                  kind: 'file-restore',
+                  version: 1,
+                  path: 'main.tex',
+                  timestamp: this.date.toISOString(),
+                },
+                operations: [
+                  {
+                    pathname: 'main.tex',
+                    newPathname: '',
+                  },
+                ],
+                timestamp: this.date.toISOString(),
+                authors: [this.author1.id],
+              },
+              {
+                origin: {
+                  kind: 'file-restore',
+                  version: 1,
+                  path: 'main.tex',
+                  timestamp: this.date.toISOString(),
+                },
+                operations: [
+                  {
+                    pathname: 'main.tex',
+                    file: {
+                      hash: this.fileHash,
+                      stringLength: 42,
+                    },
+                  },
+                ],
+                timestamp: this.date.toISOString(),
+                authors: [this.author1.id],
+              },
+              {
+                operations: [
+                  {
+                    pathname: 'main.tex',
+                    newPathname: 'main2.tex',
+                  },
+                ],
+                timestamp: this.date.toISOString(),
+                authors: [this.author1.id],
+              },
             ],
           },
         },
@@ -162,6 +207,38 @@ describe('ChunkTranslator', function () {
           }
         )
       })
+
+      it('should return the correct initial text in case of file restore', function (done) {
+        this.ChunkTranslator.convertToDiffUpdates(
+          this.projectId,
+          this.chunk,
+          'main.tex',
+          3,
+          5,
+          (error, param) => {
+            const { initialContent } = param
+            expect(error).to.be.null
+            expect(initialContent).to.equal('Hello world, this is a test')
+            done()
+          }
+        )
+      })
+
+      it('should still find original file in case it was renamed', function (done) {
+        this.ChunkTranslator.convertToDiffUpdates(
+          this.projectId,
+          this.chunk,
+          'main.tex',
+          5,
+          6,
+          (error, param) => {
+            const { initialContent } = param
+            expect(error).to.be.null
+            expect(initialContent).to.equal('Hello world, this is a test')
+            done()
+          }
+        )
+      })
     })
 
     describe('convertToSummarizedUpdates', function () {
@@ -199,6 +276,67 @@ describe('ChunkTranslator', function () {
                 end_ts: this.date.getTime(),
               },
               v: 2,
+            },
+            {
+              pathnames: [],
+              project_ops: [
+                {
+                  remove: {
+                    pathname: 'main.tex',
+                  },
+                },
+              ],
+              meta: {
+                users: [this.author1.id],
+                start_ts: this.date.getTime(),
+                end_ts: this.date.getTime(),
+                origin: {
+                  kind: 'file-restore',
+                  version: 1,
+                  path: 'main.tex',
+                  timestamp: this.date.toISOString(),
+                },
+              },
+              v: 3,
+            },
+            {
+              pathnames: [],
+              project_ops: [
+                {
+                  add: {
+                    pathname: 'main.tex',
+                  },
+                },
+              ],
+              meta: {
+                users: [this.author1.id],
+                start_ts: this.date.getTime(),
+                end_ts: this.date.getTime(),
+                origin: {
+                  kind: 'file-restore',
+                  version: 1,
+                  path: 'main.tex',
+                  timestamp: this.date.toISOString(),
+                },
+              },
+              v: 4,
+            },
+            {
+              pathnames: [],
+              project_ops: [
+                {
+                  rename: {
+                    pathname: 'main.tex',
+                    newPathname: 'main2.tex',
+                  },
+                },
+              ],
+              meta: {
+                users: [this.author1.id],
+                start_ts: this.date.getTime(),
+                end_ts: this.date.getTime(),
+              },
+              v: 5,
             },
           ])
           done()

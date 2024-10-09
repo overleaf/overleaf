@@ -49,13 +49,14 @@ export function convertToDiffUpdates(
   let file = null
   for (const change of chunk.chunk.history.changes) {
     // Because we're referencing by pathname, which can change, we
-    // want to get the first file in the range fromVersion:toVersion
+    // want to get the last file in the range fromVersion:toVersion
     // that has the pathname we want. Note that this might not exist yet
-    // at fromVersion, so we'll just settle for the first one we find
+    // at fromVersion, so we'll just settle for the last existing one we find
     // after that.
     if (fromVersion <= version && version <= toVersion) {
-      if (file == null) {
-        file = builder.getFile(pathname)
+      const currentFile = builder.getFile(pathname)
+      if (currentFile) {
+        file = currentFile
       }
     }
 
@@ -70,8 +71,9 @@ export function convertToDiffUpdates(
   // Versions act as fence posts, with updates taking us from one to another,
   // so we also need to check after the final update, when we're at the last version.
   if (fromVersion <= version && version <= toVersion) {
-    if (file == null) {
-      file = builder.getFile(pathname)
+    const currentFile = builder.getFile(pathname)
+    if (currentFile) {
+      file = currentFile
     }
   }
 
