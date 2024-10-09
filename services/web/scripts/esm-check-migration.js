@@ -85,7 +85,7 @@ function collectJsFiles(dir, files = []) {
       const basename = path.basename(fullPath)
 
       // skipping directories from search
-      if (!['test', 'frontend', 'node_modules'].includes(basename)) {
+      if (!['frontend', 'node_modules'].includes(basename)) {
         collectJsFiles(fullPath, files)
       }
     } else if (
