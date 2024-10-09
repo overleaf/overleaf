@@ -1,14 +1,13 @@
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
-const minimist = require('minimist')
-const _ = require('lodash')
-const async = require('async')
-const FeaturesUpdater = require('../app/src/Features/Subscription/FeaturesUpdater')
-const FeaturesHelper = require('../app/src/Features/Subscription/FeaturesHelper')
-const UserFeaturesUpdater = require('../app/src/Features/Subscription/UserFeaturesUpdater')
-const AnalyticsManager = require('../app/src/Features/Analytics/AnalyticsManager')
-const DropboxHandler = require('../modules/dropbox/app/src/DropboxHandler')
-const { OError } = require('../app/src/Features/Errors/Errors')
-const logger = require('@overleaf/logger')
+import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import minimist from 'minimist'
+import _ from 'lodash'
+import async from 'async'
+import FeaturesUpdater from '../app/src/Features/Subscription/FeaturesUpdater.js'
+import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.js'
+import UserFeaturesUpdater from '../app/src/Features/Subscription/UserFeaturesUpdater.js'
+import AnalyticsManager from '../app/src/Features/Analytics/AnalyticsManager.js'
+import DropboxHandler from '../modules/dropbox/app/src/DropboxHandler.js'
+import { OError } from '../app/src/Features/Errors/Errors.js'
 
 const ScriptLogger = {
   checkedUsersCount: 0,
@@ -109,7 +108,7 @@ const checkAndUpdateUser = (user, callback) =>
                   })
                 )
               }
-              logger.log({ userId: user._id }, 'Unlinked dropbox')
+              console.log({ userId: user._id }, 'Unlinked dropbox')
               callback(null, featuresChanged)
             }
           )
@@ -180,7 +179,7 @@ const setup = () => {
     console.log(
       'NOTE: features can be automatically refreshed on login (using `featuresEpoch`)\n' +
         'Consider incrementing settings.featuresEpoch instead of running this script.\n' +
-        'If you really need to run this script, use refresh_features.js --force.'
+        'If you really need to run this script, use refresh_features.mjs --force.'
     )
     process.exit(1)
   }
@@ -192,7 +191,6 @@ const setup = () => {
   }
 }
 
-waitForDb().then(() => {
-  setup()
-  run()
-})
+await waitForDb()
+setup()
+run()
