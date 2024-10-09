@@ -1,4 +1,3 @@
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Notification from '@/shared/components/notification'
 import { upgradePlan } from '@/main/account-upgrade'
@@ -6,6 +5,7 @@ import { useProjectContext } from '@/shared/context/project-context'
 import { useUserContext } from '@/shared/context/user-context'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
 import getMeta from '@/utils/meta'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function CollaboratorsLimitUpgrade() {
   const { t } = useTranslation()
@@ -44,15 +44,14 @@ export default function CollaboratorsLimitUpgrade() {
                 {t('upgrade')}
               </StartFreeTrialButton>
             ) : (
-              <Button
-                bsSize="medium"
-                className="btn-premium"
+              <OLButton
+                variant="premium"
                 onClick={() => {
                   upgradePlan('project-sharing')
                 }}
               >
                 {t('upgrade')}
-              </Button>
+              </OLButton>
             )
           }
         />
@@ -78,15 +77,15 @@ export default function CollaboratorsLimitUpgrade() {
                 {t('upgrade')}
               </StartFreeTrialButton>
             ) : (
-              <Button
-                bsSize="sm"
-                className="btn-secondary"
+              <OLButton
+                size="sm"
+                variant="secondary"
                 onClick={() => {
                   upgradePlan('project-sharing')
                 }}
               >
                 {t('upgrade')}
-              </Button>
+              </OLButton>
             )
           }
         />

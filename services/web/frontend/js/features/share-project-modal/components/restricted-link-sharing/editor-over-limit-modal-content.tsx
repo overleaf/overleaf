@@ -1,7 +1,13 @@
-import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { linkSharingEnforcementDate } from '../../utils/link-sharing'
 import { sendMB } from '@/infrastructure/event-tracking'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 
 type EditorOverLimitModalContentProps = {
   handleHide: () => void
@@ -14,22 +20,21 @@ export default function EditorOverLimitModalContent({
 
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('do_you_need_edit_access')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('do_you_need_edit_access')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <p>
           {t('this_project_has_more_than_max_collabs', {
             linkSharingDate: linkSharingEnforcementDate,
           })}
         </p>
         <p>{t('to_keep_edit_access')}</p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton
+          variant="secondary"
           href="/blog/changes-to-project-sharing"
           target="_blank"
           rel="noreferrer"
@@ -41,9 +46,9 @@ export default function EditorOverLimitModalContent({
           }}
         >
           {t('learn_more')}
-        </Button>
-        <Button
-          className="btn-primary"
+        </OLButton>
+        <OLButton
+          variant="primary"
           onClick={() => {
             sendMB('notification-click', {
               name: 'link-sharing-collaborator-limit',
@@ -53,8 +58,8 @@ export default function EditorOverLimitModalContent({
           }}
         >
           {t('ok')}
-        </Button>
-      </Modal.Footer>
+        </OLButton>
+      </OLModalFooter>
     </>
   )
 }

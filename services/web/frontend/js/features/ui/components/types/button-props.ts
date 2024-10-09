@@ -14,6 +14,7 @@ export type ButtonProps = {
   isLoading?: boolean
   loadingLabel?: string
   onClick?: React.MouseEventHandler<HTMLButtonElement>
+  onMouseDown?: React.MouseEventHandler<HTMLButtonElement>
   onMouseOver?: React.MouseEventHandler<HTMLButtonElement>
   onMouseOut?: React.MouseEventHandler<HTMLButtonElement>
   onFocus?: React.FocusEventHandler<HTMLButtonElement>

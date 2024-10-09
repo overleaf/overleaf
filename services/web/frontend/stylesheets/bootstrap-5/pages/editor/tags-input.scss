@@ -1,0 +1,68 @@
+.tags-input *,
+.tags-input *::before,
+.tags-input *::after {
+  box-sizing: border-box;
+}
+
+.tags-input label.small {
+  font-weight: normal;
+}
+
+.tags-input .host {
+  position: relative;
+  height: 100%;
+}
+
+.tags-input .host:active,
+.tags-input[disabled] .host:focus {
+  outline: none;
+}
+
+.tags-input .tags {
+  appearance: textfield;
+  overflow: hidden;
+  word-wrap: break-word;
+  cursor: text;
+  background-color: var(--white);
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+
+  .badge-tag {
+    margin: var(--spacing-01);
+
+    .badge-tag-content {
+      max-width: initial;
+
+      .badge-content {
+        white-space: initial;
+        word-break: break-word;
+        text-align: initial;
+      }
+    }
+  }
+}
+
+.tags-input .tags:focus-within {
+  @extend %input-focus-style;
+}
+
+.tags-input .tags .input {
+  border: 0;
+  outline: none;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &::placeholder {
+    color: $input-placeholder-color;
+  }
+}
+
+.tags-input .tags .input.invalid-tag {
+  color: var(--bs-danger);
+}
+
+.tags-input .tags .input::-ms-clear {
+  display: none;
+}

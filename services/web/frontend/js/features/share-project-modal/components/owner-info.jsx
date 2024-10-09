@@ -1,17 +1,18 @@
 import { useProjectContext } from '../../../shared/context/project-context'
-import { Col, Row } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
 
 export default function OwnerInfo() {
   const { t } = useTranslation()
   const { owner } = useProjectContext()
 
   return (
-    <Row className="project-member">
-      <Col xs={7}>{owner?.email}</Col>
-      <Col xs={3} className="text-left">
+    <OLRow className="project-member">
+      <OLCol xs={7}>{owner?.email}</OLCol>
+      <OLCol xs={3} className="text-start">
         {t('owner')}
-      </Col>
-    </Row>
+      </OLCol>
+    </OLRow>
   )
 }

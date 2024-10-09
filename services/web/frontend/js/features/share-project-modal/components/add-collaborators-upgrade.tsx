@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import { useUserContext } from '../../../shared/context/user-context'
 import { upgradePlan } from '../../../main/account-upgrade'
 import StartFreeTrialButton from '../../../shared/components/start-free-trial-button'
 import Icon from '../../../shared/components/icon'
 import { useFeatureFlag } from '../../../shared/context/split-test-context'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function AddCollaboratorsUpgrade() {
   const { t } = useTranslation()
@@ -21,34 +23,52 @@ export default function AddCollaboratorsUpgrade() {
       </p>
       <ul className="list-unstyled">
         <li>
-          <Icon type="check" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="check" />}
+            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
+          />
           &nbsp;
           {t('unlimited_projects')}
         </li>
         <li>
-          <Icon type="check" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="check" />}
+            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
+          />
           &nbsp;
           {t('collabs_per_proj', {
             collabcount: 'Multiple',
           })}
         </li>
         <li>
-          <Icon type="check" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="check" />}
+            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
+          />
           &nbsp;
           {t('full_doc_history')}
         </li>
         <li>
-          <Icon type="check" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="check" />}
+            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
+          />
           &nbsp;
           {t('sync_to_dropbox')}
         </li>
         <li>
-          <Icon type="check" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="check" />}
+            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
+          />
           &nbsp;
           {t('sync_to_github')}
         </li>
         <li>
-          <Icon type="check" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="check" />}
+            bs5={<MaterialIcon type="check" className="align-text-bottom" />}
+          />
           &nbsp;
           {t('compile_larger_projects')}
         </li>
@@ -65,15 +85,15 @@ export default function AddCollaboratorsUpgrade() {
               : t('start_free_trial')}
           </StartFreeTrialButton>
         ) : (
-          <Button
-            bsStyle="primary"
+          <OLButton
+            variant="primary"
             onClick={() => {
               upgradePlan('project-sharing')
               setStartedFreeTrial(true)
             }}
           >
             {t('upgrade')}
-          </Button>
+          </OLButton>
         )}
       </p>
       {startedFreeTrial && (

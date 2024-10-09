@@ -6,6 +6,12 @@ import { useCombobox } from 'downshift'
 import classnames from 'classnames'
 
 import Icon from '@/shared/components/icon'
+import MaterialIcon from '@/shared/components/material-icon'
+import Tag from '@/features/ui/components/bootstrap-5/tag'
+import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import { Spinner } from 'react-bootstrap-5'
 
 // Unicode characters in these Unicode groups:
 //  "General Punctuation — Spaces"
@@ -156,98 +162,123 @@ export default function SelectCollaborators({
           {t('add_people')}
           &nbsp;
         </strong>
-        {loading && <Icon type="refresh" spin />}
+        {loading && (
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="refresh" spin />}
+            bs5={
+              <Spinner
+                animation="border"
+                aria-hidden="true"
+                size="sm"
+                role="status"
+              />
+            }
+          />
+        )}
       </label>
 
       <div className="host">
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-        <div {...getComboboxProps()} className="tags" onClick={focusInput}>
-          <div className="tags-main">
-            {selectedItems.map((selectedItem, index) => (
-              <SelectedItem
-                key={`selected-item-${index}`}
-                removeSelectedItem={removeSelectedItem}
-                selectedItem={selectedItem}
-                focusInput={focusInput}
-                index={index}
-                getSelectedItemProps={getSelectedItemProps}
-              />
-            ))}
+        <div
+          {...getComboboxProps()}
+          className="tags form-control"
+          onClick={focusInput}
+        >
+          {selectedItems.map((selectedItem, index) => (
+            <SelectedItem
+              key={`selected-item-${index}`}
+              removeSelectedItem={removeSelectedItem}
+              selectedItem={selectedItem}
+              focusInput={focusInput}
+              index={index}
+              getSelectedItemProps={getSelectedItemProps}
+            />
+          ))}
 
-            <input
-              {...getInputProps(
-                getDropdownProps({
-                  className: classnames({
-                    input: true,
-                    'invalid-tag': !isValidInput,
-                  }),
-                  type: 'email',
-                  placeholder,
-                  size: inputValue.length
-                    ? inputValue.length + 5
-                    : placeholder.length,
-                  ref: inputRef,
-                  // preventKeyAction: showDropdown,
-                  onBlur: () => {
-                    addNewItem(inputValue, false)
-                  },
-                  onChange: e => {
-                    setInputValue(e.target.value)
-                  },
-                  onClick: () => focusInput,
-                  onKeyDown: event => {
-                    switch (event.key) {
-                      case 'Enter':
-                        // Enter: always prevent form submission
+          <input
+            {...getInputProps(
+              getDropdownProps({
+                className: classnames('input', {
+                  'invalid-tag': !isValidInput,
+                }),
+                type: 'email',
+                placeholder,
+                size: inputValue.length
+                  ? inputValue.length + 5
+                  : placeholder.length,
+                ref: inputRef,
+                // preventKeyAction: showDropdown,
+                onBlur: () => {
+                  addNewItem(inputValue, false)
+                },
+                onChange: e => {
+                  setInputValue(e.target.value)
+                },
+                onClick: () => focusInput,
+                onKeyDown: event => {
+                  switch (event.key) {
+                    case 'Enter':
+                      // Enter: always prevent form submission
+                      event.preventDefault()
+                      event.stopPropagation()
+                      break
+
+                    case 'Tab':
+                      // Tab: if the dropdown isn't open, try to create a new item using inputValue and prevent blur if successful
+                      if (!isOpen && addNewItem(inputValue)) {
                         event.preventDefault()
                         event.stopPropagation()
-                        break
+                      }
+                      break
 
-                      case 'Tab':
-                        // Tab: if the dropdown isn't open, try to create a new item using inputValue and prevent blur if successful
-                        if (!isOpen && addNewItem(inputValue)) {
-                          event.preventDefault()
-                          event.stopPropagation()
-                        }
-                        break
+                    case ',':
+                      // comma: try to create a new item using inputValue
+                      event.preventDefault()
+                      addNewItem(inputValue)
+                      break
+                  }
+                },
+                onPaste: event => {
+                  const data =
+                    // modern browsers
+                    event.clipboardData?.getData('text/plain') ??
+                    // IE11
+                    window.clipboardData?.getData('text')
 
-                      case ',':
-                        // comma: try to create a new item using inputValue
-                        event.preventDefault()
-                        addNewItem(inputValue)
-                        break
-                    }
-                  },
-                  onPaste: event => {
-                    const data =
-                      // modern browsers
-                      event.clipboardData?.getData('text/plain') ??
-                      // IE11
-                      window.clipboardData?.getData('text')
+                  if (data) {
+                    const emails = data
+                      .split(/[\r\n,; ]+/)
+                      .filter(item => item.includes('@'))
 
-                    if (data) {
-                      const emails = data
-                        .split(/[\r\n,; ]+/)
-                        .filter(item => item.includes('@'))
+                    if (emails.length) {
+                      // pasted comma-separated email addresses
+                      event.preventDefault()
 
-                      if (emails.length) {
-                        // pasted comma-separated email addresses
-                        event.preventDefault()
-
-                        for (const email of emails) {
-                          addNewItem(email)
-                        }
+                      for (const email of emails) {
+                        addNewItem(email)
                       }
                     }
-                  },
-                })
-              )}
-            />
-          </div>
+                  }
+                },
+              })
+            )}
+          />
         </div>
 
-        <div className={classnames({ autocomplete: isOpen })}>
-          <ul {...getMenuProps()} className="suggestion-list">
+        <div
+          className={bsVersion({ bs3: classnames({ autocomplete: isOpen }) })}
+        >
+          <ul
+            {...getMenuProps()}
+            className={classnames(
+              bsVersion({
+                bs3: 'suggestion-list',
+                bs5: classnames('dropdown-menu select-dropdown-menu', {
+                  show: isOpen,
+                }),
+              })
+            )}
+          >
             {isOpen &&
               filteredOptions.map((item, index) => (
                 <Option
@@ -280,15 +311,36 @@ SelectCollaborators.propTypes = {
 function Option({ selected, item, getItemProps, index }) {
   return (
     <li
-      className={classnames('suggestion-item', { selected })}
+      className={bsVersion({
+        bs3: classnames('suggestion-item', { selected }),
+      })}
       {...getItemProps({ item, index })}
     >
-      <Icon type="user" fw />
-      &nbsp;
-      {item.display}
+      <BootstrapVersionSwitcher
+        bs3={
+          <>
+            <Icon type="user" fw />
+            &nbsp;
+            {item.display}
+          </>
+        }
+        bs5={
+          <DropdownItem
+            as="span"
+            role={undefined}
+            leadingIcon="person"
+            className={classnames({
+              active: selected,
+            })}
+          >
+            {item.display}
+          </DropdownItem>
+        }
+      />
     </li>
   )
 }
+
 Option.propTypes = {
   selected: PropTypes.bool.isRequired,
   item: PropTypes.shape({
@@ -318,23 +370,44 @@ function SelectedItem({
   )
 
   return (
-    <span
-      className="tag-item"
-      {...getSelectedItemProps({ selectedItem, index })}
-    >
-      <Icon type="user" fw />
-      <span>{selectedItem.display}</span>
-      <button
-        type="button"
-        className="remove-button btn-inline-link"
-        aria-label={t('remove')}
-        onClick={handleClick}
-      >
-        <Icon type="close" fw />
-      </button>
-    </span>
+    <BootstrapVersionSwitcher
+      bs3={
+        <span
+          className="tag-item"
+          {...getSelectedItemProps({ selectedItem, index })}
+        >
+          <Icon type="user" fw />
+          <span>{selectedItem.display}</span>
+          <button
+            type="button"
+            className="remove-button btn-inline-link"
+            aria-label={t('remove')}
+            onClick={handleClick}
+          >
+            <Icon type="close" fw />
+          </button>
+        </span>
+      }
+      bs5={
+        <Tag
+          prepend={
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="user" fw />}
+              bs5={<MaterialIcon type="person" />}
+            />
+          }
+          closeBtnProps={{
+            onClick: handleClick,
+          }}
+          {...getSelectedItemProps({ selectedItem, index })}
+        >
+          {selectedItem.display}
+        </Tag>
+      }
+    />
   )
 }
+
 SelectedItem.propTypes = {
   focusInput: PropTypes.func.isRequired,
   removeSelectedItem: PropTypes.func.isRequired,

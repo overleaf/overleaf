@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Form, FormGroup, FormControl, Button } from 'react-bootstrap'
 import { useMultipleSelection } from 'downshift'
 import { useShareProjectContext } from './share-project-modal'
 import SelectCollaborators from './select-collaborators'
@@ -10,6 +9,10 @@ import useIsMounted from '../../../shared/hooks/use-is-mounted'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
 import ClickableElementEnhancer from '@/shared/components/clickable-element-enhancer'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export default function AddCollaborators() {
   const [privileges, setPrivileges] = useState('readAndWrite')
@@ -139,38 +142,39 @@ export default function AddCollaborators() {
   ])
 
   return (
-    <Form>
-      <FormGroup>
+    <OLForm>
+      <OLFormGroup>
         <SelectCollaborators
           loading={!nonMemberContacts}
           options={nonMemberContacts || []}
           placeholder="joe@example.com, sue@example.com, …"
           multipleSelectionProps={multipleSelectionProps}
         />
-      </FormGroup>
+      </OLFormGroup>
 
-      <FormGroup>
+      <OLFormGroup>
         <div className="pull-right">
-          <FormControl
-            componentClass="select"
+          <OLFormSelect
             className="privileges"
-            bsSize="sm"
             value={privileges}
             onChange={event => setPrivileges(event.target.value)}
+            bs3Props={{
+              bsSize: 'sm',
+            }}
           >
             <option value="readAndWrite">{t('can_edit')}</option>
             <option value="readOnly">{t('read_only')}</option>
-          </FormControl>
+          </OLFormSelect>
           <span>&nbsp;&nbsp;</span>
           <ClickableElementEnhancer
-            as={Button}
+            as={OLButton}
             onClick={handleSubmit}
-            bsStyle="primary"
+            variant="primary"
           >
             {t('share')}
           </ClickableElementEnhancer>
         </div>
-      </FormGroup>
-    </Form>
+      </OLFormGroup>
+    </OLForm>
   )
 }

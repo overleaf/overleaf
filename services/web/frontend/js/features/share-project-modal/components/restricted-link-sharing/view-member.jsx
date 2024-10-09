@@ -1,21 +1,27 @@
 import PropTypes from 'prop-types'
-import { Col, Row } from 'react-bootstrap'
 import MemberPrivileges from './member-privileges'
 import Icon from '@/shared/components/icon'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 export default function ViewMember({ member }) {
   return (
-    <Row className="project-member">
-      <Col xs={8}>
+    <OLRow className="project-member">
+      <OLCol xs={8}>
         <div className="project-member-email-icon">
-          <Icon type="user" fw />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="user" fw />}
+            bs5={<MaterialIcon type="person" />}
+          />
           <div className="email-warning">{member.email}</div>
         </div>
-      </Col>
-      <Col xs={4} className="text-right">
+      </OLCol>
+      <OLCol xs={4} className="text-end">
         <MemberPrivileges privileges={member.privileges} />
-      </Col>
-    </Row>
+      </OLCol>
+    </OLRow>
   )
 }
 

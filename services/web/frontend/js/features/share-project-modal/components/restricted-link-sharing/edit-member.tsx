@@ -1,10 +1,9 @@
-import { useState, useEffect, useMemo, MouseEventHandler } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
 import { removeMemberFromProject, updateMember } from '../../utils/api'
-import { Button, Col, Form, FormGroup } from 'react-bootstrap'
 import Icon from '@/shared/components/icon'
 import { useProjectContext } from '@/shared/context/project-context'
 import { sendMB } from '@/infrastructure/event-tracking'
@@ -12,6 +11,13 @@ import { Select } from '@/shared/components/select'
 import type { ProjectContextMember } from '@/shared/context/types/project-context'
 import { PermissionsLevel } from '@/features/ide-react/types/permissions'
 import { linkSharingEnforcementDate } from '../../utils/link-sharing'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
 
@@ -115,22 +121,44 @@ export default function EditMember({
   }
 
   return (
-    <Form
-      horizontal
+    <form
+      className={bsVersion({ bs3: 'form-horizontal' })}
       id="share-project-form"
       onSubmit={e => {
         e.preventDefault()
         commitPrivilegeChange(privileges)
       }}
     >
-      <FormGroup className="project-member">
-        <Col xs={7}>
+      <OLFormGroup
+        className={classnames('project-member', bsVersion({ bs5: 'row' }))}
+      >
+        <OLCol xs={7}>
           <div className="project-member-email-icon">
-            <Icon
-              type={
-                shouldWarnMember() || member.pendingEditor ? 'warning' : 'user'
+            <BootstrapVersionSwitcher
+              bs3={
+                <Icon
+                  type={
+                    shouldWarnMember() || member.pendingEditor
+                      ? 'warning'
+                      : 'user'
+                  }
+                  fw
+                />
               }
-              fw
+              bs5={
+                <MaterialIcon
+                  type={
+                    shouldWarnMember() || member.pendingEditor
+                      ? 'warning'
+                      : 'person'
+                  }
+                  className={
+                    shouldWarnMember() || member.pendingEditor
+                      ? 'text-warning'
+                      : undefined
+                  }
+                />
+              }
             />
             <div className="email-warning">
               {member.email}
@@ -146,18 +174,23 @@ export default function EditMember({
               )}
             </div>
           </div>
-        </Col>
+        </OLCol>
 
-        <Col xs={1}>
+        <OLCol xs={2}>
           {privileges !== member.privileges && privilegeChangePending && (
             <ChangePrivilegesActions
               handleReset={() => setPrivileges(member.privileges)}
             />
           )}
-        </Col>
+        </OLCol>
 
-        <Col xs={4} className="project-member-select">
-          {hasBeenDowngraded && <Icon type="warning" fw />}
+        <OLCol xs={3} className="project-member-select">
+          {hasBeenDowngraded && (
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="warning" fw />}
+              bs5={<MaterialIcon type="warning" className="text-warning" />}
+            />
+          )}
 
           <SelectPrivilege
             value={privileges}
@@ -169,9 +202,9 @@ export default function EditMember({
             hasBeenDowngraded={hasBeenDowngraded}
             canAddCollaborators={canAddCollaborators}
           />
-        </Col>
-      </FormGroup>
-    </Form>
+        </OLCol>
+      </OLFormGroup>
+    </form>
   )
 }
 EditMember.propTypes = {
@@ -262,8 +295,9 @@ function SelectPrivilege({
 }
 
 type ChangePrivilegesActionsProps = {
-  handleReset: MouseEventHandler<Button>
+  handleReset: React.ComponentProps<typeof OLButton>['onClick']
 }
+
 function ChangePrivilegesActions({
   handleReset,
 }: ChangePrivilegesActionsProps) {
@@ -271,15 +305,19 @@ function ChangePrivilegesActions({
 
   return (
     <div className="text-center">
-      <Button type="submit" bsSize="sm" bsStyle="primary">
+      <OLButton type="submit" size="sm" variant="primary">
         {t('change_or_cancel-change')}
-      </Button>
+      </OLButton>
       <div className="text-sm">
         {t('change_or_cancel-or')}
         &nbsp;
-        <Button type="button" className="btn-inline-link" onClick={handleReset}>
+        <OLButton
+          variant="link"
+          className="btn-inline-link"
+          onClick={handleReset}
+        >
           {t('change_or_cancel-cancel')}
-        </Button>
+        </OLButton>
       </div>
     </div>
   )

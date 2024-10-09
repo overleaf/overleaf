@@ -1,17 +1,18 @@
-import { Col, Row } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
 import { useProjectContext } from '../../../shared/context/project-context'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
 
 export default function SendInvitesNotice() {
   const { publicAccessLevel } = useProjectContext()
 
   return (
-    <Row className="public-access-level public-access-level--notice">
-      <Col xs={12} className="text-center">
+    <OLRow className="public-access-level public-access-level-notice">
+      <OLCol className="text-center">
         <AccessLevel level={publicAccessLevel} />
-      </Col>
-    </Row>
+      </OLCol>
+    </OLRow>
   )
 }
 

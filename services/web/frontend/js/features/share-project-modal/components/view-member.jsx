@@ -1,15 +1,16 @@
 import PropTypes from 'prop-types'
-import { Col, Row } from 'react-bootstrap'
 import MemberPrivileges from './member-privileges'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
 
 export default function ViewMember({ member }) {
   return (
-    <Row className="project-member">
-      <Col xs={7}>{member.email}</Col>
-      <Col xs={3}>
+    <OLRow className="project-member">
+      <OLCol xs={7}>{member.email}</OLCol>
+      <OLCol xs={3}>
         <MemberPrivileges privileges={member.privileges} />
-      </Col>
-    </Row>
+      </OLCol>
+    </OLRow>
   )
 }
 

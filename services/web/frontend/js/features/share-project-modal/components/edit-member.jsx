@@ -4,11 +4,17 @@ import { useTranslation } from 'react-i18next'
 import { useShareProjectContext } from './share-project-modal'
 import TransferOwnershipModal from './transfer-ownership-modal'
 import { removeMemberFromProject, updateMember } from '../utils/api'
-import { Button, Col, Form, FormControl, FormGroup } from 'react-bootstrap'
-import Tooltip from '../../../shared/components/tooltip'
 import Icon from '../../../shared/components/icon'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 export default function EditMember({ member }) {
   const [privileges, setPrivileges] = useState(member.privileges)
@@ -53,20 +59,24 @@ export default function EditMember({ member }) {
   }
 
   return (
-    <Form horizontal id="share-project-form" onSubmit={handleSubmit}>
-      <FormGroup className="project-member row">
-        <Col xs={7}>
-          <FormControl.Static>{member.email}</FormControl.Static>
-        </Col>
+    <form
+      id="share-project-form"
+      className={bsVersion({ bs3: 'form-horizontal' })}
+      onSubmit={handleSubmit}
+    >
+      <OLFormGroup className="project-member row">
+        <OLCol xs={7} className={bsVersion({ bs3: 'pt-1', bs5: 'pt-2' })}>
+          {member.email}
+        </OLCol>
 
-        <Col xs={3}>
+        <OLCol xs={3}>
           <SelectPrivilege
             value={privileges}
             handleChange={event => setPrivileges(event.target.value)}
           />
-        </Col>
+        </OLCol>
 
-        <Col xs={2}>
+        <OLCol xs={2}>
           {privileges === member.privileges ? (
             <RemoveMemberAction member={member} />
           ) : (
@@ -74,9 +84,9 @@ export default function EditMember({ member }) {
               handleReset={() => setPrivileges(member.privileges)}
             />
           )}
-        </Col>
-      </FormGroup>
-    </Form>
+        </OLCol>
+      </OLFormGroup>
+    </form>
   )
 }
 EditMember.propTypes = {
@@ -91,17 +101,18 @@ function SelectPrivilege({ value, handleChange }) {
   const { t } = useTranslation()
 
   return (
-    <FormControl
-      componentClass="select"
+    <OLFormSelect
       className="privileges"
-      bsSize="sm"
       value={value}
       onChange={handleChange}
+      bs3Props={{
+        bsSize: 'sm',
+      }}
     >
       <option value="owner">{t('owner')}</option>
       <option value="readAndWrite">{t('can_edit')}</option>
       <option value="readOnly">{t('read_only')}</option>
-    </FormControl>
+    </OLFormSelect>
   )
 }
 
@@ -134,23 +145,25 @@ function RemoveMemberAction({ member }) {
   }
 
   return (
-    <FormControl.Static className="text-center">
-      <Tooltip
+    <div className="text-center">
+      <OLTooltip
         id="remove-collaborator"
         description={t('remove_collaborator')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <Button
-          type="button"
-          bsStyle="link"
+        <OLButton
+          variant="link"
           onClick={handleClick}
           className="remove-button"
           aria-label={t('remove_collaborator')}
         >
-          <Icon type="times" />
-        </Button>
-      </Tooltip>
-    </FormControl.Static>
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="times" />}
+            bs5={<MaterialIcon type="clear" />}
+          />
+        </OLButton>
+      </OLTooltip>
+    </div>
   )
 }
 
@@ -167,15 +180,19 @@ function ChangePrivilegesActions({ handleReset }) {
 
   return (
     <div className="text-center">
-      <Button type="submit" bsSize="sm" bsStyle="primary">
+      <OLButton type="submit" size="sm" variant="primary">
         {t('change_or_cancel-change')}
-      </Button>
+      </OLButton>
       <div className="text-sm">
         {t('change_or_cancel-or')}
         &nbsp;
-        <Button type="button" className="btn-inline-link" onClick={handleReset}>
+        <OLButton
+          variant="link"
+          className="btn-inline-link"
+          onClick={handleReset}
+        >
           {t('change_or_cancel-cancel')}
-        </Button>
+        </OLButton>
       </div>
     </div>
   )

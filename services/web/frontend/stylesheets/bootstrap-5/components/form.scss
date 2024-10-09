@@ -184,3 +184,8 @@
     margin-left: var(--spacing-04);
   }
 }
+
+%input-focus-style {
+  border-color: $input-focus-border-color;
+  box-shadow: $form-check-input-focus-box-shadow;
+}

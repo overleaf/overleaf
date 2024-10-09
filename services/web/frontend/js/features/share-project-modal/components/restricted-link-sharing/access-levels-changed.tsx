@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import Notification from '@/shared/components/notification'
 import { upgradePlan } from '../../../../main/account-upgrade'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import StartFreeTrialButton from '@/shared/components/start-free-trial-button'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type AccessLevelsChangedProps = {
   somePendingEditorsResolved: boolean
@@ -50,20 +50,20 @@ export default function AccessLevelsChanged({
                 {t('upgrade')}
               </StartFreeTrialButton>
             ) : (
-              <Button
-                bsSize="sm"
-                className="btn-secondary"
+              <OLButton
+                variant="secondary"
+                size="sm"
                 onClick={() => {
                   upgradePlan('project-sharing')
                 }}
               >
                 {t('upgrade')}
-              </Button>
+              </OLButton>
             )}
-            <Button
+            <OLButton
+              variant="link"
+              size="sm"
               href="https://www.overleaf.com/blog/changes-to-project-sharing"
-              bsSize="sm"
-              className="btn-link"
               target="_blank"
               rel="noreferrer"
               onClick={() => {
@@ -75,7 +75,7 @@ export default function AccessLevelsChanged({
               }}
             >
               {t('read_more')}
-            </Button>
+            </OLButton>
           </div>
         }
       />

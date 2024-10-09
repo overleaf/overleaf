@@ -11,8 +11,8 @@ function OLCol(props: OLColProps) {
 
   const getBs3Sizes = (obj: typeof rest) => {
     const bs5ToBs3SizeMap = {
-      xs: undefined,
-      sm: undefined,
+      xs: 'xs',
+      sm: 'xs',
       md: 'sm',
       lg: 'md',
       xl: 'lg',

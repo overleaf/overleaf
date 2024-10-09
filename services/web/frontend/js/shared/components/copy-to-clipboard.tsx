@@ -73,6 +73,7 @@ const IconButton: FC<{
     <OLIconButton
       onClick={handleClick}
       variant="link"
+      size="sm"
       accessibilityLabel={t('copy')}
       className="copy-button"
       bs3Props={{ bsSize: 'xsmall' }}

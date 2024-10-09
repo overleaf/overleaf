@@ -1,13 +1,13 @@
-import { Row } from 'react-bootstrap'
 import AddCollaborators from './add-collaborators'
 import AddCollaboratorsUpgrade from './add-collaborators-upgrade'
 import PropTypes from 'prop-types'
+import OLRow from '@/features/ui/components/ol/ol-row'
 
 export default function SendInvites({ canAddCollaborators }) {
   return (
-    <Row className="invite-controls">
+    <OLRow className="invite-controls">
       {canAddCollaborators ? <AddCollaborators /> : <AddCollaboratorsUpgrade />}
-    </Row>
+    </OLRow>
   )
 }
 

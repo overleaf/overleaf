@@ -1,12 +1,21 @@
 import { useState } from 'react'
-import { Modal, Button } from 'react-bootstrap'
 import { Trans, useTranslation } from 'react-i18next'
 import PropTypes from 'prop-types'
 import Icon from '../../../shared/components/icon'
 import { transferProjectOwnership } from '../utils/api'
-import AccessibleModal from '../../../shared/components/accessible-modal'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useLocation } from '../../../shared/hooks/use-location'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import { Spinner } from 'react-bootstrap-5'
 
 export default function TransferOwnershipModal({ member, cancel }) {
   const { t } = useTranslation()
@@ -32,11 +41,11 @@ export default function TransferOwnershipModal({ member, cancel }) {
   }
 
   return (
-    <AccessibleModal show onHide={cancel}>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('change_project_owner')}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+    <OLModal show onHide={cancel}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('change_project_owner')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         <p>
           <Trans
             i18nKey="project_ownership_transfer_confirmation_1"
@@ -47,37 +56,38 @@ export default function TransferOwnershipModal({ member, cancel }) {
           />
         </p>
         <p>{t('project_ownership_transfer_confirmation_2')}</p>
-      </Modal.Body>
-      <Modal.Footer>
-        <div className="modal-footer-left">
-          {inflight && <Icon type="refresh" spin />}
-          {error && (
-            <span className="text-danger">
-              {t('generic_something_went_wrong')}
-            </span>
+        {error && (
+          <OLNotification
+            type="error"
+            content={t('generic_something_went_wrong')}
+            className="mb-0 mt-3"
+          />
+        )}
+      </OLModalBody>
+      <OLModalFooter>
+        <div className={bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })}>
+          {inflight && (
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="refresh" spin />}
+              bs5={
+                <Spinner
+                  animation="border"
+                  aria-hidden="true"
+                  size="sm"
+                  role="status"
+                />
+              }
+            />
           )}
         </div>
-        <div className="modal-footer-right">
-          <Button
-            type="button"
-            bsStyle={null}
-            className="btn-secondary"
-            onClick={cancel}
-            disabled={inflight}
-          >
-            {t('cancel')}
-          </Button>
-          <Button
-            type="button"
-            bsStyle="primary"
-            onClick={confirm}
-            disabled={inflight}
-          >
-            {t('change_owner')}
-          </Button>
-        </div>
-      </Modal.Footer>
-    </AccessibleModal>
+        <OLButton variant="secondary" onClick={cancel} disabled={inflight}>
+          {t('cancel')}
+        </OLButton>
+        <OLButton variant="primary" onClick={confirm} disabled={inflight}>
+          {t('change_owner')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 TransferOwnershipModal.propTypes = {

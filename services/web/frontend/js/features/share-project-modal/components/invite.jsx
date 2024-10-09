@@ -2,19 +2,25 @@ import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useShareProjectContext } from './share-project-modal'
 import Icon from '../../../shared/components/icon'
-import { Button, Col, Row } from 'react-bootstrap'
-import Tooltip from '../../../shared/components/tooltip'
 import { useTranslation } from 'react-i18next'
 import MemberPrivileges from './member-privileges'
 import { resendInvite, revokeInvite } from '../utils/api'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { sendMB } from '../../../infrastructure/event-tracking'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import classnames from 'classnames'
 
 export default function Invite({ invite, isProjectOwner }) {
   const { t } = useTranslation()
   return (
-    <Row className="project-invite">
-      <Col xs={7}>
+    <OLRow className="project-invite">
+      <OLCol xs={7}>
         <div>{invite.email}</div>
 
         <div className="small">
@@ -22,18 +28,18 @@ export default function Invite({ invite, isProjectOwner }) {
           .&nbsp;
           {isProjectOwner && <ResendInvite invite={invite} />}
         </div>
-      </Col>
+      </OLCol>
 
-      <Col xs={3} className="text-left">
+      <OLCol xs={3} className="text-start">
         <MemberPrivileges privileges={invite.privileges} />
-      </Col>
+      </OLCol>
 
       {isProjectOwner && (
-        <Col xs={2} className="text-center">
+        <OLCol xs={2} className="text-center">
           <RevokeInvite invite={invite} />
-        </Col>
+        </OLCol>
       )}
-    </Row>
+    </OLRow>
   )
 }
 
@@ -71,15 +77,15 @@ function ResendInvite({ invite }) {
   )
 
   return (
-    <Button
-      bsStyle="link"
+    <OLButton
+      variant="link"
       className="btn-inline-link"
       onClick={handleClick}
       disabled={inFlight}
       // ref={buttonRef}
     >
       {t('resend')}
-    </Button>
+    </OLButton>
   )
 }
 
@@ -109,21 +115,26 @@ function RevokeInvite({ invite }) {
   }
 
   return (
-    <Tooltip
+    <OLTooltip
       id="revoke-invite"
       description={t('revoke_invite')}
       overlayProps={{ placement: 'bottom' }}
     >
-      <Button
-        type="button"
-        bsStyle="link"
+      <OLButton
+        variant="link"
         onClick={handleClick}
         aria-label={t('revoke')}
-        className="btn-inline-link"
+        className={classnames(
+          'btn-inline-link',
+          bsVersion({ bs5: 'text-decoration-none' })
+        )}
       >
-        <Icon type="times" />
-      </Button>
-    </Tooltip>
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="times" />}
+          bs5={<MaterialIcon type="clear" />}
+        />
+      </OLButton>
+    </OLTooltip>
   )
 }
 

@@ -1,11 +1,20 @@
-import { Button, Modal, Grid } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
-import AccessibleModal from '../../../shared/components/accessible-modal'
-import { useEditorContext } from '../../../shared/context/editor-context'
+import { useEditorContext } from '@/shared/context/editor-context'
 import { lazy, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import ClickableElementEnhancer from '@/shared/components/clickable-element-enhancer'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import { Spinner } from 'react-bootstrap-5'
 
 const ReadOnlyTokenLink = lazy(() =>
   import('./link-sharing').then(({ ReadOnlyTokenLink }) => ({
@@ -36,13 +45,13 @@ export default function ShareProjectModalContent({
   const { isRestrictedTokenMember } = useEditorContext()
 
   return (
-    <AccessibleModal show={show} onHide={cancel} animation={animation}>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('share_project')}</Modal.Title>
-      </Modal.Header>
+    <OLModal show={show} onHide={cancel} animation={animation}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('share_project')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body className="modal-body-share">
-        <Grid fluid>
+      <OLModalBody className="modal-body-share">
+        <div className="container-fluid">
           <Suspense fallback={<FullSizeLoadingSpinner minHeight="15rem" />}>
             {isRestrictedTokenMember ? (
               <ReadOnlyTokenLink />
@@ -50,33 +59,43 @@ export default function ShareProjectModalContent({
               <ShareModalBody />
             )}
           </Suspense>
-        </Grid>
-      </Modal.Body>
-
-      <Modal.Footer className="modal-footer-share">
-        <div className="modal-footer-left">
-          {inFlight && <Icon type="refresh" spin />}
           {error && (
-            <span className="text-danger error">
-              <ErrorMessage error={error} />
-            </span>
+            <OLNotification
+              type="error"
+              content={<ErrorMessage error={error} />}
+              className="mb-0 mt-3"
+            />
+          )}
+        </div>
+      </OLModalBody>
+
+      <OLModalFooter>
+        <div className={bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })}>
+          {inFlight && (
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="refresh" spin />}
+              bs5={
+                <Spinner
+                  animation="border"
+                  aria-hidden="true"
+                  size="sm"
+                  role="status"
+                />
+              }
+            />
           )}
         </div>
 
-        <div className="modal-footer-right">
-          <ClickableElementEnhancer
-            onClick={cancel}
-            as={Button}
-            type="button"
-            bsStyle={null}
-            className="btn-secondary"
-            disabled={inFlight}
-          >
-            {t('close')}
-          </ClickableElementEnhancer>
-        </div>
-      </Modal.Footer>
-    </AccessibleModal>
+        <ClickableElementEnhancer
+          onClick={cancel}
+          as={OLButton}
+          variant="secondary"
+          disabled={inFlight}
+        >
+          {t('close')}
+        </ClickableElementEnhancer>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

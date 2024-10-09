@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import AccessibleModal from '@/shared/components/accessible-modal'
 import ViewOnlyAccessModalContent from './view-only-access-modal-content'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { sendMB } from '@/infrastructure/event-tracking'
+import OLModal from '@/features/ui/components/ol/ol-modal'
 
 const ViewOnlyAccessModal = () => {
   const [show, setShow] = useState(false)
@@ -60,7 +60,7 @@ const ViewOnlyAccessModal = () => {
   ])
 
   return show ? (
-    <AccessibleModal
+    <OLModal
       animation
       show={show}
       onHide={() => {
@@ -72,7 +72,7 @@ const ViewOnlyAccessModal = () => {
       id="editor-over-limit-modal"
     >
       <ViewOnlyAccessModalContent handleHide={handleHide} />
-    </AccessibleModal>
+    </OLModal>
   ) : null
 }
 

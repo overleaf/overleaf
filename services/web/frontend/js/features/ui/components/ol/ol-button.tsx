@@ -38,6 +38,7 @@ export function bs3ButtonProps(props: ButtonProps) {
     target: props.target,
     rel: props.rel,
     onClick: props.onClick,
+    onMouseDown: props.onMouseDown as BS3ButtonProps['onMouseDown'],
     type: props.type,
     draggable: props.draggable,
     download: props.download,

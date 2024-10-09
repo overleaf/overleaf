@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import AccessibleModal from '@/shared/components/accessible-modal'
 import EditorOverLimitModalContent from './editor-over-limit-modal-content'
 import customLocalStorage from '@/infrastructure/local-storage'
 import { useProjectContext } from '@/shared/context/project-context'
 import { useEditorContext } from '@/shared/context/editor-context'
 import { sendMB } from '@/infrastructure/event-tracking'
+import OLModal from '@/features/ui/components/ol/ol-modal'
 
 const EditorOverLimitModal = () => {
   const [show, setShow] = useState(false)
@@ -55,7 +55,7 @@ const EditorOverLimitModal = () => {
   }, [features, isProjectOwner, members, permissionsLevel, projectId])
 
   return show ? (
-    <AccessibleModal
+    <OLModal
       animation
       show={show}
       onHide={() => {
@@ -67,7 +67,7 @@ const EditorOverLimitModal = () => {
       id="editor-over-limit-modal"
     >
       <EditorOverLimitModalContent handleHide={handleHide} />
-    </AccessibleModal>
+    </OLModal>
   ) : null
 }
 

@@ -39,3 +39,9 @@
   animation-name: bounce;
   transform-origin: center bottom;
 }
+
+.recaptcha-branding {
+  padding: var(--spacing-05) var(--spacing-05) 0 var(--spacing-05);
+  text-align: center;
+  font-size: $font-size-sm;
+}

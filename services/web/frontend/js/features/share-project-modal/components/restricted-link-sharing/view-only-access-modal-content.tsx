@@ -1,6 +1,12 @@
-import { Button, Modal } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { sendMB } from '@/infrastructure/event-tracking'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 
 type ViewOnlyAccessModalContentProps = {
   handleHide: () => void
@@ -13,18 +19,17 @@ export default function ViewOnlyAccessModalContent({
 
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('view_only_access')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('view_only_access')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         <p>{t('this_project_already_has_maximum_editors')}</p>
         <p>{t('please_ask_the_project_owner_to_upgrade_more_editors')}</p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton
+          variant="secondary"
           href="/blog/changes-to-project-sharing"
           target="_blank"
           rel="noreferrer"
@@ -36,9 +41,9 @@ export default function ViewOnlyAccessModalContent({
           }}
         >
           {t('learn_more')}
-        </Button>
-        <Button
-          className="btn-primary"
+        </OLButton>
+        <OLButton
+          variant="primary"
           onClick={() => {
             sendMB('notification-click', {
               name: 'link-sharing-collaborator-limit',
@@ -48,8 +53,8 @@ export default function ViewOnlyAccessModalContent({
           }}
         >
           {t('ok')}
-        </Button>
-      </Modal.Footer>
+        </OLButton>
+      </OLModalFooter>
     </>
   )
 }
