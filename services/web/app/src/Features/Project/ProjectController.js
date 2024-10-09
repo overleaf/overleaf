@@ -719,6 +719,7 @@ const _ProjectController = {
           isTokenMember,
           isInvitedMember
         ),
+        chatEnabled: Features.hasFeature('chat'),
         roMirrorOnClientNoLocalStorage:
           Settings.adminOnlyLogin || project.name.startsWith('Debug: '),
         languages: Settings.languages,

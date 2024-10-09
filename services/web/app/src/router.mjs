@@ -1139,19 +1139,21 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     SpellingController.unlearn
   )
 
-  webRouter.get(
-    '/project/:project_id/messages',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    ChatController.getMessages
-  )
-  webRouter.post(
-    '/project/:project_id/messages',
-    AuthorizationMiddleware.blockRestrictedUserFromProject,
-    AuthorizationMiddleware.ensureUserCanReadProject,
-    RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
-    ChatController.sendMessage
-  )
+  if (Features.hasFeature('chat')) {
+    webRouter.get(
+      '/project/:project_id/messages',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      ChatController.getMessages
+    )
+    webRouter.post(
+      '/project/:project_id/messages',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
+      ChatController.sendMessage
+    )
+  }
 
   webRouter.post(
     '/project/:Project_id/references/indexAll',

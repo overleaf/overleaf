@@ -29,6 +29,7 @@ describe('ChatContext', function () {
     stubMathJax()
 
     window.metaAttributesCache.set('ol-user', user)
+    window.metaAttributesCache.set('ol-chatEnabled', true)
 
     this.stub = sinon.stub(chatClientIdGenerator, 'generate').returns(uuidValue)
   })

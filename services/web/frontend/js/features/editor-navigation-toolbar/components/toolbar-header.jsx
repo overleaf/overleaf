@@ -51,6 +51,8 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
   openShareModal,
   trackChangesVisible,
 }) {
+  const chatEnabled = getMeta('ol-chatEnabled')
+
   const { t } = useTranslation()
   const shouldDisplayPublishButton = hasPublishPermissions && PublishButton
 
@@ -123,7 +125,7 @@ const ToolbarHeader = React.memo(function ToolbarHeader({
 
             <LayoutDropdownButton />
 
-            {chatVisible && (
+            {chatEnabled && chatVisible && (
               <ChatToggleButton
                 chatIsOpen={chatIsOpen}
                 onClick={toggleChatOpen}

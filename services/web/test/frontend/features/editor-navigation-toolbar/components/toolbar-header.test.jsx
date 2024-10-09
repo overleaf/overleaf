@@ -26,6 +26,10 @@ describe('<ToolbarHeader />', function () {
     detach: () => {},
   }
 
+  beforeEach(function () {
+    window.metaAttributesCache.set('ol-chatEnabled', true)
+  })
+
   describe('cobranding logo', function () {
     it('is not displayed by default', function () {
       renderWithEditorContext(<ToolbarHeader {...defaultProps} />)

@@ -13,6 +13,7 @@ import { useSidebarPane } from '@/features/ide-react/hooks/use-sidebar-pane'
 import { useChatPane } from '@/features/ide-react/hooks/use-chat-pane'
 import { EditorAndPdf } from '@/features/ide-react/components/editor-and-pdf'
 import HistoryContainer from '@/features/ide-react/components/history-container'
+import getMeta from '@/utils/meta'
 
 export const MainLayout: FC = () => {
   const { view } = useLayoutContext()
@@ -37,6 +38,8 @@ export const MainLayout: FC = () => {
     handlePaneCollapse: handleChatCollapse,
     handlePaneExpand: handleChatExpand,
   } = useChatPane()
+
+  const chatEnabled = getMeta('ol-chatEnabled')
 
   const { t } = useTranslation()
 
@@ -90,27 +93,31 @@ export const MainLayout: FC = () => {
                 <EditorAndPdf />
               </Panel>
 
-              <HorizontalResizeHandle
-                onDoubleClick={toggleChat}
-                resizable={chatIsOpen}
-                onDragging={setChatResizing}
-                hitAreaMargins={{ coarse: 0, fine: 0 }}
-              />
+              {chatEnabled && (
+                <>
+                  <HorizontalResizeHandle
+                    onDoubleClick={toggleChat}
+                    resizable={chatIsOpen}
+                    onDragging={setChatResizing}
+                    hitAreaMargins={{ coarse: 0, fine: 0 }}
+                  />
 
-              {/* chat */}
-              <Panel
-                ref={chatPanelRef}
-                id="panel-chat"
-                order={2}
-                defaultSize={20}
-                minSize={5}
-                maxSize={30}
-                collapsible
-                onCollapse={handleChatCollapse}
-                onExpand={handleChatExpand}
-              >
-                <ChatPane />
-              </Panel>
+                  {/* chat */}
+                  <Panel
+                    ref={chatPanelRef}
+                    id="panel-chat"
+                    order={2}
+                    defaultSize={20}
+                    minSize={5}
+                    maxSize={30}
+                    collapsible
+                    onCollapse={handleChatCollapse}
+                    onExpand={handleChatExpand}
+                  >
+                    <ChatPane />
+                  </Panel>
+                </>
+              )}
             </PanelGroup>
           </Panel>
         </PanelGroup>

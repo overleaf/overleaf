@@ -22,6 +22,7 @@ describe('<ChatPane />', function () {
 
   beforeEach(function () {
     window.metaAttributesCache.set('ol-user', user)
+    window.metaAttributesCache.set('ol-chatEnabled', true)
   })
 
   afterEach(function () {

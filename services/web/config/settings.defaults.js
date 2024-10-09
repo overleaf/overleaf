@@ -407,6 +407,7 @@ module.exports = {
     },
   ],
 
+  disableChat: process.env.OVERLEAF_DISABLE_CHAT === 'true',
   enableSubscriptions: false,
   restrictedCountries: [],
   enableOnboardingEmails: process.env.ENABLE_ONBOARDING_EMAILS === 'true',
