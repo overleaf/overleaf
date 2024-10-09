@@ -220,7 +220,7 @@
     "@replit/codemirror-emacs": "overleaf/codemirror-emacs#4394c03858f27053f8768258e9493866e06e938e",
     "@replit/codemirror-indentation-markers": "overleaf/codemirror-indentation-markers#1b1f93c0bcd04293aea6986aa2275185b2c56803",
     "@replit/codemirror-vim": "overleaf/codemirror-vim#51ce0933e95705268256467fbbbcce5999ed3624",
-    "@sentry/browser": "^8.33.0",
+    "@sentry/browser": "7.46.0",
     "@storybook/addon-a11y": "^8.0.4",
     "@storybook/addon-essentials": "^8.0.4",
     "@storybook/addon-interactions": "^8.0.4",
