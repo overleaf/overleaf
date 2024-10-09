@@ -157,7 +157,7 @@ function printDirectoriesReport(allFilesAndImports) {
   // collect js files from the selected paths
   const selectedFiles = Array.from(
     findJSAndImports(paths.map(dir => path.resolve(dir))).keys()
-  )
+  ).filter(file => !file.endsWith('settings.test.js'))
   const nonMigratedFiles = selectedFiles.filter(file => !file.endsWith('.mjs'))
   const migratedFileCount = selectedFiles.filter(file =>
     file.endsWith('.mjs')
