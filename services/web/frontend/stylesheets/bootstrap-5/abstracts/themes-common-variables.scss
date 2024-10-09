@@ -1,0 +1,7 @@
+:root {
+  --editor-border-color: var(--neutral-80);
+}
+
+@include theme('light') {
+  --editor-border-color: var(--neutral-20);
+}

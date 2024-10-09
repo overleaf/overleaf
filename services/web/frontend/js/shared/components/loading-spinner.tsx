@@ -44,7 +44,7 @@ function LoadingSpinner({
             animation="border"
             aria-hidden="true"
             role="status"
-            className="align-bottom"
+            className="align-middle"
           />
           &nbsp;
           {loadingText || t('loading')}…

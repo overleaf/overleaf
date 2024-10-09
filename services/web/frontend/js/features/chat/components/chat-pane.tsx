@@ -11,6 +11,9 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { FetchError } from '../../../infrastructure/fetch-json'
 import { useChatContext } from '../context/chat-context'
 import LoadingSpinner from '../../../shared/components/loading-spinner'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const MessageList = lazy(() => import('./message-list'))
 
@@ -79,7 +82,9 @@ const ChatPane = React.memo(function ChatPane() {
         itemCount={messageContentCount}
       >
         <div>
-          <h2 className="sr-only">{t('chat')}</h2>
+          <h2 className={bsVersion({ bs3: 'sr-only', bs5: 'visually-hidden' })}>
+            {t('chat')}
+          </h2>
           <Suspense fallback={<LoadingSpinner delay={500} />}>
             {status === 'pending' && <LoadingSpinner delay={500} />}
             {shouldDisplayPlaceholder && <Placeholder />}
@@ -107,7 +112,10 @@ function Placeholder() {
       <div className="first-message text-center">
         {t('send_first_message')}
         <br />
-        <Icon type="arrow-down" />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="arrow-down" />}
+          bs5={<MaterialIcon type="arrow_downward" />}
+        />
       </div>
     </>
   )
