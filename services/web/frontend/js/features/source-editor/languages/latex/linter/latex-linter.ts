@@ -1,16 +1,13 @@
-import { createWorker } from '../../../../../utils/worker'
 import { EditorView } from '@codemirror/view'
 import { Diagnostic } from '@codemirror/lint'
 import { errorsToDiagnostics, LintError } from './errors-to-diagnostics'
 import { mergeCompatibleOverlappingDiagnostics } from './merge-overlapping-diagnostics'
 
-let lintWorker: Worker
-createWorker(() => {
-  lintWorker = new Worker(
-    new URL('./latex-linter.worker.js', import.meta.url),
-    { type: 'module' }
-  )
-})
+const lintWorker = new Worker(
+  /* webpackChunkName: "latex-linter-worker" */
+  new URL('./latex-linter.worker.js', import.meta.url),
+  { type: 'module' }
+)
 
 class Deferred {
   public promise: Promise<readonly Diagnostic[]>

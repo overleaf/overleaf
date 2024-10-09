@@ -1,14 +1,12 @@
-import { createWorker } from '@/utils/worker'
 import * as PDFJS from 'pdfjs-dist'
 import type { DocumentInitParameters } from 'pdfjs-dist/types/src/display/api'
 
 export { PDFJS }
 
-createWorker(() => {
-  PDFJS.GlobalWorkerOptions.workerPort = new Worker(
-    new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url) // NOTE: .mjs extension
-  )
-})
+PDFJS.GlobalWorkerOptions.workerPort = new Worker(
+  /* webpackChunkName: "pdf-worker" */
+  new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url) // NOTE: .mjs extension
+)
 
 export const imageResourcesPath = '/images/pdfjs-dist/'
 const cMapUrl = '/js/pdfjs-dist/cmaps/'

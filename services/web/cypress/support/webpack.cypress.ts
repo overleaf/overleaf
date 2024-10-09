@@ -6,6 +6,9 @@ import devConfig from '../../webpack.config.dev'
 
 const buildConfig = () => {
   const webpackConfig = merge(devConfig, {
+    output: {
+      workerPublicPath: '/__cypress/src/',
+    },
     devServer: {
       static: path.join(__dirname, '../../public'),
       port: 3200,

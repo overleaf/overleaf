@@ -98,6 +98,7 @@ module.exports = {
     path: path.join(__dirname, 'public'),
 
     publicPath: '/',
+    workerPublicPath: '/',
 
     // By default write into js directory
     filename: 'js/[name]-[contenthash].js',

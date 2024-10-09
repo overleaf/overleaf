@@ -1,5 +1,4 @@
 import { v4 as uuid } from 'uuid'
-import { createWorker } from '@/utils/worker'
 import getMeta from '@/utils/meta'
 import { debugConsole } from '@/utils/debugging'
 
@@ -50,14 +49,13 @@ export class HunspellManager {
 
     this.dictionariesRoot = getMeta('ol-dictionariesRoot')
 
-    createWorker(() => {
-      this.hunspellWorker = new Worker(
-        new URL('./hunspell.worker.ts', import.meta.url),
-        { type: 'module' }
-      )
+    this.hunspellWorker = new Worker(
+      /* webpackChunkName: "hunspell-worker" */
+      new URL('./hunspell.worker.ts', import.meta.url),
+      { type: 'module' }
+    )
 
-      this.hunspellWorker.addEventListener('message', this.receive.bind(this))
-    })
+    this.hunspellWorker.addEventListener('message', this.receive.bind(this))
   }
 
   destroy() {
