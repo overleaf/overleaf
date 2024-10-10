@@ -964,6 +964,7 @@ module.exports = {
     offlineModeToolbarButtons: [],
     settingsEntries: [],
     autoCompleteExtensions: [],
+    sectionTitleGenerators: [],
   },
 
   moduleImportSequence: [

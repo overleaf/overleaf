@@ -5,6 +5,7 @@ import { CompletionContext } from '@codemirror/autocomplete'
 import { Completions } from './types'
 import { metadataState } from '../../../extensions/language'
 import { extendRequiredParameter } from './apply'
+import { maybeGetSectionForOption } from './sections'
 
 export function buildReferenceCompletions(
   completions: Completions,
@@ -21,6 +22,7 @@ export function buildReferenceCompletions(
       type: 'reference',
       label: referenceKey,
       extend: extendRequiredParameter,
+      section: maybeGetSectionForOption(context, 'references'),
       deduplicate: {
         key: referenceKey,
         priority: 1,
