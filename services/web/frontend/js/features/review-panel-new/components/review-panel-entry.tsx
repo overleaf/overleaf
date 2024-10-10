@@ -48,10 +48,11 @@ export const ReviewPanelEntry: FC<{
       if (
         event.target instanceof HTMLButtonElement ||
         event.target instanceof HTMLLinkElement ||
-        event.target instanceof HTMLTextAreaElement
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLAnchorElement
       ) {
-        // Don't focus if the click was on a button/link/textarea as we don't want
-        // affect the behaviour of the button/link/textarea
+        // Don't focus if the click was on a button/link/textarea/anchor as we
+        // don't want to affect the behaviour of the button/link/textarea/anchor
         return
       }
 
