@@ -77,12 +77,10 @@ const IconButton: FC<{
       accessibilityLabel={t('copy')}
       className="copy-button"
       bs3Props={{ bsSize: 'xsmall' }}
-      icon={
-        bsVersion({
-          bs5: copied ? 'check' : 'content_copy',
-          bs3: copied ? 'check' : 'clipboard',
-        }) || ''
-      }
+      icon={bsVersion({
+        bs5: copied ? 'check' : 'content_copy',
+        bs3: copied ? 'check' : 'clipboard',
+      })}
     />
   )
 }

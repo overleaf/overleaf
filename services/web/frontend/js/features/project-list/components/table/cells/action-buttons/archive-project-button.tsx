@@ -78,12 +78,7 @@ const ArchiveProjectButtonTooltip = memo(function ArchiveProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={
-                bsVersion({
-                  bs5: 'inbox',
-                  bs3: 'inbox',
-                }) as string
-              }
+              icon={bsVersion({ bs5: 'inbox', bs3: 'inbox' })}
               bs3Props={{ fw: true }}
             />
           </span>

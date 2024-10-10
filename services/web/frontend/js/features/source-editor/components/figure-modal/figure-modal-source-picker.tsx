@@ -22,25 +22,25 @@ export const FigureModalSourcePicker: FC = () => {
       <FigureModalSourceButton
         type={FigureModalSource.FILE_UPLOAD}
         title={t('replace_from_computer')}
-        icon={bsVersion({ bs3: 'upload', bs5: 'upload' }) as string}
+        icon={bsVersion({ bs3: 'upload', bs5: 'upload' })}
       />
       <FigureModalSourceButton
         type={FigureModalSource.FILE_TREE}
         title={t('replace_from_project_files')}
-        icon={bsVersion({ bs3: 'archive', bs5: 'inbox' }) as string}
+        icon={bsVersion({ bs3: 'archive', bs5: 'inbox' })}
       />
       {(hasLinkedProjectFileFeature || hasLinkedProjectOutputFileFeature) && (
         <FigureModalSourceButton
           type={FigureModalSource.OTHER_PROJECT}
           title={t('replace_from_another_project')}
-          icon={bsVersion({ bs3: 'folder-open', bs5: 'folder_open' }) as string}
+          icon={bsVersion({ bs3: 'folder-open', bs5: 'folder_open' })}
         />
       )}
       {hasLinkUrlFeature && (
         <FigureModalSourceButton
           type={FigureModalSource.FROM_URL}
           title={t('replace_from_url')}
-          icon={bsVersion({ bs3: 'globe', bs5: 'public' }) as string}
+          icon={bsVersion({ bs3: 'globe', bs5: 'public' })}
         />
       )}
     </div>

@@ -39,12 +39,7 @@ function DownloadProjectsButton() {
         onClick={handleDownloadProjects}
         variant="secondary"
         accessibilityLabel={text}
-        icon={
-          bsVersion({
-            bs5: 'download',
-            bs3: 'cloud-download',
-          }) as string
-        }
+        icon={bsVersion({ bs5: 'download', bs3: 'cloud-download' })}
       />
     </OLTooltip>
   )

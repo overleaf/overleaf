@@ -75,12 +75,7 @@ const LeaveProjectButtonTooltip = memo(function LeaveProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={
-                bsVersion({
-                  bs5: 'logout',
-                  bs3: 'sign-out',
-                }) as string
-              }
+              icon={bsVersion({ bs5: 'logout', bs3: 'sign-out' })}
               bs3Props={{ fw: true }}
             />
           </span>

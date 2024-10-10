@@ -46,14 +46,14 @@ export const ToolbarItems: FC<{
             id="toolbar-undo"
             label={t('toolbar_undo')}
             command={undo}
-            icon={bsVersion({ bs5: 'undo', bs3: 'undo' }) as string}
+            icon={bsVersion({ bs5: 'undo', bs3: 'undo' })}
             shortcut={isMac ? '⌘Z' : 'Ctrl+Z'}
           />
           <ToolbarButton
             id="toolbar-redo"
             label={t('toolbar_redo')}
             command={redo}
-            icon={bsVersion({ bs5: 'redo', bs3: 'repeat' }) as string}
+            icon={bsVersion({ bs5: 'redo', bs3: 'repeat' })}
             shortcut={isMac ? '⇧⌘Z' : 'Ctrl+Y'}
           />
         </div>
@@ -79,7 +79,7 @@ export const ToolbarItems: FC<{
                 label={t('toolbar_format_bold')}
                 command={commands.toggleBold}
                 active={isActive('\\textbf')}
-                icon={bsVersion({ bs5: 'format_bold', bs3: 'bold' }) as string}
+                icon={bsVersion({ bs5: 'format_bold', bs3: 'bold' })}
                 shortcut={isMac ? '⌘B' : 'Ctrl+B'}
               />
               <ToolbarButton
@@ -87,9 +87,7 @@ export const ToolbarItems: FC<{
                 label={t('toolbar_format_italic')}
                 command={commands.toggleItalic}
                 active={isActive('\\textit')}
-                icon={
-                  bsVersion({ bs5: 'format_italic', bs3: 'italic' }) as string
-                }
+                icon={bsVersion({ bs5: 'format_italic', bs3: 'italic' })}
                 shortcut={isMac ? '⌘I' : 'Ctrl+I'}
               />
             </div>
@@ -124,19 +122,19 @@ export const ToolbarItems: FC<{
                 id="toolbar-href"
                 label={t('toolbar_insert_link')}
                 command={commands.wrapInHref}
-                icon={bsVersion({ bs5: 'link', bs3: 'link' }) as string}
+                icon={bsVersion({ bs5: 'link', bs3: 'link' })}
               />
               <ToolbarButton
                 id="toolbar-ref"
                 label={t('toolbar_insert_cross_reference')}
                 command={commands.insertRef}
-                icon={bsVersion({ bs5: 'sell', bs3: 'tag' }) as string}
+                icon={bsVersion({ bs5: 'sell', bs3: 'tag' })}
               />
               <ToolbarButton
                 id="toolbar-cite"
                 label={t('toolbar_insert_citation')}
                 command={commands.insertCite}
-                icon={bsVersion({ bs5: 'menu_book', bs3: 'book' }) as string}
+                icon={bsVersion({ bs5: 'menu_book', bs3: 'book' })}
               />
               <InsertFigureDropdown />
               <TableInserterDropdown />
@@ -152,34 +150,28 @@ export const ToolbarItems: FC<{
                 id="toolbar-bullet-list"
                 label={t('toolbar_bullet_list')}
                 command={commands.toggleBulletList}
-                icon={
-                  bsVersion({
-                    bs5: 'format_list_bulleted',
-                    bs3: 'list-ul',
-                  }) as string
-                }
+                icon={bsVersion({
+                  bs5: 'format_list_bulleted',
+                  bs3: 'list-ul',
+                })}
               />
               <ToolbarButton
                 id="toolbar-numbered-list"
                 label={t('toolbar_numbered_list')}
                 command={commands.toggleNumberedList}
-                icon={
-                  bsVersion({
-                    bs5: 'format_list_numbered',
-                    bs3: 'list-ol',
-                  }) as string
-                }
+                icon={bsVersion({
+                  bs5: 'format_list_numbered',
+                  bs3: 'list-ol',
+                })}
               />
               <ToolbarButton
                 id="toolbar-format-indent-decrease"
                 label={t('toolbar_decrease_indent')}
                 command={commands.indentDecrease}
-                icon={
-                  bsVersion({
-                    bs5: 'format_indent_decrease',
-                    bs3: 'outdent',
-                  }) as string
-                }
+                icon={bsVersion({
+                  bs5: 'format_indent_decrease',
+                  bs3: 'outdent',
+                })}
                 shortcut={visual ? (isMac ? '⌘[' : 'Ctrl+[') : undefined}
                 disabled={listDepth < 2}
               />
@@ -187,12 +179,10 @@ export const ToolbarItems: FC<{
                 id="toolbar-format-indent-increase"
                 label={t('toolbar_increase_indent')}
                 command={commands.indentIncrease}
-                icon={
-                  bsVersion({
-                    bs5: 'format_indent_increase',
-                    bs3: 'indent',
-                  }) as string
-                }
+                icon={bsVersion({
+                  bs5: 'format_indent_increase',
+                  bs3: 'indent',
+                })}
                 shortcut={visual ? (isMac ? '⌘]' : 'Ctrl+]') : undefined}
                 disabled={listDepth < 1}
               />

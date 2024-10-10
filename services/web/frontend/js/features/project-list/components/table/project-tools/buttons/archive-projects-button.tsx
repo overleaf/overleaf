@@ -50,12 +50,7 @@ function ArchiveProjectsButton() {
           onClick={handleOpenModal}
           variant="secondary"
           accessibilityLabel={text}
-          icon={
-            bsVersion({
-              bs5: 'inbox',
-              bs3: 'inbox',
-            }) as string
-          }
+          icon={bsVersion({ bs5: 'inbox', bs3: 'inbox' })}
         />
       </OLTooltip>
       <ArchiveProjectModal

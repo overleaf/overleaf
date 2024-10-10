@@ -76,12 +76,7 @@ const DeleteProjectButtonTooltip = memo(function DeleteProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={
-                bsVersion({
-                  bs5: 'block',
-                  bs3: 'ban',
-                }) as string
-              }
+              icon={bsVersion({ bs5: 'block', bs3: 'ban' })}
               bs3Props={{ fw: true }}
             />
           </span>

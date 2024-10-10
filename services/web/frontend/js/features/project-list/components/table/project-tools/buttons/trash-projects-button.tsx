@@ -50,12 +50,7 @@ function TrashProjectsButton() {
           onClick={handleOpenModal}
           variant="secondary"
           accessibilityLabel={text}
-          icon={
-            bsVersion({
-              bs5: 'delete',
-              bs3: 'trash',
-            }) as string
-          }
+          icon={bsVersion({ bs5: 'delete', bs3: 'trash' })}
         />
       </OLTooltip>
       <TrashProjectModal

@@ -53,12 +53,7 @@ const UntrashProjectButtonTooltip = memo(function UntrashProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={
-                bsVersion({
-                  bs5: 'restore_page',
-                  bs3: 'reply',
-                }) as string
-              }
+              icon={bsVersion({ bs5: 'restore_page', bs3: 'reply' })}
               bs3Props={{ fw: true }}
             />
           </span>

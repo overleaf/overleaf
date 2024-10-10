@@ -111,12 +111,7 @@ const CopyProjectButtonTooltip = memo(function CopyProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={
-                bsVersion({
-                  bs5: 'file_copy',
-                  bs3: 'files-o',
-                }) as string
-              }
+              icon={bsVersion({ bs5: 'file_copy', bs3: 'files-o' })}
               bs3Props={{ fw: true }}
             />
           </span>

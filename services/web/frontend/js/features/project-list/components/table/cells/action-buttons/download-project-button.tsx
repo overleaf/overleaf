@@ -52,12 +52,7 @@ const DownloadProjectButtonTooltip = memo(
                 variant="link"
                 accessibilityLabel={text}
                 className="action-btn"
-                icon={
-                  bsVersion({
-                    bs5: 'download',
-                    bs3: 'cloud-download',
-                  }) as string
-                }
+                icon={bsVersion({ bs5: 'download', bs3: 'cloud-download' })}
                 bs3Props={{ fw: true }}
               />
             </span>

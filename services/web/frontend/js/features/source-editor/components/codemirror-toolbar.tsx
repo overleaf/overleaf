@@ -187,7 +187,7 @@ const Toolbar = memo(function Toolbar() {
           label="Toggle Search"
           command={commands.toggleSearch}
           active={searchPanelOpen(state)}
-          icon={bsVersion({ bs5: 'search', bs3: 'search' }) as string}
+          icon={bsVersion({ bs5: 'search', bs3: 'search' })}
         />
 
         <SwitchToPDFButton />
@@ -202,7 +202,7 @@ const Toolbar = memo(function Toolbar() {
           id="toolbar-expand-less"
           label="Hide Toolbar"
           command={toggleToolbar}
-          icon={bsVersion({ bs5: 'arrow_drop_up', bs3: 'caret-up' }) as string}
+          icon={bsVersion({ bs5: 'arrow_drop_up', bs3: 'caret-up' })}
           hidden // enable this once there's a way to show the toolbar again
         />
       </div>

@@ -75,12 +75,7 @@ const TrashProjectButtonTooltip = memo(function TrashProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={
-                bsVersion({
-                  bs5: 'delete',
-                  bs3: 'trash',
-                }) as string
-              }
+              icon={bsVersion({ bs5: 'delete', bs3: 'trash' })}
               bs3Props={{ fw: true }}
             />
           </span>

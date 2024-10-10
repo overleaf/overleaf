@@ -159,12 +159,7 @@ const CompileAndDownloadProjectPDFButtonTooltip = memo(
                 loadingLabel={text}
                 isLoading={pendingCompile}
                 className="action-btn"
-                icon={
-                  bsVersion({
-                    bs5: 'picture_as_pdf',
-                    bs3: 'file-pdf-o',
-                  }) as string
-                }
+                icon={bsVersion({ bs5: 'picture_as_pdf', bs3: 'file-pdf-o' })}
                 bs3Props={{
                   fw: true,
                   loading: pendingCompile ? (
