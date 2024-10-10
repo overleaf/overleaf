@@ -3,6 +3,7 @@ const { ProjectInvite } = require('../../models/ProjectInvite')
 const logger = require('@overleaf/logger')
 const CollaboratorsEmailHandler = require('./CollaboratorsEmailHandler')
 const CollaboratorsHandler = require('./CollaboratorsHandler')
+const CollaboratorsInviteGetter = require('./CollaboratorsInviteGetter')
 const CollaboratorsInviteHelper = require('./CollaboratorsInviteHelper')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
@@ -89,6 +90,21 @@ const CollaboratorsInviteHandler = {
     })
 
     return _.pick(invite, ['_id', 'email', 'privileges'])
+  },
+
+  async revokeInviteForUser(projectId, targetEmails) {
+    logger.debug({ projectId }, 'getting all active invites for project')
+    const invites =
+      await CollaboratorsInviteGetter.promises.getAllInvites(projectId)
+    const matchingInvite = invites.find(invite =>
+      targetEmails.some(emailData => emailData.email === invite.email)
+    )
+    if (matchingInvite) {
+      await CollaboratorsInviteHandler.revokeInvite(
+        projectId,
+        matchingInvite._id
+      )
+    }
   },
 
   async revokeInvite(projectId, inviteId) {
@@ -185,6 +201,9 @@ const CollaboratorsInviteHandler = {
 module.exports = {
   promises: CollaboratorsInviteHandler,
   inviteToProject: callbackify(CollaboratorsInviteHandler.inviteToProject),
+  revokeInviteForUser: callbackify(
+    CollaboratorsInviteHandler.revokeInviteForUser
+  ),
   revokeInvite: callbackify(CollaboratorsInviteHandler.revokeInvite),
   generateNewInvite: callbackify(CollaboratorsInviteHandler.generateNewInvite),
   acceptInvite: callbackify(CollaboratorsInviteHandler.acceptInvite),

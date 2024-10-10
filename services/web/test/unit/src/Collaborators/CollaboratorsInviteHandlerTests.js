@@ -47,6 +47,12 @@ describe('CollaboratorsInviteHandler', function () {
       hashInviteToken: sinon.stub().returns(this.tokenHmac),
     }
 
+    this.CollaboratorsInviteGetter = {
+      promises: {
+        getAllInvites: sinon.stub(),
+      },
+    }
+
     this.SplitTestHandler = {
       promises: {
         getAssignmentForUser: sinon.stub().resolves(),
@@ -76,6 +82,7 @@ describe('CollaboratorsInviteHandler', function () {
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Notifications/NotificationsBuilder': this.NotificationsBuilder,
         './CollaboratorsInviteHelper': this.CollaboratorsInviteHelper,
+        './CollaboratorsInviteGetter': this.CollaboratorsInviteGetter,
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../Subscription/LimitationsManager': this.LimitationsManager,
         '../Project/ProjectAuditLogHandler': this.ProjectAuditLogHandler,
@@ -246,6 +253,75 @@ describe('CollaboratorsInviteHandler', function () {
 
       it('should produce an error', async function () {
         await expect(this.call()).to.be.rejectedWith(Error)
+      })
+    })
+  })
+  describe('revokeInviteForUser', function () {
+    beforeEach(function () {
+      this.targetInvite = {
+        _id: new ObjectId(),
+        email: 'fake2@example.org',
+        two: 2,
+      }
+      this.fakeInvites = [
+        { _id: new ObjectId(), email: 'fake1@example.org', one: 1 },
+        this.targetInvite,
+      ]
+      this.fakeInvitesWithoutUser = [
+        { _id: new ObjectId(), email: 'fake1@example.org', one: 1 },
+        { _id: new ObjectId(), email: 'fake3@example.org', two: 2 },
+      ]
+      this.targetEmail = [{ email: 'fake2@example.org' }]
+
+      this.CollaboratorsInviteGetter.promises.getAllInvites.resolves(
+        this.fakeInvites
+      )
+      this.CollaboratorsInviteHandler.promises.revokeInvite = sinon
+        .stub()
+        .resolves(this.targetInvite)
+
+      this.call = async () => {
+        return await this.CollaboratorsInviteHandler.promises.revokeInviteForUser(
+          this.projectId,
+          this.targetEmail
+        )
+      }
+    })
+
+    describe('for a valid user', function () {
+      it('should have called CollaboratorsInviteGetter.getAllInvites', async function () {
+        await this.call()
+        this.CollaboratorsInviteGetter.promises.getAllInvites.callCount.should.equal(
+          1
+        )
+        this.CollaboratorsInviteGetter.promises.getAllInvites
+          .calledWith(this.projectId)
+          .should.equal(true)
+      })
+
+      it('should have called revokeInvite', async function () {
+        await this.call()
+        this.CollaboratorsInviteHandler.promises.revokeInvite.callCount.should.equal(
+          1
+        )
+
+        this.CollaboratorsInviteHandler.promises.revokeInvite
+          .calledWith(this.projectId, this.targetInvite._id)
+          .should.equal(true)
+      })
+    })
+
+    describe('for a user without an invite in the project', function () {
+      beforeEach(function () {
+        this.CollaboratorsInviteGetter.promises.getAllInvites.resolves(
+          this.fakeInvitesWithoutUser
+        )
+      })
+      it('should not have called CollaboratorsInviteHandler.revokeInvite', async function () {
+        await this.call()
+        this.CollaboratorsInviteHandler.promises.revokeInvite.callCount.should.equal(
+          0
+        )
       })
     })
   })

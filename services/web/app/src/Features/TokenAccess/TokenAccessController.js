@@ -10,6 +10,7 @@ const AuthorizationManager = require('../Authorization/AuthorizationManager')
 const PrivilegeLevels = require('../Authorization/PrivilegeLevels')
 const ProjectAuditLogHandler = require('../Project/ProjectAuditLogHandler')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
+const CollaboratorsInviteHandler = require('../Collaborators/CollaboratorsInviteHandler')
 const CollaboratorsHandler = require('../Collaborators/CollaboratorsHandler')
 const EditorRealTimeController = require('../Editor/EditorRealTimeController')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
@@ -372,13 +373,20 @@ async function grantTokenAccessReadAndWrite(req, res, next) {
           : PrivilegeLevels.READ_AND_WRITE,
         { pendingEditor }
       )
-      // Does not remove any pending invite or the invite notification
+
+      // remove pending invite and notification
+      const userEmails =
+        await UserGetter.promises.getUserConfirmedEmails(userId)
+      await CollaboratorsInviteHandler.promises.revokeInviteForUser(
+        project._id,
+        userEmails
+      )
       // Should be a noop if the user is already a member,
       // and would redirect transparently into the project.
       EditorRealTimeController.emitToRoom(
         project._id,
         'project:membership:changed',
-        { members: true }
+        { members: true, invites: true }
       )
 
       return res.json({

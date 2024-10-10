@@ -83,6 +83,12 @@ describe('TokenAccessController', function () {
       },
     }
 
+    this.CollaboratorsInviteHandler = {
+      promises: {
+        revokeInviteForUser: sinon.stub().resolves(),
+      },
+    }
+
     this.CollaboratorsHandler = {
       promises: {
         addUserIdToProject: sinon.stub().resolves(),
@@ -120,6 +126,8 @@ describe('TokenAccessController', function () {
             return null
           }
         }),
+        getUserEmail: sinon.stub().resolves(),
+        getUserConfirmedEmails: sinon.stub().resolves(),
       },
     }
 
@@ -143,6 +151,8 @@ describe('TokenAccessController', function () {
         '../SplitTests/SplitTestHandler': this.SplitTestHandler,
         '../Errors/Errors': (this.Errors = { NotFoundError: sinon.stub() }),
         '../Collaborators/CollaboratorsHandler': this.CollaboratorsHandler,
+        '../Collaborators/CollaboratorsInviteHandler':
+          this.CollaboratorsInviteHandler,
         '../Collaborators/CollaboratorsGetter': this.CollaboratorsGetter,
         '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         '../Project/ProjectGetter': this.ProjectGetter,
@@ -279,7 +289,7 @@ describe('TokenAccessController', function () {
           ).to.have.been.calledWith(
             this.project._id,
             'project:membership:changed',
-            { members: true }
+            { members: true, invites: true }
           )
         })
 
@@ -365,7 +375,7 @@ describe('TokenAccessController', function () {
             ).to.have.been.calledWith(
               this.project._id,
               'project:membership:changed',
-              { members: true }
+              { members: true, invites: true }
             )
           })
 
@@ -440,7 +450,7 @@ describe('TokenAccessController', function () {
             ).to.have.been.calledWith(
               this.project._id,
               'project:membership:changed',
-              { members: true }
+              { members: true, invites: true }
             )
           })
 

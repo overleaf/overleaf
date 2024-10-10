@@ -187,7 +187,6 @@ const CollaboratorsInviteController = {
     )
     res.json({ invite })
   },
-
   async revokeInvite(req, res) {
     const projectId = req.params.Project_id
     const inviteId = req.params.invite_id
@@ -404,6 +403,9 @@ module.exports = {
   getAllInvites: expressify(CollaboratorsInviteController.getAllInvites),
   inviteToProject: expressify(CollaboratorsInviteController.inviteToProject),
   revokeInvite: expressify(CollaboratorsInviteController.revokeInvite),
+  revokeInviteForUser: expressify(
+    CollaboratorsInviteController.revokeInviteForUser
+  ),
   generateNewInvite: expressify(
     CollaboratorsInviteController.generateNewInvite
   ),
