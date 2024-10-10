@@ -16,7 +16,6 @@ import { DetachRole } from './detach-context'
 import { debugConsole } from '@/utils/debugging'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
-import useEventListener from '../hooks/use-event-listener'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -165,17 +164,6 @@ export const LayoutProvider: FC = ({ children }) => {
     detachIsLinked,
     changeLayout,
   ])
-
-  const handleSetReviewPanelOpenEvent = useCallback(
-    (e: Event) => {
-      const event = e as CustomEvent<{ isOpen: boolean }>
-      const { isOpen } = event.detail
-      setReviewPanelOpen(isOpen)
-    },
-    [setReviewPanelOpen]
-  )
-
-  useEventListener('set-review-panel-open', handleSetReviewPanelOpenEvent)
 
   const value = useMemo<LayoutContextValue>(
     () => ({

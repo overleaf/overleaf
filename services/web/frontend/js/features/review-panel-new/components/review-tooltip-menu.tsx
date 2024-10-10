@@ -13,6 +13,8 @@ import {
 import { getTooltip } from '@codemirror/view'
 import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
+import { useLayoutContext } from '@/shared/context/layout-context'
+import { useReviewPanelViewActionsContext } from '../context/review-panel-view-context'
 
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -51,13 +53,12 @@ const ReviewTooltipMenuContent: FC<{
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
+  const { setReviewPanelOpen } = useLayoutContext()
+  const { setView } = useReviewPanelViewActionsContext()
 
   const handleClick = () => {
-    window.dispatchEvent(
-      new CustomEvent<{ isOpen: boolean }>('set-review-panel-open', {
-        detail: { isOpen: true },
-      })
-    )
+    setReviewPanelOpen(true)
+    setView('cur_file')
 
     view.dispatch({
       effects: buildAddNewCommentRangeEffect(state.selection.main),

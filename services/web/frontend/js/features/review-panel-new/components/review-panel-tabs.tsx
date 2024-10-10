@@ -1,13 +1,16 @@
-import { Dispatch, FC, memo, SetStateAction } from 'react'
+import { FC, memo } from 'react'
 import classnames from 'classnames'
-import { SubView } from '../components/review-panel'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
+import {
+  useReviewPanelViewActionsContext,
+  useReviewPanelViewContext,
+} from '../context/review-panel-view-context'
 
-const ReviewPanelTabs: FC<{
-  subView: SubView
-  setSubView: Dispatch<SetStateAction<SubView>>
-}> = ({ subView, setSubView }) => {
+const ReviewPanelTabs: FC = () => {
+  const subView = useReviewPanelViewContext()
+  const { setView: setSubView } = useReviewPanelViewActionsContext()
+
   const { t } = useTranslation()
 
   return (
