@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import PasswordResetRouter from '../../../app/src/Features/PasswordReset/PasswordResetRouter.js'
+import PasswordResetRouter from '../../../app/src/Features/PasswordReset/PasswordResetRouter.mjs'
 import UserHelper from './helpers/UserHelper.js'
 
 describe('PasswordUpdate', function () {

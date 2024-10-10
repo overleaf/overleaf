@@ -6,7 +6,7 @@ import AbstractMockApi from './AbstractMockApi.js'
 
 class MockNotificationsApi extends AbstractMockApi {
   applyRoutes() {
-    this.app.get('/*', (req, res) => res.sendStatus(200))
+    this.app.get('/*', (req, res) => res.json([]))
     this.app.post('/*', (req, res) => res.sendStatus(200))
   }
 }
