@@ -1,4 +1,5 @@
 import HotkeysModal from '../js/features/hotkeys-modal/components/hotkeys-modal'
+import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const ReviewEnabled = args => {
   return <HotkeysModal {...args} />
@@ -23,5 +24,6 @@ export default {
   },
   argTypes: {
     handleHide: { action: 'handleHide' },
+    ...bsVersionDecorator.argTypes,
   },
 }

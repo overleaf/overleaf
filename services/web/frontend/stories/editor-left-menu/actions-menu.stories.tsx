@@ -4,10 +4,14 @@ import { mockCompile, mockCompileError } from '../fixtures/compile'
 import { document, mockDocument } from '../fixtures/document'
 import useFetchMock from '../hooks/use-fetch-mock'
 import { useScope } from '../hooks/use-scope'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export default {
   title: 'Editor / Left Menu / Actions Menu',
   component: ActionsMenu,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
   decorators: [
     (Story: any) => ScopeDecorator(Story, { mockCompileOnLoad: false }),
   ],

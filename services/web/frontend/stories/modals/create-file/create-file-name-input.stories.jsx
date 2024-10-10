@@ -5,6 +5,7 @@ import {
   DuplicateFilenameError,
 } from '../../../js/features/file-tree/errors'
 import { ModalBodyDecorator, ModalContentDecorator } from '../modal-decorators'
+import { bsVersionDecorator } from '../../../../.storybook/utils/with-bootstrap-switcher'
 
 export const DefaultLabel = args => (
   <FileTreeCreateNameProvider initialName="example.tex">
@@ -63,5 +64,8 @@ export default {
   decorators: [ModalBodyDecorator, ModalContentDecorator],
   args: {
     inFlight: false,
+  },
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
   },
 }

@@ -8,6 +8,7 @@ import {
 import { useMeta } from '../hooks/use-meta'
 import { tags } from '../../../test/frontend/features/project-list/fixtures/tags-data'
 import { v4 as uuid } from 'uuid'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const MOCK_DELAY = 500
 
@@ -57,4 +58,7 @@ export default {
       </div>
     ),
   ],
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

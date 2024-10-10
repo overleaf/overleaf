@@ -5,6 +5,7 @@ import { useMeta } from '../hooks/use-meta'
 import { FC } from 'react'
 import { FileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
 import RangesTracker from '@overleaf/ranges-tracker'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const FileTreePathProvider: FC = ({ children }) => (
   <FileTreePathContext.Provider
@@ -40,6 +41,9 @@ export default {
       </div>
     ),
   ],
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }
 
 const settings = {

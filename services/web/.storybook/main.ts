@@ -77,6 +77,7 @@ const config: StorybookConfig = {
           fs: false,
           os: false,
           module: false,
+          tty: require.resolve('tty-browserify'),
         },
         extensions: ['.js', '.jsx', '.mjs', '.ts', '.tsx', '.json'],
         alias: {

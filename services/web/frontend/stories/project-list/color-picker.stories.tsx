@@ -1,5 +1,6 @@
 import { ColorPicker } from '../../js/features/project-list/components/color-picker/color-picker'
 import { ColorPickerProvider } from '../../js/features/project-list/context/color-picker-context'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Select = (args: any) => {
   return (
@@ -12,4 +13,7 @@ export const Select = (args: any) => {
 export default {
   title: 'Project List / Color Picker',
   component: ColorPicker,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

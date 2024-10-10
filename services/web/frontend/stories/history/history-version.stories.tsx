@@ -2,6 +2,7 @@ import HistoryVersionComponent from '../../js/features/history/components/change
 import { ScopeDecorator } from '../decorators/scope'
 import { HistoryProvider } from '../../js/features/history/context/history-context'
 import { disableControlsOf } from '../utils/arg-types'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const update = {
   fromV: 3,
@@ -67,16 +68,19 @@ export default {
     setActiveDropdownItem: () => {},
     closeDropdownForItem: () => {},
   },
-  argTypes: disableControlsOf(
-    'update',
-    'currentUserId',
-    'projectId',
-    'setSelection',
-    'dropdownOpen',
-    'dropdownActive',
-    'setActiveDropdownItem',
-    'closeDropdownForItem'
-  ),
+  argTypes: {
+    ...disableControlsOf(
+      'update',
+      'currentUserId',
+      'projectId',
+      'setSelection',
+      'dropdownOpen',
+      'dropdownActive',
+      'setActiveDropdownItem',
+      'closeDropdownForItem'
+    ),
+    ...bsVersionDecorator.argTypes,
+  },
   decorators: [
     ScopeDecorator,
     (Story: React.ComponentType) => (

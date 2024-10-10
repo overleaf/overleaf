@@ -2,6 +2,7 @@ import NewProjectButton from '../../js/features/project-list/components/new-proj
 import { ProjectListProvider } from '../../js/features/project-list/context/project-list-context'
 import useFetchMock from '../hooks/use-fetch-mock'
 import getMeta from '@/utils/meta'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const templateLinks = [
   {
@@ -99,4 +100,7 @@ export const Error = () => {
 export default {
   title: 'Project List / New Project Button',
   component: NewProjectButton,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

@@ -1,5 +1,6 @@
 import BetaProgramSection from '../../js/features/settings/components/beta-program-section'
 import { UserProvider } from '../../js/shared/context/user-context'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const SectionNotEnrolled = args => {
   window.metaAttributesCache.set('ol-user', { betaProgram: false })
@@ -24,4 +25,7 @@ export const SectionEnrolled = args => {
 export default {
   title: 'Account Settings / Beta Program',
   component: BetaProgramSection,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

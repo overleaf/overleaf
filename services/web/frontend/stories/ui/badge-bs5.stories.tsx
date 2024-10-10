@@ -44,7 +44,7 @@ export const BadgeDefault: Story = {
   },
 }
 BadgeDefault.args = {
-  bg: meta.argTypes!.bg!.options[0],
+  bg: meta.argTypes!.bg!.options![0],
 }
 
 export const BadgePrepend: Story = {
@@ -59,5 +59,5 @@ export const BadgePrepend: Story = {
   },
 }
 BadgePrepend.args = {
-  bg: meta.argTypes!.bg!.options[0],
+  bg: meta.argTypes!.bg!.options![0],
 }

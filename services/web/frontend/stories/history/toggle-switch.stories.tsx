@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ToggleSwitchComponent from '../../js/features/history/components/change-list/toggle-switch'
 import { ScopeDecorator } from '../decorators/scope'
 import { HistoryProvider } from '../../js/features/history/context/history-context'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const HistoryAndLabelsToggleSwitch = () => {
   const [labelsOnly, setLabelsOnly] = useState(false)
@@ -30,6 +31,7 @@ export default {
         disable: true,
       },
     },
+    ...bsVersionDecorator.argTypes,
   },
   decorators: [
     ScopeDecorator,

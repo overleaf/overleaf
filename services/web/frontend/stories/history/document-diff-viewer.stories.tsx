@@ -2,6 +2,7 @@ import { ScopeDecorator } from '../decorators/scope'
 import DocumentDiffViewer from '../../js/features/history/components/diff-view/document-diff-viewer'
 import React from 'react'
 import { Highlight } from '../../js/features/history/services/types/doc'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const highlights: Highlight[] = [
   {
@@ -132,6 +133,7 @@ export default {
     highlights: {
       table: { disable: true },
     },
+    ...bsVersionDecorator.argTypes,
   },
   decorators: [
     ScopeDecorator,

@@ -1,5 +1,6 @@
 import { ScopeDecorator } from './decorators/scope'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
+import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const WithDefaultText = () => {
   return (
@@ -32,4 +33,7 @@ export default {
   title: 'Shared / Components / Feedback Badge',
   component: FeedbackBadge,
   decorators: [ScopeDecorator],
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

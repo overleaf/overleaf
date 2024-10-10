@@ -8,6 +8,7 @@ import {
   errorsMocks,
   emailLimitSetupMocks,
 } from './helpers/emails'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const EmailsList = args => {
   useFetchMock(defaultSetupMocks)
@@ -40,4 +41,7 @@ export const NetworkErrors = args => {
 export default {
   title: 'Account Settings / Emails and Affiliations',
   component: EmailsSection,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

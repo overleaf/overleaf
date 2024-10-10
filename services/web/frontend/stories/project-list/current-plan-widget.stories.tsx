@@ -1,4 +1,5 @@
 import CurrentPlanWidget from '../../js/features/project-list/components/current-plan-widget/current-plan-widget'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const FreePlan = (args: any) => {
   window.metaAttributesCache.set('ol-usersBestSubscription', {
@@ -55,4 +56,7 @@ export const PaidPlanActive = (args: any) => {
 export default {
   title: 'Project List / Current Plan Widget',
   component: CurrentPlanWidget,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

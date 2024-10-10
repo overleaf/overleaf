@@ -1,6 +1,7 @@
 import FileView from '../../js/features/file-view/components/file-view'
 import useFetchMock from '../hooks/use-fetch-mock'
 import { ScopeDecorator } from '../decorators/scope'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 const bodies = {
   latex: `\\documentclass{article}
@@ -207,6 +208,7 @@ export default {
   component: FileView,
   argTypes: {
     storeReferencesKeys: { action: 'store references keys' },
+    ...bsVersionDecorator.argTypes,
   },
   decorators: [ScopeDecorator],
 }

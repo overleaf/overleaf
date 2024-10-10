@@ -24,6 +24,7 @@ import {
 import { UserProvider } from '../../js/shared/context/user-context'
 import { ScopeDecorator } from '../decorators/scope'
 import getMeta from '@/utils/meta'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Overleaf = args => {
   setDefaultLeaveMeta()
@@ -78,4 +79,7 @@ export default {
   title: 'Account Settings / Full Page',
   component: SettingsPageRoot,
   decorators: [ScopeDecorator],
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

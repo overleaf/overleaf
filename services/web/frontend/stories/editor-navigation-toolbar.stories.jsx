@@ -1,5 +1,6 @@
 import ToolbarHeader from '../js/features/editor-navigation-toolbar/components/toolbar-header'
 import { ScopeDecorator } from './decorators/scope'
+import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export const UpToThreeConnectedUsers = args => {
   return <ToolbarHeader {...args} />
@@ -32,6 +33,7 @@ export default {
     toggleChatOpen: { action: 'toggleChatOpen' },
     openShareModal: { action: 'openShareModal' },
     onShowLeftMenuClick: { action: 'onShowLeftMenuClick' },
+    ...bsVersionDecorator.argTypes,
   },
   args: {
     projectName: 'Overleaf Project',

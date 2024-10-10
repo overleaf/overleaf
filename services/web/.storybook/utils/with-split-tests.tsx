@@ -5,7 +5,7 @@ import { SplitTestContext } from '../../frontend/js/shared/context/split-test-co
 export const splitTestsArgTypes = {
   'local-ccy-format-v2': {
     description: 'Use local currency formatting',
-    control: { type: 'radio' },
+    control: { type: 'radio' as const },
     options: ['default', 'enabled'],
   },
 }

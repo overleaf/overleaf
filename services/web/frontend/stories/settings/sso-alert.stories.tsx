@@ -1,5 +1,6 @@
 import EmailsSection from '../../js/features/settings/components/emails-section'
 import { SSOAlert } from '../../js/features/settings/components/emails/sso-alert'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Info = () => {
   window.metaAttributesCache.set('ol-institutionLinked', {
@@ -53,4 +54,7 @@ export const ErrorWithTryAgain = () => {
 export default {
   title: 'Account Settings / SSO Alerts',
   component: EmailsSection,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

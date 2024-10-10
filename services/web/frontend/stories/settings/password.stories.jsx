@@ -2,6 +2,7 @@ import useFetchMock from '../hooks/use-fetch-mock'
 import PasswordSection from '../../js/features/settings/components/password-section'
 import { setDefaultMeta, defaultSetupMocks } from './helpers/password'
 import getMeta from '@/utils/meta'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Success = args => {
   setDefaultMeta()
@@ -46,4 +47,7 @@ export const Error = args => {
 export default {
   title: 'Account Settings / Password',
   component: PasswordSection,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

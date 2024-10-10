@@ -5,6 +5,7 @@ import fixedHelpSuggestionSearch from '../../modules/support/test/frontend/util/
 import { ScopeDecorator } from './decorators/scope'
 import { StoryObj } from '@storybook/react'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 type Story = StoryObj<typeof ContactUsModal>
 type ContactUsModalProps = ComponentProps<typeof ContactUsModal>
@@ -132,5 +133,6 @@ export default {
   },
   argTypes: {
     handleHide: { action: 'close modal' },
+    ...bsVersionDecorator.argTypes,
   },
 }

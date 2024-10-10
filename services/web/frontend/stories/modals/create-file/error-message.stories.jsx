@@ -5,6 +5,7 @@ import {
   DuplicateFilenameError,
   InvalidFilenameError,
 } from '../../../js/features/file-tree/errors'
+import { bsVersionDecorator } from '../../../../.storybook/utils/with-bootstrap-switcher'
 
 export const KeyedErrors = () => {
   return (
@@ -103,4 +104,7 @@ export const SpecificClassErrors = () => {
 export default {
   title: 'Editor / Modals / Create File / Error Message',
   component: ErrorMessage,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

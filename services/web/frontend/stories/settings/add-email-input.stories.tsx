@@ -1,5 +1,6 @@
 import useFetchMock from './../hooks/use-fetch-mock'
 import Input from '../../js/features/settings/components/emails/add-email/input'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const EmailInput = (args: any) => {
   useFetchMock(fetchMock =>
@@ -26,5 +27,6 @@ export default {
   component: Input,
   argTypes: {
     onChange: { action: 'change' },
+    ...bsVersionDecorator.argTypes,
   },
 }

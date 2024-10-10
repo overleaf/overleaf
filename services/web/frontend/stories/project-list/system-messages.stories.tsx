@@ -1,6 +1,7 @@
 import SystemMessages from '@/shared/components/system-messages'
 import useFetchMock from '../hooks/use-fetch-mock'
 import { FetchMockStatic } from 'fetch-mock'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const SystemMessage = (args: any) => {
   useFetchMock((fetchMock: FetchMockStatic) => {
@@ -39,4 +40,7 @@ export const TranslationMessage = (args: any) => {
 export default {
   title: 'Project List / System Messages',
   component: SystemMessages,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

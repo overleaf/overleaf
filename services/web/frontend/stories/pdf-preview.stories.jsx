@@ -22,6 +22,7 @@ import {
 import { cloneDeep } from 'lodash'
 import { ScopeDecorator } from './decorators/scope'
 import { PdfPreviewProvider } from '@/features/pdf-preview/components/pdf-preview-provider'
+import { bsVersionDecorator } from '../../.storybook/utils/with-bootstrap-switcher'
 
 export default {
   title: 'Editor / PDF Preview',
@@ -32,6 +33,9 @@ export default {
     PdfPreviewError,
   },
   decorators: [ScopeDecorator],
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }
 
 export const Interactive = () => {

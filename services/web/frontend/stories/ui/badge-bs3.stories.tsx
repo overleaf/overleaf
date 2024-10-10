@@ -42,7 +42,7 @@ export const BadgeDefault: Story = {
   },
 }
 BadgeDefault.args = {
-  bsStyle: meta.argTypes!.bsStyle!.options[0],
+  bsStyle: meta.argTypes!.bsStyle!.options![0],
 }
 
 export const BadgePrepend: Story = {
@@ -55,5 +55,5 @@ export const BadgePrepend: Story = {
   },
 }
 BadgePrepend.args = {
-  bsStyle: meta.argTypes!.bsStyle!.options[0],
+  bsStyle: meta.argTypes!.bsStyle!.options![0],
 }

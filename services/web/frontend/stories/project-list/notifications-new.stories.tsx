@@ -13,6 +13,7 @@ import {
   setReconfirmAffiliationMeta,
   setReconfirmationMeta,
 } from './helpers/emails'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const ProjectInvite = (args: any) => {
   useFetchMock(commonSetupMocks)
@@ -316,4 +317,7 @@ export const ReconfirmedAffiliationSuccess = (args: any) => {
 export default {
   title: 'Project List / Notifications New Style',
   component: UserNotifications,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

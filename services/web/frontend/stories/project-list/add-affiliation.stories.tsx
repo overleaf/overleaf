@@ -3,6 +3,7 @@ import { ProjectListProvider } from '../../js/features/project-list/context/proj
 import useFetchMock from '../hooks/use-fetch-mock'
 import { projectsData } from '../../../test/frontend/features/project-list/fixtures/projects-data'
 import getMeta from '@/utils/meta'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Add = (args: any) => {
   Object.assign(getMeta('ol-ExposedSettings'), {
@@ -26,4 +27,7 @@ export const Add = (args: any) => {
 export default {
   title: 'Project List / Affiliation',
   component: AddAffiliation,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }

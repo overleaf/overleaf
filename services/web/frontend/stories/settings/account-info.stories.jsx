@@ -3,6 +3,7 @@ import AccountInfoSection from '../../js/features/settings/components/account-in
 import { setDefaultMeta, defaultSetupMocks } from './helpers/account-info'
 import { UserProvider } from '../../js/shared/context/user-context'
 import getMeta from '@/utils/meta'
+import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-switcher'
 
 export const Success = args => {
   setDefaultMeta()
@@ -55,4 +56,7 @@ export const Error = args => {
 export default {
   title: 'Account Settings / Account Info',
   component: AccountInfoSection,
+  argTypes: {
+    ...bsVersionDecorator.argTypes,
+  },
 }
