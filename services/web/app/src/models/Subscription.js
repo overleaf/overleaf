@@ -36,6 +36,7 @@ const SubscriptionSchema = new Schema(
       managedUsers: { type: Boolean, default: null },
       groupSSO: { type: Boolean, default: null },
     },
+    addOns: Schema.Types.Mixed,
     overleaf: {
       id: {
         type: Number,

@@ -15,6 +15,8 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Queues = require('../../infrastructure/Queues')
 const Modules = require('../../infrastructure/Modules')
 
+const AI_ADDON_CODE = 'assistant'
+
 /**
  * Enqueue a job for refreshing features for the given user
  */
@@ -147,7 +149,13 @@ async function _getV1Features(user) {
 }
 
 function _subscriptionToFeatures(subscription) {
-  return _planCodeToFeatures(subscription && subscription.planCode)
+  const addonFeatures = _subscriptionAddonsToFeatures(
+    subscription && subscription.addOns
+  )
+  const planFeatures = _planCodeToFeatures(
+    subscription && subscription.planCode
+  )
+  return FeaturesHelper.mergeFeatures(addonFeatures, planFeatures)
 }
 
 function _planCodeToFeatures(planCode) {
@@ -159,6 +167,18 @@ function _planCodeToFeatures(planCode) {
     return {}
   } else {
     return plan.features
+  }
+}
+
+function _subscriptionAddonsToFeatures(addOns) {
+  if (!addOns) {
+    return {}
+  }
+  const hasAiAddon = addOns.some(addOn => addOn.addOnCode === AI_ADDON_CODE)
+  if (hasAiAddon) {
+    return { aiErrorAssistant: true }
+  } else {
+    return {}
   }
 }
 

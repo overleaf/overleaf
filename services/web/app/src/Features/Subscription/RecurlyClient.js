@@ -44,6 +44,10 @@ async function getSubscription(subscriptionId) {
   return await client.getSubscription(subscriptionId)
 }
 
+async function getSubscriptionByUuid(subscriptionUuid) {
+  return await client.getSubscription('uuid-' + subscriptionUuid)
+}
+
 async function changeSubscription(subscriptionId, body) {
   const change = await client.createSubscriptionChange(subscriptionId, body)
   logger.debug(
@@ -101,6 +105,7 @@ module.exports = {
   getAccountForUserId: callbackify(getAccountForUserId),
   createAccountForUserId: callbackify(createAccountForUserId),
   getSubscription: callbackify(getSubscription),
+  getSubscriptionByUuid: callbackify(getSubscriptionByUuid),
   changeSubscription: callbackify(changeSubscription),
   changeSubscriptionByUuid: callbackify(changeSubscriptionByUuid),
   removeSubscriptionChange: callbackify(removeSubscriptionChange),
@@ -111,6 +116,7 @@ module.exports = {
 
   promises: {
     getSubscription,
+    getSubscriptionByUuid,
     getAccountForUserId,
     createAccountForUserId,
     changeSubscription,

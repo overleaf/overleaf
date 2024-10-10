@@ -305,8 +305,17 @@ async function updateSubscriptionFromRecurly(
     return
   }
 
+  const addOns = recurlySubscription?.subscription_add_ons?.map(addOn => {
+    return {
+      addOnCode: addOn.add_on_code,
+      quantity: addOn.quantity,
+      unitAmountInCents: addOn.unit_amount_in_cents,
+    }
+  })
+
   subscription.recurlySubscription_id = recurlySubscription.uuid
   subscription.planCode = updatedPlanCode
+  subscription.addOns = addOns || []
   subscription.recurlyStatus = {
     state: recurlySubscription.state,
     trialStartedAt: recurlySubscription.trial_started_at,
