@@ -15,6 +15,7 @@ const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const RecurlyEventHandler = require('./RecurlyEventHandler')
 const { expressify } = require('@overleaf/promise-utils')
 const OError = require('@overleaf/o-error')
+const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 const SubscriptionHelper = require('./SubscriptionHelper')
 const AuthorizationManager = require('../Authorization/AuthorizationManager')
@@ -22,7 +23,10 @@ const Modules = require('../../infrastructure/Modules')
 const async = require('async')
 const { formatCurrencyLocalized } = require('../../util/currency')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
+const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { URLSearchParams } = require('url')
+
+const AI_ADDON_CODE = 'assistant'
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -484,6 +488,69 @@ function cancelV1Subscription(req, res, next) {
   })
 }
 
+async function purchaseAddon(req, res, next) {
+  const user = SessionManager.getSessionUser(req.session)
+  const addOnCode = req.params.addOnCode
+  // currently we only support having a quantity of 1
+  const quantity = 1
+  // currently we only support one add-on, the Ai add-on
+  if (addOnCode !== AI_ADDON_CODE) {
+    return res.sendStatus(404)
+  }
+
+  logger.debug({ userId: user._id, addOnCode }, 'purchasing add-ons')
+  try {
+    await SubscriptionHandler.promises.purchaseAddon(user, addOnCode, quantity)
+    return res.sendStatus(200)
+  } catch (err) {
+    if (err instanceof DuplicateAddOnError) {
+      HttpErrorHandler.badRequest(
+        req,
+        res,
+        'Your subscription already includes this add-on',
+        { addon: addOnCode }
+      )
+    } else {
+      OError.tag(err, 'something went wrong purchasing add-ons', {
+        user_id: user._id,
+        addOnCode,
+      })
+      return next(err)
+    }
+  }
+}
+
+async function removeAddon(req, res, next) {
+  const user = SessionManager.getSessionUser(req.session)
+  const addOnCode = req.params.addOnCode
+
+  if (addOnCode !== AI_ADDON_CODE) {
+    return res.sendStatus(404)
+  }
+
+  logger.debug({ userId: user._id, addOnCode }, 'removing add-ons')
+
+  try {
+    await SubscriptionHandler.promises.removeAddon(user, addOnCode)
+    res.sendStatus(200)
+  } catch (err) {
+    if (err instanceof AddOnNotPresentError) {
+      HttpErrorHandler.badRequest(
+        req,
+        res,
+        'Your subscription does not contain the requested add-on',
+        { addon: addOnCode }
+      )
+    } else {
+      OError.tag(err, 'something went wrong removing add-ons', {
+        user_id: user._id,
+        addOnCode,
+      })
+      return next(err)
+    }
+  }
+}
+
 function updateSubscription(req, res, next) {
   const origin = req && req.query ? req.query.origin : null
   const user = SessionManager.getSessionUser(req.session)
@@ -771,6 +838,8 @@ module.exports = {
   refreshUserFeatures: expressify(refreshUserFeatures),
   redirectToHostedPage: expressify(redirectToHostedPage),
   plansBanners: _plansBanners,
+  purchaseAddon,
+  removeAddon,
   promises: {
     getRecommendedCurrency: _getRecommendedCurrency,
     getLatamCountryBannerDetails,

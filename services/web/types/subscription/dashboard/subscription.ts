@@ -5,7 +5,22 @@ import { User } from '../../user'
 
 type SubscriptionState = 'active' | 'canceled' | 'expired'
 
+// the add-ons attached to a recurly subsription
+export type AddOn = {
+  add_on_code: string
+  add_on_type: string
+  quantity: number
+  revenue_schedule_type: string
+  unit_amount_in_cents: number
+}
+
+// when puchasing a new add-on in recurly, we only need to provide the code
+export type PurchasingAddOnCode = {
+  code: string
+}
+
 type Recurly = {
+  addOns?: AddOn[]
   tax: number
   taxRate: number
   billingDetailsLink: string

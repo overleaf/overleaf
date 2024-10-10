@@ -6,6 +6,7 @@ const TeamInvitesController = require('./TeamInvitesController')
 const { RateLimiter } = require('../../infrastructure/RateLimiter')
 const RateLimiterMiddleware = require('../Security/RateLimiterMiddleware')
 const Settings = require('@overleaf/settings')
+const { Joi, validate } = require('../../infrastructure/Validation')
 
 const teamInviteRateLimiter = new RateLimiter('team-invite', {
   points: 10,
@@ -118,6 +119,28 @@ module.exports = {
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionController.updateSubscription
+    )
+    webRouter.post(
+      '/user/subscription/addon/:addOnCode/add',
+      AuthenticationController.requireLogin(),
+      validate({
+        params: Joi.object({
+          addOnCode: Joi.string(),
+        }),
+      }),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.purchaseAddon
+    )
+    webRouter.post(
+      '/user/subscription/addon/:addOnCode/remove',
+      AuthenticationController.requireLogin(),
+      validate({
+        params: Joi.object({
+          addOnCode: Joi.string(),
+        }),
+      }),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.removeAddon
     )
     webRouter.post(
       '/user/subscription/cancel-pending',

@@ -270,6 +270,7 @@ async function buildUsersSubscriptionViewModel(
       billingDetailsLink: buildHostedLink('billing-details'),
       accountManagementLink: buildHostedLink('account-management'),
       additionalLicenses,
+      addOns: recurlySubscription.subscription_add_ons || [],
       totalLicenses,
       nextPaymentDueAt: SubscriptionFormatters.formatDate(
         recurlySubscription.current_period_ends_at
