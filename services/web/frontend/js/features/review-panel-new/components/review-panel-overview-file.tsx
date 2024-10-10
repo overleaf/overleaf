@@ -59,44 +59,47 @@ export const ReviewPanelOverviewFile: FC<{
   }
 
   return (
-    <div>
-      <Button
-        bsClass="review-panel-overview-file-header"
-        bsStyle={null}
-        onClick={toggleCollapsed}
-      >
-        <MaterialIcon
-          type={collapsed ? 'keyboard_arrow_right' : 'keyboard_arrow_down'}
-        />
-        {doc.doc.name}
-        <div className="review-panel-overview-file-entry-count">
-          {numEntries}
-        </div>
-      </Button>
+    <>
+      <div>
+        <Button
+          bsClass="review-panel-overview-file-header"
+          bsStyle={null}
+          onClick={toggleCollapsed}
+        >
+          <MaterialIcon
+            type={collapsed ? 'keyboard_arrow_right' : 'keyboard_arrow_down'}
+          />
+          {doc.doc.name}
+          <div className="review-panel-overview-file-entry-count">
+            {numEntries}
+          </div>
+        </Button>
 
-      {!collapsed && (
-        <div className="review-panel-overview-file-entries">
-          {changes.map(change => (
-            <ReviewPanelChange
-              key={change.id}
-              change={change}
-              aggregate={aggregates.get(change.id)}
-              editable={false}
-              docId={doc.doc.id}
-              hoverRanges={false}
-            />
-          ))}
+        {!collapsed && (
+          <div className="review-panel-overview-file-entries">
+            {changes.map(change => (
+              <ReviewPanelChange
+                key={change.id}
+                change={change}
+                aggregate={aggregates.get(change.id)}
+                editable={false}
+                docId={doc.doc.id}
+                hoverRanges={false}
+              />
+            ))}
 
-          {unresolvedComments.map(comment => (
-            <ReviewPanelComment
-              key={comment.id}
-              comment={comment}
-              docId={doc.doc.id}
-              hoverRanges={false}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+            {unresolvedComments.map(comment => (
+              <ReviewPanelComment
+                key={comment.id}
+                comment={comment}
+                docId={doc.doc.id}
+                hoverRanges={false}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="review-panel-overfile-divider" />
+    </>
   )
 }

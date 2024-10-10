@@ -1,4 +1,4 @@
-import { FC, Fragment, useMemo } from 'react'
+import { FC, useMemo } from 'react'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { Ranges, useRangesContext } from '../context/ranges-context'
 import { useTranslation } from 'react-i18next'
@@ -58,12 +58,7 @@ export const ReviewPanelOverview: FC = () => {
           {docs.map(doc => {
             const ranges = rangesForDocs.get(doc.doc.id)
             return (
-              ranges && (
-                <Fragment key={doc.doc.id}>
-                  <ReviewPanelOverviewFile doc={doc} ranges={ranges} />
-                  <div className="review-panel-overfile-divider" />
-                </Fragment>
-              )
+              ranges && <ReviewPanelOverviewFile doc={doc} ranges={ranges} />
             )
           })}
         </div>
