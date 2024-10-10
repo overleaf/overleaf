@@ -4,7 +4,7 @@ import useWaitForI18n from '@/shared/hooks/use-wait-for-i18n'
 import getMeta from '@/utils/meta'
 import { useConnectionContext } from '../context/connection-context'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
-import { LoadingError } from './loading-error'
+import { LoadingError, LoadingErrorProps } from './loading-error'
 
 type Part = 'initial' | 'render' | 'connection' | 'translations' | 'project'
 
@@ -58,23 +58,30 @@ export const Loading: FC<{
   // Use loading text from the server, because i18n will not be ready initially
   const label = getMeta('ol-loadingText')
 
-  const hasError = Boolean(connectionState.error || i18n.error)
+  const errorCode = connectionState.error ?? (i18n.error ? 'i18n-error' : '')
 
+  return <LoadingUI progress={progress} label={label} errorCode={errorCode} />
+}
+
+type LoadingUiProps = {
+  progress: number
+  label: string
+  errorCode: LoadingErrorProps['errorCode']
+}
+
+export const LoadingUI: FC<LoadingUiProps> = ({
+  progress,
+  label,
+  errorCode,
+}) => {
   return (
     <div className="loading-screen">
       <LoadingBranded
         loadProgress={progress}
         label={label}
-        hasError={hasError}
+        hasError={Boolean(errorCode)}
       />
-      {hasError && (
-        <p className="loading-screen-error">
-          <LoadingError
-            connectionStateError={connectionState.error}
-            i18nError={i18n.error}
-          />
-        </p>
-      )}
+      {Boolean(errorCode) && <LoadingError errorCode={errorCode} />}
     </div>
   )
 }
