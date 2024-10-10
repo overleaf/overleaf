@@ -6,6 +6,7 @@ import useProjectRanges from '../hooks/use-project-ranges'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import Icon from '@/shared/components/icon'
 import { Change, CommentOperation } from '../../../../../types/change'
+import { ThreadId } from '../../../../../types/review-panel/review-panel'
 
 export const ReviewPanelResolvedThreadsMenu: FC = () => {
   const { t } = useTranslation()
@@ -92,7 +93,7 @@ export const ReviewPanelResolvedThreadsMenu: FC = () => {
         return (
           <ReviewPanelResolvedThread
             key={thread.id}
-            id={thread.id}
+            id={thread.id as ThreadId}
             comment={comment}
             docName={docNameForThread.get(thread.id) ?? t('unknown')}
           />

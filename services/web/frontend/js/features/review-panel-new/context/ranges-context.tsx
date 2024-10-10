@@ -16,6 +16,8 @@ import {
 import RangesTracker from '@overleaf/ranges-tracker'
 import { rejectChanges } from '@/features/source-editor/extensions/changes/reject-changes'
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
+import { postJSON } from '@/infrastructure/fetch-json'
+import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
 
 export type Ranges = {
   docId: string
@@ -57,7 +59,7 @@ const RangesActionsContext = createContext<RangesActions | undefined>(undefined)
 
 export const RangesProvider: FC = ({ children }) => {
   const view = useCodeMirrorViewContext()
-
+  const { projectId } = useIdeReactContext()
   const [currentDoc] = useScopeValue<DocumentContainer | null>(
     'editor.sharejs_doc'
   )
@@ -115,8 +117,10 @@ export const RangesProvider: FC = ({ children }) => {
 
   const actions = useMemo(
     () => ({
-      acceptChanges(...ids: string[]) {
+      async acceptChanges(...ids: string[]) {
         if (currentDoc?.ranges) {
+          const url = `/project/${projectId}/doc/${currentDoc.doc_id}/changes/accept`
+          await postJSON(url, { body: { change_ids: ids } })
           currentDoc.ranges.removeChangeIds(ids)
           setRanges(buildRanges(currentDoc))
         }
@@ -127,7 +131,7 @@ export const RangesProvider: FC = ({ children }) => {
         }
       },
     }),
-    [currentDoc, view]
+    [currentDoc, projectId, view]
   )
 
   return (

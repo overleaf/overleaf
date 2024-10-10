@@ -21,6 +21,7 @@ export const ReviewPanelEntry: FC<{
   className?: string
   selectLineOnFocus?: boolean
   hoverRanges?: boolean
+  disabled?: boolean
 }> = ({
   children,
   position,
@@ -30,6 +31,7 @@ export const ReviewPanelEntry: FC<{
   selectLineOnFocus = true,
   docId,
   hoverRanges = true,
+  disabled,
 }) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
@@ -95,6 +97,7 @@ export const ReviewPanelEntry: FC<{
         {
           'review-panel-entry-focused': focused,
           'review-panel-entry-highlighted': highlighted,
+          'review-panel-entry-disabled': disabled,
         },
         className
       )}

@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { useRangesActionsContext } from '../context/ranges-context'
 import {
   Change,
@@ -15,6 +15,7 @@ import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 import { useChangesUsersContext } from '../context/changes-users-context'
 import { ReviewPanelChangeUser } from './review-panel-change-user'
 import { ReviewPanelEntry } from './review-panel-entry'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
 
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
@@ -42,6 +43,27 @@ export const ReviewPanelChange = memo<{
     const { acceptChanges, rejectChanges } = useRangesActionsContext()
     const permissions = usePermissionsContext()
     const changesUsers = useChangesUsersContext()
+    const { showGenericMessageModal } = useModalsContext()
+
+    const [accepting, setAccepting] = useState(false)
+
+    const acceptHandler = useCallback(async () => {
+      setAccepting(true)
+      try {
+        if (aggregate) {
+          await acceptChanges(change.id, aggregate.id)
+        } else {
+          await acceptChanges(change.id)
+        }
+      } catch (err) {
+        showGenericMessageModal(
+          t('accept_change_error_title'),
+          t('accept_change_error_description')
+        )
+      } finally {
+        setAccepting(false)
+      }
+    }, [acceptChanges, aggregate, change.id, showGenericMessageModal, t])
 
     if (!changesUsers) {
       // if users are not loaded yet, do not show "Unknown" user
@@ -61,6 +83,7 @@ export const ReviewPanelChange = memo<{
         position={change.op.p}
         docId={docId}
         hoverRanges={hoverRanges}
+        disabled={accepting}
       >
         <div
           className="review-panel-entry-indicator"
@@ -92,14 +115,7 @@ export const ReviewPanelChange = memo<{
                   description={t('accept_change')}
                   tooltipProps={{ className: 'review-panel-tooltip' }}
                 >
-                  <Button
-                    onClick={() =>
-                      aggregate
-                        ? acceptChanges(change.id, aggregate.id)
-                        : acceptChanges(change.id)
-                    }
-                    bsStyle={null}
-                  >
+                  <Button onClick={acceptHandler} bsStyle={null}>
                     <MaterialIcon
                       type="check"
                       className="review-panel-entry-actions-icon"

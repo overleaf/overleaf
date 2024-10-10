@@ -1,10 +1,9 @@
 import { FC, useCallback, useState } from 'react'
 import {
+  CommentId,
   ReviewPanelCommentThreadMessage,
-  ThreadId,
 } from '../../../../../types/review-panel/review-panel'
 import { useTranslation } from 'react-i18next'
-import { useThreadsActionsContext } from '../context/threads-context'
 import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 import Tooltip from '@/shared/components/tooltip'
 import { Button } from 'react-bootstrap'
@@ -17,49 +16,39 @@ import ReviewPanelDeleteCommentModal from './review-panel-delete-comment-modal'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
-  threadId: ThreadId
   hasReplies: boolean
   isReply: boolean
-  onResolve: () => void
+  onResolve?: () => Promise<void>
+  onEdit?: (commentId: CommentId, content: string) => Promise<void>
+  onDelete?: (CommentId: CommentId) => Promise<void>
   isThreadResolved: boolean
 }> = ({
   message,
-  threadId,
   isReply,
   hasReplies,
   onResolve,
+  onEdit,
+  onDelete,
   isThreadResolved,
 }) => {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
-  const [error, setError] = useState<Error>()
   const [content, setContent] = useState(message.content)
-  const { editMessage, deleteMessage } = useThreadsActionsContext()
 
   const handleEditOption = useCallback(() => setEditing(true), [])
   const showDeleteModal = useCallback(() => setDeleting(true), [])
   const hideDeleteModal = useCallback(() => setDeleting(false), [])
 
-  const handleSubmit = useCallback(async () => {
-    await editMessage(threadId, message.id, content)
-      .catch(error => {
-        setError(error)
-      })
-      .finally(() => {
-        setEditing(false)
-      })
-  }, [content, editMessage, message.id, threadId])
+  const handleSubmit = useCallback(() => {
+    onEdit?.(message.id, content)
+    setEditing(false)
+  }, [content, message.id, onEdit])
 
-  const handleDelete = useCallback(async () => {
-    await deleteMessage(threadId, message.id)
-      .catch(error => {
-        setError(error)
-      })
-      .finally(() => {
-        setDeleting(false)
-      })
-  }, [deleteMessage, message.id, threadId])
+  const handleDelete = useCallback(() => {
+    onDelete?.(message.id)
+    setDeleting(false)
+  }, [message.id, onDelete])
 
   if (editing) {
     return (
@@ -83,7 +72,6 @@ export const ReviewPanelMessage: FC<{
           value={content}
           autoFocus // eslint-disable-line jsx-a11y/no-autofocus
         />
-        {error && <div>{error.message}</div>}
       </div>
     )
   }

@@ -13,6 +13,8 @@ import { Button } from 'react-bootstrap'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import { Decoration } from '@codemirror/view'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { debugConsole } from '@/utils/debugging'
 
 export const ReviewPanelAddComment: FC<{
   docId: string
@@ -25,8 +27,8 @@ export const ReviewPanelAddComment: FC<{
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
   const { addComment } = useThreadsActionsContext()
-  const [error, setError] = useState<Error>()
   const [submitting, setSubmitting] = useState(false)
+  const { showGenericMessageModal } = useModalsContext()
 
   const handleClose = useCallback(() => {
     view.dispatch({
@@ -35,22 +37,27 @@ export const ReviewPanelAddComment: FC<{
   }, [view, value])
 
   const submitForm = useCallback(
-    message => {
+    async message => {
       setSubmitting(true)
 
       const content = view.state.sliceDoc(from, to)
 
-      addComment(from, content, message)
-        .catch(setError)
-        .finally(() => setSubmitting(false))
-
-      view.dispatch({
-        selection: EditorSelection.cursor(view.state.selection.main.anchor),
-      })
-
-      handleClose()
+      try {
+        await addComment(from, content, message)
+        handleClose()
+        view.dispatch({
+          selection: EditorSelection.cursor(view.state.selection.main.anchor),
+        })
+      } catch (err) {
+        debugConsole.error(err)
+        showGenericMessageModal(
+          t('add_comment_error_title'),
+          t('add_comment_error_message')
+        )
+      }
+      setSubmitting(false)
     },
-    [addComment, view, handleClose, from, to]
+    [addComment, view, handleClose, from, to, showGenericMessageModal, t]
   )
 
   const { handleChange, handleKeyPress, content } =
@@ -123,6 +130,7 @@ export const ReviewPanelAddComment: FC<{
         t: value.spec.id as ThreadId,
       }}
       selectLineOnFocus={false}
+      disabled={submitting}
     >
       <form
         className="review-panel-entry-content"
@@ -158,7 +166,6 @@ export const ReviewPanelAddComment: FC<{
             {t('comment')}
           </Button>
         </div>
-        {error && <div>{error.message}</div>}
       </form>
     </ReviewPanelEntry>
   )

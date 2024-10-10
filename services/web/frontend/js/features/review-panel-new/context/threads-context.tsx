@@ -248,7 +248,6 @@ export const ThreadsProvider: FC = ({ children }) => {
         await postJSON(`/project/${projectId}/thread/${threadId}/messages`, {
           body: { content },
         })
-        // TODO: error_submitting_comment
       },
       async editMessage(
         threadId: ThreadId,
