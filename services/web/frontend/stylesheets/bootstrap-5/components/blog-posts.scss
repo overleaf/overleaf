@@ -2,8 +2,21 @@
   v2
   Blog Pages
 */
+
+.blog-container,
+.blog-tagged-list-container,
+.blog-post-main-container {
+  h1 {
+    margin-bottom: 0;
+  }
+}
+
 .blog-container {
+  margin-top: var(--spacing-16);
+
   .blog-list-container-title {
+    margin-top: 0; // needed to override bootstrap * + h1
+
     small {
       @include body-lg;
 
@@ -14,7 +27,21 @@
   }
 }
 
+.blog-tagged-list-container {
+  margin-top: var(--spacing-10);
+
+  .blog-list-container-title {
+    margin-top: var(--spacing-11);
+  }
+}
+
+.blog-post-main-container {
+  margin-top: var(--spacing-10);
+}
+
 .blog {
+  margin-top: var(--spacing-16);
+
   img {
     max-width: 100%;
   }

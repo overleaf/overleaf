@@ -84,10 +84,6 @@
     }
   }
 
-  .content-container > section:first-child {
-    padding-top: var(--spacing-15);
-  }
-
   section.no-top-padding {
     /* opt out of padding via the CMS */
     padding-top: 0;
