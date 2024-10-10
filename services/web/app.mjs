@@ -6,12 +6,12 @@ import metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'
 import PlansLocator from './app/src/Features/Subscription/PlansLocator.js'
-import SiteAdminHandler from './app/src/infrastructure/SiteAdminHandler.js'
+import SiteAdminHandler from './app/src/infrastructure/SiteAdminHandler.mjs'
 
 import http from 'node:http'
 import https from 'node:https'
 
-import * as Serializers from './app/src/infrastructure/LoggerSerializers.js'
+import * as Serializers from './app/src/infrastructure/LoggerSerializers.mjs'
 
 import Server from './app/src/infrastructure/Server.mjs'
 import QueueWorkers from './app/src/infrastructure/QueueWorkers.js'
