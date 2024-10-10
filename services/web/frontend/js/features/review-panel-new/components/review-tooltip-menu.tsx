@@ -14,7 +14,7 @@ import { getTooltip } from '@codemirror/view'
 import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
 
-const AddCommentTooltip: FC = () => {
+const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
   const isViewer = useViewerPermissions()
@@ -40,12 +40,12 @@ const AddCommentTooltip: FC = () => {
   }
 
   return ReactDOM.createPortal(
-    <AddCommentTooltipContent setShow={setShow} />,
+    <ReviewTooltipMenuContent setShow={setShow} />,
     tooltipView.dom
   )
 }
 
-const AddCommentTooltipContent: FC<{
+const ReviewTooltipMenuContent: FC<{
   setShow: Dispatch<SetStateAction<boolean>>
 }> = ({ setShow }) => {
   const { t } = useTranslation()
@@ -66,11 +66,16 @@ const AddCommentTooltipContent: FC<{
   }
 
   return (
-    <button className="review-panel-add-comment-tooltip" onClick={handleClick}>
-      <MaterialIcon type="chat" />
-      {t('add_comment')}
-    </button>
+    <div className="review-tooltip-menu">
+      <button
+        className="review-tooltip-menu-button review-tooltip-add-comment-button"
+        onClick={handleClick}
+      >
+        <MaterialIcon type="chat" />
+        {t('add_comment')}
+      </button>
+    </div>
   )
 }
 
-export default AddCommentTooltip
+export default ReviewTooltipMenu

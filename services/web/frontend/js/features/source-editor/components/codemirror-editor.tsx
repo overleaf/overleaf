@@ -12,7 +12,7 @@ import importOverleafModules from '../../../../macros/import-overleaf-module.mac
 import { FigureModal } from './figure-modal/figure-modal'
 import { ReviewPanelProviders } from '@/features/review-panel-new/context/review-panel-providers'
 import { ReviewPanelMigration } from '@/features/source-editor/components/review-panel/review-panel-migration'
-import AddCommentTooltip from '@/features/review-panel-new/components/add-comment-tooltip'
+import ReviewTooltipMenu from '@/features/review-panel-new/components/review-tooltip-menu'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import {
   CodeMirrorStateContext,
@@ -78,7 +78,7 @@ function CodeMirrorEditor() {
           )}
           <CodeMirrorCommandTooltip />
 
-          {newReviewPanel && <AddCommentTooltip />}
+          {newReviewPanel && <ReviewTooltipMenu />}
           <ReviewPanelMigration />
 
           {sourceEditorComponents.map(

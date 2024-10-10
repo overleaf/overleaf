@@ -608,14 +608,26 @@
   }
 }
 
-.review-panel-add-comment-tooltip {
-  height: 24px;
-  border-radius: 12px;
-  padding: 2px 12px;
+.review-tooltip-menu {
+  box-shadow: 0px 2px 4px 0px #1e253029;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.review-tooltip-menu-button {
+  background-color: inherit;
+  border: none;
   display: flex;
   align-items: center;
   gap: 2px;
+  padding: 2px;
 }
+
+.review-tooltip-add-comment-button {
+  padding: 2px 8px;
+}
+
 .review-panel-tooltip {
   pointer-events: none; // this is to prevent mouseLeave event from firing when hovering over the tooltip
 }

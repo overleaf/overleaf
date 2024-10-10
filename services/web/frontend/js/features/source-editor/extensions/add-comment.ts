@@ -100,7 +100,7 @@ function buildTooltip(range: SelectionRange): Tooltip | null {
     arrow: false,
     create() {
       const dom = document.createElement('div')
-      dom.className = 'review-panel-add-comment-tooltip-container'
+      dom.className = 'review-tooltip-menu-container'
       return { dom, overlap: true, offset: { x: 0, y: 8 } }
     },
   }
@@ -110,15 +110,16 @@ function buildTooltip(range: SelectionRange): Tooltip | null {
  * Styles for the tooltip
  */
 const addCommentTheme = EditorView.baseTheme({
-  '.review-panel-add-comment-tooltip-container.cm-tooltip': {
+  '.review-tooltip-menu-container.cm-tooltip': {
     backgroundColor: 'transparent',
     border: 'none',
   },
 
   '&light': {
-    '& .review-panel-add-comment-tooltip': {
+    '& .review-tooltip-menu': {
       backgroundColor: 'white',
-      border: '1px solid #e7e9ee',
+    },
+    '& .review-tooltip-menu-button': {
       '&:hover': {
         backgroundColor: '#e7e9ee',
       },
@@ -126,9 +127,10 @@ const addCommentTheme = EditorView.baseTheme({
   },
 
   '&dark': {
-    '& .review-panel-add-comment-tooltip': {
+    '& .review-tooltip-menu': {
       backgroundColor: '#1b222c',
-      border: '1px solid #2f3a4c',
+    },
+    '& .review-tooltip-menu-button': {
       '&:hover': {
         backgroundColor: '#2f3a4c',
       },
