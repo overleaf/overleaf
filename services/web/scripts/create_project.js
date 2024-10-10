@@ -15,8 +15,8 @@ const ProjectEntityHandler = require('../app/src/Features/Project/ProjectEntityH
 const EditorController = require('../app/src/Features/Editor/EditorController')
 
 const argv = parseArgs(process.argv.slice(2), {
-  string: ['user-id', 'name'],
-  boolean: ['old-history', 'random-content'],
+  string: ['user-id', 'name', 'random-operations', 'extend-project-id'],
+  boolean: ['random-content'],
   unknown: function (arg) {
     console.error('unrecognised argument', arg)
     process.exit(1)
@@ -27,8 +27,11 @@ console.log('argv', argv)
 
 const userId = argv['user-id']
 const projectName = argv.name || `Test Project ${new Date().toISOString()}`
-const oldHistory = argv['old-history']
-const randomContent = argv['random-content']
+let randomOperations = 0
+if (argv['random-content'] === true || argv['random-operations']) {
+  randomOperations = parseInt(argv['random-operations'] || '1000', 10)
+}
+const extendProjectId = argv['extend-project-id']
 
 console.log('userId', userId)
 
@@ -40,7 +43,7 @@ async function _createRootDoc(project, ownerId, docLines) {
       'main.tex',
       docLines,
       ownerId,
-      null
+      'create-project-script'
     )
     await ProjectEntityUpdateHandler.promises.setRootDoc(project._id, doc._id)
   } catch (error) {
@@ -67,7 +70,7 @@ async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
     'sample.bib',
     bibDocLines,
     ownerId,
-    null
+    'create-project-script'
   )
 
   const frogPath = path.join(
@@ -81,7 +84,7 @@ async function _addDefaultExampleProjectFiles(ownerId, projectName, project) {
     frogPath,
     null,
     ownerId,
-    null
+    'create-project-script'
   )
 }
 
@@ -107,8 +110,8 @@ async function _buildTemplate(templateName, userId, projectName) {
 // Unfortunately we cannot easily change the timestamps of the history entries, so everything
 // will be created at the same time.
 
-async function _pickRandomDoc(project) {
-  const result = await ProjectEntityHandler.promises.getAllDocs(project._id)
+async function _pickRandomDoc(projectId) {
+  const result = await ProjectEntityHandler.promises.getAllDocs(projectId)
   const keys = Object.keys(result)
   if (keys.length === 0) {
     return null
@@ -124,12 +127,12 @@ function nextId() {
   return ('000000' + COUNTER++).slice(-6)
 }
 
-async function _applyRandomDocUpdate(ownerId, project) {
+async function _applyRandomDocUpdate(ownerId, projectId) {
   const action = _.sample(['create', 'edit', 'delete', 'rename'])
   switch (action) {
     case 'create': // create a new doc
       await EditorController.promises.upsertDocWithPath(
-        project._id,
+        projectId,
         `subdir/new-doc-${nextId()}.tex`,
         [`This is a new doc ${new Date().toISOString()}`],
         'create-project-script',
@@ -138,7 +141,7 @@ async function _applyRandomDocUpdate(ownerId, project) {
       break
     case 'edit': {
       // edit an existing doc
-      const doc = await _pickRandomDoc(project)
+      const doc = await _pickRandomDoc(projectId)
       if (!doc) {
         return
       }
@@ -156,7 +159,7 @@ async function _applyRandomDocUpdate(ownerId, project) {
       }
       lines[index] = thisLine
       await EditorController.promises.upsertDocWithPath(
-        project._id,
+        projectId,
         doc.path,
         lines,
         'create-project-script',
@@ -166,28 +169,28 @@ async function _applyRandomDocUpdate(ownerId, project) {
     }
     case 'delete': {
       // delete an existing doc (but not the root doc)
-      const doc = await _pickRandomDoc(project)
+      const doc = await _pickRandomDoc(projectId)
       if (!doc || doc.path === '/main.tex') {
         return
       }
 
       await EditorController.promises.deleteEntityWithPath(
-        project._id,
+        projectId,
         doc.path,
-        ownerId,
-        'create-project-script'
+        'create-project-script',
+        ownerId
       )
       break
     }
     case 'rename': {
       // rename an existing doc (but not the root doc)
-      const doc = await _pickRandomDoc(project)
+      const doc = await _pickRandomDoc(projectId)
       if (!doc || doc.path === '/main.tex') {
         return
       }
       const newName = `renamed-${nextId()}.tex`
       await EditorController.promises.renameEntity(
-        project._id,
+        projectId,
         doc._id,
         'doc',
         newName,
@@ -204,25 +207,28 @@ async function createProject() {
   const user = await User.findById(userId)
   console.log('Will create project')
   console.log('user_id:', userId, '=>', user.email)
-  console.log('project name:', projectName)
-  const attributes = oldHistory ? { overleaf: {} } : {}
-  const project = await ProjectCreationHandler.promises.createBlankProject(
-    userId,
-    projectName,
-    attributes
-  )
-  await _addDefaultExampleProjectFiles(userId, projectName, project)
-  if (randomContent) {
-    for (let i = 0; i < 1000; i++) {
-      await _applyRandomDocUpdate(userId, project)
-    }
+  let projectId
+  if (extendProjectId) {
+    console.log('extending existing project', extendProjectId)
+    projectId = extendProjectId
+  } else {
+    console.log('project name:', projectName)
+    const project = await ProjectCreationHandler.promises.createBlankProject(
+      userId,
+      projectName
+    )
+    await _addDefaultExampleProjectFiles(userId, projectName, project)
+    projectId = project._id
   }
-  return project
+  for (let i = 0; i < randomOperations; i++) {
+    await _applyRandomDocUpdate(userId, projectId)
+  }
+  return projectId
 }
 
 createProject()
-  .then(project => {
-    console.log('Created project', project._id)
+  .then(projectId => {
+    console.log('Created project', projectId)
     process.exit()
   })
   .catch(err => {
