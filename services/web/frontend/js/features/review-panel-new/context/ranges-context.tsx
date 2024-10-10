@@ -32,13 +32,24 @@ type RangesActions = {
 }
 
 const buildRanges = (currentDoc: DocumentContainer | null) => {
-  if (currentDoc?.ranges) {
-    return {
-      ...currentDoc.ranges,
-      docId: currentDoc.doc_id,
-      total:
-        currentDoc.ranges.changes.length + currentDoc.ranges.comments.length,
-    }
+  const ranges = currentDoc?.ranges
+
+  if (!ranges) {
+    return undefined
+  }
+
+  const dirtyState = ranges.getDirtyState()
+  ranges.resetDirtyState()
+
+  return {
+    changes: ranges.changes.map(change =>
+      change.id in dirtyState.change ? { ...change } : change
+    ),
+    comments: ranges.comments.map(comment =>
+      comment.id in dirtyState.comment ? { ...comment } : comment
+    ),
+    docId: currentDoc.doc_id,
+    total: ranges.changes.length + ranges.comments.length,
   }
 }
 
