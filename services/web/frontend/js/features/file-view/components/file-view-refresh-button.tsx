@@ -13,6 +13,7 @@ import useAbortController from '@/shared/hooks/use-abort-controller'
 import type { BinaryFile } from '../types/binary-file'
 import { Nullable } from '../../../../../types/utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type FileViewRefreshButtonProps = {
   setRefreshError: Dispatch<SetStateAction<Nullable<string>>>
@@ -90,13 +91,21 @@ function FileViewRefreshButtonDefault({
   const { t } = useTranslation()
 
   return (
-    <button
-      className="btn btn-primary"
+    <OLButton
+      variant="primary"
       onClick={() => refreshFile(null)}
       disabled={refreshing}
+      isLoading={refreshing}
+      bs3Props={{
+        loading: (
+          <>
+            <Icon type="refresh" spin={refreshing} fw />{' '}
+            <span>{refreshing ? `${t('refreshing')}…` : t('refresh')}</span>
+          </>
+        ),
+      }}
     >
-      <Icon type="refresh" spin={refreshing} fw />
-      <span>{refreshing ? `${t('refreshing')}…` : t('refresh')}</span>
-    </button>
+      {t('refresh')}
+    </OLButton>
   )
 }

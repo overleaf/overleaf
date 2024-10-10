@@ -93,15 +93,13 @@ export default function FileViewText({
     fetchDataController,
   ])
   return (
-    <div>
-      {textPreview && (
-        <div className="text-preview">
-          <div className="scroll-container">
-            <p>{textPreview}</p>
-            {shouldShowDots && <p>...</p>}
-          </div>
+    Boolean(textPreview) && (
+      <div className="text-preview">
+        <div className="scroll-container">
+          <p>{textPreview}</p>
+          {shouldShowDots && <p>...</p>}
         </div>
-      )}
-    </div>
+      </div>
+    )
   )
 }

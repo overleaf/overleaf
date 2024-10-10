@@ -4,7 +4,7 @@ export type ButtonProps = {
   children?: ReactNode
   className?: string
   disabled?: boolean
-  download?: boolean
+  download?: boolean | string
   draggable?: boolean
   form?: string
   leadingIcon?: string | React.ReactNode

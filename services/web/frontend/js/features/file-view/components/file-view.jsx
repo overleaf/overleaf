@@ -6,7 +6,7 @@ import FileViewHeader from './file-view-header'
 import FileViewImage from './file-view-image'
 import FileViewPdf from './file-view-pdf'
 import FileViewText from './file-view-text'
-import Icon from '../../../shared/components/icon'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 import getMeta from '@/utils/meta'
 
 const imageExtensions = ['png', 'jpg', 'jpeg', 'gif']
@@ -71,13 +71,12 @@ export default function FileView({ file }) {
 }
 
 function FileViewLoadingIndicator() {
-  const { t } = useTranslation()
   return (
-    <div className="loading-panel loading-panel-file-view">
-      <span>
-        <Icon type="refresh" spin />
-        &nbsp;&nbsp;{t('loading')}…
-      </span>
+    <div
+      className="loading-panel loading-panel-file-view"
+      data-testid="loading-panel-file-view"
+    >
+      <LoadingSpinner />
     </div>
   )
 }

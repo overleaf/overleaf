@@ -4,6 +4,33 @@
   background-color: @gray-lightest;
   text-align: center;
   overflow: auto;
+
+  .file-view-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-03;
+    justify-content: center;
+  }
+
+  .file-view-error {
+    margin: @spacing-08 -15px auto;
+
+    > .alert {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+  }
+
+  .tpr-refresh-error {
+    .btn {
+      color: @neutral-90;
+      background-color: @white;
+      &:hover {
+        background-color: @neutral-20;
+      }
+    }
+  }
+
   img,
   .file-view-pdf {
     max-width: 100%;
@@ -43,10 +70,7 @@
       line-height: 1.1em;
       overflow: auto;
       border: 1px solid @gray-lighter;
-      padding-left: 12px;
-      padding-right: 12px;
-      padding-top: 8px;
-      padding-bottom: 8px;
+      padding: 8px 12px;
       text-align: left;
       white-space: pre;
       font-family: monospace;

@@ -1,0 +1,102 @@
+.file-view {
+  padding: var(--spacing-05);
+  text-align: center;
+  overflow: auto;
+
+  .loading-panel {
+    padding-top: 8rem;
+    background: var(--neutral-10);
+  }
+
+  .file-view-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-03);
+    justify-content: center;
+  }
+
+  .file-view-error {
+    margin: var(--spacing-08) auto auto;
+    max-width: 400px;
+    text-align: left;
+  }
+
+  img,
+  .file-view-pdf {
+    max-width: 100%;
+    max-height: 90%;
+    display: block;
+    margin: var(--spacing-05) auto auto;
+    border: 1px solid var(--neutral-60);
+    box-shadow: 0 2px 3px var(--neutral-60);
+    background-color: var(--white);
+  }
+
+  .file-view-pdf {
+    overflow: auto;
+    width: max-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .pdf-page:not(:last-of-type) {
+      border-bottom: 1px solid var(--neutral-60);
+    }
+  }
+
+  .linked-file-icon {
+    color: var(--blue-50);
+  }
+
+  .no-preview {
+    color: var(--neutral-60);
+    font-size: var(--font-size-06);
+    margin-top: var(--spacing-06);
+  }
+
+  .text-preview {
+    margin-top: var(--spacing-05);
+
+    .scroll-container {
+      background-color: var(--white);
+      font-size: 0.8em;
+      line-height: 1.1em;
+      overflow: auto;
+      border: 1px solid var(--neutral-30);
+      padding: var(--spacing-04) var(--spacing-05);
+      text-align: left;
+      white-space: pre;
+      font-family: monospace;
+    }
+  }
+}
+
+.full-size,
+.loading-panel {
+  position: absolute;
+  inset: 0;
+}
+
+.no-history-available,
+.no-file-selection-message,
+.multi-selection-message {
+  width: 50%;
+  margin: var(--spacing-10) auto;
+  text-align: center;
+}
+
+.pdf-empty,
+.no-history-available,
+.no-file-selection,
+.multi-selection-ongoing {
+  &::before {
+    @extend .full-size;
+
+    left: 20px;
+    content: '';
+    background: url(../../../../../public/img/ol-brand/overleaf-o-grey.svg)
+      center / 200px no-repeat;
+    opacity: 0.2;
+    pointer-events: none;
+  }
+}

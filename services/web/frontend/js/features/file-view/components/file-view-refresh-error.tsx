@@ -2,6 +2,7 @@ import type { ElementType } from 'react'
 import { useTranslation } from 'react-i18next'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { BinaryFile } from '../types/binary-file'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 type FileViewRefreshErrorProps = {
   file: BinaryFile
@@ -33,11 +34,15 @@ export default function FileViewRefreshError({
     )[0]
   } else {
     return (
-      <div className="row">
-        <br />
-        <div className="alert alert-danger col-md-6 col-md-offset-3">
-          {t('access_denied')}: {refreshError}
-        </div>
+      <div className="file-view-error">
+        <OLNotification
+          type="error"
+          content={
+            <span>
+              {t('access_denied')}: {refreshError}
+            </span>
+          }
+        />
       </div>
     )
   }

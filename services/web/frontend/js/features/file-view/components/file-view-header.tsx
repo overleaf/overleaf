@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import Icon from '../../../shared/components/icon'
 import { formatTime, relativeDate } from '../../utils/format-date'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
-import { useProjectContext } from '../../../shared/context/project-context'
+import { useProjectContext } from '@/shared/context/project-context'
 
 import { Nullable } from '../../../../../types/utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
@@ -13,6 +13,9 @@ import { BinaryFile, hasProvider, LinkedFile } from '../types/binary-file'
 import FileViewRefreshButton from './file-view-refresh-button'
 import FileViewRefreshError from './file-view-refresh-error'
 import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 const tprFileViewInfo = importOverleafModules('tprFileViewInfo') as {
   import: { TPRFileViewInfo: ElementType }
@@ -58,50 +61,44 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
   let fileInfo
   if (file.linkedFileData) {
     if (hasProvider(file, 'url')) {
-      fileInfo = (
-        <div>
-          <UrlProvider file={file} />
-        </div>
-      )
+      fileInfo = <UrlProvider file={file} />
     } else if (hasProvider(file, 'project_file')) {
-      fileInfo = (
-        <div>
-          <ProjectFilePathProvider file={file} />
-        </div>
-      )
+      fileInfo = <ProjectFilePathProvider file={file} />
     } else if (hasProvider(file, 'project_output_file')) {
-      fileInfo = (
-        <div>
-          <ProjectOutputFileProvider file={file} />
-        </div>
-      )
+      fileInfo = <ProjectOutputFileProvider file={file} />
     }
   }
 
   return (
-    <div>
+    <>
       {file.linkedFileData && fileInfo}
       {file.linkedFileData &&
         tprFileViewInfo.map(({ import: { TPRFileViewInfo }, path }) => (
           <TPRFileViewInfo key={path} file={file} />
         ))}
-      {file.linkedFileData && !fileTreeReadOnly && (
-        <FileViewRefreshButton file={file} setRefreshError={setRefreshError} />
-      )}
-      &nbsp;
-      <a
-        download={file.name}
-        href={
-          fileTreeFromHistory
-            ? `/project/${projectId}/blob/${file.hash}`
-            : `/project/${projectId}/file/${file.id}`
-        }
-        className="btn btn-secondary-info btn-secondary"
-      >
-        <Icon type="download" fw />
-        &nbsp;
-        <span>{t('download')}</span>
-      </a>
+      <div className="file-view-buttons">
+        {file.linkedFileData && !fileTreeReadOnly && (
+          <FileViewRefreshButton
+            file={file}
+            setRefreshError={setRefreshError}
+          />
+        )}
+        <OLButton
+          variant="secondary"
+          download={file.name}
+          href={
+            fileTreeFromHistory
+              ? `/project/${projectId}/blob/${file.hash}`
+              : `/project/${projectId}/file/${file.id}`
+          }
+        >
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="download" fw />}
+            bs5={<MaterialIcon type="download" className="align-middle" />}
+          />{' '}
+          <span>{t('download')}</span>
+        </OLButton>
+      </div>
       {file.linkedFileData &&
         tprFileViewNotOriginalImporter.map(
           ({ import: { TPRFileViewNotOriginalImporter }, path }) => (
@@ -111,7 +108,7 @@ export default function FileViewHeader({ file }: FileViewHeaderProps) {
       {refreshError && (
         <FileViewRefreshError file={file} refreshError={refreshError} />
       )}
-    </div>
+    </>
   )
 }
 
@@ -150,7 +147,7 @@ function ProjectFilePathProvider({ file }: ProjectFilePathProviderProps) {
   /* eslint-disable jsx-a11y/anchor-has-content, react/jsx-key */
   return (
     <p>
-      <LinkedFileIcon />
+      <LinkedFileIcon />{' '}
       <Trans
         i18nKey="imported_from_another_project_at_date"
         components={

@@ -48,7 +48,7 @@ describe('<FileView/>', function () {
       renderWithEditorContext(<FileView file={textFile} />)
 
       await waitForElementToBeRemoved(() =>
-        screen.getByText('Loading', { exact: false })
+        screen.getByTestId('loading-panel-file-view')
       )
     })
 
@@ -70,7 +70,7 @@ describe('<FileView/>', function () {
     it('shows a loading indicator while the file is loading', async function () {
       renderWithEditorContext(<FileView file={imageFile} />)
 
-      screen.getByText('Loading', { exact: false })
+      screen.getByTestId('loading-panel-file-view')
     })
 
     it('shows messaging if the image could not be loaded', async function () {
