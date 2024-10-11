@@ -1,10 +1,21 @@
 import PropTypes from 'prop-types'
 import { useTranslation } from 'react-i18next'
-import { Alert, Button, Modal, Row, Col, Grid } from 'react-bootstrap'
 import { useIdeContext } from '../../../shared/context/ide-context'
 import { useProjectContext } from '../../../shared/context/project-context'
 import { useWordCount } from '../hooks/use-word-count'
-import Icon from '../../../shared/components/icon'
+import {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import Icon from '@/shared/components/icon'
+import { Spinner } from 'react-bootstrap-5'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 // NOTE: this component is only mounted when the modal is open
 export default function WordCountModalContent({ handleHide }) {
@@ -15,71 +26,87 @@ export default function WordCountModalContent({ handleHide }) {
 
   return (
     <>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('word_count')}</Modal.Title>
-      </Modal.Header>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('word_count')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body>
+      <OLModalBody>
         {loading && !error && (
           <div className="loading">
-            <Icon type="refresh" spin fw />
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="refresh" spin fw />}
+              bs5={
+                <Spinner
+                  animation="border"
+                  aria-hidden="true"
+                  size="sm"
+                  role="status"
+                />
+              }
+            />
             &nbsp;
             {t('loading')}…
           </div>
         )}
 
         {error && (
-          <Alert bsStyle="danger">{t('generic_something_went_wrong')}</Alert>
+          <OLNotification
+            type="error"
+            content={t('generic_something_went_wrong')}
+          />
         )}
 
         {data && (
-          <Grid fluid>
+          <div className="container-fluid">
             {data.messages && (
-              <Row>
-                <Col xs={12}>
-                  <Alert bsStyle="danger">
-                    <p style={{ whiteSpace: 'pre-wrap' }}>{data.messages}</p>
-                  </Alert>
-                </Col>
-              </Row>
+              <OLRow>
+                <OLCol xs={12}>
+                  <OLNotification
+                    type="error"
+                    content={
+                      <p style={{ whiteSpace: 'pre-wrap' }}>{data.messages}</p>
+                    }
+                  />
+                </OLCol>
+              </OLRow>
             )}
 
-            <Row>
-              <Col xs={4}>
+            <OLRow>
+              <OLCol xs={4}>
                 <div className="pull-right">{t('total_words')}:</div>
-              </Col>
-              <Col xs={6}>{data.textWords}</Col>
-            </Row>
+              </OLCol>
+              <OLCol xs={6}>{data.textWords}</OLCol>
+            </OLRow>
 
-            <Row>
-              <Col xs={4}>
+            <OLRow>
+              <OLCol xs={4}>
                 <div className="pull-right">{t('headers')}:</div>
-              </Col>
-              <Col xs={6}>{data.headers}</Col>
-            </Row>
+              </OLCol>
+              <OLCol xs={6}>{data.headers}</OLCol>
+            </OLRow>
 
-            <Row>
-              <Col xs={4}>
+            <OLRow>
+              <OLCol xs={4}>
                 <div className="pull-right">{t('math_inline')}:</div>
-              </Col>
-              <Col xs={6}>{data.mathInline}</Col>
-            </Row>
+              </OLCol>
+              <OLCol xs={6}>{data.mathInline}</OLCol>
+            </OLRow>
 
-            <Row>
-              <Col xs={4}>
+            <OLRow>
+              <OLCol xs={4}>
                 <div className="pull-right">{t('math_display')}:</div>
-              </Col>
-              <Col xs={6}>{data.mathDisplay}</Col>
-            </Row>
-          </Grid>
+              </OLCol>
+              <OLCol xs={6}>{data.mathDisplay}</OLCol>
+            </OLRow>
+          </div>
         )}
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <Button bsStyle={null} className="btn-secondary" onClick={handleHide}>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={handleHide}>
           {t('close')}
-        </Button>
-      </Modal.Footer>
+        </OLButton>
+      </OLModalFooter>
     </>
   )
 }

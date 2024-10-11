@@ -3,13 +3,18 @@ import Icon from './icon'
 import { useEffect, useState } from 'react'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { Spinner } from 'react-bootstrap-5'
+import classNames from 'classnames'
 
 function LoadingSpinner({
+  align,
   delay = 0,
   loadingText,
+  size,
 }: {
+  align?: 'left' | 'center'
   delay?: 0 | 500 // 500 is our standard delay
   loadingText?: string
+  size?: 'sm'
 }) {
   const { t } = useTranslation()
 
@@ -29,6 +34,9 @@ function LoadingSpinner({
     return null
   }
 
+  const alignmentClass =
+    align === 'left' ? 'align-items-start' : 'align-items-center'
+
   return (
     <BootstrapVersionSwitcher
       bs3={
@@ -39,12 +47,13 @@ function LoadingSpinner({
         </div>
       }
       bs5={
-        <div className="text-center mt-4">
+        <div className={classNames(`d-flex ${alignmentClass}`)}>
           <Spinner
             animation="border"
             aria-hidden="true"
             role="status"
-            className="align-middle"
+            className="align-self-center"
+            size={size}
           />
           &nbsp;
           {loadingText || t('loading')}…

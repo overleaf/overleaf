@@ -35,6 +35,7 @@ export function bs3ButtonProps(props: ButtonProps) {
     disabled: props.isLoading || props.disabled,
     form: props.form,
     href: props.href,
+    id: props.id,
     target: props.target,
     rel: props.rel,
     onClick: props.onClick,

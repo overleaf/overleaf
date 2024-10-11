@@ -4,6 +4,7 @@ import * as eventTracking from '../../../infrastructure/event-tracking'
 import { useProjectContext } from '../../../shared/context/project-context'
 import HotkeysModal from '../../hotkeys-modal/components/hotkeys-modal'
 import LeftMenuButton from './left-menu-button'
+import { bsVersionIcon } from '@/features/utils/bootstrap-5'
 
 export default function HelpShowHotkeys() {
   const [showModal, setShowModal] = useState(false)
@@ -20,10 +21,10 @@ export default function HelpShowHotkeys() {
     <>
       <LeftMenuButton
         onClick={showModalWithAnalytics}
-        icon={{
-          type: 'keyboard-o',
-          fw: true,
-        }}
+        icon={bsVersionIcon({
+          bs5: { type: 'keyboard' },
+          bs3: { type: 'keyboard-o', fw: true },
+        })}
       >
         {t('show_hotkeys')}
       </LeftMenuButton>

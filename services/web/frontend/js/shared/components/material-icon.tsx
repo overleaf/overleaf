@@ -6,6 +6,7 @@ type IconProps = React.ComponentProps<'i'> & {
   type: string
   accessibilityLabel?: string
   modifier?: string
+  size?: '2x'
 }
 
 function MaterialIcon({
@@ -13,9 +14,12 @@ function MaterialIcon({
   className,
   accessibilityLabel,
   modifier,
+  size,
   ...rest
 }: IconProps) {
-  const iconClassName = classNames('material-symbols', className, modifier)
+  const iconClassName = classNames('material-symbols', className, modifier, {
+    [`size-${size}`]: size,
+  })
 
   return (
     <>

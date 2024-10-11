@@ -1,8 +1,15 @@
-import { Button, Modal, Row, Col } from 'react-bootstrap'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
-import AccessibleModal from '../../../shared/components/accessible-modal'
 import HotkeysModalBottomText from './hotkeys-modal-bottom-text'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
 
 export default function HotkeysModal({
   animation = true,
@@ -16,21 +23,16 @@ export default function HotkeysModal({
   const ctrl = isMac ? 'Cmd' : 'Ctrl'
 
   return (
-    <AccessibleModal
-      bsSize="large"
-      onHide={handleHide}
-      show={show}
-      animation={animation}
-    >
-      <Modal.Header closeButton>
-        <Modal.Title>{t('hotkeys')}</Modal.Title>
-      </Modal.Header>
+    <OLModal size="lg" onHide={handleHide} show={show} animation={animation}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('hotkeys')}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body className="hotkeys-modal">
+      <OLModalBody className="hotkeys-modal">
         <h3>{t('common')}</h3>
 
-        <Row>
-          <Col xs={4}>
+        <OLRow>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + F`}
               description={t('hotkey_find_and_replace')}
@@ -39,48 +41,48 @@ export default function HotkeysModal({
               combination={`${ctrl} + Enter`}
               description={t('hotkey_compile')}
             />
-          </Col>
-          <Col xs={4}>
+          </OLCol>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + Z`}
               description={t('hotkey_undo')}
             />
-          </Col>
-          <Col xs={4}>
+          </OLCol>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + Y`}
               description={t('hotkey_redo')}
             />
-          </Col>
-        </Row>
+          </OLCol>
+        </OLRow>
 
         <h3>{t('navigation')}</h3>
 
-        <Row>
-          <Col xs={4}>
+        <OLRow>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + Home`}
               description={t('hotkey_beginning_of_document')}
             />
-          </Col>
-          <Col xs={4}>
+          </OLCol>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + End`}
               description={t('hotkey_end_of_document')}
             />
-          </Col>
-          <Col xs={4}>
+          </OLCol>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + Shift + L`}
               description={t('hotkey_go_to_line')}
             />
-          </Col>
-        </Row>
+          </OLCol>
+        </OLRow>
 
         <h3>{t('editing')}</h3>
 
-        <Row>
-          <Col xs={4}>
+        <OLRow>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + /`}
               description={t('hotkey_toggle_comment')}
@@ -93,9 +95,9 @@ export default function HotkeysModal({
               combination={`${ctrl} + A`}
               description={t('hotkey_select_all')}
             />
-          </Col>
+          </OLCol>
 
-          <Col xs={4}>
+          <OLCol xs={4}>
             <Hotkey
               combination="Ctrl + U"
               description={t('hotkey_to_uppercase')}
@@ -108,9 +110,9 @@ export default function HotkeysModal({
               combination="Tab"
               description={t('hotkey_indent_selection')}
             />
-          </Col>
+          </OLCol>
 
-          <Col xs={4}>
+          <OLCol xs={4}>
             <Hotkey
               combination={`${ctrl} + B`}
               description={t('hotkey_bold_text')}
@@ -119,31 +121,31 @@ export default function HotkeysModal({
               combination={`${ctrl} + I`}
               description={t('hotkey_italic_text')}
             />
-          </Col>
-        </Row>
+          </OLCol>
+        </OLRow>
 
         <h3>{t('autocomplete')}</h3>
 
-        <Row>
-          <Col xs={4}>
+        <OLRow>
+          <OLCol xs={4}>
             <Hotkey
               combination="Ctrl + Space"
               description={t('hotkey_autocomplete_menu')}
             />
-          </Col>
-          <Col xs={4}>
+          </OLCol>
+          <OLCol xs={4}>
             <Hotkey
               combination="Up / Down"
               description={t('hotkey_select_candidate')}
             />
-          </Col>
-          <Col xs={4}>
+          </OLCol>
+          <OLCol xs={4}>
             <Hotkey
               combination="Enter / Tab"
               description={t('hotkey_insert_candidate')}
             />
-          </Col>
-        </Row>
+          </OLCol>
+        </OLRow>
 
         <h3>
           <Trans
@@ -152,50 +154,50 @@ export default function HotkeysModal({
           />
         </h3>
 
-        <Row>
-          <Col xs={4}>
+        <OLRow>
+          <OLCol xs={4}>
             <Hotkey
               combination={`Ctrl + Space `}
               description={t('hotkey_search_references')}
             />
-          </Col>
-        </Row>
+          </OLCol>
+        </OLRow>
 
         {trackChangesVisible && (
           <>
             <h3>{t('review')}</h3>
 
-            <Row>
-              <Col xs={4}>
+            <OLRow>
+              <OLCol xs={4}>
                 <Hotkey
                   combination={`${ctrl} + J`}
                   description={t('hotkey_toggle_review_panel')}
                 />
-              </Col>
-              <Col xs={4}>
+              </OLCol>
+              <OLCol xs={4}>
                 <Hotkey
                   combination={`${ctrl} + Shift + A`}
                   description={t('hotkey_toggle_track_changes')}
                 />
-              </Col>
-              <Col xs={4}>
+              </OLCol>
+              <OLCol xs={4}>
                 <Hotkey
                   combination={`${ctrl} + Shift + C`}
                   description={t('hotkey_add_a_comment')}
                 />
-              </Col>
-            </Row>
+              </OLCol>
+            </OLRow>
           </>
         )}
         <HotkeysModalBottomText />
-      </Modal.Body>
+      </OLModalBody>
 
-      <Modal.Footer>
-        <Button bsStyle={null} className="btn-secondary" onClick={handleHide}>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={handleHide}>
           {t('close')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

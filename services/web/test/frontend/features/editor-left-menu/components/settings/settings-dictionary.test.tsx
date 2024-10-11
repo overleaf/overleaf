@@ -9,7 +9,7 @@ describe('<SettingsDictionary />', function () {
 
     screen.getByText('Dictionary')
 
-    const button = screen.getByRole('button', { name: 'Edit' })
+    const button = screen.getByText('Edit')
     fireEvent.click(button)
 
     const modal = screen.getAllByRole('dialog')[0]

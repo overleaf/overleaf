@@ -1,4 +1,3 @@
-import { Form } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
 import SettingsAutoCloseBrackets from './settings/settings-auto-close-brackets'
@@ -20,6 +19,7 @@ import SettingsMathPreview from './settings/settings-math-preview'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import { ElementType } from 'react'
+import OLForm from '@/features/ui/components/ol/ol-form'
 
 const moduleSettings: Array<{
   import: { default: ElementType }
@@ -38,7 +38,7 @@ export default function SettingsMenu() {
   return (
     <>
       <h4>{t('settings')}</h4>
-      <Form className="settings">
+      <OLForm id="left-menu-setting" className="settings">
         <SettingsCompiler />
         <SettingsImageName />
         <SettingsDocument />
@@ -58,7 +58,7 @@ export default function SettingsMenu() {
         <SettingsFontFamily />
         <SettingsLineHeight />
         <SettingsPdfViewer />
-      </Form>
+      </OLForm>
     </>
   )
 }

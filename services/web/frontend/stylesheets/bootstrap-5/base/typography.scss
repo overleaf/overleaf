@@ -78,6 +78,10 @@ samp {
   text-align: center;
 }
 
+.text-muted {
+  color: var(--content-disabled) !important;
+}
+
 @include media-breakpoint-up(lg) {
   .text-center-only-desktop {
     text-align: center;

@@ -1,0 +1,30 @@
+.hotkeys-modal {
+  font-size: var(--font-size-02);
+
+  h3:first-child {
+    margin-top: 0;
+  }
+
+  .hotkey {
+    margin-bottom: var(--spacing-05);
+  }
+
+  .description {
+    display: inline-block;
+  }
+
+  .combination {
+    padding: var(--spacing-02) var(--spacing-04);
+    border-radius: 3px;
+    background-color: var(--bg-dark-tertiary);
+    color: var(--white);
+    font-weight: 600;
+    margin-right: var(--spacing-03);
+  }
+
+  .hotkeys-modal-bottom-text {
+    background-color: var(--bg-light-secondary);
+    padding: var(--spacing-04);
+    border-radius: var(--border-radius-base);
+  }
+}

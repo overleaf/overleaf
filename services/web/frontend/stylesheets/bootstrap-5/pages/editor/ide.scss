@@ -193,3 +193,31 @@
   position: absolute;
   inset: 0;
 }
+
+.teaser-title {
+  margin-top: 0;
+  text-align: center;
+}
+
+.teaser-refresh-label {
+  text-align: center;
+}
+
+.teaser-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: var(--spacing-03);
+}
+
+.teaser-video-container {
+  margin: calc(var(--spacing-07) * -1) calc(var(--spacing-07) * -1)
+    var(--spacing-02) calc(var(--spacing-07) * -1);
+  overflow: hidden;
+}
+
+.teaser-video {
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid var(--border-divider);
+}

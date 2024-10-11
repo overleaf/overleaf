@@ -1,28 +1,31 @@
 import { useState } from 'react'
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import DictionaryModal from '../../../dictionary/components/dictionary-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 
 export default function SettingsDictionary() {
   const { t } = useTranslation()
   const [showModal, setShowModal] = useState(false)
 
   return (
-    <div className="form-group left-menu-setting">
-      <label htmlFor="dictionary">{t('dictionary')}</label>
-      <Button
-        className="btn-secondary"
-        bsSize="xs"
-        bsStyle={null}
+    <OLFormGroup className="left-menu-setting">
+      <OLFormLabel htmlFor="dictionary-settings">{t('dictionary')}</OLFormLabel>
+      <OLButton
+        id="dictionary-settings"
+        variant="secondary"
+        size="sm"
         onClick={() => setShowModal(true)}
+        bs3Props={{ bsSize: 'xsmall' }}
       >
         {t('edit')}
-      </Button>
+      </OLButton>
 
       <DictionaryModal
         show={showModal}
         handleHide={() => setShowModal(false)}
       />
-    </div>
+    </OLFormGroup>
   )
 }

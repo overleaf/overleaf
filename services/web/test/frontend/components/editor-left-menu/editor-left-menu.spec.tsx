@@ -486,7 +486,7 @@ describe('<EditorLeftMenu />', function () {
           </EditorProviders>
         )
 
-        cy.get('label[for="dictionary"] ~ button').click()
+        cy.get('label[for="dictionary-settings"] ~ button').click()
         cy.findByText('Edit Dictionary')
         cy.findByText('Your custom dictionary is empty.')
       })

@@ -1,20 +1,43 @@
 import { PropsWithChildren } from 'react'
 import Icon from '../../../shared/components/icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type Props = {
   onClick?: () => void
-  icon: {
+  icon?: {
     type: string
     fw?: boolean
   }
+  svgIcon?: React.ReactElement | null
   disabled?: boolean
   disabledAccesibilityText?: string
   type?: 'button' | 'link'
   href?: string
 }
 
+function LeftMenuButtonIcon({
+  svgIcon,
+  icon,
+}: {
+  svgIcon?: React.ReactElement | null
+  icon?: { type: string; fw?: boolean }
+}) {
+  if (svgIcon) {
+    return <div className="material-symbols">{svgIcon}</div>
+  } else if (icon) {
+    return (
+      <BootstrapVersionSwitcher
+        bs3={<Icon type={icon.type} fw={icon.fw ?? false} />}
+        bs5={<MaterialIcon type={icon.type} />}
+      />
+    )
+  } else return null
+}
+
 export default function LeftMenuButton({
   children,
+  svgIcon,
   onClick,
   icon,
   disabled = false,
@@ -25,7 +48,7 @@ export default function LeftMenuButton({
   if (disabled) {
     return (
       <div className="left-menu-button link-disabled">
-        <Icon type={icon.type} fw={icon.fw} />
+        <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
         <span>{children}</span>
         {disabledAccesibilityText ? (
           <span className="sr-only">{disabledAccesibilityText}</span>
@@ -37,7 +60,7 @@ export default function LeftMenuButton({
   if (type === 'button') {
     return (
       <button onClick={onClick} className="left-menu-button">
-        <Icon type={icon.type} fw={icon.fw} />
+        <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
         <span>{children}</span>
       </button>
     )
@@ -49,7 +72,7 @@ export default function LeftMenuButton({
         rel="noreferrer"
         className="left-menu-button"
       >
-        <Icon type={icon.type} fw={icon.fw} />
+        <LeftMenuButtonIcon svgIcon={svgIcon} icon={icon} />
         <span>{children}</span>
       </a>
     )

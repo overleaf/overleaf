@@ -1,4 +1,9 @@
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
 import { ChangeEventHandler, useCallback } from 'react'
+import { Spinner } from 'react-bootstrap-5'
 
 type PossibleValue = string | number | boolean
 
@@ -50,16 +55,32 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
   )
 
   return (
-    <div className="form-group left-menu-setting">
-      <label htmlFor={`settings-menu-${name}`}>{label}</label>
+    <OLFormGroup
+      controlId={`settings-menu-${name}`}
+      className="left-menu-setting"
+    >
+      <OLFormLabel>{label}</OLFormLabel>
       {loading ? (
-        <p className="loading pull-right">
-          <i className="fa fa-fw fa-spin fa-refresh" />
-        </p>
+        <BootstrapVersionSwitcher
+          bs3={
+            <p className="loading pull-right">
+              <i className="fa fa-fw fa-spin fa-refresh" />
+            </p>
+          }
+          bs5={
+            <p className="mb-0">
+              <Spinner
+                animation="border"
+                aria-hidden="true"
+                size="sm"
+                role="status"
+              />
+            </p>
+          }
+        />
       ) : (
-        <select
-          id={`settings-menu-${name}`}
-          className="form-control"
+        <OLFormSelect
+          size="sm"
           onChange={handleChange}
           value={value?.toString()}
           disabled={disabled}
@@ -86,8 +107,8 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
               ))}
             </optgroup>
           ) : null}
-        </select>
+        </OLFormSelect>
       )}
-    </div>
+    </OLFormGroup>
   )
 }

@@ -9,6 +9,7 @@ export type ButtonProps = {
   form?: string
   leadingIcon?: string | React.ReactNode
   href?: string
+  id?: string
   target?: string
   rel?: string
   isLoading?: boolean

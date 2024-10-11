@@ -1,22 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import WordCountModalContent from './word-count-modal-content'
-import AccessibleModal from '../../../shared/components/accessible-modal'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
+import OLModal from '@/features/ui/components/ol/ol-modal'
 
 const WordCountModal = React.memo(function WordCountModal({
   show,
   handleHide,
 }) {
   return (
-    <AccessibleModal
-      animation
-      show={show}
-      onHide={handleHide}
-      id="word-count-modal"
-    >
+    <OLModal animation show={show} onHide={handleHide} id="word-count-modal">
       <WordCountModalContent handleHide={handleHide} />
-    </AccessibleModal>
+    </OLModal>
   )
 })
 

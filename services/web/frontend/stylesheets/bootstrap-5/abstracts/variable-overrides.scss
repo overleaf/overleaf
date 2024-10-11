@@ -247,12 +247,8 @@ $dropdown-item-padding-x: var(--spacing-04);
 $dropdown-item-padding-y: var(--spacing-05);
 $dropdown-header-color: var(--content-secondary);
 
-// List group
-$list-group-color: var(--content-secondary);
-$list-group-border-width: 0;
-$list-group-border-radius: (--border-radius-base);
-$list-group-item-padding-y: var(--spacing-04);
-$list-group-item-padding-x: var(--spacing-05);
-$list-group-hover-bg: var(--bg-light-secondary);
-$list-group-disabled-color: var(--content-disabled);
-$list-group-disabled-bg: var(--bg-light-primary);
+// Offcanvas
+$offcanvas-horizontal-width: 320px;
+$offcanvas-padding-x: 12.5px;
+$offcanvas-padding-y: 12.5px;
+$offcanvas-border-width: 0;

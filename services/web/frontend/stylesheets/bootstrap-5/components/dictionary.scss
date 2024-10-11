@@ -1,0 +1,33 @@
+#dictionary-modal {
+  .modal-body {
+    padding: 0;
+  }
+}
+
+.dictionary-entries-list {
+  overflow-y: scroll;
+  max-height: calc(100vh - 225px);
+  margin: 0;
+  padding: var(--spacing-04);
+}
+
+.dictionary-entry {
+  word-break: break-all;
+  display: flex;
+  padding: var(--spacing-04);
+  border-bottom: solid 1px var(--border-divider);
+  align-items: center;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dictionary-entry-name {
+  flex-grow: 1;
+  padding-right: var(--spacing-02);
+}
+
+.dictionary-empty-body {
+  padding: var(--spacing-07);
+}

@@ -29,4 +29,12 @@
   direction: ltr;
   font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+
+  &.size-2x {
+    font-size: 2em;
+  }
+
+  &.rotate-180 {
+    transform: rotate(180deg);
+  }
 }
