@@ -22,6 +22,7 @@ function LinkingSection() {
   const { t } = useTranslation()
   const { subscriptions } = useSSOContext()
   const ssoErrorMessage = getMeta('ol-ssoErrorMessage')
+  const cannotUseAi = getMeta('ol-cannot-use-ai')
   const projectSyncSuccessMessage = getMeta('ol-projectSyncSuccessMessage')
 
   // hide linking widgets in CI
@@ -47,7 +48,9 @@ function LinkingSection() {
     oauth2ServerComponents
   )
 
-  const haslangFeedbackLinkingWidgets = langFeedbackLinkingWidgets.length
+  // since we only have Writefull here currently, we should hide the whole section if they cant use ai
+  const haslangFeedbackLinkingWidgets =
+    langFeedbackLinkingWidgets.length && !cannotUseAi
   const hasIntegrationLinkingSection =
     renderSyncSection && allIntegrationLinkingWidgets.length
   const hasReferencesLinkingSection = referenceLinkingWidgets.length
