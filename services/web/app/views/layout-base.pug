@@ -7,7 +7,7 @@ html(
 )
 	- metadata = metadata || {}
 	- let bootstrap5PageStatus = 'disabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
-	- let bootstrap5PageSplitTest = ''
+	- let bootstrap5PageSplitTest = '' // Limits Bootstrap 5 usage on this page to users with an assignment of "enabled" for the specified split test. If left empty and bootstrap5PageStatus is "enabled", the page always uses Bootstrap 5.
 	- let isWebsiteRedesign = false
 
 	block entrypointVar
@@ -17,7 +17,7 @@ html(
 	head
 		include ./_metadata.pug
 
-		- const bootstrapVersion = bootstrap5PageStatus !== 'disabled' && (bootstrap5Override || (bootstrap5PageStatus === 'enabled' && splitTestVariants[bootstrap5PageSplitTest] === 'enabled')) ? 5 : 3
+		- const bootstrapVersion = bootstrap5PageStatus !== 'disabled' && (bootstrap5Override || (bootstrap5PageStatus === 'enabled' && (bootstrap5PageSplitTest === '' || splitTestVariants[bootstrap5PageSplitTest] === 'enabled'))) ? 5 : 3
 		- const ieeeStylesheetEnabled = splitTestVariants?.['ieee-stylesheet'] !== 'disabled'
 
 		//- Stylesheet
