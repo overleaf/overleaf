@@ -12,7 +12,7 @@ function ShareProjectButton({ onClick }) {
       <button type="button" className="btn btn-full-height" onClick={onClick}>
         <BootstrapVersionSwitcher
           bs3={<Icon type="group" fw />}
-          bs5={<MaterialIcon type="groups" className="align-middle" />}
+          bs5={<MaterialIcon type="group_add" className="align-middle" />}
         />
         <p className="toolbar-label">{t('share')}</p>
       </button>

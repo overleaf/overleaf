@@ -8,7 +8,6 @@ import Icon from '../../../shared/components/icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import { Spinner } from 'react-bootstrap-5'
 import {
   Dropdown,
   DropdownDivider,
@@ -213,20 +212,11 @@ function PdfCompileButton() {
               variant="primary"
               size="sm"
               disabled={compiling}
+              isLoading={compiling}
               onClick={() => startCompile()}
-              leadingIcon={
-                compiling ? (
-                  <Spinner
-                    animation="border"
-                    aria-hidden="true"
-                    size="sm"
-                    role="status"
-                  />
-                ) : null
-              }
               className={buttonClassName}
             >
-              {compileButtonLabel}
+              {t('recompile')}
             </OLButton>
           </OLTooltip>
 

@@ -122,7 +122,7 @@ export const ToolbarItems: FC<{
                 id="toolbar-href"
                 label={t('toolbar_insert_link')}
                 command={commands.wrapInHref}
-                icon={bsVersion({ bs5: 'link', bs3: 'link' })}
+                icon={bsVersion({ bs5: 'add_link', bs3: 'link' })}
               />
               <ToolbarButton
                 id="toolbar-ref"
@@ -134,7 +134,7 @@ export const ToolbarItems: FC<{
                 id="toolbar-cite"
                 label={t('toolbar_insert_citation')}
                 command={commands.insertCite}
-                icon={bsVersion({ bs5: 'menu_book', bs3: 'book' })}
+                icon={bsVersion({ bs5: 'book_5', bs3: 'book' })}
               />
               <InsertFigureDropdown />
               <TableInserterDropdown />

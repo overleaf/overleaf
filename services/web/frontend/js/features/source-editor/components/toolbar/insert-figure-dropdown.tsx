@@ -37,7 +37,7 @@ export const InsertFigureDropdown = memo(function InsertFigureDropdown() {
       icon={
         <BootstrapVersionSwitcher
           bs3={<Icon fw type="picture-o" />}
-          bs5={<MaterialIcon type="imagesmode" />}
+          bs5={<MaterialIcon type="add_photo_alternate" />}
         />
       }
       altCommand={insertFigure}
