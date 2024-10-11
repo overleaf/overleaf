@@ -41,6 +41,8 @@ export type User = {
   refProviders?: RefProviders
   writefull?: {
     enabled: boolean
+    autoCreatedAccount: boolean
+    firstAutoLoad: boolean
   }
 }
 

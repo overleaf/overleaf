@@ -601,14 +601,16 @@ const _ProjectController = {
         !Features.hasFeature('saas') ||
         (user.features && user.features.symbolPalette)
 
+      const userInNonIndividualSub =
+        userIsMemberOfGroupSubscription || userHasInstitutionLicence
+
       // Persistent upgrade prompts
       // in header & in share project modal
       const showUpgradePrompt =
         Features.hasFeature('saas') &&
         userId &&
         !subscription &&
-        !userIsMemberOfGroupSubscription &&
-        !userHasInstitutionLicence
+        !userInNonIndividualSub
 
       let aiFeaturesAllowed = false
       if (userId && Features.hasFeature('saas')) {
@@ -639,25 +641,42 @@ const _ProjectController = {
       }
 
       // check if a user has never tried writefull before (writefull.enabled will be null)
-      //  if they previously accepted writefull. user.writefull will be true,
+      //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
       //  if they explicitly disabled it, user.writefull will be false
-      if (aiFeaturesAllowed && user.writefull?.enabled === null) {
-        // since we are auto-enrolling users into writefull if they are part of the group, we only want to
-        // auto enroll (set writefull to true) if its the first time they have entered the test
-        // this ensures that they can still turn writefull off (otherwise, we would be setting writefull on every time they access their projects)
-        const { variant, metadata } =
-          await SplitTestHandler.promises.getAssignment(
+      if (
+        aiFeaturesAllowed &&
+        user.writefull?.enabled === null &&
+        !userInNonIndividualSub
+      ) {
+        const { variant } = await SplitTestHandler.promises.getAssignment(
+          req,
+          res,
+          'writefull-auto-account-creation'
+        )
+
+        if (variant === 'enabled') {
+          await UserUpdater.promises.updateUser(userId, {
+            $set: {
+              writefull: { enabled: true, autoCreatedAccount: true },
+            },
+          })
+          user.writefull.enabled = true
+          user.writefull.autoCreatedAccount = true
+        } else {
+          const { variant } = await SplitTestHandler.promises.getAssignment(
             req,
             res,
             'writefull-auto-load'
           )
-        if (variant === 'enabled' && metadata?.isFirstNonDefaultAssignment) {
-          await UserUpdater.promises.updateUser(userId, {
-            $set: {
-              writefull: { enabled: true },
-            },
-          })
-          user.writefull.enabled = true
+          if (variant === 'enabled') {
+            await UserUpdater.promises.updateUser(userId, {
+              $set: {
+                writefull: { enabled: true },
+              },
+            })
+            user.writefull.enabled = true
+            user.writefull.firstAutoLoad = true
+          }
         }
       }
 
@@ -690,6 +709,8 @@ const _ProjectController = {
           refProviders: _.mapValues(user.refProviders, Boolean),
           writefull: {
             enabled: Boolean(user.writefull?.enabled && aiFeaturesAllowed),
+            autoCreatedAccount: Boolean(user.writefull?.autoCreatedAccount),
+            firstAutoLoad: Boolean(user.writefull?.firstAutoLoad),
           },
           alphaProgram: user.alphaProgram,
           betaProgram: user.betaProgram,

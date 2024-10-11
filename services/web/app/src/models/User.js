@@ -190,6 +190,7 @@ const UserSchema = new Schema(
     },
     writefull: {
       enabled: { type: Boolean, default: null },
+      autoCreatedAccount: { type: Boolean, default: false },
     },
     alphaProgram: { type: Boolean, default: false }, // experimental features
     betaProgram: { type: Boolean, default: false },
