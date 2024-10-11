@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import Tooltip from '@/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 type HorizontalTogglerType = 'west' | 'east'
 
@@ -23,7 +23,7 @@ export function HorizontalToggler({
   const description = isOpen ? tooltipWhenOpen : tooltipWhenClosed
 
   return (
-    <Tooltip
+    <OLTooltip
       id={id}
       description={description}
       overlayProps={{
@@ -43,6 +43,6 @@ export function HorizontalToggler({
         title=""
         onClick={() => setIsOpen(!isOpen)}
       />
-    </Tooltip>
+    </OLTooltip>
   )
 }

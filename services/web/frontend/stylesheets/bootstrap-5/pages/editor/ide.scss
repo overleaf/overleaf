@@ -1,3 +1,20 @@
+@use 'sass:color';
+
+$editor-toggler-bg-dark-color: color.adjust(
+  $content-disabled,
+  $lightness: -15%
+);
+
+:root {
+  --editor-toggler-bg-color: #{$editor-toggler-bg-dark-color};
+  --editor-resizer-bg-color: var(--bg-dark-secondary);
+}
+
+@include theme('light') {
+  --editor-toggler-bg-color: var(--content-disabled);
+  --editor-resizer-bg-color: var(--bg-light-tertiary);
+}
+
 #ide-root {
   height: 100vh; /* for backwards compatibility */
   height: 100dvh; /* needed for mobile devices */
@@ -128,11 +145,14 @@
 
   // Enable ::before and ::after pseudo-elements to position themselves correctly
   position: relative;
-  background-color: var(--bg-dark-secondary);
+  background-color: var(--editor-resizer-bg-color);
 
   .custom-toggler {
     padding: 0;
     border-width: 0;
+
+    // Override react-resizable-panels which sets a global * { cursor: ew-resize }
+    cursor: pointer !important;
   }
 
   &.horizontal-resize-handle-enabled {
@@ -171,13 +191,69 @@
   }
 }
 
+.custom-toggler {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 7px !important;
+  height: 50px;
+  margin-top: calc(var(--spacing-08) * -1);
+  top: 50%;
+  background-color: var(--editor-toggler-bg-color);
+
+  &:hover,
+  &:focus {
+    outline: none;
+    text-decoration: none;
+  }
+
+  // Increase hit area
+  &::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0 -3px;
+  }
+
+  &::after {
+    font-family: FontAwesome; /* stylelint-disable-line font-family-no-missing-generic-family-keyword */
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 65%;
+    font-weight: bold;
+    color: var(--white);
+    user-select: none;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background-color: var(--bg-accent-01);
+  }
+}
+
+.custom-toggler-east::after {
+  content: '\f105';
+}
+
+.custom-toggler-west::after {
+  content: '\f104';
+}
+
+.custom-toggler-closed.custom-toggler-east::after {
+  content: '\f104';
+}
+
+.custom-toggler-closed.custom-toggler-west::after {
+  content: '\f105';
+}
+
 .vertical-resize-handle {
   height: 6px;
-  background-color: var(--bg-dark-secondary);
+  background-color: var(--editor-resizer-bg-color);
 
   &.vertical-resize-handle-enabled {
     &:hover {
-      background-color: var(--bg-dark-primary);
+      background-color: var(--editor-resizer-bg-color);
     }
   }
 
@@ -193,33 +269,6 @@
     display: block;
     text-align: center;
     line-height: 0;
-  }
-}
-
-.vertical-resizable-resizer {
-  background-color: var(--bg-dark-secondary);
-
-  &:hover {
-    background-color: var(--bg-dark-primary);
-  }
-
-  &::after {
-    @include heading-sm;
-
-    content: '\00b7\00b7\00b7\00b7';
-    display: block;
-    color: var(--content-disabled);
-    text-align: center;
-    pointer-events: none;
-  }
-}
-
-.vertical-resizable-resizer-disabled {
-  pointer-events: none;
-  opacity: 0.5;
-
-  &::after {
-    opacity: 0.5;
   }
 }
 

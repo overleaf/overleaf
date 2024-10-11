@@ -1,6 +1,7 @@
 :root {
   --pdf-bg: var(--neutral-10);
   --pdf-toolbar-btn-hover-color: rgb(125 125 125 / 20%);
+  --synctex-control-size: 24px;
 }
 
 @include theme('light') {
@@ -333,20 +334,42 @@
   }
 }
 
-.synctex-control {
-  > .synctex-control-icon {
-    display: inline-block;
-    font:
-      normal normal normal 14px/1 FontAwesome,
-      sans-serif;
-    font-size: inherit;
-    text-rendering: auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+.synctex-controls {
+  margin-right: calc(var(--spacing-04) * -1);
+  position: absolute;
+  z-index: 6;
+  padding: 0;
+  top: 68px;
+}
+
+.synctex-control:not(.detach-synctex-control) {
+  align-items: center;
+  background-color: rgba($bg-dark-tertiary, 0.8);
+  border-color: transparent;
+  border-radius: var(--border-radius-full);
+  color: var(--content-primary-dark);
+  display: flex !important;
+  height: var(--synctex-control-size);
+  justify-content: center;
+  margin-bottom: var(--spacing-05);
+  padding: 0;
+  transition: background 0.15s ease;
+  width: var(--synctex-control-size);
+
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
 
-  > .synctex-spin-icon {
-    margin-top: var(--spacing-01);
+  &:active {
+    background-color: rgba($bg-dark-tertiary, 0.8);
+    color: var(--content-primary-dark);
+  }
+}
+
+.synctex-control {
+  .synctex-control-icon {
+    font-weight: 700;
+    font-size: var(--font-size-06);
   }
 }
 

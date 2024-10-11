@@ -57,7 +57,12 @@ function GoToCodeButton({
     buttonIcon = (
       <BootstrapVersionSwitcher
         bs3={<Icon type="arrow-left" className="synctex-control-icon" />}
-        bs5={<MaterialIcon type="arrow_left_alt" />}
+        bs5={
+          <MaterialIcon
+            type="arrow_left_alt"
+            className="synctex-control-icon"
+          />
+        }
       />
     )
   }
@@ -130,7 +135,12 @@ function GoToPdfButton({
     buttonIcon = (
       <BootstrapVersionSwitcher
         bs3={<Icon type="arrow-right" className="synctex-control-icon" />}
-        bs5={<MaterialIcon type="arrow_right_alt" />}
+        bs5={
+          <MaterialIcon
+            type="arrow_right_alt"
+            className="synctex-control-icon"
+          />
+        }
       />
     )
   }

@@ -1,7 +1,27 @@
+:root {
+  --outline-bg-color: var(--bg-dark-secondary);
+  --outline-border-color: var(--border-disabled-dark);
+  --outline-header-hover-bg: var(--bg-dark-primary);
+  --outline-item-hover-bg: var(--bg-dark-secondary);
+  --outline-line-guide-color: var(--border-primary);
+  --outline-container-color-bg: var(--bg-dark-tertiary);
+  --outline-content-color: var(--content-primary-dark);
+}
+
+@include theme('light') {
+  --outline-bg-color: var(--bg-light-primary);
+  --outline-border-color: var(--border-disabled);
+  --outline-item-hover-bg: var(--bg-light-tertiary);
+  --outline-header-hover-bg: var(--bg-light-tertiary);
+  --outline-line-guide-color: var(--border-disabled);
+  --outline-container-color-bg: var(--bg-light-primary);
+  --outline-content-color: var(--content-secondary);
+}
+
 .outline-container {
   width: 100%;
   height: 100%;
-  background-color: var(--bg-dark-tertiary);
+  background-color: var(--outline-container-color-bg);
 }
 
 .outline-pane {
@@ -19,8 +39,8 @@
 
 .documentation-btn-container {
   @include toolbar-sm-height;
-  @include toolbar-alt-bg;
 
+  background-color: var(--outline-bg-color);
   display: flex;
   align-items: center;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
@@ -42,16 +62,16 @@
 
 .outline-header {
   @include toolbar-sm-height;
-  @include toolbar-alt-bg;
 
+  background-color: var(--outline-bg-color);
   display: flex;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border-disabled-dark);
-  border-top: 1px solid var(--border-disabled-dark);
+  border-bottom: 1px solid var(--outline-border-color);
+  border-top: 1px solid var(--outline-border-color);
 }
 
 .outline-header-expand-collapse-btn {
-  color: var(--file-tree-item-color);
+  color: var(--outline-content-color);
   display: flex;
   align-items: center;
   background-color: transparent;
@@ -70,7 +90,7 @@
   }
 
   &:hover {
-    background-color: var(--bg-dark-primary);
+    background-color: var(--outline-header-hover-bg);
   }
 
   &:hover[disabled] {
@@ -81,7 +101,7 @@
 .outline-header-name {
   @include body-sm;
 
-  color: var(--file-tree-item-color);
+  color: var(--outline-content-color);
   display: inline-block;
   font-weight: 700;
   margin: 0;
@@ -92,13 +112,13 @@
 }
 
 .outline-body {
-  background-color: var(--file-tree-bg);
+  background-color: var(--outline-container-color-bg);
   overflow-y: auto;
   padding-right: var(--spacing-03);
 }
 
 .outline-body-no-elements {
-  color: var(--file-tree-item-color);
+  color: var(--outline-content-color);
   text-align: center;
   padding: var(--spacing-08) var(--spacing-08) var(--spacing-11)
     var(--spacing-08);
@@ -106,13 +126,13 @@
 }
 
 .outline-body-link {
-  color: var(--file-tree-item-color);
+  color: var(--outline-content-color);
   display: block;
   text-decoration: underline;
 
   &:hover,
   &:focus {
-    color: var(--file-tree-item-color);
+    color: var(--outline-content-color);
     text-decoration: underline;
   }
 }
@@ -124,7 +144,7 @@
 
   &::before {
     content: '';
-    background-color: var(--neutral-60);
+    background-color: var(--outline-line-guide-color);
     top: var(--spacing-03);
     bottom: var(--spacing-03);
     width: 1px;
@@ -152,7 +172,7 @@
 }
 
 .outline-item-expand-collapse-btn {
-  background-color: var(--file-tree-bg);
+  background-color: var(--outline-container-color-bg);
   display: inline;
   border: 0;
   padding: 0;
@@ -170,14 +190,14 @@
   }
 
   &:hover {
-    background-color: var(--file-tree-item-hover-bg);
+    background-color: var(--outline-item-hover-bg);
   }
 }
 
 .outline-item-link {
   @include text-truncate;
 
-  color: var(--file-tree-item-color);
+  color: var(--outline-content-color);
   display: inline;
   background-color: transparent;
   border: 0;
@@ -190,7 +210,7 @@
 
   &:hover,
   &:focus {
-    background-color: var(--file-tree-item-hover-bg);
+    background-color: var(--outline-item-hover-bg);
     outline: 0;
   }
 }
