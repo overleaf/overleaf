@@ -13,6 +13,8 @@ import classnames from 'classnames'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import SpellingSuggestionsFeedback from './spelling-suggestions-feedback'
+import { captureException } from '@/infrastructure/error-reporter'
+import { debugConsole } from '@/utils/debugging'
 
 const ITEMS_TO_SHOW = 8
 
@@ -51,15 +53,23 @@ export const SpellingSuggestions: FC<{
 
   useEffect(() => {
     if (!word.suggestions) {
-      spellChecker?.suggest(word.text).then(result => {
-        setSuggestions(result.suggestions.slice(0, ITEMS_TO_SHOW))
-        setWaiting(false)
-        sendMB('spelling-suggestion-shown', {
-          language: spellCheckLanguage,
-          count: result.suggestions.length,
-          // word: transaction.state.sliceDoc(mark.from, mark.to),
+      spellChecker
+        ?.suggest(word.text)
+        .then(result => {
+          setSuggestions(result.suggestions.slice(0, ITEMS_TO_SHOW))
+          setWaiting(false)
+          sendMB('spelling-suggestion-shown', {
+            language: spellCheckLanguage,
+            count: result.suggestions.length,
+            // word: transaction.state.sliceDoc(mark.from, mark.to),
+          })
         })
-      })
+        .catch(error => {
+          captureException(error, {
+            language: spellCheckLanguage,
+          })
+          debugConsole.error(error)
+        })
     }
   }, [word, spellChecker, spellCheckLanguage])
 

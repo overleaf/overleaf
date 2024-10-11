@@ -1,32 +1,60 @@
+/* eslint-disable no-dupe-class-members */
+
 import { v4 as uuid } from 'uuid'
 import getMeta from '@/utils/meta'
 import { debugConsole } from '@/utils/debugging'
+import { captureException } from '@/infrastructure/error-reporter'
 
-type Message =
-  | {
-      id?: string
-      type: 'spell'
-      words: string[]
-    }
-  | {
-      id?: string
-      type: 'suggest'
-      word: string
-    }
-  | {
-      id?: string
-      type: 'add_word'
-      word: string
-    }
-  | {
-      id?: string
-      type: 'remove_word'
-      word: string
-    }
-  | {
-      id?: string
-      type: 'destroy'
-    }
+type SpellMessage = {
+  type: 'spell'
+  words: string[]
+}
+
+type SuggestMessage = {
+  type: 'suggest'
+  word: string
+}
+
+type AddWordMessage = {
+  type: 'add_word'
+  word: string
+}
+
+type RemoveWordMessage = {
+  type: 'remove_word'
+  word: string
+}
+
+type DestroyMessage = {
+  type: 'destroy'
+}
+
+type Message = { id?: string } & (
+  | SpellMessage
+  | SuggestMessage
+  | AddWordMessage
+  | RemoveWordMessage
+  | DestroyMessage
+)
+
+type EmptyResult = Record<string, never>
+
+type ErrorResult = {
+  error: true
+}
+
+type SpellResult = {
+  misspellings: { index: number }[]
+}
+
+type SuggestResult = {
+  suggestions: string[]
+}
+
+type ResultCallback =
+  | ((value: SpellResult | ErrorResult) => void)
+  | ((value: SuggestResult | ErrorResult) => void)
+  | ((value: EmptyResult | ErrorResult) => void)
 
 export class HunspellManager {
   baseAssetPath: string
@@ -35,8 +63,9 @@ export class HunspellManager {
   abortController: AbortController | undefined
   listening = false
   loaded = false
+  loadingFailed = false
   pendingMessages: Message[] = []
-  callbacks: Map<string, (value: unknown) => void> = new Map()
+  callbacks: Map<string, ResultCallback> = new Map()
 
   constructor(
     private readonly language: string,
@@ -64,8 +93,36 @@ export class HunspellManager {
     })
   }
 
-  send(message: Message, callback: (value: unknown) => void) {
-    debugConsole.log(message)
+  send(
+    message: AddWordMessage,
+    callback: (value: EmptyResult | ErrorResult) => void
+  ): void
+
+  send(
+    message: RemoveWordMessage,
+    callback: (value: EmptyResult | ErrorResult) => void
+  ): void
+
+  send(
+    message: DestroyMessage,
+    callback: (value: EmptyResult | ErrorResult) => void
+  ): void
+
+  send(
+    message: SuggestMessage,
+    callback: (value: SuggestResult | ErrorResult) => void
+  ): void
+
+  send(
+    message: SpellMessage,
+    callback: (value: SpellResult | ErrorResult) => void
+  ): void
+
+  send(message: Message, callback: ResultCallback): void {
+    if (this.loadingFailed) {
+      return // ignore the message
+    }
+
     if (callback) {
       message.id = uuid()
       this.callbacks.set(message.id, callback)
@@ -80,14 +137,14 @@ export class HunspellManager {
 
   receive(event: MessageEvent) {
     debugConsole.log(event.data)
-    const { id, listening, loaded, ...rest } = event.data
+    const { id, ...rest } = event.data
     if (id) {
       const callback = this.callbacks.get(id)
       if (callback) {
         this.callbacks.delete(id)
         callback(rest)
       }
-    } else if (listening) {
+    } else if (rest.listening) {
       this.listening = true
       this.hunspellWorker.postMessage({
         type: 'init',
@@ -100,9 +157,14 @@ export class HunspellManager {
         this.hunspellWorker.postMessage(message)
         this.pendingMessages.length = 0
       }
-    } else if (loaded) {
+    } else if (rest.loaded) {
       this.loaded = true
-      // TODO: use this to display pending state?
+    } else if (rest.loadingFailed) {
+      captureException(new Error('Spell check loading failed'), {
+        language: this.language,
+      })
+      this.loadingFailed = true
+      this.pendingMessages.length = 0
     }
   }
 }

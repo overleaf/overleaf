@@ -19,6 +19,7 @@ import { SpellChecker } from './spellchecker'
 import { parserWatcher } from '../wait-for-parser'
 import type { HunspellManager } from '@/features/source-editor/hunspell/HunspellManager'
 import { debugConsole } from '@/utils/debugging'
+import { captureException } from '@/infrastructure/error-reporter'
 
 type Options = {
   spellCheckLanguage?: string
@@ -81,9 +82,15 @@ const spellCheckerField = StateField.define<SpellChecker | null>({
             )
           : null
       } else if (effect.is(addIgnoredWord)) {
-        value?.addWord(effect.value.text).catch(debugConsole.error)
+        value?.addWord(effect.value.text).catch(error => {
+          captureException(error)
+          debugConsole.error(error)
+        })
       } else if (effect.is(removeIgnoredWord)) {
-        value?.removeWord(effect.value.text).catch(debugConsole.error)
+        value?.removeWord(effect.value.text).catch(error => {
+          captureException(error)
+          debugConsole.error(error)
+        })
       }
     }
     return value

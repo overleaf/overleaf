@@ -14,6 +14,7 @@ import {
 import { waitForParser } from '../wait-for-parser'
 import { debugConsole } from '@/utils/debugging'
 import type { HunspellManager } from '../../hunspell/HunspellManager'
+import { captureException } from '@/infrastructure/error-reporter'
 
 /*
  * Spellchecker, handles updates, schedules spelling checks
@@ -120,10 +121,14 @@ export class SpellChecker {
             type: 'spell',
             words: unknownWords.map(word => word.text),
           },
-          (result: any) => {
+          result => {
             if (!signal.aborted) {
-              if (result.error) {
+              if ('error' in result) {
                 debugConsole.error(result.error)
+                captureException(
+                  new Error('Error running spellcheck for word'),
+                  { language: this.language }
+                )
               } else {
                 processResult(result.misspellings)
               }
@@ -148,10 +153,10 @@ export class SpellChecker {
     return new Promise<{ suggestions: string[] }>((resolve, reject) => {
       if (this.hunspellManager) {
         this.hunspellManager.send({ type: 'suggest', word }, result => {
-          if ((result as { error: true }).error) {
-            reject(new Error())
+          if ('error' in result) {
+            reject(new Error('Error finding spelling suggestions for word'))
           } else {
-            resolve(result as { suggestions: string[] })
+            resolve(result)
           }
         })
       }
@@ -162,8 +167,8 @@ export class SpellChecker {
     return new Promise<void>((resolve, reject) => {
       if (this.hunspellManager) {
         this.hunspellManager.send({ type: 'add_word', word }, result => {
-          if ((result as { error: true }).error) {
-            reject(new Error())
+          if ('error' in result) {
+            reject(new Error('Error adding word to spellcheck'))
           } else {
             resolve()
           }
@@ -176,8 +181,8 @@ export class SpellChecker {
     return new Promise<void>((resolve, reject) => {
       if (this.hunspellManager) {
         this.hunspellManager.send({ type: 'remove_word', word }, result => {
-          if ((result as { error: true }).error) {
-            reject(new Error())
+          if ('error' in result) {
+            reject(new Error('Error removing word from spellcheck'))
           } else {
             resolve()
           }

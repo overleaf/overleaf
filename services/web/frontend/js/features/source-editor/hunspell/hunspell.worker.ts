@@ -171,7 +171,7 @@ self.addEventListener('message', async event => {
         self.postMessage({ loaded: true })
       } catch (error) {
         console.error(error)
-        self.postMessage({ error: true })
+        self.postMessage({ loadingFailed: true })
       }
       break
 
