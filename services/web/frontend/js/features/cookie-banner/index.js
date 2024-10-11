@@ -20,8 +20,10 @@ function setConsent(value) {
   if (value === 'all') {
     document.cookie = 'oa=1' + cookieAttributes
     loadGA()
+    window.dispatchEvent(new CustomEvent('cookie-consent', { detail: true }))
   } else {
     document.cookie = 'oa=0' + cookieAttributes
+    window.dispatchEvent(new CustomEvent('cookie-consent', { detail: false }))
   }
 }
 

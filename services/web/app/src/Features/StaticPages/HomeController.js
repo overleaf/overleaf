@@ -9,6 +9,7 @@ const SessionManager = require('../Authentication/SessionManager')
 
 const { expressify } = require('@overleaf/promise-utils')
 const logger = require('@overleaf/logger')
+const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 const homepageExists = fs.existsSync(
   Path.join(
@@ -34,6 +35,12 @@ async function home(req, res) {
     AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
       page: req.path,
     })
+
+    try {
+      await SplitTestHandler.promises.getAssignment(req, res, 'hotjar')
+    } catch {
+      // do nothing
+    }
 
     res.render('external/home/website-redesign/index')
   } else {

@@ -406,6 +406,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       sentryDsn: Settings.sentry.publicDSN,
       sentryEnvironment: Settings.sentry.environment,
       sentryRelease: Settings.sentry.release,
+      hotjarId: Settings.hotjar?.id,
+      hotjarVersion: Settings.hotjar?.version,
       enableSubscriptions: Settings.enableSubscriptions,
       gaToken:
         Settings.analytics &&
