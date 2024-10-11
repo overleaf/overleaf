@@ -1,6 +1,6 @@
 import { FC, ReactNode } from 'react'
-import { Alert } from 'react-bootstrap'
 import { DefaultMessage } from './default-message'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 export const ErrorBoundaryFallback: FC<{ modal?: ReactNode }> = ({
   children,
@@ -8,7 +8,7 @@ export const ErrorBoundaryFallback: FC<{ modal?: ReactNode }> = ({
 }) => {
   return (
     <div className="error-boundary-alert">
-      <Alert bsStyle="danger">{children || <DefaultMessage />}</Alert>
+      <OLNotification type="error" content={children || <DefaultMessage />} />
       {modal}
     </div>
   )

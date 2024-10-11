@@ -1,14 +1,19 @@
 import { useTranslation } from 'react-i18next'
-import { Modal } from 'react-bootstrap'
-import AccessibleModal from '@/shared/components/accessible-modal'
 import { memo } from 'react'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export type GenericMessageModalOwnProps = {
   title: string
   message: string
 }
 
-type GenericMessageModalProps = React.ComponentProps<typeof AccessibleModal> &
+type GenericMessageModalProps = React.ComponentProps<typeof OLModal> &
   GenericMessageModalOwnProps
 
 function GenericMessageModal({
@@ -19,19 +24,19 @@ function GenericMessageModal({
   const { t } = useTranslation()
 
   return (
-    <AccessibleModal {...modalProps}>
-      <Modal.Header closeButton>
-        <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
+    <OLModal {...modalProps}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{title}</OLModalTitle>
+      </OLModalHeader>
 
-      <Modal.Body className="modal-body-share">{message}</Modal.Body>
+      <OLModalBody className="modal-body-share">{message}</OLModalBody>
 
-      <Modal.Footer>
-        <button className="btn btn-info" onClick={() => modalProps.onHide()}>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={() => modalProps.onHide()}>
           {t('ok')}
-        </button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

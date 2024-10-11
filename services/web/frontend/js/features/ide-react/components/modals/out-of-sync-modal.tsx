@@ -1,8 +1,13 @@
 import { Trans, useTranslation } from 'react-i18next'
-import { Button, Modal } from 'react-bootstrap'
-import AccessibleModal from '@/shared/components/accessible-modal'
 import { memo, useState } from 'react'
 import { useLocation } from '@/shared/hooks/use-location'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 
 export type OutOfSyncModalProps = {
   editorContent: string
@@ -24,17 +29,17 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
   }
 
   return (
-    <AccessibleModal
+    <OLModal
       show={show}
       onHide={done}
       className="out-of-sync-modal"
       backdrop={false}
       keyboard={false}
     >
-      <Modal.Header closeButton>
-        <Modal.Title>{t('out_of_sync')}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="modal-body-share">
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('out_of_sync')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody className="modal-body-share">
         <Trans
           i18nKey="out_of_sync_detail"
           components={[
@@ -48,16 +53,16 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
             />,
           ]}
         />
-      </Modal.Body>
-      <Modal.Body>
-        <Button
-          bsStyle="info"
+      </OLModalBody>
+      <OLModalBody>
+        <OLButton
+          variant="secondary"
           onClick={() => setEditorContentShown(shown => !shown)}
         >
           {editorContentShown
             ? t('hide_local_file_contents')
             : t('show_local_file_contents')}
-        </Button>
+        </OLButton>
         {editorContentShown ? (
           <div className="text-preview">
             <textarea
@@ -68,13 +73,13 @@ function OutOfSyncModal({ editorContent, show, onHide }: OutOfSyncModalProps) {
             />
           </div>
         ) : null}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button bsStyle="info" onClick={done}>
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={done}>
           {t('reload_editor')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

@@ -28,6 +28,7 @@ function OLNotification(props: OLNotificationProps) {
           {bs3Props?.icon}
           {bs3Props?.icon && ' '}
           {notificationProps.content}
+          {notificationProps.action}
         </Alert>
       }
       bs5={

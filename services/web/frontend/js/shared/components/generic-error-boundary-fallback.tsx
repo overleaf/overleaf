@@ -1,9 +1,11 @@
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from './icon'
-import { Button } from 'react-bootstrap'
 import { useLocation } from '../hooks/use-location'
 import { DefaultMessage } from './default-message'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from './material-icon'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export const GenericErrorBoundaryFallback: FC = ({ children }) => {
   const { t } = useTranslation()
@@ -11,23 +13,34 @@ export const GenericErrorBoundaryFallback: FC = ({ children }) => {
 
   return (
     <div className="error-boundary-container">
-      <div className="icon-error-boundary-container">
-        <Icon
-          accessibilityLabel={`${t('generic_something_went_wrong')} ${t(
-            'please_refresh'
-          )}`}
-          type="exclamation-triangle fa-2x"
-          fw
-        />
-      </div>
+      <BootstrapVersionSwitcher
+        bs3={
+          <Icon
+            accessibilityLabel={`${t('generic_something_went_wrong')} ${t(
+              'please_refresh'
+            )}`}
+            type="exclamation-triangle fa-2x"
+            fw
+          />
+        }
+        bs5={
+          <MaterialIcon
+            accessibilityLabel={`${t('generic_something_went_wrong')} ${t(
+              'please_refresh'
+            )}`}
+            type="warning"
+            size="2x"
+          />
+        }
+      />
       {children || (
-        <div className="error-message-container">
+        <div className="error-message">
           <DefaultMessage className="small" style={{ fontWeight: 'bold' }} />
         </div>
       )}
-      <Button bsStyle="primary" onClick={handleClick}>
+      <OLButton variant="primary" onClick={handleClick}>
         {t('refresh')}
-      </Button>
+      </OLButton>
     </div>
   )
 }

@@ -26,6 +26,19 @@
   }
 }
 
+.global-alerts {
+  height: 0;
+  margin-top: var(--spacing-01);
+  text-align: center;
+
+  [role='alert'] {
+    text-align: left;
+    min-width: 400px;
+    position: relative;
+    z-index: 20;
+  }
+}
+
 .ide-react-editor-sidebar {
   background-color: var(--file-tree-bg);
   height: 100%;
@@ -57,16 +70,6 @@
   color: var(--neutral-20);
 }
 
-.ide-react-file-tree-panel {
-  display: flex;
-  flex-direction: column;
-
-  // Prevent the file tree expanding beyond the boundary of the panel
-  .file-tree {
-    width: 100%;
-  }
-}
-
 .ide-react-editor-panel {
   display: flex;
   flex-direction: column;
@@ -85,6 +88,37 @@
   .ide-react-editor-content,
   .pdf {
     display: none !important;
+  }
+}
+
+.modal.lock-editor-modal {
+  display: flex !important;
+  background-color: rgba($bg-dark-primary, 0.3);
+  overflow-y: hidden;
+  pointer-events: none;
+
+  .modal-dialog {
+    top: 25px;
+  }
+}
+
+.out-of-sync-modal {
+  .text-preview {
+    margin-top: var(--spacing-05);
+
+    .scroll-container {
+      @include body-sm;
+
+      max-height: 360px;
+      width: 100%;
+      background-color: var(--bg-light-primary);
+      overflow: auto;
+      border: 1px solid var(--border-primary-dark);
+      padding: var(--spacing-04) var(--spacing-05);
+      text-align: left;
+      white-space: pre;
+      font-family: monospace;
+    }
   }
 }
 
