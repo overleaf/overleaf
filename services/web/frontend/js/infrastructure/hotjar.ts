@@ -1,8 +1,11 @@
 import getMeta from '@/utils/meta'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { debugConsole } from '@/utils/debugging'
+import { initializeHotjar } from '@/infrastructure/hotjar-snippet'
 
 const { hotjarId, hotjarVersion } = getMeta('ol-ExposedSettings')
+
+let hotjarInitialized = false
 
 if (hotjarId && hotjarVersion && isSplitTestEnabled('hotjar')) {
   const loadHotjar = () => {
@@ -11,22 +14,17 @@ if (hotjarId && hotjarVersion && isSplitTestEnabled('hotjar')) {
       return
     }
 
-    // avoid inserting twice
-    if (document.getElementById('hotjar')) {
+    if (!/^\d+$/.test(hotjarId) || !/^\d+$/.test(hotjarVersion)) {
+      debugConsole.error('Invalid Hotjar id or version')
       return
     }
 
-    debugConsole.log('Loading Hotjar')
-
-    const url = new URL(`https://static.hotjar.com/c/hotjar-${hotjarId}.js`)
-    url.searchParams.set('sv', hotjarVersion)
-
-    const script = document.createElement('script')
-    script.src = url.toString()
-    script.async = true
-    script.id = 'hotjar'
-
-    document.head.append(script)
+    // avoid inserting twice
+    if (!hotjarInitialized) {
+      debugConsole.log('Loading Hotjar')
+      hotjarInitialized = true
+      initializeHotjar(hotjarId, hotjarVersion)
+    }
   }
 
   // load when idle, if supported
