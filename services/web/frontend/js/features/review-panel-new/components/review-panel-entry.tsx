@@ -70,7 +70,9 @@ export const ReviewPanelEntry: FC<{
   useEffect(() => {
     return () => {
       if (hoverRanges) {
-        view.dispatch(clearHighlightRanges(op))
+        setTimeout(() => {
+          view.dispatch(clearHighlightRanges(op))
+        })
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
