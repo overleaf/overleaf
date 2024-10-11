@@ -1,6 +1,34 @@
 .gallery {
   margin-top: var(--spacing-10);
 
+  .filters {
+    float: right;
+    margin-bottom: var(--spacing-09);
+    display: flex;
+    gap: var(--spacing-04);
+
+    @include media-breakpoint-down(lg) {
+      float: none;
+    }
+
+    a {
+      text-decoration: none;
+
+      &:visited {
+        color: var(--green-50);
+      }
+
+      &:hover {
+        color: var(--green-60);
+      }
+
+      &.active {
+        font-weight: 600;
+        text-decoration: underline;
+      }
+    }
+  }
+
   .top-picks-banner.container {
     padding: 0;
     margin: var(--spacing-16) auto;
