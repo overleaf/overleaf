@@ -3,6 +3,7 @@ import Icon from './icon'
 import { useEffect, useState } from 'react'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { Spinner } from 'react-bootstrap-5'
+import { setTimeout } from '@/utils/window'
 import classNames from 'classnames'
 
 function LoadingSpinner({
@@ -21,7 +22,7 @@ function LoadingSpinner({
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       setShow(true)
     }, delay)
 

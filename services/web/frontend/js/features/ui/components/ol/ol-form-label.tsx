@@ -13,6 +13,7 @@ function OLFormLabel(props: OLFormLabelProps) {
     children: rest.children,
     htmlFor: rest.htmlFor,
     srOnly: rest.visuallyHidden,
+    className: rest.className,
     ...bs3Props,
   }
 
