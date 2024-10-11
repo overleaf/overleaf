@@ -3,7 +3,7 @@
 
   .filters {
     float: right;
-    margin-bottom: var(--spacing-09);
+    margin-bottom: var(--spacing-11);
     display: flex;
     gap: var(--spacing-04);
 
@@ -27,6 +27,29 @@
         text-decoration: underline;
       }
     }
+  }
+
+  .gallery-header {
+    max-width: 885px;
+
+    @include media-breakpoint-up(lg) {
+      padding: 0;
+    }
+  }
+
+  .gallery-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-06);
+  }
+
+  .gallery-summary {
+    @include body-lg;
+
+    text-align: center;
+    margin-bottom: var(--spacing-08);
   }
 
   .top-picks-banner.container {
