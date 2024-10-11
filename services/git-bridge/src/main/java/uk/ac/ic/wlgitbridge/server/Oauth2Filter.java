@@ -122,7 +122,7 @@ public class Oauth2Filter implements Filter {
       cred.setAccessToken(password);
     } else if (this.isUserPasswordEnabled) {
       // password auth has been deprecated for git-bridge
-      handlePasswordAuthenticationDeprecation(projectId, request, response);
+      handlePasswordAuthenticationDeprecation(projectId, username, request, response);
       return;
     } else {
       handleNeedAuthorization(projectId, username, request, response);
@@ -265,14 +265,24 @@ public class Oauth2Filter implements Filter {
   }
 
   private void handlePasswordAuthenticationDeprecation(
-      String projectId, HttpServletRequest request, HttpServletResponse response)
+      String projectId, String username, HttpServletRequest request, HttpServletResponse response)
       throws IOException {
-    Log.info("[{}] Password authentication deprecated, ip={}", projectId, getClientIp(request));
-    sendResponse(
-        response,
-        403,
-        Arrays.asList(
-            "Overleaf now only supports Git authentication tokens to access git. See: https://www.overleaf.com/learn/how-to/Git_integration_authentication_tokens"));
+    if (username.contains("@")) {
+      Log.info("[{}] Password authentication deprecated, ip={}", projectId, getClientIp(request));
+      sendResponse(
+          response,
+          403,
+          Arrays.asList(
+              "Overleaf now only supports Git authentication tokens to access git. See: https://www.overleaf.com/learn/how-to/Git_integration_authentication_tokens"));
+    } else {
+      Log.info("[{}] Wrong git URL format, ip={}", projectId, getClientIp(request));
+      sendResponse(
+          response,
+          403,
+          Arrays.asList(
+              "Overleaf now only supports Git authentication tokens to access git. See: https://www.overleaf.com/learn/how-to/Git_integration_authentication_tokens",
+              "Please make sure your Git URL is correctly formatted. For example: https://git@git.overleaf.com/<YOUR_PROJECT_ID> or https://git:<AUTHENTICATION_TOKEN>@git.overleaf.com/<YOUR_PROJECT_ID>"));
+    }
   }
 
   /*
