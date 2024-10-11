@@ -187,7 +187,6 @@ app.delete(
 app.post('/project/:project_id/block', HttpController.blockProject)
 app.post('/project/:project_id/unblock', HttpController.unblockProject)
 
-app.get('/flush_all_projects', HttpController.flushAllProjects)
 app.get('/flush_queued_projects', HttpController.flushQueuedProjects)
 
 app.get('/total', (req, res, next) => {

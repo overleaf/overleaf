@@ -13,7 +13,6 @@ describe('HttpController', function () {
         }),
         './ProjectHistoryRedisManager': (this.ProjectHistoryRedisManager = {}),
         './ProjectManager': (this.ProjectManager = {}),
-        './ProjectFlusher': { flushAllProjects() {} },
         './DeleteQueueManager': (this.DeleteQueueManager = {}),
         './RedisManager': (this.RedisManager = {
           DOC_OPS_TTL: 42,

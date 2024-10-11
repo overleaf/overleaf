@@ -6,7 +6,6 @@ const Errors = require('./Errors')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const Metrics = require('./Metrics')
-const ProjectFlusher = require('./ProjectFlusher')
 const DeleteQueueManager = require('./DeleteQueueManager')
 const { getTotalSizeOfLines } = require('./Limits')
 const async = require('async')
@@ -409,23 +408,6 @@ function resyncProjectHistory(req, res, next) {
   )
 }
 
-function flushAllProjects(req, res, next) {
-  res.setTimeout(5 * 60 * 1000)
-  const options = {
-    limit: req.query.limit || 1000,
-    concurrency: req.query.concurrency || 5,
-    dryRun: req.query.dryRun || false,
-  }
-  ProjectFlusher.flushAllProjects(options, (err, projectIds) => {
-    if (err) {
-      logger.err({ err }, 'error bulk flushing projects')
-      res.sendStatus(500)
-    } else {
-      res.send(projectIds)
-    }
-  })
-}
-
 function flushQueuedProjects(req, res, next) {
   res.setTimeout(10 * 60 * 1000)
   const options = {
@@ -490,7 +472,6 @@ module.exports = {
   deleteComment,
   updateProject,
   resyncProjectHistory,
-  flushAllProjects,
   flushQueuedProjects,
   blockProject,
   unblockProject,
