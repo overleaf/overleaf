@@ -24,7 +24,7 @@ export function ExpiredSubscription({
         {isSplitTestEnabled('ai-add-on') && (
           <a
             className="btn btn-secondary me-1"
-            href="/user/subscription/new?planCode=assist"
+            href="/user/subscription/new?planCode=assistant"
           >
             {t('buy_overleaf_assist')}
           </a>

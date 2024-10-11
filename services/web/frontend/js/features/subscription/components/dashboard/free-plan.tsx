@@ -30,7 +30,7 @@ function FreePlan() {
       {isSplitTestEnabled('ai-add-on') && (
         <a
           className="btn btn-secondary"
-          href="/user/subscription/new?planCode=assist"
+          href="/user/subscription/new?planCode=assistant"
         >
           {t('buy_overleaf_assist')}
         </a>
