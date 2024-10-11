@@ -5,7 +5,7 @@ import { Completions } from './types'
 export function buildClassCompletions(completions: Completions) {
   for (const item of classNames) {
     completions.classes.push({
-      type: 'pkg',
+      type: 'cls',
       label: item,
       extend: extendRequiredParameter,
     })
