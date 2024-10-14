@@ -37,6 +37,7 @@ import noCache from 'nocache'
 import os from 'os'
 import http from 'http'
 import { fileURLToPath } from 'url'
+import serveStaticWrapper from './ServeStaticWrapper.mjs'
 
 const sessionsRedisClient = UserSessionsRedis.client()
 
@@ -120,10 +121,13 @@ if (Settings.exposeHostname) {
 }
 
 webRouter.use(
-  express.static(fileURLToPath(new URL('../../../public', import.meta.url)), {
-    maxAge: STATIC_CACHE_AGE,
-    setHeaders: csp.removeCSPHeaders,
-  })
+  serveStaticWrapper(
+    fileURLToPath(new URL('../../../public', import.meta.url)),
+    {
+      maxAge: STATIC_CACHE_AGE,
+      setHeaders: csp.removeCSPHeaders,
+    }
+  )
 )
 
 app.set('views', fileURLToPath(new URL('../../views', import.meta.url)))
