@@ -45,6 +45,20 @@
   }
 }
 
+@mixin action-button {
+  font-size: 0;
+  line-height: 1;
+  border-radius: 50%;
+  color: var(--content-primary);
+  background-color: transparent;
+
+  &:hover,
+  &:active,
+  &[aria-expanded='true'] {
+    background-color: rgb($neutral-90, 0.08);
+  }
+}
+
 @mixin reset-button() {
   padding: 0;
   cursor: pointer;
@@ -103,4 +117,29 @@
     transparent 75%,
     transparent
   );
+}
+
+@mixin mask-image($gradient) {
+  // mask-image isn't supported without the -webkit prefix on all browsers we support yet
+  -webkit-mask-image: $gradient;
+  mask-image: $gradient;
+}
+
+@mixin premium-background {
+  background-image: var(--premium-gradient);
+}
+
+@mixin premium-text {
+  @include premium-background;
+
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--white); // Fallback
+  background-color: var(--blue-70); // Fallback
+}
+
+@mixin dark-bg {
+  --link-color: var(--link-color-dark);
+  --link-hover-color: var(--link-hover-color-dark);
+  --link-visited-color: var(--link-visited-color-dark);
 }

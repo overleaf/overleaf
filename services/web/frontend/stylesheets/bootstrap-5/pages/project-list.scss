@@ -657,17 +657,9 @@
       }
 
       .dropdown-table-button-toggle {
-        padding: var(--spacing-04);
-        font-size: 0;
-        line-height: 1;
-        border-radius: 50%;
-        color: var(--content-primary);
-        background-color: transparent;
+        @include action-button;
 
-        &:hover,
-        &:active {
-          background-color: rgba($neutral-90, 0.08);
-        }
+        padding: var(--spacing-04);
       }
     }
   }

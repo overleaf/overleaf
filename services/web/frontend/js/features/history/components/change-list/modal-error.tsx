@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-bootstrap'
+import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 // Using this workaround due to inconsistent and improper error responses from the server
 type ModalErrorProps = {
@@ -15,10 +15,22 @@ function ModalError({ error }: ModalErrorProps) {
   const { t } = useTranslation()
 
   if (error.response?.status === 400 && error.data?.message) {
-    return <Alert bsStyle="danger">{error.data.message}</Alert>
+    return (
+      <OLNotification
+        type="error"
+        content={error.data.message}
+        className="row-spaced-small"
+      />
+    )
   }
 
-  return <Alert bsStyle="danger">{t('generic_something_went_wrong')}</Alert>
+  return (
+    <OLNotification
+      type="error"
+      content={t('generic_something_went_wrong')}
+      className="row-spaced-small"
+    />
+  )
 }
 
 export default ModalError

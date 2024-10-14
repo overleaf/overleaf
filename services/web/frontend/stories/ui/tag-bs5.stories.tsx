@@ -1,4 +1,4 @@
-import Icon from '@/shared/components/icon'
+import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
 import Tag from '@/features/ui/components/bootstrap-5/tag'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -41,7 +41,7 @@ export const TagDefault: Story = {
 
 export const TagPrepend: Story = {
   render: args => {
-    return <Tag prepend={<Icon type="tag" fw />} {...args} />
+    return <Tag prepend={<OLTagIcon />} {...args} />
   },
 }
 
@@ -49,7 +49,7 @@ export const TagWithCloseButton: Story = {
   render: args => {
     return (
       <Tag
-        prepend={<Icon type="tag" fw />}
+        prepend={<OLTagIcon />}
         closeBtnProps={{
           onClick: () => alert('Close triggered!'),
         }}
@@ -63,7 +63,7 @@ export const TagWithContentButtonAndCloseButton: Story = {
   render: args => {
     return (
       <Tag
-        prepend={<Icon type="tag" fw />}
+        prepend={<OLTagIcon />}
         contentProps={{
           onClick: () => alert('Content button clicked!'),
         }}

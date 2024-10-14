@@ -167,3 +167,15 @@
 .dropdown-item-highlighted {
   background-color: var(--bg-light-secondary);
 }
+
+.dropdown-item-material-icon-small {
+  .material-symbols,
+  &.material-symbols {
+    font-size: var(--bs-body-font-size);
+
+    // Centre the symbol in a 20px-by-20px box
+    width: 20px;
+    line-height: 20px;
+    text-align: center;
+  }
+}

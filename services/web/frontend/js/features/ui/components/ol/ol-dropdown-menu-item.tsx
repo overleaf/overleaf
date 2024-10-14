@@ -3,16 +3,26 @@ import { DropdownItem } from '@/features/ui/components/bootstrap-5/dropdown-menu
 import { DropdownItemProps } from '@/features/ui/components/types/dropdown-menu-props'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type OlDropdownMenuItemProps = DropdownItemProps & {
+type OLDropdownMenuItemProps = DropdownItemProps & {
   bs3Props?: MenuItemProps
 }
 
-function OlDropdownMenuItem(props: OlDropdownMenuItemProps) {
+function OLDropdownMenuItem(props: OLDropdownMenuItemProps) {
   const { bs3Props, ...rest } = props
 
   const bs3MenuItemProps: MenuItemProps = {
-    children: rest.children,
+    children: rest.leadingIcon ? (
+      <>
+        {rest.leadingIcon}
+        &nbsp;
+        {rest.children}
+      </>
+    ) : (
+      rest.children
+    ),
     onClick: rest.onClick,
+    href: rest.href,
+    download: rest.download,
     ...bs3Props,
   }
 
@@ -24,4 +34,4 @@ function OlDropdownMenuItem(props: OlDropdownMenuItemProps) {
   )
 }
 
-export default OlDropdownMenuItem
+export default OLDropdownMenuItem

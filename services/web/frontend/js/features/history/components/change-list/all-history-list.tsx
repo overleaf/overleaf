@@ -8,7 +8,8 @@ import { useUserContext } from '../../../../shared/context/user-context'
 import useDropdownActiveItem from '../../hooks/use-dropdown-active-item'
 import { useHistoryContext } from '../../context/history-context'
 import { useEditorContext } from '../../../../shared/context/editor-context'
-import { Overlay, Popover } from 'react-bootstrap'
+import OLPopover from '@/features/ui/components/ol/ol-popover'
+import OLOverlay from '@/features/ui/components/ol/ol-overlay'
 import Close from '@/shared/components/close'
 import { Trans, useTranslation } from 'react-i18next'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -173,18 +174,29 @@ function AllHistoryList() {
 
   if (showHistoryTutorial) {
     popover = (
-      <Overlay
-        placement="left"
+      <OLOverlay
+        placement="left-start"
         show={showHistoryTutorial}
         rootClose
         onHide={hidePopover}
         // using scrollerRef to position the popover in the middle of the viewport
-        target={scrollerRef.current ?? undefined}
-        shouldUpdatePosition
+        target={scrollerRef.current}
+        // Only used in Bootstrap 5. In Bootstrap 3 this is done with CSS.
+        popperConfig={{
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [10, 10],
+              },
+            },
+          ],
+        }}
+        bs3Props={{ shouldUpdatePosition: true }}
       >
-        <Popover
-          id="popover-toolbar-overflow"
-          arrowOffsetTop={10}
+        <OLPopover
+          id="popover-react-history-tutorial"
+          bs3Props={{ arrowOffsetTop: 10 }}
           title={
             <span>
               {t('react_history_tutorial_title')}{' '}
@@ -212,23 +224,23 @@ function AllHistoryList() {
               <a href="https://www.overleaf.com/learn/latex/Using_the_History_feature" />, // eslint-disable-line jsx-a11y/anchor-has-content, react/jsx-key
             ]}
           />
-        </Popover>
-      </Overlay>
+        </OLPopover>
+      </OLOverlay>
     )
   } else if (showRestorePromo) {
     popover = (
-      <Overlay
-        placement="left"
+      <OLOverlay
+        placement="left-start"
         show={showRestorePromo}
         rootClose
         onHide={hidePopover}
         // using scrollerRef to position the popover in the middle of the viewport
-        target={scrollerRef.current ?? undefined}
-        shouldUpdatePosition
+        target={scrollerRef.current}
+        bs3Props={{ shouldUpdatePosition: true }}
       >
-        <Popover
-          id="popover-toolbar-overflow"
-          arrowOffsetTop={10}
+        <OLPopover
+          id="popover-history-restore-promo"
+          bs3Props={{ arrowOffsetTop: 10 }}
           title={
             <span>
               {t('history_restore_promo_title')}
@@ -255,8 +267,8 @@ function AllHistoryList() {
               />,
             ]}
           />
-        </Popover>
-      </Overlay>
+        </OLPopover>
+      </OLOverlay>
     )
   }
 
@@ -330,7 +342,9 @@ function AllHistoryList() {
       {showNonOwnerPaywall ? <NonOwnerPaywallPrompt /> : null}
       {updatesLoadingState === 'loadingInitial' ||
       updatesLoadingState === 'loadingUpdates' ? (
-        <LoadingSpinner />
+        <div className="history-all-versions-loading">
+          <LoadingSpinner />
+        </div>
       ) : null}
     </div>
   )

@@ -4,6 +4,7 @@
     "function-url-quotes": null,
     "no-descending-specificity": null,
     "scss/at-extend-no-missing-placeholder": null,
-    "scss/operator-no-newline-after": null
+    "scss/operator-no-newline-after": null,
+    "property-no-vendor-prefix": [true, { "ignoreProperties": ["mask-image"] }]
   }
 }

@@ -17,9 +17,3 @@
     }
   }
 }
-
-.system-message .close {
-  @include reset-button;
-
-  color: var(--content-primary-dark);
-}

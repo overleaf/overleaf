@@ -1,0 +1,10 @@
+// This is our own implementation because the Bootstrap close button requires more customization than is worthwhile
+.close {
+  @include reset-button;
+
+  color: var(--content-primary);
+
+  &.dark {
+    color: var(--content-primary-dark);
+  }
+}

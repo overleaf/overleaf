@@ -2,7 +2,7 @@ import { forwardRef, SyntheticEvent } from 'react'
 import classnames from 'classnames'
 import RootCloseWrapper from 'react-overlays/lib/RootCloseWrapper'
 import { DropdownProps } from 'react-bootstrap'
-import { MergeAndOverride } from '../../../../../types/utils'
+import { MergeAndOverride } from '../../../../../../types/utils'
 
 type DropdownMenuWithRefProps = MergeAndOverride<
   Pick<DropdownProps, 'bsClass' | 'open' | 'pullRight' | 'onClose'>,

@@ -47,6 +47,7 @@ export default function OLModal({ children, ...props }: OLModalProps) {
     bsSize: bs5Props.size,
     show: bs5Props.show,
     onHide: bs5Props.onHide,
+    onExited: bs5Props.onExited,
     backdrop: bs5Props.backdrop,
     animation: bs5Props.animation,
     id: bs5Props.id,
@@ -86,10 +87,15 @@ export function OLModalTitle({ children, ...props }: OLModalTitleProps) {
   const bs3ModalProps: BS3ModalTitleProps = {
     componentClass: bs5Props.as,
   }
+
   return (
     <BootstrapVersionSwitcher
       bs3={<BS3Modal.Title {...bs3ModalProps}>{children}</BS3Modal.Title>}
-      bs5={<BS5Modal.Title {...bs5Props}>{children}</BS5Modal.Title>}
+      bs5={
+        <BS5Modal.Title as="h2" {...bs5Props}>
+          {children}
+        </BS5Modal.Title>
+      }
     />
   )
 }

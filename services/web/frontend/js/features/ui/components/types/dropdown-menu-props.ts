@@ -42,6 +42,8 @@ export type DropdownItemProps = PropsWithChildren<{
   role?: string
   tabIndex?: number
   target?: string
+  download?: boolean | string
+  rel?: string
 }>
 
 export type DropdownToggleProps = PropsWithChildren<{
@@ -53,6 +55,7 @@ export type DropdownToggleProps = PropsWithChildren<{
   variant?: SplitButtonVariants
   as?: ElementType
   size?: 'sm' | 'lg' | undefined
+  'aria-label'?: string
 }>
 
 export type DropdownMenuProps = PropsWithChildren<{

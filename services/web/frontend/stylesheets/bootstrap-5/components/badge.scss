@@ -16,6 +16,10 @@ $max-width: 160px;
   margin-right: var(--spacing-02);
   display: flex;
   align-items: center;
+
+  .material-symbols {
+    font-size: inherit;
+  }
 }
 
 .badge-close {

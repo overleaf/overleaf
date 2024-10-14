@@ -6,7 +6,7 @@ import {
 } from 'react-bootstrap'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
-type OLPopoverProps = PopoverProps & {
+type OLPopoverProps = Omit<PopoverProps, 'title'> & {
   title?: React.ReactNode
   bs3Props?: BS3PopoverProps
 }

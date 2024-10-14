@@ -40,8 +40,9 @@ function OLOverlay(props: OLOverlayProps) {
     >
 
     for (const placement of bs3PlacementOptions) {
-      if (placement === bs5Props.placement) {
-        bs3OverlayProps.placement = bs5Props.placement
+      // BS5 has more placement options than BS3, such as "left-start", so these are mapped to "left" etc.
+      if (bs5Props.placement.startsWith(placement)) {
+        bs3OverlayProps.placement = placement
         break
       }
     }

@@ -27,7 +27,7 @@ function CompareVersionDropdown({
         <MaterialIcon
           type="align_space_even"
           className="history-dropdown-icon"
-          accessibilityLabel="compare drop down"
+          accessibilityLabel={t('compare')}
         />
       }
     >

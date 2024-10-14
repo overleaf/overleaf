@@ -1,8 +1,15 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
-import { Modal, FormGroup, FormControl } from 'react-bootstrap'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import ModalError from './modal-error'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import useAsync from '../../../../shared/hooks/use-async'
 import useAbortController from '../../../../shared/hooks/use-abort-controller'
 import useAddOrRemoveLabels from '../../hooks/use-add-or-remove-labels'
@@ -11,6 +18,7 @@ import { addLabel } from '../../services/api'
 import { Label } from '../../services/types/label'
 import { useRefWithAutoFocus } from '../../../../shared/hooks/use-ref-with-auto-focus'
 import { debugConsole } from '@/utils/debugging'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 
 type AddLabelModalProps = {
   show: boolean
@@ -71,51 +79,55 @@ function AddLabelModal({ show, setShow, version }: AddLabelModalProps) {
   }
 
   return (
-    <AccessibleModal
+    <OLModal
       show={show}
       onExited={handleModalExited}
       onHide={() => setShow(false)}
       id="add-history-label"
     >
-      <Modal.Header>
-        <Modal.Title>{t('history_add_label')}</Modal.Title>
-      </Modal.Header>
-      <form onSubmit={handleSubmit}>
-        <Modal.Body>
+      <OLModalHeader>
+        <OLModalTitle>{t('history_add_label')}</OLModalTitle>
+      </OLModalHeader>
+      <OLForm onSubmit={handleSubmit}>
+        <OLModalBody>
           {isError && <ModalError error={responseError} />}
-          <FormGroup>
-            <input
+          <OLFormGroup>
+            <OLFormControl
               ref={autoFocusedRef}
-              className="form-control"
               type="text"
               placeholder={t('history_new_label_name')}
               required
               value={comment}
-              onChange={(
-                e: React.ChangeEvent<HTMLInputElement & FormControl>
-              ) => setComment(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setComment(e.target.value)
+              }
             />
-          </FormGroup>
-        </Modal.Body>
-        <Modal.Footer>
-          <button
-            type="button"
-            className="btn btn-secondary"
+          </OLFormGroup>
+        </OLModalBody>
+        <OLModalFooter>
+          <OLButton
+            variant="secondary"
             disabled={isLoading}
             onClick={() => setShow(false)}
           >
             {t('cancel')}
-          </button>
-          <button
+          </OLButton>
+          <OLButton
             type="submit"
-            className="btn btn-primary"
+            variant="primary"
             disabled={isLoading || !comment.length}
+            isLoading={isLoading}
+            bs3Props={{
+              loading: isLoading
+                ? t('history_adding_label')
+                : t('history_add_label'),
+            }}
           >
-            {isLoading ? t('history_adding_label') : t('history_add_label')}
-          </button>
-        </Modal.Footer>
-      </form>
-    </AccessibleModal>
+            {t('history_add_label')}
+          </OLButton>
+        </OLModalFooter>
+      </OLForm>
+    </OLModal>
   )
 }
 

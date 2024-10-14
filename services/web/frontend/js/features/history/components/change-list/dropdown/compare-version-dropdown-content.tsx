@@ -40,10 +40,7 @@ function CompareVersionDropdownContentAllHistory({
         closeDropdown={closeDropdown}
         text={t('history_compare_up_to_this_version')}
         icon={
-          <MaterialIcon
-            type="align_start"
-            className="history-dropdown-icon p-1"
-          />
+          <MaterialIcon type="align_start" className="history-dropdown-icon" />
         }
       />
       <CompareDropDownItem
@@ -56,10 +53,7 @@ function CompareVersionDropdownContentAllHistory({
         closeDropdown={closeDropdown}
         text={t('history_compare_from_this_version')}
         icon={
-          <MaterialIcon
-            type="align_end"
-            className="history-dropdown-icon p-1"
-          />
+          <MaterialIcon type="align_end" className="history-dropdown-icon" />
         }
       />
     </>
@@ -100,10 +94,7 @@ function CompareVersionDropdownContentLabelsList({
         closeDropdown={closeDropdownLabels}
         text={t('history_compare_up_to_this_version')}
         icon={
-          <MaterialIcon
-            type="align_start"
-            className="history-dropdown-icon p-1"
-          />
+          <MaterialIcon type="align_start" className="history-dropdown-icon" />
         }
       />
       <CompareDropDownItem
@@ -116,10 +107,7 @@ function CompareVersionDropdownContentLabelsList({
         closeDropdown={closeDropdownLabels}
         text={t('history_compare_from_this_version')}
         icon={
-          <MaterialIcon
-            type="align_end"
-            className="history-dropdown-icon p-1"
-          />
+          <MaterialIcon type="align_end" className="history-dropdown-icon" />
         }
       />
     </>

@@ -18,7 +18,9 @@ function SystemMessage({ id, children }: SystemMessageProps) {
 
   return (
     <li className="system-message">
-      {id !== 'protected' ? <Close onDismiss={() => setHidden(true)} /> : null}
+      {id !== 'protected' ? (
+        <Close onDismiss={() => setHidden(true)} variant="dark" />
+      ) : null}
       {children}
     </li>
   )

@@ -328,20 +328,25 @@
 ***************************************/
 
 .toggle-switch {
+  --toggle-switch-height: 26px;
+  --toggle-switch-padding: var(--spacing-01);
+
   display: inline-flex;
   align-items: center;
-  height: 26px;
+  height: var(--toggle-switch-height);
   margin-right: var(--spacing-03);
   border-radius: var(--border-radius-full);
   background-color: var(--neutral-20);
-  padding: var(--spacing-01);
+  padding: var(--toggle-switch-padding);
 }
 
 .toggle-switch-label {
   display: inline-block;
   float: left;
   font-weight: normal;
-  height: 100%;
+
+  // It seems we need to set the height explicitly rather than using 100% to get the button to display correctly in Blink
+  height: calc(var(--toggle-switch-height) - 2 * var(--toggle-switch-padding));
   text-align: center;
   margin: 0;
   cursor: pointer;

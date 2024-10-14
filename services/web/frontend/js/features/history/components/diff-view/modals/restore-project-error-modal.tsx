@@ -1,4 +1,10 @@
-import { Button, Modal } from 'react-bootstrap'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 
 export function RestoreProjectErrorModal({
@@ -9,26 +15,22 @@ export function RestoreProjectErrorModal({
   const { t } = useTranslation()
 
   return (
-    <Modal show onHide={resetErrorBoundary}>
-      <Modal.Header closeButton>
-        <Modal.Title>
+    <OLModal show onHide={resetErrorBoundary}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>
           {t('an_error_occured_while_restoring_project')}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+        </OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         {t(
           'there_was_a_problem_restoring_the_project_please_try_again_in_a_few_moments_or_contact_us'
         )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          onClick={resetErrorBoundary}
-        >
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={resetErrorBoundary}>
           {t('close')}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

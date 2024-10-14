@@ -164,14 +164,14 @@
 
   .loading-spinner-small {
     border-width: 0.2em;
-    height: 20px;
-    width: 20px;
+    height: 1.25rem;
+    width: 1.25rem;
   }
 
   .loading-spinner-large {
     border-width: 0.2em;
-    height: 24px;
-    width: 24px;
+    height: 1.5rem;
+    width: 1.5rem;
   }
 }
 
@@ -187,11 +187,11 @@
   justify-content: center;
 
   .icon-small {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 
   .icon-large {
-    font-size: 24px;
+    font-size: 1.5rem;
   }
 
   .spinner {

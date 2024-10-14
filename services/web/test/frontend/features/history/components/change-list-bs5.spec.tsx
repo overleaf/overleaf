@@ -1,4 +1,4 @@
-import '../../../helpers/bootstrap-3'
+import '../../../helpers/bootstrap-5'
 import { useState } from 'react'
 import ToggleSwitch from '../../../../../frontend/js/features/history/components/change-list/toggle-switch'
 import ChangeList from '../../../../../frontend/js/features/history/components/change-list/change-list'
@@ -31,7 +31,7 @@ const mountWithEditorProviders = (
   )
 }
 
-describe('change list (Bootstrap 3)', function () {
+describe('change list (Bootstrap 5)', function () {
   const scope = {
     ui: { view: 'history', pdfLayout: 'sideBySide', chatOpen: true },
   }
@@ -363,7 +363,7 @@ describe('change list (Bootstrap 3)', function () {
       cy.findAllByTestId('history-version-details')
         .eq(1)
         .within(() => {
-          cy.findByRole('button', { name: /compare/i }).click()
+          cy.get('[aria-label="Compare"]').click()
           cy.findByRole('menu').within(() => {
             cy.findByRole('menuitem', {
               name: /compare up to this version/i,

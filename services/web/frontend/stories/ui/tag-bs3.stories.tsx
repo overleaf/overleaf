@@ -1,4 +1,4 @@
-import Icon from '@/shared/components/icon'
+import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
 import BS3Tag from '@/shared/components/tag'
 import type { Meta, StoryObj } from '@storybook/react'
 
@@ -47,7 +47,7 @@ export const TagPrepend: Story = {
   render: args => {
     return (
       <div className="small">
-        <BS3Tag prepend={<Icon type="tag" fw />} {...args} />
+        <BS3Tag prepend={<OLTagIcon />} {...args} />
       </div>
     )
   },
@@ -58,7 +58,7 @@ export const TagWithCloseButton: Story = {
     return (
       <div className="small">
         <BS3Tag
-          prepend={<Icon type="tag" fw />}
+          prepend={<OLTagIcon />}
           closeBtnProps={{
             onClick: () => alert('Close triggered!'),
           }}

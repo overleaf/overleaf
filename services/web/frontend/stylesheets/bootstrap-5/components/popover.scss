@@ -1,5 +1,6 @@
 .popover {
   @include shadow-md;
+  @include dark-bg;
 
   line-height: var(--line-height-02);
 }

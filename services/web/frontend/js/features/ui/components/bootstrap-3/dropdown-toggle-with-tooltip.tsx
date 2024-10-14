@@ -1,8 +1,8 @@
 import { forwardRef } from 'react'
-import Tooltip from '../tooltip'
+import Tooltip from '../../../../shared/components/tooltip'
 import classnames from 'classnames'
 import { DropdownProps } from 'react-bootstrap'
-import { MergeAndOverride } from '../../../../../types/utils'
+import { MergeAndOverride } from '../../../../../../types/utils'
 
 type CustomToggleProps = MergeAndOverride<
   Pick<DropdownProps, 'bsClass' | 'open'>,

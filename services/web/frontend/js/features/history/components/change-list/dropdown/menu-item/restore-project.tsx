@@ -1,12 +1,14 @@
 import Icon from '@/shared/components/icon'
 import { useCallback, useState } from 'react'
-import { MenuItem } from 'react-bootstrap'
+import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import { useTranslation } from 'react-i18next'
 import { RestoreProjectModal } from '../../../diff-view/modals/restore-project-modal'
 import { useSplitTestContext } from '@/shared/context/split-test-context'
 import { useRestoreProject } from '@/features/history/context/hooks/use-restore-project'
 import withErrorBoundary from '@/infrastructure/error-boundary'
 import { RestoreProjectErrorModal } from '../../../diff-view/modals/restore-project-error-modal'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type RestoreProjectProps = {
   projectId: string
@@ -44,9 +46,18 @@ const RestoreProject = ({
 
   return (
     <>
-      <MenuItem onClick={handleClick}>
-        <Icon type="undo" fw /> {t('restore_project_to_this_version')}
-      </MenuItem>
+      <OLDropdownMenuItem
+        as="button"
+        leadingIcon={
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="undo" fw />}
+            bs5={<MaterialIcon type="undo" />}
+          />
+        }
+        onClick={handleClick}
+      >
+        {t('restore_project_to_this_version')}
+      </OLDropdownMenuItem>
       <RestoreProjectModal
         setShow={setShowModal}
         show={showModal}

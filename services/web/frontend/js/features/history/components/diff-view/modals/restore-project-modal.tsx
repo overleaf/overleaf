@@ -1,7 +1,12 @@
-import AccessibleModal from '@/shared/components/accessible-modal'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 import { formatDate } from '@/utils/dates'
 import { useCallback } from 'react'
-import { Button, Modal } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 
 type RestoreProjectModalProps = {
@@ -26,35 +31,31 @@ export const RestoreProjectModal = ({
   }, [setShow])
 
   return (
-    <AccessibleModal onHide={() => setShow(false)} show={show}>
-      <Modal.Header>
-        <Modal.Title>{t('restore_this_version')}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+    <OLModal onHide={() => setShow(false)} show={show}>
+      <OLModalHeader>
+        <OLModalTitle>{t('restore_this_version')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         <p>
           {t('your_current_project_will_revert_to_the_version_from_time', {
             timestamp: formatDate(endTimestamp),
           })}
         </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          className="btn btn-secondary"
-          bsStyle={null}
-          onClick={onCancel}
-          disabled={isRestoring}
-        >
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={onCancel} disabled={isRestoring}>
           {t('cancel')}
-        </Button>
-        <Button
-          className="btn btn-primary"
-          bsStyle={null}
+        </OLButton>
+        <OLButton
+          variant="primary"
           onClick={onRestore}
           disabled={isRestoring}
+          isLoading={isRestoring}
+          bs3Props={{ loading: isRestoring ? t('restoring') : t('restore') }}
         >
-          {isRestoring ? t('restoring') : t('restore')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+          {t('restore')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
