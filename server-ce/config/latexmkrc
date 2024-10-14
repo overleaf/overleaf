@@ -1,3 +1,7 @@
 # equivalent to -gt option. Used to prevent latexmk from skipping recompilation
 # of output.log and output.pdf
 $go_mode = 3;
+$pdflatex = 'pdflatex -shell-escape %O %S';
+$xelatex = 'xelatex -shell-escape %O %S';
+$lualatex = 'lualatex -shell-escape %O %S';
+$latex = 'latex -shell-escape %O %S';
