@@ -1153,6 +1153,40 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
       RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
       ChatController.sendMessage
     )
+    webRouter.get(
+      '/project/:project_id/threads',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      ChatController.getThreads
+    )
+    webRouter.post(
+      '/project/:project_id/thread/:thread_id/messages',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
+      ChatController.sendComment
+    )
+    webRouter.delete(
+      '/project/:project_id/thread/:thread_id/messages/:message_id',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
+      ChatController.deleteMessage
+    )
+    webRouter.post(
+      '/project/:project_id/thread/:thread_id/messages/:message_id/edit',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
+      ChatController.editMessage
+    )
+    webRouter.post(
+      '/project/:project_id/doc/:doc_id/thread/:thread_id/resolve',
+      AuthorizationMiddleware.blockRestrictedUserFromProject,
+      AuthorizationMiddleware.ensureUserCanReadProject,
+      RateLimiterMiddleware.rateLimit(rateLimiters.sendChatMessage),
+      ChatController.resolveThread
+    )
   }
 
   webRouter.post(
