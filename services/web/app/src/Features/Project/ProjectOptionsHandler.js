@@ -30,7 +30,7 @@ const ProjectOptionsHandler = {
       throw new Error(`invalid imageName: ${imageName}`)
     }
     const conditions = { _id: projectId }
-    const update = { imageName: settings.imageRoot + '/' + imageName }
+    const update = { imageName: imageName }
     return Project.updateOne(conditions, update, {})
   },
 

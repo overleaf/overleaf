@@ -47,10 +47,29 @@ const parseIntOrFail = function (value) {
 const DATA_DIR = '/var/lib/overleaf/data'
 const TMP_DIR = '/var/lib/overleaf/tmp'
 
+const images = process.env.ALL_TEX_LIVE_DOCKER_IMAGES.split(',')
+const imageNames = process.env.ALL_TEX_LIVE_DOCKER_IMAGE_NAMES.split(',')
+
+if (images.length !== imageNames.length) {
+  throw new Error(`image and imageName count mismatched`)
+}
+const allowedImageNames = []
+images.forEach((_, i) => {
+  allowedImageNames.push({imageName: images[i], imageDesc: imageNames[i]})
+});
+
 const settings = {
   clsi: {
     optimiseInDocker: process.env.OPTIMISE_PDF === 'true',
+    dockerRunner: process.env.DOCKER_RUNNER === 'true',
+    docker: {
+      maxContainerAge: process.env.SANDBOXED_COMPILES_CONTAINER_TIMEOUT,
+      image: process.env.TEX_LIVE_DOCKER_IMAGE,
+      user: process.env.DOCKER_USER,
+    },
   },
+
+  allowedImageNames: allowedImageNames,
 
   brandPrefix: '',
 
@@ -172,6 +191,7 @@ const settings = {
     clsiCacheDir: Path.join(DATA_DIR, 'cache'),
     // Where to write the output files to disk after running LaTeX
     outputDir: Path.join(DATA_DIR, 'output'),
+    sandboxedCompilesHostDir: process.env.SANDBOXED_COMPILES_HOST_DIR,
   },
 
   // Server Config

@@ -20,7 +20,7 @@ services:
             ####  Server Pro: Uncomment the following line to mount the docker  ####
             ####             socket, required for Sibling Containers to work    ####
             ########################################################################
-            # - /var/run/docker.sock:/var/run/docker.sock
+            - /var/run/docker.sock:/var/run/docker.sock
         environment:
 
             OVERLEAF_APP_NAME: Overleaf Community Edition
@@ -81,7 +81,15 @@ services:
             SANDBOXED_COMPILES: 'true'
             SANDBOXED_COMPILES_SIBLING_CONTAINERS: 'true'
             ### Bind-mount source for /var/lib/overleaf/data/compiles inside the container.
-            SANDBOXED_COMPILES_HOST_DIR: '/home/user/sharelatex_data/data/compiles'
+            SANDBOXED_COMPILES_HOST_DIR: '/home/overleaf/sharelatex_data/data/compiles'
+            SANDBOXED_COMPILES_CONTAINER_TIMEOUT: 3600000
+            TEX_LIVE_DOCKER_IMAGE: "ghcr.io/lcpu-club/sharelatex-base:2024.1"
+            ALL_TEX_LIVE_DOCKER_IMAGES: "ghcr.io/lcpu-club/sharelatex-base:2024.1,ghcr.io/lcpu-club/sharelatex-base:2022.1,ghcr.io/lcpu-club/sharelatex-base:2020.1"
+            ALL_TEX_LIVE_DOCKER_IMAGE_NAMES: "TeX Live 2024,TeX Live 2022,TeX Live 2020"
+            DOCKER_RUNNER: true
+            DOCKER_USER: "www-data"
+
+            OVERLEAF_IS_SERVER_PRO: true
 
             ## Works with test LDAP server shown at bottom of docker compose
             # OVERLEAF_LDAP_URL: 'ldap://ldap:389'
