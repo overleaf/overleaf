@@ -390,6 +390,29 @@ describe('UpdatesProcessor', function () {
         return this.callback.should.have.been.called
       })
     })
+
+    describe('with an error converting changes', function () {
+      beforeEach(function (done) {
+        this.err = new Error()
+        this.UpdateTranslator.convertToChanges.throws(this.err)
+        this.callback = sinon.stub()
+
+        this.UpdatesProcessor._processUpdates(
+          this.project_id,
+          this.ol_project_id,
+          this.rawUpdates,
+          this.extendLock,
+          err => {
+            this.callback(err)
+            done()
+          }
+        )
+      })
+
+      it('should call the callback with the error', function () {
+        this.callback.should.have.been.calledWith(this.err)
+      })
+    })
   })
 
   return describe('_skipAlreadyAppliedUpdates', function () {
