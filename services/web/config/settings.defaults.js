@@ -744,7 +744,7 @@ module.exports = {
     right_footer: [
       {
         text: "<i class='fa fa-github-square'></i> Fork on GitHub!",
-        url: 'https://github.com/overleaf/overleaf',
+        url: 'https://github.com/lcpu-club/overleaf',
       },
     ],
 

@@ -1,3 +1,13 @@
+## Note
+
+Should you find any security issues, DO contact us at linuxclub at pku.edu.cn and please do NOT disclose information directly here.
+
+If you want to develop a new feature, please check [GitHub Projects](https://github.com/orgs/lcpu-club/projects/2) to see if it has already been requested. If the feature is listed in the dashboard, you should comment in the corresponding issue. If your feature is not in the dashboard. You should open a new issue with your ideas on this feature. 
+
+This repo is maintained in a rebase-on-top model, which means that when syncing with upstream, changes in this fork will be rebased on top of the upstream tree.
+
+At last, we thank you for your contribution to this project and happy hacking!
+
 # Overleaf Community Edition, development environment
 
 ## Building and running

@@ -1,3 +1,25 @@
+## About This Fork 关于本分支
+
+This fork is developed and maintained by [LCPU](https://github.com/lcpu-club). We try to implement all entreprise features into this fork. We have currently implemented the following features:
+
+- Sandboxed compiles and selecting build image ([#4](https://github.com/lcpu-club/overleaf/pull/4), [#5](https://github.com/lcpu-club/overleaf/pull/5))
+- Review and comment ([#12](https://github.com/lcpu-club/overleaf/pull/12))
+
+You can see all local changes at [Commit History](https://github.com/lcpu-club/overleaf/commits/main/).
+
+For instructions on how to deploy Overleaf, see [Quick Start Guide](https://github.com/lcpu-club/overleaf/wiki/Quick-Start-Guide).
+
+Future development roadmap is in [GitHub Projects](https://github.com/orgs/lcpu-club/projects/2). Feel free to share your thoughts in [GitHub Issues](https://github.com/lcpu-club/overleaf/issues) and pull requests are welcomed and *appreciated*. To get started, go to [./development](https://github.com/lcpu-club/overleaf/tree/main/develop).
+
+本分支由[北京大学学生 Linux 俱乐部](https://github.com/lcpu-club)开发并维护。我们致力于将Overleaf中的企业级功能移植入开源分支，目前，我们已经实现了以下功能:
+
+- 编译沙箱及自定义编译镜像 ([#4](https://github.com/lcpu-club/overleaf/pull/4), [#5](https://github.com/lcpu-club/overleaf/pull/5))
+- 审阅与评论 ([#12](https://github.com/lcpu-club/overleaf/pull/12))
+
+可在[快速开始](https://github.com/lcpu-club/overleaf/wiki/快速开始)查阅安装指南。
+
+开发计划位于 [GitHub Projects](https://github.com/orgs/lcpu-club/projects/2)，欢迎在 [GitHub Issues](https://github.com/lcpu-club/overleaf/issues) 中提出你的想法。我们欢迎并由衷感谢你的PR。有关开发帮助，请参阅 [./development](https://github.com/lcpu-club/overleaf/tree/main/develop)。
+
 <h1 align="center">
   <br>
   <a href="https://www.overleaf.com"><img src="doc/logo.png" alt="Overleaf" width="300"></a>

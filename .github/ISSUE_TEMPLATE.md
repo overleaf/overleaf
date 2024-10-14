@@ -1,11 +1,6 @@
 <!--
 
-Note: If you are using www.overleaf.com and have a problem, 
-      or if you would like to request a new feature please contact
-      the support team at support@overleaf.com
-      
-      This form should only be used to report bugs in the 
-      Community Edition release of Overleaf.
+Note: Please only report bugs relating to this fork of Overleaf
 
 -->
 
