@@ -327,7 +327,7 @@ function _getMostRecentVersionWithDebug(projectId, projectHistoryId, callback) {
   )
 }
 
-function _processUpdates(
+export function _processUpdates(
   projectId,
   projectHistoryId,
   updates,

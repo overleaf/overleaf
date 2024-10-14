@@ -23,7 +23,7 @@ describe('UpdatesProcessor', function () {
   before(async function () {
     this.extendLock = sinon.stub()
     this.BlobManager = {
-      createBlobForUpdates: sinon.stub(),
+      createBlobsForUpdates: sinon.stub(),
     }
     this.HistoryStoreManager = {
       getMostRecentVersion: sinon.stub(),
@@ -56,11 +56,28 @@ describe('UpdatesProcessor', function () {
       record: sinon.stub().yields(),
     }
     this.Profiler = {
-      Profiler: sinon.stub(),
+      Profiler: class {
+        log() {
+          return this
+        }
+
+        wrap(label, cb) {
+          return cb
+        }
+
+        getTimeDelta() {
+          return 0
+        }
+
+        end() {
+          return 0
+        }
+      },
     }
     this.Metrics = {
       gauge: sinon.stub(),
       inc: sinon.stub(),
+      timing: sinon.stub(),
     }
     this.Settings = {
       redis: {
@@ -255,14 +272,20 @@ describe('UpdatesProcessor', function () {
   })
 
   describe('_processUpdates', function () {
-    return beforeEach(function () {
+    beforeEach(function () {
       this.mostRecentVersionInfo = { version: 1 }
       this.rawUpdates = ['raw updates']
       this.expandedUpdates = ['expanded updates']
       this.filteredUpdates = ['filtered updates']
       this.compressedUpdates = ['compressed updates']
       this.updatesWithBlobs = ['updates with blob']
-      this.changes = ['changes']
+      this.changes = [
+        {
+          toRaw() {
+            return 'change'
+          },
+        },
+      ]
       this.newSyncState = { resyncProjectStructure: false }
 
       this.extendLock = sinon.stub().yields()
@@ -276,77 +299,95 @@ describe('UpdatesProcessor', function () {
         this.filteredUpdates,
         this.newSyncState
       )
-      this.SyncManager.expandSyncUpdates.yields(null, this.expandedUpdates)
-      this.UpdateCompressor.compressRawUpdates.returns(this.compressedUpdates)
-      this.BlobManager.createBlobForUpdates.yields(null, this.updatesWithBlobs)
-      this.UpdateTranslator.convertToChanges.returns(this.changes)
-
-      this.UpdatesProcessor._processUpdates(
-        this.project_id,
-        this.rawUpdates,
-        this.extendLock,
-        done
+      this.SyncManager.expandSyncUpdates.callsArgWith(
+        4,
+        null,
+        this.expandedUpdates
       )
+      this.UpdateCompressor.compressRawUpdates.returns(this.compressedUpdates)
+      this.BlobManager.createBlobsForUpdates.callsArgWith(
+        4,
+        null,
+        this.updatesWithBlobs
+      )
+      this.UpdateTranslator.convertToChanges.returns(this.changes)
+    })
+
+    describe('happy path', function () {
+      beforeEach(function (done) {
+        this.UpdatesProcessor._processUpdates(
+          this.project_id,
+          this.ol_project_id,
+          this.rawUpdates,
+          this.extendLock,
+          err => {
+            this.callback(err)
+            done()
+          }
+        )
+      })
 
       it('should get the latest version id', function () {
-        return this.HistoryStoreManager.getMostRecentVersion
-          .calledWith(this.project_id, this.ol_project_id)
-          .should.equal(true)
+        return this.HistoryStoreManager.getMostRecentVersion.should.have.been.calledWith(
+          this.project_id,
+          this.ol_project_id
+        )
       })
 
       it('should skip updates when resyncing', function () {
-        return this.SyncManager.skipUpdatesDuringSync
-          .calledWith(this.project_id, this.rawUpdates)
-          .should.equal(true)
+        return this.SyncManager.skipUpdatesDuringSync.should.have.been.calledWith(
+          this.project_id,
+          this.rawUpdates
+        )
       })
 
       it('should expand sync updates', function () {
-        return this.SyncManager.expandSyncUpdates
-          .calledWith(
-            this.project_id,
-            this.ol_project_id,
-            this.filteredUpdates,
-            this.extendLock
-          )
-          .should.equal(true)
+        return this.SyncManager.expandSyncUpdates.should.have.been.calledWith(
+          this.project_id,
+          this.ol_project_id,
+          this.filteredUpdates,
+          this.extendLock
+        )
       })
 
       it('should compress updates', function () {
-        return this.UpdateCompressor.compressRawUpdates
-          .calledWith(this.expandedUpdates)
-          .should.equal(true)
+        return this.UpdateCompressor.compressRawUpdates.should.have.been.calledWith(
+          this.expandedUpdates
+        )
       })
 
-      it('should not create any blobs', function () {
-        return this.BlobManager.createBlobForUpdates
-          .calledWith(this.project_id, this.compressedUpdates)
-          .called.should.equal(false)
+      it('should create any blobs for the updates', function () {
+        return this.BlobManager.createBlobsForUpdates.should.have.been.calledWith(
+          this.project_id,
+          this.ol_project_id,
+          this.compressedUpdates
+        )
       })
 
       it('should convert the updates into a change requests', function () {
-        return this.UpdateTranslator.convertToChanges
-          .calledWith(
-            this.project_id,
-            this.updatesWithBlobs,
-            this.mostRecentVersionInfo.version
-          )
-          .should.equal(true)
+        return this.UpdateTranslator.convertToChanges.should.have.been.calledWith(
+          this.project_id,
+          this.updatesWithBlobs
+        )
       })
 
       it('should send the change request to the history store', function () {
-        return this.HistoryStoreManager.sendChanges
-          .calledWith(this.project_id, this.ol_project_id, this.changes)
-          .should.equal(true)
+        return this.HistoryStoreManager.sendChanges.should.have.been.calledWith(
+          this.project_id,
+          this.ol_project_id,
+          ['change']
+        )
       })
 
       it('should set the sync state', function () {
-        return this.SyncManager.setResyncState
-          .calledWith(this.project_id, this.newSyncState)
-          .should.equal(true)
+        return this.SyncManager.setResyncState.should.have.been.calledWith(
+          this.project_id,
+          this.newSyncState
+        )
       })
 
-      return it('should call the callback with no error', function () {
-        return this.callback.called.should.equal(true)
+      it('should call the callback with no error', function () {
+        return this.callback.should.have.been.called
       })
     })
   })
