@@ -1,20 +1,20 @@
 import './helpers/InitApp.mjs'
 import Features from '../../../app/src/infrastructure/Features.js'
 
-import MockAnalyticsApi from './mocks/MockAnalyticsApi.js'
-import MockChatApi from './mocks/MockChatApi.js'
-import MockClsiApi from './mocks/MockClsiApi.js'
+import MockAnalyticsApi from './mocks/MockAnalyticsApi.mjs'
+import MockChatApi from './mocks/MockChatApi.mjs'
+import MockClsiApi from './mocks/MockClsiApi.mjs'
 import MockDocstoreApi from './mocks/MockDocstoreApi.js'
 import MockDocUpdaterApi from './mocks/MockDocUpdaterApi.js'
 import MockFilestoreApi from './mocks/MockFilestoreApi.js'
-import MockGitBridgeApi from './mocks/MockGitBridgeApi.js'
-import MockNotificationsApi from './mocks/MockNotificationsApi.js'
+import MockGitBridgeApi from './mocks/MockGitBridgeApi.mjs'
+import MockNotificationsApi from './mocks/MockNotificationsApi.mjs'
 import MockProjectHistoryApi from './mocks/MockProjectHistoryApi.js'
-import MockSpellingApi from './mocks/MockSpellingApi.js'
+import MockSpellingApi from './mocks/MockSpellingApi.mjs'
 import MockV1Api from './mocks/MockV1Api.js'
 import MockV1HistoryApi from './mocks/MockV1HistoryApi.js'
-import MockHaveIBeenPwnedApi from './mocks/MockHaveIBeenPwnedApi.js'
-import MockThirdPartyDataStoreApi from './mocks/MockThirdPartyDataStoreApi.js'
+import MockHaveIBeenPwnedApi from './mocks/MockHaveIBeenPwnedApi.mjs'
+import MockThirdPartyDataStoreApi from './mocks/MockThirdPartyDataStoreApi.mjs'
 
 const mockOpts = {
   debug: ['1', 'true', 'TRUE'].includes(process.env.DEBUG_MOCKS),
