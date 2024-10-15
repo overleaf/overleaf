@@ -3,4 +3,4 @@
 /** @type {WebModule} */
 const HistoryModule = {}
 
-module.exports = HistoryModule
+export default HistoryModule

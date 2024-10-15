@@ -1,26 +1,17 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { expect } = require('chai')
-const _ = require('lodash')
-const fs = require('fs')
-const Path = require('path')
+import { expect } from 'chai'
 
-const User = require('../../../../../test/acceptance/src/helpers/User')
-const MockProjectHistoryApiClass = require('../../../../../test/acceptance/src/mocks/MockProjectHistoryApi')
-const MockDocstoreApiClass = require('../../../../../test/acceptance/src/mocks/MockDocstoreApi')
-const MockFilestoreApiClass = require('../../../../../test/acceptance/src/mocks/MockFilestoreApi')
+import _ from 'lodash'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import Path from 'node:path'
+import User from '../../../../../test/acceptance/src/helpers/User.js'
+import MockProjectHistoryApiClass from '../../../../../test/acceptance/src/mocks/MockProjectHistoryApi.js'
+import MockDocstoreApiClass from '../../../../../test/acceptance/src/mocks/MockDocstoreApi.js'
+import MockFilestoreApiClass from '../../../../../test/acceptance/src/mocks/MockFilestoreApi.js'
 
 let MockProjectHistoryApi, MockDocstoreApi, MockFilestoreApi
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 before(function () {
   MockProjectHistoryApi = MockProjectHistoryApiClass.instance()
@@ -31,19 +22,19 @@ before(function () {
 describe('RestoringFiles', function () {
   beforeEach(function (done) {
     this.owner = new User()
-    return this.owner.login(error => {
-      if (error != null) {
+    this.owner.login(error => {
+      if (error) {
         throw error
       }
-      return this.owner.createProject(
+      this.owner.createProject(
         'example-project',
         { template: 'example' },
         (error, projectId) => {
           this.project_id = projectId
-          if (error != null) {
+          if (error) {
             throw error
           }
-          return done()
+          done()
         }
       )
     })
@@ -58,7 +49,7 @@ describe('RestoringFiles', function () {
           'foo.tex',
           'hello world, this is foo.tex!'
         )
-        return this.owner.request(
+        this.owner.request(
           {
             method: 'POST',
             url: `/project/${this.project_id}/restore_file`,
@@ -68,18 +59,18 @@ describe('RestoringFiles', function () {
             },
           },
           (error, response, body) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             expect(response.statusCode).to.equal(200)
-            return done()
+            done()
           }
         )
       })
 
       it('should have created a doc', function (done) {
-        return this.owner.getProject(this.project_id, (error, project) => {
-          if (error != null) {
+        this.owner.getProject(this.project_id, (error, project) => {
+          if (error) {
             throw error
           }
           let doc = _.find(
@@ -88,7 +79,7 @@ describe('RestoringFiles', function () {
           )
           doc = MockDocstoreApi.docs[this.project_id][doc._id]
           expect(doc.lines).to.deep.equal(['hello world, this is foo.tex!'])
-          return done()
+          done()
         })
       })
     })
@@ -108,7 +99,7 @@ describe('RestoringFiles', function () {
           'image.png',
           this.pngData
         )
-        return this.owner.request(
+        this.owner.request(
           {
             method: 'POST',
             url: `/project/${this.project_id}/restore_file`,
@@ -118,18 +109,18 @@ describe('RestoringFiles', function () {
             },
           },
           (error, response, body) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             expect(response.statusCode).to.equal(200)
-            return done()
+            done()
           }
         )
       })
 
       it('should have created a file', function (done) {
-        return this.owner.getProject(this.project_id, (error, project) => {
-          if (error != null) {
+        this.owner.getProject(this.project_id, (error, project) => {
+          if (error) {
             throw error
           }
           let file = _.find(
@@ -138,7 +129,7 @@ describe('RestoringFiles', function () {
           )
           file = MockFilestoreApi.files[this.project_id][file._id]
           expect(file.content).to.equal(this.pngData)
-          return done()
+          done()
         })
       })
     })
@@ -151,7 +142,7 @@ describe('RestoringFiles', function () {
           'foldername/foo2.tex',
           'hello world, this is foo-2.tex!'
         )
-        return this.owner.request.post(
+        this.owner.request.post(
           {
             uri: `project/${this.project_id}/folder`,
             json: {
@@ -159,11 +150,11 @@ describe('RestoringFiles', function () {
             },
           },
           (error, response, body) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             expect(response.statusCode).to.equal(200)
-            return this.owner.request(
+            this.owner.request(
               {
                 method: 'POST',
                 url: `/project/${this.project_id}/restore_file`,
@@ -173,11 +164,11 @@ describe('RestoringFiles', function () {
                 },
               },
               (error, response, body) => {
-                if (error != null) {
+                if (error) {
                   throw error
                 }
                 expect(response.statusCode).to.equal(200)
-                return done()
+                done()
               }
             )
           }
@@ -185,8 +176,8 @@ describe('RestoringFiles', function () {
       })
 
       it('should have created the doc in the named folder', function (done) {
-        return this.owner.getProject(this.project_id, (error, project) => {
-          if (error != null) {
+        this.owner.getProject(this.project_id, (error, project) => {
+          if (error) {
             throw error
           }
           const folder = _.find(
@@ -196,7 +187,7 @@ describe('RestoringFiles', function () {
           let doc = _.find(folder.docs, doc => doc.name === 'foo2.tex')
           doc = MockDocstoreApi.docs[this.project_id][doc._id]
           expect(doc.lines).to.deep.equal(['hello world, this is foo-2.tex!'])
-          return done()
+          done()
         })
       })
     })
@@ -209,7 +200,7 @@ describe('RestoringFiles', function () {
           'nothere/foo3.tex',
           'hello world, this is foo-3.tex!'
         )
-        return this.owner.request(
+        this.owner.request(
           {
             method: 'POST',
             url: `/project/${this.project_id}/restore_file`,
@@ -219,18 +210,18 @@ describe('RestoringFiles', function () {
             },
           },
           (error, response, body) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             expect(response.statusCode).to.equal(200)
-            return done()
+            done()
           }
         )
       })
 
       it('should have created the folder and restored the doc to it', function (done) {
-        return this.owner.getProject(this.project_id, (error, project) => {
-          if (error != null) {
+        this.owner.getProject(this.project_id, (error, project) => {
+          if (error) {
             throw error
           }
           const folder = _.find(
@@ -241,7 +232,7 @@ describe('RestoringFiles', function () {
           let doc = _.find(folder.docs, doc => doc.name === 'foo3.tex')
           doc = MockDocstoreApi.docs[this.project_id][doc._id]
           expect(doc.lines).to.deep.equal(['hello world, this is foo-3.tex!'])
-          return done()
+          done()
         })
       })
     })
@@ -254,7 +245,7 @@ describe('RestoringFiles', function () {
           'main.tex',
           'hello world, this is main.tex!'
         )
-        return this.owner.request(
+        this.owner.request(
           {
             method: 'POST',
             url: `/project/${this.project_id}/restore_file`,
@@ -264,18 +255,18 @@ describe('RestoringFiles', function () {
             },
           },
           (error, response, body) => {
-            if (error != null) {
+            if (error) {
               throw error
             }
             expect(response.statusCode).to.equal(200)
-            return done()
+            done()
           }
         )
       })
 
       it('should have created the doc in the root folder', function (done) {
-        return this.owner.getProject(this.project_id, (error, project) => {
-          if (error != null) {
+        this.owner.getProject(this.project_id, (error, project) => {
+          if (error) {
             throw error
           }
           let doc = _.find(project.rootFolder[0].docs, doc =>
@@ -284,7 +275,7 @@ describe('RestoringFiles', function () {
           expect(doc).to.exist
           doc = MockDocstoreApi.docs[this.project_id][doc._id]
           expect(doc.lines).to.deep.equal(['hello world, this is main.tex!'])
-          return done()
+          done()
         })
       })
     })

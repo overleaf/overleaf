@@ -1,15 +1,17 @@
-const { expect } = require('chai')
-const { ObjectId } = require('mongodb-legacy')
-const Path = require('path')
-const fs = require('fs')
-const Settings = require('@overleaf/settings')
-const _ = require('lodash')
+import { expect } from 'chai'
+import mongodb from 'mongodb-legacy'
+import Path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import fs from 'node:fs'
+import Settings from '@overleaf/settings'
+import _ from 'lodash'
+import ProjectGetter from '../../../../../app/src/Features/Project/ProjectGetter.js'
+import User from '../../../../../test/acceptance/src/helpers/User.js'
+import MockDocUpdaterApiClass from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.js'
 
-const ProjectGetter = require('../../../../../app/src/Features/Project/ProjectGetter')
+const { ObjectId } = mongodb
 
-const User = require('../../../../../test/acceptance/src/helpers/User')
-const MockDocUpdaterApiClass = require('../../../../../test/acceptance/src/mocks/MockDocUpdaterApi')
-
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const FILES_PATH = Path.join(__dirname, '../../../../../test/acceptance/files')
 
 let MockDocUpdaterApi

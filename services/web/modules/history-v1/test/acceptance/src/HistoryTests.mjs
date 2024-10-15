@@ -1,24 +1,9 @@
-/* eslint-disable
-    max-len,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { expect } = require('chai')
-const _ = require('lodash')
+import { expect } from 'chai'
 
-const {
-  db,
-  ObjectId,
-} = require('../../../../../app/src/infrastructure/mongodb')
-const User = require('../../../../../test/acceptance/src/helpers/User')
-const MockV1HistoryApiClass = require('../../../../../test/acceptance/src/mocks/MockV1HistoryApi')
+import _ from 'lodash'
+import { db, ObjectId } from '../../../../../app/src/infrastructure/mongodb.js'
+import User from '../../../../../test/acceptance/src/helpers/User.js'
+import MockV1HistoryApiClass from '../../../../../test/acceptance/src/mocks/MockV1HistoryApi.js'
 
 let MockV1HistoryApi
 
@@ -29,18 +14,18 @@ before(function () {
 describe('History', function () {
   beforeEach(function (done) {
     this.owner = new User()
-    return this.owner.login(done)
+    this.owner.login(done)
   })
 
   describe('zip download of version', function () {
     it('should stream the zip file of a version', function (done) {
-      return this.owner.createProject('example-project', (error, projectId) => {
+      this.owner.createProject('example-project', (error, projectId) => {
         this.project_id = projectId
-        if (error != null) {
+        if (error) {
           return done(error)
         }
         this.v1_history_id = 42
-        return db.projects.updateOne(
+        db.projects.updateOne(
           {
             _id: new ObjectId(this.project_id),
           },
@@ -50,13 +35,13 @@ describe('History', function () {
             },
           },
           error => {
-            if (error != null) {
+            if (error) {
               return done(error)
             }
-            return this.owner.request(
+            this.owner.request(
               `/project/${this.project_id}/version/42/zip`,
               (error, response, body) => {
-                if (error != null) {
+                if (error) {
                   return done(error)
                 }
                 expect(response.statusCode).to.equal(200)
@@ -69,7 +54,7 @@ describe('History', function () {
                 expect(body).to.equal(
                   `Mock zip for ${this.v1_history_id} at version 42`
                 )
-                return done()
+                done()
               }
             )
           }
@@ -195,12 +180,12 @@ describe('History', function () {
     })
 
     it('should return 402 for non-v2-history project', function (done) {
-      return this.owner.createProject('non-v2-project', (error, projectId) => {
+      this.owner.createProject('non-v2-project', (error, projectId) => {
         this.project_id = projectId
-        if (error != null) {
+        if (error) {
           return done(error)
         }
-        return db.projects.updateOne(
+        db.projects.updateOne(
           {
             _id: new ObjectId(this.project_id),
           },
@@ -210,17 +195,17 @@ describe('History', function () {
             },
           },
           error => {
-            if (error != null) {
+            if (error) {
               return done(error)
             }
-            return this.owner.request(
+            this.owner.request(
               `/project/${this.project_id}/version/42/zip`,
               (error, response, body) => {
-                if (error != null) {
+                if (error) {
                   return done(error)
                 }
                 expect(response.statusCode).to.equal(402)
-                return done()
+                done()
               }
             )
           }
@@ -234,7 +219,7 @@ describe('History', function () {
       _.remove(
         MockV1HistoryApi.app._router.stack,
         appRoute =>
-          (appRoute.route != null ? appRoute.route.path : undefined) ===
+          appRoute.route?.path ===
           '/api/projects/:project_id/version/:version/zip'
       )
       MockV1HistoryApi.app.post(
@@ -258,7 +243,7 @@ describe('History', function () {
         }
         this.project_id = projectId
         this.v1_history_id = 42
-        return db.projects.updateOne(
+        db.projects.updateOne(
           {
             _id: new ObjectId(this.project_id),
           },
@@ -274,11 +259,11 @@ describe('History', function () {
             this.owner.request(
               `/project/${this.project_id}/version/42/zip`,
               (error, response, body) => {
-                if (error != null) {
+                if (error) {
                   return done(error)
                 }
                 expect(response.statusCode).to.equal(404)
-                return done()
+                done()
               }
             )
           }
@@ -292,7 +277,7 @@ describe('History', function () {
       _.remove(
         MockV1HistoryApi.app._router.stack,
         appRoute =>
-          (appRoute.route != null ? appRoute.route.path : undefined) ===
+          appRoute.route?.path ===
           '/api/projects/:project_id/version/:version/zip'
       )
       MockV1HistoryApi.app.get(
@@ -322,7 +307,7 @@ describe('History', function () {
         }
         this.project_id = projectId
         this.v1_history_id = 42
-        return db.projects.updateOne(
+        db.projects.updateOne(
           {
             _id: new ObjectId(this.project_id),
           },
@@ -338,11 +323,11 @@ describe('History', function () {
             this.owner.request(
               `/project/${this.project_id}/version/42/zip`,
               (error, response, body) => {
-                if (error != null) {
+                if (error) {
                   return done(error)
                 }
                 expect(response.statusCode).to.equal(500)
-                return done()
+                done()
               }
             )
           }
