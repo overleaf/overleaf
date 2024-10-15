@@ -504,7 +504,7 @@ module.exports = {
     { code: 'nr', name: 'Ndebele' },
     { code: 'ne_NP', dic: 'ne_NP', name: 'Nepali', server: false },
     { code: 'ns', name: 'Northern Sotho' },
-    { code: 'no', dic: 'nn_NO', name: 'Norwegian' },
+    { code: 'no', name: 'Norwegian' },
     { code: 'oc_FR', dic: 'oc_FR', name: 'Occitan', server: false },
     { code: 'fa', dic: 'fa_IR', name: 'Persian' },
     { code: 'pl', dic: 'pl_PL', name: 'Polish' },
