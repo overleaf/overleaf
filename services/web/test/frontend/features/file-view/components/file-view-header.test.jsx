@@ -92,7 +92,7 @@ describe('<FileViewHeader/>', function () {
         source_entity_path: '/source-entity-path.ext',
         provider: 'project_file',
         importer_id: USER_ID,
-        importedAt: new Date(2024, 9, 16, 1, 30).getTime(),
+        importedAt: new Date(2024, 8, 16, 1, 30).getTime(),
       },
       created: new Date(2021, 1, 17, 3, 24).toISOString(),
     }
@@ -101,7 +101,7 @@ describe('<FileViewHeader/>', function () {
     renderWithEditorContext(<FileViewHeader file={fileShown} />)
     screen.getByText('Imported from', { exact: false })
     screen.getByText('Another project', { exact: false })
-    screen.getByText('/source-entity-path.ext, at 1:30 am Wed, 16th Oct 24', {
+    screen.getByText('/source-entity-path.ext, at 1:30 am Mon, 16th Sep 24', {
       exact: false,
     })
   })
