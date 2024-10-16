@@ -1,0 +1,24 @@
+.gallery-search {
+  form {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-04);
+
+    @include media-breakpoint-down(md) {
+      .form-control-wrapper {
+        width: 100%;
+      }
+    }
+
+    input {
+      padding-top: var(--spacing-06);
+      padding-right: var(--spacing-06);
+      padding-bottom: var(--spacing-06);
+      height: 48px;
+
+      @include media-breakpoint-up(md) {
+        width: 544px;
+      }
+    }
+  }
+}
