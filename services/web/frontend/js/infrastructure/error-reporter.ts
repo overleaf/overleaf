@@ -101,7 +101,14 @@ function nullReporter() {
   })
 }
 
-export function captureException(err: Error, options?: Record<string, any>) {
+// https://develop.sentry.dev/sdk/data-model/event-payloads/contexts/
+// https://docs.sentry.io/platforms/javascript/enriching-events/context/#passing-context-directly
+type Options = {
+  tags?: Record<string, any>
+  extra?: Record<string, any>
+}
+
+export function captureException(err: Error, options?: Options) {
   options = options || {}
   const extra = Object.assign(OError.getFullInfo(err), options.extra || {})
   const fullStack = OError.getFullStack(err)

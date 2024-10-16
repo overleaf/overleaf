@@ -127,7 +127,7 @@ export class SpellChecker {
                 debugConsole.error(result.error)
                 captureException(
                   new Error('Error running spellcheck for word'),
-                  { language: this.language }
+                  { tags: { ol_spell_check_language: this.language } }
                 )
               } else {
                 processResult(result.misspellings)

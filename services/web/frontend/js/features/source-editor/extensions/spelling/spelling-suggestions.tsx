@@ -66,7 +66,7 @@ export const SpellingSuggestions: FC<{
         })
         .catch(error => {
           captureException(error, {
-            language: spellCheckLanguage,
+            tags: { ol_spell_check_language: spellCheckLanguage },
           })
           debugConsole.error(error)
         })
