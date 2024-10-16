@@ -18,9 +18,10 @@ import {
   highlightLocationsField,
   scrollToHighlight,
 } from '../../extensions/highlight-locations'
-import Icon from '../../../../shared/components/icon'
 import { useTranslation } from 'react-i18next'
 import { inlineBackground } from '../../../source-editor/extensions/inline-background'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function extensions(themeOptions: Options): Extension[] {
   return [
@@ -131,24 +132,24 @@ function DocumentDiffViewer({
     <div className="document-diff-container">
       <div ref={containerRef} className="cm-viewer-container" />
       {before > 0 ? (
-        <button
-          className="btn btn-secondary previous-highlight-button"
+        <OLButton
+          variant="secondary"
+          leadingIcon={bsVersion({ bs3: 'arrow-up', bs5: 'arrow_upward' })}
           onClick={scrollToPrevious}
+          className="previous-highlight-button"
         >
-          <Icon type="arrow-up" />
-          &nbsp;
           {t('n_more_updates_above', { count: before })}
-        </button>
+        </OLButton>
       ) : null}
       {after > 0 ? (
-        <button
-          className="btn btn-secondary next-highlight-button"
+        <OLButton
+          variant="secondary"
+          leadingIcon={bsVersion({ bs3: 'arrow-down', bs5: 'arrow_downward' })}
           onClick={scrollToNext}
+          className="next-highlight-button"
         >
-          <Icon type="arrow-down" />
-          &nbsp;
           {t('n_more_updates_below', { count: after })}
-        </button>
+        </OLButton>
       ) : null}
     </div>
   )

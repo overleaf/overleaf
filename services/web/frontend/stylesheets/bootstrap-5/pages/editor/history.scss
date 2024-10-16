@@ -365,6 +365,34 @@ history-root {
   }
 }
 
+.document-diff-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .cm-viewer-container,
+  .cm-editor {
+    height: 100%;
+  }
+
+  .previous-highlight-button,
+  .next-highlight-button {
+    @include shadow-md;
+
+    position: absolute;
+    right: var(--spacing-06);
+  }
+
+  .previous-highlight-button {
+    top: var(--spacing-06);
+  }
+
+  .next-highlight-button {
+    bottom: var(--spacing-06);
+  }
+}
+
 .history-dropdown-icon {
   color: var(--content-primary);
 }

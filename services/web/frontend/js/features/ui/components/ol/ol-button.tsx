@@ -7,6 +7,8 @@ import Button from '../bootstrap-5/button'
 import classnames from 'classnames'
 import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 import { callFnsInSequence } from '@/utils/functions'
+import Icon from '@/shared/components/icon'
+
 export type BS3ButtonSize = 'xsmall' | 'sm' | 'medium' | 'lg'
 
 export type OLButtonProps = ButtonProps & {
@@ -49,6 +51,38 @@ export function bs3ButtonProps(props: ButtonProps) {
   return bs3ButtonProps
 }
 
+function BS3ButtonContent({
+  children,
+  leadingIcon,
+  trailingIcon,
+}: {
+  children: React.ReactNode
+  leadingIcon: OLButtonProps['leadingIcon']
+  trailingIcon: OLButtonProps['trailingIcon']
+}) {
+  const leadingIconComponent =
+    leadingIcon && typeof leadingIcon === 'string' ? (
+      <Icon type={leadingIcon} />
+    ) : (
+      leadingIcon
+    )
+
+  const trailingIconComponent =
+    trailingIcon && typeof trailingIcon === 'string' ? (
+      <Icon type={trailingIcon} />
+    ) : (
+      trailingIcon
+    )
+
+  return (
+    <>
+      {leadingIconComponent ? <>{leadingIconComponent}&nbsp;</> : null}
+      {children}
+      {trailingIconComponent ? <>&nbsp;{trailingIconComponent}</> : null}
+    </>
+  )
+}
+
 const OLButton = forwardRef<HTMLButtonElement, OLButtonProps>(
   ({ bs3Props = {}, ...rest }, ref) => {
     const { className: _, ...restBs3Props } = bs3Props
@@ -78,7 +112,14 @@ const OLButton = forwardRef<HTMLButtonElement, OLButtonProps>(
             {...bs3FinalProps}
             ref={ref as React.LegacyRef<any> | undefined}
           >
-            {bs3Props?.loading || rest.children}
+            {bs3Props?.loading || (
+              <BS3ButtonContent
+                leadingIcon={rest.leadingIcon}
+                trailingIcon={rest.trailingIcon}
+              >
+                {rest.children}
+              </BS3ButtonContent>
+            )}
           </BS3Button>
         }
         bs5={<Button {...rest} ref={ref} />}
