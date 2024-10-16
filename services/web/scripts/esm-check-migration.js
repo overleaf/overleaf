@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const minimist = require('minimist')
 
-const APP_CODE_PATH = ['app', 'modules', 'migrations', 'scripts']
+const APP_CODE_PATH = ['app', 'modules', 'migrations', 'scripts', 'test']
 
 const {
   _: args,
