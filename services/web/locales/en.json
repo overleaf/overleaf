@@ -740,6 +740,7 @@
   "full_project_search": "Full Project Search",
   "full_width": "Full width",
   "gallery": "Gallery",
+  "gallery_back_to_all": "Back to all __itemPlural__",
   "gallery_find_more": "Find More __itemPlural__",
   "gallery_items_tagged": "__itemPlural__ tagged __title__",
   "gallery_page_items": "Gallery Items",
