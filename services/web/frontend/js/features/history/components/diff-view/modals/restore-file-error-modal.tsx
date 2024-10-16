@@ -1,4 +1,10 @@
-import { Button, Modal } from 'react-bootstrap'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 
 export function RestoreFileErrorModal({
@@ -9,20 +15,16 @@ export function RestoreFileErrorModal({
   const { t } = useTranslation()
 
   return (
-    <Modal show onHide={resetErrorBoundary}>
-      <Modal.Header closeButton>
-        <Modal.Title>{t('restore_file_error_title')}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>{t('restore_file_error_message')}</Modal.Body>
-      <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          onClick={resetErrorBoundary}
-        >
+    <OLModal show onHide={resetErrorBoundary}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('restore_file_error_title')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>{t('restore_file_error_message')}</OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={resetErrorBoundary}>
           {t('close')}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

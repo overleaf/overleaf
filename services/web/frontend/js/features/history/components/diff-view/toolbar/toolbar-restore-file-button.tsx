@@ -1,4 +1,4 @@
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import { useRestoreDeletedFile } from '../../../context/hooks/use-restore-deleted-file'
 import type { HistoryContextValue } from '../../../context/types/history-context-value'
@@ -15,14 +15,18 @@ export default function ToolbarRestoreFileButton({
   const { restoreDeletedFile, isLoading } = useRestoreDeletedFile()
 
   return (
-    <Button
-      className="btn-secondary history-react-toolbar-restore-file-button"
-      bsSize="xs"
-      bsStyle={null}
+    <OLButton
+      variant="secondary"
+      size="sm"
+      className="history-react-toolbar-restore-file-button"
+      isLoading={isLoading}
       onClick={() => restoreDeletedFile(selection)}
-      disabled={isLoading}
+      bs3Props={{
+        bsSize: 'xsmall',
+        loading: isLoading ? `${t('restoring')}…` : t('restore_file'),
+      }}
     >
-      {isLoading ? `${t('restoring')}…` : t('restore_file')}
-    </Button>
+      {t('restore_file')}
+    </OLButton>
   )
 }

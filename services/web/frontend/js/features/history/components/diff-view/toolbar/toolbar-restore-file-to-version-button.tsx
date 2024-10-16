@@ -1,4 +1,4 @@
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 import type { HistoryContextValue } from '../../../context/types/history-context-value'
 import withErrorBoundary from '@/infrastructure/error-boundary'
@@ -33,15 +33,18 @@ function ToolbarRestoreFileToVersionButton({
         }}
         onHide={() => setShowConfirmModal(false)}
       />
-      <Button
-        className="btn-secondary"
-        bsSize="xs"
-        bsStyle={null}
+      <OLButton
+        variant="secondary"
+        size="sm"
+        isLoading={isLoading}
         onClick={() => setShowConfirmModal(true)}
-        disabled={isLoading}
+        bs3Props={{
+          bsSize: 'xsmall',
+          loading: isLoading ? `${t('restoring')}…` : t('restore_file_version'),
+        }}
       >
-        {isLoading ? `${t('restoring')}…` : t('restore_file_version')}
-      </Button>
+        {t('restore_file_version')}
+      </OLButton>
     </>
   )
 }
