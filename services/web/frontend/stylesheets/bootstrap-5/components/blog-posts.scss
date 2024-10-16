@@ -58,10 +58,6 @@
       padding: 0;
     }
 
-    p {
-      margin-top: 12.5px;
-    }
-
     > li {
       .blog-date {
         margin-top: var(--spacing-07);
@@ -122,14 +118,12 @@
     }
 
     .blog-content-preview {
-      margin-bottom: var(--spacing-06);
-
-      > *:first-child {
-        margin-top: 0;
+      p:last-child {
+        margin-bottom: 0;
       }
 
-      > *:last-child {
-        margin-bottom: 0;
+      & + .blog-tags > div > .tags {
+        margin-top: var(--spacing-06);
       }
     }
 
