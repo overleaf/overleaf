@@ -1,6 +1,6 @@
 const version = {
   mathjax: '3.2.2',
-  dictionaries: '0.0.2',
+  dictionaries: '0.0.3',
 }
 
 module.exports = {

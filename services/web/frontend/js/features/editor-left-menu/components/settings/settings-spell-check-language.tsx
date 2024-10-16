@@ -6,8 +6,8 @@ import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
-// TODO: set to true when ready to show new languages that are only available in the client
-const showClientOnlyLanguages = false
+// allow selection of spell-check languages that are only supported in the client-side spell checker
+const showClientOnlyLanguages = true
 
 export default function SettingsSpellCheckLanguage() {
   const { t } = useTranslation()
