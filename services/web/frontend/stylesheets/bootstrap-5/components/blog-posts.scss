@@ -127,6 +127,13 @@
       }
     }
 
+    .blog-content,
+    .blog-content-preview {
+      img {
+        border-radius: var(--border-radius-medium);
+      }
+    }
+
     .blog-footer-tags {
       margin-top: var(--spacing-12);
     }
