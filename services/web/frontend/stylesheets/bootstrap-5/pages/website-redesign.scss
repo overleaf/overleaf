@@ -236,6 +236,28 @@
     --bs-card-spacer-x: var(--spacing-08);
   }
 
+  .cta-card {
+    .btn + .btn {
+      margin-left: var(--spacing-04);
+    }
+
+    p:has(.btn) {
+      margin-top: var(--spacing-09);
+
+      @include media-breakpoint-down(md) {
+        .btn {
+          width: 100%;
+          margin-left: 0;
+          margin-top: var(--spacing-05);
+        }
+
+        .btn:first-child {
+          margin-top: 0;
+        }
+      }
+    }
+  }
+
   .badge-premium {
     --badge-font-weight: 600;
   }
