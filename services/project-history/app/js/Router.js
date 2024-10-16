@@ -133,23 +133,7 @@ export function initialize(app) {
         comment: Joi.string().required(),
         created_at: Joi.string(),
         validate_exists: Joi.boolean().default(true),
-        user_id: Joi.string(),
-      },
-    }),
-
-    HttpController.createLabel
-  )
-
-  // Temporarily maintaining both paths for createLabel to support backwards
-  // compatibility while rolling out - https://github.com/overleaf/internal/pull/20200
-  app.post(
-    '/project/:project_id/user/:user_id/labels',
-    validate({
-      body: {
-        version: Joi.number().integer().required(),
-        comment: Joi.string().required(),
-        created_at: Joi.string(),
-        validate_exists: Joi.boolean().default(true),
+        user_id: Joi.string().allow(null),
       },
     }),
 
