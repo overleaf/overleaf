@@ -1,3 +1,14 @@
+.gallery.gallery-tagged {
+  .gallery-title {
+    display: block;
+    text-align: left;
+  }
+
+  .gallery-summary {
+    text-align: left;
+  }
+}
+
 .gallery {
   margin-top: var(--spacing-10);
 
@@ -49,7 +60,7 @@
     @include body-lg;
 
     text-align: center;
-    margin-bottom: var(--spacing-08);
+    margin-bottom: var(--spacing-09);
   }
 
   .top-picks-banner.container {
@@ -64,6 +75,20 @@
     h3 {
       font-size: var(--font-size-08);
     }
+  }
+
+  .no-articles-matching {
+    color: var(--neutral-90);
+    font-weight: 600;
+
+    @include heading-lg;
+  }
+
+  .template-summary {
+    margin-top: var(--spacing-02);
+    margin-bottom: var(--spacing-09);
+
+    @include body-lg;
   }
 
   @mixin text-overflow {
