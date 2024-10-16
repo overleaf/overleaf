@@ -65,7 +65,7 @@
     "local:test": "npm run local:test:unit && npm run local:test:frontend && npm run local:test:acceptance"
   },
   "browserslist": [
-    "defaults",
+    "defaults and supports woff2",
     "last 1 year",
     "safari > 13"
   ],

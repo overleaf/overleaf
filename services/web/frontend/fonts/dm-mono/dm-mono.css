@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 400;
   font-display: fallback;
-  src: url('dm-mono/DMMono-Regular.woff2') format('woff2');
+  src: url('DMMono-Regular.woff2') format('woff2');
 }
 
 @font-face {
@@ -11,7 +11,7 @@
   font-style: italic;
   font-weight: 400;
   font-display: fallback;
-  src: url('dm-mono/DMMono-Italic.woff2') format('woff2');
+  src: url('DMMono-Italic.woff2') format('woff2');
 }
 
 @font-face {
@@ -19,7 +19,7 @@
   font-style: normal;
   font-weight: 500;
   font-display: fallback;
-  src: url('dm-mono/DMMono-Medium.woff2') format('woff2');
+  src: url('DMMono-Medium.woff2') format('woff2');
 }
 
 @font-face {
@@ -27,5 +27,5 @@
   font-style: italic;
   font-weight: 500;
   font-display: fallback;
-  src: url('dm-mono/DMMono-MediumItalic.woff2') format('woff2');
+  src: url('DMMono-MediumItalic.woff2') format('woff2');
 }

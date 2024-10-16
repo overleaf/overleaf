@@ -1,0 +1,12 @@
+This directory contains fonts used by the Overleaf web application.
+
+* [DM Mono](https://github.com/googlefonts/dm-mono)
+* [Font Awesome](https://fontawesome.com/v4/)
+* [Lato](https://www.latofonts.com/)
+* [Material Symbols](https://github.com/google/material-design-icons)
+* [Merriweather](https://github.com/SorkinType/Merriweather)
+* [Noto Sans](https://notofonts.github.io/#latin-greek-cyrillic)
+* [Noto Serif](https://notofonts.github.io/#latin-greek-cyrillic)
+* [Open Sans](https://github.com/googlefonts/opensans)
+* [Source Code Pro](https://github.com/adobe-fonts/source-code-pro)
+* [STIX Two Math](https://github.com/stipub/stixfonts/)

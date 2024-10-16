@@ -3,7 +3,7 @@
   font-style: normal;
   font-weight: 200 700;
   font-stretch: 62.5% 100%;
-  src: url('noto-serif/NotoSerif[wght].woff2') format('woff2');
+  src: url('NotoSerif[wght].woff2') format('woff2');
 }
 
 @font-face {
@@ -11,5 +11,5 @@
   font-style: italic;
   font-weight: 200 700;
   font-stretch: 62.5% 100%;
-  src: url('noto-serif/NotoSerif-Italic[wght].woff2') format('woff2');
+  src: url('NotoSerif-Italic[wght].woff2') format('woff2');
 }
