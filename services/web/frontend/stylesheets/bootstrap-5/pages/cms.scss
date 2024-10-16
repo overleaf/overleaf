@@ -78,10 +78,61 @@
     font-size: 14px;
   }
 
+  section {
+    padding: var(--spacing-16) 0 0 0;
+
+    &.no-top-padding {
+      /* opt out of padding via the CMS */
+      padding-top: 0;
+    }
+
+    // TODO: confirm if we will still support this and if so what colors to use
+    // &.color-block {
+    //   &.green-dark {
+    //     background-color: @ol-dark-green;
+    //   }
+    //   &.green {
+    //     background-color: @ol-green;
+
+    //     .no-card * {
+    //       .btn-primary,
+    //       .btn-success {
+    //         // only correct button colors when green on green
+    //         .btn-primary-on-primary-bg;
+    //       }
+    //     }
+    //   }
+    //   &.blue-gray-dark {
+    //     background-color: @ol-blue-gray-5;
+    //   }
+    //   &.blue-gray-light {
+    //     background-color: @ol-blue-gray-1;
+    //   }
+
+    //   &.green,
+    //   &.green-dark,
+    //   &.blue-gray-dark {
+    //     .no-card * {
+    //       &:not(.btn) {
+    //         color: @white;
+    //       }
+    //       a {
+    //         text-decoration: underline;
+    //       }
+    //       .btn {
+    //         text-decoration: none;
+    //       }
+
+    //       .form-control {
+    //         color: @input-color;
+    //       }
+    //     }
+    //   }
+    // }
+  }
+
   .section-row {
     @extend .container;
-
-    margin: 0 auto;
   }
 
   padding-bottom: 0;
