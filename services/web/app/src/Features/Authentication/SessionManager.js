@@ -1,12 +1,6 @@
 const _ = require('lodash')
 
-/** @typedef {import('../../../../types/user').User} User */
-
 const SessionManager = {
-  /**
-   * @param session
-   * @returns {User | null}
-   */
   getSessionUser(session) {
     const sessionUser = _.get(session, ['user'])
     const sessionPassportUser = _.get(session, ['passport', 'user'])

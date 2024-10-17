@@ -46,20 +46,4 @@ export type User = {
   }
 }
 
-export type LoggedOutUser = {
-  id: null
-  email?: undefined
-  first_name?: undefined
-  last_name?: undefined
-  signUpDate?: undefined
-  labsProgram?: boolean
-  alphaProgram?: boolean
-  betaProgram?: boolean
-  allowedFreeTrial?: boolean
-  features?: Features
-  refProviders?: RefProviders
-  writefull?: undefined
-  isAdmin?: boolean
-}
-
 export type MongoUser = Pick<User, Exclude<keyof User, 'id'>> & { _id: string }

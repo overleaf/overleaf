@@ -169,16 +169,12 @@ async function viewInvite(req, res, next) {
       invite.email
     )
 
-    /** @type {import('../../../../types/user').LoggedOutUser} */
-    const userWithoutSensitiveFields = { id: null }
-
     return res.render('subscriptions/team/invite_logged_out', {
       inviterName: invite.inviterName,
       inviteToken: invite.token,
       appName: settings.appName,
       accountExists: userByEmail != null,
       emailAddress: invite.email,
-      userWithoutSensitiveFields,
     })
   }
 }
