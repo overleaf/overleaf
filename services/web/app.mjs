@@ -35,9 +35,14 @@ metrics.open_sockets.monitor()
 
 if (Settings.catchErrors) {
   process.removeAllListeners('uncaughtException')
-  process.on('uncaughtException', error =>
-    logger.error({ err: error }, 'uncaughtException')
-  )
+  process.removeAllListeners('unhandledRejection')
+  process
+    .on('uncaughtException', error =>
+      logger.error({ err: error }, 'uncaughtException')
+    )
+    .on('unhandledRejection', (reason, p) => {
+      logger.error({ err: reason }, 'unhandledRejection at Promise', p)
+    })
 }
 
 // Create ./data/dumpFolder if needed
