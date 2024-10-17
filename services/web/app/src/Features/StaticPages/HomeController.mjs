@@ -6,7 +6,6 @@ import ErrorController from '../Errors/ErrorController.js'
 import SessionManager from '../Authentication/SessionManager.js'
 import { expressify } from '@overleaf/promise-utils'
 import logger from '@overleaf/logger'
-import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 const __dirname = new URL('.', import.meta.url).pathname
 
@@ -34,12 +33,6 @@ async function home(req, res) {
     AnalyticsManager.recordEventForSession(req.session, 'home-page-view', {
       page: req.path,
     })
-
-    try {
-      await SplitTestHandler.promises.getAssignment(req, res, 'hotjar')
-    } catch {
-      // do nothing
-    }
 
     res.render('external/home/website-redesign/index')
   } else {
