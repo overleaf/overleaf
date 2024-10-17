@@ -37,6 +37,7 @@ block append meta
 			subdomainLang: settings.i18n.subdomainLang,
 			translatedLanguages: settings.translatedLanguages
 		})
+		meta(name="ol-user" data-type="json" content=(userWithoutSensitiveFields || getSessionUser()))
 
 block body
 	if (typeof suppressNavbar === "undefined")

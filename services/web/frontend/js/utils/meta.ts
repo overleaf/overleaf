@@ -1,4 +1,4 @@
-import { User, Features } from '../../../types/user'
+import { User, Features, LoggedOutUser } from '../../../types/user'
 import { User as MinimalUser } from '../../../types/admin/user'
 import { User as ManagedUser } from '../../../types/group-management/user'
 import { UserSettings } from '../../../types/user-settings'
@@ -204,7 +204,7 @@ export interface Meta {
   'ol-usGovBannerVariant': USGovBannerVariant
   'ol-useShareJsHash': boolean
   'ol-usedLatex': 'never' | 'occasionally' | 'often' | undefined
-  'ol-user': User
+  'ol-user': User | LoggedOutUser
   'ol-userAffiliations': Affiliation[]
   'ol-userCanExtendTrial': boolean
   'ol-userCanNotStartRequestedTrial': boolean

@@ -1,8 +1,10 @@
 import { createContext, FC, useContext, useMemo } from 'react'
 import getMeta from '../../utils/meta'
-import { User } from '../../../../types/user'
+import { LoggedOutUser, User } from '../../../../types/user'
 
-export const UserContext = createContext<User | undefined>(undefined)
+export const UserContext = createContext<User | LoggedOutUser | undefined>(
+  undefined
+)
 
 export const UserProvider: FC = ({ children }) => {
   const user = useMemo(() => getMeta('ol-user'), [])
