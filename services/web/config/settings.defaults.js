@@ -462,11 +462,7 @@ module.exports = {
     { code: 'ca', dic: 'ca', name: 'Catalan' },
     { code: 'hr', dic: 'hr_HR', name: 'Croatian' },
     { code: 'cs', dic: 'cs_CZ', name: 'Czech' },
-    {
-      code: 'da',
-      // dic: 'da_DK', TODO: re-enable client spell check
-      name: 'Danish',
-    },
+    { code: 'da', dic: 'da_DK', name: 'Danish' },
     { code: 'nl', dic: 'nl', name: 'Dutch' },
     { code: 'dz', dic: 'dz', name: 'Dzongkha', server: false },
     { code: 'eo', dic: 'eo', name: 'Esperanto' },
@@ -536,7 +532,7 @@ module.exports = {
     { code: 'ts', name: 'Tsonga' },
     { code: 'tn', name: 'Tswana' },
     { code: 'tr_TR', dic: 'tr_TR', name: 'Turkish', server: false },
-    // { code: 'uk_UA', dic: 'uk_UA', name: 'Ukrainian', server: false },
+    { code: 'uk_UA', dic: 'uk_UA', name: 'Ukrainian', server: false },
     { code: 'hsb', name: 'Upper Sorbian' },
     { code: 'uz_UZ', dic: 'uz_UZ', name: 'Uzbek', server: false },
     { code: 'vi_VN', dic: 'vi_VN', name: 'Vietnamese', server: false },

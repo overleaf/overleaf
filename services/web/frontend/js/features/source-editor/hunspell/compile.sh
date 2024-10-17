@@ -14,6 +14,7 @@ em++ \
     -s EXPORTED_FUNCTIONS="['_Hunspell_create', '_Hunspell_destroy', '_Hunspell_spell', '_Hunspell_suggest', '_Hunspell_free_list', '_Hunspell_add_dic', '_Hunspell_add', '_Hunspell_remove', '_free', '_malloc', 'FS']" \
     -s EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap', 'getValue', 'stringToNewUTF8', 'UTF8ToString', 'WORKERFS']" \
     -s ENVIRONMENT=worker \
+    -s STACK_SIZE=5MB \
     -s ALLOW_MEMORY_GROWTH \
     -lworkerfs.js \
     -O2 \
