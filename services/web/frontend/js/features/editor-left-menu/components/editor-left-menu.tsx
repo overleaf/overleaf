@@ -7,6 +7,8 @@ import { lazy, memo, Suspense } from 'react'
 import { FullSizeLoadingSpinner } from '@/shared/components/loading-spinner'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { Offcanvas } from 'react-bootstrap-5'
+import { EditorLeftMenuProvider } from './editor-left-menu-context'
+
 const EditorLeftMenuBody = lazy(() => import('./editor-left-menu-body'))
 
 function EditorLeftMenu() {
@@ -19,7 +21,7 @@ function EditorLeftMenu() {
   return (
     <BootstrapVersionSwitcher
       bs3={
-        <>
+        <EditorLeftMenuProvider>
           <AccessibleModal
             backdropClassName="left-menu-modal-backdrop"
             keyboard
@@ -37,10 +39,10 @@ function EditorLeftMenu() {
             </Modal.Body>
           </AccessibleModal>
           {leftMenuShown && <LeftMenuMask />}
-        </>
+        </EditorLeftMenuProvider>
       }
       bs5={
-        <>
+        <EditorLeftMenuProvider>
           <Offcanvas
             show={leftMenuShown}
             onHide={closeLeftMenu}
@@ -59,7 +61,7 @@ function EditorLeftMenu() {
             </Offcanvas.Body>
           </Offcanvas>
           {leftMenuShown && <LeftMenuMask />}
-        </>
+        </EditorLeftMenuProvider>
       }
     />
   )

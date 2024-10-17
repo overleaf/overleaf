@@ -2,8 +2,9 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
-import { ChangeEventHandler, useCallback } from 'react'
+import { ChangeEventHandler, useCallback, useEffect, useRef } from 'react'
 import { Spinner } from 'react-bootstrap-5'
+import { useEditorLeftMenuContext } from '@/features/editor-left-menu/components/editor-left-menu-context'
 
 type PossibleValue = string | number | boolean
 
@@ -54,6 +55,25 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
     [onChange, value]
   )
 
+  const { settingToFocus } = useEditorLeftMenuContext()
+
+  const selectRef = useRef<HTMLSelectElement | null>(null)
+
+  useEffect(() => {
+    if (settingToFocus === name && selectRef.current) {
+      selectRef.current.scrollIntoView({
+        block: 'center',
+        behavior: 'smooth',
+      })
+      selectRef.current.focus()
+    }
+
+    // clear the focus setting
+    window.dispatchEvent(
+      new CustomEvent('ui.focus-setting', { detail: undefined })
+    )
+  }, [name, settingToFocus])
+
   return (
     <OLFormGroup
       controlId={`settings-menu-${name}`}
@@ -84,6 +104,7 @@ export default function SettingsMenuSelect<T extends PossibleValue = string>({
           onChange={handleChange}
           value={value?.toString()}
           disabled={disabled}
+          ref={selectRef}
         >
           {options.map(option => (
             <option

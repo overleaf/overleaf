@@ -35,6 +35,7 @@ import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-c
 import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
 import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 
 // these constants can be imported in tests instead of
 // using magic strings
@@ -159,6 +160,7 @@ export function EditorProviders({
     DetachCompileProvider,
     DetachProvider,
     EditorProvider,
+    EditorLeftMenuProvider,
     EditorManagerProvider,
     SnapshotProvider,
     FileTreeDataProvider,
@@ -206,7 +208,9 @@ export function EditorProviders({
                                               <Providers.OnlineUsersProvider>
                                                 <Providers.MetadataProvider>
                                                   <Providers.OutlineProvider>
-                                                    {children}
+                                                    <Providers.EditorLeftMenuProvider>
+                                                      {children}
+                                                    </Providers.EditorLeftMenuProvider>
                                                   </Providers.OutlineProvider>
                                                 </Providers.MetadataProvider>
                                               </Providers.OnlineUsersProvider>

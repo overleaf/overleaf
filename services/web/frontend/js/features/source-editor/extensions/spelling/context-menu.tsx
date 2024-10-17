@@ -167,11 +167,13 @@ const createSpellingSuggestionList = (word: Word) => (view: EditorView) => {
         word={word}
         spellCheckLanguage={getSpellCheckLanguage(view.state)}
         spellChecker={getSpellChecker(view.state)}
-        handleClose={() => {
+        handleClose={(focus = true) => {
           view.dispatch({
             effects: hideSpellingMenu.of(null),
           })
-          view.focus()
+          if (focus) {
+            view.focus()
+          }
         }}
         handleLearnWord={() => {
           learnWordRequest(word)

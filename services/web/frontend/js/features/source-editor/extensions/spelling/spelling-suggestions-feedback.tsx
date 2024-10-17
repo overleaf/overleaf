@@ -39,7 +39,12 @@ const SpellingSuggestionsFeedback: FC = () => {
         rel="noopener noreferrer"
       >
         <BootstrapVersionSwitcher
-          bs3={<span className={classnames('badge', badgeClass)} />}
+          bs3={
+            <span
+              className={classnames('badge', badgeClass)}
+              style={{ width: 14, height: 14 }}
+            />
+          }
           bs5={
             <MaterialIcon
               type="info"

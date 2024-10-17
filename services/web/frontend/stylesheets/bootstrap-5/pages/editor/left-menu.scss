@@ -15,7 +15,7 @@
   overflow: hidden auto;
   transition: left ease-in-out 0.5s;
   font-size: var(--font-size-02);
-  width: 320px;
+  width: 340px;
 
   &.shown {
     left: 0;
@@ -147,7 +147,8 @@
       border-bottom: 0;
     }
 
-    &:hover {
+    &:hover,
+    &:focus-within {
       background-color: var(--bg-info-01);
 
       label {

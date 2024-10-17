@@ -16,6 +16,7 @@ import { DetachRole } from './detach-context'
 import { debugConsole } from '@/utils/debugging'
 import { BinaryFile } from '@/features/file-view/types/binary-file'
 import useScopeEventEmitter from '@/shared/hooks/use-scope-event-emitter'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 export type IdeLayout = 'sideBySide' | 'flat'
 export type IdeView = 'editor' | 'file' | 'pdf' | 'history'
@@ -105,6 +106,16 @@ export const LayoutProvider: FC = ({ children }) => {
   // whether the menu pane is open
   const [leftMenuShown, setLeftMenuShown] =
     useScopeValue<boolean>('ui.leftMenuShown')
+
+  useEventListener(
+    'ui.toggle-left-menu',
+    useCallback(
+      event => {
+        setLeftMenuShown((event as CustomEvent<boolean>).detail)
+      },
+      [setLeftMenuShown]
+    )
+  )
 
   // whether to display the editor and preview side-by-side or full-width ("flat")
   const [pdfLayout, setPdfLayout] = useScopeValue<IdeLayout>('ui.pdfLayout')
