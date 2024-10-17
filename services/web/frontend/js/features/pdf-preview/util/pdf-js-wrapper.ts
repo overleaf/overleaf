@@ -18,6 +18,7 @@ export default class PDFJSWrapper {
   public readonly viewer: PDFViewer
   public readonly eventBus: EventBus
   private readonly linkService: PDFLinkService
+  private readonly pdfCachingTransportFactory: any
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public container: HTMLDivElement) {
@@ -43,6 +44,8 @@ export default class PDFJSWrapper {
     })
 
     this.linkService.setViewer(this.viewer)
+
+    this.pdfCachingTransportFactory = generatePdfCachingTransportFactory()
   }
 
   // load a document from a URL
@@ -64,7 +67,7 @@ export default class PDFJSWrapper {
     }
 
     return new Promise<PDFJS.PDFDocumentProxy>((resolve, reject) => {
-      const rangeTransport = generatePdfCachingTransportFactory()({
+      const rangeTransport = this.pdfCachingTransportFactory({
         url,
         pdfFile,
         abortController,
