@@ -525,14 +525,6 @@
   }
 }
 
-.card-pattern.cta-card {
-  .font-size-display-xs {
-    @include media-breakpoint-down(lg) {
-      font-size: var(--font-size-08);
-    }
-  }
-}
-
 .contact-form-error-container {
   padding-bottom: var(--spacing-08);
 }

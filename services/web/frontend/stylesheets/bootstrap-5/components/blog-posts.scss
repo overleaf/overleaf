@@ -41,6 +41,7 @@
 
 .blog {
   margin-top: var(--spacing-16);
+  margin-bottom: var(--spacing-16);
 
   img {
     max-width: 100%;
@@ -196,5 +197,9 @@
       padding-top: var(--spacing-04);
       font-size: small;
     }
+  }
+
+  .pagination {
+    margin: var(--spacing-09) 0 0 0;
   }
 }

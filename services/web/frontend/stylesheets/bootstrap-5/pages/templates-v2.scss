@@ -192,6 +192,10 @@
     }
   }
 
+  .pagination {
+    margin-top: var(--spacing-13);
+  }
+
   .popular-tags {
     .gallery-thumbnail {
       margin: 0 0 var(--spacing-06);
