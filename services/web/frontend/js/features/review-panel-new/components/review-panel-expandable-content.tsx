@@ -1,6 +1,6 @@
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import classNames from 'classnames'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
 
 export const ExpandableContent: FC<{ className?: string }> = ({
@@ -49,22 +49,22 @@ export const ExpandableContent: FC<{ className?: string }> = ({
         {children}
       </div>
       {isExpanded ? (
-        <Button
-          bsStyle="link"
+        <OLButton
+          variant="link"
           className="btn-inline-link"
           onClick={handleShowLess}
         >
           {t('show_less')}
-        </Button>
+        </OLButton>
       ) : (
         isOverflowing && (
-          <Button
-            bsStyle="link"
+          <OLButton
+            variant="link"
             className="btn-inline-link"
             onClick={handleShowMore}
           >
             {t('show_more')}
-          </Button>
+          </OLButton>
         )
       )}
     </div>

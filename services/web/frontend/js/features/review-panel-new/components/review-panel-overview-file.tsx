@@ -11,7 +11,6 @@ import {
 } from '../../../../../types/change'
 import { canAggregate } from '../utils/can-aggregate'
 
-import { Button } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import useOverviewFileCollapsed from '../hooks/use-overview-file-collapsed'
 import { useThreadsContext } from '../context/threads-context'
@@ -61,9 +60,9 @@ export const ReviewPanelOverviewFile: FC<{
   return (
     <>
       <div>
-        <Button
-          bsClass="review-panel-overview-file-header"
-          bsStyle={null}
+        <button
+          type="button"
+          className="review-panel-overview-file-header"
           onClick={toggleCollapsed}
         >
           <MaterialIcon
@@ -73,7 +72,7 @@ export const ReviewPanelOverviewFile: FC<{
           <div className="review-panel-overview-file-entry-count">
             {numEntries}
           </div>
-        </Button>
+        </button>
 
         {!collapsed && (
           <div className="review-panel-overview-file-entries">

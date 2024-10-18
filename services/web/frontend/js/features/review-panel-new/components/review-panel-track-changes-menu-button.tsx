@@ -2,6 +2,8 @@ import { FC, memo } from 'react'
 import { Trans } from 'react-i18next'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import Icon from '@/shared/components/icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const ReviewPanelTrackChangesMenuButton: FC<{
   menuExpanded: boolean
@@ -26,7 +28,12 @@ const ReviewPanelTrackChangesMenuButton: FC<{
           components={{ strong: <strong /> }}
         />
       )}
-      <Icon type={menuExpanded ? 'angle-down' : 'angle-right'} />
+      <BootstrapVersionSwitcher
+        bs3={<Icon type={menuExpanded ? 'angle-down' : 'angle-right'} />}
+        bs5={
+          <MaterialIcon type={menuExpanded ? 'expand_more' : 'chevron_right'} />
+        }
+      />
     </button>
   )
 }

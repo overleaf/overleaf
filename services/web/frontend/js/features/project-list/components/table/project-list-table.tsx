@@ -47,7 +47,7 @@ function ProjectListTable() {
     selectOrUnselectAllProjects,
   } = useProjectListContext()
   const { handleSort } = useSort()
-  const checkAllRef = useRef<HTMLInputElement>()
+  const checkAllRef = useRef<HTMLInputElement>(null)
 
   const handleAllProjectsCheckboxChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {

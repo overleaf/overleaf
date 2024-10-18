@@ -1,5 +1,5 @@
 .review-panel-new {
-  @review-panel-header-height: 69px;
+  $review-panel-header-height: 69px;
 
   &.review-panel-container {
     height: 100%;
@@ -10,24 +10,29 @@
   .review-panel-inner {
     z-index: 6;
     flex-shrink: 0;
-    background-color: @neutral-10;
-    border-left: solid 0 @neutral-20;
-    color: @content-primary;
-    font-family: @font-family-base;
-    line-height: @line-height-base;
-    font-size: @font-size-01;
+    background-color: var(--neutral-10);
+    border-left: solid 0 var(--neutral-20);
+    color: var(--content-primary);
+    font-family: $font-family-base;
+    line-height: $line-height-base;
+    font-size: var(--font-size-01);
     box-sizing: content-box;
     width: var(--review-panel-width);
     min-height: var(--review-panel-height);
+
+    .dropdown-menu {
+      z-index: 1;
+      min-width: var(--bs-dropdown-min-width);
+    }
   }
 
   .review-panel-entry {
-    background-color: white;
-    border-radius: @border-radius-base-new;
-    border: 1px solid @neutral-20;
-    padding: @spacing-04;
-    width: calc(100% - @spacing-04);
-    margin-left: @spacing-02;
+    background-color: var(--white);
+    border-radius: var(--border-radius-base);
+    border: 1px solid var(--neutral-20);
+    padding: var(--spacing-04);
+    width: calc(100% - var(--spacing-04));
+    margin-left: var(--spacing-02);
     z-index: 1;
   }
 
@@ -43,50 +48,56 @@
   .review-panel-entry-content {
     display: flex;
     flex-direction: column;
-    font-size: @font-size-01;
-    gap: @spacing-04;
+    font-size: var(--font-size-01);
+    gap: var(--spacing-04);
   }
 
   .review-panel-entry-focused,
   .review-panel-entry-highlighted {
-    margin-left: @spacing-01;
-    border: 1px solid @blue-50;
+    margin-left: var(--spacing-01);
+    border: 1px solid var(--border-active);
   }
 
   .review-panel-entry-header {
     display: flex;
     justify-content: space-between;
+    margin-bottom: var(--spacing-01);
 
     .review-panel-entry-user {
-      color: @blue;
+      color: var(--bg-info-01);
       font-size: 110%;
     }
 
     .review-panel-entry-time {
-      color: @content-secondary;
+      color: var(--content-secondary);
     }
 
     .review-panel-entry-actions {
       display: flex;
       align-items: center;
-      gap: @spacing-03;
+      gap: var(--spacing-03);
 
       .btn {
         background-color: transparent;
+        border-width: 0;
         padding: 0;
         height: 24px;
         width: 24px;
 
         &:hover,
         &:focus {
-          background-color: @neutral-20;
-          color: @content-primary;
+          background-color: var(--neutral-20);
+          color: var(--content-primary);
         }
       }
 
+      .dropdown-toggle::after {
+        display: none;
+      }
+
       .review-panel-entry-actions-icon {
-        padding: @spacing-01;
-        font-size: @font-size-05;
+        padding: var(--spacing-01);
+        font-size: var(--font-size-05);
       }
     }
   }
@@ -94,13 +105,13 @@
   .review-panel-change-body {
     display: flex;
     align-items: flex-start;
-    color: @content-secondary;
-    gap: @spacing-02;
+    color: var(--content-secondary);
+    gap: var(--spacing-02);
     overflow-wrap: anywhere;
   }
 
   .review-panel-content-highlight {
-    color: @content-primary;
+    color: var(--content-primary);
     text-decoration: none;
   }
 
@@ -109,39 +120,39 @@
   }
 
   .review-panel-entry-icon {
-    border-radius: @border-radius-base-new;
-    padding: @spacing-02;
-    font-size: @font-size-03;
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-02);
+    font-size: var(--font-size-03);
   }
 
   .review-panel-entry-change-icon {
-    margin-top: -2px;
+    margin-top: calc(-1 * var(--spacing-01));
   }
 
   .review-panel-entry-icon-accept {
-    background-color: @green-10;
-    color: @green-50;
+    background-color: var(--bg-accent-03);
+    color: var(--bg-accent-01);
   }
 
   .review-panel-entry-icon-reject {
-    background-color: @red-10;
-    color: @red-50;
+    background-color: var(--bg-danger-03);
+    color: var(--bg-danger-01);
   }
 
   .review-panel-entry-icon-changed {
-    background-color: @neutral-20;
-    color: @content-secondary;
+    background-color: var(--neutral-20);
+    color: var(--content-secondary);
   }
 
   .review-panel-header {
     position: fixed;
     top: var(--review-panel-top);
     width: var(--review-panel-width);
-    height: @review-panel-header-height;
+    height: $review-panel-header-height;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-bottom: 1px solid @rp-border-grey;
+    border-bottom: 1px solid var(--rp-border-grey);
     background-color: white;
     text-align: center;
     z-index: 4;
@@ -149,9 +160,9 @@
 
   // TODO: Update this when we move the track changes menu to the new design
   .rp-tc-state {
-    background-color: white;
+    background-color: var(--white);
     max-height: calc(
-      100vh - var(--review-panel-top) - @review-panel-header-height
+      100vh - var(--review-panel-top) - $review-panel-header-height
     );
     overflow-y: auto;
   }
@@ -160,8 +171,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-left: 4px;
-    padding-right: 12px;
+    padding-left: var(--spacing-02);
+    padding-right: var(--spacing-05);
     flex-shrink: 0;
     flex-basis: 32px;
   }
@@ -176,7 +187,7 @@
     width: 8px;
     height: 8px;
     border-radius: 100%;
-    background-color: @green-50;
+    background-color: var(--bg-accent-01);
   }
 
   .track-changes-menu-button {
@@ -185,8 +196,8 @@
     padding: 0;
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: @font-size-02;
+    gap: var(--spacing-02);
+    font-size: var(--font-size-02);
 
     i {
       width: 8px;
@@ -197,17 +208,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 6px 4px;
+    padding: var(--spacing-03) var(--spacing-02);
 
     .review-panel-label {
-      font-family: Lato, sans-serif;
-      font-size: @font-size-02;
+      font-size: var(--font-size-02);
       font-weight: bold;
       margin: 0;
     }
 
     .review-panel-split-test-badge {
-      margin-left: 4px;
+      margin-left: var(--spacing-02);
     }
 
     .review-panel-close-button {
@@ -215,27 +225,30 @@
       align-items: center;
       border: none;
       background-color: transparent;
-      color: @content-primary;
-      padding: 2px;
+      color: var(--content-primary);
+      padding: var(--spacing-01);
 
       &:hover,
       &:focus {
-        background-color: @neutral-20;
+        background-color: var(--neutral-20);
       }
     }
   }
 
   &.review-panel-resolved-comments {
+    --bs-popover-border-width: 1px;
+    --bs-popover-bg: var(--bg-light-secondary);
+    --bs-popover-body-color: var(--content-secondary);
+
     width: 280px;
 
-    .popover-content {
-      background-color: @neutral-10;
+    .popover-body {
       overflow-y: auto;
       max-height: calc(100vh - 180px);
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      padding: 8px 6px;
+      gap: var(--spacing-02);
+      padding: var(--spacing-04) var(--spacing-03);
     }
   }
 
@@ -252,83 +265,84 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
+    padding: var(--spacing-02) 0;
   }
 
   .review-panel-resolved-comments-label {
     font-weight: bold;
-    font-size: 14px;
+    font-size: var(--font-size-02);
   }
 
   .review-panel-resolved-comments-count {
-    background-color: @neutral-20;
-    border-radius: @border-radius-base-new;
-    padding: 2px;
+    background-color: var(--neutral-20);
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-01);
   }
 
   .review-panel-resolved-comment {
-    background-color: white;
-    border-radius: @border-radius-base-new;
-    padding: @spacing-04;
+    background-color: var(--white);
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-04);
     display: flex;
     flex-direction: column;
-    gap: @spacing-04;
+    gap: var(--spacing-04);
   }
 
   .review-panel-resolved-comment-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: @content-secondary;
-    font-size: 12px;
+    color: var(--content-secondary);
+    font-size: var(--font-size-01);
   }
 
   .review-panel-resolved-comment-filename {
-    color: @content-primary;
+    color: var(--content-primary);
   }
 
   .review-panel-resolved-comment-buttons {
     display: flex;
     align-items: center;
-    gap: @spacing-03;
+    gap: var(--spacing-03);
 
     .btn {
       background-color: transparent;
-      color: @content-primary;
-      padding: @spacing-01;
+      border-width: 0;
+      color: var(--content-primary);
+      padding: var(--spacing-01);
       height: 24px;
       width: 24px;
 
       &:hover,
       &:focus {
-        background-color: @neutral-20;
+        background-color: var(--neutral-20);
       }
     }
 
     .material-symbols {
-      font-size: 20px;
+      font-size: var(--font-size-05);
     }
   }
 
   .review-panel-resolved-comment-quoted-text {
-    background-color: @neutral-20;
-    border-radius: @border-radius-base-new;
-    padding: 4px 8px;
+    background-color: var(--neutral-20);
+    border-radius: var(--border-radius-base);
+    padding: var(--spacing-02) var(--spacing-04);
   }
 
   .review-panel-resolved-comment-quoted-text-label {
-    color: @content-secondary;
-    font-size: 12px;
+    color: var(--content-secondary);
+    font-size: var(--font-size-01);
   }
 
   .review-panel-resolved-comment-quoted-text-quote {
     overflow-wrap: anywhere;
-    font-size: 14px;
+    font-size: var(--font-size-02);
   }
 
   .review-panel-comment-wrapper {
     display: flex;
-    gap: @spacing-04;
+    gap: var(--spacing-04);
   }
 
   .review-panel-comment {
@@ -336,12 +350,12 @@
   }
 
   .review-panel-comment-reply-divider {
-    border-left: 2px solid @yellow-20;
+    border-left: 2px solid var(--yellow-20);
   }
 
   .review-panel-comment-body {
-    font-size: @font-size-02;
-    color: @content-primary;
+    font-size: var(--font-size-02);
+    color: var(--content-primary);
     overflow-wrap: anywhere;
   }
 
@@ -360,13 +374,13 @@
 
   .review-panel-comment-input {
     width: 100%;
-    font-size: @rp-base-font-size;
-    padding: 2px @spacing-03;
-    border-radius: @border-radius-base-new;
-    border: solid 1px @neutral-60;
+    font-size: var(--rp-base-font-size);
+    padding: 2px var(--spacing-03);
+    border-radius: var(--border-radius-base);
+    border: solid 1px var(--neutral-60);
     resize: vertical;
-    color: @rp-type-darkgrey;
-    background-color: #fff;
+    color: var(--rp-type-darkgrey);
+    background-color: var(--white);
     height: 25px;
     min-height: 25px;
     overflow-x: hidden;
@@ -385,10 +399,9 @@
     position: sticky;
     top: 50%;
     transform: translateY(-50%);
-
     width: 100%;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: var(--spacing-06);
+    padding-right: var(--spacing-06);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -408,7 +421,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 16px;
+    margin-bottom: var(--spacing-06);
 
     .material-symbols {
       font-size: 32px;
@@ -416,9 +429,9 @@
   }
 
   .review-panel-overview {
-    padding: 4px;
+    padding: var(--spacing-02);
     position: absolute;
-    top: @review-panel-header-height;
+    top: $review-panel-header-height;
     bottom: 59px;
     width: 100%;
     overflow: auto;
@@ -432,32 +445,32 @@
 
   .review-panel-overview-file-header {
     all: unset;
-    padding: 6px 8px;
-    font-size: 14px;
+    padding: var(--spacing-03) var(--spacing-04);
+    font-size: var(--font-size-02);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--spacing-04);
     box-sizing: border-box;
     width: 100%;
   }
 
   .review-panel-overfile-divider {
-    border-bottom: 1px solid #e7e9ee;
-    margin: 2px 0;
+    border-bottom: 1px solid var(--border-divider);
+    margin: var(--spacing-01) 0;
   }
 
   .review-panel-overview-file-entries {
     overflow: hidden;
-    padding-top: 4px;
-    padding-bottom: 6px;
+    padding-top: var(--spacing-02);
+    padding-bottom: var(--spacing-03);
   }
 
   .review-panel-overview-file-entry-count {
-    background-color: @neutral-20;
-    padding: 2px 4px;
+    background-color: var(--neutral-20);
+    padding: var(--spacing-01) var(--spacing-02);
     margin-left: auto;
-    border-radius: @border-radius-base;
+    border-radius: var(--border-radius-base);
   }
 
   .review-panel-footer {
@@ -467,37 +480,37 @@
     width: var(--review-panel-width);
     z-index: 2;
     background-color: white;
-    border-top: 1px solid @rp-border-grey;
+    border-top: 1px solid var(--rp-border-grey);
     display: flex;
 
     .review-panel-tab {
       flex: 0 0 50%;
-      padding: 6px 0;
+      padding: var(--spacing-03) 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: var(--spacing-02);
       border: 0;
       border-top: solid 3px transparent;
       background: none;
-      color: @content-secondary;
-      font-size: @font-size-02;
+      color: var(--content-secondary);
+      font-size: var(--font-size-02);
 
       &:hover,
       &:focus {
         text-decoration: none;
-        color: @content-primary;
+        color: var(--content-primary);
       }
 
       &-active {
-        color: @content-primary;
-        border-top: solid 3px @green-50;
+        color: var(--content-primary);
+        border-top: solid 3px var(--bg-accent-01);
       }
     }
   }
 
   .review-panel-add-comment-textarea {
-    padding: 2px 6px;
+    padding: var(--spacing-01) var(--spacing-03);
     resize: vertical;
     min-height: 44px;
   }
@@ -505,7 +518,7 @@
   .review-panel-add-comment-buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
+    gap: var(--spacing-04);
   }
 
   .review-panel-add-comment-cancel-button {
@@ -513,8 +526,8 @@
 
     &:hover,
     &:focus {
-      background-color: @neutral-20;
-      color: @content-primary;
+      background-color: var(--neutral-20);
+      color: var(--content-primary);
     }
   }
 
@@ -531,15 +544,8 @@
     }
 
     &.upwards {
-      top: calc(var(--review-panel-top) + @review-panel-header-height + 16px);
+      top: calc(var(--review-panel-top) + $review-panel-header-height + 16px);
     }
-  }
-
-  // Would not be migrated
-  .review-panel-more-comments-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   &.review-panel-subview-overview {
@@ -575,17 +581,17 @@
       left: 0;
       top: 0;
       display: flex;
-      color: @content-secondary;
+      color: var(--content-secondary);
       cursor: pointer;
     }
 
     .review-panel-entry-content {
       display: none;
-      background: white;
-      border: 1px solid @rp-border-grey;
-      border-radius: @border-radius-base-new;
+      background: var(--white);
+      border: 1px solid var(--rp-border-grey);
+      border-radius: var(--border-radius-base);
       width: 200px;
-      padding: @spacing-02;
+      padding: var(--spacing-02);
     }
 
     .review-panel-entry-hover {
@@ -608,10 +614,10 @@
 }
 
 .review-tooltip-menu {
-  box-shadow: 0px 2px 4px 0px #1e253029;
+  box-shadow: 0 2px 4px 0 #1e253029;
   border: none;
-  border-radius: 4px;
-  padding: 4px;
+  border-radius: var(--border-radius-base);
+  padding: var(--spacing-02);
 }
 
 .review-tooltip-menu-button {
@@ -619,12 +625,12 @@
   border: none;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px;
+  gap: var(--spacing-01);
+  padding: var(--spacing-01);
 }
 
 .review-tooltip-add-comment-button {
-  padding: 2px 8px;
+  padding: var(--spacing-01) var(--spacing-04);
 }
 
 .review-panel-tooltip {

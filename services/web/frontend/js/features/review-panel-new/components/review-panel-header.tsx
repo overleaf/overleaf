@@ -2,7 +2,6 @@ import { FC, memo, useState } from 'react'
 import { ReviewPanelResolvedThreadsButton } from './review-panel-resolved-threads-button'
 import { ReviewPanelTrackChangesMenu } from './review-panel-track-changes-menu'
 import ReviewPanelTrackChangesMenuButton from './review-panel-track-changes-menu-button'
-import { Button } from 'react-bootstrap'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import SplitTestBadge from '@/shared/components/split-test-badge'
@@ -26,14 +25,13 @@ const ReviewPanelHeader: FC = () => {
             />
           </span>
         </div>
-        <Button
-          bsStyle={null}
-          className="review-panel-close-button"
+        <button
           type="button"
+          className="btn review-panel-close-button"
           onClick={() => setReviewPanelOpen(false)}
         >
           <MaterialIcon type="close" />
-        </Button>
+        </button>
       </div>
       <div className="review-panel-tools">
         <ReviewPanelResolvedThreadsButton />

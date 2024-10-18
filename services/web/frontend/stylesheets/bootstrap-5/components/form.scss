@@ -73,6 +73,32 @@
   }
 }
 
+.form-switch {
+  .form-check-input {
+    --bs-form-check-bg: var(--bg-dark-tertiary);
+
+    height: 20px;
+    margin: 0;
+    border: 0;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    &:disabled {
+      opacity: 0.32;
+      background-color: var(--bg-dark-tertiary);
+
+      &:checked {
+        background-color: var(--bg-accent-01);
+        background-image: #{escape-svg(
+            url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$component-active-color}'/></svg>")
+          )};
+      }
+    }
+  }
+}
+
 .form-text {
   display: inline-flex;
   gap: $spacing-02;

@@ -4,7 +4,7 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 
 type OLFormCheckboxProps = React.ComponentProps<(typeof Form)['Check']> & {
-  inputRef?: React.MutableRefObject<HTMLInputElement | undefined>
+  inputRef?: React.MutableRefObject<HTMLInputElement | null>
   bs3Props?: Record<string, unknown>
 }
 

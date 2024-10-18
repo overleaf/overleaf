@@ -1,5 +1,11 @@
+@use 'sass:color';
+
 :root {
   --review-icon: url('../../../../../public/img/ol-icons/review-icon-dark-theme.svg');
+  --rp-base-font-size: var(--font-size-01);
+  --rp-bg-dim-blue: #fafafa;
+  --rp-border-grey: #d9d9d9;
+  --rp-type-darkgrey: #3f3f3f;
 }
 
 @include theme('light') {
@@ -15,6 +21,43 @@
   }
 }
 
+$rp-type-blue: #6b7797;
+
+.rp-tc-state {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  list-style: none;
+  padding: 0 var(--spacing-03);
+  margin: 0;
+  border-bottom: 1px solid var(--rp-border-grey);
+  background-color: var(--rp-bg-dim-blue);
+  text-align: left;
+}
+
+.rp-tc-state-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-02) 0;
+
+  &:last-of-type {
+    padding-bottom: var(--spacing-03);
+  }
+}
+
+.rp-tc-state-item-name {
+  @extend .text-truncate;
+
+  flex-grow: 1;
+  font-weight: 600;
+}
+
+.rp-tc-state-item-name-disabled {
+  opacity: 0.35;
+}
+
 .review-icon {
   display: inline-block;
   background-image: var(--review-icon);
@@ -25,5 +68,24 @@
 
   &::before {
     content: '\00a0'; // Non-breakable space. A non-breakable character here makes this icon work like font-awesome.
+  }
+}
+
+.resolved-comments-toggle {
+  background-color: var(--bg-light-secondary);
+  font-size: var(--font-size-02);
+  color: color.adjust($rp-type-blue, $lightness: 25%);
+  border: solid 1px var(--rp-border-grey);
+  border-radius: var(--border-radius-base);
+  padding: 0 var(--spacing-02);
+  display: block;
+  height: 22px;
+  width: 22px;
+  line-height: 1.4;
+
+  &:hover,
+  &:focus {
+    text-decoration: none;
+    color: $rp-type-blue;
   }
 }

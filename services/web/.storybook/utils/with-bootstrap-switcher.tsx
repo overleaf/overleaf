@@ -11,4 +11,7 @@ export const bsVersionDecorator: Meta = {
       options: ['3', '5'],
     },
   },
+  args: {
+    [bootstrapVersionArg]: '3',
+  },
 }

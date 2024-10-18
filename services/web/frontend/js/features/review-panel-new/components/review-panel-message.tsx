@@ -5,8 +5,7 @@ import {
 } from '../../../../../types/review-panel/review-panel'
 import { useTranslation } from 'react-i18next'
 import { formatTimeBasedOnYear } from '@/features/utils/format-date'
-import Tooltip from '@/shared/components/tooltip'
-import { Button } from 'react-bootstrap'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import { buildName } from '../utils/build-name'
@@ -90,26 +89,27 @@ export const ReviewPanelMessage: FC<{
 
         <div className="review-panel-entry-actions">
           {!isReply && !isThreadResolved && (
-            <Tooltip
+            <OLTooltip
               id="resolve-thread"
               overlayProps={{ placement: 'bottom' }}
               description={t('resolve_comment')}
               tooltipProps={{ className: 'review-panel-tooltip' }}
             >
-              <Button onClick={onResolve} bsStyle={null}>
+              <button type="button" className="btn" onClick={onResolve}>
                 <MaterialIcon
                   type="check"
                   className="review-panel-entry-actions-icon"
                   accessibilityLabel={t('resolve_comment')}
                 />
-              </Button>
-            </Tooltip>
+              </button>
+            </OLTooltip>
           )}
 
           {!isThreadResolved && (
             <ReviewPanelCommentOptions
               onEdit={handleEditOption}
               onDelete={showDeleteModal}
+              id={message.id}
             />
           )}
         </div>

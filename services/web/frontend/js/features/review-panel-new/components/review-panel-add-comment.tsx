@@ -9,12 +9,12 @@ import { useThreadsActionsContext } from '../context/threads-context'
 import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/add-comment'
 import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
-import { Button } from 'react-bootstrap'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { ThreadId } from '../../../../../types/review-panel/review-panel'
 import { Decoration } from '@codemirror/view'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { debugConsole } from '@/utils/debugging'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 export const ReviewPanelAddComment: FC<{
   docId: string
@@ -148,23 +148,23 @@ export const ReviewPanelAddComment: FC<{
           disabled={submitting}
         />
         <div className="review-panel-add-comment-buttons">
-          <Button
-            bsSize="sm"
-            bsStyle={null}
+          <OLButton
+            variant="ghost"
+            size="sm"
             className="review-panel-add-comment-cancel-button"
             disabled={submitting}
             onClick={handleClose}
           >
             {t('cancel')}
-          </Button>
-          <Button
+          </OLButton>
+          <OLButton
             type="submit"
-            bsSize="sm"
-            className="btn-primary"
+            variant="primary"
+            size="sm"
             disabled={content === '' || submitting}
           >
             {t('comment')}
-          </Button>
+          </OLButton>
         </div>
       </form>
     </ReviewPanelEntry>

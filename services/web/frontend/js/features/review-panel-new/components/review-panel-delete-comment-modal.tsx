@@ -1,7 +1,12 @@
-import AccessibleModal from '@/shared/components/accessible-modal'
 import { FC, memo } from 'react'
-import { Button, Modal } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTranslation } from 'react-i18next'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
 
 const ReviewPanelDeleteCommentModal: FC<{
   onHide: () => void
@@ -12,20 +17,20 @@ const ReviewPanelDeleteCommentModal: FC<{
   const { t } = useTranslation()
 
   return (
-    <AccessibleModal show onHide={onHide}>
-      <Modal.Header>
-        <Modal.Title>{title}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>{message}</Modal.Body>
-      <Modal.Footer>
-        <Button bsStyle={null} className="btn-secondary" onClick={onHide}>
+    <OLModal show onHide={onHide}>
+      <OLModalHeader>
+        <OLModalTitle>{title}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>{message}</OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={onHide}>
           {t('cancel')}
-        </Button>
-        <Button bsStyle="danger" onClick={onDelete}>
+        </OLButton>
+        <OLButton variant="danger" onClick={onDelete}>
           {t('delete')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

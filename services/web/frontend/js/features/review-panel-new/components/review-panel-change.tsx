@@ -8,8 +8,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import classnames from 'classnames'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
-import { Button } from 'react-bootstrap'
-import Tooltip from '@/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 import { useChangesUsersContext } from '../context/changes-users-context'
@@ -109,29 +108,30 @@ export const ReviewPanelChange = memo<{
             </div>
             {editable && permissions.write && (
               <div className="review-panel-entry-actions">
-                <Tooltip
+                <OLTooltip
                   id="accept-change"
                   overlayProps={{ placement: 'bottom' }}
                   description={t('accept_change')}
                   tooltipProps={{ className: 'review-panel-tooltip' }}
                 >
-                  <Button onClick={acceptHandler} bsStyle={null}>
+                  <button type="button" className="btn" onClick={acceptHandler}>
                     <MaterialIcon
                       type="check"
                       className="review-panel-entry-actions-icon"
                       accessibilityLabel={t('accept_change')}
                     />
-                  </Button>
-                </Tooltip>
+                  </button>
+                </OLTooltip>
 
-                <Tooltip
+                <OLTooltip
                   id="reject-change"
                   description={t('reject_change')}
                   overlayProps={{ placement: 'bottom' }}
                   tooltipProps={{ className: 'review-panel-tooltip' }}
                 >
-                  <Button
-                    bsStyle={null}
+                  <button
+                    type="button"
+                    className="btn"
                     onClick={() =>
                       aggregate
                         ? rejectChanges(change.id, aggregate.id)
@@ -143,8 +143,8 @@ export const ReviewPanelChange = memo<{
                       accessibilityLabel={t('reject_change')}
                       type="close"
                     />
-                  </Button>
-                </Tooltip>
+                  </button>
+                </OLTooltip>
               </div>
             )}
           </div>

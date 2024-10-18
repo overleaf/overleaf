@@ -6,6 +6,7 @@ $prefix: bs-;
 // Quickly modify global styling by enabling or disabling optional features.
 
 $enable-validation-icons: false;
+$component-active-color: $white;
 
 // Fonts
 $font-family-sans-serif: 'Noto Sans', sans-serif;
@@ -114,6 +115,15 @@ $form-check-input-border: var(--bs-border-width) solid var(--border-primary);
 $form-check-input-border-radius: $border-radius-base;
 $form-check-input-focus-border: var(--border-primary);
 $form-check-input-disabled-opacity: 1;
+
+// form-switch-variables
+$form-switch-width: 34px;
+$form-switch-padding-start: $spacing-03;
+$form-switch-color: $component-active-color;
+$form-switch-width: 34px;
+$form-switch-padding-start: $spacing-03;
+$form-switch-focus-color: $component-active-color;
+$form-switch-checked-color: $component-active-color;
 
 // Form validation
 
