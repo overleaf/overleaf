@@ -91,7 +91,17 @@ module.exports = {
     },
     {
       // ES specific rules
-      files: ['**/app/src/**/*.mjs', 'modules/*/index.mjs', 'app.mjs'],
+      files: [
+        '**/app/src/**/*.mjs',
+        'modules/*/index.mjs',
+        'app.mjs',
+        'scripts/**/*.mjs',
+        'migrations/**/*.mjs',
+      ],
+      excludedFiles: [
+        // migration template file
+        'migrations/lib/template.mjs',
+      ],
       parserOptions: {
         sourceType: 'module',
       },
