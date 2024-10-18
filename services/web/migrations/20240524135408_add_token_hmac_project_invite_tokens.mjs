@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 import Helpers from './lib/helpers.mjs'
-import runScript from '../scripts/backfill_project_invites_token_hmac.js'
+import runScript from '../scripts/backfill_project_invites_token_hmac.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 

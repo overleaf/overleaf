@@ -1,4 +1,4 @@
-import runScript from '../scripts/back_fill_doc_name_for_deleted_docs.js'
+import runScript from '../scripts/back_fill_doc_name_for_deleted_docs.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 

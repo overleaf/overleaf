@@ -6,7 +6,7 @@ import FeaturesUpdater from '../app/src/Features/Subscription/FeaturesUpdater.js
 import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.js'
 import UserFeaturesUpdater from '../app/src/Features/Subscription/UserFeaturesUpdater.js'
 import AnalyticsManager from '../app/src/Features/Analytics/AnalyticsManager.js'
-import DropboxHandler from '../modules/dropbox/app/src/DropboxHandler.js'
+import DropboxHandler from '../modules/dropbox/app/src/DropboxHandler.mjs'
 import { OError } from '../app/src/Features/Errors/Errors.js'
 
 const ScriptLogger = {

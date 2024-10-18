@@ -1,4 +1,4 @@
-import runScript from '../scripts/back_fill_doc_rev.js'
+import runScript from '../scripts/back_fill_doc_rev.mjs'
 
 const tags = ['server-ce', 'server-pro']
 

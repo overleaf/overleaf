@@ -1,4 +1,4 @@
-import BatchedUpdateScript from '../scripts/helpers/batchedUpdate.js'
+import BatchedUpdateScript from '../scripts/helpers/batchedUpdate.mjs'
 
 const { batchedUpdate } = BatchedUpdateScript
 const tags = ['server-ce', 'server-pro', 'saas']

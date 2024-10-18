@@ -22,8 +22,9 @@ describe('BatchedUpdateTests', function () {
     })
 
     spawnSync(process.argv0, [
+      '--input-type=module',
       '-e',
-      'require("./scripts/helpers/batchedUpdate").batchedUpdateWithResultHandling("systemmessages", { content: { $ne: "42" }}, { $set: { content: "42" } })',
+      'import BatchedUpdateModule from "./scripts/helpers/batchedUpdate.mjs"; BatchedUpdateModule.batchedUpdateWithResultHandling("systemmessages", { content: { $ne: "42" }}, { $set: { content: "42" } })',
     ])
 
     await expect(

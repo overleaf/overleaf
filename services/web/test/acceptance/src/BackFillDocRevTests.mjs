@@ -24,7 +24,7 @@ describe('BackFillDocRevTests', function () {
         [
           'VERBOSE_LOGGING=true',
           'node',
-          'scripts/back_fill_doc_rev',
+          'scripts/back_fill_doc_rev.mjs',
           dryRun,
         ].join(' ')
       )

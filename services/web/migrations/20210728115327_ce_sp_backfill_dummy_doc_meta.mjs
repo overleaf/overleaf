@@ -1,4 +1,4 @@
-import runScript from '../scripts/back_fill_dummy_doc_meta.js'
+import runScript from '../scripts/back_fill_dummy_doc_meta.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 

@@ -1,4 +1,4 @@
-import runScript from '../scripts/migrate_audit_logs.js'
+import runScript from '../scripts/migrate_audit_logs.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 

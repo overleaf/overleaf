@@ -121,7 +121,7 @@ describe('BackFillDummyDocMeta', function () {
       result = await promisify(exec)(
         Object.entries(options)
           .map(([key, value]) => `${key}=${value}`)
-          .concat(['node', 'scripts/back_fill_dummy_doc_meta.js'])
+          .concat(['node', 'scripts/back_fill_dummy_doc_meta.mjs'])
           .join(' ')
       )
     } catch (error) {

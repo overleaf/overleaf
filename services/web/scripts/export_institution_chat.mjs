@@ -5,7 +5,7 @@ import {
   ObjectId,
 } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
-import InstitutionHubsController from '../modules/metrics/app/src/InstitutionHubsController.js'
+import InstitutionHubsController from '../modules/metrics/app/src/InstitutionHubsController.mjs'
 
 function usage() {
   console.log(

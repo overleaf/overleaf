@@ -1,0 +1,27 @@
+import { waitForDb } from '../app/src/infrastructure/mongodb.js'
+import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
+import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
+
+ensureRunningOnMongoSecondaryWithTimeout(300000)
+
+const institutionId = parseInt(process.argv[2])
+if (isNaN(institutionId)) throw new Error('No institution id')
+console.log('Checking users of institution', institutionId)
+const emitNonProUserIds = process.argv.includes('--emit-non-pro-user-ids')
+
+async function main() {
+  const usersSummary = await InstitutionsManager.promises.checkInstitutionUsers(
+    institutionId,
+    emitNonProUserIds
+  )
+  console.log(usersSummary)
+  process.exit()
+}
+
+try {
+  await waitForDb()
+  await main()
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

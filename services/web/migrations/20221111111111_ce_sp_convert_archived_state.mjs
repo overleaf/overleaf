@@ -1,4 +1,4 @@
-import runScript from '../scripts/convert_archived_state.js'
+import runScript from '../scripts/convert_archived_state.mjs'
 
 const tags = ['server-ce', 'server-pro']
 

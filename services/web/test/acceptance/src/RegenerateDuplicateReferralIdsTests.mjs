@@ -96,7 +96,7 @@ describe('RegenerateDuplicateReferralIds', function () {
 
           // actual command
           'node',
-          'scripts/regenerate_duplicate_referral_ids',
+          'scripts/regenerate_duplicate_referral_ids.mjs',
         ].join(' ')
       )
     } catch (err) {

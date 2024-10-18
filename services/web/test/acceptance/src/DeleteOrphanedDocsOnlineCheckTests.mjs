@@ -121,7 +121,7 @@ describe('DeleteOrphanedDocsOnlineCheck', function () {
             // Hide deprecation warnings for calling `db.collection.count`
             'NODE_OPTIONS=--no-deprecation',
           ])
-          .concat(['node', 'scripts/delete_orphaned_docs_online_check.js'])
+          .concat(['node', 'scripts/delete_orphaned_docs_online_check.mjs'])
           .join(' ')
       )
     } catch (error) {

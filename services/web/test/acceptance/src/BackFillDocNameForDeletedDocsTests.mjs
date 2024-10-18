@@ -67,7 +67,7 @@ describe('BackFillDocNameForDeletedDocs', function () {
     try {
       result = await promisify(exec)(
         ['LET_USER_DOUBLE_CHECK_INPUTS_FOR=1']
-          .concat(['node', 'scripts/back_fill_doc_name_for_deleted_docs'])
+          .concat(['node', 'scripts/back_fill_doc_name_for_deleted_docs.mjs'])
           .concat(args)
           .join(' ')
       )

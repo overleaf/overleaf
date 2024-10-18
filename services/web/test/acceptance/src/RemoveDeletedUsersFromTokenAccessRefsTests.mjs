@@ -54,7 +54,7 @@ describe('RemoveDeletedUsersFromTokenAccessRefsTests', function () {
         [
           'VERBOSE_LOGGING=true',
           'node',
-          'scripts/remove_deleted_users_from_token_access_refs',
+          'scripts/remove_deleted_users_from_token_access_refs.mjs',
           dryRun,
           projectsList,
         ].join(' ')

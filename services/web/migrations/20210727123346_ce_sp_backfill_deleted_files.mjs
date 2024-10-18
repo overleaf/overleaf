@@ -1,4 +1,4 @@
-import runScript from '../scripts/back_fill_deleted_files.js'
+import runScript from '../scripts/back_fill_deleted_files.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 

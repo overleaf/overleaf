@@ -1,0 +1,44 @@
+import readline from 'readline'
+import { waitForDb } from '../app/src/infrastructure/mongodb.js'
+import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
+import ProjectGetter from '../app/src/Features/Project/ProjectGetter.js'
+import Errors from '../app/src/Features/Errors/Errors.js'
+
+async function countFiles() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+  })
+
+  for await (const projectId of rl) {
+    try {
+      const project = await ProjectGetter.promises.getProject(projectId)
+      if (!project) {
+        throw new Errors.NotFoundError('project not found')
+      }
+      const { files, docs } =
+        ProjectEntityHandler.getAllEntitiesFromProject(project)
+      console.error(
+        projectId,
+        files.length,
+        (project.deletedFiles && project.deletedFiles.length) || 0,
+        docs.length,
+        (project.deletedDocs && project.deletedDocs.length) || 0
+      )
+    } catch (err) {
+      if (err instanceof Errors.NotFoundError) {
+        console.error(projectId, 'NOTFOUND')
+      } else {
+        console.log(projectId, 'ERROR', err.name, err.message)
+      }
+    }
+  }
+}
+
+try {
+  await waitForDb()
+  await countFiles()
+  process.exit(0)
+} catch (error) {
+  console.log('Aiee, something went wrong!', error)
+  process.exit(1)
+}

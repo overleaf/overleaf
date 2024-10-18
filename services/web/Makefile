@@ -425,7 +425,7 @@ lint_flag_res_send_usage:
 
 lint: lint_overleafModuleImports
 lint_overleafModuleImports:
-	node scripts/check_overleafModuleImports.js
+	node scripts/check_overleafModuleImports.mjs
 
 lint: typecheck_frontend
 typecheck_frontend:

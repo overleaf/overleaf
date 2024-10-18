@@ -1,4 +1,4 @@
-import runScript from '../scripts/remove_deleted_users_from_token_access_refs.js'
+import runScript from '../scripts/remove_deleted_users_from_token_access_refs.mjs'
 
 const tags = ['server-ce', 'server-pro', 'saas']
 

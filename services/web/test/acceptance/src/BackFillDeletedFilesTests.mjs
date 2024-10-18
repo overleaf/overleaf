@@ -78,7 +78,7 @@ describe('BackFillDeletedFiles', function () {
     try {
       result = await promisify(exec)(
         ['LET_USER_DOUBLE_CHECK_INPUTS_FOR=1', 'VERBOSE_LOGGING=true']
-          .concat(['node', 'scripts/back_fill_deleted_files'])
+          .concat(['node', 'scripts/back_fill_deleted_files.mjs'])
           .concat(args)
           .join(' ')
       )
