@@ -475,7 +475,6 @@
   "doing_this_will_verify_affiliation_and_allow_log_in_2": "这样做将验证您与<b>__institutionName__</b>的关系，并将允许您通过您的机构登录到 <b>__appName__</b> 。",
   "done": "完成",
   "dont_have_account": "还没有账户？",
-  "dont_have_account_without_question_mark": "没有帐号",
   "download": "下载",
   "download_all": "下载全部",
   "download_metadata": "下载 Overleaf 元数据",
