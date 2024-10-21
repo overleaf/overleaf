@@ -646,3 +646,53 @@
 .review-panel-tooltip {
   pointer-events: none; // this is to prevent mouseLeave event from firing when hovering over the tooltip
 }
+
+.review-panel-in-editor-widgets {
+  position: sticky;
+  top: 0;
+  right: 0;
+  font-size: 11px;
+  z-index: 2;
+  font-family: $font-family-base;
+
+  .review-panel-in-editor-widgets-inner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .review-panel-track-changes-indicator {
+    border: 0;
+  }
+}
+
+.review-panel-track-changes-indicator {
+  display: block;
+  padding: 5px 10px;
+  background-color: rgb(240 240 240 / 90%);
+  color: $rp-type-blue;
+  text-align: center;
+  border-bottom-left-radius: 3px;
+  white-space: nowrap;
+
+  &.review-panel-track-changes-indicator-on-dark {
+    background-color: rgb(88 88 88 / 80%);
+    color: #fff;
+
+    &:hover,
+    &:focus {
+      background-color: rgb(88 88 88 / 100%);
+      color: #fff;
+    }
+  }
+
+  &:hover,
+  &:focus {
+    outline: 0;
+    text-decoration: none;
+    background-color: rgb(240 240 240 / 100%);
+    color: $rp-type-blue;
+  }
+}
