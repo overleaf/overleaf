@@ -342,7 +342,6 @@ const _ProjectController = {
       'default-visual-for-beginners',
       'hotjar',
       'spell-check-client',
-      'spell-check-no-server',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
