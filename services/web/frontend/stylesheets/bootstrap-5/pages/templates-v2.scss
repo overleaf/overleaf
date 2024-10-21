@@ -91,50 +91,34 @@
     @include body-lg;
   }
 
-  @mixin text-overflow {
-    text-overflow: ellipsis;
+  @mixin line-clamp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     overflow: hidden;
-    white-space: nowrap;
   }
 
   .gallery-container {
-    width: 100%;
+    --bs-gutter-y: var(--spacing-09);
 
-    .gallery-thumbnail {
-      img {
-        border-radius: var(--border-radius-base);
-      }
-    }
-
-    &.use-column {
-      column-count: 3;
-      column-gap: var(--spacing-11);
-    }
-
-    &.use-percent {
-      margin: 0 -var(--spacing-08);
-
-      .gallery-thumbnail {
-        width: 33.3333%;
-        padding: 0 var(--spacing-08);
-      }
+    .thumbnail {
+      background-color: var(--bg-light-secondary);
+      aspect-ratio: 1 / 1.414; // A4 Paper
+      object-fit: contain;
     }
   }
 
   .gallery-thumbnail {
-    display: inline-block;
-    margin: 0 0 var(--spacing-09);
+    a {
+      display: inline-block;
+    }
 
     .thumbnail {
+      border-radius: var(--border-radius-base);
       box-shadow: 0 var(--spacing-01) var(--spacing-02) rgb(0 0 0 / 10%);
       margin: 0 0 var(--spacing-08) 0;
-      padding: 0;
-      overflow: hidden;
       width: 100%;
-
-      &.thumbnail-tag {
-        height: 100px;
-      }
     }
 
     .caption {
@@ -146,25 +130,21 @@
 
     .caption-description {
       color: var(--neutral-70);
-      font-size: var(--font-size-03);
-      font-weight: 400;
-      line-height: var(--line-height-03);
 
-      @include text-overflow;
+      @include line-clamp;
     }
 
     .author-name {
       margin-top: var(--spacing-04);
       color: var(--neutral-70);
-      font-size: var(--font-size-03);
       font-weight: 600;
-      line-height: var(--line-height-03);
     }
 
     .gallery-list-item-title {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: var(--spacing-04);
 
       .badge-container {
         display: flex;
@@ -179,11 +159,10 @@
 
     .caption-title {
       color: var(--neutral-90);
-      font-size: var(--font-size-06);
       font-weight: 600;
-      line-height: var(--line-height-05);
 
-      @include text-overflow;
+      @include heading-md;
+      @include line-clamp;
     }
 
     a,
@@ -199,33 +178,6 @@
   .popular-tags {
     .gallery-thumbnail {
       margin: 0 0 var(--spacing-06);
-    }
-  }
-
-  @include media-breakpoint-down(lg) {
-    .gallery-container {
-      display: grid;
-      grid-template-columns: 50% 50%;
-
-      &.use-percent {
-        .gallery-thumbnail {
-          align-content: end;
-          width: 100%;
-        }
-      }
-    }
-  }
-
-  @include media-breakpoint-down(md) {
-    .gallery-container {
-      grid-template-columns: 100%;
-
-      &.use-percent {
-        .gallery-thumbnail {
-          padding-left: unset;
-          padding-right: unset;
-        }
-      }
     }
   }
 }
