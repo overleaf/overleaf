@@ -325,7 +325,6 @@ class ChangeDeletedWidget extends WidgetType {
     const widget = document.createElement('span')
     widget.classList.add('ol-cm-change')
     widget.classList.add('ol-cm-change-d')
-    widget.textContent = '[ — ]'
     if (this.highlightType) {
       widget.classList.add(`ol-cm-change-d-${this.highlightType}`)
     }
@@ -409,24 +408,28 @@ const trackChangesTheme = EditorView.baseTheme({
   },
   // TODO: fix dark mode colors
   '&light .ol-cm-change-d': {
-    color: '#c5060b',
-    backgroundColor: '#f5beba57',
+    borderLeft: '2px dotted #c5060b',
+    marginLeft: '-1px',
   },
   '&dark .ol-cm-change-d': {
-    color: '#c5060b',
-    backgroundColor: '#f5beba57',
+    borderLeft: '2px dotted #c5060b',
+    marginLeft: '-1px',
   },
   '&light .ol-cm-change-d-highlight': {
-    backgroundColor: '#f5bebaa4',
+    borderLeft: '3px solid #c5060b',
+    marginLeft: '-2px',
   },
   '&dark .ol-cm-change-d-highlight': {
-    backgroundColor: '#f5bebaa4',
+    borderLeft: '3px solid #c5060b',
+    marginLeft: '-2px',
   },
   '&light .ol-cm-change-d-focus': {
-    backgroundColor: '#F5BEBA',
+    borderLeft: '3px solid #B83A33',
+    marginLeft: '-2px',
   },
   '&dark .ol-cm-change-d-focus': {
-    backgroundColor: '#F5BEBA',
+    borderLeft: '3px solid #B83A33',
+    marginLeft: '-2px',
   },
   '&light .ol-cm-change-highlight-i': {
     backgroundColor: '#b8dbc899',
