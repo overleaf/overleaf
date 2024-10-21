@@ -16,6 +16,15 @@ import { ReviewPanelChangeUser } from './review-panel-change-user'
 import { ReviewPanelEntry } from './review-panel-entry'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 
+const TEXT_CHAR_LIMIT = 50
+
+const truncateText = (text: string) => {
+  if (text.length > TEXT_CHAR_LIMIT) {
+    return text.slice(0, TEXT_CHAR_LIMIT) + '...'
+  }
+  return text
+}
+
 export const ReviewPanelChange = memo<{
   change: Change<EditOperation>
   aggregate?: Change<DeleteOperation>
@@ -168,18 +177,18 @@ export const ReviewPanelChange = memo<{
                   <span>
                     {t('aggregate_changed')}:{' '}
                     <del className="review-panel-content-highlight">
-                      {aggregate.op.d}
+                      {truncateText(aggregate.op.d)}
                     </del>{' '}
                     {t('aggregate_to')}{' '}
                     <ins className="review-panel-content-highlight">
-                      {change.op.i}
+                      {truncateText(change.op.i)}
                     </ins>
                   </span>
                 ) : (
                   <span>
                     {t('tracked_change_added')}:&nbsp;
                     <ins className="review-panel-content-highlight">
-                      {change.op.i}
+                      {truncateText(change.op.i)}
                     </ins>
                   </span>
                 )}
@@ -196,7 +205,7 @@ export const ReviewPanelChange = memo<{
                 <span>
                   {t('tracked_change_deleted')}:&nbsp;
                   <del className="review-panel-content-highlight">
-                    {change.op.d}
+                    {truncateText(change.op.d)}
                   </del>
                 </span>
               </>
