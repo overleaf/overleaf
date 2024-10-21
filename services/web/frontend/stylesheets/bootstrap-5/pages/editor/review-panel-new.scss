@@ -461,6 +461,9 @@
   }
 
   .review-panel-overview-file-entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-02);
     overflow: hidden;
     padding-top: var(--spacing-02);
     padding-bottom: var(--spacing-03);
