@@ -1,9 +1,9 @@
-import minimist from 'minimist'
-import {
+const minimist = require('minimist')
+const {
   db,
   ObjectId,
   waitForDb,
-} from '../../../app/src/infrastructure/mongodb.js'
+} = require('../../../app/src/infrastructure/mongodb')
 
 async function main() {
   await waitForDb()

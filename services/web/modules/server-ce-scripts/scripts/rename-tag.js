@@ -1,5 +1,5 @@
-import minimist from 'minimist'
-import { db, waitForDb } from '../../../app/src/infrastructure/mongodb.js'
+const minimist = require('minimist')
+const { db, waitForDb } = require('../../../app/src/infrastructure/mongodb')
 
 async function main() {
   await waitForDb()

@@ -1,11 +1,9 @@
-import { execSync } from 'node:child_process'
-import fs from 'node:fs'
-import Settings from '@overleaf/settings'
-import { expect } from 'chai'
-import { db } from '../../../../../app/src/infrastructure/mongodb.js'
-import UserHelper from '../../../../../test/acceptance/src/helpers/User.js'
-
-const { promises: User } = UserHelper
+const { execSync } = require('child_process')
+const fs = require('fs')
+const Settings = require('@overleaf/settings')
+const { expect } = require('chai')
+const { db } = require('../../../../../app/src/infrastructure/mongodb')
+const User = require('../../../../../test/acceptance/src/helpers/User').promises
 
 /**
  * @param {string} cmd
@@ -44,7 +42,7 @@ async function getUser(email) {
 describe('ServerCEScripts', function () {
   describe('check-mongodb', function () {
     it('should exit with code 0 on success', function () {
-      run('node modules/server-ce-scripts/scripts/check-mongodb.mjs')
+      run('node modules/server-ce-scripts/scripts/check-mongodb')
     })
 
     it('should exit with code 1 on error', function () {
@@ -52,7 +50,7 @@ describe('ServerCEScripts', function () {
         run(
           'MONGO_SERVER_SELECTION_TIMEOUT=1' +
             'MONGO_CONNECTION_STRING=mongodb://127.0.0.1:4242 ' +
-            'node modules/server-ce-scripts/scripts/check-mongodb.mjs'
+            'node modules/server-ce-scripts/scripts/check-mongodb'
         )
       } catch (e) {
         expect(e.status).to.equal(1)
@@ -64,14 +62,12 @@ describe('ServerCEScripts', function () {
 
   describe('check-redis', function () {
     it('should exit with code 0 on success', function () {
-      run('node modules/server-ce-scripts/scripts/check-redis.mjs')
+      run('node modules/server-ce-scripts/scripts/check-redis')
     })
 
     it('should exit with code 1 on error', function () {
       try {
-        run(
-          'REDIS_PORT=42 node modules/server-ce-scripts/scripts/check-redis.mjs'
-        )
+        run('REDIS_PORT=42 node modules/server-ce-scripts/scripts/check-redis')
       } catch (e) {
         expect(e.status).to.equal(1)
         return
@@ -83,28 +79,28 @@ describe('ServerCEScripts', function () {
   describe('create-user', function () {
     it('should exit with code 0 on success', function () {
       const out = run(
-        'node modules/server-ce-scripts/scripts/create-user.mjs --email=foo@bar.com'
+        'node modules/server-ce-scripts/scripts/create-user --email=foo@bar.com'
       )
       expect(out).to.include('/user/activate?token=')
     })
 
     it('should create a regular user by default', async function () {
       run(
-        'node modules/server-ce-scripts/scripts/create-user.mjs --email=foo@bar.com'
+        'node modules/server-ce-scripts/scripts/create-user --email=foo@bar.com'
       )
       expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: false })
     })
 
     it('should create an admin user with --admin flag', async function () {
       run(
-        'node modules/server-ce-scripts/scripts/create-user.mjs --admin --email=foo@bar.com'
+        'node modules/server-ce-scripts/scripts/create-user --admin --email=foo@bar.com'
       )
       expect(await getUser('foo@bar.com')).to.deep.equal({ isAdmin: true })
     })
 
     it('should exit with code 1 on missing email', function () {
       try {
-        run('node modules/server-ce-scripts/scripts/create-user.mjs')
+        run('node modules/server-ce-scripts/scripts/create-user')
       } catch (e) {
         expect(e.status).to.equal(1)
         return
@@ -123,26 +119,19 @@ describe('ServerCEScripts', function () {
     it('should log missing user', function () {
       const email = 'does-not-exist@example.com'
       const out = run(
-        'node modules/server-ce-scripts/scripts/delete-user.mjs --email=' +
-          email
+        'node modules/server-ce-scripts/scripts/delete-user --email=' + email
       )
       expect(out).to.include('not in database, potentially already deleted')
     })
 
     it('should exit with code 0 on success', function () {
       const email = user.email
-      run(
-        'node modules/server-ce-scripts/scripts/delete-user.mjs --email=' +
-          email
-      )
+      run('node modules/server-ce-scripts/scripts/delete-user --email=' + email)
     })
 
     it('should have deleted the user on success', async function () {
       const email = user.email
-      run(
-        'node modules/server-ce-scripts/scripts/delete-user.mjs --email=' +
-          email
-      )
+      run('node modules/server-ce-scripts/scripts/delete-user --email=' + email)
       const dbEntry = await user.get()
       expect(dbEntry).to.not.exist
       const softDeletedEntry = await db.deletedUsers.findOne({
@@ -154,7 +143,7 @@ describe('ServerCEScripts', function () {
 
     it('should exit with code 1 on missing email', function () {
       try {
-        run('node modules/server-ce-scripts/scripts/delete-user.mjs')
+        run('node modules/server-ce-scripts/scripts/delete-user')
       } catch (e) {
         expect(e.status).to.equal(1)
         return
@@ -210,7 +199,7 @@ describe('ServerCEScripts', function () {
 
     it('should do a dry run by default', async function () {
       run(
-        `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs ${csv}`
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js ${csv}`
       )
       for (const user of usersToMigrate) {
         const dbEntry = await user.get()
@@ -224,13 +213,13 @@ describe('ServerCEScripts', function () {
 
     it('should exit with code 0 when successfully migrating user emails', function () {
       run(
-        `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs --commit ${csv}`
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csv}`
       )
     })
 
     it('should migrate the user emails with the --commit option', async function () {
       run(
-        `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs --commit ${csv}`
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csv}`
       )
       for (const user of usersToMigrate) {
         const dbEntry = await user.get()
@@ -244,7 +233,7 @@ describe('ServerCEScripts', function () {
 
     it('should leave other user emails unchanged', async function () {
       run(
-        `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs --commit ${csv}`
+        `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csv}`
       )
       for (const user of otherUsers) {
         const dbEntry = await user.get()
@@ -255,7 +244,7 @@ describe('ServerCEScripts', function () {
     it('should exit with code 1 when there are failures migrating user emails', function () {
       try {
         run(
-          `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs --commit ${csvfail}`
+          `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csvfail}`
         )
       } catch (e) {
         expect(e.status).to.equal(1)
@@ -267,12 +256,12 @@ describe('ServerCEScripts', function () {
     it('should migrate other users when there are failures with the --continue option', async function () {
       try {
         run(
-          `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs --commit ${csvfail}`
+          `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit ${csvfail}`
         )
       } catch (e) {
         expect(e.status).to.equal(1)
         run(
-          `node modules/server-ce-scripts/scripts/migrate-user-emails.mjs --commit --continue ${csvfail}`
+          `node modules/server-ce-scripts/scripts/migrate-user-emails.js --commit --continue ${csvfail}`
         )
         for (const user of usersToMigrate) {
           const dbEntry = await user.get()
@@ -312,7 +301,7 @@ describe('ServerCEScripts', function () {
       expect(await getTagNames()).to.deep.equal([oldName])
 
       run(
-        `node modules/server-ce-scripts/scripts/rename-tag.mjs --user-id=${user.id} --old-name=${oldName} --new-name=${newName}`
+        `node modules/server-ce-scripts/scripts/rename-tag --user-id=${user.id} --old-name=${oldName} --new-name=${newName}`
       )
 
       expect(await getTagNames()).to.deep.equal([newName])
@@ -345,7 +334,7 @@ describe('ServerCEScripts', function () {
       beforeEach('run script on user a', function () {
         newUserATimeout = userATimeout - 1
         run(
-          `node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=${userA.id} --compile-timeout=${newUserATimeout}`
+          `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userA.id} --compile-timeout=${newUserATimeout}`
         )
       })
 
@@ -364,7 +353,7 @@ describe('ServerCEScripts', function () {
       it('should reject zero timeout', async function () {
         try {
           run(
-            `node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=${userA.id} --compile-timeout=0`
+            `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userA.id} --compile-timeout=0`
           )
           expect.fail('should error out')
         } catch (err) {
@@ -377,7 +366,7 @@ describe('ServerCEScripts', function () {
       it('should reject a 20min timeout', async function () {
         try {
           run(
-            `node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=${userA.id} --compile-timeout=1200`
+            `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userA.id} --compile-timeout=1200`
           )
           expect.fail('should error out')
         } catch (err) {
@@ -421,13 +410,13 @@ describe('ServerCEScripts', function () {
 
     beforeEach('downgrade userCustomTimeoutLower', async function () {
       run(
-        `node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=${userCustomTimeoutLower.id} --compile-timeout=42`
+        `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userCustomTimeoutLower.id} --compile-timeout=42`
       )
     })
 
     beforeEach('upgrade userCustomTimeoutHigher', async function () {
       run(
-        `node modules/server-ce-scripts/scripts/change-compile-timeout.mjs --user-id=${userCustomTimeoutHigher.id} --compile-timeout=360`
+        `node modules/server-ce-scripts/scripts/change-compile-timeout --user-id=${userCustomTimeoutHigher.id} --compile-timeout=360`
       )
     })
 
@@ -462,7 +451,7 @@ describe('ServerCEScripts', function () {
       let output
       beforeEach('run script', function () {
         output = run(
-          `node modules/server-ce-scripts/scripts/upgrade-user-features.mjs`
+          `node modules/server-ce-scripts/scripts/upgrade-user-features`
         )
       })
 
@@ -491,7 +480,7 @@ describe('ServerCEScripts', function () {
       let output
       beforeEach('run script', function () {
         output = run(
-          `node modules/server-ce-scripts/scripts/upgrade-user-features.mjs --dry-run=false`
+          `node modules/server-ce-scripts/scripts/upgrade-user-features --dry-run=false`
         )
       })
 
@@ -548,7 +537,7 @@ describe('ServerCEScripts', function () {
         cmd += ` OVERLEAF_IS_SERVER_PRO=${OVERLEAF_IS_SERVER_PRO}`
       }
       return (
-        cmd + ' node modules/server-ce-scripts/scripts/check-texlive-images.mjs'
+        cmd + ' node modules/server-ce-scripts/scripts/check-texlive-images'
       )
     }
 

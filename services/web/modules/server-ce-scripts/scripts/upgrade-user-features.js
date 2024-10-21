@@ -1,11 +1,10 @@
-import { fileURLToPath } from 'node:url'
-import Settings from '@overleaf/settings'
-import logger from '@overleaf/logger'
-import { db, waitForDb } from '../../../app/src/infrastructure/mongodb.js'
-import {
+const Settings = require('@overleaf/settings')
+const logger = require('@overleaf/logger')
+const { db, waitForDb } = require('../../../app/src/infrastructure/mongodb')
+const {
   mergeFeatures,
   compareFeatures,
-} from '../../../app/src/Features/Subscription/FeaturesHelper.js'
+} = require('../../../app/src/Features/Subscription/FeaturesHelper')
 const DRY_RUN = !process.argv.includes('--dry-run=false')
 
 async function main(DRY_RUN, defaultFeatures) {
@@ -41,9 +40,9 @@ async function main(DRY_RUN, defaultFeatures) {
   }
 }
 
-export default main
+module.exports = main
 
-if (fileURLToPath(import.meta.url) === process.argv[1]) {
+if (require.main === module) {
   if (DRY_RUN) {
     console.error('---')
     console.error('Dry-run enabled, use --dry-run=false to commit changes')
