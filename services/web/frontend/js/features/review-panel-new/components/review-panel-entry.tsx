@@ -12,6 +12,8 @@ import {
 } from '@/features/source-editor/extensions/ranges'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
 import { useLayoutContext } from '@/shared/context/layout-context'
+import { EditorSelection } from '@codemirror/state'
+import { EditorView } from '@codemirror/view'
 
 export const ReviewPanelEntry: FC<{
   position: number
@@ -35,7 +37,7 @@ export const ReviewPanelEntry: FC<{
 }) => {
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
-  const { openDocId } = useEditorManagerContext()
+  const { openDocId, getCurrentDocId } = useEditorManagerContext()
   const [focused, setFocused] = useState(false)
   const { setReviewPanelOpen } = useLayoutContext()
 
@@ -50,20 +52,34 @@ export const ReviewPanelEntry: FC<{
       if (
         event.target instanceof HTMLButtonElement ||
         event.target instanceof HTMLLinkElement ||
-        event.target instanceof HTMLTextAreaElement ||
         event.target instanceof HTMLAnchorElement
       ) {
-        // Don't focus if the click was on a button/link/textarea/anchor as we
-        // don't want to affect the behaviour of the button/link/textarea/anchor
+        // Don't focus if the click was on a button/link/anchor as we
+        // don't want to affect its behaviour
         return
       }
 
-      if (selectLineOnFocus) {
-        openDocId(docId, { gotoOffset: position, keepCurrentView: true })
-      }
       setFocused(true)
+
+      if (!selectLineOnFocus) {
+        return
+      }
+
+      if (getCurrentDocId() !== docId) {
+        const focusIsOnTextarea = event.target instanceof HTMLTextAreaElement
+        if (focusIsOnTextarea === false) {
+          openDocId(docId, { gotoOffset: position, keepCurrentView: true })
+        }
+      } else {
+        setTimeout(() =>
+          view.dispatch({
+            selection: EditorSelection.cursor(position),
+            effects: EditorView.scrollIntoView(position, { y: 'center' }),
+          })
+        )
+      }
     },
-    [selectLineOnFocus, docId, openDocId, position]
+    [getCurrentDocId, docId, selectLineOnFocus, view, position, openDocId]
   )
 
   // Clear op highlight on dismount
