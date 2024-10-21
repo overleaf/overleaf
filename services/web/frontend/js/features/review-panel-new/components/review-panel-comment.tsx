@@ -8,7 +8,10 @@ import classnames from 'classnames'
 import { ReviewPanelEntry } from './review-panel-entry'
 import MaterialIcon from '@/shared/components/material-icon'
 import { ReviewPanelCommentContent } from './review-panel-comment-content'
-import { CommentId } from '../../../../../types/review-panel/review-panel'
+import {
+  CommentId,
+  ThreadId,
+} from '../../../../../types/review-panel/review-panel'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { useTranslation } from 'react-i18next'
 import { debugConsole } from '@/utils/debugging'
@@ -23,8 +26,13 @@ export const ReviewPanelComment = memo<{
   hovered?: boolean
 }>(({ comment, top, hovered, onEnter, onLeave, docId, hoverRanges }) => {
   const threads = useThreadsContext()
-  const { resolveThread, editMessage, deleteMessage, addMessage } =
-    useThreadsActionsContext()
+  const {
+    resolveThread,
+    editMessage,
+    deleteMessage,
+    deleteThread,
+    addMessage,
+  } = useThreadsActionsContext()
   const { showGenericMessageModal } = useModalsContext()
   const { t } = useTranslation()
 
@@ -81,6 +89,24 @@ export const ReviewPanelComment = memo<{
     [comment.op.t, deleteMessage, showGenericMessageModal, t]
   )
 
+  const handleDeleteThread = useCallback(
+    async (commentId: ThreadId) => {
+      setProcessing(true)
+      try {
+        await deleteThread(commentId)
+      } catch (err) {
+        debugConsole.error(err)
+        showGenericMessageModal(
+          t('delete_comment_error_title'),
+          t('delete_comment_error_message')
+        )
+      } finally {
+        setProcessing(false)
+      }
+    },
+    [deleteThread, showGenericMessageModal, t]
+  )
+
   const handleSubmitReply = useCallback(
     async (content: string) => {
       setProcessing(true)
@@ -132,7 +158,8 @@ export const ReviewPanelComment = memo<{
         onEnter={onEnter}
         onResolve={handleResolveComment}
         onEdit={handleEditMessage}
-        onDelete={handleDeleteMessage}
+        onDeleteMessage={handleDeleteMessage}
+        onDeleteThread={handleDeleteThread}
         onReply={handleSubmitReply}
       />
     </ReviewPanelEntry>

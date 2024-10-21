@@ -20,7 +20,7 @@ export const ReviewPanelMessage: FC<{
   isReply: boolean
   onResolve?: () => Promise<void>
   onEdit?: (commentId: CommentId, content: string) => Promise<void>
-  onDelete?: (CommentId: CommentId) => Promise<void>
+  onDelete?: () => void
   isThreadResolved: boolean
 }> = ({
   message,
@@ -47,9 +47,9 @@ export const ReviewPanelMessage: FC<{
   }, [content, message.id, onEdit])
 
   const handleDelete = useCallback(() => {
-    onDelete?.(message.id)
+    onDelete?.()
     setDeleting(false)
-  }, [message.id, onDelete])
+  }, [onDelete])
 
   if (editing) {
     return (

@@ -7,14 +7,18 @@ import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import ReviewPanelResolvedMessage from './review-panel-resolved-message'
 import { ReviewPanelResolvedCommentThread } from '../../../../../types/review-panel/comment-thread'
 import useSubmittableTextInput from '../hooks/use-submittable-text-input'
-import { CommentId } from '../../../../../types/review-panel/review-panel'
+import {
+  CommentId,
+  ThreadId,
+} from '../../../../../types/review-panel/review-panel'
 
 export const ReviewPanelCommentContent = memo<{
   comment: Change<CommentOperation>
   isResolved: boolean
   onEdit?: (commentId: CommentId, content: string) => Promise<void>
   onReply?: (content: string) => Promise<void>
-  onDelete?: (commentId: CommentId) => Promise<void>
+  onDeleteMessage?: (commentId: CommentId) => Promise<void>
+  onDeleteThread?: (threadId: ThreadId) => Promise<void>
   onResolve?: () => Promise<void>
   onLeave?: () => void
   onEnter?: () => void
@@ -23,7 +27,8 @@ export const ReviewPanelCommentContent = memo<{
     comment,
     isResolved,
     onResolve,
-    onDelete,
+    onDeleteMessage,
+    onDeleteThread,
     onEdit,
     onReply,
     onLeave,
@@ -65,7 +70,11 @@ export const ReviewPanelCommentContent = memo<{
                 hasReplies={!isReply && thread.messages.length > 1}
                 onResolve={onResolve}
                 onEdit={onEdit}
-                onDelete={onDelete}
+                onDelete={() =>
+                  isReply
+                    ? onDeleteMessage?.(message.id)
+                    : onDeleteThread?.(comment.op.t)
+                }
                 isThreadResolved={isResolved}
               />
             </div>
