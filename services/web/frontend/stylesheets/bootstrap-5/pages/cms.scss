@@ -641,6 +641,40 @@
     .reverse-col-order-mobile {
       flex-direction: column-reverse;
     }
+
+    .section-row {
+      &.section-row-mobile-gap-spacing-16 {
+        @include section-row-custom-gap(calc(var(--spacing-16) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-15 {
+        @include section-row-custom-gap(calc(var(--spacing-15) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-14 {
+        @include section-row-custom-gap(calc(var(--spacing-14) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-13 {
+        @include section-row-custom-gap(calc(var(--spacing-13) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-12 {
+        @include section-row-custom-gap(calc(var(--spacing-12) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-11 {
+        @include section-row-custom-gap(calc(var(--spacing-11) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-10 {
+        @include section-row-custom-gap(calc(var(--spacing-10) / 2));
+      }
+
+      &.section-row-mobile-gap-spacing-09 {
+        @include section-row-custom-gap(calc(var(--spacing-09) / 2));
+      }
+    }
   }
 }
 
