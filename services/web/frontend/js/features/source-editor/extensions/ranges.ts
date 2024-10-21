@@ -385,18 +385,17 @@ const createChangeRange = (change: Change, data: RangesData) => {
 }
 
 const trackChangesTheme = EditorView.baseTheme({
-  '&light .ol-cm-change-i': {
-    backgroundColor: '#2c8e304d',
+  '.ol-cm-change-i, .ol-cm-change-highlight-i, .ol-cm-change-focus-i': {
+    backgroundColor: 'rgba(44, 142, 48, 0.30)',
   },
-  '&dark .ol-cm-change-i': {
-    backgroundColor: 'rgba(37, 107, 41, 0.15)',
-  },
-  '&light .ol-cm-change-c': {
-    backgroundColor: '#f3b1114d',
-  },
-  '&dark .ol-cm-change-c': {
-    backgroundColor: 'rgba(194, 93, 11, 0.15)',
-  },
+  '&light .ol-cm-change-c, &light .ol-cm-change-highlight-c, &light .ol-cm-change-focus-c':
+    {
+      backgroundColor: 'rgba(243, 177, 17, 0.30)',
+    },
+  '&dark .ol-cm-change-c, &dark .ol-cm-change-highlight-c, &dark .ol-cm-change-focus-c':
+    {
+      backgroundColor: 'rgba(194, 93, 11, 0.15)',
+    },
   '.ol-cm-change': {
     padding: 'var(--half-leading, 0) 0',
   },
@@ -406,7 +405,6 @@ const trackChangesTheme = EditorView.baseTheme({
   '.ol-cm-change-focus': {
     padding: 'var(--half-leading, 0) 0',
   },
-  // TODO: fix dark mode colors
   '&light .ol-cm-change-d': {
     borderLeft: '2px dotted #c5060b',
     marginLeft: '-1px',
@@ -430,29 +428,5 @@ const trackChangesTheme = EditorView.baseTheme({
   '&dark .ol-cm-change-d-focus': {
     borderLeft: '3px solid #B83A33',
     marginLeft: '-2px',
-  },
-  '&light .ol-cm-change-highlight-i': {
-    backgroundColor: '#b8dbc899',
-  },
-  '&dark .ol-cm-change-highlight-i': {
-    backgroundColor: '#b8dbc899',
-  },
-  '&light .ol-cm-change-highlight-c': {
-    backgroundColor: '#fcc4837d',
-  },
-  '&dark .ol-cm-change-highlight-c': {
-    backgroundColor: '#fcc4837d',
-  },
-  '&light .ol-cm-change-focus-i': {
-    backgroundColor: '#B8DBC8',
-  },
-  '&dark .ol-cm-change-focus-i': {
-    backgroundColor: '#B8DBC8',
-  },
-  '&light .ol-cm-change-focus-c': {
-    backgroundColor: '#FCC483',
-  },
-  '&dark .ol-cm-change-focus-c': {
-    backgroundColor: '#FCC483',
   },
 })
