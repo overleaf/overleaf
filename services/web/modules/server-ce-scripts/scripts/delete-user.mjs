@@ -1,6 +1,6 @@
-const { waitForDb } = require('../../../app/src/infrastructure/mongodb')
-const UserGetter = require('../../../app/src/Features/User/UserGetter')
-const UserDeleter = require('../../../app/src/Features/User/UserDeleter')
+import { waitForDb } from '../../../app/src/infrastructure/mongodb.js'
+import UserGetter from '../../../app/src/Features/User/UserGetter.js'
+import UserDeleter from '../../../app/src/Features/User/UserDeleter.js'
 
 async function main() {
   await waitForDb()

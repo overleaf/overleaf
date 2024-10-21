@@ -1,6 +1,9 @@
-const { ObjectId } = require('mongodb-legacy')
-const { waitForDb, db } = require('../../../app/src/infrastructure/mongodb')
-const { getMongoClient } = require('../../../app/src/infrastructure/Mongoose')
+import mongodb from 'mongodb-legacy'
+import { waitForDb, db } from '../../../app/src/infrastructure/mongodb.js'
+import mongoose from '../../../app/src/infrastructure/Mongoose.js'
+
+const { ObjectId } = mongodb
+const { getMongoClient } = mongoose
 
 const MIN_MONGO_VERSION = [5, 0]
 

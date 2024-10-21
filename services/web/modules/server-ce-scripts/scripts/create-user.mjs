@@ -1,6 +1,6 @@
-const minimist = require('minimist')
-const { db, waitForDb } = require('../../../app/src/infrastructure/mongodb')
-const UserRegistrationHandler = require('../../../app/src/Features/User/UserRegistrationHandler')
+import minimist from 'minimist'
+import { db, waitForDb } from '../../../app/src/infrastructure/mongodb.js'
+import UserRegistrationHandler from '../../../app/src/Features/User/UserRegistrationHandler.js'
 
 async function main() {
   await waitForDb()

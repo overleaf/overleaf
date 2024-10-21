@@ -1,4 +1,4 @@
-const { waitForDb, db } = require('../../../app/src/infrastructure/mongodb')
+import { waitForDb, db } from '../../../app/src/infrastructure/mongodb.js'
 
 async function readImagesInUse() {
   await waitForDb()

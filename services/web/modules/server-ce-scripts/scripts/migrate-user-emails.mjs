@@ -9,16 +9,16 @@
 // Intended for Server Pro customers migrating user emails from one domain to
 // another.
 
-const minimist = require('minimist')
-const { waitForDb } = require('../../../app/src/infrastructure/mongodb')
+import minimist from 'minimist'
 
-const os = require('os')
-const fs = require('fs')
-const csv = require('csv/sync')
-const { parseEmail } = require('../../../app/src/Features/Helpers/EmailHelper')
-const UserGetter = require('../../../app/src/Features/User/UserGetter')
-const UserUpdater = require('../../../app/src/Features/User/UserUpdater')
-const UserSessionsManager = require('../../../app/src/Features/User/UserSessionsManager')
+import { waitForDb } from '../../../app/src/infrastructure/mongodb.js'
+import os from 'node:os'
+import fs from 'node:fs'
+import * as csv from 'csv/sync'
+import { parseEmail } from '../../../app/src/Features/Helpers/EmailHelper.js'
+import UserGetter from '../../../app/src/Features/User/UserGetter.js'
+import UserUpdater from '../../../app/src/Features/User/UserUpdater.js'
+import UserSessionsManager from '../../../app/src/Features/User/UserSessionsManager.js'
 
 const hostname = os.hostname()
 const scriptTimestamp = new Date().toISOString()
