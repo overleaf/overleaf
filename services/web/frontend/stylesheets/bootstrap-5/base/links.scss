@@ -33,13 +33,10 @@ a {
   }
 }
 
-.link-black-full-width {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
+.link-black-text {
   color: var(--neutral-90);
-  font-weight: 600;
   text-decoration: none;
+  font-weight: 600;
 
   &:visited {
     color: var(--neutral-90);
@@ -49,4 +46,12 @@ a {
     color: var(--neutral-90);
     text-decoration: underline;
   }
+}
+
+.link-black-full-width {
+  @extend .link-black-text;
+
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
 }

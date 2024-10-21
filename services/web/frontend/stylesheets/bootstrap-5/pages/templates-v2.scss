@@ -112,6 +112,8 @@
 
   .gallery-thumbnail {
     a {
+      @extend .link-black-text;
+
       display: inline-block;
     }
 
@@ -148,8 +150,9 @@
       gap: var(--spacing-04);
 
       .badge-container {
-        display: flex;
-        gap: var(--spacing-04);
+        .badge:not(:first-child) {
+          margin-left: var(--spacing-04);
+        }
       }
 
       * {
@@ -164,11 +167,6 @@
 
       @include heading-md;
       @include line-clamp;
-    }
-
-    a,
-    a:hover {
-      text-decoration: none;
     }
   }
 

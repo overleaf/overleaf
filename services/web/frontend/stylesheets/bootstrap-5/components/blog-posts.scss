@@ -97,12 +97,7 @@
       margin-bottom: var(--spacing-06);
 
       a {
-        text-decoration: none;
-        color: var(--neutral-90);
-
-        &:hover {
-          text-decoration: underline;
-        }
+        @extend .link-black-text;
       }
     }
 
