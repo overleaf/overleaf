@@ -28,7 +28,8 @@ const ReviewPanelCommentOptions: FC<{
   onEdit: () => void
   onDelete: () => void
   id: string
-}> = ({ onEdit, onDelete, id }) => {
+  belongsToCurrentUser: boolean
+}> = ({ onEdit, onDelete, id, belongsToCurrentUser }) => {
   const { t } = useTranslation()
 
   return (
@@ -43,7 +44,9 @@ const ReviewPanelCommentOptions: FC<{
             />
           </BS3Dropdown.Toggle>
           <BS3Dropdown.Menu>
-            <BS3MenuItem onClick={onEdit}>{t('edit')}</BS3MenuItem>
+            {belongsToCurrentUser && (
+              <BS3MenuItem onClick={onEdit}>{t('edit')}</BS3MenuItem>
+            )}
             <BS3MenuItem onClick={onDelete}>{t('delete')}</BS3MenuItem>
           </BS3Dropdown.Menu>
         </ControlledDropdown>
@@ -61,11 +64,13 @@ const ReviewPanelCommentOptions: FC<{
             />
           </DropdownToggle>
           <DropdownMenu flip={false}>
-            <li role="none">
-              <DropdownItem as="button" onClick={onEdit}>
-                {t('edit')}
-              </DropdownItem>
-            </li>
+            {belongsToCurrentUser && (
+              <li role="none">
+                <DropdownItem as="button" onClick={onEdit}>
+                  {t('edit')}
+                </DropdownItem>
+              </li>
+            )}
             <li role="none">
               <DropdownItem as="button" onClick={onDelete}>
                 {t('delete')}

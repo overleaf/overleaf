@@ -12,6 +12,7 @@ import { buildName } from '../utils/build-name'
 import ReviewPanelCommentOptions from './review-panel-comment-options'
 import { ExpandableContent } from './review-panel-expandable-content'
 import ReviewPanelDeleteCommentModal from './review-panel-delete-comment-modal'
+import { useUserContext } from '@/shared/context/user-context'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -34,6 +35,7 @@ export const ReviewPanelMessage: FC<{
   const [editing, setEditing] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [content, setContent] = useState(message.content)
+  const user = useUserContext()
 
   const handleEditOption = useCallback(() => setEditing(true), [])
   const showDeleteModal = useCallback(() => setDeleting(true), [])
@@ -107,6 +109,7 @@ export const ReviewPanelMessage: FC<{
 
           {!isThreadResolved && (
             <ReviewPanelCommentOptions
+              belongsToCurrentUser={user.id === message.user.id}
               onEdit={handleEditOption}
               onDelete={showDeleteModal}
               id={message.id}
