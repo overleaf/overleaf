@@ -41,10 +41,14 @@
   }
 
   .gallery-header {
-    max-width: 885px;
+    // padding: 0 is added when the screen size is much bigger than the $templates-search-max-width
+    // to remove unwanted padding
+    @include media-breakpoint-up(xl) {
+      padding: 0;
+    }
 
     @include media-breakpoint-up(lg) {
-      padding: 0;
+      max-width: $templates-search-max-width;
     }
   }
 
