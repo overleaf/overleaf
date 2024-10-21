@@ -1,4 +1,11 @@
-import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react'
+import {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 import ReactDOM from 'react-dom'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useTranslation } from 'react-i18next'
@@ -56,7 +63,7 @@ const ReviewTooltipMenuContent: FC<{
   const { setReviewPanelOpen } = useLayoutContext()
   const { setView } = useReviewPanelViewActionsContext()
 
-  const handleClick = () => {
+  const addComment = useCallback(() => {
     setReviewPanelOpen(true)
     setView('cur_file')
 
@@ -64,13 +71,20 @@ const ReviewTooltipMenuContent: FC<{
       effects: buildAddNewCommentRangeEffect(state.selection.main),
     })
     setShow(false)
-  }
+  }, [setReviewPanelOpen, setView, setShow, view, state.selection.main])
+
+  useEffect(() => {
+    window.addEventListener('add-new-review-comment', addComment)
+    return () => {
+      window.removeEventListener('add-new-review-comment', addComment)
+    }
+  }, [addComment])
 
   return (
     <div className="review-tooltip-menu">
       <button
         className="review-tooltip-menu-button review-tooltip-add-comment-button"
-        onClick={handleClick}
+        onClick={addComment}
       >
         <MaterialIcon type="chat" />
         {t('add_comment')}
