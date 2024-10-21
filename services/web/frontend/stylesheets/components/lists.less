@@ -25,26 +25,3 @@
 .list-style-check-green {
   list-style-image: url('../../../public/img/fa-check-green.svg');
 }
-
-.icon-bullet-list {
-  @icon-bullet-list-icon-size: 30px;
-  ul {
-    list-style: none;
-    margin-top: 30px;
-    padding-left: 20px;
-  }
-
-  &.checked {
-    li {
-      background: url('../../../public/img/material-icons/circle-green-24.svg')
-        no-repeat left top;
-      background-size: @icon-bullet-list-icon-size @icon-bullet-list-icon-size;
-      min-height: @icon-bullet-list-icon-size;
-      margin-bottom: 18px;
-      padding-left: 42px;
-      &:first-line {
-        line-height: @icon-bullet-list-icon-size;
-      }
-    }
-  }
-}
