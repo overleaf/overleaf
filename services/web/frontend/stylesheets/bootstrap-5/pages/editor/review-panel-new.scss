@@ -36,6 +36,10 @@
     z-index: 1;
   }
 
+  .review-panel-entry:hover {
+    @include shadow-sm;
+  }
+
   .review-panel-entry.review-panel-entry-disabled {
     opacity: 0.5;
     pointer-events: none;
@@ -52,10 +56,12 @@
     gap: var(--spacing-04);
   }
 
-  .review-panel-entry-focused,
-  .review-panel-entry-highlighted {
+  .review-panel-entry.review-panel-entry-focused,
+  .review-panel-entry.review-panel-entry-highlighted {
     margin-left: var(--spacing-01);
     border: 1px solid var(--border-active);
+
+    @include shadow-md;
   }
 
   .review-panel-entry-header {

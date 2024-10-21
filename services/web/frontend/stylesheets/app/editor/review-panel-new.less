@@ -30,6 +30,10 @@
     margin-left: @spacing-02;
     z-index: 1;
   }
+  .review-panel-entry:hover {
+    // shadow-sm
+    box-shadow: 0px 2px 4px rgba(30, 37, 48, 0.16);
+  }
 
   .review-panel-entry.review-panel-entry-disabled {
     opacity: 0.5;
@@ -47,10 +51,14 @@
     gap: @spacing-04;
   }
 
-  .review-panel-entry-focused,
-  .review-panel-entry-highlighted {
+  .review-panel-entry.review-panel-entry-focused,
+  .review-panel-entry.review-panel-entry-highlighted {
     margin-left: @spacing-01;
     border: 1px solid @blue-50;
+    // shadow-md
+    box-shadow:
+      0px 4px 12px rgba(30, 37, 48, 0.12),
+      0px 2px 4px rgba(30, 37, 48, 0.08);
   }
 
   .review-panel-entry-header {
