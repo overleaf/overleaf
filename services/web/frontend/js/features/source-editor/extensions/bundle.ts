@@ -1,5 +1,10 @@
 import { syntaxTree } from '@codemirror/language'
-import { EditorSelection, StateEffect, StateField } from '@codemirror/state'
+import {
+  EditorSelection,
+  Prec,
+  StateEffect,
+  StateField,
+} from '@codemirror/state'
 import {
   Decoration,
   EditorView,
@@ -14,6 +19,7 @@ export default {
   Decoration,
   EditorSelection,
   EditorView,
+  Prec,
   StateEffect,
   StateField,
   ViewPlugin,
