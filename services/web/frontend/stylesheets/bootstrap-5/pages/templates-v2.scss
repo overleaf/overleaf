@@ -176,8 +176,15 @@
   }
 
   .popular-tags {
-    .gallery-thumbnail {
-      margin: 0 0 var(--spacing-06);
+    margin-top: var(--spacing-16);
+    margin-bottom: var(--spacing-16);
+
+    h2 {
+      margin-bottom: var(--spacing-09);
+    }
+
+    .popular-tags-list {
+      row-gap: var(--spacing-11);
     }
   }
 }
