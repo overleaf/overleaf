@@ -26,7 +26,7 @@ describe('SpellChecker', function () {
         extensions,
       })
       const line = view.state.doc.line(1)
-      const words = getWordsFromLine(view, line, ignoredWords, lang)
+      const words = Array.from(getWordsFromLine(view, line, ignoredWords, lang))
       expect(words).to.deep.equal([
         { text: 'Hello', from: 0, to: 5, lineNumber: 1, lang: 'en' },
         { text: 'test', from: 6, to: 10, lineNumber: 1, lang: 'en' },
@@ -42,7 +42,7 @@ describe('SpellChecker', function () {
         extensions,
       })
       const line = view.state.doc.line(1)
-      const words = getWordsFromLine(view, line, ignoredWords, lang)
+      const words = Array.from(getWordsFromLine(view, line, ignoredWords, lang))
       expect(words).to.deep.equal([
         { text: 'Hello', from: 0, to: 5, lineNumber: 1, lang: 'en' },
         { text: 'one', from: 11, to: 14, lineNumber: 1, lang: 'en' },
@@ -56,7 +56,7 @@ describe('SpellChecker', function () {
         extensions,
       })
       const line = view.state.doc.line(1)
-      const words = getWordsFromLine(view, line, ignoredWords, lang)
+      const words = Array.from(getWordsFromLine(view, line, ignoredWords, lang))
       expect(words).to.deep.equal([])
     })
 
@@ -66,7 +66,7 @@ describe('SpellChecker', function () {
         extensions,
       })
       const line = view.state.doc.line(1)
-      const words = getWordsFromLine(view, line, ignoredWords, lang)
+      const words = Array.from(getWordsFromLine(view, line, ignoredWords, lang))
       expect(words).to.deep.equal([
         { text: 'seven', from: 24, to: 29, lineNumber: 1, lang: 'en' },
         { text: 'eight', from: 30, to: 35, lineNumber: 1, lang: 'en' },
@@ -79,7 +79,7 @@ describe('SpellChecker', function () {
         extensions,
       })
       const line = view.state.doc.line(1)
-      const words = getWordsFromLine(view, line, ignoredWords, lang)
+      const words = Array.from(getWordsFromLine(view, line, ignoredWords, lang))
       expect(words).to.deep.equal([
         { text: 'nine', from: 5, to: 9, lineNumber: 1, lang: 'en' },
         { text: 'ten', from: 15, to: 18, lineNumber: 1, lang: 'en' },
