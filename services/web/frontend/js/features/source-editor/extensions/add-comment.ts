@@ -121,7 +121,7 @@ const addCommentTheme = EditorView.baseTheme({
     },
     '& .review-tooltip-menu-button': {
       '&:hover': {
-        backgroundColor: '#e7e9ee',
+        backgroundColor: '#2f3a4c14',
       },
     },
   },
