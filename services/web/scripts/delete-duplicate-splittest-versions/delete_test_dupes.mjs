@@ -1,5 +1,5 @@
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
-const minimist = require('minimist')
+import { db, waitForDb } from '../../app/src/infrastructure/mongodb.js'
+import minimist from 'minimist'
 
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined

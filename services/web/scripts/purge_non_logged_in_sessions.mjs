@@ -1,10 +1,11 @@
-const RedisWrapper = require('@overleaf/redis-wrapper')
-const Settings = require('@overleaf/settings')
-const SessionManager = require('../app/src/Features/Authentication/SessionManager')
+import RedisWrapper from '@overleaf/redis-wrapper'
+import Settings from '@overleaf/settings'
+import SessionManager from '../app/src/Features/Authentication/SessionManager.js'
+import minimist from 'minimist'
 
 const redis = RedisWrapper.createClient(Settings.redis.websessions)
 
-const argv = require('minimist')(process.argv.slice(2), {
+const argv = minimist(process.argv.slice(2), {
   string: ['count'],
   boolean: ['dry-run', 'help'],
   alias: {
@@ -92,7 +93,9 @@ async function scanAndPurge() {
   redis.quit()
 }
 
-scanAndPurge().catch(err => {
-  console.error(err)
+try {
+  await scanAndPurge()
+} catch (error) {
+  console.error(error)
   process.exit()
-})
+}

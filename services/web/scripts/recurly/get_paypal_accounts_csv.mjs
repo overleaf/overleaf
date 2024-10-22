@@ -1,6 +1,6 @@
-const RecurlyWrapper = require('../../app/src/Features/Subscription/RecurlyWrapper')
-const async = require('async')
-const CSVParser = require('json2csv').Parser
+import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
+import async from 'async'
+import { Parser as CSVParser } from 'json2csv'
 
 const NOW = new Date()
 

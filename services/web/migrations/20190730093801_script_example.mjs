@@ -8,7 +8,7 @@
  * or "hello <name>", when User.findOne() finds something.
  */
 
-import runScript from '../scripts/example/script_for_migration.js'
+import runScript from '../scripts/example/script_for_migration.mjs'
 
 const tags = []
 

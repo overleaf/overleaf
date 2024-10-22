@@ -1,9 +1,10 @@
-const RecurlyWrapper = require('../../app/src/Features/Subscription/RecurlyWrapper')
-const minimist = require('minimist')
-const logger = require('@overleaf/logger')
+import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
+import minimist from 'minimist'
+import logger from '@overleaf/logger'
+import { fileURLToPath } from 'url'
 
 const waitMs =
-  require.main === module
+  fileURLToPath(import.meta.url) === process.argv[1]
     ? timeout => new Promise(resolve => setTimeout(() => resolve(), timeout))
     : () => Promise.resolve()
 
@@ -116,16 +117,15 @@ const main = async () => {
   }
 }
 
-if (require.main === module) {
-  main()
-    .then(() => {
-      logger.info('Done.')
-      process.exit(0)
-    })
-    .catch(err => {
-      logger.error({ err }, 'Error')
-      process.exit(1)
-    })
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
+  try {
+    await main()
+    logger.info('Done.')
+    process.exit(0)
+  } catch (error) {
+    logger.error({ error }, 'Error')
+    process.exit(1)
+  }
 }
 
-module.exports = { main }
+export default { main }

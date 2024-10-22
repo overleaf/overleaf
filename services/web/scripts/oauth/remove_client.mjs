@@ -1,9 +1,9 @@
-const minimist = require('minimist')
-const {
+import minimist from 'minimist'
+import {
   waitForDb,
   db,
   READ_PREFERENCE_SECONDARY,
-} = require('../../app/src/infrastructure/mongodb')
+} from '../../app/src/infrastructure/mongodb.js'
 
 async function main() {
   const opts = parseArgs()
@@ -114,11 +114,10 @@ Options:
 `)
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

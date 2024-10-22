@@ -1,4 +1,4 @@
-const GoogleBigQuery = require('@google-cloud/bigquery').BigQuery
+import { BigQuery as GoogleBigQuery } from '@google-cloud/bigquery'
 
 let dataset = null
 
@@ -25,6 +25,6 @@ async function query(query) {
   return rows
 }
 
-module.exports = {
+export default {
   query,
 }

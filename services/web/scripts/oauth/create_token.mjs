@@ -1,8 +1,6 @@
-const minimist = require('minimist')
-const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
-const {
-  hashSecret,
-} = require('../../modules/oauth2-server/app/src/SecretsHelper')
+import minimist from 'minimist'
+import { waitForDb, db } from '../../app/src/infrastructure/mongodb.js'
+import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
 
 async function main() {
   const opts = parseArgs()
@@ -91,11 +89,10 @@ Options:
 `)
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

@@ -1,13 +1,13 @@
-const GoogleBigQueryHelper = require('./helpers/GoogleBigQueryHelper')
-const { Subscription } = require('../../app/src/models/Subscription')
-const { waitForDb } = require('../../app/src/infrastructure/mongodb')
-const AnalyticsManager = require('../../app/src/Features/Analytics/AnalyticsManager')
-const {
-  DeletedSubscription,
-} = require('../../app/src/models/DeletedSubscription')
-const minimist = require('minimist')
-const _ = require('lodash')
-const { ObjectId } = require('mongodb-legacy')
+import GoogleBigQueryHelper from './helpers/GoogleBigQueryHelper.mjs'
+import { Subscription } from '../../app/src/models/Subscription.js'
+import { waitForDb } from '../../app/src/infrastructure/mongodb.js'
+import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.js'
+import { DeletedSubscription } from '../../app/src/models/DeletedSubscription.js'
+import minimist from 'minimist'
+import _ from 'lodash'
+import mongodb from 'mongodb-legacy'
+
+const { ObjectId } = mongodb
 
 let FETCH_LIMIT, COMMIT, VERBOSE
 
@@ -260,12 +260,11 @@ const setup = () => {
 }
 
 setup()
-main()
-  .then(() => {
-    console.error('Done.')
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error({ error })
-    process.exit(1)
-  })
+try {
+  await main()
+  console.error('Done.')
+  process.exit(0)
+} catch (error) {
+  console.error({ error })
+  process.exit(1)
+}

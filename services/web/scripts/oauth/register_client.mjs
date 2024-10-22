@@ -1,9 +1,9 @@
-const minimist = require('minimist')
-const { ObjectId } = require('mongodb-legacy')
-const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
-const {
-  hashSecret,
-} = require('../../modules/oauth2-server/app/src/SecretsHelper')
+import minimist from 'minimist'
+import mongodb from 'mongodb-legacy'
+import { waitForDb, db } from '../../app/src/infrastructure/mongodb.js'
+import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
+
+const { ObjectId } = mongodb
 
 async function main() {
   const opts = parseArgs()
@@ -121,11 +121,10 @@ function toArray(value) {
   }
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

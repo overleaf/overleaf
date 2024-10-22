@@ -1,6 +1,9 @@
-// Increase default mongo query timeout from 1min to 1h
-process.env.MONGO_SOCKET_TIMEOUT = process.env.MONGO_SOCKET_TIMEOUT || '360000'
-const { waitForDb, db } = require('../../app/src/infrastructure/mongodb')
+import { waitForDb, db } from '../../app/src/infrastructure/mongodb.js'
+import { ensureMongoTimeout } from '../helpers/env_variable_helper.mjs'
+// Ensure default mongo query timeout has been increased 1h
+if (!process.env.MONGO_SOCKET_TIMEOUT) {
+  ensureMongoTimeout(360000)
+}
 
 async function main() {
   await checkAllProjectsAreMigrated()

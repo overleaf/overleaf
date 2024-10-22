@@ -2,10 +2,11 @@
 // app/templates/plans/groups.json
 //
 // Usage example:
-// node scripts/recurly/get_recurly_group_prices.js
+// node scripts/recurly/get_recurly_group_prices.mjs
 
-const recurly = require('recurly')
-const Settings = require('@overleaf/settings')
+import recurly from 'recurly'
+
+import Settings from '@overleaf/settings'
 
 const recurlySettings = Settings.apis.recurly
 const recurlyApiKey = recurlySettings ? recurlySettings.apiKey : undefined
@@ -37,11 +38,10 @@ async function main() {
   console.log(JSON.stringify(prices, undefined, 2))
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error({ error })
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error({ error })
+  process.exit(1)
+}

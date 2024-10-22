@@ -1,16 +1,14 @@
-'use strict'
-
-const fs = require('fs')
-const minimist = require('minimist')
-const readline = require('readline')
-
-const {
+import fs from 'fs'
+import minimist from 'minimist'
+import readline from 'readline'
+import {
   db,
   ObjectId,
   waitForDb,
-} = require('../../app/src/infrastructure/mongodb')
-const DocstoreManager =
-  require('../../app/src/Features/Docstore/DocstoreManager').promises
+} from '../../app/src/infrastructure/mongodb.js'
+import DocstoreManagerModule from '../../app/src/Features/Docstore/DocstoreManager.js'
+
+const { promises: DocstoreManager } = DocstoreManagerModule
 
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined

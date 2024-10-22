@@ -6,7 +6,9 @@
  * in the migrations directory.
  */
 
-const { User } = require('../../app/src/models/User')
+import { User } from '../../app/src/models/User.js'
+import { fileURLToPath } from 'url'
+
 // const somePackage = require('some-package')
 
 const runScript = async () => {
@@ -15,13 +17,14 @@ const runScript = async () => {
   console.log(`Hello ${name}!`)
 }
 
-if (require.main === module) {
-  runScript()
-    .then(() => process.exit())
-    .catch(err => {
-      console.error(err)
-      process.exit(1)
-    })
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
+  try {
+    await runScript()
+    process.exit()
+  } catch (error) {
+    console.error(error)
+    process.exit(1)
+  }
 }
 
-module.exports = runScript
+export default runScript

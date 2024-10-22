@@ -1,12 +1,13 @@
 // recover docs from redis where there is no doc in mongo but the project exists
 
-const minimist = require('minimist')
-const { db, waitForDb, ObjectId } = require('../app/src/infrastructure/mongodb')
-const ProjectEntityUpdateHandler = require('../app/src/Features/Project/ProjectEntityUpdateHandler')
-const ProjectEntityRestoreHandler = require('../app/src/Features/Project/ProjectEntityRestoreHandler')
-const RedisWrapper = require('@overleaf/redis-wrapper')
-const Settings = require('@overleaf/settings')
-const logger = require('@overleaf/logger')
+import minimist from 'minimist'
+
+import { db, waitForDb, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
+import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.js'
+import RedisWrapper from '@overleaf/redis-wrapper'
+import Settings from '@overleaf/settings'
+import logger from '@overleaf/logger'
 const opts = parseArgs()
 const redis = RedisWrapper.createClient(Settings.redis.web)
 
@@ -172,11 +173,10 @@ async function deleteDocFromRedis(projectId, docId) {
   await redis.srem(`DocsIn:{${projectId}}`, projectId)
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

@@ -2,9 +2,11 @@ import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import chaiAsPromised from 'chai-as-promised'
 import sinonChai from 'sinon-chai'
-import { main } from '../../../scripts/recurly/collect_paypal_past_due_invoice.js'
+import CollectPaypalPastDueInvoice from '../../../scripts/recurly/collect_paypal_past_due_invoice.mjs'
 import RecurlyWrapper from '../../../app/src/Features/Subscription/RecurlyWrapper.js'
 import OError from '@overleaf/o-error'
+
+const { main } = CollectPaypalPastDueInvoice
 
 chai.use(chaiAsPromised)
 chai.use(sinonChai)

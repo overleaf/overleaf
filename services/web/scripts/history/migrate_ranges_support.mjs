@@ -1,6 +1,6 @@
-const HistoryRangesSupportMigration = require('../../app/src/Features/History/HistoryRangesSupportMigration')
-const { waitForDb } = require('../../app/src/infrastructure/mongodb')
-const minimist = require('minimist')
+import HistoryRangesSupportMigration from '../../app/src/Features/History/HistoryRangesSupportMigration.mjs'
+import { waitForDb } from '../../app/src/infrastructure/mongodb.js'
+import minimist from 'minimist'
 
 async function main() {
   await waitForDb()
@@ -31,7 +31,7 @@ async function main() {
 }
 
 function usage() {
-  console.error(`Usage: migrate_ranges_support.js [OPTIONS]
+  console.error(`Usage: migrate_ranges_support.mjs [OPTIONS]
 
 Options:
 
@@ -112,11 +112,10 @@ function arrayOpt(value) {
   }
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

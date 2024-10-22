@@ -6,9 +6,10 @@
 // node scripts/merge_group_subscription_members \
 //  --target [targetSubscriptionId] --source [sourceSubscriptionId] --commit
 
-const { db, ObjectId, waitForDb } = require('../app/src/infrastructure/mongodb')
-const SubscriptionUpdater = require('../app/src/Features/Subscription/SubscriptionUpdater')
-const minimist = require('minimist')
+import { db, ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+
+import SubscriptionUpdater from '../app/src/Features/Subscription/SubscriptionUpdater.js'
+import minimist from 'minimist'
 const argv = minimist(process.argv.slice(2), {
   string: ['target', 'source'],
   boolean: ['commit'],
@@ -93,12 +94,11 @@ async function main() {
   }
 }
 
-main()
-  .then(() => {
-    console.error('Done.')
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error({ error })
-    process.exit(1)
-  })
+try {
+  await main()
+  console.error('Done.')
+  process.exit(0)
+} catch (error) {
+  console.error({ error })
+  process.exit(1)
+}

@@ -46,7 +46,7 @@ undo the changes made in `migrate`.
 #### Running scripts as a migration
 
 To run a script in a migration file, look at `migrations/20190730093801_script_example.js`, which runs the script
-`scripts/example/script_for_migration.js`. This uses a method where the script can be run standalone via `node`, or
+`scripts/example/script_for_migration.mjs`. This uses a method where the script can be run standalone via `node`, or
 through the migrations' mechanism.
 
 ### Running migrations
