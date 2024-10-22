@@ -4,6 +4,8 @@ import HistoryFileTreeItem from './history-file-tree-item'
 import iconTypeFromName from '../../../file-tree/util/icon-type-from-name'
 import Icon from '../../../../shared/components/icon'
 import type { FileDiff } from '../../services/types/file'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type HistoryFileTreeDocProps = {
   file: FileDiff
@@ -34,10 +36,20 @@ function HistoryFileTreeDoc({
         name={name}
         operation={'operation' in file ? file.operation : undefined}
         icons={
-          <Icon
-            type={iconTypeFromName(name)}
-            fw
-            className="spaced file-tree-icon"
+          <BootstrapVersionSwitcher
+            bs3={
+              <Icon
+                type={iconTypeFromName(name)}
+                fw
+                className="file-tree-icon"
+              />
+            }
+            bs5={
+              <MaterialIcon
+                type={iconTypeFromName(name)}
+                className="file-tree-icon"
+              />
+            }
           />
         }
       />

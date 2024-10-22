@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import type { ReactNode } from 'react'
 import type { FileOperation } from '../../services/types/file-operation'
-import Tag from '@/shared/components/tag'
+import OLTag from '@/features/ui/components/ol/ol-tag'
 
 type FileTreeItemProps = {
   name: string
@@ -26,7 +26,7 @@ export default function HistoryFileTreeItem({
           {name}
         </div>
         {operation && (
-          <Tag className="history-file-tree-item-badge">{operation}</Tag>
+          <OLTag className="history-file-tree-item-badge">{operation}</OLTag>
         )}
       </div>
     </div>

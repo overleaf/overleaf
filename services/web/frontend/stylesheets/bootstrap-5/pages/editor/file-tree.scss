@@ -114,26 +114,14 @@
       line-height: var(--file-tree-line-height);
       position: relative;
 
-      &:focus {
-        outline: none;
-      }
-
       .entity {
         user-select: none;
-
-        &:focus {
-          outline: none;
-        }
       }
 
       .entity > .entity-name > button {
         background-color: transparent;
         border: 0;
         padding: 0;
-
-        &:focus {
-          outline: none;
-        }
 
         &.item-name-button {
           color: inherit;
@@ -155,10 +143,6 @@
 
         &.entity-name-react {
           text-overflow: clip;
-        }
-
-        &:focus {
-          outline: none;
         }
 
         background-color: transparent;
@@ -217,11 +201,6 @@
           margin-left: var(--spacing-04);
           vertical-align: sub;
         }
-      }
-
-      .material-symbols.folder-open,
-      .material-symbols.fa-folder {
-        color: var(--content-disabled);
       }
 
       .material-symbols.toggle {

@@ -359,7 +359,7 @@ history-root {
 }
 
 .history-version-label-tooltip {
-  padding: 6px;
+  padding: var(--spacing-03);
   text-align: initial;
 
   .history-version-label-tooltip-row {
@@ -433,6 +433,125 @@ history-root {
   vertical-align: middle;
 }
 
+.history-file-tree {
+  display: flex !important; // To work around jQuery layout's inline styles
+  flex-direction: column;
+  max-height: 100%;
+
+  ul.history-file-tree-list {
+    margin: 0;
+    overflow: hidden auto;
+
+    .history-file-tree-item > ul,
+    ul[role='tree'] {
+      margin-left: var(--spacing-08);
+    }
+
+    &::after {
+      content: '';
+      display: block;
+      min-height: 25px;
+    }
+
+    li {
+      line-height: var(--file-tree-line-height);
+      position: relative;
+      margin-left: var(--spacing-04);
+
+      .history-file-tree-item {
+        color: var(--file-tree-item-color);
+        cursor: pointer;
+        white-space: nowrap;
+        user-select: none;
+        display: flex;
+        align-items: center;
+
+        @include fake-full-width-bg(transparent);
+
+        &:hover {
+          background-color: var(--file-tree-item-hover-bg);
+
+          // When the entity is a subfolder, the DOM element is "indented" via margin-left. This makes the
+          // element not fill the entire file-tree width (as it's spaced from the left-hand side via margin)
+          // and, in consequence, the background gets clipped. The ::before pseudo-selector is used to fill
+          // the empty space.
+          @include fake-full-width-bg(var(--file-tree-item-hover-bg));
+        }
+
+        .history-file-tree-folder-button {
+          padding: 0;
+          cursor: pointer;
+          background: transparent;
+          border: 0;
+        }
+
+        .history-file-tree-item-name-wrapper {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          overflow: hidden;
+
+          .history-file-tree-item-name {
+            margin-right: var(--spacing-02);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            white-space: pre;
+
+            &.strikethrough {
+              text-decoration: line-through;
+            }
+          }
+
+          .history-file-tree-item-badge {
+            text-transform: capitalize;
+            font-weight: normal;
+            margin-right: var(--spacing-05);
+
+            &:hover {
+              background-color: var(--neutral-20) !important;
+            }
+          }
+        }
+      }
+
+      .material-symbols {
+        color: var(--content-disabled);
+
+        &.file-tree-icon {
+          margin-right: var(--spacing-02);
+          margin-left: var(--spacing-04);
+        }
+
+        &.file-tree-folder-icon {
+          margin-right: var(--spacing-02);
+          vertical-align: sub;
+        }
+
+        &.file-tree-expand-icon {
+          margin-left: var(--spacing-04);
+          vertical-align: sub;
+        }
+      }
+    }
+
+    li.selected > .history-file-tree-item {
+      color: var(--file-tree-item-selected-color);
+      background-color: var(--file-tree-item-selected-bg);
+      font-weight: bold;
+
+      > div > .material-symbols,
+      > button > .material-symbols,
+      > .material-symbols,
+      .material-symbols {
+        color: var(--file-tree-item-selected-color);
+      }
+
+      @include fake-full-width-bg(var(--file-tree-item-selected-bg));
+    }
+  }
+}
+
 .history-error {
-  padding: 16px;
+  padding: var(--spacing-06);
 }
