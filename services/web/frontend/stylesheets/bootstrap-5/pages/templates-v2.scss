@@ -41,14 +41,13 @@
   }
 
   .gallery-header {
-    // padding: 0 is added when the screen size is much bigger than the $templates-search-max-width
-    // to remove unwanted padding
-    @include media-breakpoint-up(xl) {
-      padding: 0;
-    }
-
     @include media-breakpoint-up(lg) {
       max-width: $templates-search-max-width;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 
@@ -69,14 +68,9 @@
     max-width: 828px;
   }
 
-  .top-picks-banner.container {
+  .top-picks-banner {
     padding: 0;
     margin: var(--spacing-16) auto;
-  }
-
-  .top-picks-banner {
-    // padding: var(--spacing-16) 90px;
-    // width: 100%;
 
     h3 {
       font-size: var(--font-size-08);
