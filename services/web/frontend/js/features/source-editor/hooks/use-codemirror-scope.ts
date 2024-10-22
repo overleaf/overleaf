@@ -108,9 +108,12 @@ function useCodeMirrorScope(view: EditorView) {
     'onlineUserCursorHighlights'
   )
 
-  const [spellCheckLanguage] = useScopeValue<string>(
-    'project.spellCheckLanguage'
-  )
+  let [spellCheckLanguage] = useScopeValue<string>('project.spellCheckLanguage')
+  // spell check is off when read-only
+  if (!permissions.write) {
+    spellCheckLanguage = ''
+  }
+
   const [projectFeatures] =
     useScopeValue<Record<string, boolean | string | number | undefined>>(
       'project.features'

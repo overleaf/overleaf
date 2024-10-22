@@ -62,7 +62,6 @@ export class SpellChecker {
 
   destroy() {
     this._clearPendingSpellCheck()
-    // this.hunspellManager?.destroy()
   }
 
   _abortRequest() {

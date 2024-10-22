@@ -5,6 +5,7 @@ import { useProjectSettingsContext } from '../../context/project-settings-contex
 import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import { useEditorContext } from '@/shared/context/editor-context'
 
 export default function SettingsSpellCheckLanguage() {
   const { t } = useTranslation()
@@ -15,6 +16,7 @@ export default function SettingsSpellCheckLanguage() {
 
   const { spellCheckLanguage, setSpellCheckLanguage } =
     useProjectSettingsContext()
+  const { permissionsLevel } = useEditorContext()
 
   const optgroup: Optgroup = useMemo(() => {
     const options = (languages ?? []).filter(language => {
@@ -48,6 +50,7 @@ export default function SettingsSpellCheckLanguage() {
       optgroup={optgroup}
       label={t('spell_check')}
       name="spellCheckLanguage"
+      disabled={permissionsLevel === 'readOnly'}
     />
   )
 }
