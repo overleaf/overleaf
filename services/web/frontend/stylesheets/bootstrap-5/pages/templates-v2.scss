@@ -107,12 +107,6 @@
 
   .gallery-container {
     --bs-gutter-y: var(--spacing-09);
-
-    .thumbnail {
-      background-color: var(--bg-light-secondary);
-      aspect-ratio: 1 / 1.414; // A4 Paper
-      object-fit: contain;
-    }
   }
 
   .gallery-thumbnail {
@@ -122,11 +116,18 @@
       display: inline-block;
     }
 
+    .thumbnail,
+    .thumbnail-tag {
+      width: 100%;
+      margin: 0 0 var(--spacing-08) 0;
+    }
+
     .thumbnail {
+      background-color: var(--bg-light-secondary);
+      aspect-ratio: 1 / 1.414; // A4 Paper
+      object-fit: contain;
       border-radius: var(--border-radius-base);
       box-shadow: 0 var(--spacing-01) var(--spacing-02) rgb(0 0 0 / 10%);
-      margin: 0 0 var(--spacing-08) 0;
-      width: 100%;
     }
 
     .caption {
@@ -182,6 +183,10 @@
   .popular-tags {
     margin-top: var(--spacing-16);
     margin-bottom: var(--spacing-16);
+
+    a {
+      width: 100%;
+    }
 
     h2 {
       margin-bottom: var(--spacing-09);
