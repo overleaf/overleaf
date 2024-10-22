@@ -6,7 +6,7 @@ export function useLayoutEventTracking() {
   const { view, leftMenuShown, chatIsOpen } = useLayoutContext()
 
   useEffect(() => {
-    if (view !== 'editor' && view !== 'pdf') {
+    if (view && view !== 'editor' && view !== 'pdf') {
       sendMBOnce(`ide-open-view-${view}-once`)
     }
   }, [view])
