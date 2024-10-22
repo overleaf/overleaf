@@ -6,27 +6,29 @@ import SettingsMenuSelect from './settings-menu-select'
 import type { Optgroup } from './settings-menu-select'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
 
-// allow selection of spell-check languages that are only supported in the client-side spell checker
-const showClientOnlyLanguages = true
-
 export default function SettingsSpellCheckLanguage() {
   const { t } = useTranslation()
   const languages = getMeta('ol-languages')
 
   const spellCheckClientEnabled = useFeatureFlag('spell-check-client')
+  const spellCheckNoServer = useFeatureFlag('spell-check-no-server')
 
   const { spellCheckLanguage, setSpellCheckLanguage } =
     useProjectSettingsContext()
 
   const optgroup: Optgroup = useMemo(() => {
-    const options = (languages ?? []).filter(lang => {
-      const clientOnly = lang.server === false
-
-      if (clientOnly && !showClientOnlyLanguages) {
-        return false
+    const options = (languages ?? []).filter(language => {
+      if (!spellCheckClientEnabled) {
+        // only include spell-check languages that are available on the server
+        return language.server !== false
       }
 
-      return spellCheckClientEnabled || !clientOnly
+      if (spellCheckNoServer) {
+        // only include spell-check languages that are available in the client
+        return language.dic !== undefined
+      }
+
+      return true
     })
 
     return {
@@ -36,7 +38,7 @@ export default function SettingsSpellCheckLanguage() {
         label: language.name,
       })),
     }
-  }, [languages, spellCheckClientEnabled])
+  }, [languages, spellCheckClientEnabled, spellCheckNoServer])
 
   return (
     <SettingsMenuSelect

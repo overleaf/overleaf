@@ -131,6 +131,7 @@ describe('EditorHttpController', function () {
     }
     this.SplitTestHandler = {
       promises: {
+        getAssignmentForUser: sinon.stub().resolves({ variant: 'default' }),
         getAssignmentForMongoUser: sinon
           .stub()
           .resolves({ variant: 'default' }),
