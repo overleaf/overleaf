@@ -41,11 +41,5 @@ export default {
       RateLimiterMiddleware.rateLimit(rateLimiters.uniExternalCollabProxy),
       AnalyticsProxy.call('/uniExternalCollaboration')
     )
-
-    publicApiRouter.post(
-      '/analytics/register-v-1-salesforce-mapping',
-      AuthenticationController.requirePrivateApiAuth(),
-      AnalyticsController.registerSalesforceMapping
-    )
   },
 }
