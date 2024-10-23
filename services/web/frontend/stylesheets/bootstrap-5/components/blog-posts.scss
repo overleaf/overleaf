@@ -150,30 +150,6 @@
     }
   }
 
-  .tags {
-    margin-top: var(--margin-md);
-
-    .tags-list {
-      list-style: none;
-      padding: 0;
-      display: flex;
-      gap: var(--spacing-05);
-      flex-wrap: wrap;
-    }
-
-    .badge-tag {
-      padding: 0 var(--bs-badge-padding-x);
-    }
-
-    li {
-      display: inline-flex;
-    }
-
-    a {
-      font-size: small;
-    }
-  }
-
   pre {
     border: 1px solid var(--neutral-40);
     border-radius: var(--border-radius-base);

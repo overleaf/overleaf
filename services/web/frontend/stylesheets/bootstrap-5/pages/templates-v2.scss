@@ -190,4 +190,119 @@
       row-gap: var(--spacing-11);
     }
   }
+
+  .gallery-item-title {
+    display: inline-flex;
+    gap: var(--spacing-06);
+
+    h1 {
+      margin: unset;
+    }
+
+    .gallery-item-title-badge-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: var(--spacing-04);
+
+      .badge-content {
+        font-size: var(--font-size-02);
+        line-height: var(--line-height-02);
+      }
+    }
+  }
+
+  .template-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-04);
+  }
+
+  .gallery-abstract {
+    word-break: break-word;
+    hyphens: auto;
+
+    a {
+      hyphens: none;
+    }
+  }
+
+  .field-title {
+    color: var(--neutral-70);
+    font-weight: 600;
+
+    @include heading-xs;
+  }
+
+  .field-description {
+    @include heading-xs;
+  }
+
+  .section-tags {
+    display: flex;
+    gap: var(--spacing-04);
+  }
+
+  .cta-links {
+    margin: var(--spacing-09) 0;
+
+    .col-md-12 {
+      display: inline-flex;
+      gap: var(--spacing-04);
+      padding: unset;
+    }
+  }
+
+  .gallery-large-pdf-preview {
+    img {
+      width: 100%;
+    }
+
+    @include shadow-md;
+  }
+
+  @include media-breakpoint-down(lg) {
+    .gallery-container {
+      display: grid;
+      grid-template-columns: 50% 50%;
+
+      &.use-percent {
+        .gallery-thumbnail {
+          align-content: end;
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  @include media-breakpoint-up(lg) {
+    .template-item-left-section {
+      padding-right: var(--spacing-10);
+    }
+
+    .template-item-right-section {
+      padding-left: var(--spacing-10);
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    .gallery-container {
+      grid-template-columns: 100%;
+
+      &.use-percent {
+        .gallery-thumbnail {
+          padding-left: unset;
+          padding-right: unset;
+        }
+      }
+    }
+
+    .template-item-right-section {
+      margin-top: var(--spacing-11);
+    }
+
+    .section-tags {
+      margin-top: var(--spacing-04);
+    }
+  }
 }

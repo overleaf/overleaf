@@ -97,3 +97,25 @@ $max-width: 160px;
   margin-left: 5px;
   font-weight: var(--badge-font-weight);
 }
+
+.tags {
+  .tags-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--spacing-05);
+    flex-wrap: wrap;
+  }
+
+  .badge-tag {
+    padding: 0 var(--bs-badge-padding-x);
+  }
+
+  li {
+    display: inline-flex;
+  }
+
+  a {
+    font-size: small;
+  }
+}
