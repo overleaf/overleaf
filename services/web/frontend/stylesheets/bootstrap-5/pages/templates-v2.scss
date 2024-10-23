@@ -6,6 +6,7 @@
 
   .gallery-summary {
     text-align: left;
+    max-width: 828px;
   }
 }
 
@@ -78,7 +79,6 @@
 
     text-align: center;
     margin-bottom: var(--spacing-09);
-    max-width: 828px;
   }
 
   .top-picks-banner {
