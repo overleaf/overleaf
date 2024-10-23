@@ -6,39 +6,39 @@ import { bsVersionDecorator } from '../../../.storybook/utils/with-bootstrap-swi
 
 const templateLinks = [
   {
-    name: 'Academic Journal',
+    name: 'Journal articles',
     url: '/gallery/tagged/academic-journal',
   },
   {
-    name: 'Book',
+    name: 'Books',
     url: '/gallery/tagged/book',
   },
   {
-    name: 'Formal Letter',
+    name: 'Formal letters',
     url: '/gallery/tagged/formal-letter',
   },
   {
-    name: 'Homework Assignment',
+    name: 'Assignments',
     url: '/gallery/tagged/homework',
   },
   {
-    name: 'Poster',
+    name: 'Posters',
     url: '/gallery/tagged/poster',
   },
   {
-    name: 'Presentation',
+    name: 'Presentations',
     url: '/gallery/tagged/presentation',
   },
   {
-    name: 'Project / Lab Report',
+    name: 'Reports',
     url: '/gallery/tagged/report',
   },
   {
-    name: 'Résumé / CV ',
+    name: 'CVs and résumés',
     url: '/gallery/tagged/cv',
   },
   {
-    name: 'Thesis',
+    name: 'Theses',
     url: '/gallery/tagged/thesis',
   },
   {

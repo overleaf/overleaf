@@ -15,7 +15,7 @@ describe('<NewProjectButton />', function () {
       Object.assign(getMeta('ol-ExposedSettings'), {
         templateLinks: [
           {
-            name: 'Academic Journal',
+            name: 'Journal articles',
             url: '/gallery/tagged/academic-journal',
           },
           {
@@ -44,7 +44,7 @@ describe('<NewProjectButton />', function () {
       screen.getByText('Templates')
 
       // dynamic menu based on templateLinks
-      screen.getByText('Academic Journal')
+      screen.getByText('Journal articles')
       screen.getByText('View All')
     })
 
@@ -80,7 +80,7 @@ describe('<NewProjectButton />', function () {
       Object.assign(getMeta('ol-ExposedSettings'), {
         templateLinks: [
           {
-            name: 'Academic Journal',
+            name: 'Journal articles',
             url: '/gallery/tagged/academic-journal',
           },
           {
@@ -127,7 +127,7 @@ describe('<NewProjectButton />', function () {
       screen.getByText('Templates')
 
       // dynamic menu based on templateLinks
-      screen.getByText('Academic Journal')
+      screen.getByText('Journal articles')
       screen.getByText('View All')
     })
   })
