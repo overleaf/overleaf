@@ -136,12 +136,14 @@
       @extend .link-black-text;
 
       display: inline-block;
+      width: 100%;
     }
 
     .thumbnail,
     .thumbnail-tag {
       width: 100%;
       margin: 0 0 var(--spacing-08) 0;
+      display: inline-block;
     }
 
     .thumbnail {
