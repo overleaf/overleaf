@@ -1,12 +1,16 @@
-import { Form } from 'react-bootstrap-5'
+import { Form, FormTextProps as BS5FormTextProps } from 'react-bootstrap-5'
 import MaterialIcon from '@/shared/components/material-icon'
 import classnames from 'classnames'
+import { MergeAndOverride } from '../../../../../../../types/utils'
 
 type TextType = 'default' | 'info' | 'success' | 'warning' | 'error'
 
-export type FormTextProps = React.ComponentProps<typeof Form.Text> & {
-  type?: TextType
-}
+export type FormTextProps = MergeAndOverride<
+  BS5FormTextProps,
+  {
+    type?: TextType
+  }
+>
 
 const typeClassMap: Partial<Record<TextType, string>> = {
   error: 'text-danger',
@@ -43,8 +47,10 @@ function FormText({
       className={classnames(className, getFormTextClass(type))}
       {...rest}
     >
-      <FormTextIcon type={type} />
-      {children}
+      <span className="form-text-inner">
+        <FormTextIcon type={type} />
+        {children}
+      </span>
     </Form.Text>
   )
 }

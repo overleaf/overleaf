@@ -268,7 +268,7 @@ function PasswordFormGroup({
         isInvalid={isInvalid}
       />
       {isInvalid && (
-        <OLFormText isError>
+        <OLFormText type="error">
           {parentValidationMessage || validationMessage}
         </OLFormText>
       )}

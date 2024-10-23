@@ -6,8 +6,9 @@ import {
 } from './figure-modal-context'
 import { useTranslation } from 'react-i18next'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
+import OLFormText from '@/features/ui/components/ol/ol-form-text'
 import OLToggleButtonGroup from '@/features/ui/components/ol/ol-toggle-button-group'
 import OLToggleButton from '@/features/ui/components/ol/ol-toggle-button'
 import MaterialIcon from '@/shared/components/material-icon'
@@ -42,12 +43,11 @@ export const FigureModalFigureOptions: FC = () => {
           label={
             <span className="figure-modal-label-content">
               {t('include_label')}
-              <br />
-              <small className="text-muted">
+              <OLFormText className={bsVersion({ bs3: 'mt-1 text-muted' })}>
                 {t(
                   'used_when_referring_to_the_figure_elsewhere_in_the_document'
                 )}
-              </small>
+              </OLFormText>
             </span>
           }
         />

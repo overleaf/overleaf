@@ -100,12 +100,16 @@
 }
 
 .form-text {
-  display: inline-flex;
-  gap: $spacing-02;
-  line-height: var(--line-height-02);
+  margin-top: var(--spacing-02);
 
   .form-control[disabled] ~ & {
     color: var(--content-disabled);
+  }
+
+  .form-text-inner {
+    display: flex;
+    gap: var(--spacing-02);
+    line-height: var(--line-height-02);
   }
 }
 

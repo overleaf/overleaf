@@ -10,20 +10,19 @@ type OLFormTextProps = FormTextProps & {
   bs3Props?: Record<string, unknown>
 }
 
-function OLFormText(props: OLFormTextProps) {
+function OLFormText({ as = 'div', ...props }: OLFormTextProps) {
   const { bs3Props, ...rest } = props
 
   const bs3HelpBlockProps = {
     children: rest.children,
     className: classnames('small', rest.className, getFormTextClass(rest.type)),
-    as: 'span',
     ...bs3Props,
   } as const satisfies React.ComponentProps<typeof PolymorphicComponent>
 
   return (
     <BootstrapVersionSwitcher
-      bs3={<PolymorphicComponent {...bs3HelpBlockProps} />}
-      bs5={<FormText {...rest} />}
+      bs3={<PolymorphicComponent {...bs3HelpBlockProps} as={as} />}
+      bs5={<FormText {...rest} as={as} />}
     />
   )
 }
