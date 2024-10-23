@@ -1,4 +1,4 @@
-import { forwardRef, ComponentProps } from 'react'
+import { forwardRef, ComponentProps, useCallback } from 'react'
 import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
 import BS3FormControl from '@/features/ui/components/bootstrap-3/form/form-control'
@@ -15,8 +15,22 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
   (props, ref) => {
     const { bs3Props, ...rest } = props
 
+    // Use a callback so that the ref passed to the BS3 FormControl is stable
+    const bs3InputRef = useCallback(
+      (inputElement: HTMLInputElement) => {
+        if (typeof ref === 'function') {
+          ref(inputElement)
+        } else if (ref) {
+          ref.current = inputElement
+        }
+      },
+      [ref]
+    )
+
     let bs3FormControlProps: BS3FormControlProps = {
+      inputRef: bs3InputRef,
       componentClass: rest.as,
+      bsSize: rest.size,
       id: rest.id,
       name: rest.name,
       className: rest.className,
@@ -37,13 +51,6 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       onFocus: rest.onFocus as BS3FormControlProps['onFocus'],
       onBlur: rest.onBlur as BS3FormControlProps['onBlur'],
       onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
-      inputRef: (inputElement: HTMLInputElement) => {
-        if (typeof ref === 'function') {
-          ref(inputElement)
-        } else if (ref) {
-          ref.current = inputElement
-        }
-      },
       prepend: rest.prepend,
       append: rest.append,
       ...bs3Props,

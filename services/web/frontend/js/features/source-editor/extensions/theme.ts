@@ -2,6 +2,7 @@ import { EditorView } from '@codemirror/view'
 import { Annotation, Compartment, TransactionSpec } from '@codemirror/state'
 import { syntaxHighlighting } from '@codemirror/language'
 import { classHighlighter } from './class-highlighter'
+import classNames from 'classnames'
 
 const optionsThemeConf = new Compartment()
 const selectedThemeConf = new Compartment()
@@ -16,6 +17,7 @@ type Options = {
   fontFamily: FontFamily
   lineHeight: LineHeight
   overallTheme: OverallTheme
+  bootstrapVersion: 3 | 5
 }
 
 export const theme = (options: Options) => [
@@ -67,13 +69,17 @@ const createThemeFromOptions = ({
   fontFamily = 'monaco',
   lineHeight = 'normal',
   overallTheme = '',
+  bootstrapVersion = 3,
 }: Options) => {
   /**
    * Theme styles that depend on settings.
    */
   return [
     EditorView.editorAttributes.of({
-      class: overallTheme === '' ? 'overall-theme-dark' : 'overall-theme-light',
+      class: classNames(
+        overallTheme === '' ? 'overall-theme-dark' : 'overall-theme-light',
+        'bootstrap-' + bootstrapVersion
+      ),
       style: Object.entries({
         '--font-size': `${fontSize}px`,
         '--source-font-family': fontFamilies[fontFamily]?.join(', '),
