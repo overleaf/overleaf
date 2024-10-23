@@ -72,6 +72,14 @@
         max-width: $templates-search-max-width;
       }
 
+      .search-author {
+        display: block;
+
+        & + .search-hit-tags {
+          margin-top: var(--spacing-06);
+        }
+      }
+
       .gallery-official {
         margin-left: var(--spacing-06);
         vertical-align: text-top;
