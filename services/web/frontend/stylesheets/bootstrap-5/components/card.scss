@@ -176,6 +176,10 @@
 }
 
 .card-gray-dark {
-  background-color: var(--neutral-20);
+  background-color: var(--neutral-10);
   border-radius: var(--border-radius-base);
+
+  .card-body {
+    padding: var(--spacing-10) var(--spacing-09);
+  }
 }
