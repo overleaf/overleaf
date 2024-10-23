@@ -279,12 +279,6 @@
     font-size: var(--font-size-02);
   }
 
-  .review-panel-resolved-comments-count {
-    background-color: var(--neutral-20);
-    border-radius: var(--border-radius-base);
-    padding: var(--spacing-01);
-  }
-
   .review-panel-resolved-comment {
     background-color: var(--white);
     border-radius: var(--border-radius-base);
@@ -292,6 +286,10 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-04);
+
+    .btn-inline-link {
+      font-size: 12px;
+    }
   }
 
   .review-panel-resolved-comment-header {
@@ -342,6 +340,7 @@
   }
 
   .review-panel-resolved-comment-quoted-text-quote {
+    color: var(--content-primary);
     overflow-wrap: anywhere;
     font-size: var(--font-size-02);
   }

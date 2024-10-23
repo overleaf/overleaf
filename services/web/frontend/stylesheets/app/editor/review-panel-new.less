@@ -269,9 +269,10 @@
   }
 
   .review-panel-resolved-comments-count {
+    color: @content-secondary;
     background-color: @neutral-20;
-    border-radius: @border-radius-base-new;
-    padding: 2px;
+    font-weight: normal;
+    padding: 4px;
   }
 
   .review-panel-resolved-comment {
@@ -322,6 +323,10 @@
     background-color: @neutral-20;
     border-radius: @border-radius-base-new;
     padding: 4px 8px;
+
+    .btn-inline-link {
+      font-size: 12px;
+    }
   }
 
   .review-panel-resolved-comment-quoted-text-label {
@@ -330,6 +335,7 @@
   }
 
   .review-panel-resolved-comment-quoted-text-quote {
+    color: @content-primary;
     overflow-wrap: anywhere;
     font-size: 14px;
   }
