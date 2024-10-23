@@ -1,11 +1,13 @@
 import { useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { Trans, useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import PreviewLogEntryHeader from './preview-log-entry-header'
 import Icon from '../../../shared/components/icon'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
   const { t } = useTranslation()
@@ -34,16 +36,22 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
           {hasErrors && !stoppedOnFirstError ? (
             <>
               <p>
-                <Icon type="lightbulb-o" />
+                <BootstrapVersionSwitcher
+                  bs3={<Icon type="lightbulb-o" />}
+                  bs5={
+                    <MaterialIcon type="lightbulb" className="align-middle" />
+                  }
+                />
                 &nbsp;
                 <strong>{t('tip')}: </strong>
                 <Trans
                   i18nKey="log_entry_maximum_entries_enable_stop_on_first_error"
                   components={[
-                    <Button
+                    <OLButton
+                      variant="info"
+                      size="sm"
                       key="enable-stop-on-first-error"
-                      bsSize="xs"
-                      bsStyle="info"
+                      bs3Props={{ bsSize: 'xsmall' }}
                       onClick={handleEnableStopOnFirstErrorClick}
                     />,
                     // eslint-disable-next-line jsx-a11y/anchor-has-content
@@ -58,7 +66,10 @@ function PreviewLogsPaneMaxEntries({ totalEntries, entriesShown, hasErrors }) {
             </>
           ) : (
             <p>
-              <Icon type="lightbulb-o" />
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="lightbulb-o" />}
+                bs5={<MaterialIcon type="lightbulb" className="align-middle" />}
+              />
               &nbsp;
               <strong>{t('tip')}: </strong>
               {t('log_entry_maximum_entries_see_full_logs')}

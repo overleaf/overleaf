@@ -508,6 +508,8 @@ const hints = {
   },
 }
 
+export const ruleIds = Object.keys(hints)
+
 if (!getMeta('ol-wikiEnabled')) {
   Object.keys(hints).forEach(ruleId => {
     hints[ruleId].extraInfoURL = null

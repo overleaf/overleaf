@@ -3,8 +3,11 @@ import classNames from 'classnames'
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import useResizeObserver from '../hooks/use-resize-observer'
-import Tooltip from '../../../shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import Icon from '../../../shared/components/icon'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 function PreviewLogEntryHeader({
   sourceLocation,
@@ -72,18 +75,25 @@ function PreviewLogEntryHeader({
   // This essentially tells the browser that, althought the text is laid out from right-to-left,
   // the wrapped portion of text should follow left-to-right writing rules.
   const locationLink = locationLinkText ? (
-    <button
+    <OLButton
+      variant="ghost"
       className={logEntryLocationBtnClasses}
-      type="button"
       aria-label={headerLogLocationTitle}
       onClick={onSourceLocationClick}
     >
-      <Icon type="chain" />
-      &nbsp;
+      <BootstrapVersionSwitcher
+        bs3={
+          <>
+            <Icon type="chain" />
+            &nbsp;
+          </>
+        }
+        bs5={<MaterialIcon type="link" />}
+      />
       <span ref={logLocationSpanRef} className="log-entry-header-link-location">
         {`\u202A${locationLinkText}\u202C`}
       </span>
-    </button>
+    </OLButton>
   ) : null
 
   const headerTitleText = logType ? `${logType} ${headerTitle}` : headerTitle
@@ -95,26 +105,26 @@ function PreviewLogEntryHeader({
       ) : null}
       <h3 className="log-entry-header-title">{headerTitleText}</h3>
       {locationSpanOverflown && locationLinkText ? (
-        <Tooltip
+        <OLTooltip
           id={locationLinkText}
           description={locationLinkText}
           overlayProps={{ placement: 'left' }}
           tooltipProps={{ className: 'log-location-tooltip' }}
         >
           {locationLink}
-        </Tooltip>
+        </OLTooltip>
       ) : (
         locationLink
       )}
       {showCloseButton ? (
-        <button
+        <OLButton
+          variant="link"
           className="btn-inline-link log-entry-header-link"
-          type="button"
           aria-label={t('dismiss_error_popup')}
           onClick={onClose}
         >
           <span aria-hidden="true">&times;</span>
-        </button>
+        </OLButton>
       ) : null}
     </header>
   )

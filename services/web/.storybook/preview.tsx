@@ -177,7 +177,11 @@ const preview: Preview = {
       return (
         <>
           {activeStyle && <style>{activeStyle.default}</style>}
-          <Story {...context} />
+          <Story
+            {...context}
+            // force re-renders when switching between Bootstrap versions
+            key={bootstrapVersion}
+          />
         </>
       )
     },

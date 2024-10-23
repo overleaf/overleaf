@@ -1,3 +1,5 @@
+@import '../../abstracts/variables';
+
 :root {
   --toolbar-border-color: var(--neutral-80);
   --toolbar-header-bg-color: var(--neutral-90);
@@ -7,7 +9,8 @@
   --toolbar-btn-hover-color: var(--white);
   --toolbar-btn-active-color: var(--white);
   --toolbar-btn-active-bg-color: var(--green-50);
-  --toolbar-small-height: 32px;
+  --toolbar-height: #{$toolbar-height};
+  --toolbar-small-height: #{$toolbar-small-height};
   --toolbar-alt-bg-color: var(--neutral-80);
   --formatting-btn-color: var(--white);
   --formatting-btn-bg: var(--neutral-80);
@@ -208,8 +211,6 @@
   }
 
   &.toolbar-header {
-    --toolbar-height: 40px;
-
     align-items: stretch;
     background-color: var(--toolbar-header-bg-color);
     position: absolute;
@@ -315,7 +316,7 @@
 }
 
 .toolbar-editor {
-  height: 32px;
+  height: var(--toolbar-small-height);
   background-color: var(--editor-toolbar-bg);
   padding: 0 5px;
   overflow: hidden;

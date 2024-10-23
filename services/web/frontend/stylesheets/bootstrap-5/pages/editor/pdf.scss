@@ -136,7 +136,6 @@
 }
 
 .pdf-viewer,
-.pdf-logs,
 .pdf-errors,
 .pdf-uncompiled {
   @extend .full-size;
@@ -377,4 +376,18 @@
   .tooltip-inner {
     max-width: none;
   }
+}
+
+#dropdown-files-logs-pane-list {
+  overflow-y: auto;
+
+  .dropdown-header {
+    white-space: nowrap;
+  }
+
+  // This keeps the dropdown menu inside the Logs div.
+  // "spacing-11" is there to compensate the button height and the margin around the logs.
+  max-height: calc(
+    100vh - #{$toolbar-small-height + $toolbar-height + $spacing-11}
+  );
 }

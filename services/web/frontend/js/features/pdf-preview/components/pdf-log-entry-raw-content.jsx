@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { useResizeObserver } from '../../../shared/hooks/use-resize-observer'
 import { useTranslation } from 'react-i18next'
 import classNames from 'classnames'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import Icon from '../../../shared/components/icon'
 import PropTypes from 'prop-types'
 
@@ -44,10 +44,13 @@ export default function PdfLogEntryRawContent({
             'log-entry-content-button-container-collapsed': !expanded,
           })}
         >
-          <Button
-            bsSize="xs"
-            bsStyle={null}
-            className="log-entry-btn-expand-collapse btn-secondary"
+          <OLButton
+            variant="secondary"
+            size="sm"
+            bs3Props={{
+              bsSize: 'xsmall',
+              className: 'log-entry-btn-expand-collapse',
+            }}
             onClick={() => setExpanded(value => !value)}
           >
             {expanded ? (
@@ -59,7 +62,7 @@ export default function PdfLogEntryRawContent({
                 <Icon type="angle-down" /> {t('expand')}
               </>
             )}
-          </Button>
+          </OLButton>
         </div>
       )}
     </div>

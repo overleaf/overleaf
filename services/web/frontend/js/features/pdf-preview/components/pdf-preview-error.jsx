@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import { useTranslation, Trans } from 'react-i18next'
 import { memo, useCallback } from 'react'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
@@ -23,9 +23,10 @@ function PdfPreviewError({ error }) {
                 i18nKey="something_went_wrong_rendering_pdf_expected"
                 components={[
                   // eslint-disable-next-line react/jsx-key
-                  <Button
-                    bsSize="xs"
-                    bsStyle="info"
+                  <OLButton
+                    variant="info"
+                    size="sm"
+                    bs3Props={{ bsSize: 'xsmall' }}
                     onClick={() => startCompile()}
                   />,
                 ]}
@@ -157,7 +158,7 @@ function PdfPreviewError({ error }) {
         <ErrorLogEntry title={t('no_pdf_error_title')}>
           {t('no_pdf_error_explanation')}
 
-          <ul className="log-entry-formatted-content-list">
+          <ul className="my-1 ps-3">
             <li>{t('no_pdf_error_reason_unrecoverable_error')}</li>
             <li>
               <Trans
@@ -282,9 +283,10 @@ function TimedOutLogEntry() {
                 i18nKey="project_timed_out_enable_stop_on_first_error"
                 components={[
                   // eslint-disable-next-line react/jsx-key
-                  <Button
-                    bsSize="xs"
-                    bsStyle="info"
+                  <OLButton
+                    variant="info"
+                    size="sm"
+                    bs3Props={{ bsSize: 'xsmall' }}
                     onClick={handleEnableStopOnFirstErrorClick}
                   />,
                 ]}

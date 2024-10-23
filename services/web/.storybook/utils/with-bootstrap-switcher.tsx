@@ -9,6 +9,9 @@ export const bsVersionDecorator: Meta = {
       description: 'Bootstrap version for components',
       control: { type: 'inline-radio' },
       options: ['3', '5'],
+      table: {
+        defaultValue: { summary: '3' },
+      },
     },
   },
   args: {

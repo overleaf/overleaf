@@ -1,0 +1,203 @@
+@import '../../foundations/colors';
+
+.logs-pane {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  background-color: var(--bg-dark-secondary);
+  z-index: 11; // above the PDF viewer + controls
+  top: var(--toolbar-small-height);
+
+  .logs-pane-content {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+    min-height: 100%;
+  }
+
+  .logs-pane-actions {
+    display: flex;
+    flex-wrap: wrap;
+    place-content: flex-end flex-end;
+    padding: var(--spacing-03) 0;
+    flex-grow: 1;
+    align-items: flex-end;
+    gap: var(--spacing-04);
+  }
+
+  .log-entry {
+    border-radius: var(--border-radius-base);
+    overflow: hidden;
+  }
+
+  .log-entry-header {
+    padding: var(--spacing-02) var(--spacing-04);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-04);
+    border-radius: var(--border-radius-base) var(--border-radius-base) 0 0;
+    color: var(--content-primary-dark);
+
+    .material-symbols {
+      @include body-base;
+    }
+  }
+
+  .log-entry-header-error {
+    background-color: var(--content-danger);
+  }
+
+  .log-entry-header-link-error {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: var(--bg-danger-02),
+      $hover-background: var(--red-70)
+    );
+  }
+
+  .log-entry-header-warning {
+    background-color: var(--content-warning-dark);
+  }
+
+  .log-entry-header-link-warning {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: var(--bg-warning-01),
+      $hover-background: var(--bg-warning-02)
+    );
+  }
+
+  .log-entry-header-typesetting {
+    background-color: var(--blue-50);
+  }
+
+  .log-entry-header-link-typesetting {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: var(--blue-60),
+      $hover-background: var(--blue-70)
+    );
+  }
+
+  .log-entry-header-raw,
+  .log-entry-header-info {
+    background-color: var(--bg-dark-tertiary);
+  }
+
+  .log-entry-header-link-raw,
+  .log-entry-header-link-info {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: var(--bg-dark-secondary),
+      $hover-background: var(--bg-dark-primary)
+    );
+  }
+
+  .log-entry-header-success {
+    background-color: var(--green-50);
+  }
+
+  .log-entry-header-link-success {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: var(--green-60),
+      $hover-background: var(--green-70)
+    );
+  }
+
+  .log-entry-header-title {
+    @include body-base;
+
+    flex-grow: 1;
+    font-weight: bold;
+    margin: 0;
+    color: var(--content-primary-dark);
+  }
+
+  .log-entry-header-link {
+    color: var(--content-primary-dark);
+    border-width: 0;
+    max-width: 33%;
+    text-decoration: none; // needed for the "close button"
+    padding: 0 var(--spacing-03);
+
+    .button-content {
+      min-width: 0; // needed to display the ellipsis on overflow
+    }
+  }
+
+  .log-entry-header-link-location {
+    white-space: nowrap;
+    direction: rtl;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .log-entry-content {
+    background-color: var(--bg-light-primary);
+    padding: var(--spacing-04);
+  }
+
+  .log-entry-content-raw {
+    font-size: var(--font-size-01);
+    color: var(--content-secondary);
+    padding: var(--spacing-03);
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  .log-entry-content-button-container {
+    position: relative;
+    height: 40px;
+    margin-top: 0;
+    transition:
+      margin 0.15s ease-in-out,
+      opacity 0.15s ease-in-out;
+    padding-bottom: var(--spacing-04);
+    text-align: center;
+    background-image: linear-gradient(
+      0deg,
+      var(--bg-light-tertiary) 0%,
+      transparent 100%
+    );
+    border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
+  }
+
+  .log-entry-content-button-container-collapsed {
+    margin-top: -40px;
+  }
+
+  .log-entry-content-raw-container {
+    background-color: var(--bg-light-tertiary);
+    border-radius: var(--border-radius-base);
+    overflow: hidden;
+    margin-top: var(--spacing-03);
+  }
+}
+
+.btn-secondary-compile-timeout-override {
+  color: var(--content-primary);
+  background-color: var(--bg-light-primary);
+  border-color: var(--border-primary);
+  border-width: 1px;
+}
+
+.log-entry-formatted-content,
+.log-entry-content-link {
+  font-size: var(--font-size-02);
+  margin-top: var(--spacing-02);
+
+  &:first-of-type {
+    margin-top: 0;
+  }
+}
+
+.log-location-tooltip {
+  word-break: break-all;
+
+  & > .tooltip-inner {
+    max-width: 450px;
+    text-align: left;
+  }
+}

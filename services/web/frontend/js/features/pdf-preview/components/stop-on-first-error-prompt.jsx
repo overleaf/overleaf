@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import { Button } from 'react-bootstrap'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import PdfLogEntry from './pdf-log-entry'
 import { useDetachCompileContext as useCompileContext } from '../../../shared/context/detach-compile-context'
 import { useStopOnFirstError } from '../../../shared/hooks/use-stop-on-first-error'
@@ -28,9 +28,14 @@ export default function StopOnFirstErrorPrompt() {
             // eslint-disable-next-line react/jsx-key
             components={[<strong />]}
           />{' '}
-          <Button bsSize="xs" bsStyle="info" onClick={handleDisableButtonClick}>
+          <OLButton
+            variant="info"
+            size="sm"
+            onClick={handleDisableButtonClick}
+            bs3Props={{ bsSize: 'xsmall' }}
+          >
             {t('disable_stop_on_first_error')}
-          </Button>
+          </OLButton>
         </>
       }
       level="info"
