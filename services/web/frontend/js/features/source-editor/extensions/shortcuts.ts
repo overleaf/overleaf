@@ -26,7 +26,12 @@ import {
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 const toggleReviewPanel = () => {
-  dispatchEditorEvent('toggle-review-panel')
+  if (isSplitTestEnabled('review-panel-redesign')) {
+    window.dispatchEvent(new Event('ui.toggle-review-panel'))
+  } else {
+    dispatchEditorEvent('toggle-review-panel')
+  }
+
   return true
 }
 
@@ -40,7 +45,11 @@ const addNewCommentFromKbdShortcut = (view: EditorView) => {
 }
 
 const toggleTrackChangesFromKbdShortcut = () => {
-  dispatchEditorEvent('toggle-track-changes')
+  if (isSplitTestEnabled('review-panel-redesign')) {
+    window.dispatchEvent(new Event('toggle-track-changes'))
+  } else {
+    dispatchEditorEvent('toggle-track-changes')
+  }
   return true
 }
 

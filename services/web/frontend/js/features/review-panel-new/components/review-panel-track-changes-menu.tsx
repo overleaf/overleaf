@@ -1,12 +1,13 @@
-import { FC, useCallback } from 'react'
+import { FC } from 'react'
 import TrackChangesToggle from '@/features/source-editor/components/review-panel/toolbar/track-changes-toggle'
 import { useProjectContext } from '@/shared/context/project-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 import { useTranslation } from 'react-i18next'
-import { useTrackChangesStateContext } from '../context/track-changes-state-context'
-import { postJSON } from '@/infrastructure/fetch-json'
+import {
+  useTrackChangesStateActionsContext,
+  useTrackChangesStateContext,
+} from '../context/track-changes-state-context'
 import { useChangesUsersContext } from '../context/changes-users-context'
-import { UserId } from '../../../../../types/user'
 import { buildName } from '../utils/build-name'
 
 export const ReviewPanelTrackChangesMenu: FC = () => {
@@ -14,34 +15,14 @@ export const ReviewPanelTrackChangesMenu: FC = () => {
   const permissions = usePermissionsContext()
   const project = useProjectContext()
   const trackChanges = useTrackChangesStateContext()
+  const { saveTrackChanges } = useTrackChangesStateActionsContext()
   const changesUsers = useChangesUsersContext()
-
-  const saveTrackChanges = useCallback(
-    body => {
-      postJSON(`/project/${project._id}/track_changes`, {
-        body,
-      })
-    },
-    [project._id]
-  )
 
   if (trackChanges === undefined || !changesUsers) {
     return null
   }
 
-  const trackChangesIsObject = trackChanges !== true && trackChanges !== false
-  const onForEveryone = trackChanges === true
-  const onForGuests =
-    onForEveryone || (trackChangesIsObject && trackChanges.__guests__ === true)
-
-  const trackChangesValues: Record<UserId, boolean | undefined> = {}
-  if (trackChangesIsObject) {
-    for (const key of Object.keys(trackChanges)) {
-      if (key !== '__guests__') {
-        trackChangesValues[key as UserId] = trackChanges[key as UserId]
-      }
-    }
-  }
+  const { onForEveryone, onForGuests, onForMembers } = trackChanges
 
   const canToggle = project.features.trackChanges && permissions.write
 
@@ -65,8 +46,7 @@ export const ReviewPanelTrackChangesMenu: FC = () => {
         const user = changesUsers.get(member._id) ?? member
         const name = buildName(user)
 
-        const value =
-          trackChanges === true || trackChangesValues[member._id] === true
+        const value = onForEveryone || onForMembers[member._id] === true
 
         return (
           <div key={member._id} className="rp-tc-state-item">
@@ -78,7 +58,7 @@ export const ReviewPanelTrackChangesMenu: FC = () => {
               handleToggle={() => {
                 saveTrackChanges({
                   on_for: {
-                    ...trackChangesValues,
+                    ...onForMembers,
                     [member._id]: !value,
                   },
                   on_for_guests: onForGuests,
@@ -99,7 +79,7 @@ export const ReviewPanelTrackChangesMenu: FC = () => {
           description={t('track_changes_for_guests')}
           handleToggle={() =>
             saveTrackChanges({
-              on_for: trackChangesValues,
+              on_for: onForMembers,
               on_for_guests: !onForGuests,
             })
           }

@@ -97,7 +97,7 @@ export const LayoutProvider: FC = ({ children }) => {
 
   // whether the review pane is open
   const [reviewPanelOpen, setReviewPanelOpen] =
-    useScopeValue('ui.reviewPanelOpen')
+    useScopeValue<boolean>('ui.reviewPanelOpen')
 
   // whether the review pane is collapsed
   const [miniReviewPanelVisible, setMiniReviewPanelVisible] =
@@ -115,6 +115,13 @@ export const LayoutProvider: FC = ({ children }) => {
       },
       [setLeftMenuShown]
     )
+  )
+
+  useEventListener(
+    'ui.toggle-review-panel',
+    useCallback(() => {
+      setReviewPanelOpen(open => !open)
+    }, [setReviewPanelOpen])
   )
 
   // whether to display the editor and preview side-by-side or full-width ("flat")
