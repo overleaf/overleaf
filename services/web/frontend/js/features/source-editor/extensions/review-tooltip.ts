@@ -31,31 +31,31 @@ export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
   )
 }
 
-export const addComment = (): Extension => {
+export const reviewTooltip = (): Extension => {
   if (!isSplitTestEnabled('review-panel-redesign')) {
     return []
   }
 
-  return [addCommentTheme, addCommentStateField, textSelected]
+  return [reviewTooltipTheme, reviewTooltipStateField, textSelected]
 }
 
-export const addCommentStateField = StateField.define<{
+export const reviewTooltipStateField = StateField.define<{
   tooltip: Tooltip | null
-  ranges: DecorationSet
+  addCommentRanges: DecorationSet
 }>({
   create() {
-    return { tooltip: null, ranges: Decoration.none }
+    return { tooltip: null, addCommentRanges: Decoration.none }
   },
 
   update(field, tr) {
-    let { tooltip, ranges } = field
+    let { tooltip, addCommentRanges } = field
 
-    ranges = ranges.map(tr.changes)
+    addCommentRanges = addCommentRanges.map(tr.changes)
 
     for (const effect of tr.effects) {
       if (effect.is(removeNewCommentRangeEffect)) {
         const rangeToRemove = effect.value
-        ranges = ranges.update({
+        addCommentRanges = addCommentRanges.update({
           // eslint-disable-next-line no-unused-vars
           filter: (from, to, value) => {
             return value.spec.id !== rangeToRemove.spec.id
@@ -65,7 +65,7 @@ export const addCommentStateField = StateField.define<{
 
       if (effect.is(addNewCommentRangeEffect)) {
         const rangeToAdd = effect.value
-        ranges = ranges.update({
+        addCommentRanges = addCommentRanges.update({
           add: [rangeToAdd],
         })
       }
@@ -79,11 +79,11 @@ export const addCommentStateField = StateField.define<{
       }
     }
 
-    return { tooltip, ranges }
+    return { tooltip, addCommentRanges }
   },
 
   provide: field => [
-    EditorView.decorations.from(field, field => field.ranges),
+    EditorView.decorations.from(field, field => field.addCommentRanges),
     showTooltip.compute([field], state => state.field(field).tooltip),
   ],
 })
@@ -109,7 +109,7 @@ function buildTooltip(range: SelectionRange): Tooltip | null {
 /**
  * Styles for the tooltip
  */
-const addCommentTheme = EditorView.baseTheme({
+const reviewTooltipTheme = EditorView.baseTheme({
   '.review-tooltip-menu-container.cm-tooltip': {
     backgroundColor: 'transparent',
     border: 'none',

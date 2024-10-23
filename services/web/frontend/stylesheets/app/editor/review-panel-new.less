@@ -619,10 +619,12 @@
 }
 
 .review-tooltip-menu {
+  display: flex;
   box-shadow: 0px 2px 4px 0px #1e253029;
   border: none;
   border-radius: 4px;
   padding: 4px;
+  gap: 4px;
 }
 
 .review-tooltip-menu-button {
@@ -633,6 +635,11 @@
   gap: 2px;
   padding: 2px;
   border-radius: @border-radius-base;
+}
+
+.review-tooltip-menu-divider {
+  width: 1px;
+  background-color: #e7e9ee;
 }
 
 .review-tooltip-add-comment-button {

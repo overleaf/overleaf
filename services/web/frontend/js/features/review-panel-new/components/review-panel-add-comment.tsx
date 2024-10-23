@@ -6,7 +6,7 @@ import {
 import { EditorSelection } from '@codemirror/state'
 import { useTranslation } from 'react-i18next'
 import { useThreadsActionsContext } from '../context/threads-context'
-import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/add-comment'
+import { removeNewCommentRangeEffect } from '@/features/source-editor/extensions/review-tooltip'
 import useSubmittableTextInput from '../hooks/use-submittable-text-input'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
 import { ReviewPanelEntry } from './review-panel-entry'
