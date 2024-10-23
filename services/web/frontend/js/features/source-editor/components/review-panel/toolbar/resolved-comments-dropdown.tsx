@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useState, useMemo, useCallback } from 'react'
 import Icon from '../../../../../shared/components/icon'
-import Tooltip from '../../../../../shared/components/tooltip'
 import ResolvedCommentsScroller from './resolved-comments-scroller'
 import classnames from 'classnames'
 import {
@@ -16,6 +15,10 @@ import { ReviewPanelResolvedCommentThread } from '../../../../../../../types/rev
 import { DocId } from '../../../../../../../types/project-settings'
 import { ReviewPanelEntry } from '../../../../../../../types/review-panel/entry'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
+import LoadingSpinner from '@/shared/components/loading-spinner'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 export interface FilteredResolvedComments
   extends ReviewPanelResolvedCommentThread {
@@ -97,7 +100,7 @@ function ResolvedCommentsDropdown() {
         onClick={() => setIsOpen(false)}
       />
 
-      <Tooltip
+      <OLTooltip
         id="resolved-comments-toggle"
         description={t('resolved_comments')}
         overlayProps={{ container: document.body, placement: 'bottom' }}
@@ -107,9 +110,12 @@ function ResolvedCommentsDropdown() {
           onClick={handleResolvedCommentsClick}
           aria-label={t('resolved_comments')}
         >
-          <Icon type="inbox" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="inbox" />}
+            bs5={<MaterialIcon type="inbox" />}
+          />
         </button>
-      </Tooltip>
+      </OLTooltip>
 
       <div
         className={classnames('resolved-comments-dropdown', {
@@ -117,9 +123,7 @@ function ResolvedCommentsDropdown() {
         })}
       >
         {isLoading ? (
-          <div className="rp-loading">
-            <Icon type="spinner" spin />
-          </div>
+          <LoadingSpinner className="d-flex justify-content-center my-2" />
         ) : isOpen ? (
           <ResolvedCommentsScroller
             resolvedComments={filteredResolvedComments}

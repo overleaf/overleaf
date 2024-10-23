@@ -61,7 +61,7 @@ function ResolvedCommentEntry({
             <>
               &nbsp;
               <button
-                className="rp-collapse-toggle btn-inline-link"
+                className="rp-collapse-toggle"
                 onClick={() => setIsCollapsed(value => !value)}
               >
                 {isCollapsed ? `… (${t('show_all')})` : ` (${t('show_less')})`}

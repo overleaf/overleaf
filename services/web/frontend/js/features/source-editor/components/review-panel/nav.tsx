@@ -8,6 +8,8 @@ import {
 import { isCurrentFileView, isOverviewView } from '../../utils/sub-view'
 import { useCallback } from 'react'
 import { useResizeObserver } from '../../../../shared/hooks/use-resize-observer'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 function Nav() {
   const { t } = useTranslation()
@@ -40,7 +42,10 @@ function Nav() {
         })}
         onClick={() => handleSetSubview('cur_file')}
       >
-        <Icon type="file-text-o" />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="file-text-o" />}
+          bs5={<MaterialIcon type="description" className="align-middle" />}
+        />
         <span className="rp-nav-label">{t('current_file')}</span>
       </button>
       <button
@@ -55,7 +60,10 @@ function Nav() {
         })}
         onClick={() => handleSetSubview('overview')}
       >
-        <Icon type="list" />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="list" />}
+          bs5={<MaterialIcon type="list" className="align-middle" />}
+        />
         <span className="rp-nav-label">{t('overview')}</span>
       </button>
     </div>

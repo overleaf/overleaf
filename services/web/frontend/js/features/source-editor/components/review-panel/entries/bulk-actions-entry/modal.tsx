@@ -1,8 +1,13 @@
 import { useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button, Modal as BootstrapModal } from 'react-bootstrap'
-import AccessibleModal from '../../../../../../shared/components/accessible-modal'
 import { useReviewPanelUpdaterFnsContext } from '../../../../context/review-panel/review-panel-context'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 
 type BulkActionsModalProps = {
   show: boolean
@@ -22,30 +27,28 @@ function Modal({
   const { t } = useTranslation()
 
   return (
-    <AccessibleModal show={show} onHide={() => setShow(false)}>
-      <BootstrapModal.Header closeButton>
-        <h3>{isAccept ? t('accept_all') : t('reject_all')}</h3>
-      </BootstrapModal.Header>
-      <BootstrapModal.Body>
+    <OLModal show={show} onHide={() => setShow(false)}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>
+          {isAccept ? t('accept_all') : t('reject_all')}
+        </OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         <p>
           {isAccept
             ? t('bulk_accept_confirm', { nChanges })
             : t('bulk_reject_confirm', { nChanges })}
         </p>
-      </BootstrapModal.Body>
-      <BootstrapModal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          onClick={() => setShow(false)}
-        >
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={() => setShow(false)}>
           {t('cancel')}
-        </Button>
-        <Button bsStyle={null} className="btn-primary" onClick={onConfirm}>
+        </OLButton>
+        <OLButton variant="primary" onClick={onConfirm}>
           {t('ok')}
-        </Button>
-      </BootstrapModal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

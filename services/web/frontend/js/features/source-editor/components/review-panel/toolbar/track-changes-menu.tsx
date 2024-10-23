@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next'
-import Tooltip from '@/shared/components/tooltip'
 import TrackChangesToggle from '@/features/source-editor/components/review-panel/toolbar/track-changes-toggle'
 import {
   useReviewPanelUpdaterFnsContext,
@@ -7,6 +6,7 @@ import {
 } from '@/features/source-editor/context/review-panel/review-panel-context'
 import { useProjectContext } from '@/shared/context/project-context'
 import classnames from 'classnames'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 function TrackChangesMenu() {
   const { t } = useTranslation()
@@ -28,7 +28,7 @@ function TrackChangesMenu() {
   return (
     <ul className="rp-tc-state" data-testid="review-panel-track-changes-menu">
       <li className="rp-tc-state-item rp-tc-state-item-everyone">
-        <Tooltip
+        <OLTooltip
           description={t('tc_switch_everyone_tip')}
           id="track-changes-switch-everyone"
           overlayProps={{
@@ -38,7 +38,7 @@ function TrackChangesMenu() {
           }}
         >
           <span className="rp-tc-state-item-name">{t('tc_everyone')}</span>
-        </Tooltip>
+        </OLTooltip>
 
         <TrackChangesToggle
           id="track-changes-everyone"
@@ -52,7 +52,7 @@ function TrackChangesMenu() {
       </li>
       {Object.values(formattedProjectMembers).map(member => (
         <li className="rp-tc-state-item" key={member.id}>
-          <Tooltip
+          <OLTooltip
             description={t('tc_switch_user_tip')}
             id="track-changes-switch-user"
             overlayProps={{
@@ -68,7 +68,7 @@ function TrackChangesMenu() {
             >
               {member.name}
             </span>
-          </Tooltip>
+          </OLTooltip>
 
           <TrackChangesToggle
             id={`track-changes-user-toggle-${member.id}`}
@@ -90,7 +90,7 @@ function TrackChangesMenu() {
       ))}
       <li className="rp-tc-state-separator" />
       <li className="rp-tc-state-item">
-        <Tooltip
+        <OLTooltip
           description={t('tc_switch_guests_tip')}
           id="track-changes-switch-guests"
           overlayProps={{
@@ -106,7 +106,7 @@ function TrackChangesMenu() {
           >
             {t('tc_guests')}
           </span>
-        </Tooltip>
+        </OLTooltip>
 
         <TrackChangesToggle
           id="track-changes-guests-toggle"

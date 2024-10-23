@@ -8,6 +8,8 @@ import classnames from 'classnames'
 import { ReviewPanelDocEntries } from '../../../../../../types/review-panel/review-panel'
 import { MainDocument } from '../../../../../../types/project-settings'
 import OverviewFileEntries from '@/features/source-editor/components/review-panel/entries/overview-file-entries'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type OverviewFileProps = {
   docId: MainDocument['doc']['id']
@@ -45,7 +47,10 @@ function OverviewFile({ docId, docPath }: OverviewFileProps) {
               'rp-overview-file-header-collapse-on': docCollapsed,
             })}
           >
-            <Icon type="angle-down" />
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="angle-down" />}
+              bs5={<MaterialIcon type="expand_more" />}
+            />
           </span>
           {docPath}
           {docCollapsed && (

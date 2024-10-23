@@ -9,10 +9,8 @@
 @rp-border-grey: #d9d9d9;
 
 @rp-green: #2c8e30;
-@rp-green-on-dark: rgba(37, 107, 41, 0.5);
 @rp-red: #c5060b;
 @rp-yellow: #f3b111;
-@rp-yellow-on-dark: rgba(194, 93, 11, 0.5);
 @rp-grey: #aaaaaa;
 
 @rp-type-blue: #6b7797;
@@ -23,8 +21,6 @@
 @rp-semibold-weight: 600;
 @review-panel-width: 230px;
 @review-off-width: 22px;
-
-@rp-toolbar-height: 32px;
 
 @rp-entry-animation-speed: 0.3s;
 
@@ -64,12 +60,6 @@
   }
 }
 
-.loading-panel {
-  .rp-size-expanded & {
-    right: @review-panel-width;
-  }
-}
-
 .review-panel-toolbar {
   display: none;
 
@@ -103,10 +93,6 @@
 .review-panel-toolbar-label-disabled {
   cursor: auto;
   margin-right: 5px;
-}
-
-.review-panel-toolbar-spinner {
-  margin-left: 5px;
 }
 
 .rp-tc-state {
@@ -171,10 +157,6 @@
     flex-grow: 2;
     overflow-y: auto;
   }
-}
-
-.rp-entry-list-inner {
-  position: relative;
 }
 
 .rp-entry-indicator {
@@ -752,11 +734,6 @@
   }
 }
 
-.rp-loading {
-  text-align: center;
-  padding: 5px;
-}
-
 .rp-nav {
   display: none;
   flex-shrink: 0;
@@ -804,18 +781,6 @@
 .rp-nav-label {
   display: block;
   font-size: @rp-base-font-size;
-}
-
-#editor {
-  .rp-size-mini & {
-    right: @review-off-width;
-  }
-
-  .rp-size-expanded & {
-    right: @review-panel-width;
-    left: 0px;
-    width: auto;
-  }
 }
 
 .review-icon {
@@ -919,6 +884,7 @@ button when (@is-overleaf-light = true) {
 }
 
 .rp-collapse-toggle {
+  .btn-inline-link;
   color: @rp-type-blue;
   font-weight: @rp-semibold-weight;
 
@@ -979,8 +945,8 @@ button when (@is-overleaf-light = true) {
   }
 
   .rp-size-expanded & {
-    &::after {
-      content: '\f105';
+    .review-panel-toggler-icon .fa {
+      transform: scale(0.7) rotate(180deg);
     }
   }
 
@@ -990,20 +956,16 @@ button when (@is-overleaf-light = true) {
     background-color: #fff;
   }
 
-  &::after {
-    content: '\f104';
-    font-family: FontAwesome;
-    line-height: 1;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-size: 16px;
-    display: block;
+  .review-panel-toggler-icon {
     position: sticky;
     top: 50%;
     bottom: 50%;
     width: 100%;
-    text-align: center;
-    margin-top: -0.5em;
+
+    .fa {
+      font-size: 14px;
+      transform: scale(0.7);
+    }
   }
 }
 
@@ -1134,40 +1096,10 @@ button when (@is-overleaf-light = true) {
   }
 }
 
-.review-panel-indicator {
-  display: none;
-}
-
-.review-panel-mini {
-  width: 22px !important;
-  overflow: visible !important;
-
-  .rp-entry {
-    height: 12px;
-  }
-
-  .rp-entry-indicator {
-    position: absolute;
-    left: -6px;
-    right: 0;
-    display: flex;
-    width: 20px;
-    height: 20px;
-  }
-
-  .rp-entry-content {
-    display: none;
-    background: white;
-    border: 1px solid @rp-border-grey;
-    width: 200px;
-  }
-
-  .rp-entry:hover {
-    .rp-entry-content {
-      display: initial;
-      position: absolute;
-      left: -206px;
-      top: 0;
-    }
-  }
+.track-changes-indicator-circle {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+  background-color: @ol-green;
 }

@@ -1,12 +1,21 @@
 import { useTranslation } from 'react-i18next'
-import { Row, Col, Button, Modal } from 'react-bootstrap'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
 import Icon from '../../../../shared/components/icon'
 import { useProjectContext } from '../../../../shared/context/project-context'
 import { useUserContext } from '../../../../shared/context/user-context'
 import { startFreeTrial, upgradePlan } from '../../../../main/account-upgrade'
 import { memo } from 'react'
 import { useFeatureFlag } from '@/shared/context/split-test-context'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 type UpgradeTrackChangesModalProps = {
   show: boolean
@@ -24,11 +33,11 @@ function UpgradeTrackChangesModal({
   const hasNewPaywallCta = useFeatureFlag('paywall-cta')
 
   return (
-    <AccessibleModal show={show} onHide={() => setShow(false)}>
-      <Modal.Header closeButton>
-        <h3>{t('upgrade_to_track_changes')}</h3>
-      </Modal.Header>
-      <Modal.Body>
+    <OLModal show={show} onHide={() => setShow(false)}>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('upgrade_to_track_changes')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         <div className="teaser-video-container">
           {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video className="teaser-video" autoPlay loop>
@@ -45,8 +54,8 @@ function UpgradeTrackChangesModal({
         <h4 className="teaser-title">
           {t('see_changes_in_your_documents_live')}
         </h4>
-        <Row>
-          <Col md={10} mdOffset={1}>
+        <OLRow>
+          <OLCol lg={{ span: 10, offset: 1 }}>
             <ul className="list-unstyled">
               {[
                 t('track_any_change_in_real_time'),
@@ -54,36 +63,43 @@ function UpgradeTrackChangesModal({
                 t('accept_or_reject_each_changes_individually'),
               ].map(translation => (
                 <li key={translation}>
-                  <Icon type="check" /> {translation}
+                  <BootstrapVersionSwitcher
+                    bs3={<Icon type="check" />}
+                    bs5={
+                      <MaterialIcon
+                        type="check"
+                        className="align-text-bottom"
+                      />
+                    }
+                  />
+                  &nbsp;{translation}
                 </li>
               ))}
             </ul>
-          </Col>
-        </Row>
+          </OLCol>
+        </OLRow>
         <p className="small">
           {t('already_subscribed_try_refreshing_the_page')}
         </p>
         {project.owner && (
-          <Row className="text-center">
+          <div className="text-center">
             {project.owner._id === user.id ? (
               user.allowedFreeTrial ? (
-                <Button
-                  bsStyle={null}
-                  className="btn-primary"
+                <OLButton
+                  variant="primary"
                   onClick={() => startFreeTrial('track-changes')}
                 >
                   {hasNewPaywallCta
                     ? t('get_track_changes')
                     : t('try_it_for_free')}
-                </Button>
+                </OLButton>
               ) : (
-                <Button
-                  bsStyle={null}
-                  className="btn-primary"
+                <OLButton
+                  variant="primary"
                   onClick={() => upgradePlan('project-sharing')}
                 >
                   {t('upgrade')}
-                </Button>
+                </OLButton>
               )
             ) : (
               <p>
@@ -94,19 +110,15 @@ function UpgradeTrackChangesModal({
                 </strong>
               </p>
             )}
-          </Row>
+          </div>
         )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button
-          bsStyle={null}
-          className="btn-secondary"
-          onClick={() => setShow(false)}
-        >
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={() => setShow(false)}>
           {t('close')}
-        </Button>
-      </Modal.Footer>
-    </AccessibleModal>
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
 

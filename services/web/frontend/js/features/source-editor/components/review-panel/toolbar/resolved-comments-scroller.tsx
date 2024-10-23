@@ -31,7 +31,7 @@ function ResolvedCommentsScroller({
         />
       ))}
       {!resolvedComments.length && (
-        <div className="rp-loading">{t('no_resolved_threads')}</div>
+        <div className="text-center p-1">{t('no_resolved_threads')}</div>
       )}
     </div>
   )

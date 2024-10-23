@@ -13,6 +13,8 @@ import comparePropsWithShallowArrayCompare from '../utils/compare-props-with-sha
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
 import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 interface ChangeEntryProps extends BaseChangeEntryProps {
   type: ReviewPanelChangeEntry['type']
@@ -71,7 +73,14 @@ function ChangeEntry({
         onMouseEnter={handleIndicatorMouseEnter}
         onClick={handleIndicatorClick}
       >
-        {isInsert ? <Icon type="pencil" /> : <i className="rp-icon-delete" />}
+        {isInsert ? (
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="pencil" />}
+            bs5={<MaterialIcon type="edit" />}
+          />
+        ) : (
+          <i className="rp-icon-delete" />
+        )}
       </EntryIndicator>
       <div
         className={classnames('rp-entry', `rp-entry-${type}`, {
@@ -81,7 +90,10 @@ function ChangeEntry({
         <div className="rp-entry-body">
           <div className="rp-entry-action-icon">
             {isInsert ? (
-              <Icon type="pencil" />
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="pencil" />}
+                bs5={<MaterialIcon type="edit" />}
+              />
             ) : (
               <i className="rp-icon-delete" />
             )}
@@ -106,7 +118,7 @@ function ChangeEntry({
                 )}
                 {needsCollapsing && (
                   <button
-                    className="rp-collapse-toggle btn-inline-link"
+                    className="rp-collapse-toggle"
                     onClick={handleToggleCollapse}
                   >
                     {isCollapsed
@@ -137,10 +149,18 @@ function ChangeEntry({
         {permissions.write && (
           <EntryActions>
             <EntryActions.Button onClick={() => rejectChanges(entryIds)}>
-              <Icon type="times" /> {t('reject')}
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="times" />}
+                bs5={<MaterialIcon type="close" />}
+              />
+              &nbsp;{t('reject')}
             </EntryActions.Button>
             <EntryActions.Button onClick={() => acceptChanges(entryIds)}>
-              <Icon type="check" /> {t('accept')}
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="check" />}
+                bs5={<MaterialIcon type="check" />}
+              />
+              &nbsp;{t('accept')}
             </EntryActions.Button>
           </EntryActions>
         )}

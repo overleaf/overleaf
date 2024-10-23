@@ -2,11 +2,11 @@ import Container from './container'
 import Toggler from './toggler'
 import Toolbar from './toolbar/toolbar'
 import Nav from './nav'
-import Icon from '../../../../shared/components/icon'
 import OverviewFile from './overview-file'
 import { useReviewPanelValueContext } from '../../context/review-panel/review-panel-context'
 import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { memo } from 'react'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 
 function OverviewContainer() {
   const { isOverviewLoading } = useReviewPanelValueContext()
@@ -24,9 +24,7 @@ function OverviewContainer() {
         aria-labelledby="review-panel-tab-overview"
       >
         {isOverviewLoading ? (
-          <div className="rp-loading">
-            <Icon type="spinner" spin />
-          </div>
+          <LoadingSpinner className="d-flex justify-content-center my-2" />
         ) : (
           docs?.map(doc => (
             <OverviewFile

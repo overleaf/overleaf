@@ -294,8 +294,8 @@ $editor-toggler-bg-dark-color: color.adjust(
 }
 
 .teaser-video-container {
-  margin: calc(var(--spacing-07) * -1) calc(var(--spacing-07) * -1)
-    var(--spacing-02) calc(var(--spacing-07) * -1);
+  margin: calc(var(--bs-modal-padding) * -1) calc(var(--bs-modal-padding) * -1)
+    var(--spacing-02) calc(var(--bs-modal-padding) * -1);
   overflow: hidden;
 }
 

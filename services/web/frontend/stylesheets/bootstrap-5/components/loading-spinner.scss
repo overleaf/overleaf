@@ -1,4 +1,6 @@
 .loading {
+  display: inline-flex;
+
   .spinner-border-sm,
   .spinner-border {
     // Ensure the thickness of the spinner is independent of the font size of its container

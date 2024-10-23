@@ -11,6 +11,9 @@ import {
   useReviewPanelValueContext,
 } from '../../../context/review-panel/review-panel-context'
 import classnames from 'classnames'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 
 function AddCommentEntry() {
   const { t } = useTranslation()
@@ -116,9 +119,7 @@ function AddCommentEntry() {
           <>
             <div className="rp-new-comment">
               {isSubmitting ? (
-                <div className="rp-loading">
-                  <Icon type="spinner" spin />
-                </div>
+                <LoadingSpinner className="d-flex justify-content-center" />
               ) : (
                 <AutoExpandingTextArea
                   className="rp-comment-input"
@@ -137,19 +138,34 @@ function AddCommentEntry() {
                 className="rp-entry-button-cancel"
                 onClick={handleCancelNewComment}
               >
-                <Icon type="times" /> {t('cancel')}
+                <BootstrapVersionSwitcher
+                  bs3={<Icon type="times" />}
+                  bs5={<MaterialIcon type="close" />}
+                />
+                &nbsp;
+                {t('cancel')}
               </EntryActions.Button>
               <EntryActions.Button
                 onClick={handleSubmitNewComment}
                 disabled={isSubmitting || !content.length}
               >
-                <Icon type="comment" /> {t('comment')}
+                <BootstrapVersionSwitcher
+                  bs3={<Icon type="comment" />}
+                  bs5={<MaterialIcon type="mode_comment" />}
+                />
+                &nbsp;
+                {t('comment')}
               </EntryActions.Button>
             </EntryActions>
           </>
         ) : (
           <AddCommentButton onClick={handleStartNewComment}>
-            <Icon type="comment" /> {t('add_comment')}
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="comment" />}
+              bs5={<MaterialIcon type="mode_comment" />}
+            />
+            &nbsp;
+            {t('add_comment')}
           </AddCommentButton>
         )}
       </div>

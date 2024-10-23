@@ -39,10 +39,7 @@ function LoadingSpinner({
   }
 
   const extraClasses = isBootstrap5()
-    ? [
-        'd-inline-flex',
-        align === 'left' ? 'align-items-start' : 'align-items-center',
-      ]
+    ? [align === 'left' ? 'align-items-start' : 'align-items-center']
     : null
 
   return (

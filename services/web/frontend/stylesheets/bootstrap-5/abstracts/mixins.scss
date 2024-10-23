@@ -143,3 +143,33 @@
   --link-hover-color: var(--link-hover-color-dark);
   --link-visited-color: var(--link-visited-color-dark);
 }
+
+@mixin triangle($direction, $width, $height, $color) {
+  position: absolute;
+  border-color: transparent;
+  border-style: solid;
+  width: 0;
+  height: 0;
+
+  @if $direction == top {
+    border-width: 0 calc(#{$width} / 2) #{$height} calc(#{$width} / 2);
+    border-bottom-color: $color;
+    border-left-color: transparent;
+    border-right-color: transparent;
+  } @else if $direction == bottom {
+    border-width: #{$height} calc(#{$width} / 2) 0 calc(#{$width} / 2);
+    border-top-color: $color;
+    border-left-color: transparent;
+    border-right-color: transparent;
+  } @else if $direction == right {
+    border-width: calc(#{$height} / 2) 0 calc(#{$height} / 2) #{$width};
+    border-left-color: $color;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+  } @else if $direction == left {
+    border-width: calc(#{$height} / 2) #{$width} calc(#{$height} / 2) 0;
+    border-right-color: $color;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+  }
+}

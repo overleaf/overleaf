@@ -12,6 +12,8 @@ import { BaseChangeEntryProps } from '../types/base-change-entry-props'
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
 import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 interface AggregateChangeEntryProps extends BaseChangeEntryProps {
   replacedContent: string
@@ -80,7 +82,10 @@ function AggregateChangeEntry({
         onMouseEnter={handleIndicatorMouseEnter}
         onClick={handleIndicatorClick}
       >
-        <Icon type="pencil" />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="pencil" />}
+          bs5={<MaterialIcon type="edit" />}
+        />
       </EntryIndicator>
       <div
         className={classnames('rp-entry', 'rp-entry-aggregate', {
@@ -89,7 +94,10 @@ function AggregateChangeEntry({
       >
         <div className="rp-entry-body">
           <div className="rp-entry-action-icon">
-            <Icon type="pencil" />
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="pencil" />}
+              bs5={<MaterialIcon type="edit" />}
+            />
           </div>
           <div className="rp-entry-details">
             <div className="rp-entry-description">
@@ -97,7 +105,7 @@ function AggregateChangeEntry({
               <del className="rp-content-highlight">{deletionContent}</del>
               {deletionNeedsCollapsing && (
                 <button
-                  className="rp-collapse-toggle btn-inline-link"
+                  className="rp-collapse-toggle"
                   onClick={handleDeletionToggleCollapse}
                 >
                   {isDeletionCollapsed
@@ -109,7 +117,7 @@ function AggregateChangeEntry({
               <ins className="rp-content-highlight">{insertionContent}</ins>
               {insertionNeedsCollapsing && (
                 <button
-                  className="rp-collapse-toggle btn-inline-link"
+                  className="rp-collapse-toggle"
                   onClick={handleInsertionToggleCollapse}
                 >
                   {isInsertionCollapsed
@@ -139,10 +147,18 @@ function AggregateChangeEntry({
         {permissions.write && (
           <EntryActions>
             <EntryActions.Button onClick={() => rejectChanges(entryIds)}>
-              <Icon type="times" /> {t('reject')}
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="times" />}
+                bs5={<MaterialIcon type="close" />}
+              />
+              &nbsp;{t('reject')}
             </EntryActions.Button>
             <EntryActions.Button onClick={() => acceptChanges(entryIds)}>
-              <Icon type="check" /> {t('accept')}
+              <BootstrapVersionSwitcher
+                bs3={<Icon type="check" />}
+                bs5={<MaterialIcon type="check" />}
+              />
+              &nbsp;{t('accept')}
             </EntryActions.Button>
           </EntryActions>
         )}

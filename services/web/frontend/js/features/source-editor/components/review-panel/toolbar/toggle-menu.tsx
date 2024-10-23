@@ -10,6 +10,8 @@ import {
 } from '../../../context/review-panel/review-panel-context'
 import { send, sendMB } from '../../../../../infrastructure/event-tracking'
 import classnames from 'classnames'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 const sendAnalytics = () => {
   send('subscription-funnel', 'editor-click-feature', 'real-time-track-changes')
@@ -39,7 +41,7 @@ function ToggleMenu() {
       <span className="review-panel-toolbar-label">
         {wantTrackChanges && (
           <span className="review-panel-toolbar-icon-on">
-            <Icon type="circle" />
+            <span className="track-changes-indicator-circle" />
           </span>
         )}
 
@@ -47,13 +49,18 @@ function ToggleMenu() {
           className="review-panel-toolbar-collapse-button"
           onClick={handleToggleFullTCStateCollapse}
         >
-          {wantTrackChanges ? <TrackChangesOn /> : <TrackChangesOff />}
+          <span>
+            {wantTrackChanges ? <TrackChangesOn /> : <TrackChangesOff />}
+          </span>
           <span
             className={classnames('rp-tc-state-collapse', {
               'rp-tc-state-collapse-on': shouldCollapse,
             })}
           >
-            <Icon type="angle-down" />
+            <BootstrapVersionSwitcher
+              bs3={<Icon type="angle-down" />}
+              bs5={<MaterialIcon type="expand_more" />}
+            />
           </span>
         </button>
       </span>

@@ -16,6 +16,9 @@ import { ReviewPanelCommentEntry } from '../../../../../../../types/review-panel
 import useIndicatorHover from '../hooks/use-indicator-hover'
 import EntryIndicator from './entry-indicator'
 import { useEntryClick } from '@/features/source-editor/components/review-panel/hooks/use-entry-click'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import LoadingSpinner from '@/shared/components/loading-spinner'
 
 type CommentEntryProps = {
   docId: DocId
@@ -120,7 +123,10 @@ function CommentEntry({
           onMouseEnter={handleIndicatorMouseEnter}
           onClick={handleIndicatorClick}
         >
-          <Icon type="comment" />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="comment" />}
+            bs5={<MaterialIcon type="mode_comment" />}
+          />
         </EntryIndicator>
         <div
           className={classnames('rp-entry', 'rp-entry-comment', {
@@ -130,7 +136,7 @@ function CommentEntry({
           ref={entryDivRef}
         >
           {!submitting && (!thread || thread.messages.length === 0) && (
-            <div className="rp-loading">{t('no_comments')}</div>
+            <div className="text-center p-1">{t('no_comments')}</div>
           )}
           <div className="rp-comment-loaded">
             {thread.messages.map(comment => (
@@ -143,9 +149,7 @@ function CommentEntry({
             ))}
           </div>
           {submitting && (
-            <div className="rp-loading">
-              <Icon type="spinner" spin />
-            </div>
+            <LoadingSpinner className="d-flex justify-content-center" />
           )}
           {permissions.comment && (
             <div className="rp-comment-reply">
@@ -163,7 +167,11 @@ function CommentEntry({
           <EntryActions>
             {permissions.comment && permissions.write && (
               <EntryActions.Button onClick={handleAnimateAndCallOnResolve}>
-                <Icon type="inbox" /> {t('resolve')}
+                <BootstrapVersionSwitcher
+                  bs3={<Icon type="inbox" />}
+                  bs5={<MaterialIcon type="inbox" />}
+                />
+                &nbsp;{t('resolve')}
               </EntryActions.Button>
             )}
             {permissions.comment && (
@@ -171,7 +179,11 @@ function CommentEntry({
                 onClick={handleOnReply}
                 disabled={!replyContent.length}
               >
-                <Icon type="reply" /> {t('reply')}
+                <BootstrapVersionSwitcher
+                  bs3={<Icon type="reply" />}
+                  bs5={<MaterialIcon type="reply" />}
+                />
+                &nbsp;{t('reply')}
               </EntryActions.Button>
             )}
           </EntryActions>
