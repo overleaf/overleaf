@@ -1,46 +1,31 @@
 const logger = require('@overleaf/logger')
+const ObjectPersistor = require('@overleaf/object-persistor')
 const Settings = require('@overleaf/settings')
-const fs = require('fs')
-const Path = require('path')
 const { promisify } = require('util')
-const disrequire = require('disrequire')
 const AWS = require('aws-sdk')
+const App = require('../../../app')
+const FileHandler = require('../../../app/js/FileHandler')
 
 logger.logger.level('info')
 
-const fsReaddir = promisify(fs.readdir)
 const sleep = promisify(setTimeout)
 
 class FilestoreApp {
-  constructor() {
-    this.running = false
-    this.initing = false
-  }
-
   async runServer() {
-    if (this.running) {
-      return
-    }
-
-    if (this.initing) {
-      return await this.waitForInit()
-    }
-    this.initing = true
-
-    this.app = await FilestoreApp.requireApp()
-
-    await new Promise((resolve, reject) => {
-      this.server = this.app.listen(
-        Settings.internal.filestore.port,
-        '127.0.0.1',
-        err => {
-          if (err) {
-            return reject(err)
+    if (!this.server) {
+      await new Promise((resolve, reject) => {
+        this.server = App.listen(
+          Settings.internal.filestore.port,
+          '127.0.0.1',
+          err => {
+            if (err) {
+              return reject(err)
+            }
+            resolve()
           }
-          resolve()
-        }
-      )
-    })
+        )
+      })
+    }
 
     if (Settings.filestore.backend === 's3') {
       try {
@@ -51,14 +36,11 @@ class FilestoreApp {
       }
     }
 
-    this.initing = false
-    this.persistor = require('../../../app/js/PersistorManager')
-  }
-
-  async waitForInit() {
-    while (this.initing) {
-      await sleep(1000)
-    }
+    this.persistor = ObjectPersistor({
+      ...Settings.filestore,
+      paths: Settings.path,
+    })
+    FileHandler._TESTONLYSwapPersistorManager(this.persistor)
   }
 
   async stop() {
@@ -104,19 +86,6 @@ class FilestoreApp {
         await sleep(1000)
       }
     }
-  }
-
-  static async requireApp() {
-    // unload the app, as we may be doing this on multiple runs with
-    // different settings, which affect startup in some cases
-    const files = await fsReaddir(Path.resolve(__dirname, '../../../app/js'))
-    files.forEach(file => {
-      disrequire(Path.resolve(__dirname, '../../../app/js', file))
-    })
-    disrequire(Path.resolve(__dirname, '../../../app'))
-    disrequire('@overleaf/object-persistor')
-
-    return require('../../../app')
   }
 }
 

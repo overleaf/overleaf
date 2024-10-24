@@ -1,5 +1,6 @@
 const streamifier = require('streamifier')
 const fetch = require('node-fetch')
+const ObjectPersistor = require('@overleaf/object-persistor')
 
 const { expect } = require('chai')
 
@@ -7,6 +8,7 @@ module.exports = {
   uploadStringToPersistor,
   getStringFromPersistor,
   expectPersistorToHaveFile,
+  expectPersistorToHaveSomeFile,
   expectPersistorNotToHaveFile,
   streamToString,
   getMetric,
@@ -47,6 +49,25 @@ async function getStringFromPersistor(persistor, bucket, key) {
 
 async function expectPersistorToHaveFile(persistor, bucket, key, content) {
   const foundContent = await getStringFromPersistor(persistor, bucket, key)
+  expect(foundContent).to.equal(content)
+}
+
+async function expectPersistorToHaveSomeFile(persistor, bucket, keys, content) {
+  let foundContent
+  for (const key of keys) {
+    try {
+      foundContent = await getStringFromPersistor(persistor, bucket, key)
+      break
+    } catch (err) {
+      if (err instanceof ObjectPersistor.Errors.NotFoundError) {
+        continue
+      }
+      throw err
+    }
+  }
+  if (foundContent === undefined) {
+    expect.fail(`Could not find any of the specified keys: ${keys}`)
+  }
   expect(foundContent).to.equal(content)
 }
 

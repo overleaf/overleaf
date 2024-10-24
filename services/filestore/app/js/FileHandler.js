@@ -1,7 +1,7 @@
 const Settings = require('@overleaf/settings')
 const { callbackify } = require('util')
 const fs = require('fs')
-const PersistorManager = require('./PersistorManager')
+let PersistorManager = require('./PersistorManager')
 const LocalFileWriter = require('./LocalFileWriter')
 const FileConverter = require('./FileConverter')
 const KeyBuilder = require('./KeyBuilder')
@@ -28,6 +28,12 @@ module.exports = {
     getFileSize,
     getDirectorySize,
   },
+}
+
+if (process.env.NODE_ENV === 'test') {
+  module.exports._TESTONLYSwapPersistorManager = _PersistorManager => {
+    PersistorManager = _PersistorManager
+  }
 }
 
 async function copyObject(bucket, sourceKey, destinationKey) {

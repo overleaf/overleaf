@@ -39,14 +39,12 @@
     "aws-sdk": "^2.718.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "disrequire": "^1.1.0",
     "mocha": "^10.2.0",
     "mongodb": "^6.1.0",
     "sandboxed-module": "2.0.4",
     "sinon": "9.0.2",
     "sinon-chai": "^3.7.0",
     "streamifier": "^0.1.1",
-    "timekeeper": "^2.2.0",
     "typescript": "^5.0.4"
   }
 }

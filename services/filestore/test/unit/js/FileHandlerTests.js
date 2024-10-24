@@ -89,7 +89,7 @@ describe('FileHandler', function () {
         },
         fs,
       },
-      globals: { console },
+      globals: { console, process },
     })
   })
 

@@ -12,7 +12,6 @@ const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 const { ObjectId } = require('mongodb')
-const tk = require('timekeeper')
 const ChildProcess = require('child_process')
 
 const fsWriteFile = promisify(fs.writeFile)
@@ -506,11 +505,9 @@ describe('Filestore', function () {
 
       if (backendSettings.backend === 'gcs') {
         describe('when deleting a file in GCS', function () {
-          let fileId, fileUrl, content, error, date
+          let fileId, fileUrl, content, error, dateBefore, dateAfter
 
           beforeEach(async function () {
-            date = new Date()
-            tk.freeze(date)
             fileId = new ObjectId()
             fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
 
@@ -519,12 +516,10 @@ describe('Filestore', function () {
             const readStream = streamifier.createReadStream(content)
             let res = await fetch(fileUrl, { method: 'POST', body: readStream })
             if (!res.ok) throw new Error(res.statusText)
+            dateBefore = new Date()
             res = await fetch(fileUrl, { method: 'DELETE' })
+            dateAfter = new Date()
             if (!res.ok) throw new Error(res.statusText)
-          })
-
-          afterEach(function () {
-            tk.reset()
           })
 
           it('should not throw an error', function () {
@@ -532,10 +527,16 @@ describe('Filestore', function () {
           })
 
           it('should copy the file to the deleted-files bucket', async function () {
-            await TestHelper.expectPersistorToHaveFile(
+            let date = dateBefore
+            const keys = []
+            while (date <= dateAfter) {
+              keys.push(`${projectId}/${fileId}-${date.toISOString()}`)
+              date = new Date(date.getTime() + 1)
+            }
+            await TestHelper.expectPersistorToHaveSomeFile(
               app.persistor,
               `${Settings.filestore.stores.user_files}-deleted`,
-              `${projectId}/${fileId}-${date.toISOString()}`,
+              keys,
               content
             )
           })
