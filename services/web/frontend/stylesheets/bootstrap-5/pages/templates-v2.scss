@@ -129,6 +129,8 @@
 
   .gallery-container {
     --bs-gutter-y: var(--spacing-09);
+
+    align-items: baseline;
   }
 
   .gallery-thumbnail {
@@ -149,9 +151,6 @@
     .thumbnail {
       @include shadow-lg;
 
-      background-color: var(--bg-light-secondary);
-      aspect-ratio: 1 / 1.414; // A4 Paper
-      object-fit: contain;
       border-radius: var(--border-radius-base);
     }
 
