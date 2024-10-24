@@ -329,5 +329,13 @@ describe('<Select />', function () {
       })
       cy.findByText('Demo item 2').should('exist')
     })
+
+    it('should show default text when selected is null', function () {
+      render({
+        selected: null,
+        defaultText: 'Choose an item',
+      })
+      cy.findByText('Choose an item').should('exist')
+    })
   })
 })

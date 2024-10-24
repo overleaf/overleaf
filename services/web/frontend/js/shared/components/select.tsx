@@ -33,7 +33,7 @@ export type SelectProps<T> = {
   defaultText?: string
   // Initial selected item, displayed in the initial render. When both `defaultText`
   // and `defaultItem` are set the latter is ignored.
-  defaultItem?: T
+  defaultItem?: T | null
   // Stringifies an item. The resulting string is rendered as a subtitle in a dropdown option.
   itemToSubtitle?: (item: T | null | undefined) => string
   // Stringifies an item. The resulting string is rendered as a React `key` for each item.
@@ -41,7 +41,7 @@ export type SelectProps<T> = {
   // Callback invoked after the selected item is updated.
   onSelectedItemChanged?: (item: T | null | undefined) => void
   // Optionally directly control the selected item.
-  selected?: T
+  selected?: T | null
   // When `true` item selection is disabled.
   disabled?: boolean
   // Determine which items should be disabled
