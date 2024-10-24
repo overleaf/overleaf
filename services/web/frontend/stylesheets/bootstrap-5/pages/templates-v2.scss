@@ -163,6 +163,7 @@
 
     .caption-description {
       color: var(--neutral-70);
+      margin-bottom: 0;
 
       @include line-clamp;
     }
