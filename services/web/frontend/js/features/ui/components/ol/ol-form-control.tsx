@@ -7,9 +7,12 @@ import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/boots
 type OLFormControlProps = ComponentProps<typeof FormControl> & {
   bs3Props?: Record<string, unknown>
   'data-ol-dirty'?: unknown
+  'main-field'?: any // For the CM6's benefit in the editor search panel
 }
 
-type BS3FormControlProps = ComponentProps<typeof BS3FormControl>
+type BS3FormControlProps = ComponentProps<typeof BS3FormControl> & {
+  'main-field'?: any
+}
 
 const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
   (props, ref) => {
@@ -53,6 +56,7 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
       prepend: rest.prepend,
       append: rest.append,
+      'main-field': rest['main-field'],
       ...bs3Props,
     }
 
