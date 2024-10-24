@@ -15,10 +15,14 @@ module.exports = {
 async function getMetric(filestoreUrl, metric) {
   const res = await fetch(`${filestoreUrl}/metrics`)
   expect(res.status).to.equal(200)
-  const metricRegex = new RegExp(`^${metric}{[^}]+} ([0-9]+)$`, 'm')
+  const metricRegex = new RegExp(`^${metric}{[^}]+} ([0-9]+)$`, 'gm')
   const body = await res.text()
-  const found = metricRegex.exec(body)
-  return parseInt(found ? found[1] : 0) || 0
+  let v = 0
+  // Sum up size="lt-128KiB" and size="gte-128KiB"
+  for (const [, found] of body.matchAll(metricRegex)) {
+    v += parseInt(found, 10) || 0
+  }
+  return v
 }
 
 function streamToString(stream) {
