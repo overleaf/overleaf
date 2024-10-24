@@ -181,8 +181,12 @@
       gap: var(--spacing-04);
 
       .badge-container {
-        display: flex;
-        gap: var(--spacing-04);
+        display: inline-block;
+        text-wrap: nowrap;
+
+        .badge:not(:first-child) {
+          margin-left: var(--spacing-04);
+        }
       }
 
       * {
