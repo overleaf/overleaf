@@ -323,6 +323,10 @@
 
     &.all-tags {
       max-height: none;
+
+      // min-height prevents elements below the tags from moving upwards
+      // when Show More is clicked
+      min-height: 102px;
     }
   }
 
