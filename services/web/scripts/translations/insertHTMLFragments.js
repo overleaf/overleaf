@@ -13,6 +13,9 @@
   localeKey: ['key1', 'key2']
   click_here_to_view_sl_in_lng: ['lngName']
  */
+import TransformLocales from './transformLocales.js'
+import { fileURLToPath } from 'url'
+
 const MAPPING = {
   support_lots_of_features: ['help_guides_link'],
   nothing_to_install_ready_to_go: ['start_now'],
@@ -37,8 +40,6 @@ const MAPPING = {
   click_here_to_view_sl_in_lng: ['lngName'],
 }
 
-const { transformLocales } = require('./transformLocales')
-
 function transformLocale(locale, components) {
   components.forEach((key, idx) => {
     const i18nKey = `__${key}__`
@@ -51,9 +52,12 @@ function transformLocale(locale, components) {
 }
 
 function main() {
-  transformLocales(MAPPING, transformLocale)
+  TransformLocales.transformLocales(MAPPING, transformLocale)
 }
 
-if (require.main === module) {
+if (
+  fileURLToPath(import.meta.url).replace(/\.js$/, '') ===
+  process.argv[1].replace(/\.js$/, '')
+) {
   main()
 }

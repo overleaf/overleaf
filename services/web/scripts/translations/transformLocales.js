@@ -1,5 +1,9 @@
-const Path = require('path')
-const fs = require('fs')
+import Path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'node:url'
+import { loadLocale } from './utils.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const LANGUAGES = [
   'cs',
@@ -24,7 +28,7 @@ const LANGUAGES = [
 const LOCALES = {}
 LANGUAGES.forEach(loadLocales)
 function loadLocales(language) {
-  LOCALES[language] = require(`../../locales/${language}.json`)
+  LOCALES[language] = loadLocale(language)
 }
 
 function transformLocales(mapping, transformLocale) {
@@ -45,6 +49,6 @@ function transformLocales(mapping, transformLocale) {
   })
 }
 
-module.exports = {
+export default {
   transformLocales,
 }

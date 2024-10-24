@@ -1,21 +1,25 @@
-const fs = require('fs')
-const Path = require('path')
+import fs from 'fs'
+import Path from 'path'
+import { fileURLToPath } from 'node:url'
+import { loadLocale } from './utils.js'
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const LOCALES = Path.join(__dirname, '../../locales')
 const SORT_BY_PROGRESS = process.argv.includes('--sort-by-progress')
 
-function count(file) {
-  return Object.keys(require(Path.join(LOCALES, file))).length
+function count(language) {
+  const locale = loadLocale(language)
+  return Object.keys(locale).length
 }
 
 async function main() {
-  const EN = count('en.json')
+  const EN = count('en')
   const rows = []
 
   for (const file of await fs.promises.readdir(LOCALES)) {
     if (file === 'README.md') continue
-    const n = count(file)
     const name = file.replace('.json', '')
+    const n = count(name)
     rows.push({
       name,
       done: n,
@@ -29,7 +33,9 @@ async function main() {
   console.table(rows)
 }
 
-main().catch(error => {
+try {
+  await main()
+} catch (error) {
   console.error(error)
   process.exit(1)
-})
+}

@@ -13,12 +13,13 @@
   localeKey: ['keyLinkOpen', 'keyLinkClose']
   faq_pay_by_invoice_answer: ['payByInvoiceLinkOpen', 'payByInvoiceLinkClose']
  */
+import TransformLocales from './transformLocales.js'
+import { fileURLToPath } from 'url'
+
 const MAPPING = {
   also_provides_free_plan: ['registerLinkOpen', 'registerLinkClose'],
   faq_pay_by_invoice_answer: ['payByInvoiceLinkOpen', 'payByInvoiceLinkClose'],
 }
-
-const { transformLocales } = require('./transformLocales')
 
 function transformLocale(locale, [open, close]) {
   const i18nOpen = `__${open}__`
@@ -30,9 +31,12 @@ function transformLocale(locale, [open, close]) {
 }
 
 function main() {
-  transformLocales(MAPPING, transformLocale)
+  TransformLocales.transformLocales(MAPPING, transformLocale)
 }
 
-if (require.main === module) {
+if (
+  fileURLToPath(import.meta.url).replace(/\.js$/, '') ===
+  process.argv[1].replace(/\.js$/, '')
+) {
   main()
 }

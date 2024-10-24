@@ -1,14 +1,19 @@
-const yargs = require('yargs/yargs')
-const { hideBin } = require('yargs/helpers')
-const Path = require('path')
-const fs = require('fs')
+import yargs from 'yargs/yargs'
+import { hideBin } from 'yargs/helpers'
+import Path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+import Settings from '../../config/settings.defaults.js'
+import Readline from 'readline'
+import { loadLocale as loadTranslations } from './utils.js'
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const LOCALES = Path.join(__dirname, '../../locales')
-const VALID_LOCALES = Object.keys(
-  require('../../config/settings.defaults').translatedLanguages
-).filter(locale => locale !== 'en')
+const VALID_LOCALES = Object.keys(Settings.translatedLanguages).filter(
+  locale => locale !== 'en'
+)
 
-const readline = require('readline').createInterface({
+const readline = Readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 })
@@ -91,12 +96,6 @@ async function translateLocales() {
   }
 }
 
-async function loadTranslations(locale) {
-  return JSON.parse(
-    fs.readFileSync(Path.join(LOCALES, `${locale}.json`), 'utf-8')
-  )
-}
-
 function prompt(text) {
   return new Promise((resolve, reject) =>
     readline.question(text, value => {
@@ -105,11 +104,10 @@ function prompt(text) {
   )
 }
 
-translateLocales()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+try {
+  await translateLocales()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

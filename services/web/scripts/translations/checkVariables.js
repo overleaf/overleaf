@@ -1,10 +1,13 @@
-const fs = require('fs')
-const Path = require('path')
+import fs from 'fs'
+import Path from 'path'
+import { fileURLToPath } from 'node:url'
+import { loadLocale } from './utils.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const GLOBALS = ['__appName__']
 const LOCALES = Path.join(__dirname, '../../locales')
-const baseLocalePath = Path.join(LOCALES, 'en.json')
-const baseLocale = JSON.parse(fs.readFileSync(baseLocalePath, 'utf-8'))
+const baseLocale = loadLocale('en')
 const baseLocaleKeys = Object.keys(baseLocale)
 
 const IGNORE_ORPHANED_TRANSLATIONS = process.argv.includes(
@@ -41,9 +44,7 @@ function difference(key, base, target) {
 let violations = 0
 for (const localeName of fs.readdirSync(LOCALES)) {
   if (localeName === 'README.md') continue
-  const localePath = Path.join(LOCALES, localeName)
-
-  const locale = JSON.parse(fs.readFileSync(localePath, 'utf-8'))
+  const locale = loadLocale(localeName.replace('.json', ''))
 
   for (const key of Object.keys(locale)) {
     if (!baseLocaleKeys.includes(key)) {

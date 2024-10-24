@@ -1,8 +1,13 @@
-const Path = require('path')
-const { promises: fs } = require('fs')
-const { promisify } = require('util')
-const oneSky = require('@brainly/onesky-utils')
-const { withAuth } = require('./config')
+import Path from 'path'
+import { promises as fs } from 'fs'
+import { promisify } from 'util'
+import oneSky from '@brainly/onesky-utils'
+import Config from './config.js'
+import { fileURLToPath } from 'url'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+
+const { withAuth } = Config
 
 const sleep = promisify(setTimeout)
 
@@ -58,7 +63,9 @@ async function main() {
   }
 }
 
-main().catch(error => {
+try {
+  await main()
+} catch (error) {
   console.error({ error })
   process.exit(1)
-})
+}

@@ -1,5 +1,8 @@
-const fs = require('fs')
-const Path = require('path')
+import fs from 'fs'
+import Path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const LOCALES = Path.join(__dirname, '../../locales')
 const CHECK = process.argv.includes('--check')
@@ -30,7 +33,9 @@ async function main() {
   }
 }
 
-main().catch(error => {
+try {
+  await main()
+} catch (error) {
   console.error(error)
   process.exit(1)
-})
+}

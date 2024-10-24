@@ -1,7 +1,10 @@
-const fs = require('fs')
-const Path = require('path')
-const { execSync } = require('child_process')
+import fs from 'fs'
+import Path from 'path'
+import { execSync } from 'child_process'
+import { fileURLToPath } from 'node:url'
+import { loadLocale } from './utils.js'
 
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const EN_JSON = Path.join(__dirname, '../../locales/en.json')
 const CHECK = process.argv.includes('--check')
 const SYNC_NON_EN = process.argv.includes('--sync-non-en')
@@ -17,7 +20,7 @@ const COUNT_SUFFIXES = [
 ]
 
 async function main() {
-  const locales = JSON.parse(await fs.promises.readFile(EN_JSON, 'utf-8'))
+  const locales = loadLocale('en')
 
   const src = execSync(
     // - find all the app source files in web
@@ -112,7 +115,7 @@ async function main() {
       if (name === 'README.md') continue
       if (name === 'en.json') continue
       const path = Path.join(LOCALES, name)
-      const locales = JSON.parse(await fs.promises.readFile(path, 'utf-8'))
+      const locales = loadLocale(name.replace('.json', ''))
       for (const key of Object.keys(locales)) {
         if (!found.has(key)) {
           delete locales[key]
@@ -154,7 +157,9 @@ async function main() {
   await fs.promises.writeFile(EN_JSON, sorted)
 }
 
-main().catch(error => {
+try {
+  await main()
+} catch (error) {
   console.error(error)
   process.exit(1)
-})
+}

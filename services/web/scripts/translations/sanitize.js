@@ -1,4 +1,4 @@
-const sanitizeHtml = require('sanitize-html')
+import sanitizeHtml from 'sanitize-html'
 
 /**
  * Sanitize a translation string to prevent injection attacks
@@ -43,4 +43,4 @@ function sanitize(input) {
   )
 }
 
-module.exports = { sanitize }
+export default { sanitize }

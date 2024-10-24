@@ -1,7 +1,13 @@
+import fs from 'fs'
+import Path from 'path'
+import { fileURLToPath } from 'url'
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const ONESKY_SETTING_PATH = Path.join(__dirname, '../../data/onesky.json')
 let userOptions
 try {
-  userOptions = require('../../data/onesky.json')
+  userOptions = JSON.parse(fs.readFileSync(ONESKY_SETTING_PATH))
 } catch (err) {
+  if (err.code !== 'ENOENT') throw err
   if (!process.env.ONE_SKY_PUBLIC_KEY) {
     console.error(
       'Cannot detect onesky credentials.\n\tDevelopers: see the docs at',
@@ -24,6 +30,6 @@ function withAuth(options) {
   )
 }
 
-module.exports = {
+export default {
   withAuth,
 }
