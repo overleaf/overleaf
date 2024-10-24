@@ -1,7 +1,6 @@
 import { FC, useCallback } from 'react'
 import useIsMounted from '@/shared/hooks/use-is-mounted'
 import { useFileTreePathContext } from '@/features/file-tree/contexts/file-tree-path'
-import { debugConsole } from '@/utils/debugging'
 
 const FileViewPdf: FC<{
   fileId: string
@@ -21,7 +20,6 @@ const FileViewPdf: FC<{
 
         // bail out if loading PDF.js took too long
         if (!mountedRef.current) {
-          onError()
           return
         }
 
@@ -37,7 +35,6 @@ const FileViewPdf: FC<{
 
         // bail out if loading the PDF took too long
         if (!mountedRef.current) {
-          onError()
           return
         }
 
@@ -47,6 +44,12 @@ const FileViewPdf: FC<{
 
         for (let i = 1; i <= pdf.numPages; i++) {
           const page = await pdf.getPage(i)
+
+          // bail out if the component has been unmounted
+          if (!mountedRef.current) {
+            return
+          }
+
           const viewport = page.getViewport({ scale })
 
           const canvas = document.createElement('canvas')
@@ -64,11 +67,6 @@ const FileViewPdf: FC<{
         }
 
         onLoad()
-
-        return () => {
-          pdf.cleanup().catch(debugConsole.error)
-          pdf.destroy()
-        }
       }
     },
     [mountedRef, pathInFolder, fileId, previewByPath, onLoad, onError]

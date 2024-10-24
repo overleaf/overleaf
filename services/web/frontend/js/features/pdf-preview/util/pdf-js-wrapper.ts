@@ -1,6 +1,5 @@
 import { captureException } from '@/infrastructure/error-reporter'
 import { generatePdfCachingTransportFactory } from './pdf-caching-transport'
-import { debugConsole } from '@/utils/debugging'
 import { PDFJS, loadPdfDocumentFromUrl, imageResourcesPath } from './pdf-js'
 import {
   PDFViewer,
@@ -13,12 +12,11 @@ import 'pdfjs-dist/web/pdf_viewer.css'
 const DEFAULT_RANGE_CHUNK_SIZE = 128 * 1024 // 128K chunks
 
 export default class PDFJSWrapper {
-  private loadDocumentTask: PDFJS.PDFDocumentLoadingTask | undefined
-
   public readonly viewer: PDFViewer
   public readonly eventBus: EventBus
   private readonly linkService: PDFLinkService
   private readonly pdfCachingTransportFactory: any
+  private url?: string
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public container: HTMLDivElement) {
@@ -49,7 +47,7 @@ export default class PDFJSWrapper {
   }
 
   // load a document from a URL
-  loadDocument({
+  async loadDocument({
     url,
     pdfFile,
     abortController,
@@ -60,61 +58,45 @@ export default class PDFJSWrapper {
     abortController: AbortController
     handleFetchError: (error: Error) => void
   }) {
-    // cancel any previous loading task
-    if (this.loadDocumentTask) {
-      this.loadDocumentTask.destroy().catch(debugConsole.error)
-      this.loadDocumentTask = undefined
+    this.url = url
+
+    const rangeTransport = this.pdfCachingTransportFactory({
+      url,
+      pdfFile,
+      abortController,
+      handleFetchError,
+    })
+    let rangeChunkSize = DEFAULT_RANGE_CHUNK_SIZE
+    if (rangeTransport && pdfFile.size < 2 * DEFAULT_RANGE_CHUNK_SIZE) {
+      // pdf.js disables the "bulk" download optimization when providing a
+      //  custom range transport. Restore it by bumping the chunk size.
+      rangeChunkSize = pdfFile.size
     }
 
-    return new Promise<PDFJS.PDFDocumentProxy>((resolve, reject) => {
-      const rangeTransport = this.pdfCachingTransportFactory({
-        url,
-        pdfFile,
-        abortController,
-        handleFetchError,
-      })
-      let rangeChunkSize = DEFAULT_RANGE_CHUNK_SIZE
-      if (rangeTransport && pdfFile.size < 2 * DEFAULT_RANGE_CHUNK_SIZE) {
-        // pdf.js disables the "bulk" download optimization when providing a
-        //  custom range transport. Restore it by bumping the chunk size.
-        rangeChunkSize = pdfFile.size
-      }
-      this.loadDocumentTask = loadPdfDocumentFromUrl(url, {
+    try {
+      const doc = await loadPdfDocumentFromUrl(url, {
         rangeChunkSize,
         range: rangeTransport,
-      })
+      }).promise
 
-      this.loadDocumentTask.promise
-        .then(doc => {
-          if (!this.loadDocumentTask || !this.viewer) {
-            return // ignoring the response since loading task has been aborted
-          }
+      // check that this is still the current URL
+      if (url !== this.url) {
+        return
+      }
 
-          const previousDoc = this.viewer.pdfDocument
-          this.viewer.setDocument(doc)
-          this.linkService.setDocument(doc)
-          resolve(doc)
+      this.viewer.setDocument(doc)
+      this.linkService.setDocument(doc)
 
-          if (previousDoc) {
-            previousDoc.cleanup().catch(debugConsole.error)
-            previousDoc.destroy().catch(debugConsole.error)
-          }
+      return doc
+    } catch (error: any) {
+      if (!error || error.name !== 'MissingPDFException') {
+        captureException(error, {
+          tags: { handler: 'pdf-preview' },
         })
-        .catch(error => {
-          if (this.loadDocumentTask) {
-            if (!error || error.name !== 'MissingPDFException') {
-              captureException(error, {
-                tags: { handler: 'pdf-preview' },
-              })
-            }
+      }
 
-            reject(error)
-          }
-        })
-        .finally(() => {
-          this.loadDocumentTask = undefined
-        })
-    })
+      throw error
+    }
   }
 
   // update the current scale value if the container size changes
@@ -215,15 +197,5 @@ export default class PDFJSWrapper {
 
   isVisible() {
     return this.viewer.container.offsetParent !== null
-  }
-
-  abortDocumentLoading() {
-    this.loadDocumentTask = undefined
-  }
-
-  async destroy() {
-    await this.loadDocumentTask?.destroy().catch(debugConsole.error)
-    this.loadDocumentTask = undefined
-    await this.viewer.pdfDocument?.destroy().catch(debugConsole.error)
   }
 }

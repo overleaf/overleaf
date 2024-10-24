@@ -64,23 +64,22 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
   const handleContainer = useCallback(
     parent => {
       if (parent) {
-        let wrapper: PDFJSWrapper | undefined
         try {
-          wrapper = new PDFJSWrapper(parent.firstChild)
-          setPdfJsWrapper(wrapper)
+          setPdfJsWrapper(new PDFJSWrapper(parent.firstChild))
         } catch (error: any) {
           setLoadingError(true)
           captureException(error)
-        }
-
-        return () => {
-          setPdfJsWrapper(null)
-          wrapper?.destroy().catch(debugConsole.error)
         }
       }
     },
     [setLoadingError]
   )
+
+  useEffect(() => {
+    return () => {
+      setPdfJsWrapper(null)
+    }
+  }, [])
 
   const [startFetch, setStartFetch] = useState(0)
 
@@ -181,7 +180,9 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
       pdfJsWrapper
         .loadDocument({ url, pdfFile, abortController, handleFetchError })
         .then(doc => {
-          setTotalPages(doc.numPages)
+          if (doc) {
+            setTotalPages(doc.numPages)
+          }
         })
         .catch(error => {
           if (abortController.signal.aborted) return
@@ -190,7 +191,6 @@ function PdfJsViewer({ url, pdfFile }: PdfJsViewerProps) {
         })
       return () => {
         abortController.abort()
-        pdfJsWrapper.abortDocumentLoading()
       }
     }
   }, [pdfJsWrapper, url, pdfFile, setError, setStartFetch])
