@@ -235,6 +235,10 @@
     }
   }
 
+  .recent-docs + .featured-docs {
+    margin-top: var(--spacing-16);
+  }
+
   .gallery-item-title {
     display: inline-flex;
     gap: var(--spacing-06);
