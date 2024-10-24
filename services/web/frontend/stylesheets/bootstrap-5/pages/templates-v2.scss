@@ -147,11 +147,12 @@
     }
 
     .thumbnail {
+      @include shadow-lg;
+
       background-color: var(--bg-light-secondary);
       aspect-ratio: 1 / 1.414; // A4 Paper
       object-fit: contain;
       border-radius: var(--border-radius-base);
-      box-shadow: 0 var(--spacing-01) var(--spacing-02) rgb(0 0 0 / 10%);
     }
 
     .caption {
