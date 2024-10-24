@@ -1,4 +1,3 @@
-const PersistorManager = require('./PersistorManager')
 const FileHandler = require('./FileHandler')
 const metrics = require('@overleaf/metrics')
 const parseRange = require('range-parser')
@@ -139,17 +138,17 @@ function copyFile(req, res, next) {
   })
   req.requestLogger.setMessage('copying file')
 
-  PersistorManager.copyObject(bucket, `${oldProjectId}/${oldFileId}`, key)
-    .then(() => res.sendStatus(200))
-    .catch(err => {
-      if (err) {
-        if (err instanceof Errors.NotFoundError) {
-          res.sendStatus(404)
-        } else {
-          next(err)
-        }
+  FileHandler.copyObject(bucket, `${oldProjectId}/${oldFileId}`, key, err => {
+    if (err) {
+      if (err instanceof Errors.NotFoundError) {
+        res.sendStatus(404)
+      } else {
+        next(err)
       }
-    })
+    } else {
+      res.sendStatus(200)
+    }
+  })
 }
 
 function deleteFile(req, res, next) {

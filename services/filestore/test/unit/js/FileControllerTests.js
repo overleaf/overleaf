@@ -6,14 +6,7 @@ const Errors = require('../../../app/js/Errors')
 const modulePath = '../../../app/js/FileController.js'
 
 describe('FileController', function () {
-  let PersistorManager,
-    FileHandler,
-    LocalFileWriter,
-    FileController,
-    req,
-    res,
-    next,
-    stream
+  let FileHandler, LocalFileWriter, FileController, req, res, next, stream
   const settings = {
     s3: {
       buckets: {
@@ -32,13 +25,8 @@ describe('FileController', function () {
   const error = new Error('incorrect utensil')
 
   beforeEach(function () {
-    PersistorManager = {
-      sendStream: sinon.stub().yields(),
-      copyObject: sinon.stub().resolves(),
-      deleteObject: sinon.stub().yields(),
-    }
-
     FileHandler = {
+      copyObject: sinon.stub().yields(),
       getFile: sinon.stub().yields(null, fileStream),
       getFileSize: sinon.stub().yields(null, fileSize),
       deleteFile: sinon.stub().yields(),
@@ -57,7 +45,6 @@ describe('FileController', function () {
       requires: {
         './LocalFileWriter': LocalFileWriter,
         './FileHandler': FileHandler,
-        './PersistorManager': PersistorManager,
         './Errors': Errors,
         stream,
         '@overleaf/settings': settings,
@@ -239,7 +226,7 @@ describe('FileController', function () {
   })
 
   describe('insertFile', function () {
-    it('should send bucket name key and res to PersistorManager', function (done) {
+    it('should send bucket name key and res to FileHandler', function (done) {
       res.sendStatus = code => {
         expect(FileHandler.insertFile).to.have.been.calledWith(bucket, key, req)
         expect(code).to.equal(200)
@@ -263,10 +250,10 @@ describe('FileController', function () {
       }
     })
 
-    it('should send bucket name and both keys to PersistorManager', function (done) {
+    it('should send bucket name and both keys to FileHandler', function (done) {
       res.sendStatus = code => {
         code.should.equal(200)
-        expect(PersistorManager.copyObject).to.have.been.calledWith(
+        expect(FileHandler.copyObject).to.have.been.calledWith(
           bucket,
           oldKey,
           key
@@ -277,7 +264,7 @@ describe('FileController', function () {
     })
 
     it('should send a 404 if the original file was not found', function (done) {
-      PersistorManager.copyObject.rejects(
+      FileHandler.copyObject.yields(
         new Errors.NotFoundError({ message: 'not found', info: {} })
       )
       res.sendStatus = code => {
@@ -288,7 +275,7 @@ describe('FileController', function () {
     })
 
     it('should send an error if there was an error', function (done) {
-      PersistorManager.copyObject.rejects(error)
+      FileHandler.copyObject.yields(error)
       FileController.copyFile(req, res, err => {
         expect(err).to.equal(error)
         done()

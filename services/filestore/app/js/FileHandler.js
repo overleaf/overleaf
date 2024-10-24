@@ -10,6 +10,7 @@ const { ConversionError, InvalidParametersError } = require('./Errors')
 const metrics = require('@overleaf/metrics')
 
 module.exports = {
+  copyObject: callbackify(copyObject),
   insertFile: callbackify(insertFile),
   deleteFile: callbackify(deleteFile),
   deleteProject: callbackify(deleteProject),
@@ -18,6 +19,7 @@ module.exports = {
   getFileSize: callbackify(getFileSize),
   getDirectorySize: callbackify(getDirectorySize),
   promises: {
+    copyObject,
     getFile,
     getRedirectUrl,
     insertFile,
@@ -26,6 +28,10 @@ module.exports = {
     getFileSize,
     getDirectorySize,
   },
+}
+
+async function copyObject(bucket, sourceKey, destinationKey) {
+  await PersistorManager.copyObject(bucket, sourceKey, destinationKey)
 }
 
 async function insertFile(bucket, key, stream) {
