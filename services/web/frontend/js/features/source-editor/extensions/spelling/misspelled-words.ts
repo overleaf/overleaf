@@ -1,4 +1,4 @@
-import { StateField, StateEffect } from '@codemirror/state'
+import { StateField, StateEffect, Line } from '@codemirror/state'
 import { EditorView, Decoration, DecorationSet } from '@codemirror/view'
 import { updateAfterAddingIgnoredWord } from './ignored-words'
 import { Word } from './spellchecker'
@@ -36,9 +36,27 @@ export const misspelledWordsField = StateField.define<DecorationSet>({
 
     for (const effect of transaction.effects) {
       if (effect.is(addMisspelledWords)) {
+        const { doc } = transaction.state
+
+        // collect the lines that contained mispelled words, so existing marks can be removed
+        const affectedLines = new Map<number, Line>()
+        for (const word of effect.value) {
+          if (!affectedLines.has(word.lineNumber)) {
+            affectedLines.set(word.lineNumber, doc.line(word.lineNumber))
+          }
+        }
+
         // Merge the new misspelled words into the existing set of marks
         marks = marks.update({
-          add: effect.value.map(word => createMark(word)), // TODO: make sure these positions are still accurate
+          filter(from, to) {
+            for (const line of affectedLines.values()) {
+              if (to > line.from && from < line.to) {
+                return false
+              }
+            }
+            return true
+          },
+          add: effect.value.map(word => createMark(word)),
           sort: true,
         })
       } else if (effect.is(updateAfterAddingIgnoredWord)) {
