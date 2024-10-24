@@ -49,9 +49,6 @@ async function insertFile(bucket, key, stream) {
       convertedKey,
     })
   }
-  if (Settings.enableConversions) {
-    await PersistorManager.deleteDirectory(bucket, convertedKey)
-  }
   await PersistorManager.sendStream(bucket, key, stream)
 }
 
@@ -65,7 +62,10 @@ async function deleteFile(bucket, key) {
     })
   }
   const jobs = [PersistorManager.deleteObject(bucket, key)]
-  if (Settings.enableConversions) {
+  if (
+    Settings.enableConversions &&
+    bucket === Settings.filestore.stores.template_files
+  ) {
     jobs.push(PersistorManager.deleteDirectory(bucket, convertedKey))
   }
   await Promise.all(jobs)

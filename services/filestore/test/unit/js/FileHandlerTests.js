@@ -67,7 +67,11 @@ describe('FileHandler', function () {
         compressPng: sinon.stub().resolves(),
       },
     }
-    Settings = {}
+    Settings = {
+      filestore: {
+        stores: { template_files: 'template_files', user_files: 'user_files' },
+      },
+    }
     fs = {
       createReadStream: sinon.stub().returns(readStream),
     }
@@ -133,23 +137,6 @@ describe('FileHandler', function () {
         done()
       })
     })
-
-    describe('when conversions are enabled', function () {
-      beforeEach(function () {
-        Settings.enableConversions = true
-      })
-
-      it('should delete the convertedKey folder', function (done) {
-        FileHandler.insertFile(bucket, key, stream, err => {
-          expect(err).not.to.exist
-          expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
-            bucket,
-            convertedFolderKey
-          )
-          done()
-        })
-      })
-    })
   })
 
   describe('deleteFile', function () {
@@ -195,15 +182,31 @@ describe('FileHandler', function () {
         Settings.enableConversions = true
       })
 
-      it('should delete the convertedKey folder', function (done) {
-        FileHandler.deleteFile(bucket, key, err => {
-          expect(err).not.to.exist
-          expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
-            bucket,
-            convertedFolderKey
-          )
-          done()
-        })
+      it('should delete the convertedKey folder for template files', function (done) {
+        FileHandler.deleteFile(
+          Settings.filestore.stores.template_files,
+          key,
+          err => {
+            expect(err).not.to.exist
+            expect(PersistorManager.deleteDirectory).to.have.been.calledWith(
+              Settings.filestore.stores.template_files,
+              convertedFolderKey
+            )
+            done()
+          }
+        )
+      })
+
+      it('should not delete the convertedKey folder for user files', function (done) {
+        FileHandler.deleteFile(
+          Settings.filestore.stores.user_files,
+          key,
+          err => {
+            expect(err).not.to.exist
+            expect(PersistorManager.deleteDirectory).to.not.have.been.called
+            done()
+          }
+        )
       })
     })
   })
