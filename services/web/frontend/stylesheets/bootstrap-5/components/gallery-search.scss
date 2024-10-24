@@ -48,6 +48,10 @@
           img {
             width: 185px;
             box-shadow: 0 2px 4px 0 rgba(30 37 48 / 16%);
+
+            @include media-breakpoint-down(sm) {
+              width: 35vw;
+            }
           }
         }
       }
@@ -55,10 +59,17 @@
       .search-title {
         margin-bottom: var(--spacing-04);
         max-width: $templates-search-max-width;
+        display: flex;
+        align-items: center;
 
         a {
           @include heading-md;
 
+          line-clamp: 2;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow-y: hidden;
           color: var(--content-primary);
           text-decoration: none;
 
@@ -90,6 +101,7 @@
         margin: 0;
         padding-left: 0;
         display: flex;
+        flex-wrap: wrap;
         gap: var(--spacing-04);
 
         li a {
