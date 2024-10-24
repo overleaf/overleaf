@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * Checks that all institutional sso provider certs are still current with the
  * data provided by the ukamf export file.
@@ -10,18 +8,13 @@
  *     http://metadata.ukfederation.org.uk/
  */
 
-const { Certificate } = require('@fidm/x509')
-const UKAMFDB = require('./ukamf-db')
-const V1Api = require('../../app/src/Features/V1/V1Api').promises
-const { db, waitForDb } = require('../../app/src/infrastructure/mongodb')
-const moment = require('moment')
+import { Certificate } from '@fidm/x509'
+import UKAMFDB from './ukamf-db.js'
+import V1ApiModule from '../../app/src/Features/V1/V1Api.js'
+import { db, waitForDb } from '../../app/src/infrastructure/mongodb.js'
+import moment from 'moment'
 
-waitForDb()
-  .then(main)
-  .catch(err => {
-    console.error(err.stack)
-  })
-  .then(() => process.exit())
+const { promises: V1Api } = V1ApiModule
 
 async function main() {
   const [, , file] = process.argv
@@ -96,3 +89,11 @@ async function getActiveProviderIds() {
     'samlIdentifiers.externalUserId': { $exists: true },
   })
 }
+
+try {
+  await waitForDb()
+  await main()
+} catch (error) {
+  console.error(error.stack)
+}
+process.exit()

@@ -1,9 +1,6 @@
-'use strict'
-
-const fs = require('fs-extra')
-const xml2js = require('xml2js')
-
-const UKAMFEntity = require('./ukamf-entity')
+import fs from 'fs-extra'
+import xml2js from 'xml2js'
+import UKAMFEntity from './ukamf-entity.js'
 
 class UKAMFDB {
   constructor(file) {
@@ -28,4 +25,4 @@ class UKAMFDB {
   }
 }
 
-module.exports = UKAMFDB
+export default UKAMFDB

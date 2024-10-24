@@ -1,6 +1,4 @@
-'use strict'
-
-const _ = require('lodash')
+import _ from 'lodash'
 
 class UKAMFEntity {
   constructor(data) {
@@ -68,4 +66,4 @@ class UKAMFEntity {
   }
 }
 
-module.exports = UKAMFEntity
+export default UKAMFEntity

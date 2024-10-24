@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * Run with: node metadata-processor /path/ukamf.xml http://idp/entity/id
  *
@@ -11,14 +9,9 @@
  * The entity id should be provided by the university.
  */
 
-const { Certificate } = require('@fidm/x509')
-const moment = require('moment')
-
-const UKAMFDB = require('./ukamf-db')
-
-main().catch(err => {
-  console.error(err.stack)
-})
+import { Certificate } from '@fidm/x509'
+import moment from 'moment'
+import UKAMFDB from './ukamf-db.js'
 
 async function main() {
   const [, , file, entityId] = process.argv
@@ -70,4 +63,10 @@ async function main() {
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
   }
+}
+
+try {
+  await main()
+} catch (error) {
+  console.error(error)
 }
