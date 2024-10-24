@@ -1,5 +1,6 @@
 import { StateEffect, StateField } from '@codemirror/state'
 import { EditorView, showPanel } from '@codemirror/view'
+import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 
 const toggleToolbarEffect = StateEffect.define<boolean>()
 const toolbarState = StateField.define<boolean>({
@@ -116,7 +117,7 @@ const toolbarTheme = EditorView.theme({
     margin: '0 1px',
     backgroundColor: 'transparent',
     border: 'none',
-    borderRadius: '1px',
+    borderRadius: isBootstrap5() ? 'var(--border-radius-base)' : '1px',
     lineHeight: '1',
     width: '24px',
     height: '24px',
@@ -176,7 +177,7 @@ const toolbarTheme = EditorView.theme({
     border: 'none',
     whiteSpace: 'nowrap',
     color: 'inherit',
-    borderRadius: '0',
+    borderRadius: isBootstrap5() ? 'var(--border-radius-base)' : '0',
     opacity: 0.8,
     width: '120px',
     fontSize: '13px',

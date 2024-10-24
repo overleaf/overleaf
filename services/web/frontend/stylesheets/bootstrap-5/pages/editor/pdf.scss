@@ -242,6 +242,10 @@
   gap: var(--spacing-04);
   margin-left: var(--spacing-04);
   margin-right: var(--spacing-04);
+
+  .btn {
+    border-radius: var(--border-radius-base) !important;
+  }
 }
 
 .pdfjs-toolbar-button {

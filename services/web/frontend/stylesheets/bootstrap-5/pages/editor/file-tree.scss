@@ -45,6 +45,31 @@
   }
 }
 
+@include theme('default') {
+  .file-tree {
+    .toolbar {
+      .toolbar-right,
+      .toolbar-left {
+        button {
+          opacity: 0.8;
+
+          &:hover,
+          &:focus,
+          &:active,
+          &.active {
+            background-color: rgba(125 125 125 / 20%);
+          }
+
+          &.active,
+          &:active {
+            background-color: rgba(125 125 125 / 40%);
+          }
+        }
+      }
+    }
+  }
+}
+
 .file-tree {
   display: flex !important; // To work around jQuery layout's inline styles
   flex-direction: column;
@@ -71,6 +96,36 @@
     border-bottom: 1px solid var(--border-primary);
     padding-bottom: var(--spacing-02);
     margin: var(--spacing-05);
+  }
+
+  .toolbar {
+    .toolbar-right,
+    .toolbar-left {
+      button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        box-shadow: none;
+        border-radius: var(--border-radius-base);
+        border: none;
+
+        &:hover,
+        &:focus,
+        &:active,
+        &.active {
+          background-color: rgb(125 125 125 / 10%);
+          color: var(--toolbar-btn-color) !important;
+        }
+
+        &.active,
+        &:active {
+          background-color: rgb(125 125 125 / 20%);
+        }
+      }
+    }
   }
 
   &-history {
