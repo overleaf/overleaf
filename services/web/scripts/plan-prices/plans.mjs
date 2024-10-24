@@ -1,10 +1,15 @@
 // Creates data for localizedPlanPricing object in settings.overrides.saas.js
 // and plans object in main/plans.js
 
-const csv = require('csv/sync')
-const fs = require('fs')
-const path = require('path')
-const minimist = require('minimist')
+// https://github.com/import-js/eslint-plugin-import/issues/1810
+// eslint-disable-next-line import/no-unresolved
+import * as csv from 'csv/sync'
+import fs from 'fs'
+import path from 'path'
+import minimist from 'minimist'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function readCSVFile(fileName) {
   // Pick the csv file
@@ -156,7 +161,7 @@ if (argv.file) {
       console.log('Invalid file type: must be csv or json')
   }
 } else {
-  console.log('usage: node plans.js -f <file.csv|file.json> -o <dir>')
+  console.log('usage: node plans.mjs -f <file.csv|file.json> -o <dir>')
   process.exit(1)
 }
 // removes quotes from object keys

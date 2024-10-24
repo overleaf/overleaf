@@ -1,8 +1,10 @@
-const minimist = require('minimist')
-const { promisify } = require('util')
-const bcrypt = require('bcrypt')
-const { promiseMapWithLimit } = require('@overleaf/promise-utils')
-const csv = require('csv/sync')
+import minimist from 'minimist'
+import { promisify } from 'util'
+import bcrypt from 'bcrypt'
+import { promiseMapWithLimit } from '@overleaf/promise-utils'
+// https://github.com/import-js/eslint-plugin-import/issues/1810
+// eslint-disable-next-line import/no-unresolved
+import * as csv from 'csv/sync'
 
 const bcryptCompare = promisify(bcrypt.compare)
 const bcryptGenSalt = promisify(bcrypt.genSalt)
@@ -111,11 +113,10 @@ async function main() {
   if (argv.csv) console.log(csv.stringify(STATS, { header: true }))
 }
 
-main()
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

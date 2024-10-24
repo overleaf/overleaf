@@ -1,9 +1,9 @@
-const fs = require('fs')
-const { setTimeout } = require('timers/promises')
-const csv = require('csv')
-const minimist = require('minimist')
-const recurly = require('recurly')
-const Settings = require('@overleaf/settings')
+import fs from 'fs'
+import { setTimeout } from 'timers/promises'
+import * as csv from 'csv'
+import minimist from 'minimist'
+import recurly from 'recurly'
+import Settings from '@overleaf/settings'
 
 const recurlyClient = new recurly.Client(Settings.apis.recurly.apiKey)
 
@@ -206,7 +206,7 @@ function parseArgs() {
 }
 
 function usage() {
-  console.error(`Usage: node scripts/recurly/change_prices_at_renewal.js [OPTS] [INPUT-FILE]
+  console.error(`Usage: node scripts/recurly/change_prices_at_renewal.mjs [OPTS] [INPUT-FILE]
 
 Options:
 
@@ -222,7 +222,9 @@ class ReportError extends Error {
   }
 }
 
-main().catch(err => {
-  console.error(err)
+try {
+  await main()
+} catch (error) {
+  console.error(error)
   process.exit(1)
-})
+}

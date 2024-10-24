@@ -1,11 +1,14 @@
-const { checkSanitizeOptions } = require('./checkSanitizeOptions')
-const { getAllPagesAndCache, scrapeAndCachePage } = require('./scrape')
+import checkSanitizeOptions from './checkSanitizeOptions.mjs'
+import Scrape from './scrape.mjs'
+import { fileURLToPath } from 'url'
+
+const { getAllPagesAndCache, scrapeAndCachePage } = Scrape
 
 async function main() {
   const BASE_URL = process.argv.pop()
   if (!BASE_URL.startsWith('http')) {
     throw new Error(
-      'Usage: node scripts/learn/checkSanitize https://LEARN_WIKI'
+      'Usage: node scripts/learn/checkSanitize/index.mjs https://LEARN_WIKI'
     )
   }
 
@@ -27,9 +30,12 @@ async function main() {
   }
 }
 
-if (require.main === module) {
-  main().catch(err => {
-    console.error(err)
+if (fileURLToPath(import.meta.url) === process.argv[1]) {
+  try {
+    await main()
+    process.exit(0)
+  } catch (error) {
+    console.error(error)
     process.exit(1)
-  })
+  }
 }

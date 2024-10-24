@@ -1,12 +1,14 @@
-// Usage: node scripts/add_user_count_to_csv.js [OPTS] [INPUT-FILE]
+// Usage: node scripts/add_user_count_to_csv.mjs [OPTS] [INPUT-FILE]
 // Looks up the number of users for each domain in the input csv file and adds
 // columns for the number of users in the domain, subdomains, and total.
-const fs = require('fs')
-const csv = require('csv/sync')
-const minimist = require('minimist')
-const UserGetter = require('../app/src/Features/User/UserGetter')
-const { db, waitForDb } = require('../app/src/infrastructure/mongodb')
-const _ = require('lodash')
+import fs from 'fs'
+// https://github.com/import-js/eslint-plugin-import/issues/1810
+// eslint-disable-next-line import/no-unresolved
+import * as csv from 'csv/sync'
+import minimist from 'minimist'
+import UserGetter from '../app/src/Features/User/UserGetter.js'
+import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import _ from 'lodash'
 
 const argv = minimist(process.argv.slice(2), {
   string: ['domain', 'output'],
@@ -84,12 +86,11 @@ async function getUsersByHostnameWithSubdomain(domain, projection) {
   return await db.users.find(query, { projection }).toArray()
 }
 
-main()
-  .then(() => {
-    console.error('Done')
-    process.exit(0)
-  })
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+  console.log('Done')
+  process.exit(0)
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}

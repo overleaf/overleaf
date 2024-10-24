@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-// $ node scripts/recurly/generate_recurly_prices.js -f input.csv -o prices.json
+// $ node scripts/recurly/generate_recurly_prices.mjs -f input.csv -o prices.json
 //
 // The input csv file has the following format:
 //
@@ -16,10 +16,13 @@
 //
 // The output can be used as input for the upload script `recurly_prices.js`.
 
-const minimist = require('minimist')
-const csv = require('csv/sync')
-const _ = require('lodash')
-const fs = require('fs')
+import minimist from 'minimist'
+
+// https://github.com/import-js/eslint-plugin-import/issues/1810
+// eslint-disable-next-line import/no-unresolved
+import * as csv from 'csv/sync'
+import _ from 'lodash'
+import fs from 'fs'
 
 const argv = minimist(process.argv.slice(2), {
   string: ['output', 'file'],

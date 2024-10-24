@@ -1,7 +1,7 @@
 # Usage
 
 ```
-node scripts/learn/checkSanitize https://LEARN_WIKI
+node scripts/learn/checkSanitize/index.mjs https://LEARN_WIKI
 ```
 
 ## Bulk export

@@ -14,11 +14,12 @@
 // The idea is to download the current prices to a file, update them locally (e.g. via a script)
 // and then upload them to recurly.
 
-const recurly = require('recurly')
-const Settings = require('@overleaf/settings')
-const minimist = require('minimist')
-const _ = require('lodash')
-const fs = require('fs')
+import recurly from 'recurly'
+
+import Settings from '@overleaf/settings'
+import minimist from 'minimist'
+import _ from 'lodash'
+import fs from 'fs'
 
 const recurlySettings = Settings.apis.recurly
 const recurlyApiKey = recurlySettings ? recurlySettings.apiKey : undefined
@@ -203,23 +204,21 @@ if (argv.upload && DRY_RUN === COMMIT) {
 }
 
 if (argv.download) {
-  download(argv.output)
-    .then(() => {
-      process.exit(0)
-    })
-    .catch(error => {
-      console.error({ error })
-      process.exit(1)
-    })
+  try {
+    await download(argv.output)
+    process.exit(0)
+  } catch (error) {
+    console.error({ error })
+    process.exit(1)
+  }
 } else if (argv.upload) {
-  upload(argv.file)
-    .then(() => {
-      process.exit(0)
-    })
-    .catch(error => {
-      console.error({ error })
-      process.exit(1)
-    })
+  try {
+    await upload(argv.file)
+    process.exit(0)
+  } catch (error) {
+    console.error({ error })
+    process.exit(1)
+  }
 } else {
   console.log(
     'usage:\n' + '  --save -o file.json\n' + '  --load -f file.json\n'

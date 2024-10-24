@@ -1,11 +1,8 @@
-'use strict'
+import fs from 'fs'
+import minimist from 'minimist'
+import InstitutionsAPIModule from '../../app/src/Features/Institutions/InstitutionsAPI.js'
 
-const fs = require('fs')
-const minimist = require('minimist')
-
-const InstitutionsAPI =
-  require('../../app/src/Features/Institutions/InstitutionsAPI').promises
-
+const { promises: InstitutionsAPI } = InstitutionsAPIModule
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined
 const ignoreNulls = !!argv['ignore-nulls']
@@ -16,10 +13,6 @@ if (!commit) {
 
 const userEntitlements = loadUserEntitlements(argv['user-entitlements'])
 const cachedEntitlements = loadCachedEntitlements(argv['cached-entitlements'])
-
-syncUserEntitlements(userEntitlements, cachedEntitlements)
-  .catch(err => console.error(err.stack))
-  .then(() => process.exit())
 
 async function syncUserEntitlements(userEntitlements, cachedEntitlements) {
   // check for user entitlements in mongo but not in postgres
@@ -194,3 +187,10 @@ function loadCachedEntitlements(cachedEntitlementsFilename) {
 
   return cachedEntitlements
 }
+
+try {
+  await syncUserEntitlements(userEntitlements, cachedEntitlements)
+} catch (error) {
+  console.error(error.stack)
+}
+process.exit()

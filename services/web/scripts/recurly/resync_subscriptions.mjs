@@ -1,13 +1,13 @@
-const { Subscription } = require('../../app/src/models/Subscription')
-const RecurlyWrapper = require('../../app/src/Features/Subscription/RecurlyWrapper')
-const SubscriptionUpdater = require('../../app/src/Features/Subscription/SubscriptionUpdater')
-const minimist = require('minimist')
-const { setTimeout } = require('node:timers/promises')
+import { Subscription } from '../../app/src/models/Subscription.js'
+import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
+import SubscriptionUpdater from '../../app/src/Features/Subscription/SubscriptionUpdater.js'
+import minimist from 'minimist'
+import { setTimeout } from 'node:timers/promises'
 
-// make sure all `allMismatchReasons` are displayed in the output
-const util = require('util')
-const pLimit = require('p-limit')
-const { waitForDb } = require('../../app/src/infrastructure/mongodb')
+import util from 'util'
+
+import pLimit from 'p-limit'
+import { waitForDb } from '../../app/src/infrastructure/mongodb.js'
 
 util.inspect.defaultOptions.maxArrayLength = null
 
@@ -16,6 +16,7 @@ const ScriptLogger = {
   mismatchSubscriptionsCount: 0,
   allMismatchReasons: {},
 
+  // make sure all `allMismatchReasons` are displayed in the output
   recordMismatch: (subscription, recurlySubscription) => {
     const mismatchReasons = {}
     if (subscription.planCode !== recurlySubscription.plan.plan_code) {
@@ -184,6 +185,5 @@ const setup = () => {
 }
 
 setup()
-run().then(() => {
-  process.exit()
-})
+await run()
+process.exit()

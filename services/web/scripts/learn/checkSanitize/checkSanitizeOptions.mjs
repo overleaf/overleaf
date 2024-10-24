@@ -1,15 +1,15 @@
-const crypto = require('crypto')
-const fs = require('fs')
-const Path = require('path')
+import crypto from 'crypto'
+import fs from 'fs'
+import Path from 'path'
+import cheerio from 'cheerio'
+// checkSanitizeOptions is only used in dev env
+// eslint-disable-next-line import/no-extraneous-dependencies
+import prettier from 'prettier'
+import sanitizeHtml from 'sanitize-html'
+import { sanitizeOptions } from '../../../modules/learn/app/src/sanitizeOptions.js'
+import { fileURLToPath } from 'url'
 
-const cheerio = require('cheerio')
-const prettier = require('prettier')
-const sanitizeHtml = require('sanitize-html')
-
-const {
-  sanitizeOptions,
-} = require('../../../modules/learn/app/src/sanitizeOptions')
-
+const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 const EXTRACT_STYLE = process.env.EXTRACT_STYLES === 'true'
 const OMIT_STYLE = process.env.OMIT_STYLE !== 'false'
 const DUMP_CSS_IN = Path.join(
@@ -115,6 +115,4 @@ function checkSanitizeOptions(page, title, text) {
   console.error('sanitizedToText:', peak(sanitizedToText, offsetText))
 }
 
-module.exports = {
-  checkSanitizeOptions,
-}
+export default checkSanitizeOptions

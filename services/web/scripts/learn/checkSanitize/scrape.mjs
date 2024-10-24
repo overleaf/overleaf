@@ -1,12 +1,14 @@
-const Path = require('path')
-const fs = require('fs')
-
-const {
+import Path from 'path'
+import fs from 'fs'
+import {
   fetchString,
   fetchJson,
   RequestFailedError,
-} = require('@overleaf/fetch-utils')
+} from '@overleaf/fetch-utils'
+import crypto from 'crypto'
+import { fileURLToPath } from 'url'
 
+const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 const CACHE_IN = Path.join(
   Path.dirname(Path.dirname(Path.dirname(__dirname))),
   'data',
@@ -32,8 +34,6 @@ async function scrape(baseUrl, page) {
     }
   }
 }
-
-const crypto = require('crypto')
 
 function hash(blob) {
   return crypto.createHash('sha1').update(blob).digest('hex')
@@ -124,7 +124,7 @@ async function getAllPagesAndCache(baseUrl) {
   }
 }
 
-module.exports = {
+export default {
   getAllPagesAndCache,
   scrapeAndCachePage,
 }
