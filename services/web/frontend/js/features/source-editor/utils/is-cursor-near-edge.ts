@@ -4,6 +4,16 @@ const TOP_EDGE_THRESHOLD = 100
 const BOTTOM_EDGE_THRESHOLD = 200
 
 export function isCursorNearViewportEdge(view: EditorView, pos: number) {
+  return (
+    isCursorNearViewportTop(view, pos) || isCursorNearViewportBottom(view, pos)
+  )
+}
+
+export function isCursorNearViewportTop(
+  view: EditorView,
+  pos: number,
+  threshold = TOP_EDGE_THRESHOLD
+) {
   const cursorCoords = view.coordsAtPos(pos)
 
   if (!cursorCoords) {
@@ -12,12 +22,22 @@ export function isCursorNearViewportEdge(view: EditorView, pos: number) {
 
   const scrollInfo = view.scrollDOM.getBoundingClientRect()
 
-  // check if the cursor is near the top of the viewport
-  if (Math.abs(cursorCoords.bottom - scrollInfo.top) <= TOP_EDGE_THRESHOLD) {
-    return true
+  return Math.abs(cursorCoords.bottom - scrollInfo.top) <= threshold
+}
+
+export function isCursorNearViewportBottom(
+  view: EditorView,
+  pos: number,
+  threshold = BOTTOM_EDGE_THRESHOLD
+) {
+  const cursorCoords = view.coordsAtPos(pos)
+
+  if (!cursorCoords) {
+    return false
   }
-  // check if the cursor is near the bottom of the viewport
+
+  const scrollInfo = view.scrollDOM.getBoundingClientRect()
   const viewportHeight = view.scrollDOM.clientHeight
   const viewportBottom = scrollInfo.top + viewportHeight
-  return Math.abs(cursorCoords.bottom - viewportBottom) <= BOTTOM_EDGE_THRESHOLD
+  return Math.abs(cursorCoords.bottom - viewportBottom) <= threshold
 }
