@@ -622,6 +622,12 @@
     .review-panel-footer {
       display: none;
     }
+
+    .review-panel-entry:hover,
+    .review-panel-entry-focused,
+    .review-panel-entry-highlighted {
+      box-shadow: none;
+    }
   }
 }
 
