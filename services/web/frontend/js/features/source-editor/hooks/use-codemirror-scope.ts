@@ -232,7 +232,9 @@ function useCodeMirrorScope(view: EditorView) {
       spellCheckLanguage,
       hunspellManager,
     }
-    view.dispatch(setSpellCheckLanguage(spellingRef.current))
+    window.setTimeout(() => {
+      view.dispatch(setSpellCheckLanguage(spellingRef.current))
+    })
   }, [view, spellCheckLanguage, hunspellManager])
 
   const projectFeaturesRef = useRef(projectFeatures)
