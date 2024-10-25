@@ -48,11 +48,34 @@
           width: 100%;
 
           img {
+            @include shadow-md;
+
             width: 185px;
-            box-shadow: 0 2px 4px 0 rgba(30 37 48 / 16%);
+            border-radius: var(--border-radius-base);
+            position: relative;
 
             @include media-breakpoint-down(sm) {
               width: 35vw;
+            }
+
+            &::before {
+              content: '';
+              background: var(--neutral-90);
+              opacity: 0;
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              border-radius: var(--border-radius-base);
+              transition: opacity 0.15s ease-in-out;
+            }
+          }
+
+          &:hover {
+            &::before {
+              opacity: 0.08;
+              transition: opacity 0.15s ease-in-out;
             }
           }
         }
