@@ -127,9 +127,14 @@
     overflow: hidden;
   }
 
+  .popular-tags-list,
   .gallery-container {
-    --bs-gutter-y: var(--spacing-09);
+    --bs-gutter-x: var(--spacing-09);
 
+    row-gap: var(--spacing-11);
+  }
+
+  .gallery-container {
     align-items: baseline;
   }
 
@@ -224,19 +229,19 @@
   }
 
   .popular-tags {
-    margin-top: var(--spacing-16);
+    margin-top: 0;
     margin-bottom: var(--spacing-16);
 
     a {
       width: 100%;
     }
+  }
 
+  .popular-tags,
+  .recent-docs,
+  .featured-docs {
     h2 {
       margin-bottom: var(--spacing-09);
-    }
-
-    .popular-tags-list {
-      row-gap: var(--spacing-11);
     }
   }
 
