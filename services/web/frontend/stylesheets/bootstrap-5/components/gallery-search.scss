@@ -103,18 +103,6 @@
         display: flex;
         flex-wrap: wrap;
         gap: var(--spacing-04);
-
-        li a {
-          @include body-sm;
-
-          color: var(--color-primary-dark);
-          text-decoration: none;
-
-          &:hover {
-            text-decoration: underline;
-            color: var(--green-50);
-          }
-        }
       }
     }
   }

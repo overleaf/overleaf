@@ -98,6 +98,25 @@ $max-width: 160px;
   font-weight: var(--badge-font-weight);
 }
 
+.badge-link {
+  display: inline-block;
+
+  &.badge-link-light:hover .badge {
+    background-color: var(--neutral-30) !important;
+  }
+
+  .badge {
+    @include body-sm;
+
+    padding: 0 var(--bs-badge-padding-x);
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+      transition: background-color 0.15s ease-in-out;
+    }
+  }
+}
+
 .tags {
   .tags-list {
     list-style: none;
@@ -107,15 +126,7 @@ $max-width: 160px;
     flex-wrap: wrap;
   }
 
-  .badge-tag {
-    padding: 0 var(--bs-badge-padding-x);
-  }
-
   li {
     display: inline-flex;
-  }
-
-  a {
-    font-size: small;
   }
 }
