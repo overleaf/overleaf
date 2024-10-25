@@ -111,7 +111,7 @@
       .search-author {
         display: block;
 
-        & + .search-hit-tags {
+        & + .badge-link-list {
           margin-top: var(--spacing-06);
         }
       }
@@ -119,15 +119,6 @@
       .gallery-official {
         margin-left: var(--spacing-06);
         vertical-align: text-top;
-      }
-
-      .search-hit-tags {
-        list-style: none;
-        margin: 0;
-        padding-left: 0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-04);
       }
     }
   }

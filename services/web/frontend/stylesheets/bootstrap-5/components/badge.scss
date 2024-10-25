@@ -117,16 +117,10 @@ $max-width: 160px;
   }
 }
 
-.tags {
-  .tags-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    gap: var(--spacing-05);
-    flex-wrap: wrap;
-  }
-
-  li {
-    display: inline-flex;
-  }
+.badge-link-list {
+  display: flex;
+  gap: var(--spacing-05);
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
 }

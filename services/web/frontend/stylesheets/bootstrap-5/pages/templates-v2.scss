@@ -340,11 +340,6 @@
     @include heading-xs;
   }
 
-  .section-tags {
-    display: flex;
-    gap: var(--spacing-04);
-  }
-
   .cta-links {
     margin: var(--spacing-09) 0;
 
@@ -409,12 +404,14 @@
   }
 
   @include media-breakpoint-down(md) {
-    .template-item-right-section {
-      margin-top: var(--spacing-11);
+    .template-item-left-section {
+      .badge-link-list {
+        margin-top: var(--spacing-04);
+      }
     }
 
-    .section-tags {
-      margin-top: var(--spacing-04);
+    .template-item-right-section {
+      margin-top: var(--spacing-11);
     }
   }
 }
