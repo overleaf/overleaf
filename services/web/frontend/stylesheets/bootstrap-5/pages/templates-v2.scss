@@ -8,6 +8,12 @@
     text-align: left;
     max-width: 828px;
   }
+
+  .gallery-filters {
+    @include media-breakpoint-down(lg) {
+      margin-top: var(--spacing-06);
+    }
+  }
 }
 
 .gallery {
@@ -26,10 +32,11 @@
     }
   }
 
-  .filters {
+  .gallery-filters {
     float: right;
     margin-bottom: var(--spacing-11);
     display: flex;
+    flex-wrap: wrap;
     gap: var(--spacing-04);
 
     @include media-breakpoint-down(lg) {
