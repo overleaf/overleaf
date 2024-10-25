@@ -116,7 +116,7 @@ const ReviewPanelCurrentFile: FC = () => {
     false
   )?.addCommentRanges
 
-  useEffect(() => {
+  const positionsMeasureRequest = useCallback(() => {
     if (aggregatedRanges) {
       view.requestMeasure({
         key: 'review-panel-position',
@@ -176,6 +176,9 @@ const ReviewPanelCurrentFile: FC = () => {
       })
     }
   }, [view, aggregatedRanges, addCommentRanges])
+
+  useEffect(positionsMeasureRequest, [positionsMeasureRequest])
+  useEventListener('editor:geometry-change', positionsMeasureRequest)
 
   const showEmptyState = useMemo(
     () => hasActiveRange(ranges, threads) === false,
