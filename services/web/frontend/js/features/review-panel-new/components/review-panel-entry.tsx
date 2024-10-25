@@ -38,6 +38,7 @@ export const ReviewPanelEntry: FC<{
   const state = useCodeMirrorStateContext()
   const view = useCodeMirrorViewContext()
   const { openDocId, getCurrentDocId } = useEditorManagerContext()
+  const [selected, setSelected] = useState(false)
   const [focused, setFocused] = useState(false)
   const { setReviewPanelOpen } = useLayoutContext()
 
@@ -49,6 +50,8 @@ export const ReviewPanelEntry: FC<{
 
   const focusHandler = useCallback(
     event => {
+      setFocused(true)
+
       if (
         event.target instanceof HTMLButtonElement ||
         event.target instanceof HTMLLinkElement ||
@@ -59,7 +62,7 @@ export const ReviewPanelEntry: FC<{
         return
       }
 
-      setFocused(true)
+      setSelected(true)
 
       if (!selectLineOnFocus) {
         return
@@ -97,7 +100,10 @@ export const ReviewPanelEntry: FC<{
     <div
       onMouseDown={openReviewPanel} // Using onMouseDown rather than onClick to guarantee that it fires before onFocus
       onFocus={focusHandler}
-      onBlur={() => setFocused(false)}
+      onBlur={() => {
+        setSelected(false)
+        setFocused(false)
+      }}
       onMouseEnter={() => {
         if (hoverRanges) {
           view.dispatch(highlightRanges(op))
@@ -113,7 +119,15 @@ export const ReviewPanelEntry: FC<{
       className={classNames(
         'review-panel-entry',
         {
+          // 'selected' is used to manually select an entry
+          // useful if the range is within range and you want to show the one outside the viewport
+          // it is not enough to just check isSelectionWithinOp for that
+          'review-panel-entry-selected': selected,
+          // 'focused' is set even when an entry was clicked but not selected (like clicking on a menu option)
+          // used to set z-index above other entries (since entries are not ordered the same way visually and in the DOM)
           'review-panel-entry-focused': focused,
+          // 'highlighted' is set if the selection is within op but that doesn't necessarily mean it should be selected
+          // multiple entries can be highlighted at the same time
           'review-panel-entry-highlighted': highlighted,
           'review-panel-entry-disabled': disabled,
         },

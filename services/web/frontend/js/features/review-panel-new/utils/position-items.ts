@@ -26,14 +26,14 @@ export const positionItems = debounce(
 
     if (activeItemIndex === -1) {
       // if there is no action available
-      // check if there is a focused entry
+      // check if there is manually selected entry
       activeItemIndex = items.findIndex(item =>
-        item.classList.contains('review-panel-entry-focused')
+        item.classList.contains('review-panel-entry-selected')
       )
     }
 
     if (activeItemIndex === -1) {
-      // if entry was not focused manually
+      // if entry was not selected manually
       // check if there is an entry in selection and use that as the focused item
       activeItemIndex = items.findIndex(item =>
         item.classList.contains('review-panel-entry-highlighted')

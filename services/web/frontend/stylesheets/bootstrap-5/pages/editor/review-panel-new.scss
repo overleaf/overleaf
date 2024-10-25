@@ -56,12 +56,16 @@
     gap: var(--spacing-04);
   }
 
-  .review-panel-entry.review-panel-entry-focused,
+  .review-panel-entry.review-panel-entry-selected,
   .review-panel-entry.review-panel-entry-highlighted {
     margin-left: var(--spacing-01);
     border: 1px solid var(--border-active);
 
     @include shadow-md;
+  }
+
+  .review-panel-entry.review-panel-entry-focused {
+    z-index: 2;
   }
 
   .review-panel-entry-header {

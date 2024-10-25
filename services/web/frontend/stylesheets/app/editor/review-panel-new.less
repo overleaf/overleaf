@@ -51,7 +51,7 @@
     gap: @spacing-04;
   }
 
-  .review-panel-entry.review-panel-entry-focused,
+  .review-panel-entry.review-panel-entry-selected,
   .review-panel-entry.review-panel-entry-highlighted {
     margin-left: @spacing-01;
     border: 1px solid @blue-50;
@@ -59,6 +59,10 @@
     box-shadow:
       0px 4px 12px rgba(30, 37, 48, 0.12),
       0px 2px 4px rgba(30, 37, 48, 0.08);
+  }
+
+  .review-panel-entry.review-panel-entry-focused {
+    z-index: 2;
   }
 
   .review-panel-entry-header {
