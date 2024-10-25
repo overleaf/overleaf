@@ -396,6 +396,10 @@
     max-height: 400px;
   }
 
+  .review-panel-comment-edit {
+    margin-top: var(--spacing-03);
+  }
+
   .review-panel-empty-state {
     position: fixed;
     width: var(--review-panel-width);

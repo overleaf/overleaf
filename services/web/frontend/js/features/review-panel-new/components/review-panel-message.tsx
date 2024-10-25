@@ -51,32 +51,6 @@ export const ReviewPanelMessage: FC<{
     setDeleting(false)
   }, [onDelete])
 
-  if (editing) {
-    return (
-      <div>
-        <AutoExpandingTextArea
-          className="review-panel-comment-input"
-          onBlur={handleSubmit}
-          onChange={e => setContent(e.target.value)}
-          onKeyDown={e => {
-            if (
-              e.key === 'Enter' &&
-              !e.shiftKey &&
-              !e.ctrlKey &&
-              !e.metaKey &&
-              content
-            ) {
-              e.preventDefault()
-              handleSubmit()
-            }
-          }}
-          value={content}
-          autoFocus // eslint-disable-line jsx-a11y/no-autofocus
-        />
-      </div>
-    )
-  }
-
   return (
     <div className="review-panel-comment">
       <div className="review-panel-entry-header">
@@ -90,7 +64,7 @@ export const ReviewPanelMessage: FC<{
         </div>
 
         <div className="review-panel-entry-actions">
-          {!isReply && !isThreadResolved && (
+          {!editing && !isReply && !isThreadResolved && (
             <OLTooltip
               id="resolve-thread"
               overlayProps={{ placement: 'bottom' }}
@@ -107,7 +81,7 @@ export const ReviewPanelMessage: FC<{
             </OLTooltip>
           )}
 
-          {!isThreadResolved && (
+          {!editing && !isThreadResolved && (
             <ReviewPanelCommentOptions
               belongsToCurrentUser={user.id === message.user.id}
               onEdit={handleEditOption}
@@ -117,9 +91,32 @@ export const ReviewPanelMessage: FC<{
           )}
         </div>
       </div>
-      <ExpandableContent className="review-panel-comment-body">
-        {message.content}
-      </ExpandableContent>
+      {editing ? (
+        <AutoExpandingTextArea
+          className="review-panel-comment-input review-panel-comment-edit"
+          onBlur={handleSubmit}
+          onChange={e => setContent(e.target.value)}
+          onKeyDown={e => {
+            if (
+              e.key === 'Enter' &&
+              !e.shiftKey &&
+              !e.ctrlKey &&
+              !e.metaKey &&
+              content
+            ) {
+              e.preventDefault()
+              ;(e.target as HTMLTextAreaElement).blur()
+            }
+          }}
+          value={content}
+          autoFocus // eslint-disable-line jsx-a11y/no-autofocus
+        />
+      ) : (
+        <ExpandableContent className="review-panel-comment-body">
+          {message.content}
+        </ExpandableContent>
+      )}
+
       {deleting && (
         <ReviewPanelDeleteCommentModal
           onHide={hideDeleteModal}
