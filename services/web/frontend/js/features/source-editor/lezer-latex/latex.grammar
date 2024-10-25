@@ -87,6 +87,7 @@
     AuthorCtrlSeq,
     AffilCtrlSeq,
     AffiliationCtrlSeq,
+    DateCtrlSeq,
     MaketitleCtrlSeq,
     TextColorCtrlSeq,
     ColorBoxCtrlSeq,
@@ -244,6 +245,9 @@ KnownCommand<ArgumentType> {
     } |
     Affiliation {
         AffiliationCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? TextArgument
+    } |
+    Date {
+        DateCtrlSeq optionalWhitespace? OptionalArgument? optionalWhitespace? ShortTextArgument
     } |
     DocumentClass {
         DocumentClassCtrlSeq optionalWhitespace? OptionalArgument?

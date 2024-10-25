@@ -3,6 +3,7 @@ import { Line } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import { SyntaxNodeRef } from '@lezer/common'
 import OError from '@overleaf/o-error'
+import { noSpellCheckProp } from '@/features/source-editor/utils/node-props'
 
 /* A convenient wrapper around 'Normal' tokens */
 export class NormalTextSpan {
@@ -39,18 +40,6 @@ export class NormalTextSpan {
   }
 }
 
-const NotNormalNodeAncestors = [
-  'Include',
-  'Input',
-  'IncludeGraphics',
-  'Cite',
-  'LabelArgument',
-  'UsePackage',
-  'PackageArgument',
-  'EnvNameGroup',
-  'RefArgument',
-]
-
 export const getNormalTextSpansFromLine = (
   view: EditorView,
   line: Line
@@ -64,7 +53,11 @@ export const getNormalTextSpansFromLine = (
     from: lineStart,
     to: lineEnd,
     enter: (node: SyntaxNodeRef) => {
-      if (NotNormalNodeAncestors.includes(node.type.name)) {
+      if (
+        node.type.prop(noSpellCheckProp)?.some(context => {
+          return node.matchContext(context)
+        })
+      ) {
         return false
       }
       if (node.type.name === 'Normal') {

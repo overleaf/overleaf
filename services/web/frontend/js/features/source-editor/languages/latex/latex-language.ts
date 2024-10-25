@@ -10,6 +10,7 @@ import {
   getFoldRange,
 } from '../../utils/tree-query'
 import { closeBracketConfig } from './close-bracket-config'
+import { noSpellCheckProp } from '@/features/source-editor/utils/node-props'
 
 const styleOverrides: Record<string, any> = {
   DocumentClassCtrlSeq: t.keyword,
@@ -117,6 +118,24 @@ export const LaTeXLanguage = LRLanguage.define({
           }
           return content
         },
+      }),
+      // disable spell check in these node types when they're inside these parents (empty string = any parent)
+      noSpellCheckProp.add({
+        BibKeyArgument: [['']],
+        BibliographyArgument: [['']],
+        BibliographyStyleArgument: [['']],
+        DocumentClassArgument: [['']],
+        LabelArgument: [['']],
+        PackageArgument: [['']],
+        RefArgument: [['']],
+        OptionalArgument: [
+          ['DocumentClass'],
+          ['IncludeGraphics'],
+          ['LineBreak'],
+          ['UsePackage'],
+        ],
+        ShortTextArgument: [['Date']],
+        TextArgument: [['TabularEnvironment', 'BeginEnv']],
       }),
       // TODO: does this override groups defined in the grammar?
       NodeProp.group.add(type => {
