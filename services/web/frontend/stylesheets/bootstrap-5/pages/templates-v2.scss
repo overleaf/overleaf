@@ -364,9 +364,7 @@
 
   .related-tags {
     margin-top: var(--spacing-09);
-    padding: 0 var(--spacing-05);
-    gap: var(--spacing-05);
-    max-height: 60px;
+    max-height: 61px;
     overflow: hidden;
 
     &.all-tags {
@@ -376,17 +374,10 @@
       // when Show More is clicked
       min-height: 102px;
     }
-  }
 
-  .tag-badge {
-    max-width: 200px;
-  }
-
-  .tag-link {
-    text-decoration: none;
-    color: inherit;
-
-    @include body-sm;
+    .badge-link {
+      max-width: 200px;
+    }
   }
 
   .show-more-tags {
