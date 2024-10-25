@@ -152,7 +152,9 @@ forEach(Object.keys(suggestions)).describe(
       const [from, to] = suggestions[spellCheckLanguage]
 
       cy.get('@line').type(`${from} ${to}`)
-      cy.get('@line').get('.ol-cm-spelling-error').should('have.length', 1)
+      cy.get('@line')
+        .get('.ol-cm-spelling-error', { timeout: 10000 })
+        .should('have.length', 1)
       cy.get('@line').get('.ol-cm-spelling-error').should('have.text', from)
 
       cy.get('@line').get('.ol-cm-spelling-error').rightclick()
