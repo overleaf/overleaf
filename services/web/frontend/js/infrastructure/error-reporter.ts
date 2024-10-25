@@ -45,6 +45,8 @@ function sentryReporter() {
             "Cannot read properties of undefined (reading 'length')",
             // Ignore Angular digest iteration limit - see https://github.com/overleaf/internal/issues/15750
             '10 $digest() iterations reached',
+            // Ignore a frequent unhandled promise rejection
+            /Non-Error promise rejection captured with keys: currentTarget, detail, isTrusted, target/,
           ],
 
           denyUrls: [
