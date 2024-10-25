@@ -23,7 +23,7 @@ block content
 				span.loading-screen-ellip .
 
 block append meta
-	include ./editor/meta
+	include editor/_meta
 
 block prepend foot-scripts
 	each file in (useOpenTelemetry ? entrypointScripts("tracing") : [])
