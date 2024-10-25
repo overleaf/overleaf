@@ -18,7 +18,7 @@ import {
   buildAddNewCommentRangeEffect,
   reviewTooltipStateField,
 } from '@/features/source-editor/extensions/review-tooltip'
-import { getTooltip } from '@codemirror/view'
+import { EditorView, getTooltip } from '@codemirror/view'
 import useViewerPermissions from '@/shared/hooks/use-viewer-permissions'
 import usePreviousValue from '@/shared/hooks/use-previous-value'
 import { useLayoutContext } from '@/shared/context/layout-context'
@@ -28,6 +28,7 @@ import {
   useRangesContext,
 } from '../context/ranges-context'
 import { isInsertOperation } from '@/utils/operations'
+import { isCursorNearViewportEdge } from '@/features/source-editor/utils/is-cursor-near-edge'
 
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -75,9 +76,15 @@ const ReviewTooltipMenuContent: FC<{
     setReviewPanelOpen(true)
     setView('cur_file')
 
-    view.dispatch({
-      effects: buildAddNewCommentRangeEffect(state.selection.main),
-    })
+    const commentPos = state.selection.main.anchor
+    const effects = isCursorNearViewportEdge(view, commentPos)
+      ? [
+          buildAddNewCommentRangeEffect(state.selection.main),
+          EditorView.scrollIntoView(commentPos, { y: 'center' }),
+        ]
+      : [buildAddNewCommentRangeEffect(state.selection.main)]
+
+    view.dispatch({ effects })
     setShow(false)
   }, [setReviewPanelOpen, setView, setShow, view, state.selection.main])
 
