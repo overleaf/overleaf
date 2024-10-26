@@ -24,6 +24,7 @@
   "about_to_delete_the_following_projects": "Vous allez supprimer les projets suivants",
   "about_to_delete_user_preamble": "Vous êtes sur le point de supprimer __userName__ (__userEmail__). Ceci signifie :",
   "about_to_enable_managed_users": "En activant la fonctionnalité Gestion des Utilisateur·rice·s, tous les membres existants de votre abonnement de groupe seront invités à devenir administrés. Cela vous donnera des droits d’administrateur sur leur compte. Vous aurez également la possibilité d’inviter de nouveaux membres à rejoindre l’abonnement et à devenir administrés.",
+  "about_to_leave_project": "Vous êtes sur le point de quitter ce projet.",
   "about_to_leave_projects": "Vous allez quitter les projets suivants :",
   "about_to_trash_projects": "Vous êtes sur le point de mettre à la corbeille les projets suivants :",
   "abstract": "Résumé",
