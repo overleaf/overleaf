@@ -47,8 +47,7 @@ export const ReviewPanelEntry: FC<{
   const { openDocId, getCurrentDocId } = useEditorManagerContext()
   const [selected, setSelected] = useState(false)
   const [focused, setFocused] = useState(false)
-  const { setReviewPanelOpen } = useLayoutContext()
-
+  const { setReviewPanelOpen, reviewPanelOpen } = useLayoutContext()
   const highlighted = isSelectionWithinOp(op, state.selection.main)
 
   const openReviewPanel = useCallback(() => {
@@ -62,10 +61,11 @@ export const ReviewPanelEntry: FC<{
       if (
         event.target instanceof HTMLButtonElement ||
         event.target instanceof HTMLLinkElement ||
-        event.target instanceof HTMLAnchorElement
+        event.target instanceof HTMLAnchorElement ||
+        (event.target instanceof HTMLTextAreaElement && !reviewPanelOpen)
       ) {
-        // Don't focus if the click was on a button/link/anchor as we
-        // don't want to affect its behaviour
+        // Ignore focus events on certain elements so as to not affect
+        // their behavior
         return
       }
 
@@ -89,7 +89,15 @@ export const ReviewPanelEntry: FC<{
         )
       }
     },
-    [getCurrentDocId, docId, selectLineOnFocus, view, position, openDocId]
+    [
+      getCurrentDocId,
+      docId,
+      selectLineOnFocus,
+      view,
+      position,
+      openDocId,
+      reviewPanelOpen,
+    ]
   )
 
   // Clear op highlight on dismount
