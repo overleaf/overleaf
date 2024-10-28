@@ -347,13 +347,14 @@
     @include heading-xs;
   }
 
-  .cta-links {
+  .cta-links-container {
     margin: var(--spacing-09) 0;
 
-    .col-md-12 {
+    .cta-links {
       display: inline-flex;
       gap: var(--spacing-04);
       padding: unset;
+      flex-wrap: wrap;
     }
   }
 
