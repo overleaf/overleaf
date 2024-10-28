@@ -19,6 +19,7 @@ import {
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLButtonGroup from '@/features/ui/components/ol/ol-button-group'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import { useLayoutContext } from '@/shared/context/layout-context'
 
 const modifierKey = /Mac/i.test(navigator.platform) ? 'Cmd' : 'Ctrl'
 
@@ -55,6 +56,8 @@ function PdfCompileButton() {
     useStopOnFirstError({ eventSource: 'dropdown' })
 
   const { t } = useTranslation()
+
+  const { detachRole } = useLayoutContext()
 
   const fromScratchWithEvent = () => {
     eventTracking.sendMB('recompile-setting-changed', {
@@ -97,7 +100,10 @@ function PdfCompileButton() {
               description: tooltipElement,
               id: 'compile',
               tooltipProps: { className: 'keyboard-tooltip' },
-              overlayProps: { delayShow: 500 },
+              overlayProps: {
+                delayShow: 500,
+                placement: detachRole === 'detached' ? 'bottom' : undefined,
+              },
             },
             icon: { type: 'refresh', spin: compiling },
             onClick: () => startCompile(),
@@ -206,7 +212,10 @@ function PdfCompileButton() {
             description={tooltipElement}
             id="compile"
             tooltipProps={{ className: 'keyboard-tooltip' }}
-            overlayProps={{ delay: { show: 500, hide: 0 } }}
+            overlayProps={{
+              delay: { show: 500, hide: 0 },
+              placement: detachRole === 'detached' ? 'bottom' : undefined,
+            }}
           >
             <OLButton
               variant="primary"
