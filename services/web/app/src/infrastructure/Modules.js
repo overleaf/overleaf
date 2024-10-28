@@ -1,7 +1,6 @@
 const fs = require('fs')
 const Path = require('path')
-const async = require('async')
-const { promisify } = require('util')
+const { promisify, callbackify } = require('util')
 const Settings = require('@overleaf/settings')
 const Views = require('./Views')
 const _ = require('lodash')
@@ -147,9 +146,14 @@ async function linkedFileAgentsIncludes() {
 
 async function attachHooks() {
   for (const module of await modules()) {
-    for (const hook in module.hooks || {}) {
-      const method = module.hooks[hook]
+    const { promises, ...hooks } = module.hooks || {}
+    for (const hook in promises || {}) {
+      const method = promises[hook]
       attachHook(hook, method)
+    }
+    for (const hook in hooks || {}) {
+      const method = hooks[hook]
+      attachHook(hook, promisify(method))
     }
   }
 }
@@ -173,32 +177,19 @@ async function attachMiddleware() {
   }
 }
 
-function fireHook(name, ...rest) {
-  const adjustedLength = Math.max(rest.length, 1)
-  const args = rest.slice(0, adjustedLength - 1)
-  const callback = rest[adjustedLength - 1]
-  function fire() {
-    const methods = _hooks[name] || []
-    const callMethods = methods.map(method => cb => method(...args, cb))
-    async.series(callMethods, function (error, results) {
-      if (error) {
-        return callback(error)
-      }
-      callback(null, results)
-    })
-  }
-
+async function fireHook(name, ...args) {
   // ensure that modules are loaded if we need to fire a hook
   // this can happen if a script calls a method that fires a hook
   if (!_modulesLoaded) {
-    loadModules()
-      .then(() => {
-        fire()
-      })
-      .catch(err => callback(err))
-  } else {
-    fire()
+    await loadModules()
   }
+  const methods = _hooks[name] || []
+  const results = []
+  for (const method of methods) {
+    const result = await method(...args)
+    results.push(result)
+  }
+  return results
 }
 
 async function getMiddleware(name) {
@@ -220,12 +211,12 @@ module.exports = {
   start,
   hooks: {
     attach: attachHook,
-    fire: fireHook,
+    fire: callbackify(fireHook),
   },
   middleware: getMiddleware,
   promises: {
     hooks: {
-      fire: promisify(fireHook),
+      fire: fireHook,
     },
   },
 }
