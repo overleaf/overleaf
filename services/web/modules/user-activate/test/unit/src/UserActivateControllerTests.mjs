@@ -1,15 +1,16 @@
-const Path = require('path')
-const SandboxedModule = require('sandboxed-module')
-const sinon = require('sinon')
+import Path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { strict as esmock } from 'esmock'
+import sinon from 'sinon'
 
-const MODULE_PATH = Path.join(
-  __dirname,
-  '../../../app/src/UserActivateController.js'
-)
+const __dirname = Path.dirname(fileURLToPath(import.meta.url))
+
+const MODULE_PATH = '../../../app/src/UserActivateController.mjs'
+
 const VIEW_PATH = Path.join(__dirname, '../../../app/views/user/activate')
 
 describe('UserActivateController', function () {
-  beforeEach(function () {
+  beforeEach(async function () {
     this.user = {
       _id: (this.user_id = 'kwjewkl'),
       features: {},
@@ -19,14 +20,12 @@ describe('UserActivateController', function () {
     this.UserGetter = { getUser: sinon.stub() }
     this.UserRegistrationHandler = {}
     this.ErrorController = { notFound: sinon.stub() }
-    this.UserActivateController = SandboxedModule.require(MODULE_PATH, {
-      requires: {
-        '../../../../app/src/Features/User/UserGetter': this.UserGetter,
-        '../../../../app/src/Features/User/UserRegistrationHandler':
-          this.UserRegistrationHandler,
-        '../../../../app/src/Features/Errors/ErrorController':
-          this.ErrorController,
-      },
+    this.UserActivateController = await esmock(MODULE_PATH, {
+      '../../../../../app/src/Features/User/UserGetter.js': this.UserGetter,
+      '../../../../../app/src/Features/User/UserRegistrationHandler.js':
+        this.UserRegistrationHandler,
+      '../../../../../app/src/Features/Errors/ErrorController.js':
+        this.ErrorController,
     })
     this.req = {
       body: {},

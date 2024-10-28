@@ -1,9 +1,12 @@
-const Path = require('path')
-const UserGetter = require('../../../../app/src/Features/User/UserGetter')
-const UserRegistrationHandler = require('../../../../app/src/Features/User/UserRegistrationHandler')
-const ErrorController = require('../../../../app/src/Features/Errors/ErrorController')
+import Path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
+import UserRegistrationHandler from '../../../../app/src/Features/User/UserRegistrationHandler.js'
+import ErrorController from '../../../../app/src/Features/Errors/ErrorController.js'
 
-module.exports = {
+const __dirname = Path.dirname(fileURLToPath(import.meta.url))
+
+export default {
   registerNewUser(req, res, next) {
     res.render(Path.resolve(__dirname, '../views/user/register'))
   },

@@ -1,4 +1,4 @@
-const UserActivateRouter = require('./app/src/UserActivateRouter')
+import UserActivateRouter from './app/src/UserActivateRouter.mjs'
 
 /**
  * @import { WebModule } from "../../types/web-module"
@@ -9,4 +9,4 @@ const UserActivateModule = {
   router: UserActivateRouter,
 }
 
-module.exports = UserActivateModule
+export default UserActivateModule

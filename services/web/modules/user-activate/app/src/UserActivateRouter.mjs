@@ -1,9 +1,9 @@
-const logger = require('@overleaf/logger')
-const UserActivateController = require('./UserActivateController')
-const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
-const AuthorizationMiddleware = require('../../../../app/src/Features/Authorization/AuthorizationMiddleware')
+import logger from '@overleaf/logger'
+import UserActivateController from './UserActivateController.mjs'
+import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.js'
+import AuthorizationMiddleware from '../../../../app/src/Features/Authorization/AuthorizationMiddleware.js'
 
-module.exports = {
+export default {
   apply(webRouter) {
     logger.debug({}, 'Init UserActivate router')
 
