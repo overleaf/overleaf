@@ -29,6 +29,7 @@ import {
 } from '../context/ranges-context'
 import { isInsertOperation } from '@/utils/operations'
 import { isCursorNearViewportEdge } from '@/features/source-editor/utils/is-cursor-near-edge'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -129,18 +130,23 @@ const ReviewTooltipMenuContent: FC<{
       {showChangesButtons && (
         <>
           <div className="review-tooltip-menu-divider" />
-          <button
-            className="review-tooltip-menu-button"
-            onClick={acceptChangesHandler}
-          >
-            <MaterialIcon type="check" />
-          </button>
-          <button
-            className="review-tooltip-menu-button"
-            onClick={rejectChangesHandler}
-          >
-            <MaterialIcon type="clear" />
-          </button>
+          <OLTooltip id="accept-all-changes" description={t('accept_all')}>
+            <button
+              className="review-tooltip-menu-button"
+              onClick={acceptChangesHandler}
+            >
+              <MaterialIcon type="check" />
+            </button>
+          </OLTooltip>
+
+          <OLTooltip id="reject-all-changes" description={t('reject_all')}>
+            <button
+              className="review-tooltip-menu-button"
+              onClick={rejectChangesHandler}
+            >
+              <MaterialIcon type="clear" />
+            </button>
+          </OLTooltip>
         </>
       )}
     </div>

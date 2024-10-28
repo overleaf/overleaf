@@ -612,10 +612,11 @@
 
     .review-panel-entry-hover {
       .review-panel-entry-content {
-        display: initial;
+        display: flex;
         position: absolute;
         left: -200px;
         top: 0;
+        padding: var(--spacing-04);
       }
     }
 
