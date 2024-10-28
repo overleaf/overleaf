@@ -6,7 +6,6 @@ import {
 } from '../context/threads-context'
 import classnames from 'classnames'
 import { ReviewPanelEntry } from './review-panel-entry'
-import MaterialIcon from '@/shared/components/material-icon'
 import { ReviewPanelCommentContent } from './review-panel-comment-content'
 import {
   CommentId,
@@ -143,14 +142,10 @@ export const ReviewPanelComment = memo<{
       position={comment.op.p}
       hoverRanges={hoverRanges}
       disabled={processing}
+      onEnterEntryIndicator={onEnter}
+      onLeaveEntryIndicator={onLeave}
+      entryIndicator="comment"
     >
-      <div
-        className="review-panel-entry-indicator"
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-      >
-        <MaterialIcon type="comment" className="review-panel-entry-icon" />
-      </div>
       <ReviewPanelCommentContent
         comment={comment}
         isResolved={false}

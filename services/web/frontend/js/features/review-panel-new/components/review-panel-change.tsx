@@ -92,15 +92,10 @@ export const ReviewPanelChange = memo<{
         docId={docId}
         hoverRanges={hoverRanges}
         disabled={accepting}
+        onEnterEntryIndicator={onEnter}
+        onLeaveEntryIndicator={onLeave}
+        entryIndicator="edit"
       >
-        <div
-          className="review-panel-entry-indicator"
-          onMouseEnter={onEnter}
-          onMouseLeave={onLeave}
-        >
-          <MaterialIcon type="edit" className="review-panel-entry-icon" />
-        </div>
-
         <div
           className="review-panel-entry-content"
           onMouseEnter={onEnter}
