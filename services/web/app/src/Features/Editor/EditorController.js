@@ -614,6 +614,24 @@ const EditorController = {
     )
   },
 
+  setMainBibliographyDoc(projectId, newBibliographyDocId, callback) {
+    ProjectEntityUpdateHandler.setMainBibliographyDoc(
+      projectId,
+      newBibliographyDocId,
+      function (err) {
+        if (err) {
+          return callback(err)
+        }
+        EditorRealTimeController.emitToRoom(
+          projectId,
+          'mainBibliographyDocUpdated',
+          newBibliographyDocId
+        )
+        callback()
+      }
+    )
+  },
+
   _notifyProjectUsersOfNewFolders(projectId, folders, callback) {
     async.eachSeries(
       folders,

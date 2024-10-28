@@ -1112,6 +1112,31 @@ const convertDocToFile = wrapWithLock({
   },
 })
 
+async function setMainBibliographyDoc(projectId, newBibliographyDocId) {
+  logger.debug(
+    { projectId, mainBibliographyDocId: newBibliographyDocId },
+    'setting main bibliography doc'
+  )
+  if (projectId == null || newBibliographyDocId == null) {
+    throw new Errors.InvalidError('missing arguments (project or doc)')
+  }
+  const docPath =
+    await ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId(
+      projectId,
+      newBibliographyDocId
+    )
+  if (ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(docPath)) {
+    await Project.updateOne(
+      { _id: projectId },
+      { mainBibliographyDoc_id: newBibliographyDocId }
+    ).exec()
+  } else {
+    throw new Errors.UnsupportedFileTypeError(
+      'invalid file extension for main bibliography doc'
+    )
+  }
+}
+
 const ProjectEntityUpdateHandler = {
   LOCK_NAMESPACE,
 
@@ -1153,6 +1178,8 @@ const ProjectEntityUpdateHandler = {
   setRootDoc: callbackify(setRootDoc),
 
   unsetRootDoc: callbackify(unsetRootDoc),
+
+  setMainBibliographyDoc: callbackify(setMainBibliographyDoc),
 
   updateDocLines: callbackify(updateDocLines),
 
@@ -1500,6 +1527,11 @@ const ProjectEntityUpdateHandler = {
   isPathValidForRootDoc(docPath) {
     const docExtension = Path.extname(docPath)
     return VALID_ROOT_DOC_REGEXP.test(docExtension)
+  },
+
+  isPathValidForMainBibliographyDoc(docPath) {
+    const docExtension = Path.extname(docPath).toLowerCase()
+    return docExtension === '.bib'
   },
 
   async _cleanUpEntity(

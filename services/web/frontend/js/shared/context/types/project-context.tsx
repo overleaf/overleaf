@@ -14,6 +14,7 @@ export type ProjectContextValue = {
   _id: string
   name: string
   rootDocId?: string
+  mainBibliographyDocId?: string
   compiler: string
   members: ProjectContextMember[]
   invites: ProjectContextMember[]

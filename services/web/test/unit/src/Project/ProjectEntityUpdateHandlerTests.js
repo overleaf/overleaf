@@ -3001,4 +3001,136 @@ describe('ProjectEntityUpdateHandler', function () {
       })
     })
   })
+
+  describe('isPathValidForMainBibliographyDoc', function () {
+    it('should not allow other endings than .bib', function () {
+      const endings = ['.tex', '.png', '.jpg', '.pdf', '.docx', '.doc']
+      endings.forEach(ending => {
+        expect(
+          this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
+            `/foo/bar/baz${ending}`
+          )
+        ).to.be.false
+      })
+    })
+
+    it('should allow a mix of lower and uppercase letters', function () {
+      const endings = ['.bib', '.BiB', '.BIB', '.bIB']
+      endings.forEach(ending => {
+        expect(
+          this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
+            `/foo/bar/baz.${ending}`
+          )
+        ).to.be.true
+      })
+    })
+
+    it('should not allow a path without an extension', function () {
+      expect(
+        this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc(
+          '/foo/bar/baz'
+        )
+      ).to.be.false
+    })
+
+    it('should not allow the empty path', function () {
+      expect(
+        this.ProjectEntityUpdateHandler.isPathValidForMainBibliographyDoc('')
+      ).to.be.false
+    })
+  })
+
+  describe('setMainBibliographyDoc', function () {
+    describe('on success', function () {
+      beforeEach(function (done) {
+        this.doc = {
+          _id: new ObjectId(),
+          name: 'test.bib',
+        }
+        this.path = '/path/to/test.bib'
+        this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
+          .withArgs(this.project._id, this.doc._id)
+          .resolves(this.path)
+
+        this.callback = sinon.stub().callsFake(() => done())
+
+        this.ProjectEntityUpdateHandler.setMainBibliographyDoc(
+          this.project._id,
+          this.doc._id,
+          this.callback
+        )
+      })
+
+      it('should update the project with the new main bibliography doc', function () {
+        expect(this.ProjectModel.updateOne).to.have.been.calledWith(
+          { _id: this.project._id },
+          { mainBibliographyDoc_id: this.doc._id }
+        )
+      })
+    })
+
+    describe('on failure', function () {
+      describe("when document can't be found", function () {
+        beforeEach(function (done) {
+          this.doc = {
+            _id: new ObjectId(),
+            name: 'test.bib',
+          }
+          this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
+            .withArgs(this.project._id, this.doc._id)
+            .rejects(new Error('error'))
+
+          this.callback = sinon.stub().callsFake(() => done())
+
+          this.ProjectEntityUpdateHandler.setMainBibliographyDoc(
+            this.project._id,
+            this.doc._id,
+            this.callback
+          )
+        })
+
+        it('should call the callback with an error', function () {
+          expect(this.callback).to.have.been.calledWith(
+            sinon.match.instanceOf(Error)
+          )
+        })
+
+        it('should not update the project with the new main bibliography doc', function () {
+          expect(this.ProjectModel.updateOne).to.not.have.been.called
+        })
+      })
+
+      describe("when path is not a bib file can't be found", function () {
+        beforeEach(function (done) {
+          this.doc = {
+            _id: new ObjectId(),
+            name: 'test.bib',
+          }
+
+          this.path = '/path/to/test.tex'
+          this.ProjectEntityHandler.promises.getDocPathByProjectIdAndDocId
+            .withArgs(this.project._id, this.doc._id)
+            .resolves(this.path)
+
+          this.callback = sinon.stub().callsFake(() => done())
+
+          this.ProjectEntityUpdateHandler.setMainBibliographyDoc(
+            this.project._id,
+            this.doc._id,
+            this.callback
+          )
+        })
+
+        it('should call the callback with an error', function () {
+          expect(this.callback).to.have.been.calledWith(
+            sinon.match.instanceOf(Error)
+          )
+        })
+
+        it('should not update the project with the new main bibliography doc', function () {
+          expect(this.ProjectModel.updateOne).to.not.have.been.called
+        })
+      })
+    })
+  })
 })

@@ -40,6 +40,7 @@ export const ProjectProvider: FC = ({ children }) => {
     publicAccesLevel: publicAccessLevel,
     owner,
     trackChangesState,
+    mainBibliographyDoc_id: mainBibliographyDocId,
   } = project || projectFallback
 
   const tags = useMemo(
@@ -63,6 +64,7 @@ export const ProjectProvider: FC = ({ children }) => {
       owner,
       tags,
       trackChangesState,
+      mainBibliographyDocId,
     }
   }, [
     _id,
@@ -76,6 +78,7 @@ export const ProjectProvider: FC = ({ children }) => {
     owner,
     tags,
     trackChangesState,
+    mainBibliographyDocId,
   ])
 
   return (

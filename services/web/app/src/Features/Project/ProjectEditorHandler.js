@@ -23,6 +23,7 @@ module.exports = ProjectEditorHandler = {
       _id: project._id,
       name: project.name,
       rootDoc_id: project.rootDoc_id,
+      mainBibliographyDoc_id: project.mainBibliographyDoc_id,
       rootFolder: [this.buildFolderModelView(project.rootFolder[0])],
       publicAccesLevel: project.publicAccesLevel,
       dropboxEnabled: !!project.existsInDropbox,
