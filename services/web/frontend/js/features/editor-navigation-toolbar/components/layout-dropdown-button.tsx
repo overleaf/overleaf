@@ -26,6 +26,7 @@ import useEventListener from '../../../shared/hooks/use-event-listener'
 import { DetachRole } from '@/shared/context/detach-context'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 
 function IconPlaceholder() {
   return <Icon type="" fw />
@@ -139,7 +140,7 @@ const LayoutDropdownToggleButton = forwardRef<
 })
 LayoutDropdownToggleButton.displayName = 'LayoutDropdownToggleButton'
 
-function DetachDisabled() {
+function BS3DetachDisabled() {
   const { t } = useTranslation()
 
   return (
@@ -158,9 +159,25 @@ function DetachDisabled() {
   )
 }
 
-function LayoutDropdownButton() {
+function BS5DetachDisabled() {
   const { t } = useTranslation()
 
+  return (
+    <OLTooltip
+      id="detach-disabled"
+      description={t('your_browser_does_not_support_this_feature')}
+      overlayProps={{ placement: 'left' }}
+    >
+      <span>
+        <EnhancedDropdownItem disabled leadingIcon="select_window">
+          {t('pdf_in_separate_tab')}
+        </EnhancedDropdownItem>
+      </span>
+    </OLTooltip>
+  )
+}
+
+function LayoutDropdownButton() {
   const {
     reattach,
     detach,
@@ -199,9 +216,42 @@ function LayoutDropdownButton() {
     [changeLayout, handleReattach]
   )
 
-  const processing = !detachIsLinked && detachRole === 'detacher'
+  return (
+    <LayoutDropdownButtonUi
+      processing={!detachIsLinked && detachRole === 'detacher'}
+      handleChangeLayout={handleChangeLayout}
+      handleDetach={handleDetach}
+      detachIsLinked={detachIsLinked}
+      detachRole={detachRole}
+      pdfLayout={pdfLayout}
+      view={view}
+      detachable={'BroadcastChannel' in window}
+    />
+  )
+}
 
-  // bsStyle is required for Dropdown.Toggle, but we will override style
+type LayoutDropdownButtonUiProps = {
+  processing: boolean
+  handleChangeLayout: (newLayout: IdeLayout, newView?: IdeView) => void
+  handleDetach: () => void
+  detachIsLinked: boolean
+  detachRole: DetachRole
+  pdfLayout: IdeLayout
+  view: IdeView | null
+  detachable: boolean
+}
+
+export const LayoutDropdownButtonUi = ({
+  processing,
+  handleChangeLayout,
+  handleDetach,
+  detachIsLinked,
+  detachRole,
+  view,
+  pdfLayout,
+  detachable,
+}: LayoutDropdownButtonUiProps) => {
+  const { t } = useTranslation()
   return (
     <>
       {processing && (
@@ -219,6 +269,7 @@ function LayoutDropdownButton() {
             className="toolbar-item layout-dropdown"
             pullRight
           >
+            {/* bsStyle is required for Dropdown.Toggle, but we will override style */}
             <BS3Dropdown.Toggle className="btn-full-height" bsStyle="link">
               {processing ? <IconRefresh /> : <IconLayout />}
               <span className="toolbar-label">{t('layout')}</span>
@@ -280,7 +331,7 @@ function LayoutDropdownButton() {
                 }
               />
 
-              {'BroadcastChannel' in window ? (
+              {detachable ? (
                 <LayoutMenuItem
                   onSelect={() => handleDetach()}
                   checkmark={
@@ -298,7 +349,7 @@ function LayoutDropdownButton() {
                   text={t('pdf_in_separate_tab')}
                 />
               ) : (
-                <DetachDisabled />
+                <BS3DetachDisabled />
               )}
             </BS3Dropdown.Menu>
           </ControlledDropdown>
@@ -322,7 +373,7 @@ function LayoutDropdownButton() {
               )}
               <span className="toolbar-label">{t('layout')}</span>
             </DropdownToggle>
-            <DropdownMenu className="layout-dropdown-list">
+            <DropdownMenu>
               <EnhancedDropdownItem
                 onClick={() => handleChangeLayout('sideBySide')}
                 active={isActiveDropdownItem({
@@ -346,15 +397,14 @@ function LayoutDropdownButton() {
                 })}
                 leadingIcon="code"
               >
-                <Trans
-                  i18nKey="editor_only_hide_pdf"
-                  components={[
-                    <span
-                      key="editor_only_hide_pdf"
-                      className="ms-1 subdued"
-                    />,
-                  ]}
-                />
+                <div className="d-flex flex-column">
+                  <Trans
+                    i18nKey="editor_only_hide_pdf"
+                    components={[
+                      <span key="editor_only_hide_pdf" className="subdued" />,
+                    ]}
+                  />
+                </div>
               </EnhancedDropdownItem>
 
               <EnhancedDropdownItem
@@ -367,18 +417,17 @@ function LayoutDropdownButton() {
                 })}
                 leadingIcon="picture_as_pdf"
               >
-                <Trans
-                  i18nKey="pdf_only_hide_editor"
-                  components={[
-                    <span
-                      key="pdf_only_hide_editor"
-                      className="ms-1 subdued"
-                    />,
-                  ]}
-                />
+                <div className="d-flex flex-column">
+                  <Trans
+                    i18nKey="pdf_only_hide_editor"
+                    components={[
+                      <span key="pdf_only_hide_editor" className="subdued" />,
+                    ]}
+                  />
+                </div>
               </EnhancedDropdownItem>
 
-              {'BroadcastChannel' in window ? (
+              {detachable ? (
                 <EnhancedDropdownItem
                   onClick={() => handleDetach()}
                   active={detachRole === 'detacher' && detachIsLinked}
@@ -406,7 +455,7 @@ function LayoutDropdownButton() {
                   {t('pdf_in_separate_tab')}
                 </EnhancedDropdownItem>
               ) : (
-                <DetachDisabled />
+                <BS5DetachDisabled />
               )}
             </DropdownMenu>
           </Dropdown>
