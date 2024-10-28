@@ -19,11 +19,13 @@ describe('RateLimiter', function () {
     this.RateLimiterFlexible = {
       RateLimiterRedis: sinon.stub(),
     }
+    this.Settings = {}
 
     this.RateLimiter = SandboxedModule.require(modulePath, {
       requires: {
         './RedisWrapper': this.RedisWrapper,
         'rate-limiter-flexible': this.RateLimiterFlexible,
+        '@overleaf/settings': this.Settings,
       },
     })
   })
@@ -58,6 +60,36 @@ describe('RateLimiter', function () {
       expect(() =>
         this.rateLimiter.getSubnetKeyFromIp('255.255.255')
       ).to.throw()
+    })
+  })
+
+  describe('_subnetRateLimiter', function () {
+    it('should be defined by default', function () {
+      const rateLimiter = new this.RateLimiter.RateLimiter('some-limit', {
+        points: 20,
+        subnetPoints: 200,
+        duration: 60,
+      })
+      expect(rateLimiter._subnetRateLimiter).not.to.be.undefined
+    })
+
+    it('should be undefined when subnet rate limiting is disabled', function () {
+      this.Settings.rateLimit = { subnetRateLimiterDisabled: true }
+
+      const rateLimiter = new this.RateLimiter.RateLimiter('some-limit', {
+        points: 20,
+        subnetPoints: 200,
+        duration: 60,
+      })
+      expect(rateLimiter._subnetRateLimiter).to.be.undefined
+    })
+
+    it('should be undefined when subnetPoints are not passed as an option', function () {
+      const rateLimiter = new this.RateLimiter.RateLimiter('some-limit', {
+        points: 20,
+        duration: 60,
+      })
+      expect(rateLimiter._subnetRateLimiter).to.be.undefined
     })
   })
 })

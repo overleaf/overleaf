@@ -212,6 +212,11 @@ const settings = {
     enabled: process.env.OVERLEAF_CSP_ENABLED !== 'false',
   },
 
+  rateLimit: {
+    subnetRateLimiterDisabled:
+      process.env.SUBNET_RATE_LIMITER_DISABLED !== 'false',
+  },
+
   // These credentials are used for authenticating api requests
   // between services that may need to go over public channels
   httpAuthUsers,

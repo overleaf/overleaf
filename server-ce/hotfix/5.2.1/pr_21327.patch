@@ -1,0 +1,36 @@
+--- overleaf/services/web/app/src/infrastructure/RateLimiter.js
++++ overleaf/services/web/app/src/infrastructure/RateLimiter.js
+@@ -39,7 +39,7 @@ class RateLimiter {
+       keyPrefix: `rate-limit:${name}`,
+       storeClient: rclient,
+     })
+-    if (opts.subnetPoints) {
++    if (opts.subnetPoints && !Settings.rateLimit?.subnetRateLimiterDisabled) {
+       this._subnetRateLimiter = new RateLimiterFlexible.RateLimiterRedis({
+         ...opts,
+         points: opts.subnetPoints,
+--- overleaf/services/web/config/settings.defaults.js
++++ overleaf/services/web/config/settings.defaults.js
+@@ -777,6 +777,8 @@ module.exports = {
+   reloadModuleViewsOnEachRequest: process.env.NODE_ENV === 'development',
+
+   rateLimit: {
++    subnetRateLimiterDisabled:
++      process.env.SUBNET_RATE_LIMITER_DISABLED === 'true',
+     autoCompile: {
+       everyone: process.env.RATE_LIMIT_AUTO_COMPILE_EVERYONE || 100,
+       standard: process.env.RATE_LIMIT_AUTO_COMPILE_STANDARD || 25,
+--- etc/overleaf/settings.js
++++ etc/overleaf/settings.js
+@@ -212,6 +212,11 @@ const settings = {
+     enabled: process.env.OVERLEAF_CSP_ENABLED !== 'false',
+   },
+
++  rateLimit: {
++    subnetRateLimiterDisabled:
++      process.env.SUBNET_RATE_LIMITER_DISABLED !== 'false',
++  },
++
+   // These credentials are used for authenticating api requests
+   // between services that may need to go over public channels
+   httpAuthUsers,

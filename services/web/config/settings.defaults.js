@@ -777,6 +777,8 @@ module.exports = {
   reloadModuleViewsOnEachRequest: process.env.NODE_ENV === 'development',
 
   rateLimit: {
+    subnetRateLimiterDisabled:
+      process.env.SUBNET_RATE_LIMITER_DISABLED === 'true',
     autoCompile: {
       everyone: process.env.RATE_LIMIT_AUTO_COMPILE_EVERYONE || 100,
       standard: process.env.RATE_LIMIT_AUTO_COMPILE_STANDARD || 25,

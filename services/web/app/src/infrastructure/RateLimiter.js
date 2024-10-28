@@ -39,7 +39,7 @@ class RateLimiter {
       keyPrefix: `rate-limit:${name}`,
       storeClient: rclient,
     })
-    if (opts.subnetPoints) {
+    if (opts.subnetPoints && !Settings.rateLimit?.subnetRateLimiterDisabled) {
       this._subnetRateLimiter = new RateLimiterFlexible.RateLimiterRedis({
         ...opts,
         points: opts.subnetPoints,
