@@ -4,6 +4,10 @@
 
 .select-trigger {
   cursor: default;
+
+  & + .form-control-end-icon {
+    pointer-events: none;
+  }
 }
 
 .select-highlighted {
