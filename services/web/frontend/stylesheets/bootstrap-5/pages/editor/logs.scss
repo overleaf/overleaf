@@ -1,10 +1,16 @@
-@import '../../foundations/colors';
+:root {
+  --logs-pane-bg: var(--bg-dark-secondary);
+}
+
+@include theme('light') {
+  --logs-pane-bg: var(--bg-light-secondary);
+}
 
 .logs-pane {
   position: absolute;
   inset: 0;
   overflow-y: auto;
-  background-color: var(--bg-dark-secondary);
+  background-color: var(--logs-pane-bg);
   z-index: 11; // above the PDF viewer + controls
   top: var(--toolbar-small-height);
 
