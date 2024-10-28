@@ -1,6 +1,17 @@
 import Icon from './icon'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { useTranslation } from 'react-i18next'
 import { memo } from 'react'
+
+function Check() {
+  return (
+    <BootstrapVersionSwitcher
+      bs3={<Icon type="check" />}
+      bs5={<MaterialIcon type="check" />}
+    />
+  )
+}
 
 function UpgradeBenefits() {
   const { t } = useTranslation()
@@ -8,32 +19,32 @@ function UpgradeBenefits() {
   return (
     <ul className="list-unstyled upgrade-benefits">
       <li>
-        <Icon type="check" />
+        <Check />
         &nbsp;
         {t('unlimited_projects')}
       </li>
       <li>
-        <Icon type="check" />
+        <Check />
         &nbsp;
         {t('collabs_per_proj', { collabcount: 'Multiple' })}
       </li>
       <li>
-        <Icon type="check" />
+        <Check />
         &nbsp;
         {t('full_doc_history')}
       </li>
       <li>
-        <Icon type="check" />
+        <Check />
         &nbsp;
         {t('sync_to_dropbox')}
       </li>
       <li>
-        <Icon type="check" />
+        <Check />
         &nbsp;
         {t('sync_to_github')}
       </li>
       <li>
-        <Icon type="check" />
+        <Check />
         &nbsp;
         {t('compile_larger_projects')}
       </li>

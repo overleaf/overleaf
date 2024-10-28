@@ -30,3 +30,7 @@
 
 // Page layout that isn't related to a particular component or page
 @import 'base/layout';
+
+// Module styles
+// TODO: find a way for modules to add styles dynamically
+@import 'modules/all';
