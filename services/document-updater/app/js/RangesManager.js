@@ -80,6 +80,13 @@ const RangesManager = {
       }
     }
 
+    sanityCheckTrackedChanges(
+      projectId,
+      docId,
+      rangesTracker.changes,
+      getDocLength(newDocLines)
+    )
+
     if (
       rangesTracker.changes?.length > RangesManager.MAX_CHANGES ||
       rangesTracker.comments?.length > RangesManager.MAX_COMMENTS
@@ -127,11 +134,17 @@ const RangesManager = {
     return { newRanges, rangesWereCollapsed, historyUpdates }
   },
 
-  acceptChanges(changeIds, ranges) {
+  acceptChanges(projectId, docId, changeIds, ranges, lines) {
     const { changes, comments } = ranges
     logger.debug(`accepting ${changeIds.length} changes in ranges`)
     const rangesTracker = new RangesTracker(changes, comments)
     rangesTracker.removeChangeIds(changeIds)
+    sanityCheckTrackedChanges(
+      projectId,
+      docId,
+      rangesTracker.changes,
+      getDocLength(lines)
+    )
     const newRanges = RangesManager._getRanges(rangesTracker)
     return newRanges
   },
@@ -555,6 +568,90 @@ function getCroppedCommentOps(op, comments) {
   }
 
   return historyCommentOps
+}
+
+/**
+ * Check some tracked changes assumptions:
+ *
+ * - Tracked changes can't be empty
+ * - Tracked inserts can't overlap with another tracked change
+ * - There can't be two tracked deletes at the same position
+ * - Ranges should be ordered by position, deletes before inserts
+ *
+ * If any assumption isn't upheld, log a warning.
+ *
+ * @param {string} projectId
+ * @param {string} docId
+ * @param {TrackedChange[]} changes
+ * @param {number} docLength
+ */
+function sanityCheckTrackedChanges(projectId, docId, changes, docLength) {
+  let lastDeletePos = -1 // allow a tracked delete at position 0
+  let lastInsertEnd = 0
+  let ok = true
+  let badChangeIndex
+  for (let i = 0; i < changes.length; i++) {
+    const change = changes[i]
+
+    const op = change.op
+    if ('i' in op) {
+      if (
+        op.i.length === 0 ||
+        op.p < lastDeletePos ||
+        op.p < lastInsertEnd ||
+        op.p < 0 ||
+        op.p + op.i.length > docLength
+      ) {
+        ok = false
+        badChangeIndex = i
+        break
+      }
+      lastInsertEnd = op.p + op.i.length
+    } else if ('d' in op) {
+      if (
+        op.d.length === 0 ||
+        op.p <= lastDeletePos ||
+        op.p < lastInsertEnd ||
+        op.p < 0 ||
+        op.p > docLength
+      ) {
+        ok = false
+        badChangeIndex = i
+        break
+      }
+      lastDeletePos = op.p
+      if (lastDeletePos >= docLength) {
+        badChangeIndex = i
+        break
+      }
+    }
+  }
+
+  if (ok) {
+    return
+  }
+
+  const changeRanges = []
+  for (const change of changes) {
+    if ('i' in change.op) {
+      changeRanges.push({
+        id: change.id,
+        p: change.op.p,
+        i: change.op.i.length,
+      })
+    } else if ('d' in change.op) {
+      changeRanges.push({
+        id: change.id,
+        p: change.op.p,
+        d: change.op.d.length,
+      })
+    }
+  }
+
+  logger.warn(
+    { projectId, docId, changes: changeRanges, badChangeIndex },
+    'Malformed tracked changes detected'
+  )
 }
 
 module.exports = RangesManager
