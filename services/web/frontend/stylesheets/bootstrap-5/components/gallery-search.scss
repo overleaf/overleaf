@@ -46,29 +46,29 @@
           justify-content: center;
           height: 100%;
           width: 100%;
+          position: relative;
+
+          &::before {
+            content: '';
+            background: var(--neutral-90);
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius-base);
+            transition: opacity 0.15s ease-in-out;
+          }
 
           img {
             @include shadow-md;
 
             width: 185px;
             border-radius: var(--border-radius-base);
-            position: relative;
 
             @include media-breakpoint-down(sm) {
               width: 35vw;
-            }
-
-            &::before {
-              content: '';
-              background: var(--neutral-90);
-              opacity: 0;
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              border-radius: var(--border-radius-base);
-              transition: opacity 0.15s ease-in-out;
             }
           }
 
