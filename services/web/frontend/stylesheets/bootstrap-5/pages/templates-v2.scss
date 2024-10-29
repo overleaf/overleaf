@@ -14,14 +14,14 @@
       margin-top: var(--spacing-06);
     }
   }
+
+  h2 {
+    margin-top: 0;
+  }
 }
 
 .gallery {
   margin-top: var(--spacing-10);
-
-  .gallery-tagged-container-spacing {
-    padding: 0 var(--spacing-09);
-  }
 
   .gallery-tagged-tags-container-spacing {
     padding: 0 var(--spacing-09);
@@ -62,6 +62,8 @@
   }
 
   .gallery-header {
+    margin-bottom: var(--spacing-09);
+
     @include media-breakpoint-up(lg) {
       max-width: $templates-search-max-width;
       display: flex;
@@ -85,12 +87,16 @@
     @include body-lg;
 
     text-align: center;
-    margin-bottom: var(--spacing-09);
+    margin-bottom: 0;
+  }
+
+  .tagged-header-container {
+    margin-bottom: var(--spacing-16);
   }
 
   .top-picks-banner {
     padding: 0;
-    margin: var(--spacing-16) auto;
+    margin: 0 auto var(--spacing-16) auto;
 
     h2 {
       @include heading-xl;
