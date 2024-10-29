@@ -4,7 +4,7 @@ history-v1
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=18.20.2
+--node-version=20.18.0
 --public-repo=False
 --script-version=4.5.0
 --tsconfig-extra-includes=api/**/*,migrations/**/*,storage/**/*

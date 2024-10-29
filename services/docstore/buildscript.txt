@@ -4,6 +4,6 @@ docstore
 --env-add=
 --env-pass-through=
 --esmock-loader=False
---node-version=18.20.2
+--node-version=20.18.0
 --public-repo=True
 --script-version=4.5.0

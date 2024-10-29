@@ -2,7 +2,7 @@
 # Instead run bin/update_build_scripts from
 # https://github.com/overleaf/internal/
 
-FROM node:18.20.2 AS base
+FROM node:20.18.0 AS base
 
 WORKDIR /overleaf/services/document-updater
 

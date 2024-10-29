@@ -1,4 +1,4 @@
-FROM node:18.20.2
+FROM node:20.18.0
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
 &&  echo \
       "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \

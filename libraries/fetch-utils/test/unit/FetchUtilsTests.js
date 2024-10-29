@@ -30,7 +30,11 @@ const _originalLookup = dns.lookup
 dns.lookup = (hostname, options, callback) => {
   if (hostname === 'example.com') {
     // If the hostname is our test case, return the ip address for the test server
-    callback(null, '127.0.0.1', 4)
+    if (options?.all) {
+      callback(null, [{ address: '127.0.0.1', family: 4 }])
+    } else {
+      callback(null, '127.0.0.1', 4)
+    }
   } else {
     // Otherwise, use the default lookup
     _originalLookup(hostname, options, callback)

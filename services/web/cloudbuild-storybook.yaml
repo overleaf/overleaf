@@ -1,13 +1,13 @@
 steps:
   - id: npm_ci
-    name: "node:18.20.2"
+    name: "node:20.18.0"
     entrypoint: /bin/bash
     args:
       - '-c'
       - 'bin/npm_install_subset . libraries/* services/web'
 
   - id: build-storybook
-    name: 'node:18.20.2'
+    name: 'node:20.18.0'
     env:
       - 'BRANCH_NAME=$BRANCH_NAME'
       - 'BUILD_ID=$BUILD_ID'
@@ -49,7 +49,7 @@ steps:
       - deploy-storybook
 
   - id: create-storybook-index
-    name: 'node:18.20.2'
+    name: 'node:20.18.0'
     dir: services/web
     env:
       - 'BRANCH_NAME=$BRANCH_NAME'

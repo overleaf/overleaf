@@ -6,7 +6,7 @@ version: "2.3"
 
 services:
   test_unit:
-    image: node:18.20.2
+    image: node:20.18.0
     volumes:
       - .:/overleaf/services/docstore
       - ../../node_modules:/overleaf/node_modules
@@ -20,7 +20,7 @@ services:
     user: node
 
   test_acceptance:
-    image: node:18.20.2
+    image: node:20.18.0
     volumes:
       - .:/overleaf/services/docstore
       - ../../node_modules:/overleaf/node_modules
