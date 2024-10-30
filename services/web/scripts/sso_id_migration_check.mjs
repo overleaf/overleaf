@@ -1,5 +1,5 @@
 import { waitForDb } from '../app/src/infrastructure/mongodb.js'
-import SAMLUserIdMigrationHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler.js'
+import SAMLUserIdMigrationHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler.mjs'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
 
 ensureRunningOnMongoSecondaryWithTimeout(300000)

@@ -1,4 +1,4 @@
-import SAMLUserIdAttributeBatchHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdAttributeBatchHandler.js'
+import SAMLUserIdAttributeBatchHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdAttributeBatchHandler.mjs'
 
 const startInstitutionId = parseInt(process.argv[2])
 const endInstitutionId = parseInt(process.argv[3])

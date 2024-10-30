@@ -1,4 +1,4 @@
-import SAMLEmailBatchCheck from '../modules/saas-authentication/app/src/SAML/SAMLEmailBatchCheck.js'
+import SAMLEmailBatchCheck from '../modules/saas-authentication/app/src/SAML/SAMLEmailBatchCheck.mjs'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
 
 ensureRunningOnMongoSecondaryWithTimeout(300000)
