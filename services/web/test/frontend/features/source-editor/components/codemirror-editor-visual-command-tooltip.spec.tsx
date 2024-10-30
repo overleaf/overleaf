@@ -25,7 +25,6 @@ describe('<CodeMirrorEditor/> command tooltip in Visual mode', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
     cy.interceptMetadata()
-    cy.interceptSpelling()
   })
 
   it('shows a tooltip for \\href', function () {

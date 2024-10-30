@@ -39,7 +39,6 @@ describe('<CodeMirrorEditor/> toolbar in Rich Text mode', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
     cy.interceptMetadata()
-    cy.interceptSpelling()
   })
 
   it('should handle Undo and Redo', function () {

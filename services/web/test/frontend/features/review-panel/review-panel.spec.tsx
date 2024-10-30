@@ -9,7 +9,6 @@ describe('<ReviewPanel />', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
 
     cy.interceptEvents()
-    cy.interceptSpelling()
 
     const scope = mockScope('')
     scope.editor.showVisual = true

@@ -107,7 +107,7 @@ function checkBordersWithNoMultiColumn(
 describe('<CodeMirrorEditor/> Table editor', function () {
   beforeEach(function () {
     cy.interceptEvents()
-    cy.interceptSpelling()
+
     cy.interceptMathJax()
     cy.interceptCompile('compile', Number.MAX_SAFE_INTEGER)
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)

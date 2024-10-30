@@ -3,7 +3,6 @@ import { ignoredWordsField, resetSpellChecker } from './ignored-words'
 import { cacheField, addWordToCache, WordCacheValue } from './cache'
 import { WORD_REGEX } from './helpers'
 import OError from '@overleaf/o-error'
-import { spellCheckRequest } from './backend'
 import { EditorView, ViewUpdate } from '@codemirror/view'
 import { ChangeSet, Line, Range, RangeValue } from '@codemirror/state'
 import { IgnoredWords } from '../../../dictionary/ignored-words'
@@ -158,16 +157,6 @@ export class SpellChecker {
             }
           }
         )
-      } else {
-        spellCheckRequest(this.language, unknownWords, this.abortController)
-          .then(result => {
-            this.abortController = null
-            return processResult(result.misspellings)
-          })
-          .catch(error => {
-            this.abortController = null
-            debugConsole.error(error)
-          })
       }
     }
   }

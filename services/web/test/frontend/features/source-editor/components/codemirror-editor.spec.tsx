@@ -12,7 +12,6 @@ describe('<CodeMirrorEditor/>', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
-    cy.interceptSpelling()
   })
 
   it('deletes selected text on Backspace', function () {

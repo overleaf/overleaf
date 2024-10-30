@@ -25,7 +25,6 @@ describe('<CodeMirrorEditor/> paste HTML in Visual mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
-    cy.interceptSpelling()
   })
 
   it('handles paste', function () {

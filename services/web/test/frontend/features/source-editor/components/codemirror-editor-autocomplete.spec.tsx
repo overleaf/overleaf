@@ -16,7 +16,6 @@ describe('autocomplete', { scrollBehavior: false }, function () {
     window.metaAttributesCache.set('ol-showSymbolPalette', true)
     cy.interceptEvents()
     cy.interceptMetadata()
-    cy.interceptSpelling()
   })
 
   it('opens autocomplete on matched text', function () {

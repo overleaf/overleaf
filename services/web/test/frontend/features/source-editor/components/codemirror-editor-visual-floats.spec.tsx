@@ -24,7 +24,6 @@ describe('<CodeMirrorEditor/> floats', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
-    cy.interceptSpelling()
   })
 
   it('decorates a caption', function () {

@@ -441,10 +441,12 @@ describe('<EditorLeftMenu />', function () {
           {
             name: 'Lang 1',
             code: 'lang-1',
+            dic: 'lang_1',
           },
           {
             name: 'Lang 2',
             code: 'lang-2',
+            dic: 'lang_2',
           },
         ]
 

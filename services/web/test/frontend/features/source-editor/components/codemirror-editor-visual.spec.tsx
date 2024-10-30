@@ -14,7 +14,6 @@ describe('<CodeMirrorEditor/> in Visual mode', function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
     cy.interceptMetadata()
-    cy.interceptSpelling()
     cy.interceptMathJax()
 
     // 3 blank lines

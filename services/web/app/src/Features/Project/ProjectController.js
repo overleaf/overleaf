@@ -348,8 +348,6 @@ const _ProjectController = {
       'write-and-cite-ars',
       'default-visual-for-beginners',
       'hotjar',
-      'spell-check-client',
-      'spell-check-no-server',
     ].filter(Boolean)
 
     const getUserValues = async userId =>

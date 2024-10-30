@@ -114,14 +114,6 @@ forEach(Object.keys(suggestions)).describe(
     beforeEach(function () {
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-preventCompileOnLoad', true)
-        win.metaAttributesCache.set('ol-splitTestVariants', {
-          'spell-check-client': 'enabled',
-          'spell-check-no-server': 'enabled',
-        })
-        win.metaAttributesCache.set('ol-splitTestInfo', {
-          'spell-check-client': { phase: 'release' },
-          'spell-check-no-server': { phase: 'release' },
-        })
         win.metaAttributesCache.set('ol-learnedWords', ['baz'])
         win.metaAttributesCache.set(
           'ol-dictionariesRoot',

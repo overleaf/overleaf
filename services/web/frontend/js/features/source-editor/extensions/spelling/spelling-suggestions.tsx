@@ -10,7 +10,6 @@ import { SpellChecker, Word } from './spellchecker'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import classnames from 'classnames'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
 import { sendMB } from '@/infrastructure/event-tracking'
 import SpellingSuggestionsFeedback from './spelling-suggestions-feedback'
 import { SpellingSuggestionsLanguage } from './spelling-suggestions-language'
@@ -76,13 +75,11 @@ export const SpellingSuggestions: FC<{
 
   const language = useMemo(() => {
     if (spellCheckLanguage) {
-      return getMeta('ol-languages').find(
+      return (getMeta('ol-languages') ?? []).find(
         item => item.code === spellCheckLanguage
       )
     }
   }, [spellCheckLanguage])
-
-  const spellCheckClientEnabled = useFeatureFlag('spell-check-client')
 
   if (!language) {
     return null
@@ -146,7 +143,7 @@ export const SpellingSuggestions: FC<{
         />
       </li>
 
-      {spellCheckClientEnabled && language.dic && (
+      {getMeta('ol-isSaas') && (
         <>
           <li className="divider" />
           <li role="menuitem">

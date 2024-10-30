@@ -26,7 +26,6 @@ describe('<CodeMirrorEditor/> lists in Rich Text mode', function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
-    cy.interceptSpelling()
   })
 
   it('creates a nested list inside an unindented list', function () {

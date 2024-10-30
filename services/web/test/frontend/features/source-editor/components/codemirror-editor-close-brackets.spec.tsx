@@ -8,7 +8,6 @@ describe('close brackets', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
-    cy.interceptSpelling()
 
     const scope = mockScope()
 

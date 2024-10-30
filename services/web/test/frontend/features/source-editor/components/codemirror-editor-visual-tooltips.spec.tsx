@@ -10,7 +10,6 @@ describe('<CodeMirrorEditor/> tooltips in Visual mode', function () {
     cy.interceptMathJax()
     cy.interceptMetadata()
     cy.interceptEvents()
-    cy.interceptSpelling()
 
     const scope = mockScope('\n\n\n')
     scope.editor.showVisual = true

@@ -74,7 +74,7 @@ describe('<FigureModal />', function () {
     cy.interceptMathJax()
     cy.interceptEvents()
     cy.interceptMetadata()
-    cy.interceptSpelling()
+
     mount()
   })
 

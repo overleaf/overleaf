@@ -62,7 +62,6 @@ describe('<CodeMirrorEditor/> in Visual mode with read-only permission', functio
     cy.interceptMathJax()
     cy.interceptEvents()
     cy.interceptMetadata()
-    cy.interceptSpelling()
   })
 
   it('decorates footnote content', function () {

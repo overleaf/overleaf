@@ -14,7 +14,6 @@ const DocstoreManager = require('../Docstore/DocstoreManager')
 const logger = require('@overleaf/logger')
 const { expressify } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
-const SplitTestHandler = require('../SplitTests/SplitTestHandler')
 
 module.exports = {
   joinProject: expressify(joinProject),
@@ -57,33 +56,9 @@ async function joinProject(req, res, next) {
     await ProjectDeleter.promises.unmarkAsDeletedByExternalSource(projectId)
   }
 
-  let spellCheckClient
-  try {
-    const assignment = await SplitTestHandler.promises.getAssignmentForUser(
-      userId,
-      'spell-check-client'
-    )
-    spellCheckClient = assignment?.variant === 'enabled'
-  } catch {
-    spellCheckClient = false
-  }
-
-  let spellCheckNoServer
-  try {
-    const assignment = await SplitTestHandler.promises.getAssignmentForUser(
-      userId,
-      'spell-check-no-server'
-    )
-    spellCheckNoServer = assignment?.variant === 'enabled'
-  } catch {
-    spellCheckNoServer = false
-  }
-
   if (project.spellCheckLanguage) {
     project.spellCheckLanguage = await chooseSpellCheckLanguage(
-      project.spellCheckLanguage,
-      spellCheckClient,
-      spellCheckNoServer
+      project.spellCheckLanguage
     )
   }
 
@@ -289,43 +264,20 @@ async function deleteEntity(req, res, next) {
   res.sendStatus(204)
 }
 
-async function chooseSpellCheckLanguage(
-  spellCheckLanguage,
-  spellCheckClient = false,
-  spellCheckNoServer = false
-) {
-  const supportedSpellCheckLanguages = new Set(
-    Settings.languages
-      // optionally only include languages which support client-side spell checking
-      .filter(language => {
-        if (!spellCheckClient) {
-          // only include spell-check languages that are available on the server
-          return language.server !== false
-        }
+const supportedSpellCheckLanguages = new Set(
+  Settings.languages
+    // only include spell-check languages that are available in the client
+    .filter(language => language.dic !== undefined)
+    .map(language => language.code)
+)
 
-        if (spellCheckNoServer) {
-          // only include spell-check languages that are available in the client
-          return language.dic !== undefined
-        }
-
-        return true
-      })
-      .map(language => language.code)
-  )
-
+async function chooseSpellCheckLanguage(spellCheckLanguage) {
   if (supportedSpellCheckLanguages.has(spellCheckLanguage)) {
     return spellCheckLanguage
   }
 
-  // Disable spell checking for currently unsupported spell check languages.
   // Preserve the value in the database so they can use it again once we add back support.
-
-  // existing behaviour: map all unsupported languages to "off"
-  if (!spellCheckNoServer) {
-    return ''
-  }
-
-  // new behaviour: map some server-only languages to a specific variant
+  // Map some server-only languages to a specific variant, or disable spell checking for currently unsupported spell check languages.
   switch (spellCheckLanguage) {
     case 'en':
       // map "English" to "English (American)"
