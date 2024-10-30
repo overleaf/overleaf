@@ -1,3 +1,5 @@
+// @ts-check
+
 const RecurlyWrapper = require('./RecurlyWrapper')
 const RecurlyClient = require('./RecurlyClient')
 const { User } = require('../../models/User')
@@ -5,15 +7,13 @@ const logger = require('@overleaf/logger')
 const SubscriptionUpdater = require('./SubscriptionUpdater')
 const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
-const PlansLocator = require('./PlansLocator')
-const SubscriptionHelper = require('./SubscriptionHelper')
 const { callbackify } = require('@overleaf/promise-utils')
 const UserUpdater = require('../User/UserUpdater')
-const {
-  DuplicateAddOnError,
-  AddOnNotPresentError,
-  NoRecurlySubscriptionError,
-} = require('./Errors')
+const { NoRecurlySubscriptionError } = require('./Errors')
+
+/**
+ * @import { RecurlySubscription } from './RecurlyEntities'
+ */
 
 async function validateNoSubscriptionInRecurly(userId) {
   let subscriptions =
@@ -76,13 +76,18 @@ async function updateSubscription(user, planCode, couponCode) {
     )
   }
 
-  if (!hasSubscription) {
+  if (
+    !hasSubscription ||
+    subscription == null ||
+    subscription.recurlySubscription_id == null
+  ) {
     return
   }
+  const recurlySubscriptionId = subscription.recurlySubscription_id
 
   if (couponCode) {
     const usersSubscription = await RecurlyWrapper.promises.getSubscription(
-      subscription.recurlySubscription_id,
+      recurlySubscriptionId,
       { includeAccount: true }
     )
 
@@ -91,47 +96,12 @@ async function updateSubscription(user, planCode, couponCode) {
       couponCode
     )
   }
-  let changeAtTermEnd
 
-  const currentPlan = PlansLocator.findLocalPlanInSettings(
-    subscription.planCode
+  const recurlySubscription = await RecurlyClient.promises.getSubscription(
+    recurlySubscriptionId
   )
-  const newPlan = PlansLocator.findLocalPlanInSettings(planCode)
-  if (currentPlan && newPlan) {
-    changeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
-      currentPlan,
-      newPlan
-    )
-  } else {
-    logger.error(
-      { currentPlan: subscription.planCode, newPlan: planCode },
-      'unable to locate both plans in settings'
-    )
-    throw new Error('unable to locate both plans in settings')
-  }
-
-  const timeframe = changeAtTermEnd ? 'term_end' : 'now'
-  const subscriptionChangeOptions = { planCode, timeframe }
-  await _updateAndSyncSubscription(
-    user,
-    subscription.recurlySubscription_id,
-    subscriptionChangeOptions
-  )
-}
-
-async function _updateAndSyncSubscription(
-  user,
-  recurlySubscriptionId,
-  subscriptionChangeOptions
-) {
-  await RecurlyClient.promises.changeSubscriptionByUuid(
-    recurlySubscriptionId,
-    subscriptionChangeOptions
-  )
-
-  // v2 recurly API wants a UUID, but UUID isn't included in the subscription change response
-  // we got the UUID from the DB using userHasV2Subscription() - it is the only property
-  // we need to be able to build a 'recurlySubscription' object for syncSubscription()
+  const changeRequest = recurlySubscription.getRequestForPlanChange(planCode)
+  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
   await syncSubscription({ uuid: recurlySubscriptionId }, user._id)
 }
 
@@ -139,7 +109,7 @@ async function cancelPendingSubscriptionChange(user) {
   const { hasSubscription, subscription } =
     await LimitationsManager.promises.userHasV2Subscription(user)
 
-  if (hasSubscription) {
+  if (hasSubscription && subscription != null) {
     await RecurlyClient.promises.removeSubscriptionChangeByUuid(
       subscription.recurlySubscription_id
     )
@@ -150,7 +120,7 @@ async function cancelSubscription(user) {
   try {
     const { hasSubscription, subscription } =
       await LimitationsManager.promises.userHasV2Subscription(user)
-    if (hasSubscription) {
+    if (hasSubscription && subscription != null) {
       await RecurlyClient.promises.cancelSubscriptionByUuid(
         subscription.recurlySubscription_id
       )
@@ -178,7 +148,7 @@ async function reactivateSubscription(user) {
   try {
     const { hasSubscription, subscription } =
       await LimitationsManager.promises.userHasV2Subscription(user)
-    if (hasSubscription) {
+    if (hasSubscription && subscription != null) {
       await RecurlyClient.promises.reactivateSubscriptionByUuid(
         subscription.recurlySubscription_id
       )
@@ -269,6 +239,9 @@ async function _updateSubscriptionFromRecurly(subscription) {
   )
 }
 
+/**
+ * @return {Promise<RecurlySubscription>}
+ */
 async function _getSubscription(user) {
   const { hasSubscription = false, subscription } =
     await LimitationsManager.promises.userHasV2Subscription(user)
@@ -281,50 +254,26 @@ async function _getSubscription(user) {
   }
 
   const currentSub = await RecurlyClient.promises.getSubscription(
-    `uuid-${subscription.recurlySubscription_id}`
+    subscription.recurlySubscription_id
   )
   return currentSub
 }
 
 async function purchaseAddon(user, addOnCode, quantity) {
   const subscription = await _getSubscription(user)
-  const currentAddons = subscription?.addOns || []
-
-  const hasAddon = currentAddons.some(addOn => addOn.addOn.code === addOnCode)
-  if (hasAddon) {
-    throw new DuplicateAddOnError('User already has add-on', {
-      userId: user._id,
-      addOnCode,
-    })
-  }
-  const addOns = [...currentAddons, { code: addOnCode, quantity }]
-  const subscriptionChangeOptions = { addOns, timeframe: 'now' }
-
-  await _updateAndSyncSubscription(
-    user,
-    subscription.uuid,
-    subscriptionChangeOptions
+  const changeRequest = subscription.getRequestForAddOnPurchase(
+    addOnCode,
+    quantity
   )
+  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
+  await syncSubscription({ uuid: subscription.id }, user._id)
 }
 
 async function removeAddon(user, addOnCode) {
   const subscription = await _getSubscription(user)
-  const currentAddons = subscription?.addOns || []
-
-  const hasAddon = currentAddons.some(addOn => addOn.addOn.code === addOnCode)
-  if (!hasAddon) {
-    throw new AddOnNotPresentError('User does not have add-on to remove', {
-      userId: user._id,
-      addOnCode,
-    })
-  }
-  const addOns = currentAddons.filter(addOn => addOn.addOn.code !== addOnCode)
-  const subscriptionChangeOptions = { addOns, timeframe: 'term_end' }
-  await _updateAndSyncSubscription(
-    user,
-    subscription.uuid,
-    subscriptionChangeOptions
-  )
+  const changeRequest = subscription.getRequestForAddOnRemoval(addOnCode)
+  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
+  await syncSubscription({ uuid: subscription.id }, user._id)
 }
 
 module.exports = {
