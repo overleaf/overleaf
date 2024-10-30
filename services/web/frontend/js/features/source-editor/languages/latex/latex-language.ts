@@ -133,6 +133,7 @@ export const LaTeXLanguage = LRLanguage.define({
           ['IncludeGraphics'],
           ['LineBreak'],
           ['UsePackage'],
+          ['FigureEnvironment', 'BeginEnv'],
         ],
         ShortTextArgument: [['Date']],
         TextArgument: [['TabularEnvironment', 'BeginEnv']],
