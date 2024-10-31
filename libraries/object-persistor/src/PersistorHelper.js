@@ -3,7 +3,7 @@ const Stream = require('stream')
 const { pipeline } = require('stream/promises')
 const Logger = require('@overleaf/logger')
 const Metrics = require('@overleaf/metrics')
-const { WriteError, NotFoundError } = require('./Errors')
+const { WriteError, NotFoundError, AlreadyWrittenError } = require('./Errors')
 
 const _128KiB = 128 * 1024
 const TIMING_BUCKETS = [
@@ -146,6 +146,13 @@ function wrapError(error, message, params, ErrorType) {
     (error.response && error.response.statusCode === 404)
   ) {
     return new NotFoundError('no such file', params, error)
+  } else if (
+    params.ifNoneMatch === '*' &&
+    (error.code === 'PreconditionFailed' ||
+      error.response?.statusCode === 412 ||
+      error instanceof AlreadyWrittenError)
+  ) {
+    return new AlreadyWrittenError(message, params, error)
   } else {
     return new ErrorType(message, params, error)
   }

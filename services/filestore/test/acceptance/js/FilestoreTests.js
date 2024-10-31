@@ -32,6 +32,10 @@ process.on('unhandledRejection', e => {
 // store settings for multiple backends, so that we can test each one.
 // fs will always be available - add others if they are configured
 const { BackendSettings, s3Config } = require('./TestConfig')
+const {
+  AlreadyWrittenError,
+  NotImplementedError,
+} = require('@overleaf/object-persistor/src/Errors')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)
@@ -271,6 +275,40 @@ describe('Filestore', function () {
           const response = await fetch(fileUrl)
           const body = await response.text()
           expect(body).to.equal(newContent)
+        })
+
+        describe('IfNoneMatch', function () {
+          if (backendSettings.backend === 'fs') {
+            it('should refuse to handle IfNoneMatch', async function () {
+              await expect(
+                app.persistor.sendStream(
+                  Settings.filestore.stores.user_files,
+                  `${projectId}/${fileId}`,
+                  fs.createReadStream(localFileReadPath),
+                  { ifNoneMatch: '*' }
+                )
+              ).to.be.rejectedWith(NotImplementedError)
+            })
+          } else {
+            it('should reject sendStream on the same key with IfNoneMatch', async function () {
+              await expect(
+                app.persistor.sendStream(
+                  Settings.filestore.stores.user_files,
+                  `${projectId}/${fileId}`,
+                  fs.createReadStream(localFileReadPath),
+                  { ifNoneMatch: '*' }
+                )
+              ).to.be.rejectedWith(AlreadyWrittenError)
+            })
+            it('should allow sendStream on a different key with IfNoneMatch', async function () {
+              await app.persistor.sendStream(
+                Settings.filestore.stores.user_files,
+                `${projectId}/${fileId}-other`,
+                fs.createReadStream(localFileReadPath),
+                { ifNoneMatch: '*' }
+              )
+            })
+          }
         })
 
         if (backendSettings.backend !== 'fs') {

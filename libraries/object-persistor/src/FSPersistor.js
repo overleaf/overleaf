@@ -8,7 +8,7 @@ const { pipeline } = require('stream/promises')
 const { promisify } = require('util')
 
 const AbstractPersistor = require('./AbstractPersistor')
-const { ReadError, WriteError } = require('./Errors')
+const { ReadError, WriteError, NotImplementedError } = require('./Errors')
 const PersistorHelper = require('./PersistorHelper')
 
 const glob = promisify(globCallbacks)
@@ -36,6 +36,14 @@ module.exports = class FSPersistor extends AbstractPersistor {
   }
 
   async sendStream(location, target, sourceStream, opts = {}) {
+    if (opts.ifNoneMatch === '*') {
+      // The standard library only has fs.rename(), which does not support exclusive flags.
+      // Refuse to act on this write operation.
+      throw new NotImplementedError(
+        'Overwrite protection required by caller, but it is not available is FS backend. Configure GCS or S3 backend instead, get in touch with support for further information.'
+      )
+    }
+
     const targetPath = this._getFsPath(location, target)
 
     try {
@@ -55,7 +63,7 @@ module.exports = class FSPersistor extends AbstractPersistor {
       throw PersistorHelper.wrapError(
         err,
         'failed to write stream',
-        { location, target },
+        { location, target, ifNoneMatch: opts.ifNoneMatch },
         WriteError
       )
     }

@@ -52,6 +52,9 @@ module.exports = class S3Persistor extends AbstractPersistor {
       if (opts.contentEncoding) {
         uploadOptions.ContentEncoding = opts.contentEncoding
       }
+      if (opts.ifNoneMatch === '*') {
+        uploadOptions.IfNoneMatch = '*'
+      }
 
       // if we have an md5 hash, pass this to S3 to verify the upload - otherwise
       // we rely on the S3 client's checksum calculation to validate the upload
@@ -69,7 +72,7 @@ module.exports = class S3Persistor extends AbstractPersistor {
       throw PersistorHelper.wrapError(
         err,
         'upload to S3 failed',
-        { bucketName, key },
+        { bucketName, key, ifNoneMatch: opts.ifNoneMatch },
         WriteError
       )
     }

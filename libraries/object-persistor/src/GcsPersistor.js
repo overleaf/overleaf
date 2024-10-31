@@ -78,10 +78,14 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         writeOptions.metadata = writeOptions.metadata || {}
         writeOptions.metadata.contentEncoding = opts.contentEncoding
       }
+      const fileOptions = {}
+      if (opts.ifNoneMatch === '*') {
+        fileOptions.generation = 0
+      }
 
       const uploadStream = this.storage
         .bucket(bucketName)
-        .file(key)
+        .file(key, fileOptions)
         .createWriteStream(writeOptions)
 
       await pipeline(readStream, observer, uploadStream)
@@ -97,7 +101,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       throw PersistorHelper.wrapError(
         err,
         'upload to GCS failed',
-        { bucketName, key },
+        { bucketName, key, ifNoneMatch: opts.ifNoneMatch },
         WriteError
       )
     }
