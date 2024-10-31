@@ -333,7 +333,7 @@
     "qrcode": "^1.4.4",
     "react": "^17.0.2",
     "react-bootstrap": "^0.33.1",
-    "react-bootstrap-5": "npm:react-bootstrap@^2.10.2",
+    "react-bootstrap-5": "npm:react-bootstrap@^2.10.5",
     "react-chartjs-2": "^5.0.1",
     "react-color": "^2.19.3",
     "react-dnd": "^16.0.1",
