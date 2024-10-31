@@ -1,4 +1,5 @@
 import mongodbLegacy from 'mongodb-legacy'
+import { db, getCollectionInternal } from '../app/src/infrastructure/mongodb.js'
 const { ObjectId, ReadPreference } = mongodbLegacy
 
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE || '1000', 10)
@@ -6,8 +7,8 @@ const MIN_ID = process.env.MIN_ID
 
 const tags = ['server-ce', 'server-pro', 'saas']
 
-const migrate = async ({ db, nativeDb }) => {
-  const docOps = nativeDb.collection('docOps')
+const migrate = async () => {
+  const docOps = await getCollectionInternal('docOps')
 
   const filter = {}
   if (MIN_ID) {

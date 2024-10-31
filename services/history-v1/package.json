@@ -29,7 +29,7 @@
     "jsonwebtoken": "^9.0.0",
     "knex": "^2.4.0",
     "lodash": "^4.17.19",
-    "mongodb": "^6.2.0",
+    "mongodb": "6.7.0",
     "overleaf-editor-core": "*",
     "pg": "^8.7.1",
     "swagger-tools": "^0.10.4",

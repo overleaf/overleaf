@@ -3,30 +3,29 @@ const {
   connectionPromise,
   db,
 } = require('../../../app/src/infrastructure/mongodb')
-const { getMongoClient } = require('../../../app/src/infrastructure/Mongoose')
 
 const MIN_MONGO_VERSION = [5, 0]
 
 async function main() {
+  let mongoClient
   try {
-    await connectionPromise
+    mongoClient = await connectionPromise
   } catch (err) {
     console.error('Cannot connect to mongodb')
     throw err
   }
 
-  await checkMongoVersion()
+  await checkMongoVersion(mongoClient)
 
   try {
-    await testTransactions()
+    await testTransactions(mongoClient)
   } catch (err) {
     console.error("Mongo instance doesn't support transactions")
     throw err
   }
 }
 
-async function testTransactions() {
-  const mongoClient = await getMongoClient()
+async function testTransactions(mongoClient) {
   const session = mongoClient.startSession()
   try {
     await session.withTransaction(async () => {
@@ -37,8 +36,7 @@ async function testTransactions() {
   }
 }
 
-async function checkMongoVersion() {
-  const mongoClient = await getMongoClient()
+async function checkMongoVersion(mongoClient) {
   const buildInfo = await mongoClient.db().admin().buildInfo()
   const [major, minor] = buildInfo.versionArray
   const [minMajor, minMinor] = MIN_MONGO_VERSION

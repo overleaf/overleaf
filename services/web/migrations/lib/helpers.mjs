@@ -6,8 +6,18 @@ import {
   getCollectionInternal,
 } from '../../app/src/infrastructure/mongodb.js'
 
+/**
+ * @typedef {import('mongodb-legacy').Document} Collection
+ * @typedef {import('mongodb-legacy').Collection<Document>} Collection
+ */
+
+/**
+ * @param {Collection} collection
+ * @param {Array<{ name: string }>} indexes
+ * @return {Promise<void>}
+ */
 async function addIndexesToCollection(collection, indexes) {
-  return Promise.all(
+  await Promise.all(
     indexes.map(index => {
       index.background = true
       return collection.createIndex(index.key, index)
@@ -15,8 +25,13 @@ async function addIndexesToCollection(collection, indexes) {
   )
 }
 
+/**
+ * @param {Collection} collection
+ * @param {Array<{ name: string }>} indexes
+ * @return {Promise<void>}
+ */
 async function dropIndexesFromCollection(collection, indexes) {
-  return Promise.all(
+  await Promise.all(
     indexes.map(async index => {
       try {
         await collection.dropIndex(index.name)
@@ -31,6 +46,10 @@ async function dropIndexesFromCollection(collection, indexes) {
   )
 }
 
+/**
+ * @param {string} collectionName
+ * @return {Promise<void>}
+ */
 async function dropCollection(collectionName) {
   if (db[collectionName]) {
     throw new Error(`blocking drop of an active collection: ${collectionName}`)

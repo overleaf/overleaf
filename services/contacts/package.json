@@ -25,7 +25,7 @@
     "body-parser": "^1.20.3",
     "bunyan": "^1.8.15",
     "express": "^4.21.0",
-    "mongodb": "^6.1.0",
+    "mongodb": "6.7.0",
     "request": "~2.88.2",
     "underscore": "~1.13.1"
   },

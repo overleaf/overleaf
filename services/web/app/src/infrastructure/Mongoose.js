@@ -61,18 +61,6 @@ mongoose.plugin(schema => {
 
 mongoose.Promise = global.Promise
 
-async function getMongoClient() {
-  const mongooseInstance = await connectionPromise
-  return mongooseInstance.connection.getClient()
-}
-
-async function getNativeDb() {
-  const mongooseInstance = await connectionPromise
-  return mongooseInstance.connection.db
-}
-
-mongoose.getMongoClient = getMongoClient
-mongoose.getNativeDb = getNativeDb
 mongoose.connectionPromise = connectionPromise
 
 module.exports = mongoose
