@@ -176,9 +176,9 @@ function PdfZoomDropdown({
           <DropdownToggle
             id="pdf-zoom-dropdown"
             variant="link"
-            className="pdf-toolbar-btn pdfjs-zoom-dropdown-button"
+            className="pdf-toolbar-btn pdfjs-zoom-dropdown-button small"
           >
-            <small>{rawScaleToPercentage(rawScale)}</small>
+            {rawScaleToPercentage(rawScale)}
           </DropdownToggle>
           <DropdownMenu className="pdfjs-zoom-dropdown-menu">
             <li role="none">
