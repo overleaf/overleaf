@@ -33,6 +33,13 @@
   --navbar-subdued-hover-bg: var(--white);
   --navbar-subdued-hover-color: var(--green-50);
 
+  // Properties of "primary" items
+  --navbar-primary-color: var(--white);
+  --navbar-primary-border-color: var(--green-50);
+  --navbar-primary-bg: var(--green-50);
+  --navbar-primary-hover-bg: var(--green-60);
+  --navbar-primary-hover-border-color: var(--navbar-primary-hover-bg);
+
   // Links
   --navbar-link-color: var(--white);
   --navbar-link-border-color: var(--navbar-link-color);

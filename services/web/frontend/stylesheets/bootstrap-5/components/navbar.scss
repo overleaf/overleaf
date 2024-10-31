@@ -84,6 +84,19 @@
           background-color: var(--navbar-subdued-hover-bg);
         }
       }
+
+      &.primary > .nav-link {
+        color: var(--navbar-primary-color);
+        background-color: var(--navbar-primary-bg);
+        border-color: var(--navbar-primary-border-color);
+
+        &.show,
+        &:hover,
+        &:focus {
+          background-color: var(--navbar-primary-hover-bg);
+          border-color: var(--navbar-primary-hover-border-color);
+        }
+      }
     }
   }
 
