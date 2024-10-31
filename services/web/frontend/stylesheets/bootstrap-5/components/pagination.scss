@@ -21,6 +21,7 @@
       border: 1px solid var(--neutral-30);
       margin-left: -1px;
       font-weight: 600;
+      transition: background-color 0.15s ease-in-out;
 
       &:hover,
       &:focus {
@@ -28,6 +29,7 @@
         background-color: var(--neutral-10);
         border-color: var(--neutral-30);
         text-decoration: none;
+        transition: background-color 0.15s ease-in-out;
       }
     }
 
