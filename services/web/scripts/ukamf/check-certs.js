@@ -11,7 +11,7 @@
 import { Certificate } from '@fidm/x509'
 import UKAMFDB from './ukamf-db.js'
 import V1ApiModule from '../../app/src/Features/V1/V1Api.js'
-import { db, waitForDb } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.js'
 import moment from 'moment'
 
 const { promises: V1Api } = V1ApiModule
@@ -91,7 +91,6 @@ async function getActiveProviderIds() {
 }
 
 try {
-  await waitForDb()
   await main()
 } catch (error) {
   console.error(error.stack)

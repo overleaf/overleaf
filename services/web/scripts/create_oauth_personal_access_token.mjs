@@ -4,7 +4,6 @@
 
 import parseArgs from 'minimist'
 
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import OAuthPersonalAccessTokenManager from '../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager.js'
 
 const argv = parseArgs(process.argv.slice(2), {
@@ -19,7 +18,6 @@ if (!userId) {
 }
 
 async function createPersonalAccessToken() {
-  await waitForDb()
   const accessToken = await OAuthPersonalAccessTokenManager.createToken(userId)
   console.log('Personal Access Token: ' + accessToken)
 }

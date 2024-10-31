@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = Path.dirname(__filename)
-const { db, waitForDb } = mongodb
+const { db } = mongodb
 const { getNativeDb } = Mongoose
 
 class Adapter {
@@ -26,7 +26,6 @@ class Adapter {
   }
 
   async connect() {
-    await waitForDb()
     const nativeDb = await getNativeDb()
     return { db, nativeDb }
   }

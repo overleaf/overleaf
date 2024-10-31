@@ -1,4 +1,4 @@
-import { waitForDb, db } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.js'
 import { ensureMongoTimeout } from '../helpers/env_variable_helper.mjs'
 // Ensure default mongo query timeout has been increased 1h
 if (!process.env.MONGO_SOCKET_TIMEOUT) {
@@ -65,9 +65,9 @@ async function gracefullyDropCollection(collection) {
   console.log(`removing \`${collectionName}\` data - Done`)
 }
 
-waitForDb()
-  .then(main)
-  .catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+try {
+  await main()
+} catch (err) {
+  console.error(err)
+  process.exit(1)
+}

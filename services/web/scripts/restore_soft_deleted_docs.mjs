@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
 
@@ -25,7 +24,6 @@ async function main() {
 }
 
 try {
-  await waitForDb()
   await main()
   process.exit(0)
 } catch (error) {

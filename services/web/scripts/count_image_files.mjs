@@ -1,6 +1,5 @@
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import { extname } from 'node:path'
@@ -22,7 +21,6 @@ const FILE_TYPES = [
 const longestFileType = Math.max(...FILE_TYPES.map(fileType => fileType.length))
 
 async function main() {
-  await waitForDb()
   const projects = db.projects.find(
     {},
     {

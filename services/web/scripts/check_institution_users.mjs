@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
 
@@ -19,7 +18,6 @@ async function main() {
 }
 
 try {
-  await waitForDb()
   await main()
 } catch (error) {
   console.error(error)

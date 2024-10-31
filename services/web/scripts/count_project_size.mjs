@@ -1,5 +1,5 @@
 import readline from 'readline'
-import { waitForDb, ObjectId, db } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId, db } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
 import ProjectGetter from '../app/src/Features/Project/ProjectGetter.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
@@ -127,7 +127,6 @@ async function countDocsSizes(docs) {
 }
 
 try {
-  await waitForDb()
   await countProjectFiles()
   process.exit(0)
 } catch (error) {

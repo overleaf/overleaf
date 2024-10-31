@@ -1,5 +1,5 @@
 import NotificationsBuilder from '../app/src/Features/Notifications/NotificationsBuilder.js'
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 
 const { batchedUpdate } = BatchedUpdateModule
@@ -57,8 +57,6 @@ async function processBatch(groupSubscriptionsBatch) {
 }
 
 async function main() {
-  await waitForDb()
-
   await batchedUpdate('subscriptions', { groupPlan: true }, processBatch, {
     member_ids: 1,
   })

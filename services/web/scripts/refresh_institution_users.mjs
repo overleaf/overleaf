@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
 
@@ -32,7 +31,6 @@ function main() {
 }
 
 try {
-  await waitForDb()
   await main()
 } catch (error) {
   console.error(error)

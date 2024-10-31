@@ -8,7 +8,6 @@ import path from 'path'
 import _ from 'lodash'
 import parseArgs from 'minimist'
 import OError from '@overleaf/o-error'
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import { User } from '../app/src/models/User.js'
 import ProjectCreationHandler from '../app/src/Features/Project/ProjectCreationHandler.js'
 import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
@@ -207,7 +206,6 @@ async function _applyRandomDocUpdate(ownerId, projectId) {
 }
 
 async function createProject() {
-  await waitForDb()
   const user = await User.findById(userId)
   console.log('Will create project')
   console.log('user_id:', userId, '=>', user.email)

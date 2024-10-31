@@ -432,7 +432,7 @@ async function run() {
 }
 
 try {
-  await Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
+  await Promise.all([mongodb.connectionPromise, mongoose.connectionPromise])
   await run()
   log('Completed')
   process.exit(0)

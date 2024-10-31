@@ -1,14 +1,11 @@
 import { OauthApplication } from '../app/src/models/OauthApplication.js'
 import parseArgs from 'minimist'
 import OError from '@overleaf/o-error'
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 
 async function _removeOauthApplication(appId) {
   if (!appId) {
     throw new OError('No app id supplied')
   }
-  console.log('Waiting for db...')
-  await waitForDb()
   console.log(`Removing oauthApplication with id=${appId}`)
   const result = await OauthApplication.deleteOne({ id: appId })
   console.log('Result', result)

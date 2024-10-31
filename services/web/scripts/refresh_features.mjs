@@ -1,4 +1,4 @@
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 import _ from 'lodash'
 import async from 'async'
@@ -191,6 +191,5 @@ const setup = () => {
   }
 }
 
-await waitForDb()
 setup()
 run()

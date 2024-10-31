@@ -6,7 +6,7 @@
 // node scripts/merge_group_subscription_members \
 //  --target [targetSubscriptionId] --source [sourceSubscriptionId] --commit
 
-import { db, ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 
 import SubscriptionUpdater from '../app/src/Features/Subscription/SubscriptionUpdater.js'
 import minimist from 'minimist'
@@ -42,8 +42,6 @@ async function main() {
   if (!commit) {
     console.log('Doing dry run without --commit')
   }
-
-  await waitForDb()
 
   const targetSubscription = await getSubscription(new ObjectId(target))
   const sourceSubscription = await getSubscription(new ObjectId(source))

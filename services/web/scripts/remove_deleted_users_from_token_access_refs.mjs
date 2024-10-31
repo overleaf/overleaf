@@ -1,6 +1,5 @@
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
@@ -192,7 +191,6 @@ async function fixProjectsWithInvalidTokenAccessRefsIds(
 }
 
 async function main(DRY_RUN, PROJECTS_LIST) {
-  await waitForDb()
   await fixProjectsWithInvalidTokenAccessRefsIds(DRY_RUN, PROJECTS_LIST)
 }
 

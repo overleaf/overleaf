@@ -5,7 +5,7 @@
 import minimist from 'minimist'
 
 import mongodb from 'mongodb-legacy'
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
 import FileStoreHandler from '../app/src/Features/FileStore/FileStoreHandler.js'
 import ProjectEntityMongoUpdateHandler from '../app/src/Features/Project/ProjectEntityMongoUpdateHandler.js'
@@ -30,7 +30,6 @@ function parseArgs() {
 }
 
 async function main() {
-  await waitForDb()
   const projects = await getProjects()
 
   for (const project of projects) {

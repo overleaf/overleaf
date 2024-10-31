@@ -1,10 +1,8 @@
 const minimist = require('minimist')
-const { db, waitForDb } = require('../../../app/src/infrastructure/mongodb')
+const { db } = require('../../../app/src/infrastructure/mongodb')
 const UserRegistrationHandler = require('../../../app/src/Features/User/UserRegistrationHandler')
 
 async function main() {
-  await waitForDb()
-
   const argv = minimist(process.argv.slice(2), {
     string: ['email'],
     boolean: ['admin'],

@@ -1,7 +1,6 @@
-const { waitForDb, db } = require('../../../app/src/infrastructure/mongodb')
+const { db } = require('../../../app/src/infrastructure/mongodb')
 
 async function readImagesInUse() {
-  await waitForDb()
   const projectCount = await db.projects.countDocuments()
   if (projectCount === 0) {
     return []

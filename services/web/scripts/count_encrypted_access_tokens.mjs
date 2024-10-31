@@ -1,6 +1,5 @@
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
@@ -56,8 +55,6 @@ async function count(collectionName, paths) {
 }
 
 async function main() {
-  await waitForDb()
-
   const STATS = {}
   for (const [collectionName, paths] of Object.entries(CASES)) {
     const stats = await count(collectionName, paths)

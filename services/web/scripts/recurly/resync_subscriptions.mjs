@@ -7,7 +7,6 @@ import { setTimeout } from 'node:timers/promises'
 import util from 'util'
 
 import pLimit from 'p-limit'
-import { waitForDb } from '../../app/src/infrastructure/mongodb.js'
 
 util.inspect.defaultOptions.maxArrayLength = null
 
@@ -147,8 +146,6 @@ const loopForSubscriptions = async skipInitial => {
 
 let retryCounter = 0
 const run = async () => {
-  await waitForDb()
-
   while (true) {
     try {
       await loopForSubscriptions(

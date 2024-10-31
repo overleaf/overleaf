@@ -1,7 +1,6 @@
 import { Subscription } from '../app/src/models/Subscription.js'
 import SubscriptionUpdater from '../app/src/Features/Subscription/SubscriptionUpdater.js'
 import minimist from 'minimist'
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import mongodb from 'mongodb-legacy'
 
 const { ObjectId } = mongodb
@@ -39,12 +38,10 @@ const setup = () => {
 
 setup()
 
-waitForDb()
-  .then(run)
-  .then(() => {
-    process.exit(0)
-  })
-  .catch(err => {
-    console.log('Aiee, something went wrong!', err)
-    process.exit(1)
-  })
+try {
+  await run()
+  process.exit(0)
+} catch (err) {
+  console.error('Aiee, something went wrong!', err)
+  process.exit(1)
+}

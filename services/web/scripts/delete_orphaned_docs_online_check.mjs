@@ -3,7 +3,6 @@ import { promisify } from 'util'
 import mongodb from 'mongodb-legacy'
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_PRIMARY,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
@@ -41,8 +40,6 @@ function getSecondsFromObjectId(id) {
 
 async function main() {
   await letUserDoubleCheckInputs()
-  await waitForDb()
-
   let lowerProjectId = BATCH_LAST_ID
 
   let nProjectsProcessedTotal = 0

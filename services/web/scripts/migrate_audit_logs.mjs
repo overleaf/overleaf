@@ -1,6 +1,6 @@
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import { promiseMapWithLimit, promisify } from '@overleaf/promise-utils'
-import { db, ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
 import { fileURLToPath } from 'url'
 
@@ -153,7 +153,6 @@ export default main
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   try {
-    await waitForDb()
     await main()
     console.log('Done.')
     process.exit(0)

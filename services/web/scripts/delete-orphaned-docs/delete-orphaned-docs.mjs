@@ -1,11 +1,7 @@
 import fs from 'fs'
 import minimist from 'minimist'
 import readline from 'readline'
-import {
-  db,
-  ObjectId,
-  waitForDb,
-} from '../../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../../app/src/infrastructure/mongodb.js'
 import DocstoreManagerModule from '../../app/src/Features/Docstore/DocstoreManager.js'
 
 const { promises: DocstoreManager } = DocstoreManagerModule
@@ -65,8 +61,6 @@ rl.on('close', async () => {
   const projectCount = Object.keys(orphanedDocs).length
 
   console.log(`Loaded Data for ${docCount} docs in ${projectCount} Projects`)
-
-  await waitForDb()
 
   for (const projectId of Object.keys(orphanedDocs)) {
     await deleteOrphanedDocs(projectId, orphanedDocs[projectId])

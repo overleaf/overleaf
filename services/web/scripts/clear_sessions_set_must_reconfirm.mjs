@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import async from 'async'
 import UserUpdater from '../app/src/Features/User/UserUpdater.js'
 import UserSessionsManager from '../app/src/Features/User/UserSessionsManager.js'
@@ -73,8 +73,6 @@ const userIds = usersFile
 
 async function processUsers(userIds) {
   console.log('---Starting set_must_reconfirm script---')
-  await waitForDb()
-
   _validateUserIdList(userIds)
   console.log(`---Starting to process ${userIds.length} users---`)
   await _loopUsers(userIds)

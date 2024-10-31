@@ -1,6 +1,5 @@
 import GoogleBigQueryHelper from './helpers/GoogleBigQueryHelper.mjs'
 import { Subscription } from '../../app/src/models/Subscription.js'
-import { waitForDb } from '../../app/src/infrastructure/mongodb.js'
 import AnalyticsManager from '../../app/src/Features/Analytics/AnalyticsManager.js'
 import { DeletedSubscription } from '../../app/src/models/DeletedSubscription.js'
 import minimist from 'minimist'
@@ -12,8 +11,6 @@ const { ObjectId } = mongodb
 let FETCH_LIMIT, COMMIT, VERBOSE
 
 async function main() {
-  await waitForDb()
-
   console.log('## Syncing group subscription memberships...')
 
   const subscriptionsCount = await Subscription.countDocuments({

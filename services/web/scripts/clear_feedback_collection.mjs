@@ -5,11 +5,10 @@
  *   DRY_RUN=false node scripts/clear_feedback_collection.js 2022-11-01  # deletion mode
  */
 
-import { db, ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import { fileURLToPath } from 'url'
 
 const runScript = async (timestamp, dryRun) => {
-  await waitForDb()
   const t = new Date(timestamp)
   if (isNaN(t)) {
     throw new Error('invalid date ' + timestamp)

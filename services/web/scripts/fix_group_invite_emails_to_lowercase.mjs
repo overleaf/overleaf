@@ -1,4 +1,4 @@
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 
 const { batchedUpdate } = BatchedUpdateModule
@@ -46,8 +46,6 @@ async function processBatch(subscriptions) {
 }
 
 async function main() {
-  await waitForDb()
-
   const projection = {
     _id: 1,
     teamInvites: 1,

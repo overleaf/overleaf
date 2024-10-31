@@ -1,7 +1,6 @@
 import mongodb from 'mongodb-legacy'
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../../app/src/infrastructure/mongodb.js'
 
@@ -126,7 +125,6 @@ async function batchedUpdate(
   findOptions,
   batchedUpdateOptions
 ) {
-  await waitForDb()
   const collection = db[collectionName]
   ID_EDGE_PAST = await getIdEdgePast(collection)
   if (!ID_EDGE_PAST) {

@@ -6,15 +6,13 @@
  * script.
  */
 import mongodb from 'mongodb-legacy'
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import ProjectLocator from '../app/src/Features/Project/ProjectLocator.js'
 
 const { ObjectId } = mongodb
 
 async function main() {
   const { projectId, mongoPath } = parseArgs()
-  await waitForDb()
-
   let modifiedCount
   if (isRootFolder(mongoPath)) {
     modifiedCount = await fixRootFolder(projectId)

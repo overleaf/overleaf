@@ -1,4 +1,4 @@
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import minimist from 'minimist'
 import CollaboratorsInviteHelper from '../app/src/Features/Collaborators/CollaboratorsInviteHelper.js'
@@ -53,7 +53,6 @@ async function addTokenHmacField(DRY_RUN) {
 }
 
 async function main(DRY_RUN) {
-  await waitForDb()
   await addTokenHmacField(DRY_RUN)
 }
 

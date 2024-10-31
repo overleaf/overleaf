@@ -2,7 +2,7 @@
 
 import minimist from 'minimist'
 
-import { db, waitForDb, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
 import ProjectEntityRestoreHandler from '../app/src/Features/Project/ProjectEntityRestoreHandler.js'
 import RedisWrapper from '@overleaf/redis-wrapper'
@@ -30,7 +30,6 @@ function extractObjectId(s) {
 }
 
 async function main() {
-  await waitForDb()
   logger.info({ opts }, 'removing deleted docs')
   let cursor = 0
   do {

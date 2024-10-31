@@ -1,4 +1,4 @@
-import { db, waitForDb } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 
 const argv = minimist(process.argv.slice(2))
@@ -9,7 +9,6 @@ if (!commit) {
 }
 
 async function getDupes(commit) {
-  await waitForDb()
   const entries = await db.splittests.aggregate([
     {
       $match: {

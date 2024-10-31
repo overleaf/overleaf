@@ -1,6 +1,6 @@
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
-const { db, waitForDb } = require('../../../app/src/infrastructure/mongodb')
+const { db } = require('../../../app/src/infrastructure/mongodb')
 const {
   mergeFeatures,
   compareFeatures,
@@ -8,8 +8,6 @@ const {
 const DRY_RUN = !process.argv.includes('--dry-run=false')
 
 async function main(DRY_RUN, defaultFeatures) {
-  await waitForDb()
-
   logger.info({ defaultFeatures }, 'default features')
 
   const cursor = db.users.find(

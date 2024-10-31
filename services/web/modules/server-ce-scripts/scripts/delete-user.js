@@ -1,10 +1,7 @@
-const { waitForDb } = require('../../../app/src/infrastructure/mongodb')
 const UserGetter = require('../../../app/src/Features/User/UserGetter')
 const UserDeleter = require('../../../app/src/Features/User/UserDeleter')
 
 async function main() {
-  await waitForDb()
-
   const email = (process.argv.slice(2).pop() || '').replace(/^--email=/, '')
   if (!email) {
     console.error(`Usage: node ${__filename} --email=joe@example.com`)

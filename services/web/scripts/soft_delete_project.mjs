@@ -1,5 +1,4 @@
 import minimist from 'minimist'
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import ProjectDeleter from '../app/src/Features/Project/ProjectDeleter.js'
 
 async function main() {
@@ -10,8 +9,6 @@ async function main() {
     throw new Error('set --project-id')
   }
   console.log(`Soft deleting project ${projectId}`)
-  await waitForDb()
-
   // soft delete, project will be permanently deleted after 90 days
   await ProjectDeleter.promises.deleteProject(projectId)
 }

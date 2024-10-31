@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import SAMLUserIdMigrationHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler.mjs'
 import { ensureMongoTimeout } from './helpers/env_variable_helper.mjs'
 
@@ -31,7 +30,6 @@ async function main() {
 }
 
 try {
-  await waitForDb()
   await main()
 } catch (error) {
   console.error(error)

@@ -1,4 +1,4 @@
-import { ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import UserUpdater from '../app/src/Features/User/UserUpdater.js'
 import UserGetter from '../app/src/Features/User/UserGetter.js'
 
@@ -53,7 +53,6 @@ async function removeEmail() {
   )
 }
 try {
-  await waitForDb()
   await removeEmail()
   console.log('Done.')
   process.exit()

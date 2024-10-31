@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 import ThirdPartyIdentityManager from '../app/src/Features/User/ThirdPartyIdentityManager.js'
 import UserGetter from '../app/src/Features/User/UserGetter.js'
@@ -41,8 +40,6 @@ async function main() {
   if (!USER_ID) {
     throw new Error('No --userId argument provided')
   }
-
-  await waitForDb()
 
   const auditLog = {
     initiatorId: undefined,

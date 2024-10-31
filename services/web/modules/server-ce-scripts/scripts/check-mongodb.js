@@ -1,12 +1,15 @@
 const { ObjectId } = require('mongodb-legacy')
-const { waitForDb, db } = require('../../../app/src/infrastructure/mongodb')
+const {
+  connectionPromise,
+  db,
+} = require('../../../app/src/infrastructure/mongodb')
 const { getMongoClient } = require('../../../app/src/infrastructure/Mongoose')
 
 const MIN_MONGO_VERSION = [5, 0]
 
 async function main() {
   try {
-    await waitForDb()
+    await connectionPromise
   } catch (err) {
     console.error('Cannot connect to mongodb')
     throw err

@@ -1,7 +1,10 @@
 // @ts-check
 
-import mongodb from '../../app/src/infrastructure/mongodb.js'
-const { db, getCollectionNames, getCollectionInternal, waitForDb } = mongodb
+import {
+  db,
+  getCollectionNames,
+  getCollectionInternal,
+} from '../../app/src/infrastructure/mongodb.js'
 
 async function addIndexesToCollection(collection, indexes) {
   return Promise.all(
@@ -29,7 +32,6 @@ async function dropIndexesFromCollection(collection, indexes) {
 }
 
 async function dropCollection(collectionName) {
-  await waitForDb()
   if (db[collectionName]) {
     throw new Error(`blocking drop of an active collection: ${collectionName}`)
   }
@@ -46,7 +48,6 @@ async function dropCollection(collectionName) {
  * @param {string} migrationName
  */
 async function assertDependency(migrationName) {
-  await waitForDb()
   const migrations = await getCollectionInternal('migrations')
   const migration = await migrations.findOne({ name: migrationName })
   if (migration == null) {

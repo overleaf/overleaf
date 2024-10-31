@@ -1,11 +1,9 @@
 import minimist from 'minimist'
-import { waitForDb, db } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.js'
 import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
 
 async function main() {
   const opts = parseArgs()
-  await waitForDb()
-
   if (opts.accessToken == null) {
     console.error('Missing --token option')
     process.exit(1)

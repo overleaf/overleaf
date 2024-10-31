@@ -1,7 +1,6 @@
 import {
   db,
   READ_PREFERENCE_SECONDARY,
-  waitForDb,
   ObjectId,
 } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
@@ -76,7 +75,6 @@ function getUserMappings(affiliations) {
 
 async function main() {
   const args = parseArgs()
-  await waitForDb()
   const affiliations = await fetchInstitutionAndAffiliations(args.institutionId)
   const userMappings = getUserMappings(affiliations)
 

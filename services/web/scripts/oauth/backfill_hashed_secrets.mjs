@@ -1,12 +1,10 @@
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../../app/src/infrastructure/mongodb.js'
 import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
 
 async function main() {
-  await waitForDb()
   console.log('Hashing client secrets...')
   await hashSecrets(db.oauthApplications, 'clientSecret')
   console.log('Hashing access tokens...')

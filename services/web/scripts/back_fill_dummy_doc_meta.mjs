@@ -2,7 +2,6 @@ import { promisify } from 'util'
 import mongodb from 'mongodb-legacy'
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
@@ -50,8 +49,6 @@ async function main(options) {
   })
 
   await letUserDoubleCheckInputs(options)
-  await waitForDb()
-
   let startId = options.firstProjectId
 
   let nProcessed = 0

@@ -1,8 +1,7 @@
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import { fileURLToPath } from 'url'
 
 async function updateStringDates() {
-  await waitForDb()
   const users = db.users.find({
     splitTests: { $exists: true },
   })

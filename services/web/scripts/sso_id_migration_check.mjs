@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import SAMLUserIdMigrationHandler from '../modules/saas-authentication/app/src/SAML/SAMLUserIdMigrationHandler.mjs'
 import { ensureRunningOnMongoSecondaryWithTimeout } from './helpers/env_variable_helper.mjs'
 
@@ -10,12 +9,12 @@ const emitUsers = process.argv.includes('--emit-users')
 
 console.log('Checking SSO user ID migration for institution:', institutionId)
 
-waitForDb()
-  .then(main)
-  .catch(error => {
-    console.error(error)
-    process.exit(1)
-  })
+try {
+  await main()
+} catch (error) {
+  console.error(error)
+  process.exit(1)
+}
 
 async function main() {
   const result =

@@ -1,4 +1,3 @@
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import { User } from '../app/src/models/User.js'
 import UserController from '../app/src/Features/User/UserController.js'
 import Logger from '@overleaf/logger'
@@ -45,7 +44,6 @@ async function run() {
 }
 
 try {
-  await waitForDb()
   await run()
   process.exit()
 } catch (error) {

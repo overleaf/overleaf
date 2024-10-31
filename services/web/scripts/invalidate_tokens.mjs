@@ -1,4 +1,4 @@
-import { db, ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined
@@ -10,8 +10,6 @@ if (!commit) {
   console.log('Doing dry run without --commit')
 }
 console.log('checking', projectIds.length, 'projects')
-
-await waitForDb()
 
 const affectedProjects = await db.projects
   .find(

@@ -1,4 +1,4 @@
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import mongodb from 'mongodb-legacy'
 import fs from 'fs'
@@ -26,7 +26,6 @@ async function main() {
   optedOutList = optedOutFile.split('\n').map(id => new ObjectId(id))
 
   console.log(`preserving opt-outs of ${optedOutList.length} users`)
-  await waitForDb()
   // update all applicable user models
   await batchedUpdate(
     'users',

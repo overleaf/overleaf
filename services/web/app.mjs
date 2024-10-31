@@ -59,7 +59,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
   PlansLocator.ensurePlansAreSetupCorrectly()
 
-  Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
+  Promise.all([mongodb.connectionPromise, mongoose.connectionPromise])
     .then(async () => {
       Server.server.listen(port, host, function () {
         logger.debug(`web starting up, listening on ${host}:${port}`)
@@ -77,7 +77,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 
 // initialise site admin tasks
-Promise.all([mongodb.waitForDb(), mongoose.connectionPromise])
+Promise.all([mongodb.connectionPromise, mongoose.connectionPromise])
   .then(() => SiteAdminHandler.initialise())
   .catch(err => {
     logger.fatal({ err }, 'Cannot connect to mongo. Exiting.')

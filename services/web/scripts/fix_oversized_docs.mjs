@@ -1,6 +1,6 @@
 import fs from 'fs'
 import minimist from 'minimist'
-import { waitForDb, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
 import FileStoreHandler from '../app/src/Features/FileStore/FileStoreHandler.js'
 import FileWriter from '../app/src/infrastructure/FileWriter.js'
@@ -39,7 +39,6 @@ Options:
 }
 
 async function main() {
-  await waitForDb()
   for (const projectId of opts.projectIds) {
     await processProject(projectId)
   }

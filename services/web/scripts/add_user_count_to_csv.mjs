@@ -7,7 +7,7 @@ import fs from 'fs'
 import * as csv from 'csv/sync'
 import minimist from 'minimist'
 import UserGetter from '../app/src/Features/User/UserGetter.js'
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
 
 const argv = minimist(process.argv.slice(2), {
@@ -45,7 +45,6 @@ if (records.length === 0) {
 }
 
 async function main() {
-  await waitForDb()
   for (const record of records) {
     const domain = record[argv.domain]
     const { domainUserCount, subdomainUserCount } = await getUserCount(domain, {

@@ -10,7 +10,6 @@
 // another.
 
 const minimist = require('minimist')
-const { waitForDb } = require('../../../app/src/infrastructure/mongodb')
 
 const os = require('os')
 const fs = require('fs')
@@ -182,7 +181,6 @@ async function migrateEmails() {
   const csvFile = fs.readFileSync(csvFilePath, 'utf8')
   const rows = csv.parse(csvFile)
   console.log('Number of users to migrate: ', rows.length)
-  await waitForDb()
   const emails = filterEmails(rows)
   const existingUserEmails = await checkEmailsAgainstDb(emails)
   await doMigration(existingUserEmails)

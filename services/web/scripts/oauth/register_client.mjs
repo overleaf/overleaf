@@ -1,13 +1,12 @@
 import minimist from 'minimist'
 import mongodb from 'mongodb-legacy'
-import { waitForDb, db } from '../../app/src/infrastructure/mongodb.js'
+import { db } from '../../app/src/infrastructure/mongodb.js'
 import { hashSecret } from '../../modules/oauth2-server/app/src/SecretsHelper.js'
 
 const { ObjectId } = mongodb
 
 async function main() {
   const opts = parseArgs()
-  await waitForDb()
   const application = await getApplication(opts.id)
   if (application == null) {
     console.log(

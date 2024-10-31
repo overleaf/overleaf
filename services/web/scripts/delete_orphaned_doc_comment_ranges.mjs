@@ -1,5 +1,4 @@
 import minimist from 'minimist'
-import { waitForDb } from '../app/src/infrastructure/mongodb.js'
 import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
@@ -14,8 +13,6 @@ const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
  * for more detail.
  */
 async function main() {
-  await waitForDb()
-
   const argv = minimist(process.argv.slice(2))
   const { projectId, docId } = argv
 

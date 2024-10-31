@@ -1,13 +1,11 @@
 import minimist from 'minimist'
 import {
-  waitForDb,
   db,
   READ_PREFERENCE_SECONDARY,
 } from '../../app/src/infrastructure/mongodb.js'
 
 async function main() {
   const opts = parseArgs()
-  await waitForDb()
   const application = await getApplication(opts.clientId)
   if (application == null) {
     console.error(`Client configuration not found: ${opts.clientId}`)

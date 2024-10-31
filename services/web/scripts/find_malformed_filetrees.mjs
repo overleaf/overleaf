@@ -1,11 +1,9 @@
 import {
   db,
-  waitForDb,
   READ_PREFERENCE_SECONDARY,
 } from '../app/src/infrastructure/mongodb.js'
 
 async function main() {
-  await waitForDb()
   const projects = db.projects.find(
     {},
     {

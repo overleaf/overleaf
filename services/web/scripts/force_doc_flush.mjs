@@ -1,5 +1,5 @@
 import mongodb from 'mongodb-legacy'
-import { db, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 import DocumentUpdaterHandler from '../app/src/Features/DocumentUpdater/DocumentUpdaterHandler.js'
 
 const { ObjectId } = mongodb
@@ -16,8 +16,6 @@ console.log({
 })
 
 async function main() {
-  await waitForDb()
-
   const { lines, version, ranges } = await getDocument()
   const size = lines.reduce((size, line) => size + line.length + 1, 0)
 

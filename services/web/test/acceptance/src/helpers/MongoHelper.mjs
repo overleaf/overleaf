@@ -1,6 +1,6 @@
 import { execFile } from 'child_process'
 import {
-  waitForDb,
+  connectionPromise,
   db,
   dropTestDatabase,
 } from '../../../../app/src/infrastructure/mongodb.js'
@@ -10,7 +10,9 @@ const DEFAULT_ENV = 'saas'
 
 export default {
   initialize() {
-    before('wait for db', waitForDb)
+    before('wait for db', async function () {
+      await connectionPromise
+    })
     if (process.env.CLEANUP_MONGO === 'true') {
       before('drop test database', dropTestDatabase)
     }

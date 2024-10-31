@@ -1,9 +1,7 @@
 import HistoryRangesSupportMigration from '../../app/src/Features/History/HistoryRangesSupportMigration.mjs'
-import { waitForDb } from '../../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 
 async function main() {
-  await waitForDb()
   const {
     projectIds,
     ownerIds,

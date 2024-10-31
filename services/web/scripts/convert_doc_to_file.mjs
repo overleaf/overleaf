@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import { waitForDb, ObjectId } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityUpdateHandler from '../app/src/Features/Project/ProjectEntityUpdateHandler.js'
 import Errors from '../app/src/Features/Errors/Errors.js'
 
@@ -16,7 +16,6 @@ async function main() {
   }
 
   console.log(`Converting doc ${projectId}/${docId} as user ${userId}`)
-  await waitForDb()
   try {
     await ProjectEntityUpdateHandler.promises.convertDocToFile(
       projectId,

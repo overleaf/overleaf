@@ -26,7 +26,7 @@
 import minimist from 'minimist'
 
 import fs from 'fs'
-import { ObjectId, waitForDb } from '../app/src/infrastructure/mongodb.js'
+import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import pLimit from 'p-limit'
 import FeaturesUpdater from '../app/src/Features/Subscription/FeaturesUpdater.js'
 import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.js'
@@ -161,8 +161,6 @@ async function processUsers(userIds) {
       ? 'Users with this feature already will be skipped'
       : 'Every user in file will get feature override'
   )
-
-  await waitForDb()
 
   _validateUserIdList(userIds)
   console.log(`---Starting to process ${userIds.length} users---`)

@@ -1,13 +1,7 @@
 const minimist = require('minimist')
-const {
-  db,
-  ObjectId,
-  waitForDb,
-} = require('../../../app/src/infrastructure/mongodb')
+const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
 
 async function main() {
-  await waitForDb()
-
   const argv = minimist(process.argv.slice(2), {
     string: ['user-id', 'compile-timeout'],
   })
