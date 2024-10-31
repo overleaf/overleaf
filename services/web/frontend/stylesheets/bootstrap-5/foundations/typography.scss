@@ -1,5 +1,4 @@
 // This file provides CSS variables for font size and line height, plus Sass variables for base text size for Bootstrap
-@use 'sass:math';
 
 :root {
   --font-size-01: 0.75rem; // 12px
@@ -100,7 +99,7 @@
   line-height: var(--line-height-01);
 }
 
-.dm-mono {
+@mixin font-mono {
   font-family: 'DM Mono', monospace;
 
   // We're using the "ss05" (stylistic set 5) version of the DM Mono, by setting the `font-feature-settings` rule

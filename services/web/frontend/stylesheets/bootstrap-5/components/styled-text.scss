@@ -1,5 +1,5 @@
 .text-with-bg {
-  @extend .dm-mono;
+  @include font-mono;
 
   padding: 0 var(--spacing-04);
   border-radius: var(--border-radius-medium);
@@ -28,7 +28,7 @@
 }
 
 .mono-text {
-  @extend .dm-mono;
+  @include font-mono;
   @include body-lg;
 
   color: var(--green-60);

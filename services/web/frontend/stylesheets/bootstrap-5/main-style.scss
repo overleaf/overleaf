@@ -12,7 +12,7 @@
 // TODO Bootstrap 5: Check whether this works with Bootstrap 5, and whether we can replace it
 @import '../vendor/select/select';
 
-// Boostrap-related
+// Bootstrap-related
 
 // Note that files containing Bootstrap or Sass files that interact with
 // Bootstrap's Sass variables must use @import rather than @use because
@@ -21,8 +21,23 @@
 // Include Bootstrap 5 itself, plus overrides and extend Bootstrap styles.
 @import 'base/bootstrap';
 
+// Extra colours for the website redesign
+@import 'base/colors';
+
+// Components custom style
+@import 'components/all';
+
 // Typography-related
 @import 'base/typography';
+
+// Custom helpers
+@import 'helpers/all';
+
+// Modals
+@import 'modals/all';
+
+// Pages custom style
+@import 'pages/all';
 
 // Link styles
 @import 'base/links';

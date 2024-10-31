@@ -138,7 +138,7 @@
       margin-bottom: var(--spacing-07);
 
       a {
-        @extend .dm-mono;
+        @include font-mono;
 
         text-decoration: none;
         font-weight: 500;

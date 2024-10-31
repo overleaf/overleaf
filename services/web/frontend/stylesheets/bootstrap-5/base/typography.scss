@@ -78,6 +78,10 @@ samp {
   color: var(--content-disabled) !important;
 }
 
+.dm-mono {
+  @include font-mono;
+}
+
 @include media-breakpoint-up(lg) {
   .text-center-only-desktop {
     text-align: center;

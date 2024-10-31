@@ -55,15 +55,6 @@ $yellow-50: #8f5514;
 $yellow-60: #7a4304;
 $yellow-70: #633a0b;
 
-/* Website redesign */
-$vivid-tangerine: #f1a695;
-$ceil: #9597c9;
-$caramel: #f9d38f;
-$dark-jungle-green: #0f271a;
-$sapphire-blue: #4354a3;
-$purple-bright: #939aff;
-$green-bright: #13c965;
-
 /* ====== Semantic Sass color variables ====== */
 $bg-light-primary: $white;
 $bg-light-secondary: $neutral-10;
@@ -173,15 +164,6 @@ $link-ui-visited-dark: $blue-40;
   --yellow-50: #{$yellow-50};
   --yellow-60: #{$yellow-60};
   --yellow-70: #{$yellow-70};
-
-  /* Website redesign */
-  --vivid-tangerine: #{$vivid-tangerine};
-  --ceil: #{$ceil};
-  --caramel: #{$caramel};
-  --dark-jungle-green: #{$dark-jungle-green};
-  --sapphire-blue: #{$sapphire-blue};
-  --green-bright: #{$green-bright};
-  --purple-bright: #{$purple-bright};
 
   /* ====== Semantic CSS color variables ====== */
   --bg-light-primary: var(--white);

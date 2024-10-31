@@ -23,7 +23,7 @@ a {
 }
 
 .link-monospace {
-  @extend .dm-mono;
+  @include font-mono;
 
   font-weight: 500;
   color: var(--green-50);
