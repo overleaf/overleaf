@@ -13,12 +13,12 @@ mixin begin_now_card()
 						span now
 						span.text-green-bright }
 				p #{translate("discover_why_people_worldwide_trust_overleaf", {count: 18})}
-				p
+				p.card-links
 					if !isUserLoggedIn
 						a.btn.btn-primary.card-link(
 							href=registerURL
 						) #{translate("sign_up_for_free")}
-					a.card-link(
-						class = isUserLoggedIn ? 'btn btn-primary' : 'btn btn-secondary'
+					a.btn.card-link(
+						class = isUserLoggedIn ? 'btn-primary' : 'btn-secondary'
 						href=plansURL
 					) #{translate("explore_all_plans")}

@@ -354,13 +354,18 @@
   }
 
   .cta-links-container {
-    margin: var(--spacing-09) 0;
+    margin-top: var(--spacing-09);
+    margin-bottom: var(--spacing-09);
 
     .cta-links {
       display: inline-flex;
-      gap: var(--spacing-04);
-      padding: unset;
+      align-items: flex-start;
       flex-wrap: wrap;
+      gap: var(--spacing-06);
+
+      .btn {
+        margin: 0; // gap will handle spacing
+      }
     }
   }
 
