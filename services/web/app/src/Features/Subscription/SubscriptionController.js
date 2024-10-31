@@ -397,6 +397,7 @@ async function interstitialPaymentPage(req, res) {
       latamCountryBannerDetails,
       skipLinkTarget: req.session?.postCheckoutRedirect || '/project',
       websiteRedesignPlansVariant: websiteRedesignPlansAssignment.variant,
+      countryCode,
     })
   }
 }
