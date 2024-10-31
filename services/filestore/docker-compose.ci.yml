@@ -21,10 +21,12 @@ services:
       ELASTIC_SEARCH_DSN: es:9200
       MONGO_HOST: mongo
       POSTGRES_HOST: postgres
-      AWS_S3_ENDPOINT: http://s3:9090
+      AWS_S3_ENDPOINT: https://minio:9000
       AWS_S3_PATH_STYLE: 'true'
-      AWS_ACCESS_KEY_ID: fake
-      AWS_SECRET_ACCESS_KEY: fake
+      AWS_ACCESS_KEY_ID: OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: OVERLEAF_FILESTORE_S3_SECRET_ACCESS_KEY
+      MINIO_ROOT_USER: MINIO_ROOT_USER
+      MINIO_ROOT_PASSWORD: MINIO_ROOT_PASSWORD
       GCS_API_ENDPOINT: http://gcs:9090
       GCS_PROJECT_ID: fake
       STORAGE_EMULATOR_HOST: http://gcs:9090/storage/v1
@@ -33,13 +35,19 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_CONVERSIONS: "true"
       USE_PROM_METRICS: "true"
-      AWS_S3_USER_FILES_BUCKET_NAME: fake_user_files
-      AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake_template_files
-      GCS_USER_FILES_BUCKET_NAME: fake_userfiles
-      GCS_TEMPLATE_FILES_BUCKET_NAME: fake_templatefiles
+      AWS_S3_USER_FILES_BUCKET_NAME: fake-user-files
+      AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake-template-files
+      GCS_USER_FILES_BUCKET_NAME: fake-gcs-user-files
+      GCS_TEMPLATE_FILES_BUCKET_NAME: fake-gcs-template-files
+    volumes:
+      - ./test/acceptance/certs:/certs
     depends_on:
-      s3:
-        condition: service_healthy
+      certs:
+        condition: service_completed_successfully
+      minio:
+        condition: service_started
+      minio_setup:
+        condition: service_completed_successfully
       gcs:
         condition: service_healthy
     user: node
@@ -53,14 +61,121 @@ services:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
-  s3:
-    image: adobe/s3mock:2.4.14
+  certs:
+    image: node:18.20.2
+    volumes:
+      - ./test/acceptance/certs:/certs
+    working_dir: /certs
+    entrypoint: sh
+    command:
+      - '-cex'
+      - |
+        if [ ! -f ./certgen ]; then
+          wget -O ./certgen "https://github.com/minio/certgen/releases/download/v1.3.0/certgen-linux-$(dpkg --print-architecture)"
+          chmod +x ./certgen
+        fi
+        if [ ! -f private.key ] || [ ! -f public.crt ]; then
+          ./certgen -host minio
+        fi
+
+  minio:
+    image: minio/minio:RELEASE.2024-10-13T13-34-11Z
+    command: server /data
+    volumes:
+      - ./test/acceptance/certs:/root/.minio/certs
     environment:
-      - initialBuckets=fake_user_files,fake_template_files,bucket
-    healthcheck:
-      test: wget --quiet --output-document=/dev/null http://localhost:9090
-      interval: 1s
-      retries: 20
+      MINIO_ROOT_USER: MINIO_ROOT_USER
+      MINIO_ROOT_PASSWORD: MINIO_ROOT_PASSWORD
+    depends_on:
+      certs:
+        condition: service_completed_successfully
+
+  minio_setup:
+    depends_on:
+      certs:
+        condition: service_completed_successfully
+      minio:
+        condition: service_started
+    image: minio/mc:RELEASE.2024-10-08T09-37-26Z
+    volumes:
+      - ./test/acceptance/certs:/root/.mc/certs/CAs
+    entrypoint: sh
+    command:
+      - '-cex'
+      - |
+        sleep 1
+        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
+        || sleep 3 && \
+        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
+        || sleep 3 && \
+        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
+        || sleep 3 && \
+        mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
+
+        mc mb --ignore-existing s3/fake-user-files
+        mc mb --ignore-existing s3/fake-template-files
+        mc admin user add s3 \
+          OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID \
+          OVERLEAF_FILESTORE_S3_SECRET_ACCESS_KEY
+
+        echo '
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Resource": "arn:aws:s3:::fake-user-files"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:GetObject",
+                  "s3:DeleteObject"
+                ],
+                "Resource": "arn:aws:s3:::fake-user-files/*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Resource": "arn:aws:s3:::fake-template-files"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:GetObject",
+                  "s3:DeleteObject"
+                ],
+                "Resource": "arn:aws:s3:::fake-template-files/*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Resource": "arn:aws:s3:::random-bucket-*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:GetObject",
+                  "s3:DeleteObject"
+                ],
+                "Resource": "arn:aws:s3:::random-bucket-*"
+              }
+            ]
+          }' > policy-filestore.json
+
+        mc admin policy create s3 overleaf-filestore policy-filestore.json
+        mc admin policy attach s3 overleaf-filestore \
+          --user=OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID
   gcs:
     image: fsouza/fake-gcs-server:1.45.2
     command: ["--port=9090", "--scheme=http"]

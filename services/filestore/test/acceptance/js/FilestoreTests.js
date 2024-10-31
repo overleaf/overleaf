@@ -31,7 +31,7 @@ process.on('unhandledRejection', e => {
 
 // store settings for multiple backends, so that we can test each one.
 // fs will always be available - add others if they are configured
-const BackendSettings = require('./TestConfig')
+const { BackendSettings, s3Config } = require('./TestConfig')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)
@@ -467,17 +467,18 @@ describe('Filestore', function () {
           beforeEach(async function () {
             constantFileContent = `This is a file in a different S3 bucket ${Math.random()}`
             fileId = new ObjectId().toString()
-            bucketName = new ObjectId().toString()
+            bucketName = `random-bucket-${new ObjectId().toString()}`
             fileUrl = `${filestoreUrl}/bucket/${bucketName}/key/${fileId}`
 
+            const cfg = s3Config()
             const s3ClientSettings = {
               credentials: {
-                accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+                accessKeyId: process.env.MINIO_ROOT_USER,
+                secretAccessKey: process.env.MINIO_ROOT_PASSWORD,
               },
-              endpoint: process.env.AWS_S3_ENDPOINT,
-              sslEnabled: false,
-              s3ForcePathStyle: true,
+              endpoint: cfg.endpoint,
+              httpOptions: cfg.httpOptions,
+              s3ForcePathStyle: cfg.pathStyle,
             }
 
             const s3 = new S3(s3ClientSettings)

@@ -1,22 +1,33 @@
 const fs = require('fs')
 const Path = require('path')
+const https = require('https')
 
 // use functions to get a fresh copy, not a reference, each time
+function s3BaseConfig() {
+  return {
+    endpoint: process.env.AWS_S3_ENDPOINT,
+    pathStyle: true,
+    partSize: 100 * 1024 * 1024,
+    httpOptions: {
+      agent: new https.Agent({
+        rejectUnauthorized: true,
+        ca: [fs.readFileSync('/certs/public.crt')],
+      }),
+    },
+  }
+}
+
 function s3Config() {
   return {
     key: process.env.AWS_ACCESS_KEY_ID,
     secret: process.env.AWS_SECRET_ACCESS_KEY,
-    endpoint: process.env.AWS_S3_ENDPOINT,
-    pathStyle: true,
-    partSize: 100 * 1024 * 1024,
+    ...s3BaseConfig(),
   }
 }
 
 function s3ConfigDefaultProviderCredentials() {
   return {
-    endpoint: process.env.AWS_S3_ENDPOINT,
-    pathStyle: true,
-    partSize: 100 * 1024 * 1024,
+    ...s3BaseConfig(),
   }
 }
 
@@ -60,7 +71,7 @@ function fallbackStores(primaryConfig, fallbackConfig) {
   }
 }
 
-module.exports = {
+const BackendSettings = {
   SHARD_01_FSPersistor: {
     backend: 'fs',
     stores: fsStores(),
@@ -137,3 +148,8 @@ function checkForUnexpectedTestFile() {
   }
 }
 checkForUnexpectedTestFile()
+
+module.exports = {
+  BackendSettings,
+  s3Config,
+}
