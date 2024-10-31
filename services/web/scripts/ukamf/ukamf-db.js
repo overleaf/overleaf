@@ -1,4 +1,4 @@
-import fs from 'fs-extra'
+import fs from 'fs'
 import xml2js from 'xml2js'
 import UKAMFEntity from './ukamf-entity.js'
 
@@ -8,7 +8,7 @@ class UKAMFDB {
   }
 
   async init() {
-    const data = await fs.readFile(this.file, 'utf8')
+    const data = await fs.promises.readFile(this.file, 'utf8')
     const parser = new xml2js.Parser()
     const xml = await parser.parseStringPromise(data)
 

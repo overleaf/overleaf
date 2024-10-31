@@ -1,5 +1,5 @@
 const Path = require('path')
-const fs = require('fs-extra')
+const fs = require('fs')
 const { callbackify } = require('util')
 const ArchiveManager = require('./ArchiveManager')
 const { Doc } = require('../../models/Doc')
@@ -59,7 +59,7 @@ async function createProjectFromZipArchive(ownerId, defaultName, zipPath) {
       )
     throw err
   }
-  await fs.remove(contentsPath)
+  await fs.promises.rm(contentsPath, { recursive: true, force: true })
   return project
 }
 
@@ -92,7 +92,7 @@ async function createProjectFromZipArchiveWithName(
       )
     throw err
   }
-  await fs.remove(contentsPath)
+  await fs.promises.rm(contentsPath, { recursive: true, force: true })
   return project
 }
 

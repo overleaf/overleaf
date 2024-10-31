@@ -62,7 +62,9 @@ describe('ProjectUploadManager', function () {
     ]
 
     this.fs = {
-      remove: sinon.stub().resolves(),
+      promises: {
+        rm: sinon.stub().resolves(),
+      },
     }
     this.ArchiveManager = {
       promises: {
@@ -146,7 +148,7 @@ describe('ProjectUploadManager', function () {
 
     this.ProjectUploadManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
-        'fs-extra': this.fs,
+        fs: this.fs,
         './ArchiveManager': this.ArchiveManager,
         '../../models/Doc': { Doc: this.Doc },
         '../Docstore/DocstoreManager': this.DocstoreManager,
@@ -230,7 +232,10 @@ describe('ProjectUploadManager', function () {
       })
 
       it('should remove the destination directory afterwards', function () {
-        this.fs.remove.should.have.been.calledWith(this.extractedZipPath)
+        this.fs.promises.rm.should.have.been.calledWith(this.extractedZipPath, {
+          recursive: true,
+          force: true,
+        })
       })
     })
 
@@ -311,7 +316,10 @@ describe('ProjectUploadManager', function () {
     })
 
     it('should remove the destination directory afterwards', function () {
-      this.fs.remove.should.have.been.calledWith(this.extractedZipPath)
+      this.fs.promises.rm.should.have.been.calledWith(this.extractedZipPath, {
+        recursive: true,
+        force: true,
+      })
     })
 
     describe('when initializing the folder structure fails', function () {

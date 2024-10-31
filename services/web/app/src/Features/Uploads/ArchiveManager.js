@@ -17,7 +17,6 @@ const OError = require('@overleaf/o-error')
 const metrics = require('@overleaf/metrics')
 const fs = require('fs')
 const Path = require('path')
-const fse = require('fs-extra')
 const yauzl = require('yauzl')
 const Settings = require('@overleaf/settings')
 const {
@@ -122,7 +121,7 @@ const ArchiveManager = {
         return callback(err)
       }
 
-      return fse.ensureDir(Path.dirname(destFile), function (err) {
+      fs.mkdir(Path.dirname(destFile), { recursive: true }, function (err) {
         if (err != null) {
           return errorHandler(err)
         }

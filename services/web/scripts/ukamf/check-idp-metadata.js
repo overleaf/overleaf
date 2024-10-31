@@ -7,7 +7,7 @@
 import { Certificate } from '@fidm/x509'
 import _ from 'lodash'
 import moment from 'moment'
-import fs from 'fs-extra'
+import fs from 'fs'
 import xml2js from 'xml2js'
 
 function checkCertDates(signingKey) {
@@ -45,7 +45,7 @@ async function main() {
 
   console.log('Checking SAML metadata')
 
-  const data = await fs.readFile(file, 'utf8')
+  const data = await fs.promises.readFile(file, 'utf8')
   const parser = new xml2js.Parser()
   const xml = await parser.parseStringPromise(data)
 
