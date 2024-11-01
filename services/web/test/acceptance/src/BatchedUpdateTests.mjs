@@ -36,4 +36,73 @@ describe('BatchedUpdateTests', function () {
       { content: '42' },
     ])
   })
+
+  it('can handle ids sitting on the edge', async function () {
+    const edge = '3028de800000000000000000'
+    await db.systemmessages.insertOne({
+      content: '1',
+      _id: new ObjectId('300000000000000000000000'),
+    })
+    await db.systemmessages.insertOne({
+      content: '2',
+      _id: new ObjectId(),
+    })
+    await db.systemmessages.insertOne({
+      content: '3',
+      _id: new ObjectId('400000000000000000000000'),
+    })
+    const { stderr } = spawnSync(
+      process.argv0,
+      [
+        '--input-type=module',
+        '-e',
+        'import BatchedUpdateModule from "./scripts/helpers/batchedUpdate.mjs"; BatchedUpdateModule.batchedUpdateWithResultHandling("systemmessages", { content: { $ne: "42" }}, { $set: { content: "42" } })',
+      ],
+      { encoding: 'utf-8' }
+    )
+    expect(
+      await db.systemmessages.find({}).project({ content: 1, _id: 0 }).toArray()
+    ).to.deep.equal([{ content: '42' }, { content: '42' }, { content: '42' }])
+    expect(stderr).to.include('Completed batch ending 300000000000000000000000')
+    expect(stderr).to.include(`Completed batch ending ${edge}`) // hit the edge
+    expect(stderr).to.include('Completed batch ending 400000000000000000000000')
+  })
+
+  it('can handle ids sitting on the edge descending', async function () {
+    const edge = '3fd721800000000000000000'
+    await db.systemmessages.insertOne({
+      content: '1',
+      _id: new ObjectId('300000000000000000000000'),
+    })
+    await db.systemmessages.insertOne({
+      content: '2',
+      _id: new ObjectId(edge),
+    })
+    await db.systemmessages.insertOne({
+      content: '3',
+      _id: new ObjectId('400000000000000000000000'),
+    })
+    const { stderr } = spawnSync(
+      process.argv0,
+      [
+        '--input-type=module',
+        '-e',
+        'import BatchedUpdateModule from "./scripts/helpers/batchedUpdate.mjs"; BatchedUpdateModule.batchedUpdateWithResultHandling("systemmessages", { content: { $ne: "42" }}, { $set: { content: "42" } })',
+      ],
+      {
+        encoding: 'utf-8',
+        env: {
+          ...process.env,
+          BATCH_DESCENDING: 'true',
+          BATCH_RANGE_START: '400000000000000000000001',
+        },
+      }
+    )
+    expect(
+      await db.systemmessages.find({}).project({ content: 1, _id: 0 }).toArray()
+    ).to.deep.equal([{ content: '42' }, { content: '42' }, { content: '42' }])
+    expect(stderr).to.include('Completed batch ending 400000000000000000000000')
+    expect(stderr).to.include(`Completed batch ending ${edge}`) // hit the edge
+    expect(stderr).to.include('Completed batch ending 300000000000000000000000')
+  })
 })

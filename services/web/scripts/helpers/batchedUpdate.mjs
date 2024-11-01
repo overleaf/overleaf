@@ -91,12 +91,12 @@ async function getNextBatch(
   if (BATCH_DESCENDING) {
     query._id = {
       $gt: end,
-      $lt: start,
+      $lte: start,
     }
   } else {
     query._id = {
       $gt: start,
-      $lt: end,
+      $lte: end,
     }
   }
   return await collection
