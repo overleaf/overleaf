@@ -1,0 +1,136 @@
+.dev-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 40px;
+  background-color: var(--bg-dark-primary);
+  padding: var(--spacing-02) var(--spacing-05);
+
+  button.widget {
+    color: var(--neutral-10);
+    margin: 0 var(--spacing-02);
+    padding: 0 var(--spacing-02);
+    border: none;
+    text-decoration: none;
+
+    .badge {
+      font-size: var(--font-size-03);
+    }
+  }
+
+  .collapse-button {
+    position: absolute;
+    padding: 0;
+    margin-top: calc(var(--spacing-01) * -1);
+    color: var(--neutral-50);
+    border-color: transparent;
+
+    span {
+      font-size: var(--font-size-07);
+    }
+
+    &:hover {
+      color: var(--border-primary-dark);
+    }
+  }
+}
+
+.dev-tool-bar-open-button {
+  position: fixed;
+  bottom: -2px;
+  left: 6px;
+  color: var(--neutral-70);
+
+  span {
+    font-size: var(--font-size-07);
+  }
+
+  &:hover {
+    color: var(--border-primary-dark);
+  }
+}
+
+.dev-toolbar-tooltip {
+  opacity: 1 !important;
+
+  a {
+    color: var(--blue-20) !important;
+    text-decoration: none;
+
+    &.btn {
+      color: var(--neutral-10);
+    }
+  }
+
+  &.tooltip.top {
+    margin-top: calc(var(--spacing-04) * -1);
+    opacity: 1;
+  }
+
+  .tooltip-inner {
+    padding: var(--spacing-01) var(--spacing-04) var(--spacing-04)
+      var(--spacing-04);
+    text-align: left;
+    min-width: 300px;
+    max-height: 800px;
+    overflow-y: auto;
+  }
+
+  .title {
+    margin-top: var(--spacing-02);
+  }
+
+  .test-card {
+    text-align: left;
+    color: var(--neutral-10);
+    padding: var(--spacing-03);
+    border: var(--spacing-01) solid var(--neutral-70);
+    background-color: var(--bg-dark-secondary);
+    border-radius: var(--border-radius-base);
+    margin-top: var(--spacing-04);
+
+    &.override {
+      border-color: var(--blue-40);
+    }
+
+    .test-name {
+      font-family: monospace;
+      font-size: var(--font-size-01);
+      font-weight: bold;
+    }
+
+    ul {
+      li.variant-row {
+        line-height: var(--line-height-03);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--spacing-01) 0;
+
+        .btn-inline-link {
+          color: var(--content-primary-dark) !important;
+          opacity: 1;
+          font-weight: 400;
+          text-decoration: none;
+
+          .material-symbols {
+            vertical-align: sub;
+            font-weight: 400;
+            font-size: var(--font-size-03);
+          }
+        }
+      }
+    }
+  }
+
+  .actions {
+    margin-top: var(--spacing-04);
+    text-align: right;
+  }
+
+  ul {
+    margin-bottom: 0;
+  }
+}

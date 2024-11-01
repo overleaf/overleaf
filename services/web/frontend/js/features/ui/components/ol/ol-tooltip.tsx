@@ -18,6 +18,8 @@ function OLTooltip(props: OLTooltipProps) {
     tooltipProps: bs5Props.tooltipProps as BS3TooltipProps,
     overlayProps: {
       placement: bs5Props.overlayProps?.placement,
+      rootClose: bs5Props.overlayProps?.rootClose,
+      trigger: bs5Props.overlayProps?.trigger,
     },
     ...bs3Props,
   }
