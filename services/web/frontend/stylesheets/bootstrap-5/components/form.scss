@@ -99,9 +99,13 @@
   }
 }
 
-.form-text {
-  margin-top: var(--spacing-02);
+.form-check-label-description {
+  .form-text-inner {
+    margin-top: var(--spacing-01) !important;
+  }
+}
 
+.form-text {
   .form-control[disabled] ~ & {
     color: var(--content-disabled);
   }
@@ -110,6 +114,7 @@
     display: flex;
     gap: var(--spacing-02);
     line-height: var(--line-height-02);
+    margin-top: var(--spacing-04);
   }
 }
 

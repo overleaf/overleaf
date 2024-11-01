@@ -46,7 +46,7 @@ function LoadingSpinner({
     <div className={classNames('loading', className, extraClasses)}>
       <OLSpinner size={size} />
       &nbsp;
-      {loadingText || t('loading')}…
+      {loadingText || `${t('loading')}…`}
     </div>
   )
 }

@@ -24,6 +24,7 @@ import { UserProvider } from '@/shared/context/user-context'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 const educationalPercentDiscount = 40
 const groupSizeForEducationalDiscount = 10
@@ -243,16 +244,22 @@ export function ChangeToGroupModal() {
                   <fieldset className="form-group">
                     <legend className="legend-as-label">{t('plan')}</legend>
                     {groupPlans.plans.map(option => (
-                      <OLFormCheckbox
+                      <div
+                        className={bsVersion({ bs3: 'radio' })}
                         key={option.code}
-                        type="radio"
-                        name="plan-code"
-                        value={option.code}
-                        id={`plan-option-${option.code}`}
-                        onChange={() => setGroupPlanToChangeToCode(option.code)}
-                        checked={option.code === groupPlanToChangeToCode}
-                        label={option.display}
-                      />
+                      >
+                        <OLFormCheckbox
+                          type="radio"
+                          name="plan-code"
+                          value={option.code}
+                          id={`plan-option-${option.code}`}
+                          onChange={() =>
+                            setGroupPlanToChangeToCode(option.code)
+                          }
+                          checked={option.code === groupPlanToChangeToCode}
+                          label={option.display}
+                        />
+                      </div>
                     ))}
                   </fieldset>
 
