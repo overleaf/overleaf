@@ -1,9 +1,12 @@
 import { FC, memo, useRef } from 'react'
 import useDropdown from '../../../../../shared/hooks/use-dropdown'
-import { ListGroup, Overlay, Popover } from 'react-bootstrap'
-import Tooltip from '../../../../../shared/components/tooltip'
+import OLListGroup from '@/features/ui/components/ol/ol-list-group'
+import OLOverlay from '@/features/ui/components/ol/ol-overlay'
+import OLPopover from '@/features/ui/components/ol/ol-popover'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '../../../../../shared/components/material-icon'
 import { useTabularContext } from '../contexts/tabular-context'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 export const ToolbarButtonMenu: FC<{
   id: string
@@ -45,36 +48,37 @@ export const ToolbarButtonMenu: FC<{
   )
 
   const overlay = tableContainerRef.current && (
-    <Overlay
+    <OLOverlay
       show={open}
       target={target.current}
       placement="bottom"
       container={tableContainerRef.current}
       containerPadding={0}
-      animation
+      transition
       rootClose
       onHide={() => onToggle(false)}
     >
-      <Popover
+      <OLPopover
         id={`${id}-menu`}
         ref={ref}
         className="table-generator-button-menu-popover"
       >
-        <ListGroup
+        <OLListGroup
           role="menu"
           onClick={() => {
             onToggle(false)
           }}
+          className={bsVersion({ bs5: 'd-block' })}
         >
           {children}
-        </ListGroup>
-      </Popover>
-    </Overlay>
+        </OLListGroup>
+      </OLPopover>
+    </OLOverlay>
   )
 
   return (
     <>
-      <Tooltip
+      <OLTooltip
         hidden={open}
         id={id}
         description={
@@ -83,7 +87,7 @@ export const ToolbarButtonMenu: FC<{
         overlayProps={{ placement: 'bottom' }}
       >
         {button}
-      </Tooltip>
+      </OLTooltip>
       {overlay}
     </>
   )

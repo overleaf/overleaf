@@ -1,9 +1,8 @@
 import MaterialIcon from '@/shared/components/material-icon'
 import { WidthSelection } from './toolbar/column-width-modal/column-width'
 import { useMemo } from 'react'
-import { Button } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
-import Tooltip from '@/shared/components/tooltip'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { useSelectionContext } from './contexts/selection-context'
 
 function roundIfNeeded(width: number) {
@@ -32,7 +31,7 @@ export const ColumnSizeIndicator = ({
   }
 
   return (
-    <Tooltip
+    <OLTooltip
       id="tooltip-column-width-button"
       description={
         unit === 'custom'
@@ -43,9 +42,8 @@ export const ColumnSizeIndicator = ({
       }
       overlayProps={{ delay: 0, placement: 'bottom' }}
     >
-      <Button
-        bsStyle={null}
-        className="table-generator-column-indicator-button"
+      <button
+        className="btn table-generator-column-indicator-button"
         onClick={onClick}
       >
         <MaterialIcon
@@ -55,7 +53,7 @@ export const ColumnSizeIndicator = ({
         <span className="table-generator-column-indicator-label">
           {formattedWidth}
         </span>
-      </Button>
-    </Tooltip>
+      </button>
+    </OLTooltip>
   )
 }

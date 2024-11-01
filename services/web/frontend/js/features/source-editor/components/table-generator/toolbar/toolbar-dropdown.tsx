@@ -1,8 +1,9 @@
 import { ButtonHTMLAttributes, FC, useCallback, useRef } from 'react'
 import useDropdown from '../../../../../shared/hooks/use-dropdown'
-import { Overlay, Popover } from 'react-bootstrap'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLOverlay from '@/features/ui/components/ol/ol-overlay'
+import OLPopover from '@/features/ui/components/ol/ol-popover'
 import MaterialIcon from '../../../../../shared/components/material-icon'
-import Tooltip from '../../../../../shared/components/tooltip'
 import { useTabularContext } from '../contexts/tabular-context'
 import { emitTableGeneratorEvent } from '../analytics'
 import { useCodeMirrorViewContext } from '../../codemirror-context'
@@ -55,17 +56,17 @@ export const ToolbarDropdown: FC<{
     </button>
   )
   const overlay = tabularRef.current && (
-    <Overlay
+    <OLOverlay
       show={open}
-      target={toggleButtonRef.current ?? undefined}
+      target={toggleButtonRef.current}
       placement="bottom"
       container={tabularRef.current}
-      animation
+      transition
       rootClose
       containerPadding={0}
       onHide={() => onToggle(false)}
     >
-      <Popover
+      <OLPopover
         id={`${id}-popover`}
         ref={ref}
         className="table-generator-toolbar-dropdown-popover"
@@ -82,21 +83,21 @@ export const ToolbarDropdown: FC<{
         >
           {children}
         </div>
-      </Popover>
-    </Overlay>
+      </OLPopover>
+    </OLOverlay>
   )
 
   if (tooltip || (disabled && disabledTooltip)) {
     return (
       <>
-        <Tooltip
+        <OLTooltip
           hidden={open}
           id={id}
           description={disabled && disabledTooltip ? disabledTooltip : tooltip}
           overlayProps={{ placement: 'bottom' }}
         >
           {button}
-        </Tooltip>
+        </OLTooltip>
         {overlay}
       </>
     )

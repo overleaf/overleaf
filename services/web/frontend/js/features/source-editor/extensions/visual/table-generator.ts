@@ -1,4 +1,5 @@
 import { EditorView } from '@codemirror/view'
+import { isBootstrap5 } from '@/features/utils/bootstrap-5'
 
 export const tableGeneratorTheme = EditorView.baseTheme({
   '&dark .table-generator': {
@@ -309,14 +310,14 @@ export const tableGeneratorTheme = EditorView.baseTheme({
 
   '.table-generator-button-menu-popover': {
     'background-color': 'var(--table-generator-toolbar-background) !important',
-    '& .popover-content': {
+    '& .popover-content, & .popover-body': {
       padding: '4px',
     },
     '& .list-group': {
       margin: '0',
       padding: '0',
     },
-    '& > .arrow': {
+    '& > .arrow, & > .popover-arrow': {
       display: 'none',
     },
   },
@@ -348,7 +349,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     gap: '6px',
     'align-items': 'flex-start',
     'max-width': '240px',
-    'font-family': 'Lato',
+    'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
 
     '& .info-icon': {
       flex: ' 0 0 24px',
@@ -369,7 +370,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     display: 'flex',
     'align-items': 'center',
     'justify-content': 'space-between',
-    'font-family': 'Lato',
+    'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
     height: '36px',
 
     '&:not(:first-child)': {
@@ -387,11 +388,11 @@ export const tableGeneratorTheme = EditorView.baseTheme({
     'max-width': '300px',
     background: 'var(--table-generator-toolbar-background) !important',
 
-    '& .popover-content': {
+    '& .popover-content, & .popover-body': {
       padding: '0',
     },
 
-    '& > .arrow': {
+    '& > .arrow, & > .popover-arrow': {
       display: 'none',
     },
   },
@@ -416,7 +417,7 @@ export const tableGeneratorTheme = EditorView.baseTheme({
       'column-gap': '8px',
       'align-self': 'stretch',
       padding: '12px 8px',
-      'font-family': 'Lato',
+      'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
 
       '& .table-generator-button-label': {
         'align-self': 'stretch',
@@ -482,31 +483,8 @@ export const tableGeneratorTheme = EditorView.baseTheme({
   '.ol-cm-environment-table.table-generator-error-container, .ol-cm-environment-table.ol-cm-tabular':
     {
       background: 'rgba(125, 125, 125, 0.05)',
+      'font-family': isBootstrap5() ? 'var(--bs-body-font-family)' : 'Lato',
     },
-
-  '.table-generator-error': {
-    background: 'var(--table-generator-error-background)',
-    display: 'flex',
-    'justify-content': 'space-between',
-    color: 'var(--table-generator-error-color)',
-    border: '1px solid var(--table-generator-error-border-color)',
-    'font-family': 'Lato',
-    margin: '0 16px 0 16px',
-    '& .table-generator-error-message': {
-      flex: '1 1 auto',
-    },
-    '& .table-generator-error-message-header': {
-      fontWeight: 'bold',
-      marginBottom: '2px',
-    },
-    '& .table-generator-error-show-code-button': {
-      alignSelf: 'baseline',
-    },
-    '& .table-generator-error-icon': {
-      color: '#3265B2',
-      'margin-right': '12px',
-    },
-  },
 
   '.table-generator-filler-row': {
     border: 'none !important',

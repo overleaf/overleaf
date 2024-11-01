@@ -1,4 +1,4 @@
-import { FC, memo, MouseEventHandler, useCallback, useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
@@ -33,54 +33,31 @@ export const CopyToClipboard = memo<{
       description={copied ? `${t('copied')}!` : t('copy')}
       overlayProps={{ delay: copied ? 1000 : 250 }}
     >
-      <span>
-        {kind === 'text' ? (
-          <TextButton handleClick={handleClick} />
-        ) : (
-          <IconButton handleClick={handleClick} copied={copied} />
-        )}
-      </span>
+      {kind === 'text' ? (
+        <OLButton
+          onClick={handleClick}
+          size="sm"
+          variant="secondary"
+          className="copy-button"
+          bs3Props={{ bsSize: 'xsmall' }}
+        >
+          {t('copy')}
+        </OLButton>
+      ) : (
+        <OLIconButton
+          onClick={handleClick}
+          variant="link"
+          size="sm"
+          accessibilityLabel={t('copy')}
+          className="copy-button"
+          bs3Props={{ bsSize: 'xsmall' }}
+          icon={bsVersion({
+            bs5: copied ? 'check' : 'content_copy',
+            bs3: copied ? 'check' : 'clipboard',
+          })}
+        />
+      )}
     </OLTooltip>
   )
 })
 CopyToClipboard.displayName = 'CopyToClipboard'
-
-const TextButton: FC<{
-  handleClick: MouseEventHandler<HTMLButtonElement>
-}> = ({ handleClick }) => {
-  const { t } = useTranslation()
-
-  return (
-    <OLButton
-      onClick={handleClick}
-      size="sm"
-      variant="secondary"
-      className="copy-button"
-      bs3Props={{ bsSize: 'xsmall' }}
-    >
-      {t('copy')}
-    </OLButton>
-  )
-}
-
-const IconButton: FC<{
-  handleClick: MouseEventHandler<HTMLButtonElement>
-  copied: boolean
-}> = ({ handleClick, copied }) => {
-  const { t } = useTranslation()
-
-  return (
-    <OLIconButton
-      onClick={handleClick}
-      variant="link"
-      size="sm"
-      accessibilityLabel={t('copy')}
-      className="copy-button"
-      bs3Props={{ bsSize: 'xsmall' }}
-      icon={bsVersion({
-        bs5: copied ? 'check' : 'content_copy',
-        bs3: copied ? 'check' : 'clipboard',
-      })}
-    />
-  )
-}

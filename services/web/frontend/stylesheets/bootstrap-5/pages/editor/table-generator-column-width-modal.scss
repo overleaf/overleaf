@@ -1,0 +1,13 @@
+.table-generator-width-modal {
+  .table-generator-width-label {
+    width: 100%;
+  }
+
+  .table-generator-usepackage-copy {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-03) var(--spacing-05);
+    background: var(--bg-light-secondary);
+    border: 1px solid var(--border-primary-dark);
+  }
+}

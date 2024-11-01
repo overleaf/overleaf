@@ -10,28 +10,34 @@ export class TableRenderingErrorWidget extends WidgetType {
 
   toDOM(view: EditorView): HTMLElement {
     const warning = document.createElement('div')
-    warning.classList.add('table-generator-error', 'alert')
+    warning.classList.add('notification', 'notification-type-info')
     warning.role = 'alert'
-    const icon = document.createElement('span')
-    icon.classList.add('table-generator-error-icon')
-    const iconType = document.createElement('i')
-    iconType.classList.add('fa', 'fa-info-circle')
+    const icon = document.createElement('div')
+    icon.classList.add('notification-icon')
+    const iconType = document.createElement('span')
+    iconType.classList.add('material-symbols')
+    iconType.setAttribute('aria-hidden', 'true')
+    iconType.textContent = 'info'
     icon.appendChild(iconType)
     warning.appendChild(icon)
+    const messageWrapper = document.createElement('div')
+    messageWrapper.classList.add('notification-content-and-cta')
     const message = document.createElement('div')
-    message.classList.add('table-generator-error-message')
+    message.classList.add('notification-content')
     const messageHeader = document.createElement('p')
-    messageHeader.classList.add('table-generator-error-message-header')
-    messageHeader.textContent = view.state.phrase(
+    const messageHeaderInner = document.createElement('strong')
+    messageHeaderInner.textContent = view.state.phrase(
       'sorry_your_table_cant_be_displayed_at_the_moment'
     )
+    messageHeader.appendChild(messageHeaderInner)
     const messageBody = document.createElement('p')
     messageBody.textContent = view.state.phrase(
       'this_could_be_because_we_cant_support_some_elements_of_the_table'
     )
     message.appendChild(messageHeader)
     message.appendChild(messageBody)
-    warning.appendChild(message)
+    messageWrapper.appendChild(message)
+    warning.appendChild(messageWrapper)
     const element = document.createElement('div')
     element.classList.add('table-generator', 'table-generator-error-container')
     element.appendChild(warning)

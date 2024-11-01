@@ -1,5 +1,10 @@
-import { Button, Modal } from 'react-bootstrap'
-import AccessibleModal from '../../../../shared/components/accessible-modal'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLButton from '@/features/ui/components/ol/ol-button'
 import { useTabularContext } from './contexts/tabular-context'
 import { Trans, useTranslation } from 'react-i18next'
 
@@ -9,15 +14,15 @@ export const TableGeneratorHelpModal = () => {
   if (!helpShown) return null
 
   return (
-    <AccessibleModal
+    <OLModal
       show={helpShown}
       onHide={hideHelp}
       className="table-generator-help-modal"
     >
-      <Modal.Header closeButton>
-        <Modal.Title>{t('help')}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('help')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
         <p>
           <Trans
             i18nKey="this_tool_helps_you_insert_simple_tables_into_your_project_without_writing_latex_code_give_feedback"
@@ -83,10 +88,12 @@ export const TableGeneratorHelpModal = () => {
             ]}
           />
         </p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button onClick={hideHelp}>{t('close')}</Button>
-      </Modal.Footer>
-    </AccessibleModal>
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton variant="secondary" onClick={hideHelp}>
+          {t('close')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }

@@ -1,5 +1,3 @@
-import AccessibleModal from '@/shared/components/accessible-modal'
-import { Button, Modal, Form, FormGroup } from 'react-bootstrap'
 import { useTabularContext } from '../../contexts/tabular-context'
 import { Select } from '@/shared/components/select'
 import { Trans, useTranslation } from 'react-i18next'
@@ -18,8 +16,24 @@ import { setColumnWidth } from '../commands'
 import { UNITS, WidthSelection, WidthUnit } from './column-width'
 import { useCodeMirrorViewContext } from '../../../codemirror-context'
 import { CopyToClipboard } from '@/shared/components/copy-to-clipboard'
-import Tooltip from '@/shared/components/tooltip'
 import Icon from '@/shared/components/icon'
+import OLModal, {
+  OLModalBody,
+  OLModalFooter,
+  OLModalHeader,
+  OLModalTitle,
+} from '@/features/ui/components/ol/ol-modal'
+import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLCol from '@/features/ui/components/ol/ol-col'
+import OLRow from '@/features/ui/components/ol/ol-row'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import { bsVersion } from '@/features/utils/bootstrap-5'
+import MaterialIcon from '@/shared/components/material-icon'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 type UnitDescription = { label: string; tooltip?: string } | undefined
 
@@ -93,7 +107,7 @@ const ColumnWidthModalBody = () => {
     }
   }, [columnWidthModalShown, selection, table])
 
-  const onSubmit: FormEventHandler<Form> = useCallback(
+  const onSubmit: FormEventHandler<HTMLFormElement> = useCallback(
     e => {
       e.preventDefault()
       if (selection && currentUnit) {
@@ -121,60 +135,67 @@ const ColumnWidthModalBody = () => {
   )
 
   return (
-    <AccessibleModal
+    <OLModal
       show={columnWidthModalShown}
       onHide={closeColumnWidthModal}
       className="table-generator-width-modal"
     >
-      <Form onSubmit={onSubmit}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t('set_column_width')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="clearfix">
-            <FormGroup className="col-md-8 p-0 mb-0">
-              <label
-                className="table-generator-width-label"
-                htmlFor="column-width-modal-width"
+      <OLModalHeader closeButton>
+        <OLModalTitle>{t('set_column_width')}</OLModalTitle>
+      </OLModalHeader>
+      <OLModalBody>
+        <OLForm id="table-generator-width-form" onSubmit={onSubmit}>
+          <OLRow className={bsVersion({ bs5: 'g-3' })}>
+            <OLCol lg={8}>
+              <OLFormGroup
+                controlId="column-width-modal-width"
+                className="mb-0"
               >
-                {t('column_width')}
-              </label>
-              <input
-                id="column-width-modal-width"
-                value={currentWidth}
-                required
-                onChange={e => setCurrentWidth(e.target.value)}
-                type={currentUnit === 'custom' ? 'text' : 'number'}
-                className="form-control"
-                ref={inputRef}
-              />
-            </FormGroup>
-            <FormGroup className="col-md-4 mb-0">
-              <Select
-                label={
-                  <>
-                    &nbsp;<span className="sr-only">{t('length_unit')}</span>
-                  </>
-                }
-                items={UNITS}
-                itemToKey={x => x ?? ''}
-                itemToString={x => (x === 'custom' ? t('custom') : (x ?? ''))}
-                onSelectedItemChanged={item => setCurrentUnit(item)}
-                defaultItem={currentUnit}
-              />
-            </FormGroup>
-          </div>
+                <OLFormLabel>{t('column_width')}</OLFormLabel>
+                <OLFormControl
+                  value={currentWidth}
+                  required
+                  onChange={e => setCurrentWidth(e.target.value)}
+                  type={currentUnit === 'custom' ? 'text' : 'number'}
+                  ref={inputRef}
+                />
+              </OLFormGroup>
+            </OLCol>
+            <OLCol lg={4}>
+              <OLFormGroup className="mb-0">
+                <Select
+                  label={
+                    <>
+                      &nbsp;<span className="sr-only">{t('length_unit')}</span>
+                    </>
+                  }
+                  items={UNITS}
+                  itemToKey={x => x ?? ''}
+                  itemToString={x => (x === 'custom' ? t('custom') : (x ?? ''))}
+                  onSelectedItemChanged={item => setCurrentUnit(item)}
+                  defaultItem={currentUnit}
+                />
+              </OLFormGroup>
+            </OLCol>
+          </OLRow>
           {unitHelp && (
             <p className="my-1">
               {unitHelp.label}{' '}
               {unitHelp.tooltip && (
-                <Tooltip
+                <OLTooltip
                   id="table-generator-unit-tooltip"
                   description={unitHelp.tooltip}
                   overlayProps={{ delay: 0, placement: 'top' }}
                 >
-                  <Icon type="question-circle" fw />
-                </Tooltip>
+                  <span>
+                    <BootstrapVersionSwitcher
+                      bs3={<Icon type="question-circle" />}
+                      bs5={
+                        <MaterialIcon type="help" className="align-middle" />
+                      }
+                    />
+                  </span>
+                </OLTooltip>
               )}
             </p>
           )}
@@ -196,22 +217,25 @@ const ColumnWidthModalBody = () => {
               tooltipId="table-generator-array-copy"
             />
           </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            bsStyle={null}
-            className="btn-secondary"
-            onClick={() => {
-              closeColumnWidthModal()
-            }}
-          >
-            {t('cancel')}
-          </Button>
-          <Button bsStyle={null} className="btn-primary" type="submit">
-            {t('ok')}
-          </Button>
-        </Modal.Footer>
-      </Form>
-    </AccessibleModal>
+        </OLForm>
+      </OLModalBody>
+      <OLModalFooter>
+        <OLButton
+          variant="secondary"
+          onClick={() => {
+            closeColumnWidthModal()
+          }}
+        >
+          {t('cancel')}
+        </OLButton>
+        <OLButton
+          variant="primary"
+          form="table-generator-width-form"
+          type="submit"
+        >
+          {t('ok')}
+        </OLButton>
+      </OLModalFooter>
+    </OLModal>
   )
 }
