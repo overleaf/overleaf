@@ -20,8 +20,8 @@ import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
-import { Spinner } from 'react-bootstrap-5'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
+import OLSpinner from '@/features/ui/components/ol/ol-spinner'
 
 /* eslint-disable no-unused-vars */
 export enum FileUploadStatus {
@@ -297,18 +297,7 @@ export const FileContainer: FC<{
           })}
         >
           {status === FileUploadStatus.UPLOADING ? (
-            <BootstrapVersionSwitcher
-              bs3={<Icon spin type="spinner" className="file-icon" />}
-              bs5={
-                <Spinner
-                  animation="border"
-                  aria-hidden="true"
-                  as="span"
-                  role="status"
-                  size="sm"
-                />
-              }
-            />
+            <OLSpinner size="sm" />
           ) : (
             <BootstrapVersionSwitcher
               bs3={<Icon type={icon} className="file-icon" />}

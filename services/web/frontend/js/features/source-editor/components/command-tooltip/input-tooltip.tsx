@@ -1,8 +1,10 @@
 import { FC } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from 'react-bootstrap'
 import Icon from '@/shared/components/icon'
 import { useIncludedFile } from '@/features/source-editor/hooks/use-included-file'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 export const InputTooltipContent: FC = () => {
   const { t } = useTranslation()
@@ -10,15 +12,18 @@ export const InputTooltipContent: FC = () => {
 
   return (
     <div className="ol-cm-command-tooltip-content">
-      <Button
+      <OLButton
+        variant="link"
         type="button"
-        bsStyle="link"
         className="ol-cm-command-tooltip-link"
         onClick={openIncludedFile}
       >
-        <Icon type="edit" fw />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="edit" fw />}
+          bs5={<MaterialIcon type="edit" />}
+        />
         {t('open_file')}
-      </Button>
+      </OLButton>
     </div>
   )
 }

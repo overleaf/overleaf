@@ -56,6 +56,7 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
       prepend: rest.prepend,
       append: rest.append,
+      size: rest.htmlSize,
       'main-field': rest['main-field'],
       ...bs3Props,
     }

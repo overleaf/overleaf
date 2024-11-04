@@ -4,7 +4,6 @@ import {
   useCodeMirrorStateContext,
   useCodeMirrorViewContext,
 } from '../codemirror-context'
-import { Button } from 'react-bootstrap'
 import { resolveCommandNode } from '../../extensions/command-tooltip'
 import {
   LabelArgument,
@@ -21,6 +20,9 @@ import {
 } from '@codemirror/state'
 import { EditorView } from '@codemirror/view'
 import Icon from '../../../../shared/components/icon'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 export const RefTooltipContent: FC = () => {
   const { t } = useTranslation()
@@ -29,9 +31,9 @@ export const RefTooltipContent: FC = () => {
 
   return (
     <div className="ol-cm-command-tooltip-content">
-      <Button
+      <OLButton
+        variant="link"
         type="button"
-        bsStyle="link"
         className="ol-cm-command-tooltip-link"
         onClick={() => {
           const target = readTarget(state)
@@ -44,9 +46,12 @@ export const RefTooltipContent: FC = () => {
           }
         }}
       >
-        <Icon type="link" fw />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="link" fw />}
+          bs5={<MaterialIcon type="link" />}
+        />
         {t('open_target')}
-      </Button>
+      </OLButton>
     </div>
   )
 }

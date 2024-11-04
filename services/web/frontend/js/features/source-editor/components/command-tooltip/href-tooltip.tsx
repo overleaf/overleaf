@@ -14,10 +14,16 @@ import {
   ShortTextArgument,
   UrlArgument,
 } from '../../lezer-latex/latex.terms.mjs'
-import { Button, ControlLabel, FormControl, FormGroup } from 'react-bootstrap'
 import Icon from '../../../../shared/components/icon'
 import { EditorState } from '@codemirror/state'
 import { openURL } from '@/features/source-editor/utils/url'
+import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
+import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
+import OLFormControl from '@/features/ui/components/ol/ol-form-control'
+import OLForm from '@/features/ui/components/ol/ol-form'
+import OLButton from '@/features/ui/components/ol/ol-button'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
 
 export const HrefTooltipContent: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -77,16 +83,16 @@ export const HrefTooltipContent: FC = () => {
 
   return (
     <div className="ol-cm-command-tooltip-content">
-      <form className="ol-cm-command-tooltip-form" onSubmit={handleSubmit}>
-        <FormGroup controlId="link-tooltip-url-input">
-          <ControlLabel>URL</ControlLabel>
-          <FormControl
+      <OLForm className="ol-cm-command-tooltip-form" onSubmit={handleSubmit}>
+        <OLFormGroup controlId="link-tooltip-url-input">
+          <OLFormLabel>URL</OLFormLabel>
+          <OLFormControl
             type="url"
-            bsSize="sm"
-            size={50}
+            size="lg"
+            htmlSize={50}
             placeholder="https://…"
             value={url}
-            inputRef={element => {
+            ref={element => {
               inputRef.current = element
             }}
             autoComplete="off"
@@ -100,27 +106,31 @@ export const HrefTooltipContent: FC = () => {
             }}
             disabled={state.readOnly}
           />
-        </FormGroup>
-      </form>
+        </OLFormGroup>
+      </OLForm>
 
-      <Button
+      <OLButton
+        variant="link"
         type="button"
-        bsStyle="link"
-        className="ol-cm-command-tooltip-link"
+        className="ol-cm-command-tooltip-link justify-content-start"
         onClick={() => {
           // TODO: unescape content
           openURL(url)
         }}
       >
-        <Icon type="external-link" fw />
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="external-link" fw />}
+          bs5={<MaterialIcon type="open_in_new" />}
+        />
+
         {t('open_link')}
-      </Button>
+      </OLButton>
 
       {!state.readOnly && (
-        <Button
+        <OLButton
+          variant="link"
           type="button"
-          bsStyle="link"
-          className="ol-cm-command-tooltip-link"
+          className="ol-cm-command-tooltip-link justify-content-start"
           onClick={() => {
             const spec = removeLink(state)
             if (spec) {
@@ -129,9 +139,13 @@ export const HrefTooltipContent: FC = () => {
             }
           }}
         >
-          <Icon type="chain-broken" fw />
+          <BootstrapVersionSwitcher
+            bs3={<Icon type="chain-broken" fw />}
+            bs5={<MaterialIcon type="link_off" />}
+          />
+
           {t('remove_link')}
-        </Button>
+        </OLButton>
       )}
     </div>
   )
