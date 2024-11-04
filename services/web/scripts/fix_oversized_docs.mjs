@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import minimist from 'minimist'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'

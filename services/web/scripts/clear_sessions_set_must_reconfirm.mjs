@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import async from 'async'
 import UserUpdater from '../app/src/Features/User/UserUpdater.js'

@@ -1,6 +1,6 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const { batchedUpdate } = BatchedUpdateModule
 

@@ -1,5 +1,5 @@
 import DocstoreManager from '../app/src/Features/Docstore/DocstoreManager.js'
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import mongodb from 'mongodb-legacy'
 import {
   db,

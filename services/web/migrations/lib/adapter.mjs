@@ -1,6 +1,6 @@
-import Path from 'path'
+import Path from 'node:path'
 import { db } from '../../app/src/infrastructure/mongodb.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = Path.dirname(__filename)

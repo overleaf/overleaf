@@ -1,7 +1,7 @@
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import { promiseMapWithLimit, promisify } from '@overleaf/promise-utils'
 import { db } from '../app/src/infrastructure/mongodb.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 import _ from 'lodash'
 
 const sleep = promisify(setTimeout)

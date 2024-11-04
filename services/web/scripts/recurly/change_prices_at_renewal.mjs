@@ -1,5 +1,5 @@
-import fs from 'fs'
-import { setTimeout } from 'timers/promises'
+import fs from 'node:fs'
+import { setTimeout } from 'node:timers/promises'
 import * as csv from 'csv'
 import minimist from 'minimist'
 import recurly from 'recurly'

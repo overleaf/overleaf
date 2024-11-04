@@ -34,9 +34,9 @@ import { hasAdminAccess } from '../Features/Helpers/AdminAuthorizationHelper.js'
 import Modules from './Modules.js'
 import expressLocals from './ExpressLocals.js'
 import noCache from 'nocache'
-import os from 'os'
-import http from 'http'
-import { fileURLToPath } from 'url'
+import os from 'node:os'
+import http from 'node:http'
+import { fileURLToPath } from 'node:url'
 import serveStaticWrapper from './ServeStaticWrapper.mjs'
 
 const sessionsRedisClient = UserSessionsRedis.client()

@@ -19,7 +19,7 @@ import recurly from 'recurly'
 import Settings from '@overleaf/settings'
 import minimist from 'minimist'
 import _ from 'lodash'
-import fs from 'fs'
+import fs from 'node:fs'
 
 const recurlySettings = Settings.apis.recurly
 const recurlyApiKey = recurlySettings ? recurlySettings.apiKey : undefined

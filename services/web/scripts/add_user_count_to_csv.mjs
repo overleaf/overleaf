@@ -1,7 +1,7 @@
 // Usage: node scripts/add_user_count_to_csv.mjs [OPTS] [INPUT-FILE]
 // Looks up the number of users for each domain in the input csv file and adds
 // columns for the number of users in the domain, subdomains, and total.
-import fs from 'fs'
+import fs from 'node:fs'
 // https://github.com/import-js/eslint-plugin-import/issues/1810
 // eslint-disable-next-line import/no-unresolved
 import * as csv from 'csv/sync'

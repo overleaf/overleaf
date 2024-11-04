@@ -1,8 +1,8 @@
 import { parser } from '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
 
-import * as fs from 'fs'
-import * as path from 'path'
-import { fileURLToPath } from 'url'
+import * as fs from 'node:fs'
+import * as path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import minimist from 'minimist'
 
 const argv = minimist(process.argv.slice(2))

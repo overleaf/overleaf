@@ -16,7 +16,7 @@ import mongodb from './app/src/infrastructure/mongodb.js'
 import mongoose from './app/src/infrastructure/Mongoose.js'
 import { triggerGracefulShutdown } from './app/src/infrastructure/GracefulShutdown.js'
 import FileWriter from './app/src/infrastructure/FileWriter.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 logger.initialize(process.env.METRICS_APP_NAME || 'web')
 logger.logger.serializers.user = Serializers.user

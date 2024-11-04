@@ -1,5 +1,5 @@
 // ts-check
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 import SurveyCache from './SurveyCache.mjs'
 import SubscriptionLocator from '../Subscription/SubscriptionLocator.js'

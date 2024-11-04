@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import minimist from 'minimist'
 import { parse } from 'csv'
-import Stream from 'stream/promises'
+import Stream from 'node:stream/promises'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import { Subscription } from '../app/src/models/Subscription.js'
 

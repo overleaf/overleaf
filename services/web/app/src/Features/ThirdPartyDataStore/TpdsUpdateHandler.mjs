@@ -1,4 +1,4 @@
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import UpdateMerger from './UpdateMerger.js'
 import logger from '@overleaf/logger'
 import NotificationsBuilder from '../Notifications/NotificationsBuilder.js'

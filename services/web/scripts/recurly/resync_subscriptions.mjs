@@ -4,7 +4,7 @@ import SubscriptionUpdater from '../../app/src/Features/Subscription/Subscriptio
 import minimist from 'minimist'
 import { setTimeout } from 'node:timers/promises'
 
-import util from 'util'
+import util from 'node:util'
 
 import pLimit from 'p-limit'
 

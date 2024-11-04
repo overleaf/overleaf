@@ -1,4 +1,4 @@
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import { ProjectInvite } from '../../models/ProjectInvite.js'
 import logger from '@overleaf/logger'
 import CollaboratorsEmailHandler from './CollaboratorsEmailHandler.mjs'

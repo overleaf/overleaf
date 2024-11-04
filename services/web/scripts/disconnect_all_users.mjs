@@ -1,8 +1,8 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import Settings from '@overleaf/settings'
 import AdminController from '../app/src/Features/ServerAdmin/AdminController.js'
 import minimist from 'minimist'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const args = minimist(process.argv.slice(2), {
   string: ['confirm-site-url', 'delay-in-seconds'],

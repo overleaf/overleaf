@@ -6,7 +6,7 @@ import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import mongodb from 'mongodb-legacy'
 import minimist from 'minimist'
 import CollaboratorsHandler from '../app/src/Features/Collaborators/CollaboratorsHandler.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const { ObjectId } = mongodb
 

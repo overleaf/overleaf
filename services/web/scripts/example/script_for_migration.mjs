@@ -7,7 +7,7 @@
  */
 
 import { User } from '../../app/src/models/User.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 // const somePackage = require('some-package')
 

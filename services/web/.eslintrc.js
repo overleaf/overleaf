@@ -107,7 +107,6 @@ module.exports = {
       },
       plugins: ['unicorn'],
       rules: {
-        'unicorn/prefer-module': 'error',
         'import/no-unresolved': 'error',
         'import/extensions': [
           'error',
@@ -117,6 +116,8 @@ module.exports = {
             mjs: 'always',
           },
         ],
+        'unicorn/prefer-module': 'error',
+        'unicorn/prefer-node-protocol': 'error',
       },
     },
     {

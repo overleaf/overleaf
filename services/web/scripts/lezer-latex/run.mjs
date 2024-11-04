@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
 import { logTree } from './print-tree.mjs'
 import { parser as LaTeXParser } from '../../frontend/js/features/source-editor/lezer-latex/latex.mjs'
 import { parser as BibTeXParser } from '../../frontend/js/features/source-editor/lezer-bibtex/bibtex.mjs'

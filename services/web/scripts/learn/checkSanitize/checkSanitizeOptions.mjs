@@ -1,13 +1,13 @@
-import crypto from 'crypto'
-import fs from 'fs'
-import Path from 'path'
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import Path from 'node:path'
 import cheerio from 'cheerio'
 // checkSanitizeOptions is only used in dev env
 // eslint-disable-next-line import/no-extraneous-dependencies
 import prettier from 'prettier'
 import sanitizeHtml from 'sanitize-html'
 import { sanitizeOptions } from '../../../modules/learn/app/src/sanitizeOptions.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 const EXTRACT_STYLE = process.env.EXTRACT_STYLES === 'true'

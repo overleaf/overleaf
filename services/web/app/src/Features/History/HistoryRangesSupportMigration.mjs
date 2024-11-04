@@ -1,6 +1,6 @@
 // @ts-check
 
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import OError from '@overleaf/o-error'
 import logger from '@overleaf/logger'
 import HistoryManager from '../History/HistoryManager.js'

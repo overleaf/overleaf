@@ -1,4 +1,4 @@
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import ProjectGetter from '../Project/ProjectGetter.js'
 import LimitationsManager from '../Subscription/LimitationsManager.js'
 import UserGetter from '../User/UserGetter.js'

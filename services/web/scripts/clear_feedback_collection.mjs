@@ -6,7 +6,7 @@
  */
 
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const runScript = async (timestamp, dryRun) => {
   const t = new Date(timestamp)

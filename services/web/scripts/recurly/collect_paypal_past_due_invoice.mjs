@@ -1,7 +1,7 @@
 import RecurlyWrapper from '../../app/src/Features/Subscription/RecurlyWrapper.js'
 import minimist from 'minimist'
 import logger from '@overleaf/logger'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const waitMs =
   fileURLToPath(import.meta.url) === process.argv[1]

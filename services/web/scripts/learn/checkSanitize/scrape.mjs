@@ -1,12 +1,12 @@
-import Path from 'path'
-import fs from 'fs'
+import Path from 'node:path'
+import fs from 'node:fs'
 import {
   fetchString,
   fetchJson,
   RequestFailedError,
 } from '@overleaf/fetch-utils'
-import crypto from 'crypto'
-import { fileURLToPath } from 'url'
+import crypto from 'node:crypto'
+import { fileURLToPath } from 'node:url'
 
 const __dirname = Path.dirname(fileURLToPath(import.meta.url))
 const CACHE_IN = Path.join(

@@ -1,5 +1,5 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 async function updateStringDates() {
   const users = await db.users.aggregate([

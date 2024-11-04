@@ -1,6 +1,6 @@
 import checkSanitizeOptions from './checkSanitizeOptions.mjs'
 import Scrape from './scrape.mjs'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const { getAllPagesAndCache, scrapeAndCachePage } = Scrape
 

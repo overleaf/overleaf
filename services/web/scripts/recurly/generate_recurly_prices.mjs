@@ -22,7 +22,7 @@ import minimist from 'minimist'
 // eslint-disable-next-line import/no-unresolved
 import * as csv from 'csv/sync'
 import _ from 'lodash'
-import fs from 'fs'
+import fs from 'node:fs'
 
 const argv = minimist(process.argv.slice(2), {
   string: ['output', 'file'],

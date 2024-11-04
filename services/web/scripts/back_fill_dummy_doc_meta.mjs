@@ -1,4 +1,4 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import mongodb from 'mongodb-legacy'
 import {
   db,
@@ -6,7 +6,7 @@ import {
 } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
 import LRUCache from 'lru-cache'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const { ObjectId } = mongodb
 const sleep = promisify(setTimeout)

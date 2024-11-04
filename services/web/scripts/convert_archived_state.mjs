@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 
 const { batchedUpdate } = BatchedUpdateModule
 

@@ -1,4 +1,4 @@
-import readline from 'readline'
+import readline from 'node:readline'
 import { ObjectId, db } from '../app/src/infrastructure/mongodb.js'
 import ProjectEntityHandler from '../app/src/Features/Project/ProjectEntityHandler.js'
 import ProjectGetter from '../app/src/Features/Project/ProjectGetter.js'

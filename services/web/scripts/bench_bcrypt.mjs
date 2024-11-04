@@ -1,5 +1,5 @@
 import minimist from 'minimist'
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import bcrypt from 'bcrypt'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 // https://github.com/import-js/eslint-plugin-import/issues/1810

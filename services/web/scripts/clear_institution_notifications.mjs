@@ -1,6 +1,6 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import InstitutionsManager from '../app/src/Features/Institutions/InstitutionsManager.js'
-import { fileURLToPath } from 'url'
+import { fileURLToPath } from 'node:url'
 const sleep = promisify(setTimeout)
 
 async function main() {

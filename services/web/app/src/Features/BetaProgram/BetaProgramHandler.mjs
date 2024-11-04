@@ -1,4 +1,4 @@
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import metrics from '@overleaf/metrics'
 import UserUpdater from '../User/UserUpdater.js'
 import AnalyticsManager from '../Analytics/AnalyticsManager.js'

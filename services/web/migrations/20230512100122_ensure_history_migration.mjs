@@ -1,4 +1,4 @@
-import util from 'util'
+import util from 'node:util'
 const { promisify } = util
 const sleep = promisify(setTimeout)
 

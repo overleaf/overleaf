@@ -1,8 +1,8 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
 import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
 import mongodb from 'mongodb-legacy'
-import fs from 'fs'
-import { fileURLToPath } from 'url'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 const { ObjectId } = mongodb
 const { batchedUpdate } = BatchedUpdateModule

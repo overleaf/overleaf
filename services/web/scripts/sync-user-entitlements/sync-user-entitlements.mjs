@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import minimist from 'minimist'
 import InstitutionsAPIModule from '../../app/src/Features/Institutions/InstitutionsAPI.js'
 

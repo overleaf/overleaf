@@ -25,7 +25,7 @@
 
 import minimist from 'minimist'
 
-import fs from 'fs'
+import fs from 'node:fs'
 import { ObjectId } from '../app/src/infrastructure/mongodb.js'
 import pLimit from 'p-limit'
 import FeaturesUpdater from '../app/src/Features/Subscription/FeaturesUpdater.js'
