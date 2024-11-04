@@ -4,3 +4,4 @@ export type SubscriptionDashModalIds =
   | 'keep-current-plan'
   | 'leave-group'
   | 'change-plan'
+  | 'cancel-ai-add-on'

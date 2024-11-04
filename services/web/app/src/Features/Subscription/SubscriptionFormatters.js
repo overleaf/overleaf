@@ -68,15 +68,23 @@ function formatPriceLocalized(priceInCents, currency = 'USD', locale) {
   return formatCurrencyLocalized(priceInCurrencyUnit, currency, locale)
 }
 
-function formatDate(date) {
+function formatDateTime(date) {
   if (!date) {
     return null
   }
   return dateformat(date, 'mmmm dS, yyyy h:MM TT Z', true)
 }
 
+function formatDate(date) {
+  if (!date) {
+    return null
+  }
+  return dateformat(date, 'mmmm dS, yyyy', true)
+}
+
 module.exports = {
   formatPriceDefault,
   formatPriceLocalized,
+  formatDateTime,
   formatDate,
 }

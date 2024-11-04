@@ -1,0 +1,188 @@
+import { useTranslation, Trans } from 'react-i18next'
+import { PriceExceptions } from '../../../shared/price-exceptions'
+import { useSubscriptionDashboardContext } from '../../../../context/subscription-dashboard-context'
+import { RecurlySubscription } from '../../../../../../../../types/subscription/dashboard/subscription'
+import { CancelSubscription } from './cancel-plan/cancel-subscription'
+import { PendingPlanChange } from './pending-plan-change'
+import SubscriptionRemainder from './subscription-remainder'
+import { ChangePlanModal } from './change-plan/modals/change-plan-modal'
+import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan-modal'
+import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
+import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
+import { CancelAiAddOnModal } from './change-plan/modals/cancel-ai-add-on-modal'
+import {
+  AI_STANDALONE_PLAN_CODE,
+  ADD_ON_NAME,
+  AI_STANDALONE_PLAN_NAME,
+  AI_STANDALONE_ANNUAL_PLAN_CODE,
+} from '../../../../data/add-on-codes'
+import { CancelSubscriptionButton } from './cancel-subscription-button'
+
+import OLButton from '@/features/ui/components/ol/ol-button'
+
+export function ActiveAiAddonSubscription({
+  subscription,
+}: {
+  subscription: RecurlySubscription
+}) {
+  const { t } = useTranslation()
+  const { recurlyLoadError, showCancellation, setModalIdShown } =
+    useSubscriptionDashboardContext()
+  if (showCancellation) return <CancelSubscription />
+
+  const onStandalonePlan = [
+    AI_STANDALONE_PLAN_CODE,
+    AI_STANDALONE_ANNUAL_PLAN_CODE,
+  ].includes(subscription.planCode)
+
+  const handlePlanChange = () => setModalIdShown('change-plan')
+
+  const handleCancelClick = () => setModalIdShown('cancel-ai-add-on')
+
+  return (
+    <>
+      <p className="mb-0">
+        <Trans
+          i18nKey="your_plan_is"
+          values={{
+            planName: onStandalonePlan
+              ? AI_STANDALONE_PLAN_NAME
+              : subscription.plan.name,
+          }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
+          components={{ strong: <strong /> }}
+        />
+      </p>
+      <p>
+        <Trans
+          i18nKey="add_ons_are"
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
+          values={{
+            addOnName: ADD_ON_NAME,
+          }}
+          components={{ strong: <strong /> }}
+        />
+      </p>
+      <p>
+        {subscription.pendingPlan && (
+          <PendingPlanChange subscription={subscription} />
+        )}
+      </p>
+      {subscription.pendingPlan &&
+        subscription.pendingPlan.name !== subscription.plan.name && (
+          <p>{t('want_change_to_apply_before_plan_end')}</p>
+        )}
+      <p>
+        <Trans
+          i18nKey="next_payment_of_x_collectected_on_y"
+          values={{
+            paymentAmmount: subscription.recurly.displayPrice,
+            collectionDate: subscription.recurly.nextPaymentDueDate,
+          }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
+          components={[
+            // eslint-disable-next-line react/jsx-key
+            <strong />,
+            // eslint-disable-next-line react/jsx-key
+            <strong />,
+          ]}
+        />
+      </p>
+      <PriceExceptions subscription={subscription} />
+      {!recurlyLoadError && (
+        <p>
+          <i>
+            <SubscriptionRemainder subscription={subscription} hideTime />
+          </i>
+        </p>
+      )}
+      {!recurlyLoadError && (
+        <p className="d-inline-flex flex-wrap gap-1">
+          {onStandalonePlan ? (
+            <StandaloneAiPlanActions
+              handlePlanChange={handlePlanChange}
+              handleCancelClick={handleCancelClick}
+            />
+          ) : (
+            <PlanWithAddonsActions
+              handlePlanChange={handlePlanChange}
+              handleCancelClick={handleCancelClick}
+            />
+          )}
+        </p>
+      )}
+      <p>
+        <a
+          href={subscription.recurly.accountManagementLink}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          {t('view_invoices')}
+        </a>
+      </p>
+      <p>
+        <a
+          href={subscription.recurly.billingDetailsLink}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          {t('update_billing_details')}
+        </a>
+      </p>
+
+      <ChangePlanModal />
+      <ConfirmChangePlanModal />
+      <KeepCurrentPlanModal />
+      <ChangeToGroupModal />
+      <CancelAiAddOnModal />
+    </>
+  )
+}
+
+function StandaloneAiPlanActions({
+  handlePlanChange,
+  handleCancelClick,
+}: {
+  handlePlanChange(): void
+  handleCancelClick(): void
+}) {
+  const { t } = useTranslation()
+  return (
+    <>
+      <OLButton variant="secondary" onClick={handlePlanChange}>
+        {t('upgrade')}
+      </OLButton>
+
+      <OLButton variant="danger-ghost" onClick={handleCancelClick}>
+        {t('cancel_add_on')}
+      </OLButton>
+    </>
+  )
+}
+
+function PlanWithAddonsActions({
+  handlePlanChange,
+  handleCancelClick,
+}: {
+  handlePlanChange(): void
+  handleCancelClick(): void
+}) {
+  const { t } = useTranslation()
+  return (
+    <>
+      <OLButton variant="secondary" onClick={handlePlanChange}>
+        {t('switch_plan')}
+      </OLButton>
+
+      <>
+        <OLButton variant="danger-ghost" onClick={handleCancelClick}>
+          {t('remove_add_on')}
+        </OLButton>{' '}
+        <CancelSubscriptionButton />
+      </>
+    </>
+  )
+}
