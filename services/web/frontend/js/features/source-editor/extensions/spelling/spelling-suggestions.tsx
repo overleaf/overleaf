@@ -15,6 +15,9 @@ import SpellingSuggestionsFeedback from './spelling-suggestions-feedback'
 import { SpellingSuggestionsLanguage } from './spelling-suggestions-language'
 import { captureException } from '@/infrastructure/error-reporter'
 import { debugConsole } from '@/utils/debugging'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { SpellCheckLanguage } from '../../../../../../types/project-settings'
+import { Dropdown } from 'react-bootstrap-5'
 
 const ITEMS_TO_SHOW = 8
 
@@ -22,14 +25,16 @@ const ITEMS_TO_SHOW = 8
 const wrapArrayIndex = (index: number, length: number) =>
   ((index % length) + length) % length
 
-export const SpellingSuggestions: FC<{
+type SpellingSuggestionsProps = {
   word: Word
   spellCheckLanguage?: string
   spellChecker?: SpellChecker | null
   handleClose: () => void
   handleLearnWord: () => void
   handleCorrectWord: (text: string) => void
-}> = ({
+}
+
+export const SpellingSuggestions: FC<SpellingSuggestionsProps> = ({
   word,
   spellCheckLanguage,
   spellChecker,
@@ -37,8 +42,6 @@ export const SpellingSuggestions: FC<{
   handleLearnWord,
   handleCorrectWord,
 }) => {
-  const { t } = useTranslation()
-
   const [suggestions, setSuggestions] = useState(() =>
     Array.isArray(word.suggestions)
       ? word.suggestions.slice(0, ITEMS_TO_SHOW)
@@ -46,10 +49,6 @@ export const SpellingSuggestions: FC<{
   )
 
   const [waiting, setWaiting] = useState(!word.suggestions)
-
-  const [selectedIndex, setSelectedIndex] = useState(0)
-
-  const itemsLength = suggestions.length + 1
 
   useEffect(() => {
     if (!word.suggestions) {
@@ -85,6 +84,46 @@ export const SpellingSuggestions: FC<{
     return null
   }
 
+  const innerProps = {
+    suggestions,
+    waiting,
+    handleClose,
+    handleCorrectWord,
+    handleLearnWord,
+    language,
+  }
+
+  return (
+    <BootstrapVersionSwitcher
+      bs3={<B3SpellingSuggestions {...innerProps} />}
+      bs5={<B5SpellingSuggestions {...innerProps} />}
+    />
+  )
+}
+
+type SpellingSuggestionsInnerProps = {
+  suggestions: string[]
+  waiting: boolean
+  handleClose: () => void
+  handleCorrectWord: (text: string) => void
+  handleLearnWord: () => void
+  language: SpellCheckLanguage
+}
+
+const B3SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
+  suggestions,
+  waiting,
+  language,
+  handleClose,
+  handleCorrectWord,
+  handleLearnWord,
+}) => {
+  const { t } = useTranslation()
+
+  const [selectedIndex, setSelectedIndex] = useState(0)
+
+  const itemsLength = suggestions.length + 1
+
   return (
     <ul
       className={classnames('dropdown-menu', 'dropdown-menu-unpositioned', {
@@ -113,7 +152,7 @@ export const SpellingSuggestions: FC<{
       {Array.isArray(suggestions) && (
         <>
           {suggestions.map((suggestion, index) => (
-            <ListItem
+            <BS3ListItem
               key={suggestion}
               content={suggestion}
               selected={index === selectedIndex}
@@ -126,7 +165,7 @@ export const SpellingSuggestions: FC<{
           {suggestions.length > 0 && <li className="divider" />}
         </>
       )}
-      <ListItem
+      <BS3ListItem
         content={t('add_to_dictionary')}
         selected={selectedIndex === itemsLength - 1}
         handleClick={event => {
@@ -155,7 +194,7 @@ export const SpellingSuggestions: FC<{
   )
 }
 
-const ListItem: FC<{
+const BS3ListItem: FC<{
   content: string
   selected: boolean
   handleClick: MouseEventHandler<HTMLButtonElement>
@@ -181,5 +220,96 @@ const ListItem: FC<{
         {content}
       </button>
     </li>
+  )
+}
+
+const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
+  suggestions,
+  waiting,
+  language,
+  handleClose,
+  handleCorrectWord,
+  handleLearnWord,
+}) => {
+  const { t } = useTranslation()
+  return (
+    <Dropdown>
+      <Dropdown.Menu
+        className={classnames('dropdown-menu', 'dropdown-menu-unpositioned', {
+          hidden: waiting,
+        })}
+        show={!waiting}
+        tabIndex={0}
+        role="menu"
+        onKeyDown={event => {
+          switch (event.code) {
+            case 'Escape':
+            case 'Tab':
+              event.preventDefault()
+              handleClose()
+              break
+          }
+        }}
+      >
+        {Array.isArray(suggestions) &&
+          suggestions.map((suggestion, index) => (
+            <BS5ListItem
+              key={suggestion}
+              content={suggestion}
+              handleClick={event => {
+                event.preventDefault()
+                handleCorrectWord(suggestion)
+              }}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus={index === 0}
+            />
+          ))}
+        {suggestions?.length > 0 && <Dropdown.Divider />}
+        <BS5ListItem
+          content={t('add_to_dictionary')}
+          handleClick={event => {
+            event.preventDefault()
+            handleLearnWord()
+          }}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus={suggestions?.length === 0}
+        />
+
+        <Dropdown.Divider />
+        <SpellingSuggestionsLanguage
+          language={language}
+          handleClose={handleClose}
+        />
+        {getMeta('ol-isSaas') && (
+          <>
+            <Dropdown.Divider />
+            <SpellingSuggestionsFeedback />
+          </>
+        )}
+      </Dropdown.Menu>
+    </Dropdown>
+  )
+}
+
+const BS5ListItem: FC<{
+  content: string
+  handleClick: MouseEventHandler<HTMLButtonElement>
+  autoFocus?: boolean
+}> = ({ content, handleClick, autoFocus }) => {
+  const handleListItem = useCallback(
+    (node: HTMLElement | null) => {
+      if (node && autoFocus) node.focus()
+    },
+    [autoFocus]
+  )
+  return (
+    <Dropdown.Item
+      role="menuitem"
+      className="btn-link text-left dropdown-menu-button"
+      onClick={handleClick}
+      ref={handleListItem}
+    >
+      {content}
+    </Dropdown.Item>
   )
 }

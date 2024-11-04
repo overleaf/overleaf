@@ -9,6 +9,15 @@
     var(--spacing-04);
 }
 
+.dropdown-menu.dropdown-menu-unpositioned {
+  position: unset;
+  top: unset;
+  left: unset;
+  z-index: unset;
+  display: block;
+  float: unset;
+}
+
 .dropdown-menu {
   @include shadow-md;
 

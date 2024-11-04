@@ -61,6 +61,7 @@ const spellingTheme = EditorView.baseTheme({
   },
   '.cm-tooltip.ol-cm-spelling-context-menu-tooltip': {
     borderWidth: '0',
+    background: 'transparent',
   },
 })
 
