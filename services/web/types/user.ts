@@ -25,6 +25,13 @@ export type Features = {
   zotero?: boolean
 }
 
+export type FeatureUsage = {
+  [feature: string]: {
+    remainingUsage: number
+    resetDate: string // date string
+  }
+}
+
 export type User = {
   id: UserId | null
   isAdmin?: boolean
@@ -44,6 +51,7 @@ export type User = {
     autoCreatedAccount: boolean
     firstAutoLoad: boolean
   }
+  featureUsage?: FeatureUsage
 }
 
 export type MongoUser = Pick<User, Exclude<keyof User, 'id'>> & { _id: string }

@@ -49,13 +49,17 @@ export const EditorContext = createContext<
       currentPopup: string | null
       setCurrentPopup: Dispatch<SetStateAction<string | null>>
       setOutOfSync: (value: boolean) => void
+      hasPremiumSuggestion: boolean
+      setHasPremiumSuggestion: (value: boolean) => void
+      setPremiumSuggestionResetDate: (date: Date) => void
+      premiumSuggestionResetDate: Date
     }
   | undefined
 >(undefined)
 
 export const EditorProvider: FC = ({ children }) => {
   const ide = useIdeContext()
-  const { id: userId } = useUserContext()
+  const { id: userId, featureUsage } = useUserContext()
   const { role } = useDetachContext()
   const { showGenericMessageModal } = useModalsContext()
 
@@ -91,6 +95,20 @@ export const EditorProvider: FC = ({ children }) => {
   )
 
   const [currentPopup, setCurrentPopup] = useState<string | null>(null)
+  const [hasPremiumSuggestion, setHasPremiumSuggestion] = useState<boolean>(
+    () => {
+      return Boolean(
+        featureUsage?.aiErrorAssistant &&
+          featureUsage?.aiErrorAssistant.remainingUsage > 0
+      )
+    }
+  )
+  const [premiumSuggestionResetDate, setPremiumSuggestionResetDate] =
+    useState<Date>(() => {
+      return featureUsage?.aiErrorAssistant.resetDate
+        ? new Date(featureUsage.aiErrorAssistant.resetDate)
+        : new Date()
+    })
 
   const isPendingEditor = useMemo(
     () =>
@@ -183,6 +201,10 @@ export const EditorProvider: FC = ({ children }) => {
       currentPopup,
       setCurrentPopup,
       setOutOfSync,
+      hasPremiumSuggestion,
+      setHasPremiumSuggestion,
+      premiumSuggestionResetDate,
+      setPremiumSuggestionResetDate,
     }),
     [
       cobranding,
@@ -203,6 +225,10 @@ export const EditorProvider: FC = ({ children }) => {
       setCurrentPopup,
       outOfSync,
       setOutOfSync,
+      hasPremiumSuggestion,
+      setHasPremiumSuggestion,
+      premiumSuggestionResetDate,
+      setPremiumSuggestionResetDate,
     ]
   )
 

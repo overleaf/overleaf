@@ -348,6 +348,9 @@ const _ProjectController = {
       'write-and-cite-ars',
       'default-visual-for-beginners',
       'hotjar',
+      'spell-check-client',
+      'spell-check-no-server',
+      'ai-add-on',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -646,6 +649,21 @@ const _ProjectController = {
           aiFeaturesAllowed = false
         }
       }
+      const canUseErrorAssistant =
+        user.features?.aiErrorAssistant ||
+        splitTestAssignments['ai-add-on']?.variant === 'enabled'
+
+      let featureUsage = {}
+
+      if (Features.hasFeature('saas')) {
+        const usagesLeft = await Modules.promises.hooks.fire(
+          'remainingFeatureAllocation',
+          userId
+        )
+        usagesLeft?.forEach(usage => {
+          featureUsage = { ...featureUsage, ...usage }
+        })
+      }
 
       // check if a user has never tried writefull before (writefull.enabled will be null)
       //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
@@ -713,6 +731,7 @@ const _ProjectController = {
           allowedFreeTrial,
           featureSwitches: user.featureSwitches,
           features: user.features,
+          featureUsage,
           refProviders: _.mapValues(user.refProviders, Boolean),
           writefull: {
             enabled: Boolean(user.writefull?.enabled && aiFeaturesAllowed),
@@ -766,8 +785,7 @@ const _ProjectController = {
         showSymbolPalette,
         symbolPaletteAvailable: Features.hasFeature('symbol-palette'),
         userRestrictions: Array.from(req.userRestrictions || []),
-        showAiErrorAssistant:
-          aiFeaturesAllowed && user.features?.aiErrorAssistant,
+        showAiErrorAssistant: aiFeaturesAllowed && canUseErrorAssistant,
         detachRole,
         metadata: { viewport: false },
         showUpgradePrompt,

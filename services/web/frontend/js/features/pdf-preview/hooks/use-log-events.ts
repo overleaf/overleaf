@@ -31,11 +31,24 @@ export const useLogEvents = (setShowLogs: (show: boolean) => void) => {
           })
 
           if (suggestFix) {
-            element
-              .querySelector<HTMLButtonElement>(
-                'button[data-action="suggest-fix"]'
-              )
-              ?.click()
+            // if they are paywalled, click that instead
+            const paywall = document.querySelector<HTMLButtonElement>(
+              'button[data-action="assistant-paywall-show"]'
+            )
+
+            if (paywall) {
+              paywall.scrollIntoView({
+                block: 'start',
+                inline: 'nearest',
+              })
+              paywall.click()
+            } else {
+              element
+                .querySelector<HTMLButtonElement>(
+                  'button[data-action="suggest-fix"]'
+                )
+                ?.click()
+            }
           }
         }
       })
