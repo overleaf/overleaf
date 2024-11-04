@@ -635,4 +635,12 @@
     width: 26em; // sized to create a wrap between the sentences
     max-width: 100%;
   }
+
+  .uppy-Informer p {
+    background-color: var(--bg-info-03);
+    border: 1px solid var(--blue-20);
+    border-radius: var(--border-radius-base);
+    color: var(--content-primary);
+    font-size: var(--font-size-03);
+  }
 }
