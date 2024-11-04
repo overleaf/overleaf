@@ -1,0 +1,9 @@
+.ol-cm-math-tooltip {
+  border-radius: var(--border-radius-base);
+  max-height: 400px;
+  max-width: 800px;
+  overflow: auto;
+  padding: var(--spacing-04);
+  display: flex;
+  gap: var(--spacing-04);
+}
