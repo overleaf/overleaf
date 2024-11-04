@@ -1,7 +1,7 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
 import minimist from 'minimist'
 import UserGetter from '../app/src/Features/User/UserGetter.js'
-import fs from 'fs'
+import fs from 'node:fs'
 
 function usage() {
   console.log(
