@@ -5,7 +5,7 @@ import getMeta from '../../../../utils/meta'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function SuccessfulSubscription() {
@@ -21,7 +21,7 @@ function SuccessfulSubscription() {
     <div className="container">
       <OLRow>
         <OLCol lg={{ span: 8, offset: 2 }}>
-          <OLCard>
+          <OLPageContentCard>
             <div className="page-header">
               <h2>{t('thanks_for_subscribing')}</h2>
             </div>
@@ -106,7 +106,7 @@ function SuccessfulSubscription() {
                 &lt; {t('back_to_your_projects')}
               </a>
             </p>
-          </OLCard>
+          </OLPageContentCard>
         </OLCol>
       </OLRow>
     </div>

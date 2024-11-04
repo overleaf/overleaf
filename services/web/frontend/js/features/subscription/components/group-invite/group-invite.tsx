@@ -9,7 +9,7 @@ import JoinGroup from './join-group'
 import AcceptedInvite from './accepted-invite'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 
 export type InviteViewTypes =
   | 'invite'
@@ -74,7 +74,7 @@ export default function GroupInvite() {
 
       <OLRow className="row row-spaced">
         <OLCol lg={{ span: 8, offset: 2 }}>
-          <OLCard>
+          <OLPageContentCard>
             <div className="page-header">
               <h1 className="text-center">
                 <Trans
@@ -90,7 +90,7 @@ export default function GroupInvite() {
               </h1>
             </div>
             <GroupInviteViews />
-          </OLCard>
+          </OLPageContentCard>
         </OLCol>
       </OLRow>
     </div>

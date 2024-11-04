@@ -1,7 +1,7 @@
 import { Trans } from 'react-i18next'
 import GroupInvitesItemFooter from './group-invites-item-footer'
 import type { TeamInvite } from '../../../../../../types/team-invite'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 
@@ -15,7 +15,7 @@ export default function GroupInvitesItem({
   return (
     <OLRow className="row-spaced">
       <OLCol lg={{ span: 8, offset: 2 }} className="text-center">
-        <OLCard>
+        <OLPageContentCard>
           <div className="page-header">
             <h2>
               <Trans
@@ -31,7 +31,7 @@ export default function GroupInvitesItem({
             </h2>
           </div>
           <GroupInvitesItemFooter teamInvite={teamInvite} />
-        </OLCard>
+        </OLPageContentCard>
       </OLCol>
     </OLRow>
   )

@@ -10,7 +10,7 @@ import ManagedInstitutions from './managed-institutions'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import getMeta from '../../../../utils/meta'
 import PremiumFeaturesLink from './premium-features-link'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
@@ -37,7 +37,7 @@ function SubscriptionDashboard() {
               type="warning"
             />
           )}
-          <OLCard>
+          <OLPageContentCard>
             <div className="page-header">
               <h1>{t('your_subscription')}</h1>
             </div>
@@ -53,7 +53,7 @@ function SubscriptionDashboard() {
               {!hasDisplayedSubscription &&
                 (hasSubscription ? <ContactSupport /> : <FreePlan />)}
             </div>
-          </OLCard>
+          </OLPageContentCard>
         </OLCol>
       </OLRow>
     </div>

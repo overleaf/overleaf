@@ -232,11 +232,21 @@
   .card {
     --bs-card-bg: var(--neutral-10);
     --bs-card-border-radius: var(--border-radius-large);
-    --bs-card-spacer-y: var(--spacing-08);
-    --bs-card-spacer-x: var(--spacing-08);
+
+    &.page-content-card {
+      --bs-card-bg: transparent;
+    }
   }
 
   .badge-premium {
     --badge-font-weight: 600;
+  }
+
+  .content-alt {
+    background-color: var(--bg-light-primary);
+  }
+
+  .page-header {
+    border-bottom-width: 0;
   }
 }

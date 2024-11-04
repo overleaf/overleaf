@@ -340,7 +340,8 @@ footer.site-footer {
   }
 }
 
-.website-redesign-fat-footer {
+.website-redesign-fat-footer,
+.website-redesign .fat-footer {
   .fat-footer-container {
     @include media-breakpoint-down(sm) {
       margin: var(--spacing-11) 0;

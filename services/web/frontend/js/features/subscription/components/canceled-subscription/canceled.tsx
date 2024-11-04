@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 
 function Canceled() {
@@ -11,7 +11,7 @@ function Canceled() {
     <div className="container">
       <OLRow>
         <OLCol lg={{ span: 8, offset: 2 }}>
-          <OLCard>
+          <OLPageContentCard>
             <div className="page-header">
               <h2>{t('subscription_canceled')}</h2>
             </div>
@@ -35,7 +35,7 @@ function Canceled() {
                 &lt; {t('back_to_your_projects')}
               </a>
             </p>
-          </OLCard>
+          </OLPageContentCard>
         </OLCol>
       </OLRow>
     </div>

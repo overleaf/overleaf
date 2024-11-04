@@ -211,7 +211,8 @@
   }
 }
 
-.website-redesign-navbar {
+.website-redesign-navbar,
+.website-redesign .navbar-default {
   --navbar-title-color: var(--content-primary);
   --navbar-title-color-hover: var(--content-secondary);
   --navbar-brand-image-url: url('../../../../public/img/ol-brand/overleaf-black.svg');

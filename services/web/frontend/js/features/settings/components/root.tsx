@@ -21,7 +21,7 @@ import useScrollToIdOnLoad from '../../../shared/hooks/use-scroll-to-id-on-load'
 import { SSOAlert } from './emails/sso-alert'
 import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 
 function SettingsPageRoot() {
   const { isReady } = useWaitForI18n()
@@ -48,7 +48,7 @@ function SettingsPageContent() {
 
   return (
     <UserProvider>
-      <OLCard>
+      <OLPageContentCard>
         <div className="page-header">
           <h1>{t('account_settings')}</h1>
         </div>
@@ -92,7 +92,7 @@ function SettingsPageContent() {
             </>
           ) : null}
         </div>
-      </OLCard>
+      </OLPageContentCard>
     </UserProvider>
   )
 }

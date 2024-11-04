@@ -6,7 +6,7 @@ import type { Nullable } from '../../../../../types/utils'
 import WelcomeMessageLink from './welcome-message-new/welcome-message-link'
 import WelcomeMessageCreateNewProjectDropdown from './welcome-message-new/welcome-message-create-new-project-dropdown'
 import getMeta from '@/utils/meta'
-import OLCard from '@/features/ui/components/ol/ol-card'
+import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 
 export default function WelcomeMessage() {
   const { t } = useTranslation()
@@ -17,7 +17,7 @@ export default function WelcomeMessage() {
 
   return (
     <>
-      <OLCard>
+      <OLPageContentCard>
         <div className="welcome-new-wrapper">
           <div className="welcome text-center">
             <h2 className="welcome-title">{t('welcome_to_sl')}</h2>
@@ -43,7 +43,7 @@ export default function WelcomeMessage() {
             </div>
           </div>
         </div>
-      </OLCard>
+      </OLPageContentCard>
       <NewProjectButtonModal
         modal={activeModal}
         onHide={() => setActiveModal(null)}

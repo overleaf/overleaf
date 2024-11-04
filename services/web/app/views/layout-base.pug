@@ -77,7 +77,7 @@ html(
 
 	body(class={
 		'thin-footer': showThinFooter,
-		'website-redesign': isWebsiteRedesign === true
+		'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride
 	}, data-theme="default")
 		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
 			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render=" + settings.recaptcha.siteKeyV3, defer=deferScripts)
