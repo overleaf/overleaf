@@ -40,16 +40,14 @@ export default function PdfViewerControlsMenuButton({
         description={t('view_options')}
         overlayProps={{ placement: 'bottom' }}
       >
-        <span>
-          <OLButton
-            variant="ghost"
-            className="pdf-toolbar-btn pdfjs-toolbar-popover-button"
-            onClick={togglePopover}
-            ref={targetRef}
-          >
-            <MaterialIcon type="more_horiz" />
-          </OLButton>
-        </span>
+        <OLButton
+          variant="ghost"
+          className="pdf-toolbar-btn pdfjs-toolbar-popover-button"
+          onClick={togglePopover}
+          ref={targetRef}
+        >
+          <MaterialIcon type="more_horiz" />
+        </OLButton>
       </OLTooltip>
 
       <OLOverlay
