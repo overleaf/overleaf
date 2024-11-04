@@ -6,6 +6,7 @@
   --outline-line-guide-color: var(--border-primary);
   --outline-container-color-bg: var(--bg-dark-tertiary);
   --outline-content-color: var(--content-primary-dark);
+  --outline-item-highlight-color: var(--neutral-60);
 }
 
 @include theme('light') {
@@ -16,6 +17,7 @@
   --outline-line-guide-color: var(--border-disabled);
   --outline-container-color-bg: var(--bg-light-primary);
   --outline-content-color: var(--content-secondary);
+  --outline-item-highlight-color: var(--bg-light-secondary);
 }
 
 .outline-container {
@@ -216,7 +218,7 @@
 }
 
 .outline-item-link-highlight {
-  background-color: tint($bg-dark-tertiary, 15%);
+  background-color: var(--outline-item-highlight-color);
 }
 
 .outline-caret-icon {
