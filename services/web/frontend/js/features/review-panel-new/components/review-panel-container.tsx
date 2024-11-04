@@ -20,23 +20,17 @@ function ReviewPanelContainer() {
     return null
   }
 
-  // the full-width review panel
-  if (reviewPanelOpen) {
-    return ReactDOM.createPortal(<ReviewPanel />, view.scrollDOM)
-  }
+  const hasCommentOrChange = hasActiveRange(ranges, threads)
+  const showPanel = reviewPanelOpen || hasCommentOrChange
+  const showTrackChangesWidget = wantTrackChanges && !reviewPanelOpen
 
-  // the mini review panel
-  if (hasActiveRange(ranges, threads)) {
-    return ReactDOM.createPortal(
-      <>
-        {wantTrackChanges && <TrackChangesOnWidget />}
-        <ReviewPanel mini />
-      </>,
-      view.scrollDOM
-    )
-  }
-
-  return null
+  return ReactDOM.createPortal(
+    <>
+      {showTrackChangesWidget && <TrackChangesOnWidget />}
+      {showPanel && <ReviewPanel mini={!reviewPanelOpen} />}
+    </>,
+    view.scrollDOM
+  )
 }
 
 export default memo(ReviewPanelContainer)
