@@ -98,6 +98,7 @@ import {
   TextStrikeOutCtrlSeq,
   EmphasisCtrlSeq,
   UnderlineCtrlSeq,
+  SetLengthCtrlSeq,
 } from './latex.terms.mjs'
 
 const MAX_ARGUMENT_LOOKAHEAD = 100
@@ -603,6 +604,7 @@ const otherKnowncommands = {
   '\\sout': TextStrikeOutCtrlSeq,
   '\\emph': EmphasisCtrlSeq,
   '\\underline': UnderlineCtrlSeq,
+  '\\setlength': SetLengthCtrlSeq,
 }
 // specializer for control sequences
 // return new tokens for specific control sequences

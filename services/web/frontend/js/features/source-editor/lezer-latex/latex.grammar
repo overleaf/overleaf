@@ -107,7 +107,8 @@
     TextSubscriptCtrlSeq,
     TextStrikeOutCtrlSeq,
     EmphasisCtrlSeq,
-    UnderlineCtrlSeq
+    UnderlineCtrlSeq,
+    SetLengthCtrlSeq
 }
 
 @external specialize {EnvName} specializeEnvName from "./tokens.mjs" {
@@ -406,6 +407,9 @@ KnownCommand<ArgumentType> {
     } |
     UnderlineCommand {
         UnderlineCtrlSeq ArgumentType
+    } |
+    SetLengthCommand {
+        SetLengthCtrlSeq optionalWhitespace? ShortTextArgument optionalWhitespace? ShortTextArgument
     }
 }
 
