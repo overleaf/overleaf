@@ -89,6 +89,7 @@ export interface Meta {
   'ol-features': Features
   'ol-footer': FatFooterMetadata
   'ol-fromPlansPage': boolean
+  'ol-galleryTagName': string
   'ol-gitBridgeEnabled': boolean
   'ol-gitBridgePublicBaseUrl': string
   'ol-github': { enabled: boolean; error: boolean }
