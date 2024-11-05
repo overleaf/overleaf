@@ -69,7 +69,7 @@ services:
     command: npm run --silent test:acceptance
 
   certs:
-    image: node:18.20.2
+    image: node:18.20.4
     volumes:
       - ./test/acceptance/certs:/certs
     working_dir: /certs

@@ -1,6 +1,6 @@
 # the base image is suitable for running web with /overleaf/services/web bind
 # mounted
-FROM node:18.20.2 AS base
+FROM node:18.20.4 AS base
 
 WORKDIR /overleaf/services/web
 
