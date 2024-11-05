@@ -328,9 +328,19 @@
   }
 
   .template-details-container {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-04);
+    @include heading-xs;
+
+    gap: var(--spacing-04) var(--spacing-11);
+    display: grid;
+    grid-template-columns: auto auto;
+
+    .template-detail {
+      display: contents;
+
+      &.tags > div {
+        margin-top: var(--spacing-06);
+      }
+    }
   }
 
   .gallery-abstract {
@@ -340,17 +350,10 @@
     a {
       hyphens: none;
     }
-  }
 
-  .field-title {
-    color: var(--neutral-70);
-    font-weight: 600;
-
-    @include heading-xs;
-  }
-
-  .field-description {
-    @include heading-xs;
+    p:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .cta-links-container {
