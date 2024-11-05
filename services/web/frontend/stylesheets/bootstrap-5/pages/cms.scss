@@ -66,6 +66,43 @@
     }
   }
 
+  // create .paragraphs-margin-spacing-00, .paragraphs-margin-spacing-01, .paragraphs-margin-spacing-02, .paragraphs-margin-spacing-03, .paragraphs-margin-spacing-04, .paragraphs-margin-spacing-05, .paragraphs-margin-spacing-06, .paragraphs-margin-spacing-07, .paragraphs-margin-spacing-08, .paragraphs-margin-spacing-09, .paragraphs-margin-spacing-10, .paragraphs-margin-spacing-11, .paragraphs-margin-spacing-12, .paragraphs-margin-spacing-13, .paragraphs-margin-spacing-14, .paragraphs-margin-spacing-15, .paragraphs-margin-spacing-16
+  @each $spacing-option in $all-spacings {
+    .paragraphs-margin-#{$spacing-option} {
+      p {
+        margin-bottom: var(--#{$spacing-option});
+      }
+    }
+  }
+
+  // create .headers-top-margin-spacing-00, .headers-top-margin-spacing-01, .headers-top-margin-spacing-02, .headers-top-margin-spacing-03, .headers-top-margin-spacing-04, .headers-top-margin-spacing-05, .headers-top-margin-spacing-06, .headers-top-margin-spacing-07, .headers-top-margin-spacing-08, .headers-top-margin-spacing-09, .headers-top-margin-spacing-10, .headers-top-margin-spacing-11, .headers-top-margin-spacing-12, .headers-top-margin-spacing-13, .headers-top-margin-spacing-14, .headers-top-margin-spacing-15, .headers-top-margin-spacing-16
+  @each $spacing-option in $all-spacings {
+    .headers-top-margin-#{$spacing-option} {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin-top: var(--#{$spacing-option});
+      }
+    }
+  }
+
+  // create .headers-bottom-margin-spacing-00, .headers-bottom-margin-spacing-01, .headers-bottom-margin-spacing-02, .headers-bottom-margin-spacing-03, .headers-bottom-margin-spacing-04, .headers-bottom-margin-spacing-05, .headers-bottom-margin-spacing-06, .headers-bottom-margin-spacing-07, .headers-bottom-margin-spacing-08, .headers-bottom-margin-spacing-09, .headers-bottom-margin-spacing-10, .headers-bottom-margin-spacing-11, .headers-bottom-margin-spacing-12, .headers-bottom-margin-spacing-13, .headers-bottom-margin-spacing-14, .headers-bottom-margin-spacing-15, .headers-bottom-margin-spacing-16
+  @each $spacing-option in $all-spacings {
+    .headers-bottom-margin-#{$spacing-option} {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin-bottom: var(--#{$spacing-option});
+      }
+    }
+  }
+
   .card + .card {
     margin-top: var(--spacing-09);
   }
@@ -405,6 +442,33 @@
 
     &.top-margin-xxl {
       margin-top: var(--spacing-11);
+    }
+
+    // create .top-margin-spacing-00, .top-margin-spacing-01, .top-margin-spacing-02, .top-margin-spacing-03, .top-margin-spacing-04, .top-margin-spacing-05, .top-margin-spacing-06, .top-margin-spacing-07, .top-margin-spacing-08, .top-margin-spacing-09, .top-margin-spacing-10, .top-margin-spacing-11, .top-margin-spacing-12, .top-margin-spacing-13, .top-margin-spacing-14, .top-margin-spacing-15, .top-margin-spacing-16
+    @each $spacing-option in $all-spacings {
+      &.top-margin-#{$spacing-option} {
+        margin-top: var(--#{$spacing-option});
+      }
+    }
+  }
+
+  .card {
+    @each $spacing-option in $all-spacings {
+      // create .padding-spacing-00, .padding-spacing-01, .padding-spacing-02, .padding-spacing-03, .padding-spacing-04, .padding-spacing-05, .padding-spacing-06, .padding-spacing-07, .padding-spacing-08, .padding-spacing-09, .padding-spacing-10, .padding-spacing-11, .padding-spacing-12, .padding-spacing-13, .padding-spacing-14, .padding-spacing-15, .padding-spacing-16
+      &.padding-#{$spacing-option} {
+        .card-body {
+          padding: var(--#{$spacing-option});
+        }
+      }
+    }
+  }
+
+  .no-card {
+    @each $spacing-option in $all-spacings {
+      // create .padding-spacing-00, .padding-spacing-01, .padding-spacing-02, .padding-spacing-03, .padding-spacing-04, .padding-spacing-05, .padding-spacing-06, .padding-spacing-07, .padding-spacing-08, .padding-spacing-09, .padding-spacing-10, .padding-spacing-11, .padding-spacing-12, .padding-spacing-13, .padding-spacing-14, .padding-spacing-15, .padding-spacing-16
+      &.padding-#{$spacing-option} {
+        padding: var(--#{$spacing-option});
+      }
     }
   }
 }
