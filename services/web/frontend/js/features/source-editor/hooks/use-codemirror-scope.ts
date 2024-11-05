@@ -576,6 +576,13 @@ function useCodeMirrorScope(view: EditorView) {
 
   useEventListener('learnedWords:reset', handleResetLearnedWords)
 
+  useEventListener(
+    'editor:focus',
+    useCallback(() => {
+      view.focus()
+    }, [view])
+  )
+
   useEffect(() => {
     view.dispatch(reviewPanelToggled())
   }, [reviewPanelOpen, miniReviewPanelVisible, view])
