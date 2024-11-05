@@ -8,13 +8,16 @@ import {
   useState,
 } from 'react'
 import Icon from '../../../../shared/components/icon'
-import { Overlay, Popover } from 'react-bootstrap'
 import { useTranslation } from 'react-i18next'
 import { EditorView } from '@codemirror/view'
 import { PastedContent } from '../../extensions/visual/pasted-content'
 import useEventListener from '../../../../shared/hooks/use-event-listener'
 import { FeedbackBadge } from '@/shared/components/feedback-badge'
 import { sendMB } from '@/infrastructure/event-tracking'
+import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import MaterialIcon from '@/shared/components/material-icon'
+import OLOverlay from '@/features/ui/components/ol/ol-overlay'
+import OLPopover from '@/features/ui/components/ol/ol-popover'
 
 const isMac = /Mac/.test(window.navigator?.platform)
 
@@ -96,22 +99,34 @@ export const PastedContentMenu: FC<{
         onClick={() => setMenuOpen(isOpen => !isOpen)}
         style={{ userSelect: 'none' }}
       >
-        <Icon type="clipboard" fw />
-        <Icon type="caret-down" fw />
+        <BootstrapVersionSwitcher
+          bs3={
+            <>
+              <Icon type="clipboard" fw />
+              <Icon type="caret-down" fw />
+            </>
+          }
+          bs5={
+            <>
+              <MaterialIcon type="content_copy" />
+              <MaterialIcon type="expand_more" />
+            </>
+          }
+        />
       </button>
 
       {menuOpen && (
-        <Overlay
+        <OLOverlay
           show
           onHide={() => setMenuOpen(false)}
-          animation={false}
+          transition={false}
           container={view.scrollDOM}
           containerPadding={0}
           placement="bottom"
           rootClose
-          target={toggleButtonRef.current ?? undefined}
+          target={toggleButtonRef?.current}
         >
-          <Popover
+          <OLPopover
             id="popover-pasted-content-menu"
             className="ol-cm-pasted-content-menu-popover"
           >
@@ -183,8 +198,8 @@ export const PastedContentMenu: FC<{
                 </span>
               </MenuItem>
             </div>
-          </Popover>
-        </Overlay>
+          </OLPopover>
+        </OLOverlay>
       )}
     </>
   )

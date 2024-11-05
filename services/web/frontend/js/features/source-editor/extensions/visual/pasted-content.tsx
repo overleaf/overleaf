@@ -49,16 +49,28 @@ const pastedContentTheme = EditorView.baseTheme({
     background: 'none',
     borderRadius: '8px',
     border: '1px solid rgb(125, 125, 125)',
+    color: 'inherit',
     margin: '0 4px',
     opacity: '0.7',
     '&:hover': {
       opacity: '1',
     },
+    '& .material-symbols': {
+      verticalAlign: 'text-bottom',
+    },
   },
   '.ol-cm-pasted-content-menu-popover': {
+    backgroundColor: '#fff',
     maxWidth: 'unset',
     '& .popover-content': {
       padding: 0,
+    },
+    '& .popover-body': {
+      color: 'inherit',
+      padding: 0,
+    },
+    '& .popover-arrow::after': {
+      borderBottomColor: '#fff',
     },
   },
   '&dark .ol-cm-pasted-content-menu-popover': {
@@ -72,6 +84,7 @@ const pastedContentTheme = EditorView.baseTheme({
     fontFamily: '"Lato", sans-serif',
   },
   '.ol-cm-pasted-content-menu-item': {
+    color: 'inherit',
     border: 'none',
     background: 'none',
     padding: '8px 16px',
