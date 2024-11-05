@@ -105,7 +105,7 @@ export const EditorProvider: FC = ({ children }) => {
   )
   const [premiumSuggestionResetDate, setPremiumSuggestionResetDate] =
     useState<Date>(() => {
-      return featureUsage?.aiErrorAssistant.resetDate
+      return featureUsage?.aiErrorAssistant?.resetDate
         ? new Date(featureUsage.aiErrorAssistant.resetDate)
         : new Date()
     })
