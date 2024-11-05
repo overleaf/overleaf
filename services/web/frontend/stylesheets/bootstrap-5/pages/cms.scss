@@ -127,7 +127,8 @@
     // }
   }
 
-  .section-row {
+  // only first level of .section-row need to act like containers. We do not want to update .section-row nested within a .section-row
+  section > .section-row {
     @extend .container;
   }
 
@@ -448,10 +449,8 @@
   bottom: 1px;
 }
 
-.vertically-center-col {
-  div[class*='col-'] {
-    align-self: center;
-  }
+.vertically-center-col > div[class*='col-'] {
+  align-self: center;
 
   // remove margin to better vertically align
   // some elements need to be nested within a container, and others are directly within .no-card/.card
@@ -567,13 +566,9 @@
 
 // Desktop layout options depdendent on mobile breakpoint
 @include media-breakpoint-up(lg) {
-  .row-equal-column-heights {
-    div[class*='col-'] {
-      .card,
-      .no-card {
-        height: 100%;
-      }
-    }
+  .row-equal-column-heights > div[class*='col-'] > .card,
+  .no-card {
+    height: 100%;
   }
 
   .section-row {
