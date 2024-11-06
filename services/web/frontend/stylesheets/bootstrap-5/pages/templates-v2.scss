@@ -343,6 +343,10 @@
     .template-detail {
       display: contents;
 
+      div:first-child {
+        white-space: nowrap;
+      }
+
       &.tags > div {
         margin-top: var(--spacing-06);
       }
