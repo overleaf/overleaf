@@ -336,12 +336,20 @@
   .template-details-container {
     @include heading-xs;
 
-    gap: var(--spacing-04) var(--spacing-11);
-    display: grid;
-    grid-template-columns: auto auto;
+    @include media-breakpoint-up(lg) {
+      gap: var(--spacing-04) var(--spacing-11);
+      display: grid;
+      grid-template-columns: auto auto;
+    }
 
     .template-detail {
-      display: contents;
+      @include media-breakpoint-down(lg) {
+        margin-bottom: var(--spacing-06);
+      }
+
+      @include media-breakpoint-up(lg) {
+        display: contents;
+      }
 
       div:first-child {
         white-space: nowrap;
