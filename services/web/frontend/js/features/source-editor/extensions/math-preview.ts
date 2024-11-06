@@ -9,6 +9,7 @@ import {
   Compartment,
   EditorState,
   Extension,
+  StateEffect,
   StateField,
   TransactionSpec,
 } from '@codemirror/state'
@@ -22,13 +23,11 @@ import {
 import { documentCommands } from '../languages/latex/document-commands'
 import { debugConsole } from '@/utils/debugging'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-import ReactDOM from 'react-dom'
-import { SplitTestProvider } from '@/shared/context/split-test-context'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import { nodeHasError } from '../utils/tree-operations/common'
 import { documentEnvironments } from '../languages/latex/document-environments'
 
 const REPOSITION_EVENT = 'editor:repositionMathTooltips'
+const HIDE_TOOLTIP_EVENT = 'editor:hideMathTooltip'
 
 export const mathPreview = (enabled: boolean): Extension => {
   if (!isSplitTestEnabled('math-preview')) {
@@ -40,37 +39,90 @@ export const mathPreview = (enabled: boolean): Extension => {
   )
 }
 
+export const hideTooltipEffect = StateEffect.define<null>()
+
 const mathPreviewConf = new Compartment()
 
 export const setMathPreview = (enabled: boolean): TransactionSpec => ({
   effects: mathPreviewConf.reconfigure(enabled ? mathPreviewStateField : []),
 })
 
-const mathPreviewStateField = StateField.define<Tooltip | null>({
-  create: buildTooltip,
+export const mathPreviewStateField = StateField.define<{
+  tooltip: Tooltip | null
+  mathContent: HTMLDivElement | null
+  hide: boolean
+}>({
+  create: buildInitialState,
 
-  update(tooltips, tr) {
-    if (tr.docChanged || tr.selection) {
-      tooltips = buildTooltip(tr.state)
+  update(state, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(hideTooltipEffect)) {
+        return { tooltip: null, hide: true, mathContent: null }
+      }
     }
 
-    return tooltips
+    if (tr.docChanged || tr.selection) {
+      const mathContainer = getMathContainer(tr.state)
+
+      if (mathContainer) {
+        if (state.hide) {
+          return { tooltip: null, hide: true, mathContent: null }
+        } else {
+          const mathContent = buildTooltipContent(tr.state, mathContainer)
+
+          return {
+            tooltip: buildTooltip(mathContainer, mathContent),
+            mathContent,
+            hide: false,
+          }
+        }
+      }
+
+      return { tooltip: null, hide: false, mathContent: null }
+    }
+
+    return state
   },
 
   provide: field => [
-    showTooltip.compute([field], state => state.field(field)),
+    showTooltip.compute([field], state => state.field(field).tooltip),
 
     ViewPlugin.define(view => {
       const listener = () => repositionTooltips(view)
+      const hideTooltip = () => {
+        view.dispatch({
+          effects: hideTooltipEffect.of(null),
+        })
+      }
+
       window.addEventListener(REPOSITION_EVENT, listener)
+      window.addEventListener(HIDE_TOOLTIP_EVENT, hideTooltip)
+
       return {
         destroy() {
           window.removeEventListener(REPOSITION_EVENT, listener)
+          window.removeEventListener(HIDE_TOOLTIP_EVENT, hideTooltip)
         },
       }
     }),
   ],
 })
+
+function buildInitialState(state: EditorState) {
+  const mathContainer = getMathContainer(state)
+
+  if (mathContainer) {
+    const mathContent = buildTooltipContent(state, mathContainer)
+
+    return {
+      tooltip: buildTooltip(mathContainer, mathContent),
+      mathContent,
+      hide: false,
+    }
+  }
+
+  return { tooltip: null, hide: false, mathContent: null }
+}
 
 const renderMath = async (
   content: string,
@@ -96,17 +148,11 @@ const renderMath = async (
   element.append(math)
 }
 
-function buildTooltip(state: EditorState): Tooltip | null {
-  const range = state.selection.main
-
-  if (!range.empty) {
-    return null
-  }
-
-  const mathContainer = getMathContainer(state, range.from)
-  const content = buildTooltipContent(state, mathContainer)
-
-  if (!content || !mathContainer) {
+function buildTooltip(
+  mathContainer: MathContainer,
+  mathContent: HTMLDivElement | null
+): Tooltip | null {
+  if (!mathContent || !mathContainer) {
     return null
   }
 
@@ -117,19 +163,22 @@ function buildTooltip(state: EditorState): Tooltip | null {
     arrow: false,
     create() {
       const dom = document.createElement('div')
-      dom.append(content)
-      const badge = renderSplitTestBadge()
-      dom.append(badge)
-      dom.className = 'ol-cm-math-tooltip'
+      dom.classList.add('ol-cm-math-tooltip-container')
 
       return { dom, overlap: true, offset: { x: 0, y: 8 } }
     },
   }
 }
 
-const getMathContainer = (state: EditorState, pos: number) => {
+const getMathContainer = (state: EditorState) => {
+  const range = state.selection.main
+
+  if (!range.empty) {
+    return null
+  }
+
   // if anywhere inside Math, find the whole Math node
-  const ancestorNode = mathAncestorNode(state, pos)
+  const ancestorNode = mathAncestorNode(state, range.from)
   if (!ancestorNode) return null
 
   const [node] = descendantsOfNodeWithType(ancestorNode, 'Math', 'Math')
@@ -182,30 +231,16 @@ const buildTooltipContent = (
   return element
 }
 
-const renderSplitTestBadge = () => {
-  const element = document.createElement('span')
-  ReactDOM.render(
-    <SplitTestProvider>
-      <SplitTestBadge
-        displayOnVariants={['enabled']}
-        splitTestName="math-preview"
-      />
-    </SplitTestProvider>,
-    element
-  )
-  return element
-}
-
 /**
  * Styles for the preview tooltip
  */
 const mathPreviewTheme = EditorView.baseTheme({
-  '&light .ol-cm-math-tooltip': {
+  '&light .ol-cm-math-tooltip-container': {
     boxShadow: '0px 2px 4px 0px #1e253029',
     border: '1px solid #e7e9ee !important',
     backgroundColor: 'white !important',
   },
-  '&dark .ol-cm-math-tooltip': {
+  '&dark .ol-cm-math-tooltip-container': {
     boxShadow: '0px 2px 4px 0px #1e253029',
     border: '1px solid #2f3a4c !important',
     backgroundColor: '#1b222c !important',
