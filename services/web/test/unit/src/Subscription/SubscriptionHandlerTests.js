@@ -122,6 +122,12 @@ describe('SubscriptionHandler', function () {
       },
     }
 
+    this.SubscriptionLocator = {
+      promises: {
+        getUsersSubscription: sinon.stub().resolves(this.subscription),
+      },
+    }
+
     this.EmailHandler = {
       sendEmail: sinon.stub(),
       sendDeferredEmail: sinon.stub(),
@@ -142,6 +148,7 @@ describe('SubscriptionHandler', function () {
           User: this.User,
         },
         './SubscriptionUpdater': this.SubscriptionUpdater,
+        './SubscriptionLocator': this.SubscriptionLocator,
         './LimitationsManager': this.LimitationsManager,
         '../Email/EmailHandler': this.EmailHandler,
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
@@ -267,7 +274,7 @@ describe('SubscriptionHandler', function () {
           this.RecurlyClient.promises.applySubscriptionChangeRequest
         ).to.have.been.calledWith(
           new RecurlySubscriptionChangeRequest({
-            subscriptionId: this.subscription.recurlySubscription_id,
+            subscription: this.activeRecurlyClientSubscription,
             timeframe: 'now',
             planCode: this.plan_code,
           })
@@ -380,7 +387,7 @@ describe('SubscriptionHandler', function () {
           this.RecurlyClient.promises.applySubscriptionChangeRequest
         ).to.be.calledWith(
           new RecurlySubscriptionChangeRequest({
-            subscriptionId: this.subscription.recurlySubscription_id,
+            subscription: this.activeRecurlyClientSubscription,
             timeframe: 'now',
             planCode: this.plan_code,
           })

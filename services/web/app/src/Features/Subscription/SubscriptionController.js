@@ -1,3 +1,5 @@
+// @ts-check
+
 const SessionManager = require('../Authentication/SessionManager')
 const SubscriptionHandler = require('./SubscriptionHandler')
 const SubscriptionViewModelBuilder = require('./SubscriptionViewModelBuilder')
@@ -25,8 +27,13 @@ const { formatCurrencyLocalized } = require('../../util/currency')
 const SubscriptionFormatters = require('./SubscriptionFormatters')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { URLSearchParams } = require('url')
+const RecurlyClient = require('./RecurlyClient')
 
-const AI_ADDON_CODE = 'assistant'
+/**
+ * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
+ */
+
+const AI_ADDON_CODES = ['assistant', 'assistant-annual']
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -222,11 +229,6 @@ function formatGroupPlansDataForDash() {
   }
 }
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- */
 async function userSubscriptionPage(req, res) {
   const user = SessionManager.getSessionUser(req.session)
 
@@ -402,11 +404,6 @@ async function interstitialPaymentPage(req, res) {
   }
 }
 
-/**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
- */
 async function successfulSubscription(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
@@ -489,13 +486,81 @@ function cancelV1Subscription(req, res, next) {
   })
 }
 
+async function previewAddonPurchase(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const addOnCode = req.params.addOnCode
+
+  if (!AI_ADDON_CODES.includes(addOnCode)) {
+    return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
+  }
+
+  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
+
+  let subscriptionChange
+  try {
+    subscriptionChange =
+      await SubscriptionHandler.promises.previewAddonPurchase(userId, addOnCode)
+  } catch (err) {
+    if (err instanceof DuplicateAddOnError) {
+      return HttpErrorHandler.badRequest(
+        req,
+        res,
+        `Subscription already has add-on "${addOnCode}"`
+      )
+    }
+    throw err
+  }
+
+  const subscription = subscriptionChange.subscription
+  const addOn = await RecurlyClient.promises.getAddOn(
+    subscription.planCode,
+    addOnCode
+  )
+
+  /** @type {SubscriptionChangePreview} */
+  const changePreview = {
+    change: {
+      type: 'add-on-purchase',
+      addOn: {
+        code: addOn.code,
+        name: addOn.name,
+      },
+    },
+    currency: subscription.currency,
+    immediateCharge: subscriptionChange.immediateCharge,
+    paymentMethod: paymentMethod.toString(),
+    nextInvoice: {
+      date: subscription.periodEnd.toISOString(),
+      plan: {
+        name: subscriptionChange.nextPlanName,
+        amount: subscriptionChange.nextPlanPrice,
+      },
+      addOns: subscriptionChange.nextAddOns.map(addOn => ({
+        code: addOn.code,
+        name: addOn.name,
+        quantity: addOn.quantity,
+        unitAmount: addOn.unitPrice,
+        amount: addOn.preTaxTotal,
+      })),
+      subtotal: subscriptionChange.subtotal,
+      tax: {
+        rate: subscription.taxRate,
+        amount: subscriptionChange.tax,
+      },
+      total: subscriptionChange.total,
+    },
+  }
+
+  res.render('subscriptions/preview-change', { changePreview })
+}
+
 async function purchaseAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const addOnCode = req.params.addOnCode
   // currently we only support having a quantity of 1
   const quantity = 1
   // currently we only support one add-on, the Ai add-on
-  if (addOnCode !== AI_ADDON_CODE) {
+  if (!AI_ADDON_CODES.includes(addOnCode)) {
     return res.sendStatus(404)
   }
 
@@ -512,10 +577,12 @@ async function purchaseAddon(req, res, next) {
         { addon: addOnCode }
       )
     } else {
-      OError.tag(err, 'something went wrong purchasing add-ons', {
-        user_id: user._id,
-        addOnCode,
-      })
+      if (err instanceof Error) {
+        OError.tag(err, 'something went wrong purchasing add-ons', {
+          user_id: user._id,
+          addOnCode,
+        })
+      }
       return next(err)
     }
   }
@@ -525,7 +592,7 @@ async function removeAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const addOnCode = req.params.addOnCode
 
-  if (addOnCode !== AI_ADDON_CODE) {
+  if (!AI_ADDON_CODES.includes(addOnCode)) {
     return res.sendStatus(404)
   }
 
@@ -543,10 +610,12 @@ async function removeAddon(req, res, next) {
         { addon: addOnCode }
       )
     } else {
-      OError.tag(err, 'something went wrong removing add-ons', {
-        user_id: user._id,
-        addOnCode,
-      })
+      if (err instanceof Error) {
+        OError.tag(err, 'something went wrong removing add-ons', {
+          user_id: user._id,
+          addOnCode,
+        })
+      }
       return next(err)
     }
   }
@@ -839,6 +908,7 @@ module.exports = {
   refreshUserFeatures: expressify(refreshUserFeatures),
   redirectToHostedPage: expressify(redirectToHostedPage),
   plansBanners: _plansBanners,
+  previewAddonPurchase: expressify(previewAddonPurchase),
   purchaseAddon,
   removeAddon,
   promises: {

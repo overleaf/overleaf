@@ -5,6 +5,8 @@ const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Subscription/Errors')
 const {
   RecurlySubscriptionChangeRequest,
+  RecurlySubscriptionChange,
+  RecurlySubscription,
 } = require('../../../../app/src/Features/Subscription/RecurlyEntities')
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/RecurlyEntities'
@@ -71,7 +73,7 @@ describe('RecurlyEntities', function () {
             this.subscription.getRequestForPlanChange('premium-plan')
           expect(changeRequest).to.deep.equal(
             new RecurlySubscriptionChangeRequest({
-              subscriptionId: this.subscription.id,
+              subscription: this.subscription,
               timeframe: 'now',
               planCode: 'premium-plan',
             })
@@ -84,7 +86,7 @@ describe('RecurlyEntities', function () {
             this.subscription.getRequestForPlanChange('cheap-plan')
           expect(changeRequest).to.deep.equal(
             new RecurlySubscriptionChangeRequest({
-              subscriptionId: this.subscription.id,
+              subscription: this.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
             })
@@ -102,7 +104,7 @@ describe('RecurlyEntities', function () {
             this.subscription.getRequestForAddOnPurchase('another-add-on')
           expect(changeRequest).to.deep.equal(
             new RecurlySubscriptionChangeRequest({
-              subscriptionId: this.subscription.id,
+              subscription: this.subscription,
               timeframe: 'now',
               addOnUpdates: [
                 new RecurlySubscriptionAddOnUpdate({
@@ -133,7 +135,7 @@ describe('RecurlyEntities', function () {
           )
           expect(changeRequest).to.deep.equal(
             new RecurlySubscriptionChangeRequest({
-              subscriptionId: this.subscription.id,
+              subscription: this.subscription,
               timeframe: 'term_end',
               addOnUpdates: [],
             })
@@ -180,7 +182,7 @@ describe('RecurlyEntities', function () {
               this.subscription.getRequestForAddOnPurchase('some-add-on')
             expect(changeRequest).to.deep.equal(
               new RecurlySubscriptionChangeRequest({
-                subscriptionId: this.subscription.id,
+                subscription: this.subscription,
                 timeframe: 'now',
                 addOnUpdates: [
                   new RecurlySubscriptionAddOnUpdate({
@@ -200,6 +202,36 @@ describe('RecurlyEntities', function () {
             ).to.throw(Errors.AddOnNotPresentError)
           })
         })
+      })
+    })
+  })
+
+  describe('RecurlySubscriptionChange', function () {
+    describe('constructor', function () {
+      it('rounds the amounts when calculating the taxes', function () {
+        const subscription = new RecurlySubscription({
+          id: 'subscription-id',
+          userId: 'user-id',
+          planCode: 'premium-plan',
+          planName: 'Premium plan',
+          planPrice: 10,
+          subtotal: 10,
+          taxRate: 0.15,
+          taxAmount: 1.5,
+          currency: 'USD',
+          total: 11.5,
+          periodStart: new Date(),
+          periodEnd: new Date(),
+        })
+        const change = new RecurlySubscriptionChange({
+          subscription,
+          nextPlanCode: 'promotional-plan',
+          nextPlanName: 'Promotial plan',
+          nextPlanPrice: 8.99,
+          nextAddOns: [],
+        })
+        expect(change.tax).to.equal(1.35)
+        expect(change.total).to.equal(10.34)
       })
     })
   })

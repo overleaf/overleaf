@@ -2,7 +2,7 @@ const dateformat = require('dateformat')
 const { formatCurrencyLocalized } = require('../../util/currency')
 
 /**
- * @import { CurrencyCode } from '@/shared/utils/currency'
+ * @import { CurrencyCode } from '../../../../types/currency-code'
  */
 
 const currencySymbols = {

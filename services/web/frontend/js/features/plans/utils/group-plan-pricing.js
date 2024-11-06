@@ -1,7 +1,7 @@
 import getMeta from '../../../utils/meta'
 
 /**
- * @import { CurrencyCode } from '@/shared/utils/currency'
+ * @import { CurrencyCode } from '../../../../../types/currency-code'
  */
 
 // plan: 'collaborator' or 'professional'

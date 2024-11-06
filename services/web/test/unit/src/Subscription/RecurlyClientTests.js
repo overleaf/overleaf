@@ -32,6 +32,7 @@ describe('RecurlyClient', function () {
       name: 'My Add-On',
       quantity: 1,
       unitPrice: 2,
+      preTaxTotal: 2,
     }
 
     this.subscription = {
@@ -46,6 +47,8 @@ describe('RecurlyClient', function () {
       taxRate: 0.1,
       taxAmount: 1.5,
       total: 16.5,
+      periodStart: new Date(),
+      periodEnd: new Date(),
     }
 
     this.recurlySubscription = {
@@ -73,6 +76,8 @@ describe('RecurlyClient', function () {
       tax: this.subscription.taxAmount,
       total: this.subscription.total,
       currency: this.subscription.currency,
+      currentPeriodStartedAt: this.subscription.periodStart,
+      currentPeriodEndsAt: this.subscription.periodEnd,
     }
 
     this.recurlySubscriptionChange = new recurly.SubscriptionChange()
@@ -203,7 +208,7 @@ describe('RecurlyClient', function () {
     it('handles plan changes', async function () {
       await this.RecurlyClient.promises.applySubscriptionChangeRequest(
         new RecurlySubscriptionChangeRequest({
-          subscriptionId: this.subscription.id,
+          subscription: this.subscription,
           timeframe: 'now',
           planCode: 'new-plan',
         })
@@ -217,7 +222,7 @@ describe('RecurlyClient', function () {
     it('handles add-on changes', async function () {
       await this.RecurlyClient.promises.applySubscriptionChangeRequest(
         new RecurlySubscriptionChangeRequest({
-          subscriptionId: this.subscription.id,
+          subscription: this.subscription,
           timeframe: 'now',
           addOnUpdates: [
             new RecurlySubscriptionAddOnUpdate({
@@ -240,10 +245,9 @@ describe('RecurlyClient', function () {
     it('should throw any API errors', async function () {
       this.client.createSubscriptionChange = sinon.stub().throws()
       await expect(
-        this.RecurlyClient.promises.applySubscriptionChangeRequest(
-          this.subscription.id,
-          {}
-        )
+        this.RecurlyClient.promises.applySubscriptionChangeRequest({
+          subscription: this.subscription,
+        })
       ).to.eventually.be.rejectedWith(Error)
     })
   })

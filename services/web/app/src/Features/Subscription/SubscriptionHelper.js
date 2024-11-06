@@ -9,7 +9,7 @@ function shouldPlanChangeAtTermEnd(oldPlan, newPlan) {
 }
 
 /**
- * @import { CurrencyCode } from '../../../../frontend/js/shared/utils/currency'
+ * @import { CurrencyCode } from '../../../../types/currency-code'
  */
 
 /**

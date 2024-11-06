@@ -9,10 +9,15 @@ const UserGetter = require('../User/UserGetter')
 const {
   RecurlySubscription,
   RecurlySubscriptionAddOn,
+  RecurlySubscriptionChange,
+  PaypalPaymentMethod,
+  CreditCardPaymentMethod,
+  RecurlyAddOn,
 } = require('./RecurlyEntities')
 
 /**
  * @import { RecurlySubscriptionChangeRequest } from './RecurlyEntities'
+ * @import { PaymentMethod } from './types'
  */
 
 const recurlySettings = Settings.apis.recurly
@@ -59,7 +64,7 @@ async function createAccountForUserId(userId) {
  */
 async function getSubscription(subscriptionId) {
   const subscription = await client.getSubscription(`uuid-${subscriptionId}`)
-  return makeSubscription(subscription)
+  return subscriptionFromApi(subscription)
 }
 
 /**
@@ -68,33 +73,32 @@ async function getSubscription(subscriptionId) {
  * @param {RecurlySubscriptionChangeRequest} changeRequest
  */
 async function applySubscriptionChangeRequest(changeRequest) {
-  /** @type {recurly.SubscriptionChangeCreate} */
-  const body = {
-    timeframe: changeRequest.timeframe,
-  }
-  if (changeRequest.planCode != null) {
-    body.planCode = changeRequest.planCode
-  }
-  if (changeRequest.addOnUpdates != null) {
-    body.addOns = changeRequest.addOnUpdates.map(addOnUpdate => {
-      /** @type {recurly.SubscriptionAddOnUpdate} */
-      const update = { code: addOnUpdate.code }
-      if (addOnUpdate.quantity != null) {
-        update.quantity = addOnUpdate.quantity
-      }
-      if (addOnUpdate.unitPrice != null) {
-        update.unitAmount = addOnUpdate.unitPrice
-      }
-      return update
-    })
-  }
+  const body = subscriptionChangeRequestToApi(changeRequest)
   const change = await client.createSubscriptionChange(
-    `uuid-${changeRequest.subscriptionId}`,
+    `uuid-${changeRequest.subscription.id}`,
     body
   )
   logger.debug(
-    { subscriptionId: changeRequest.subscriptionId, changeId: change.id },
+    { subscriptionId: changeRequest.subscription.id, changeId: change.id },
     'created subscription change'
+  )
+}
+
+/**
+ * Preview a subscription change
+ *
+ * @param {RecurlySubscriptionChangeRequest} changeRequest
+ * @return {Promise<RecurlySubscriptionChange>}
+ */
+async function previewSubscriptionChange(changeRequest) {
+  const body = subscriptionChangeRequestToApi(changeRequest)
+  const subscriptionChange = await client.previewSubscriptionChange(
+    `uuid-${changeRequest.subscription.id}`,
+    body
+  )
+  return subscriptionChangeFromApi(
+    changeRequest.subscription,
+    subscriptionChange
   )
 }
 
@@ -131,6 +135,32 @@ async function cancelSubscriptionByUuid(subscriptionUuid) {
   }
 }
 
+/**
+ * Get the payment method for the given user
+ *
+ * @param {string} userId
+ * @return {Promise<PaymentMethod>}
+ */
+async function getPaymentMethod(userId) {
+  const billingInfo = await client.getBillingInfo(`code-${userId}`)
+  return paymentMethodFromApi(billingInfo)
+}
+
+/**
+ * Get the configuration for a given add-on
+ *
+ * @param {string} planCode
+ * @param {string} addOnCode
+ * @return {Promise<RecurlyAddOn>}
+ */
+async function getAddOn(planCode, addOnCode) {
+  const addOn = await client.getPlanAddOn(
+    `code-${planCode}`,
+    `code-${addOnCode}`
+  )
+  return addOnFromApi(addOn)
+}
+
 function subscriptionIsCanceledOrExpired(subscription) {
   const state = subscription?.recurlyStatus?.state
   return state === 'canceled' || state === 'expired'
@@ -142,7 +172,7 @@ function subscriptionIsCanceledOrExpired(subscription) {
  * @param {recurly.Subscription} subscription
  * @return {RecurlySubscription}
  */
-function makeSubscription(subscription) {
+function subscriptionFromApi(subscription) {
   if (
     subscription.uuid == null ||
     subscription.plan == null ||
@@ -153,7 +183,9 @@ function makeSubscription(subscription) {
     subscription.unitAmount == null ||
     subscription.subtotal == null ||
     subscription.total == null ||
-    subscription.currency == null
+    subscription.currency == null ||
+    subscription.currentPeriodStartedAt == null ||
+    subscription.currentPeriodEndsAt == null
   ) {
     throw new OError('Invalid Recurly subscription', { subscription })
   }
@@ -163,12 +195,14 @@ function makeSubscription(subscription) {
     planCode: subscription.plan.code,
     planName: subscription.plan.name,
     planPrice: subscription.unitAmount,
-    addOns: (subscription.addOns ?? []).map(makeSubscriptionAddOn),
+    addOns: (subscription.addOns ?? []).map(subscriptionAddOnFromApi),
     subtotal: subscription.subtotal,
     taxRate: subscription.taxInfo?.rate ?? 0,
     taxAmount: subscription.tax ?? 0,
     total: subscription.total,
     currency: subscription.currency,
+    periodStart: subscription.currentPeriodStartedAt,
+    periodEnd: subscription.currentPeriodEndsAt,
   })
 }
 
@@ -178,7 +212,7 @@ function makeSubscription(subscription) {
  * @param {recurly.SubscriptionAddOn} addOn
  * @return {RecurlySubscriptionAddOn}
  */
-function makeSubscriptionAddOn(addOn) {
+function subscriptionAddOnFromApi(addOn) {
   if (
     addOn.addOn == null ||
     addOn.addOn.code == null ||
@@ -196,27 +230,136 @@ function makeSubscriptionAddOn(addOn) {
   })
 }
 
+/**
+ * Build a RecurlySubscriptionChange from Recurly API data
+ *
+ * @param {RecurlySubscription} subscription - the current subscription
+ * @param {recurly.SubscriptionChange} subscriptionChange - the subscription change returned from the API
+ * @return {RecurlySubscriptionChange}
+ */
+function subscriptionChangeFromApi(subscription, subscriptionChange) {
+  if (
+    subscriptionChange.plan == null ||
+    subscriptionChange.plan.code == null ||
+    subscriptionChange.plan.name == null ||
+    subscriptionChange.unitAmount == null
+  ) {
+    throw new OError('Invalid Recurly subscription change', {
+      subscriptionChange,
+    })
+  }
+  const nextAddOns = (subscriptionChange.addOns ?? []).map(
+    subscriptionAddOnFromApi
+  )
+  return new RecurlySubscriptionChange({
+    subscription,
+    nextPlanCode: subscriptionChange.plan.code,
+    nextPlanName: subscriptionChange.plan.name,
+    nextPlanPrice: subscriptionChange.unitAmount,
+    nextAddOns,
+    immediateCharge:
+      subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0,
+  })
+}
+
+/**
+ * Returns a payment method from Recurly API data
+ *
+ * @param {recurly.BillingInfo} billingInfo
+ * @return {PaymentMethod}
+ */
+function paymentMethodFromApi(billingInfo) {
+  if (billingInfo.paymentMethod == null) {
+    throw new OError('Invalid Recurly billing info', { billingInfo })
+  }
+  const paymentMethod = billingInfo.paymentMethod
+
+  if (paymentMethod.billingAgreementId != null) {
+    return new PaypalPaymentMethod()
+  }
+
+  if (paymentMethod.cardType == null || paymentMethod.lastFour == null) {
+    throw new OError('Invalid Recurly billing info', { billingInfo })
+  }
+  return new CreditCardPaymentMethod({
+    cardType: paymentMethod.cardType,
+    lastFour: paymentMethod.lastFour,
+  })
+}
+
+/**
+ * Build a RecurlyAddOn from Recurly API data
+ *
+ * @param {recurly.AddOn} addOn
+ * @return {RecurlyAddOn}
+ */
+function addOnFromApi(addOn) {
+  if (addOn.code == null || addOn.name == null) {
+    throw new OError('Invalid Recurly add-on', { addOn })
+  }
+  return new RecurlyAddOn({
+    code: addOn.code,
+    name: addOn.name,
+  })
+}
+
+/**
+ * Build an API request from a RecurlySubscriptionChangeRequest
+ *
+ * @param {RecurlySubscriptionChangeRequest} changeRequest
+ * @return {recurly.SubscriptionChangeCreate}
+ */
+function subscriptionChangeRequestToApi(changeRequest) {
+  /** @type {recurly.SubscriptionChangeCreate} */
+  const requestBody = {
+    timeframe: changeRequest.timeframe,
+  }
+  if (changeRequest.planCode != null) {
+    requestBody.planCode = changeRequest.planCode
+  }
+  if (changeRequest.addOnUpdates != null) {
+    requestBody.addOns = changeRequest.addOnUpdates.map(addOnUpdate => {
+      /** @type {recurly.SubscriptionAddOnUpdate} */
+      const update = { code: addOnUpdate.code }
+      if (addOnUpdate.quantity != null) {
+        update.quantity = addOnUpdate.quantity
+      }
+      if (addOnUpdate.unitPrice != null) {
+        update.unitAmount = addOnUpdate.unitPrice
+      }
+      return update
+    })
+  }
+  return requestBody
+}
+
 module.exports = {
   errors: recurly.errors,
 
   getAccountForUserId: callbackify(getAccountForUserId),
   createAccountForUserId: callbackify(createAccountForUserId),
   getSubscription: callbackify(getSubscription),
+  previewSubscriptionChange: callbackify(previewSubscriptionChange),
   applySubscriptionChangeRequest: callbackify(applySubscriptionChangeRequest),
   removeSubscriptionChange: callbackify(removeSubscriptionChange),
   removeSubscriptionChangeByUuid: callbackify(removeSubscriptionChangeByUuid),
   reactivateSubscriptionByUuid: callbackify(reactivateSubscriptionByUuid),
   cancelSubscriptionByUuid: callbackify(cancelSubscriptionByUuid),
+  getPaymentMethod: callbackify(getPaymentMethod),
+  getAddOn: callbackify(getAddOn),
   subscriptionIsCanceledOrExpired,
 
   promises: {
     getSubscription,
     getAccountForUserId,
     createAccountForUserId,
+    previewSubscriptionChange,
     applySubscriptionChangeRequest,
     removeSubscriptionChange,
     removeSubscriptionChangeByUuid,
     reactivateSubscriptionByUuid,
     cancelSubscriptionByUuid,
+    getPaymentMethod,
+    getAddOn,
   },
 }

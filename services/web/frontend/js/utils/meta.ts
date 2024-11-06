@@ -47,6 +47,7 @@ import { PasswordStrengthOptions } from '../../../types/password-strength-option
 import { Subscription as ProjectDashboardSubscription } from '../../../types/project/dashboard/subscription'
 import { ThirdPartyIds } from '../../../types/third-party-ids'
 import { Publisher } from '../../../types/subscription/dashboard/publisher'
+import { SubscriptionChangePreview } from '../../../types/subscription/subscription-change-preview'
 import { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
 import { FatFooterMetadata } from '@/features/ui/components/types/fat-footer-metadata'
 export interface Meta {
@@ -191,6 +192,7 @@ export interface Meta {
   'ol-ssoDisabled': boolean
   'ol-ssoErrorMessage': string
   'ol-subscription': any // TODO: mixed types, split into two fields
+  'ol-subscriptionChangePreview': SubscriptionChangePreview
   'ol-subscriptionId': string
   'ol-suggestedLanguage': SuggestedLanguage | undefined
   'ol-survey': Survey | undefined

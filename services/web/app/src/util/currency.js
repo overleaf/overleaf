@@ -3,7 +3,7 @@
  */
 
 /**
- * @import { CurrencyCode } from '@/shared/utils/currency'
+ * @import { CurrencyCode } from '../../../types/currency-code'
  */
 
 /**
