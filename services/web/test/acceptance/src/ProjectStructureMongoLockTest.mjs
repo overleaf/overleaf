@@ -75,7 +75,7 @@ describe('ProjectStructureMongoLock', function () {
       })
     })
 
-    after(function (done) {
+    afterEach(function (done) {
       return LockManager._releaseLock(this.lock_key, this.lockValue, done)
     })
 
