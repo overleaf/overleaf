@@ -376,73 +376,93 @@ function useCodeMirrorScope(view: EditorView) {
     if (docName) {
       docNameRef.current = docName
 
-      view.dispatch(
-        setDocName(docNameRef.current),
-        setLanguage(
-          docNameRef.current,
-          metadataRef.current,
-          settingsRef.current.syntaxValidation
+      window.setTimeout(() => {
+        view.dispatch(
+          setDocName(docNameRef.current),
+          setLanguage(
+            docNameRef.current,
+            metadataRef.current,
+            settingsRef.current.syntaxValidation
+          )
         )
-      )
+      })
     }
   }, [view, docName])
 
   useEffect(() => {
     visualRef.current.visual = showVisual
-    view.dispatch(setVisual(visualRef.current))
-    view.dispatch({
-      effects: EditorView.scrollIntoView(view.state.selection.main.head),
+    window.setTimeout(() => {
+      view.dispatch(setVisual(visualRef.current))
+      view.dispatch({
+        effects: EditorView.scrollIntoView(view.state.selection.main.head),
+      })
+      // clear performance measures and marks when switching between Source and Rich Text
+      window.dispatchEvent(new Event('editor:visual-switch'))
     })
-    // clear performance measures and marks when switching between Source and Rich Text
-    window.dispatchEvent(new Event('editor:visual-switch'))
   }, [view, showVisual])
 
   useEffect(() => {
     visualRef.current.previewByPath = previewByPath
-    view.dispatch(setVisual(visualRef.current))
+    window.setTimeout(() => {
+      view.dispatch(setVisual(visualRef.current))
+    })
   }, [view, previewByPath])
 
   useEffect(() => {
     editableRef.current = permissions.write
-    view.dispatch(setEditable(editableRef.current)) // the editor needs to be locked when there's a problem saving data
+    window.setTimeout(() => {
+      view.dispatch(setEditable(editableRef.current)) // the editor needs to be locked when there's a problem saving data
+    })
   }, [view, permissions.write])
 
   useEffect(() => {
     phrasesRef.current = phrases
-    view.dispatch(setPhrases(phrases))
+    window.setTimeout(() => {
+      view.dispatch(setPhrases(phrases))
+    })
   }, [view, phrases])
 
   // listen to editor settings updates
   useEffect(() => {
     settingsRef.current.autoPairDelimiters = autoPairDelimiters
-    view.dispatch(setAutoPair(autoPairDelimiters))
+    window.setTimeout(() => {
+      view.dispatch(setAutoPair(autoPairDelimiters))
+    })
   }, [view, autoPairDelimiters])
 
   useEffect(() => {
     settingsRef.current.autoComplete = autoComplete
-    view.dispatch(
-      setAutoComplete({
-        enabled: autoComplete,
-        projectFeatures: projectFeaturesRef.current,
-      })
-    )
+    window.setTimeout(() => {
+      view.dispatch(
+        setAutoComplete({
+          enabled: autoComplete,
+          projectFeatures: projectFeaturesRef.current,
+        })
+      )
+    })
   }, [view, autoComplete])
 
   useEffect(() => {
     settingsRef.current.mode = mode
     setKeybindings(mode).then(spec => {
-      view.dispatch(spec)
+      window.setTimeout(() => {
+        view.dispatch(spec)
+      })
     })
   }, [view, mode])
 
   useEffect(() => {
     settingsRef.current.syntaxValidation = syntaxValidation
-    view.dispatch(setSyntaxValidation(syntaxValidation))
+    window.setTimeout(() => {
+      view.dispatch(setSyntaxValidation(syntaxValidation))
+    })
   }, [view, syntaxValidation])
 
   useEffect(() => {
     settingsRef.current.mathPreview = mathPreview
-    view.dispatch(setMathPreview(mathPreview))
+    window.setTimeout(() => {
+      view.dispatch(setMathPreview(mathPreview))
+    })
   }, [view, mathPreview])
 
   const emitSyncToPdf = useScopeEventEmitter('cursor:editor:syncToPdf')
@@ -511,10 +531,9 @@ function useCodeMirrorScope(view: EditorView) {
 
   // enable/disable the compile log linter as appropriate
   useEffect(() => {
-    // dispatch in a timeout, so the dispatch isn't in the same cycle as the edit which caused it
     window.setTimeout(() => {
       view.dispatch(showCompileLogDiagnostics(enableCompileLogLinter))
-    }, 0)
+    })
   }, [view, enableCompileLogLinter])
 
   // set the compile log annotations when they change
@@ -522,7 +541,6 @@ function useCodeMirrorScope(view: EditorView) {
     if (currentDoc && logEntryAnnotations) {
       const annotations = logEntryAnnotations[currentDoc.doc_id]
 
-      // dispatch in a timeout, so the dispatch isn't in the same cycle as the edit which caused it
       window.setTimeout(() => {
         view.dispatch(
           setAnnotations(view.state, annotations || []),
@@ -563,7 +581,9 @@ function useCodeMirrorScope(view: EditorView) {
 
   const handleRemoveLearnedWords = useCallback(
     (event: CustomEvent<string>) => {
-      view.dispatch(removeLearnedWord(spellCheckLanguage, event.detail))
+      window.setTimeout(() => {
+        view.dispatch(removeLearnedWord(spellCheckLanguage, event.detail))
+      })
     },
     [spellCheckLanguage, view]
   )
@@ -571,7 +591,9 @@ function useCodeMirrorScope(view: EditorView) {
   useEventListener('learnedWords:remove', handleRemoveLearnedWords)
 
   const handleResetLearnedWords = useCallback(() => {
-    view.dispatch(resetLearnedWords())
+    window.setTimeout(() => {
+      view.dispatch(resetLearnedWords())
+    })
   }, [view])
 
   useEventListener('learnedWords:reset', handleResetLearnedWords)
@@ -584,7 +606,9 @@ function useCodeMirrorScope(view: EditorView) {
   )
 
   useEffect(() => {
-    view.dispatch(reviewPanelToggled())
+    window.setTimeout(() => {
+      view.dispatch(reviewPanelToggled())
+    })
   }, [reviewPanelOpen, miniReviewPanelVisible, view])
 }
 
