@@ -276,6 +276,7 @@ const updateDeleteWidgetHighlight = (
   }
 
   return decorations.update({
+    sort: true,
     filter: (from, to, decoration) => {
       return !widgetsToReplace.includes(decoration.spec?.widget)
     },
