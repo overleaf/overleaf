@@ -88,7 +88,7 @@ export const HrefTooltipContent: FC = () => {
           <OLFormLabel>URL</OLFormLabel>
           <OLFormControl
             type="url"
-            size="lg"
+            size="sm"
             htmlSize={50}
             placeholder="https://…"
             value={url}
