@@ -14,12 +14,15 @@ import {
 } from '@codemirror/state'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { v4 as uuid } from 'uuid'
-import { textSelected, textSelectedEffect } from './text-selected'
 import { isCursorNearViewportTop } from '../utils/is-cursor-near-edge'
 
 export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
 
 export const removeNewCommentRangeEffect = StateEffect.define<Decoration>()
+
+export const textSelectedEffect = StateEffect.define<EditorView>()
+
+export const removeReviewPanelTooltipEffect = StateEffect.define()
 
 export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
   return addNewCommentRangeEffect.of(
@@ -37,7 +40,34 @@ export const reviewTooltip = (): Extension => {
     return []
   }
 
-  return [reviewTooltipTheme, reviewTooltipStateField, textSelected]
+  return [
+    reviewTooltipTheme,
+    reviewTooltipStateField,
+    EditorView.domEventHandlers({
+      mouseup(event, view) {
+        if (!view.state.selection.main.empty) {
+          view.dispatch({
+            effects: textSelectedEffect.of(view),
+          })
+        }
+      },
+      keyup(event, view) {
+        if (
+          (event.shiftKey || event.key === 'Meta') &&
+          !view.state.selection.main.empty
+        ) {
+          view.dispatch({
+            effects: textSelectedEffect.of(view),
+          })
+        }
+      },
+      mousedown(event, view) {
+        view.dispatch({
+          effects: removeReviewPanelTooltipEffect.of(null),
+        })
+      },
+    }),
+  ]
 }
 
 export const reviewTooltipStateField = StateField.define<{
@@ -54,6 +84,10 @@ export const reviewTooltipStateField = StateField.define<{
     addCommentRanges = addCommentRanges.map(tr.changes)
 
     for (const effect of tr.effects) {
+      if (effect.is(removeReviewPanelTooltipEffect)) {
+        return { tooltip: null, addCommentRanges }
+      }
+
       if (effect.is(removeNewCommentRangeEffect)) {
         const rangeToRemove = effect.value
         addCommentRanges = addCommentRanges.update({
