@@ -79,6 +79,17 @@ services:
       - ../services/history-v1/knexfile.js:/overleaf/services/history-v1/knexfile.js
       - ../services/history-v1/migrations:/overleaf/services/history-v1/migrations
 
+  references:
+    command: ["node", "--watch", "app.js"]
+    environment:
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+    ports:
+      - "127.0.0.1:9236:9229"
+    volumes:
+      - ../services/references/app:/overleaf/services/references/app
+      - ../services/references/config:/overleaf/services/references/config
+      - ../services/references/app.js:/overleaf/services/references/app.js
+
   notifications:
     command: ["node", "--watch", "app.js"]
     environment:

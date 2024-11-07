@@ -1,0 +1,35 @@
+{
+  "name": "@overleaf/references",
+  "author": "Tackoil",
+  "description": "references",
+  "private": true,
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node $NODE_APP_OPTIONS app.js"
+  },
+  "version": "0.1.0",
+  "dependencies": {
+    "@overleaf/fetch-utils": "*",
+    "@overleaf/logger": "*",
+    "@overleaf/metrics": "*",
+    "@overleaf/o-error": "*",
+    "@overleaf/redis-wrapper": "*",
+    "@overleaf/settings": "*",
+    "async": "^3.2.5",
+    "body-parser": "^1.20.3",
+    "bunyan": "^1.8.15",
+    "express": "^4.21.0",
+    "ioredis": "^4.16.1",
+    "lodash": "^4.17.19"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^10.2.0",
+    "mongodb": "^6.1.0",
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.2.4",
+    "typescript": "^5.0.4"
+  }
+}
