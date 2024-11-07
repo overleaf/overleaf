@@ -48,7 +48,7 @@ export const extendRequiredParameter = (
   }
 ) => {
   if (typeof change.insert !== 'string') {
-    return change
+    change.insert = change.insert.toString()
   }
 
   const argumentNode = ancestorNodeOfType(state, change.from, '$Argument')
@@ -96,6 +96,7 @@ export const extendRequiredParameter = (
       )
     }
   }
+  change.insert = state.toText(change.insert)
   return change
 }
 
