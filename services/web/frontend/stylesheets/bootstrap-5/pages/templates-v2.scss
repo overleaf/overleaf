@@ -404,7 +404,7 @@
 
   .related-tags {
     margin-top: var(--spacing-09);
-    max-height: 61px;
+    max-height: 62px;
     overflow: hidden;
 
     &.all-tags {
@@ -412,7 +412,7 @@
 
       // min-height prevents elements below the tags from moving upwards
       // when Show More is clicked
-      min-height: 102px;
+      min-height: 105px;
     }
 
     .badge-link {
