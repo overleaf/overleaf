@@ -286,6 +286,11 @@ const errors: Rule[] = [
     package: 'LaTeX',
   },
   {
+    ruleId: 'hint_unicode_character',
+    regexToMatch: /^LaTeX Error: Unicode character /,
+    package: 'LaTeX',
+  },
+  {
     ruleId: 'hint_cannot_define_unicode_char_value_lt_00a0',
     regexToMatch:
       /^Package inputenc error: Cannot define Unicode char value < 00A0/,
