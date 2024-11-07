@@ -125,4 +125,8 @@ $max-width: 160px;
   margin: 0;
   padding: 0;
   align-content: flex-start;
+
+  .badge {
+    max-width: 200px;
+  }
 }
