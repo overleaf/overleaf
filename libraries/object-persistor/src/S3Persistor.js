@@ -523,7 +523,7 @@ class S3Persistor extends AbstractPersistor {
     if (this.settings.endpoint) {
       const endpoint = new URL(this.settings.endpoint)
       options.endpoint = this.settings.endpoint
-      options.sslEnabled = endpoint.protocol === 'https'
+      options.sslEnabled = endpoint.protocol === 'https:'
     }
 
     // path-style access is only used for acceptance tests
@@ -535,6 +535,14 @@ class S3Persistor extends AbstractPersistor {
       if (this.settings[opt]) {
         options[opt] = this.settings[opt]
       }
+    }
+
+    if (options.sslEnabled && this.settings.ca && !options.httpOptions?.agent) {
+      options.httpOptions = options.httpOptions || {}
+      options.httpOptions.agent = new https.Agent({
+        rejectUnauthorized: true,
+        ca: this.settings.ca,
+      })
     }
 
     return options

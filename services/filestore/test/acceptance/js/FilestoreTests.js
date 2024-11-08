@@ -7,7 +7,6 @@ const Path = require('path')
 const FilestoreApp = require('./FilestoreApp')
 const TestHelper = require('./TestHelper')
 const fetch = require('node-fetch')
-const S3 = require('aws-sdk/clients/s3')
 const { promisify } = require('util')
 const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
@@ -43,6 +42,7 @@ const {
   PerProjectEncryptedS3Persistor,
   RootKeyEncryptionKey,
 } = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
+const { S3Persistor } = require('@overleaf/object-persistor/src/S3Persistor')
 const crypto = require('crypto')
 
 describe('Filestore', function () {
@@ -521,18 +521,11 @@ describe('Filestore', function () {
             bucketName = `random-bucket-${new ObjectId().toString()}`
             fileUrl = `${filestoreUrl}/bucket/${bucketName}/key/${fileId}`
 
-            const cfg = s3Config()
-            const s3ClientSettings = {
-              credentials: {
-                accessKeyId: process.env.MINIO_ROOT_USER,
-                secretAccessKey: process.env.MINIO_ROOT_PASSWORD,
-              },
-              endpoint: cfg.endpoint,
-              httpOptions: cfg.httpOptions,
-              s3ForcePathStyle: cfg.pathStyle,
-            }
-
-            const s3 = new S3(s3ClientSettings)
+            const s3 = new S3Persistor({
+              ...s3Config(),
+              key: process.env.MINIO_ROOT_USER,
+              secret: process.env.MINIO_ROOT_PASSWORD,
+            })._getClientForBucket(bucketName)
             await s3
               .createBucket({
                 Bucket: bucketName,
@@ -1263,16 +1256,8 @@ describe('Filestore', function () {
         })
 
         let s3Client
-        before('create s3Client', function () {
-          const cfg = s3Config()
-          const s3ClientSettings = {
-            accessKeyId: cfg.key,
-            secretAccessKey: cfg.secret,
-            endpoint: cfg.endpoint,
-            httpOptions: cfg.httpOptions,
-            s3ForcePathStyle: cfg.pathStyle,
-          }
-          s3Client = new S3(s3ClientSettings)
+        before('create s3 client', function () {
+          s3Client = new S3Persistor(s3Config())._getClientForBucket('')
         })
 
         async function checkDEKStorage({

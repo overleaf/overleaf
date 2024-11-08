@@ -1,7 +1,6 @@
 const fs = require('fs')
 const Path = require('path')
 const crypto = require('crypto')
-const https = require('https')
 const {
   RootKeyEncryptionKey,
 } = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
@@ -12,12 +11,7 @@ function s3BaseConfig() {
     endpoint: process.env.AWS_S3_ENDPOINT,
     pathStyle: true,
     partSize: 100 * 1024 * 1024,
-    httpOptions: {
-      agent: new https.Agent({
-        rejectUnauthorized: true,
-        ca: [fs.readFileSync('/certs/public.crt')],
-      }),
-    },
+    ca: [fs.readFileSync('/certs/public.crt')],
   }
 }
 
