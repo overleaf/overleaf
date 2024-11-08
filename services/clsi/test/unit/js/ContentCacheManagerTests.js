@@ -1,5 +1,5 @@
-const fs = require('fs')
-const Path = require('path')
+const fs = require('node:fs')
+const Path = require('node:path')
 const { expect } = require('chai')
 
 const MODULE_PATH = '../../../app/js/ContentCacheManager'

@@ -10,11 +10,11 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { promisify } from 'util'
-import fs from 'fs'
-import crypto from 'crypto'
+import { promisify } from 'node:util'
+import fs from 'node:fs'
+import crypto from 'node:crypto'
 import OError from '@overleaf/o-error'
-import { pipeline } from 'stream'
+import { pipeline } from 'node:stream'
 
 export function _getBlobHashFromString(string) {
   const byteLength = Buffer.byteLength(string)

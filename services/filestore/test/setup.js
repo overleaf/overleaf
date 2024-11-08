@@ -21,6 +21,11 @@ SandboxedModule.configure({
   requires: {
     '@overleaf/logger': stubs.logger,
   },
+  sourceTransformers: {
+    removeNodePrefix: function (source) {
+      return source.replace(/require\(['"]node:/g, "require('")
+    },
+  },
 })
 
 exports.mochaHooks = {

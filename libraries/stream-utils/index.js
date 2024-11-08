@@ -1,4 +1,4 @@
-const { Writable, Readable, PassThrough, Transform } = require('stream')
+const { Writable, Readable, PassThrough, Transform } = require('node:stream')
 
 /**
  * A writable stream that stores all data written to it in a node Buffer.

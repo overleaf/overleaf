@@ -2,9 +2,9 @@
 'use strict'
 
 const BPromise = require('bluebird')
-const fs = BPromise.promisifyAll(require('fs'))
-const crypto = require('crypto')
-const { pipeline } = require('stream')
+const fs = BPromise.promisifyAll(require('node:fs'))
+const crypto = require('node:crypto')
+const { pipeline } = require('node:stream')
 const assert = require('./assert')
 
 function getGitBlobHeader(byteLength) {

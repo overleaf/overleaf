@@ -11,17 +11,17 @@
  * @license MIT
  */
 
-const { URL } = require('url')
-const spawn = require('child_process').spawn
-const fs = require('fs')
+const { URL } = require('node:url')
+const spawn = require('node:child_process').spawn
+const fs = require('node:fs')
 
 exports.XMLHttpRequest = function () {
   /**
    * Private variables
    */
   const self = this
-  const http = require('http')
-  const https = require('https')
+  const http = require('node:http')
+  const https = require('node:https')
 
   // Holds http.js objects
   let request

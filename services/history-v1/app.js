@@ -6,7 +6,7 @@
 require('@overleaf/metrics/initialize')
 
 const config = require('config')
-const Events = require('events')
+const Events = require('node:events')
 const BPromise = require('bluebird')
 const express = require('express')
 const helmet = require('helmet')
@@ -19,7 +19,7 @@ const swaggerDoc = require('./api/swagger')
 const security = require('./api/app/security')
 const healthChecks = require('./api/controllers/health_checks')
 const { mongodb, loadGlobalBlobs } = require('./storage')
-const path = require('path')
+const path = require('node:path')
 
 Events.setMaxListeners(20)
 const app = express()

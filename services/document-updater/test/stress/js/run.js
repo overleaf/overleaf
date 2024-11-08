@@ -15,7 +15,7 @@
  */
 const DocUpdaterClient = require('../../acceptance/js/helpers/DocUpdaterClient')
 // MockWebApi = require "../../acceptance/js/helpers/MockWebApi"
-const assert = require('assert')
+const assert = require('node:assert')
 const async = require('async')
 
 const insert = function (string, pos, content) {

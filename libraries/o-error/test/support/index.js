@@ -23,7 +23,7 @@ exports.expectError = function OErrorExpectError(e, expected) {
   ).to.be.true
 
   expect(
-    require('util').types.isNativeError(e),
+    require('node:util').types.isNativeError(e),
     'error should be recognised by util.types.isNativeError'
   ).to.be.true
 

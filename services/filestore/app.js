@@ -1,7 +1,7 @@
 // Metrics must be initialized before importing anything else
 require('@overleaf/metrics/initialize')
 
-const Events = require('events')
+const Events = require('node:events')
 const Metrics = require('@overleaf/metrics')
 
 const logger = require('@overleaf/logger')

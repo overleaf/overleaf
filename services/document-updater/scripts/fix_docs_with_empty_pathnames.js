@@ -6,7 +6,7 @@ const rclient = require('@overleaf/redis-wrapper').createClient(
 const keys = Settings.redis.documentupdater.key_schema
 const ProjectFlusher = require('app/js/ProjectFlusher')
 const DocumentManager = require('app/js/DocumentManager')
-const util = require('util')
+const util = require('node:util')
 const flushAndDeleteDocWithLock = util.promisify(
   DocumentManager.flushAndDeleteDocWithLock
 )

@@ -11,8 +11,8 @@
  */
 
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
-const path = require('path')
+const assert = require('node:assert')
+const path = require('node:path')
 const sinon = require('sinon')
 const modulePath = path.join(__dirname, '../../../app/js/ConnectedUsersManager')
 const { expect } = require('chai')

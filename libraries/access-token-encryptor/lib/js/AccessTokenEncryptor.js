@@ -1,5 +1,5 @@
-const { promisify } = require('util')
-const crypto = require('crypto')
+const { promisify } = require('node:util')
+const crypto = require('node:crypto')
 
 const ALGORITHM = 'aes-256-ctr'
 

@@ -1,9 +1,9 @@
 const _ = require('lodash')
-const { Readable } = require('stream')
+const { Readable } = require('node:stream')
 const OError = require('@overleaf/o-error')
 const fetch = require('node-fetch')
-const http = require('http')
-const https = require('https')
+const http = require('node:http')
+const https = require('node:https')
 
 /**
  * @import { Response } from 'node-fetch'

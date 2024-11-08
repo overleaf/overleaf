@@ -13,7 +13,7 @@ const Client = require('./helpers/Client')
 const request = require('request')
 const { expect } = require('chai')
 const ClsiApp = require('./helpers/ClsiApp')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 
 describe('Syncing', function () {
   before(function (done) {

@@ -1,6 +1,6 @@
-const fs = require('fs')
-const Path = require('path')
-const crypto = require('crypto')
+const fs = require('node:fs')
+const Path = require('node:path')
+const crypto = require('node:crypto')
 const {
   RootKeyEncryptionKey,
 } = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')

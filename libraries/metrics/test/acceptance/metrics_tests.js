@@ -1,6 +1,6 @@
-const { promisify } = require('util')
-const os = require('os')
-const http = require('http')
+const { promisify } = require('node:util')
+const os = require('node:os')
+const http = require('node:http')
 const { expect } = require('chai')
 const Metrics = require('../..')
 

@@ -5,7 +5,7 @@
  */
 const chai = require('chai')
 const { expect } = chai
-const path = require('path')
+const path = require('node:path')
 const modulePath = path.join(__dirname, '../../../event_loop.js')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')

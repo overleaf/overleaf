@@ -15,11 +15,11 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/DockerRunner'
 )
-const Path = require('path')
+const Path = require('node:path')
 
 describe('DockerRunner', function () {
   beforeEach(function () {

@@ -1,7 +1,7 @@
-const fsPromises = require('fs/promises')
-const os = require('os')
-const Path = require('path')
-const { callbackify } = require('util')
+const fsPromises = require('node:fs/promises')
+const os = require('node:os')
+const Path = require('node:path')
+const { callbackify } = require('node:util')
 
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')

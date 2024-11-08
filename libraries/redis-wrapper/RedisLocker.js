@@ -1,8 +1,8 @@
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
-const os = require('os')
-const crypto = require('crypto')
+const os = require('node:os')
+const crypto = require('node:crypto')
 
 const HOST = os.hostname()
 const PID = process.pid

@@ -7,7 +7,7 @@
  */
 
 const BPromise = require('bluebird')
-const fs = BPromise.promisifyAll(require('fs'))
+const fs = BPromise.promisifyAll(require('node:fs'))
 const temp = BPromise.promisifyAll(require('temp'))
 
 exports.open = function (affixes) {

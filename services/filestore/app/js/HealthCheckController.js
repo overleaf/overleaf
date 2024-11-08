@@ -1,9 +1,9 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('node:fs')
+const path = require('node:path')
 const Settings = require('@overleaf/settings')
 const { WritableBuffer } = require('@overleaf/stream-utils')
-const { promisify } = require('util')
-const Stream = require('stream')
+const { promisify } = require('node:util')
+const Stream = require('node:stream')
 
 const pipeline = promisify(Stream.pipeline)
 const fsCopy = promisify(fs.copyFile)

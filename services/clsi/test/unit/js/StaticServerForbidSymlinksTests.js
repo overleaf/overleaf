@@ -10,8 +10,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
-const path = require('path')
+const assert = require('node:assert')
+const path = require('node:path')
 const sinon = require('sinon')
 const modulePath = path.join(
   __dirname,

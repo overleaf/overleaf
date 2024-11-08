@@ -1,6 +1,6 @@
 const commandLineArgs = require('command-line-args')
 const BPromise = require('bluebird')
-const timersPromises = require('timers/promises')
+const timersPromises = require('node:timers/promises')
 
 const { knex, historyStore } = require('..')
 

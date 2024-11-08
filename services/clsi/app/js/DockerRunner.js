@@ -1,13 +1,13 @@
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const Docker = require('dockerode')
 const dockerode = new Docker()
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const async = require('async')
 const LockManager = require('./DockerLockManager')
-const fs = require('fs')
-const Path = require('path')
+const fs = require('node:fs')
+const Path = require('node:path')
 const _ = require('lodash')
 
 const ONE_HOUR_IN_MS = 60 * 60 * 1000

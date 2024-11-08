@@ -13,7 +13,10 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath = require('path').join(__dirname, '../../../app/js/UrlCache')
+const modulePath = require('node:path').join(
+  __dirname,
+  '../../../app/js/UrlCache'
+)
 
 describe('UrlCache', function () {
   beforeEach(function () {

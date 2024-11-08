@@ -1,7 +1,7 @@
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 
-const os = require('os')
+const os = require('node:os')
 const HOST = os.hostname()
 const PID = process.pid
 let COUNT = 0

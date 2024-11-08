@@ -1,6 +1,6 @@
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 const OError = require('@overleaf/o-error')
 
 const IdMap = new Map() // keep track of whether ids are from projects or docs

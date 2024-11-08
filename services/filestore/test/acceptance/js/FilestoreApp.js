@@ -1,7 +1,7 @@
 const logger = require('@overleaf/logger')
 const ObjectPersistor = require('@overleaf/object-persistor')
 const Settings = require('@overleaf/settings')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const App = require('../../../app')
 const FileHandler = require('../../../app/js/FileHandler')
 

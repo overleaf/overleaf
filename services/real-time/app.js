@@ -27,7 +27,7 @@ const DrainManager = require('./app/js/DrainManager')
 const HealthCheckManager = require('./app/js/HealthCheckManager')
 const DeploymentManager = require('./app/js/DeploymentManager')
 
-const Path = require('path')
+const Path = require('node:path')
 
 // NOTE: debug is invoked for every blob that is put on the wire
 const socketIoLogger = {
@@ -48,7 +48,7 @@ DeploymentManager.initialise()
 // Set up socket.io server
 const app = express()
 
-const server = require('http').createServer(app)
+const server = require('node:http').createServer(app)
 server.keepAliveTimeout = Settings.keepAliveTimeoutMs
 const io = require('socket.io').listen(server, {
   logger: socketIoLogger,

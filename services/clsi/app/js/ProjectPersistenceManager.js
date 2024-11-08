@@ -15,9 +15,9 @@ const logger = require('@overleaf/logger')
 const oneDay = 24 * 60 * 60 * 1000
 const Settings = require('@overleaf/settings')
 const diskusage = require('diskusage')
-const { callbackify } = require('util')
-const Path = require('path')
-const fs = require('fs')
+const { callbackify } = require('node:util')
+const Path = require('node:path')
+const fs = require('node:fs')
 
 // projectId -> timestamp mapping.
 const LAST_ACCESS = new Map()

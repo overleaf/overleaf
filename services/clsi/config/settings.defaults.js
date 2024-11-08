@@ -1,5 +1,5 @@
-const Path = require('path')
-const os = require('os')
+const Path = require('node:path')
+const os = require('node:os')
 
 const isPreEmptible = os.hostname().includes('pre-emp')
 
@@ -131,7 +131,7 @@ if (process.env.DOCKER_RUNNER) {
   try {
     seccompProfilePath = Path.resolve(__dirname, '../seccomp/clsi-profile.json')
     module.exports.clsi.docker.seccomp_profile = JSON.stringify(
-      JSON.parse(require('fs').readFileSync(seccompProfilePath))
+      JSON.parse(require('node:fs').readFileSync(seccompProfilePath))
     )
   } catch (error) {
     console.error(

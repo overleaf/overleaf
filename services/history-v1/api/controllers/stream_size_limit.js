@@ -1,4 +1,4 @@
-const stream = require('stream')
+const stream = require('node:stream')
 
 /**
  * Transform stream that stops passing bytes through after some threshold has

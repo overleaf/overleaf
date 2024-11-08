@@ -1,4 +1,4 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import logger from '@overleaf/logger'
 import async from 'async'
 import metrics from '@overleaf/metrics'

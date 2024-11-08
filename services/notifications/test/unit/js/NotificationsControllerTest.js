@@ -12,7 +12,7 @@
 const sinon = require('sinon')
 const modulePath = '../../../app/js/NotificationsController.js'
 const SandboxedModule = require('sandboxed-module')
-const assert = require('assert')
+const assert = require('node:assert')
 
 const userId = '51dc93e6fb625a261300003b'
 const notificationId = 'fb625a26f09d'

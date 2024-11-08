@@ -4,7 +4,7 @@
 // TODO: This file was created by bulk-decaffeinate.
 // Fix any style issues and re-enable lint.
 let ContentTypeMapper
-const Path = require('path')
+const Path = require('node:path')
 
 // here we coerce html, css and js to text/plain,
 // otherwise choose correct mime type based on file extension,

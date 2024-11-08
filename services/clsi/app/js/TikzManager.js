@@ -11,9 +11,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let TikzManager
-const fs = require('fs')
-const Path = require('path')
-const { promisify } = require('util')
+const fs = require('node:fs')
+const Path = require('node:path')
+const { promisify } = require('node:util')
 const ResourceWriter = require('./ResourceWriter')
 const SafeReader = require('./SafeReader')
 const logger = require('@overleaf/logger')

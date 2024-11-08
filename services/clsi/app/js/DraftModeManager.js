@@ -1,5 +1,5 @@
-const fsPromises = require('fs/promises')
-const { callbackify } = require('util')
+const fsPromises = require('node:fs/promises')
+const { callbackify } = require('node:util')
 const logger = require('@overleaf/logger')
 
 async function injectDraftMode(filename) {

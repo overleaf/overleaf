@@ -1,5 +1,5 @@
 const { NoXrefTableError } = require('./Errors')
-const fs = require('fs')
+const fs = require('node:fs')
 const { O_RDONLY, O_NOFOLLOW } = fs.constants
 const MAX_XREF_FILE_SIZE = 1024 * 1024
 

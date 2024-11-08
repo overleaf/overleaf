@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('node:path')
 
 exports.path = function (pathname) {
   return path.join(__dirname, '..', 'files', pathname)

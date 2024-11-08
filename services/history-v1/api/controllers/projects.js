@@ -1,11 +1,11 @@
 'use strict'
 
 const _ = require('lodash')
-const Path = require('path')
-const Stream = require('stream')
+const Path = require('node:path')
+const Stream = require('node:stream')
 const HTTPStatus = require('http-status')
-const fs = require('fs')
-const { promisify } = require('util')
+const fs = require('node:fs')
+const { promisify } = require('node:util')
 const config = require('config')
 
 const logger = require('@overleaf/logger')

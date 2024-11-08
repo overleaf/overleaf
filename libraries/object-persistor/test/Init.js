@@ -25,4 +25,9 @@ SandboxedModule.configure({
     },
   },
   globals: { Buffer, Math, console, process, URL },
+  sourceTransformers: {
+    removeNodePrefix: function (source) {
+      return source.replace(/require\(['"]node:/g, "require('")
+    },
+  },
 })

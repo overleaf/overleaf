@@ -3,7 +3,7 @@ const chai = require('chai')
 const { expect } = chai
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../src/Errors')
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 
 const MODULE_PATH = '../../src/S3Persistor.js'
 

@@ -15,7 +15,7 @@ import * as LabelsManager from './LabelsManager.js'
 import * as HistoryApiManager from './HistoryApiManager.js'
 import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
-import { pipeline } from 'stream'
+import { pipeline } from 'node:stream'
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
 

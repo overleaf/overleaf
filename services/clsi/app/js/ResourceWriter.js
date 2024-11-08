@@ -13,10 +13,10 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ResourceWriter
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const UrlCache = require('./UrlCache')
-const Path = require('path')
-const fs = require('fs')
+const Path = require('node:path')
+const fs = require('node:fs')
 const async = require('async')
 const OutputFileFinder = require('./OutputFileFinder')
 const ResourceStateManager = require('./ResourceStateManager')

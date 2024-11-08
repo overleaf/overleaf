@@ -11,7 +11,7 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/DocumentUpdaterController'
 )

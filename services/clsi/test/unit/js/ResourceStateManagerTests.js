@@ -12,11 +12,11 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/ResourceStateManager'
 )
-const Path = require('path')
+const Path = require('node:path')
 const Errors = require('../../../app/js/Errors')
 
 describe('ResourceStateManager', function () {

@@ -1,5 +1,5 @@
 const { expect } = require('chai')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 
 const OError = require('..')
 

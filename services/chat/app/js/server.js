@@ -1,10 +1,10 @@
-import http from 'http'
+import http from 'node:http'
 import metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
 import express from 'express'
 import exegesisExpress from 'exegesis-express'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import * as messagesController from './Features/Messages/MessageHttpController.js'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))

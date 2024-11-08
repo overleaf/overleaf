@@ -6,7 +6,7 @@ const DocArchive = require('./DocArchiveManager')
 const RangeManager = require('./RangeManager')
 const Settings = require('@overleaf/settings')
 const { callbackifyAll } = require('@overleaf/promise-utils')
-const { setTimeout } = require('timers/promises')
+const { setTimeout } = require('node:timers/promises')
 
 /**
  * @import { Document } from 'mongodb'

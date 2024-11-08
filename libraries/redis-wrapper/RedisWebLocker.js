@@ -1,8 +1,8 @@
-const { callbackify, promisify } = require('util')
+const { callbackify, promisify } = require('node:util')
 const metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
-const os = require('os')
-const crypto = require('crypto')
+const os = require('node:os')
+const crypto = require('node:crypto')
 const async = require('async')
 
 const HOST = os.hostname()

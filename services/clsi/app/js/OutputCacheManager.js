@@ -1,12 +1,12 @@
 let OutputCacheManager
-const { callbackify, promisify } = require('util')
+const { callbackify, promisify } = require('node:util')
 const async = require('async')
-const fs = require('fs')
-const Path = require('path')
+const fs = require('node:fs')
+const Path = require('node:path')
 const logger = require('@overleaf/logger')
 const _ = require('lodash')
 const Settings = require('@overleaf/settings')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const Metrics = require('./Metrics')
 
 const OutputFileOptimiser = require('./OutputFileOptimiser')

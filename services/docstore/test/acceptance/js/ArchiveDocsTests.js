@@ -399,7 +399,7 @@ describe('Archiving', function () {
       this.project_id = new ObjectId()
       this.timeout(1000 * 30)
       const quarterMegInBytes = 250000
-      const bigLine = require('crypto')
+      const bigLine = require('node:crypto')
         .randomBytes(quarterMegInBytes)
         .toString('hex')
       this.doc = {

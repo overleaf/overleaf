@@ -1,4 +1,4 @@
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')

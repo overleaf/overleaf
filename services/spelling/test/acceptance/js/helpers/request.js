@@ -1,4 +1,4 @@
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import Request from 'request'
 
 export const PORT = 3005

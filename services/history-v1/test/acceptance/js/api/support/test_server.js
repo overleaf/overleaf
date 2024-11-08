@@ -8,7 +8,7 @@
 
 const BPromise = require('bluebird')
 const config = require('config')
-const http = require('http')
+const http = require('node:http')
 const jwt = require('jsonwebtoken')
 
 const Swagger = require('swagger-client')

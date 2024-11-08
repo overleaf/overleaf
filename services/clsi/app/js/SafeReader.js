@@ -12,7 +12,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let SafeReader
-const fs = require('fs')
+const fs = require('node:fs')
 const logger = require('@overleaf/logger')
 
 module.exports = SafeReader = {

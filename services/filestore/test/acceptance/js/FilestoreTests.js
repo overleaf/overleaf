@@ -1,18 +1,18 @@
 const chai = require('chai')
 const { expect } = chai
-const fs = require('fs')
-const Stream = require('stream')
+const fs = require('node:fs')
+const Stream = require('node:stream')
 const Settings = require('@overleaf/settings')
-const Path = require('path')
+const Path = require('node:path')
 const FilestoreApp = require('./FilestoreApp')
 const TestHelper = require('./TestHelper')
 const fetch = require('node-fetch')
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const { Storage } = require('@google-cloud/storage')
 const streamifier = require('streamifier')
 chai.use(require('chai-as-promised'))
 const { ObjectId } = require('mongodb')
-const ChildProcess = require('child_process')
+const ChildProcess = require('node:child_process')
 
 const fsWriteFile = promisify(fs.writeFile)
 const fsStat = promisify(fs.stat)
@@ -43,7 +43,7 @@ const {
   RootKeyEncryptionKey,
 } = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
 const { S3Persistor } = require('@overleaf/object-persistor/src/S3Persistor')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)

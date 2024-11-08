@@ -4,6 +4,9 @@
     "standard",
     "prettier"
   ],
+  "plugins": [
+    "unicorn"
+  ],
   "parserOptions": {
     "ecmaVersion": 2020
   },
@@ -12,7 +15,8 @@
   },
   "rules": {
     // Do not allow importing of implicit dependencies.
-    "import/no-extraneous-dependencies": "error"
+    "import/no-extraneous-dependencies": "error",
+    "unicorn/prefer-node-protocol": "error"
   },
   "overrides": [
     // Extra rules for Cypress tests

@@ -1,9 +1,9 @@
-const { callbackify } = require('util')
+const { callbackify } = require('node:util')
 const MongoManager = require('./MongoManager').promises
 const Errors = require('./Errors')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const { ReadableString } = require('@overleaf/stream-utils')
 const RangeManager = require('./RangeManager')
 const PersistorManager = require('./PersistorManager')

@@ -1,7 +1,7 @@
 const { db, ObjectId } = require('./mongodb')
 const Settings = require('@overleaf/settings')
 const Errors = require('./Errors')
-const { callbackify } = require('util')
+const { callbackify } = require('node:util')
 
 const ARCHIVING_LOCK_DURATION_MS = Settings.archivingLockDurationMs
 

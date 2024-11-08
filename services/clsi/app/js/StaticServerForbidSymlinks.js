@@ -13,8 +13,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let ForbidSymlinks
-const Path = require('path')
-const fs = require('fs')
+const Path = require('node:path')
+const fs = require('node:fs')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 

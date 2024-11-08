@@ -10,7 +10,7 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const express = require('express')
-const Path = require('path')
+const Path = require('node:path')
 const Client = require('./helpers/Client')
 const sinon = require('sinon')
 const ClsiApp = require('./helpers/ClsiApp')

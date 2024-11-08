@@ -1,7 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const bunyan = require('bunyan')
 const { expect } = require('chai')
-const path = require('path')
+const path = require('node:path')
 const sinon = require('sinon')
 
 const MODULE_PATH = path.join(__dirname, '../../logging-manager.js')

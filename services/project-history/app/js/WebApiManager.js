@@ -1,5 +1,5 @@
-import { callbackify } from 'util'
-import { setTimeout } from 'timers/promises'
+import { callbackify } from 'node:util'
+import { setTimeout } from 'node:timers/promises'
 import logger from '@overleaf/logger'
 import Metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'

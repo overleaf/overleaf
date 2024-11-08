@@ -1,8 +1,8 @@
 // @ts-check
 
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import Core from 'overleaf-editor-core'
-import { Readable as StringStream } from 'stream'
+import { Readable as StringStream } from 'node:stream'
 import OError from '@overleaf/o-error'
 import * as HistoryStoreManager from './HistoryStoreManager.js'
 import * as WebApiManager from './WebApiManager.js'

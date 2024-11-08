@@ -60,6 +60,11 @@ SandboxedModule.configure({
     TextEncoder,
     TextDecoder,
   },
+  sourceTransformers: {
+    removeNodePrefix: function (source) {
+      return source.replace(/require\(['"]node:/g, "require('")
+    },
+  },
 })
 
 function getSandboxedModuleRequires() {

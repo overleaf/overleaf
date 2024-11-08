@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('node:fs')
 const { parseXrefTable } = require('../app/lib/pdfjs/parseXrefTable')
 
 const pdfPath = process.argv[2]

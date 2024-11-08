@@ -2,7 +2,7 @@ const sinon = require('sinon')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const Errors = require('../../../../app/js/Errors')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const tk = require('timekeeper')
 
 const MODULE_PATH = '../../../../app/js/RedisManager.js'

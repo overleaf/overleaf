@@ -12,7 +12,7 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
-const path = require('path')
+const path = require('node:path')
 const modulePath = '../../../app/js/AuthorizationManager'
 
 describe('AuthorizationManager', function () {

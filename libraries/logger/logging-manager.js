@@ -1,4 +1,4 @@
-const Stream = require('stream')
+const Stream = require('node:stream')
 const bunyan = require('bunyan')
 const GCPManager = require('./gcp-manager')
 const SentryManager = require('./sentry-manager')

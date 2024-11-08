@@ -1,6 +1,6 @@
 // @ts-check
-const http = require('http')
-const https = require('https')
+const http = require('node:http')
+const https = require('node:https')
 if (http.globalAgent.maxSockets < 300) {
   http.globalAgent.maxSockets = 300
 }
@@ -8,15 +8,15 @@ if (https.globalAgent.maxSockets < 300) {
   https.globalAgent.maxSockets = 300
 }
 
-const Crypto = require('crypto')
+const Crypto = require('node:crypto')
 const Metrics = require('@overleaf/metrics')
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
 
-const { pipeline, PassThrough } = require('stream')
-const fs = require('fs')
+const { pipeline, PassThrough } = require('node:stream')
+const fs = require('node:fs')
 const S3 = require('aws-sdk/clients/s3')
-const { URL } = require('url')
+const { URL } = require('node:url')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 
 /**

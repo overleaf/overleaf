@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { promisify, callbackify } from 'util'
+import { promisify, callbackify } from 'node:util'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 import * as UpdatesProcessor from './UpdatesProcessor.js'

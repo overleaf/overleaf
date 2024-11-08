@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/LockManager'
 )

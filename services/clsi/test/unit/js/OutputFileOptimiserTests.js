@@ -12,13 +12,13 @@
  */
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/OutputFileOptimiser'
 )
-const path = require('path')
+const path = require('node:path')
 const { expect } = require('chai')
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 
 describe('OutputFileOptimiser', function () {
   beforeEach(function () {

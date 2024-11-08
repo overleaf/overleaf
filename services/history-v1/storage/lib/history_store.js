@@ -4,7 +4,7 @@ const BPromise = require('bluebird')
 const core = require('overleaf-editor-core')
 
 const config = require('config')
-const path = require('path')
+const path = require('node:path')
 
 const OError = require('@overleaf/o-error')
 const objectPersistor = require('@overleaf/object-persistor')

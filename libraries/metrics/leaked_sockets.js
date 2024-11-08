@@ -6,8 +6,8 @@
  * logged along with the corresponding information from /proc/net/tcp.
  */
 
-const fs = require('fs')
-const diagnosticsChannel = require('diagnostics_channel')
+const fs = require('node:fs')
+const diagnosticsChannel = require('node:diagnostics_channel')
 
 const SOCKET_MONITOR_INTERVAL = 60 * 1000
 // set the threshold for logging leaked sockets in minutes, defaults to 15

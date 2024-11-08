@@ -1,7 +1,7 @@
 'use strict'
 
 const { expect } = require('chai')
-const fs = require('fs')
+const fs = require('node:fs')
 const HTTPStatus = require('http-status')
 const fetch = require('node-fetch')
 const sinon = require('sinon')

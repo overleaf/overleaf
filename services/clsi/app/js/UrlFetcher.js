@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('node:fs')
 const logger = require('@overleaf/logger')
 const Settings = require('@overleaf/settings')
 const {
@@ -6,8 +6,8 @@ const {
   CustomHttpsAgent,
   fetchStream,
 } = require('@overleaf/fetch-utils')
-const { URL } = require('url')
-const { pipeline } = require('stream/promises')
+const { URL } = require('node:url')
+const { pipeline } = require('node:stream/promises')
 const Metrics = require('./Metrics')
 
 const MAX_CONNECT_TIME = 1000

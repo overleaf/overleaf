@@ -12,8 +12,8 @@
 const Client = require('./helpers/Client')
 const request = require('request')
 const { expect } = require('chai')
-const path = require('path')
-const fs = require('fs')
+const path = require('node:path')
+const fs = require('node:fs')
 const ClsiApp = require('./helpers/ClsiApp')
 
 describe('Syncing', function () {

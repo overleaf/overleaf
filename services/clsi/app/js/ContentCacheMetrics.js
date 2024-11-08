@@ -1,6 +1,6 @@
 const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
-const os = require('os')
+const os = require('node:os')
 
 let CACHED_LOAD = {
   expires: -1,

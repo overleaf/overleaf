@@ -1,6 +1,6 @@
 const logger = require('@overleaf/logger')
 const metrics = require('@overleaf/metrics')
-const { callbackify } = require('util')
+const { callbackify } = require('node:util')
 const safeExec = require('./SafeExec').promises
 
 module.exports = {

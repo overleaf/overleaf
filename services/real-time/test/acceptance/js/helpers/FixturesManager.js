@@ -147,7 +147,7 @@ module.exports = FixturesManager = {
   },
 
   getRandomId() {
-    return require('crypto')
+    return require('node:crypto')
       .createHash('sha1')
       .update(Math.random().toString())
       .digest('hex')

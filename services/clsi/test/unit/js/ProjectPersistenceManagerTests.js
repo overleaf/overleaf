@@ -13,7 +13,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const assert = require('chai').assert
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/ProjectPersistenceManager'
 )

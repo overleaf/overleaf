@@ -70,7 +70,7 @@ sayHi3(43, (err, result) => {
   }
 })
 
-const promisify = require('util').promisify
+const promisify = require('node:util').promisify
 demoDatabase.findUserAsync = promisify(demoDatabase.findUser)
 
 async function sayHi4NoHandling(userId) {

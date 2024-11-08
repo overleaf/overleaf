@@ -20,8 +20,8 @@ const pubsubClient = require('@overleaf/redis-wrapper').createClient(
 )
 const Keys = Settings.redis.documentupdater.key_schema
 const logger = require('@overleaf/logger')
-const os = require('os')
-const crypto = require('crypto')
+const os = require('node:os')
+const crypto = require('node:crypto')
 const metrics = require('./Metrics')
 
 const HOST = os.hostname()

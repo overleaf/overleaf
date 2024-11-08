@@ -1,8 +1,8 @@
 const ContentCacheManager = require('../../app/js/ContentCacheManager')
-const fs = require('fs')
-const crypto = require('crypto')
-const path = require('path')
-const os = require('os')
+const fs = require('node:fs')
+const crypto = require('node:crypto')
+const path = require('node:path')
+const os = require('node:os')
 const async = require('async')
 const _createHash = crypto.createHash
 

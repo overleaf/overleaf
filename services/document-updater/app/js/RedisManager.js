@@ -7,7 +7,7 @@ const OError = require('@overleaf/o-error')
 const { promisifyAll } = require('@overleaf/promise-utils')
 const metrics = require('./Metrics')
 const Errors = require('./Errors')
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const async = require('async')
 const { docIsTooLarge } = require('./Limits')
 

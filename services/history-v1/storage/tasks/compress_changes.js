@@ -8,7 +8,7 @@
  * where CSV_FILE contains a list of project ids in the first column
  */
 
-const fs = require('fs')
+const fs = require('node:fs')
 const BPromise = require('bluebird')
 const { History } = require('overleaf-editor-core')
 const { historyStore, chunkStore } = require('..')

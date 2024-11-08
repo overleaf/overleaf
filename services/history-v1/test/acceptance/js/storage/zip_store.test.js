@@ -2,7 +2,7 @@
 
 const BPromise = require('bluebird')
 const { expect } = require('chai')
-const fs = BPromise.promisifyAll(require('fs'))
+const fs = BPromise.promisifyAll(require('node:fs'))
 const temp = require('temp')
 
 const cleanup = require('./support/cleanup')

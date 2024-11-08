@@ -6,9 +6,9 @@
 'use strict'
 
 const BPromise = require('bluebird')
-const zlib = require('zlib')
+const zlib = require('node:zlib')
 const { WritableBuffer, ReadableString } = require('@overleaf/stream-utils')
-const { pipeline } = require('stream')
+const { pipeline } = require('node:stream')
 
 /**
  * Pipe a read stream to a write stream. The promise resolves when the write

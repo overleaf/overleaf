@@ -2,10 +2,10 @@
  * ContentCacheManager - maintains a cache of stream hashes from a PDF file
  */
 
-const { callbackify } = require('util')
-const fs = require('fs')
-const crypto = require('crypto')
-const Path = require('path')
+const { callbackify } = require('node:util')
+const fs = require('node:fs')
+const crypto = require('node:crypto')
+const Path = require('node:path')
 const Settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const pLimit = require('p-limit')

@@ -1,5 +1,5 @@
 const { fetchString } = require('@overleaf/fetch-utils')
-const fs = require('fs')
+const fs = require('node:fs')
 
 class LogLevelChecker {
   constructor(logger, defaultLevel) {

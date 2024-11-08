@@ -1,5 +1,5 @@
-const Path = require('path')
-const { promisify } = require('util')
+const Path = require('node:path')
+const { promisify } = require('node:util')
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')

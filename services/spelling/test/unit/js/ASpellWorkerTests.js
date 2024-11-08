@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import { expect } from 'chai'
 import esmock from 'esmock'
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 
 describe('ASpellWorker', function () {
   beforeEach(async function () {

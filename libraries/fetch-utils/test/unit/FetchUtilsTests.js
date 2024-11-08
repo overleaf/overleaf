@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const { FetchError, AbortError } = require('node-fetch')
-const { Readable } = require('stream')
-const { once } = require('events')
+const { Readable } = require('node:stream')
+const { once } = require('node:events')
 const { TestServer } = require('./helpers/TestServer')
 const selfsigned = require('selfsigned')
 const {
@@ -24,7 +24,7 @@ const pems = selfsigned.generate(attrs, { days: 365 })
 const PRIVATE_KEY = pems.private
 const PUBLIC_CERT = pems.cert
 
-const dns = require('dns')
+const dns = require('node:dns')
 const _originalLookup = dns.lookup
 // Custom DNS resolver function
 dns.lookup = (hostname, options, callback) => {

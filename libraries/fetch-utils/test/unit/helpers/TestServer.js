@@ -1,9 +1,9 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const { EventEmitter } = require('events')
-const http = require('http')
-const https = require('https')
-const { promisify } = require('util')
+const { EventEmitter } = require('node:events')
+const http = require('node:http')
+const https = require('node:https')
+const { promisify } = require('node:util')
 
 class TestServer {
   constructor() {

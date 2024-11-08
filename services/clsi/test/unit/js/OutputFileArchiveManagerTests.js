@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { assert, expect } = require('chai')
 
-const MODULE_PATH = require('path').join(
+const MODULE_PATH = require('node:path').join(
   __dirname,
   '../../../app/js/OutputFileArchiveManager'
 )
@@ -50,7 +50,7 @@ describe('OutputFileArchiveManager', function () {
         './OutputFileFinder': this.OutputFileFinder,
         './OutputCacheManager': this.OutputCacheManger,
         archiver: this.archiver,
-        'node:fs/promises': this.fs,
+        'fs/promises': this.fs,
         '@overleaf/settings': {
           path: {
             outputDir: this.outputDir,

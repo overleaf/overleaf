@@ -1,4 +1,4 @@
-import { callbackify } from 'util'
+import { callbackify } from 'node:util'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'
 import { db } from './mongodb.js'

@@ -1,4 +1,4 @@
-const Path = require('path')
+const Path = require('node:path')
 const send = require('send')
 const Settings = require('@overleaf/settings')
 const OutputCacheManager = require('./OutputCacheManager')

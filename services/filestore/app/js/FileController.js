@@ -2,7 +2,7 @@ const FileHandler = require('./FileHandler')
 const metrics = require('@overleaf/metrics')
 const parseRange = require('range-parser')
 const Errors = require('./Errors')
-const { pipeline } = require('stream')
+const { pipeline } = require('node:stream')
 
 const maxSizeInBytes = 1024 * 1024 * 1024 // 1GB
 

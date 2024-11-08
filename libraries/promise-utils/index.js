@@ -1,4 +1,4 @@
-const { promisify, callbackify } = require('util')
+const { promisify, callbackify } = require('node:util')
 const pLimit = require('p-limit')
 
 module.exports = {

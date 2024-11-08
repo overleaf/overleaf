@@ -7,7 +7,7 @@ const keys = Settings.redis.documentupdater.key_schema
 const ProjectFlusher = require('../app/js/ProjectFlusher')
 const DocumentManager = require('../app/js/DocumentManager')
 const { mongoClient, db, ObjectId } = require('../app/js/mongodb')
-const util = require('util')
+const util = require('node:util')
 const flushAndDeleteDocWithLock = util.promisify(
   DocumentManager.flushAndDeleteDocWithLock
 )

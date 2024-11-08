@@ -10,8 +10,8 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 const sinon = require('sinon')
-const assert = require('assert')
-const path = require('path')
+const assert = require('node:assert')
+const path = require('node:path')
 const modulePath = path.join(__dirname, '../../../../app/js/LockManager.js')
 const projectId = 1234
 const docId = 5678

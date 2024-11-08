@@ -1,6 +1,6 @@
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
-const modulePath = require('path').join(
+const modulePath = require('node:path').join(
   __dirname,
   '../../../app/js/WebsocketAddressManager'
 )

@@ -1,7 +1,7 @@
 // @ts-check
 
 import _ from 'lodash'
-import { callbackify, promisify } from 'util'
+import { callbackify, promisify } from 'node:util'
 import { callbackifyMultiResult } from '@overleaf/promise-utils'
 import Settings from '@overleaf/settings'
 import logger from '@overleaf/logger'

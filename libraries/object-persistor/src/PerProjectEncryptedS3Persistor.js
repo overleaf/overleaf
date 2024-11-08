@@ -1,8 +1,8 @@
 // @ts-check
-const Crypto = require('crypto')
-const Stream = require('stream')
-const fs = require('fs')
-const { promisify } = require('util')
+const Crypto = require('node:crypto')
+const Stream = require('node:stream')
+const fs = require('node:fs')
+const { promisify } = require('node:util')
 const { WritableBuffer } = require('@overleaf/stream-utils')
 const { S3Persistor, SSECOptions } = require('./S3Persistor.js')
 const {
@@ -13,7 +13,7 @@ const {
   ReadError,
 } = require('./Errors')
 const logger = require('@overleaf/logger')
-const Path = require('path')
+const Path = require('node:path')
 
 const generateKey = promisify(Crypto.generateKey)
 const hkdf = promisify(Crypto.hkdf)

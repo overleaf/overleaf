@@ -14,19 +14,19 @@
  */
 const Client = require('./helpers/Client')
 const fetch = require('node-fetch')
-const { pipeline } = require('stream')
-const fs = require('fs')
-const ChildProcess = require('child_process')
+const { pipeline } = require('node:stream')
+const fs = require('node:fs')
+const ChildProcess = require('node:child_process')
 const ClsiApp = require('./helpers/ClsiApp')
 const logger = require('@overleaf/logger')
-const Path = require('path')
+const Path = require('node:path')
 const fixturePath = path => {
   if (path.slice(0, 3) === 'tmp') {
     return '/tmp/clsi_acceptance_tests' + path.slice(3)
   }
   return Path.join(__dirname, '../fixtures/', path)
 }
-const process = require('process')
+const process = require('node:process')
 console.log(
   process.pid,
   process.ppid,

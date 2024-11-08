@@ -11,7 +11,7 @@
  */
 const sinon = require('sinon')
 const SandboxedModule = require('sandboxed-module')
-const path = require('path')
+const path = require('node:path')
 const modulePath = path.join(__dirname, '../../../app/js/DrainManager')
 
 describe('DrainManager', function () {

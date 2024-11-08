@@ -1,5 +1,5 @@
-const Path = require('path')
-const fs = require('fs')
+const Path = require('node:path')
+const fs = require('node:fs')
 const { callbackifyMultiResult } = require('@overleaf/promise-utils')
 
 async function walkFolder(compileDir, d, files, allEntries) {

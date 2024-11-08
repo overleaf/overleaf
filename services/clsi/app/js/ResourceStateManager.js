@@ -1,5 +1,5 @@
-const Path = require('path')
-const fs = require('fs')
+const Path = require('node:path')
+const fs = require('node:fs')
 const logger = require('@overleaf/logger')
 const Errors = require('./Errors')
 const SafeReader = require('./SafeReader')

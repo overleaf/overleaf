@@ -8,7 +8,7 @@
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 const { expect } = require('chai')
 const SandboxedModule = require('sandboxed-module')
 const modulePath = '../../../app/js/SessionSockets'

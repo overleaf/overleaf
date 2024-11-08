@@ -22,7 +22,7 @@
 // Actual storage is handled by the database wrappers in db/*, wrapped by DocCache
 
 let Model
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 
 const queue = require('./syncqueue')
 const types = require('../types')

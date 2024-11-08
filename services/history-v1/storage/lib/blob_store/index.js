@@ -1,7 +1,7 @@
 'use strict'
 
 const config = require('config')
-const fs = require('fs')
+const fs = require('node:fs')
 const isValidUtf8 = require('utf-8-validate')
 const { ReadableString } = require('@overleaf/stream-utils')
 

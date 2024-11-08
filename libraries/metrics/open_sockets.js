@@ -11,13 +11,13 @@ const seconds = 1000
 // In Node 0.10 the default is 5, which means only 5 open connections at one.
 // Node 0.12 has a default of Infinity. Make sure we have no limit set,
 // regardless of Node version.
-require('http').globalAgent.maxSockets = Infinity
-require('https').globalAgent.maxSockets = Infinity
+require('node:http').globalAgent.maxSockets = Infinity
+require('node:https').globalAgent.maxSockets = Infinity
 
-const SOCKETS_HTTP = require('http').globalAgent.sockets
-const SOCKETS_HTTPS = require('https').globalAgent.sockets
-const FREE_SOCKETS_HTTP = require('http').globalAgent.freeSockets
-const FREE_SOCKETS_HTTPS = require('https').globalAgent.freeSockets
+const SOCKETS_HTTP = require('node:http').globalAgent.sockets
+const SOCKETS_HTTPS = require('node:https').globalAgent.sockets
+const FREE_SOCKETS_HTTP = require('node:http').globalAgent.freeSockets
+const FREE_SOCKETS_HTTPS = require('node:https').globalAgent.freeSockets
 
 // keep track of set gauges and reset them in the next collection cycle
 const SEEN_HOSTS_HTTP = new Set()

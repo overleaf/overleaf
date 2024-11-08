@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import request from 'request'
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 import mongodb from 'mongodb-legacy'
 import nock from 'nock'
 import * as ProjectHistoryClient from './helpers/ProjectHistoryClient.js'

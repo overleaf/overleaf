@@ -1,9 +1,9 @@
-const Path = require('path')
-const { promisify } = require('util')
+const Path = require('node:path')
+const { promisify } = require('node:util')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 const CommandRunner = require('./CommandRunner')
-const fs = require('fs')
+const fs = require('node:fs')
 
 const ProcessTable = {} // table of currently running jobs (pids or docker container names)
 

@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const sinonChai = require('sinon-chai')
 const chaiAsPromised = require('chai-as-promised')
 const SandboxedModule = require('sandboxed-module')
-const timersPromises = require('timers/promises')
+const timersPromises = require('node:timers/promises')
 
 // ensure every ObjectId has the id string as a property for correct comparisons
 require('mongodb-legacy').ObjectId.cacheHexString = true
@@ -37,6 +37,11 @@ SandboxedModule.configure({
     'mongodb-legacy': require('mongodb-legacy'),
   },
   globals: { Buffer, JSON, Math, console, process },
+  sourceTransformers: {
+    removeNodePrefix: function (source) {
+      return source.replace(/require\(['"]node:/g, "require('")
+    },
+  },
 })
 
 exports.mochaHooks = {

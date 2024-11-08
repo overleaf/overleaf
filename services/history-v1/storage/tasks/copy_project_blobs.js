@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const { promisify } = require('util')
+const { promisify } = require('node:util')
 const BPromise = require('bluebird')
 const commandLineArgs = require('command-line-args')
 const config = require('config')
-const fs = require('fs')
-const readline = require('readline')
+const fs = require('node:fs')
+const readline = require('node:readline')
 const { History } = require('overleaf-editor-core')
 const { knex, historyStore, persistor } = require('..')
 const projectKey = require('../lib/project_key')

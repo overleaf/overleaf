@@ -13,14 +13,14 @@
  * only 24h, to match the lifecycle rule on the zip bucket.
  */
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const util = require('util')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const util = require('node:util')
 
 // Something is registering 11 listeners, over the limit of 10, which generates
 // a lot of warning noise.
-require('events').EventEmitter.defaultMaxListeners = 11
+require('node:events').EventEmitter.defaultMaxListeners = 11
 
 const config = require('config')
 // We depend on this via object-persistor.

@@ -7,13 +7,13 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import { promisify } from 'util'
+import { promisify } from 'node:util'
 import async from 'async'
 import metrics from '@overleaf/metrics'
 import Settings from '@overleaf/settings'
 import redis from '@overleaf/redis-wrapper'
-import os from 'os'
-import crypto from 'crypto'
+import os from 'node:os'
+import crypto from 'node:crypto'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
 

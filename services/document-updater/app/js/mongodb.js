@@ -24,5 +24,5 @@ module.exports = {
   db,
   ObjectId,
   mongoClient,
-  healthCheck: require('util').callbackify(healthCheck),
+  healthCheck: require('node:util').callbackify(healthCheck),
 }

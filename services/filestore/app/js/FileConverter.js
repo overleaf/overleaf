@@ -1,6 +1,6 @@
 const metrics = require('@overleaf/metrics')
 const Settings = require('@overleaf/settings')
-const { callbackify } = require('util')
+const { callbackify } = require('node:util')
 
 const safeExec = require('./SafeExec').promises
 const { ConversionError } = require('./Errors')

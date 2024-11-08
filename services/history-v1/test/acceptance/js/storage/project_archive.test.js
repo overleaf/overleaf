@@ -3,9 +3,9 @@
 const _ = require('lodash')
 const BPromise = require('bluebird')
 const { expect } = require('chai')
-const fs = BPromise.promisifyAll(require('fs'))
+const fs = BPromise.promisifyAll(require('node:fs'))
 const sinon = require('sinon')
-const stream = require('stream')
+const stream = require('node:stream')
 const temp = require('temp')
 
 const cleanup = require('./support/cleanup')

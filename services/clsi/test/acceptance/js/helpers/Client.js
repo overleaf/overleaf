@@ -13,7 +13,7 @@
 let Client
 const express = require('express')
 const request = require('request')
-const fs = require('fs')
+const fs = require('node:fs')
 const Settings = require('@overleaf/settings')
 
 module.exports = Client = {

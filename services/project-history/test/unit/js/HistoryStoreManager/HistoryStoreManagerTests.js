@@ -1,7 +1,7 @@
 import sinon from 'sinon'
 import { expect } from 'chai'
 import { strict as esmock } from 'esmock'
-import EventEmitter from 'events'
+import EventEmitter from 'node:events'
 import { RequestFailedError } from '@overleaf/fetch-utils'
 import * as Errors from '../../../../app/js/Errors.js'
 

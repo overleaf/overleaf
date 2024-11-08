@@ -1,4 +1,4 @@
-const Path = require('path')
+const Path = require('node:path')
 
 /**
  * Parse output from the `synctex view` command

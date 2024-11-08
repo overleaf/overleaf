@@ -1,4 +1,4 @@
-const Path = require('path')
+const Path = require('node:path')
 
 // environment variables renamed for consistency
 // use AWS_ACCESS_KEY_ID-style going forward

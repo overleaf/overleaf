@@ -88,7 +88,7 @@ function initializeProfileAgent() {
 }
 
 function initializePrometheus() {
-  const os = require('os')
+  const os = require('node:os')
   const promClient = require('prom-client')
   promClient.register.setDefaultLabels({ app: APP_NAME, host: os.hostname() })
   promClient.collectDefaultMetrics({ timeout: 5000, prefix: '' })

@@ -33,6 +33,11 @@ SandboxedModule.configure({
     'mongodb-legacy': require('mongodb-legacy'), // for ObjectId comparisons
   },
   globals: { Buffer, JSON, Math, console, process },
+  sourceTransformers: {
+    removeNodePrefix: function (source) {
+      return source.replace(/require\(['"]node:/g, "require('")
+    },
+  },
 })
 
 // Mocha hooks

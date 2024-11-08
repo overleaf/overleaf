@@ -10,7 +10,7 @@ const base64id = require('base64id')
 const { UnexpectedArgumentsError } = require('./Errors')
 const Joi = require('joi')
 
-const HOSTNAME = require('os').hostname()
+const HOSTNAME = require('node:os').hostname()
 
 const JOI_OBJECT_ID = Joi.string()
   .required()

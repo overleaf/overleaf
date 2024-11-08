@@ -12,9 +12,9 @@
  */
 const UrlFetcher = require('./UrlFetcher')
 const Settings = require('@overleaf/settings')
-const fs = require('fs')
-const Path = require('path')
-const { callbackify } = require('util')
+const fs = require('node:fs')
+const Path = require('node:path')
+const { callbackify } = require('node:util')
 const Metrics = require('./Metrics')
 
 const PENDING_DOWNLOADS = new Map()

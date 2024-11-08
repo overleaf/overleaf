@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const path = require('path')
+const path = require('node:path')
 
 //
 // The advice in http://docs.aws.amazon.com/AmazonS3/latest/dev/

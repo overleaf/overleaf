@@ -1,9 +1,9 @@
-const Path = require('path')
+const Path = require('node:path')
 const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
 const sinon = require('sinon')
 
-const MODULE_PATH = require('path').join(
+const MODULE_PATH = require('node:path').join(
   __dirname,
   '../../../app/js/CompileManager'
 )

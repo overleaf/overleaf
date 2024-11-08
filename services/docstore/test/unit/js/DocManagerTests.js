@@ -1,7 +1,10 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
-const modulePath = require('path').join(__dirname, '../../../app/js/DocManager')
+const modulePath = require('node:path').join(
+  __dirname,
+  '../../../app/js/DocManager'
+)
 const { ObjectId } = require('mongodb-legacy')
 const Errors = require('../../../app/js/Errors')
 

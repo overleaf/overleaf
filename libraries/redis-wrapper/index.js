@@ -1,6 +1,6 @@
-const crypto = require('crypto')
-const os = require('os')
-const { promisify } = require('util')
+const crypto = require('node:crypto')
+const os = require('node:os')
+const { promisify } = require('node:util')
 
 const Redis = require('ioredis')
 

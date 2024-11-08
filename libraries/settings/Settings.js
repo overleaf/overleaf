@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-const fs = require('fs')
-const Path = require('path')
+const fs = require('node:fs')
+const Path = require('node:path')
 const { merge } = require('./merge')
 
 const CWD = process.cwd()

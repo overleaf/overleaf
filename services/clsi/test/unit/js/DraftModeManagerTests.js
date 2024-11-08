@@ -1,5 +1,5 @@
-const Path = require('path')
-const fsPromises = require('fs/promises')
+const Path = require('node:path')
+const fsPromises = require('node:fs/promises')
 const { expect } = require('chai')
 const mockFs = require('mock-fs')
 const SandboxedModule = require('sandboxed-module')

@@ -1,5 +1,5 @@
-const fs = require('fs')
-const Path = require('path')
+const fs = require('node:fs')
+const Path = require('node:path')
 const { expect } = require('chai')
 const { parseXrefTable } = require('../../../app/js/XrefParser')
 const { NoXrefTableError } = require('../../../app/js/Errors')

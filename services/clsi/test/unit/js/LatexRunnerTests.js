@@ -2,7 +2,7 @@ const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
 
-const MODULE_PATH = require('path').join(
+const MODULE_PATH = require('node:path').join(
   __dirname,
   '../../../app/js/LatexRunner'
 )

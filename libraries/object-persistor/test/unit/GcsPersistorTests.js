@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events')
+const { EventEmitter } = require('node:events')
 const sinon = require('sinon')
 const chai = require('chai')
 const { expect } = chai

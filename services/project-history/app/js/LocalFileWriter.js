@@ -9,10 +9,10 @@
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-import fs from 'fs'
-import { pipeline } from 'stream'
-import { randomUUID } from 'crypto'
-import path from 'path'
+import fs from 'node:fs'
+import { pipeline } from 'node:stream'
+import { randomUUID } from 'node:crypto'
+import path from 'node:path'
 import _ from 'lodash'
 import logger from '@overleaf/logger'
 import metrics from '@overleaf/metrics'

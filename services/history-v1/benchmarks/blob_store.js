@@ -1,4 +1,4 @@
-const crypto = require('crypto')
+const crypto = require('node:crypto')
 const benny = require('benny')
 const { Blob } = require('overleaf-editor-core')
 const mongoBackend = require('../storage/lib/blob_store/mongo')

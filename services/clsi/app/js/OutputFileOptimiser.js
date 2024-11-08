@@ -13,9 +13,9 @@
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
 let OutputFileOptimiser
-const fs = require('fs')
-const Path = require('path')
-const { spawn } = require('child_process')
+const fs = require('node:fs')
+const Path = require('node:path')
+const { spawn } = require('node:child_process')
 const logger = require('@overleaf/logger')
 const Metrics = require('./Metrics')
 const _ = require('lodash')

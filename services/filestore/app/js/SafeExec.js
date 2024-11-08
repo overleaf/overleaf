@@ -1,5 +1,5 @@
 const lodashOnce = require('lodash.once')
-const childProcess = require('child_process')
+const childProcess = require('node:child_process')
 const Settings = require('@overleaf/settings')
 const { ConversionsDisabledError, FailedCommandError } = require('./Errors')
 
