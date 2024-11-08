@@ -12,9 +12,8 @@ import OLModal, {
   OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
 import MaterialIcon from '@/shared/components/material-icon'
-import SplitTestBadge from '@/shared/components/split-test-badge'
 import useEventListener from '@/shared/hooks/use-event-listener'
-import { FC, useCallback, useEffect, useRef, useState } from 'react'
+import { FC, useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import {
   useCodeMirrorStateContext,
@@ -86,7 +85,7 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
 
   useEventListener('keydown', keyDownListener)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (mathRef.current) {
       mathRef.current.replaceChildren(mathContent)
     }
@@ -96,10 +95,8 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
     <>
       <div className="ol-cm-math-tooltip">
         <span ref={mathRef} />
-        <SplitTestBadge
-          displayOnVariants={['enabled']}
-          splitTestName="math-preview"
-        />
+        <CustomSplitTestBadge />
+
         <BootstrapVersionSwitcher
           bs5={
             <Dropdown align="end">
@@ -214,6 +211,23 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
         </OLModal>
       )}
     </>
+  )
+}
+
+// Temporary SplitTest badge for just this component that always shows
+// as in beta and doesn't have a tooltip
+const CustomSplitTestBadge: FC = () => {
+  return (
+    <a
+      href="https://forms.gle/uDVGSqnBBJQ8fUPt5"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <BootstrapVersionSwitcher
+        bs3={<span className="badge beta-badge" />}
+        bs5={<MaterialIcon type="info" className="align-middle beta-badge" />}
+      />
+    </a>
   )
 }
 
