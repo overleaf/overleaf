@@ -1,0 +1,26 @@
+.toast-container {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.toast-content {
+  pointer-events: auto;
+}
+
+.toast.showing {
+  opacity: 0;
+}
+
+.global-toasts {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  [role='alert'] {
+    z-index: 20;
+  }
+}

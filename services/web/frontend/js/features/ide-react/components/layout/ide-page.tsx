@@ -9,6 +9,7 @@ import { useRegisterUserActivity } from '@/features/ide-react/hooks/use-register
 import { useHasLintingError } from '@/features/ide-react/hooks/use-has-linting-error'
 import { Modals } from '@/features/ide-react/components/modals/modals'
 import { GlobalAlertsProvider } from '@/features/ide-react/context/global-alerts-context'
+import { GlobalToasts } from '../global-toasts'
 
 export default function IdePage() {
   useLayoutEventTracking() // sent event when the layout changes
@@ -24,6 +25,7 @@ export default function IdePage() {
       <Modals />
       <EditorLeftMenu />
       <MainLayout />
+      <GlobalToasts />
     </GlobalAlertsProvider>
   )
 }

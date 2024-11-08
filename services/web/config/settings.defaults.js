@@ -963,6 +963,7 @@ module.exports = {
     settingsEntries: [],
     autoCompleteExtensions: [],
     sectionTitleGenerators: [],
+    toastGenerators: [],
   },
 
   moduleImportSequence: [

@@ -27,7 +27,7 @@ export type NotificationProps = {
   id?: string
 }
 
-function NotificationIcon({
+export function NotificationIcon({
   notificationType,
   customIcon,
 }: {
