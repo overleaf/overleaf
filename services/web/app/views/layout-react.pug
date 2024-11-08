@@ -17,6 +17,7 @@ block append meta
 		- const canDisplaySplitTestMenu = hasFeature('saas') && (canDisplayAdminMenu || staffAccess?.splitTestMetrics || staffAccess?.splitTestManagement)
 		- const canDisplaySurveyMenu = hasFeature('saas') && canDisplayAdminMenu
 		- const enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+		- const showSignUpLink = hasFeature('registration-page')
 
 		meta(name="ol-navbar" data-type="json" content={
 			customLogo: settings.nav.custom_logo,
@@ -29,6 +30,8 @@ block append meta
 			suppressNavbarRight: !!suppressNavbarRight,
 			suppressNavContentLinks: !!suppressNavContentLinks,
 			showSubscriptionLink: nav.showSubscriptionLink,
+			showSignUpLink: showSignUpLink,
+			currentUrl: currentUrl,
 			sessionUser: sessionUser ? { email: sessionUser.email} : undefined,
 			adminUrl: settings.adminUrl,
 			items: cloneAndTranslateText(nav.header_extras)

@@ -6,14 +6,11 @@ import AdminMenu from '@/features/ui/components/bootstrap-5/navbar/admin-menu'
 import type { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
 import NavItemFromData from '@/features/ui/components/bootstrap-5/navbar/nav-item-from-data'
 import LoggedInItems from '@/features/ui/components/bootstrap-5/navbar/logged-in-items'
+import LoggedOutItems from '@/features/ui/components/bootstrap-5/navbar/logged-out-items'
 import HeaderLogoOrTitle from '@/features/ui/components/bootstrap-5/navbar/header-logo-or-title'
 import MaterialIcon from '@/shared/components/material-icon'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
-
-function LoggedOutItems() {
-  return <span>Logged out</span>
-}
 
 function DefaultNavbar(props: DefaultNavbarMetadata) {
   const {
@@ -27,6 +24,8 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     suppressNavbarRight,
     suppressNavContentLinks,
     showSubscriptionLink,
+    showSignUpLink,
+    currentUrl,
     sessionUser,
     adminUrl,
     items,
@@ -117,7 +116,10 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                       showSubscriptionLink={showSubscriptionLink}
                     />
                   ) : (
-                    <LoggedOutItems />
+                    <LoggedOutItems
+                      showSignUpLink={showSignUpLink}
+                      currentUrl={currentUrl}
+                    />
                   )}
                 </Nav>
               </Navbar.Collapse>

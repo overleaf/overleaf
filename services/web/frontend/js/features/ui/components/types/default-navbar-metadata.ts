@@ -14,6 +14,8 @@ export type DefaultNavbarMetadata = {
   suppressNavbarRight: boolean
   suppressNavContentLinks: boolean
   showSubscriptionLink: boolean
+  showSignUpLink: boolean
+  currentUrl: string
   sessionUser?: NavbarSessionUser
   adminUrl?: string
   items: NavbarItemData[]
