@@ -112,9 +112,11 @@ export const ReviewPanelMessage: FC<{
           autoFocus // eslint-disable-line jsx-a11y/no-autofocus
         />
       ) : (
-        <ExpandableContent className="review-panel-comment-body">
-          {message.content}
-        </ExpandableContent>
+        <ExpandableContent
+          className="review-panel-comment-body"
+          checkNewLines
+          content={message.content}
+        />
       )}
 
       {deleting && (

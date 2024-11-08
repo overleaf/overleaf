@@ -97,9 +97,11 @@ export const ReviewPanelResolvedThread: FC<{
         <div className="review-panel-resolved-comment-quoted-text-label">
           {t('quoted_text')}
         </div>
-        <ExpandableContent className="review-panel-resolved-comment-quoted-text-quote">
-          {comment?.op.c}
-        </ExpandableContent>
+        <ExpandableContent
+          className="review-panel-resolved-comment-quoted-text-quote"
+          content={comment?.op.c}
+          checkNewLines
+        />
       </div>
 
       <ReviewPanelCommentContent comment={comment} isResolved />

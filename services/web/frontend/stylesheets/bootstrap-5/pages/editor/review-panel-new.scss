@@ -366,19 +366,27 @@
     font-size: var(--font-size-02);
     color: var(--content-primary);
     overflow-wrap: anywhere;
+    white-space: pre-wrap;
   }
 
-  .review-panel-content-expandable {
-    display: -webkit-box;
-    text-overflow: ellipsis;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    overflow: hidden;
+  .review-panel-expandable-content {
+    display: inline;
+    padding-right: var(--spacing-02);
   }
 
-  .review-panel-content-expanded {
-    display: block;
+  .review-panel-expandable-inline {
+    display: inline;
+  }
+
+  .review-panel-expandable-links {
+    .btn-inline-link {
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    .btn-inline-link:hover {
+      text-decoration: underline;
+    }
   }
 
   .review-panel-comment-input {
