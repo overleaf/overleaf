@@ -40,6 +40,11 @@ class Blob {
 
   static NotFoundError = NotFoundError
 
+  /**
+   * @param {string} hash
+   * @param {number} byteLength
+   * @param {number} [stringLength]
+   */
   constructor(hash, byteLength, stringLength) {
     this.setHash(hash)
     this.setByteLength(byteLength)
@@ -63,14 +68,14 @@ class Blob {
 
   /**
    * Hex hash.
-   * @return {?String}
+   * @return {String}
    */
   getHash() {
     return this.hash
   }
 
   setHash(hash) {
-    assert.maybe.match(hash, Blob.HEX_HASH_RX, 'bad hash')
+    assert.match(hash, Blob.HEX_HASH_RX, 'bad hash')
     this.hash = hash
   }
 
@@ -83,7 +88,7 @@ class Blob {
   }
 
   setByteLength(byteLength) {
-    assert.maybe.integer(byteLength, 'bad byteLength')
+    assert.integer(byteLength, 'bad byteLength')
     this.byteLength = byteLength
   }
 

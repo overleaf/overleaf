@@ -142,12 +142,8 @@ class StringFileData extends FileData {
         trackedChanges: this.trackedChanges.toRaw(),
       }
       const rangesBlob = await blobStore.putObject(ranges)
-      // TODO(das7pad): Provide interface that guarantees hash exists?
-      // @ts-ignore
       return { hash: blob.getHash(), rangesHash: rangesBlob.getHash() }
     }
-    // TODO(das7pad): Provide interface that guarantees hash exists?
-    // @ts-ignore
     return { hash: blob.getHash() }
   }
 }

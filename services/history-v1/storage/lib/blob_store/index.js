@@ -79,23 +79,12 @@ function getBackend(projectId) {
 }
 
 async function makeBlobForFile(pathname) {
-  async function getByteLengthOfFile() {
-    const stat = await fs.promises.stat(pathname)
-    return stat.size
-  }
-
-  async function getHashOfFile(blob) {
-    const stream = fs.createReadStream(pathname)
-    const hash = await blobHash.fromStream(blob.getByteLength(), stream)
-    return hash
-  }
-
-  const blob = new Blob()
-  const byteLength = await getByteLengthOfFile()
-  blob.setByteLength(byteLength)
-  const hash = await getHashOfFile(blob)
-  blob.setHash(hash)
-  return blob
+  const { size: byteLength } = await fs.promises.stat(pathname)
+  const hash = await blobHash.fromStream(
+    byteLength,
+    fs.createReadStream(pathname)
+  )
+  return new Blob(hash, byteLength)
 }
 
 async function getStringLengthOfFile(byteLength, pathname) {
