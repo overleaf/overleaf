@@ -1,0 +1,30 @@
+{
+  "name": "@overleaf/mongo-utils",
+  "version": "0.0.1",
+  "description": "utilities to help working with mongo",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && npm run format && npm run types:check && npm run test:unit",
+    "test:unit": "mocha --exit test/**/*.{js,cjs}",
+    "lint": "eslint --ext .js --ext .cjs --ext .ts --max-warnings 0 --format unix .",
+    "lint:fix": "eslint --fix --ext .js --ext .cjs --ext .ts .",
+    "format": "prettier --list-different $PWD/'**/*.{js,cjs,ts}'",
+    "format:fix": "prettier --write $PWD/'**/*.{js,cjs,ts}'",
+    "test:ci": "npm run test:unit",
+    "types:check": "tsc --noEmit"
+  },
+  "author": "Overleaf (https://www.overleaf.com)",
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "mongodb": "6.7.0",
+    "mongodb-legacy": "6.1.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.2.0",
+    "sandboxed-module": "^2.0.4",
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.7.0",
+    "typescript": "^5.0.4"
+  }
+}
