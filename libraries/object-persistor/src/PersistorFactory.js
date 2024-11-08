@@ -1,15 +1,18 @@
 const Logger = require('@overleaf/logger')
 const { SettingsError } = require('./Errors')
 const GcsPersistor = require('./GcsPersistor')
-const S3Persistor = require('./S3Persistor')
+const { S3Persistor } = require('./S3Persistor')
 const FSPersistor = require('./FSPersistor')
 const MigrationPersistor = require('./MigrationPersistor')
+const PerProjectEncryptedS3Persistor = require('./PerProjectEncryptedS3Persistor')
 
 function getPersistor(backend, settings) {
   switch (backend) {
     case 'aws-sdk':
     case 's3':
       return new S3Persistor(settings.s3)
+    case 's3SSEC':
+      return new PerProjectEncryptedS3Persistor(settings.s3SSEC)
     case 'fs':
       return new FSPersistor({
         useSubdirectories: settings.useSubdirectories,

@@ -32,7 +32,7 @@ describe('PersistorManager', function () {
     Settings = {}
     const requires = {
       './GcsPersistor': GcsPersistor,
-      './S3Persistor': S3Persistor,
+      './S3Persistor': { S3Persistor },
       './FSPersistor': FSPersistor,
       '@overleaf/logger': {
         info() {},

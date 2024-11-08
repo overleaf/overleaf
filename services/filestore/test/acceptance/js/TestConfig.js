@@ -1,5 +1,6 @@
 const fs = require('fs')
 const Path = require('path')
+const crypto = require('crypto')
 const https = require('https')
 
 // use functions to get a fresh copy, not a reference, each time
@@ -22,6 +23,25 @@ function s3Config() {
     key: process.env.AWS_ACCESS_KEY_ID,
     secret: process.env.AWS_SECRET_ACCESS_KEY,
     ...s3BaseConfig(),
+  }
+}
+
+function s3SSECConfig() {
+  return {
+    ...s3Config(),
+    pathIsProjectFolder(_bucketName, path) {
+      return !!path.match(/^[a-f0-9]+\/$/)
+    },
+    pathToDataEncryptionKeyPath(_bucketName, path) {
+      const [projectFolder] = path.match(/^[a-f0-9]+\//)
+      return {
+        bucketName: process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME,
+        path: Path.join(projectFolder, 'dek'),
+      }
+    },
+    async getKeyEncryptionKey() {
+      return crypto.generateKeySync('aes', { length: 256 }).export()
+    },
   }
 }
 
@@ -90,6 +110,11 @@ const BackendSettings = {
     backend: 'gcs',
     gcs: gcsConfig(),
     stores: gcsStores(),
+  },
+  SHARD_01_PerProjectEncryptedS3Persistor: {
+    backend: 's3SSEC',
+    s3SSEC: s3SSECConfig(),
+    stores: s3Stores(),
   },
   SHARD_02_FallbackS3ToFSPersistor: {
     backend: 's3',

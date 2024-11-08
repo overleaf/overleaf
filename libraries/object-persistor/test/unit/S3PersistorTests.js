@@ -159,7 +159,7 @@ describe('S3PersistorTests', function () {
         crypto,
       },
       globals: { console, Buffer },
-    }))(settings)
+    }).S3Persistor)(settings)
   })
 
   describe('getObjectStream', function () {

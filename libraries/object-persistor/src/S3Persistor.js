@@ -1,3 +1,4 @@
+// @ts-check
 const http = require('http')
 const https = require('https')
 if (http.globalAgent.maxSockets < 300) {
@@ -7,6 +8,7 @@ if (https.globalAgent.maxSockets < 300) {
   https.globalAgent.maxSockets = 300
 }
 
+const Crypto = require('crypto')
 const Metrics = require('@overleaf/metrics')
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
@@ -17,17 +19,75 @@ const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('url')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 
-module.exports = class S3Persistor extends AbstractPersistor {
+/**
+ * Wrapper with private fields to avoid revealing them on console, JSON.stringify or similar.
+ */
+class SSECOptions {
+  #keyAsBuffer
+  #keyMD5
+
+  /**
+   * @param {Buffer} keyAsBuffer
+   */
+  constructor(keyAsBuffer) {
+    this.#keyAsBuffer = keyAsBuffer
+    this.#keyMD5 = Crypto.createHash('md5').update(keyAsBuffer).digest('base64')
+  }
+
+  getPutOptions() {
+    return {
+      SSECustomerKey: this.#keyAsBuffer,
+      SSECustomerKeyMD5: this.#keyMD5,
+      SSECustomerAlgorithm: 'AES256',
+    }
+  }
+
+  getGetOptions() {
+    return {
+      SSECustomerKey: this.#keyAsBuffer,
+      SSECustomerKeyMD5: this.#keyMD5,
+      SSECustomerAlgorithm: 'AES256',
+    }
+  }
+
+  getCopyOptions() {
+    return {
+      CopySourceSSECustomerKey: this.#keyAsBuffer,
+      CopySourceSSECustomerKeyMD5: this.#keyMD5,
+      CopySourceSSECustomerAlgorithm: 'AES256',
+    }
+  }
+}
+
+class S3Persistor extends AbstractPersistor {
   constructor(settings = {}) {
     super()
 
     this.settings = settings
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {string} fsPath
+   * @return {Promise<void>}
+   */
   async sendFile(bucketName, key, fsPath) {
-    return await this.sendStream(bucketName, key, fs.createReadStream(fsPath))
+    await this.sendStream(bucketName, key, fs.createReadStream(fsPath))
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {NodeJS.ReadableStream} readStream
+   * @param {Object} opts
+   * @param {string} [opts.contentType]
+   * @param {string} [opts.contentEncoding]
+   * @param {'*'} [opts.ifNoneMatch]
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @param {string} [opts.sourceMd5]
+   * @return {Promise<void>}
+   */
   async sendStream(bucketName, key, readStream, opts = {}) {
     try {
       const observeOptions = {
@@ -55,6 +115,9 @@ module.exports = class S3Persistor extends AbstractPersistor {
       if (opts.ifNoneMatch === '*') {
         uploadOptions.IfNoneMatch = '*'
       }
+      if (opts.ssecOptions) {
+        Object.assign(uploadOptions, opts.ssecOptions.getPutOptions())
+      }
 
       // if we have an md5 hash, pass this to S3 to verify the upload - otherwise
       // we rely on the S3 client's checksum calculation to validate the upload
@@ -78,6 +141,16 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {number} [opts.start]
+   * @param {number} [opts.end]
+   * @param {string} [opts.contentEncoding]
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<NodeJS.ReadableStream>}
+   */
   async getObjectStream(bucketName, key, opts) {
     opts = opts || {}
 
@@ -87,6 +160,9 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
     if (opts.start != null && opts.end != null) {
       params.Range = `bytes=${opts.start}-${opts.end}`
+    }
+    if (opts.ssecOptions) {
+      Object.assign(params, opts.ssecOptions.getGetOptions())
     }
     const observer = new PersistorHelper.ObserverStream({
       metric: 's3.ingress', // ingress from S3 to us
@@ -102,10 +178,10 @@ module.exports = class S3Persistor extends AbstractPersistor {
           switch (statusCode) {
             case 200: // full response
             case 206: // partial response
-              return resolve()
+              return resolve(undefined)
             case 403: // AccessDenied is handled the same as NoSuchKey
             case 404: // NoSuchKey
-              return reject(new NotFoundError())
+              return reject(new NotFoundError('not found'))
             default:
               return reject(new Error('non success status: ' + statusCode))
           }
@@ -131,17 +207,22 @@ module.exports = class S3Persistor extends AbstractPersistor {
     return pass
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @return {Promise<string>}
+   */
   async getRedirectUrl(bucketName, key) {
     const expiresSeconds = Math.round(this.settings.signedUrlExpiryInMs / 1000)
     try {
-      const url = await this._getClientForBucket(
-        bucketName
-      ).getSignedUrlPromise('getObject', {
-        Bucket: bucketName,
-        Key: key,
-        Expires: expiresSeconds,
-      })
-      return url
+      return await this._getClientForBucket(bucketName).getSignedUrlPromise(
+        'getObject',
+        {
+          Bucket: bucketName,
+          Key: key,
+          Expires: expiresSeconds,
+        }
+      )
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -152,6 +233,12 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {string} [continuationToken]
+   * @return {Promise<void>}
+   */
   async deleteDirectory(bucketName, key, continuationToken) {
     let response
     const options = { Bucket: bucketName, Prefix: key }
@@ -172,8 +259,8 @@ module.exports = class S3Persistor extends AbstractPersistor {
       )
     }
 
-    const objects = response.Contents.map(item => ({ Key: item.Key }))
-    if (objects.length) {
+    const objects = response.Contents?.map(item => ({ Key: item.Key || '' }))
+    if (objects?.length) {
       try {
         await this._getClientForBucket(bucketName)
           .deleteObjects({
@@ -203,12 +290,22 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
-  async getObjectSize(bucketName, key) {
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<S3.HeadObjectOutput>}
+   */
+  async #headObject(bucketName, key, opts = {}) {
+    const params = { Bucket: bucketName, Key: key }
+    if (opts.ssecOptions) {
+      Object.assign(params, opts.ssecOptions.getGetOptions())
+    }
     try {
-      const response = await this._getClientForBucket(bucketName)
-        .headObject({ Bucket: bucketName, Key: key })
+      return await this._getClientForBucket(bucketName)
+        .headObject(params)
         .promise()
-      return response.ContentLength
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -219,19 +316,39 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
-  async getObjectMd5Hash(bucketName, key) {
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<number>}
+   */
+  async getObjectSize(bucketName, key, opts = {}) {
+    const response = await this.#headObject(bucketName, key, opts)
+    return response.ContentLength || 0
+  }
+
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @param {boolean} [opts.etagIsNotMD5]
+   * @return {Promise<string>}
+   */
+  async getObjectMd5Hash(bucketName, key, opts = {}) {
     try {
-      const response = await this._getClientForBucket(bucketName)
-        .headObject({ Bucket: bucketName, Key: key })
-        .promise()
-      const md5 = S3Persistor._md5FromResponse(response)
-      if (md5) {
-        return md5
+      if (!opts.etagIsNotMD5) {
+        const response = await this.#headObject(bucketName, key, opts)
+        const md5 = S3Persistor._md5FromResponse(response)
+        if (md5) {
+          return md5
+        }
       }
       // etag is not in md5 format
       Metrics.inc('s3.md5Download')
       return await PersistorHelper.calculateStreamMd5(
-        await this.getObjectStream(bucketName, key)
+        await this.getObjectStream(bucketName, key, opts)
       )
     } catch (err) {
       throw PersistorHelper.wrapError(
@@ -243,6 +360,11 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @return {Promise<void>}
+   */
   async deleteObject(bucketName, key) {
     try {
       await this._getClientForBucket(bucketName)
@@ -259,11 +381,26 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
-  async copyObject(bucketName, sourceKey, destKey) {
+  /**
+   * @param {string} bucketName
+   * @param {string} sourceKey
+   * @param {string} destKey
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecSrcOptions]
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<void>}
+   */
+  async copyObject(bucketName, sourceKey, destKey, opts = {}) {
     const params = {
       Bucket: bucketName,
       Key: destKey,
       CopySource: `${bucketName}/${sourceKey}`,
+    }
+    if (opts.ssecSrcOptions) {
+      Object.assign(params, opts.ssecSrcOptions.getCopyOptions())
+    }
+    if (opts.ssecOptions) {
+      Object.assign(params, opts.ssecOptions.getPutOptions())
     }
     try {
       await this._getClientForBucket(bucketName).copyObject(params).promise()
@@ -277,9 +414,16 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
-  async checkIfObjectExists(bucketName, key) {
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<boolean>}
+   */
+  async checkIfObjectExists(bucketName, key, opts) {
     try {
-      await this.getObjectSize(bucketName, key)
+      await this.getObjectSize(bucketName, key, opts)
       return true
     } catch (err) {
       if (err instanceof NotFoundError) {
@@ -294,6 +438,12 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {string} [continuationToken]
+   * @return {Promise<number>}
+   */
   async directorySize(bucketName, key, continuationToken) {
     try {
       const options = {
@@ -307,7 +457,8 @@ module.exports = class S3Persistor extends AbstractPersistor {
         .listObjectsV2(options)
         .promise()
 
-      const size = response.Contents.reduce((acc, item) => item.Size + acc, 0)
+      const size =
+        response.Contents?.reduce((acc, item) => (item.Size || 0) + acc, 0) || 0
       if (response.IsTruncated) {
         return (
           size +
@@ -329,6 +480,12 @@ module.exports = class S3Persistor extends AbstractPersistor {
     }
   }
 
+  /**
+   * @param {string} bucket
+   * @param {Object} [clientOptions]
+   * @return {S3}
+   * @private
+   */
   _getClientForBucket(bucket, clientOptions) {
     return new S3(
       this._buildClientOptions(
@@ -338,6 +495,12 @@ module.exports = class S3Persistor extends AbstractPersistor {
     )
   }
 
+  /**
+   * @param {Object} bucketCredentials
+   * @param {Object} clientOptions
+   * @return {Object}
+   * @private
+   */
   _buildClientOptions(bucketCredentials, clientOptions) {
     const options = clientOptions || {}
 
@@ -376,6 +539,11 @@ module.exports = class S3Persistor extends AbstractPersistor {
     return options
   }
 
+  /**
+   * @param {S3.HeadObjectOutput} response
+   * @return {string|null}
+   * @private
+   */
   static _md5FromResponse(response) {
     const md5 = (response.ETag || '').replace(/[ "]/g, '')
     if (!md5.match(/^[a-f0-9]{32}$/)) {
@@ -384,4 +552,9 @@ module.exports = class S3Persistor extends AbstractPersistor {
 
     return md5
   }
+}
+
+module.exports = {
+  S3Persistor,
+  SSECOptions,
 }

@@ -2,7 +2,7 @@ const { Writable, Readable, PassThrough, Transform } = require('stream')
 
 /**
  * A writable stream that stores all data written to it in a node Buffer.
- * @extends stream.Writable
+ * @extends Writable
  * @example
  * const { WritableBuffer } = require('@overleaf/stream-utils')
  * const bufferStream = new WritableBuffer()
@@ -43,7 +43,7 @@ class WritableBuffer extends Writable {
 
 /**
  * A readable stream created from a string.
- * @extends stream.Readable
+ * @extends Readable
  * @example
  * const { ReadableString } = require('@overleaf/stream-utils')
  * const stringStream = new ReadableString('hello world')
@@ -66,7 +66,7 @@ class SizeExceededError extends Error {}
 
 /**
  * Limited size stream which will emit a SizeExceededError if the size is exceeded
- * @extends stream.Transform
+ * @extends Transform
  */
 class LimitedStream extends Transform {
   constructor(maxSize) {
@@ -93,7 +93,7 @@ class AbortError extends Error {}
 
 /**
  * TimeoutStream which will emit an AbortError if it exceeds a user specified timeout
- * @extends stream.PassThrough
+ * @extends PassThrough
  */
 class TimeoutStream extends PassThrough {
   constructor(timeout) {
@@ -111,7 +111,7 @@ class TimeoutStream extends PassThrough {
 
 /**
  * LoggerStream which will call the provided logger function when the stream exceeds a user specified limit. It will call the provided function again when flushing the stream and it exceeded the user specified limit before.
- * @extends stream.Transform
+ * @extends Transform
  */
 class LoggerStream extends Transform {
   /**

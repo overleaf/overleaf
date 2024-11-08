@@ -1,6 +1,12 @@
 const { NotImplementedError } = require('./Errors')
 
 module.exports = class AbstractPersistor {
+  /**
+   * @param location
+   * @param target
+   * @param {string} source
+   * @return {Promise<void>}
+   */
   async sendFile(location, target, source) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'sendFile',
@@ -10,6 +16,13 @@ module.exports = class AbstractPersistor {
     })
   }
 
+  /**
+   * @param location
+   * @param target
+   * @param {NodeJS.ReadableStream} sourceStream
+   * @param {Object} opts
+   * @return {Promise<void>}
+   */
   async sendStream(location, target, sourceStream, opts = {}) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'sendStream',
@@ -25,7 +38,7 @@ module.exports = class AbstractPersistor {
    * @param {Object} opts
    * @param {Number} opts.start
    * @param {Number} opts.end
-   * @return {Promise<Readable>}
+   * @return {Promise<NodeJS.ReadableStream>}
    */
   async getObjectStream(location, name, opts) {
     throw new NotImplementedError('method not implemented in persistor', {
@@ -36,6 +49,11 @@ module.exports = class AbstractPersistor {
     })
   }
 
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @return {Promise<string>}
+   */
   async getRedirectUrl(location, name) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getRedirectUrl',
@@ -44,7 +62,13 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async getObjectSize(location, name) {
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @param {Object} opts
+   * @return {Promise<number>}
+   */
+  async getObjectSize(location, name, opts) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getObjectSize',
       location,
@@ -52,7 +76,13 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async getObjectMd5Hash(location, name) {
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @param {Object} opts
+   * @return {Promise<string>}
+   */
+  async getObjectMd5Hash(location, name, opts) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'getObjectMd5Hash',
       location,
@@ -60,7 +90,14 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async copyObject(location, fromName, toName) {
+  /**
+   * @param {string} location
+   * @param {string} fromName
+   * @param {string} toName
+   * @param {Object} opts
+   * @return {Promise<void>}
+   */
+  async copyObject(location, fromName, toName, opts) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'copyObject',
       location,
@@ -69,6 +106,11 @@ module.exports = class AbstractPersistor {
     })
   }
 
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @return {Promise<void>}
+   */
   async deleteObject(location, name) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'deleteObject',
@@ -77,7 +119,13 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async deleteDirectory(location, name) {
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @param {string} [continuationToken]
+   * @return {Promise<void>}
+   */
+  async deleteDirectory(location, name, continuationToken) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'deleteDirectory',
       location,
@@ -85,7 +133,13 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async checkIfObjectExists(location, name) {
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @param {Object} opts
+   * @return {Promise<boolean>}
+   */
+  async checkIfObjectExists(location, name, opts) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'checkIfObjectExists',
       location,
@@ -93,7 +147,13 @@ module.exports = class AbstractPersistor {
     })
   }
 
-  async directorySize(location, name) {
+  /**
+   * @param {string} location
+   * @param {string} name
+   * @param {string} [continuationToken]
+   * @return {Promise<number>}
+   */
+  async directorySize(location, name, continuationToken) {
     throw new NotImplementedError('method not implemented in persistor', {
       method: 'directorySize',
       location,

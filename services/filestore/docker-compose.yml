@@ -53,6 +53,7 @@ services:
       ENABLE_CONVERSIONS: "true"
       USE_PROM_METRICS: "true"
       AWS_S3_USER_FILES_BUCKET_NAME: fake-user-files
+      AWS_S3_USER_FILES_DEK_BUCKET_NAME: fake-user-files-dek
       AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake-template-files
       GCS_USER_FILES_BUCKET_NAME: fake-gcs-user-files
       GCS_TEMPLATE_FILES_BUCKET_NAME: fake-gcs-template-files
@@ -120,6 +121,7 @@ services:
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
 
         mc mb --ignore-existing s3/fake-user-files
+        mc mb --ignore-existing s3/fake-user-files-dek
         mc mb --ignore-existing s3/fake-template-files
         mc admin user add s3 \
           OVERLEAF_FILESTORE_S3_ACCESS_KEY_ID \
@@ -144,6 +146,22 @@ services:
                   "s3:DeleteObject"
                 ],
                 "Resource": "arn:aws:s3:::fake-user-files/*"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:ListBucket"
+                ],
+                "Resource": "arn:aws:s3:::fake-user-files-dek"
+              },
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "s3:PutObject",
+                  "s3:GetObject",
+                  "s3:DeleteObject"
+                ],
+                "Resource": "arn:aws:s3:::fake-user-files-dek/*"
               },
               {
                 "Effect": "Allow",

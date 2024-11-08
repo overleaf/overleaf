@@ -26,12 +26,14 @@ const SIZE_BUCKETS = [
  */
 class ObserverStream extends Stream.Transform {
   /**
-   * @param {string} metric prefix for metrics
-   * @param {string} bucket name of source/target bucket
-   * @param {string} hash optional hash algorithm, e.g. 'md5'
+   * @param {Object} opts
+   * @param {string} opts.metric prefix for metrics
+   * @param {string} opts.bucket name of source/target bucket
+   * @param {string} [opts.hash] optional hash algorithm, e.g. 'md5'
    */
-  constructor({ metric, bucket, hash = '' }) {
+  constructor(opts) {
     super({ autoDestroy: true })
+    const { metric, bucket, hash = '' } = opts
 
     this.bytes = 0
     this.start = performance.now()

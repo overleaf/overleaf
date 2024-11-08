@@ -130,7 +130,7 @@ async function getFileSize(bucket, key) {
 }
 
 async function getDirectorySize(bucket, projectId) {
-  return PersistorManager.directorySize(bucket, projectId)
+  return await PersistorManager.directorySize(bucket, projectId)
 }
 
 async function _getConvertedFile(bucket, key, opts) {
