@@ -10,6 +10,7 @@
 import async from 'async'
 import logger from '@overleaf/logger'
 import OError from '@overleaf/o-error'
+import metrics from '@overleaf/metrics'
 import _ from 'lodash'
 import * as RedisManager from './RedisManager.js'
 import * as UpdatesProcessor from './UpdatesProcessor.js'
@@ -34,8 +35,10 @@ export function flushIfOld(projectId, cutoffTime, callback) {
           { projectId, firstOpTimestamp, cutoffTime },
           'flushing old project'
         )
+        metrics.inc('flush-old-updates', 1, { status: 'flushed' })
         return UpdatesProcessor.processUpdatesForProject(projectId, callback)
       } else {
+        metrics.inc('flush-old-updates', 1, { status: 'skipped' })
         return callback()
       }
     }
