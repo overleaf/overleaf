@@ -1,11 +1,11 @@
-import BatchedUpdateScript from '../scripts/helpers/batchedUpdate.mjs'
+import { db } from '../app/src/infrastructure/mongodb.js'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
-const { batchedUpdate } = BatchedUpdateScript
 const tags = ['server-ce', 'server-pro', 'saas']
 
 const migrate = async () => {
   await batchedUpdate(
-    'users',
+    db.users,
     { 'features.templates': { $exists: true } },
     { $unset: { 'features.templates': true } }
   )

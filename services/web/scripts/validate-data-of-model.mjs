@@ -1,6 +1,5 @@
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
-
-const { batchedUpdateWithResultHandling } = BatchedUpdateModule
+import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
 const MODEL_NAME = process.argv.pop()
 
@@ -20,10 +19,10 @@ function processBatch(batch) {
 }
 
 batchedUpdateWithResultHandling(
-  Model.collection.name,
+  db[Model.collection.name],
   {},
   async nextBatch => {
-    await processBatch(nextBatch)
+    processBatch(nextBatch)
   },
-  {}
+  {} // fetch the entire record
 )

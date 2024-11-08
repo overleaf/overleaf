@@ -4,9 +4,8 @@ import {
 } from '../app/src/infrastructure/mongodb.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import TokenGenerator from '../app/src/Features/TokenGenerator/TokenGenerator.js'
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
-const { batchedUpdate } = BatchedUpdateModule
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true'
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE, 10) || 100
@@ -92,7 +91,7 @@ async function processBatch(users) {
 
 async function main() {
   await batchedUpdate(
-    'users',
+    db.users,
     { referal_id: { $exists: true } },
     processBatch,
     { _id: 1, referal_id: 1 }

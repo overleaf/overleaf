@@ -1,14 +1,14 @@
+// @ts-check
 import '../app/src/models/User.js'
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import { getQueue } from '../app/src/infrastructure/Queues.js'
 import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLocator.js'
 import PlansLocator from '../app/src/Features/Subscription/PlansLocator.js'
 import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
-const { batchedUpdateWithResultHandling } = BatchedUpdateModule
-
-const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
+const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY || '10', 10)
 
 const mixpanelSinkQueue = getQueue('analytics-mixpanel-sink')
 
@@ -99,7 +99,7 @@ async function processBatch(_, users) {
 }
 
 batchedUpdateWithResultHandling(
-  'users',
+  db.users,
   {
     $nor: [
       { thirdPartyIdentifiers: { $exists: false } },

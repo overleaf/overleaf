@@ -1,8 +1,6 @@
 import { db } from '../app/src/infrastructure/mongodb.js'
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { fileURLToPath } from 'node:url'
-
-const { batchedUpdate } = BatchedUpdateModule
 
 const DRY_RUN = !process.argv.includes('--dry-run=false')
 const LOG_EVERY_IN_S = parseInt(process.env.LOG_EVERY_IN_S, 10) || 5
@@ -17,7 +15,7 @@ async function main(DRY_RUN) {
   }
 
   await batchedUpdate(
-    'docs',
+    db.docs,
     { rev: { $exists: false } },
     async docs => {
       if (!DRY_RUN) {

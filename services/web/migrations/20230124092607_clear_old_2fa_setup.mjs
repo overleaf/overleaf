@@ -1,5 +1,5 @@
-import BatchedUpdateScript from '../scripts/helpers/batchedUpdate.mjs'
-const { batchedUpdate } = BatchedUpdateScript
+import { db } from '../app/src/infrastructure/mongodb.js'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const tags = ['saas']
 
@@ -10,7 +10,7 @@ const batchedUpdateOptions = {
 
 const migrate = async () => {
   await batchedUpdate(
-    'users',
+    db.users,
     { 'twoFactorAuthentication.secret': { $exists: true } },
     { $unset: { twoFactorAuthentication: true } },
     null,
@@ -21,7 +21,7 @@ const migrate = async () => {
 
 const rollback = async () => {
   await batchedUpdate(
-    'users',
+    db.users,
     { 'twoFactorAuthentication.secretEncrypted': { $exists: true } },
     { $unset: { twoFactorAuthentication: true } },
     null,

@@ -1,7 +1,7 @@
+// @ts-check
 import minimist from 'minimist'
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
-
-const { batchedUpdateWithResultHandling } = BatchedUpdateModule
+import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
 const argv = minimist(process.argv.slice(2))
 const commit = argv.commit !== undefined
@@ -50,7 +50,7 @@ if (!commit) {
 }
 
 batchedUpdateWithResultHandling(
-  'projects',
+  db.projects,
   { imageName: null },
   { $set: { imageName } }
 )

@@ -1,10 +1,8 @@
 import _ from 'lodash'
 import { db } from '../app/src/infrastructure/mongodb.js'
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import { fileURLToPath } from 'node:url'
-
-const { batchedUpdate } = BatchedUpdateModule
 
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 
@@ -14,7 +12,7 @@ async function main(STAGE) {
   for (const FIELD of ['archived', 'trashed']) {
     if (STAGE.includes('FIRST')) {
       await batchedUpdate(
-        'projects',
+        db.projects,
         { [FIELD]: false },
         {
           $set: { [FIELD]: [] },
@@ -26,7 +24,7 @@ async function main(STAGE) {
 
     if (STAGE.includes('SECOND')) {
       await batchedUpdate(
-        'projects',
+        db.projects,
         { [FIELD]: true },
         async function performUpdate(nextBatch) {
           await promiseMapWithLimit(

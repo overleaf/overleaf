@@ -1,11 +1,10 @@
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit, promisify } from '@overleaf/promise-utils'
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'
 import _ from 'lodash'
 import { fileURLToPath } from 'node:url'
 
 const sleep = promisify(setTimeout)
-const { batchedUpdate } = BatchedUpdateModule
 
 async function main(options) {
   if (!options) {
@@ -50,7 +49,7 @@ async function main(options) {
   } else {
     if (!options.skipUsersMigration) {
       await batchedUpdate(
-        'users',
+        db.users,
         { auditLog: { $exists: true } },
         async users => {
           await processUsersBatch(users, options)
@@ -63,7 +62,7 @@ async function main(options) {
     // users with an existing `auditLog` have been taken into consideration, leaving
     // some projects orphan. This batched update processes all remaining projects.
     await batchedUpdate(
-      'projects',
+      db.projects,
       { auditLog: { $exists: true } },
       async projects => {
         await processProjectsBatch(projects, options)

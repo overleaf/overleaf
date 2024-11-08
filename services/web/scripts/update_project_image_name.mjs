@@ -1,6 +1,6 @@
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
-const { batchedUpdate } = BatchedUpdateModule
 const oldImage = process.argv[2]
 const newImage = process.argv[3]
 
@@ -34,7 +34,7 @@ if (!process.env.ALL_TEX_LIVE_DOCKER_IMAGES.split(',').includes(newImage)) {
 
 try {
   await batchedUpdate(
-    'projects',
+    db.projects,
     { imageName: oldImage },
     { $set: { imageName: newImage } }
   )

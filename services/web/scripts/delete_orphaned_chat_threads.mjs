@@ -1,11 +1,11 @@
 import mongodb from 'mongodb-legacy'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import ChatApiHandler from '../app/src/Features/Chat/ChatApiHandler.js'
 import DeleteOrphanedDataHelper from './delete_orphaned_data_helper.mjs'
 import { ensureMongoTimeout } from './helpers/env_variable_helper.mjs'
+import { db } from '../app/src/infrastructure/mongodb.js'
 
-const { batchedUpdate } = BatchedUpdateModule
 const { ObjectId } = mongodb
 const { getHardDeletedProjectIds } = DeleteOrphanedDataHelper
 
@@ -86,7 +86,7 @@ async function main() {
     _id: 1,
     project_id: 1,
   }
-  await batchedUpdate('rooms', {}, processBatch, projection)
+  await batchedUpdate(db.rooms, {}, processBatch, projection)
   console.log('Final')
   console.log(RESULT)
 }

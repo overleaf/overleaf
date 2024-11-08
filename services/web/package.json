@@ -79,6 +79,7 @@
     "@overleaf/fetch-utils": "*",
     "@overleaf/logger": "*",
     "@overleaf/metrics": "*",
+    "@overleaf/mongo-utils": "*",
     "@overleaf/o-error": "*",
     "@overleaf/object-persistor": "*",
     "@overleaf/promise-utils": "*",

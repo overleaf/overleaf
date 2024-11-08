@@ -1,11 +1,10 @@
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdate } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit, promisify } from '@overleaf/promise-utils'
 import { db } from '../app/src/infrastructure/mongodb.js'
 import { fileURLToPath } from 'node:url'
 import _ from 'lodash'
 
 const sleep = promisify(setTimeout)
-const { batchedUpdate } = BatchedUpdateModule
 
 async function main(options) {
   if (!options) {
@@ -23,7 +22,7 @@ async function main(options) {
   await letUserDoubleCheckInputs(options)
 
   await batchedUpdate(
-    'projects',
+    db.projects,
     // array is not empty ~ array has one item
     { 'deletedDocs.0': { $exists: true } },
     async projects => {

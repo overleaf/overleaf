@@ -1,11 +1,10 @@
-import BatchedUpdateModule from './helpers/batchedUpdate.mjs'
+import { batchedUpdateWithResultHandling } from '@overleaf/mongo-utils/batchedUpdate.js'
 import { promiseMapWithLimit } from '@overleaf/promise-utils'
 import SubscriptionLocator from '../app/src/Features/Subscription/SubscriptionLocator.js'
 import PlansLocator from '../app/src/Features/Subscription/PlansLocator.js'
 import FeaturesHelper from '../app/src/Features/Subscription/FeaturesHelper.js'
 import AnalyticsManager from '../app/src/Features/Analytics/AnalyticsManager.js'
-
-const { batchedUpdateWithResultHandling } = BatchedUpdateModule
+import { db } from '../app/src/infrastructure/mongodb.js'
 
 const WRITE_CONCURRENCY = parseInt(process.env.WRITE_CONCURRENCY, 10) || 10
 
@@ -55,7 +54,7 @@ async function processBatch(users) {
   })
 }
 
-batchedUpdateWithResultHandling('users', {}, processBatch, {
+batchedUpdateWithResultHandling(db.users, {}, processBatch, {
   _id: true,
   analyticsId: true,
   features: true,
