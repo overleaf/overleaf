@@ -13,6 +13,7 @@ const {
   ReadError,
 } = require('./Errors')
 const logger = require('@overleaf/logger')
+const Path = require('path')
 
 const generateKey = promisify(Crypto.generateKey)
 const hkdf = promisify(Crypto.hkdf)
@@ -26,8 +27,8 @@ const AES256_KEY_LENGTH = 32
 /**
  * @typedef {Object} Settings
  * @property {boolean} automaticallyRotateDEKEncryption
+ * @property {string} dataEncryptionKeyBucketName
  * @property {boolean} ignoreErrorsFromDEKReEncryption
- * @property {(bucketName: string, path: string) => {bucketName: string, path: string}} pathToDataEncryptionKeyPath
  * @property {(bucketName: string, path: string) => string} pathToProjectFolder
  * @property {() => Promise<Array<RootKeyEncryptionKey>>} getRootKeyEncryptionKeys
  */
@@ -102,9 +103,12 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    * @param {Settings} settings
    */
   constructor(settings) {
+    if (!settings.dataEncryptionKeyBucketName) {
+      throw new Error('settings.dataEncryptionKeyBucketName is missing')
+    }
     super(settings)
     this.#settings = settings
-    this.#availableKeyEncryptionKeysPromise = this.#settings
+    this.#availableKeyEncryptionKeysPromise = settings
       .getRootKeyEncryptionKeys()
       .then(rootKEKs => {
         if (rootKEKs.length === 0) throw new Error('no root kek provided')
@@ -119,13 +123,21 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
   /**
    * @param {string} bucketName
    * @param {string} path
+   * @return {{dekPath: string, projectFolder: string}}
+   */
+  #buildProjectPaths(bucketName, path) {
+    const projectFolder = this.#settings.pathToProjectFolder(bucketName, path)
+    const dekPath = Path.join(projectFolder, 'dek')
+    return { projectFolder, dekPath }
+  }
+
+  /**
+   * @param {string} projectFolder
    * @return {Promise<SSECOptions>}
    */
-  async #getCurrentKeyEncryptionKey(bucketName, path) {
+  async #getCurrentKeyEncryptionKey(projectFolder) {
     const [currentRootKEK] = await this.#availableKeyEncryptionKeysPromise
-    return await currentRootKEK.forProject(
-      this.#settings.pathToProjectFolder(bucketName, path)
-    )
+    return await currentRootKEK.forProject(projectFolder)
   }
 
   /**
@@ -133,15 +145,15 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    * @param {string} path
    */
   async getDataEncryptionKeySize(bucketName, path) {
-    const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
+    const { projectFolder, dekPath } = this.#buildProjectPaths(bucketName, path)
     for (const rootKEK of await this.#availableKeyEncryptionKeysPromise) {
-      const ssecOptions = await rootKEK.forProject(
-        this.#settings.pathToProjectFolder(bucketName, path)
-      )
+      const ssecOptions = await rootKEK.forProject(projectFolder)
       try {
-        return await super.getObjectSize(dekPath.bucketName, dekPath.path, {
-          ssecOptions,
-        })
+        return await super.getObjectSize(
+          this.#settings.dataEncryptionKeyBucketName,
+          dekPath,
+          { ssecOptions }
+        )
       } catch (err) {
         if (isForbiddenError(err)) continue
         throw err
@@ -180,15 +192,15 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     const dataEncryptionKey = (
       await generateKey('aes', { length: 256 })
     ).export()
-    const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
+    const { projectFolder, dekPath } = this.#buildProjectPaths(bucketName, path)
     await super.sendStream(
-      dekPath.bucketName,
-      dekPath.path,
+      this.#settings.dataEncryptionKeyBucketName,
+      dekPath,
       Stream.Readable.from([dataEncryptionKey]),
       {
         // Do not overwrite any objects if already created
         ifNoneMatch: '*',
-        ssecOptions: await this.#getCurrentKeyEncryptionKey(bucketName, path),
+        ssecOptions: await this.#getCurrentKeyEncryptionKey(projectFolder),
       }
     )
     return new SSECOptions(dataEncryptionKey)
@@ -200,17 +212,17 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    * @return {Promise<SSECOptions>}
    */
   async #getExistingDataEncryptionKeyOptions(bucketName, path) {
-    const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
+    const { projectFolder, dekPath } = this.#buildProjectPaths(bucketName, path)
     let res
     let kekIndex = 0
     for (const rootKEK of await this.#availableKeyEncryptionKeysPromise) {
-      const ssecOptions = await rootKEK.forProject(
-        this.#settings.pathToProjectFolder(bucketName, path)
-      )
+      const ssecOptions = await rootKEK.forProject(projectFolder)
       try {
-        res = await super.getObjectStream(dekPath.bucketName, dekPath.path, {
-          ssecOptions,
-        })
+        res = await super.getObjectStream(
+          this.#settings.dataEncryptionKeyBucketName,
+          dekPath,
+          { ssecOptions }
+        )
       } catch (err) {
         if (isForbiddenError(err)) {
           kekIndex++
@@ -224,20 +236,17 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     await Stream.promises.pipeline(res, buf)
 
     if (kekIndex !== 0 && this.#settings.automaticallyRotateDEKEncryption) {
-      const ssecOptions = await this.#getCurrentKeyEncryptionKey(
-        bucketName,
-        path
-      )
+      const ssecOptions = await this.#getCurrentKeyEncryptionKey(projectFolder)
       try {
         await super.sendStream(
-          dekPath.bucketName,
-          dekPath.path,
+          this.#settings.dataEncryptionKeyBucketName,
+          dekPath,
           Stream.Readable.from([buf.getContents()]),
           { ssecOptions }
         )
       } catch (err) {
         if (this.#settings.ignoreErrorsFromDEKReEncryption) {
-          logger.warn({ err, ...dekPath }, 'failed to persist re-encrypted DEK')
+          logger.warn({ err, dekPath }, 'failed to persist re-encrypted DEK')
         } else {
           throw err
         }
@@ -309,12 +318,12 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
   async deleteDirectory(bucketName, path, continuationToken) {
     // Note: Listing/Deleting a prefix does not require SSE-C credentials.
     await super.deleteDirectory(bucketName, path, continuationToken)
-    if (this.#settings.pathToProjectFolder(bucketName, path) === path) {
-      const dekPath = this.#settings.pathToDataEncryptionKeyPath(
-        bucketName,
-        path
+    const { projectFolder, dekPath } = this.#buildProjectPaths(bucketName, path)
+    if (projectFolder === path) {
+      await super.deleteObject(
+        this.#settings.dataEncryptionKeyBucketName,
+        dekPath
       )
-      await super.deleteObject(dekPath.bucketName, dekPath.path)
     }
   }
 

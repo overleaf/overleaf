@@ -41,16 +41,10 @@ function s3SSECConfig() {
     ...s3Config(),
     ignoreErrorsFromDEKReEncryption: false,
     automaticallyRotateDEKEncryption: true,
+    dataEncryptionKeyBucketName: process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME,
     pathToProjectFolder(_bucketName, path) {
       const [projectFolder] = path.match(/^[a-f0-9]+\//)
       return projectFolder
-    },
-    pathToDataEncryptionKeyPath(_bucketName, path) {
-      const [projectFolder] = path.match(/^[a-f0-9]+\//)
-      return {
-        bucketName: process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME,
-        path: Path.join(projectFolder, 'dek'),
-      }
     },
     async getRootKeyEncryptionKeys() {
       return S3SSECKeys
