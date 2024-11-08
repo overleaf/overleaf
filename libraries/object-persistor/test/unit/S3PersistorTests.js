@@ -93,6 +93,12 @@ describe('S3PersistorTests', function () {
         setTimeout(() => {
           if (this.err) return ReadStream.emit('error', this.err)
           this.emit('httpHeaders', this.statusCode)
+          if (this.statusCode === 403) {
+            ReadStream.emit('error', S3AccessDeniedError)
+          }
+          if (this.statusCode === 404) {
+            ReadStream.emit('error', S3NotFoundError)
+          }
         })
         return ReadStream
       }
@@ -359,7 +365,7 @@ describe('S3PersistorTests', function () {
       })
 
       it('wraps the error', function () {
-        expect(error.cause).to.exist
+        expect(error.cause).to.equal(S3AccessDeniedError)
       })
 
       it('stores the bucket and key in the error', function () {

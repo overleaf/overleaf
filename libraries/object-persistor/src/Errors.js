@@ -6,6 +6,7 @@ class ReadError extends OError {}
 class SettingsError extends OError {}
 class NotImplementedError extends OError {}
 class AlreadyWrittenError extends OError {}
+class NoKEKMatchedError extends OError {}
 
 module.exports = {
   NotFoundError,
@@ -14,4 +15,5 @@ module.exports = {
   SettingsError,
   NotImplementedError,
   AlreadyWrittenError,
+  NoKEKMatchedError,
 }

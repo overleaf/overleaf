@@ -1,31 +1,62 @@
 // @ts-check
-const Stream = require('stream')
-const { promisify } = require('util')
 const Crypto = require('crypto')
+const Stream = require('stream')
+const fs = require('fs')
+const { promisify } = require('util')
 const { WritableBuffer } = require('@overleaf/stream-utils')
 const { S3Persistor, SSECOptions } = require('./S3Persistor.js')
+const {
+  AlreadyWrittenError,
+  NoKEKMatchedError,
+  NotFoundError,
+  NotImplementedError,
+  ReadError,
+} = require('./Errors')
+const logger = require('@overleaf/logger')
 
 const generateKey = promisify(Crypto.generateKey)
 
 /**
- * @typedef {Object} Settings
- * @property {(bucketName: string, path: string) => {bucketName: string, path: string}} pathToDataEncryptionKeyPath
- * @property {(bucketName: string, path: string) => boolean} pathIsProjectFolder
- * @property {() => Promise<Buffer>} getKeyEncryptionKey
+ * @typedef {import('aws-sdk').AWSError} AWSError
  */
 
-const {
-  NotFoundError,
-  NotImplementedError,
-  AlreadyWrittenError,
-} = require('./Errors')
-const fs = require('fs')
+/**
+ * @typedef {Object} Settings
+ * @property {boolean} automaticallyRotateDEKEncryption
+ * @property {boolean} ignoreErrorsFromDEKReEncryption
+ * @property {(bucketName: string, path: string) => {bucketName: string, path: string}} pathToDataEncryptionKeyPath
+ * @property {(bucketName: string, path: string) => boolean} pathIsProjectFolder
+ * @property {() => Promise<Array<Buffer>>} getKeyEncryptionKeys
+ */
+
+/**
+ * Helper function to make TS happy when accessing error properties
+ * AWSError is not an actual class, so we cannot use instanceof.
+ * @param {any} err
+ * @return {err is AWSError}
+ */
+function isAWSError(err) {
+  return !!err
+}
+
+/**
+ * @param {any} err
+ * @return {boolean}
+ */
+function isForbiddenError(err) {
+  if (!err || !(err instanceof ReadError || err instanceof NotFoundError)) {
+    return false
+  }
+  const cause = err.cause
+  if (!isAWSError(cause)) return false
+  return cause.statusCode === 403
+}
 
 class PerProjectEncryptedS3Persistor extends S3Persistor {
-  /** @type Settings */
+  /** @type {Settings} */
   #settings
-  /** @type Promise<SSECOptions> */
-  #keyEncryptionKeyOptions
+  /** @type {Promise<Array<SSECOptions>>} */
+  #availableKeyEncryptionKeysPromise
 
   /**
    * @param {Settings} settings
@@ -33,13 +64,21 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
   constructor(settings) {
     super(settings)
     this.#settings = settings
-    this.#keyEncryptionKeyOptions = this.#settings
-      .getKeyEncryptionKey()
-      .then(keyAsBuffer => new SSECOptions(keyAsBuffer))
+    this.#availableKeyEncryptionKeysPromise = this.#settings
+      .getKeyEncryptionKeys()
+      .then(keysAsBuffer => {
+        if (keysAsBuffer.length === 0) throw new Error('no kek provided')
+        return keysAsBuffer.map(buffer => new SSECOptions(buffer))
+      })
   }
 
-  async ensureKeyEncryptionKeyLoaded() {
-    await this.#keyEncryptionKeyOptions
+  async ensureKeyEncryptionKeysLoaded() {
+    await this.#availableKeyEncryptionKeysPromise
+  }
+
+  async #getCurrentKeyEncryptionKey() {
+    const available = await this.#availableKeyEncryptionKeysPromise
+    return available[0]
   }
 
   /**
@@ -48,9 +87,17 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    */
   async getDataEncryptionKeySize(bucketName, path) {
     const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
-    return await super.getObjectSize(dekPath.bucketName, dekPath.path, {
-      ssecOptions: await this.#keyEncryptionKeyOptions,
-    })
+    for (const ssecOptions of await this.#availableKeyEncryptionKeysPromise) {
+      try {
+        return await super.getObjectSize(dekPath.bucketName, dekPath.path, {
+          ssecOptions,
+        })
+      } catch (err) {
+        if (isForbiddenError(err)) continue
+        throw err
+      }
+    }
+    throw new NoKEKMatchedError('no kek matched')
   }
 
   /**
@@ -91,7 +138,7 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
       {
         // Do not overwrite any objects if already created
         ifNoneMatch: '*',
-        ssecOptions: await this.#keyEncryptionKeyOptions,
+        ssecOptions: await this.#getCurrentKeyEncryptionKey(),
       }
     )
     return new SSECOptions(dataEncryptionKey)
@@ -104,11 +151,42 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    */
   async #getExistingDataEncryptionKeyOptions(bucketName, path) {
     const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
-    const res = await super.getObjectStream(dekPath.bucketName, dekPath.path, {
-      ssecOptions: await this.#keyEncryptionKeyOptions,
-    })
+    let res
+    let kekIndex = 0
+    for (const ssecOptions of await this.#availableKeyEncryptionKeysPromise) {
+      try {
+        res = await super.getObjectStream(dekPath.bucketName, dekPath.path, {
+          ssecOptions,
+        })
+      } catch (err) {
+        if (isForbiddenError(err)) {
+          kekIndex++
+          continue
+        }
+        throw err
+      }
+    }
+    if (!res) throw new NoKEKMatchedError('no kek matched')
     const buf = new WritableBuffer()
     await Stream.promises.pipeline(res, buf)
+
+    if (kekIndex !== 0 && this.#settings.automaticallyRotateDEKEncryption) {
+      try {
+        await super.sendStream(
+          dekPath.bucketName,
+          dekPath.path,
+          Stream.Readable.from([buf.getContents()]),
+          { ssecOptions: await this.#getCurrentKeyEncryptionKey() }
+        )
+      } catch (err) {
+        if (this.#settings.ignoreErrorsFromDEKReEncryption) {
+          logger.warn({ err, ...dekPath }, 'failed to persist re-encrypted DEK')
+        } else {
+          throw err
+        }
+      }
+    }
+
     return new SSECOptions(buf.getContents())
   }
 

@@ -32,12 +32,15 @@ process.on('unhandledRejection', e => {
 
 // store settings for multiple backends, so that we can test each one.
 // fs will always be available - add others if they are configured
-const { BackendSettings, s3Config } = require('./TestConfig')
+const { BackendSettings, s3Config, s3SSECConfig } = require('./TestConfig')
 const {
   AlreadyWrittenError,
   NotFoundError,
   NotImplementedError,
+  NoKEKMatchedError,
 } = require('@overleaf/object-persistor/src/Errors')
+const PerProjectEncryptedS3Persistor = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
+const crypto = require('crypto')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)
@@ -1015,12 +1018,19 @@ describe('Filestore', function () {
           expect(dataEncryptionKeySize).to.equal(32)
         })
 
-        let fileId1, fileId2, fileKey1, fileKey2, fileUrl1, fileUrl2
+        let fileId1,
+          fileId2,
+          fileKey1,
+          fileKey2,
+          fileKeyOtherProject,
+          fileUrl1,
+          fileUrl2
         beforeEach('prepare ids', function () {
           fileId1 = new ObjectId().toString()
           fileId2 = new ObjectId().toString()
           fileKey1 = `${projectId}/${fileId1}`
           fileKey2 = `${projectId}/${fileId2}`
+          fileKeyOtherProject = `${new ObjectId().toString()}/${new ObjectId().toString()}`
           fileUrl1 = `${filestoreUrl}/project/${projectId}/file/${fileId1}`
           fileUrl2 = `${filestoreUrl}/project/${projectId}/file/${fileId2}`
         })
@@ -1105,6 +1115,139 @@ describe('Filestore', function () {
           const checkGET2 = await createRandomContent(fileUrl2, '2')
           await checkGET1()
           await checkGET2()
+        })
+
+        describe('kek rotation', function () {
+          const newKEK = crypto.generateKeySync('aes', { length: 256 }).export()
+          const oldKEK = crypto.generateKeySync('aes', { length: 256 }).export()
+          const migrationStep0 = new PerProjectEncryptedS3Persistor({
+            ...s3SSECConfig(),
+            automaticallyRotateDEKEncryption: false,
+            async getKeyEncryptionKeys() {
+              return [oldKEK] // only old key
+            },
+          })
+          const migrationStep1 = new PerProjectEncryptedS3Persistor({
+            ...s3SSECConfig(),
+            automaticallyRotateDEKEncryption: false,
+            async getKeyEncryptionKeys() {
+              return [oldKEK, newKEK] // new key as fallback
+            },
+          })
+          const migrationStep2 = new PerProjectEncryptedS3Persistor({
+            ...s3SSECConfig(),
+            automaticallyRotateDEKEncryption: true, // <- different compared to partiallyRotated
+            async getKeyEncryptionKeys() {
+              return [newKEK, oldKEK] // old keys as fallback
+            },
+          })
+          const migrationStep3 = new PerProjectEncryptedS3Persistor({
+            ...s3SSECConfig(),
+            automaticallyRotateDEKEncryption: true,
+            async getKeyEncryptionKeys() {
+              return [newKEK] // only new key
+            },
+          })
+
+          async function checkWrites(
+            fileKey,
+            writer,
+            readersSuccess,
+            readersFailed
+          ) {
+            const content = Math.random().toString()
+            await writer.sendStream(
+              Settings.filestore.stores.user_files,
+              fileKey,
+              Stream.Readable.from([content])
+            )
+
+            for (const persistor of readersSuccess) {
+              await TestHelper.expectPersistorToHaveFile(
+                persistor,
+                backendSettings.stores.user_files,
+                fileKey,
+                content
+              )
+            }
+
+            for (const persistor of readersFailed) {
+              await expect(
+                TestHelper.expectPersistorToHaveFile(
+                  persistor,
+                  backendSettings.stores.user_files,
+                  fileKey,
+                  content
+                )
+              ).to.be.rejectedWith(NoKEKMatchedError)
+            }
+          }
+
+          const stages = [
+            {
+              name: 'stage 0 - [old]',
+              prev: migrationStep0,
+              cur: migrationStep0,
+              fail: [migrationStep3],
+            },
+            {
+              name: 'stage 1 - [old,new]',
+              prev: migrationStep0,
+              cur: migrationStep1,
+              fail: [],
+            },
+            {
+              name: 'stage 2 - [new,old]',
+              prev: migrationStep1,
+              cur: migrationStep2,
+              fail: [],
+            },
+            {
+              name: 'stage 3 - [new]',
+              prev: migrationStep2,
+              cur: migrationStep3,
+              fail: [migrationStep0],
+            },
+          ]
+
+          for (const { name, prev, cur, fail } of stages) {
+            describe(name, function () {
+              it('can read old writes', async function () {
+                await checkWrites(fileKey1, prev, [prev, cur], fail)
+                await checkWrites(fileKey2, prev, [prev, cur], fail) // check again after access
+                await checkWrites(fileKeyOtherProject, prev, [prev, cur], fail)
+              })
+              it('can read new writes', async function () {
+                await checkWrites(fileKey1, prev, [prev, cur], fail)
+                await checkWrites(fileKey2, cur, [prev, cur], fail) // check again after access
+                await checkWrites(fileKeyOtherProject, cur, [prev, cur], fail)
+              })
+            })
+          }
+
+          describe('full migration', function () {
+            it('can read old writes if rotated in sequence', async function () {
+              await checkWrites(
+                fileKey1,
+                migrationStep0,
+                [
+                  migrationStep0,
+                  migrationStep1,
+                  migrationStep2, // migrates
+                  migrationStep3,
+                ],
+                []
+              )
+            })
+            it('cannot read/write if not rotated', async function () {
+              await checkWrites(
+                fileKey1,
+                migrationStep0,
+                [migrationStep0],
+                [migrationStep3]
+              )
+            })
+          })
         })
 
         let s3Client

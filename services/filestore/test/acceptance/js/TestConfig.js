@@ -26,9 +26,13 @@ function s3Config() {
   }
 }
 
+const S3SSECKeys = [crypto.generateKeySync('aes', { length: 256 }).export()]
+
 function s3SSECConfig() {
   return {
     ...s3Config(),
+    ignoreErrorsFromDEKReEncryption: false,
+    automaticallyRotateDEKEncryption: true,
     pathIsProjectFolder(_bucketName, path) {
       return !!path.match(/^[a-f0-9]+\/$/)
     },
@@ -39,8 +43,8 @@ function s3SSECConfig() {
         path: Path.join(projectFolder, 'dek'),
       }
     },
-    async getKeyEncryptionKey() {
-      return crypto.generateKeySync('aes', { length: 256 }).export()
+    async getKeyEncryptionKeys() {
+      return S3SSECKeys
     },
   }
 }
@@ -177,4 +181,5 @@ checkForUnexpectedTestFile()
 module.exports = {
   BackendSettings,
   s3Config,
+  s3SSECConfig,
 }

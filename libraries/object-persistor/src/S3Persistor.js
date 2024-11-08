@@ -179,7 +179,8 @@ class S3Persistor extends AbstractPersistor {
             case 200: // full response
             case 206: // partial response
               return resolve(undefined)
-            case 403: // AccessDenied is handled the same as NoSuchKey
+            case 403: // AccessDenied
+              return // handled by stream.on('error') handler below
             case 404: // NoSuchKey
               return reject(new NotFoundError('not found'))
             default:
