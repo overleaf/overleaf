@@ -33,7 +33,7 @@ export type FeatureUsage = {
 }
 
 export type User = {
-  id: UserId | null
+  id: UserId
   isAdmin?: boolean
   email: string
   allowedFreeTrial?: boolean
@@ -52,6 +52,22 @@ export type User = {
     firstAutoLoad: boolean
   }
   featureUsage?: FeatureUsage
+}
+
+export type LoggedOutUser = {
+  id: null
+  email?: undefined
+  first_name?: undefined
+  last_name?: undefined
+  signUpDate?: undefined
+  labsProgram?: undefined
+  alphaProgram?: undefined
+  betaProgram?: undefined
+  allowedFreeTrial?: undefined
+  features?: undefined
+  refProviders?: undefined
+  writefull?: undefined
+  isAdmin?: undefined
 }
 
 export type MongoUser = Pick<User, Exclude<keyof User, 'id'>> & { _id: string }

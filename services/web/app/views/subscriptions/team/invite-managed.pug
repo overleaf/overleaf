@@ -1,4 +1,4 @@
-extends ../../layout-marketing
+extends ../../layout-react
 
 block vars
 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
@@ -16,6 +16,7 @@ block append meta
 	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
 	meta(name="ol-groupSSOActive" data-type="boolean" content=groupSSOActive)
 	meta(name="ol-subscriptionId" data-type="string" content=subscriptionId)
+	meta(name="ol-user" data-type="json" content=user)
 
 block content
 	main.content.content-alt.team-invite#invite-managed-root

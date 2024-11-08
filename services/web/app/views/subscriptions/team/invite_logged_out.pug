@@ -1,8 +1,11 @@
-extends ../../layout-marketing
+extends ../../layout-react
 
 block vars
 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
 	- bootstrap5PageSplitTest = 'bootstrap-5-subscription'
+
+block append meta
+	meta(name="ol-user" data-type="json" content=user)
 
 block content
 	- var colClass = bootstrapVersion === 5 ? 'col-lg-8 m-auto' : 'col-md-8 col-md-offset-2'

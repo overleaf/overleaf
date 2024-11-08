@@ -65,8 +65,8 @@ async function createInvite(req, res, next) {
 
 async function viewInvite(req, res, next) {
   const { token } = req.params
-  const userId = SessionManager.getLoggedInUserId(req.session)
-
+  const sessionUser = SessionManager.getSessionUser(req.session)
+  const userId = sessionUser?._id
   const { invite, subscription } =
     await TeamInvitesHandler.promises.getInvite(token)
 
@@ -102,13 +102,13 @@ async function viewInvite(req, res, next) {
         await subscription.populate('groupPolicy')
       }
 
-      const user = await UserGetter.promises.getUser(userId)
+      const dbUser = await UserGetter.promises.getUser(userId)
 
       const isUserEnrolledInDifferentGroup =
         (
           await Modules.promises.hooks.fire(
             'isUserEnrolledInDifferentGroup',
-            user.enrollment,
+            dbUser.enrollment,
             subscription._id
           )
         )?.[0] === true
@@ -122,7 +122,7 @@ async function viewInvite(req, res, next) {
 
       validationStatus =
         await PermissionsManager.promises.getUserValidationStatus({
-          user,
+          user: dbUser,
           groupPolicy: subscription.groupPolicy,
           subscription,
         })
@@ -143,6 +143,7 @@ async function viewInvite(req, res, next) {
         currentManagedUserAdminEmail,
         groupSSOActive,
         subscriptionId: subscription._id.toString(),
+        user: sessionUser,
       })
     } else {
       let currentManagedUserAdminEmail
@@ -162,6 +163,7 @@ async function viewInvite(req, res, next) {
         currentManagedUserAdminEmail,
         groupSSOActive,
         subscriptionId: subscription._id.toString(),
+        user: sessionUser,
       })
     }
   } else {
@@ -175,18 +177,18 @@ async function viewInvite(req, res, next) {
       appName: settings.appName,
       accountExists: userByEmail != null,
       emailAddress: invite.email,
+      user: { id: null },
     })
   }
 }
 
 async function viewInvites(req, res, next) {
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const userEmail = await UserGetter.promises.getUserEmail(userId)
+  const user = SessionManager.getSessionUser(req.session)
   const groupSubscriptions =
-    await SubscriptionLocator.promises.getGroupsWithTeamInvitesEmail(userEmail)
+    await SubscriptionLocator.promises.getGroupsWithTeamInvitesEmail(user.email)
 
   const teamInvites = groupSubscriptions.map(groupSubscription =>
-    groupSubscription.teamInvites.find(invite => invite.email === userEmail)
+    groupSubscription.teamInvites.find(invite => invite.email === user.email)
   )
 
   await SplitTestHandler.promises.getAssignment(
@@ -197,6 +199,7 @@ async function viewInvites(req, res, next) {
 
   return res.render('subscriptions/team/group-invites', {
     teamInvites,
+    user,
   })
 }
 

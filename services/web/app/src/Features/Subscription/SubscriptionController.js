@@ -435,6 +435,7 @@ async function successfulSubscription(req, res) {
       title: 'thank_you',
       personalSubscription,
       postCheckoutRedirect,
+      user,
     })
   }
 }
@@ -469,6 +470,7 @@ async function canceledSubscription(req, res, next) {
   )
   return res.render('subscriptions/canceled-subscription-react', {
     title: 'subscription_canceled',
+    user: SessionManager.getSessionUser(req.session),
   })
 }
 

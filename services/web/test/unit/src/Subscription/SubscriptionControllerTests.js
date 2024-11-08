@@ -1017,6 +1017,7 @@ describe('SubscriptionController', function () {
           title: 'thank_you',
           personalSubscription: 'foo',
           postCheckoutRedirect: undefined,
+          user: this.user,
         })
         done()
       }

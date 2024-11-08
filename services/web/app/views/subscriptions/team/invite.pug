@@ -1,4 +1,4 @@
-extends ../../layout-marketing
+extends ../../layout-react
 
 block vars
 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
@@ -9,12 +9,13 @@ block entrypointVar
 
 block append meta
 	meta(name="ol-hasIndividualRecurlySubscription" data-type="boolean" content=hasIndividualRecurlySubscription)
-	meta(name="ol-inviterName" date-type="string" content=inviterName)
+	meta(name="ol-inviterName" data-type="string" content=inviterName)
 	meta(name="ol-inviteToken" data-type="string" content=inviteToken)
 	meta(name="ol-currentManagedUserAdminEmail" data-type="string" content=currentManagedUserAdminEmail)
 	meta(name="ol-expired" data-type="boolean" content=expired)
 	meta(name="ol-groupSSOActive" data-type="boolean" content=groupSSOActive)
 	meta(name="ol-subscriptionId" data-type="string" content=subscriptionId)
+	meta(name="ol-user" data-type="json" content=user)
 
 block content
 	main.content.content-alt#invite-root

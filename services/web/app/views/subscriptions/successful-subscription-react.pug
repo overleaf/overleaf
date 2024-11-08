@@ -1,4 +1,4 @@
-extends ../layout-marketing
+extends ../layout-react
 
 block vars
 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
@@ -10,6 +10,7 @@ block entrypointVar
 block append meta
 	meta(name="ol-subscription" data-type="json" content=personalSubscription)
 	meta(name="ol-postCheckoutRedirect" content=postCheckoutRedirect)
+	meta(name="ol-user" data-type="json" content=user)
 
 block content
 	main.content.content-alt#subscription-success-root

@@ -1,4 +1,4 @@
-extends ../../layout-marketing
+extends ../../layout-react
 
 block vars
 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
@@ -9,6 +9,7 @@ block entrypointVar
 
 block append meta
 	meta(name="ol-teamInvites" data-type="json" content=teamInvites)
+	meta(name="ol-user" data-type="json" content=user)
 
 block content
 	main.content.content-alt.team-invite#group-invites-root
