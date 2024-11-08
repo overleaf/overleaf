@@ -457,9 +457,6 @@ function cancelSubscription(req, res, next) {
 }
 
 /**
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
  * @returns {Promise<void>}
  */
 async function canceledSubscription(req, res, next) {

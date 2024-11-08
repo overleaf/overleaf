@@ -68,6 +68,7 @@ export type LoggedOutUser = {
   refProviders?: undefined
   writefull?: undefined
   isAdmin?: undefined
+  featureUsage?: undefined
 }
 
 export type MongoUser = Pick<User, Exclude<keyof User, 'id'>> & { _id: string }
