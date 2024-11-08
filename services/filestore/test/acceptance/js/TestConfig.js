@@ -2,6 +2,9 @@ const fs = require('fs')
 const Path = require('path')
 const crypto = require('crypto')
 const https = require('https')
+const {
+  RootKeyEncryptionKey,
+} = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
 
 // use functions to get a fresh copy, not a reference, each time
 function s3BaseConfig() {
@@ -26,15 +29,21 @@ function s3Config() {
   }
 }
 
-const S3SSECKeys = [crypto.generateKeySync('aes', { length: 256 }).export()]
+const S3SSECKeys = [
+  new RootKeyEncryptionKey(
+    crypto.generateKeySync('aes', { length: 256 }).export(),
+    Buffer.alloc(32)
+  ),
+]
 
 function s3SSECConfig() {
   return {
     ...s3Config(),
     ignoreErrorsFromDEKReEncryption: false,
     automaticallyRotateDEKEncryption: true,
-    pathIsProjectFolder(_bucketName, path) {
-      return !!path.match(/^[a-f0-9]+\/$/)
+    pathToProjectFolder(_bucketName, path) {
+      const [projectFolder] = path.match(/^[a-f0-9]+\//)
+      return projectFolder
     },
     pathToDataEncryptionKeyPath(_bucketName, path) {
       const [projectFolder] = path.match(/^[a-f0-9]+\//)
@@ -43,7 +52,7 @@ function s3SSECConfig() {
         path: Path.join(projectFolder, 'dek'),
       }
     },
-    async getKeyEncryptionKeys() {
+    async getRootKeyEncryptionKeys() {
       return S3SSECKeys
     },
   }

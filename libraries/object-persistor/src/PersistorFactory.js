@@ -4,7 +4,9 @@ const GcsPersistor = require('./GcsPersistor')
 const { S3Persistor } = require('./S3Persistor')
 const FSPersistor = require('./FSPersistor')
 const MigrationPersistor = require('./MigrationPersistor')
-const PerProjectEncryptedS3Persistor = require('./PerProjectEncryptedS3Persistor')
+const {
+  PerProjectEncryptedS3Persistor,
+} = require('./PerProjectEncryptedS3Persistor')
 
 function getPersistor(backend, settings) {
   switch (backend) {

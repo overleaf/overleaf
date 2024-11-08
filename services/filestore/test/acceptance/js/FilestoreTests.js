@@ -39,7 +39,10 @@ const {
   NotImplementedError,
   NoKEKMatchedError,
 } = require('@overleaf/object-persistor/src/Errors')
-const PerProjectEncryptedS3Persistor = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
+const {
+  PerProjectEncryptedS3Persistor,
+  RootKeyEncryptionKey,
+} = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
 const crypto = require('crypto')
 
 describe('Filestore', function () {
@@ -1118,33 +1121,39 @@ describe('Filestore', function () {
         })
 
         describe('kek rotation', function () {
-          const newKEK = crypto.generateKeySync('aes', { length: 256 }).export()
-          const oldKEK = crypto.generateKeySync('aes', { length: 256 }).export()
+          const newKEK = new RootKeyEncryptionKey(
+            crypto.generateKeySync('aes', { length: 256 }).export(),
+            Buffer.alloc(32)
+          )
+          const oldKEK = new RootKeyEncryptionKey(
+            crypto.generateKeySync('aes', { length: 256 }).export(),
+            Buffer.alloc(32)
+          )
           const migrationStep0 = new PerProjectEncryptedS3Persistor({
             ...s3SSECConfig(),
             automaticallyRotateDEKEncryption: false,
-            async getKeyEncryptionKeys() {
+            async getRootKeyEncryptionKeys() {
               return [oldKEK] // only old key
             },
           })
           const migrationStep1 = new PerProjectEncryptedS3Persistor({
             ...s3SSECConfig(),
             automaticallyRotateDEKEncryption: false,
-            async getKeyEncryptionKeys() {
+            async getRootKeyEncryptionKeys() {
               return [oldKEK, newKEK] // new key as fallback
             },
           })
           const migrationStep2 = new PerProjectEncryptedS3Persistor({
             ...s3SSECConfig(),
             automaticallyRotateDEKEncryption: true, // <- different compared to partiallyRotated
-            async getKeyEncryptionKeys() {
+            async getRootKeyEncryptionKeys() {
               return [newKEK, oldKEK] // old keys as fallback
             },
           })
           const migrationStep3 = new PerProjectEncryptedS3Persistor({
             ...s3SSECConfig(),
             automaticallyRotateDEKEncryption: true,
-            async getKeyEncryptionKeys() {
+            async getRootKeyEncryptionKeys() {
               return [newKEK] // only new key
             },
           })

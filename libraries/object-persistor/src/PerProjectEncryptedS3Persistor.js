@@ -15,6 +15,9 @@ const {
 const logger = require('@overleaf/logger')
 
 const generateKey = promisify(Crypto.generateKey)
+const hkdf = promisify(Crypto.hkdf)
+
+const AES256_KEY_LENGTH = 32
 
 /**
  * @typedef {import('aws-sdk').AWSError} AWSError
@@ -25,8 +28,8 @@ const generateKey = promisify(Crypto.generateKey)
  * @property {boolean} automaticallyRotateDEKEncryption
  * @property {boolean} ignoreErrorsFromDEKReEncryption
  * @property {(bucketName: string, path: string) => {bucketName: string, path: string}} pathToDataEncryptionKeyPath
- * @property {(bucketName: string, path: string) => boolean} pathIsProjectFolder
- * @property {() => Promise<Array<Buffer>>} getKeyEncryptionKeys
+ * @property {(bucketName: string, path: string) => string} pathToProjectFolder
+ * @property {() => Promise<Array<RootKeyEncryptionKey>>} getRootKeyEncryptionKeys
  */
 
 /**
@@ -52,10 +55,47 @@ function isForbiddenError(err) {
   return cause.statusCode === 403
 }
 
+class RootKeyEncryptionKey {
+  /** @type {Buffer} */
+  #keyEncryptionKey
+  /** @type {Buffer} */
+  #salt
+
+  /**
+   * @param {Buffer} keyEncryptionKey
+   * @param {Buffer} salt
+   */
+  constructor(keyEncryptionKey, salt) {
+    if (keyEncryptionKey.byteLength !== AES256_KEY_LENGTH) {
+      throw new Error(`kek is not ${AES256_KEY_LENGTH} bytes long`)
+    }
+    this.#keyEncryptionKey = keyEncryptionKey
+    this.#salt = salt
+  }
+
+  /**
+   * @param {string} prefix
+   * @return {Promise<SSECOptions>}
+   */
+  async forProject(prefix) {
+    return new SSECOptions(
+      Buffer.from(
+        await hkdf(
+          'sha256',
+          this.#keyEncryptionKey,
+          this.#salt,
+          prefix,
+          AES256_KEY_LENGTH
+        )
+      )
+    )
+  }
+}
+
 class PerProjectEncryptedS3Persistor extends S3Persistor {
   /** @type {Settings} */
   #settings
-  /** @type {Promise<Array<SSECOptions>>} */
+  /** @type {Promise<Array<RootKeyEncryptionKey>>} */
   #availableKeyEncryptionKeysPromise
 
   /**
@@ -65,10 +105,10 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     super(settings)
     this.#settings = settings
     this.#availableKeyEncryptionKeysPromise = this.#settings
-      .getKeyEncryptionKeys()
-      .then(keysAsBuffer => {
-        if (keysAsBuffer.length === 0) throw new Error('no kek provided')
-        return keysAsBuffer.map(buffer => new SSECOptions(buffer))
+      .getRootKeyEncryptionKeys()
+      .then(rootKEKs => {
+        if (rootKEKs.length === 0) throw new Error('no root kek provided')
+        return rootKEKs
       })
   }
 
@@ -76,9 +116,16 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     await this.#availableKeyEncryptionKeysPromise
   }
 
-  async #getCurrentKeyEncryptionKey() {
-    const available = await this.#availableKeyEncryptionKeysPromise
-    return available[0]
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @return {Promise<SSECOptions>}
+   */
+  async #getCurrentKeyEncryptionKey(bucketName, path) {
+    const [currentRootKEK] = await this.#availableKeyEncryptionKeysPromise
+    return await currentRootKEK.forProject(
+      this.#settings.pathToProjectFolder(bucketName, path)
+    )
   }
 
   /**
@@ -87,7 +134,10 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    */
   async getDataEncryptionKeySize(bucketName, path) {
     const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
-    for (const ssecOptions of await this.#availableKeyEncryptionKeysPromise) {
+    for (const rootKEK of await this.#availableKeyEncryptionKeysPromise) {
+      const ssecOptions = await rootKEK.forProject(
+        this.#settings.pathToProjectFolder(bucketName, path)
+      )
       try {
         return await super.getObjectSize(dekPath.bucketName, dekPath.path, {
           ssecOptions,
@@ -138,7 +188,7 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
       {
         // Do not overwrite any objects if already created
         ifNoneMatch: '*',
-        ssecOptions: await this.#getCurrentKeyEncryptionKey(),
+        ssecOptions: await this.#getCurrentKeyEncryptionKey(bucketName, path),
       }
     )
     return new SSECOptions(dataEncryptionKey)
@@ -153,7 +203,10 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     const dekPath = this.#settings.pathToDataEncryptionKeyPath(bucketName, path)
     let res
     let kekIndex = 0
-    for (const ssecOptions of await this.#availableKeyEncryptionKeysPromise) {
+    for (const rootKEK of await this.#availableKeyEncryptionKeysPromise) {
+      const ssecOptions = await rootKEK.forProject(
+        this.#settings.pathToProjectFolder(bucketName, path)
+      )
       try {
         res = await super.getObjectStream(dekPath.bucketName, dekPath.path, {
           ssecOptions,
@@ -171,12 +224,16 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     await Stream.promises.pipeline(res, buf)
 
     if (kekIndex !== 0 && this.#settings.automaticallyRotateDEKEncryption) {
+      const ssecOptions = await this.#getCurrentKeyEncryptionKey(
+        bucketName,
+        path
+      )
       try {
         await super.sendStream(
           dekPath.bucketName,
           dekPath.path,
           Stream.Readable.from([buf.getContents()]),
-          { ssecOptions: await this.#getCurrentKeyEncryptionKey() }
+          { ssecOptions }
         )
       } catch (err) {
         if (this.#settings.ignoreErrorsFromDEKReEncryption) {
@@ -252,7 +309,7 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
   async deleteDirectory(bucketName, path, continuationToken) {
     // Note: Listing/Deleting a prefix does not require SSE-C credentials.
     await super.deleteDirectory(bucketName, path, continuationToken)
-    if (this.#settings.pathIsProjectFolder(bucketName, path)) {
+    if (this.#settings.pathToProjectFolder(bucketName, path) === path) {
       const dekPath = this.#settings.pathToDataEncryptionKeyPath(
         bucketName,
         path
@@ -357,4 +414,8 @@ class CachedPerProjectEncryptedS3Persistor {
   }
 }
 
-module.exports = PerProjectEncryptedS3Persistor
+module.exports = {
+  PerProjectEncryptedS3Persistor,
+  CachedPerProjectEncryptedS3Persistor,
+  RootKeyEncryptionKey,
+}
