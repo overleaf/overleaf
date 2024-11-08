@@ -138,3 +138,23 @@
     }
   }
 }
+
+.payment-container {
+  padding-top: var(--spacing-13);
+
+  .payment-row {
+    display: flex;
+    gap: var(--spacing-10);
+    justify-content: center;
+
+    .payment-right-section {
+      padding: var(--spacing-08);
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    .payment-left-section {
+      padding: 0;
+    }
+  }
+}
