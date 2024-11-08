@@ -729,12 +729,13 @@ describe('<EditorLeftMenu />', function () {
         cy.get<HTMLOptionElement>('#settings-menu-fontFamily option').then(
           options => {
             const values = [...options].map(o => o.value)
-            expect(values).to.deep.eq(['monaco', 'lucida'])
+            expect(values).to.deep.eq(['monaco', 'lucida', 'opendyslexicmono'])
 
             const texts = [...options].map(o => o.text)
             expect(texts).to.deep.eq([
               'Monaco / Menlo / Consolas',
               'Lucida / Source Code Pro',
+              'OpenDyslexic Mono',
             ])
           }
         )

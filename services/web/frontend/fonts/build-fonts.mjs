@@ -72,6 +72,14 @@ const families = [
       'https://raw.githubusercontent.com/notofonts/latin-greek-cyrillic/refs/heads/main/OFL.txt',
   },
   {
+    folder: 'open-dyslexic-mono',
+    url: 'https://github.com/antijingoist/opendyslexic',
+    fonts: [
+      'https://github.com/antijingoist/open-dyslexic/blob/master/otf/OpenDyslexicMono-Regular.otf',
+    ],
+    license: 'https://github.com/antijingoist/opendyslexic/blob/master/OFL.txt',
+  },
+  {
     folder: 'open-sans',
     url: 'https://github.com/googlefonts/opensans',
     fonts: [

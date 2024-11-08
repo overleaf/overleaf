@@ -8,7 +8,7 @@ const optionsThemeConf = new Compartment()
 const selectedThemeConf = new Compartment()
 export const themeOptionsChange = Annotation.define<boolean>()
 
-export type FontFamily = 'monaco' | 'lucida'
+export type FontFamily = 'monaco' | 'lucida' | 'opendyslexicmono'
 export type LineHeight = 'compact' | 'normal' | 'wide'
 export type OverallTheme = '' | 'light-'
 
@@ -62,6 +62,7 @@ export const lineHeights: Record<LineHeight, number> = {
 const fontFamilies: Record<FontFamily, string[]> = {
   monaco: ['Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'monospace'],
   lucida: ['Lucida Console', 'Source Code Pro', 'monospace'],
+  opendyslexicmono: ['OpenDyslexic Mono', 'monospace'],
 }
 
 const createThemeFromOptions = ({

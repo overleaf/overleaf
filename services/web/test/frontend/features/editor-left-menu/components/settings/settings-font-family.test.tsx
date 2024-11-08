@@ -19,5 +19,10 @@ describe('<SettingsFontFamily />', function () {
 
     const optionLucida = within(select).getByText('Lucida / Source Code Pro')
     expect(optionLucida.getAttribute('value')).to.equal('lucida')
+
+    const optionOpenDyslexicMono = within(select).getByText('OpenDyslexic Mono')
+    expect(optionOpenDyslexicMono.getAttribute('value')).to.equal(
+      'opendyslexicmono'
+    )
   })
 })
