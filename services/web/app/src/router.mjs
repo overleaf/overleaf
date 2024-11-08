@@ -1111,11 +1111,6 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   )
 
   webRouter.post(
-    '/spelling/check',
-    AuthenticationController.requireLogin(),
-    SpellingController.proxyCheckRequestToSpellingApi
-  )
-  webRouter.post(
     '/spelling/learn',
     validate({
       body: Joi.object({
