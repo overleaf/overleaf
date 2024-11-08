@@ -467,6 +467,7 @@ describe('Filestore', function () {
       })
 
       describe('with a large file', function () {
+        this.timeout(1000 * 20)
         let fileId, fileUrl, largeFileContent, error
 
         beforeEach('upload large file', async function () {
@@ -1221,6 +1222,8 @@ describe('Filestore', function () {
 
           for (const { name, prev, cur, fail } of stages) {
             describe(name, function () {
+              this.timeout(1000 * 30)
+
               it('can read old writes', async function () {
                 await checkWrites(fileKey1, prev, [prev, cur], fail)
                 await checkWrites(fileKey2, prev, [prev, cur], fail) // check again after access

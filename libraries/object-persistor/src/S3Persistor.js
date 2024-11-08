@@ -184,7 +184,7 @@ class S3Persistor extends AbstractPersistor {
             case 404: // NoSuchKey
               return reject(new NotFoundError('not found'))
             default:
-              return reject(new Error('non success status: ' + statusCode))
+            // handled by stream.on('error') handler below
           }
         })
         // The AWS SDK is forwarding any errors from the request to the stream.

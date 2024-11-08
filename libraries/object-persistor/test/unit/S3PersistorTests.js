@@ -91,6 +91,14 @@ describe('S3PersistorTests', function () {
 
       createReadStream() {
         setTimeout(() => {
+          if (this.notFoundSSEC) {
+            // special case for AWS S3: 404 NoSuchKey wrapped in a 400. A single request received a single response, and multiple httpHeaders events are triggered. Don't ask.
+            this.emit('httpHeaders', 400)
+            this.emit('httpHeaders', 404)
+            ReadStream.emit('error', S3NotFoundError)
+            return
+          }
+
           if (this.err) return ReadStream.emit('error', this.err)
           this.emit('httpHeaders', this.statusCode)
           if (this.statusCode === 403) {
@@ -327,6 +335,34 @@ describe('S3PersistorTests', function () {
         }
       })
 
+      it('does not return a stream', function () {
+        expect(stream).not.to.exist
+      })
+
+      it('throws a NotFoundError', function () {
+        expect(error).to.be.an.instanceOf(Errors.NotFoundError)
+      })
+
+      it('wraps the error', function () {
+        expect(error.cause).to.exist
+      })
+
+      it('stores the bucket and key in the error', function () {
+        expect(error.info).to.include({ bucketName: bucket, key })
+      })
+    })
+
+    describe("when the file doesn't exist -- SSEC", function () {
+      let error, stream
+
+      beforeEach(async function () {
+        S3GetObjectRequest.notFoundSSEC = 404
+        try {
+          stream = await S3Persistor.getObjectStream(bucket, key)
+        } catch (err) {
+          error = err
+        }
+      })
       it('does not return a stream', function () {
         expect(stream).not.to.exist
       })
