@@ -10,12 +10,16 @@ import { useUserContext } from '../../../shared/context/user-context'
 import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { FetchError } from '../../../infrastructure/fetch-json'
 import { useChatContext } from '../context/chat-context'
-import LoadingSpinner from '../../../shared/components/loading-spinner'
+import { FullSizeLoadingSpinner } from '../../../shared/components/loading-spinner'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 
 const MessageList = lazy(() => import('./message-list'))
+
+const Loading = () => (
+  <FullSizeLoadingSpinner delay={500} className={bsVersion({ bs5: 'pt-4' })} />
+)
 
 const ChatPane = React.memo(function ChatPane() {
   const { t } = useTranslation()
@@ -85,8 +89,8 @@ const ChatPane = React.memo(function ChatPane() {
           <h2 className={bsVersion({ bs3: 'sr-only', bs5: 'visually-hidden' })}>
             {t('chat')}
           </h2>
-          <Suspense fallback={<LoadingSpinner delay={500} />}>
-            {status === 'pending' && <LoadingSpinner delay={500} />}
+          <Suspense fallback={<Loading />}>
+            {status === 'pending' && <Loading />}
             {shouldDisplayPlaceholder && <Placeholder />}
             <MessageList
               messages={messages}

@@ -58,14 +58,19 @@ export function FullSizeLoadingSpinner({
   minHeight,
   loadingText,
   size = 'sm',
+  className,
 }: {
   delay?: 0 | 500
   minHeight?: string
   loadingText?: string
   size?: OLSpinnerSize
+  className?: string
 }) {
   return (
-    <div className="full-size-loading-spinner-container" style={{ minHeight }}>
+    <div
+      className={classNames('full-size-loading-spinner-container', className)}
+      style={{ minHeight }}
+    >
       <LoadingSpinner size={size} loadingText={loadingText} delay={delay} />
     </div>
   )
