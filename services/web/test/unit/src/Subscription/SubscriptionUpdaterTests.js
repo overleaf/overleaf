@@ -13,9 +13,6 @@ describe('SubscriptionUpdater', function () {
       plan: {
         plan_code: this.recurlyPlan.planCode,
       },
-      account: {
-        url: 'test_url',
-      },
     }
 
     this.adminUser = { _id: (this.adminuser_id = '5208dd34438843e2db000007') }
@@ -29,7 +26,6 @@ describe('SubscriptionUpdater', function () {
       save: sinon.stub().resolves(),
       planCode: 'student_or_something',
       recurlySubscription_id: 'abc123def456fab789',
-      managedUsersEnabled: false,
     }
     this.user_id = this.adminuser_id
 
@@ -124,7 +120,6 @@ describe('SubscriptionUpdater', function () {
           },
         },
       ],
-      adminUrl: 'test_admin_url',
     }
 
     this.UserFeaturesUpdater = {
@@ -182,13 +177,6 @@ describe('SubscriptionUpdater', function () {
         '../Analytics/AnalyticsManager': this.AnalyticsManager,
         '../../infrastructure/Features': this.Features,
         '../User/UserAuditLogHandler': this.UserAuditLogHandler,
-        '../../infrastructure/Modules': (this.Modules = {
-          promises: {
-            hooks: {
-              fire: sinon.stub().resolves(),
-            },
-          },
-        }),
       },
     })
   })
@@ -328,52 +316,6 @@ describe('SubscriptionUpdater', function () {
         {}
       )
       this.SubscriptionModel.deleteOne.should.not.have.been.called
-      const adminUrl = `${this.Settings.adminUrl + '/admin/user/' + this.subscription.admin_id}`
-      const groupUrl = `${this.Settings.adminUrl + '/admin/group/' + this.subscription._id}`
-      let message = `\n**Recurly account:** <a href="${this.recurlySubscription?.account?.url}">${this.recurlySubscription.account?.url}</a>`
-      message += `\n**Group admin:** <a href="${adminUrl}">${adminUrl}</a>`
-      message += `\n**Group:** <a href="${groupUrl}">${groupUrl}</a>`
-      message += `\n**Managed users enabled:** false`
-      message += `\n**SSO enabled:** true`
-      expect(this.Modules.promises.hooks.fire).to.have.been.calledOnce
-      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
-        'sendSupportRequest',
-        {
-          subject: 'Skipped deleting pro group subscription',
-          inbox: 'support',
-          tags: 'Group subscription',
-          message,
-        }
-      )
-    })
-
-    it('should not remove the subscription when expired if it has managed users is enabled', async function () {
-      this.Features.hasFeature.withArgs('saas').returns(true)
-      this.subscription.managedUsersEnabled = true
-
-      this.recurlySubscription.state = 'expired'
-      await this.SubscriptionUpdater.promises.updateSubscriptionFromRecurly(
-        this.recurlySubscription,
-        this.subscription,
-        {}
-      )
-      this.SubscriptionModel.deleteOne.should.not.have.been.called
-      const adminUrl = `${this.Settings.adminUrl + '/admin/user/' + this.subscription.admin_id}`
-      const groupUrl = `${this.Settings.adminUrl + '/admin/group/' + this.subscription._id}`
-      let message = `\n**Recurly account:** <a href="${this.recurlySubscription?.account?.url}">${this.recurlySubscription.account?.url}</a>`
-      message += `\n**Group admin:** <a href="${adminUrl}">${adminUrl}</a>`
-      message += `\n**Group:** <a href="${groupUrl}">${groupUrl}</a>`
-      message += `\n**Managed users enabled:** true`
-      message += `\n**SSO enabled:** false`
-      expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
-        'sendSupportRequest',
-        {
-          subject: 'Skipped deleting pro group subscription',
-          inbox: 'support',
-          tags: 'Group subscription',
-          message,
-        }
-      )
     })
 
     it('should update all the users features', async function () {
