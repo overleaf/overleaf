@@ -1,5 +1,6 @@
 import esmock from 'esmock'
 import sinon from 'sinon'
+import { expect } from 'chai'
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupController'
 
@@ -24,6 +25,7 @@ describe('SubscriptionGroupController', function () {
 
     this.subscription = {
       _id: this.subscriptionId,
+      teamName: 'Cool group',
     }
 
     this.SubscriptionGroupHandler = {
@@ -35,6 +37,7 @@ describe('SubscriptionGroupController', function () {
     this.SubscriptionLocator = {
       promises: {
         getSubscription: sinon.stub().resolves(this.subscription),
+        getUsersSubscription: sinon.stub().resolves(this.subscription),
       },
     }
 
@@ -61,6 +64,13 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
+    this.SplitTestHandler = {
+      promises: {
+        getAssignment: sinon.stub().resolves({ variant: 'default' }),
+      },
+      getAssignment: sinon.stub().yields(null, { variant: 'default' }),
+    }
+
     this.Controller = await esmock.strict(modulePath, {
       '../../../../app/src/Features/Subscription/SubscriptionGroupHandler':
         this.SubscriptionGroupHandler,
@@ -71,6 +81,12 @@ describe('SubscriptionGroupController', function () {
       '../../../../app/src/Features/User/UserAuditLogHandler':
         this.UserAuditLogHandler,
       '../../../../app/src/infrastructure/Modules': this.Modules,
+      '../../../../app/src/Features/SplitTests/SplitTestHandler':
+        this.SplitTestHandler,
+      '../../../../app/src/Features/Errors/ErrorController':
+        (this.ErrorController = {
+          notFound: sinon.stub(),
+        }),
     })
   })
 
@@ -251,6 +267,21 @@ describe('SubscriptionGroupController', function () {
         },
       }
       this.Controller.removeSelfFromGroup(this.req, res, done)
+    })
+  })
+
+  describe('add seats', function () {
+    it('render the request confirmation view', async function () {
+      this.SplitTestHandler.promises.getAssignment.resolves({
+        variant: 'enabled',
+      })
+      await this.Controller.requestConfirmation(this.req, {
+        render: (viewPath, viewParams) => {
+          expect(viewPath).to.equal('subscriptions/request-confirmation-react')
+          expect(viewParams.groupName).to.equal('Cool group')
+        },
+      })
+      expect(this.ErrorController.notFound).to.not.have.been.called
     })
   })
 })

@@ -183,3 +183,21 @@
     padding: var(--spacing-10) var(--spacing-09);
   }
 }
+
+.card-icon {
+  display: flex;
+  width: max-content;
+  margin: 0 auto;
+  padding: var(--spacing-08);
+  border-radius: 50%;
+  background-color: var(--bg-light-secondary);
+  color: var(--content-secondary);
+
+  .material-symbols {
+    font-size: 2rem;
+  }
+}
+
+.card-description-secondary {
+  color: var(--content-secondary);
+}

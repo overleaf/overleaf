@@ -80,6 +80,13 @@ export default {
       SubscriptionGroupController.removeSelfFromGroup
     )
 
+    webRouter.get(
+      '/user/subscription/group/request-confirmation',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.requestConfirmation
+    )
+
     // Team invites
     webRouter.get(
       '/subscription/invites/:token/',

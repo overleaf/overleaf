@@ -158,3 +158,21 @@
     }
   }
 }
+
+.group-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-04);
+  margin-bottom: var(--spacing-06);
+
+  h2 {
+    @include heading-lg;
+
+    margin: 0;
+    word-break: break-all;
+  }
+
+  .btn-ghost {
+    --bs-btn-bg: transparent;
+  }
+}

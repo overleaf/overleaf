@@ -8,6 +8,8 @@ import SessionManager from '../Authentication/SessionManager.js'
 import UserAuditLogHandler from '../User/UserAuditLogHandler.js'
 import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
+import ErrorController from '../Errors/ErrorController.js'
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription"
@@ -111,7 +113,33 @@ async function _removeUserFromGroup(
   res.sendStatus(200)
 }
 
+async function requestConfirmation(req, res) {
+  const { variant } = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'flexible-group-licensing'
+  )
+
+  if (variant !== 'enabled') {
+    return ErrorController.notFound(req, res)
+  }
+
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const subscription =
+      await SubscriptionLocator.promises.getUsersSubscription(userId)
+
+    res.render('subscriptions/request-confirmation-react', {
+      groupName: subscription.teamName,
+    })
+  } catch (error) {
+    logger.err({ error }, 'error trying to request seats to subscription')
+    return res.render('/user/subscription')
+  }
+}
+
 export default {
   removeUserFromGroup: expressify(removeUserFromGroup),
   removeSelfFromGroup: expressify(removeSelfFromGroup),
+  requestConfirmation: expressify(requestConfirmation),
 }
