@@ -43,24 +43,21 @@ export const reviewTooltip = (): Extension => {
   return [
     reviewTooltipTheme,
     reviewTooltipStateField,
+    EditorView.updateListener.of(update => {
+      if (update.selectionSet && !update.state.selection.main.empty) {
+        update.view.dispatch({
+          effects: textSelectedEffect.of(update.view),
+        })
+      } else if (
+        !update.startState.selection.main.empty &&
+        update.state.selection.main.empty
+      ) {
+        update.view.dispatch({
+          effects: removeReviewPanelTooltipEffect.of(null),
+        })
+      }
+    }),
     EditorView.domEventHandlers({
-      mouseup(event, view) {
-        if (!view.state.selection.main.empty) {
-          view.dispatch({
-            effects: textSelectedEffect.of(view),
-          })
-        }
-      },
-      keyup(event, view) {
-        if (
-          (event.shiftKey || event.key === 'Meta') &&
-          !view.state.selection.main.empty
-        ) {
-          view.dispatch({
-            effects: textSelectedEffect.of(view),
-          })
-        }
-      },
       mousedown(event, view) {
         view.dispatch({
           effects: removeReviewPanelTooltipEffect.of(null),
