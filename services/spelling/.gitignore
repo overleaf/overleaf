@@ -1,8 +1,0 @@
-**.swp
-**.swo
-node_modules/*
-cache/spell.cache
-**/*.map
-
-# managed by dev-environment$ bin/update_build_scripts
-.npmrc
