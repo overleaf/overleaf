@@ -12,9 +12,13 @@ import GenericMessageModal, {
 import OutOfSyncModal, {
   OutOfSyncModalProps,
 } from '@/features/ide-react/components/modals/out-of-sync-modal'
+import GenericConfirmModal, {
+  GenericConfirmModalOwnProps,
+} from '../components/modals/generic-confirm-modal'
 
 type ModalsContextValue = {
   genericModalVisible: boolean
+  showGenericConfirmModal: (data: GenericConfirmModalOwnProps) => void
   showGenericMessageModal: (
     title: GenericMessageModalOwnProps['title'],
     message: GenericMessageModalOwnProps['message']
@@ -28,8 +32,15 @@ const ModalsContext = createContext<ModalsContextValue | undefined>(undefined)
 
 export const ModalsContextProvider: FC = ({ children }) => {
   const [showGenericModal, setShowGenericModal] = useState(false)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [genericMessageModalData, setGenericMessageModalData] =
     useState<GenericMessageModalOwnProps>({ title: '', message: '' })
+  const [genericConfirmModalData, setGenericConfirmModalData] =
+    useState<GenericConfirmModalOwnProps>({
+      title: '',
+      message: '',
+      onConfirm: () => {},
+    })
 
   const [shouldShowOutOfSyncModal, setShouldShowOutOfSyncModal] =
     useState(false)
@@ -41,6 +52,15 @@ export const ModalsContextProvider: FC = ({ children }) => {
     setShowGenericModal(false)
   }, [])
 
+  const handleHideGenericConfirmModal = useCallback(() => {
+    setShowConfirmModal(false)
+  }, [])
+
+  const handleConfirmGenericConfirmModal = useCallback(() => {
+    genericConfirmModalData.onConfirm()
+    setShowConfirmModal(false)
+  }, [genericConfirmModalData])
+
   const showGenericMessageModal = useCallback(
     (
       title: GenericMessageModalOwnProps['title'],
@@ -48,6 +68,14 @@ export const ModalsContextProvider: FC = ({ children }) => {
     ) => {
       setGenericMessageModalData({ title, message })
       setShowGenericModal(true)
+    },
+    []
+  )
+
+  const showGenericConfirmModal = useCallback(
+    (data: GenericConfirmModalOwnProps) => {
+      setGenericConfirmModalData(data)
+      setShowConfirmModal(true)
     },
     []
   )
@@ -64,10 +92,16 @@ export const ModalsContextProvider: FC = ({ children }) => {
   const value = useMemo<ModalsContextValue>(
     () => ({
       showGenericMessageModal,
+      showGenericConfirmModal,
       genericModalVisible: showGenericModal,
       showOutOfSyncModal,
     }),
-    [showGenericMessageModal, showGenericModal, showOutOfSyncModal]
+    [
+      showGenericMessageModal,
+      showGenericConfirmModal,
+      showGenericModal,
+      showOutOfSyncModal,
+    ]
   )
 
   return (
@@ -77,6 +111,12 @@ export const ModalsContextProvider: FC = ({ children }) => {
         show={showGenericModal}
         onHide={handleHideGenericModal}
         {...genericMessageModalData}
+      />
+      <GenericConfirmModal
+        show={showConfirmModal}
+        onHide={handleHideGenericConfirmModal}
+        {...genericConfirmModalData}
+        onConfirm={handleConfirmGenericConfirmModal}
       />
       <OutOfSyncModal
         {...outOfSyncModalData}

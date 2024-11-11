@@ -30,6 +30,8 @@ import {
 import { isInsertOperation } from '@/utils/operations'
 import { isCursorNearViewportEdge } from '@/features/source-editor/utils/is-cursor-near-edge'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
+import { useModalsContext } from '@/features/ide-react/context/modals-context'
+import { numberOfChangesInSelection } from '../utils/changes-in-selection'
 
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -72,6 +74,7 @@ const ReviewTooltipMenuContent: FC<{
   const { setView } = useReviewPanelViewActionsContext()
   const ranges = useRangesContext()
   const { acceptChanges, rejectChanges } = useRangesActionsContext()
+  const { showGenericConfirmModal } = useModalsContext()
 
   const addComment = useCallback(() => {
     setReviewPanelOpen(true)
@@ -109,12 +112,42 @@ const ReviewTooltipMenuContent: FC<{
   }, [ranges, state.selection.main])
 
   const acceptChangesHandler = useCallback(() => {
-    acceptChanges(...changeIdsInSelection)
-  }, [acceptChanges, changeIdsInSelection])
+    const nChanges = numberOfChangesInSelection(ranges, state.selection.main)
+    showGenericConfirmModal({
+      message: t('confirm_accept_selected_changes', { count: nChanges }),
+      title: t('accept_selected_changes'),
+      onConfirm: () => {
+        acceptChanges(...changeIdsInSelection)
+      },
+      primaryVariant: 'danger',
+    })
+  }, [
+    acceptChanges,
+    changeIdsInSelection,
+    ranges,
+    showGenericConfirmModal,
+    state.selection.main,
+    t,
+  ])
 
   const rejectChangesHandler = useCallback(() => {
-    rejectChanges(...changeIdsInSelection)
-  }, [rejectChanges, changeIdsInSelection])
+    const nChanges = numberOfChangesInSelection(ranges, state.selection.main)
+    showGenericConfirmModal({
+      message: t('confirm_reject_selected_changes', { count: nChanges }),
+      title: t('reject_selected_changes'),
+      onConfirm: () => {
+        rejectChanges(...changeIdsInSelection)
+      },
+      primaryVariant: 'danger',
+    })
+  }, [
+    showGenericConfirmModal,
+    t,
+    ranges,
+    state.selection.main,
+    rejectChanges,
+    changeIdsInSelection,
+  ])
 
   const showChangesButtons = changeIdsInSelection.length > 0
 
@@ -130,7 +163,10 @@ const ReviewTooltipMenuContent: FC<{
       {showChangesButtons && (
         <>
           <div className="review-tooltip-menu-divider" />
-          <OLTooltip id="accept-all-changes" description={t('accept_all')}>
+          <OLTooltip
+            id="accept-all-changes"
+            description={t('accept_selected_changes')}
+          >
             <button
               className="review-tooltip-menu-button"
               onClick={acceptChangesHandler}
@@ -139,7 +175,10 @@ const ReviewTooltipMenuContent: FC<{
             </button>
           </OLTooltip>
 
-          <OLTooltip id="reject-all-changes" description={t('reject_all')}>
+          <OLTooltip
+            id="reject-all-changes"
+            description={t('reject_selected_changes')}
+          >
             <button
               className="review-tooltip-menu-button"
               onClick={rejectChangesHandler}
