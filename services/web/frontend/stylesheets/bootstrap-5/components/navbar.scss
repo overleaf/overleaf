@@ -149,7 +149,8 @@
         display: block;
 
         > a,
-        > .dropdown-toggle {
+        > .dropdown-toggle,
+        > .nav-link {
           margin: 0;
           padding-top: var(--spacing-05);
           padding-bottom: var(--spacing-05);
