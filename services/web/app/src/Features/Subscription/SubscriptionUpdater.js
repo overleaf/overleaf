@@ -274,6 +274,27 @@ async function _notifySupportSubscriptionDeletionSkipped(
   await Modules.promises.hooks.fire('sendSupportRequest', data)
 }
 
+async function _notifySubscriptionDowngradeSkipped(
+  subscription,
+  recurlySubscription,
+  subject
+) {
+  const adminUrl = `${Settings.adminUrl + '/admin/user/' + subscription.admin_id}`
+  const groupUrl = `${Settings.adminUrl + '/admin/group/' + subscription._id}`
+  let message = `\n**Recurly account:** <a href="${recurlySubscription?.account?.url}">${recurlySubscription?.account?.url}</a>`
+  message += `\n**Group admin:** <a href="${adminUrl}">${adminUrl}</a>`
+  message += `\n**Group:** <a href="${groupUrl}">${groupUrl}</a>`
+
+  const data = {
+    subject,
+    inbox: 'support',
+    tags: 'Group subscription',
+    message,
+  }
+
+  await Modules.promises.hooks.fire('sendSupportRequest', data)
+}
+
 async function updateSubscriptionFromRecurly(
   recurlySubscription,
   subscription,
@@ -353,6 +374,8 @@ async function updateSubscriptionFromRecurly(
     return
   }
 
+  const currentSubscriptionPlanCode = subscription.planCode
+
   const addOns = recurlySubscription?.subscription_add_ons?.map(addOn => {
     return {
       addOnCode: addOn.add_on_code,
@@ -371,13 +394,65 @@ async function updateSubscriptionFromRecurly(
   }
 
   if (plan.groupPlan) {
+    if (Settings.preventSubscriptionPlanDowngrade) {
+      // We're preventing professional to standard downgrade.
+      // See https://github.com/overleaf/internal/issues/19852
+      const isProfessionalToStandardDowngrade =
+        currentSubscriptionPlanCode.includes('professional') &&
+        plan.planCode.includes('collaborator') &&
+        !plan.planCode.includes('_ibis') &&
+        !plan.planCode.includes('_heron') &&
+        plan.planCode !== 'collaborator-annual_free_trial'
+
+      if (isProfessionalToStandardDowngrade) {
+        try {
+          await _notifySubscriptionDowngradeSkipped(
+            subscription,
+            recurlySubscription,
+            'Skipped professional to standard downgrade'
+          )
+        } catch (e) {
+          logger.warn(
+            { subscriptionId: subscription._id },
+            'unable to send notification to support that  professional to standard downgrade was skipped'
+          )
+        }
+        subscription.planCode = currentSubscriptionPlanCode
+      }
+    }
+
     if (!subscription.groupPlan) {
       subscription.member_ids = subscription.member_ids || []
       subscription.member_ids.push(subscription.admin_id)
     }
 
     subscription.groupPlan = true
-    subscription.membersLimit = plan.membersLimit
+
+    if (Settings.preventSubscriptionPlanDowngrade) {
+      // We're preventing automatically downgrading of group member limit
+      // See https://github.com/overleaf/internal/issues/19852
+      if (
+        !subscription.membersLimit ||
+        subscription.membersLimit < plan.membersLimit
+      ) {
+        subscription.membersLimit = plan.membersLimit
+      } else {
+        try {
+          await _notifySubscriptionDowngradeSkipped(
+            subscription,
+            recurlySubscription,
+            'Skipped group size downgrade'
+          )
+        } catch (e) {
+          logger.warn(
+            { subscriptionId: subscription._id },
+            'unable to send notification to support that group size downgrade was skipped'
+          )
+        }
+      }
+    } else {
+      subscription.membersLimit = plan.membersLimit
+    }
 
     // Some plans allow adding more seats than the base plan provides.
     // This is recorded as a subscription add on.
