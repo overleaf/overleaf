@@ -126,6 +126,7 @@ describe('emacs keybindings', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
+    cy.interceptMetadata()
 
     const shortDoc = `
 \\documentclass{article}
@@ -227,6 +228,7 @@ describe('vim keybindings', { scrollBehavior: false }, function () {
   beforeEach(function () {
     window.metaAttributesCache.set('ol-preventCompileOnLoad', true)
     cy.interceptEvents()
+    cy.interceptMetadata()
 
     // Make a short doc that will fit entirely into the dom tree, so that
     // index() corresponds to line number - 1

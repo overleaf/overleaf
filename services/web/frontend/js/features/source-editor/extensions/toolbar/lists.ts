@@ -6,7 +6,6 @@ import {
   SelectionRange,
 } from '@codemirror/state'
 import {
-  getIndentation,
   getIndentUnit,
   IndentContext,
   indentString,
@@ -38,7 +37,7 @@ const wrapRangeInList = (
   prefix = ''
 ) => {
   const cx = new IndentContext(state)
-  const columns = getIndentation(cx, range.from) ?? 0
+  const columns = cx.lineIndent(range.from)
   const unit = getIndentUnit(state)
   const indent = indentString(state, columns)
   const itemIndent = indentString(state, columns + unit)
@@ -113,7 +112,7 @@ const unwrapRangeFromList = (
   const listToLine = state.doc.lineAt(list.to)
 
   const cx = new IndentContext(state)
-  const columns = getIndentation(cx, range.from) ?? 0
+  const columns = cx.lineIndent(range.from)
   const unit = getIndentUnit(state)
   const indent = indentString(state, columns - unit) // decrease indent depth
 
@@ -270,7 +269,8 @@ const toggleListForRange = (
 
               // if the line before the command is empty, remove one unit of indentation
               if (lineBeforeCommand.trim().length === 0) {
-                const indentation = getIndentation(view.state, itemNode.from)
+                const cx = new IndentContext(view.state)
+                const indentation = cx.lineIndent(itemNode.from)
                 change.from -= Math.min(indentation ?? 0, indentUnit)
               }
 
