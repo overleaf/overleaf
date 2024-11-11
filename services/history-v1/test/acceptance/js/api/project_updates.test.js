@@ -11,6 +11,7 @@ const expectResponse = require('./support/expect_response')
 const testServer = require('./support/test_server')
 
 const core = require('overleaf-editor-core')
+const testProjects = require('./support/test_projects')
 const Change = core.Change
 const ChunkResponse = core.ChunkResponse
 const File = core.File
@@ -637,10 +638,10 @@ describe('history import', function () {
 
     let testProjectId
 
-    return BPromise.resolve(basicAuthClient.apis.Project.initializeProject())
-      .then(response => {
-        expect(response.status).to.equal(HTTPStatus.OK)
-        testProjectId = response.obj.projectId
+    return testProjects
+      .createEmptyProject()
+      .then(projectId => {
+        testProjectId = projectId
         expect(testProjectId).to.be.a('string')
       })
       .then(() => {
@@ -705,10 +706,10 @@ describe('history import', function () {
 
     let testProjectId
 
-    return basicAuthClient.apis.Project.initializeProject()
-      .then(response => {
-        expect(response.status).to.equal(HTTPStatus.OK)
-        testProjectId = response.obj.projectId
+    return testProjects
+      .createEmptyProject()
+      .then(projectId => {
+        testProjectId = projectId
         expect(testProjectId).to.be.a('string')
       })
       .then(() => {
@@ -756,10 +757,10 @@ describe('history import', function () {
 
     let testProjectId
 
-    return basicAuthClient.apis.Project.initializeProject()
-      .then(response => {
-        expect(response.status).to.equal(HTTPStatus.OK)
-        testProjectId = response.obj.projectId
+    return testProjects
+      .createEmptyProject()
+      .then(projectId => {
+        testProjectId = projectId
         expect(testProjectId).to.be.a('string')
       })
       .then(() => {
@@ -802,10 +803,9 @@ describe('history import', function () {
   })
 
   it("returns unprocessable if end_version isn't provided", function () {
-    return basicAuthClient.apis.Project.initializeProject()
-      .then(response => {
-        expect(response.status).to.equal(HTTPStatus.OK)
-        const projectId = response.obj.projectId
+    return testProjects
+      .createEmptyProject()
+      .then(projectId => {
         expect(projectId).to.be.a('string')
         return projectId
       })
@@ -828,11 +828,8 @@ describe('history import', function () {
   })
 
   it('returns unprocessable if return_snapshot is invalid', function () {
-    return basicAuthClient.apis.Project.initializeProject()
-      .then(response => {
-        expect(response.status).to.equal(HTTPStatus.OK)
-        return response.obj.projectId
-      })
+    return testProjects
+      .createEmptyProject()
       .then(projectId => {
         // Import changes
         return basicAuthClient.apis.ProjectImport.importChanges1({

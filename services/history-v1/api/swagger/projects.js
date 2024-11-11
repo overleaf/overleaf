@@ -9,6 +9,7 @@ exports.paths = {
       operationId: 'initializeProject',
       tags: ['Project'],
       description: 'Initialize project.',
+      consumes: ['application/json'],
       parameters: [
         {
           name: 'body',
