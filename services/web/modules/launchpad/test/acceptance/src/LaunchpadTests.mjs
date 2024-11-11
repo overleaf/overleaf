@@ -1,6 +1,6 @@
-const { expect } = require('chai')
-const cheerio = require('cheerio')
-const UserHelper = require('../../../../../test/acceptance/src/helpers/UserHelper')
+import { expect } from 'chai'
+import cheerio from 'cheerio'
+import UserHelper from '../../../../../test/acceptance/src/helpers/UserHelper.js'
 
 describe('Launchpad', function () {
   const adminEmail = 'admin@example.com'

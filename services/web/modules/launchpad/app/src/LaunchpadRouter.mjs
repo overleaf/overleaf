@@ -1,20 +1,10 @@
-/* eslint-disable
-    max-len,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const logger = require('@overleaf/logger')
-const LaunchpadController = require('./LaunchpadController')
-const AuthenticationController = require('../../../../app/src/Features/Authentication/AuthenticationController')
-const AuthorizationMiddleware = require('../../../../app/src/Features/Authorization/AuthorizationMiddleware')
+import logger from '@overleaf/logger'
 
-module.exports = {
+import LaunchpadController from './LaunchpadController.mjs'
+import AuthenticationController from '../../../../app/src/Features/Authentication/AuthenticationController.js'
+import AuthorizationMiddleware from '../../../../app/src/Features/Authorization/AuthorizationMiddleware.js'
+
+export default {
   apply(webRouter) {
     logger.debug({}, 'Init launchpad router')
 
@@ -37,7 +27,7 @@ module.exports = {
       LaunchpadController.sendTestEmail
     )
 
-    if (AuthenticationController.addEndpointToLoginWhitelist != null) {
+    if (AuthenticationController.addEndpointToLoginWhitelist) {
       AuthenticationController.addEndpointToLoginWhitelist('/launchpad')
       AuthenticationController.addEndpointToLoginWhitelist(
         '/launchpad/register_admin'
@@ -45,7 +35,7 @@ module.exports = {
       AuthenticationController.addEndpointToLoginWhitelist(
         '/launchpad/register_ldap_admin'
       )
-      return AuthenticationController.addEndpointToLoginWhitelist(
+      AuthenticationController.addEndpointToLoginWhitelist(
         '/launchpad/register_saml_admin'
       )
     }

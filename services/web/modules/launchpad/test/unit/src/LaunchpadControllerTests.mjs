@@ -1,26 +1,24 @@
-/* eslint-disable
-    max-len,
-    no-return-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const SandboxedModule = require('sandboxed-module')
-const { expect } = require('chai')
-const sinon = require('sinon')
-const MockResponse = require('../../../../../test/unit/src/helpers/MockResponse')
-const modulePath = require('path').join(
+import { fileURLToPath } from 'node:url'
+import * as path from 'node:path'
+import { strict as esmock } from 'esmock'
+import { expect } from 'chai'
+import sinon from 'sinon'
+import Settings from '@overleaf/settings'
+import MockResponse from '../../../../../test/unit/src/helpers/MockResponse.js'
+
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
+const modulePath = path.join(
   __dirname,
-  '../../../app/src/LaunchpadController.js'
+  '../../../app/src/LaunchpadController.mjs'
 )
 
 describe('LaunchpadController', function () {
-  beforeEach(function () {
+  // esmock doesn't work well with CommonJS dependencies, global imports for
+  // @overleaf/settings aren't working until that module is migrated to ESM. In the
+  // meantime, the workaroung is to set and restore settings values
+  let oldSettingsAdminPrivilegeAvailable
+
+  beforeEach(async function () {
     this.user = {
       _id: '323123',
       first_name: 'fn',
@@ -28,30 +26,30 @@ describe('LaunchpadController', function () {
       save: sinon.stub().callsArgWith(0),
     }
 
+    oldSettingsAdminPrivilegeAvailable = Settings.adminPrivilegeAvailable
+    Settings.adminPrivilegeAvailable = true
+
     this.User = {}
-    this.LaunchpadController = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': (this.Settings = {
-          adminPrivilegeAvailable: true,
-        }),
-        '@overleaf/metrics': (this.Metrics = {}),
-        '../../../../app/src/Features/User/UserRegistrationHandler':
-          (this.UserRegistrationHandler = {
-            promises: {},
-          }),
-        '../../../../app/src/Features/Email/EmailHandler': (this.EmailHandler =
-          { promises: {} }),
-        '../../../../app/src/Features/User/UserGetter': (this.UserGetter = {
+    this.LaunchpadController = await esmock(modulePath, {
+      '@overleaf/metrics': (this.Metrics = {}),
+      '../../../../../app/src/Features/User/UserRegistrationHandler.js':
+        (this.UserRegistrationHandler = {
           promises: {},
         }),
-        '../../../../app/src/models/User': { User: this.User },
-        '../../../../app/src/Features/Authentication/AuthenticationController':
-          (this.AuthenticationController = {}),
-        '../../../../app/src/Features/Authentication/AuthenticationManager':
-          (this.AuthenticationManager = {}),
-        '../../../../app/src/Features/Authentication/SessionManager':
-          (this.SessionManager = {}),
-      },
+      '../../../../../app/src/Features/Email/EmailHandler.js':
+        (this.EmailHandler = { promises: {} }),
+      '../../../../../app/src/Features/User/UserGetter.js': (this.UserGetter = {
+        promises: {},
+      }),
+      '../../../../../app/src/models/User.js': { User: this.User },
+      '../../../../../app/src/Features/Authentication/AuthenticationController.js':
+        (this.AuthenticationController = {}),
+      '../../../../../app/src/Features/Authentication/AuthenticationManager.js':
+        (this.AuthenticationManager = {}),
+      '../../../../../app/src/Features/Authentication/SessionManager.js':
+        (this.SessionManager = {
+          getSessionUser: sinon.stub(),
+        }),
     })
 
     this.email = 'bob@smith.com'
@@ -72,17 +70,16 @@ describe('LaunchpadController', function () {
     this.next = sinon.stub()
   })
 
+  afterEach(function () {
+    Settings.adminPrivilegeAvailable = oldSettingsAdminPrivilegeAvailable
+  })
+
   describe('launchpadPage', function () {
     beforeEach(function () {
-      this._atLeastOneAdminExists = sinon.stub(
-        this.LaunchpadController,
-        '_atLeastOneAdminExists'
-      )
-      return (this.AuthenticationController.setRedirectInSession = sinon.stub())
-    })
-
-    afterEach(function () {
-      return this._atLeastOneAdminExists.restore()
+      this.LaunchpadController._mocks._atLeastOneAdminExists = sinon.stub()
+      this._atLeastOneAdminExists =
+        this.LaunchpadController._mocks._atLeastOneAdminExists
+      this.AuthenticationController.setRedirectInSession = sinon.stub()
     })
 
     describe('when the user is not logged in', function () {
@@ -91,9 +88,9 @@ describe('LaunchpadController', function () {
       })
 
       describe('when there are no admins', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this._atLeastOneAdminExists.resolves(false)
-          return this.LaunchpadController.launchpadPage(
+          await this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
             this.next
@@ -101,12 +98,9 @@ describe('LaunchpadController', function () {
         })
 
         it('should render the launchpad page', function () {
-          const viewPath = require('path').join(
-            __dirname,
-            '../../../app/views/launchpad'
-          )
+          const viewPath = path.join(__dirname, '../../../app/views/launchpad')
           this.res.render.callCount.should.equal(1)
-          return this.res.render
+          this.res.render
             .calledWith(viewPath, {
               adminUserExists: false,
               authMethod: 'local',
@@ -116,9 +110,9 @@ describe('LaunchpadController', function () {
       })
 
       describe('when there is at least one admin', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this._atLeastOneAdminExists.resolves(true)
-          return this.LaunchpadController.launchpadPage(
+          await this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
             this.next
@@ -133,7 +127,7 @@ describe('LaunchpadController', function () {
         })
 
         it('should not render the launchpad page', function () {
-          return this.res.render.callCount.should.equal(0)
+          this.res.render.callCount.should.equal(0)
         })
       })
     })
@@ -144,16 +138,16 @@ describe('LaunchpadController', function () {
           _id: 'abcd',
           email: 'abcd@example.com',
         }
-        this.SessionManager.getSessionUser = sinon.stub().returns(this.user)
+        this.SessionManager.getSessionUser.returns(this.user)
         this._atLeastOneAdminExists.resolves(true)
       })
 
       describe('when the user is an admin', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.UserGetter.promises.getUser = sinon
             .stub()
             .resolves({ isAdmin: true })
-          return this.LaunchpadController.launchpadPage(
+          await this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
             this.next
@@ -161,10 +155,7 @@ describe('LaunchpadController', function () {
         })
 
         it('should render the launchpad page', function () {
-          const viewPath = require('path').join(
-            __dirname,
-            '../../../app/views/launchpad'
-          )
+          const viewPath = path.join(__dirname, '../../../app/views/launchpad')
           this.res.render.callCount.should.equal(1)
           this.res.render
             .calledWith(viewPath, {
@@ -177,11 +168,11 @@ describe('LaunchpadController', function () {
       })
 
       describe('when the user is not an admin', function () {
-        beforeEach(function () {
+        beforeEach(async function () {
           this.UserGetter.promises.getUser = sinon
             .stub()
             .resolves({ isAdmin: false })
-          return this.LaunchpadController.launchpadPage(
+          await this.LaunchpadController.launchpadPage(
             this.req,
             this.res,
             this.next
@@ -190,7 +181,7 @@ describe('LaunchpadController', function () {
 
         it('should redirect to restricted page', function () {
           this.res.redirect.callCount.should.equal(1)
-          return this.res.redirect.calledWith('/restricted').should.equal(true)
+          this.res.redirect.calledWith('/restricted').should.equal(true)
         })
       })
     })
@@ -199,7 +190,7 @@ describe('LaunchpadController', function () {
   describe('_atLeastOneAdminExists', function () {
     describe('when there are no admins', function () {
       beforeEach(function () {
-        return (this.UserGetter.promises.getUser = sinon.stub().resolves(null))
+        this.UserGetter.promises.getUser = sinon.stub().resolves(null)
       })
 
       it('should callback with false', async function () {
@@ -210,9 +201,9 @@ describe('LaunchpadController', function () {
 
     describe('when there are some admins', function () {
       beforeEach(function () {
-        return (this.UserGetter.promises.getUser = sinon
+        this.UserGetter.promises.getUser = sinon
           .stub()
-          .resolves({ _id: 'abcd' }))
+          .resolves({ _id: 'abcd' })
       })
 
       it('should callback with true', async function () {
@@ -223,9 +214,9 @@ describe('LaunchpadController', function () {
 
     describe('when getUser produces an error', function () {
       beforeEach(function () {
-        return (this.UserGetter.promises.getUser = sinon
+        this.UserGetter.promises.getUser = sinon
           .stub()
-          .rejects(new Error('woops')))
+          .rejects(new Error('woops'))
       })
 
       it('should produce an error', async function () {
@@ -251,7 +242,7 @@ describe('LaunchpadController', function () {
 
     it('should not call next with an error', function () {
       this.LaunchpadController.sendTestEmail(this.req, this.res, this.next)
-      return this.next.callCount.should.equal(0)
+      this.next.callCount.should.equal(0)
     })
 
     it('should have called sendEmail', async function () {
@@ -261,16 +252,16 @@ describe('LaunchpadController', function () {
         this.next
       )
       this.EmailHandler.promises.sendEmail.callCount.should.equal(1)
-      return this.EmailHandler.promises.sendEmail
+      this.EmailHandler.promises.sendEmail
         .calledWith('testEmail')
         .should.equal(true)
     })
 
     describe('when sendEmail produces an error', function () {
       beforeEach(function () {
-        return (this.EmailHandler.promises.sendEmail = sinon
+        this.EmailHandler.promises.sendEmail = sinon
           .stub()
-          .rejects(new Error('woops')))
+          .rejects(new Error('woops'))
       })
 
       it('should call next with an error', function (done) {
@@ -285,7 +276,7 @@ describe('LaunchpadController', function () {
 
     describe('when no email address is supplied', function () {
       beforeEach(function () {
-        return (this.req.body.email = undefined)
+        this.req.body.email = undefined
       })
 
       it('should produce a 400 response', function () {
@@ -302,18 +293,13 @@ describe('LaunchpadController', function () {
 
   describe('registerAdmin', function () {
     beforeEach(function () {
-      return (this._atLeastOneAdminExists = sinon.stub(
-        this.LaunchpadController,
-        '_atLeastOneAdminExists'
-      ))
-    })
-
-    afterEach(function () {
-      return this._atLeastOneAdminExists.restore()
+      this.LaunchpadController._mocks._atLeastOneAdminExists = sinon.stub()
+      this._atLeastOneAdminExists =
+        this.LaunchpadController._mocks._atLeastOneAdminExists
     })
 
     describe('when all goes well', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -332,7 +318,7 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -345,21 +331,21 @@ describe('LaunchpadController', function () {
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({ email: this.email, password: this.password })
           .should.equal(true)
       })
 
       it('should have updated the user to make them an admin', function () {
         this.User.updateOne.callCount.should.equal(1)
-        return this.User.updateOne
+        this.User.updateOne
           .calledWithMatch(
             { _id: this.user._id },
             {
@@ -376,7 +362,7 @@ describe('LaunchpadController', function () {
     })
 
     describe('when no email is supplied', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = undefined
         this.password = 'a_really_bad_password'
@@ -389,7 +375,7 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -398,22 +384,22 @@ describe('LaunchpadController', function () {
 
       it('should send a 400 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
 
       it('should not check for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(0)
+        this._atLeastOneAdminExists.callCount.should.equal(0)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when no password is supplied', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = undefined
@@ -426,7 +412,7 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -435,22 +421,22 @@ describe('LaunchpadController', function () {
 
       it('should send a 400 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
 
       it('should not check for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(0)
+        this._atLeastOneAdminExists.callCount.should.equal(0)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when an invalid email is supplied', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'invalid password'
@@ -467,7 +453,7 @@ describe('LaunchpadController', function () {
           .stub()
           .returns(new Error('bad email'))
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -477,20 +463,20 @@ describe('LaunchpadController', function () {
       it('should send a 400 response', function () {
         this.res.status.callCount.should.equal(1)
         this.res.status.calledWith(400).should.equal(true)
-        return this.res.json.calledWith({
+        this.res.json.calledWith({
           message: { type: 'error', text: 'bad email' },
         })
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when an invalid password is supplied', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'invalid password'
@@ -507,7 +493,7 @@ describe('LaunchpadController', function () {
         this.AuthenticationManager.validatePassword = sinon
           .stub()
           .returns(new Error('bad password'))
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -517,20 +503,20 @@ describe('LaunchpadController', function () {
       it('should send a 400 response', function () {
         this.res.status.callCount.should.equal(1)
         this.res.status.calledWith(400).should.equal(true)
-        return this.res.json.calledWith({
+        this.res.json.calledWith({
           message: { type: 'error', text: 'bad password' },
         })
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when there are already existing admins', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(true)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -545,7 +531,7 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -554,18 +540,18 @@ describe('LaunchpadController', function () {
 
       it('should send a 403 response', function () {
         this.res.status.callCount.should.equal(1)
-        return this.res.status.calledWith(403).should.equal(true)
+        this.res.status.calledWith(403).should.equal(true)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when checking admins produces an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.rejects(new Error('woops'))
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -578,7 +564,7 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -587,22 +573,22 @@ describe('LaunchpadController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when registerNewUser produces an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -619,7 +605,7 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -628,29 +614,29 @@ describe('LaunchpadController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({ email: this.email, password: this.password })
           .should.equal(true)
       })
 
       it('should not call update', function () {
-        return this.User.updateOne.callCount.should.equal(0)
+        this.User.updateOne.callCount.should.equal(0)
       })
     })
 
     describe('when user update produces an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -669,7 +655,7 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession = sinon.stub()
         this.AuthenticationManager.validateEmail = sinon.stub().returns(null)
         this.AuthenticationManager.validatePassword = sinon.stub().returns(null)
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
@@ -678,26 +664,29 @@ describe('LaunchpadController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({ email: this.email, password: this.password })
           .should.equal(true)
       })
     })
 
     describe('when overleaf', function () {
-      beforeEach(function () {
-        this.Settings.overleaf = { one: 1 }
+      let oldSettingsOverleaf
+
+      beforeEach(async function () {
+        oldSettingsOverleaf = Settings.overleaf
+        Settings.overleaf = { one: 1 }
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.password = 'a_really_bad_password'
@@ -719,11 +708,15 @@ describe('LaunchpadController', function () {
         this.UserGetter.promises.getUser = sinon
           .stub()
           .resolves({ _id: '1234' })
-        return this.LaunchpadController.registerAdmin(
+        await this.LaunchpadController.registerAdmin(
           this.req,
           this.res,
           this.next
         )
+      })
+
+      afterEach(async function () {
+        Settings.overleaf = oldSettingsOverleaf
       })
 
       it('should send back a json response', function () {
@@ -732,20 +725,20 @@ describe('LaunchpadController', function () {
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({ email: this.email, password: this.password })
           .should.equal(true)
       })
 
       it('should have updated the user to make them an admin', function () {
-        return this.User.updateOne
+        this.User.updateOne
           .calledWith(
             { _id: this.user._id },
             {
@@ -763,20 +756,22 @@ describe('LaunchpadController', function () {
   })
 
   describe('registerExternalAuthAdmin', function () {
+    let oldSettingsLDAP
+
     beforeEach(function () {
-      this.Settings.ldap = { one: 1 }
-      return (this._atLeastOneAdminExists = sinon.stub(
-        this.LaunchpadController,
-        '_atLeastOneAdminExists'
-      ))
+      oldSettingsLDAP = Settings.ldap
+      Settings.ldap = { one: 1 }
+      this.LaunchpadController._mocks._atLeastOneAdminExists = sinon.stub()
+      this._atLeastOneAdminExists =
+        this.LaunchpadController._mocks._atLeastOneAdminExists
     })
 
     afterEach(function () {
-      return this._atLeastOneAdminExists.restore()
+      Settings.ldap = oldSettingsLDAP
     })
 
     describe('when all goes well', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -791,7 +786,7 @@ describe('LaunchpadController', function () {
           .stub()
           .returns({ exec: sinon.stub().resolves() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
+        await this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
           this.next
@@ -800,18 +795,18 @@ describe('LaunchpadController', function () {
 
       it('should send back a json response', function () {
         this.res.json.callCount.should.equal(1)
-        return expect(this.res.json.lastCall.args[0].email).to.equal(this.email)
+        expect(this.res.json.lastCall.args[0].email).to.equal(this.email)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({
             email: this.email,
             password: 'password_here',
@@ -823,7 +818,7 @@ describe('LaunchpadController', function () {
 
       it('should have updated the user to make them an admin', function () {
         this.User.updateOne.callCount.should.equal(1)
-        return this.User.updateOne
+        this.User.updateOne
           .calledWith(
             { _id: this.user._id },
             {
@@ -842,14 +837,14 @@ describe('LaunchpadController', function () {
         this.AuthenticationController.setRedirectInSession.callCount.should.equal(
           1
         )
-        return this.AuthenticationController.setRedirectInSession
+        this.AuthenticationController.setRedirectInSession
           .calledWith(this.req, '/launchpad')
           .should.equal(true)
       })
     })
 
     describe('when the authMethod is invalid', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = undefined
         this.req.body.email = this.email
@@ -860,29 +855,29 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin(
+        await this.LaunchpadController.registerExternalAuthAdmin(
           'NOTAVALIDAUTHMETHOD'
         )(this.req, this.res, this.next)
       })
 
       it('should send a 403 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(403).should.equal(true)
+        this.res.sendStatus.calledWith(403).should.equal(true)
       })
 
       it('should not check for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(0)
+        this._atLeastOneAdminExists.callCount.should.equal(0)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when no email is supplied', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = undefined
         this.req.body.email = this.email
@@ -893,7 +888,7 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
+        await this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
           this.next
@@ -902,22 +897,22 @@ describe('LaunchpadController', function () {
 
       it('should send a 400 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(400).should.equal(true)
+        this.res.sendStatus.calledWith(400).should.equal(true)
       })
 
       it('should not check for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(0)
+        this._atLeastOneAdminExists.callCount.should.equal(0)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when there are already existing admins', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(true)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -928,7 +923,7 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
+        await this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
           this.next
@@ -937,18 +932,18 @@ describe('LaunchpadController', function () {
 
       it('should send a 403 response', function () {
         this.res.sendStatus.callCount.should.equal(1)
-        return this.res.sendStatus.calledWith(403).should.equal(true)
+        this.res.sendStatus.calledWith(403).should.equal(true)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when checking admins produces an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.rejects(new Error('woops'))
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -959,7 +954,7 @@ describe('LaunchpadController', function () {
         this.UserRegistrationHandler.promises.registerNewUser = sinon.stub()
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
+        await this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
           this.next
@@ -968,22 +963,22 @@ describe('LaunchpadController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should not call registerNewUser', function () {
-        return this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
+        this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           0
         )
       })
     })
 
     describe('when registerNewUser produces an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -996,7 +991,7 @@ describe('LaunchpadController', function () {
           .rejects(new Error('woops'))
         this.User.updateOne = sinon.stub().returns({ exec: sinon.stub() })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
+        await this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
           this.next
@@ -1005,18 +1000,18 @@ describe('LaunchpadController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({
             email: this.email,
             password: 'password_here',
@@ -1027,12 +1022,12 @@ describe('LaunchpadController', function () {
       })
 
       it('should not call update', function () {
-        return this.User.updateOne.callCount.should.equal(0)
+        this.User.updateOne.callCount.should.equal(0)
       })
     })
 
     describe('when user update produces an error', function () {
-      beforeEach(function () {
+      beforeEach(async function () {
         this._atLeastOneAdminExists.resolves(false)
         this.email = 'someone@example.com'
         this.req.body.email = this.email
@@ -1047,7 +1042,7 @@ describe('LaunchpadController', function () {
           exec: sinon.stub().rejects(new Error('woops')),
         })
         this.AuthenticationController.setRedirectInSession = sinon.stub()
-        return this.LaunchpadController.registerExternalAuthAdmin('ldap')(
+        await this.LaunchpadController.registerExternalAuthAdmin('ldap')(
           this.req,
           this.res,
           this.next
@@ -1056,18 +1051,18 @@ describe('LaunchpadController', function () {
 
       it('should call next with an error', function () {
         this.next.callCount.should.equal(1)
-        return expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
+        expect(this.next.lastCall.args[0]).to.be.instanceof(Error)
       })
 
       it('should have checked for existing admins', function () {
-        return this._atLeastOneAdminExists.callCount.should.equal(1)
+        this._atLeastOneAdminExists.callCount.should.equal(1)
       })
 
       it('should have called registerNewUser', function () {
         this.UserRegistrationHandler.promises.registerNewUser.callCount.should.equal(
           1
         )
-        return this.UserRegistrationHandler.promises.registerNewUser
+        this.UserRegistrationHandler.promises.registerNewUser
           .calledWith({
             email: this.email,
             password: 'password_here',
