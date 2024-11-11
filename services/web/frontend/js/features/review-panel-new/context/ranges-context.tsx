@@ -43,13 +43,32 @@ const buildRanges = (currentDoc: DocumentContainer | null) => {
   const dirtyState = ranges.getDirtyState()
   ranges.resetDirtyState()
 
+  const changed = {
+    changes: new Set([
+      ...Object.keys(dirtyState.change.added),
+      ...Object.keys(dirtyState.change.moved),
+      ...Object.keys(dirtyState.change.removed),
+    ]),
+    comments: new Set([
+      ...Object.keys(dirtyState.comment.added),
+      ...Object.keys(dirtyState.comment.moved),
+      ...Object.keys(dirtyState.comment.removed),
+    ]),
+  }
+
   return {
-    changes: ranges.changes.map(change =>
-      change.id in dirtyState.change ? { ...change } : change
-    ),
-    comments: ranges.comments.map(comment =>
-      comment.id in dirtyState.comment ? { ...comment } : comment
-    ),
+    changes:
+      changed.changes.size > 0
+        ? ranges.changes.map(change =>
+            changed.changes.has(change.id) ? { ...change } : change
+          )
+        : ranges.changes,
+    comments:
+      changed.comments.size > 0
+        ? ranges.comments.map(comment =>
+            changed.comments.has(comment.id) ? { ...comment } : comment
+          )
+        : ranges.comments,
     docId: currentDoc.doc_id,
     total: ranges.changes.length + ranges.comments.length,
   }
