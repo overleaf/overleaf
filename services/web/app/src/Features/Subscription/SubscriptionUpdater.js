@@ -11,6 +11,8 @@ const logger = require('@overleaf/logger')
 const Features = require('../../infrastructure/Features')
 const UserAuditLogHandler = require('../User/UserAuditLogHandler')
 const { SSOConfig } = require('../../models/SSOConfig')
+const Modules = require('../../infrastructure/Modules')
+const Settings = require('@overleaf/settings')
 
 /**
  * Change the admin of the given subscription.
@@ -249,6 +251,29 @@ async function _deleteAndReplaceSubscriptionFromRecurly(
   )
 }
 
+async function _notifySupportSubscriptionDeletionSkipped(
+  subscription,
+  recurlySubscription,
+  hasGroupSSOEnabled
+) {
+  const adminUrl = `${Settings.adminUrl + '/admin/user/' + subscription.admin_id}`
+  const groupUrl = `${Settings.adminUrl + '/admin/group/' + subscription._id}`
+  let message = `\n**Recurly account:** <a href="${recurlySubscription?.account?.url}">${recurlySubscription?.account?.url}</a>`
+  message += `\n**Group admin:** <a href="${adminUrl}">${adminUrl}</a>`
+  message += `\n**Group:** <a href="${groupUrl}">${groupUrl}</a>`
+  message += `\n**Managed users enabled:** ${subscription?.managedUsersEnabled}`
+  message += `\n**SSO enabled:** ${hasGroupSSOEnabled}`
+
+  const data = {
+    subject: 'Skipped deleting pro group subscription',
+    inbox: 'support',
+    tags: 'Group subscription',
+    message,
+  }
+
+  await Modules.promises.hooks.fire('sendSupportRequest', data)
+}
+
 async function updateSubscriptionFromRecurly(
   recurlySubscription,
   subscription,
@@ -258,6 +283,18 @@ async function updateSubscriptionFromRecurly(
     const hasManagedUsersFeature =
       Features.hasFeature('saas') && subscription?.managedUsersEnabled
 
+    let hasGroupSSOEnabled = false
+    if (subscription?.ssoConfig) {
+      const ssoConfig = await SSOConfig.findOne({
+        _id: subscription.ssoConfig._id || subscription.ssoConfig,
+      })
+        .lean()
+        .exec()
+      if (ssoConfig.enabled) {
+        hasGroupSSOEnabled = true
+      }
+    }
+
     // If a payment lapses and if the group is managed or has group SSO, as a temporary measure we need to
     // make sure that the group continues as-is and no destructive actions are taken.
     if (hasManagedUsersFeature) {
@@ -265,28 +302,39 @@ async function updateSubscriptionFromRecurly(
         { subscriptionId: subscription._id },
         'expired subscription has managedUsers feature enabled, skipping deletion'
       )
-    } else {
-      let hasGroupSSOEnabled = false
-      if (subscription?.ssoConfig) {
-        const ssoConfig = await SSOConfig.findOne({
-          _id: subscription.ssoConfig._id || subscription.ssoConfig,
-        })
-          .lean()
-          .exec()
-        if (ssoConfig.enabled) {
-          hasGroupSSOEnabled = true
-        }
-      }
-
-      if (hasGroupSSOEnabled) {
+      try {
+        await _notifySupportSubscriptionDeletionSkipped(
+          subscription,
+          recurlySubscription,
+          hasGroupSSOEnabled
+        )
+      } catch (e) {
         logger.warn(
           { subscriptionId: subscription._id },
-          'expired subscription has groupSSO feature enabled, skipping deletion'
+          'unable to send notification to support that subscription deletion was skipped'
         )
-      } else {
-        await deleteSubscription(subscription, requesterData)
       }
+    } else if (hasGroupSSOEnabled) {
+      logger.warn(
+        { subscriptionId: subscription._id },
+        'expired subscription has groupSSO feature enabled, skipping deletion'
+      )
+      try {
+        await _notifySupportSubscriptionDeletionSkipped(
+          subscription,
+          recurlySubscription,
+          hasGroupSSOEnabled
+        )
+      } catch (e) {
+        logger.warn(
+          { subscriptionId: subscription._id },
+          'unable to send notification to support that subscription deletion was skipped'
+        )
+      }
+    } else {
+      await deleteSubscription(subscription, requesterData)
     }
+
     return
   }
   const updatedPlanCode = recurlySubscription.plan.plan_code
