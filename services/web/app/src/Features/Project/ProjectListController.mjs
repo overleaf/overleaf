@@ -168,16 +168,6 @@ async function projectListPage(req, res, next) {
     if (user && UserPrimaryEmailCheckHandler.requiresPrimaryEmailCheck(user)) {
       return res.redirect('/user/emails/primary-email-check')
     }
-  } else {
-    if (!process.env.OVERLEAF_IS_SERVER_PRO) {
-      // temporary survey for CE: https://github.com/overleaf/internal/issues/19710
-      survey = {
-        name: 'ce-survey',
-        preText: 'Help us improve Overleaf',
-        linkText: 'by filling out this quick survey',
-        url: 'https://docs.google.com/forms/d/e/1FAIpQLSdPAS-731yaLOvRM8HW7j6gVeOpcmB_X5A5qwgNJT7Oj09lLA/viewform?usp=sf_link',
-      }
-    }
   }
 
   const tags = await TagsHandler.promises.getAllTags(userId)
