@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "module": "esnext",
     "allowJs": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
@@ -10,6 +11,7 @@
       "@overleaf/fetch-utils": ["./libraries/fetch-utils"],
       "@overleaf/logger": ["./libraries/logger"],
       "@overleaf/metrics": ["./libraries/metrics"],
+      "@overleaf/mongo-utils": ["./libraries/mongo-utils"],
       "@overleaf/object-persistor": ["./libraries/object-persistor"],
       "@overleaf/o-error": ["./libraries/o-error"],
       "overleaf-editor-core": ["./libraries/overleaf-editor-core"],

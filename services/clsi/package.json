@@ -11,8 +11,8 @@
     "test:unit": "npm run test:unit:_run -- --grep=$MOCHA_GREP",
     "nodemon": "node --watch app.js",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "format": "prettier --list-different $PWD/'**/*.*js'",
+    "format:fix": "prettier --write $PWD/'**/*.*js'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },

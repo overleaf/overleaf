@@ -17,8 +17,8 @@
     "nodemon": "node --watch app.js",
     "compile:smoke_tests": "[ ! -e test/smoke/coffee ] &&  echo 'No smoke tests to compile' || coffee -o test/smoke/js -c test/smoke/coffee",
     "lint": "eslint --max-warnings 0 --format unix .",
-    "format": "prettier --list-different $PWD/'**/*.js'",
-    "format:fix": "prettier --write $PWD/'**/*.js'",
+    "format": "prettier --list-different $PWD/'**/*.*js'",
+    "format:fix": "prettier --write $PWD/'**/*.*js'",
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit"
   },
