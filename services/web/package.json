@@ -325,7 +325,7 @@
     "mock-fs": "^5.1.2",
     "nvd3": "^1.8.6",
     "overleaf-editor-core": "*",
-    "pdfjs-dist": "4.8.69",
+    "pdfjs-dist": "4.6.82",
     "pirates": "^4.0.1",
     "postcss": "^8.4.31",
     "postcss-loader": "^7.3.3",
