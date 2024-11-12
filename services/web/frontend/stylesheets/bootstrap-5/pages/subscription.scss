@@ -185,8 +185,21 @@
     }
   }
 
-  .payment-right-section {
+  .payment-checkout {
     padding: var(--spacing-08);
+    width: 408px;
+
+    @include media-breakpoint-down(lg) {
+      width: 100%;
+    }
+
+    h1 {
+      @include heading-md;
+    }
+
+    .student-disclaimer {
+      @include body-sm;
+    }
   }
 }
 
