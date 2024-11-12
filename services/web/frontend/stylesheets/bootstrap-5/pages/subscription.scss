@@ -147,13 +147,42 @@
     gap: var(--spacing-10);
     justify-content: center;
 
+    .payment-review-panel {
+      h4 {
+        color: var(--neutral-70);
+        font-weight: 600;
+
+        @include heading-sm;
+      }
+
+      .price-feature-description {
+        color: var(--neutral-70);
+        font-weight: 400;
+
+        @include body-base;
+
+        h4 {
+          margin-bottom: var(--spacing-06);
+        }
+
+        .features-list {
+          margin-top: var(--spacing-08);
+        }
+      }
+
+      hr {
+        margin-top: var(--spacing-08);
+        margin-bottom: var(--spacing-08);
+      }
+    }
+
     .payment-right-section {
       padding: var(--spacing-08);
     }
   }
 
   @include media-breakpoint-up(md) {
-    .payment-left-section {
+    .payment-review-panel {
       padding: 0;
     }
   }
