@@ -141,50 +141,52 @@
 
 .payment-container {
   padding-top: var(--spacing-13);
+  display: flex;
+  gap: var(--spacing-10);
+  justify-content: center;
 
-  .payment-row {
-    display: flex;
-    gap: var(--spacing-10);
-    justify-content: center;
+  @include media-breakpoint-down(lg) {
+    flex-direction: column;
+    align-items: center;
+  }
 
-    .payment-review-panel {
+  .payment-review-panel {
+    width: 339px;
+
+    @include media-breakpoint-down(lg) {
+      width: 100%;
+    }
+
+    h4 {
+      color: var(--neutral-70);
+      font-weight: 600;
+
+      @include heading-sm;
+    }
+
+    .price-feature-description {
+      color: var(--neutral-70);
+      font-weight: 400;
+
+      @include body-base;
+
       h4 {
-        color: var(--neutral-70);
-        font-weight: 600;
-
-        @include heading-sm;
+        margin-bottom: var(--spacing-06);
       }
 
-      .price-feature-description {
-        color: var(--neutral-70);
-        font-weight: 400;
-
-        @include body-base;
-
-        h4 {
-          margin-bottom: var(--spacing-06);
-        }
-
-        .features-list {
-          margin-top: var(--spacing-08);
-        }
-      }
-
-      hr {
+      .features-list {
         margin-top: var(--spacing-08);
-        margin-bottom: var(--spacing-08);
       }
     }
 
-    .payment-right-section {
-      padding: var(--spacing-08);
+    hr {
+      margin-top: var(--spacing-08);
+      margin-bottom: var(--spacing-08);
     }
   }
 
-  @include media-breakpoint-up(md) {
-    .payment-review-panel {
-      padding: 0;
-    }
+  .payment-right-section {
+    padding: var(--spacing-08);
   }
 }
 
