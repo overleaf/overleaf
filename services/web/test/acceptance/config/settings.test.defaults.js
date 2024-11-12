@@ -55,10 +55,6 @@ module.exports = {
     documentupdater: {
       url: 'http://127.0.0.1:23003',
     },
-    spelling: {
-      url: 'http://127.0.0.1:23005',
-      host: '127.0.0.1',
-    },
     docstore: {
       url: 'http://127.0.0.1:23016',
       pubUrl: 'http://127.0.0.1:23016',

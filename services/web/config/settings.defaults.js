@@ -225,10 +225,6 @@ module.exports = {
         '127.0.0.1'
       }:3003`,
     },
-    spelling: {
-      url: `http://${process.env.SPELLING_HOST || '127.0.0.1'}:3005`,
-      host: process.env.SPELLING_HOST,
-    },
     docstore: {
       url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
       pubUrl: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,

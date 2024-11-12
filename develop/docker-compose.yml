@@ -8,7 +8,6 @@ volumes:
   mongo-data:
   redis-data:
   sharelatex-data:
-  spelling-cache:
   web-data:
   history-v1-buckets:
 
@@ -124,15 +123,6 @@ services:
     volumes:
       - redis-data:/data
 
-  spelling:
-    build:
-      context: ..
-      dockerfile: services/spelling/Dockerfile
-    env_file:
-      - dev.env
-    volumes:
-      - spelling-cache:/overleaf/services/spelling/cache
-
   web:
     build:
       context: ..
@@ -163,7 +153,6 @@ services:
       - notifications
       - project-history
       - real-time
-      - spelling
 
   webpack:
     build:

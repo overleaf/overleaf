@@ -21,9 +21,6 @@ module.exports = [
     name: 'chat',
   },
   {
-    name: 'spelling',
-  },
-  {
     name: 'contacts',
   },
   {

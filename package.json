@@ -64,7 +64,6 @@
     "services/project-history",
     "services/real-time",
     "services/references",
-    "services/spelling",
     "services/templates",
     "services/third-party-datastore",
     "services/third-party-references",
