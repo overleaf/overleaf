@@ -49,7 +49,7 @@
   }
 
   .begin-now-card {
-    margin: var(--spacing-16) 0;
+    margin: calc(var(--spacing-16) * 2) 0;
   }
 
   // TODO: only used on about page. Confirm with UX changes needed

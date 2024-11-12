@@ -400,6 +400,10 @@
 
   .related-tags-header {
     margin-top: var(--spacing-16);
+
+    h2 {
+      margin-bottom: 0;
+    }
   }
 
   .related-tags {
