@@ -631,7 +631,7 @@
 // Desktop layout options depdendent on mobile breakpoint
 @include media-breakpoint-up(lg) {
   .row-equal-column-heights > div[class*='col-'] > .card,
-  .no-card {
+  .row-equal-column-heights > div[class*='col-'] > .no-card {
     height: 100%;
   }
 
