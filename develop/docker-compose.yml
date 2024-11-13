@@ -96,6 +96,13 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  references:
+    build:
+      context: ..
+      dockerfile: services/references/Dockerfile
+    env_file:
+      - dev.env
+
   notifications:
     build:
       context: ..
@@ -161,6 +168,7 @@ services:
       - filestore
       - history-v1
       - notifications
+      - references
       - project-history
       - real-time
       - spelling
