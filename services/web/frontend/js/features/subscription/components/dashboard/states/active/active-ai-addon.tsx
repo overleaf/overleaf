@@ -10,10 +10,12 @@ import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan
 import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
 import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
 import { CancelAiAddOnModal } from './change-plan/modals/cancel-ai-add-on-modal'
+import { PendingRecurlyPlan } from '../../../../../../../../types/subscription/plan'
 import {
-  AI_STANDALONE_PLAN_CODE,
   ADD_ON_NAME,
+  AI_ADD_ON_CODE,
   AI_STANDALONE_PLAN_NAME,
+  AI_STANDALONE_PLAN_CODE,
   AI_STANDALONE_ANNUAL_PLAN_CODE,
 } from '../../../../data/add-on-codes'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
@@ -110,6 +112,7 @@ export function ActiveAiAddonSubscription({
             <PlanWithAddonsActions
               handlePlanChange={handlePlanChange}
               handleCancelClick={handleCancelClick}
+              subscription={subscription}
             />
           )}
         </p>
@@ -155,9 +158,8 @@ function StandaloneAiPlanActions({
       <OLButton variant="secondary" onClick={handlePlanChange}>
         {t('upgrade')}
       </OLButton>
-
       <OLButton variant="danger-ghost" onClick={handleCancelClick}>
-        {t('cancel_add_on')}
+        {t('remove_add_on')}
       </OLButton>
     </>
   )
@@ -166,11 +168,25 @@ function StandaloneAiPlanActions({
 function PlanWithAddonsActions({
   handlePlanChange,
   handleCancelClick,
+  subscription,
 }: {
   handlePlanChange(): void
   handleCancelClick(): void
+  subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
+
+  const pendingPlan = subscription.pendingPlan as PendingRecurlyPlan
+
+  const hasAiAddon = subscription.addOns?.some(
+    addOn => addOn.addOnCode === AI_ADD_ON_CODE
+  )
+
+  const pendingCancellation = Boolean(
+    hasAiAddon &&
+      pendingPlan &&
+      !pendingPlan.addOns?.some(addOn => addOn.add_on_code === AI_ADD_ON_CODE)
+  )
   return (
     <>
       <OLButton variant="secondary" onClick={handlePlanChange}>
@@ -178,9 +194,11 @@ function PlanWithAddonsActions({
       </OLButton>
 
       <>
-        <OLButton variant="danger-ghost" onClick={handleCancelClick}>
-          {t('remove_add_on')}
-        </OLButton>{' '}
+        {!pendingCancellation && (
+          <OLButton variant="danger-ghost" onClick={handleCancelClick}>
+            {t('remove_add_on')}
+          </OLButton>
+        )}
         <CancelSubscriptionButton />
       </>
     </>
