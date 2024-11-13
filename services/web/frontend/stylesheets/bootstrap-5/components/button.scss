@@ -91,6 +91,17 @@
       background: var(--blue-70);
     }
   }
+
+  &.btn-premium-secondary {
+    @include ol-button-variant(
+      $color: var(--blue-60),
+      $background: var(--bg-light-primary),
+      $border: var(--blue-60),
+      $hover-background: var(--bg-info-03),
+      $hover-border: var(--blue-60),
+      $borderless: false
+    );
+  }
 }
 
 // Link buttons

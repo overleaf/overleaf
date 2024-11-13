@@ -41,6 +41,7 @@ const meta: Meta<typeof Button> = {
         'danger',
         'danger-ghost',
         'premium',
+        'premium-secondary',
       ],
     },
   },

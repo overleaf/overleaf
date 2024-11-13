@@ -32,5 +32,6 @@ export type ButtonProps = {
     | 'danger'
     | 'danger-ghost'
     | 'premium'
+    | 'premium-secondary'
     | 'link'
 }
