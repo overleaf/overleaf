@@ -37,6 +37,7 @@ export type User = {
   isAdmin?: boolean
   email: string
   allowedFreeTrial?: boolean
+  hasRecurlySubscription?: boolean
   first_name?: string
   last_name?: string
   alphaProgram?: boolean

@@ -15,8 +15,6 @@ import { ConfirmChangePlanModal } from './change-plan/modals/confirm-change-plan
 import { KeepCurrentPlanModal } from './change-plan/modals/keep-current-plan-modal'
 import { ChangeToGroupModal } from './change-plan/modals/change-to-group-modal'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { BuyAiAddOnButton } from './change-plan/buy-ai-add-on-button'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 
 export function ActiveSubscription({
   subscription,
@@ -28,8 +26,6 @@ export function ActiveSubscription({
     useSubscriptionDashboardContext()
 
   if (showCancellation) return <CancelSubscription />
-
-  const aiAddOnAvailable = isSplitTestEnabled('ai-add-on')
 
   return (
     <>
@@ -149,8 +145,6 @@ export function ActiveSubscription({
       <ConfirmChangePlanModal />
       <KeepCurrentPlanModal />
       <ChangeToGroupModal />
-      {/* to be removed once we have purchasing options ready  */}
-      {aiAddOnAvailable && <BuyAiAddOnButton />}
     </>
   )
 }

@@ -1,6 +1,4 @@
 import { useTranslation, Trans } from 'react-i18next'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-import { AI_STANDALONE_PLAN_CODE } from '../../data/add-on-codes'
 
 function FreePlan() {
   const { t } = useTranslation()
@@ -28,14 +26,6 @@ function FreePlan() {
       <a className="btn btn-primary me-1" href="/user/subscription/plans">
         {t('upgrade_now')}
       </a>
-      {isSplitTestEnabled('ai-add-on') && (
-        <a
-          className="btn btn-secondary"
-          href={`/user/subscription/new?planCode=${AI_STANDALONE_PLAN_CODE}`}
-        >
-          {t('buy_overleaf_assist')}
-        </a>
-      )}
     </>
   )
 }
