@@ -547,12 +547,16 @@
 
 .row-within-card {
   .no-card {
-    > :first-child {
-      margin-top: 0;
+    div:first-child {
+      > :first-child {
+        margin-top: 0;
+      }
     }
 
-    > :last-child {
-      margin-bottom: 0;
+    div:last-child {
+      > :last-child {
+        margin-bottom: 0;
+      }
     }
   }
 }
