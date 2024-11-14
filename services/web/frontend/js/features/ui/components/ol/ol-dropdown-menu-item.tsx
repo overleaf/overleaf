@@ -23,6 +23,7 @@ function OLDropdownMenuItem(props: OLDropdownMenuItemProps) {
     onClick: rest.onClick,
     href: rest.href,
     download: rest.download,
+    eventKey: rest.eventKey,
     ...bs3Props,
   }
 

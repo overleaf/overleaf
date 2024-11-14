@@ -251,3 +251,39 @@
     --bs-btn-bg: transparent;
   }
 }
+
+.change-currency {
+  .dropdown-item:not(:first-child) {
+    margin-top: var(--spacing-02);
+  }
+}
+
+.change-currency-toggle {
+  padding-left: 0;
+  text-decoration: underline;
+  color: var(--content-secondary);
+
+  &:hover,
+  &:focus,
+  &:active {
+    // !important is unfortunately necessary to override btn:first-child:active
+    color: var(--content-secondary) !important;
+  }
+
+  &:not(:hover) {
+    text-decoration: underline;
+  }
+
+  // Hide the dropdown caret, BS5 react-bootstrap does not have a prop for this
+  &::after {
+    display: none;
+  }
+
+  @include body-xs;
+}
+
+.change-currency-dropdown-selected-icon {
+  position: absolute;
+  right: 10px;
+  top: var(--bs-dropdown-item-padding-y);
+}
