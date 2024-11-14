@@ -136,7 +136,7 @@ services:
       - EMAIL_CONFIRMATION_DISABLED=true
       - NODE_ENV=development
       - OVERLEAF_ALLOW_PUBLIC_ACCESS=true
-    command: ["node", "app.js"]
+    command: ["node", "app.mjs"]
     volumes:
       - sharelatex-data:/var/lib/overleaf
       - web-data:/overleaf/services/web/data
@@ -158,7 +158,7 @@ services:
     build:
       context: ..
       dockerfile: services/web/Dockerfile
-      target: dev
+      target: webpack
     command: ["npx", "webpack", "serve", "--config", "webpack.config.dev-env.js"]
     ports:
       - "127.0.0.1:80:3808"
