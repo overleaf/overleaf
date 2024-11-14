@@ -28,12 +28,11 @@ const SubscriptionFormatters = require('./SubscriptionFormatters')
 const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { URLSearchParams } = require('url')
 const RecurlyClient = require('./RecurlyClient')
+const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
 
 /**
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
  */
-
-const AI_ADDON_CODES = ['assistant', 'assistant-annual']
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
 const validGroupPlanModalOptions = {
@@ -489,7 +488,7 @@ async function previewAddonPurchase(req, res) {
   const userId = SessionManager.getLoggedInUserId(req.session)
   const addOnCode = req.params.addOnCode
 
-  if (!AI_ADDON_CODES.includes(addOnCode)) {
+  if (addOnCode !== AI_ADD_ON_CODE) {
     return HttpErrorHandler.notFound(req, res, `Unknown add-on: ${addOnCode}`)
   }
 
@@ -559,7 +558,7 @@ async function purchaseAddon(req, res, next) {
   // currently we only support having a quantity of 1
   const quantity = 1
   // currently we only support one add-on, the Ai add-on
-  if (!AI_ADDON_CODES.includes(addOnCode)) {
+  if (addOnCode !== AI_ADD_ON_CODE) {
     return res.sendStatus(404)
   }
 
@@ -591,7 +590,7 @@ async function removeAddon(req, res, next) {
   const user = SessionManager.getSessionUser(req.session)
   const addOnCode = req.params.addOnCode
 
-  if (!AI_ADDON_CODES.includes(addOnCode)) {
+  if (addOnCode !== AI_ADD_ON_CODE) {
     return res.sendStatus(404)
   }
 

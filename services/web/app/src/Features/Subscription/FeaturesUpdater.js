@@ -14,8 +14,7 @@ const UserGetter = require('../User/UserGetter')
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const Queues = require('../../infrastructure/Queues')
 const Modules = require('../../infrastructure/Modules')
-
-const AI_ADDON_CODE = 'assistant'
+const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
 
 /**
  * Enqueue a job for refreshing features for the given user
@@ -174,7 +173,7 @@ function _subscriptionAddonsToFeatures(addOns) {
   if (!addOns) {
     return {}
   }
-  const hasAiAddon = addOns.some(addOn => addOn.addOnCode === AI_ADDON_CODE)
+  const hasAiAddon = addOns.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)
   if (hasAiAddon) {
     return { aiErrorAssistant: true }
   } else {

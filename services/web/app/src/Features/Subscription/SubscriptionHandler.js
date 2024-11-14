@@ -1,5 +1,6 @@
 // @ts-check
 
+const recurly = require('recurly')
 const RecurlyWrapper = require('./RecurlyWrapper')
 const RecurlyClient = require('./RecurlyClient')
 const { User } = require('../../models/User')
@@ -11,9 +12,9 @@ const EmailHandler = require('../Email/EmailHandler')
 const { callbackify } = require('@overleaf/promise-utils')
 const UserUpdater = require('../User/UserUpdater')
 const { NoRecurlySubscriptionError } = require('./Errors')
+const { NotFoundError } = require('../Errors/Errors')
 
 /**
- * @import recurly from 'recurly'
  * @import { RecurlySubscription, RecurlySubscriptionChange } from './RecurlyEntities'
  */
 
@@ -297,6 +298,17 @@ async function previewAddonPurchase(userId, addOnCode) {
   }
 
   const subscription = await RecurlyClient.promises.getSubscription(recurlyId)
+  try {
+    await RecurlyClient.promises.getAddOn(subscription.planCode, addOnCode)
+  } catch (err) {
+    if (err instanceof recurly.errors.NotFoundError) {
+      throw new NotFoundError({
+        message: 'Add-on not found',
+        info: { addOnCode },
+      })
+    }
+    throw err
+  }
   const changeRequest = subscription.getRequestForAddOnPurchase(addOnCode)
   const change =
     await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
@@ -305,6 +317,17 @@ async function previewAddonPurchase(userId, addOnCode) {
 
 async function purchaseAddon(user, addOnCode, quantity) {
   const subscription = await _getSubscription(user)
+  try {
+    await RecurlyClient.promises.getAddOn(subscription.planCode, addOnCode)
+  } catch (err) {
+    if (err instanceof recurly.errors.NotFoundError) {
+      throw new NotFoundError({
+        message: 'Add-on not found',
+        info: { addOnCode },
+      })
+    }
+    throw err
+  }
   const changeRequest = subscription.getRequestForAddOnPurchase(
     addOnCode,
     quantity

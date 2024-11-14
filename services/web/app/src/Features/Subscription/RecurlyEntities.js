@@ -5,6 +5,8 @@ const { DuplicateAddOnError, AddOnNotPresentError } = require('./Errors')
 const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 
+const AI_ADD_ON_CODE = 'assistant'
+
 class RecurlySubscription {
   /**
    * @param {object} props
@@ -261,6 +263,7 @@ class RecurlyAddOn {
 }
 
 module.exports = {
+  AI_ADD_ON_CODE,
   RecurlySubscription,
   RecurlySubscriptionAddOn,
   RecurlySubscriptionChange,
