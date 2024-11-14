@@ -1,12 +1,31 @@
+import { useCallback } from 'react'
 import { Grid, Row, Col, Button } from 'react-bootstrap'
 import moment from 'moment'
 import { useTranslation, Trans } from 'react-i18next'
+import { SubscriptionChangePreview } from '../../../../../../types/subscription/subscription-change-preview'
 import getMeta from '@/utils/meta'
 import { formatCurrencyLocalized } from '@/shared/utils/currency'
+import useAsync from '@/shared/hooks/use-async'
+import { useLocation } from '@/shared/hooks/use-location'
+import { debugConsole } from '@/utils/debugging'
+import { postJSON } from '@/infrastructure/fetch-json'
+import Notification from '@/shared/components/notification'
 
 function PreviewSubscriptionChange() {
-  const { t } = useTranslation()
   const preview = getMeta('ol-subscriptionChangePreview')
+  const { t } = useTranslation()
+  const payNowTask = useAsync()
+  const location = useLocation()
+
+  const handlePayNowClick = useCallback(() => {
+    payNowTask
+      .runAsync(payNow(preview))
+      .then(() => {
+        location.replace('/user/subscription/thank-you')
+      })
+      .catch(debugConsole.error)
+  }, [location, payNowTask, preview])
+
   return (
     <Grid>
       <Row>
@@ -19,6 +38,20 @@ function PreviewSubscriptionChange() {
                 })}
               </h1>
             )}
+
+            {payNowTask.isError && (
+              <Notification
+                type="error"
+                aria-live="polite"
+                content={
+                  <>
+                    {t('generic_something_went_wrong')}. {t('try_again')}.{' '}
+                    {t('generic_if_problem_continues_contact_us')}.
+                  </>
+                }
+              />
+            )}
+
             <div className="payment-summary-card mt-5">
               <h3>{t('payment_summary')}</h3>
               <Row>
@@ -106,7 +139,12 @@ function PreviewSubscriptionChange() {
             </div>
 
             <div className="mt-5">
-              <Button bsStyle="primary" bsSize="large">
+              <Button
+                bsStyle="primary"
+                bsSize="large"
+                onClick={handlePayNowClick}
+                disabled={payNowTask.isLoading || payNowTask.isSuccess}
+              >
                 {t('pay_now')}
               </Button>
             </div>
@@ -117,4 +155,13 @@ function PreviewSubscriptionChange() {
   )
 }
 
+async function payNow(preview: SubscriptionChangePreview) {
+  if (preview.change.type === 'add-on-purchase') {
+    await postJSON(`/user/subscription/addon/${preview.change.addOn.code}/add`)
+  } else {
+    throw new Error(
+      `Unknown subscription change preview type: ${preview.change.type}`
+    )
+  }
+}
 export default PreviewSubscriptionChange
