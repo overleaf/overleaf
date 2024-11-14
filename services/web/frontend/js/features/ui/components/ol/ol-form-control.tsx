@@ -65,6 +65,7 @@ const OLFormControl: BsPrefixRefForwardingComponent<
     prepend: rest.prepend,
     size: rest.htmlSize,
     'main-field': rest['main-field'],
+    children: rest.children,
     ...bs3Props,
   }
 
