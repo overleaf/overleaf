@@ -177,6 +177,33 @@
       .features-list {
         margin-top: var(--spacing-08);
       }
+
+      .price-summary {
+        .price-summary-line {
+          display: flex;
+          justify-content: space-between;
+
+          .price-summary-line-width {
+            width: 70%;
+          }
+        }
+
+        p {
+          margin: unset;
+        }
+
+        .price-nowrap {
+          white-space: nowrap;
+        }
+
+        .price-summary-total-line {
+          margin-top: var(--spacing-06);
+
+          .price-summary-due {
+            color: var(--green-50);
+          }
+        }
+      }
     }
 
     hr {
