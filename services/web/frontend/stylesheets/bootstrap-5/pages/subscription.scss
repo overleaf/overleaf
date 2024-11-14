@@ -204,6 +204,10 @@
           }
         }
       }
+
+      .price-cancel-anytime {
+        @include body-xs;
+      }
     }
 
     hr {
