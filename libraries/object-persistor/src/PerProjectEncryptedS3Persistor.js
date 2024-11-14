@@ -223,6 +223,7 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
           dekPath,
           { ssecOptions }
         )
+        break
       } catch (err) {
         if (isForbiddenError(err)) {
           kekIndex++
