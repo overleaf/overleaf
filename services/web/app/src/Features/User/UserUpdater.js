@@ -494,7 +494,18 @@ async function changeEmailAddress(userId, newEmail, auditLog) {
   await removeEmailAddress(userId, oldEmail, auditLog)
 }
 
-async function removeReconfirmFlag(userId) {
+/**
+ * @param {string} userId
+ * @param {{initiatorId: string, ip: string}} auditLog
+ * @returns {Promise<void>}
+ */
+async function removeReconfirmFlag(userId, auditLog) {
+  await UserAuditLogHandler.promises.addEntry(
+    userId.toString(),
+    'must-reset-password-unset',
+    auditLog.initiatorId,
+    auditLog.ip
+  )
   await updateUser(userId.toString(), { $set: { must_reconfirm: false } })
 }
 

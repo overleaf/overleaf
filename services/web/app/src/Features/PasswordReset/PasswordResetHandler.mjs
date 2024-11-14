@@ -71,6 +71,7 @@ async function getUserForPasswordResetToken(token) {
     _id: 1,
     'overleaf.id': 1,
     email: 1,
+    must_reconfirm: 1,
   })
 
   await assertUserPermissions(user, ['change-password'])
@@ -117,7 +118,12 @@ async function setNewUserPassword(token, password, auditLog) {
 
   await PasswordResetHandler.promises.expirePasswordResetToken(token)
 
-  return { found: true, reset, userId: user._id }
+  return {
+    found: true,
+    reset,
+    userId: user._id,
+    mustReconfirm: user.must_reconfirm,
+  }
 }
 
 const PasswordResetHandler = {

@@ -44,7 +44,7 @@ async function setNewUserPassword(req, res, next) {
       password,
       auditLog
     )
-    const { found, reset, userId } = result
+    const { found, reset, userId, mustReconfirm } = result
     if (!found) {
       return res.status(404).json({
         message: {
@@ -58,7 +58,9 @@ async function setNewUserPassword(req, res, next) {
       })
     }
     await UserSessionsManager.promises.removeSessionsFromRedis({ _id: userId })
-    await UserUpdater.promises.removeReconfirmFlag(userId)
+    if (mustReconfirm) {
+      await UserUpdater.promises.removeReconfirmFlag(userId, auditLog)
+    }
     if (!req.session.doLoginAfterPasswordReset) {
       return res.sendStatus(200)
     }

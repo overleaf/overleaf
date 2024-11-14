@@ -35,9 +35,12 @@ describe('PasswordResetController', function () {
       generateAndEmailResetToken: sinon.stub(),
       promises: {
         generateAndEmailResetToken: sinon.stub(),
-        setNewUserPassword: sinon
-          .stub()
-          .resolves({ found: true, reset: true, userID: this.user_id }),
+        setNewUserPassword: sinon.stub().resolves({
+          found: true,
+          reset: true,
+          userID: this.user_id,
+          mustReconfirm: true,
+        }),
         getUserForPasswordResetToken: sinon
           .stub()
           .withArgs(this.token)
@@ -271,7 +274,7 @@ describe('PasswordResetController', function () {
       this.PasswordResetController.setNewUserPassword(this.req, this.res)
     })
 
-    it('should call removeReconfirmFlag', function (done) {
+    it('should call removeReconfirmFlag if user.must_reconfirm', function (done) {
       this.res.sendStatus = code => {
         this.UserUpdater.promises.removeReconfirmFlag.callCount.should.equal(1)
         done()
