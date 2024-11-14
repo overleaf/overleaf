@@ -34,7 +34,7 @@
     --link-hover-color: var(--link-web-hover);
     --link-visited-color: var(--link-web-visited);
 
-    &:hover {
+    a:hover {
       text-decoration: underline;
     }
   }
