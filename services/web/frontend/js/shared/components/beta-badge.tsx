@@ -3,6 +3,7 @@ import classnames from 'classnames'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type TooltipProps = {
   id: string
@@ -30,7 +31,9 @@ const BetaBadge: FC<{
       }}
     >
       <a href={url} target="_blank" rel="noopener noreferrer">
-        <span className="sr-only">{tooltip.text}</span>
+        <span className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}>
+          {tooltip.text}
+        </span>
         <BootstrapVersionSwitcher
           bs3={<span className={classnames('badge', badgeClass)} />}
           bs5={

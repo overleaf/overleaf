@@ -159,6 +159,7 @@ output {
     height: auto;
     border-radius: @border-radius-base;
   }
+
   // Smaller border-radius for `select` inputs
   select& {
     border-radius: @border-radius-base;
@@ -294,6 +295,11 @@ input[type='checkbox'],
     height: @input-height-base;
     line-height: @input-height-base;
     text-align: center;
+  }
+
+  // Position the feedback inside the input element when there's no label
+  &.hidden-label .form-control-feedback {
+    margin-top: -(@line-height-computed + 5);
   }
 }
 

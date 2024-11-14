@@ -1,0 +1,76 @@
+.references-search-modal {
+  .references-search-upgrade-prompt {
+    padding: var(--spacing-08);
+    padding-bottom: var(--spacing-11);
+
+    .upgrade-prompt {
+      text-align: center;
+      width: 400px;
+      padding: var(--spacing-06) var(--spacing-10);
+      margin: auto;
+      background: rgb($white, 0.95);
+      border-radius: var(--border-radius-medium);
+
+      .message {
+        margin-top: var(--spacing-06);
+
+        &.call-to-action {
+          font-weight: bold;
+        }
+
+        ul.upgrade-benefits {
+          text-align: left;
+
+          li {
+            display: flex;
+            align-items: center;
+          }
+        }
+      }
+    }
+  }
+
+  .notification {
+    margin-top: var(--spacing-05);
+    margin-bottom: 0;
+  }
+
+  // search result items list
+  .search-results {
+    font-size: var(--font-size-01);
+
+    .no-results-message,
+    .too-many-results-message {
+      font-size: var(--font-size-03);
+    }
+
+    .search-results-scroll-container {
+      max-height: calc(100vh - 225px);
+      overflow-y: auto;
+    }
+
+    .search-result-hit {
+      &:hover {
+        cursor: pointer;
+      }
+
+      border-bottom: 1px solid var(--border-divider);
+      padding: var(--spacing-04);
+
+      &:last-child {
+        border-bottom: 1px solid transparent;
+      }
+
+      border-left: var(--spacing-02) solid transparent;
+
+      &.selected-search-result-hit {
+        color: var(--content-positive);
+      }
+
+      .hit-title {
+        font-size: var(--font-size-03);
+        font-style: italic;
+      }
+    }
+  }
+}

@@ -1,13 +1,16 @@
 import { forwardRef } from 'react'
-import { Form, FormControlProps } from 'react-bootstrap-5'
+import {
+  Form,
+  FormControlProps as BS5FormControlProps,
+} from 'react-bootstrap-5'
 import classnames from 'classnames'
 
-type OLFormControlProps = FormControlProps & {
+type FormControlProps = BS5FormControlProps & {
   prepend?: React.ReactNode
   append?: React.ReactNode
 }
 
-const FormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
+const FormControl = forwardRef<HTMLInputElement, FormControlProps>(
   ({ prepend, append, className, ...props }, ref) => {
     if (prepend || append) {
       const wrapperClassNames = classnames('form-control-wrapper', {

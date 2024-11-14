@@ -3,11 +3,14 @@ import { getAriaAndDataProps } from '@/features/utils/bootstrap-5'
 import FormControl from '@/features/ui/components/bootstrap-5/form/form-control'
 import BS3FormControl from '@/features/ui/components/bootstrap-3/form/form-control'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import OLSpinner from '@/features/ui/components/ol/ol-spinner'
+import Icon from '@/shared/components/icon'
 
 type OLFormControlProps = ComponentProps<typeof FormControl> & {
   bs3Props?: Record<string, unknown>
   'data-ol-dirty'?: unknown
   'main-field'?: any // For the CM6's benefit in the editor search panel
+  loading?: boolean
 }
 
 type BS3FormControlProps = ComponentProps<typeof BS3FormControl> & {
@@ -16,7 +19,7 @@ type BS3FormControlProps = ComponentProps<typeof BS3FormControl> & {
 
 const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
   (props, ref) => {
-    const { bs3Props, ...rest } = props
+    const { bs3Props, append, ...rest } = props
 
     // Use a callback so that the ref passed to the BS3 FormControl is stable
     const bs3InputRef = useCallback(
@@ -55,7 +58,6 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
       onBlur: rest.onBlur as BS3FormControlProps['onBlur'],
       onInvalid: rest.onInvalid as BS3FormControlProps['onInvalid'],
       prepend: rest.prepend,
-      append: rest.append,
       size: rest.htmlSize,
       'main-field': rest['main-field'],
       ...bs3Props,
@@ -69,8 +71,19 @@ const OLFormControl = forwardRef<HTMLInputElement, OLFormControlProps>(
 
     return (
       <BootstrapVersionSwitcher
-        bs3={<BS3FormControl {...bs3FormControlProps} />}
-        bs5={<FormControl ref={ref} {...rest} />}
+        bs3={
+          <BS3FormControl
+            {...bs3FormControlProps}
+            append={rest.loading ? <Icon type="spinner" spin /> : append}
+          />
+        }
+        bs5={
+          <FormControl
+            ref={ref}
+            {...rest}
+            append={rest.loading ? <OLSpinner size="sm" /> : append}
+          />
+        }
       />
     )
   }
