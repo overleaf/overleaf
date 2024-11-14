@@ -1,5 +1,5 @@
 .writefull-loading-bar {
-  font-size: @font-size-small;
+  font-size: var(--font-size-02);
   height: 40px;
   justify-content: center;
 }
