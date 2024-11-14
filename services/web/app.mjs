@@ -26,7 +26,9 @@ logger.logger.serializers.project = Serializers.project
 if (Settings.sentry?.dsn != null) {
   logger.initializeErrorReporting(Settings.sentry.dsn)
 }
+http.globalAgent.keepAlive = false
 http.globalAgent.maxSockets = Settings.limits.httpGlobalAgentMaxSockets
+https.globalAgent.keepAlive = false
 https.globalAgent.maxSockets = Settings.limits.httpsGlobalAgentMaxSockets
 
 metrics.memory.monitor(logger)

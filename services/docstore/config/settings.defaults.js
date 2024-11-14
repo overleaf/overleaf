@@ -1,5 +1,6 @@
 const http = require('node:http')
 http.globalAgent.maxSockets = 300
+http.globalAgent.keepAlive = false
 
 const Settings = {
   internal: {
