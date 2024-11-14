@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-type Target = HTMLInputElement | HTMLSelectElement
+type Target = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
 
 function useValidateField<T extends { target: Target }>() {
   const [isValid, setIsValid] = useState(true)
