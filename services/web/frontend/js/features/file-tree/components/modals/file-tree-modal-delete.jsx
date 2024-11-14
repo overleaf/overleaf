@@ -63,7 +63,7 @@ function FileTreeModalDelete() {
           />
         ) : (
           <>
-            <OLButton className="secondary" onClick={handleHide}>
+            <OLButton variant="secondary" onClick={handleHide}>
               {t('cancel')}
             </OLButton>
             <OLButton variant="danger" onClick={handleDelete}>
