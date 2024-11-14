@@ -120,6 +120,8 @@ async function settingsPage(req, res) {
   // populates splitTestVariants with a value for the split test name and allows
   // Pug to read it
   await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5')
+  // Get the users write-and-cite assignment to switch between translation strings
+  await SplitTestHandler.promises.getAssignment(req, res, 'write-and-cite')
 
   res.render('user/settings', {
     title: 'account_settings',
