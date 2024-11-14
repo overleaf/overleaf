@@ -6,6 +6,8 @@ import {
   DropdownItem as BS5DropdownItem,
   DropdownDivider as BS5DropdownDivider,
   DropdownHeader as BS5DropdownHeader,
+  Button as BS5Button,
+  type ButtonProps,
 } from 'react-bootstrap-5'
 import type {
   DropdownProps,
@@ -102,6 +104,20 @@ const ForwardReferredDropdownItem = fixedForwardRef(DropdownItem, {
 })
 
 export { ForwardReferredDropdownItem as DropdownItem }
+
+export const DropdownToggleCustom = forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, className, ...props }, ref) => (
+    <BS5Button
+      ref={ref}
+      className={classnames('custom-toggle', className)}
+      {...props}
+    >
+      {children}
+      <MaterialIcon type="expand_more" />
+    </BS5Button>
+  )
+)
+DropdownToggleCustom.displayName = 'CustomCaret'
 
 export const DropdownToggle = forwardRef<
   typeof BS5DropdownToggle,

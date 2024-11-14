@@ -10,6 +10,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
+  DropdownToggleCustom,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
 import { Trans, useTranslation } from 'react-i18next'
 import Tooltip from '../../../shared/components/tooltip'
@@ -136,7 +137,7 @@ const LayoutDropdownToggleButton = forwardRef<
     onClick(e)
   }
 
-  return <button {...props} ref={ref} onClick={handleClick} />
+  return <DropdownToggleCustom {...props} ref={ref} onClick={handleClick} />
 })
 LayoutDropdownToggleButton.displayName = 'LayoutDropdownToggleButton'
 

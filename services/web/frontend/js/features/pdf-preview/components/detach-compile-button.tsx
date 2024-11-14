@@ -46,7 +46,7 @@ function DetachCompileButton() {
           size="sm"
           isLoading={compiling}
           bs3Props={{
-            loading: (
+            loading: compiling && (
               <>
                 <Icon type="refresh" spin={compiling} />
                 <span className="detach-compile-button-label">
@@ -58,11 +58,14 @@ function DetachCompileButton() {
         >
           <BootstrapVersionSwitcher
             bs3={
-              <span className="detach-compile-button-label">
-                {compileButtonLabel}
-              </span>
+              <>
+                <Icon type="refresh" spin={compiling} />
+                <span className="detach-compile-button-label">
+                  {compileButtonLabel}
+                </span>
+              </>
             }
-            bs5={compileButtonLabel}
+            bs5={t('recompile')}
           />
         </OLButton>
       </OLTooltip>

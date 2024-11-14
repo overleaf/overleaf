@@ -29,3 +29,43 @@ $stripe-width: 20px;
     cursor: not-allowed;
   }
 }
+
+@keyframes compile-button-flash {
+  0%,
+  100% {
+    background: rgb(0 0 0 / 0%);
+  }
+
+  25%,
+  75% {
+    background: rgb(0 0 0 / 20%);
+  }
+}
+
+@keyframes compile-button-bounce {
+  0%,
+  50%,
+  100% {
+    transform: translateY(0);
+  }
+
+  25%,
+  75% {
+    transform: translateY(2px);
+  }
+}
+
+.detach-compile-button-animate {
+  animation-duration: 1.2s;
+  animation-fill-mode: both;
+  animation-timing-function: ease-in-out;
+  animation-name: compile-button-flash;
+}
+
+.detach-compile-button-animate .material-symbols {
+  animation-duration: 0.6s;
+  animation-delay: 0.4s;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+  animation-name: compile-button-bounce;
+}

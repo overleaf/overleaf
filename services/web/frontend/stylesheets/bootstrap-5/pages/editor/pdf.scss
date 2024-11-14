@@ -26,6 +26,17 @@
 .toolbar-pdf-left {
   gap: var(--spacing-02);
 
+  .compile-button-group {
+    height: 28px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: var(--bg-accent-01);
+
+    .btn-primary:hover {
+      z-index: auto; // prevents border from being hidden
+    }
+  }
+
   .dropdown > .btn {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
