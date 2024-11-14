@@ -1,16 +1,20 @@
-import { forwardRef } from 'react'
+import React, { forwardRef } from 'react'
 import {
   Form,
   FormControlProps as BS5FormControlProps,
 } from 'react-bootstrap-5'
 import classnames from 'classnames'
+import type { BsPrefixRefForwardingComponent } from 'react-bootstrap-5/helpers'
 
-type FormControlProps = BS5FormControlProps & {
+export type OLBS5FormControlProps = BS5FormControlProps & {
   prepend?: React.ReactNode
   append?: React.ReactNode
 }
 
-const FormControl = forwardRef<HTMLInputElement, FormControlProps>(
+const FormControl: BsPrefixRefForwardingComponent<
+  'input',
+  OLBS5FormControlProps
+> = forwardRef<HTMLInputElement, OLBS5FormControlProps>(
   ({ prepend, append, className, ...props }, ref) => {
     if (prepend || append) {
       const wrapperClassNames = classnames('form-control-wrapper', {

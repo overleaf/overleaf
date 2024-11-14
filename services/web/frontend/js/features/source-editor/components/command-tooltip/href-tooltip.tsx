@@ -92,7 +92,7 @@ export const HrefTooltipContent: FC = () => {
             htmlSize={50}
             placeholder="https://…"
             value={url}
-            ref={element => {
+            ref={(element: HTMLInputElement) => {
               inputRef.current = element
             }}
             autoComplete="off"
