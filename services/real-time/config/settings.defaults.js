@@ -1,4 +1,9 @@
 /* eslint-disable camelcase */
+const http = require('node:http')
+const https = require('node:https')
+
+http.globalAgent.keepAlive = false
+https.globalAgent.keepAlive = false
 
 const settings = {
   redis: {

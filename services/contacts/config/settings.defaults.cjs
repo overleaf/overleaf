@@ -1,6 +1,9 @@
 const http = require('node:http')
+const https = require('node:https')
+
 http.globalAgent.maxSockets = 300
 http.globalAgent.keepAlive = false
+https.globalAgent.keepAlive = false
 
 module.exports = {
   internal: {
