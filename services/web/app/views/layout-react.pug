@@ -8,6 +8,9 @@ include ./_mixins/bootstrap_js
 block entrypointVar
 	- entrypoint = 'marketing'
 		
+block isApplicationPageVar
+	- isApplicationPage = true
+		
 block append meta
 	if bootstrapVersion === 5
 		- const canDisplayAdminMenu = hasAdminAccess()

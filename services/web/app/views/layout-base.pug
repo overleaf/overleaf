@@ -9,8 +9,11 @@ html(
 	- let bootstrap5PageStatus = 'disabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
 	- let bootstrap5PageSplitTest = '' // Limits Bootstrap 5 usage on this page to users with an assignment of "enabled" for the specified split test. If left empty and bootstrap5PageStatus is "enabled", the page always uses Bootstrap 5.
 	- let isWebsiteRedesign = false
+	- let isApplicationPage = false	
 
 	block entrypointVar
+
+	block isApplicationPageVar
 
 	block vars
 
@@ -77,7 +80,8 @@ html(
 
 	body(class={
 		'thin-footer': showThinFooter,
-		'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride
+		'website-redesign': isWebsiteRedesign === true || websiteRedesignOverride,
+		'application-page': isApplicationPage
 	}, data-theme="default")
 		if(settings.recaptcha && settings.recaptcha.siteKeyV3)
 			script(type="text/javascript", nonce=scriptNonce, src="https://www.recaptcha.net/recaptcha/api.js?render=" + settings.recaptcha.siteKeyV3, defer=deferScripts)

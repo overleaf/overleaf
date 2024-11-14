@@ -29,9 +29,15 @@
 }
 
 .website-redesign {
-  --link-color: var(--link-web);
-  --link-hover-color: var(--link-web-hover);
-  --link-visited-color: var(--link-web-visited);
+  &:not(.application-page) {
+    --link-color: var(--link-web);
+    --link-hover-color: var(--link-web-hover);
+    --link-visited-color: var(--link-web-visited);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 
   // hero section of features, enterprises, and universities will have an image that will overflow the page
 
@@ -40,10 +46,6 @@
   overflow-x: hidden;
 
   a {
-    &:hover {
-      text-decoration: underline;
-    }
-
     &:focus,
     &:focus-visible {
       outline: 0;
