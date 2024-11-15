@@ -17,9 +17,7 @@ const footerLanguageElement = document.querySelector(
 
 const allTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]')
 
-const possibleBadgeTooltips = document.querySelectorAll(
-  '[data-bs-toggle="tooltip-if-needed"]'
-)
+const possibleBadgeTooltips = document.querySelectorAll('[data-badge-tooltip]')
 
 // eslint-disable-next-line no-unused-vars
 const footLangTooltip = new Tooltip(footerLanguageElement)
@@ -30,7 +28,7 @@ allTooltips.forEach(element => {
 })
 
 possibleBadgeTooltips.forEach(element => {
-  // Put data-bs-toggle="tooltip-if-needed" on .badge-content
+  // Put data-badge-tooltip on .badge-content
   // then tooltip is only shown if content is clipped due to max-width on .badge
   // Due to font loading, the width calculated on page load might change, so we might
   // incorrectly determine a tooltip is not needed. This is why max-width will always be set to none

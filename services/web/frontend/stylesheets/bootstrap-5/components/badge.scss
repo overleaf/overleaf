@@ -105,6 +105,12 @@ $max-width: 160px;
     background-color: var(--neutral-30) !important;
   }
 
+  &.badge-link-no-max-width {
+    .badge {
+      max-width: none;
+    }
+  }
+
   .badge {
     @include body-sm;
 
