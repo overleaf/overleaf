@@ -45,11 +45,11 @@ describe('GcsPersistorTests', function () {
 
     files = [
       {
-        metadata: { size: 11, md5Hash: '/////wAAAAD/////AAAAAA==' },
+        metadata: { size: '11', md5Hash: '/////wAAAAD/////AAAAAA==' },
         delete: sinon.stub(),
       },
       {
-        metadata: { size: 22, md5Hash: '/////wAAAAD/////AAAAAA==' },
+        metadata: { size: '22', md5Hash: '/////wAAAAD/////AAAAAA==' },
         delete: sinon.stub(),
       },
     ]
@@ -302,7 +302,7 @@ describe('GcsPersistorTests', function () {
       })
 
       it('should return the object size', function () {
-        expect(size).to.equal(files[0].metadata.size)
+        expect(size).to.equal(11)
       })
 
       it('should pass the bucket and key to GCS', function () {

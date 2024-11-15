@@ -180,7 +180,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         .bucket(bucketName)
         .file(key)
         .getMetadata()
-      return metadata.size
+      return parseInt(metadata.size, 10)
     } catch (err) {
       throw PersistorHelper.wrapError(
         err,
@@ -289,7 +289,10 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       )
     }
 
-    return files.reduce((acc, file) => Number(file.metadata.size) + acc, 0)
+    return files.reduce(
+      (acc, file) => parseInt(file.metadata.size, 10) + acc,
+      0
+    )
   }
 
   async checkIfObjectExists(bucketName, key) {

@@ -1354,6 +1354,25 @@ describe('Filestore', function () {
         })
       })
 
+      describe('getObjectSize', function () {
+        it('should return a number', async function () {
+          const buf = Buffer.from('hello')
+          const fileId = new ObjectId().toString()
+          const fileUrl = `${filestoreUrl}/project/${projectId}/file/${fileId}`
+          const res = await fetch(fileUrl, {
+            method: 'POST',
+            body: Stream.Readable.from([buf]),
+          })
+          if (!res.ok) throw new Error(res.statusText)
+          expect(
+            await app.persistor.getObjectSize(
+              Settings.filestore.stores.user_files,
+              `${projectId}/${fileId}`
+            )
+          ).to.equal(buf.byteLength)
+        })
+      })
+
       describe('checkIfObjectExists', function () {
         it('should return false when the object does not exist', async function () {
           expect(
