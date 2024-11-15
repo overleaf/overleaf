@@ -2,7 +2,12 @@ const fs = require('node:fs')
 const { pipeline } = require('node:stream/promises')
 const { PassThrough } = require('node:stream')
 const { Storage, IdempotencyStrategy } = require('@google-cloud/storage')
-const { WriteError, ReadError, NotFoundError } = require('./Errors')
+const {
+  WriteError,
+  ReadError,
+  NotFoundError,
+  NotImplementedError,
+} = require('./Errors')
 const asyncPool = require('tiny-async-pool')
 const AbstractPersistor = require('./AbstractPersistor')
 const PersistorHelper = require('./PersistorHelper')
@@ -11,8 +16,13 @@ const zlib = require('node:zlib')
 
 module.exports = class GcsPersistor extends AbstractPersistor {
   constructor(settings) {
-    super()
+    if (settings.storageClass) {
+      throw new NotImplementedError(
+        'Use default bucket class for GCS instead of settings.storageClass'
+      )
+    }
 
+    super()
     this.settings = settings
 
     // endpoint settings will be null by default except for tests

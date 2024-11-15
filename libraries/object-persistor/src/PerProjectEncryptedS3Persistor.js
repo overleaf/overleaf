@@ -311,6 +311,16 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
     return await super.getObjectSize(bucketName, path, { ...opts, ssecOptions })
   }
 
+  async getObjectStorageClass(bucketName, path, opts = {}) {
+    const ssecOptions =
+      opts.ssecOptions ||
+      (await this.#getExistingDataEncryptionKeyOptions(bucketName, path))
+    return await super.getObjectStorageClass(bucketName, path, {
+      ...opts,
+      ssecOptions,
+    })
+  }
+
   async directorySize(bucketName, path, continuationToken) {
     // Note: Listing a bucket does not require SSE-C credentials.
     return await super.directorySize(bucketName, path, continuationToken)

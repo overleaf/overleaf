@@ -5,6 +5,9 @@ const {
   RootKeyEncryptionKey,
 } = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
 
+const AWS_S3_USER_FILES_STORAGE_CLASS =
+  process.env.AWS_S3_USER_FILES_STORAGE_CLASS
+
 // use functions to get a fresh copy, not a reference, each time
 function s3BaseConfig() {
   return {
@@ -42,6 +45,10 @@ function s3SSECConfig() {
     },
     async getRootKeyEncryptionKeys() {
       return S3SSECKeys
+    },
+    storageClass: {
+      [process.env.AWS_S3_USER_FILES_BUCKET_NAME]:
+        AWS_S3_USER_FILES_STORAGE_CLASS,
     },
   }
 }
@@ -176,6 +183,7 @@ function checkForUnexpectedTestFile() {
 checkForUnexpectedTestFile()
 
 module.exports = {
+  AWS_S3_USER_FILES_STORAGE_CLASS,
   BackendSettings,
   s3Config,
   s3SSECConfig,

@@ -52,6 +52,7 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
       ENABLE_CONVERSIONS: "true"
       USE_PROM_METRICS: "true"
+      AWS_S3_USER_FILES_STORAGE_CLASS: REDUCED_REDUNDANCY
       AWS_S3_USER_FILES_BUCKET_NAME: fake-user-files
       AWS_S3_USER_FILES_DEK_BUCKET_NAME: fake-user-files-dek
       AWS_S3_TEMPLATE_FILES_BUCKET_NAME: fake-template-files

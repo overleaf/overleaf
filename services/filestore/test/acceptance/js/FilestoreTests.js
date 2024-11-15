@@ -31,7 +31,12 @@ process.on('unhandledRejection', e => {
 
 // store settings for multiple backends, so that we can test each one.
 // fs will always be available - add others if they are configured
-const { BackendSettings, s3Config, s3SSECConfig } = require('./TestConfig')
+const {
+  BackendSettings,
+  s3Config,
+  s3SSECConfig,
+  AWS_S3_USER_FILES_STORAGE_CLASS,
+} = require('./TestConfig')
 const {
   AlreadyWrittenError,
   NotFoundError,
@@ -1257,6 +1262,7 @@ describe('Filestore', function () {
           })
         })
 
+        /** @type {import('aws-sdk/clients/s3')} */
         let s3Client
         before('create s3 client', function () {
           s3Client = new S3Persistor(s3Config())._getClientForBucket('')
@@ -1400,6 +1406,40 @@ describe('Filestore', function () {
           ).to.equal(true)
         })
       })
+
+      if (backendSettings.backend === 's3SSEC') {
+        describe('storageClass', function () {
+          it('should use the default storage class for dek', async function () {
+            const key = `${projectId}/${new ObjectId()}`
+            const dekBucket = process.env.AWS_S3_USER_FILES_DEK_BUCKET_NAME
+            await app.persistor.sendStream(
+              dekBucket,
+              key,
+              Stream.Readable.from(['hello'])
+            )
+            expect(
+              await app.persistor.getObjectStorageClass(dekBucket, key)
+            ).to.equal(undefined)
+          })
+
+          it('should use the custom storage class for user files', async function () {
+            const key = `${projectId}/${new ObjectId()}`
+            await app.persistor.sendStream(
+              Settings.filestore.stores.user_files,
+              key,
+              Stream.Readable.from(['hello'])
+            )
+            const sc = AWS_S3_USER_FILES_STORAGE_CLASS
+            expect(sc).to.exist
+            expect(
+              await app.persistor.getObjectStorageClass(
+                Settings.filestore.stores.user_files,
+                key
+              )
+            ).to.equal(sc)
+          })
+        })
+      }
 
       describe('autoGunzip', function () {
         let key

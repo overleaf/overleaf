@@ -15,6 +15,12 @@ const glob = promisify(globCallbacks)
 
 module.exports = class FSPersistor extends AbstractPersistor {
   constructor(settings = {}) {
+    if (settings.storageClass) {
+      throw new NotImplementedError(
+        'FS backend does not support storage classes'
+      )
+    }
+
     super()
     this.useSubdirectories = Boolean(settings.useSubdirectories)
   }

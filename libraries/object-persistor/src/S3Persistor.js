@@ -64,6 +64,7 @@ class S3Persistor extends AbstractPersistor {
   constructor(settings = {}) {
     super()
 
+    settings.storageClass = settings.storageClass || {}
     this.settings = settings
   }
 
@@ -100,11 +101,15 @@ class S3Persistor extends AbstractPersistor {
       // observer will catch errors, clean up and log a warning
       pipeline(readStream, observer, () => {})
 
-      // if we have an md5 hash, pass this to S3 to verify the upload
+      /** @type {S3.PutObjectRequest} */
       const uploadOptions = {
         Bucket: bucketName,
         Key: key,
         Body: observer,
+      }
+
+      if (this.settings.storageClass[bucketName]) {
+        uploadOptions.StorageClass = this.settings.storageClass[bucketName]
       }
 
       if (opts.contentType) {
@@ -334,6 +339,18 @@ class S3Persistor extends AbstractPersistor {
   async getObjectSize(bucketName, key, opts = {}) {
     const response = await this.#headObject(bucketName, key, opts)
     return response.ContentLength || 0
+  }
+
+  /**
+   * @param {string} bucketName
+   * @param {string} key
+   * @param {Object} opts
+   * @param {SSECOptions} [opts.ssecOptions]
+   * @return {Promise<string | undefined>}
+   */
+  async getObjectStorageClass(bucketName, key, opts = {}) {
+    const response = await this.#headObject(bucketName, key, opts)
+    return response.StorageClass
   }
 
   /**
