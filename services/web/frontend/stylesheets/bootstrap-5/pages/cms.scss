@@ -639,53 +639,36 @@
     height: 100%;
   }
 
-  .section-row {
-    &.section-row-max-800 {
+  .row {
+    &.row-max-800 {
       max-width: 800px !important;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    &.section-row-max-900 {
+    &.row-max-900 {
       max-width: 900px !important;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    &.section-row-max-1000 {
+    &.row-max-1000 {
       max-width: 1000px !important;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    &.section-row-max-unset {
+    &.row-max-unset {
       max-width: unset !important;
+      margin-left: auto;
+      margin-right: auto;
     }
+  }
 
-    &.section-row-gap-spacing-16 {
-      @include section-row-custom-gap(calc(var(--spacing-16) / 2));
-    }
-
-    &.section-row-gap-spacing-15 {
-      @include section-row-custom-gap(calc(var(--spacing-15) / 2));
-    }
-
-    &.section-row-gap-spacing-14 {
-      @include section-row-custom-gap(calc(var(--spacing-14) / 2));
-    }
-
-    &.section-row-gap-spacing-13 {
-      @include section-row-custom-gap(calc(var(--spacing-13) / 2));
-    }
-
-    &.section-row-gap-spacing-12 {
-      @include section-row-custom-gap(calc(var(--spacing-12) / 2));
-    }
-
-    &.section-row-gap-spacing-11 {
-      @include section-row-custom-gap(calc(var(--spacing-11) / 2));
-    }
-
-    &.section-row-gap-spacing-10 {
-      @include section-row-custom-gap(calc(var(--spacing-10) / 2));
-    }
-
-    &.section-row-gap-spacing-09 {
-      @include section-row-custom-gap(calc(var(--spacing-09) / 2));
+  // create .row-gap-spacing-00, .row-gap-spacing-01, .row-gap-spacing-02, .row-gap-spacing-03, .row-gap-spacing-04, .row-gap-spacing-05, .row-gap-spacing-06, .row-gap-spacing-07, .row-gap-spacing-08, .row-gap-spacing-09, .row-gap-spacing-10, .row-gap-spacing-11, .row-gap-spacing-12, .row-gap-spacing-13, .row-gap-spacing-14, .row-gap-spacing-15, .row-gap-spacing-16
+  @each $spacing-option in $all-spacings {
+    .row-gap-#{$spacing-option} {
+      @include section-row-custom-gap(calc(var(--#{$spacing-option}) / 2));
     }
   }
 }
@@ -701,37 +684,10 @@
       flex-direction: column-reverse;
     }
 
-    .section-row {
-      &.section-row-mobile-gap-spacing-16 {
-        @include section-row-custom-gap(calc(var(--spacing-16) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-15 {
-        @include section-row-custom-gap(calc(var(--spacing-15) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-14 {
-        @include section-row-custom-gap(calc(var(--spacing-14) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-13 {
-        @include section-row-custom-gap(calc(var(--spacing-13) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-12 {
-        @include section-row-custom-gap(calc(var(--spacing-12) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-11 {
-        @include section-row-custom-gap(calc(var(--spacing-11) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-10 {
-        @include section-row-custom-gap(calc(var(--spacing-10) / 2));
-      }
-
-      &.section-row-mobile-gap-spacing-09 {
-        @include section-row-custom-gap(calc(var(--spacing-09) / 2));
+    // create .row-mobile-gap-spacing-00, .row-mobile-gap-spacing-01, .row-mobile-gap-spacing-02, .row-mobile-gap-spacing-03, .row-mobile-gap-spacing-04, .row-mobile-gap-spacing-05, .row-mobile-gap-spacing-06, .row-mobile-gap-spacing-07, .row-mobile-gap-spacing-08, .row-mobile-gap-spacing-09, .row-mobile-gap-spacing-10, .row-mobile-gap-spacing-11, .row-mobile-gap-spacing-12, .row-mobile-gap-spacing-13, .row-mobile-gap-spacing-14, .row-mobile-gap-spacing-15, .row-mobile-gap-spacing-16
+    @each $spacing-option in $all-spacings {
+      .row-mobile-gap-#{$spacing-option} {
+        @include section-row-custom-gap(calc(var(--#{$spacing-option}) / 2));
       }
     }
   }
