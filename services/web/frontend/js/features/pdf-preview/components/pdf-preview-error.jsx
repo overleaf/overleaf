@@ -136,7 +136,7 @@ function PdfPreviewError({ error }) {
         </ErrorLogEntry>
       )
 
-    case 'auto-compile-disabled':
+    case 'autocompile-disabled':
       return (
         <ErrorLogEntry title={t('autocompile_disabled')}>
           {t('autocompile_disabled_reason')}

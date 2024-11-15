@@ -244,6 +244,7 @@ export const CompileError = () => {
           left: 10,
           background: 'white',
           padding: 10,
+          zIndex: 100,
         }}
       >
         <label>
