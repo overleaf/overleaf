@@ -692,7 +692,7 @@ NonEmptyGroup<GroupContent> {
 
 ///  MATH MODE
 
-DollarMath {
+DollarMath[@isGroup="$MathContainer"] {
   Dollar (InlineMath | DisplayMath) Dollar
 }
 
@@ -714,7 +714,7 @@ CloseParenMath[openedBy=OpenParenMath] {
 }
 
 // alternative syntax \( math \) for inline math, it is the same as $ math $
-ParenMath {
+ParenMath[@isGroup="$MathContainer"] {
     OpenParenMath
     Math?
     CloseParenMath
@@ -729,7 +729,7 @@ CloseBracketMath[openedBy=OpenBracketMath] {
 }
 
 // alternative syntax \[ math \] for display math, it is the same as $$ math $$
-BracketMath {
+BracketMath[@isGroup="$MathContainer"] {
     OpenBracketMath
     Math?
     CloseBracketMath
