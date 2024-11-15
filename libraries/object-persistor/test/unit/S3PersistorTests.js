@@ -93,14 +93,14 @@ describe('S3PersistorTests', function () {
         setTimeout(() => {
           if (this.notFoundSSEC) {
             // special case for AWS S3: 404 NoSuchKey wrapped in a 400. A single request received a single response, and multiple httpHeaders events are triggered. Don't ask.
-            this.emit('httpHeaders', 400)
-            this.emit('httpHeaders', 404)
+            this.emit('httpHeaders', 400, {})
+            this.emit('httpHeaders', 404, {})
             ReadStream.emit('error', S3NotFoundError)
             return
           }
 
           if (this.err) return ReadStream.emit('error', this.err)
-          this.emit('httpHeaders', this.statusCode)
+          this.emit('httpHeaders', this.statusCode, {})
           if (this.statusCode === 403) {
             ReadStream.emit('error', S3AccessDeniedError)
           }

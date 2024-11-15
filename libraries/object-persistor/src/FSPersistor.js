@@ -71,6 +71,11 @@ module.exports = class FSPersistor extends AbstractPersistor {
 
   // opts may be {start: Number, end: Number}
   async getObjectStream(location, name, opts = {}) {
+    if (opts.autoGunzip) {
+      throw new NotImplementedError(
+        'opts.autoGunzip is not supported by FS backend. Configure GCS or S3 backend instead, get in touch with support for further information.'
+      )
+    }
     const observer = new PersistorHelper.ObserverStream({
       metric: 'fs.ingress', // ingress to us from disk
       bucket: location,

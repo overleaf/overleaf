@@ -412,7 +412,7 @@ class CachedPerProjectEncryptedS3Persistor {
    * @param {Object} opts
    * @param {number} [opts.start]
    * @param {number} [opts.end]
-   * @param {string} [opts.contentEncoding]
+   * @param {boolean} [opts.autoGunzip]
    * @param {SSECOptions} [opts.ssecOptions]
    * @return {Promise<NodeJS.ReadableStream>}
    */

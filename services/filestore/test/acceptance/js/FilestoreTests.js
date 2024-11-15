@@ -44,6 +44,8 @@ const {
 } = require('@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor')
 const { S3Persistor } = require('@overleaf/object-persistor/src/S3Persistor')
 const crypto = require('node:crypto')
+const { WritableBuffer } = require('@overleaf/stream-utils')
+const { gzipSync } = require('node:zlib')
 
 describe('Filestore', function () {
   this.timeout(1000 * 10)
@@ -1397,6 +1399,97 @@ describe('Filestore', function () {
             )
           ).to.equal(true)
         })
+      })
+
+      describe('autoGunzip', function () {
+        let key
+        beforeEach('new key', function () {
+          key = `${projectId}/${new ObjectId().toString()}`
+        })
+        this.timeout(60 * 1000)
+        const body = Buffer.alloc(10 * 1024 * 1024, 'hello')
+        const gzippedBody = gzipSync(body)
+
+        /**
+         * @param {string} key
+         * @param {Buffer} wantBody
+         * @param {boolean} autoGunzip
+         * @return {Promise<void>}
+         */
+        async function checkBodyIsTheSame(key, wantBody, autoGunzip) {
+          const s = await app.persistor.getObjectStream(
+            Settings.filestore.stores.user_files,
+            key,
+            { autoGunzip }
+          )
+          const buf = new WritableBuffer()
+          await Stream.promises.pipeline(s, buf)
+          expect(buf.getContents()).to.deep.equal(wantBody)
+        }
+
+        if (backendSettings.backend === 'fs') {
+          it('should refuse to handle autoGunzip', async function () {
+            await expect(
+              app.persistor.getObjectStream(
+                Settings.filestore.stores.user_files,
+                key,
+                { autoGunzip: true }
+              )
+            ).to.be.rejectedWith(NotImplementedError)
+          })
+        } else {
+          it('should return the raw body with gzip', async function () {
+            await app.persistor.sendStream(
+              Settings.filestore.stores.user_files,
+              key,
+              Stream.Readable.from([gzippedBody]),
+              { contentEncoding: 'gzip' }
+            )
+            expect(
+              await app.persistor.getObjectSize(
+                Settings.filestore.stores.user_files,
+                key
+              )
+            ).to.equal(gzippedBody.byteLength)
+            // raw body with autoGunzip=true
+            await checkBodyIsTheSame(key, body, true)
+            // gzip body without autoGunzip=false
+            await checkBodyIsTheSame(key, gzippedBody, false)
+          })
+          it('should return the raw body without gzip compression', async function () {
+            await app.persistor.sendStream(
+              Settings.filestore.stores.user_files,
+              key,
+              Stream.Readable.from([body])
+            )
+            expect(
+              await app.persistor.getObjectSize(
+                Settings.filestore.stores.user_files,
+                key
+              )
+            ).to.equal(body.byteLength)
+            // raw body with both autoGunzip options
+            await checkBodyIsTheSame(key, body, true)
+            await checkBodyIsTheSame(key, body, false)
+          })
+
+          it('should return the gzip body without gzip header', async function () {
+            await app.persistor.sendStream(
+              Settings.filestore.stores.user_files,
+              key,
+              Stream.Readable.from([gzippedBody])
+            )
+            expect(
+              await app.persistor.getObjectSize(
+                Settings.filestore.stores.user_files,
+                key
+              )
+            ).to.equal(gzippedBody.byteLength)
+            // gzip body with both autoGunzip options
+            await checkBodyIsTheSame(key, gzippedBody, true)
+            await checkBodyIsTheSame(key, gzippedBody, false)
+          })
+        }
       })
     })
   }

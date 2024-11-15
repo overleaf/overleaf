@@ -18,6 +18,7 @@ const fs = require('node:fs')
 const S3 = require('aws-sdk/clients/s3')
 const { URL } = require('node:url')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
+const zlib = require('node:zlib')
 
 /**
  * Wrapper with private fields to avoid revealing them on console, JSON.stringify or similar.
@@ -147,7 +148,7 @@ class S3Persistor extends AbstractPersistor {
    * @param {Object} opts
    * @param {number} [opts.start]
    * @param {number} [opts.end]
-   * @param {string} [opts.contentEncoding]
+   * @param {boolean} [opts.autoGunzip]
    * @param {SSECOptions} [opts.ssecOptions]
    * @return {Promise<NodeJS.ReadableStream>}
    */
@@ -172,12 +173,14 @@ class S3Persistor extends AbstractPersistor {
     const req = this._getClientForBucket(bucketName).getObject(params)
     const stream = req.createReadStream()
 
+    let contentEncoding
     try {
       await new Promise((resolve, reject) => {
-        req.on('httpHeaders', statusCode => {
+        req.on('httpHeaders', (statusCode, headers) => {
           switch (statusCode) {
             case 200: // full response
             case 206: // partial response
+              contentEncoding = headers['content-encoding']
               return resolve(undefined)
             case 403: // AccessDenied
               return // handled by stream.on('error') handler below
@@ -202,7 +205,11 @@ class S3Persistor extends AbstractPersistor {
     }
     // Return a PassThrough stream with a minimal interface. It will buffer until the caller starts reading. It will emit errors from the source stream (Stream.pipeline passes errors along).
     const pass = new PassThrough()
-    pipeline(stream, observer, pass, err => {
+    const transformer = []
+    if (contentEncoding === 'gzip' && opts.autoGunzip) {
+      transformer.push(zlib.createGunzip())
+    }
+    pipeline(stream, observer, ...transformer, pass, err => {
       if (err) req.abort()
     })
     return pass

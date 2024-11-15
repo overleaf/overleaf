@@ -63,7 +63,7 @@ describe('GcsPersistorTests', function () {
 
       read() {
         if (this.err) return this.emit('error', this.err)
-        this.emit('response', { statusCode: this.statusCode })
+        this.emit('response', { statusCode: this.statusCode, headers: {} })
       }
     }
 
