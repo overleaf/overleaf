@@ -246,6 +246,12 @@ module.exports = {
       sendProjectStructureOps: true,
       url: `http://${process.env.PROJECT_HISTORY_HOST || '127.0.0.1'}:3054`,
     },
+    historyBackupDeletion: {
+      enabled: false,
+      url: `http://${process.env.HISTORY_BACKUP_DELETION_HOST || '127.0.0.1'}:3101`,
+      user: process.env.HISTORY_BACKUP_DELETION_USER || 'staging',
+      pass: process.env.HISTORY_BACKUP_DELETION_PASS,
+    },
     realTime: {
       url: `http://${process.env.REALTIME_HOST || '127.0.0.1'}:3026`,
     },

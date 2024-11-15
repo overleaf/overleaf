@@ -86,6 +86,11 @@ module.exports = {
       user: 'overleaf',
       pass: 'password',
     },
+    historyBackupDeletion: {
+      url: `http://127.0.0.1:23101`,
+      user: 'overleaf',
+      pass: 'password',
+    },
     webpack: {
       url: 'http://127.0.0.1:23808',
     },

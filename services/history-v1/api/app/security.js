@@ -105,6 +105,8 @@ function handleJWTAuth(req, authOrSecDef, scopesOrApiKey, next) {
   next()
 }
 
+exports.hasValidBasicAuthCredentials = hasValidBasicAuthCredentials
+
 /**
  * Verify and decode the given JSON Web Token
  */

@@ -4,6 +4,7 @@ const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
+const HistoryBackupDeletionHandler = require('./HistoryBackupDeletionHandler')
 
 async function initializeProject(projectId) {
   const body = await fetchJson(`${settings.apis.project_history.url}/project`, {
@@ -77,6 +78,7 @@ async function deleteProject(projectId, historyId) {
     tasks.push(_deleteProjectInFullProjectHistory(historyId))
   }
   await Promise.all(tasks)
+  await HistoryBackupDeletionHandler.deleteProject(projectId)
 }
 
 async function _deleteProjectInProjectHistory(projectId) {

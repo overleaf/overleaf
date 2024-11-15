@@ -81,7 +81,7 @@ async function lazyLoadHistoryFiles(history, batchBlobStore) {
 /**
  * Load the latest Chunk stored for a project, including blob metadata.
  *
- * @param {number} projectId
+ * @param {number|string} projectId
  * @return {Promise.<Chunk>}
  */
 async function loadLatest(projectId) {
@@ -315,6 +315,7 @@ class AlreadyInitialized extends OError {
 }
 
 module.exports = {
+  getBackend,
   initializeProject,
   loadLatest,
   loadAtVersion,

@@ -29,6 +29,7 @@
   "zipStore": {
     "zipTimeoutMs": "360000"
   },
+  "minSoftDeletionPeriodDays": "90",
   "maxDeleteKeys": "1000",
   "useDeleteObjects": "true",
   "clusterWorkers": "1",

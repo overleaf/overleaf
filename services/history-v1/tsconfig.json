@@ -4,6 +4,7 @@
     "api/**/*",
     "app.js",
     "app/js/**/*",
+    "backup-deletion-app.mjs",
     "benchmarks/**/*",
     "config/**/*",
     "migrations/**/*",

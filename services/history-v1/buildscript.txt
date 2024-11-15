@@ -7,4 +7,4 @@ history-v1
 --node-version=20.18.0
 --public-repo=False
 --script-version=4.5.0
---tsconfig-extra-includes=api/**/*,migrations/**/*,storage/**/*
+--tsconfig-extra-includes=backup-deletion-app.mjs,api/**/*,migrations/**/*,storage/**/*

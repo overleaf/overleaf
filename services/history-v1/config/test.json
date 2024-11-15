@@ -33,6 +33,7 @@
     },
     "tieringStorageClass": "REDUCED_REDUNDANCY"
   },
+  "healthCheckProjects": "[\"42\",\"000000000000000000000042\"]",
   "maxDeleteKeys": "3",
   "useDeleteObjects": "false",
   "mongo": {
