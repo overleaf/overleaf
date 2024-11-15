@@ -277,6 +277,7 @@ function batchedUpdateWithResultHandling(
 }
 
 module.exports = {
+  READ_PREFERENCE_SECONDARY,
   batchedUpdate,
   batchedUpdateWithResultHandling,
 }

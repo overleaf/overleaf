@@ -23,6 +23,18 @@
   "zipStore": {
     "bucket": "overleaf-development-zips"
   },
+  "backupStore": {
+    "chunksBucket":"overleaf-development-history-chunks",
+    "deksBucket":"overleaf-development-history-deks",
+    "globalBlobsBucket":"overleaf-development-history-global-blobs",
+    "projectBlobsBucket":"overleaf-development-history-project-blobs"
+  },
+  "backupPersistor": {
+    "keyEncryptionKeys": "[{\"key\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\",\"salt\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\"}]",
+    "s3SSEC": {
+      "ca": "[\"/certs/public.crt\"]"
+    }
+  },
   "useDeleteObjects": "false",
   "mongo": {
     "uri": "mongodb://mongo:27017/sharelatex"

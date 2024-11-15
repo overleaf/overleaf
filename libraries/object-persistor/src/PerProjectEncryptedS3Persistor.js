@@ -201,6 +201,7 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
         // Do not overwrite any objects if already created
         ifNoneMatch: '*',
         ssecOptions: await this.#getCurrentKeyEncryptionKey(projectFolder),
+        contentLength: 32,
       }
     )
     return new SSECOptions(dataEncryptionKey)
@@ -404,6 +405,7 @@ class CachedPerProjectEncryptedS3Persistor {
    * @param {Object} opts
    * @param {string} [opts.contentType]
    * @param {string} [opts.contentEncoding]
+   * @param {number} [opts.contentLength]
    * @param {'*'} [opts.ifNoneMatch]
    * @param {SSECOptions} [opts.ssecOptions]
    * @param {string} [opts.sourceMd5]

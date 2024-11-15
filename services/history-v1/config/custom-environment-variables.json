@@ -8,6 +8,8 @@
     "s3": {
       "key": "AWS_ACCESS_KEY_ID",
       "secret": "AWS_SECRET_ACCESS_KEY",
+      "endpoint": "AWS_S3_ENDPOINT",
+      "pathStyle": "AWS_S3_PATH_STYLE",
       "maxRetries": "S3_MAX_RETRIES",
       "httpOptions": {
         "timeout": "S3_TIMEOUT"
@@ -30,6 +32,19 @@
       "buckets": "PERSISTOR_BUCKET_MAPPING"
     }
   },
+  "backupPersistor": {
+    "keyEncryptionKeys": "BACKUP_KEY_ENCRYPTION_KEYS",
+    "s3SSEC": {
+      "key": "AWS_ACCESS_KEY_ID",
+      "secret": "AWS_SECRET_ACCESS_KEY",
+      "endpoint": "AWS_S3_ENDPOINT",
+      "pathStyle": "AWS_S3_PATH_STYLE",
+      "maxRetries": "BACKUP_S3_MAX_RETRIES",
+      "httpOptions": {
+        "timeout": "BACKUP_S3_TIMEOUT"
+      }
+    }
+  },
   "blobStore": {
     "globalBucket": "OVERLEAF_EDITOR_BLOBS_BUCKET",
     "projectBucket": "OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET"
@@ -41,6 +56,12 @@
   "zipStore": {
     "bucket": "OVERLEAF_EDITOR_ZIPS_BUCKET",
     "zipTimeoutMs": "ZIP_STORE_ZIP_TIMEOUT_MS"
+  },
+  "backupStore": {
+    "chunksBucket":"BACKUP_OVERLEAF_EDITOR_CHUNKS_BUCKET",
+    "deksBucket":"BACKUP_OVERLEAF_EDITOR_DEKS_BUCKET",
+    "globalBlobsBucket":"BACKUP_OVERLEAF_EDITOR_GLOBAL_BLOBS_BUCKET",
+    "projectBlobsBucket":"BACKUP_OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET"
   },
   "mongo": {
     "uri": "MONGO_CONNECTION_STRING"

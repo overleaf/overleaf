@@ -14,6 +14,12 @@ const MONGO_COLLECTIONS = [
   'projectHistoryBlobs',
   'projectHistoryShardedBlobs',
   'projectHistoryChunks',
+
+  // back_fill_file_hash.test.mjs
+  'deletedFiles',
+  'deletedProjects',
+  'projects',
+  'projectHistoryBackedUpBlobs',
 ]
 
 // make sure we don't delete the wrong data by accident

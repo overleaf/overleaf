@@ -13,6 +13,16 @@
       "deleteConcurrency": "50"
     }
   },
+  "backupPersistor": {
+    "backend": "s3SSEC",
+    "s3SSEC": {
+      "maxRetries": "1",
+      "pathStyle": false,
+      "httpOptions": {
+        "timeout": "8000"
+      }
+    }
+  },
   "chunkStore": {
     "historyStoreConcurrency": "4"
   },

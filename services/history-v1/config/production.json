@@ -1,1 +1,5 @@
-{ }
+{
+  "backupPersistor": {
+    "tieringStorageClass": "INTELLIGENT_TIERING"
+  }
+}

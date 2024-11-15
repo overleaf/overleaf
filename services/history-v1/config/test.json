@@ -20,6 +20,19 @@
   "zipStore": {
     "bucket": "overleaf-test-zips"
   },
+  "backupStore": {
+    "chunksBucket":"overleaf-test-history-chunks",
+    "deksBucket":"overleaf-test-history-deks",
+    "globalBlobsBucket":"overleaf-test-history-global-blobs",
+    "projectBlobsBucket":"overleaf-test-history-project-blobs"
+  },
+  "backupPersistor": {
+    "keyEncryptionKeys": "[{\"key\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\",\"salt\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\"}]",
+    "s3SSEC": {
+      "ca": "[\"/certs/public.crt\"]"
+    },
+    "tieringStorageClass": "REDUCED_REDUNDANCY"
+  },
   "maxDeleteKeys": "3",
   "useDeleteObjects": "false",
   "mongo": {

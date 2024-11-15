@@ -337,4 +337,4 @@ class BlobStore {
   }
 }
 
-module.exports = { BlobStore, loadGlobalBlobs }
+module.exports = { BlobStore, loadGlobalBlobs, makeProjectKey, GLOBAL_BLOBS }
