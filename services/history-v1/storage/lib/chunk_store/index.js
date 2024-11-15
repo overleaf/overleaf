@@ -27,7 +27,7 @@ const { Chunk, History, Snapshot } = require('overleaf-editor-core')
 const assert = require('../assert')
 const BatchBlobStore = require('../batch_blob_store')
 const { BlobStore } = require('../blob_store')
-const historyStore = require('../history_store')
+const { historyStore } = require('../history_store')
 const mongoBackend = require('./mongo')
 const postgresBackend = require('./postgres')
 const { ChunkVersionConflictError } = require('./errors')
@@ -81,7 +81,7 @@ async function lazyLoadHistoryFiles(history, batchBlobStore) {
 /**
  * Load the latest Chunk stored for a project, including blob metadata.
  *
- * @param {number|string} projectId
+ * @param {string} projectId
  * @return {Promise.<Chunk>}
  */
 async function loadLatest(projectId) {

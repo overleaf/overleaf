@@ -109,7 +109,7 @@ class History {
    * @param {BlobStore} blobStore
    * @param {number} [concurrency] applies separately to files, changes and
    *                               operations
-   * @return {Promise.<Object>}
+   * @return {Promise<import('overleaf-editor-core/lib/types').RawHistory>}
    */
   async store(blobStore, concurrency) {
     assert.maybe.number(concurrency, 'bad concurrency')

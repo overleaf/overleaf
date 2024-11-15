@@ -8,6 +8,7 @@ import {
   PerProjectEncryptedS3Persistor,
   RootKeyEncryptionKey,
 } from '@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor.js'
+import { HistoryStore } from './history_store.js'
 
 const persistorConfig = _.cloneDeep(config.get('backupPersistor'))
 const { chunksBucket, deksBucket, globalBlobsBucket, projectBlobsBucket } =
@@ -105,3 +106,8 @@ export const backupPersistor = new PerProjectEncryptedS3Persistor({
     [projectBlobsBucket]: persistorConfig.tieringStorageClass,
   },
 })
+
+export const backupHistoryStore = new HistoryStore(
+  backupPersistor,
+  chunksBucket
+)
