@@ -149,7 +149,7 @@ export const enterNode = (
       return state.doc.sliceString(ctrlSeq.from + 1, ctrlSeq.to)
     }
 
-    const nestingLevel = parent?.type.is('$SectioningCommand')
+    const nestingLevel = parent?.type.is('$Section')
       ? getNestingLevel(parent.type.id)
       : getNestingLevel(getCommandName())
 

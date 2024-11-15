@@ -548,7 +548,7 @@ export const atomicDecorations = (options: Options) => {
                 break
             }
           }
-        } else if (nodeRef.type.is('$SectioningCommand')) {
+        } else if (nodeRef.type.is('$SectioningCtrlSeq')) {
           const ancestorNode = ancestorNodeOfType(
             state,
             nodeRef.to,
