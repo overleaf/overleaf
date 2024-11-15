@@ -101,6 +101,17 @@
           &:hover {
             text-decoration: underline;
           }
+
+          @include media-breakpoint-down(lg) {
+            @include heading-sm;
+          }
+
+          @include media-breakpoint-down(md) {
+            @include heading-xs;
+
+            line-clamp: 3;
+            -webkit-line-clamp: 3;
+          }
         }
       }
 
