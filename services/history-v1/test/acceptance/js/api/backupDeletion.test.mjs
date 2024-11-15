@@ -96,6 +96,7 @@ describe('backupDeletion', function () {
     const projectIdNonDeleted = new ObjectId('000000000000000000000003')
     const projectIdNonExpired = new ObjectId('000000000000000000000004')
     const projectIdWithChunks = new ObjectId('000000000000000000000005')
+    const projectIdNoHistoryId = new ObjectId('000000000000000000000006')
 
     beforeEach('cleanup s3 buckets', async function () {
       await backupPersistor.deleteDirectory(deksBucket, '')
@@ -107,36 +108,34 @@ describe('backupDeletion', function () {
       await deletedProjectsCollection.insertMany([
         {
           _id: new ObjectId(),
-          project: {
-            _id: projectIdPostgres,
-            overleaf: { history: { id: postgresHistoryId } },
-          },
           deleterData: {
             deletedProjectId: projectIdPostgres,
             deletedAt: new Date('2024-01-01T00:00:00Z'),
+            deletedProjectOverleafHistoryId: postgresHistoryId,
           },
         },
         {
           _id: new ObjectId(),
-          project: {
-            _id: projectIdNonExpired,
-            overleaf: { history: { id: projectIdNonExpired.toString() } },
-          },
           deleterData: {
             deletedProjectId: projectIdNonExpired,
             deletedAt: new Date(),
+            deletedProjectOverleafHistoryId: projectIdNonExpired.toString(),
+          },
+        },
+        {
+          _id: new ObjectId(),
+          deleterData: {
+            deletedProjectId: projectIdNoHistoryId,
+            deletedAt: new Date('2024-01-01T00:00:00Z'),
           },
         },
         ...[projectIdMongoDB, projectIdWithChunks].map(projectId => {
           return {
             _id: new ObjectId(),
-            project: {
-              _id: projectId,
-              overleaf: { history: { id: projectId.toString() } },
-            },
             deleterData: {
               deletedProjectId: projectId,
               deletedAt: new Date('2024-01-01T00:00:00Z'),
+              deletedProjectOverleafHistoryId: projectId.toString(),
             },
           }
         }),
@@ -154,6 +153,7 @@ describe('backupDeletion', function () {
         projectIdNonDeleted,
         projectIdNonExpired,
         projectIdWithChunks,
+        projectIdNoHistoryId,
       ]
       const jobs = []
       for (const historyId of historyIds) {
@@ -225,6 +225,14 @@ describe('backupDeletion', function () {
         'refusing to delete project with remaining chunks'
       )
       await expectToHaveBackup(projectIdWithChunks)
+    })
+    it('returns 422 when historyId is unknown', async function () {
+      const response = await deleteProject(projectIdNoHistoryId)
+      expect(response.status).to.equal(422)
+      expect(await response.text()).to.equal(
+        'refusing to delete project with unknown historyId'
+      )
+      await expectToHaveBackup(projectIdNoHistoryId)
     })
     it('should successfully delete postgres id', async function () {
       await expectToHaveBackup(postgresHistoryId)

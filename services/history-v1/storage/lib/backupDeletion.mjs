@@ -37,7 +37,7 @@ async function deleteProjectBackup(projectId) {
     { 'deleterData.deletedProjectId': new ObjectId(projectId) },
     {
       projection: {
-        'project.overleaf.history.id': 1,
+        'deleterData.deletedProjectOverleafHistoryId': 1,
         'deleterData.deletedAt': 1,
       },
     }
@@ -51,7 +51,13 @@ async function deleteProjectBackup(projectId) {
     throw new NotReadyToDelete('refusing to delete non-expired project')
   }
 
-  const historyId = deletedProject.project.overleaf.history.id
+  const historyId = deletedProject.deleterData.deletedProjectOverleafHistoryId
+  if (!historyId) {
+    throw new NotReadyToDelete(
+      'refusing to delete project with unknown historyId'
+    )
+  }
+
   if (await projectHasLatestChunk(historyId)) {
     throw new NotReadyToDelete(
       'refusing to delete project with remaining chunks'
