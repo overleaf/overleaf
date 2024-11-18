@@ -29,13 +29,9 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { URLSearchParams } = require('url')
 const RecurlyClient = require('./RecurlyClient')
 const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
-const PlansLocator = require('./PlansLocator')
 
 /**
- * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
  * @import { SubscriptionChangePreview } from '../../../../types/subscription/subscription-change-preview'
- * @import { RecurlySubscriptionChange } from './RecurlyEntities'
- * @import { PaymentMethod } from './types'
  */
 
 const groupPlanModalOptions = Settings.groupPlanModalOptions
@@ -520,17 +516,38 @@ async function previewAddonPurchase(req, res) {
   )
 
   /** @type {SubscriptionChangePreview} */
-  const changePreview = makeChangePreview(
-    {
+  const changePreview = {
+    change: {
       type: 'add-on-purchase',
       addOn: {
         code: addOn.code,
         name: addOn.name,
       },
     },
-    subscriptionChange,
-    paymentMethod
-  )
+    currency: subscription.currency,
+    immediateCharge: subscriptionChange.immediateCharge,
+    paymentMethod: paymentMethod.toString(),
+    nextInvoice: {
+      date: subscription.periodEnd.toISOString(),
+      plan: {
+        name: subscriptionChange.nextPlanName,
+        amount: subscriptionChange.nextPlanPrice,
+      },
+      addOns: subscriptionChange.nextAddOns.map(addOn => ({
+        code: addOn.code,
+        name: addOn.name,
+        quantity: addOn.quantity,
+        unitAmount: addOn.unitPrice,
+        amount: addOn.preTaxTotal,
+      })),
+      subtotal: subscriptionChange.subtotal,
+      tax: {
+        rate: subscription.taxRate,
+        amount: subscriptionChange.tax,
+      },
+      total: subscriptionChange.total,
+    },
+  }
 
   res.render('subscriptions/preview-change', { changePreview })
 }
@@ -600,31 +617,6 @@ async function removeAddon(req, res, next) {
       return next(err)
     }
   }
-}
-
-async function previewSubscription(req, res, next) {
-  const planCode = req.query.planCode
-  if (!planCode) {
-    return HttpErrorHandler.notFound(req, res, 'Missing plan code')
-  }
-  const plan = await RecurlyClient.promises.getPlan(planCode)
-  const userId = SessionManager.getLoggedInUserId(req.session)
-  const subscriptionChange =
-    await SubscriptionHandler.promises.previewSubscriptionChange(
-      userId,
-      planCode
-    )
-  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(userId)
-  const changePreview = makeChangePreview(
-    {
-      type: 'premium-subscription',
-      plan: { code: plan.code, name: plan.name },
-    },
-    subscriptionChange,
-    paymentMethod
-  )
-
-  res.render('subscriptions/preview-change', { changePreview })
 }
 
 function updateSubscription(req, res, next) {
@@ -895,54 +887,6 @@ async function getLatamCountryBannerDetails(req, res) {
   return latamCountryBannerDetails
 }
 
-/**
- * Build a subscription change preview for display purposes
- *
- * @param {SubscriptionChangeDescription} subscriptionChangeDescription A description of the change for the frontend
- * @param {RecurlySubscriptionChange} subscriptionChange The subscription change object coming from Recurly
- * @param {PaymentMethod} paymentMethod The payment method associated to the user
- * @return {SubscriptionChangePreview}
- */
-function makeChangePreview(
-  subscriptionChangeDescription,
-  subscriptionChange,
-  paymentMethod
-) {
-  const subscription = subscriptionChange.subscription
-  const nextPlan = PlansLocator.findLocalPlanInSettings(
-    subscriptionChange.nextPlanCode
-  )
-  return {
-    change: subscriptionChangeDescription,
-    currency: subscription.currency,
-    immediateCharge: subscriptionChange.immediateCharge,
-    paymentMethod: paymentMethod.toString(),
-    nextPlan: {
-      annual: nextPlan.annual ?? false,
-    },
-    nextInvoice: {
-      date: subscription.periodEnd.toISOString(),
-      plan: {
-        name: subscriptionChange.nextPlanName,
-        amount: subscriptionChange.nextPlanPrice,
-      },
-      addOns: subscriptionChange.nextAddOns.map(addOn => ({
-        code: addOn.code,
-        name: addOn.name,
-        quantity: addOn.quantity,
-        unitAmount: addOn.unitPrice,
-        amount: addOn.preTaxTotal,
-      })),
-      subtotal: subscriptionChange.subtotal,
-      tax: {
-        rate: subscription.taxRate,
-        amount: subscriptionChange.tax,
-      },
-      total: subscriptionChange.total,
-    },
-  }
-}
-
 module.exports = {
   plansPage: expressify(plansPage),
   plansPageLightDesign: expressify(plansPageLightDesign),
@@ -952,7 +896,6 @@ module.exports = {
   cancelSubscription,
   canceledSubscription: expressify(canceledSubscription),
   cancelV1Subscription,
-  previewSubscription: expressify(previewSubscription),
   updateSubscription,
   cancelPendingSubscriptionChange,
   updateAccountEmailAddress,

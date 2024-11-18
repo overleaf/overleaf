@@ -7,7 +7,11 @@ import { ExpiredSubscription } from './states/expired'
 import { useSubscriptionDashboardContext } from '../../context/subscription-dashboard-context'
 import PersonalSubscriptionRecurlySyncEmail from './personal-subscription-recurly-sync-email'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
-import { isStandaloneAiPlanCode, AI_ADD_ON_CODE } from '../../data/add-on-codes'
+import {
+  AI_STANDALONE_PLAN_CODE,
+  AI_STANDALONE_ANNUAL_PLAN_CODE,
+  AI_ADD_ON_CODE,
+} from '../../data/add-on-codes'
 
 function PastDueSubscriptionAlert({
   subscription,
@@ -46,7 +50,11 @@ function PersonalSubscriptionStates({
     addOn => addOn.addOnCode === AI_ADD_ON_CODE
   )
 
-  const onAiStandalonePlan = isStandaloneAiPlanCode(subscription.planCode)
+  const onAiStandalonePlan = [
+    AI_STANDALONE_PLAN_CODE,
+    AI_STANDALONE_ANNUAL_PLAN_CODE,
+  ].includes(subscription.planCode)
+
   const planHasAi = onAiStandalonePlan || hasAiAddon
 
   if (state === 'active' && planHasAi) {

@@ -10,10 +10,6 @@ const Errors = require('../Errors/Errors')
 const SubscriptionErrors = require('./Errors')
 const { callbackify } = require('@overleaf/promise-utils')
 
-/**
- * @param accountId
- * @param newEmail
- */
 async function updateAccountEmailAddress(accountId, newEmail) {
   const data = {
     email: newEmail,
@@ -818,9 +814,6 @@ const promises = {
     }
   },
 
-  /**
-   * @param xml
-   */
   _parseXml(xml) {
     function convertDataTypes(data) {
       let key, value

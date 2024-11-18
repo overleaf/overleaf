@@ -66,26 +66,6 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
 }
 
 /**
- * Preview the effect of changing the subscription plan
- *
- * @param {string} userId
- * @param {string} planCode
- * @return {Promise<RecurlySubscriptionChange>}
- */
-async function previewSubscriptionChange(userId, planCode) {
-  const recurlyId = await getSubscriptionRecurlyId(userId)
-  if (recurlyId == null) {
-    throw new NoRecurlySubscriptionError('Subscription not found', { userId })
-  }
-
-  const subscription = await RecurlyClient.promises.getSubscription(recurlyId)
-  const changeRequest = subscription?.getRequestForPlanChange(planCode)
-  const change =
-    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
-  return change
-}
-
-/**
  * @param user
  * @param planCode
  * @param couponCode
@@ -381,7 +361,6 @@ async function getSubscriptionRecurlyId(userId) {
 module.exports = {
   validateNoSubscriptionInRecurly: callbackify(validateNoSubscriptionInRecurly),
   createSubscription: callbackify(createSubscription),
-  previewSubscriptionChange: callbackify(previewSubscriptionChange),
   updateSubscription: callbackify(updateSubscription),
   cancelPendingSubscriptionChange: callbackify(cancelPendingSubscriptionChange),
   cancelSubscription: callbackify(cancelSubscription),
@@ -395,7 +374,6 @@ module.exports = {
   promises: {
     validateNoSubscriptionInRecurly,
     createSubscription,
-    previewSubscriptionChange,
     updateSubscription,
     cancelPendingSubscriptionChange,
     cancelSubscription,

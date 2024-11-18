@@ -3,7 +3,6 @@ const { expect } = require('chai')
 const recurly = require('recurly')
 const SandboxedModule = require('sandboxed-module')
 const {
-  RecurlySubscription,
   RecurlySubscriptionChangeRequest,
   RecurlySubscriptionAddOnUpdate,
 } = require('../../../../app/src/Features/Subscription/RecurlyEntities')
@@ -36,7 +35,7 @@ describe('RecurlyClient', function () {
       preTaxTotal: 2,
     }
 
-    this.subscription = new RecurlySubscription({
+    this.subscription = {
       id: 'subscription-id',
       userId: 'user-id',
       currency: 'EUR',
@@ -50,7 +49,7 @@ describe('RecurlyClient', function () {
       total: 16.5,
       periodStart: new Date(),
       periodEnd: new Date(),
-    })
+    }
 
     this.recurlySubscription = {
       uuid: this.subscription.id,

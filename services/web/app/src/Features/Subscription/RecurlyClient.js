@@ -13,7 +13,6 @@ const {
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
   RecurlyAddOn,
-  RecurlyPlan,
 } = require('./RecurlyEntities')
 
 /**
@@ -66,32 +65,6 @@ async function createAccountForUserId(userId) {
 async function getSubscription(subscriptionId) {
   const subscription = await client.getSubscription(`uuid-${subscriptionId}`)
   return subscriptionFromApi(subscription)
-}
-
-/**
- * Get the subscription for a given user
- *
- * @param {string} userId
- * @return {Promise<RecurlySubscription | null>}
- */
-async function getSubscriptionForUser(userId) {
-  const subscriptions = await client.listAccountSubscriptions(
-    `code-${userId}`,
-    { params: { state: 'active', limit: 2 } }
-  )
-  let result = null
-  for await (const subscription of subscriptions.each()) {
-    if (result != null) {
-      throw new OError('User has more than one Recurly subscription', {
-        userId,
-      })
-    }
-    result = subscription
-  }
-  if (result == null) {
-    return null
-  }
-  return subscriptionFromApi(result)
 }
 
 /**
@@ -188,17 +161,6 @@ async function getAddOn(planCode, addOnCode) {
   return addOnFromApi(addOn)
 }
 
-/**
- * Get the configuration for a given plan
- *
- * @param {string} planCode
- * @return {Promise<RecurlyPlan>}
- */
-async function getPlan(planCode) {
-  const plan = await client.getPlan(`code-${planCode}`)
-  return planFromApi(plan)
-}
-
 function subscriptionIsCanceledOrExpired(subscription) {
   const state = subscription?.recurlyStatus?.state
   return state === 'canceled' || state === 'expired'
@@ -207,53 +169,41 @@ function subscriptionIsCanceledOrExpired(subscription) {
 /**
  * Build a RecurlySubscription from Recurly API data
  *
- * @param {recurly.Subscription} apiSubscription
+ * @param {recurly.Subscription} subscription
  * @return {RecurlySubscription}
  */
-function subscriptionFromApi(apiSubscription) {
+function subscriptionFromApi(subscription) {
   if (
-    apiSubscription.uuid == null ||
-    apiSubscription.plan == null ||
-    apiSubscription.plan.code == null ||
-    apiSubscription.plan.name == null ||
-    apiSubscription.account == null ||
-    apiSubscription.account.code == null ||
-    apiSubscription.unitAmount == null ||
-    apiSubscription.subtotal == null ||
-    apiSubscription.total == null ||
-    apiSubscription.currency == null ||
-    apiSubscription.currentPeriodStartedAt == null ||
-    apiSubscription.currentPeriodEndsAt == null
+    subscription.uuid == null ||
+    subscription.plan == null ||
+    subscription.plan.code == null ||
+    subscription.plan.name == null ||
+    subscription.account == null ||
+    subscription.account.code == null ||
+    subscription.unitAmount == null ||
+    subscription.subtotal == null ||
+    subscription.total == null ||
+    subscription.currency == null ||
+    subscription.currentPeriodStartedAt == null ||
+    subscription.currentPeriodEndsAt == null
   ) {
-    throw new OError('Invalid Recurly subscription', {
-      subscription: apiSubscription,
-    })
+    throw new OError('Invalid Recurly subscription', { subscription })
   }
-
-  const subscription = new RecurlySubscription({
-    id: apiSubscription.uuid,
-    userId: apiSubscription.account.code,
-    planCode: apiSubscription.plan.code,
-    planName: apiSubscription.plan.name,
-    planPrice: apiSubscription.unitAmount,
-    addOns: (apiSubscription.addOns ?? []).map(subscriptionAddOnFromApi),
-    subtotal: apiSubscription.subtotal,
-    taxRate: apiSubscription.taxInfo?.rate ?? 0,
-    taxAmount: apiSubscription.tax ?? 0,
-    total: apiSubscription.total,
-    currency: apiSubscription.currency,
-    periodStart: apiSubscription.currentPeriodStartedAt,
-    periodEnd: apiSubscription.currentPeriodEndsAt,
+  return new RecurlySubscription({
+    id: subscription.uuid,
+    userId: subscription.account.code,
+    planCode: subscription.plan.code,
+    planName: subscription.plan.name,
+    planPrice: subscription.unitAmount,
+    addOns: (subscription.addOns ?? []).map(subscriptionAddOnFromApi),
+    subtotal: subscription.subtotal,
+    taxRate: subscription.taxInfo?.rate ?? 0,
+    taxAmount: subscription.tax ?? 0,
+    total: subscription.total,
+    currency: subscription.currency,
+    periodStart: subscription.currentPeriodStartedAt,
+    periodEnd: subscription.currentPeriodEndsAt,
   })
-
-  if (apiSubscription.pendingChange != null) {
-    subscription.pendingChange = subscriptionChangeFromApi(
-      subscription,
-      apiSubscription.pendingChange
-    )
-  }
-
-  return subscription
 }
 
 /**
@@ -301,22 +251,14 @@ function subscriptionChangeFromApi(subscription, subscriptionChange) {
   const nextAddOns = (subscriptionChange.addOns ?? []).map(
     subscriptionAddOnFromApi
   )
-
-  let immediateCharge =
-    subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0
-  for (const creditInvoice of subscriptionChange.invoiceCollection
-    ?.creditInvoices ?? []) {
-    // The credit invoice totals are already negative
-    immediateCharge += creditInvoice.total ?? 0
-  }
-
   return new RecurlySubscriptionChange({
     subscription,
     nextPlanCode: subscriptionChange.plan.code,
     nextPlanName: subscriptionChange.plan.name,
     nextPlanPrice: subscriptionChange.unitAmount,
     nextAddOns,
-    immediateCharge,
+    immediateCharge:
+      subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0,
   })
 }
 
@@ -362,22 +304,6 @@ function addOnFromApi(addOn) {
 }
 
 /**
- * Build a RecurlyPlan from Recurly API data
- *
- * @param {recurly.Plan} plan
- * @return {RecurlyPlan}
- */
-function planFromApi(plan) {
-  if (plan.code == null || plan.name == null) {
-    throw new OError('Invalid Recurly add-on', { plan })
-  }
-  return new RecurlyPlan({
-    code: plan.code,
-    name: plan.name,
-  })
-}
-
-/**
  * Build an API request from a RecurlySubscriptionChangeRequest
  *
  * @param {RecurlySubscriptionChangeRequest} changeRequest
@@ -413,7 +339,6 @@ module.exports = {
   getAccountForUserId: callbackify(getAccountForUserId),
   createAccountForUserId: callbackify(createAccountForUserId),
   getSubscription: callbackify(getSubscription),
-  getSubscriptionForUser: callbackify(getSubscriptionForUser),
   previewSubscriptionChange: callbackify(previewSubscriptionChange),
   applySubscriptionChangeRequest: callbackify(applySubscriptionChangeRequest),
   removeSubscriptionChange: callbackify(removeSubscriptionChange),
@@ -422,12 +347,10 @@ module.exports = {
   cancelSubscriptionByUuid: callbackify(cancelSubscriptionByUuid),
   getPaymentMethod: callbackify(getPaymentMethod),
   getAddOn: callbackify(getAddOn),
-  getPlan: callbackify(getPlan),
   subscriptionIsCanceledOrExpired,
 
   promises: {
     getSubscription,
-    getSubscriptionForUser,
     getAccountForUserId,
     createAccountForUserId,
     previewSubscriptionChange,
@@ -438,6 +361,5 @@ module.exports = {
     cancelSubscriptionByUuid,
     getPaymentMethod,
     getAddOn,
-    getPlan,
   },
 }
