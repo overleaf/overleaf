@@ -75,6 +75,7 @@
   "add_comment_error_message": "There was an error adding your comment. Please try again in a few moments.",
   "add_comment_error_title": "Add Comment Error",
   "add_company_details": "Add Company Details",
+  "add_company_details_lowercase": "Add company details",
   "add_email": "Add Email",
   "add_email_address": "Add email address",
   "add_email_to_claim_features": "Add an institutional email address to claim your features.",
