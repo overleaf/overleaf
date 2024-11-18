@@ -6,6 +6,7 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 
 const AI_ADD_ON_CODE = 'assistant'
+const STANDALONE_AI_ADD_ON_CODES = ['assistant', 'assistant-annual']
 
 class RecurlySubscription {
   /**
@@ -42,6 +43,15 @@ class RecurlySubscription {
 
   hasAddOn(code) {
     return this.addOns.some(addOn => addOn.code === code)
+  }
+
+  /**
+   * Returns whether this subscription is a standalone AI add-on subscription
+   *
+   * @return {boolean}
+   */
+  isStandaloneAiAddOn() {
+    return isStandaloneAiAddOnPlanCode(this.planCode)
   }
 
   /**
@@ -262,6 +272,30 @@ class RecurlyAddOn {
   }
 }
 
+/**
+ * A plan configuration
+ */
+class RecurlyPlan {
+  /**
+   * @param {object} props
+   * @param {string} props.code
+   * @param {string} props.name
+   */
+  constructor(props) {
+    this.code = props.code
+    this.name = props.name
+  }
+}
+
+/**
+ * Returns whether the given plan code is a standalone AI plan
+ *
+ * @param {string} planCode
+ */
+function isStandaloneAiAddOnPlanCode(planCode) {
+  return STANDALONE_AI_ADD_ON_CODES.includes(planCode)
+}
+
 module.exports = {
   AI_ADD_ON_CODE,
   RecurlySubscription,
@@ -272,4 +306,6 @@ module.exports = {
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
   RecurlyAddOn,
+  RecurlyPlan,
+  isStandaloneAiAddOnPlanCode,
 }

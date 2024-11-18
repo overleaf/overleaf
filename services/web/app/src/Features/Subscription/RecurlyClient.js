@@ -13,6 +13,7 @@ const {
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
   RecurlyAddOn,
+  RecurlyPlan,
 } = require('./RecurlyEntities')
 
 /**
@@ -65,6 +66,32 @@ async function createAccountForUserId(userId) {
 async function getSubscription(subscriptionId) {
   const subscription = await client.getSubscription(`uuid-${subscriptionId}`)
   return subscriptionFromApi(subscription)
+}
+
+/**
+ * Get the subscription for a given user
+ *
+ * @param {string} userId
+ * @return {Promise<RecurlySubscription | null>}
+ */
+async function getSubscriptionForUser(userId) {
+  const subscriptions = await client.listAccountSubscriptions(
+    `code-${userId}`,
+    { params: { state: 'active', limit: 2 } }
+  )
+  let result = null
+  for await (const subscription of subscriptions.each()) {
+    if (result != null) {
+      throw new OError('User has more than one Recurly subscription', {
+        userId,
+      })
+    }
+    result = subscription
+  }
+  if (result == null) {
+    return null
+  }
+  return subscriptionFromApi(result)
 }
 
 /**
@@ -159,6 +186,17 @@ async function getAddOn(planCode, addOnCode) {
     `code-${addOnCode}`
   )
   return addOnFromApi(addOn)
+}
+
+/**
+ * Get the configuration for a given plan
+ *
+ * @param {string} planCode
+ * @return {Promise<RecurlyPlan>}
+ */
+async function getPlan(planCode) {
+  const plan = await client.getPlan(`code-${planCode}`)
+  return planFromApi(plan)
 }
 
 function subscriptionIsCanceledOrExpired(subscription) {
@@ -304,6 +342,22 @@ function addOnFromApi(addOn) {
 }
 
 /**
+ * Build a RecurlyPlan from Recurly API data
+ *
+ * @param {recurly.Plan} plan
+ * @return {RecurlyPlan}
+ */
+function planFromApi(plan) {
+  if (plan.code == null || plan.name == null) {
+    throw new OError('Invalid Recurly add-on', { plan })
+  }
+  return new RecurlyPlan({
+    code: plan.code,
+    name: plan.name,
+  })
+}
+
+/**
  * Build an API request from a RecurlySubscriptionChangeRequest
  *
  * @param {RecurlySubscriptionChangeRequest} changeRequest
@@ -339,6 +393,7 @@ module.exports = {
   getAccountForUserId: callbackify(getAccountForUserId),
   createAccountForUserId: callbackify(createAccountForUserId),
   getSubscription: callbackify(getSubscription),
+  getSubscriptionForUser: callbackify(getSubscriptionForUser),
   previewSubscriptionChange: callbackify(previewSubscriptionChange),
   applySubscriptionChangeRequest: callbackify(applySubscriptionChangeRequest),
   removeSubscriptionChange: callbackify(removeSubscriptionChange),
@@ -347,10 +402,12 @@ module.exports = {
   cancelSubscriptionByUuid: callbackify(cancelSubscriptionByUuid),
   getPaymentMethod: callbackify(getPaymentMethod),
   getAddOn: callbackify(getAddOn),
+  getPlan: callbackify(getPlan),
   subscriptionIsCanceledOrExpired,
 
   promises: {
     getSubscription,
+    getSubscriptionForUser,
     getAccountForUserId,
     createAccountForUserId,
     previewSubscriptionChange,
@@ -361,5 +418,6 @@ module.exports = {
     cancelSubscriptionByUuid,
     getPaymentMethod,
     getAddOn,
+    getPlan,
   },
 }

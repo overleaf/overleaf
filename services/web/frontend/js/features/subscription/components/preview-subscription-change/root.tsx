@@ -31,13 +31,17 @@ function PreviewSubscriptionChange() {
       <Row>
         <Col md={8} mdOffset={2}>
           <div className="card p-5">
-            {preview.change.type === 'add-on-purchase' && (
+            {preview.change.type === 'add-on-purchase' ? (
               <h1>
                 {t('add_add_on_to_your_plan', {
                   addOnName: preview.change.addOn.name,
                 })}
               </h1>
-            )}
+            ) : preview.change.type === 'premium-subscription' ? (
+              <h1>
+                {t('subscribe_to_plan', { planName: preview.change.plan.name })}
+              </h1>
+            ) : null}
 
             {payNowTask.isError && (
               <Notification

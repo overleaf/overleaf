@@ -121,6 +121,12 @@ export default {
     )
 
     // user changes their account state
+    webRouter.get(
+      '/user/subscription/preview',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionController.previewSubscription
+    )
     webRouter.post(
       '/user/subscription/update',
       AuthenticationController.requireLogin(),
