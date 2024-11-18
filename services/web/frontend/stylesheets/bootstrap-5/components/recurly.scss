@@ -1,0 +1,9 @@
+.recurly-element-card {
+  height: 50px;
+  border: 1px solid var(--neutral-60);
+  border-radius: var(--border-radius-base);
+
+  &.recurly-element-card-invalid {
+    border-color: var(--red-50);
+  }
+}
