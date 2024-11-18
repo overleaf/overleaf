@@ -251,4 +251,17 @@
   .page-header {
     border-bottom-width: 0;
   }
+
+  .round-background {
+    border-radius: 50%;
+    vertical-align: middle;
+    width: 20px;
+    height: 20px;
+  }
+
+  .green-round-background {
+    @extend .round-background;
+
+    background: var(--green-30);
+  }
 }

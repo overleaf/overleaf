@@ -208,6 +208,25 @@
       .price-cancel-anytime {
         @include body-xs;
       }
+
+      .trial-coupon-summary {
+        padding-top: var(--spacing-08);
+
+        .trial-coupon-summary-list-container {
+          padding-left: 0;
+
+          li {
+            display: flex;
+            color: var(--neutral-90);
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: var(--spacing-04);
+            gap: var(--spacing-05);
+
+            @include body-sm;
+          }
+        }
+      }
     }
 
     hr {
