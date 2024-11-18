@@ -287,3 +287,18 @@
   right: 10px;
   top: var(--bs-dropdown-item-padding-y);
 }
+
+.payment-method-toggle {
+  .form-check {
+    margin-bottom: var(--spacing-05);
+  }
+
+  .payment-method-logos {
+    display: inline-block;
+    margin-left: var(--spacing-05);
+
+    img:not(:last-child) {
+      margin-right: var(--spacing-04);
+    }
+  }
+}
