@@ -103,6 +103,18 @@
     }
   }
 
+  .font-color-green-bright {
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      color: var(--green-bright);
+    }
+  }
+
   .card + .card {
     margin-top: var(--spacing-09);
   }
