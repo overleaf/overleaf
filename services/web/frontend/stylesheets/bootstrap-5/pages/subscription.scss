@@ -302,3 +302,17 @@
     }
   }
 }
+
+.address2-button {
+  text-decoration: none;
+  padding: 0;
+
+  :hover {
+    text-decoration: underline;
+  }
+
+  .button-content {
+    justify-content: flex-start;
+    color: var(--link-web);
+  }
+}
