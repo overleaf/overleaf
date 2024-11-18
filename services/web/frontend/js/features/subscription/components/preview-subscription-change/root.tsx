@@ -115,7 +115,11 @@ function PreviewSubscriptionChange() {
               )}
 
               <Row className="mt-1">
-                <Col xs={9}>{t('total_per_month')}</Col>
+                <Col xs={9}>
+                  {preview.nextPlan.annual
+                    ? t('total_per_year')
+                    : t('total_per_month')}
+                </Col>
                 <Col xs={3} className="text-right">
                   {formatCurrencyLocalized(
                     preview.nextInvoice.total,

@@ -29,6 +29,7 @@ const HttpErrorHandler = require('../Errors/HttpErrorHandler')
 const { URLSearchParams } = require('url')
 const RecurlyClient = require('./RecurlyClient')
 const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
+const PlansLocator = require('./PlansLocator')
 
 /**
  * @import { SubscriptionChangeDescription } from '../../../../types/subscription/subscription-change-preview'
@@ -908,11 +909,17 @@ function makeChangePreview(
   paymentMethod
 ) {
   const subscription = subscriptionChange.subscription
+  const nextPlan = PlansLocator.findLocalPlanInSettings(
+    subscriptionChange.nextPlanCode
+  )
   return {
     change: subscriptionChangeDescription,
     currency: subscription.currency,
     immediateCharge: subscriptionChange.immediateCharge,
     paymentMethod: paymentMethod.toString(),
+    nextPlan: {
+      annual: nextPlan.annual ?? false,
+    },
     nextInvoice: {
       date: subscription.periodEnd.toISOString(),
       plan: {

@@ -3,6 +3,9 @@ export type SubscriptionChangePreview = {
   currency: string
   paymentMethod: string
   immediateCharge: number
+  nextPlan: {
+    annual: boolean
+  }
   nextInvoice: {
     date: string
     plan: {
