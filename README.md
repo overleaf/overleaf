@@ -45,8 +45,8 @@ This repo contains two dockerfiles, [`Dockerfile-base`](server-ce/Dockerfile-bas
 `sharelatex/sharelatex-base` image, and [`Dockerfile`](server-ce/Dockerfile) which builds the
 `sharelatex/sharelatex` (or "community") image.
 
-The Base image generally contains the basic dependencies like `wget` and
-`aspell`, plus `texlive`. We split this out because it's a pretty heavy set of
+The Base image generally contains the basic dependencies like `wget`, plus `texlive`.
+We split this out because it's a pretty heavy set of
 dependencies, and it's nice to not have to rebuild all of that every time.
 
 The `sharelatex/sharelatex` image extends the base image and adds the actual Overleaf code
