@@ -88,6 +88,11 @@ describe('BlobStore', function () {
         await blobStore2.initialize()
       })
 
+      it('can initialize a project again without throwing an error', async function () {
+        await blobStore.initialize()
+        await blobStore2.initialize()
+      })
+
       it('can store and fetch string content', async function () {
         function checkBlob(blob) {
           expect(blob.getHash()).to.equal(helloWorldHash)

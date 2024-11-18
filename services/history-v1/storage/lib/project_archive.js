@@ -49,7 +49,7 @@ class ProjectArchive {
   /**
    * @constructor
    * @param {Snapshot} snapshot
-   * @param {?number} timeout in ms
+   * @param {number} [timeout] in ms
    * @classdesc
    * Writes the project snapshot to a zip file.
    */

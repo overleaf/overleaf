@@ -47,7 +47,7 @@ class FileData {
 
   /** @see File.createHollow
    * @param {number} byteLength
-   * @param {number|null} stringLength
+   * @param {number} [stringLength]
    */
   static createHollow(byteLength, stringLength) {
     if (stringLength == null) {

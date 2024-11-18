@@ -94,7 +94,7 @@ class Blob {
 
   /**
    * Utf-8 length of the blob content, if it appears to be valid UTF-8.
-   * @return {?number}
+   * @return {number|undefined}
    */
   getStringLength() {
     return this.stringLength

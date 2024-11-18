@@ -95,7 +95,7 @@ class File {
 
   /**
    * @param  {number} byteLength
-   * @param  {number?} stringLength
+   * @param  {number} [stringLength]
    * @param  {Object} [metadata]
    * @return {File}
    */

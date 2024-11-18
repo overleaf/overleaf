@@ -27,7 +27,7 @@ class V2DocVersions {
   }
 
   /**
-   * @return {?RawV2DocVersions}
+   * @return {RawV2DocVersions|null}
    */
   toRaw() {
     if (!this.data) return null

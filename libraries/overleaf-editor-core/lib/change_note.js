@@ -10,7 +10,7 @@ const Change = require('./change')
 class ChangeNote {
   /**
    * @param {number} baseVersion the new base version for the change
-   * @param {?Change} change
+   * @param {Change} [change]
    */
   constructor(baseVersion, change) {
     assert.integer(baseVersion, 'bad baseVersion')
