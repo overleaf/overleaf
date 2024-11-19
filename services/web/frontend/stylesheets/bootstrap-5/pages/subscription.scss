@@ -152,6 +152,7 @@
 
   .payment-review-panel {
     width: 339px;
+    height: 100%;
 
     @include media-breakpoint-down(lg) {
       width: 100%;
