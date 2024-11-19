@@ -122,6 +122,12 @@ describe('back_fill_file_hash script', function () {
   const fileIdDeleted3 = objectIdFromTime('2017-02-01T00:09:00Z')
   const fileIdDeleted4 = objectIdFromTime('2024-02-01T00:10:00Z')
   const fileIdDeleted5 = objectIdFromTime('2024-02-01T00:11:00Z')
+  const contentTextBlob0 = Buffer.from('Hello 0')
+  const hashTextBlob0 = gitBlobHashBuffer(contentTextBlob0)
+  const contentTextBlob1 = Buffer.from('Hello 1')
+  const hashTextBlob1 = gitBlobHashBuffer(contentTextBlob1)
+  const contentTextBlob2 = Buffer.from('Hello 2')
+  const hashTextBlob2 = gitBlobHashBuffer(contentTextBlob2)
   const deleteProjectsRecordId0 = new ObjectId()
   const deleteProjectsRecordId1 = new ObjectId()
   const deleteProjectsRecordId2 = new ObjectId()
@@ -138,8 +144,27 @@ describe('back_fill_file_hash script', function () {
       historyId: historyId0,
       fileId: fileId7,
       hash: hashFile7,
+      content: contentFile7,
     },
     { projectId: projectId0, historyId: historyId0, fileId: fileIdDeleted5 },
+    {
+      projectId: projectId0,
+      historyId: historyId0,
+      hash: hashTextBlob0,
+      content: contentTextBlob0,
+    },
+    {
+      projectId: projectId1,
+      historyId: historyId1,
+      hash: hashTextBlob1,
+      content: contentTextBlob1,
+    },
+    {
+      projectId: projectId2,
+      historyId: historyId2,
+      hash: hashTextBlob2,
+      content: contentTextBlob2,
+    },
     { projectId: projectId1, historyId: historyId1, fileId: fileId1 },
     { projectId: projectId1, historyId: historyId1, fileId: fileIdDeleted1 },
     // { historyId: historyId2, fileId: fileId2 }, // already has hash
@@ -371,6 +396,13 @@ describe('back_fill_file_hash script', function () {
     await testProjects.createEmptyProject(historyId3)
     await testProjects.createEmptyProject(historyIdDeleted0)
     await testProjects.createEmptyProject(historyIdDeleted1)
+
+    const blobStore0 = new BlobStore(historyId0.toString())
+    await blobStore0.putString(contentTextBlob0.toString())
+    const blobStore1 = new BlobStore(historyId1.toString())
+    await blobStore1.putString(contentTextBlob1.toString())
+    const blobStore2 = new BlobStore(historyId2.toString())
+    await blobStore2.putString(contentTextBlob2.toString())
   })
 
   beforeEach('populate filestore', async function () {
@@ -454,7 +486,9 @@ describe('back_fill_file_hash script', function () {
         process.argv0,
         [
           'storage/scripts/back_fill_file_hash.mjs',
+          'collectBackedUpBlobs',
           'live',
+          'blobs',
           'deleted',
           'deletedFiles',
         ],
@@ -726,6 +760,7 @@ describe('back_fill_file_hash script', function () {
             binaryForGitBlobHash(gitBlobHash(fileId0)),
             binaryForGitBlobHash(hashFile7),
             binaryForGitBlobHash(gitBlobHash(fileIdDeleted5)),
+            binaryForGitBlobHash(hashTextBlob0),
           ].sort(),
         },
         {
@@ -733,7 +768,12 @@ describe('back_fill_file_hash script', function () {
           blobs: [
             binaryForGitBlobHash(gitBlobHash(fileId1)),
             binaryForGitBlobHash(gitBlobHash(fileIdDeleted1)),
+            binaryForGitBlobHash(hashTextBlob1),
           ].sort(),
+        },
+        {
+          _id: projectId2,
+          blobs: [binaryForGitBlobHash(hashTextBlob2)].sort(),
         },
         {
           _id: projectIdDeleted0,
@@ -748,8 +788,10 @@ describe('back_fill_file_hash script', function () {
       const rerun = await runScript({}, false)
       expect(rerun.stats).deep.equal({
         ...STATS_ALL_ZERO,
-        // We still need to iterate over all the projects.
+        // We still need to iterate over all the projects and blobs.
         projects: 4,
+        blobs: 10,
+        backedUpBlobs: 10,
       })
     })
     it('should have backed up all the files', async function () {
@@ -762,7 +804,7 @@ describe('back_fill_file_hash script', function () {
           )
           .sort()
       )
-      for (let { historyId, fileId, hash } of writtenBlobs) {
+      for (let { historyId, fileId, hash, content } of writtenBlobs) {
         hash = hash || gitBlobHash(fileId.toString())
         const s = await backupPersistor.getObjectStream(
           projectBlobsBucket,
@@ -772,7 +814,9 @@ describe('back_fill_file_hash script', function () {
         const buf = new WritableBuffer()
         await Stream.promises.pipeline(s, buf)
         expect(gitBlobHashBuffer(buf.getContents())).to.equal(hash)
-        if (fileId !== fileId7) {
+        if (content) {
+          expect(buf.getContents()).to.deep.equal(content)
+        } else {
           const id = buf.getContents().toString('utf-8')
           expect(id).to.equal(fileId.toString())
           // double check we are not comparing 'undefined' or '[object Object]' above
@@ -791,16 +835,18 @@ describe('back_fill_file_hash script', function () {
       )
     })
     it('should have written the back filled files to history v1', async function () {
-      for (const { historyId, fileId } of writtenBlobs) {
+      for (const { historyId, hash, fileId, content } of writtenBlobs) {
         const blobStore = new BlobStore(historyId.toString())
-        if (fileId === fileId7) {
-          const s = await blobStore.getStream(hashFile7)
+        if (content) {
+          const s = await blobStore.getStream(hash)
           const buf = new WritableBuffer()
           await Stream.promises.pipeline(s, buf)
-          expect(buf.getContents()).to.deep.equal(contentFile7)
+          expect(buf.getContents()).to.deep.equal(content)
           continue
         }
-        const id = await blobStore.getString(gitBlobHash(fileId.toString()))
+        const id = await blobStore.getString(
+          hash || gitBlobHash(fileId.toString())
+        )
         expect(id).to.equal(fileId.toString())
         // double check we are not comparing 'undefined' or '[object Object]' above
         expect(id).to.match(/^[a-f0-9]{24}$/)
@@ -826,6 +872,8 @@ describe('back_fill_file_hash script', function () {
 
   const STATS_ALL_ZERO = {
     projects: 0,
+    blobs: 0,
+    backedUpBlobs: 0,
     filesWithoutHash: 0,
     filesDuplicated: 0,
     filesRetries: 0,
@@ -845,9 +893,13 @@ describe('back_fill_file_hash script', function () {
     readFromGCSIngress: 0,
     writeToAWSCount: 0,
     writeToAWSEgress: 0,
+    writeToGCSCount: 0,
+    writeToGCSEgress: 0,
   }
   const STATS_UP_TO_PROJECT1 = {
     projects: 2,
+    blobs: 2,
+    backedUpBlobs: 0,
     filesWithoutHash: 7,
     filesDuplicated: 1,
     filesRetries: 0,
@@ -863,13 +915,17 @@ describe('back_fill_file_hash script', function () {
     deduplicatedWriteToAWSLocalEgress: 0,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 6,
-    readFromGCSIngress: 4000120,
-    writeToAWSCount: 5,
-    writeToAWSEgress: 4032,
+    readFromGCSCount: 8,
+    readFromGCSIngress: 4000134,
+    writeToAWSCount: 7,
+    writeToAWSEgress: 4086,
+    writeToGCSCount: 5,
+    writeToGCSEgress: 4000096,
   }
   const STATS_UP_FROM_PROJECT1_ONWARD = {
     projects: 2,
+    blobs: 1,
+    backedUpBlobs: 0,
     filesWithoutHash: 3,
     filesDuplicated: 0,
     filesRetries: 0,
@@ -880,15 +936,17 @@ describe('back_fill_file_hash script', function () {
     projectDeleted: 0,
     projectHardDeleted: 0,
     fileHardDeleted: 0,
-    mongoUpdates: 4,
+    mongoUpdates: 5,
     deduplicatedWriteToAWSLocalCount: 1,
     deduplicatedWriteToAWSLocalEgress: 30,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 3,
-    readFromGCSIngress: 72,
-    writeToAWSCount: 2,
-    writeToAWSEgress: 58,
+    readFromGCSCount: 4,
+    readFromGCSIngress: 79,
+    writeToAWSCount: 3,
+    writeToAWSEgress: 85,
+    writeToGCSCount: 2,
+    writeToGCSEgress: 48,
   }
 
   function sumStats(a, b) {
@@ -920,6 +978,8 @@ describe('back_fill_file_hash script', function () {
         readFromGCSIngress: -24,
         writeToAWSCount: -1,
         writeToAWSEgress: -28,
+        writeToGCSCount: -1,
+        writeToGCSEgress: -24,
       })
     )
     // should not retry 404

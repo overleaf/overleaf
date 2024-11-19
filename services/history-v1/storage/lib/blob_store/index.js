@@ -177,7 +177,7 @@ class BlobStore {
    * temporary file).
    *
    * @param {string} pathname
-   * @return {Promise.<core.Blob>}
+   * @return {Promise<core.Blob>}
    */
   async putFile(pathname) {
     assert.string(pathname, 'bad pathname')
@@ -191,9 +191,26 @@ class BlobStore {
       pathname
     )
     newBlob.setStringLength(stringLength)
-    await uploadBlob(this.projectId, newBlob, fs.createReadStream(pathname))
-    await this.backend.insertBlob(this.projectId, newBlob)
+    await this.putBlob(pathname, newBlob)
     return newBlob
+  }
+
+  /**
+   * Write a new blob, the stringLength must have been added already. It should
+   * have been checked that the blob does not exist yet. Consider using
+   * {@link putFile} instead of this lower-level method.
+   *
+   * @param {string} pathname
+   * @param {core.Blob} finializedBlob
+   * @return {Promise<void>}
+   */
+  async putBlob(pathname, finializedBlob) {
+    await uploadBlob(
+      this.projectId,
+      finializedBlob,
+      fs.createReadStream(pathname)
+    )
+    await this.backend.insertBlob(this.projectId, finializedBlob)
   }
 
   /**
@@ -347,4 +364,11 @@ class BlobStore {
   }
 }
 
-module.exports = { BlobStore, loadGlobalBlobs, makeProjectKey, GLOBAL_BLOBS }
+module.exports = {
+  BlobStore,
+  loadGlobalBlobs,
+  makeProjectKey,
+  makeBlobForFile,
+  getStringLengthOfFile,
+  GLOBAL_BLOBS,
+}

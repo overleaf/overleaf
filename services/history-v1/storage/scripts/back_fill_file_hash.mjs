@@ -25,6 +25,8 @@ import {
   BlobStore,
   GLOBAL_BLOBS,
   loadGlobalBlobs,
+  getStringLengthOfFile,
+  makeBlobForFile,
   makeProjectKey,
 } from '../lib/blob_store/index.js'
 import { backedUpBlobs, db } from '../lib/mongodb.js'
@@ -67,16 +69,22 @@ ObjectId.cacheHexString = true
  * @property {ObjectId} _id
  * @property {Array<Folder>} rootFolder
  * @property {Array<string>} deletedFileIds
+ * @property {Array<Blob>} blobs
  * @property {{history: {id: string}}} overleaf
+ * @property {Array<string>} [backedUpBlobs]
  */
 
 /**
  * @typedef {Object} QueueEntry
  * @property {ProjectContext} ctx
- * @property {string} fileId
+ * @property {string} cacheKey
+ * @property {string} [fileId]
  * @property {string} path
  * @property {string} [hash]
+ * @property {Blob} [blob]
  */
+
+const COLLECT_BLOBS = process.argv.includes('blobs')
 
 // Time of closing the ticket for adding hashes: https://github.com/overleaf/internal/issues/464#issuecomment-492668129
 const ALL_PROJECTS_HAVE_FILE_HASHES_AFTER = new Date('2019-05-15T14:02:00Z')
@@ -120,6 +128,8 @@ const deletedFilesCollection = db.collection('deletedFiles')
 
 const STATS = {
   projects: 0,
+  blobs: 0,
+  backedUpBlobs: 0,
   filesWithoutHash: 0,
   filesDuplicated: 0,
   filesRetries: 0,
@@ -139,6 +149,8 @@ const STATS = {
   readFromGCSIngress: 0,
   writeToAWSCount: 0,
   writeToAWSEgress: 0,
+  writeToGCSCount: 0,
+  writeToGCSEgress: 0,
 }
 
 const processStart = performance.now()
@@ -250,28 +262,50 @@ async function processFile(entry) {
  * @return {Promise<string>}
  */
 async function processFileOnce(entry) {
-  const { fileId } = entry
   const { projectId, historyId } = entry.ctx
-  const filePath = Path.join(
-    BUFFER_DIR,
-    projectId.toString() + fileId.toString()
-  )
-  const dst = fs.createWriteStream(filePath, {
-    highWaterMark: STREAM_HIGH_WATER_MARK,
-  })
+  const { fileId, cacheKey } = entry
+  const filePath = Path.join(BUFFER_DIR, projectId.toString() + cacheKey)
+  const blobStore = new BlobStore(historyId)
+  if (entry.blob) {
+    const { blob } = entry
+    const hash = blob.getHash()
+    if (entry.ctx.hasBackedUpBlob(hash)) {
+      STATS.deduplicatedWriteToAWSLocalCount++
+      STATS.deduplicatedWriteToAWSLocalEgress += estimateBlobSize(blob)
+      return hash
+    }
+    entry.ctx.recordPendingBlob(hash)
+    STATS.readFromGCSCount++
+    const src = await blobStore.getStream(hash)
+    const dst = fs.createWriteStream(filePath, {
+      highWaterMark: STREAM_HIGH_WATER_MARK,
+    })
+    try {
+      await Stream.promises.pipeline(src, dst)
+    } finally {
+      STATS.readFromGCSIngress += dst.bytesWritten
+    }
+    await uploadBlobToAWS(entry, blob, filePath)
+    return hash
+  }
+
   STATS.readFromGCSCount++
   const src = await filestorePersistor.getObjectStream(
     USER_FILES_BUCKET_NAME,
     `${projectId}/${fileId}`
   )
+  const dst = fs.createWriteStream(filePath, {
+    highWaterMark: STREAM_HIGH_WATER_MARK,
+  })
   try {
     await Stream.promises.pipeline(src, dst)
   } finally {
     STATS.readFromGCSIngress += dst.bytesWritten
   }
-
-  const blobStore = new BlobStore(historyId)
-  const blob = await blobStore.putFile(filePath)
+  const blob = await makeBlobForFile(filePath)
+  blob.setStringLength(
+    await getStringLengthOfFile(blob.getByteLength(), filePath)
+  )
   const hash = blob.getHash()
 
   if (GLOBAL_BLOBS.has(hash)) {
@@ -279,7 +313,6 @@ async function processFileOnce(entry) {
     STATS.globalBlobsEgress += estimateBlobSize(blob)
     return hash
   }
-
   if (entry.ctx.hasBackedUpBlob(hash)) {
     STATS.deduplicatedWriteToAWSLocalCount++
     STATS.deduplicatedWriteToAWSLocalEgress += estimateBlobSize(blob)
@@ -287,6 +320,47 @@ async function processFileOnce(entry) {
   }
   entry.ctx.recordPendingBlob(hash)
 
+  try {
+    await uploadBlobToGCS(blobStore, entry, blob, hash, filePath)
+    await uploadBlobToAWS(entry, blob, filePath)
+  } catch (err) {
+    entry.ctx.recordFailedBlob(hash)
+    throw err
+  }
+  return hash
+}
+
+/**
+ * @param {BlobStore} blobStore
+ * @param {QueueEntry} entry
+ * @param {Blob} blob
+ * @param {string} hash
+ * @param {string} filePath
+ * @return {Promise<void>}
+ */
+async function uploadBlobToGCS(blobStore, entry, blob, hash, filePath) {
+  if (entry.ctx.hasHistoryBlob(hash)) {
+    return // fast-path using hint from pre-fetched blobs
+  }
+  if (!COLLECT_BLOBS && (await blobStore.getBlob(hash))) {
+    entry.ctx.recordHistoryBlob(hash)
+    return // round trip to postgres/mongo when not pre-fetched
+  }
+  // blob missing in history-v1, create in GCS and persist in postgres/mongo
+  STATS.writeToGCSCount++
+  STATS.writeToGCSEgress += blob.getByteLength()
+  await blobStore.putBlob(filePath, blob)
+  entry.ctx.recordHistoryBlob(hash)
+}
+
+/**
+ * @param {QueueEntry} entry
+ * @param {Blob} blob
+ * @param {string} filePath
+ * @return {Promise<void>}
+ */
+async function uploadBlobToAWS(entry, blob, filePath) {
+  const { historyId } = entry.ctx
   let backupSource
   let contentEncoding
   const md5 = Crypto.createHash('md5')
@@ -343,12 +417,10 @@ async function processFileOnce(entry) {
       STATS.deduplicatedWriteToAWSRemoteEgress += size
     } else {
       STATS.writeToAWSEgress += size
-      entry.ctx.recordFailedBlob(hash)
       throw err
     }
   }
-  entry.ctx.recordBackedUpBlob(hash)
-  return hash
+  entry.ctx.recordBackedUpBlob(blob.getHash())
 }
 
 /**
@@ -394,18 +466,41 @@ async function processFiles(files) {
  * @return {Promise<void>}
  */
 async function handleLiveTreeBatch(batch, prefix = 'rootFolder.0') {
+  let nBackedUpBlobs = 0
+  if (process.argv.includes('collectBackedUpBlobs')) {
+    nBackedUpBlobs = await collectBackedUpBlobs(batch)
+  }
   if (process.argv.includes('deletedFiles')) {
     await collectDeletedFiles(batch)
   }
+  let blobs = 0
+  if (COLLECT_BLOBS) {
+    blobs = await collectBlobs(batch)
+  }
   const files = Array.from(findFileInBatch(batch, prefix))
   STATS.projects += batch.length
-  STATS.filesWithoutHash += files.length
+  STATS.blobs += blobs
+  STATS.backedUpBlobs += nBackedUpBlobs
+  STATS.filesWithoutHash += files.length - (blobs - nBackedUpBlobs)
   batch.length = 0 // GC
   // The files are currently ordered by project-id.
-  // Order them by file-id to
+  // Order them by file-id ASC then blobs ASC to
+  // - process files before blobs
   // - avoid head-of-line blocking from many project-files waiting on the generation of the projects DEK (round trip to AWS)
   // - bonus: increase chance of de-duplicating write to AWS
-  files.sort((a, b) => (a.fileId > b.fileId ? 1 : -1))
+  files.sort(
+    /**
+     * @param {QueueEntry} a
+     * @param {QueueEntry} b
+     * @return {number}
+     */
+    function (a, b) {
+      if (a.fileId && b.fileId) return a.fileId > b.fileId ? 1 : -1
+      if (a.hash && b.hash) return a.hash > b.hash ? 1 : -1
+      if (a.fileId) return -1
+      return 1
+    }
+  )
   await processFiles(files)
   await promiseMapWithLimit(
     CONCURRENCY,
@@ -566,6 +661,7 @@ function* findFiles(ctx, folder, path) {
     if (!fileRef.hash) {
       yield {
         ctx,
+        cacheKey: fileRef._id.toString(),
         fileId: fileRef._id.toString(),
         path: `${path}.fileRefs.${i}`,
       }
@@ -577,15 +673,41 @@ function* findFiles(ctx, folder, path) {
 /**
  * @param {Array<Project>} projects
  * @param {string} prefix
+ * @return Generator<QueueEntry>
  */
 function* findFileInBatch(projects, prefix) {
   for (const project of projects) {
     const ctx = new ProjectContext(project)
     yield* findFiles(ctx, project.rootFolder[0], prefix)
     for (const fileId of project.deletedFileIds || []) {
-      yield { ctx, fileId, path: '' }
+      yield { ctx, cacheKey: fileId, fileId, path: '' }
+    }
+    for (const blob of project.blobs || []) {
+      if (ctx.hasBackedUpBlob(blob.getHash())) continue
+      yield {
+        ctx,
+        cacheKey: blob.getHash(),
+        path: 'blob',
+        blob,
+        hash: blob.getHash(),
+      }
     }
   }
+}
+
+/**
+ * @param {Array<Project>} projects
+ * @return {Promise<number>}
+ */
+async function collectBlobs(projects) {
+  let blobs = 0
+  for (const project of projects) {
+    const historyId = project.overleaf.history.id.toString()
+    const blobStore = new BlobStore(historyId)
+    project.blobs = await blobStore.getProjectBlobs()
+    blobs += project.blobs.length
+  }
+  return blobs
 }
 
 /**
@@ -621,6 +743,37 @@ async function collectDeletedFiles(projects) {
   }
 }
 
+/**
+ * @param {Array<Project>} projects
+ * @return {Promise<number>}
+ */
+async function collectBackedUpBlobs(projects) {
+  const cursor = backedUpBlobs.find(
+    { _id: { $in: projects.map(p => p._id) } },
+    {
+      readPreference: READ_PREFERENCE_SECONDARY,
+      sort: { _id: 1 },
+    }
+  )
+  let nBackedUpBlobs = 0
+  const processed = projects.slice()
+  for await (const record of cursor) {
+    const idx = processed.findIndex(
+      p => p._id.toString() === record._id.toString()
+    )
+    if (idx === -1) {
+      throw new Error(
+        `bug: order of backedUpBlobs mongo records does not match batch of projects (${record._id} out of order)`
+      )
+    }
+    processed.splice(0, idx)
+    const project = processed[0]
+    project.backedUpBlobs = record.blobs.map(b => b.toString('hex'))
+    nBackedUpBlobs += record.blobs.length
+  }
+  return nBackedUpBlobs
+}
+
 const BATCH_HASH_WRITES = 1_000
 const BATCH_FILE_UPDATES = 100
 
@@ -628,12 +781,27 @@ class ProjectContext {
   /** @type {Promise<CachedPerProjectEncryptedS3Persistor> | null} */
   #cachedPersistorPromise = null
 
+  /** @type {Set<string>} */
+  #backedUpBlobs
+
+  /** @type {Set<string>} */
+  #historyBlobs
+
   /**
    * @param {Project} project
    */
   constructor(project) {
     this.projectId = project._id
     this.historyId = project.overleaf.history.id.toString()
+    this.#backedUpBlobs = new Set(project.backedUpBlobs || [])
+    this.#historyBlobs = new Set((project.blobs || []).map(b => b.getHash()))
+  }
+
+  hasHistoryBlob(hash) {
+    return this.#historyBlobs.has(hash)
+  }
+  recordHistoryBlob(hash) {
+    this.#historyBlobs.add(hash)
   }
 
   /**
@@ -722,6 +890,7 @@ class ProjectContext {
    * @param {string} hash
    */
   recordBackedUpBlob(hash) {
+    this.#backedUpBlobs.add(hash)
     this.#completedBlobs.add(hash)
     this.#pendingBlobs.delete(hash)
   }
@@ -731,7 +900,11 @@ class ProjectContext {
    * @return {boolean}
    */
   hasBackedUpBlob(hash) {
-    return this.#pendingBlobs.has(hash) || this.#completedBlobs.has(hash)
+    return (
+      this.#pendingBlobs.has(hash) ||
+      this.#completedBlobs.has(hash) ||
+      this.#backedUpBlobs.has(hash)
+    )
   }
 
   /** @type {Array<QueueEntry>} */
@@ -741,6 +914,7 @@ class ProjectContext {
    * @param {QueueEntry} entry
    */
   queueFileForWritingHash(entry) {
+    if (entry.path === 'blob') return
     this.#pendingFileWrites.push(entry)
   }
 
@@ -806,12 +980,12 @@ class ProjectContext {
    * @param {QueueEntry} entry
    */
   async processFile(entry) {
-    if (this.#pendingFiles.has(entry.fileId)) {
+    if (this.#pendingFiles.has(entry.cacheKey)) {
       STATS.filesDuplicated++
     } else {
-      this.#pendingFiles.set(entry.fileId, processFile(entry))
+      this.#pendingFiles.set(entry.cacheKey, processFile(entry))
     }
-    entry.hash = await this.#pendingFiles.get(entry.fileId)
+    entry.hash = await this.#pendingFiles.get(entry.cacheKey)
     this.queueFileForWritingHash(entry)
     await this.flushMongoQueuesIfNeeded()
   }
