@@ -198,6 +198,55 @@ async function findBlobsSharded(projectId, hashSet) {
 }
 
 /**
+ * Return metadata for all blobs in the given project
+ */
+async function getProjectBlobs(projectId) {
+  assert.mongoId(projectId, 'bad projectId')
+
+  const result = await mongodb.blobs.findOne(
+    { _id: new ObjectId(projectId) },
+    { projection: { _id: 0 } }
+  )
+
+  if (!result) {
+    return []
+  }
+
+  // Build blobs from the query results
+  const blobs = []
+  for (const bucket of Object.values(result.blobs)) {
+    for (const record of bucket) {
+      blobs.push(recordToBlob(record))
+    }
+  }
+
+  // Look for all possible sharded blobs
+
+  const minShardedId = makeShardedId(projectId, '0')
+  const maxShardedId = makeShardedId(projectId, 'f')
+  // @ts-ignore We are using a custom _id here.
+  const shardedRecords = mongodb.shardedBlobs.find(
+    {
+      _id: { $gte: minShardedId, $lte: maxShardedId },
+    },
+    { projection: { _id: 0 } }
+  )
+
+  for await (const shardedRecord of shardedRecords) {
+    if (shardedRecord.blobs == null) {
+      continue
+    }
+    for (const bucket of Object.values(shardedRecord.blobs)) {
+      for (const record of bucket) {
+        blobs.push(recordToBlob(record))
+      }
+    }
+  }
+
+  return blobs
+}
+
+/**
  * Add a blob's metadata to the blobs collection after it has been uploaded.
  * @param {string} projectId
  * @param {Blob} blob
@@ -323,6 +372,7 @@ module.exports = {
   initialize,
   findBlob,
   findBlobs,
+  getProjectBlobs,
   insertBlob,
   deleteBlobs,
 }

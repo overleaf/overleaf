@@ -113,6 +113,15 @@ describe('BlobStore Mongo backend', function () {
       })
     })
 
+    describe('getProjectBlobs', function () {
+      it('returns all blobs for a given project', async function () {
+        const blobs = await mongoBackend.getProjectBlobs(projectId)
+        const obtainedHashes = blobs.map(blob => blob.getHash())
+        const expectedHashes = hashes.abcd.concat(hashes[1234])
+        expect(obtainedHashes).to.have.members(expectedHashes)
+      })
+    })
+
     describe('deleteBlobs', function () {
       it('deletes all blobs for a given project', async function () {
         await mongoBackend.deleteBlobs(projectId)

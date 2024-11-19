@@ -259,6 +259,16 @@ describe('BlobStore', function () {
             testFiles.GRAPH_PNG_HASH,
           ])
         })
+
+        it('getProjectBlobs() returns all blobs in the project', async function () {
+          const blobs = await blobStore.getProjectBlobs()
+          const hashes = blobs.map(blob => blob.getHash())
+          expect(hashes).to.have.members([
+            testFiles.HELLO_TXT_HASH,
+            testFiles.GRAPH_PNG_HASH,
+            helloWorldHash,
+          ])
+        })
       })
 
       describe('two blob stores on different projects', function () {

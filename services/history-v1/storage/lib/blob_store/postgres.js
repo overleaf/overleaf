@@ -54,6 +54,23 @@ async function findBlobs(projectId, hashes) {
 }
 
 /**
+ * Return metadata for all blobs in the given project
+ */
+async function getProjectBlobs(projectId) {
+  projectId = parseInt(projectId, 10)
+  assert.integer(projectId, 'bad projectId')
+
+  const records = await knex('project_blobs')
+    .select('hash_bytes', 'byte_length', 'string_length')
+    .where({
+      project_id: projectId,
+    })
+
+  const blobs = records.map(recordToBlob)
+  return blobs
+}
+
+/**
  * Add a blob's metadata to the blobs table after it has been uploaded.
  */
 async function insertBlob(projectId, blob) {
@@ -108,6 +125,7 @@ module.exports = {
   initialize,
   findBlob,
   findBlobs,
+  getProjectBlobs,
   insertBlob,
   deleteBlobs,
 }

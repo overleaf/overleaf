@@ -318,6 +318,16 @@ class BlobStore {
   }
 
   /**
+   * Retrieve all blobs associated with the project.
+   * @returns {Promise<core.Blob[]>} A promise that resolves to an array of blobs.
+   */
+
+  async getProjectBlobs() {
+    const projectBlobs = await this.backend.getProjectBlobs(this.projectId)
+    return projectBlobs
+  }
+
+  /**
    * Delete all blobs that belong to the project.
    */
   async deleteBlobs() {
