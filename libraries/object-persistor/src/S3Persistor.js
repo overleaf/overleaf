@@ -61,6 +61,9 @@ class SSECOptions {
 }
 
 class S3Persistor extends AbstractPersistor {
+  /** @type {Map<string, S3>} */
+  #clients = new Map()
+
   constructor(settings = {}) {
     super()
 
@@ -131,19 +134,19 @@ class S3Persistor extends AbstractPersistor {
 
       // if we have an md5 hash, pass this to S3 to verify the upload - otherwise
       // we rely on the S3 client's checksum calculation to validate the upload
-      const clientOptions = {}
+      let computeChecksums = false
       if (opts.sourceMd5) {
         uploadOptions.ContentMD5 = PersistorHelper.hexToBase64(opts.sourceMd5)
       } else {
-        clientOptions.computeChecksums = true
+        computeChecksums = true
       }
 
       if (this.settings.disableMultiPartUpload) {
-        await this._getClientForBucket(bucketName, clientOptions)
+        await this._getClientForBucket(bucketName, computeChecksums)
           .putObject(uploadOptions)
           .promise()
       } else {
-        await this._getClientForBucket(bucketName, clientOptions)
+        await this._getClientForBucket(bucketName, computeChecksums)
           .upload(uploadOptions, { partSize: this.settings.partSize })
           .promise()
       }
@@ -517,23 +520,34 @@ class S3Persistor extends AbstractPersistor {
 
   /**
    * @param {string} bucket
-   * @param {Object} [clientOptions]
+   * @param {boolean} computeChecksums
    * @return {S3}
    * @private
    */
-  _getClientForBucket(bucket, clientOptions) {
-    return new S3(
-      this._buildClientOptions(
-        this.settings.bucketCreds?.[bucket],
-        clientOptions
+  _getClientForBucket(bucket, computeChecksums = false) {
+    /** @type {S3.Types.ClientConfiguration} */
+    const clientOptions = {}
+    const cacheKey = `${bucket}:${computeChecksums}`
+    if (computeChecksums) {
+      clientOptions.computeChecksums = true
+    }
+    let client = this.#clients.get(cacheKey)
+    if (!client) {
+      client = new S3(
+        this._buildClientOptions(
+          this.settings.bucketCreds?.[bucket],
+          clientOptions
+        )
       )
-    )
+      this.#clients.set(cacheKey, client)
+    }
+    return client
   }
 
   /**
    * @param {Object} bucketCredentials
-   * @param {Object} clientOptions
-   * @return {Object}
+   * @param {S3.Types.ClientConfiguration} clientOptions
+   * @return {S3.Types.ClientConfiguration}
    * @private
    */
   _buildClientOptions(bucketCredentials, clientOptions) {

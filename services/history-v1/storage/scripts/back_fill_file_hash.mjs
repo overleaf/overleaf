@@ -3,6 +3,7 @@ import Crypto from 'node:crypto'
 import Events from 'node:events'
 import fs from 'node:fs'
 import Path from 'node:path'
+import { performance } from 'node:perf_hooks'
 import Stream from 'node:stream'
 import zLib from 'node:zlib'
 import { setTimeout } from 'node:timers/promises'
@@ -37,6 +38,7 @@ ObjectId.cacheHexString = true
 
 /**
  * @typedef {import("overleaf-editor-core").Blob} Blob
+ * @typedef {import("perf_hooks").EventLoopUtilization} EventLoopUtilization
  * @typedef {import("mongodb").Collection} Collection
  * @typedef {import("@overleaf/object-persistor/src/PerProjectEncryptedS3Persistor").CachedPerProjectEncryptedS3Persistor} CachedPerProjectEncryptedS3Persistor
  */
@@ -105,6 +107,12 @@ const RETRY_FILESTORE_404 = process.env.RETRY_FILESTORE_404 === 'true'
 const BUFFER_DIR = fs.mkdtempSync(
   process.env.BUFFER_DIR_PREFIX || '/tmp/back_fill_file_hash-'
 )
+// https://nodejs.org/api/stream.html#streamgetdefaulthighwatermarkobjectmode
+const STREAM_HIGH_WATER_MARK = parseInt(
+  process.env.STREAM_HIGH_WATER_MARK || (64 * 1024).toString(),
+  10
+)
+const LOGGING_INTERVAL = parseInt(process.env.LOGGING_INTERVAL || '60000', 10)
 
 const projectsCollection = db.collection('projects')
 const deletedProjectsCollection = db.collection('deletedProjects')
@@ -127,20 +135,81 @@ const STATS = {
   deduplicatedWriteToAWSLocalEgress: 0,
   deduplicatedWriteToAWSRemoteCount: 0,
   deduplicatedWriteToAWSRemoteEgress: 0,
+  readFromGCSCount: 0,
+  readFromGCSIngress: 0,
   writeToAWSCount: 0,
   writeToAWSEgress: 0,
 }
 
+const processStart = performance.now()
+let lastLogTS = processStart
+let lastLog = Object.assign({}, STATS)
+let lastEventLoopStats = performance.eventLoopUtilization()
+
+/**
+ * @param {number} v
+ * @param {number} ms
+ */
+function toMiBPerSecond(v, ms) {
+  const ONE_MiB = 1024 * 1024
+  return v / ONE_MiB / (ms / 1000)
+}
+
+/**
+ * @param {any} stats
+ * @param {number} ms
+ * @return {{writeToAWSThroughputMiBPerSecond: number, readFromGCSThroughputMiBPerSecond: number}}
+ */
+function bandwidthStats(stats, ms) {
+  return {
+    readFromGCSThroughputMiBPerSecond: toMiBPerSecond(
+      stats.readFromGCSIngress,
+      ms
+    ),
+    writeToAWSThroughputMiBPerSecond: toMiBPerSecond(
+      stats.writeToAWSEgress,
+      ms
+    ),
+  }
+}
+
+/**
+ * @param {EventLoopUtilization} nextEventLoopStats
+ * @param {number} now
+ * @return {Object}
+ */
+function computeDiff(nextEventLoopStats, now) {
+  const ms = now - lastLogTS
+  lastLogTS = now
+  const diff = {
+    eventLoop: performance.eventLoopUtilization(
+      nextEventLoopStats,
+      lastEventLoopStats
+    ),
+  }
+  for (const [name, v] of Object.entries(STATS)) {
+    diff[name] = v - lastLog[name]
+  }
+  return Object.assign(diff, bandwidthStats(diff, ms))
+}
+
 function printStats() {
+  const now = performance.now()
+  const nextEventLoopStats = performance.eventLoopUtilization()
   console.log(
     JSON.stringify({
       time: new Date(),
       ...STATS,
+      ...bandwidthStats(STATS, now - processStart),
+      eventLoop: nextEventLoopStats,
+      diff: computeDiff(nextEventLoopStats, now),
     })
   )
+  lastEventLoopStats = nextEventLoopStats
+  lastLog = Object.assign({}, STATS)
 }
 
-setInterval(printStats, 60_000)
+setInterval(printStats, LOGGING_INTERVAL)
 
 /**
  * @param {QueueEntry} entry
@@ -187,12 +256,19 @@ async function processFileOnce(entry) {
     BUFFER_DIR,
     projectId.toString() + fileId.toString()
   )
-  const dst = fs.createWriteStream(filePath)
+  const dst = fs.createWriteStream(filePath, {
+    highWaterMark: STREAM_HIGH_WATER_MARK,
+  })
+  STATS.readFromGCSCount++
   const src = await filestorePersistor.getObjectStream(
     USER_FILES_BUCKET_NAME,
     `${projectId}/${fileId}`
   )
-  await Stream.promises.pipeline(src, dst)
+  try {
+    await Stream.promises.pipeline(src, dst)
+  } finally {
+    STATS.readFromGCSIngress += dst.bytesWritten
+  }
 
   const blobStore = new BlobStore(historyId)
   const blob = await blobStore.putFile(filePath)
@@ -221,7 +297,7 @@ async function processFileOnce(entry) {
     contentEncoding = 'gzip'
     size = 0
     await Stream.promises.pipeline(
-      fs.createReadStream(filePath),
+      fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK }),
       zLib.createGzip(),
       async function* (source) {
         for await (const chunk of source) {
@@ -230,12 +306,17 @@ async function processFileOnce(entry) {
           yield chunk
         }
       },
-      fs.createWriteStream(filePathCompressed)
+      fs.createWriteStream(filePathCompressed, {
+        highWaterMark: STREAM_HIGH_WATER_MARK,
+      })
     )
   } else {
     backupSource = filePath
     size = blob.getByteLength()
-    await Stream.promises.pipeline(fs.createReadStream(filePath), md5)
+    await Stream.promises.pipeline(
+      fs.createReadStream(filePath, { highWaterMark: STREAM_HIGH_WATER_MARK }),
+      md5
+    )
   }
   const backendKeyPath = makeProjectKey(historyId, blob.getHash())
   const persistor = await entry.ctx.getCachedPersistor(backendKeyPath)
@@ -244,7 +325,9 @@ async function processFileOnce(entry) {
     await persistor.sendStream(
       projectBlobsBucket,
       backendKeyPath,
-      fs.createReadStream(backupSource),
+      fs.createReadStream(backupSource, {
+        highWaterMark: STREAM_HIGH_WATER_MARK,
+      }),
       {
         contentEncoding,
         contentType: 'application/octet-stream',

@@ -147,7 +147,7 @@ describe('S3PersistorTests', function () {
       deleteObjects: sinon.stub().returns(EmptyPromise),
       getSignedUrlPromise: sinon.stub().resolves(redirectUrl),
     }
-    S3 = sinon.stub().returns(S3Client)
+    S3 = sinon.stub().callsFake(() => Object.assign({}, S3Client))
 
     Hash = {
       end: sinon.stub(),
@@ -1025,6 +1025,24 @@ describe('S3PersistorTests', function () {
       it('should eventually wrap the error', function () {
         expect(error.cause.cause).to.equal(genericError)
       })
+    })
+  })
+
+  describe('_getClientForBucket', function () {
+    it('should return same instance for same bucket', function () {
+      const a = S3Persistor._getClientForBucket('foo')
+      const b = S3Persistor._getClientForBucket('foo')
+      expect(a).to.equal(b)
+    })
+    it('should return different instance for different bucket', function () {
+      const a = S3Persistor._getClientForBucket('foo')
+      const b = S3Persistor._getClientForBucket('bar')
+      expect(a).to.not.equal(b)
+    })
+    it('should return different instance for same bucket different computeChecksums', function () {
+      const a = S3Persistor._getClientForBucket('foo', false)
+      const b = S3Persistor._getClientForBucket('foo', true)
+      expect(a).to.not.equal(b)
     })
   })
 })

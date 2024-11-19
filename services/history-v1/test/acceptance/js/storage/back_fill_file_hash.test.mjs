@@ -127,7 +127,8 @@ describe('back_fill_file_hash script', function () {
   const deleteProjectsRecordId2 = new ObjectId()
   const deleteProjectsRecordId3 = new ObjectId()
   const deleteProjectsRecordId4 = new ObjectId()
-  const contentFile7 = Buffer.alloc(11_000_000)
+  const twoByteUTF8Symbol = 'ö'
+  const contentFile7 = Buffer.alloc(4_000_000, twoByteUTF8Symbol)
   const hashFile7 = gitBlobHashBuffer(contentFile7)
   const writtenBlobs = [
     { projectId: projectId0, historyId: historyId0, fileId: fileId0 },
@@ -441,7 +442,12 @@ describe('back_fill_file_hash script', function () {
     )
   })
 
-  async function tryRunScript(env = {}) {
+  /**
+   * @param {Record<string, string>} env
+   * @param {boolean} shouldHaveWritten
+   * @return {Promise<{result, stats: any}>}
+   */
+  async function tryRunScript(env = {}, shouldHaveWritten) {
     let result
     try {
       result = await promisify(execFile)(
@@ -471,14 +477,35 @@ describe('back_fill_file_hash script', function () {
       }
       result = { stdout, stderr, status: code }
     }
+    const extraStatsKeys = [
+      'eventLoop',
+      'readFromGCSThroughputMiBPerSecond',
+      'writeToAWSThroughputMiBPerSecond',
+    ]
     const stats = JSON.parse(result.stdout.trimEnd().split('\n').pop())
+    expect(Object.keys(stats.diff).sort()).to.deep.equal(
+      [...extraStatsKeys, ...Object.keys(STATS_ALL)].sort()
+    )
+    delete stats.diff
     expect(new Date(stats.time).toISOString()).to.equal(stats.time)
     delete stats.time
+    if (shouldHaveWritten) {
+      expect(stats.readFromGCSThroughputMiBPerSecond).to.be.greaterThan(0)
+      expect(stats.writeToAWSThroughputMiBPerSecond).to.be.greaterThan(0)
+    }
+    for (const key of extraStatsKeys) {
+      delete stats[key]
+    }
     return { stats, result }
   }
 
-  async function runScript(env = {}) {
-    const { stats, result } = await tryRunScript(env)
+  /**
+   * @param {Record<string, string>} env
+   * @param {boolean} shouldHaveWritten
+   * @return {Promise<{result, stats: any}>}
+   */
+  async function runScript(env = {}, shouldHaveWritten = true) {
+    const { stats, result } = await tryRunScript(env, shouldHaveWritten)
     if (result.status !== 0) {
       console.log(result)
       expect(result).to.have.property('status', 0)
@@ -718,7 +745,7 @@ describe('back_fill_file_hash script', function () {
       ])
     })
     it('should process nothing on re-run', async function () {
-      const rerun = await runScript()
+      const rerun = await runScript({}, false)
       expect(rerun.stats).deep.equal({
         ...STATS_ALL_ZERO,
         // We still need to iterate over all the projects.
@@ -814,6 +841,8 @@ describe('back_fill_file_hash script', function () {
     deduplicatedWriteToAWSLocalEgress: 0,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
+    readFromGCSCount: 0,
+    readFromGCSIngress: 0,
     writeToAWSCount: 0,
     writeToAWSEgress: 0,
   }
@@ -834,8 +863,10 @@ describe('back_fill_file_hash script', function () {
     deduplicatedWriteToAWSLocalEgress: 0,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
+    readFromGCSCount: 6,
+    readFromGCSIngress: 4000120,
     writeToAWSCount: 5,
-    writeToAWSEgress: 11000118,
+    writeToAWSEgress: 4032,
   }
   const STATS_UP_FROM_PROJECT1_ONWARD = {
     projects: 2,
@@ -854,6 +885,8 @@ describe('back_fill_file_hash script', function () {
     deduplicatedWriteToAWSLocalEgress: 30,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
+    readFromGCSCount: 3,
+    readFromGCSIngress: 72,
     writeToAWSCount: 2,
     writeToAWSEgress: 58,
   }
@@ -884,6 +917,7 @@ describe('back_fill_file_hash script', function () {
       sumStats(STATS_ALL, {
         ...STATS_ALL_ZERO,
         filesFailed: 1,
+        readFromGCSIngress: -24,
         writeToAWSCount: -1,
         writeToAWSEgress: -28,
       })
@@ -921,8 +955,13 @@ describe('back_fill_file_hash script', function () {
     ])
     expectNotFoundError(result, 'failed to process file, trying again')
     expect(result.status).to.equal(0)
-    expect({ ...stats, filesRetries: 0 }).to.deep.equal(STATS_ALL)
+    expect({ ...stats, filesRetries: 0, readFromGCSCount: 0 }).to.deep.equal({
+      ...STATS_ALL,
+      filesRetries: 0,
+      readFromGCSCount: 0,
+    })
     expect(stats.filesRetries).to.be.greaterThan(0)
+    expect(stats.filesRetries).to.be.greaterThan(STATS_ALL.readFromGCSCount)
   })
 
   describe('full run CONCURRENCY=1', function () {
@@ -944,6 +983,19 @@ describe('back_fill_file_hash script', function () {
     beforeEach('run script', async function () {
       output = await runScript({
         CONCURRENCY: '10',
+      })
+    })
+    it('should print stats', function () {
+      expect(output.stats).deep.equal(STATS_ALL)
+    })
+    commonAssertions()
+  })
+
+  describe('full run STREAM_HIGH_WATER_MARK=1MB', function () {
+    let output
+    beforeEach('run script', async function () {
+      output = await runScript({
+        STREAM_HIGH_WATER_MARK: (1024 * 1024).toString(),
       })
     })
     it('should print stats', function () {
