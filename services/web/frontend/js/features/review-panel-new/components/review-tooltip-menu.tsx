@@ -1,4 +1,5 @@
 import {
+  CSSProperties,
   Dispatch,
   FC,
   SetStateAction,
@@ -32,6 +33,10 @@ import { isCursorNearViewportEdge } from '@/features/source-editor/utils/is-curs
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import { useModalsContext } from '@/features/ide-react/context/modals-context'
 import { numberOfChangesInSelection } from '../utils/changes-in-selection'
+import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+
+const TRACK_CHANGES_ON_WIDGET_HEIGHT = 25
+const CM_LINE_RIGHT_PADDING = 2
 
 const ReviewTooltipMenu: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -70,11 +75,13 @@ const ReviewTooltipMenuContent: FC<{
   const { t } = useTranslation()
   const view = useCodeMirrorViewContext()
   const state = useCodeMirrorStateContext()
-  const { setReviewPanelOpen } = useLayoutContext()
+  const { setReviewPanelOpen, reviewPanelOpen } = useLayoutContext()
   const { setView } = useReviewPanelViewActionsContext()
   const ranges = useRangesContext()
   const { acceptChanges, rejectChanges } = useRangesActionsContext()
   const { showGenericConfirmModal } = useModalsContext()
+  const { wantTrackChanges } = useEditorManagerContext()
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | undefined>()
 
   const addComment = useCallback(() => {
     setReviewPanelOpen(true)
@@ -151,8 +158,46 @@ const ReviewTooltipMenuContent: FC<{
 
   const showChangesButtons = changeIdsInSelection.length > 0
 
+  useEffect(() => {
+    view.requestMeasure({
+      key: 'review-tooltip-outside-viewport',
+      read(view) {
+        const cursorCoords = view.coordsAtPos(view.state.selection.main.head)
+
+        if (!cursorCoords) {
+          return
+        }
+
+        const scrollDomRect = view.scrollDOM.getBoundingClientRect()
+        const contentDomRect = view.contentDOM.getBoundingClientRect()
+        const editorRightPos = contentDomRect.right - CM_LINE_RIGHT_PADDING
+
+        if (
+          cursorCoords.top > scrollDomRect.top &&
+          cursorCoords.top < scrollDomRect.bottom
+        ) {
+          return
+        }
+
+        const widgetOffset =
+          wantTrackChanges && !reviewPanelOpen
+            ? TRACK_CHANGES_ON_WIDGET_HEIGHT
+            : 0
+
+        return {
+          position: 'fixed' as const,
+          top: scrollDomRect.top + widgetOffset,
+          right: window.innerWidth - editorRightPos,
+        }
+      },
+      write(res) {
+        setTooltipStyle(res)
+      },
+    })
+  }, [view, reviewPanelOpen, wantTrackChanges])
+
   return (
-    <div className="review-tooltip-menu">
+    <div className="review-tooltip-menu" style={tooltipStyle}>
       <button
         className="review-tooltip-menu-button review-tooltip-add-comment-button"
         onClick={addComment}
