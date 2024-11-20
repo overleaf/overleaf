@@ -1020,8 +1020,11 @@ describe('back_fill_file_hash script', function () {
       filesRetries: 0,
       readFromGCSCount: 0,
     })
-    expect(stats.filesRetries).to.be.greaterThan(0)
-    expect(stats.filesRetries).to.be.greaterThan(STATS_ALL.readFromGCSCount)
+    expect(stats.filesRetries).to.be.greaterThan(0, 'should have retried')
+    expect(stats.readFromGCSCount).to.be.greaterThan(
+      STATS_ALL.readFromGCSCount,
+      'should have read more times from GCS compared to normal operations'
+    )
   })
 
   describe('full run CONCURRENCY=1', function () {
