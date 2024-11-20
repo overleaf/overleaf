@@ -4,7 +4,7 @@
 
 import parseArgs from 'minimist'
 
-import OAuthPersonalAccessTokenManager from '../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager.js'
+import OAuthPersonalAccessTokenManager from '../modules/oauth2-server/app/src/OAuthPersonalAccessTokenManager.mjs'
 
 const argv = parseArgs(process.argv.slice(2), {
   string: ['user-id'],
