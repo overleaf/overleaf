@@ -2140,6 +2140,8 @@
   "thanks_for_confirming_your_email_address": "Thanks for confirming your email address",
   "thanks_for_getting_in_touch": "Thanks for getting in touch. Our team will get back to you by email as soon as possible.",
   "thanks_for_subscribing": "Thanks for subscribing!",
+  "thanks_for_subscribing_to_plan_with_add_on": "Thank you for subscribing to the __planName__ plan with the __addOnName__ add-on. It’s support from people like yourself that allows __appName__ to continue to grow and improve.",
+  "thanks_for_subscribing_to_the_add_on": "Thank you for subscribing to the __addOnName__ add-on. It’s support from people like yourself that allows __appName__ to continue to grow and improve.",
   "thanks_for_subscribing_you_help_sl": "Thank you for subscribing to the __planName__ plan. It’s support from people like yourself that allows __appName__ to continue to grow and improve.",
   "thanks_settings_updated": "Thanks, your settings have been updated.",
   "the_add_on_will_remain_active_until": "The add-on will remain active until the end of the current billing period.",

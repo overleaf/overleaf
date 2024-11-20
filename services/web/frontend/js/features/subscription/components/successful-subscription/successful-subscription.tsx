@@ -7,6 +7,12 @@ import OLRow from '@/features/ui/components/ol/ol-row'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLPageContentCard from '@/features/ui/components/ol/ol-page-content-card'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
+import {
+  AI_ADD_ON_CODE,
+  ADD_ON_NAME,
+  isStandaloneAiPlanCode,
+} from '../../data/add-on-codes'
+import { RecurlySubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
 function SuccessfulSubscription() {
   const { t } = useTranslation()
@@ -16,6 +22,8 @@ function SuccessfulSubscription() {
   const { appName, adminEmail } = getMeta('ol-ExposedSettings')
 
   if (!subscription || !('recurly' in subscription)) return null
+
+  const onAiStandalonePlan = isStandaloneAiPlanCode(subscription.planCode)
 
   return (
     <div className="container">
@@ -66,12 +74,11 @@ function SuccessfulSubscription() {
                 </a>
               </p>
             )}
-            <p>
-              {t('thanks_for_subscribing_you_help_sl', {
-                planName: subscription.plan.name,
-              })}
-            </p>
-            <PremiumFeaturesLink />
+            <ThankYouSection
+              subscription={subscription}
+              onAiStandalonePlan={onAiStandalonePlan}
+            />
+            {!onAiStandalonePlan && <PremiumFeaturesLink />}
             <p>
               {t('need_anything_contact_us_at')}&nbsp;
               <a href={`mailto:${adminEmail}`} rel="noopener noreferrer">
@@ -79,19 +86,21 @@ function SuccessfulSubscription() {
               </a>
               .
             </p>
-            <p>
-              <Trans
-                i18nKey="help_improve_overleaf_fill_out_this_survey"
-                components={[
-                  // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
-                  <a
-                    href="https://forms.gle/CdLNX9m6NLxkv1yr5"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  />,
-                ]}
-              />
-            </p>
+            {!onAiStandalonePlan && (
+              <p>
+                <Trans
+                  i18nKey="help_improve_overleaf_fill_out_this_survey"
+                  components={[
+                    // eslint-disable-next-line react/jsx-key, jsx-a11y/anchor-has-content
+                    <a
+                      href="https://forms.gle/CdLNX9m6NLxkv1yr5"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    />,
+                  ]}
+                />
+              </p>
+            )}
             <p>
               {t('regards')},
               <br />
@@ -110,6 +119,47 @@ function SuccessfulSubscription() {
         </OLCol>
       </OLRow>
     </div>
+  )
+}
+
+function ThankYouSection({
+  subscription,
+  onAiStandalonePlan,
+}: {
+  subscription: RecurlySubscription
+  onAiStandalonePlan: boolean
+}) {
+  const { t } = useTranslation()
+  const hasAiAddon = subscription?.addOns?.some(
+    addOn => addOn.addOnCode === AI_ADD_ON_CODE
+  )
+
+  if (onAiStandalonePlan) {
+    return (
+      <p>
+        {t('thanks_for_subscribing_to_the_add_on', {
+          addOnName: ADD_ON_NAME,
+        })}
+      </p>
+    )
+  }
+  if (hasAiAddon) {
+    return (
+      <p>
+        {t('thanks_for_subscribing_to_plan_with_add_on', {
+          planName: subscription.plan.name,
+          addOnName: ADD_ON_NAME,
+        })}
+      </p>
+    )
+  }
+
+  return (
+    <p>
+      {t('thanks_for_subscribing_you_help_sl', {
+        planName: subscription.plan.name,
+      })}
+    </p>
   )
 }
 
