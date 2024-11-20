@@ -214,8 +214,8 @@
   }
 
   .plans-new-period-switcher-container {
+    position: relative;
     display: inline-flex;
-    justify-content: center;
     background-color: var(--neutral-10);
     border-radius: var(--border-radius-full-new);
     padding: var(--spacing-03);
@@ -227,45 +227,49 @@
       margin-bottom: var(--spacing-09);
     }
 
-    .plans-new-period-switcher {
+    label {
+      display: inline-flex;
+      align-items: center;
+      margin: 0;
       font-size: var(--font-size-05);
       font-weight: 600;
       line-height: var(--line-height-04);
       text-align: center;
       padding: var(--spacing-01) var(--spacing-04);
       border-radius: var(--border-radius-full-new);
-      display: flex;
-      align-items: center;
-      border: unset;
-      background-color: unset;
 
       &:hover {
         background-color: var(--neutral-20);
+        cursor: pointer;
       }
+    }
 
-      &.active {
-        background-color: var(--green-50);
-        color: white;
-        box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
-
-        .plans-new-discount-badge {
-          background-color: var(--green-10);
-          color: var(--green-60);
-        }
-      }
-
+    input[type='radio'] {
+      position: absolute;
+      left: -9999px;
       &:focus,
       &:focus-visible {
         outline: 0;
       }
+    }
 
-      &:focus-visible {
-        .box-shadow-button-input();
-      }
+    input[type='radio']:focus-visible + label,
+    input[type='radio']:checked:focus-visible + label {
+      .box-shadow-button-input();
+    }
 
+    input[type='radio']:checked + label {
+      background-color: var(--green-50);
+      color: white;
+      box-shadow: 0px 2px 4px 0px rgba(30, 37, 48, 0.16);
       .plans-new-discount-badge {
-        margin-left: 6px;
+        background-color: var(--green-10);
+        color: var(--green-60);
       }
+    }
+
+    .plans-new-discount-badge {
+      margin-left: var(--spacing-03);
     }
   }
 
