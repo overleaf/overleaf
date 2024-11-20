@@ -40,6 +40,9 @@ function deleteDoc(projectId, docId, name, deletedAt, callback) {
   })
 }
 
+/**
+ * @param {string} projectId
+ */
 function getAllDocs(projectId, callback) {
   const url = `${settings.apis.docstore.url}/project/${projectId}/doc`
   request.get(

@@ -10,6 +10,9 @@ const { promisifyMultiResult } = require('@overleaf/promise-utils')
 const ProjectGetter = require('../Project/ProjectGetter')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
 
+/**
+ * @param {string} projectId
+ */
 function flushProjectToMongo(projectId, callback) {
   _makeRequest(
     {
@@ -29,6 +32,9 @@ function flushMultipleProjectsToMongo(projectIds, callback) {
   async.series(jobs, callback)
 }
 
+/**
+ * @param {string} projectId
+ */
 function flushProjectToMongoAndDelete(projectId, callback) {
   _makeRequest(
     {
