@@ -47,7 +47,6 @@ export type ExposedSettings = {
   fileIgnorePattern: string
   templateLinks?: TemplateLink[]
   labsEnabled: boolean
-  groupSSOEnabled?: boolean
   wikiEnabled?: boolean
   templatesEnabled?: boolean
 }

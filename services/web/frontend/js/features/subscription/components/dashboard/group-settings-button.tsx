@@ -1,5 +1,4 @@
 import { RowLink } from '@/features/subscription/components/dashboard/row-link'
-import getMeta from '@/utils/meta'
 import { useTranslation } from 'react-i18next'
 import { ManagedGroupSubscription } from '../../../../../../types/subscription/dashboard/subscription'
 
@@ -10,13 +9,11 @@ export default function GroupSettingsButton({
 }) {
   const { t } = useTranslation()
 
-  const { groupSSOEnabled } = getMeta('ol-ExposedSettings')
-
   const subscriptionHasManagedUsers =
     subscription.features?.managedUsers !== false
   const subscriptionHasGroupSSO =
     subscription.features?.groupSSO === true ||
-    (groupSSOEnabled && subscription.features?.groupSSO === null)
+    subscription.features?.groupSSO === null
 
   let groupSettingRowSubText = ''
   if (subscriptionHasGroupSSO && subscriptionHasManagedUsers) {

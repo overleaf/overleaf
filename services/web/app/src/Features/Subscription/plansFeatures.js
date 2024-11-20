@@ -1,5 +1,3 @@
-const Settings = require('@overleaf/settings')
-
 const individualPlans = [
   {
     divider: false,
@@ -259,7 +257,7 @@ const groupPlans = [
         value: 'bool',
         plans: {
           group_standard: false,
-          group_professional: Settings.groupSSO?.enabled === true,
+          group_professional: true,
           organization: true,
         },
       },
