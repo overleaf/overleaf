@@ -277,6 +277,8 @@
 }
 
 .change-currency {
+  margin-top: var(--spacing-02);
+
   .dropdown-item:not(:first-child) {
     margin-top: var(--spacing-02);
   }
