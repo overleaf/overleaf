@@ -16,12 +16,16 @@
  */
 
 const { Blob } = require('overleaf-editor-core')
-const { ObjectId, Binary, MongoError } = require('mongodb')
+const { ObjectId, Binary, MongoError, ReadPreference } = require('mongodb')
 const assert = require('../assert')
 const mongodb = require('../mongodb')
 
 const MAX_BLOBS_IN_BUCKET = 8
 const DUPLICATE_KEY_ERROR_CODE = 11000
+
+/**
+ * @typedef {import('mongodb').ReadPreferenceLike} ReadPreferenceLike
+ */
 
 /**
  * Set up the data structures for a given project.
@@ -247,6 +251,60 @@ async function getProjectBlobs(projectId) {
 }
 
 /**
+ * Return metadata for all blobs in the given project
+ * @param {Array<string>} projectIds
+ * @return {Promise<{ nBlobs: number, blobs: Map<string, Array<Blob>> }>}
+ */
+async function getProjectBlobsBatch(projectIds) {
+  for (const project of projectIds) {
+    assert.mongoId(project, 'bad projectId')
+  }
+  let nBlobs = 0
+  const blobs = new Map()
+  if (projectIds.length === 0) return { nBlobs, blobs }
+
+  // blobs
+  {
+    const cursor = await mongodb.blobs.find(
+      { _id: { $in: projectIds.map(projectId => new ObjectId(projectId)) } },
+      { readPreference: ReadPreference.secondaryPreferred }
+    )
+    for await (const record of cursor) {
+      const projectBlobs = Object.values(record.blobs).flat().map(recordToBlob)
+      blobs.set(record._id.toString(), projectBlobs)
+      nBlobs += projectBlobs.length
+    }
+  }
+
+  // sharded blobs
+  {
+    // @ts-ignore We are using a custom _id here.
+    const cursor = await mongodb.shardedBlobs.find(
+      {
+        _id: {
+          $gte: makeShardedId(projectIds[0], '0'),
+          $lte: makeShardedId(projectIds[projectIds.length - 1], 'f'),
+        },
+      },
+      { readPreference: ReadPreference.secondaryPreferred }
+    )
+    for await (const record of cursor) {
+      const recordIdHex = record._id.toString('hex')
+      const recordProjectId = recordIdHex.slice(0, 24)
+      const projectBlobs = Object.values(record.blobs).flat().map(recordToBlob)
+      const found = blobs.get(recordProjectId)
+      if (found) {
+        found.push(...projectBlobs)
+      } else {
+        blobs.set(recordProjectId, projectBlobs)
+      }
+      nBlobs += projectBlobs.length
+    }
+  }
+  return { nBlobs, blobs }
+}
+
+/**
  * Add a blob's metadata to the blobs collection after it has been uploaded.
  * @param {string} projectId
  * @param {Blob} blob
@@ -373,6 +431,7 @@ module.exports = {
   findBlob,
   findBlobs,
   getProjectBlobs,
+  getProjectBlobsBatch,
   insertBlob,
   deleteBlobs,
 }

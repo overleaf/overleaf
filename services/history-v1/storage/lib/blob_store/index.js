@@ -126,6 +126,34 @@ async function loadGlobalBlobs() {
 }
 
 /**
+ * Return metadata for all blobs in the given project
+ * @param {Array<string|number>} projectIds
+ * @return {Promise<{nBlobs:number, blobs:Map<string,Array<core.Blob>>}>}
+ */
+async function getProjectBlobsBatch(projectIds) {
+  const mongoProjects = []
+  const postgresProjects = []
+  for (const projectId of projectIds) {
+    if (typeof projectId === 'number') {
+      postgresProjects.push(projectId)
+    } else {
+      mongoProjects.push(projectId)
+    }
+  }
+  const [
+    { nBlobs: nBlobsPostgres, blobs: blobsPostgres },
+    { nBlobs: nBlobsMongo, blobs: blobsMongo },
+  ] = await Promise.all([
+    postgresBackend.getProjectBlobsBatch(postgresProjects),
+    mongoBackend.getProjectBlobsBatch(mongoProjects),
+  ])
+  for (const [id, blobs] of blobsPostgres.entries()) {
+    blobsMongo.set(id.toString(), blobs)
+  }
+  return { nBlobs: nBlobsPostgres + nBlobsMongo, blobs: blobsMongo }
+}
+
+/**
  * @classdesc
  * Fetch and store the content of files using content-addressable hashing. The
  * blob store manages both content and metadata (byte and UTF-8 length) for
@@ -366,6 +394,7 @@ class BlobStore {
 
 module.exports = {
   BlobStore,
+  getProjectBlobsBatch,
   loadGlobalBlobs,
   makeProjectKey,
   makeBlobForFile,

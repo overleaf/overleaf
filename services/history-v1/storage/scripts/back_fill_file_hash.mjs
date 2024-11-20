@@ -25,11 +25,12 @@ import {
   BlobStore,
   GLOBAL_BLOBS,
   loadGlobalBlobs,
+  getProjectBlobsBatch,
   getStringLengthOfFile,
   makeBlobForFile,
   makeProjectKey,
 } from '../lib/blob_store/index.js'
-import { backedUpBlobs, db } from '../lib/mongodb.js'
+import { backedUpBlobs as backedUpBlobsCollection, db } from '../lib/mongodb.js'
 import filestorePersistor from '../lib/persistor.js'
 
 // Silence warning.
@@ -68,10 +69,7 @@ ObjectId.cacheHexString = true
  * @typedef {Object} Project
  * @property {ObjectId} _id
  * @property {Array<Folder>} rootFolder
- * @property {Array<string>} deletedFileIds
- * @property {Array<Blob>} blobs
- * @property {{history: {id: string}}} overleaf
- * @property {Array<string>} [backedUpBlobs]
+ * @property {{history: {id: (number|string)}}} overleaf
  */
 
 /**
@@ -499,22 +497,16 @@ async function processFiles(files) {
  * @return {Promise<void>}
  */
 async function handleLiveTreeBatch(batch, prefix = 'rootFolder.0') {
-  let nBackedUpBlobs = 0
-  if (process.argv.includes('collectBackedUpBlobs')) {
-    nBackedUpBlobs = await collectBackedUpBlobs(batch)
-  }
-  if (process.argv.includes('deletedFiles')) {
-    await collectDeletedFiles(batch)
-  }
-  let blobs = 0
-  if (COLLECT_BLOBS) {
-    blobs = await collectBlobs(batch)
-  }
-  const files = Array.from(findFileInBatch(batch, prefix))
+  const deletedFiles = await collectDeletedFiles(batch)
+  const { nBlobs, blobs } = await collectProjectBlobs(batch)
+  const { nBackedUpBlobs, backedUpBlobs } = await collectBackedUpBlobs(batch)
+  const files = Array.from(
+    findFileInBatch(batch, prefix, deletedFiles, blobs, backedUpBlobs)
+  )
   STATS.projects += batch.length
-  STATS.blobs += blobs
+  STATS.blobs += nBlobs
   STATS.backedUpBlobs += nBackedUpBlobs
-  STATS.filesWithoutHash += files.length - (blobs - nBackedUpBlobs)
+  STATS.filesWithoutHash += files.length - (nBlobs - nBackedUpBlobs)
   batch.length = 0 // GC
   // The files are currently ordered by project-id.
   // Order them by file-id ASC then blobs ASC to
@@ -709,17 +701,36 @@ function* findFiles(ctx, folder, path) {
 /**
  * @param {Array<Project>} projects
  * @param {string} prefix
+ * @param {Map<string,Array<string>>} deletedFiles
+ * @param {Map<string,Array<Blob>>} blobs
+ * @param {Map<string,Array<string>>} backedUpBlobs
  * @return Generator<QueueEntry>
  */
-function* findFileInBatch(projects, prefix) {
+function* findFileInBatch(
+  projects,
+  prefix,
+  deletedFiles,
+  blobs,
+  backedUpBlobs
+) {
   for (const project of projects) {
-    const ctx = new ProjectContext(project)
+    const projectIdS = project._id.toString()
+    const historyIdS = project.overleaf.history.id.toString()
+    const projectBlobs = blobs.get(historyIdS) || []
+    const projectBackedUpBlobs = new Set(backedUpBlobs.get(projectIdS) || [])
+    const projectDeletedFiles = deletedFiles.get(projectIdS) || []
+    const ctx = new ProjectContext(
+      project._id,
+      historyIdS,
+      projectBlobs,
+      projectBackedUpBlobs
+    )
     yield* findFiles(ctx, project.rootFolder[0], prefix)
-    for (const fileId of project.deletedFileIds || []) {
+    for (const fileId of projectDeletedFiles) {
       yield { ctx, cacheKey: fileId, fileId, path: '' }
     }
-    for (const blob of project.blobs || []) {
-      if (ctx.hasBackedUpBlob(blob.getHash())) continue
+    for (const blob of projectBlobs) {
+      if (projectBackedUpBlobs.has(blob.getHash())) continue
       yield {
         ctx,
         cacheKey: blob.getHash(),
@@ -732,25 +743,22 @@ function* findFileInBatch(projects, prefix) {
 }
 
 /**
- * @param {Array<Project>} projects
- * @return {Promise<number>}
+ * @param {Array<Project>} batch
+ * @return {Promise<{nBlobs: number, blobs: Map<string, Array<Blob>>}>}
  */
-async function collectBlobs(projects) {
-  let blobs = 0
-  for (const project of projects) {
-    const historyId = project.overleaf.history.id.toString()
-    const blobStore = new BlobStore(historyId)
-    project.blobs = await blobStore.getProjectBlobs()
-    blobs += project.blobs.length
-  }
-  return blobs
+async function collectProjectBlobs(batch) {
+  if (!COLLECT_BLOBS) return { nBlobs: 0, blobs: new Map() }
+  return await getProjectBlobsBatch(batch.map(p => p.overleaf.history.id))
 }
 
 /**
  * @param {Array<Project>} projects
- * @return {Promise<void>}
+ * @return {Promise<Map<string, Array<string>>>}
  */
 async function collectDeletedFiles(projects) {
+  const deletedFiles = new Map()
+  if (!process.argv.includes('deletedFiles')) return deletedFiles
+
   const cursor = deletedFilesCollection.find(
     {
       projectId: { $in: projects.map(p => p._id) },
@@ -762,52 +770,42 @@ async function collectDeletedFiles(projects) {
       sort: { projectId: 1 },
     }
   )
-  const processed = projects.slice()
   for await (const deletedFileRef of cursor) {
-    const idx = processed.findIndex(
-      p => p._id.toString() === deletedFileRef.projectId.toString()
-    )
-    if (idx === -1) {
-      throw new Error(
-        `bug: order of deletedFiles mongo records does not match batch of projects (${deletedFileRef.projectId} out of order)`
-      )
+    const projectId = deletedFileRef.projectId.toString()
+    const fileId = deletedFileRef._id.toString()
+    const found = deletedFiles.get(projectId)
+    if (found) {
+      found.push(fileId)
+    } else {
+      deletedFiles.set(projectId, [fileId])
     }
-    processed.splice(0, idx)
-    const project = processed[0]
-    project.deletedFileIds = project.deletedFileIds || []
-    project.deletedFileIds.push(deletedFileRef._id.toString())
   }
+  return deletedFiles
 }
 
 /**
  * @param {Array<Project>} projects
- * @return {Promise<number>}
+ * @return {Promise<{nBackedUpBlobs:number,backedUpBlobs:Map<string,Array<string>>}>}
  */
 async function collectBackedUpBlobs(projects) {
-  const cursor = backedUpBlobs.find(
+  let nBackedUpBlobs = 0
+  const backedUpBlobs = new Map()
+  if (!process.argv.includes('collectBackedUpBlobs')) {
+    return { nBackedUpBlobs, backedUpBlobs }
+  }
+  const cursor = backedUpBlobsCollection.find(
     { _id: { $in: projects.map(p => p._id) } },
     {
       readPreference: READ_PREFERENCE_SECONDARY,
       sort: { _id: 1 },
     }
   )
-  let nBackedUpBlobs = 0
-  const processed = projects.slice()
   for await (const record of cursor) {
-    const idx = processed.findIndex(
-      p => p._id.toString() === record._id.toString()
-    )
-    if (idx === -1) {
-      throw new Error(
-        `bug: order of backedUpBlobs mongo records does not match batch of projects (${record._id} out of order)`
-      )
-    }
-    processed.splice(0, idx)
-    const project = processed[0]
-    project.backedUpBlobs = record.blobs.map(b => b.toString('hex'))
-    nBackedUpBlobs += record.blobs.length
+    const blobs = record.blobs.map(b => b.toString('hex'))
+    backedUpBlobs.set(record._id.toString(), blobs)
+    nBackedUpBlobs += blobs.length
   }
-  return nBackedUpBlobs
+  return { nBackedUpBlobs, backedUpBlobs }
 }
 
 const BATCH_HASH_WRITES = 1_000
@@ -824,13 +822,16 @@ class ProjectContext {
   #historyBlobs
 
   /**
-   * @param {Project} project
+   * @param {ObjectId} projectId
+   * @param {string} historyId
+   * @param {Array<Blob>} blobs
+   * @param {Set<string>} backedUpBlobs
    */
-  constructor(project) {
-    this.projectId = project._id
-    this.historyId = project.overleaf.history.id.toString()
-    this.#backedUpBlobs = new Set(project.backedUpBlobs || [])
-    this.#historyBlobs = new Set((project.blobs || []).map(b => b.getHash()))
+  constructor(projectId, historyId, blobs, backedUpBlobs) {
+    this.projectId = projectId
+    this.historyId = historyId
+    this.#backedUpBlobs = backedUpBlobs
+    this.#historyBlobs = new Set(blobs.map(b => b.getHash()))
   }
 
   hasHistoryBlob(hash) {
@@ -901,7 +902,7 @@ class ProjectContext {
     )
     this.#completedBlobs.clear()
     STATS.mongoUpdates++
-    await backedUpBlobs.updateOne(
+    await backedUpBlobsCollection.updateOne(
       { _id: this.projectId },
       { $addToSet: { blobs: { $each: blobs } } },
       { upsert: true }

@@ -71,6 +71,35 @@ async function getProjectBlobs(projectId) {
 }
 
 /**
+ * Return metadata for all blobs in the given project
+ * @param {Array<number>} projectIds
+ * @return {Promise<{ nBlobs: number, blobs: Map<number, Array<Blob>> }>}
+ */
+async function getProjectBlobsBatch(projectIds) {
+  for (const projectId of projectIds) {
+    assert.integer(projectId, 'bad projectId')
+  }
+  let nBlobs = 0
+  const blobs = new Map()
+  if (projectIds.length === 0) return { nBlobs, blobs }
+
+  const records = await knex('project_blobs')
+    .select('project_id', 'hash_bytes', 'byte_length', 'string_length')
+    .whereIn('project_id', projectIds)
+
+  for (const record of records) {
+    const found = blobs.get(record.project_id)
+    if (found) {
+      found.push(recordToBlob(record))
+    } else {
+      blobs.set(record.project_id, [recordToBlob(record)])
+    }
+    nBlobs++
+  }
+  return { nBlobs, blobs }
+}
+
+/**
  * Add a blob's metadata to the blobs table after it has been uploaded.
  */
 async function insertBlob(projectId, blob) {
@@ -126,6 +155,7 @@ module.exports = {
   findBlob,
   findBlobs,
   getProjectBlobs,
+  getProjectBlobsBatch,
   insertBlob,
   deleteBlobs,
 }

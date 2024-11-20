@@ -22,6 +22,7 @@ const {
 } = require('../../../../storage')
 const mongoBackend = require('../../../../storage/lib/blob_store/mongo')
 const postgresBackend = require('../../../../storage/lib/blob_store/postgres')
+const { getProjectBlobsBatch } = require('../../../../storage/lib/blob_store')
 
 const mkTmpDir = promisify(temp.mkdir)
 
@@ -327,6 +328,31 @@ describe('BlobStore', function () {
             'expected Blob.NotFoundError when calling blobStore.getStream()'
           )
         })
+
+        if (scenario.backend !== mongoBackend) {
+          // mongo backend has its own test for this, covering sharding
+          it('getProjectBlobsBatch() returns blobs per project', async function () {
+            const projects = [
+              parseInt(scenario.projectId, 10),
+              parseInt(scenario.projectId2, 10),
+            ]
+            const { nBlobs, blobs } =
+              await postgresBackend.getProjectBlobsBatch(projects)
+            expect(nBlobs).to.equal(2)
+            expect(Object.fromEntries(blobs.entries())).to.deep.equal({
+              [parseInt(scenario.projectId, 10)]: [
+                new Blob(helloWorldHash, 11, 11),
+              ],
+              [parseInt(scenario.projectId2, 10)]: [
+                new Blob(
+                  testFiles.GRAPH_PNG_HASH,
+                  testFiles.GRAPH_PNG_BYTE_LENGTH,
+                  null
+                ),
+              ],
+            })
+          })
+        }
       })
 
       describe('a global blob', function () {
@@ -454,4 +480,42 @@ describe('BlobStore', function () {
       })
     })
   }
+
+  it('getProjectBlobsBatch() with mixed projects', async function () {
+    for (const scenario of scenarios) {
+      const blobStore = new BlobStore(scenario.projectId)
+      const blobStore2 = new BlobStore(scenario.projectId2)
+      await blobStore.initialize()
+      await blobStore.putString(helloWorldString)
+      await blobStore2.initialize()
+      await blobStore2.putFile(testFiles.path('graph.png'))
+    }
+
+    const projects = [
+      parseInt(scenarios[0].projectId, 10),
+      scenarios[1].projectId,
+      parseInt(scenarios[0].projectId2, 10),
+      scenarios[1].projectId2,
+    ]
+    const { nBlobs, blobs } = await getProjectBlobsBatch(projects)
+    expect(nBlobs).to.equal(4)
+    expect(Object.fromEntries(blobs.entries())).to.deep.equal({
+      [scenarios[0].projectId]: [new Blob(helloWorldHash, 11, 11)],
+      [scenarios[1].projectId]: [new Blob(helloWorldHash, 11, 11)],
+      [scenarios[0].projectId2]: [
+        new Blob(
+          testFiles.GRAPH_PNG_HASH,
+          testFiles.GRAPH_PNG_BYTE_LENGTH,
+          null
+        ),
+      ],
+      [scenarios[1].projectId2]: [
+        new Blob(
+          testFiles.GRAPH_PNG_HASH,
+          testFiles.GRAPH_PNG_BYTE_LENGTH,
+          null
+        ),
+      ],
+    })
+  })
 })
