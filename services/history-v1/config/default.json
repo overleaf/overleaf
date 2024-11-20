@@ -19,7 +19,7 @@
       "maxRetries": "1",
       "pathStyle": false,
       "httpOptions": {
-        "timeout": "8000"
+        "timeout": "30000"
       }
     }
   },
