@@ -4,9 +4,11 @@ const SandboxedModule = require('sandboxed-module')
 const { expect } = require('chai')
 const Errors = require('../../../../app/src/Features/Subscription/Errors')
 const {
+  AI_ADD_ON_CODE,
   RecurlySubscriptionChangeRequest,
   RecurlySubscriptionChange,
   RecurlySubscription,
+  RecurlySubscriptionAddOnUpdate,
 } = require('../../../../app/src/Features/Subscription/RecurlyEntities')
 
 const MODULE_PATH = '../../../../app/src/Features/Subscription/RecurlyEntities'
@@ -16,6 +18,7 @@ describe('RecurlyEntities', function () {
     beforeEach(function () {
       this.Settings = {
         plans: [
+          { planCode: 'assistant-annual', price_in_cents: 5900 },
           { planCode: 'cheap-plan', price_in_cents: 500 },
           { planCode: 'regular-plan', price_in_cents: 1000 },
           { planCode: 'premium-plan', price_in_cents: 2000 },
@@ -89,6 +92,67 @@ describe('RecurlyEntities', function () {
               subscription: this.subscription,
               timeframe: 'term_end',
               planCode: 'cheap-plan',
+            })
+          )
+        })
+
+        it('preserves the AI add-on on upgrades', function () {
+          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          this.addOn.code = AI_ADD_ON_CODE
+          const changeRequest =
+            this.subscription.getRequestForPlanChange('premium-plan')
+          expect(changeRequest).to.deep.equal(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              planCode: 'premium-plan',
+              addOnUpdates: [
+                new RecurlySubscriptionAddOnUpdate({
+                  code: AI_ADD_ON_CODE,
+                  quantity: 1,
+                }),
+              ],
+            })
+          )
+        })
+
+        it('preserves the AI add-on on downgrades', function () {
+          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          this.addOn.code = AI_ADD_ON_CODE
+          const changeRequest =
+            this.subscription.getRequestForPlanChange('cheap-plan')
+          expect(changeRequest).to.deep.equal(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'term_end',
+              planCode: 'cheap-plan',
+              addOnUpdates: [
+                new RecurlySubscriptionAddOnUpdate({
+                  code: AI_ADD_ON_CODE,
+                  quantity: 1,
+                }),
+              ],
+            })
+          )
+        })
+
+        it('preserves the AI add-on on upgrades from the standalone AI plan', function () {
+          const { RecurlySubscriptionChangeRequest } = this.RecurlyEntities
+          this.subscription.planCode = 'assistant-annual'
+          this.subscription.addOns = []
+          const changeRequest =
+            this.subscription.getRequestForPlanChange('cheap-plan')
+          expect(changeRequest).to.deep.equal(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'term_end',
+              planCode: 'cheap-plan',
+              addOnUpdates: [
+                new RecurlySubscriptionAddOnUpdate({
+                  code: AI_ADD_ON_CODE,
+                  quantity: 1,
+                }),
+              ],
             })
           )
         })

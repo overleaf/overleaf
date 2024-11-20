@@ -15,8 +15,7 @@ import {
   ADD_ON_NAME,
   AI_ADD_ON_CODE,
   AI_STANDALONE_PLAN_NAME,
-  AI_STANDALONE_PLAN_CODE,
-  AI_STANDALONE_ANNUAL_PLAN_CODE,
+  isStandaloneAiPlanCode,
 } from '../../../../data/add-on-codes'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
 
@@ -32,10 +31,7 @@ export function ActiveAiAddonSubscription({
     useSubscriptionDashboardContext()
   if (showCancellation) return <CancelSubscription />
 
-  const onStandalonePlan = [
-    AI_STANDALONE_PLAN_CODE,
-    AI_STANDALONE_ANNUAL_PLAN_CODE,
-  ].includes(subscription.planCode)
+  const onStandalonePlan = isStandaloneAiPlanCode(subscription.planCode)
 
   const handlePlanChange = () => setModalIdShown('change-plan')
 

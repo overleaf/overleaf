@@ -14,8 +14,8 @@ import OLButton from '@/features/ui/components/ol/ol-button'
 import OLNotification from '@/features/ui/components/ol/ol-notification'
 import {
   AI_ADD_ON_CODE,
-  AI_STANDALONE_PLAN_CODE,
   ADD_ON_NAME,
+  isStandaloneAiPlanCode,
 } from '../../../../../../data/add-on-codes'
 import {
   cancelSubscriptionUrl,
@@ -33,7 +33,7 @@ export function CancelAiAddOnModal() {
 
   if (!personalSubscription) return null
 
-  const onStandalone = personalSubscription.planCode === AI_STANDALONE_PLAN_CODE
+  const onStandalone = isStandaloneAiPlanCode(personalSubscription.planCode)
 
   const cancellationEndpoint = onStandalone
     ? cancelSubscriptionUrl

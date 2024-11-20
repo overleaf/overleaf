@@ -6,6 +6,7 @@ const PlansLocator = require('./PlansLocator')
 const SubscriptionHelper = require('./SubscriptionHelper')
 
 const AI_ADD_ON_CODE = 'assistant'
+const STANDALONE_AI_ADD_ON_CODES = ['assistant', 'assistant-annual']
 
 class RecurlySubscription {
   /**
@@ -23,6 +24,7 @@ class RecurlySubscription {
    * @param {number} props.total
    * @param {Date} props.periodStart
    * @param {Date} props.periodEnd
+   * @param {RecurlySubscriptionChange} [props.pendingChange]
    */
   constructor(props) {
     this.id = props.id
@@ -38,10 +40,45 @@ class RecurlySubscription {
     this.total = props.total
     this.periodStart = props.periodStart
     this.periodEnd = props.periodEnd
+    this.pendingChange = props.pendingChange ?? null
   }
 
+  /**
+   * Returns whether this subscription currently has the given add-on
+   *
+   * @param {string} code
+   * @return {boolean}
+   */
   hasAddOn(code) {
     return this.addOns.some(addOn => addOn.code === code)
+  }
+
+  /**
+   * Returns whether this subscription is a standalone AI add-on subscription
+   *
+   * @return {boolean}
+   */
+  isStandaloneAiAddOn() {
+    return isStandaloneAiAddOnPlanCode(this.planCode)
+  }
+
+  /**
+   * Returns whether this subcription will have the given add-on next billing
+   * period.
+   *
+   * There are two cases: either the subscription already has the add-on and
+   * won't change next period, or the subscription will change next period and
+   * the change includes the add-on.
+   *
+   * @param {string} code
+   * @return {boolean}
+   */
+  hasAddOnNextPeriod(code) {
+    if (this.pendingChange != null) {
+      return this.pendingChange.nextAddOns.some(addOn => addOn.code === code)
+    } else {
+      return this.hasAddOn(code)
+    }
   }
 
   /**
@@ -60,16 +97,31 @@ class RecurlySubscription {
     if (newPlan == null) {
       throw new OError('Unable to find plan in settings', { planCode })
     }
-    const changeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
+    const shouldChangeAtTermEnd = SubscriptionHelper.shouldPlanChangeAtTermEnd(
       currentPlan,
       newPlan
     )
-    const timeframe = changeAtTermEnd ? 'term_end' : 'now'
-    return new RecurlySubscriptionChangeRequest({
+
+    const changeRequest = new RecurlySubscriptionChangeRequest({
       subscription: this,
-      timeframe,
+      timeframe: shouldChangeAtTermEnd ? 'term_end' : 'now',
       planCode,
     })
+
+    // Carry the AI add-on to the new plan if applicable
+    if (
+      this.isStandaloneAiAddOn() ||
+      (!shouldChangeAtTermEnd && this.hasAddOn(AI_ADD_ON_CODE)) ||
+      (shouldChangeAtTermEnd && this.hasAddOnNextPeriod(AI_ADD_ON_CODE))
+    ) {
+      const addOnUpdate = new RecurlySubscriptionAddOnUpdate({
+        code: AI_ADD_ON_CODE,
+        quantity: 1,
+      })
+      changeRequest.addOnUpdates = [addOnUpdate]
+    }
+
+    return changeRequest
   }
 
   /**
@@ -262,6 +314,30 @@ class RecurlyAddOn {
   }
 }
 
+/**
+ * A plan configuration
+ */
+class RecurlyPlan {
+  /**
+   * @param {object} props
+   * @param {string} props.code
+   * @param {string} props.name
+   */
+  constructor(props) {
+    this.code = props.code
+    this.name = props.name
+  }
+}
+
+/**
+ * Returns whether the given plan code is a standalone AI plan
+ *
+ * @param {string} planCode
+ */
+function isStandaloneAiAddOnPlanCode(planCode) {
+  return STANDALONE_AI_ADD_ON_CODES.includes(planCode)
+}
+
 module.exports = {
   AI_ADD_ON_CODE,
   RecurlySubscription,
@@ -272,4 +348,6 @@ module.exports = {
   PaypalPaymentMethod,
   CreditCardPaymentMethod,
   RecurlyAddOn,
+  RecurlyPlan,
+  isStandaloneAiAddOnPlanCode,
 }
