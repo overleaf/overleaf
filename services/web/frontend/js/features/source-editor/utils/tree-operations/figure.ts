@@ -2,16 +2,12 @@ import { SyntaxNode, SyntaxNodeRef } from '@lezer/common'
 import { CenteringCtrlSeq } from '../../lezer-latex/latex.terms.mjs'
 
 export function centeringNodeForEnvironment(
-  node: SyntaxNodeRef
+  environmentNodeRef: SyntaxNodeRef
 ): SyntaxNode | null {
   let centeringNode: SyntaxNode | null = null
-  const cursor = node.node.cursor()
-  cursor.next()
+  const cursor = environmentNodeRef.node.cursor()
   cursor.iterate(nodeRef => {
     if (centeringNode) {
-      return false
-    }
-    if (nodeRef.from > node.to) {
       return false
     }
     if (nodeRef.type.is(CenteringCtrlSeq)) {
@@ -19,7 +15,10 @@ export function centeringNodeForEnvironment(
       return false
     }
     // don't descend into nested environments
-    if (nodeRef.type.is('$Environment')) {
+    if (
+      nodeRef.node !== environmentNodeRef.node &&
+      nodeRef.type.is('$Environment')
+    ) {
       return false
     }
   })
