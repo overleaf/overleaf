@@ -185,7 +185,7 @@
     "@codemirror/lint": "^6.8.2",
     "@codemirror/search": "github:overleaf/codemirror-search#94f33f7fa6db95dadd3d7aed05c30cdde550835a",
     "@codemirror/state": "^6.4.1",
-    "@codemirror/view": "^6.34.3",
+    "@codemirror/view": "^6.34.0",
     "@juggle/resize-observer": "^3.3.1",
     "@lezer/common": "^1.2.3",
     "@lezer/generator": "^1.7.1",
