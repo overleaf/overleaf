@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import Crypto from 'node:crypto'
 import Stream from 'node:stream'
 import { setTimeout } from 'node:timers/promises'
@@ -511,6 +512,9 @@ describe('back_fill_file_hash script', function () {
       }
       result = { stdout, stderr, status: code }
     }
+    expect((await fs.promises.readdir('/tmp')).join(';')).to.not.match(
+      /back_fill_file_hash/
+    )
     const extraStatsKeys = [
       'eventLoop',
       'readFromGCSThroughputMiBPerSecond',

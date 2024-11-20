@@ -1101,6 +1101,13 @@ try {
     await main()
   } finally {
     printStats()
+    try {
+      // Perform non-recursive removal of the BUFFER_DIR. Individual files
+      // should get removed in parallel as part of batch processing.
+      await fs.promises.rmdir(BUFFER_DIR)
+    } catch (err) {
+      console.error(`cleanup of BUFFER_DIR=${BUFFER_DIR} failed`, err)
+    }
   }
 
   let code = 0
