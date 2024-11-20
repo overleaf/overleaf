@@ -14,19 +14,18 @@ function getElementWidth(el: Element) {
 const footerLanguageElement = document.querySelector(
   '[data-ol-lang-selector-tooltip]'
 ) as Element
+if (footerLanguageElement) {
+  // eslint-disable-next-line no-new
+  new Tooltip(footerLanguageElement)
+}
 
 const allTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-
-const possibleBadgeTooltips = document.querySelectorAll('[data-badge-tooltip]')
-
-// eslint-disable-next-line no-unused-vars
-const footLangTooltip = new Tooltip(footerLanguageElement)
-
 allTooltips.forEach(element => {
   // eslint-disable-next-line no-unused-vars
   const tooltip = new Tooltip(element)
 })
 
+const possibleBadgeTooltips = document.querySelectorAll('[data-badge-tooltip]')
 possibleBadgeTooltips.forEach(element => {
   // Put data-badge-tooltip on .badge-content
   // then tooltip is only shown if content is clipped due to max-width on .badge
