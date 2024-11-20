@@ -1366,7 +1366,6 @@
   "only_group_admin_or_managers_can_delete_your_account_4": "Når du bliver en styret bruger kan du ikke gå tilbage. <0>Lær mere om styrede Overleaf konti.</0>",
   "only_group_admin_or_managers_can_delete_your_account_5": "For mere information, se \"Managed Accounts\" sektionen i vores brugsvilkår som du accepterer ved at klikke Accepter invitation",
   "only_importer_can_refresh": "Kun personen som oprindeligt importerede denne __provider__ fil kan genindlæse den.",
-  "open_a_file_on_the_left": "Open en fil til venstre",
   "open_action_menu": "Åbn __name__ handlingsmenu",
   "open_advanced_reference_search": "Åbn avanceret henvisningssøgning",
   "open_as_template": "Åben som skabelon",

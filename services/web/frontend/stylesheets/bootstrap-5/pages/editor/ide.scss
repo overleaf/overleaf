@@ -313,3 +313,10 @@ $editor-toggler-bg-dark-color: color.adjust(
   height: auto;
   border-bottom: 1px solid var(--border-divider);
 }
+
+.loading-panel {
+  inset: 0;
+  text-align: center;
+  padding-top: var(--spacing-16);
+  background-color: var(--bg-light-secondary);
+}
