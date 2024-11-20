@@ -244,6 +244,10 @@
       width: 100%;
     }
 
+    .address-line-1-tooltip {
+      font-size: var(--font-size-03);
+    }
+
     h1 {
       @include heading-md;
     }
