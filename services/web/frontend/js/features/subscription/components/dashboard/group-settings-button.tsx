@@ -10,10 +10,8 @@ export default function GroupSettingsButton({
   const { t } = useTranslation()
 
   const subscriptionHasManagedUsers =
-    subscription.features?.managedUsers !== false
-  const subscriptionHasGroupSSO =
-    subscription.features?.groupSSO === true ||
-    subscription.features?.groupSSO === null
+    subscription.features?.managedUsers === true
+  const subscriptionHasGroupSSO = subscription.features?.groupSSO === true
 
   let groupSettingRowSubText = ''
   if (subscriptionHasGroupSSO && subscriptionHasManagedUsers) {

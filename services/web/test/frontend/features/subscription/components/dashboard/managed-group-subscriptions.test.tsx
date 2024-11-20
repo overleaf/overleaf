@@ -83,8 +83,6 @@ const managedGroupSubscriptions3: ManagedGroupSubscription[] =
   getManagedGroupSubscriptions(true, false)
 const managedGroupSubscriptions4: ManagedGroupSubscription[] =
   getManagedGroupSubscriptions(false, true)
-const managedGroupSubscriptions5: ManagedGroupSubscription[] =
-  getManagedGroupSubscriptions(null, true)
 
 describe('<ManagedGroupSubscriptions />', function () {
   afterEach(function () {
@@ -189,23 +187,6 @@ describe('<ManagedGroupSubscriptions />', function () {
         {
           name: 'ol-groupSettingsEnabledFor',
           value: [managedGroupSubscriptions2[0]._id],
-        },
-      ],
-    })
-    await screen.findAllByText('Manage group settings')
-    await screen.findAllByText('Configure and manage SSO and Managed Users')
-  })
-
-  it('renders Group SSO settings when the feature is null', async function () {
-    renderWithSubscriptionDashContext(<ManagedGroupSubscriptions />, {
-      metaTags: [
-        {
-          name: 'ol-managedGroupSubscriptions',
-          value: managedGroupSubscriptions5,
-        },
-        {
-          name: 'ol-groupSettingsEnabledFor',
-          value: [managedGroupSubscriptions5[0]._id],
         },
       ],
     })
