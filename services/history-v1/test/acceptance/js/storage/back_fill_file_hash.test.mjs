@@ -168,7 +168,7 @@ describe('back_fill_file_hash script', function () {
     { projectId: projectId1, historyId: historyId1, fileId: fileId1 },
     { projectId: projectId1, historyId: historyId1, fileId: fileIdDeleted1 },
     // { historyId: historyId2, fileId: fileId2 }, // already has hash
-    // { historyId: historyId3, fileId: fileId3 }, // too new
+    { projectId: projectId3, historyId: historyId3, fileId: fileId3 },
     {
       projectId: projectIdDeleted0,
       historyId: historyIdDeleted0,
@@ -284,7 +284,7 @@ describe('back_fill_file_hash script', function () {
                 fileRefs: [],
                 folders: [
                   {
-                    fileRefs: [{ _id: fileId3, hash: gitBlobHash(fileId3) }],
+                    fileRefs: [{ _id: fileId3 }],
                     folders: [],
                   },
                 ],
@@ -782,6 +782,10 @@ describe('back_fill_file_hash script', function () {
             binaryForGitBlobHash(gitBlobHash(fileIdDeleted2)),
           ].sort(),
         },
+        {
+          _id: projectId3,
+          blobs: [binaryForGitBlobHash(gitBlobHash(fileId3))].sort(),
+        },
       ])
     })
     it('should process nothing on re-run', async function () {
@@ -789,9 +793,9 @@ describe('back_fill_file_hash script', function () {
       expect(rerun.stats).deep.equal({
         ...STATS_ALL_ZERO,
         // We still need to iterate over all the projects and blobs.
-        projects: 4,
-        blobs: 10,
-        backedUpBlobs: 10,
+        projects: 6,
+        blobs: 11,
+        backedUpBlobs: 11,
       })
     })
     it('should have backed up all the files', async function () {
@@ -923,10 +927,10 @@ describe('back_fill_file_hash script', function () {
     writeToGCSEgress: 4000096,
   }
   const STATS_UP_FROM_PROJECT1_ONWARD = {
-    projects: 2,
+    projects: 4,
     blobs: 1,
     backedUpBlobs: 0,
-    filesWithoutHash: 3,
+    filesWithoutHash: 4,
     filesDuplicated: 0,
     filesRetries: 0,
     filesFailed: 0,
@@ -936,17 +940,17 @@ describe('back_fill_file_hash script', function () {
     projectDeleted: 0,
     projectHardDeleted: 0,
     fileHardDeleted: 0,
-    mongoUpdates: 5,
+    mongoUpdates: 7,
     deduplicatedWriteToAWSLocalCount: 1,
     deduplicatedWriteToAWSLocalEgress: 30,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 4,
-    readFromGCSIngress: 79,
-    writeToAWSCount: 3,
-    writeToAWSEgress: 85,
-    writeToGCSCount: 2,
-    writeToGCSEgress: 48,
+    readFromGCSCount: 5,
+    readFromGCSIngress: 103,
+    writeToAWSCount: 4,
+    writeToAWSEgress: 115,
+    writeToGCSCount: 3,
+    writeToGCSEgress: 72,
   }
 
   function sumStats(a, b) {

@@ -84,17 +84,11 @@ ObjectId.cacheHexString = true
 
 const COLLECT_BLOBS = process.argv.includes('blobs')
 
-// Time of closing the ticket for adding hashes: https://github.com/overleaf/internal/issues/464#issuecomment-492668129
-const ALL_PROJECTS_HAVE_FILE_HASHES_AFTER = new Date('2019-05-15T14:02:00Z')
 const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
 const BATCH_RANGE_START =
   process.env.BATCH_RANGE_START ||
   ObjectId.createFromTime(PUBLIC_LAUNCH_DATE.getTime() / 1000).toString()
-const BATCH_RANGE_END =
-  process.env.BATCH_RANGE_END ||
-  ObjectId.createFromTime(
-    ALL_PROJECTS_HAVE_FILE_HASHES_AFTER.getTime() / 1000
-  ).toString()
+const BATCH_RANGE_END = process.env.BATCH_RANGE_END || new ObjectId().toString()
 // We need to control the start and end as ids of deleted projects are created at time of deletion.
 delete process.env.BATCH_RANGE_START
 delete process.env.BATCH_RANGE_END
