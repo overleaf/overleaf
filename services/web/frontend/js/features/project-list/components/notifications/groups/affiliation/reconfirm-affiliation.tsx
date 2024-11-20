@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useTranslation, Trans } from 'react-i18next'
-import Icon from '../../../../../../shared/components/icon'
 import getMeta from '../../../../../../utils/meta'
 import useAsync from '../../../../../../shared/hooks/use-async'
 import {
@@ -88,13 +87,6 @@ function ReconfirmAffiliation({
             className="btn-inline-link"
             disabled={isLoading}
             isLoading={isLoading}
-            bs3Props={{
-              loading: isLoading ? (
-                <>
-                  <Icon type="refresh" spin fw /> {t('sending')}&hellip;
-                </>
-              ) : null,
-            }}
           >
             {t('resend_confirmation_email')}
           </OLButton>
@@ -143,14 +135,6 @@ function ReconfirmAffiliation({
       action={
         <OLButton
           variant="secondary"
-          bs3Props={{
-            loading:
-              isLoading || isPending ? (
-                <>
-                  <Icon type="refresh" spin fw /> {t('sending')}&hellip;
-                </>
-              ) : null,
-          }}
           isLoading={isLoading || isPending}
           disabled={isLoading || isPending}
           onClick={handleRequestReconfirmation}

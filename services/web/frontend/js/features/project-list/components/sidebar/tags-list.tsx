@@ -13,7 +13,6 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -76,65 +75,31 @@ export default function TagsList() {
                 </span>
               </span>
             </button>
-            <BootstrapVersionSwitcher
-              bs5={
-                <Dropdown align="end" className="tag-menu">
-                  <DropdownToggle id={`${tag._id}-dropdown-toggle`}>
-                    <span className="caret" />
-                  </DropdownToggle>
-                  <DropdownMenu className="dropdown-menu-sm-width">
-                    <DropdownItem
-                      as="li"
-                      className="tag-action"
-                      onClick={e => handleEditTag(e, tag._id)}
-                    >
-                      {t('edit')}
-                    </DropdownItem>
-                    <DropdownItem
-                      as="li"
-                      className="tag-action"
-                      onClick={e => handleDeleteTag(e, tag._id)}
-                    >
-                      {t('delete')}
-                    </DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
-              }
-              bs3={
-                <span className="dropdown tag-menu">
-                  <button
-                    type="button"
-                    className="dropdown-toggle"
-                    data-toggle="dropdown"
-                    dropdown-toggle=""
-                    aria-haspopup="true"
-                    aria-expanded="false"
-                  >
-                    <span className="caret" />
-                  </button>
-                  <ul className="dropdown-menu dropdown-menu-right" role="menu">
-                    <li>
-                      <button
-                        type="button"
-                        onClick={e => handleEditTag(e, tag._id)}
-                        className="tag-action"
-                      >
-                        {t('edit')}
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        type="button"
-                        onClick={e => handleDeleteTag(e, tag._id)}
-                        className="tag-action"
-                      >
-                        {t('delete')}
-                      </button>
-                    </li>
-                  </ul>
-                </span>
-              }
-            />
+
+            <Dropdown align="end" className="tag-menu">
+              <DropdownToggle
+                id={`${tag._id}-dropdown-toggle`}
+                data-testid="tag-dropdown-toggle"
+              >
+                <span className="caret" />
+              </DropdownToggle>
+              <DropdownMenu className="dropdown-menu-sm-width">
+                <DropdownItem
+                  as="li"
+                  className="tag-action"
+                  onClick={e => handleEditTag(e, tag._id)}
+                >
+                  {t('edit')}
+                </DropdownItem>
+                <DropdownItem
+                  as="li"
+                  className="tag-action"
+                  onClick={e => handleDeleteTag(e, tag._id)}
+                >
+                  {t('delete')}
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
           </li>
         )
       })}

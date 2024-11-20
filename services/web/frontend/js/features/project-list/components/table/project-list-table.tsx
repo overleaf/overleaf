@@ -1,6 +1,5 @@
 import { useCallback, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import Icon from '../../../../shared/components/icon'
 import ProjectListTableRow from './project-list-table-row'
 import { useProjectListContext } from '../../context/project-list-context'
 import useSort from '../../hooks/use-sort'
@@ -8,30 +7,16 @@ import withContent, { SortBtnProps } from '../sort/with-content'
 import OLTable from '@/features/ui/components/ol/ol-table'
 import OLFormCheckbox from '@/features/ui/components/ol/ol-form-checkbox'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 function SortBtn({ onClick, text, iconType, screenReaderText }: SortBtnProps) {
   return (
     <button
-      className={classnames(
-        'table-header-sort-btn',
-        bsVersion({
-          bs5: 'd-none d-md-inline-block',
-          bs3: 'hidden-xs',
-        })
-      )}
+      className="table-header-sort-btn d-none d-md-inline-block"
       onClick={onClick}
       aria-label={screenReaderText}
     >
-      <span className={bsVersion({ bs3: 'tablesort-text' })}>{text}</span>
-      {iconType && (
-        <BootstrapVersionSwitcher
-          bs3={<Icon type={iconType} />}
-          bs5={<MaterialIcon type={iconType} />}
-        />
-      )}
+      <span>{text}</span>
+      {iconType && <MaterialIcon type={iconType} />}
     </button>
   )
 }
@@ -66,26 +51,11 @@ function ProjectListTable() {
 
   return (
     <OLTable className="project-dash-table" container={false} hover>
-      <caption
-        className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}
-      >
-        {t('projects_list')}
-      </caption>
-      <thead
-        className={bsVersion({
-          bs5: 'visually-hidden-max-md',
-          bs3: 'sr-only-xs',
-        })}
-      >
+      <caption className="visually-hidden">{t('projects_list')}</caption>
+      <thead className="visually-hidden-max-md">
         <tr>
           <th
-            className={classnames(
-              'dash-cell-checkbox',
-              bsVersion({
-                bs5: 'd-none d-md-table-cell',
-                bs3: 'hidden-xs',
-              })
-            )}
+            className="dash-cell-checkbox d-none d-md-table-cell"
             aria-label={t('select_projects')}
           >
             <OLFormCheckbox
@@ -97,10 +67,6 @@ function ProjectListTable() {
               }
               disabled={visibleProjects.length === 0}
               aria-label={t('select_all_projects')}
-              bs3Props={{
-                bsClass: 'dash-cell-checkbox-wrapper',
-                inputRef: undefined,
-              }}
               inputRef={checkAllRef}
             />
           </th>
@@ -123,22 +89,13 @@ function ProjectListTable() {
             />
           </th>
           <th
-            className={classnames(
-              'dash-cell-date-owner',
-              bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
-            )}
+            className="dash-cell-date-owner d-md-none"
             aria-label={t('date_and_owner')}
           >
             {t('date_and_owner')}
           </th>
           <th
-            className={classnames(
-              'dash-cell-owner',
-              bsVersion({
-                bs5: 'd-none d-md-table-cell',
-                bs3: 'hidden-xs',
-              })
-            )}
+            className="dash-cell-owner d-none d-md-table-cell"
             aria-label={t('owner')}
             aria-sort={
               sort.by === 'owner'
@@ -156,13 +113,7 @@ function ProjectListTable() {
             />
           </th>
           <th
-            className={classnames(
-              'dash-cell-date',
-              bsVersion({
-                bs5: 'd-none d-md-table-cell',
-                bs3: 'hidden-xs',
-              })
-            )}
+            className="dash-cell-date d-none d-md-table-cell"
             aria-label={t('last_modified')}
             aria-sort={
               sort.by === 'lastUpdated'
@@ -179,13 +130,7 @@ function ProjectListTable() {
               onClick={() => handleSort('lastUpdated')}
             />
           </th>
-          <th
-            className={classnames(
-              'dash-cell-tag',
-              bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
-            )}
-            aria-label={t('tags')}
-          >
+          <th className="dash-cell-tag d-md-none" aria-label={t('tags')}>
             {t('tags')}
           </th>
           <th className="dash-cell-actions" aria-label={t('actions')}>

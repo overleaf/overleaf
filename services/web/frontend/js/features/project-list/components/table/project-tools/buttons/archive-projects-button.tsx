@@ -7,7 +7,6 @@ import useIsMounted from '../../../../../../shared/hooks/use-is-mounted'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
 import { Project } from '../../../../../../../../types/project/dashboard/api'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function ArchiveProjectsButton() {
   const { selectedProjects, toggleSelectedProject, updateProjectViewData } =
@@ -50,7 +49,7 @@ function ArchiveProjectsButton() {
           onClick={handleOpenModal}
           variant="secondary"
           accessibilityLabel={text}
-          icon={bsVersion({ bs5: 'inbox', bs3: 'inbox' })}
+          icon="inbox"
         />
       </OLTooltip>
       <ArchiveProjectModal

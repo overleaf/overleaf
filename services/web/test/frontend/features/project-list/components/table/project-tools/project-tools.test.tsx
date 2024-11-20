@@ -11,13 +11,22 @@ describe('<ProjectTools />', function () {
     resetProjectListContextFetch()
   })
 
-  it('renders the project tools for the all projects filter', function () {
+  it('renders the project tools for the all projects filter', async function () {
     renderWithProjectListContext(<ProjectTools />)
-    expect(screen.getAllByRole('button').length).to.equal(5)
-    screen.getByLabelText('Download')
-    screen.getByLabelText('Archive')
-    screen.getByLabelText('Trash')
-    screen.getByLabelText('Tags')
-    screen.getByRole('button', { name: 'Create new tag' })
+
+    const initialButtons = screen.getAllByRole('button')
+    expect(initialButtons).to.have.length(4)
+
+    expect(screen.getByLabelText('Download')).to.exist
+    expect(screen.getByLabelText('Archive')).to.exist
+    expect(screen.getByLabelText('Trash')).to.exist
+    expect(screen.getByLabelText('Tags')).to.exist
+
+    expect(screen.queryByText('Create new tag')).to.not.exist
+
+    screen.getByLabelText('Tags').click()
+
+    const createTagButton = await screen.findByText('Create new tag')
+    expect(createTagButton).to.exist
   })
 })

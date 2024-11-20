@@ -6,7 +6,6 @@ import { useLocation } from '../../../../../../shared/hooks/use-location'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type DownloadProjectButtonProps = {
   project: Project
@@ -52,8 +51,7 @@ const DownloadProjectButtonTooltip = memo(
                 variant="link"
                 accessibilityLabel={text}
                 className="action-btn"
-                icon={bsVersion({ bs5: 'download', bs3: 'cloud-download' })}
-                bs3Props={{ fw: true }}
+                icon="download"
               />
             </span>
           </OLTooltip>

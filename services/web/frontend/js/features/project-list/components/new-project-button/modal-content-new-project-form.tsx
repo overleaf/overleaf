@@ -102,9 +102,6 @@ function ModalContentNewProjectForm({ onCancel, template = 'none' }: Props) {
           onClick={createNewProject}
           disabled={projectName === '' || isLoading}
           isLoading={isLoading}
-          bs3Props={{
-            loading: isLoading ? `${t('creating')}…` : t('create'),
-          }}
         >
           {t('create')}
         </OLButton>

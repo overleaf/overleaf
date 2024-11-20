@@ -1,6 +1,5 @@
 import { useTranslation, Trans } from 'react-i18next'
 import Notification from '../notification'
-import Icon from '../../../../../shared/components/icon'
 import getMeta from '../../../../../utils/meta'
 import useAsyncDismiss from '../hooks/useAsyncDismiss'
 import useAsync from '../../../../../shared/hooks/use-async'
@@ -96,13 +95,6 @@ function CommonNotification({ notification }: CommonNotificationProps) {
             ) : (
               <OLButton
                 variant="secondary"
-                bs3Props={{
-                  loading: isLoading ? (
-                    <>
-                      <Icon type="spinner" spin /> {t('joining')}&hellip;
-                    </>
-                  ) : null,
-                }}
                 isLoading={isLoading}
                 disabled={isLoading}
                 onClick={() => handleAcceptInvite(notification)}

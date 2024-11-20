@@ -7,7 +7,6 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import { trashProject } from '../../../../util/api'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type TrashProjectButtonProps = {
   project: Project
@@ -75,8 +74,7 @@ const TrashProjectButtonTooltip = memo(function TrashProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={bsVersion({ bs5: 'delete', bs3: 'trash' })}
-              bs3Props={{ fw: true }}
+              icon="delete"
             />
           </span>
         </OLTooltip>

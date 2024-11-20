@@ -3,8 +3,6 @@ import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
 import SurveyWidget from '../survey-widget'
 import { usePersistedResize } from '../../../../shared/hooks/use-resize'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 function Sidebar() {
   const { show: showAddAffiliationWidget } = useAddAffiliation()
@@ -14,10 +12,7 @@ function Sidebar() {
 
   return (
     <div
-      className={classnames(
-        'project-list-sidebar-wrapper-react',
-        bsVersion({ bs5: 'd-none d-md-block', bs3: 'hidden-xs' })
-      )}
+      className="project-list-sidebar-wrapper-react d-none d-md-block"
       {...getTargetProps({
         style: {
           ...(mousePos?.x && { flexBasis: `${mousePos.x}px` }),

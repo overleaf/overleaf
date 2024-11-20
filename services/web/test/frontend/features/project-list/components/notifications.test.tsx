@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import sinon from 'sinon'
+import sinon, { SinonStub } from 'sinon'
 import {
   fireEvent,
   render,
@@ -46,6 +46,7 @@ import {
   individualSubscription,
 } from '../fixtures/user-subscriptions'
 import getMeta from '@/utils/meta'
+import * as bootstrapUtils from '@/features/utils/bootstrap-5'
 
 const renderWithinProjectListProvider = (Component: React.ComponentType) => {
   render(<Component />, {
@@ -64,6 +65,16 @@ describe('<UserNotifications />', function () {
     samlInitPath: '/fakeSaml/',
     appName: 'Overleaf',
   }
+
+  let isBootstrap5Stub: SinonStub
+
+  before(function () {
+    isBootstrap5Stub = sinon.stub(bootstrapUtils, 'isBootstrap5').returns(true)
+  })
+
+  after(function () {
+    isBootstrap5Stub.restore()
+  })
 
   beforeEach(function () {
     fetchMock.reset()
@@ -127,15 +138,15 @@ describe('<UserNotifications />', function () {
 
       expect(joinBtn.disabled).to.be.true
 
-      await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /joining/i })
-      )
+      screen.debug()
+
+      await waitForElementToBeRemoved(() => screen.getByText('Loading'))
 
       expect(acceptMock.called()).to.be.true
       screen.getByText(/joined/i)
       expect(screen.queryByRole('button', { name: /join project/i })).to.be.null
 
-      const openProject = screen.getByRole('link', { name: /open project/i })
+      const openProject = screen.getByRole('button', { name: /open project/i })
       expect(openProject.getAttribute('href')).to.equal(
         `/project/${notificationProjectInvite.messageOpts.projectId}`
       )
@@ -173,12 +184,12 @@ describe('<UserNotifications />', function () {
       fireEvent.click(joinBtn)
 
       await waitForElementToBeRemoved(() =>
-        screen.getByRole('button', { name: /joining/i })
+        screen.getByRole('button', { name: /loading/i })
       )
 
       expect(fetchMock.called()).to.be.true
       screen.getByRole('button', { name: /join project/i })
-      expect(screen.queryByRole('link', { name: /open project/i })).to.be.null
+      expect(screen.queryByRole('button', { name: /open project/i })).to.be.null
     })
 
     it('shows WFH2020', async function () {
@@ -197,7 +208,7 @@ describe('<UserNotifications />', function () {
       screen.getByRole('alert')
       screen.getByText(/your free WFH2020 upgrade came to an end on/i)
 
-      const viewLink = screen.getByRole('link', { name: /view/i })
+      const viewLink = screen.getByRole('button', { name: /view/i })
       expect(viewLink.getAttribute('href')).to.equal(
         'https://www.overleaf.com/events/wfh2020'
       )
@@ -236,7 +247,7 @@ describe('<UserNotifications />', function () {
       expect(findOutMore.getAttribute('href')).to.equal(
         'https://www.overleaf.com/learn/how-to/Institutional_Login'
       )
-      const linkAccount = screen.getByRole('link', { name: /link account/i })
+      const linkAccount = screen.getByRole('button', { name: /link account/i })
       expect(linkAccount.getAttribute('href')).to.equal(
         `${exposedSettings.samlInitPath}?university_id=${notificationIPMatchedAffiliation.messageOpts.institutionId}&auto=/project`
       )
@@ -271,7 +282,7 @@ describe('<UserNotifications />', function () {
         /add an institutional email address to claim your features/i
       )
 
-      const addAffiliation = screen.getByRole('link', {
+      const addAffiliation = screen.getByRole('button', {
         name: /add affiliation/i,
       })
       expect(addAffiliation.getAttribute('href')).to.equal(`/user/settings`)
@@ -297,7 +308,7 @@ describe('<UserNotifications />', function () {
       screen.getByText(/file limit/i)
       screen.getByText(/You can't add more files to the project or sync it/i)
 
-      const accountSettings = screen.getByRole('link', {
+      const accountSettings = screen.getByRole('button', {
         name: /Open project/i,
       })
       expect(accountSettings.getAttribute('href')).to.equal('/project/123')
@@ -487,7 +498,7 @@ describe('<UserNotifications />', function () {
         '/learn/how-to/Institutional_Login'
       )
 
-      const action = screen.getByRole('link', { name: /link account/i })
+      const action = screen.getByRole('button', { name: /link account/i })
       expect(action.getAttribute('href')).to.equal(
         `${exposedSettings.samlInitPath}?university_id=${notificationsInstitution.institutionId}&auto=/project&email=${notificationsInstitution.email}`
       )
@@ -552,7 +563,7 @@ describe('<UserNotifications />', function () {
       screen.getByRole('alert')
       screen.getByText(/which is already registered with/i)
 
-      const action = screen.getByRole('link', { name: /find out more/i })
+      const action = screen.getByRole('button', { name: /find out more/i })
       expect(action.getAttribute('href')).to.equal(
         '/learn/how-to/Institutional_Login'
       )
@@ -735,7 +746,7 @@ describe('<UserNotifications />', function () {
         screen.getByRole('button', { name: /confirm affiliation/i })
       )
 
-      await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
+      await waitForElementToBeRemoved(() => screen.getByText(/loading/i))
       screen.getByText(/check your email inbox to confirm/i)
       expect(screen.queryByRole('button', { name: /confirm affiliation/i })).to
         .be.null
@@ -745,7 +756,7 @@ describe('<UserNotifications />', function () {
       fireEvent.click(
         screen.getByRole('button', { name: /resend confirmation email/i })
       )
-      await waitForElementToBeRemoved(() => screen.getByText(/sending/i))
+      await waitForElementToBeRemoved(() => screen.getByText('Loading'))
       expect(sendReconfirmationMock.calls()).to.have.lengthOf(2)
     })
 
@@ -814,7 +825,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.flush(true)
 
-      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
+      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.be.null
     })
 
     it('shows the banner for users that have dismissed the previous banners', async function () {
@@ -824,7 +835,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.flush(true)
 
-      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.not.be
+      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.not.be
         .null
     })
 
@@ -840,7 +851,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.flush(true)
 
-      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.not.be
+      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.not.be
         .null
     })
 
@@ -856,7 +867,7 @@ describe('<UserNotifications />', function () {
       renderWithinProjectListProvider(GroupsAndEnterpriseBanner)
       await fetchMock.flush(true)
 
-      expect(screen.queryByRole('link', { name: 'Contact Sales' })).to.be.null
+      expect(screen.queryByRole('button', { name: 'Contact Sales' })).to.be.null
     })
 
     describe('users that are not in group and are not affiliated', function () {
@@ -897,7 +908,7 @@ describe('<UserNotifications />', function () {
         screen.getByText(
           'Overleaf On-Premises: Does your company want to keep its data within its firewall? Overleaf offers Server Pro, an on-premises solution for companies. Get in touch to learn more.'
         )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
+        const link = screen.getByRole('button', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-2`)
       })
@@ -914,7 +925,7 @@ describe('<UserNotifications />', function () {
         screen.getByText(
           'Why do Fortune 500 companies and top research institutions trust Overleaf to streamline their collaboration? Get in touch to learn more.'
         )
-        const link = screen.getByRole('link', { name: 'Contact Sales' })
+        const link = screen.getByRole('button', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
       })
@@ -941,7 +952,7 @@ describe('<UserNotifications />', function () {
       })
       it('shows the banner', function () {
         renderWithinProjectListProvider(UserNotifications)
-        const ctaLink = screen.getByRole('link', {
+        const ctaLink = screen.getByRole('button', {
           name: 'Get Writefull Premium',
         })
         expect(ctaLink.getAttribute('href')).to.equal(
@@ -951,7 +962,7 @@ describe('<UserNotifications />', function () {
 
       it('dismisses the banner when the close button is clicked', function () {
         renderWithinProjectListProvider(UserNotifications)
-        screen.getByRole('link', { name: /Writefull/ })
+        screen.getByRole('button', { name: /Writefull/ })
         const WritefullPromoBanner = screen.getByTestId(
           'writefull-premium-promo-banner'
         )

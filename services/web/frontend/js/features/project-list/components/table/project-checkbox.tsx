@@ -23,7 +23,6 @@ export const ProjectCheckbox = memo<{ projectId: string; projectName: string }>(
         checked={selectedProjectIds.has(projectId)}
         aria-label={t('select_project', { project: projectName })}
         data-project-id={projectId}
-        bs3Props={{ bsClass: 'dash-cell-checkbox-wrapper' }}
       />
     )
   }

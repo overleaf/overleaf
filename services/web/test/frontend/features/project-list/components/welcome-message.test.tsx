@@ -61,7 +61,7 @@ describe('<WelcomeMessage />', function () {
     screen.getByText('Institution Templates')
 
     // dynamic menu based on portalTemplates
-    const affiliationTemplate = screen.getByRole('link', {
+    const affiliationTemplate = screen.getByRole('menuitem', {
       name: 'Affiliation 1',
     })
 

@@ -158,14 +158,12 @@ describe('<TagsList />', function () {
   describe('Edit modal', function () {
     beforeEach(async function () {
       const tag1Button = screen.getByText('Tag 1')
-
-      const editButton = within(
+      const dropdownToggle = within(
         tag1Button.closest('li') as HTMLElement
-      ).getByRole('button', {
-        name: 'Edit',
-      })
-
-      await fireEvent.click(editButton)
+      ).getByTestId('tag-dropdown-toggle')
+      await fireEvent.click(dropdownToggle)
+      const editMenuItem = await screen.findByRole('menuitem', { name: 'Edit' })
+      await fireEvent.click(editMenuItem)
     })
 
     it('modal is open', async function () {
@@ -250,15 +248,15 @@ describe('<TagsList />', function () {
 
   describe('Delete modal', function () {
     beforeEach(async function () {
-      const tag1Button = screen.getByText('Another tag')
-
-      const deleteButton = within(
+      const tag1Button = screen.getByText('Tag 1')
+      const dropdownToggle = within(
         tag1Button.closest('li') as HTMLElement
-      ).getByRole('button', {
+      ).getByTestId('tag-dropdown-toggle')
+      await fireEvent.click(dropdownToggle)
+      const deleteMenuItem = await screen.findByRole('menuitem', {
         name: 'Delete',
       })
-
-      await fireEvent.click(deleteButton)
+      await fireEvent.click(deleteMenuItem)
     })
 
     it('modal is open', async function () {

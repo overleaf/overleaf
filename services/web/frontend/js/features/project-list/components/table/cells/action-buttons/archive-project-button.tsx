@@ -7,7 +7,6 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import { archiveProject } from '../../../../util/api'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type ArchiveProjectButtonProps = {
   project: Project
@@ -78,8 +77,7 @@ const ArchiveProjectButtonTooltip = memo(function ArchiveProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={bsVersion({ bs5: 'inbox', bs3: 'inbox' })}
-              bs3Props={{ fw: true }}
+              icon="inbox"
             />
           </span>
         </OLTooltip>

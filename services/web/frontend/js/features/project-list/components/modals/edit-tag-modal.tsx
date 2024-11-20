@@ -138,9 +138,6 @@ export function EditTagModal({ id, tag, onEdit, onClose }: EditTagModalProps) {
             !!validationError
           }
           isLoading={isLoading}
-          bs3Props={{
-            loading: isLoading ? `${t('saving')}…` : t('save'),
-          }}
         >
           {t('save')}
         </OLButton>

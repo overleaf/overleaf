@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { FormControl } from 'react-bootstrap'
-import Icon from '../../../shared/components/icon'
 import * as eventTracking from '../../../infrastructure/event-tracking'
 import classnames from 'classnames'
 import { Tag } from '../../../../../app/src/Features/Tags/types'
@@ -12,8 +11,6 @@ import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLCol from '@/features/ui/components/ol/ol-col'
 import OLFormControl from '@/features/ui/components/ol/ol-form-control'
 import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type SearchFormOwnProps = {
   inputValue: string
@@ -79,12 +76,9 @@ function SearchForm({
       className={classnames('project-search', className)}
       role="search"
       onSubmit={e => e.preventDefault()}
-      bs3Props={{ horizontal: true }}
       {...props}
     >
-      <OLFormGroup
-        className={bsVersion({ bs3: 'has-feedback has-feedback-left' })}
-      >
+      <OLFormGroup>
         <OLCol>
           <OLFormControl
             type="text"
@@ -92,25 +86,16 @@ function SearchForm({
             onChange={handleChange}
             placeholder={placeholder}
             aria-label={placeholder}
-            prepend={BootstrapVersionSwitcher({
-              bs3: <Icon type="search" />,
-              bs5: <MaterialIcon type="search" />,
-            })}
+            prepend={<MaterialIcon type="search" />}
             append={
               inputValue.length > 0 && (
                 <button
                   type="button"
-                  className={bsVersion({
-                    bs3: 'project-search-clear-btn btn-link',
-                    bs5: 'project-search-clear-btn',
-                  })}
+                  className="project-search-clear-btn"
                   aria-label={t('clear_search')}
                   onClick={handleClear}
                 >
-                  <BootstrapVersionSwitcher
-                    bs3={<Icon type="times" />}
-                    bs5={<MaterialIcon type="clear" />}
-                  />
+                  <MaterialIcon type="clear" />
                 </button>
               )
             }

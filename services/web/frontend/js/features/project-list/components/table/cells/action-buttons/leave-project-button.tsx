@@ -8,7 +8,6 @@ import { Project } from '../../../../../../../../types/project/dashboard/api'
 import getMeta from '@/utils/meta'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type LeaveProjectButtonProps = {
   project: Project
@@ -75,8 +74,7 @@ const LeaveProjectButtonTooltip = memo(function LeaveProjectButtonTooltip({
               variant="link"
               accessibilityLabel={text}
               className="action-btn"
-              icon={bsVersion({ bs5: 'logout', bs3: 'sign-out' })}
-              bs3Props={{ fw: true }}
+              icon="logout"
             />
           </span>
         </OLTooltip>

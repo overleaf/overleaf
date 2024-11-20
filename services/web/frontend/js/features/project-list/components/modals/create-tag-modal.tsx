@@ -129,9 +129,6 @@ export default function CreateTagModal({
             status === 'pending' || !tagName?.length || !!validationError
           }
           isLoading={isLoading}
-          bs3Props={{
-            loading: isLoading ? `${t('creating')}…` : t('create'),
-          }}
         >
           {t('create')}
         </OLButton>

@@ -1,12 +1,9 @@
 import { useTranslation, Trans } from 'react-i18next'
 import OLButton from '@/features/ui/components/ol/ol-button'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
 import { FreePlanSubscription } from '../../../../../../types/project/dashboard/subscription'
 import * as eventTracking from '../../../../infrastructure/event-tracking'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 
 type FreePlanProps = Pick<FreePlanSubscription, 'featuresPageURL'>
 
@@ -27,14 +24,7 @@ function FreePlan({ featuresPageURL }: FreePlanProps) {
 
   return (
     <>
-      <span
-        className={classnames(
-          'current-plan-label',
-          bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
-        )}
-      >
-        {currentPlanLabel}
-      </span>
+      <span className="current-plan-label d-md-none">{currentPlanLabel}</span>
       <OLTooltip
         description={t('free_plan_tooltip')}
         id="free-plan"
@@ -42,26 +32,13 @@ function FreePlan({ featuresPageURL }: FreePlanProps) {
       >
         <a
           href={featuresPageURL}
-          className={classnames(
-            'current-plan-label',
-            bsVersion({ bs5: 'd-none d-md-inline-block', bs3: 'hidden-xs' })
-          )}
+          className="current-plan-label d-none d-md-inline-block"
         >
           {currentPlanLabel}&nbsp;
-          <BootstrapVersionSwitcher
-            bs3={<span className="info-badge" />}
-            bs5={
-              <MaterialIcon type="info" className="current-plan-label-icon" />
-            }
-          />
+          <MaterialIcon type="info" className="current-plan-label-icon" />
         </a>
       </OLTooltip>{' '}
-      <span
-        className={bsVersion({
-          bs5: 'd-none d-md-inline-block',
-          bs3: 'hidden-xs',
-        })}
-      >
+      <span className="d-none d-md-inline-block">
         <OLButton
           variant="primary"
           href="/user/subscription/plans"

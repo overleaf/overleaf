@@ -6,7 +6,6 @@ import * as eventTracking from '../../../../../../infrastructure/event-tracking'
 import { useProjectListContext } from '../../../../context/project-list-context'
 import { useLocation } from '../../../../../../shared/hooks/use-location'
 import { isSmallDevice } from '../../../../../../infrastructure/event-tracking'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 function DownloadProjectsButton() {
   const { selectedProjects, selectOrUnselectAllProjects } =
@@ -39,7 +38,7 @@ function DownloadProjectsButton() {
         onClick={handleDownloadProjects}
         variant="secondary"
         accessibilityLabel={text}
-        icon={bsVersion({ bs5: 'download', bs3: 'cloud-download' })}
+        icon="download"
       />
     </OLTooltip>
   )

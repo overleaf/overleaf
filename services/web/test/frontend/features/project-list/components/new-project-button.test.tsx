@@ -117,7 +117,7 @@ describe('<NewProjectButton />', function () {
 
       // dynamic menu based on portalTemplates
       const affiliationTemplate = screen.getByRole('menuitem', {
-        name: 'Affiliation 1',
+        name: 'Affiliation 1 Template',
       })
       expect(affiliationTemplate.getAttribute('href')).to.equal(
         '/edu/test-new-template#templates'

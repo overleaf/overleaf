@@ -72,9 +72,6 @@ export default function DeleteTagModal({
           variant="danger"
           disabled={isLoading}
           isLoading={isLoading}
-          bs3Props={{
-            loading: isLoading ? `${t('deleting')}…` : t('delete'),
-          }}
         >
           {t('delete')}
         </OLButton>

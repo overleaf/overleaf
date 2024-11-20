@@ -26,11 +26,8 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '../../../shared/components/generic-error-boundary-fallback'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import OLCol from '@/features/ui/components/ol/ol-col'
-import { bsVersion } from '@/features/utils/bootstrap-5'
-import classnames from 'classnames'
 import Notification from '@/shared/components/notification'
 import OLRow from '@/features/ui/components/ol/ol-row'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { TableContainer } from '@/features/ui/components/bootstrap-5/table'
 
 function ProjectListRoot() {
@@ -78,13 +75,7 @@ function ProjectListPageContent() {
   const { t } = useTranslation()
 
   const tableTopArea = (
-    <div
-      className={classnames(
-        'pt-2',
-        'pb-3',
-        bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
-      )}
-    >
+    <div className="pt-2 pb-3 d-md-none">
       <div className="clearfix">
         <NewProjectButton
           id="new-project-button-projects-table"
@@ -110,12 +101,7 @@ function ProjectListPageContent() {
     <>
       <SystemMessages />
 
-      <div
-        className={classnames(
-          'project-list-wrapper',
-          bsVersion({ bs3: 'clearfix container mx-0 px-0' })
-        )}
-      >
+      <div className="project-list-wrapper">
         {totalProjectsCount > 0 ? (
           <>
             <Sidebar />
@@ -131,43 +117,22 @@ function ProjectListPageContent() {
                   filter={filter}
                   selectedTag={selectedTag}
                   selectedTagId={selectedTagId}
-                  className={classnames(
-                    'text-truncate',
-                    bsVersion({
-                      bs5: 'd-none d-md-block',
-                      bs3: 'hidden-xs',
-                    })
-                  )}
+                  className="text-truncate d-none d-md-block"
                 />
                 <div className="project-tools">
-                  <div
-                    className={bsVersion({
-                      bs5: 'd-none d-md-block',
-                      bs3: 'hidden-xs',
-                    })}
-                  >
+                  <div className="d-none d-md-block">
                     {selectedProjects.length === 0 ? (
                       <CurrentPlanWidget />
                     ) : (
                       <ProjectTools />
                     )}
                   </div>
-                  <div
-                    className={bsVersion({
-                      bs5: 'd-md-none',
-                      bs3: 'visible-xs',
-                    })}
-                  >
+                  <div className="d-md-none">
                     <CurrentPlanWidget />
                   </div>
                 </div>
               </div>
-              <OLRow
-                className={bsVersion({
-                  bs5: 'd-none d-md-block',
-                  bs3: 'hidden-xs',
-                })}
-              >
+              <OLRow className="d-none d-md-block">
                 <OLCol lg={7}>
                   <SearchForm
                     inputValue={searchText}
@@ -177,20 +142,10 @@ function ProjectListPageContent() {
                   />
                 </OLCol>
               </OLRow>
-              <div
-                className={classnames(
-                  'project-list-sidebar-survey-wrapper',
-                  bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
-                )}
-              >
+              <div className="project-list-sidebar-survey-wrapper d-md-none">
                 <SurveyWidget />
               </div>
-              <div
-                className={classnames(
-                  'mt-1',
-                  bsVersion({ bs5: 'd-md-none', bs3: 'visible-xs' })
-                )}
-              >
+              <div className="mt-1 d-md-none">
                 <div
                   role="toolbar"
                   className="projects-toolbar"
@@ -202,20 +157,10 @@ function ProjectListPageContent() {
               </div>
               <OLRow className="row-spaced">
                 <OLCol>
-                  <BootstrapVersionSwitcher
-                    bs3={
-                      <div className="card project-list-card">
-                        {tableTopArea}
-                        <ProjectListTable />
-                      </div>
-                    }
-                    bs5={
-                      <TableContainer bordered>
-                        {tableTopArea}
-                        <ProjectListTable />
-                      </TableContainer>
-                    }
-                  />
+                  <TableContainer bordered>
+                    {tableTopArea}
+                    <ProjectListTable />
+                  </TableContainer>
                 </OLCol>
               </OLRow>
               <OLRow className="row-spaced">
@@ -253,11 +198,7 @@ function DashApiError() {
   const { t } = useTranslation()
   return (
     <OLRow className="row-spaced">
-      <OLCol
-        xs={{ span: 8, offset: 2 }}
-        bs3Props={{ xs: 8, xsOffset: 2 }}
-        aria-live="polite"
-      >
+      <OLCol xs={{ span: 8, offset: 2 }} aria-live="polite">
         <div className="notification-list">
           <Notification
             content={t('generic_something_went_wrong')}

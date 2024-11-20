@@ -18,9 +18,7 @@ import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormLabel from '@/features/ui/components/ol/ol-form-label'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import Notification from '@/shared/components/notification'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type ManageTagModalProps = {
   id: string
@@ -125,12 +123,9 @@ export function ManageTagModal({
         <OLButton
           variant="danger"
           onClick={() => runDeleteTag(tag._id)}
-          className={bsVersion({ bs3: 'pull-left', bs5: 'me-auto' })}
+          className="me-auto"
           disabled={isDeleteLoading || isUpdateLoading}
           isLoading={isDeleteLoading}
-          bs3Props={{
-            loading: isDeleteLoading ? `${t('deleting')}…` : t('delete_tag'),
-          }}
         >
           {t('delete_tag')}
         </OLButton>
@@ -151,15 +146,9 @@ export function ManageTagModal({
               (newTagName === tag?.name && selectedColor === getTagColor(tag))
           )}
           isLoading={isUpdateLoading}
-          bs3Props={{
-            loading: isUpdateLoading
-              ? `${t('saving')}…`
-              : t('save_or_cancel-save'),
-          }}
         >
           {t('save_or_cancel-save')}
         </OLButton>
-        <BootstrapVersionSwitcher bs3={<div className="clearfix" />} />
       </OLModalFooter>
     </OLModal>
   )

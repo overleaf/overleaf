@@ -5,7 +5,6 @@ import { useProjectListContext } from '../../../../context/project-list-context'
 import { unarchiveProject } from '../../../../util/api'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import OLIconButton from '@/features/ui/components/ol/ol-icon-button'
-import { bsVersion } from '@/features/utils/bootstrap-5'
 
 type UnarchiveProjectButtonProps = {
   project: Project
@@ -54,8 +53,7 @@ const UnarchiveProjectButtonTooltip = memo(
                 variant="link"
                 accessibilityLabel={text}
                 className="action-btn"
-                icon={bsVersion({ bs5: 'restore_page', bs3: 'reply' })}
-                bs3Props={{ fw: true }}
+                icon="restore_page"
               />
             </span>
           </OLTooltip>
