@@ -83,11 +83,11 @@ async function getProjectBlobsBatch(projectIds) {
   const blobs = new Map()
   if (projectIds.length === 0) return { nBlobs, blobs }
 
-  const records = await knex('project_blobs')
+  const cursor = knex('project_blobs')
     .select('project_id', 'hash_bytes', 'byte_length', 'string_length')
     .whereIn('project_id', projectIds)
-
-  for (const record of records) {
+    .stream()
+  for await (const record of cursor) {
     const found = blobs.get(record.project_id)
     if (found) {
       found.push(recordToBlob(record))

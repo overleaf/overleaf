@@ -35,6 +35,7 @@
     "mongodb": "6.7.0",
     "overleaf-editor-core": "*",
     "pg": "^8.7.1",
+    "pg-query-stream": "^4.2.4",
     "swagger-tools": "^0.10.4",
     "temp": "^0.8.3",
     "throng": "^4.0.0",
