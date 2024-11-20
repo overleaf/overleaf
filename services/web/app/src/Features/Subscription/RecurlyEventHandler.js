@@ -1,5 +1,6 @@
 const AnalyticsManager = require('../Analytics/AnalyticsManager')
 const SubscriptionEmailHandler = require('./SubscriptionEmailHandler')
+const { AI_ADD_ON_CODE } = require('./RecurlyEntities')
 const { ObjectId } = require('mongodb-legacy')
 
 const INVOICE_SUBSCRIPTION_LIMIT = 10
@@ -49,7 +50,7 @@ async function sendRecurlyAnalyticsEvent(event, eventData) {
 }
 
 async function _sendSubscriptionStartedEvent(userId, eventData) {
-  const { planCode, quantity, state, isTrial, subscriptionId } =
+  const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
     userId,
@@ -58,6 +59,7 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
       plan_code: planCode,
       quantity,
       is_trial: isTrial,
+      has_ai_add_on: hasAiAddOn,
       subscriptionId,
     }
   )
@@ -83,7 +85,7 @@ async function _sendSubscriptionStartedEvent(userId, eventData) {
 }
 
 async function _sendSubscriptionUpdatedEvent(userId, eventData) {
-  const { planCode, quantity, state, isTrial, subscriptionId } =
+  const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
     userId,
@@ -92,6 +94,7 @@ async function _sendSubscriptionUpdatedEvent(userId, eventData) {
       plan_code: planCode,
       quantity,
       is_trial: isTrial,
+      has_ai_add_on: hasAiAddOn,
       subscriptionId,
     }
   )
@@ -113,7 +116,7 @@ async function _sendSubscriptionUpdatedEvent(userId, eventData) {
 }
 
 async function _sendSubscriptionCancelledEvent(userId, eventData) {
-  const { planCode, quantity, state, isTrial, subscriptionId } =
+  const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
     userId,
@@ -122,6 +125,7 @@ async function _sendSubscriptionCancelledEvent(userId, eventData) {
       plan_code: planCode,
       quantity,
       is_trial: isTrial,
+      has_ai_add_on: hasAiAddOn,
       subscriptionId,
     }
   )
@@ -138,7 +142,7 @@ async function _sendSubscriptionCancelledEvent(userId, eventData) {
 }
 
 async function _sendSubscriptionExpiredEvent(userId, eventData) {
-  const { planCode, quantity, state, isTrial, subscriptionId } =
+  const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
     userId,
@@ -147,6 +151,7 @@ async function _sendSubscriptionExpiredEvent(userId, eventData) {
       plan_code: planCode,
       quantity,
       is_trial: isTrial,
+      has_ai_add_on: hasAiAddOn,
       subscriptionId,
     }
   )
@@ -168,7 +173,7 @@ async function _sendSubscriptionExpiredEvent(userId, eventData) {
 }
 
 async function _sendSubscriptionRenewedEvent(userId, eventData) {
-  const { planCode, quantity, state, isTrial, subscriptionId } =
+  const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
     userId,
@@ -177,6 +182,7 @@ async function _sendSubscriptionRenewedEvent(userId, eventData) {
       plan_code: planCode,
       quantity,
       is_trial: isTrial,
+      has_ai_add_on: hasAiAddOn,
       subscriptionId,
     }
   )
@@ -198,7 +204,7 @@ async function _sendSubscriptionRenewedEvent(userId, eventData) {
 }
 
 async function _sendSubscriptionReactivatedEvent(userId, eventData) {
-  const { planCode, quantity, state, isTrial, subscriptionId } =
+  const { planCode, quantity, state, isTrial, hasAiAddOn, subscriptionId } =
     _getSubscriptionData(eventData)
   AnalyticsManager.recordEventForUserInBackground(
     userId,
@@ -206,6 +212,7 @@ async function _sendSubscriptionReactivatedEvent(userId, eventData) {
     {
       plan_code: planCode,
       quantity,
+      has_ai_add_on: hasAiAddOn,
       subscriptionId,
     }
   )
@@ -281,12 +288,17 @@ function _getSubscriptionData(eventData) {
     eventData.subscription.current_period_started_at &&
     eventData.subscription.trial_started_at.getTime() ===
       eventData.subscription.current_period_started_at.getTime()
+  const hasAiAddOn =
+    eventData.subscription.subscription_add_ons?.some(
+      addOn => addOn.add_on_code === AI_ADD_ON_CODE
+    ) ?? false
   return {
     planCode: eventData.subscription.plan.plan_code,
     quantity: eventData.subscription.quantity,
     state: eventData.subscription.state,
     subscriptionId: eventData.subscription.uuid,
     isTrial,
+    hasAiAddOn,
   }
 }
 

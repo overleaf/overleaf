@@ -60,6 +60,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
@@ -113,6 +114,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 3,
         is_trial: false,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
@@ -145,6 +147,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
@@ -182,6 +185,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
@@ -213,6 +217,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
@@ -249,6 +254,7 @@ describe('RecurlyEventHandler', function () {
         plan_code: this.planCode,
         quantity: 1,
         is_trial: true,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
@@ -266,6 +272,7 @@ describe('RecurlyEventHandler', function () {
       {
         plan_code: this.planCode,
         quantity: 1,
+        has_ai_add_on: false,
         subscriptionId: this.eventData.subscription.uuid,
       }
     )
