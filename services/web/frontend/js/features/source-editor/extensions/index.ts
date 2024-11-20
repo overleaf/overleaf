@@ -95,6 +95,16 @@ export const createExtensions = (options: Record<string, any>): Extension[] => [
   // to avoid cutting off tooltips which overflow the editor.
   tooltips({
     parent: document.body,
+    tooltipSpace(view) {
+      const { top, bottom } = view.scrollDOM.getBoundingClientRect()
+
+      return {
+        top,
+        left: 0,
+        bottom,
+        right: window.innerWidth,
+      }
+    },
   }),
   keymaps,
   goToLinePanel(),
