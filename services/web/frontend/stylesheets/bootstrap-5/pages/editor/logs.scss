@@ -141,6 +141,10 @@
   }
 
   .log-entry-content {
+    &:empty {
+      display: none;
+    }
+
     background-color: var(--bg-light-primary);
     padding: var(--spacing-04);
   }

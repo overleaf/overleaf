@@ -358,7 +358,7 @@ const searchFormTheme = EditorView.theme({
   },
   '.ol-cm-search-form-position': {
     flexShrink: 0,
-    color: 'var(--ol-blue-gray-4)',
+    color: 'var(--content-secondary)',
   },
   '.ol-cm-search-hidden-inputs': {
     position: 'absolute',
