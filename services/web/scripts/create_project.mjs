@@ -1,6 +1,6 @@
 // Script to create projects with sharelatex history for testing
 // Example:
-// node scripts/create_project.js --user-id=5dca84e11e71ae002ff73bd4 --name="My Test Project" --old-history
+// node scripts/create_project.mjs --user-id=5dca84e11e71ae002ff73bd4 --name="My Test Project" --old-history
 
 import fs from 'node:fs'
 

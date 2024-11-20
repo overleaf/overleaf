@@ -196,7 +196,7 @@ export default main
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
   if (argv.help || argv._.length > 1) {
-    console.error(`Usage: node scripts/remove_deleted_users_from_token_access_refs.js [OPTS]
+    console.error(`Usage: node scripts/remove_deleted_users_from_token_access_refs.mjs [OPTS]
       Finds or removes deleted user ids from token access fields
       "tokenAccessReadOnly_refs" and "tokenAccessReadAndWrite_refs" in the "projects" collection.
 

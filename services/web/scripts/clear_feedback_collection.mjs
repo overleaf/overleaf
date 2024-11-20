@@ -1,8 +1,8 @@
 /* Clear feedback collection before a cutoff date
  *
  * Usage
- *   node scripts/clear_feedback_collection.js 2022-11-01                # dry run mode
- *   DRY_RUN=false node scripts/clear_feedback_collection.js 2022-11-01  # deletion mode
+ *   node scripts/clear_feedback_collection.mjs 2022-11-01               # dry run mode
+ *   DRY_RUN=false node scripts/clear_feedback_collection.mjs 2022-11-01 # deletion mode
  */
 
 import { db, ObjectId } from '../app/src/infrastructure/mongodb.js'

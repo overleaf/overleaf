@@ -24,7 +24,7 @@ const argv = minimist(process.argv.slice(2), {
 })
 
 if (argv.help || argv._.length > 1) {
-  console.error(`Usage: node scripts/add_user_count_to_csv.js [OPTS] [INPUT-FILE]
+  console.error(`Usage: node scripts/add_user_count_to_csv.mjs [OPTS] [INPUT-FILE]
     Looks up the number of users for each domain in the input file and adds
     columns for the number of users in the domain, subdomains, and total.
 

@@ -3,10 +3,10 @@
 // Usage:
 //
 // Save current plan and addon prices to file
-// $ node scripts/recurly/recurly_prices.js --download -o prices.json
+// $ node scripts/recurly/recurly_prices.mjs --download -o prices.json
 //
 // Upload new plan and addon prices (change --dry-run to --commit to make the change)
-// $ node scripts/recurly/recurly_prices.js --upload -f prices.json --dry-run
+// $ node scripts/recurly/recurly_prices.mjs --upload -f prices.json --dry-run
 //
 // File format is JSON of the plans returned by recurly, with an extra _addOns property for the
 // addOns associated with that plan.
