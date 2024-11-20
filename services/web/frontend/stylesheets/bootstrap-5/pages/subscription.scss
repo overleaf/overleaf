@@ -229,11 +229,6 @@
         }
       }
     }
-
-    hr {
-      margin-top: var(--spacing-08);
-      margin-bottom: var(--spacing-08);
-    }
   }
 
   .payment-checkout {
@@ -286,6 +281,7 @@
 
 .change-currency-toggle {
   padding-left: 0;
+  padding-bottom: 0;
   text-decoration: underline;
   color: var(--content-secondary);
 
