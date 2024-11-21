@@ -4,6 +4,7 @@ import {
   EditorView,
   showTooltip,
   Tooltip,
+  TooltipView,
 } from '@codemirror/view'
 import {
   Extension,
@@ -11,16 +12,16 @@ import {
   StateEffect,
   Range,
   SelectionRange,
+  EditorState,
 } from '@codemirror/state'
 import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { v4 as uuid } from 'uuid'
-import { isCursorNearViewportTop } from '../utils/is-cursor-near-edge'
 
 export const addNewCommentRangeEffect = StateEffect.define<Range<Decoration>>()
 
 export const removeNewCommentRangeEffect = StateEffect.define<Decoration>()
 
-export const textSelectedEffect = StateEffect.define<EditorView>()
+export const textSelectedEffect = StateEffect.define<null>()
 
 export const removeReviewPanelTooltipEffect = StateEffect.define()
 
@@ -46,7 +47,7 @@ export const reviewTooltip = (): Extension => {
     EditorView.updateListener.of(update => {
       if (update.selectionSet && !update.state.selection.main.empty) {
         update.view.dispatch({
-          effects: textSelectedEffect.of(update.view),
+          effects: textSelectedEffect.of(null),
         })
       } else if (
         !update.startState.selection.main.empty &&
@@ -103,7 +104,7 @@ export const reviewTooltipStateField = StateField.define<{
       }
 
       if (effect.is(textSelectedEffect)) {
-        tooltip = buildTooltip(effect.value)
+        tooltip = buildTooltip(tr.state)
       }
 
       if (tooltip && tr.state.selection.main.empty) {
@@ -120,22 +121,25 @@ export const reviewTooltipStateField = StateField.define<{
   ],
 })
 
-function buildTooltip(view: EditorView): Tooltip | null {
-  if (view.state.selection.main.empty) {
+function buildTooltip(state: EditorState): Tooltip | null {
+  if (state.selection.main.empty) {
     return null
   }
 
-  const pos = view.state.selection.main.head
   return {
-    pos,
-    above: !isCursorNearViewportTop(view, pos, 50),
-    strictSide: true,
-    arrow: false,
-    create() {
-      const dom = document.createElement('div')
-      dom.className = 'review-tooltip-menu-container'
-      return { dom, overlap: true, offset: { x: 0, y: 8 } }
-    },
+    pos: state.selection.main.head,
+    above: true,
+    create: createReviewTooltipView,
+  }
+}
+
+const createReviewTooltipView = (): TooltipView => {
+  const dom = document.createElement('div')
+  dom.className = 'review-tooltip-menu-container'
+  return {
+    dom,
+    overlap: true,
+    offset: { x: 0, y: 8 },
   }
 }
 
