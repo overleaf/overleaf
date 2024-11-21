@@ -98,6 +98,7 @@ describe('RecurlyClient', function () {
     this.client = client = {
       getAccount: sinon.stub(),
       listAccountSubscriptions: sinon.stub(),
+      previewSubscriptionChange: sinon.stub(),
     }
     this.recurly = {
       errors: recurly.errors,
@@ -379,6 +380,67 @@ describe('RecurlyClient', function () {
       expect(this.client.cancelSubscription).to.be.calledWith(
         'uuid-' + this.subscription.uuid
       )
+    })
+  })
+
+  describe('previewSubscriptionChange', function () {
+    describe('compute immediate charge', function () {
+      it('only has charge invoice', async function () {
+        this.client.previewSubscriptionChange.resolves({
+          plan: { code: 'test_code', name: 'test name' },
+          unitAmount: 0,
+          invoiceCollection: {
+            chargeInvoice: {
+              subtotal: 100,
+              tax: 20,
+              total: 120,
+            },
+          },
+        })
+        const { immediateCharge } =
+          await this.RecurlyClient.promises.previewSubscriptionChange(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              planCode: 'new-plan',
+            })
+          )
+        expect(immediateCharge.subtotal).to.be.equal(100)
+        expect(immediateCharge.tax).to.be.equal(20)
+        expect(immediateCharge.total).to.be.equal(120)
+      })
+
+      it('credit invoice with imprecise float number', async function () {
+        this.client.previewSubscriptionChange.resolves({
+          plan: { code: 'test_code', name: 'test name' },
+          unitAmount: 0,
+          invoiceCollection: {
+            chargeInvoice: {
+              subtotal: 100.3,
+              tax: 20.3,
+              total: 120.3,
+            },
+            creditInvoices: [
+              {
+                subtotal: -20.1,
+                tax: -4.1,
+                total: -24.1,
+              },
+            ],
+          },
+        })
+        const { immediateCharge } =
+          await this.RecurlyClient.promises.previewSubscriptionChange(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              planCode: 'new-plan',
+            })
+          )
+        expect(immediateCharge.subtotal).to.be.equal(80.2)
+        expect(immediateCharge.tax).to.be.equal(16.2)
+        expect(immediateCharge.total).to.be.equal(96.2)
+      })
     })
   })
 })

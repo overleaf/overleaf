@@ -252,7 +252,7 @@ class RecurlySubscriptionChange {
    * @param {string} props.nextPlanName
    * @param {number} props.nextPlanPrice
    * @param {RecurlySubscriptionAddOn[]} props.nextAddOns
-   * @param {number} [props.immediateCharge]
+   * @param {RecurlyImmediateCharge} [props.immediateCharge]
    */
   constructor(props) {
     this.subscription = props.subscription
@@ -260,7 +260,9 @@ class RecurlySubscriptionChange {
     this.nextPlanName = props.nextPlanName
     this.nextPlanPrice = props.nextPlanPrice
     this.nextAddOns = props.nextAddOns
-    this.immediateCharge = props.immediateCharge ?? 0
+    this.immediateCharge =
+      props.immediateCharge ??
+      new RecurlyImmediateCharge({ subtotal: 0, tax: 0, total: 0 })
 
     this.subtotal = this.nextPlanPrice
     for (const addOn of this.nextAddOns) {
@@ -296,6 +298,20 @@ class CreditCardPaymentMethod {
 
   toString() {
     return `${this.cardType} **** ${this.lastFour}`
+  }
+}
+
+class RecurlyImmediateCharge {
+  /**
+   * @param {object} props
+   * @param {number} props.subtotal
+   * @param {number} props.tax
+   * @param {number} props.total
+   */
+  constructor(props) {
+    this.subtotal = props.subtotal
+    this.tax = props.tax
+    this.total = props.total
   }
 }
 
@@ -350,4 +366,5 @@ module.exports = {
   RecurlyAddOn,
   RecurlyPlan,
   isStandaloneAiAddOnPlanCode,
+  RecurlyImmediateCharge,
 }

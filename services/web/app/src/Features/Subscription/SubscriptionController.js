@@ -915,7 +915,7 @@ function makeChangePreview(
   return {
     change: subscriptionChangeDescription,
     currency: subscription.currency,
-    immediateCharge: subscriptionChange.immediateCharge,
+    immediateCharge: { ...subscriptionChange.immediateCharge },
     paymentMethod: paymentMethod.toString(),
     nextPlan: {
       annual: nextPlan.annual ?? false,
@@ -966,6 +966,7 @@ module.exports = {
   previewAddonPurchase: expressify(previewAddonPurchase),
   purchaseAddon,
   removeAddon,
+  makeChangePreview,
   promises: {
     getRecommendedCurrency: _getRecommendedCurrency,
     getLatamCountryBannerDetails,

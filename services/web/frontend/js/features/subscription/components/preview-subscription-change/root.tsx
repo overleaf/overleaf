@@ -65,7 +65,7 @@ function PreviewSubscriptionChange() {
                 <Col xs={3} className="text-right">
                   <strong>
                     {formatCurrencyLocalized(
-                      preview.immediateCharge,
+                      preview.immediateCharge.total,
                       preview.currency
                     )}
                   </strong>

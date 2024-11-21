@@ -14,6 +14,7 @@ const {
   CreditCardPaymentMethod,
   RecurlyAddOn,
   RecurlyPlan,
+  RecurlyImmediateCharge,
 } = require('./RecurlyEntities')
 
 /**
@@ -315,21 +316,42 @@ function subscriptionChangeFromApi(subscription, subscriptionChange) {
     subscriptionAddOnFromApi
   )
 
-  let immediateCharge =
-    subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0
-  for (const creditInvoice of subscriptionChange.invoiceCollection
-    ?.creditInvoices ?? []) {
-    // The credit invoice totals are already negative
-    immediateCharge += creditInvoice.total ?? 0
-  }
-
   return new RecurlySubscriptionChange({
     subscription,
     nextPlanCode: subscriptionChange.plan.code,
     nextPlanName: subscriptionChange.plan.name,
     nextPlanPrice: subscriptionChange.unitAmount,
     nextAddOns,
-    immediateCharge,
+    immediateCharge: computeImmediateCharge(subscriptionChange),
+  })
+}
+
+/**
+ * Compute immediate charge based on invoice collection
+ *
+ * @param {recurly.SubscriptionChange} subscriptionChange - the subscription change returned from the API
+ * @return {RecurlyImmediateCharge}
+ */
+function computeImmediateCharge(subscriptionChange) {
+  const roundToTwoDecimal = (/** @type {number} */ num) =>
+    Math.round(num * 100) / 100
+  let subtotal =
+    subscriptionChange.invoiceCollection?.chargeInvoice?.subtotal ?? 0
+  let tax = subscriptionChange.invoiceCollection?.chargeInvoice?.tax ?? 0
+  let total = subscriptionChange.invoiceCollection?.chargeInvoice?.total ?? 0
+  for (const creditInvoice of subscriptionChange.invoiceCollection
+    ?.creditInvoices ?? []) {
+    // The credit invoice numbers are already negative
+    subtotal = roundToTwoDecimal(subtotal + (creditInvoice.subtotal ?? 0))
+    total = roundToTwoDecimal(total + (creditInvoice.total ?? 0))
+    // Tax rate can be different in credit invoice if a user relocates
+    tax = roundToTwoDecimal(tax + (creditInvoice.tax ?? 0))
+  }
+
+  return new RecurlyImmediateCharge({
+    subtotal,
+    total,
+    tax,
   })
 }
 
