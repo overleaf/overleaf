@@ -974,6 +974,7 @@
   "only_group_admin_or_managers_can_delete_your_account_1": "Wenn du ein verwalteter Benutzer wirst, hat deine Organisation Administratorrechte für deinen Account und die Kontrolle über deine Daten, einschließlich des Rechts, deinen Account zu schließen und auf deine Daten zuzugreifen, sie zu löschen und zu teilen. Das Ergebnis ist:",
   "only_group_admin_or_managers_can_delete_your_account_4": "Sobald du ein verwalteter Benutzer geworden bist, kannst du nicht mehr zurückwechseln. <0>Erfahren Sie mehr über verwaltete Overleaf-Konten.</0>",
   "only_group_admin_or_managers_can_delete_your_account_5": "Weitere Informationen findest du im Abschnitt „Verwaltete Accounts“ in unseren Nutzungsbedingungen, denen du zustimmst, indem du auf Einladung akzeptieren klickst.",
+  "open_a_file_on_the_left": "Öffne eine Datei auf der linken Seite",
   "open_as_template": "Als Vorlage öffnen",
   "open_project": "Öffne Projekt",
   "opted_out_linking": "Du hast dich gegen die Verknüpfung deines <b>__email__</b> <b>__appName__</b>-Kontos mit deinem institutionellen Konto entschieden.",
