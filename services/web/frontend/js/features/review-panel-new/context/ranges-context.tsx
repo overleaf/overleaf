@@ -1,6 +1,7 @@
 import {
   createContext,
   FC,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -18,6 +19,8 @@ import { rejectChanges } from '@/features/source-editor/extensions/changes/rejec
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useIdeReactContext } from '@/features/ide-react/context/ide-react-context'
+import { useConnectionContext } from '@/features/ide-react/context/connection-context'
+import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 
 export type Ranges = {
   docId: string
@@ -82,7 +85,7 @@ export const RangesProvider: FC = ({ children }) => {
   const [currentDoc] = useScopeValue<DocumentContainer | null>(
     'editor.sharejs_doc'
   )
-
+  const { socket } = useConnectionContext()
   const [ranges, setRanges] = useState<Ranges | undefined>(() =>
     buildRanges(currentDoc)
   )
@@ -133,6 +136,22 @@ export const RangesProvider: FC = ({ children }) => {
       }
     }
   }, [currentDoc])
+
+  useSocketListener(
+    socket,
+    'accept-changes',
+    useCallback(
+      (docId: string, entryIds: string[]) => {
+        if (currentDoc?.ranges) {
+          if (docId === currentDoc.doc_id) {
+            currentDoc.ranges.removeChangeIds(entryIds)
+            setRanges(buildRanges(currentDoc))
+          }
+        }
+      },
+      [currentDoc]
+    )
+  )
 
   const actions = useMemo(
     () => ({
