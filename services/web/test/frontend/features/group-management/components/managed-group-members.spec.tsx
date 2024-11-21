@@ -2,6 +2,7 @@ import '../../../helpers/bootstrap-3'
 import GroupMembers from '@/features/group-management/components/group-members'
 import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 import { User } from '../../../../../types/group-management/user'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const GROUP_ID = '777fff777fff'
 const JOHN_DOE: User = {
@@ -57,9 +58,11 @@ const PATHS = {
 
 function mountGroupMembersProvider() {
   cy.mount(
-    <GroupMembersProvider>
-      <GroupMembers />
-    </GroupMembersProvider>
+    <SplitTestProvider>
+      <GroupMembersProvider>
+        <GroupMembers />
+      </GroupMembersProvider>
+    </SplitTestProvider>
   )
 }
 

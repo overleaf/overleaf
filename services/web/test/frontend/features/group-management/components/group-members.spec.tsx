@@ -2,6 +2,7 @@ import '../../../helpers/bootstrap-3'
 import GroupMembers from '@/features/group-management/components/group-members'
 import { GroupMembersProvider } from '@/features/group-management/context/group-members-context'
 import { User } from '../../../../../types/group-management/user'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 const GROUP_ID = '777fff777fff'
 const PATHS = {
@@ -14,9 +15,11 @@ const PATHS = {
 describe('GroupMembers', function () {
   function mountGroupMembersProvider() {
     cy.mount(
-      <GroupMembersProvider>
-        <GroupMembers />
-      </GroupMembersProvider>
+      <SplitTestProvider>
+        <GroupMembersProvider>
+          <GroupMembers />
+        </GroupMembersProvider>
+      </SplitTestProvider>
     )
   }
 
@@ -47,9 +50,11 @@ describe('GroupMembers', function () {
       })
 
       cy.mount(
-        <GroupMembersProvider>
-          <GroupMembers />
-        </GroupMembersProvider>
+        <SplitTestProvider>
+          <GroupMembersProvider>
+            <GroupMembers />
+          </GroupMembersProvider>
+        </SplitTestProvider>
       )
     })
 
@@ -454,6 +459,77 @@ describe('GroupMembers', function () {
           cy.get('.sr-only').contains('SSO active')
         })
       })
+    })
+  })
+
+  describe('with flexible group licensing enabled', function () {
+    const JOHN_DOE = {
+      _id: 'abc123def456',
+      first_name: 'John',
+      last_name: 'Doe',
+      email: 'john.doe@test.com',
+      last_active_at: new Date('2023-01-15'),
+      invite: false,
+    }
+    const BOBBY_LAPOINTE = {
+      _id: 'bcd234efa567',
+      first_name: 'Bobby',
+      last_name: 'Lapointe',
+      email: 'bobby.lapointe@test.com',
+      last_active_at: new Date('2023-01-02'),
+      invite: false,
+    }
+
+    it('renders the group members page with the new text', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-groupId', GROUP_ID)
+        win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
+        win.metaAttributesCache.set('ol-groupSize', 10)
+        win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
+        win.metaAttributesCache.set('ol-splitTestVariants', {
+          'flexible-group-licensing': 'enabled',
+        })
+      })
+
+      cy.mount(
+        <SplitTestProvider>
+          <GroupMembersProvider>
+            <GroupMembers />
+          </GroupMembersProvider>
+        </SplitTestProvider>
+      )
+
+      cy.findByTestId('group-size-details').contains(
+        'You have 2 users and your plan supports up to 10. Add more users.'
+      )
+      cy.findByTestId('add-more-members-form').within(() => {
+        cy.contains('Invite more members')
+        cy.get('button').contains('Invite')
+      })
+    })
+
+    it('renders the group members page with new text when only has one group member', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-groupId', GROUP_ID)
+        win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
+        win.metaAttributesCache.set('ol-groupSize', 10)
+        win.metaAttributesCache.set('ol-users', [JOHN_DOE])
+        win.metaAttributesCache.set('ol-splitTestVariants', {
+          'flexible-group-licensing': 'enabled',
+        })
+      })
+
+      cy.mount(
+        <SplitTestProvider>
+          <GroupMembersProvider>
+            <GroupMembers />
+          </GroupMembersProvider>
+        </SplitTestProvider>
+      )
+
+      cy.findByTestId('group-size-details').contains(
+        'You have 1 user and your plan supports up to 10. Add more users.'
+      )
     })
   })
 })

@@ -11,6 +11,7 @@ import {
 import { SSOConfig } from '../../models/SSOConfig.js'
 import { Parser as CSVParser } from 'json2csv'
 import { expressify } from '@overleaf/promise-utils'
+import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 
 async function manageGroupMembers(req, res, next) {
   const { entity: subscription, entityConfig } = req
@@ -28,6 +29,12 @@ async function manageGroupMembers(req, res, next) {
     entityConfig
   )
   const ssoConfig = await SSOConfig.findById(subscription.ssoConfig).exec()
+
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'flexible-group-licensing'
+  )
 
   res.render('user_membership/group-members-react', {
     name: entityName,
