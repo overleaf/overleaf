@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 import UserHelper from './helpers/User.js'
+import { renderObjectId } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const User = UserHelper.promises
 
@@ -78,7 +79,9 @@ describe('BackFillDocNameForDeletedDocs', function () {
     }
     const { stderr: stdErr } = result
 
-    expect(stdErr).to.include(`Completed batch ending ${projectId2}`)
+    expect(stdErr).to.include(
+      `Completed batch ending ${renderObjectId(projectId2)}`
+    )
   }
 
   function checkDocsBackFilled() {

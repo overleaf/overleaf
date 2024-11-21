@@ -11,6 +11,7 @@ import { Binary, ObjectId } from 'mongodb'
 import logger from '@overleaf/logger'
 import {
   batchedUpdate,
+  objectIdFromInput,
   READ_PREFERENCE_SECONDARY,
 } from '@overleaf/mongo-utils/batchedUpdate.js'
 import OError from '@overleaf/o-error'
@@ -85,13 +86,17 @@ ObjectId.cacheHexString = true
 const COLLECT_BLOBS = process.argv.includes('blobs')
 
 const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
-const BATCH_RANGE_START =
-  process.env.BATCH_RANGE_START ||
-  ObjectId.createFromTime(PUBLIC_LAUNCH_DATE.getTime() / 1000).toString()
-const BATCH_RANGE_END = process.env.BATCH_RANGE_END || new ObjectId().toString()
+const BATCH_RANGE_START = objectIdFromInput(
+  process.env.BATCH_RANGE_START || PUBLIC_LAUNCH_DATE.toISOString()
+).toString()
+const BATCH_RANGE_END = objectIdFromInput(
+  process.env.BATCH_RANGE_END || new Date().toISOString()
+).toString()
 // We need to control the start and end as ids of deleted projects are created at time of deletion.
 delete process.env.BATCH_RANGE_START
 delete process.env.BATCH_RANGE_END
+
+const LOGGING_IDENTIFIER = process.env.LOGGING_IDENTIFIER || BATCH_RANGE_START
 
 // Concurrency for downloading from GCS and updating hashes in mongo
 const CONCURRENCY = parseInt(process.env.CONCURRENCY || '100', 10)
@@ -197,18 +202,25 @@ function computeDiff(nextEventLoopStats, now) {
   return Object.assign(diff, bandwidthStats(diff, ms))
 }
 
-function printStats() {
+/**
+ * @param {boolean} isLast
+ */
+function printStats(isLast = false) {
   const now = performance.now()
   const nextEventLoopStats = performance.eventLoopUtilization()
-  console.log(
-    JSON.stringify({
-      time: new Date(),
-      ...STATS,
-      ...bandwidthStats(STATS, now - processStart),
-      eventLoop: nextEventLoopStats,
-      diff: computeDiff(nextEventLoopStats, now),
-    })
-  )
+  const logLine = JSON.stringify({
+    time: new Date(),
+    LOGGING_IDENTIFIER,
+    ...STATS,
+    ...bandwidthStats(STATS, now - processStart),
+    eventLoop: nextEventLoopStats,
+    diff: computeDiff(nextEventLoopStats, now),
+  })
+  if (isLast) {
+    console.warn(logLine)
+  } else {
+    console.log(logLine)
+  }
   lastEventLoopStats = nextEventLoopStats
   lastLog = Object.assign({}, STATS)
 }
@@ -1100,7 +1112,7 @@ try {
   try {
     await main()
   } finally {
-    printStats()
+    printStats(true)
     try {
       // Perform non-recursive removal of the BUFFER_DIR. Individual files
       // should get removed in parallel as part of batch processing.

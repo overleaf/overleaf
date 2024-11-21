@@ -520,7 +520,12 @@ describe('back_fill_file_hash script', function () {
       'readFromGCSThroughputMiBPerSecond',
       'writeToAWSThroughputMiBPerSecond',
     ]
-    const stats = JSON.parse(result.stdout.trimEnd().split('\n').pop())
+    const stats = JSON.parse(
+      result.stderr
+        .split('\n')
+        .filter(l => l.includes('LOGGING_IDENTIFIER'))
+        .pop()
+    )
     expect(Object.keys(stats.diff).sort()).to.deep.equal(
       [...extraStatsKeys, ...Object.keys(STATS_ALL)].sort()
     )
@@ -534,6 +539,7 @@ describe('back_fill_file_hash script', function () {
     for (const key of extraStatsKeys) {
       delete stats[key]
     }
+    delete stats.LOGGING_IDENTIFIER
     return { stats, result }
   }
 

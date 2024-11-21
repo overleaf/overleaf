@@ -4,6 +4,7 @@ import { expect } from 'chai'
 import logger from '@overleaf/logger'
 import { filterOutput } from './helpers/settings.mjs'
 import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { renderObjectId } from '@overleaf/mongo-utils/batchedUpdate.js'
 
 const BATCH_SIZE = 100
 let n = 0
@@ -111,10 +112,10 @@ describe('RegenerateDuplicateReferralIds', function () {
     stdErr = stdErr.split('\n').filter(filterOutput)
     stdOut = stdOut.split('\n').filter(filterOutput)
     expect(stdErr).to.include.members([
-      `Completed batch ending ${firstBatch[BATCH_SIZE - 1]}`,
-      `Completed batch ending ${secondBatch[BATCH_SIZE - 1]}`,
-      `Completed batch ending ${thirdBatch[BATCH_SIZE - 1]}`,
-      `Completed batch ending ${forthBatch[BATCH_SIZE - 1]}`,
+      `Completed batch ending ${renderObjectId(firstBatch[BATCH_SIZE - 1])}`,
+      `Completed batch ending ${renderObjectId(secondBatch[BATCH_SIZE - 1])}`,
+      `Completed batch ending ${renderObjectId(thirdBatch[BATCH_SIZE - 1])}`,
+      `Completed batch ending ${renderObjectId(forthBatch[BATCH_SIZE - 1])}`,
       'Done.',
       '',
     ])

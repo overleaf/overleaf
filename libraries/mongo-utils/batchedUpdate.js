@@ -46,9 +46,9 @@ function refreshGlobalOptionsForBatchedUpdate(options = {}) {
   BATCH_SIZE = parseInt(options.BATCH_SIZE || '1000', 10) || 1000
   VERBOSE_LOGGING = options.VERBOSE_LOGGING === 'true'
   if (options.BATCH_LAST_ID) {
-    BATCH_RANGE_START = new ObjectId(options.BATCH_LAST_ID)
+    BATCH_RANGE_START = objectIdFromInput(options.BATCH_LAST_ID)
   } else if (options.BATCH_RANGE_START) {
-    BATCH_RANGE_START = new ObjectId(options.BATCH_RANGE_START)
+    BATCH_RANGE_START = objectIdFromInput(options.BATCH_RANGE_START)
   } else {
     if (BATCH_DESCENDING) {
       BATCH_RANGE_START = ID_EDGE_FUTURE
@@ -61,7 +61,7 @@ function refreshGlobalOptionsForBatchedUpdate(options = {}) {
     10
   )
   if (options.BATCH_RANGE_END) {
-    BATCH_RANGE_END = new ObjectId(options.BATCH_RANGE_END)
+    BATCH_RANGE_END = objectIdFromInput(options.BATCH_RANGE_END)
   } else {
     if (BATCH_DESCENDING) {
       BATCH_RANGE_END = ID_EDGE_PAST
@@ -118,6 +118,28 @@ async function performUpdate(collection, nextBatch, update) {
     { _id: { $in: nextBatch.map(entry => entry._id) } },
     update
   )
+}
+
+/**
+ * @param {string} input
+ * @return {ObjectId}
+ */
+function objectIdFromInput(input) {
+  if (input.includes('T')) {
+    const t = new Date(input).getTime()
+    if (Number.isNaN(t)) throw new Error(`${input} is not a valid date`)
+    return objectIdFromMs(t)
+  } else {
+    return new ObjectId(input)
+  }
+}
+
+/**
+ * @param {ObjectId} objectId
+ * @return {string}
+ */
+function renderObjectId(objectId) {
+  return `${objectId} (${objectId.getTimestamp().toISOString()})`
 }
 
 /**
@@ -227,7 +249,7 @@ async function batchedUpdate(
           )}`
         )
       } else {
-        console.error(`Running update on batch ending ${end}`)
+        console.error(`Running update on batch ending ${renderObjectId(end)}`)
       }
 
       if (typeof update === 'function') {
@@ -236,7 +258,7 @@ async function batchedUpdate(
         await performUpdate(collection, nextBatch, update)
       }
     }
-    console.error(`Completed batch ending ${end}`)
+    console.error(`Completed batch ending ${renderObjectId(end)}`)
     start = end
   }
   return updated
@@ -278,6 +300,8 @@ function batchedUpdateWithResultHandling(
 
 module.exports = {
   READ_PREFERENCE_SECONDARY,
+  objectIdFromInput,
+  renderObjectId,
   batchedUpdate,
   batchedUpdateWithResultHandling,
 }
