@@ -34,6 +34,7 @@ import {
 } from '../lib/blob_store/index.js'
 import { backedUpBlobs as backedUpBlobsCollection, db } from '../lib/mongodb.js'
 import filestorePersistor from '../lib/persistor.js'
+import commandLineArgs from 'command-line-args'
 
 // Silence warning.
 Events.setMaxListeners(20)
@@ -84,20 +85,70 @@ ObjectId.cacheHexString = true
  * @property {Blob} [blob]
  */
 
-const COLLECT_BLOBS = process.argv.includes('blobs')
+/**
+ * @return {{PROCESS_DELETED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
+ */
+function parseArgs() {
+  const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
+  const args = commandLineArgs([
+    { name: 'processNonDeletedProjects', type: String, defaultValue: 'false' },
+    { name: 'processDeletedProjects', type: String, defaultValue: 'false' },
+    { name: 'processDeletedFiles', type: String, defaultValue: 'false' },
+    { name: 'processBlobs', type: String, defaultValue: 'true' },
+    { name: 'collectBackedUpBlobs', type: String, defaultValue: 'true' },
+    {
+      name: 'BATCH_RANGE_START',
+      type: String,
+      defaultValue: PUBLIC_LAUNCH_DATE.toISOString(),
+    },
+    {
+      name: 'BATCH_RANGE_END',
+      type: String,
+      defaultValue: new Date().toISOString(),
+    },
+    { name: 'LOGGING_IDENTIFIER', type: String, defaultValue: '' },
+  ])
+  /**
+   * commandLineArgs cannot handle --foo=false, so go the long way
+   * @param {string} name
+   * @return {boolean}
+   */
+  function boolVal(name) {
+    const v = args[name]
+    if (['true', 'false'].includes(v)) return v === 'true'
+    throw new Error(`expected "true" or "false" for boolean option ${name}`)
+  }
+  const BATCH_RANGE_START = objectIdFromInput(
+    args['BATCH_RANGE_START']
+  ).toString()
+  const BATCH_RANGE_END = objectIdFromInput(args['BATCH_RANGE_END']).toString()
+  return {
+    PROCESS_NON_DELETED_PROJECTS: boolVal('processNonDeletedProjects'),
+    PROCESS_DELETED_PROJECTS: boolVal('processDeletedProjects'),
+    PROCESS_BLOBS: boolVal('processBlobs'),
+    PROCESS_DELETED_FILES: boolVal('processDeletedFiles'),
+    COLLECT_BACKED_UP_BLOBS: boolVal('collectBackedUpBlobs'),
+    BATCH_RANGE_START,
+    BATCH_RANGE_END,
+    LOGGING_IDENTIFIER: args['LOGGING_IDENTIFIER'] || BATCH_RANGE_START,
+  }
+}
 
-const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
-const BATCH_RANGE_START = objectIdFromInput(
-  process.env.BATCH_RANGE_START || PUBLIC_LAUNCH_DATE.toISOString()
-).toString()
-const BATCH_RANGE_END = objectIdFromInput(
-  process.env.BATCH_RANGE_END || new Date().toISOString()
-).toString()
-// We need to control the start and end as ids of deleted projects are created at time of deletion.
-delete process.env.BATCH_RANGE_START
-delete process.env.BATCH_RANGE_END
+const {
+  PROCESS_NON_DELETED_PROJECTS,
+  PROCESS_DELETED_PROJECTS,
+  PROCESS_BLOBS,
+  PROCESS_DELETED_FILES,
+  COLLECT_BACKED_UP_BLOBS,
+  BATCH_RANGE_START,
+  BATCH_RANGE_END,
+  LOGGING_IDENTIFIER,
+} = parseArgs()
 
-const LOGGING_IDENTIFIER = process.env.LOGGING_IDENTIFIER || BATCH_RANGE_START
+// We need to handle the start and end differently as ids of deleted projects are created at time of deletion.
+if (process.env.BATCH_RANGE_START || process.env.BATCH_RANGE_END) {
+  throw new Error('use --BATCH_RANGE_START and --BATCH_RANGE_END')
+}
 
 // Concurrency for downloading from GCS and updating hashes in mongo
 const CONCURRENCY = parseInt(process.env.CONCURRENCY || '100', 10)
@@ -396,7 +447,7 @@ async function uploadBlobToGCS(blobStore, entry, blob, hash, filePath) {
   if (entry.ctx.hasHistoryBlob(hash)) {
     return // fast-path using hint from pre-fetched blobs
   }
-  if (!COLLECT_BLOBS && (await blobStore.getBlob(hash))) {
+  if (!PROCESS_BLOBS && (await blobStore.getBlob(hash))) {
     entry.ctx.recordHistoryBlob(hash)
     return // round trip to postgres/mongo when not pre-fetched
   }
@@ -817,7 +868,7 @@ function* findFileInBatch(
  * @return {Promise<{nBlobs: number, blobs: Map<string, Array<Blob>>}>}
  */
 async function collectProjectBlobs(batch) {
-  if (!COLLECT_BLOBS) return { nBlobs: 0, blobs: new Map() }
+  if (!PROCESS_BLOBS) return { nBlobs: 0, blobs: new Map() }
   return await getProjectBlobsBatch(batch.map(p => p.overleaf.history.id))
 }
 
@@ -827,7 +878,7 @@ async function collectProjectBlobs(batch) {
  */
 async function collectDeletedFiles(projects) {
   const deletedFiles = new Map()
-  if (!process.argv.includes('deletedFiles')) return deletedFiles
+  if (!PROCESS_DELETED_FILES) return deletedFiles
 
   const cursor = deletedFilesCollection.find(
     {
@@ -860,9 +911,8 @@ async function collectDeletedFiles(projects) {
 async function collectBackedUpBlobs(projects) {
   let nBackedUpBlobs = 0
   const backedUpBlobs = new Map()
-  if (!process.argv.includes('collectBackedUpBlobs')) {
-    return { nBackedUpBlobs, backedUpBlobs }
-  }
+  if (!COLLECT_BACKED_UP_BLOBS) return { nBackedUpBlobs, backedUpBlobs }
+
   const cursor = backedUpBlobsCollection.find(
     { _id: { $in: projects.map(p => p._id) } },
     {
@@ -1122,7 +1172,7 @@ function estimateBlobSize(blob) {
   return size
 }
 
-async function updateLiveFileTrees() {
+async function processNonDeletedProjects() {
   try {
     await batchedUpdate(
       projectsCollection,
@@ -1144,7 +1194,7 @@ async function updateLiveFileTrees() {
   console.warn('Done updating live projects')
 }
 
-async function updateDeletedFileTrees() {
+async function processDeletedProjects() {
   try {
     await batchedUpdate(
       deletedProjectsCollection,
@@ -1173,11 +1223,11 @@ async function updateDeletedFileTrees() {
 
 async function main() {
   await loadGlobalBlobs()
-  if (process.argv.includes('live')) {
-    await updateLiveFileTrees()
+  if (PROCESS_NON_DELETED_PROJECTS) {
+    await processNonDeletedProjects()
   }
-  if (process.argv.includes('deleted')) {
-    await updateDeletedFileTrees()
+  if (PROCESS_DELETED_PROJECTS) {
+    await processDeletedProjects()
   }
   console.warn('Done.')
 }

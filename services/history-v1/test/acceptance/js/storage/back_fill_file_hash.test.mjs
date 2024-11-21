@@ -476,22 +476,22 @@ describe('back_fill_file_hash script', function () {
   })
 
   /**
+   * @param {Array<string>} args
    * @param {Record<string, string>} env
    * @param {boolean} shouldHaveWritten
    * @return {Promise<{result, stats: any}>}
    */
-  async function tryRunScript(env = {}, shouldHaveWritten) {
+  async function tryRunScript(args = [], env = {}, shouldHaveWritten) {
     let result
     try {
       result = await promisify(execFile)(
         process.argv0,
         [
           'storage/scripts/back_fill_file_hash.mjs',
-          'collectBackedUpBlobs',
-          'live',
-          'blobs',
-          'deleted',
-          'deletedFiles',
+          '--processNonDeletedProjects=true',
+          '--processDeletedProjects=true',
+          '--processDeletedFiles=true',
+          ...args,
         ],
         {
           encoding: 'utf-8',
@@ -549,12 +549,13 @@ describe('back_fill_file_hash script', function () {
   }
 
   /**
+   * @param {Array<string>} args
    * @param {Record<string, string>} env
    * @param {boolean} shouldHaveWritten
    * @return {Promise<{result, stats: any}>}
    */
-  async function runScript(env = {}, shouldHaveWritten = true) {
-    const { stats, result } = await tryRunScript(env, shouldHaveWritten)
+  async function runScript(args = [], env = {}, shouldHaveWritten = true) {
+    const { stats, result } = await tryRunScript(args, env, shouldHaveWritten)
     if (result.status !== 0) {
       console.log(result)
       expect(result).to.have.property('status', 0)
@@ -804,7 +805,7 @@ describe('back_fill_file_hash script', function () {
       ])
     })
     it('should process nothing on re-run', async function () {
-      const rerun = await runScript({}, false)
+      const rerun = await runScript([], {}, false)
       expect(rerun.stats).deep.equal({
         ...STATS_ALL_ZERO,
         // We still need to iterate over all the projects and blobs.
@@ -983,7 +984,7 @@ describe('back_fill_file_hash script', function () {
       `${projectId0}/${fileId0}`
     )
     const t0 = Date.now()
-    const { stats, result } = await tryRunScript({
+    const { stats, result } = await tryRunScript([], {
       RETRIES: '10',
       RETRY_DELAY_MS: '1000',
     })
@@ -1025,7 +1026,7 @@ describe('back_fill_file_hash script', function () {
         value: { stats, result },
       },
     ] = await Promise.allSettled([
-      tryRunScript({
+      tryRunScript([], {
         RETRY_DELAY_MS: '100',
         RETRIES: '60',
         RETRY_FILESTORE_404: 'true', // 404s are the easiest to simulate in tests
@@ -1049,7 +1050,7 @@ describe('back_fill_file_hash script', function () {
   describe('full run CONCURRENCY=1', function () {
     let output
     beforeEach('run script', async function () {
-      output = await runScript({
+      output = await runScript([], {
         CONCURRENCY: '1',
       })
     })
@@ -1063,7 +1064,7 @@ describe('back_fill_file_hash script', function () {
   describe('full run CONCURRENCY=10', function () {
     let output
     beforeEach('run script', async function () {
-      output = await runScript({
+      output = await runScript([], {
         CONCURRENCY: '10',
       })
     })
@@ -1076,7 +1077,7 @@ describe('back_fill_file_hash script', function () {
   describe('full run STREAM_HIGH_WATER_MARK=1MB', function () {
     let output
     beforeEach('run script', async function () {
-      output = await runScript({
+      output = await runScript([], {
         STREAM_HIGH_WATER_MARK: (1024 * 1024).toString(),
       })
     })
@@ -1098,7 +1099,7 @@ describe('back_fill_file_hash script', function () {
     })
     let output
     beforeEach('run script', async function () {
-      output = await runScript({
+      output = await runScript([], {
         CONCURRENCY: '1',
       })
     })
@@ -1122,15 +1123,13 @@ describe('back_fill_file_hash script', function () {
     const edge = projectId1.toString()
     let outputPart0, outputPart1
     beforeEach('run script on part 0', async function () {
-      outputPart0 = await runScript({
+      outputPart0 = await runScript([`--BATCH_RANGE_END=${edge}`], {
         CONCURRENCY: '1',
-        BATCH_RANGE_END: edge,
       })
     })
     beforeEach('run script on part 1', async function () {
-      outputPart1 = await runScript({
+      outputPart1 = await runScript([`--BATCH_RANGE_START=${edge}`], {
         CONCURRENCY: '1',
-        BATCH_RANGE_START: edge,
       })
     })
 

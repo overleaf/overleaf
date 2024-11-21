@@ -5,6 +5,8 @@
 FROM node:20.18.0 AS base
 
 WORKDIR /overleaf/services/history-v1
+COPY services/history-v1/install_deps.sh /overleaf/services/history-v1/
+RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
 
 # Google Cloud Storage needs a writable $HOME/.config for resumable uploads
 # (see https://googleapis.dev/nodejs/storage/latest/File.html#createWriteStream)
