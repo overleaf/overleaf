@@ -18,7 +18,7 @@ export const CompileTimeWarningUpgradePromptInner: FC<{
           variant="new-10s"
           source="compile-time-warning"
           buttonProps={{
-            className: 'btn-secondary-compile-timeout-override',
+            variant: 'secondary',
           }}
         >
           {hasNewPaywallCta
