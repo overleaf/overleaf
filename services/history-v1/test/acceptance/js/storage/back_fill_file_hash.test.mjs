@@ -540,6 +540,11 @@ describe('back_fill_file_hash script', function () {
       delete stats[key]
     }
     delete stats.LOGGING_IDENTIFIER
+    expect(stats.deferredBatches).to.have.length(
+      0,
+      'should not have any remaining deferred batches'
+    )
+    delete stats.deferredBatches
     return { stats, result }
   }
 

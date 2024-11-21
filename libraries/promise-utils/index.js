@@ -253,8 +253,14 @@ function expressifyErrorHandler(fn) {
  * Map values in `array` with the async function `fn`
  *
  * Limit the number of unresolved promises to `concurrency`.
+ * @template T
+ * @template V
+ * @param {number} concurrency
+ * @param {Array<T>} array
+ * @param {(arg: T) => Promise<V>} fn
+ * @return {Promise<Array<Awaited<V>>>}
  */
-function promiseMapWithLimit(concurrency, array, fn) {
+async function promiseMapWithLimit(concurrency, array, fn) {
   const limit = pLimit(concurrency)
-  return Promise.all(array.map(x => limit(() => fn(x))))
+  return await Promise.all(array.map(x => limit(() => fn(x))))
 }
