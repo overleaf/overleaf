@@ -96,7 +96,7 @@ export const ReviewPanelMessage: FC<{
           className="review-panel-comment-input review-panel-comment-edit"
           onBlur={handleSubmit}
           onChange={e => setContent(e.target.value)}
-          onKeyDown={e => {
+          onKeyPress={e => {
             if (
               e.key === 'Enter' &&
               !e.shiftKey &&

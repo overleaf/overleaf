@@ -142,7 +142,7 @@ export const ReviewPanelAddComment: FC<{
           name="message"
           className="review-panel-add-comment-textarea"
           onChange={handleChange}
-          onKeyDown={handleKeyPress}
+          onKeyPress={handleKeyPress}
           placeholder={t('add_your_comment_here')}
           value={content}
           disabled={submitting}

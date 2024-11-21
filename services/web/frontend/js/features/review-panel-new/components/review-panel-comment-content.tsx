@@ -95,7 +95,7 @@ export const ReviewPanelCommentContent = memo<{
             name="content"
             className="review-panel-comment-input"
             onChange={handleChange}
-            onKeyDown={handleKeyPress}
+            onKeyPress={handleKeyPress}
             placeholder={t('reply')}
             value={content}
           />
