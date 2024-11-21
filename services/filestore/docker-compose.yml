@@ -120,7 +120,6 @@ services:
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD \
         || sleep 3 && \
         mc alias set s3 https://minio:9000 MINIO_ROOT_USER MINIO_ROOT_PASSWORD
-
         mc mb --ignore-existing s3/fake-user-files
         mc mb --ignore-existing s3/fake-user-files-dek
         mc mb --ignore-existing s3/fake-template-files

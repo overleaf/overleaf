@@ -78,7 +78,7 @@ services:
       retries: 20
 
   certs:
-    image: node:18.20.4
+    image: node:20.18.0
     volumes:
       - ./test/acceptance/certs:/certs
     working_dir: /certs
