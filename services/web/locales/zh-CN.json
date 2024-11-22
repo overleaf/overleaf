@@ -1375,7 +1375,6 @@
   "only_group_admin_or_managers_can_delete_your_account_4": "一旦您成为托管用户，就无法再更改回来。 <0>了解有关托管 Overleaf 帐户的更多信息。</0>",
   "only_group_admin_or_managers_can_delete_your_account_5": "有关更多信息，请参阅我们的使用条款中的“托管帐户”部分，您可以通过单击“接受邀请”来同意该条款",
   "only_importer_can_refresh": "只有最初导入此 __provider__ 文件的人才能刷新它。",
-  "open_a_file_on_the_left": "打开左侧的一个文件",
   "open_advanced_reference_search": "打开高级引用搜索",
   "open_as_template": "作为模版打开",
   "open_file": "编辑文件",
