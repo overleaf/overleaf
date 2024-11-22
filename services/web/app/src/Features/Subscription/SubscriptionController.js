@@ -547,7 +547,11 @@ async function purchaseAddon(req, res, next) {
 
   logger.debug({ userId: user._id, addOnCode }, 'purchasing add-ons')
   try {
-    await SubscriptionHandler.promises.purchaseAddon(user, addOnCode, quantity)
+    await SubscriptionHandler.promises.purchaseAddon(
+      user._id,
+      addOnCode,
+      quantity
+    )
     return res.sendStatus(200)
   } catch (err) {
     if (err instanceof DuplicateAddOnError) {
@@ -580,7 +584,7 @@ async function removeAddon(req, res, next) {
   logger.debug({ userId: user._id, addOnCode }, 'removing add-ons')
 
   try {
-    await SubscriptionHandler.promises.removeAddon(user, addOnCode)
+    await SubscriptionHandler.promises.removeAddon(user._id, addOnCode)
     res.sendStatus(200)
   } catch (err) {
     if (err instanceof AddOnNotPresentError) {

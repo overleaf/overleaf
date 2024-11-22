@@ -14,11 +14,8 @@ class DuplicateAddOnError extends OError {}
 
 class AddOnNotPresentError extends OError {}
 
-class NoRecurlySubscriptionError extends OError {}
-
 module.exports = {
   RecurlyTransactionError,
   DuplicateAddOnError,
   AddOnNotPresentError,
-  NoRecurlySubscriptionError,
 }

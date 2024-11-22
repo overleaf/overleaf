@@ -11,7 +11,6 @@ const LimitationsManager = require('./LimitationsManager')
 const EmailHandler = require('../Email/EmailHandler')
 const { callbackify } = require('@overleaf/promise-utils')
 const UserUpdater = require('../User/UserUpdater')
-const { NoRecurlySubscriptionError } = require('./Errors')
 const { NotFoundError } = require('../Errors/Errors')
 
 /**
@@ -73,12 +72,7 @@ async function createSubscription(user, subscriptionDetails, recurlyTokenIds) {
  * @return {Promise<RecurlySubscriptionChange>}
  */
 async function previewSubscriptionChange(userId, planCode) {
-  const recurlyId = await getSubscriptionRecurlyId(userId)
-  if (recurlyId == null) {
-    throw new NoRecurlySubscriptionError('Subscription not found', { userId })
-  }
-
-  const subscription = await RecurlyClient.promises.getSubscription(recurlyId)
+  const subscription = await getSubscriptionForUser(userId)
   const changeRequest = subscription?.getRequestForPlanChange(planCode)
   const change =
     await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
@@ -285,26 +279,6 @@ async function _updateSubscriptionFromRecurly(subscription) {
 }
 
 /**
- * @return {Promise<RecurlySubscription>}
- */
-async function _getSubscription(user) {
-  const { hasSubscription = false, subscription } =
-    await LimitationsManager.promises.userHasV2Subscription(user)
-
-  if (!hasSubscription || !subscription?.recurlySubscription_id) {
-    throw new NoRecurlySubscriptionError(
-      "could not fetch the user's Recurly subscription",
-      { userId: user._id }
-    )
-  }
-
-  const currentSub = await RecurlyClient.promises.getSubscription(
-    subscription.recurlySubscription_id
-  )
-  return currentSub
-}
-
-/**
  * Preview the effect of purchasing an add-on
  *
  * @param {string} userId
@@ -312,12 +286,8 @@ async function _getSubscription(user) {
  * @return {Promise<RecurlySubscriptionChange>}
  */
 async function previewAddonPurchase(userId, addOnCode) {
-  const recurlyId = await getSubscriptionRecurlyId(userId)
-  if (recurlyId == null) {
-    throw new NoRecurlySubscriptionError('Subscription not found', { userId })
-  }
+  const subscription = await getSubscriptionForUser(userId)
 
-  const subscription = await RecurlyClient.promises.getSubscription(recurlyId)
   try {
     await RecurlyClient.promises.getAddOn(subscription.planCode, addOnCode)
   } catch (err) {
@@ -329,14 +299,22 @@ async function previewAddonPurchase(userId, addOnCode) {
     }
     throw err
   }
+
   const changeRequest = subscription.getRequestForAddOnPurchase(addOnCode)
   const change =
     await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
   return change
 }
 
-async function purchaseAddon(user, addOnCode, quantity) {
-  const subscription = await _getSubscription(user)
+/**
+ * Purchase an add-on for a user
+ *
+ * @param {string} userId
+ * @param {string} addOnCode
+ * @param {number} quantity
+ */
+async function purchaseAddon(userId, addOnCode, quantity) {
+  const subscription = await getSubscriptionForUser(userId)
   try {
     await RecurlyClient.promises.getAddOn(subscription.planCode, addOnCode)
   } catch (err) {
@@ -353,29 +331,54 @@ async function purchaseAddon(user, addOnCode, quantity) {
     quantity
   )
   await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await syncSubscription({ uuid: subscription.id }, user._id)
+  await syncSubscription({ uuid: subscription.id }, userId)
 }
 
-async function removeAddon(user, addOnCode) {
-  const subscription = await _getSubscription(user)
+/**
+ * Cancels and add-on for a user
+ *
+ * @param {string} userId
+ * @param {string} addOnCode
+ */
+async function removeAddon(userId, addOnCode) {
+  const subscription = await getSubscriptionForUser(userId)
   const changeRequest = subscription.getRequestForAddOnRemoval(addOnCode)
   await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
-  await syncSubscription({ uuid: subscription.id }, user._id)
+  await syncSubscription({ uuid: subscription.id }, userId)
 }
 
 /**
  * Returns the Recurly UUID for the given user
  *
+ * Throws a NotFoundError if the subscription can't be found
+ *
  * @param {string} userId
- * @return {Promise<string | null>} the Recurly UUID
+ * @return {Promise<RecurlySubscription>}
  */
-async function getSubscriptionRecurlyId(userId) {
+async function getSubscriptionForUser(userId) {
   const subscription =
     await SubscriptionLocator.promises.getUsersSubscription(userId)
-  if (subscription == null) {
-    return null
+  const recurlyId = subscription?.recurlySubscription_id
+  if (recurlyId == null) {
+    throw new NotFoundError({
+      message: 'Recurly subscription not found',
+      info: { userId },
+    })
   }
-  return subscription.recurlySubscription_id ?? null
+
+  try {
+    const subscription = await RecurlyClient.promises.getSubscription(recurlyId)
+    return subscription
+  } catch (err) {
+    if (err instanceof recurly.errors.NotFoundError) {
+      throw new NotFoundError({
+        message: 'Subscription not found',
+        info: { userId, recurlyId },
+      })
+    } else {
+      throw err
+    }
+  }
 }
 
 module.exports = {
