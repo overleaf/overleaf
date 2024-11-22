@@ -166,7 +166,10 @@ function handleShutdownSignal(signal) {
   // stop accepting new connections, the callback is called when existing connections have finished
   server.close(() => {
     logger.info({ signal }, 'server closed')
-    process.exit()
+    // exit after a short delay so logs can be flushed
+    setTimeout(() => {
+      process.exit()
+    }, 100)
   })
   // close idle http keep-alive connections
   server.closeIdleConnections()
@@ -178,7 +181,7 @@ function handleShutdownSignal(signal) {
     setTimeout(() => {
       process.exit()
     }, 100)
-  }, settings.delayShutdownMs)
+  }, settings.gracefulShutdownDelayInMs)
 }
 
 process.on('SIGTERM', handleShutdownSignal)
