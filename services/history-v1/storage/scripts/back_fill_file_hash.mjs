@@ -335,6 +335,7 @@ async function processFile(entry, filePath) {
     try {
       return await processFileOnce(entry, filePath)
     } catch (err) {
+      if (gracefulShutdownInitiated) throw err
       if (err instanceof NotFoundError) {
         const { bucketName } = OError.getFullInfo(err)
         if (bucketName === USER_FILES_BUCKET_NAME && !RETRY_FILESTORE_404) {
@@ -991,6 +992,7 @@ class ProjectContext {
       try {
         return await backupPersistor.forProject(projectBlobsBucket, key)
       } catch (err) {
+        if (gracefulShutdownInitiated) throw err
         if (err instanceof NoKEKMatchedError) {
           throw err
         } else {
