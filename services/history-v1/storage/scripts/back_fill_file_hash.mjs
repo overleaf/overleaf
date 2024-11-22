@@ -198,6 +198,7 @@ const STATS = {
   filesRetries: 0,
   filesFailed: 0,
   fileTreeUpdated: 0,
+  badFileTrees: 0,
   globalBlobsCount: 0,
   globalBlobsEgress: 0,
   projectDeleted: 0,
@@ -844,7 +845,6 @@ function* findFileInBatch(
       projectBlobs,
       projectBackedUpBlobs
     )
-    yield* findFiles(ctx, project.rootFolder[0], prefix, true)
     for (const fileId of projectDeletedFiles) {
       ctx.remainingQueueEntries++
       yield { ctx, cacheKey: fileId, fileId, path: '' }
@@ -859,6 +859,12 @@ function* findFileInBatch(
         blob,
         hash: blob.getHash(),
       }
+    }
+    try {
+      yield* findFiles(ctx, project.rootFolder[0], prefix, true)
+    } catch (err) {
+      STATS.badFileTrees++
+      logger.error({ err, projectId: projectIdS }, 'bad file-tree')
     }
   }
 }

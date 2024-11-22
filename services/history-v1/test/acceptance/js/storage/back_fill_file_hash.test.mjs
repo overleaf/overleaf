@@ -104,12 +104,14 @@ describe('back_fill_file_hash script', function () {
   const projectIdHardDeleted = objectIdFromTime('2017-01-01T00:08:00Z')
   const projectIdNoOverleaf = objectIdFromTime('2017-01-01T00:09:00Z')
   const projectIdNoOverleafDeleted = objectIdFromTime('2017-01-01T00:10:00Z')
+  const projectIdBadFileTree = objectIdFromTime('2024-01-01T00:11:00Z')
   const historyId0 = 42 // stored as number is mongo
   const historyId1 = projectId1.toString()
   const historyId2 = projectId2.toString()
   const historyId3 = projectId3.toString()
   const historyIdDeleted0 = projectIdDeleted0.toString()
   const historyIdDeleted1 = projectIdDeleted1.toString()
+  const historyIdBadFileTree = projectIdBadFileTree.toString()
   const fileId0 = objectIdFromTime('2017-02-01T00:00:00Z')
   const fileId1 = objectIdFromTime('2017-02-01T00:01:00Z')
   const fileId2 = objectIdFromTime('2017-02-01T00:02:00Z')
@@ -129,6 +131,8 @@ describe('back_fill_file_hash script', function () {
   const hashTextBlob1 = gitBlobHashBuffer(contentTextBlob1)
   const contentTextBlob2 = Buffer.from('Hello 2')
   const hashTextBlob2 = gitBlobHashBuffer(contentTextBlob2)
+  const contentTextBlob3 = Buffer.from('Hello 3')
+  const hashTextBlob3 = gitBlobHashBuffer(contentTextBlob3)
   const deleteProjectsRecordId0 = new ObjectId()
   const deleteProjectsRecordId1 = new ObjectId()
   const deleteProjectsRecordId2 = new ObjectId()
@@ -182,6 +186,12 @@ describe('back_fill_file_hash script', function () {
     },
     // { historyId: historyIdDeleted0, fileId:fileIdDeleted3 }, // fileIdDeleted3 is dupe of fileIdDeleted2
     // { historyId: historyIdDeleted0, fileId: fileIdDeleted4 }, // already has hash
+    {
+      projectId: projectIdBadFileTree,
+      historyId: historyIdBadFileTree,
+      hash: hashTextBlob3,
+      content: contentTextBlob3,
+    },
   ]
   if (PRINT_IDS_AND_HASHES_FOR_DEBUGGING) {
     const fileIds = {
@@ -304,6 +314,11 @@ describe('back_fill_file_hash script', function () {
         _id: projectIdNoOverleaf,
         rootFolder: [{ fileRefs: [], folders: [] }],
       },
+      {
+        _id: projectIdBadFileTree,
+        rootFolder: [],
+        overleaf: { history: { id: historyIdBadFileTree } },
+      },
     ])
     await deletedProjectsCollection.insertMany([
       {
@@ -397,6 +412,7 @@ describe('back_fill_file_hash script', function () {
     await testProjects.createEmptyProject(historyId3)
     await testProjects.createEmptyProject(historyIdDeleted0)
     await testProjects.createEmptyProject(historyIdDeleted1)
+    await testProjects.createEmptyProject(historyIdBadFileTree)
 
     const blobStore0 = new BlobStore(historyId0.toString())
     await blobStore0.putString(contentTextBlob0.toString())
@@ -404,6 +420,8 @@ describe('back_fill_file_hash script', function () {
     await blobStore1.putString(contentTextBlob1.toString())
     const blobStore2 = new BlobStore(historyId2.toString())
     await blobStore2.putString(contentTextBlob2.toString())
+    const blobStoreBadFileTree = new BlobStore(historyIdBadFileTree.toString())
+    await blobStoreBadFileTree.putString(contentTextBlob3.toString())
   })
 
   beforeEach('populate filestore', async function () {
@@ -649,6 +667,11 @@ describe('back_fill_file_hash script', function () {
           _id: projectIdNoOverleaf,
           rootFolder: [{ fileRefs: [], folders: [] }],
         },
+        {
+          _id: projectIdBadFileTree,
+          rootFolder: [],
+          overleaf: { history: { id: historyIdBadFileTree } },
+        },
       ])
       expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal([
         {
@@ -802,6 +825,10 @@ describe('back_fill_file_hash script', function () {
           _id: projectId3,
           blobs: [binaryForGitBlobHash(gitBlobHash(fileId3))].sort(),
         },
+        {
+          _id: projectIdBadFileTree,
+          blobs: [binaryForGitBlobHash(hashTextBlob3)].sort(),
+        },
       ])
     })
     it('should process nothing on re-run', async function () {
@@ -809,9 +836,10 @@ describe('back_fill_file_hash script', function () {
       expect(rerun.stats).deep.equal({
         ...STATS_ALL_ZERO,
         // We still need to iterate over all the projects and blobs.
-        projects: 6,
-        blobs: 11,
-        backedUpBlobs: 11,
+        projects: 7,
+        blobs: 12,
+        backedUpBlobs: 12,
+        badFileTrees: 1,
       })
     })
     it('should have backed up all the files', async function () {
@@ -904,6 +932,7 @@ describe('back_fill_file_hash script', function () {
     projectDeleted: 0,
     projectHardDeleted: 0,
     fileHardDeleted: 0,
+    badFileTrees: 0,
     mongoUpdates: 0,
     deduplicatedWriteToAWSLocalCount: 0,
     deduplicatedWriteToAWSLocalEgress: 0,
@@ -930,6 +959,7 @@ describe('back_fill_file_hash script', function () {
     projectDeleted: 0,
     projectHardDeleted: 0,
     fileHardDeleted: 0,
+    badFileTrees: 0,
     mongoUpdates: 6,
     deduplicatedWriteToAWSLocalCount: 0,
     deduplicatedWriteToAWSLocalEgress: 0,
@@ -943,8 +973,8 @@ describe('back_fill_file_hash script', function () {
     writeToGCSEgress: 4000096,
   }
   const STATS_UP_FROM_PROJECT1_ONWARD = {
-    projects: 4,
-    blobs: 1,
+    projects: 5,
+    blobs: 2,
     backedUpBlobs: 0,
     filesWithoutHash: 4,
     filesDuplicated: 0,
@@ -956,15 +986,16 @@ describe('back_fill_file_hash script', function () {
     projectDeleted: 0,
     projectHardDeleted: 0,
     fileHardDeleted: 0,
-    mongoUpdates: 7,
+    badFileTrees: 1,
+    mongoUpdates: 8,
     deduplicatedWriteToAWSLocalCount: 1,
     deduplicatedWriteToAWSLocalEgress: 30,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 5,
-    readFromGCSIngress: 103,
-    writeToAWSCount: 4,
-    writeToAWSEgress: 115,
+    readFromGCSCount: 6,
+    readFromGCSIngress: 110,
+    writeToAWSCount: 5,
+    writeToAWSEgress: 142,
     writeToGCSCount: 3,
     writeToGCSEgress: 72,
   }
@@ -1057,6 +1088,15 @@ describe('back_fill_file_hash script', function () {
 
     it('should print stats', function () {
       expect(output.stats).deep.equal(STATS_ALL)
+    })
+    it('should have logged the bad file-tree', function () {
+      const line = output.result.stdout
+        .split('\n')
+        .find(l => l.includes('bad file-tree'))
+      expect(line).to.exist
+      expect(JSON.parse(line)).to.include({
+        projectId: projectIdBadFileTree.toString(),
+      })
     })
     commonAssertions()
   })
