@@ -10,6 +10,7 @@ import { useLocation } from '@/shared/hooks/use-location'
 import { debugConsole } from '@/utils/debugging'
 import { postJSON } from '@/infrastructure/fetch-json'
 import Notification from '@/shared/components/notification'
+import { subscriptionUpdateUrl } from '@/features/subscription/data/subscription-url'
 
 function PreviewSubscriptionChange() {
   const preview = getMeta('ol-subscriptionChangePreview')
@@ -166,10 +167,15 @@ function PreviewSubscriptionChange() {
 async function payNow(preview: SubscriptionChangePreview) {
   if (preview.change.type === 'add-on-purchase') {
     await postJSON(`/user/subscription/addon/${preview.change.addOn.code}/add`)
+  } else if (preview.change.type === 'premium-subscription') {
+    await postJSON(subscriptionUpdateUrl, {
+      body: { plan_code: preview.change.plan.code },
+    })
   } else {
     throw new Error(
-      `Unknown subscription change preview type: ${preview.change.type}`
+      `Unknown subscription change preview type: ${preview.change}`
     )
   }
 }
+
 export default PreviewSubscriptionChange
