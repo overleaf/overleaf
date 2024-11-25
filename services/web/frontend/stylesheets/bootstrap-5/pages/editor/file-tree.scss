@@ -4,6 +4,8 @@
   --file-tree-item-color: var(--content-primary-dark);
   --file-tree-bg: var(--bg-dark-tertiary);
   --file-tree-item-selected-color: var(--content-primary-dark);
+  --file-tree-item-dragging-bg: #{rgb($bg-dark-secondary, 0.9)};
+  --file-tree-item-dragging-preview-bg: #{rgb($bg-accent-01, 0.6)};
   --file-tree-line-height: 2.05;
 }
 
@@ -12,6 +14,7 @@
   --file-tree-item-color: var(--content-secondary);
   --file-tree-bg: var(--bg-light-primary);
   --file-tree-item-selected-color: var(--bg-light-primary);
+  --file-tree-item-dragging-bg: #{rgb($bg-light-tertiary, 0.9)};
 }
 
 .ide-react-file-tree-panel {
@@ -75,7 +78,6 @@
   flex-direction: column;
   height: 100%;
 
-  > file-tree-root,
   .file-tree-inner {
     position: relative;
     display: flex;
@@ -84,6 +86,7 @@
     overflow-y: auto;
     width: inherit;
     height: inherit;
+    font-size: var(--font-size-02);
 
     &.no-toolbar {
       top: 0;
@@ -92,7 +95,7 @@
 
   // TODO; Consolidate with "Project files" in Overleaf
   h3 {
-    font-size: 1rem;
+    font-size: var(--font-size-03);
     border-bottom: 1px solid var(--border-primary);
     padding-bottom: var(--spacing-02);
     margin: var(--spacing-05);
@@ -128,25 +131,6 @@
     }
   }
 
-  &-history {
-    .entity-name {
-      padding-left: var(--spacing-03);
-
-      &.deleted {
-        text-decoration: line-through;
-      }
-    }
-
-    .loading {
-      padding-left: var(--spacing-03);
-      color: var(--content-primary-dark);
-
-      .material-symbols {
-        color: var(--content-primary-dark);
-      }
-    }
-  }
-
   ul.file-tree-list {
     margin: 0;
     overflow: hidden auto;
@@ -173,19 +157,24 @@
         user-select: none;
       }
 
-      .entity > .entity-name > button {
-        background-color: transparent;
-        border: 0;
-        padding: 0;
+      .entity > .entity-name {
+        display: flex;
+        align-items: center;
 
-        &.item-name-button {
-          color: inherit;
-          width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          text-align: left;
-          padding-right: var(--spacing-09);
-          white-space: pre;
+        & > button {
+          background-color: transparent;
+          border: 0;
+          padding: 0;
+
+          &.item-name-button {
+            color: inherit;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+            padding-right: var(--spacing-09);
+            white-space: pre;
+          }
         }
       }
 
@@ -242,7 +231,7 @@
               top: 4px;
               width: 0;
               left: -5px;
-              font-size: 12px;
+              font-size: var(--font-size-01);
             }
           }
         }
@@ -317,7 +306,6 @@
       .menu-button {
         position: absolute;
         right: 0;
-        top: 3px;
       }
 
       .rename-input {
@@ -413,9 +401,9 @@
     li
     .entity.file-tree-entity-dragging
     .entity-name {
-    background-color: fade(var(--file-tree-item-hover-bg), 90%);
+    background-color: var(--file-tree-item-dragging-bg);
 
-    @include fake-full-width-bg(fade(var(--file-tree-item-hover-bg), 90%));
+    @include fake-full-width-bg(var(--file-tree-item-dragging-bg));
 
     color: var(--file-tree-item-color);
 
@@ -455,7 +443,7 @@
 
   .dnd-draggable-preview-item {
     color: var(--file-tree-item-selected-color);
-    background-color: fade(var(--file-tree-item-selected-bg), 60%);
+    background-color: var(--file-tree-item-dragging-preview-bg);
     width: 75%;
     padding-left: var(--spacing-08);
     line-height: 2.05;
@@ -490,7 +478,7 @@
   }
 
   .toggle-file-type-button {
-    font-size: 80%;
+    font-size: var(--font-size-02);
     margin-top: calc(var(--spacing-05) * -1);
 
     .btn {
