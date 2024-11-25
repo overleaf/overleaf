@@ -140,6 +140,10 @@ async function verifyMd5(persistor, bucket, key, sourceMd5, destMd5 = null) {
 }
 
 function wrapError(error, message, params, ErrorType) {
+  params = {
+    ...params,
+    cause: error,
+  }
   if (
     error instanceof NotFoundError ||
     ['NoSuchKey', 'NotFound', 404, 'AccessDenied', 'ENOENT'].includes(

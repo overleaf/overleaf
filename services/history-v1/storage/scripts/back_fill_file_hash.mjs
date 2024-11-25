@@ -356,7 +356,8 @@ async function processFile(entry, filePath) {
         { err, projectId, fileId, hash, path, attempt },
         'failed to process file, trying again'
       )
-      await setTimeout(RETRY_DELAY_MS)
+      const jitter = Math.random() * RETRY_DELAY_MS
+      await setTimeout(RETRY_DELAY_MS + jitter)
     }
   }
   return await processFileOnce(entry, filePath)
@@ -1000,7 +1001,8 @@ class ProjectContext {
             { err, projectId: this.projectId, attempt },
             'failed to get DEK, trying again'
           )
-          await setTimeout(RETRY_DELAY_MS)
+          const jitter = Math.random() * RETRY_DELAY_MS
+          await setTimeout(RETRY_DELAY_MS + jitter)
         }
       }
     }
