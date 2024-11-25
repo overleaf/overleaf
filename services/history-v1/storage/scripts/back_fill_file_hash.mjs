@@ -989,8 +989,25 @@ class ProjectContext {
    * @return {Promise<CachedPerProjectEncryptedS3Persistor>}
    */
   async #getCachedPersistorWithRetries(key) {
+    // Optimization: Skip GET on DEK in case no blobs are marked as backed up yet.
+    let tryGenerateDEKFirst = this.#backedUpBlobs.size === 0
     for (let attempt = 0; attempt < RETRIES; attempt++) {
       try {
+        if (tryGenerateDEKFirst) {
+          try {
+            return await backupPersistor.generateDataEncryptionKey(
+              projectBlobsBucket,
+              key
+            )
+          } catch (err) {
+            if (err instanceof AlreadyWrittenError) {
+              tryGenerateDEKFirst = false
+              // fall back to GET below
+            } else {
+              throw err
+            }
+          }
+        }
         return await backupPersistor.forProject(projectBlobsBucket, key)
       } catch (err) {
         if (gracefulShutdownInitiated) throw err

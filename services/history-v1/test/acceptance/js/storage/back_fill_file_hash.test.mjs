@@ -1158,6 +1158,43 @@ describe('back_fill_file_hash script', function () {
     commonAssertions()
   })
 
+  describe('with something in the bucket and marked as processed', function () {
+    beforeEach('create a file in s3', async function () {
+      await backupPersistor.sendStream(
+        projectBlobsBucket,
+        makeProjectKey(historyId0, hashTextBlob0),
+        Stream.Readable.from([contentTextBlob0]),
+        { contentLength: contentTextBlob0.byteLength }
+      )
+      await backedUpBlobs.insertMany([
+        {
+          _id: projectId0,
+          blobs: [binaryForGitBlobHash(hashTextBlob0)],
+        },
+      ])
+    })
+    let output
+    beforeEach('run script', async function () {
+      output = await runScript([], {
+        CONCURRENCY: '1',
+      })
+    })
+
+    it('should print stats', function () {
+      expect(output.stats).deep.equal(
+        sumStats(STATS_ALL, {
+          ...STATS_ALL_ZERO,
+          backedUpBlobs: 1,
+          writeToAWSCount: -1,
+          writeToAWSEgress: -27,
+          readFromGCSCount: -1,
+          readFromGCSIngress: -7,
+        })
+      )
+    })
+    commonAssertions()
+  })
+
   describe('split run CONCURRENCY=1', function () {
     // part0: project0+project1, part1: project2 onwards
     const edge = projectId1.toString()
