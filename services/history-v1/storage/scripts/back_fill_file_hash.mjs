@@ -823,14 +823,45 @@ async function updateFileRefInMongo(entry) {
  * @return Generator<QueueEntry>
  */
 function* findFiles(ctx, folder, path, isInputLoop = false) {
+  if (!folder || typeof folder !== 'object') {
+    ctx.fileTreeBroken = true
+    logger.warn({ projectId: ctx.projectId, path }, 'bad file-tree, bad folder')
+    return
+  }
+  if (!Array.isArray(folder.folders)) {
+    folder.folders = []
+    ctx.fileTreeBroken = true
+    logger.warn(
+      { projectId: ctx.projectId, path: `${path}.folders` },
+      'bad file-tree, bad folders'
+    )
+  }
   let i = 0
   for (const child of folder.folders) {
     const idx = i++
     yield* findFiles(ctx, child, `${path}.folders.${idx}`, isInputLoop)
   }
+  if (!Array.isArray(folder.fileRefs)) {
+    folder.fileRefs = []
+    ctx.fileTreeBroken = true
+    logger.warn(
+      { projectId: ctx.projectId, path: `${path}.fileRefs` },
+      'bad file-tree, bad fileRefs'
+    )
+  }
   i = 0
   for (const fileRef of folder.fileRefs) {
     const idx = i++
+    const fileRefPath = `${path}.fileRefs.${idx}`
+    if (!fileRef._id || !(fileRef._id instanceof ObjectId)) {
+      ctx.fileTreeBroken = true
+      logger.warn(
+        { projectId: ctx.projectId, path: fileRefPath },
+        'bad file-tree, bad fileRef id'
+      )
+      continue
+    }
+    const fileId = fileRef._id.toString()
     if (PROCESS_HASHED_FILES && fileRef.hash) {
       if (ctx.canSkipProcessingHashedFile(fileRef.hash)) continue
       if (isInputLoop) {
@@ -840,7 +871,7 @@ function* findFiles(ctx, folder, path, isInputLoop = false) {
       yield {
         ctx,
         cacheKey: fileRef.hash,
-        fileId: fileRef._id.toString(),
+        fileId,
         path: MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE,
         hash: fileRef.hash,
       }
@@ -852,9 +883,9 @@ function* findFiles(ctx, folder, path, isInputLoop = false) {
       }
       yield {
         ctx,
-        cacheKey: fileRef._id.toString(),
-        fileId: fileRef._id.toString(),
-        path: `${path}.fileRefs.${idx}`,
+        cacheKey: fileId,
+        fileId,
+        path: fileRefPath,
       }
     }
   }
@@ -918,10 +949,14 @@ function* findFileInBatch(
       }
     }
     try {
-      yield* findFiles(ctx, project.rootFolder[0], prefix, true)
+      yield* findFiles(ctx, project.rootFolder?.[0], prefix, true)
     } catch (err) {
-      STATS.badFileTrees++
-      logger.error({ err, projectId: projectIdS }, 'bad file-tree')
+      logger.error(
+        { err, projectId: projectIdS },
+        'bad file-tree, processing error'
+      )
+    } finally {
+      if (ctx.fileTreeBroken) STATS.badFileTrees++
     }
   }
 }
@@ -1012,6 +1047,9 @@ class ProjectContext {
 
   /** @type {number} */
   remainingQueueEntries = 0
+
+  /** @type {boolean} */
+  fileTreeBroken = false
 
   /**
    * @param {ObjectId} projectId

@@ -104,14 +104,20 @@ describe('back_fill_file_hash script', function () {
   const projectIdHardDeleted = objectIdFromTime('2017-01-01T00:08:00Z')
   const projectIdNoOverleaf = objectIdFromTime('2017-01-01T00:09:00Z')
   const projectIdNoOverleafDeleted = objectIdFromTime('2017-01-01T00:10:00Z')
-  const projectIdBadFileTree = objectIdFromTime('2024-01-01T00:11:00Z')
+  const projectIdBadFileTree0 = objectIdFromTime('2024-01-01T00:11:00Z')
+  const projectIdBadFileTree1 = objectIdFromTime('2024-01-01T00:12:00Z')
+  const projectIdBadFileTree2 = objectIdFromTime('2024-01-01T00:13:00Z')
+  const projectIdBadFileTree3 = objectIdFromTime('2024-01-01T00:14:00Z')
   const historyId0 = 42 // stored as number is mongo
   const historyId1 = projectId1.toString()
   const historyId2 = projectId2.toString()
   const historyId3 = projectId3.toString()
   const historyIdDeleted0 = projectIdDeleted0.toString()
   const historyIdDeleted1 = projectIdDeleted1.toString()
-  const historyIdBadFileTree = projectIdBadFileTree.toString()
+  const historyIdBadFileTree0 = projectIdBadFileTree0.toString()
+  const historyIdBadFileTree1 = projectIdBadFileTree1.toString()
+  const historyIdBadFileTree2 = projectIdBadFileTree2.toString()
+  const historyIdBadFileTree3 = projectIdBadFileTree3.toString()
   const fileId0 = objectIdFromTime('2017-02-01T00:00:00Z')
   const fileId1 = objectIdFromTime('2017-02-01T00:01:00Z')
   const fileId2 = objectIdFromTime('2017-02-01T00:02:00Z')
@@ -121,6 +127,7 @@ describe('back_fill_file_hash script', function () {
   const fileId6 = objectIdFromTime('2017-02-01T00:06:00Z')
   const fileId7 = objectIdFromTime('2017-02-01T00:07:00Z')
   const fileId8 = objectIdFromTime('2017-02-01T00:08:00Z')
+  const fileId9 = objectIdFromTime('2017-02-01T00:09:00Z')
   const fileIdDeleted1 = objectIdFromTime('2017-03-01T00:01:00Z')
   const fileIdDeleted2 = objectIdFromTime('2017-03-01T00:02:00Z')
   const fileIdDeleted3 = objectIdFromTime('2017-03-01T00:03:00Z')
@@ -204,10 +211,15 @@ describe('back_fill_file_hash script', function () {
       hasHash: true,
     },
     {
-      projectId: projectIdBadFileTree,
-      historyId: historyIdBadFileTree,
+      projectId: projectIdBadFileTree0,
+      historyId: historyIdBadFileTree0,
       hash: hashTextBlob3,
       content: contentTextBlob3,
+    },
+    {
+      projectId: projectIdBadFileTree3,
+      historyId: historyIdBadFileTree3,
+      fileId: fileId9,
     },
   ]
   if (PRINT_IDS_AND_HASHES_FOR_DEBUGGING) {
@@ -342,9 +354,28 @@ describe('back_fill_file_hash script', function () {
         rootFolder: [{ fileRefs: [], folders: [] }],
       },
       {
-        _id: projectIdBadFileTree,
+        _id: projectIdBadFileTree0,
+        overleaf: { history: { id: historyIdBadFileTree0 } },
+      },
+      {
+        _id: projectIdBadFileTree1,
         rootFolder: [],
-        overleaf: { history: { id: historyIdBadFileTree } },
+        overleaf: { history: { id: historyIdBadFileTree1 } },
+      },
+      {
+        _id: projectIdBadFileTree2,
+        rootFolder: [{ fileRefs: [{ _id: null }] }],
+        overleaf: { history: { id: historyIdBadFileTree2 } },
+      },
+      {
+        _id: projectIdBadFileTree3,
+        rootFolder: [
+          {
+            folders: [null, { folders: {}, fileRefs: 13 }],
+            fileRefs: [{ _id: fileId9 }],
+          },
+        ],
+        overleaf: { history: { id: historyIdBadFileTree3 } },
       },
     ])
     await deletedProjectsCollection.insertMany([
@@ -433,13 +464,18 @@ describe('back_fill_file_hash script', function () {
       { _id: fileIdDeleted5, projectId: projectId0 },
     ])
 
-    await testProjects.createEmptyProject(historyId0.toString())
-    await testProjects.createEmptyProject(historyId1)
-    await testProjects.createEmptyProject(historyId2)
-    await testProjects.createEmptyProject(historyId3)
-    await testProjects.createEmptyProject(historyIdDeleted0)
-    await testProjects.createEmptyProject(historyIdDeleted1)
-    await testProjects.createEmptyProject(historyIdBadFileTree)
+    await Promise.all([
+      testProjects.createEmptyProject(historyId0.toString()),
+      testProjects.createEmptyProject(historyId1),
+      testProjects.createEmptyProject(historyId2),
+      testProjects.createEmptyProject(historyId3),
+      testProjects.createEmptyProject(historyIdDeleted0),
+      testProjects.createEmptyProject(historyIdDeleted1),
+      testProjects.createEmptyProject(historyIdBadFileTree0),
+      testProjects.createEmptyProject(historyIdBadFileTree1),
+      testProjects.createEmptyProject(historyIdBadFileTree2),
+      testProjects.createEmptyProject(historyIdBadFileTree3),
+    ])
 
     const blobStore0 = new BlobStore(historyId0.toString())
     await blobStore0.putString(contentTextBlob0.toString())
@@ -447,7 +483,7 @@ describe('back_fill_file_hash script', function () {
     await blobStore1.putString(contentTextBlob1.toString())
     const blobStore2 = new BlobStore(historyId2.toString())
     await blobStore2.putString(contentTextBlob2.toString())
-    const blobStoreBadFileTree = new BlobStore(historyIdBadFileTree.toString())
+    const blobStoreBadFileTree = new BlobStore(historyIdBadFileTree0.toString())
     await blobStoreBadFileTree.putString(contentTextBlob3.toString())
   })
 
@@ -517,6 +553,11 @@ describe('back_fill_file_hash script', function () {
       USER_FILES_BUCKET_NAME,
       `${projectIdDeleted0}/${fileIdDeleted4}`,
       Stream.Readable.from([fileIdDeleted4.toString()])
+    )
+    await FILESTORE_PERSISTOR.sendStream(
+      USER_FILES_BUCKET_NAME,
+      `${projectIdBadFileTree3}/${fileId9}`,
+      Stream.Readable.from([fileId9.toString()])
     )
   })
 
@@ -703,9 +744,28 @@ describe('back_fill_file_hash script', function () {
           rootFolder: [{ fileRefs: [], folders: [] }],
         },
         {
-          _id: projectIdBadFileTree,
+          _id: projectIdBadFileTree0,
+          overleaf: { history: { id: historyIdBadFileTree0 } },
+        },
+        {
+          _id: projectIdBadFileTree1,
           rootFolder: [],
-          overleaf: { history: { id: historyIdBadFileTree } },
+          overleaf: { history: { id: historyIdBadFileTree1 } },
+        },
+        {
+          _id: projectIdBadFileTree2,
+          rootFolder: [{ fileRefs: [{ _id: null }] }],
+          overleaf: { history: { id: historyIdBadFileTree2 } },
+        },
+        {
+          _id: projectIdBadFileTree3,
+          rootFolder: [
+            {
+              folders: [null, { folders: {}, fileRefs: 13 }],
+              fileRefs: [{ _id: fileId9, hash: gitBlobHash(fileId9) }],
+            },
+          ],
+          overleaf: { history: { id: historyIdBadFileTree3 } },
         },
       ])
       expect(await deletedProjectsCollection.find({}).toArray()).to.deep.equal([
@@ -881,8 +941,12 @@ describe('back_fill_file_hash script', function () {
             ]
           : []),
         {
-          _id: projectIdBadFileTree,
+          _id: projectIdBadFileTree0,
           blobs: [binaryForGitBlobHash(hashTextBlob3)].sort(),
+        },
+        {
+          _id: projectIdBadFileTree3,
+          blobs: [binaryForGitBlobHash(gitBlobHash(fileId9))].sort(),
         },
       ])
     })
@@ -895,10 +959,10 @@ describe('back_fill_file_hash script', function () {
       let stats = {
         ...STATS_ALL_ZERO,
         // We still need to iterate over all the projects and blobs.
-        projects: 7,
-        blobs: 12,
-        backedUpBlobs: 12,
-        badFileTrees: 1,
+        projects: 10,
+        blobs: 13,
+        backedUpBlobs: 13,
+        badFileTrees: 4,
       }
       if (processHashedFiles) {
         stats = sumStats(stats, {
@@ -1042,11 +1106,11 @@ describe('back_fill_file_hash script', function () {
     writeToGCSEgress: 4000096,
   }
   const STATS_UP_FROM_PROJECT1_ONWARD = {
-    projects: 5,
+    projects: 8,
     blobs: 2,
     backedUpBlobs: 0,
     filesWithHash: 0,
-    filesWithoutHash: 4,
+    filesWithoutHash: 5,
     filesDuplicated: 0,
     filesRetries: 0,
     filesFailed: 0,
@@ -1056,18 +1120,18 @@ describe('back_fill_file_hash script', function () {
     projectDeleted: 0,
     projectHardDeleted: 0,
     fileHardDeleted: 0,
-    badFileTrees: 1,
-    mongoUpdates: 8,
+    badFileTrees: 4,
+    mongoUpdates: 10,
     deduplicatedWriteToAWSLocalCount: 1,
     deduplicatedWriteToAWSLocalEgress: 30,
     deduplicatedWriteToAWSRemoteCount: 0,
     deduplicatedWriteToAWSRemoteEgress: 0,
-    readFromGCSCount: 6,
-    readFromGCSIngress: 110,
-    writeToAWSCount: 5,
-    writeToAWSEgress: 143,
-    writeToGCSCount: 3,
-    writeToGCSEgress: 72,
+    readFromGCSCount: 7,
+    readFromGCSIngress: 134,
+    writeToAWSCount: 6,
+    writeToAWSEgress: 173,
+    writeToGCSCount: 4,
+    writeToGCSEgress: 96,
   }
 
   function sumStats(a, b) {
@@ -1156,17 +1220,61 @@ describe('back_fill_file_hash script', function () {
       })
     })
 
+    /**
+     * @param {ObjectId} projectId
+     * @param {string} msg
+     */
+    function expectBadFileTreeMessage(projectId, msg, path) {
+      const line = output.result.stdout
+        .split('\n')
+        .find(l => l.includes(msg) && l.includes(projectId.toString()))
+      expect(line).to.exist
+      expect(JSON.parse(line)).to.include({
+        projectId: projectId.toString(),
+        msg,
+        path,
+      })
+    }
+
     it('should print stats', function () {
       expect(output.stats).deep.equal(STATS_ALL)
     })
     it('should have logged the bad file-tree', function () {
-      const line = output.result.stdout
-        .split('\n')
-        .find(l => l.includes('bad file-tree'))
-      expect(line).to.exist
-      expect(JSON.parse(line)).to.include({
-        projectId: projectIdBadFileTree.toString(),
-      })
+      expectBadFileTreeMessage(
+        projectIdBadFileTree0,
+        'bad file-tree, bad folder',
+        'rootFolder.0'
+      )
+      expectBadFileTreeMessage(
+        projectIdBadFileTree1,
+        'bad file-tree, bad folder',
+        'rootFolder.0'
+      )
+      expectBadFileTreeMessage(
+        projectIdBadFileTree1,
+        'bad file-tree, bad folder',
+        'rootFolder.0'
+      )
+      expectBadFileTreeMessage(
+        projectIdBadFileTree2,
+        'bad file-tree, bad fileRef id',
+        'rootFolder.0.fileRefs.0'
+      )
+      expectBadFileTreeMessage(
+        projectIdBadFileTree3,
+        'bad file-tree, bad folder',
+        'rootFolder.0.folders.0'
+      )
+      expectBadFileTreeMessage(
+        projectIdBadFileTree3,
+        'bad file-tree, bad folders',
+        'rootFolder.0.folders.1.folders'
+      )
+      expectBadFileTreeMessage(
+        projectIdBadFileTree3,
+        'bad file-tree, bad fileRefs',
+        'rootFolder.0.folders.1.fileRefs'
+      )
     })
     commonAssertions()
   })
