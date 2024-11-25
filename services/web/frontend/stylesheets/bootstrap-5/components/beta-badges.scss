@@ -3,9 +3,9 @@
 }
 
 .alpha-badge {
-  color: var(--green-50);
+  font-family: $font-family-monospace;
 }
 
-.beta-badge {
-  color: var(--yellow-40);
+.split-test-badge-tooltip .tooltip-inner {
+  white-space: pre-wrap;
 }

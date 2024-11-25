@@ -4,6 +4,7 @@ import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { bsVersion } from '@/features/utils/bootstrap-5'
+import OLBadge from '@/features/ui/components/ol/ol-badge'
 
 type TooltipProps = {
   id: string
@@ -12,6 +13,28 @@ type TooltipProps = {
   placement?: NonNullable<
     React.ComponentProps<typeof OLTooltip>['overlayProps']
   >['placement']
+}
+
+function BS5BetaBadge({
+  badgeClass,
+}: {
+  badgeClass: ReturnType<typeof chooseBadgeClass>
+}) {
+  if (badgeClass === 'info-badge') {
+    return <MaterialIcon type="info" className="align-middle info-badge" />
+  } else if (badgeClass === 'alpha-badge') {
+    return (
+      <OLBadge bg="primary" className="alpha-badge">
+        α
+      </OLBadge>
+    )
+  } else {
+    return (
+      <OLBadge bg="warning" className="beta-badge">
+        β
+      </OLBadge>
+    )
+  }
 }
 
 const BetaBadge: FC<{
@@ -36,12 +59,7 @@ const BetaBadge: FC<{
         </span>
         <BootstrapVersionSwitcher
           bs3={<span className={classnames('badge', badgeClass)} />}
-          bs5={
-            <MaterialIcon
-              type="info"
-              className={classnames('align-middle', badgeClass)}
-            />
-          }
+          bs5={<BS5BetaBadge badgeClass={badgeClass} />}
         />
       </a>
     </OLTooltip>
