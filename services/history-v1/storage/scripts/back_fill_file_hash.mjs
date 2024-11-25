@@ -86,7 +86,7 @@ ObjectId.cacheHexString = true
  */
 
 /**
- * @return {{PROCESS_DELETED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
+ * @return {{PROCESS_HASHED_FILES: boolean, PROCESS_DELETED_FILES: boolean, LOGGING_IDENTIFIER: string, BATCH_RANGE_START: string, PROCESS_BLOBS: boolean, BATCH_RANGE_END: string, PROCESS_NON_DELETED_PROJECTS: boolean, PROCESS_DELETED_PROJECTS: boolean, COLLECT_BACKED_UP_BLOBS: boolean}}
  */
 function parseArgs() {
   const PUBLIC_LAUNCH_DATE = new Date('2012-01-01T00:00:00Z')
@@ -94,6 +94,7 @@ function parseArgs() {
     { name: 'processNonDeletedProjects', type: String, defaultValue: 'false' },
     { name: 'processDeletedProjects', type: String, defaultValue: 'false' },
     { name: 'processDeletedFiles', type: String, defaultValue: 'false' },
+    { name: 'processHashedFiles', type: String, defaultValue: 'false' },
     { name: 'processBlobs', type: String, defaultValue: 'true' },
     { name: 'collectBackedUpBlobs', type: String, defaultValue: 'true' },
     {
@@ -127,6 +128,7 @@ function parseArgs() {
     PROCESS_DELETED_PROJECTS: boolVal('processDeletedProjects'),
     PROCESS_BLOBS: boolVal('processBlobs'),
     PROCESS_DELETED_FILES: boolVal('processDeletedFiles'),
+    PROCESS_HASHED_FILES: boolVal('processHashedFiles'),
     COLLECT_BACKED_UP_BLOBS: boolVal('collectBackedUpBlobs'),
     BATCH_RANGE_START,
     BATCH_RANGE_END,
@@ -139,6 +141,7 @@ const {
   PROCESS_DELETED_PROJECTS,
   PROCESS_BLOBS,
   PROCESS_DELETED_FILES,
+  PROCESS_HASHED_FILES,
   COLLECT_BACKED_UP_BLOBS,
   BATCH_RANGE_START,
   BATCH_RANGE_END,
@@ -193,6 +196,7 @@ const STATS = {
   projects: 0,
   blobs: 0,
   backedUpBlobs: 0,
+  filesWithHash: 0,
   filesWithoutHash: 0,
   filesDuplicated: 0,
   filesRetries: 0,
@@ -396,6 +400,13 @@ async function processFileOnce(entry, filePath) {
     await uploadBlobToAWS(entry, blob, filePath)
     return hash
   }
+  if (entry.hash && entry.ctx.hasBackedUpBlob(entry.hash)) {
+    STATS.deduplicatedWriteToAWSLocalCount++
+    const blob = entry.ctx.getCachedHistoryBlob(entry.hash)
+    // blob might not exist on re-run with --PROCESS_BLOBS=false
+    if (blob) STATS.deduplicatedWriteToAWSLocalEgress += estimateBlobSize(blob)
+    return entry.hash
+  }
 
   STATS.readFromGCSCount++
   const src = await filestorePersistor.getObjectStream(
@@ -415,6 +426,9 @@ async function processFileOnce(entry, filePath) {
     await getStringLengthOfFile(blob.getByteLength(), filePath)
   )
   const hash = blob.getHash()
+  if (entry.hash && hash !== entry.hash) {
+    throw new OError('hash mismatch', { entry, hash })
+  }
 
   if (GLOBAL_BLOBS.has(hash)) {
     STATS.globalBlobsCount++
@@ -447,18 +461,22 @@ async function processFileOnce(entry, filePath) {
  * @return {Promise<void>}
  */
 async function uploadBlobToGCS(blobStore, entry, blob, hash, filePath) {
-  if (entry.ctx.hasHistoryBlob(hash)) {
+  if (entry.ctx.getCachedHistoryBlob(hash)) {
     return // fast-path using hint from pre-fetched blobs
   }
-  if (!PROCESS_BLOBS && (await blobStore.getBlob(hash))) {
-    entry.ctx.recordHistoryBlob(hash)
-    return // round trip to postgres/mongo when not pre-fetched
+  if (!PROCESS_BLOBS) {
+    // round trip to postgres/mongo when not pre-fetched
+    const blob = await blobStore.getBlob(hash)
+    if (blob) {
+      entry.ctx.recordHistoryBlob(blob)
+      return
+    }
   }
   // blob missing in history-v1, create in GCS and persist in postgres/mongo
   STATS.writeToGCSCount++
   STATS.writeToGCSEgress += blob.getByteLength()
   await blobStore.putBlob(filePath, blob)
-  entry.ctx.recordHistoryBlob(hash)
+  entry.ctx.recordHistoryBlob(blob)
 }
 
 const GZ_SUFFIX = '.gz'
@@ -630,8 +648,13 @@ async function processBatch(batch, prefix = 'rootFolder.0') {
   STATS.projects += batch.length
   STATS.blobs += nBlobs
   STATS.backedUpBlobs += nBackedUpBlobs
-  STATS.filesWithoutHash += files.length - (nBlobs - nBackedUpBlobs)
-  batch.length = 0 // GC
+
+  // GC
+  batch.length = 0
+  deletedFiles.clear()
+  blobs.clear()
+  backedUpBlobs.clear()
+
   // The files are currently ordered by project-id.
   // Order them by file-id ASC then blobs ASC to
   // - process files before blobs
@@ -679,7 +702,7 @@ async function handleDeletedFileTreeBatch(batch) {
  * @return {Promise<boolean>}
  */
 async function tryUpdateFileRefInMongo(entry) {
-  if (entry.path === '') {
+  if (entry.path === MONGO_PATH_DELETED_FILE) {
     return await tryUpdateDeletedFileRefInMongo(entry)
   } else if (entry.path.startsWith('project.')) {
     return await tryUpdateFileRefInMongoInDeletedProject(entry)
@@ -802,28 +825,45 @@ async function updateFileRefInMongo(entry) {
 function* findFiles(ctx, folder, path, isInputLoop = false) {
   let i = 0
   for (const child of folder.folders) {
-    yield* findFiles(ctx, child, `${path}.folders.${i}`, isInputLoop)
-    i++
+    const idx = i++
+    yield* findFiles(ctx, child, `${path}.folders.${idx}`, isInputLoop)
   }
   i = 0
   for (const fileRef of folder.fileRefs) {
+    const idx = i++
+    if (PROCESS_HASHED_FILES && fileRef.hash) {
+      if (ctx.canSkipProcessingHashedFile(fileRef.hash)) continue
+      if (isInputLoop) {
+        ctx.remainingQueueEntries++
+        STATS.filesWithHash++
+      }
+      yield {
+        ctx,
+        cacheKey: fileRef.hash,
+        fileId: fileRef._id.toString(),
+        path: MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE,
+        hash: fileRef.hash,
+      }
+    }
     if (!fileRef.hash) {
-      if (isInputLoop) ctx.remainingQueueEntries++
+      if (isInputLoop) {
+        ctx.remainingQueueEntries++
+        STATS.filesWithoutHash++
+      }
       yield {
         ctx,
         cacheKey: fileRef._id.toString(),
         fileId: fileRef._id.toString(),
-        path: `${path}.fileRefs.${i}`,
+        path: `${path}.fileRefs.${idx}`,
       }
     }
-    i++
   }
 }
 
 /**
  * @param {Array<Project>} projects
  * @param {string} prefix
- * @param {Map<string,Array<string>>} deletedFiles
+ * @param {Map<string,Array<DeletedFileRef>>} deletedFiles
  * @param {Map<string,Array<Blob>>} blobs
  * @param {Map<string,Array<string>>} backedUpBlobs
  * @return Generator<QueueEntry>
@@ -847,9 +887,24 @@ function* findFileInBatch(
       projectBlobs,
       projectBackedUpBlobs
     )
-    for (const fileId of projectDeletedFiles) {
-      ctx.remainingQueueEntries++
-      yield { ctx, cacheKey: fileId, fileId, path: '' }
+    for (const fileRef of projectDeletedFiles) {
+      const fileId = fileRef._id.toString()
+      if (fileRef.hash) {
+        if (ctx.canSkipProcessingHashedFile(fileRef.hash)) continue
+        ctx.remainingQueueEntries++
+        STATS.filesWithHash++
+        yield {
+          ctx,
+          cacheKey: fileRef.hash,
+          fileId,
+          hash: fileRef.hash,
+          path: MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE,
+        }
+      } else {
+        ctx.remainingQueueEntries++
+        STATS.filesWithoutHash++
+        yield { ctx, cacheKey: fileId, fileId, path: MONGO_PATH_DELETED_FILE }
+      }
     }
     for (const blob of projectBlobs) {
       if (projectBackedUpBlobs.has(blob.getHash())) continue
@@ -857,7 +912,7 @@ function* findFileInBatch(
       yield {
         ctx,
         cacheKey: blob.getHash(),
-        path: 'blob',
+        path: MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE,
         blob,
         hash: blob.getHash(),
       }
@@ -882,7 +937,7 @@ async function collectProjectBlobs(batch) {
 
 /**
  * @param {Array<Project>} projects
- * @return {Promise<Map<string, Array<string>>>}
+ * @return {Promise<Map<string, Array<DeletedFileRef>>>}
  */
 async function collectDeletedFiles(projects) {
   const deletedFiles = new Map()
@@ -891,22 +946,25 @@ async function collectDeletedFiles(projects) {
   const cursor = deletedFilesCollection.find(
     {
       projectId: { $in: projects.map(p => p._id) },
-      hash: { $exists: false },
+      ...(PROCESS_HASHED_FILES
+        ? {}
+        : {
+            hash: { $exists: false },
+          }),
     },
     {
-      projection: { _id: 1, projectId: 1 },
+      projection: { _id: 1, projectId: 1, hash: 1 },
       readPreference: READ_PREFERENCE_SECONDARY,
       sort: { projectId: 1 },
     }
   )
   for await (const deletedFileRef of cursor) {
     const projectId = deletedFileRef.projectId.toString()
-    const fileId = deletedFileRef._id.toString()
     const found = deletedFiles.get(projectId)
     if (found) {
-      found.push(fileId)
+      found.push(deletedFileRef)
     } else {
-      deletedFiles.set(projectId, [fileId])
+      deletedFiles.set(projectId, [deletedFileRef])
     }
   }
   return deletedFiles
@@ -939,6 +997,9 @@ async function collectBackedUpBlobs(projects) {
 const BATCH_HASH_WRITES = 1_000
 const BATCH_FILE_UPDATES = 100
 
+const MONGO_PATH_DELETED_FILE = 'deleted-file'
+const MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE = 'skip-write-to-file-tree'
+
 class ProjectContext {
   /** @type {Promise<CachedPerProjectEncryptedS3Persistor> | null} */
   #cachedPersistorPromise = null
@@ -946,7 +1007,7 @@ class ProjectContext {
   /** @type {Set<string>} */
   #backedUpBlobs
 
-  /** @type {Set<string>} */
+  /** @type {Map<string, Blob>} */
   #historyBlobs
 
   /** @type {number} */
@@ -962,14 +1023,32 @@ class ProjectContext {
     this.projectId = projectId
     this.historyId = historyId
     this.#backedUpBlobs = backedUpBlobs
-    this.#historyBlobs = new Set(blobs.map(b => b.getHash()))
+    this.#historyBlobs = new Map(blobs.map(b => [b.getHash(), b]))
   }
 
-  hasHistoryBlob(hash) {
-    return this.#historyBlobs.has(hash)
+  /**
+   * @param {string} hash
+   * @return {Blob | undefined}
+   */
+  getCachedHistoryBlob(hash) {
+    return this.#historyBlobs.get(hash)
   }
-  recordHistoryBlob(hash) {
-    this.#historyBlobs.add(hash)
+
+  /**
+   * @param {Blob} blob
+   */
+  recordHistoryBlob(blob) {
+    this.#historyBlobs.set(blob.getHash(), blob)
+  }
+
+  /**
+   * @param {string} hash
+   * @return {boolean}
+   */
+  canSkipProcessingHashedFile(hash) {
+    if (this.#historyBlobs.has(hash)) return true // This file will be processed as blob.
+    if (GLOBAL_BLOBS.has(hash)) return true // global blob
+    return false
   }
 
   /**
@@ -1105,7 +1184,7 @@ class ProjectContext {
    * @param {QueueEntry} entry
    */
   queueFileForWritingHash(entry) {
-    if (entry.path === 'blob') return
+    if (entry.path === MONGO_PATH_SKIP_WRITE_HASH_TO_FILE_TREE) return
     this.#pendingFileWrites.push(entry)
   }
 
@@ -1136,7 +1215,7 @@ class ProjectContext {
     const projectEntries = []
     const deletedProjectEntries = []
     for (const entry of this.#pendingFileWrites) {
-      if (entry.path === '') {
+      if (entry.path === MONGO_PATH_DELETED_FILE) {
         individualUpdates.push(entry)
       } else if (entry.path.startsWith('project.')) {
         deletedProjectEntries.push(entry)
