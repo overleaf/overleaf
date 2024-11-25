@@ -1,8 +1,10 @@
-import { EditorView } from '@codemirror/view'
+import { Command } from '@codemirror/view'
 import { EditorSelection } from '@codemirror/state'
+import { emitShortcutEvent } from '@/features/source-editor/extensions/toolbar/utils/analytics'
 
 export const cloneSelectionVertically =
-  (forward: boolean, cumulative: boolean) => (view: EditorView) => {
+  (forward: boolean, cumulative: boolean, modifier: string): Command =>
+  view => {
     const { main, ranges, mainIndex } = view.state.selection
     const { anchor, head, goalColumn } = main
     const start = EditorSelection.range(anchor, head, goalColumn)
@@ -23,5 +25,12 @@ export const cloneSelectionVertically =
       filteredRanges.length
     )
     view.dispatch({ selection })
+
+    emitShortcutEvent(view, 'clone-selection-vertically', {
+      forward,
+      cumulative,
+      modifier,
+    })
+
     return true
   }
