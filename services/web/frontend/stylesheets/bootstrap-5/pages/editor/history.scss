@@ -380,19 +380,6 @@ history-root {
   }
 }
 
-.history-version-dropdown-menu {
-  [role='menuitem'] {
-    padding: var(--spacing-05);
-    color: var(--content-primary);
-
-    &:hover,
-    &:focus {
-      color: var(--content-primary);
-      background-color: var(--bg-light-secondary);
-    }
-  }
-}
-
 .document-diff-container {
   height: 100%;
   display: flex;

@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import NavDropdownItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-item'
+import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import { DropdownItem } from 'react-bootstrap-5'
 import { DropdownItemProps } from 'react-bootstrap-5/DropdownItem'
 
@@ -13,10 +13,10 @@ export default function NavDropdownLinkItem({
   children: ReactNode
 }) {
   return (
-    <NavDropdownItem>
+    <DropdownListItem>
       <DropdownItem href={href} role="menuitem" onClick={onClick}>
         {children}
       </DropdownItem>
-    </NavDropdownItem>
+    </DropdownListItem>
   )
 }

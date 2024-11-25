@@ -55,7 +55,7 @@
   display: grid;
   grid-auto-flow: column;
   place-content: center start;
-  min-height: 44px; // a minimum height of 44px to be accessible for touch screens
+  min-height: 36px; // a minimum height of 36px to be accessible for touch screens
   position: relative;
 
   &:active {

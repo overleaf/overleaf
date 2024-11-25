@@ -2,6 +2,7 @@ import { useHistoryContext } from '../../../../context/history-context'
 import { UpdateRange } from '../../../../services/types/update'
 import { ReactNode } from 'react'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
+import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 
 type CompareProps = {
   comparisonRange: UpdateRange
@@ -32,15 +33,17 @@ function CompareDropDownItem({
   }
 
   return (
-    <OLDropdownMenuItem
-      {...props}
-      leadingIcon={icon}
-      as="button"
-      onClick={handleCompareVersion}
-      className="dropdown-item-material-icon-small"
-    >
-      {text}
-    </OLDropdownMenuItem>
+    <DropdownListItem>
+      <OLDropdownMenuItem
+        {...props}
+        leadingIcon={icon}
+        as="button"
+        onClick={handleCompareVersion}
+        className="dropdown-item-material-icon-small"
+      >
+        {text}
+      </OLDropdownMenuItem>
+    </DropdownListItem>
   )
 }
 

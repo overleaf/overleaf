@@ -4,7 +4,7 @@ import NavDropdownDivider from '@/features/ui/components/bootstrap-5/navbar/nav-
 import getMeta from '@/utils/meta'
 import NavDropdownMenu from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-menu'
 import NavDropdownLinkItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-link-item'
-import NavDropdownItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-item'
+import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import type { NavbarSessionUser } from '@/features/ui/components/types/navbar'
 import NavLinkItem from '@/features/ui/components/bootstrap-5/navbar/nav-link-item'
 
@@ -35,7 +35,7 @@ export default function LoggedInItems({
           </NavDropdownLinkItem>
         ) : null}
         <NavDropdownDivider />
-        <NavDropdownItem>
+        <DropdownListItem>
           {
             // The button is outside the form but still belongs to it via the
             // form attribute. The reason to do this is that if the button is
@@ -53,7 +53,7 @@ export default function LoggedInItems({
           <form id={logOutFormId} method="POST" action="/logout">
             <input type="hidden" name="_csrf" value={getMeta('ol-csrfToken')} />
           </form>
-        </NavDropdownItem>
+        </DropdownListItem>
       </NavDropdownMenu>
     </>
   )

@@ -1,7 +1,7 @@
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useTranslation } from 'react-i18next'
 import { DropdownItem } from 'react-bootstrap-5'
-import NavDropdownItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-item'
+import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 
 export default function ContactUsItem({
   showModal,
@@ -11,7 +11,7 @@ export default function ContactUsItem({
   const { t } = useTranslation()
 
   return (
-    <NavDropdownItem>
+    <DropdownListItem>
       <DropdownItem
         as="button"
         role="menuitem"
@@ -22,6 +22,6 @@ export default function ContactUsItem({
       >
         {t('contact_us')}
       </DropdownItem>
-    </NavDropdownItem>
+    </DropdownListItem>
   )
 }

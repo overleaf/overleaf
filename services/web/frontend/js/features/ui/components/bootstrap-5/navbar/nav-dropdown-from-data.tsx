@@ -3,7 +3,7 @@ import NavDropdownDivider from '@/features/ui/components/bootstrap-5/navbar/nav-
 import { sendMB } from '@/infrastructure/event-tracking'
 import { isDropdownLinkItem } from '@/features/ui/components/bootstrap-5/navbar/util'
 import NavDropdownLinkItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-link-item'
-import NavDropdownItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-item'
+import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 import NavDropdownMenu from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-menu'
 import ContactUsItem from '@/features/ui/components/bootstrap-5/navbar/contact-us-item'
 
@@ -35,9 +35,9 @@ export default function NavDropdownFromData({
           )
         } else {
           return (
-            <NavDropdownItem key={index}>
+            <DropdownListItem key={index}>
               {child.translatedText}
-            </NavDropdownItem>
+            </DropdownListItem>
           )
         }
       })}

@@ -9,6 +9,7 @@ import withErrorBoundary from '@/infrastructure/error-boundary'
 import { RestoreProjectErrorModal } from '../../../diff-view/modals/restore-project-error-modal'
 import MaterialIcon from '@/shared/components/material-icon'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
+import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 
 type RestoreProjectProps = {
   projectId: string
@@ -45,7 +46,7 @@ const RestoreProject = ({
   }
 
   return (
-    <>
+    <DropdownListItem>
       <OLDropdownMenuItem
         as="button"
         leadingIcon={
@@ -65,7 +66,7 @@ const RestoreProject = ({
         isRestoring={isRestoring}
         onRestore={onRestore}
       />
-    </>
+    </DropdownListItem>
   )
 }
 
