@@ -259,14 +259,19 @@ describe('RestoreManager', function () {
       beforeEach(function () {
         this.pathname = 'foo.tex'
         this.comments = [
-          (this.comment = { op: { t: 'comment-1', p: 0, c: 'foo' } }),
+          { op: { t: 'comment-in-other-doc', p: 0, c: 'foo' } },
+          { op: { t: 'single-comment', p: 10, c: 'bar' } },
+          { op: { t: 'deleted-comment', p: 20, c: 'baz' } },
         ]
-        this.remappedComments = [{ op: { t: 'comment-2', p: 0, c: 'foo' } }]
+        this.remappedComments = [
+          { op: { t: 'duplicate-comment', p: 0, c: 'foo' } },
+          { op: { t: 'single-comment', p: 10, c: 'bar' } },
+        ]
         this.ProjectLocator.promises.findElementByPath = sinon.stub().rejects()
         this.DocstoreManager.promises.getAllRanges = sinon.stub().resolves([
           {
             ranges: {
-              comments: [this.comment],
+              comments: this.comments.slice(0, 1),
             },
           },
         ])
@@ -274,17 +279,26 @@ describe('RestoreManager', function () {
           .stub()
           .resolves({
             newThreads: {
-              'comment-1': {
-                duplicateId: 'comment-2',
+              'comment-in-other-doc': {
+                duplicateId: 'duplicate-comment',
               },
             },
           })
         this.ChatApiHandler.promises.generateThreadData = sinon.stub().resolves(
           (this.threadData = {
-            'comment-2': {
+            'single-comment': {
               messages: [
                 {
                   content: 'message-content',
+                  timestamp: '2024-01-01T00:00:00.000Z',
+                  user_id: 'user-1',
+                },
+              ],
+            },
+            'duplicate-comment': {
+              messages: [
+                {
+                  content: 'another message',
                   timestamp: '2024-01-01T00:00:00.000Z',
                   user_id: 'user-1',
                 },

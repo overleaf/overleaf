@@ -187,8 +187,8 @@ const RestoreManager = {
           }
           // We have a new id for this comment thread
           comment.op.t = result.duplicateId
-          newRanges.comments.push(comment)
         }
+        newRanges.comments.push(comment)
       }
     } else {
       newRanges.comments = ranges.comments
@@ -200,6 +200,13 @@ const RestoreManager = {
         newRanges.comments.map(({ op: { t } }) => t)
       )
     await ChatManager.promises.injectUserInfoIntoThreads(newCommentThreadData)
+
+    // Only keep restored comment ranges that point to a valid thread.
+    // The chat service won't have generated thread data for deleted threads.
+    newRanges.comments = newRanges.comments.filter(
+      comment => newCommentThreadData[comment.op.t] != null
+    )
+
     logger.debug({ newCommentThreadData }, 'emitting new comment threads')
     EditorRealTimeController.emitToRoom(
       projectId,
