@@ -1,0 +1,26 @@
+diff --git a/node_modules/pdfjs-dist/legacy/web/pdf_viewer.mjs b/node_modules/pdfjs-dist/legacy/web/pdf_viewer.mjs
+index 267083f..e3eedf2 100644
+--- a/node_modules/pdfjs-dist/legacy/web/pdf_viewer.mjs
++++ b/node_modules/pdfjs-dist/legacy/web/pdf_viewer.mjs
+@@ -8882,7 +8882,7 @@ class TextLayerBuilder {
+       if (anchor.nodeType === Node.TEXT_NODE) {
+         anchor = anchor.parentNode;
+       }
+-      const parentTextLayer = anchor.parentElement.closest(".textLayer");
++      const parentTextLayer = anchor.parentElement?.closest(".textLayer");
+       const endDiv = this.#textLayers.get(parentTextLayer);
+       if (endDiv) {
+         endDiv.style.width = parentTextLayer.style.width;
+diff --git a/node_modules/pdfjs-dist/web/pdf_viewer.mjs b/node_modules/pdfjs-dist/web/pdf_viewer.mjs
+index 9849c0a..8ee31e7 100644
+--- a/node_modules/pdfjs-dist/web/pdf_viewer.mjs
++++ b/node_modules/pdfjs-dist/web/pdf_viewer.mjs
+@@ -5192,7 +5192,7 @@ class TextLayerBuilder {
+       if (anchor.nodeType === Node.TEXT_NODE) {
+         anchor = anchor.parentNode;
+       }
+-      const parentTextLayer = anchor.parentElement.closest(".textLayer");
++      const parentTextLayer = anchor.parentElement?.closest(".textLayer");
+       const endDiv = this.#textLayers.get(parentTextLayer);
+       if (endDiv) {
+         endDiv.style.width = parentTextLayer.style.width;
