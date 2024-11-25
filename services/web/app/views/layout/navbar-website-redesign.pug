@@ -9,7 +9,7 @@ nav.navbar.navbar-default.navbar-main.website-redesign-navbar
 					aria-label="Toggle " + translate('navigation')
 				)
 					i.fa.fa-bars(aria-hidden="true")
-			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 			if (enableUpgradeButton)
 				a.btn.btn-primary.pull-right.me-2.visible-xs(
 					href="/user/subscription/plans"

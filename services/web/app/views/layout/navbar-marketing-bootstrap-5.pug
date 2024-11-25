@@ -12,7 +12,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 			else
 				a(href='/', aria-label=settings.appName).navbar-brand
 
-			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && usersBestSubscription.type === 'free'
+			- var enableUpgradeButton = projectDashboardReact && usersBestSubscription && (usersBestSubscription.type === 'free' || usersBestSubscription.type === 'standalone-ai-add-on')
 			if (enableUpgradeButton)
 				a.btn.btn-primary.me-2.d-md-none(
 					href="/user/subscription/plans"

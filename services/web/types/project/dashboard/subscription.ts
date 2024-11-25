@@ -37,4 +37,11 @@ type PaidSubscription =
   | GroupPlanSubscription
   | CommonsPlanSubscription
 
-export type Subscription = FreeSubscription | PaidSubscription
+export type StandaloneAiAddOnSubscription = {
+  type: 'standalone-ai-add-on'
+}
+
+export type Subscription =
+  | FreeSubscription
+  | PaidSubscription
+  | StandaloneAiAddOnSubscription

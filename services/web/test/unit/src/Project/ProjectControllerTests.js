@@ -28,6 +28,8 @@ describe('ProjectController', function () {
       },
       siteUrl: 'https://overleaf.com',
       algolia: {},
+      plans: [],
+      features: {},
     }
     this.brandVariationDetails = {
       id: '12',

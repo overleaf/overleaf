@@ -45,6 +45,9 @@ const OnboardingDataCollectionManager = require('../OnboardingDataCollection/Onb
 const UserUpdater = require('../User/UserUpdater')
 const Modules = require('../../infrastructure/Modules')
 const UserGetter = require('../User/UserGetter')
+const {
+  isStandaloneAiAddOnPlanCode,
+} = require('../Subscription/RecurlyEntities')
 
 /**
  * @import { GetProjectsRequest, GetProjectsResponse, Project } from "./types"
@@ -612,12 +615,15 @@ const _ProjectController = {
       const userInNonIndividualSub =
         userIsMemberOfGroupSubscription || userHasInstitutionLicence
 
+      const userHasPremiumSub =
+        subscription && !isStandaloneAiAddOnPlanCode(subscription.planCode)
+
       // Persistent upgrade prompts
       // in header & in share project modal
       const showUpgradePrompt =
         Features.hasFeature('saas') &&
         userId &&
-        !subscription &&
+        !userHasPremiumSub &&
         !userInNonIndividualSub
 
       let aiFeaturesAllowed = false

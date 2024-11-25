@@ -392,7 +392,10 @@ async function projectListPage(req, res, next) {
   let showLATAMBanner = false
   let recommendedCurrency
 
-  if (usersBestSubscription?.type === 'free') {
+  if (
+    usersBestSubscription?.type === 'free' ||
+    usersBestSubscription?.type === 'standalone-ai-add-on'
+  ) {
     const latamGeoPricingAssignment =
       await SplitTestHandler.promises.getAssignment(
         req,

@@ -61,7 +61,9 @@ function isOnFreeOrIndividualPlan() {
     return false
   }
   const { type } = subscription
-  return type === 'free' || type === 'individual'
+  return (
+    type === 'free' || type === 'individual' || type === 'standalone-ai-add-on'
+  )
 }
 
 const showConfirmEmail = (userEmail: UserEmailData) => {
