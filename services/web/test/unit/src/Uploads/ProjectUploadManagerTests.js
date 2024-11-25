@@ -94,7 +94,7 @@ describe('ProjectUploadManager', function () {
     }
     this.FileStoreHandler = {
       promises: {
-        uploadFileFromDisk: sinon
+        uploadFileFromDiskWithHistoryId: sinon
           .stub()
           .resolves({ fileRef: this.file, url: this.fileStoreUrl }),
       },

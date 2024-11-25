@@ -78,6 +78,10 @@ class MockV1HistoryApi extends AbstractMockApi {
     this.app.delete('/api/projects/:project_id', (req, res, next) => {
       res.sendStatus(204)
     })
+
+    this.app.put('/api/projects/:project_id/blobs/:hash', (req, res, next) => {
+      res.sendStatus(204)
+    })
   }
 }
 

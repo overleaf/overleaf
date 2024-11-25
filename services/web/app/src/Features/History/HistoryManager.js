@@ -1,5 +1,6 @@
 const { callbackify } = require('util')
 const { fetchJson, fetchNothing } = require('@overleaf/fetch-utils')
+const fs = require('fs')
 const settings = require('@overleaf/settings')
 const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
@@ -111,6 +112,22 @@ async function _deleteProjectInFullProjectHistory(historyId) {
   } catch (err) {
     throw OError.tag(err, 'failed to clear project history', { historyId })
   }
+}
+
+async function uploadBlobFromDisk(historyId, hash, byteLength, fsPath) {
+  const outStream = fs.createReadStream(fsPath)
+
+  const url = `${settings.apis.v1_history.url}/projects/${historyId}/blobs/${hash}`
+  await fetchNothing(url, {
+    method: 'PUT',
+    body: outStream,
+    headers: { 'Content-Length': byteLength }, // add the content length to work around problems with chunked encoding in node 18
+    signal: AbortSignal.timeout(60 * 1000),
+    basicAuth: {
+      user: settings.apis.v1_history.user,
+      password: settings.apis.v1_history.pass,
+    },
+  })
 }
 
 /**
@@ -265,6 +282,7 @@ module.exports = {
   deleteProjectHistory: callbackify(deleteProjectHistory),
   injectUserDetails: callbackify(injectUserDetails),
   getCurrentContent: callbackify(getCurrentContent),
+  uploadBlobFromDisk: callbackify(uploadBlobFromDisk),
   promises: {
     initializeProject,
     flushProject,
@@ -274,5 +292,6 @@ module.exports = {
     deleteProjectHistory,
     getCurrentContent,
     getContentAtVersion,
+    uploadBlobFromDisk,
   },
 }

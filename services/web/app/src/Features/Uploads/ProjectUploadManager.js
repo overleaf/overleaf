@@ -15,6 +15,7 @@ const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectDeleter = require('../Project/ProjectDeleter')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const logger = require('@overleaf/logger')
+const OError = require('@overleaf/o-error')
 
 module.exports = {
   createProjectFromZipArchive: callbackify(createProjectFromZipArchive),
@@ -124,7 +125,7 @@ async function _initializeProjectWithZipContents(
   const importEntries =
     await FileSystemImportManager.promises.importDir(topLevelDir)
   const { fileEntries, docEntries } = await _createEntriesFromImports(
-    project._id,
+    project,
     importEntries
   )
   const projectVersion =
@@ -141,14 +142,14 @@ async function _initializeProjectWithZipContents(
   await TpdsProjectFlusher.promises.flushProjectToTpds(project._id)
 }
 
-async function _createEntriesFromImports(projectId, importEntries) {
+async function _createEntriesFromImports(project, importEntries) {
   const fileEntries = []
   const docEntries = []
   for (const importEntry of importEntries) {
     switch (importEntry.type) {
       case 'doc': {
         const docEntry = await _createDoc(
-          projectId,
+          project,
           importEntry.projectPath,
           importEntry.lines
         )
@@ -157,7 +158,7 @@ async function _createEntriesFromImports(projectId, importEntries) {
       }
       case 'file': {
         const fileEntry = await _createFile(
-          projectId,
+          project,
           importEntry.projectPath,
           importEntry.fsPath
         )
@@ -172,7 +173,8 @@ async function _createEntriesFromImports(projectId, importEntries) {
   return { fileEntries, docEntries }
 }
 
-async function _createDoc(projectId, projectPath, docLines) {
+async function _createDoc(project, projectPath, docLines) {
+  const projectId = project._id
   const docName = Path.basename(projectPath)
   const doc = new Doc({ name: docName })
   await DocstoreManager.promises.updateDoc(
@@ -185,13 +187,20 @@ async function _createDoc(projectId, projectPath, docLines) {
   return { doc, path: projectPath, docLines: docLines.join('\n') }
 }
 
-async function _createFile(projectId, projectPath, fsPath) {
+async function _createFile(project, projectPath, fsPath) {
+  const projectId = project._id
+  const historyId = project.overleaf?.history?.id
+  if (!historyId) {
+    throw new OError('missing history id')
+  }
   const fileName = Path.basename(projectPath)
-  const { fileRef, url } = await FileStoreHandler.promises.uploadFileFromDisk(
-    projectId,
-    { name: fileName },
-    fsPath
-  )
+  const { fileRef, url } =
+    await FileStoreHandler.promises.uploadFileFromDiskWithHistoryId(
+      projectId,
+      historyId,
+      { name: fileName },
+      fsPath
+    )
   return { file: fileRef, path: projectPath, url }
 }
 
