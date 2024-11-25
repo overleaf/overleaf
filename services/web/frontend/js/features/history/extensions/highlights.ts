@@ -74,6 +74,16 @@ function highlightedLines(highlights: Highlight[], state: EditorState) {
   return lineStatuses
 }
 
+const tooltipTheme = EditorView.theme({
+  '.cm-tooltip': {
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    // Prevent a tooltip getting in the way of hovering over a line that it
+    // obscures
+    pointerEvents: 'none',
+  },
+})
+
 const theme = EditorView.baseTheme({
   ['.' + ADDITION_MARKER_CLASS]: {
     paddingTop: 'var(--half-leading)',
@@ -84,14 +94,7 @@ const theme = EditorView.baseTheme({
     textDecoration: 'line-through',
     color: 'hsl(var(--hue), 70%, 40%)',
   },
-  '.cm-tooltip': {
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    // Prevent a tooltip getting in the way of hovering over a line that it
-    // obscures
-    pointerEvents: 'none',
-  },
-  '.ol-cm-highlight-tooltip': {
+  '.cm-tooltip.ol-cm-highlight-tooltip': {
     backgroundColor: 'hsl(var(--hue), 70%, 50%)',
     borderRadius: '4px',
     padding: '4px',
@@ -389,6 +392,7 @@ export const highlightDecorationsField =
       ),
       EditorView.decorations.from(field, value => value.lineHighlights),
       theme,
+      tooltipTheme,
       highlightTooltipPlugin,
     ],
   })
