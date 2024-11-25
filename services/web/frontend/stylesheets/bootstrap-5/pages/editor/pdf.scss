@@ -406,3 +406,11 @@
     100vh - #{$toolbar-small-height + $toolbar-height + $spacing-11}
   );
 }
+
+.pdf-preview-messages {
+  position: absolute;
+  right: var(--spacing-06);
+  left: var(--spacing-06);
+  top: var(--spacing-10);
+  z-index: 1;
+}
