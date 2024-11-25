@@ -16,6 +16,7 @@ import { useFileTreeData } from '@/shared/context/file-tree-data-context'
 import { findDocEntityById } from '@/features/ide-react/util/find-doc-entity-by-id'
 import { IdeEvents } from '@/features/ide-react/create-ide-event-emitter'
 import { debugConsole } from '@/utils/debugging'
+import useEventListener from '@/shared/hooks/use-event-listener'
 
 export const ReferencesContext = createContext<
   | {
@@ -99,6 +100,10 @@ export const ReferencesProvider: FC = ({ children }) => {
       eventEmitter.off('document:closed', handleDocClosed)
     }
   }, [eventEmitter, fileTreeData, indexReferencesIfDocModified])
+
+  useEventListener('reference:added', function () {
+    indexAllReferences(true)
+  })
 
   useEffect(() => {
     const handleProjectJoined = () => {
