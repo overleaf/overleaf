@@ -13,7 +13,7 @@ export const FeedbackBadge: FC<{
     }
   }, [id, text])
 
-  return <BetaBadge tooltip={tooltip} phase="release" url={url} />
+  return <BetaBadge tooltip={tooltip} phase="release" link={{ href: url }} />
 }
 
 const DefaultContent = () => (

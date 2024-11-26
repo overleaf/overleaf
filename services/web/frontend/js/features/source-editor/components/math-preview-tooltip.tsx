@@ -29,6 +29,7 @@ import {
   Dropdown as BS3Dropdown,
   MenuItem as BS3MenuItem,
 } from 'react-bootstrap'
+import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 
 const MathPreviewTooltipContainer: FC = () => {
   const state = useCodeMirrorStateContext()
@@ -223,10 +224,7 @@ const CustomSplitTestBadge: FC = () => {
       target="_blank"
       rel="noopener noreferrer"
     >
-      <BootstrapVersionSwitcher
-        bs3={<span className="badge beta-badge" />}
-        bs5={<MaterialIcon type="info" className="align-middle beta-badge" />}
-      />
+      <BetaBadgeIcon phase="beta" />
     </a>
   )
 }

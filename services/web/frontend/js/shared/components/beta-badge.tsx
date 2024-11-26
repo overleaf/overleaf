@@ -1,10 +1,7 @@
-import type { FC, ReactNode } from 'react'
-import classnames from 'classnames'
+import type { FC, MouseEventHandler, ReactNode } from 'react'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
-import MaterialIcon from '@/shared/components/material-icon'
-import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { bsVersion } from '@/features/utils/bootstrap-5'
-import OLBadge from '@/features/ui/components/ol/ol-badge'
+import BetaBadgeIcon from '@/shared/components/beta-badge-icon'
 
 type TooltipProps = {
   id: string
@@ -15,35 +12,42 @@ type TooltipProps = {
   >['placement']
 }
 
-function BS5BetaBadge({
-  badgeClass,
-}: {
-  badgeClass: ReturnType<typeof chooseBadgeClass>
-}) {
-  if (badgeClass === 'info-badge') {
-    return <MaterialIcon type="info" className="align-middle info-badge" />
-  } else if (badgeClass === 'alpha-badge') {
-    return (
-      <OLBadge bg="primary" className="alpha-badge">
-        α
-      </OLBadge>
-    )
-  } else {
-    return (
-      <OLBadge bg="warning" className="beta-badge">
-        β
-      </OLBadge>
-    )
-  }
+type LinkProps = {
+  href?: string
+  ref?: React.Ref<HTMLAnchorElement>
+  className?: string
+  onMouseDown?: MouseEventHandler<HTMLAnchorElement>
 }
 
+const defaultHref = '/beta/participate'
+
 const BetaBadge: FC<{
-  tooltip: TooltipProps
-  url?: string
+  tooltip?: TooltipProps
+  link?: LinkProps
+  description?: ReactNode
   phase?: string
-}> = ({ tooltip, url = '/beta/participate', phase = 'beta' }) => {
-  const badgeClass = chooseBadgeClass(phase)
-  return (
+}> = ({
+  tooltip,
+  link = { href: defaultHref },
+  description,
+  phase = 'beta',
+}) => {
+  const { href, ...linkProps } = link
+  const linkedBadge = (
+    <a
+      target="_blank"
+      rel="noopener noreferrer"
+      href={href || defaultHref}
+      {...linkProps}
+    >
+      <span className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}>
+        {description || tooltip?.text}
+      </span>
+      <BetaBadgeIcon phase={phase} />
+    </a>
+  )
+
+  return tooltip ? (
     <OLTooltip
       id={tooltip.id}
       description={tooltip.text}
@@ -53,29 +57,11 @@ const BetaBadge: FC<{
         delay: 100,
       }}
     >
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        <span className={bsVersion({ bs5: 'visually-hidden', bs3: 'sr-only' })}>
-          {tooltip.text}
-        </span>
-        <BootstrapVersionSwitcher
-          bs3={<span className={classnames('badge', badgeClass)} />}
-          bs5={<BS5BetaBadge badgeClass={badgeClass} />}
-        />
-      </a>
+      {linkedBadge}
     </OLTooltip>
+  ) : (
+    linkedBadge
   )
-}
-
-export const chooseBadgeClass = (phase?: string) => {
-  switch (phase) {
-    case 'release':
-      return 'info-badge'
-    case 'alpha':
-      return 'alpha-badge'
-    case 'beta':
-    default:
-      return 'beta-badge'
-  }
 }
 
 export default BetaBadge

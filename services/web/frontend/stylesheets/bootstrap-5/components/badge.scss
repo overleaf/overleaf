@@ -10,6 +10,10 @@ $max-width: 160px;
   &:not(.badge-tag) {
     max-width: $max-width;
   }
+
+  &.bg-warning {
+    --bs-badge-color: var(--content-warning);
+  }
 }
 
 .badge-prepend {
@@ -51,6 +55,7 @@ $max-width: 160px;
   @include text-truncate;
 
   padding: var(--bs-badge-padding-y) 0;
+  min-width: 1em;
 }
 
 .badge-tag {

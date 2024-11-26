@@ -45,9 +45,11 @@ export default function SplitTestBadge({
         ),
       }}
       phase={testInfo.phase}
-      url={
-        testInfo.badgeInfo?.url?.length ? testInfo.badgeInfo?.url : undefined
-      }
+      link={{
+        href: testInfo.badgeInfo?.url?.length
+          ? testInfo.badgeInfo?.url
+          : undefined,
+      }}
     />
   )
 }
