@@ -179,6 +179,18 @@ class PerProjectEncryptedS3Persistor extends S3Persistor {
    * @param {string} path
    * @return {Promise<CachedPerProjectEncryptedS3Persistor>}
    */
+  async forProjectRO(bucketName, path) {
+    return new CachedPerProjectEncryptedS3Persistor(
+      this,
+      await this.#getExistingDataEncryptionKeyOptions(bucketName, path)
+    )
+  }
+
+  /**
+   * @param {string} bucketName
+   * @param {string} path
+   * @return {Promise<CachedPerProjectEncryptedS3Persistor>}
+   */
   async generateDataEncryptionKey(bucketName, path) {
     return new CachedPerProjectEncryptedS3Persistor(
       this,

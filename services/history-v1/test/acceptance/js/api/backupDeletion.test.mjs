@@ -1,7 +1,7 @@
 // @ts-check
 import cleanup from '../storage/support/cleanup.js'
 import fetch from 'node-fetch'
-import testServer from './support/test_backup_server.mjs'
+import testServer from './support/test_backup_deletion_server.mjs'
 import { expect } from 'chai'
 import testProjects from './support/test_projects.js'
 import { db } from '../../../../storage/lib/mongodb.js'

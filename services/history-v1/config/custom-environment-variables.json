@@ -63,6 +63,7 @@
     "globalBlobsBucket":"BACKUP_OVERLEAF_EDITOR_GLOBAL_BLOBS_BUCKET",
     "projectBlobsBucket":"BACKUP_OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET"
   },
+  "healthCheckBlobs": "HEALTH_CHECK_BLOBS",
   "healthCheckProjects": "HEALTH_CHECK_PROJECTS",
   "minSoftDeletionPeriodDays": "MIN_SOFT_DELETION_PERIOD_DAYS",
   "mongo": {
