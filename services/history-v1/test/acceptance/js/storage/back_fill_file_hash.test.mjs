@@ -1133,6 +1133,17 @@ describe('back_fill_file_hash script', function () {
     writeToGCSCount: 4,
     writeToGCSEgress: 96,
   }
+  const STATS_FILES_HASHED_EXTRA = {
+    ...STATS_ALL_ZERO,
+    filesWithHash: 3,
+    mongoUpdates: 1,
+    readFromGCSCount: 3,
+    readFromGCSIngress: 72,
+    writeToAWSCount: 3,
+    writeToAWSEgress: 89,
+    writeToGCSCount: 3,
+    writeToGCSEgress: 72,
+  }
 
   function sumStats(a, b) {
     return Object.fromEntries(Object.entries(a).map(([k, v]) => [k, v + b[k]]))
@@ -1277,6 +1288,24 @@ describe('back_fill_file_hash script', function () {
       )
     })
     commonAssertions()
+
+    describe('when processing hashed files later', function () {
+      let output
+      beforeEach('run script', async function () {
+        output = await runScript(['--processHashedFiles=true'], {})
+      })
+      it('should print stats', function () {
+        expect(output.stats).deep.equal({
+          ...STATS_FILES_HASHED_EXTRA,
+          projects: 10,
+          blobs: 13,
+          backedUpBlobs: 13,
+          badFileTrees: 4,
+          mongoUpdates: 3,
+        })
+      })
+      commonAssertions(true)
+    })
   })
 
   describe('full run CONCURRENCY=10', function () {
@@ -1312,17 +1341,7 @@ describe('back_fill_file_hash script', function () {
     })
     it('should print stats', function () {
       expect(output.stats).deep.equal(
-        sumStats(STATS_ALL, {
-          ...STATS_ALL_ZERO,
-          filesWithHash: 3,
-          mongoUpdates: 1,
-          readFromGCSCount: 3,
-          readFromGCSIngress: 72,
-          writeToAWSCount: 3,
-          writeToAWSEgress: 89,
-          writeToGCSCount: 3,
-          writeToGCSEgress: 72,
-        })
+        sumStats(STATS_ALL, STATS_FILES_HASHED_EXTRA)
       )
     })
     commonAssertions(true)
