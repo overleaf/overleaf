@@ -8,6 +8,7 @@
   --link-color-dark: var(--link-ui-dark);
   --link-hover-color-dark: var(--link-ui-hover-dark);
   --link-visited-color-dark: var(--link-ui-visited-dark);
+  --link-hover-text-decoration: none;
 }
 
 a {
@@ -19,6 +20,7 @@ a {
 
   &:hover {
     color: var(--link-hover-color);
+    text-decoration: var(--link-hover-text-decoration);
   }
 }
 
