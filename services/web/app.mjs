@@ -23,9 +23,6 @@ logger.logger.serializers.user = Serializers.user
 logger.logger.serializers.docs = Serializers.docs
 logger.logger.serializers.files = Serializers.files
 logger.logger.serializers.project = Serializers.project
-if (Settings.sentry?.dsn != null) {
-  logger.initializeErrorReporting(Settings.sentry.dsn)
-}
 http.globalAgent.keepAlive = false
 http.globalAgent.maxSockets = Settings.limits.httpGlobalAgentMaxSockets
 https.globalAgent.keepAlive = false

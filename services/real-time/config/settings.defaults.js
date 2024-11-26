@@ -162,10 +162,6 @@ const settings = {
   // the deployment colour for this app.
   deploymentFile: process.env.DEPLOYMENT_FILE,
 
-  sentry: {
-    dsn: process.env.SENTRY_DSN,
-  },
-
   errors: {
     catchUncaughtErrors: true,
     shutdownOnUncaughtError: true,

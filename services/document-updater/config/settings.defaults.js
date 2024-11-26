@@ -176,10 +176,6 @@ module.exports = {
     },
   },
 
-  sentry: {
-    dsn: process.env.SENTRY_DSN,
-  },
-
   publishOnIndividualChannels:
     process.env.PUBLISH_ON_INDIVIDUAL_CHANNELS === 'true',
 

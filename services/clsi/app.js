@@ -6,9 +6,6 @@ const ContentController = require('./app/js/ContentController')
 const Settings = require('@overleaf/settings')
 const logger = require('@overleaf/logger')
 logger.initialize('clsi')
-if (Settings.sentry.dsn != null) {
-  logger.initializeErrorReporting(Settings.sentry.dsn)
-}
 const Metrics = require('@overleaf/metrics')
 
 const smokeTest = require('./test/smoke/js/SmokeTests')

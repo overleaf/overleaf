@@ -1,4 +1,3 @@
-import Settings from '@overleaf/settings'
 import Metrics from '@overleaf/metrics'
 import logger from '@overleaf/logger'
 import express from 'express'
@@ -8,10 +7,6 @@ import * as Router from './Router.js'
 import * as Validation from './Validation.js'
 
 const HistoryLogger = logger.initialize('project-history').logger
-
-if (Settings.sentry.dsn) {
-  logger.initializeErrorReporting(Settings.sentry.dsn)
-}
 
 Metrics.event_loop.monitor(logger)
 Metrics.memory.monitor(logger)

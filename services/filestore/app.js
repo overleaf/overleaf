@@ -23,10 +23,6 @@ const app = express()
 
 app.use(RequestLogger.middleware)
 
-if (settings.sentry && settings.sentry.dsn) {
-  logger.initializeErrorReporting(settings.sentry.dsn)
-}
-
 Metrics.open_sockets.monitor(true)
 Metrics.memory.monitor(logger)
 if (Metrics.event_loop) {

@@ -99,10 +99,6 @@ const settings = {
 
   enableConversions: process.env.ENABLE_CONVERSIONS === 'true',
 
-  sentry: {
-    dsn: process.env.SENTRY_DSN,
-  },
-
   gracefulShutdownDelayInMs:
     parseInt(process.env.GRACEFUL_SHUTDOWN_DELAY_SECONDS ?? '30', 10) * 1000,
 }

@@ -9,10 +9,6 @@ logger.initialize('document-updater')
 
 logger.logger.addSerializers(require('./app/js/LoggerSerializers'))
 
-if (Settings.sentry != null && Settings.sentry.dsn != null) {
-  logger.initializeErrorReporting(Settings.sentry.dsn)
-}
-
 const RedisManager = require('./app/js/RedisManager')
 const DispatchManager = require('./app/js/DispatchManager')
 const DeleteQueueManager = require('./app/js/DeleteQueueManager')

@@ -101,9 +101,5 @@ module.exports = {
     uploadFolder: process.env.UPLOAD_FOLDER || '/tmp/',
   },
 
-  sentry: {
-    dsn: process.env.SENTRY_DSN,
-  },
-
   maxFileSizeInBytes: 100 * 1024 * 1024, // 100 megabytes
 }

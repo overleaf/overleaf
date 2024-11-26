@@ -13,9 +13,6 @@ Metrics.open_sockets.monitor()
 const express = require('express')
 const session = require('express-session')
 const redis = require('@overleaf/redis-wrapper')
-if (Settings.sentry && Settings.sentry.dsn) {
-  logger.initializeErrorReporting(Settings.sentry.dsn)
-}
 
 const sessionRedisClient = redis.createClient(Settings.redis.websessions)
 

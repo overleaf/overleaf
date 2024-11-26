@@ -27,7 +27,6 @@ The CLSI can be configured through the following environment variables:
 * `FILESTORE_PARALLEL_FILE_DOWNLOADS` - Number of parallel file downloads
 * `LISTEN_ADDRESS` - The address for the RESTful service to listen on. Set to `0.0.0.0` to listen on all network interfaces
 * `PROCESS_LIFE_SPAN_LIMIT_MS` - Process life span limit in milliseconds
-* `SENTRY_DSN` - Sentry [Data Source Name](https://docs.sentry.io/product/sentry-basics/dsn-explainer/)
 * `SMOKE_TEST` - Whether to run smoke tests
 * `TEXLIVE_IMAGE` - The TeX Live Docker image to use for sibling containers, e.g. `gcr.io/overleaf-ops/texlive-full:2017.1`
 * `TEX_LIVE_IMAGE_NAME_OVERRIDE` - The name of the registry for the Docker image e.g. `gcr.io/overleaf-ops`

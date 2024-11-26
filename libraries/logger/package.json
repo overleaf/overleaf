@@ -23,7 +23,6 @@
     "@google-cloud/logging-bunyan": "^5.1.0",
     "@overleaf/fetch-utils": "*",
     "@overleaf/o-error": "*",
-    "@sentry/node": "^6.13.2",
     "bunyan": "^1.8.14"
   },
   "devDependencies": {

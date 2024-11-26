@@ -1,7 +1,6 @@
 const Stream = require('node:stream')
 const bunyan = require('bunyan')
 const GCPManager = require('./gcp-manager')
-const SentryManager = require('./sentry-manager')
 const Serializers = require('./serializers')
 const {
   FileLogLevelChecker,
@@ -31,10 +30,6 @@ const LoggingManager = {
     this._setupRingBuffer()
     this._setupLogLevelChecker()
     return this
-  },
-
-  initializeErrorReporting(dsn, options) {
-    this.sentryManager = new SentryManager()
   },
 
   /**
@@ -68,9 +63,6 @@ const LoggingManager = {
       })
     }
     this.logger.error(attributes, message, ...Array.from(args))
-    if (this.sentryManager) {
-      this.sentryManager.captureExceptionRateLimited(attributes, message)
-    }
   },
 
   /**
@@ -98,9 +90,6 @@ const LoggingManager = {
    */
   fatal(attributes, message) {
     this.logger.fatal(attributes, message)
-    if (this.sentryManager) {
-      this.sentryManager.captureException(attributes, message, 'fatal')
-    }
   },
 
   _getOutputStreamConfig() {

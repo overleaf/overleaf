@@ -43,20 +43,14 @@ describe('LoggingManager', function () {
         .stub()
         .returns(this.GCEMetadataLogLevelChecker),
     }
-    this.SentryManager = {
-      captureException: sinon.stub(),
-      captureExceptionRateLimited: sinon.stub(),
-    }
     this.LoggingManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
         bunyan: this.Bunyan,
         './log-level-checker': this.LogLevelChecker,
-        './sentry-manager': sinon.stub().returns(this.SentryManager),
       },
     })
     this.loggerName = 'test'
     this.logger = this.LoggingManager.initialize(this.loggerName)
-    this.logger.initializeErrorReporting('test_dsn')
   })
 
   afterEach(function () {
@@ -157,13 +151,6 @@ describe('LoggingManager', function () {
     it('should log err', function () {
       this.logger.err(this.logArgs)
       this.bunyanLogger.error.should.have.been.calledWith(this.logArgs)
-    })
-  })
-
-  describe('logger.error', function () {
-    it('should report errors to Sentry', function () {
-      this.logger.error({ foo: 'bar' }, 'message')
-      expect(this.SentryManager.captureExceptionRateLimited).to.have.been.called
     })
   })
 
