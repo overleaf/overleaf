@@ -9,11 +9,12 @@ import { useTranslation } from 'react-i18next'
 import Icon from '@/shared/components/icon'
 import { postJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
-import useAbortController from '@/shared/hooks/use-abort-controller'
 import type { BinaryFile } from '../types/binary-file'
 import { Nullable } from '../../../../../types/utils'
 import importOverleafModules from '../../../../macros/import-overleaf-module.macro'
 import OLButton from '@/features/ui/components/ol/ol-button'
+import { sendMB } from '@/infrastructure/event-tracking'
+import useIsMounted from '@/shared/hooks/use-is-mounted'
 
 type FileViewRefreshButtonProps = {
   setRefreshError: Dispatch<SetStateAction<Nullable<string>>>
@@ -32,8 +33,8 @@ export default function FileViewRefreshButton({
   file,
 }: FileViewRefreshButtonProps) {
   const { _id: projectId } = useProjectContext()
-  const { signal } = useAbortController()
   const [refreshing, setRefreshing] = useState(false)
+  const isMountedRef = useIsMounted()
 
   const refreshFile = useCallback(
     (isTPR: Nullable<boolean>) => {
@@ -44,18 +45,24 @@ export default function FileViewRefreshButton({
         shouldReindexReferences: isTPR || /\.bib$/.test(file.name),
       }
       postJSON(`/project/${projectId}/linked_file/${file.id}/refresh`, {
-        signal,
         body,
       })
         .then(() => {
-          setRefreshing(false)
+          if (isMountedRef.current) {
+            setRefreshing(false)
+          }
+          sendMB('refresh-linked-file', {
+            provider: file.linkedFileData?.provider,
+          })
         })
         .catch(err => {
-          setRefreshing(false)
-          setRefreshError(err.data?.message || err.message)
+          if (isMountedRef.current) {
+            setRefreshing(false)
+            setRefreshError(err.data?.message || err.message)
+          }
         })
     },
-    [file, projectId, signal, setRefreshError]
+    [file, projectId, setRefreshError, isMountedRef]
   )
 
   if (tprFileViewRefreshButton.length > 0) {
