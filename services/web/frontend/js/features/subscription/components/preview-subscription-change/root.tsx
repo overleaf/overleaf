@@ -11,6 +11,7 @@ import { debugConsole } from '@/utils/debugging'
 import { postJSON } from '@/infrastructure/fetch-json'
 import Notification from '@/shared/components/notification'
 import { subscriptionUpdateUrl } from '@/features/subscription/data/subscription-url'
+import * as eventTracking from '@/infrastructure/event-tracking'
 
 function PreviewSubscriptionChange() {
   const preview = getMeta('ol-subscriptionChangePreview')
@@ -19,6 +20,7 @@ function PreviewSubscriptionChange() {
   const location = useLocation()
 
   const handlePayNowClick = useCallback(() => {
+    eventTracking.sendMB('assistant-add-on-purchase')
     payNowTask
       .runAsync(payNow(preview))
       .then(() => {
