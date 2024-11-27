@@ -222,6 +222,30 @@ async function getProjectBlob(req, res, next) {
   }
 }
 
+async function copyProjectBlob(req, res, next) {
+  const sourceProjectId = req.swagger.params.copyFrom.value
+  const targetProjectId = req.swagger.params.project_id.value
+  const blobHash = req.swagger.params.hash.value
+  // Check that blob exists in source project
+  const sourceBlobStore = new BlobStore(sourceProjectId)
+  const targetBlobStore = new BlobStore(targetProjectId)
+  const [sourceBlob, targetBlob] = await Promise.all([
+    sourceBlobStore.getBlob(blobHash),
+    targetBlobStore.getBlob(blobHash),
+  ])
+  if (!sourceBlob) {
+    return render.notFound(res)
+  }
+  // Exit early if the blob exists in the target project.
+  // This will also catch global blobs, which always exist.
+  if (targetBlob) {
+    return res.status(HTTPStatus.NO_CONTENT).end()
+  }
+  // Otherwise, copy blob from source project to target project
+  await sourceBlobStore.copyBlob(sourceBlob, targetProjectId)
+  res.status(HTTPStatus.CREATED).end()
+}
+
 async function getSnapshotAtVersion(projectId, version) {
   const chunk = await chunkStore.loadAtVersion(projectId, version)
   const snapshot = chunk.getSnapshot()
@@ -247,4 +271,5 @@ module.exports = {
   deleteProject: expressify(deleteProject),
   createProjectBlob: expressify(createProjectBlob),
   getProjectBlob: expressify(getProjectBlob),
+  copyProjectBlob: expressify(copyProjectBlob),
 }

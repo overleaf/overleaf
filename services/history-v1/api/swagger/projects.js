@@ -134,6 +134,42 @@ exports.paths = {
         },
       },
     },
+    post: {
+      'x-swagger-router-controller': 'projects',
+      operationId: 'copyProjectBlob',
+      tags: ['Project'],
+      description:
+        'Copies a blob from a source project to a target project when duplicating a project',
+      parameters: [
+        {
+          name: 'project_id',
+          in: 'path',
+          description: 'target project id',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'hash',
+          in: 'path',
+          description: 'Hexadecimal SHA-1 hash',
+          required: true,
+          type: 'string',
+          pattern: Blob.HEX_HASH_RX_STRING,
+        },
+        {
+          name: 'copyFrom',
+          in: 'query',
+          description: 'source project id',
+          required: false,
+          type: 'string',
+        },
+      ],
+      responses: {
+        201: {
+          description: 'Created',
+        },
+      },
+    },
   },
   '/projects/{project_id}/latest/content': {
     get: {

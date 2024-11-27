@@ -478,6 +478,30 @@ describe('BlobStore', function () {
           expect(content).to.equal(globalBlobString)
         })
       })
+
+      describe('copyBlob method', function () {
+        it('copies a binary blob to another project', async function () {
+          const testFile = 'graph.png'
+          const originalHash = testFiles.GRAPH_PNG_HASH
+          const insertedBlob = await blobStore.putFile(testFiles.path(testFile))
+          await blobStore.copyBlob(insertedBlob, scenario.projectId2)
+          const copiedBlob = await blobStore2.getBlob(originalHash)
+          expect(copiedBlob.getHash()).to.equal(originalHash)
+          expect(copiedBlob.getByteLength()).to.equal(
+            insertedBlob.getByteLength()
+          )
+          expect(copiedBlob.getStringLength()).to.be.null
+        })
+
+        it('copies a text blob to another project', async function () {
+          const insertedBlob = await blobStore.putString(helloWorldString)
+          await blobStore.copyBlob(insertedBlob, scenario.projectId2)
+          const copiedBlob = await blobStore2.getBlob(helloWorldHash)
+          expect(copiedBlob.getHash()).to.equal(helloWorldHash)
+          const content = await blobStore2.getString(helloWorldHash)
+          expect(content).to.equal(helloWorldString)
+        })
+      })
     })
   }
 

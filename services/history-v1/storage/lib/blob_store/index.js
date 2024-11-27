@@ -390,6 +390,31 @@ class BlobStore {
     const blob = await this.backend.findBlob(this.projectId, hash)
     return blob
   }
+
+  /**
+   * Copy an existing sourceBlob in this project to a target project.
+   * @param {Blob} sourceBlob
+   * @param {string} targetProjectId
+   * @return {Promise<void>}
+   */
+  async copyBlob(sourceBlob, targetProjectId) {
+    assert.instance(sourceBlob, Blob, 'bad sourceBlob')
+    assert.projectId(targetProjectId, 'bad targetProjectId')
+    const hash = sourceBlob.getHash()
+    const sourceProjectId = this.projectId
+    const { bucket, key: sourceKey } = getBlobLocation(sourceProjectId, hash)
+    const destKey = makeProjectKey(targetProjectId, hash)
+    logger.debug({ sourceProjectId, targetProjectId, hash }, 'copyBlob started')
+    try {
+      await persistor.copyObject(bucket, sourceKey, destKey)
+      await this.backend.insertBlob(targetProjectId, sourceBlob)
+    } finally {
+      logger.debug(
+        { sourceProjectId, targetProjectId, hash },
+        'copyBlob finished'
+      )
+    }
+  }
 }
 
 module.exports = {
