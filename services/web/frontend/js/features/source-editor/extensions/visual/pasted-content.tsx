@@ -81,7 +81,7 @@ const pastedContentTheme = EditorView.baseTheme({
     flexDirection: 'column',
     boxSizing: 'border-box',
     fontSize: '14px',
-    fontFamily: '"Lato", sans-serif',
+    fontFamily: 'var(--font-sans)',
   },
   '.ol-cm-pasted-content-menu-item': {
     color: 'inherit',

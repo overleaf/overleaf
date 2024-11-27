@@ -366,7 +366,7 @@ const mainVisualTheme = EditorView.theme({
   '.ol-cm-preamble-widget, .ol-cm-end-document-widget': {
     padding: '0.25em 1em',
     borderRadius: '8px',
-    fontFamily: '"Lato", sans-serif',
+    fontFamily: 'var(--font-sans)',
     fontSize: '14px',
     '.ol-cm-preamble-expanded &': {
       borderBottomLeftRadius: '0',
