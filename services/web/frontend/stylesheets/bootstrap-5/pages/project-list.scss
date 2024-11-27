@@ -18,7 +18,7 @@
 }
 
 .project-list-react {
-  body > &.content {
+  #project-list-root > &.content {
     padding-top: $header-height;
     padding-bottom: 0;
     min-height: calc(100vh - #{$header-height});

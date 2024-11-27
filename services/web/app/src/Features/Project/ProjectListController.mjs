@@ -443,6 +443,15 @@ async function projectListPage(req, res, next) {
     )
   }
 
+  // Get the user's assignment for the DS unified nav split test, which
+  // populates splitTestVariants with a value for the split test name and allows
+  // Pug to send it to the browser
+  await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'sidebar-navigation-ui-update'
+  )
+
   res.render('project/list-react', {
     title: 'your_projects',
     usersBestSubscription,

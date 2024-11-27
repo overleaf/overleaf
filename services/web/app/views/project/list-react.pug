@@ -4,7 +4,9 @@ block entrypointVar
 	- entrypoint = 'pages/project-list'
 
 block vars
-	- var suppressNavContentLinks = true
+	- const suppressNavContentLinks = true
+	- const suppressNavbar = true
+	- const suppressFooter = true
 	- bootstrap5PageStatus = 'enabled' // One of 'disabled', 'enabled', and 'queryStringOnly'
 
 block append meta
@@ -40,5 +42,4 @@ block append meta
 	meta(name="ol-usGovBannerVariant" data-type="string" content=usGovBannerVariant)
 
 block content
-	main.content.content-alt.project-list-react#main-content
-		#project-list-root
+	#project-list-root

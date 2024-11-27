@@ -5,7 +5,6 @@ import './../i18n'
 import '../features/event-tracking'
 import '../features/cookie-banner'
 import '../features/link-helpers/slow-link'
-import '../features/header-footer-react'
 import ReactDOM from 'react-dom'
 import ProjectListRoot from '../features/project-list/components/project-list-root'
 
