@@ -16,7 +16,7 @@ describe('group invite', function () {
         'You already have an individual subscription, would you like us to cancel this first before joining the group licence?'
       )
       screen.getByRole('button', { name: 'Not now' })
-      screen.getByRole('button', { name: 'Cancel Your Subscription' })
+      screen.getByRole('button', { name: 'Cancel your subscription' })
     })
 
     it('handles subscription cancellation and calls to change invite view', async function () {
@@ -24,7 +24,7 @@ describe('group invite', function () {
       const setView = sinon.stub()
       render(<HasIndividualRecurlySubscription setView={setView} />)
       const button = await screen.findByRole('button', {
-        name: 'Cancel Your Subscription',
+        name: 'Cancel your subscription',
       })
       fireEvent.click(button)
       await waitFor(() => {
@@ -35,7 +35,7 @@ describe('group invite', function () {
     it('shows error message when cancelling subscription fails', async function () {
       render(<HasIndividualRecurlySubscription setView={() => {}} />)
       const button = await screen.findByRole('button', {
-        name: 'Cancel Your Subscription',
+        name: 'Cancel your subscription',
       })
       fireEvent.click(button)
       await waitFor(() => {

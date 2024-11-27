@@ -12,6 +12,6 @@ describe('<FreePlan />', function () {
       }
     )
 
-    screen.getByText('Upgrade Now')
+    screen.getByText('Upgrade now')
   })
 })

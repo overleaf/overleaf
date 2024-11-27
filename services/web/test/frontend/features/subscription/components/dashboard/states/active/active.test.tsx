@@ -57,8 +57,8 @@ describe('<ActiveSubscription />', function () {
       '* Prices may be subject to additional VAT, depending on your country.'
     )
 
-    screen.getByRole('link', { name: 'Update Your Billing Details' })
-    screen.getByRole('link', { name: 'View Your Invoices' })
+    screen.getByRole('link', { name: 'Update your billing details' })
+    screen.getByRole('link', { name: 'View your invoices' })
   }
 
   it('renders the dash annual active subscription', function () {
@@ -208,7 +208,7 @@ describe('<ActiveSubscription />', function () {
 
     function showConfirmCancelUI() {
       const button = screen.getByRole('button', {
-        name: 'Cancel Your Subscription',
+        name: 'Cancel your subscription',
       })
       fireEvent.click(button)
     }
@@ -227,7 +227,7 @@ describe('<ActiveSubscription />', function () {
       )
       expect(dates.length).to.equal(2)
       const button = screen.getByRole('button', {
-        name: 'Cancel Your Subscription',
+        name: 'Cancel your subscription',
       })
       expect(button).to.exist
     })
@@ -243,7 +243,7 @@ describe('<ActiveSubscription />', function () {
       )
       expect(dates.length).to.equal(3)
       const button = screen.getByRole('button', {
-        name: 'Cancel Your Subscription',
+        name: 'Cancel your subscription',
       })
       expect(button).to.exist
     })

@@ -87,7 +87,7 @@ describe('<PersonalSubscription />', function () {
 
       screen.getByText('No further payments will be taken.', { exact: false })
 
-      screen.getByRole('link', { name: 'View Your Invoices' })
+      screen.getByRole('link', { name: 'View your invoices' })
       screen.getByRole('button', { name: 'Reactivate your subscription' })
     })
 

@@ -387,7 +387,7 @@ describe('<ChangePlanModal />', function () {
 
       expect(within(modal).queryByText('tax', { exact: false })).to.be.null
 
-      within(modal).getByRole('button', { name: 'Upgrade Now' })
+      within(modal).getByRole('button', { name: 'Upgrade now' })
 
       within(modal).getByRole('button', {
         name: 'Need more than 50 licenses? Please get in touch',
@@ -523,7 +523,7 @@ describe('<ChangePlanModal />', function () {
 
       await openModal()
 
-      const buttonConfirm = screen.getByRole('button', { name: 'Upgrade Now' })
+      const buttonConfirm = screen.getByRole('button', { name: 'Upgrade now' })
       fireEvent.click(buttonConfirm)
 
       screen.getByText('processing', { exact: false })
@@ -544,7 +544,7 @@ describe('<ChangePlanModal />', function () {
 
       await openModal()
 
-      const buttonConfirm = screen.getByRole('button', { name: 'Upgrade Now' })
+      const buttonConfirm = screen.getByRole('button', { name: 'Upgrade now' })
       fireEvent.click(buttonConfirm)
 
       screen.getByText('processing', { exact: false })
