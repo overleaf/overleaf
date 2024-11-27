@@ -420,7 +420,10 @@ async function getBestSubscription(user) {
     }
   }
   if (individualSubscription && !individualSubscription.groupPlan) {
-    if (isStandaloneAiAddOnPlanCode(individualSubscription.planCode)) {
+    if (
+      isStandaloneAiAddOnPlanCode(individualSubscription.planCode) &&
+      bestSubscription.type === 'free'
+    ) {
       bestSubscription = { type: 'standalone-ai-add-on' }
     } else {
       const plan = PlansLocator.findLocalPlanInSettings(
