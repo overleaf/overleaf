@@ -4,6 +4,6 @@ set -ex
 
 apt-get update
 
-apt-get install parallel --yes
+apt-get install jq parallel --yes
 
 rm -rf /var/lib/apt/lists/*
