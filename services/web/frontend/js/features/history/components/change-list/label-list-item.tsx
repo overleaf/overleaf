@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react'
 import { UpdateRange, Version } from '../../services/types/update'
 import TagTooltip from './tag-tooltip'
-import { formatTimeBasedOnYear, isoToUnix } from '../../../utils/format-date'
+import { formatTimeBasedOnYear } from '../../../utils/format-date'
 import HistoryDropdown from './dropdown/history-dropdown'
 import HistoryVersionDetails from './history-version-details'
 import { LoadedLabel } from '../../services/types/label'
@@ -49,9 +49,9 @@ function LabelListItem({
   const { t } = useTranslation()
 
   // first label
-  const fromVTimestamp = isoToUnix(labels[labels.length - 1].created_at)
+  const fromVTimestamp = Date.parse(labels[labels.length - 1].created_at)
   // most recent label
-  const toVTimestamp = isoToUnix(labels[0].created_at)
+  const toVTimestamp = Date.parse(labels[0].created_at)
 
   const updateRange: UpdateRange = {
     fromV: version,
@@ -92,7 +92,7 @@ function LabelListItem({
             version={version}
             projectId={projectId}
             closeDropdownForItem={closeDropdownForItem}
-            endTimestamp={toVTimestamp * 1000}
+            endTimestamp={toVTimestamp}
           />
         ) : null}
       </HistoryDropdown>

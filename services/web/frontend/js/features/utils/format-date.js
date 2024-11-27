@@ -26,12 +26,3 @@ export function formatTimeBasedOnYear(date) {
     ? formatTime(date, 'D MMMM YYYY, h:mm a')
     : formatTime(date, 'D MMMM, h:mm a')
 }
-
-/**
- * @param {string} isoTimestamp
- * @returns {number}
- */
-export function isoToUnix(isoTimestamp) {
-  const unixTimestamp = Date.parse(isoTimestamp) / 1000
-  return unixTimestamp
-}
