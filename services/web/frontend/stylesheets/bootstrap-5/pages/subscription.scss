@@ -253,6 +253,12 @@
       @include body-sm;
     }
 
+    .paypal-disclaimer {
+      @include body-sm;
+
+      margin: var(--spacing-05) 0 0 0;
+    }
+
     .form-group {
       &:not(.payment-method-toggle) {
         margin-bottom: var(--spacing-05);
