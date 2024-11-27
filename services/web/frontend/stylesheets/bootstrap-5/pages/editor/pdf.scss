@@ -343,8 +343,16 @@
 }
 
 :fullscreen {
+  /* stylelint-disable selector-class-pattern */
+  .pdfViewer {
+    min-height: auto !important;
+  }
+
   .pdfjs-viewer-inner {
     overflow-y: hidden !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
