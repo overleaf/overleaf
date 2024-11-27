@@ -245,10 +245,30 @@
 
     h1 {
       @include heading-md;
+
+      margin-bottom: var(--spacing-08);
     }
 
     .student-disclaimer {
       @include body-sm;
+    }
+
+    .form-group {
+      &:not(.payment-method-toggle) {
+        margin-bottom: var(--spacing-05);
+      }
+
+      &.address-1 {
+        margin-bottom: var(--spacing-04);
+      }
+    }
+
+    .form-check {
+      margin-bottom: 0; // override bootstrap5 default margin-bottom of 0.125rem
+    }
+
+    .checkout-form-submit {
+      margin-top: var(--spacing-08);
     }
   }
 }
@@ -312,7 +332,13 @@
 
 .payment-method-toggle {
   .form-check {
-    margin-bottom: var(--spacing-05);
+    &:first-of-type {
+      margin-bottom: var(--spacing-05);
+    }
+
+    label {
+      margin-bottom: 0; // override .website-redesign default
+    }
   }
 
   .payment-method-logos {
@@ -327,6 +353,7 @@
 
 .address2-button {
   text-decoration: none;
+  margin-bottom: var(--spacing-05);
   padding: 0;
 
   :hover {
