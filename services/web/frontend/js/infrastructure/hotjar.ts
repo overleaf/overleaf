@@ -1,13 +1,13 @@
 import getMeta from '@/utils/meta'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { debugConsole } from '@/utils/debugging'
 import { initializeHotjar } from '@/infrastructure/hotjar-snippet'
 
 const { hotjarId, hotjarVersion } = getMeta('ol-ExposedSettings')
+const shouldLoadHotjar = getMeta('ol-shouldLoadHotjar')
 
 let hotjarInitialized = false
 
-if (hotjarId && hotjarVersion && isSplitTestEnabled('hotjar')) {
+if (hotjarId && hotjarVersion && shouldLoadHotjar) {
   const loadHotjar = () => {
     // consent needed
     if (!document.cookie.split('; ').some(item => item === 'oa=1')) {

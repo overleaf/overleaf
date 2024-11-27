@@ -130,6 +130,8 @@ async function plansPage(req, res) {
       ? formatCurrencyLocalized
       : SubscriptionHelper.formatCurrencyDefault
 
+  const shouldLoadHotjar = await getShouldLoadHotjar(req, res)
+
   res.render('subscriptions/plans', {
     title: 'plans_and_pricing',
     currentView,
@@ -156,6 +158,7 @@ async function plansPage(req, res) {
     latamCountryBannerDetails,
     countryCode,
     websiteRedesignPlansVariant: 'default',
+    shouldLoadHotjar,
   })
 }
 
@@ -194,6 +197,8 @@ async function plansPageLightDesign(req, res) {
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
 
+  const shouldLoadHotjar = await getShouldLoadHotjar(req, res)
+
   res.render('subscriptions/plans-light-design', {
     title: 'plans_and_pricing',
     currentView,
@@ -220,6 +225,7 @@ async function plansPageLightDesign(req, res) {
     latamCountryBannerDetails,
     countryCode,
     websiteRedesignPlansVariant: 'light-design',
+    shouldLoadHotjar,
   })
 }
 
@@ -383,6 +389,8 @@ async function interstitialPaymentPage(req, res) {
       'local-ccy-format-v2'
     )
 
+    const shouldLoadHotjar = await getShouldLoadHotjar(req, res)
+
     res.render(template, {
       title: 'subscribe',
       itm_content: req.query?.itm_content,
@@ -403,6 +411,7 @@ async function interstitialPaymentPage(req, res) {
       skipLinkTarget: req.session?.postCheckoutRedirect || '/project',
       websiteRedesignPlansVariant: websiteRedesignPlansAssignment.variant,
       countryCode,
+      shouldLoadHotjar,
     })
   }
 }
@@ -897,6 +906,15 @@ async function getLatamCountryBannerDetails(req, res) {
   }
 
   return latamCountryBannerDetails
+}
+
+async function getShouldLoadHotjar(req, res) {
+  const assignment = await SplitTestHandler.promises.getAssignment(
+    req,
+    res,
+    'hotjar-plans'
+  )
+  return assignment?.variant === 'enabled'
 }
 
 /**

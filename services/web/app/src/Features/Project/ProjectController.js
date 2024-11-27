@@ -807,6 +807,7 @@ const _ProjectController = {
             ? usedLatex
             : null,
         isSaas: Features.hasFeature('saas'),
+        shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
       })
       timer.done()
     } catch (err) {

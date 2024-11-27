@@ -1,4 +1,5 @@
 import '../../../../marketing'
+import '../../../../infrastructure/hotjar'
 
 import * as eventTracking from '../../../../infrastructure/event-tracking'
 import { setUpStickyHeaderObserver } from './plans-v2-sticky-header'
