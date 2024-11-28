@@ -10,7 +10,6 @@ import {
   pathInFolder,
 } from '@/features/file-tree/util/path'
 import { PreviewPath } from '../../../../../types/preview-path'
-import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
 
 type FileTreePathContextValue = {
   pathInFolder: (id: string) => string | null
@@ -25,7 +24,6 @@ export const FileTreePathContext = createContext<
 
 export const FileTreePathProvider: FC = ({ children }) => {
   const { fileTreeData }: { fileTreeData: Folder } = useFileTreeData()
-  const { fileTreeFromHistory } = useSnapshotContext()
   const projectId = getMeta('ol-project_id')
 
   const pathInFileTree = useCallback(
@@ -39,9 +37,8 @@ export const FileTreePathProvider: FC = ({ children }) => {
   )
 
   const previewByPathInFileTree = useCallback(
-    (path: string) =>
-      previewByPath(fileTreeData, projectId, path, fileTreeFromHistory),
-    [fileTreeData, projectId, fileTreeFromHistory]
+    (path: string) => previewByPath(fileTreeData, projectId, path),
+    [fileTreeData, projectId]
   )
 
   const dirnameInFileTree = useCallback(

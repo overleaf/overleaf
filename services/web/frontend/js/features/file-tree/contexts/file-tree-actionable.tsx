@@ -33,7 +33,6 @@ import {
 } from '../errors'
 import { Folder } from '../../../../../types/folder'
 import { useReferencesContext } from '@/features/ide-react/context/references-context'
-import { useSnapshotContext } from '@/features/ide-react/context/snapshot-context'
 
 type DroppedFile = File & {
   relativePath?: string
@@ -221,7 +220,6 @@ export const FileTreeActionableProvider: FC = ({ children }) => {
   const { _id: projectId } = useProjectContext()
   const { fileTreeReadOnly } = useFileTreeData()
   const { indexAllReferences } = useReferencesContext()
-  const { fileTreeFromHistory } = useSnapshotContext()
 
   const [state, dispatch] = useReducer(
     fileTreeReadOnly
@@ -494,17 +492,14 @@ export const FileTreeActionableProvider: FC = ({ children }) => {
       const selectedEntity = findInTree(fileTreeData, selectedEntityId)
 
       if (selectedEntity?.type === 'fileRef') {
-        if (fileTreeFromHistory) {
-          return `/project/${projectId}/blob/${selectedEntity.entity.hash}`
-        }
-        return `/project/${projectId}/file/${selectedEntityId}`
+        return `/project/${projectId}/blob/${selectedEntity.entity.hash}?fallback=${selectedEntityId}`
       }
 
       if (selectedEntity?.type === 'doc') {
         return `/project/${projectId}/doc/${selectedEntityId}/download`
       }
     }
-  }, [fileTreeData, projectId, selectedEntityIds, fileTreeFromHistory])
+  }, [fileTreeData, projectId, selectedEntityIds])
 
   // TODO: wrap in useMemo
   const value = {
