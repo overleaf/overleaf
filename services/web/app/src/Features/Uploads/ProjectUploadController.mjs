@@ -143,6 +143,7 @@ async function uploadFile(req, res, next) {
           success: true,
           entity_id: entity?._id,
           entity_type: entity?.type,
+          hash: entity?.hash,
         })
       }
     }

@@ -60,6 +60,7 @@ describe('HistoryManager', function () {
 
     this.HistoryManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
+        '../../infrastructure/mongodb': { ObjectId },
         '@overleaf/fetch-utils': this.FetchUtils,
         '@overleaf/settings': this.settings,
         '../User/UserGetter': this.UserGetter,

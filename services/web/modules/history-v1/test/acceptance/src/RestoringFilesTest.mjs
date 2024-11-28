@@ -127,8 +127,8 @@ describe('RestoringFiles', function () {
             project.rootFolder[0].fileRefs,
             file => file.name === 'image.png'
           )
-          file = MockFilestoreApi.files[this.project_id][file._id]
-          expect(file.content).to.equal(this.pngData)
+          file = MockFilestoreApi.getFile(this.project_id, file._id)
+          expect(file).to.deep.equal(this.pngData)
           done()
         })
       })

@@ -550,6 +550,36 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
     AuthorizationMiddleware.ensureUserCanReadProject,
     FileStoreController.getFile
   )
+  webRouter.head(
+    '/project/:project_id/blob/:hash',
+    validate({
+      params: Joi.object({
+        project_id: Joi.objectId().required(),
+        hash: Joi.string().required().hex().length(40),
+      }),
+      query: Joi.object({
+        fallback: Joi.objectId().optional(),
+      }),
+    }),
+    RateLimiterMiddleware.rateLimit(rateLimiters.getProjectBlob),
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    HistoryController.headBlob
+  )
+  webRouter.get(
+    '/project/:project_id/blob/:hash',
+    validate({
+      params: Joi.object({
+        project_id: Joi.objectId().required(),
+        hash: Joi.string().required().hex().length(40),
+      }),
+      query: Joi.object({
+        fallback: Joi.objectId().optional(),
+      }),
+    }),
+    RateLimiterMiddleware.rateLimit(rateLimiters.getProjectBlob),
+    AuthorizationMiddleware.ensureUserCanReadProject,
+    HistoryController.getBlob
+  )
   webRouter.get(
     '/Project/:Project_id/doc/:Doc_id/download', // "download" suffix to avoid conflict with private API route at doc/:doc_id
     AuthorizationMiddleware.ensureUserCanReadProject,

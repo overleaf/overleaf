@@ -198,19 +198,52 @@ async function createProjectBlob(req, res, next) {
   })
 }
 
+async function headProjectBlob(req, res) {
+  const projectId = req.swagger.params.project_id.value
+  const hash = req.swagger.params.hash.value
+
+  const blobStore = new BlobStore(projectId)
+  const blob = await blobStore.getBlob(hash)
+  if (blob) {
+    res.set('Content-Length', blob.getByteLength())
+    res.status(200).end()
+  } else {
+    res.status(404).end()
+  }
+}
+
+// Support simple, singular ranges starting from zero only, up-to 2MB = 2_000_000, 7 digits
+const RANGE_HEADER = /^bytes=0-(\d{1,7})$/
+
+/**
+ * @param {string} header
+ * @return {{}|{start: number, end: number}}
+ * @private
+ */
+function _getRangeOpts(header) {
+  if (!header) return {}
+  const match = header.match(RANGE_HEADER)
+  if (match) {
+    const end = parseInt(match[1], 10)
+    return { start: 0, end }
+  }
+  return {}
+}
+
 async function getProjectBlob(req, res, next) {
   const projectId = req.swagger.params.project_id.value
   const hash = req.swagger.params.hash.value
+  const opts = _getRangeOpts(req.swagger.params.range.value || '')
 
   const blobStore = new BlobStore(projectId)
   logger.debug({ projectId, hash }, 'getProjectBlob started')
   try {
     let stream
     try {
-      stream = await blobStore.getStream(hash)
+      stream = await blobStore.getStream(hash, opts)
     } catch (err) {
       if (err instanceof Blob.NotFoundError) {
-        return render.notFound(res)
+        return res.status(404).end()
       } else {
         throw err
       }
@@ -271,5 +304,6 @@ module.exports = {
   deleteProject: expressify(deleteProject),
   createProjectBlob: expressify(createProjectBlob),
   getProjectBlob: expressify(getProjectBlob),
+  headProjectBlob: expressify(headProjectBlob),
   copyProjectBlob: expressify(copyProjectBlob),
 }

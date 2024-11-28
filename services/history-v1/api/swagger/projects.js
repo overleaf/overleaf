@@ -86,6 +86,52 @@ exports.paths = {
           type: 'string',
           pattern: Blob.HEX_HASH_RX_STRING,
         },
+        {
+          name: 'range',
+          in: 'header',
+          description: 'HTTP Range header',
+          required: false,
+          type: 'string',
+        },
+      ],
+      produces: ['application/octet-stream'],
+      responses: {
+        200: {
+          description: 'Success',
+          schema: {
+            type: 'file',
+          },
+        },
+        404: {
+          description: 'Not Found',
+          schema: {
+            $ref: '#/definitions/Error',
+          },
+        },
+      },
+      security: [{ jwt: [] }, { token: [] }],
+    },
+    head: {
+      'x-swagger-router-controller': 'projects',
+      operationId: 'headProjectBlob',
+      tags: ['Project'],
+      description: 'Fetch blob content-length by its project id and hash.',
+      parameters: [
+        {
+          name: 'project_id',
+          in: 'path',
+          description: 'project id',
+          required: true,
+          type: 'string',
+        },
+        {
+          name: 'hash',
+          in: 'path',
+          description: 'Hexadecimal SHA-1 hash',
+          required: true,
+          type: 'string',
+          pattern: Blob.HEX_HASH_RX_STRING,
+        },
       ],
       produces: ['application/octet-stream'],
       responses: {

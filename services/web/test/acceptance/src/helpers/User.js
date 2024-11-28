@@ -784,6 +784,24 @@ class User {
   }
 
   uploadFileInProject(projectId, folderId, file, name, contentType, callback) {
+    this.uploadFileInProjectFull(
+      projectId,
+      folderId,
+      file,
+      name,
+      contentType,
+      (err, body) => callback(err, body?.entity_id)
+    )
+  }
+
+  uploadFileInProjectFull(
+    projectId,
+    folderId,
+    file,
+    name,
+    contentType,
+    callback
+  ) {
     const fileStream = fs.createReadStream(
       Path.resolve(Path.join(__dirname, '..', '..', 'files', file))
     )
@@ -819,7 +837,7 @@ class User {
           )
         }
 
-        callback(null, JSON.parse(body).entity_id)
+        callback(null, JSON.parse(body))
       }
     )
   }

@@ -16,6 +16,7 @@ import * as HistoryApiManager from './HistoryApiManager.js'
 import * as RetryManager from './RetryManager.js'
 import * as FlushManager from './FlushManager.js'
 import { pipeline } from 'node:stream'
+import { RequestFailedError } from '@overleaf/fetch-utils'
 
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60
 
@@ -27,6 +28,9 @@ export function getProjectBlob(req, res, next) {
     blobHash,
     (err, stream) => {
       if (err != null) {
+        if (err instanceof RequestFailedError && err.response.status === 404) {
+          return res.status(404).end()
+        }
         return next(OError.tag(err))
       }
       res.setHeader('Cache-Control', `private, max-age=${ONE_DAY_IN_SECONDS}`)

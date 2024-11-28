@@ -16,6 +16,7 @@ const Errors = require('../../../../app/src/Features/Errors/Errors')
 
 const modulePath = '../../../../app/src/Features/History/HistoryController'
 const SandboxedModule = require('sandboxed-module')
+const { ObjectId } = require('mongodb-legacy')
 
 describe('HistoryController', function () {
   beforeEach(function () {
@@ -31,6 +32,9 @@ describe('HistoryController', function () {
       requires: {
         request: (this.request = sinon.stub()),
         '@overleaf/settings': (this.settings = {}),
+        '@overleaf/fetch-utils': {},
+        '@overleaf/Metrics': {},
+        '../../infrastructure/mongodb': { ObjectId },
         stream: this.Stream,
         '../Authentication/SessionManager': this.SessionManager,
         './HistoryManager': (this.HistoryManager = {}),

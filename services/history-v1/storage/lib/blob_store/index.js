@@ -309,14 +309,15 @@ class BlobStore {
    * failure, so the caller must be prepared to retry on errors, if appropriate.
    *
    * @param {string} hash hexadecimal SHA-1 hash
+   * @param {Object} opts
    * @return {Promise.<Readable>} a stream to read the file
    */
-  async getStream(hash) {
+  async getStream(hash, opts = {}) {
     assert.blobHash(hash, 'bad hash')
 
     const { bucket, key } = getBlobLocation(this.projectId, hash)
     try {
-      const stream = await persistor.getObjectStream(bucket, key)
+      const stream = await persistor.getObjectStream(bucket, key, opts)
       return stream
     } catch (err) {
       if (err instanceof objectPersistor.Errors.NotFoundError) {

@@ -13,10 +13,61 @@ const ProjectDetailsHandler = require('../Project/ProjectDetailsHandler')
 const ProjectEntityUpdateHandler = require('../Project/ProjectEntityUpdateHandler')
 const RestoreManager = require('./RestoreManager')
 const { pipeline } = require('stream')
+const Stream = require('stream')
 const { prepareZipAttachment } = require('../../infrastructure/Response')
 const Features = require('../../infrastructure/Features')
+const { expressify } = require('@overleaf/promise-utils')
+
+async function getBlob(req, res) {
+  await requestBlob('GET', req, res)
+}
+
+async function headBlob(req, res) {
+  await requestBlob('HEAD', req, res)
+}
+
+async function requestBlob(method, req, res) {
+  const { project_id: projectId, hash } = req.params
+  const range = req.get('Range')
+  let url, stream, source, contentLength
+  try {
+    ;({ url, stream, source, contentLength } =
+      await HistoryManager.promises.requestBlobWithFallback(
+        projectId,
+        hash,
+        req.query.fallback,
+        method,
+        range
+      ))
+  } catch (err) {
+    if (err instanceof Errors.NotFoundError) return res.status(404).end()
+    throw err
+  }
+  res.appendHeader('X-Served-By', source)
+
+  // allow the browser to cache these immutable files
+  // note: both "private" and "max-age" appear to be required for caching
+  res.setHeader('Cache-Control', 'private, max-age=3600')
+
+  if (contentLength) res.setHeader('Content-Length', contentLength) // set on HEAD
+  res.setHeader('Content-Type', 'application/octet-stream')
+
+  try {
+    await Stream.promises.pipeline(stream, res)
+  } catch (err) {
+    // If the downstream request is cancelled, we get an
+    // ERR_STREAM_PREMATURE_CLOSE, ignore these "errors".
+    if (err?.code === 'ERR_STREAM_PREMATURE_CLOSE') return
+
+    logger.warn({ err, url, method, range }, 'streaming blob error')
+    throw err
+  }
+}
 
 module.exports = HistoryController = {
+  getBlob: expressify(getBlob),
+  headBlob: expressify(headBlob),
+
   proxyToHistoryApi(req, res, next) {
     const userId = SessionManager.getLoggedInUserId(req.session)
     const url = settings.apis.project_history.url + req.url
@@ -36,30 +87,6 @@ module.exports = HistoryController = {
         next(err)
       }
     })
-  },
-
-  getBlob(req, res, next) {
-    const { project_id: projectId, blob } = req.params
-
-    ProjectGetter.getProject(
-      projectId,
-      { 'overleaf.history.id': true },
-      (err, project) => {
-        if (err) return next(err)
-
-        const url = new URL(settings.apis.project_history.url)
-        url.pathname = `/project/${project.overleaf.history.id}/blob/${blob}`
-
-        pipeline(request(url.href), res, err => {
-          // If the downstream request is cancelled, we get an
-          // ERR_STREAM_PREMATURE_CLOSE.
-          if (err && err.code !== 'ERR_STREAM_PREMATURE_CLOSE') {
-            logger.warn({ url, err }, 'history API error')
-            next(err)
-          }
-        })
-      }
-    )
   },
 
   proxyToHistoryApiAndInjectUserDetails(req, res, next) {

@@ -116,6 +116,33 @@ describe('Project blobs API', function () {
       expect(payload).to.equal(fileContents.toString())
     })
 
+    it('supports range request', async function () {
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${projectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('token', token)
+      const response = await fetch(url, { headers: { Range: 'bytes=0-4' } })
+      const payload = await response.text()
+      expect(payload).to.equal(fileContents.toString().slice(0, 4))
+    })
+
+    it('supports HEAD request', async function () {
+      const url = new URL(
+        testServer.url(
+          `/api/projects/${projectId}/blobs/${testFiles.HELLO_TXT_HASH}`
+        )
+      )
+      url.searchParams.append('token', token)
+      const response = await fetch(url, { method: 'HEAD' })
+      expect(response.headers.get('Content-Length')).to.equal(
+        testFiles.HELLO_TXT_BYTE_LENGTH.toString()
+      )
+      const payload = await response.text()
+      expect(payload).to.have.length(0)
+    })
+
     it('rejects an unautorized request', async function () {
       const response = await fetch(
         testServer.url(
