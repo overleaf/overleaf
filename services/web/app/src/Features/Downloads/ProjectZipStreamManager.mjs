@@ -3,7 +3,7 @@ import async from 'async'
 import logger from '@overleaf/logger'
 import ProjectEntityHandler from '../Project/ProjectEntityHandler.js'
 import ProjectGetter from '../Project/ProjectGetter.js'
-import FileStoreHandler from '../FileStore/FileStoreHandler.js'
+import HistoryManager from '../History/HistoryManager.js'
 let ProjectZipStreamManager
 
 export default ProjectZipStreamManager = {
@@ -114,11 +114,11 @@ export default ProjectZipStreamManager = {
         return callback(error)
       }
       const jobs = Object.entries(files).map(([path, file]) => cb => {
-        FileStoreHandler.getFileStream(
+        HistoryManager.requestBlobWithFallback(
           projectId,
+          file.hash,
           file._id,
-          {},
-          (error, stream) => {
+          (error, result) => {
             if (error) {
               logger.warn(
                 { err: error, projectId, fileId: file._id },
@@ -129,6 +129,7 @@ export default ProjectZipStreamManager = {
             if (path[0] === '/') {
               path = path.slice(1)
             }
+            const { stream } = result
             archive.append(stream, { name: path })
             stream.on('end', () => cb())
           }

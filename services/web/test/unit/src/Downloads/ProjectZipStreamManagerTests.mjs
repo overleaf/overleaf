@@ -32,8 +32,8 @@ describe('ProjectZipStreamManager', function () {
       '@overleaf/logger': this.logger,
       '../../../../app/src/Features/Project/ProjectEntityHandler':
         (this.ProjectEntityHandler = {}),
-      '../../../../app/src/Features/FileStore/FileStoreHandler':
-        (this.FileStoreHandler = {}),
+      '../../../../app/src/Features/History/HistoryManager.js':
+        (this.HistoryManager = {}),
       '../../../../app/src/Features/Project/ProjectGetter':
         (this.ProjectGetter = {}),
     }))
@@ -366,9 +366,11 @@ describe('ProjectZipStreamManager', function () {
       this.files = {
         '/image.png': {
           _id: 'file-id-1',
+          hash: 'abc',
         },
         '/folder/picture.png': {
           _id: 'file-id-2',
+          hash: 'def',
         },
       }
       this.streams = {
@@ -378,11 +380,15 @@ describe('ProjectZipStreamManager', function () {
       this.ProjectEntityHandler.getAllFiles = sinon
         .stub()
         .callsArgWith(1, null, this.files)
-      this.FileStoreHandler.getFileStream = (projectId, fileId, ...rest) => {
-        const [, callback] = rest
-        return callback(null, this.streams[fileId])
+      this.HistoryManager.requestBlobWithFallback = (
+        projectId,
+        hash,
+        fileId,
+        callback
+      ) => {
+        return callback(null, { stream: this.streams[fileId] })
       }
-      sinon.spy(this.FileStoreHandler, 'getFileStream')
+      sinon.spy(this.HistoryManager, 'requestBlobWithFallback')
       this.ProjectZipStreamManager.addAllFilesToArchive(
         this.project_id,
         this.archive,
@@ -410,8 +416,8 @@ describe('ProjectZipStreamManager', function () {
         for (const path in this.files) {
           const file = this.files[path]
           result.push(
-            this.FileStoreHandler.getFileStream
-              .calledWith(this.project_id, file._id)
+            this.HistoryManager.requestBlobWithFallback
+              .calledWith(this.project_id, file.hash, file._id)
               .should.equal(true)
           )
         }

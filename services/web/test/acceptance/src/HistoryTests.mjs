@@ -6,6 +6,8 @@ import MockV1HistoryApiClass from './mocks/MockV1HistoryApi.js'
 import ProjectGetter from '../../../app/src/Features/Project/ProjectGetter.js'
 import MockFilestoreApiClass from './mocks/MockFilestoreApi.js'
 import { fileURLToPath } from 'node:url'
+import sinon from 'sinon'
+import logger from '@overleaf/logger'
 import Metrics from './helpers/metrics.js'
 const User = UserHelper.promises
 
@@ -63,6 +65,41 @@ describe('HistoryTests', function () {
     expect(await getSourceMetric('history-v1')).to.equal(historySource)
     expect(await getSourceMetric('filestore')).to.equal(filestoreSource)
   }
+
+  describe('/project/:projectId/download/zip', function () {
+    let spy, downloadZIPURL
+    beforeEach(async function () {
+      spy = sinon.spy(logger, 'error')
+      downloadZIPURL = `/project/${projectId}/download/zip`
+    })
+    afterEach(function () {
+      spy.restore()
+    })
+    it('should work from history-v1', async function () {
+      const { response, body } = await user.doRequest('GET', downloadZIPURL)
+      expect(response.statusCode).to.equal(200)
+      expect(body).to.include('2pixel.png')
+      await expectHistoryV1Hit()
+    })
+    it('should work from filestore', async function () {
+      MockV1HistoryApi.reset()
+      const { response, body } = await user.doRequest('GET', downloadZIPURL)
+      expect(response.statusCode).to.equal(200)
+      expect(body).to.include('2pixel.png')
+      await expectFilestoreHit()
+    })
+    it('should not include when missing in both places', async function () {
+      MockFilestoreApi.reset()
+      MockV1HistoryApi.reset()
+      const { response, body } = await user.doRequest('GET', downloadZIPURL)
+      expect(response.statusCode).to.equal(200)
+      expect(
+        spy.args.find(([, msg]) => msg === 'error adding files to zip stream')
+      ).to.exist
+      expect(body).to.not.include('2pixel.png')
+      await expectNoIncrement()
+    })
+  })
 
   describe('/project/:projectId/blob/:hash', function () {
     describe('HEAD', function () {
