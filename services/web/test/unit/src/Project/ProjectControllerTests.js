@@ -190,6 +190,11 @@ describe('ProjectController', function () {
         hasLicence: sinon.stub().resolves(false),
       },
     }
+    this.InstitutionsGetter = {
+      promises: {
+        getCurrentAffiliations: sinon.stub().resolves([]),
+      },
+    }
     this.SubscriptionViewModelBuilder = {
       getBestSubscription: sinon.stub().yields(null, { type: 'free' }),
     }
@@ -256,6 +261,7 @@ describe('ProjectController', function () {
           },
         },
         '../Institutions/InstitutionsFeatures': this.InstitutionsFeatures,
+        '../Institutions/InstitutionsGetter': this.InstitutionsGetter,
         '../Survey/SurveyHandler': this.SurveyHandler,
         './ProjectAuditLogHandler': this.ProjectAuditLogHandler,
         '../Tutorial/TutorialHandler': this.TutorialHandler,

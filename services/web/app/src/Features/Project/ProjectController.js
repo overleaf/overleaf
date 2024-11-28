@@ -37,6 +37,7 @@ const FeaturesUpdater = require('../Subscription/FeaturesUpdater')
 const SpellingHandler = require('../Spelling/SpellingHandler')
 const { hasAdminAccess } = require('../Helpers/AdminAuthorizationHelper')
 const InstitutionsFeatures = require('../Institutions/InstitutionsFeatures')
+const InstitutionsGetter = require('../Institutions/InstitutionsGetter')
 const ProjectAuditLogHandler = require('./ProjectAuditLogHandler')
 const PublicAccessLevels = require('../Authorization/PublicAccessLevels')
 const TagsHandler = require('../Tags/TagsHandler')
@@ -383,6 +384,12 @@ const _ProjectController = {
               logger.error({ err, userId }, 'failed to get institution licence')
               return false
             }),
+          affiliations: InstitutionsGetter.promises
+            .getCurrentAffiliations(userId)
+            .catch(err => {
+              logger.error({ err, userId }, 'failed to get institution licence')
+              return false
+            }),
           subscription:
             SubscriptionLocator.promises.getUsersSubscription(userId),
           isTokenMember: CollaboratorsGetter.promises.userIsTokenMember(
@@ -653,6 +660,7 @@ const _ProjectController = {
           aiFeaturesAllowed = false
         }
       }
+
       const canUseErrorAssistant =
         user.features?.aiErrorAssistant ||
         splitTestAssignments['ai-add-on']?.variant === 'enabled'
@@ -669,13 +677,21 @@ const _ProjectController = {
         })
       }
 
+      let inEnterpriseCommons = false
+      const affiliations = userValues.affiliations || []
+      for (const affiliation of affiliations) {
+        inEnterpriseCommons =
+          inEnterpriseCommons || affiliation.institution?.enterpriseCommons
+      }
+
       // check if a user has never tried writefull before (writefull.enabled will be null)
       //  if they previously accepted writefull, or are have been already assigned to a trial, user.writefull will be true,
       //  if they explicitly disabled it, user.writefull will be false
       if (
         aiFeaturesAllowed &&
         user.writefull?.enabled === null &&
-        !userInNonIndividualSub
+        !userIsMemberOfGroupSubscription &&
+        !inEnterpriseCommons
       ) {
         const { variant } = await SplitTestHandler.promises.getAssignment(
           req,
