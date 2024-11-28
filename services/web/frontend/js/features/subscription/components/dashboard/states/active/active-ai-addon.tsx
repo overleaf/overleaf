@@ -14,7 +14,6 @@ import { PendingRecurlyPlan } from '../../../../../../../../types/subscription/p
 import {
   ADD_ON_NAME,
   AI_ADD_ON_CODE,
-  AI_STANDALONE_PLAN_NAME,
   isStandaloneAiPlanCode,
 } from '../../../../data/add-on-codes'
 import { CancelSubscriptionButton } from './cancel-subscription-button'
@@ -27,11 +26,35 @@ export function ActiveAiAddonSubscription({
   subscription: RecurlySubscription
 }) {
   const { t } = useTranslation()
-  const { recurlyLoadError, showCancellation, setModalIdShown } =
-    useSubscriptionDashboardContext()
+  const {
+    recurlyLoadError,
+    showCancellation,
+    setModalIdShown,
+    memberGroupSubscriptions,
+    institutionMemberships,
+  } = useSubscriptionDashboardContext()
   if (showCancellation) return <CancelSubscription />
 
   const onStandalonePlan = isStandaloneAiPlanCode(subscription.planCode)
+
+  let planName
+  if (onStandalonePlan) {
+    planName = 'Overleaf Free'
+    if (institutionMemberships && institutionMemberships.length > 0) {
+      planName = 'Overleaf Professional'
+    }
+    if (memberGroupSubscriptions.length > 0) {
+      if (
+        memberGroupSubscriptions.some(s => s.planLevelName === 'Professional')
+      ) {
+        planName = 'Overleaf Professional'
+      } else {
+        planName = 'Overleaf Standard'
+      }
+    }
+  } else {
+    planName = subscription.plan.name
+  }
 
   const handlePlanChange = () => setModalIdShown('change-plan')
 
@@ -42,11 +65,7 @@ export function ActiveAiAddonSubscription({
       <p className="mb-0">
         <Trans
           i18nKey="your_plan_is"
-          values={{
-            planName: onStandalonePlan
-              ? AI_STANDALONE_PLAN_NAME
-              : subscription.plan.name,
-          }}
+          values={{ planName }}
           shouldUnescape
           tOptions={{ interpolation: { escapeValue: true } }}
           components={{ strong: <strong /> }}
