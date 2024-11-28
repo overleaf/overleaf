@@ -1,5 +1,6 @@
 const { callbackify } = require('util')
 const Path = require('path')
+const logger = require('@overleaf/logger')
 const OError = require('@overleaf/o-error')
 const { promiseMapWithLimit } = require('@overleaf/promise-utils')
 const { Doc } = require('../../models/Doc')
@@ -7,6 +8,7 @@ const { File } = require('../../models/File')
 const DocstoreManager = require('../Docstore/DocstoreManager')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const FileStoreHandler = require('../FileStore/FileStoreHandler')
+const HistoryManager = require('../History/HistoryManager')
 const ProjectCreationHandler = require('./ProjectCreationHandler')
 const ProjectDeleter = require('./ProjectDeleter')
 const ProjectEntityMongoUpdateHandler = require('./ProjectEntityMongoUpdateHandler')
@@ -36,6 +38,7 @@ async function duplicate(owner, originalProjectId, newProjectName, tags = []) {
       rootDoc_id: true,
       fromV1TemplateId: true,
       fromV1TemplateVersionId: true,
+      overleaf: true,
     }
   )
   const { path: rootDocPath } = await ProjectLocator.promises.findRootDoc({
@@ -185,6 +188,15 @@ async function _getDocLinesForProject(projectId) {
 }
 
 async function _copyFiles(sourceEntries, sourceProject, targetProject) {
+  const sourceHistoryId = sourceProject.overleaf?.history?.id
+  const targetHistoryId = targetProject.overleaf?.history?.id
+  if (!sourceHistoryId) {
+    throw new OError('missing history id', { sourceProject })
+  }
+  if (!targetHistoryId) {
+    throw new OError('missing history id', { targetProject })
+  }
+
   const targetEntries = await promiseMapWithLimit(
     5,
     sourceEntries,
@@ -198,6 +210,26 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
       }
       if (sourceFile.hash != null) {
         file.hash = sourceFile.hash
+      }
+      if (file.hash != null) {
+        try {
+          await HistoryManager.promises.copyBlob(
+            sourceHistoryId,
+            targetHistoryId,
+            file.hash
+          )
+        } catch (err) {
+          logger.error(
+            {
+              err,
+              sourceProjectId: sourceProject._id,
+              targetProjectId: targetProject._id,
+              sourceFile,
+              sourceHistoryId,
+            },
+            'unexpected error copying blob'
+          )
+        }
       }
       const url = await FileStoreHandler.promises.copyFile(
         sourceProject._id,

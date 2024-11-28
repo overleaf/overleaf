@@ -139,6 +139,20 @@ async function uploadBlobFromDisk(historyId, hash, byteLength, fsPath) {
   })
 }
 
+async function copyBlob(sourceHistoryId, targetHistoryId, hash) {
+  const url = `${settings.apis.v1_history.url}/projects/${targetHistoryId}/blobs/${hash}`
+  await fetchNothing(
+    `${url}?${new URLSearchParams({ copyFrom: sourceHistoryId })}`,
+    {
+      method: 'POST',
+      basicAuth: {
+        user: settings.apis.v1_history.user,
+        password: settings.apis.v1_history.pass,
+      },
+    }
+  )
+}
+
 async function requestBlobWithFallback(
   projectId,
   hash,
@@ -351,6 +365,7 @@ module.exports = {
   injectUserDetails: callbackify(injectUserDetails),
   getCurrentContent: callbackify(getCurrentContent),
   uploadBlobFromDisk: callbackify(uploadBlobFromDisk),
+  copyBlob: callbackify(copyBlob),
   requestBlobWithFallback: callbackify(requestBlobWithFallback),
   promises: {
     initializeProject,
@@ -362,6 +377,7 @@ module.exports = {
     getCurrentContent,
     getContentAtVersion,
     uploadBlobFromDisk,
+    copyBlob,
     requestBlobWithFallback,
   },
 }

@@ -4,6 +4,7 @@ const {
   zipAttachment,
   prepareZipAttachment,
 } = require('../../../../app/src/infrastructure/Response')
+const Joi = require('joi')
 
 class MockV1HistoryApi extends AbstractMockApi {
   reset() {
@@ -104,6 +105,17 @@ class MockV1HistoryApi extends AbstractMockApi {
       const buf = this.blobs[projectId]?.[hash]
       if (!buf) return res.status(404).end()
       res.status(200).end(buf)
+    })
+
+    this.app.post('/api/projects/:project_id/blobs/:hash', (req, res, next) => {
+      const schema = Joi.object({
+        copyFrom: Joi.number().required(),
+      })
+      const { error } = schema.validate(req.query)
+      if (error) {
+        return res.sendStatus(400)
+      }
+      res.sendStatus(204)
     })
   }
 }

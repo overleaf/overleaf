@@ -13,7 +13,7 @@ describe('ProjectDuplicator', function () {
     this.doc0Lines = ['zero']
     this.doc1Lines = ['one']
     this.doc2Lines = ['two']
-    this.file0 = { name: 'file0', _id: 'file0' }
+    this.file0 = { name: 'file0', _id: 'file0', hash: 'abcde' }
     this.file1 = { name: 'file1', _id: 'file1' }
     this.file2 = {
       name: 'file2',
@@ -48,6 +48,7 @@ describe('ProjectDuplicator', function () {
       rootDoc_id: this.doc0._id,
       rootFolder: [this.rootFolder],
       compiler: 'this_is_a_Compiler',
+      overleaf: { history: { id: 123456 } },
     }
     this.doc0Path = '/rootDocHere'
     this.doc1Path = '/level1folder/level1folderDocName'
@@ -144,6 +145,16 @@ describe('ProjectDuplicator', function () {
         copyFile: sinon.stub().resolves(this.filestoreUrl),
       },
     }
+    this.HistoryManager = {
+      promises: {
+        copyBlob: sinon.stub().callsFake((historyId, newHistoryId, hash) => {
+          if (hash === 'abcde') {
+            return Promise.reject(new Error('copy blob error'))
+          }
+          return Promise.resolve()
+        }),
+      },
+    }
     this.TagsHandler = {
       promises: {
         addProjectToTags: sinon.stub().resolves({
@@ -226,6 +237,7 @@ describe('ProjectDuplicator', function () {
         './ProjectOptionsHandler': this.ProjectOptionsHandler,
         '../ThirdPartyDataStore/TpdsProjectFlusher': this.TpdsProjectFlusher,
         '../Tags/TagsHandler': this.TagsHandler,
+        '../History/HistoryManager': this.HistoryManager,
       },
     })
   })
@@ -254,6 +266,36 @@ describe('ProjectDuplicator', function () {
           docLines,
           0,
           {}
+        )
+      }
+    })
+
+    it('should duplicate the files with hashes by copying the blobs in history v1', function () {
+      for (const file of [this.file0, this.file2]) {
+        this.HistoryManager.promises.copyBlob.should.have.been.calledWith(
+          this.project.overleaf.history.id,
+          this.newProject.overleaf.history.id,
+          file.hash
+        )
+      }
+    })
+
+    it('should ignore any errors when copying the blobs in history v1', async function () {
+      await expect(
+        this.HistoryManager.promises.copyBlob(
+          this.project.overleaf.history.id,
+          this.newProject.overleaf.history.id,
+          this.file0.hash
+        )
+      ).to.be.rejectedWith('copy blob error')
+    })
+
+    it('should not try to copy the blobs for any files without hashes', function () {
+      for (const file of [this.file1]) {
+        this.HistoryManager.promises.copyBlob.should.not.have.been.calledWith(
+          this.project.overleaf.history.id,
+          this.newProject.overleaf.history.id,
+          file.hash
         )
       }
     })
