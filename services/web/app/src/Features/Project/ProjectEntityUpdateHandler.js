@@ -596,7 +596,9 @@ const upsertFile = wrapWithLock({
       const projectHistoryId = project.overleaf?.history?.id
       await TpdsUpdateSender.promises.addFile({
         projectId: project._id,
+        historyId: projectHistoryId,
         fileId: fileRef._id,
+        hash: fileRef.hash,
         path: path.fileSystem,
         rev: fileRef.rev,
         projectName: project.name,
@@ -1298,9 +1300,15 @@ const ProjectEntityUpdateHandler = {
       })
     }
 
+    const historyId = project?.overleaf?.history?.id
+    if (!historyId) {
+      throw new OError('project does not have a history id', { projectId })
+    }
     await TpdsUpdateSender.promises.addFile({
       projectId,
+      historyId,
       fileId: fileRef._id,
+      hash: fileRef.hash,
       path: result?.path?.fileSystem,
       projectName: project.name,
       rev: fileRef.rev,
@@ -1346,7 +1354,9 @@ const ProjectEntityUpdateHandler = {
     const projectHistoryId = project.overleaf?.history?.id
     await TpdsUpdateSender.promises.addFile({
       projectId: project._id,
+      historyId: projectHistoryId,
       fileId: updatedFileRef._id,
+      hash: updatedFileRef.hash,
       path: path.fileSystem,
       rev: updatedFileRef.rev,
       projectName: project.name,

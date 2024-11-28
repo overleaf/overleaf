@@ -41,6 +41,7 @@ async function addEntity(params) {
     rev,
     folderId,
     streamOrigin,
+    streamFallback,
     entityId,
     entityType,
   } = params
@@ -60,6 +61,7 @@ async function addEntity(params) {
       uri: buildTpdsUrl(userId, projectName, path),
       title: 'addFile',
       streamOrigin,
+      streamFallback,
     }
 
     await enqueue(userId, 'pipeStreamFrom', job)
@@ -68,8 +70,21 @@ async function addEntity(params) {
 
 async function addFile(params) {
   metrics.inc('tpds.add-file')
-  const { projectId, fileId, path, projectName, rev, folderId } = params
+  const {
+    projectId,
+    historyId,
+    fileId,
+    hash,
+    path,
+    projectName,
+    rev,
+    folderId,
+  } = params
+  // Go through project-history to avoid the need for handling history-v1 authentication.
   const streamOrigin =
+    settings.apis.project_history.url +
+    Path.join(`/project/${historyId}/blob/${hash}`)
+  const streamFallback =
     settings.apis.filestore.url +
     Path.join(`/project/${projectId}`, `/file/${fileId}`)
 
@@ -80,6 +95,7 @@ async function addFile(params) {
     rev,
     folderId,
     streamOrigin,
+    streamFallback,
     entityId: fileId,
     entityType: 'file',
   })

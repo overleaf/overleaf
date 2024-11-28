@@ -9,7 +9,7 @@ const MODULE_PATH =
 
 describe('TpdsProjectFlusher', function () {
   beforeEach(function () {
-    this.project = { _id: new ObjectId() }
+    this.project = { _id: new ObjectId(), overleaf: { history: { id: 42 } } }
     this.folder = { _id: new ObjectId() }
     this.docs = {
       '/doc/one': {
@@ -26,8 +26,18 @@ describe('TpdsProjectFlusher', function () {
       },
     }
     this.files = {
-      '/file/one': { _id: 'mock-file-1', rev: 7, folder: this.folder },
-      '/file/two': { _id: 'mock-file-2', rev: 8, folder: this.folder },
+      '/file/one': {
+        _id: 'mock-file-1',
+        rev: 7,
+        folder: this.folder,
+        hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+      },
+      '/file/two': {
+        _id: 'mock-file-2',
+        rev: 8,
+        folder: this.folder,
+        hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      },
     }
     this.DocumentUpdaterHandler = {
       promises: {
@@ -107,7 +117,9 @@ describe('TpdsProjectFlusher', function () {
             this.TpdsUpdateSender.promises.addFile
           ).to.have.been.calledWith({
             projectId: this.project._id,
+            historyId: this.project.overleaf.history.id,
             fileId: file._id,
+            hash: file.hash,
             projectName: this.project.name,
             rev: file.rev,
             path,
@@ -235,7 +247,9 @@ describe('TpdsProjectFlusher', function () {
               this.TpdsUpdateSender.promises.addFile
             ).to.have.been.calledWith({
               projectId: this.project._id,
+              historyId: this.project.overleaf.history.id,
               fileId: file._id,
+              hash: file.hash,
               projectName: this.project.name,
               rev: file.rev,
               path,

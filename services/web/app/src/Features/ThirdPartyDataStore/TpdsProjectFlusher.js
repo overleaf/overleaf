@@ -5,6 +5,7 @@ const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectEntityHandler = require('../Project/ProjectEntityHandler')
 const { Project } = require('../../models/Project')
 const TpdsUpdateSender = require('./TpdsUpdateSender')
+const OError = require('@overleaf/o-error')
 
 module.exports = {
   flushProjectToTpds: callbackify(flushProjectToTpds),
@@ -24,6 +25,7 @@ async function flushProjectToTpds(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     name: true,
     deferredTpdsFlushCounter: true,
+    'overleaf.history.id': 1,
   })
   await _flushProjectToTpds(project)
 }
@@ -37,6 +39,7 @@ async function flushProjectToTpdsIfNeeded(projectId) {
   const project = await ProjectGetter.promises.getProject(projectId, {
     name: true,
     deferredTpdsFlushCounter: true,
+    'overleaf.history.id': 1,
   })
   if (project.deferredTpdsFlushCounter > 0) {
     await _flushProjectToTpds(project)
@@ -44,6 +47,11 @@ async function flushProjectToTpdsIfNeeded(projectId) {
 }
 
 async function _flushProjectToTpds(project) {
+  const historyId = project?.overleaf?.history?.id
+  if (!historyId) {
+    const projectId = project._id
+    throw new OError('project does not have a history id', { projectId })
+  }
   logger.debug({ projectId: project._id }, 'flushing project to TPDS')
   logger.debug({ projectId: project._id }, 'finished flushing project to TPDS')
   await DocumentUpdaterHandler.promises.flushProjectToMongo(project._id)
@@ -64,7 +72,9 @@ async function _flushProjectToTpds(project) {
   for (const [filePath, file] of Object.entries(files)) {
     await TpdsUpdateSender.promises.addFile({
       projectId: project._id,
+      historyId,
       fileId: file._id,
+      hash: file.hash,
       path: filePath,
       projectName: project.name,
       rev: file.rev,

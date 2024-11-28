@@ -682,6 +682,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
         this.newFile = {
           _id: fileId,
+          hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
           rev: 0,
           name: this.fileName,
           linkedFileData: this.linkedFileData,
@@ -734,8 +735,10 @@ describe('ProjectEntityUpdateHandler', function () {
         this.TpdsUpdateSender.promises.addFile
           .calledWith({
             projectId,
+            historyId: this.project.overleaf.history.id,
             projectName: this.project.name,
             fileId,
+            hash: this.newFile.hash,
             rev: 0,
             path: this.path,
             folderId,
@@ -777,6 +780,7 @@ describe('ProjectEntityUpdateHandler', function () {
 
         this.newFile = {
           _id: fileId,
+          hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
           rev: 0,
           name: this.fileName,
           linkedFileData: this.linkedFileData,
@@ -835,7 +839,11 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('updating an existing doc', function () {
       beforeEach(function (done) {
         this.existingDoc = { _id: docId, name: this.docName }
-        this.existingFile = { _id: fileId, name: this.fileName }
+        this.existingFile = {
+          _id: fileId,
+          name: this.fileName,
+          hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        }
         this.folder = {
           _id: folderId,
           docs: [this.existingDoc],
@@ -1120,7 +1128,12 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('updating an existing file', function () {
       beforeEach(function (done) {
         this.existingFile = { _id: fileId, name: this.fileName, rev: 1 }
-        this.newFile = { _id: new ObjectId(), name: this.fileName, rev: 3 }
+        this.newFile = {
+          _id: new ObjectId(),
+          name: this.fileName,
+          rev: 3,
+          hash: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        }
         this.folder = { _id: folderId, fileRefs: [this.existingFile], docs: [] }
         this.ProjectLocator.promises.findElement.resolves({
           element: this.folder,
@@ -1172,8 +1185,10 @@ describe('ProjectEntityUpdateHandler', function () {
       it('notifies the tpds', function () {
         this.TpdsUpdateSender.promises.addFile.should.have.been.calledWith({
           projectId,
+          historyId: this.project.overleaf.history.id,
           projectName: this.project.name,
           fileId: this.newFile._id,
+          hash: this.newFile.hash,
           rev: this.newFile.rev,
           path: this.fileSystemPath,
           folderId,
@@ -1222,7 +1237,10 @@ describe('ProjectEntityUpdateHandler', function () {
     describe('creating a new file', function () {
       beforeEach(function (done) {
         this.folder = { _id: folderId, fileRefs: [], docs: [] }
-        this.newFile = { _id: fileId }
+        this.newFile = {
+          _id: fileId,
+          hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        }
         this.ProjectLocator.promises.findElement.resolves({
           element: this.folder,
         })
