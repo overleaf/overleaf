@@ -740,11 +740,19 @@ function _finaliseRequest(projectId, options, project, docs, files) {
   for (let path in files) {
     const file = files[path]
     path = path.replace(/^\//, '') // Remove leading /
-    const { bucket, key } = getBlobLocation(historyId, file.hash)
+
+    const filestoreURL = `${Settings.apis.filestore.url}/project/${project._id}/file/${file._id}`
+    let url = filestoreURL
+    let fallbackURL
+    if (file.hash) {
+      const { bucket, key } = getBlobLocation(historyId, file.hash)
+      url = `${Settings.apis.filestore.url}/bucket/${bucket}/key/${key}`
+      fallbackURL = filestoreURL
+    }
     resources.push({
       path,
-      url: `${Settings.apis.filestore.url}/bucket/${bucket}/key/${key}`,
-      fallbackURL: `${Settings.apis.filestore.url}/project/${project._id}/file/${file._id}`,
+      url,
+      fallbackURL,
       modified: file.created?.getTime(),
     })
   }

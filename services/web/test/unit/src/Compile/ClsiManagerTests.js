@@ -46,6 +46,11 @@ describe('ClsiManager', function () {
         created: new Date(),
         hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       },
+      '/images/no-hash.png': {
+        name: 'no-hash.png',
+        _id: 'mock-file-id-3',
+        created: new Date(),
+      },
     }
     this.clsiCookieKey = 'clsiserver'
     this.clsiServerId = 'clsi-server-id'
@@ -1027,16 +1032,20 @@ function _makeResources(project, docs, files) {
     })
   }
   for (const [path, file] of Object.entries(files)) {
-    let url
+    let url, fallbackURL
     if (file.hash === GLOBAL_BLOB_HASH) {
       url = `${FILESTORE_URL}/bucket/global-blobs/key/aa/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
-    } else {
+      fallbackURL = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
+    } else if (file.hash) {
       url = `${FILESTORE_URL}/bucket/project-blobs/key/${project.overleaf.history.id}/${file.hash}`
+      fallbackURL = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
+    } else {
+      url = `${FILESTORE_URL}/project/${project._id}/file/${file._id}`
     }
     resources.push({
       path: path.replace(/^\//, ''),
       url,
-      fallbackURL: `${FILESTORE_URL}/project/${project._id}/file/${file._id}`,
+      fallbackURL,
       modified: file.created.getTime(),
     })
   }
