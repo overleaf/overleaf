@@ -28,6 +28,8 @@ InstitutionSchema.method('fetchV1Data', async function (callback) {
     this.countryCode = parsedBody != null ? parsedBody.country_code : undefined
     this.departments = parsedBody != null ? parsedBody.departments : undefined
     this.portalSlug = parsedBody != null ? parsedBody.portal_slug : undefined
+    this.enterpriseCommons =
+      parsedBody != null ? parsedBody.enterprise_commons : undefined
   } catch (error) {
     // log error and carry on without v1 data
     logger.err(

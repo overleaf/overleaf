@@ -265,6 +265,7 @@ const InstitutionsManager = {
       institution.countryCode = data?.country_code
       institution.departments = data?.departments
       institution.portalSlug = data?.portal_slug
+      institution.enterpriseCommons = data?.enterprise_commons
     } catch (error) {
       logger.err(
         { model: 'Institution', v1Id: institution.v1Id, error },
