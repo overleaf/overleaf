@@ -24,6 +24,7 @@ const ClsiFormatChecker = require('./ClsiFormatChecker')
 const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const Metrics = require('@overleaf/metrics')
 const Errors = require('../Errors/Errors')
+const { getBlobLocation } = require('../History/HistoryManager')
 
 const VALID_COMPILERS = ['pdflatex', 'latex', 'xelatex', 'lualatex']
 const OUTPUT_FILE_TIMEOUT_MS = 60000
@@ -532,6 +533,7 @@ async function _buildRequest(projectId, options) {
     rootDoc_id: 1,
     imageName: 1,
     rootFolder: 1,
+    'overleaf.history.id': 1,
   })
   if (project == null) {
     throw new Errors.NotFoundError(`project does not exist: ${projectId}`)
@@ -731,12 +733,18 @@ function _finaliseRequest(projectId, options, project, docs, files) {
     }
   }
 
+  const historyId = project.overleaf.history.id
+  if (!historyId) {
+    throw new OError('project does not have a history id', { projectId })
+  }
   for (let path in files) {
     const file = files[path]
     path = path.replace(/^\//, '') // Remove leading /
+    const { bucket, key } = getBlobLocation(historyId, file.hash)
     resources.push({
       path,
-      url: `${Settings.apis.filestore.url}/project/${project._id}/file/${file._id}`,
+      url: `${Settings.apis.filestore.url}/bucket/${bucket}/key/${key}`,
+      fallbackURL: `${Settings.apis.filestore.url}/project/${project._id}/file/${file._id}`,
       modified: file.created?.getTime(),
     })
   }

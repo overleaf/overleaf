@@ -73,6 +73,10 @@ const settings = {
     stores: {
       user_files: process.env.USER_FILES_BUCKET_NAME,
       template_files: process.env.TEMPLATE_FILES_BUCKET_NAME,
+
+      // allow signed links to be generated for these buckets
+      project_blobs: process.env.OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET,
+      global_blobs: process.env.OVERLEAF_EDITOR_BLOBS_BUCKET,
     },
 
     fallback: process.env.FALLBACK_BACKEND

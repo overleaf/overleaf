@@ -23,6 +23,7 @@ describe('UrlCache', function () {
     this.callback = sinon.stub()
     this.url =
       'http://filestore/project/60b0dd39c418bc00598a0d22/file/60ae721ffb1d920027d3201f'
+    this.fallbackURL = 'http://filestore/bucket/project-blobs/key/ab/cd/ef'
     this.project_id = '60b0dd39c418bc00598a0d22'
     return (this.UrlCache = SandboxedModule.require(modulePath, {
       requires: {
@@ -54,6 +55,29 @@ describe('UrlCache', function () {
       this.UrlCache.downloadUrlToFile(
         this.project_id,
         this.url,
+        this.fallbackURL,
+        this.destPath,
+        this.lastModified,
+        error => {
+          expect(error).to.not.exist
+          expect(
+            this.UrlFetcher.promises.pipeUrlToFileWithRetry.called
+          ).to.equal(false)
+          done()
+        }
+      )
+    })
+
+    it('should not download on the semi-happy path', function (done) {
+      const codedError = new Error()
+      codedError.code = 'ENOENT'
+      this.fs.promises.copyFile.onCall(0).rejects(codedError)
+      this.fs.promises.copyFile.onCall(1).resolves()
+
+      this.UrlCache.downloadUrlToFile(
+        this.project_id,
+        this.url,
+        this.fallbackURL,
         this.destPath,
         this.lastModified,
         error => {
@@ -70,11 +94,13 @@ describe('UrlCache', function () {
       const codedError = new Error()
       codedError.code = 'ENOENT'
       this.fs.promises.copyFile.onCall(0).rejects(codedError)
-      this.fs.promises.copyFile.onCall(1).resolves()
+      this.fs.promises.copyFile.onCall(1).rejects(codedError)
+      this.fs.promises.copyFile.onCall(2).resolves()
 
       this.UrlCache.downloadUrlToFile(
         this.project_id,
         this.url,
+        this.fallbackURL,
         this.destPath,
         this.lastModified,
         error => {
@@ -94,6 +120,7 @@ describe('UrlCache', function () {
       this.UrlCache.downloadUrlToFile(
         this.project_id,
         this.url,
+        this.fallbackURL,
         this.destPath,
         this.lastModified,
         error => {

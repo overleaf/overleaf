@@ -378,12 +378,13 @@ describe('ResourceWriter', function () {
         this.fs.mkdir = sinon.stub().callsArg(2)
         this.resource = {
           path: 'main.tex',
-          url: 'http://www.example.com/main.tex',
+          url: 'http://www.example.com/primary/main.tex',
+          fallbackURL: 'http://fallback.example.com/fallback/main.tex',
           modified: Date.now(),
         }
         this.UrlCache.downloadUrlToFile = sinon
           .stub()
-          .callsArgWith(4, 'fake error downloading file')
+          .callsArgWith(5, 'fake error downloading file')
         return this.ResourceWriter._writeResourceToDisk(
           this.project_id,
           this.resource,
@@ -405,6 +406,7 @@ describe('ResourceWriter', function () {
           .calledWith(
             this.project_id,
             this.resource.url,
+            this.resource.fallbackURL,
             path.join(this.basePath, this.resource.path),
             this.resource.modified
           )

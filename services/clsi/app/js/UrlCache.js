@@ -47,14 +47,29 @@ async function createProjectDir(projectId) {
   await fs.promises.mkdir(getProjectDir(projectId), { recursive: true })
 }
 
-async function downloadUrlToFile(projectId, url, destPath, lastModified) {
+async function downloadUrlToFile(
+  projectId,
+  url,
+  fallbackURL,
+  destPath,
+  lastModified
+) {
   const cachePath = getCachePath(projectId, url, lastModified)
   try {
     const timer = new Metrics.Timer('url_cache', {
       status: 'cache-hit',
       path: 'copy',
     })
-    await fs.promises.copyFile(cachePath, destPath)
+    try {
+      await fs.promises.copyFile(cachePath, destPath)
+    } catch (err) {
+      if (err.code === 'ENOENT' && fallbackURL) {
+        const fallbackPath = getCachePath(projectId, fallbackURL, lastModified)
+        await fs.promises.copyFile(fallbackPath, destPath)
+      } else {
+        throw err
+      }
+    }
     // the metric is only updated if the file is present in the cache
     timer.done()
     return
@@ -70,7 +85,7 @@ async function downloadUrlToFile(projectId, url, destPath, lastModified) {
       path: 'download',
     })
     try {
-      await download(url, cachePath)
+      await download(url, fallbackURL, cachePath)
     } finally {
       timer.done()
     }
@@ -86,13 +101,17 @@ async function downloadUrlToFile(projectId, url, destPath, lastModified) {
   }
 }
 
-async function download(url, cachePath) {
+async function download(url, fallbackURL, cachePath) {
   let pending = PENDING_DOWNLOADS.get(cachePath)
   if (pending) {
     return pending
   }
 
-  pending = UrlFetcher.promises.pipeUrlToFileWithRetry(url, cachePath)
+  pending = UrlFetcher.promises.pipeUrlToFileWithRetry(
+    url,
+    fallbackURL,
+    cachePath
+  )
   PENDING_DOWNLOADS.set(cachePath, pending)
   try {
     await pending

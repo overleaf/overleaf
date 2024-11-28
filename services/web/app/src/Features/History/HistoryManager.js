@@ -11,10 +11,46 @@ const OError = require('@overleaf/o-error')
 const UserGetter = require('../User/UserGetter')
 const ProjectGetter = require('../Project/ProjectGetter')
 const HistoryBackupDeletionHandler = require('./HistoryBackupDeletionHandler')
-const { ObjectId } = require('../../infrastructure/mongodb')
+const { db, ObjectId } = require('../../infrastructure/mongodb')
 const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const { NotFoundError } = require('../Errors/Errors')
+const projectKey = require('./project_key')
+
+// BEGIN copy from services/history-v1/storage/lib/blob_store/index.js
+
+const GLOBAL_BLOBS = new Set() // CHANGE FROM SOURCE: only store hashes.
+
+function makeGlobalKey(hash) {
+  return `${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash.slice(4)}`
+}
+
+function makeProjectKey(projectId, hash) {
+  return `${projectKey.format(projectId)}/${hash.slice(0, 2)}/${hash.slice(2)}`
+}
+
+function getBlobLocation(projectId, hash) {
+  if (GLOBAL_BLOBS.has(hash)) {
+    return {
+      bucket: settings.apis.v1_history.buckets.globalBlobs,
+      key: makeGlobalKey(hash),
+    }
+  } else {
+    return {
+      bucket: settings.apis.v1_history.buckets.projectBlobs,
+      key: makeProjectKey(projectId, hash),
+    }
+  }
+}
+
+async function loadGlobalBlobs() {
+  const blobs = db.projectHistoryGlobalBlobs.find()
+  for await (const blob of blobs) {
+    GLOBAL_BLOBS.add(blob._id) // CHANGE FROM SOURCE: only store hashes.
+  }
+}
+
+// END copy from services/history-v1/storage/lib/blob_store/index.js
 
 async function initializeProject(projectId) {
   const body = await fetchJson(`${settings.apis.project_history.url}/project`, {
@@ -357,6 +393,7 @@ function _userView(user) {
 }
 
 module.exports = {
+  getBlobLocation,
   initializeProject: callbackify(initializeProject),
   flushProject: callbackify(flushProject),
   resyncProject: callbackify(resyncProject),
@@ -368,6 +405,7 @@ module.exports = {
   copyBlob: callbackify(copyBlob),
   requestBlobWithFallback: callbackify(requestBlobWithFallback),
   promises: {
+    loadGlobalBlobs,
     initializeProject,
     flushProject,
     resyncProject,

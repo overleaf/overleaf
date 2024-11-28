@@ -14,6 +14,8 @@ const Path = require('node:path')
 const Client = require('./helpers/Client')
 const sinon = require('sinon')
 const ClsiApp = require('./helpers/ClsiApp')
+const request = require('request')
+const Settings = require('@overleaf/settings')
 
 const Server = {
   run() {
@@ -33,6 +35,21 @@ const Server = {
       } else {
         res.send('THE CONTENT')
       }
+    })
+
+    app.get('/not-found', (req, res, next) => {
+      this.getFile(req.url)
+      res.status(404).end()
+    })
+
+    app.get('/project/:projectId/file/:fileId', (req, res, next) => {
+      this.getFile(req.url)
+      return res.send(`${req.params.projectId}:${req.params.fileId}`)
+    })
+
+    app.get('/bucket/:bucket/key/*', (req, res, next) => {
+      this.getFile(req.url)
+      return res.send(`${req.params.bucket}:${req.params[0]}`)
     })
 
     app.get('/:random_id/*', (req, res, next) => {
@@ -218,8 +235,23 @@ describe('Url Caching', function () {
       return Server.getFile.restore()
     })
 
-    return it('should not download the image again', function () {
+    it('should not download the image again', function () {
       return Server.getFile.called.should.equal(false)
+    })
+
+    it('should gather metrics', function (done) {
+      request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
+        if (err) return done(err)
+        body
+          .split('\n')
+          .some(line => {
+            return (
+              line.startsWith('url_source') && line.includes('path="unknown"')
+            )
+          })
+          .should.equal(true)
+        done()
+      })
     })
   })
 
@@ -391,7 +423,7 @@ describe('Url Caching', function () {
     })
   })
 
-  return describe('After clearing the cache', function () {
+  describe('After clearing the cache', function () {
     before(function (done) {
       this.project_id = Client.randomId()
       this.file = `${Server.randomId()}/lion.png`
@@ -444,6 +476,142 @@ describe('Url Caching', function () {
 
     return it('should download the image again', function () {
       return Server.getFile.called.should.equal(true)
+    })
+  })
+
+  describe('fallbackURL', function () {
+    describe('when the primary resource is available', function () {
+      before(function (done) {
+        this.project_id = Client.randomId()
+        this.file = `/project/${Server.randomId()}/file/${Server.randomId()}`
+        this.fallback = `/bucket/project-blobs/key/ab/cd/${Server.randomId()}`
+        this.request = {
+          resources: [
+            {
+              path: 'main.tex',
+              content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`,
+            },
+            {
+              path: 'lion.png',
+              url: `http://filestore${this.file}`,
+              fallbackURL: `http://filestore${this.fallback}`,
+            },
+          ],
+        }
+
+        sinon.spy(Server, 'getFile')
+        return ClsiApp.ensureRunning(() => {
+          return Client.compile(
+            this.project_id,
+            this.request,
+            (error, res, body) => {
+              this.error = error
+              this.res = res
+              this.body = body
+              return done()
+            }
+          )
+        })
+      })
+
+      after(function () {
+        return Server.getFile.restore()
+      })
+
+      it('should download from the primary', function () {
+        Server.getFile.calledWith(this.file).should.equal(true)
+      })
+      it('should not download from the fallback', function () {
+        Server.getFile.calledWith(this.fallback).should.equal(false)
+      })
+
+      it('should gather metrics', function (done) {
+        request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
+          if (err) return done(err)
+          body
+            .split('\n')
+            .some(line => {
+              return (
+                line.startsWith('url_source') &&
+                line.includes('path="user-files"')
+              )
+            })
+            .should.equal(true)
+          done()
+        })
+      })
+    })
+
+    describe('when the primary resource is not available', function () {
+      before(function (done) {
+        this.project_id = Client.randomId()
+        this.file = `/project/${Server.randomId()}/file/${Server.randomId()}`
+        this.fallback = `/bucket/project-blobs/key/ab/cd/${Server.randomId()}`
+        this.request = {
+          resources: [
+            {
+              path: 'main.tex',
+              content: `\
+\\documentclass{article}
+\\usepackage{graphicx}
+\\begin{document}
+\\includegraphics{lion.png}
+\\end{document}\
+`,
+            },
+            {
+              path: 'lion.png',
+              url: `http://filestore/not-found`,
+              fallbackURL: `http://filestore${this.fallback}`,
+            },
+          ],
+        }
+
+        sinon.spy(Server, 'getFile')
+        return ClsiApp.ensureRunning(() => {
+          return Client.compile(
+            this.project_id,
+            this.request,
+            (error, res, body) => {
+              this.error = error
+              this.res = res
+              this.body = body
+              return done()
+            }
+          )
+        })
+      })
+
+      after(function () {
+        return Server.getFile.restore()
+      })
+
+      it('should download from the fallback', function () {
+        Server.getFile.calledWith(`/not-found`).should.equal(true)
+        Server.getFile.calledWith(this.fallback).should.equal(true)
+      })
+
+      it('should gather metrics', function (done) {
+        request.get(`${Settings.apis.clsi.url}/metrics`, (err, res, body) => {
+          if (err) return done(err)
+          body
+            .split('\n')
+            .some(line => {
+              return (
+                line.startsWith('url_source') &&
+                line.includes('path="project-blobs"')
+              )
+            })
+            .should.equal(true)
+          done()
+        })
+      })
     })
   })
 })

@@ -333,6 +333,7 @@ module.exports = ResourceWriter = {
               return UrlCache.downloadUrlToFile(
                 projectId,
                 resource.url,
+                resource.fallbackURL,
                 path,
                 resource.modified,
                 function (err) {

@@ -275,6 +275,23 @@ module.exports = {
         process.env.HAVE_I_BEEN_PWNED_URL || 'https://api.pwnedpasswords.com',
       timeout: parseInt(process.env.HAVE_I_BEEN_PWNED_TIMEOUT, 10) || 5 * 1000,
     },
+    v1_history: {
+      url:
+        process.env.V1_HISTORY_URL ||
+        `http://${process.env.V1_HISTORY_HOST || '127.0.0.1'}:${
+          process.env.V1_HISTORY_PORT || '3100'
+        }/api`,
+      user: process.env.V1_HISTORY_USER || 'staging',
+      pass:
+        process.env.V1_HISTORY_PASS ||
+        process.env.V1_HISTORY_PASSWORD ||
+        'password',
+
+      buckets: {
+        globalBlobs: process.env.OVERLEAF_EDITOR_BLOBS_BUCKET,
+        projectBlobs: process.env.OVERLEAF_EDITOR_PROJECT_BLOBS_BUCKET,
+      },
+    },
 
     // For legacy reasons, we need to populate the below objects.
     v1: {},

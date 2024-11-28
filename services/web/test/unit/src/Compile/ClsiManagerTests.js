@@ -9,6 +9,8 @@ const FILESTORE_URL = 'http://filestore.example.com'
 const CLSI_HOST = 'clsi.example.com'
 const MODULE_PATH = '../../../../app/src/Features/Compile/ClsiManager.js'
 
+const GLOBAL_BLOB_HASH = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+
 describe('ClsiManager', function () {
   beforeEach(function () {
     this.user_id = 'user-id'
@@ -17,6 +19,7 @@ describe('ClsiManager', function () {
       compiler: 'latex',
       rootDoc_id: 'mock-doc-id-1',
       imageName: 'mock-image-name',
+      overleaf: { history: { id: 42 } },
     }
     this.docs = {
       '/main.tex': {
@@ -31,10 +34,17 @@ describe('ClsiManager', function () {
       },
     }
     this.files = {
-      '/images/image.png': {
-        name: 'image.png',
+      '/images/frog.png': {
+        name: 'frog.png',
         _id: 'mock-file-id-1',
         created: new Date(),
+        hash: GLOBAL_BLOB_HASH,
+      },
+      '/images/image.png': {
+        name: 'image.png',
+        _id: 'mock-file-id-2',
+        created: new Date(),
+        hash: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
       },
     }
     this.clsiCookieKey = 'clsiserver'
@@ -129,6 +139,17 @@ describe('ClsiManager', function () {
       enablePdfCaching: true,
       clsiCookie: { key: 'clsiserver' },
     }
+    this.HistoryManager = {
+      getBlobLocation: sinon.stub().callsFake((historyId, hash) => {
+        if (hash === GLOBAL_BLOB_HASH) {
+          return {
+            bucket: 'global-blobs',
+            key: 'aa/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+          }
+        }
+        return { bucket: 'project-blobs', key: `${historyId}/${hash}` }
+      }),
+    }
 
     this.ClsiManager = SandboxedModule.require(MODULE_PATH, {
       requires: {
@@ -145,6 +166,7 @@ describe('ClsiManager', function () {
         '@overleaf/fetch-utils': this.FetchUtils,
         './ClsiFormatChecker': this.ClsiFormatChecker,
         '@overleaf/metrics': this.Metrics,
+        '../History/HistoryManager': this.HistoryManager,
       },
     })
     tk.freeze(Date.now())
@@ -238,6 +260,7 @@ describe('ClsiManager', function () {
             rootDoc_id: 1,
             imageName: 1,
             rootFolder: 1,
+            'overleaf.history.id': 1,
           }
         )
       })
@@ -372,6 +395,7 @@ describe('ClsiManager', function () {
             rootDoc_id: 1,
             imageName: 1,
             rootFolder: 1,
+            'overleaf.history.id': 1,
           }
         )
       })
@@ -1003,9 +1027,16 @@ function _makeResources(project, docs, files) {
     })
   }
   for (const [path, file] of Object.entries(files)) {
+    let url
+    if (file.hash === GLOBAL_BLOB_HASH) {
+      url = `${FILESTORE_URL}/bucket/global-blobs/key/aa/aa/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa`
+    } else {
+      url = `${FILESTORE_URL}/bucket/project-blobs/key/${project.overleaf.history.id}/${file.hash}`
+    }
     resources.push({
       path: path.replace(/^\//, ''),
-      url: `${FILESTORE_URL}/project/${project._id}/file/${file._id}`,
+      url,
+      fallbackURL: `${FILESTORE_URL}/project/${project._id}/file/${file._id}`,
       modified: file.created.getTime(),
     })
   }

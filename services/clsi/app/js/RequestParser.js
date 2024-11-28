@@ -169,11 +169,15 @@ function _parseResource(resource) {
   if (resource.url != null && typeof resource.url !== 'string') {
     throw new Error('url attribute should be a string')
   }
+  if (resource.fallbackURL && typeof resource.fallbackURL !== 'string') {
+    throw new Error('fallbackURL attribute should be a string')
+  }
 
   return {
     path: resource.path,
     modified,
     url: resource.url,
+    fallbackURL: resource.fallbackURL,
     content: resource.content,
   }
 }
