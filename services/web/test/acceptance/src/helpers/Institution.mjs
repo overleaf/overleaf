@@ -1,6 +1,7 @@
-const { ObjectId } = require('mongodb-legacy')
-const InstitutionModel =
-  require('../../../../app/src/models/Institution').Institution
+import mongodb from 'mongodb-legacy'
+import { Institution as InstitutionModel } from '../../../../app/src/models/Institution.js'
+
+const { ObjectId } = mongodb
 
 let count = parseInt(Math.random() * 999999)
 
@@ -12,15 +13,15 @@ class Institution {
     count += 1
   }
 
-  ensureExists(callback) {
+  async ensureExists() {
     const filter = { v1Id: this.v1Id }
     const options = { upsert: true, new: true, setDefaultsOnInsert: true }
-    InstitutionModel.findOneAndUpdate(filter, {}, options)
-      .then(institution => {
-        this._id = institution._id
-        callback()
-      })
-      .catch(callback)
+    const institution = await InstitutionModel.findOneAndUpdate(
+      filter,
+      {},
+      options
+    )
+    this._id = institution._id
   }
 
   setManagerIds(managerIds, callback) {
@@ -33,4 +34,4 @@ class Institution {
   }
 }
 
-module.exports = Institution
+export default Institution
