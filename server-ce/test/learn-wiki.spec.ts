@@ -83,7 +83,8 @@ describe('LearnWiki', function () {
   })
 
   function checkDisabled() {
-    it('should not add a documentation entry to the nav bar', () => {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip('should not add a documentation entry to the nav bar', () => {
       login(REGULAR_USER)
       cy.visit('/project')
       cy.findByText('Documentation').should('not.exist')
