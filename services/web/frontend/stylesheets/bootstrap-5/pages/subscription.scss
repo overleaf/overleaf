@@ -239,6 +239,11 @@
       width: 100%;
     }
 
+    @include media-breakpoint-down(xs) {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
     .address-line-1-tooltip {
       font-size: var(--font-size-03);
     }
