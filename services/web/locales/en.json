@@ -1578,6 +1578,7 @@
   "portal_add_affiliation_to_join": "It looks like you are already logged in to __appName__. If you have a __portalTitle__ email you can add it now.",
   "position": "Position",
   "postal_code": "Postal Code",
+  "postal_code_sentence_case": "Postal code",
   "powerful_latex_editor_and_realtime_collaboration": "Powerful LaTeX editor & real-time collaboration",
   "powerful_latex_editor_and_realtime_collaboration_info": "Spell check, intelligent autocomplete, syntax highlighting, dozens of color themes, vim and emacs bindings, help with LaTeX warnings and error messages, and more. Everyone always has the latest version, and you can see your collaborators’ cursors and changes in real time.",
   "premium_feature": "Premium feature",
