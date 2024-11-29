@@ -15,7 +15,7 @@ const FileTypeManager = {
   TEXT_EXTENSIONS: new Set(Settings.textExtensions.map(ext => `.${ext}`)),
   EDITABLE_FILENAMES: Settings.editableFilenames,
 
-  MAX_TEXT_FILE_SIZE: 1 * 1024 * 1024, // 1 MB
+  MAX_TEXT_FILE_SIZE: 3 * Settings.max_doc_length, // allow 3 bytes for every character
 
   isDirectory(path, callback) {
     fs.stat(path, (error, stats) => {
@@ -61,6 +61,9 @@ const FileTypeManager = {
         }
         const encoding = _detectEncoding(bytes)
         const text = bytes.toString(encoding)
+        if (text.length >= Settings.max_doc_length) {
+          return callback(null, { binary: true }) // Treat large text file as binary
+        }
         // For compatibility with the history service, only accept valid utf8 with no
         // nulls or non-BMP characters as text, eveything else is binary.
         if (text.includes('\x00')) {
@@ -73,28 +76,6 @@ const FileTypeManager = {
         callback(null, { binary: false, encoding })
       })
     })
-  },
-
-  getStrictTypeFromContent(name, contents) {
-    const basename = Path.basename(name)
-    const isText = _isTextFilename(basename)
-
-    if (!isText) {
-      return false
-    }
-    if (
-      Buffer.byteLength(contents, 'utf8') > FileTypeManager.MAX_TEXT_FILE_SIZE
-    ) {
-      return false
-    }
-    if (contents.indexOf('\x00') !== -1) {
-      return false
-    }
-    if (/[\uD800-\uDFFF]/.test(contents)) {
-      // non-BMP characters (high and low surrogate characters)
-      return false
-    }
-    return true
   },
 
   // FIXME: we can convert this to a synchronous function if we want to
