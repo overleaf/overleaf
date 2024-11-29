@@ -16,6 +16,7 @@ const modulePath =
 describe('ReferencesHandler', function () {
   beforeEach(async function () {
     this.projectId = '222'
+    this.historyId = 42
     this.fakeProject = {
       _id: this.projectId,
       owner_ref: (this.fakeOwner = {
@@ -33,12 +34,16 @@ describe('ReferencesHandler', function () {
           folders: [
             {
               docs: [{ name: 'three.bib', _id: 'ccc' }],
-              fileRefs: [{ name: 'four.bib', _id: 'ghg' }],
+              fileRefs: [
+                { name: 'four.bib', _id: 'fff' },
+                { name: 'five.bib', _id: 'ggg', hash: 'hash' },
+              ],
               folders: [],
             },
           ],
         },
       ],
+      overleaf: { history: { id: this.historyId } },
     }
     this.docIds = ['aaa', 'ccc']
     this.handler = await esmock.strict(modulePath, {
@@ -47,6 +52,7 @@ describe('ReferencesHandler', function () {
           references: { url: 'http://some.url/references' },
           docstore: { url: 'http://some.url/docstore' },
           filestore: { url: 'http://some.url/filestore' },
+          project_history: { url: 'http://project-history.local' },
         },
       }),
       request: (this.request = {
@@ -77,7 +83,9 @@ describe('ReferencesHandler', function () {
   describe('indexAll', function () {
     beforeEach(function () {
       sinon.stub(this.handler, '_findBibDocIds').returns(['aaa', 'ccc'])
-      sinon.stub(this.handler, '_findBibFileIds').returns(['fff', 'ggg'])
+      sinon
+        .stub(this.handler, '_findBibFileRefs')
+        .returns([{ _id: 'fff' }, { _id: 'ggg', hash: 'hash' }])
       sinon.stub(this.handler, '_isFullIndex').callsArgWith(1, null, true)
       this.request.post.callsArgWith(
         1,
@@ -101,7 +109,7 @@ describe('ReferencesHandler', function () {
       })
     })
 
-    it('should call _findBibFileIds', function (done) {
+    it('should call _findBibFileRefs', function (done) {
       return this.call((err, data) => {
         expect(err).to.be.null
         this.handler._findBibDocIds.callCount.should.equal(1)
@@ -125,8 +133,30 @@ describe('ReferencesHandler', function () {
         expect(err).to.be.null
         this.request.post.callCount.should.equal(1)
         const arg = this.request.post.firstCall.args[0]
-        expect(arg.json).to.have.all.keys('docUrls', 'fullIndex')
+        expect(arg.json).to.have.all.keys('docUrls', 'sourceURLs', 'fullIndex')
         expect(arg.json.docUrls.length).to.equal(4)
+        expect(arg.json.docUrls).to.deep.equal([
+          `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/aaa/raw`,
+          `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/ccc/raw`,
+          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/fff`,
+          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/ggg`,
+        ])
+        expect(arg.json.sourceURLs.length).to.equal(4)
+        expect(arg.json.sourceURLs).to.deep.equal([
+          {
+            url: `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/aaa/raw`,
+          },
+          {
+            url: `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/ccc/raw`,
+          },
+          {
+            url: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/fff`,
+          },
+          {
+            url: `${this.settings.apis.project_history.url}/project/${this.historyId}/blob/hash`,
+            fallbackURL: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/ggg`,
+          },
+        ])
         expect(arg.json.fullIndex).to.equal(true)
         return done()
       })
@@ -274,7 +304,7 @@ describe('ReferencesHandler', function () {
     })
   })
 
-  describe('_findBibFileIds', function () {
+  describe('_findBibFileRefs', function () {
     beforeEach(function () {
       this.fakeProject = {
         rootFolder: [
@@ -294,11 +324,14 @@ describe('ReferencesHandler', function () {
           },
         ],
       }
-      return (this.expectedIds = ['ddd', 'ghg'])
+      this.expectedIds = [
+        this.fakeProject.rootFolder[0].fileRefs[0],
+        this.fakeProject.rootFolder[0].folders[0].fileRefs[0],
+      ]
     })
 
     it('should select the correct docIds', function () {
-      const result = this.handler._findBibFileIds(this.fakeProject)
+      const result = this.handler._findBibFileRefs(this.fakeProject)
       return expect(result).to.deep.equal(this.expectedIds)
     })
   })
