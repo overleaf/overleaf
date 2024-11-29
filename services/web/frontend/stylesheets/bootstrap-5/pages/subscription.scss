@@ -371,3 +371,9 @@
     color: var(--link-web);
   }
 }
+
+.three-d-secure-container {
+  > .three-d-secure-recurly-container {
+    height: 400px;
+  }
+}
