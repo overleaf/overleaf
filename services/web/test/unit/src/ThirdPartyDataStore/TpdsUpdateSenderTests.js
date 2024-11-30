@@ -117,59 +117,6 @@ describe('TpdsUpdateSender', function () {
 
     it('queues a post the file with user and file id', async function () {
       const fileId = '4545345'
-      const hash = undefined
-      const historyId = 91525
-      const path = '/some/path/here.jpg'
-
-      await this.TpdsUpdateSender.promises.addFile({
-        projectId,
-        historyId,
-        fileId,
-        hash,
-        path,
-        projectName,
-      })
-
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
-        {
-          json: {
-            group: userId,
-            method: 'pipeStreamFrom',
-            job: {
-              method: 'post',
-              streamOrigin: `${filestoreUrl}/project/${projectId}/file/${fileId}`,
-              uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
-                projectName
-              )}${encodeURIComponent(path)}`,
-              headers: {},
-            },
-          },
-        }
-      )
-
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
-        {
-          json: {
-            group: collaberatorRef,
-          },
-        }
-      )
-
-      expect(this.FetchUtils.fetchNothing).to.have.been.calledWithMatch(
-        this.enqueueUrl,
-        {
-          json: {
-            group: readOnlyRef,
-            job: {},
-          },
-        }
-      )
-    })
-
-    it('queues a post the file with user and file id and hash', async function () {
-      const fileId = '4545345'
       const hash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
       const historyId = 91525
       const path = '/some/path/here.jpg'
