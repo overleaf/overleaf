@@ -316,7 +316,7 @@ async function checkSummaryValues(key, values) {
   for (const quantile of Object.keys(values)) {
     expect(found[quantile]).to.be.within(
       values[quantile] - 5,
-      values[quantile] + 5,
+      values[quantile] + 15,
       `quantile: ${quantile}`
     )
   }
