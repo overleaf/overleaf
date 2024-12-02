@@ -150,7 +150,8 @@
   }
 
   .log-entry-content-raw {
-    font-size: var(--font-size-01);
+    @include body-xs;
+
     color: var(--content-secondary);
     padding: var(--spacing-03);
     margin: 0;

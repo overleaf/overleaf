@@ -79,7 +79,7 @@ function PdfFileList({ fileList }) {
           ))}
 
           {fileList.other.length > 0 && fileList.top.length > 0 && (
-            <DropdownDivider divider />
+            <DropdownDivider />
           )}
 
           {fileList.other.map(file => (
