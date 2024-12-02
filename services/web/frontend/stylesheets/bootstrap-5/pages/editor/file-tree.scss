@@ -226,12 +226,13 @@
             left: -2px;
 
             + .linked-file-highlight {
-              color: inherit;
-              position: relative;
-              top: 4px;
-              width: 0;
-              left: -5px;
+              color: var(--file-tree-bg);
+              background-color: var(--content-disabled);
+              position: absolute;
+              top: 14px;
+              left: 20px;
               font-size: var(--font-size-01);
+              border-radius: var(--spacing-01);
             }
           }
         }
@@ -285,7 +286,7 @@
             }
 
             > .material-symbols.linked-file-highlight {
-              color: var(--bg-info-01);
+              background-color: var(--bg-info-01);
             }
 
             @include fake-full-width-bg(var(--bg-info-01));
@@ -362,7 +363,7 @@
           }
 
           > .material-symbols.linked-file-highlight {
-            color: var(--bg-info-01);
+            background-color: var(--bg-info-01);
           }
 
           @include fake-full-width-bg(var(--file-tree-item-selected-bg));
