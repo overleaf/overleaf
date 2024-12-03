@@ -7,6 +7,7 @@ const HTTPStatus = require('http-status')
 const fs = require('node:fs')
 const { promisify } = require('node:util')
 const config = require('config')
+const OError = require('@overleaf/o-error')
 
 const logger = require('@overleaf/logger')
 const { Chunk, ChunkResponse, Blob } = require('overleaf-editor-core')
@@ -243,13 +244,22 @@ async function getProjectBlob(req, res, next) {
       stream = await blobStore.getStream(hash, opts)
     } catch (err) {
       if (err instanceof Blob.NotFoundError) {
+        logger.warn({ projectId, hash }, 'Blob not found')
         return res.status(404).end()
       } else {
         throw err
       }
     }
     res.set('Content-Type', 'application/octet-stream')
-    await pipeline(stream, res)
+    try {
+      await pipeline(stream, res)
+    } catch (err) {
+      if (err?.code === 'ERR_STREAM_PREMATURE_CLOSE') {
+        res.end()
+      } else {
+        throw OError.tag(err, 'error transferring stream', { projectId, hash })
+      }
+    }
   } finally {
     logger.debug({ projectId, hash }, 'getProjectBlob finished')
   }
