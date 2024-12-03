@@ -113,27 +113,23 @@ const MathPreviewTooltip: FC<{ mathContent: HTMLDivElement }> = ({
                 />
               </DropdownToggle>
               <DropdownMenu flip={false}>
-                <li>
-                  <OLDropdownMenuItem
-                    onClick={onHide}
-                    description={t('temporarily_hides_the_preview')}
-                    trailingIcon={
-                      <span className="math-tooltip-options-keyboard-shortcut">
-                        Esc
-                      </span>
-                    }
-                  >
-                    {t('hide')}
-                  </OLDropdownMenuItem>
-                </li>
-                <li>
-                  <OLDropdownMenuItem
-                    onClick={openDisableModal}
-                    description={t('permanently_disables_the_preview')}
-                  >
-                    {t('disable')}
-                  </OLDropdownMenuItem>
-                </li>
+                <OLDropdownMenuItem
+                  onClick={onHide}
+                  description={t('temporarily_hides_the_preview')}
+                  trailingIcon={
+                    <span className="math-tooltip-options-keyboard-shortcut">
+                      Esc
+                    </span>
+                  }
+                >
+                  {t('hide')}
+                </OLDropdownMenuItem>
+                <OLDropdownMenuItem
+                  onClick={openDisableModal}
+                  description={t('permanently_disables_the_preview')}
+                >
+                  {t('disable')}
+                </OLDropdownMenuItem>
               </DropdownMenu>
             </Dropdown>
           }

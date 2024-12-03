@@ -3,7 +3,6 @@ import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-ite
 import MaterialIcon from '@/shared/components/material-icon'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import Icon from '../../../../../../shared/components/icon'
-import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 
 type DownloadProps = {
   projectId: string
@@ -20,23 +19,21 @@ function Download({
   const { t } = useTranslation()
 
   return (
-    <DropdownListItem>
-      <OLDropdownMenuItem
-        href={`/project/${projectId}/version/${version}/zip`}
-        download={`${projectId}_v${version}.zip`}
-        rel="noreferrer"
-        onClick={closeDropdown}
-        leadingIcon={
-          <BootstrapVersionSwitcher
-            bs3={<Icon type="cloud-download" fw />}
-            bs5={<MaterialIcon type="download" />}
-          />
-        }
-        {...props}
-      >
-        {t('history_download_this_version')}
-      </OLDropdownMenuItem>
-    </DropdownListItem>
+    <OLDropdownMenuItem
+      href={`/project/${projectId}/version/${version}/zip`}
+      download={`${projectId}_v${version}.zip`}
+      rel="noreferrer"
+      onClick={closeDropdown}
+      leadingIcon={
+        <BootstrapVersionSwitcher
+          bs3={<Icon type="cloud-download" fw />}
+          bs5={<MaterialIcon type="download" />}
+        />
+      }
+      {...props}
+    >
+      {t('history_download_this_version')}
+    </OLDropdownMenuItem>
   )
 }
 

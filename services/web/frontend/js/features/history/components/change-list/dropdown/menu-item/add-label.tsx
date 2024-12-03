@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import OLDropdownMenuItem from '@/features/ui/components/ol/ol-dropdown-menu-item'
 import OLTagIcon from '@/features/ui/components/ol/icons/ol-tag-icon'
 import AddLabelModal from '../../add-label-modal'
-import DropdownListItem from '@/features/ui/components/bootstrap-5/dropdown-list-item'
 
 type DownloadProps = {
   projectId: string
@@ -26,7 +25,7 @@ function AddLabel({
   }
 
   return (
-    <DropdownListItem>
+    <>
       <OLDropdownMenuItem
         onClick={handleClick}
         leadingIcon={<OLTagIcon />}
@@ -41,7 +40,7 @@ function AddLabel({
         setShow={setShowModal}
         version={version}
       />
-    </DropdownListItem>
+    </>
   )
 }
 
