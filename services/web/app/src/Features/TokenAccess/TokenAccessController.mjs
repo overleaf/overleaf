@@ -25,6 +25,7 @@ import LimitationsManager from '../Subscription/LimitationsManager.js'
 const orderedPrivilegeLevels = [
   PrivilegeLevels.NONE,
   PrivilegeLevels.READ_ONLY,
+  PrivilegeLevels.REVIEW,
   PrivilegeLevels.READ_AND_WRITE,
   PrivilegeLevels.OWNER,
 ]

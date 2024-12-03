@@ -275,6 +275,7 @@ describe('ProjectGetter', function () {
       this.fields = { mock: 'fields' }
       this.projectOwned = { _id: 'mock-owned-projects' }
       this.projectRW = { _id: 'mock-rw-projects' }
+      this.projectReview = { _id: 'mock-review-projects' }
       this.projectRO = { _id: 'mock-ro-projects' }
       this.projectTokenRW = { _id: 'mock-token-rw-projects' }
       this.projectTokenRO = { _id: 'mock-token-ro-projects' }
@@ -289,6 +290,7 @@ describe('ProjectGetter', function () {
         readOnly: [this.projectRO],
         tokenReadAndWrite: [this.projectTokenRW],
         tokenReadOnly: [this.projectTokenRO],
+        review: [this.projectReview],
       })
       const projects = await this.ProjectGetter.promises.findAllUsersProjects(
         this.userId,
@@ -301,6 +303,7 @@ describe('ProjectGetter', function () {
         readOnly: [this.projectRO],
         tokenReadAndWrite: [this.projectTokenRW],
         tokenReadOnly: [this.projectTokenRO],
+        review: [this.projectReview],
       })
     })
 
@@ -314,6 +317,7 @@ describe('ProjectGetter', function () {
           this.projectTokenRO,
           this.projectRO,
         ],
+        review: [this.projectReview],
       })
       const projects = await this.ProjectGetter.promises.findAllUsersProjects(
         this.userId,
@@ -326,6 +330,7 @@ describe('ProjectGetter', function () {
         readOnly: [this.projectRO],
         tokenReadAndWrite: [this.projectTokenRW],
         tokenReadOnly: [this.projectTokenRO],
+        review: [this.projectReview],
       })
     })
   })

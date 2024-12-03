@@ -50,7 +50,11 @@ export default {
         }),
         body: Joi.object({
           privilegeLevel: Joi.string()
-            .valid(PrivilegeLevels.READ_ONLY, PrivilegeLevels.READ_AND_WRITE)
+            .valid(
+              PrivilegeLevels.READ_ONLY,
+              PrivilegeLevels.READ_AND_WRITE,
+              PrivilegeLevels.REVIEW
+            )
             .required(),
         }),
       }),

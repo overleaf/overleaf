@@ -186,6 +186,7 @@ async function canUserReadProject(userId, projectId, token) {
     PrivilegeLevels.OWNER,
     PrivilegeLevels.READ_AND_WRITE,
     PrivilegeLevels.READ_ONLY,
+    PrivilegeLevels.REVIEW,
   ].includes(privilegeLevel)
 }
 
