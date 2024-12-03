@@ -122,6 +122,8 @@ async function settingsPage(req, res) {
   await SplitTestHandler.promises.getAssignment(req, res, 'bootstrap-5')
   // Get the users write-and-cite assignment to switch between translation strings
   await SplitTestHandler.promises.getAssignment(req, res, 'write-and-cite')
+  // Get the users papers-integration assignment to show the linking widget
+  await SplitTestHandler.promises.getAssignment(req, res, 'papers-integration')
 
   res.render('user/settings', {
     title: 'account_settings',
@@ -140,11 +142,13 @@ async function settingsPage(req, res) {
         github: user.features.github,
         mendeley: user.features.mendeley,
         zotero: user.features.zotero,
+        papers: user.features.papers,
         references: user.features.references,
       },
       refProviders: {
         mendeley: Boolean(user.refProviders?.mendeley),
         zotero: Boolean(user.refProviders?.zotero),
+        papers: Boolean(user.refProviders?.papers),
       },
       writefull: {
         enabled: Boolean(user.writefull?.enabled),

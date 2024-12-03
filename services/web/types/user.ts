@@ -2,6 +2,7 @@ import { Brand } from './helpers/brand'
 
 export type RefProviders = {
   mendeley?: boolean
+  papers?: boolean
   zotero?: boolean
 }
 
@@ -16,6 +17,7 @@ export type Features = {
   gitBridge?: boolean
   github?: boolean
   mendeley?: boolean
+  papers?: boolean
   references?: boolean
   referencesSearch?: boolean
   symbolPalette?: boolean

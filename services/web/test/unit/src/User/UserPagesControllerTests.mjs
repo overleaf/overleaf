@@ -36,6 +36,7 @@ describe('UserPagesController', function () {
       refProviders: {
         mendeley: { encrypted: 'aaaa' },
         zotero: { encrypted: 'bbbb' },
+        papers: { encrypted: 'cccc' },
       },
     }
     this.adminEmail = 'group-admin-email@overleaf.com'
@@ -338,6 +339,7 @@ describe('UserPagesController', function () {
       this.res.callback = () => {
         expect(this.res.renderedVariables.user.refProviders).to.deep.equal({
           mendeley: true,
+          papers: true,
           zotero: true,
         })
         done()
