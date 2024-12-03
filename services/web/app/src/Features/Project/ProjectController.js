@@ -353,7 +353,6 @@ const _ProjectController = {
       'default-visual-for-beginners',
       'hotjar',
       'ai-add-on',
-      'reviewer-role',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
@@ -895,14 +894,8 @@ const _ProjectController = {
   },
   _buildProjectList(allProjects, userId) {
     let project
-    const {
-      owned,
-      review,
-      readAndWrite,
-      readOnly,
-      tokenReadAndWrite,
-      tokenReadOnly,
-    } = allProjects
+    const { owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly } =
+      allProjects
     const projects = []
     for (project of owned) {
       projects.push(
@@ -920,16 +913,6 @@ const _ProjectController = {
         ProjectController._buildProjectViewModel(
           project,
           'readWrite',
-          Sources.INVITE,
-          userId
-        )
-      )
-    }
-    for (project of review) {
-      projects.push(
-        ProjectController._buildProjectViewModel(
-          project,
-          'review',
           Sources.INVITE,
           userId
         )

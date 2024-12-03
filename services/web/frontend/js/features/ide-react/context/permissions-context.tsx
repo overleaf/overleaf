@@ -21,12 +21,6 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
     admin: false,
     comment: true,
   },
-  review: {
-    read: true,
-    write: true,
-    admin: false,
-    comment: true,
-  },
   readAndWrite: {
     read: true,
     write: true,
@@ -44,14 +38,12 @@ const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
 const anonymousPermissionsMap: typeof permissionsMap = {
   readOnly: { ...permissionsMap.readOnly, comment: false },
   readAndWrite: { ...permissionsMap.readAndWrite, comment: false },
-  review: { ...permissionsMap.review, comment: false },
   owner: { ...permissionsMap.owner, comment: false },
 }
 
 const linkSharingWarningPermissionsMap: typeof permissionsMap = {
   readOnly: { ...permissionsMap.readOnly, comment: false },
   readAndWrite: permissionsMap.readAndWrite,
-  review: permissionsMap.review,
   owner: permissionsMap.owner,
 }
 

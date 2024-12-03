@@ -5,4 +5,4 @@ export type Permissions = {
   comment: boolean
 }
 
-export type PermissionsLevel = 'owner' | 'readAndWrite' | 'review' | 'readOnly'
+export type PermissionsLevel = 'owner' | 'readAndWrite' | 'readOnly'

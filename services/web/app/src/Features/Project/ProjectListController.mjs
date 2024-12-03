@@ -549,14 +549,8 @@ async function _getProjects(
  * @private
  */
 function _formatProjects(projects, userId) {
-  const {
-    owned,
-    review,
-    readAndWrite,
-    readOnly,
-    tokenReadAndWrite,
-    tokenReadOnly,
-  } = projects
+  const { owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly } =
+    projects
 
   const formattedProjects = /** @type {Project[]} **/ []
   for (const project of owned) {
@@ -568,11 +562,6 @@ function _formatProjects(projects, userId) {
   for (const project of readAndWrite) {
     formattedProjects.push(
       _formatProjectInfo(project, 'readWrite', Sources.INVITE, userId)
-    )
-  }
-  for (const project of review) {
-    formattedProjects.push(
-      _formatProjectInfo(project, 'review', Sources.INVITE, userId)
     )
   }
   for (const project of readOnly) {

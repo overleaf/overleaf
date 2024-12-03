@@ -5,7 +5,7 @@ module.exports = AuthorizationManager = {
   assertClientCanViewProject(client, callback) {
     AuthorizationManager._assertClientHasPrivilegeLevel(
       client,
-      ['readOnly', 'readAndWrite', 'review', 'owner'],
+      ['readOnly', 'readAndWrite', 'owner'],
       callback
     )
   },

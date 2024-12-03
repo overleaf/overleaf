@@ -3,7 +3,7 @@ import { PublicAccessLevel } from '../../../../../types/public-access-level'
 
 export type ProjectContextMember = {
   _id: UserId
-  privileges: 'readOnly' | 'readAndWrite' | 'review'
+  privileges: 'readOnly' | 'readAndWrite'
   email: string
   first_name: string
   last_name: string

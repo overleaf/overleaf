@@ -20,8 +20,6 @@ describe('CollaboratorsGetter', function () {
     this.pendingEditorRef = new ObjectId()
     this.readWriteRef1 = new ObjectId()
     this.readWriteRef2 = new ObjectId()
-    this.reviewer1Ref = new ObjectId()
-    this.reviewer2Ref = new ObjectId()
     this.readOnlyTokenRef = new ObjectId()
     this.readWriteTokenRef = new ObjectId()
     this.nonMemberRef = new ObjectId()
@@ -35,7 +33,6 @@ describe('CollaboratorsGetter', function () {
       ],
       pendingEditor_refs: [this.pendingEditorRef],
       collaberator_refs: [this.readWriteRef1, this.readWriteRef2],
-      reviewer_refs: [this.reviewer1Ref, this.reviewer2Ref],
       tokenAccessReadAndWrite_refs: [this.readWriteTokenRef],
       tokenAccessReadOnly_refs: [this.readOnlyTokenRef],
       publicAccesLevel: 'tokenBased',
@@ -124,16 +121,6 @@ describe('CollaboratorsGetter', function () {
             privilegeLevel: 'readAndWrite',
             source: 'token',
           },
-          {
-            id: this.reviewer1Ref.toString(),
-            privilegeLevel: 'review',
-            source: 'invite',
-          },
-          {
-            id: this.reviewer2Ref.toString(),
-            privilegeLevel: 'review',
-            source: 'invite',
-          },
         ])
       })
     })
@@ -167,8 +154,6 @@ describe('CollaboratorsGetter', function () {
         this.pendingEditorRef.toString(),
         this.readWriteTokenRef.toString(),
         this.readOnlyTokenRef.toString(),
-        this.reviewer1Ref.toString(),
-        this.reviewer2Ref.toString(),
       ])
     })
   })
@@ -186,8 +171,6 @@ describe('CollaboratorsGetter', function () {
         this.readWriteRef1.toString(),
         this.readWriteRef2.toString(),
         this.pendingEditorRef.toString(),
-        this.reviewer1Ref.toString(),
-        this.reviewer2Ref.toString(),
       ])
     })
   })
@@ -206,9 +189,6 @@ describe('CollaboratorsGetter', function () {
       this.UserGetter.promises.getUser
         .withArgs(this.readWriteTokenRef.toString())
         .resolves({ _id: this.readWriteTokenRef })
-      this.UserGetter.promises.getUser
-        .withArgs(this.reviewer1Ref.toString())
-        .resolves({ _id: this.reviewer1Ref })
     })
 
     it('should return an array of invited members with their privilege levels', async function () {
@@ -219,7 +199,6 @@ describe('CollaboratorsGetter', function () {
       expect(result).to.have.deep.members([
         { user: { _id: this.readOnlyRef1 }, privilegeLevel: 'readOnly' },
         { user: { _id: this.readWriteRef2 }, privilegeLevel: 'readAndWrite' },
-        { user: { _id: this.reviewer1Ref }, privilegeLevel: 'review' },
       ])
     })
   })
@@ -232,15 +211,6 @@ describe('CollaboratorsGetter', function () {
           this.project._id
         )
       expect(level).to.equal('readOnly')
-    })
-
-    it('should return review privilege level', async function () {
-      const level =
-        await this.CollaboratorsGetter.promises.getMemberIdPrivilegeLevel(
-          this.reviewer1Ref,
-          this.project._id
-        )
-      expect(level).to.equal('review')
     })
 
     it('should return false if the member has no privilege level', async function () {
@@ -319,11 +289,6 @@ describe('CollaboratorsGetter', function () {
         .withArgs({ readOnly_refs: this.userId }, this.fields)
         .chain('exec')
         .resolves(['mock-read-only-project-1', 'mock-read-only-project-2'])
-
-      this.ProjectMock.expects('find')
-        .withArgs({ reviewer_refs: this.userId }, this.fields)
-        .chain('exec')
-        .resolves(['mock-review-project-1', 'mock-review-project-2'])
       this.ProjectMock.expects('find')
         .withArgs(
           {
@@ -372,7 +337,6 @@ describe('CollaboratorsGetter', function () {
           'mock-token-read-only-project-1',
           'mock-token-read-only-project-2',
         ],
-        review: ['mock-review-project-1', 'mock-review-project-2'],
       })
     })
   })
@@ -388,21 +352,15 @@ describe('CollaboratorsGetter', function () {
         _id: this.readWriteRef1,
         email: 'readwrite@example.com',
       }
-      this.reviewUser = {
-        _id: this.reviewer1Ref,
-        email: 'review@example.com',
-      }
       this.members = [
         { user: this.owningUser, privilegeLevel: 'owner' },
         { user: this.readWriteUser, privilegeLevel: 'readAndWrite' },
-        { user: this.reviewUser, privilegeLevel: 'review' },
       ]
       this.views = {
         owner: this.owningUser,
         ownerFeatures: this.owningUser.features,
         members: [
           { _id: this.readWriteUser._id, email: this.readWriteUser.email },
-          { _id: this.reviewUser._id, email: this.reviewUser.email },
         ],
       }
       this.UserGetter.promises.getUser
@@ -411,9 +369,6 @@ describe('CollaboratorsGetter', function () {
       this.UserGetter.promises.getUser
         .withArgs(this.readWriteUser._id.toString())
         .resolves(this.readWriteUser)
-      this.UserGetter.promises.getUser
-        .withArgs(this.reviewUser._id.toString())
-        .resolves(this.reviewUser)
       this.ProjectEditorHandler.buildOwnerAndMembersViews.returns(this.views)
       this.result =
         await this.CollaboratorsGetter.promises.getAllInvitedMembers(

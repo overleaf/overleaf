@@ -814,10 +814,7 @@ function useReviewPanelState(): ReviewPanel.ReviewPanelState {
       }
       const members = project.members ?? []
       for (const member of members) {
-        if (
-          member.privileges === 'readAndWrite' ||
-          member.privileges === 'review'
-        ) {
+        if (member.privileges === 'readAndWrite') {
           if (!trackChangesState[member._id]) {
             // An added member will have track changes enabled if track changes is on for everyone
             setUserTCState(

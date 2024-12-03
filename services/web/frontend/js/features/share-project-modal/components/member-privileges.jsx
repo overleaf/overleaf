@@ -11,9 +11,6 @@ export default function MemberPrivileges({ privileges }) {
     case 'readOnly':
       return t('read_only')
 
-    case 'review':
-      return t('can_review')
-
     default:
       return null
   }

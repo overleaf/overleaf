@@ -61,7 +61,6 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     tokenAccessReadAndWrite_refs: 1,
     publicAccesLevel: 1,
     pendingEditor_refs: 1,
-    reviewer_refs: 1,
   })
   if (!project) {
     throw new Errors.NotFoundError(`no project found with id ${projectId}`)
@@ -73,8 +72,7 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     project.tokenAccessReadAndWrite_refs,
     project.tokenAccessReadOnly_refs,
     project.publicAccesLevel,
-    project.pendingEditor_refs,
-    project.reviewer_refs
+    project.pendingEditor_refs
   )
   return memberIds
 }
@@ -224,10 +222,9 @@ async function getPublicShareTokens(userId, projectId) {
 // token access has been disabled.
 async function getProjectsUserIsMemberOf(userId, fields) {
   const limit = pLimit(2)
-  const [readAndWrite, review, readOnly, tokenReadAndWrite, tokenReadOnly] =
+  const [readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly] =
     await Promise.all([
       limit(() => Project.find({ collaberator_refs: userId }, fields).exec()),
-      limit(() => Project.find({ reviewer_refs: userId }, fields).exec()),
       limit(() => Project.find({ readOnly_refs: userId }, fields).exec()),
       limit(() =>
         Project.find(
@@ -248,7 +245,7 @@ async function getProjectsUserIsMemberOf(userId, fields) {
         ).exec()
       ),
     ])
-  return { readAndWrite, review, readOnly, tokenReadAndWrite, tokenReadOnly }
+  return { readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly }
 }
 
 // This function returns all the projects that a user is a member of, regardless of
@@ -327,8 +324,7 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
   tokenAccessIds,
   tokenAccessReadOnlyIds,
   publicAccessLevel,
-  pendingEditorIds,
-  reviewerIds
+  pendingEditorIds
 ) {
   const members = []
   members.push({
@@ -368,13 +364,6 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
         source: Sources.TOKEN,
       })
     }
-  }
-  for (const memberId of reviewerIds || []) {
-    members.push({
-      id: memberId.toString(),
-      privilegeLevel: PrivilegeLevels.REVIEW,
-      source: Sources.INVITE,
-    })
   }
   return members
 }

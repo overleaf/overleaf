@@ -47,17 +47,6 @@ describe('AuthorizationManager', function () {
       )
     })
 
-    it('should allow the review privilegeLevel', function (done) {
-      this.client.ol_context.privilege_level = 'review'
-      return this.AuthorizationManager.assertClientCanViewProject(
-        this.client,
-        error => {
-          expect(error).to.be.null
-          return done()
-        }
-      )
-    })
-
     it('should allow the owner privilegeLevel', function (done) {
       this.client.ol_context.privilege_level = 'owner'
       return this.AuthorizationManager.assertClientCanViewProject(
