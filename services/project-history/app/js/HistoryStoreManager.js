@@ -300,8 +300,18 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
     if (urlMatch[1] !== projectId) {
       return callback(new OError('invalid project for blob creation'))
     }
+
     const fileId = urlMatch[2]
     const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
+
+    if (update.createdBlob) {
+      logger.debug(
+        { projectId, fileId },
+        'Skipping blob creation as it has already been created'
+      )
+      return callback(null, { file: update.hash })
+    }
+
     fetchStream(filestoreURL, {
       signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT),
     })

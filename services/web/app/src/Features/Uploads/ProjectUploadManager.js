@@ -194,14 +194,14 @@ async function _createFile(project, projectPath, fsPath) {
     throw new OError('missing history id')
   }
   const fileName = Path.basename(projectPath)
-  const { fileRef, url } =
+  const { createdBlob, fileRef, url } =
     await FileStoreHandler.promises.uploadFileFromDiskWithHistoryId(
       projectId,
       historyId,
       { name: fileName },
       fsPath
     )
-  return { file: fileRef, path: projectPath, url }
+  return { createdBlob, file: fileRef, path: projectPath, url }
 }
 
 async function _notifyDocumentUpdater(project, userId, changes) {

@@ -490,6 +490,7 @@ function _getUpdates(
         url: newEntity.url,
         hash: newEntity.file != null ? newEntity.file.hash : undefined,
         metadata: buildFileMetadataForHistory(newEntity.file),
+        createdBlob: newEntity.createdBlob ?? false,
       })
     } else if (newEntity.path !== oldEntity.path) {
       // entity renamed
