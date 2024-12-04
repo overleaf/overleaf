@@ -206,7 +206,7 @@ exports.paths = {
           name: 'copyFrom',
           in: 'query',
           description: 'source project id',
-          required: false,
+          required: true,
           type: 'string',
         },
       ],

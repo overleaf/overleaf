@@ -405,10 +405,11 @@ class BlobStore {
     const sourceProjectId = this.projectId
     const { bucket, key: sourceKey } = getBlobLocation(sourceProjectId, hash)
     const destKey = makeProjectKey(targetProjectId, hash)
+    const targetBackend = getBackend(targetProjectId)
     logger.debug({ sourceProjectId, targetProjectId, hash }, 'copyBlob started')
     try {
       await persistor.copyObject(bucket, sourceKey, destKey)
-      await this.backend.insertBlob(targetProjectId, sourceBlob)
+      await targetBackend.insertBlob(targetProjectId, sourceBlob)
     } finally {
       logger.debug(
         { sourceProjectId, targetProjectId, hash },
