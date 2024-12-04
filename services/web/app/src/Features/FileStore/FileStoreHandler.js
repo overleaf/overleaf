@@ -100,7 +100,7 @@ const FileStoreHandler = {
                   })
                   return callback(err)
                 }
-                callback(err, result.url, result.fileRef, true)
+                callback(err, result.url, result.fileRef)
               }
             )
           }
@@ -303,6 +303,6 @@ module.exports = FileStoreHandler
 module.exports.promises = promisifyAll(FileStoreHandler, {
   multiResult: {
     uploadFileFromDisk: ['url', 'fileRef'],
-    uploadFileFromDiskWithHistoryId: ['url', 'fileRef', 'createdBlob'],
+    uploadFileFromDiskWithHistoryId: ['url', 'fileRef'],
   },
 })

@@ -105,19 +105,16 @@ describe('ProjectDuplicator', function () {
     ]
     this.fileEntries = [
       {
-        createdBlob: false,
         path: this.file0Path,
         file: this.newFile0,
         url: this.filestoreUrl,
       },
       {
-        createdBlob: false,
         path: this.file1Path,
         file: this.newFile1,
         url: this.filestoreUrl,
       },
       {
-        createdBlob: true,
         path: this.file2Path,
         file: this.newFile2,
         url: this.filestoreUrl,

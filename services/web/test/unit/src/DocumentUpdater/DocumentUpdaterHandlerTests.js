@@ -1132,7 +1132,6 @@ describe('DocumentUpdaterHandler', function () {
               hash: undefined,
               ranges: undefined,
               metadata: undefined,
-              createdBlob: false,
             },
           ]
 
@@ -1185,7 +1184,6 @@ describe('DocumentUpdaterHandler', function () {
               historyRangesSupport: false,
               hash: '12345',
               ranges: undefined,
-              createdBlob: false,
               metadata: undefined,
             },
           ]
@@ -1298,7 +1296,6 @@ describe('DocumentUpdaterHandler', function () {
               hash: undefined,
               ranges: undefined,
               metadata: undefined,
-              createdBlob: false,
             },
           ]
 
@@ -1401,7 +1398,6 @@ describe('DocumentUpdaterHandler', function () {
               hash: undefined,
               ranges: this.ranges,
               metadata: undefined,
-              createdBlob: false,
             },
           ]
 
@@ -1448,7 +1444,6 @@ describe('DocumentUpdaterHandler', function () {
               hash: undefined,
               ranges: this.ranges,
               metadata: undefined,
-              createdBlob: false,
             },
           ]
 

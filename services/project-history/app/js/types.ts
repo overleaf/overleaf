@@ -76,7 +76,6 @@ export type AddFileUpdate = ProjectUpdateBase & {
   file: string
   url: string
   hash: string
-  createdBlob?: boolean
   metadata?: LinkedFileData
 }
 
