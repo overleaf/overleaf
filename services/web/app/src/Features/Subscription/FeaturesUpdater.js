@@ -115,9 +115,22 @@ async function computeFeatures(userId) {
 }
 
 async function _getIndividualFeatures(userId) {
-  const sub =
-    await SubscriptionLocator.promises.getUserIndividualSubscription(userId)
-  return _subscriptionToFeatures(sub)
+  const subscription =
+    await SubscriptionLocator.promises.getUsersSubscription(userId)
+  if (subscription == null) {
+    return {}
+  }
+
+  const featureSets = []
+
+  // The plan doesn't apply to the group admin when the subscription
+  // is a group subscription
+  if (!subscription.groupPlan) {
+    featureSets.push(_subscriptionToFeatures(subscription))
+  }
+
+  featureSets.push(_aiAddOnFeatures(subscription))
+  return _.reduce(featureSets, FeaturesHelper.mergeFeatures, {})
 }
 
 async function _getGroupFeatureSets(userId) {
@@ -148,20 +161,10 @@ async function _getV1Features(user) {
 }
 
 function _subscriptionToFeatures(subscription) {
-  const addonFeatures = _subscriptionAddonsToFeatures(
-    subscription && subscription.addOns
-  )
-  const planFeatures = _planCodeToFeatures(
-    subscription && subscription.planCode
-  )
-  return FeaturesHelper.mergeFeatures(addonFeatures, planFeatures)
-}
-
-function _planCodeToFeatures(planCode) {
-  if (!planCode) {
+  if (!subscription?.planCode) {
     return {}
   }
-  const plan = PlansLocator.findLocalPlanInSettings(planCode)
+  const plan = PlansLocator.findLocalPlanInSettings(subscription.planCode)
   if (!plan) {
     return {}
   } else {
@@ -169,12 +172,8 @@ function _planCodeToFeatures(planCode) {
   }
 }
 
-function _subscriptionAddonsToFeatures(addOns) {
-  if (!addOns) {
-    return {}
-  }
-  const hasAiAddon = addOns.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)
-  if (hasAiAddon) {
+function _aiAddOnFeatures(subscription) {
+  if (subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)) {
     return { aiErrorAssistant: true }
   } else {
     return {}
