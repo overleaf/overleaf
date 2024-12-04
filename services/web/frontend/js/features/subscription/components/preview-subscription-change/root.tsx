@@ -2,7 +2,10 @@ import { useCallback } from 'react'
 import { Grid, Row, Col, Button } from 'react-bootstrap'
 import moment from 'moment'
 import { useTranslation, Trans } from 'react-i18next'
-import { SubscriptionChangePreview } from '../../../../../../types/subscription/subscription-change-preview'
+import {
+  SubscriptionChangePreview,
+  AddOnPurchase,
+} from '../../../../../../types/subscription/subscription-change-preview'
 import getMeta from '@/utils/meta'
 import { formatCurrencyLocalized } from '@/shared/utils/currency'
 import useAsync from '@/shared/hooks/use-async'
@@ -12,9 +15,12 @@ import { postJSON } from '@/infrastructure/fetch-json'
 import Notification from '@/shared/components/notification'
 import { subscriptionUpdateUrl } from '@/features/subscription/data/subscription-url'
 import * as eventTracking from '@/infrastructure/event-tracking'
+import sparkleText from '@/shared/svgs/ai-sparkle-text.svg'
 
 function PreviewSubscriptionChange() {
-  const preview = getMeta('ol-subscriptionChangePreview')
+  const preview = getMeta(
+    'ol-subscriptionChangePreview'
+  ) as SubscriptionChangePreview
   const { t } = useTranslation()
   const payNowTask = useAsync()
   const location = useLocation()
@@ -28,6 +34,10 @@ function PreviewSubscriptionChange() {
       })
       .catch(debugConsole.error)
   }, [location, payNowTask, preview])
+
+  const addOnChange = preview.change.type === 'add-on-purchase'
+  const aiAddOnChange =
+    addOnChange && (preview.change as AddOnPurchase).addOn.code === 'assistant'
 
   return (
     <Grid>
@@ -57,6 +67,25 @@ function PreviewSubscriptionChange() {
                   </>
                 }
               />
+            )}
+
+            {aiAddOnChange && (
+              <div className="text-small">
+                <Trans
+                  i18nKey="add_error_assist_to_your_projects"
+                  components={{
+                    sparkle: (
+                      <img
+                        alt="sparkle"
+                        className="ai-error-assistant-sparkle"
+                        src={sparkleText}
+                        aria-hidden="true"
+                        key="sparkle"
+                      />
+                    ),
+                  }}
+                />
+              </div>
             )}
 
             <div className="payment-summary-card mt-5">

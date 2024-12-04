@@ -36,7 +36,7 @@ type AddOn = {
 
 export type SubscriptionChangeDescription = AddOnPurchase | PremiumSubscription
 
-type AddOnPurchase = {
+export type AddOnPurchase = {
   type: 'add-on-purchase'
   addOn: {
     code: string
