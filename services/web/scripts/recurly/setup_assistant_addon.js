@@ -16,7 +16,7 @@ const INDIVIDUAL_PLANS = [
 ]
 const INDIVIDUAL_VARIANTS = ['', '_free_trial_7_days']
 const GROUP_PLANS = ['collaborator', 'professional']
-const GROUP_SIZES = [2, 3, 4, 5, 10, 20, 50, 100, 200, 500]
+const GROUP_SIZES = [2, 3, 4, 5, 10, 20, 50]
 const GROUP_SEGMENTS = ['educational', 'enterprise']
 
 const ARGS = parseArgs()
