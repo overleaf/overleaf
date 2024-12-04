@@ -163,13 +163,6 @@ async function plansPage(req, res) {
 }
 
 async function plansPageLightDesign(req, res) {
-  const splitTestActive = await SplitTestHandler.promises.isSplitTestActive(
-    'website-redesign-plans'
-  )
-
-  if (!splitTestActive && req.query.preview !== 'true') {
-    return res.redirect(302, '/user/subscription/plans')
-  }
   const { currency, countryCode, geoPricingLATAMTestVariant } =
     await _getRecommendedCurrency(req, res)
 

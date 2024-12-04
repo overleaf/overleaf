@@ -130,7 +130,6 @@ describe('SubscriptionController', function () {
     this.SplitTestV2Hander = {
       promises: {
         getAssignment: sinon.stub().resolves({ variant: 'default' }),
-        isSplitTestActive: sinon.stub().resolves(true),
       },
     }
     this.SubscriptionHelper = {
