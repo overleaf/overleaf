@@ -176,7 +176,7 @@ function _aiAddOnFeatures(subscription) {
   if (subscription?.addOns?.some(addOn => addOn.addOnCode === AI_ADD_ON_CODE)) {
     return { aiErrorAssistant: true }
   } else {
-    return {}
+    return { aiErrorAssistant: false }
   }
 }
 
