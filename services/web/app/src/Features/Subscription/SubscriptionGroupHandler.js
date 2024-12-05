@@ -7,6 +7,11 @@ const SessionManager = require('../Authentication/SessionManager')
 const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
 
+const PLAN_UPGRADE_MAP = {
+  group_collaborator: 'group_professional',
+  group_collaborator_educational: 'group_professional_educational',
+}
+
 async function removeUserFromGroup(subscriptionId, userIdToRemove) {
   await SubscriptionUpdater.promises.removeUserFromGroup(
     subscriptionId,
@@ -140,12 +145,58 @@ async function createAddSeatsSubscriptionChange(req) {
   return { adding: req.body.adding }
 }
 
+async function _getUpgradeTargetPlanCodeMaybeThrow(subscription) {
+  if (!Object.keys(PLAN_UPGRADE_MAP).includes(subscription.planCode)) {
+    throw new Error('Not eligible for group plan upgrade')
+  }
+
+  return PLAN_UPGRADE_MAP[subscription.planCode]
+}
+
+async function _getGroupPlanUpgradeChangeRequest(ownerId) {
+  const olSubscription =
+    await SubscriptionLocator.promises.getUsersSubscription(ownerId)
+
+  const newPlanCode = await _getUpgradeTargetPlanCodeMaybeThrow(olSubscription)
+
+  const recurlySubscription = await RecurlyClient.promises.getSubscription(
+    olSubscription.recurlySubscription_id
+  )
+  return recurlySubscription.getRequestForFlexibleLicensingGroupPlanUpgrade(
+    newPlanCode
+  )
+}
+
+async function getGroupPlanUpgradePreview(ownerId) {
+  const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
+  const subscriptionChange =
+    await RecurlyClient.promises.previewSubscriptionChange(changeRequest)
+  const paymentMethod = await RecurlyClient.promises.getPaymentMethod(ownerId)
+  return SubscriptionController.makeChangePreview(
+    {
+      type: 'group-plan-upgrade',
+      prevPlan: {
+        name: subscriptionChange.subscription.planName,
+      },
+    },
+    subscriptionChange,
+    paymentMethod
+  )
+}
+
+async function upgradeGroupPlan(ownerId) {
+  const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
+  await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
+}
+
 module.exports = {
   removeUserFromGroup: callbackify(removeUserFromGroup),
   replaceUserReferencesInGroups: callbackify(replaceUserReferencesInGroups),
   ensureFlexibleLicensingEnabled: callbackify(ensureFlexibleLicensingEnabled),
   getTotalConfirmedUsersInGroup: callbackify(getTotalConfirmedUsersInGroup),
   isUserPartOfGroup: callbackify(isUserPartOfGroup),
+  getGroupPlanUpgradePreview: callbackify(getGroupPlanUpgradePreview),
+  upgradeGroupPlan: callbackify(upgradeGroupPlan),
   promises: {
     removeUserFromGroup,
     replaceUserReferencesInGroups,
@@ -155,5 +206,7 @@ module.exports = {
     getUsersGroupSubscriptionDetails,
     previewAddSeatsSubscriptionChange,
     createAddSeatsSubscriptionChange,
+    getGroupPlanUpgradePreview,
+    upgradeGroupPlan,
   },
 }

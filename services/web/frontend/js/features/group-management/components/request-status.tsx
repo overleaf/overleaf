@@ -9,7 +9,7 @@ import classnames from 'classnames'
 type RequestStatusProps = {
   icon: string
   title: string
-  content: React.ReactNode
+  content?: React.ReactNode
   variant?: 'primary' | 'danger'
 }
 
@@ -44,7 +44,9 @@ function RequestStatus({ icon, title, content, variant }: RequestStatusProps) {
                 <h3 className="mb-0 fw-bold" data-testid="title">
                   {title}
                 </h3>
-                <div className="card-description-secondary">{content}</div>
+                {content && (
+                  <div className="card-description-secondary">{content}</div>
+                )}
               </div>
               <div className="text-center">
                 <Button variant="secondary" href="/user/subscription">

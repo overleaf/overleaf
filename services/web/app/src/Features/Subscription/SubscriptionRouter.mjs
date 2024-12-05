@@ -108,6 +108,21 @@ export default {
       SubscriptionGroupController.submitForm
     )
 
+    webRouter.get(
+      '/user/subscription/group/upgrade-subscription',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.flexibleLicensingSplitTest,
+      SubscriptionGroupController.subscriptionUpgradePage
+    )
+
+    webRouter.post(
+      '/user/subscription/group/upgrade-subscription',
+      AuthenticationController.requireLogin(),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.upgradeSubscription
+    )
+
     // Team invites
     webRouter.get(
       '/subscription/invites/:token/',

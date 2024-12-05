@@ -216,6 +216,30 @@ class RecurlySubscription {
       addOnUpdates,
     })
   }
+
+  /**
+   * Upgrade group plan with the plan code provided
+   *
+   * @param {string} newPlanCode
+   * @return {RecurlySubscriptionChangeRequest}
+   */
+  getRequestForFlexibleLicensingGroupPlanUpgrade(newPlanCode) {
+    // Ensure all the existing add-ons are added to the new plan
+    const existingAddOns = this.addOns.map(
+      addOn =>
+        new RecurlySubscriptionAddOnUpdate({
+          code: addOn.code,
+          quantity: addOn.quantity,
+        })
+    )
+
+    return new RecurlySubscriptionChangeRequest({
+      subscription: this,
+      timeframe: 'now',
+      addOnUpdates: existingAddOns,
+      planCode: newPlanCode,
+    })
+  }
 }
 
 /**

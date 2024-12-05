@@ -38,6 +38,7 @@ export type SubscriptionChangeDescription =
   | AddOnPurchase
   | AddOnUpdate
   | PremiumSubscription
+  | GroupPlanUpgrade
 
 export type AddOnPurchase = {
   type: 'add-on-purchase'
@@ -48,6 +49,13 @@ export type AddOnUpdate = {
   type: 'add-on-update'
   addOn: Pick<AddOn, 'code' | 'quantity'> & {
     prevQuantity: AddOn['quantity']
+  }
+}
+
+export type GroupPlanUpgrade = {
+  type: 'group-plan-upgrade'
+  prevPlan: {
+    name: string
   }
 }
 

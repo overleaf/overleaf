@@ -382,3 +382,31 @@
     height: 400px;
   }
 }
+
+.group-subscription-upgrade-features {
+  .material-symbols {
+    @include body-sm;
+
+    vertical-align: top;
+  }
+
+  .per-user-price {
+    @include heading-lg;
+
+    color: var(--content-primary);
+  }
+
+  .per-user-price-text {
+    @include body-xs;
+  }
+
+  .feature-list-item {
+    @include body-sm;
+  }
+}
+
+.group-subscription-upgrade-card {
+  .title {
+    @include body-lg;
+  }
+}

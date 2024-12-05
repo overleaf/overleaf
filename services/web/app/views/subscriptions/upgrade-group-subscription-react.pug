@@ -1,0 +1,15 @@
+extends ../layout-marketing
+
+block vars
+	- bootstrap5PageStatus = 'enabled' // Enforce BS5 version
+
+block entrypointVar
+	- entrypoint = 'pages/user/subscription/group-management/upgrade-group-subscription'
+
+block append meta
+	meta(name="ol-subscriptionChangePreview" data-type="json" content=changePreview)
+	meta(name="ol-totalLicenses", data-type="number", content=totalLicenses)
+	meta(name="ol-groupName", data-type="string", content=groupName)
+
+block content
+	main.content.content-alt#upgrade-group-subscription-root

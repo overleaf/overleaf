@@ -77,6 +77,12 @@ describe('SubscriptionGroupController', function () {
       },
     }
 
+    this.RecurlyClient = {}
+
+    this.SubscriptionController = {}
+
+    this.SubscriptionModel = { Subscription: {} }
+
     this.Controller = await esmock.strict(modulePath, {
       '../../../../app/src/Features/Subscription/SubscriptionGroupHandler':
         this.SubscriptionGroupHandler,
@@ -94,6 +100,11 @@ describe('SubscriptionGroupController', function () {
         (this.ErrorController = {
           notFound: sinon.stub(),
         }),
+      '../../../../app/src/Features/Subscription/SubscriptionController':
+        this.SubscriptionController,
+      '../../../../app/src/Features/Subscription/RecurlyClient':
+        this.RecurlyClient,
+      '../../../../app/src/models/Subscription': this.SubscriptionModel,
     })
   })
 

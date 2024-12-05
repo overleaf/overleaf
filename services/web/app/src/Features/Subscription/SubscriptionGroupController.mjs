@@ -12,9 +12,10 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import ErrorController from '../Errors/ErrorController.js'
 import SalesContactFormController from '../../../../modules/cms/app/src/controllers/SalesContactFormController.mjs'
 import UserGetter from '../User/UserGetter.js'
+import { Subscription } from '../../models/Subscription.js'
 
 /**
- * @import { Subscription } from "../../../../types/subscription/dashboard/subscription"
+ * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
  */
 
 /**
@@ -220,6 +221,36 @@ async function flexibleLicensingSplitTest(req, res, next) {
   next()
 }
 
+async function subscriptionUpgradePage(req, res) {
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    const changePreview =
+      await SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview(userId)
+    const olSubscription = await Subscription.findOne({
+      admin_id: userId,
+    }).exec()
+    res.render('subscriptions/upgrade-group-subscription-react', {
+      changePreview,
+      totalLicenses: olSubscription.membersLimit,
+      groupName: olSubscription.teamName,
+    })
+  } catch (error) {
+    logger.err({ error }, 'error loading upgrade subscription page')
+    return res.render('/user/subscription')
+  }
+}
+
+async function upgradeSubscription(req, res) {
+  try {
+    const userId = SessionManager.getLoggedInUserId(req.session)
+    await SubscriptionGroupHandler.promises.upgradeGroupPlan(userId)
+    return res.sendStatus(200)
+  } catch (error) {
+    logger.err({ error }, 'error trying to upgrade subscription')
+    return res.sendStatus(500)
+  }
+}
+
 export default {
   removeUserFromGroup: expressify(removeUserFromGroup),
   removeSelfFromGroup: expressify(removeSelfFromGroup),
@@ -232,4 +263,6 @@ export default {
   createAddSeatsSubscriptionChange: expressify(
     createAddSeatsSubscriptionChange
   ),
+  subscriptionUpgradePage: expressify(subscriptionUpgradePage),
+  upgradeSubscription: expressify(upgradeSubscription),
 }
