@@ -353,6 +353,7 @@ const _ProjectController = {
       'default-visual-for-beginners',
       'hotjar',
       'ai-add-on',
+      'papers-integration',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
