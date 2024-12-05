@@ -65,4 +65,69 @@
   .registration-block-separator {
     margin-bottom: 0;
   }
+
+  .login-register-form-focus {
+    padding: var(--spacing-08) 0 0 0;
+    border-bottom: solid 1px var(--neutral-20);
+
+    &:last-child {
+      border-bottom-width: 0;
+    }
+  }
+
+  .login-register-alternatives {
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-02) 0;
+  }
+
+  .login-btn-icon {
+    position: relative;
+    top: unset;
+    left: unset;
+    background: unset;
+    border-radius: unset;
+    width: 20px;
+    height: 20px;
+    margin-right: var(--spacing-02);
+  }
+
+  .login-register-hr-text-container {
+    padding: var(--spacing-08) 0 var(--spacing-05) 0;
+
+    &::before {
+      top: calc(var(--spacing-08) + var(--spacing-08) / 4);
+    }
+  }
+}
+
+.login-register-hr-text-container {
+  margin: 0;
+  line-height: 1;
+  position: relative;
+  padding: var(--spacing-08) 0;
+  font-size: var(--font-size-02);
+
+  &::before {
+    content: '';
+    position: absolute;
+    height: 1px;
+    background-color: var(--neutral-20);
+    top: 50%;
+    left: 0;
+    right: 0;
+  }
+}
+
+.login-register-hr-text {
+  position: relative;
+  background-color: #fff;
+  padding: 0 var(--spacing-05);
 }
