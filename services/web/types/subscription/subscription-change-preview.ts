@@ -34,13 +34,20 @@ type AddOn = {
   amount: number
 }
 
-export type SubscriptionChangeDescription = AddOnPurchase | PremiumSubscription
+export type SubscriptionChangeDescription =
+  | AddOnPurchase
+  | AddOnUpdate
+  | PremiumSubscription
 
 export type AddOnPurchase = {
   type: 'add-on-purchase'
-  addOn: {
-    code: string
-    name: string
+  addOn: Pick<AddOn, 'code' | 'name'>
+}
+
+export type AddOnUpdate = {
+  type: 'add-on-update'
+  addOn: Pick<AddOn, 'code' | 'quantity'> & {
+    prevQuantity: AddOn['quantity']
   }
 }
 

@@ -10,6 +10,8 @@ import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import ErrorController from '../Errors/ErrorController.js'
+import SalesContactFormController from '../../../../modules/cms/app/src/controllers/SalesContactFormController.mjs'
+import UserGetter from '../User/UserGetter.js'
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription"
@@ -113,7 +115,98 @@ async function _removeUserFromGroup(
   res.sendStatus(200)
 }
 
-async function requestConfirmation(req, res) {
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function addSeatsToGroupSubscription(req, res) {
+  try {
+    const { subscription, plan } =
+      await SubscriptionGroupHandler.promises.getUsersGroupSubscriptionDetails(
+        req
+      )
+    await SubscriptionGroupHandler.promises.ensureFlexibleLicensingEnabled(plan)
+
+    res.render('subscriptions/add-seats', {
+      subscriptionId: subscription._id,
+      groupName: subscription.teamName,
+      totalLicenses: subscription.membersLimit,
+    })
+  } catch (error) {
+    logger.err(
+      { error },
+      'error while getting users group subscription details'
+    )
+    return res.redirect('/user/subscription')
+  }
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function previewAddSeatsSubscriptionChange(req, res) {
+  try {
+    const preview =
+      await SubscriptionGroupHandler.promises.previewAddSeatsSubscriptionChange(
+        req
+      )
+
+    res.json(preview)
+  } catch (error) {
+    logger.err(
+      { error },
+      'error trying to preview "add seats" subscription change'
+    )
+    return res.status(400).end()
+  }
+}
+
+/**
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ * @returns {Promise<void>}
+ */
+async function createAddSeatsSubscriptionChange(req, res) {
+  try {
+    const preview =
+      await SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange(
+        req
+      )
+
+    res.json(preview)
+  } catch (error) {
+    logger.err(
+      { error },
+      'error trying to create "add seats" subscription change'
+    )
+    return res.status(400).end()
+  }
+}
+
+async function submitForm(req, res) {
+  const userId = SessionManager.getLoggedInUserId(req.session)
+  const userEmail = await UserGetter.promises.getUserEmail(userId)
+  const { adding } = req.body
+
+  req.body = {
+    email: userEmail,
+    subject: 'Self-Serve Group User Increase Request',
+    estimatedNumberOfUsers: adding,
+    message:
+      `This email has been generated on behalf of user with email **${userEmail}** ` +
+      'to request an increase in the total number of users ' +
+      `for their subscription.\n\n` +
+      `The requested number of users to add is: ${adding}`,
+    inbox: 'sales',
+  }
+
+  return SalesContactFormController.submitForm(req, res)
+}
+
+async function flexibleLicensingSplitTest(req, res, next) {
   const { variant } = await SplitTestHandler.promises.getAssignment(
     req,
     res,
@@ -124,22 +217,19 @@ async function requestConfirmation(req, res) {
     return ErrorController.notFound(req, res)
   }
 
-  try {
-    const userId = SessionManager.getLoggedInUserId(req.session)
-    const subscription =
-      await SubscriptionLocator.promises.getUsersSubscription(userId)
-
-    res.render('subscriptions/request-confirmation-react', {
-      groupName: subscription.teamName,
-    })
-  } catch (error) {
-    logger.err({ error }, 'error trying to request seats to subscription')
-    return res.render('/user/subscription')
-  }
+  next()
 }
 
 export default {
   removeUserFromGroup: expressify(removeUserFromGroup),
   removeSelfFromGroup: expressify(removeSelfFromGroup),
-  requestConfirmation: expressify(requestConfirmation),
+  addSeatsToGroupSubscription: expressify(addSeatsToGroupSubscription),
+  submitForm: expressify(submitForm),
+  flexibleLicensingSplitTest: expressify(flexibleLicensingSplitTest),
+  previewAddSeatsSubscriptionChange: expressify(
+    previewAddSeatsSubscriptionChange
+  ),
+  createAddSeatsSubscriptionChange: expressify(
+    createAddSeatsSubscriptionChange
+  ),
 }

@@ -152,6 +152,44 @@ class RecurlySubscription {
   }
 
   /**
+   * Update an add-on on this subscription
+   *
+   * @param {string} code
+   * @param {number} quantity
+   * @return {RecurlySubscriptionChangeRequest} - the change request to send to
+   * Recurly
+   *
+   * @throws {AddOnNotPresentError} if the subscription doesn't have the add-on
+   */
+  getRequestForAddOnUpdate(code, quantity) {
+    if (!this.hasAddOn(code)) {
+      throw new AddOnNotPresentError(
+        'Subscription does not have add-on to update',
+        {
+          subscriptionId: this.id,
+          addOnCode: code,
+        }
+      )
+    }
+
+    const addOnUpdates = this.addOns.map(addOn => {
+      const update = addOn.toAddOnUpdate()
+
+      if (update.code === code) {
+        update.quantity = quantity
+      }
+
+      return update
+    })
+
+    return new RecurlySubscriptionChangeRequest({
+      subscription: this,
+      timeframe: 'now',
+      addOnUpdates,
+    })
+  }
+
+  /**
    * Remove an add-on from this subscription
    *
    * @param {string} code
@@ -162,7 +200,7 @@ class RecurlySubscription {
   getRequestForAddOnRemoval(code) {
     if (!this.hasAddOn(code)) {
       throw new AddOnNotPresentError(
-        'Subscripiton does not have add-on to remove',
+        'Subscription does not have add-on to remove',
         {
           subscriptionId: this.id,
           addOnCode: code,

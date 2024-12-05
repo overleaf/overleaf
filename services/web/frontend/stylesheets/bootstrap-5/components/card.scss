@@ -196,6 +196,14 @@
   .material-symbols {
     font-size: 2rem;
   }
+
+  &.text-primary {
+    background-color: var(--bg-accent-03);
+  }
+
+  &.text-danger {
+    background-color: var(--bg-danger-03);
+  }
 }
 
 .card-description-secondary {

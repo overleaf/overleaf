@@ -1,12 +1,14 @@
 import '../../../helpers/bootstrap-5'
-import RequestConfirmation from '@/features/group-management/components/request-confirmation'
+import RequestStatus from '@/features/group-management/components/request-status'
 
 describe('request confirmation page', function () {
   beforeEach(function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
     })
-    cy.mount(<RequestConfirmation />)
+    cy.mount(
+      <RequestStatus icon="email" title="Test title" content="Test content" />
+    )
   })
 
   it('renders the back button', function () {
@@ -25,9 +27,12 @@ describe('request confirmation page', function () {
     })
   })
 
-  it('indicates the message was received', function () {
-    cy.findByRole('heading', { name: /we’ve got your request/i })
-    cy.findByText(/our team will get back to you shortly/i)
+  it('shows the title', function () {
+    cy.findByTestId('title').should('contain.text', 'Test title')
+  })
+
+  it('shows the content', function () {
+    cy.findByText('Test content')
   })
 
   it('renders the link to subscriptions', function () {

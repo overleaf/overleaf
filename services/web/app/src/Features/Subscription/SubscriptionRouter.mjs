@@ -7,6 +7,7 @@ import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
 import Settings from '@overleaf/settings'
 import { Joi, validate } from '../../infrastructure/Validation.js'
+import SupportRouter from '../../../../modules/support/app/src/SupportRouter.mjs'
 
 const teamInviteRateLimiter = new RateLimiter('team-invite', {
   points: 10,
@@ -17,6 +18,14 @@ const subscriptionRateLimiter = new RateLimiter('subscription', {
   points: 30,
   duration: 60,
 })
+
+const MAX_NUMBER_OF_USERS = 50
+
+const addSeatsValidateSchema = {
+  body: Joi.object({
+    adding: Joi.number().integer().min(1).max(MAX_NUMBER_OF_USERS).required(),
+  }),
+}
 
 export default {
   apply(webRouter, privateApiRouter, publicApiRouter) {
@@ -62,10 +71,41 @@ export default {
     )
 
     webRouter.get(
-      '/user/subscription/group/request-confirmation',
+      '/user/subscription/group/add-users',
       AuthenticationController.requireLogin(),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
-      SubscriptionGroupController.requestConfirmation
+      SubscriptionGroupController.flexibleLicensingSplitTest,
+      SubscriptionGroupController.addSeatsToGroupSubscription
+    )
+
+    webRouter.post(
+      '/user/subscription/group/add-users/preview',
+      AuthenticationController.requireLogin(),
+      validate(addSeatsValidateSchema),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.previewAddSeatsSubscriptionChange
+    )
+
+    webRouter.post(
+      '/user/subscription/group/add-users/create',
+      AuthenticationController.requireLogin(),
+      validate(addSeatsValidateSchema),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.createAddSeatsSubscriptionChange
+    )
+
+    webRouter.post(
+      '/user/subscription/group/add-users/sales-contact-form',
+      validate({
+        body: Joi.object({
+          adding: Joi.number().integer().min(MAX_NUMBER_OF_USERS).required(),
+        }),
+      }),
+      RateLimiterMiddleware.rateLimit(
+        SupportRouter.rateLimiters.supportRequests
+      ),
+      RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
+      SubscriptionGroupController.submitForm
     )
 
     // Team invites

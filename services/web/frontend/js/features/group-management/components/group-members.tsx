@@ -66,7 +66,7 @@ export default function GroupMembers() {
             href="/user/subscription/group/add-users"
             rel="noreferrer noopener"
           >
-            {t('add_more_users')}
+            {t('add_more_users')}.
           </a>
         </small>
       )

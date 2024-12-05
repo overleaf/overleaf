@@ -192,6 +192,39 @@ describe('RecurlyEntities', function () {
         })
       })
 
+      describe('getRequestForAddOnUpdate()', function () {
+        it('returns a change request', function () {
+          const {
+            RecurlySubscriptionChangeRequest,
+            RecurlySubscriptionAddOnUpdate,
+          } = this.RecurlyEntities
+          const newQuantity = 2
+          const changeRequest = this.subscription.getRequestForAddOnUpdate(
+            'add-on-code',
+            newQuantity
+          )
+          expect(changeRequest).to.deep.equal(
+            new RecurlySubscriptionChangeRequest({
+              subscription: this.subscription,
+              timeframe: 'now',
+              addOnUpdates: [
+                new RecurlySubscriptionAddOnUpdate({
+                  code: this.addOn.code,
+                  quantity: newQuantity,
+                  unitPrice: this.addOn.unitPrice,
+                }),
+              ],
+            })
+          )
+        })
+
+        it("throws a AddOnNotPresentError if the subscription doesn't have the add-on", function () {
+          expect(() =>
+            this.subscription.getRequestForAddOnUpdate('another-add-on', 2)
+          ).to.throw(Errors.AddOnNotPresentError)
+        })
+      })
+
       describe('getRequestForAddOnRemoval()', function () {
         it('returns a change request', function () {
           const changeRequest = this.subscription.getRequestForAddOnRemoval(

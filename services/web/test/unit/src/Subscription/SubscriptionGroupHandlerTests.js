@@ -27,6 +27,10 @@ describe('SubscriptionGroupHandler', function () {
       },
     }
 
+    this.SubscriptionController = {
+      makeChangePreview: sinon.stub().resolves(),
+    }
+
     this.SubscriptionUpdater = {
       promises: {
         removeUserFromGroup: sinon.stub().resolves(),
@@ -40,13 +44,19 @@ describe('SubscriptionGroupHandler', function () {
       findOne: sinon.stub().returns({ exec: sinon.stub().resolves }),
     }
 
+    this.RecurlyClient = {
+      promises: {},
+    }
+
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
+        './SubscriptionController': this.SubscriptionController,
         '../../models/Subscription': {
           Subscription: this.Subscription,
         },
+        './RecurlyClient': this.RecurlyClient,
       },
     })
   })

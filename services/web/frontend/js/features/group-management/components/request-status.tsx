@@ -4,15 +4,23 @@ import Button from '@/features/ui/components/bootstrap-5/button'
 import MaterialIcon from '@/shared/components/material-icon'
 import getMeta from '@/utils/meta'
 import IconButton from '@/features/ui/components/bootstrap-5/icon-button'
+import classnames from 'classnames'
 
-function RequestConfirmation() {
+type RequestStatusProps = {
+  icon: string
+  title: string
+  content: React.ReactNode
+  variant?: 'primary' | 'danger'
+}
+
+function RequestStatus({ icon, title, content, variant }: RequestStatusProps) {
   const { t } = useTranslation()
   const groupName = getMeta('ol-groupName')
 
   return (
     <div className="container">
       <Row>
-        <Col xl={{ span: 4, offset: 4 }} md={{ span: 6, offset: 3 }}>
+        <Col xxl={5} xl={6} lg={7} md={9} className="mx-auto">
           <div className="group-heading" data-testid="group-heading">
             <IconButton
               variant="ghost"
@@ -25,14 +33,18 @@ function RequestConfirmation() {
           </div>
           <Card>
             <CardBody className="d-grid gap-3">
-              <div className="card-icon">
-                <MaterialIcon type="email" />
+              <div
+                className={classnames('card-icon', {
+                  [`text-${variant}`]: variant,
+                })}
+              >
+                <MaterialIcon type={icon} />
               </div>
               <div className="d-grid gap-2 text-center">
-                <h3 className="mb-0 fw-bold">{t('we_got_your_request')}</h3>
-                <div className="card-description-secondary">
-                  {t('our_team_will_get_back_to_you_shortly')}
-                </div>
+                <h3 className="mb-0 fw-bold" data-testid="title">
+                  {title}
+                </h3>
+                <div className="card-description-secondary">{content}</div>
               </div>
               <div className="text-center">
                 <Button variant="secondary" href="/user/subscription">
@@ -47,4 +59,4 @@ function RequestConfirmation() {
   )
 }
 
-export default RequestConfirmation
+export default RequestStatus
