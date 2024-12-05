@@ -1,4 +1,4 @@
-import { JSXElementConstructor, useState, ElementType } from 'react'
+import { JSXElementConstructor, useState } from 'react'
 import Common from './groups/common'
 import Institution from './groups/institution'
 import ConfirmEmail from './groups/confirm-email'
@@ -22,11 +22,6 @@ const [enrollmentNotificationModule] = importOverleafModules(
 )
 
 const [usGovBannerModule] = importOverleafModules('usGovBanner')
-
-const moduleNotifications = importOverleafModules('userNotifications') as {
-  import: { default: ElementType }
-  path: string
-}[]
 
 const EnrollmentNotification: JSXElementConstructor<{
   groupId: string
@@ -95,11 +90,6 @@ function UserNotifications() {
             setDismissedWritefull(true)
           }}
         />
-        {moduleNotifications.map(({ import: { default: Component }, path }) => (
-          <Component key={path} />
-        ))}
-
-        {isDeprecatedBrowser() && <DeprecatedBrowser />}
       </ul>
     </div>
   )

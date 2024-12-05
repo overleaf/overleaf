@@ -115,7 +115,7 @@ async function projectListPage(req, res, next) {
   })
   const user = await User.findById(
     userId,
-    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck labsProgram signUpDate${
+    `email emails features alphaProgram betaProgram lastPrimaryEmailCheck signUpDate${
       isSaas ? ' enrollment writefull completedTutorials' : ''
     }`
   )
