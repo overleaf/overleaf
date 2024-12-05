@@ -255,7 +255,7 @@
         width: 100%;
         font-weight: normal;
         text-align: left;
-        color: var(--white);
+        color: var(--content-primary-dark);
         background-color: transparent;
         border-radius: unset;
         border: none;
@@ -292,10 +292,10 @@
       > button {
         background-color: var(--neutral-90);
         font-weight: 700;
-        color: var(--white);
+        color: var(--content-primary-dark);
 
         .subdued {
-          color: var(--white);
+          color: var(--content-primary-dark);
         }
       }
     }
@@ -309,9 +309,16 @@
     }
 
     > li.tag {
+      &.active,
+      &:focus-within {
+        .tag-menu {
+          display: block;
+        }
+      }
+
       &.active {
         .tag-menu > button {
-          color: var(--white);
+          color: var(--content-primary-dark);
           border-color: var(--white);
 
           &:hover {
@@ -370,7 +377,7 @@
         border: 1px solid var(--white);
         border-radius: var(--border-radius-base);
         background-color: transparent;
-        color: var(--white);
+        color: var(--content-primary-dark);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -405,7 +412,7 @@
         font-weight: normal;
 
         &:hover {
-          color: var(--white);
+          color: var(--content-primary-dark);
           background-color: var(--bg-accent-01);
         }
 
@@ -845,7 +852,7 @@ form.project-search {
 
   .color-picker-item-icon {
     margin: 3px; // it's centered, no matching spacing variable
-    color: var(--white);
+    color: var(--content-primary-dark);
     font-weight: bold;
   }
 
@@ -856,7 +863,7 @@ form.project-search {
 
     .color-picker-item-icon {
       margin: 5px; // it's centered, no matching spacing variable
-      color: var(--white);
+      color: var(--content-primary-dark);
     }
   }
 }

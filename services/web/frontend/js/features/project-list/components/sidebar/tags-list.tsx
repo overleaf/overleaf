@@ -78,11 +78,10 @@ export default function TagsList() {
 
             <Dropdown align="end" className="tag-menu">
               <DropdownToggle
+                aria-label={t('open_action_menu', { name: tag.name })}
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
-              >
-                <span className="caret" />
-              </DropdownToggle>
+              />
               <DropdownMenu className="dropdown-menu-sm-width">
                 <DropdownItem
                   as="li"
