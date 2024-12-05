@@ -58,8 +58,66 @@
             font-size: var(--font-size-02);
           }
         }
+
+        .tos-agreement-notice {
+          text-align: left;
+        }
       }
     }
+
+    .register-illustration-container {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      position: relative;
+
+      .register-illustration {
+        position: absolute;
+        left: 80px;
+        top: 100px;
+
+        // for wide screen
+        @media (width >= 1700px) {
+          position: relative;
+          left: unset;
+          top: unset;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+        }
+
+        .register-main-image {
+          max-width: 850px;
+
+          @media (width <= 1350px) {
+            max-width: 750px;
+          }
+
+          @media (width <= 1150px) {
+            max-width: 670px;
+          }
+        }
+
+        .sticky-tags {
+          position: absolute;
+          height: 210px;
+          bottom: -135px;
+          right: 130px;
+
+          // for wide screen
+          @media (width >= 1700px) {
+            right: calc(50% - 300px);
+          }
+        }
+      }
+    }
+  }
+
+  .recaptcha-branding {
+    text-align: left;
+    padding: var(--spacing-05) 0;
+    font-size: var(--font-size-01);
   }
 
   .registration-block-separator {
@@ -144,6 +202,41 @@
 
       #visibility-icon-off {
         margin-top: 2px; // workaround for the icon not having the same center as the non-slashed one
+      }
+    }
+  }
+
+  .login-register-text {
+    padding-bottom: var(--spacing-08);
+    margin-bottom: 0;
+
+    @include body-sm;
+  }
+
+  .login-register-other-links {
+    padding: var(--spacing-08) 0;
+    text-align: left;
+
+    .login-register-text {
+      padding-bottom: 0;
+    }
+
+    a {
+      color: var(--green-50);
+      text-decoration: underline;
+
+      // text-decoration-;skip-ink is for letter with descender (like 'g' and 'y')
+      // this will force underline to not skip the descender
+      text-decoration-skip-ink: none;
+
+      &:hover {
+        color: var(--green-60);
+      }
+
+      // for accessibility with keyboard navigation
+      &:focus {
+        outline: 2px solid var(--green-50);
+        outline-offset: 1px;
       }
     }
   }
