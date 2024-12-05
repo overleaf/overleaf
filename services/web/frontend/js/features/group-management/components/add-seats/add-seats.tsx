@@ -307,7 +307,7 @@ function AddSeats() {
                 )}
                 <div className="d-flex align-items-center justify-content-end gap-2">
                   <a
-                    href="user/subscription/group/upgrade-subscription"
+                    href="/user/subscription/group/upgrade-subscription"
                     rel="noreferrer noopener"
                     className="me-auto"
                   >
