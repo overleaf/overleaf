@@ -579,6 +579,9 @@ describe('RecurlyWrapper', function () {
           state: 'some_state',
           zip: 'some_zip',
         },
+        subscription_add_ons: [
+          { subscription_add_on: { add_on_code: 'test_add_on', quantity: 2 } },
+        ],
         ITMCampaign: 'itm-campaign-value',
         ITMContent: 'itm-content-value',
         ITMReferrer: 'itm-referrer-value',
@@ -633,6 +636,12 @@ describe('RecurlyWrapper', function () {
 			<three_d_secure_action_result_token_id>a-3d-token-id</three_d_secure_action_result_token_id>
 		</billing_info>
 	</account>
+	<subscription_add_ons>
+		<subscription_add_on>
+			<add_on_code>test_add_on</add_on_code>
+			<quantity>2</quantity>
+		</subscription_add_on>
+	</subscription_add_ons>
 	<custom_fields>
 		<custom_field>
 			<name>itm_campaign</name>
@@ -883,6 +892,31 @@ describe('RecurlyWrapper', function () {
         this.setAddressAndCompanyBillingInfo.callCount.should.equal(0)
         this.createSubscription.callCount.should.equal(0)
       })
+    })
+
+    it('throw error if purchase with addon', async function () {
+      this.subscriptionDetails = {
+        currencyCode: 'EUR',
+        plan_code: 'some_plan_code',
+        coupon_code: '',
+        isPaypal: true,
+        address: {
+          address1: 'addr_one',
+          address2: 'addr_two',
+          country: 'some_country',
+          state: 'some_state',
+          zip: 'some_zip',
+        },
+        subscription_add_ons: [
+          { subscription_add_on: { add_on_code: 'test_add_on', quantity: 2 } },
+        ],
+      }
+      await expect(this.call()).to.be.rejected
+      this.checkAccountExists.callCount.should.equal(0)
+      this.createAccount.callCount.should.equal(0)
+      this.createBillingInfo.callCount.should.equal(0)
+      this.setAddressAndCompanyBillingInfo.callCount.should.equal(0)
+      this.createSubscription.callCount.should.equal(0)
     })
   })
 

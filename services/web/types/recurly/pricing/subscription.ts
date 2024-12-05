@@ -48,13 +48,18 @@ interface Coupon {
   redemption_resource: string
 }
 
+interface AddOn {
+  code: string
+  quantity: number
+}
+
 // Extending the default interface as it lacks the `items` prop
 export interface SubscriptionPricingInstanceCustom
   extends SubscriptionPricingInstance,
     SubscriptionPricingState {
   id: string
   items: {
-    addons: unknown[]
+    addons: AddOn[]
     address?: Address
     coupon?: Coupon
     currency: string

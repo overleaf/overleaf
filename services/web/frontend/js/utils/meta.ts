@@ -130,6 +130,7 @@ export interface Meta {
   'ol-languages': SpellCheckLanguage[]
   'ol-learnedWords': string[]
   'ol-legacyEditorThemes': string[]
+  'ol-licenseQuantity': number | undefined
   'ol-linkSharingEnforcement': boolean
   'ol-linkSharingWarning': boolean
   'ol-loadingText': string
