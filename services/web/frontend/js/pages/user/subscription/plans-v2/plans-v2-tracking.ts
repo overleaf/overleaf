@@ -12,6 +12,10 @@ export function sendPlansViewEvent() {
         'geo-pricing-latam-v2'
       )
 
+      const groupTabImprovementsVariant = getSplitTestVariant(
+        'group-tab-improvements'
+      )
+
       const websiteRedesignPlansTestVariant = getMeta(
         'ol-websiteRedesignPlansVariant'
       )
@@ -20,12 +24,17 @@ export function sendPlansViewEvent() {
         ? 'mobile'
         : 'desktop'
 
+      const queryParams = new URLSearchParams(window.location.search)
+      const planTabParam = queryParams.get('plan')
+
       const plansPageViewSegmentation = {
         currency,
         countryCode,
         device,
         'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
         'website-redesign-plans': websiteRedesignPlansTestVariant,
+        'group-tab-improvements': groupTabImprovementsVariant,
+        plan: planTabParam,
       }
 
       const isPlansPage = window.location.href.includes(
