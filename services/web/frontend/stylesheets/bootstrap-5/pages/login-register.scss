@@ -106,6 +106,47 @@
       top: calc(var(--spacing-08) + var(--spacing-08) / 4);
     }
   }
+
+  .login-register-error-container {
+    padding-bottom: var(--spacing-05);
+  }
+
+  .form-group {
+    text-align: left;
+
+    label {
+      font-size: var(--font-size-02);
+    }
+  }
+
+  .form-group-password {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+
+    .form-group-password-input {
+      input.form-control {
+        padding-right: 35px;
+      }
+    }
+
+    .visibility-toggle {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 35px; // TODO: Should this be calculated ?
+      height: 35px; // TODO: Should this be calculated ?
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: unset;
+      background-color: unset;
+
+      #visibility-icon-off {
+        margin-top: 2px; // workaround for the icon not having the same center as the non-slashed one
+      }
+    }
+  }
 }
 
 .login-register-hr-text-container {
