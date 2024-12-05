@@ -137,9 +137,9 @@ const UserSchema = new Schema(
         type: Boolean,
         default: Settings.defaultFeatures.symbolPalette,
       },
-      // labs feature, which shouldnt have a default as we havent decided pricing model yet
       aiErrorAssistant: {
         type: Boolean,
+        default: false,
       },
     },
     featuresOverrides: [

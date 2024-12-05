@@ -12,10 +12,6 @@ import customLocalStorage from '../../../../infrastructure/local-storage'
 import { sendMB } from '../../../../infrastructure/event-tracking'
 import GeoBanners from './geo-banners'
 import AccessibilitySurveyBanner from './accessibility-survey-banner'
-import {
-  DeprecatedBrowser,
-  isDeprecatedBrowser,
-} from '@/shared/components/deprecated-browser'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'

@@ -115,6 +115,7 @@ module.exports = {
       compileGroup: 'standard',
       trackChanges: false,
       symbolPalette: false,
+      aiErrorAssistant: false,
     },
     personal: {
       collaborators: 1,
@@ -131,6 +132,7 @@ module.exports = {
       compileGroup: 'standard',
       trackChanges: false,
       symbolPalette: false,
+      aiErrorAssistant: false,
     },
     collaborator: {
       collaborators: 10,
@@ -147,6 +149,7 @@ module.exports = {
       compileGroup: 'priority',
       trackChanges: true,
       symbolPalette: true,
+      aiErrorAssistant: false,
     },
     professional: {
       collaborators: -1,
@@ -163,6 +166,7 @@ module.exports = {
       compileGroup: 'priority',
       trackChanges: true,
       symbolPalette: true,
+      aiErrorAssistant: false,
     },
   }),
 
