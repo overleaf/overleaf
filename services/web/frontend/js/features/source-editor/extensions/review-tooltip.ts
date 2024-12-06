@@ -126,9 +126,21 @@ function buildTooltip(state: EditorState): Tooltip | null {
     return null
   }
 
+  const lineAtFrom = state.doc.lineAt(state.selection.main.from)
+  const lineAtTo = state.doc.lineAt(state.selection.main.to)
+  const multiLineSelection = lineAtFrom.number !== lineAtTo.number
+  const column = state.selection.main.head - lineAtTo.from
+
+  // If the selection is a multi-line selection and the cursor is at the beginning of the next line
+  // we want to show the tooltip at the end of the previous line
+  const pos =
+    multiLineSelection && column === 0
+      ? state.selection.main.head - 1
+      : state.selection.main.head
+
   return {
-    pos: state.selection.main.head,
-    above: true,
+    pos,
+    above: state.selection.main.head !== state.selection.main.to,
     create: createReviewTooltipView,
   }
 }
