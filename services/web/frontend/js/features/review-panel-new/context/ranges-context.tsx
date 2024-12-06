@@ -24,6 +24,7 @@ import useSocketListener from '@/features/ide-react/hooks/use-socket-listener'
 
 export type Ranges = {
   docId: string
+  total: number
   changes: Change<EditOperation>[]
   comments: Change<CommentOperation>[]
 }
@@ -72,6 +73,7 @@ const buildRanges = (currentDoc: DocumentContainer | null) => {
           )
         : ranges.comments,
     docId: currentDoc.doc_id,
+    total: ranges.changes.length + ranges.comments.length,
   }
 }
 
