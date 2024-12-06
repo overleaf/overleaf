@@ -1,12 +1,15 @@
 const OError = require('@overleaf/o-error')
 const logger = require('@overleaf/logger')
 const DocstoreManager = require('../Docstore/DocstoreManager')
+const DocumentUpdaterHandler = require('../DocumentUpdater/DocumentUpdaterHandler')
 const ProjectGetter = require('../Project/ProjectGetter')
 const ProjectUpdateHandler = require('../Project/ProjectUpdateHandler')
 const { Project } = require('../../models/Project')
 const { ObjectId } = require('mongodb-legacy')
+const Modules = require('../../infrastructure/Modules')
 const { READ_PREFERENCE_SECONDARY } = require('../../infrastructure/mongodb')
 const { callbackifyAll } = require('@overleaf/promise-utils')
+const Metrics = require('@overleaf/metrics')
 
 const MILISECONDS_IN_DAY = 86400000
 const InactiveProjectManager = {
@@ -93,6 +96,26 @@ const InactiveProjectManager = {
   async deactivateProject(projectId) {
     logger.debug({ projectId }, 'deactivating inactive project')
 
+    // ensure project is removed from document updater (also flushes updates to history)
+    try {
+      await DocumentUpdaterHandler.promises.flushProjectToMongoAndDelete(
+        projectId
+      )
+    } catch (err) {
+      logger.warn(
+        { err, projectId },
+        'error flushing project to mongo when archiving'
+      )
+      Metrics.inc('inactive-project', 1, {
+        method: 'archive',
+        status: 'flush-error',
+      })
+      throw err
+    }
+
+    await Modules.promises.hooks.fire('deactivateProject', projectId)
+
+    // now archive the project and mark it as inactive
     try {
       await DocstoreManager.promises.archiveProject(projectId)
       await ProjectUpdateHandler.promises.markAsInactive(projectId)
