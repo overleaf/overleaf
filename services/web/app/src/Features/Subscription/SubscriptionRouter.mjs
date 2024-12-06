@@ -7,7 +7,6 @@ import { RateLimiter } from '../../infrastructure/RateLimiter.js'
 import RateLimiterMiddleware from '../Security/RateLimiterMiddleware.js'
 import Settings from '@overleaf/settings'
 import { Joi, validate } from '../../infrastructure/Validation.js'
-import SupportRouter from '../../../../modules/support/app/src/SupportRouter.mjs'
 
 const teamInviteRateLimiter = new RateLimiter('team-invite', {
   points: 10,
@@ -101,9 +100,6 @@ export default {
           adding: Joi.number().integer().min(MAX_NUMBER_OF_USERS).required(),
         }),
       }),
-      RateLimiterMiddleware.rateLimit(
-        SupportRouter.rateLimiters.supportRequests
-      ),
       RateLimiterMiddleware.rateLimit(subscriptionRateLimiter),
       SubscriptionGroupController.submitForm
     )
