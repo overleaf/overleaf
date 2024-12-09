@@ -20,6 +20,10 @@ export function sendPlansViewEvent() {
         'ol-websiteRedesignPlansVariant'
       )
 
+      const periodToggleTestVariant = getSplitTestVariant(
+        'period-toggle-improvements'
+      )
+
       const device = window.matchMedia('(max-width: 767px)').matches
         ? 'mobile'
         : 'desktop'
@@ -35,6 +39,7 @@ export function sendPlansViewEvent() {
         'website-redesign-plans': websiteRedesignPlansTestVariant,
         'group-tab-improvements': groupTabImprovementsVariant,
         plan: planTabParam,
+        'period-toggle-improvements': periodToggleTestVariant,
       }
 
       const isPlansPage = window.location.href.includes(
