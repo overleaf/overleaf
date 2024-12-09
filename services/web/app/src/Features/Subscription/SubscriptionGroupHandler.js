@@ -6,6 +6,7 @@ const { Subscription } = require('../../models/Subscription')
 const SessionManager = require('../Authentication/SessionManager')
 const RecurlyClient = require('./RecurlyClient')
 const PlansLocator = require('./PlansLocator')
+const SubscriptionHandler = require('./SubscriptionHandler')
 
 const PLAN_UPGRADE_MAP = {
   group_collaborator: 'group_professional',
@@ -139,8 +140,13 @@ async function previewAddSeatsSubscriptionChange(req) {
 }
 
 async function createAddSeatsSubscriptionChange(req) {
-  const { changeRequest } = await _addSeatsSubscriptionChange(req)
+  const { changeRequest, userId, recurlySubscription } =
+    await _addSeatsSubscriptionChange(req)
   await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
+  await SubscriptionHandler.promises.syncSubscription(
+    { uuid: recurlySubscription.id },
+    userId
+  )
 
   return { adding: req.body.adding }
 }
@@ -187,6 +193,10 @@ async function getGroupPlanUpgradePreview(ownerId) {
 async function upgradeGroupPlan(ownerId) {
   const changeRequest = await _getGroupPlanUpgradeChangeRequest(ownerId)
   await RecurlyClient.promises.applySubscriptionChangeRequest(changeRequest)
+  await SubscriptionHandler.promises.syncSubscription(
+    { uuid: changeRequest.subscription.id },
+    ownerId
+  )
 }
 
 module.exports = {

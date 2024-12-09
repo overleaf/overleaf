@@ -48,11 +48,18 @@ describe('SubscriptionGroupHandler', function () {
       promises: {},
     }
 
+    this.SubscriptionHandler = {
+      promises: {
+        syncSubscription: sinon.stub().resolves(),
+      },
+    }
+
     this.Handler = SandboxedModule.require(modulePath, {
       requires: {
         './SubscriptionUpdater': this.SubscriptionUpdater,
         './SubscriptionLocator': this.SubscriptionLocator,
         './SubscriptionController': this.SubscriptionController,
+        './SubscriptionHandler': this.SubscriptionHandler,
         '../../models/Subscription': {
           Subscription: this.Subscription,
         },
