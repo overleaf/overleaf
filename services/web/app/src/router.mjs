@@ -543,11 +543,13 @@ async function initialize(webRouter, privateApiRouter, publicApiRouter) {
   webRouter.head(
     '/Project/:Project_id/file/:File_id',
     AuthorizationMiddleware.ensureUserCanReadProject,
+    HistoryController.fileToBlobRedirectMiddleware,
     FileStoreController.getFileHead
   )
   webRouter.get(
     '/Project/:Project_id/file/:File_id',
     AuthorizationMiddleware.ensureUserCanReadProject,
+    HistoryController.fileToBlobRedirectMiddleware,
     FileStoreController.getFile
   )
   webRouter.head(
