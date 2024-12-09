@@ -18,6 +18,7 @@ describe('<FileView/>', function () {
       source_entity_path: '/source-entity-path.ext',
       provider: 'project_file',
     },
+    hash: '012345678901234567890123',
     created: new Date(2021, 1, 17, 3, 24).toISOString(),
   }
 

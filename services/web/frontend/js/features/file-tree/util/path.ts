@@ -3,6 +3,7 @@ import { FileTreeEntity } from '../../../../../types/file-tree-entity'
 import { Doc } from '../../../../../types/doc'
 import { FileRef } from '../../../../../types/file-ref'
 import { PreviewPath } from '../../../../../types/preview-path'
+import { fileUrl } from '../../utils/fileUrl'
 
 type DocFindResult = {
   entity: Doc
@@ -124,7 +125,7 @@ export function previewByPath(
     if (result?.type === 'fileRef') {
       const { name, _id: id, hash } = result.entity
       return {
-        url: `/project/${projectId}/blob/${hash}?fallback=${id}`,
+        url: fileUrl(projectId, id, hash),
         extension: name.slice(name.lastIndexOf('.') + 1),
       }
     }
