@@ -68,10 +68,8 @@ function _getGroupPlanModalDefaults(req, currency) {
   }
 }
 
-function _plansBanners({ geoPricingLATAMTestVariant, countryCode }) {
-  const showLATAMBanner =
-    geoPricingLATAMTestVariant === 'latam' &&
-    ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
+function _plansBanners(countryCode) {
+  const showLATAMBanner = ['MX', 'CO', 'CL', 'PE'].includes(countryCode)
   const showInrGeoBanner = countryCode === 'IN'
   const showBrlGeoBanner = countryCode === 'BR'
   return { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner }
@@ -105,20 +103,15 @@ async function plansPage(req, res) {
 
   const plans = SubscriptionViewModelBuilder.buildPlansList()
 
-  const { currency, countryCode, geoPricingLATAMTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const { currency, countryCode } = await _getRecommendedCurrency(req, res)
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
   const groupPlanModalDefaults = _getGroupPlanModalDefaults(req, currency)
 
   const currentView = 'annual'
 
-  const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } = _plansBanners(
-    {
-      geoPricingLATAMTestVariant,
-      countryCode,
-    }
-  )
+  const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
+    _plansBanners(countryCode)
 
   const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
     req,
@@ -163,8 +156,7 @@ async function plansPage(req, res) {
 }
 
 async function plansPageLightDesign(req, res) {
-  const { currency, countryCode, geoPricingLATAMTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const { currency, countryCode } = await _getRecommendedCurrency(req, res)
 
   const language = req.i18n.language || 'en'
   const currentView = 'annual'
@@ -181,12 +173,8 @@ async function plansPageLightDesign(req, res) {
       ? formatCurrencyLocalized
       : SubscriptionHelper.formatCurrencyDefault
 
-  const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } = _plansBanners(
-    {
-      geoPricingLATAMTestVariant,
-      countryCode,
-    }
-  )
+  const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
+    _plansBanners(countryCode)
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
 
@@ -358,8 +346,10 @@ async function interstitialPaymentPage(req, res) {
   }
 
   const user = SessionManager.getSessionUser(req.session)
-  const { recommendedCurrency, countryCode, geoPricingLATAMTestVariant } =
-    await _getRecommendedCurrency(req, res)
+  const { recommendedCurrency, countryCode } = await _getRecommendedCurrency(
+    req,
+    res
+  )
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
 
@@ -371,10 +361,7 @@ async function interstitialPaymentPage(req, res) {
     res.redirect('/user/subscription?hasSubscription=true')
   } else {
     const { showLATAMBanner, showInrGeoBanner, showBrlGeoBanner } =
-      _plansBanners({
-        geoPricingLATAMTestVariant,
-        countryCode,
-      })
+      _plansBanners(countryCode)
 
     const localCcyAssignment = await SplitTestHandler.promises.getAssignment(
       req,
@@ -827,20 +814,7 @@ async function _getRecommendedCurrency(req, res) {
   }
   const currencyLookup = await GeoIpLookup.promises.getCurrencyCode(ip)
   const countryCode = currencyLookup.countryCode
-  let recommendedCurrency = currencyLookup.currencyCode
-
-  const assignmentLATAM = await SplitTestHandler.promises.getAssignment(
-    req,
-    res,
-    'geo-pricing-latam-v2'
-  )
-
-  if (
-    ['MXN', 'COP', 'CLP', 'PEN'].includes(recommendedCurrency) &&
-    assignmentLATAM?.variant === 'default'
-  ) {
-    recommendedCurrency = GeoIpLookup.DEFAULT_CURRENCY_CODE
-  }
+  const recommendedCurrency = currencyLookup.currencyCode
 
   let currency = null
   const queryCurrency = req.query.currency?.toUpperCase()
@@ -854,7 +828,6 @@ async function _getRecommendedCurrency(req, res) {
     currency,
     recommendedCurrency,
     countryCode,
-    geoPricingLATAMTestVariant: assignmentLATAM?.variant,
   }
 }
 

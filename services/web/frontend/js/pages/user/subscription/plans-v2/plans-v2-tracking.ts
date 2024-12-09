@@ -8,9 +8,6 @@ export function sendPlansViewEvent() {
     function () {
       const currency = getMeta('ol-recommendedCurrency')
       const countryCode = getMeta('ol-countryCode')
-      const geoPricingLATAMTestVariant = getSplitTestVariant(
-        'geo-pricing-latam-v2'
-      )
 
       const groupTabImprovementsVariant = getSplitTestVariant(
         'group-tab-improvements'
@@ -35,7 +32,6 @@ export function sendPlansViewEvent() {
         currency,
         countryCode,
         device,
-        'geo-pricing-latam-v2': geoPricingLATAMTestVariant,
         'website-redesign-plans': websiteRedesignPlansTestVariant,
         'group-tab-improvements': groupTabImprovementsVariant,
         plan: planTabParam,
