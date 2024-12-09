@@ -19,7 +19,7 @@ const SpamSafe = {
 
   isSafeProjectName(name) {
     if (HAN_REGEX.test(name)) {
-      return SAFE_REGEX.test(name) && name.length <= 30
+      return SAFE_REGEX.test(name) && name.length <= 10
     }
     return SAFE_REGEX.test(name) && name.length <= 100
   },
