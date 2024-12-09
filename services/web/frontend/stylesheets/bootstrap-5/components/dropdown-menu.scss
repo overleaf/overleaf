@@ -113,7 +113,9 @@
 
 .dropdown-item-description-container {
   grid-auto-flow: row;
-  min-height: 60px;
+  min-height: 44px;
+  display: grid;
+  place-content: center start;
 }
 
 .dropdown-item-trailing-icon {
@@ -124,6 +126,8 @@
 }
 
 .dropdown-item-leading-icon {
+  display: flex;
+  align-items: center;
   padding-right: var(--spacing-04);
 
   &.spinner {

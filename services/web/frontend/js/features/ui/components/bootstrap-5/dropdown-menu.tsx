@@ -78,19 +78,23 @@ function DropdownItem(
   return (
     <BS5DropdownItem
       active={active}
-      className={classnames(className, {
-        'dropdown-item-description-container': description,
-      })}
+      className={className}
       role="menuitem"
       {...props}
       ref={ref}
     >
       {leadingIconComponent}
-      {children}
-      {trailingIconComponent}
-      {description && (
-        <span className="dropdown-item-description">{description}</span>
-      )}
+      <div
+        className={classnames({
+          'dropdown-item-description-container': description,
+        })}
+      >
+        {children}
+        {trailingIconComponent}
+        {description && (
+          <span className="dropdown-item-description">{description}</span>
+        )}
+      </div>
     </BS5DropdownItem>
   )
 }

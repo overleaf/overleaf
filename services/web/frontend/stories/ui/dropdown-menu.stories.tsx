@@ -138,7 +138,7 @@ export const Description = (args: Args) => {
   )
 }
 
-export const Icon = (args: Args) => {
+export const LeadingIcon = (args: Args) => {
   return (
     <DropdownMenu show>
       <OLDropdownMenuItem
@@ -175,9 +175,44 @@ export const Icon = (args: Args) => {
         eventKey="5"
         href="#/action-5"
         leadingIcon="align_space_even"
+        description="Some description"
+      >
+        With a description
+      </OLDropdownMenuItem>
+      <OLDropdownMenuItem
+        eventKey="6"
+        href="#/action-6"
+        leadingIcon="align_space_even"
         className="dropdown-item-material-icon-small"
       >
         Small icon
+      </OLDropdownMenuItem>
+    </DropdownMenu>
+  )
+}
+
+export const TrailingIcon = (args: Args) => {
+  return (
+    <DropdownMenu show>
+      <OLDropdownMenuItem eventKey="1" href="#/action-1" trailingIcon="check">
+        Tick
+      </OLDropdownMenuItem>
+      <OLDropdownMenuItem
+        eventKey="2"
+        href="#/action-2"
+        trailingIcon="check"
+        description="Some description"
+      >
+        With a description
+      </OLDropdownMenuItem>
+      <OLDropdownMenuItem
+        eventKey="3"
+        href="#/action-3"
+        leadingIcon="align_space_even"
+        trailingIcon="check"
+        description="Some description"
+      >
+        With a leading icon
       </OLDropdownMenuItem>
     </DropdownMenu>
   )
