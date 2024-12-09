@@ -36,7 +36,12 @@ const ReviewPanelCommentOptions: FC<{
     <BootstrapVersionSwitcher
       bs3={
         <ControlledDropdown id={`review-panel-comment-options-${id}`} pullRight>
-          <BS3Dropdown.Toggle noCaret bsSize="small" bsStyle={null}>
+          <BS3Dropdown.Toggle
+            tabIndex={0}
+            noCaret
+            bsSize="small"
+            bsStyle={null}
+          >
             <MaterialIcon
               type="more_vert"
               className="review-panel-entry-actions-icon"
@@ -54,6 +59,7 @@ const ReviewPanelCommentOptions: FC<{
       bs5={
         <Dropdown align="end">
           <DropdownToggle
+            tabIndex={0}
             as={ReviewPanelCommentDropdownToggleButton}
             id={`review-panel-comment-options-btn-${id}`}
           >

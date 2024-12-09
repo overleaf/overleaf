@@ -71,7 +71,12 @@ export const ReviewPanelMessage: FC<{
               description={t('resolve_comment')}
               tooltipProps={{ className: 'review-panel-tooltip' }}
             >
-              <button type="button" className="btn" onClick={onResolve}>
+              <button
+                type="button"
+                tabIndex={0}
+                className="btn"
+                onClick={onResolve}
+              >
                 <MaterialIcon
                   type="check"
                   className="review-panel-entry-actions-icon"

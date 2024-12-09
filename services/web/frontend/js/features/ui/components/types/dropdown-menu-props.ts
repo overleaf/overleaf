@@ -55,6 +55,7 @@ export type DropdownToggleProps = PropsWithChildren<{
   variant?: SplitButtonVariants
   as?: ElementType
   size?: 'sm' | 'lg' | undefined
+  tabIndex?: number
   'aria-label'?: string
 }>
 
