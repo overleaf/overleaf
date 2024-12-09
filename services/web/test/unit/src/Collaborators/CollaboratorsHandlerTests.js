@@ -65,8 +65,10 @@ describe('CollaboratorsHandler', function () {
     this.CollaboratorsGetter = {
       promises: {
         dangerouslyGetAllProjectsUserIsMemberOf: sinon.stub(),
+        getMemberIdsWithPrivilegeLevels: sinon.stub().resolves([]),
       },
     }
+    this.EditorRealTimeController = { emitToRoom: sinon.stub() }
     this.CollaboratorsHandler = SandboxedModule.require(MODULE_PATH, {
       requires: {
         '../User/UserGetter': this.UserGetter,
@@ -76,6 +78,7 @@ describe('CollaboratorsHandler', function () {
         '../ThirdPartyDataStore/TpdsUpdateSender': this.TpdsUpdateSender,
         '../Project/ProjectGetter': this.ProjectGetter,
         '../Project/ProjectHelper': this.ProjectHelper,
+        '../Editor/EditorRealTimeController': this.EditorRealTimeController,
         './CollaboratorsGetter': this.CollaboratorsGetter,
       },
     })
@@ -105,6 +108,7 @@ describe('CollaboratorsHandler', function () {
             {
               $pull: {
                 collaberator_refs: this.userId,
+                reviewer_refs: this.userId,
                 readOnly_refs: this.userId,
                 pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
@@ -148,6 +152,7 @@ describe('CollaboratorsHandler', function () {
               },
               $pull: {
                 collaberator_refs: this.userId,
+                reviewer_refs: this.userId,
                 readOnly_refs: this.userId,
                 pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
@@ -183,6 +188,7 @@ describe('CollaboratorsHandler', function () {
             {
               $pull: {
                 collaberator_refs: this.userId,
+                reviewer_refs: this.userId,
                 readOnly_refs: this.userId,
                 pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,
@@ -302,6 +308,43 @@ describe('CollaboratorsHandler', function () {
       })
     })
 
+    describe('as reviewer', function () {
+      beforeEach(async function () {
+        this.ProjectMock.expects('updateOne')
+          .withArgs(
+            {
+              _id: this.project._id,
+            },
+            {
+              track_changes: { [this.userId]: true },
+              $addToSet: { reviewer_refs: this.userId },
+            }
+          )
+          .chain('exec')
+          .resolves()
+        await this.CollaboratorsHandler.promises.addUserIdToProject(
+          this.project._id,
+          this.addingUserId,
+          this.userId,
+          'review'
+        )
+      })
+
+      it('should update the client with new track changes settings', function () {
+        return this.EditorRealTimeController.emitToRoom
+          .calledWith(this.project._id, 'toggle-track-changes', {
+            [this.userId]: true,
+          })
+          .should.equal(true)
+      })
+
+      it('should flush the project to the TPDS', function () {
+        expect(
+          this.TpdsProjectFlusher.promises.flushProjectToTpds
+        ).to.have.been.calledWith(this.project._id)
+      })
+    })
+
     describe('with invalid privilegeLevel', function () {
       it('should call the callback with an error', async function () {
         await expect(
@@ -405,6 +448,7 @@ describe('CollaboratorsHandler', function () {
             {
               $pull: {
                 collaberator_refs: this.userId,
+                reviewer_refs: this.userId,
                 readOnly_refs: this.userId,
                 pendingEditor_refs: this.userId,
                 tokenAccessReadOnly_refs: this.userId,

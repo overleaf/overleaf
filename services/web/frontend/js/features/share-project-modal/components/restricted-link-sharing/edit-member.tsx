@@ -237,6 +237,7 @@ function SelectPrivilege({
     (): Privilege[] => [
       { key: 'owner', label: t('make_owner') },
       { key: 'readAndWrite', label: t('editor') },
+      { key: 'review', label: t('reviewer') },
       { key: 'readOnly', label: t('viewer') },
       { key: 'removeAccess', label: t('remove_access') },
     ],

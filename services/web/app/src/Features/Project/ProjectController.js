@@ -353,6 +353,7 @@ const _ProjectController = {
       'default-visual-for-beginners',
       'hotjar',
       'ai-add-on',
+      'reviewer-role',
       'papers-integration',
     ].filter(Boolean)
 

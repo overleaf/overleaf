@@ -61,6 +61,7 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     tokenAccessReadAndWrite_refs: 1,
     publicAccesLevel: 1,
     pendingEditor_refs: 1,
+    reviewer_refs: 1,
   })
   if (!project) {
     throw new Errors.NotFoundError(`no project found with id ${projectId}`)
@@ -72,7 +73,8 @@ async function getMemberIdsWithPrivilegeLevels(projectId) {
     project.tokenAccessReadAndWrite_refs,
     project.tokenAccessReadOnly_refs,
     project.publicAccesLevel,
-    project.pendingEditor_refs
+    project.pendingEditor_refs,
+    project.reviewer_refs
   )
   return memberIds
 }
@@ -324,7 +326,8 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
   tokenAccessIds,
   tokenAccessReadOnlyIds,
   publicAccessLevel,
-  pendingEditorIds
+  pendingEditorIds,
+  reviewerIds
 ) {
   const members = []
   members.push({
@@ -364,6 +367,13 @@ function _getMemberIdsWithPrivilegeLevelsFromFields(
         source: Sources.TOKEN,
       })
     }
+  }
+  for (const memberId of reviewerIds || []) {
+    members.push({
+      id: memberId.toString(),
+      privilegeLevel: PrivilegeLevels.REVIEW,
+      source: Sources.INVITE,
+    })
   }
   return members
 }
