@@ -228,7 +228,7 @@ describe('AuthorizationManager', function () {
     })
   })
 
-  return describe('assertClientCanEditProjectAndDoc', function () {
+  describe('assertClientCanEditProjectAndDoc', function () {
     beforeEach(function () {
       this.doc_id = '12345'
       this.callback = sinon.stub()
@@ -318,6 +318,105 @@ describe('AuthorizationManager', function () {
 
         return it('should deny access', function () {
           return this.AuthorizationManager.assertClientCanEditProjectAndDoc(
+            this.client,
+            this.doc_id,
+            err => err.message.should.equal('not authorized')
+          )
+        })
+      })
+    })
+  })
+
+  return describe('assertClientCanReviewProjectAndDoc', function () {
+    beforeEach(function () {
+      this.doc_id = '12345'
+      this.callback = sinon.stub()
+      return (this.client.ol_context = {})
+    })
+
+    describe('when not authorised at the project level', function () {
+      beforeEach(function () {
+        return (this.client.ol_context.privilege_level = 'readOnly')
+      })
+
+      it('should not allow access', function () {
+        return this.AuthorizationManager.assertClientCanReviewProjectAndDoc(
+          this.client,
+          this.doc_id,
+          err => err.message.should.equal('not authorized')
+        )
+      })
+
+      return describe('even when authorised at the doc level', function () {
+        beforeEach(function (done) {
+          return this.AuthorizationManager.addAccessToDoc(
+            this.client,
+            this.doc_id,
+            done
+          )
+        })
+
+        return it('should not allow access', function () {
+          return this.AuthorizationManager.assertClientCanReviewProjectAndDoc(
+            this.client,
+            this.doc_id,
+            err => err.message.should.equal('not authorized')
+          )
+        })
+      })
+    })
+
+    return describe('when authorised at the project level', function () {
+      beforeEach(function () {
+        return (this.client.ol_context.privilege_level = 'review')
+      })
+
+      describe('and not authorised at the document level', function () {
+        return it('should not allow access', function () {
+          return this.AuthorizationManager.assertClientCanReviewProjectAndDoc(
+            this.client,
+            this.doc_id,
+            err => err.message.should.equal('not authorized')
+          )
+        })
+      })
+
+      describe('and authorised at the document level', function () {
+        beforeEach(function (done) {
+          return this.AuthorizationManager.addAccessToDoc(
+            this.client,
+            this.doc_id,
+            done
+          )
+        })
+
+        return it('should allow access', function () {
+          this.AuthorizationManager.assertClientCanReviewProjectAndDoc(
+            this.client,
+            this.doc_id,
+            this.callback
+          )
+          return this.callback.calledWith(null).should.equal(true)
+        })
+      })
+
+      return describe('when document authorisation is added and then removed', function () {
+        beforeEach(function (done) {
+          return this.AuthorizationManager.addAccessToDoc(
+            this.client,
+            this.doc_id,
+            () => {
+              return this.AuthorizationManager.removeAccessToDoc(
+                this.client,
+                this.doc_id,
+                done
+              )
+            }
+          )
+        })
+
+        return it('should deny access', function () {
+          return this.AuthorizationManager.assertClientCanReviewProjectAndDoc(
             this.client,
             this.doc_id,
             err => err.message.should.equal('not authorized')

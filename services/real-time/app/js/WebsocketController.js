@@ -622,26 +622,25 @@ module.exports = WebsocketController = {
   },
 
   _assertClientCanApplyUpdate(client, docId, update, callback) {
-    AuthorizationManager.assertClientCanEditProjectAndDoc(
-      client,
-      docId,
-      function (error) {
-        if (
-          error &&
-          error.message === 'not authorized' &&
-          WebsocketController._isCommentUpdate(update)
-        ) {
-          // This might be a comment op, which we only need read-only priveleges for
-          AuthorizationManager.assertClientCanViewProjectAndDoc(
-            client,
-            docId,
-            callback
-          )
-          return
-        }
-        callback(error)
-      }
-    )
+    if (WebsocketController._isCommentUpdate(update)) {
+      return AuthorizationManager.assertClientCanViewProjectAndDoc(
+        client,
+        docId,
+        callback
+      )
+    } else if (update.meta?.tc) {
+      return AuthorizationManager.assertClientCanReviewProjectAndDoc(
+        client,
+        docId,
+        callback
+      )
+    } else {
+      return AuthorizationManager.assertClientCanEditProjectAndDoc(
+        client,
+        docId,
+        callback
+      )
+    }
   },
 
   _isCommentUpdate(update) {

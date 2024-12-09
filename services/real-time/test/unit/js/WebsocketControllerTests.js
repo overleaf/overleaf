@@ -1578,6 +1578,8 @@ describe('WebsocketController', function () {
       } // comments may still be in an edit op
       this.comment_update = { op: [{ c: 'bar', p: 132 }] }
       this.AuthorizationManager.assertClientCanEditProjectAndDoc = sinon.stub()
+      this.AuthorizationManager.assertClientCanReviewProjectAndDoc =
+        sinon.stub()
       return (this.AuthorizationManager.assertClientCanViewProjectAndDoc =
         sinon.stub())
     })
@@ -1633,7 +1635,7 @@ describe('WebsocketController', function () {
       })
     })
 
-    return describe('with a totally unauthorized client', function () {
+    describe('with a totally unauthorized client', function () {
       return it('should return an error', function (done) {
         this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(
           new Error('not authorized')
@@ -1645,6 +1647,46 @@ describe('WebsocketController', function () {
           this.client,
           this.doc_id,
           this.comment_update,
+          error => {
+            expect(error.message).to.equal('not authorized')
+            return done()
+          }
+        )
+      })
+    })
+
+    describe('with a review client', function () {
+      it('op with tc should succeed', function (done) {
+        this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(
+          new Error('not authorized')
+        )
+        this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(null)
+        this.AuthorizationManager.assertClientCanReviewProjectAndDoc.yields(
+          null
+        )
+        return this.WebsocketController._assertClientCanApplyUpdate(
+          this.client,
+          this.doc_id,
+          { op: [{ p: 10, i: 'a' }], meta: { tc: '123456' } },
+          error => {
+            expect(error).to.be.null
+            return done()
+          }
+        )
+      })
+
+      return it('op without tc should fail', function (done) {
+        this.AuthorizationManager.assertClientCanEditProjectAndDoc.yields(
+          new Error('not authorized')
+        )
+        this.AuthorizationManager.assertClientCanViewProjectAndDoc.yields(null)
+        this.AuthorizationManager.assertClientCanReviewProjectAndDoc.yields(
+          null
+        )
+        return this.WebsocketController._assertClientCanApplyUpdate(
+          this.client,
+          this.doc_id,
+          { op: [{ p: 10, i: 'a' }] },
           error => {
             expect(error.message).to.equal('not authorized')
             return done()
