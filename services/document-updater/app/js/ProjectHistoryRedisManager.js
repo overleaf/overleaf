@@ -122,6 +122,7 @@ const ProjectHistoryRedisManager = {
       hash: projectUpdate.hash,
       metadata: projectUpdate.metadata,
       projectHistoryId,
+      createdBlob: projectUpdate.createdBlob ?? false,
     }
     if (ranges) {
       projectUpdate.ranges = ranges

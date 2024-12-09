@@ -58,7 +58,12 @@ describe('ProjectUploadManager', function () {
       },
     ]
     this.fileEntries = [
-      { file: this.file, path: `/${this.file.name}`, url: this.fileStoreUrl },
+      {
+        file: this.file,
+        path: `/${this.file.name}`,
+        url: this.fileStoreUrl,
+        createdBlob: true,
+      },
     ]
 
     this.fs = {
@@ -94,9 +99,11 @@ describe('ProjectUploadManager', function () {
     }
     this.FileStoreHandler = {
       promises: {
-        uploadFileFromDiskWithHistoryId: sinon
-          .stub()
-          .resolves({ fileRef: this.file, url: this.fileStoreUrl }),
+        uploadFileFromDiskWithHistoryId: sinon.stub().resolves({
+          fileRef: this.file,
+          url: this.fileStoreUrl,
+          createdBlob: true,
+        }),
       },
     }
     this.FileSystemImportManager = {

@@ -491,6 +491,44 @@ describe('HistoryStoreManager', function () {
         expect(this.actualHash).to.equal(this.hash)
       })
     })
+    describe('when the createdBlob flag is set on the update', function () {
+      beforeEach(function (done) {
+        this.file_id = '012345678901234567890123'
+        this.update = {
+          file: true,
+          createdBlob: true,
+          url: `http://filestore.other.cloud.provider/project/${this.projectId}/file/${this.file_id}`,
+          hash: this.hash,
+        }
+        this.HistoryStoreManager.createBlobForUpdate(
+          this.projectId,
+          this.historyId,
+          this.update,
+          (err, { file: hash }) => {
+            if (err) {
+              return done(err)
+            }
+            this.actualHash = hash
+            done()
+          }
+        )
+      })
+
+      it('should call the callback with the existing hash', function () {
+        expect(this.actualHash).to.equal(this.hash)
+      })
+
+      it('should not request the file from the filestore', function () {
+        expect(this.FetchUtils.fetchStream).to.not.have.been.called
+      })
+
+      it('should log a debug level message', function () {
+        expect(this.logger.debug).to.have.been.calledWith(
+          { projectId: this.projectId, fileId: this.file_id },
+          'Skipping blob creation as it has already been created'
+        )
+      })
+    })
   })
 
   describe('getProjectBlob', function () {

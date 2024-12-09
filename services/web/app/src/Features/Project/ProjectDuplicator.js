@@ -211,6 +211,7 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
       if (sourceFile.hash != null) {
         file.hash = sourceFile.hash
       }
+      let createdBlob = false
       if (file.hash != null) {
         try {
           await HistoryManager.promises.copyBlob(
@@ -218,6 +219,7 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
             targetHistoryId,
             file.hash
           )
+          createdBlob = true
         } catch (err) {
           logger.error(
             {
@@ -237,7 +239,7 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
         targetProject._id,
         file._id
       )
-      return { file, path, url }
+      return { createdBlob, file, path, url }
     }
   )
   return targetEntries
