@@ -904,8 +904,14 @@ const _ProjectController = {
   },
   _buildProjectList(allProjects, userId) {
     let project
-    const { owned, readAndWrite, readOnly, tokenReadAndWrite, tokenReadOnly } =
-      allProjects
+    const {
+      owned,
+      review,
+      readAndWrite,
+      readOnly,
+      tokenReadAndWrite,
+      tokenReadOnly,
+    } = allProjects
     const projects = []
     for (project of owned) {
       projects.push(
@@ -923,6 +929,16 @@ const _ProjectController = {
         ProjectController._buildProjectViewModel(
           project,
           'readWrite',
+          Sources.INVITE,
+          userId
+        )
+      )
+    }
+    for (project of review) {
+      projects.push(
+        ProjectController._buildProjectViewModel(
+          project,
+          'review',
           Sources.INVITE,
           userId
         )

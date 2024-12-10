@@ -219,12 +219,14 @@ describe('ProjectListController', function () {
       this.readOnly = [{ _id: 3, lastUpdated: 3, owner_ref: 'user-1' }]
       this.tokenReadAndWrite = [{ _id: 6, lastUpdated: 5, owner_ref: 'user-4' }]
       this.tokenReadOnly = [{ _id: 7, lastUpdated: 4, owner_ref: 'user-5' }]
+      this.review = [{ _id: 8, lastUpdated: 4, owner_ref: 'user-6' }]
       this.allProjects = {
         owned: this.projects,
         readAndWrite: this.readAndWrite,
         readOnly: this.readOnly,
         tokenReadAndWrite: this.tokenReadAndWrite,
         tokenReadOnly: this.tokenReadOnly,
+        review: this.review,
       }
 
       this.ProjectGetter.promises.findAllUsersProjects.resolves(
@@ -279,7 +281,8 @@ describe('ProjectListController', function () {
             this.readAndWrite.length +
             this.readOnly.length +
             this.tokenReadAndWrite.length +
-            this.tokenReadOnly.length
+            this.tokenReadOnly.length +
+            this.review.length
         )
         done()
       }
@@ -719,12 +722,14 @@ describe('ProjectListController', function () {
         { _id: 6, lastUpdated: 5, owner_ref: 'user-4' }, // Also in tokenReadAndWrite
         { _id: 7, lastUpdated: 4, owner_ref: 'user-5' },
       ]
+      this.review = [{ _id: 8, lastUpdated: 5, owner_ref: 'user-6' }]
       this.allProjects = {
         owned: this.projects,
         readAndWrite: this.readAndWrite,
         readOnly: this.readOnly,
         tokenReadAndWrite: this.tokenReadAndWrite,
         tokenReadOnly: this.tokenReadOnly,
+        review: this.review,
       }
 
       this.ProjectGetter.promises.findAllUsersProjects.resolves(
@@ -747,7 +752,8 @@ describe('ProjectListController', function () {
             this.readAndWrite.length +
             this.readOnly.length +
             this.tokenReadAndWrite.length +
-            this.tokenReadOnly.length -
+            this.tokenReadOnly.length +
+            this.review.length -
             1
         )
         done()

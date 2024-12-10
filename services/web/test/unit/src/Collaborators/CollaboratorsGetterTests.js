@@ -319,6 +319,11 @@ describe('CollaboratorsGetter', function () {
         .withArgs({ readOnly_refs: this.userId }, this.fields)
         .chain('exec')
         .resolves(['mock-read-only-project-1', 'mock-read-only-project-2'])
+
+      this.ProjectMock.expects('find')
+        .withArgs({ reviewer_refs: this.userId }, this.fields)
+        .chain('exec')
+        .resolves(['mock-review-project-1', 'mock-review-project-2'])
       this.ProjectMock.expects('find')
         .withArgs(
           {
@@ -367,6 +372,7 @@ describe('CollaboratorsGetter', function () {
           'mock-token-read-only-project-1',
           'mock-token-read-only-project-2',
         ],
+        review: ['mock-review-project-1', 'mock-review-project-2'],
       })
     })
   })
