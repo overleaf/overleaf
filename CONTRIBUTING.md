@@ -14,6 +14,8 @@ When submitting an issue please describe the issue as clearly as possible, inclu
 reproduce the bug, which situations it appears in, what you expected to happen, and what actually happens.
 If you can include a screenshot for front end issues that is very helpful.
 
+**Note**: If you are using [www.overleaf.com](www.overleaf.com) and have a problem, or if you would like to request a new feature, please contact the Support team at support@overleaf.com. Raise an issue here only to report bugs in the Community Edition release of Overleaf.
+
 Pull Requests
 -------------
 
@@ -34,7 +36,7 @@ Please see [our security policy](https://github.com/overleaf/overleaf/security/p
 Contributor License Agreement
 -----------------------------
 
-Before we can accept any contributions of code, we need you to agree to our 
+Before we can accept any contributions of code, we need you to agree to our
 [Contributor License Agreement](https://docs.google.com/forms/d/e/1FAIpQLSef79XH3mb7yIiMzZw-yALEegS-wyFetvjTiNBfZvf_IHD2KA/viewform?usp=sf_link).
 This is to ensure that you own the copyright of your contribution, and that you
 agree to give us a license to use it in both the open source version, and the version
