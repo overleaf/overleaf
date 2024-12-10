@@ -203,6 +203,7 @@ describe('Templates', () => {
         .click()
       cy.findAllByText('All Templates')
         .first()
+        .parent()
         .should('have.attr', 'href', '/templates/all')
     })
   })
