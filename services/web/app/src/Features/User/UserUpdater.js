@@ -18,6 +18,7 @@ const SubscriptionLocator = require('../Subscription/SubscriptionLocator')
 const NotificationsBuilder = require('../Notifications/NotificationsBuilder')
 const _ = require('lodash')
 const Modules = require('../../infrastructure/Modules')
+const UserSessionsManager = require('./UserSessionsManager')
 
 async function _sendSecurityAlertPrimaryEmailChanged(userId, oldEmail, email) {
   // Send email to the following:
@@ -509,6 +510,29 @@ async function removeReconfirmFlag(userId, auditLog) {
   await updateUser(userId.toString(), { $set: { must_reconfirm: false } })
 }
 
+async function suspendUser(userId, auditLog = {}) {
+  const res = await updateUser(
+    { _id: userId, suspended: { $ne: true } },
+    { $set: { suspended: true } }
+  )
+  if (res.matchedCount !== 1) {
+    throw new Errors.NotFoundError('user id not found or already suspended')
+  }
+  await UserAuditLogHandler.promises.addEntry(
+    userId,
+    'account-suspension',
+    auditLog.initiatorId,
+    auditLog.ip,
+    auditLog.info || {}
+  )
+  await UserSessionsManager.promises.removeSessionsFromRedis({ _id: userId })
+  await Modules.promises.hooks.fire(
+    'removeDropbox',
+    userId,
+    'account-suspension'
+  )
+}
+
 function _securityAlertPrimaryEmailChangedExtraRecipients(
   emailsData,
   oldEmail,
@@ -564,6 +588,7 @@ module.exports = {
   setDefaultEmailAddress: callbackify(setDefaultEmailAddress),
   migrateDefaultEmailAddress: callbackify(migrateDefaultEmailAddress),
   updateUser: callbackify(updateUser),
+  suspendUser: callbackify(suspendUser),
   promises: {
     addAffiliationForNewUser,
     addEmailAddress,
@@ -575,5 +600,6 @@ module.exports = {
     setDefaultEmailAddress,
     migrateDefaultEmailAddress,
     updateUser,
+    suspendUser,
   },
 }

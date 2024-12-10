@@ -20,6 +20,7 @@ function _canHaveNoInitiatorId(operation, info) {
   if (operation === 'leave-group-subscription') return true
   if (operation === 'must-reset-password-set') return true
   if (operation === 'must-reset-password-unset') return true
+  if (operation === 'account-suspension' && info.script) return true
 }
 
 /**
