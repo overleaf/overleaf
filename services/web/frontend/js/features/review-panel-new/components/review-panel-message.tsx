@@ -8,11 +8,11 @@ import { formatTimeBasedOnYear } from '@/features/utils/format-date'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
 import MaterialIcon from '@/shared/components/material-icon'
 import AutoExpandingTextArea from '@/shared/components/auto-expanding-text-area'
-import { buildName } from '../utils/build-name'
 import ReviewPanelCommentOptions from './review-panel-comment-options'
 import { ExpandableContent } from './review-panel-expandable-content'
 import ReviewPanelDeleteCommentModal from './review-panel-delete-comment-modal'
 import { useUserContext } from '@/shared/context/user-context'
+import ReviewPanelEntryUser from './review-panel-entry-user'
 
 export const ReviewPanelMessage: FC<{
   message: ReviewPanelCommentThreadMessage
@@ -55,9 +55,7 @@ export const ReviewPanelMessage: FC<{
     <div className="review-panel-comment">
       <div className="review-panel-entry-header">
         <div>
-          <div className="review-panel-entry-user">
-            {buildName(message.user)}
-          </div>
+          <ReviewPanelEntryUser user={message.user} />
           <div className="review-panel-entry-time">
             {formatTimeBasedOnYear(message.timestamp)}
           </div>

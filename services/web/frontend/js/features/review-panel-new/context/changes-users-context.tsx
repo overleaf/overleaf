@@ -10,7 +10,7 @@ import { getJSON } from '@/infrastructure/fetch-json'
 import { useProjectContext } from '@/shared/context/project-context'
 import { UserId } from '../../../../../types/user'
 
-type ChangesUser = {
+export type ChangesUser = {
   id: UserId
   email: string
   first_name?: string

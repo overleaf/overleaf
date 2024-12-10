@@ -95,9 +95,7 @@ export const ReviewPanelChange = memo<{
         >
           <div className="review-panel-entry-header">
             <div>
-              <div className="review-panel-entry-user">
-                <ReviewPanelChangeUser change={change} />
-              </div>
+              <ReviewPanelChangeUser change={change} />
               <div className="review-panel-entry-time">
                 {formatTimeBasedOnYear(change.metadata?.ts)}
               </div>

@@ -1,16 +1,16 @@
 import { memo, useMemo } from 'react'
 import { useChangesUsersContext } from '../context/changes-users-context'
-import { buildName } from '../utils/build-name'
 import { Change } from '../../../../../types/change'
+import ReviewPanelEntryUser from './review-panel-entry-user'
 
 export const ReviewPanelChangeUser = memo<{ change: Change }>(({ change }) => {
   const changesUsers = useChangesUsersContext()
   const userId = change.metadata?.user_id
-  const userName = useMemo(
-    () => buildName(userId ? changesUsers?.get(userId) : undefined),
+  const user = useMemo(
+    () => (userId ? changesUsers?.get(userId) : undefined),
     [changesUsers, userId]
   )
 
-  return <span>{userName}</span>
+  return <ReviewPanelEntryUser user={user} />
 })
 ReviewPanelChangeUser.displayName = 'ReviewPanelChangeUser'

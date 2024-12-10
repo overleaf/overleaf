@@ -74,7 +74,7 @@
     margin-bottom: var(--spacing-01);
 
     .review-panel-entry-user {
-      color: var(--bg-info-01);
+      color: $content-primary;
       font-size: 110%;
     }
 
@@ -110,6 +110,14 @@
         font-size: var(--font-size-05);
       }
     }
+  }
+
+  .review-panel-entry-user-color-badge {
+    display: inline-block;
+    width: $spacing-04;
+    height: $spacing-04;
+    margin-right: $spacing-02;
+    border-radius: 2px;
   }
 
   .review-panel-change-body {
