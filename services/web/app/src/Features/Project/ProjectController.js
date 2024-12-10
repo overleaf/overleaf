@@ -434,6 +434,7 @@ const _ProjectController = {
           tokenAccessReadAndWrite_refs: 1, // used for link sharing analytics
           collaberator_refs: 1, // used for link sharing analytics
           pendingEditor_refs: 1, // used for link sharing analytics
+          reviewer_refs: 1,
         }),
         userIsMemberOfGroupSubscription: sessionUser
           ? (async () =>
@@ -829,6 +830,10 @@ const _ProjectController = {
             : null,
         isSaas: Features.hasFeature('saas'),
         shouldLoadHotjar: splitTestAssignments.hotjar?.variant === 'enabled',
+        isReviewerRoleEnabled:
+          (privilegeLevel === PrivilegeLevels.OWNER &&
+            splitTestAssignments['reviewer-role']?.variant === 'enabled') ||
+          Object.keys(project.reviewer_refs || {}).length > 0,
       })
       timer.done()
     } catch (err) {
