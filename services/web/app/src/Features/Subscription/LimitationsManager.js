@@ -5,8 +5,6 @@ const SubscriptionLocator = require('./SubscriptionLocator')
 const Settings = require('@overleaf/settings')
 const CollaboratorsGetter = require('../Collaborators/CollaboratorsGetter')
 const CollaboratorsInvitesGetter = require('../Collaborators/CollaboratorsInviteGetter')
-const V1SubscriptionManager = require('./V1SubscriptionManager')
-const { V1ConnectionError } = require('../Errors/Errors')
 const {
   callbackify,
   callbackifyMultiResult,
@@ -73,18 +71,11 @@ async function canAddXEditCollaborators(
 }
 
 async function hasPaidSubscription(user) {
-  const { hasSubscription, subscription } = await userHasV2Subscription(user)
+  const { hasSubscription, subscription } = await userHasSubscription(user)
   const { isMember } = await userIsMemberOfGroupSubscription(user)
-  try {
-    const hasV1Subscription = await userHasV1Subscription(user)
-    return {
-      hasPaidSubscription: hasSubscription || isMember || hasV1Subscription,
-      subscription,
-    }
-  } catch (err) {
-    throw new V1ConnectionError('error getting subscription from v1').withCause(
-      err
-    )
+  return {
+    hasPaidSubscription: hasSubscription || isMember,
+    subscription,
   }
 }
 
@@ -93,7 +84,7 @@ async function userHasSubscriptionOrIsGroupMember(user) {
   return await hasPaidSubscription(user)
 }
 
-async function userHasV2Subscription(user) {
+async function userHasSubscription(user) {
   const subscription = await SubscriptionLocator.promises.getUsersSubscription(
     user._id
   )
@@ -109,29 +100,10 @@ async function userHasV2Subscription(user) {
   }
 }
 
-async function userHasV1OrV2Subscription(user) {
-  const { hasSubscription: hasV2Subscription } =
-    await userHasV2Subscription(user)
-  if (hasV2Subscription) {
-    return true
-  }
-  const hasV1Subscription = await userHasV1Subscription(user)
-  if (hasV1Subscription) {
-    return true
-  }
-  return false
-}
-
 async function userIsMemberOfGroupSubscription(user) {
   const subscriptions =
     (await SubscriptionLocator.promises.getMemberSubscriptions(user._id)) || []
   return { isMember: subscriptions.length > 0, subscriptions }
-}
-
-async function userHasV1Subscription(user, callback) {
-  const v1Subscription =
-    await V1SubscriptionManager.promises.getSubscriptionsFromV1(user._id)
-  return !!(v1Subscription ? v1Subscription.has_subscription : undefined)
 }
 
 function teamHasReachedMemberLimit(subscription) {
@@ -171,16 +143,14 @@ const LimitationsManager = {
     userHasSubscriptionOrIsGroupMember,
     ['hasPaidSubscription', 'subscription']
   ),
-  userHasV2Subscription: callbackifyMultiResult(userHasV2Subscription, [
+  userHasSubscription: callbackifyMultiResult(userHasSubscription, [
     'hasSubscription',
     'subscription',
   ]),
-  userHasV1OrV2Subscription: callbackify(userHasV1OrV2Subscription),
   userIsMemberOfGroupSubscription: callbackifyMultiResult(
     userIsMemberOfGroupSubscription,
     ['isMember', 'subscriptions']
   ),
-  userHasV1Subscription: callbackify(userHasV1Subscription),
   hasGroupMembersLimitReached: callbackifyMultiResult(
     hasGroupMembersLimitReached,
     ['limitReached', 'subscription']
@@ -196,10 +166,8 @@ const LimitationsManager = {
     canAddXEditCollaborators,
     hasPaidSubscription,
     userHasSubscriptionOrIsGroupMember,
-    userHasV2Subscription,
-    userHasV1OrV2Subscription,
+    userHasSubscription,
     userIsMemberOfGroupSubscription,
-    userHasV1Subscription,
     hasGroupMembersLimitReached,
   },
 }

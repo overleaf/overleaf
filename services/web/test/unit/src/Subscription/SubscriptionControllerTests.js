@@ -61,12 +61,12 @@ describe('SubscriptionController', function () {
 
     this.LimitationsManager = {
       hasPaidSubscription: sinon.stub(),
-      userHasV1OrV2Subscription: sinon.stub(),
-      userHasV2Subscription: sinon.stub(),
+      userHasSubscription: sinon
+        .stub()
+        .yields(null, { hasSubscription: false }),
       promises: {
         hasPaidSubscription: sinon.stub().resolves(),
-        userHasV1OrV2Subscription: sinon.stub().resolves(),
-        userHasV2Subscription: sinon.stub().resolves(),
+        userHasSubscription: sinon.stub().resolves({ hasSubscription: false }),
       },
     }
 
@@ -756,9 +756,9 @@ describe('SubscriptionController', function () {
 
     describe('with a user with subscription', function () {
       it('should redirect to the subscription dashboard', function (done) {
-        this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(
-          true
-        )
+        this.LimitationsManager.promises.userHasSubscription.resolves({
+          hasSubscription: true,
+        })
         this.res.redirect = url => {
           url.should.equal('/user/subscription?hasSubscription=true')
           done()
@@ -954,7 +954,9 @@ describe('SubscriptionController', function () {
           planCodesChangingAtTermEnd: [],
         }
       )
-      this.LimitationsManager.promises.userHasV1OrV2Subscription.resolves(false)
+      this.LimitationsManager.promises.userHasSubscription.resolves({
+        hasSubscription: false,
+      })
       this.res.render = (view, data) => {
         this.data = data
         expect(view).to.equal('subscriptions/dashboard-react')

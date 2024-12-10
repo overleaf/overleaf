@@ -90,7 +90,7 @@ async function updateSubscription(user, planCode, couponCode) {
 
   try {
     ;({ hasSubscription, subscription } =
-      await LimitationsManager.promises.userHasV2Subscription(user))
+      await LimitationsManager.promises.userHasSubscription(user))
   } catch (err) {
     logger.warn(
       { err, userId: user._id },
@@ -132,7 +132,7 @@ async function updateSubscription(user, planCode, couponCode) {
  */
 async function cancelPendingSubscriptionChange(user) {
   const { hasSubscription, subscription } =
-    await LimitationsManager.promises.userHasV2Subscription(user)
+    await LimitationsManager.promises.userHasSubscription(user)
 
   if (hasSubscription && subscription != null) {
     await RecurlyClient.promises.removeSubscriptionChangeByUuid(
@@ -147,7 +147,7 @@ async function cancelPendingSubscriptionChange(user) {
 async function cancelSubscription(user) {
   try {
     const { hasSubscription, subscription } =
-      await LimitationsManager.promises.userHasV2Subscription(user)
+      await LimitationsManager.promises.userHasSubscription(user)
     if (hasSubscription && subscription != null) {
       await RecurlyClient.promises.cancelSubscriptionByUuid(
         subscription.recurlySubscription_id
@@ -178,7 +178,7 @@ async function cancelSubscription(user) {
 async function reactivateSubscription(user) {
   try {
     const { hasSubscription, subscription } =
-      await LimitationsManager.promises.userHasV2Subscription(user)
+      await LimitationsManager.promises.userHasSubscription(user)
     if (hasSubscription && subscription != null) {
       await RecurlyClient.promises.reactivateSubscriptionByUuid(
         subscription.recurlySubscription_id

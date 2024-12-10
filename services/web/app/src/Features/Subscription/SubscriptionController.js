@@ -253,8 +253,8 @@ async function userSubscriptionPage(req, res) {
     managedInstitutions,
     managedPublishers,
   } = results
-  const hasSubscription =
-    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
+  const { hasSubscription } =
+    await LimitationsManager.promises.userHasSubscription(user)
 
   const userCanExtendTrial = (
     await Modules.promises.hooks.fire('userCanExtendTrial', user)
@@ -353,8 +353,8 @@ async function interstitialPaymentPage(req, res) {
 
   const latamCountryBannerDetails = await getLatamCountryBannerDetails(req, res)
 
-  const hasSubscription =
-    await LimitationsManager.promises.userHasV1OrV2Subscription(user)
+  const { hasSubscription } =
+    await LimitationsManager.promises.userHasSubscription(user)
   const showSkipLink = req.query?.skipLink === 'true'
 
   if (hasSubscription) {
@@ -749,7 +749,7 @@ function recurlyCallback(req, res, next) {
 async function extendTrial(req, res) {
   const user = SessionManager.getSessionUser(req.session)
   const { subscription } =
-    await LimitationsManager.promises.userHasV2Subscription(user)
+    await LimitationsManager.promises.userHasSubscription(user)
 
   const allowed = (
     await Modules.promises.hooks.fire('userCanExtendTrial', user)

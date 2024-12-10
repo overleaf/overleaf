@@ -6,19 +6,6 @@ const { V1ConnectionError, NotFoundError } = require('../Errors/Errors')
 const { promisifyAll } = require('@overleaf/promise-utils')
 
 module.exports = V1SubscriptionManager = {
-  getSubscriptionsFromV1(userId, callback) {
-    V1SubscriptionManager._v1Request(
-      userId,
-      {
-        method: 'GET',
-        url(v1Id) {
-          return `/api/v1/overleaf/users/${v1Id}/subscriptions`
-        },
-      },
-      callback
-    )
-  },
-
   cancelV1Subscription(userId, callback) {
     V1SubscriptionManager._v1Request(
       userId,

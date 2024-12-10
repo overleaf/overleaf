@@ -118,7 +118,7 @@ describe('SubscriptionHandler', function () {
 
     this.LimitationsManager = {
       promises: {
-        userHasV2Subscription: sinon.stub().resolves(),
+        userHasSubscription: sinon.stub().resolves(),
       },
     }
 
@@ -258,7 +258,7 @@ describe('SubscriptionHandler', function () {
           },
         })
         this.plan_code = 'professional'
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: this.subscription,
         })
@@ -304,7 +304,7 @@ describe('SubscriptionHandler', function () {
           },
         })
 
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: this.subscription,
         })
@@ -326,7 +326,7 @@ describe('SubscriptionHandler', function () {
 
     describe('with a user without a subscription', function () {
       beforeEach(async function () {
-        this.LimitationsManager.promises.userHasV2Subscription.resolves(false)
+        this.LimitationsManager.promises.userHasSubscription.resolves(false)
         await this.SubscriptionHandler.promises.updateSubscription(
           this.user,
           this.plan_code,
@@ -356,7 +356,7 @@ describe('SubscriptionHandler', function () {
         })
         this.plan_code = 'collaborator'
         this.coupon_code = '1231312'
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: this.subscription,
         })
@@ -399,7 +399,7 @@ describe('SubscriptionHandler', function () {
   describe('cancelSubscription', function () {
     describe('with a user without a subscription', function () {
       beforeEach(async function () {
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
           subscription: this.subscription,
         })
@@ -415,7 +415,7 @@ describe('SubscriptionHandler', function () {
 
     describe('with a user with a subscription', function () {
       beforeEach(async function () {
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: this.subscription,
         })
@@ -445,7 +445,7 @@ describe('SubscriptionHandler', function () {
   describe('reactivateSubscription', function () {
     describe('with a user without a subscription', function () {
       beforeEach(async function () {
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: false,
           subscription: this.subscription,
         })
@@ -467,7 +467,7 @@ describe('SubscriptionHandler', function () {
 
     describe('with a user with a subscription', function () {
       beforeEach(async function () {
-        this.LimitationsManager.promises.userHasV2Subscription.resolves({
+        this.LimitationsManager.promises.userHasSubscription.resolves({
           hasSubscription: true,
           subscription: this.subscription,
         })
