@@ -11,7 +11,7 @@
     z-index: 6;
     flex-shrink: 0;
     background-color: var(--neutral-10);
-    border-left: solid 0 var(--neutral-20);
+    border-left: 1px solid var(--border-divider);
     color: var(--content-primary);
     font-family: $font-family-base;
     line-height: $line-height-base;
