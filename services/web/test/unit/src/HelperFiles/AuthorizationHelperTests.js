@@ -25,10 +25,6 @@ describe('AuthorizationHelper', function () {
             },
           },
         },
-        '../Project/ProjectGetter': (this.ProjectGetter = { promises: {} }),
-        '../SplitTests/SplitTestHandler': (this.SplitTestHandler = {
-          promises: {},
-        }),
       },
     })
   })
@@ -61,78 +57,6 @@ describe('AuthorizationHelper', function () {
       // give user access
       const user = { staffAccess: { adminMetrics: false, somethingElse: true } }
       expect(this.AuthorizationHelper.hasAnyStaffAccess(user)).to.be.false
-    })
-  })
-
-  describe('isReviewerRoleEnabled', function () {
-    it('with no reviewers and no split test', async function () {
-      this.ProjectGetter.promises.getProject = sinon.stub().resolves({
-        reviewer_refs: {},
-        owner_ref: 'ownerId',
-      })
-      this.SplitTestHandler.promises.getAssignmentForUser = sinon
-        .stub()
-        .resolves({
-          variant: 'disabled',
-        })
-      expect(
-        await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
-          'projectId'
-        )
-      ).to.be.false
-    })
-
-    it('with no reviewers and enabled split test', async function () {
-      this.ProjectGetter.promises.getProject = sinon.stub().resolves({
-        reviewer_refs: {},
-        owner_ref: 'userId',
-      })
-      this.SplitTestHandler.promises.getAssignmentForUser = sinon
-        .stub()
-        .resolves({
-          variant: 'enabled',
-        })
-      expect(
-        await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
-          'projectId'
-        )
-      ).to.be.true
-    })
-
-    it('with reviewers and disabled split test', async function () {
-      this.ProjectGetter.promises.getProject = sinon.stub().resolves({
-        reviewer_refs: [{ $oid: 'userId' }],
-      })
-      this.SplitTestHandler.promises.getAssignmentForUser = sinon
-        .stub()
-        .resolves({
-          variant: 'default',
-        })
-      expect(
-        await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
-          'projectId'
-        )
-      ).to.be.true
-    })
-
-    it('with reviewers and enabled split test', async function () {
-      this.ProjectGetter.promises.getProject = sinon.stub().resolves({
-        reviewer_refs: [{ $oid: 'userId' }],
-      })
-      this.SplitTestHandler.promises.getAssignmentForUser = sinon
-        .stub()
-        .resolves({
-          variant: 'enabled',
-        })
-      expect(
-        await this.AuthorizationHelper.promises.isReviewerRoleEnabled(
-          'userId',
-          'projectId'
-        )
-      ).to.be.true
     })
   })
 })
