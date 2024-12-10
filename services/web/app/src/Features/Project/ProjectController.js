@@ -526,15 +526,13 @@ const _ProjectController = {
         }
       }
 
-      let allowedFreeTrial = true
-
       if (privilegeLevel == null || privilegeLevel === PrivilegeLevels.NONE) {
         return res.sendStatus(401)
       }
 
-      if (subscription != null) {
-        allowedFreeTrial = false
-      }
+      const allowedFreeTrial =
+        subscription == null ||
+        isStandaloneAiAddOnPlanCode(subscription.planCode)
 
       let wsUrl = Settings.wsUrl
       let metricName = 'load-editor-ws'
