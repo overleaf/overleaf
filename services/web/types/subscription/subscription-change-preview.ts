@@ -37,8 +37,8 @@ type AddOn = {
 export type SubscriptionChangeDescription =
   | AddOnPurchase
   | AddOnUpdate
-  | PremiumSubscription
   | GroupPlanUpgrade
+  | PremiumSubscriptionChange
 
 export type AddOnPurchase = {
   type: 'add-on-purchase'
@@ -59,7 +59,7 @@ export type GroupPlanUpgrade = {
   }
 }
 
-type PremiumSubscription = {
+export type PremiumSubscriptionChange = {
   type: 'premium-subscription'
   plan: {
     code: string

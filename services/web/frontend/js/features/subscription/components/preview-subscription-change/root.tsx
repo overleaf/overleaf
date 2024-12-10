@@ -5,6 +5,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import {
   SubscriptionChangePreview,
   AddOnPurchase,
+  PremiumSubscriptionChange,
 } from '../../../../../../types/subscription/subscription-change-preview'
 import getMeta from '@/utils/meta'
 import { formatCurrencyLocalized } from '@/shared/utils/currency'
@@ -35,9 +36,15 @@ function PreviewSubscriptionChange() {
       .catch(debugConsole.error)
   }, [location, payNowTask, preview])
 
-  const addOnChange = preview.change.type === 'add-on-purchase'
   const aiAddOnChange =
-    addOnChange && (preview.change as AddOnPurchase).addOn.code === 'assistant'
+    preview.change.type === 'add-on-purchase' &&
+    preview.change.addOn.code === 'assistant'
+
+  // the driver of the change, which we can display as the immediate charge
+  const changeName =
+    preview.change.type === 'add-on-purchase'
+      ? (preview.change as AddOnPurchase).addOn.name
+      : (preview.change as PremiumSubscriptionChange).plan.name
 
   return (
     <Grid>
@@ -89,11 +96,35 @@ function PreviewSubscriptionChange() {
             )}
 
             <div className="payment-summary-card mt-5">
-              <h3>{t('payment_summary')}</h3>
+              <h3>{t('due_today')}:</h3>
               <Row>
-                <Col xs={9}>
-                  <strong>{t('due_today')}:</strong>
+                <Col xs={9}>{changeName}</Col>
+                <Col xs={3} className="text-right">
+                  <strong>
+                    {formatCurrencyLocalized(
+                      preview.immediateCharge.subtotal,
+                      preview.currency
+                    )}
+                  </strong>
                 </Col>
+              </Row>
+
+              {preview.immediateCharge.tax > 0 && (
+                <Row className="mt-1">
+                  <Col xs={9}>
+                    {t('vat')} {preview.nextInvoice.tax.rate * 100}%
+                  </Col>
+                  <Col xs={3} className="text-right">
+                    {formatCurrencyLocalized(
+                      preview.immediateCharge.tax,
+                      preview.currency
+                    )}
+                  </Col>
+                </Row>
+              )}
+
+              <Row>
+                <Col xs={9}>{t('total_today')}</Col>
                 <Col xs={3} className="text-right">
                   <strong>
                     {formatCurrencyLocalized(
@@ -103,13 +134,38 @@ function PreviewSubscriptionChange() {
                   </strong>
                 </Col>
               </Row>
+            </div>
 
-              <hr />
+            <div className="mt-5">
+              <Trans
+                i18nKey="this_total_reflects_the_amount_due_until"
+                values={{ date: moment(preview.nextInvoice.date).format('LL') }}
+                components={{ strong: <strong /> }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
+              />{' '}
+              <Trans
+                i18nKey="we_will_use_your_existing_payment_method"
+                values={{ paymentMethod: preview.paymentMethod }}
+                components={{ strong: <strong /> }}
+                shouldUnescape
+                tOptions={{ interpolation: { escapeValue: true } }}
+              />
+            </div>
 
-              <div>
-                <strong>{t('future_payments')}:</strong>
-              </div>
+            <div className="mt-5">
+              <Button
+                bsStyle="primary"
+                bsSize="large"
+                onClick={handlePayNowClick}
+                disabled={payNowTask.isLoading || payNowTask.isSuccess}
+              >
+                {t('pay_now')}
+              </Button>
+            </div>
 
+            <div className="payment-summary-card mt-5">
+              <h3>{t('future_payments')}:</h3>
               <Row className="mt-1">
                 <Col xs={9}>{preview.nextInvoice.plan.name}</Col>
                 <Col xs={3} className="text-right">
@@ -168,25 +224,7 @@ function PreviewSubscriptionChange() {
                 components={{ strong: <strong /> }}
                 shouldUnescape
                 tOptions={{ interpolation: { escapeValue: true } }}
-              />{' '}
-              <Trans
-                i18nKey="the_payment_method_used_is"
-                values={{ paymentMethod: preview.paymentMethod }}
-                components={{ strong: <strong /> }}
-                shouldUnescape
-                tOptions={{ interpolation: { escapeValue: true } }}
               />
-            </div>
-
-            <div className="mt-5">
-              <Button
-                bsStyle="primary"
-                bsSize="large"
-                onClick={handlePayNowClick}
-                disabled={payNowTask.isLoading || payNowTask.isSuccess}
-              >
-                {t('pay_now')}
-              </Button>
             </div>
           </div>
         </Col>
