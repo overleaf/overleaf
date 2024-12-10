@@ -10,7 +10,6 @@ import { expressify } from '@overleaf/promise-utils'
 import Modules from '../../infrastructure/Modules.js'
 import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import ErrorController from '../Errors/ErrorController.js'
-import SalesContactFormController from '../../../../modules/cms/app/src/controllers/SalesContactFormController.mjs'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
 
@@ -192,19 +191,24 @@ async function submitForm(req, res) {
   const userEmail = await UserGetter.promises.getUserEmail(userId)
   const { adding } = req.body
 
-  req.body = {
+  const messageLines = [`\n**Overleaf Sales Contact Form:**`]
+  messageLines.push('**Subject:** Self-Serve Group User Increase Request')
+  messageLines.push(`**Estimated Number of Users:** ${adding}`)
+  messageLines.push(
+    `**Message:** This email has been generated on behalf of user with email **${userEmail}** ` +
+      'to request an increase in the total number of users for their subscription.'
+  )
+  const messageFormatted = messageLines.join('\n\n')
+
+  const data = {
     email: userEmail,
-    subject: 'Self-Serve Group User Increase Request',
-    estimatedNumberOfUsers: adding,
-    message:
-      `This email has been generated on behalf of user with email **${userEmail}** ` +
-      'to request an increase in the total number of users ' +
-      `for their subscription.\n\n` +
-      `The requested number of users to add is: ${adding}`,
+    subject: 'Sales Contact Form',
+    message: messageFormatted,
     inbox: 'sales',
   }
 
-  return SalesContactFormController.submitForm(req, res)
+  await Modules.promises.hooks.fire('sendSupportRequest', data)
+  res.sendStatus(204)
 }
 
 async function flexibleLicensingSplitTest(req, res, next) {
