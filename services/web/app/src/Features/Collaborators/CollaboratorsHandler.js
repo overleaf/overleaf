@@ -284,20 +284,39 @@ async function setCollaboratorPrivilegeLevel(
   // collaborator
   const query = {
     _id: projectId,
-    $or: [{ collaberator_refs: userId }, { readOnly_refs: userId }],
+    $or: [
+      { collaberator_refs: userId },
+      { readOnly_refs: userId },
+      { reviewer_refs: userId },
+    ],
   }
   let update
   switch (privilegeLevel) {
     case PrivilegeLevels.READ_AND_WRITE: {
       update = {
-        $pull: { readOnly_refs: userId, pendingEditor_refs: userId },
+        $pull: {
+          readOnly_refs: userId,
+          pendingEditor_refs: userId,
+          reviewer_refs: userId,
+        },
         $addToSet: { collaberator_refs: userId },
+      }
+      break
+    }
+    case PrivilegeLevels.REVIEW: {
+      update = {
+        $pull: {
+          readOnly_refs: userId,
+          pendingEditor_refs: userId,
+          collaberator_refs: userId,
+        },
+        $addToSet: { reviewer_refs: userId },
       }
       break
     }
     case PrivilegeLevels.READ_ONLY: {
       update = {
-        $pull: { collaberator_refs: userId },
+        $pull: { collaberator_refs: userId, reviewer_refs: userId },
         $addToSet: { readOnly_refs: userId },
       }
       if (pendingEditor) {
