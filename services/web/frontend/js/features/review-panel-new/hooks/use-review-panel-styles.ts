@@ -1,9 +1,14 @@
 import { CSSProperties, useCallback, useEffect, useState } from 'react'
 import { useCodeMirrorViewContext } from '@/features/source-editor/components/codemirror-context'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 export const useReviewPanelStyles = (mini: boolean) => {
   const view = useCodeMirrorViewContext()
-  const [styles, setStyles] = useState<CSSProperties>()
+  const enableReviewerRole = useFeatureFlag('reviewer-role')
+
+  const [styles, setStyles] = useState<CSSProperties>({
+    '--review-panel-header-height': enableReviewerRole ? '36px' : '69px',
+  } as CSSProperties)
 
   const updateScrollDomVariables = useCallback((element: HTMLDivElement) => {
     const { top, bottom } = element.getBoundingClientRect()

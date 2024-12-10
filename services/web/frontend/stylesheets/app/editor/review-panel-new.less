@@ -1,6 +1,4 @@
 .review-panel-new {
-  @review-panel-header-height: 69px;
-
   &.review-panel-container {
     height: 100%;
     flex-shrink: 0;
@@ -149,7 +147,7 @@
     position: sticky;
     top: 0;
     width: var(--review-panel-width);
-    height: @review-panel-header-height;
+    height: var(--review-panel-header-height);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -163,7 +161,7 @@
   .rp-tc-state {
     background-color: white;
     max-height: calc(
-      100vh - var(--review-panel-top) - @review-panel-header-height
+      100vh - var(--review-panel-top) - var(--review-panel-header-height)
     );
     overflow-y: auto;
   }
@@ -178,10 +176,40 @@
     flex-basis: 32px;
   }
 
-  .resolved-comments-toggle {
+  .review-panel-resolved-comments-toggle {
+    background-color: @gray-lightest;
+    font-size: 14px;
+    color: lighten(@rp-type-blue, 25%);
+    border: solid 1px @rp-border-grey;
+    border-radius: 3px;
+    padding: 0 4px;
+    height: 22px;
+    width: 22px;
+    line-height: 1.4;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      color: @rp-type-blue;
+    }
+  }
+
+  .review-panel-resolved-comments-toggle-reviewer-role {
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: transparent;
+    color: @content-primary;
+    padding: 2px;
+    border-radius: 100%;
+
+    &:hover,
+    &:focus {
+      background-color: @neutral-20;
+    }
   }
 
   .track-changes-indicator-circle {
@@ -207,15 +235,17 @@
 
   .review-panel-heading {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 6px 4px;
+    gap: 2px;
 
     .review-panel-label {
       font-family: Lato, sans-serif;
       font-size: @font-size-02;
       font-weight: bold;
       margin: 0;
+      flex: 1;
+      text-align: start;
     }
 
     .review-panel-split-test-badge {
@@ -447,7 +477,7 @@
   .review-panel-overview {
     padding: 4px;
     position: absolute;
-    top: @review-panel-header-height;
+    top: var(--review-panel-header-height);
     bottom: 59px;
     width: 100%;
     overflow: auto;
@@ -563,7 +593,9 @@
     }
 
     &.upwards {
-      top: calc(var(--review-panel-top) + @review-panel-header-height + 16px);
+      top: calc(
+        var(--review-panel-top) + var(--review-panel-header-height) + 16px
+      );
     }
   }
 

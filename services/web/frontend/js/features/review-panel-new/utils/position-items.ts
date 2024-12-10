@@ -1,6 +1,7 @@
+import { isSplitTestEnabled } from '@/utils/splitTestUtils'
 import { debounce } from 'lodash'
 
-const COLLAPSED_HEADER_HEIGHT = 75
+const COLLAPSED_HEADER_HEIGHT = isSplitTestEnabled('reviewer-role') ? 42 : 75
 const OFFSET_FOR_ENTRIES_ABOVE = 70
 const GAP_BETWEEN_ENTRIES = 4
 

@@ -6,12 +6,15 @@ import MaterialIcon from '@/shared/components/material-icon'
 import { useLayoutContext } from '@/shared/context/layout-context'
 import SplitTestBadge from '@/shared/components/split-test-badge'
 import { useTranslation } from 'react-i18next'
+import { useFeatureFlag } from '@/shared/context/split-test-context'
 
 const ReviewPanelHeader: FC = () => {
   const [trackChangesMenuExpanded, setTrackChangesMenuExpanded] =
     useState(false)
   const { setReviewPanelOpen } = useLayoutContext()
   const { t } = useTranslation()
+
+  const enableReviewerRole = useFeatureFlag('reviewer-role')
 
   return (
     <div className="review-panel-header">
@@ -25,6 +28,7 @@ const ReviewPanelHeader: FC = () => {
             />
           </span>
         </div>
+        {enableReviewerRole && <ReviewPanelResolvedThreadsButton />}
         <button
           type="button"
           className="btn review-panel-close-button"
@@ -33,13 +37,15 @@ const ReviewPanelHeader: FC = () => {
           <MaterialIcon type="close" />
         </button>
       </div>
-      <div className="review-panel-tools">
-        <ReviewPanelResolvedThreadsButton />
-        <ReviewPanelTrackChangesMenuButton
-          menuExpanded={trackChangesMenuExpanded}
-          setMenuExpanded={setTrackChangesMenuExpanded}
-        />
-      </div>
+      {!enableReviewerRole && (
+        <div className="review-panel-tools">
+          <ReviewPanelResolvedThreadsButton />
+          <ReviewPanelTrackChangesMenuButton
+            menuExpanded={trackChangesMenuExpanded}
+            setMenuExpanded={setTrackChangesMenuExpanded}
+          />
+        </div>
+      )}
 
       {trackChangesMenuExpanded && <ReviewPanelTrackChangesMenu />}
     </div>

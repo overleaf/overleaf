@@ -1,6 +1,6 @@
-.review-panel-new {
-  $review-panel-header-height: 69px;
+@use 'sass:color';
 
+.review-panel-new {
   &.review-panel-container {
     height: 100%;
     flex-shrink: 0;
@@ -158,7 +158,7 @@
     position: sticky;
     top: 0;
     width: var(--review-panel-width);
-    height: $review-panel-header-height;
+    height: var(--review-panel-header-height);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -172,7 +172,7 @@
   .rp-tc-state {
     background-color: var(--white);
     max-height: calc(
-      100vh - var(--review-panel-top) - $review-panel-header-height
+      100vh - var(--review-panel-top) - var(--review-panel-header-height)
     );
     overflow-y: auto;
   }
@@ -187,10 +187,40 @@
     flex-basis: 32px;
   }
 
-  .resolved-comments-toggle {
+  .review-panel-resolved-comments-toggle {
+    background-color: var(--bg-light-secondary);
+    font-size: var(--font-size-02);
+    color: color.adjust($rp-type-blue, $lightness: 25%);
+    border: solid 1px var(--rp-border-grey);
+    border-radius: var(--border-radius-base);
+    padding: 0;
+    height: 22px;
+    width: 22px;
+    line-height: 1.4;
     display: flex;
     align-items: center;
     justify-content: center;
+
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      color: $rp-type-blue;
+    }
+  }
+
+  .review-panel-resolved-comments-toggle-reviewer-role {
+    display: flex;
+    align-items: center;
+    border: none;
+    background-color: transparent;
+    color: var(--content-primary);
+    padding: var(--spacing-01);
+    border-radius: 100%;
+
+    &:hover,
+    &:focus {
+      background-color: var(--neutral-20);
+    }
   }
 
   .track-changes-indicator-circle {
@@ -216,14 +246,16 @@
 
   .review-panel-heading {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: var(--spacing-03) var(--spacing-02);
+    gap: 2px;
 
     .review-panel-label {
       font-size: var(--font-size-02);
       font-weight: bold;
       margin: 0;
+      flex: 1;
+      text-align: start;
     }
 
     .review-panel-split-test-badge {
@@ -452,7 +484,7 @@
   .review-panel-overview {
     padding: var(--spacing-02);
     position: absolute;
-    top: $review-panel-header-height;
+    top: var(--review-panel-header-height);
     bottom: 59px;
     width: 100%;
     overflow: auto;
@@ -568,7 +600,9 @@
     }
 
     &.upwards {
-      top: calc(var(--review-panel-top) + $review-panel-header-height + 16px);
+      top: calc(
+        var(--review-panel-top) + var(--review-panel-header-height) + 16px
+      );
     }
   }
 
