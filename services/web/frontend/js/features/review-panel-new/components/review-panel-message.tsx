@@ -119,6 +119,7 @@ export const ReviewPanelMessage: FC<{
       ) : (
         <ExpandableContent
           className="review-panel-comment-body"
+          contentLimit={100}
           checkNewLines
           content={message.content}
         />
