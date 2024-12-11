@@ -103,6 +103,20 @@
     }
   }
 
+  @each $spacing-option in $all-spacings {
+    // create .padding-top-spacing-00, .padding-top-spacing-01, .padding-top-spacing-02, .padding-top-spacing-03, .padding-top-spacing-04, .padding-top-spacing-05, .padding-top-spacing-06, .padding-top-spacing-07, .padding-top-spacing-08, .padding-top-spacing-09, .padding-top-spacing-10, .padding-top-spacing-11, .padding-top-spacing-12, .padding-top-spacing-13, .padding-top-spacing-14, .padding-top-spacing-15, .padding-top-spacing-16
+    .padding-top-#{$spacing-option} {
+      padding-top: var(--#{$spacing-option});
+    }
+  }
+
+  @each $spacing-option in $all-spacings {
+    // create .padding-bottom-spacing-00, .padding-bottom-spacing-01, .padding-bottom-spacing-02, .padding-bottom-spacing-03, .padding-bottom-spacing-04, .padding-bottom-spacing-05, .padding-bottom-spacing-06, .padding-bottom-spacing-07, .padding-bottom-spacing-08, .padding-bottom-spacing-09, .padding-bottom-spacing-10, .padding-bottom-spacing-11, .padding-bottom-spacing-12, .padding-bottom-spacing-13, .padding-bottom-spacing-14, .padding-bottom-spacing-15, .padding-bottom-spacing-16
+    .padding-bottom-#{$spacing-option} {
+      padding-bottom: var(--#{$spacing-option});
+    }
+  }
+
   .font-color-green-bright {
     p,
     h1,
