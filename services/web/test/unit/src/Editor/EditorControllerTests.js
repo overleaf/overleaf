@@ -14,6 +14,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const OError = require('@overleaf/o-error')
 
 const modulePath = require('path').join(
   __dirname,
@@ -1023,6 +1024,58 @@ describe('EditorController', function () {
 
       it('should not emit the update to the room', function () {
         expect(this.EditorRealTimeController.emitToRoom).to.not.have.been.called
+      })
+    })
+  })
+
+  describe('appendToDoc', function () {
+    describe('on success', function () {
+      beforeEach(function () {
+        this.docId = 'doc-1'
+        this.ProjectEntityUpdateHandler.appendToDoc = sinon
+          .stub()
+          .yields(null, { rev: '1' })
+        this.EditorController.appendToDoc(
+          this.project_id,
+          this.docId,
+          this.docLines,
+          this.source,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('appends to the doc using the project entity handler', function () {
+        this.ProjectEntityUpdateHandler.appendToDoc
+          .calledWith(this.project_id, this.docId, this.docLines, this.source)
+          .should.equal(true)
+      })
+    })
+
+    describe('on error', function () {
+      beforeEach(function () {
+        this.docId = 'doc-1'
+        this.ProjectEntityUpdateHandler.appendToDoc = sinon
+          .stub()
+          .yields(new Error('foo'))
+        this.EditorController.appendToDoc(
+          this.project_id,
+          this.docId,
+          this.docLines,
+          this.source,
+          this.user_id,
+          this.callback
+        )
+      })
+
+      it('tries to append to the doc using the project entity handler', function () {
+        this.ProjectEntityUpdateHandler.appendToDoc
+          .calledWith(this.project_id, this.docId, this.docLines, this.source)
+          .should.equal(true)
+      })
+
+      it('tags the error', function () {
+        this.callback.calledWith(sinon.match.instanceOf(OError))
       })
     })
   })

@@ -209,7 +209,7 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.DocumentManager.setDocWithLock = sinon
           .stub()
-          .callsArgWith(6, null, { rev: '123' })
+          .callsArgWith(7, null, { rev: '123' })
         this.HttpController.setDoc(this.req, this.res, this.next)
       })
 
@@ -221,7 +221,8 @@ describe('HttpController', function () {
             this.lines,
             this.source,
             this.user_id,
-            this.undoing
+            this.undoing,
+            true
           )
           .should.equal(true)
       })
@@ -255,7 +256,7 @@ describe('HttpController', function () {
       beforeEach(function () {
         this.DocumentManager.setDocWithLock = sinon
           .stub()
-          .callsArgWith(6, new Error('oops'))
+          .callsArgWith(7, new Error('oops'))
         this.HttpController.setDoc(this.req, this.res, this.next)
       })
 
@@ -1100,6 +1101,98 @@ describe('HttpController', function () {
 
       it('should call next with the error', function () {
         this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+    })
+  })
+
+  describe('appendToDoc', function () {
+    beforeEach(function () {
+      this.lines = ['one', 'two', 'three']
+      this.source = 'dropbox'
+      this.user_id = 'user-id-123'
+      this.req = {
+        headers: {},
+        params: {
+          project_id: this.project_id,
+          doc_id: this.doc_id,
+        },
+        query: {},
+        body: {
+          lines: this.lines,
+          source: this.source,
+          user_id: this.user_id,
+          undoing: (this.undoing = true),
+        },
+      }
+    })
+
+    describe('successfully', function () {
+      beforeEach(function () {
+        this.DocumentManager.appendToDocWithLock = sinon
+          .stub()
+          .callsArgWith(5, null, { rev: '123' })
+        this.HttpController.appendToDoc(this.req, this.res, this.next)
+      })
+
+      it('should append to the doc', function () {
+        this.DocumentManager.appendToDocWithLock
+          .calledWith(
+            this.project_id,
+            this.doc_id,
+            this.lines,
+            this.source,
+            this.user_id
+          )
+          .should.equal(true)
+      })
+
+      it('should return a json response with the document rev from web', function () {
+        this.res.json.calledWithMatch({ rev: '123' }).should.equal(true)
+      })
+
+      it('should log the request', function () {
+        this.logger.debug
+          .calledWith(
+            {
+              docId: this.doc_id,
+              projectId: this.project_id,
+              lines: this.lines,
+              source: this.source,
+              userId: this.user_id,
+            },
+            'appending to doc via http'
+          )
+          .should.equal(true)
+      })
+
+      it('should time the request', function () {
+        this.Metrics.Timer.prototype.done.called.should.equal(true)
+      })
+    })
+
+    describe('when an errors occurs', function () {
+      beforeEach(function () {
+        this.DocumentManager.appendToDocWithLock = sinon
+          .stub()
+          .callsArgWith(5, new Error('oops'))
+        this.HttpController.appendToDoc(this.req, this.res, this.next)
+      })
+
+      it('should call next with the error', function () {
+        this.next.calledWith(sinon.match.instanceOf(Error)).should.equal(true)
+      })
+    })
+
+    describe('when the payload is too large', function () {
+      beforeEach(function () {
+        this.DocumentManager.appendToDocWithLock = sinon
+          .stub()
+          .callsArgWith(5, new Errors.FileTooLargeError())
+        this.HttpController.appendToDoc(this.req, this.res, this.next)
+      })
+
+      it('should send back a 422 response', function () {
+        this.res.sendStatus.calledWith(422).should.equal(true)
       })
     })
   })

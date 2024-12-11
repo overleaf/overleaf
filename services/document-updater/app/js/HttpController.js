@@ -144,12 +144,42 @@ function setDoc(req, res, next) {
     source,
     userId,
     undoing,
+    true,
     (error, result) => {
       timer.done()
       if (error) {
         return next(error)
       }
       logger.debug({ projectId, docId }, 'set doc via http')
+      res.json(result)
+    }
+  )
+}
+
+function appendToDoc(req, res, next) {
+  const docId = req.params.doc_id
+  const projectId = req.params.project_id
+  const { lines, source, user_id: userId } = req.body
+  const timer = new Metrics.Timer('http.appendToDoc')
+  DocumentManager.appendToDocWithLock(
+    projectId,
+    docId,
+    lines,
+    source,
+    userId,
+    (error, result) => {
+      timer.done()
+      if (error instanceof Errors.FileTooLargeError) {
+        logger.warn('refusing to append to file, it would become too large')
+        return res.sendStatus(422)
+      }
+      if (error) {
+        return next(error)
+      }
+      logger.debug(
+        { projectId, docId, lines, source, userId },
+        'appending to doc via http'
+      )
       res.json(result)
     }
   )
@@ -460,6 +490,7 @@ module.exports = {
   peekDoc,
   getProjectDocsAndFlushIfOld,
   clearProjectState,
+  appendToDoc,
   setDoc,
   flushDocIfLoaded,
   deleteDoc,

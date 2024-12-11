@@ -515,6 +515,24 @@ const upsertDoc = wrapWithLock(
   }
 )
 
+const appendToDoc = wrapWithLock(
+  async (projectId, docId, lines, source, userId) => {
+    const { element } = await ProjectLocator.promises.findElement({
+      project_id: projectId,
+      element_id: docId,
+      type: 'doc',
+    })
+
+    return await DocumentUpdaterHandler.promises.appendToDocument(
+      projectId,
+      element._id,
+      userId,
+      lines,
+      source
+    )
+  }
+)
+
 const upsertFile = wrapWithLock({
   async beforeLock(
     projectId,
@@ -1212,6 +1230,8 @@ const ProjectEntityUpdateHandler = {
 
   upsertDoc: callbackifyMultiResult(upsertDoc, ['doc', 'isNew']),
 
+  appendToDoc: callbackify(appendToDoc),
+
   upsertDocWithPath: callbackifyMultiResult(upsertDocWithPath, [
     'doc',
     'isNew',
@@ -1253,6 +1273,7 @@ const ProjectEntityUpdateHandler = {
     upsertDocWithPath,
     upsertFile,
     upsertFileWithPath,
+    appendToDocWithPath: appendToDoc,
   },
 
   async _addDocAndSendToTpds(projectId, folderId, doc) {

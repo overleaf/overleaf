@@ -3167,4 +3167,107 @@ describe('ProjectEntityUpdateHandler', function () {
       })
     })
   })
+
+  describe('appendToDoc', function () {
+    describe('when document cannot be found', function () {
+      beforeEach(function (done) {
+        this.appendedLines = ['5678', 'def']
+        this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
+        this.ProjectLocator.promises.findElement = sinon.stub()
+        this.ProjectLocator.promises.findElement
+          .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
+          .rejects(new Errors.NotFoundError())
+        this.ProjectEntityUpdateHandler.appendToDoc(
+          projectId,
+          docId,
+          this.appendedLines,
+          this.source,
+          userId,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should not talk to DocumentUpdaterHandler', function () {
+        this.DocumentUpdaterHandler.promises.appendToDocument.should.not.have
+          .been.called
+      })
+
+      it('should throw the error', function () {
+        this.callback.should.have.been.calledWith(
+          sinon.match.instanceOf(Errors.NotFoundError)
+        )
+      })
+    })
+
+    describe('when document is found', function () {
+      beforeEach(function (done) {
+        this.appendedLines = ['5678', 'def']
+        this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
+        this.DocumentUpdaterHandler.promises.appendToDocument
+          .withArgs(projectId, docId, userId, this.appendedLines, this.source)
+          .resolves({ rev: 1 })
+        this.ProjectLocator.promises.findElement = sinon.stub()
+        this.ProjectLocator.promises.findElement
+          .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
+          .resolves({ element: { _id: docId } })
+        this.ProjectEntityUpdateHandler.appendToDoc(
+          projectId,
+          docId,
+          this.appendedLines,
+          this.source,
+          userId,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should forward call to DocumentUpdaterHandler.appendToDocument', function () {
+        this.DocumentUpdaterHandler.promises.appendToDocument.should.have.been.calledWith(
+          projectId,
+          docId,
+          userId,
+          this.appendedLines,
+          this.source
+        )
+      })
+
+      it('should return the response from DocumentUpdaterHandler', function () {
+        this.callback.should.have.been.calledWith(null, { rev: 1 })
+      })
+    })
+
+    describe('when DocumentUpdater throws an error', function () {
+      beforeEach(function (done) {
+        this.appendedLines = ['5678', 'def']
+        this.DocumentUpdaterHandler.promises.appendToDocument = sinon.stub()
+        this.DocumentUpdaterHandler.promises.appendToDocument.rejects(
+          new Error()
+        )
+        this.ProjectLocator.promises.findElement = sinon.stub()
+        this.ProjectLocator.promises.findElement
+          .withArgs({ project_id: projectId, element_id: docId, type: 'doc' })
+          .resolves({ element: { _id: docId } })
+        this.ProjectEntityUpdateHandler.appendToDoc(
+          projectId,
+          docId,
+          this.appendedLines,
+          this.source,
+          userId,
+          (...args) => {
+            this.callback(...args)
+            done()
+          }
+        )
+      })
+
+      it('should return the response from DocumentUpdaterHandler', function () {
+        this.callback.should.have.been.calledWith(sinon.match.instanceOf(Error))
+      })
+    })
+  })
 })

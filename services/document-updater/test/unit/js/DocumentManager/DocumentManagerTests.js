@@ -53,6 +53,9 @@ describe('DocumentManager', function () {
       acceptChanges: sinon.stub(),
       deleteComment: sinon.stub(),
     }
+    this.Settings = {
+      max_doc_length: 2 * 1024 * 1024, // 2mb
+    }
 
     this.DocumentManager = SandboxedModule.require(modulePath, {
       requires: {
@@ -65,6 +68,7 @@ describe('DocumentManager', function () {
         './UpdateManager': this.UpdateManager,
         './RangesManager': this.RangesManager,
         './Errors': Errors,
+        '@overleaf/settings': this.Settings,
       },
     })
     this.project_id = 'project-id-123'
@@ -446,7 +450,8 @@ describe('DocumentManager', function () {
             this.beforeLines,
             this.source,
             this.user_id,
-            false
+            false,
+            true
           )
         })
 
@@ -480,7 +485,8 @@ describe('DocumentManager', function () {
             this.beforeLines,
             this.source,
             this.user_id,
-            false
+            false,
+            true
           )
         })
 
@@ -513,7 +519,8 @@ describe('DocumentManager', function () {
             this.afterLines,
             this.source,
             this.user_id,
-            false
+            false,
+            true
           )
         })
 
@@ -582,7 +589,8 @@ describe('DocumentManager', function () {
             this.afterLines,
             this.source,
             this.user_id,
-            false
+            false,
+            true
           )
         })
 
@@ -618,7 +626,8 @@ describe('DocumentManager', function () {
               null,
               this.source,
               this.user_id,
-              false
+              false,
+              true
             )
           ).to.be.rejectedWith('No lines were provided to setDoc')
         })
@@ -642,12 +651,84 @@ describe('DocumentManager', function () {
             this.afterLines,
             this.source,
             this.user_id,
+            true,
             true
           )
         })
 
         it('should set the undo flag on each op', function () {
           this.ops.map(op => op.u.should.equal(true))
+        })
+      })
+
+      describe('with the external flag', function () {
+        beforeEach(async function () {
+          this.undoing = false
+          // Copy ops so we don't interfere with other tests
+          this.ops = [
+            { i: 'foo', p: 4 },
+            { d: 'bar', p: 42 },
+          ]
+          this.DiffCodec.diffAsShareJsOp.returns(this.ops)
+          await this.DocumentManager.promises.setDoc(
+            this.project_id,
+            this.doc_id,
+            this.afterLines,
+            this.source,
+            this.user_id,
+            this.undoing,
+            true
+          )
+        })
+
+        it('should add the external type to update metadata', function () {
+          this.UpdateManager.promises.applyUpdate
+            .calledWith(this.project_id, this.doc_id, {
+              doc: this.doc_id,
+              v: this.version,
+              op: this.ops,
+              meta: {
+                type: 'external',
+                source: this.source,
+                user_id: this.user_id,
+              },
+            })
+            .should.equal(true)
+        })
+      })
+
+      describe('without the external flag', function () {
+        beforeEach(async function () {
+          this.undoing = false
+          // Copy ops so we don't interfere with other tests
+          this.ops = [
+            { i: 'foo', p: 4 },
+            { d: 'bar', p: 42 },
+          ]
+          this.DiffCodec.diffAsShareJsOp.returns(this.ops)
+          await this.DocumentManager.promises.setDoc(
+            this.project_id,
+            this.doc_id,
+            this.afterLines,
+            this.source,
+            this.user_id,
+            this.undoing,
+            false
+          )
+        })
+
+        it('should not add the external type to update metadata', function () {
+          this.UpdateManager.promises.applyUpdate
+            .calledWith(this.project_id, this.doc_id, {
+              doc: this.doc_id,
+              v: this.version,
+              op: this.ops,
+              meta: {
+                source: this.source,
+                user_id: this.user_id,
+              },
+            })
+            .should.equal(true)
         })
       })
     })
@@ -1133,6 +1214,70 @@ describe('DocumentManager', function () {
             this.historyRangesSupport
           )
           .should.equal(true)
+      })
+    })
+  })
+
+  describe('appendToDoc', function () {
+    describe('sucessfully', function () {
+      beforeEach(async function () {
+        this.lines = ['one', 'two', 'three']
+        this.DocumentManager.promises.setDoc = sinon
+          .stub()
+          .resolves({ rev: '123' })
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+        })
+        this.result = await this.DocumentManager.promises.appendToDoc(
+          this.project_id,
+          this.doc_id,
+          ['four', 'five', 'six'],
+          this.source,
+          this.user_id
+        )
+      })
+
+      it('should call setDoc with concatenated lines', function () {
+        this.DocumentManager.promises.setDoc
+          .calledWith(
+            this.project_id,
+            this.doc_id,
+            ['one', 'two', 'three', 'four', 'five', 'six'],
+            this.source,
+            this.user_id,
+            false,
+            false
+          )
+          .should.equal(true)
+      })
+
+      it('should return output from setDoc', function () {
+        this.result.should.deep.equal({ rev: '123' })
+      })
+    })
+
+    describe('when doc would become too big', function () {
+      beforeEach(async function () {
+        this.Settings.max_doc_length = 100
+        this.lines = ['one', 'two', 'three']
+        this.DocumentManager.promises.setDoc = sinon
+          .stub()
+          .resolves({ rev: '123' })
+        this.DocumentManager.promises.getDoc = sinon.stub().resolves({
+          lines: this.lines,
+        })
+      })
+
+      it('should fail with FileTooLarge error', async function () {
+        expect(
+          this.DocumentManager.promises.appendToDoc(
+            this.project_id,
+            this.doc_id,
+            ['x'.repeat(1000)],
+            this.source,
+            this.user_id
+          )
+        ).to.eventually.be.rejectedWith(Errors.FileTooLargeError)
       })
     })
   })

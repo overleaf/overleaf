@@ -9,6 +9,8 @@ const HistoryManager = require('./HistoryManager')
 const Errors = require('./Errors')
 const RangesManager = require('./RangesManager')
 const { extractOriginOrSource } = require('./Utils')
+const { getTotalSizeOfLines } = require('./Limits')
+const Settings = require('@overleaf/settings')
 
 const MAX_UNFLUSHED_AGE = 300 * 1000 // 5 mins, document should be flushed to mongo this time after a change
 
@@ -112,7 +114,41 @@ const DocumentManager = {
     }
   },
 
-  async setDoc(projectId, docId, newLines, originOrSource, userId, undoing) {
+  async appendToDoc(projectId, docId, linesToAppend, originOrSource, userId) {
+    const { lines: currentLines } = await DocumentManager.getDoc(
+      projectId,
+      docId
+    )
+    const currentLineSize = getTotalSizeOfLines(currentLines)
+    const addedSize = getTotalSizeOfLines(linesToAppend)
+    const newlineSize = '\n'.length
+
+    if (currentLineSize + newlineSize + addedSize > Settings.max_doc_length) {
+      throw new Errors.FileTooLargeError(
+        'doc would become too large if appending this text'
+      )
+    }
+
+    return await DocumentManager.setDoc(
+      projectId,
+      docId,
+      currentLines.concat(linesToAppend),
+      originOrSource,
+      userId,
+      false,
+      false
+    )
+  },
+
+  async setDoc(
+    projectId,
+    docId,
+    newLines,
+    originOrSource,
+    userId,
+    undoing,
+    external
+  ) {
     if (newLines == null) {
       throw new Error('No lines were provided to setDoc')
     }
@@ -150,9 +186,11 @@ const DocumentManager = {
       op,
       v: version,
       meta: {
-        type: 'external',
         user_id: userId,
       },
+    }
+    if (external) {
+      update.meta.type = 'external'
     }
     if (origin) {
       update.meta.origin = origin
@@ -481,7 +519,15 @@ const DocumentManager = {
     )
   },
 
-  async setDocWithLock(projectId, docId, lines, source, userId, undoing) {
+  async setDocWithLock(
+    projectId,
+    docId,
+    lines,
+    source,
+    userId,
+    undoing,
+    external
+  ) {
     const UpdateManager = require('./UpdateManager')
     return await UpdateManager.promises.lockUpdatesAndDo(
       DocumentManager.setDoc,
@@ -490,7 +536,20 @@ const DocumentManager = {
       lines,
       source,
       userId,
-      undoing
+      undoing,
+      external
+    )
+  },
+
+  async appendToDocWithLock(projectId, docId, lines, source, userId) {
+    const UpdateManager = require('./UpdateManager')
+    return await UpdateManager.promises.lockUpdatesAndDo(
+      DocumentManager.appendToDoc,
+      projectId,
+      docId,
+      lines,
+      source,
+      userId
     )
   },
 

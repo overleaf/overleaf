@@ -114,6 +114,23 @@ function setDocument(projectId, docId, userId, docLines, source, callback) {
   )
 }
 
+function appendToDocument(projectId, docId, userId, lines, source, callback) {
+  _makeRequest(
+    {
+      path: `/project/${projectId}/doc/${docId}/append`,
+      method: 'POST',
+      json: {
+        lines,
+        source,
+        user_id: userId,
+      },
+    },
+    projectId,
+    'append-to-document',
+    callback
+  )
+}
+
 function getProjectDocsIfMatch(projectId, projectStateHash, callback) {
   // If the project state hasn't changed, we can get all the latest
   // docs from redis via the docupdater. Otherwise we will need to
@@ -533,6 +550,7 @@ module.exports = {
   deleteDoc,
   getDocument,
   setDocument,
+  appendToDocument,
   getProjectDocsIfMatch,
   clearProjectState,
   acceptChanges,
@@ -566,5 +584,6 @@ module.exports = {
     blockProject: promisify(blockProject),
     unblockProject: promisify(unblockProject),
     updateProjectStructure: promisify(updateProjectStructure),
+    appendToDocument: promisify(appendToDocument),
   },
 }
