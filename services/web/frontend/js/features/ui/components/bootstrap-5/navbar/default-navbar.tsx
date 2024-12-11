@@ -23,6 +23,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     enableUpgradeButton,
     suppressNavbarRight,
     suppressNavContentLinks,
+    showAccountButtons = true,
     showSubscriptionLink,
     showSignUpLink,
     currentUrl,
@@ -110,17 +111,18 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                       />
                     ) : null
                   })}
-                  {sessionUser ? (
-                    <LoggedInItems
-                      sessionUser={sessionUser}
-                      showSubscriptionLink={showSubscriptionLink}
-                    />
-                  ) : (
-                    <LoggedOutItems
-                      showSignUpLink={showSignUpLink}
-                      currentUrl={currentUrl}
-                    />
-                  )}
+                  {showAccountButtons &&
+                    (sessionUser ? (
+                      <LoggedInItems
+                        sessionUser={sessionUser}
+                        showSubscriptionLink={showSubscriptionLink}
+                      />
+                    ) : (
+                      <LoggedOutItems
+                        showSignUpLink={showSignUpLink}
+                        currentUrl={currentUrl}
+                      />
+                    ))}
                 </Nav>
               </Navbar.Collapse>
             </>

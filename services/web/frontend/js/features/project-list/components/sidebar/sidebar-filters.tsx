@@ -27,7 +27,7 @@ export function SidebarFilter({ filter, text }: SidebarFilterProps) {
   )
 }
 
-export default function SidebarFilters() {
+export default function SidebarFilters({ withHr }: { withHr?: boolean }) {
   const { t } = useTranslation()
 
   return (
@@ -37,6 +37,11 @@ export default function SidebarFilters() {
       <SidebarFilter filter="shared" text={t('shared_with_you')} />
       <SidebarFilter filter="archived" text={t('archived_projects')} />
       <SidebarFilter filter="trashed" text={t('trashed_projects')} />
+      {withHr && (
+        <li role="none">
+          <hr />
+        </li>
+      )}
       <TagsList />
     </ul>
   )

@@ -5,6 +5,7 @@ import { ColorPickerProvider } from '../../../../../frontend/js/features/project
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
 import { Project } from '../../../../../types/project/dashboard/api'
 import { projectsData } from '../fixtures/projects-data'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
 
 type Options = {
   projects?: Project[]
@@ -36,7 +37,9 @@ export function renderWithProjectListContext(
     children: React.ReactNode
   }) => (
     <ProjectListProvider>
-      <ColorPickerProvider>{children}</ColorPickerProvider>
+      <SplitTestProvider>
+        <ColorPickerProvider>{children}</ColorPickerProvider>
+      </SplitTestProvider>
     </ProjectListProvider>
   )
 

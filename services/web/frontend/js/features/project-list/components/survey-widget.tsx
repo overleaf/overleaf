@@ -3,7 +3,11 @@ import getMeta from '../../../utils/meta'
 import { useCallback } from 'react'
 import Close from '@/shared/components/close'
 
-export default function SurveyWidget() {
+export default function SurveyWidget({
+  variant = 'dark',
+}: {
+  variant?: 'light' | 'dark'
+}) {
   const survey = getMeta('ol-survey')
   const [dismissedSurvey, setDismissedSurvey] = usePersistedState(
     `dismissed-${survey?.name}`,
@@ -34,7 +38,7 @@ export default function SurveyWidget() {
             </a>
           </div>
           <div className="notification-close notification-close-button-style">
-            <Close variant="dark" onDismiss={() => dismissSurvey()} />
+            <Close variant={variant} onDismiss={() => dismissSurvey()} />
           </div>
         </div>
       </div>

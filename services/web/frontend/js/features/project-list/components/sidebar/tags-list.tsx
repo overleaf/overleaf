@@ -13,6 +13,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '@/features/ui/components/bootstrap-5/dropdown-menu'
+import { useIsDsNav } from '@/features/project-list/components/use-is-ds-nav'
 
 export default function TagsList() {
   const { t } = useTranslation()
@@ -33,6 +34,7 @@ export default function TagsList() {
     DeleteTagModal,
   } = useTag()
 
+  const isDsNav = useIsDsNav()
   return (
     <>
       <li
@@ -40,7 +42,7 @@ export default function TagsList() {
         aria-hidden="true"
         data-testid="organize-projects"
       >
-        {t('organize_projects')}
+        {isDsNav ? t('organize_tags') : t('organize_projects')}
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>
@@ -113,7 +115,7 @@ export default function TagsList() {
             className="tag-name"
             onClick={() => selectTag(UNCATEGORIZED_KEY)}
           >
-            <span className="name">
+            <span className="name fst-italic">
               {t('uncategorized')}{' '}
               <span className="subdued">({untaggedProjectsCount})</span>
             </span>

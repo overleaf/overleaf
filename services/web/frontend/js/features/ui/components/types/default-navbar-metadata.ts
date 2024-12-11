@@ -13,6 +13,7 @@ export type DefaultNavbarMetadata = {
   enableUpgradeButton: boolean
   suppressNavbarRight: boolean
   suppressNavContentLinks: boolean
+  showAccountButtons?: boolean
   showSubscriptionLink: boolean
   showSignUpLink: boolean
   currentUrl: string

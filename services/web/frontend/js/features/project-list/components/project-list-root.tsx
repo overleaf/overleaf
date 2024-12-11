@@ -20,6 +20,7 @@ import DefaultNavbar from '@/features/ui/components/bootstrap-5/navbar/default-n
 import FatFooter from '@/features/ui/components/bootstrap-5/footer/fat-footer'
 import WelcomePageContent from '@/features/project-list/components/welcome-page-content'
 import ProjectListDefault from '@/features/project-list/components/project-list-default'
+import { ProjectListDsNav } from '@/features/project-list/components/project-list-ds-nav'
 
 function ProjectListRoot() {
   const { isReady } = useWaitForI18n()
@@ -108,12 +109,7 @@ function ProjectListPageContent() {
       </DefaultPageContentWrapper>
     )
   } else if (hasDsNav) {
-    return (
-      <>
-        <div>Header with cut-down nav</div>
-        <div>Project list with DS nav and footer</div>
-      </>
-    )
+    return <ProjectListDsNav />
   } else {
     return (
       <DefaultPageContentWrapper>
