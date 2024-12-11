@@ -8,6 +8,8 @@ import { useThreadsContext } from '@/features/review-panel-new/context/threads-c
 import { hasActiveRange } from '@/features/review-panel-new/utils/has-active-range'
 import TrackChangesOnWidget from './track-changes-on-widget'
 import { useEditorManagerContext } from '@/features/ide-react/context/editor-manager-context'
+import ReviewModeSwitcher from './review-mode-switcher'
+import getMeta from '@/utils/meta'
 
 function ReviewPanelContainer() {
   const view = useCodeMirrorViewContext()
@@ -15,6 +17,7 @@ function ReviewPanelContainer() {
   const threads = useThreadsContext()
   const { reviewPanelOpen } = useLayoutContext()
   const { wantTrackChanges } = useEditorManagerContext()
+  const enableReviewerRole = getMeta('ol-isReviewerRoleEnabled')
 
   if (!view) {
     return null
@@ -22,11 +25,13 @@ function ReviewPanelContainer() {
 
   const hasCommentOrChange = hasActiveRange(ranges, threads)
   const showPanel = reviewPanelOpen || hasCommentOrChange
-  const showTrackChangesWidget = wantTrackChanges && !reviewPanelOpen
+  const showTrackChangesWidget =
+    !enableReviewerRole && wantTrackChanges && !reviewPanelOpen
 
   return ReactDOM.createPortal(
     <>
       {showTrackChangesWidget && <TrackChangesOnWidget />}
+      {enableReviewerRole && <ReviewModeSwitcher />}
       {showPanel && <ReviewPanel mini={!reviewPanelOpen} />}
     </>,
     view.scrollDOM

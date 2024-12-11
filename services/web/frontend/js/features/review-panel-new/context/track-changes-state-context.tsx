@@ -36,6 +36,7 @@ type SaveTrackChangesRequestBody = {
 
 type TrackChangesStateActions = {
   saveTrackChanges: (trackChangesBody: SaveTrackChangesRequestBody) => void
+  saveTrackChangesForCurrentUser: (trackChanges: boolean) => void
 }
 
 const TrackChangesStateActionsContext = createContext<
@@ -64,17 +65,6 @@ export const TrackChangesStateProvider: FC = ({ children }) => {
     )
   }, [setWantTrackChanges, trackChangesValue, user.id])
 
-  const actions = useMemo(
-    () => ({
-      async saveTrackChanges(trackChangesBody: SaveTrackChangesRequestBody) {
-        postJSON(`/project/${project._id}/track_changes`, {
-          body: trackChangesBody,
-        })
-      },
-    }),
-    [project._id]
-  )
-
   const trackChangesIsObject =
     trackChangesValue !== true && trackChangesValue !== false
   const onForEveryone = trackChangesValue === true
@@ -93,6 +83,38 @@ export const TrackChangesStateProvider: FC = ({ children }) => {
     }
     return onForMembers
   }, [trackChangesIsObject, trackChangesValue])
+
+  const saveTrackChanges = useCallback(
+    async (trackChangesBody: SaveTrackChangesRequestBody) => {
+      postJSON(`/project/${project._id}/track_changes`, {
+        body: trackChangesBody,
+      })
+    },
+    [project._id]
+  )
+
+  const saveTrackChangesForCurrentUser = useCallback(
+    async (trackChanges: boolean) => {
+      if (user.id) {
+        saveTrackChanges({
+          on_for: {
+            ...onForMembers,
+            [user.id]: trackChanges,
+          },
+          on_for_guests: onForGuests,
+        })
+      }
+    },
+    [onForMembers, onForGuests, user.id, saveTrackChanges]
+  )
+
+  const actions = useMemo(
+    () => ({
+      saveTrackChanges,
+      saveTrackChangesForCurrentUser,
+    }),
+    [saveTrackChanges, saveTrackChangesForCurrentUser]
+  )
 
   useEventListener(
     'toggle-track-changes',

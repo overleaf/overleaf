@@ -43,7 +43,7 @@ export const EditorContext = createContext<
       isProjectOwner: boolean
       isRestrictedTokenMember?: boolean
       isPendingEditor: boolean
-      permissionsLevel: 'readOnly' | 'readAndWrite' | 'owner'
+      permissionsLevel: PermissionsLevel
       deactivateTutorial: (tutorial: string) => void
       inactiveTutorials: string[]
       currentPopup: string | null
