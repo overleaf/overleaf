@@ -80,6 +80,28 @@
     }
   }
 
+  &.card-blue-border {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      color: var(--sapphire-blue);
+    }
+
+    background-color: white;
+    border-radius: var(--spacing-04);
+    border: 2px solid var(--sapphire-blue);
+
+    .card-body {
+      padding: var(--spacing-10);
+    }
+
+    .btn {
+      width: 100%;
+    }
+  }
+
   &.card-pattern {
     border-radius: var(--border-radius-medium);
     color: var(--white);

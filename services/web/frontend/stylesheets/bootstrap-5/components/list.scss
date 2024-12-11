@@ -8,6 +8,7 @@
   }
 
   li {
+    min-height: $icon-size;
     background-size: $icon-size $icon-size;
     margin-bottom: var(--spacing-05);
     padding-left: calc(var(--spacing-05) + $icon-size);

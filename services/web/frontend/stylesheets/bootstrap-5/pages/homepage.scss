@@ -1,0 +1,329 @@
+.homepage-container {
+  padding-top: $header-height;
+
+  .home-animation-text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .home-begin-text {
+      font-weight: 400;
+      display: flex;
+      color: #5f5ff0;
+      font-size: 4rem;
+      line-height: 1.25;
+      font-family: 'DM Mono', monospace;
+      align-self: flex-start;
+      width: 100%;
+      margin-top: 0;
+
+      @include media-breakpoint-down(lg) {
+        text-align: center;
+        flex-direction: column;
+        align-items: center;
+        font-size: 2.25rem;
+      }
+    }
+
+    .home-parenthesis-text {
+      color: #bbdbb8;
+      font-size: 4rem;
+      line-height: 1.25;
+      display: inherit;
+
+      span {
+        /* specifity workaround, otherwise .website-redesign span would take precedence */
+        font-family: 'DM Mono', monospace;
+      }
+
+      #home-animation-text {
+        color: var(--neutral-70);
+      }
+
+      @include media-breakpoint-down(lg) {
+        font-size: 2.25rem;
+      }
+    }
+  }
+
+  .home-top-text {
+    @include heading-sm;
+
+    text-align: center;
+    font-weight: 400;
+
+    @include media-breakpoint-down(lg) {
+      @include heading-xs;
+
+      padding: 0 var(--spacing-16);
+    }
+
+    @include media-breakpoint-down(md) {
+      padding: 0 var(--spacing-07);
+    }
+
+    // force different line for desktop on both text
+    > span:first-of-type {
+      display: block;
+
+      @include media-breakpoint-down(lg) {
+        display: inline;
+      }
+    }
+
+    // need to have an extra space only for mobile
+    // since on mobile all the text are inline
+    .dash-text {
+      @include media-breakpoint-down(lg) {
+        &::after {
+          content: ' ';
+        }
+      }
+    }
+  }
+
+  .home-registration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: var(--spacing-07);
+
+    .home-registration-sso {
+      display: flex;
+      gap: 16px;
+
+      .btn {
+        width: 100%;
+      }
+
+      @include media-breakpoint-down(md) {
+        flex-direction: column;
+        width: 100%;
+      }
+    }
+
+    .home-registration-separator {
+      margin: var(--spacing-04) 0;
+      color: var(--neutral-90);
+
+      > span {
+        vertical-align: middle;
+
+        &::before,
+        &::after {
+          content: '';
+          display: inline-block;
+          vertical-align: middle;
+          width: 196px;
+          height: 1px;
+          background-color: var(--neutral-20);
+
+          @include media-breakpoint-down(lg) {
+            flex-direction: column;
+            width: 156px;
+          }
+        }
+
+        &::before {
+          margin-right: var(--spacing-07);
+
+          @include media-breakpoint-down(lg) {
+            margin-right: var(--spacing-03);
+          }
+        }
+
+        &::after {
+          margin-left: var(--spacing-07);
+
+          @include media-breakpoint-down(lg) {
+            margin-left: var(--spacing-03);
+          }
+        }
+      }
+    }
+
+    .home-registration-password {
+      display: flex;
+      flex-direction: column;
+
+      .home-registration-password-input {
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-06);
+        margin-bottom: 0;
+      }
+
+      input {
+        flex: 1;
+      }
+    }
+
+    .home-registration-sign-up {
+      display: block;
+      margin-top: var(--spacing-06);
+      width: 100%;
+      margin-bottom: 0;
+
+      > button {
+        width: 100%;
+      }
+    }
+
+    .tos-agreement-notice {
+      font-size: 0.75rem;
+    }
+  }
+
+  .editor-pdf-video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 585px;
+    padding: 0 var(--spacing-06);
+
+    @include media-breakpoint-down(lg) {
+      height: auto;
+    }
+
+    video {
+      box-shadow: 0 60px 25px -15px rgb(16 24 40 / 20%);
+      max-height: 100%;
+      width: auto;
+      padding: 0;
+
+      @include media-breakpoint-down(lg) {
+        width: 100%;
+      }
+    }
+  }
+
+  .home-millions-user-text {
+    @include heading-sm;
+
+    text-align: center;
+
+    @include media-breakpoint-down(lg) {
+      @include body-base;
+    }
+  }
+
+  .organization-logos-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    @include media-breakpoint-down(lg) {
+      flex-wrap: wrap;
+      gap: var(--spacing-09);
+    }
+
+    .organization-logo {
+      object-fit: contain;
+      max-height: 62px;
+
+      &.samsung-logo {
+        max-height: 110px;
+        height: 110px;
+      }
+
+      @include media-breakpoint-down(lg) {
+        max-height: 40px;
+        flex-basis: 34%;
+      }
+    }
+  }
+
+  .header-description {
+    @include heading-sm;
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  #home-features-arrow-green {
+    position: absolute;
+    left: 154px;
+    top: -98px;
+
+    @include media-breakpoint-down(lg) {
+      height: 100px;
+      left: 120px;
+      top: -60px;
+    }
+  }
+
+  #home-rocket-yellow {
+    position: absolute;
+    right: 30px;
+    bottom: 0;
+
+    @include media-breakpoint-down(xl) {
+      height: 100px;
+      right: 30px;
+      bottom: -84px;
+    }
+
+    @include media-breakpoint-down(lg) {
+      height: 70px;
+      right: 0;
+      bottom: unset;
+      top: -59px;
+    }
+  }
+
+  .template-card {
+    > img.img-responsive {
+      width: 100%;
+      border-radius: var(--border-radius-medium);
+    }
+
+    .template-card-title {
+      @include heading-md;
+
+      margin-top: var(--spacing-06);
+      margin-bottom: var(--spacing-04);
+
+      i.material-symbols {
+        vertical-align: middle;
+        text-decoration: none;
+      }
+    }
+
+    &:not(:last-of-type) {
+      @include media-breakpoint-down(lg) {
+        margin-bottom: var(--spacing-10);
+      }
+    }
+  }
+
+  .plans-card {
+    min-height: 348px;
+    height: 100%;
+
+    .card-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      @include heading-sm;
+
+      padding: 0;
+    }
+
+    .plans-card-footer {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-05);
+      margin-top: auto;
+    }
+  }
+
+  .customer-story-card-title {
+    @include heading-md;
+
+    margin-top: var(--spacing-08);
+    margin-bottom: var(--spacing-05);
+  }
+}

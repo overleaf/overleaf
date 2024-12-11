@@ -102,6 +102,34 @@
       $borderless: false
     );
   }
+
+  &.btn-blue {
+    @include ol-button-variant(
+      $color: var(--content-primary-dark),
+      $background: var(--sapphire-blue),
+      $border: var(--sapphire-blue),
+      $hover-background: (
+        var(--sapphire-blue-dark),
+      ),
+      $hover-border: (
+        var(--sapphire-blue-dark),
+      ),
+      $borderless: false
+    );
+  }
+
+  &.btn-social {
+    @extend .btn-secondary;
+
+    padding-left: var(--spacing-03);
+
+    .btn-social-icon {
+      height: 24px;
+      width: 24px;
+      padding: var(--spacing-01);
+      margin-right: var(--spacing-02);
+    }
+  }
 }
 
 // Link buttons

@@ -261,4 +261,104 @@
 
     background: var(--green-30);
   }
+
+  .features-card {
+    display: flex; /* equal heights */
+    flex-wrap: wrap;
+    align-items: center;
+
+    .features-card-media,
+    .features-card-media-right {
+      padding-top: var(--spacing-08);
+      position: relative;
+
+      img.img-responsive {
+        width: 100%;
+      }
+
+      video {
+        box-shadow:
+          0 4px 6px 0 rgb(30 37 48 / 12%),
+          0 8px 16px 0 rgb(30 37 48 / 12%);
+        max-height: 100%;
+        width: auto;
+        width: 100%;
+      }
+
+      @include media-breakpoint-down(lg) {
+        margin-bottom: var(--spacing-11);
+      }
+    }
+
+    @include media-breakpoint-up(lg) {
+      .features-card-media-right {
+        padding-left: var(--spacing-13);
+      }
+
+      .features-card-media {
+        padding-right: var(--spacing-13);
+      }
+    }
+
+    .features-card-description,
+    .features-card-description-list {
+      padding-top: var(--spacing-06);
+
+      p {
+        margin-bottom: var(--spacing-06);
+        font-size: 1.125rem;
+        line-height: 1.333;
+
+        @include media-breakpoint-down(lg) {
+          font-size: 1rem;
+          line-height: 1.375;
+        }
+      }
+    }
+
+    .features-card-description {
+      h3 {
+        font-size: 1.5rem;
+        line-height: 1.4;
+        margin-bottom: var(--spacing-04);
+      }
+    }
+
+    .features-card-description-list {
+      h3 {
+        font-size: 1.875rem;
+        line-height: 1.5;
+      }
+
+      ul.list-simple-text,
+      ul.list-heading-text {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          margin-bottom: var(--spacing-05);
+          font-size: 1.125rem;
+          line-height: 1.333;
+          display: flex;
+
+          @include media-breakpoint-down(lg) {
+            font-size: 1rem;
+            line-height: 1.375;
+          }
+        }
+      }
+
+      ul.list-heading-text {
+        li {
+          h4 {
+            margin-top: 0;
+            margin-bottom: var(--spacing-04);
+            font-size: 20px;
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
 }
