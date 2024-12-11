@@ -113,12 +113,12 @@
         }
       }
     }
-  }
 
-  .recaptcha-branding {
-    text-align: left;
-    padding: var(--spacing-05) 0;
-    font-size: var(--font-size-01);
+    .recaptcha-branding {
+      text-align: left;
+      padding: var(--spacing-05) 0;
+      font-size: var(--font-size-01);
+    }
   }
 
   .registration-block-separator {
@@ -168,6 +168,7 @@
 
   .login-register-error-container {
     padding-bottom: var(--spacing-05);
+    text-align: left;
   }
 
   .form-group {
