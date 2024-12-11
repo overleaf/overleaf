@@ -92,6 +92,7 @@ export default function EditMember({
       )
     } else if (
       newPrivileges === 'readAndWrite' ||
+      newPrivileges === 'review' ||
       newPrivileges === 'readOnly'
     ) {
       monitorRequest(() =>

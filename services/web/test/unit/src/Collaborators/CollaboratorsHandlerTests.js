@@ -590,12 +590,14 @@ describe('CollaboratorsHandler', function () {
             $or: [
               { collaberator_refs: this.userId },
               { readOnly_refs: this.userId },
+              { reviewer_refs: this.userId },
             ],
           },
           {
             $pull: {
               collaberator_refs: this.userId,
               pendingEditor_refs: this.userId,
+              reviewer_refs: this.userId,
             },
             $addToSet: { readOnly_refs: this.userId },
           }
@@ -617,12 +619,14 @@ describe('CollaboratorsHandler', function () {
             $or: [
               { collaberator_refs: this.userId },
               { readOnly_refs: this.userId },
+              { reviewer_refs: this.userId },
             ],
           },
           {
             $addToSet: { collaberator_refs: this.userId },
             $pull: {
               readOnly_refs: this.userId,
+              reviewer_refs: this.userId,
               pendingEditor_refs: this.userId,
             },
           }
@@ -636,6 +640,35 @@ describe('CollaboratorsHandler', function () {
       )
     })
 
+    it('sets a collaborator to reviewer', async function () {
+      this.ProjectMock.expects('updateOne')
+        .withArgs(
+          {
+            _id: this.projectId,
+            $or: [
+              { collaberator_refs: this.userId },
+              { readOnly_refs: this.userId },
+              { reviewer_refs: this.userId },
+            ],
+          },
+          {
+            $addToSet: { reviewer_refs: this.userId },
+            $pull: {
+              readOnly_refs: this.userId,
+              collaberator_refs: this.userId,
+              pendingEditor_refs: this.userId,
+            },
+          }
+        )
+        .chain('exec')
+        .resolves({ matchedCount: 1 })
+      await this.CollaboratorsHandler.promises.setCollaboratorPrivilegeLevel(
+        this.projectId,
+        this.userId,
+        'review'
+      )
+    })
+
     it('sets a collaborator to read-only as a pendingEditor', async function () {
       this.ProjectMock.expects('updateOne')
         .withArgs(
@@ -644,6 +677,7 @@ describe('CollaboratorsHandler', function () {
             $or: [
               { collaberator_refs: this.userId },
               { readOnly_refs: this.userId },
+              { reviewer_refs: this.userId },
             ],
           },
           {
@@ -653,6 +687,7 @@ describe('CollaboratorsHandler', function () {
             },
             $pull: {
               collaberator_refs: this.userId,
+              reviewer_refs: this.userId,
             },
           }
         )
