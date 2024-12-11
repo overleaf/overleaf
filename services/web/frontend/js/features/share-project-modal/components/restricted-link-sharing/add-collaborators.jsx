@@ -14,7 +14,7 @@ import OLForm from '@/features/ui/components/ol/ol-form'
 import OLFormGroup from '@/features/ui/components/ol/ol-form-group'
 import OLFormSelect from '@/features/ui/components/ol/ol-form-select'
 import OLButton from '@/features/ui/components/ol/ol-button'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
+import getMeta from '@/utils/meta'
 
 export default function AddCollaborators({ readOnly }) {
   const [privileges, setPrivileges] = useState('readAndWrite')
@@ -174,7 +174,7 @@ export default function AddCollaborators({ readOnly }) {
               {t('can_edit')}
             </option>
             <option value="readOnly">{t('can_view')}</option>
-            {isSplitTestEnabled('reviewer-role') && (
+            {getMeta('ol-isReviewerRoleEnabled') && (
               <option value="review">{t('can_review')}</option>
             )}
           </OLFormSelect>

@@ -7,14 +7,12 @@ import { ReviewPanelResolvedThreadsMenu } from './review-panel-resolved-threads-
 import { useTranslation } from 'react-i18next'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import MaterialIcon from '@/shared/components/material-icon'
-import { useFeatureFlag } from '@/shared/context/split-test-context'
+import getMeta from '@/utils/meta'
 
 export const ReviewPanelResolvedThreadsButton: FC = () => {
   const [expanded, setExpanded] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { t } = useTranslation()
-
-  const enableReviewerRole = useFeatureFlag('reviewer-role')
 
   return (
     <>
@@ -25,7 +23,7 @@ export const ReviewPanelResolvedThreadsButton: FC = () => {
       >
         <button
           className={
-            enableReviewerRole
+            getMeta('ol-isReviewerRoleEnabled')
               ? 'review-panel-resolved-comments-toggle-reviewer-role'
               : 'review-panel-resolved-comments-toggle'
           }
