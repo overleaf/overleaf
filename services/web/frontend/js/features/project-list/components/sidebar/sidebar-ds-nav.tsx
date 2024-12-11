@@ -12,7 +12,7 @@ function SidebarDsNav() {
 
   return (
     <div
-      className="project-ds-nav-sidebar d-none d-md-flex"
+      className="project-list-sidebar-wrapper-react d-none d-md-flex"
       {...getTargetProps({
         style: {
           ...(mousePos?.x && { flexBasis: `${mousePos.x}px` }),
@@ -21,7 +21,7 @@ function SidebarDsNav() {
     >
       <NewProjectButton id="new-project-button-sidebar" />
       <div className="project-list-sidebar-scroll">
-        <SidebarFilters withHr />
+        <SidebarFilters />
         {showAddAffiliationWidget && <hr />}
         <AddAffiliation />
       </div>

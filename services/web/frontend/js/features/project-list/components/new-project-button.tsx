@@ -1,4 +1,5 @@
 import { type JSXElementConstructor, useCallback, useState } from 'react'
+import classnames from 'classnames'
 import { useTranslation } from 'react-i18next'
 import getMeta from '../../../utils/meta'
 import NewProjectButtonModal, {
@@ -145,7 +146,10 @@ function NewProjectButton({
 
   return (
     <>
-      <Dropdown className={className} onSelect={handleMainButtonClick}>
+      <Dropdown
+        className={classnames('new-project-dropdown', className)}
+        onSelect={handleMainButtonClick}
+      >
         <DropdownToggle
           id={id}
           className="new-project-button"
