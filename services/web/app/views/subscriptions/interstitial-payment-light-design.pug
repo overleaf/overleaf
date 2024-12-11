@@ -68,7 +68,8 @@ block content
 						text: translate("continue_with_free_plan"),
 						href: skipLinkTarget,
 						eventTracking: 'skip-button-click',
-						eventSegmentation: {location: 'interstitial-page'}
+						eventSegmentation: {location: 'interstitial-page'},
+						eventTrackingTrigger: 'click'
 					})
 
 	!= moduleIncludes("contactModalGeneral-marketing", locals)

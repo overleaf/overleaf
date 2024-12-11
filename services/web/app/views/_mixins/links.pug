@@ -117,7 +117,7 @@ mixin linkUniversities(linkText, linkClass)
 	a(href=(settings.siteUrl ? settings.siteUrl : '') + "/for/universities" class=linkClass ? linkClass : '')
 		| #{linkText ? linkText : 'universities'}
 
-mixin linkWithArrow({text, href, eventTracking, eventSegmentation})
-	a.link-with-arrow(href=href event-tracking=eventTracking event-segmentation=eventSegmentation)
+mixin linkWithArrow({text, href, eventTracking, eventSegmentation, eventTrackingTrigger})
+	a.link-with-arrow(href=href event-tracking=eventTracking event-segmentation=eventSegmentation, event-tracking-trigger=eventTrackingTrigger event-tracking-mb)
 		| #{text}
 		i.material-symbols(aria-hidden="true") arrow_right_alt
