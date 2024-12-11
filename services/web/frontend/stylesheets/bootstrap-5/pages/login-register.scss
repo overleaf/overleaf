@@ -6,6 +6,7 @@
 .website-redesign {
   .register-container {
     .register-content-container {
+      padding: 0; // override bootstrap padding
       display: flex;
       background-color: #f2f4f7;
       min-height: 100vh;
