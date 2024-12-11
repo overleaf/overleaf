@@ -690,6 +690,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
           url: this.fileUrl,
           fileRef: this.newFile,
+          createdBlob: true,
         })
         this.TpdsUpdateSender.promises.addFile.resolves()
         this.ProjectEntityMongoUpdateHandler.promises.addFile.resolves({
@@ -759,6 +760,7 @@ describe('ProjectEntityUpdateHandler', function () {
             file: this.newFile,
             path: this.path,
             url: this.fileUrl,
+            createdBlob: true,
           },
         ]
         this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
@@ -1098,6 +1100,7 @@ describe('ProjectEntityUpdateHandler', function () {
       this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
         url: this.fileUrl,
         fileRef: this.file,
+        createdBlob: true,
       })
     })
 
@@ -1214,6 +1217,7 @@ describe('ProjectEntityUpdateHandler', function () {
             file: this.newFile,
             path: this.fileSystemPath,
             url: this.fileUrl,
+            createdBlob: true,
           },
         ]
         this.DocumentUpdaterHandler.promises.updateProjectStructure.should.have.been.calledWith(
@@ -1247,6 +1251,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
           url: this.fileUrl,
           fileRef: this.newFile,
+          createdBlob: true,
         })
         this.ProjectEntityUpdateHandler.promises.addFile = {
           mainTask: sinon.stub().resolves(this.newFile),
@@ -1285,6 +1290,7 @@ describe('ProjectEntityUpdateHandler', function () {
           fileRef: this.newFile,
           fileStoreUrl: this.fileUrl,
           source: this.source,
+          createdBlob: true,
         })
       })
 
@@ -1367,6 +1373,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
           url: this.newFileUrl,
           fileRef: this.newFile,
+          createdBlob: true,
         })
         this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile.resolves(
           this.newProject
@@ -1402,6 +1409,7 @@ describe('ProjectEntityUpdateHandler', function () {
             file: this.newFile,
             path: this.path,
             url: this.newFileUrl,
+            createdBlob: true,
           },
         ]
         const updates = {
@@ -1583,6 +1591,7 @@ describe('ProjectEntityUpdateHandler', function () {
         this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
           url: this.fileUrl,
           fileRef: this.newFile,
+          createdBlob: true,
         })
         this.ProjectEntityUpdateHandler.promises.mkdirp = {
           withoutLock: sinon
@@ -1627,6 +1636,7 @@ describe('ProjectEntityUpdateHandler', function () {
             fileRef: this.newFile,
             fileStoreUrl: this.fileUrl,
             source: this.source,
+            createdBlob: true,
           }
         )
       })
@@ -2907,6 +2917,7 @@ describe('ProjectEntityUpdateHandler', function () {
       this.FileStoreHandler.promises.uploadFileFromDisk.resolves({
         url: this.fileStoreUrl,
         fileRef: this.file,
+        createdBlob: true,
       })
       this.ProjectEntityMongoUpdateHandler.promises.replaceDocWithFile.resolves(
         this.project
@@ -2962,7 +2973,12 @@ describe('ProjectEntityUpdateHandler', function () {
           {
             oldDocs: [{ doc: this.doc, path: this.path }],
             newFiles: [
-              { file: this.file, path: this.path, url: this.fileStoreUrl },
+              {
+                file: this.file,
+                path: this.path,
+                url: this.fileStoreUrl,
+                createdBlob: true,
+              },
             ],
             newProject: this.project,
           },

@@ -302,7 +302,7 @@ const FileStoreHandler = {
 module.exports = FileStoreHandler
 module.exports.promises = promisifyAll(FileStoreHandler, {
   multiResult: {
-    uploadFileFromDisk: ['url', 'fileRef'],
+    uploadFileFromDisk: ['url', 'fileRef', 'createdBlob'],
     uploadFileFromDiskWithHistoryId: ['url', 'fileRef', 'createdBlob'],
   },
 })
