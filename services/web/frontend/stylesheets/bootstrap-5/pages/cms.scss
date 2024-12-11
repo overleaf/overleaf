@@ -519,6 +519,12 @@
   }
 }
 
+.visual-with-content {
+  display: flex;
+  gap: var(--spacing-06);
+  align-items: flex-start;
+}
+
 .svg-arrow-icon {
   position: relative;
   left: 4px;
