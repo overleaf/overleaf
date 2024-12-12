@@ -155,9 +155,9 @@ const FileStoreHandler = {
   },
 
   getFileStream(projectId, fileId, query, callback) {
-    let queryString = ''
+    let queryString = '?from=getFileStream'
     if (query != null && query.format != null) {
-      queryString = `?format=${query.format}`
+      queryString += `&format=${query.format}`
     }
     const opts = {
       method: 'get',
@@ -183,7 +183,7 @@ const FileStoreHandler = {
 
   getFileSize(projectId, fileId, callback) {
     const url = this._buildUrl(projectId, fileId)
-    request.head(url, (err, res) => {
+    request.head(`${url}?from=getFileSize`, (err, res) => {
       if (err) {
         OError.tag(err, 'failed to get file size from filestore', {
           projectId,

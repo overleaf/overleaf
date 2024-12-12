@@ -172,7 +172,8 @@ export default ReferencesHandler = {
               settings,
               projectId,
               historyId,
-              fileRef
+              fileRef,
+              'bibFileUrls'
             )
           )
           const sourceURLs = bibDocUrls.concat(bibFileUrls)

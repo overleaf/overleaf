@@ -87,7 +87,8 @@ async function addFile(params) {
       settings,
       projectId,
       historyId,
-      { _id: fileId, hash }
+      { _id: fileId, hash },
+      'tpdsAddFile'
     )
 
   await addEntity({

@@ -138,7 +138,7 @@ describe('TpdsUpdateSender', function () {
             method: 'pipeStreamFrom',
             job: {
               method: 'post',
-              streamOrigin: `${filestoreUrl}/project/${projectId}/file/${fileId}`,
+              streamOrigin: `${filestoreUrl}/project/${projectId}/file/${fileId}?from=tpdsAddFile`,
               uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
                 projectName
               )}${encodeURIComponent(path)}`,
@@ -192,7 +192,7 @@ describe('TpdsUpdateSender', function () {
             job: {
               method: 'post',
               streamOrigin: `${projectHistoryUrl}/project/${historyId}/blob/${hash}`,
-              streamFallback: `${filestoreUrl}/project/${projectId}/file/${fileId}`,
+              streamFallback: `${filestoreUrl}/project/${projectId}/file/${fileId}?from=tpdsAddFile`,
               uri: `${thirdPartyDataStoreApiUrl}/user/${userId}/entity/${encodeURIComponent(
                 projectName
               )}${encodeURIComponent(path)}`,

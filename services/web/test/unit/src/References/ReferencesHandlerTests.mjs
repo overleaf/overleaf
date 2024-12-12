@@ -138,8 +138,8 @@ describe('ReferencesHandler', function () {
         expect(arg.json.docUrls).to.deep.equal([
           `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/aaa/raw`,
           `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/ccc/raw`,
-          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/fff`,
-          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/ggg`,
+          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/fff?from=bibFileUrls`,
+          `${this.settings.apis.filestore.url}/project/${this.projectId}/file/ggg?from=bibFileUrls`,
         ])
         expect(arg.json.sourceURLs.length).to.equal(4)
         expect(arg.json.sourceURLs).to.deep.equal([
@@ -150,11 +150,11 @@ describe('ReferencesHandler', function () {
             url: `${this.settings.apis.docstore.url}/project/${this.projectId}/doc/ccc/raw`,
           },
           {
-            url: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/fff`,
+            url: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/fff?from=bibFileUrls`,
           },
           {
             url: `${this.settings.apis.project_history.url}/project/${this.historyId}/blob/hash`,
-            fallbackURL: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/ggg`,
+            fallbackURL: `${this.settings.apis.filestore.url}/project/${this.projectId}/file/ggg?from=bibFileUrls`,
           },
         ])
         expect(arg.json.fullIndex).to.equal(true)

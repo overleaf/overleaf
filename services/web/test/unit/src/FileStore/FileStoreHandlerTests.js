@@ -386,7 +386,9 @@ describe('FileStoreHandler', function () {
             return done(err)
           }
           this.request.args[0][0].method.should.equal('get')
-          this.request.args[0][0].uri.should.equal(fileUrl)
+          this.request.args[0][0].uri.should.equal(
+            fileUrl + '?from=getFileStream'
+          )
           done()
         }
       )
@@ -475,7 +477,8 @@ describe('FileStoreHandler', function () {
   describe('getFileSize', function () {
     it('returns the file size reported by filestore', function (done) {
       const expectedFileSize = 32432
-      const fileUrl = this.getFileUrl(this.projectId, this.fileId)
+      const fileUrl =
+        this.getFileUrl(this.projectId, this.fileId) + '?from=getFileSize'
       this.request.head.yields(
         new Error('request.head() received unexpected arguments')
       )

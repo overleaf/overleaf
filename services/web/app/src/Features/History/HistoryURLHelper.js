@@ -3,9 +3,10 @@ function projectHistoryURLWithFilestoreFallback(
   Settings,
   projectId,
   historyId,
-  fileRef
+  fileRef,
+  origin
 ) {
-  const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileRef._id}`
+  const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileRef._id}?from=${origin}`
   if (fileRef.hash) {
     return {
       url: `${Settings.apis.project_history.url}/project/${historyId}/blob/${fileRef.hash}`,
