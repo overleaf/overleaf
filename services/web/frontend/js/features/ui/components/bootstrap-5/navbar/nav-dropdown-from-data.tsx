@@ -1,4 +1,7 @@
-import type { NavbarDropdownItemData } from '@/features/ui/components/types/navbar'
+import type {
+  NavbarDropdownItemData,
+  NavbarItemDropdownData,
+} from '@/features/ui/components/types/navbar'
 import NavDropdownDivider from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-divider'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { isDropdownLinkItem } from '@/features/ui/components/bootstrap-5/navbar/util'
@@ -16,7 +19,24 @@ export default function NavDropdownFromData({
 }) {
   return (
     <NavDropdownMenu title={item.translatedText} className={item.class}>
-      {item.dropdown.map((child, index) => {
+      <NavDropdownMenuItems
+        dropdown={item.dropdown}
+        showContactUsModal={showContactUsModal}
+      />
+    </NavDropdownMenu>
+  )
+}
+
+export function NavDropdownMenuItems({
+  dropdown,
+  showContactUsModal,
+}: {
+  dropdown: NavbarItemDropdownData
+  showContactUsModal: (event?: Event) => void
+}) {
+  return (
+    <>
+      {dropdown.map((child, index) => {
         if ('divider' in child) {
           return <NavDropdownDivider key={index} />
         } else if ('isContactUs' in child) {
@@ -41,6 +61,6 @@ export default function NavDropdownFromData({
           )
         }
       })}
-    </NavDropdownMenu>
+    </>
   )
 }
