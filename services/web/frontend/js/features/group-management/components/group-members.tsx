@@ -24,13 +24,16 @@ export default function GroupMembers() {
     paths,
   } = useGroupMembersContext()
   const [emailString, setEmailString] = useState<string>('')
-  const flexibleGroupLicensingEnabled = useFeatureFlag(
+  const isFlexibleGroupLicensingFeatureFlagEnabled = useFeatureFlag(
     'flexible-group-licensing'
   )
 
   const groupId = getMeta('ol-groupId')
   const groupName = getMeta('ol-groupName')
   const groupSize = getMeta('ol-groupSize')
+  const canUseFlexibleLicensing = getMeta('ol-canUseFlexibleLicensing')
+  const isFlexibleGroupLicensing =
+    canUseFlexibleLicensing && isFlexibleGroupLicensingFeatureFlagEnabled
 
   const handleEmailsChange = useCallback(
     e => {
@@ -49,7 +52,7 @@ export default function GroupMembers() {
   }
 
   const groupSizeDetails = () => {
-    if (flexibleGroupLicensingEnabled) {
+    if (isFlexibleGroupLicensing) {
       return (
         <small data-testid="group-size-details">
           <strong>
@@ -129,7 +132,7 @@ export default function GroupMembers() {
                 data-testid="add-more-members-form"
               >
                 <p className="small">
-                  {flexibleGroupLicensingEnabled
+                  {isFlexibleGroupLicensing
                     ? t('invite_more_members')
                     : t('add_more_members')}
                 </p>
@@ -148,16 +151,14 @@ export default function GroupMembers() {
                     <Col xs={4}>
                       {inviteMemberLoading ? (
                         <Button bsStyle="primary" disabled>
-                          {flexibleGroupLicensingEnabled
+                          {isFlexibleGroupLicensing
                             ? t('inviting')
                             : t('adding')}
                           &hellip;
                         </Button>
                       ) : (
                         <Button bsStyle="primary" onClick={onAddMembersSubmit}>
-                          {flexibleGroupLicensingEnabled
-                            ? t('invite')
-                            : t('add')}
+                          {isFlexibleGroupLicensing ? t('invite') : t('add')}
                         </Button>
                       )}
                     </Col>

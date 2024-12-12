@@ -61,6 +61,7 @@ export interface Meta {
   'ol-brandVariation': Record<string, any>
 
   // dynamic keys based on permissions
+  'ol-canUseFlexibleLicensing': boolean
   'ol-cannot-add-secondary-email': boolean
   'ol-cannot-change-password': boolean
   'ol-cannot-delete-own-account': boolean

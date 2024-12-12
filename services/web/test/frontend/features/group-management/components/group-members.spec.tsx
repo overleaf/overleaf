@@ -463,32 +463,40 @@ describe('GroupMembers', function () {
   })
 
   describe('with flexible group licensing enabled', function () {
-    const JOHN_DOE = {
-      _id: 'abc123def456',
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john.doe@test.com',
-      last_active_at: new Date('2023-01-15'),
-      invite: false,
-    }
-    const BOBBY_LAPOINTE = {
-      _id: 'bcd234efa567',
-      first_name: 'Bobby',
-      last_name: 'Lapointe',
-      email: 'bobby.lapointe@test.com',
-      last_active_at: new Date('2023-01-02'),
-      invite: false,
-    }
-
-    it('renders the group members page with the new text', function () {
+    beforeEach(function () {
+      this.JOHN_DOE = {
+        _id: 'abc123def456',
+        first_name: 'John',
+        last_name: 'Doe',
+        email: 'john.doe@test.com',
+        last_active_at: new Date('2023-01-15'),
+        invite: false,
+      }
+      this.BOBBY_LAPOINTE = {
+        _id: 'bcd234efa567',
+        first_name: 'Bobby',
+        last_name: 'Lapointe',
+        email: 'bobby.lapointe@test.com',
+        last_active_at: new Date('2023-01-02'),
+        invite: false,
+      }
       cy.window().then(win => {
         win.metaAttributesCache.set('ol-groupId', GROUP_ID)
         win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
         win.metaAttributesCache.set('ol-groupSize', 10)
-        win.metaAttributesCache.set('ol-users', [JOHN_DOE, BOBBY_LAPOINTE])
         win.metaAttributesCache.set('ol-splitTestVariants', {
           'flexible-group-licensing': 'enabled',
         })
+        win.metaAttributesCache.set('ol-canUseFlexibleLicensing', true)
+      })
+    })
+
+    it('renders the group members page with the new text', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-users', [
+          this.JOHN_DOE,
+          this.BOBBY_LAPOINTE,
+        ])
       })
 
       cy.mount(
@@ -510,13 +518,7 @@ describe('GroupMembers', function () {
 
     it('renders the group members page with new text when only has one group member', function () {
       cy.window().then(win => {
-        win.metaAttributesCache.set('ol-groupId', GROUP_ID)
-        win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')
-        win.metaAttributesCache.set('ol-groupSize', 10)
-        win.metaAttributesCache.set('ol-users', [JOHN_DOE])
-        win.metaAttributesCache.set('ol-splitTestVariants', {
-          'flexible-group-licensing': 'enabled',
-        })
+        win.metaAttributesCache.set('ol-users', [this.JOHN_DOE])
       })
 
       cy.mount(
