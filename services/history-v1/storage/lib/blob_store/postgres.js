@@ -13,8 +13,8 @@ async function initialize(projectId) {
  * Return blob metadata for the given project and hash
  */
 async function findBlob(projectId, hash) {
+  assert.postgresId(projectId, `bad projectId ${projectId}`)
   projectId = parseInt(projectId, 10)
-  assert.integer(projectId, 'bad projectId')
   assert.blobHash(hash, 'bad hash')
 
   const binaryHash = hashToBuffer(hash)
@@ -35,8 +35,8 @@ async function findBlob(projectId, hash) {
  * @return {Promise.<Array.<Blob?>>} no guarantee on order
  */
 async function findBlobs(projectId, hashes) {
+  assert.postgresId(projectId, `bad projectId ${projectId}`)
   projectId = parseInt(projectId, 10)
-  assert.integer(projectId, 'bad projectId')
   assert.array(hashes, 'bad hashes: not array')
   hashes.forEach(function (hash) {
     assert.blobHash(hash, 'bad hash')
@@ -57,8 +57,8 @@ async function findBlobs(projectId, hashes) {
  * Return metadata for all blobs in the given project
  */
 async function getProjectBlobs(projectId) {
+  assert.postgresId(projectId, `bad projectId ${projectId}`)
   projectId = parseInt(projectId, 10)
-  assert.integer(projectId, 'bad projectId')
 
   const records = await knex('project_blobs')
     .select('hash_bytes', 'byte_length', 'string_length')
@@ -103,8 +103,8 @@ async function getProjectBlobsBatch(projectIds) {
  * Add a blob's metadata to the blobs table after it has been uploaded.
  */
 async function insertBlob(projectId, blob) {
+  assert.postgresId(projectId, `bad projectId ${projectId}`)
   projectId = parseInt(projectId, 10)
-  assert.integer(projectId, 'bad projectId')
 
   await knex('project_blobs')
     .insert(blobToRecord(projectId, blob))
@@ -116,8 +116,8 @@ async function insertBlob(projectId, blob) {
  * Deletes all blobs for a given project
  */
 async function deleteBlobs(projectId) {
+  assert.postgresId(projectId, `bad projectId ${projectId}`)
   projectId = parseInt(projectId, 10)
-  assert.integer(projectId, 'bad projectId')
 
   await knex('project_blobs').where('project_id', projectId).delete()
 }

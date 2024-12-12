@@ -40,6 +40,10 @@ function mongoId(arg, message) {
   assert.match(arg, MONGO_ID_REGEXP)
 }
 
+function postgresId(arg, message) {
+  assert.match(arg, POSTGRES_ID_REGEXP, message)
+}
+
 module.exports = {
   ...assert,
   transaction,
@@ -47,6 +51,7 @@ module.exports = {
   projectId,
   chunkId,
   mongoId,
+  postgresId,
   MONGO_ID_REGEXP,
   POSTGRES_ID_REGEXP,
 }
