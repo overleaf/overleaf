@@ -85,14 +85,16 @@ module.exports = HistoryController = {
         if (err) {
           return next(err)
         }
-        if (file?.hash) {
-          req.url = `/project/${projectId}/blob/${file.hash}`
-        }
         metrics.inc('fileToBlobRedirectMiddleware', 1, {
           method: req.method,
           status: Boolean(file?.hash),
         })
-        next()
+        if (file?.hash) {
+          req.url = `/project/${projectId}/blob/${file.hash}`
+          next('route') // redirect to blob route
+        } else {
+          next() // continue with file route
+        }
       }
     )
   },
