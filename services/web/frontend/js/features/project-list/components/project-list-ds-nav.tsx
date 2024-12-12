@@ -63,60 +63,62 @@ export function ProjectListDsNav() {
       <main className="project-list-wrapper">
         <SidebarDsNav />
         <div className="project-ds-nav-content">
-          {error ? <DashApiError /> : ''}
-          <UserNotifications />
-          <div className="project-list-header-row">
-            <ProjectListTitle
-              filter={filter}
-              selectedTag={selectedTag}
-              selectedTagId={selectedTagId}
-              className="text-truncate d-none d-md-block"
-            />
-            <div className="project-tools">
-              <div className="d-none d-md-block">
-                {selectedProjects.length === 0 ? (
+          <div className="p-4">
+            {error ? <DashApiError /> : ''}
+            <UserNotifications />
+            <div className="project-list-header-row">
+              <ProjectListTitle
+                filter={filter}
+                selectedTag={selectedTag}
+                selectedTagId={selectedTagId}
+                className="text-truncate d-none d-md-block"
+              />
+              <div className="project-tools">
+                <div className="d-none d-md-block">
+                  {selectedProjects.length === 0 ? (
+                    <CurrentPlanWidget />
+                  ) : (
+                    <ProjectTools />
+                  )}
+                </div>
+                <div className="d-md-none">
                   <CurrentPlanWidget />
-                ) : (
-                  <ProjectTools />
-                )}
-              </div>
-              <div className="d-md-none">
-                <CurrentPlanWidget />
+                </div>
               </div>
             </div>
-          </div>
-          <div className="project-ds-nav-project-list">
-            <OLRow className="d-none d-md-block">
-              <OLCol lg={7}>
-                <SearchForm
-                  inputValue={searchText}
-                  setInputValue={setSearchText}
-                  filter={filter}
-                  selectedTag={selectedTag}
-                />
-              </OLCol>
-            </OLRow>
-            <div className="project-list-sidebar-survey-wrapper d-md-none">
-              <SurveyWidget />
-            </div>
-            <div className="mt-1 d-md-none">
-              <div
-                role="toolbar"
-                className="projects-toolbar"
-                aria-label={t('projects')}
-              >
-                <ProjectsDropdown />
-                <SortByDropdown />
+            <div className="project-ds-nav-project-list">
+              <OLRow className="d-none d-md-block">
+                <OLCol lg={7}>
+                  <SearchForm
+                    inputValue={searchText}
+                    setInputValue={setSearchText}
+                    filter={filter}
+                    selectedTag={selectedTag}
+                  />
+                </OLCol>
+              </OLRow>
+              <div className="project-list-sidebar-survey-wrapper d-md-none">
+                <SurveyWidget />
               </div>
-            </div>
-            <div className="mt-3">
-              <TableContainer bordered>
-                {tableTopArea}
-                <ProjectListTable />
-              </TableContainer>
-            </div>
-            <div className="mt-3">
-              <LoadMore />
+              <div className="mt-1 d-md-none">
+                <div
+                  role="toolbar"
+                  className="projects-toolbar"
+                  aria-label={t('projects')}
+                >
+                  <ProjectsDropdown />
+                  <SortByDropdown />
+                </div>
+              </div>
+              <div className="mt-3">
+                <TableContainer bordered>
+                  {tableTopArea}
+                  <ProjectListTable />
+                </TableContainer>
+              </div>
+              <div className="mt-3">
+                <LoadMore />
+              </div>
             </div>
           </div>
           <FatFooter {...footerProps} />

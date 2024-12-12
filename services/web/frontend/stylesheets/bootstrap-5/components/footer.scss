@@ -1,5 +1,60 @@
 @use 'sass:map';
 
+// Max width of the sidebar
+$footer-width-delta: 320px;
+
+@mixin footer-container-up($bp) {
+  $size: map.get($grid-breakpoints, $bp);
+
+  @supports (container-type: inline-size) {
+    @container fatfooter (width >= #{$size}) {
+      @content;
+    }
+  }
+
+  @supports not (container-type: inline-size) {
+    @at-root {
+      .project-ds-nav-page & {
+        @media (min-width: #{$size + $footer-width-delta}) {
+          @content;
+        }
+      }
+
+      :not(.project-ds-nav-page *) & {
+        @media (min-width: #{$size}) {
+          @content;
+        }
+      }
+    }
+  }
+}
+
+@mixin footer-container-down($bp) {
+  $size: map.get($grid-breakpoints, $bp);
+
+  @supports (container-type: inline-size) {
+    @container fatfooter (width < #{$size}) {
+      @content;
+    }
+  }
+
+  @supports not (container-type: inline-size) {
+    @at-root {
+      .project-ds-nav-page & {
+        @media (max-width: #{$size + $footer-width-delta}) {
+          @content;
+        }
+      }
+
+      :not(.project-ds-nav-page *) & {
+        @media (max-width: #{$size}) {
+          @content;
+        }
+      }
+    }
+  }
+}
+
 footer.site-footer {
   background-color: var(--bg-light-primary);
   border-top: 1px solid var(--border-primary-dark);
@@ -63,6 +118,8 @@ footer.site-footer {
 }
 
 .fat-footer {
+  container-name: fatfooter;
+  container-type: inline-size;
   background: var(--bg-dark-primary);
   color: var(--content-secondary-dark);
   display: flex;
@@ -71,7 +128,7 @@ footer.site-footer {
   .fat-footer-container {
     margin: var(--spacing-11) auto;
 
-    @include media-breakpoint-down(sm) {
+    @include footer-container-down(sm) {
       margin: var(--spacing-11) 0;
     }
   }
@@ -177,7 +234,7 @@ footer.site-footer {
     white-space: nowrap;
   }
 
-  @include media-breakpoint-down(md) {
+  @include footer-container-down(md) {
     .fat-footer-sections {
       grid-template-columns: repeat(2, 1fr);
       grid-template-rows: repeat(4, auto);
@@ -214,7 +271,7 @@ footer.site-footer {
         gap: var(--spacing-09);
         justify-content: center;
 
-        @include media-breakpoint-down(sm) {
+        @include footer-container-down(sm) {
           gap: var(--spacing-06);
         }
       }
@@ -234,7 +291,7 @@ footer.site-footer {
     }
   }
 
-  @include media-breakpoint-up(md) {
+  @include footer-container-up(md) {
     .fat-footer-container {
       width: (map.get($grid-breakpoints, 'md') - ($spacing-04 * 2));
     }
@@ -280,7 +337,7 @@ footer.site-footer {
     }
   }
 
-  @include media-breakpoint-up(lg) {
+  @include footer-container-up(lg) {
     .fat-footer-container {
       width: (map.get($grid-breakpoints, 'lg') - $spacing-07);
     }
@@ -290,7 +347,7 @@ footer.site-footer {
     }
   }
 
-  @include media-breakpoint-up(xl) {
+  @include footer-container-up(xl) {
     .fat-footer-container {
       width: (map.get($grid-breakpoints, 'xl') - $spacing-09);
     }
@@ -343,7 +400,7 @@ footer.site-footer {
 .website-redesign-fat-footer,
 .website-redesign .fat-footer {
   .fat-footer-container {
-    @include media-breakpoint-down(sm) {
+    @include footer-container-down(sm) {
       margin: var(--spacing-11) 0;
     }
   }
@@ -381,7 +438,7 @@ footer.site-footer {
     background-image: url('../../../../public/img/ol-brand/overleaf-black.svg');
   }
 
-  @include media-breakpoint-down(sm) {
+  @include footer-container-down(sm) {
     .fat-footer-sections {
       grid-template-columns: repeat(1, 1fr);
       grid-template-rows: repeat(6, auto);

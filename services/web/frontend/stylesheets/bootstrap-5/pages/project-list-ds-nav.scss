@@ -133,16 +133,10 @@
       overflow-y: auto;
       position: relative;
       background-color: var(--bg-light-secondary);
-      padding: var(--spacing-08) var(--spacing-06);
 
-      @include media-breakpoint-up(md) {
-        padding: var(--spacing-08);
+      @media (width >= 768px) {
         border-top-left-radius: var(--border-radius-large);
       }
-    }
-
-    .fat-footer-container {
-      width: 100% !important;
     }
   }
 
