@@ -347,6 +347,7 @@ const _ProjectController = {
       !anonymous && 'ro-mirror-on-client',
       'track-pdf-download',
       !anonymous && 'writefull-oauth-promotion',
+      'ieee-stylesheet',
       'write-and-cite',
       'write-and-cite-ars',
       'default-visual-for-beginners',
