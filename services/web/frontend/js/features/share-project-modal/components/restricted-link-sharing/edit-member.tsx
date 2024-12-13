@@ -18,6 +18,7 @@ import MaterialIcon from '@/shared/components/material-icon'
 import BootstrapVersionSwitcher from '@/features/ui/components/bootstrap-5/bootstrap-version-switcher'
 import { bsVersion } from '@/features/utils/bootstrap-5'
 import classnames from 'classnames'
+import getMeta from '@/utils/meta'
 
 type PermissionsOption = PermissionsLevel | 'removeAccess' | 'downgraded'
 
@@ -235,13 +236,21 @@ function SelectPrivilege({
   const { features } = useProjectContext()
 
   const privileges = useMemo(
-    (): Privilege[] => [
-      { key: 'owner', label: t('make_owner') },
-      { key: 'readAndWrite', label: t('editor') },
-      { key: 'review', label: t('reviewer') },
-      { key: 'readOnly', label: t('viewer') },
-      { key: 'removeAccess', label: t('remove_access') },
-    ],
+    (): Privilege[] =>
+      getMeta('ol-isReviewerRoleEnabled')
+        ? [
+            { key: 'owner', label: t('make_owner') },
+            { key: 'readAndWrite', label: t('editor') },
+            { key: 'review', label: t('reviewer') },
+            { key: 'readOnly', label: t('viewer') },
+            { key: 'removeAccess', label: t('remove_access') },
+          ]
+        : [
+            { key: 'owner', label: t('make_owner') },
+            { key: 'readAndWrite', label: t('editor') },
+            { key: 'readOnly', label: t('viewer') },
+            { key: 'removeAccess', label: t('remove_access') },
+          ],
     [t]
   )
 
