@@ -34,6 +34,12 @@
     --link-hover-color: var(--link-web-hover);
     --link-visited-color: var(--link-web-visited);
     --link-hover-text-decoration: underline;
+
+    .notification {
+      --link-color: var(--link-ui);
+      --link-hover-color: var(--link-ui-hover);
+      --link-visited-color: var(--link-ui-visited);
+    }
   }
 
   // hero section of features, enterprises, and universities will have an image that will overflow the page
