@@ -23,7 +23,7 @@ const LinkedFilesHandler = {
   },
 
   async getSourceProject(data) {
-    const projection = { _id: 1, name: 1 }
+    const projection = { _id: 1, name: 1, overleaf: 1 } // include the historyId for future use
     if (data.v1_source_doc_id != null) {
       const project = await Project.findOne(
         { 'overleaf.id': data.v1_source_doc_id },

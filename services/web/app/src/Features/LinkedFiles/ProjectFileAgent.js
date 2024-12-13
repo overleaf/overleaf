@@ -134,9 +134,9 @@ module.exports = ProjectFileAgent = {
                 }
               ) // Created
             } else if (type === 'file') {
-              return FileStoreHandler.getFileStream(
-                sourceProject._id,
-                entity._id,
+              return FileStoreHandler.getFileStreamNew(
+                sourceProject,
+                entity,
                 null,
                 function (err, fileStream) {
                   if (err != null) {

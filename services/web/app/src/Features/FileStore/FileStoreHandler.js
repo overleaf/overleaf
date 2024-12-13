@@ -154,6 +154,34 @@ const FileStoreHandler = {
     })
   },
 
+  getFileStreamNew(project, file, query, callback) {
+    const projectId = project._id
+    const historyId = project.overleaf?.history?.id
+    const fileId = file._id
+    const hash = file.hash
+    if (historyId && hash) {
+      // new behaviour - request from history
+      const range = _extractRange(query?.range)
+      HistoryManager.requestBlobWithFallback(
+        projectId,
+        hash,
+        fileId,
+        'GET',
+        range,
+        function (err, result) {
+          if (err) {
+            return callback(err)
+          }
+          const { stream } = result
+          callback(null, stream)
+        }
+      )
+    } else {
+      // original behaviour
+      FileStoreHandler.getFileStream(projectId, fileId, query, callback)
+    }
+  },
+
   getFileStream(projectId, fileId, query, callback) {
     let queryString = '?from=getFileStream'
     if (query != null && query.format != null) {
@@ -297,6 +325,12 @@ const FileStoreHandler = {
       (fileId ? `/file/${fileId}` : '')
     )
   },
+}
+
+function _extractRange(range) {
+  if (typeof range === 'string' && /\d+-\d+/.test(range)) {
+    return `bytes=${range}`
+  }
 }
 
 module.exports = FileStoreHandler
