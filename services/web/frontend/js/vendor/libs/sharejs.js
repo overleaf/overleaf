@@ -695,6 +695,9 @@ export const { Doc } = (() => {
       var op = { p: pos, i: text };
       if (fromUndo) {
         op.u = true;
+        // TODO: This flag is temporary. It is only necessary while we change
+        // the behaviour of tracked delete rejections in RangesTracker
+        op.orderedRejections = true;
       }
       op = [op];
 

@@ -352,6 +352,12 @@ function getHistoryOpForInsert(op, comments, changes) {
     }
   }
 
+  // If it's determined that the op is a tracked delete rejection, we have to
+  // calculate its proper history position. If multiple tracked deletes are
+  // found at the same position as the insert, the tracked deletes that come
+  // before the tracked delete that was actually rejected offset the history
+  // position.
+  let trackedDeleteRejectionOffset = 0
   for (const change of changes) {
     if (!isDelete(change.op)) {
       // We're only interested in tracked deletes
@@ -362,14 +368,25 @@ function getHistoryOpForInsert(op, comments, changes) {
       // Tracked delete is before the op. Move the op forward.
       hpos += change.op.d.length
     } else if (change.op.p === op.p) {
-      // Tracked delete is at the same position as the op. The insert comes before
-      // the tracked delete so it doesn't move.
+      // Tracked delete is at the same position as the op.
       if (op.u && change.op.d.startsWith(op.i)) {
         // We're undoing and the insert matches the start of the tracked
         // delete. RangesManager treats this as a tracked delete rejection. We
         // will note this in the op so that project-history can take the
         // appropriate action.
         trackedDeleteRejection = true
+
+        // The history must be updated to take into account all preceding
+        // tracked deletes at the same position
+        hpos += trackedDeleteRejectionOffset
+
+        // No need to continue. All subsequent tracked deletes are after the
+        // insert.
+        break
+      } else {
+        // This tracked delete does not match the insert. Note its length in
+        // case we find a tracked delete that matches later.
+        trackedDeleteRejectionOffset += change.op.d.length
       }
     } else {
       // Tracked delete is after the insert. Tracked deletes are ordered, so
