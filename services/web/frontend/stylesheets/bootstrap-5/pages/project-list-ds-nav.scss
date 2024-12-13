@@ -181,6 +181,15 @@
       }
     }
 
+    .project-ds-nav-main {
+      min-height: 100%;
+      padding: var(--spacing-08) var(--spacing-06);
+
+      @include media-breakpoint-up(md) {
+        padding: var(--spacing-08);
+      }
+    }
+
     .project-dash-table {
       .btn-link {
         color: var(--content-secondary);
@@ -207,8 +216,10 @@
       position: relative;
       background-color: var(--bg-light-secondary);
 
-      @media (width >= 768px) {
+      @include media-breakpoint-up(md) {
         border-top-left-radius: var(--border-radius-large);
+        border-left: 1px solid var(--border-divider);
+        border-top: 1px solid var(--border-divider);
       }
     }
   }

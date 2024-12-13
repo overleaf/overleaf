@@ -62,7 +62,7 @@ export function ProjectListDsNav() {
       <main className="project-list-wrapper">
         <SidebarDsNav />
         <div className="project-ds-nav-content">
-          <div className="p-4">
+          <div className="project-ds-nav-main">
             {error ? <DashApiError /> : ''}
             <UserNotifications />
             <div className="project-list-header-row">
