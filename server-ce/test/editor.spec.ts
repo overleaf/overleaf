@@ -187,6 +187,7 @@ describe('editor', () => {
       createProject(`project-${uuid()}`, { type: 'Example Project' })
       // wait until the main document is rendered
       cy.findByText(/Loading/).should('not.exist')
+      cy.findByText(/Your Paper/)
     })
 
     it('renders jpg', () => {
