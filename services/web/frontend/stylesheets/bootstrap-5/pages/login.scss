@@ -37,30 +37,6 @@
     @include body-sm;
   }
 
-  .login-or-text-container {
-    margin: 0;
-    line-height: 1;
-    position: relative;
-    font-size: var(--font-size-02);
-    padding: var(--spacing-08) 0 var(--spacing-05) 0;
-
-    &::before {
-      content: '';
-      position: absolute;
-      height: 1px;
-      background-color: var(--neutral-20);
-      left: 0;
-      right: 0;
-      top: calc(var(--spacing-08) + var(--spacing-08) / 4);
-    }
-  }
-
-  .login-or-text {
-    position: relative;
-    background-color: #fff;
-    padding: 0 var(--spacing-05);
-  }
-
   .recaptcha-branding {
     @include body-xs;
   }

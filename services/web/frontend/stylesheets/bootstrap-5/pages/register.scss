@@ -1,0 +1,112 @@
+.register-container {
+  h1 {
+    @include heading-sm;
+
+    color: var(--neutral-90);
+    margin-bottom: 0;
+  }
+
+  .register-content-container {
+    padding: 0; // override bootstrap padding
+    display: flex;
+    background-color: #f2f4f7;
+    min-height: 100vh;
+  }
+
+  .register-form-container {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--spacing-11);
+    background-color: var(--white);
+
+    @include media-breakpoint-down(lg) {
+      height: 100%;
+    }
+
+    .register-form {
+      text-align: center;
+      max-width: 320px;
+      padding-bottom: 120px;
+
+      .notification-content p {
+        text-align: left;
+      }
+
+      .registration-message {
+        text-align: center;
+        padding-bottom: var(--spacing-07);
+
+        .registration-message-heading {
+          color: var(--neutral-70);
+          font-size: var(--font-size-05);
+          line-height: var(--line-height-04);
+          margin-top: var(--spacing-08);
+          margin-bottom: var(--spacing-05);
+        }
+
+        .registration-message-details {
+          font-size: var(--font-size-02);
+        }
+      }
+
+      .tos-agreement-notice {
+        text-align: left;
+      }
+    }
+  }
+
+  .register-illustration-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    .register-illustration {
+      position: absolute;
+      left: 80px;
+      top: 100px;
+
+      // for wide screen
+      @media (width >= 1700px) {
+        position: relative;
+        left: unset;
+        top: unset;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+
+      .register-main-image {
+        max-width: 850px;
+
+        @media (width <= 1350px) {
+          max-width: 750px;
+        }
+
+        @media (width <= 1150px) {
+          max-width: 670px;
+        }
+      }
+
+      .sticky-tags {
+        position: absolute;
+        height: 210px;
+        bottom: -135px;
+        right: 130px;
+
+        // for wide screen
+        @media (width >= 1700px) {
+          right: calc(50% - 300px);
+        }
+      }
+    }
+  }
+
+  .recaptcha-branding {
+    @include body-xs;
+
+    text-align: left;
+    padding: var(--spacing-05) 0;
+  }
+}
