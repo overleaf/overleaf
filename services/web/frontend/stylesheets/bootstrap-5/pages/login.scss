@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding-top: var(--spacing-11);
   text-align: center;
+  padding-bottom: 125px; // to prevent cookie banner from covering the bottom text of the page on mobile
 
   h1 {
     margin-bottom: 0;
