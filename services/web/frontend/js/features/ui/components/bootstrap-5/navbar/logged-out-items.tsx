@@ -16,7 +16,7 @@ export default function LoggedOutItems({
       {showSignUpLink ? (
         <NavLinkItem
           href="/register"
-          className="primary"
+          className="primary nav-account-item"
           onClick={e => {
             sendMB('menu-clicked-register', { page: currentUrl })
           }}
@@ -26,6 +26,7 @@ export default function LoggedOutItems({
       ) : null}
       <NavLinkItem
         href="/login"
+        className="nav-account-item"
         onClick={e => {
           sendMB('menu-clicked-login', { page: currentUrl })
         }}

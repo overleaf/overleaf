@@ -56,9 +56,8 @@ export function ProjectListDsNav() {
     <div className="project-ds-nav-page website-redesign">
       <DefaultNavbar
         {...navbarProps}
-        items={navbarProps.items.filter(item => item.text !== 'help')}
         customLogo="/img/ol-brand/overleaf-a-ds-solution-mallard.svg"
-        showAccountButtons={false}
+        showCloseIcon
       />
       <main className="project-list-wrapper">
         <SidebarDsNav />

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { sendMB } from '@/infrastructure/event-tracking'
 import { useTranslation } from 'react-i18next'
 import { Button, Container, Nav, Navbar } from 'react-bootstrap-5'
@@ -23,7 +24,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     enableUpgradeButton,
     suppressNavbarRight,
     suppressNavContentLinks,
-    showAccountButtons = true,
+    showCloseIcon = false,
     showSubscriptionLink,
     showSignUpLink,
     currentUrl,
@@ -33,6 +34,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
   } = props
   const { t } = useTranslation()
   const { isReady } = useWaitForI18n()
+  const [expanded, setExpanded] = useState(false)
 
   // The Contact Us modal is rendered at this level rather than inside the nav
   // bar because otherwise the help wiki search results dropdown doesn't show up
@@ -47,7 +49,11 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
 
   return (
     <>
-      <Navbar className="navbar-default navbar-main" expand="lg">
+      <Navbar
+        className="navbar-default navbar-main"
+        expand="lg"
+        onToggle={expanded => setExpanded(expanded)}
+      >
         <Container className="navbar-container" fluid>
           <div className="navbar-header">
             <HeaderLogoOrTitle title={title} customLogo={customLogo} />
@@ -76,7 +82,9 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                 aria-expanded="false"
                 aria-label={t('main_navigation')}
               >
-                <MaterialIcon type="menu" />
+                <MaterialIcon
+                  type={showCloseIcon && expanded ? 'close' : 'menu'}
+                />
               </Navbar.Toggle>
               <Navbar.Collapse
                 id="navbar-main-collapse"
@@ -111,18 +119,17 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                       />
                     ) : null
                   })}
-                  {showAccountButtons &&
-                    (sessionUser ? (
-                      <LoggedInItems
-                        sessionUser={sessionUser}
-                        showSubscriptionLink={showSubscriptionLink}
-                      />
-                    ) : (
-                      <LoggedOutItems
-                        showSignUpLink={showSignUpLink}
-                        currentUrl={currentUrl}
-                      />
-                    ))}
+                  {sessionUser ? (
+                    <LoggedInItems
+                      sessionUser={sessionUser}
+                      showSubscriptionLink={showSubscriptionLink}
+                    />
+                  ) : (
+                    <LoggedOutItems
+                      showSignUpLink={showSignUpLink}
+                      currentUrl={currentUrl}
+                    />
+                  )}
                 </Nav>
               </Navbar.Collapse>
             </>

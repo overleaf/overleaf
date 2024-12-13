@@ -14,8 +14,10 @@ export default function LoggedInItems({
   const { t } = useTranslation()
   return (
     <>
-      <NavLinkItem href="/project">{t('projects')}</NavLinkItem>
-      <NavDropdownMenu title={t('Account')}>
+      <NavLinkItem href="/project" className="nav-item-projects">
+        {t('projects')}
+      </NavLinkItem>
+      <NavDropdownMenu title={t('Account')} className="nav-item-account">
         <AccountMenuItems
           sessionUser={sessionUser}
           showSubscriptionLink={showSubscriptionLink}
