@@ -115,12 +115,28 @@ mixin overleafGroupPlans()
 					div.mt-2 Collaborators are people that your group users may invite to work with them on their projects. So, for example, if you have the Group Standard plan, the users in your group can invite up to 10 people to work with them on a project. And if you have the Group Professional plan, your users can invite as many people to work with them as they want.
 		.custom-accordion-item
 			button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ2" aria-expanded="false" aria-controls="overleafGroupPlansQ2")
-				| Is an Overleaf Group plan more cost effective?
+				if showGroupPricing2025
+					| What is the benefit of purchasing an Overleaf Group plan?
+				else
+					| Is an Overleaf Group plan more cost effective?
 				span.custom-accordion-icon
 					i.material-symbols.material-symbols-outlined(aria-hidden="true") keyboard_arrow_down
 			.collapse(id="overleafGroupPlansQ2")
 				.custom-accordion-body
-					| Our Group subscriptions allow you to purchase access to our premium features for multiple people. They’re easy to manage, help save on paperwork, and reduce the cost of purchasing multiple subscriptions separately. 
+					if showGroupPricing2025
+						| Our Group subscriptions allow you to purchase access to our premium features for multiple people. They’re easy to manage, help save on paperwork, and allow groups of 5 or more to purchase via purchase order (PO). We also offer discounts on purchases of Group subscriptions for more than 50 users; just get in touch with our 
+						a.inline-green-link(
+							target="_blank"
+							href="/for/contact-sales"
+							event-tracking="plans-page-click"
+							event-tracking-mb="true"
+							event-tracking-trigger="click"
+							event-segmentation={ button: 'contact', location: 'faq' }
+						)
+							span Sales team
+						| .
+					else
+						| Our Group subscriptions allow you to purchase access to our premium features for multiple people. They’re easy to manage, help save on paperwork, and reduce the cost of purchasing multiple subscriptions separately.
 		.custom-accordion-item
 			button.custom-accordion-header.collapsed(type="button" data-toggle="collapse" data-target="#overleafGroupPlansQ3" aria-expanded="false" aria-controls="overleafGroupPlansQ3")
 				| Who is eligible for the educational discount?
