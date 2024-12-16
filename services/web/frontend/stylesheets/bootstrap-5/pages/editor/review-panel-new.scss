@@ -839,4 +839,10 @@
   .review-mode-switcher-toggle-label {
     display: none;
   }
+
+  &.review-mode-switcher-toggle-button-expanded {
+    .review-mode-switcher-toggle-label {
+      display: block;
+    }
+  }
 }

@@ -14,6 +14,7 @@ import {
 import { useUserContext } from '@/shared/context/user-context'
 import { useTranslation } from 'react-i18next'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
+import usePersistedState from '@/shared/hooks/use-persisted-state'
 
 type Mode = 'viewing' | 'reviewing' | 'editing'
 
@@ -144,11 +145,21 @@ const ModeSwitcherToggleButtonContent = forwardRef<
     ariaExpanded: boolean
   }
 >(({ onClick, className, iconType, label, ariaExpanded }, ref) => {
+  const [isFirstTimeUsed, setIsFirstTimeUsed] = usePersistedState(
+    `modeSwitcherFirstTimeUsed`,
+    true
+  )
+
   return (
     <button
-      className={classNames('review-mode-switcher-toggle-button', className)}
+      className={classNames('review-mode-switcher-toggle-button', className, {
+        'review-mode-switcher-toggle-button-expanded': isFirstTimeUsed,
+      })}
       ref={ref}
-      onClick={onClick}
+      onClick={event => {
+        setIsFirstTimeUsed(false)
+        onClick(event)
+      }}
       aria-expanded={ariaExpanded}
     >
       <MaterialIcon className="material-symbols-outlined" type={iconType} />
