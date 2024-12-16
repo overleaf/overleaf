@@ -183,20 +183,22 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
 
     res.locals.moment = moment
 
-    res.locals.isIEEE = brandVariation =>
-      brandVariation?.brand_id === IEEE_BRAND_ID
+    res.locals.isIEEE = brandId => brandId === IEEE_BRAND_ID
 
     res.locals.getCssThemeModifier = function (
       userSettings,
       brandVariation,
-      ieeeStylesheetEnabled
+      enableIeeeBranding
     ) {
       // Themes only exist in OL v2
       if (Settings.overleaf != null) {
-        // The IEEE theme takes precedence over the user personal setting, i.e. a user with
-        // a theme setting of "light" will still get the IEE theme in IEEE branded projects.
-        if (ieeeStylesheetEnabled && res.locals.isIEEE(brandVariation)) {
-          return 'ieee-'
+        // The IEEE theme is no longer applied in the editor, which sets
+        // enableIeeeBranding to false, but is used in the IEEE portal. If
+        // this is an IEEE-branded page and IEEE branding is disabled in this
+        // page, always use the default theme (i.e. no light theme in the
+        // IEEE-branded editor)
+        if (res.locals.isIEEE(brandVariation?.brand_id)) {
+          return enableIeeeBranding ? 'ieee-' : ''
         } else if (userSettings && userSettings.overallTheme != null) {
           return userSettings.overallTheme
         }
@@ -213,11 +215,10 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
       bootstrapVersion = 3
     ) {
       // Pick which main stylesheet to use based on Bootstrap version
-      const bootstrap5Modifier = bootstrapVersion === 5 ? '-bootstrap-5' : ''
-      const computedThemeModifier = bootstrapVersion === 5 ? '' : themeModifier
-
       return res.locals.buildStylesheetPath(
-        `main-${computedThemeModifier}style${bootstrap5Modifier}.css`
+        bootstrapVersion === 5
+          ? 'main-style-bootstrap-5.css'
+          : `main-${themeModifier}style.css`
       )
     }
 
