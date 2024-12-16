@@ -42,6 +42,7 @@ export const RefTooltipContent: FC = () => {
             // TODO: handle label not found
             if (labelNode) {
               view.dispatch(selectNode(labelNode))
+              view.focus()
             }
           }
         }}
