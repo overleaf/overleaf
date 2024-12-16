@@ -39,13 +39,13 @@
     }
 
     @include media-breakpoint-down(lg) {
-      --navbar-hamburger-submenu-item-hover-color: var(--content-secondary);
-      --navbar-subdued-hover-color: var(--content-secondary);
-      --navbar-link-hover-color: var(--content-secondary);
-      --navbar-link-hover-bg: none;
-      --navbar-subdued-hover-bg: none;
+      --navbar-hamburger-submenu-item-hover-color: var(--content-primary);
+      --navbar-hamburger-submenu-item-hover-bg: var(--bg-light-secondary);
+      --navbar-subdued-hover-color: var(--content-primary);
+      --navbar-link-hover-color: var(--content-primary);
+      --navbar-link-hover-bg: var(--bg-light-secondary);
+      --navbar-subdued-hover-bg: var(--bg-light-secondary);
       --navbar-hamburger-submenu-bg: none;
-      --navbar-hamburger-submenu-item-hover-bg: none;
 
       .nav-item-help::before {
         content: '';
