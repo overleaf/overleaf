@@ -185,7 +185,10 @@ export const MetadataProvider: FC = ({ children }) => {
         )
       }
       window.setTimeout(() => {
-        if (permissionsRef.current.write) {
+        if (
+          permissionsRef.current.write ||
+          permissionsRef.current.trackedWrite
+        ) {
           loadProjectMetaFromServer()
         }
       }, 200)

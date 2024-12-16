@@ -62,6 +62,7 @@ export const mockScope = (content?: string) => {
     },
     permissions: {
       comment: true,
+      trackedWrite: true,
       write: true,
     },
     reviewPanel: {

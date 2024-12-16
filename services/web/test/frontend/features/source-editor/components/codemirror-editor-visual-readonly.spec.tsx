@@ -27,9 +27,10 @@ const PermissionsProvider: FC = ({ children }) => (
   <PermissionsContext.Provider
     value={{
       read: true,
+      comment: true,
+      trackedWrite: false,
       write: false,
       admin: false,
-      comment: true,
     }}
   >
     {children}
@@ -39,6 +40,7 @@ const PermissionsProvider: FC = ({ children }) => (
 const mountEditor = (content: string) => {
   const scope = mockScope(content)
   scope.permissions.write = false
+  scope.permissions.trackedWrite = false
   scope.editor.showVisual = true
 
   cy.mount(

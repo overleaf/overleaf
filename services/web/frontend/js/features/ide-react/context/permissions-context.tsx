@@ -17,27 +17,31 @@ export const PermissionsContext = createContext<Permissions | undefined>(
 const permissionsMap: DeepReadonly<Record<PermissionsLevel, Permissions>> = {
   readOnly: {
     read: true,
+    comment: true,
+    trackedWrite: false,
     write: false,
     admin: false,
-    comment: true,
   },
   review: {
     read: true,
-    write: true,
-    admin: false,
     comment: true,
+    trackedWrite: true,
+    write: false,
+    admin: false,
   },
   readAndWrite: {
     read: true,
+    comment: true,
+    trackedWrite: true,
     write: true,
     admin: false,
-    comment: true,
   },
   owner: {
     read: true,
+    comment: true,
+    trackedWrite: true,
     write: true,
     admin: true,
-    comment: true,
   },
 }
 

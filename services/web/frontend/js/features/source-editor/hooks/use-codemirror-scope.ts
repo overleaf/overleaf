@@ -67,11 +67,12 @@ import { updateRanges } from '@/features/source-editor/extensions/ranges'
 import { useThreadsContext } from '@/features/review-panel-new/context/threads-context'
 import { useHunspell } from '@/features/source-editor/hooks/use-hunspell'
 import { isBootstrap5 } from '@/features/utils/bootstrap-5'
+import { Permissions } from '@/features/ide-react/types/permissions'
 
 function useCodeMirrorScope(view: EditorView) {
   const { fileTreeData } = useFileTreeData()
 
-  const [permissions] = useScopeValue<{ write: boolean }>('permissions')
+  const [permissions] = useScopeValue<Permissions>('permissions')
 
   // set up scope listeners
 
@@ -111,7 +112,7 @@ function useCodeMirrorScope(view: EditorView) {
 
   let [spellCheckLanguage] = useScopeValue<string>('project.spellCheckLanguage')
   // spell check is off when read-only
-  if (!permissions.write) {
+  if (!permissions.write && !permissions.trackedWrite) {
     spellCheckLanguage = ''
   }
 
@@ -288,7 +289,7 @@ function useCodeMirrorScope(view: EditorView) {
     }
   }, [view, fileTreeData])
 
-  const editableRef = useRef(permissions.write)
+  const editableRef = useRef(permissions.write || permissions.trackedWrite)
 
   const { previewByPath } = useFileTreePathContext()
 
@@ -409,11 +410,11 @@ function useCodeMirrorScope(view: EditorView) {
   }, [view, previewByPath])
 
   useEffect(() => {
-    editableRef.current = permissions.write
+    editableRef.current = permissions.write || permissions.trackedWrite
     window.setTimeout(() => {
       view.dispatch(setEditable(editableRef.current)) // the editor needs to be locked when there's a problem saving data
     })
-  }, [view, permissions.write])
+  }, [view, permissions.write, permissions.trackedWrite])
 
   useEffect(() => {
     phrasesRef.current = phrases

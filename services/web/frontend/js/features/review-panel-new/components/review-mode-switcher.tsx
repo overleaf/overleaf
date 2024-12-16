@@ -13,7 +13,6 @@ import {
 } from '../context/track-changes-state-context'
 import { useUserContext } from '@/shared/context/user-context'
 import { useTranslation } from 'react-i18next'
-import { useEditorContext } from '@/shared/context/editor-context'
 import { usePermissionsContext } from '@/features/ide-react/context/permissions-context'
 
 type Mode = 'viewing' | 'reviewing' | 'editing'
@@ -24,11 +23,11 @@ const useCurrentMode = (): Mode => {
   const trackChangesForCurrentUser =
     trackChanges?.onForEveryone ||
     (user && user.id && trackChanges?.onForMembers[user.id])
-  const { write } = usePermissionsContext()
+  const { write, trackedWrite } = usePermissionsContext()
 
   if (write && !trackChangesForCurrentUser) {
     return 'editing'
-  } else if (write) {
+  } else if (trackedWrite) {
     return 'reviewing'
   }
 
@@ -41,12 +40,8 @@ function ReviewModeSwitcher() {
     useTrackChangesStateActionsContext()
   const mode = useCurrentMode()
 
-  const { permissionsLevel } = useEditorContext()
-
-  const enableEditing =
-    permissionsLevel === 'owner' || permissionsLevel === 'readAndWrite'
-  const enableReviewing = enableEditing || permissionsLevel === 'review'
-  const showViewOption = !enableReviewing
+  const { write, trackedWrite } = usePermissionsContext()
+  const showViewOption = !trackedWrite
 
   return (
     <div className="review-mode-switcher-container">
@@ -57,24 +52,24 @@ function ReviewModeSwitcher() {
         />
         <DropdownMenu flip={false}>
           <OLDropdownMenuItem
-            disabled={!enableEditing}
+            disabled={!write}
             onClick={() => {
               saveTrackChangesForCurrentUser(false)
             }}
             description={t('can_edit_content')}
             leadingIcon="edit"
-            active={enableEditing && mode === 'editing'}
+            active={write && mode === 'editing'}
           >
             {t('editing')}
           </OLDropdownMenuItem>
           <OLDropdownMenuItem
-            disabled={!enableReviewing}
+            disabled={!trackedWrite}
             onClick={() => {
               saveTrackChangesForCurrentUser(true)
             }}
             description={t('can_add_tracked_changes_and_comments')}
             leadingIcon="rate_review"
-            active={enableReviewing && mode === 'reviewing'}
+            active={trackedWrite && mode === 'reviewing'}
           >
             {t('reviewing')}
           </OLDropdownMenuItem>
