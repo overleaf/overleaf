@@ -1,6 +1,5 @@
 import { sortBy } from 'lodash'
 import { useTranslation } from 'react-i18next'
-import { Plus, TagSimple } from '@phosphor-icons/react'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import {
   UNCATEGORIZED_KEY,
@@ -47,12 +46,7 @@ export default function TagsList() {
       </li>
       <li className="tag">
         <button type="button" className="tag-name" onClick={openCreateTagModal}>
-          {isDsNav ? (
-            <Plus weight="bold" />
-          ) : (
-            <MaterialIcon type="add" className="tag-list-icon" />
-          )}
-
+          <MaterialIcon type="add" className="tag-list-icon" />
           <span className="name">{t('new_tag')}</span>
         </button>
       </li>
@@ -74,11 +68,7 @@ export default function TagsList() {
                   color: getTagColor(tag),
                 }}
               >
-                {isDsNav ? (
-                  <TagSimple weight="fill" className="tag-list-icon" />
-                ) : (
-                  <MaterialIcon type="label" className="tag-list-icon" />
-                )}
+                <MaterialIcon type="label" className="tag-list-icon" />
               </span>
               <span className="name">
                 {tag.name}{' '}
