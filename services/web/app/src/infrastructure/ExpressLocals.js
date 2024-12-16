@@ -244,8 +244,8 @@ module.exports = function (webRouter, privateApiRouter, publicApiRouter) {
     }
 
     // This function is used to add translations from the server for main
-    // navigation items because it's tricky to get them in the front end
-    // otherwise.
+    // navigation and footer items because it's tricky to get them in the front
+    // end otherwise.
     res.locals.cloneAndTranslateText = obj => {
       const clone = _.cloneDeep(obj)
       addTranslatedTextDeep(clone)

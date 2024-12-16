@@ -17,7 +17,7 @@ import withErrorBoundary from '../../../infrastructure/error-boundary'
 import { GenericErrorBoundaryFallback } from '@/shared/components/generic-error-boundary-fallback'
 import getMeta from '@/utils/meta'
 import DefaultNavbar from '@/features/ui/components/bootstrap-5/navbar/default-navbar'
-import FatFooter from '@/features/ui/components/bootstrap-5/footer/fat-footer'
+import Footer from '@/features/ui/components/bootstrap-5/footer/footer'
 import WelcomePageContent from '@/features/project-list/components/welcome-page-content'
 import ProjectListDefault from '@/features/project-list/components/project-list-default'
 import { ProjectListDsNav } from '@/features/project-list/components/project-list-ds-nav'
@@ -57,7 +57,7 @@ function DefaultNavbarAndFooter({ children }: { children: ReactNode }) {
       >
         {children}
       </main>
-      <FatFooter {...footerProps} />
+      <Footer {...footerProps} />
     </>
   )
 }

@@ -10,6 +10,7 @@ describe('LanguagePicker', function () {
       currentLangCode: 'en',
     })
     window.metaAttributesCache.set('ol-footer', {
+      showThinFooter: false,
       translatedLanguages: {
         en: 'English',
         fr: 'Français',
@@ -26,12 +27,12 @@ describe('LanguagePicker', function () {
   })
 
   it('renders the language picker with the current language', function () {
-    cy.mount(<LanguagePicker />)
+    cy.mount(<LanguagePicker showHeader />)
     cy.get('#language-picker-toggle').should('contain', 'English')
   })
 
   it('opens the dropdown and lists available languages', function () {
-    cy.mount(<LanguagePicker />)
+    cy.mount(<LanguagePicker showHeader />)
     cy.get('#language-picker-toggle').click()
 
     cy.get('.dropdown-menu').within(() => {
@@ -42,7 +43,7 @@ describe('LanguagePicker', function () {
   })
 
   it('changes the language and updates the URL when a language is selected', function () {
-    cy.mount(<LanguagePicker />)
+    cy.mount(<LanguagePicker showHeader />)
     cy.get('#language-picker-toggle').should('exist').click()
     cy.contains('Français').click()
     cy.url().should('include', 'fr.overleaf.com')

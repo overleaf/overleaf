@@ -55,6 +55,7 @@ describe('<ProjectListRoot />', function () {
     window.metaAttributesCache.set('ol-user', {})
     window.metaAttributesCache.set('ol-user_id', userId)
     window.metaAttributesCache.set('ol-footer', {
+      showThinFooter: false,
       translatedLanguages: { en: 'English' },
       subdomainLang: { en: { lngCode: 'en', url: 'overleaf.com' } },
     })

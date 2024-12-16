@@ -40,8 +40,12 @@ block append meta
 			items: cloneAndTranslateText(nav.header_extras)
 		})
 		meta(name="ol-footer" data-type="json" content={
+			showThinFooter: showThinFooter,
+			showPoweredBy: !hasFeature('saas') && !settings.nav.hide_powered_by,
 			subdomainLang: settings.i18n.subdomainLang,
-			translatedLanguages: settings.translatedLanguages
+			translatedLanguages: settings.translatedLanguages,
+			leftItems: cloneAndTranslateText(settings.nav.left_footer),
+			rightItems: settings.nav.right_footer
 		})
 
 block body
@@ -55,7 +59,10 @@ block body
 
 	if (typeof suppressFooter === "undefined")
 		if showThinFooter
-			include layout/footer-marketing
+			if bootstrapVersion === 5
+				include layout/thin-footer-bootstrap-5
+			else
+				include layout/thin-footer
 		else
 			if bootstrapVersion === 5
 				include layout/fat-footer-react-bootstrap-5

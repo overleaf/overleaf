@@ -1,10 +1,14 @@
-// Footer
-$footer-height: 50px;
-
 // Header
 $header-height: 68px;
 $toolbar-height: 40px;
 $toolbar-small-height: 32px;
+
+// Footer
+$thin-footer-height: 50px;
+$fat-footer-content-height: calc(100vh - $header-height);
+$thin-footer-content-height: calc(
+  100vh - ($header-height + $thin-footer-height)
+);
 
 // List of allowed themes
 $themes: ('default', 'light');

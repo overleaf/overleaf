@@ -8,11 +8,13 @@
   --link-color-dark: var(--link-ui-dark);
   --link-hover-color-dark: var(--link-ui-hover-dark);
   --link-visited-color-dark: var(--link-ui-visited-dark);
+  --link-text-decoration: underline;
   --link-hover-text-decoration: none;
 }
 
 a {
   color: var(--link-color);
+  text-decoration: var(--link-text-decoration);
 
   &:visited {
     color: var(--link-visited-color);

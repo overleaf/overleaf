@@ -137,7 +137,7 @@
 
 // Make a button look and behave like a link
 .btn-link {
-  color: var(--link-ui);
+  color: var(--link-color);
   font-weight: normal;
   cursor: pointer;
   text-decoration: underline;
@@ -156,7 +156,7 @@
 
   &:hover,
   &:focus {
-    color: var(--link-ui-hover);
+    color: var(--link-hover-color);
     text-decoration: none;
     background-color: transparent;
   }

@@ -22,7 +22,6 @@ import SidebarDsNav from '@/features/project-list/components/sidebar/sidebar-ds-
 
 export function ProjectListDsNav() {
   const navbarProps = getMeta('ol-navbar')
-  const footerProps = getMeta('ol-footer')
   const { t } = useTranslation()
   const {
     error,
@@ -120,7 +119,7 @@ export function ProjectListDsNav() {
               </div>
             </div>
           </div>
-          <FatFooter {...footerProps} />
+          <FatFooter />
         </div>
       </main>
     </div>

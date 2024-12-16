@@ -33,7 +33,7 @@ function FatFooterBase() {
           </FooterBaseLink>
         </div>
         <div className="fat-footer-base-item fat-footer-base-language">
-          <LanguagePicker />
+          <LanguagePicker showHeader={false} />
         </div>
       </div>
       <div className="fat-footer-base-section fat-footer-base-social">

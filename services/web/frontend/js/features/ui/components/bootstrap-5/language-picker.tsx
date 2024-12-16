@@ -4,12 +4,13 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
+  DropdownHeader,
 } from './dropdown-menu'
 import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
-import Icon from '@/shared/components/icon'
+import MaterialIcon from '@/shared/components/material-icon'
 
-function LanguagePicker() {
+function LanguagePicker({ showHeader } = { showHeader: false }) {
   const { t } = useTranslation()
 
   const currentLangCode = getMeta('ol-i18n').currentLangCode
@@ -26,18 +27,18 @@ function LanguagePicker() {
         className="btn-inline-link"
         variant="link"
       >
-        <Icon
-          type="language"
-          className="fa fa-fw"
-          accessibilityLabel={t('select_a_language')}
-        />
-        {translatedLanguages?.[currentLangCode]}
+        <MaterialIcon type="translate" />
+        &nbsp;
+        <span className="language-picker-text">
+          {translatedLanguages?.[currentLangCode]}
+        </span>
       </DropdownToggle>
 
       <DropdownMenu
         className="dropdown-menu-sm-width"
         aria-labelledby="language-picker-toggle"
       >
+        {showHeader ? <DropdownHeader>{t('language')}</DropdownHeader> : null}
         {subdomainLang &&
           Object.entries(subdomainLang).map(([subdomain, subdomainDetails]) => {
             if (

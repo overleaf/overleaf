@@ -1,21 +1,19 @@
 li.dropdown.dropup.subdued(dropdown).language-picker
-	a#language-picker-toggle(
-		href="#",
+	button#language-picker-toggle.btn.btn-link.btn-inline-link(
 		dropdown-toggle,
 		data-ol-lang-selector-tooltip,
 		data-bs-toggle="dropdown",
-		role="button"
 		aria-haspopup="true",
 		aria-expanded="false",
 		aria-label="Select " + translate('language'),
 		tooltip=translate('language')
 		title=translate('language')
 	)
-		i.fa.fa-fw.fa-language
-		|
-		| #{settings.translatedLanguages[currentLngCode]}
+		span.material-symbols(aria-hidden="true") translate
+		| &nbsp;
+		span.language-picker-text #{settings.translatedLanguages[currentLngCode]}
 
-	ul.dropdown-menu(role="menu" aria-labelledby="language-picker-toggle")
+	ul.dropdown-menu.dropdown-menu-sm-width(role="menu" aria-labelledby="language-picker-toggle")
 		li.dropdown-header #{translate("language")}
 		each subdomainDetails, subdomain in settings.i18n.subdomainLang
 			if !subdomainDetails.hide
@@ -24,4 +22,4 @@ li.dropdown.dropup.subdued(dropdown).language-picker
 					a.menu-indent(href=subdomainDetails.url+currentUrlWithQueryParams, role="menuitem", class=isActive ? 'dropdown-item active' : 'dropdown-item', aria-selected=isActive ? 'true' : 'false')
 						| #{settings.translatedLanguages[subdomainDetails.lngCode]}
 						if subdomainDetails.lngCode === currentLngCode
-							span.material-symbols.dropdown-item-trailing-icon.pull-right(aria-hidden="true") check
+							span.material-symbols.dropdown-item-trailing-icon(aria-hidden="true") check

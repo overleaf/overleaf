@@ -1,7 +1,6 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import FatFooterBase from './fat-footer-base'
-import { FatFooterMetadata } from '../../types/fat-footer-metadata'
 
 type FooterLinkProps = {
   href: string
@@ -13,7 +12,7 @@ type FooterSectionProps = {
   links: FooterLinkProps[]
 }
 
-function FatFooter(props: FatFooterMetadata) {
+function FatFooter() {
   const { t } = useTranslation()
   const hideFatFooter = false
 

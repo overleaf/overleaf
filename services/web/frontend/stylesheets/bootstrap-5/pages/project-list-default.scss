@@ -1,24 +1,30 @@
 .project-list-react {
+  --project-list-content-height: #{$fat-footer-content-height};
+
   #project-list-root > &.content {
     padding-top: $header-height;
     padding-bottom: 0;
-    min-height: calc(100vh - #{$header-height});
+    min-height: var(--project-list-content-height);
     display: flex;
     flex-direction: column;
+
+    .thin-footer & {
+      --project-list-content-height: #{$thin-footer-content-height};
+    }
   }
 
   .project-list-wrapper {
     display: flex;
     align-items: stretch;
     width: 100%;
-    min-height: calc(100vh - #{$header-height});
+    min-height: var(--project-list-content-height);
   }
 
   .project-list-sidebar-wrapper-react {
     position: relative;
     background-color: var(--bg-dark-secondary);
     flex: 0 0 15%;
-    min-height: calc(100vh - #{$header-height});
+    min-height: var(--project-list-content-height);
     max-width: 320px;
     min-width: 200px;
 
@@ -121,7 +127,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - #{$header-height});
+    min-height: var(--project-list-content-height);
 
     .loading-screen-brand-container {
       margin: 0 auto;

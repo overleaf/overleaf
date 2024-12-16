@@ -1,3 +1,5 @@
+$dropdown-item-min-height: 36px;
+
 .dropdown {
   display: inline-flex;
 
@@ -20,6 +22,9 @@
 .dropdown-header {
   @include body-xs;
 
+  display: flex;
+  align-items: center;
+  min-height: $dropdown-item-min-height; // a minimum height of 36px to be accessible for touch screens
   padding: var(--spacing-05) var(--spacing-06) var(--spacing-02)
     var(--spacing-04);
 }
@@ -55,7 +60,7 @@
   display: grid;
   grid-auto-flow: column;
   place-content: center start;
-  min-height: 36px; // a minimum height of 36px to be accessible for touch screens
+  min-height: $dropdown-item-min-height; // a minimum height of 36px to be accessible for touch screens
   position: relative;
 
   &:active {

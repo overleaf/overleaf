@@ -1,7 +1,15 @@
+body {
+  position: relative;
+}
+
 .content {
   min-height: 100vh;
   padding-top: $header-height + $spacing-08;
   padding-bottom: $spacing-08;
+
+  .thin-footer & {
+    min-height: calc(100vh - #{$thin-footer-height});
+  }
 }
 
 .content-alt {

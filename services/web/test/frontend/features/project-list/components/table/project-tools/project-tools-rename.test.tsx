@@ -65,6 +65,7 @@ describe('<ProjectTools />', function () {
     })
 
     window.metaAttributesCache.set('ol-footer', {
+      showThinFooter: false,
       translatedLanguages: { en: 'English' },
       subdomainLang: { en: { lngCode: 'en', url: 'overleaf.com' } },
     })
