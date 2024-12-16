@@ -41,31 +41,7 @@ export const reviewTooltip = (): Extension => {
     return []
   }
 
-  return [
-    reviewTooltipTheme,
-    reviewTooltipStateField,
-    EditorView.updateListener.of(update => {
-      if (update.selectionSet && !update.state.selection.main.empty) {
-        update.view.dispatch({
-          effects: textSelectedEffect.of(null),
-        })
-      } else if (
-        !update.startState.selection.main.empty &&
-        update.state.selection.main.empty
-      ) {
-        update.view.dispatch({
-          effects: removeReviewPanelTooltipEffect.of(null),
-        })
-      }
-    }),
-    EditorView.domEventHandlers({
-      mousedown(event, view) {
-        view.dispatch({
-          effects: removeReviewPanelTooltipEffect.of(null),
-        })
-      },
-    }),
-  ]
+  return [reviewTooltipTheme, reviewTooltipStateField]
 }
 
 export const reviewTooltipStateField = StateField.define<{
@@ -82,10 +58,6 @@ export const reviewTooltipStateField = StateField.define<{
     addCommentRanges = addCommentRanges.map(tr.changes)
 
     for (const effect of tr.effects) {
-      if (effect.is(removeReviewPanelTooltipEffect)) {
-        return { tooltip: null, addCommentRanges }
-      }
-
       if (effect.is(removeNewCommentRangeEffect)) {
         const rangeToRemove = effect.value
         addCommentRanges = addCommentRanges.update({
@@ -102,14 +74,10 @@ export const reviewTooltipStateField = StateField.define<{
           add: [rangeToAdd],
         })
       }
+    }
 
-      if (effect.is(textSelectedEffect)) {
-        tooltip = buildTooltip(tr.state)
-      }
-
-      if (tooltip && tr.state.selection.main.empty) {
-        tooltip = null
-      }
+    if (tr.selection) {
+      tooltip = buildTooltip(tr.state)
     }
 
     return { tooltip, addCommentRanges }
