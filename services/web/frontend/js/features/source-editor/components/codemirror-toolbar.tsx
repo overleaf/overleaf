@@ -41,7 +41,6 @@ const Toolbar = memo(function Toolbar() {
   const view = useCodeMirrorViewContext()
 
   const [overflowed, setOverflowed] = useState(false)
-  const [collapsed, setCollapsed] = useState(false)
 
   const overflowedItemsRef = useRef<Set<string>>(new Set())
 
@@ -132,14 +131,6 @@ const Toolbar = memo(function Toolbar() {
     }
   }, [buildOverflow, insideTable, resizeRef])
 
-  const toggleToolbar = useCallback(() => {
-    setCollapsed(value => !value)
-  }, [])
-
-  if (collapsed) {
-    return null
-  }
-
   const showActions = !state.readOnly && !insideTable
 
   return (
@@ -193,18 +184,6 @@ const Toolbar = memo(function Toolbar() {
         <SwitchToPDFButton />
         <DetacherSynctexControl />
         <DetachCompileButtonWrapper />
-      </div>
-      <div
-        className="ol-cm-toolbar-button-group hidden"
-        aria-label={t('toolbar_visibility')}
-      >
-        <ToolbarButton
-          id="toolbar-expand-less"
-          label="Hide Toolbar"
-          command={toggleToolbar}
-          icon={bsVersion({ bs5: 'arrow_drop_up', bs3: 'caret-up' })}
-          hidden // enable this once there's a way to show the toolbar again
-        />
       </div>
     </div>
   )
