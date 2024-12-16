@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import classnames from 'classnames'
+import { Question, User } from '@phosphor-icons/react'
 import NewProjectButton from '../new-project-button'
 import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
 import SurveyWidget from '../survey-widget'
-import { usePersistedResize } from '../../../../shared/hooks/use-resize'
-import MaterialIcon from '@/shared/components/material-icon'
+import { usePersistedResize } from '@/shared/hooks/use-resize'
 import { Dropdown } from 'react-bootstrap-5'
 import getMeta from '@/utils/meta'
 import OLTooltip from '@/features/ui/components/ol/ol-tooltip'
@@ -77,11 +77,18 @@ function SidebarDsNav() {
                   }}
                 >
                   <div>
-                    <MaterialIcon type="help" size="2x" />
+                    <Question size={24} />
                   </div>
                 </OLTooltip>
               </Dropdown.Toggle>
-              <Dropdown.Menu as="ul" role="menu" align="end">
+              <Dropdown.Menu
+                as="ul"
+                role="menu"
+                align="end"
+                popperConfig={{
+                  modifiers: [{ name: 'offset', options: { offset: [0, 5] } }],
+                }}
+              >
                 <NavDropdownMenuItems
                   dropdown={helpItem.dropdown}
                   showContactUsModal={showContactUsModal}
@@ -105,11 +112,20 @@ function SidebarDsNav() {
                     }}
                   >
                     <div>
-                      <MaterialIcon type="person" size="2x" />
+                      <User size={24} />
                     </div>
                   </OLTooltip>
                 </Dropdown.Toggle>
-                <Dropdown.Menu as="ul" role="menu" align="end">
+                <Dropdown.Menu
+                  as="ul"
+                  role="menu"
+                  align="end"
+                  popperConfig={{
+                    modifiers: [
+                      { name: 'offset', options: { offset: [-50, 5] } },
+                    ],
+                  }}
+                >
                   <AccountMenuItems
                     sessionUser={sessionUser}
                     showSubscriptionLink={showSubscriptionLink}
