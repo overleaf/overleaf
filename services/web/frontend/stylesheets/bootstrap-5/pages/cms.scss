@@ -66,6 +66,17 @@
     }
   }
 
+  .linkable-list-container {
+    .row-with-id {
+      margin-top: var(--spacing-12);
+
+      h2:first-child {
+        // css specificity problem. this is more specific than header overrides below
+        margin-top: 0;
+      }
+    }
+  }
+
   // create .paragraphs-margin-spacing-00, .paragraphs-margin-spacing-01, .paragraphs-margin-spacing-02, .paragraphs-margin-spacing-03, .paragraphs-margin-spacing-04, .paragraphs-margin-spacing-05, .paragraphs-margin-spacing-06, .paragraphs-margin-spacing-07, .paragraphs-margin-spacing-08, .paragraphs-margin-spacing-09, .paragraphs-margin-spacing-10, .paragraphs-margin-spacing-11, .paragraphs-margin-spacing-12, .paragraphs-margin-spacing-13, .paragraphs-margin-spacing-14, .paragraphs-margin-spacing-15, .paragraphs-margin-spacing-16
   @each $spacing-option in $all-spacings {
     .paragraphs-margin-#{$spacing-option} {
@@ -84,7 +95,9 @@
       h4,
       h5,
       h6 {
-        margin-top: var(--#{$spacing-option});
+        margin-top: var(
+          --#{$spacing-option}
+        ) !important; // needed for :first-child specificity
       }
     }
   }
@@ -494,6 +507,47 @@
       // create .padding-spacing-00, .padding-spacing-01, .padding-spacing-02, .padding-spacing-03, .padding-spacing-04, .padding-spacing-05, .padding-spacing-06, .padding-spacing-07, .padding-spacing-08, .padding-spacing-09, .padding-spacing-10, .padding-spacing-11, .padding-spacing-12, .padding-spacing-13, .padding-spacing-14, .padding-spacing-15, .padding-spacing-16
       &.padding-#{$spacing-option} {
         padding: var(--#{$spacing-option});
+      }
+    }
+  }
+
+  .table-of-contents {
+    --link-color: var(--neutral-70);
+    --link-visited-color: var(--neutral-70);
+
+    border-top: 1px solid var(--neutral-30);
+    border-bottom: 1px solid var(--neutral-30);
+    padding: var(--spacing-09) 0;
+    margin-right: var(--spacing-13);
+
+    h2 {
+      @include heading-xs;
+
+      color: var(--green-60);
+      margin: 0;
+      margin-bottom: var(--spacing-06);
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      li {
+        margin-top: var(--spacing-06);
+      }
+
+      li:first-child {
+        margin-top: 0;
+      }
+    }
+
+    a {
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: none !important;
       }
     }
   }
