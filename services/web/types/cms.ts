@@ -1,23 +1,3 @@
-export type IconElementMaterial =
-  | 'add_notes'
-  | 'assured_workload'
-  | 'biotech'
-  | 'book_5'
-  | 'draw'
-  | 'edit_document'
-  | 'edit_note'
-  | 'function'
-  | 'groups'
-  | 'live_tv'
-  | 'local_library'
-  | 'lock'
-  | 'picture_as_pdf'
-  | 'preview'
-  | 'school'
-  | 'security'
-  | 'verified_user'
-  | 'workspace_premium'
-
 export type IconElementSticker =
   | 'sticker | arrow | grey | large'
   | 'sticker | books | pink'
@@ -39,5 +19,5 @@ export type IconElementSticker =
   | 'sticker | support | tangerine'
   | 'sticker | support | yellow'
 
-export type IconElement = IconElementMaterial | IconElementSticker
+export type IconElement = IconElementSticker
 export type IconStyle = 'Green circle' | 'Large purple text' | 'Default'
