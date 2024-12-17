@@ -240,7 +240,7 @@ async function subscriptionUpgradePage(req, res) {
     })
   } catch (error) {
     logger.err({ error }, 'error loading upgrade subscription page')
-    return res.render('/user/subscription')
+    return res.redirect('/user/subscription')
   }
 }
 
