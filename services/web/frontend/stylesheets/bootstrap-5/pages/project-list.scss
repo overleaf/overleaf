@@ -285,15 +285,11 @@
 
     .tag-menu {
       button.dropdown-toggle {
-        border-radius: var(--border-radius-base);
         background-color: transparent;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 16px;
-        height: 16px;
         position: relative;
-        padding: var(--spacing-01) var(--spacing-03);
 
         &::after {
           margin: 0;

@@ -116,8 +116,12 @@
 
     .tag-menu {
       button.dropdown-toggle {
+        border-radius: var(--border-radius-base);
         border: 1px solid var(--white);
         color: var(--content-primary-dark);
+        width: 16px;
+        height: 16px;
+        padding: var(--spacing-01) var(--spacing-03);
       }
     }
   }

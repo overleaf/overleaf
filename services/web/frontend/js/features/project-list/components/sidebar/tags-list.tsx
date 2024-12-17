@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash'
 import { useTranslation } from 'react-i18next'
-import { Plus, TagSimple } from '@phosphor-icons/react'
+import { DotsThreeVertical, Plus, TagSimple } from '@phosphor-icons/react'
 import MaterialIcon from '../../../../shared/components/material-icon'
 import {
   UNCATEGORIZED_KEY,
@@ -93,7 +93,9 @@ export default function TagsList() {
                 aria-label={t('open_action_menu', { name: tag.name })}
                 id={`${tag._id}-dropdown-toggle`}
                 data-testid="tag-dropdown-toggle"
-              />
+              >
+                {isDsNav && <DotsThreeVertical weight="bold" />}
+              </DropdownToggle>
               <DropdownMenu className="dropdown-menu-sm-width">
                 <DropdownItem
                   as="li"

@@ -177,8 +177,20 @@
 
       .tag-menu {
         button.dropdown-toggle {
-          border: 1px solid var(--content-secondary);
+          border-radius: var(--border-radius-full);
+          border: none;
           color: var(--content-secondary);
+          height: 20px;
+          width: 20px;
+          padding: 0;
+
+          &::after {
+            display: none;
+          }
+
+          &:hover {
+            background-color: var(--neutral-20) !important;
+          }
         }
       }
     }
