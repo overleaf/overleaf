@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { RecurlySubscription } from '../../../../../../../types/subscription/dashboard/subscription'
-import { isSplitTestEnabled } from '@/utils/splitTestUtils'
-import { AI_STANDALONE_PLAN_CODE } from '../../../data/add-on-codes'
 
 export function ExpiredSubscription({
   subscription,
@@ -22,14 +20,6 @@ export function ExpiredSubscription({
         >
           {t('view_your_invoices')}
         </a>
-        {isSplitTestEnabled('ai-add-on') && (
-          <a
-            className="btn btn-secondary me-1"
-            href={`/user/subscription/new?planCode=${AI_STANDALONE_PLAN_CODE}`}
-          >
-            {t('buy_overleaf_assist')}
-          </a>
-        )}
         <a href="/user/subscription/plans" className="btn btn-primary">
           {t('create_new_subscription')}
         </a>
