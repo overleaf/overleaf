@@ -75,6 +75,10 @@
     }
   }
 
+  .navbar-nav > li > .dropdown-toggle::after {
+    display: none;
+  }
+
   .project-list-wrapper {
     flex-grow: 1;
     display: flex;

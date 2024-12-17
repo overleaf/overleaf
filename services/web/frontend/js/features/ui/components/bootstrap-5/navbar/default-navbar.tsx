@@ -12,6 +12,7 @@ import HeaderLogoOrTitle from '@/features/ui/components/bootstrap-5/navbar/heade
 import MaterialIcon from '@/shared/components/material-icon'
 import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
+import { X } from '@phosphor-icons/react'
 
 function DefaultNavbar(props: DefaultNavbarMetadata) {
   const {
@@ -81,9 +82,11 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                 aria-expanded="false"
                 aria-label={t('main_navigation')}
               >
-                <MaterialIcon
-                  type={showCloseIcon && expanded ? 'close' : 'menu'}
-                />
+                {showCloseIcon && expanded ? (
+                  <X />
+                ) : (
+                  <MaterialIcon type="menu" />
+                )}
               </Navbar.Toggle>
               <Navbar.Collapse
                 id="navbar-main-collapse"
