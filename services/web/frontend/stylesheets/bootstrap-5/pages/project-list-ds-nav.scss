@@ -92,9 +92,10 @@
 
       .new-project-dropdown {
         padding: 0 var(--spacing-08) var(--spacing-05) var(--spacing-05);
+        border-bottom: solid 1px transparent;
 
         &.show-shadow {
-          box-shadow: 0 2px 2px rgb(0 0 0 / 10%);
+          border-bottom-color: var(--border-divider);
         }
       }
 
@@ -108,9 +109,10 @@
 
       .ds-nav-sidebar-lower {
         padding: var(--spacing-05) var(--spacing-08) 0 var(--spacing-05);
+        border-top: solid 1px transparent;
 
         &.show-shadow {
-          box-shadow: 0 -2px 2px rgb(0 0 0 / 10%);
+          border-top-color: var(--border-divider);
         }
       }
 
