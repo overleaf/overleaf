@@ -1,6 +1,7 @@
 import type { DefaultNavbarMetadata } from '@/features/ui/components/types/default-navbar-metadata'
 import NavDropdownMenu from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-menu'
 import NavDropdownLinkItem from '@/features/ui/components/bootstrap-5/navbar/nav-dropdown-link-item'
+import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 
 export default function AdminMenu({
   canDisplayAdminMenu,
@@ -16,8 +17,20 @@ export default function AdminMenu({
   | 'canDisplaySurveyMenu'
   | 'adminUrl'
 >) {
+  const sendProjectListMB = useSendProjectListMB()
   return (
-    <NavDropdownMenu title="Admin" className="subdued">
+    <NavDropdownMenu
+      title="Admin"
+      className="subdued"
+      onToggle={nextShow => {
+        if (nextShow) {
+          sendProjectListMB('menu-expand', {
+            item: 'admin',
+            location: 'top-menu',
+          })
+        }
+      }}
+    >
       {canDisplayAdminMenu ? (
         <>
           <NavDropdownLinkItem href="/admin">Manage Site</NavDropdownLinkItem>

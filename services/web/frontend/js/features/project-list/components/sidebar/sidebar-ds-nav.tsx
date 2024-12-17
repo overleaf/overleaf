@@ -16,6 +16,7 @@ import { useContactUsModal } from '@/shared/hooks/use-contact-us-modal'
 import { UserProvider } from '@/shared/context/user-context'
 import { AccountMenuItems } from '@/features/ui/components/bootstrap-5/navbar/account-menu-items'
 import { useScrolled } from '@/features/project-list/components/sidebar/use-scroll'
+import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
 
 function SidebarDsNav() {
   const { t } = useTranslation()
@@ -29,6 +30,7 @@ function SidebarDsNav() {
   const { mousePos, getHandleProps, getTargetProps } = usePersistedResize({
     name: 'project-sidebar',
   })
+  const sendMB = useSendProjectListMB()
   const { sessionUser, showSubscriptionLink, items } = getMeta('ol-navbar')
   const helpItem = items.find(
     item => item.text === 'help'
@@ -65,7 +67,12 @@ function SidebarDsNav() {
           {helpItem && (
             <Dropdown
               className="ds-nav-icon-dropdown"
-              onToggle={show => setShowHelpDropdown(show)}
+              onToggle={show => {
+                setShowHelpDropdown(show)
+                if (show) {
+                  sendMB('menu-expand', { item: 'help', location: 'sidebar' })
+                }
+              }}
             >
               <Dropdown.Toggle role="menuitem" aria-label={t('help')}>
                 <OLTooltip
@@ -92,6 +99,7 @@ function SidebarDsNav() {
                 <NavDropdownMenuItems
                   dropdown={helpItem.dropdown}
                   showContactUsModal={showContactUsModal}
+                  location="sidebar"
                 />
               </Dropdown.Menu>
             </Dropdown>
@@ -100,7 +108,15 @@ function SidebarDsNav() {
             <>
               <Dropdown
                 className="ds-nav-icon-dropdown"
-                onToggle={show => setShowAccountDropdown(show)}
+                onToggle={show => {
+                  setShowAccountDropdown(show)
+                  if (show) {
+                    sendMB('menu-expand', {
+                      item: 'account',
+                      location: 'sidebar',
+                    })
+                  }
+                }}
               >
                 <Dropdown.Toggle role="menuitem" aria-label={t('Account')}>
                   <OLTooltip
