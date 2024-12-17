@@ -311,32 +311,6 @@ describe('SplitTestHandler', function () {
       )
     })
   })
-
-  describe('isSplitTestActive', function () {
-    it('returns false when current version is not active', async function () {
-      const res =
-        await this.SplitTestHandler.promises.isSplitTestActive(
-          'not-active-test'
-        )
-      expect(res).to.be.false
-    })
-    it('returns undefined false when current version is active', async function () {
-      const res =
-        await this.SplitTestHandler.promises.isSplitTestActive('active-test')
-      expect(res).to.be.true
-    })
-    it('returns undefined when there is an error checking', async function () {
-      this.SplitTestCache.get.rejects(new Error('oops'))
-      const res =
-        await this.SplitTestHandler.promises.isSplitTestActive('active-test')
-      expect(res).to.be.undefined
-    })
-    it('returns undefined when there is no test', async function () {
-      const res =
-        await this.SplitTestHandler.promises.isSplitTestActive('not-a-test')
-      expect(res).to.be.undefined
-    })
-  })
 })
 
 function makeSplitTest(
