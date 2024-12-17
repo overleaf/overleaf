@@ -12,6 +12,14 @@ function setupEventTracking(el) {
   const element = el.getAttribute('event-tracking-element')
 
   function submit() {
+    if (key === 'menu-expand') {
+      const expanded = el.getAttribute('aria-expanded')
+      if (expanded === 'true') {
+        // skip if the menu is already expanded
+        return
+      }
+    }
+
     const segmentation = JSON.parse(
       el.getAttribute('event-segmentation') || '{}'
     )

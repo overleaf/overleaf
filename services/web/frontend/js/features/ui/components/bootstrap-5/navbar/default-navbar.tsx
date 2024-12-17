@@ -27,7 +27,6 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
     showCloseIcon = false,
     showSubscriptionLink,
     showSignUpLink,
-    currentUrl,
     sessionUser,
     adminUrl,
     items,
@@ -125,10 +124,7 @@ function DefaultNavbar(props: DefaultNavbarMetadata) {
                       showSubscriptionLink={showSubscriptionLink}
                     />
                   ) : (
-                    <LoggedOutItems
-                      showSignUpLink={showSignUpLink}
-                      currentUrl={currentUrl}
-                    />
+                    <LoggedOutItems showSignUpLink={showSignUpLink} />
                   )}
                 </Nav>
               </Navbar.Collapse>
