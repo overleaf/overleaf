@@ -97,6 +97,16 @@
         &.show-shadow {
           border-bottom-color: var(--border-divider);
         }
+
+        > .dropdown-menu {
+          // navbar + new-project spacing + new-project button height (36px) + extra padding
+          max-height: calc(
+            100vh - #{$header-height} - var(--spacing-03) - var(--spacing-08) - 36px - var(
+                --spacing-05
+              )
+          );
+          overflow: auto;
+        }
       }
 
       .project-list-sidebar-scroll {
