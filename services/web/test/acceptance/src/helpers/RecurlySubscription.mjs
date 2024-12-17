@@ -1,9 +1,10 @@
-const { ObjectId } = require('mongodb-legacy')
-const Subscription = require('./Subscription')
-const MockRecurlyApiClass = require('../mocks/MockRecurlyApi')
-const RecurlyWrapper = require('../../../../app/src/Features/Subscription/RecurlyWrapper')
-const { promisifyClass } = require('@overleaf/promise-utils')
+import mongodb from 'mongodb-legacy'
+import Subscription from './Subscription.mjs'
+import MockRecurlyApiClass from '../mocks/MockRecurlyApi.js'
+import RecurlyWrapper from '../../../../app/src/Features/Subscription/RecurlyWrapper.js'
+import { promisifyClass } from '@overleaf/promise-utils'
 
+const { ObjectId } = mongodb
 let MockRecurlyApi
 
 before(function () {
@@ -57,7 +58,8 @@ class RecurlySubscription {
   }
 }
 
-module.exports = RecurlySubscription
-module.exports.promises = promisifyClass(RecurlySubscription, {
+export default RecurlySubscription
+
+export const promises = promisifyClass(RecurlySubscription, {
   without: ['buildCallbackXml'],
 })

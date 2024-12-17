@@ -1,14 +1,12 @@
-const { db, ObjectId } = require('../../../../app/src/infrastructure/mongodb')
-const { expect } = require('chai')
-const { callbackifyClass } = require('@overleaf/promise-utils')
-const SubscriptionUpdater = require('../../../../app/src/Features/Subscription/SubscriptionUpdater')
-const PermissionsManager = require('../../../../app/src/Features/Authorization/PermissionsManager')
-const SSOConfigManager = require('../../../../modules/group-settings/app/src/sso/SSOConfigManager')
-const SubscriptionModel =
-  require('../../../../app/src/models/Subscription').Subscription
-const DeletedSubscriptionModel =
-  require('../../../../app/src/models/DeletedSubscription').DeletedSubscription
-const Modules = require('../../../../app/src/infrastructure/Modules')
+import { db, ObjectId } from '../../../../app/src/infrastructure/mongodb.js'
+import { expect } from 'chai'
+import { callbackifyClass } from '@overleaf/promise-utils'
+import SubscriptionUpdater from '../../../../app/src/Features/Subscription/SubscriptionUpdater.js'
+import PermissionsManager from '../../../../app/src/Features/Authorization/PermissionsManager.js'
+import SSOConfigManager from '../../../../modules/group-settings/app/src/sso/SSOConfigManager.mjs'
+import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'
+import { DeletedSubscription as DeletedSubscriptionModel } from '../../../../app/src/models/DeletedSubscription.js'
+import Modules from '../../../../app/src/infrastructure/Modules.js'
 
 class PromisifiedSubscription {
   constructor(options = {}) {
@@ -178,4 +176,4 @@ const Subscription = callbackifyClass(PromisifiedSubscription, {
 })
 Subscription.promises = class extends PromisifiedSubscription {}
 
-module.exports = Subscription
+export default Subscription

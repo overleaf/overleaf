@@ -1,18 +1,19 @@
-const fs = require('fs')
-const Path = require('path')
-const User = require('./User').promises
-const Subscription = require('./Subscription').promises
-const { SSOConfig } = require('../../../../app/src/models/SSOConfig')
-const UserHelper = require('./UserHelper')
-const SAMLHelper = require('./SAMLHelper')
-const Settings = require('@overleaf/settings')
-const {
-  getProviderId,
-} = require('../../../../app/src/Features/Subscription/GroupUtils')
-const UserGetter = require('../../../../app/src/Features/User/UserGetter')
-const {
-  Subscription: SubscriptionModel,
-} = require('../../../../app/src/models/Subscription')
+import fs from 'fs'
+import Path from 'path'
+import UserModule from './User.js'
+import SubscriptionHelper from './Subscription.mjs'
+import { SSOConfig } from '../../../../app/src/models/SSOConfig.js'
+import UserHelper from './UserHelper.js'
+import SAMLHelper from './SAMLHelper.js'
+import Settings from '@overleaf/settings'
+import { getProviderId } from '../../../../app/src/Features/Subscription/GroupUtils.js'
+import UserGetter from '../../../../app/src/Features/User/UserGetter.js'
+import { fileURLToPath } from 'node:url'
+import { Subscription as SubscriptionModel } from '../../../../app/src/models/Subscription.js'
+
+const { promises: User } = UserModule
+const { promises: Subscription } = SubscriptionHelper
+const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 const SAML_TEST_CERT = fs
   .readFileSync(Path.resolve(__dirname, '../../files/saml-cert.crt'), 'utf8')
@@ -26,14 +27,14 @@ function getEnrollmentUrl(groupId) {
 
 const userIdAttribute = 'nameID'
 
-const baseSsoConfig = {
+export const baseSsoConfig = {
   entryPoint: 'http://example-sso.com/saml',
   certificates: [SAML_TEST_CERT],
   signatureAlgorithm: 'sha256',
   userIdAttribute,
 } // the database also sets enabled and validated, but we cannot set that in the POST request for /manage/groups/:ID/settings/sso
 
-async function createGroupSSO() {
+export async function createGroupSSO() {
   const nonSSOMemberHelper = await UserHelper.createUser()
   const nonSSOMember = nonSSOMemberHelper.user
 
@@ -91,7 +92,7 @@ async function createGroupSSO() {
   }
 }
 
-async function linkGroupMember(
+export async function linkGroupMember(
   userEmail,
   userPassword,
   groupId,
@@ -165,7 +166,7 @@ async function linkGroupMember(
   return userHelper
 }
 
-async function setConfigAndEnableSSO(
+export async function setConfigAndEnableSSO(
   subscriptionHelper,
   adminEmailPassword,
   config
@@ -211,7 +212,7 @@ async function setConfigAndEnableSSO(
   }
 }
 
-module.exports = {
+export default {
   createGroupSSO,
   linkGroupMember,
   baseSsoConfig,

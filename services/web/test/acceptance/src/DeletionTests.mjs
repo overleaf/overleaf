@@ -1,5 +1,5 @@
 import User from './helpers/User.js'
-import Subscription from './helpers/Subscription.js'
+import Subscription from './helpers/Subscription.mjs'
 import request from './helpers/request.js'
 import async from 'async'
 import { expect } from 'chai'

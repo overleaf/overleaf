@@ -1,7 +1,7 @@
-const FeaturesHelper = require('./FeaturesHelper')
-const PlanLocator = require('./PlansLocator')
+import FeaturesHelper from './FeaturesHelper.js'
+import PlanLocator from './PlansLocator.js'
 
-function isProfessionalPlan(planCode) {
+export function isProfessionalPlan(planCode) {
   const plan = PlanLocator.findLocalPlanInSettings(planCode)
   // only identify "modern" professional group plans as eligible, and do not include legacy plans
   return Boolean(
@@ -10,12 +10,12 @@ function isProfessionalPlan(planCode) {
   )
 }
 
-function isProfessionalGroupPlan(subscription) {
+export function isProfessionalGroupPlan(subscription) {
   const isProfessional = isProfessionalPlan(subscription.planCode)
   return subscription.groupPlan && isProfessional
 }
 
-module.exports = {
+export default {
   isProfessionalPlan,
   isProfessionalGroupPlan,
 }
