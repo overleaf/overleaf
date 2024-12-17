@@ -25,6 +25,25 @@ export const textSelectedEffect = StateEffect.define<null>()
 
 export const removeReviewPanelTooltipEffect = StateEffect.define()
 
+const mouseDownEffect = StateEffect.define()
+const mouseUpEffect = StateEffect.define()
+const mouseDownStateField = StateField.define<boolean>({
+  create() {
+    return false
+  },
+  update(value, tr) {
+    for (const effect of tr.effects) {
+      if (effect.is(mouseDownEffect)) {
+        return true
+      } else if (effect.is(mouseUpEffect)) {
+        return false
+      }
+    }
+
+    return value
+  },
+})
+
 export const buildAddNewCommentRangeEffect = (range: SelectionRange) => {
   return addNewCommentRangeEffect.of(
     Decoration.mark({
@@ -41,7 +60,32 @@ export const reviewTooltip = (): Extension => {
     return []
   }
 
-  return [reviewTooltipTheme, reviewTooltipStateField]
+  let mouseUpListener: null | (() => void) = null
+  const disableMouseUpListener = () => {
+    if (mouseUpListener) {
+      document.removeEventListener('mouseup', mouseUpListener)
+    }
+  }
+
+  return [
+    reviewTooltipTheme,
+    reviewTooltipStateField,
+    mouseDownStateField,
+    EditorView.domEventHandlers({
+      mousedown: (event, view) => {
+        disableMouseUpListener()
+        mouseUpListener = () => {
+          disableMouseUpListener()
+          view.dispatch({ effects: mouseUpEffect.of(null) })
+        }
+
+        view.dispatch({
+          effects: mouseDownEffect.of(null),
+        })
+        document.addEventListener('mouseup', mouseUpListener)
+      },
+    }),
+  ]
 }
 
 export const reviewTooltipStateField = StateField.define<{
@@ -76,8 +120,11 @@ export const reviewTooltipStateField = StateField.define<{
       }
     }
 
-    if (tr.selection) {
+    const isMouseDown = tr.state.field(mouseDownStateField)
+    if (!isMouseDown && !tr.state.selection.main.empty) {
       tooltip = buildTooltip(tr.state)
+    } else if (tooltip && tr.state.selection.main.empty) {
+      tooltip = null
     }
 
     return { tooltip, addCommentRanges }
@@ -90,10 +137,6 @@ export const reviewTooltipStateField = StateField.define<{
 })
 
 function buildTooltip(state: EditorState): Tooltip | null {
-  if (state.selection.main.empty) {
-    return null
-  }
-
   const lineAtFrom = state.doc.lineAt(state.selection.main.from)
   const lineAtTo = state.doc.lineAt(state.selection.main.to)
   const multiLineSelection = lineAtFrom.number !== lineAtTo.number
