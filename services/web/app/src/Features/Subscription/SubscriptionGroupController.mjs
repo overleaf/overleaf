@@ -171,12 +171,12 @@ async function previewAddSeatsSubscriptionChange(req, res) {
  */
 async function createAddSeatsSubscriptionChange(req, res) {
   try {
-    const preview =
+    const create =
       await SubscriptionGroupHandler.promises.createAddSeatsSubscriptionChange(
         req
       )
 
-    res.json(preview)
+    res.json(create)
   } catch (error) {
     logger.err(
       { error },

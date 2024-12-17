@@ -1,7 +1,7 @@
 import '../../../helpers/bootstrap-5'
 import RequestStatus from '@/features/group-management/components/request-status'
 
-describe('request confirmation page', function () {
+describe('<RequestStatus />', function () {
   beforeEach(function () {
     cy.window().then(win => {
       win.metaAttributesCache.set('ol-groupName', 'My Awesome Team')

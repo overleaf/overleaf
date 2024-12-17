@@ -20,7 +20,10 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
   const { t } = useTranslation()
 
   return (
-    <Card className="card-gray card-description-secondary">
+    <Card
+      className="card-gray card-description-secondary"
+      data-testid="cost-summary"
+    >
       <Card.Body className="d-grid gap-2 p-3">
         <div>
           <div className="fw-bold">{t('cost_summary')}</div>
@@ -53,35 +56,44 @@ function CostSummary({ subscriptionChange, totalLicenses }: CostSummaryProps) {
           <>
             <div>
               <ListGroup>
-                <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
+                <ListGroup.Item
+                  className="bg-transparent border-0 px-0 gap-3 card-description-secondary"
+                  data-testid="plan"
+                >
                   <span className="me-auto">
                     {subscriptionChange.nextInvoice.plan.name} x{' '}
                     {subscriptionChange.change.addOn.quantity -
                       subscriptionChange.change.addOn.prevQuantity}{' '}
                     {t('seats')}
                   </span>
-                  <span>
+                  <span data-testid="price">
                     {formatCurrencyLocalized(
                       subscriptionChange.immediateCharge.subtotal,
                       subscriptionChange.currency
                     )}
                   </span>
                 </ListGroup.Item>
-                <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
+                <ListGroup.Item
+                  className="bg-transparent border-0 px-0 gap-3 card-description-secondary"
+                  data-testid="tax"
+                >
                   <span className="me-auto">
                     {t('sales_tax')} &middot;{' '}
                     {subscriptionChange.nextInvoice.tax.rate * 100}%
                   </span>
-                  <span>
+                  <span data-testid="price">
                     {formatCurrencyLocalized(
                       subscriptionChange.immediateCharge.tax,
                       subscriptionChange.currency
                     )}
                   </span>
                 </ListGroup.Item>
-                <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
+                <ListGroup.Item
+                  className="bg-transparent border-0 px-0 gap-3 card-description-secondary"
+                  data-testid="total"
+                >
                   <strong className="me-auto">{t('total_due_today')}</strong>
-                  <strong>
+                  <strong data-testid="price">
                     {formatCurrencyLocalized(
                       subscriptionChange.immediateCharge.total,
                       subscriptionChange.currency

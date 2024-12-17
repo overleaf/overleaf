@@ -29,7 +29,7 @@ import {
 } from '../../../../../../types/subscription/subscription-change-preview'
 import { MergeAndOverride } from '../../../../../../types/utils'
 
-const MAX_NUMBER_OF_USERS = 50
+export const MAX_NUMBER_OF_USERS = 50
 
 function AddSeats() {
   const { t } = useTranslation()
@@ -244,6 +244,7 @@ function AddSeats() {
                 className="d-grid gap-4"
                 onSubmit={handleSubmit}
                 ref={formRef}
+                data-testid="add-more-users-group-form"
               >
                 <div className="d-grid gap-1">
                   <h4 className="fw-bold m-0 card-description-secondary">

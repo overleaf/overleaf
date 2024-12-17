@@ -1,6 +1,7 @@
 const SandboxedModule = require('sandboxed-module')
 const sinon = require('sinon')
 const { expect } = require('chai')
+const MockRequest = require('../helpers/MockRequest')
 const modulePath =
   '../../../../app/src/Features/Subscription/SubscriptionGroupHandler'
 
@@ -12,6 +13,12 @@ describe('SubscriptionGroupHandler', function () {
     this.email = 'jim@example.com'
     this.user = { _id: this.user_id, email: this.newEmail }
     this.subscription_id = '31DSd1123D'
+    this.adding = 1
+    this.paymentMethod = { cardType: 'Visa', lastFour: '1111' }
+    this.localPlanInSettings = {
+      membersLimit: 2,
+      membersLimitAddOn: 'additional-license',
+    }
 
     this.subscription = {
       admin_id: this.adminUser_id,
@@ -19,16 +26,35 @@ describe('SubscriptionGroupHandler', function () {
       _id: this.subscription_id,
     }
 
+    this.changeRequest = {
+      timeframe: 'now',
+    }
+
+    this.recurlySubscription = {
+      id: 123,
+      addOns: [
+        {
+          code: 'additional-license',
+          quantity: 1,
+        },
+      ],
+      getRequestForAddOnUpdate: sinon.stub().returns(this.changeRequest),
+    }
+
     this.SubscriptionLocator = {
       promises: {
-        getUsersSubscription: sinon.stub(),
+        getUsersSubscription: sinon.stub().resolves({ groupPlan: true }),
         getSubscriptionByMemberIdAndId: sinon.stub(),
         getSubscription: sinon.stub().resolves(this.subscription),
       },
     }
 
+    this.changePreview = {
+      currency: 'USD',
+    }
+
     this.SubscriptionController = {
-      makeChangePreview: sinon.stub().resolves(),
+      makeChangePreview: sinon.stub().resolves(this.changePreview),
     }
 
     this.SubscriptionUpdater = {
@@ -44,8 +70,36 @@ describe('SubscriptionGroupHandler', function () {
       findOne: sinon.stub().returns({ exec: sinon.stub().resolves }),
     }
 
+    this.SessionManager = {
+      getLoggedInUserId: sinon.stub().returns(this.user._id),
+    }
+
+    this.previewSubscriptionChange = {
+      nextAddOns: [
+        {
+          code: 'additional-license',
+          quantity: this.recurlySubscription.addOns[0].quantity + this.adding,
+        },
+      ],
+    }
+
+    this.applySubscriptionChange = {}
+
     this.RecurlyClient = {
-      promises: {},
+      promises: {
+        getSubscription: sinon.stub().resolves(this.recurlySubscription),
+        getPaymentMethod: sinon.stub().resolves(this.paymentMethod),
+        previewSubscriptionChange: sinon
+          .stub()
+          .resolves(this.previewSubscriptionChange),
+        applySubscriptionChangeRequest: sinon
+          .stub()
+          .resolves(this.applySubscriptionChange),
+      },
+    }
+
+    this.PlansLocator = {
+      findLocalPlanInSettings: sinon.stub(this.localPlanInSettings),
     }
 
     this.SubscriptionHandler = {
@@ -64,6 +118,8 @@ describe('SubscriptionGroupHandler', function () {
           Subscription: this.Subscription,
         },
         './RecurlyClient': this.RecurlyClient,
+        './PlansLocator': this.PlansLocator,
+        '../Authentication/SessionManager': this.SessionManager,
       },
     })
   })
@@ -182,5 +238,128 @@ describe('SubscriptionGroupHandler', function () {
         expect(count).not.to.exist
       })
     })
+  })
+
+  describe('getUsersGroupSubscriptionDetails', function () {
+    beforeEach(function () {
+      this.req = new MockRequest()
+      this.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
+        ...this.localPlanInSettings,
+        canUseFlexibleLicensing: true,
+      })
+    })
+
+    it('should throw if the subscription is not a group plan', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({ groupPlan: false })
+
+      await expect(
+        this.Handler.promises.getUsersGroupSubscriptionDetails(this.req)
+      ).to.be.rejectedWith('User subscription is not a group plan')
+    })
+
+    it('should return users group subscription details', async function () {
+      const data = await this.Handler.promises.getUsersGroupSubscriptionDetails(
+        this.req
+      )
+
+      expect(data).to.deep.equal({
+        subscription: { groupPlan: true },
+        plan: {
+          membersLimit: 2,
+          membersLimitAddOn: 'additional-license',
+          canUseFlexibleLicensing: true,
+        },
+        recurlySubscription: this.recurlySubscription,
+      })
+    })
+  })
+
+  describe('add seats subscription change', function () {
+    beforeEach(function () {
+      this.req = new MockRequest()
+      Object.assign(this.req.body, { adding: this.adding })
+      this.PlansLocator.findLocalPlanInSettings = sinon.stub().returns({
+        ...this.localPlanInSettings,
+        canUseFlexibleLicensing: true,
+      })
+    })
+
+    afterEach(function () {
+      this.recurlySubscription.getRequestForAddOnUpdate
+        .calledWith(
+          'additional-license',
+          this.recurlySubscription.addOns[0].quantity + this.adding
+        )
+        .should.equal(true)
+    })
+
+    describe('previewAddSeatsSubscriptionChange', function () {
+      it('should return the subscription change preview', async function () {
+        const preview =
+          await this.Handler.promises.previewAddSeatsSubscriptionChange(
+            this.req
+          )
+
+        this.RecurlyClient.promises.getPaymentMethod
+          .calledWith(this.user_id)
+          .should.equal(true)
+        this.RecurlyClient.promises.previewSubscriptionChange
+          .calledWith(this.changeRequest)
+          .should.equal(true)
+        this.SubscriptionController.makeChangePreview
+          .calledWith(
+            {
+              type: 'add-on-update',
+              addOn: {
+                code: 'additional-license',
+                quantity:
+                  this.recurlySubscription.addOns[0].quantity + this.adding,
+                prevQuantity: this.adding,
+              },
+            },
+            this.previewSubscriptionChange,
+            this.paymentMethod
+          )
+          .should.equal(true)
+        preview.should.equal(this.changePreview)
+      })
+    })
+
+    describe('createAddSeatsSubscriptionChange', function () {
+      it('should change the subscription', async function () {
+        const result =
+          await this.Handler.promises.createAddSeatsSubscriptionChange(this.req)
+
+        this.RecurlyClient.promises.applySubscriptionChangeRequest
+          .calledWith(this.changeRequest)
+          .should.equal(true)
+        this.SubscriptionHandler.promises.syncSubscription
+          .calledWith({ uuid: this.recurlySubscription.id }, this.user_id)
+          .should.equal(true)
+        expect(result).to.deep.equal({
+          adding: this.req.body.adding,
+        })
+      })
+    })
+  })
+
+  describe('ensureFlexibleLicensingEnabled', function () {
+    it('should throw if the subscription can not use flexible licensing', async function () {
+      await expect(
+        this.Handler.promises.ensureFlexibleLicensingEnabled({
+          canUseFlexibleLicensing: false,
+        })
+      ).to.be.rejectedWith('The group plan does not support flexible licencing')
+    })
+  })
+
+  it('should not throw if the subscription can use flexible licensing', async function () {
+    await expect(
+      this.Handler.promises.ensureFlexibleLicensingEnabled({
+        canUseFlexibleLicensing: true,
+      })
+    ).to.not.be.rejected
   })
 })
