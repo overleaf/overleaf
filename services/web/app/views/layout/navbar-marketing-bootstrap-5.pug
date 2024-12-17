@@ -48,10 +48,6 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 								aria-expanded="false",
 								data-bs-toggle="dropdown"
 								role="menuitem"
-								event-tracking="menu-expand"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={"item": "admin", "location": "top-menu"}
 							)
 								| Admin
 								span.caret
@@ -88,10 +84,6 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 										aria-expanded="false",
 										data-bs-toggle="dropdown"
 										role="menuitem"
-										event-tracking="menu-expand"
-										event-tracking-mb="true"
-										event-tracking-trigger="click"
-										event-segmentation={"item": item.trackingKey, "location": "top-menu"}
 									)
 										| !{translate(item.text)}
 										span.caret
@@ -101,7 +93,7 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 												+dropdown-menu-divider
 											else if child.isContactUs
 												+dropdown-menu-link-item()(data-ol-open-contact-form-modal="contact-us" data-bs-target="#contactUsModal" href data-bs-toggle="modal")
-													span(event-tracking="menu-click" event-tracking-mb="true" event-tracking-trigger="click" event-segmentation={"item": "contact", "location": "top-menu"})
+													span(event-tracking="menu-clicked-contact" event-tracking-mb="true" event-tracking-trigger="click")
 														| #{translate("contact_us")}
 											else
 												if child.url
@@ -135,22 +127,22 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 							+nav-item.primary
 								+nav-link(
 									href="/register"
-									event-tracking="menu-click"
+									event-tracking="menu-clicked-register"
 									event-tracking-action="clicked"
 									event-tracking-trigger="click"
 									event-tracking-mb="true"
-									event-segmentation={ page: currentUrl, item: 'register', location: 'top-menu' }
+									event-segmentation={ page: currentUrl }
 								) #{translate('sign_up')}
 
 						// login link
 						+nav-item
 							+nav-link(
 								href="/login"
-								event-tracking="menu-click"
+								event-tracking="menu-clicked-login"
 								event-tracking-action="clicked"
 								event-tracking-trigger="click"
 								event-tracking-mb="true"
-								event-segmentation={ page: currentUrl, item: 'login', location: 'top-menu' }
+								event-segmentation={ page: currentUrl }
 							) #{translate('log_in')}
 
 					// projects link and account menu
@@ -163,10 +155,6 @@ nav.navbar.navbar-default.navbar-main.navbar-expand-lg(class={
 								aria-expanded="false",
 								data-bs-toggle="dropdown"
 								role="menuitem"
-								event-tracking="menu-expand"
-								event-tracking-mb="true"
-								event-tracking-trigger="click"
-								event-segmentation={"item": "account", "location": "top-menu"}
 							)
 								| #{translate('Account')}
 								span.caret

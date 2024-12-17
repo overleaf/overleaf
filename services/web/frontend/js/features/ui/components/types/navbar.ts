@@ -14,7 +14,7 @@ export interface NavbarDropdownTextItem {
 
 export interface NavbarDropdownLinkItem extends NavbarDropdownTextItem {
   url: string
-  trackingKey: string
+  event: string
   eventSegmentation?: Record<string, any>
 }
 
@@ -37,12 +37,11 @@ export interface NavbarTextItemData {
 
 export interface NavbarDropdownItemData extends NavbarTextItemData {
   dropdown: NavbarItemDropdownData
-  trackingKey: 'help' | 'account' | 'features' | 'admin'
 }
 
 export interface NavbarLinkItemData extends NavbarTextItemData {
   url: string
-  trackingKey: string
+  event: string
 }
 
 export type NavbarItemData =
