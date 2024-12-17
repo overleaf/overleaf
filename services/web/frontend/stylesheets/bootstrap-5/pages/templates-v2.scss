@@ -21,7 +21,7 @@
 }
 
 .gallery {
-  margin-top: var(--spacing-10);
+  padding-top: calc($header-height + var(--spacing-10)) !important;
 
   .gallery-tagged-tags-container-spacing {
     padding: 0 var(--spacing-09);
