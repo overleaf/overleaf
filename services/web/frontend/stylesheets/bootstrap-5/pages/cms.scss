@@ -624,46 +624,6 @@
   padding-bottom: var(--spacing-08);
 }
 
-.row-top-padding-sm {
-  padding-top: var(--spacing-05);
-}
-
-.row-top-padding-md {
-  padding-top: var(--spacing-07);
-}
-
-.row-top-padding-lg {
-  padding-top: var(--spacing-09);
-}
-
-.row-top-padding-xl {
-  padding-top: var(--spacing-10);
-}
-
-.row-top-padding-xxl {
-  padding-top: var(--spacing-11);
-}
-
-.row-bottom-padding-sm {
-  padding-bottom: var(--spacing-05);
-}
-
-.row-bottom-padding-md {
-  padding-bottom: var(--spacing-07);
-}
-
-.row-bottom-padding-lg {
-  padding-bottom: var(--spacing-09);
-}
-
-.row-bottom-padding-xl {
-  padding-bottom: var(--spacing-10);
-}
-
-.row-bottom-padding-xxl {
-  padding-bottom: var(--spacing-11);
-}
-
 // Desktop layout options depdendent on mobile breakpoint
 @include media-breakpoint-up(lg) {
   .row-equal-column-heights > div[class*='col-'] > .card,
