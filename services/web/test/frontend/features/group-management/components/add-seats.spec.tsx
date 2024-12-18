@@ -16,6 +16,7 @@ describe('<AddSeats />', function () {
         '2025-01-01T12:00:00.000Z'
       )
       win.metaAttributesCache.set('ol-totalLicenses', this.totalLicenses)
+      win.metaAttributesCache.set('ol-isProfessional', false)
     })
 
     cy.mount(
@@ -69,20 +70,36 @@ describe('<AddSeats />', function () {
     })
   })
 
-  it('shows the "Upgrade my plan" link', function () {
-    cy.findByRole('link', { name: /upgrade my plan/i }).should(
-      'have.attr',
-      'href',
-      '/user/subscription/group/upgrade-subscription'
-    )
-  })
-
   it('renders the cancel button', function () {
     cy.findByRole('button', { name: /cancel/i }).should(
       'have.attr',
       'href',
       '/user/subscription'
     )
+  })
+
+  describe('"Upgrade my plan" link', function () {
+    it('shows the link', function () {
+      cy.findByRole('link', { name: /upgrade my plan/i }).should(
+        'have.attr',
+        'href',
+        '/user/subscription/group/upgrade-subscription'
+      )
+    })
+
+    it('hides the link', function () {
+      cy.window().then(win => {
+        win.metaAttributesCache.set('ol-isProfessional', true)
+      })
+
+      cy.mount(
+        <SplitTestProvider>
+          <AddSeats />
+        </SplitTestProvider>
+      )
+
+      cy.findByRole('link', { name: /upgrade my plan/i }).should('not.exist')
+    })
   })
 
   describe('cost summary', function () {

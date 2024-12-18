@@ -109,6 +109,10 @@ describe('SubscriptionGroupController', function () {
 
     this.SubscriptionModel = { Subscription: {} }
 
+    this.PlansHelper = {
+      isProfessionalGroupPlan: sinon.stub().returns(false),
+    }
+
     this.Controller = await esmock.strict(modulePath, {
       '../../../../app/src/Features/Subscription/SubscriptionGroupHandler':
         this.SubscriptionGroupHandler,
@@ -130,6 +134,7 @@ describe('SubscriptionGroupController', function () {
         this.SubscriptionController,
       '../../../../app/src/Features/Subscription/RecurlyClient':
         this.RecurlyClient,
+      '../../../../app/src/Features/Subscription/PlansHelper': this.PlansHelper,
       '../../../../app/src/models/Subscription': this.SubscriptionModel,
       '@overleaf/logger': {
         err: sinon.stub(),
@@ -335,6 +340,7 @@ describe('SubscriptionGroupController', function () {
           props.subscriptionId.should.equal(this.subscriptionId)
           props.groupName.should.equal(this.subscription.teamName)
           props.totalLicenses.should.equal(this.subscription.membersLimit)
+          props.isProfessional.should.equal(false)
           done()
         },
       }

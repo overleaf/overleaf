@@ -36,6 +36,7 @@ function AddSeats() {
   const groupName = getMeta('ol-groupName')
   const subscriptionId = getMeta('ol-subscriptionId')
   const totalLicenses = Number(getMeta('ol-totalLicenses'))
+  const isProfessional = getMeta('ol-isProfessional')
   const [addSeatsInputError, setAddSeatsInputError] = useState<string>()
   const [shouldContactSales, setShouldContactSales] = useState(false)
   const controller = useAbortController()
@@ -307,13 +308,15 @@ function AddSeats() {
                   />
                 )}
                 <div className="d-flex align-items-center justify-content-end gap-2">
-                  <a
-                    href="/user/subscription/group/upgrade-subscription"
-                    rel="noreferrer noopener"
-                    className="me-auto"
-                  >
-                    {t('upgrade_my_plan')}
-                  </a>
+                  {!isProfessional && (
+                    <a
+                      href="/user/subscription/group/upgrade-subscription"
+                      rel="noreferrer noopener"
+                      className="me-auto"
+                    >
+                      {t('upgrade_my_plan')}
+                    </a>
+                  )}
                   <Button variant="secondary" href="/user/subscription">
                     {t('cancel')}
                   </Button>

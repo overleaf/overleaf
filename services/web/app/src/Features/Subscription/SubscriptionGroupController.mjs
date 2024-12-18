@@ -12,6 +12,7 @@ import SplitTestHandler from '../SplitTests/SplitTestHandler.js'
 import ErrorController from '../Errors/ErrorController.js'
 import UserGetter from '../User/UserGetter.js'
 import { Subscription } from '../../models/Subscription.js'
+import { isProfessionalGroupPlan } from './PlansHelper.mjs'
 
 /**
  * @import { Subscription } from "../../../../types/subscription/dashboard/subscription.js"
@@ -132,6 +133,7 @@ async function addSeatsToGroupSubscription(req, res) {
       subscriptionId: subscription._id,
       groupName: subscription.teamName,
       totalLicenses: subscription.membersLimit,
+      isProfessional: isProfessionalGroupPlan(subscription),
     })
   } catch (error) {
     logger.err(
