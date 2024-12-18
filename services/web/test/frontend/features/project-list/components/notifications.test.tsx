@@ -26,7 +26,6 @@ import Common from '../../../../../frontend/js/features/project-list/components/
 import Institution from '../../../../../frontend/js/features/project-list/components/notifications/groups/institution'
 import ConfirmEmail from '../../../../../frontend/js/features/project-list/components/notifications/groups/confirm-email'
 import ReconfirmationInfo from '../../../../../frontend/js/features/project-list/components/notifications/groups/affiliation/reconfirmation-info'
-import UserNotifications from '../../../../../frontend/js/features/project-list/components/notifications/user-notifications'
 import { ProjectListProvider } from '../../../../../frontend/js/features/project-list/context/project-list-context'
 import { SplitTestProvider } from '@/shared/context/split-test-context'
 import {
@@ -928,73 +927,6 @@ describe('<UserNotifications />', function () {
         const link = screen.getByRole('button', { name: 'Contact Sales' })
 
         expect(link.getAttribute('href')).to.equal(`/for/contact-sales-4`)
-      })
-    })
-  })
-
-  describe('<WritefullPromoBanner>', function () {
-    beforeEach(function () {
-      Object.assign(getMeta('ol-ExposedSettings'), exposedSettings)
-      window.metaAttributesCache.set('ol-showWritefullPromoBanner', true)
-
-      // The older banner is only shown to Chrome users
-      const navigator = window.navigator as any
-      navigator.userAgentData = { brands: [{ brand: 'Chromium' }] }
-
-      localStorage.clear()
-    })
-
-    describe('when the writefull integration is enabled', function () {
-      beforeEach(function () {
-        window.metaAttributesCache.set('ol-user', {
-          writefull: { enabled: true },
-        })
-      })
-      it('shows the banner', function () {
-        renderWithinProjectListProvider(UserNotifications)
-        const ctaLink = screen.getByRole('button', {
-          name: 'Get Writefull Premium',
-        })
-        expect(ctaLink.getAttribute('href')).to.equal(
-          'https://my.writefull.com/overleaf-invite?code=OVERLEAF10&redirect=plans'
-        )
-      })
-
-      it('dismisses the banner when the close button is clicked', function () {
-        renderWithinProjectListProvider(UserNotifications)
-        screen.getByRole('button', { name: /Writefull/ })
-        const WritefullPromoBanner = screen.getByTestId(
-          'writefull-premium-promo-banner'
-        )
-        const closeButton = within(WritefullPromoBanner).getByRole('button', {
-          name: 'Close',
-        })
-        fireEvent.click(closeButton)
-        expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
-        expect(localStorage.getItem('has_dismissed_writefull_promo_banner')).to
-          .exist
-      })
-
-      it("doesn't show the banner if it has been dismissed", function () {
-        localStorage.setItem(
-          'has_dismissed_writefull_promo_banner',
-          new Date(Date.now() - 500)
-        )
-        renderWithinProjectListProvider(UserNotifications)
-        expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
-      })
-    })
-
-    describe('when the writefull integration is not enabled', function () {
-      beforeEach(function () {
-        window.metaAttributesCache.set('ol-user', {
-          writefull: { enabled: false },
-        })
-      })
-
-      it("doesn't show the banner", function () {
-        renderWithinProjectListProvider(UserNotifications)
-        expect(screen.queryByRole('link', { name: /Writefull/ })).to.be.null
       })
     })
   })
