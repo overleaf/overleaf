@@ -106,6 +106,7 @@ export class SpellChecker {
   _performSpellCheck(view: EditorView) {
     const wordsToCheck = this.getWordsToCheck(view)
     if (wordsToCheck.length === 0) {
+      this.trackedChanges = ChangeSet.empty(0)
       return
     }
     const cache = view.state.field(cacheField)
@@ -245,7 +246,7 @@ export class SpellChecker {
 
     const { from, to } = view.viewport
     const changedLineNumbers = new Set<number>()
-    if (this.trackedChanges.length > 0) {
+    if (!this.trackedChanges.empty) {
       this.trackedChanges.iterChangedRanges((_fromA, _toA, fromB, toB) => {
         if (fromB <= to && toB >= from) {
           const fromLine = view.state.doc.lineAt(fromB).number
