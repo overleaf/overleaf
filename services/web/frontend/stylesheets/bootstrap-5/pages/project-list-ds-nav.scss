@@ -138,10 +138,21 @@
         background-color: var(--bg-light-secondary);
         color: var(--content-secondary);
         box-shadow: none;
+        border-radius: var(--border-radius-large);
+        position: relative;
 
-        button.close {
-          color: var(--content-secondary) !important;
+        .user-notification-close {
+          border: none;
           padding: 0;
+          background: none;
+          position: absolute;
+          top: var(--spacing-07);
+          right: var(--spacing-07);
+          color: inherit;
+        }
+
+        p {
+          margin-bottom: var(--spacing-03);
         }
       }
 

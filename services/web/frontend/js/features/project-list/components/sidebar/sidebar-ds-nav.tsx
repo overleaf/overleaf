@@ -4,7 +4,6 @@ import { Question, User } from '@phosphor-icons/react'
 import NewProjectButton from '../new-project-button'
 import SidebarFilters from './sidebar-filters'
 import AddAffiliation, { useAddAffiliation } from '../add-affiliation'
-import SurveyWidget from '../survey-widget'
 import { usePersistedResize } from '@/shared/hooks/use-resize'
 import { Dropdown } from 'react-bootstrap-5'
 import getMeta from '@/utils/meta'
@@ -17,6 +16,7 @@ import { UserProvider } from '@/shared/context/user-context'
 import { AccountMenuItems } from '@/features/ui/components/bootstrap-5/navbar/account-menu-items'
 import { useScrolled } from '@/features/project-list/components/sidebar/use-scroll'
 import { useSendProjectListMB } from '@/features/project-list/components/project-list-events'
+import { SurveyWidgetDsNav } from '@/features/project-list/components/survey-widget-ds-nav'
 
 function SidebarDsNav() {
   const { t } = useTranslation()
@@ -61,7 +61,7 @@ function SidebarDsNav() {
         )}
       >
         <div className="project-list-sidebar-survey-wrapper">
-          <SurveyWidget variant="light" />
+          <SurveyWidgetDsNav />
         </div>
         <div className="d-flex gap-3 mb-2">
           {helpItem && (

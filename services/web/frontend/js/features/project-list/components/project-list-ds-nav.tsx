@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import CurrentPlanWidget from './current-plan-widget/current-plan-widget'
 import NewProjectButton from './new-project-button'
 import ProjectListTable from './table/project-list-table'
-import SurveyWidget from './survey-widget'
 import UserNotifications from './notifications/user-notifications'
 import SearchForm from './search-form'
 import ProjectsDropdown from './dropdown/projects-dropdown'
@@ -96,7 +95,7 @@ export function ProjectListDsNav() {
                 </OLCol>
               </OLRow>
               <div className="project-list-sidebar-survey-wrapper d-md-none">
-                <SurveyWidget />
+                {/* Omit the survey card in mobile view for now */}
               </div>
               <div className="mt-1 d-md-none">
                 <div

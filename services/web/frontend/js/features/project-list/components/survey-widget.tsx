@@ -3,11 +3,7 @@ import getMeta from '../../../utils/meta'
 import { useCallback } from 'react'
 import Close from '@/shared/components/close'
 
-export default function SurveyWidget({
-  variant = 'dark',
-}: {
-  variant?: 'light' | 'dark'
-}) {
+export default function SurveyWidget() {
   const survey = getMeta('ol-survey')
   const [dismissedSurvey, setDismissedSurvey] = usePersistedState(
     `dismissed-${survey?.name}`,
@@ -19,6 +15,12 @@ export default function SurveyWidget({
   }, [setDismissedSurvey])
 
   if (!survey?.name || dismissedSurvey) {
+    return null
+  }
+
+  // Short-term hard-coded special case: hide the "DS nav" survey for users on
+  // the default variant
+  if (survey?.name === 'ds-nav') {
     return null
   }
 
@@ -38,7 +40,7 @@ export default function SurveyWidget({
             </a>
           </div>
           <div className="notification-close notification-close-button-style">
-            <Close variant={variant} onDismiss={() => dismissSurvey()} />
+            <Close variant="dark" onDismiss={() => dismissSurvey()} />
           </div>
         </div>
       </div>
