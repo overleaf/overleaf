@@ -31,7 +31,9 @@ export default function NavDropdownMenu({
     >
       <Dropdown.Toggle role="menuitem">
         {title}
-        {isDsNav && <Caret weight="bold" className="ms-2" />}
+        {isDsNav && (
+          <Caret weight="bold" className="ms-2 navbar-dropdown-caret" />
+        )}
       </Dropdown.Toggle>
       <Dropdown.Menu as="ul" role="menu" align="end">
         {children}
