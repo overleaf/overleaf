@@ -1171,7 +1171,7 @@
   "library": "Library",
   "license": "License",
   "license_for_educational_purposes": "This license is for educational purposes (applies to students or faculty using __appName__ for teaching)",
-  "limited_offer": "Limited offer",
+  "license_for_educational_purposes_2025": "<0>__percent__% educational discount</0><1/>I confirm this subscription is for educational purposes (applies to students or faculty using __appName__ for teaching)",
   "limited_to_n_editors": "Limited to __count__ editor",
   "limited_to_n_editors_per_project": "Limited to __count__ editor per project",
   "limited_to_n_editors_per_project_plural": "Limited to __count__ editors per project",
