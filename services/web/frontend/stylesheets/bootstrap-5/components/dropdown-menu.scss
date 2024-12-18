@@ -22,8 +22,6 @@ $dropdown-item-min-height: 36px;
 .dropdown-header {
   @include body-xs;
 
-  display: flex;
-  align-items: center;
   min-height: $dropdown-item-min-height; // a minimum height of 36px to be accessible for touch screens
   padding: var(--spacing-05) var(--spacing-06) var(--spacing-02)
     var(--spacing-04);
