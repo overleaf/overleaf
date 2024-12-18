@@ -38,7 +38,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
                 {subscriptionChange.nextInvoice.plan.name} x {totalLicenses}{' '}
                 {t('users')}
               </span>
-              <span>
+              <span data-testid="subtotal">
                 {formatCurrencyLocalized(
                   subscriptionChange.immediateCharge.subtotal,
                   subscriptionChange.currency
@@ -47,7 +47,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
             </ListGroup.Item>
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
               <span className="me-auto">{t('sales_tax')}</span>
-              <span>
+              <span data-testid="tax">
                 {formatCurrencyLocalized(
                   subscriptionChange.immediateCharge.tax,
                   subscriptionChange.currency
@@ -56,7 +56,7 @@ function UpgradeSummary({ subscriptionChange }: UpgradeSummaryProps) {
             </ListGroup.Item>
             <ListGroup.Item className="bg-transparent border-0 px-0 gap-3 card-description-secondary">
               <strong className="me-auto">{t('total_due_today')}</strong>
-              <strong>
+              <strong data-testid="total">
                 {formatCurrencyLocalized(
                   subscriptionChange.immediateCharge.total,
                   subscriptionChange.currency

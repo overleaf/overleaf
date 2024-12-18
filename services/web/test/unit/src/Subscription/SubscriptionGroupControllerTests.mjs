@@ -56,6 +56,9 @@ describe('SubscriptionGroupController', function () {
           .stub()
           .resolves(this.createSubscriptionChangeData),
         ensureFlexibleLicensingEnabled: sinon.stub().resolves(),
+        getGroupPlanUpgradePreview: sinon
+          .stub()
+          .resolves(this.previewSubscriptionChangeData),
       },
     }
 
@@ -494,6 +497,79 @@ describe('SubscriptionGroupController', function () {
         variant: 'default',
       })
       this.Controller.flexibleLicensingSplitTest(this.req, res, next, done)
+    })
+  })
+
+  describe('subscriptionUpgradePage', function () {
+    it('should render "subscription upgrade" page', function (done) {
+      const olSubscription = { membersLimit: 1, teamName: 'test team' }
+      this.SubscriptionModel.Subscription.findOne = () => {
+        return {
+          exec: () => olSubscription,
+        }
+      }
+
+      const res = {
+        render: (page, data) => {
+          this.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview
+            .calledWith(this.req.session.user._id)
+            .should.equal(true)
+          page.should.equal('subscriptions/upgrade-group-subscription-react')
+          data.totalLicenses.should.equal(olSubscription.membersLimit)
+          data.groupName.should.equal(olSubscription.teamName)
+          data.changePreview.should.equal(this.previewSubscriptionChangeData)
+          done()
+        },
+      }
+
+      this.Controller.subscriptionUpgradePage(this.req, res)
+    })
+
+    it('should redirect if failed to generate preview', function (done) {
+      this.SubscriptionGroupHandler.promises.getGroupPlanUpgradePreview = sinon
+        .stub()
+        .rejects()
+
+      const res = {
+        redirect: url => {
+          url.should.equal('/user/subscription')
+          done()
+        },
+      }
+
+      this.Controller.subscriptionUpgradePage(this.req, res)
+    })
+  })
+
+  describe('upgradeSubscription', function () {
+    it('should send 200 response', function (done) {
+      this.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
+        .stub()
+        .resolves()
+
+      const res = {
+        sendStatus: code => {
+          code.should.equal(200)
+          done()
+        },
+      }
+
+      this.Controller.upgradeSubscription(this.req, res)
+    })
+
+    it('should send 500 response', function (done) {
+      this.SubscriptionGroupHandler.promises.upgradeGroupPlan = sinon
+        .stub()
+        .rejects()
+
+      const res = {
+        sendStatus: code => {
+          code.should.equal(500)
+          done()
+        },
+      }
+
+      this.Controller.upgradeSubscription(this.req, res)
     })
   })
 })

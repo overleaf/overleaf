@@ -10,6 +10,7 @@ import RequestStatus from '../request-status'
 import UpgradeSummary, {
   SubscriptionChange,
 } from './upgrade-subscription-upgrade-summary'
+import { debugConsole } from '@/utils/debugging'
 
 function UpgradeSubscription() {
   const { t } = useTranslation()
@@ -17,7 +18,9 @@ function UpgradeSubscription() {
   const preview = getMeta('ol-subscriptionChangePreview') as SubscriptionChange
   const { isError, runAsync, isSuccess, isLoading } = useAsync()
   const onSubmit = () => {
-    runAsync(postJSON('/user/subscription/group/upgrade-subscription'))
+    runAsync(postJSON('/user/subscription/group/upgrade-subscription')).catch(
+      debugConsole.error
+    )
   }
 
   if (isSuccess) {
@@ -51,7 +54,7 @@ function UpgradeSubscription() {
     <div className="container">
       <Row>
         <Col xl={{ span: 8, offset: 2 }}>
-          <div className="group-heading">
+          <div className="group-heading" data-testid="group-heading">
             <IconButton
               variant="ghost"
               href="/user/subscription"

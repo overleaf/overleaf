@@ -28,7 +28,7 @@ function UpgradeSubscriptionPlanDetails() {
         <b>{preview.nextInvoice.plan.name}</b>
         <Row xs="auto" className="gx-2">
           <Col>
-            <span className="per-user-price">
+            <span className="per-user-price" data-testid="per-user-price">
               <b>
                 {formatCurrencyLocalized(
                   licenseUnitPrice,

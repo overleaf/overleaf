@@ -28,6 +28,9 @@ describe('SubscriptionGroupHandler', function () {
 
     this.changeRequest = {
       timeframe: 'now',
+      subscription: {
+        id: 'test_id',
+      },
     }
 
     this.recurlySubscription = {
@@ -39,6 +42,9 @@ describe('SubscriptionGroupHandler', function () {
         },
       ],
       getRequestForAddOnUpdate: sinon.stub().returns(this.changeRequest),
+      getRequestForFlexibleLicensingGroupPlanUpgrade: sinon
+        .stub()
+        .returns(this.changeRequest),
     }
 
     this.SubscriptionLocator = {
@@ -81,6 +87,9 @@ describe('SubscriptionGroupHandler', function () {
           quantity: this.recurlySubscription.addOns[0].quantity + this.adding,
         },
       ],
+      subscription: {
+        planName: 'test plan',
+      },
     }
 
     this.applySubscriptionChange = {}
@@ -361,5 +370,45 @@ describe('SubscriptionGroupHandler', function () {
         canUseFlexibleLicensing: true,
       })
     ).to.not.be.rejected
+  })
+
+  describe('upgradeGroupPlan', function () {
+    it('should upgrade the subscription', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({ groupPlan: true, planCode: 'group_collaborator' })
+      await this.Handler.promises.upgradeGroupPlan(this.user_id)
+      this.RecurlyClient.promises.applySubscriptionChangeRequest
+        .calledWith(this.changeRequest)
+        .should.equal(true)
+      this.SubscriptionHandler.promises.syncSubscription
+        .calledWith({ uuid: this.changeRequest.subscription.id }, this.user_id)
+        .should.equal(true)
+    })
+
+    it('should fail the upgrade if not eligible', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({ groupPlan: true, planCode: 'group_professional' })
+      await expect(
+        this.Handler.promises.upgradeGroupPlan(this.user_id)
+      ).to.be.rejectedWith('Not eligible for group plan upgrade')
+    })
+  })
+
+  describe('getGroupPlanUpgradePreview', function () {
+    it('should generate preview for subscription upgrade', async function () {
+      this.SubscriptionLocator.promises.getUsersSubscription = sinon
+        .stub()
+        .resolves({ groupPlan: true, planCode: 'group_collaborator' })
+      const result = await this.Handler.promises.getGroupPlanUpgradePreview(
+        this.user_id
+      )
+      this.RecurlyClient.promises.previewSubscriptionChange
+        .calledWith(this.changeRequest)
+        .should.equal(true)
+
+      result.should.equal(this.changePreview)
+    })
   })
 })
