@@ -249,16 +249,22 @@
       }
     }
 
-    .project-ds-nav-content {
+    .project-ds-nav-content-and-messages {
       flex-grow: 1;
-      overflow-y: auto;
-      position: relative;
-      background-color: var(--bg-light-secondary);
+      display: flex;
+      flex-direction: column;
 
-      @include media-breakpoint-up(md) {
-        border-top-left-radius: var(--border-radius-large);
-        border-left: 1px solid var(--border-divider);
-        border-top: 1px solid var(--border-divider);
+      .project-ds-nav-content {
+        flex-grow: 1;
+        overflow-y: auto;
+        position: relative;
+        background-color: var(--bg-light-secondary);
+
+        @include media-breakpoint-up(md) {
+          border-top-left-radius: var(--border-radius-large);
+          border-left: 1px solid var(--border-divider);
+          border-top: 1px solid var(--border-divider);
+        }
       }
     }
   }
