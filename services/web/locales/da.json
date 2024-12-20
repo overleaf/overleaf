@@ -1085,7 +1085,6 @@
   "library": "Bibliotek",
   "license": "Licens",
   "license_for_educational_purposes": "Denne licens er til uddannelsesformål (gælder for studerende og fakultet som bruger __appName__ til undervisning)",
-  "limited_offer": "Begrænset tilbud",
   "limited_to_n_editors": "Begrænset til __count__ redaktører",
   "limited_to_n_editors_per_project": "Begrænset til __count__ redaktører per projekt",
   "limited_to_n_editors_per_project_plural": "Begrænset til __count__ redaktører per projekt",

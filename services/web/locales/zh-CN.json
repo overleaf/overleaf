@@ -1090,7 +1090,6 @@
   "library": "库",
   "license": "许可",
   "license_for_educational_purposes": "此许可证用于教育目的（适用于使用__appName__进行教学的学生或教师）",
-  "limited_offer": "限时优惠",
   "limited_to_n_editors": "仅限 __count__ 个编辑",
   "limited_to_n_editors_per_project": "每个项目仅限 __count__ 个编辑者",
   "limited_to_n_editors_per_project_plural": "每个项目最多可有 __count__ 名编辑者",
