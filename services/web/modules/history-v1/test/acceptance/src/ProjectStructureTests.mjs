@@ -8,6 +8,7 @@ import _ from 'lodash'
 import ProjectGetter from '../../../../../app/src/Features/Project/ProjectGetter.js'
 import User from '../../../../../test/acceptance/src/helpers/User.js'
 import MockDocUpdaterApiClass from '../../../../../test/acceptance/src/mocks/MockDocUpdaterApi.js'
+import Features from '../../../../../app/src/infrastructure/Features.js'
 
 const { ObjectId } = mongodb
 
@@ -256,7 +257,11 @@ describe('ProjectStructureChanges', function () {
       expect(updates[2].type).to.equal('add-file')
       expect(updates[2].userId).to.equal(owner._id)
       expect(updates[2].pathname).to.equal('/frog.jpg')
-      expect(updates[2].url).to.be.a('string')
+      if (Features.hasFeature('saas')) {
+        expect(updates[2].url).to.be.null
+      } else {
+        expect(updates[2].url).to.be.a('string')
+      }
       expect(version).to.equal(1)
     })
   })

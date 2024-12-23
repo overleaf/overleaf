@@ -166,8 +166,8 @@ function _isAddFileUpdate(update) {
   return (
     'file' in update &&
     update.file != null &&
-    'url' in update &&
-    update.url != null
+    (('createdBlob' in update && update.createdBlob) ||
+      ('url' in update && update.url != null))
   )
 }
 

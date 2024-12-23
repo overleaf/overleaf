@@ -263,6 +263,29 @@ function _checkBlobExists(historyId, hash, callback) {
     })
 }
 
+function _rewriteFilestoreUrl(url, projectId, callback) {
+  if (!url) {
+    return { fileId: null, filestoreURL: null }
+  }
+  // Rewrite the filestore url to point to the location in the local
+  // settings for this service (this avoids problems with cross-
+  // datacentre requests when running filestore in multiple locations).
+  const { pathname: fileStorePath } = new URL(url)
+  const urlMatch = /^\/project\/([0-9a-f]{24})\/file\/([0-9a-f]{24})$/.exec(
+    fileStorePath
+  )
+  if (urlMatch == null) {
+    return callback(new OError('invalid file for blob creation'))
+  }
+  if (urlMatch[1] !== projectId) {
+    return callback(new OError('invalid project for blob creation'))
+  }
+
+  const fileId = urlMatch[2]
+  const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
+  return { filestoreURL, fileId }
+}
+
 export function createBlobForUpdate(projectId, historyId, update, callback) {
   callback = _.once(callback)
 
@@ -303,24 +326,15 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
         }
       }
     )
-  } else if (update.file != null && update.url != null) {
-    // Rewrite the filestore url to point to the location in the local
-    // settings for this service (this avoids problems with cross-
-    // datacentre requests when running filestore in multiple locations).
-    const { pathname: fileStorePath } = new URL(update.url)
-    const urlMatch = /^\/project\/([0-9a-f]{24})\/file\/([0-9a-f]{24})$/.exec(
-      fileStorePath
+  } else if (
+    update.file != null &&
+    (update.url != null || update.createdBlob)
+  ) {
+    const { fileId, filestoreURL } = _rewriteFilestoreUrl(
+      update.url,
+      projectId,
+      callback
     )
-    if (urlMatch == null) {
-      return callback(new OError('invalid file for blob creation'))
-    }
-    if (urlMatch[1] !== projectId) {
-      return callback(new OError('invalid project for blob creation'))
-    }
-
-    const fileId = urlMatch[2]
-    const filestoreURL = `${Settings.apis.filestore.url}/project/${projectId}/file/${fileId}`
-
     _checkBlobExists(historyId, update.hash, (err, blobExists) => {
       if (err) {
         logger.warn(
@@ -339,6 +353,13 @@ export function createBlobForUpdate(projectId, historyId, update, callback) {
           'created blob does not exist, reading from filestore'
         )
       }
+
+      if (!filestoreURL) {
+        return callback(
+          new OError('no filestore URL provided and blob was not created')
+        )
+      }
+
       fetchStream(filestoreURL, {
         signal: AbortSignal.timeout(HTTP_REQUEST_TIMEOUT),
       })

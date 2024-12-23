@@ -66,6 +66,19 @@ function slAddFileUpdate(historyId, file, userId, ts, projectId) {
   }
 }
 
+function createdBlobFileUpdate(historyId, file, userId, ts, projectId) {
+  return {
+    projectHistoryId: historyId,
+    pathname: file.pathname,
+    createdBlob: true,
+    url: null,
+    file: file.id,
+    hash: file.hash,
+    ranges: undefined,
+    meta: { user_id: userId, ts: ts.getTime() },
+  }
+}
+
 function slRenameUpdate(historyId, doc, userId, ts, pathname, newPathname) {
   return {
     projectHistoryId: historyId,
@@ -548,6 +561,73 @@ describe('Sending Updates', function () {
           assert(
             createChange.isDone(),
             `/api/projects/${historyId}/changes should have been called`
+          )
+          done()
+        }
+      )
+    })
+
+    it('should not get file from filestore if no url provided', function (done) {
+      const file = {
+        id: new ObjectId().toString(),
+        pathname: '/test.png',
+        contents: Buffer.from([1, 2, 3]),
+        hash: 'aed2973e4b8a7ff1b30ff5c4751e5a2b38989e74',
+      }
+
+      const fileStoreRequest = MockFileStore()
+        .get(`/project/${this.projectId}/file/${file.id}`)
+        .reply(200, file.contents)
+
+      const checkBlob = MockHistoryStore()
+        .head(`/api/projects/${historyId}/blobs/${file.hash}`)
+        .reply(200)
+
+      const addFile = MockHistoryStore()
+        .post(`/api/projects/${historyId}/legacy_changes`, body => {
+          expect(body).to.deep.equal([
+            olAddFileUpdate(file, this.userId, this.timestamp, file.hash),
+          ])
+          return true
+        })
+        .query({ end_version: 0 })
+        .reply(204)
+
+      async.series(
+        [
+          cb => {
+            ProjectHistoryClient.pushRawUpdate(
+              this.projectId,
+              createdBlobFileUpdate(
+                historyId,
+                file,
+                this.userId,
+                this.timestamp,
+                this.projectId
+              ),
+              cb
+            )
+          },
+          cb => {
+            ProjectHistoryClient.flushProject(this.projectId, cb)
+          },
+        ],
+        error => {
+          if (error) {
+            return done(error)
+          }
+          assert(
+            !fileStoreRequest.isDone(),
+            'filestore should not have been called'
+          )
+
+          assert(
+            checkBlob.isDone(),
+            `HEAD /api/projects/${historyId}/blobs/${file.hash} should have been called`
+          )
+          assert(
+            addFile.isDone(),
+            `/api/projects/${historyId}/latest/files should have been called`
           )
           done()
         }

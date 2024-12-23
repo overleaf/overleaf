@@ -20,6 +20,7 @@ const SafePath = require('./SafePath')
 const TpdsProjectFlusher = require('../ThirdPartyDataStore/TpdsProjectFlusher')
 const _ = require('lodash')
 const TagsHandler = require('../Tags/TagsHandler')
+const Features = require('../../infrastructure/Features')
 
 module.exports = {
   duplicate: callbackify(duplicate),
@@ -233,12 +234,16 @@ async function _copyFiles(sourceEntries, sourceProject, targetProject) {
           )
         }
       }
+      if (createdBlob && Features.hasFeature('saas')) {
+        return { createdBlob, file, path, url: null }
+      }
       const url = await FileStoreHandler.promises.copyFile(
         sourceProject._id,
         sourceFile._id,
         targetProject._id,
         file._id
       )
+
       return { createdBlob, file, path, url }
     }
   )
