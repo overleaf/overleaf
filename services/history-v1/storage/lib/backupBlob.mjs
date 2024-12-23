@@ -30,15 +30,15 @@ function recordBackupConclusion(status, reason = 'none') {
 /**
  * Performs the actual upload of the blob to the backup storage.
  *
- * @param {string} projectId - The project ID of the project the blob belongs to (should have been converted from a postgres ID already if necessary)
+ * @param {string} historyId - The history ID of the project the blob belongs to
  * @param {Blob} blob - The blob being uploaded
  * @param {string} path - The path to the file to upload (should have been stored on disk already)
  * @return {Promise<void>}
  */
-export async function uploadBlobToBackup(projectId, blob, path) {
+export async function uploadBlobToBackup(historyId, blob, path) {
   const md5 = Crypto.createHash('md5')
   await Stream.promises.pipeline(fs.createReadStream(path), md5)
-  const key = makeProjectKey(projectId, blob.getHash())
+  const key = makeProjectKey(historyId, blob.getHash())
   const persistor = await backupPersistor.forProject(projectBlobsBucket, key)
   await persistor.sendStream(
     projectBlobsBucket,
@@ -147,7 +147,7 @@ export async function backupBlob(historyId, blob, tmpPath) {
 
   try {
     logger.debug({ projectId, hash }, 'Starting blob backup')
-    await uploadBlobToBackup(projectId, blob, tmpPath)
+    await uploadBlobToBackup(historyId, blob, tmpPath)
     await storeBlobBackup(projectId, hash)
     recordBackupConclusion('success')
   } catch (error) {
