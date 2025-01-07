@@ -590,6 +590,8 @@
   "editor_limit_exceeded_in_this_project": "Too many editors in this project",
   "editor_only_hide_pdf": "Editor only <0>(hide PDF)</0>",
   "editor_theme": "Editor theme",
+  "educational_disclaimer": "I confirm that users will be students or faculty using Overleaf primarily for study and teaching, and can provide evidence of this if requested.",
+  "educational_disclaimer_heading": "Educational discount confirmation",
   "educational_discount_applied": "40% educational discount applied!",
   "educational_discount_available_for_groups_of_ten_or_more": "The educational discount is available for groups of 10 or more",
   "educational_discount_disclaimer": "This license is for educational purposes (applies to students or faculty using Overleaf for teaching)",
