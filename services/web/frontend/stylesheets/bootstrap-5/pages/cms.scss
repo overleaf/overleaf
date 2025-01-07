@@ -50,6 +50,10 @@
     }
   }
 
+  .row {
+    row-gap: var(--spacing-13);
+  }
+
   .p-no-text-nodes:has(.btn) {
     margin-top: var(--spacing-09);
 
@@ -82,6 +86,15 @@
     .paragraphs-margin-#{$spacing-option} {
       p {
         margin-bottom: var(--#{$spacing-option});
+      }
+    }
+  }
+
+  // create .paragraphs-top-margin-spacing-00, .paragraphs-top-margin-spacing-01, .paragraphs-top-margin-spacing-02, .paragraphs-top-margin-spacing-03, .paragraphs-top-margin-spacing-04, .paragraphs-top-margin-spacing-05, .paragraphs-top-margin-spacing-06, .paragraphs-top-margin-spacing-07, .paragraphs-top-margin-spacing-08, .paragraphs-top-margin-spacing-09, .paragraphs-top-margin-spacing-10, .paragraphs-top-margin-spacing-11, .paragraphs-top-margin-spacing-12, .paragraphs-top-margin-spacing-13, .paragraphs-top-margin-spacing-14, .paragraphs-top-margin-spacing-15, .paragraphs-top-margin-spacing-16
+  @each $spacing-option in $all-spacings {
+    .paragraphs-top-margin-#{$spacing-option} {
+      p {
+        margin-top: var(--#{$spacing-option}) !important;
       }
     }
   }
@@ -722,10 +735,6 @@
 // Mobile layout options depdendent on mobile breakpoint
 @include media-breakpoint-down(lg) {
   .cms-page {
-    div.row {
-      row-gap: var(--spacing-13);
-    }
-
     .reverse-col-order-mobile {
       flex-direction: column-reverse;
     }
