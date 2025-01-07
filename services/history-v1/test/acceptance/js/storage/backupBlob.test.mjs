@@ -50,6 +50,10 @@ describe('backupBlob', function () {
     expect(await listS3Bucket(projectBlobsBucket)).to.have.length(0)
   })
 
+  beforeEach('cleanup mongo', async function () {
+    await backedUpBlobs.deleteMany({})
+  })
+
   describe('when the blob is already backed up', function () {
     let blob
     let historyId
@@ -66,14 +70,13 @@ describe('backupBlob', function () {
         },
         { upsert: true }
       )
+      await backupBlob(historyId, blob, filePath)
     })
 
     it('does not upload the blob', async function () {
-      await backupBlob(historyId, blob, filePath)
       const bucketContents = await listS3Bucket(projectBlobsBucket)
       expect(bucketContents).to.have.lengthOf(0)
     })
-    it('does not store the backup', function () {})
   })
 
   describe('when the historyId is for a postgres project', function () {
@@ -88,7 +91,7 @@ describe('backupBlob', function () {
         _id: projectId,
         overleaf: { history: { id: 123 } },
       })
-      await backedUpBlobs.deleteOne({ _id: projectId })
+      await backupBlob(historyId, blob, filePath)
     })
 
     afterEach(async function () {
@@ -98,13 +101,12 @@ describe('backupBlob', function () {
     })
 
     it('uploads the blob to the backup', async function () {
-      await backupBlob(historyId, blob, filePath)
       const bucketContents = await listS3Bucket(projectBlobsBucket)
       expect(bucketContents).to.have.lengthOf(1)
     })
-    it('stores the backup', function () {
+    it('stores the backup', async function () {
       expect(
-        backedUpBlobs.findOne({
+        await backedUpBlobs.findOne({
           _id: projectId,
           blobs: {
             $elemMatch: { $eq: new Binary(Buffer.from(blob.getHash(), 'hex')) },
@@ -120,17 +122,16 @@ describe('backupBlob', function () {
     beforeEach(async function () {
       blob = await makeBlobForFile(filePath)
       historyId = 'abc123def456abc789def123'
-      await backedUpBlobs.deleteOne({ _id: new ObjectId(historyId) })
+      await backupBlob(historyId, blob, filePath)
     })
 
     it('uploads the blob to the backup', async function () {
-      await backupBlob(historyId, blob, filePath)
       const bucketContents = await listS3Bucket(projectBlobsBucket)
       expect(bucketContents).to.have.lengthOf(1)
     })
-    it('stores the backup', function () {
+    it('stores the backup', async function () {
       expect(
-        backedUpBlobs.findOne({
+        await backedUpBlobs.findOne({
           _id: new ObjectId(historyId),
           blobs: {
             $elemMatch: { $eq: new Binary(Buffer.from(blob.getHash(), 'hex')) },
