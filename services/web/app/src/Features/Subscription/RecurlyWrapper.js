@@ -443,6 +443,8 @@ const promises = {
           `Recurly API returned with status code: ${error.response.status}`,
           { statusCode: error.response.status }
         )
+      } else {
+        throw error
       }
     }
   },
