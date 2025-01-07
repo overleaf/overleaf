@@ -67,18 +67,20 @@ test_module: test_unit_module test_acceptance_module
 #
 
 test_unit: test_unit_all
+test_unit_all: export COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME)
 test_unit_all:
-	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all
-	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all
+	$(DOCKER_COMPOSE) down -v -t 0
 
+test_unit_all_silent: export COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME)
 test_unit_all_silent:
-	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all:silent
-	COMPOSE_PROJECT_NAME=unit_test_all_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --rm test_unit npm run test:unit:all:silent
+	$(DOCKER_COMPOSE) down -v -t 0
 
+test_unit_app: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)
 test_unit_app:
-	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
-	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	$(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
+	$(DOCKER_COMPOSE) down -v -t 0
 
 TEST_SUITES = $(sort $(filter-out \
 	$(wildcard test/unit/src/helpers/*), \
@@ -101,7 +103,6 @@ test_unit_app_parallel_gnu_make: $(TEST_SUITES)
 test_unit_app_parallel_gnu_make_docker: export COMPOSE_PROJECT_NAME = \
 	unit_test_parallel_make_$(BUILD_DIR_NAME)
 test_unit_app_parallel_gnu_make_docker:
-	$(DOCKER_COMPOSE) down -v -t 0
 	$(DOCKER_COMPOSE) run --rm test_unit \
 		make test_unit_app_parallel_gnu_make --output-sync -j $(J)
 	$(DOCKER_COMPOSE) down -v -t 0
@@ -157,16 +158,6 @@ test_frontend_ct_editor:
 # Acceptance tests
 #
 
-# Keep in sync with TEST_ACCEPTANCE_MONGO_INIT in Makefile.module
-TEST_ACCEPTANCE_MONGO_INIT := \
-	$(DOCKER_COMPOSE) up -d mongo; \
-	$(DOCKER_COMPOSE) exec -T mongo sh -c ' \
-		while ! mongosh --eval "db.version()" > /dev/null; do \
-			echo "Waiting for Mongo..."; \
-			sleep 1; \
-		done; \
-		mongosh --eval "rs.initiate({ _id: \"overleaf\", members: [ { _id: 0, host: \"mongo:27017\" } ] })"'
-
 test_acceptance: test_acceptance_app test_acceptance_modules
 test_acceptance_saas: test_acceptance_app_saas test_acceptance_modules_merged_saas
 test_acceptance_server_ce: test_acceptance_app_server_ce test_acceptance_modules_merged_server_ce
@@ -186,8 +177,6 @@ test_acceptance_app_server_pro: export COMPOSE_PROJECT_NAME=acceptance_test_serv
 test_acceptance_app_server_pro: export OVERLEAF_CONFIG=$(CFG_SERVER_PRO)
 
 $(TEST_ACCEPTANCE_APP):
-	$(DOCKER_COMPOSE) down -v -t 0
-	$(TEST_ACCEPTANCE_MONGO_INIT)
 	$(DOCKER_COMPOSE) run --rm test_acceptance
 	$(DOCKER_COMPOSE) down -v -t 0
 
@@ -335,8 +324,6 @@ TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS = \
 	test_acceptance_modules_merged_server_pro \
 
 $(TEST_ACCEPTANCE_MODULES_MERGED_VARIANTS):
-	$(DOCKER_COMPOSE) down -v -t 0
-	$(TEST_ACCEPTANCE_MONGO_INIT)
 	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner
 	$(DOCKER_COMPOSE) down -v -t 0
 
@@ -358,8 +345,6 @@ test_acceptance_modules_merged_saas_4: export COMPOSE_PROJECT_NAME = \
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): export BASE_CONFIG = $(CFG_SAAS)
 
 $(TEST_ACCEPTANCE_MODULES_MERGED_SPLIT_SAAS): test_acceptance_modules_merged_saas_%:
-	$(DOCKER_COMPOSE) down -v -t 0
-	$(TEST_ACCEPTANCE_MONGO_INIT)
 	$(DOCKER_COMPOSE) run --rm test_acceptance make test_acceptance_modules_merged_inner_$*
 	$(DOCKER_COMPOSE) down -v -t 0
 

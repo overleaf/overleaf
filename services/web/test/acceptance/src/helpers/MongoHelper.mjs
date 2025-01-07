@@ -1,7 +1,7 @@
 import { execFile } from 'child_process'
 import {
   connectionPromise,
-  db,
+  cleanupTestDatabase,
   dropTestDatabase,
 } from '../../../../app/src/infrastructure/mongodb.js'
 import Settings from '@overleaf/settings'
@@ -34,16 +34,6 @@ export default {
       })
     })
 
-    afterEach('purge mongo data', async function () {
-      return Promise.all(
-        Object.values(db).map(async collection => {
-          if (collection === db.migrations) {
-            // Do not clear the collection for tracking migrations.
-            return
-          }
-          return collection.deleteMany({})
-        })
-      )
-    })
+    afterEach('purge mongo data', cleanupTestDatabase)
   },
 }

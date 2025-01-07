@@ -4,15 +4,6 @@ const Metrics = require('@overleaf/metrics')
 const logger = require('@overleaf/logger')
 const { addConnectionDrainer } = require('./GracefulShutdown')
 
-if (
-  typeof global.beforeEach === 'function' &&
-  process.argv.join(' ').match(/unit/)
-) {
-  throw new Error(
-    'It looks like unit tests are running, but you are connecting to Mongo. Missing a stub?'
-  )
-}
-
 mongoose.set('autoIndex', false)
 mongoose.set('strictQuery', false)
 

@@ -19,31 +19,14 @@ DOCKER_COMPOSE := cd ../../ && \
 	MOCHA_GREP=${MOCHA_GREP} \
 	docker compose ${DOCKER_COMPOSE_FLAGS}
 
-DOCKER_COMPOSE_TEST_ACCEPTANCE := \
-	export COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) \
-	&& $(DOCKER_COMPOSE)
-
-DOCKER_COMPOSE_TEST_UNIT := \
-	export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) \
-	&& $(DOCKER_COMPOSE)
-
-# Keep in sync with TEST_ACCEPTANCE_MONGO_INIT in Makefile
-TEST_ACCEPTANCE_MONGO_INIT := \
-	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) up -d mongo; \
-	$(DOCKER_COMPOSE_TEST_ACCEPTANCE) exec -T mongo sh -c ' \
-		while ! mongosh --eval "db.version()" > /dev/null; do \
-			echo "Waiting for Mongo..."; \
-			sleep 1; \
-		done; \
-		mongosh --eval "rs.initiate({ _id: \"overleaf\", members: [ { _id: 0, host: \"mongo:27017\" } ] })"'
-
 ifeq (,$(wildcard test/unit))
 test_unit:
 
 else
+test_unit: export COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME)_$(MODULE_NAME)
 test_unit:
-	${DOCKER_COMPOSE_TEST_UNIT} run --rm test_unit npm -q run test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/src
-	${DOCKER_COMPOSE_TEST_UNIT} down
+	${DOCKER_COMPOSE} run --rm test_unit npm -q run test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/src
+	${DOCKER_COMPOSE} down
 
 endif
 
@@ -66,17 +49,18 @@ test_acceptance_saas: export BASE_CONFIG = $(CFG_SAAS)
 test_acceptance_server_ce: export BASE_CONFIG = $(CFG_SERVER_CE)
 test_acceptance_server_pro: export BASE_CONFIG = $(CFG_SERVER_PRO)
 
+$(ALL_TEST_ACCEPTANCE_VARIANTS): export COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME)
 $(ALL_TEST_ACCEPTANCE_VARIANTS):
 	$(MAKE) --no-print-directory clean_test_acceptance
-	$(TEST_ACCEPTANCE_MONGO_INIT)
-	${DOCKER_COMPOSE_TEST_ACCEPTANCE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
+	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 	$(MAKE) --no-print-directory clean_test_acceptance
 
 test_acceptance_merged_inner:
 	cd ../../ && \
 			npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/src
 
+clean_test_acceptance: export COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME)
 clean_test_acceptance:
-	${DOCKER_COMPOSE_TEST_ACCEPTANCE} down -v -t 0
+	${DOCKER_COMPOSE} down -v -t 0
 
 endif

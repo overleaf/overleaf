@@ -12,6 +12,7 @@ services:
       - ../../node_modules:/overleaf/node_modules
       - ../../libraries:/overleaf/libraries
     working_dir: /overleaf/services/web
+    env_file: docker-compose.common.env
     environment:
       BASE_CONFIG:
       OVERLEAF_CONFIG:
@@ -19,6 +20,8 @@ services:
       NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run --silent test:unit:app
     user: node
+    depends_on:
+      - mongo
 
   test_acceptance:
     image: node:20.18.0
@@ -83,6 +86,15 @@ services:
   mongo:
     image: mongo:6.0.13
     command: --replSet overleaf
+    volumes:
+      - ./docker/mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
+    environment:
+      MONGO_INITDB_DATABASE: sharelatex
+    extra_hosts:
+      # Required when using the automatic database setup for initializing the
+      # replica set. This override is not needed when running the setup after
+      # starting up mongo.
+      - mongo:127.0.0.1
 
   ldap:
     image: rroemhild/test-openldap:1.1

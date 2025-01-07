@@ -16,15 +16,6 @@ if (Mongoose.mongo.ObjectId !== mongodb.ObjectId) {
 
 const { ObjectId, ReadPreference } = mongodb
 
-if (
-  typeof global.beforeEach === 'function' &&
-  process.argv.join(' ').match(/unit/)
-) {
-  throw new Error(
-    'It looks like unit tests are running, but you are connecting to Mongo. Missing a stub?'
-  )
-}
-
 const READ_PREFERENCE_PRIMARY = ReadPreference.primary.mode
 const READ_PREFERENCE_SECONDARY = Settings.mongo.hasSecondaries
   ? ReadPreference.secondary.mode
@@ -101,7 +92,24 @@ async function getCollectionNames() {
   return collections.map(collection => collection.collectionName)
 }
 
+async function cleanupTestDatabase() {
+  ensureTestDatabase()
+  const collectionNames = await getCollectionNames()
+  const collections = []
+  for (const name of collectionNames) {
+    if (name in db && name !== 'migrations') {
+      collections.push(db[name])
+    }
+  }
+  await Promise.all(collections.map(coll => coll.deleteMany({})))
+}
+
 async function dropTestDatabase() {
+  ensureTestDatabase()
+  await mongoClient.db().dropDatabase()
+}
+
+function ensureTestDatabase() {
   const internalDb = mongoClient.db()
   const dbName = internalDb.databaseName
   const env = process.env.NODE_ENV
@@ -111,8 +119,6 @@ async function dropTestDatabase() {
       `Refusing to clear database '${dbName}' in environment '${env}'`
     )
   }
-
-  await internalDb.dropDatabase()
 }
 
 /**
@@ -129,6 +135,7 @@ module.exports = {
   connectionPromise,
   getCollectionNames,
   getCollectionInternal,
+  cleanupTestDatabase,
   dropTestDatabase,
   READ_PREFERENCE_PRIMARY,
   READ_PREFERENCE_SECONDARY,

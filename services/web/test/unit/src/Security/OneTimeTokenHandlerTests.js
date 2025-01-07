@@ -1,225 +1,151 @@
-const SandboxedModule = require('sandboxed-module')
-const path = require('path')
 const sinon = require('sinon')
-const modulePath = path.join(
-  __dirname,
-  '../../../../app/src/Features/Security/OneTimeTokenHandler'
-)
-const Errors = require('../../../../app/src/Features/Errors/Errors')
-const tk = require('timekeeper')
 const { expect } = require('chai')
+const Errors = require('../../../../app/src/Features/Errors/Errors')
+const {
+  connectionPromise,
+  cleanupTestDatabase,
+} = require('../../../../app/src/infrastructure/mongodb')
+const OneTimeTokenHandler = require('../../../../app/src/Features/Security/OneTimeTokenHandler')
 
 describe('OneTimeTokenHandler', function () {
+  before(async function () {
+    await connectionPromise
+  })
+  beforeEach(cleanupTestDatabase)
+
   beforeEach(function () {
-    tk.freeze(Date.now()) // freeze the time for these tests
-    this.stubbedToken = 'mock-token'
-    this.callback = sinon.stub()
-    this.OneTimeTokenHandler = SandboxedModule.require(modulePath, {
-      requires: {
-        '@overleaf/settings': this.settings,
-        crypto: {
-          randomBytes: () => this.stubbedToken,
-        },
-        '../../infrastructure/mongodb': {
-          db: (this.db = { tokens: {} }),
-        },
-      },
-    })
+    this.clock = sinon.useFakeTimers()
   })
 
   afterEach(function () {
-    tk.reset()
+    this.clock.restore()
   })
 
   describe('getNewToken', function () {
-    beforeEach(function () {
-      this.db.tokens.insertOne = sinon.stub().yields()
+    it('generates a token and stores it in the database', async function () {
+      const token = await OneTimeTokenHandler.promises.getNewToken(
+        'password',
+        'mock-data-to-store'
+      )
+      const { data } = await OneTimeTokenHandler.promises.peekValueFromToken(
+        'password',
+        token
+      )
+      expect(data).to.equal('mock-data-to-store')
     })
 
-    describe('normally', function () {
-      beforeEach(function () {
-        this.OneTimeTokenHandler.getNewToken(
-          'password',
-          'mock-data-to-store',
-          this.callback
-        )
-      })
-
-      it('should insert a generated token with a 1 hour expiry', function () {
-        this.db.tokens.insertOne
-          .calledWith({
-            use: 'password',
-            token: this.stubbedToken,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-            data: 'mock-data-to-store',
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with the token', function () {
-        this.callback.calledWith(null, this.stubbedToken).should.equal(true)
-      })
+    it('expires the generated token after 1 hour', async function () {
+      const token = await OneTimeTokenHandler.promises.getNewToken(
+        'password',
+        'mock-data-to-store'
+      )
+      this.clock.tick('25:00:00')
+      await expect(
+        OneTimeTokenHandler.promises.peekValueFromToken('password', token)
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
 
-    describe('with an optional expiresIn parameter', function () {
-      beforeEach(function () {
-        this.OneTimeTokenHandler.getNewToken(
-          'password',
-          'mock-data-to-store',
-          { expiresIn: 42 },
-          this.callback
-        )
-      })
-
-      it('should insert a generated token with a custom expiry', function () {
-        this.db.tokens.insertOne
-          .calledWith({
-            use: 'password',
-            token: this.stubbedToken,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 42 * 1000),
-            data: 'mock-data-to-store',
-          })
-          .should.equal(true)
-      })
-
-      it('should call the callback with the token', function () {
-        this.callback.calledWith(null, this.stubbedToken).should.equal(true)
-      })
+    it('accepts an expiresIn parameter', async function () {
+      const token = await OneTimeTokenHandler.promises.getNewToken(
+        'password',
+        'mock-data-to-store',
+        { expiresIn: 42 }
+      )
+      this.clock.tick('00:30')
+      const { data } = await OneTimeTokenHandler.promises.peekValueFromToken(
+        'password',
+        token
+      )
+      expect(data).to.equal('mock-data-to-store')
+      this.clock.tick('00:15')
+      await expect(
+        OneTimeTokenHandler.promises.peekValueFromToken('password', token)
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
   })
 
   describe('peekValueFromToken', function () {
-    describe('successfully', function () {
+    it('should return the data and peek count', async function () {
       const data = { email: 'some-mock-data' }
-      let result
-      beforeEach(async function () {
-        this.db.tokens.findOneAndUpdate = sinon
-          .stub()
-          .resolves({ data, peekCount: 1 })
-        result = await this.OneTimeTokenHandler.promises.peekValueFromToken(
-          'password',
-          'mock-token'
-        )
-      })
-
-      it('should increment the peekCount', function () {
-        this.db.tokens.findOneAndUpdate
-          .calledWith(
-            {
-              use: 'password',
-              token: 'mock-token',
-              expiresAt: { $gt: new Date() },
-              usedAt: { $exists: false },
-              peekCount: { $not: { $gte: this.OneTimeTokenHandler.MAX_PEEKS } },
-            },
-            {
-              $inc: { peekCount: 1 },
-            }
-          )
-          .should.equal(true)
-      })
-
-      it('should return the data', function () {
-        expect(result).to.deep.equal({ data, remainingPeeks: 3 })
+      const token = await OneTimeTokenHandler.promises.getNewToken(
+        'password',
+        data
+      )
+      const result = await OneTimeTokenHandler.promises.peekValueFromToken(
+        'password',
+        token
+      )
+      expect(result).to.deep.equal({
+        data,
+        remainingPeeks: OneTimeTokenHandler.MAX_PEEKS - 1,
       })
     })
 
-    describe('when a valid token is not found', function () {
-      beforeEach(function () {
-        this.db.tokens.findOneAndUpdate = sinon.stub().resolves(null)
-      })
+    it('should throw a NotFoundError if the token is not found', async function () {
+      await expect(
+        OneTimeTokenHandler.promises.peekValueFromToken('password', 'bad-token')
+      ).to.be.rejectedWith(Errors.NotFoundError)
+    })
 
-      it('should return a NotFoundError', async function () {
-        await expect(
-          this.OneTimeTokenHandler.promises.peekValueFromToken(
-            'password',
-            'mock-token'
-          )
-        ).to.be.rejectedWith(Errors.NotFoundError)
-      })
+    it('should stop returning the data after the peek count is exceeded', async function () {
+      const data = { email: 'some-mock-data' }
+      const token = await OneTimeTokenHandler.promises.getNewToken(
+        'password',
+        data
+      )
+      for (let peeks = 1; peeks <= OneTimeTokenHandler.MAX_PEEKS; peeks++) {
+        const result = await OneTimeTokenHandler.promises.peekValueFromToken(
+          'password',
+          token
+        )
+        expect(result).to.deep.equal({
+          data,
+          remainingPeeks: OneTimeTokenHandler.MAX_PEEKS - peeks,
+        })
+      }
+      await expect(
+        OneTimeTokenHandler.promises.peekValueFromToken('password', token)
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
   })
 
   describe('expireToken', function () {
-    beforeEach(function () {
-      this.db.tokens.updateOne = sinon.stub().yields(null)
-      this.OneTimeTokenHandler.expireToken(
+    it('should expire the token immediately', async function () {
+      const token = await OneTimeTokenHandler.promises.getNewToken(
         'password',
-        'mock-token',
-        this.callback
+        'mock-data'
       )
-    })
-
-    it('should expire the token', function () {
-      this.db.tokens.updateOne
-        .calledWith(
-          {
-            use: 'password',
-            token: 'mock-token',
-          },
-          {
-            $set: {
-              usedAt: new Date(),
-            },
-          }
-        )
-        .should.equal(true)
-      this.callback.calledWith(null).should.equal(true)
+      await OneTimeTokenHandler.promises.expireToken('password', token)
+      await expect(
+        OneTimeTokenHandler.promises.peekValueFromToken('password', token)
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
   })
 
   describe('getValueFromTokenAndExpire', function () {
-    describe('successfully', function () {
-      beforeEach(function () {
-        this.db.tokens.findOneAndUpdate = sinon
-          .stub()
-          .yields(null, { data: 'mock-data' })
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire(
+    it('should return the value and expire the token', async function () {
+      const token = await OneTimeTokenHandler.promises.getNewToken(
+        'password',
+        'mock-data'
+      )
+      const data =
+        await OneTimeTokenHandler.promises.getValueFromTokenAndExpire(
           'password',
-          'mock-token',
-          this.callback
+          token
         )
-      })
-
-      it('should expire the token', function () {
-        this.db.tokens.findOneAndUpdate
-          .calledWith(
-            {
-              use: 'password',
-              token: 'mock-token',
-              expiresAt: { $gt: new Date() },
-              usedAt: { $exists: false },
-              peekCount: { $not: { $gte: this.OneTimeTokenHandler.MAX_PEEKS } },
-            },
-            {
-              $set: { usedAt: new Date() },
-            }
-          )
-          .should.equal(true)
-      })
-
-      it('should return the data', function () {
-        this.callback.calledWith(null, 'mock-data').should.equal(true)
-      })
+      expect(data).to.equal('mock-data')
+      await expect(
+        OneTimeTokenHandler.promises.peekValueFromToken('password', token)
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
 
-    describe('when a valid token is not found', function () {
-      beforeEach(function () {
-        this.db.tokens.findOneAndUpdate = sinon.stub().yields(null, null)
-        this.OneTimeTokenHandler.getValueFromTokenAndExpire(
+    it('should throw a NotFoundError if the token is not found', async function () {
+      await expect(
+        OneTimeTokenHandler.promises.getValueFromTokenAndExpire(
           'password',
-          'mock-token',
-          this.callback
+          'bad-token'
         )
-      })
-
-      it('should return a NotFoundError', function () {
-        this.callback
-          .calledWith(sinon.match.instanceOf(Errors.NotFoundError))
-          .should.equal(true)
-      })
+      ).to.be.rejectedWith(Errors.NotFoundError)
     })
   })
 })
