@@ -10,6 +10,8 @@ import {
   OLModalTitle,
 } from '@/features/ui/components/ol/ol-modal'
 
+const WRITEFULL_SUPPORT_EMAIL = 'support@writefull.com'
+
 type LeaveModalContentProps = {
   handleHide: () => void
   inFlight: boolean
@@ -36,11 +38,25 @@ function LeaveModalContentBlock({
   }
 
   return (
-    <LeaveModalForm
-      setInFlight={setInFlight}
-      isFormValid={isFormValid}
-      setIsFormValid={setIsFormValid}
-    />
+    <>
+      <LeaveModalForm
+        setInFlight={setInFlight}
+        isFormValid={isFormValid}
+        setIsFormValid={setIsFormValid}
+      />
+      <p>
+        <Trans
+          i18nKey="to_delete_your_writefull_account"
+          values={{ email: WRITEFULL_SUPPORT_EMAIL }}
+          shouldUnescape
+          tOptions={{ interpolation: { escapeValue: true } }}
+          components={{
+            // eslint-disable-next-line jsx-a11y/anchor-has-content
+            a: <a href={`mailto:${WRITEFULL_SUPPORT_EMAIL}`} />,
+          }}
+        />
+      </p>
+    </>
   )
 }
 
