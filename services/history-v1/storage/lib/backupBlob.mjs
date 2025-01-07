@@ -10,6 +10,7 @@ import { Binary, ObjectId } from 'mongodb'
 import logger from '@overleaf/logger/logging-manager.js'
 import { AlreadyWrittenError } from '@overleaf/object-persistor/src/Errors.js'
 import metrics from '@overleaf/metrics'
+import zLib from 'node:zlib'
 
 const HIGHWATER_MARK = 1024 * 1024
 
@@ -37,20 +38,58 @@ function recordBackupConclusion(status, reason = 'none') {
  */
 export async function uploadBlobToBackup(historyId, blob, path) {
   const md5 = Crypto.createHash('md5')
-  await Stream.promises.pipeline(fs.createReadStream(path), md5)
-  const key = makeProjectKey(historyId, blob.getHash())
-  const persistor = await backupPersistor.forProject(projectBlobsBucket, key)
-  await persistor.sendStream(
-    projectBlobsBucket,
-    key,
-    fs.createReadStream(path, { highWaterMark: HIGHWATER_MARK }),
-    {
-      contentType: 'application/octet-stream',
-      contentLength: blob.getByteLength(),
-      sourceMd5: md5.digest('hex'),
-      ifNoneMatch: '*',
+  const filePathCompressed = path + '.gz'
+  let backupSource
+  let contentEncoding
+  let size
+  try {
+    if (blob.getStringLength()) {
+      backupSource = filePathCompressed
+      contentEncoding = 'gzip'
+      size = 0
+      await Stream.promises.pipeline(
+        fs.createReadStream(path, { highWaterMark: HIGHWATER_MARK }),
+        zLib.createGzip(),
+        async function* (source) {
+          for await (const chunk of source) {
+            size += chunk.byteLength
+            md5.update(chunk)
+            yield chunk
+          }
+        },
+        fs.createWriteStream(filePathCompressed, {
+          highWaterMark: HIGHWATER_MARK,
+        })
+      )
+    } else {
+      backupSource = path
+      size = blob.getByteLength()
+      await Stream.promises.pipeline(
+        fs.createReadStream(path, { highWaterMark: HIGHWATER_MARK }),
+        md5
+      )
     }
-  )
+    const key = makeProjectKey(historyId, blob.getHash())
+    const persistor = await backupPersistor.forProject(projectBlobsBucket, key)
+    await persistor.sendStream(
+      projectBlobsBucket,
+      key,
+      fs.createReadStream(backupSource, { highWaterMark: HIGHWATER_MARK }),
+      {
+        contentEncoding,
+        contentType: 'application/octet-stream',
+        contentLength: size,
+        sourceMd5: md5.digest('hex'),
+        ifNoneMatch: '*',
+      }
+    )
+  } finally {
+    if (backupSource === filePathCompressed) {
+      try {
+        await fs.promises.rm(filePathCompressed, { force: true })
+      } catch {}
+    }
+  }
 }
 
 /**
