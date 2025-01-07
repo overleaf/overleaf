@@ -2,7 +2,9 @@ import { screen, within } from '@testing-library/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsCompiler from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-compiler'
-import { renderWithEditorContext } from '../../../../helpers/render-with-context'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
+import { render } from '@testing-library/react'
+import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsCompiler />', function () {
   afterEach(function () {
@@ -10,7 +12,13 @@ describe('<SettingsCompiler />', function () {
   })
 
   it('shows correct menu', async function () {
-    renderWithEditorContext(<SettingsCompiler />)
+    render(
+      <EditorProviders>
+        <EditorLeftMenuProvider>
+          <SettingsCompiler />
+        </EditorLeftMenuProvider>
+      </EditorProviders>
+    )
 
     const select = screen.getByLabelText('Compiler')
 

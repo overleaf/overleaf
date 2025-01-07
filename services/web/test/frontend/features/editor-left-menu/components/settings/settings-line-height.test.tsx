@@ -2,7 +2,9 @@ import { screen, within } from '@testing-library/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsLineHeight from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-line-height'
-import { renderWithEditorContext } from '../../../../helpers/render-with-context'
+import { render } from '@testing-library/react'
+import { EditorProviders } from '../../../../helpers/editor-providers'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 
 describe('<SettingsLineHeight />', function () {
   afterEach(function () {
@@ -10,7 +12,13 @@ describe('<SettingsLineHeight />', function () {
   })
 
   it('shows correct menu', async function () {
-    renderWithEditorContext(<SettingsLineHeight />)
+    render(
+      <EditorProviders>
+        <EditorLeftMenuProvider>
+          <SettingsLineHeight />
+        </EditorLeftMenuProvider>
+      </EditorProviders>
+    )
 
     const select = screen.getByLabelText('Line Height')
 

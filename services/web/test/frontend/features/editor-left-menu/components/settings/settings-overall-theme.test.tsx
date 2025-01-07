@@ -3,8 +3,10 @@ import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsOverallTheme from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-overall-theme'
 import type { OverallThemeMeta } from '../../../../../../types/project-settings'
-import { renderWithEditorContext } from '../../../../helpers/render-with-context'
 import getMeta from '@/utils/meta'
+import { render } from '@testing-library/react'
+import { EditorProviders } from '../../../../helpers/editor-providers'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 
 const IEEE_BRAND_ID = 1234
 const OTHER_BRAND_ID = 2234
@@ -35,7 +37,13 @@ describe('<SettingsOverallTheme />', function () {
   })
 
   it('shows correct menu', async function () {
-    renderWithEditorContext(<SettingsOverallTheme />)
+    render(
+      <EditorProviders>
+        <EditorLeftMenuProvider>
+          <SettingsOverallTheme />
+        </EditorLeftMenuProvider>
+      </EditorProviders>
+    )
 
     const select = screen.getByLabelText('Overall theme')
 
@@ -49,7 +57,13 @@ describe('<SettingsOverallTheme />', function () {
       window.metaAttributesCache.set('ol-brandVariation', {
         brand_id: IEEE_BRAND_ID,
       })
-      renderWithEditorContext(<SettingsOverallTheme />)
+      render(
+        <EditorProviders>
+          <EditorLeftMenuProvider>
+            <SettingsOverallTheme />
+          </EditorLeftMenuProvider>
+        </EditorProviders>
+      )
       const select = screen.queryByText('Overall theme')
       expect(select).to.not.exist
     })
@@ -58,14 +72,26 @@ describe('<SettingsOverallTheme />', function () {
       window.metaAttributesCache.set('ol-brandVariation', {
         brand_id: OTHER_BRAND_ID,
       })
-      renderWithEditorContext(<SettingsOverallTheme />)
+      render(
+        <EditorProviders>
+          <EditorLeftMenuProvider>
+            <SettingsOverallTheme />
+          </EditorLeftMenuProvider>
+        </EditorProviders>
+      )
       const select = screen.getByLabelText('Overall theme')
       expect(select).to.exist
     })
 
     it('should show overall theme picker for non branded projects', function () {
       window.metaAttributesCache.set('ol-brandVariation', undefined)
-      renderWithEditorContext(<SettingsOverallTheme />)
+      render(
+        <EditorProviders>
+          <EditorLeftMenuProvider>
+            <SettingsOverallTheme />
+          </EditorLeftMenuProvider>
+        </EditorProviders>
+      )
       const select = screen.getByLabelText('Overall theme')
       expect(select).to.exist
     })

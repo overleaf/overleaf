@@ -2,7 +2,9 @@ import { screen, within } from '@testing-library/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsAutoCloseBrackets from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-auto-close-brackets'
-import { renderWithEditorContext } from '../../../../helpers/render-with-context'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
+import { render } from '@testing-library/react'
+import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsAutoCloseBrackets />', function () {
   afterEach(function () {
@@ -10,7 +12,13 @@ describe('<SettingsAutoCloseBrackets />', function () {
   })
 
   it('shows correct menu', async function () {
-    renderWithEditorContext(<SettingsAutoCloseBrackets />)
+    render(
+      <EditorProviders>
+        <EditorLeftMenuProvider>
+          <SettingsAutoCloseBrackets />
+        </EditorLeftMenuProvider>
+      </EditorProviders>
+    )
 
     const select = screen.getByLabelText('Auto-close Brackets')
 

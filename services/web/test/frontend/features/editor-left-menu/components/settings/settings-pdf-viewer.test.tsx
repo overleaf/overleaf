@@ -2,7 +2,9 @@ import { screen, within } from '@testing-library/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsPdfViewer from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-pdf-viewer'
-import { renderWithEditorContext } from '../../../../helpers/render-with-context'
+import { render } from '@testing-library/react'
+import { EditorProviders } from '../../../../helpers/editor-providers'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
 
 describe('<SettingsPdfViewer />', function () {
   afterEach(function () {
@@ -10,7 +12,13 @@ describe('<SettingsPdfViewer />', function () {
   })
 
   it('shows correct menu', async function () {
-    renderWithEditorContext(<SettingsPdfViewer />)
+    render(
+      <EditorProviders>
+        <EditorLeftMenuProvider>
+          <SettingsPdfViewer />
+        </EditorLeftMenuProvider>
+      </EditorProviders>
+    )
 
     const select = screen.getByLabelText('PDF Viewer')
 

@@ -1,79 +1,110 @@
 import { FC } from 'react'
+import { ChatProvider } from '@/features/chat/context/chat-context'
 import { ConnectionProvider } from './connection-context'
+import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
+import { DetachProvider } from '@/shared/context/detach-context'
+import { EditorManagerProvider } from '@/features/ide-react/context/editor-manager-context'
+import { EditorProvider } from '@/shared/context/editor-context'
+import { FileTreeDataProvider } from '@/shared/context/file-tree-data-context'
+import { FileTreeOpenProvider } from '@/features/ide-react/context/file-tree-open-context'
+import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
 import { IdeReactProvider } from '@/features/ide-react/context/ide-react-context'
 import { LayoutProvider } from '@/shared/context/layout-context'
-import { DetachProvider } from '@/shared/context/detach-context'
+import { LocalCompileProvider } from '@/shared/context/local-compile-context'
+import { MetadataProvider } from '@/features/ide-react/context/metadata-context'
+import { ModalsContextProvider } from '@/features/ide-react/context/modals-context'
+import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-context'
+import { OutlineProvider } from '@/features/ide-react/context/outline-context'
+import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
 import { ProjectProvider } from '@/shared/context/project-context'
 import { ProjectSettingsProvider } from '@/features/editor-left-menu/context/project-settings-context'
-import { EditorProvider } from '@/shared/context/editor-context'
-import { UserProvider } from '@/shared/context/user-context'
-import { EditorManagerProvider } from '@/features/ide-react/context/editor-manager-context'
-import { FileTreeDataProvider } from '@/shared/context/file-tree-data-context'
-import { DetachCompileProvider } from '@/shared/context/detach-compile-context'
-import { ChatProvider } from '@/features/chat/context/chat-context'
-import { LocalCompileProvider } from '@/shared/context/local-compile-context'
-import { OnlineUsersProvider } from '@/features/ide-react/context/online-users-context'
-import { MetadataProvider } from '@/features/ide-react/context/metadata-context'
 import { ReferencesProvider } from '@/features/ide-react/context/references-context'
-import { SplitTestProvider } from '@/shared/context/split-test-context'
-import { ModalsContextProvider } from '@/features/ide-react/context/modals-context'
-import { FileTreePathProvider } from '@/features/file-tree/contexts/file-tree-path'
-import { UserSettingsProvider } from '@/shared/context/user-settings-context'
-import { PermissionsProvider } from '@/features/ide-react/context/permissions-context'
-import { FileTreeOpenProvider } from '@/features/ide-react/context/file-tree-open-context'
-import { OutlineProvider } from '@/features/ide-react/context/outline-context'
 import { SnapshotProvider } from '@/features/ide-react/context/snapshot-context'
+import { SplitTestProvider } from '@/shared/context/split-test-context'
+import { UserProvider } from '@/shared/context/user-context'
+import { UserSettingsProvider } from '@/shared/context/user-settings-context'
 
-export const ReactContextRoot: FC = ({ children }) => {
+export const ReactContextRoot: FC<{ providers?: Record<string, FC> }> = ({
+  children,
+  providers = {},
+}) => {
+  const Providers = {
+    ChatProvider,
+    ConnectionProvider,
+    DetachCompileProvider,
+    DetachProvider,
+    EditorManagerProvider,
+    EditorProvider,
+    FileTreeDataProvider,
+    FileTreeOpenProvider,
+    FileTreePathProvider,
+    IdeReactProvider,
+    LayoutProvider,
+    LocalCompileProvider,
+    MetadataProvider,
+    ModalsContextProvider,
+    OnlineUsersProvider,
+    OutlineProvider,
+    PermissionsProvider,
+    ProjectProvider,
+    ProjectSettingsProvider,
+    ReferencesProvider,
+    SnapshotProvider,
+    SplitTestProvider,
+    UserProvider,
+    UserSettingsProvider,
+    ...providers,
+  }
+
   return (
-    <SplitTestProvider>
-      <ModalsContextProvider>
-        <ConnectionProvider>
-          <IdeReactProvider>
-            <UserProvider>
-              <UserSettingsProvider>
-                <ProjectProvider>
-                  <SnapshotProvider>
-                    <FileTreeDataProvider>
-                      <FileTreePathProvider>
-                        <ReferencesProvider>
-                          <DetachProvider>
-                            <EditorProvider>
-                              <PermissionsProvider>
-                                <ProjectSettingsProvider>
-                                  <LayoutProvider>
-                                    <EditorManagerProvider>
-                                      <LocalCompileProvider>
-                                        <DetachCompileProvider>
-                                          <ChatProvider>
-                                            <FileTreeOpenProvider>
-                                              <OnlineUsersProvider>
-                                                <MetadataProvider>
-                                                  <OutlineProvider>
+    <Providers.SplitTestProvider>
+      <Providers.ModalsContextProvider>
+        <Providers.ConnectionProvider>
+          <Providers.IdeReactProvider>
+            <Providers.UserProvider>
+              <Providers.UserSettingsProvider>
+                <Providers.ProjectProvider>
+                  <Providers.SnapshotProvider>
+                    <Providers.FileTreeDataProvider>
+                      <Providers.FileTreePathProvider>
+                        <Providers.ReferencesProvider>
+                          <Providers.DetachProvider>
+                            <Providers.EditorProvider>
+                              <Providers.PermissionsProvider>
+                                <Providers.ProjectSettingsProvider>
+                                  <Providers.LayoutProvider>
+                                    <Providers.EditorManagerProvider>
+                                      <Providers.LocalCompileProvider>
+                                        <Providers.DetachCompileProvider>
+                                          <Providers.ChatProvider>
+                                            <Providers.FileTreeOpenProvider>
+                                              <Providers.OnlineUsersProvider>
+                                                <Providers.MetadataProvider>
+                                                  <Providers.OutlineProvider>
                                                     {children}
-                                                  </OutlineProvider>
-                                                </MetadataProvider>
-                                              </OnlineUsersProvider>
-                                            </FileTreeOpenProvider>
-                                          </ChatProvider>
-                                        </DetachCompileProvider>
-                                      </LocalCompileProvider>
-                                    </EditorManagerProvider>
-                                  </LayoutProvider>
-                                </ProjectSettingsProvider>
-                              </PermissionsProvider>
-                            </EditorProvider>
-                          </DetachProvider>
-                        </ReferencesProvider>
-                      </FileTreePathProvider>
-                    </FileTreeDataProvider>
-                  </SnapshotProvider>
-                </ProjectProvider>
-              </UserSettingsProvider>
-            </UserProvider>
-          </IdeReactProvider>
-        </ConnectionProvider>
-      </ModalsContextProvider>
-    </SplitTestProvider>
+                                                  </Providers.OutlineProvider>
+                                                </Providers.MetadataProvider>
+                                              </Providers.OnlineUsersProvider>
+                                            </Providers.FileTreeOpenProvider>
+                                          </Providers.ChatProvider>
+                                        </Providers.DetachCompileProvider>
+                                      </Providers.LocalCompileProvider>
+                                    </Providers.EditorManagerProvider>
+                                  </Providers.LayoutProvider>
+                                </Providers.ProjectSettingsProvider>
+                              </Providers.PermissionsProvider>
+                            </Providers.EditorProvider>
+                          </Providers.DetachProvider>
+                        </Providers.ReferencesProvider>
+                      </Providers.FileTreePathProvider>
+                    </Providers.FileTreeDataProvider>
+                  </Providers.SnapshotProvider>
+                </Providers.ProjectProvider>
+              </Providers.UserSettingsProvider>
+            </Providers.UserProvider>
+          </Providers.IdeReactProvider>
+        </Providers.ConnectionProvider>
+      </Providers.ModalsContextProvider>
+    </Providers.SplitTestProvider>
   )
 }

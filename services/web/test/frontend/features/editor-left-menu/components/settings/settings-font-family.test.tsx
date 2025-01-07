@@ -2,7 +2,9 @@ import { screen, within } from '@testing-library/dom'
 import { expect } from 'chai'
 import fetchMock from 'fetch-mock'
 import SettingsFontFamily from '../../../../../../frontend/js/features/editor-left-menu/components/settings/settings-font-family'
-import { renderWithEditorContext } from '../../../../helpers/render-with-context'
+import { EditorLeftMenuProvider } from '@/features/editor-left-menu/components/editor-left-menu-context'
+import { render } from '@testing-library/react'
+import { EditorProviders } from '../../../../helpers/editor-providers'
 
 describe('<SettingsFontFamily />', function () {
   afterEach(function () {
@@ -10,7 +12,13 @@ describe('<SettingsFontFamily />', function () {
   })
 
   it('shows correct menu', async function () {
-    renderWithEditorContext(<SettingsFontFamily />)
+    render(
+      <EditorProviders>
+        <EditorLeftMenuProvider>
+          <SettingsFontFamily />
+        </EditorLeftMenuProvider>
+      </EditorProviders>
+    )
 
     const select = screen.getByLabelText('Font Family')
 
