@@ -9,6 +9,10 @@ import getMeta from '../../../../utils/meta'
 import importOverleafModules from '../../../../../macros/import-overleaf-module.macro'
 import GeoBanners from './geo-banners'
 import AccessibilitySurveyBanner from './accessibility-survey-banner'
+import {
+  DeprecatedBrowser,
+  isDeprecatedBrowser,
+} from '@/shared/components/deprecated-browser'
 
 const [enrollmentNotificationModule] = importOverleafModules(
   'managedGroupSubscriptionEnrollmentNotification'
@@ -49,6 +53,8 @@ function UserNotifications() {
         {USGovBanner && <USGovBanner />}
 
         <AccessibilitySurveyBanner />
+
+        {isDeprecatedBrowser() && <DeprecatedBrowser />}
       </ul>
     </div>
   )
