@@ -16,7 +16,9 @@
 @group-member-picker-top-height: 36px;
 @group-member-picker-sm-width: 50%;
 @group-member-picker-md-width: 25%;
+@group-member-picker-min-width: 234px;
 
+@container-plans-responsive-width: 95%;
 @table-4-column-width: 25%;
 @table-5-column-width: 20%;
 
@@ -27,6 +29,13 @@
 
   .container {
     padding: 0 var(--spacing-06);
+
+    @media (min-width: @screen-sm-min) {
+      width: @container-plans-responsive-width;
+    }
+    @media (min-width: @screen-xl-min) {
+      width: @container-xl;
+    }
 
     .geo-banner-container {
       margin-top: var(--spacing-08);
@@ -321,6 +330,10 @@
   .plans-new-table {
     width: 100%;
 
+    // keep the borders separate to help with spacing and alignment in the CTAs
+    border-collapse: separate;
+    border-spacing: 0;
+
     th,
     td {
       width: @table-4-column-width;
@@ -367,6 +380,12 @@
       padding-bottom: var(--spacing-06);
       @media (max-width: @screen-md-max) {
         padding-bottom: var(--spacing-05);
+      }
+
+      // use transparent borders to use the same spacing as highlighted cells
+      &:not(.plans-new-table-highlighted-cell) {
+        border-right: var(--border-width-base) solid transparent;
+        border-left: var(--border-width-base) solid transparent;
       }
     }
 
@@ -433,6 +452,7 @@
     }
     @media (min-width: @screen-md-min) {
       width: @group-member-picker-md-width;
+      min-width: @group-member-picker-min-width; // ensure checkbox title doesn't wrap in English
     }
   }
 
