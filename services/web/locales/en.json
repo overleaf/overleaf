@@ -248,6 +248,8 @@
   "cancel": "Cancel",
   "cancel_add_on": "Cancel add-on",
   "cancel_anytime": "We’re confident that you’ll love __appName__, but if not you can cancel anytime. We’ll give you your money back, no questions asked, if you let us know within 30 days.",
+  "cancel_group_price_warning": "Our per-user prices are increasing in 2025. Keep your current rate for existing and new users by staying with us.",
+  "cancel_group_price_warning_heading": "Don’t lose your current pricing",
   "cancel_my_account": "Cancel my subscription",
   "cancel_my_subscription": "Cancel my subscription",
   "cancel_personal_subscription_first": "You already have an individual subscription, would you like us to cancel this first before joining the group licence?",

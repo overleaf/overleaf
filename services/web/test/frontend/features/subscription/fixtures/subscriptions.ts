@@ -49,6 +49,7 @@ export const annualActiveSubscription: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -90,6 +91,7 @@ export const annualActiveSubscriptionEuro: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -130,6 +132,7 @@ export const annualActiveSubscriptionPro: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -171,6 +174,7 @@ export const pastDueExpiredSubscription: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'true', $: { type: 'boolean' } },
     },
@@ -212,6 +216,7 @@ export const canceledSubscription: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'true', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -253,6 +258,7 @@ export const pendingSubscriptionChange: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -305,6 +311,7 @@ export const groupActiveSubscription: GroupSubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },
@@ -351,6 +358,7 @@ export const groupActiveSubscriptionWithPendingLicenseChange: GroupSubscription 
       activeCoupons: [],
       account: {
         email: 'fake@example.com',
+        created_at: '2024-12-31T09:40:27.000Z',
         has_canceled_subscription: {
           _: 'false',
           $: {
@@ -415,6 +423,7 @@ export const trialSubscription: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'fake@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: {
         _: 'false',
         $: {
@@ -487,6 +496,7 @@ export const trialCollaboratorSubscription: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'foo@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: {
         _: 'false',
         $: {
@@ -537,6 +547,7 @@ export const monthlyActiveCollaborator: RecurlySubscription = {
     activeCoupons: [],
     account: {
       email: 'foo@example.com',
+      created_at: '2024-12-31T09:40:27.000Z',
       has_canceled_subscription: { _: 'false', $: { type: 'boolean' } },
       has_past_due_invoice: { _: 'false', $: { type: 'boolean' } },
     },

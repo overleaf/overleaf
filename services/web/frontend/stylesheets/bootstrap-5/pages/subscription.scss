@@ -410,3 +410,9 @@
     @include body-lg;
   }
 }
+
+.pricing-warning-heading {
+  @include body-base;
+
+  font-weight: 600;
+}
