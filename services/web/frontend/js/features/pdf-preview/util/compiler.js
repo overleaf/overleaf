@@ -176,7 +176,7 @@ export default class DocumentCompiler {
   // if it contains "\documentclass" then use this as the root doc
   getRootDocOverrideId() {
     // only override when not in the root doc itself
-    if (this.currentDoc.doc_id !== this.projectRootDocId) {
+    if (this.currentDoc && this.currentDoc.doc_id !== this.projectRootDocId) {
       const snapshot = this.currentDoc.getSnapshot()
 
       if (snapshot && isMainFile(snapshot)) {

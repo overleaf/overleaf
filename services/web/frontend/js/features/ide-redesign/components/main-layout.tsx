@@ -1,6 +1,7 @@
 import { Panel, PanelGroup } from 'react-resizable-panels'
 import classNames from 'classnames'
 import { HorizontalResizeHandle } from '@/features/ide-react/components/resize/horizontal-resize-handle'
+import PdfPreview from '@/features/pdf-preview/components/pdf-preview'
 
 export default function MainLayout() {
   return (
@@ -41,10 +42,12 @@ export default function MainLayout() {
             resizable
             hitAreaMargins={{ coarse: 0, fine: 0 }}
           />
-          <Panel id="ide-redesign-pdf-panel" order={2}>
-            <div className="ide-skeleton-block ide-redesign-full-height">
-              PDF
-            </div>
+          <Panel
+            className="ide-redesign-pdf-container"
+            id="ide-redesign-pdf-panel"
+            order={2}
+          >
+            <PdfPreview />
           </Panel>
         </PanelGroup>
       </div>
