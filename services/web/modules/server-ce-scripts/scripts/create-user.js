@@ -1,49 +1,13 @@
-const minimist = require('minimist')
-const { db } = require('../../../app/src/infrastructure/mongodb')
-const UserRegistrationHandler = require('../../../app/src/Features/User/UserRegistrationHandler')
+/**
+ * WARNING
+ * This file has been replaced by create-user.mjs. It is left in place for backwards compatibility with previous versions of Overleaf.
+ * This will be used by the e2e tests that check the upgrade from the older versions, if these tests are updated or removed,
+ * this file can be removed as well.
+ */
 
 async function main() {
-  const argv = minimist(process.argv.slice(2), {
-    string: ['email'],
-    boolean: ['admin'],
-  })
-
-  const { admin, email } = argv
-  if (!email) {
-    console.error(`Usage: node ${__filename} [--admin] --email=joe@example.com`)
-    process.exit(1)
-  }
-
-  await new Promise((resolve, reject) => {
-    UserRegistrationHandler.registerNewUserAndSendActivationEmail(
-      email,
-      (error, user, setNewPasswordUrl) => {
-        if (error) {
-          return reject(error)
-        }
-        db.users.updateOne(
-          { _id: user._id },
-          { $set: { isAdmin: admin } },
-          error => {
-            if (error) {
-              return reject(error)
-            }
-
-            console.log('')
-            console.log(`\
-Successfully created ${email} as ${admin ? 'an admin' : 'a'} user.
-
-Please visit the following URL to set a password for ${email} and log in:
-
-  ${setNewPasswordUrl}
-
-`)
-            resolve()
-          }
-        )
-      }
-    )
-  })
+  const { default: createUser } = await import('./create-user.mjs')
+  await createUser()
 }
 
 main()

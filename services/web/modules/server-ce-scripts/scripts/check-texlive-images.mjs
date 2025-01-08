@@ -1,4 +1,4 @@
-const { db } = require('../../../app/src/infrastructure/mongodb')
+import { db } from '../../../app/src/infrastructure/mongodb.js'
 
 async function readImagesInUse() {
   const projectCount = await db.projects.countDocuments()

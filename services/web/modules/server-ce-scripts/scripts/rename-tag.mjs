@@ -1,5 +1,8 @@
-const minimist = require('minimist')
-const { db } = require('../../../app/src/infrastructure/mongodb')
+import minimist from 'minimist'
+import { db } from '../../../app/src/infrastructure/mongodb.js'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
 
 async function main() {
   const argv = minimist(process.argv.slice(2), {
@@ -9,7 +12,7 @@ async function main() {
   const { 'user-id': userId, 'old-name': oldName, 'new-name': newName } = argv
   if (!userId || !oldName || !newName) {
     console.error(
-      `Usage: node ${__filename} --user-id=5a9414f259776c7900b300e6 --old-name=my-folder --new-name=my-folder-renamed`
+      `Usage: node ${filename} --user-id=5a9414f259776c7900b300e6 --old-name=my-folder --new-name=my-folder-renamed`
     )
     process.exit(101)
   }

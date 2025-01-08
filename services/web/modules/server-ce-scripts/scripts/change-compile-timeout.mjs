@@ -1,5 +1,5 @@
-const minimist = require('minimist')
-const { db, ObjectId } = require('../../../app/src/infrastructure/mongodb')
+import minimist from 'minimist'
+import { db, ObjectId } from '../../../app/src/infrastructure/mongodb.js'
 
 async function main() {
   const argv = minimist(process.argv.slice(2), {
@@ -15,7 +15,7 @@ async function main() {
     Number.isNaN(compileTimeout)
   ) {
     console.error(
-      `Usage: node ${__filename} --user-id=5a9414f259776c7900b300e6 --timeout=90`
+      `Usage: node ${import.meta.filename} --user-id=5a9414f259776c7900b300e6 --timeout=90`
     )
     process.exit(101)
   }

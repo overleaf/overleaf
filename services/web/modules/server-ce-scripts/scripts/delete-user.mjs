@@ -1,10 +1,13 @@
-const UserGetter = require('../../../app/src/Features/User/UserGetter')
-const UserDeleter = require('../../../app/src/Features/User/UserDeleter')
+import UserGetter from '../../../app/src/Features/User/UserGetter.js'
+import UserDeleter from '../../../app/src/Features/User/UserDeleter.js'
+import { fileURLToPath } from 'url'
+
+const filename = fileURLToPath(import.meta.url)
 
 async function main() {
   const email = (process.argv.slice(2).pop() || '').replace(/^--email=/, '')
   if (!email) {
-    console.error(`Usage: node ${__filename} --email=joe@example.com`)
+    console.error(`Usage: node ${filename} --email=joe@example.com`)
     process.exit(1)
   }
 

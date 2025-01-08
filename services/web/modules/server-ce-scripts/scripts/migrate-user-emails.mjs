@@ -9,15 +9,15 @@
 // Intended for Server Pro customers migrating user emails from one domain to
 // another.
 
-const minimist = require('minimist')
+import minimist from 'minimist'
 
-const os = require('os')
-const fs = require('fs')
-const csv = require('csv/sync')
-const { parseEmail } = require('../../../app/src/Features/Helpers/EmailHelper')
-const UserGetter = require('../../../app/src/Features/User/UserGetter')
-const UserUpdater = require('../../../app/src/Features/User/UserUpdater')
-const UserSessionsManager = require('../../../app/src/Features/User/UserSessionsManager')
+import os from 'os'
+import fs from 'fs'
+import * as csv from 'csv/sync'
+import { parseEmail } from '../../../app/src/Features/Helpers/EmailHelper.js'
+import UserGetter from '../../../app/src/Features/User/UserGetter.js'
+import UserUpdater from '../../../app/src/Features/User/UserUpdater.js'
+import UserSessionsManager from '../../../app/src/Features/User/UserSessionsManager.js'
 
 const hostname = os.hostname()
 const scriptTimestamp = new Date().toISOString()
@@ -39,7 +39,7 @@ const argv = minimist(process.argv.slice(2), {
 // display usage if no CSV file is provided
 if (argv._.length === 0) {
   console.log(
-    'Usage: node migrate_user_emails.js [--commit] [--continue|--ignore-missing] [--admin-id=ADMIN_USER_ID] <csv_file>'
+    'Usage: node migrate_user_emails.mjs [--commit] [--continue|--ignore-missing] [--admin-id=ADMIN_USER_ID] <csv_file>'
   )
   console.log('  --commit: actually do the migration (default: false)')
   console.log(

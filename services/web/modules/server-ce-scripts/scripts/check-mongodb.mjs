@@ -1,8 +1,10 @@
-const { ObjectId } = require('mongodb-legacy')
-const {
+import mongodb from 'mongodb-legacy'
+import {
   connectionPromise,
   db,
-} = require('../../../app/src/infrastructure/mongodb')
+} from '../../../app/src/infrastructure/mongodb.js'
+
+const { ObjectId } = mongodb
 
 const MIN_MONGO_VERSION = [5, 0]
 
