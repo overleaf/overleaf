@@ -1,0 +1,22 @@
+.ide-redesign-body {
+  display: flex;
+  flex-grow: 1;
+  background-color: var(--bg-light-secondary);
+  overflow-y: hidden;
+  z-index: 0;
+}
+
+.ide-redesign-main {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.ide-skeleton-block {
+  border: 1px solid grey;
+  background-color: white;
+}
+
+.ide-redesign-full-height {
+  height: 100%;
+}

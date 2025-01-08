@@ -354,6 +354,7 @@ const _ProjectController = {
       'ai-add-on',
       'reviewer-role',
       'papers-integration',
+      'editor-redesign',
     ].filter(Boolean)
 
     const getUserValues = async userId =>
