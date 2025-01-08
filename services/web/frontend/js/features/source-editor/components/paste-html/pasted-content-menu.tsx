@@ -37,9 +37,12 @@ export const PastedContentMenu: FC<{
 
   // record whether the Shift key is currently down, for use in the `paste` event handler
   const shiftRef = useRef(false)
-  useEventListener('keydown', (event: KeyboardEvent) => {
-    shiftRef.current = event.shiftKey
-  })
+  useEventListener(
+    'keydown',
+    useCallback((event: KeyboardEvent) => {
+      shiftRef.current = event.shiftKey
+    }, [])
+  )
 
   // track interaction events
   const trackedEventsRef = useRef<Record<string, boolean>>({

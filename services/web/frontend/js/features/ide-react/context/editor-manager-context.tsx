@@ -617,17 +617,26 @@ export const EditorManagerProvider: FC = ({ children }) => {
     t,
   ])
 
-  useEventListener('editor:insert-symbol', () => {
-    sendMB('symbol-palette-insert')
-  })
+  useEventListener(
+    'editor:insert-symbol',
+    useCallback(() => {
+      sendMB('symbol-palette-insert')
+    }, [])
+  )
 
-  useEventListener('flush-changes', () => {
-    openDocs.flushAll()
-  })
+  useEventListener(
+    'flush-changes',
+    useCallback(() => {
+      openDocs.flushAll()
+    }, [openDocs])
+  )
 
-  useEventListener('blur', () => {
-    openDocs.flushAll()
-  })
+  useEventListener(
+    'blur',
+    useCallback(() => {
+      openDocs.flushAll()
+    }, [openDocs])
+  )
 
   // Flush changes before disconnecting
   useEffect(() => {

@@ -101,9 +101,12 @@ export const ReferencesProvider: FC = ({ children }) => {
     }
   }, [eventEmitter, fileTreeData, indexReferencesIfDocModified])
 
-  useEventListener('reference:added', function () {
-    indexAllReferences(true)
-  })
+  useEventListener(
+    'reference:added',
+    useCallback(() => {
+      indexAllReferences(true)
+    }, [indexAllReferences])
+  )
 
   useEffect(() => {
     const handleProjectJoined = () => {
