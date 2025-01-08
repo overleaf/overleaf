@@ -211,11 +211,7 @@ function PdfCompileButton() {
         </SplitMenu>
       }
       bs5={
-        <Dropdown
-          as={OLButtonGroup}
-          autoClose="outside"
-          className="compile-button-group"
-        >
+        <Dropdown as={OLButtonGroup} className="compile-button-group">
           <OLTooltip
             description={tooltipElement}
             id="compile"
