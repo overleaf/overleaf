@@ -74,6 +74,7 @@ export class MakeTitleWidget extends WidgetType {
           if (!this.destroyed) {
             await MathJax.typesetPromise([element])
             view.requestMeasure()
+            MathJax.typesetClear([element])
           }
         })
         .catch(() => {

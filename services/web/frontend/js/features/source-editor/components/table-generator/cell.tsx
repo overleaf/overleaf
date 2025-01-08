@@ -164,9 +164,11 @@ export const Cell: FC<{
       )
       loadMathJax()
         .then(async MathJax => {
-          if (renderDiv.current) {
-            await MathJax.typesetPromise([renderDiv.current])
+          const element = renderDiv.current
+          if (element) {
+            await MathJax.typesetPromise([element])
             view.requestMeasure()
+            MathJax.typesetClear([element])
           }
         })
         .catch(() => {})

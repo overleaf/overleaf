@@ -49,6 +49,7 @@ export class BeginTheoremWidget extends BeginWidget {
           if (!this.destroyed) {
             await MathJax.typesetPromise([nameElement])
             view.requestMeasure()
+            MathJax.typesetClear([nameElement])
           }
         })
         .catch(() => {
