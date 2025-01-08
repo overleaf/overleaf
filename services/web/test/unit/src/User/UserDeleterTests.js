@@ -236,6 +236,17 @@ describe('UserDeleter', function () {
             ).to.have.been.calledWith(this.userId)
           })
 
+          it('should cleanup collabratec access tokens', async function () {
+            await this.UserDeleter.promises.deleteUser(this.userId, {
+              ipAddress: this.ipAddress,
+            })
+            expect(this.Modules.promises.hooks.fire).to.have.been.calledWith(
+              'cleanupPersonalAccessTokens',
+              this.userId,
+              ['collabratec', 'git_bridge']
+            )
+          })
+
           it('should fire the deleteUser hook for modules', async function () {
             await this.UserDeleter.promises.deleteUser(this.userId, {
               ipAddress: this.ipAddress,

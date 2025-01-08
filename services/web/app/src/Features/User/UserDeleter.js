@@ -158,4 +158,8 @@ async function _cleanupUser(user) {
   await InstitutionsAPI.promises.deleteAffiliations(user._id)
   await SubscriptionUpdater.promises.removeUserFromAllGroups(user._id)
   await UserMembershipsHandler.promises.removeUserFromAllEntities(user._id)
+  await Modules.promises.hooks.fire('cleanupPersonalAccessTokens', user._id, [
+    'collabratec',
+    'git_bridge',
+  ])
 }
