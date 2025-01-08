@@ -11,7 +11,6 @@ import { useTranslation } from 'react-i18next'
 import getMeta from '@/utils/meta'
 import classnames from 'classnames'
 import { sendMB } from '@/infrastructure/event-tracking'
-import SpellingSuggestionsFeedback from './spelling-suggestions-feedback'
 import { SpellingSuggestionsLanguage } from './spelling-suggestions-language'
 import { captureException } from '@/infrastructure/error-reporter'
 import { debugConsole } from '@/utils/debugging'
@@ -181,15 +180,6 @@ const B3SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
           handleClose={handleClose}
         />
       </li>
-
-      {getMeta('ol-isSaas') && (
-        <>
-          <li className="divider" />
-          <li role="menuitem">
-            <SpellingSuggestionsFeedback />
-          </li>
-        </>
-      )}
     </ul>
   )
 }
@@ -280,12 +270,6 @@ const B5SpellingSuggestions: FC<SpellingSuggestionsInnerProps> = ({
           language={language}
           handleClose={handleClose}
         />
-        {getMeta('ol-isSaas') && (
-          <>
-            <Dropdown.Divider />
-            <SpellingSuggestionsFeedback />
-          </>
-        )}
       </Dropdown.Menu>
     </Dropdown>
   )
